@@ -520,4 +520,46 @@ describe('spawn', () => {
       expect(result.code).toBe(0)
     })
   })
+
+  describe('spinner stop/restart around child process', () => {
+    it('stops the spinner while the child runs and restarts after success', async () => {
+      let stopCount = 0
+      let startCount = 0
+      const spinnerMock = {
+        isSpinning: true,
+        stop: () => {
+          stopCount += 1
+        },
+        start: () => {
+          startCount += 1
+        },
+      }
+      await spawn('echo', ['ok'], {
+        spinner: spinnerMock as never,
+        stdio: 'inherit',
+      })
+      expect(stopCount).toBe(1)
+      expect(startCount).toBe(1)
+    })
+
+    it('restarts the spinner even when the child errors', async () => {
+      let stopCount = 0
+      let startCount = 0
+      const spinnerMock = {
+        isSpinning: true,
+        stop: () => {
+          stopCount += 1
+        },
+        start: () => {
+          startCount += 1
+        },
+      }
+      await spawn('node', ['-e', 'process.exit(7)'], {
+        spinner: spinnerMock as never,
+        stdio: 'inherit',
+      }).catch(() => {})
+      expect(stopCount).toBe(1)
+      expect(startCount).toBe(1)
+    })
+  })
 })
