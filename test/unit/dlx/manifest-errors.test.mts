@@ -166,5 +166,33 @@ describe.sequential('dlx/manifest — error branches', () => {
       // fails internally, clear() swallows via its own try/catch.
       await expect(manifest.clear('a')).resolves.toBeUndefined()
     })
+
+    it('runs cleanup branch when renameSync throws + temp file exists', async () => {
+      // Seed a manifest so set() goes through writeManifest with a real temp.
+      writeFileSync(manifestPath, '{}', 'utf8')
+      // Patch fs.renameSync at runtime to throw, causing the outer catch.
+      const fsMod = require('node:fs') as typeof import('node:fs')
+      const originalRename = fsMod.renameSync
+      fsMod.renameSync = ((_src: string, _dest: string) => {
+        throw makeFsError('EPERM')
+      }) as typeof fsMod.renameSync
+      try {
+        // set() calls writeManifest; the writeFileSync to tempPath
+        // succeeds, the renameSync throws, the inner cleanup runs.
+        await expect(
+          manifest.set('test-pkg', {
+            url: 'https://example.com/pkg.tar',
+            integrity: 'sha512-fake==',
+            size: 1,
+            timestamp: 1,
+            extractedPath: '/tmp/x',
+            sha256: 'fake',
+            tag: 'v1',
+          }),
+        ).rejects.toThrow(/EPERM/)
+      } finally {
+        fsMod.renameSync = originalRename
+      }
+    })
   })
 })
