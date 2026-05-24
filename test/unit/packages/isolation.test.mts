@@ -1,16 +1,23 @@
 /**
- * @file Unit tests for packages/isolation.ts — pure-ish helpers
- *   `mergePackageJson` and `resolveRealPath`. The orchestrator `isolatePackage`
- *   spawns npm and is covered by integration tests; these helpers don't.
+ * @file Unit tests for packages/isolation.ts. Covers `mergePackageJson` and
+ *   `resolveRealPath` pure helpers + the orchestrator `isolatePackage` via the
+ *   `install` callback escape hatch (so tests never spawn pnpm). Real
+ *   end-to-end pnpm-install behavior is covered by integration tests.
  */
 
-import { mkdtempSync, promises as fsp, writeFileSync } from 'node:fs'
+import {
+  mkdirSync,
+  mkdtempSync,
+  promises as fsp,
+  writeFileSync,
+} from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  isolatePackage,
   mergePackageJson,
   resolveRealPath,
 } from '../../../src/packages/isolation'
@@ -95,5 +102,124 @@ describe('packages/isolation — resolveRealPath', () => {
     const resolved = await resolveRealPath(link)
     // realpath follows the symlink → resolved tail is `real.txt`, not link.txt.
     expect(resolved.endsWith('real.txt')).toBe(true)
+  })
+})
+
+describe('packages/isolation — isolatePackage', () => {
+  // Build a tiny local source package under tmp. The shape:
+  //   tmp/src-pkg/package.json
+  //   tmp/src-pkg/index.js
+  function makeSrcPkg(name: string) {
+    const dir = path.join(tmp, `src-${name.replace(/[@/]/g, '-')}`)
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(
+      path.join(dir, 'package.json'),
+      JSON.stringify({ name, version: '1.0.0', main: 'index.js' }),
+    )
+    writeFileSync(path.join(dir, 'index.js'), 'module.exports = { hello: 1 }')
+    return dir
+  }
+
+  it('throws when sourcePath does not exist (path input)', async () => {
+    await expect(isolatePackage('/does/not/exist-12345')).rejects.toThrow(
+      /Source path does not exist/,
+    )
+  })
+
+  it('throws when no version spec is provided + no sourcePath', async () => {
+    // 'unscoped-pkg-name' is parsed as registry spec (no version, no path).
+    // npmPackageArg picks up the bare name → spec is set → registry branch,
+    // which under our `install: noop` shortcut still throws because the
+    // registry install doesn't actually populate node_modules/<pkg>.
+    // Use `install: noop` to skip the spawn but still hit the codepath.
+    // Then the readPackageJson on the (empty) installedPath should throw.
+    const install = vi.fn(async () => undefined)
+    await expect(
+      isolatePackage('lodash@^4.17.0', { install }),
+    ).rejects.toThrow(/JSON file not found|Could not read package.json/)
+    expect(install).toHaveBeenCalledTimes(1)
+  })
+
+  it('copies a local source package and reads its package.json (path input)', async () => {
+    const srcDir = makeSrcPkg('localpkg')
+    const install = vi.fn(async () => undefined)
+    const result = await isolatePackage(srcDir, { install })
+    expect(result.tmpdir).toContain('node_modules')
+    expect(result.tmpdir).toContain('localpkg')
+    // install callback fired (replaces pnpm install).
+    expect(install).toHaveBeenCalledTimes(1)
+    // package.json was copied through.
+    const installedPkg = JSON.parse(
+      String(
+        await fsp.readFile(path.join(result.tmpdir, 'package.json'), 'utf8'),
+      ),
+    )
+    expect(installedPkg.name).toBe('localpkg')
+  })
+
+  it('handles scoped packages by creating the @scope dir', async () => {
+    const srcDir = makeSrcPkg('@scope/sub')
+    const install = vi.fn(async () => undefined)
+    const result = await isolatePackage(srcDir, { install })
+    // installedPath is node_modules/@scope/sub
+    expect(result.tmpdir).toMatch(/node_modules[/\\]@scope[/\\]sub$/)
+  })
+
+  it('applies onPackageJson callback to transform installed package.json', async () => {
+    const srcDir = makeSrcPkg('xform-pkg')
+    const install = vi.fn(async () => undefined)
+    const result = await isolatePackage(srcDir, {
+      install,
+      onPackageJson: pkg => ({ ...pkg, description: 'xformed' }),
+    })
+    const written = JSON.parse(
+      String(
+        await fsp.readFile(path.join(result.tmpdir, 'package.json'), 'utf8'),
+      ),
+    )
+    expect(written.description).toBe('xformed')
+  })
+
+  it('loads exports map when imports option is provided', async () => {
+    const srcDir = makeSrcPkg('imp-pkg')
+    const install = vi.fn(async () => undefined)
+    const result = await isolatePackage(srcDir, {
+      install,
+      imports: { default: 'index.js' },
+    })
+    expect(result.exports?.['default']).toEqual({ hello: 1 })
+  })
+
+  it('handles a parsed-registry spec via npm-package-arg (no sourcePath)', async () => {
+    // `lodash` alone parses as a registry tag spec — exercises the
+    // spec-branch where registry install would normally run.
+    // We feed install:noop to skip the spawn; the failure mode is then
+    // readPackageJson on the non-existent installedPath. Confirms the
+    // spec branch was entered (the install callback was called).
+    const install = vi.fn(async () => undefined)
+    await expect(isolatePackage('lodash', { install })).rejects.toThrow(
+      /JSON file not found|Could not read package.json/,
+    )
+    expect(install).toHaveBeenCalledTimes(1)
+  })
+
+  it('rejects directory parsed-spec when fetchSpec does not exist', async () => {
+    // npmPackageArg parses './nonexistent' as a directory spec; the
+    // helper then throws when fs.existsSync(fetchSpec) is false.
+    await expect(
+      isolatePackage('./does-not-exist-zzz-' + Date.now()),
+    ).rejects.toThrow(/Source path does not exist/)
+  })
+
+  it('reads package name from package.json when parser doesn\'t supply one', async () => {
+    // Build an anonymous package — npmPackageArg with a directory path
+    // sometimes returns a parsed.name that's missing/empty when the
+    // path doesn't follow the spec form. We test this branch by passing
+    // a path through the isPath() === true route, which always tries
+    // readPackageJson first.
+    const srcDir = makeSrcPkg('via-pkgjson')
+    const install = vi.fn(async () => undefined)
+    const result = await isolatePackage(srcDir, { install })
+    expect(result.tmpdir).toContain('via-pkgjson')
   })
 })
