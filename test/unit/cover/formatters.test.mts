@@ -118,6 +118,21 @@ describe('cover/formatters', () => {
       expect(out).toBe('0.00')
     })
 
+    it('treats NaN type.percent as 0 when computing the overall average', () => {
+      const out = formatCoverage({
+        code: sampleCode,
+        // type with NaN percent string — hits the NaN coerce-to-0 branch.
+        type: {
+          covered: 0,
+          total: 0,
+          percent: 'NaN',
+        } as unknown as Parameters<typeof formatCoverage>[0]['type'],
+        format: 'simple',
+      })
+      // (85+80+90+88+0)/5 = 68.6 — proves the NaN-arm contributed 0.
+      expect(out).toBe('68.60')
+    })
+
     it('appends an emoji to the overall line in default format', () => {
       const out = formatCoverage({ code: sampleCode })
       // 85.75% overall → 💚 band.
