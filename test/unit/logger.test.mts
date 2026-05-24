@@ -348,4 +348,25 @@ describe('Logger', () => {
       expect(output).toContain('false')
     })
   })
+
+  describe('substep()', () => {
+    it('prepends a 2-space indent to the message', () => {
+      logger.substep('subitem')
+      const output = stdoutData.join('')
+      expect(output).toContain('  subitem')
+    })
+
+    it('returns the logger for chaining', () => {
+      const result = logger.substep('chained')
+      expect(result).toBe(logger)
+    })
+
+    it('forwards extras to log()', () => {
+      logger.substep('with-extras', 42, 'tail')
+      const output = stdoutData.join('')
+      expect(output).toContain('with-extras')
+      expect(output).toContain('42')
+      expect(output).toContain('tail')
+    })
+  })
 })
