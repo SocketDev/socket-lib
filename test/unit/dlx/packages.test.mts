@@ -76,6 +76,19 @@ describe.sequential('dlx/packages', () => {
       const result = listDlxPackages()
       expect(result).toEqual([])
     })
+
+    it('returns [] when DLX dir is a regular file (readdir throws ENOTDIR)', () => {
+      // Point socket-dlx-dir at a regular file so readDirNamesSync throws
+      // and the catch arm returns []. Exercises the defensive try/catch.
+      rmSync(tmpDir, { recursive: true, force: true })
+      writeFileSync(tmpDir, 'not a directory')
+      setPath('socket-dlx-dir', tmpDir)
+      try {
+        expect(listDlxPackages()).toEqual([])
+      } finally {
+        rmSync(tmpDir, { force: true })
+      }
+    })
   })
 
   describe('listDlxPackagesAsync', () => {

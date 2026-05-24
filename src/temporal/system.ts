@@ -65,6 +65,8 @@ export function systemUTCEpochNanoseconds(): bigint {
     const elapsedNs = _hrtimeBigint() - _anchorHrns
     return _anchorWallMs * _NS_PER_MS + elapsedNs
   }
+  /* c8 ignore next - Non-Node runtime fallback; tests always run under Node
+     where _hrtimeBigint is bound from process.hrtime.bigint. */
   return BigIntCtor(DateNow()) * _NS_PER_MS
 
   // Step 2 is deferred to IsValidEpochNanoseconds upstream.

@@ -56,11 +56,12 @@ export function isSeaBinary(): boolean {
       // eslint-disable-next-line n/no-unsupported-features/node-builtins
       const seaModule = require('node:sea')
       _isSea = seaModule.isSea()
-    } catch {
-      /* c8 ignore next - Node.js < 24 fallback; node:sea is in
+      /* c8 ignore start - Node.js < 24 fallback; node:sea is in
          supported Node 22+ as of this codebase. */
+    } catch {
       _isSea = false
     }
+    /* c8 ignore stop */
   }
   return _isSea ?? false
 }

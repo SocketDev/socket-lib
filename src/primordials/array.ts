@@ -146,6 +146,9 @@ while (
   _iteratorLookup &&
   typeof (_iteratorLookup as { next?: unknown }).next !== 'function'
 ) {
+  /* c8 ignore next - Modern V8 puts Iterator.prototype one hop up the chain
+     so the first check already finds .next; the walk-further branch fires
+     only on hypothetical engines where the prototype layout differs. */
   _iteratorLookup = Object.getPrototypeOf(_iteratorLookup)
 }
 const _iteratorProto = _iteratorLookup as {

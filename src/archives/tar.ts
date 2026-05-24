@@ -73,12 +73,12 @@ export async function extractTar(
   const tarFs = getTarFs()
   const extractStream = tarFs.extract(normalizedOutputDir, {
     map: (header: { name: string; size?: number; type?: string }) => {
-      // Skip if destroy already scheduled
-      /* c8 ignore next 3 - destroyScheduled is set by the same map()
-         when a security limit trips; only fires after the schedule. */
+      /* c8 ignore start - destroyScheduled is set by the same map() when a
+         security limit trips; only fires after the schedule. */
       if (destroyScheduled) {
         return header
       }
+      /* c8 ignore stop */
 
       /* c8 ignore start - Security-defense branches inside tar-fs
          map() schedule extractStream.destroy via process.nextTick.
@@ -216,12 +216,12 @@ export async function extractTarGz(
   const tarFs = getTarFs()
   const extractStream = tarFs.extract(normalizedOutputDir, {
     map: (header: { name: string; size?: number; type?: string }) => {
-      // Skip if destroy already scheduled
-      /* c8 ignore next 3 - destroyScheduled is set by the same map()
-         when a security limit trips; only fires after the schedule. */
+      /* c8 ignore start - destroyScheduled is set by the same map() when a
+         security limit trips; only fires after the schedule. */
       if (destroyScheduled) {
         return header
       }
+      /* c8 ignore stop */
 
       /* c8 ignore start - Security-defense branches inside tar-fs
          map() schedule extractStream.destroy via process.nextTick.

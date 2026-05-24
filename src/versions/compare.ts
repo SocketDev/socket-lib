@@ -40,10 +40,13 @@ export const eq: (a: string, b: string) => boolean = impl.eq.bind(impl)
 /**
  * Check if a does not equal b.
  */
+/* c8 ignore start - smol-versions exposes .neq, so the bind arm is taken;
+   the polyfill fallback fires only on a hypothetical impl that lacks .neq. */
 export const neq: (a: string, b: string) => boolean =
   typeof (impl as { neq?: unknown }).neq === 'function'
     ? (impl as { neq: (a: string, b: string) => boolean }).neq.bind(impl)
     : (a, b) => !impl.eq(a, b)
+/* c8 ignore stop */
 
 /**
  * Check if a is greater than b.

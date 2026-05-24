@@ -23,9 +23,10 @@ export function getTsTypesAvailable(): boolean {
   try {
     require.resolve('typescript/lib/lib.d.ts')
     return true
-  } catch {
-    /* c8 ignore next - TypeScript is a project devDep; the catch
+    /* c8 ignore start - TypeScript is a project devDep; the catch
        only fires when consumers run without typescript installed. */
+  } catch {
     return false
   }
+  /* c8 ignore stop */
 }

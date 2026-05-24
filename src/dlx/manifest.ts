@@ -213,9 +213,12 @@ export class DlxManifest {
     const manifestDir = path.dirname(this.manifestPath)
     try {
       safeMkdirSync(manifestDir, { recursive: true })
+      /* c8 ignore start - safeMkdirSync with recursive:true rarely throws;
+         defensive log path for permission-error / EACCES edge cases. */
     } catch (e) {
       logger.warn(`Failed to create manifest directory: ${errorMessage(e)}`)
     }
+    /* c8 ignore stop */
 
     // Write atomically.
     const content = JSONStringify(data, undefined, 2)
@@ -260,9 +263,12 @@ export class DlxManifest {
         delete data[name]
 
         await this.writeManifest(data)
+        /* c8 ignore start - readJson/writeManifest catch; only fires on
+           corrupted manifest or filesystem permission errors. */
       } catch (e) {
         logger.warn(`Failed to clear cache for ${name}: ${errorMessage(e)}`)
       }
+      /* c8 ignore stop */
     })
   }
 

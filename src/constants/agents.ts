@@ -19,11 +19,12 @@ export const NPX = 'npx' // # socket-hook: allow npx
 const _npmBinPath = /*@__PURE__*/ (() => {
   try {
     return which.sync('npm', { nothrow: true }) || undefined
-  } catch {
-    /* c8 ignore next - which.sync throw catch; module-init IIFE
+    /* c8 ignore start - which.sync throw catch; module-init IIFE
        runs once at load time before tests can intercept. */
+  } catch {
     return undefined
   }
+  /* c8 ignore stop */
 })()
 
 export const NPM_BIN_PATH = _npmBinPath || 'npm'
@@ -34,11 +35,12 @@ export const NPM_BIN_PATH = _npmBinPath || 'npm'
 export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
   try {
     // Reuse cached npm bin path to avoid duplicate which.sync call.
-    /* c8 ignore next 3 - Module-init IIFE; only reachable when
+    /* c8 ignore start - Module-init IIFE; only reachable when
        which.sync returns null at module load. */
     if (!_npmBinPath) {
       return undefined
     }
+    /* c8 ignore stop */
     const { existsSync } = /*@__PURE__*/ require('node:fs')
     const path = /*@__PURE__*/ require('node:path')
     // npm bin is typically at: /path/to/node/bin/npm
@@ -57,13 +59,13 @@ export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
     if (existsSync(nodeModulesPath)) {
       return nodeModulesPath
     }
-    /* c8 ignore next - Falls through when cli.js isn't at the
-       expected node_modules location. */
+    /* c8 ignore start - Module-init fallthroughs; reached only when cli.js
+       isn't where expected, or when the outer try throws. */
     return undefined
   } catch {
-    /* c8 ignore next - Module-init IIFE catch; can't intercept. */
     return undefined
   }
+  /* c8 ignore stop */
 })()
 
 // NPM registry URL.
