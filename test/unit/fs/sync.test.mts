@@ -22,7 +22,7 @@ import { join } from 'node:path'
 
 import type { SafeReadOptions } from '../../../src/fs/types'
 
-import { isSymlinkSync, safeStatSync } from '../../../src/fs/inspect'
+import { isDir, isSymlinkSync, safeStatSync } from '../../../src/fs/inspect'
 import { readFileBinary, safeReadFileSync } from '../../../src/fs/read-file'
 import { readJsonSync } from '../../../src/fs/read-json'
 import { writeJsonSync } from '../../../src/fs/write-json'
@@ -269,6 +269,23 @@ describe.sequential('fs - Sync Functions', () => {
       const nonExistent = join(testDir, 'no-stats.txt')
       const stats = safeStatSync(nonExistent)
       expect(stats).toBeUndefined()
+    })
+
+    it('returns undefined when the path has an embedded null byte (statSync throws)', () => {
+      // null bytes in path are an ERR_INVALID_ARG_VALUE thrown by Node before
+      // any filesystem syscall — the safeStatSync catch swallows it.
+      const stats = safeStatSync(join(testDir, '\0bogus'))
+      expect(stats).toBeUndefined()
+    })
+
+    it('isDir returns true for directories and false otherwise', async () => {
+      const dir = join(testDir, 'is-dir-target')
+      mkdirSync(dir)
+      expect(await isDir(dir)).toBe(true)
+      const file = join(testDir, 'is-dir-file.txt')
+      writeFileSync(file, 'x')
+      expect(await isDir(file)).toBe(false)
+      expect(await isDir(join(testDir, 'no-such-thing'))).toBe(false)
     })
 
     it('should return stats for symlinks', () => {
