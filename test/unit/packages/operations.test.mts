@@ -24,6 +24,7 @@ import {
   readPackageJsonSync,
   resolveGitHubTgzUrl,
   resolvePackageName,
+  resolveRegistryPackageName,
 } from '../../../src/packages/operations'
 import type { PackageJson } from '../../../src/packages/types'
 import { describe, expect, it } from 'vitest'
@@ -929,6 +930,26 @@ describe('packages/operations', () => {
       testCases.forEach(({ input, expected }) => {
         expect(getReleaseTag(input)).toBe(expected)
       })
+    })
+  })
+
+  describe('resolveRegistryPackageName', () => {
+    it('escapes scoped package names with double-underscore', () => {
+      expect(resolveRegistryPackageName('@babel/core')).toBe('babel__core')
+    })
+
+    it('returns unscoped names verbatim', () => {
+      expect(resolveRegistryPackageName('lodash')).toBe('lodash')
+    })
+
+    it('handles dotted scope', () => {
+      expect(resolveRegistryPackageName('@scope.with.dots/pkg')).toBe(
+        'scope.with.dots__pkg',
+      )
+    })
+
+    it('handles complex nested scope names', () => {
+      expect(resolveRegistryPackageName('@types/node')).toBe('types__node')
     })
   })
 })
