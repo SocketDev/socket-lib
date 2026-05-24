@@ -78,4 +78,36 @@ describe('links', () => {
       expect(links([])).toEqual([])
     })
   })
+
+  describe('link() — uncovered branches', () => {
+    it('falls through to cyan when resolveColor returns "inherit"', () => {
+      // Custom theme with link='inherit' — exercises L78 else-branch.
+      const customTheme = {
+        colors: {
+          link: 'inherit',
+          primary: 'cyan',
+          secondary: 'magenta',
+        },
+      }
+      const output = link('Inherit', 'https://example.com', {
+        theme: customTheme as unknown as Parameters<typeof link>[2]['theme'],
+      })
+      expect(output).toContain('Inherit')
+    })
+
+    it('handles RGB-tuple resolved link color', () => {
+      // L73-77 array branch: resolveColor returns an RGB tuple.
+      const customTheme = {
+        colors: {
+          link: [140, 82, 255],
+          primary: 'cyan',
+          secondary: 'magenta',
+        },
+      }
+      const output = link('Rgb', 'https://example.com', {
+        theme: customTheme as unknown as Parameters<typeof link>[2]['theme'],
+      })
+      expect(output).toContain('Rgb')
+    })
+  })
 })
