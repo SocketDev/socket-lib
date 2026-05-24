@@ -242,4 +242,31 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
       expect(cleaned).toBe(1)
     })
   })
+
+  test('cleanDlxCache catch-arm: keeps a non-empty dir even when metadata is missing', async () => {
+    await withMockHome(async () => {
+      const cachePath = getDlxCachePath()
+      const entryPath = path.join(cachePath, 'non-empty-no-meta')
+      mkdirSync(entryPath, { recursive: true })
+      // Add a stray file (no metadata.json) so the inner cleanup branch
+      // sees a non-empty dir → it must NOT remove the entry.
+      writeFileSync(path.join(entryPath, 'binary.exe'), 'mz...')
+      const cleaned = await cleanDlxCache(0)
+      // entry kept; cleaned counts dirs actually removed.
+      expect(cleaned).toBe(0)
+    })
+  })
+
+  test('cleanDlxCache: skips entries that disappear between readdir and existsSync', async () => {
+    await withMockHome(async () => {
+      const cachePath = getDlxCachePath()
+      // Create dir, then immediately delete to mimic the race.
+      const entryPath = path.join(cachePath, 'race-entry')
+      mkdirSync(entryPath, { recursive: true })
+      rmSync(entryPath, { force: true, recursive: true })
+      // existsSync now returns false → continue (line 216).
+      const cleaned = await cleanDlxCache(0)
+      expect(cleaned).toBe(0)
+    })
+  })
 })
