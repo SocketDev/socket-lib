@@ -18,7 +18,10 @@ vi.mock('../../../src/constants/platform', async importOriginal => {
   return { ...actual, WIN32: true }
 })
 
-import { resolveBinaryPath } from '../../../src/dlx/binary-resolution'
+import {
+  makePackageBinsExecutable,
+  resolveBinaryPath,
+} from '../../../src/dlx/binary-resolution'
 
 let tmp: string
 
@@ -83,5 +86,14 @@ describe('dlx/binary-resolution — resolveBinaryPath (WIN32 stub)', () => {
     // Subsequent lookup invalidates the stale cache entry.
     // With no wrapper present, falls back to basePath.
     expect(resolveBinaryPath(base)).toBe(base)
+  })
+})
+
+describe('dlx/binary-resolution — makePackageBinsExecutable (WIN32 stub)', () => {
+  it('early-returns without touching the filesystem on Windows', () => {
+    // No package.json need exist; the Win32 path returns before any I/O.
+    expect(() =>
+      makePackageBinsExecutable(tmp, 'never-installed'),
+    ).not.toThrow()
   })
 })
