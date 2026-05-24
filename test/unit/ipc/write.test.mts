@@ -1,8 +1,14 @@
-import { existsSync, readFileSync, rmSync, statSync } from 'node:fs'
+import {
+  existsSync,
+  promises as fs,
+  readFileSync,
+  rmSync,
+  statSync,
+} from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
-import { afterEach, beforeEach, describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { getIpcStubPath } from '../../../src/ipc/paths'
 import { writeIpcStub } from '../../../src/ipc/write'
@@ -76,5 +82,26 @@ describe.sequential('ipc/write — writeIpcStub', () => {
     await writeIpcStub(appName, { v: 1 })
     expect(existsSync(appDir)).toBe(true)
     expect(statSync(appDir).isDirectory()).toBe(true)
+  })
+
+  test('re-throws non-EEXIST errors from fs.promises.open', async () => {
+    // Mock fs.promises.open to throw a synthetic EACCES — the only
+    // path that exercises the L94 re-throw branch (EEXIST is handled
+    // by the existing stale-stub test).
+    const original = fs.open
+    const err = new Error('synthetic EACCES') as NodeJS.ErrnoException
+    err.code = 'EACCES'
+    const spy = vi.spyOn(fs, 'open').mockImplementationOnce(async () => {
+      throw err
+    })
+    try {
+      await expect(writeIpcStub(appName, { v: 1 })).rejects.toThrow(
+        /synthetic EACCES/,
+      )
+    } finally {
+      spy.mockRestore()
+      // Belt-and-suspenders: confirm the original was restored.
+      expect(fs.open).toBe(original)
+    }
   })
 })
