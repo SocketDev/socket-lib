@@ -81,6 +81,8 @@ export type PackageJson = {
   private?: boolean | undefined
   publishConfig?: Record<string, unknown> | undefined
   files?: string[] | undefined
+  keywords?: string[] | undefined
+  sideEffects?: boolean | string[] | undefined
 
   // Engines and OS
   engines?: Record<string, string> | undefined
