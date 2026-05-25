@@ -1,6 +1,6 @@
 /* oxlint-disable socket/sort-source-methods -- build-runner helpers interleaved with config constants and module-level state; reordering would split state from its consumers. */
 /**
- * @fileoverview Fast build runner using esbuild for smaller bundles and faster builds.
+ * @file Fast build runner using esbuild for smaller bundles and faster builds.
  */
 
 import { existsSync } from 'node:fs'
@@ -34,8 +34,8 @@ const rootPath = path.resolve(
 )
 
 /**
- * Build source code with esbuild.
- * Returns { exitCode, buildTime, result } for external logging.
+ * Build source code with esbuild. Returns { exitCode, buildTime, result } for
+ * external logging.
  */
 interface BuildSourceOptions {
   quiet?: boolean
@@ -92,8 +92,7 @@ export async function buildSource(
 }
 
 /**
- * Build TypeScript declarations.
- * Returns exitCode for external logging.
+ * Build TypeScript declarations. Returns exitCode for external logging.
  */
 interface BuildTypesOptions {
   quiet?: boolean
@@ -139,8 +138,7 @@ export async function buildTypes(
 }
 
 /**
- * Build external dependencies.
- * Returns exitCode for external logging.
+ * Build external dependencies. Returns exitCode for external logging.
  */
 export async function buildExternals(
   options: { quiet?: boolean; verbose?: boolean } = {},
@@ -172,8 +170,7 @@ export async function buildExternals(
 }
 
 /**
- * Fix exports after build.
- * Returns exitCode for external logging.
+ * Fix exports after build. Returns exitCode for external logging.
  */
 export async function fixExports(
   options: { quiet?: boolean; verbose?: boolean } = {},
