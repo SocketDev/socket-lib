@@ -101,8 +101,9 @@ describe.sequential('request-attempt — body cleanup on error', () => {
         signal: controller.signal,
       }),
     ).rejects.toThrow(/request failed/i)
-    const captured = (httpStub.request as { lastOpts: Record<string, unknown> })
-      .lastOpts
+    const captured = (
+      httpStub.request as unknown as { lastOpts: Record<string, unknown> }
+    ).lastOpts
     expect(captured['signal']).toBe(controller.signal)
   })
 

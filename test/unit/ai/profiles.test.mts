@@ -9,7 +9,7 @@ import {
   EDIT_ONLY_PROFILE,
   FULL_FIX_PROFILE,
   READ_ONLY_PROFILE,
-} from '../../../src/ai/profiles'
+} from '../../../src/ai/profiles.mts'
 
 describe('READ_ONLY_PROFILE', () => {
   it('has bash explicitly denied', () => {

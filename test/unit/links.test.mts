@@ -90,7 +90,9 @@ describe('links', () => {
         },
       }
       const output = link('Inherit', 'https://example.com', {
-        theme: customTheme as unknown as Parameters<typeof link>[2]['theme'],
+        theme: customTheme as unknown as NonNullable<
+          Parameters<typeof link>[2]
+        >['theme'],
       })
       expect(output).toContain('Inherit')
     })
@@ -105,7 +107,9 @@ describe('links', () => {
         },
       }
       const output = link('Rgb', 'https://example.com', {
-        theme: customTheme as unknown as Parameters<typeof link>[2]['theme'],
+        theme: customTheme as unknown as NonNullable<
+          Parameters<typeof link>[2]
+        >['theme'],
       })
       expect(output).toContain('Rgb')
     })

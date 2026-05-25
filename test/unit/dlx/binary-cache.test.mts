@@ -283,7 +283,10 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
     }) as typeof realFs.existsSync
     try {
       expect(
-        await isBinaryCacheValid(path.join(tmpRoot, 'unreadable-valid')),
+        await isBinaryCacheValid(
+          path.join(tmpRoot, 'unreadable-valid'),
+          60 * 60 * 1000,
+        ),
       ).toBe(false)
     } finally {
       ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync =

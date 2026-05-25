@@ -181,13 +181,9 @@ describe.sequential('dlx/manifest — error branches', () => {
         // succeeds, the renameSync throws, the inner cleanup runs.
         await expect(
           manifest.set('test-pkg', {
-            url: 'https://example.com/pkg.tar',
-            integrity: 'sha512-fake==',
-            size: 1,
-            timestamp: 1,
-            extractedPath: '/tmp/x',
-            sha256: 'fake',
-            tag: 'v1',
+            timestampFetch: 1,
+            timestampNotification: 1,
+            version: '1.0.0',
           }),
         ).rejects.toThrow(/EPERM/)
       } finally {

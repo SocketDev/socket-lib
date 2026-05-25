@@ -125,14 +125,14 @@ describe.sequential('packages/manifest — createPackageJson', () => {
     // packageDefaultNodeRange enforces a floor; a very old range like "^12"
     // should be replaced with the fleet default.
     const pkg = createPackageJson('a', 'p', { engines: { node: '^12' } })
-    expect(pkg.engines?.node).not.toBe('^12')
-    expect(typeof pkg.engines?.node).toBe('string')
+    expect(pkg.engines?.['node']).not.toBe('^12')
+    expect(typeof pkg.engines?.['node']).toBe('string')
   })
 
   it('preserves a caller-supplied node engine when it satisfies the fleet default', () => {
     // Use a range high enough that any reasonable fleet default is satisfied.
     const pkg = createPackageJson('a', 'p', { engines: { node: '>=99' } })
-    expect(pkg.engines?.node).toBe('>=99')
+    expect(pkg.engines?.['node']).toBe('>=99')
   })
 
   it('preserves non-node engine keys verbatim', () => {
