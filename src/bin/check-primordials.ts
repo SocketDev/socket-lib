@@ -22,6 +22,10 @@ import { ErrorCtor } from '../primordials/error'
 import { JSONParse, JSONStringify } from '../primordials/json'
 import { ObjectEntries } from '../primordials/object'
 import {
+  DEFAULT_ALIAS_MAP,
+  DEFAULT_NODE_INTERNAL_ONLY,
+} from '../checks/primordials-defaults'
+import {
   type PrimordialsCheckConfig,
   type PrimordialsCheckResult,
   type PrimordialsFinding,
@@ -121,13 +125,15 @@ export function printHelp(): void {
   logger.log('Config (.socket-lib.json — primordials section):')
   logger.log('  {')
   logger.log('    "primordials": {')
-  logger.log('      "aliasMap":         { "Array": "ArrayCtor" },')
-  logger.log('      "nodeInternalOnly": ["SafeMap", "SafeSet"],')
   logger.log(
     '      "scanDirs":         ["src", "additions/source-patched/lib"]',
   )
   logger.log('    }')
   logger.log('  }')
+  logger.log('')
+  logger.log('Only `scanDirs` is required. `aliasMap` and `nodeInternalOnly`')
+  logger.log('default to the fleet-canonical sets and only need entries when')
+  logger.log('your repo extends or overrides them.')
   logger.log('')
   logger.log('A bare object (no `primordials` section) is also accepted for')
   logger.log('repos that only run this one check.')
@@ -189,14 +195,21 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
     throw new ErrorCtor('config.nodeInternalOnly must be an array of strings')
   }
 
-  const aliasMap = new Map<string, string>(
-    ObjectEntries((raw.aliasMap ?? {}) as Record<string, string>),
-  )
-  const nodeInternalOnly = new Set(
-    ((raw.nodeInternalOnly ?? []) as string[]).filter(
+  // Merge the fleet-canonical defaults with the user's config. The user
+  // map overlays the defaults — any key the user defines wins, but they
+  // don't have to repeat the 26-entry boilerplate that every fleet repo
+  // shares. The Map constructor consumes the entries in order, so the
+  // user's later entries naturally overwrite the earlier defaults.
+  const aliasMap = new Map<string, string>([
+    ...ObjectEntries(DEFAULT_ALIAS_MAP),
+    ...ObjectEntries((raw.aliasMap ?? {}) as Record<string, string>),
+  ])
+  const nodeInternalOnly = new Set<string>([
+    ...DEFAULT_NODE_INTERNAL_ONLY,
+    ...((raw.nodeInternalOnly ?? []) as string[]).filter(
       x => typeof x === 'string',
     ),
-  )
+  ])
 
   // repoRoot is where scanDirs are resolved from. Default to cwd —
   // the user runs `socket-lib check prim` from their repo root.

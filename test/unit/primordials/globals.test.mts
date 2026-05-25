@@ -19,9 +19,11 @@ import {
   NaNValue,
   ProxyCtor,
   SharedArrayBufferCtor,
-  decodeComponent,
-  encodeComponent,
-  globalThisRef,
+  atob as GlobalAtob,
+  btoa as GlobalBtoa,
+  decodeURIComponent as GlobalDecodeURIComponent,
+  encodeURIComponent as GlobalEncodeURIComponent,
+  globalThis as GlobalThis,
 } from '../../../src/primordials/globals'
 
 import { JSONParse, JSONStringify } from '../../../src/primordials/json'
@@ -109,9 +111,14 @@ describe('constructors', () => {
 })
 
 describe('global functions', () => {
-  it('decodeComponent / encodeComponent round-trip', () => {
+  it('GlobalDecodeURIComponent / GlobalEncodeURIComponent round-trip', () => {
     const raw = 'hello world!'
-    expect(decodeComponent(encodeComponent(raw))).toBe(raw)
+    expect(GlobalDecodeURIComponent(GlobalEncodeURIComponent(raw))).toBe(raw)
+  })
+
+  it('GlobalAtob / GlobalBtoa round-trip', () => {
+    const raw = 'hello world!'
+    expect(GlobalAtob(GlobalBtoa(raw))).toBe(raw)
   })
 })
 
@@ -125,9 +132,9 @@ describe('global values', () => {
     expect(typeof NaNValue).toBe('number')
   })
 
-  it('globalThisRef is the same object as the live globalThis', () => {
-    expect(globalThisRef).toBe(globalThis)
-    expect(typeof globalThisRef.Object).toBe('function')
+  it('GlobalThis is the same object as the live globalThis', () => {
+    expect(GlobalThis).toBe(globalThis)
+    expect(typeof GlobalThis.Object).toBe('function')
   })
 })
 

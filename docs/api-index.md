@@ -99,9 +99,10 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## checks/
 
-| Subpath                                                                         | Description        |
-| ------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/checks/primordials`](../src/checks/primordials.ts) | _(no description)_ |
+| Subpath                                                                                           | Description        |
+| ------------------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/checks/primordials`](../src/checks/primordials.ts)                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/checks/primordials-defaults`](../src/checks/primordials-defaults.ts) | _(no description)_ |
 
 ## colors/
 

@@ -20,12 +20,20 @@ export const SharedArrayBufferCtor: SharedArrayBufferConstructor =
 // for symmetry with `NumberPOSITIVE_INFINITY` / `NumberNaN`.
 export const InfinityValue: number = Infinity
 export const NaNValue: number = NaN
-// `globalThisRef` is the captured `globalThis` reference — same object
-// in every realm and frozen on the spec side. Importers that need to
-// install or read globals safely use this rather than the keyword
-// directly.
-export const globalThisRef: typeof globalThis = globalThis
+// Captured `globalThis` reference. Re-exported under the natural name
+// `globalThis` so consumers can pull it via the same alias-at-import
+// pattern they use for other captured globals:
+//   `import { globalThis as GlobalThis } from '@socketsecurity/lib/primordials/globals'`
+const capturedGlobalThis: typeof globalThis = globalThis
+// eslint-disable-next-line no-shadow-restricted-names
+export { capturedGlobalThis as globalThis }
 
-// ─── Global functions ──────────────────────────────────────────────────
-export const decodeComponent = globalThis.decodeURIComponent
-export const encodeComponent = globalThis.encodeURIComponent
+// ─── Captured globals (functions / methods) ────────────────────────────
+// Base64 + URI codecs are non-method globals; we capture them at module
+// load so consumers reading adversarial input never see a tampered
+// global. Exports keep their natural names; consumers rename via the
+// alias map at import time (e.g. `import { atob as GlobalAtob }`).
+export const atob = globalThis.atob
+export const btoa = globalThis.btoa
+export const decodeURIComponent = globalThis.decodeURIComponent
+export const encodeURIComponent = globalThis.encodeURIComponent

@@ -3,8 +3,6 @@
  *   the historical monolithic test/unit/bin.test.mts.
  */
 
-import path from 'node:path'
-
 import { describe, expect, it } from 'vitest'
 
 import { whichReal, whichRealSync } from '../../../src/bin/which'

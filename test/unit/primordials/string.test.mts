@@ -42,8 +42,6 @@ import {
   StringRaw,
 } from '../../../src/primordials/string'
 
-import { uncurryThis } from '../../../src/primordials/uncurry'
-
 describe('String (static)', () => {
   it('FromCharCode / FromCodePoint / Raw', () => {
     expect(StringFromCharCode(65, 66, 67)).toBe('ABC')

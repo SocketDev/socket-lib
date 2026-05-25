@@ -4,8 +4,6 @@
  *   the fleet's 500-line soft cap.
  */
 
-import path from 'node:path'
-
 import { describe, expect, it } from 'vitest'
 
 import { isShadowBinPath } from '../../../src/bin/shadow'

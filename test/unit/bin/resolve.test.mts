@@ -11,7 +11,10 @@ import { describe, expect, it } from 'vitest'
 
 import { resolveRealBinSync } from '../../../src/bin/resolve'
 import { isError } from '../../../src/errors/predicates'
+import { getDefaultLogger } from '../../../src/logger/default'
 import { runWithTempDir } from '../util/temp-file-helper'
+
+const logger = getDefaultLogger()
 
 describe('resolveRealBinSync', () => {
   it('should normalize path with forward slashes', () => {
