@@ -20,11 +20,11 @@ import {
   fetchChecksums,
   parseChecksums,
 } from '../../src/http-request/checksums'
-import { httpJson, httpText } from '../../src/http-request/convenience'
+import { httpJson, httpText } from '../../src/http-request/node'
 import { getSocketCallerUserAgent } from '../../src/http-request/user-agent'
 import { httpDownload } from '../../src/http-request/download'
 import { httpRequest } from '../../src/http-request/request'
-import { Logger } from '../../src/logger/default'
+import { Logger } from '../../src/logger/node'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures'
 import { runWithTempDir } from '../unit/util/temp-file-helper'

@@ -9,7 +9,7 @@
  *     centralized logging without explicit Logger instantiation.
  */
 
-import { getDefaultLogger } from '../../../src/logger/default'
+import { getDefaultLogger } from '../../../src/logger/node'
 import { describe, expect, it } from 'vitest'
 
 describe('getDefaultLogger', () => {

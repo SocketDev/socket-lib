@@ -7,7 +7,7 @@
  */
 
 import type { IncomingHttpHeaders } from 'node:http'
-import type { Logger } from '../logger/default'
+import type { Logger } from '../logger/node'
 
 /**
  * Configuration options for file downloads.
@@ -57,7 +57,7 @@ export interface HttpDownloadOptions {
    *
    * @example
    *   ;```ts
-   *   import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+   *   import { getDefaultLogger } from '@socketsecurity/lib/logger/node'
    *
    *   const logger = getDefaultLogger()
    *   await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {

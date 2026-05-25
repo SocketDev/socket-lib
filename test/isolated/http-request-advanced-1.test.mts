@@ -15,7 +15,7 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { fetchChecksums } from '../../src/http-request/checksums'
-import { httpJson, httpText } from '../../src/http-request/convenience'
+import { httpJson, httpText } from '../../src/http-request/node'
 import { httpDownload } from '../../src/http-request/download'
 import { enrichErrorMessage } from '../../src/http-request/errors'
 import { getSocketCallerUserAgent } from '../../src/http-request/user-agent'

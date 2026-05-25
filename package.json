@@ -1484,6 +1484,15 @@
       "types": "./dist/globs/types.d.ts",
       "default": "./dist/globs/types.js"
     },
+    "./http-request": {
+      "source": "./src/http-request/node.ts",
+      "browser": {
+        "types": "./dist/http-request/browser.d.ts",
+        "default": "./dist/http-request/browser.js"
+      },
+      "types": "./dist/http-request/node.d.ts",
+      "default": "./dist/http-request/node.js"
+    },
     "./http-request/browser": {
       "browser": {
         "source": "./src/http-request/browser.ts",
@@ -1509,11 +1518,6 @@
       "types": "./dist/http-request/checksums.d.ts",
       "default": "./dist/http-request/checksums.js"
     },
-    "./http-request/convenience": {
-      "source": "./src/http-request/convenience.ts",
-      "types": "./dist/http-request/convenience.d.ts",
-      "default": "./dist/http-request/convenience.js"
-    },
     "./http-request/download": {
       "source": "./src/http-request/download.ts",
       "types": "./dist/http-request/download.d.ts",
@@ -1533,6 +1537,11 @@
       "source": "./src/http-request/headers.ts",
       "types": "./dist/http-request/headers.d.ts",
       "default": "./dist/http-request/headers.js"
+    },
+    "./http-request/node": {
+      "source": "./src/http-request/node.ts",
+      "types": "./dist/http-request/node.d.ts",
+      "default": "./dist/http-request/node.js"
     },
     "./http-request/request": {
       "source": "./src/http-request/request.ts",
@@ -1630,13 +1639,13 @@
       "default": "./dist/links/types.js"
     },
     "./logger": {
-      "source": "./src/logger/default.ts",
+      "source": "./src/logger/node.ts",
       "browser": {
         "types": "./dist/logger/browser.d.ts",
         "default": "./dist/logger/browser.js"
       },
-      "types": "./dist/logger/default.d.ts",
-      "default": "./dist/logger/default.js"
+      "types": "./dist/logger/node.d.ts",
+      "default": "./dist/logger/node.js"
     },
     "./logger/browser": {
       "browser": {
@@ -1658,10 +1667,10 @@
       "types": "./dist/logger/console.d.ts",
       "default": "./dist/logger/console.js"
     },
-    "./logger/default": {
-      "source": "./src/logger/default.ts",
-      "types": "./dist/logger/default.d.ts",
-      "default": "./dist/logger/default.js"
+    "./logger/node": {
+      "source": "./src/logger/node.ts",
+      "types": "./dist/logger/node.d.ts",
+      "default": "./dist/logger/node.js"
     },
     "./logger/symbols": {
       "source": "./src/logger/symbols.ts",

@@ -15,7 +15,7 @@
 
 import { Writable } from 'node:stream'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { Logger } from '../../src/logger/default'
+import { Logger } from '../../src/logger/node'
 import {
   LOG_SYMBOLS,
   incLogCallCountSymbol,

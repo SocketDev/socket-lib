@@ -15,7 +15,7 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, it } from 'vitest'
 
-import { httpJson, httpText } from '../../src/http-request/convenience'
+import { httpJson, httpText } from '../../src/http-request/node'
 import {
   parseRetryAfterHeader,
   sanitizeHeaders,

@@ -10,7 +10,7 @@
 
 import { Writable } from 'node:stream'
 
-import { Logger } from '../../../src/logger/default'
+import { Logger } from '../../../src/logger/node'
 import { LOG_SYMBOLS } from '../../../src/logger/symbols'
 import { THEMES } from '../../../src/themes/themes'
 import { describe, expect, it, beforeEach } from 'vitest'

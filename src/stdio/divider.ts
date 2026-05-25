@@ -3,7 +3,7 @@
  *   for visual separation in CLI output.
  */
 
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/node'
 import { repeatString } from '../strings/format'
 
 const logger = getDefaultLogger()

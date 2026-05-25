@@ -9,7 +9,7 @@
  */
 
 import Arborist from '../external/@npmcli/arborist'
-import { httpJson } from '../http-request/convenience'
+import { httpJson } from '../http-request/node'
 import { getSocketCallerUserAgent } from '../http-request/user-agent'
 
 import { ErrorCtor } from '../primordials/error'

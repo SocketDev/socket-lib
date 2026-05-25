@@ -298,16 +298,19 @@ async function main(): Promise<void> {
   // would violate the "no barrel files" CLAUDE.md rule; an exports-map
   // alias is just a re-pointer with no source file behind it.
   const fleetCompatAliases: Array<[string, string]> = [
-    ['./logger', './logger/default'],
+    ['./logger', './logger/node'],
+    ['./http-request', './http-request/node'],
     ['./errors', './errors/message'],
   ]
   // Alias targets that have a dedicated browser implementation. When a
   // bundler resolves the 'browser' condition on the alias, send it to
   // the browser leaf instead of the Node default. Without this, browser
-  // consumers of '@socketsecurity/lib/logger' silently pull in
-  // node:process / node:console / node:os via logger/default.
+  // consumers of '@socketsecurity/lib/logger' or
+  // '@socketsecurity/lib/http-request' silently pull in node:* builtins
+  // via the Node-side default.
   const fleetCompatBrowserSource: Record<string, string> = {
     './logger': './logger/browser',
+    './http-request': './http-request/browser',
   }
   for (const { 0: alias, 1: target } of fleetCompatAliases) {
     const targetValue = subpathExports[target]

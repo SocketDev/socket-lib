@@ -7,7 +7,7 @@
  *   prim → primordials.
  */
 
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/node'
 
 import { runCheckPrimordials } from './check-primordials'
 

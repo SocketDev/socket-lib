@@ -351,10 +351,10 @@ describe('git', () => {
     })
 
     it('should handle files in subdirectories', async () => {
-      // src/logger.ts was reshaped into src/logger/default.ts (v6.1
+      // src/logger.ts was reshaped into src/logger/node.ts (v6.1
       // renamed the leaf from `logger` to `default` so it lines up
       // with `getDefaultLogger`).
-      const result = await isChanged('src/logger/default.ts', {
+      const result = await isChanged('src/logger/node.ts', {
         cwd: projectRoot,
       })
       expect(typeof result).toBe('boolean')

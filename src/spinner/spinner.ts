@@ -23,7 +23,7 @@ import { configToSpec, frameColors } from '../effects/shimmer'
 import { colorsToAnsi } from '../effects/shimmer-terminal'
 import { getCI } from '../env/ci'
 import yoctoSpinner from '../external/@socketregistry/yocto-spinner'
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/node'
 import {
   LOG_SYMBOLS,
   incLogCallCountSymbol,

@@ -26,7 +26,7 @@
 import { errorMessage } from '../errors/message'
 import { readFileUtf8Sync } from '../fs/read-file'
 import { safeDeleteSync, safeMkdirSync } from '../fs/safe'
-import { getDefaultLogger } from '../logger/default'
+import { getDefaultLogger } from '../logger/node'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process/lock-instance'
 

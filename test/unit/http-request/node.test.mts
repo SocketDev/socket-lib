@@ -22,7 +22,7 @@ function makeResponse(opts: { ok: boolean; status?: number; body: string }) {
 async function loadFresh() {
   const reqMod = await import('../../../src/http-request/request')
   const httpReqMock = reqMod.httpRequest as ReturnType<typeof vi.fn>
-  const mod = await import('../../../src/http-request/convenience')
+  const mod = await import('../../../src/http-request/node')
   return { httpReqMock, httpJson: mod.httpJson, httpText: mod.httpText }
 }
 
@@ -34,7 +34,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('http-request/convenience — httpJson', () => {
+describe.sequential('http-request/node — httpJson', () => {
   test('returns parsed JSON on a 2xx response', async () => {
     const { httpJson, httpReqMock } = await loadFresh()
     httpReqMock.mockResolvedValueOnce(
@@ -99,7 +99,7 @@ describe.sequential('http-request/convenience — httpJson', () => {
   })
 })
 
-describe.sequential('http-request/convenience — httpText', () => {
+describe.sequential('http-request/node — httpText', () => {
   test('returns the response body as text on a 2xx response', async () => {
     const { httpText, httpReqMock } = await loadFresh()
     httpReqMock.mockResolvedValueOnce(
