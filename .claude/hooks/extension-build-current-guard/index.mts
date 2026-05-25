@@ -27,9 +27,7 @@ import { readStdin } from '../_shared/transcript.mts'
 
 interface PostToolUsePayload {
   readonly tool_name?: string | undefined
-  readonly tool_input?:
-    | { readonly file_path?: unknown | undefined }
-    | undefined
+  readonly tool_input?: { readonly file_path?: unknown | undefined } | undefined
   readonly cwd?: string | undefined
 }
 
@@ -46,8 +44,8 @@ export function isExtensionSrcPath(filePath: string): boolean {
 
 /**
  * Walks up from `start` looking for a directory that contains both
- * `package.json` AND `tools/trusted-publisher-extension/`. Returns
- * the path or undefined.
+ * `package.json` AND `tools/trusted-publisher-extension/`. Returns the path or
+ * undefined.
  */
 export function findRepoRoot(start: string): string | undefined {
   let cur = start

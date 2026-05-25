@@ -38,9 +38,7 @@ import process from 'node:process'
 interface Payload {
   readonly hook_event_name?: string | undefined
   readonly tool_name?: string | undefined
-  readonly tool_input?:
-    | { readonly command?: string | undefined }
-    | undefined
+  readonly tool_input?: { readonly command?: string | undefined } | undefined
   readonly tool_response?: unknown | undefined
 }
 
@@ -151,9 +149,7 @@ export function formatReminder(
   lines.push('')
   lines.push('🚨 enterprise-push-property-reminder')
   lines.push('')
-  lines.push(
-    'The `git push` was rejected by the Socket enterprise ruleset on',
-  )
+  lines.push('The `git push` was rejected by the Socket enterprise ruleset on')
   lines.push('refs/heads/main:')
   lines.push('')
   lines.push('  - Required workflow ... is not satisfied')
