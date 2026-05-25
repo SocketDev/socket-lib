@@ -21,7 +21,7 @@ concurrency:
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@11236f6ebd45f1f50947d75f4dc81b6c8a6b0d6a # main (2026-05-25)
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@29100ff292fefdae4eba0ab2a40697fea06b1ad2 # main (2026-05-25)
     with:
       test-script: 'pnpm exec vitest --config .config/vitest.config.mts run'
 
