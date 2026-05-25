@@ -26,6 +26,16 @@ export const JANUS_ASSET_MAP: Readonly<Record<string, JanusAssetEntry>> =
     }) as unknown as JanusAssetEntry,
   }) as unknown as Readonly<Record<string, JanusAssetEntry>>
 
+/**
+ * Single source of truth for the platform-arch tokens janus ships. Derived from
+ * JANUS_ASSET_MAP keys so adding a new asset entry automatically updates the
+ * supported set. Use this from `from-download.ts` to throw a helpful error
+ * rather than letting the URL builder silently return undefined.
+ */
+export const JANUS_SUPPORTED_PLATFORM_ARCHES: readonly string[] = ObjectFreeze(
+  Object.keys(JANUS_ASSET_MAP),
+) as readonly string[]
+
 export function getJanusAssetEntry(
   platformArch: string,
 ): JanusAssetEntry | undefined {

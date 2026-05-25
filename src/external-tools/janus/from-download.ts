@@ -9,12 +9,14 @@
  */
 
 import path from 'node:path'
-import process from 'node:process'
 
 import { getSocketWheelhouseDir } from '../../paths/socket'
 import { downloadAndExtractTool } from '../from-download'
 
-import { getJanusDownloadUrl } from './asset-names'
+import {
+  JANUS_SUPPORTED_PLATFORM_ARCHES,
+  getJanusDownloadUrl,
+} from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
@@ -36,11 +38,21 @@ export interface JanusFromDownloadOptions {
 
 export async function janusFromDownload(
   opts: JanusFromDownloadOptions,
-): Promise<ResolvedJanus | undefined> {
+): Promise<ResolvedJanus> {
   const { cacheDir, downloader, integrity, platformArch, version } = opts
+  if (!JANUS_SUPPORTED_PLATFORM_ARCHES.includes(platformArch)) {
+    const supported = JANUS_SUPPORTED_PLATFORM_ARCHES.map(p => `\`${p}\``).join(
+      ', ',
+    )
+    throw new Error(
+      `janusFromDownload: platformArch must be one of [${supported}], got \`${platformArch}\`. Upstream janus only publishes the macOS arm64 build (see https://github.com/divmain/janus/releases); request \`darwin-arm64\` or use a different tool for other platforms.`,
+    )
+  }
   const url = getJanusDownloadUrl({ version, platformArch })
   if (!url) {
-    return undefined
+    throw new Error(
+      `janusFromDownload: no upstream asset for janus@${version} on \`${platformArch}\`. The platform is in the supported set but the version may be missing; check https://github.com/divmain/janus/releases/tag/v${version}.`,
+    )
   }
   const extractedDir =
     cacheDir ??
@@ -52,9 +64,8 @@ export async function janusFromDownload(
     extractedDir,
     downloader,
   })
-  const binary = process.platform === 'win32' ? 'janus.exe' : 'janus'
   return {
-    path: path.join(extractedDir, binary),
+    path: path.join(extractedDir, 'janus'),
     source: 'download',
     integrity: archive.integrity,
   }
