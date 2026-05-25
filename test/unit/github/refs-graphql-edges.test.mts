@@ -13,6 +13,9 @@ import { httpRequest } from '../../../src/http-request/request'
 
 const JSONStringify = JSON.stringify
 
+// oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes; carry the exemption here once instead of stacking identical disables at each call site.
+const GRAPHQL_NULL = null
+
 function mkResponse(body: Buffer, ok: boolean, status: number) {
   return {
     body,
@@ -59,11 +62,9 @@ describe.sequential('github/refs-graphql — fetchRefShaViaGraphQL', () => {
           JSONStringify({
             data: {
               repository: {
-                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
-                tagRef: null,
+                tagRef: GRAPHQL_NULL,
                 branchRef: { target: { oid: 'sha-branch' } },
-                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
-                commit: null,
+                commit: GRAPHQL_NULL,
               },
             },
           }),
@@ -82,12 +83,9 @@ describe.sequential('github/refs-graphql — fetchRefShaViaGraphQL', () => {
           JSONStringify({
             data: {
               repository: {
-                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
-                tagRef: null,
-                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
-                branchRef: null,
-                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
-                commit: null,
+                tagRef: GRAPHQL_NULL,
+                branchRef: GRAPHQL_NULL,
+                commit: GRAPHQL_NULL,
               },
             },
           }),
