@@ -465,8 +465,13 @@ async function main(): Promise<void> {
         logger.success('Build Cleaned')
       }
 
-      // Run source, externals, and types builds in parallel
-      const [srcResult, externalsExitCode, typesExitCode] = await Promise.all([
+      // Run source, externals, and types builds in parallel. Use
+      // `allSettled` so a rejection in one builder doesn't short-
+      // circuit the others mid-write — past CI flakiness on a SHIP
+      // had buildExternals finish + log "Build completed successfully"
+      // while buildSource/buildTypes were still writing files, then
+      // the test runner started before those writes flushed.
+      const settled = await Promise.allSettled([
         buildSource({
           quiet,
           verbose,
@@ -476,6 +481,23 @@ async function main(): Promise<void> {
         buildExternals({ quiet, verbose }),
         buildTypes({ quiet, verbose, skipClean: true }),
       ])
+      const [srcSettled, externalsSettled, typesSettled] = settled
+      const srcResult: BuildSourceResult =
+        srcSettled.status === 'fulfilled'
+          ? srcSettled.value
+          : (logger.error(`buildSource rejected: ${srcSettled.reason}`),
+            { exitCode: 1, buildTime: 0, result: undefined })
+      const externalsExitCode: number =
+        externalsSettled.status === 'fulfilled'
+          ? externalsSettled.value
+          : (logger.error(
+              `buildExternals rejected: ${externalsSettled.reason}`,
+            ),
+            1)
+      const typesExitCode: number =
+        typesSettled.status === 'fulfilled'
+          ? typesSettled.value
+          : (logger.error(`buildTypes rejected: ${typesSettled.reason}`), 1)
 
       // Log completion messages if analyze flag is set
       if (!quiet && values.analyze && srcResult.result?.metafile) {
