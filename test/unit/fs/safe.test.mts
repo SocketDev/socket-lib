@@ -1,7 +1,7 @@
 /**
- * @file Unit tests for src/fs/safe — safeDelete/Sync and safeMkdir/Sync.
- *   Split out of the historical monolithic test/unit/fs.test.mts to keep each
- *   test file under the fleet's 500-line soft cap.
+ * @file Unit tests for src/fs/safe — safeDelete/Sync and safeMkdir/Sync. Split
+ *   out of the historical monolithic test/unit/fs.test.mts to keep each test
+ *   file under the fleet's 500-line soft cap.
  */
 
 import { existsSync, promises as fs } from 'node:fs'
@@ -18,6 +18,14 @@ import {
 } from '../../../src/fs/safe'
 
 import { runWithTempDir } from '../util/temp-file-helper'
+
+// Helper that owns the `prefer-exists-sync` exemption once instead of
+// repeating it at every fs.stat() call — these tests verify the stat
+// output (isDirectory), not just existence.
+async function inspectDirStats(p: string) {
+  // oxlint-disable-next-line socket/prefer-exists-sync -- verifying stats.isDirectory(), not existence.
+  return fs.stat(p)
+}
 
 describe('safeDelete', () => {
   it('should delete files in temp directory', async () => {
@@ -157,7 +165,7 @@ describe('safeMkdir', () => {
       const newDir = path.join(tmpDir, 'test-dir')
       await safeMkdir(newDir)
 
-      const stats = await fs.stat(newDir)
+      const stats = await inspectDirStats(newDir)
       expect(stats.isDirectory()).toBe(true)
     }, 'safeMkdir-single-')
   })
@@ -167,7 +175,7 @@ describe('safeMkdir', () => {
       const nestedDir = path.join(tmpDir, 'level1', 'level2', 'level3')
       await safeMkdir(nestedDir)
 
-      const stats = await fs.stat(nestedDir)
+      const stats = await inspectDirStats(nestedDir)
       expect(stats.isDirectory()).toBe(true)
     }, 'safeMkdir-nested-')
   })
@@ -179,7 +187,7 @@ describe('safeMkdir', () => {
 
       await expect(safeMkdir(newDir)).resolves.toBeUndefined()
 
-      const stats = await fs.stat(newDir)
+      const stats = await inspectDirStats(newDir)
       expect(stats.isDirectory()).toBe(true)
     }, 'safeMkdir-exists-')
   })
@@ -188,9 +196,7 @@ describe('safeMkdir', () => {
     await runWithTempDir(async tmpDir => {
       const nestedDir = path.join(tmpDir, 'level1', 'level2')
 
-      await expect(
-        safeMkdir(nestedDir, { recursive: false }),
-      ).rejects.toThrow()
+      await expect(safeMkdir(nestedDir, { recursive: false })).rejects.toThrow()
     }, 'safeMkdir-no-recursive-')
   })
 
@@ -199,7 +205,7 @@ describe('safeMkdir', () => {
       const newDir = path.join(tmpDir, 'custom-mode')
       await safeMkdir(newDir, { mode: 0o755 })
 
-      const stats = await fs.stat(newDir)
+      const stats = await inspectDirStats(newDir)
       expect(stats.isDirectory()).toBe(true)
     }, 'safeMkdir-mode-')
   })
@@ -226,7 +232,7 @@ describe('safeMkdirSync', () => {
       const newDir = path.join(tmpDir, 'test-dir')
       safeMkdirSync(newDir)
 
-      const stats = await fs.stat(newDir)
+      const stats = await inspectDirStats(newDir)
       expect(stats.isDirectory()).toBe(true)
     }, 'safeMkdirSync-single-')
   })
@@ -236,7 +242,7 @@ describe('safeMkdirSync', () => {
       const nestedDir = path.join(tmpDir, 'level1', 'level2', 'level3')
       safeMkdirSync(nestedDir)
 
-      const stats = await fs.stat(nestedDir)
+      const stats = await inspectDirStats(nestedDir)
       expect(stats.isDirectory()).toBe(true)
     }, 'safeMkdirSync-nested-')
   })
@@ -248,7 +254,7 @@ describe('safeMkdirSync', () => {
 
       expect(() => safeMkdirSync(newDir)).not.toThrow()
 
-      const stats = await fs.stat(newDir)
+      const stats = await inspectDirStats(newDir)
       expect(stats.isDirectory()).toBe(true)
     }, 'safeMkdirSync-exists-')
   })
@@ -266,7 +272,7 @@ describe('safeMkdirSync', () => {
       const newDir = path.join(tmpDir, 'custom-mode')
       safeMkdirSync(newDir, { mode: 0o755 })
 
-      const stats = await fs.stat(newDir)
+      const stats = await inspectDirStats(newDir)
       expect(stats.isDirectory()).toBe(true)
     }, 'safeMkdirSync-mode-')
   })

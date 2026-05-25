@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for src/fs/unique — uniqueSync filename suffix collision
- *   avoidance. Split out of the historical monolithic test/unit/fs.test.mts
- *   to keep each test file under the fleet's 500-line soft cap.
+ *   avoidance. Split out of the historical monolithic test/unit/fs.test.mts to
+ *   keep each test file under the fleet's 500-line soft cap.
  */
 
 import { promises as fs } from 'node:fs'

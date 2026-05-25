@@ -174,9 +174,7 @@ if (process.platform !== 'win32') {
         await fs.writeFile(testFile, '{"x":1}', 'utf8')
         await fs.chmod(testFile, 0o000)
         try {
-          await expect(readJson(testFile)).rejects.toThrow(
-            /Permission denied/,
-          )
+          await expect(readJson(testFile)).rejects.toThrow(/Permission denied/)
         } finally {
           await fs.chmod(testFile, 0o644)
         }

@@ -155,12 +155,9 @@ describe('findUpSync', () => {
       const testFile = path.join(tmpDir, 'config.yaml')
       await fs.writeFile(testFile, '', 'utf8')
 
-      const result = findUpSync(
-        ['config.json', 'config.yaml', 'config.yml'],
-        {
-          cwd: tmpDir,
-        },
-      )
+      const result = findUpSync(['config.json', 'config.yaml', 'config.yml'], {
+        cwd: tmpDir,
+      })
       expect(result).toBeDefined()
       expect(result).toContain('config.yaml')
     }, 'findUpSync-array-')

@@ -1,8 +1,8 @@
 /**
- * @file Unit tests for src/fs/read-file — readFileBinary/Sync, readFileUtf8/Sync,
- *   safeReadFile/Sync, and their defaultValue variants. Split out of the
- *   historical monolithic test/unit/fs.test.mts to keep each test file under
- *   the fleet's 500-line soft cap.
+ * @file Unit tests for src/fs/read-file — readFileBinary/Sync,
+ *   readFileUtf8/Sync, safeReadFile/Sync, and their defaultValue variants.
+ *   Split out of the historical monolithic test/unit/fs.test.mts to keep each
+ *   test file under the fleet's 500-line soft cap.
  */
 
 import { promises as fs } from 'node:fs'
