@@ -269,7 +269,8 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
         await readBinaryCacheMetadata(path.join(tmpRoot, 'unreadable')),
       ).toBeUndefined()
     } finally {
-      ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync = origExists
+      ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync =
+        origExists
     }
   })
 
@@ -285,7 +286,8 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
         await isBinaryCacheValid(path.join(tmpRoot, 'unreadable-valid')),
       ).toBe(false)
     } finally {
-      ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync = origExists
+      ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync =
+        origExists
     }
   })
 })

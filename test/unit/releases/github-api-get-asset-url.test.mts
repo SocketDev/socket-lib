@@ -149,11 +149,7 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
       vi.mocked(httpRequest).mockResolvedValue(
         createMockHttpResponse(Buffer.from(''), false, 404, 'Not Found'),
       )
-      const promise = getReleaseAssetUrl(
-        'v1.0.0',
-        '*.tar.gz',
-        SOCKET_BTM_REPO,
-      )
+      const promise = getReleaseAssetUrl('v1.0.0', '*.tar.gz', SOCKET_BTM_REPO)
       await vi.runAllTimersAsync()
       await expect(promise).rejects.toThrow(/Failed to fetch.*release v1\.0\.0/)
     } finally {
