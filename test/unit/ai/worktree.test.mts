@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
@@ -41,7 +41,7 @@ function initRepo(dir: string): void {
 beforeEach(() => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'ai-worktree-test-'))
   repo = path.join(tmpRoot, 'repo')
-  sh(tmpRoot, `mkdir -p ${path.basename(repo)}`)
+  mkdirSync(repo, { recursive: true })
   initRepo(repo)
 })
 
@@ -128,7 +128,7 @@ describe.sequential('hasStagedOrUnstaged', () => {
 describe.sequential('spawnAiAgentsInWorktrees', () => {
   test('throws when baseRepo is not a git checkout', async () => {
     const notARepo = path.join(tmpRoot, 'not-a-repo')
-    sh(tmpRoot, `mkdir -p ${path.basename(notARepo)}`)
+    mkdirSync(notARepo, { recursive: true })
     await expect(
       spawnAiAgentsInWorktrees([1], async () => 'ok', {
         baseRepo: notARepo,
