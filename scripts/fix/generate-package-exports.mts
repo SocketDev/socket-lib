@@ -211,10 +211,21 @@ async function main(): Promise<void> {
     './versions/',
     './words/',
   ]
+  // Any leaf whose path ends in `/browser` or `/browser-fetch` IS the
+  // browser implementation — it's browser-safe by construction, so it
+  // carries the `browser` condition pointing at itself. Otherwise
+  // `./logger/browser` (the explicit browser entry) would lack the
+  // condition that `./logger` (via the alias) routes to, which makes
+  // the alias-routing strictly stronger than the explicit-entry route.
+  const isExplicitBrowserLeaf = (p: string): boolean =>
+    p.endsWith('/browser') || p.endsWith('/browser-fetch')
   for (const { 0: exportPath, 1: exportValue } of Object.entries(
     subpathExports,
   )) {
-    if (!BROWSER_SAFE_PREFIXES.some(p => exportPath.startsWith(p))) {
+    if (
+      !BROWSER_SAFE_PREFIXES.some(p => exportPath.startsWith(p)) &&
+      !isExplicitBrowserLeaf(exportPath)
+    ) {
       continue
     }
     if (
@@ -290,10 +301,46 @@ async function main(): Promise<void> {
     ['./logger', './logger/default'],
     ['./errors', './errors/message'],
   ]
+  // Alias targets that have a dedicated browser implementation. When a
+  // bundler resolves the 'browser' condition on the alias, send it to
+  // the browser leaf instead of the Node default. Without this, browser
+  // consumers of '@socketsecurity/lib/logger' silently pull in
+  // node:process / node:console / node:os via logger/default.
+  const fleetCompatBrowserSource: Record<string, string> = {
+    './logger': './logger/browser',
+  }
   for (const { 0: alias, 1: target } of fleetCompatAliases) {
     const targetValue = subpathExports[target]
     if (targetValue && !subpathExports[alias]) {
-      subpathExports[alias] = targetValue
+      const browserTargetKey = fleetCompatBrowserSource[alias]
+      const browserTarget = browserTargetKey
+        ? subpathExports[browserTargetKey]
+        : undefined
+      if (
+        browserTarget &&
+        typeof browserTarget === 'object' &&
+        typeof targetValue === 'object'
+      ) {
+        // Splice `browser` BEFORE the other conditions (most-specific first).
+        const {
+          source,
+          types,
+          default: def,
+        } = targetValue as Record<string, unknown>
+        const browserDef = browserTarget as Record<string, unknown>
+        const next: Record<string, unknown> = {
+          source,
+          browser: {
+            types: browserDef.types,
+            default: browserDef.default,
+          },
+          types,
+          default: def,
+        }
+        subpathExports[alias] = next
+      } else {
+        subpathExports[alias] = targetValue
+      }
     }
   }
 

@@ -1485,11 +1485,21 @@
       "default": "./dist/globs/types.js"
     },
     "./http-request/browser": {
+      "browser": {
+        "source": "./src/http-request/browser.ts",
+        "types": "./dist/http-request/browser.d.ts",
+        "default": "./dist/http-request/browser.js"
+      },
       "source": "./src/http-request/browser.ts",
       "types": "./dist/http-request/browser.d.ts",
       "default": "./dist/http-request/browser.js"
     },
     "./http-request/browser-fetch": {
+      "browser": {
+        "source": "./src/http-request/browser-fetch.ts",
+        "types": "./dist/http-request/browser-fetch.d.ts",
+        "default": "./dist/http-request/browser-fetch.js"
+      },
       "source": "./src/http-request/browser-fetch.ts",
       "types": "./dist/http-request/browser-fetch.d.ts",
       "default": "./dist/http-request/browser-fetch.js"
@@ -1621,10 +1631,19 @@
     },
     "./logger": {
       "source": "./src/logger/default.ts",
+      "browser": {
+        "types": "./dist/logger/browser.d.ts",
+        "default": "./dist/logger/browser.js"
+      },
       "types": "./dist/logger/default.d.ts",
       "default": "./dist/logger/default.js"
     },
     "./logger/browser": {
+      "browser": {
+        "source": "./src/logger/browser.ts",
+        "types": "./dist/logger/browser.d.ts",
+        "default": "./dist/logger/browser.js"
+      },
       "source": "./src/logger/browser.ts",
       "types": "./dist/logger/browser.d.ts",
       "default": "./dist/logger/browser.js"
