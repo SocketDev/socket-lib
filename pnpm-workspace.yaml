@@ -128,6 +128,7 @@ overrides:
   'picomatch': '4.0.4'
   'postcss': '8.5.10'
   'proc-log': '6.1.0'
+  'qs': '6.15.2'
   'semver': '7.7.2'
   'signal-exit': '4.1.0'
   'spdx-expression-parse': '4.0.0'
