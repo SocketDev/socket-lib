@@ -14,6 +14,7 @@ import {
 } from '../../../src/secrets/rc'
 
 const IS_DARWIN = os.platform() === 'darwin'
+const IS_WIN32 = os.platform() === 'win32'
 
 let tmpRoot: string
 
@@ -169,7 +170,11 @@ describe.sequential('pickRcFile', () => {
 })
 
 describe.sequential('writeRcFile', () => {
-  test('writes content with 0o600 mode', () => {
+  test.skipIf(IS_WIN32)('writes content with 0o600 mode', () => {
+    // Windows doesn't honor POSIX mode bits; the chmod call is a
+    // no-op on win32 and the file ends up with whatever default ACL
+    // the parent dir applies. The write itself is still tested by
+    // the next case.
     const rcPath = path.join(tmpRoot, '.rcfile')
     writeRcFile(rcPath, 'hello')
     expect(readFileSync(rcPath, 'utf8')).toBe('hello')
