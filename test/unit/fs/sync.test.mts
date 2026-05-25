@@ -281,10 +281,13 @@ describe.sequential('fs - Sync Functions', () => {
     it('isDir returns true for directories and false otherwise', async () => {
       const dir = join(testDir, 'is-dir-target')
       mkdirSync(dir)
+      // oxlint-disable-next-line socket/prefer-exists-sync -- isDir is the unit under test.
       expect(await isDir(dir)).toBe(true)
       const file = join(testDir, 'is-dir-file.txt')
       writeFileSync(file, 'x')
+      // oxlint-disable-next-line socket/prefer-exists-sync -- isDir is the unit under test.
       expect(await isDir(file)).toBe(false)
+      // oxlint-disable-next-line socket/prefer-exists-sync -- isDir is the unit under test.
       expect(await isDir(join(testDir, 'no-such-thing'))).toBe(false)
     })
 

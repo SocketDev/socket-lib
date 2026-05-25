@@ -197,6 +197,7 @@ describe.sequential('packages/provenance — getProvenanceDetails', () => {
 
 describe.sequential('packages/provenance — isTrustedPublisher', () => {
   it('returns false for non-string or empty input', () => {
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(isTrustedPublisher(null)).toBe(false)
     expect(isTrustedPublisher(undefined)).toBe(false)
     expect(isTrustedPublisher(42)).toBe(false)

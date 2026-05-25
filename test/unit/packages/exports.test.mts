@@ -18,6 +18,7 @@ import {
 
 describe.sequential('packages/exports — isConditionalExports', () => {
   it('returns false for non-objects', () => {
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(isConditionalExports(null)).toBe(false)
     expect(isConditionalExports(undefined)).toBe(false)
     expect(isConditionalExports('./index.js')).toBe(false)
@@ -50,7 +51,9 @@ describe.sequential('packages/exports — isConditionalExports', () => {
 
 describe.sequential('packages/exports — isSubpathExports', () => {
   it('returns false for non-objects', () => {
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(isSubpathExports(null)).toBe(false)
+    expect(isSubpathExports(undefined)).toBe(false)
     expect(isSubpathExports('./index.js')).toBe(false)
   })
 
@@ -72,7 +75,9 @@ describe.sequential('packages/exports — isSubpathExports', () => {
 
 describe.sequential('packages/exports — getSubpaths', () => {
   it('returns [] for non-objects', () => {
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(getSubpaths(null)).toEqual([])
+    expect(getSubpaths(undefined)).toEqual([])
     expect(getSubpaths('./index.js')).toEqual([])
   })
 
@@ -93,7 +98,9 @@ describe.sequential('packages/exports — getSubpaths', () => {
 
 describe.sequential('packages/exports — getExportFilePaths', () => {
   it('returns [] for non-objects', () => {
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(getExportFilePaths(null)).toEqual([])
+    expect(getExportFilePaths(undefined)).toEqual([])
     expect(getExportFilePaths('./index.js')).toEqual([])
   })
 
@@ -157,6 +164,7 @@ describe.sequential('packages/exports — resolvePackageJsonEntryExports', () =>
 
   it('returns undefined for non-object non-array non-string', () => {
     expect(resolvePackageJsonEntryExports(undefined)).toBeUndefined()
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(resolvePackageJsonEntryExports(null)).toBeUndefined()
     expect(resolvePackageJsonEntryExports(42)).toBeUndefined()
   })

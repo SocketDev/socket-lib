@@ -176,6 +176,7 @@ describe.sequential('dlx/arborist — readTopLevelFromIdealTree', () => {
   })
 
   it('throws when tree is null', () => {
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(() => readTopLevelFromIdealTree(null, 'pkg')).toThrow(
       /missing inventory/,
     )

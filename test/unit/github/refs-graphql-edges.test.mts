@@ -59,8 +59,10 @@ describe.sequential('github/refs-graphql — fetchRefShaViaGraphQL', () => {
           JSONStringify({
             data: {
               repository: {
+                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
                 tagRef: null,
                 branchRef: { target: { oid: 'sha-branch' } },
+                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
                 commit: null,
               },
             },
@@ -80,8 +82,11 @@ describe.sequential('github/refs-graphql — fetchRefShaViaGraphQL', () => {
           JSONStringify({
             data: {
               repository: {
+                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
                 tagRef: null,
+                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
                 branchRef: null,
+                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
                 commit: null,
               },
             },

@@ -77,6 +77,7 @@ describe.sequential('github/ghsa — fetchGhsaDetailsViaGraphQL edges', () => {
   it('throws when securityAdvisory is null (not found)', async () => {
     vi.mocked(httpRequest).mockResolvedValueOnce(
       mkResponse(
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
         Buffer.from(JSONStringify({ data: { securityAdvisory: null } })),
         true,
         200,
@@ -100,6 +101,7 @@ describe.sequential('github/ghsa — fetchGhsaDetailsViaGraphQL edges', () => {
                 severity: 'HIGH',
                 publishedAt: '2026-01-01T00:00:00Z',
                 updatedAt: '2026-01-02T00:00:00Z',
+                // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes
                 withdrawnAt: null,
                 cvss: { score: 7.5, vectorString: 'CVSS:3.1/AV:N' },
                 cwes: {
