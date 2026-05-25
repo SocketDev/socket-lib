@@ -5,6 +5,77 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.1) - 2026-05-25
+
+Five additive features plus public-surface polish on top of 6.0.0. The path renames drop doubled-name leaves (`spawn/spawn`, `ttl-cache/cache`, `globs/glob`, `links/link`, `promise-queue/queue`) and regroup three top-level directories whose contents were the same concept (process events) under a new `events/` umbrella. Renames are path-only; no symbol renames or behavior changes.
+
+### Added
+
+- **`colors/socket-palette`** — Socket-branded 24-bit ANSI palette. Three themes (`'light' | 'dark' | 'synthwave'`) expose status colors (`success` / `warning` / `alert` / `error` / `info`) plus the Socket brand constants (`socketPurple` `#8c50ff`, `socketPink` `#ff00aa`). Each helper emits `\x1b[38;2;R;G;Bm` directly rather than rounding to the legacy 8-color palette, so truecolor terminals render the brand hex byte-for-byte. Hex values exposed via `palette.hex.*` for callers building their own escapes. Default theme is `'dark'`.
+- **`logger/browser`** — minimal `console`-backed `Logger` mirroring the public `success` / `fail` / `warn` / `error` / `info` / `log` surface, with no `node:process` / `node:console` / `node:os` imports. Usable from Chrome MV3 service workers, content scripts, and popups. Importing `@socketsecurity/lib/logger` in a bundler that resolves the `'browser'` export condition (rolldown, vite, esbuild) automatically picks up this shim; Node consumers continue to get the full `Logger` class.
+- **`'browser'` export condition** on 40 leaf modules. 35 zero-Node leaf utilities (`arrays`, `colors`, `errors`, `objects`, `regexps`, `strings`, `url`, `versions`, `words` families) carry a `'browser'` condition signalling browser-safety to bundlers. Five leaves with dedicated browser implementations (`logger/browser`, `http-request/browser`, `http-request/browser-fetch`) route to the alternate file. Browser-incompatible modules (`fs`, `archives`, `bin`, subprocess / TTY / OS-secrets surfaces) deliberately omit the condition. Full compatibility matrix in [`docs/browser-compatibility.md`](./docs/browser-compatibility.md).
+- **`http-request` `signal` option (Node-side parity).** `HttpRequestOptions.signal?: AbortSignal | undefined` is now plumbed through `request-attempt` → `httpModule.request()`. An aborted signal short-circuits the retry loop (caller cancel is not retryable). Brings the Node side to parity with the browser side, which already exposes `signal` via `AbortController` on `fetch()`.
+- **Default-on read-result cache for `fs/read-json` `readJson` / `readJsonSync`.** Process-scoped LRU cache keyed on `path + ino + size + mtimeMs`. Safe by four guards: stat-validated keys (re-read on stat mismatch), defensive clone on both insert and hit (caller mutations can't poison the entry), reviver opt-out (function identity isn't safely hashable), and per-call `cache: false` escape hatch. Cap defaults to 256 entries (env `SOCKET_LIB_READ_JSON_CACHE_MAX` or `setReadJsonCacheMax()`); TTL defaults to 5 min (env `SOCKET_LIB_READ_JSON_CACHE_TTL_MS` or `setReadJsonCacheTtlMs()`; set to `0` to disable TTL). `clearReadJsonCache()` + `getReadJsonCacheStats()` exported for tests and long-running daemons.
+- **`argv/parse-args-string`** — `parseArgsString(cmd)` tokenizes a shell-style command string into an argv array. Recognizes bare tokens, single + double quoted tokens, and mixed `key="value"` tokens. Use for turning a string representation of a command (from config, a `bin` field, a test fixture) into argv that `child_process.spawn` / `execFileSync` accepts directly, bypassing platform shell quoting differences (`cmd.exe` vs `bash`).
+
+### Changed (breaking)
+
+- **`spawn/*` → `process/spawn/*`.** Directory moved under `process/` (which already housed `process/abort`); the function leaf renames from `spawn/spawn` to `process/spawn/child` (the spawned child is what `spawn()` returns). Sibling files keep their names: `process/spawn/{errors,stdio,types,_internal}`.
+- **`signal-exit/*` → `events/exit/*`.** Directory merged into a new `events/` umbrella. Entry leaf renames from `signal-exit/register` to `events/exit/handler`. Sibling files unchanged: `events/exit/{intercept,lifecycle,signals,types,_internal}`.
+- **`warnings/*` → `events/warning/*`.** Sibling of `events/exit/` under the new `events/` umbrella. Entry leaf renames from `warnings/event-target` to `events/warning/handler`; `warnings/suppress` becomes `events/warning/suppress`.
+- **`ttl-cache/*` → `cache/ttl/*`.** Directory renamed; entry leaf renames from `ttl-cache/cache` to `cache/ttl/store`. `ttl-cache/types` becomes `cache/ttl/types`.
+- **`promise-queue/*` folded into existing `promises/`.** `promise-queue/queue` becomes `promises/queue`; `promise-queue/types` merges into the existing `promises/types`.
+- **`spinner/registry` → `spinner/default`.** Matches the `getDefaultSpinner()` naming pattern — the leaf is "the default spinner", not "the registry of spinners".
+- **`logger/logger` → `logger/default`.** Matches the `getDefaultLogger()` naming pattern; drops the doubled segment.
+- **`globs/glob` → `globs/match`.** Drops the doubled segment; `match` describes what the function does (pattern-match files), not what type the file is.
+- **`links/link` → `links/create`.** Drops the doubled segment; `create` describes the verb (`createSymlink`).
+- **`exports` map refreshed** for all renamed/moved leaves. The `./promises/types` entry stays unchanged — `promise-queue/types` content was folded into it.
+
+### Removed (breaking)
+
+- **Top-level directories `spawn/`, `signal-exit/`, `warnings/`, `ttl-cache/`, `promise-queue/`.** All five disappear in favor of the regrouped layouts above. No backcompat aliases.
+
+### Migration
+
+```diff
+- import { spawn, spawnSync } from '@socketsecurity/lib/spawn/spawn'
+- import { isSpawnError, SpawnError } from '@socketsecurity/lib/spawn/errors'
+- import type { SpawnOptions } from '@socketsecurity/lib/spawn/types'
++ import {
++   spawn,
++   spawnSync,
++   isSpawnError,
++   SpawnError,
++ } from '@socketsecurity/lib/process/spawn/child'
++ import type { SpawnOptions } from '@socketsecurity/lib/process/spawn/types'
+
+- import { onExit } from '@socketsecurity/lib/signal-exit/register'
++ import { onExit } from '@socketsecurity/lib/events/exit/handler'
+
+- import { suppressDeprecationWarnings } from '@socketsecurity/lib/warnings/suppress'
++ import { suppressDeprecationWarnings } from '@socketsecurity/lib/events/warning/suppress'
+
+- import { createTtlCache, TtlCache } from '@socketsecurity/lib/ttl-cache/cache'
++ import { createTtlCache, TtlCache } from '@socketsecurity/lib/cache/ttl/store'
+
+- import { getDefaultSpinner } from '@socketsecurity/lib/spinner/registry'
++ import { getDefaultSpinner } from '@socketsecurity/lib/spinner/default'
+
+- import { getDefaultLogger } from '@socketsecurity/lib/logger/logger'
++ import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+
+- import { PromiseQueue } from '@socketsecurity/lib/promise-queue/queue'
++ import { PromiseQueue } from '@socketsecurity/lib/promises/queue'
+
+- import { glob } from '@socketsecurity/lib/globs/glob'
++ import { glob } from '@socketsecurity/lib/globs/match'
+
+- import { createSymlink } from '@socketsecurity/lib/links/link'
++ import { createSymlink } from '@socketsecurity/lib/links/create'
+```
+
+No symbol names changed. No behavior changes.
+
 ## [6.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.0) - 2026-05-20
 
 Public-surface reshape. All top-level barrels are gone; import from named leaf subpaths instead. `@socketsecurity/lib/logger` and `@socketsecurity/lib/errors` stay as aliases.
