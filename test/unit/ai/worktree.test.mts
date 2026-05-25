@@ -1,4 +1,3 @@
-import { execSync } from 'node:child_process'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -12,6 +11,7 @@ import {
   spawnAiAgentsInWorktrees,
   tryGit,
 } from '../../../src/ai/worktree.mts'
+import { sh } from '../util/cross-platform-sh'
 
 // These tests stand up a real git repo per test. Real git, real worktrees —
 // the spawn surface is too tangled with the lib's own helpers to mock cleanly,
@@ -22,14 +22,6 @@ import {
 
 let tmpRoot: string
 let repo: string
-
-function sh(cwd: string, cmd: string): string {
-  return execSync(cmd, {
-    cwd,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim()
-}
 
 function initRepo(dir: string): void {
   sh(dir, 'git init -b main -q')

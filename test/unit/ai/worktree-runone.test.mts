@@ -1,21 +1,13 @@
-import { execSync } from 'node:child_process'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { runOne } from '../../../src/ai/worktree.mts'
+import { sh } from '../util/cross-platform-sh'
 
 let tmpRoot: string
 let repo: string
-
-function sh(cwd: string, cmd: string): string {
-  return execSync(cmd, {
-    cwd,
-    encoding: 'utf8',
-    stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim()
-}
 
 function initRepo(dir: string): void {
   sh(dir, 'git init -b main -q')
@@ -27,7 +19,7 @@ function initRepo(dir: string): void {
 beforeEach(() => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'ai-worktree-runone-test-'))
   repo = path.join(tmpRoot, 'repo')
-  sh(tmpRoot, `mkdir -p ${path.basename(repo)}`)
+  mkdirSync(repo, { recursive: true })
   initRepo(repo)
 })
 
