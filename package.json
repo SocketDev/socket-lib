@@ -179,6 +179,11 @@
       "types": "./dist/argv/parse.d.ts",
       "default": "./dist/argv/parse.js"
     },
+    "./argv/parse-args-string": {
+      "source": "./src/argv/parse-args-string.ts",
+      "types": "./dist/argv/parse-args-string.d.ts",
+      "default": "./dist/argv/parse-args-string.js"
+    },
     "./arrays/chunk": {
       "browser": {
         "source": "./src/arrays/chunk.ts",

@@ -50,11 +50,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## argv/
 
-| Subpath                                                                             | Description        |
-| ----------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/argv/flag-predicates`](../src/argv/flag-predicates.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/argv/flag-types`](../src/argv/flag-types.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/argv/parse`](../src/argv/parse.ts)                     | _(no description)_ |
+| Subpath                                                                                 | Description        |
+| --------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/argv/flag-predicates`](../src/argv/flag-predicates.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/argv/flag-types`](../src/argv/flag-types.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/argv/parse`](../src/argv/parse.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/argv/parse-args-string`](../src/argv/parse-args-string.ts) | _(no description)_ |
 
 ## arrays/
 
