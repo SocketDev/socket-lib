@@ -17,12 +17,30 @@ vi.mock('../../../src/external/make-fetch-happen', () => ({
 }))
 
 import {
+  compareTrust,
+  didTrustDecrease,
   fetchPackageProvenance,
   findProvenance,
   getAttestations,
   getProvenanceDetails,
+  getTrustLevel,
+  getTrustLevelName,
+  getTrustStatus,
   isTrustedPublisher,
 } from '../../../src/packages/provenance'
+
+const fullyTrustedDoc = {
+  _npmUser: { name: 'someone', trustedPublisher: { id: 'github' } },
+  dist: { attestations: { provenance: { predicateType: 'slsa' } } },
+}
+const provenanceOnlyDoc = {
+  _npmUser: { name: 'someone' },
+  dist: { attestations: { provenance: { predicateType: 'slsa' } } },
+}
+const bareDoc = {
+  _npmUser: { name: 'someone' },
+  dist: { tarball: 'https://registry.npmjs.org/x/-/x-1.0.0.tgz' },
+}
 
 describe.sequential('packages/provenance — getAttestations', () => {
   it('returns [] when input has no attestations field', () => {
@@ -330,5 +348,91 @@ describe.sequential('packages/provenance — fetchPackageProvenance', () => {
     const url = String(mockFetcher.mock.calls[0]?.[0])
     expect(url).toContain('%40scope%2Fwith%20space')
     expect(url).toContain('1.0.0%2Bmeta')
+  })
+})
+
+describe('packages/provenance — trust status', () => {
+  it('getTrustStatus returns all-false for non-object input', () => {
+    expect(getTrustStatus(undefined)).toEqual({
+      provenance: false,
+      trustedPublisher: false,
+      stagedPublish: false,
+    })
+    expect(getTrustStatus('nope')).toEqual({
+      provenance: false,
+      trustedPublisher: false,
+      stagedPublish: false,
+    })
+  })
+
+  it('getTrustStatus reads provenance + trustedPublisher from a full doc', () => {
+    expect(getTrustStatus(fullyTrustedDoc)).toEqual({
+      provenance: true,
+      trustedPublisher: true,
+      stagedPublish: false,
+    })
+  })
+
+  it('getTrustStatus reads provenance only when no trusted publisher', () => {
+    expect(getTrustStatus(provenanceOnlyDoc)).toEqual({
+      provenance: true,
+      trustedPublisher: false,
+      stagedPublish: false,
+    })
+  })
+
+  it('getTrustStatus returns all-false for a bare doc', () => {
+    expect(getTrustStatus(bareDoc)).toEqual({
+      provenance: false,
+      trustedPublisher: false,
+      stagedPublish: false,
+    })
+  })
+
+  it('getTrustLevel maps statuses to the 0..3 ladder', () => {
+    expect(getTrustLevel(getTrustStatus(bareDoc))).toBe(0)
+    expect(getTrustLevel(getTrustStatus(provenanceOnlyDoc))).toBe(1)
+    expect(getTrustLevel(getTrustStatus(fullyTrustedDoc))).toBe(2)
+    expect(
+      getTrustLevel({
+        provenance: false,
+        trustedPublisher: false,
+        stagedPublish: true,
+      }),
+    ).toBe(3)
+  })
+
+  it('getTrustLevelName maps statuses to names', () => {
+    expect(getTrustLevelName(getTrustStatus(bareDoc))).toBe('none')
+    expect(getTrustLevelName(getTrustStatus(provenanceOnlyDoc))).toBe(
+      'provenance',
+    )
+    expect(getTrustLevelName(getTrustStatus(fullyTrustedDoc))).toBe(
+      'trustedPublisher',
+    )
+    expect(
+      getTrustLevelName({
+        provenance: false,
+        trustedPublisher: false,
+        stagedPublish: true,
+      }),
+    ).toBe('stagedPublish')
+  })
+
+  it('compareTrust compares by trust level', () => {
+    const bare = getTrustStatus(bareDoc)
+    const prov = getTrustStatus(provenanceOnlyDoc)
+    const full = getTrustStatus(fullyTrustedDoc)
+    expect(compareTrust(bare, full)).toBe(-1)
+    expect(compareTrust(full, bare)).toBe(1)
+    expect(compareTrust(prov, prov)).toBe(0)
+  })
+
+  it('didTrustDecrease detects a drop in trust level', () => {
+    const bare = getTrustStatus(bareDoc)
+    const full = getTrustStatus(fullyTrustedDoc)
+    expect(didTrustDecrease(full, bare)).toBe(true)
+    expect(didTrustDecrease(bare, full)).toBe(false)
+    expect(didTrustDecrease(full, full)).toBe(false)
   })
 })
