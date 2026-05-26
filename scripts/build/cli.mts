@@ -34,12 +34,14 @@ const rootPath = path.resolve(
 )
 
 /**
- * Walk `dist/` recursively and fsync every regular file + each directory entry.
- * Forces the kernel to flush write buffers to disk before downstream steps
- * (tests, packagers) read the tree. Without this, esbuild + child-process
- * builders that resolve their `await fs.writeFile()` promises can still leave
- * data in the page cache — macOS CI runners are particularly prone to seeing
- * the "logical write completed but file system view is stale" race.
+ * MacOS-only fsync barrier: walk `dist/` and `fsync()` every regular file so
+ * downstream steps (tests, packagers) see fully-durable bytes rather than
+ * page-cache state. esbuild + child-process builders resolve their write
+ * Promises before the file system view is durable on darwin CI runners.
+ *
+ * Skipped on Linux + Windows: Linux's `fs.writeFile` already provides the
+ * needed durability for our use, and Windows cannot `open(dir, 'r')` for the
+ * directory-flush step (different file-handle semantics).
  *
  * **Why:** Past incident — socket-lib v6.0.1 + v6.0.2 macOS CI flakes where
  * `Build completed successfully` logged with 502 validated exports, then the
@@ -48,10 +50,10 @@ const rootPath = path.resolve(
  * not yet durable.
  */
 async function fsyncDirRecursive(dir: string): Promise<void> {
+  if (process.platform !== 'darwin') {
+    return
+  }
   const entries = await fsPromises.readdir(dir, { withFileTypes: true })
-  // Fsync files first; recurse into subdirs afterward so directory metadata
-  // settles last (fsync(directory_fd) only persists the entry list, not the
-  // contents — file fsyncs must happen before the dir fsync to be useful).
   const filePromises: Array<Promise<void>> = []
   const subdirs: string[] = []
   for (const entry of entries) {
@@ -65,21 +67,21 @@ async function fsyncDirRecursive(dir: string): Promise<void> {
   await Promise.all(filePromises)
   // Subdirs in parallel to keep the barrier cheap on wide trees.
   await Promise.all(subdirs.map(fsyncDirRecursive))
-  // Finally, persist the directory entry list itself.
-  const dirHandle = await fsPromises.open(dir, 'r')
-  try {
-    await dirHandle.sync()
-  } finally {
-    await dirHandle.close()
-  }
 }
 
 async function fsyncFile(filePath: string): Promise<void> {
-  const fh = await fsPromises.open(filePath, 'r')
+  // Best-effort — a single failed fsync shouldn't tank the build. Macs
+  // occasionally surface EPERM on system-restored files; the bytes are
+  // already on disk, just unflushable from userspace.
   try {
-    await fh.sync()
-  } finally {
-    await fh.close()
+    const fh = await fsPromises.open(filePath, 'r')
+    try {
+      await fh.sync()
+    } finally {
+      await fh.close()
+    }
+  } catch {
+    // ignore — best-effort barrier
   }
 }
 
