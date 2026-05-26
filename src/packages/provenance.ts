@@ -289,10 +289,10 @@ export interface TrustStatus {
 }
 
 /**
- * Trust ladder, low → high. The index IS the level (0..3), so a single
- * array maps both directions: `TRUST_LEVELS[level]` → name, and
- * `TRUST_LEVELS.indexOf(name)` → level. One source of truth, no parallel
- * Record to keep in sync.
+ * Trust ladder, low → high. The index IS the level (0..3), so a single array
+ * maps both directions: `TRUST_LEVELS[level]` → name, and
+ * `TRUST_LEVELS.indexOf(name)` → level. One source of truth, no parallel Record
+ * to keep in sync.
  */
 export const TRUST_LEVELS = [
   'none',
