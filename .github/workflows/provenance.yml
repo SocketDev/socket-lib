@@ -31,7 +31,6 @@ jobs:
       debug: ${{ inputs.debug }}
       dry-run: ${{ inputs.dry-run }}
       package-name: '@socketsecurity/lib'
-      publish-script: 'node scripts/publish.mts --staged'
       setup-script: 'pnpm run build'
       use-trusted-publishing: true
     secrets:
