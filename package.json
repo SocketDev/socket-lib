@@ -2762,7 +2762,7 @@
     "lint": "node scripts/lint.mts",
     "prim": "node tools/prim/bin/prim.mts",
     "security": "node scripts/security.mts",
-    "prepare": "node scripts/install-git-hooks.mts && node scripts/build/cli.mts --quiet",
+    "prepare": "node scripts/install-git-hooks.mts && node scripts/build/cli.mts --needed --quiet",
     "prepublishOnly": "pnpm run build",
     "publish": "node scripts/publish.mts",
     "test": "node scripts/test/cli.mts",
