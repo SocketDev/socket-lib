@@ -35,6 +35,35 @@ const SLSA_PROVENANCE_V1_0 = 'https://slsa.dev/provenance/v1'
 let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
 
 /**
+ * Comparator ordering two trust statuses by ascending trust level. Sorts an
+ * array of statuses lowest-trust-first; negate for highest-first.
+ */
+export function compareTrust(a: TrustStatus, b: TrustStatus): -1 | 0 | 1 {
+  const levelA = getTrustLevel(a)
+  const levelB = getTrustLevel(b)
+  if (levelA < levelB) {
+    return -1
+  }
+  if (levelA > levelB) {
+    return 1
+  }
+  return 0
+}
+
+/**
+ * Whether `next` sits at a lower trust level than `prev` — i.e. a release
+ * regressed its supply-chain posture. Drives the post-publish provenance
+ * reminder: a version that drops from trustedPublisher back to bare provenance
+ * is a red flag worth surfacing.
+ */
+export function didTrustDecrease(
+  prev: TrustStatus,
+  next: TrustStatus,
+): boolean {
+  return getTrustLevel(next) < getTrustLevel(prev)
+}
+
+/**
  * Fetch package provenance information from npm registry.
  *
  * @example
@@ -233,6 +262,67 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
 }
 
 /**
+ * Map a trust status to its 0..3 ladder level.
+ */
+export function getTrustLevel(status: TrustStatus): TrustLevel {
+  if (status.stagedPublish) {
+    return 3
+  }
+  if (status.trustedPublisher && status.provenance) {
+    return 2
+  }
+  if (status.provenance) {
+    return 1
+  }
+  return 0
+}
+
+/**
+ * Map a trust status to its human-readable level name.
+ */
+export function getTrustLevelName(status: TrustStatus): TrustLevelName {
+  return TRUST_LEVELS[getTrustLevel(status)]
+}
+
+/**
+ * Extract provenance / trusted-publisher / staged-publish flags from a registry
+ * version document.
+ */
+export function getTrustStatus(meta: unknown): TrustStatus {
+  const status: TrustStatus = {
+    provenance: false,
+    trustedPublisher: false,
+    // Reserved: the npm registry does not yet expose a staged-publish flag, so
+    // this stays false until a registry signal exists to set it.
+    stagedPublish: false,
+  }
+  if (!isObject(meta)) {
+    return status
+  }
+  const npmUser = ObjectHasOwn(meta, '_npmUser') ? meta['_npmUser'] : undefined
+  if (
+    isObject(npmUser) &&
+    ObjectHasOwn(npmUser, 'trustedPublisher') &&
+    npmUser['trustedPublisher']
+  ) {
+    status.trustedPublisher = true
+  }
+  const dist = ObjectHasOwn(meta, 'dist') ? meta['dist'] : undefined
+  const attestations =
+    isObject(dist) && ObjectHasOwn(dist, 'attestations')
+      ? dist['attestations']
+      : undefined
+  if (
+    isObject(attestations) &&
+    ObjectHasOwn(attestations, 'provenance') &&
+    attestations['provenance']
+  ) {
+    status.provenance = true
+  }
+  return status
+}
+
+/**
  * Check if a value indicates a trusted publisher (GitHub or GitLab).
  */
 export function isTrustedPublisher(value: unknown): boolean {
@@ -304,93 +394,3 @@ export const TRUST_LEVELS = [
 export type TrustLevel = 0 | 1 | 2 | 3
 
 export type TrustLevelName = (typeof TRUST_LEVELS)[number]
-
-/**
- * Extract provenance / trusted-publisher / staged-publish flags from a registry
- * version document.
- */
-export function getTrustStatus(meta: unknown): TrustStatus {
-  const status: TrustStatus = {
-    provenance: false,
-    trustedPublisher: false,
-    // Reserved: the npm registry does not yet expose a staged-publish flag, so
-    // this stays false until a registry signal exists to set it.
-    stagedPublish: false,
-  }
-  if (!isObject(meta)) {
-    return status
-  }
-  const npmUser = ObjectHasOwn(meta, '_npmUser') ? meta['_npmUser'] : undefined
-  if (
-    isObject(npmUser) &&
-    ObjectHasOwn(npmUser, 'trustedPublisher') &&
-    npmUser['trustedPublisher']
-  ) {
-    status.trustedPublisher = true
-  }
-  const dist = ObjectHasOwn(meta, 'dist') ? meta['dist'] : undefined
-  const attestations =
-    isObject(dist) && ObjectHasOwn(dist, 'attestations')
-      ? dist['attestations']
-      : undefined
-  if (
-    isObject(attestations) &&
-    ObjectHasOwn(attestations, 'provenance') &&
-    attestations['provenance']
-  ) {
-    status.provenance = true
-  }
-  return status
-}
-
-/**
- * Map a trust status to its 0..3 ladder level.
- */
-export function getTrustLevel(status: TrustStatus): TrustLevel {
-  if (status.stagedPublish) {
-    return 3
-  }
-  if (status.trustedPublisher && status.provenance) {
-    return 2
-  }
-  if (status.provenance) {
-    return 1
-  }
-  return 0
-}
-
-/**
- * Map a trust status to its human-readable level name.
- */
-export function getTrustLevelName(status: TrustStatus): TrustLevelName {
-  return TRUST_LEVELS[getTrustLevel(status)]
-}
-
-/**
- * Comparator ordering two trust statuses by ascending trust level. Sorts an
- * array of statuses lowest-trust-first; negate for highest-first.
- */
-export function compareTrust(a: TrustStatus, b: TrustStatus): -1 | 0 | 1 {
-  const levelA = getTrustLevel(a)
-  const levelB = getTrustLevel(b)
-  if (levelA < levelB) {
-    return -1
-  }
-  if (levelA > levelB) {
-    return 1
-  }
-  return 0
-}
-
-/**
- * Whether `next` sits at a lower trust level than `prev` — i.e. a release
- * regressed its supply-chain posture. Drives the post-publish provenance
- * reminder: a version that drops from trustedPublisher back to bare provenance
- * is a red flag worth surfacing.
- */
-export function didTrustDecrease(
-  prev: TrustStatus,
-  next: TrustStatus,
-): boolean {
-  return getTrustLevel(next) < getTrustLevel(prev)
-}

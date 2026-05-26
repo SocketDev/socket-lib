@@ -5,16 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.0.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.2) - 2026-05-25
+## [6.0.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.2) - 2026-05-26
 
 ### Added
 
-- **`./http-request` top-level export.** New canonical entry for the Node-side HTTP surface (`httpJson`, `httpText`, `httpRequest`, `HttpResponseError`). Symmetric with `./http-request/browser` so `import { httpJson } from '@socketsecurity/lib/http-request'` works on both platforms — bundlers that honor the `'browser'` export condition pick the browser variant automatically.
+- **`./logger/logger` and `./http-request/http-request`** as the canonical class / function-surface entries, paired with the existing `./logger/{node,browser}` and `./http-request/{node,browser}` implementations. Bundlers that honor the `'browser'` export condition pick the right impl automatically: `import { Logger } from '@socketsecurity/lib/logger/logger'` and `import { httpJson } from '@socketsecurity/lib/http-request/http-request'` work on both platforms.
+- **`./logger/default`** holds the shared-singleton accessor: `getDefaultLogger()` returns one process-wide `Logger` instance (lazily constructed). Same on both platforms.
+- **`./http-request` top-level export.** New canonical entry mirroring `./http-request/http-request`.
+- **Package trust-status helpers in `./packages/provenance`.** `getTrustStatus(meta)` extracts `{ provenance, trustedPublisher, stagedPublish }` from an npm registry version document; `getTrustLevel(status)` maps to a 0..3 ladder and `getTrustLevelName(status)` to its name; `TRUST_LEVELS` is the single source-of-truth array (index = level); `compareTrust(a, b)` is an ascending-level comparator; `didTrustDecrease(prev, next)` flags a release that regressed its supply-chain posture.
+- **`primordials/map-set` Stage 4 surface.** `getOrInsert` / `getOrInsertComputed` on `Map` / `WeakMap` plus the Set-composition methods (`union`, `intersection`, `difference`, `symmetricDifference`, `isSubsetOf`, `isSupersetOf`, `isDisjointFrom`) are ambient-declared, so consumers get types for methods Node 22+ ships but TypeScript's lib doesn't yet surface.
 
 ### Changed (breaking)
 
-- **`./logger/default` → `./logger/node`.** The Node-side logger leaf is renamed to pair with `./logger/browser`. The canonical `./logger` path is unchanged; consumers importing the explicit `./logger/default` subpath update to `./logger/node`.
-- **`./http-request/convenience` removed.** Its exports (`httpJson`, `httpText`) move to the new `./http-request/node` leaf, which also re-exports `httpRequest` and `HttpResponseError`. Most consumers should import from `./http-request` (auto-routing) rather than the explicit leaf.
+- **`getDefaultLogger` moved from `./logger` to `./logger/default`.** The bare `./logger` entry now exposes the `Logger` class only (matching `./logger/logger`). Migration: `import { getDefaultLogger } from '@socketsecurity/lib/logger'` → `from '@socketsecurity/lib/logger/default'`.
+- **`./logger/default` semantics shifted.** Previously `./logger/default` resolved to the Node logger source; that file is now `./logger/node`. The `./logger/default` path is the singleton accessor module.
+- **`./http-request/convenience` removed.** `httpJson` and `httpText` live on `./http-request/node` and `./http-request/browser` alongside `httpRequest` and `HttpResponseError`. Most consumers should import from `./http-request` (auto-routing) rather than the explicit leaf.
 
 ### Fixed
 
