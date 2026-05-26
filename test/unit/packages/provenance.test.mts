@@ -17,6 +17,7 @@ vi.mock('../../../src/external/make-fetch-happen', () => ({
 }))
 
 import {
+  TRUST_LEVELS,
   compareTrust,
   didTrustDecrease,
   fetchPackageProvenance,
@@ -434,5 +435,25 @@ describe('packages/provenance — trust status', () => {
     expect(didTrustDecrease(full, bare)).toBe(true)
     expect(didTrustDecrease(bare, full)).toBe(false)
     expect(didTrustDecrease(full, full)).toBe(false)
+  })
+
+  it('TRUST_LEVELS index round-trips with getTrustLevel', () => {
+    expect(TRUST_LEVELS).toEqual([
+      'none',
+      'provenance',
+      'trustedPublisher',
+      'stagedPublish',
+    ])
+    // The index IS the level: TRUST_LEVELS[getTrustLevel(x)] === name.
+    for (const status of [
+      getTrustStatus(bareDoc),
+      getTrustStatus(provenanceOnlyDoc),
+      getTrustStatus(fullyTrustedDoc),
+      { provenance: false, trustedPublisher: false, stagedPublish: true },
+    ]) {
+      expect(TRUST_LEVELS[getTrustLevel(status)]).toBe(
+        getTrustLevelName(status),
+      )
+    }
   })
 })
