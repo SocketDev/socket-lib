@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.2) - 2026-05-25
+
+### Added
+
+- **`./http-request` top-level export.** New canonical entry for the Node-side HTTP surface (`httpJson`, `httpText`, `httpRequest`, `HttpResponseError`). Symmetric with `./http-request/browser` so `import { httpJson } from '@socketsecurity/lib/http-request'` works on both platforms — bundlers that honor the `'browser'` export condition pick the browser variant automatically.
+
+### Changed (breaking)
+
+- **`./logger/default` → `./logger/node`.** The Node-side logger leaf is renamed to pair with `./logger/browser`. The canonical `./logger` path is unchanged; consumers importing the explicit `./logger/default` subpath update to `./logger/node`.
+- **`./http-request/convenience` removed.** Its exports (`httpJson`, `httpText`) move to the new `./http-request/node` leaf, which also re-exports `httpRequest` and `HttpResponseError`. Most consumers should import from `./http-request` (auto-routing) rather than the explicit leaf.
+
+### Fixed
+
+- **`./logger` auto-resolves to `./logger/browser` on browser platforms.** 6.0.1 announced this but shipped without the `'browser'` condition on the `./logger` entry, so bundlers fell through to the Node default and pulled in `node:*` builtins.
+
 ## [6.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.1) - 2026-05-25
 
 Five additive features plus public-surface polish on top of 6.0.0. The path renames drop doubled-name leaves (`spawn/spawn`, `ttl-cache/cache`, `globs/glob`, `links/link`, `promise-queue/queue`) and regroup three top-level directories whose contents were the same concept (process events) under a new `events/` umbrella. Renames are path-only; no symbol renames or behavior changes.

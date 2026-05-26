@@ -1,10 +1,12 @@
 /**
- * @file The `Logger` class + the shared-default `getDefaultLogger()` accessor —
- *   the public class surface for `logger/*`. Owns the per-instance state
- *   (parent, bound stream, indent buffers, theme), the symbol-prefixed semantic
- *   methods (`success`, `fail`, `info`, ...), the chainable wrappers around the
- *   underlying `Console` methods, AND the module-singleton accessor for the
- *   shared default instance. Console construction is deliberately lazy: the
+ * @file Node-side `Logger` class — owns the per-instance state (parent, bound
+ *   stream, indent buffers, theme), the symbol-prefixed semantic methods
+ *   (`success`, `fail`, `info`, ...), and the chainable wrappers around the
+ *   underlying `node:console` methods. The shared-default singleton lives in
+ *   `./default`; this file exports only the class. Consumers should import
+ *   `Logger` from `./logger` (auto-routed by the package.json `browser`
+ *   condition); `./node` is the explicit Node entry, useful for tests pinning
+ *   to one implementation. Console construction is deliberately lazy: the
  *   constructor only stashes its args in `_internal.privateConstructorArgs`;
  *   the actual `node:console` instance is built on first call to
  *   `#getConsole()`. This lets the logger be imported during early Node.js
@@ -979,24 +981,4 @@ export class Logger {
     this[lastWasBlankSymbol](false)
     return this
   }
-}
-
-let _logger: Logger | undefined
-
-/**
- * Get the default logger instance. Lazily creates the logger to avoid circular
- * dependencies during module initialization. Reuses the same instance across
- * calls.
- *
- * Construction is lazy so that importing this module during early Node.js
- * bootstrap doesn't try to resolve `node:console` before stdout is ready
- * (mirrors the lazy `Console` init inside `Logger` itself).
- *
- * @returns Shared default logger instance
- */
-export function getDefaultLogger(): Logger {
-  if (_logger === undefined) {
-    _logger = new Logger()
-  }
-  return _logger
 }

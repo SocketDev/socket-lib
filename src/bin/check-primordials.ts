@@ -16,7 +16,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { errorMessage } from '../errors/message'
-import { getDefaultLogger } from '../logger/node'
+import { getDefaultLogger } from '../logger/default'
 import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
 import { JSONParse, JSONStringify } from '../primordials/json'

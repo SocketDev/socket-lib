@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 import { build, context } from 'esbuild'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 

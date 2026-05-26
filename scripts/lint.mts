@@ -11,7 +11,7 @@ import process from 'node:process'
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { getChangedFilesSync } from '@socketsecurity/lib-stable/git/changed'
 import { getStagedFilesSync } from '@socketsecurity/lib-stable/git/staged'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { parseArgs } from './util/parse-args.mts'

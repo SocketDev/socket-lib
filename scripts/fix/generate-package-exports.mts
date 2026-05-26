@@ -11,7 +11,7 @@ import { fileURLToPath } from 'node:url'
 import builtinNames from '@socketregistry/packageurl-js-stable/data/npm/builtin-names.json' with { type: 'json' }
 import fastGlob from 'fast-glob'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { toSortedObject } from '@socketsecurity/lib-stable/objects/sort'
 import { readPackageJson } from '@socketsecurity/lib-stable/packages/operations'
 
@@ -298,23 +298,32 @@ async function main(): Promise<void> {
   // would violate the "no barrel files" CLAUDE.md rule; an exports-map
   // alias is just a re-pointer with no source file behind it.
   const fleetCompatAliases: Array<[string, string]> = [
+    // Bare `./logger` and explicit `./logger/logger` both give consumers
+    // the `Logger` class (auto-routed by the 'browser' condition below).
+    // The singleton accessor lives at `./logger/default`.
     ['./logger', './logger/node'],
+    ['./logger/logger', './logger/node'],
     ['./http-request', './http-request/node'],
+    ['./http-request/http-request', './http-request/node'],
     ['./errors', './errors/message'],
   ]
   // Alias targets that have a dedicated browser implementation. When a
   // bundler resolves the 'browser' condition on the alias, send it to
   // the browser leaf instead of the Node default. Without this, browser
-  // consumers of '@socketsecurity/lib/logger' or
-  // '@socketsecurity/lib/http-request' silently pull in node:* builtins
-  // via the Node-side default.
+  // consumers silently pull in node:* builtins via the Node-side default.
   const fleetCompatBrowserSource: Record<string, string> = {
     './logger': './logger/browser',
+    './logger/logger': './logger/browser',
     './http-request': './http-request/browser',
+    './http-request/http-request': './http-request/browser',
   }
+  // Alias keys may already exist (e.g. `./logger/logger` resolves to a real
+  // source file `src/logger/logger.ts` that's just a 1-line re-export of
+  // `./node`). The alias-routing version is strictly better than the
+  // self-resolution, so unconditionally overwrite.
   for (const { 0: alias, 1: target } of fleetCompatAliases) {
     const targetValue = subpathExports[target]
-    if (targetValue && !subpathExports[alias]) {
+    if (targetValue) {
       const browserTargetKey = fleetCompatBrowserSource[alias]
       const browserTarget = browserTargetKey
         ? subpathExports[browserTargetKey]

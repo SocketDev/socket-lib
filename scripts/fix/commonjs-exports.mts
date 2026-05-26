@@ -12,7 +12,7 @@ import { parse } from '@babel/parser'
 import MagicString from 'magic-string'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 const logger = getDefaultLogger()
 

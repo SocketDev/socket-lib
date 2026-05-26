@@ -20,7 +20,7 @@ import path from 'node:path'
 
 import { whichSync } from '../bin/which'
 import { errorMessage } from '../errors/message'
-import { getDefaultLogger } from '../logger/node'
+import { getDefaultLogger } from '../logger/default'
 import { JSONParse, JSONStringify } from '../primordials/json'
 
 const logger = getDefaultLogger()

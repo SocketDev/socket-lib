@@ -8,7 +8,7 @@
 import process from 'node:process'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { pluralize } from '@socketsecurity/lib-stable/words/pluralize'
 
 import { buildExternals } from '../build-externals/orchestrator.mts'

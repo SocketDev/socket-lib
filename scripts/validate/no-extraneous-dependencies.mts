@@ -29,7 +29,7 @@ import * as t from '@babel/types'
 // Handle @babel/traverse CommonJS/ESM interop
 const traverse = traverseModule.default
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 const logger = getDefaultLogger()
 

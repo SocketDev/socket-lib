@@ -7,7 +7,7 @@ import { extractArchive } from '../archives/extract'
 
 import type { ArchiveFormat } from '../archives/types'
 import { safeDelete, safeMkdir } from '../fs/safe'
-import { getDefaultLogger } from '../logger/node'
+import { getDefaultLogger } from '../logger/default'
 import { ErrorCtor } from '../primordials/error'
 import { downloadReleaseAsset } from './github-downloads'
 

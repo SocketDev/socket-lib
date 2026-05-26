@@ -9,11 +9,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## Top-level
 
-| Subpath                                                         | Description        |
-| --------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/errors`](../src/errors/message.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/integrity`](../src/integrity.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger`](../src/logger/default.ts) | _(no description)_ |
+| Subpath                                                                  | Description        |
+| ------------------------------------------------------------------------ | ------------------ |
+| [`@socketsecurity/lib-stable/errors`](../src/errors/message.ts)          | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request`](../src/http-request/node.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/integrity`](../src/integrity.ts)            | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger`](../src/logger/node.ts)             | _(no description)_ |
 
 ## abort/
 
@@ -421,11 +422,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/http-request/browser`](../src/http-request/browser.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/browser-fetch`](../src/http-request/browser-fetch.ts)     | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/checksums`](../src/http-request/checksums.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/convenience`](../src/http-request/convenience.ts)         | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/download`](../src/http-request/download.ts)               | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/download-types`](../src/http-request/download-types.ts)   | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/errors`](../src/http-request/errors.ts)                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/headers`](../src/http-request/headers.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/http-request`](../src/http-request/node.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/node`](../src/http-request/node.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/request`](../src/http-request/request.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/request-attempt`](../src/http-request/request-attempt.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/request-types`](../src/http-request/request-types.ts)     | _(no description)_ |
@@ -473,6 +475,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/logger/colors`](../src/logger/colors.ts)                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/logger/console`](../src/logger/console.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/logger/default`](../src/logger/default.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/logger`](../src/logger/node.ts)                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/node`](../src/logger/node.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/logger/symbols`](../src/logger/symbols.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/logger/symbols-builder`](../src/logger/symbols-builder.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/logger/types`](../src/logger/types.ts)                     | _(no description)_ |

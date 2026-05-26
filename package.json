@@ -1538,6 +1538,15 @@
       "types": "./dist/http-request/headers.d.ts",
       "default": "./dist/http-request/headers.js"
     },
+    "./http-request/http-request": {
+      "source": "./src/http-request/node.ts",
+      "browser": {
+        "types": "./dist/http-request/browser.d.ts",
+        "default": "./dist/http-request/browser.js"
+      },
+      "types": "./dist/http-request/node.d.ts",
+      "default": "./dist/http-request/node.js"
+    },
     "./http-request/node": {
       "source": "./src/http-request/node.ts",
       "types": "./dist/http-request/node.d.ts",
@@ -1666,6 +1675,20 @@
       "source": "./src/logger/console.ts",
       "types": "./dist/logger/console.d.ts",
       "default": "./dist/logger/console.js"
+    },
+    "./logger/default": {
+      "source": "./src/logger/default.ts",
+      "types": "./dist/logger/default.d.ts",
+      "default": "./dist/logger/default.js"
+    },
+    "./logger/logger": {
+      "source": "./src/logger/node.ts",
+      "browser": {
+        "types": "./dist/logger/browser.d.ts",
+        "default": "./dist/logger/browser.js"
+      },
+      "types": "./dist/logger/node.d.ts",
+      "default": "./dist/logger/node.js"
     },
     "./logger/node": {
       "source": "./src/logger/node.ts",

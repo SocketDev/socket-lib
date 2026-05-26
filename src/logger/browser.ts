@@ -1,61 +1,46 @@
 /**
- * @file Browser-safe Logger surface — minimal shim mirroring the public
- *   `success`/`fail`/`warn`/`error`/`info`/`log` methods of the full Node
- *   Logger, but backed by the global `console` so it works in Chrome MV3
+ * @file Browser-safe `Logger` implementation — mirrors the public `success` /
+ *   `fail` / `warn` / `error` / `info` / `log` surface of the Node `Logger`
+ *   (see `./node`) but backed by the global `console` so it works in Chrome MV3
  *   service workers, content scripts, popups, and any other browser context
- *   that doesn't have `node:process` / `node:console` / fs.
+ *   without `node:process` / `node:console` / fs. Consumers should import
+ *   `Logger` from `./logger` (auto-routed by the package.json `browser`
+ *   condition) or `./default` for the singleton. `./browser` is the
+ *   explicit-platform name; useful for tests pinning to one implementation.
  */
-
-export interface BrowserLogger {
-  log(message: unknown, ...args: unknown[]): BrowserLogger
-  info(message: unknown, ...args: unknown[]): BrowserLogger
-  warn(message: unknown, ...args: unknown[]): BrowserLogger
-  error(message: unknown, ...args: unknown[]): BrowserLogger
-  success(message: unknown, ...args: unknown[]): BrowserLogger
-  fail(message: unknown, ...args: unknown[]): BrowserLogger
-}
 
 const SYM_SUCCESS = '✓' // oxlint-disable-line socket/no-status-emoji -- canonical logger owner
 const SYM_FAIL = '✕' // oxlint-disable-line socket/no-status-emoji -- canonical logger owner
 const SYM_WARN = '⚠' // oxlint-disable-line socket/no-status-emoji -- canonical logger owner
 const SYM_INFO = 'ℹ' // oxlint-disable-line socket/no-status-emoji -- canonical logger owner
 
-class ConsoleBrowserLogger implements BrowserLogger {
+export class Logger {
   log(message: unknown, ...args: unknown[]): this {
-    console.log(message, ...args)
+    console.log(message, ...args) // oxlint-disable-line socket/no-console-prefer-logger -- canonical logger owner
     return this
   }
 
   info(message: unknown, ...args: unknown[]): this {
-    console.log(SYM_INFO, message, ...args)
+    console.log(SYM_INFO, message, ...args) // oxlint-disable-line socket/no-console-prefer-logger -- canonical logger owner
     return this
   }
 
   warn(message: unknown, ...args: unknown[]): this {
-    console.warn(SYM_WARN, message, ...args)
+    console.warn(SYM_WARN, message, ...args) // oxlint-disable-line socket/no-console-prefer-logger -- canonical logger owner
     return this
   }
 
   error(message: unknown, ...args: unknown[]): this {
-    console.error(SYM_FAIL, message, ...args)
+    console.error(SYM_FAIL, message, ...args) // oxlint-disable-line socket/no-console-prefer-logger -- canonical logger owner
     return this
   }
 
   success(message: unknown, ...args: unknown[]): this {
-    console.log(SYM_SUCCESS, message, ...args)
+    console.log(SYM_SUCCESS, message, ...args) // oxlint-disable-line socket/no-console-prefer-logger -- canonical logger owner
     return this
   }
 
   fail(message: unknown, ...args: unknown[]): this {
     return this.error(message, ...args)
   }
-}
-
-let sharedLogger: BrowserLogger | undefined
-
-export function getDefaultLogger(): BrowserLogger {
-  if (!sharedLogger) {
-    sharedLogger = new ConsoleBrowserLogger()
-  }
-  return sharedLogger
 }

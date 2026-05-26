@@ -1,8 +1,8 @@
 /**
- * @file Unit tests for the browser-safe Logger surface.
+ * @file Unit tests for the browser-safe `Logger` class.
  *
- *   - Singleton accessor returns one shared instance
- *   - Every method on BrowserLogger returns the logger (chainable)
+ *   - Constructor produces an instance with the documented methods
+ *   - Every method returns the logger (chainable)
  *   - Methods route to the right console.* sink (log/warn/error)
  *   - Status symbols (✓ ⚠ ✕ ℹ) are prefixed inline
  *   - No reliance on node:process / node:console / fs
@@ -12,9 +12,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { MockInstance } from 'vitest'
 
-import { getDefaultLogger } from '../../../src/logger/browser'
+import { Logger } from '../../../src/logger/browser'
 
-describe('logger/browser → getDefaultLogger', () => {
+describe('logger/browser → Logger', () => {
   let logSpy: MockInstance
   let warnSpy: MockInstance
   let errorSpy: MockInstance
@@ -31,8 +31,8 @@ describe('logger/browser → getDefaultLogger', () => {
     errorSpy.mockRestore()
   })
 
-  it('returns a logger with the documented methods', () => {
-    const logger = getDefaultLogger()
+  it('exposes the documented methods', () => {
+    const logger = new Logger()
     expect(typeof logger.log).toBe('function')
     expect(typeof logger.info).toBe('function')
     expect(typeof logger.warn).toBe('function')
@@ -41,14 +41,8 @@ describe('logger/browser → getDefaultLogger', () => {
     expect(typeof logger.fail).toBe('function')
   })
 
-  it('returns the same instance across calls (singleton)', () => {
-    const a = getDefaultLogger()
-    const b = getDefaultLogger()
-    expect(a).toBe(b)
-  })
-
   it('every method returns the logger (chainable)', () => {
-    const logger = getDefaultLogger()
+    const logger = new Logger()
     expect(logger.log('a')).toBe(logger)
     expect(logger.info('a')).toBe(logger)
     expect(logger.warn('a')).toBe(logger)
@@ -58,44 +52,37 @@ describe('logger/browser → getDefaultLogger', () => {
   })
 
   it('log() routes to console.log without a symbol prefix', () => {
-    const logger = getDefaultLogger()
-    logger.log('hello')
+    new Logger().log('hello')
     expect(logSpy).toHaveBeenCalledWith('hello')
   })
 
   it('info() prefixes with ℹ and routes to console.log', () => {
-    const logger = getDefaultLogger()
-    logger.info('hello')
+    new Logger().info('hello')
     expect(logSpy).toHaveBeenCalledWith('ℹ', 'hello')
   })
 
   it('warn() prefixes with ⚠ and routes to console.warn', () => {
-    const logger = getDefaultLogger()
-    logger.warn('hello')
+    new Logger().warn('hello')
     expect(warnSpy).toHaveBeenCalledWith('⚠', 'hello')
   })
 
   it('error() prefixes with ✕ and routes to console.error', () => {
-    const logger = getDefaultLogger()
-    logger.error('hello')
+    new Logger().error('hello')
     expect(errorSpy).toHaveBeenCalledWith('✕', 'hello')
   })
 
   it('success() prefixes with ✓ and routes to console.log', () => {
-    const logger = getDefaultLogger()
-    logger.success('hello')
+    new Logger().success('hello')
     expect(logSpy).toHaveBeenCalledWith('✓', 'hello')
   })
 
   it('fail() is an alias for error()', () => {
-    const logger = getDefaultLogger()
-    logger.fail('boom')
+    new Logger().fail('boom')
     expect(errorSpy).toHaveBeenCalledWith('✕', 'boom')
   })
 
   it('passes extra args through unchanged', () => {
-    const logger = getDefaultLogger()
-    logger.info('a', { x: 1 }, [2, 3])
+    new Logger().info('a', { x: 1 }, [2, 3])
     expect(logSpy).toHaveBeenCalledWith('ℹ', 'a', { x: 1 }, [2, 3])
   })
 })
