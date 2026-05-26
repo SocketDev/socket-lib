@@ -1,7 +1,18 @@
 name: 📦 Publish to npm
 
 # Dependencies:
-#   - SocketDev/socket-registry/.github/workflows/provenance.yml
+#   - SocketDev/socket-registry/.github/actions/setup-and-install
+
+# Publishing is INLINED here (not delegated to socket-registry's reusable
+# provenance.yml) on purpose. npm's OIDC trusted-publisher matcher keys on the
+# workflow that contains the publish step. When the publish step lives in a
+# reusable workflow, the OIDC `job_workflow_ref` claim carries the reusable's
+# SHA-pinned ref — which changes every time we cascade a new socket-registry
+# SHA, so no stable npm trusted-publisher config can match it (the token
+# exchange 404s → publish runs unauthenticated → PUT 404 / stage 403).
+#
+# Inlining keeps `job_workflow_ref` = SocketDev/socket-lib/.github/workflows/
+# provenance.yml@<ref>, a stable identity the trusted publisher matches.
 
 on:
   workflow_dispatch:
@@ -11,33 +22,36 @@ on:
         required: false
         default: true
         type: boolean
-      debug:
-        description: 'Enable debug output'
-        required: false
-        default: '0'
-        type: string
-        options:
-          - '0'
-          - '1'
 
 permissions:
-  contents: write # Push git tags and create GitHub releases
-  id-token: write # NPM trusted publishing via OIDC
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false # Don't cancel publishing.
 
 jobs:
   publish:
-    uses: SocketDev/socket-registry/.github/workflows/provenance.yml@3ee41c620baed62f610b3cffe64e3fda68bcbb8d # main (2026-05-26)
-    with:
-      debug: ${{ inputs.debug }}
-      dry-run: ${{ inputs.dry-run }}
-      # Direct publish (no staging). The `pnpm stage publish` path 403s on
-      # this package even with a correctly configured trusted publisher +
-      # npm-publish environment — server-side stage-token scope issue still
-      # under investigation. `npm publish` via OIDC works (v6.0.1 shipped
-      # this way), so publish directly until staged publish is unblocked.
-      publish-script: 'node scripts/publish.mts --direct'
-      package-name: '@socketsecurity/lib'
-      setup-script: 'pnpm run build'
-      use-trusted-publishing: true
-    secrets:
-      SOCKET_API_TOKEN: ${{ secrets.SOCKET_API_TOKEN }}
+    name: Build and Publish
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      # Needed for npm provenance via OIDC trusted publishing.
+      id-token: write
+    steps:
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@eb02d98f2c53a12ade27199c017fc64aa209492e # main (2026-05-25)
+        with:
+          socket-api-token: ${{ secrets.SOCKET_API_TOKEN || secrets.SOCKET_API_KEY }}
+
+      - name: Build
+        run: pnpm run build
+
+      - name: Publish to npm
+        env:
+          DRY_RUN: ${{ inputs.dry-run }}
+        run: |
+          if [ "$DRY_RUN" = "true" ]; then
+            node scripts/publish.mts --direct --dry-run
+          else
+            node scripts/publish.mts --direct
+          fi
