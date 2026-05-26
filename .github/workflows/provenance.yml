@@ -30,12 +30,12 @@ jobs:
     with:
       debug: ${{ inputs.debug }}
       dry-run: ${{ inputs.dry-run }}
-      # Binds the publish job to the `npm-publish` GitHub environment so the
-      # OIDC token carries an environment claim — npm's documented
-      # disambiguator for the workflow_call trusted-publisher path. The
-      # matching environment must be configured on the package's npm
-      # trusted publisher.
-      environment: 'npm-publish'
+      # Direct publish (no staging). The `pnpm stage publish` path 403s on
+      # this package even with a correctly configured trusted publisher +
+      # npm-publish environment — server-side stage-token scope issue still
+      # under investigation. `npm publish` via OIDC works (v6.0.1 shipped
+      # this way), so publish directly until staged publish is unblocked.
+      publish-script: 'node scripts/publish.mts --direct'
       package-name: '@socketsecurity/lib'
       setup-script: 'pnpm run build'
       use-trusted-publishing: true
