@@ -750,6 +750,11 @@ export class Logger {
    * The output stream (stderr or stdout) depends on whether the logger is
    * stream-bound.
    *
+   * Always clears the current line before writing so calling `progress(...)`
+   * twice in a row redraws cleanly, and any partially-flushed prior output on
+   * the same row gets overwritten. TTY path uses `cursorTo(0) + clearLine(0)`;
+   * non-TTY path falls back to `\r\x1b[K` (which still works in CI logs).
+   *
    * @param text - The progress message to display.
    */
   progress(text: string): this {
@@ -757,7 +762,18 @@ export class Logger {
     const stream = this.#getTargetStream()
     const streamObj = (
       stream === 'stderr' ? con['_stderr'] : con['_stdout']
-    ) as NodeJS.WriteStream & { write: (text: string) => boolean }
+    ) as NodeJS.WriteStream & {
+      isTTY: boolean
+      cursorTo: (x: number) => void
+      clearLine: (dir: number) => void
+      write: (text: string) => boolean
+    }
+    if (streamObj.isTTY) {
+      streamObj.cursorTo(0)
+      streamObj.clearLine(0)
+    } else {
+      streamObj.write('\r\x1b[K')
+    }
     const symbols = this.#getSymbols()
     streamObj.write(`${symbols.progress} ${text}`)
     this[lastWasBlankSymbol](false)
