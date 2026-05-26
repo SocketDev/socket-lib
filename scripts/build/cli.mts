@@ -3,7 +3,7 @@
  * @file Fast build runner using esbuild for smaller bundles and faster builds.
  */
 
-import { existsSync } from 'node:fs'
+import { existsSync, promises as fsPromises } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -32,6 +32,56 @@ const rootPath = path.resolve(
   '..',
   '..',
 )
+
+/**
+ * Walk `dist/` recursively and fsync every regular file + each directory entry.
+ * Forces the kernel to flush write buffers to disk before downstream steps
+ * (tests, packagers) read the tree. Without this, esbuild + child-process
+ * builders that resolve their `await fs.writeFile()` promises can still leave
+ * data in the page cache — macOS CI runners are particularly prone to seeing
+ * the "logical write completed but file system view is stale" race.
+ *
+ * **Why:** Past incident — socket-lib v6.0.1 + v6.0.2 macOS CI flakes where
+ * `Build completed successfully` logged with 502 validated exports, then the
+ * very next vitest run hit `Unexpected token '{'` on a `dist/external/*.js`
+ * shim and `Cannot find module 'dist/packages/normalize.js'`. Files written but
+ * not yet durable.
+ */
+async function fsyncDirRecursive(dir: string): Promise<void> {
+  const entries = await fsPromises.readdir(dir, { withFileTypes: true })
+  // Fsync files first; recurse into subdirs afterward so directory metadata
+  // settles last (fsync(directory_fd) only persists the entry list, not the
+  // contents — file fsyncs must happen before the dir fsync to be useful).
+  const filePromises: Array<Promise<void>> = []
+  const subdirs: string[] = []
+  for (const entry of entries) {
+    const entryPath = path.join(dir, entry.name)
+    if (entry.isDirectory()) {
+      subdirs.push(entryPath)
+    } else if (entry.isFile()) {
+      filePromises.push(fsyncFile(entryPath))
+    }
+  }
+  await Promise.all(filePromises)
+  // Subdirs in parallel to keep the barrier cheap on wide trees.
+  await Promise.all(subdirs.map(fsyncDirRecursive))
+  // Finally, persist the directory entry list itself.
+  const dirHandle = await fsPromises.open(dir, 'r')
+  try {
+    await dirHandle.sync()
+  } finally {
+    await dirHandle.close()
+  }
+}
+
+async function fsyncFile(filePath: string): Promise<void> {
+  const fh = await fsPromises.open(filePath, 'r')
+  try {
+    await fh.sync()
+  } finally {
+    await fh.close()
+  }
+}
 
 /**
  * Build source code with esbuild. Returns { exitCode, buildTime, result } for
@@ -514,8 +564,15 @@ async function main(): Promise<void> {
             ? externalsExitCode
             : typesExitCode
 
-      // If all parallel builds succeeded, fix exports
+      // If all parallel builds succeeded, flush dist/ to disk and fix exports.
       if (exitCode === 0) {
+        // Fsync barrier — see `fsyncDirRecursive` docstring. Runs between the
+        // parallel builders and downstream phases (fixExports, then tests) so
+        // no consumer reads stale page-cache state.
+        const distDir = path.join(rootPath, 'dist')
+        if (existsSync(distDir)) {
+          await fsyncDirRecursive(distDir)
+        }
         const fixExitCode = await fixExports({ quiet, verbose })
         exitCode = fixExitCode
       }
