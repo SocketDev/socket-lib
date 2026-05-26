@@ -7,6 +7,20 @@
 
 import { uncurryThis } from './uncurry'
 
+// TC39 Stage 3 `getOrInsert` proposal — Node 22.10+ ships these, but
+// TypeScript's lib.es2024.* still lacks them. Ambient-declare here until
+// the lib catches up.
+declare global {
+  interface Map<K, V> {
+    getOrInsert(key: K, value: V): V
+    getOrInsertComputed(key: K, callbackfn: (key: K) => V): V
+  }
+  interface WeakMap<K extends WeakKey, V> {
+    getOrInsert(key: K, value: V): V
+    getOrInsertComputed(key: K, callbackfn: (key: K) => V): V
+  }
+}
+
 // ─── Constructors ──────────────────────────────────────────────────────
 export const MapCtor: MapConstructor = Map
 export const SetCtor: SetConstructor = Set
@@ -20,6 +34,10 @@ export const MapPrototypeDelete = uncurryThis(Map.prototype.delete)
 export const MapPrototypeEntries = uncurryThis(Map.prototype.entries)
 export const MapPrototypeForEach = uncurryThis(Map.prototype.forEach)
 export const MapPrototypeGet = uncurryThis(Map.prototype.get)
+export const MapPrototypeGetOrInsert = uncurryThis(Map.prototype.getOrInsert)
+export const MapPrototypeGetOrInsertComputed = uncurryThis(
+  Map.prototype.getOrInsertComputed,
+)
 export const MapPrototypeHas = uncurryThis(Map.prototype.has)
 export const MapPrototypeKeys = uncurryThis(Map.prototype.keys)
 export const MapPrototypeSet = uncurryThis(Map.prototype.set)
@@ -38,6 +56,12 @@ export const SetPrototypeValues = uncurryThis(Set.prototype.values)
 // ─── WeakMap (prototype) ───────────────────────────────────────────────
 export const WeakMapPrototypeDelete = uncurryThis(WeakMap.prototype.delete)
 export const WeakMapPrototypeGet = uncurryThis(WeakMap.prototype.get)
+export const WeakMapPrototypeGetOrInsert = uncurryThis(
+  WeakMap.prototype.getOrInsert,
+)
+export const WeakMapPrototypeGetOrInsertComputed = uncurryThis(
+  WeakMap.prototype.getOrInsertComputed,
+)
 export const WeakMapPrototypeHas = uncurryThis(WeakMap.prototype.has)
 export const WeakMapPrototypeSet = uncurryThis(WeakMap.prototype.set)
 
