@@ -19,7 +19,17 @@
  *     the files.
  */
 
-import { readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import {
+  closeSync,
+  fsyncSync,
+  openSync,
+  readdirSync,
+  readFileSync,
+  renameSync,
+  statSync,
+  unlinkSync,
+  writeSync,
+} from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
@@ -646,11 +656,51 @@ export async function rewriteFile({
     importAdded = result2.importAdded
   }
 
-  if (apply) {
-    writeFileSync(absPath, newSource)
+  if (apply && newSource !== src) {
+    atomicWrite(absPath, newSource)
   }
 
   return { rewrites: rewrites.length, importAdded, skipped }
+}
+
+/**
+ * Atomic write: write to `<path>.tmp-<pid>-<rand>`, fsync, rename. Guarantees
+ * concurrent readers see either the old content or the new — never the partial
+ * write that triggers `Unexpected token` in vitest immediately after build.
+ *
+ * **Why:** Past incident — socket-lib CI macOS + ubuntu flake where
+ * `dist/external/normalize-package-data.js` reported `SyntaxError: Unexpected
+ * token '{'` at col 34 of line 4. Root cause: the transform-primordials codemod
+ * `writeFileSync`'d every bundled file in `dist/external/` unconditionally;
+ * test workers reading the same file mid-write saw a half-flushed buffer. Now
+ * we (1) skip the write when content is unchanged (handled by the `newSource
+ * !== src` guard at the call site) and (2) rename-in atomically when we do
+ * write.
+ */
+export function atomicWrite(absPath: string, content: string): void {
+  const tmpPath = `${absPath}.tmp-${process.pid}-${Math.random().toString(36).slice(2, 10)}`
+  let fd: number | undefined
+  try {
+    fd = openSync(tmpPath, 'w', 0o644)
+    writeSync(fd, content)
+    fsyncSync(fd)
+  } catch (e) {
+    if (fd !== undefined) {
+      try {
+        closeSync(fd)
+      } catch {
+        // ignore close error
+      }
+    }
+    try {
+      unlinkSync(tmpPath)
+    } catch {
+      // ignore unlink error
+    }
+    throw e
+  }
+  closeSync(fd)
+  renameSync(tmpPath, absPath)
 }
 
 /**
