@@ -2764,6 +2764,7 @@
     "security": "node scripts/security.mts",
     "prepare": "node scripts/install-git-hooks.mts && node scripts/build/cli.mts --quiet",
     "prepublishOnly": "pnpm run build",
+    "publish": "node scripts/publish.mts",
     "test": "node scripts/test/cli.mts",
     "update": "node scripts/update.mts",
     "lockstep": "node scripts/lockstep.mts",
