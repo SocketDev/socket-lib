@@ -7,9 +7,11 @@
 
 import { uncurryThis } from './uncurry'
 
-// TC39 Stage 3 `getOrInsert` proposal — Node 22.10+ ships these, but
-// TypeScript's lib.es2024.* still lacks them. Ambient-declare here until
-// the lib catches up.
+// Stage 3+ TC39 proposals that Node 22+ ships but TypeScript's
+// lib.es2024.* still lacks. Ambient-declare here until the lib catches
+// up. References:
+//   - getOrInsert: https://github.com/tc39/proposal-upsert
+//   - Set composition: https://github.com/tc39/proposal-set-methods
 declare global {
   interface Map<K, V> {
     getOrInsert(key: K, value: V): V
@@ -18,6 +20,20 @@ declare global {
   interface WeakMap<K extends WeakKey, V> {
     getOrInsert(key: K, value: V): V
     getOrInsertComputed(key: K, callbackfn: (key: K) => V): V
+  }
+  interface ReadonlySetLike<T> {
+    has(value: T): boolean
+    keys(): IterableIterator<T>
+    readonly size: number
+  }
+  interface Set<T> {
+    difference<U>(other: ReadonlySetLike<U>): Set<T>
+    intersection<U>(other: ReadonlySetLike<U>): Set<T & U>
+    isDisjointFrom(other: ReadonlySetLike<unknown>): boolean
+    isSubsetOf(other: ReadonlySetLike<unknown>): boolean
+    isSupersetOf(other: ReadonlySetLike<unknown>): boolean
+    symmetricDifference<U>(other: ReadonlySetLike<U>): Set<T | U>
+    union<U>(other: ReadonlySetLike<U>): Set<T | U>
   }
 }
 
@@ -47,10 +63,21 @@ export const MapPrototypeValues = uncurryThis(Map.prototype.values)
 export const SetPrototypeAdd = uncurryThis(Set.prototype.add)
 export const SetPrototypeClear = uncurryThis(Set.prototype.clear)
 export const SetPrototypeDelete = uncurryThis(Set.prototype.delete)
+export const SetPrototypeDifference = uncurryThis(Set.prototype.difference)
 export const SetPrototypeEntries = uncurryThis(Set.prototype.entries)
 export const SetPrototypeForEach = uncurryThis(Set.prototype.forEach)
 export const SetPrototypeHas = uncurryThis(Set.prototype.has)
+export const SetPrototypeIntersection = uncurryThis(Set.prototype.intersection)
+export const SetPrototypeIsDisjointFrom = uncurryThis(
+  Set.prototype.isDisjointFrom,
+)
+export const SetPrototypeIsSubsetOf = uncurryThis(Set.prototype.isSubsetOf)
+export const SetPrototypeIsSupersetOf = uncurryThis(Set.prototype.isSupersetOf)
 export const SetPrototypeKeys = uncurryThis(Set.prototype.keys)
+export const SetPrototypeSymmetricDifference = uncurryThis(
+  Set.prototype.symmetricDifference,
+)
+export const SetPrototypeUnion = uncurryThis(Set.prototype.union)
 export const SetPrototypeValues = uncurryThis(Set.prototype.values)
 
 // ─── WeakMap (prototype) ───────────────────────────────────────────────
