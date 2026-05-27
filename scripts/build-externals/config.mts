@@ -38,6 +38,9 @@ export const externalPackages = [
   { name: 'picomatch', bundle: false },
   // pony-cause
   { name: 'pony-cause', bundle: true },
+  // shell-quote: zero-dep shell tokenizer + quoter. Powers shell/parse +
+  // shell/quote and the re-based argv/parse-args-string.
+  { name: 'shell-quote', bundle: true },
   // spdx-pack: Bundle spdx-correct, spdx-expression-parse, and dependencies together.
   { name: 'spdx-pack', bundle: true },
   { name: 'spdx-correct', bundle: false },
