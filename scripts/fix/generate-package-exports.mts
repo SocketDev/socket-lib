@@ -87,8 +87,14 @@ async function main(): Promise<void> {
         // not public exports of @socketsecurity/lib-stable.
         'tools/**',
         'vendor/**',
-        // Files prefixed with _ are private helpers, not public API.
+        // Files / directories prefixed with `_` are private helpers, not
+        // public API. Two patterns: `dist/**/_*` catches underscore-prefixed
+        // leaves at any depth; `dist/_*/**` catches underscore-prefixed
+        // directories sitting directly under `dist/` (e.g. rolldown's
+        // `_virtual/_rolldown/runtime.js` shared-runtime artifact under
+        // preserveModules), which the first pattern misses.
         'dist/**/_*',
+        'dist/_*/**',
       ],
       gitignore: false,
     })),

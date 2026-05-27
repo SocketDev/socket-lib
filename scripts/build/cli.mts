@@ -1,6 +1,7 @@
 /* oxlint-disable socket/sort-source-methods -- build-runner helpers interleaved with config constants and module-level state; reordering would split state from its consumers. */
 /**
- * @file Fast build runner using esbuild for smaller bundles and faster builds.
+ * @file Build runner: rolldown for the per-file source + externals builds,
+ *   tsgo for declarations.
  */
 
 import { existsSync, promises as fsPromises } from 'node:fs'
@@ -8,23 +9,17 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { build, context } from 'esbuild'
+import { rolldown, watch } from 'rolldown'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import {
-  analyzeMetafile,
-  buildConfig,
-  watchConfig,
-} from '../../.config/esbuild.config.mts'
+import { buildConfig } from '../../.config/rolldown.config.mts'
 import { parseArgs } from '../util/parse-args.mts'
 import { runSequence } from '../util/run-command.mts'
 import { verifyDist } from './verify-dist.mts'
-
-import type { BuildResult } from 'esbuild'
 
 const logger = getDefaultLogger()
 
@@ -87,7 +82,7 @@ async function fsyncFile(filePath: string): Promise<void> {
 }
 
 /**
- * Build source code with esbuild. Returns { exitCode, buildTime, result } for
+ * Build source code with rolldown. Returns { exitCode, buildTime } for
  * external logging.
  */
 interface BuildSourceOptions {
@@ -100,13 +95,12 @@ interface BuildSourceOptions {
 interface BuildSourceResult {
   exitCode: number
   buildTime: number
-  result: BuildResult | null
 }
 
 export async function buildSource(
   options: BuildSourceOptions = {},
 ): Promise<BuildSourceResult> {
-  const { quiet = false, skipClean = false, verbose = false } = options
+  const { quiet = false, skipClean = false } = options
 
   // Clean dist directory if needed
   if (!skipClean) {
@@ -120,27 +114,28 @@ export async function buildSource(
       if (!quiet) {
         logger.error('Clean failed')
       }
-      return { exitCode, buildTime: 0, result: undefined }
+      return { exitCode, buildTime: 0 }
     }
   }
 
   try {
     const startTime = Date.now()
-    // Determine log level based on verbosity
-    const logLevel = quiet ? 'silent' : verbose ? 'info' : 'warning'
-    const result = await build({
-      ...buildConfig,
-      logLevel,
-    })
+    const { output, ...inputOptions } = buildConfig
+    const bundle = await rolldown(inputOptions)
+    try {
+      await bundle.write(output)
+    } finally {
+      await bundle.close()
+    }
     const buildTime = Date.now() - startTime
 
-    return { exitCode: 0, buildTime, result }
+    return { exitCode: 0, buildTime }
   } catch (error) {
     if (!quiet) {
       logger.error('Source build failed')
       logger.error(error)
     }
-    return { exitCode: 1, buildTime: 0, result: undefined }
+    return { exitCode: 1, buildTime: 0 }
   }
 }
 
@@ -260,7 +255,7 @@ export async function fixExports(
 export async function watchBuild(
   options: { quiet?: boolean; verbose?: boolean } = {},
 ): Promise<number> {
-  const { quiet = false, verbose = false } = options
+  const { quiet = false } = options
 
   if (!quiet) {
     logger.step('Starting watch mode with incremental builds')
@@ -268,49 +263,30 @@ export async function watchBuild(
   }
 
   try {
-    // Determine log level based on verbosity
-    const logLevel = quiet ? 'silent' : verbose ? 'debug' : 'warning'
+    const { output, ...inputOptions } = buildConfig
+    const watcher = watch({ ...inputOptions, output })
 
-    // Use context API for incremental builds (68% faster rebuilds)
-    // Extract watch option from watchConfig as it's not valid for context()
-    const { watch: _watchOpts, ...contextConfig } = watchConfig
-    const ctx = await context({
-      ...contextConfig,
-      logLevel,
-      plugins: [
-        ...(contextConfig.plugins || []),
-        {
-          name: 'rebuild-logger',
-          setup(build) {
-            build.onEnd(result => {
-              if (result.errors.length > 0) {
-                if (!quiet) {
-                  logger.error('Rebuild failed')
-                }
-              } else {
-                if (!quiet) {
-                  logger.success('Rebuild succeeded')
-                  if (result?.metafile && verbose) {
-                    const analysis = analyzeMetafile(result.metafile)
-                    logger.info(`Bundle size: ${analysis.totalSize}`)
-                  }
-                }
-              }
-            })
-          },
-        },
-      ],
+    // rolldown requires closing each build's result on BUNDLE_END to avoid
+    // leaking native handles; ERROR surfaces a failed rebuild.
+    watcher.on('event', event => {
+      if (event.code === 'BUNDLE_END') {
+        if (!quiet) {
+          logger.success('Rebuild succeeded')
+        }
+        event.result.close()
+      } else if (event.code === 'ERROR') {
+        if (!quiet) {
+          logger.error('Rebuild failed')
+          logger.error(event.error)
+        }
+      }
     })
 
-    // Enable watch mode
-    await ctx.watch()
-
-    // On Ctrl-C, tear down the esbuild context and exit cleanly. Earlier
-    // this handler threw inside an async callback, which surfaced as an
-    // unhandled rejection and the surrounding try/catch rewrote the clean
-    // exit into "Watch mode failed: Watch mode interrupted".
+    // On Ctrl-C, close the watcher and exit cleanly. A throw inside an async
+    // callback would surface as an unhandled rejection and get rewritten by
+    // the surrounding catch into a misleading "Watch mode failed".
     process.on('SIGINT', () => {
-      ctx.dispose().finally(() => process.exit(0))
+      watcher.close().finally(() => process.exit(0))
     })
 
     // Wait indefinitely — SIGINT is the only exit path.
@@ -404,9 +380,7 @@ async function main(): Promise<void> {
         '  pnpm build --watch      # Watch mode with incremental builds',
       )
       logger.log('  pnpm build --analyze    # Build with size analysis')
-      logger.log(
-        '\nNote: Watch mode uses esbuild context API for 68% faster rebuilds',
-      )
+      logger.log('\nNote: Watch mode uses rolldown for incremental rebuilds')
       process.exitCode = 0
       return
     }
@@ -447,23 +421,14 @@ async function main(): Promise<void> {
       if (!quiet) {
         printHeader('Building Source')
       }
-      const {
-        buildTime,
-        exitCode: srcExitCode,
-        result,
-      } = await buildSource({ quiet, verbose, analyze: values.analyze })
+      const { buildTime, exitCode: srcExitCode } = await buildSource({
+        quiet,
+        verbose,
+        analyze: values.analyze,
+      })
       exitCode = srcExitCode
       if (exitCode === 0 && !quiet) {
         logger.substep(`Source build complete in ${buildTime}ms`)
-
-        if (values.analyze && result?.metafile) {
-          const analysis = analyzeMetafile(result.metafile)
-          logger.info('Build output:')
-          for (const file of analysis.files) {
-            logger.substep(`${file.name}: ${file.size}`)
-          }
-          logger.step(`Total bundle size: ${analysis.totalSize}`)
-        }
       }
     }
     // Build everything (default)
@@ -536,7 +501,7 @@ async function main(): Promise<void> {
         srcSettled.status === 'fulfilled'
           ? srcSettled.value
           : (logger.error(`buildSource rejected: ${srcSettled.reason}`),
-            { exitCode: 1, buildTime: 0, result: undefined })
+            { exitCode: 1, buildTime: 0 })
       const externalsExitCode: number =
         externalsSettled.status === 'fulfilled'
           ? externalsSettled.value
@@ -548,16 +513,6 @@ async function main(): Promise<void> {
         typesSettled.status === 'fulfilled'
           ? typesSettled.value
           : (logger.error(`buildTypes rejected: ${typesSettled.reason}`), 1)
-
-      // Log completion messages if analyze flag is set
-      if (!quiet && values.analyze && srcResult.result?.metafile) {
-        const analysis = analyzeMetafile(srcResult.result.metafile)
-        logger.info('Build output:')
-        for (const file of analysis.files) {
-          logger.substep(`${file.name}: ${file.size}`)
-        }
-        logger.step(`Total bundle size: ${analysis.totalSize}`)
-      }
 
       // Check if any of the parallel builds failed
       exitCode =
