@@ -13,7 +13,7 @@
 // `gh release create` upload progress. lib/spawn returns a Promise
 // that resolves only on exit; here we need the live ChildProcess
 // stream.
-import { spawn } from 'node:child_process'
+import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import process from 'node:process'
 
 const WIN32 = process.platform === 'win32'
@@ -29,7 +29,11 @@ export function runInherit(
   cwd: string,
 ): Promise<number> {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, { cwd, shell: WIN32, stdio: 'inherit' })
+    const { process: child } = spawn(cmd, args, {
+      cwd,
+      shell: WIN32,
+      stdio: 'inherit',
+    })
     child.on('error', reject)
     child.on('exit', code => {
       resolve(code ?? 0)
@@ -48,13 +52,13 @@ export function runCapture(
   cwd: string,
 ): Promise<{ stdout: string; code: number }> {
   return new Promise((resolve, reject) => {
-    const child = spawn(cmd, args, {
+    const { process: child } = spawn(cmd, args, {
       cwd,
       shell: WIN32,
       stdio: ['ignore', 'pipe', 'inherit'],
     })
     let stdout = ''
-    child.stdout?.on('data', chunk => {
+    child.stdout?.on('data', (chunk: Buffer) => {
       stdout += chunk.toString('utf8')
     })
     child.on('error', reject)
@@ -153,7 +157,9 @@ export interface RegistryVersionInfo {
    * `_npmUser.trustedPublisher` — set when the version was uploaded via OIDC
    * trusted publisher (GitHub Actions). Omit when classic token was used.
    */
-  trustedPublisher?: { id: string; oidcConfigId?: string } | undefined
+  trustedPublisher?:
+    | { id: string; oidcConfigId?: string | undefined }
+    | undefined
   /**
    * `dist.attestations` — present when the upload included npm provenance
    * (`--provenance` flag). The URL fetches the SLSA provenance bundle.
@@ -193,18 +199,30 @@ export async function fetchVersionTrustInfo(
 ): Promise<Record<string, RegistryVersionInfo>> {
   const url = `https://registry.npmjs.org/${encodeURIComponent(name).replace('%40', '@')}`
   let json: {
-    versions?: Record<
-      string,
-      {
-        dist?: {
-          attestations?: {
-            url: string
-            provenance: { predicateType: string }
+    versions?:
+      | Record<
+          string,
+          {
+            dist?:
+              | {
+                  attestations?:
+                    | {
+                        url: string
+                        provenance: { predicateType: string }
+                      }
+                    | undefined
+                }
+              | undefined
+            _npmUser?:
+              | {
+                  trustedPublisher?:
+                    | { id: string; oidcConfigId?: string | undefined }
+                    | undefined
+                }
+              | undefined
           }
-        }
-        _npmUser?: { trustedPublisher?: { id: string; oidcConfigId?: string } }
-      }
-    >
+        >
+      | undefined
   }
   try {
     const headers: Record<string, string> =

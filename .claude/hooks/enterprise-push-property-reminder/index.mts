@@ -32,8 +32,11 @@
 // Fail-open on hook bugs: exit 0 + silent log so a bad deploy
 // can't suppress legitimate push errors.
 
-import { spawnSync } from 'node:child_process'
 import process from 'node:process'
+
+import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
+
+import { findInvocation } from '../_shared/shell-command.mts'
 
 interface Payload {
   readonly hook_event_name?: string | undefined
@@ -50,10 +53,13 @@ const RULESET_ERROR_PATTERNS: readonly RegExp[] = [
   /Changes must be made through a pull request/,
 ]
 
-// Matches `git push` invocations (with or without args). The hook
-// scopes to push commands only — pulls/fetches/commits don't trip
-// the enterprise ruleset.
-const GIT_PUSH_PATTERN = /\bgit\s+push\b/
+// Detects `git push` invocations via the shell parser (sees through
+// chains / `$(…)`; ignores a quoted "git push" in a message). The hook
+// scopes to push commands only — pulls/fetches/commits don't trip the
+// enterprise ruleset.
+function isGitPush(command: string): boolean {
+  return findInvocation(command, { binary: 'git', subcommand: 'push' })
+}
 
 // Read the tool_response into a string for pattern matching. Bash's
 // tool_response shape is typically `{ stdout: string, stderr: string,
@@ -218,7 +224,7 @@ async function main(): Promise<void> {
     process.exit(0)
   }
   const command = payload.tool_input?.command
-  if (typeof command !== 'string' || !GIT_PUSH_PATTERN.test(command)) {
+  if (typeof command !== 'string' || !isGitPush(command)) {
     process.exit(0)
   }
   const output = extractOutput(payload.tool_response)
