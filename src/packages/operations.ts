@@ -58,19 +58,6 @@ const pacoteCachePath = getPacoteCachePath()
 // helper (e.g. `pkgNameToSlug`). Bundlers that stub npm-pack then crash at
 // module load. A memoized getter defers the cost to the first fetcher use.
 let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
-export function getFetcher(): ReturnType<typeof makeFetchHappen.defaults> {
-  if (_fetcher === undefined) {
-    _fetcher = makeFetchHappen.defaults({
-      cachePath: pacoteCachePath,
-      // Prefer-offline: Staleness checks for cached data will be bypassed, but
-      // missing data will be requested from the server.
-      // https://github.com/npm/make-fetch-happen?tab=readme-ov-file#--optscache
-      cache: 'force-cache',
-    })
-  }
-  return _fetcher
-}
-
 /**
  * Extract a package to a destination directory.
  *
@@ -159,6 +146,19 @@ export function findPackageExtensions(
     }
   }
   return result
+}
+
+export function getFetcher(): ReturnType<typeof makeFetchHappen.defaults> {
+  if (_fetcher === undefined) {
+    _fetcher = makeFetchHappen.defaults({
+      cachePath: pacoteCachePath,
+      // Prefer-offline: Staleness checks for cached data will be bypassed, but
+      // missing data will be requested from the server.
+      // https://github.com/npm/make-fetch-happen?tab=readme-ov-file#--optscache
+      cache: 'force-cache',
+    })
+  }
+  return _fetcher
 }
 
 /**
