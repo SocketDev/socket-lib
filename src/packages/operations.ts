@@ -58,7 +58,7 @@ const pacoteCachePath = getPacoteCachePath()
 // helper (e.g. `pkgNameToSlug`). Bundlers that stub npm-pack then crash at
 // module load. A memoized getter defers the cost to the first fetcher use.
 let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
-function getFetcher(): ReturnType<typeof makeFetchHappen.defaults> {
+export function getFetcher(): ReturnType<typeof makeFetchHappen.defaults> {
   if (_fetcher === undefined) {
     _fetcher = makeFetchHappen.defaults({
       cachePath: pacoteCachePath,
