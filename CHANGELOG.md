@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.3](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.3) - 2026-05-26
+
+### Added
+
+- **`paths/walk` — `walkUp(from, { cwd, stopAt })`.** Lazy generator yielding a path then each ancestor up to (and including) the filesystem root or a `stopAt` boundary. `fs/find-up` now builds on it.
+- **`fs/access` — `canAccess` / `canRead` / `canWrite` / `canExecute`.** Sync boolean permission checks over `fs.accessSync` (F_OK / R_OK / W_OK / X_OK). For "I'm about to write" prefer attempting the write over a pre-check (TOCTOU); use these when the answer drives a branch.
+- **`fs/resolve-module` — `requireResolveFrom(fromDir, specifier)` / `requireResolveFromCwd(specifier)`.** `require.resolve` anchored at an arbitrary directory (e.g. "the `typescript` THIS project would load"). `nothrow: true` returns `undefined` instead of throwing.
+- **`releases/github-retry-config` — `GITHUB_RETRY_CONFIG`, `resolveBaseDelayMs()`, `DEFAULT_BASE_DELAY_MS`.** Shared backoff config for the GitHub release helpers. The base retry delay is overridable via the `SOCKET_GITHUB_RETRY_BASE_DELAY_MS` env var (default 5000ms; set `0` for near-instant retries) — useful in CI / tests to skip the exponential-backoff wait.
+- **`smol/path` — `getSmolPath()`.** Lazy accessor for socket-btm's `node:smol-path` native binding; `undefined` on stock Node. `walkUp`, `canAccess`, and `findUp` now prefer the native fast path (`dirname` / `access` / batched find-up) when running on a smol binary and fall back to the JS implementation otherwise — transparent to callers.
+
+### Changed (breaking)
+
+- **`ai/profiles` exports a single `AI_PROFILE` capability ladder** instead of the four standalone `*_PROFILE` constants. The tiers are `AI_PROFILE.read` ⊂ `.edit` ⊂ `.create` ⊂ `.full`, ordered least-to-most capable. Migration: `READ_ONLY_PROFILE` → `AI_PROFILE.read`; `EDIT_ONLY_PROFILE` → `AI_PROFILE.create` (the old `EDIT_ONLY` allowed `Write`/`MultiEdit`); `FULL_FIX_PROFILE` → `AI_PROFILE.full`. New `AI_PROFILE.edit` is the narrowest fix tier — `Edit` on existing files only, no `Write`/`MultiEdit` — for lint autofix and in-place codemods.
+
+### Changed
+
+- **Every `AI_PROFILE` tier now denies `Agent`.** Sub-agent spawning is blocked across all profiles, since a sub-agent can escape the parent's tool restrictions.
+
 ## [6.0.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.2) - 2026-05-26
 
 ### Added
