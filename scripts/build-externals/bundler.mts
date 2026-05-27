@@ -1,5 +1,5 @@
 /**
- * @file Package bundling logic using esbuild.
+ * @file Package bundling logic using rolldown.
  */
 
 import { existsSync, promises as fs } from 'node:fs'
@@ -7,13 +7,13 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 
-import esbuild from 'esbuild'
+import { rolldown } from 'rolldown'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {
-  getEsbuildConfig,
   getPackageSpecificOptions,
-} from './esbuild-config.mts'
+  getRolldownConfig,
+} from './rolldown-config.mts'
 import {
   getLocalPackagePath,
   resolveLocalEntryPoint,
@@ -87,11 +87,20 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
     // Get package-specific optimizations.
     const packageOpts = getPackageSpecificOptions(packageName)
 
-    // Get esbuild configuration.
-    const config = getEsbuildConfig(packagePath, outputPath, packageOpts)
+    // Get rolldown configuration.
+    const { output, ...inputOptions } = getRolldownConfig(
+      packagePath,
+      outputPath,
+      packageOpts,
+    )
 
-    // Bundle the package with esbuild.
-    await esbuild.build(config)
+    // Bundle the package with rolldown.
+    const bundle = await rolldown(inputOptions)
+    try {
+      await bundle.write(output)
+    } finally {
+      await bundle.close()
+    }
 
     // Add a header comment to the bundled file.
     const bundleContent = await fs.readFile(outputPath, 'utf8')
@@ -100,7 +109,7 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
     const finalContent = `"use strict";
 /**
  * Bundled from ${packageName}
- * This is a zero-dependency bundle created by esbuild.
+ * This is a zero-dependency bundle created by rolldown.
  */
 ${contentWithoutStrict}`
     // Atomic write: tmp + rename so a concurrent reader (the
