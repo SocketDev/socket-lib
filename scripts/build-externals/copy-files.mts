@@ -11,7 +11,7 @@ const logger = getDefaultLogger()
 
 /**
  * Copy local TypeScript declaration files only. JavaScript files are either
- * bundled by esbuild or manually vendored (handled separately).
+ * bundled by rolldown or manually vendored (handled separately).
  */
 export async function copyLocalFiles(
   srcDir: string,
@@ -23,7 +23,7 @@ export async function copyLocalFiles(
 
   for (const file of files) {
     // Only copy .d.ts files (hand-written type definitions)
-    // .js files are either bundled by esbuild or don't need to be in dist
+    // .js files are either bundled by rolldown or don't need to be in dist
     if (file.endsWith('.d.ts')) {
       const srcPath = path.join(srcDir, file)
       const destPath = path.join(destDir, file)

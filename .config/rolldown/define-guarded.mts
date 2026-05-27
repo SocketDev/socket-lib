@@ -3,17 +3,14 @@
  *   that replaces global / property-accessor reads with constant values — like
  *   oxc's `transform.define`, but it ONLY rewrites read positions. Matches that
  *   sit in an assignment target, a `delete` / `++` / `--` operand, or a binding
- *   position are left untouched.
- *
- *   Why this exists: oxc's `define` (and `@rollup/plugin-replace`, even with
- *   `preventAssignment`) substitutes `delete` operands, so `delete
- *   process.env.DEBUG` (debug's node.js `save()`) becomes `delete undefined` —
- *   a strict-mode SyntaxError. esbuild's `define` skipped both lvalue and
- *   delete positions; this restores that behavior so risky keys
- *   (`process.env.DEBUG`, …) stay safe to define.
- *
- *   Uses rolldown's bundled oxc parser (`rolldown/parseAst`) for reliable AST
- *   spans + `magic-string` for surgical rewrites. Keys are matched as exact
+ *   position are left untouched. Why this exists: oxc's `define` (and
+ *   `@rollup/plugin-replace`, even with `preventAssignment`) substitutes
+ *   `delete` operands, so `delete process.env.DEBUG` (debug's node.js `save()`)
+ *   becomes `delete undefined` — a strict-mode SyntaxError. esbuild's `define`
+ *   skipped both lvalue and delete positions; this restores that behavior so
+ *   risky keys (`process.env.DEBUG`, …) stay safe to define. Uses rolldown's
+ *   bundled oxc parser (`rolldown/parseAst`) for reliable AST spans +
+ *   `magic-string` for surgical rewrites. Keys are matched as exact
  *   `process.env.X` member chains or bare identifiers; values are
  *   already-quoted source text (same contract as esbuild / oxc `define`).
  */
@@ -70,9 +67,7 @@ function matchesChain(
   source: string,
 ): boolean {
   if (segments.length === 1) {
-    return (
-      node['type'] === 'Identifier' && node['name'] === segments[0]
-    )
+    return node['type'] === 'Identifier' && node['name'] === segments[0]
   }
   // Multi-segment: must be a member chain whose printed text equals the key.
   const start = node['start'] as number

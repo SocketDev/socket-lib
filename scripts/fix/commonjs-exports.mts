@@ -1,6 +1,6 @@
 /**
  * @file Fix CommonJS exports for Node.js ESM compatibility. Transforms
- *   esbuild's minified exports to clear module.exports = { ... } format.
+ *   the bundler's minified exports to clear module.exports = { ... } format.
  */
 
 import { promises as fs } from 'node:fs'
@@ -187,7 +187,7 @@ export async function processDirectory(
         }
 
         // SIMPLIFIED APPROACH: External packages use standard CommonJS exports.
-        // esbuild bundles them with `minify: false` producing clean `module.exports` patterns.
+        // rolldown bundles them with `minify: false` producing clean `module.exports` patterns.
         // All external packages work directly: require('./external/packagename')
         // NO .default references needed - internal code uses them as-is.
 

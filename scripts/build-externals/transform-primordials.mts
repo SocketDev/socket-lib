@@ -1,7 +1,7 @@
 /**
  * @file Post-bundle transform that rewrites bundled CJS externals to call
  *   socket-lib's primordials surface instead of mutable globals. Pipeline:
- *   esbuild produces dist/external/*.js (CJS bundles) → this transform parses
+ *   rolldown produces dist/external/*.js (CJS bundles) → this transform parses
  *   each bundle, finds well-known global call sites (Buffer.from, Date.now,
  *   Object.keys, …), rewrites them to primordial-shaped calls, and prepends a
  *   CJS require pulling the primordials it needs from a relative path → the
@@ -61,8 +61,8 @@ export async function transformPrimordials(
   // The codemod needs to know which primordials we export so it doesn't
   // try to call out to identifiers we haven't actually exported. Read
   // the surface from src/primordials/ (the directory of ESM leaves
-  // post-split) rather than dist/primordials/*.js (esbuild-compiled
-  // with a `__export(obj, {…})` form parseExports doesn't recognize).
+  // post-split) rather than dist/primordials/*.js (bundler-compiled
+  // with an `exports.X = …` form parseExports doesn't recognize).
   // `loadPrimordialsSurface` concatenates every leaf in the directory
   // and parses the unified output as a single primordials surface.
   const srcPrimordialsDir = path.join(distRoot, '..', 'src', 'primordials')

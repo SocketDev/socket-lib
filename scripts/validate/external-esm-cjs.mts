@@ -285,7 +285,7 @@ async function main(): Promise<void> {
       logger.log('')
       logger.warn('Recommended fixes:')
       logger.substep(
-        'Ensure esbuild configuration preserves proper export structure',
+        'Ensure rolldown configuration preserves proper export structure',
       )
       logger.substep('Check that external bundles use correct format settings')
       logger.substep(

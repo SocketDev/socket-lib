@@ -23,7 +23,7 @@ const require = createRequire(import.meta.url)
 const logger = getDefaultLogger()
 
 /**
- * Bundle a single package with esbuild.
+ * Bundle a single package with rolldown.
  *
  * @param {string} packageName - Name of the package to bundle.
  * @param {string} outputPath - Output file path.
