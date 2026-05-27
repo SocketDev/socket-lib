@@ -60,13 +60,22 @@ function collectCtorBaseNames(): Set<string> {
 /**
  * Build the alias-map target (`Global<Name>`) for a captured-global source
  * name. Strips a leading `global` so `globalThis` → `GlobalThis` (not
- * `GlobalGlobalThis`); otherwise title-cases the first letter.
+ * `GlobalGlobalThis`); otherwise title-cases the first letter. Embedded `DOM` /
+ * `URI` / `URL` acronyms are normalized to `Dom` / `Uri` / `Url` so the alias
+ * reads as a single TitleCase word (`encodeURIComponent` →
+ * `GlobalEncodeUriComponent`, not `GlobalEncodeURIComponent`) — consistent with
+ * TitleCase identifier style.
  */
 function aliasTarget(sourceName: string): string {
   const stripped = sourceName.startsWith('global')
     ? sourceName.slice('global'.length)
     : sourceName
-  return `Global${stripped.charAt(0).toUpperCase()}${stripped.slice(1)}`
+  const titled = `${stripped.charAt(0).toUpperCase()}${stripped.slice(1)}`
+  const normalized = titled
+    .replace(/DOM/g, 'Dom')
+    .replace(/URI/g, 'Uri')
+    .replace(/URL/g, 'Url')
+  return `Global${normalized}`
 }
 
 /**

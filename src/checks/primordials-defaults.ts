@@ -58,8 +58,8 @@ export const DEFAULT_ALIAS_MAP: Readonly<Record<string, string>> = ObjectFreeze(
     WeakSet: 'WeakSetCtor',
     atob: 'GlobalAtob',
     btoa: 'GlobalBtoa',
-    decodeURIComponent: 'GlobalDecodeURIComponent',
-    encodeURIComponent: 'GlobalEncodeURIComponent',
+    decodeURIComponent: 'GlobalDecodeUriComponent',
+    encodeURIComponent: 'GlobalEncodeUriComponent',
     globalThis: 'GlobalThis',
   },
 ) as unknown as Readonly<Record<string, string>>
