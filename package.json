@@ -2350,6 +2350,16 @@
       "types": "./dist/shadow/types.d.ts",
       "default": "./dist/shadow/types.js"
     },
+    "./shell/parse": {
+      "source": "./src/shell/parse.ts",
+      "types": "./dist/shell/parse.d.ts",
+      "default": "./dist/shell/parse.js"
+    },
+    "./shell/quote": {
+      "source": "./src/shell/quote.ts",
+      "types": "./dist/shell/quote.d.ts",
+      "default": "./dist/shell/quote.js"
+    },
     "./smol/detect": {
       "source": "./src/smol/detect.ts",
       "types": "./dist/smol/detect.d.ts",
