@@ -32,7 +32,9 @@ export type ParseEntry = string | ShellOp | ShellComment | ShellGlob
  * semantics). Bare strings are quoted as needed; `ShellOp` / `ShellComment` /
  * `ShellGlob` objects are emitted as their operator / comment / pattern.
  */
-export function quote(args: ReadonlyArray<string | ShellOp | ShellComment | ShellGlob>): string
+export function quote(
+  args: ReadonlyArray<string | ShellOp | ShellComment | ShellGlob>,
+): string
 
 /**
  * Tokenize a command line into `ParseEntry` items. `$VAR` references resolve
@@ -41,6 +43,9 @@ export function quote(args: ReadonlyArray<string | ShellOp | ShellComment | Shel
  */
 export function parse(
   cmd: string,
-  env?: Record<string, string> | ((key: string) => string | undefined) | undefined,
+  env?:
+    | Record<string, string>
+    | ((key: string) => string | undefined)
+    | undefined,
   opts?: { escape?: string } | undefined,
 ): ParseEntry[]
