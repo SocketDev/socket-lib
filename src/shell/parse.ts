@@ -12,7 +12,12 @@ import { parse as shellParse } from '../external/shell-quote'
 
 import type { ParseEntry } from '../external/shell-quote'
 
-export type { ParseEntry, ShellComment, ShellGlob, ShellOp } from '../external/shell-quote'
+export type {
+  ParseEntry,
+  ShellComment,
+  ShellGlob,
+  ShellOp,
+} from '../external/shell-quote'
 
 /**
  * Tokenize `cmd` into `ParseEntry` items, preserving operators and comments.
@@ -30,7 +35,10 @@ export type { ParseEntry, ShellComment, ShellGlob, ShellOp } from '../external/s
  */
 export function parseShell(
   cmd: string,
-  env?: Record<string, string> | ((key: string) => string | undefined) | undefined,
+  env?:
+    | Record<string, string>
+    | ((key: string) => string | undefined)
+    | undefined,
 ): ParseEntry[] {
   return shellParse(cmd, env)
 }
