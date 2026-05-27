@@ -15,6 +15,8 @@ import { fileURLToPath } from 'node:url'
 
 import type { Plugin, RolldownOptions } from 'rolldown'
 
+import { defineGuardedPlugin } from '../../.config/rolldown/define-guarded.mts'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const stubsDir = path.join(__dirname, 'stubs')
 
@@ -114,7 +116,9 @@ export function createForceNodeModulesPlugin(): Plugin {
         // require.resolve fails for ESM-only packages; resolve the
         // package.json and derive the entry point instead.
         try {
-          const pkgJsonPath = requireResolve.resolve(`${match.pkg}/package.json`)
+          const pkgJsonPath = requireResolve.resolve(
+            `${match.pkg}/package.json`,
+          )
           const pkgDir = path.dirname(pkgJsonPath)
           const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as {
             exports?: string | { default?: string } | undefined
@@ -241,21 +245,19 @@ export function getRolldownConfig(
       id.startsWith('node:') ||
       exactExternals.has(id) ||
       prefixExternals.some(p => id.startsWith(p)),
-    // oxc define for dead-code elimination. Lives under `transform` (top-level
-    // `define` is rejected by rolldown 1.0.2). Values are already-quoted
-    // source text, same contract as esbuild's `define`.
-    transform: {
-      define: {
+    plugins: [
+      createForceNodeModulesPlugin(),
+      createStubPlugin(),
+      // Guarded define for dead-code elimination. Read-only substitution —
+      // assignment targets and `delete` operands are left alone, so e.g.
+      // `delete process.env.DEBUG` (debug's node.js save()) stays verbatim
+      // instead of becoming the strict-mode-illegal `delete undefined`. Plain
+      // `transform.define` / @rollup/plugin-replace can't guard `delete`.
+      defineGuardedPlugin({
         'process.env.NODE_ENV': '"production"',
         __DEV__: 'false',
         'global.GENTLY': 'false',
-        // NOTE: `process.env.DEBUG` is intentionally NOT defined. oxc's
-        // define (unlike esbuild's) substitutes assignment targets and
-        // `delete` operands, so `process.env.DEBUG = x` / `delete
-        // process.env.DEBUG` (debug's node.js save()) became
-        // `undefined = x` / `delete undefined` — a strict-mode SyntaxError.
-        // Defining it away also wrongly disabled debug-namespace support for
-        // consumers. Let it read the real env at runtime.
+        'process.env.DEBUG': 'undefined',
         'process.browser': 'false',
         'process.env.VERBOSE': 'false',
         window: 'undefined',
@@ -273,11 +275,7 @@ export function getRolldownConfig(
         'process.env.JEST_WORKER_ID': 'undefined',
         'process.env.NODE_TEST': 'undefined',
         ...packageOpts.define,
-      },
-    },
-    plugins: [
-      createForceNodeModulesPlugin(),
-      createStubPlugin(),
+      }),
       ...(packageOpts.plugins || []),
     ],
     output: {
