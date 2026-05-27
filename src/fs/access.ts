@@ -9,6 +9,7 @@
  */
 
 import { getNodeFs } from '../node/fs'
+import { getSmolPath } from '../smol/path'
 
 import type { PathLike } from 'node:fs'
 
@@ -23,6 +24,15 @@ import type { PathLike } from 'node:fs'
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function canAccess(path: PathLike, mode?: number | undefined): boolean {
+  // Native boolean access() via node:smol-path when available — skips the
+  // throw/catch + V8 error-object materialization the JS wrapper pays on
+  // every negative check. Falls back to fs.accessSync on stock Node.
+  /* c8 ignore start - native access arm only on socket-btm smol binaries; getSmolPath() is undefined on stock Node. */
+  const smolAccess = getSmolPath()?.access
+  if (smolAccess) {
+    return smolAccess(path, mode)
+  }
+  /* c8 ignore stop */
   const fs = getNodeFs()
   try {
     // oxlint-disable-next-line socket/prefer-exists-sync -- checks the mode bit (R_OK/W_OK/X_OK), not mere existence; existsSync can't express permissions.

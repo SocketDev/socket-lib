@@ -16,6 +16,7 @@ import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 import { normalizePath } from '../paths/normalize'
 import { walkUp } from '../paths/walk'
+import { getSmolPath } from '../smol/path'
 
 import type { FindUpOptions, FindUpSyncOptions } from './types'
 
@@ -137,6 +138,18 @@ export function findUpSync(
   const fs = getNodeFs()
   const path = getNodePath()
   const names = isArray(name) ? name : [name as string]
+  // Native in-C++ find-up when available — one binding call instead of N
+  // JS↔native crossings (a dirname-loop + a stat per candidate). Only the
+  // no-`stopAt` case maps to the binding's signature; bounded walks keep the
+  // JS path. Native may be partial (onlyFiles only), so we only delegate when
+  // the requested shape is expressible.
+  /* c8 ignore start - native findUp arm only on socket-btm smol binaries; getSmolPath() is undefined on stock Node. */
+  const smolFindUp = getSmolPath()?.findUp
+  if (smolFindUp && stopAt === undefined) {
+    const found = smolFindUp(path.resolve(cwd), names, { onlyDirectories })
+    return found === undefined ? undefined : normalizePath(found)
+  }
+  /* c8 ignore stop */
   // walkUp yields each ancestor (incl. root / stopAt) lazily; the
   // stopAt boundary that used to need a duplicated tail block is now
   // just the generator's `stopAt` option.

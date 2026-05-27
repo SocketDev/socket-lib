@@ -688,6 +688,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/smol/http`](../src/smol/http.ts)             | _(no description)_ |
 | [`@socketsecurity/lib-stable/smol/https`](../src/smol/https.ts)           | _(no description)_ |
 | [`@socketsecurity/lib-stable/smol/manifest`](../src/smol/manifest.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/smol/path`](../src/smol/path.ts)             | _(no description)_ |
 | [`@socketsecurity/lib-stable/smol/primordial`](../src/smol/primordial.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/smol/purl`](../src/smol/purl.ts)             | _(no description)_ |
 | [`@socketsecurity/lib-stable/smol/versions`](../src/smol/versions.ts)     | _(no description)_ |

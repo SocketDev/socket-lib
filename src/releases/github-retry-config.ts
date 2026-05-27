@@ -16,16 +16,16 @@ import { getEnvValue } from '../env/rewire'
 import { ObjectFreeze } from '../primordials/object'
 
 /**
- * Default base delay (ms) before the first retry when the env override is
- * unset or non-numeric.
+ * Default base delay (ms) before the first retry when the env override is unset
+ * or non-numeric.
  */
 export const DEFAULT_BASE_DELAY_MS = 5000
 
 /**
  * Resolve the retry base delay from `SOCKET_GITHUB_RETRY_BASE_DELAY_MS`,
  * falling back to {@link DEFAULT_BASE_DELAY_MS}. Read live (not memoized) so
- * it's unit-testable by mutating the env — and so a long-lived process that
- * has the env changed under it picks up the new value on next read.
+ * it's unit-testable by mutating the env — and so a long-lived process that has
+ * the env changed under it picks up the new value on next read.
  *
  * @returns The configured base delay in milliseconds.
  */

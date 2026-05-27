@@ -1,13 +1,10 @@
 /**
  * @file Tests for releases/github-retry-config — the shared GITHUB_RETRY_CONFIG
- *   and its SOCKET_GITHUB_RETRY_BASE_DELAY_MS env override.
- *
- *   The override is read live via `resolveBaseDelayMs()` (not memoized), so
- *   these tests mutate `process.env` per case rather than re-importing the
- *   module. The frozen GITHUB_RETRY_CONFIG snapshots the delay at load time;
- *   we assert its fixed invariants (backoffFactor / retries / frozen / null
- *   proto) separately.
- *
+ *   and its SOCKET_GITHUB_RETRY_BASE_DELAY_MS env override. The override is
+ *   read live via `resolveBaseDelayMs()` (not memoized), so these tests mutate
+ *   `process.env` per case rather than re-importing the module. The frozen
+ *   GITHUB_RETRY_CONFIG snapshots the delay at load time; we assert its fixed
+ *   invariants (backoffFactor / retries / frozen / null proto) separately.
  *   Note: the vitest config sets SOCKET_GITHUB_RETRY_BASE_DELAY_MS=0 globally
  *   so the slow GitHub-API retry tests don't burn real wallclock. Each case
  *   here sets the env explicitly and restores it after.

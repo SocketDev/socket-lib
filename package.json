@@ -2370,6 +2370,11 @@
       "types": "./dist/smol/manifest.d.ts",
       "default": "./dist/smol/manifest.js"
     },
+    "./smol/path": {
+      "source": "./src/smol/path.ts",
+      "types": "./dist/smol/path.d.ts",
+      "default": "./dist/smol/path.js"
+    },
     "./smol/primordial": {
       "source": "./src/smol/primordial.ts",
       "types": "./dist/smol/primordial.d.ts",

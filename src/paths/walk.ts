@@ -9,6 +9,7 @@
 import process from 'node:process'
 
 import { getNodePath } from '../node/path'
+import { getSmolPath } from '../smol/path'
 
 import { normalizePath } from './normalize'
 
@@ -54,6 +55,14 @@ export function* walkUp(
     ...options,
   } as WalkUpOptions
   const path = getNodePath()
+  // Native `dirname` via node:smol-path (one-byte Fast API) when available —
+  // this is the hot inner-loop call for findUp / findPackageJson. Falls back
+  // to node:path on stock Node. `getSmolPath()` is undefined on stock Node,
+  // so `dirname` is `path.dirname` in every non-smol environment (incl.
+  // tests); the native binding is exercised by socket-btm's own tests.
+  /* c8 ignore next 2 - native binding only on socket-btm smol binaries. */
+  const smol = getSmolPath()
+  const dirname = smol?.dirname ?? path.dirname
   let dir = path.resolve(cwd, from)
   const stopDir = stopAt ? path.resolve(cwd, stopAt) : undefined
   let prev: string | undefined
@@ -63,6 +72,6 @@ export function* walkUp(
       return
     }
     prev = dir
-    dir = path.dirname(dir)
+    dir = dirname(dir)
   }
 }
