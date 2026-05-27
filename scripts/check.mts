@@ -101,7 +101,7 @@ async function main(): Promise<void> {
         },
       },
       {
-        args: ['scripts/validate/rolldown-minify.mts'],
+        args: ['scripts/validate-rolldown-minify.mts'],
         command: 'node',
         options: {
           ...(process.platform === 'win32' && { shell: true }),
