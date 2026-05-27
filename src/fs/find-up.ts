@@ -15,6 +15,7 @@ import { getAbortSignal } from '../process/abort'
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 import { normalizePath } from '../paths/normalize'
+import { walkUp } from '../paths/walk'
 
 import type { FindUpOptions, FindUpSyncOptions } from './types'
 
@@ -63,13 +64,11 @@ export async function findUp(
   }
   const fs = getNodeFs()
   const path = getNodePath()
-  let dir = path.resolve(cwd)
-  const { root } = path.parse(dir)
   const names = isArray(name) ? name : [name as string]
-  // Traverse up to and INCLUDING the filesystem root. Previously the
-  // loop exited when `dir === root`, so a match at e.g. `/.foo` was
-  // never visited.
-  while (dir) {
+  // walkUp computes the ancestor chain synchronously (pure dirname
+  // math); we await the stat inside. The async findUp has no stopAt
+  // option in its type, so the walk runs to the filesystem root.
+  for (const dir of walkUp(cwd)) {
     for (const n of names) {
       if (signal?.aborted) {
         return undefined
@@ -86,10 +85,6 @@ export async function findUp(
         }
       } catch {}
     }
-    if (dir === root) {
-      break
-    }
-    dir = path.dirname(dir)
   }
   return undefined
 }
@@ -141,33 +136,11 @@ export function findUpSync(
   }
   const fs = getNodeFs()
   const path = getNodePath()
-  let dir = path.resolve(cwd)
-  const { root } = path.parse(dir)
-  const stopDir = stopAt ? path.resolve(stopAt) : undefined
   const names = isArray(name) ? name : [name as string]
-  // Traverse up to and INCLUDING the filesystem root (or stopAt). The
-  // old `while (dir && dir !== root)` exited before visiting `root`
-  // itself, so a match at `/.foo` was never found.
-  while (dir) {
-    // stopDir-equality block fires only when caller passes stopAt;
-    // tests rarely exercise this code path.
-    /* c8 ignore start */
-    if (stopDir && dir === stopDir) {
-      for (const n of names) {
-        const thePath = path.join(dir, n)
-        try {
-          const stats = fs.statSync(thePath)
-          if (!onlyDirectories && stats.isFile()) {
-            return normalizePath(thePath)
-          }
-          if (!onlyFiles && stats.isDirectory()) {
-            return normalizePath(thePath)
-          }
-        } catch {}
-      }
-      return undefined
-    }
-    /* c8 ignore stop */
+  // walkUp yields each ancestor (incl. root / stopAt) lazily; the
+  // stopAt boundary that used to need a duplicated tail block is now
+  // just the generator's `stopAt` option.
+  for (const dir of walkUp(cwd, { stopAt })) {
     for (const n of names) {
       const thePath = path.join(dir, n)
       try {
@@ -180,10 +153,6 @@ export function findUpSync(
         }
       } catch {}
     }
-    if (dir === root) {
-      break
-    }
-    dir = path.dirname(dir)
   }
   return undefined
 }

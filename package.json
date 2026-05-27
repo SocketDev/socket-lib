@@ -1319,6 +1319,11 @@
       "types": "./dist/external-tools/uv/types.d.ts",
       "default": "./dist/external-tools/uv/types.js"
     },
+    "./fs/access": {
+      "source": "./src/fs/access.ts",
+      "types": "./dist/fs/access.d.ts",
+      "default": "./dist/fs/access.js"
+    },
     "./fs/encoding": {
       "source": "./src/fs/encoding.ts",
       "types": "./dist/fs/encoding.d.ts",
@@ -1358,6 +1363,11 @@
       "source": "./src/fs/read-json-cache.ts",
       "types": "./dist/fs/read-json-cache.d.ts",
       "default": "./dist/fs/read-json-cache.js"
+    },
+    "./fs/resolve-module": {
+      "source": "./src/fs/resolve-module.ts",
+      "types": "./dist/fs/resolve-module.d.ts",
+      "default": "./dist/fs/resolve-module.js"
     },
     "./fs/safe": {
       "source": "./src/fs/safe.ts",
@@ -1989,6 +1999,11 @@
       "source": "./src/paths/socket.ts",
       "types": "./dist/paths/socket.d.ts",
       "default": "./dist/paths/socket.js"
+    },
+    "./paths/walk": {
+      "source": "./src/paths/walk.ts",
+      "types": "./dist/paths/walk.d.ts",
+      "default": "./dist/paths/walk.js"
     },
     "./perf/enabled": {
       "source": "./src/perf/enabled.ts",

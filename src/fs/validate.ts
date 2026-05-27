@@ -5,7 +5,7 @@
  *   content-addressable store, or filesystem races during CI runs.
  */
 
-import { getNodeFs } from '../node/fs'
+import { canRead } from './access'
 
 import type { ValidateFilesResult } from './types'
 
@@ -45,17 +45,13 @@ import type { ValidateFilesResult } from './types'
 export function validateFiles(
   filepaths: string[] | readonly string[],
 ): ValidateFilesResult {
-  const fs = getNodeFs()
   const validPaths: string[] = []
   const invalidPaths: string[] = []
-  const { R_OK } = fs.constants
 
   for (const filepath of filepaths) {
-    try {
-      // oxlint-disable-next-line socket/prefer-exists-sync -- accessSync(R_OK) checks read permission, not just existence.
-      fs.accessSync(filepath, R_OK)
+    if (canRead(filepath)) {
       validPaths.push(filepath)
-    } catch {
+    } else {
       invalidPaths.push(filepath)
     }
   }

@@ -14,6 +14,7 @@
  */
 
 import { isInSocketDlx } from './paths'
+import { findUpSync } from '../fs/find-up'
 import { getSocketDlxDir } from '../paths/socket'
 
 import { DateNow } from '../primordials/date'
@@ -112,23 +113,14 @@ export function findPackageJson(filePath: string): string | undefined {
     }
   }
 
-  let currentDir = startDir
-  const root = path.parse(currentDir).root
-
-  while (currentDir !== root) {
-    const packageJsonPath = path.join(currentDir, 'package.json')
-    if (fs.existsSync(packageJsonPath)) {
-      // Cache the result for the starting directory.
-      packageJsonPathCacheSet(startDir, packageJsonPath)
-      return packageJsonPath
-    }
-
-    currentDir = path.dirname(currentDir)
-  }
-
-  // Cache the negative result.
-  packageJsonPathCacheSet(startDir, undefined)
-  return undefined
+  // findUpSync walks ancestors (incl. filesystem root) and matches a
+  // file named package.json — the LRU + negative-TTL cache around it
+  // is this function's contribution. The previous inline
+  // `while (dir !== root)` loop never visited root, so a package.json
+  // at `/package.json` was missed; findUpSync includes root.
+  const packageJsonPath = findUpSync('package.json', { cwd: startDir })
+  packageJsonPathCacheSet(startDir, packageJsonPath)
+  return packageJsonPath
 }
 
 /**

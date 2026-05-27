@@ -200,14 +200,14 @@ export async function runOne<I, T>(
  *   ;```ts
  *   import { spawnAiAgentsInWorktrees } from '@socketsecurity/lib/ai/worktree'
  *   import { spawnAiAgent } from '@socketsecurity/lib/ai/spawn'
- *   import { EDIT_ONLY_PROFILE } from '@socketsecurity/lib/ai/profiles'
+ *   import { AI_PROFILE } from '@socketsecurity/lib/ai/profiles'
  *
  *   const repos = ['socket-addon', 'socket-btm', 'socket-lib']
  *   const settled = await spawnAiAgentsInWorktrees(
  *     repos,
  *     async ({ cwd }) => {
  *       return await spawnAiAgent({
- *         ...EDIT_ONLY_PROFILE,
+ *         ...AI_PROFILE.create,
  *         prompt: 'Run the cleanup task',
  *         cwd,
  *       })

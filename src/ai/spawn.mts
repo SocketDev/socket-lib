@@ -177,11 +177,11 @@ export async function pickAgent(
  *
  * @example
  *   ```ts
- *   import { EDIT_ONLY_PROFILE } from '@socketsecurity/lib/ai/profiles'
+ *   import { AI_PROFILE } from '@socketsecurity/lib/ai/profiles'
  *   import { spawnAiAgent } from '@socketsecurity/lib/ai/spawn'
  *
  *   const result = await spawnAiAgent({
- *   ...EDIT_ONLY_PROFILE,
+ *   ...AI_PROFILE.edit,
  *   prompt: 'Fix the lint findings in src/foo.ts',
  *   cwd: process.cwd(),
  *   model: 'claude-sonnet-4-6',

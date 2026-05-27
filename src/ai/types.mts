@@ -46,9 +46,9 @@ export interface AgentSpawnResult {
  *
  * Required: `prompt`, `cwd`, `tools`, `disallow`, `permissionMode`.
  *
- * Pre-built profiles in `profiles.ts` cover the common shapes
- * (READ_ONLY_PROFILE, EDIT_ONLY_PROFILE) — callers spread the profile and
- * override per-call (model, timeout, addDirs).
+ * Pre-built profiles in `profiles.ts` cover the common shapes (the `AI_PROFILE`
+ * capability ladder) — callers spread a tier and override per-call (model,
+ * timeout, addDirs).
  *
  * Why the lockdown fields are required (not defaulted to a permissive shape):
  * the CLAUDE.md rule says "all four lockdown flags MUST be set on every spawn."

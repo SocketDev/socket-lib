@@ -1,77 +1,113 @@
 /**
  * @file Tests for ai/ profiles — verifies the lockdown shapes are what callers
- *   expect.
+ *   expect, and that the capability ladder (read ⊂ edit ⊂ create ⊂ full)
+ *   holds.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  EDIT_ONLY_PROFILE,
-  FULL_FIX_PROFILE,
-  READ_ONLY_PROFILE,
-} from '../../../src/ai/profiles.mts'
+import { AI_PROFILE } from '../../../src/ai/profiles.mts'
 
-describe('READ_ONLY_PROFILE', () => {
-  it('has bash explicitly denied', () => {
-    expect(READ_ONLY_PROFILE.disallow).toContain('Bash')
-    expect(READ_ONLY_PROFILE.disallow).toContain('Edit')
-    expect(READ_ONLY_PROFILE.disallow).toContain('Write')
+describe('AI_PROFILE.read', () => {
+  it('denies all mutation tools', () => {
+    expect(AI_PROFILE.read.disallow).toContain('Bash')
+    expect(AI_PROFILE.read.disallow).toContain('Edit')
+    expect(AI_PROFILE.read.disallow).toContain('Write')
   })
 
   it('uses dontAsk permission', () => {
-    expect(READ_ONLY_PROFILE.permissionMode).toBe('dontAsk')
+    expect(AI_PROFILE.read.permissionMode).toBe('dontAsk')
   })
 
   it('allows read tools', () => {
-    expect(READ_ONLY_PROFILE.tools).toContain('Read')
-    expect(READ_ONLY_PROFILE.tools).toContain('Grep')
-    expect(READ_ONLY_PROFILE.tools).toContain('Glob')
+    expect(AI_PROFILE.read.tools).toContain('Read')
+    expect(AI_PROFILE.read.tools).toContain('Grep')
+    expect(AI_PROFILE.read.tools).toContain('Glob')
   })
 })
 
-describe('EDIT_ONLY_PROFILE', () => {
-  it('denies bash and allows edit', () => {
-    expect(EDIT_ONLY_PROFILE.disallow).toContain('Bash')
-    expect(EDIT_ONLY_PROFILE.tools).toContain('Edit')
-    expect(EDIT_ONLY_PROFILE.tools).toContain('Write')
+describe('AI_PROFILE.edit', () => {
+  it('allows Edit but NOT Write / MultiEdit (in-place only)', () => {
+    expect(AI_PROFILE.edit.tools).toContain('Edit')
+    expect(AI_PROFILE.edit.tools).not.toContain('Write')
+    expect(AI_PROFILE.edit.tools).not.toContain('MultiEdit')
+    expect(AI_PROFILE.edit.disallow).toContain('Write')
+    expect(AI_PROFILE.edit.disallow).toContain('MultiEdit')
   })
 
-  it('uses acceptEdits permission', () => {
-    expect(EDIT_ONLY_PROFILE.permissionMode).toBe('acceptEdits')
+  it('denies bash and uses acceptEdits', () => {
+    expect(AI_PROFILE.edit.disallow).toContain('Bash')
+    expect(AI_PROFILE.edit.permissionMode).toBe('acceptEdits')
   })
 })
 
-describe('FULL_FIX_PROFILE', () => {
+describe('AI_PROFILE.create', () => {
+  it('allows Write + MultiEdit (can create files) but not Bash', () => {
+    expect(AI_PROFILE.create.tools).toContain('Write')
+    expect(AI_PROFILE.create.tools).toContain('MultiEdit')
+    expect(AI_PROFILE.create.tools).not.toContain('Bash')
+    expect(AI_PROFILE.create.disallow).toContain('Bash')
+  })
+})
+
+describe('AI_PROFILE.full', () => {
   it('allows bash but allowlists shell calls', () => {
-    expect(FULL_FIX_PROFILE.tools).toContain('Bash')
-    expect(FULL_FIX_PROFILE.allow.length).toBeGreaterThan(0)
-    for (const entry of FULL_FIX_PROFILE.allow) {
+    expect(AI_PROFILE.full.tools).toContain('Bash')
+    expect(AI_PROFILE.full.allow.length).toBeGreaterThan(0)
+    for (const entry of AI_PROFILE.full.allow) {
       expect(entry).toMatch(/^Bash\(/)
     }
   })
 
   it('denies webfetch and websearch', () => {
-    expect(FULL_FIX_PROFILE.disallow).toContain('WebFetch')
-    expect(FULL_FIX_PROFILE.disallow).toContain('WebSearch')
+    expect(AI_PROFILE.full.disallow).toContain('WebFetch')
+    expect(AI_PROFILE.full.disallow).toContain('WebSearch')
   })
 })
 
+const TIERS = [
+  ['read', AI_PROFILE.read],
+  ['edit', AI_PROFILE.edit],
+  ['create', AI_PROFILE.create],
+  ['full', AI_PROFILE.full],
+] as const
+
 describe('all profiles', () => {
-  it.each([
-    ['READ_ONLY', READ_ONLY_PROFILE],
-    ['EDIT_ONLY', EDIT_ONLY_PROFILE],
-    ['FULL_FIX', FULL_FIX_PROFILE],
-  ] as const)('%s tools are alphabetically sorted', (_name, profile) => {
+  it.each(TIERS)('%s tools are alphabetically sorted', (_name, profile) => {
     const sorted = [...profile.tools].sort()
     expect(profile.tools).toStrictEqual(sorted)
   })
 
-  it.each([
-    ['READ_ONLY', READ_ONLY_PROFILE],
-    ['EDIT_ONLY', EDIT_ONLY_PROFILE],
-    ['FULL_FIX', FULL_FIX_PROFILE],
-  ] as const)('%s disallow is alphabetically sorted', (_name, profile) => {
+  it.each(TIERS)('%s disallow is alphabetically sorted', (_name, profile) => {
     const sorted = [...profile.disallow].sort()
     expect(profile.disallow).toStrictEqual(sorted)
+  })
+
+  it.each(TIERS)('%s denies Agent (no sub-agent escape)', (_name, profile) => {
+    expect(profile.disallow).toContain('Agent')
+  })
+})
+
+describe('capability ladder (read ⊂ edit ⊂ create ⊂ full)', () => {
+  it('each tier mutation-tool set is a superset of the previous', () => {
+    // Compare the editing/writing/bash tools only — read's Web* tools
+    // are orthogonal (research surface, dropped once we start mutating).
+    const mutating = (p: { tools: readonly string[] }) =>
+      new Set(
+        p.tools.filter(t => ['Bash', 'Edit', 'MultiEdit', 'Write'].includes(t)),
+      )
+    const edit = mutating(AI_PROFILE.edit)
+    const create = mutating(AI_PROFILE.create)
+    const full = mutating(AI_PROFILE.full)
+    // edit ⊂ create
+    for (const t of edit) {
+      expect(create.has(t)).toBe(true)
+    }
+    expect(create.size).toBeGreaterThan(edit.size)
+    // create ⊂ full
+    for (const t of create) {
+      expect(full.has(t)).toBe(true)
+    }
+    expect(full.size).toBeGreaterThan(create.size)
   })
 })
