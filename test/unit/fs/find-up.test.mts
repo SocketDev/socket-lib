@@ -199,4 +199,21 @@ describe('findUpSync', () => {
       expect(result).toContain('config.json')
     }, 'findUpSync-stopAt-check-')
   })
+
+  it('should not match a file when onlyDirectories is true (sync)', async () => {
+    // A same-named FILE exists at the start dir. With onlyDirectories,
+    // stats.isDirectory() is false so the entry is skipped and the walk
+    // continues to undefined — exercises the `!onlyFiles &&
+    // stats.isDirectory()` false branch in findUpSync.
+    await runWithTempDir(async tmpDir => {
+      const testFile = path.join(tmpDir, 'target')
+      await fs.writeFile(testFile, '', 'utf8')
+
+      const result = findUpSync('target', {
+        cwd: tmpDir,
+        onlyDirectories: true,
+      })
+      expect(result).toBeUndefined()
+    }, 'findUpSync-only-dirs-file-')
+  })
 })
