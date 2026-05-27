@@ -634,16 +634,17 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## releases/
 
-| Subpath                                                                                       | Description        |
-| --------------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/releases/github-archives`](../src/releases/github-archives.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-asset-url`](../src/releases/github-asset-url.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-assets`](../src/releases/github-assets.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-auth`](../src/releases/github-auth.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-downloads`](../src/releases/github-downloads.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-listing`](../src/releases/github-listing.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-types`](../src/releases/github-types.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/socket-btm`](../src/releases/socket-btm.ts)             | _(no description)_ |
+| Subpath                                                                                             | Description        |
+| --------------------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/releases/github-archives`](../src/releases/github-archives.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-asset-url`](../src/releases/github-asset-url.ts)       | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-assets`](../src/releases/github-assets.ts)             | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-auth`](../src/releases/github-auth.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-downloads`](../src/releases/github-downloads.ts)       | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-listing`](../src/releases/github-listing.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-retry-config`](../src/releases/github-retry-config.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-types`](../src/releases/github-types.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/socket-btm`](../src/releases/socket-btm.ts)                   | _(no description)_ |
 
 ## schema/
 

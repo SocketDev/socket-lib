@@ -2265,6 +2265,11 @@
       "types": "./dist/releases/github-listing.d.ts",
       "default": "./dist/releases/github-listing.js"
     },
+    "./releases/github-retry-config": {
+      "source": "./src/releases/github-retry-config.ts",
+      "types": "./dist/releases/github-retry-config.d.ts",
+      "default": "./dist/releases/github-retry-config.js"
+    },
     "./releases/github-types": {
       "source": "./src/releases/github-types.ts",
       "types": "./dist/releases/github-types.d.ts",

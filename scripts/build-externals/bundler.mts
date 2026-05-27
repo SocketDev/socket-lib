@@ -5,6 +5,7 @@
 import { existsSync, promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
+import process from 'node:process'
 
 import esbuild from 'esbuild'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
@@ -102,7 +103,15 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
  * This is a zero-dependency bundle created by esbuild.
  */
 ${contentWithoutStrict}`
-    await fs.writeFile(outputPath, finalContent)
+    // Atomic write: tmp + rename so a concurrent reader (the
+    // primordials codemod's read pass, a parallel builder, or a
+    // racing test runner on an overloaded CI host) never observes a
+    // truncated header-injection in progress. Past CI symptom:
+    // `dist/external/normalize-package-data.js` caught mid-write
+    // surfaced as `SyntaxError: Unexpected token '{'`.
+    const tmpPath = `${outputPath}.tmp-${process.pid}-${Math.random().toString(36).slice(2, 10)}`
+    await fs.writeFile(tmpPath, finalContent)
+    await fs.rename(tmpPath, outputPath)
 
     // oxlint-disable-next-line socket/prefer-exists-sync -- need size for logging.
     const stats = await fs.stat(outputPath)

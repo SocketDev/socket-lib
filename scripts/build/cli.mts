@@ -22,6 +22,7 @@ import {
 } from '../../.config/esbuild.config.mts'
 import { parseArgs } from '../util/parse-args.mts'
 import { runSequence } from '../util/run-command.mts'
+import { verifyDist } from './verify-dist.mts'
 
 import type { BuildResult } from 'esbuild'
 
@@ -577,6 +578,12 @@ async function main(): Promise<void> {
         }
         const fixExitCode = await fixExports({ quiet, verbose })
         exitCode = fixExitCode
+        // Integrity guard: syntax-check the emitted JS so a corrupt /
+        // half-written file (parallel-write race) fails the build here
+        // rather than as a cryptic SyntaxError at test time.
+        if (exitCode === 0 && existsSync(distDir)) {
+          exitCode = await verifyDist(distDir)
+        }
       }
     }
 

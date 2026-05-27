@@ -16,26 +16,12 @@ import { pRetry } from '../promises/retry'
 import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
 import { JSONParse, JSONStringify } from '../primordials/json'
-import { ObjectFreeze } from '../primordials/object'
 
 import { createAssetMatcher } from './github-assets'
 import { getAuthHeaders } from './github-auth'
+import { GITHUB_RETRY_CONFIG as RETRY_CONFIG } from './github-retry-config'
 
 import type { AssetPattern, RepoConfig } from './github-types'
-
-/**
- * Retry configuration for GitHub API requests. Uses exponential backoff to
- * handle transient failures and rate limiting.
- */
-const RETRY_CONFIG = ObjectFreeze({
-  __proto__: null,
-  // Exponential backoff: delay doubles with each retry (5s, 10s, 20s).
-  backoffFactor: 2,
-  // Initial delay before first retry.
-  baseDelayMs: 5000,
-  // Maximum number of retry attempts (excluding initial request).
-  retries: 2,
-})
 
 /**
  * Fetch the assets of a single release identified by tag via GraphQL.

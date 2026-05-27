@@ -54,6 +54,12 @@ const vitestConfig = defineConfig({
     deps: { interopDefault: false },
     env: {
       INLINED_LIB_VERSION: rootPkgJson.version,
+      // Near-instant retry backoff in tests. The GitHub release helpers
+      // retry with 5s/10s exponential backoff via node:timers/promises,
+      // which fake timers don't reliably intercept — a real-wallclock
+      // sleep would make these tests take 15-19s each and starve the
+      // worker pool. Zero base delay keeps them sub-second.
+      SOCKET_GITHUB_RETRY_BASE_DELAY_MS: '0',
     },
     globalSetup: [path.resolve(__dirname, 'vitest-global-setup.mts')],
     setupFiles: [path.resolve(__dirname, 'vitest-setup-tests.mts')],
