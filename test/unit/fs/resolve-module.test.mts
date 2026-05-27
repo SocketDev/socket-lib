@@ -72,6 +72,17 @@ describe('requireResolveFrom', () => {
 })
 
 describe('requireResolveFromCwd', () => {
+  it('resolves a builtin from cwd (no nothrow → returns a path)', () => {
+    // `node:path` is always resolvable; exercises the non-nothrow
+    // branch that delegates to requireResolveFrom(cwd, specifier).
+    const resolved = requireResolveFromCwd('node:path')
+    expect(resolved).toBe('node:path')
+  })
+
+  it('throws from cwd for an unresolvable specifier (no nothrow)', () => {
+    expect(() => requireResolveFromCwd('does-not-exist-xyz')).toThrow()
+  })
+
   it('returns undefined with nothrow for an unresolvable specifier', () => {
     expect(
       requireResolveFromCwd('does-not-exist-xyz', { nothrow: true }),
