@@ -88,9 +88,9 @@ export interface ExecutableDetectionResult {
  */
 export function findPackageJson(filePath: string): string | undefined {
   const fs = getNodeFs()
-  const path = getNodePath()
+  const nodePath = getNodePath()
 
-  const startDir = path.dirname(path.resolve(filePath))
+  const startDir = nodePath.dirname(nodePath.resolve(filePath))
 
   // Check cache first.
   const cached = packageJsonPathCache.get(startDir)
@@ -118,6 +118,8 @@ export function findPackageJson(filePath: string): string | undefined {
   // is this function's contribution. The previous inline
   // `while (dir !== root)` loop never visited root, so a package.json
   // at `/package.json` was missed; findUpSync includes root.
+  // findUpSync already returns a normalized (forward-slash) path, so the
+  // API output is identical across platforms without re-normalizing here.
   const packageJsonPath = findUpSync('package.json', { cwd: startDir })
   packageJsonPathCacheSet(startDir, packageJsonPath)
   return packageJsonPath

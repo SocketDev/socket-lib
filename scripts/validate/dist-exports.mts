@@ -16,7 +16,9 @@ const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
 const { isQuiet } = require('@socketsecurity/lib-stable/argv/flag-predicates')
-const { getDefaultLogger } = require('@socketsecurity/lib-stable/logger')
+const {
+  getDefaultLogger,
+} = require('@socketsecurity/lib-stable/logger/default')
 const { normalizePath } = require('@socketsecurity/lib-stable/paths/normalize')
 const { pluralize } = require('@socketsecurity/lib-stable/words/pluralize')
 

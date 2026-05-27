@@ -24,7 +24,7 @@ import {
   isNativeBinary,
   isNodePackage,
 } from '../../../src/dlx/detect'
-import { normalizePath } from '../../../src/paths/normalize'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { resetPaths, setPath } from '../../../src/paths/rewire'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'

@@ -13,8 +13,8 @@
  *   Platform/path construction goes through `getSocketHomePath()` from
  *   `@socketsecurity/lib-stable/paths/socket` so darwin / linux / win32 all
  *   resolve correctly. Cross-platform spawn lifecycle via `spawn` from
- *   `@socketsecurity/lib-stable/spawn` with `shell: WIN32` for Windows
- *   .exe/.cmd resolution. Wired in via `package.json`: "janus": "node
+ *   `@socketsecurity/lib-stable/process/spawn/child` with `shell: WIN32` for
+ *   Windows .exe/.cmd resolution. Wired in via `package.json`: "janus": "node
  *   scripts/janus.mts". Byte-identical across every fleet repo.
  *   Sync-scaffolding flags drift.
  */

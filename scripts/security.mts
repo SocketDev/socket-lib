@@ -12,8 +12,8 @@
  *      rather than failing the entire run. Cross-platform: uses `which` from
  *      `@socketsecurity/lib-stable/bin` for binary discovery (handles Windows
  *      .exe/.cmd resolution; returns null rather than throwing on miss) and
- *      `spawn` from `@socketsecurity/lib-stable/spawn` for proper async
- *      lifecycle. Wired in via `package.json`: "security": "node
+ *      `spawn` from `@socketsecurity/lib-stable/process/spawn/child` for proper
+ *      async lifecycle. Wired in via `package.json`: "security": "node
  *      scripts/security.mts" Byte-identical across every fleet repo.
  *      Sync-scaffolding flags drift.
  */
