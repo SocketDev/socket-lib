@@ -1,6 +1,6 @@
 /**
- * @file Fix CommonJS exports for Node.js ESM compatibility. Transforms
- *   the bundler's minified exports to clear module.exports = { ... } format.
+ * @file Fix CommonJS exports for Node.js ESM compatibility. Transforms the
+ *   bundler's minified exports to clear module.exports = { ... } format.
  */
 
 import { promises as fs } from 'node:fs'
