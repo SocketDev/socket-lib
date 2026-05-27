@@ -266,7 +266,7 @@ Hooks that gate specific external tools — they only fire when those tools appe
 
 Core infrastructure library for Socket.dev security tools.
 
-🚨 Internal imports use relative paths (no aliases). Vendored externals (`cacache`, `make-fetch-happen`, `fast-sort`, `pacote`, `adm-zip`, `tar-fs`, `picomatch`) live in `src/external/` and import by bare name. Build: `pnpm build` (esbuild → CJS) / type-check: `pnpm run check` (tsgo) / test: `pnpm test` / coverage: `pnpm run cover`. NEVER use `process.chdir()` — pass `{ cwd }` and absolute paths. NEVER use `--` before vitest test paths — runs all tests.
+🚨 Internal imports use relative paths (no aliases). Vendored externals live in `src/external/` and import by bare name (`cacache`, `make-fetch-happen`, `pacote`, `picomatch`, `semver`, and others). Build: `pnpm build` (rolldown → CJS) / type-check: `pnpm run check` (tsgo) / test: `pnpm test` / coverage: `pnpm run cover`. NEVER use `process.chdir()` — pass `{ cwd }` and absolute paths. NEVER use `--` before vitest test paths — runs all tests.
 
 🚨 **Vitest OOM with `tests 0ms` = infinite stream, not memory.** `Readable.push(undefined)` doesn't end the stream (only `null` does). Bisect with `pnpm exec vitest -t '<describe>'` **before** raising heap. See [`test/isolated/http-request-advanced-2.test.mts`](test/isolated/http-request-advanced-2.test.mts) for the canonical example.
 
