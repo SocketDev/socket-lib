@@ -38,15 +38,12 @@ describe.sequential('argv/parse-args-string', () => {
     ])
   })
 
-  it('preserves inner quotes on mixed key="value" tokens', () => {
-    // Mixed tokens (where quoted segments are glued to bare chars)
-    // retain the quote characters in the result — matches string-argv
-    // upstream behavior. Callers that want unquoted values should
-    // either parse the result themselves or pass the bare quoted form
-    // (e.g. `foo --bar "x y" baz`).
+  it('strips inner quotes on mixed key="value" tokens', () => {
+    // shell-quote unwraps the quoted segment glued to bare chars, so the
+    // value arrives unquoted — the form `child_process.spawn` wants.
     expect(parseArgsString('foo --bar="x y" baz')).toEqual([
       'foo',
-      '--bar="x y"',
+      '--bar=x y',
       'baz',
     ])
   })
@@ -90,10 +87,10 @@ describe.sequential('argv/parse-args-string', () => {
     ])
   })
 
-  it('preserves quotes inside mixed tokens for both quote styles', () => {
+  it('strips quotes inside mixed tokens for both quote styles', () => {
     expect(parseArgsString("foo --bar='x y' baz")).toEqual([
       'foo',
-      "--bar='x y'",
+      '--bar=x y',
       'baz',
     ])
   })
@@ -114,14 +111,14 @@ describe.sequential('argv/parse-args-string', () => {
     expect(parseArgsString('"hello" world')).toEqual(['hello', 'world'])
   })
 
-  it('handles unmatched / unterminated quote by capturing through end', () => {
-    // The regex is greedy through the next matching quote; an
-    // unterminated quote leaves the unmatched chunk as a bare token
-    // (the outer regex's [^\s'"]+ branch matches up to the quote).
-    // This is a regression test, not a guarantee — callers that need
-    // strict validation should check before passing input.
-    const result = parseArgsString('echo "unterminated')
-    expect(result[0]).toBe('echo')
+  it('tolerates an unterminated quote', () => {
+    // shell-quote strips the dangling quote rather than throwing; the
+    // remaining word survives as a bare token. Not a guarantee — callers
+    // needing strict validation should check before passing input.
+    expect(parseArgsString('echo "unterminated')).toEqual([
+      'echo',
+      'unterminated',
+    ])
   })
 
   it('handles single-character tokens', () => {
@@ -153,10 +150,20 @@ describe.sequential('argv/parse-args-string', () => {
     ])
   })
 
-  it('handles a token containing internal quote pairs', () => {
-    // `foo"bar"baz` is a single mixed token; the quote pair gets
-    // preserved verbatim in the result (string-argv behavior).
-    expect(parseArgsString('foo"bar"baz')).toEqual(['foo"bar"baz'])
+  it('strips internal quote pairs from a mixed token', () => {
+    // `foo"bar"baz` is a single token; shell-quote strips the quote pair
+    // (POSIX sh semantics), unlike the old regex tokenizer which kept it
+    // verbatim.
+    expect(parseArgsString('foo"bar"baz')).toEqual(['foobarbaz'])
+  })
+
+  it('collapses an unresolved $VAR to an empty string', () => {
+    // No env is supplied, so shell-quote resolves `$HOME` to ''.
+    expect(parseArgsString('echo $HOME')).toEqual(['echo', ''])
+  })
+
+  it('drops operators between commands', () => {
+    expect(parseArgsString('ls && echo done')).toEqual(['ls', 'echo', 'done'])
   })
 
   it('handles tokens that are only whitespace surrounded by quotes', () => {
