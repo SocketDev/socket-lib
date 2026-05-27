@@ -46,12 +46,12 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Publish to npm
+      - name: Stage publish to npm
         env:
           DRY_RUN: ${{ inputs.dry-run }}
         run: |
           if [ "$DRY_RUN" = "true" ]; then
-            node scripts/publish.mts --direct --dry-run
+            node scripts/publish.mts --staged --dry-run
           else
-            node scripts/publish.mts --direct
+            node scripts/publish.mts --staged
           fi
