@@ -24,6 +24,7 @@ import {
   isNativeBinary,
   isNodePackage,
 } from '../../../src/dlx/detect'
+import { normalizePath } from '../../../src/paths/normalize'
 import { resetPaths, setPath } from '../../../src/paths/rewire'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
@@ -149,7 +150,12 @@ describe('DLX Executable Type Detection', () => {
 
       expect(result.type).toBe('package')
       expect(result.method).toBe('package-json')
-      expect(result.packageJsonPath).toBe(join(projectDir, 'package.json'))
+      // findPackageJson returns a normalized (forward-slash) path —
+      // findUpSync runs all output through normalizePath. On POSIX this
+      // equals join(); on Windows it's the forward-slash form.
+      expect(result.packageJsonPath).toBe(
+        normalizePath(join(projectDir, 'package.json')),
+      )
       expect(result.inDlxCache).toBe(false)
     })
 
@@ -247,7 +253,12 @@ describe('DLX Executable Type Detection', () => {
 
       expect(result.type).toBe('package')
       expect(result.method).toBe('package-json')
-      expect(result.packageJsonPath).toBe(join(projectDir, 'package.json'))
+      // findPackageJson returns a normalized (forward-slash) path —
+      // findUpSync runs all output through normalizePath. On POSIX this
+      // equals join(); on Windows it's the forward-slash form.
+      expect(result.packageJsonPath).toBe(
+        normalizePath(join(projectDir, 'package.json')),
+      )
     })
 
     it('should handle paths without package.json in tree', () => {
