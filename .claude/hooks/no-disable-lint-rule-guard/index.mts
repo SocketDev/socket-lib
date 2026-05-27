@@ -99,7 +99,7 @@ export function newlyDisabledRules(
       added.push(rule)
     }
   }
-  return added.sort()
+  return added.toSorted()
 }
 
 function getOldNewContent(

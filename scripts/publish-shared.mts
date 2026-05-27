@@ -229,6 +229,7 @@ export async function fetchVersionTrustInfo(
       variant === 'abbreviated'
         ? { accept: 'application/vnd.npm.install-v1+json' }
         : { accept: 'application/json' }
+    // socket-hook: allow global-fetch -- publish tooling probes the npm registry directly; the lib http-request helper isn't a dependency here.
     const response = await fetch(url, { headers })
     if (!response.ok) {
       return {}
