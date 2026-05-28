@@ -8,10 +8,7 @@
         "from '../../primordials/array'",
         "ArrayPrototypePush"
       ],
-      "contentExcludes": [
-        "from '@socketsecurity/lib/primordials'",
-        "arr.push("
-      ]
+      "contentExcludes": ["from '@socketsecurity/lib/primordials'", "arr.push("]
     }
   }
 }

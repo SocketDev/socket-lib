@@ -4,14 +4,8 @@
     "src/consumer.ts": {
       "rewrites": 1,
       "importAdded": true,
-      "contentIncludes": [
-        "from './primordials/array'",
-        "ArrayPrototypePush"
-      ],
-      "contentExcludes": [
-        "from '@socketsecurity/lib/primordials'",
-        "arr.push("
-      ]
+      "contentIncludes": ["from './primordials/array'", "ArrayPrototypePush"],
+      "contentExcludes": ["from '@socketsecurity/lib/primordials'", "arr.push("]
     }
   }
 }
