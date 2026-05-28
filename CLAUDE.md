@@ -29,7 +29,7 @@ Apply in: worktree creation, base-ref resolution for `git diff`/`git rev-list`, 
 
 ### Public-surface hygiene
 
-🚨 Never write a real customer / company name, private repo / internal project name, or Linear ref (`SOC-123`, `ENG-456`, Linear URLs) into a commit, PR, issue, comment, or release note. No denylist — a denylist is itself a leak (enforced by `.claude/hooks/{private-name-guard,public-surface-reminder}/`).
+🚨 Never write a real customer / company name, private repo / internal project name, or Linear ref (`SOC-123`, `ENG-456`, Linear URLs) into a commit, PR, issue, comment, or release note. No denylist — a denylist is itself a leak (enforced by `.claude/hooks/fleet/{private-name-guard,public-surface-reminder}/`).
 
 🚨 Never `gh workflow run|dispatch` against publish / release / build-release workflows (enforced by `.claude/hooks/fleet/release-workflow-guard/`). Bypass: `gh workflow run -f dry-run=true` (workflow declares `dry-run:` input) OR `Allow workflow-dispatch bypass: <workflow>` typed verbatim. `workflow_dispatch.inputs` keys are kebab-case.
 
@@ -65,13 +65,13 @@ Some fleet repos squash the default branch on a cadence — currently socket-add
 
 ### Tooling
 
-🚨 **Package manager: `pnpm`** — scripts via `pnpm run foo --flag` (never `foo:bar`); `pnpm install` after `package.json` edits. NEVER `npx` / `pnpm dlx` / `yarn dlx` — use `pnpm exec` / `pnpm run`. NEVER `--experimental-strip-types` (enforced by `.claude/hooks/fleet/no-experimental-strip-types-guard/`). Engine floors fleet-wide: `engines.pnpm: ">=11.4.0"`, `engines.npm: ">=11.16.0"` (RFC #868 `allowScripts`). **`allowScripts` ↔ `allowBuilds`:** package.json `allowScripts` mirrors pnpm-workspace.yaml `allowBuilds` per-repo (npm 12 blocks postinstall scripts by default — npm/cli#9360); sync-scaffolding `allow_scripts_drift` auto-fixes on every cascade, or `pnpm exec node scripts/fleet/sync-allow-scripts.mts` for an out-of-band sync. Wheelhouse `package.json` is source of truth. **Bundler: rolldown, not esbuild.** Backward compatibility is FORBIDDEN. **`-stable` self-import:** `scripts/**` + `.claude/hooks/**` import via `-stable` alias, never bare name (bare = WIP local `src/`). Autofix `socket/prefer-stable-self-import`.
+🚨 **Package manager: `pnpm`** — scripts via `pnpm run foo --flag`; `pnpm install` after `package.json` edits. NEVER `npx` / `pnpm dlx` / `yarn dlx` — use `pnpm exec` / `pnpm run`. NEVER `--experimental-strip-types` (enforced by `.claude/hooks/fleet/no-experimental-strip-types-guard/`). Engine floors: `engines.pnpm: ">=11.4.0"`, `engines.npm: ">=11.16.0"`. `package.json` `allowScripts` mirrors `pnpm-workspace.yaml` `allowBuilds` per-repo (sync-scaffolding `allow_scripts_drift` auto-fixes). **Bundler: rolldown, not esbuild.** Backward compatibility is FORBIDDEN. **`-stable` self-import:** `scripts/**` + `.claude/hooks/**` import via `-stable` alias, never bare name. Autofix `socket/prefer-stable-self-import`.
 
 🚨 **Supply-chain hygiene.** New deps Socket-scored at edit time; 7-day `minimumReleaseAge` soak is malware protection (bypass `Allow minimumReleaseAge bypass`); soak-bypass entries need `# published: YYYY-MM-DD | removable: YYYY-MM-DD` annotations. Dep overrides in `pnpm-workspace.yaml`, never `package.json` `pnpm.overrides` (bypass `Allow package-json-overrides bypass`). **Never weaken a trust gate** (`trustPolicy: no-downgrade`, `--config.trustPolicy=trust-all`, `blockExoticSubdeps`) — fix stale lockfiles via the soak/exclude entry; the bypass `Allow trust-downgrade bypass` is single-use and not persisted (enforced by `.claude/hooks/fleet/{check-new-deps,minimum-release-age-guard,soak-exclude-date-annotation-guard,no-package-json-pnpm-overrides-guard,trust-downgrade-guard}/`).
 
 Full ruleset (docs lead with pnpm, `packageManager` field, `.config/` placement, `.mts` runners, monorepo `engines.node`, vitest/node-test runner separation, `npm-run-all2` + `node --run` opt-in) in [`docs/claude.md/fleet/tooling.md`](docs/claude.md/fleet/tooling.md).
 
-🚨 **Need a database? PostgreSQL + Drizzle ORM** (driver `node:smol-sql`, `pglite` for tests, config `.config/drizzle.config.mts`). Most repos need none; don't add speculatively. [`docs/claude.md/fleet/database.md`](docs/claude.md/fleet/database.md).
+🚨 **Database:** PostgreSQL + Drizzle ORM (driver `node:smol-sql`, `pglite` for tests). Most repos need none. [`docs/claude.md/fleet/database.md`](docs/claude.md/fleet/database.md).
 
 ### Claude Code plugin pins
 
@@ -169,6 +169,10 @@ Default to no comments (enforced by `.claude/hooks/fleet/no-meta-comments-guard/
 
 🚨 Never prefix an **identifier** (function, variable, type, export) with `_` — patterns like `_resetX`, `_cache`, `_doFoo`, `_internal` are banned at the symbol level. Privacy in TS is handled by module boundaries (not exporting) or by `_internal/` _directory_ layout; the underscore-as-internal-marker convention from other languages adds noise without enforcement. Exporting "internal" helpers is fine and explicitly preferred — easier to unit-test. **Exception:** the directory name `_internal/` is allowed (and is the documented way to signal module-private files); the rule is about identifiers inside files, not folder layout (enforced by `.claude/hooks/fleet/no-underscore-identifier-guard/` + the `socket/no-underscore-identifier` oxlint rule; bypass: `Allow underscore-identifier bypass`).
 
+### Function declarations over const expressions
+
+🚨 Module-scope functions use `function foo() {}` declarations, not `const foo = () => {}` or `const foo = function () {}` expressions. Function declarations hoist, sort cleanly under `socket/sort-source-methods`, and render with a stable `foo.name` in stack traces. Arrow expressions assigned to `const` lose all three. Apply also to `export` (write `export function foo()`, not `export const foo = () =>`). Exception: declarators carrying a TS type annotation (`const foo: Handler = () => ...`) — the annotation is the contract. Enforced by the `socket/prefer-function-declaration` oxlint rule (autofixes at commit time) and at edit time by `.claude/hooks/fleet/prefer-function-declaration-guard/` so the agent never writes the wrong shape in the first place. Bypass: `Allow function-declaration bypass`.
+
 ### File size
 
 Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, split along natural seams — group by domain, not line count; name files for what's in them; co-locate helpers with consumers. Exceptions: a single function that legitimately needs the space (note it inline), or a generated artifact. Full playbook in [`docs/claude.md/fleet/file-size.md`](docs/claude.md/fleet/file-size.md).
@@ -216,7 +220,7 @@ Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socket
 
 ### Token hygiene
 
-🚨 Never emit a raw secret to tool output, commits, comments, or replies; when blocked, rewrite — don't bypass. Redact `token` / `jwt` / `api_key` / `secret` / `password` / `authorization` fields when citing API responses (`.claude/hooks/fleet/token-guard/`). Tokens live in env vars (CI) or the OS keychain (dev local) — never in `.env*` / `.envrc` / `~/.sfw.config` / dotfiles (`.claude/hooks/fleet/no-token-in-dotenv-guard/`). Setup + rotation: `node .claude/hooks/setup-security-tools/install.mts [--rotate]` — the ONLY correct rotator. Never call platform keychain CLIs from Bash to read (token is already in-process — use `findApiToken()` or `process.env.SOCKET_API_KEY` / `SOCKET_API_TOKEN`); writes/deletes are allowed. Bypass: `Allow blind-keychain-read bypass` (`.claude/hooks/fleet/no-blind-keychain-read-guard/`). Canonical env var: `SOCKET_API_TOKEN` in docs / workflow inputs / `.env.example`; local-dev keychain stores as `SOCKET_API_KEY`. Full spec: [`docs/claude.md/fleet/token-hygiene.md`](docs/claude.md/fleet/token-hygiene.md).
+🚨 Never emit a raw secret to tool output, commits, comments, or replies; when blocked, rewrite — don't bypass. Redact `token` / `jwt` / `api_key` / `secret` / `password` / `authorization` fields when citing API responses (`.claude/hooks/fleet/token-guard/`). Tokens live in env vars (CI) or the OS keychain (dev local) — never in `.env*` / `.envrc` / `~/.sfw.config` / dotfiles (`.claude/hooks/fleet/no-token-in-dotenv-guard/`). Setup + rotation: `node .claude/hooks/fleet/setup-security-tools/install.mts [--rotate]` — the ONLY correct rotator. Never call platform keychain CLIs from Bash to read (token is already in-process — use `findApiToken()` or `process.env.SOCKET_API_KEY` / `SOCKET_API_TOKEN`); writes/deletes are allowed. Bypass: `Allow blind-keychain-read bypass` (`.claude/hooks/fleet/no-blind-keychain-read-guard/`). Canonical env var: `SOCKET_API_TOKEN` in docs / workflow inputs / `.env.example`; local-dev keychain stores as `SOCKET_API_KEY`. Full spec: [`docs/claude.md/fleet/token-hygiene.md`](docs/claude.md/fleet/token-hygiene.md).
 
 ### gh token hygiene
 
@@ -224,11 +228,11 @@ Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socket
 
 1. **Keychain storage only.** `gh auth status` must report `(keyring)`. On-disk `~/.config/gh/hosts.yml` rejected — re-auth with `gh auth logout && gh auth login` (keychain is the default since gh 2.40). Nx breach exfiltrated this file in <74s.
 2. **`workflow` scope off by default; bypass single-use + Touch ID.** Type `Allow workflow-scope bypass` → `gh auth refresh -s workflow` → Touch ID (osascript fallback, absolute `/usr/bin/` paths defeat PATH-hijack) → ONE dispatch. Recommended scopes: `read:org, repo, gist` (gh forces `gist`).
-3. **8-hour token age cap.** Same hook. Refresh: `gh auth refresh -h github.com`. If you refreshed outside Claude (side shell), run `node .claude/hooks/gh-token-hygiene-guard/index.mts --stamp` to recover. Full spec + recovery: [`docs/claude.md/fleet/gh-token-hygiene.md`](docs/claude.md/fleet/gh-token-hygiene.md).
+3. **8-hour token age cap.** Same hook. Refresh: `gh auth refresh -h github.com`. If you refreshed outside Claude (side shell), run `node .claude/hooks/fleet/gh-token-hygiene-guard/index.mts --stamp` to recover. Full spec + recovery: [`docs/claude.md/fleet/gh-token-hygiene.md`](docs/claude.md/fleet/gh-token-hygiene.md).
 
 ### Commit signing
 
-🚨 Commits on `main`/`master` must be signed. Three layers: pre-commit config gate, pre-push signature check (`%G?` ∈ {`N`,`B`} blocks), GitHub `required_signatures`. Setup: `node .claude/hooks/setup-signing/install.mts`. Bypass envs `SOCKET_PRE_{COMMIT,PUSH}_ALLOW_UNSIGNED=1`. Full spec: [`docs/claude.md/fleet/commit-signing.md`](docs/claude.md/fleet/commit-signing.md). Post-hoc audit: `node scripts/audit-transcript.mts --recent` flags privileged tool uses in a session ([full stack](docs/claude.md/fleet/security-stack.md)).
+🚨 Commits on `main`/`master` must be signed. Three layers: pre-commit config gate, pre-push signature check (`%G?` ∈ {`N`,`B`} blocks), GitHub `required_signatures`. Setup: `node .claude/hooks/fleet/setup-signing/install.mts`. Bypass envs `SOCKET_PRE_{COMMIT,PUSH}_ALLOW_UNSIGNED=1`. Full spec: [`docs/claude.md/fleet/commit-signing.md`](docs/claude.md/fleet/commit-signing.md). Post-hoc audit: `node scripts/audit-transcript.mts --recent` flags privileged tool uses in a session ([full stack](docs/claude.md/fleet/security-stack.md)).
 
 ### Agents & skills
 
