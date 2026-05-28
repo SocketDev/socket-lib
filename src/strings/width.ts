@@ -26,11 +26,14 @@ let _eastAsianWidth: typeof eastAsianWidthType | undefined
 /*@__NO_SIDE_EFFECTS__*/
 export function getEastAsianWidth() {
   if (_eastAsianWidth === undefined) {
-    _eastAsianWidth = (
-      /*@__PURE__*/ require('../external/get-east-asian-width') as {
-        eastAsianWidth: typeof eastAsianWidthType
-      }
-    ).eastAsianWidth
+    // The /*@__PURE__*/ stays adjacent to the require() call — oxfmt
+    // reformats `(/*@__PURE__*/ require(…) as T).x` back into the
+    // outside-paren form that rolldown doesn't honor; using an
+    // intermediate const sidesteps the reformat. See task #23.
+    const mod = /*@__PURE__*/ require('../external/get-east-asian-width') as {
+      eastAsianWidth: typeof eastAsianWidthType
+    }
+    _eastAsianWidth = mod.eastAsianWidth
   }
   return _eastAsianWidth!
 }

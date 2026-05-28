@@ -160,11 +160,15 @@ export function getMatchesGlob():
   | ((p: string, pattern: string) => boolean)
   | undefined {
   if (!_matchesGlobProbed) {
-    const fn = (
+    // The /*@__PURE__*/ stays adjacent to the require() call — oxfmt
+    // reformats `(/*@__PURE__*/ require(…) as T).x` back into the
+    // outside-paren form that rolldown doesn't honor; using an
+    // intermediate const sidesteps the reformat. See task #23.
+    const pathMod =
       /*@__PURE__*/ require('node:path') as typeof import('node:path') & {
         matchesGlob?: unknown
       }
-    ).matchesGlob
+    const fn = pathMod.matchesGlob
     // path.matchesGlob is present on Node 22+; missing-fn arm fires
     // only on older runtimes.
     /* c8 ignore start */
