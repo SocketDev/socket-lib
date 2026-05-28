@@ -38,6 +38,7 @@ import process from 'node:process'
 import { discoverAiAgents } from '@socketsecurity/lib-stable/ai/discover'
 import { AI_PROFILE } from '@socketsecurity/lib-stable/ai/profiles'
 import { spawnAiAgent } from '@socketsecurity/lib-stable/ai/spawn'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { isSpawnError } from '@socketsecurity/lib-stable/process/spawn/errors'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
@@ -425,7 +426,6 @@ async function main(): Promise<void> {
 }
 
 main().catch((e: unknown) => {
-  const msg = e instanceof Error ? e.message : String(e)
-  logger.error(`ai-lint-fix: ${msg}`)
+  logger.error(`ai-lint-fix: ${errorMessage(e)}`)
   process.exitCode = 1
 })
