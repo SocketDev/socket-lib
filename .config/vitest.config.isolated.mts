@@ -8,6 +8,8 @@ import { fileURLToPath } from 'node:url'
 import process from 'node:process'
 import { defineConfig } from 'vitest/config'
 
+import { baseCoverageConfig } from './vitest.coverage.config.mts'
+
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = path.resolve(__dirname, '..')
 
@@ -70,10 +72,18 @@ const vitestConfigIsolated = defineConfig({
         isolate: true,
       },
     },
-    testTimeout: 10_000,
-    hookTimeout: 10_000,
+    // Heavy I/O tests (archive extraction, large http fixtures) need
+    // headroom under coverage instrumentation. CI is colder and slower than
+    // local dev — give it more rope. Locally we keep it tight so a hung
+    // test surfaces fast.
+    testTimeout: isCI ? 60_000 : 20_000,
+    hookTimeout: isCI ? 60_000 : 20_000,
     sequence: {
       concurrent: false,
+    },
+    coverage: {
+      ...baseCoverageConfig,
+      reportsDirectory: 'coverage-isolated',
     },
   },
 })

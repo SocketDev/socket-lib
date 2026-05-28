@@ -39,6 +39,7 @@ yarn.lock
 # ============================================================================
 .type-coverage/
 coverage/
+coverage-isolated/
 dist/
 *.tsbuildinfo
 *.tgz
@@ -108,6 +109,7 @@ Thumbs.db
 # variants (e.g. a non-standard dist path) go OUTSIDE this block.
 **/build/
 **/coverage/
+**/coverage-isolated/
 **/dist/
 **/.cache/
 

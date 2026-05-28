@@ -35,7 +35,7 @@ import { extractTar, extractTarGz } from '../../src/archives/tar'
 import { extractZip } from '../../src/archives/zip'
 import { safeDelete } from '../../src/fs/safe'
 
-import { runWithTempDir } from './util/temp-file-helper'
+import { runWithTempDir } from '../unit/util/temp-file-helper'
 
 // Test archive fixtures
 let testZipPath: string
