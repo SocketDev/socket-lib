@@ -7,9 +7,9 @@
  *   - `staged` — pre-commit hook scope. Hand `git diff --cached` filenames to
  *     `vitest related <files…> --run` so vitest walks the module graph and
  *     finds every test transitively touched by the staged delta. The `--run`
- *     flag is mandatory: `vitest related` defaults to watch mode just like
- *     the bare `vitest` invocation, which would hang the pre-commit hook.
- *     See https://vitest.dev/guide/cli.html#vitest-related.
+ *     flag is mandatory: `vitest related` defaults to watch mode just like the
+ *     bare `vitest` invocation, which would hang the pre-commit hook. See
+ *     https://vitest.dev/guide/cli.html#vitest-related.
  *   - `changed` — local-dev scope (working tree). Run `vitest --changed`,
  *     vitest's native "compare vs HEAD, including uncommitted" mode. This
  *     catches transitive imports the basename-mapping approach misses (a change
