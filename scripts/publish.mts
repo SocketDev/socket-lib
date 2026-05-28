@@ -81,9 +81,7 @@ async function main(): Promise<void> {
     logger.log(
       '  --direct             CI: classic-token npm publish (no staging).',
     )
-    logger.log(
-      '                       Use when staged publishing is blocked',
-    )
+    logger.log('                       Use when staged publishing is blocked')
     logger.log(
       '                       (e.g. Socket Firewall not yet allowlisting',
     )
@@ -94,7 +92,9 @@ async function main(): Promise<void> {
     logger.log(
       '  --otp <code>         pre-supply 2FA (skips OTP prompt on --approve)',
     )
-    logger.log('  --tag <tag>          dist-tag for --staged / --direct (default: latest)')
+    logger.log(
+      '  --tag <tag>          dist-tag for --staged / --direct (default: latest)',
+    )
     process.exitCode = values['help'] ? 0 : 1
     return
   }
@@ -128,12 +128,12 @@ async function main(): Promise<void> {
  * Bypass for when `pnpm stage publish` is blocked by infrastructure (today:
  * Socket Firewall doesn't yet allowlist /-/stage endpoints — tracked in
  * firewall PR #123). Same OIDC `--provenance` injection as --staged when
- * running in GitHub Actions. Refuses to publish an already-published
- * version (surfaces the error before the network call).
+ * running in GitHub Actions. Refuses to publish an already-published version
+ * (surfaces the error before the network call).
  *
- * Use only in CI contexts that have the classic-token publish role
- * configured. Local users should still prefer the --staged → --approve
- * dance because it isolates the OIDC upload from the human 2FA promotion.
+ * Use only in CI contexts that have the classic-token publish role configured.
+ * Local users should still prefer the --staged → --approve dance because it
+ * isolates the OIDC upload from the human 2FA promotion.
  */
 async function runDirect(tag: string, dryRun: boolean): Promise<void> {
   const pkg = readPackageJson()
