@@ -2890,7 +2890,8 @@
   },
   "engines": {
     "node": ">=22",
-    "pnpm": ">=11.3.0"
+    "npm": ">=11.16.0",
+    "pnpm": ">=11.4.0"
   },
-  "packageManager": "pnpm@11.3.0"
+  "packageManager": "pnpm@11.4.0"
 }

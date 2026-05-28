@@ -55,6 +55,7 @@ catalog:
   'vitest': 4.1.6
 
 allowBuilds:
+  esbuild: true
   rolldown: true
 
 # Wait 7 days (10080 minutes) before installing newly published packages.

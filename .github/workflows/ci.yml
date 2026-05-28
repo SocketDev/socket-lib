@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@c291a14196d088970c0453e905b40969b11bf193 # main (2026-05-25)
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@45ab8bc21faf51c460590a14e23978c27cbd3030 # main (2026-05-28)
       - name: Build project
         run: pnpm run build
 
