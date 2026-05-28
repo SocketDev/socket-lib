@@ -218,13 +218,12 @@ export async function runTests(
   const { all, coverage, force, staged, update } = options
   const runAll = all || force
 
-  // Get tests to run
-  const testInfo = getTestsToRun({ staged, all: runAll })
-  const { mode, reason, tests: testsToRun } = testInfo
+  // Choose vitest invocation strategy based on scope of changes.
+  const strategy = getTestsToRun({ staged, all: runAll })
+  const { files: relatedFiles, mode: strategyMode, reason } = strategy
 
-  // No tests needed
-  if (testsToRun == null) {
-    logger.substep('No relevant changes detected, skipping tests')
+  if (strategyMode === 'skip') {
+    logger.substep(`No relevant changes detected, skipping tests (${reason})`)
     return 0
   }
 
@@ -232,32 +231,46 @@ export async function runTests(
   const vitestCmd = WIN32 ? 'vitest.cmd' : 'vitest'
   const vitestPath = path.join(nodeModulesBinPath, vitestCmd)
 
-  // --passWithNoTests: a scoped run where the changed files don't resolve
-  // to any test file should succeed rather than error with "No test files
-  // found". Keeps pre-commit hooks passing when an edit touches only
-  // non-testable code.
-  const vitestArgs = ['--config', configPath, 'run', '--passWithNoTests']
+  // `vitest run` runs the suite once and exits (vs. watch mode); we
+  // tack the scope flag onto that. `--passWithNoTests` keeps scoped
+  // runs from erroring when the change touches only non-testable
+  // code (matters most for the pre-commit `--staged` path).
+  const vitestArgs: string[] = ['--config', configPath]
+  // Subcommand: `related` for staged, `run` for the others. Both need
+  // an explicit non-watch flag — `vitest related` defaults to watch
+  // mode just like the bare `vitest` invocation does, so we pass
+  // `--run` to force a single execution. `vitest run` already implies
+  // it via the subcommand name.
+  if (strategyMode === 'related') {
+    vitestArgs.push('related', '--run')
+  } else {
+    vitestArgs.push('run')
+  }
+  vitestArgs.push('--passWithNoTests')
 
-  // Add coverage if requested
   if (coverage) {
     vitestArgs.push('--coverage')
   }
 
-  // Add update if requested
   if (update) {
     vitestArgs.push('--update')
   }
 
-  // Add test patterns if not running all
-  if (testsToRun === 'all') {
+  // Scope flags: pick the right one for the strategy chosen above.
+  if (strategyMode === 'all') {
     logger.step(`Running all tests (${reason})`)
+  } else if (strategyMode === 'changed') {
+    logger.step(`Running tests for changed files (${reason})`)
+    vitestArgs.push('--changed')
   } else {
-    const modeText = mode === 'staged' ? 'staged' : 'changed'
-    logger.step(`Running tests for ${modeText} files:`)
-    testsToRun.forEach(test => {
-      logger.substep(test)
+    // related — pass staged files as positionals; vitest walks the
+    // module graph from each and runs every transitively-affected
+    // test file.
+    logger.step(`Running tests related to staged files (${reason}):`)
+    relatedFiles.forEach(file => {
+      logger.substep(file)
     })
-    vitestArgs.push(...testsToRun)
+    vitestArgs.push(...relatedFiles)
   }
 
   // Add any additional positional arguments

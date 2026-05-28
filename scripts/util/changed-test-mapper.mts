@@ -1,189 +1,108 @@
-/* oxlint-disable socket/sort-source-methods -- mapper helpers interleaved with module-level pattern config they consume; reordering would split state from its consumers. */
 /**
- * @file Maps changed source files to test files for affected test running. Uses
- *   git utilities from socket-registry to detect changes.
+ * @file Choose vitest invocation strategy based on the scope of changes. Three
+ *   modes:
+ *
+ *   - `all` — run the full suite (`vitest run`). Used in CI and on explicit
+ *     `--all` / `--force` / `FORCE_TEST=1`.
+ *   - `staged` — pre-commit hook scope. Hand `git diff --cached` filenames to
+ *     `vitest related <files…> --run` so vitest walks the module graph and
+ *     finds every test transitively touched by the staged delta. The `--run`
+ *     flag is mandatory: `vitest related` defaults to watch mode just like
+ *     the bare `vitest` invocation, which would hang the pre-commit hook.
+ *     See https://vitest.dev/guide/cli.html#vitest-related.
+ *   - `changed` — local-dev scope (working tree). Run `vitest --changed`,
+ *     vitest's native "compare vs HEAD, including uncommitted" mode. This
+ *     catches transitive imports the basename-mapping approach misses (a change
+ *     to a util shared by many test files used to fall back to "run all";
+ *     `--changed` walks the actual graph instead). Config-file changes
+ *     (`vitest.config*`, `tsconfig*`) still escalate to `all` because
+ *     module-graph traversal doesn't capture config-derived changes (test
+ *     discovery, resolver aliases, etc.).
  */
 
-import { existsSync } from 'node:fs'
-import path from 'node:path'
 import process from 'node:process'
 
 import { getChangedFilesSync } from '@socketsecurity/lib-stable/git/changed'
 import { getStagedFilesSync } from '@socketsecurity/lib-stable/git/staged'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-const rootPath = path.resolve(process.cwd())
-
 /**
- * Core files that require running all tests when changed.
+ * Files whose change forces a full-suite run. Module-graph traversal via
+ * `vitest --changed` / `vitest related` doesn't pick up config- driven
+ * discovery + alias changes — escalate to `all` here.
  */
-const CORE_FILES = [
-  'src/helpers.ts',
-  'src/strings.ts',
-  'src/constants.ts',
-  'src/lang.ts',
-  'src/error.ts',
-  'src/validate.ts',
-  'src/normalize.ts',
-  'src/encode.ts',
-  'src/decode.ts',
-  'src/objects.ts',
+const FULL_SUITE_TRIGGER_PATTERNS = [
+  /vitest\.config/,
+  /tsconfig/,
+  /\.config\/vitest/,
 ]
 
-/**
- * Map source files to their corresponding test files.
- *
- * @param {string} filepath - Path to source file.
- *
- * @returns {string[]} Array of test file paths
- */
-export function mapSourceToTests(filepath: string): string[] {
-  const normalized = normalizePath(filepath)
-
-  // Skip non-code files
-  const ext = path.extname(normalized)
-  const codeExtensions = ['.js', '.mjs', '.cjs', '.ts', '.cts', '.mts', '.json']
-  if (!codeExtensions.includes(ext)) {
-    return []
-  }
-
-  // Core utilities affect all tests
-  if (CORE_FILES.some(f => normalized.includes(f))) {
-    return ['all']
-  }
-
-  // Map specific files to their test files
-  const basename = path.basename(normalized, path.extname(normalized))
-  const testFile = `test/${basename}.test.mts`
-
-  // Check if corresponding test exists
-  if (existsSync(path.join(rootPath, testFile))) {
-    return [testFile]
-  }
-
-  // Special mappings
-  if (normalized.includes('src/package-url.ts')) {
-    return ['test/package-url.test.mts', 'test/integration.test.mts']
-  }
-  if (normalized.includes('src/package-url-builder.ts')) {
-    return ['test/package-url-builder.test.mts', 'test/integration.test.mts']
-  }
-  if (normalized.includes('src/url-converter.ts')) {
-    return ['test/url-converter.test.mts']
-  }
-  if (normalized.includes('src/result.ts')) {
-    return ['test/result.test.mts']
-  }
-
-  // If no specific mapping, run all tests to be safe
-  return ['all']
-}
-
-/**
- * Get affected test files to run based on changed files.
- *
- * @param {Object} options
- * @param {boolean} options.staged - Use staged files instead of all changes.
- * @param {boolean} options.all - Run all tests.
- *
- * @returns {{ tests: string[] | 'all' | null; reason?: string; mode?: string }}
- *   Object with test patterns, reason, and mode.
- */
-interface TestResult {
-  tests: string[] | 'all' | undefined
-  reason?: string
-  mode?: string
+export interface TestStrategy {
+  /**
+   * `all` — pass no scope args (run the whole suite). `changed` — pass
+   * `--changed` to vitest. `related` — pass `related <files…>` to vitest.
+   * `skip` — no changes; skip the run entirely.
+   */
+  mode: 'all' | 'changed' | 'related' | 'skip'
+  reason: string
+  /**
+   * Files for `related` mode. Empty for the other modes.
+   */
+  files: readonly string[]
 }
 
 export function getTestsToRun(
   options: { staged?: boolean; all?: boolean } = {},
-): TestResult {
+): TestStrategy {
   const { all = false, staged = false } = options
 
-  // All mode runs all tests
-  if (all || process.env.FORCE_TEST === '1') {
-    return { tests: 'all', reason: 'explicit --all flag', mode: 'all' }
+  if (all || process.env['FORCE_TEST'] === '1') {
+    return { mode: 'all', reason: 'explicit --all flag', files: [] }
   }
 
-  // CI always runs all tests
-  if (process.env.CI === 'true') {
-    return { tests: 'all', reason: 'CI environment', mode: 'all' }
+  if (process.env['CI'] === 'true') {
+    return { mode: 'all', reason: 'CI environment', files: [] }
   }
 
-  // Get changed files
   const changedFiles = staged ? getStagedFilesSync() : getChangedFilesSync()
-  const mode = staged ? 'staged' : 'changed'
 
   if (changedFiles.length === 0) {
-    // No changes, skip tests
-    return { tests: undefined, mode }
+    return {
+      mode: 'skip',
+      reason: 'no changes detected',
+      files: [],
+    }
   }
-
-  const testFiles = new Set<string>()
-  let runAllTests = false
-  let runAllReason = ''
 
   for (const file of changedFiles) {
     const normalized = normalizePath(file)
-
-    // Test files always run themselves
-    if (normalized.startsWith('test/') && normalized.includes('.test.')) {
-      // Skip deleted files.
-      if (existsSync(path.join(rootPath, file))) {
-        testFiles.add(file)
-      }
-      continue
-    }
-
-    // Source files map to test files
-    if (normalized.startsWith('src/')) {
-      const tests = mapSourceToTests(normalized)
-      if (tests.includes('all')) {
-        runAllTests = true
-        runAllReason = 'core file changes'
-        break
-      }
-      for (const test of tests) {
-        // Skip deleted files.
-        if (existsSync(path.join(rootPath, test))) {
-          testFiles.add(test)
+    for (const pattern of FULL_SUITE_TRIGGER_PATTERNS) {
+      if (pattern.test(normalized)) {
+        return {
+          mode: 'all',
+          reason: `config change escalates to full run (${file})`,
+          files: [],
         }
       }
-      continue
-    }
-
-    // Config changes run all tests
-    if (normalized.includes('vitest.config')) {
-      runAllTests = true
-      runAllReason = 'vitest config changed'
-      break
-    }
-
-    if (normalized.includes('tsconfig')) {
-      runAllTests = true
-      runAllReason = 'TypeScript config changed'
-      break
-    }
-
-    // Data changes run integration tests
-    if (normalized.startsWith('data/')) {
-      // Skip deleted files.
-      if (existsSync(path.join(rootPath, 'test/integration.test.mts'))) {
-        testFiles.add('test/integration.test.mts')
-      }
-      if (existsSync(path.join(rootPath, 'test/purl-types.test.mts'))) {
-        testFiles.add('test/purl-types.test.mts')
-      }
     }
   }
 
-  if (runAllTests) {
-    return { tests: 'all', reason: runAllReason, mode: 'all' }
+  // Staged → run tests RELATED to the staged file set. Vitest walks
+  // the module graph and surfaces every test file transitively affected.
+  if (staged) {
+    return {
+      mode: 'related',
+      reason: `${changedFiles.length} staged file(s)`,
+      files: changedFiles,
+    }
   }
 
-  if (testFiles.size === 0) {
-    return { tests: undefined, mode }
+  // Working-tree changes → use vitest's native --changed mode. Same
+  // module-graph walk, but the file list comes from vitest's own
+  // git integration (compares vs HEAD, includes uncommitted).
+  return {
+    mode: 'changed',
+    reason: `${changedFiles.length} changed file(s)`,
+    files: [],
   }
-
-  return { tests: Array.from(testFiles), mode }
 }
