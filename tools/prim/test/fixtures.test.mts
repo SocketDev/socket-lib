@@ -1,38 +1,36 @@
 /**
  * @file Fixture-corpus tests for `prim mod`. Each fixture under
- *   `fixtures/<name>/` is a regression contract — a scenario the tool got
- *   wrong before. The contract: copy the fixture's `input/` into a tmpdir,
- *   run `applyCodemod`, compare the result against `expected.json`.
- *
- *   `expected.json` shape:
+ *   `fixtures/<name>/` is a regression contract — a scenario the tool got wrong
+ *   before. The contract: copy the fixture's `input/` into a tmpdir, run
+ *   `applyCodemod`, compare the result against `expected.json`. `expected.json`
+ *   shape:
  *
  *   ```jsonc
  *   {
- *     // What the codemod did. `ok: false` means the batch was rejected.
- *     "ok": true,
- *     // Optional: expected validation findings (when `ok: false`).
- *     "findings": [
- *       { "kind": "self-import", "fileMatches": "^src/primordials/" }
- *     ],
- *     // Optional: per-file rewrite count + new content invariants.
- *     "files": {
- *       "src/consumer.ts": {
- *         "rewrites": 1,
- *         "importAdded": true,
- *         "contentIncludes": ["from '../primordials/array'"],
- *         "contentExcludes": ["from '@socketsecurity/lib/primordials'"]
- *       }
- *     }
+ *   // What the codemod did. `ok: false` means the batch was rejected.
+ *   "ok": true,
+ *   // Optional: expected validation findings (when `ok: false`).
+ *   "findings": [
+ *   { "kind": "self-import", "fileMatches": "^src/primordials/" }
+ *   ],
+ *   // Optional: per-file rewrite count + new content invariants.
+ *   "files": {
+ *   "src/consumer.ts": {
+ *   "rewrites": 1,
+ *   "importAdded": true,
+ *   "contentIncludes": ["from '../primordials/array'"],
+ *   "contentExcludes": ["from '@socketsecurity/lib/primordials'"]
+ *   }
+ *   }
  *   }
  *   ```
  *
- *   Adding a new scenario: create `fixtures/<name>/input/...` + `expected.json`.
- *   The runner picks it up automatically; no test code to write per scenario.
- *
- *   Each fixture's input MAY include a `primordials/` directory of leaves so
- *   the codemod's split-by-leaf import wiring exercises against a realistic
- *   surface. Otherwise the codemod falls back to the package-name specifier
- *   (consumer-of-lib mode).
+ *   Adding a new scenario: create `fixtures/<name>/input/...` +
+ *   `expected.json`. The runner picks it up automatically; no test code to
+ *   write per scenario. Each fixture's input MAY include a `primordials/`
+ *   directory of leaves so the codemod's split-by-leaf import wiring exercises
+ *   against a realistic surface. Otherwise the codemod falls back to the
+ *   package-name specifier (consumer-of-lib mode).
  */
 
 import assert from 'node:assert/strict'
@@ -60,7 +58,14 @@ const FIXTURES_DIR = path.join(here, 'fixtures')
 // pick up in production. Fixtures that don't ship their own primordials/
 // borrow this one so the codemod has something to consult when deciding
 // which calls have a primordial counterpart.
-const LIB_PRIMORDIALS = path.resolve(here, '..', '..', '..', 'src', 'primordials')
+const LIB_PRIMORDIALS = path.resolve(
+  here,
+  '..',
+  '..',
+  '..',
+  'src',
+  'primordials',
+)
 
 interface ExpectedFile {
   readonly rewrites?: number
@@ -81,9 +86,9 @@ interface Expected {
 }
 
 /**
- * Set up a tmpdir from the fixture's `input/` directory + invoke the
- * codemod. Returns the path to the temp scan dir + the codemod's result so
- * the caller can assert per-fixture.
+ * Set up a tmpdir from the fixture's `input/` directory + invoke the codemod.
+ * Returns the path to the temp scan dir + the codemod's result so the caller
+ * can assert per-fixture.
  */
 async function runFixture(fixturePath: string): Promise<{
   scanDir: string
@@ -254,10 +259,7 @@ describe('prim mod fixture corpus', () => {
               `expected ${relPath} importAdded=${fileExpected.importAdded}; got ${fileResult?.importAdded ?? false}`,
             )
           }
-          if (
-            fileExpected.contentIncludes ||
-            fileExpected.contentExcludes
-          ) {
+          if (fileExpected.contentIncludes || fileExpected.contentExcludes) {
             const actual = readFileSync(absPath, 'utf8')
             for (const needle of fileExpected.contentIncludes ?? []) {
               assert.ok(

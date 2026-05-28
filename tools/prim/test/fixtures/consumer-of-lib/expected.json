@@ -1,0 +1,14 @@
+{
+  "ok": true,
+  "files": {
+    "src/consumer.ts": {
+      "rewrites": 1,
+      "importAdded": true,
+      "contentIncludes": [
+        "from '@socketsecurity/lib/primordials'",
+        "ArrayPrototypePush"
+      ],
+      "contentExcludes": ["arr.push("]
+    }
+  }
+}
