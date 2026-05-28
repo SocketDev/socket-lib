@@ -87,19 +87,27 @@ export async function gitShortSha(cwd: string): Promise<string> {
 
 /**
  * `npm view <name>@<version> version` exits 0 iff the version exists on the
- * registry. Faster than fetching the full packument for a yes/no check.
+ * registry. Faster than fetching the full packument for a yes/no check. On
+ * non-zero exit (404 for unpublished version, network error, etc.) the
+ * runCapture's underlying spawn wrapper REJECTS the promise; catch that and
+ * return false — "not present on the registry" is the expected pre-publish
+ * state, not an error.
  */
 export async function isAlreadyPublished(
   name: string,
   version: string,
   cwd: string,
 ): Promise<boolean> {
-  const { code } = await runCapture(
-    'npm',
-    ['view', `${name}@${version}`, 'version'],
-    cwd,
-  )
-  return code === 0
+  try {
+    const { code } = await runCapture(
+      'npm',
+      ['view', `${name}@${version}`, 'version'],
+      cwd,
+    )
+    return code === 0
+  } catch {
+    return false
+  }
 }
 
 /**

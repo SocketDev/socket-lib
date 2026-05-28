@@ -46,12 +46,17 @@ jobs:
       - name: Build
         run: pnpm run build
 
-      - name: Stage publish to npm
+      - name: Publish to npm
+        # TEMPORARY: --direct (classic-token publish, no staging) instead of
+        # --staged because Socket Firewall does not yet allowlist the
+        # /-/stage/* endpoints, so `pnpm stage publish` fails with
+        # "failed to parse URL" + 403. Tracked in firewall PR #123. Flip
+        # back to --staged once that lands + deploys.
         env:
           DRY_RUN: ${{ inputs.dry-run }}
         run: |
           if [ "$DRY_RUN" = "true" ]; then
-            node scripts/publish.mts --staged --dry-run
+            node scripts/publish.mts --direct --dry-run
           else
-            node scripts/publish.mts --staged
+            node scripts/publish.mts --direct
           fi

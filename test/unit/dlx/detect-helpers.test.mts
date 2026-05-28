@@ -12,6 +12,8 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+
 import { findPackageJson, readPackageJson } from '../../../src/dlx/detect'
 
 let tmp: string
@@ -35,7 +37,12 @@ describe.sequential('dlx/detect — findPackageJson', () => {
     // dirname(tmp/src/index.ts) === tmp/src, which doesn't have pkg-json,
     // so the walk proceeds up to tmp where it does. Build the file under
     // tmp directly to start the walk at tmp itself.
-    expect(findPackageJson(path.join(tmp, 'index.ts'))).toBe(pkgPath)
+    // findPackageJson normalizes its return to forward slashes (fleet
+    // convention); compare against the normalized form so the test
+    // passes on Windows where path.join produces backslashes.
+    expect(findPackageJson(path.join(tmp, 'index.ts'))).toBe(
+      normalizePath(pkgPath),
+    )
   })
 
   it('walks up to a parent that has package.json', () => {
@@ -43,7 +50,7 @@ describe.sequential('dlx/detect — findPackageJson', () => {
     mkdirSync(sub, { recursive: true })
     const pkgPath = path.join(tmp, 'package.json')
     writeFileSync(pkgPath, '{}')
-    expect(findPackageJson(fileIn(sub))).toBe(pkgPath)
+    expect(findPackageJson(fileIn(sub))).toBe(normalizePath(pkgPath))
   })
 
   it('returns undefined when no package.json exists up to root', () => {
@@ -61,7 +68,9 @@ describe.sequential('dlx/detect — findPackageJson', () => {
   it('drops the positive cache when the cached path no longer exists', () => {
     const pkgPath = path.join(tmp, 'package.json')
     writeFileSync(pkgPath, '{}')
-    expect(findPackageJson(path.join(tmp, 'index.ts'))).toBe(pkgPath)
+    expect(findPackageJson(path.join(tmp, 'index.ts'))).toBe(
+      normalizePath(pkgPath),
+    )
     rmSync(pkgPath)
     expect(findPackageJson(path.join(tmp, 'index.ts'))).toBeUndefined()
   })
