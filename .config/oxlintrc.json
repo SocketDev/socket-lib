@@ -1,7 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "import"],
-  "jsPlugins": ["./oxlint-plugin/index.mts"],
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "import"
+  ],
+  "jsPlugins": [
+    "./oxlint-plugin/index.mts"
+  ],
   "categories": {
     "correctness": "error",
     "suspicious": "error"
@@ -20,7 +26,10 @@
     "socket/prefer-undefined-over-null": "error",
     "socket/sort-set-args": "error",
     "socket/sort-source-methods": "error",
-    "eslint/curly": ["error", "all"],
+    "eslint/curly": [
+      "error",
+      "all"
+    ],
     "eslint/no-await-in-loop": "off",
     "eslint/no-console": "off",
     "eslint/no-control-regex": "off",
@@ -79,7 +88,9 @@
   },
   "overrides": [
     {
-      "files": ["**/src/logger/**"],
+      "files": [
+        "**/src/logger/**"
+      ],
       "rules": {
         "socket/no-console-prefer-logger": "off",
         "socket/no-inline-logger": "off"
@@ -107,7 +118,12 @@
       }
     },
     {
-      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+      "files": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.mts",
+        "**/*.cts"
+      ],
       "rules": {
         "eslint/no-unused-vars": "off"
       }
@@ -136,6 +152,8 @@
     "**/.pnpm-store/**",
     "**/vendor/**",
     "**/wasm_exec.js",
+    "**/scripts/plugin-patches/**/*.files/**",
+    "**/scripts/plugin-patches/**/*.patch",
     "**/.config/lockstep.schema.json",
     "**/.config/markdownlint-rules/_shared/wheelhouse-self-skip.mjs",
     "**/.config/markdownlint-rules/socket-no-private-wheelhouse-leak.mjs",
@@ -145,6 +163,7 @@
     "**/.config/socket-wheelhouse-schema.json",
     "**/.config/taze.config.mts",
     "**/.config/tsconfig.base.json",
+    "**/.config/vitest.coverage.fleet.config.mts",
     "**/packages/build-infra/lib/release-checksums/consumer.mts",
     "**/packages/build-infra/lib/release-checksums/core.mts",
     "**/packages/build-infra/lib/release-checksums/producer.mts",
@@ -189,6 +208,7 @@
     "**/scripts/lockstep/scan.mts",
     "**/scripts/lockstep/schema.mts",
     "**/scripts/lockstep/types.mts",
+    "**/scripts/plugin-patches/codex-1.0.1-stdin-eagain.files/scripts/lib/read-stdin-sync.mjs",
     "**/scripts/power-state.mts",
     "**/scripts/publish-release.mts",
     "**/scripts/publish-shared.mts",
@@ -201,10 +221,11 @@
     "**/scripts/test/install-claude-plugins.test.mts",
     "**/scripts/test/install-git-hooks.test.mts",
     "**/scripts/update.mts",
+    "**/scripts/util/run-command.mts",
     "**/scripts/validate-bundle-deps.mts",
     "**/scripts/validate-config-paths.mts",
-    "**/scripts/validate-esbuild-minify.mts",
     "**/scripts/validate-file-size.mts",
+    "**/scripts/validate-rolldown-minify.mts",
     "#fleet-canonical-end"
   ]
 }
