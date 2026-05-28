@@ -57,7 +57,6 @@ async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
       approve: { default: false, type: 'boolean' },
-      direct: { default: false, type: 'boolean' },
       'dry-run': { default: false, type: 'boolean' },
       help: { default: false, type: 'boolean' },
       otp: { type: 'string' },
@@ -68,44 +67,24 @@ async function main(): Promise<void> {
     strict: false,
   })
 
-  if (
-    values['help'] ||
-    (!values['staged'] && !values['approve'] && !values['direct'])
-  ) {
+  if (values['help'] || (!values['staged'] && !values['approve'])) {
     logger.log(
-      'Usage: pnpm publish --staged | --approve | --direct [--dry-run] [--otp <code>]',
+      'Usage: pnpm publish --staged | --approve [--dry-run] [--otp <code>]',
     )
     logger.log('')
     logger.log('  --staged             CI: upload to npm staging via OIDC')
     logger.log('  --approve            local: multi-select + 2FA promote')
-    logger.log(
-      '  --direct             CI: classic-token npm publish (no staging).',
-    )
-    logger.log('                       Use when staged publishing is blocked')
-    logger.log(
-      '                       (e.g. Socket Firewall not yet allowlisting',
-    )
-    logger.log(
-      '                       /-/stage endpoints — see firewall PR #123).',
-    )
     logger.log('  --dry-run            simulate; no registry writes')
     logger.log(
       '  --otp <code>         pre-supply 2FA (skips OTP prompt on --approve)',
     )
-    logger.log(
-      '  --tag <tag>          dist-tag for --staged / --direct (default: latest)',
-    )
+    logger.log('  --tag <tag>          dist-tag for --staged (default: latest)')
     process.exitCode = values['help'] ? 0 : 1
     return
   }
 
-  // Modes are mutually exclusive — pick exactly one.
-  const modeCount =
-    Number(!!values['staged']) +
-    Number(!!values['approve']) +
-    Number(!!values['direct'])
-  if (modeCount > 1) {
-    logger.fail('Pass exactly one of --staged, --approve, --direct.')
+  if (values['staged'] && values['approve']) {
+    logger.fail('Pass --staged OR --approve, not both.')
     process.exitCode = 1
     return
   }
@@ -115,67 +94,8 @@ async function main(): Promise<void> {
     typeof values['otp'] === 'string' ? values['otp'] : undefined
   if (values['staged']) {
     await runStaged(String(values['tag']), dryRun)
-  } else if (values['direct']) {
-    await runDirect(String(values['tag']), dryRun)
   } else {
     await runApprove(dryRun, otpFromFlag)
-  }
-}
-
-/**
- * `--direct` mode: classic-token `npm publish` (no staging).
- *
- * Bypass for when `pnpm stage publish` is blocked by infrastructure (today:
- * Socket Firewall doesn't yet allowlist /-/stage endpoints — tracked in
- * firewall PR #123). Same OIDC `--provenance` injection as --staged when
- * running in GitHub Actions. Refuses to publish an already-published version
- * (surfaces the error before the network call).
- *
- * Use only in CI contexts that have the classic-token publish role configured.
- * Local users should still prefer the --staged → --approve dance because it
- * isolates the OIDC upload from the human 2FA promotion.
- */
-async function runDirect(tag: string, dryRun: boolean): Promise<void> {
-  const pkg = readPackageJson()
-  logger.log(
-    `Publishing ${pkg.name}@${pkg.version} (tag=${tag})${dryRun ? ' [dry-run]' : ''}`,
-  )
-
-  if (await isAlreadyPublished(pkg.name, pkg.version, rootPath)) {
-    logger.fail(
-      `${pkg.name}@${pkg.version} is already published. Bump the version and try again.`,
-    )
-    process.exitCode = 1
-    return
-  }
-
-  const args = [
-    'publish',
-    '--access',
-    'public',
-    '--tag',
-    tag,
-    '--no-git-checks',
-    '--ignore-scripts',
-  ]
-  if (process.env['GITHUB_ACTIONS'] === 'true') {
-    args.push('--provenance')
-  }
-  if (dryRun) {
-    args.push('--dry-run')
-  }
-  const code = await runInherit('pnpm', args, rootPath)
-  if (code !== 0) {
-    logger.fail(`pnpm publish exited ${code}`)
-    process.exitCode = code
-    return
-  }
-  if (dryRun) {
-    logger.success(
-      `Dry-run complete for ${pkg.name}@${pkg.version}. Re-run without --dry-run to publish.`,
-    )
-  } else {
-    logger.success(`Published ${pkg.name}@${pkg.version}.`)
   }
 }
 

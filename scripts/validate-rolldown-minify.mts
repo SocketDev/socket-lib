@@ -28,7 +28,6 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 const logger = getDefaultLogger()
@@ -117,7 +116,7 @@ export function readConfigManifest(): string[] | undefined {
     parsed = JSON.parse(readFileSync(manifestPath, 'utf8'))
   } catch (e) {
     logger.error(
-      `Failed to parse .config/rolldown-validate.json: ${errorMessage(e)}`,
+      `Failed to parse .config/rolldown-validate.json: ${e instanceof Error ? e.message : String(e)}`,
     )
     process.exitCode = 1
     return undefined
@@ -171,7 +170,7 @@ export async function validateRolldownMinify(): Promise<MinifyViolation[]> {
       }
     } catch (e) {
       logger.error(
-        `Failed to load rolldown config ${configPath}: ${errorMessage(e)}`,
+        `Failed to load rolldown config ${configPath}: ${e instanceof Error ? e.message : String(e)}`,
       )
       process.exitCode = 1
       return []

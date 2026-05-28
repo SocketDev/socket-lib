@@ -19,7 +19,6 @@ import { existsSync, mkdirSync, promises as fs, readdirSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
@@ -644,6 +643,7 @@ async function main(): Promise<void> {
 }
 
 main().catch((err: unknown) => {
-  logger.error(`git-partial-submodule: ${errorMessage(err)}`)
+  const msg = err instanceof Error ? err.message : String(err)
+  logger.error(`git-partial-submodule: ${msg}`)
   process.exitCode = 1
 })

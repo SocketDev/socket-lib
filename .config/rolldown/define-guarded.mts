@@ -136,9 +136,9 @@ function matchesChain(
   for (let i = segments.length - 1; i >= 1; i -= 1) {
     if (
       !current ||
-      (current['type'] !== 'StaticMemberExpression' &&
-        current['type'] !== 'ComputedMemberExpression' &&
-        current['type'] !== 'MemberExpression')
+      (current['type'] !== 'ComputedMemberExpression' &&
+        current['type'] !== 'MemberExpression' &&
+        current['type'] !== 'StaticMemberExpression')
     ) {
       return false
     }
@@ -203,8 +203,9 @@ export function defineGuardedPlugin(define: Record<string, string>): Plugin {
       // Prefer rolldown's native MagicString (experimental.nativeMagicString)
       // when the transform hook hands one over; same .overwrite()/.toString()
       // API as the npm package. Fall back to a JS instance otherwise.
-      const native = (meta as { magicString?: MagicString } | undefined)
-        ?.magicString
+      const native = (
+        meta as { magicString?: MagicString | undefined } | undefined
+      )?.magicString
       const ms = native ?? new MagicString(code)
       let rewrote = false
       // Track [start,end] spans already rewritten so a parent member chain
@@ -252,7 +253,7 @@ export function defineGuardedPlugin(define: Record<string, string>): Plugin {
           }
         }
         for (const k of Object.keys(n)) {
-          if (k === 'start' || k === 'end') {
+          if (k === 'end' || k === 'start') {
             continue
           }
           walk(n[k], n, k)

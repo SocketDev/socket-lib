@@ -1,9 +1,8 @@
 /**
  * @file Fleet-canonical coverage defaults — the shape every socket-* repo
  *   shares. Repos layer their own exclude entries + thresholds on top via
- *   .config/vitest.coverage.config.mts. Hoisted to
- *   socket-wheelhouse/template/.config/ on the next cascade; do not add
- *   repo-specific paths here.
+ *   .config/vitest.coverage.config.mts. Do NOT add repo-specific paths here;
+ *   anything in this file cascades to every fleet repo.
  */
 
 import type { CoverageOptions } from 'vitest'
