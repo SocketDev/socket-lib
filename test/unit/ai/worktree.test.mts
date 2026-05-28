@@ -11,7 +11,7 @@ import {
   spawnAiAgentsInWorktrees,
   tryGit,
 } from '../../../src/ai/worktree.mts'
-import { sh } from '../util/cross-platform-sh'
+import { sh } from '../util/cross-platform-sh.mts'
 
 // These tests stand up a real git repo per test. Real git, real worktrees —
 // the spawn surface is too tangled with the lib's own helpers to mock cleanly,

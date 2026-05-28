@@ -4,7 +4,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { runOne } from '../../../src/ai/worktree.mts'
-import { sh } from '../util/cross-platform-sh'
+import { sh } from '../util/cross-platform-sh.mts'
 
 let tmpRoot: string
 let repo: string
