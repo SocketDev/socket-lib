@@ -37,6 +37,9 @@ import { parse } from 'acorn-wasm'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
+import type { PlannedRewrite, ValidationFinding } from './validate.mts'
+import { validateRewrites } from './validate.mts'
+
 import { isAmbiguousMethod } from './ambiguous-methods.mts'
 import { buildSnippet, disambiguateReceiver } from './disambiguate.mts'
 import {
@@ -133,8 +136,16 @@ export async function applyCodemod({
   nullable = new Set(),
   scanDir,
   targetRoot,
+  validate = true,
 }) {
-  const result = {
+  const result: {
+    filesChanged: number
+    rewriteCount: number
+    skipped: number
+    files: Array<{ file: string; rewrites: number; importAdded: boolean }>
+    validationFailed?: boolean
+    validationFindings?: readonly ValidationFinding[]
+  } = {
     filesChanged: 0,
     rewriteCount: 0,
     skipped: 0,
@@ -149,6 +160,23 @@ export async function applyCodemod({
   const primordialsRoot = localPrimordialsPath
     ? `${normalizePath(path.resolve(localPrimordialsPath))}/`
     : undefined
+  // Two-phase apply, when `validate !== false`:
+  //   Phase 1 (compute): walk files with apply=false. Each rewriteFile call
+  //     computes the new content + returns it WITHOUT writing.
+  //   Phase 2 (validate): run cross-batch checks (self-import, inside-root,
+  //     unparseable). If anything fails, abort — leave the working tree
+  //     pristine. The user sees the report instead of 40 dirty files.
+  //   Phase 3 (apply): every plan that survived validation gets written via
+  //     atomicWrite. Per-file atomicity + batch-level validation = effectively
+  //     transactional.
+  //
+  // When `validate === false` (caller opts out) OR `apply === false` (caller
+  // is in dry-run), we skip the two-phase split and walk inline. Same code
+  // path as before; lets the consumer choose speed over safety when they
+  // know what they're doing.
+  const useTwoPhase = apply && validate !== false
+  const plans: PlannedRewrite[] = []
+  const reportEntries: typeof result.files = []
   for (const abs of walkDir(scanDir)) {
     // Skip files that ARE the primordials surface — rewriting their
     // `Number.parseInt(...)` to `NumberParseInt(...)` then adding an
@@ -160,10 +188,13 @@ export async function applyCodemod({
       continue
     }
     const rel = path.relative(targetRoot, abs)
+    // Compute pass: when two-phase is on, force `apply: false` so the
+    // rewriter computes the new content but doesn't write. We persist
+    // ourselves AFTER validation.
     const fileResult = await rewriteFile({
       absPath: abs,
       aiDisambiguate,
-      apply,
+      apply: useTwoPhase ? false : apply,
       exported,
       importStyle,
       includeGuessed,
@@ -174,14 +205,41 @@ export async function applyCodemod({
     if (fileResult.rewrites > 0) {
       result.filesChanged += 1
       result.rewriteCount += fileResult.rewrites
-      result.files.push({
+      reportEntries.push({
         file: rel,
         rewrites: fileResult.rewrites,
         importAdded: fileResult.importAdded,
       })
+      if (useTwoPhase && fileResult.newSource !== undefined) {
+        plans.push({
+          absPath: abs,
+          relPath: rel,
+          newSource: fileResult.newSource,
+        })
+      }
     }
     result.skipped += fileResult.skipped
   }
+
+  if (useTwoPhase) {
+    const findings = validateRewrites(plans, { primordialsRoot })
+    if (findings.length > 0) {
+      // Reject the batch. Caller (cli.mts) sees the findings + bails.
+      // Working tree stays pristine — that's the whole point of the
+      // two-phase split.
+      result.validationFailed = true
+      result.validationFindings = findings
+      return result
+    }
+    // All checks green — commit the planned writes. Per-file atomic;
+    // any individual write failure aborts the rest (leaving partial
+    // state, but every file so far is internally consistent).
+    for (let i = 0, { length } = plans; i < length; i += 1) {
+      const plan = plans[i]!
+      atomicWrite(plan.absPath, plan.newSource)
+    }
+  }
+  result.files = reportEntries
 
   return result
 }
@@ -676,11 +734,21 @@ export async function rewriteFile({
     importAdded = result2.importAdded
   }
 
-  if (apply && newSource !== src) {
+  // Only return newSource when it actually changed AND we have rewrites
+  // applied. Callers in batch-validation mode read this to plan writes
+  // after running cross-file checks (cycle detection, self-import veto)
+  // without already having dirtied the working tree.
+  const changed = newSource !== src
+  if (apply && changed) {
     atomicWrite(absPath, newSource)
   }
 
-  return { rewrites: rewrites.length, importAdded, skipped }
+  return {
+    rewrites: rewrites.length,
+    importAdded,
+    skipped,
+    newSource: changed ? newSource : undefined,
+  }
 }
 
 /**

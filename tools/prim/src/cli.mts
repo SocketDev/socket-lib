@@ -37,6 +37,7 @@ import { applyCodemod } from './codemod.mts'
 import { formatHuman, formatJson } from './format.mts'
 import { formatLintFindings, lintSource } from './lint.mts'
 import { loadPrimordialsSurface } from './surface.mts'
+import { formatValidationReport } from './validate.mts'
 
 const HELP = `prim — audit & migrate JavaScript built-in usage to primordials
 
@@ -77,6 +78,12 @@ COMMON OPTIONS
   --include-guessed    Also rewrite prototype-method calls where the
                        receiver type was guessed from the identifier
                        name. Off by default — these need manual review.
+  --no-validate        Skip the cross-batch validation pass (self-imports,
+                       writes inside the primordials root, unparseable
+                       output). ON by default — opt out only when you know
+                       the rewrite is safe and the validator is being too
+                       conservative. Bypassing has caused real install
+                       breaks; the default is the safer choice.
   --surface <path>     Explicit primordials source file (same as audit).
 
 \`audit\` AND \`mod\` SHARED OPTION
@@ -128,6 +135,10 @@ const ARG_OPTIONS = {
   help: { type: 'boolean', short: 'h', default: false },
   'include-guessed': { type: 'boolean', default: false },
   json: { type: 'boolean', default: false },
+  // `--no-validate` opts OUT of the cross-batch validation phase. Default
+  // ON — the safer setting. Use this only when you know the rewrite is
+  // safe AND the validator is being too conservative.
+  'no-validate': { type: 'boolean', default: false },
   'primordials-source': { type: 'string', multiple: true },
   surface: { type: 'string' },
   target: { type: 'string' },
@@ -285,6 +296,7 @@ export async function runCli(argv) {
       nullable: surface.nullable,
       scanDir,
       targetRoot,
+      validate: !values['no-validate'],
     })
     reportMod(result, json, values.apply)
     return
@@ -481,6 +493,25 @@ export function reportLint(findings, json, targetName) {
 }
 
 export function reportMod(result, json, applied) {
+  // Validation failure short-circuit: when the two-phase apply rejected
+  // the batch, surface the per-finding report and exit non-zero. Working
+  // tree is pristine (no atomicWrite happened), so the user can re-attempt
+  // after addressing the findings or bypass with `--no-validate`.
+  if (result.validationFailed) {
+    const report = formatValidationReport(result.validationFindings ?? [])
+    if (json) {
+      const payload = formatJson({
+        applied: false,
+        validationFailed: true,
+        validationFindings: result.validationFindings,
+      })
+      process.stdout.write(`${payload}\n`) // socket-hook: allow console
+    } else {
+      process.stderr.write(`${report}\n`) // socket-hook: allow console
+    }
+    process.exitCode = 1
+    return
+  }
   if (json) {
     const payload = formatJson({
       applied,
