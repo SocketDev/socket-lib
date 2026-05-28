@@ -27,10 +27,13 @@
  *   `internal/socketsecurity/safe-references`, `safe-references`.
  */
 
-import { existsSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { parseArgs } from 'node:util'
+
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { createPatch } from 'diff'
 
 import { auditDirectory } from './audit.mts'
 import { applyCodemod } from './codemod.mts'
@@ -84,6 +87,10 @@ COMMON OPTIONS
                        the rewrite is safe and the validator is being too
                        conservative. Bypassing has caused real install
                        breaks; the default is the safer choice.
+  --diff               In dry-run mode, render a unified line-diff per
+                       file after the summary so you can review the
+                       exact rewrites before passing --apply. No-op
+                       when --apply is set or no rewrites are planned.
   --surface <path>     Explicit primordials source file (same as audit).
 
 \`audit\` AND \`mod\` SHARED OPTION
@@ -130,6 +137,10 @@ const ARG_OPTIONS = {
   'ai-disambiguate': { type: 'boolean', default: false },
   apply: { type: 'boolean', default: false },
   coverage: { type: 'boolean', default: false },
+  // `--diff` renders a unified diff per planned rewrite during dry-run.
+  // Defaults to false to keep the existing summary output stable; opt-in
+  // when you want to review the actual rewrites before `--apply`.
+  diff: { type: 'boolean', default: false },
   dir: { type: 'string' },
   gaps: { type: 'boolean', default: false },
   help: { type: 'boolean', short: 'h', default: false },
@@ -298,7 +309,7 @@ export async function runCli(argv) {
       targetRoot,
       validate: !values['no-validate'],
     })
-    reportMod(result, json, values.apply)
+    reportMod(result, json, values.apply, values.diff)
     return
   }
 
@@ -492,7 +503,7 @@ export function reportLint(findings, json, targetName) {
   process.stdout.write(formatLintFindings(findings, { targetName })) // socket-hook: allow console
 }
 
-export function reportMod(result, json, applied) {
+export function reportMod(result, json, applied, showDiff = false) {
   // Validation failure short-circuit: when the two-phase apply rejected
   // the batch, surface the per-finding report and exit non-zero. Working
   // tree is pristine (no atomicWrite happened), so the user can re-attempt
@@ -540,6 +551,30 @@ export function reportMod(result, json, applied) {
   for (const f of result.files) {
     const fileLine = `  ${f.file}: ${f.rewrites} rewrite(s), import added: ${f.importAdded ? 'yes' : 'no'}\n`
     process.stdout.write(fileLine) // socket-hook: allow console
+  }
+  if (showDiff && !applied) {
+    // Dry-run preview: render unified line-diff per planned rewrite by
+    // reading the pre-change source from disk and comparing it to the
+    // staged new source. Disk is never written in dry-run mode.
+    const logger = getDefaultLogger()
+    for (const plan of result.plans ?? []) {
+      let oldSource = ''
+      try {
+        oldSource = readFileSync(plan.absPath, 'utf8')
+      } catch {
+        continue
+      }
+      const patch = createPatch(
+        plan.relPath,
+        oldSource,
+        plan.newSource,
+        '',
+        '',
+        { context: 3 },
+      )
+      logger.log('')
+      logger.log(String(patch))
+    }
   }
 }
 

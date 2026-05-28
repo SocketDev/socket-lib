@@ -143,6 +143,10 @@ export async function applyCodemod({
     rewriteCount: number
     skipped: number
     files: Array<{ file: string; rewrites: number; importAdded: boolean }>
+    // Per-file planned rewrites, kept across the run regardless of
+    // validate / apply mode. The CLI's `--diff` flag reads this to render
+    // unified diffs in dry-run mode without re-walking the tree.
+    plans: PlannedRewrite[]
     validationFailed?: boolean
     validationFindings?: readonly ValidationFinding[]
   } = {
@@ -150,6 +154,7 @@ export async function applyCodemod({
     rewriteCount: 0,
     skipped: 0,
     files: [],
+    plans: [],
   }
 
   // Normalize the primordials root via lib's normalizePath so the
@@ -175,7 +180,10 @@ export async function applyCodemod({
   // path as before; lets the consumer choose speed over safety when they
   // know what they're doing.
   const useTwoPhase = apply && validate !== false
-  const plans: PlannedRewrite[] = []
+  // Plans live on `result.plans` so the CLI can render diffs after the
+  // codemod returns. The two-phase apply still reads from this same list
+  // — single source of truth.
+  const plans = result.plans
   const reportEntries: typeof result.files = []
   for (const abs of walkDir(scanDir)) {
     // Skip files that ARE the primordials surface — rewriting their
@@ -210,7 +218,12 @@ export async function applyCodemod({
         rewrites: fileResult.rewrites,
         importAdded: fileResult.importAdded,
       })
-      if (useTwoPhase && fileResult.newSource !== undefined) {
+      if (fileResult.newSource !== undefined) {
+        // Always collect plans, not just in two-phase mode. The CLI's
+        // `--diff` flag reads them from `result.plans` to render the
+        // unified diff in dry-run mode without re-walking the tree.
+        // Memory cost is bounded: each plan carries the file's
+        // full new content, which we already computed.
         plans.push({
           absPath: abs,
           relPath: rel,
