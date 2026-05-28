@@ -97,6 +97,12 @@ async function main(): Promise<void> {
         // preserveModules), which the first pattern misses.
         'dist/**/_*',
         'dist/_*/**',
+        // Bundled CLI artifacts under dist/bin/ that are runtime-only —
+        // exposed via package.json `bin`, not as library subpath exports.
+        // Listed explicitly so the regular dist/bin/*.{ts,js} library
+        // helpers (check, find, resolve, ...) continue to be exported.
+        'dist/bin/prim.cjs',
+        'dist/bin/acorn-bindgen.cjs',
       ],
       gitignore: false,
     })),

@@ -33,7 +33,10 @@ async function collectJsFiles(dir: string): Promise<string[]> {
     if (entry.isDirectory()) {
       // eslint-disable-next-line no-await-in-loop
       out.push(...(await collectJsFiles(full)))
-    } else if (entry.isFile() && full.endsWith('.js')) {
+    } else if (
+      entry.isFile() &&
+      (full.endsWith('.js') || full.endsWith('.cjs'))
+    ) {
       out.push(full)
     }
   }

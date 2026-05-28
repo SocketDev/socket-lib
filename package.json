@@ -20,6 +20,7 @@
     "url": "git+https://github.com/SocketDev/socket-lib.git"
   },
   "bin": {
+    "prim": "./dist/bin/prim.cjs",
     "socket-lib": "./dist/bin/socket-lib.js"
   },
   "files": [

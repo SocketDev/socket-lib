@@ -17,6 +17,7 @@ import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { buildConfig } from '../../.config/rolldown.config.mts'
+import { primBuildConfig } from '../../.config/rolldown.prim.config.mts'
 import { parseArgs } from '../util/parse-args.mts'
 import { runSequence } from '../util/run-command.mts'
 import { verifyDist } from './verify-dist.mts'
@@ -183,6 +184,52 @@ export async function buildTypes(
   }
 
   return exitCode
+}
+
+/**
+ * Build the prim CLI: a true bundle (not per-file transpile) that inlines
+ * lib-stable + diff + the acorn-wasm wrapper into a single
+ * `dist/bin/prim.cjs`. The vendored `acorn-bindgen.cjs` + `acorn.wasm`
+ * are copied alongside so the bindgen's `${__dirname}/./acorn.wasm`
+ * sibling-load resolves after publish.
+ */
+export async function buildPrim(
+  options: { quiet?: boolean } = {},
+): Promise<number> {
+  const { quiet = false } = options
+  try {
+    const { output, ...inputOptions } = primBuildConfig
+    const bundle = await rolldown(inputOptions)
+    try {
+      await bundle.write(output)
+    } finally {
+      await bundle.close()
+    }
+    // Stage vendored wasm + bindgen next to the bundle. The bindgen
+    // uses `${__dirname}/./acorn.wasm`, so they must be siblings of
+    // `dist/bin/prim.cjs` at runtime.
+    const binDir = path.join(rootPath, 'dist/bin')
+    await fsPromises.mkdir(binDir, { recursive: true })
+    const vendor = path.join(rootPath, 'vendor/acorn-wasm')
+    await fsPromises.copyFile(
+      path.join(vendor, 'acorn-bindgen.cjs'),
+      path.join(binDir, 'acorn-bindgen.cjs'),
+    )
+    await fsPromises.copyFile(
+      path.join(vendor, 'acorn.wasm'),
+      path.join(binDir, 'acorn.wasm'),
+    )
+    // Make the bin executable so `pnpm exec prim` / direct invocation
+    // works without `node` prefix.
+    await fsPromises.chmod(path.join(binDir, 'prim.cjs'), 0o755)
+    return 0
+  } catch (error) {
+    if (!quiet) {
+      logger.error('prim bundle build failed')
+      logger.error(error)
+    }
+    return 1
+  }
 }
 
 /**
@@ -495,8 +542,9 @@ async function main(): Promise<void> {
         }),
         buildExternals({ quiet, verbose }),
         buildTypes({ quiet, verbose, skipClean: true }),
+        buildPrim({ quiet }),
       ])
-      const [srcSettled, externalsSettled, typesSettled] = settled
+      const [srcSettled, externalsSettled, typesSettled, primSettled] = settled
       const srcResult: BuildSourceResult =
         srcSettled.status === 'fulfilled'
           ? srcSettled.value
@@ -513,6 +561,10 @@ async function main(): Promise<void> {
         typesSettled.status === 'fulfilled'
           ? typesSettled.value
           : (logger.error(`buildTypes rejected: ${typesSettled.reason}`), 1)
+      const primExitCode: number =
+        primSettled.status === 'fulfilled'
+          ? primSettled.value
+          : (logger.error(`buildPrim rejected: ${primSettled.reason}`), 1)
 
       // Check if any of the parallel builds failed
       exitCode =
@@ -520,7 +572,9 @@ async function main(): Promise<void> {
           ? srcResult.exitCode
           : externalsExitCode !== 0
             ? externalsExitCode
-            : typesExitCode
+            : typesExitCode !== 0
+              ? typesExitCode
+              : primExitCode
 
       // If all parallel builds succeeded, flush dist/ to disk and fix exports.
       if (exitCode === 0) {
