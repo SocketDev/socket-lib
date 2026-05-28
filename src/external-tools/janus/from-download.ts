@@ -22,6 +22,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedJanus } from './types'
 
+import { ErrorCtor } from '../../primordials/error'
+
 export interface JanusFromDownloadOptions {
   version: string
   platformArch: string
@@ -44,13 +46,13 @@ export async function janusFromDownload(
     const supported = JANUS_SUPPORTED_PLATFORM_ARCHES.map(p => `\`${p}\``).join(
       ', ',
     )
-    throw new Error(
+    throw new ErrorCtor(
       `janusFromDownload: platformArch must be one of [${supported}], got \`${platformArch}\`. Upstream janus only publishes the macOS arm64 build (see https://github.com/divmain/janus/releases); request \`darwin-arm64\` or use a different tool for other platforms.`,
     )
   }
   const url = getJanusDownloadUrl({ version, platformArch })
   if (!url) {
-    throw new Error(
+    throw new ErrorCtor(
       `janusFromDownload: no upstream asset for janus@${version} on \`${platformArch}\`. The platform is in the supported set but the version may be missing; check https://github.com/divmain/janus/releases/tag/v${version}.`,
     )
   }

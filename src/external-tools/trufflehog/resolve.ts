@@ -17,6 +17,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedTrufflehog } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveTrufflehogOptions {
   /**
    * When set, the resolver falls through to a GitHub release download after the
@@ -33,7 +35,7 @@ export interface ResolveTrufflehogOptions {
     | undefined
 }
 
-const resolutionCache = new Map<
+const resolutionCache = new MapCtor<
   string,
   Promise<ResolvedTrufflehog | undefined>
 >()

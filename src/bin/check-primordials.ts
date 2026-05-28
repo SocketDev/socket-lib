@@ -33,6 +33,8 @@ import {
 } from '../checks/primordials'
 import { parseArgs as parseLibArgs } from '../argv/parse'
 
+import { MapCtor, SetCtor } from '../primordials/map-set'
+
 const logger = getDefaultLogger()
 
 // Default config name. We accept both the root-level dotfile (the
@@ -200,11 +202,11 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
   // don't have to repeat the 26-entry boilerplate that every fleet repo
   // shares. The Map constructor consumes the entries in order, so the
   // user's later entries naturally overwrite the earlier defaults.
-  const aliasMap = new Map<string, string>([
+  const aliasMap = new MapCtor<string, string>([
     ...ObjectEntries(DEFAULT_ALIAS_MAP),
     ...ObjectEntries((raw.aliasMap ?? {}) as Record<string, string>),
   ])
-  const nodeInternalOnly = new Set<string>([
+  const nodeInternalOnly = new SetCtor<string>([
     ...DEFAULT_NODE_INTERNAL_ONLY,
     ...((raw.nodeInternalOnly ?? []) as string[]).filter(
       x => typeof x === 'string',

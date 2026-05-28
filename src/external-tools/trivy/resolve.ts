@@ -17,6 +17,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedTrivy } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveTrivyOptions {
   downloadIfMissing?:
     | {
@@ -29,7 +31,10 @@ export interface ResolveTrivyOptions {
     | undefined
 }
 
-const resolutionCache = new Map<string, Promise<ResolvedTrivy | undefined>>()
+const resolutionCache = new MapCtor<
+  string,
+  Promise<ResolvedTrivy | undefined>
+>()
 
 export function cacheKey(opts: ResolveTrivyOptions | undefined): string {
   if (!opts?.downloadIfMissing) {

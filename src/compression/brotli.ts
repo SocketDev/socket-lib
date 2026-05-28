@@ -30,6 +30,10 @@ import { resolveFileArgs, stripExt } from './_internal'
 
 import type { CompressFileOptions, CompressOptions } from './types'
 
+import { BufferFrom, BufferIsBuffer } from '../primordials/buffer'
+
+import { SetCtor } from '../primordials/map-set'
+
 const brotliCompressAsync = promisify(brotliCompress)
 const brotliDecompressAsync = promisify(brotliDecompress)
 
@@ -64,7 +68,7 @@ export async function compressBrotli(
   input: string | Buffer,
   options?: CompressOptions | undefined,
 ): Promise<Buffer> {
-  const buf = typeof input === 'string' ? Buffer.from(input, 'utf8') : input
+  const buf = typeof input === 'string' ? BufferFrom!(input, 'utf8') : input
   const opts = resolveBrotliOptions(options)
   // Auto-fill size hint when not provided — brotli picks better
   // blocking when it knows the input size up front.
@@ -207,7 +211,7 @@ const BROTLI_MIN_LEN = 4
  * `decompressBrotli(buf)` succeeding. Use for UI hints, not correctness.
  */
 export function isBrotliCompressed(input: Buffer): boolean {
-  return Buffer.isBuffer(input) && input.byteLength >= BROTLI_MIN_LEN
+  return BufferIsBuffer!(input) && input.byteLength >= BROTLI_MIN_LEN
 }
 
 // Use Sets — O(1) lookup, sorted alphanumerically per CLAUDE.md so
@@ -219,7 +223,7 @@ export function isBrotliCompressed(input: Buffer): boolean {
 // Exported so callers can introspect what counts as a "brotli"
 // extension without re-implementing the list, and so tests can pin
 // the recognized set.
-export const BROTLI_EXTS: ReadonlySet<string> = new Set(['.br', '.brotli'])
+export const BROTLI_EXTS: ReadonlySet<string> = new SetCtor(['.br', '.brotli'])
 
 /**
  * Extension check for brotli paths — matches `.br` / `.brotli`

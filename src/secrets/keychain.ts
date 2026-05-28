@@ -22,6 +22,8 @@
 
 import { platform } from 'node:os'
 
+import { ErrorCtor, TypeErrorCtor } from '../primordials/error'
+
 import {
   dedupeRead,
   getCached,
@@ -351,11 +353,11 @@ export async function writeSecret({
   label,
 }: WriteOptions): Promise<'written' | 'unchanged'> {
   if (!value || typeof value !== 'string') {
-    throw new TypeError('writeSecret: value must be a non-empty string')
+    throw new TypeErrorCtor('writeSecret: value must be a non-empty string')
   }
   const platform_ = detectPlatform()
   if (platform_ === 'other') {
-    throw new Error(
+    throw new ErrorCtor(
       `Unsupported platform: ${platform()}. ` +
         'Secret storage requires macOS, Linux, or Windows.',
     )
@@ -392,11 +394,11 @@ export function writeSecretSync({
   label,
 }: WriteOptions): 'written' | 'unchanged' {
   if (!value || typeof value !== 'string') {
-    throw new TypeError('writeSecret: value must be a non-empty string')
+    throw new TypeErrorCtor('writeSecret: value must be a non-empty string')
   }
   const platform_ = detectPlatform()
   if (platform_ === 'other') {
-    throw new Error(
+    throw new ErrorCtor(
       `Unsupported platform: ${platform()}. ` +
         'Secret storage requires macOS, Linux, or Windows.',
     )

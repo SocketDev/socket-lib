@@ -6,6 +6,8 @@ import { envAsBoolean } from './boolean'
 import { envAsNumber } from './number'
 import { getEnvValue } from './rewire'
 
+import { NumberIsFinite } from '../primordials/number'
+
 /**
  * Whether the MCP server should run in HTTP mode. MCP_HTTP_MODE — when set to
  * the literal string `'true'`, the MCP server serves over HTTP instead of
@@ -44,7 +46,7 @@ export function getMcpHttpMode(): boolean {
 /*@__NO_SIDE_EFFECTS__*/
 export function getMcpPort(): number {
   const parsed = envAsNumber(getEnvValue('MCP_PORT'))
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : 3000
+  return NumberIsFinite(parsed) && parsed > 0 ? parsed : 3000
 }
 
 /**

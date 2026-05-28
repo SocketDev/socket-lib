@@ -27,6 +27,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedJre } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveJreOptions {
   /**
    * When set, the resolver falls through to an Adoptium download after the
@@ -44,7 +46,7 @@ export interface ResolveJreOptions {
     | undefined
 }
 
-const resolutionCache = new Map<string, Promise<ResolvedJre | undefined>>()
+const resolutionCache = new MapCtor<string, Promise<ResolvedJre | undefined>>()
 
 export function cacheKey(opts: ResolveJreOptions | undefined): string {
   if (!opts?.downloadIfMissing) {

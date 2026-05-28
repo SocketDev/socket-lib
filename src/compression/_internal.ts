@@ -14,6 +14,8 @@ import { StringPrototypeToLowerCase } from '../primordials/string'
 
 import type { CompressFileOptions, CompressOptions } from './types'
 
+import { ObjectFreeze } from '../primordials/object'
+
 /**
  * Strip the trailing extension from a filename when it matches one of `exts`.
  * Returns the input unchanged when the trailing extname isn't in the set.
@@ -59,7 +61,7 @@ export function resolveFileArgs(
         `${fnName}: srcPath and destPath must differ; got ${srcPath}`,
       )
     }
-    return Object.freeze({
+    return ObjectFreeze({
       __proto__: null,
       destPath: destOrOptions,
       options: maybeOptions,
@@ -68,7 +70,7 @@ export function resolveFileArgs(
   }
   // Options object (or undefined → not inPlace, no destPath given).
   if (destOrOptions?.inPlace) {
-    return Object.freeze({
+    return ObjectFreeze({
       __proto__: null,
       destPath: computeInPlaceDest(srcPath),
       options: destOrOptions,

@@ -11,16 +11,18 @@ import { getDefaultLogger } from '../logger/default'
 
 import { runCheckPrimordials } from './check-primordials'
 
+import { MapCtor } from '../primordials/map-set'
+
 const logger = getDefaultLogger()
 
 // Each entry maps an invocation name to the canonical name. Aliases
 // resolve to the same handler; help prints them grouped.
-const CHECKS: ReadonlyMap<string, string> = new Map([
+const CHECKS: ReadonlyMap<string, string> = new MapCtor([
   ['primordials', 'primordials'],
   ['prim', 'primordials'],
 ])
 
-const ALIASES: ReadonlyMap<string, readonly string[]> = new Map([
+const ALIASES: ReadonlyMap<string, readonly string[]> = new MapCtor([
   ['primordials', ['prim']],
 ])
 

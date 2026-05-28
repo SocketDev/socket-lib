@@ -45,6 +45,12 @@ import process from 'node:process'
 
 import { getHome } from '../env/home'
 
+import { ObjectEntries } from '../primordials/object'
+
+import { RegExpCtor } from '../primordials/regexp'
+
+import { StringPrototypeEndsWith } from '../primordials/string'
+
 export function buildBlock(opts: WriteOptions): {
   begin: string
   end: string
@@ -57,7 +63,7 @@ export function buildBlock(opts: WriteOptions): {
   const begin = `# BEGIN ${opts.service} env (managed)`
   const end = `# END ${opts.service} env (managed)`
   const noteLines = (opts.notes ?? []).map(line => `# ${line}`)
-  const exportLines = Object.entries(opts.exports).map(
+  const exportLines = ObjectEntries(opts.exports).map(
     ([name, value]) => `export ${name}=${shellSingleQuote(value)}`,
   )
   const body = [...noteLines, ...exportLines].join('\n')
@@ -99,7 +105,7 @@ export function clear(
       end === endStripped
         ? escapeRegExp(end)
         : `(?:${escapeRegExp(end)}|${escapeRegExp(endStripped)})`
-    const re = new RegExp(
+    const re = new RegExpCtor(
       `\n*${escapeRegExp(begin)}[\\s\\S]*?${endAlt}\n?`,
       'g',
     )
@@ -189,11 +195,11 @@ export function pickRcFile(
   const shellPath = process.env['SHELL'] ?? ''
   const shell: 'zsh' | 'bash' | 'fish' | undefined =
     shellOverride ??
-    (shellPath.endsWith('zsh')
+    (StringPrototypeEndsWith(shellPath, 'zsh')
       ? 'zsh'
-      : shellPath.endsWith('bash')
+      : StringPrototypeEndsWith(shellPath, 'bash')
         ? 'bash'
-        : shellPath.endsWith('fish')
+        : StringPrototypeEndsWith(shellPath, 'fish')
           ? 'fish'
           : undefined)
   if (shell === 'zsh') {
@@ -271,14 +277,14 @@ export function write(opts: WriteOptions): WriteResult {
       legacyEnd === legacyEndStripped
         ? escapeRegExp(legacyEnd)
         : `(?:${escapeRegExp(legacyEnd)}|${escapeRegExp(legacyEndStripped)})`
-    const legacyRe = new RegExp(
+    const legacyRe = new RegExpCtor(
       `\n*${escapeRegExp(legacyBegin)}[\\s\\S]*?${endAlt}\n?`,
       'g',
     )
     working = working.replace(legacyRe, '\n')
   }
 
-  const blockRe = new RegExp(
+  const blockRe = new RegExpCtor(
     `${escapeRegExp(begin)}[\\s\\S]*?${escapeRegExp(end)}`,
   )
   const match = blockRe.exec(working)
@@ -299,9 +305,10 @@ export function write(opts: WriteOptions): WriteResult {
   // No existing canonical block. Append the new block to the
   // (possibly legacy-scrubbed) working copy and write the whole
   // thing back.
-  const needsLeadingNewline = working.length > 0 && !working.endsWith('\n\n')
+  const needsLeadingNewline =
+    working.length > 0 && !StringPrototypeEndsWith(working, '\n\n')
   const prefix = needsLeadingNewline
-    ? working.endsWith('\n')
+    ? StringPrototypeEndsWith(working, '\n')
       ? '\n'
       : '\n\n'
     : ''

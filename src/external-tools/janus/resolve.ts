@@ -19,6 +19,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedJanus } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveJanusOptions {
   downloadIfMissing?:
     | {
@@ -31,7 +33,10 @@ export interface ResolveJanusOptions {
     | undefined
 }
 
-const resolutionCache = new Map<string, Promise<ResolvedJanus | undefined>>()
+const resolutionCache = new MapCtor<
+  string,
+  Promise<ResolvedJanus | undefined>
+>()
 
 export function cacheKey(opts: ResolveJanusOptions | undefined): string {
   if (!opts?.downloadIfMissing) {

@@ -25,8 +25,10 @@
  *   re-check after creating the entry must call `invalidate`.
  */
 
-const valueCache = new Map<string, string | undefined>()
-const inflight = new Map<string, Promise<string | undefined>>()
+import { MapCtor } from '../primordials/map-set'
+
+const valueCache = new MapCtor<string, string | undefined>()
+const inflight = new MapCtor<string, Promise<string | undefined>>()
 
 export function cacheKey(service: string, account: string): string {
   // ` ` is invalid in either a real service name or an

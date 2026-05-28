@@ -27,6 +27,8 @@ const logger = getDefaultLogger()
 
 import type { AiAgentName, DiscoveredAgents } from './types.mts'
 
+import { DateNow } from '../primordials/date'
+
 const KNOWN_AGENTS: readonly AiAgentName[] = [
   'claude',
   'codex',
@@ -121,7 +123,7 @@ export function readDiskCache(cachePath: string): DiscoveredAgents | undefined {
       typeof parsed !== 'object' ||
       parsed === null ||
       typeof parsed.writtenAt !== 'number' ||
-      Date.now() - parsed.writtenAt > CACHE_TTL_MS
+      DateNow() - parsed.writtenAt > CACHE_TTL_MS
     ) {
       return undefined
     }
@@ -146,7 +148,7 @@ export async function writeDiskCache(
 ): Promise<void> {
   try {
     await mkdir(path.dirname(cachePath), { recursive: true })
-    const payload: OnDiskCache = { agents, writtenAt: Date.now() }
+    const payload: OnDiskCache = { agents, writtenAt: DateNow() }
     writeFileSync(cachePath, JSONStringify(payload, undefined, 2) + '\n')
   } catch (e) {
     // Cache-write failure is non-fatal — discovery still works for

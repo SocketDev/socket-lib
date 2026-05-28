@@ -23,6 +23,10 @@ import { RangeErrorCtor, TypeErrorCtor } from '../primordials/error'
 
 import { getInstantNanoseconds, hasInstantSlot, setInstantSlots } from './slots'
 
+import { JSONStringify } from '../primordials/json'
+
+import { ObjectDefineProperty } from '../primordials/object'
+
 // ─────────────────────────────────────────────────────────────────
 // 8.1.1.x IsValidEpochNanoseconds ( epochNanoseconds )
 // https://tc39.es/proposal-temporal/#sec-temporal-isvalidepochnanoseconds
@@ -154,7 +158,7 @@ export function epochNanosecondsImpl(this: Instant): bigint {
   return ns
 }
 
-Object.defineProperty(Instant.prototype, 'epochNanoseconds', {
+ObjectDefineProperty(Instant.prototype, 'epochNanoseconds', {
   get: epochNanosecondsImpl,
   configurable: true,
 })
@@ -177,5 +181,5 @@ export function describe(value: unknown): string {
     const ctor = (value as { constructor?: { name?: string } }).constructor
     return ctor && ctor.name ? `<${ctor.name}>` : '<object>'
   }
-  return typeof value === 'string' ? JSON.stringify(value) : String(value)
+  return typeof value === 'string' ? JSONStringify(value) : String(value)
 }

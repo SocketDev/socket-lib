@@ -2,6 +2,18 @@
 
 import { doFetch } from './browser-fetch'
 
+import { Uint8ArrayCtor } from '../primordials/array'
+
+import { DateNow } from '../primordials/date'
+
+import { ErrorCtor } from '../primordials/error'
+
+import { JSONParse } from '../primordials/json'
+
+import { MathPow } from '../primordials/math'
+
+import { PromiseCtor } from '../primordials/promise'
+
 /**
  * @file Browser-safe HTTP request layer — mirrors the public surface of
  *   `@socketsecurity/lib/http-request` (`httpJson`, `httpText`, `httpRequest`,
@@ -96,7 +108,7 @@ export async function attempt(
   if (signal) {
     init.signal = signal
   }
-  const startedAt = Date.now()
+  const startedAt = DateNow()
   if (options.hooks?.onRequest) {
     options.hooks.onRequest({
       method,
@@ -112,17 +124,17 @@ export async function attempt(
       options.maxResponseSize !== undefined &&
       buffer.byteLength > options.maxResponseSize
     ) {
-      throw new Error(
+      throw new ErrorCtor(
         `Response body (${buffer.byteLength} bytes) exceeds maxResponseSize (${options.maxResponseSize})`,
       )
     }
-    const body = new Uint8Array(buffer)
+    const body = new Uint8ArrayCtor(buffer)
     const headers = headersToRecord(response.headers)
     if (options.hooks?.onResponse) {
       options.hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startedAt,
+        duration: DateNow() - startedAt,
         status: response.status,
         statusText: response.statusText,
         headers,
@@ -142,7 +154,7 @@ export async function attempt(
         return decodeText(body)
       },
       json<T = unknown>(): T {
-        return JSON.parse(decodeText(body)) as T
+        return JSONParse(decodeText(body)) as T
       },
     }
   } catch (err) {
@@ -150,8 +162,8 @@ export async function attempt(
       options.hooks.onResponse({
         method,
         url,
-        duration: Date.now() - startedAt,
-        error: err instanceof Error ? err : new Error(String(err)),
+        duration: DateNow() - startedAt,
+        error: err instanceof Error ? err : new ErrorCtor(String(err)),
       })
     }
     throw err
@@ -350,7 +362,7 @@ export async function httpRequest(
       const response = await attempt(url, opts)
       // 5xx → eligible for retry
       if (response.status >= 500 && i + 1 < maxAttempts) {
-        await sleep(baseDelay * Math.pow(2, i))
+        await sleep(baseDelay * MathPow(2, i))
         continue
       }
       if (opts.throwOnError && !response.ok) {
@@ -365,14 +377,14 @@ export async function httpRequest(
         throw err
       }
       if (i + 1 < maxAttempts) {
-        await sleep(baseDelay * Math.pow(2, i))
+        await sleep(baseDelay * MathPow(2, i))
         continue
       }
     }
   }
   throw lastError instanceof Error
     ? lastError
-    : new Error(`HTTP request to ${url} failed`)
+    : new ErrorCtor(`HTTP request to ${url} failed`)
 }
 
 /**
@@ -390,5 +402,5 @@ export async function httpText(
 }
 
 export function sleep(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new PromiseCtor(resolve => setTimeout(resolve, ms))
 }

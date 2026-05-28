@@ -19,6 +19,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedSbt } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveSbtOptions {
   /**
    * When set, the resolver falls through to a GitHub release download after the
@@ -34,7 +36,7 @@ export interface ResolveSbtOptions {
     | undefined
 }
 
-const resolutionCache = new Map<string, Promise<ResolvedSbt | undefined>>()
+const resolutionCache = new MapCtor<string, Promise<ResolvedSbt | undefined>>()
 
 export function cacheKey(opts: ResolveSbtOptions | undefined): string {
   if (!opts?.downloadIfMissing) {

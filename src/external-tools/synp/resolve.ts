@@ -15,6 +15,8 @@ import { synpFromVfs } from './from-vfs'
 
 import type { ResolvedSynp } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveSynpOptions {
   downloadIfMissing?:
     | {
@@ -24,7 +26,7 @@ export interface ResolveSynpOptions {
     | undefined
 }
 
-const resolutionCache = new Map<string, Promise<ResolvedSynp | undefined>>()
+const resolutionCache = new MapCtor<string, Promise<ResolvedSynp | undefined>>()
 
 export function cacheKey(opts: ResolveSynpOptions | undefined): string {
   if (!opts?.downloadIfMissing) {

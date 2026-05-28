@@ -27,7 +27,7 @@
  *   `internal/socketsecurity/safe-references`, `safe-references`.
  */
 
-import { existsSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { parseArgs } from 'node:util'
@@ -219,8 +219,44 @@ export async function runCli(argv) {
     // package-name specifier `'@socketsecurity/lib/primordials'`,
     // which would create a circular-self-import.
     const localPrimordialsPath = findLocalPrimordials(scanDir)
-    const importStyle = localPrimordialsPath
-      ? {
+    let importStyle:
+      | undefined
+      | {
+          kind: 'esm'
+          specifier?: (absFile: string) => string
+          splitByLeaf?: {
+            exportToLeaf: Map<string, string>
+            leafSpecifier: (absFile: string, leaf: string) => string
+          }
+        }
+    if (localPrimordialsPath) {
+      if (isSplitPrimordials(localPrimordialsPath)) {
+        // Split-surface layout: `primordials/` directory with per-leaf
+        // files. The codemod groups identifiers by leaf and emits one
+        // import per leaf — `from '../primordials/array'`, etc.
+        importStyle = {
+          kind: 'esm' as const,
+          specifier: (): string => '',
+          splitByLeaf: {
+            exportToLeaf: surface.exportToLeaf,
+            leafSpecifier: (absFile: string, leaf: string): string => {
+              const fileDir = path.dirname(absFile)
+              let rel = path.relative(
+                fileDir,
+                path.join(localPrimordialsPath, leaf),
+              )
+              rel = rel.replace(/\.(?:cjs|cts|js|mjs|mts|ts|tsx)$/, '')
+              if (!rel.startsWith('.')) {
+                rel = './' + rel
+              }
+              return rel
+            },
+          },
+        }
+      } else {
+        // Legacy single-file primordials. Insert one combined import
+        // from the relative path.
+        importStyle = {
           kind: 'esm' as const,
           specifier: (absFile: string): string => {
             const fileDir = path.dirname(absFile)
@@ -237,13 +273,15 @@ export async function runCli(argv) {
             return rel
           },
         }
-      : undefined
+      }
+    }
     const result = await applyCodemod({
       aiDisambiguate: values['ai-disambiguate'],
       apply: values.apply,
       exported: surface.exports,
       ...(importStyle ? { importStyle } : {}),
       includeGuessed: values['include-guessed'],
+      ...(localPrimordialsPath ? { localPrimordialsPath } : {}),
       nullable: surface.nullable,
       scanDir,
       targetRoot,
@@ -337,10 +375,14 @@ const PRIMORDIALS_FILE_EXTS = ['.cjs', '.cts', '.js', '.mjs', '.mts', '.ts']
 
 /**
  * Walk up from `scanDir` looking for a sibling
- * `primordials.{ts,mts,cts,js,mjs,cjs}` file. Returns the absolute path to it,
- * or `undefined` if none is found within the scan root. The codemod uses this
- * to decide whether to insert relative-path imports (when the project owns
- * primordials) vs. the package-name specifier (when consuming
+ * `primordials.{ts,mts,cts,js,mjs,cjs}` file, OR a `primordials/` directory
+ * containing per-leaf files (`primordials/array.ts`, `primordials/string.ts`,
+ * etc. — the split-surface layout socket-lib uses today). Returns the absolute
+ * path to the file or directory, or `undefined` if neither is found within the
+ * scan root.
+ *
+ * The codemod uses this to decide whether to insert relative-path imports (when
+ * the project owns primordials) vs. the package-name specifier (when consuming
  * `@socketsecurity/lib`).
  *
  * Search order: scanDir itself, then a single level up. Beyond that we assume
@@ -351,14 +393,48 @@ export function findLocalPrimordials(scanDir): string | undefined {
   const candidates = [scanDir, path.dirname(scanDir)]
   for (let i = 0, { length: dl } = candidates; i < dl; i++) {
     const dir = candidates[i]!
+    // 1. Legacy single-file shape: primordials.{ext}
     for (let j = 0, { length: el } = PRIMORDIALS_FILE_EXTS; j < el; j++) {
       const candidate = path.join(dir, `primordials${PRIMORDIALS_FILE_EXTS[j]}`)
       if (existsSync(candidate)) {
         return candidate
       }
     }
+    // 2. Split-surface shape: primordials/ directory containing per-leaf
+    //    files (`array.ts`, `string.ts`, etc.). Detect by probing for a
+    //    known leaf — `array` is the most-likely one to exist. Returning
+    //    the directory path lets the caller compute `../primordials/array`
+    //    style imports via splitByLeaf.
+    const dirCandidate = path.join(dir, 'primordials')
+    if (existsSync(dirCandidate)) {
+      for (let j = 0, { length: el } = PRIMORDIALS_FILE_EXTS; j < el; j++) {
+        if (
+          existsSync(
+            path.join(dirCandidate, `array${PRIMORDIALS_FILE_EXTS[j]}`),
+          )
+        ) {
+          return dirCandidate
+        }
+      }
+    }
   }
   return undefined
+}
+
+/**
+ * Returns true when `localPrimordialsPath` points at a directory of per-leaf
+ * primordials files (the split-surface layout socket-lib uses), false when it's
+ * the legacy single-file shape.
+ *
+ * Callers use this to choose between top-level `specifier` (single-file) and
+ * `splitByLeaf` (directory) import wiring.
+ */
+export function isSplitPrimordials(localPrimordialsPath: string): boolean {
+  try {
+    return statSync(localPrimordialsPath).isDirectory()
+  } catch {
+    return false
+  }
 }
 
 export function report(

@@ -38,6 +38,8 @@ import {
 
 import type { FastGlobOptions, Pattern } from './types'
 
+import { ObjectKeys } from '../primordials/object'
+
 /**
  * Whether the caller's option bag is fully expressible with `node:fs.glob`
  * (`cwd` + `exclude`). Any other option means we must fall back to fast-glob,
@@ -55,7 +57,7 @@ export function canUseNodeFsGlob(
   }
   // Use ObjectKeys via primordials? Standard for-in is fine here for
   // type-narrowed access — the option object is plain.
-  for (const key of Object.keys(options)) {
+  for (const key of ObjectKeys(options)) {
     if (key !== 'cwd' && key !== 'ignore') {
       return false
     }

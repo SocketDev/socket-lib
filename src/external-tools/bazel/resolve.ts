@@ -22,6 +22,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedBazel } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveBazelOptions {
   /**
    * When set, the resolver falls through to a GitHub release download after the
@@ -37,7 +39,10 @@ export interface ResolveBazelOptions {
     | undefined
 }
 
-const resolutionCache = new Map<string, Promise<ResolvedBazel | undefined>>()
+const resolutionCache = new MapCtor<
+  string,
+  Promise<ResolvedBazel | undefined>
+>()
 
 export function cacheKey(opts: ResolveBazelOptions | undefined): string {
   if (!opts?.downloadIfMissing) {

@@ -21,6 +21,8 @@ import { findGitRoot, getCachedRealpath, getCwd, getPath } from './repo'
 
 import type { GitDiffOptions } from './types'
 
+import { DateNow } from '../primordials/date'
+
 export type SpawnArgs = [string, string[], Record<string, unknown>]
 
 export interface GitDiffSpawnArgs {
@@ -52,7 +54,7 @@ export function getCachedGitDiff(key: string): string[] | undefined {
   if (!entry) {
     return undefined
   }
-  if (Date.now() >= entry.expiresAt) {
+  if (DateNow() >= entry.expiresAt) {
     gitDiffCache.delete(key)
     return undefined
   }

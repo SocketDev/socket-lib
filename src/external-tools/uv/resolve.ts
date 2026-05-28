@@ -16,6 +16,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedUv } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveUvOptions {
   downloadIfMissing?:
     | {
@@ -28,7 +30,7 @@ export interface ResolveUvOptions {
     | undefined
 }
 
-const resolutionCache = new Map<string, Promise<ResolvedUv | undefined>>()
+const resolutionCache = new MapCtor<string, Promise<ResolvedUv | undefined>>()
 
 export function cacheKey(opts: ResolveUvOptions | undefined): string {
   if (!opts?.downloadIfMissing) {

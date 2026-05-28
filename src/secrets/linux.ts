@@ -14,13 +14,17 @@
 
 import { spawn, spawnSync } from 'node:child_process'
 
+import { ErrorCtor } from '../primordials/error'
+
+import { PromiseCtor } from '../primordials/promise'
+
 const SECRET_TOOL_BIN = 'secret-tool'
 
 export async function deleteLinux(
   service: string,
   account: string,
 ): Promise<'removed' | 'absent'> {
-  return new Promise(resolve => {
+  return new PromiseCtor(resolve => {
     const child = spawn(
       SECRET_TOOL_BIN,
       ['clear', 'service', service, 'user', account],
@@ -52,7 +56,7 @@ export async function readLinux(
   service: string,
   account: string,
 ): Promise<string | undefined> {
-  return new Promise(resolve => {
+  return new PromiseCtor(resolve => {
     const child = spawn(
       SECRET_TOOL_BIN,
       ['lookup', 'service', service, 'user', account],
@@ -97,7 +101,7 @@ export async function writeLinux(
   value: string,
   label: string,
 ): Promise<void> {
-  return new Promise((resolve, reject) => {
+  return new PromiseCtor((resolve, reject) => {
     const child = spawn(
       SECRET_TOOL_BIN,
       ['store', `--label=${label}`, 'service', service, 'user', account],
@@ -152,7 +156,7 @@ export function writeLinuxSync(
     },
   )
   if (r.status !== 0) {
-    throw new Error(
+    throw new ErrorCtor(
       `secret-tool store failed (status=${r.status}, user=${account}): ${r.stderr.trim()}. ` +
         'Install libsecret-tools (apt install libsecret-tools / dnf install libsecret) ' +
         'or ensure a Secret Service provider (gnome-keyring, kwallet) is running.',

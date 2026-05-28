@@ -22,6 +22,8 @@ import type { HashSpec } from '../../integrity'
 import type { CdxgenVariant } from './asset-names'
 import type { ResolvedCdxgen } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveCdxgenOptions {
   downloadIfMissing?:
     | {
@@ -35,7 +37,10 @@ export interface ResolveCdxgenOptions {
     | undefined
 }
 
-const resolutionCache = new Map<string, Promise<ResolvedCdxgen | undefined>>()
+const resolutionCache = new MapCtor<
+  string,
+  Promise<ResolvedCdxgen | undefined>
+>()
 
 export function cacheKey(opts: ResolveCdxgenOptions | undefined): string {
   if (!opts?.downloadIfMissing) {

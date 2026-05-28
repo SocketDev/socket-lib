@@ -15,6 +15,8 @@
  *   js-temporal/temporal-polyfill `lib/slots.ts` (pinned commit in README.md).
  */
 
+import { WeakMapCtor, WeakSetCtor } from '../primordials/map-set'
+
 // ─────────────────────────────────────────────────────────────────
 // Temporal.Instant slots
 // https://tc39.es/proposal-temporal/#sec-properties-of-temporal-instant-instances
@@ -25,8 +27,8 @@
 //                                    1970-01-01T00:00:00Z; integral
 // ─────────────────────────────────────────────────────────────────
 
-const _initializedInstant = new WeakSet<object>()
-const _instantNanoseconds = new WeakMap<object, bigint>()
+const _initializedInstant = new WeakSetCtor<object>()
+const _instantNanoseconds = new WeakMapCtor<object, bigint>()
 
 /**
  * Read `[[Nanoseconds]]`. Caller MUST gate on `hasInstantSlot` first; behaviour

@@ -17,6 +17,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedOpengrep } from './types'
 
+import { MapCtor } from '../../primordials/map-set'
+
 export interface ResolveOpengrepOptions {
   downloadIfMissing?:
     | {
@@ -29,7 +31,10 @@ export interface ResolveOpengrepOptions {
     | undefined
 }
 
-const resolutionCache = new Map<string, Promise<ResolvedOpengrep | undefined>>()
+const resolutionCache = new MapCtor<
+  string,
+  Promise<ResolvedOpengrep | undefined>
+>()
 
 export function cacheKey(opts: ResolveOpengrepOptions | undefined): string {
   if (!opts?.downloadIfMissing) {

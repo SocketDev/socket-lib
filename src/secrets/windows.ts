@@ -21,6 +21,12 @@ import { homedir } from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { ErrorCtor } from '../primordials/error'
+
+import { JSONStringify } from '../primordials/json'
+
+import { PromiseCtor } from '../primordials/promise'
+
 const POWERSHELL_BIN = 'powershell'
 
 export function buildTarget(service: string, account: string): string {
@@ -192,7 +198,7 @@ export function runPsAsync(
   stdout: string
   stderr: string
 }> {
-  return new Promise(resolve => {
+  return new PromiseCtor(resolve => {
     const child = spawn(POWERSHELL_BIN, ['-NoProfile', '-Command', script], {
       stdio: ['pipe', 'pipe', 'pipe'],
     })
@@ -249,8 +255,8 @@ export function validateKeychainComponent(value: string, name: string): void {
     value === '' ||
     value === '.'
   ) {
-    throw new Error(
-      `secrets/windows: ${name} contains path-traversal characters: ${JSON.stringify(value)}. Use a plain identifier (no \\\\, /, .., or NUL).`,
+    throw new ErrorCtor(
+      `secrets/windows: ${name} contains path-traversal characters: ${JSONStringify(value)}. Use a plain identifier (no \\\\, /, .., or NUL).`,
     )
   }
 }
@@ -272,7 +278,7 @@ export async function writeDpapi(
   `
   const r = await runPsAsync(script, value)
   if (r.status !== 0) {
-    throw new Error(
+    throw new ErrorCtor(
       `DPAPI file write failed: ${r.stderr.trim()}. ` +
         'Install the CredentialManager PowerShell module (' +
         '`Install-Module CredentialManager -Scope CurrentUser`) for a cleaner storage path.',
@@ -294,7 +300,7 @@ export function writeDpapiSync(filePath: string, value: string): void {
   `
   const r = runPsSync(script, value)
   if (r.status !== 0) {
-    throw new Error(
+    throw new ErrorCtor(
       `DPAPI file write failed: ${r.stderr.trim()}. ` +
         'Install the CredentialManager PowerShell module (' +
         '`Install-Module CredentialManager -Scope CurrentUser`) for a cleaner storage path.',

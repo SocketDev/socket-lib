@@ -30,6 +30,8 @@ import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
 import type { ResolvedJre } from './types'
 
+import { StringPrototypeStartsWith } from '../../primordials/string'
+
 export interface JreFromDownloadOptions {
   /**
    * Java feature version (the major), e.g. `21`.
@@ -84,7 +86,9 @@ export async function jreFromDownload(
   // Extension is load-bearing: extractArchive auto-detects format
   // from the cached filename. Adoptium ships `.tar.gz` on
   // mac/linux and `.zip` on windows.
-  const archiveExt = platformArch.startsWith('win-') ? '.zip' : '.tar.gz'
+  const archiveExt = StringPrototypeStartsWith(platformArch, 'win-')
+    ? '.zip'
+    : '.tar.gz'
   // strip:1 unwraps the top-level `jdk-21.0.x-jre/` directory that
   // Adoptium archives include, so the resulting tree has `bin/` etc.
   // at extractedDir root.

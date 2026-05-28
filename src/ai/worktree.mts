@@ -23,6 +23,16 @@ import { isSpawnError } from '../process/spawn/errors'
 
 import type { WorktreeCleanup } from './types.mts'
 
+import { ArrayFrom } from '../primordials/array'
+
+import { DateNow } from '../primordials/date'
+
+import { ErrorCtor } from '../primordials/error'
+
+import { MathMax } from '../primordials/math'
+
+import { PromiseAll } from '../primordials/promise'
+
 const DEFAULT_CONCURRENCY = 4
 const MAX_CONCURRENCY = 8
 
@@ -129,7 +139,7 @@ export async function runOne<I, T>(
   if (!add.ok) {
     return {
       cleanup: 'kept',
-      error: new Error(`git worktree add failed: ${add.output}`),
+      error: new ErrorCtor(`git worktree add failed: ${add.output}`),
       merged: false,
       status: 'rejected',
       worktreePath,
@@ -152,7 +162,7 @@ export async function runOne<I, T>(
     if (merge.ok) {
       merged = true
     } else {
-      error = new Error(`git merge --ff-only failed: ${merge.output}`)
+      error = new ErrorCtor(`git merge --ff-only failed: ${merge.output}`)
     }
   }
 
@@ -227,13 +237,13 @@ export async function spawnAiAgentsInWorktrees<I, T>(
 ): Promise<ReadonlyArray<WorktreeRunSettled<T>>> {
   const cleanup = options.cleanup ?? 'always'
   const namePrefix = options.namePrefix ?? 'agent-task'
-  const concurrency = Math.max(
+  const concurrency = MathMax(
     1,
     Math.min(options.concurrency ?? DEFAULT_CONCURRENCY, MAX_CONCURRENCY),
   )
   const baseRepo = options.baseRepo
   if (!existsSync(path.join(baseRepo, '.git'))) {
-    throw new Error(
+    throw new ErrorCtor(
       `spawnAiAgentsInWorktrees: baseRepo is not a git checkout: ${baseRepo}`,
     )
   }
@@ -258,7 +268,7 @@ export async function spawnAiAgentsInWorktrees<I, T>(
         return
       }
       const item = items[idx] as I
-      const worktreeBranch = `${namePrefix}-${idx}-${Date.now()}`
+      const worktreeBranch = `${namePrefix}-${idx}-${DateNow()}`
       const worktreePath = path.join(worktreeRoot, `${namePrefix}-${idx}`)
       const result: WorktreeRunSettled<T> = await runOne(
         item,
@@ -274,7 +284,7 @@ export async function spawnAiAgentsInWorktrees<I, T>(
     }
   }
 
-  await Promise.all(Array.from({ length: concurrency }, () => worker()))
+  await PromiseAll(ArrayFrom({ length: concurrency }, () => worker()))
   return settled
 }
 

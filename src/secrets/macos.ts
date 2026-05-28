@@ -21,6 +21,10 @@
 
 import { spawn, spawnSync } from 'node:child_process'
 
+import { ErrorCtor } from '../primordials/error'
+
+import { PromiseCtor } from '../primordials/promise'
+
 const SECURITY_BIN = 'security'
 
 export async function deleteMacOS(
@@ -103,7 +107,7 @@ export function runAsync(
   stdout: string
   stderr: string
 }> {
-  return new Promise(resolve => {
+  return new PromiseCtor(resolve => {
     const child = spawn(SECURITY_BIN, args as string[], {
       stdio: opts.stdio ?? ['ignore', 'pipe', 'pipe'],
     })
@@ -163,7 +167,7 @@ export async function writeMacOS(
     label,
   ])
   if (r.status !== 0) {
-    throw new Error(
+    throw new ErrorCtor(
       `security(1) add-generic-password failed (status=${r.status}, account=${account}): ${r.stderr.trim()}`,
     )
   }
@@ -198,7 +202,7 @@ export function writeMacOSSync(
     { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] },
   )
   if (r.status !== 0) {
-    throw new Error(
+    throw new ErrorCtor(
       `security(1) add-generic-password failed (status=${r.status}, account=${account}): ${r.stderr.trim()}`,
     )
   }

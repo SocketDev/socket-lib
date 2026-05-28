@@ -9,6 +9,10 @@ import { getSmolPrimordial } from '../smol/primordial'
 
 import { uncurryThis } from './uncurry'
 
+import { MapCtor } from './map-set'
+
+import { ObjectGetPrototypeOf } from './object'
+
 const _smolPrimordial = getSmolPrimordial()
 
 // ─── Constructors ──────────────────────────────────────────────────────
@@ -140,8 +144,8 @@ export const ArrayPrototypeWith = uncurryThis(Array.prototype.with) as <T>(
 // In some engines `.next` lives on the immediate prototype; in others it
 // lives on a shared ancestor. Walk up until we find the level that owns
 // the method so `uncurryThis` grabs the same one regardless of engine.
-const _anyIterator = new Map().keys() as Iterator<unknown>
-let _iteratorLookup: object | null = Object.getPrototypeOf(_anyIterator)
+const _anyIterator = new MapCtor().keys() as Iterator<unknown>
+let _iteratorLookup: object | null = ObjectGetPrototypeOf(_anyIterator)
 while (
   _iteratorLookup &&
   typeof (_iteratorLookup as { next?: unknown }).next !== 'function'
@@ -149,7 +153,7 @@ while (
   /* c8 ignore next - Modern V8 puts Iterator.prototype one hop up the chain
      so the first check already finds .next; the walk-further branch fires
      only on hypothetical engines where the prototype layout differs. */
-  _iteratorLookup = Object.getPrototypeOf(_iteratorLookup)
+  _iteratorLookup = ObjectGetPrototypeOf(_iteratorLookup)
 }
 const _iteratorProto = _iteratorLookup as {
   next: (this: Iterator<unknown>) => IteratorResult<unknown>

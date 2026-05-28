@@ -34,6 +34,8 @@ import {
 
 import type { DlxBinaryOptions } from './binary-types'
 
+import { BufferFrom } from '../primordials/buffer'
+
 /**
  * Download a binary from a URL with caching (without execution). Similar to
  * downloadPackage from dlx/package.
@@ -222,7 +224,7 @@ export async function downloadBinaryFile(
     const integrityMatch =
       actualIntegrity.length === integrity.length &&
       crypto.timingSafeEqual(
-        Buffer.from(actualIntegrity),
+        BufferFrom!(actualIntegrity),
         Buffer.from(integrity),
       )
     if (!integrityMatch) {
@@ -245,7 +247,7 @@ export async function downloadBinaryFile(
     const sha256Match =
       actualSha256.length === sha256.length &&
       crypto.timingSafeEqual(
-        Buffer.from(actualSha256),
+        BufferFrom!(actualSha256),
         Buffer.from(sha256.toLowerCase()),
       )
     if (!sha256Match) {

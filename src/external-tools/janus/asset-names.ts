@@ -8,7 +8,7 @@
  *   404.
  */
 
-import { ObjectFreeze } from '../../primordials/object'
+import { ObjectFreeze, ObjectKeys } from '../../primordials/object'
 
 export interface JanusAssetEntry {
   /**
@@ -33,7 +33,7 @@ export const JANUS_ASSET_MAP: Readonly<Record<string, JanusAssetEntry>> =
  * rather than letting the URL builder silently return undefined.
  */
 export const JANUS_SUPPORTED_PLATFORM_ARCHES: readonly string[] = ObjectFreeze(
-  Object.keys(JANUS_ASSET_MAP),
+  ObjectKeys(JANUS_ASSET_MAP),
 ) as readonly string[]
 
 export function getJanusAssetEntry(

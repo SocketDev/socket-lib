@@ -30,6 +30,10 @@ import { resolveFileArgs, stripExt } from './_internal'
 
 import type { CompressFileOptions, CompressOptions } from './types'
 
+import { BufferFrom, BufferIsBuffer } from '../primordials/buffer'
+
+import { SetCtor } from '../primordials/map-set'
+
 const gzipAsync = promisify(gzip)
 const gunzipAsync = promisify(gunzip)
 
@@ -57,7 +61,7 @@ export async function compressGzip(
   input: string | Buffer,
   options?: CompressOptions | undefined,
 ): Promise<Buffer> {
-  const buf = typeof input === 'string' ? Buffer.from(input, 'utf8') : input
+  const buf = typeof input === 'string' ? BufferFrom!(input, 'utf8') : input
   return await gzipAsync(buf, resolveGzipOptions(options))
 }
 
@@ -185,7 +189,7 @@ const GZIP_MAGIC_1 = 0x8b
  */
 export function isGzipCompressed(input: Buffer): boolean {
   return (
-    Buffer.isBuffer(input) &&
+    BufferIsBuffer!(input) &&
     input.byteLength >= 2 &&
     input[0] === GZIP_MAGIC_0 &&
     input[1] === GZIP_MAGIC_1
@@ -195,7 +199,11 @@ export function isGzipCompressed(input: Buffer): boolean {
 // Exported so callers can introspect what counts as a "gzip"
 // extension without re-implementing the list, and so tests can pin
 // the recognized set.
-export const GZIP_EXTS: ReadonlySet<string> = new Set(['.gz', '.gzip', '.tgz'])
+export const GZIP_EXTS: ReadonlySet<string> = new SetCtor([
+  '.gz',
+  '.gzip',
+  '.tgz',
+])
 
 /**
  * Extension check for gzip paths — matches `.gz` / `.gzip` / `.tgz`

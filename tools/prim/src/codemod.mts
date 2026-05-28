@@ -127,6 +127,7 @@ export async function applyCodemod({
     specifier: DEFAULT_PRIMORDIALS_IMPORT_SPECIFIER,
   },
   includeGuessed,
+  localPrimordialsPath,
   nullable = new Set(),
   scanDir,
   targetRoot,
@@ -138,7 +139,36 @@ export async function applyCodemod({
     files: [],
   }
 
+  // Normalize the primordials root once so the per-file containment
+  // check is platform-stable. `path.relative` gives us a relative path
+  // that starts with `..` IFF `abs` is OUTSIDE `localPrimordialsPath`;
+  // anything else means `abs` is inside or equal to the root. This is
+  // the cross-platform way to do "is X inside Y" without string-level
+  // `startsWith` + `path.sep` gymnastics.
+  const primordialsRoot = localPrimordialsPath
+    ? path.resolve(localPrimordialsPath)
+    : undefined
   for (const abs of walkDir(scanDir)) {
+    if (primordialsRoot) {
+      const relToPrim = path.relative(primordialsRoot, abs)
+      // Inside the primordials root iff the relative path doesn't
+      // backtrack with `..` AND isn't absolute (a different drive on
+      // Windows shows up as an absolute path here).
+      const isInside =
+        relToPrim !== '' &&
+        !relToPrim.startsWith(`..${path.sep}`) &&
+        !relToPrim.startsWith('../') &&
+        !path.isAbsolute(relToPrim)
+      // Skip files that ARE the primordials surface — rewriting their
+      // `Number.parseInt(...)` to `NumberParseInt(...)` then adding an
+      // `import { NumberParseInt } from './number'` produces a
+      // self-import when the file IS `primordials/number.ts`. The
+      // primordials leaves use local references; they're the source of
+      // truth, not consumers of it.
+      if (isInside) {
+        continue
+      }
+    }
     const rel = path.relative(targetRoot, abs)
     const fileResult = await rewriteFile({
       absPath: abs,

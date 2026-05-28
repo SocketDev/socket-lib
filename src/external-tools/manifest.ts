@@ -24,6 +24,10 @@ import { isIntegrityString } from '../integrity'
 import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
 
+import { ObjectKeys } from '../primordials/object'
+
+import { StringPrototypeStartsWith } from '../primordials/string'
+
 /**
  * Lookup helper — return the plain tool entry for `toolName`, or `undefined` if
  * the manifest doesn't have it or the entry is flavored / other-shape.
@@ -175,7 +179,7 @@ export function parseChecksums(
     )
   }
   const out: Record<string, ToolChecksum> = {}
-  for (const platformKey of Object.keys(raw)) {
+  for (const platformKey of ObjectKeys(raw)) {
     out[platformKey] = parseChecksum(raw[platformKey], toolName, platformKey)
   }
   return out
@@ -234,8 +238,8 @@ export async function readExternalToolsManifest(
     )
   }
   const tools: Record<string, ManifestEntry> = {}
-  for (const toolName of Object.keys(raw)) {
-    if (toolName.startsWith('$')) {
+  for (const toolName of ObjectKeys(raw)) {
+    if (StringPrototypeStartsWith(toolName, '$')) {
       // Skip JSON-Schema metadata keys like $schema.
       continue
     }
@@ -251,7 +255,7 @@ export function tryParseFlavored(
   // Flavored entries have at least one nested object that itself has
   // a 'checksums' field — those are the flavor variants.
   const flavors: Record<string, ToolFlavor> = {}
-  for (const key of Object.keys(raw)) {
+  for (const key of ObjectKeys(raw)) {
     const value = raw[key]
     if (!isObject(value)) {
       continue
@@ -269,7 +273,7 @@ export function tryParseFlavored(
       checksums: parseChecksums(rf.checksums, `${toolName}.${key}`),
     }
   }
-  if (Object.keys(flavors).length === 0) {
+  if (ObjectKeys(flavors).length === 0) {
     return undefined
   }
   return {

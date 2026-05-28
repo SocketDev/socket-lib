@@ -12,6 +12,8 @@
 
 import { getSmolUtil } from '../smol/detect'
 
+import { WeakRefCtor } from './map-set'
+
 const _smolUtil = getSmolUtil()
 
 // ─── uncurryThis ───────────────────────────────────────────────────────
@@ -87,7 +89,7 @@ export const weakRefSafe: <T extends object | symbol>(
   _smolUtil?.weakRefSafe ??
   (<T extends object | symbol>(target: T): WeakRef<T> | undefined => {
     try {
-      return new WeakRef(target)
+      return new WeakRefCtor(target)
     } catch {
       return undefined
     }

@@ -19,6 +19,12 @@ import { isSpawnError } from '../process/spawn/errors'
 
 import { discoverAiAgents } from './discover.mts'
 
+import { DateNow } from '../primordials/date'
+
+import { ErrorCtor } from '../primordials/error'
+
+import { PromiseCtor } from '../primordials/promise'
+
 import type {
   AgentSpawnResult,
   AiAgentName,
@@ -150,7 +156,7 @@ export async function pickAgent(
   const discovered = await discoverAiAgents({ repoRoot: cwd })
   if (requested) {
     if (!(requested in discovered)) {
-      throw new Error(
+      throw new ErrorCtor(
         `spawnAiAgent: requested agent "${requested}" is not on PATH. Install the CLI or pass a different agent. Discovered: ${ObjectKeys(discovered).join(', ') || '(none)'}`,
       )
     }
@@ -167,7 +173,7 @@ export async function pickAgent(
       return candidate
     }
   }
-  throw new Error(
+  throw new ErrorCtor(
     'spawnAiAgent: no AI agent CLI on PATH. Install one of: claude, codex, opencode, gemini.',
   )
 }
@@ -203,7 +209,7 @@ export async function spawnAiAgent(
   let stderr = ''
   let exitCode = 0
   let attempts = 0
-  const start = Date.now()
+  const start = DateNow()
 
   while (attempts < MAX_ATTEMPTS) {
     attempts += 1
@@ -237,12 +243,12 @@ export async function spawnAiAgent(
     if (!isOverloaded(stdout, stderr) || attempts >= MAX_ATTEMPTS) {
       break
     }
-    await new Promise(resolve => setTimeout(resolve, backoffFor(attempts)))
+    await new PromiseCtor(resolve => setTimeout(resolve, backoffFor(attempts)))
   }
 
   return {
     attempts,
-    durationMs: Date.now() - start,
+    durationMs: DateNow() - start,
     exitCode,
     stderr,
     stdout,

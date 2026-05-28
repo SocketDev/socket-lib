@@ -43,6 +43,7 @@ import {
 import { toEditablePackageJson, toEditablePackageJsonSync } from './edit'
 
 import {
+  StringPrototypeCharCodeAt,
   StringPrototypeIndexOf,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
@@ -230,7 +231,7 @@ export async function packPackage(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function pkgNameToSlug(pkgName: string): string {
-  return pkgName.charCodeAt(0) === 64 /* '@' */
+  return StringPrototypeCharCodeAt(pkgName, 0) === 64 /* '@' */
     ? `${pkgName.slice(1).replace('/', '-')}`
     : pkgName
 }
