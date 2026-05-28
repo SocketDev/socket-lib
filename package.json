@@ -2893,5 +2893,9 @@
     "npm": ">=11.16.0",
     "pnpm": ">=11.4.0"
   },
-  "packageManager": "pnpm@11.4.0"
+  "packageManager": "pnpm@11.4.0",
+  "allowScripts": {
+    "esbuild": true,
+    "rolldown": true
+  }
 }
