@@ -27,7 +27,7 @@ const MAX_FILE_SIZE = 2 * 1024 * 1024
 // parser shared by AST-based oxlint plugin rules + hooks; ~3MB is the
 // upstream build artifact.
 const ALLOWED_LARGE_FILES = new Set<string>([
-  '.claude/hooks/_shared/acorn/acorn.wasm',
+  '.claude/hooks/fleet/_shared/acorn/acorn.wasm',
   'vendor/acorn-wasm/acorn.wasm',
 ])
 
