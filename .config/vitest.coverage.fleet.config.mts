@@ -46,8 +46,8 @@ export const baseFleetCoverageConfig: CoverageOptions = {
 
 /**
  * Fleet-default cumulative threshold. A repo can override these in its own
- * coverage config when its bar is materially different — the wheelhouse
- * default is the conservative starting point.
+ * coverage config when its bar is materially different — the wheelhouse default
+ * is the conservative starting point.
  */
 export const baseFleetAggregateThresholds = {
   branches: 95,

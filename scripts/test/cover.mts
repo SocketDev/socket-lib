@@ -3,14 +3,11 @@
  *   vitest suites, merge coverage-final.json via max-hit-count, and gate the
  *   aggregate against thresholds declared in
  *   .config/vitest.coverage.config.mts. Sets COVERAGE=true so vitest config
- *   enables source resolution.
- *
- *   Flags:
- *     --code-only      Skip type-coverage (only run vitest)
- *     --type-only      Skip vitest (only run type-coverage)
- *     --summary        Hide detailed coverage table, show summary only
- *     --update-readme  After a successful run, rewrite the coverage badge
- *                      in README.md to the aggregate statements percentage
+ *   enables source resolution. Flags: --code-only Skip type-coverage (only run
+ *   vitest) --type-only Skip vitest (only run type-coverage) --summary Hide
+ *   detailed coverage table, show summary only --update-readme After a
+ *   successful run, rewrite the coverage badge in README.md to the aggregate
+ *   statements percentage.
  */
 
 import fs from 'node:fs/promises'
@@ -124,9 +121,9 @@ export async function runTestSuites(
 }
 
 /**
- * Merge coverage-final.json from both suites using max-hit-count strategy.
- * A statement/branch/function covered by either suite counts as covered.
- * Returns aggregate percentages for statements, branches, functions, lines.
+ * Merge coverage-final.json from both suites using max-hit-count strategy. A
+ * statement/branch/function covered by either suite counts as covered. Returns
+ * aggregate percentages for statements, branches, functions, lines.
  */
 export async function mergeCoverageFinal(): Promise<
   AggregateCoverage | undefined
@@ -339,9 +336,9 @@ export function displayCodeCoverage(
 /**
  * Rewrite the coverage badge in README.md to the given percentage. The badge
  * shape matches the canonical fleet form:
- *   ![Coverage](https://img.shields.io/badge/coverage-<PCT>%25-brightgreen)
- * No-op (and reports back) when no badge line matches — surfaces the drift
- * rather than silently doing nothing.
+ * ![Coverage](https://img.shields.io/badge/coverage-<PCT>%25-brightgreen) No-op
+ * (and reports back) when no badge line matches — surfaces the drift rather
+ * than silently doing nothing.
  */
 export async function updateReadmeBadge(percent: number): Promise<boolean> {
   const readmePath = path.join(rootPath, 'README.md')
