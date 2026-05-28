@@ -21,7 +21,7 @@
  *     containment checks.
  */
 
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { parse } from 'acorn-wasm'
@@ -30,26 +30,156 @@ import { stripTypeScriptTypes } from 'node:module'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 /**
- * Read the on-disk content of every planned-rewrite file's importers' existing
- * import lines + simulate the new graph. Detects cycles introduced by the
- * rewrite that would break module-load order.
+ * Detect import cycles introduced (or made worse) by the planned rewrites.
  *
- * Implemented as a focused walk: for each plan, build the union of (existing
- * neighbors + newly-introduced relative imports) and DFS for back-edges within
- * the cohort.
+ * Algorithm:
  *
- * Out of scope for v1 — single-file self-import detection (above) catches the
- * primary failure mode we observed today. Multi-hop cycle detection is planned
- * as a follow-up; flag is reserved here so the option surface stays
- * compatible.
+ * 1. Build a module graph rooted at every planned file. Each node is a normalized,
+ *    extension-stripped absolute path. Edges are relative- specifier imports
+ *    resolved against the importer's directory.
+ * 2. For nodes that ARE plans, use `plan.newSource` as the source-of-truth (the
+ *    post-rewrite view). For other nodes referenced via edges, read the file on
+ *    disk + parse. Files that don't exist or fail to parse contribute no
+ *    outgoing edges (the cycle search continues past them).
+ * 3. Run DFS from each plan node. Track a recursion stack of `(node, edge
+ *    specifier)` tuples. A revisit of any node currently on the stack means we
+ *    found a back-edge → cycle. Walk the stack to recover the path, surface it
+ *    as `detail`.
+ * 4. Cap the cycle-finding count per plan at 1 — we only need to report each
+ *    introduced cycle once, not every back-edge that participates in it.
+ *
+ * Why this matters: today's `primordials/array.ts` → `./map-set` → `./array`
+ * cycle would have been caught. The single-file self-import detector only sees
+ * `array.ts` → `./array`, not the indirect path through `map-set`.
+ *
+ * Performance: visited-set + memoized parse cache keeps the walk O(N+E) where N
+ * is the total reachable file count and E is the import-edge count. Plans are
+ * walked sequentially but parse results cache across them.
  */
 export function detectImportCycles(
-  _plans: readonly PlannedRewrite[],
+  plans: readonly PlannedRewrite[],
 ): readonly ValidationFinding[] {
-  // Reserved: implement when needed. The self-import + inside-root checks
-  // above cover today's failure modes. Multi-hop cycles would need a full
-  // graph build + DFS; deferred until we see a real one.
-  return []
+  if (plans.length === 0) {
+    return []
+  }
+  // Plans, keyed by normalized + ext-stripped absolute path. The map is the
+  // override layer: when DFS visits one of these nodes, we use the planned
+  // newSource instead of reading from disk.
+  const planByNode = new Map<string, PlannedRewrite>()
+  for (let i = 0, { length } = plans; i < length; i += 1) {
+    const plan = plans[i]!
+    planByNode.set(nodeKey(plan.absPath), plan)
+  }
+  // Memoize per-node outgoing-edge lookup. Saves rereading + reparsing files
+  // referenced by multiple plans (the primordials/ leaves all import
+  // ./uncurry, for example).
+  const edgeCache = new Map<string, readonly string[]>()
+  const findings: ValidationFinding[] = []
+  for (let i = 0, { length } = plans; i < length; i += 1) {
+    const plan = plans[i]!
+    const startNode = nodeKey(plan.absPath)
+    const startAbs = nodeAbsForKey(startNode, plan.absPath)
+    const stack: Array<{ node: string; abs: string; via?: string }> = []
+    const onStack = new Set<string>()
+    const visited = new Set<string>()
+    const cycle = dfsForCycle(
+      startNode,
+      startAbs,
+      planByNode,
+      edgeCache,
+      stack,
+      onStack,
+      visited,
+    )
+    if (cycle) {
+      findings.push({
+        kind: 'cycle',
+        file: plan.relPath,
+        message: 'rewrite introduced or extended an import cycle',
+        detail: `cycle path: ${cycle.join(' → ')}`,
+      })
+    }
+  }
+  return findings
+}
+
+/**
+ * Iterative DFS for a back-edge into the recursion stack. Returns the cycle
+ * path (sequence of node keys ending at the back-edge target) or undefined if
+ * no cycle is found from this start.
+ *
+ * Iterative (not recursive) because deep graphs would blow the call stack on
+ * pathological inputs. The state per frame is the node, its abs path, and an
+ * index into its outgoing-edges list.
+ */
+export function dfsForCycle(
+  start: string,
+  startAbs: string,
+  planByNode: ReadonlyMap<string, PlannedRewrite>,
+  edgeCache: Map<string, readonly string[]>,
+  stack: Array<{ node: string; abs: string; via?: string }>,
+  onStack: Set<string>,
+  visited: Set<string>,
+): readonly string[] | undefined {
+  // Each frame: { node, abs, edges, edgeIndex }. We push on enter and pop
+  // on exit. `via` (in the stack array passed by caller) records the
+  // specifier that led to this node, used to render the cycle path.
+  type Frame = {
+    node: string
+    abs: string
+    edges: readonly string[]
+    edgeIndex: number
+  }
+  const frames: Frame[] = []
+  const enter = (node: string, abs: string): void => {
+    const edges = getOutgoingEdges(node, abs, planByNode, edgeCache)
+    frames.push({ node, abs, edges, edgeIndex: 0 })
+    stack.push({ node, abs })
+    onStack.add(node)
+    visited.add(node)
+  }
+  const leave = (): void => {
+    const frame = frames.pop()
+    if (frame) {
+      onStack.delete(frame.node)
+      stack.pop()
+    }
+  }
+  enter(start, startAbs)
+  while (frames.length > 0) {
+    const frame = frames[frames.length - 1]!
+    if (frame.edgeIndex >= frame.edges.length) {
+      leave()
+      continue
+    }
+    const target = frame.edges[frame.edgeIndex]!
+    frame.edgeIndex += 1
+    if (onStack.has(target)) {
+      // Back-edge → cycle. Walk the stack from the back-edge target to the
+      // current node + close it with the target again. The result is a
+      // human-readable path like `array → map-set → array`.
+      const path: string[] = []
+      let started = false
+      for (let i = 0, { length } = stack; i < length; i += 1) {
+        const entry = stack[i]!
+        if (entry.node === target) {
+          started = true
+        }
+        if (started) {
+          path.push(shortenForReport(entry.node))
+        }
+      }
+      path.push(shortenForReport(target))
+      return path
+    }
+    if (visited.has(target)) {
+      // Already fully explored from a sibling path; safe to skip.
+      continue
+    }
+    const targetAbs = nodeAbsForKey(target, target)
+    enter(target, targetAbs)
+  }
+  return undefined
 }
 
 /**
@@ -128,8 +258,109 @@ export function formatValidationReport(
   return lines.join('\n')
 }
 
+/**
+ * Compute the outgoing edges of a node — the relative imports it declares. For
+ * nodes that match a plan, use the plan's `newSource`. For other nodes, read
+ * the file on disk. Memoized via `edgeCache`.
+ *
+ * Returns an array of `{ targetNode, specifier }` entries. Non-relative
+ * specifiers (`node:fs`, `@socketsecurity/lib-stable/...`) contribute no edges
+ * — they're external to the local graph.
+ */
+export function getOutgoingEdges(
+  node: string,
+  abs: string,
+  planByNode: ReadonlyMap<string, PlannedRewrite>,
+  edgeCache: Map<string, readonly string[]>,
+): readonly string[] {
+  const cached = edgeCache.get(node)
+  if (cached) {
+    return cached
+  }
+  let source: string | undefined
+  const plan = planByNode.get(node)
+  if (plan) {
+    source = plan.newSource
+  } else {
+    try {
+      source = readFileSync(abs, 'utf8')
+    } catch {
+      // Missing or unreadable file → no outgoing edges. The cycle search
+      // continues; we just don't follow into a phantom node.
+      edgeCache.set(node, [])
+      return []
+    }
+  }
+  let imports: readonly string[]
+  try {
+    imports = extractImports(source, abs)
+  } catch {
+    edgeCache.set(node, [])
+    return []
+  }
+  const dir = path.dirname(abs)
+  const targets: string[] = []
+  for (let i = 0, { length } = imports; i < length; i += 1) {
+    const spec = imports[i]!
+    if (!isRelativeSpecifier(spec)) {
+      continue
+    }
+    const resolved = path.resolve(dir, spec)
+    targets.push(stripExt(normalizePath(resolved)))
+  }
+  edgeCache.set(node, targets)
+  return targets
+}
+
 export function isRelativeSpecifier(spec: string): boolean {
   return spec.startsWith('./') || spec.startsWith('../')
+}
+
+/**
+ * Recover a usable absolute path for a node key. The DFS visits nodes by key
+ * (ext-stripped) but needs the actual on-disk path to read source. We probe the
+ * same set of extensions used elsewhere; first one that exists wins.
+ *
+ * `hint` is the original path (with ext) for the starting plan — used as the
+ * preferred answer when the key matches.
+ */
+export function nodeAbsForKey(node: string, hint: string): string {
+  if (stripExt(normalizePath(hint)) === node) {
+    return hint
+  }
+  // Try common TS/JS extensions in order.
+  const exts = ['.ts', '.mts', '.cts', '.tsx', '.js', '.mjs', '.cjs', '.jsx']
+  for (let i = 0, { length } = exts; i < length; i += 1) {
+    const candidate = `${node}${exts[i]}`
+    if (existsSync(candidate)) {
+      return candidate
+    }
+  }
+  // Fall back to bare key (caller's readFileSync will throw, caught by the
+  // edge lookup, contributing no outgoing edges).
+  return node
+}
+
+/**
+ * Build the module-graph node key for an absolute path. Two forms of the same
+ * file (`./foo`, `./foo.ts`) must collapse to one node, so we strip the
+ * extension. Also normalize to forward-slash so Windows + posix agree.
+ */
+export function nodeKey(absPath: string): string {
+  return stripExt(normalizePath(absPath))
+}
+
+/**
+ * Render a node key as a short relative-style path for the cycle report. The
+ * full absolute path is noisy; the basename plus its parent dir is enough to
+ * identify the file in context.
+ */
+export function shortenForReport(node: string): string {
+  const parts = node.split('/')
+  if (parts.length <= 2) {
+    return node
+  }
+  return parts.slice(-2).join('/')
 }
 
 export function stripExt(p: string): string {
@@ -244,6 +475,15 @@ export function validateRewrites(
         })
       }
     }
+  }
+  // Multi-hop cycle detection runs ACROSS the plan set. Even when no single
+  // file self-imports, a chain like `array.ts → ./map-set → ./array` is a
+  // load-order break. The walk is memoized so plans referencing common
+  // dependencies (every primordials/ leaf imports ./uncurry) only pay the
+  // parse cost once.
+  const cycleFindings = detectImportCycles(plans)
+  for (let i = 0, { length } = cycleFindings; i < length; i += 1) {
+    findings.push(cycleFindings[i]!)
   }
   return findings
 }
