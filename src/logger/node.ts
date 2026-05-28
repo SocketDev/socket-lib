@@ -63,7 +63,6 @@ import type { LogSymbols, Task } from './types'
  * Enhanced console logger with indentation, colored symbols, and stream
  * management.
  */
-/*@__PURE__*/
 export class Logger {
   /**
    * Static reference to log symbols for convenience.

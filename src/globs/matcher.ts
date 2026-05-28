@@ -160,8 +160,8 @@ export function getMatchesGlob():
   | ((p: string, pattern: string) => boolean)
   | undefined {
   if (!_matchesGlobProbed) {
-    const fn = /*@__PURE__*/ (
-      require('node:path') as typeof import('node:path') & {
+    const fn = (
+      /*@__PURE__*/ require('node:path') as typeof import('node:path') & {
         matchesGlob?: unknown
       }
     ).matchesGlob

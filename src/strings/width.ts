@@ -26,8 +26,8 @@ let _eastAsianWidth: typeof eastAsianWidthType | undefined
 /*@__NO_SIDE_EFFECTS__*/
 export function getEastAsianWidth() {
   if (_eastAsianWidth === undefined) {
-    _eastAsianWidth = /*@__PURE__*/ (
-      require('../external/get-east-asian-width') as {
+    _eastAsianWidth = (
+      /*@__PURE__*/ require('../external/get-east-asian-width') as {
         eastAsianWidth: typeof eastAsianWidthType
       }
     ).eastAsianWidth
