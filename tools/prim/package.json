@@ -22,7 +22,8 @@
   },
   "dependencies": {
     "@socketsecurity/lib-stable": "catalog:",
-    "acorn-wasm": "workspace:*"
+    "acorn-wasm": "workspace:*",
+    "diff": "catalog:"
   },
   "peerDependencies": {
     "@anthropic-ai/claude-agent-sdk": "^0.2.0"
