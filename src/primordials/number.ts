@@ -51,7 +51,7 @@ export const NumberParseInt: typeof Number.parseInt = _smolParseInt10
   ? (s, radix) =>
       radix === undefined || radix === 10
         ? _smolParseInt10(s as string)
-        : NumberParseInt(s, radix)
+        : Number.parseInt(s, radix)
   : Number.parseInt
 /* c8 ignore stop */
 export const NumberPrototypeToExponential = uncurryThis(

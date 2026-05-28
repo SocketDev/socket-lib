@@ -21,6 +21,7 @@
     "test": "node --experimental-strip-types --test test/*.test.mts"
   },
   "dependencies": {
+    "@socketsecurity/lib-stable": "catalog:",
     "acorn-wasm": "workspace:*"
   },
   "peerDependencies": {

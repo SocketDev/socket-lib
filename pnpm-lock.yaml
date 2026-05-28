@@ -905,6 +905,9 @@ importers:
       '@anthropic-ai/claude-agent-sdk':
         specifier: ^0.2.0
         version: 0.2.116(supports-color@10.2.2)(zod@4.1.12)
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.0.4(typescript@5.9.2)'
       acorn-wasm:
         specifier: workspace:*
         version: link:../../vendor/acorn-wasm
