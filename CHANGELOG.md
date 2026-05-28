@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.4](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.4) - 2026-05-28
+
+### Added
+
+- **`shell/quote` — `quote(argv)`.** Escape an argv array into a single POSIX-`sh`-safe command string for display, logging, or copy-pasteable reproductions. Wraps the vendored `shell-quote`. For spawning, prefer `child_process.spawn` with an argv array over quoting into a shell string.
+- **`shell/parse` — `parseShell(line)`.** Tokenize a command line into typed entries (bare strings, operators, comments, globs), preserving shell structure. Use when you need the operators / comments back; for plain argv extraction continue to use `argv/parse-args-string`.
+
+### Changed
+
+- **`argv/parse-args-string` now delegates to the vendored `shell-quote` parser** instead of the hand-rolled regex. Output narrows to bare-string tokens: inner quotes on mixed `key="value"` tokens are stripped (`--bar="x y"` → `--bar=x y`), `$VAR` collapses to empty, operators and comments are dropped. The function's own `@example` already documented the stripped form; only one unit test relied on the old shape.
+
+### Fixed
+
+- **`make-fetch-happen` fetcher is now lazily initialized.** `packages/operations.ts` was creating the fetcher at module load, which forced `make-fetch-happen` (and the npm-pack bundle behind it) to load for any consumer of the module — even ones that only used pure helpers. Initialization now defers to first use.
+- **`Global*` primordial aliases normalize embedded acronyms.** The generator was title-casing the first letter only, leaving embedded acronyms screaming (`encodeURIComponent` → `GlobalEncodeURIComponent`). DOM/URI/URL now lowercase past the first letter so aliases read as single TitleCase words. Concrete renames in `DEFAULT_ALIAS_MAP`: `GlobalDecodeURIComponent` → `GlobalDecodeUriComponent`, `GlobalEncodeURIComponent` → `GlobalEncodeUriComponent`.
+
 ## [6.0.3](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.3) - 2026-05-26
 
 ### Added
