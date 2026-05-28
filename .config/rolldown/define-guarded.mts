@@ -11,8 +11,8 @@
  *   risky keys (`process.env.DEBUG`, …) stay safe to define. Uses rolldown's
  *   bundled oxc parser (`rolldown/parseAst`) for reliable AST spans +
  *   MagicString for surgical rewrites. When the consuming build opts into
- *   rolldown's `experimental.nativeMagicString`, the `transform` hook receives a
- *   native MagicString on `meta.magicString` (same API, Rust-backed, no JS
+ *   rolldown's `experimental.nativeMagicString`, the `transform` hook receives
+ *   a native MagicString on `meta.magicString` (same API, Rust-backed, no JS
  *   sourcemap round-trip) — we use it when present and fall back to the
  *   `magic-string` npm package otherwise. Keys are dotted member chains
  *   (`process.env.X`) or bare identifiers; source may spell a member access
