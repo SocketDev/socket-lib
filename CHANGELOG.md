@@ -13,10 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`http-request/headers` — `basicAuthHeader(token)`.** Builds the Socket API Basic-auth shape (token-as-username, empty password) so call sites stop hand-rolling `Basic ${base64(token + ':')}`.
 - **`http-request` retry instrumentation.** Adds `Retry-Attempt`, `Retry-Max`, and `Retry-After` request headers on retried attempts so server-side logs can correlate a retry chain.
 - **`prim` CLI bin.** `prim` is now published as a `bin` entry (`dist/bin/prim.cjs`); installs from `@socketsecurity/lib` make `npx prim` work. Also new in this release: `prim --diff` for unified line-diffs in dry-run mode, multi-hop cycle detection in `validateRewrites`, and a two-phase apply with cross-batch validation.
-
-### Changed
-
-- **`sanitizeHeaders` now redacts by name SHAPE, not enumeration.** The new `isSensitiveHeaderName` regex (`auth | cookie | credential | key | password | secret | token`) covers custom token headers (`x-amz-security-token`, `api-key`, …) without an explicit allowlist. Same reasoning as "a denylist is itself a leak."
+- **`sanitizeHeaders` shape-based redaction.** `isSensitiveHeaderName` regex (`auth | cookie | credential | key | password | secret | token`) covers custom token headers (`x-amz-security-token`, `api-key`, …) without an explicit allowlist. Same reasoning as "a denylist is itself a leak."
 
 ### Fixed
 
