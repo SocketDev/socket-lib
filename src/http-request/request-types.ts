@@ -145,8 +145,8 @@ export interface HttpRequestOptions {
    * HTTP headers to send with the request. A `User-Agent` header is
    * automatically added if not provided.
    *
-   * On retried attempts (when `retries` > 0), three telemetry headers are
-   * added automatically for server-side logging and are NOT removable here:
+   * On retried attempts (when `retries` > 0), three telemetry headers are added
+   * automatically for server-side logging and are NOT removable here:
    * `Retry-Attempt` (1-based retry number), `Retry-Max` (the `retries`
    * ceiling), and `Retry-After` (seconds waited before this attempt).
    *
