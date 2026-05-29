@@ -619,20 +619,38 @@ describe('git extended tests', () => {
 
   describe('concurrent operations', () => {
     it('should handle many concurrent git operations', async () => {
-      const operations = Array.from({ length: 20 }, (_, i) => {
-        if (i % 3 === 0) {
-          return getChangedFiles({ cwd: projectRoot })
-        }
-        if (i % 3 === 1) {
-          return getStagedFiles({ cwd: projectRoot })
-        }
-        return getUnstagedFiles({ cwd: projectRoot })
-      })
+      // Use a freshly-seeded temp repo instead of `projectRoot` so 20
+      // concurrent git invocations don't contend with the live working
+      // tree (size + index lock + ongoing edits). Past flake: 30s timeout
+      // on macOS runners when projectRoot grew large.
+      await runWithTempDir(async tmpDir => {
+        spawnSync('git', ['init'], { cwd: tmpDir })
+        spawnSync('git', ['config', 'user.name', 'Test User'], { cwd: tmpDir })
+        spawnSync('git', ['config', 'user.email', 'test@example.com'], {
+          cwd: tmpDir,
+        })
+        await fs.writeFile(path.join(tmpDir, 'a.txt'), 'a', 'utf8')
+        await fs.writeFile(path.join(tmpDir, 'b.txt'), 'b', 'utf8')
 
-      const results = await Promise.all(operations)
-      for (const result of results) {
-        expect(Array.isArray(result)).toBe(true)
-      }
+        const operations = Array.from({ length: 20 }, (_, i) => {
+          // Always disable the result cache so each call hits git for
+          // real — otherwise 19 of 20 invocations would short-circuit
+          // on the cache and the test wouldn't exercise concurrency.
+          const opts = { cache: false, cwd: tmpDir }
+          if (i % 3 === 0) {
+            return getChangedFiles(opts)
+          }
+          if (i % 3 === 1) {
+            return getStagedFiles(opts)
+          }
+          return getUnstagedFiles(opts)
+        })
+
+        const results = await Promise.all(operations)
+        for (const result of results) {
+          expect(Array.isArray(result)).toBe(true)
+        }
+      }, 'git-concurrent-')
     })
 
     it('should handle mixed sync and async operations', async () => {
