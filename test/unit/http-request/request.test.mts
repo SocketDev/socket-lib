@@ -235,6 +235,85 @@ describe.sequential('http-request/request — retry loop', () => {
   })
 })
 
+describe.sequential('http-request/request — retry telemetry headers', () => {
+  test('does not add retry headers to the first attempt', async () => {
+    const { httpRequest, httpRequestAttempt } = await loadFresh()
+    httpRequestAttempt.mockResolvedValueOnce(makeResponse({ ok: true }))
+    await httpRequest('https://example.com', {
+      headers: { 'X-Foo': 'bar' },
+      retries: 2,
+      retryDelay: 0,
+    })
+    const [, opts] = httpRequestAttempt.mock.calls[0]!
+    expect(opts.headers).toEqual({ 'X-Foo': 'bar' })
+    expect(opts.headers['Retry-Attempt']).toBeUndefined()
+  })
+
+  test('stamps Retry-Attempt / Retry-Max / Retry-After on retried requests', async () => {
+    const { httpRequest, httpRequestAttempt } = await loadFresh()
+    httpRequestAttempt
+      .mockRejectedValueOnce(new Error('first'))
+      .mockRejectedValueOnce(new Error('second'))
+      .mockResolvedValueOnce(makeResponse({ ok: true }))
+    // onRetry overrides the delay to 0 so the test stays fast while still
+    // exercising the per-attempt header stamping. Retry-After reflects the
+    // computed exponential delay (retryDelay * 2**attempt, in seconds) which
+    // we capture below independently of the actual wait.
+    await httpRequest('https://example.com', {
+      headers: { 'X-Foo': 'bar' },
+      retries: 5,
+      retryDelay: 1000,
+      onRetry: () => 0,
+    })
+    // Second call = first retry: attempt 1, computed delay 1000ms -> 1s.
+    const [, firstRetry] = httpRequestAttempt.mock.calls[1]!
+    expect(firstRetry.headers).toEqual({
+      'X-Foo': 'bar',
+      'Retry-Attempt': '1',
+      'Retry-Max': '5',
+      'Retry-After': '0',
+    })
+    // Third call = second retry: attempt 2.
+    const [, secondRetry] = httpRequestAttempt.mock.calls[2]!
+    expect(secondRetry.headers).toEqual({
+      'X-Foo': 'bar',
+      'Retry-Attempt': '2',
+      'Retry-Max': '5',
+      'Retry-After': '0',
+    })
+  })
+
+  test('Retry-After reflects an onRetry-overridden delay (rounded seconds)', async () => {
+    const { httpRequest, httpRequestAttempt } = await loadFresh()
+    httpRequestAttempt
+      .mockRejectedValueOnce(new Error('first'))
+      .mockResolvedValueOnce(makeResponse({ ok: true }))
+    await httpRequest('https://example.com', {
+      retries: 1,
+      retryDelay: 60_000,
+      // Override to 1.5s — mirrors honoring a server Retry-After; rounds to 2.
+      onRetry: () => 1500,
+    })
+    const [, retry] = httpRequestAttempt.mock.calls[1]!
+    expect(retry.headers['Retry-After']).toBe('2')
+    expect(retry.headers['Retry-Attempt']).toBe('1')
+  })
+
+  test('does not mutate the caller headers object across retries', async () => {
+    const { httpRequest, httpRequestAttempt } = await loadFresh()
+    httpRequestAttempt
+      .mockRejectedValueOnce(new Error('first'))
+      .mockResolvedValueOnce(makeResponse({ ok: true }))
+    const callerHeaders = { 'X-Foo': 'bar' }
+    await httpRequest('https://example.com', {
+      headers: callerHeaders,
+      retries: 1,
+      retryDelay: 0,
+    })
+    expect(callerHeaders).toEqual({ 'X-Foo': 'bar' })
+  })
+})
+
 describe.sequential('http-request/request — re-exports', () => {
   test('re-exports httpRequestAttempt and readIncomingResponse from the leaves', async () => {
     const mod = await import('../../../src/http-request/request')

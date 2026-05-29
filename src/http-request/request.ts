@@ -14,7 +14,7 @@
 import { setTimeout as delay } from 'node:timers/promises'
 
 import { ErrorCtor } from '../primordials/error'
-import { MathMax } from '../primordials/math'
+import { MathMax, MathRound } from '../primordials/math'
 import { NumberIsNaN } from '../primordials/number'
 
 import { httpRequestAttempt } from './request-attempt'
@@ -102,7 +102,7 @@ export async function httpRequest(
     )
   }
 
-  const attemptOpts: HttpRequestOptions = {
+  const baseAttemptOpts: HttpRequestOptions = {
     body,
     ca,
     // Disable redirect following for stream bodies — the stream is consumed
@@ -120,7 +120,26 @@ export async function httpRequest(
 
   // Retry logic with exponential backoff
   let lastError: Error | undefined
+  // Seconds waited before the upcoming attempt, surfaced via the Retry-After
+  // request header for server-side logging. Updated in the catch block below.
+  let lastDelaySeconds = 0
   for (let attempt = 0; attempt <= retries; attempt++) {
+    // Build a fresh per-attempt options object so each attempt carries its own
+    // headers snapshot — the caller's `headers` is reused and must not change.
+    // On retries (attempt > 0), stamp outgoing telemetry headers so the server
+    // can log retry state.
+    const attemptOpts: HttpRequestOptions =
+      attempt > 0
+        ? {
+            ...baseAttemptOpts,
+            headers: {
+              ...headers,
+              'Retry-Attempt': `${attempt}`,
+              'Retry-Max': `${retries}`,
+              'Retry-After': `${lastDelaySeconds}`,
+            },
+          }
+        : baseAttemptOpts
     try {
       // eslint-disable-next-line no-await-in-loop
       const response = await httpRequestAttempt(url, attemptOpts)
@@ -159,10 +178,12 @@ export async function httpRequest(
           typeof retryResult === 'number' && !NumberIsNaN(retryResult)
             ? MathMax(0, retryResult)
             : delayMs
+        lastDelaySeconds = MathRound(actualDelay / 1000)
         // eslint-disable-next-line no-await-in-loop
         await delay(actualDelay)
       } else {
         // Default: retry with exponential backoff
+        lastDelaySeconds = MathRound(delayMs / 1000)
         // eslint-disable-next-line no-await-in-loop
         await delay(delayMs)
       }
