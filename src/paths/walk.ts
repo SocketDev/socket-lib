@@ -26,6 +26,26 @@ export interface WalkUpOptions {
   stopAt?: string | undefined
 }
 
+// A bare Windows drive letter with no trailing slash.
+const BARE_DRIVE_RE = /^[A-Za-z]:$/
+
+/**
+ * Normalize a directory for `walkUp` output. Like `normalizePath`, but keeps
+ * the root slash on a bare Windows drive letter: `normalizePath('D:\\')`
+ * collapses the trailing separator to `'D:'` (correct for general paths, where
+ * `'D:'` means "current directory on D:"), yet the filesystem root `walkUp`
+ * must emit is `'D:/'` — matching `path.parse(dir).root`. Without the slash the
+ * final ancestor would differ from the actual root on Windows.
+ *
+ * @param dir - An absolute directory path.
+ *
+ * @returns The forward-slash-normalized path, with the drive root preserved.
+ */
+export function normalizeWalkDir(dir: string): string {
+  const normalized = normalizePath(dir)
+  return BARE_DRIVE_RE.test(normalized) ? `${normalized}/` : normalized
+}
+
 /**
  * Lazily yield `from` and each of its ancestor directories, up to and including
  * the filesystem root (or `stopAt`). Each yielded path is normalized to forward
@@ -67,7 +87,7 @@ export function* walkUp(
   const stopDir = stopAt ? path.resolve(cwd, stopAt) : undefined
   let prev: string | undefined
   while (dir !== prev) {
-    yield normalizePath(dir)
+    yield normalizeWalkDir(dir)
     if (stopDir !== undefined && dir === stopDir) {
       return
     }
