@@ -6,23 +6,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { normalizeWalkDir, walkUp } from '../../../src/paths/walk'
-
-describe('normalizeWalkDir', () => {
-  it('preserves the root slash on a bare Windows drive letter', () => {
-    expect(normalizeWalkDir('D:\\')).toBe('D:/')
-    expect(normalizeWalkDir('C:\\')).toBe('C:/')
-  })
-
-  it('normalizes backslashes and leaves non-root paths slash-free', () => {
-    expect(normalizeWalkDir('C:\\a\\b')).toBe('C:/a/b')
-    expect(normalizeWalkDir('/a/b/c')).toBe('/a/b/c')
-  })
-
-  it('leaves a posix root unchanged', () => {
-    expect(normalizeWalkDir('/')).toBe('/')
-  })
-})
+import { walkUp } from '../../../src/paths/walk'
 
 // On Windows, `path.resolve('/a/b/c')` returns `D:\a\b\c` (current drive).
 // walkUp yields the normalized form `D:/a/b/c`. Strip the drive prefix on

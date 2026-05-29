@@ -50,6 +50,18 @@ describe('paths/normalize', () => {
       expect(normalizePath('D:\\projects\\app')).toBe('D:/projects/app')
     })
 
+    it('should keep the root slash on a bare drive root', () => {
+      // A drive ROOT keeps its trailing slash — `D:` alone means "current
+      // directory on D:", a different location from the root `D:/`.
+      expect(normalizePath('D:\\')).toBe('D:/')
+      expect(normalizePath('C:/')).toBe('C:/')
+    })
+
+    it('should not add a slash to a drive-relative path', () => {
+      // `D:foo` (no separator after the colon) is drive-relative, not a root.
+      expect(normalizePath('D:foo')).toBe('D:foo')
+    })
+
     it('should normalize mixed slashes', () => {
       expect(normalizePath('C:\\Users/user\\file.txt')).toBe(
         'C:/Users/user/file.txt',
