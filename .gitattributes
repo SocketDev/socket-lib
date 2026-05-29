@@ -139,6 +139,7 @@
 .config/oxlint-plugin/rules/sort-boolean-chains.mts linguist-generated=true
 .config/oxlint-plugin/rules/sort-equality-disjunctions.mts linguist-generated=true
 .config/oxlint-plugin/rules/sort-named-imports.mts linguist-generated=true
+.config/oxlint-plugin/rules/sort-object-literal-properties.mts linguist-generated=true
 .config/oxlint-plugin/rules/sort-regex-alternations.mts linguist-generated=true
 .config/oxlint-plugin/rules/sort-set-args.mts linguist-generated=true
 .config/oxlint-plugin/rules/sort-source-methods.mts linguist-generated=true
