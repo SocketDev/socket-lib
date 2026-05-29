@@ -2805,7 +2805,8 @@
     "update": "node scripts/update.mts",
     "lockstep": "node scripts/lockstep.mts",
     "lockstep:emit-schema": "node scripts/lockstep-emit-schema.mts",
-    "setup-security-tools": "node .claude/hooks/setup-security-tools/install.mts"
+    "setup-security-tools": "node .claude/hooks/setup-security-tools/install.mts",
+    "ci:local": "agent-ci run --all"
   },
   "devDependencies": {
     "@anthropic-ai/claude-code": "2.1.92",
@@ -2822,6 +2823,7 @@
     "@npmcli/arborist": "9.1.4",
     "@npmcli/package-json": "7.0.0",
     "@npmcli/promise-spawn": "8.0.3",
+    "@redwoodjs/agent-ci": "catalog:",
     "@sinclair/typebox": "0.34.49",
     "@socketregistry/is-unicode-supported": "1.0.5",
     "@socketregistry/packageurl-js": "catalog:",
@@ -2896,7 +2898,10 @@
   },
   "packageManager": "pnpm@11.4.0",
   "allowScripts": {
+    "cpu-features": false,
     "esbuild": true,
-    "rolldown": true
+    "protobufjs": false,
+    "rolldown": true,
+    "ssh2": false
   }
 }

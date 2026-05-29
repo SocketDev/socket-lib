@@ -18,6 +18,7 @@ packages:
 # repo itself ships. Pinning them here keeps the entire hook tree in
 # lockstep with the parent without each hook duplicating literal pins.
 catalog:
+  '@redwoodjs/agent-ci': 0.16.2
   '@sinclair/typebox': 0.34.49
   '@socketregistry/packageurl-js': 'npm:@socketregistry/packageurl-js@1.4.2'
   '@types/shell-quote': 1.7.5
@@ -57,8 +58,11 @@ catalog:
   'vitest': 4.1.6
 
 allowBuilds:
+  cpu-features: false
   esbuild: true
+  protobufjs: false
   rolldown: true
+  ssh2: false
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
 minimumReleaseAge: 10080
@@ -149,6 +153,8 @@ minimumReleaseAgeExclude:
   - '@rolldown/binding-wasm32-wasi'
   - '@rolldown/binding-win32-arm64-msvc'
   - '@rolldown/binding-win32-x64-msvc'
+  - '@redwoodjs/agent-ci'
+  - 'dtu-github-actions'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
