@@ -54,7 +54,7 @@ describe('walkUp', () => {
   })
 
   it('a start AT the stopAt yields just that one dir', () => {
-    expect([...walkUp('/a', { stopAt: '/a' })]).toStrictEqual(['/a'])
+    expect([...walkUp('/a', { stopAt: '/a' })]).toStrictEqual([withDrive('/a')])
   })
 
   it('is lazy — can break early without computing the whole chain', () => {
