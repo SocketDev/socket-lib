@@ -24,7 +24,7 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
-import { parse } from 'acorn-wasm'
+import { parse } from 'acorn'
 import { stripTypeScriptTypes } from 'node:module'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'

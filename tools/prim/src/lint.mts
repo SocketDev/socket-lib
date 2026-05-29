@@ -18,7 +18,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
-import { walk } from 'acorn-wasm'
+import { walk } from 'acorn'
 
 // Names that MUST be aliased with `<Name>Ctor` when imported from
 // `primordials` (or any other surface). Matches the convention used

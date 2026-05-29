@@ -210,7 +210,7 @@ export async function buildPrim(
     // `dist/bin/prim.cjs` at runtime.
     const binDir = path.join(rootPath, 'dist/bin')
     await fsPromises.mkdir(binDir, { recursive: true })
-    const vendor = path.join(rootPath, 'vendor/acorn-wasm')
+    const vendor = path.join(rootPath, 'vendor/acorn')
     await fsPromises.copyFile(
       path.join(vendor, 'acorn-bindgen.cjs'),
       path.join(binDir, 'acorn-bindgen.cjs'),

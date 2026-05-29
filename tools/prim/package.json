@@ -22,7 +22,7 @@
   },
   "dependencies": {
     "@socketsecurity/lib-stable": "catalog:",
-    "acorn-wasm": "workspace:*",
+    "acorn": "workspace:*",
     "diff": "catalog:"
   },
   "peerDependencies": {

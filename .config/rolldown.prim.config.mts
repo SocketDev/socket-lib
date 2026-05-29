@@ -9,8 +9,8 @@
  *   runtime resolves to `dist/bin/` where both files sit. Output contract:
  *
  *   - `dist/bin/prim.cjs` — the bundled CLI
- *   - `dist/bin/acorn-bindgen.cjs` — copied from vendor/acorn-wasm
- *   - `dist/bin/acorn.wasm` — copied from vendor/acorn-wasm The bin entry in
+ *   - `dist/bin/acorn-bindgen.cjs` — copied from vendor/acorn
+ *   - `dist/bin/acorn.wasm` — copied from vendor/acorn The bin entry in
  *     `package.json` points at `dist/bin/prim.cjs`.
  */
 

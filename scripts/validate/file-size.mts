@@ -28,7 +28,7 @@ const MAX_FILE_SIZE = 2 * 1024 * 1024
 // upstream build artifact.
 const ALLOWED_LARGE_FILES = new Set<string>([
   '.claude/hooks/fleet/_shared/acorn/acorn.wasm',
-  'vendor/acorn-wasm/acorn.wasm',
+  'vendor/acorn/acorn.wasm',
 ])
 
 // Directories to skip

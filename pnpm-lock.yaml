@@ -320,14 +320,14 @@ importers:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.0.5(typescript@5.9.2)'
-      acorn-wasm:
+      acorn:
         specifier: workspace:*
-        version: link:../../vendor/acorn-wasm
+        version: link:../../vendor/acorn
       diff:
         specifier: 9.0.0
         version: 9.0.0
 
-  vendor/acorn-wasm: {}
+  vendor/acorn: {}
 
 packages:
 

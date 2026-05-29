@@ -33,7 +33,7 @@ import {
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
-import { parse } from 'acorn-wasm'
+import { parse } from 'acorn'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
