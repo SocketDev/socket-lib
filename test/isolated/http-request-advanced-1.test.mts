@@ -240,6 +240,33 @@ describe('http-request', () => {
         getSocketCallerUserAgent(),
       )
       expect(requestInfos[0]!.headers['X-Custom']).toBe('test-value')
+      // Buffered requests advertise the encodings response-reader can decode.
+      expect(requestInfos[0]!.headers['Accept-Encoding']).toBe('gzip, br')
+    })
+
+    it('omits Accept-Encoding on streamed requests (piped raw to disk)', async () => {
+      const requestInfos: HttpHookRequestInfo[] = []
+      const response = await httpRequest(`${fixture.baseUrl}/json`, {
+        stream: true,
+        hooks: {
+          onRequest: info => requestInfos.push(info),
+        },
+      })
+      // Drain the stream so the socket closes cleanly.
+      response.rawResponse?.resume()
+      expect(requestInfos).toHaveLength(1)
+      expect(requestInfos[0]!.headers['Accept-Encoding']).toBeUndefined()
+    })
+
+    it('lets a caller override Accept-Encoding', async () => {
+      const requestInfos: HttpHookRequestInfo[] = []
+      await httpRequest(`${fixture.baseUrl}/json`, {
+        headers: { 'Accept-Encoding': 'identity' },
+        hooks: {
+          onRequest: info => requestInfos.push(info),
+        },
+      })
+      expect(requestInfos[0]!.headers['Accept-Encoding']).toBe('identity')
     })
 
     it('should call onResponse with status, headers, and duration', async () => {

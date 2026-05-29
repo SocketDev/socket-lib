@@ -1,9 +1,55 @@
 import { describe, expect, test } from 'vitest'
 
 import {
+  basicAuthHeader,
+  isSensitiveHeaderName,
   parseRetryAfterHeader,
   sanitizeHeaders,
 } from '../../../src/http-request/headers'
+
+describe.sequential('http-request/headers — isSensitiveHeaderName', () => {
+  test('matches credential header families (case-insensitive)', () => {
+    for (const name of [
+      'Authorization',
+      'cookie',
+      'Set-Cookie',
+      'proxy-authorization',
+      'www-authenticate',
+      'x-api-key',
+      'API-KEY',
+      'x-auth-token',
+      'x-amz-security-token',
+      'x-secret',
+      'db-password',
+    ]) {
+      expect(isSensitiveHeaderName(name)).toBe(true)
+    }
+  })
+
+  test('does not match benign headers', () => {
+    for (const name of [
+      'content-type',
+      'accept',
+      'user-agent',
+      'x-request-id',
+      'retry-after',
+    ]) {
+      expect(isSensitiveHeaderName(name)).toBe(false)
+    }
+  })
+})
+
+describe.sequential('http-request/headers — basicAuthHeader', () => {
+  test('builds Basic header with token as username and empty password', () => {
+    // 'tok:' base64 is 'dG9rOg=='
+    expect(basicAuthHeader('tok')).toBe('Basic dG9rOg==')
+  })
+
+  test('handles an empty token', () => {
+    // ':' base64 is 'Og=='
+    expect(basicAuthHeader('')).toBe('Basic Og==')
+  })
+})
 
 describe.sequential('http-request/headers — parseRetryAfterHeader', () => {
   test('returns undefined for undefined input', () => {
@@ -75,6 +121,26 @@ describe.sequential('http-request/headers — sanitizeHeaders', () => {
   test('redacts the authorization header', () => {
     expect(sanitizeHeaders({ authorization: 'Bearer secret-token' })).toEqual({
       authorization: '[REDACTED]',
+    })
+  })
+
+  test('redacts custom credential headers by name shape, not a fixed list', () => {
+    expect(
+      sanitizeHeaders({
+        'x-api-key': 'sk_live_xxx',
+        'x-auth-token': 'tok_yyy',
+        'x-amz-security-token': 'amz_zzz',
+        'api-key': 'plain_key',
+        'content-type': 'application/json',
+        'x-request-id': 'req-123',
+      }),
+    ).toEqual({
+      'x-api-key': '[REDACTED]',
+      'x-auth-token': '[REDACTED]',
+      'x-amz-security-token': '[REDACTED]',
+      'api-key': '[REDACTED]',
+      'content-type': 'application/json',
+      'x-request-id': 'req-123',
     })
   })
 

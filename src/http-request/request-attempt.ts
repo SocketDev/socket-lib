@@ -65,6 +65,13 @@ export async function httpRequestAttempt(
       : undefined
 
   const mergedHeaders = {
+    // Advertise only the encodings response-reader can decompress, and ONLY for
+    // buffered responses. Streamed responses (stream: true, e.g. httpDownload)
+    // are piped to disk raw — response-reader never runs — so a compressed body
+    // would land on disk still deflated and fail checksum. Node's http client
+    // does not negotiate or decompress on its own. Caller headers win, so a
+    // caller can override (e.g. 'identity') if it wants raw bytes.
+    ...(stream ? undefined : { 'Accept-Encoding': 'gzip, br' }),
     'User-Agent': getSocketCallerUserAgent(),
     ...streamHeaders,
     ...headers,
