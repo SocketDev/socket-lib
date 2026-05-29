@@ -228,6 +228,13 @@ overrides:
   'strip-ansi': '7.1.2'
   'supports-color': '10.2.2'
   'tar': '7.5.11'
+  # uuid 10.x is deprecated AND vulnerable to GHSA-w5hq-g745-h8pq
+  # (CVE-2026-41907, missing bounds check in v3/v5/v6 with caller-
+  # supplied buf). socket-lib only reaches uuid via dockerode -> uuid.v4
+  # which is NOT the vulnerable path, but the alert surfaces fleet-wide
+  # so we override to the fixed CJS-friendly track. uuid@11.1.1 backports
+  # the bounds-check fix and stays on the CommonJS-compatible branch.
+  'uuid': '11.1.1'
   'which': '5.0.0'
   'wrap-ansi': '9.0.2'
   'yoctocolors-cjs': '2.1.3'
