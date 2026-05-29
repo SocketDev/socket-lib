@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
+import { compressBrotli } from '../../../src/compression/brotli'
+import { compressGzip } from '../../../src/compression/gzip'
 import { readIncomingResponse } from '../../../src/http-request/response-reader'
 
 import type { IncomingResponse } from '../../../src/http-request/request-types'
@@ -112,6 +114,63 @@ describe.sequential('http-request/response-reader — readIncomingResponse', () 
     const msg = makeMsg({ chunks: [], statusCode: 204 })
     const response = await readIncomingResponse(msg)
     expect(response.text()).toBe('')
+    expect(response.body.byteLength).toBe(0)
+  })
+
+  test('decompresses a gzip Content-Encoding body', async () => {
+    const payload = JSON.stringify({ hello: 'gzip' })
+    const compressed = await compressGzip(payload)
+    const msg = makeMsg({
+      chunks: [compressed],
+      statusCode: 200,
+      headers: { 'content-encoding': 'gzip' },
+    })
+    const response = await readIncomingResponse(msg)
+    expect(response.text()).toBe(payload)
+    expect(response.json<{ hello: string }>().hello).toBe('gzip')
+  })
+
+  test('decompresses a br Content-Encoding body', async () => {
+    const payload = JSON.stringify({ hello: 'brotli' })
+    const compressed = await compressBrotli(payload)
+    const msg = makeMsg({
+      chunks: [compressed],
+      statusCode: 200,
+      headers: { 'content-encoding': 'br' },
+    })
+    const response = await readIncomingResponse(msg)
+    expect(response.text()).toBe(payload)
+  })
+
+  test('is case-insensitive on the encoding token', async () => {
+    const payload = 'plain text body'
+    const compressed = await compressGzip(payload)
+    const msg = makeMsg({
+      chunks: [compressed],
+      statusCode: 200,
+      headers: { 'content-encoding': 'GZIP' },
+    })
+    const response = await readIncomingResponse(msg)
+    expect(response.text()).toBe(payload)
+  })
+
+  test('leaves the body untouched for identity / absent encoding', async () => {
+    const msg = makeMsg({
+      chunks: [Buffer.from('raw')],
+      statusCode: 200,
+      headers: { 'content-encoding': 'identity' },
+    })
+    const response = await readIncomingResponse(msg)
+    expect(response.text()).toBe('raw')
+  })
+
+  test('does not attempt to decompress an empty body even when encoded', async () => {
+    const msg = makeMsg({
+      chunks: [],
+      statusCode: 204,
+      headers: { 'content-encoding': 'gzip' },
+    })
+    const response = await readIncomingResponse(msg)
     expect(response.body.byteLength).toBe(0)
   })
 })

@@ -14,12 +14,56 @@ import { ArrayIsArray } from '../primordials/array'
 
 import { DateCtor, DateNow } from '../primordials/date'
 
-import { SetCtor } from '../primordials/map-set'
+import { btoa } from '../primordials/globals'
 
 import { NumberIsNaN } from '../primordials/number'
 
 import { ObjectKeys } from '../primordials/object'
 const RETRY_AFTER_INT_RE = /^\d+$/
+
+/**
+ * Build an HTTP Basic `Authorization` header value from a Socket API token.
+ *
+ * The Socket API uses the token as the username with an empty password, so the
+ * credential pair is `<token>:`. Centralized here so every fleet caller emits
+ * the identical shape instead of hand-rolling `btoa(\`${token}:`)`.
+ *
+ * @example
+ *   ;```ts
+ *   const headers = { Authorization: basicAuthHeader(apiToken) }
+ *   // { Authorization: 'Basic c2t0X3h4eHg6' }
+ *   ```
+ *
+ * @param token - The Socket API token (used as the Basic-auth username).
+ *
+ * @returns The `Authorization` header value, e.g. `Basic <base64>`.
+ */
+/*@__NO_SIDE_EFFECTS__*/
+export function basicAuthHeader(token: string): string {
+  return `Basic ${btoa(`${token}:`)}`
+}
+
+// Match credential-bearing header names by shape rather than an enumerated
+// list. A fixed list reads as complete while silently missing real headers
+// (x-amz-security-token, api-key, x-functions-key, …); a name pattern catches
+// the family. Same reasoning as the fleet's "a denylist is itself a leak" —
+// don't try to name every secret, recognize the shape. The standard auth /
+// cookie / proxy headers all contain one of these tokens, so they stay covered.
+const SENSITIVE_HEADER_NAME_RE =
+  /auth|cookie|credential|key|password|secret|token/i
+
+/**
+ * Whether a header name looks credential-bearing and should be redacted from
+ * logs and telemetry. Case-insensitive substring match on the name only — the
+ * value is never inspected.
+ *
+ * @param name - The header name (e.g. `Authorization`, `x-api-key`).
+ *
+ * @returns `true` when the value should be replaced with `[REDACTED]`.
+ */
+export function isSensitiveHeaderName(name: string): boolean {
+  return SENSITIVE_HEADER_NAME_RE.test(name)
+}
 
 /**
  * Parse a `Retry-After` HTTP header value into milliseconds.
@@ -76,9 +120,10 @@ export function parseRetryAfterHeader(
 /**
  * Redact sensitive HTTP headers for safe logging and telemetry.
  *
- * Replaces values of sensitive headers (Authorization, Cookie, etc.) with
- * `[REDACTED]`. Non-sensitive headers are passed through unchanged. Array
- * values are joined with `', '`.
+ * Replaces values of credential-bearing headers with `[REDACTED]`, matching the
+ * header name by shape (see `isSensitiveHeaderName`) so custom token headers
+ * are covered without an enumerated list. Non-sensitive headers pass through
+ * unchanged. Array values are joined with `', '`.
  *
  * @example
  *   ;```ts
@@ -99,20 +144,12 @@ export function sanitizeHeaders(
   if (!headers) {
     return {}
   }
-  const sensitiveHeaders = new SetCtor([
-    'authorization',
-    'cookie',
-    'proxy-authorization',
-    'proxy-authenticate',
-    'set-cookie',
-    'www-authenticate',
-  ])
   const result: Record<string, string> = {
     __proto__: null,
   } as unknown as Record<string, string>
   for (const key of ObjectKeys(headers)) {
     const value = headers[key]
-    if (sensitiveHeaders.has(key.toLowerCase())) {
+    if (isSensitiveHeaderName(key)) {
       result[key] = '[REDACTED]'
     } else if (ArrayIsArray(value)) {
       result[key] = value.join(', ')

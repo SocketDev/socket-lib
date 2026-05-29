@@ -20,6 +20,9 @@ import {
 
 import { msysDriveRegExp, pathLikeToString, slashRegExp } from './_internal'
 
+// A normalized path that is exactly a bare Windows drive letter (`C:`).
+const DRIVE_LETTER_REGEXP = /^[A-Za-z]:$/
+
 // On Windows, convert MSYS drive notation to native: /c/path → C:/path
 export function msysDriveToNative(normalized: string): string {
   /* c8 ignore start - Windows-only branch. */
@@ -275,6 +278,18 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
 
   if (collapsed.length === 0) {
     return prefix || '.'
+  }
+  // A bare drive letter that came from a drive ROOT keeps its slash: `D:\` and
+  // `D:/` normalize to `D:/`, not `D:`. The trailing separator is significant
+  // on a drive root — `D:` alone means "current directory on D:", a different
+  // location. Detected by a separator immediately after the colon in the
+  // original input (index 2), so drive-relative `D:foo` is unaffected.
+  if (
+    DRIVE_LETTER_REGEXP.test(collapsed) &&
+    (StringPrototypeCharCodeAt(filepath, 2) === 47 /*'/'*/ ||
+      StringPrototypeCharCodeAt(filepath, 2) === 92) /*'\\'*/
+  ) {
+    return msysDriveToNative(`${prefix}${collapsed}/`)
   }
   return msysDriveToNative(prefix + collapsed)
 }
