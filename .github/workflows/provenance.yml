@@ -22,6 +22,14 @@ on:
         required: false
         default: true
         type: boolean
+      mode:
+        description: 'Publish mode (staged is recommended; direct is the escape hatch)'
+        required: false
+        default: staged
+        type: choice
+        options:
+          - staged
+          - direct
 
 permissions:
   contents: read
@@ -47,16 +55,18 @@ jobs:
         run: pnpm run build
 
       - name: Publish to npm
-        # TEMPORARY: --direct (classic-token publish, no staging) instead of
-        # --staged because Socket Firewall does not yet allowlist the
-        # /-/stage/* endpoints, so `pnpm stage publish` fails with
-        # "failed to parse URL" + 403. Tracked in firewall PR #123. Flip
-        # back to --staged once that lands + deploys.
+        # Default mode: --staged. Socket Firewall v1.12+ allowlists the
+        # /-/stage/* endpoints, so `pnpm stage publish` works end-to-end.
+        # The mode input is a `choice` of staged|direct; --direct is the
+        # escape hatch for environments where the stage path can't reach
+        # npm. publish.mts refuses --direct if prior package versions
+        # used staging (would downgrade trust evidence).
         env:
           DRY_RUN: ${{ inputs.dry-run }}
+          MODE: ${{ inputs.mode }}
         run: |
+          ARGS="--${MODE:-staged}"
           if [ "$DRY_RUN" = "true" ]; then
-            node scripts/publish.mts --direct --dry-run
-          else
-            node scripts/publish.mts --direct
+            ARGS="$ARGS --dry-run"
           fi
+          node scripts/publish.mts $ARGS
