@@ -287,25 +287,33 @@ export function getTrustLevelName(status: TrustStatus): TrustLevelName {
 /**
  * Extract provenance / trusted-publisher / staged-publish flags from a registry
  * version document.
+ *
+ * Staged-publish detection follows pnpm/pnpm#12056: `_npmUser.approver` is set
+ * by the registry when a package version was promoted out of staging via a
+ * 2FA-gated approve step. That signal ranks ABOVE both `trustedPublisher` and
+ * `provenance` in pnpm's trust-evidence ladder, because it adds a human
+ * approval gate on top of the OIDC publisher identity.
  */
 export function getTrustStatus(meta: unknown): TrustStatus {
   const status: TrustStatus = {
     provenance: false,
     trustedPublisher: false,
-    // Reserved: the npm registry does not yet expose a staged-publish flag, so
-    // this stays false until a registry signal exists to set it.
     stagedPublish: false,
   }
   if (!isObject(meta)) {
     return status
   }
   const npmUser = ObjectHasOwn(meta, '_npmUser') ? meta['_npmUser'] : undefined
-  if (
-    isObject(npmUser) &&
-    ObjectHasOwn(npmUser, 'trustedPublisher') &&
-    npmUser['trustedPublisher']
-  ) {
-    status.trustedPublisher = true
+  if (isObject(npmUser)) {
+    if (ObjectHasOwn(npmUser, 'approver') && npmUser['approver']) {
+      status.stagedPublish = true
+    }
+    if (
+      ObjectHasOwn(npmUser, 'trustedPublisher') &&
+      npmUser['trustedPublisher']
+    ) {
+      status.trustedPublisher = true
+    }
   }
   const dist = ObjectHasOwn(meta, 'dist') ? meta['dist'] : undefined
   const attestations =
