@@ -42,6 +42,18 @@ const bareDoc = {
   _npmUser: { name: 'someone' },
   dist: { tarball: 'https://registry.npmjs.org/x/-/x-1.0.0.tgz' },
 }
+const stagedPublishDoc = {
+  _npmUser: {
+    name: 'someone',
+    approver: { name: 'approver-bot' },
+    trustedPublisher: { id: 'github' },
+  },
+  dist: { attestations: { provenance: { predicateType: 'slsa' } } },
+}
+const stagedPublishOnlyDoc = {
+  _npmUser: { name: 'someone', approver: 'approver-bot' },
+  dist: { tarball: 'https://registry.npmjs.org/x/-/x-1.0.0.tgz' },
+}
 
 describe.sequential('packages/provenance — getAttestations', () => {
   it('returns [] when input has no attestations field', () => {
@@ -390,17 +402,57 @@ describe('packages/provenance — trust status', () => {
     })
   })
 
+  it('getTrustStatus reads stagedPublish from _npmUser.approver (per pnpm#12056)', () => {
+    expect(getTrustStatus(stagedPublishOnlyDoc)).toEqual({
+      provenance: false,
+      trustedPublisher: false,
+      stagedPublish: true,
+    })
+  })
+
+  it('getTrustStatus reads stagedPublish alongside trustedPublisher + provenance', () => {
+    expect(getTrustStatus(stagedPublishDoc)).toEqual({
+      provenance: true,
+      trustedPublisher: true,
+      stagedPublish: true,
+    })
+  })
+
+  it('getTrustStatus ignores falsy approver values', () => {
+    expect(
+      getTrustStatus({
+        _npmUser: { name: 'someone', approver: undefined },
+        dist: {},
+      }),
+    ).toEqual({
+      provenance: false,
+      trustedPublisher: false,
+      stagedPublish: false,
+    })
+    expect(
+      getTrustStatus({
+        _npmUser: { name: 'someone', approver: '' },
+        dist: {},
+      }),
+    ).toEqual({
+      provenance: false,
+      trustedPublisher: false,
+      stagedPublish: false,
+    })
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- registry JSON may carry null; tested explicitly as a falsy form.
+    expect(getTrustStatus({ _npmUser: { approver: null }, dist: {} })).toEqual({
+      provenance: false,
+      trustedPublisher: false,
+      stagedPublish: false,
+    })
+  })
+
   it('getTrustLevel maps statuses to the 0..3 ladder', () => {
     expect(getTrustLevel(getTrustStatus(bareDoc))).toBe(0)
     expect(getTrustLevel(getTrustStatus(provenanceOnlyDoc))).toBe(1)
     expect(getTrustLevel(getTrustStatus(fullyTrustedDoc))).toBe(2)
-    expect(
-      getTrustLevel({
-        provenance: false,
-        trustedPublisher: false,
-        stagedPublish: true,
-      }),
-    ).toBe(3)
+    expect(getTrustLevel(getTrustStatus(stagedPublishDoc))).toBe(3)
+    expect(getTrustLevel(getTrustStatus(stagedPublishOnlyDoc))).toBe(3)
   })
 
   it('getTrustLevelName maps statuses to names', () => {
@@ -411,30 +463,35 @@ describe('packages/provenance — trust status', () => {
     expect(getTrustLevelName(getTrustStatus(fullyTrustedDoc))).toBe(
       'trustedPublisher',
     )
-    expect(
-      getTrustLevelName({
-        provenance: false,
-        trustedPublisher: false,
-        stagedPublish: true,
-      }),
-    ).toBe('stagedPublish')
+    expect(getTrustLevelName(getTrustStatus(stagedPublishDoc))).toBe(
+      'stagedPublish',
+    )
+    expect(getTrustLevelName(getTrustStatus(stagedPublishOnlyDoc))).toBe(
+      'stagedPublish',
+    )
   })
 
   it('compareTrust compares by trust level', () => {
     const bare = getTrustStatus(bareDoc)
     const prov = getTrustStatus(provenanceOnlyDoc)
     const full = getTrustStatus(fullyTrustedDoc)
+    const staged = getTrustStatus(stagedPublishDoc)
     expect(compareTrust(bare, full)).toBe(-1)
     expect(compareTrust(full, bare)).toBe(1)
     expect(compareTrust(prov, prov)).toBe(0)
+    expect(compareTrust(full, staged)).toBe(-1)
+    expect(compareTrust(staged, full)).toBe(1)
   })
 
   it('didTrustDecrease detects a drop in trust level', () => {
     const bare = getTrustStatus(bareDoc)
     const full = getTrustStatus(fullyTrustedDoc)
+    const staged = getTrustStatus(stagedPublishDoc)
     expect(didTrustDecrease(full, bare)).toBe(true)
     expect(didTrustDecrease(bare, full)).toBe(false)
     expect(didTrustDecrease(full, full)).toBe(false)
+    expect(didTrustDecrease(staged, full)).toBe(true)
+    expect(didTrustDecrease(full, staged)).toBe(false)
   })
 
   it('TRUST_LEVELS index round-trips with getTrustLevel', () => {
@@ -449,7 +506,8 @@ describe('packages/provenance — trust status', () => {
       getTrustStatus(bareDoc),
       getTrustStatus(provenanceOnlyDoc),
       getTrustStatus(fullyTrustedDoc),
-      { provenance: false, trustedPublisher: false, stagedPublish: true },
+      getTrustStatus(stagedPublishOnlyDoc),
+      getTrustStatus(stagedPublishDoc),
     ]) {
       expect(TRUST_LEVELS[getTrustLevel(status)]).toBe(
         getTrustLevelName(status),
