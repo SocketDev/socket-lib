@@ -53,7 +53,7 @@ catalog:
   'oxlint': 1.63.0
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
-  'rolldown': 1.0.2
+  'rolldown': 1.0.3
   'shell-quote': 1.8.4
   'taze': 19.11.0
   'vitest': 4.1.6
@@ -178,6 +178,14 @@ blockExoticSubdeps: true
 # in the default `catalog:` block above. This defeats accidental
 # local-checkout resolution when a sibling repo is on disk.
 overrides:
+  # Fleet-canonical overrides (managed by socket-wheelhouse sync; do not edit).
+  '@socketregistry/packageurl-js': 'catalog:'
+  '@socketsecurity/lib': 'catalog:'
+  '@socketsecurity/registry': 'catalog:'
+  '@socketsecurity/sdk': 'catalog:'
+  'uuid': '11.1.1'
+
+  # Repo-specific overrides below.
   '@anthropic-ai/sdk': '0.91.1'
   '@inquirer/ansi': '2.0.5'
   '@inquirer/core': '11.1.8'
@@ -191,10 +199,6 @@ overrides:
   '@npmcli/run-script': '10.0.0'
   '@sigstore/core': '3.1.0'
   '@sigstore/sign': '4.1.0'
-  '@socketregistry/packageurl-js': 'catalog:'
-  '@socketsecurity/lib': 'catalog:'
-  '@socketsecurity/registry': 'catalog:'
-  '@socketsecurity/sdk': 'catalog:'
   'ansi-regex': '6.2.2'
   'brace-expansion': '5.0.5'
   'chownr': '3.0.0'
@@ -235,13 +239,6 @@ overrides:
   'strip-ansi': '7.1.2'
   'supports-color': '10.2.2'
   'tar': '7.5.11'
-  # uuid 10.x is deprecated AND vulnerable to GHSA-w5hq-g745-h8pq
-  # (CVE-2026-41907, missing bounds check in v3/v5/v6 with caller-
-  # supplied buf). socket-lib only reaches uuid via dockerode -> uuid.v4
-  # which is NOT the vulnerable path, but the alert surfaces fleet-wide
-  # so we override to the fixed CJS-friendly track. uuid@11.1.1 backports
-  # the bounds-check fix and stays on the CommonJS-compatible branch.
-  'uuid': '11.1.1'
   'which': '5.0.0'
   'wrap-ansi': '9.0.2'
   'yoctocolors-cjs': '2.1.3'
