@@ -44,7 +44,6 @@ const pkgScopePrefixRegExp = /^@socketregistry\//
  *   })
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function createPackageJson(
   sockRegPkgName: string,
   directory: string,
@@ -142,7 +141,6 @@ export function createPackageJson(
  *   const manifest = await fetchPackageManifest('lodash@4.17.21')
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function fetchPackageManifest(
   pkgNameOrId: string,
   options?: PacoteOptions,
@@ -192,7 +190,6 @@ export async function fetchPackageManifest(
  *   const packument = await fetchPackagePackument('lodash')
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function fetchPackagePackument(
   pkgNameOrId: string,
   options?: PacoteOptions,

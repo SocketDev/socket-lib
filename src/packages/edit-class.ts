@@ -78,7 +78,6 @@ let _EditablePackageJsonClass: EditablePackageJsonConstructor | undefined
  *   console.log(pkg.content.name)
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
   if (_EditablePackageJsonClass === undefined) {
     // module is imported at the top

@@ -35,7 +35,6 @@ import type { EnvAsNumberOptions } from './types'
  *
  * @returns The parsed number, or the default value if parsing fails
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function envAsNumber(
   value: unknown,
   defaultValueOrOptions: number | EnvAsNumberOptions | undefined = 0,

@@ -32,7 +32,6 @@ import {
  *
  * @returns The string without BOM
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function stripBom(str: string): string {
   // In JavaScript, string data is stored as UTF-16, so BOM is 0xFEFF.
   // https://tc39.es/ecma262/#sec-unicode-format-control-characters
@@ -66,7 +65,6 @@ export function stripBom(str: string): string {
  *
  * @returns The kebab-case string
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function toKebabCase(str: string): string {
   if (!str.length) {
     return str
@@ -104,7 +102,6 @@ export function toKebabCase(str: string): string {
  *
  * @returns The string with leading and trailing newlines removed
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function trimNewlines(str: string): string {
   const { length } = str
   if (length === 0) {

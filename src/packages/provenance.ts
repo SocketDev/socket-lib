@@ -71,7 +71,6 @@ export function didTrustDecrease(
  *   const provenance = await fetchPackageProvenance('lodash', '4.17.21')
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function fetchPackageProvenance(
   pkgName: string,
   pkgVersion: string,
@@ -182,7 +181,6 @@ export function getAttestations(attestationData: unknown): unknown[] {
   })
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getFetcher() {
   if (_fetcher === undefined) {
     // module is imported at the top

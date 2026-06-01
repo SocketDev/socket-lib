@@ -63,7 +63,6 @@ import type { ReadJsonOptions } from './types'
  * @returns Promise resolving to parsed JSON value, or undefined if throws is
  *   false and an error occurs.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function readJson(
   filepath: PathLike,
   options?: ReadJsonOptions | string | undefined,
@@ -191,7 +190,6 @@ export async function readJson(
  * @returns Parsed JSON value, or undefined if throws is false and an error
  *   occurs.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function readJsonSync(
   filepath: PathLike,
   options?: ReadJsonOptions | string | undefined,

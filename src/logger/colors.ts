@@ -14,7 +14,6 @@ import type { ColorValue } from '../colors/types'
  * Apply a color to text using yoctocolors. Handles both named colors and RGB
  * tuples.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function applyColor(
   text: string,
   color: ColorValue,
@@ -33,7 +32,6 @@ export function applyColor(
 /**
  * Get the yoctocolors module for terminal colors.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getYoctocolors() {
   return yoctocolorsCjs
 }

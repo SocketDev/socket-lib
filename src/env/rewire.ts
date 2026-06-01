@@ -41,7 +41,10 @@ const sharedOverridesSymbol = Symbol.for(
 const globalThisRef = globalThis as Record<symbol, unknown>
 const isVitestEnv = envAsBoolean(process.env['VITEST'])
 if (isVitestEnv && !globalThisRef[sharedOverridesSymbol]) {
-  globalThisRef[sharedOverridesSymbol] = new MapCtor<string, string | undefined>()
+  globalThisRef[sharedOverridesSymbol] = new MapCtor<
+    string,
+    string | undefined
+  >()
 }
 const sharedOverrides: Map<string, string | undefined> | undefined =
   globalThisRef[sharedOverridesSymbol] as

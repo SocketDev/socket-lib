@@ -22,7 +22,6 @@ export const abortSignal = getAbortSignal()
  *
  * @returns The Node.js timers/promises module
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getTimers() {
   // Use non-'node:' prefixed require to avoid Webpack errors.
   return require('node:timers/promises') as typeof import('node:timers/promises')

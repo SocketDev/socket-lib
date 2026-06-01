@@ -95,7 +95,6 @@ let _smolPrimordialProbed = false
  * Returns `node:smol-primordial` when running on the smol Node binary,
  * otherwise `undefined`. Result is cached across calls.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSmolPrimordial(): SmolPrimordialBinding | undefined {
   if (!_smolPrimordialProbed) {
     _smolPrimordialProbed = true

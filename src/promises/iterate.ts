@@ -66,7 +66,6 @@ import type { IterationOptions, RetryOptions } from './types'
  *
  * @returns Promise that resolves when all items are processed
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function pEach<T>(
   array: T[],
   callbackFn: (item: T) => Promise<unknown>,
@@ -148,7 +147,6 @@ export async function pEach<T>(
  *
  * @returns Promise that resolves when all chunks are processed
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function pEachChunk<T>(
   array: T[],
   callbackFn: (chunk: T[]) => Promise<unknown>,
@@ -217,7 +215,6 @@ export async function pEachChunk<T>(
  *
  * @returns Promise resolving to filtered array
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function pFilter<T>(
   array: T[],
   callbackFn: (item: T) => Promise<boolean>,
@@ -256,7 +253,6 @@ export async function pFilter<T>(
  *
  * @returns Promise resolving to array of filtered chunks
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function pFilterChunk<T>(
   chunks: T[][],
   callbackFn: (value: T) => Promise<boolean>,

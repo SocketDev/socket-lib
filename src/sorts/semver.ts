@@ -15,7 +15,6 @@ import { getSemver } from './_internal'
  *   compareSemver('1.0.0', '1.0.0') // 0
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function compareSemver(a: string, b: string): number {
   // External semver calls
   /* c8 ignore start */

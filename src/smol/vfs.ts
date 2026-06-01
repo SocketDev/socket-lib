@@ -104,7 +104,6 @@ let _smolVfsProbed = false
  * binding-module loader is collapsed into this function so callers don't deal
  * with two indirection levels.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSmolVfs(): SmolVirtualFileSystem | undefined {
   if (!_smolVfsProbed) {
     _smolVfsProbed = true

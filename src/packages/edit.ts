@@ -139,7 +139,6 @@ export interface EditablePackageJsonInstance {
  *   )
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function toEditablePackageJson(
   pkgJson: PackageJson,
   options?: EditablePackageJsonOptions,
@@ -184,7 +183,6 @@ export async function toEditablePackageJson(
  *   )
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function toEditablePackageJsonSync(
   pkgJson: PackageJson,
   options?: EditablePackageJsonOptions,

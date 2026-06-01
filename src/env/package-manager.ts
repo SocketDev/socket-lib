@@ -38,7 +38,6 @@ export type PackageManagerType = 'npm' | 'pnpm' | 'yarn' | 'bun' | undefined
  *
  * @returns The detected package manager or null if unable to determine
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function detectPackageManager(): PackageManagerType {
   const userAgent = getPackageManagerUserAgent()
 
@@ -95,7 +94,6 @@ export function detectPackageManager(): PackageManagerType {
  *
  * @returns Object with name and version, or null if not available
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getPackageManagerInfo():
   | {
       name: string
@@ -133,7 +131,6 @@ export function getPackageManagerInfo():
  *
  * @returns The user agent string or undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getPackageManagerUserAgent(): string | undefined {
   return getEnvValue('npm_config_user_agent')
 }

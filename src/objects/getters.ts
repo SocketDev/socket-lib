@@ -65,7 +65,6 @@ import type {
  *
  * @returns A frozen object with all specified properties
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function createConstantsObject(
   props: object,
   options_?: ConstantsObjectOptions | undefined,
@@ -157,7 +156,6 @@ export function createConstantsObject(
  *
  * @returns A memoized getter function
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function createLazyGetter<T>(
   name: PropertyKey,
   getter: () => T,

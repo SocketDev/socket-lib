@@ -1,8 +1,7 @@
 /**
- * @fileoverview Bundle external dependencies into standalone zero-dependency modules.
- * This bundles packages like cacache, pacote, make-fetch-happen into dist/external.
- *
- * Entry point that wraps the modular build-externals system.
+ * @file Bundle external dependencies into standalone zero-dependency modules.
+ *   This bundles packages like cacache, pacote, make-fetch-happen into
+ *   dist/external. Entry point that wraps the modular build-externals system.
  */
 
 import process from 'node:process'

@@ -25,7 +25,6 @@ let _disjunctionFormatter: Intl.ListFormat | undefined
  * @returns Cached Intl.ListFormat instance configured for conjunction
  *   formatting.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getConjunctionFormatter() {
   if (_conjunctionFormatter === undefined) {
     // Intl.ListFormat initialization
@@ -58,7 +57,6 @@ export function getConjunctionFormatter() {
  * @returns Cached Intl.ListFormat instance configured for disjunction
  *   formatting.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getDisjunctionFormatter() {
   if (_disjunctionFormatter === undefined) {
     // Intl.ListFormat initialization

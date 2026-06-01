@@ -37,7 +37,6 @@ import type { SpawnError } from './types'
  *   }
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function enhanceSpawnError(error: unknown): unknown {
   if (error === null || typeof error !== 'object') {
     return error
@@ -156,7 +155,6 @@ export function enhanceSpawnError(error: unknown): unknown {
  *
  * @returns {boolean} `true` if the value has spawn error properties
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isSpawnError(value: unknown): value is SpawnError {
   if (value === null || typeof value !== 'object') {
     return false

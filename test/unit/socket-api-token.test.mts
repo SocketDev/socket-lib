@@ -4,11 +4,10 @@
  *   (`SOCKET_API_TOKEN` → `SOCKET_API_KEY`) in order, that the sync + async
  *   variants behave identically on the env-var path, and that `allowEnvOnly`
  *   suppresses the keychain fallback. Env-var values are tested directly (no
- *   mocking); keychain behavior is covered by `secrets.test.mts`.
- *
- *   The helpers below read/write `process.env.SOCKET_API_TOKEN` directly so the
- *   suite can drive the env-var precedence path of the resolver. That is the
- *   exact scenario the `use-fleet-canonical-api-token-getter` bypass exists for
+ *   mocking); keychain behavior is covered by `secrets.test.mts`. The helpers
+ *   below read/write `process.env.SOCKET_API_TOKEN` directly so the suite can
+ *   drive the env-var precedence path of the resolver. That is the exact
+ *   scenario the `use-fleet-canonical-api-token-getter` bypass exists for
  *   (test/bootstrap code manipulating the raw env), so each direct access
  *   carries the `socket-api-token-getter: allow direct-env` marker.
  */

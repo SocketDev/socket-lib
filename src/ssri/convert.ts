@@ -28,7 +28,6 @@ import { ErrorCtor } from '../primordials/error'
  *
  * @throws Error if hex format is invalid
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function hexToSsri(hex: string, algorithm = 'sha256'): string {
   if (!/^[a-f0-9]+$/i.test(hex)) {
     throw new ErrorCtor(`Invalid hex format: ${hex}`)
@@ -59,7 +58,6 @@ export function hexToSsri(hex: string, algorithm = 'sha256'): string {
  *
  * @throws Error if SSRI format is invalid
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function ssriToHex(ssri: string): string {
   const match = /^([a-z0-9]+)-([A-Za-z0-9+/]+=*)$/i.exec(ssri)
   if (!match || !match[2] || match[2].length < 2) {

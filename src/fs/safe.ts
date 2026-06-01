@@ -45,7 +45,6 @@ let _del:
   | { deleteAsync: typeof deleteAsyncType; deleteSync: typeof deleteSyncType }
   | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getDel() {
   if (_del === undefined) {
     _del = /*@__PURE__*/ require('../external/del')

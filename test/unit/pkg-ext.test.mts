@@ -111,10 +111,7 @@ describe('pkg-ext', () => {
 
     it('should not be modifiable (frozen array)', () => {
       expect(() => {
-        ;(packageExtensions as unknown as unknown[]).push([
-          'test@1.0.0',
-          {},
-        ])
+        ;(packageExtensions as unknown as unknown[]).push(['test@1.0.0', {}])
       }).toThrow()
     })
 
@@ -141,7 +138,9 @@ describe('pkg-ext', () => {
       expect(yarnExt).toBeDefined()
       const [, config] = yarnExt!
       expect(config).toHaveProperty('peerDependencies')
-      expect((config as Record<string, unknown>).peerDependencies).toBeUndefined()
+      expect(
+        (config as Record<string, unknown>).peerDependencies,
+      ).toBeUndefined()
     })
 
     it('should have abab with webpack devDependency override', () => {

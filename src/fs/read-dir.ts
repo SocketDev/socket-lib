@@ -26,7 +26,6 @@ import type { ReadDirOptions } from './types'
  *
  * @returns Array of directory names, optionally sorted
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function innerReadDirNames(
   dirents: Dirent[],
   dirname: string | undefined,
@@ -73,7 +72,6 @@ export function innerReadDirNames(
  *
  * @returns Array of directory names, empty array on error
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function readDirNames(
   dirname: PathLike,
   options?: ReadDirOptions | undefined,
@@ -115,7 +113,6 @@ export async function readDirNames(
  *
  * @returns Array of directory names, empty array on error
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function readDirNamesSync(dirname: PathLike, options?: ReadDirOptions) {
   const fs = getNodeFs()
   try {

@@ -1,15 +1,13 @@
 /**
  * @file Shared test fixtures for the logger test files. The logger suite was
  *   originally a single 1200-line file that tripped `socket/max-file-lines`
- *   (1000-line hard cap). It is now split across two sibling `*.test.mts`
- *   files (`logger.test.mts` covers the core logging surface; the LOG_SYMBOLS
- *   and internal-symbol coverage lives alongside it). This module owns the
- *   shared capturing-stream helpers so neither file duplicates the typed
- *   Writable plumbing.
- *
- *   `createCaptureStream()` builds a `node:stream` Writable whose `write`
- *   pushes each chunk's string form into the provided sink array and then
- *   signals completion. The returned object is a `MockStream` — a Writable
+ *   (1000-line hard cap). It is now split across two sibling `*.test.mts` files
+ *   (`logger.test.mts` covers the core logging surface; the LOG_SYMBOLS and
+ *   internal-symbol coverage lives alongside it). This module owns the shared
+ *   capturing-stream helpers so neither file duplicates the typed Writable
+ *   plumbing. `createCaptureStream()` builds a `node:stream` Writable whose
+ *   `write` pushes each chunk's string form into the provided sink array and
+ *   then signals completion. The returned object is a `MockStream` — a Writable
  *   widened with the optional TTY fields the Logger probes (`isTTY`,
  *   `cursorTo`, `clearLine`). Tests assign those fields directly on the typed
  *   object instead of casting through `any`.

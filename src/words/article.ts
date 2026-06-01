@@ -12,7 +12,6 @@
  *   determineArticle('banana') // 'a'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function determineArticle(word: string): string {
   // Case-insensitive so `Apple` and `apple` both pick `an`. Strict
   // spelling rules can't handle silent-h / y-sound exceptions (hour,

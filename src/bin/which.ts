@@ -68,10 +68,7 @@ export async function which(
     // whichModule returns string when found, rejects when not found
     // whichModule is imported at the top
     /* c8 ignore next - External which call */
-    const result = await whichModule(
-      binName,
-      options as ExternalWhichOptions,
-    )
+    const result = await whichModule(binName, options as ExternalWhichOptions)
     return result as string | string[]
   } catch {
     // Binary not found in PATH. Return type matches upstream `which`
@@ -130,10 +127,7 @@ export async function whichReal(
 
   // Depending on options `whichModule` may throw if `binName` is not found.
   /* c8 ignore next - External which call */
-  const result = await whichModule(
-    binName,
-    opts as ExternalWhichOptions,
-  )
+  const result = await whichModule(binName, opts as ExternalWhichOptions)
 
   // opts.all (returns array) and not-found arms.
   /* c8 ignore start */
@@ -279,10 +273,7 @@ export function whichSync(
   try {
     // whichModule.sync returns string when found, throws when not found
     // whichModule is imported at the top
-    const result = whichModule.sync(
-      binName,
-      options as ExternalWhichOptions,
-    )
+    const result = whichModule.sync(binName, options as ExternalWhichOptions)
     return result as string | string[]
   } catch {
     // Binary not found in PATH. Return type matches upstream `which`

@@ -13,7 +13,6 @@
  *   capitalize('') // ''
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function capitalize(word: string): string {
   if (word.length === 0) {
     return word

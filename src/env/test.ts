@@ -21,7 +21,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The Jest worker ID string, or empty string if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getJestWorkerId(): string {
   return envAsString(getEnvValue('JEST_WORKER_ID'))
 }
@@ -40,7 +39,6 @@ export function getJestWorkerId(): string {
  *
  * @returns `true` if running in Vitest, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getVitest(): boolean {
   return envAsBoolean(getEnvValue('VITEST'))
 }
@@ -60,7 +58,6 @@ export function getVitest(): boolean {
  *
  * @returns `true` if running in a test environment, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isTest(): boolean {
   const nodeEnv = envAsString(getNodeEnv())
   return nodeEnv === 'test' || getVitest() || !!getJestWorkerId()

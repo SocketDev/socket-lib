@@ -26,7 +26,6 @@ const ANSI_REGEX = /\x1b\[[0-9;]*m/g
  *   ansiRegex({ onlyFirst: true }) // matches only the first code
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function ansiRegex(options?: {
   onlyFirst?: boolean | undefined
 }): RegExp {
@@ -51,7 +50,6 @@ export function ansiRegex(options?: {
  *   stripAnsi('\u001b[1mBold\u001b[0m') // 'Bold'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function stripAnsi(text: string): string {
   return StringPrototypeReplace(text, ANSI_REGEX, '')
 }

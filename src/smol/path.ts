@@ -60,7 +60,6 @@ let _smolPathProbed = false
  *
  * @returns The native binding, or `undefined` to signal "use the JS fallback".
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSmolPath(): SmolPathBinding | undefined {
   if (!_smolPathProbed) {
     _smolPathProbed = true

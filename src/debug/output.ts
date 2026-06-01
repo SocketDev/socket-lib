@@ -38,7 +38,6 @@ export function debug(...args: unknown[]): void {
  *   debugCache('miss', 'socket-sdk:scans:xyz', { ttl: 60000 })
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function debugCache(
   operation: string,
   key: string,
@@ -246,7 +245,6 @@ export function debugNs(
  * Create a Node.js util.debuglog compatible function. Returns a function that
  * conditionally writes debug messages to stderr.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function debuglog(section: string) {
   const util = getUtil()
   return util.debuglog(section)
@@ -256,7 +254,6 @@ export function debuglog(section: string) {
  * Create timing functions for measuring code execution time. Returns an object
  * with start() and end() methods, plus a callable function.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function debugtime(label: string) {
   const util = getUtil()
   // Node.js util doesn't have debugtime - create a custom implementation

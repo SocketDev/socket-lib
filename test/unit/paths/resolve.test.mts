@@ -1,6 +1,6 @@
 /**
- * @file Unit tests for relative path resolution. Tests relativeResolve(),
- *   which resolves a path relative to a base directory:
+ * @file Unit tests for relative path resolution. Tests relativeResolve(), which
+ *   resolves a path relative to a base directory:
  *
  *   - Basic relative paths between sibling, parent, and child directories
  *   - Root path handling

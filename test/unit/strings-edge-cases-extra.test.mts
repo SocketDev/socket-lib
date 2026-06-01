@@ -16,7 +16,11 @@ import {
 } from '../../src/strings/format'
 import { isBlankString, isNonEmptyString } from '../../src/strings/predicates'
 import { search } from '../../src/strings/search'
-import { stripBom, toKebabCase, trimNewlines } from '../../src/strings/transform'
+import {
+  stripBom,
+  toKebabCase,
+  trimNewlines,
+} from '../../src/strings/transform'
 import { stringWidth } from '../../src/strings/width'
 import { describe, expect, it } from 'vitest'
 

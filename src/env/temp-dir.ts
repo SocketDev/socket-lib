@@ -18,7 +18,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The Windows temp directory path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getTemp(): string | undefined {
   return getEnvValue('TEMP')
 }
@@ -36,7 +35,6 @@ export function getTemp(): string | undefined {
  *
  * @returns The alternative temp directory path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getTmp(): string | undefined {
   return getEnvValue('TMP')
 }
@@ -54,7 +52,6 @@ export function getTmp(): string | undefined {
  *
  * @returns The Unix/macOS temp directory path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getTmpdir(): string | undefined {
   return getEnvValue('TMPDIR')
 }

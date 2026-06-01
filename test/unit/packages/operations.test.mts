@@ -7,11 +7,10 @@
  *   - Extensions: findPackageExtensions() looks up configured extensions
  *   - Tag parsing: getReleaseTag() extracts version tags from package specs
  *   - Misc edge cases + an editable package.json integration workflow
- *
- *   readPackageJson / readPackageJsonSync coverage lives in
- *   operations.read-package-json.test.mts. Network-backed suites
- *   (extractPackage / packPackage / resolveGitHubTgzUrl) live in
- *   operations.network.test.mts.
+ *     readPackageJson / readPackageJsonSync coverage lives in
+ *     operations.read-package-json.test.mts. Network-backed suites
+ *     (extractPackage / packPackage / resolveGitHubTgzUrl) live in
+ *     operations.network.test.mts.
  */
 
 import { promises as fs } from 'node:fs'

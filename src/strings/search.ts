@@ -39,7 +39,6 @@ import type { SearchOptions } from './types'
  *
  * @returns The index of the first match, or -1 if not found
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function search(
   str: string,
   regexp: RegExp,

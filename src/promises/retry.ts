@@ -109,7 +109,6 @@ import type { RetryOptions } from './types'
  *
  * @throws {Error} The last error if all retry attempts fail
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function pRetry<T>(
   callbackFn: (...args: unknown[]) => Promise<T>,
   options?: number | RetryOptions | undefined,

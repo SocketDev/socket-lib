@@ -11,7 +11,6 @@ import type * as NodeChildProcess from 'node:child_process'
 
 let _childProcess: typeof NodeChildProcess | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeChildProcess(): typeof NodeChildProcess {
   return (_childProcess ??=
     /*@__PURE__*/ require('node:child_process') as typeof NodeChildProcess)

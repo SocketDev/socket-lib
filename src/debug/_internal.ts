@@ -34,7 +34,6 @@ let _pointingTriangle: string | undefined
    only fires when debugJs emits, which requires DEBUG=* env var
    set at the right module-load timing. Tests use the SOCKET_DEBUG
    path which writes via logger.info directly. */
-/*@__NO_SIDE_EFFECTS__*/
 export function customLog(...args: unknown[]) {
   const util = getNodeUtil()
   const inspectOpts = debugJs.inspectOpts
@@ -67,7 +66,6 @@ export function customLog(...args: unknown[]) {
 /* c8 ignore start - First-call init for module-level glyph; only
    one of the 5 debug functions hits the body. The unicode-fallback
    arm also fires only on terminals without unicode support. */
-/*@__NO_SIDE_EFFECTS__*/
 export function getPointingTriangle(): string {
   if (_pointingTriangle === undefined) {
     const supported = isUnicodeSupported()

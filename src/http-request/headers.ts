@@ -38,7 +38,6 @@ const RETRY_AFTER_INT_RE = /^\d+$/
  *
  * @returns The `Authorization` header value, e.g. `Basic <base64>`.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function basicAuthHeader(token: string): string {
   return `Basic ${btoa(`${token}:`)}`
 }

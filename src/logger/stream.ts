@@ -3,10 +3,26 @@
  *   Node-side `Logger` methods that write directly to a stream (`clearLine`,
  *   `clearVisible`, `progress`). The Logger's `node:console` instance keeps its
  *   underlying writable streams on the internal `_stderr` / `_stdout` symbols;
- *   these helpers resolve the right one for a given target stream and centralize
- *   the TTY-vs-non-TTY clear sequence (`cursorTo(0) + clearLine(0)` on a TTY,
- *   `\r\x1b[K` fallback elsewhere — which still works in CI logs).
+ *   these helpers resolve the right one for a given target stream and
+ *   centralize the TTY-vs-non-TTY clear sequence (`cursorTo(0) + clearLine(0)`
+ *   on a TTY, `\r\x1b[K` fallback elsewhere — which still works in CI logs).
  */
+
+/**
+ * Clear the current line on a writable stream. Uses `cursorTo(0) +
+ * clearLine(0)` on a TTY and falls back to `\r\x1b[K` otherwise so the same
+ * call redraws cleanly in both interactive terminals and CI logs.
+ *
+ * @param streamObj - The resolved writable stream to clear.
+ */
+export function clearTerminalLine(streamObj: WriteStreamLike): void {
+  if (streamObj.isTTY) {
+    streamObj.cursorTo(0)
+    streamObj.clearLine(0)
+  } else {
+    streamObj.write('\r\x1b[K')
+  }
+}
 
 /**
  * Subset of `NodeJS.WriteStream` the logger needs for direct, cursor-aware
@@ -35,20 +51,4 @@ export function resolveWriteStream(
   return (
     stream === 'stderr' ? con['_stderr'] : con['_stdout']
   ) as WriteStreamLike
-}
-
-/**
- * Clear the current line on a writable stream. Uses `cursorTo(0) +
- * clearLine(0)` on a TTY and falls back to `\r\x1b[K` otherwise so the same
- * call redraws cleanly in both interactive terminals and CI logs.
- *
- * @param streamObj - The resolved writable stream to clear.
- */
-export function clearTerminalLine(streamObj: WriteStreamLike): void {
-  if (streamObj.isTTY) {
-    streamObj.cursorTo(0)
-    streamObj.clearLine(0)
-  } else {
-    streamObj.write('\r\x1b[K')
-  }
 }

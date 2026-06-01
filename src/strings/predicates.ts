@@ -29,7 +29,6 @@ import type { BlankString, EmptyString } from './types'
  *
  * @returns `true` if the value is a blank string, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isBlankString(value: unknown): value is BlankString {
   return typeof value === 'string' && (!value.length || /^\s+$/.test(value))
 }
@@ -55,7 +54,6 @@ export function isBlankString(value: unknown): value is BlankString {
  *
  * @returns `true` if the value is a non-empty string, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isNonEmptyString(
   value: unknown,
 ): value is Exclude<string, EmptyString> {

@@ -23,7 +23,6 @@ import type { SignalListener, SignalListenerMap } from './types'
 
 let _sigListeners: SignalListenerMap | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getSignalListeners() {
   if (_sigListeners === undefined) {
     _sigListeners = { __proto__: null } as unknown as SignalListenerMap
@@ -64,7 +63,6 @@ export function getSignalListeners() {
  *   // Signal handlers are now active
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function load(): void {
   /* c8 ignore next - !globalProcess never fires in Node tests. */
   if (isLoaded() || !globalProcess) {
@@ -113,7 +111,6 @@ export function load(): void {
  *   // Signal handlers are now removed
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function unload(): void {
   // !globalProcess never fires in Node tests.
   /* c8 ignore start */

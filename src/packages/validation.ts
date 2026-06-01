@@ -14,7 +14,6 @@ import { StringPrototypeStartsWith } from '../primordials/string'
  *   isBlessedPackageName('lodash') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isBlessedPackageName(name: unknown): boolean {
   return (
     typeof name === 'string' &&
@@ -35,7 +34,6 @@ export function isBlessedPackageName(name: unknown): boolean {
  *   isRegistryFetcherType('git') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isRegistryFetcherType(type: string): boolean {
   // RegistryFetcher spec.type check based on:
   // https://github.com/npm/pacote/blob/v19.0.0/lib/fetcher.js#L467-L488
@@ -53,7 +51,6 @@ export function isRegistryFetcherType(type: string): boolean {
  *   isValidPackageName('.invalid') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isValidPackageName(name: string): boolean {
   // validateNpmPackageName is imported at the top
   return validateNpmPackageName(name).validForOldPackages

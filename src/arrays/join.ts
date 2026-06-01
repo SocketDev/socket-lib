@@ -40,7 +40,6 @@ import { getConjunctionFormatter, getDisjunctionFormatter } from './_internal'
  *
  * @returns Formatted string with proper "and" conjunction
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function joinAnd(arr: string[] | readonly string[]): string {
   return getConjunctionFormatter().format(arr)
 }
@@ -80,7 +79,6 @@ export function joinAnd(arr: string[] | readonly string[]): string {
  *
  * @returns Formatted string with proper "or" disjunction
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function joinOr(arr: string[] | readonly string[]): string {
   return getDisjunctionFormatter().format(arr)
 }

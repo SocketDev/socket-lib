@@ -1700,7 +1700,11 @@ export function inferIntent(messages) {
   const intents = new Set()
   for (let i = 0, { length } = messages; i < length; i += 1) {
     const msg = messages[i]!
-    for (let j = 0, { length: entryLength } = patternEntries; j < entryLength; j += 1) {
+    for (
+      let j = 0, { length: entryLength } = patternEntries;
+      j < entryLength;
+      j += 1
+    ) {
       const [intent, pattern] = patternEntries[j]!
       if (pattern.test(msg)) {
         intents.add(intent)
@@ -3118,7 +3122,11 @@ Remember: small commits, follow project standards, no AI attribution.`
         log.substep('Changes detected:')
         const changeLines = project.changes.split('\n')
         const previewLines = changeLines.slice(0, 10)
-        for (let j = 0, { length: previewLength } = previewLines; j < previewLength; j += 1) {
+        for (
+          let j = 0, { length: previewLength } = previewLines;
+          j < previewLength;
+          j += 1
+        ) {
           const line = previewLines[j]!
           log.substep(`  ${line}`)
         }

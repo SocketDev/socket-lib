@@ -34,7 +34,6 @@ import type { PropertyBag } from './types'
  *
  * @returns `true` if obj has enumerable own properties, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function hasKeys(obj: unknown): obj is PropertyBag {
   if (obj === null || obj === undefined) {
     return false
@@ -68,7 +67,6 @@ export function hasKeys(obj: unknown): obj is PropertyBag {
  *
  * @returns `true` if obj has the property as an own property, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function hasOwn(
   obj: unknown,
   propKey: PropertyKey,
@@ -99,7 +97,6 @@ export function hasOwn(
  *
  * @returns `true` if value is an object (including arrays), `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isObject(
   value: unknown,
 ): value is { [key: PropertyKey]: unknown } {
@@ -126,7 +123,6 @@ export function isObject(
  *
  * @returns `true` if value is a plain object, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isPlainObject(
   value: unknown,
 ): value is { [key: PropertyKey]: unknown } {

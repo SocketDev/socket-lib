@@ -13,7 +13,6 @@ import { getNodePath } from '../node/path'
  * POSIX and Windows-style separators so paths captured on either platform
  * classify the same regardless of the host we're running on.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isPackageJsonFile(filepath: string): boolean {
   return (
     filepath === 'package.json' ||
@@ -25,7 +24,6 @@ export function isPackageJsonFile(filepath: string): boolean {
 /**
  * Resolve directory path from a package.json file path.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageJsonDirname(filepath: string): string {
   if (isPackageJsonFile(filepath)) {
     const path = getNodePath()
@@ -37,7 +35,6 @@ export function resolvePackageJsonDirname(filepath: string): string {
 /**
  * Resolve full path to package.json from a directory or file path.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageJsonPath(filepath: string): string {
   if (isPackageJsonFile(filepath)) {
     return normalizePath(filepath)

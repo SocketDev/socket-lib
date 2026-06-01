@@ -12,7 +12,6 @@ import type * as NodeFs from 'node:fs'
 
 let _fs: typeof NodeFs | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeFs(): typeof NodeFs {
   return (_fs ??= /*@__PURE__*/ require('node:fs') as typeof NodeFs)
 }

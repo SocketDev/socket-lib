@@ -32,7 +32,6 @@ let _picomatch: typeof picomatchType | undefined
 export { getNodeFs as getFs } from '../node/fs'
 export { getNodeFsPromises as getFsPromises } from '../node/fs-promises'
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getFastGlob() {
   if (_fastGlob === undefined) {
     _fastGlob = /*@__PURE__*/ require('../external/fast-glob.js')
@@ -40,7 +39,6 @@ export function getFastGlob() {
   return _fastGlob!
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getPicomatch() {
   if (_picomatch === undefined) {
     _picomatch = /*@__PURE__*/ require('../external/picomatch.js')

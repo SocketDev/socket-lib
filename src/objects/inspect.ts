@@ -30,7 +30,6 @@ import { isObject } from './predicates'
  *
  * @returns Array of enumerable string keys, or empty array for non-objects
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getKeys(obj: unknown): string[] {
   return isObject(obj) ? ObjectKeys(obj) : []
 }
@@ -57,7 +56,6 @@ export function getKeys(obj: unknown): string[] {
  * @returns The property value, or `undefined` if not found or obj is
  *   null/undefined.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getOwn(obj: unknown, propKey: PropertyKey): unknown {
   if (obj === null || obj === undefined) {
     return undefined
@@ -84,7 +82,6 @@ export function getOwn(obj: unknown, propKey: PropertyKey): unknown {
  *
  * @returns Array of all own property values, or empty array for null/undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getOwnPropertyValues<T>(
   obj: { [key: PropertyKey]: T } | null | undefined,
 ): T[] {

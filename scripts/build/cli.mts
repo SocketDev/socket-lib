@@ -1,7 +1,7 @@
 /* oxlint-disable socket/sort-source-methods -- build-runner helpers interleaved with config constants and module-level state; reordering would split state from its consumers. */
 /**
- * @file Build runner: rolldown for the per-file source + externals builds,
- *   tsgo for declarations.
+ * @file Build runner: rolldown for the per-file source + externals builds, tsgo
+ *   for declarations.
  */
 
 import { existsSync, promises as fsPromises } from 'node:fs'
@@ -83,8 +83,8 @@ async function fsyncFile(filePath: string): Promise<void> {
 }
 
 /**
- * Build source code with rolldown. Returns { exitCode, buildTime } for
- * external logging.
+ * Build source code with rolldown. Returns { exitCode, buildTime } for external
+ * logging.
  */
 interface BuildSourceOptions {
   quiet?: boolean
@@ -188,10 +188,9 @@ export async function buildTypes(
 
 /**
  * Build the prim CLI: a true bundle (not per-file transpile) that inlines
- * lib-stable + diff + the acorn-wasm wrapper into a single
- * `dist/bin/prim.cjs`. The vendored `acorn-bindgen.cjs` + `acorn.wasm`
- * are copied alongside so the bindgen's `${__dirname}/./acorn.wasm`
- * sibling-load resolves after publish.
+ * lib-stable + diff + the acorn-wasm wrapper into a single `dist/bin/prim.cjs`.
+ * The vendored `acorn-bindgen.cjs` + `acorn.wasm` are copied alongside so the
+ * bindgen's `${__dirname}/./acorn.wasm` sibling-load resolves after publish.
  */
 export async function buildPrim(
   options: { quiet?: boolean } = {},

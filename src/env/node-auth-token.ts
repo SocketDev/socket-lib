@@ -19,7 +19,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The Node.js registry auth token, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeAuthToken(): string | undefined {
   return getEnvValue('NODE_AUTH_TOKEN')
 }

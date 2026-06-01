@@ -3,12 +3,11 @@
  *
  *   - Property access: getOwn(), hasOwn(), getKeys(), hasKeys(),
  *     getOwnPropertyValues()
- *   - Type guards: isObject(), isPlainObject() (excludes arrays/null)
- *
- *   Mutation and sorting tests live in objects-mutate-sort.test.mts;
- *   lazy-getter and constants-object tests live in objects-getters.test.mts.
- *   Tests validate type narrowing and edge cases (symbol/number keys,
- *   non-enumerable properties, prototype chains).
+ *   - Type guards: isObject(), isPlainObject() (excludes arrays/null) Mutation
+ *     and sorting tests live in objects-mutate-sort.test.mts; lazy-getter and
+ *     constants-object tests live in objects-getters.test.mts. Tests validate
+ *     type narrowing and edge cases (symbol/number keys, non-enumerable
+ *     properties, prototype chains).
  */
 
 import {

@@ -8,7 +8,6 @@ import type * as NodeTimersPromises from 'node:timers/promises'
 
 let _timersPromises: typeof NodeTimersPromises | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeTimersPromises(): typeof NodeTimersPromises {
   return (_timersPromises ??=
     /*@__PURE__*/ require('node:timers/promises') as typeof NodeTimersPromises)

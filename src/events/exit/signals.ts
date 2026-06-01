@@ -16,7 +16,6 @@ import { getSignals } from './_internal'
  *   console.log(sigs) // ['SIGABRT', 'SIGALRM', 'SIGHUP', ...]
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function signals(): string[] {
   return getSignals()
 }

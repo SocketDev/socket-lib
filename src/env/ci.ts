@@ -20,7 +20,6 @@ import { isInEnv } from './rewire'
  *
  * @returns `true` if running in a CI environment, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getCI(): boolean {
   return isInEnv('CI')
 }

@@ -33,7 +33,6 @@ import { normalizePath } from './normalize'
  *
  * @returns {string} Native Windows path or normalized Unix path
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function fromUnixPath(pathLike: string | Buffer | URL): string {
   const normalized = normalizePath(pathLike)
   // Windows-only backslash conversion.
@@ -62,7 +61,6 @@ export function fromUnixPath(pathLike: string | Buffer | URL): string {
  *
  * @returns {string[]} Array of path segments, or empty array for empty paths
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function splitPath(pathLike: string | Buffer | URL): string[] {
   const filepath = pathLikeToString(pathLike)
   if (filepath === '') {
@@ -89,7 +87,6 @@ export function splitPath(pathLike: string | Buffer | URL): string[] {
  *
  * @returns {string} Unix-style POSIX path
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function toUnixPath(pathLike: string | Buffer | URL): string {
   // Always normalize first to ensure consistent behavior across platforms
   // (empty → '.', backslashes → forward slashes).
@@ -124,7 +121,6 @@ export function toUnixPath(pathLike: string | Buffer | URL): string {
  *
  * @returns {string} The path without leading `./` / `.\`, or unchanged
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function trimLeadingDotSlash(pathLike: string | Buffer | URL): string {
   const filepath = pathLikeToString(pathLike)
   if (

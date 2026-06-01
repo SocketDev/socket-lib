@@ -7,7 +7,8 @@
  *   tracking via the exported logger symbols, and returns the logger for
  *   chaining. Pulling these out of `./node` keeps the `Logger` class body under
  *   the file-size cap while preserving the per-method documentation here. The
- *   class retains one-line delegators that supply `this` and `this.#getConsole()`.
+ *   class retains one-line delegators that supply `this` and
+ *   `this.#getConsole()`.
  */
 
 import { incLogCallCountSymbol, lastWasBlankSymbol } from './symbols'
@@ -136,26 +137,6 @@ export function tableMethod<T extends LoggerTrackable>(
 }
 
 /**
- * Starts a timer for measuring elapsed time.
- *
- * Creates a timer with the given label. Use `timeEnd()` with the same label to
- * stop the timer and log the elapsed time, or use `timeLog()` to check the time
- * without stopping the timer.
- *
- * @param logger - The calling logger instance.
- * @param con - The logger's resolved console instance.
- * @param label - Optional label for the timer (defaults to 'default').
- */
-export function timeMethod<T extends LoggerTrackable>(
-  logger: T,
-  con: ConsoleLike,
-  label?: string | undefined,
-): T {
-  con.time(label)
-  return logger
-}
-
-/**
  * Ends a timer and logs the elapsed time.
  *
  * Logs the duration since `console.time()` or `logger.time()` was called with
@@ -196,6 +177,26 @@ export function timeLogMethod<T extends LoggerTrackable>(
   con.timeLog(label, ...data)
   logger[lastWasBlankSymbol](false)
   return logger[incLogCallCountSymbol]() as T
+}
+
+/**
+ * Starts a timer for measuring elapsed time.
+ *
+ * Creates a timer with the given label. Use `timeEnd()` with the same label to
+ * stop the timer and log the elapsed time, or use `timeLog()` to check the time
+ * without stopping the timer.
+ *
+ * @param logger - The calling logger instance.
+ * @param con - The logger's resolved console instance.
+ * @param label - Optional label for the timer (defaults to 'default').
+ */
+export function timeMethod<T extends LoggerTrackable>(
+  logger: T,
+  con: ConsoleLike,
+  label?: string | undefined,
+): T {
+  con.time(label)
+  return logger
 }
 
 /**

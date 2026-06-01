@@ -4,10 +4,9 @@
  *   parseRetryAfterHeader / sanitizeHeaders edge cases, maxResponseSize settle
  *   guards, and Uint8Array bodies. Redirect hook / cleanup paths, stream-body
  *   cleanup on failure, and hook error resilience moved to part 4. Split from
- *   the original
- *   advanced surface to keep each worker within the v8 heap ceiling —
- *   cumulative HTTP state retains memory faster than GC can reclaim it within a
- *   single test file. Shares the test server with the sibling
+ *   the original advanced surface to keep each worker within the v8 heap
+ *   ceiling — cumulative HTTP state retains memory faster than GC can reclaim
+ *   it within a single test file. Shares the test server with the sibling
  *   http-request-*.test.mts files via http-request-fixtures.mts.
  */
 
@@ -54,9 +53,7 @@ describe('http-request', () => {
         `--${boundary}--`,
       ].join('\r\n')
 
-      const stream = Readable.from(
-        Buffer.from(formBody),
-      ) as Readable & {
+      const stream = Readable.from(Buffer.from(formBody)) as Readable & {
         getHeaders: () => Record<string, string>
       }
       stream.getHeaders = () => ({
@@ -77,9 +74,7 @@ describe('http-request', () => {
     })
 
     it('should allow user headers to override stream headers', async () => {
-      const stream = Readable.from(
-        Buffer.from('override test'),
-      ) as Readable & {
+      const stream = Readable.from(Buffer.from('override test')) as Readable & {
         getHeaders: () => Record<string, string>
       }
       stream.getHeaders = () => ({

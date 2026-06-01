@@ -38,7 +38,6 @@ import type { StdioType } from './types'
  *
  * @returns {boolean} `true` if stdio matches the type or is valid
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isStdioType(
   stdio: string | string[],
   type?: StdioType | undefined,

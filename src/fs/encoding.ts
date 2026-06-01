@@ -28,7 +28,6 @@ import type { BufferEncoding } from './types'
  *
  * @see https://github.com/nodejs/node/blob/ae62b36d442b7bf987e85ae6e0df0f02cc1bb17f/lib/internal/util.js#L247-L310
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function normalizeEncoding(
   enc: BufferEncoding | string | null | undefined,
 ): BufferEncoding {
@@ -56,7 +55,6 @@ export function normalizeEncoding(
  *
  * @see https://github.com/nodejs/node/blob/ae62b36d442b7bf987e85ae6e0df0f02cc1bb17f/lib/internal/util.js#L247-L310
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function normalizeEncodingSlow(enc: string): BufferEncoding {
   const { length } = enc
   if (length === 4) {

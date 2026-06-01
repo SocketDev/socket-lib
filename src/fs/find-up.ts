@@ -44,7 +44,6 @@ const abortSignal = getAbortSignal()
  *
  * @returns Normalized absolute path if found, undefined otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function findUp(
   name: string | string[] | readonly string[],
   options?: FindUpOptions | undefined,
@@ -116,7 +115,6 @@ export async function findUp(
  *
  * @returns Normalized absolute path if found, undefined otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function findUpSync(
   name: string | string[] | readonly string[],
   options?: FindUpSyncOptions | undefined,

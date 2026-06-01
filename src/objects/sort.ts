@@ -34,7 +34,6 @@ import type { SortedObject } from './types'
  *
  * @returns Negative if a < b, positive if a > b, zero if equal
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function entryKeyComparator(
   a: [PropertyKey, unknown],
   b: [PropertyKey, unknown],
@@ -63,7 +62,6 @@ export function entryKeyComparator(
  *
  * @returns Array of [key, value] tuples, or empty array for null/undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function objectEntries(obj: unknown): Array<[PropertyKey, unknown]> {
   if (obj === null || obj === undefined) {
     return []
@@ -95,7 +93,6 @@ export function objectEntries(obj: unknown): Array<[PropertyKey, unknown]> {
  *
  * @returns A new object with sorted keys
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function toSortedObject<T extends object>(obj: T): T {
   return toSortedObjectFromEntries(objectEntries(obj)) as T
 }
@@ -121,7 +118,6 @@ export function toSortedObject<T extends object>(obj: T): T {
  *
  * @returns A new object with sorted keys
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function toSortedObjectFromEntries<T = unknown>(
   entries: Iterable<[PropertyKey, T]>,
 ): SortedObject<T> {

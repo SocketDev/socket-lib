@@ -24,7 +24,6 @@ import type { OnExitOptions } from './types'
  *   remove()
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function onExit(
   // oxlint-disable-next-line socket/prefer-undefined-over-null -- mirrors upstream signal-exit API (signal/code are `null` for non-signal/non-exit events).
   cb: (code: number | null, signal: string | null) => void,

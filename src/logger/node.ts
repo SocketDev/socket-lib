@@ -661,8 +661,8 @@ export class Logger {
    * Shows a progress indicator (a `∴`-prefixed status message) that can be
    * cleared with `clearLine()`. The output stream depends on whether the logger
    * is stream-bound. Always clears the current line first so repeated
-   * `progress(...)` calls redraw cleanly: TTY uses `cursorTo(0) + clearLine(0)`,
-   * non-TTY falls back to `\r\x1b[K` (still works in CI logs).
+   * `progress(...)` calls redraw cleanly: TTY uses `cursorTo(0) +
+   * clearLine(0)`, non-TTY falls back to `\r\x1b[K` (still works in CI logs).
    *
    * @param text - The progress message to display.
    */

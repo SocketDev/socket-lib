@@ -22,7 +22,6 @@ const UrlCtor = URL
  *   createRelativeUrl('/api/test', { base: 'https://example.com' }) // 'https://example.com/api/test'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function createRelativeUrl(
   path: string,
   options?: CreateRelativeUrlOptions | undefined,
@@ -54,7 +53,6 @@ export function createRelativeUrl(
  *   parseUrl('invalid') // undefined
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function parseUrl(value: string | URL): URL | undefined {
   try {
     return new UrlCtor(value)
