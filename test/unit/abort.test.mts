@@ -285,8 +285,8 @@ describe('abort', () => {
     })
 
     it('should throw TypeError for non-number timeout', () => {
-      expect(() => createTimeoutSignal('100' as any)).toThrow(TypeError)
-      expect(() => createTimeoutSignal('100' as any)).toThrow(
+      expect(() => createTimeoutSignal('100' as never)).toThrow(TypeError)
+      expect(() => createTimeoutSignal('100' as never)).toThrow(
         'timeout must be a number',
       )
     })
@@ -343,36 +343,36 @@ describe('abort', () => {
     })
 
     it('should throw TypeError for null timeout', () => {
-      expect(() => createTimeoutSignal(undefined as any)).toThrow(TypeError)
-      expect(() => createTimeoutSignal(undefined as any)).toThrow(
+      expect(() => createTimeoutSignal(undefined as never)).toThrow(TypeError)
+      expect(() => createTimeoutSignal(undefined as never)).toThrow(
         'timeout must be a number',
       )
     })
 
     it('should throw TypeError for undefined timeout', () => {
-      expect(() => createTimeoutSignal(undefined as any)).toThrow(TypeError)
-      expect(() => createTimeoutSignal(undefined as any)).toThrow(
+      expect(() => createTimeoutSignal(undefined as never)).toThrow(TypeError)
+      expect(() => createTimeoutSignal(undefined as never)).toThrow(
         'timeout must be a number',
       )
     })
 
     it('should throw TypeError for object timeout', () => {
-      expect(() => createTimeoutSignal({} as any)).toThrow(TypeError)
-      expect(() => createTimeoutSignal({} as any)).toThrow(
+      expect(() => createTimeoutSignal({} as never)).toThrow(TypeError)
+      expect(() => createTimeoutSignal({} as never)).toThrow(
         'timeout must be a number',
       )
     })
 
     it('should throw TypeError for array timeout', () => {
-      expect(() => createTimeoutSignal([] as any)).toThrow(TypeError)
-      expect(() => createTimeoutSignal([] as any)).toThrow(
+      expect(() => createTimeoutSignal([] as never)).toThrow(TypeError)
+      expect(() => createTimeoutSignal([] as never)).toThrow(
         'timeout must be a number',
       )
     })
 
     it('should throw TypeError for boolean timeout', () => {
-      expect(() => createTimeoutSignal(true as any)).toThrow(TypeError)
-      expect(() => createTimeoutSignal(true as any)).toThrow(
+      expect(() => createTimeoutSignal(true as never)).toThrow(TypeError)
+      expect(() => createTimeoutSignal(true as never)).toThrow(
         'timeout must be a number',
       )
     })

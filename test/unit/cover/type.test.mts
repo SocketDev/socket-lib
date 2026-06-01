@@ -38,7 +38,7 @@ describe('cover/type', () => {
         signal: undefined,
         stdout: Buffer.from('1234 / 5678 21.74%'),
         stderr: Buffer.from(''),
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof spawn>>)
       const result = await getTypeCoverage({ cwd: '/some/path' })
       expect(result).toEqual({ covered: 1234, total: 5678, percent: '21.74' })
     })
@@ -49,7 +49,7 @@ describe('cover/type', () => {
         signal: undefined,
         stdout: Buffer.from('some files\n  500 / 1000 50.00%\nsome more text'),
         stderr: Buffer.from(''),
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof spawn>>)
       const result = await getTypeCoverage({ cwd: '/some/path' })
       expect(result).toEqual({ covered: 500, total: 1000, percent: '50.00' })
     })
@@ -60,7 +60,7 @@ describe('cover/type', () => {
         signal: undefined,
         stdout: Buffer.from('no metrics here'),
         stderr: Buffer.from(''),
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof spawn>>)
       const result = await getTypeCoverage({ cwd: '/some/path' })
       expect(result).toBeUndefined()
     })
@@ -71,7 +71,7 @@ describe('cover/type', () => {
         signal: undefined,
         stdout: undefined,
         stderr: Buffer.from(''),
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof spawn>>)
       const result = await getTypeCoverage({ cwd: '/some/path' })
       expect(result).toBeUndefined()
     })
@@ -110,7 +110,7 @@ describe('cover/type', () => {
         signal: undefined,
         stdout: Buffer.from('1 / 1 100.00%'),
         stderr: Buffer.from(''),
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof spawn>>)
       // Should resolve cleanly without throwing the cwd-required guard.
       const result = await getTypeCoverage()
       expect(result).toEqual({ covered: 1, total: 1, percent: '100.00' })
@@ -122,7 +122,7 @@ describe('cover/type', () => {
         signal: undefined,
         stdout: Buffer.from('100 / 200 50.00%'),
         stderr: Buffer.from(''),
-      } as any)
+      } as unknown as Awaited<ReturnType<typeof spawn>>)
       await getTypeCoverage({ cwd: '/x' })
       expect(vi.mocked(spawn).mock.calls[0]?.[0]).toBe('type-coverage')
       expect(vi.mocked(spawn).mock.calls[0]?.[1]).toEqual(['--detail'])

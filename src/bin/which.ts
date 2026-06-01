@@ -19,6 +19,7 @@ import { ArrayIsArray, ArrayPrototypeMap } from '../primordials/array'
 import { binPathAllCache, binPathCache, getFs } from './_internal'
 import { resolveRealBinSync } from './resolve'
 
+import type { WhichOptions as ExternalWhichOptions } from '../external/which'
 import type { WhichOptions } from './types'
 
 /**
@@ -69,7 +70,7 @@ export async function which(
     /* c8 ignore next - External which call */
     const result = await whichModule(
       binName,
-      options as import('../external/which').WhichOptions,
+      options as ExternalWhichOptions,
     )
     return result as string | string[]
   } catch {
@@ -131,7 +132,7 @@ export async function whichReal(
   /* c8 ignore next - External which call */
   const result = await whichModule(
     binName,
-    opts as import('../external/which').WhichOptions,
+    opts as ExternalWhichOptions,
   )
 
   // opts.all (returns array) and not-found arms.
@@ -280,7 +281,7 @@ export function whichSync(
     // whichModule is imported at the top
     const result = whichModule.sync(
       binName,
-      options as import('../external/which').WhichOptions,
+      options as ExternalWhichOptions,
     )
     return result as string | string[]
   } catch {

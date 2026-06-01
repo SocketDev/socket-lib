@@ -1,11 +1,8 @@
-/* oxlint-disable socket/sort-source-methods -- 5700-line CLI tool with helper functions organized by command grouping (run*, validate*, etc.); module-level const config sandwiched between groups blocks autofix and manual reorder would either split state or change initialization order. */
 /**
  * @file Claude Code-powered utilities for Socket projects. Provides various
  *   AI-assisted development tools and automations using Claude Code CLI.
  *   Requires Claude Code (claude) CLI to be installed.
  */
-
-/* oxlint-disable socket/no-status-emoji, socket/prefer-exists-sync -- custom logger wrapper with color-coded prefixes; stat() calls read mtime for cleanup decisions. */
 
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import crypto from 'node:crypto'
@@ -65,36 +62,36 @@ const REPO_STORAGE = {
 
 // Retention periods (milliseconds).
 const RETENTION = {
-  // 7 days
-  snapshots: 7 * 24 * 60 * 60 * 1000,
   // 30 days
   cache: 30 * 24 * 60 * 60 * 1000,
   // 1 day
   sessions: 24 * 60 * 60 * 1000,
+  // 7 days
+  snapshots: 7 * 24 * 60 * 60 * 1000,
 }
 
 // Claude API pricing (USD per token).
 // https://www.anthropic.com/pricing
 const PRICING = {
-  'claude-sonnet-4-5': {
-    // $3 per 1M input tokens
-    input: 3.0 / 1_000_000,
-    // $15 per 1M output tokens
-    output: 15.0 / 1_000_000,
-    // $3.75 per 1M cache write tokens
-    cache_write: 3.75 / 1_000_000,
-    // $0.30 per 1M cache read tokens
-    cache_read: 0.3 / 1_000_000,
-  },
   'claude-sonnet-3-7': {
+    // $0.30 per 1M cache read tokens
+    cache_read: 0.3 / 1_000_000,
+    // $3.75 per 1M cache write tokens
+    cache_write: 3.75 / 1_000_000,
     // $3 per 1M input tokens
     input: 3.0 / 1_000_000,
     // $15 per 1M output tokens
     output: 15.0 / 1_000_000,
-    // $3.75 per 1M cache write tokens
-    cache_write: 3.75 / 1_000_000,
+  },
+  'claude-sonnet-4-5': {
     // $0.30 per 1M cache read tokens
     cache_read: 0.3 / 1_000_000,
+    // $3.75 per 1M cache write tokens
+    cache_write: 3.75 / 1_000_000,
+    // $3 per 1M input tokens
+    input: 3.0 / 1_000_000,
+    // $15 per 1M output tokens
+    output: 15.0 / 1_000_000,
   },
 }
 
@@ -114,7 +111,10 @@ const log = {
     process.stdout.write('\r\x1b[K')
     logger.progress(msg)
   },
-  step: msg => logger.log(`\n${msg}`),
+  step: msg => {
+    logger.log('')
+    logger.log(msg)
+  },
   substep: msg => logger.log(`  ${msg}`),
   success: msg => logger.log(`${colors.green('✓')} ${msg}`),
   warn: msg => logger.log(`${colors.yellow('⚠')} ${msg}`),
@@ -157,6 +157,7 @@ export async function cleanupOldData() {
     const toDelete = []
     for (const snap of snapshots) {
       const snapPath = path.join(REPO_STORAGE.snapshots, snap)
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime to age out old snapshots, not just existence.
       const stats = await fs.stat(snapPath)
       if (now - stats.mtime.getTime() > RETENTION.snapshots) {
         toDelete.push(snapPath)
@@ -176,6 +177,7 @@ export async function cleanupOldData() {
     const toDelete = []
     for (const file of cached) {
       const filePath = path.join(STORAGE_PATHS.cache, file)
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime to age out stale cache entries, not just existence.
       const stats = await fs.stat(filePath)
       if (now - stats.mtime.getTime() > RETENTION.cache) {
         toDelete.push(filePath)
@@ -945,17 +947,34 @@ export async function runCommand(command, args = [], options = {}) {
 
 export async function runCommandWithOutput(command, args = [], options = {}) {
   const opts = { __proto__: null, ...options }
-  const { input, ...spawnOpts } = opts
+  const { input, timeout: timeoutMs, ...spawnOpts } = opts
 
   return new Promise((resolve, reject) => {
     let stdout = ''
     let stderr = ''
+    let timedOut = false
 
     const child = spawn(command, args, {
       cwd: rootPath,
       ...(WIN32 && { shell: true }),
       ...spawnOpts,
     })
+
+    // Kill the child once the timeout elapses and resolve with a timeout
+    // result instead of racing promises (Promise.race leaks the losing
+    // promise and its handles).
+    const timeoutId = timeoutMs
+      ? setTimeout(() => {
+          timedOut = true
+          child.kill()
+          resolve({
+            exitCode: 1,
+            stdout,
+            stderr: stderr || 'Operation timed out',
+            timedOut: true,
+          })
+        }, timeoutMs)
+      : undefined
 
     // Write input to stdin if provided.
     if (input && child.stdin) {
@@ -976,10 +995,22 @@ export async function runCommandWithOutput(command, args = [], options = {}) {
     }
 
     child.on('exit', code => {
+      if (timedOut) {
+        return
+      }
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
       resolve({ exitCode: code || 0, stdout, stderr })
     })
 
     child.on('error', error => {
+      if (timedOut) {
+        return
+      }
+      if (timeoutId) {
+        clearTimeout(timeoutId)
+      }
       reject(error)
     })
   })
@@ -1112,26 +1143,18 @@ export async function runClaude(claudeCmd, prompt, options = {}) {
         }, 10_000)
       }
 
-      // Run command with timeout
-      result = await Promise.race([
-        runCommandWithOutput(claudeCmd, args, {
-          ...opts,
-          input: enhancedPrompt,
-          stdio: ['pipe', 'pipe', 'pipe'],
-        }),
-        new Promise(resolve => {
-          setTimeout(() => {
-            if (!timedOut) {
-              timedOut = true
-              resolve({
-                exitCode: 1,
-                stdout: '',
-                stderr: 'Operation timed out',
-              })
-            }
-          }, timeout)
-        }),
-      ])
+      // Run command with timeout. runCommandWithOutput kills the child and
+      // resolves a timeout-shaped result once `timeout` elapses, so there is
+      // no losing promise left pending.
+      result = await runCommandWithOutput(claudeCmd, args, {
+        ...opts,
+        input: enhancedPrompt,
+        stdio: ['pipe', 'pipe', 'pipe'],
+        timeout,
+      })
+      if (result.timedOut) {
+        timedOut = true
+      }
 
       // Clear progress interval
       if (progressInterval) {
@@ -1667,20 +1690,22 @@ export function inferIntent(messages) {
   const patterns = {
     bugfix: /fix|bug|issue|error|crash/i,
     feature: /add|implement|feature|new/i,
+    performance: /perf|speed|optimize|faster/i,
     refactor: /refactor|clean|improve|optimize/i,
     security: /security|vulnerability|cve/i,
-    performance: /perf|speed|optimize|faster/i,
     test: /test|spec|coverage/i,
   }
+  const patternEntries = Object.entries(patterns)
 
   const intents = new Set()
   for (let i = 0, { length } = messages; i < length; i += 1) {
     const msg = messages[i]!
-    Object.entries(patterns).forEach(([intent, pattern]) => {
+    for (let j = 0, { length: entryLength } = patternEntries; j < entryLength; j += 1) {
+      const [intent, pattern] = patternEntries[j]!
       if (pattern.test(msg)) {
         intents.add(intent)
       }
-    })
+    }
   }
 
   return Array.from(intents)
@@ -1880,34 +1905,34 @@ export function filterCILogs(rawLogs) {
  * appropriate context.
  */
 export function prepareClaudeArgs(args = [], options = {}) {
-  const _opts = { __proto__: null, ...options }
+  const opts = { __proto__: null, ...options }
   const claudeArgs = [...args]
 
   // Smart model selection.
-  const task = _opts.prompt || _opts.command || 'general task'
-  const forceModel = _opts['the-brain']
+  const task = opts.prompt || opts.command || 'general task'
+  const forceModel = opts['the-brain']
     ? 'the-brain'
-    : _opts.pinky
+    : opts.pinky
       ? 'pinky'
       : undefined
 
   const mode = modelStrategy.selectMode(task, {
     forceModel,
-    lastError: _opts.lastError,
+    lastError: opts.lastError,
   })
 
   const model = modelStrategy.selectModel(task, {
     forceModel,
-    lastError: _opts.lastError,
+    lastError: opts.lastError,
   })
 
   // Track mode for caching and logging.
-  _opts._selectedMode = mode
-  _opts._selectedModel = model
+  opts._selectedMode = mode
+  opts._selectedModel = model
 
   // Add --dangerously-skip-permissions unless --no-darkwing is specified
   // "Let's get dangerous!" mode for automated CI fixes
-  if (!_opts['no-darkwing']) {
+  if (!opts['no-darkwing']) {
     claudeArgs.push('--dangerously-skip-permissions')
   }
 
@@ -2193,7 +2218,7 @@ Output ONLY the updated CLAUDE.md content, nothing else.`
  * Update a project's CLAUDE.md using Claude.
  */
 export async function updateProjectClaudeMd(claudeCmd, project, options = {}) {
-  const _opts = { __proto__: null, ...options }
+  const opts = { __proto__: null, ...options }
   const { claudeMdPath, name } = project
   const isRegistry = name === 'socket-registry'
 
@@ -2463,7 +2488,7 @@ export async function syncClaudeMd(claudeCmd, options = {}) {
  * Scan a project for issues and generate a report.
  */
 export async function scanProjectForIssues(claudeCmd, project, options = {}) {
-  const _opts = { __proto__: null, ...options }
+  const opts = { __proto__: null, ...options }
   const { name, path: projectPath } = project
 
   log.progress(`Scanning ${name} for issues`)
@@ -2520,7 +2545,7 @@ export async function scanProjectForIssues(claudeCmd, project, options = {}) {
 
   // Use smart context if available to prioritize files
   let filesToScan = allFiles
-  if (_opts.smartContext !== false) {
+  if (opts.smartContext !== false) {
     const context = await getSmartContext({
       fileTypes: extensions,
       maxFiles: 100,
@@ -2776,7 +2801,7 @@ export async function interactiveFixSession(
   _projects,
   options = {},
 ) {
-  const _opts = { __proto__: null, ...options }
+  const opts = { __proto__: null, ...options }
   printHeader('Interactive Fix Session')
 
   // Group issues by severity.
@@ -3092,12 +3117,9 @@ Remember: small commits, follow project standards, no AI attribution.`
       if (project.changes) {
         log.substep('Changes detected:')
         const changeLines = project.changes.split('\n')
-        for (
-          let i = 0, { length } = changeLines.slice(0, 10);
-          i < length;
-          i += 1
-        ) {
-          const line = changeLines.slice(0, 10)[i]!
+        const previewLines = changeLines.slice(0, 10)
+        for (let j = 0, { length: previewLength } = previewLines; j < previewLength; j += 1) {
+          const line = previewLines[j]!
           log.substep(`  ${line}`)
         }
         if (changeLines.length > 10) {
@@ -3651,7 +3673,7 @@ Be specific and actionable.`
  * Clean up code by removing unused elements.
  */
 export async function runCleanup(claudeCmd, options = {}) {
-  const _opts = { __proto__: null, ...options }
+  const opts = { __proto__: null, ...options }
   printHeader('Code Cleanup')
 
   log.step('Analyzing codebase for cleanup opportunities')
@@ -5335,7 +5357,6 @@ export async function runWatchMode(claudeCmd, options = {}) {
   log.info('Starting continuous monitoring…')
   log.substep('Press Ctrl+C to stop')
 
-  const _watchPath = !opts['cross-repo'] ? rootPath : parentPath
   const projects = !opts['cross-repo']
     ? [{ name: path.basename(rootPath), path: rootPath }]
     : SOCKET_PROJECTS.map(name => ({

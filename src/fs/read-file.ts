@@ -37,7 +37,6 @@ const abortSignal = getAbortSignal()
  *
  * @returns Promise resolving to Buffer containing file contents
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function readFileBinary(
   filepath: PathLike,
   options?: ReadFileOptions | undefined,
@@ -70,7 +69,6 @@ export async function readFileBinary(
  *
  * @returns Buffer containing file contents
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function readFileBinarySync(
   filepath: PathLike,
   options?: ReadFileOptions | undefined,
@@ -102,7 +100,6 @@ export function readFileBinarySync(
  *
  * @returns Promise resolving to string containing file contents
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function readFileUtf8(
   filepath: PathLike,
   options?: ReadFileOptions | undefined,
@@ -135,7 +132,6 @@ export async function readFileUtf8(
  *
  * @returns String containing file contents
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function readFileUtf8Sync(
   filepath: PathLike,
   options?: ReadFileOptions | undefined,
@@ -176,17 +172,14 @@ export function readFileUtf8Sync(
  * @returns Promise resolving to file contents (string by default), or undefined
  *   on error.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function safeReadFile(
   filepath: PathLike,
   options: SafeReadOptions & { encoding: null },
 ): Promise<Buffer | undefined>
-/*@__NO_SIDE_EFFECTS__*/
 export async function safeReadFile(
   filepath: PathLike,
   options?: SafeReadOptions | undefined,
 ): Promise<string | undefined>
-/*@__NO_SIDE_EFFECTS__*/
 export async function safeReadFile(
   filepath: PathLike,
   options?: SafeReadOptions | undefined,
@@ -251,17 +244,14 @@ export async function safeReadFile(
  *
  * @returns File contents (string by default), or undefined on error
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function safeReadFileSync(
   filepath: PathLike,
   options: SafeReadOptions & { encoding: null },
 ): Buffer | undefined
-/*@__NO_SIDE_EFFECTS__*/
 export function safeReadFileSync(
   filepath: PathLike,
   options?: SafeReadOptions | undefined,
 ): string | undefined
-/*@__NO_SIDE_EFFECTS__*/
 export function safeReadFileSync(
   filepath: PathLike,
   options?: SafeReadOptions | undefined,

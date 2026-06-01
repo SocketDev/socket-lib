@@ -6,49 +6,6 @@ import { envAsBoolean } from './boolean'
 import { envAsNumber } from './number'
 import { getEnvValue } from './rewire'
 
-import { NumberIsFinite } from '../primordials/number'
-
-/**
- * Whether the MCP server should run in HTTP mode. MCP_HTTP_MODE — when set to
- * the literal string `'true'`, the MCP server serves over HTTP instead of
- * stdio. Returns `false` for any other value (including unset).
- *
- * @example
- *   ;```typescript
- *   import { getMcpHttpMode } from '@socketsecurity/lib/env/socket'
- *
- *   if (getMcpHttpMode()) {
- *     startHttpServer()
- *   }
- *   ```
- *
- * @returns `true` if HTTP mode is enabled, `false` otherwise
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getMcpHttpMode(): boolean {
-  return getEnvValue('MCP_HTTP_MODE') === 'true'
-}
-
-/**
- * MCP HTTP server listen port. MCP_PORT — port the MCP HTTP server binds to.
- * Defaults to `3000` (matches socket-mcp's documented default). Invalid /
- * non-numeric values also fall back to `3000`.
- *
- * @example
- *   ;```typescript
- *   import { getMcpPort } from '@socketsecurity/lib/env/socket'
- *
- *   const port = getMcpPort()
- *   ```
- *
- * @returns The MCP server port (default `3000`)
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getMcpPort(): number {
-  const parsed = envAsNumber(getEnvValue('MCP_PORT'))
-  return NumberIsFinite(parsed) && parsed > 0 ? parsed : 3000
-}
-
 /**
  * SOCKET_ACCEPT_RISKS environment variable getter. Whether to accept all Socket
  * Security risks.
@@ -64,7 +21,6 @@ export function getMcpPort(): number {
  *
  * @returns `true` if risks are accepted, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketAcceptRisks(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_ACCEPT_RISKS'))
 }
@@ -83,7 +39,6 @@ export function getSocketAcceptRisks(): boolean {
  *
  * @returns The API base URL, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiBaseUrl(): string | undefined {
   return getEnvValue('SOCKET_API_BASE_URL')
 }
@@ -102,7 +57,6 @@ export function getSocketApiBaseUrl(): string | undefined {
  *
  * @returns The API proxy URL, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiProxy(): string | undefined {
   return getEnvValue('SOCKET_API_PROXY')
 }
@@ -121,7 +75,6 @@ export function getSocketApiProxy(): string | undefined {
  *
  * @returns The timeout in milliseconds, or `0` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiTimeout(): number {
   return envAsNumber(getEnvValue('SOCKET_API_TIMEOUT'))
 }
@@ -146,7 +99,6 @@ export function getSocketApiTimeout(): number {
  *
  * @returns The API token, or `undefined` if no name in the chain is set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiToken(): string | undefined {
   return (
     getEnvValue('SOCKET_API_TOKEN') ||
@@ -173,7 +125,6 @@ export function getSocketApiToken(): string | undefined {
  *
  * @returns The API URL override, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketApiUrl(): string | undefined {
   return getEnvValue('SOCKET_API_URL')
 }
@@ -191,7 +142,6 @@ export function getSocketApiUrl(): string | undefined {
  *
  * @returns The branch name, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketBranchName(): string | undefined {
   return getEnvValue('SOCKET_BRANCH_NAME')
 }
@@ -210,7 +160,6 @@ export function getSocketBranchName(): string | undefined {
  *
  * @returns The cacache directory path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCacacheDirEnv(): string | undefined {
   return getEnvValue('SOCKET_CACACHE_DIR')
 }
@@ -231,7 +180,6 @@ export function getSocketCacacheDirEnv(): string | undefined {
  *
  * @returns The override URL, or `undefined` when default applies
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCloudAuthUrl(): string | undefined {
   return getEnvValue('SOCKET_CLOUD_AUTH_URL')
 }
@@ -244,7 +192,6 @@ export function getSocketCloudAuthUrl(): string | undefined {
  *
  * @returns The client ID, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCloudClientId(): string | undefined {
   return getEnvValue('SOCKET_CLOUD_CLIENT_ID')
 }
@@ -256,7 +203,6 @@ export function getSocketCloudClientId(): string | undefined {
  *
  * @returns The client secret, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCloudClientSecret(): string | undefined {
   return getEnvValue('SOCKET_CLOUD_CLIENT_SECRET')
 }
@@ -268,7 +214,6 @@ export function getSocketCloudClientSecret(): string | undefined {
  *
  * @returns The override URL, or `undefined` when default applies
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCloudIntrospectUrl(): string | undefined {
   return getEnvValue('SOCKET_CLOUD_INTROSPECT_URL')
 }
@@ -280,7 +225,6 @@ export function getSocketCloudIntrospectUrl(): string | undefined {
  *
  * @returns The override URL, or `undefined` when default applies
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCloudTokenUrl(): string | undefined {
   return getEnvValue('SOCKET_CLOUD_TOKEN_URL')
 }
@@ -292,7 +236,6 @@ export function getSocketCloudTokenUrl(): string | undefined {
  *
  * @returns The override URL, or `undefined` when default applies
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCloudUserinfoUrl(): string | undefined {
   return getEnvValue('SOCKET_CLOUD_USERINFO_URL')
 }
@@ -311,7 +254,6 @@ export function getSocketCloudUserinfoUrl(): string | undefined {
  *
  * @returns The config file path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketConfig(): string | undefined {
   return getEnvValue('SOCKET_CONFIG')
 }
@@ -330,7 +272,6 @@ export function getSocketConfig(): string | undefined {
  *
  * @returns The Socket debug filter, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketDebug(): string | undefined {
   return getEnvValue('SOCKET_DEBUG')
 }
@@ -349,7 +290,6 @@ export function getSocketDebug(): string | undefined {
  *
  * @returns The DLX directory path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketDlxDirEnv(): string | undefined {
   return getEnvValue('SOCKET_DLX_DIR')
 }
@@ -367,7 +307,6 @@ export function getSocketDlxDirEnv(): string | undefined {
  *
  * @returns The Socket home directory, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketHome(): string | undefined {
   return getEnvValue('SOCKET_HOME')
 }
@@ -387,7 +326,6 @@ export function getSocketHome(): string | undefined {
  *
  * @returns `true` if the API token requirement is skipped, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketNoApiToken(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_NO_API_TOKEN'))
 }
@@ -406,86 +344,8 @@ export function getSocketNoApiToken(): boolean {
  *
  * @returns The Socket NPM registry URL, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketNpmRegistry(): string | undefined {
   return getEnvValue('SOCKET_NPM_REGISTRY')
-}
-
-/**
- * OAuth introspection client ID for the MCP HTTP server.
- * SOCKET_OAUTH_INTROSPECTION_CLIENT_ID — client credential used to call the
- * issuer's introspection endpoint. Empty string when unset.
- *
- * @example
- *   ;```typescript
- *   import { getSocketOauthIntrospectionClientId } from '@socketsecurity/lib/env/socket'
- *
- *   const clientId = getSocketOauthIntrospectionClientId()
- *   ```
- *
- * @returns The OAuth client ID, or `''` if not set
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSocketOauthIntrospectionClientId(): string {
-  return getEnvValue('SOCKET_OAUTH_INTROSPECTION_CLIENT_ID') ?? ''
-}
-
-/**
- * OAuth introspection client secret for the MCP HTTP server.
- * SOCKET_OAUTH_INTROSPECTION_CLIENT_SECRET — paired with the client ID for
- * authenticated introspection requests. Empty string when unset.
- *
- * @example
- *   ;```typescript
- *   import { getSocketOauthIntrospectionClientSecret } from '@socketsecurity/lib/env/socket'
- *
- *   const clientSecret = getSocketOauthIntrospectionClientSecret()
- *   ```
- *
- * @returns The OAuth client secret, or `''` if not set
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSocketOauthIntrospectionClientSecret(): string {
-  return getEnvValue('SOCKET_OAUTH_INTROSPECTION_CLIENT_SECRET') ?? ''
-}
-
-/**
- * OAuth issuer URL for the MCP HTTP server. SOCKET_OAUTH_ISSUER — issuer to
- * validate inbound OAuth tokens against. Returns the empty string when unset;
- * callers treat empty as "no issuer configured".
- *
- * @example
- *   ;```typescript
- *   import { getSocketOauthIssuer } from '@socketsecurity/lib/env/socket'
- *
- *   const issuer = getSocketOauthIssuer()
- *   if (issuer) { ... }
- *   ```
- *
- * @returns The OAuth issuer URL, or `''` if not set
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSocketOauthIssuer(): string {
-  return getEnvValue('SOCKET_OAUTH_ISSUER') ?? ''
-}
-
-/**
- * Required OAuth scopes for the MCP HTTP server. SOCKET_OAUTH_REQUIRED_SCOPES —
- * whitespace-separated list of scopes inbound tokens must carry. Defaults to
- * `'packages:list'` (the minimum scope socket-mcp's depscore tool needs).
- *
- * @example
- *   ;```typescript
- *   import { getSocketOauthRequiredScopes } from '@socketsecurity/lib/env/socket'
- *
- *   const scopes = getSocketOauthRequiredScopes().split(/\s+/u)
- *   ```
- *
- * @returns The required-scopes string, defaulting to `'packages:list'`
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getSocketOauthRequiredScopes(): string {
-  return getEnvValue('SOCKET_OAUTH_REQUIRED_SCOPES') ?? 'packages:list'
 }
 
 /**
@@ -502,7 +362,6 @@ export function getSocketOauthRequiredScopes(): string {
  *
  * @returns The organization slug, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketOrgSlug(): string | undefined {
   return getEnvValue('SOCKET_ORG_SLUG')
 }
@@ -521,7 +380,6 @@ export function getSocketOrgSlug(): string | undefined {
  *
  * @returns The Socket registry URL, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketRegistryUrl(): string | undefined {
   return getEnvValue('SOCKET_REGISTRY_URL')
 }
@@ -540,7 +398,6 @@ export function getSocketRegistryUrl(): string | undefined {
  *
  * @returns The repository name, or `undefined` if neither is set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketRepositoryName(): string | undefined {
   return (
     getEnvValue('SOCKET_REPOSITORY_NAME') ||
@@ -564,27 +421,16 @@ export function getSocketRepositoryName(): string | undefined {
  *
  * @returns `true` if viewing all risks, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketViewAllRisks(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_VIEW_ALL_RISKS'))
 }
 
-/**
- * Whether the MCP HTTP server should trust upstream proxy headers. TRUST_PROXY
- * — when set to the literal string `'true'`, the server honors
- * `X-Forwarded-Host` / `X-Forwarded-Proto` when composing OAuth metadata URLs.
- * Off by default to prevent header spoofing when no upstream proxy is present.
- *
- * @example
- *   ;```typescript
- *   import { getTrustProxy } from '@socketsecurity/lib/env/socket'
- *
- *   if (getTrustProxy()) { ... }
- *   ```
- *
- * @returns `true` if proxy headers are trusted, `false` otherwise
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getTrustProxy(): boolean {
-  return getEnvValue('TRUST_PROXY') === 'true'
-}
+export {
+  getMcpHttpMode,
+  getMcpPort,
+  getSocketOauthIntrospectionClientId,
+  getSocketOauthIntrospectionClientSecret,
+  getSocketOauthIssuer,
+  getSocketOauthRequiredScopes,
+  getTrustProxy,
+} from './socket-mcp'

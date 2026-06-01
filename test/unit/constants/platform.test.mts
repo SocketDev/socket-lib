@@ -15,14 +15,14 @@ import os from 'node:os'
 import process from 'node:process'
 
 import {
-  DARWIN,
   S_IXGRP,
   S_IXOTH,
   S_IXUSR,
-  WIN32,
   getArch,
   getPlatform,
-} from '../../../src/constants/platform'
+} from '@socketsecurity/lib-stable/constants/platform'
+
+import { DARWIN, WIN32 } from '../../../src/constants/platform'
 
 describe('constants/platform', () => {
   describe('platform detection', () => {

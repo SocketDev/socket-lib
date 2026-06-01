@@ -9,11 +9,11 @@
  *   `onThemeChange`.
  */
 
-/* oxlint-disable socket/no-status-emoji */
 // This module is the canonical owner of LOG_SYMBOLS — it constructs
 // the very symbols that the rule advises callers to use via
 // `logger.success()` / `logger.fail()` / `logger.warn()`. The rule
-// has no way to except its own source.
+// has no way to except its own source, so the emoji-bearing lines
+// below carry per-line disables.
 
 import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported'
 
@@ -27,8 +27,8 @@ import { getTheme, onThemeChange } from '../themes/context'
 import { applyColor, getYoctocolors } from './colors'
 import { globalConsole } from './_internal'
 
-let _consoleSymbols: symbol[] | undefined
-let _kGroupIndentationWidthSymbol: symbol | undefined
+let consoleSymbols: symbol[] | undefined
+let kGroupIndentationWidthSymbol: symbol | undefined
 
 /**
  * Lazily get console symbols on first access.
@@ -39,11 +39,11 @@ let _kGroupIndentationWidthSymbol: symbol | undefined
 export function getConsoleSymbols(): symbol[] {
   // Lazy-init second-call branch; module-singleton.
   /* c8 ignore start */
-  if (_consoleSymbols === undefined) {
-    _consoleSymbols = ObjectGetOwnPropertySymbols(globalConsole)
+  if (consoleSymbols === undefined) {
+    consoleSymbols = ObjectGetOwnPropertySymbols(globalConsole)
   }
   /* c8 ignore stop */
-  return _consoleSymbols
+  return consoleSymbols
 }
 
 /**
@@ -51,12 +51,13 @@ export function getConsoleSymbols(): symbol[] {
  */
 export function getKGroupIndentationWidthSymbol(): symbol {
   /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-  if (_kGroupIndentationWidthSymbol === undefined) {
-    _kGroupIndentationWidthSymbol =
-      getConsoleSymbols().find(s => (s as any).label === 'kGroupIndentWidth') ??
-      Symbol('kGroupIndentWidth')
+  if (kGroupIndentationWidthSymbol === undefined) {
+    kGroupIndentationWidthSymbol =
+      getConsoleSymbols().find(
+        s => (s as { label?: string | undefined }).label === 'kGroupIndentWidth',
+      ) ?? Symbol('kGroupIndentWidth')
   }
-  return _kGroupIndentationWidthSymbol
+  return kGroupIndentationWidthSymbol
 }
 
 /**
@@ -75,32 +76,8 @@ export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
  */
 export const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
 
-/**
- * Log symbols for terminal output with colored indicators.
- *
- * Provides colored Unicode symbols (✖, ℹ, ∴, →, ✔, ⚠) with ASCII fallbacks (×,
- * i, :., >, √, ‼) for terminals that don't support Unicode. Symbols are colored
- * according to the active theme's color palette (error, info, reason, step,
- * success, warning).
- *
- * The symbols are lazily initialized on first access and automatically update
- * when the fallback theme changes (via setTheme()). Note that LOG_SYMBOLS
- * reflect the global fallback theme, not async-local theme contexts from
- * withTheme().
- *
- * @example
- *   ```typescript
- *   import { LOG_SYMBOLS } from '@socketsecurity/lib/logger/symbols'
- *
- *   console.log(`${LOG_SYMBOLS.fail} Build failed`) // Theme error color ✖
- *   console.log(`${LOG_SYMBOLS.info} Starting process`) // Theme info color ℹ
- *   console.log(`${LOG_SYMBOLS.progress} Working on task`) // Theme step color ∴
- *   console.log(`${LOG_SYMBOLS.step} Processing files`) // Theme step color →
- *   console.log(`${LOG_SYMBOLS.success} Build completed`) // Theme success color ✔
- *   console.log(`${LOG_SYMBOLS.warn} Deprecated API used`) // Theme warning color ⚠
- *   ```
- */
-export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
+function createLogSymbolsProxyPlaceholder(): void {}
+export function createLogSymbols(): Record<string, string> {
   const target: Record<string, string> = {
     __proto__: null,
   } as unknown as Record<string, string>
@@ -134,7 +111,9 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
     )
     target['skip'] = applyColor(supported ? '↻' : '@', stepColor, colors)
     target['step'] = applyColor(supported ? '→' : '>', stepColor, colors)
+    // oxlint-disable-next-line socket/no-status-emoji -- This module is the canonical owner of LOG_SYMBOLS.success; it constructs the symbol the rule points callers at.
     target['success'] = applyColor(supported ? '✔' : '√', successColor, colors)
+    // oxlint-disable-next-line socket/no-status-emoji -- This module is the canonical owner of LOG_SYMBOLS.warn; it constructs the symbol the rule points callers at.
     target['warn'] = applyColor(supported ? '⚠' : '‼', warningColor, colors)
     /* c8 ignore stop */
   }
@@ -190,4 +169,6 @@ export const LOG_SYMBOLS = /*@__PURE__*/ (() => {
   })
 
   return new ProxyCtor(target, handler)
-})()
+}
+
+export const LOG_SYMBOLS = /*@__PURE__*/ createLogSymbols()

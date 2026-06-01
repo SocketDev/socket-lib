@@ -10,9 +10,9 @@ import { getFastSort } from './_internal'
 
 import type { FastSortFunction } from './types'
 
-let _localeCompare: ((x: string, y: string) => number) | undefined
-let _naturalCompare: ((x: string, y: string) => number) | undefined
-let _naturalSorter: FastSortFunction | undefined
+let cachedLocaleCompare: ((x: string, y: string) => number) | undefined
+let cachedNaturalCompare: ((x: string, y: string) => number) | undefined
+let cachedNaturalSorter: FastSortFunction | undefined
 
 /**
  * Compare two strings using locale-aware comparison.
@@ -24,13 +24,12 @@ let _naturalSorter: FastSortFunction | undefined
  *   localeCompare('a', 'a') // 0
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function localeCompare(x: string, y: string): number {
-  if (_localeCompare === undefined) {
+  if (cachedLocaleCompare === undefined) {
     // Lazily call new Intl.Collator() because in Node it can take 10-14ms.
-    _localeCompare = new Intl.Collator().compare
+    cachedLocaleCompare = new Intl.Collator().compare
   }
-  return _localeCompare(x, y)
+  return cachedLocaleCompare(x, y)
 }
 
 /**
@@ -42,11 +41,10 @@ export function localeCompare(x: string, y: string): number {
  *   naturalCompare('img10', 'img2') // positive (img10 after img2)
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function naturalCompare(x: string, y: string): number {
-  if (_naturalCompare === undefined) {
+  if (cachedNaturalCompare === undefined) {
     // Lazily call new Intl.Collator() because in Node it can take 10-14ms.
-    _naturalCompare = new Intl.Collator(
+    cachedNaturalCompare = new Intl.Collator(
       // The `undefined` locale means it uses the default locale of the user's
       // environment.
       undefined,
@@ -61,7 +59,7 @@ export function naturalCompare(x: string, y: string): number {
       },
     ).compare
   }
-  return _naturalCompare(x, y)
+  return cachedNaturalCompare(x, y)
 }
 
 /**
@@ -73,18 +71,17 @@ export function naturalCompare(x: string, y: string): number {
  *   // ['file1', 'file2', 'file10']
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function naturalSorter<T>(
   arrayToSort: T[],
 ): ReturnType<FastSortFunction> {
-  if (_naturalSorter === undefined) {
+  if (cachedNaturalSorter === undefined) {
     // External fast-sort call
-    /* c8 ignore start */
+    /* c8 ignore start - external fast-sort instance creation */
     const fastSort = getFastSort()
-    _naturalSorter = fastSort.createNewSortInstance({
+    cachedNaturalSorter = fastSort.createNewSortInstance({
       comparer: naturalCompare,
     }) as FastSortFunction
     /* c8 ignore stop */
   }
-  return (_naturalSorter as FastSortFunction)(arrayToSort)
+  return (cachedNaturalSorter as FastSortFunction)(arrayToSort)
 }

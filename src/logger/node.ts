@@ -20,12 +20,6 @@
  *   - shared private state — `./_internal`
  */
 
-/* oxlint-disable socket/no-status-emoji */
-// This module's `#getSymbols()` builds per-instance status emoji
-// for the very methods the rule recommends (logger.success / .fail /
-// .warn). Disabling the rule for the canonical owner — same reason
-// it's disabled in `./symbols`.
-
 import process from 'node:process'
 
 import { ArrayPrototypeAt, ArrayPrototypeSlice } from '../primordials/array'
@@ -56,8 +50,21 @@ import {
 } from './symbols'
 
 import { constructConsole, ensurePrototypeInitialized } from './console'
+import {
+  assertMethod,
+  countMethod,
+  dirMethod,
+  dirxmlMethod,
+  tableMethod,
+  timeEndMethod,
+  timeLogMethod,
+  timeMethod,
+  traceMethod,
+} from './console-methods'
+import { clearTerminalLine, resolveWriteStream } from './stream'
 
 import type { LogSymbols, Task } from './types'
+import type { Theme } from '../themes/types'
 
 /**
  * Enhanced console logger with indentation, colored symbols, and stream
@@ -80,14 +87,12 @@ export class Logger {
   #logCallCount = 0
   #options: Record<string, unknown>
   #originalStdout?: NodeJS.WritableStream | undefined
-  #theme?: import('../themes/types').Theme | undefined
+  #theme?: Theme | undefined
 
   /**
-   * Creates a new Logger instance.
-   *
-   * When called without arguments, creates a logger using the default
-   * `process.stdout` and `process.stderr` streams. Can accept custom console
-   * constructor arguments for advanced use cases.
+   * Creates a new Logger instance. Without arguments uses the default
+   * `process.stdout` / `process.stderr`; accepts custom console constructor
+   * arguments for advanced use cases.
    *
    * @param args - Optional console constructor arguments.
    */
@@ -115,7 +120,7 @@ export class Logger {
           }
         } else {
           // Theme object
-          this.#theme = themeOption as import('../themes/types').Theme
+          this.#theme = themeOption as Theme
         }
       }
     } else {
@@ -155,7 +160,7 @@ export class Logger {
       logArgs,
     )
     this[lastWasBlankSymbol](hasText && isBlankString(logArgs[0]), targetStream)
-    ;(this as any)[incLogCallCountSymbol]()
+    this[incLogCallCountSymbol]()
     return this
   }
 
@@ -252,7 +257,7 @@ export class Logger {
    *
    * @private
    */
-  #getTheme(): import('../themes/types').Theme {
+  #getTheme(): Theme {
     return this.#theme ?? getTheme()
   }
 
@@ -323,16 +328,13 @@ export class Logger {
       ...extras,
     )
     this[lastWasBlankSymbol](false, 'stderr')
-    ;(this as any)[incLogCallCountSymbol]()
+    this[incLogCallCountSymbol]()
     return this
   }
 
   /**
-   * Gets a logger instance bound exclusively to stderr.
-   *
-   * All logging operations on this instance will write to stderr only.
-   * Indentation is tracked separately from stdout. The instance is cached and
-   * reused on subsequent accesses.
+   * Gets a logger instance bound exclusively to stderr. Indentation is tracked
+   * separately from stdout; the instance is cached and reused.
    *
    * @returns A logger instance bound to stderr
    */
@@ -353,11 +355,8 @@ export class Logger {
   }
 
   /**
-   * Gets a logger instance bound exclusively to stdout.
-   *
-   * All logging operations on this instance will write to stdout only.
-   * Indentation is tracked separately from stderr. The instance is cached and
-   * reused on subsequent accesses.
+   * Gets a logger instance bound exclusively to stdout. Indentation is tracked
+   * separately from stderr; the instance is cached and reused.
    *
    * @returns A logger instance bound to stdout
    */
@@ -378,11 +377,8 @@ export class Logger {
   }
 
   /**
-   * Gets the total number of log calls made on this logger instance.
-   *
-   * Tracks all logging method calls including `log()`, `error()`, `warn()`,
-   * `success()`, `fail()`, etc. Useful for testing and monitoring logging
-   * activity.
+   * Gets the total number of log calls made on this logger instance. Tracks all
+   * logging method calls; useful for testing and monitoring.
    *
    * @returns The number of times logging methods have been called
    */
@@ -392,10 +388,8 @@ export class Logger {
   }
 
   /**
-   * Increments the internal log call counter.
-   *
-   * This is called automatically by logging methods and should not be called
-   * directly in normal usage.
+   * Increments the internal log call counter. Called automatically by logging
+   * methods; not for direct use.
    */
   [incLogCallCountSymbol]() {
     const root = this.#getRoot()
@@ -404,10 +398,8 @@ export class Logger {
   }
 
   /**
-   * Sets whether the last logged line was blank.
-   *
-   * Used internally to track blank lines and prevent duplicate spacing. This is
-   * called automatically by logging methods.
+   * Sets whether the last logged line was blank, tracking blank lines to
+   * prevent duplicate spacing. Called automatically by logging methods.
    *
    * @param value - Whether the last line was blank.
    * @param stream - Optional stream to update (defaults to both streams if not
@@ -429,58 +421,29 @@ export class Logger {
   }
 
   /**
-   * Logs an assertion failure message if the value is falsy.
-   *
-   * Works like `console.assert()` but returns the logger for chaining. If the
-   * value is truthy, nothing is logged. If falsy, logs an error message with an
-   * assertion failure.
-   *
-   * @param value - The value to test.
-   * @param message - Optional message and additional arguments to log.
+   * Logs an assertion failure message if the value is falsy. See
+   * {@link assertMethod}.
    */
   assert(value: unknown, ...message: unknown[]): this {
-    const con = this.#getConsole()
-    con.assert(value, message[0] as string, ...message.slice(1))
-    this[lastWasBlankSymbol](false)
-    return value ? this : this[incLogCallCountSymbol]()
+    return assertMethod(this, this.#getConsole(), value, message)
   }
 
   /**
-   * Clears the current line in the terminal.
-   *
-   * Moves the cursor to the beginning of the line and clears all content. Works
-   * in both TTY and non-TTY environments. Useful for clearing progress
-   * indicators created with `progress()`.
-   *
-   * The stream to clear (stderr or stdout) depends on whether the logger is
-   * stream-bound.
+   * Clears the current line in the terminal (TTY and non-TTY). Useful for
+   * clearing progress indicators created with `progress()`. The stream cleared
+   * depends on whether the logger is stream-bound.
    */
   clearLine(): this {
     const con = this.#getConsole()
     const stream = this.#getTargetStream()
-    const streamObj = (
-      stream === 'stderr' ? con['_stderr'] : con['_stdout']
-    ) as NodeJS.WriteStream & {
-      isTTY: boolean
-      cursorTo: (x: number) => void
-      clearLine: (dir: number) => void
-      write: (text: string) => boolean
-    }
-    if (streamObj.isTTY) {
-      streamObj.cursorTo(0)
-      streamObj.clearLine(0)
-    } else {
-      streamObj.write('\r\x1b[K')
-    }
+    clearTerminalLine(resolveWriteStream(con, stream))
     return this
   }
 
   /**
-   * Clears the visible terminal screen.
-   *
-   * Only available on the main logger instance, not on stream-bound instances
-   * (`.stderr` or `.stdout`). Resets the log call count and blank line tracking
-   * if the output is a TTY.
+   * Clears the visible terminal screen. Only available on the main logger
+   * instance, not stream-bound instances. Resets the log call count and blank
+   * line tracking if the output is a TTY.
    *
    * @throws {Error} If called on a stream-bound logger instance
    */
@@ -495,8 +458,8 @@ export class Logger {
     }
     const con = this.#getConsole()
     con.clear()
-    if ((con as any)._stdout.isTTY) {
-      ;(this as any)[lastWasBlankSymbol](true)
+    if ((con['_stdout'] as { isTTY?: boolean | undefined }).isTTY) {
+      this[lastWasBlankSymbol](true)
       this.#logCallCount = 0
     }
     return this
@@ -504,27 +467,15 @@ export class Logger {
   }
 
   /**
-   * Increments and logs a counter for the given label.
-   *
-   * Each unique label maintains its own counter. Works like `console.count()`.
-   *
-   * @default 'default'
-   *
-   * @param label - Optional label for the counter.
+   * Increments and logs a counter for the given label. See {@link countMethod}.
    */
   count(label?: string | undefined): this {
-    const con = this.#getConsole()
-    con.count(label)
-    this[lastWasBlankSymbol](false)
-    return this[incLogCallCountSymbol]()
+    return countMethod(this, this.#getConsole(), label)
   }
 
   /**
-   * Creates a task that logs start and completion messages automatically.
-   *
-   * Returns a task object with a `run()` method that executes the provided
-   * function and logs "Starting task: {name}" before execution and "Completed
-   * task: {name}" after completion.
+   * Creates a task whose `run()` method logs "Starting task: {name}" before
+   * executing the provided function and "Completed task: {name}" after.
    *
    * @param name - The name of the task.
    *
@@ -542,11 +493,9 @@ export class Logger {
   }
 
   /**
-   * Decreases the indentation level by removing spaces from the prefix.
-   *
-   * When called on the main logger, affects both stderr and stdout indentation.
-   * When called on a stream-bound logger (`.stderr` or `.stdout`), affects only
-   * that stream's indentation.
+   * Decreases the indentation level by removing spaces from the prefix. On the
+   * main logger affects both streams; on a stream-bound logger affects only
+   * that stream.
    *
    * @default 2
    */
@@ -566,83 +515,56 @@ export class Logger {
   }
 
   /**
-   * Displays an object's properties in a formatted way.
-   *
-   * Works like `console.dir()` with customizable options for depth, colors,
-   * etc. Useful for inspecting complex objects.
-   *
-   * @param obj - The object to display.
-   * @param options - Optional formatting options (Node.js inspect options)
+   * Displays an object's properties in a formatted way. See {@link dirMethod}.
    */
   dir(obj: unknown, options?: unknown | undefined): this {
-    const con = this.#getConsole()
-    con.dir(obj, options as import('node:util').InspectOptions | undefined)
-    this[lastWasBlankSymbol](false)
-    return this[incLogCallCountSymbol]()
+    return dirMethod(this, this.#getConsole(), obj, options)
   }
 
   /**
-   * Displays data as XML/HTML in a formatted way.
-   *
-   * Works like `console.dirxml()`. In Node.js, behaves the same as `dir()`.
-   *
-   * @param data - The data to display.
+   * Displays data as XML/HTML in a formatted way. See {@link dirxmlMethod}.
    */
   dirxml(...data: unknown[]): this {
-    const con = this.#getConsole()
-    con.dirxml(data)
-    this[lastWasBlankSymbol](false)
-    return this[incLogCallCountSymbol]()
+    return dirxmlMethod(this, this.#getConsole(), data)
   }
 
   /**
    * Logs a completion message with a success symbol (alias for `success()`).
-   *
-   * Provides semantic clarity when marking something as "done". Does NOT
-   * automatically clear the current line - call `clearLine()` first if needed
-   * after using `progress()`.
+   * Does NOT clear the current line; call `clearLine()` first if needed after
+   * `progress()`.
    */
   done(...args: unknown[]): this {
     return this.#symbolApply('success', args)
   }
 
   /**
-   * Logs an error message to stderr.
-   *
-   * Automatically applies current indentation. All arguments are formatted and
-   * logged like `console.error()`.
+   * Logs an error message to stderr with current indentation, formatting
+   * arguments like `console.error()`.
    */
   error(...args: unknown[]): this {
     return this.#apply('error', args)
   }
 
   /**
-   * Logs a newline to stderr only if the last line wasn't already blank.
-   *
-   * Prevents multiple consecutive blank lines. Useful for adding spacing
-   * between sections without creating excessive whitespace.
+   * Logs a newline to stderr only if the last line wasn't already blank,
+   * preventing multiple consecutive blank lines.
    */
   errorNewline() {
     return this.#getLastWasBlank('stderr') ? this : this.error('')
   }
 
   /**
-   * Logs a failure message with a red colored fail symbol.
-   *
-   * Automatically prefixes the message with `LOG_SYMBOLS.fail` (red ✖). Always
-   * outputs to stderr. If the message starts with an existing symbol, it will
-   * be stripped and replaced.
+   * Logs a failure message prefixed with the red `LOG_SYMBOLS.fail` symbol to
+   * stderr. Existing leading symbols are stripped and replaced.
    */
   fail(...args: unknown[]): this {
     return this.#symbolApply('fail', args)
   }
 
   /**
-   * Starts a new indented log group.
-   *
-   * If a label is provided, it's logged before increasing indentation. Groups
-   * can be nested. Each group increases indentation by the `kGroupIndentWidth`
-   * (default 2 spaces). Call `groupEnd()` to close.
+   * Starts a new indented log group. A provided label is logged before
+   * increasing indentation by `kGroupIndentWidth` (default 2). Groups nest;
+   * call `groupEnd()` to close.
    *
    * @param label - Optional label to display before the group.
    */
@@ -651,18 +573,20 @@ export class Logger {
     if (length) {
       ReflectApply(this.log, this, label)
     }
-    this.indent((this as any)[getKGroupIndentationWidthSymbol()])
+    this.indent(
+      (this as unknown as Record<symbol, number | undefined>)[
+        getKGroupIndentationWidthSymbol()
+      ],
+    )
     if (length) {
-      ;(this as any)[lastWasBlankSymbol](false)
-      ;(this as any)[incLogCallCountSymbol]()
+      this[lastWasBlankSymbol](false)
+      this[incLogCallCountSymbol]()
     }
     return this
   }
 
   /**
-   * Starts a new collapsed log group (alias for `group()`).
-   *
-   * In browser consoles, this creates a collapsed group. In Node.js, it behaves
+   * Starts a new collapsed log group (alias for `group()`). In Node.js behaves
    * identically to `group()`.
    *
    * @param label - Optional label to display before the group.
@@ -674,22 +598,22 @@ export class Logger {
   }
 
   /**
-   * Ends the current log group and decreases indentation.
-   *
-   * Must be called once for each `group()` or `groupCollapsed()` call to
-   * properly close the group and restore indentation.
+   * Ends the current log group and decreases indentation. Call once per
+   * `group()` / `groupCollapsed()` to restore indentation.
    */
   groupEnd() {
-    this.dedent((this as any)[getKGroupIndentationWidthSymbol()])
+    this.dedent(
+      (this as unknown as Record<symbol, number | undefined>)[
+        getKGroupIndentationWidthSymbol()
+      ],
+    )
     return this
   }
 
   /**
-   * Increases the indentation level by adding spaces to the prefix.
-   *
-   * When called on the main logger, affects both stderr and stdout indentation.
-   * When called on a stream-bound logger (`.stderr` or `.stdout`), affects only
-   * that stream's indentation. Maximum indentation is 1000 spaces.
+   * Increases the indentation level by adding spaces to the prefix. On the main
+   * logger affects both streams; on a stream-bound logger affects only that
+   * stream. Maximum indentation is 1000 spaces.
    *
    * @default 2
    */
@@ -710,69 +634,43 @@ export class Logger {
   }
 
   /**
-   * Logs an informational message with a blue colored info symbol.
-   *
-   * Automatically prefixes the message with `LOG_SYMBOLS.info` (blue ℹ). Always
-   * outputs to stderr. If the message starts with an existing symbol, it will
-   * be stripped and replaced.
+   * Logs an informational message prefixed with the blue `LOG_SYMBOLS.info`
+   * symbol to stderr. Existing leading symbols are stripped and replaced.
    */
   info(...args: unknown[]): this {
     return this.#symbolApply('info', args)
   }
 
   /**
-   * Logs a message to stdout.
-   *
-   * Automatically applies current indentation. All arguments are formatted and
-   * logged like `console.log()`. This is the primary method for standard
-   * output.
+   * Logs a message to stdout with current indentation, formatting arguments
+   * like `console.log()`. The primary method for standard output.
    */
   log(...args: unknown[]): this {
     return this.#apply('log', args)
   }
 
   /**
-   * Logs a newline to stdout only if the last line wasn't already blank.
-   *
-   * Prevents multiple consecutive blank lines. Useful for adding spacing
-   * between sections without creating excessive whitespace.
+   * Logs a newline to stdout only if the last line wasn't already blank,
+   * preventing multiple consecutive blank lines.
    */
   logNewline() {
     return this.#getLastWasBlank('stdout') ? this : this.log('')
   }
 
   /**
-   * Shows a progress indicator that can be cleared with `clearLine()`.
-   *
-   * Displays a simple status message with a '∴' prefix. Does not include
-   * animation or spinner. Intended to be cleared once the operation completes.
-   * The output stream (stderr or stdout) depends on whether the logger is
-   * stream-bound.
-   *
-   * Always clears the current line before writing so calling `progress(...)`
-   * twice in a row redraws cleanly, and any partially-flushed prior output on
-   * the same row gets overwritten. TTY path uses `cursorTo(0) + clearLine(0)`;
-   * non-TTY path falls back to `\r\x1b[K` (which still works in CI logs).
+   * Shows a progress indicator (a `∴`-prefixed status message) that can be
+   * cleared with `clearLine()`. The output stream depends on whether the logger
+   * is stream-bound. Always clears the current line first so repeated
+   * `progress(...)` calls redraw cleanly: TTY uses `cursorTo(0) + clearLine(0)`,
+   * non-TTY falls back to `\r\x1b[K` (still works in CI logs).
    *
    * @param text - The progress message to display.
    */
   progress(text: string): this {
     const con = this.#getConsole()
     const stream = this.#getTargetStream()
-    const streamObj = (
-      stream === 'stderr' ? con['_stderr'] : con['_stdout']
-    ) as NodeJS.WriteStream & {
-      isTTY: boolean
-      cursorTo: (x: number) => void
-      clearLine: (dir: number) => void
-      write: (text: string) => boolean
-    }
-    if (streamObj.isTTY) {
-      streamObj.cursorTo(0)
-      streamObj.clearLine(0)
-    } else {
-      streamObj.write('\r\x1b[K')
-    }
+    const streamObj = resolveWriteStream(con, stream)
+    clearTerminalLine(streamObj)
     const symbols = this.#getSymbols()
     streamObj.write(`${symbols.progress} ${text}`)
     this[lastWasBlankSymbol](false)
@@ -840,7 +738,7 @@ export class Logger {
       ...extras,
     )
     this[lastWasBlankSymbol](false, 'stdout')
-    ;(this as any)[incLogCallCountSymbol]()
+    this[incLogCallCountSymbol]()
     return this
   }
 
@@ -872,92 +770,42 @@ export class Logger {
   }
 
   /**
-   * Displays data in a table format.
-   *
-   * Works like `console.table()`. Accepts arrays of objects or objects with
-   * nested objects. Optionally specify which properties to include in the
-   * table.
-   *
-   * @param tabularData - The data to display as a table.
-   * @param properties - Optional array of property names to include.
+   * Displays data in a table format. See {@link tableMethod}.
    */
   table(
     tabularData: unknown,
     properties?: readonly string[] | undefined,
   ): this {
-    const con = this.#getConsole()
-    con.table(tabularData, properties)
-    this[lastWasBlankSymbol](false)
-    return this[incLogCallCountSymbol]()
+    return tableMethod(this, this.#getConsole(), tabularData, properties)
   }
 
   /**
-   * Starts a timer for measuring elapsed time.
-   *
-   * Creates a timer with the given label. Use `timeEnd()` with the same label
-   * to stop the timer and log the elapsed time, or use `timeLog()` to check the
-   * time without stopping the timer.
-   *
-   * @default 'default'
-   *
-   * @param label - Optional label for the timer.
+   * Starts a timer for measuring elapsed time. See {@link timeMethod}.
    */
   time(label?: string | undefined): this {
-    const con = this.#getConsole()
-    con.time(label)
-    return this
+    return timeMethod(this, this.#getConsole(), label)
   }
 
   /**
-   * Ends a timer and logs the elapsed time.
-   *
-   * Logs the duration since `console.time()` or `logger.time()` was called with
-   * the same label. The timer is stopped and removed.
-   *
-   * @default 'default'
-   *
-   * @param label - Optional label for the timer.
+   * Ends a timer and logs the elapsed time. See {@link timeEndMethod}.
    */
   timeEnd(label?: string | undefined): this {
-    const con = this.#getConsole()
-    con.timeEnd(label)
-    this[lastWasBlankSymbol](false)
-    return this[incLogCallCountSymbol]()
+    return timeEndMethod(this, this.#getConsole(), label)
   }
 
   /**
-   * Logs the current value of a timer without stopping it.
-   *
-   * Logs the duration since `console.time()` was called with the same label,
-   * but keeps the timer running. Can include additional data to log alongside
-   * the time.
-   *
-   * @default 'default'
-   *
-   * @param label - Optional label for the timer.
-   * @param data - Additional data to log with the time.
+   * Logs the current value of a timer without stopping it. See
+   * {@link timeLogMethod}.
    */
   timeLog(label?: string | undefined, ...data: unknown[]): this {
-    const con = this.#getConsole()
-    con.timeLog(label, ...data)
-    this[lastWasBlankSymbol](false)
-    return this[incLogCallCountSymbol]()
+    return timeLogMethod(this, this.#getConsole(), label, data)
   }
 
   /**
-   * Logs a stack trace to the console.
-   *
-   * Works like `console.trace()`. Shows the call stack leading to where this
-   * method was called. Useful for debugging.
-   *
-   * @param message - Optional message to display with the trace.
-   * @param args - Additional arguments to log.
+   * Logs a stack trace to the console. See {@link traceMethod}.
    */
   trace(message?: unknown | undefined, ...args: unknown[]): this {
-    const con = this.#getConsole()
-    con.trace(message, ...args)
-    this[lastWasBlankSymbol](false)
-    return this[incLogCallCountSymbol]()
+    return traceMethod(this, this.#getConsole(), message, args)
   }
 
   /**

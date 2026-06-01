@@ -15,7 +15,6 @@
  *   isNpmAuditFlag('--save') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isNpmAuditFlag(cmdArg: string): boolean {
   return /^--(?:no-)?audit(?:=.*)?$/.test(cmdArg)
 }
@@ -30,7 +29,6 @@ export function isNpmAuditFlag(cmdArg: string): boolean {
  *   isNpmFundFlag('--save') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isNpmFundFlag(cmdArg: string): boolean {
   return /^--(?:no-)?fund(?:=.*)?$/.test(cmdArg)
 }
@@ -46,7 +44,6 @@ export function isNpmFundFlag(cmdArg: string): boolean {
  *   isNpmLoglevelFlag('--save') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isNpmLoglevelFlag(cmdArg: string): boolean {
   // https://docs.npmjs.com/cli/v11/using-npm/logging#setting-log-levels
   if (/^--loglevel(?:=.*)?$/.test(cmdArg)) {
@@ -68,7 +65,6 @@ export function isNpmLoglevelFlag(cmdArg: string): boolean {
  *   isNpmNodeOptionsFlag('--save') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isNpmNodeOptionsFlag(cmdArg: string): boolean {
   // https://docs.npmjs.com/cli/v9/using-npm/config#node-options
   return /^--node-options(?:=.*)?$/.test(cmdArg)
@@ -84,7 +80,6 @@ export function isNpmNodeOptionsFlag(cmdArg: string): boolean {
  *   isNpmProgressFlag('--save') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isNpmProgressFlag(cmdArg: string): boolean {
   return /^--(?:no-)?progress(?:=.*)?$/.test(cmdArg)
 }

@@ -12,14 +12,16 @@ import { StringPrototypeStartsWith } from '../primordials/string'
 
 import { MATCHER_CACHE_MAX_SIZE, getPicomatch, matcherCache } from './_internal'
 
+import type NodePath from 'node:path'
+
 import type { Pattern } from './types'
 
 // `path.matchesGlob` was added in Node v22.5.0 / v20.17.0 (Stable).
 // Engines is >=22, so it's missing only on 22.0.x – 22.4.x.
-// `_matchesGlob` caches the resolved native function; `_matchesGlobProbed`
+// `matchesGlobCache` caches the resolved native function; `matchesGlobProbed`
 // distinguishes "not yet probed" from "probed but absent".
-let _matchesGlob: ((p: string, pattern: string) => boolean) | undefined
-let _matchesGlobProbed = false
+let matchesGlobCache: ((p: string, pattern: string) => boolean) | undefined
+let matchesGlobProbed = false
 
 /**
  * Return a glob-matcher function, memoized by pattern + options.
@@ -45,7 +47,6 @@ let _matchesGlobProbed = false
  *   const isSource = getGlobMatcher(['src/**', '!**\/*.test.ts'])
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getGlobMatcher(
   glob: Pattern | Pattern[],
   options?: {
@@ -159,17 +160,16 @@ export function getGlobMatcher(
  *
  * @internal
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getMatchesGlob():
   | ((p: string, pattern: string) => boolean)
   | undefined {
-  if (!_matchesGlobProbed) {
+  if (!matchesGlobProbed) {
     // The /*@__PURE__*/ stays adjacent to the require() call — oxfmt
     // reformats `(/*@__PURE__*/ require(…) as T).x` back into the
     // outside-paren form that rolldown doesn't honor; using an
     // intermediate const sidesteps the reformat. See task #23.
     const pathMod =
-      /*@__PURE__*/ require('node:path') as typeof import('node:path') & {
+      /*@__PURE__*/ require('node:path') as typeof NodePath & {
         matchesGlob?: unknown | undefined
       }
     const fn = pathMod.matchesGlob
@@ -177,10 +177,10 @@ export function getMatchesGlob():
     // only on older runtimes.
     /* c8 ignore start */
     if (typeof fn === 'function') {
-      _matchesGlob = fn as (p: string, pattern: string) => boolean
+      matchesGlobCache = fn as (p: string, pattern: string) => boolean
     }
     /* c8 ignore stop */
-    _matchesGlobProbed = true
+    matchesGlobProbed = true
   }
-  return _matchesGlob
+  return matchesGlobCache
 }

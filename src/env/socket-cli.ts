@@ -21,7 +21,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns Whether to accept all risks
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliAcceptRisks(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_CLI_ACCEPT_RISKS'))
 }
@@ -40,7 +39,6 @@ export function getSocketCliAcceptRisks(): boolean {
  *
  * @returns API base URL or undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliApiBaseUrl(): string | undefined {
   return (
     getEnvValue('SOCKET_CLI_API_BASE_URL') ||
@@ -64,7 +62,6 @@ export function getSocketCliApiBaseUrl(): string | undefined {
  *
  * @returns API proxy URL or undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliApiProxy(): string | undefined {
   return (
     getEnvValue('SOCKET_CLI_API_PROXY') ||
@@ -89,7 +86,6 @@ export function getSocketCliApiProxy(): string | undefined {
  *
  * @returns API timeout in milliseconds
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliApiTimeout(): number {
   return envAsNumber(getEnvValue('SOCKET_CLI_API_TIMEOUT'))
 }
@@ -108,7 +104,6 @@ export function getSocketCliApiTimeout(): number {
  *
  * @returns Bootstrap cache directory or undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliBootstrapCacheDir(): string | undefined {
   return getEnvValue('SOCKET_CLI_BOOTSTRAP_CACHE_DIR')
 }
@@ -127,7 +122,6 @@ export function getSocketCliBootstrapCacheDir(): string | undefined {
  *
  * @returns Bootstrap package spec or undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliBootstrapSpec(): string | undefined {
   return getEnvValue('SOCKET_CLI_BOOTSTRAP_SPEC')
 }
@@ -145,7 +139,6 @@ export function getSocketCliBootstrapSpec(): string | undefined {
  *
  * @returns Config file path or undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliConfig(): string | undefined {
   return getEnvValue('SOCKET_CLI_CONFIG')
 }
@@ -163,7 +156,6 @@ export function getSocketCliConfig(): string | undefined {
  *
  * @returns Fix mode value or undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliFix(): string | undefined {
   return getEnvValue('SOCKET_CLI_FIX')
 }
@@ -182,7 +174,6 @@ export function getSocketCliFix(): string | undefined {
  *
  * @returns GitHub token or undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliGithubToken(): string | undefined {
   return (
     getEnvValue('SOCKET_CLI_GITHUB_TOKEN') ||
@@ -205,7 +196,6 @@ export function getSocketCliGithubToken(): string | undefined {
  *
  * @returns Whether to skip API token requirement
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliNoApiToken(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_CLI_NO_API_TOKEN'))
 }
@@ -224,7 +214,6 @@ export function getSocketCliNoApiToken(): boolean {
  *
  * @returns Whether optimization mode is enabled
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliOptimize(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_CLI_OPTIMIZE'))
 }
@@ -243,7 +232,6 @@ export function getSocketCliOptimize(): boolean {
  *
  * @returns Organization slug or undefined
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliOrgSlug(): string | undefined {
   return getEnvValue('SOCKET_CLI_ORG_SLUG') || getEnvValue('SOCKET_ORG_SLUG')
 }
@@ -262,7 +250,6 @@ export function getSocketCliOrgSlug(): string | undefined {
  *
  * @returns Whether to view all risks
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSocketCliViewAllRisks(): boolean {
   return envAsBoolean(getEnvValue('SOCKET_CLI_VIEW_ALL_RISKS'))
 }

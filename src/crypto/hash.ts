@@ -6,16 +6,18 @@
 
 import { getNodeCrypto } from '../node/crypto'
 
+import type { hash as NodeHash } from 'node:crypto'
+
 // `crypto.hash(algorithm, data, outputEncoding)` was added in Node
 // v21.7.0 / v20.12.0 (Stable). Engines is >=22, so it's always present
 // here in practice — feature-detect anyway because the type surface
 // for `node:crypto` doesn't include it on every TS lib version.
 //
-// `_hash` is the resolved native function (or `undefined` if absent
-// or not yet probed). `_hashProbed` distinguishes the two cases so a
-// missing native is detected only once.
-let _hash: typeof import('node:crypto').hash | undefined
-let _hashProbed = false
+// `cachedNativeHash` is the resolved native function (or `undefined` if
+// absent or not yet probed). `nativeHashProbed` distinguishes the two cases
+// so a missing native is detected only once.
+let cachedNativeHash: typeof NodeHash | undefined
+let nativeHashProbed = false
 
 /**
  * Compute a one-shot cryptographic hash.
@@ -39,7 +41,6 @@ let _hashProbed = false
  *   // 'z4PhNX7vuL3xVChQ1m2AB9Yg5AULVxXcg/SpIdNs6c5H0NE8XYXysP+DGNKHfuwvY7kxvUdBeoGlODJ6+SfaPg=='
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function hash(
   algorithm: string,
   data: string | NodeJS.ArrayBufferView,
@@ -62,18 +63,15 @@ export function hash(
  *
  * @internal
  */
-/*@__NO_SIDE_EFFECTS__*/
-export function nativeHash(): typeof import('node:crypto').hash | undefined {
-  if (!_hashProbed) {
+export function nativeHash(): typeof NodeHash | undefined {
+  if (!nativeHashProbed) {
     const fn = (
-      getNodeCrypto() as typeof import('node:crypto') & {
-        hash?: unknown | undefined
-      }
+      getNodeCrypto() as { hash?: unknown | undefined }
     ).hash
     if (typeof fn === 'function') {
-      _hash = fn as typeof import('node:crypto').hash
+      cachedNativeHash = fn as typeof NodeHash
     }
-    _hashProbed = true
+    nativeHashProbed = true
   }
-  return _hash
+  return cachedNativeHash
 }

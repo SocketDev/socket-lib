@@ -6,8 +6,6 @@
  *   use `node:fs` directly.
  */
 
-/* oxlint-disable socket/prefer-exists-sync -- this module IS the stat-wrapper surface; callers use these for type discrimination (isFile/isDirectory) or metadata, not pure existence checks. */
-
 import { defaultIgnore } from '../globs/defaults'
 import { getGlobMatcher } from '../globs/matcher'
 import { getNodeFs } from '../node/fs'
@@ -32,7 +30,6 @@ import type { IsDirEmptyOptions } from './types'
  *
  * @returns `true` if path is a directory, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function isDir(filepath: PathLike) {
   return !!(await safeStat(filepath))?.isDirectory()
 }
@@ -56,7 +53,6 @@ export async function isDir(filepath: PathLike) {
  *
  * @returns `true` if directory is empty (or doesn't exist), `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isDirEmptySync(
   dirname: PathLike,
   options?: IsDirEmptyOptions | undefined,
@@ -112,7 +108,6 @@ export function isDirEmptySync(
  *
  * @returns `true` if path is a directory, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isDirSync(filepath: PathLike) {
   return !!safeStatSync(filepath)?.isDirectory()
 }
@@ -132,10 +127,10 @@ export function isDirSync(filepath: PathLike) {
  *
  * @returns `true` if path is a symbolic link, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isSymlinkSync(filepath: PathLike) {
   const fs = getNodeFs()
   try {
+    // oxlint-disable-next-line socket/prefer-exists-sync -- needs lstat metadata to test isSymbolicLink, not mere existence.
     return fs.lstatSync(filepath).isSymbolicLink()
   } catch {}
   return false
@@ -160,10 +155,10 @@ export function isSymlinkSync(filepath: PathLike) {
  *
  * @returns Promise resolving to Stats object, or undefined on error
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function safeStat(filepath: PathLike) {
   const fs = getNodeFs()
   try {
+    // oxlint-disable-next-line socket/prefer-exists-sync -- returns the Stats object for callers reading metadata (size, mtime, isDirectory), not existence.
     return await fs.promises.stat(filepath)
   } catch {}
   return undefined
@@ -188,10 +183,10 @@ export async function safeStat(filepath: PathLike) {
  *
  * @returns Stats object, or undefined on error
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function safeStatSync(filepath: PathLike) {
   const fs = getNodeFs()
   try {
+    // oxlint-disable-next-line socket/prefer-exists-sync -- returns the Stats object for callers reading metadata (size, mtime, isDirectory), not existence.
     return fs.statSync(filepath, {
       __proto__: null,
       throwIfNoEntry: false,

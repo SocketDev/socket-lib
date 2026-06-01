@@ -20,7 +20,9 @@ import * as selectModuleImport from '../external/@inquirer/select'
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 
 import type { ColorValue } from '../colors/types'
+import type { Remap } from '../objects/types'
 import { getDefaultSpinner } from '../spinner/default'
+import type { SpinnerInstance } from '../spinner/types'
 import { getTheme } from '../themes/context'
 import { THEMES } from '../themes/themes'
 import type { ThemeName } from '../themes/themes'
@@ -98,12 +100,12 @@ interface InquirerContext {
  * Extended context with spinner support. Allows passing a spinner instance to
  * be managed during prompts.
  */
-export type Context = import('../objects/types').Remap<
+export type Context = Remap<
   InquirerContext & {
     /**
      * Optional spinner to stop/start during prompt display.
      */
-    spinner?: import('../spinner/types').SpinnerInstance | undefined
+    spinner?: SpinnerInstance | undefined
   }
 >
 
@@ -139,7 +141,11 @@ export type Separator = SeparatorType
 export function applyColor(text: string, color: ColorValue): string {
   if (typeof color === 'string') {
     // Named color like 'green', 'red', etc.
-    return (yoctocolorsCjs as any)[color](text)
+    const colorFns = yoctocolorsCjs as unknown as Record<
+      string,
+      (text: string) => string
+    >
+    return colorFns[color]!(text)
   }
   // RGB tuple [r, g, b] - manually construct ANSI escape codes.
   // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.
@@ -290,7 +296,6 @@ export function resolveTheme(theme: Theme | ThemeName): Theme {
  *
  * @returns Wrapped prompt function with spinner, theme, and signal handling
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function wrapPrompt<T = unknown>(
   inquirerPrompt: (...args: unknown[]) => Promise<T>,
 ): (...args: unknown[]) => Promise<T | undefined> {

@@ -25,7 +25,6 @@ const BooleanCtor = Boolean
  *   urlSearchParamsAsArray(null) // []
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsAsArray(
   value: string | null | undefined,
 ): string[] {
@@ -48,7 +47,6 @@ export function urlSearchParamsAsArray(
  *   urlSearchParamsAsBoolean(null) // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsAsBoolean(
   value: string | null | undefined,
   options?: UrlSearchParamsAsBooleanOptions | undefined,
@@ -91,7 +89,6 @@ export function urlSearchParamsAsBoolean(
  *   urlSearchParamsAsNumber(params, 'other') // 0
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsAsNumber(
   params: URLSearchParams | null | undefined,
   key: string,
@@ -121,7 +118,6 @@ export function urlSearchParamsAsNumber(
  *   urlSearchParamsAsString(params, 'other') // ''
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsAsString(
   params: URLSearchParams | null | undefined,
   key: string,
@@ -147,7 +143,6 @@ export function urlSearchParamsAsString(
  *   urlSearchParamsGetArray(params, 'tags') // ['a', 'b', 'c']
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsGetArray(
   params: URLSearchParams | null | undefined,
   key: string,
@@ -174,7 +169,6 @@ export function urlSearchParamsGetArray(
  *   urlSearchParamsGetBoolean(params, 'other') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function urlSearchParamsGetBoolean(
   params: URLSearchParams | null | undefined,
   key: string,

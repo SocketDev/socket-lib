@@ -22,10 +22,9 @@ import {
 
 import type { eastAsianWidth as eastAsianWidthType } from '../external/get-east-asian-width'
 
-let _eastAsianWidth: typeof eastAsianWidthType | undefined
-/*@__NO_SIDE_EFFECTS__*/
+let cachedEastAsianWidth: typeof eastAsianWidthType | undefined
 export function getEastAsianWidth() {
-  if (_eastAsianWidth === undefined) {
+  if (cachedEastAsianWidth === undefined) {
     // The /*@__PURE__*/ stays adjacent to the require() call — oxfmt
     // reformats `(/*@__PURE__*/ require(…) as T).x` back into the
     // outside-paren form that rolldown doesn't honor; using an
@@ -33,9 +32,9 @@ export function getEastAsianWidth() {
     const mod = /*@__PURE__*/ require('../external/get-east-asian-width') as {
       eastAsianWidth: typeof eastAsianWidthType
     }
-    _eastAsianWidth = mod.eastAsianWidth
+    cachedEastAsianWidth = mod.eastAsianWidth
   }
-  return _eastAsianWidth!
+  return cachedEastAsianWidth!
 }
 
 // Initialize Intl.Segmenter for proper grapheme cluster segmentation.
@@ -74,7 +73,7 @@ let emojiRegex: RegExp
 try {
   // Try 'v' flag first (Node 20+) for most accurate Unicode property support.
   zeroWidthClusterRegex =
-    /^(?:\p{Default_Ignorable_Code_Point}|\p{Control}|\p{Mark}|\p{Surrogate})+$/v
+    /^(?:\p{Control}|\p{Default_Ignorable_Code_Point}|\p{Mark}|\p{Surrogate})+$/v
 
   leadingNonPrintingRegex =
     /^[\p{Default_Ignorable_Code_Point}\p{Control}\p{Format}\p{Mark}\p{Surrogate}]+/v
@@ -84,7 +83,7 @@ try {
 } catch {
   // Fall back to 'u' flag (Node 18+) — no \p{Surrogate}, broader emoji.
   zeroWidthClusterRegex =
-    /^(?:\p{Default_Ignorable_Code_Point}|\p{Control}|\p{Mark})+$/u
+    /^(?:\p{Control}|\p{Default_Ignorable_Code_Point}|\p{Mark})+$/u
   leadingNonPrintingRegex =
     /^[\p{Default_Ignorable_Code_Point}\p{Control}\p{Format}\p{Mark}]+/u
   emojiRegex = /^\p{Extended_Pictographic}$/u
@@ -116,7 +115,6 @@ try {
  *
  * @returns The visual width in terminal columns
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function stringWidth(text: string): number {
   if (typeof text !== 'string' || !text.length) {
     return 0

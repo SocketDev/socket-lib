@@ -91,14 +91,18 @@ describe('pkg-ext', () => {
 
         if (name.startsWith('abab')) {
           expect(config).toHaveProperty('devDependencies')
-          const devDeps = (config as any).devDependencies
+          const devDeps = (config as Record<string, unknown>)
+            .devDependencies as Record<string, unknown>
           expect(devDeps).toBeDefined()
-          expect(devDeps.webpack).toBe('^3.12.0')
+          expect(devDeps['webpack']).toBe('^3.12.0')
         }
 
         if (name.startsWith('is-generator-function')) {
           expect(config).toHaveProperty('scripts')
-          const scripts = (config as any).scripts
+          const scripts = (config as Record<string, unknown>).scripts as Record<
+            string,
+            unknown
+          >
           expect(scripts).toBeDefined()
           expect(scripts['test:uglified']).toBe('')
         }
@@ -107,7 +111,10 @@ describe('pkg-ext', () => {
 
     it('should not be modifiable (frozen array)', () => {
       expect(() => {
-        ;(packageExtensions as any).push(['test@1.0.0', {}])
+        ;(packageExtensions as unknown as unknown[]).push([
+          'test@1.0.0',
+          {},
+        ])
       }).toThrow()
     })
 
@@ -134,7 +141,7 @@ describe('pkg-ext', () => {
       expect(yarnExt).toBeDefined()
       const [, config] = yarnExt!
       expect(config).toHaveProperty('peerDependencies')
-      expect((config as any).peerDependencies).toBeUndefined()
+      expect((config as Record<string, unknown>).peerDependencies).toBeUndefined()
     })
 
     it('should have abab with webpack devDependency override', () => {
@@ -144,9 +151,10 @@ describe('pkg-ext', () => {
       expect(ababExt).toBeDefined()
       const [, config] = ababExt!
       expect(config).toHaveProperty('devDependencies')
-      const devDeps = (config as any).devDependencies
+      const devDeps = (config as Record<string, unknown>)
+        .devDependencies as Record<string, unknown>
       expect(devDeps).toHaveProperty('webpack')
-      expect(devDeps.webpack).toBe('^3.12.0')
+      expect(devDeps['webpack']).toBe('^3.12.0')
     })
 
     it('should have is-generator-function with silenced test script', () => {
@@ -156,7 +164,10 @@ describe('pkg-ext', () => {
       expect(isGenFnExt).toBeDefined()
       const [, config] = isGenFnExt!
       expect(config).toHaveProperty('scripts')
-      const scripts = (config as any).scripts
+      const scripts = (config as Record<string, unknown>).scripts as Record<
+        string,
+        unknown
+      >
       expect(scripts).toHaveProperty('test:uglified')
       expect(scripts['test:uglified']).toBe('')
     })

@@ -48,7 +48,6 @@ import {
  *
  * @returns {boolean} `true` if absolute, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isAbsolute(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
   const { length } = filepath
@@ -100,7 +99,6 @@ export function isAbsolute(pathLike: string | Buffer | URL): boolean {
  *
  * @returns {boolean} `true` if the path contains `node_modules`
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isNodeModules(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
   return RegExpPrototypeTest(nodeModulesPathRegExp, filepath)
@@ -125,7 +123,6 @@ export function isNodeModules(pathLike: string | Buffer | URL): boolean {
  *
  * @returns {boolean} `true` if the value is a valid file path
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isPath(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
   if (typeof filepath !== 'string' || filepath.length === 0) {
@@ -181,7 +178,6 @@ export function isPath(pathLike: string | Buffer | URL): boolean {
  *
  * @returns {boolean} `true` if separator
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isPathSeparator(code: number): boolean {
   return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH
 }
@@ -202,7 +198,6 @@ export function isPathSeparator(code: number): boolean {
  *
  * @returns {boolean} `true` if the path is relative
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isRelative(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
   /* c8 ignore start */
@@ -233,7 +228,6 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
  *
  * @returns {boolean} `true` if the path uses MSYS drive letter notation
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isUnixPath(pathLike: string | Buffer | URL): boolean {
   const filepath = pathLikeToString(pathLike)
   return (
@@ -257,7 +251,6 @@ export function isUnixPath(pathLike: string | Buffer | URL): boolean {
  * @returns {boolean} `true` if valid drive-letter code
  */
 /* c8 ignore start - Only called from Windows-only branches. */
-/*@__NO_SIDE_EFFECTS__*/
 export function isWindowsDeviceRoot(code: number): boolean {
   return (
     (code >= CHAR_UPPERCASE_A && code <= CHAR_UPPERCASE_Z) ||

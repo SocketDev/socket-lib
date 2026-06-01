@@ -58,7 +58,7 @@ const pacoteCachePath = getPacoteCachePath()
 // bundle into any consumer that imports this module for an unrelated pure
 // helper (e.g. `pkgNameToSlug`). Bundlers that stub npm-pack then crash at
 // module load. A memoized getter defers the cost to the first fetcher use.
-let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
+let cachedFetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
 /**
  * Extract a package to a destination directory.
  *
@@ -67,7 +67,6 @@ let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
  *   await extractPackage('lodash@4.17.21', { dest: '/tmp/lodash' })
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function extractPackage(
   pkgNameOrId: string,
   options?: ExtractOptions,
@@ -122,7 +121,6 @@ export async function extractPackage(
  *   const extensions = findPackageExtensions('my-pkg', '1.0.0')
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function findPackageExtensions(
   pkgName: string,
   pkgVer: string,
@@ -150,8 +148,8 @@ export function findPackageExtensions(
 }
 
 export function getFetcher(): ReturnType<typeof makeFetchHappen.defaults> {
-  if (_fetcher === undefined) {
-    _fetcher = makeFetchHappen.defaults({
+  if (cachedFetcher === undefined) {
+    cachedFetcher = makeFetchHappen.defaults({
       cachePath: pacoteCachePath,
       // Prefer-offline: Staleness checks for cached data will be bypassed, but
       // missing data will be requested from the server.
@@ -159,7 +157,7 @@ export function getFetcher(): ReturnType<typeof makeFetchHappen.defaults> {
       cache: 'force-cache',
     })
   }
-  return _fetcher
+  return cachedFetcher
 }
 
 /**
@@ -172,7 +170,6 @@ export function getFetcher(): ReturnType<typeof makeFetchHappen.defaults> {
  *   getReleaseTag('lodash') // ''
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getReleaseTag(spec: string): string {
   if (!spec) {
     return ''
@@ -200,7 +197,6 @@ export function getReleaseTag(spec: string): string {
  *   const tarball = await packPackage('lodash@4.17.21')
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function packPackage(
   spec: string,
   options?: PacoteOptions,
@@ -229,7 +225,6 @@ export async function packPackage(
  *   pkgNameToSlug('lodash') // 'lodash'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function pkgNameToSlug(pkgName: string): string {
   return StringPrototypeCharCodeAt(pkgName, 0) === 64 /* '@' */
     ? `${pkgName.slice(1).replace('/', '-')}`
@@ -245,7 +240,6 @@ export function pkgNameToSlug(pkgName: string): string {
  *   console.log(pkgJson?.name)
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function readPackageJson(
   filepath: string,
   options?: ReadPackageJsonOptions,
@@ -279,7 +273,6 @@ export async function readPackageJson(
  *   console.log(pkgJson?.name)
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function readPackageJsonSync(
   filepath: string,
   options?: NormalizeOptions & {
@@ -319,7 +312,6 @@ export function readPackageJsonSync(
  *   const url = await resolveGitHubTgzUrl('my-pkg@1.0.0', '/tmp/my-project')
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function resolveGitHubTgzUrl(
   pkgNameOrId: string,
   where?: unknown,
@@ -401,7 +393,6 @@ export async function resolveGitHubTgzUrl(
  *   resolvePackageName({ name: 'lodash' }) // 'lodash'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageName(
   purlObj: { name: string; namespace?: string | undefined },
   delimiter: string = '/',
@@ -419,7 +410,6 @@ export function resolvePackageName(
  *   resolveRegistryPackageName('lodash') // 'lodash'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolveRegistryPackageName(pkgName: string): string {
   const input = `pkg:npm/${pkgName}`
   // Prefer node:smol-purl on the smol binary (C++-accelerated, with

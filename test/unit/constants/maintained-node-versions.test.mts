@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { maintainedNodeVersions } from '../../../src/constants/maintained-node-versions'
+import { maintainedNodeVersions } from '@socketsecurity/lib-stable/constants/maintained-node-versions'
 
 describe('maintained-node-versions', () => {
   describe('default export', () => {
@@ -114,7 +114,7 @@ describe('maintained-node-versions', () => {
     it('should not allow modification of array elements', () => {
       expect(() => {
         // Testing runtime immutability (readonly array)
-        const arr = maintainedNodeVersions as any
+        const arr = maintainedNodeVersions as unknown as string[]
         arr[0] = '99.99.99'
       }).toThrow()
     })
@@ -122,7 +122,7 @@ describe('maintained-node-versions', () => {
     it('should not allow push', () => {
       expect(() => {
         // Testing runtime immutability (readonly array)
-        const arr = maintainedNodeVersions as any
+        const arr = maintainedNodeVersions as unknown as string[]
         arr.push('99.99.99')
       }).toThrow()
     })
@@ -130,7 +130,7 @@ describe('maintained-node-versions', () => {
     it('should not allow pop', () => {
       expect(() => {
         // Testing runtime immutability (readonly array)
-        const arr = maintainedNodeVersions as any
+        const arr = maintainedNodeVersions as unknown as string[]
         arr.pop()
       }).toThrow()
     })
@@ -138,7 +138,7 @@ describe('maintained-node-versions', () => {
     it('should not allow modification of named properties', () => {
       expect(() => {
         // Testing runtime immutability (readonly properties)
-        const obj = maintainedNodeVersions as any
+        const obj = maintainedNodeVersions as unknown as Record<string, string>
         obj.current = '99.99.99'
       }).toThrow()
     })
@@ -208,7 +208,9 @@ describe('maintained-node-versions', () => {
   describe('array operations', () => {
     it('should support forEach iteration', () => {
       const versions: string[] = []
-      maintainedNodeVersions.forEach(v => versions.push(v))
+      for (let i = 0, { length } = maintainedNodeVersions; i < length; i += 1) {
+        versions.push(maintainedNodeVersions[i]!)
+      }
       expect(versions).toHaveLength(4)
     })
 
@@ -217,7 +219,9 @@ describe('maintained-node-versions', () => {
         Number.parseInt(v.split('.')[0]!, 10),
       )
       expect(majors).toHaveLength(4)
-      majors.forEach(m => expect(typeof m).toBe('number'))
+      for (let i = 0, { length } = majors; i < length; i += 1) {
+        expect(typeof majors[i]).toBe('number')
+      }
     })
 
     it('should support filter operation', () => {
