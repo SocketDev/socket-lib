@@ -13,6 +13,7 @@
  *     its own download-attempt loop.
  */
 
+import { BufferAlloc, BufferConcat } from '../primordials/buffer'
 import { DateNow } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
@@ -22,6 +23,7 @@ import { URLCtor } from '../primordials/url'
 
 import { getHttp, getHttps } from './_internal'
 import { enrichErrorMessage } from './errors'
+import { decodeBody } from './response-reader'
 import { getSocketCallerUserAgent } from './user-agent'
 
 import type {
@@ -185,9 +187,9 @@ export async function httpRequestAttempt(
 
           const redirectUrl = res.headers.location.startsWith('http')
             ? res.headers.location
-            : new URL(res.headers.location, url).toString()
+            : new URLCtor(res.headers.location, url).toString()
 
-          const redirectParsed = new URL(redirectUrl)
+          const redirectParsed = new URLCtor(redirectUrl)
           if (isHttps && redirectParsed.protocol !== 'https:') {
             // Hook already emitted above — reject directly to avoid double-fire.
             settled = true
@@ -202,7 +204,7 @@ export async function httpRequestAttempt(
           // Strip auth/session headers on cross-origin redirects to prevent
           // leaking credentials to third-party hosts (e.g., GitHub -> S3).
           let redirectHeaders = headers
-          if (new URL(url).origin !== redirectParsed.origin) {
+          if (new URLCtor(url).origin !== redirectParsed.origin) {
             redirectHeaders = { __proto__: null } as unknown as typeof headers
             const stripped = new Set([
               'authorization',
@@ -250,7 +252,7 @@ export async function httpRequestAttempt(
             statusText,
           })
 
-          const emptyBody = Buffer.alloc(0)
+          const emptyBody = BufferAlloc!(0)
           resolveOnce({
             arrayBuffer: () => emptyBody.buffer as ArrayBuffer,
             body: emptyBody,
@@ -292,7 +294,16 @@ export async function httpRequestAttempt(
             return
           }
 
-          const responseBody = Buffer.concat(chunks)
+          // Decompress per Content-Encoding before exposing the body. We
+          // advertise `Accept-Encoding: gzip, br`, so servers (GitHub API,
+          // nodejs.org, …) may return a compressed body — without this,
+          // `.json()` / `.text()` see raw gzip bytes and fail to parse.
+          // decodeBody is async (zlib); resolve through a promise then build
+          // the response. Falls back to the raw bytes on decode failure.
+          const rawBody = BufferConcat!(chunks)
+          void decodeBody(rawBody, res.headers['content-encoding'])
+            .catch(() => rawBody)
+            .then(responseBody => {
           const ok =
             res.statusCode !== undefined &&
             res.statusCode >= 200 &&
@@ -303,7 +314,7 @@ export async function httpRequestAttempt(
               return responseBody.buffer.slice(
                 responseBody.byteOffset,
                 responseBody.byteOffset + responseBody.byteLength,
-              )
+              ) as ArrayBuffer
             },
             body: responseBody,
             headers: res.headers,
@@ -326,6 +337,7 @@ export async function httpRequestAttempt(
           })
 
           resolveOnce(response)
+            })
         })
 
         res.on('error', (error: Error) => {
