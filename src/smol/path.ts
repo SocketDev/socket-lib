@@ -51,8 +51,8 @@ export interface SmolPathBinding {
     | undefined
 }
 
-let _smolPath: SmolPathBinding | undefined
-let _smolPathProbed = false
+let smolPathCache: SmolPathBinding | undefined
+let smolPathProbed = false
 
 /**
  * Returns the `node:smol-path` binding when running on a smol Node binary that
@@ -61,13 +61,13 @@ let _smolPathProbed = false
  * @returns The native binding, or `undefined` to signal "use the JS fallback".
  */
 export function getSmolPath(): SmolPathBinding | undefined {
-  if (!_smolPathProbed) {
-    _smolPathProbed = true
+  if (!smolPathProbed) {
+    smolPathProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-path')) {
-      _smolPath = require('node:smol-path') as SmolPathBinding
+      smolPathCache = require('node:smol-path') as SmolPathBinding
     }
     /* c8 ignore stop */
   }
-  return _smolPath
+  return smolPathCache
 }

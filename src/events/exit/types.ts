@@ -5,13 +5,15 @@
  *   effects.
  */
 
+import type { EventEmitter } from 'node:events'
+
 // Type for tracking emitted signals.
 export type EmittedSignals = {
   // Using string as signals can include custom events like 'exit' and 'afterexit'.
   [signal: string]: boolean
 }
 
-export type SignalExitEmitter = import('node:events').EventEmitter & {
+export type SignalExitEmitter = EventEmitter & {
   count?: number | undefined
   emitted?: EmittedSignals | undefined
   infinite?: boolean | undefined

@@ -32,7 +32,7 @@ import type {
 const identSymbol = INDENT_SYMBOL
 const newlineSymbol = NEWLINE_SYMBOL
 
-let _EditableJsonClass: EditableJsonConstructor | undefined
+let editableJsonClass: EditableJsonConstructor | undefined
 /**
  * Get the EditableJson class for JSON file manipulation.
  *
@@ -49,17 +49,17 @@ let _EditableJsonClass: EditableJsonConstructor | undefined
 export function getEditableJsonClass<
   T = Record<string, unknown>,
 >(): EditableJsonConstructor<T> {
-  if (_EditableJsonClass === undefined) {
-    _EditableJsonClass = class EditableJson<
-      T = Record<string, unknown>,
-    > implements EditableJsonInstance<T> {
+  if (editableJsonClass === undefined) {
+    editableJsonClass = class EditableJson<
+      InstanceData = Record<string, unknown>,
+    > implements EditableJsonInstance<InstanceData> {
       _canSave = true
-      _content: T = {} as T
+      _content: InstanceData = {} as InstanceData
       _path: string | undefined = undefined
       _readFileContent = ''
       _readFileJson: unknown = undefined
 
-      get content(): Readonly<T> {
+      get content(): Readonly<InstanceData> {
         return this._content
       }
 
@@ -113,19 +113,19 @@ export function getEditableJsonClass<
 
       create(path: string): this {
         this._path = path
-        this._content = {} as T
+        this._content = {} as InstanceData
         this._canSave = true
         return this
       }
 
       fromContent(data: unknown): this {
-        this._content = data as T
+        this._content = data as InstanceData
         this._canSave = false
         return this
       }
 
       fromJSON(data: string): this {
-        const parsed = JSONParse(data) as T & Record<symbol, unknown>
+        const parsed = JSONParse(data) as InstanceData & Record<symbol, unknown>
         // Extract and preserve formatting metadata
         const indent = detectIndent(data)
         const newline = detectNewline(data)
@@ -134,7 +134,7 @@ export function getEditableJsonClass<
         ;(parsed as Record<symbol, unknown>)[identSymbol] = indent
         ;(parsed as Record<symbol, unknown>)[newlineSymbol] = newline
 
-        this._content = parsed as T
+        this._content = parsed as InstanceData
         return this
       }
 
@@ -224,11 +224,11 @@ export function getEditableJsonClass<
         return true
       }
 
-      update(content: Partial<T>): this {
+      update(content: Partial<InstanceData>): this {
         this._content = {
           ...this._content,
           ...content,
-        } as T
+        } as InstanceData
         return this
       }
 
@@ -246,7 +246,7 @@ export function getEditableJsonClass<
       }
     } as EditableJsonConstructor
   }
-  return _EditableJsonClass as EditableJsonConstructor<T>
+  return editableJsonClass as EditableJsonConstructor<T>
 }
 
 /**

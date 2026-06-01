@@ -57,21 +57,21 @@ export interface SmolVersionsBinding {
   coerce(version: string, ecosystem?: string): string | undefined
 }
 
-let _smolVersions: SmolVersionsBinding | undefined
-let _smolVersionsProbed = false
+let smolVersions: SmolVersionsBinding | undefined
+let smolVersionsProbed = false
 
 /**
  * Returns `node:smol-versions` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  */
 export function getSmolVersions(): SmolVersionsBinding | undefined {
-  if (!_smolVersionsProbed) {
-    _smolVersionsProbed = true
+  if (!smolVersionsProbed) {
+    smolVersionsProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-versions')) {
-      _smolVersions = require('node:smol-versions') as SmolVersionsBinding
+      smolVersions = require('node:smol-versions') as SmolVersionsBinding
     }
     /* c8 ignore stop */
   }
-  return _smolVersions
+  return smolVersions
 }

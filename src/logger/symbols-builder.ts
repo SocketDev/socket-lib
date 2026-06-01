@@ -8,7 +8,6 @@
  *   - `stripLoggerSymbols` — strip leading status emoji from a string
  */
 
-/* oxlint-disable socket/no-status-emoji */
 // The `buildLoggerSymbols` factory below assembles the canonical
 // symbol map used by `logger.success` / `logger.fail` / `logger.warn`
 // etc. This module IS the source of those symbols, so the rule that
@@ -39,12 +38,19 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
      terminals without unicode support; tests run on unicode TTYs. */
   return {
     __proto__: null,
+    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
     fail: applyColor(supported ? '✖' : '×', theme.colors.error, colors),
+    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
     info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info, colors),
+    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
     progress: applyColor(supported ? '∴' : ':.', theme.colors.step, colors),
+    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
     skip: applyColor(supported ? '↻' : '@', theme.colors.step, colors),
+    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
     step: applyColor(supported ? '→' : '>', theme.colors.step, colors),
+    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
     success: applyColor(supported ? '✔' : '√', theme.colors.success, colors),
+    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
     warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning, colors),
   } as LogSymbols
   /* c8 ignore stop */
@@ -60,5 +66,6 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
  * input becomes `'Done'`.
  */
 export function stripLoggerSymbols(text: string): string {
-  return StringPrototypeReplace(text, /^(?:[✖✗×⚠‼✔✓√ℹ→∴↻]|:.)[️\s]*/u, '')
+  // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
+  return StringPrototypeReplace(text, /^(?::.|[✖✗×⚠‼✔✓√ℹ→∴↻])[️\s]*/u, '')
 }

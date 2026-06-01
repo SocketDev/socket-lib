@@ -20,9 +20,11 @@ import {
   spawnSync,
 } from '@socketsecurity/lib-stable/process/spawn/child'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
-import { homedir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
+
+import type fs from 'node:fs'
 
 import { ErrorCtor } from '../primordials/error'
 
@@ -82,7 +84,7 @@ export function deleteWindowsSync(
   const filePath = getDpapiFilePath(service, account)
   if (existsSync(filePath)) {
     try {
-      const fsMod = require('node:fs') as typeof import('node:fs')
+      const fsMod = require('node:fs') as typeof fs
       fsMod.rmSync(filePath, { force: true })
       removedAny = true
     } catch {
@@ -96,7 +98,7 @@ export function getDpapiFilePath(service: string, account: string): string {
   validateKeychainComponent(service, 'service')
   validateKeychainComponent(account, 'account')
   const appData =
-    process.env['APPDATA'] ?? path.join(homedir(), 'AppData', 'Roaming')
+    process.env['APPDATA'] ?? path.join(os.homedir(), 'AppData', 'Roaming')
   return path.join(appData, service, `${account}.enc`)
 }
 

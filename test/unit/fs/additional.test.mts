@@ -7,29 +7,18 @@
  *     paths
  *   - Error handling: non-existent paths, permission errors, invalid JSON
  *   - Binary file operations: non-UTF8 content, Buffer handling
- *   - Directory operations: empty directories, nested structures
+ *   - File read/write/json option handling
  *   - Sync vs async consistency: validates both APIs behave identically
- *   - Platform-specific scenarios: Windows vs Unix path handling
- *   - Safe operations: graceful handling of missing files, concurrent access Uses
- *     runWithTempDir for isolated test environments to avoid filesystem
- *     pollution. Complements primary fs.test.ts by focusing on uncommon code
- *     paths and error conditions.
+ *
+ *   Uses runWithTempDir for isolated test environments to avoid filesystem
+ *   pollution. Directory, delete, and path-inspection coverage lives in the
+ *   companion file additional-dir-delete.test.mts.
  */
 
-/* oxlint-disable socket/prefer-safe-delete, socket/prefer-exists-sync -- tests verify raw fs behavior (unlink semantics, stat output) — not the lib wrappers. */
-
-import { existsSync, promises as fs } from 'node:fs'
-import os from 'node:os'
+import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { findUp, findUpSync } from '../../../src/fs/find-up'
-import {
-  isDirEmptySync,
-  isDirSync,
-  safeStat,
-  safeStatSync,
-} from '../../../src/fs/inspect'
-import { readDirNames, readDirNamesSync } from '../../../src/fs/read-dir'
 import {
   readFileBinary,
   readFileBinarySync,
@@ -39,8 +28,6 @@ import {
   safeReadFileSync,
 } from '../../../src/fs/read-file'
 import { readJson, readJsonSync } from '../../../src/fs/read-json'
-import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
-import { uniqueSync } from '../../../src/fs/unique'
 import { writeJson, writeJsonSync } from '../../../src/fs/write-json'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../util/temp-file-helper'
@@ -411,281 +398,6 @@ describe('fs - Additional Coverage', () => {
         const result = safeReadFileSync(testFile, { encoding: 'utf8' })
         expect(result).toBe('content')
       }, 'safeReadFileSync-string-encoding-')
-    })
-  })
-
-  describe('readDirNames with more options', () => {
-    it('should handle sort: false', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.mkdir(path.join(tmpDir, 'b-dir'))
-        await fs.mkdir(path.join(tmpDir, 'a-dir'))
-
-        const result = await readDirNames(tmpDir, { sort: false })
-        expect(result.length).toBe(2)
-        expect(result).toContain('a-dir')
-        expect(result).toContain('b-dir')
-      }, 'readDirNames-no-sort-')
-    })
-
-    it('should handle includeEmpty: true explicitly', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.mkdir(path.join(tmpDir, 'empty-dir'))
-        await fs.mkdir(path.join(tmpDir, 'non-empty-dir'))
-        await fs.writeFile(
-          path.join(tmpDir, 'non-empty-dir', 'file.txt'),
-          '',
-          'utf8',
-        )
-
-        const result = await readDirNames(tmpDir, { includeEmpty: true })
-        expect(result).toEqual(['empty-dir', 'non-empty-dir'])
-      }, 'readDirNames-include-empty-')
-    })
-  })
-
-  describe('readDirNamesSync with more options', () => {
-    it('should handle sort: false', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.mkdir(path.join(tmpDir, 'z-dir'))
-        await fs.mkdir(path.join(tmpDir, 'a-dir'))
-
-        const result = readDirNamesSync(tmpDir, { sort: false })
-        expect(result.length).toBe(2)
-        expect(result).toContain('a-dir')
-        expect(result).toContain('z-dir')
-      }, 'readDirNamesSync-no-sort-')
-    })
-
-    it('should handle includeEmpty: false', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.mkdir(path.join(tmpDir, 'empty'))
-        await fs.mkdir(path.join(tmpDir, 'non-empty'))
-        await fs.writeFile(path.join(tmpDir, 'non-empty', 'f.txt'), '', 'utf8')
-
-        const result = readDirNamesSync(tmpDir, { includeEmpty: false })
-        expect(result).toEqual(['non-empty'])
-      }, 'readDirNamesSync-no-empty-')
-    })
-
-    it('should handle includeEmpty: true explicitly', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.mkdir(path.join(tmpDir, 'empty'))
-
-        const result = readDirNamesSync(tmpDir, { includeEmpty: true })
-        expect(result).toEqual(['empty'])
-      }, 'readDirNamesSync-include-empty-')
-    })
-  })
-
-  describe('isDirEmptySync with more ignore patterns', () => {
-    it('should return true when all files are ignored', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.writeFile(path.join(tmpDir, '.DS_Store'), '', 'utf8')
-        await fs.writeFile(path.join(tmpDir, 'Thumbs.db'), '', 'utf8')
-
-        const result = isDirEmptySync(tmpDir, {
-          ignore: ['**/.DS_Store', '**/Thumbs.db'],
-        })
-        expect(result).toBe(true)
-      }, 'isDirEmpty-all-ignored-')
-    })
-
-    it('should return true for empty directory with custom ignore', async () => {
-      await runWithTempDir(async tmpDir => {
-        const emptyDir = path.join(tmpDir, 'empty')
-        await fs.mkdir(emptyDir)
-
-        const result = isDirEmptySync(emptyDir, { ignore: ['*.log'] })
-        expect(result).toBe(true)
-      }, 'isDirEmpty-custom-ignore-')
-    })
-
-    it('should handle partially ignored files', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.writeFile(path.join(tmpDir, 'keep.txt'), '', 'utf8')
-        await fs.writeFile(path.join(tmpDir, 'ignore.log'), '', 'utf8')
-
-        const result = isDirEmptySync(tmpDir, { ignore: ['*.log'] })
-        expect(result).toBe(false)
-      }, 'isDirEmpty-partial-ignore-')
-    })
-  })
-
-  describe('safeDelete in allowed directories', () => {
-    it('should delete files in temp directory without force', async () => {
-      const tmpDir = os.tmpdir()
-      const testFile = path.join(tmpDir, `test-safe-delete-${Date.now()}.txt`)
-
-      try {
-        await fs.writeFile(testFile, 'test', 'utf8')
-        await safeDelete(testFile, { force: false })
-
-        const exists = existsSync(testFile)
-        expect(exists).toBe(false)
-      } catch (e) {
-        // Clean up if test fails
-        try {
-          await safeDelete(testFile)
-        } catch {}
-        throw e
-      }
-    })
-
-    it('should handle array of paths in temp directory', async () => {
-      const tmpDir = os.tmpdir()
-      const file1 = path.join(tmpDir, `test-1-${Date.now()}.txt`)
-      const file2 = path.join(tmpDir, `test-2-${Date.now()}.txt`)
-
-      try {
-        await fs.writeFile(file1, 'test1', 'utf8')
-        await fs.writeFile(file2, 'test2', 'utf8')
-
-        await safeDelete([file1, file2], { force: false })
-
-        const exists1 = existsSync(file1)
-        const exists2 = existsSync(file2)
-
-        expect(exists1).toBe(false)
-        expect(exists2).toBe(false)
-      } catch (e) {
-        // Clean up if test fails
-        try {
-          await fs.unlink(file1)
-        } catch {}
-        try {
-          await fs.unlink(file2)
-        } catch {}
-        throw e
-      }
-    })
-
-    it('should use force: true by default for temp directory', async () => {
-      const tmpDir = os.tmpdir()
-      const testFile = path.join(tmpDir, `test-default-${Date.now()}.txt`)
-
-      try {
-        await fs.writeFile(testFile, 'test', 'utf8')
-        await safeDelete(testFile)
-
-        const exists = existsSync(testFile)
-        expect(exists).toBe(false)
-      } catch (e) {
-        try {
-          await fs.unlink(testFile)
-        } catch {}
-        throw e
-      }
-    })
-  })
-
-  describe('safeDeleteSync in allowed directories', () => {
-    it('should delete files in temp directory without force', async () => {
-      const tmpDir = os.tmpdir()
-      const testFile = path.join(tmpDir, `test-sync-${Date.now()}.txt`)
-
-      try {
-        await fs.writeFile(testFile, 'test', 'utf8')
-        safeDeleteSync(testFile, { force: false })
-
-        const exists = existsSync(testFile)
-        expect(exists).toBe(false)
-      } catch (e) {
-        try {
-          await fs.unlink(testFile)
-        } catch {}
-        throw e
-      }
-    })
-
-    it('should handle array of paths', async () => {
-      const tmpDir = os.tmpdir()
-      const file1 = path.join(tmpDir, `sync-1-${Date.now()}.txt`)
-      const file2 = path.join(tmpDir, `sync-2-${Date.now()}.txt`)
-
-      try {
-        await fs.writeFile(file1, 'test1', 'utf8')
-        await fs.writeFile(file2, 'test2', 'utf8')
-
-        safeDeleteSync([file1, file2])
-
-        const exists1 = existsSync(file1)
-        const exists2 = existsSync(file2)
-
-        expect(exists1).toBe(false)
-        expect(exists2).toBe(false)
-      } catch (e) {
-        try {
-          await fs.unlink(file1)
-        } catch {}
-        try {
-          await fs.unlink(file2)
-        } catch {}
-        throw e
-      }
-    })
-  })
-
-  describe('uniqueSync edge cases', () => {
-    it('should handle paths with multiple dots', async () => {
-      await runWithTempDir(async tmpDir => {
-        const testFile = path.join(tmpDir, 'file.test.json')
-        await fs.writeFile(testFile, '', 'utf8')
-
-        const result = uniqueSync(testFile)
-        expect(result).toContain('file.test-1.json')
-      }, 'uniqueSync-multiple-dots-')
-    })
-
-    it('should handle directory paths', async () => {
-      await runWithTempDir(async tmpDir => {
-        const testDir = path.join(tmpDir, 'existing-dir')
-        await fs.mkdir(testDir)
-
-        const result = uniqueSync(testDir)
-        expect(result).toContain('existing-dir-1')
-      }, 'uniqueSync-directory-')
-    })
-  })
-
-  describe('Path-like inputs', () => {
-    it('isDirSync should handle Buffer paths', async () => {
-      await runWithTempDir(async tmpDir => {
-        const bufferPath = Buffer.from(tmpDir)
-        const result = isDirSync(bufferPath)
-        expect(result).toBe(true)
-      }, 'isDirSync-buffer-')
-    })
-
-    it('isDir should handle Buffer paths', async () => {
-      await runWithTempDir(async tmpDir => {
-        const bufferPath = Buffer.from(tmpDir)
-        const result = await existsSync(bufferPath)
-        expect(result).toBe(true)
-      }, 'isDir-buffer-')
-    })
-
-    it('safeStat should handle Buffer paths', async () => {
-      await runWithTempDir(async tmpDir => {
-        const testFile = path.join(tmpDir, 'test.txt')
-        await fs.writeFile(testFile, '', 'utf8')
-        const bufferPath = Buffer.from(testFile)
-
-        const result = await safeStat(bufferPath)
-        expect(result).toBeDefined()
-        expect(result?.isFile()).toBe(true)
-      }, 'safeStat-buffer-')
-    })
-
-    it('safeStatSync should handle Buffer paths', async () => {
-      await runWithTempDir(async tmpDir => {
-        const testFile = path.join(tmpDir, 'test.txt')
-        await fs.writeFile(testFile, '', 'utf8')
-        const bufferPath = Buffer.from(testFile)
-
-        const result = safeStatSync(bufferPath)
-        expect(result).toBeDefined()
-        expect(result?.isFile()).toBe(true)
-      }, 'safeStatSync-buffer-')
     })
   })
 })

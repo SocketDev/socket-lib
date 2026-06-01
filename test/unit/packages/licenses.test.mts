@@ -291,9 +291,9 @@ describe('packages/licenses', () => {
 
   describe('edge cases', () => {
     it('should handle null in license nodes array', () => {
-      const nodes = [
+      const nodes: LicenseNode[] = [
         { license: 'MIT', inFile: undefined },
-        undefined as any,
+        undefined as unknown as LicenseNode,
         { license: 'Apache-2.0', inFile: undefined },
       ]
       const result = collectIncompatibleLicenses(nodes)
@@ -301,9 +301,9 @@ describe('packages/licenses', () => {
     })
 
     it('should handle undefined in license nodes array', () => {
-      const nodes = [
+      const nodes: LicenseNode[] = [
         { license: 'MIT', inFile: undefined },
-        undefined as any,
+        undefined as unknown as LicenseNode,
         { license: 'Apache-2.0', inFile: undefined },
       ]
       const result = collectIncompatibleLicenses(nodes)

@@ -124,10 +124,10 @@ describe('primordials (extended surface)', () => {
         ['a', 1],
         ['b', 2],
       ])
-      const it = m.keys()
-      expect(IteratorPrototypeNext(it)).toEqual({ value: 'a', done: false })
-      expect(IteratorPrototypeNext(it)).toEqual({ value: 'b', done: false })
-      expect(IteratorPrototypeNext(it).done).toBe(true)
+      const iter = m.keys()
+      expect(IteratorPrototypeNext(iter)).toEqual({ value: 'a', done: false })
+      expect(IteratorPrototypeNext(iter)).toEqual({ value: 'b', done: false })
+      expect(IteratorPrototypeNext(iter).done).toBe(true)
     })
 
     it('IteratorPrototypeReturn short-circuits an iterator when present', () => {
@@ -138,9 +138,9 @@ describe('primordials (extended surface)', () => {
         ['a', 1],
         ['b', 2],
       ])
-      const it = m.keys()
-      IteratorPrototypeReturn(it)
-      expect(IteratorPrototypeNext(it).done).toBe(true)
+      const iter = m.keys()
+      IteratorPrototypeReturn(iter)
+      expect(IteratorPrototypeNext(iter).done).toBe(true)
     })
   })
 

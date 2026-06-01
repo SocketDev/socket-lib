@@ -52,6 +52,14 @@ import {
   MathTrunc,
 } from '../../../src/primordials/math'
 
+// MathFround and MathF16round are used to BUILD expected values inside
+// `expect(...)`, so the assertion-side bindings come from the published snapshot
+// via the `-stable` alias, not local `src/`.
+import {
+  MathF16round as ExpectedMathF16round,
+  MathFround as ExpectedMathFround,
+} from '@socketsecurity/lib-stable/primordials/math'
+
 describe('Math', () => {
   it('basic math primordials', () => {
     expect(MathAbs(-3)).toBe(3)
@@ -127,7 +135,7 @@ describe('Math', () => {
     // `fround` rounds to the nearest float32. 0.1 isn't exactly
     // representable in either format, but the float32 result must
     // round-trip back to the same float32 value.
-    expect(MathFround(MathFround(0.1))).toBe(MathFround(0.1))
+    expect(MathFround(ExpectedMathFround(0.1))).toBe(ExpectedMathFround(0.1))
   })
 
   it('integer ops: clz32', () => {
@@ -142,6 +150,8 @@ describe('Math', () => {
     if (typeof MathF16round !== 'function') {
       return
     }
-    expect(MathF16round(MathF16round(0.1))).toBe(MathF16round(0.1))
+    expect(MathF16round(ExpectedMathF16round(0.1))).toBe(
+      ExpectedMathF16round(0.1),
+    )
   })
 })

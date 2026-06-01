@@ -4,8 +4,8 @@
  *   lazily because `new Intl.ListFormat(...)` is a measurable startup cost.
  */
 
-let _conjunctionFormatter: Intl.ListFormat | undefined
-let _disjunctionFormatter: Intl.ListFormat | undefined
+let conjunctionFormatter: Intl.ListFormat | undefined
+let disjunctionFormatter: Intl.ListFormat | undefined
 
 /**
  * Get a cached Intl.ListFormat instance for conjunction (and) formatting.
@@ -26,17 +26,17 @@ let _disjunctionFormatter: Intl.ListFormat | undefined
  *   formatting.
  */
 export function getConjunctionFormatter() {
-  if (_conjunctionFormatter === undefined) {
+  if (conjunctionFormatter === undefined) {
     // Intl.ListFormat initialization
-    /* c8 ignore start */
-    _conjunctionFormatter = new Intl.ListFormat('en', {
+    /* c8 ignore start - lazy singleton init runs once; not worth a dedicated test */
+    conjunctionFormatter = new Intl.ListFormat('en', {
       style: 'long',
       // "and" lists.
       type: 'conjunction',
     })
     /* c8 ignore stop */
   }
-  return _conjunctionFormatter
+  return conjunctionFormatter
 }
 
 /**
@@ -58,15 +58,15 @@ export function getConjunctionFormatter() {
  *   formatting.
  */
 export function getDisjunctionFormatter() {
-  if (_disjunctionFormatter === undefined) {
+  if (disjunctionFormatter === undefined) {
     // Intl.ListFormat initialization
-    /* c8 ignore start */
-    _disjunctionFormatter = new Intl.ListFormat('en', {
+    /* c8 ignore start - lazy singleton init runs once; not worth a dedicated test */
+    disjunctionFormatter = new Intl.ListFormat('en', {
       style: 'long',
       // "or" lists.
       type: 'disjunction',
     })
     /* c8 ignore stop */
   }
-  return _disjunctionFormatter
+  return disjunctionFormatter
 }

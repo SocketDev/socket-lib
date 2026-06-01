@@ -143,10 +143,10 @@ describe('paths/packages', () => {
     })
 
     it('should handle complex real-world paths', () => {
-      const complexPath = '/Users/john/projects/my-app/node_modules/@foo/bar'
+      const complexPath = '/Users/<user>/projects/my-app/node_modules/@foo/bar'
       const packagePath = resolvePackageJsonPath(complexPath)
       expect(packagePath).toBe(
-        '/Users/john/projects/my-app/node_modules/@foo/bar/package.json',
+        '/Users/<user>/projects/my-app/node_modules/@foo/bar/package.json',
       )
 
       const extractedDir = resolvePackageJsonDirname(packagePath)

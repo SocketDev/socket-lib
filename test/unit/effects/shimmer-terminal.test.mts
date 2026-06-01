@@ -11,7 +11,9 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ANSI_RESET as CANONICAL_ANSI_RESET } from '../../../src/ansi/constants'
+import { ANSI_RESET as CANONICAL_ANSI_RESET } from '@socketsecurity/lib-stable/ansi/constants'
+import { ansiTruecolor as canonicalAnsiTruecolor } from '@socketsecurity/lib-stable/effects/shimmer-terminal'
+
 import {
   blockKernel,
   configToSpec,
@@ -97,7 +99,7 @@ describe('effects/shimmer-terminal', () => {
 
     it('uses ansiTruecolor for the escape prefix', () => {
       const result = colorsToAnsi('a', [RED])
-      expect(result).toContain(ansiTruecolor(RED))
+      expect(result).toContain(canonicalAnsiTruecolor(RED))
     })
   })
 

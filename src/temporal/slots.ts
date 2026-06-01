@@ -27,15 +27,15 @@ import { WeakMapCtor, WeakSetCtor } from '../primordials/map-set'
 //                                    1970-01-01T00:00:00Z; integral
 // ─────────────────────────────────────────────────────────────────
 
-const _initializedInstant = new WeakSetCtor<object>()
-const _instantNanoseconds = new WeakMapCtor<object, bigint>()
+const initializedInstant = new WeakSetCtor<object>()
+const instantNanoseconds = new WeakMapCtor<object, bigint>()
 
 /**
  * Read `[[Nanoseconds]]`. Caller MUST gate on `hasInstantSlot` first; behaviour
  * on absent-slot input is undefined.
  */
 export function getInstantNanoseconds(o: object): bigint {
-  return _instantNanoseconds.get(o)!
+  return instantNanoseconds.get(o)!
 }
 
 /**
@@ -43,7 +43,7 @@ export function getInstantNanoseconds(o: object): bigint {
  * Returns false for non-object inputs.
  */
 export function hasInstantSlot(o: unknown): o is object {
-  return typeof o === 'object' && o !== null && _initializedInstant.has(o)
+  return typeof o === 'object' && o !== null && initializedInstant.has(o)
 }
 
 /**
@@ -52,6 +52,6 @@ export function hasInstantSlot(o: unknown): o is object {
  * `IsValidEpochNanoseconds` first; this function does not.
  */
 export function setInstantSlots(o: object, nanoseconds: bigint): void {
-  _initializedInstant.add(o)
-  _instantNanoseconds.set(o, nanoseconds)
+  initializedInstant.add(o)
+  instantNanoseconds.set(o, nanoseconds)
 }
