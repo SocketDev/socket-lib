@@ -9,8 +9,11 @@
 import { Writable } from 'node:stream'
 
 import { Logger } from '../../src/logger/node'
-import { LOG_SYMBOLS } from '../../src/logger/symbols'
 import { beforeEach, describe, expect, it } from 'vitest'
+
+// LOG_SYMBOLS is used to BUILD expected values inside `expect(...)`, so it must
+// come from the published snapshot via the `-stable` alias, not local `src/`.
+import { LOG_SYMBOLS } from '@socketsecurity/lib-stable/logger/symbols'
 
 describe('Logger', () => {
   let stdout: Writable
@@ -125,8 +128,12 @@ describe('Logger', () => {
 
     it('should log debug', () => {
       // debug() is dynamically added from console.debug if available
-      if (typeof (logger as any).debug === 'function') {
-        ;(logger as any).debug('debug message')
+      const dynamicLogger = logger as unknown as Record<
+        string,
+        (...args: unknown[]) => unknown
+      >
+      if (typeof dynamicLogger['debug'] === 'function') {
+        dynamicLogger['debug']('debug message')
         expect(stdoutData.join('')).toContain('debug message')
       }
     })
@@ -270,9 +277,13 @@ describe('Logger', () => {
 
     it('should support countReset method', () => {
       // countReset() is dynamically added from console.countReset if available
-      if (typeof (logger as any).countReset === 'function') {
+      const dynamicLogger = logger as unknown as Record<
+        string,
+        (...args: unknown[]) => unknown
+      >
+      if (typeof dynamicLogger['countReset'] === 'function') {
         logger.count('counter')
-        const result = (logger as any).countReset('counter')
+        const result = dynamicLogger['countReset']('counter')
         expect(result).toBe(logger)
       }
     })

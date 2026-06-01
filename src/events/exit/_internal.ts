@@ -9,6 +9,9 @@
  *   Contributors.
  */
 
+import type { EventEmitter } from 'node:events'
+import type * as NodeEvents from 'node:events'
+
 import type { EmittedSignals, SignalExitEmitter } from './types'
 
 // This is not the set of all possible signals.
@@ -34,7 +37,7 @@ import type { EmittedSignals, SignalExitEmitter } from './types'
 
 export const globalProcess = globalThis.process as
   | (NodeJS.Process & {
-      __signal_exit_emitter__?: import('node:events').EventEmitter | undefined
+      __signal_exit_emitter__?: EventEmitter | undefined
       reallyExit?: ((code?: number | undefined) => never) | undefined
     })
   | undefined
@@ -45,69 +48,66 @@ export const originalProcessReallyExit = globalProcess?.reallyExit as
   | undefined
 export const WIN32 = platform === 'win32'
 
-let _events: typeof import('node:events') | undefined
-let _emitter: SignalExitEmitter | undefined
-let _loaded = false
-let _signals: string[] | undefined
+let events: typeof NodeEvents | undefined
+let emitter: SignalExitEmitter | undefined
+let loaded = false
+let signals: string[] | undefined
 
 /* c8 ignore start - Only called from signal-listener body and
    processEmit/processReallyExit interceptors, all of which are
    c8-ignored. Cannot be reached from the test runner. */
-/*@__NO_SIDE_EFFECTS__*/
 export function emit(
   event: string,
   code: number | undefined,
   signal: string | undefined,
 ): void {
-  const emitter = getEmitter()
-  if (emitter.emitted?.[event]) {
+  const sigEmitter = getEmitter()
+  if (sigEmitter.emitted?.[event]) {
     return
   }
-  if (emitter.emitted) {
-    emitter.emitted[event] = true
+  if (sigEmitter.emitted) {
+    sigEmitter.emitted[event] = true
   }
-  emitter.emit(event, code, signal)
+  sigEmitter.emit(event, code, signal)
 }
 /* c8 ignore stop */
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getEmitter() {
   // Lazy-init second-call branch; module-singleton. The pre-existing
   // emitter and infinite-listeners-already-enabled branches fire only
   // when another copy of signal-exit is loaded in the same process.
-  /* c8 ignore start */
-  if (_emitter === undefined) {
+  /* c8 ignore start - cross-copy signal-exit init, unreachable from test runner */
+  if (emitter === undefined) {
     if (globalProcess?.__signal_exit_emitter__) {
-      _emitter = globalProcess.__signal_exit_emitter__
+      emitter = globalProcess.__signal_exit_emitter__
     } else if (globalProcess) {
-      const EventEmitter = getEvents().EventEmitter
-      _emitter = globalProcess.__signal_exit_emitter__ =
-        new EventEmitter() as SignalExitEmitter
-      _emitter.count = 0
-      _emitter.emitted = { __proto__: null } as unknown as EmittedSignals
+      const EventEmitterClass = getEvents().EventEmitter
+      emitter = globalProcess.__signal_exit_emitter__ =
+        new EventEmitterClass() as SignalExitEmitter
+      emitter.count = 0
+      emitter.emitted = { __proto__: null } as unknown as EmittedSignals
     }
     // Because this emitter is a global, we have to check to see if a
     // previous version of this library failed to enable infinite listeners.
-    if (_emitter && !_emitter.infinite) {
-      _emitter.setMaxListeners(Number.POSITIVE_INFINITY)
-      _emitter.infinite = true
+    if (emitter && !emitter.infinite) {
+      emitter.setMaxListeners(Number.POSITIVE_INFINITY)
+      emitter.infinite = true
     }
   }
   /* c8 ignore stop */
-  return _emitter as SignalExitEmitter
+  return emitter as SignalExitEmitter
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getEvents() {
   // Lazy-init second-call branch; module-singleton.
-  /* c8 ignore start */
-  if (_events === undefined) {
+  /* c8 ignore start - lazy require, second-call branch unreachable from test runner */
+  if (events === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _events = /*@__PURE__*/ require('node:events')
+    events = /*@__PURE__*/ require('node:events')
   }
   /* c8 ignore stop */
-  return _events as typeof import('node:events')
+  return events as typeof NodeEvents
 }
 
 /**
@@ -115,15 +115,14 @@ export function getEvents() {
  * runs it returns the filtered subset of successfully registered signals
  * instead of the full default list.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSignals(): string[] {
-  if (_signals === undefined) {
-    _signals = ['SIGABRT', 'SIGALRM', 'SIGHUP', 'SIGINT', 'SIGTERM']
+  if (signals === undefined) {
+    signals = ['SIGABRT', 'SIGALRM', 'SIGHUP', 'SIGINT', 'SIGTERM']
     // WIN32-only branch tested on Windows runners; Linux branch on
     // Linux runners. Each runs on its target platform only.
-    /* c8 ignore start */
+    /* c8 ignore start - platform-specific signal lists run only on their target OS */
     if (!WIN32) {
-      _signals.push(
+      signals.push(
         'SIGVTALRM',
         'SIGXCPU',
         'SIGXFSZ',
@@ -135,11 +134,11 @@ export function getSignals(): string[] {
       )
     }
     if (platform === 'linux') {
-      _signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT', 'SIGUNUSED')
+      signals.push('SIGIO', 'SIGPOLL', 'SIGPWR', 'SIGSTKFLT', 'SIGUNUSED')
     }
     /* c8 ignore stop */
   }
-  return _signals as string[]
+  return signals as string[]
 }
 
 /**
@@ -148,7 +147,7 @@ export function getSignals(): string[] {
  * @private
  */
 export function isLoaded(): boolean {
-  return _loaded
+  return loaded
 }
 
 /**
@@ -157,7 +156,7 @@ export function isLoaded(): boolean {
  * @private
  */
 export function setLoaded(value: boolean): void {
-  _loaded = value
+  loaded = value
 }
 
 /**
@@ -166,5 +165,5 @@ export function setLoaded(value: boolean): void {
  * @private
  */
 export function setSignals(value: string[]): void {
-  _signals = value
+  signals = value
 }

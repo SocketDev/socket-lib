@@ -5,6 +5,12 @@
  *   variants behave identically on the env-var path, and that `allowEnvOnly`
  *   suppresses the keychain fallback. Env-var values are tested directly (no
  *   mocking); keychain behavior is covered by `secrets.test.mts`.
+ *
+ *   The helpers below read/write `process.env.SOCKET_API_TOKEN` directly so the
+ *   suite can drive the env-var precedence path of the resolver. That is the
+ *   exact scenario the `use-fleet-canonical-api-token-getter` bypass exists for
+ *   (test/bootstrap code manipulating the raw env), so each direct access
+ *   carries the `socket-api-token-getter: allow direct-env` marker.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -14,22 +20,32 @@ import {
   readSocketApiTokenSync,
 } from '../../src/secrets/socket-api-token'
 
+const TOKEN_VAR = 'SOCKET_API_TOKEN'
+
+export function readTokenEnv(): string | undefined {
+  // socket-api-token-getter: allow direct-env
+  return process.env[TOKEN_VAR]
+}
+
+export function setTokenEnv(value: string): void {
+  // socket-api-token-getter: allow direct-env
+  process.env[TOKEN_VAR] = value
+}
+
+export function clearTokenEnv(): void {
+  // socket-api-token-getter: allow direct-env
+  delete process.env[TOKEN_VAR]
+}
+
 export function snapshotEnv(): { restore: () => void } {
-  const prevToken = process.env['SOCKET_API_TOKEN']
-  const prevKey = process.env['SOCKET_API_TOKEN']
-  delete process.env['SOCKET_API_TOKEN']
-  delete process.env['SOCKET_API_TOKEN']
+  const prevToken = readTokenEnv()
+  clearTokenEnv()
   return {
     restore: () => {
       if (prevToken === undefined) {
-        delete process.env['SOCKET_API_TOKEN']
+        clearTokenEnv()
       } else {
-        process.env['SOCKET_API_TOKEN'] = prevToken
-      }
-      if (prevKey === undefined) {
-        delete process.env['SOCKET_API_TOKEN']
-      } else {
-        process.env['SOCKET_API_TOKEN'] = prevKey
+        setTokenEnv(prevToken)
       }
     },
   }
@@ -45,45 +61,26 @@ describe.sequential('secrets/socket-api-token', () => {
   })
 
   it('reads the canonical SOCKET_API_TOKEN env var', async () => {
-    process.env['SOCKET_API_TOKEN'] = 'canonical-value'
+    setTokenEnv('canonical-value')
     expect(await readSocketApiToken({ allowEnvOnly: true })).toBe(
       'canonical-value',
     )
   })
 
-  it('falls back to legacy SOCKET_API_KEY when canonical is unset', async () => {
-    process.env['SOCKET_API_TOKEN'] = 'legacy-value'
+  it('returns the env value via the allowEnvOnly path', async () => {
+    setTokenEnv('legacy-value')
     expect(await readSocketApiToken({ allowEnvOnly: true })).toBe(
       'legacy-value',
     )
   })
 
-  it('prefers canonical over legacy when both are set', async () => {
-    process.env['SOCKET_API_TOKEN'] = 'canonical-wins'
-    process.env['SOCKET_API_TOKEN'] = 'legacy-loses'
-    expect(await readSocketApiToken({ allowEnvOnly: true })).toBe(
-      'canonical-wins',
-    )
-  })
-
-  it('returns undefined when neither env var is set (allowEnvOnly)', async () => {
+  it('returns undefined when the env var is unset (allowEnvOnly)', async () => {
     expect(await readSocketApiToken({ allowEnvOnly: true })).toBeUndefined()
   })
 
-  it('treats whitespace-only env var as unset', async () => {
-    process.env['SOCKET_API_TOKEN'] = '   '
-    process.env['SOCKET_API_TOKEN'] = 'real-legacy'
-    expect(await readSocketApiToken({ allowEnvOnly: true })).toBe('real-legacy')
-  })
-
-  it('sync variant mirrors async on the env path', () => {
-    process.env['SOCKET_API_TOKEN'] = 'sync-value'
+  it('reads a populated env var on the sync path', () => {
+    setTokenEnv('sync-value')
     expect(readSocketApiTokenSync({ allowEnvOnly: true })).toBe('sync-value')
-  })
-
-  it('sync variant: legacy fallback', () => {
-    process.env['SOCKET_API_TOKEN'] = 'sync-legacy'
-    expect(readSocketApiTokenSync({ allowEnvOnly: true })).toBe('sync-legacy')
   })
 
   it('sync variant: returns undefined when nothing is set', () => {
@@ -91,10 +88,9 @@ describe.sequential('secrets/socket-api-token', () => {
   })
 
   it('options are optional (defaults to allowing keychain fallback)', async () => {
-    // With no env vars set and no options, the call must not throw. The
-    // result depends on whether the host keychain has a `socket-cli` entry,
-    // so we only assert the shape: a string or undefined.
-    process.env['SOCKET_API_TOKEN'] = 'present'
+    // With the env var set, the call resolves to that value without touching
+    // the keychain.
+    setTokenEnv('present')
     const value = await readSocketApiToken()
     expect(value).toBe('present')
   })

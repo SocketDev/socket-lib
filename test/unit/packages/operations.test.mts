@@ -1,17 +1,20 @@
 /**
- * @file Unit tests for package manipulation operations. Tests package operation
- *   utilities:
+ * @file Unit tests for package name and tag helpers from
+ *   src/packages/operations:
  *
- *   - Extraction: extractPackage() unpacks tarballs to directories
- *   - Packing: packPackage() creates tarballs from directories
- *   - Reading: readPackageJson(), readPackageJsonSync() parse package.json files
- *   - Resolution: resolveGitHubTgzUrl() resolves GitHub tarball URLs
- *   - Tag parsing: getReleaseTag() extracts version tags from package specs Used
- *     by Socket tools for package management and dependency operations.
+ *   - Resolution: resolvePackageName(), resolveRegistryPackageName(),
+ *     pkgNameToSlug() normalize package names
+ *   - Extensions: findPackageExtensions() looks up configured extensions
+ *   - Tag parsing: getReleaseTag() extracts version tags from package specs
+ *   - Misc edge cases + an editable package.json integration workflow
+ *
+ *   readPackageJson / readPackageJsonSync coverage lives in
+ *   operations.read-package-json.test.mts. Network-backed suites
+ *   (extractPackage / packPackage / resolveGitHubTgzUrl) live in
+ *   operations.network.test.mts.
  */
 
-import { existsSync, promises as fs } from 'node:fs'
-import { createRequire } from 'node:module'
+import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
 import {
@@ -21,15 +24,17 @@ import {
   packPackage,
   pkgNameToSlug,
   readPackageJson,
-  readPackageJsonSync,
-  resolveGitHubTgzUrl,
   resolvePackageName,
   resolveRegistryPackageName,
 } from '../../../src/packages/operations'
 import type { PackageJson } from '../../../src/packages/types'
 import { describe, expect, it } from 'vitest'
-import { describeNetworkOnly } from '../util/skip-helpers'
 import { runWithTempDir } from '../util/temp-file-helper'
+
+type EditablePackageJson = PackageJson & {
+  save: () => Promise<unknown>
+  update: (data: Record<string, unknown>) => unknown
+}
 
 describe('packages/operations', () => {
   describe('getReleaseTag', () => {
@@ -101,6 +106,15 @@ describe('packages/operations', () => {
       const result = findPackageExtensions('@scope/package', '1.0.0')
       expect(result === undefined || typeof result === 'object').toBe(true)
     })
+
+    it('should handle findPackageExtensions with invalid version', () => {
+      const result = findPackageExtensions('package', 'not-a-version')
+      expect(result === undefined || typeof result === 'object').toBe(true)
+    })
+
+    it('findPackageExtensions returns without throwing', () => {
+      expect(() => findPackageExtensions('package', '1.0.0')).not.toThrow()
+    })
   })
 
   describe('resolvePackageName', () => {
@@ -133,6 +147,12 @@ describe('packages/operations', () => {
       const purlObj = { name: 'mypackage', namespace: '@myorg' }
       expect(resolvePackageName(purlObj)).toBe('@myorg/mypackage')
     })
+
+    it('should handle resolvePackageName with null values', () => {
+      const purlObj = { name: 'package', namespace: undefined }
+      const result = resolvePackageName(purlObj)
+      expect(result).toBe('package')
+    })
   })
 
   describe('pkgNameToSlug', () => {
@@ -163,776 +183,6 @@ describe('packages/operations', () => {
     })
   })
 
-  describe('readPackageJson', () => {
-    it('should read and parse package.json from directory', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = {
-          name: 'test-package',
-          version: '1.0.0',
-          description: 'Test package',
-        }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2),
-        )
-
-        const result = await readPackageJson(tmpDir)
-        expect(result).toBeDefined()
-        expect(result?.name).toBe('test-package')
-        expect(result?.version).toBe('1.0.0')
-      }, 'read-pkg-json-')
-    })
-
-    it('should read package.json from file path', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgPath = path.join(tmpDir, 'package.json')
-        const pkgData = { name: 'test', version: '2.0.0' }
-        await fs.writeFile(pkgPath, JSON.stringify(pkgData))
-
-        const result = await readPackageJson(pkgPath)
-        expect(result?.name).toBe('test')
-      }, 'read-pkg-json-file-')
-    })
-
-    it('should return undefined for non-existent file', async () => {
-      await runWithTempDir(async tmpDir => {
-        const result = await readPackageJson(tmpDir, { throws: false })
-        expect(result).toBeUndefined()
-      }, 'read-pkg-json-missing-')
-    })
-
-    it('should normalize when normalize option is true', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = await readPackageJson(tmpDir, { normalize: true })
-        expect(result).toBeDefined()
-        expect(result?.name).toBe('test')
-        // Normalization should add version field
-        expect(result?.version).toBeDefined()
-      }, 'read-pkg-json-normalize-')
-    })
-
-    it('should return editable package.json when editable option is true', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', version: '1.0.0' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = await readPackageJson(tmpDir, { editable: true })
-        expect(result).toBeDefined()
-        expect(typeof result?.['save']).toBe('function')
-      }, 'read-pkg-json-editable-')
-    })
-
-    it('should handle editable with normalize options', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', version: '1.0.0', custom: 'field' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        // When using editable with normalize, the options are passed to the editable converter
-        await expect(
-          readPackageJson(tmpDir, {
-            editable: true,
-            normalize: true,
-            preserve: ['custom'],
-          }),
-        ).resolves.toBeDefined()
-      }, 'read-pkg-json-editable-normalize-')
-    })
-
-    it('should throw when throws option is true and file missing', async () => {
-      await runWithTempDir(async tmpDir => {
-        await expect(
-          readPackageJson(tmpDir, { throws: true }),
-        ).rejects.toThrow()
-      }, 'read-pkg-json-throws-')
-    })
-
-    it('should pass normalize options through', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', custom: 'field' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = await readPackageJson(tmpDir, {
-          normalize: true,
-          preserve: ['custom'],
-        })
-        expect(result).toBeDefined()
-      }, 'read-pkg-json-preserve-')
-    })
-
-    it('should handle malformed JSON gracefully', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.writeFile(path.join(tmpDir, 'package.json'), '{ invalid json')
-
-        const result = await readPackageJson(tmpDir, { throws: false })
-        expect(result).toBeUndefined()
-      }, 'read-pkg-json-malformed-')
-    })
-
-    it('should not normalize by default', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', custom: 'field' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = await readPackageJson(tmpDir)
-        expect(result?.['custom']).toBe('field')
-      }, 'read-pkg-json-no-normalize-')
-    })
-  })
-
-  describe('readPackageJsonSync', () => {
-    it('should synchronously read and parse package.json', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test-sync', version: '1.0.0' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = readPackageJsonSync(tmpDir)
-        expect(result).toBeDefined()
-        expect(result?.name).toBe('test-sync')
-      }, 'read-pkg-json-sync-')
-    })
-
-    it('should return undefined for non-existent file', async () => {
-      await runWithTempDir(async tmpDir => {
-        const result = readPackageJsonSync(tmpDir, { throws: false })
-        expect(result).toBeUndefined()
-      }, 'read-pkg-json-sync-missing-')
-    })
-
-    it('should normalize when normalize option is true', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = readPackageJsonSync(tmpDir, {
-          editable: false,
-          normalize: true,
-        } as any)
-        expect(result?.version).toBeDefined()
-      }, 'read-pkg-json-sync-normalize-')
-    })
-
-    it('should return editable when editable option is true', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', version: '1.0.0' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = readPackageJsonSync(tmpDir, { editable: true })
-        expect(result).toBeDefined()
-        expect(typeof result?.['save']).toBe('function')
-      }, 'read-pkg-json-sync-editable-')
-    })
-
-    it('should throw when throws option is true and file missing', async () => {
-      await runWithTempDir(async tmpDir => {
-        expect(() => readPackageJsonSync(tmpDir, { throws: true })).toThrow()
-      }, 'read-pkg-json-sync-throws-')
-    })
-
-    it('should handle editable with normalize options', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', version: '1.0.0', custom: 'field' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        // When using editable with normalize, the options are passed to the editable converter
-        expect(() =>
-          readPackageJsonSync(tmpDir, {
-            editable: true,
-            normalize: true,
-            preserve: ['custom'],
-          } as any),
-        ).not.toThrow()
-      }, 'read-pkg-json-sync-editable-norm-')
-    })
-
-    it('should pass normalize options through', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', custom: 'field' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = readPackageJsonSync(tmpDir, {
-          normalize: true,
-          preserve: ['custom'],
-        } as any)
-        expect(result).toBeDefined()
-      }, 'read-pkg-json-sync-preserve-')
-    })
-  })
-
-  // Network-only: extractPackage delegates to pacote, which fetches
-  // the tarball from registry.npmjs.org. There's no useful unit-test
-  // shape without the registry — these are de facto integration
-  // tests. Skipped when SOCKET_LIB_SKIP_NETWORK_TESTS is set so
-  // pre-commit + air-gapped CI lanes don't hit the public registry
-  // and trip Socket Firewall rate-limits.
-  describeNetworkOnly('extractPackage', () => {
-    it('should extract package to destination directory', async () => {
-      await runWithTempDir(async tmpDir => {
-        const dest = path.join(tmpDir, 'extracted')
-        await fs.mkdir(dest, { recursive: true })
-
-        // Extract a small package for testing
-        await extractPackage('is-number@7.0.0', { dest })
-
-        // Verify extraction
-        const pkgJsonPath = path.join(dest, 'package.json')
-        const exists = existsSync(pkgJsonPath)
-        expect(exists).toBe(true)
-      }, 'extract-pkg-')
-    }, 30_000)
-
-    it('should call callback with destination path', async () => {
-      await runWithTempDir(async tmpDir => {
-        const dest = path.join(tmpDir, 'extracted')
-        await fs.mkdir(dest, { recursive: true })
-
-        let callbackPath = ''
-        await extractPackage('is-number@7.0.0', { dest }, async destPath => {
-          callbackPath = destPath
-        })
-
-        expect(callbackPath).toBe(dest)
-      }, 'extract-pkg-callback-')
-    }, 30_000)
-
-    it('should use temporary directory when dest not provided', async () => {
-      let tmpPath = ''
-      await extractPackage('is-number@7.0.0', (async (destPath: string) => {
-        tmpPath = destPath
-        // Verify package.json exists in temp directory
-        const pkgJsonPath = path.join(destPath, 'package.json')
-        const exists = existsSync(pkgJsonPath)
-        expect(exists).toBe(true)
-      }) as any)
-
-      expect(tmpPath).toBeTruthy()
-    }, 30_000)
-
-    it('should handle function as second argument', async () => {
-      let called = false
-      await extractPackage('is-number@7.0.0', (async (destPath: string) => {
-        called = true
-        expect(destPath).toBeTruthy()
-      }) as any)
-
-      expect(called).toBe(true)
-    }, 30_000)
-
-    it('should pass extract options to pacote', async () => {
-      await runWithTempDir(async tmpDir => {
-        const dest = path.join(tmpDir, 'extracted')
-        await fs.mkdir(dest, { recursive: true })
-
-        await extractPackage('is-number@7.0.0', {
-          dest,
-          preferOffline: true,
-        })
-
-        const pkgJsonPath = path.join(dest, 'package.json')
-        const exists = existsSync(pkgJsonPath)
-        expect(exists).toBe(true)
-      }, 'extract-pkg-options-')
-    }, 30_000)
-
-    it('should use tmpPrefix option for temp directory', async () => {
-      let tmpPath = ''
-      await extractPackage(
-        'is-number@7.0.0',
-        { tmpPrefix: 'test-prefix-' } as any,
-        async destPath => {
-          tmpPath = destPath
-        },
-      )
-
-      expect(tmpPath).toBeTruthy()
-    }, 30_000)
-  })
-
-  // Network-only: see comment on `extractPackage` above.
-  describeNetworkOnly('packPackage', () => {
-    it('should pack a package tarball', async () => {
-      await runWithTempDir(async tmpDir => {
-        // Create a simple package to pack
-        const pkgData = {
-          name: 'test-package',
-          version: '1.0.0',
-          main: 'index.js',
-        }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2),
-        )
-        await fs.writeFile(path.join(tmpDir, 'index.js'), 'module.exports = {}')
-
-        const tarball = await packPackage(tmpDir)
-        expect(tarball).toBeDefined()
-        expect(Buffer.isBuffer(tarball)).toBe(true)
-      }, 'pack-pkg-')
-    }, 30_000)
-
-    it('should pack package with options', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', version: '1.0.0' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-        await fs.writeFile(path.join(tmpDir, 'index.js'), '')
-
-        const tarball = await packPackage(tmpDir, { preferOffline: true })
-        expect(tarball).toBeDefined()
-      }, 'pack-pkg-options-')
-    }, 30_000)
-
-    it('should pack remote package spec', async () => {
-      const tarball = await packPackage('is-number@7.0.0')
-      expect(tarball).toBeDefined()
-      expect(Buffer.isBuffer(tarball)).toBe(true)
-    }, 30_000)
-
-    it('should run prepack scripts for a directory spec', async () => {
-      // Regression: @npmcli/run-script was previously stubbed as empty,
-      // which caused `runScript is not a function` when libnpmpack tried
-      // to fire `prepack` on directory specs. Write the sentinel file
-      // from a plain JS file rather than an inline -e string so shell
-      // quoting differences across platforms don't mask the test.
-      await runWithTempDir(async tmpDir => {
-        const sentinel = path.join(tmpDir, '.prepack-ran')
-        const scriptPath = path.join(tmpDir, 'prepack.cjs')
-        await fs.writeFile(
-          scriptPath,
-          `require('node:fs').writeFileSync(${JSON.stringify(sentinel)}, '1')\n`,
-        )
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify({
-            name: 'prepack-probe',
-            version: '1.0.0',
-            scripts: {
-              prepack: `node ${JSON.stringify(scriptPath)}`,
-            },
-          }),
-        )
-
-        const tarball = await packPackage(tmpDir)
-        expect(Buffer.isBuffer(tarball)).toBe(true)
-        expect(existsSync(sentinel)).toBe(true)
-      }, 'pack-prepack-')
-    }, 30_000)
-  })
-
-  // Network-only: exercises pacote's remote-tarball fetcher path.
-  describeNetworkOnly('pacote fetcher coverage', () => {
-    // These tests guard against re-stubbing the non-registry pacote
-    // fetchers. Each spec type reaches a different fetcher inside
-    // pacote/lib — if any of dir/file/remote/git is stubbed with
-    // `pacote-fetcher-throw.cjs`, the corresponding assertion below
-    // fails loudly rather than silently shipping a broken bundle.
-    it('directory specs use pacote/lib/dir.js', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify({ name: 'dir-probe', version: '1.0.0' }),
-        )
-        const tarball = await packPackage(tmpDir)
-        expect(Buffer.isBuffer(tarball)).toBe(true)
-      }, 'dir-fetcher-')
-    }, 30_000)
-
-    it('local tarball specs use pacote/lib/file.js', async () => {
-      // First pack a tiny directory into a tarball, then re-pack the
-      // tarball file itself. The second call hits the File fetcher.
-      await runWithTempDir(async tmpDir => {
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify({ name: 'file-probe', version: '1.0.0' }),
-        )
-        const tarball = (await packPackage(tmpDir)) as Buffer
-        const tarballPath = path.join(tmpDir, 'file-probe-1.0.0.tgz')
-        await fs.writeFile(tarballPath, tarball)
-
-        const extractDest = path.join(tmpDir, 'extracted')
-        await fs.mkdir(extractDest, { recursive: true })
-        await extractPackage(tarballPath, { dest: extractDest })
-        expect(existsSync(path.join(extractDest, 'package.json'))).toBe(true)
-      }, 'file-fetcher-')
-    }, 30_000)
-
-    it('remote tarball specs use pacote/lib/remote.js', async () => {
-      // Registry tarball fetched via a direct http(s) URL — bypasses
-      // the registry resolver and goes straight through RemoteFetcher.
-      await runWithTempDir(async tmpDir => {
-        const extractDest = path.join(tmpDir, 'extracted')
-        await fs.mkdir(extractDest, { recursive: true })
-        await extractPackage(
-          'https://registry.npmjs.org/is-number/-/is-number-7.0.0.tgz',
-          { dest: extractDest },
-        )
-        expect(existsSync(path.join(extractDest, 'package.json'))).toBe(true)
-      }, 'remote-fetcher-')
-    }, 60_000)
-
-    it('git specs use pacote/lib/git.js + @npmcli/git', async () => {
-      // Git archives are fetched via pacote/lib/git.js which wraps
-      // @npmcli/git. Stubbing either breaks every git-backed spec.
-      // pacote's GitFetcher requires an Arborist constructor at pack
-      // time — pass it explicitly so the fetcher can run.
-      const testRequire = createRequire(import.meta.url)
-      const Arborist = testRequire('@npmcli/arborist')
-      await runWithTempDir(async tmpDir => {
-        const extractDest = path.join(tmpDir, 'extracted')
-        await fs.mkdir(extractDest, { recursive: true })
-        await extractPackage('github:jonschlinkert/is-number#7.0.0', {
-          dest: extractDest,
-          Arborist,
-        } as any)
-        expect(existsSync(path.join(extractDest, 'package.json'))).toBe(true)
-      }, 'git-fetcher-')
-    }, 120_000)
-  })
-
-  describeNetworkOnly('resolveGitHubTgzUrl', () => {
-    it('should return empty string when package.json not found', async () => {
-      const pkgJson: PackageJson = {
-        name: 'test-package',
-        version: '1.0.0',
-      }
-      const result = await resolveGitHubTgzUrl('test-package', pkgJson)
-      expect(result).toBe('')
-    })
-
-    it('should return saveSpec for tarball URL spec', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = {
-          name: 'test',
-          version: '1.0.0',
-          repository: { url: 'git+https://github.com/user/repo.git' },
-        }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const tgzUrl = 'https://github.com/user/repo/archive/abc123.tar.gz'
-        const result = await resolveGitHubTgzUrl(tgzUrl, tmpDir)
-        // Should return the URL itself if it's already a tarball URL
-        expect(typeof result).toBe('string')
-      }, 'resolve-github-tgz-spec-')
-    }, 30_000)
-
-    it('should accept package.json object as where parameter', async () => {
-      const pkgJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        repository: { url: 'git+https://github.com/user/repo.git' },
-      }
-
-      const result = await resolveGitHubTgzUrl('test-package', pkgJson)
-      // Should return empty string or valid URL
-      expect(typeof result).toBe('string')
-    }, 30_000)
-
-    it('should return empty string when no repository URL', async () => {
-      const pkgJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-      }
-
-      const result = await resolveGitHubTgzUrl('test', pkgJson)
-      expect(result).toBe('')
-    })
-
-    it('should handle GitHub URL spec with committish', async () => {
-      const pkgJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        repository: { url: 'git+https://github.com/user/repo.git' },
-      }
-
-      const result = await resolveGitHubTgzUrl('github:user/repo#main', pkgJson)
-      expect(typeof result).toBe('string')
-    }, 30_000)
-
-    it('should try version with v prefix first', async () => {
-      const pkgJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        repository: { url: 'git+https://github.com/user/repo.git' },
-      }
-
-      const result = await resolveGitHubTgzUrl('test', pkgJson)
-      // Will return empty string if tag doesn't exist, which is expected
-      expect(typeof result).toBe('string')
-    }, 30_000)
-
-    it('should fallback to version without v prefix', async () => {
-      const pkgJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        repository: { url: 'git+https://github.com/user/repo.git' },
-      }
-
-      const result = await resolveGitHubTgzUrl('test', pkgJson)
-      expect(typeof result).toBe('string')
-    }, 30_000)
-
-    it('should handle repository as string', async () => {
-      const pkgJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        repository: 'github:user/repo' as any,
-      }
-
-      const result = await resolveGitHubTgzUrl('test', pkgJson)
-      expect(typeof result).toBe('string')
-    }, 30_000)
-  })
-
-  describe('edge cases and error handling', () => {
-    it('should handle extractPackage with invalid spec', async () => {
-      await expect(
-        extractPackage('non-existent-package-xyz-123', { dest: '/tmp/test' }),
-      ).rejects.toThrow()
-    }, 30_000)
-
-    it('should handle packPackage with invalid path', async () => {
-      await expect(packPackage('/non/existent/path')).rejects.toThrow()
-    }, 30_000)
-
-    it('should handle readPackageJson with invalid JSON', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          'not valid json {{',
-        )
-
-        const result = await readPackageJson(tmpDir, { throws: false })
-        expect(result).toBeUndefined()
-      }, 'edge-invalid-json-')
-    })
-
-    it('should handle readPackageJsonSync with invalid JSON', async () => {
-      await runWithTempDir(async tmpDir => {
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          'not valid json {{',
-        )
-
-        const result = readPackageJsonSync(tmpDir, { throws: false })
-        expect(result).toBeUndefined()
-      }, 'edge-invalid-json-sync-')
-    })
-
-    it('should handle getReleaseTag with special characters', () => {
-      expect(getReleaseTag('package@1.0.0-beta.1')).toBe('1.0.0-beta.1')
-      expect(getReleaseTag('package@1.0.0+build.123')).toBe('1.0.0+build.123')
-    })
-
-    it('should handle resolvePackageName with null values', () => {
-      const purlObj = { name: 'package', namespace: undefined as any }
-      const result = resolvePackageName(purlObj)
-      expect(result).toBe('package')
-    })
-
-    it('should handle findPackageExtensions with invalid version', () => {
-      const result = findPackageExtensions('package', 'not-a-version')
-      expect(result === undefined || typeof result === 'object').toBe(true)
-    })
-  })
-
-  // Network-only subset of lazy-loading tests: those that exercise
-  // extractPackage / resolveGitHubTgzUrl through pacote / GitHub.
-  describeNetworkOnly('lazy loading (network)', () => {
-    it('should lazy load cacache on first use', async () => {
-      // This test verifies that cacache is only loaded when needed.
-      // Using extractPackage without dest triggers cacache loading.
-      let called = false
-      await extractPackage('is-number@7.0.0', (async () => {
-        called = true
-      }) as any)
-      expect(called).toBe(true)
-    }, 30_000)
-
-    it('resolveGitHubTgzUrl returns without throwing for valid input', async () => {
-      const pkgJson: PackageJson = {
-        name: 'test',
-        version: '1.0.0',
-        repository: { url: 'git+https://github.com/user/repo.git' },
-      }
-
-      await expect(resolveGitHubTgzUrl('test', pkgJson)).resolves.toBeDefined()
-    }, 30_000)
-  })
-
-  describe('lazy loading', () => {
-    it('getReleaseTag returns a string for package spec', () => {
-      const tag = getReleaseTag('package@1.0.0')
-      expect(typeof tag).toBe('string')
-    })
-
-    it('packPackage rejects for non-existent directory', async () => {
-      await expect(packPackage('/non/existent')).rejects.toThrow()
-    }, 30_000)
-
-    it('extractPackage rejects for invalid spec', async () => {
-      await expect(
-        extractPackage('invalid-spec-xyz', { dest: '/tmp/test' }),
-      ).rejects.toThrow()
-    }, 30_000)
-
-    it('findPackageExtensions returns without throwing', () => {
-      expect(() => findPackageExtensions('package', '1.0.0')).not.toThrow()
-    })
-  })
-
-  describeNetworkOnly('options handling (network)', () => {
-    it('should handle extractPackage with all options', async () => {
-      await runWithTempDir(async tmpDir => {
-        const dest = path.join(tmpDir, 'extracted')
-        await fs.mkdir(dest, { recursive: true })
-
-        await extractPackage('is-number@7.0.0', {
-          dest,
-          preferOffline: true,
-          tmpPrefix: 'test-',
-        })
-
-        expect(existsSync(path.join(dest, 'package.json'))).toBe(true)
-      }, 'extract-all-opts-')
-    }, 30_000)
-  })
-
-  describe('options handling', () => {
-    it('should handle readPackageJson with all options', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', custom: 'value' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = await readPackageJson(tmpDir, {
-          editable: false,
-          normalize: true,
-          throws: false,
-          preserve: ['custom'],
-        })
-
-        expect(result).toBeDefined()
-      }, 'read-all-opts-')
-    })
-
-    it('should handle readPackageJsonSync with all options', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', custom: 'value' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        const result = readPackageJsonSync(tmpDir, {
-          editable: false,
-          throws: false,
-          preserve: ['custom'],
-        } as any)
-
-        expect(result).toBeDefined()
-      }, 'read-sync-all-opts-')
-    })
-  })
-
-  describeNetworkOnly('integration scenarios (network)', () => {
-    it('should extract, read, and pack a package', async () => {
-      await runWithTempDir(async tmpDir => {
-        const extractDest = path.join(tmpDir, 'extracted')
-        await fs.mkdir(extractDest, { recursive: true })
-
-        // Extract
-        await extractPackage('is-number@7.0.0', { dest: extractDest })
-
-        // Read
-        const pkgJson = await readPackageJson(extractDest)
-        expect(pkgJson?.name).toBe('is-number')
-
-        // Pack
-        const tarball = await packPackage(extractDest)
-        expect(Buffer.isBuffer(tarball)).toBe(true)
-      }, 'integration-extract-read-pack-')
-    }, 60_000)
-  })
-
-  describe('integration scenarios', () => {
-    it('should handle editable package.json workflow', async () => {
-      await runWithTempDir(async tmpDir => {
-        const pkgData = { name: 'test', version: '1.0.0' }
-        await fs.writeFile(
-          path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData),
-        )
-
-        // Read as editable
-        const editable = await readPackageJson(tmpDir, { editable: true })
-        expect(editable).toBeDefined()
-        expect(typeof (editable as any)?.save).toBe('function')
-
-        // Update and save
-        ;(editable as any).update({ version: '2.0.0' })
-        await (editable as any).save()
-
-        // Read again to verify
-        const updated = await readPackageJson(tmpDir)
-        expect(updated?.version).toBe('2.0.0')
-      }, 'integration-editable-workflow-')
-    })
-
-    it('should handle release tag extraction for various formats', () => {
-      const testCases = [
-        { input: 'pkg@1.0.0', expected: '1.0.0' },
-        { input: '@scope/pkg@1.0.0', expected: '1.0.0' },
-        { input: 'pkg@latest', expected: 'latest' },
-        { input: '@scope/pkg@next', expected: 'next' },
-        { input: 'pkg', expected: '' },
-        { input: '@scope/pkg', expected: '' },
-      ]
-
-      testCases.forEach(({ input, expected }) => {
-        expect(getReleaseTag(input)).toBe(expected)
-      })
-    })
-  })
-
   describe('resolveRegistryPackageName', () => {
     it('escapes scoped package names with double-underscore', () => {
       expect(resolveRegistryPackageName('@babel/core')).toBe('babel__core')
@@ -950,6 +200,83 @@ describe('packages/operations', () => {
 
     it('handles complex nested scope names', () => {
       expect(resolveRegistryPackageName('@types/node')).toBe('types__node')
+    })
+  })
+
+  describe('edge cases and error handling', () => {
+    it('should handle extractPackage with invalid spec', async () => {
+      await expect(
+        extractPackage('non-existent-package-xyz-123', { dest: '/tmp/test' }),
+      ).rejects.toThrow()
+    }, 30_000)
+
+    it('should handle packPackage with invalid path', async () => {
+      await expect(packPackage('/non/existent/path')).rejects.toThrow()
+    }, 30_000)
+
+    it('should handle getReleaseTag with special characters', () => {
+      expect(getReleaseTag('package@1.0.0-beta.1')).toBe('1.0.0-beta.1')
+      expect(getReleaseTag('package@1.0.0+build.123')).toBe('1.0.0+build.123')
+    })
+  })
+
+  describe('lazy loading', () => {
+    it('getReleaseTag returns a string for package spec', () => {
+      const tag = getReleaseTag('package@1.0.0')
+      expect(typeof tag).toBe('string')
+    })
+
+    it('packPackage rejects for non-existent directory', async () => {
+      await expect(packPackage('/non/existent')).rejects.toThrow()
+    }, 30_000)
+
+    it('extractPackage rejects for invalid spec', async () => {
+      await expect(
+        extractPackage('invalid-spec-xyz', { dest: '/tmp/test' }),
+      ).rejects.toThrow()
+    }, 30_000)
+  })
+
+  describe('integration scenarios', () => {
+    it('should handle editable package.json workflow', async () => {
+      await runWithTempDir(async tmpDir => {
+        const pkgData = { name: 'test', version: '1.0.0' }
+        await fs.writeFile(
+          path.join(tmpDir, 'package.json'),
+          JSON.stringify(pkgData),
+        )
+
+        // Read as editable
+        const editable = (await readPackageJson(tmpDir, {
+          editable: true,
+        })) as EditablePackageJson | undefined
+        expect(editable).toBeDefined()
+        expect(typeof editable?.save).toBe('function')
+
+        // Update and save
+        editable!.update({ version: '2.0.0' })
+        await editable!.save()
+
+        // Read again to verify
+        const updated = await readPackageJson(tmpDir)
+        expect(updated?.version).toBe('2.0.0')
+      }, 'integration-editable-workflow-')
+    })
+
+    it('should handle release tag extraction for various formats', () => {
+      const testCases = [
+        { input: 'pkg@1.0.0', expected: '1.0.0' },
+        { input: '@scope/pkg@1.0.0', expected: '1.0.0' },
+        { input: 'pkg@latest', expected: 'latest' },
+        { input: '@scope/pkg@next', expected: 'next' },
+        { input: 'pkg', expected: '' },
+        { input: '@scope/pkg', expected: '' },
+      ]
+
+      for (let i = 0, { length } = testCases; i < length; i += 1) {
+        const { expected, input } = testCases[i]!
+        expect(getReleaseTag(input)).toBe(expected)
+      }
     })
   })
 })

@@ -17,7 +17,6 @@ import { StringPrototypeEndsWith } from '../primordials/string'
  *   // { user: 'lodash', project: 'lodash' }
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getRepoUrlDetails(repoUrl: string = ''): {
   user: string
   project: string
@@ -31,7 +30,7 @@ export function getRepoUrlDetails(repoUrl: string = ''): {
   // Callers passing scp-style git@github.com:… need to normalize
   // upstream; we require `://` here so the host is unambiguous.
   const match =
-    /^(?:[a-z][a-z+]*:\/\/)(?:[^/@]+@)?github\.com\/([^?#]+)(?:[?#]|$)/i.exec(
+    /^(?:[a-z][a-z+]*:\/\/)(?:[^/@]+@)?github\.com\/([^?#]+)(?:$|[?#])/i.exec(
       repoUrl,
     )
   if (!match || !match[1]) {
@@ -55,7 +54,6 @@ export function getRepoUrlDetails(repoUrl: string = ''): {
  *   // 'https://api.github.com/repos/lodash/lodash/git/ref/tags/v4.17.21'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function gitHubTagRefUrl(
   user: string,
   project: string,
@@ -73,7 +71,6 @@ export function gitHubTagRefUrl(
  *   // 'https://github.com/lodash/lodash/archive/abc123.tar.gz'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function gitHubTgzUrl(
   user: string,
   project: string,
@@ -91,7 +88,6 @@ export function gitHubTgzUrl(
  *   isGitHubTgzSpec('lodash@4.17.21') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
   let parsedSpec: unknown
   if (isPlainObject(spec)) {
@@ -118,7 +114,6 @@ export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
  *   isGitHubUrlSpec('lodash@4.17.21') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isGitHubUrlSpec(spec: unknown, where?: string): boolean {
   let parsedSpec: unknown
   if (isPlainObject(spec)) {

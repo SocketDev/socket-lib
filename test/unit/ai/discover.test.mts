@@ -45,9 +45,12 @@ afterEach(() => {
 
 describe.sequential('cachePathFor', () => {
   test('joins repo root + .cache/agent-discovery.json', () => {
-    expect(cachePathFor('/foo')).toBe(
-      path.join('/foo', '.cache', 'agent-discovery.json'),
-    )
+    const result = cachePathFor('/foo')
+    expect(path.isAbsolute(result)).toBe(true)
+    expect(path.relative('/foo', result).split(path.sep)).toEqual([
+      '.cache',
+      'agent-discovery.json',
+    ])
   })
 })
 
@@ -77,14 +80,14 @@ describe.sequential('readDiskCache', () => {
   })
 
   test('returns undefined on malformed JSON', () => {
-    const cachePath = path.join(tmpRoot, '.cache', 'agent-discovery.json')
+    const cachePath = cachePathFor(tmpRoot)
     mkdirSync(path.dirname(cachePath), { recursive: true })
     writeFileSync(cachePath, 'this is not json')
     expect(readDiskCache(cachePath)).toBeUndefined()
   })
 
   test('returns undefined when writtenAt is missing', () => {
-    const cachePath = path.join(tmpRoot, '.cache', 'agent-discovery.json')
+    const cachePath = cachePathFor(tmpRoot)
     mkdirSync(path.dirname(cachePath), { recursive: true })
     writeFileSync(
       cachePath,
@@ -94,7 +97,7 @@ describe.sequential('readDiskCache', () => {
   })
 
   test('returns undefined when writtenAt is not a number', () => {
-    const cachePath = path.join(tmpRoot, '.cache', 'agent-discovery.json')
+    const cachePath = cachePathFor(tmpRoot)
     mkdirSync(path.dirname(cachePath), { recursive: true })
     writeFileSync(
       cachePath,
@@ -104,7 +107,7 @@ describe.sequential('readDiskCache', () => {
   })
 
   test('returns undefined when writtenAt is past the TTL', () => {
-    const cachePath = path.join(tmpRoot, '.cache', 'agent-discovery.json')
+    const cachePath = cachePathFor(tmpRoot)
     mkdirSync(path.dirname(cachePath), { recursive: true })
     const past = Date.now() - (60 * 60 * 1000 + 1)
     writeFileSync(
@@ -115,7 +118,7 @@ describe.sequential('readDiskCache', () => {
   })
 
   test('returns the agents map for a fresh on-disk cache', () => {
-    const cachePath = path.join(tmpRoot, '.cache', 'agent-discovery.json')
+    const cachePath = cachePathFor(tmpRoot)
     mkdirSync(path.dirname(cachePath), { recursive: true })
     writeFileSync(
       cachePath,

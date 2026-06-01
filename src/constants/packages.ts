@@ -17,12 +17,12 @@ import { ArrayFrom } from '../primordials/array'
 import { ObjectEntries } from '../primordials/object'
 
 import { ReflectGetPrototypeOf } from '../primordials/reflect'
-let _lifecycleScriptNames: string[]
-let _packageDefaultNodeRange: string | undefined
-let _packageDefaultSocketCategories: readonly string[]
-let _packageExtensions: Iterable<[string, unknown]>
-let _pacoteCachePath: string
-let _packumentCache: Map<string, unknown>
+let cachedLifecycleScriptNames: string[]
+let cachedPackageDefaultNodeRange: string | undefined
+let cachedPackageDefaultSocketCategories: readonly string[]
+let cachedPackageExtensions: Iterable<[string, unknown]>
+let cachedPacoteCachePath: string
+let cachedPackumentCache: Map<string, unknown>
 
 // Package constants.
 export const PACKAGE = 'package'
@@ -37,46 +37,42 @@ export const PACKAGE_DEFAULT_VERSION = '1.0.0'
 export function clearPackumentCache(): void {
   // First-call branch fires only when cache is uninitialized; tests
   // exercise the truthy path.
-  /* c8 ignore next 3 */
-  if (_packumentCache !== undefined) {
-    _packumentCache.clear()
+  /* c8 ignore next 3 - uninitialized-cache branch unreachable in tests */
+  if (cachedPackumentCache !== undefined) {
+    cachedPackumentCache.clear()
   }
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getLifecycleScriptNames(): string[] {
-  if (_lifecycleScriptNames === undefined) {
+  if (cachedLifecycleScriptNames === undefined) {
     // lifecycleScriptNames is imported at the top
-    _lifecycleScriptNames = ArrayFrom(lifecycleScriptNamesImport)
+    cachedLifecycleScriptNames = ArrayFrom(lifecycleScriptNamesImport)
   }
-  return _lifecycleScriptNames
+  return cachedLifecycleScriptNames
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getPackageDefaultNodeRange(): string | undefined {
-  if (_packageDefaultNodeRange === undefined) {
+  if (cachedPackageDefaultNodeRange === undefined) {
     // packageDefaultNodeRange is imported at the top
-    _packageDefaultNodeRange = packageDefaultNodeRangeImport
+    cachedPackageDefaultNodeRange = packageDefaultNodeRangeImport
   }
-  return _packageDefaultNodeRange
+  return cachedPackageDefaultNodeRange
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getPackageDefaultSocketCategories() {
-  if (_packageDefaultSocketCategories === undefined) {
+  if (cachedPackageDefaultSocketCategories === undefined) {
     // packageDefaultSocketCategories is imported at the top
-    _packageDefaultSocketCategories = packageDefaultSocketCategoriesImport
+    cachedPackageDefaultSocketCategories = packageDefaultSocketCategoriesImport
   }
-  return _packageDefaultSocketCategories
+  return cachedPackageDefaultSocketCategories
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getPackageExtensions(): Iterable<[string, unknown]> {
-  if (_packageExtensions === undefined) {
+  if (cachedPackageExtensions === undefined) {
     // packageExtensions is imported at the top
-    _packageExtensions = ObjectEntries(packageExtensionsImport)
+    cachedPackageExtensions = ObjectEntries(packageExtensionsImport)
   }
-  return _packageExtensions
+  return cachedPackageExtensions
 }
 
 const PACKUMENT_CACHE_MAX = 500
@@ -100,17 +96,15 @@ class BoundedPackumentCache extends Map<string, unknown> {
   }
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getPackumentCache(): Map<string, unknown> {
-  if (_packumentCache === undefined) {
-    _packumentCache = new BoundedPackumentCache()
+  if (cachedPackumentCache === undefined) {
+    cachedPackumentCache = new BoundedPackumentCache()
   }
-  return _packumentCache
+  return cachedPackumentCache
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getPacoteCachePath(): string {
-  if (_pacoteCachePath === undefined) {
+  if (cachedPacoteCachePath === undefined) {
     try {
       // module is imported at the top
       const proto = ReflectGetPrototypeOf(
@@ -129,11 +123,11 @@ export function getPacoteCachePath(): string {
       const cachePath = PacoteFetcherBase
         ? new PacoteFetcherBase(/*placeholder package spec*/ 'x', {}).cache
         : ''
-      _pacoteCachePath = cachePath ? normalizePath(cachePath) : ''
+      cachedPacoteCachePath = cachePath ? normalizePath(cachePath) : ''
       /* c8 ignore stop */
     } catch {
-      _pacoteCachePath = ''
+      cachedPacoteCachePath = ''
     }
   }
-  return _pacoteCachePath
+  return cachedPacoteCachePath
 }

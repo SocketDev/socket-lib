@@ -402,7 +402,7 @@ describe('stdio/prompts', () => {
       const wrapped = wrapPrompt(mockPrompt)
 
       // Pass a non-object value as config
-      const result = await wrapped('not an object' as any)
+      const result = await wrapped('not an object')
       expect(result).toBe('test')
       expect(mockPrompt).toHaveBeenCalled()
     })
@@ -412,7 +412,7 @@ describe('stdio/prompts', () => {
       const wrapped = wrapPrompt(mockPrompt)
 
       // Pass an array (which is technically an object but not the expected config)
-      const result = await wrapped([1, 2, 3] as any)
+      const result = await wrapped([1, 2, 3])
       expect(result).toBe('test')
       expect(mockPrompt).toHaveBeenCalled()
     })
@@ -635,7 +635,7 @@ describe('stdio/prompts', () => {
     })
 
     it('should handle number input', () => {
-      const theme = createInquirerTheme(42 as any)
+      const theme = createInquirerTheme(42)
       expect(theme).toBe(42)
     })
   })
@@ -680,7 +680,7 @@ describe('stdio/prompts', () => {
       const result = await wrapped(
         { message: 'Test?' },
         { signal: new AbortController().signal },
-        'extra arg' as any,
+        'extra arg',
       )
       expect(result).toBe('test')
       expect(mockPrompt).toHaveBeenCalledWith(

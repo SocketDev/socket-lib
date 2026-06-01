@@ -19,7 +19,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The GH CLI token, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getGhToken(): string | undefined {
   return getEnvValue('GH_TOKEN')
 }
@@ -38,7 +37,6 @@ export function getGhToken(): string | undefined {
  *
  * @returns The GitHub API URL, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getGithubApiUrl(): string | undefined {
   return getEnvValue('GITHUB_API_URL')
 }
@@ -56,7 +54,6 @@ export function getGithubApiUrl(): string | undefined {
  *
  * @returns The pull request base branch name, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getGithubBaseRef(): string | undefined {
   return getEnvValue('GITHUB_BASE_REF')
 }
@@ -74,7 +71,6 @@ export function getGithubBaseRef(): string | undefined {
  *
  * @returns The branch or tag name, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getGithubRefName(): string | undefined {
   return getEnvValue('GITHUB_REF_NAME')
 }
@@ -92,7 +88,6 @@ export function getGithubRefName(): string | undefined {
  *
  * @returns The ref type ('branch' or 'tag'), or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getGithubRefType(): string | undefined {
   return getEnvValue('GITHUB_REF_TYPE')
 }
@@ -111,7 +106,6 @@ export function getGithubRefType(): string | undefined {
  *
  * @returns The repository name, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getGithubRepository(): string | undefined {
   return getEnvValue('GITHUB_REPOSITORY')
 }
@@ -130,7 +124,6 @@ export function getGithubRepository(): string | undefined {
  *
  * @returns The GitHub server URL, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getGithubServerUrl(): string | undefined {
   return getEnvValue('GITHUB_SERVER_URL')
 }
@@ -149,7 +142,6 @@ export function getGithubServerUrl(): string | undefined {
  *
  * @returns The GitHub token, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getGithubToken(): string | undefined {
   return getEnvValue('GITHUB_TOKEN')
 }

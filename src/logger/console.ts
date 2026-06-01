@@ -22,6 +22,8 @@
 
 import process from 'node:process'
 
+import type { Console } from 'node:console'
+
 import {
   ObjectDefineProperties,
   ObjectEntries,
@@ -39,23 +41,22 @@ import {
 import { Logger } from './node'
 import { getKGroupIndentationWidthSymbol } from './symbols'
 
-let _Console: typeof import('node:console').Console | undefined
-let _prototypeInitialized = false
+let cachedConsole: typeof Console | undefined
+let prototypeInitialized = false
 
 /**
  * Construct a new Console instance.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function constructConsole(...args: unknown[]) {
   /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-  if (_Console === undefined) {
+  if (cachedConsole === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
     const nodeConsole = /*@__PURE__*/ require('node:console')
-    _Console = nodeConsole.Console
+    cachedConsole = nodeConsole.Console
   }
   return ReflectConstruct(
-    _Console! as new (...args: unknown[]) => Console, // eslint-disable-line no-undef
+    cachedConsole! as new (...args: unknown[]) => Console,
     args,
   )
 }
@@ -68,10 +69,10 @@ export function constructConsole(...args: unknown[]) {
  * ready.
  */
 export function ensurePrototypeInitialized() {
-  if (_prototypeInitialized) {
+  if (prototypeInitialized) {
     return
   }
-  _prototypeInitialized = true
+  prototypeInitialized = true
 
   const entries: Array<[string | symbol, PropertyDescriptor]> = [
     [
@@ -91,7 +92,10 @@ export function ensurePrototypeInitialized() {
     ],
   ]
   for (const { 0: key, 1: value } of ObjectEntries(globalConsole)) {
-    if (!(Logger.prototype as any)[key] && typeof value === 'function') {
+    if (
+      !(Logger.prototype as unknown as Record<string, unknown>)[key] &&
+      typeof value === 'function'
+    ) {
       // Dynamically name the log method without using Object.defineProperty.
       const { [key]: func } = {
         [key](this: Logger, ...args: unknown[]) {
@@ -118,7 +122,11 @@ export function ensurePrototypeInitialized() {
             privateConsole.set(this, con)
           }
           /* c8 ignore stop */
-          const result = (con as any)[key](...args)
+          const consoleMethods = con as unknown as Record<
+            string,
+            (...methodArgs: unknown[]) => unknown
+          >
+          const result = consoleMethods[key]!(...args)
           // Most Console methods return undefined; the `=== con` chain
           // arm fires for builtin methods that return `this`.
           /* c8 ignore next */

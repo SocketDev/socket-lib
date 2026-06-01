@@ -30,7 +30,6 @@ import {
  *   // types === './dist/index.d.ts'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function findTypesForSubpath(
   entryExports: unknown,
   subpath: string,
@@ -80,7 +79,6 @@ export function findTypesForSubpath(
  *   getExportFilePaths(exports) // ['./dist/index.js', './dist/utils.js']
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getExportFilePaths(entryExports: unknown): string[] {
   if (!isObject(entryExports)) {
     return []
@@ -138,7 +136,6 @@ export function getExportFilePaths(entryExports: unknown): string[] {
  *   getSubpaths(exports) // ['.', './utils']
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSubpaths(entryExports: unknown): string[] {
   if (!isObject(entryExports)) {
     return []
@@ -158,7 +155,6 @@ export function getSubpaths(entryExports: unknown): string[] {
  *   isConditionalExports({ '.': './index.js' }) // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isConditionalExports(entryExports: unknown): boolean {
   if (!isPlainObject(entryExports)) {
     return false
@@ -190,7 +186,6 @@ export function isConditionalExports(entryExports: unknown): boolean {
  *   isSubpathExports({ import: './index.mjs' }) // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isSubpathExports(entryExports: unknown): boolean {
   if (isPlainObject(entryExports)) {
     const keys = ObjectGetOwnPropertyNames(entryExports)
@@ -219,7 +214,6 @@ export function isSubpathExports(entryExports: unknown): boolean {
  *   // { '.': './index.js' }
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageJsonEntryExports(entryExports: unknown): unknown {
   // If conditional exports main sugar
   // https://nodejs.org/api/packages.html#exports-sugar

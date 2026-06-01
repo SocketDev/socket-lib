@@ -22,7 +22,6 @@ import { envAsBoolean } from '@socketsecurity/lib-stable/env/boolean'
  *
  * @private
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
   return namespaces !== null && typeof namespaces === 'object'
     ? ({ __proto__: null, ...namespaces } as DebugOptions)
@@ -34,7 +33,6 @@ export function extractOptions(namespaces: NamespacesOrOptions): DebugOptions {
  *
  * @private
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getDebugJsInstance(namespace: string) {
   let inst = debugByNamespace.get(namespace)
   // Per-namespace cache hit; first-call always misses. Same-namespace
@@ -61,7 +59,6 @@ export function getDebugJsInstance(namespace: string) {
 /**
  * Check if debug mode is enabled.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isDebug(): boolean {
   return envAsBoolean(getSocketDebug())
 }
@@ -69,7 +66,6 @@ export function isDebug(): boolean {
 /**
  * Check if debug mode is enabled.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isDebugNs(namespaces: string | undefined): boolean {
   return envAsBoolean(getSocketDebug()) && isEnabled(namespaces)
 }
@@ -79,7 +75,6 @@ export function isDebugNs(namespaces: string | undefined): boolean {
  *
  * @private
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isEnabled(namespaces: string | undefined) {
   // Check if debugging is enabled at all
   if (!getSocketDebug()) {

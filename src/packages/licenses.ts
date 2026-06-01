@@ -75,7 +75,6 @@ export interface LicenseVisitor {
  *   // incompatible contains only the GPL-3.0 node
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function collectIncompatibleLicenses(
   licenseNodes: LicenseNode[],
 ): LicenseNode[] {
@@ -98,7 +97,6 @@ export function collectIncompatibleLicenses(
  *   collectLicenseWarnings(nodes) // ['Package is unlicensed']
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function collectLicenseWarnings(licenseNodes: LicenseNode[]): string[] {
   const warnings = new MapCtor()
   for (let i = 0, { length } = licenseNodes; i < length; i += 1) {
@@ -126,7 +124,6 @@ export function collectLicenseWarnings(licenseNodes: LicenseNode[]): string[] {
  *   // node.type === 'License'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function createAstNode(rawNode: SpdxAstNode): InternalAstNode {
   return hasOwn(rawNode, 'license')
     ? createLicenseNode(rawNode as SpdxLicenseNode)
@@ -147,7 +144,6 @@ export function createAstNode(rawNode: SpdxAstNode): InternalAstNode {
  *   // node.type === 'BinaryOperation'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function createBinaryOperationNode(
   rawNodeParam: SpdxBinaryOperationNode,
 ): InternalBinaryOperationNode {
@@ -187,7 +183,6 @@ export function createBinaryOperationNode(
  *   // node.type === 'License' && node.license === 'MIT'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function createLicenseNode(
   rawNode: SpdxLicenseNode,
 ): InternalLicenseNode {
@@ -207,7 +202,6 @@ export function createLicenseNode(
  *   // ast is a BinaryOperation node with MIT and Apache-2.0 leaves
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function parseSpdxExp(spdxExp: string): SpdxAstNode | undefined {
   // spdxExpParse is imported at the top
   try {
@@ -227,7 +221,6 @@ export function parseSpdxExp(spdxExp: string): SpdxAstNode | undefined {
  *   // [{ license: 'MIT' }]
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageLicenses(
   licenseFieldValue: string,
   where: string,
@@ -295,7 +288,6 @@ export function resolvePackageLicenses(
  *   // licenses === ['MIT', 'Apache-2.0']
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function visitLicenses(ast: SpdxAstNode, visitor: LicenseVisitor): void {
   const queue: Array<[InternalAstNode, InternalAstNode | undefined]> = [
     [createAstNode(ast), undefined],

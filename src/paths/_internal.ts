@@ -9,6 +9,8 @@
  *   - `pathLikeToString` — `string | Buffer | URL` → `string`
  */
 
+import type nodeUrl from 'node:url'
+
 import { WIN32 } from '../constants/platform'
 
 import { BufferIsBuffer } from '../primordials/buffer'
@@ -34,11 +36,11 @@ export const CHAR_UPPERCASE_A = 65
 // 'Z'
 export const CHAR_UPPERCASE_Z = 90
 
-export const msysDriveRegExp = /^\/(?:[a-zA-Z])(?:\/|$)/
-export const nodeModulesPathRegExp = /(?:^|[/\\])node_modules(?:[/\\]|$)/
+export const msysDriveRegExp = /^\/(?:[a-zA-Z])(?:$|\/)/
+export const nodeModulesPathRegExp = /(?:[/\\]|^)node_modules(?:$|[/\\])/
 export const slashRegExp = /[/\\]/
 
-let _url: typeof import('node:url') | undefined
+let cachedUrl: typeof nodeUrl | undefined
 
 /**
  * Lazily load the url module.
@@ -48,14 +50,13 @@ let _url: typeof import('node:url') | undefined
  *
  * @private
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getUrl() {
-  if (_url === undefined) {
+  if (cachedUrl === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _url = /*@__PURE__*/ require('node:url')
+    cachedUrl = /*@__PURE__*/ require('node:url')
   }
-  return _url as typeof import('node:url')
+  return cachedUrl as typeof nodeUrl
 }
 
 /**
@@ -79,7 +80,6 @@ export function getUrl() {
  * @returns {string} The string representation, or empty string for
  *   null/undefined.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function pathLikeToString(
   pathLike: string | Buffer | URL | null | undefined,
 ): string {

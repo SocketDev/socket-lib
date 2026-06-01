@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- AsyncLocalStorage / module state is interleaved with the lazy-loader functions; reordering would split that state from its consumers. */
 /**
  * @file Environment variable rewiring utilities for testing. Uses
  *   AsyncLocalStorage for context-isolated overrides that work with concurrent
@@ -18,23 +17,12 @@ import { envAsBoolean } from './boolean'
 import { MapCtor } from '../primordials/map-set'
 
 import { ObjectEntries } from '../primordials/object'
-let _async_hooks: typeof import('node:async_hooks') | undefined
-/**
- * Lazily load the async_hooks module to avoid Webpack errors.
- *
- * @private
- */
-/*@__NO_SIDE_EFFECTS__*/
-export function getAsyncHooks() {
-  if (_async_hooks === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _async_hooks = /*@__PURE__*/ require('node:async_hooks')
-  }
-  return _async_hooks as typeof import('node:async_hooks')
-}
+import type * as asyncHooksModule from 'node:async_hooks'
 
 type EnvOverrides = Map<string, string | undefined>
+
+let asyncHooks: typeof asyncHooksModule | undefined
 
 // Isolated execution context storage for nested overrides (withEnv/withEnvSync)
 // AsyncLocalStorage creates isolated contexts that don't leak between concurrent code
@@ -50,13 +38,13 @@ const isolatedOverridesStorage = new AsyncLocalStorage<EnvOverrides>()
 const sharedOverridesSymbol = Symbol.for(
   '@socketsecurity/lib/env/rewire/test-overrides',
 )
-const _globalThis = globalThis as Record<symbol, unknown>
+const globalThisRef = globalThis as Record<symbol, unknown>
 const isVitestEnv = envAsBoolean(process.env['VITEST'])
-if (isVitestEnv && !_globalThis[sharedOverridesSymbol]) {
-  _globalThis[sharedOverridesSymbol] = new MapCtor<string, string | undefined>()
+if (isVitestEnv && !globalThisRef[sharedOverridesSymbol]) {
+  globalThisRef[sharedOverridesSymbol] = new MapCtor<string, string | undefined>()
 }
 const sharedOverrides: Map<string, string | undefined> | undefined =
-  _globalThis[sharedOverridesSymbol] as
+  globalThisRef[sharedOverridesSymbol] as
     | Map<string, string | undefined>
     | undefined
 
@@ -75,6 +63,20 @@ const sharedOverrides: Map<string, string | undefined> | undefined =
  */
 export function clearEnv(key: string): void {
   sharedOverrides?.delete(key)
+}
+
+/**
+ * Lazily load the async_hooks module to avoid Webpack errors.
+ *
+ * @private
+ */
+export function getAsyncHooks() {
+  if (asyncHooks === undefined) {
+    // Use non-'node:' prefixed require to avoid Webpack errors.
+
+    asyncHooks = /*@__PURE__*/ require('node:async_hooks')
+  }
+  return asyncHooks as typeof asyncHooksModule
 }
 
 /**

@@ -20,6 +20,16 @@ import {
   getXdgDataHome,
 } from '../../../src/env/xdg'
 
+// These constants are XDG fixture paths, not this repo's tool caches: `~/.cache`
+// is the freedesktop.org XDG_CACHE_HOME default the getters under test must
+// honor, so the literals legitimately point outside `node_modules/.cache/`.
+// oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- XDG spec default cache fixture
+const XDG_CACHE_HOME_DEFAULT = '/home/user/.cache'
+// oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- XDG spec default cache fixture with trailing slash
+const XDG_CACHE_HOME_TRAILING = '/home/user/.cache/'
+// oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- snap-confined XDG cache fixture
+const XDG_CACHE_HOME_SNAP = '/home/user/snap/app/current/.cache'
+
 describe('env/xdg', () => {
   afterEach(() => {
     resetEnv()
@@ -27,8 +37,8 @@ describe('env/xdg', () => {
 
   describe('getXdgCacheHome', () => {
     it('should return XDG_CACHE_HOME when set', () => {
-      setEnv('XDG_CACHE_HOME', '/home/user/.cache')
-      expect(getXdgCacheHome()).toBe('/home/user/.cache')
+      setEnv('XDG_CACHE_HOME', XDG_CACHE_HOME_DEFAULT)
+      expect(getXdgCacheHome()).toBe(XDG_CACHE_HOME_DEFAULT)
     })
 
     it('should fall back to process.env when override is cleared', () => {
@@ -37,8 +47,8 @@ describe('env/xdg', () => {
     })
 
     it('should handle default cache location', () => {
-      setEnv('XDG_CACHE_HOME', '/home/user/.cache')
-      expect(getXdgCacheHome()).toBe('/home/user/.cache')
+      setEnv('XDG_CACHE_HOME', XDG_CACHE_HOME_DEFAULT)
+      expect(getXdgCacheHome()).toBe(XDG_CACHE_HOME_DEFAULT)
     })
 
     it('should handle custom cache location', () => {
@@ -47,8 +57,8 @@ describe('env/xdg', () => {
     })
 
     it('should handle cache with trailing slash', () => {
-      setEnv('XDG_CACHE_HOME', '/home/user/.cache/')
-      expect(getXdgCacheHome()).toBe('/home/user/.cache/')
+      setEnv('XDG_CACHE_HOME', XDG_CACHE_HOME_TRAILING)
+      expect(getXdgCacheHome()).toBe(XDG_CACHE_HOME_TRAILING)
     })
 
     it('should handle empty string', () => {
@@ -65,10 +75,10 @@ describe('env/xdg', () => {
     })
 
     it('should handle consecutive reads', () => {
-      setEnv('XDG_CACHE_HOME', '/home/user/.cache')
-      expect(getXdgCacheHome()).toBe('/home/user/.cache')
-      expect(getXdgCacheHome()).toBe('/home/user/.cache')
-      expect(getXdgCacheHome()).toBe('/home/user/.cache')
+      setEnv('XDG_CACHE_HOME', XDG_CACHE_HOME_DEFAULT)
+      expect(getXdgCacheHome()).toBe(XDG_CACHE_HOME_DEFAULT)
+      expect(getXdgCacheHome()).toBe(XDG_CACHE_HOME_DEFAULT)
+      expect(getXdgCacheHome()).toBe(XDG_CACHE_HOME_DEFAULT)
     })
 
     it('should handle cache path with spaces', () => {
@@ -77,8 +87,8 @@ describe('env/xdg', () => {
     })
 
     it('should handle snap cache location', () => {
-      setEnv('XDG_CACHE_HOME', '/home/user/snap/app/current/.cache')
-      expect(getXdgCacheHome()).toBe('/home/user/snap/app/current/.cache')
+      setEnv('XDG_CACHE_HOME', XDG_CACHE_HOME_SNAP)
+      expect(getXdgCacheHome()).toBe(XDG_CACHE_HOME_SNAP)
     })
 
     it('should handle flatpak cache location', () => {
@@ -223,11 +233,11 @@ describe('env/xdg', () => {
 
   describe('XDG directories interaction', () => {
     it('should handle all XDG dirs set simultaneously', () => {
-      setEnv('XDG_CACHE_HOME', '/home/user/.cache')
+      setEnv('XDG_CACHE_HOME', XDG_CACHE_HOME_DEFAULT)
       setEnv('XDG_CONFIG_HOME', '/home/user/.config')
       setEnv('XDG_DATA_HOME', '/home/user/.local/share')
 
-      expect(getXdgCacheHome()).toBe('/home/user/.cache')
+      expect(getXdgCacheHome()).toBe(XDG_CACHE_HOME_DEFAULT)
       expect(getXdgConfigHome()).toBe('/home/user/.config')
       expect(getXdgDataHome()).toBe('/home/user/.local/share')
     })
@@ -247,11 +257,11 @@ describe('env/xdg', () => {
     })
 
     it('should handle XDG dirs with common prefix', () => {
-      setEnv('XDG_CACHE_HOME', '/home/user/.cache')
+      setEnv('XDG_CACHE_HOME', XDG_CACHE_HOME_DEFAULT)
       setEnv('XDG_CONFIG_HOME', '/home/user/.config')
       setEnv('XDG_DATA_HOME', '/home/user/.local/share')
 
-      expect(getXdgCacheHome()).toBe('/home/user/.cache')
+      expect(getXdgCacheHome()).toBe(XDG_CACHE_HOME_DEFAULT)
       expect(getXdgConfigHome()).toBe('/home/user/.config')
       expect(getXdgDataHome()).toBe('/home/user/.local/share')
     })

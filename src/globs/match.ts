@@ -37,6 +37,7 @@ import {
 } from './_internal'
 
 import type { FastGlobOptions, Pattern } from './types'
+import type { Options as FastGlobLibOptions } from 'fast-glob'
 
 import { ObjectKeys } from '../primordials/object'
 
@@ -74,7 +75,6 @@ export function canUseNodeFsGlob(
  *   console.log(files) // ['src/index.ts', 'src/utils.ts']
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function glob(
   patterns: Pattern | Pattern[],
   options?: FastGlobOptions,
@@ -99,7 +99,7 @@ export async function glob(
   /* c8 ignore next - External fast-glob call */
   const fastGlob = getFastGlob()
   const out = await fastGlob.glob(patterns, {
-    ...(options as import('fast-glob').Options),
+    ...(options as FastGlobLibOptions),
     ...(normalizedIgnore ? { ignore: normalizedIgnore } : {}),
   })
   return normalizeGlobResults(out)
@@ -115,7 +115,6 @@ export async function glob(
  *   console.log(files) // ['package.json', 'tsconfig.json']
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function globSync(
   patterns: Pattern | Pattern[],
   options?: FastGlobOptions,
@@ -139,7 +138,7 @@ export function globSync(
   const fastGlob = getFastGlob()
   return normalizeGlobResults(
     fastGlob.globSync(patterns, {
-      ...(options as import('fast-glob').Options),
+      ...(options as FastGlobLibOptions),
       ...(normalizedIgnore ? { ignore: normalizedIgnore } : {}),
     }),
   )

@@ -95,9 +95,11 @@ describe('spawn', () => {
       })
 
       it('should treat null/undefined as pipe', () => {
-        expect(isStdioType(undefined as any, 'pipe')).toBe(true)
-        expect(isStdioType(undefined as any, 'pipe')).toBe(true)
-        expect(isStdioType(undefined as any, 'ignore')).toBe(false)
+        expect(isStdioType(undefined as unknown as string, 'pipe')).toBe(true)
+        expect(isStdioType(undefined as unknown as string, 'pipe')).toBe(true)
+        expect(isStdioType(undefined as unknown as string, 'ignore')).toBe(
+          false,
+        )
       })
 
       it('should match array with all elements same as type', () => {

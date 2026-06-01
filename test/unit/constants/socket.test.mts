@@ -38,7 +38,7 @@ import {
   SOCKET_SECURITY_SCOPE,
   SOCKET_STATUS_URL,
   SOCKET_WEBSITE_URL,
-} from '../../../src/constants/socket'
+} from '@socketsecurity/lib-stable/constants/socket'
 
 describe('constants/socket', () => {
   describe('Socket.dev API', () => {

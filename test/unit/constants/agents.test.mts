@@ -34,7 +34,7 @@ import {
   YARN_BERRY,
   YARN_CLASSIC,
   YARN_LOCK,
-} from '../../../src/constants/agents'
+} from '@socketsecurity/lib-stable/constants/agents'
 
 describe('constants/agents', () => {
   describe('agent names', () => {
@@ -304,10 +304,12 @@ describe('constants/agents', () => {
         [VLT_LOCK_JSON]: VLT,
       }
 
-      Object.entries(lockfiles).forEach(([lockfile, agent]) => {
+      const entries = Object.entries(lockfiles)
+      for (let i = 0, { length } = entries; i < length; i += 1) {
+        const [lockfile, agent] = entries[i]!
         expect(typeof lockfile).toBe('string')
         expect(typeof agent).toBe('string')
-      })
+      }
     })
   })
 

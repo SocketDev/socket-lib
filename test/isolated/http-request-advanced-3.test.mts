@@ -1,9 +1,10 @@
 /**
  * @file Unit tests for HTTP/HTTPS request utilities — advanced surface (part 3
- *   of 3). Covers streaming body bodies, additional onRetry / throwOnError /
+ *   of 4). Covers streaming body bodies, additional onRetry / throwOnError /
  *   parseRetryAfterHeader / sanitizeHeaders edge cases, maxResponseSize settle
- *   guards, Uint8Array bodies, redirect hook / cleanup paths, stream-body
- *   cleanup on failure, and hook error resilience. Split from the original
+ *   guards, and Uint8Array bodies. Redirect hook / cleanup paths, stream-body
+ *   cleanup on failure, and hook error resilience moved to part 4. Split from
+ *   the original
  *   advanced surface to keep each worker within the v8 heap ceiling —
  *   cumulative HTTP state retains memory faster than GC can reclaim it within a
  *   single test file. Shares the test server with the sibling
@@ -14,6 +15,8 @@ import http from 'node:http'
 import { Readable } from 'node:stream'
 
 import { describe, expect, it } from 'vitest'
+
+import type { HttpHookResponseInfo } from '@socketsecurity/lib/http-request/request-types'
 
 import { httpJson, httpText } from '../../src/http-request/node'
 import {
@@ -34,7 +37,7 @@ describe('http-request', () => {
 
       const response = await httpRequest(`${fixture.baseUrl}/echo-body`, {
         method: 'POST',
-        body: body as import('node:stream').Readable,
+        body: body as Readable,
       })
 
       expect(response.text()).toBe('streamed data')
@@ -53,7 +56,7 @@ describe('http-request', () => {
 
       const stream = Readable.from(
         Buffer.from(formBody),
-      ) as import('node:stream').Readable & {
+      ) as Readable & {
         getHeaders: () => Record<string, string>
       }
       stream.getHeaders = () => ({
@@ -76,7 +79,7 @@ describe('http-request', () => {
     it('should allow user headers to override stream headers', async () => {
       const stream = Readable.from(
         Buffer.from('override test'),
-      ) as import('node:stream').Readable & {
+      ) as Readable & {
         getHeaders: () => Record<string, string>
       }
       stream.getHeaders = () => ({
@@ -106,7 +109,7 @@ describe('http-request', () => {
       await expect(
         httpRequest(`${fixture.baseUrl}/echo-body`, {
           method: 'POST',
-          body: body as import('node:stream').Readable,
+          body: body as Readable,
           retries: 1,
         }),
       ).rejects.toThrow(/Streaming body.*cannot be used with retries/)
@@ -119,7 +122,7 @@ describe('http-request', () => {
       // redirects are disabled, so we get the raw 302.
       const response = await httpRequest(`${fixture.baseUrl}/redirect`, {
         method: 'POST',
-        body: body as import('node:stream').Readable,
+        body: body as Readable,
       })
 
       // Should get the 302 directly, not follow to /text
@@ -128,9 +131,7 @@ describe('http-request', () => {
     })
 
     it('should handle stream errors without double-firing hooks', async () => {
-      const responseInfos: Array<
-        import('@socketsecurity/lib/http-request/request-types').HttpHookResponseInfo
-      > = []
+      const responseInfos: HttpHookResponseInfo[] = []
 
       const errorStream = new Readable({
         read() {
@@ -144,7 +145,7 @@ describe('http-request', () => {
       await expect(
         httpRequest(`${fixture.baseUrl}/echo-body`, {
           method: 'POST',
-          body: errorStream as import('node:stream').Readable,
+          body: errorStream as Readable,
           hooks: {
             onResponse: info => responseInfos.push(info),
           },
@@ -411,9 +412,7 @@ describe('http-request', () => {
 
   describe('maxResponseSize - settle guard', () => {
     it('should fire onResponse exactly once when maxResponseSize exceeded', async () => {
-      const responseInfos: Array<
-        import('@socketsecurity/lib/http-request/request-types').HttpHookResponseInfo
-      > = []
+      const responseInfos: HttpHookResponseInfo[] = []
 
       await httpRequest(`${fixture.baseUrl}/large-body`, {
         maxResponseSize: 50,
@@ -468,135 +467,6 @@ describe('http-request', () => {
       }
 
       expect(onRetryCalled).toBe(false)
-    })
-  })
-
-  describe('redirect hook and cleanup', () => {
-    it('should fire onResponse exactly once per redirect hop on maxRedirects exceeded', async () => {
-      const responseInfos: Array<
-        import('@socketsecurity/lib/http-request/request-types').HttpHookResponseInfo
-      > = []
-
-      await httpRequest(`${fixture.baseUrl}/redirect-loop-1`, {
-        maxRedirects: 2,
-        hooks: {
-          onResponse: info => responseInfos.push(info),
-        },
-      }).catch(() => {})
-
-      // 3 redirect hops observed (each emits one 3xx hook before checking limits).
-      // The "too many redirects" rejection uses raw reject, not rejectOnce,
-      // so no additional error hook fires. Exactly 3 hook calls total.
-      expect(responseInfos).toHaveLength(3)
-      for (let i = 0, { length } = responseInfos; i < length; i += 1) {
-        const info = responseInfos[i]!
-        expect(info.status).toBeGreaterThanOrEqual(300)
-        expect(info.status).toBeLessThan(400)
-        expect(info.error).toBeUndefined()
-      }
-    })
-
-    it('should work correctly with throwOnError across a 302 → 200 redirect', async () => {
-      const response = await httpRequest(`${fixture.baseUrl}/redirect`, {
-        throwOnError: true,
-      })
-
-      expect(response.ok).toBe(true)
-      expect(response.status).toBe(200)
-      expect(response.text()).toBe('Plain text response')
-    })
-  })
-
-  describe('stream body cleanup on failure', () => {
-    it('should destroy source stream body on request timeout', async () => {
-      let streamDestroyed = false
-
-      // Create a slow stream that will outlive the request.
-      const slowStream = new Readable({
-        read() {
-          // Never push data — simulate a stalled upload.
-        },
-        destroy(_err, callback) {
-          streamDestroyed = true
-          callback(undefined)
-        },
-      })
-
-      await expect(
-        httpRequest(`${fixture.baseUrl}/timeout`, {
-          method: 'POST',
-          body: slowStream as import('node:stream').Readable,
-          timeout: 100,
-        }),
-      ).rejects.toThrow(/timed out/)
-
-      expect(streamDestroyed).toBe(true)
-    })
-
-    it('should destroy source stream body on connection error', async () => {
-      let streamDestroyed = false
-
-      const stream = new Readable({
-        read() {
-          // Never push — connection will fail first.
-        },
-        destroy(_err, callback) {
-          streamDestroyed = true
-          callback(undefined)
-        },
-      })
-
-      await expect(
-        httpRequest('http://localhost:1/no-server', {
-          method: 'POST',
-          body: stream as import('node:stream').Readable,
-          timeout: 100,
-        }),
-      ).rejects.toThrow()
-
-      expect(streamDestroyed).toBe(true)
-    })
-  })
-
-  describe('hook error resilience', () => {
-    it('should still resolve when onResponse hook throws on success', async () => {
-      const response = await httpRequest(`${fixture.baseUrl}/json`, {
-        hooks: {
-          onResponse: () => {
-            throw new Error('hook exploded')
-          },
-        },
-      })
-
-      // Promise must still settle despite the hook throwing.
-      expect(response.ok).toBe(true)
-      expect(response.status).toBe(200)
-    })
-
-    it('should still reject when onResponse hook throws on error', async () => {
-      await expect(
-        httpRequest(`${fixture.baseUrl}/timeout`, {
-          timeout: 50,
-          hooks: {
-            onResponse: () => {
-              throw new Error('hook exploded on error')
-            },
-          },
-        }),
-      ).rejects.toThrow(/timed out/)
-    })
-
-    it('should still reject when onResponse hook throws on redirect failure', async () => {
-      await expect(
-        httpRequest(`${fixture.baseUrl}/redirect-loop-1`, {
-          maxRedirects: 0,
-          hooks: {
-            onResponse: () => {
-              throw new Error('hook exploded on redirect')
-            },
-          },
-        }),
-      ).rejects.toThrow(/Too many redirects/)
     })
   })
 })

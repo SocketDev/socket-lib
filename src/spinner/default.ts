@@ -14,8 +14,8 @@ import { Spinner } from './spinner'
 
 import type { SpinnerInstance, SpinnerStyle } from './types'
 
-let _cliSpinners: Record<string, SpinnerStyle> | undefined
-let _spinner: SpinnerInstance | undefined
+let cliSpinners: Record<string, SpinnerStyle> | undefined
+let spinner: SpinnerInstance | undefined
 
 /**
  * Get available CLI spinner styles or a specific style by name. Extends the
@@ -41,28 +41,33 @@ let _spinner: SpinnerInstance | undefined
  *
  * @see https://github.com/sindresorhus/cli-spinners/blob/main/spinners.json
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getCliSpinners(
   styleName?: string | undefined,
 ): SpinnerStyle | Record<string, SpinnerStyle> | undefined {
-  if (_cliSpinners === undefined) {
+  if (cliSpinners === undefined) {
     /* c8 ignore start - External yoctoSpinner initialization */
-    const YoctoCtor: any = yoctoSpinner as any
-    // Get the YoctoSpinner class to access static properties.
-    const tempInstance: any = YoctoCtor({})
-    const YoctoSpinnerClass: any = tempInstance.constructor as any
+    // yoctoSpinner is a factory function whose instances expose the
+    // YoctoSpinner class via `.constructor`, which carries a static `spinners`
+    // map. Narrow the dynamic shape through `unknown` rather than `any`.
+    const yoctoFactory = yoctoSpinner as unknown as (
+      options: Record<string, unknown>,
+    ) => {
+      constructor: { spinners?: Record<string, SpinnerStyle> | undefined }
+    }
+    const tempInstance = yoctoFactory({})
+    const yoctoSpinnerClass = tempInstance.constructor
     /* c8 ignore stop */
     // Extend the standard cli-spinners collection with Socket custom spinners.
-    _cliSpinners = {
+    cliSpinners = {
       __proto__: null,
-      ...YoctoSpinnerClass.spinners,
+      ...yoctoSpinnerClass.spinners,
       socket: generateSocketSpinnerFrames(),
-    }
+    } as unknown as Record<string, SpinnerStyle>
   }
-  if (typeof styleName === 'string' && _cliSpinners) {
-    return hasOwn(_cliSpinners, styleName) ? _cliSpinners[styleName] : undefined
+  if (typeof styleName === 'string' && cliSpinners) {
+    return hasOwn(cliSpinners, styleName) ? cliSpinners[styleName] : undefined
   }
-  return _cliSpinners
+  return cliSpinners
 }
 
 /**
@@ -81,8 +86,8 @@ export function getCliSpinners(
  * @returns Shared default spinner instance
  */
 export function getDefaultSpinner(): SpinnerInstance {
-  if (_spinner === undefined) {
-    _spinner = Spinner()
+  if (spinner === undefined) {
+    spinner = Spinner()
   }
-  return _spinner
+  return spinner
 }
