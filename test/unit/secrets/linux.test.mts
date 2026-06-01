@@ -58,23 +58,38 @@ interface FakeChild extends EventEmitter {
   stderr: Readable | null
 }
 
+// Writable stdin helper. Pass nothing for a no-op sink (the default a
+// FakeChild ships with); pass an array to capture each chunk as a string
+// so a test can assert what bytes the source wrote to the child. One
+// shape covers both call sites — the FakeChild default + the test that
+// overrides stdin to capture writeLinux's secret payload.
+function makeWritableStdin(captureInto?: string[]): Writable {
+  return new Writable({
+    write(chunk, _enc, cb) {
+      if (captureInto) {
+        captureInto.push(String(chunk))
+      }
+      cb()
+    },
+  })
+}
+
 // `@socketsecurity/lib-stable/process/spawn/child`'s `spawn()` returns
 // `{ process: ChildProcess, ... }` (the lib wraps the raw child); src code
 // does `const { process: cp } = spawn(...)`. Returns the wrapped shape so
 // `mockSpawn.mockImplementationOnce(() => makeFakeChild({ ... }))` Just
-// Works without per-call destructuring.
+// Works without per-call destructuring. Pass `stdinCapture: []` to swap
+// the no-op stdin for a sink that records every chunk written to the
+// child.
 function makeFakeChild(opts: {
   stdout?: string | undefined
   stderr?: string | undefined
   exitCode?: number | null | undefined
   emitError?: Error | undefined
+  stdinCapture?: string[] | undefined
 }): { process: FakeChild } {
   const emitter = new EventEmitter() as FakeChild
-  emitter.stdin = new Writable({
-    write(_c, _e, cb) {
-      cb()
-    },
-  })
+  emitter.stdin = makeWritableStdin(opts.stdinCapture)
   emitter.stdout = Readable.from(opts.stdout ? [opts.stdout] : [])
   emitter.stderr = Readable.from(opts.stderr ? [opts.stderr] : [])
   const stdoutDone = !opts.stdout
@@ -205,20 +220,13 @@ describe.sequential('secrets/linux — readLinuxSync', () => {
 
 describe.sequential('secrets/linux — writeLinux', () => {
   test('resolves on status 0', async () => {
-    const stdinWrites: string[] = []
-    mockSpawn.mockImplementationOnce(() => {
-      const c = makeFakeChild({ exitCode: 0 })
-      // makeFakeChild returns { process: FakeChild }; override stdin on
-      // the wrapped emitter so the test captures the secret bytes written
-      // to the child rather than the no-op default.
-      c.process.stdin = new Writable({
-        write(chunk, _e, cb) {
-          stdinWrites.push(String(chunk))
-          cb()
-        },
-      })
-      return c
-    })
+    // `stdinCapture: writes` swaps the FakeChild's default no-op stdin
+    // for a sink that records every chunk — so the assertion below can
+    // check the source actually piped the secret value to secret-tool.
+    const writes: string[] = []
+    mockSpawn.mockImplementationOnce(() =>
+      makeFakeChild({ exitCode: 0, stdinCapture: writes }),
+    )
     const { writeLinux } = await loadFresh()
     // Traceable placeholders: service / account / value / label all carry
     // 'socket-lib unit test' lineage. The mock above intercepts before any
@@ -226,7 +234,7 @@ describe.sequential('secrets/linux — writeLinux', () => {
     await expect(
       writeLinux(TEST_SERVICE_WRITE, TEST_ACCOUNT, TEST_VALUE, TEST_LABEL),
     ).resolves.toBeUndefined()
-    expect(stdinWrites.join('')).toBe(TEST_VALUE)
+    expect(writes.join('')).toBe(TEST_VALUE)
   })
 
   test('passes --label=<label> and service/user attributes', async () => {
