@@ -13,7 +13,7 @@ import type { CoverageOptions } from 'vitest'
 import {
   baseFleetAggregateThresholds,
   baseFleetCoverageConfig,
-} from './vitest.coverage.fleet.config.mts'
+} from './fleet/vitest.coverage.fleet.config.mts'
 
 /**
  * Lib-specific src/ files excluded from coverage. Each entry needs a one-line
