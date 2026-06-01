@@ -8,7 +8,10 @@ import { SOCKET_THEME, THEMES } from './themes'
 import type { ThemeName } from './themes'
 
 import { SetCtor } from '../primordials/map-set'
-let _async_hooks: typeof import('node:async_hooks') | undefined
+
+import type * as AsyncHooks from 'node:async_hooks'
+
+let asyncHooks: typeof AsyncHooks | undefined
 
 /**
  * Theme change event listener signature.
@@ -32,12 +35,12 @@ export function emitThemeChange(theme: Theme): void {
  * @private
  */
 export function getAsyncHooks() {
-  if (_async_hooks === undefined) {
+  if (asyncHooks === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.
 
-    _async_hooks = /*@__PURE__*/ require('node:async_hooks')
+    asyncHooks = /*@__PURE__*/ require('node:async_hooks')
   }
-  return _async_hooks as typeof import('node:async_hooks')
+  return asyncHooks as typeof AsyncHooks
 }
 
 /**

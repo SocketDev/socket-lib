@@ -150,7 +150,7 @@ describe.sequential('cover/code', () => {
 
     it('runs vitest when coverage file is missing and generateIfMissing=true', async () => {
       const coveragePath = path.join(tmpDir, 'will-be-generated.json')
-      vi.mocked(spawn).mockImplementationOnce(((..._args: any[]) => {
+      vi.mocked(spawn).mockImplementationOnce((() => {
         // Simulate the vitest run creating the file.
         writeFileSync(coveragePath, JSON.stringify({}))
         const promise = Promise.resolve({
@@ -158,11 +158,11 @@ describe.sequential('cover/code', () => {
           signal: undefined,
           stdout: Buffer.from(''),
           stderr: Buffer.from(''),
-        }) as any
-        promise.process = undefined
-        promise.stdin = undefined
+        }) as unknown as Record<string, unknown>
+        promise['process'] = undefined
+        promise['stdin'] = undefined
         return promise
-      }) as any)
+      }) as unknown as typeof spawn)
       const result = await getCodeCoverage({
         coveragePath,
         generateIfMissing: true,

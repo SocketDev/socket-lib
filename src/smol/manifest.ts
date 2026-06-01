@@ -163,21 +163,21 @@ export interface SmolManifestBinding {
   ) => ManifestErrorLike
 }
 
-let _smolManifest: SmolManifestBinding | undefined
-let _smolManifestProbed = false
+let cachedSmolManifest: SmolManifestBinding | undefined
+let smolManifestProbed = false
 
 /**
  * Returns `node:smol-manifest` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  */
 export function getSmolManifest(): SmolManifestBinding | undefined {
-  if (!_smolManifestProbed) {
-    _smolManifestProbed = true
+  if (!smolManifestProbed) {
+    smolManifestProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-manifest')) {
-      _smolManifest = require('node:smol-manifest') as SmolManifestBinding
+      cachedSmolManifest = require('node:smol-manifest') as SmolManifestBinding
     }
     /* c8 ignore stop */
   }
-  return _smolManifest
+  return cachedSmolManifest
 }

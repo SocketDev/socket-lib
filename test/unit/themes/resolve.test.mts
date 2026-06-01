@@ -12,13 +12,16 @@
  */
 
 import {
-  RAINBOW_GRADIENT,
   createTheme,
   extendTheme,
   resolveColor,
   resolveShimmerColor,
 } from '../../../src/themes/resolve'
+import { RAINBOW_GRADIENT } from '@socketsecurity/lib-stable/themes/resolve'
 import { describe, expect, it } from 'vitest'
+
+import type { ColorValue } from '../../../src/colors/types'
+import type { ColorReference } from '../../../src/themes/types'
 
 const BASE_COLORS = {
   error: 'red' as const,
@@ -176,7 +179,7 @@ describe('themes/resolve', () => {
     })
 
     it('should handle arbitrary color names', () => {
-      const result = resolveColor('yellowBright' as any, {
+      const result = resolveColor('yellowBright' as ColorReference, {
         primary: 'blue' as const,
         secondary: 'green' as const,
         success: 'green' as const,
@@ -242,13 +245,18 @@ describe('themes/resolve', () => {
         [0, 255, 0],
         [0, 0, 255],
       ] as const
-      expect(resolveShimmerColor(gradient as any, baseTheme)).toEqual(gradient)
+      expect(
+        resolveShimmerColor(gradient as unknown as ColorValue[], baseTheme),
+      ).toEqual(gradient)
     })
 
     it('passes through single RGB tuples', () => {
-      expect(resolveShimmerColor([100, 150, 200] as any, baseTheme)).toEqual([
-        100, 150, 200,
-      ])
+      expect(
+        resolveShimmerColor(
+          [100, 150, 200] as unknown as ColorValue[],
+          baseTheme,
+        ),
+      ).toEqual([100, 150, 200])
     })
 
     it('resolves a primary keyword via the theme palette', () => {

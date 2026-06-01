@@ -26,6 +26,8 @@ import { enrichErrorMessage } from './errors'
 import { decodeBody } from './response-reader'
 import { getSocketCallerUserAgent } from './user-agent'
 
+import type { Readable } from 'node:stream'
+
 import type {
   HttpHookResponseInfo,
   HttpRequestOptions,
@@ -376,12 +378,12 @@ export async function httpRequestAttempt(
         // The error listener is cleaned up implicitly: on failure rejectOnce
         // destroys the stream, and on success the stream is fully consumed.
         // Both cases prevent further error events.
-        const stream = body as import('node:stream').Readable
-        stream.on('error', (err: Error) => {
+        const bodyStream = body as Readable
+        bodyStream.on('error', (err: Error) => {
           request.destroy()
           rejectOnce(err)
         })
-        stream.pipe(request)
+        bodyStream.pipe(request)
         return
       }
       // String or Buffer.

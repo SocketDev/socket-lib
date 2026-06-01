@@ -112,14 +112,14 @@ describe('eco/cargo/parse-lockfile', () => {
     })
 
     it('returns zero packages for empty content', () => {
-      const result = parseCargoLock('')
-      expect(result.packages).toEqual([])
+      const empty = parseCargoLock('')
+      expect(empty.packages).toEqual([])
     })
 
     it('ignores [metadata] and similar non-[[package]] sections', () => {
       const lock = `[metadata]\nfoo = "bar"\n\n[[package]]\nname = "x"\nversion = "1.0.0"\n`
-      const result = parseCargoLock(lock)
-      expect(result.packages.map(p => p.name)).toEqual(['x'])
+      const parsed = parseCargoLock(lock)
+      expect(parsed.packages.map(p => p.name)).toEqual(['x'])
     })
 
     it('ignores [[patch.unused]] table-of-arrays sections', () => {
@@ -127,8 +127,8 @@ describe('eco/cargo/parse-lockfile', () => {
       // effect. They share the table-array shape with `[[package]]` but
       // must NOT be treated as real deps.
       const lock = `[[package]]\nname = "real"\nversion = "1.0.0"\n\n[[patch.unused]]\nname = "shadow"\nversion = "2.0.0"\nsource = "registry+https://example.com"\n`
-      const result = parseCargoLock(lock)
-      expect(result.packages.map(p => p.name)).toEqual(['real'])
+      const parsed = parseCargoLock(lock)
+      expect(parsed.packages.map(p => p.name)).toEqual(['real'])
     })
 
     it('freezes the result and packages list', () => {

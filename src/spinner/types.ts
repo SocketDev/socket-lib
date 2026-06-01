@@ -13,6 +13,8 @@ import type {
   ShimmerConfig,
   ShimmerDirection,
 } from '../effects/shimmer'
+import type { ThemeName } from '../themes/themes'
+import type { Theme } from '../themes/types'
 
 /**
  * Progress tracking information for display in spinner. Used by `progress()`
@@ -312,10 +314,7 @@ export type SpinnerOptions = {
    *
    * @default Current theme from getTheme()
    */
-  readonly theme?:
-    | import('../themes/types').Theme
-    | import('../themes/themes').ThemeName
-    | undefined
+  readonly theme?: Theme | ThemeName | undefined
 }
 
 /**

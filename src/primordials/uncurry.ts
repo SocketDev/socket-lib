@@ -12,7 +12,7 @@
 
 import { getSmolUtil } from '../smol/detect'
 
-const _smolUtil = getSmolUtil()
+const smolUtil = getSmolUtil()
 
 // ─── uncurryThis ───────────────────────────────────────────────────────
 // Mirrors Node.js internal/per_context/primordials.js:
@@ -20,12 +20,12 @@ const _smolUtil = getSmolUtil()
 //   const uncurryThis = bind.bind(call)
 const { apply, bind, call } = Function.prototype
 export const uncurryThis =
-  _smolUtil?.uncurryThis ??
+  smolUtil?.uncurryThis ??
   (bind.bind(call) as <T, A extends readonly unknown[], R>(
     fn: (this: T, ...args: A) => R,
   ) => (self: T, ...args: A) => R)
 export const applyBind =
-  _smolUtil?.applyBind ??
+  smolUtil?.applyBind ??
   (bind.bind(apply) as <T, A extends readonly unknown[], R>(
     fn: (this: T, ...args: A) => R,
   ) => (self: T, args: A) => R)
@@ -36,13 +36,13 @@ export const applyBind =
 // inner call. Used by logger sinks, debug hooks, abort handlers — any
 // place where the callee is untrusted user code and the host doesn't
 // care whether it threw.
-const _applyBoundForSafe = applyBind
+const applyBoundForSafe = applyBind
 export const applySafe: <T, A extends readonly unknown[], R>(
   fn: (this: T, ...args: A) => R,
 ) => (self: T, args: A) => R | undefined =
-  _smolUtil?.applySafe ??
+  smolUtil?.applySafe ??
   (<T, A extends readonly unknown[], R>(fn: (this: T, ...args: A) => R) => {
-    const apply2 = _applyBoundForSafe(fn)
+    const apply2 = applyBoundForSafe(fn)
     return (self: T, args: A): R | undefined => {
       try {
         return apply2(self, args)
@@ -66,7 +66,7 @@ type BindCall = <
   thisArg: T,
   ...presetArgs: P
 ) => (...newArgs: A) => R
-const _bindCallFallback = ((
+const bindCallFallback = ((
   fn: (...a: unknown[]) => unknown,
   thisArg: unknown,
   ...presetArgs: unknown[]
@@ -75,7 +75,7 @@ const _bindCallFallback = ((
     thisArg,
     ...presetArgs,
   ])) as unknown as BindCall
-export const bindCall: BindCall = _smolUtil?.bindCall ?? _bindCallFallback
+export const bindCall: BindCall = smolUtil?.bindCall ?? bindCallFallback
 
 // ─── weakRefSafe ───────────────────────────────────────────────────────
 // `new WeakRef(target)` throws for non-Object, non-Symbol inputs. The
@@ -84,7 +84,7 @@ export const bindCall: BindCall = _smolUtil?.bindCall ?? _bindCallFallback
 export const weakRefSafe: <T extends object | symbol>(
   target: T,
 ) => WeakRef<T> | undefined =
-  _smolUtil?.weakRefSafe ??
+  smolUtil?.weakRefSafe ??
   (<T extends object | symbol>(target: T): WeakRef<T> | undefined => {
     try {
       return new WeakRef(target)

@@ -92,8 +92,8 @@ export interface SmolVirtualFileSystemBinding {
   getSmolVfs(): SmolVirtualFileSystem | undefined
 }
 
-let _smolVfs: SmolVirtualFileSystem | undefined
-let _smolVfsProbed = false
+let cachedSmolVfs: SmolVirtualFileSystem | undefined
+let smolVfsProbed = false
 
 /**
  * Returns the pre-mounted SEA `SmolVirtualFileSystem` instance when running on
@@ -105,14 +105,14 @@ let _smolVfsProbed = false
  * with two indirection levels.
  */
 export function getSmolVfs(): SmolVirtualFileSystem | undefined {
-  if (!_smolVfsProbed) {
-    _smolVfsProbed = true
+  if (!smolVfsProbed) {
+    smolVfsProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-vfs')) {
       const binding = require('node:smol-vfs') as SmolVirtualFileSystemBinding
-      _smolVfs = binding.getSmolVfs()
+      cachedSmolVfs = binding.getSmolVfs()
     }
     /* c8 ignore stop */
   }
-  return _smolVfs
+  return cachedSmolVfs
 }

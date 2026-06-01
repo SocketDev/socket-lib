@@ -5,10 +5,12 @@
  *
  *   - Stat-validated keys: a `stat()` call before serving a cache hit ensures the
  *     file hasn't changed (mtime + size mismatch ⇒ cache miss, re-read).
- *   - Defensive clone on hit: every hit returns `structuredClone(parsed)` so
- *     callers can mutate the returned object without poisoning the cache for
- *     the next reader. The clone cost is far less than re-read + re-parse for
- *     anything bigger than a trivial JSON document.
+ *   - Defensive clone on hit: every hit returns a JSON round-trip clone
+ *     (`JSON.parse(JSON.stringify(parsed))`) so callers can mutate the returned
+ *     object without poisoning the cache for the next reader. The clone cost is
+ *     far less than re-read + re-parse for anything bigger than a trivial JSON
+ *     document, and the round-trip is faster than `structuredClone` over the
+ *     JSON subset these values always belong to.
  *   - Reviver opt-out: when the caller passes a `reviver` function, we skip the
  *     cache. Function identity isn't safely hashable across boundaries, and the
  *     reviver can produce a different shape from the same bytes.
@@ -32,6 +34,7 @@ import process from 'node:process'
 
 import { DateNow } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'
+import { JSONParse, JSONStringify } from '../primordials/json'
 import { MapCtor } from '../primordials/map-set'
 import { NumberIsFinite, NumberParseInt } from '../primordials/number'
 
@@ -110,7 +113,7 @@ export function getCachedJson(
     return undefined
   }
   hits += 1
-  return structuredClone(entry.parsed)
+  return JSONParse(JSONStringify(entry.parsed)) as JsonValue
 }
 
 /**
@@ -186,7 +189,7 @@ export function setCachedJson(
     ino,
     size,
     mtimeMs,
-    parsed: structuredClone(parsed),
+    parsed: JSONParse(JSONStringify(parsed)) as JsonValue,
     insertedAt: DateNow(),
   })
 }

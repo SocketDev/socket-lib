@@ -11,7 +11,7 @@
  *   specifiers and required a post-pass).
  */
 
-import fs from 'node:fs'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -25,7 +25,7 @@ import type { RolldownOptions } from 'rolldown'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 const rootPkgJson = JSON.parse(
-  fs.readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
+  readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
 ) as { version: string }
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
@@ -55,8 +55,6 @@ for (let i = 0, { length } = entryFiles; i < length; i += 1) {
 const version = JSON.stringify(rootPkgJson.version)
 
 export const buildConfig: RolldownOptions = {
-  input,
-  platform: 'node',
   // bundle:false equivalent — keep each source file as its own module with
   // inter-file requires intact (verified: rolldown does not inline siblings
   // under preserveModules). The `src/external/*` tree is built separately into
@@ -67,29 +65,31 @@ export const buildConfig: RolldownOptions = {
   // this is exactly what esbuild's bundle:false avoided by treating every
   // import as external).
   external: (id: string) =>
-    /(?:^|[/\\])external[/\\]/.test(id) ||
+    /(?:[/\\]|^)external[/\\]/.test(id) ||
     (!id.startsWith('.') && !path.isAbsolute(id)),
+  input,
+  output: {
+    banner: '"use strict";\n/* Socket Lib - Built with rolldown */',
+    chunkFileNames: '[name].js',
+    dir: distPath,
+    entryFileNames: '[name].js',
+    format: 'cjs',
+    minify: false,
+    preserveModules: true,
+    preserveModulesRoot: srcPath,
+    sourcemap: envAsBoolean(process.env['COVERAGE']),
+  },
+  platform: 'node',
   // oxc define lives under `transform` (top-level `define` is rejected by
   // rolldown 1.0.2). Values are already-quoted source text, same contract as
   // esbuild's `define`. oxc normalizes the member-access shape, so the dotted
   // key matches both `process.env.X` and `process.env['X']` reads.
   transform: {
     define: {
+      'process.env.INLINED_LIB_VERSION': version,
       'process.env.NODE_ENV': JSON.stringify(
         process.env['NODE_ENV'] || 'production',
       ),
-      'process.env.INLINED_LIB_VERSION': version,
     },
-  },
-  output: {
-    dir: distPath,
-    format: 'cjs',
-    preserveModules: true,
-    preserveModulesRoot: srcPath,
-    minify: false,
-    sourcemap: envAsBoolean(process.env['COVERAGE']),
-    entryFileNames: '[name].js',
-    chunkFileNames: '[name].js',
-    banner: '"use strict";\n/* Socket Lib - Built with rolldown */',
   },
 }

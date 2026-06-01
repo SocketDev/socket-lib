@@ -14,8 +14,9 @@ import {
   MIT,
   UNLICENCED,
   UNLICENSED,
-  getCopyLeftLicenses,
-} from '../../../src/constants/licenses'
+} from '@socketsecurity/lib-stable/constants/licenses'
+
+import { getCopyLeftLicenses } from '../../../src/constants/licenses'
 
 describe('constants/licenses', () => {
   describe('license identifier constants', () => {

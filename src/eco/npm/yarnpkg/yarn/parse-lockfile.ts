@@ -22,7 +22,7 @@
  *      https://github.com/CycloneDX/cdxgen/blob/v11.11.0/lib/parsers/js.js
  *      (parseYarnLock)
  *   4. **yarn format docs**: classic (v1):
- *      https://github.com/yarnpkg/yarn/blob/master/src/lockfile/parse.js berry
+ *      https://github.com/yarnpkg/yarn/blob/v1.22.22/src/lockfile/parse.js berry
  *      (v2+): https://yarnpkg.com/configuration/yarnrc#lockfileVersion
  *      protocols: https://yarnpkg.com/protocol/ Bug fixes implemented here (and
  *      in the native parser):
@@ -348,10 +348,10 @@ export function valueAfterKey(line: string, keyLen: number): string {
   return StringPrototypeTrim(StringPrototypeSlice(line, keyLen))
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
-export const parseYarnLock: (content: string) => ParsedLockfile = _smol
+export const parseYarnLock: (content: string) => ParsedLockfile = smol
   ? /* c8 ignore next 2 - smol Node binary only. */
     (content: string) =>
-      _smol.parseLockfile(content, 'npm', 'yarn') as ParsedLockfile
+      smol.parseLockfile(content, 'npm', 'yarn') as ParsedLockfile
   : jsParseYarnLock

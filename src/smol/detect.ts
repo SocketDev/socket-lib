@@ -76,15 +76,15 @@ export interface SmolUtilBinding {
 /**
  * Cached smol-binary detection result.
  */
-let _isSmol: boolean | undefined
+let isSmolCache: boolean | undefined
 
 /**
  * Cached `node:smol-util` binding. `null` = probed and unavailable; `undefined`
  * = not yet probed. JS truthiness collapses both to "no binding" at the call
  * site.
  */
-let _smolUtil: SmolUtilBinding | undefined
-let _smolUtilProbed = false
+let smolUtilCache: SmolUtilBinding | undefined
+let smolUtilProbed = false
 
 // ─── exports (alphabetical) ────────────────────────────────────────────
 
@@ -93,15 +93,15 @@ let _smolUtilProbed = false
  * `undefined`. Result is cached across calls.
  */
 export function getSmolUtil(): SmolUtilBinding | undefined {
-  if (!_smolUtilProbed) {
-    _smolUtilProbed = true
+  if (!smolUtilProbed) {
+    smolUtilProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-util')) {
-      _smolUtil = require('node:smol-util') as SmolUtilBinding
+      smolUtilCache = require('node:smol-util') as SmolUtilBinding
     }
     /* c8 ignore stop */
   }
-  return _smolUtil
+  return smolUtilCache
 }
 
 /**
@@ -122,8 +122,8 @@ export function getSmolUtil(): SmolUtilBinding | undefined {
  *   ```
  */
 export function isSmol(): boolean {
-  if (_isSmol === undefined) {
-    _isSmol = isNodeBuiltin('node:smol-util')
+  if (isSmolCache === undefined) {
+    isSmolCache = isNodeBuiltin('node:smol-util')
   }
-  return _isSmol
+  return isSmolCache
 }

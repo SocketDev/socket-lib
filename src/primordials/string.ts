@@ -32,7 +32,7 @@ import { getSmolPrimordial } from '../smol/primordial'
 
 import { uncurryThis } from './uncurry'
 
-const _smolPrimordial = getSmolPrimordial()
+const smolPrimordial = getSmolPrimordial()
 
 export const StringCtor: StringConstructor = String
 
@@ -50,13 +50,13 @@ export const StringPrototypeCharAt = uncurryThis(String.prototype.charAt)
 // The fast path returns -1 for OOB indices (Fast API can't return
 // NaN from an int32 signature); the wrapper here translates -1 back
 // to NaN to match `String.prototype.charCodeAt` spec.
-const _smolCharCodeAt = _smolPrimordial?.stringCharCodeAt
-// _smolCharCodeAt fast-path fires only on socket-btm's smol Node binary.
-/* c8 ignore start */
+const smolCharCodeAt = smolPrimordial?.stringCharCodeAt
+// smolCharCodeAt fast-path fires only on socket-btm's smol Node binary.
+/* c8 ignore start - smol Node fast path unreachable on stock Node test runner */
 export const StringPrototypeCharCodeAt: (s: string, i: number) => number =
-  _smolCharCodeAt
+  smolCharCodeAt
     ? (s, i) => {
-        const code = _smolCharCodeAt(s, i)
+        const code = smolCharCodeAt(s, i)
         return code === -1 ? NaN : code
       }
     : uncurryThis(String.prototype.charCodeAt)
@@ -77,7 +77,7 @@ export const StringPrototypeIndexOf = uncurryThis(String.prototype.indexOf)
 // Routes through `node:smol-primordial` on the smol Node binary (ASCII
 // fast path returns true unconditionally without an O(n) scan).
 export const StringPrototypeIsWellFormed: (s: string) => boolean =
-  _smolPrimordial?.stringIsWellFormed ??
+  smolPrimordial?.stringIsWellFormed ??
   uncurryThis(String.prototype.isWellFormed)
 export const StringPrototypeLastIndexOf = uncurryThis(
   String.prototype.lastIndexOf,
@@ -105,14 +105,14 @@ export const StringPrototypeReplace = uncurryThis(
   String.prototype.replace as (
     this: string,
     searchValue: string | RegExp,
-    replaceValue: string | ((substring: string, ...args: any[]) => string),
+    replaceValue: string | ((substring: string, ...args: unknown[]) => string),
   ) => string,
 )
 export const StringPrototypeReplaceAll = uncurryThis(
   String.prototype.replaceAll as (
     this: string,
     searchValue: string | RegExp,
-    replaceValue: string | ((substring: string, ...args: any[]) => string),
+    replaceValue: string | ((substring: string, ...args: unknown[]) => string),
   ) => string,
 )
 export const StringPrototypeSearch = uncurryThis(String.prototype.search)

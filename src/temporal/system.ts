@@ -19,8 +19,8 @@ import { DateNow } from '../primordials/date'
 // Anchors captured at module load
 // ─────────────────────────────────────────────────────────────────
 //
-// The wallclock at `_anchorWallMs` corresponds to the monotonic
-// counter value `_anchorHrns`. Subsequent reads compute the elapsed
+// The wallclock at `anchorWallMs` corresponds to the monotonic
+// counter value `anchorHrns`. Subsequent reads compute the elapsed
 // monotonic nanoseconds and add them to the captured wallclock.
 //
 // Drift caveat: NTP adjustments after capture will not be reflected.
@@ -28,7 +28,7 @@ import { DateNow } from '../primordials/date'
 // is bounded by ±ppm × process-uptime — sub-second over weeks.
 // Acceptable.
 
-const _hrtimeBigint: (() => bigint) | undefined = (
+const hrtimeBigint: (() => bigint) | undefined = (
   globalThis as {
     process?:
       | { hrtime?: { bigint?: (() => bigint) | undefined } | undefined }
@@ -36,9 +36,9 @@ const _hrtimeBigint: (() => bigint) | undefined = (
   }
 ).process?.hrtime?.bigint
 
-const _anchorWallMs: bigint = BigIntCtor(DateNow())
-const _anchorHrns: bigint = _hrtimeBigint ? _hrtimeBigint() : 0n
-const _NS_PER_MS = 1_000_000n
+const anchorWallMs: bigint = BigIntCtor(DateNow())
+const anchorHrns: bigint = hrtimeBigint ? hrtimeBigint() : 0n
+const NS_PER_MS = 1_000_000n
 
 // ─────────────────────────────────────────────────────────────────
 // 21.x SystemUTCEpochNanoseconds ( )
@@ -65,13 +65,13 @@ const _NS_PER_MS = 1_000_000n
  */
 export function systemUTCEpochNanoseconds(): bigint {
   // Step 1.
-  if (_hrtimeBigint) {
-    const elapsedNs = _hrtimeBigint() - _anchorHrns
-    return _anchorWallMs * _NS_PER_MS + elapsedNs
+  if (hrtimeBigint) {
+    const elapsedNs = hrtimeBigint() - anchorHrns
+    return anchorWallMs * NS_PER_MS + elapsedNs
   }
   /* c8 ignore next - Non-Node runtime fallback; tests always run under Node
-     where _hrtimeBigint is bound from process.hrtime.bigint. */
-  return BigIntCtor(DateNow()) * _NS_PER_MS
+     where hrtimeBigint is bound from process.hrtime.bigint. */
+  return BigIntCtor(DateNow()) * NS_PER_MS
 
   // Step 2 is deferred to IsValidEpochNanoseconds upstream.
   // Step 3 is implicit — the return type is already BigInt (ℤ).

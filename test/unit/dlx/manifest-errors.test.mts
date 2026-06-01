@@ -6,10 +6,10 @@
  *   catch / cleanup paths.
  */
 
+import crypto from 'node:crypto'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { randomUUID } from 'node:crypto'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -18,9 +18,12 @@ import { DlxManifest } from '../../../src/dlx/manifest'
 import { readFileUtf8Sync } from '../../../src/fs/read-file'
 import { safeDelete, safeDeleteSync, safeMkdirSync } from '../../../src/fs/safe'
 
+import type * as nodeFs from 'node:fs'
+import type * as readFileModule from '../../../src/fs/read-file'
+import type * as safeModule from '../../../src/fs/safe'
+
 vi.mock(import('../../../src/fs/read-file'), async importOriginal => {
-  const original =
-    await importOriginal<typeof import('../../../src/fs/read-file')>()
+  const original = await importOriginal<typeof readFileModule>()
   return {
     ...original,
     readFileUtf8Sync: vi.fn(original.readFileUtf8Sync),
@@ -28,7 +31,7 @@ vi.mock(import('../../../src/fs/read-file'), async importOriginal => {
 })
 
 vi.mock(import('../../../src/fs/safe'), async importOriginal => {
-  const original = await importOriginal<typeof import('../../../src/fs/safe')>()
+  const original = await importOriginal<typeof safeModule>()
   return {
     ...original,
     safeDeleteSync: vi.fn(original.safeDeleteSync),
@@ -48,7 +51,7 @@ describe.sequential('dlx/manifest — error branches', () => {
   let manifest: DlxManifest
 
   beforeEach(() => {
-    testDir = path.join(os.tmpdir(), `socket-manifest-err-${randomUUID()}`)
+    testDir = path.join(os.tmpdir(), `socket-manifest-err-${crypto.randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
     manifestPath = path.join(testDir, '.dlx-manifest.json')
     manifest = new DlxManifest({ manifestPath })
@@ -171,9 +174,9 @@ describe.sequential('dlx/manifest — error branches', () => {
       // Seed a manifest so set() goes through writeManifest with a real temp.
       writeFileSync(manifestPath, '{}', 'utf8')
       // Patch fs.renameSync at runtime to throw, causing the outer catch.
-      const fsMod = require('node:fs') as typeof import('node:fs')
+      const fsMod = require('node:fs') as typeof nodeFs
       const originalRename = fsMod.renameSync
-      fsMod.renameSync = ((_src: string, _dest: string) => {
+      fsMod.renameSync = ((src: string, dest: string) => {
         throw makeFsError('EPERM')
       }) as typeof fsMod.renameSync
       try {
