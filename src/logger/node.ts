@@ -4,17 +4,22 @@
  *   delegators over sibling free-function leaves (per `socket-lib`'s
  *   export-top-level-functions rule). Console construction is lazy: the
  *   constructor stashes its args in `_internal.privateConstructorArgs` and the
- *   `node:console` instance is built on first `#getConsole()`, so the logger can
- *   be imported during early Node.js bootstrap before stdout is ready
- *   (avoiding `ERR_CONSOLE_WRITABLE_STREAM`). Method bodies live in the leaves:
+ *   `node:console` instance is built on first `#getConsole()`, so the logger
+ *   can be imported during early Node.js bootstrap before stdout is ready
+ *   (avoiding `ERR_CONSOLE_WRITABLE_STREAM`). Method bodies live in the
+ *   leaves:
  *
- *   - console mirrors (`assert`, `dir`, `table`, `time*`, ...) — `./console-methods`
- *   - symbol-prefixed semantic methods + indented `applyMethod` — `./semantic-methods`
+ *   - console mirrors (`assert`, `dir`, `table`, `time*`, ...) —
+ *     `./console-methods`
+ *   - symbol-prefixed semantic methods + indented `applyMethod` —
+ *     `./semantic-methods`
  *   - indentation domain (`indent`, `group`, ...) — `./indentation-methods`
- *   - raw-stream methods (`clearLine`, `progress`, `write`, ...) — `./stream-methods`
+ *   - raw-stream methods (`clearLine`, `progress`, `write`, ...) —
+ *     `./stream-methods`
  *   - lazy console resolve + prototype mirror — `./console`
  *   - constructor options parsing — `./options`
- *   - log symbols — `./symbols` / `./symbols-builder`; shared state — `./_internal`
+ *   - log symbols — `./symbols` / `./symbols-builder`; shared state —
+ *     `./_internal`
  */
 
 import { ReflectApply } from '../primordials/reflect'
@@ -67,7 +72,9 @@ import type { Theme } from '../themes/types'
  * management.
  */
 export class Logger {
-  /** Static reference to log symbols for convenience. */
+  /**
+   * Static reference to log symbols for convenience.
+   */
   static LOG_SYMBOLS = LOG_SYMBOLS
 
   #parent?: Logger | undefined
@@ -103,8 +110,8 @@ export class Logger {
   }
 
   /**
-   * Resolve the target stream + indent, then delegate to {@link applyMethod}
-   * for an indented `node:console` write. Backs `log` / `error`.
+   * Resolve the target stream + indent, then delegate to {@link applyMethod} for
+   * an indented `node:console` write. Backs `log` / `error`.
    */
   #apply(
     methodName: string,
@@ -122,18 +129,24 @@ export class Logger {
     )
   }
 
-  /** Resolve this logger's lazily-built Console. See {@link resolveConsole}. */
+  /**
+   * Resolve this logger's lazily-built Console. See {@link resolveConsole}.
+   */
   #getConsole(): typeof console & Record<string, unknown> {
     return resolveConsole(this)
   }
 
-  /** Read the indentation prefix for a stream (from the root logger). */
+  /**
+   * Read the indentation prefix for a stream (from the root logger).
+   */
   #getIndent(stream: 'stderr' | 'stdout'): string {
     const root = this.#getRoot()
     return stream === 'stderr' ? root.#stderrIndention : root.#stdoutIndention
   }
 
-  /** Read the last-was-blank flag for a stream (from the root logger). */
+  /**
+   * Read the last-was-blank flag for a stream (from the root logger).
+   */
   #getLastWasBlank(stream: 'stderr' | 'stdout'): boolean {
     const root = this.#getRoot()
     return stream === 'stderr'
@@ -141,22 +154,30 @@ export class Logger {
       : root.#stdoutLastWasBlank
   }
 
-  /** The root logger that owns the shared indentation / blank-line state. */
+  /**
+   * The root logger that owns the shared indentation / blank-line state.
+   */
   #getRoot(): Logger {
     return this.#parent || this
   }
 
-  /** Build this logger's `LogSymbols` map from its resolved theme. */
+  /**
+   * Build this logger's `LogSymbols` map from its resolved theme.
+   */
   #getSymbols(): LogSymbols {
     return buildLoggerSymbols(this.#getTheme())
   }
 
-  /** The stream this logger writes to (`stderr` unless stdout-bound). */
+  /**
+   * The stream this logger writes to (`stderr` unless stdout-bound).
+   */
   #getTargetStream(): 'stderr' | 'stdout' {
     return this.#boundStream || 'stderr'
   }
 
-  /** The instance theme if set, else the context theme. */
+  /**
+   * The instance theme if set, else the context theme.
+   */
   #getTheme(): Theme {
     return this.#theme ?? getTheme()
   }
@@ -175,7 +196,9 @@ export class Logger {
     }
   }
 
-  /** Write the indentation prefix for a stream (on the root logger). */
+  /**
+   * Write the indentation prefix for a stream (on the root logger).
+   */
   #setIndent(stream: 'stderr' | 'stdout', value: string): void {
     const root = this.#getRoot()
     if (stream === 'stderr') {
@@ -185,7 +208,9 @@ export class Logger {
     }
   }
 
-  /** Write the last-was-blank flag for a stream (on the root logger). */
+  /**
+   * Write the last-was-blank flag for a stream (on the root logger).
+   */
   #setLastWasBlank(stream: 'stderr' | 'stdout', value: boolean): void {
     const root = this.#getRoot()
     if (stream === 'stderr') {
@@ -228,7 +253,10 @@ export class Logger {
     )
   }
 
-  /** A cached logger bound exclusively to stderr (separate indentation from stdout). */
+  /**
+   * A cached logger bound exclusively to stderr (separate indentation from
+   * stdout).
+   */
   get stderr(): Logger {
     if (!this.#stderrLogger) {
       this.#stderrLogger = this.#streamChild('stderr')
@@ -236,7 +264,10 @@ export class Logger {
     return this.#stderrLogger
   }
 
-  /** A cached logger bound exclusively to stdout (separate indentation from stderr). */
+  /**
+   * A cached logger bound exclusively to stdout (separate indentation from
+   * stderr).
+   */
   get stdout(): Logger {
     if (!this.#stdoutLogger) {
       this.#stdoutLogger = this.#streamChild('stdout')
@@ -244,7 +275,9 @@ export class Logger {
     return this.#stdoutLogger
   }
 
-  /** The total number of log calls made on this logger instance. */
+  /**
+   * The total number of log calls made on this logger instance.
+   */
   get logCallCount() {
     const root = this.#getRoot()
     return root.#logCallCount
@@ -277,12 +310,18 @@ export class Logger {
     return this
   }
 
-  /** Logs an assertion failure message if the value is falsy. See {@link assertMethod}. */
+  /**
+   * Logs an assertion failure message if the value is falsy. See
+   * {@link assertMethod}.
+   */
   assert(value: unknown, ...message: unknown[]): this {
     return assertMethod(this, this.#getConsole(), value, message)
   }
 
-  /** Clears the current terminal line on the target stream. See {@link clearLineMethod}. */
+  /**
+   * Clears the current terminal line on the target stream. See
+   * {@link clearLineMethod}.
+   */
   clearLine(): this {
     return clearLineMethod(this, this.#getConsole(), this.#getTargetStream())
   }
@@ -302,7 +341,9 @@ export class Logger {
     )
   }
 
-  /** Increments and logs a counter for the given label. See {@link countMethod}. */
+  /**
+   * Increments and logs a counter for the given label. See {@link countMethod}.
+   */
   count(label?: string | undefined): this {
     return countMethod(this, this.#getConsole(), label)
   }
@@ -312,6 +353,7 @@ export class Logger {
    * the provided function and "Completed task: {name}" after.
    *
    * @param name - The name of the task.
+   *
    * @returns A task object with a `run()` method.
    */
   createTask(name: string): Task {
@@ -325,17 +367,24 @@ export class Logger {
     }
   }
 
-  /** Decreases the indentation level by `spaces` (default 2). See {@link dedentMethod}. */
+  /**
+   * Decreases the indentation level by `spaces` (default 2). See
+   * {@link dedentMethod}.
+   */
   dedent(spaces = 2) {
     return dedentMethod(this, this.#indentCtx(), spaces)
   }
 
-  /** Displays an object's properties in a formatted way. See {@link dirMethod}. */
+  /**
+   * Displays an object's properties in a formatted way. See {@link dirMethod}.
+   */
   dir(obj: unknown, options?: unknown | undefined): this {
     return dirMethod(this, this.#getConsole(), obj, options)
   }
 
-  /** Displays data as XML/HTML in a formatted way. See {@link dirxmlMethod}. */
+  /**
+   * Displays data as XML/HTML in a formatted way. See {@link dirxmlMethod}.
+   */
   dirxml(...data: unknown[]): this {
     return dirxmlMethod(this, this.#getConsole(), data)
   }
@@ -348,60 +397,88 @@ export class Logger {
     return this.#symbol('success', args)
   }
 
-  /** Logs an error message to stderr with current indentation, like `console.error()`. */
+  /**
+   * Logs an error message to stderr with current indentation, like
+   * `console.error()`.
+   */
   error(...args: unknown[]): this {
     return this.#apply('error', args)
   }
 
-  /** Logs a newline to stderr unless the last line was already blank. */
+  /**
+   * Logs a newline to stderr unless the last line was already blank.
+   */
   errorNewline() {
     return this.#getLastWasBlank('stderr') ? this : this.error('')
   }
 
-  /** Logs a failure message with the red `LOG_SYMBOLS.fail` symbol to stderr. See {@link symbolApplyMethod}. */
+  /**
+   * Logs a failure message with the red `LOG_SYMBOLS.fail` symbol to stderr.
+   * See {@link symbolApplyMethod}.
+   */
   fail(...args: unknown[]): this {
     return this.#symbol('fail', args)
   }
 
-  /** Starts a new indented log group, logging an optional `label` first. See {@link groupMethod}. */
+  /**
+   * Starts a new indented log group, logging an optional `label` first. See
+   * {@link groupMethod}.
+   */
   group(...label: unknown[]): this {
     return groupMethod(this, label)
   }
 
   /**
    * Starts a new collapsed log group; in Node.js identical to `group()`.
-   * https://nodejs.org/api/console.html#consolegroupcollapsed
+   * https://nodejs.org/api/console.html#consolegroupcollapsed.
    */
   groupCollapsed(...label: unknown[]): this {
     return ReflectApply(this.group, this, label)
   }
 
-  /** Ends the current log group and decreases indentation. See {@link groupEndMethod}. */
+  /**
+   * Ends the current log group and decreases indentation. See
+   * {@link groupEndMethod}.
+   */
   groupEnd() {
     return groupEndMethod(this)
   }
 
-  /** Increases the indentation level by `spaces` (default 2, capped at 1000). See {@link indentMethod}. */
+  /**
+   * Increases the indentation level by `spaces` (default 2, capped at 1000).
+   * See {@link indentMethod}.
+   */
   indent(spaces = 2) {
     return indentMethod(this, this.#indentCtx(), spaces)
   }
 
-  /** Logs an info message with the blue `LOG_SYMBOLS.info` symbol to stderr. See {@link symbolApplyMethod}. */
+  /**
+   * Logs an info message with the blue `LOG_SYMBOLS.info` symbol to stderr. See
+   * {@link symbolApplyMethod}.
+   */
   info(...args: unknown[]): this {
     return this.#symbol('info', args)
   }
 
-  /** Logs a message to stdout with current indentation, like `console.log()`. The primary output method. */
+  /**
+   * Logs a message to stdout with current indentation, like `console.log()`.
+   * The primary output method.
+   */
   log(...args: unknown[]): this {
     return this.#apply('log', args)
   }
 
-  /** Logs a newline to stdout unless the last line was already blank. */
+  /**
+   * Logs a newline to stdout unless the last line was already blank.
+   */
   logNewline() {
     return this.#getLastWasBlank('stdout') ? this : this.log('')
   }
 
-  /** Shows a `∴`-prefixed progress indicator, clearable with `clearLine()`. See {@link progressMethod}. */
+  /**
+   * Shows a `∴`-prefixed progress indicator, clearable with `clearLine()`. See
+   * {@link progressMethod}.
+   */
   progress(text: string): this {
     return progressMethod(
       this,
@@ -412,12 +489,18 @@ export class Logger {
     )
   }
 
-  /** Resets all indentation to zero (both streams on the root; the bound stream otherwise). See {@link resetIndentMethod}. */
+  /**
+   * Resets all indentation to zero (both streams on the root; the bound stream
+   * otherwise). See {@link resetIndentMethod}.
+   */
   resetIndent() {
     return resetIndentMethod(this, this.#indentCtx())
   }
 
-  /** Logs a skip message with the cyan `LOG_SYMBOLS.skip` (↻) symbol to stderr. See {@link symbolApplyMethod}. */
+  /**
+   * Logs a skip message with the cyan `LOG_SYMBOLS.skip` (↻) symbol to stderr.
+   * See {@link symbolApplyMethod}.
+   */
   skip(...args: unknown[]): this {
     return this.#symbol('skip', args)
   }
@@ -442,17 +525,25 @@ export class Logger {
     )
   }
 
-  /** Logs a stateless substep: a 2-space-indented line that doesn't change indentation state. */
+  /**
+   * Logs a stateless substep: a 2-space-indented line that doesn't change
+   * indentation state.
+   */
   substep(msg: string, ...extras: unknown[]): this {
     return this.log(`  ${msg}`, ...extras)
   }
 
-  /** Logs a success message with the green `LOG_SYMBOLS.success` (✔) symbol to stderr. See {@link symbolApplyMethod}. */
+  /**
+   * Logs a success message with the green `LOG_SYMBOLS.success` (✔) symbol to
+   * stderr. See {@link symbolApplyMethod}.
+   */
   success(...args: unknown[]): this {
     return this.#symbol('success', args)
   }
 
-  /** Displays data in a table format. See {@link tableMethod}. */
+  /**
+   * Displays data in a table format. See {@link tableMethod}.
+   */
   table(
     tabularData: unknown,
     properties?: readonly string[] | undefined,
@@ -460,32 +551,47 @@ export class Logger {
     return tableMethod(this, this.#getConsole(), tabularData, properties)
   }
 
-  /** Starts a timer for measuring elapsed time. See {@link timeMethod}. */
+  /**
+   * Starts a timer for measuring elapsed time. See {@link timeMethod}.
+   */
   time(label?: string | undefined): this {
     return timeMethod(this, this.#getConsole(), label)
   }
 
-  /** Ends a timer and logs the elapsed time. See {@link timeEndMethod}. */
+  /**
+   * Ends a timer and logs the elapsed time. See {@link timeEndMethod}.
+   */
   timeEnd(label?: string | undefined): this {
     return timeEndMethod(this, this.#getConsole(), label)
   }
 
-  /** Logs the current value of a timer without stopping it. See {@link timeLogMethod}. */
+  /**
+   * Logs the current value of a timer without stopping it. See
+   * {@link timeLogMethod}.
+   */
   timeLog(label?: string | undefined, ...data: unknown[]): this {
     return timeLogMethod(this, this.#getConsole(), label, data)
   }
 
-  /** Logs a stack trace to the console. See {@link traceMethod}. */
+  /**
+   * Logs a stack trace to the console. See {@link traceMethod}.
+   */
   trace(message?: unknown | undefined, ...args: unknown[]): this {
     return traceMethod(this, this.#getConsole(), message, args)
   }
 
-  /** Logs a warning message with the yellow `LOG_SYMBOLS.warn` (⚠) symbol to stderr. See {@link symbolApplyMethod}. */
+  /**
+   * Logs a warning message with the yellow `LOG_SYMBOLS.warn` (⚠) symbol to
+   * stderr. See {@link symbolApplyMethod}.
+   */
   warn(...args: unknown[]): this {
     return this.#symbol('warn', args)
   }
 
-  /** Writes text directly to stdout, no newline or indentation, bypassing Console formatting. See {@link writeMethod}. */
+  /**
+   * Writes text directly to stdout, no newline or indentation, bypassing
+   * Console formatting. See {@link writeMethod}.
+   */
   write(text: string): this {
     return writeMethod(
       this,

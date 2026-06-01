@@ -8,11 +8,10 @@
  *   - Error handling: non-existent paths, permission errors, invalid JSON
  *   - Binary file operations: non-UTF8 content, Buffer handling
  *   - File read/write/json option handling
- *   - Sync vs async consistency: validates both APIs behave identically
- *
- *   Uses runWithTempDir for isolated test environments to avoid filesystem
- *   pollution. Directory, delete, and path-inspection coverage lives in the
- *   companion file additional-dir-delete.test.mts.
+ *   - Sync vs async consistency: validates both APIs behave identically Uses
+ *     runWithTempDir for isolated test environments to avoid filesystem
+ *     pollution. Directory, delete, and path-inspection coverage lives in the
+ *     companion file additional-dir-delete.test.mts.
  */
 
 import { promises as fs } from 'node:fs'

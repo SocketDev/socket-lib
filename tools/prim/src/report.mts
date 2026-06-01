@@ -1,9 +1,9 @@
 /**
  * @file `prim` CLI output reporters. Each command (`audit`, `lint`, `mod`)
  *   funnels its results through one of these functions, which emit either
- *   machine-readable JSON (when `--json` is set) or human-readable text.
- *   Kept separate from the argument-parsing entry point in `cli.mts` so the
- *   command dispatch and the presentation layer stay independently testable.
+ *   machine-readable JSON (when `--json` is set) or human-readable text. Kept
+ *   separate from the argument-parsing entry point in `cli.mts` so the command
+ *   dispatch and the presentation layer stay independently testable.
  */
 
 import { readFileSync } from 'node:fs'

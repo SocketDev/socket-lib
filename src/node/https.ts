@@ -9,5 +9,6 @@ import type * as NodeHttps from 'node:https'
 let cachedHttps: typeof NodeHttps | undefined
 
 export function getNodeHttps(): typeof NodeHttps {
-  return (cachedHttps ??= /*@__PURE__*/ require('node:https') as typeof NodeHttps)
+  return (cachedHttps ??=
+    /*@__PURE__*/ require('node:https') as typeof NodeHttps)
 }

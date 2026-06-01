@@ -460,4 +460,3 @@ export function isSplitPrimordials(localPrimordialsPath: string): boolean {
     return false
   }
 }
-

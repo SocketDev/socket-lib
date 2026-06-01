@@ -27,7 +27,10 @@ describe.sequential('dlx/package — pure functions', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = path.join(os.tmpdir(), `socket-lib-dlx-pure-${crypto.randomUUID()}`)
+    testDir = path.join(
+      os.tmpdir(),
+      `socket-lib-dlx-pure-${crypto.randomUUID()}`,
+    )
     mkdirSync(testDir, { recursive: true })
   })
 

@@ -51,7 +51,10 @@ describe.sequential('dlx/manifest — error branches', () => {
   let manifest: DlxManifest
 
   beforeEach(() => {
-    testDir = path.join(os.tmpdir(), `socket-manifest-err-${crypto.randomUUID()}`)
+    testDir = path.join(
+      os.tmpdir(),
+      `socket-manifest-err-${crypto.randomUUID()}`,
+    )
     mkdirSync(testDir, { recursive: true })
     manifestPath = path.join(testDir, '.dlx-manifest.json')
     manifest = new DlxManifest({ manifestPath })

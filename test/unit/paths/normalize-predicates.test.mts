@@ -9,11 +9,9 @@
  *   - splitPath() splits paths into segments
  *   - trimLeadingDotSlash() removes ./ prefix
  *   - pathLikeToString() converts Buffer/URL to string
- *   - relativeResolve() resolves relative paths
- *
- *   Conversion utilities (normalizePath/toUnixPath/fromUnixPath) live in
- *   normalize.test.mts. Used throughout Socket tools for cross-platform path
- *   handling.
+ *   - relativeResolve() resolves relative paths Conversion utilities
+ *     (normalizePath/toUnixPath/fromUnixPath) live in normalize.test.mts. Used
+ *     throughout Socket tools for cross-platform path handling.
  */
 
 import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'

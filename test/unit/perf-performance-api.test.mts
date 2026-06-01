@@ -4,10 +4,9 @@
  *
  *   - performance.now() provides monotonic timestamps in milliseconds
  *   - Validates timing accuracy for elapsed time measurements
- *   - Ensures compatibility with Node.js performance hooks
- *
- *   The perf utilities themselves (perfTimer, measure, metrics, report) are
- *   covered in perf.test.mts.
+ *   - Ensures compatibility with Node.js performance hooks The perf utilities
+ *     themselves (perfTimer, measure, metrics, report) are covered in
+ *     perf.test.mts.
  */
 
 import { describe, expect, it } from 'vitest'

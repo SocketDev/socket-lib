@@ -1,13 +1,13 @@
 /**
- * @file Unit tests for the brotli compression helpers. Covers all three
- *   calling shapes:
+ * @file Unit tests for the brotli compression helpers. Covers all three calling
+ *   shapes:
  *
  *   1. In-memory (Buffer/string round-trip)
  *   2. File-to-file (stream pipeline)
- *   3. Raw transform stream (composition) Plus brotli detection (magic
- *      bytes, filename extensions), the replace-in-place wrappers, and
- *      resolveBrotliOptions. The gzip counterparts and the shared
- *      cross-format / stripExt coverage live in compression-gzip.test.mts.
+ *   3. Raw transform stream (composition) Plus brotli detection (magic bytes,
+ *      filename extensions), the replace-in-place wrappers, and
+ *      resolveBrotliOptions. The gzip counterparts and the shared cross-format
+ *      / stripExt coverage live in compression-gzip.test.mts.
  */
 
 import { Buffer } from 'node:buffer'
@@ -34,7 +34,11 @@ import {
 } from '../../src/compression/brotli'
 import { compressGzip } from '../../src/compression/gzip'
 import { safeDelete } from '../../src/fs/safe'
-import { LARGE_TEXT, SMALL_TEXT, streamToBuffer } from './compression-fixtures.mts'
+import {
+  LARGE_TEXT,
+  SMALL_TEXT,
+  streamToBuffer,
+} from './compression-fixtures.mts'
 
 let tmpDir: string
 

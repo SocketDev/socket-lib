@@ -8,17 +8,12 @@
  *   - isDlxPackageInstalled(), listDlxPackages() package management
  *   - removeDlxPackage(), removeDlxPackageSync() package removal
  *   - generateCacheKey() creates unique cache keys for packages Used by Socket
- *     CLI for pnpm dlx / npx-style package execution.
- *
- *   The pure path-resolution tests live in paths.test.mts.
+ *     CLI for pnpm dlx / npx-style package execution. The pure path-resolution
+ *     tests live in paths.test.mts.
  */
 
 import crypto from 'node:crypto'
-import {
-  existsSync,
-  mkdirSync,
-  promises as fsPromises,
-} from 'node:fs'
+import { existsSync, mkdirSync, promises as fsPromises } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -55,7 +50,10 @@ describe.sequential('dlx', () => {
   beforeEach(async () => {
     // Save original env and create isolated test directory
     originalEnv = process.env['SOCKET_DLX_DIR']
-    testDlxDir = path.join(os.tmpdir(), `socket-dlx-test-${crypto.randomUUID()}`)
+    testDlxDir = path.join(
+      os.tmpdir(),
+      `socket-dlx-test-${crypto.randomUUID()}`,
+    )
     process.env['SOCKET_DLX_DIR'] = testDlxDir
 
     // Clean up any existing test artifacts

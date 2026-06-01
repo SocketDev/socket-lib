@@ -1,6 +1,6 @@
 /**
- * @file Tests for pnpm-specific flag and command detection helpers.
- *   Covers isPnpmIgnoreScriptsFlag(), isPnpmFrozenLockfileFlag(),
+ * @file Tests for pnpm-specific flag and command detection helpers. Covers
+ *   isPnpmIgnoreScriptsFlag(), isPnpmFrozenLockfileFlag(),
  *   isPnpmInstallCommand(), and isPnpmLoglevelFlag(). The loglevel helper is
  *   expected to behave identically to npm's; the npm oracle in that comparison
  *   comes from the published `-stable` snapshot so the test can't validate

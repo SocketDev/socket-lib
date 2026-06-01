@@ -24,10 +24,9 @@ vi.mock(import('../../../src/process/lock-instance'), () => ({
   },
 }))
 vi.mock(import('../../../src/dlx/binary-cache'), async () => {
-  const actual =
-    await vi.importActual<typeof BinaryCacheModule>(
-      '../../../src/dlx/binary-cache',
-    )
+  const actual = await vi.importActual<typeof BinaryCacheModule>(
+    '../../../src/dlx/binary-cache',
+  )
   return { ...actual, getDlxCachePath: vi.fn() }
 })
 
@@ -229,8 +228,9 @@ describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
   async function loadWithMkdirError(code: string | undefined) {
     vi.resetModules()
     vi.doMock(import('../../../src/fs/safe'), async () => {
-      const actual =
-        await vi.importActual<typeof FsSafeModule>('../../../src/fs/safe')
+      const actual = await vi.importActual<typeof FsSafeModule>(
+        '../../../src/fs/safe',
+      )
       const err = new Error(code ?? 'generic')
       if (code) {
         Object.assign(err, { code })

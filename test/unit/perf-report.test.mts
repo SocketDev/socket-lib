@@ -4,12 +4,10 @@
  *   - Summaries (getPerformanceSummary, printPerformanceSummary)
  *   - Checkpoints and memory tracking (perfCheckpoint, trackMemory)
  *   - Report generation (generatePerformanceReport)
- *   - End-to-end integration scenarios
- *
- *   The timer and metrics-collection primitives (perfTimer, measure,
- *   measureSync, getPerformanceMetrics, clearPerformanceMetrics) are covered in
- *   perf.test.mts. The raw Performance API is covered in
- *   perf-performance-api.test.mts.
+ *   - End-to-end integration scenarios The timer and metrics-collection
+ *     primitives (perfTimer, measure, measureSync, getPerformanceMetrics,
+ *     clearPerformanceMetrics) are covered in perf.test.mts. The raw
+ *     Performance API is covered in perf-performance-api.test.mts.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'

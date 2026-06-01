@@ -37,15 +37,15 @@ export function buildLineStarts(src) {
 }
 
 /**
- * Recognize esbuild's CJS-output boilerplate — the helper-variable
- * assignments at the top of every esbuild-bundled file: var __defProp =
+ * Recognize esbuild's CJS-output boilerplate — the helper-variable assignments
+ * at the top of every esbuild-bundled file: var __defProp =
  * Object.defineProperty; var __getOwnPropDesc =
  * Object.getOwnPropertyDescriptor; var __getOwnPropNames =
  * Object.getOwnPropertyNames; var __hasOwnProp =
  * Object.prototype.hasOwnProperty;
  *
- * These are machine-generated bundler plumbing, not user code. The tell is
- * that they're being assigned to a `__`-prefixed identifier inside a
+ * These are machine-generated bundler plumbing, not user code. The tell is that
+ * they're being assigned to a `__`-prefixed identifier inside a
  * `VariableDeclarator`. The helpers themselves use those locals, not the
  * original `Object.X` references — flagging the assignment is misleading
  * because there's nothing to migrate.
@@ -125,8 +125,8 @@ export function isExportsInteropGlue(node) {
 }
 
 /**
- * Recognize the safe `Object.prototype.hasOwnProperty.call(target, key)`
- * idiom — that's already-correct hardening, not a migration target.
+ * Recognize the safe `Object.prototype.hasOwnProperty.call(target, key)` idiom
+ * — that's already-correct hardening, not a migration target.
  *
  * Pattern: `Object.prototype.<method>.call(...)` where `<method>` is a method
  * on `Object.prototype` (`hasOwnProperty`, `propertyIsEnumerable`,

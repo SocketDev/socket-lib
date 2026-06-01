@@ -17,10 +17,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
 import { safeDelete } from '../../../src/fs/safe'
-import {
-  startDlxTestServer,
-  stopDlxTestServer,
-} from './binary-test-server.mts'
+import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'
 
 import type { DlxTestServer } from './binary-test-server.mts'
 

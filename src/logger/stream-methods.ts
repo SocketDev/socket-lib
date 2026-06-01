@@ -2,11 +2,12 @@
  * @file Free-function bodies for the `Logger` methods that write to or clear a
  *   raw stream rather than going through the indented `#apply` path
  *   (`clearLine`, `clearVisible`, `progress`, `write`). Each takes the calling
- *   logger plus the already-resolved `node:console` instance and whatever stream
- *   / symbol state it needs, then updates the shared blank-line / call-count
- *   tracking via the exported logger symbols. Pulling these out of `./node`
- *   keeps the `Logger` class body under the file-size cap; the class retains
- *   one-line delegators that resolve the arguments from its private state.
+ *   logger plus the already-resolved `node:console` instance and whatever
+ *   stream / symbol state it needs, then updates the shared blank-line /
+ *   call-count tracking via the exported logger symbols. Pulling these out of
+ *   `./node` keeps the `Logger` class body under the file-size cap; the class
+ *   retains one-line delegators that resolve the arguments from its private
+ *   state.
  */
 
 import { ErrorCtor } from '../primordials/error'

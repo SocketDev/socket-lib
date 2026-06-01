@@ -1,8 +1,8 @@
 /**
  * @file Unit tests for the gzip compression helpers plus the shared
- *   cross-format coverage (stripExt, cross-format negative cases). The
- *   brotli counterparts live in compression.test.mts; shared fixtures
- *   live in compression-fixtures.mts.
+ *   cross-format coverage (stripExt, cross-format negative cases). The brotli
+ *   counterparts live in compression.test.mts; shared fixtures live in
+ *   compression-fixtures.mts.
  */
 
 import { Buffer } from 'node:buffer'
@@ -28,7 +28,11 @@ import {
 import { BROTLI_EXTS, compressBrotli } from '../../src/compression/brotli'
 import { stripExt } from '../../src/compression/_internal'
 import { safeDelete } from '../../src/fs/safe'
-import { LARGE_TEXT, SMALL_TEXT, streamToBuffer } from './compression-fixtures.mts'
+import {
+  LARGE_TEXT,
+  SMALL_TEXT,
+  streamToBuffer,
+} from './compression-fixtures.mts'
 
 let tmpDir: string
 

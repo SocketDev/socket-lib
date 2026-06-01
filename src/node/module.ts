@@ -9,9 +9,8 @@ import type * as NodeModule from 'node:module'
 let cachedModule: typeof NodeModule | undefined
 
 export function getNodeModule(): typeof NodeModule {
-  return (cachedModule ??= /*@__PURE__*/ require(
-    'node:module',
-  ) as typeof NodeModule)
+  return (cachedModule ??=
+    /*@__PURE__*/ require('node:module') as typeof NodeModule)
 }
 
 /**

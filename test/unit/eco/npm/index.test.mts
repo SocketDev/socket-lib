@@ -1,13 +1,12 @@
 /**
- * @file Tests for npm-specific flag detection helpers.
- *   Covers the isNpm*Flag() predicates used by Socket CLI to filter npm flags:
+ * @file Tests for npm-specific flag detection helpers. Covers the isNpm*Flag()
+ *   predicates used by Socket CLI to filter npm flags:
  *
  *   - isNpmAuditFlag(), isNpmFundFlag(), isNpmProgressFlag()
- *   - isNpmLoglevelFlag(), isNpmNodeOptionsFlag()
- *
- *   Includes edge-case coverage for case sensitivity, boundary inputs,
- *   whitespace, and special characters. pnpm flag helpers live in
- *   pnpm-flags.test.mts; execution wrappers live in exec.test.mts.
+ *   - isNpmLoglevelFlag(), isNpmNodeOptionsFlag() Includes edge-case coverage for
+ *     case sensitivity, boundary inputs, whitespace, and special characters.
+ *     pnpm flag helpers live in pnpm-flags.test.mts; execution wrappers live in
+ *     exec.test.mts.
  */
 
 import { describe, expect, it } from 'vitest'

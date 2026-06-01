@@ -1,9 +1,9 @@
 /**
- * @file Integration tests for package manager execution wrappers.
- *   Exercises execNpm(), execPnpm(), execYarn(), and execScript() against the
- *   real spawn path. Full command execution can't run here, so these assert the
- *   observable contract: each wrapper returns a Promise and accepts the
- *   documented argument shapes (terminator splitting, loglevel preservation,
+ * @file Integration tests for package manager execution wrappers. Exercises
+ *   execNpm(), execPnpm(), execYarn(), and execScript() against the real spawn
+ *   path. Full command execution can't run here, so these assert the observable
+ *   contract: each wrapper returns a Promise and accepts the documented
+ *   argument shapes (terminator splitting, loglevel preservation,
  *   install-command handling).
  */
 

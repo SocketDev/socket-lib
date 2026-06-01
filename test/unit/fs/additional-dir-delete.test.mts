@@ -7,11 +7,10 @@
  *   - isDirEmptySync ignore-pattern handling
  *   - safeDelete / safeDeleteSync against temp directories
  *   - uniqueSync edge cases (multiple dots, directory paths)
- *   - Path-like (Buffer) inputs to isDir / safeStat
- *
- *   Uses runWithTempDir for isolated test environments to avoid filesystem
- *   pollution. Raw fs APIs (existsSync, fs.unlink) are used intentionally to
- *   verify behavior rather than the lib wrappers, with per-call-site disables.
+ *   - Path-like (Buffer) inputs to isDir / safeStat Uses runWithTempDir for
+ *     isolated test environments to avoid filesystem pollution. Raw fs APIs
+ *     (existsSync, fs.unlink) are used intentionally to verify behavior rather
+ *     than the lib wrappers, with per-call-site disables.
  */
 
 import { existsSync, promises as fs } from 'node:fs'
