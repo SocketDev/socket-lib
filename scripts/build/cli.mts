@@ -18,8 +18,8 @@ import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { buildConfig } from '../../.config/rolldown.config.mts'
 import { primBuildConfig } from '../../.config/rolldown.prim.config.mts'
-import { parseArgs } from '../util/parse-args.mts'
-import { runSequence } from '../util/run-command.mts'
+import { parseArgs } from '../fleet/util/parse-args.mts'
+import { runSequence } from '../fleet/util/run-command.mts'
 import { verifyDist } from './verify-dist.mts'
 
 const logger = getDefaultLogger()

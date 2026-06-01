@@ -25,7 +25,7 @@ import colors from 'yoctocolors-cjs'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { parseArgs } from './util/parse-args.mts'
+import { parseArgs } from './fleet/util/parse-args.mts'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const logger = getDefaultLogger()
