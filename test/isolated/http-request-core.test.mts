@@ -52,6 +52,35 @@ describe('http-request', () => {
       expect(data.status).toBe('success')
     })
 
+    // The following tests hit the in-process fixture server at
+    // http://localhost (fixture.baseUrl, bound via listen(0)) — no
+    // third-party network. They exercise Content-Encoding decode.
+    it('should decompress a gzip Content-Encoding response', async () => {
+      // Regression: httpRequest advertises Accept-Encoding: gzip but its
+      // on('end') handler previously built the response from raw chunks
+      // without decoding, so .json()/.text() saw gzip bytes and failed to
+      // parse (broke GitHub-releases / nodejs.org fetches downstream).
+      const response = await httpRequest(`${fixture.baseUrl}/gzip`)
+
+      expect(response.status).toBe(200)
+      expect(response.headers['content-encoding']).toBe('gzip')
+      const data = response.json<{ encoded: string; ok: boolean }>()
+      expect(data.encoded).toBe('gzip')
+      expect(data.ok).toBe(true)
+      // text() must also see the inflated body.
+      expect(response.text()).toContain('"encoded":"gzip"')
+    })
+
+    it('should decompress a brotli Content-Encoding response', async () => {
+      const response = await httpRequest(`${fixture.baseUrl}/brotli`)
+
+      expect(response.status).toBe(200)
+      expect(response.headers['content-encoding']).toBe('br')
+      const data = response.json<{ encoded: string; ok: boolean }>()
+      expect(data.encoded).toBe('br')
+      expect(data.ok).toBe(true)
+    })
+
     it('should handle 404 errors', async () => {
       const response = await httpRequest(`${fixture.baseUrl}/not-found`)
 
