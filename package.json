@@ -880,6 +880,11 @@
       "types": "./dist/env/socket-cli.d.ts",
       "default": "./dist/env/socket-cli.js"
     },
+    "./env/socket-mcp": {
+      "source": "./src/env/socket-mcp.ts",
+      "types": "./dist/env/socket-mcp.d.ts",
+      "default": "./dist/env/socket-mcp.js"
+    },
     "./env/string": {
       "source": "./src/env/string.ts",
       "types": "./dist/env/string.d.ts",
@@ -1717,10 +1722,20 @@
       "types": "./dist/logger/console.d.ts",
       "default": "./dist/logger/console.js"
     },
+    "./logger/console-methods": {
+      "source": "./src/logger/console-methods.ts",
+      "types": "./dist/logger/console-methods.d.ts",
+      "default": "./dist/logger/console-methods.js"
+    },
     "./logger/default": {
       "source": "./src/logger/default.ts",
       "types": "./dist/logger/default.d.ts",
       "default": "./dist/logger/default.js"
+    },
+    "./logger/indentation-methods": {
+      "source": "./src/logger/indentation-methods.ts",
+      "types": "./dist/logger/indentation-methods.d.ts",
+      "default": "./dist/logger/indentation-methods.js"
     },
     "./logger/logger": {
       "source": "./src/logger/node.ts",
@@ -1735,6 +1750,26 @@
       "source": "./src/logger/node.ts",
       "types": "./dist/logger/node.d.ts",
       "default": "./dist/logger/node.js"
+    },
+    "./logger/options": {
+      "source": "./src/logger/options.ts",
+      "types": "./dist/logger/options.d.ts",
+      "default": "./dist/logger/options.js"
+    },
+    "./logger/semantic-methods": {
+      "source": "./src/logger/semantic-methods.ts",
+      "types": "./dist/logger/semantic-methods.d.ts",
+      "default": "./dist/logger/semantic-methods.js"
+    },
+    "./logger/stream": {
+      "source": "./src/logger/stream.ts",
+      "types": "./dist/logger/stream.d.ts",
+      "default": "./dist/logger/stream.js"
+    },
+    "./logger/stream-methods": {
+      "source": "./src/logger/stream-methods.ts",
+      "types": "./dist/logger/stream-methods.d.ts",
+      "default": "./dist/logger/stream-methods.js"
     },
     "./logger/symbols": {
       "source": "./src/logger/symbols.ts",
@@ -2101,6 +2136,11 @@
       "types": "./dist/primordials/globals.d.ts",
       "default": "./dist/primordials/globals.js"
     },
+    "./primordials/headers": {
+      "source": "./src/primordials/headers.ts",
+      "types": "./dist/primordials/headers.d.ts",
+      "default": "./dist/primordials/headers.js"
+    },
     "./primordials/json": {
       "source": "./src/primordials/json.ts",
       "types": "./dist/primordials/json.d.ts",
@@ -2311,6 +2351,11 @@
       "types": "./dist/releases/socket-btm.d.ts",
       "default": "./dist/releases/socket-btm.js"
     },
+    "./releases/socket-btm-binary-naming": {
+      "source": "./src/releases/socket-btm-binary-naming.ts",
+      "types": "./dist/releases/socket-btm-binary-naming.d.ts",
+      "default": "./dist/releases/socket-btm-binary-naming.js"
+    },
     "./schema/parse": {
       "source": "./src/schema/parse.ts",
       "types": "./dist/schema/parse.d.ts",
@@ -2456,6 +2501,11 @@
       "types": "./dist/sorts/types.d.ts",
       "default": "./dist/sorts/types.js"
     },
+    "./spinner/create-spinner-class": {
+      "source": "./src/spinner/create-spinner-class.ts",
+      "types": "./dist/spinner/create-spinner-class.d.ts",
+      "default": "./dist/spinner/create-spinner-class.js"
+    },
     "./spinner/default": {
       "source": "./src/spinner/default.ts",
       "types": "./dist/spinner/default.d.ts",
@@ -2470,6 +2520,21 @@
       "source": "./src/spinner/spinner.ts",
       "types": "./dist/spinner/spinner.d.ts",
       "default": "./dist/spinner/spinner.js"
+    },
+    "./spinner/spinner-internals": {
+      "source": "./src/spinner/spinner-internals.ts",
+      "types": "./dist/spinner/spinner-internals.d.ts",
+      "default": "./dist/spinner/spinner-internals.js"
+    },
+    "./spinner/spinner-shimmer-methods": {
+      "source": "./src/spinner/spinner-shimmer-methods.ts",
+      "types": "./dist/spinner/spinner-shimmer-methods.d.ts",
+      "default": "./dist/spinner/spinner-shimmer-methods.js"
+    },
+    "./spinner/spinner-status-methods": {
+      "source": "./src/spinner/spinner-status-methods.ts",
+      "types": "./dist/spinner/spinner-status-methods.d.ts",
+      "default": "./dist/spinner/spinner-status-methods.js"
     },
     "./spinner/types": {
       "source": "./src/spinner/types.ts",
