@@ -2,11 +2,10 @@
  * @file Unit tests for synchronous function memoization. Tests:
  *
  *   - memoize() caches synchronous function results
- *   - edge cases (large caches, nested objects, NaN/Infinity arguments)
- *
- *   Async, weak, once, decorator, and cache-clearing memoization tests live
- *   in memo-async-weak-once.test.mts. Used by Socket tools to optimize
- *   expensive operations and API calls.
+ *   - edge cases (large caches, nested objects, NaN/Infinity arguments) Async,
+ *     weak, once, decorator, and cache-clearing memoization tests live in
+ *     memo-async-weak-once.test.mts. Used by Socket tools to optimize expensive
+ *     operations and API calls.
  */
 
 import { memoize } from '../../src/memo/memoize'

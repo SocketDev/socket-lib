@@ -2,12 +2,14 @@
  * @file Unit tests for Node.js version detection and feature support. Tests:
  *
  *   - Version getters: getNodeVersion(), getNodeMajorVersion(),
- *     getNodeMinorVersion(), getNodePatchVersion(), getMaintainedNodeVersions()
+ *     getNodeMinorVersion(), getNodePatchVersion(),
+ *     getMaintainedNodeVersions()
  *   - Feature detection: supportsNodeCompileCacheApi(),
  *     supportsNodeCompileCacheEnvVar(), supportsNodeDisableWarningFlag(),
  *     supportsNodePermissionFlag(), supportsNodeRequireModule(),
- *     supportsNodeRun(), supportsNodeDisableSigusr1Flag(), supportsProcessSend()
- *     Critical for Node.js version-specific behavior and compatibility.
+ *     supportsNodeRun(), supportsNodeDisableSigusr1Flag(),
+ *     supportsProcessSend() Critical for Node.js version-specific behavior and
+ *     compatibility.
  */
 
 import process from 'node:process'

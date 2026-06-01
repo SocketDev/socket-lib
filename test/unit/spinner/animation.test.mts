@@ -1,9 +1,9 @@
 /**
  * @file Unit tests for the Spinner class shimmer and progress animation
  *   methods: enableShimmer/disableShimmer/setShimmer/updateShimmer state,
- *   shimmer direction/speed/palette defaults, progress()/progressStep()
- *   updates and chaining, and progress-bar rendering paths. Used by Socket CLI
- *   for long-running operations (package scanning, API calls).
+ *   shimmer direction/speed/palette defaults, progress()/progressStep() updates
+ *   and chaining, and progress-bar rendering paths. Used by Socket CLI for
+ *   long-running operations (package scanning, API calls).
  */
 
 import process from 'node:process'

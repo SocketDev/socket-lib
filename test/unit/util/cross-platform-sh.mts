@@ -13,7 +13,8 @@ import { parseShell } from '../../../src/shell/parse'
 
 /**
  * Run a command line. Splits on `&&` operators and execs each segment via the
- * lib's `spawnSync` (no shell). Returns the trimmed stdout of the last segment.
+ * lib's `spawnSync` (no shell). Returns the trimmed stdout of the last
+ * segment.
  */
 export function sh(cwd: string, cmd: string): string {
   // Group parsed tokens into segments at each `&&` operator. Operators surface

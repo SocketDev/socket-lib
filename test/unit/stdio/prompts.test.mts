@@ -8,11 +8,10 @@
  *   - Choice<T> type for prompt options with value, name, description, short
  *     text, and disabled states
  *   - Context type for prompt configuration (signal, input/output streams,
- *     clearPromptOnDone)
- *
- *   The runtime prompt-wrapping machinery (wrapPrompt, createSeparator, the
- *   prompt functions) lives in prompts-wrap.test.mts. Used by Socket CLI tools
- *   for user interactions like selecting options, confirming actions.
+ *     clearPromptOnDone) The runtime prompt-wrapping machinery (wrapPrompt,
+ *     createSeparator, the prompt functions) lives in prompts-wrap.test.mts.
+ *     Used by Socket CLI tools for user interactions like selecting options,
+ *     confirming actions.
  */
 
 import process from 'node:process'

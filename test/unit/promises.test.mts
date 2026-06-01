@@ -1,11 +1,11 @@
 /**
  * @file Unit tests for the pRetry() helper. Exercises the retry runtime:
  *   success, failure-then-retry, exponential backoff, jitter, maxDelayMs cap,
- *   abort-signal handling, and onRetry callback semantics.
- *
- *   Used by Socket tools for fault-tolerant API calls. Retry option normalizers
- *   (normalizeRetryOptions, resolveRetryOptions) live in promises-options.test.mts;
- *   iteration helpers live in promises-iterate.test.mts; resolver helpers live in
+ *   abort-signal handling, and onRetry callback semantics. Used by Socket tools
+ *   for fault-tolerant API calls. Retry option normalizers
+ *   (normalizeRetryOptions, resolveRetryOptions) live in
+ *   promises-options.test.mts; iteration helpers live in
+ *   promises-iterate.test.mts; resolver helpers live in
  *   promises-resolvers.test.mts.
  */
 
@@ -478,5 +478,4 @@ describe('promises', () => {
       }
     })
   })
-
 })

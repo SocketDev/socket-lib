@@ -3,10 +3,10 @@
  *   stream, indent buffers, theme) and exposes the public surface as thin
  *   delegators over sibling free-function leaves. Console construction is lazy:
  *   the constructor stashes its args in `_internal.privateConstructorArgs` and
- *   the `node:console` instance is built on first `#getConsole()`, so the logger
- *   can be imported during early Node.js bootstrap before stdout is ready
- *   (avoiding `ERR_CONSOLE_WRITABLE_STREAM`). Method bodies live in the leaves:
- *   `./console-methods`, `./semantic-methods`, `./indentation-methods`,
+ *   the `node:console` instance is built on first `#getConsole()`, so the
+ *   logger can be imported during early Node.js bootstrap before stdout is
+ *   ready (avoiding `ERR_CONSOLE_WRITABLE_STREAM`). Method bodies live in the
+ *   leaves: `./console-methods`, `./semantic-methods`, `./indentation-methods`,
  *   `./stream-methods`, `./console`, `./options`, `./symbols`,
  *   `./symbols-builder`, `./_internal`.
  */

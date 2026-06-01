@@ -6,12 +6,11 @@
  *   - getGitHubTokenWithFallback() multi-source token resolution
  *   - clearRefCache() clears git reference cache
  *   - getGhsaUrl() edge cases exercised alongside the token helpers
- *   - Environment variable handling (GITHUB_TOKEN, GH_TOKEN)
- *
- *   The dedicated getGhsaUrl() formatting suite lives in
- *   github-ghsa-url.test.mts. HTTP-facing tests (fetchGitHub, resolveRefToSha,
- *   GHSA fetches) live in github-fetch.test.mts and github-ghsa.test.mts. Used
- *   by Socket tools for GitHub API authentication and GHSA lookups.
+ *   - Environment variable handling (GITHUB_TOKEN, GH_TOKEN) The dedicated
+ *     getGhsaUrl() formatting suite lives in github-ghsa-url.test.mts.
+ *     HTTP-facing tests (fetchGitHub, resolveRefToSha, GHSA fetches) live in
+ *     github-fetch.test.mts and github-ghsa.test.mts. Used by Socket tools for
+ *     GitHub API authentication and GHSA lookups.
  */
 
 import process from 'node:process'
@@ -446,5 +445,4 @@ describe.sequential('github', () => {
       await expect(getGitHubTokenWithFallback()).resolves.not.toThrow()
     })
   })
-
 })

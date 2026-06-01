@@ -4,11 +4,9 @@
  *
  *   - fetchGitHub() raw GitHub API requests (auth, rate limits, error codes)
  *   - resolveRefToSha() git reference resolution (tag → branch → commit, with
- *     GraphQL fallback for the empty-body incident shape)
- *
- *   These tests mock HTTP with nock. GHSA advisory fetches live in
- *   github-ghsa.test.mts; token/URL helpers live in github.test.mts and
- *   github-ghsa-url.test.mts.
+ *     GraphQL fallback for the empty-body incident shape) These tests mock HTTP
+ *     with nock. GHSA advisory fetches live in github-ghsa.test.mts; token/URL
+ *     helpers live in github.test.mts and github-ghsa-url.test.mts.
  */
 
 import { fetchGitHub } from '../../src/github/fetch'

@@ -3,10 +3,9 @@
  *   resolvers that back the retry helpers:
  *
  *   - normalizeRetryOptions() retry option normalizer
- *   - resolveRetryOptions() retry configuration resolver
- *
- *   The pRetry() behavior tests live in promises.test.mts; iteration option
- *   normalization (normalizeIterationOptions) lives in promises-iterate.test.mts.
+ *   - resolveRetryOptions() retry configuration resolver The pRetry() behavior
+ *     tests live in promises.test.mts; iteration option normalization
+ *     (normalizeIterationOptions) lives in promises-iterate.test.mts.
  */
 
 import {

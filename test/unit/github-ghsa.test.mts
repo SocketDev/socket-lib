@@ -3,11 +3,10 @@
  *
  *   - fetchGhsaDetails() fetches GitHub Security Advisory details
  *   - cacheFetchGhsa() caches GHSA lookups
- *   - JSON parsing error handling for malformed GitHub API responses
- *
- *   These tests mock HTTP with nock. fetchGitHub() + resolveRefToSha() live in
- *   github-fetch.test.mts; token/URL helpers live in github.test.mts and
- *   github-ghsa-url.test.mts.
+ *   - JSON parsing error handling for malformed GitHub API responses These tests
+ *     mock HTTP with nock. fetchGitHub() + resolveRefToSha() live in
+ *     github-fetch.test.mts; token/URL helpers live in github.test.mts and
+ *     github-ghsa-url.test.mts.
  */
 
 import { fetchGitHub } from '../../src/github/fetch'

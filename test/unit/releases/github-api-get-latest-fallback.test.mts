@@ -1,8 +1,8 @@
 /**
  * @file Unit tests for GitHub `getLatestRelease` GraphQL fallback + error
  *   surfaces. Covers the REST-degraded → GraphQL re-query path and the
- *   transport/parse failure modes. REST happy-path matching + date-sorting
- *   live in `github-api-get-latest.test.mts`.
+ *   transport/parse failure modes. REST happy-path matching + date-sorting live
+ *   in `github-api-get-latest.test.mts`.
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'

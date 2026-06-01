@@ -155,7 +155,10 @@ describe.sequential('ttl-cache — getAll wildcard', () => {
     } as unknown as ReturnType<typeof cacacheInternal.getCacache>
     vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
     vi.mocked(cacacheRead.safeGet).mockResolvedValue(
-      makeCacheEntry('memo:k1', Buffer.from(JSON.stringify(validEntry), 'utf8')),
+      makeCacheEntry(
+        'memo:k1',
+        Buffer.from(JSON.stringify(validEntry), 'utf8'),
+      ),
     )
 
     const result = await cache.getAll<string>('*')

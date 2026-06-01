@@ -3,10 +3,9 @@
  *   helpers:
  *
  *   - pFilter() filters arrays with an async predicate + concurrency control
- *   - pFilterChunk() filters chunked arrays with an async predicate
- *
- *   The pEach()/pEachChunk() iteration helpers and normalizeIterationOptions()
- *   live in promises-iterate.test.mts.
+ *   - pFilterChunk() filters chunked arrays with an async predicate The
+ *     pEach()/pEachChunk() iteration helpers and normalizeIterationOptions()
+ *     live in promises-iterate.test.mts.
  */
 
 import { pFilter, pFilterChunk } from '../../src/promises/iterate'

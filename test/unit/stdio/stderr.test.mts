@@ -3,9 +3,9 @@
  *
  *   - writeStderr() writes to stderr stream
  *   - Error message formatting
- *   - Warning and stack-trace formatting Used by Socket tools for error
- *     reporting and diagnostic output. Terminal/stream-control coverage
- *     (TTY detection, cursor, dimensions) lives in stderr-terminal.test.mts.
+ *   - Warning and stack-trace formatting Used by Socket tools for error reporting
+ *     and diagnostic output. Terminal/stream-control coverage (TTY detection,
+ *     cursor, dimensions) lives in stderr-terminal.test.mts.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -61,9 +61,7 @@ describe('stdio/stderr', () => {
 
     it('should handle ANSI color codes', () => {
       writeErrorLine('[31mRed Error[0m')
-      expect(getContext().writeSpy).toHaveBeenCalledWith(
-        '[31mRed Error[0m\n',
-      )
+      expect(getContext().writeSpy).toHaveBeenCalledWith('[31mRed Error[0m\n')
     })
 
     it('should not return a value', () => {
@@ -95,9 +93,7 @@ describe('stdio/stderr', () => {
 
     it('should handle ANSI escape sequences', () => {
       writeError('[33mWarning[0m')
-      expect(getContext().writeSpy).toHaveBeenCalledWith(
-        '[33mWarning[0m',
-      )
+      expect(getContext().writeSpy).toHaveBeenCalledWith('[33mWarning[0m')
     })
 
     it('should not return a value', () => {

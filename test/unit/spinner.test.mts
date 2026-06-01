@@ -4,14 +4,13 @@
  *   - Spinner class for manual control (start, stop, update text)
  *   - Indentation, text/control, color methods
  *   - Method chaining, edge cases, theme handling, getCliSpinners, streams
- *   - Color preservation after spinner operations
- *
- *   The withSpinner()/withSpinnerSync() wrapper tests live in
- *   spinner/with.test.mts; status and AndStop method tests in
- *   spinner/status.test.mts; shimmer and progress animation tests in
- *   spinner/animation.test.mts; end-to-end workflow tests in
- *   spinner/workflows.test.mts. Used by Socket CLI for long-running
- *   operations (package scanning, API calls).
+ *   - Color preservation after spinner operations The
+ *     withSpinner()/withSpinnerSync() wrapper tests live in
+ *     spinner/with.test.mts; status and AndStop method tests in
+ *     spinner/status.test.mts; shimmer and progress animation tests in
+ *     spinner/animation.test.mts; end-to-end workflow tests in
+ *     spinner/workflows.test.mts. Used by Socket CLI for long-running
+ *     operations (package scanning, API calls).
  */
 
 import process from 'node:process'
@@ -372,5 +371,4 @@ describe('spinner', () => {
       expect(result9).toBe(spinner)
     })
   })
-
 })
