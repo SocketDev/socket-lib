@@ -174,9 +174,9 @@ export async function pRetry<T>(
           if (typeof result === 'number' && result >= 0) {
             waitTime = MathMin(result, maxDelayMs as number)
           }
-        } catch (e) {
+        } catch (onRetryError) {
           if (onRetryRethrow) {
-            throw e
+            throw onRetryError
           }
         }
       }

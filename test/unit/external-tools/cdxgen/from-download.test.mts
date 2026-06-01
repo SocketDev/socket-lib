@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import type nodeFs from 'node:fs'
+
 vi.mock(import('../../../../src/external-tools/from-download'), () => ({
   downloadToolArchive: vi.fn(),
 }))
@@ -13,7 +15,7 @@ vi.mock(import('../../../../src/fs/safe'), () => ({
 }))
 
 vi.mock(import('node:fs'), async () => {
-  const actual = await vi.importActual<typeof import('node:fs')>('node:fs')
+  const actual = await vi.importActual<typeof nodeFs>('node:fs')
   return {
     ...actual,
     promises: {

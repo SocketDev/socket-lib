@@ -2,7 +2,7 @@
  * @file Temporary file and directory utilities for tests.
  */
 
-import { randomUUID } from 'node:crypto'
+import crypto from 'node:crypto'
 import { promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -18,7 +18,7 @@ import { resetPaths } from '../../../src/paths/rewire'
  */
 export async function createTempDir(prefix: string): Promise<string> {
   const tempBaseDir = os.tmpdir()
-  const tempDirName = `${prefix}${randomUUID()}`
+  const tempDirName = `${prefix}${crypto.randomUUID()}`
   const tempDir = path.join(tempBaseDir, tempDirName)
 
   await fs.mkdir(tempDir, { recursive: true })
@@ -139,7 +139,7 @@ export async function withTempFile(
   const { extension = '.txt', prefix = 'temp-file-' } = options
 
   const tempBaseDir = os.tmpdir()
-  const tempFileName = `${prefix}${randomUUID()}${extension}`
+  const tempFileName = `${prefix}${crypto.randomUUID()}${extension}`
   const tempFile = path.join(tempBaseDir, tempFileName)
 
   await fs.writeFile(tempFile, content, 'utf8')

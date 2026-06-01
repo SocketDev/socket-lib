@@ -18,6 +18,7 @@ import { IpcStubSchema, getFs } from './_internal'
 import { ensureIpcDirectory } from './directory'
 import { getIpcStubPath } from './paths'
 
+import type { promises as fsPromises } from 'node:fs'
 import type { IpcStub } from './types'
 
 /**
@@ -82,7 +83,7 @@ export async function writeIpcStub(
     fs.constants.O_NOFOLLOW
   // Retry once if a stale stub (from the same PID, reused after an ungraceful
   // exit) already exists — remove and recreate. Only one retry.
-  let handle: import('node:fs').promises.FileHandle | undefined
+  let handle: fsPromises.FileHandle | undefined
   try {
     handle = await fs.promises.open(stubPath, flags, 0o600)
   } catch (e) {

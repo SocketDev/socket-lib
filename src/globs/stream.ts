@@ -18,6 +18,7 @@ import {
 } from './_internal'
 
 import type { GlobOptions } from './types'
+import type { Options as FastGlobOptions } from 'fast-glob'
 
 /**
  * Create a stream of license file paths matching glob patterns.
@@ -61,7 +62,7 @@ export function globStreamLicenses(
       cwd: dirname,
       ...globOptions,
       ...(ignore ? { ignore } : {}),
-    } as import('fast-glob').Options,
+    } as FastGlobOptions,
   )
   /* c8 ignore stop */
 }

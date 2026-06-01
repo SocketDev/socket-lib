@@ -58,21 +58,21 @@ export interface SmolHttpsBinding {
   serve(options: SmolHttpsServeOptions): unknown
 }
 
-let _smolHttps: SmolHttpsBinding | undefined
-let _smolHttpsProbed = false
+let smolHttps: SmolHttpsBinding | undefined
+let smolHttpsProbed = false
 
 /**
  * Returns `node:smol-https` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  */
 export function getSmolHttps(): SmolHttpsBinding | undefined {
-  if (!_smolHttpsProbed) {
-    _smolHttpsProbed = true
+  if (!smolHttpsProbed) {
+    smolHttpsProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-https')) {
-      _smolHttps = require('node:smol-https') as SmolHttpsBinding
+      smolHttps = require('node:smol-https') as SmolHttpsBinding
     }
     /* c8 ignore stop */
   }
-  return _smolHttps
+  return smolHttps
 }

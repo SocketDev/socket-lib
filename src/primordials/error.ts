@@ -68,7 +68,7 @@ export const ErrorPrepareStackTrace:
 // `__lookupGetter__` is "annex B legacy" but supported in V8 / SpiderMonkey
 // / JavaScriptCore. We probe it once at load time and fall back to
 // reading the data property if no accessor exists.
-const _stackTraceLimitGetter: (() => number) | undefined = (() => {
+const stackTraceLimitGetter: (() => number) | undefined = (() => {
   const getter = (
     Error as unknown as {
       __lookupGetter__?: (key: string) => (() => number) | undefined
@@ -83,10 +83,10 @@ const _stackTraceLimitGetter: (() => number) | undefined = (() => {
   /* c8 ignore stop */
 })()
 export function ErrorStackTraceLimit(): number | undefined {
-  // _stackTraceLimitGetter is always set on V8.
-  /* c8 ignore start */
-  if (_stackTraceLimitGetter) {
-    return _stackTraceLimitGetter()
+  // stackTraceLimitGetter is always set on V8.
+  /* c8 ignore start - non-V8 fallback path unreachable under test */
+  if (stackTraceLimitGetter) {
+    return stackTraceLimitGetter()
   }
   return (Error as { stackTraceLimit?: number | undefined }).stackTraceLimit
   /* c8 ignore stop */

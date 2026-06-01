@@ -79,7 +79,7 @@ export interface DownloadAndExtractOptions extends DownloadOptions {
  *   const { extractedDir, integrity } = await downloadAndExtractTool({
  *     url: 'https://example.com/jre-21-darwin-arm64.tar.gz',
  *     name: 'jre-21-darwin-arm64',
- *     extractedDir: '/Users/me/.cache/socket/jre/21/darwin-arm64',
+ *     extractedDir: '/Users/<user>/.cache/socket/jre/21/darwin-arm64',
  *     extractOptions: { strip: 1 },
  *   })
  *   // Caller constructs ResolvedJre from extractedDir.

@@ -6,8 +6,8 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodePath from 'node:path'
 
-let _path: typeof NodePath | undefined
+let cachedPath: typeof NodePath | undefined
 
 export function getNodePath(): typeof NodePath {
-  return (_path ??= /*@__PURE__*/ require('node:path') as typeof NodePath)
+  return (cachedPath ??= /*@__PURE__*/ require('node:path') as typeof NodePath)
 }

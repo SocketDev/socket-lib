@@ -23,17 +23,17 @@ interface PathRewireState {
 }
 
 const stateSymbol = Symbol.for('@socketsecurity/lib/paths/rewire/state')
-const _globalThis = globalThis as typeof globalThis &
+const globalState = globalThis as typeof globalThis &
   Record<symbol, PathRewireState | undefined>
-if (!_globalThis[stateSymbol]) {
-  _globalThis[stateSymbol] = {
+if (!globalState[stateSymbol]) {
+  globalState[stateSymbol] = {
     testOverrides: new MapCtor<string, string | undefined>(),
     valueCache: new MapCtor<string, string>(),
     cacheInvalidationCallbacks: [] as Array<() => void>,
   }
 }
 
-const sharedState: PathRewireState = _globalThis[stateSymbol]!
+const sharedState: PathRewireState = globalState[stateSymbol]!
 
 // Per-test overrides
 const testOverrides = sharedState.testOverrides

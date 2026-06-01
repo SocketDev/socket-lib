@@ -4,6 +4,8 @@
  *   prefix excludes from public exports.
  */
 
+import type timersPromises from 'node:timers/promises'
+
 import { getAbortSignal } from '../process/abort'
 
 export const abortSignal = getAbortSignal()
@@ -24,5 +26,5 @@ export const abortSignal = getAbortSignal()
  */
 export function getTimers() {
   // Use non-'node:' prefixed require to avoid Webpack errors.
-  return require('node:timers/promises') as typeof import('node:timers/promises')
+  return require('node:timers/promises') as typeof timersPromises
 }

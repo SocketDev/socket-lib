@@ -35,10 +35,14 @@ describe('spawn integration', () => {
       try {
         await spawn('node', ['--invalid-flag'])
         expect.fail('Should have thrown')
-      } catch (error: any) {
-        expect(error.message).toContain('Command failed')
-        expect(error.message).toContain('exit code')
-        expect(error.code).toBe(9)
+      } catch (error: unknown) {
+        const err = error as {
+          code?: number | undefined
+          message?: string | undefined
+        }
+        expect(err.message).toContain('Command failed')
+        expect(err.message).toContain('exit code')
+        expect(err.code).toBe(9)
       }
     })
 
@@ -60,7 +64,7 @@ describe('spawn integration', () => {
       expect(result.code).toBe(0)
       // macOS uses /private/tmp symlink, Windows Git Bash uses /d/tmp or similar
       expect(result.stdout.toString().trim()).toMatch(
-        /^(?:\/tmp|\/private\/tmp|\/[a-z]\/tmp)$/,
+        /^(?:\/[a-z]\/tmp|\/private\/tmp|\/tmp)$/,
       )
     })
 

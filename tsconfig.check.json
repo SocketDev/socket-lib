@@ -1,13 +1,15 @@
 {
-  "extends": "./tsconfig.json",
+  "extends": "./.config/fleet/tsconfig.check.base.json",
   "compilerOptions": {
-    "declarationMap": false,
-    "module": "esnext",
-    "noEmit": true,
-    "rootDir": ".",
-    "skipLibCheck": true,
-    "sourceMap": false,
-    "types": ["node", "vitest"]
+    "paths": {
+      "adm-zip": ["./src/external/adm-zip"],
+      "cacache": ["./src/external/cacache"],
+      "make-fetch-happen": ["./src/external/make-fetch-happen"],
+      "fast-sort": ["./src/external/fast-sort"],
+      "pacote": ["./src/external/pacote"],
+      "tar-fs": ["./src/external/tar-fs"]
+    },
+    "rootDir": "."
   },
   "include": ["./src/**/*.ts", "./test/**/*.ts", "./test/**/*.mts"],
   "exclude": ["./.cache", "./dist/**/*", "./node_modules"]

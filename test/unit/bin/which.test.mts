@@ -136,12 +136,12 @@ describe('whichReal', () => {
 
 describe('whichRealSync and whichReal - options coverage', () => {
   it('should handle options with all explicitly set to undefined', () => {
-    const result = whichRealSync('node', { all: undefined as any })
+    const result = whichRealSync('node', { all: undefined })
     expect(result).toBeDefined()
   })
 
   it('should handle async version with all explicitly set to undefined', async () => {
-    const result = await whichReal('node', { all: undefined as any })
+    const result = await whichReal('node', { all: undefined })
     expect(result).toBeDefined()
   })
 

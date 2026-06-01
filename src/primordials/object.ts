@@ -56,7 +56,7 @@ export const ObjectPrototypeValueOf = uncurryThis(Object.prototype.valueOf)
 // a class defines a getter without instantiating).
 //
 // See: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/__lookupGetter__
-const _objectProto = Object.prototype as unknown as {
+const objectProto = Object.prototype as unknown as {
   __defineGetter__: (this: object, key: PropertyKey, fn: () => unknown) => void
   __defineSetter__: (
     this: object,
@@ -73,14 +73,14 @@ const _objectProto = Object.prototype as unknown as {
   ) => ((value: unknown) => void) | undefined
 }
 export const ObjectPrototypeDefineGetter = uncurryThis(
-  _objectProto.__defineGetter__,
+  objectProto.__defineGetter__,
 )
 export const ObjectPrototypeDefineSetter = uncurryThis(
-  _objectProto.__defineSetter__,
+  objectProto.__defineSetter__,
 )
 export const ObjectPrototypeLookupGetter = uncurryThis(
-  _objectProto.__lookupGetter__,
+  objectProto.__lookupGetter__,
 )
 export const ObjectPrototypeLookupSetter = uncurryThis(
-  _objectProto.__lookupSetter__,
+  objectProto.__lookupSetter__,
 )
