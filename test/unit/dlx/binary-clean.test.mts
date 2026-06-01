@@ -1,21 +1,22 @@
 /**
- * @file Unit tests for DLX binary cache cleanup. Covers cleanDlxCache()
- *   expiry and clock-skew handling. Split from binary.test.mts to stay under
- *   the file-size cap; listDlxCache()/atomic metadata writes live in
+ * @file Unit tests for DLX binary cache cleanup. Covers cleanDlxCache() expiry
+ *   and clock-skew handling. Split from binary.test.mts to stay under the
+ *   file-size cap; listDlxCache()/atomic metadata writes live in
  *   binary-list.test.mts and the dlxBinary() suites in binary.test.mts.
  */
 
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
-import { cleanDlxCache, dlxBinary, getDlxCachePath } from '../../../src/dlx/binary'
+import {
+  cleanDlxCache,
+  dlxBinary,
+  getDlxCachePath,
+} from '../../../src/dlx/binary'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
-import {
-  startDlxTestServer,
-  stopDlxTestServer,
-} from './binary-test-server.mts'
+import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'
 
 import type { DlxTestServer } from './binary-test-server.mts'
 

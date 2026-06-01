@@ -4,10 +4,9 @@
  *
  *   - Timing wrappers (perfTimer, measure, measureSync)
  *   - Metrics collection (getPerformanceMetrics, clearPerformanceMetrics)
- *
- *   Reporting, summaries, checkpoints, and memory tracking are covered in
- *   perf-report.test.mts. The raw Performance API primitive (performance.now())
- *   is covered in perf-performance-api.test.mts.
+ *     Reporting, summaries, checkpoints, and memory tracking are covered in
+ *     perf-report.test.mts. The raw Performance API primitive
+ *     (performance.now()) is covered in perf-performance-api.test.mts.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -275,5 +274,4 @@ describe.sequential('performance', () => {
       expect(getPerformanceMetrics().length).toBe(1)
     })
   })
-
 })

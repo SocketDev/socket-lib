@@ -4,8 +4,8 @@
  *   `obj.method(...)` prototype call, decides whether a primordial rewrite
  *   applies and records the span. Ambiguous-method sites whose receiver can't
  *   be guessed statically are captured for the post-walk AI pass
- *   (`ai-disambiguate-pass.mts`). Split out from `codemod.mts` so the
- *   per-node classification logic and its globals tables live in one domain.
+ *   (`ai-disambiguate-pass.mts`). Split out from `codemod.mts` so the per-node
+ *   classification logic and its globals tables live in one domain.
  */
 
 import type { PendingAmbiguous, Rewrite } from './ai-disambiguate-pass.mts'
@@ -25,8 +25,8 @@ import { findClosingParen, walkAst } from './source-text.mts'
 
 /**
  * Walk `ast` and append every applicable primordial rewrite to `rewrites`,
- * recording introduced primordials in `usedPrimordials`. Ambiguous-method
- * call sites that need the AI pass are pushed onto `pendingAmbiguous`.
+ * recording introduced primordials in `usedPrimordials`. Ambiguous-method call
+ * sites that need the AI pass are pushed onto `pendingAmbiguous`.
  *
  * Returns the number of sites skipped (guessed receiver without
  * `--include-guessed`, or ambiguous without an AI fallback) so the caller can

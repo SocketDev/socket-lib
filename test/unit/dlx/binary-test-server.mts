@@ -25,7 +25,10 @@ export async function startDlxTestServer(): Promise<DlxTestServer> {
         res.end('#!/bin/bash\necho "test binary"')
       } else if (url === '/binary-with-integrity') {
         const content = '#!/bin/bash\necho "verified binary"'
-        const hash = crypto.createHash('sha512').update(content).digest('base64')
+        const hash = crypto
+          .createHash('sha512')
+          .update(content)
+          .digest('base64')
         res.writeHead(200, {
           'Content-Type': 'application/octet-stream',
           'X-Integrity': `sha512-${hash}`,

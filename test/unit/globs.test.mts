@@ -12,9 +12,9 @@
  *   - defaultIgnore is frozen (immutable) to prevent accidental modifications
  *     Tests validate pattern matching, exclusions, options handling, and edge
  *     cases. Used by Socket tools for file discovery and npm package analysis.
- *
- *   Streaming (globStreamLicenses), globSync(), trailing-slash ignore
- *   normalization, and matcher integration tests live in globs-stream.test.mts.
+ *     Streaming (globStreamLicenses), globSync(), trailing-slash ignore
+ *     normalization, and matcher integration tests live in
+ *     globs-stream.test.mts.
  */
 
 import path from 'node:path'

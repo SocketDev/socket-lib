@@ -1,8 +1,8 @@
 /**
  * @file Shared fixtures and helpers for the compression unit tests
  *   (compression.test.mts + compression-gzip.test.mts). Keeps the two
- *   per-format test files under the file-size cap while sharing the same
- *   input corpora and stream-draining helper.
+ *   per-format test files under the file-size cap while sharing the same input
+ *   corpora and stream-draining helper.
  */
 
 import { Buffer } from 'node:buffer'
@@ -11,9 +11,8 @@ import { Buffer } from 'node:buffer'
 //   - small: a few hundred bytes — exercises the in-memory path
 //   - large: ~1 MB of repeating JSON — exercises the streaming path
 //     and lets us verify the compressed size is meaningfully smaller
-export const SMALL_TEXT = 'The quick brown fox jumps over the lazy dog. '.repeat(
-  20,
-)
+export const SMALL_TEXT =
+  'The quick brown fox jumps over the lazy dog. '.repeat(20)
 export const LARGE_TEXT = JSON.stringify({
   items: Array.from({ length: 5000 }, (_, i) => ({
     id: i,

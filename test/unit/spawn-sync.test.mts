@@ -1,9 +1,9 @@
 /**
- * @file Unit tests for synchronous process spawn utilities. Tests
- *   spawnSync() synchronous process execution: exit status, output capture,
- *   stdio handling, ANSI stripping, and error cases. Companion to
- *   spawn.test.mts, which covers the async spawn() path. Used by Socket tools
- *   for git operations, npm commands, and external process execution.
+ * @file Unit tests for synchronous process spawn utilities. Tests spawnSync()
+ *   synchronous process execution: exit status, output capture, stdio handling,
+ *   ANSI stripping, and error cases. Companion to spawn.test.mts, which covers
+ *   the async spawn() path. Used by Socket tools for git operations, npm
+ *   commands, and external process execution.
  */
 
 import process from 'node:process'

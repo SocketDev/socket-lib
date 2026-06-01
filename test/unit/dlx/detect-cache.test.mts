@@ -20,7 +20,10 @@ describe.sequential('dlx/detect — cache + stale paths', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = path.join(os.tmpdir(), `socket-detect-cache-${crypto.randomUUID()}`)
+    testDir = path.join(
+      os.tmpdir(),
+      `socket-detect-cache-${crypto.randomUUID()}`,
+    )
     mkdirSync(testDir, { recursive: true })
   })
 

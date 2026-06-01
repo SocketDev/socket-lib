@@ -1,5 +1,5 @@
 /**
- * @file acorn-walk visitor table for the primordial audit. Built per
+ * @file Acorn-walk visitor table for the primordial audit. Built per
  *   `auditDirectory` call from a context object that carries the shared
  *   per-file state (`currentFile`), the finding recorders, the exported-name
  *   set, and the pending-ambiguous queue. Split out of `audit.mts` to keep the
@@ -31,11 +31,21 @@ import {
  *
  * @param {Object} ctx
  * @param {boolean} ctx.aiDisambiguate
- * @param {{ relPath: string, lineStarts: number[], src: string }} ctx.currentFile
+ * @param {{ relPath: string; lineStarts: number[]; src: string }} ctx.currentFile
  * @param {Set<string>} ctx.exported Currently-exported primordials.
- * @param {Array<Object>} ctx.pendingAmbiguous Queue drained after the walk.
- * @param {(file: string, offset: number, pattern: string, primordial: string) => void} ctx.record
- * @param {(file: string, offset: number, name: string, pattern: string) => void} ctx.recordRedeclaration
+ * @param {Object[]} ctx.pendingAmbiguous Queue drained after the walk.
+ * @param {(
+ *   file: string,
+ *   offset: number,
+ *   pattern: string,
+ *   primordial: string,
+ * ) => void} ctx.record
+ * @param {(
+ *   file: string,
+ *   offset: number,
+ *   name: string,
+ *   pattern: string,
+ * ) => void} ctx.recordRedeclaration
  */
 export function buildVisitors({
   aiDisambiguate,

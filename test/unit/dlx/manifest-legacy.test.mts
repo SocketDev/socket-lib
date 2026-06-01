@@ -6,11 +6,10 @@
  *   - get / set legacy-format records
  *   - clear (single entry)
  *   - isFresh TTL checks
- *   - getAllPackages (legacy + new format keys)
- *
- *   The new-format entry API (getManifestEntry / setPackageEntry /
- *   setBinaryEntry / clearAll) lives in manifest-class.test.mts. The pure type
- *   guards (isPackageEntry / isBinaryEntry) live in manifest.test.mts.
+ *   - getAllPackages (legacy + new format keys) The new-format entry API
+ *     (getManifestEntry / setPackageEntry / setBinaryEntry / clearAll) lives in
+ *     manifest-class.test.mts. The pure type guards (isPackageEntry /
+ *     isBinaryEntry) live in manifest.test.mts.
  */
 
 import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'

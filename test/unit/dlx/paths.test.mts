@@ -6,9 +6,8 @@
  *   - getDlxPackageNodeModulesDir() resolves the package node_modules directory
  *   - getDlxInstalledPackageDir() resolves the installed package directory
  *   - getDlxPackageJsonPath() resolves a package's package.json path
- *   - isInSocketDlx() classifies paths as inside or outside the DLX directory
- *
- *   The directory-lifecycle and package-management tests live in main.test.mts.
+ *   - isInSocketDlx() classifies paths as inside or outside the DLX directory The
+ *     directory-lifecycle and package-management tests live in main.test.mts.
  */
 
 import crypto from 'node:crypto'
@@ -36,7 +35,10 @@ describe.sequential('dlx paths', () => {
   beforeEach(() => {
     // Save original env and create isolated test directory
     originalEnv = process.env['SOCKET_DLX_DIR']
-    testDlxDir = path.join(os.tmpdir(), `socket-dlx-test-${crypto.randomUUID()}`)
+    testDlxDir = path.join(
+      os.tmpdir(),
+      `socket-dlx-test-${crypto.randomUUID()}`,
+    )
     process.env['SOCKET_DLX_DIR'] = testDlxDir
   })
 

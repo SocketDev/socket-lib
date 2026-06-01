@@ -1,7 +1,7 @@
 /**
  * @file Safe references to the Fetch `Headers` constructor and its
- *   `Headers.prototype` methods. `Headers` is a global on Node 22+ (the
- *   fleet floor), captured unguarded like `URL` / `URLSearchParams`.
+ *   `Headers.prototype` methods. `Headers` is a global on Node 22+ (the fleet
+ *   floor), captured unguarded like `URL` / `URLSearchParams`.
  */
 
 import { uncurryThis } from './uncurry'

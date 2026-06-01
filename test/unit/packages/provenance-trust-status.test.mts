@@ -1,8 +1,8 @@
 /**
  * @file Unit tests for the trust-status helpers in packages/provenance.ts
  *   (getTrustStatus / getTrustLevel / getTrustLevelName / compareTrust /
- *   didTrustDecrease / TRUST_LEVELS). Split out of provenance.test.mts to
- *   stay under the file-line cap; the parsing + fetch helpers live there.
+ *   didTrustDecrease / TRUST_LEVELS). Split out of provenance.test.mts to stay
+ *   under the file-line cap; the parsing + fetch helpers live there.
  */
 
 import { describe, expect, it } from 'vitest'

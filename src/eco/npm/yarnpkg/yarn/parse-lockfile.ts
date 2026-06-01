@@ -22,8 +22,8 @@
  *      https://github.com/CycloneDX/cdxgen/blob/v11.11.0/lib/parsers/js.js
  *      (parseYarnLock)
  *   4. **yarn format docs**: classic (v1):
- *      https://github.com/yarnpkg/yarn/blob/v1.22.22/src/lockfile/parse.js berry
- *      (v2+): https://yarnpkg.com/configuration/yarnrc#lockfileVersion
+ *      https://github.com/yarnpkg/yarn/blob/v1.22.22/src/lockfile/parse.js
+ *      berry (v2+): https://yarnpkg.com/configuration/yarnrc#lockfileVersion
  *      protocols: https://yarnpkg.com/protocol/ Bug fixes implemented here (and
  *      in the native parser):
  *

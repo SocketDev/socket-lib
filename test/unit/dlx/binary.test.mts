@@ -6,11 +6,9 @@
  *   - getDlxCachePath() resolves cache directory paths
  *   - Cross-platform binary execution
  *   - HTTP download with integrity verification Used by Socket CLI for secure
- *     one-off package execution.
- *
- *   Cache enumeration/cleanup suites (cleanDlxCache, listDlxCache, atomic
- *   metadata writes) live in binary-cache-list.test.mts to keep both files
- *   under the file-size cap.
+ *     one-off package execution. Cache enumeration/cleanup suites
+ *     (cleanDlxCache, listDlxCache, atomic metadata writes) live in
+ *     binary-cache-list.test.mts to keep both files under the file-size cap.
  */
 
 import crypto from 'node:crypto'
@@ -22,10 +20,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { itWindowsOnly } from '../util/skip-helpers'
 import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
-import {
-  startDlxTestServer,
-  stopDlxTestServer,
-} from './binary-test-server.mts'
+import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'
 
 import type { DlxTestServer } from './binary-test-server.mts'
 

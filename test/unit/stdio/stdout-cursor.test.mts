@@ -3,10 +3,9 @@
  *
  *   - hideCursor() / showCursor() cursor visibility control
  *   - ensureCursorOnExit() idempotent exit-handler registration
- *   - integration, edge-case, and real-world usage scenarios
- *
- * Core stream output (writeLine/write/clearLine/cursorTo/isTTY/dimensions)
- * lives in stdout.test.mts.
+ *   - integration, edge-case, and real-world usage scenarios Core stream output
+ *     (writeLine/write/clearLine/cursorTo/isTTY/dimensions) lives in
+ *     stdout.test.mts.
  */
 
 import process from 'node:process'

@@ -1,13 +1,13 @@
 /**
  * @file Free-function bodies for the symbol-prefixed semantic `Logger` methods
- *   (`done`, `fail`, `info`, `skip`, `step`, `success`, `warn`). Each strips any
- *   leading status symbol from the message, re-prefixes it with the theme's
- *   colored symbol, writes to the appropriate stream (status messages to stderr,
- *   `step` to stdout), and updates the shared blank-line / call-count tracking
- *   via the exported logger symbols. Pulling these out of `./node` keeps the
- *   `Logger` class body under the file-size cap. The class retains one-line
- *   delegators that resolve `con` / `indent` / `symbols` from its private state
- *   and forward them here.
+ *   (`done`, `fail`, `info`, `skip`, `step`, `success`, `warn`). Each strips
+ *   any leading status symbol from the message, re-prefixes it with the theme's
+ *   colored symbol, writes to the appropriate stream (status messages to
+ *   stderr, `step` to stdout), and updates the shared blank-line / call-count
+ *   tracking via the exported logger symbols. Pulling these out of `./node`
+ *   keeps the `Logger` class body under the file-size cap. The class retains
+ *   one-line delegators that resolve `con` / `indent` / `symbols` from its
+ *   private state and forward them here.
  */
 
 import { ArrayPrototypeAt, ArrayPrototypeSlice } from '../primordials/array'
@@ -32,7 +32,8 @@ import type { LogSymbols } from './types'
  *
  * @param logger - The calling logger instance.
  * @param con - The logger's resolved console instance.
- * @param methodName - The `node:console` method to invoke (`log`, `error`, ...).
+ * @param methodName - The `node:console` method to invoke (`log`, `error`,
+ *   ...).
  * @param args - The arguments forwarded to the console method.
  * @param targetStream - The stream the method writes to.
  * @param indent - The resolved indentation prefix for `targetStream`.
@@ -48,13 +49,13 @@ export function applyMethod<T extends LoggerTrackable>(
   const text = ArrayPrototypeAt(args, 0)
   const hasText = typeof text === 'string'
   const logArgs = hasText
-    ? [applyLinePrefix(text, { prefix: indent }), ...ArrayPrototypeSlice(args, 1)]
+    ? [
+        applyLinePrefix(text, { prefix: indent }),
+        ...ArrayPrototypeSlice(args, 1),
+      ]
     : args
   ReflectApply(con[methodName] as (...a: unknown[]) => unknown, con, logArgs)
-  logger[lastWasBlankSymbol](
-    hasText && isBlankString(logArgs[0]),
-    targetStream,
-  )
+  logger[lastWasBlankSymbol](hasText && isBlankString(logArgs[0]), targetStream)
   logger[incLogCallCountSymbol]()
   return logger
 }

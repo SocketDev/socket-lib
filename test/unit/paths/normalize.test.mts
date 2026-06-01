@@ -5,11 +5,11 @@
  *   - toUnixPath() converts Windows paths to Unix-style POSIX paths for Git Bash
  *     tools
  *   - fromUnixPath() converts MSYS/Unix-style paths back to native Windows paths
- *
- *   Predicates (isAbsolute/isRelative/isUnixPath/isPath/isNodeModules) and path
- *   manipulation (splitPath/trimLeadingDotSlash/pathLikeToString/relativeResolve)
- *   plus shared edge cases live in normalize-predicates.test.mts.
- *   Used throughout Socket tools for cross-platform path handling.
+ *     Predicates (isAbsolute/isRelative/isUnixPath/isPath/isNodeModules) and
+ *     path manipulation
+ *     (splitPath/trimLeadingDotSlash/pathLikeToString/relativeResolve) plus
+ *     shared edge cases live in normalize-predicates.test.mts. Used throughout
+ *     Socket tools for cross-platform path handling.
  */
 
 import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'

@@ -4,10 +4,9 @@
  *   - writeLine() / write() write to the stdout stream
  *   - clearLine() / cursorTo() / clearScreenDown() terminal control
  *   - isTTY() stream detection (TTY vs pipe)
- *   - getColumns() / getRows() terminal dimension queries
- *
- * Cursor lifecycle (hideCursor/showCursor/ensureCursorOnExit) and
- * scenario tests live in stdout-cursor.test.mts.
+ *   - getColumns() / getRows() terminal dimension queries Cursor lifecycle
+ *     (hideCursor/showCursor/ensureCursorOnExit) and scenario tests live in
+ *     stdout-cursor.test.mts.
  */
 
 import process from 'node:process'

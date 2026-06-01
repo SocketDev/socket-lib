@@ -8,10 +8,9 @@
  *   - remove() deletes cached entries
  *   - clear() purges entire cache
  *   - withTmp() provides temporary cache directory Used by Socket tools for
- *     package tarball caching and content storage.
- *
- *   Integration, wildcard-pattern, and edge-case coverage lives in the sibling
- *   cacache-patterns.test.mts.
+ *     package tarball caching and content storage. Integration,
+ *     wildcard-pattern, and edge-case coverage lives in the sibling
+ *     cacache-patterns.test.mts.
  */
 
 import { describe, expect, it, vi } from 'vitest'
