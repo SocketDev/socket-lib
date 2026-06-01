@@ -6,7 +6,13 @@
  *   `downloadAndExtractTool` can hand the archive to `extractArchive`.
  */
 
-import { existsSync, mkdtempSync, readdirSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  readdirSync,
+  writeFileSync,
+} from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -76,10 +82,9 @@ describe.sequential('external-tools/from-download', () => {
      * (createWriteStream + readFileSync) raced under vitest's vm-context.
      */
     function buildTarFixture(scratchDir: string): Promise<Buffer> {
-      const fs = require('node:fs') as typeof import('node:fs')
       const packRoot = path.join(scratchDir, 'pack-root')
-      fs.mkdirSync(path.join(packRoot, 'source'), { recursive: true })
-      fs.writeFileSync(path.join(packRoot, 'source', 'hello.txt'), 'world')
+      mkdirSync(path.join(packRoot, 'source'), { recursive: true })
+      writeFileSync(path.join(packRoot, 'source', 'hello.txt'), 'world')
       return new Promise<Buffer>((resolve, reject) => {
         const chunks: Buffer[] = []
         const pack = tarFs.pack(packRoot)
@@ -112,9 +117,8 @@ describe.sequential('external-tools/from-download', () => {
       const tarBytes = await buildTarFixture(scratch)
       const { downloader } = makeFakeDownloader(tarBytes)
       const extractedDir = path.join(scratch, 'pre-empty')
-      const fs = require('node:fs') as typeof import('node:fs')
       // Pre-create the dir empty (simulates a prior interrupted setup).
-      fs.mkdirSync(extractedDir, { recursive: true })
+      mkdirSync(extractedDir, { recursive: true })
       expect(existsSync(extractedDir)).toBe(true)
       expect(readdirSync(extractedDir).length).toBe(0)
 
@@ -157,10 +161,9 @@ describe.sequential('external-tools/from-download', () => {
     it('forwards extractOptions.strip to extractArchive', async () => {
       // Build a tar wrapping `top/inner.txt`. With strip: 1, the
       // extracted tree should contain `inner.txt` directly.
-      const fs = require('node:fs') as typeof import('node:fs')
       const packRoot = path.join(scratch, 'strip-pack')
-      fs.mkdirSync(path.join(packRoot, 'top'), { recursive: true })
-      fs.writeFileSync(path.join(packRoot, 'top', 'inner.txt'), 'hi')
+      mkdirSync(path.join(packRoot, 'top'), { recursive: true })
+      writeFileSync(path.join(packRoot, 'top', 'inner.txt'), 'hi')
       const tarBytes = await new Promise<Buffer>((resolve, reject) => {
         const chunks: Buffer[] = []
         const pack = tarFs.pack(packRoot)

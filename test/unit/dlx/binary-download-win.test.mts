@@ -10,15 +10,16 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type * as PlatformModule from '../../../src/constants/platform'
+import type * as DownloadModule from '../../../src/http-request/download'
+
 vi.mock(import('../../../src/constants/platform'), async importOriginal => {
-  const actual =
-    await importOriginal<typeof import('../../../src/constants/platform')>()
+  const actual = await importOriginal<typeof PlatformModule>()
   return { ...actual, WIN32: true }
 })
 
 vi.mock(import('../../../src/http-request/download'), async importOriginal => {
-  const original =
-    await importOriginal<typeof import('../../../src/http-request/download')>()
+  const original = await importOriginal<typeof DownloadModule>()
   return {
     ...original,
     httpDownload: vi.fn(
@@ -26,9 +27,7 @@ vi.mock(import('../../../src/http-request/download'), async importOriginal => {
         // Write a known payload so SRI integrity computes deterministically.
         writeFileSync(destPath, Buffer.from('win-payload'))
         return { ok: true, status: 200, path: destPath } as unknown as Awaited<
-          ReturnType<
-            typeof import('../../../src/http-request/download').httpDownload
-          >
+          ReturnType<typeof DownloadModule.httpDownload>
         >
       },
     ),

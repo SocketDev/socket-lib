@@ -19,28 +19,28 @@ export type Libc = 'glibc' | 'musl'
  */
 export type Platform = NodeJS.Platform
 
-let _arch: Arch | undefined
+let memoizedArch: Arch | undefined
 
 /**
  * Get the current CPU architecture (memoized).
  */
 export function getArch(): Arch {
-  if (_arch === undefined) {
-    _arch = getNodeOs().arch()
+  if (memoizedArch === undefined) {
+    memoizedArch = getNodeOs().arch()
   }
-  return _arch
+  return memoizedArch
 }
 
-let _platform: Platform | undefined
+let memoizedPlatform: Platform | undefined
 
 /**
  * Get the current platform (memoized).
  */
 export function getPlatform(): Platform {
-  if (_platform === undefined) {
-    _platform = getNodeOs().platform()
+  if (memoizedPlatform === undefined) {
+    memoizedPlatform = getNodeOs().platform()
   }
-  return _platform
+  return memoizedPlatform
 }
 
 // Platform detection (memoized at module load).

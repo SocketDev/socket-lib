@@ -21,13 +21,14 @@ import { httpDownload } from '../../../src/http-request/download'
 import { getReleaseAssetUrl } from '../../../src/releases/github-asset-url'
 import { getLatestRelease } from '../../../src/releases/github-listing'
 
+import type * as DownloadModule from '../../../src/http-request/download'
+import type * as GitHubAssetUrlModule from '../../../src/releases/github-asset-url'
+import type * as GitHubListingModule from '../../../src/releases/github-listing'
+
 vi.mock(
   import('../../../src/releases/github-asset-url'),
   async importOriginal => {
-    const original =
-      await importOriginal<
-        typeof import('../../../src/releases/github-asset-url')
-      >()
+    const original = await importOriginal<typeof GitHubAssetUrlModule>()
     return {
       ...original,
       getReleaseAssetUrl: vi.fn(),
@@ -38,10 +39,7 @@ vi.mock(
 vi.mock(
   import('../../../src/releases/github-listing'),
   async importOriginal => {
-    const original =
-      await importOriginal<
-        typeof import('../../../src/releases/github-listing')
-      >()
+    const original = await importOriginal<typeof GitHubListingModule>()
     return {
       ...original,
       getLatestRelease: vi.fn(),
@@ -50,17 +48,18 @@ vi.mock(
 )
 
 vi.mock(import('../../../src/http-request/download'), async importOriginal => {
-  const original =
-    await importOriginal<typeof import('../../../src/http-request/download')>()
+  const original = await importOriginal<typeof DownloadModule>()
   return {
     ...original,
     httpDownload: vi.fn(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      async (_url: string, destPath: string, _opts?: any) => {
+      async (
+        _url: string,
+        destPath: string,
+        _opts?: Record<string, unknown> | undefined,
+      ) => {
         // Write a real file at destPath so subsequent fs ops succeed.
         writeFileSync(destPath, 'fake-binary-content')
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return { ok: true, status: 200, path: destPath } as any
+        return { ok: true, status: 200, path: destPath }
       },
     ),
   }

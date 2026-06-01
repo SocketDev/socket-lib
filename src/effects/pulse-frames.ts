@@ -6,6 +6,9 @@
 
 import { ANSI_BOLD, ANSI_DIM, ANSI_RESET } from '../ansi/constants'
 
+import type { ThemeName } from '../themes/themes'
+import type { Theme } from '../themes/types'
+
 export type SocketFramesOptions = {
   readonly baseColor?: readonly [number, number, number] | undefined
   readonly interval?: number | undefined
@@ -14,10 +17,7 @@ export type SocketFramesOptions = {
    * etc.) or a Theme object. Note: Currently frames only contain brightness
    * modifiers. Colors are applied by yocto-spinner based on spinner.color.
    */
-  readonly theme?:
-    | import('../themes/types').Theme
-    | import('../themes/themes').ThemeName
-    | undefined
+  readonly theme?: Theme | ThemeName | undefined
 }
 
 /**

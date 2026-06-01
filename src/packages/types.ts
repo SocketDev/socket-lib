@@ -6,6 +6,7 @@
  */
 
 import type { CategoryString } from '../eco/types'
+import type { EditablePackageJsonInstance } from './edit'
 
 // Type for package.json exports field.
 type PackageExports = {
@@ -13,7 +14,7 @@ type PackageExports = {
 }
 
 // Re-export the EditablePackageJson instance type for convenient access
-export type EditablePackageJson = import('./edit').EditablePackageJsonInstance
+export type EditablePackageJson = EditablePackageJsonInstance
 
 /**
  * Extended PackageJson type based on NPMCliPackageJson.Content with

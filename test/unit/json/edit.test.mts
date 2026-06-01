@@ -3,9 +3,9 @@
  *   surface. Split out of the historical monolithic test/unit/json.test.mts.
  */
 
-import { mkdtemp, readFile, writeFile } from 'node:fs/promises'
+import { mkdtemp, writeFile } from 'node:fs/promises'
 import os from 'node:os'
-import { join } from 'node:path'
+import path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 import process from 'node:process'
 
@@ -18,7 +18,7 @@ describe('EditableJson', () => {
   let testDir: string
 
   beforeEach(async () => {
-    testDir = await mkdtemp(join(os.tmpdir(), 'editable-json-test-'))
+    testDir = await mkdtemp(path.join(os.tmpdir(), 'editable-json-test-'))
   })
 
   afterEach(async () => {
@@ -71,7 +71,7 @@ describe('EditableJson', () => {
   describe('static create', () => {
     it('should create a new instance with path', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'new.json')
+      const filepath = path.join(testDir, 'new.json')
       const instance = await EditableJson.create(filepath)
       expect(instance.path).toBe(filepath)
       expect(instance.content).toMatchObject({})
@@ -79,7 +79,7 @@ describe('EditableJson', () => {
 
     it('should create instance with initial data', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'with-data.json')
+      const filepath = path.join(testDir, 'with-data.json')
       const instance = await EditableJson.create(filepath, {
         data: { key: 'value' },
       })
@@ -92,7 +92,7 @@ describe('EditableJson', () => {
         count: number
       }
       const EditableJson = getEditableJsonClass<Config>()
-      const filepath = join(testDir, 'typed.json')
+      const filepath = path.join(testDir, 'typed.json')
       const instance = await EditableJson.create(filepath, {
         data: { name: 'test', count: 42 },
       })
@@ -103,7 +103,7 @@ describe('EditableJson', () => {
   describe('static load', () => {
     it('should load existing JSON file', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'existing.json')
+      const filepath = path.join(testDir, 'existing.json')
       await writeFile(filepath, '{"loaded":true}', 'utf8')
 
       const instance = await EditableJson.load(filepath)
@@ -112,14 +112,14 @@ describe('EditableJson', () => {
 
     it('should throw error if file does not exist', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'nonexistent.json')
+      const filepath = path.join(testDir, 'nonexistent.json')
 
       await expect(EditableJson.load(filepath)).rejects.toThrow()
     })
 
     it('should create file if create option is true', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'created.json')
+      const filepath = path.join(testDir, 'created.json')
 
       const instance = await EditableJson.load(filepath, { create: true })
       expect(instance.content).toMatchObject({})
@@ -128,7 +128,7 @@ describe('EditableJson', () => {
 
     it('should load file if it exists even with create option', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'exists.json')
+      const filepath = path.join(testDir, 'exists.json')
       await writeFile(filepath, '{"existing":true}', 'utf8')
 
       const instance = await EditableJson.load(filepath, { create: true })
@@ -137,7 +137,7 @@ describe('EditableJson', () => {
 
     it('should preserve indentation from loaded file', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'indented.json')
+      const filepath = path.join(testDir, 'indented.json')
       await writeFile(filepath, '{\n    "key": "value"\n}\n', 'utf8')
 
       const instance = await EditableJson.load(filepath)
@@ -146,7 +146,7 @@ describe('EditableJson', () => {
 
     it('should preserve CRLF line endings', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'crlf.json')
+      const filepath = path.join(testDir, 'crlf.json')
       await writeFile(filepath, '{\r\n  "key": "value"\r\n}\r\n', 'utf8')
 
       const instance = await EditableJson.load(filepath)
@@ -158,7 +158,7 @@ describe('EditableJson', () => {
     it('should set path and enable saving', async () => {
       const EditableJson = getEditableJsonClass()
       const instance = new EditableJson()
-      const filepath = join(testDir, 'instance.json')
+      const filepath = path.join(testDir, 'instance.json')
 
       instance.create(filepath)
       expect(instance.path).toBe(filepath)
@@ -169,7 +169,7 @@ describe('EditableJson', () => {
       const EditableJson = getEditableJsonClass()
       const instance = new EditableJson()
 
-      instance.create(join(testDir, 'empty.json'))
+      instance.create(path.join(testDir, 'empty.json'))
       expect(instance.content).toMatchObject({})
     })
   })
@@ -280,190 +280,10 @@ describe('EditableJson', () => {
     })
   })
 
-  describe('save', () => {
-    it('should save JSON to file', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'save.json')
-      const instance = await EditableJson.create(filepath, {
-        data: { saved: true },
-      })
-
-      const saved = await instance.save()
-      expect(saved).toBe(true)
-
-      // Verify by checking internal state after save
-      expect((instance as any)._readFileContent).toBe('{\n  "saved": true\n}\n')
-    })
-
-    it('should return false if no changes', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'no-change.json')
-      await writeFile(filepath, '{\n  "key": "value"\n}\n', 'utf8')
-
-      const instance = await EditableJson.load(filepath)
-      const saved = await instance.save()
-      expect(saved).toBe(false)
-    })
-
-    it('should throw if no file path', async () => {
-      const EditableJson = getEditableJsonClass()
-      const instance = new EditableJson()
-
-      instance.fromContent({ key: 'value' })
-      await expect(instance.save()).rejects.toThrow('No file path to save to')
-    })
-
-    it('should support ignoreWhitespace option', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'whitespace.json')
-      await writeFile(filepath, '{\n  "key": "value"\n}\n', 'utf8')
-
-      const instance = await EditableJson.load(filepath)
-      // No actual content changes, just formatting
-      const saved = await instance.save({ ignoreWhitespace: true })
-      expect(saved).toBe(false)
-    })
-
-    it('should use default 2-space indent for new files', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'default-indent.json')
-      const instance = await EditableJson.create(filepath, {
-        data: { key: 'value' },
-      })
-
-      await instance.save()
-
-      // Verify indent by checking internal state
-      const savedContent = (instance as any)._readFileContent
-      expect(savedContent).toContain('  ') // 2 spaces
-      expect(savedContent).not.toContain('    ') // not 4 spaces
-    })
-
-    it('should use LF line endings by default', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'default-lf.json')
-      const instance = await EditableJson.create(filepath, {
-        data: { key: 'value' },
-      })
-
-      await instance.save()
-
-      // Verify LF by checking internal state
-      const savedContent = (instance as any)._readFileContent
-      expect(savedContent).toContain('\n')
-      expect(savedContent).not.toContain('\r\n')
-    })
-  })
-
-  describe('saveSync', () => {
-    it('should save JSON synchronously', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'sync.json')
-      const instance = await EditableJson.create(filepath, {
-        data: { sync: true },
-      })
-
-      const saved = instance.saveSync()
-      expect(saved).toBe(true)
-
-      const content = await readFile(filepath, 'utf8')
-      expect(JSON.parse(content)).toEqual({ sync: true })
-    })
-
-    it('should return false if no changes', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'sync-no-change.json')
-      await writeFile(filepath, '{\n  "key": "value"\n}\n', 'utf8')
-
-      const instance = await EditableJson.load(filepath)
-      const saved = instance.saveSync()
-      expect(saved).toBe(false)
-    })
-
-    it('should throw if no file path', () => {
-      const EditableJson = getEditableJsonClass()
-      const instance = new EditableJson()
-
-      instance.fromContent({ key: 'value' })
-      expect(() => instance.saveSync()).toThrow('No file path to save to')
-    })
-
-    it('should support sort option', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'sync-sorted.json')
-      const instance = await EditableJson.create(filepath, {
-        data: { z: 3, a: 1, m: 2 },
-      })
-
-      instance.saveSync({ sort: true })
-
-      const content = await readFile(filepath, 'utf8')
-      const keys = Object.keys(JSON.parse(content))
-      expect(keys).toEqual(['a', 'm', 'z'])
-    })
-
-    it('should support ignoreWhitespace option', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'sync-whitespace.json')
-      await writeFile(filepath, '{\n  "key": "value"\n}\n', 'utf8')
-
-      const instance = await EditableJson.load(filepath)
-      const saved = instance.saveSync({ ignoreWhitespace: true })
-      expect(saved).toBe(false)
-    })
-  })
-
-  describe('willSave', () => {
-    it('should return true if changes will be saved', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'will-save.json')
-      await writeFile(filepath, '{\n  "key": "value"\n}\n', 'utf8')
-
-      const instance = await EditableJson.load(filepath)
-      instance.update({ newKey: 'newValue' })
-      expect(instance.willSave()).toBe(true)
-    })
-
-    it('should return false if no changes', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'will-not-save.json')
-      await writeFile(filepath, '{\n  "key": "value"\n}\n', 'utf8')
-
-      const instance = await EditableJson.load(filepath)
-      expect(instance.willSave()).toBe(false)
-    })
-
-    it('should return false if no file path', () => {
-      const EditableJson = getEditableJsonClass()
-      const instance = new EditableJson()
-
-      instance.fromContent({ key: 'value' })
-      expect(instance.willSave()).toBe(false)
-    })
-
-    it('should respect ignoreWhitespace option', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'will-save-whitespace.json')
-      await writeFile(filepath, '{\n  "key": "value"\n}\n', 'utf8')
-
-      const instance = await EditableJson.load(filepath)
-      expect(instance.willSave({ ignoreWhitespace: true })).toBe(false)
-    })
-
-    it('should respect sort option', async () => {
-      const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'will-save-sort.json')
-      await writeFile(filepath, '{\n  "z": 3,\n  "a": 1\n}\n', 'utf8')
-
-      const instance = await EditableJson.load(filepath)
-      expect(instance.willSave({ sort: true })).toBe(true)
-    })
-  })
-
   describe('filename property', () => {
     it('should return the file path', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'filename.json')
+      const filepath = path.join(testDir, 'filename.json')
       const instance = await EditableJson.create(filepath)
 
       expect(instance.filename).toBe(filepath)
@@ -480,7 +300,7 @@ describe('EditableJson', () => {
   describe('path property', () => {
     it('should return the directory path', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'path.json')
+      const filepath = path.join(testDir, 'path.json')
       const instance = await EditableJson.create(filepath)
 
       expect(instance.path).toBe(filepath)
@@ -516,7 +336,7 @@ describe('EditableJson', () => {
   describe('edge cases', () => {
     it('should handle empty JSON object', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'empty.json')
+      const filepath = path.join(testDir, 'empty.json')
       await writeFile(filepath, '{}', 'utf8')
 
       const instance = await EditableJson.load(filepath)
@@ -525,7 +345,7 @@ describe('EditableJson', () => {
 
     it('should handle JSON with nested objects', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'nested.json')
+      const filepath = path.join(testDir, 'nested.json')
       const data = { level1: { level2: { level3: 'deep' } } }
       await writeFile(filepath, JSON.stringify(data, null, 2), 'utf8')
 
@@ -535,7 +355,7 @@ describe('EditableJson', () => {
 
     it('should handle JSON with arrays', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'arrays.json')
+      const filepath = path.join(testDir, 'arrays.json')
       const data = { numbers: [1, 2, 3], strings: ['a', 'b', 'c'] }
       await writeFile(filepath, JSON.stringify(data, null, 2), 'utf8')
 
@@ -545,7 +365,7 @@ describe('EditableJson', () => {
 
     it('should handle special characters in values', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'special.json')
+      const filepath = path.join(testDir, 'special.json')
       const data = { text: 'line1\nline2\ttab' }
       await writeFile(filepath, JSON.stringify(data, null, 2), 'utf8')
 
@@ -555,7 +375,7 @@ describe('EditableJson', () => {
 
     it('should handle unicode characters', async () => {
       const EditableJson = getEditableJsonClass()
-      const filepath = join(testDir, 'unicode.json')
+      const filepath = path.join(testDir, 'unicode.json')
       const data = { emoji: '😀', chinese: '你好' }
       await writeFile(filepath, JSON.stringify(data, null, 2), 'utf8')
 

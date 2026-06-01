@@ -9,7 +9,7 @@ import { getSmolPrimordial } from '../smol/primordial'
 
 import { uncurryThis } from './uncurry'
 
-const _smolPrimordial = getSmolPrimordial()
+const smolPrimordial = getSmolPrimordial()
 
 // ─── Constructors ──────────────────────────────────────────────────────
 export const ArrayCtor: ArrayConstructor = Array
@@ -50,7 +50,7 @@ export const ArrayFromAsync: ArrayFromAsync | undefined = (
 // `arrayIsArray` is a Fast API binding — a single map-pointer
 // comparison that V8 inlines into JIT'd callers. Spec semantics
 // match Array.isArray (excludes typed arrays + array-like objects).
-export const ArrayIsArray = _smolPrimordial?.arrayIsArray ?? Array.isArray
+export const ArrayIsArray = smolPrimordial?.arrayIsArray ?? Array.isArray
 export const ArrayOf = Array.of
 
 // ─── ArrayBuffer (static) ──────────────────────────────────────────────
@@ -140,28 +140,28 @@ export const ArrayPrototypeWith = uncurryThis(Array.prototype.with) as <T>(
 // In some engines `.next` lives on the immediate prototype; in others it
 // lives on a shared ancestor. Walk up until we find the level that owns
 // the method so `uncurryThis` grabs the same one regardless of engine.
-const _anyIterator = new Map().keys() as Iterator<unknown>
-let _iteratorLookup: object | null = Object.getPrototypeOf(_anyIterator)
+const anyIterator = new Map().keys() as Iterator<unknown>
+let iteratorLookup: object | null = Object.getPrototypeOf(anyIterator)
 while (
-  _iteratorLookup &&
-  typeof (_iteratorLookup as { next?: unknown | undefined }).next !== 'function'
+  iteratorLookup &&
+  typeof (iteratorLookup as { next?: unknown | undefined }).next !== 'function'
 ) {
   /* c8 ignore next - Modern V8 puts Iterator.prototype one hop up the chain
      so the first check already finds .next; the walk-further branch fires
      only on hypothetical engines where the prototype layout differs. */
-  _iteratorLookup = Object.getPrototypeOf(_iteratorLookup)
+  iteratorLookup = Object.getPrototypeOf(iteratorLookup)
 }
-const _iteratorProto = _iteratorLookup as {
+const iteratorProto = iteratorLookup as {
   next: (this: Iterator<unknown>) => IteratorResult<unknown>
   return?:
     | ((this: Iterator<unknown>, value?: unknown) => IteratorResult<unknown>)
     | undefined
 }
-export const IteratorPrototypeNext = uncurryThis(_iteratorProto.next)
+export const IteratorPrototypeNext = uncurryThis(iteratorProto.next)
 // Iterator.prototype.return is always a function in modern V8.
 /* c8 ignore start */
 export const IteratorPrototypeReturn =
-  typeof _iteratorProto.return === 'function'
-    ? uncurryThis(_iteratorProto.return)
+  typeof iteratorProto.return === 'function'
+    ? uncurryThis(iteratorProto.return)
     : undefined
 /* c8 ignore stop */

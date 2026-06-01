@@ -11,10 +11,10 @@ import { maintainedNodeVersions } from './maintained-node-versions'
 import { NumberParseInt } from '../primordials/number'
 const NODE_VERSION = process.version
 
-let _nodeDisableSigusr1Flags: string[]
-let _nodeHardenFlags: string[]
-let _nodeNoWarningsFlags: string[]
-let _nodePermissionFlags: string[]
+let nodeDisableSigusr1Flags: string[]
+let nodeHardenFlags: string[]
+let nodeNoWarningsFlags: string[]
+let nodePermissionFlags: string[]
 
 /**
  * Get the absolute path to the currently running Node.js binary.
@@ -42,7 +42,7 @@ export function getMaintainedNodeVersions() {
  * @returns A non-empty array of CLI flags suitable for passing to `node`.
  */
 export function getNodeDisableSigusr1Flags(): string[] {
-  if (_nodeDisableSigusr1Flags === undefined) {
+  if (nodeDisableSigusr1Flags === undefined) {
     // SIGUSR1 is reserved by Node.js for starting the debugger/inspector.
     // In production CLI environments, we want to prevent debugger attachment.
     //
@@ -53,12 +53,12 @@ export function getNodeDisableSigusr1Flags(): string[] {
     // --no-inspect is a fallback that still creates the signal handler thread but blocks later.
     /* c8 ignore start - --no-inspect fallback fires only on Node
        runtimes pre-v22.14 / v23.7 / v24.8; tests run on Node 24+. */
-    _nodeDisableSigusr1Flags = supportsNodeDisableSigusr1Flag()
+    nodeDisableSigusr1Flags = supportsNodeDisableSigusr1Flag()
       ? ['--disable-sigusr1']
       : ['--no-inspect']
     /* c8 ignore stop */
   }
-  return _nodeDisableSigusr1Flags
+  return nodeDisableSigusr1Flags
 }
 
 /**
@@ -71,7 +71,7 @@ export function getNodeDisableSigusr1Flags(): string[] {
  * @returns A non-empty array of CLI flags suitable for passing to `node`.
  */
 export function getNodeHardenFlags(): string[] {
-  if (_nodeHardenFlags === undefined) {
+  if (nodeHardenFlags === undefined) {
     const major = getNodeMajorVersion()
     const flags: string[] = ['--disable-proto=delete']
 
@@ -97,9 +97,9 @@ export function getNodeHardenFlags(): string[] {
     }
     /* c8 ignore stop */
 
-    _nodeHardenFlags = flags
+    nodeHardenFlags = flags
   }
-  return _nodeHardenFlags
+  return nodeHardenFlags
 }
 
 /**
@@ -135,10 +135,10 @@ export function getNodeMinorVersion(): number {
  * @returns A non-empty array of CLI flags suitable for passing to `node`.
  */
 export function getNodeNoWarningsFlags(): string[] {
-  if (_nodeNoWarningsFlags === undefined) {
-    _nodeNoWarningsFlags = ['--no-warnings', '--no-deprecation']
+  if (nodeNoWarningsFlags === undefined) {
+    nodeNoWarningsFlags = ['--no-warnings', '--no-deprecation']
   }
-  return _nodeNoWarningsFlags
+  return nodeNoWarningsFlags
 }
 
 /**
@@ -162,12 +162,12 @@ export function getNodePatchVersion(): number {
  * @returns The permission flag list (possibly empty) for the current runtime.
  */
 export function getNodePermissionFlags(): string[] {
-  if (_nodePermissionFlags === undefined) {
+  if (nodePermissionFlags === undefined) {
     const major = getNodeMajorVersion()
     // Node.js 24+ requires explicit permission grants when using --permission flag.
     // npm needs filesystem access to read package.json files and node_modules.
     if (major >= 24) {
-      _nodePermissionFlags = [
+      nodePermissionFlags = [
         // Allow reading from the entire filesystem (npm needs to read package.json, node_modules, etc.).
         '--allow-fs-read=*',
         // Allow writing to the entire filesystem (npm needs to write to node_modules, cache, etc.).
@@ -179,11 +179,11 @@ export function getNodePermissionFlags(): string[] {
       // or uses different permission API.
       /* c8 ignore start */
     } else {
-      _nodePermissionFlags = []
+      nodePermissionFlags = []
     }
     /* c8 ignore stop */
   }
-  return _nodePermissionFlags
+  return nodePermissionFlags
 }
 
 /**

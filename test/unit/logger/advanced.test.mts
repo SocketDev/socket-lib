@@ -12,8 +12,6 @@
  *   - Complex indentation scenarios and edge cases
  */
 
-/* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */
-
 import { Writable } from 'node:stream'
 
 import { Logger } from '../../../src/logger/node'
@@ -142,8 +140,9 @@ describe.sequential('Logger - Advanced Features', () => {
       logger.error('error')
       logger.warn('warn')
       // debug() is dynamically added - test if available
-      if (typeof (logger as any).debug === 'function') {
-        ;(logger as any).debug('debug')
+      const maybeDebug = (logger as unknown as Record<string, unknown>)['debug']
+      if (typeof maybeDebug === 'function') {
+        ;(maybeDebug as (...args: unknown[]) => void).call(logger, 'debug')
       }
       // Expect at least 3 calls (log, error, warn)
       expect(logger.logCallCount).toBeGreaterThanOrEqual(3)
@@ -252,6 +251,7 @@ describe.sequential('Logger - Advanced Features', () => {
     })
 
     it('should strip existing symbols', () => {
+      // oxlint-disable-next-line socket/no-status-emoji -- test asserts the leading symbol is stripped and re-added.
       logger.success('✔ Already has symbol')
       const output = stderrData.join('')
       // Symbol should be stripped and re-added

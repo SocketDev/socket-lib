@@ -152,10 +152,17 @@ describe('signal-exit', () => {
     })
 
     it('should throw TypeError for non-function callback', () => {
-      expect(() => onExit(undefined as any)).toThrow(TypeError)
-      expect(() => onExit(undefined as any)).toThrow(TypeError)
-      expect(() => onExit(42 as any)).toThrow(TypeError)
-      expect(() => onExit('string' as any)).toThrow(TypeError)
+      type ExitCallback = Parameters<typeof onExit>[0]
+      expect(() => onExit(undefined as unknown as ExitCallback)).toThrow(
+        TypeError,
+      )
+      expect(() => onExit(undefined as unknown as ExitCallback)).toThrow(
+        TypeError,
+      )
+      expect(() => onExit(42 as unknown as ExitCallback)).toThrow(TypeError)
+      expect(() => onExit('string' as unknown as ExitCallback)).toThrow(
+        TypeError,
+      )
     })
 
     it('should allow multiple handlers', () => {

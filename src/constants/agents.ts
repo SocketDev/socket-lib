@@ -16,37 +16,39 @@ export const NPX = 'npx' // # socket-hook: allow npx
 
 // NPM binary path - resolved once at runtime using which.
 // Shared between NPM_BIN_PATH and NPM_REAL_EXEC_PATH to avoid duplicate which.sync calls.
-const _npmBinPath = /*@__PURE__*/ (() => {
+export function resolveNpmBinPath(): string | undefined {
   try {
     return which.sync('npm', { nothrow: true }) || undefined
-    /* c8 ignore start - which.sync throw catch; module-init IIFE
+    /* c8 ignore start - which.sync throw catch; module-init helper
        runs once at load time before tests can intercept. */
   } catch {
     return undefined
   }
   /* c8 ignore stop */
-})()
+}
 
-export const NPM_BIN_PATH = _npmBinPath || 'npm'
+const npmBinPath = /*@__PURE__*/ resolveNpmBinPath()
+
+export const NPM_BIN_PATH = npmBinPath || 'npm'
 
 // NPM CLI entry point - resolved at runtime from npm bin location.
 // NOTE: This is kept for backward compatibility but NPM_BIN_PATH should be used instead
 // because cli.js exports a function that must be invoked, not executed directly.
-export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
+export function resolveNpmRealExecPath(): string | undefined {
   try {
     // Reuse cached npm bin path to avoid duplicate which.sync call.
-    /* c8 ignore start - Module-init IIFE; only reachable when
+    /* c8 ignore start - Module-init helper; only reachable when
        which.sync returns null at module load. */
-    if (!_npmBinPath) {
+    if (!npmBinPath) {
       return undefined
     }
     /* c8 ignore stop */
-    const { existsSync } = /*@__PURE__*/ require('node:fs')
-    const path = /*@__PURE__*/ require('node:path')
+    const { existsSync } = require('node:fs')
+    const path = require('node:path')
     // npm bin is typically at: /path/to/node/bin/npm
     // cli.js is at: /path/to/node/lib/node_modules/npm/lib/cli.js
     // /path/to/node/bin
-    const npmDir = path.dirname(_npmBinPath)
+    const npmDir = path.dirname(npmBinPath)
     const nodeModulesPath = path.join(
       npmDir,
       '..',
@@ -66,7 +68,9 @@ export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ (() => {
     return undefined
   }
   /* c8 ignore stop */
-})()
+}
+
+export const NPM_REAL_EXEC_PATH = /*@__PURE__*/ resolveNpmRealExecPath()
 
 // NPM registry URL.
 export const NPM_REGISTRY_URL = 'https://registry.npmjs.org'

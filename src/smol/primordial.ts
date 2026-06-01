@@ -88,21 +88,21 @@ export interface SmolPrimordialBinding {
   stringIsWellFormed(s: string): boolean
 }
 
-let _smolPrimordial: SmolPrimordialBinding | undefined
-let _smolPrimordialProbed = false
+let smolPrimordial: SmolPrimordialBinding | undefined
+let smolPrimordialProbed = false
 
 /**
  * Returns `node:smol-primordial` when running on the smol Node binary,
  * otherwise `undefined`. Result is cached across calls.
  */
 export function getSmolPrimordial(): SmolPrimordialBinding | undefined {
-  if (!_smolPrimordialProbed) {
-    _smolPrimordialProbed = true
+  if (!smolPrimordialProbed) {
+    smolPrimordialProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-primordial')) {
-      _smolPrimordial = require('node:smol-primordial') as SmolPrimordialBinding
+      smolPrimordial = require('node:smol-primordial') as SmolPrimordialBinding
     }
     /* c8 ignore stop */
   }
-  return _smolPrimordial
+  return smolPrimordial
 }

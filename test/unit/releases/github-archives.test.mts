@@ -6,10 +6,10 @@
  *   wrapping.
  */
 
-import { randomUUID } from 'node:crypto'
+import crypto from 'node:crypto'
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
-import { join } from 'node:path'
+import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -19,8 +19,10 @@ import {
 } from '../../../src/releases/github-archives'
 
 import { extractArchive } from '../../../src/archives/extract'
-import { safeDeleteSync } from '../../../src/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 import { downloadReleaseAsset } from '../../../src/releases/github-downloads'
+
+import type * as ExtractModule from '../../../src/archives/extract'
 
 // Mock at the resolved path the SUT imports (relative within src/).
 vi.mock(import('../../../src/releases/github-downloads'), () => ({
@@ -40,8 +42,7 @@ vi.mock(import('../../../src/releases/github-downloads'), () => ({
 }))
 
 vi.mock(import('../../../src/archives/extract'), async importOriginal => {
-  const original =
-    await importOriginal<typeof import('../../../src/archives/extract')>()
+  const original = await importOriginal<typeof ExtractModule>()
   return {
     ...original,
     extractArchive: vi.fn(async () => {}),
@@ -57,21 +58,24 @@ describe.sequential('releases/github-archives', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = join(os.tmpdir(), `socket-lib-archives-test-${randomUUID()}`)
+    testDir = path.join(
+      os.tmpdir(),
+      `socket-lib-archives-test-${crypto.randomUUID()}`,
+    )
     mkdirSync(testDir, { recursive: true })
     vi.mocked(downloadReleaseAsset).mockClear()
     vi.mocked(extractArchive).mockClear()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     if (existsSync(testDir)) {
-      safeDeleteSync(testDir, { force: true })
+      await safeDelete(testDir, { force: true })
     }
   })
 
   describe('downloadAndExtractArchive', () => {
     it('downloads + extracts and returns the output dir on success', async () => {
-      const out = join(testDir, 'extract')
+      const out = path.join(testDir, 'extract')
       const result = await downloadAndExtractArchive(
         'v1.0.0',
         'data-v1.0.0.tar.gz',
@@ -85,7 +89,7 @@ describe.sequential('releases/github-archives', () => {
     })
 
     it('honors explicit format option for extension picking (zip)', async () => {
-      const out = join(testDir, 'fmt-zip')
+      const out = path.join(testDir, 'fmt-zip')
       await downloadAndExtractArchive('v1', 'asset', out, REPO, {
         format: 'zip',
         quiet: true,
@@ -95,7 +99,7 @@ describe.sequential('releases/github-archives', () => {
     })
 
     it('honors tar.gz format option (suffix kept literal)', async () => {
-      const out = join(testDir, 'fmt-targz')
+      const out = path.join(testDir, 'fmt-targz')
       await downloadAndExtractArchive('v1', 'asset', out, REPO, {
         format: 'tar.gz',
         quiet: true,
@@ -105,7 +109,7 @@ describe.sequential('releases/github-archives', () => {
     })
 
     it('detects tar.gz from a string asset pattern', async () => {
-      const out = join(testDir, 'fmt-detect')
+      const out = path.join(testDir, 'fmt-detect')
       await downloadAndExtractArchive('v1', 'thing-v1.tar.gz', out, REPO, {
         quiet: true,
       })
@@ -114,7 +118,7 @@ describe.sequential('releases/github-archives', () => {
     })
 
     it('falls back to .archive when format and pattern give no signal', async () => {
-      const out = join(testDir, 'fmt-fallback')
+      const out = path.join(testDir, 'fmt-fallback')
       // AssetPattern object — detectArchiveFormat only inspects strings.
       await downloadAndExtractArchive(
         'v1',
@@ -134,14 +138,14 @@ describe.sequential('releases/github-archives', () => {
       vi.mocked(extractArchive).mockImplementationOnce(async () => {
         throw new Error('bad-archive')
       })
-      const out = join(testDir, 'extract-fail')
+      const out = path.join(testDir, 'extract-fail')
       await expect(
         downloadAndExtractArchive('v1', 'a.tar.gz', out, REPO, { quiet: true }),
       ).rejects.toThrow(/Failed to extract archive/)
     })
 
     it('cleans up the temp archive file after extraction', async () => {
-      const out = join(testDir, 'cleanup-on')
+      const out = path.join(testDir, 'cleanup-on')
       await downloadAndExtractArchive('v1', 'a.zip', out, REPO, {
         quiet: true,
       })
@@ -150,7 +154,7 @@ describe.sequential('releases/github-archives', () => {
     })
 
     it('keeps the temp archive when cleanup:false', async () => {
-      const out = join(testDir, 'cleanup-off')
+      const out = path.join(testDir, 'cleanup-off')
       await downloadAndExtractArchive('v1', 'a.zip', out, REPO, {
         cleanup: false,
         quiet: true,
@@ -160,14 +164,14 @@ describe.sequential('releases/github-archives', () => {
     })
 
     it('runs the non-quiet log path without throwing', async () => {
-      const out = join(testDir, 'verbose')
+      const out = path.join(testDir, 'verbose')
       await expect(
         downloadAndExtractArchive('v1', 'a.tar', out, REPO, { quiet: false }),
       ).resolves.toBe(out)
     })
 
     it('uses default options when called with no options object', async () => {
-      const out = join(testDir, 'no-opts')
+      const out = path.join(testDir, 'no-opts')
       await expect(
         downloadAndExtractArchive('v1', 'a.zip', out, REPO),
       ).resolves.toBe(out)
@@ -176,7 +180,7 @@ describe.sequential('releases/github-archives', () => {
 
   describe('downloadAndExtractZip', () => {
     it('downloads + extracts and returns the output dir', async () => {
-      const out = join(testDir, 'zip-ok')
+      const out = path.join(testDir, 'zip-ok')
       const result = await downloadAndExtractZip('v1', 'a.zip', out, REPO, {
         quiet: true,
       })
@@ -184,7 +188,7 @@ describe.sequential('releases/github-archives', () => {
     })
 
     it('writes to a __temp_download__.zip file', async () => {
-      const out = join(testDir, 'zip-tempname')
+      const out = path.join(testDir, 'zip-tempname')
       await downloadAndExtractZip('v1', 'a.zip', out, REPO, { quiet: true })
       const args = vi.mocked(downloadReleaseAsset).mock.calls[0]!
       expect((args[2] as string).endsWith('__temp_download__.zip')).toBe(true)
@@ -194,21 +198,21 @@ describe.sequential('releases/github-archives', () => {
       vi.mocked(extractArchive).mockImplementationOnce(async () => {
         throw new Error('bad-zip')
       })
-      const out = join(testDir, 'zip-fail')
+      const out = path.join(testDir, 'zip-fail')
       await expect(
         downloadAndExtractZip('v1', 'a.zip', out, REPO, { quiet: true }),
       ).rejects.toThrow(/Failed to extract zip file/)
     })
 
     it('cleans up the temp zip file by default', async () => {
-      const out = join(testDir, 'zip-cleanup')
+      const out = path.join(testDir, 'zip-cleanup')
       await downloadAndExtractZip('v1', 'a.zip', out, REPO, { quiet: true })
       const args = vi.mocked(downloadReleaseAsset).mock.calls[0]!
       expect(existsSync(args[2] as string)).toBe(false)
     })
 
     it('keeps the temp zip file when cleanup:false', async () => {
-      const out = join(testDir, 'zip-keep')
+      const out = path.join(testDir, 'zip-keep')
       await downloadAndExtractZip('v1', 'a.zip', out, REPO, {
         cleanup: false,
         quiet: true,
@@ -218,7 +222,7 @@ describe.sequential('releases/github-archives', () => {
     })
 
     it('runs the non-quiet log path without throwing', async () => {
-      const out = join(testDir, 'zip-verbose')
+      const out = path.join(testDir, 'zip-verbose')
       await expect(
         downloadAndExtractZip('v1', 'a.zip', out, REPO),
       ).resolves.toBe(out)

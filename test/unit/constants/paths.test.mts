@@ -10,6 +10,14 @@
 
 import { describe, expect, it } from 'vitest'
 
+// Published-snapshot bindings used to BUILD expected values inside
+// `expect(...)`. The system-under-test bindings still come from `src/`
+// below; these stable aliases satisfy `socket/no-src-import-in-test-expect`.
+import {
+  LICENSE as STABLE_LICENSE,
+  PACKAGE_JSON as STABLE_PACKAGE_JSON,
+} from '@socketsecurity/lib-stable/paths/filenames'
+
 // Filenames
 import {
   CHANGELOG_MD,
@@ -105,6 +113,7 @@ describe('constants/paths', () => {
     })
 
     it('should export ESLINT_CONFIG_JS', () => {
+      // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- asserting the literal value of the real exported ESLINT_CONFIG_JS constant, not a stale config reference.
       expect(ESLINT_CONFIG_JS).toBe('eslint.config.js')
     })
 
@@ -330,11 +339,11 @@ describe('constants/paths', () => {
 
   describe('constant relationships', () => {
     it('should have LICENSE_MD contain LICENSE', () => {
-      expect(LICENSE_MD).toContain(LICENSE)
+      expect(LICENSE_MD).toContain(STABLE_LICENSE)
     })
 
     it('should have LICENSE_ORIGINAL contain LICENSE', () => {
-      expect(LICENSE_ORIGINAL).toContain(LICENSE)
+      expect(LICENSE_ORIGINAL).toContain(STABLE_LICENSE)
     })
 
     it('should have consistent cache directory naming', () => {
@@ -346,7 +355,7 @@ describe('constants/paths', () => {
   describe('real-world usage', () => {
     it('should support file name matching', () => {
       const filename = 'package.json'
-      expect(filename).toBe(PACKAGE_JSON)
+      expect(filename).toBe(STABLE_PACKAGE_JSON)
     })
 
     it('should support extension detection', () => {

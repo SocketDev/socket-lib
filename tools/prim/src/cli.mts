@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- subcommand handlers ordered by user-facing command grouping; module-level config between them blocks autofix. */
 /**
  * @file `prim` CLI entry point. Subcommands: audit — find call sites where
  *   primordials apply. Shows both migration candidates (covered) and surface
@@ -27,20 +26,16 @@
  *   `internal/socketsecurity/safe-references`, `safe-references`.
  */
 
-import { existsSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { parseArgs } from 'node:util'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-import { createPatch } from 'diff'
-
 import { auditDirectory } from './audit.mts'
 import { applyCodemod } from './codemod.mts'
-import { formatHuman, formatJson } from './format.mts'
-import { formatLintFindings, lintSource } from './lint.mts'
+import { lintSource } from './lint.mts'
+import { fail, report, reportLint, reportMod } from './report.mts'
 import { loadPrimordialsSurface } from './surface.mts'
-import { formatValidationReport } from './validate.mts'
 
 const HELP = `prim — audit & migrate JavaScript built-in usage to primordials
 
@@ -416,6 +411,7 @@ const PRIMORDIALS_FILE_EXTS = ['.cjs', '.cts', '.js', '.mjs', '.mts', '.ts']
  * any primordials.* found is unrelated (avoid drifting up to a monorepo-root
  * primordials owned by a sibling package).
  */
+// oxlint-disable-next-line socket/sort-source-methods -- helper sits after `runCli` so the module reads entry-point-first; the `PRIMORDIALS_FILE_EXTS` config between them blocks safe autofix reordering.
 export function findLocalPrimordials(scanDir): string | undefined {
   const candidates = [scanDir, path.dirname(scanDir)]
   for (let i = 0, { length: dl } = candidates; i < dl; i++) {
@@ -456,6 +452,7 @@ export function findLocalPrimordials(scanDir): string | undefined {
  * Callers use this to choose between top-level `specifier` (single-file) and
  * `splitByLeaf` (directory) import wiring.
  */
+// oxlint-disable-next-line socket/sort-source-methods -- helper sits after `runCli` so the module reads entry-point-first; the `PRIMORDIALS_FILE_EXTS` config between them blocks safe autofix reordering.
 export function isSplitPrimordials(localPrimordialsPath: string): boolean {
   try {
     return statSync(localPrimordialsPath).isDirectory()
@@ -464,125 +461,3 @@ export function isSplitPrimordials(localPrimordialsPath: string): boolean {
   }
 }
 
-export function report(
-  findings,
-  json,
-  targetName,
-  mode,
-  parseFailureFiles: string[] = [],
-  stripFailureFiles: string[] = [],
-) {
-  if (json) {
-    // Embed the failure lists in the JSON output so machine consumers
-    // can see what got skipped — non-enumerable handles on the array
-    // don't survive JSON.stringify, so we lift them onto the wrapper.
-    // Raw stdout keeps CLI output machine-pipeable (no logger prefixes / colors).
-    const payload = formatJson({
-      targetName,
-      mode,
-      count: findings.length,
-      findings,
-      parseFailures: parseFailureFiles.length,
-      parseFailureFiles,
-      stripFailures: stripFailureFiles.length,
-      stripFailureFiles,
-    })
-    process.stdout.write(`${payload}\n`) // socket-hook: allow console
-  } else {
-    process.stdout.write(formatHuman(findings, { mode, targetName }) + '\n') // socket-hook: allow console
-  }
-}
-
-export function reportLint(findings, json, targetName) {
-  if (json) {
-    const payload = formatJson({
-      targetName,
-      mode: 'lint',
-      count: findings.length,
-      findings,
-    })
-    process.stdout.write(`${payload}\n`) // socket-hook: allow console
-    return
-  }
-  process.stdout.write(formatLintFindings(findings, { targetName })) // socket-hook: allow console
-}
-
-export function reportMod(result, json, applied, showDiff = false) {
-  // Validation failure short-circuit: when the two-phase apply rejected
-  // the batch, surface the per-finding report and exit non-zero. Working
-  // tree is pristine (no atomicWrite happened), so the user can re-attempt
-  // after addressing the findings or bypass with `--no-validate`.
-  if (result.validationFailed) {
-    const report = formatValidationReport(result.validationFindings ?? [])
-    if (json) {
-      const payload = formatJson({
-        applied: false,
-        validationFailed: true,
-        validationFindings: result.validationFindings,
-      })
-      process.stdout.write(`${payload}\n`) // socket-hook: allow console
-    } else {
-      process.stderr.write(`${report}\n`) // socket-hook: allow console
-    }
-    process.exitCode = 1
-    return
-  }
-  if (json) {
-    const payload = formatJson({
-      applied,
-      filesChanged: result.filesChanged,
-      rewriteCount: result.rewriteCount,
-      skipped: result.skipped,
-      files: result.files,
-    })
-    process.stdout.write(`${payload}\n`) // socket-hook: allow console
-    return
-  }
-  const verb = applied ? 'Wrote' : 'Would write'
-  if (result.rewriteCount === 0) {
-    process.stdout.write('mod: no rewrites needed.\n') // socket-hook: allow console
-    return
-  }
-  const summary = `mod: ${verb} ${result.rewriteCount} rewrite(s) across ${result.filesChanged} file(s).\n`
-  process.stdout.write(summary) // socket-hook: allow console
-  if (result.skipped > 0) {
-    const skippedMsg = `mod: skipped ${result.skipped} candidate(s) — pass --include-guessed to rewrite receiver-guessed sites too.\n`
-    process.stdout.write(skippedMsg) // socket-hook: allow console
-  }
-  if (!applied) {
-    process.stdout.write('mod: dry run — pass --apply to write changes.\n') // socket-hook: allow console
-  }
-  for (const f of result.files) {
-    const fileLine = `  ${f.file}: ${f.rewrites} rewrite(s), import added: ${f.importAdded ? 'yes' : 'no'}\n`
-    process.stdout.write(fileLine) // socket-hook: allow console
-  }
-  if (showDiff && !applied) {
-    // Dry-run preview: render unified line-diff per planned rewrite by
-    // reading the pre-change source from disk and comparing it to the
-    // staged new source. Disk is never written in dry-run mode.
-    const logger = getDefaultLogger()
-    for (const plan of result.plans ?? []) {
-      let oldSource = ''
-      try {
-        oldSource = readFileSync(plan.absPath, 'utf8')
-      } catch {
-        continue
-      }
-      const patch = createPatch(
-        plan.relPath,
-        oldSource,
-        plan.newSource,
-        '',
-        '',
-        { context: 3 },
-      )
-      logger.log('')
-      logger.log(String(patch))
-    }
-  }
-}
-
-export function fail(msg) {
-  process.stderr.write(`prim: ${msg}\n`) // socket-hook: allow console
-  process.exit(1)
-}

@@ -11,9 +11,8 @@
  *     operations on shared resources.
  */
 
-/* oxlint-disable socket/prefer-exists-sync -- tests verify stat output (isFile/isDirectory/mtime/size), not existence. */
-
 import { existsSync } from 'node:fs'
+import type fsType from 'node:fs'
 import { createRequire } from 'node:module'
 import os from 'node:os'
 import * as path from 'node:path'
@@ -21,7 +20,7 @@ import { setTimeout as sleep } from 'node:timers/promises'
 
 import { processLock } from '../../../src/process/lock-instance'
 import type { ProcessLockOptions } from '../../../src/process/lock-types'
-import { safeDeleteSync } from '../../../src/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 // process-lock lazily does `require('node:fs')` inside getFs(). The require'd
@@ -29,7 +28,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 // namespace import. We grab the same module via createRequire and patch
 // mkdirSync directly to drive errno error paths in acquire().
 const cjsRequire = createRequire(import.meta.url)
-const fsCjs = cjsRequire('node:fs') as typeof import('node:fs')
+const fsCjs = cjsRequire('node:fs') as typeof fsType
 
 describe.sequential('process/lock', () => {
   let testLockPath: string
@@ -42,11 +41,11 @@ describe.sequential('process/lock', () => {
     )
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Clean up lock files after each test
     try {
       if (existsSync(testLockPath)) {
-        safeDeleteSync(testLockPath, { recursive: true })
+        await safeDelete(testLockPath, { recursive: true })
       }
     } catch {
       // Ignore cleanup errors
@@ -387,9 +386,11 @@ describe.sequential('process/lock', () => {
         staleMs: 200,
         touchIntervalMs: 50,
       })
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime, not existence.
       const initialMtime = fs.statSync(testLockPath).mtime.getTime()
       // Wait longer than staleMs.
       await sleep(300)
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime, not existence.
       const refreshedMtime = fs.statSync(testLockPath).mtime.getTime()
       expect(refreshedMtime).toBeGreaterThan(initialMtime)
       release()
@@ -401,8 +402,10 @@ describe.sequential('process/lock', () => {
         touchIntervalMs: 0,
         staleMs: 5000,
       })
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime, not existence.
       const initial = fs.statSync(testLockPath).mtime.getTime()
       await sleep(100)
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime, not existence.
       const after = fs.statSync(testLockPath).mtime.getTime()
       // No automatic touch — mtime stable.
       expect(after).toBe(initial)
