@@ -263,6 +263,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/env/shell`](../src/env/shell.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/socket`](../src/env/socket.ts)                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/socket-cli`](../src/env/socket-cli.ts)             | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/socket-mcp`](../src/env/socket-mcp.ts)             | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/string`](../src/env/string.ts)                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/temp-dir`](../src/env/temp-dir.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/term`](../src/env/term.ts)                         | _(no description)_ |
@@ -477,17 +478,23 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## logger/
 
-| Subpath                                                                                 | Description        |
-| --------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/logger/browser`](../src/logger/browser.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/colors`](../src/logger/colors.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/console`](../src/logger/console.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/default`](../src/logger/default.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/logger`](../src/logger/node.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/node`](../src/logger/node.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/symbols`](../src/logger/symbols.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/symbols-builder`](../src/logger/symbols-builder.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/logger/types`](../src/logger/types.ts)                     | _(no description)_ |
+| Subpath                                                                                         | Description        |
+| ----------------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/logger/browser`](../src/logger/browser.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/colors`](../src/logger/colors.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/console`](../src/logger/console.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/console-methods`](../src/logger/console-methods.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/default`](../src/logger/default.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/indentation-methods`](../src/logger/indentation-methods.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/logger`](../src/logger/node.ts)                             | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/node`](../src/logger/node.ts)                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/options`](../src/logger/options.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/semantic-methods`](../src/logger/semantic-methods.ts)       | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/stream`](../src/logger/stream.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/stream-methods`](../src/logger/stream-methods.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/symbols`](../src/logger/symbols.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/symbols-builder`](../src/logger/symbols-builder.ts)         | _(no description)_ |
+| [`@socketsecurity/lib-stable/logger/types`](../src/logger/types.ts)                             | _(no description)_ |
 
 ## memo/
 
@@ -592,6 +599,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/primordials/error`](../src/primordials/error.ts)       | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/function`](../src/primordials/function.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/globals`](../src/primordials/globals.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/headers`](../src/primordials/headers.ts)   | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/json`](../src/primordials/json.ts)         | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/map-set`](../src/primordials/map-set.ts)   | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/math`](../src/primordials/math.ts)         | _(no description)_ |
@@ -640,17 +648,18 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## releases/
 
-| Subpath                                                                                             | Description        |
-| --------------------------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/releases/github-archives`](../src/releases/github-archives.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-asset-url`](../src/releases/github-asset-url.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-assets`](../src/releases/github-assets.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-auth`](../src/releases/github-auth.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-downloads`](../src/releases/github-downloads.ts)       | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-listing`](../src/releases/github-listing.ts)           | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-retry-config`](../src/releases/github-retry-config.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/github-types`](../src/releases/github-types.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/releases/socket-btm`](../src/releases/socket-btm.ts)                   | _(no description)_ |
+| Subpath                                                                                                       | Description        |
+| ------------------------------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/releases/github-archives`](../src/releases/github-archives.ts)                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-asset-url`](../src/releases/github-asset-url.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-assets`](../src/releases/github-assets.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-auth`](../src/releases/github-auth.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-downloads`](../src/releases/github-downloads.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-listing`](../src/releases/github-listing.ts)                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-retry-config`](../src/releases/github-retry-config.ts)           | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/github-types`](../src/releases/github-types.ts)                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/socket-btm`](../src/releases/socket-btm.ts)                             | _(no description)_ |
+| [`@socketsecurity/lib-stable/releases/socket-btm-binary-naming`](../src/releases/socket-btm-binary-naming.ts) | _(no description)_ |
 
 ## schema/
 
@@ -718,13 +727,17 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## spinner/
 
-| Subpath                                                                   | Description        |
-| ------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/spinner/default`](../src/spinner/default.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/spinner/format`](../src/spinner/format.ts)   | _(no description)_ |
-| [`@socketsecurity/lib-stable/spinner/spinner`](../src/spinner/spinner.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/spinner/types`](../src/spinner/types.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/spinner/with`](../src/spinner/with.ts)       | _(no description)_ |
+| Subpath                                                                                                   | Description        |
+| --------------------------------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/spinner/create-spinner-class`](../src/spinner/create-spinner-class.ts)       | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/default`](../src/spinner/default.ts)                                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/format`](../src/spinner/format.ts)                                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/spinner`](../src/spinner/spinner.ts)                                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/spinner-internals`](../src/spinner/spinner-internals.ts)             | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/spinner-shimmer-methods`](../src/spinner/spinner-shimmer-methods.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/spinner-status-methods`](../src/spinner/spinner-status-methods.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/types`](../src/spinner/types.ts)                                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/spinner/with`](../src/spinner/with.ts)                                       | _(no description)_ |
 
 ## ssri/
 
