@@ -310,6 +310,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/cdxgen/resolve`](../src/external-tools/cdxgen/resolve.ts)                               | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/cdxgen/types`](../src/external-tools/cdxgen/types.ts)                                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/from-download`](../src/external-tools/from-download.ts)                                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/from-pip-venv`](../src/external-tools/from-pip-venv.ts)                                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/janus/asset-names`](../src/external-tools/janus/asset-names.ts)                         | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/janus/from-download`](../src/external-tools/janus/from-download.ts)                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/janus/from-path`](../src/external-tools/janus/from-path.ts)                             | _(no description)_ |
@@ -337,6 +338,11 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/sbt/from-vfs`](../src/external-tools/sbt/from-vfs.ts)                                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/resolve`](../src/external-tools/sbt/resolve.ts)                                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/types`](../src/external-tools/sbt/types.ts)                                         | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/skillspector/from-dlx`](../src/external-tools/skillspector/from-dlx.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/skillspector/from-path`](../src/external-tools/skillspector/from-path.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/skillspector/from-vfs`](../src/external-tools/skillspector/from-vfs.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/skillspector/resolve`](../src/external-tools/skillspector/resolve.ts)                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/skillspector/types`](../src/external-tools/skillspector/types.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/synp/asset-names`](../src/external-tools/synp/asset-names.ts)                           | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/synp/from-download`](../src/external-tools/synp/from-download.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/synp/from-path`](../src/external-tools/synp/from-path.ts)                               | _(no description)_ |
