@@ -29,12 +29,12 @@ export function jsParseManifest(
   }
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
 /* c8 ignore start - smol-fallback branch is smol Node binary only. */
-const smolParseManifest = _smol
+const smolParseManifest = smol
   ? (content: string, ecosystem: EcosystemString) =>
-      _smol.parseManifest(content, ecosystem) as ParsedManifest
+      smol.parseManifest(content, ecosystem) as ParsedManifest
   : undefined
 /* c8 ignore stop */
 

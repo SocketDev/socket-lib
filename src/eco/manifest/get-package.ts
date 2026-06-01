@@ -24,9 +24,9 @@ export function jsGetPackage(
   return lockfile.packages[idx[0]!]
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
 export const getPackage: (
   lockfile: ParsedLockfile,
   name: string,
-) => PackageRef | undefined = _smol ? _smol.getPackage : jsGetPackage
+) => PackageRef | undefined = smol ? smol.getPackage : jsGetPackage

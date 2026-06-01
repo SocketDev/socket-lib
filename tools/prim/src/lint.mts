@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- lint-rule helpers ordered by visit order; rule config tables between them block autofix. */
 /**
  * @file `prim lint` — structural lint rules for primordials usage. Currently
  *   encoded rules:
@@ -100,20 +99,6 @@ export function buildLineStarts(src) {
   return starts
 }
 
-export function lineColumnAt(lineStarts, offset) {
-  let lo = 0
-  let hi = lineStarts.length - 1
-  while (lo < hi) {
-    const mid = (lo + hi + 1) >>> 1
-    if (lineStarts[mid] <= offset) {
-      lo = mid
-    } else {
-      hi = mid - 1
-    }
-  }
-  return { line: lo + 1, column: offset - lineStarts[lo] + 1 }
-}
-
 /**
  * Default set of source identifiers / require specifiers that we consider
  * "primordials-shaped" — destructures from these sources are subject to
@@ -189,6 +174,33 @@ export function describeSource(node) {
     return `require('${node.arguments[0].value}')`
   }
   return node.type
+}
+
+export function formatLintFindings(findings, ctx) {
+  if (findings.length === 0) {
+    return `${ctx.targetName}: no lint violations.\n`
+  }
+  const lines = [`${ctx.targetName} (lint): ${findings.length} violation(s)\n`]
+  for (const f of findings) {
+    lines.push(
+      `  [${f.rule}] ${f.file}:${f.line}:${f.column}  destructured \`${f.name}\` from ${f.source}; expected \`${f.name}: ${f.expected}\``,
+    )
+  }
+  return lines.join('\n') + '\n'
+}
+
+export function lineColumnAt(lineStarts, offset) {
+  let lo = 0
+  let hi = lineStarts.length - 1
+  while (lo < hi) {
+    const mid = (lo + hi + 1) >>> 1
+    if (lineStarts[mid] <= offset) {
+      lo = mid
+    } else {
+      hi = mid - 1
+    }
+  }
+  return { line: lo + 1, column: offset - lineStarts[lo] + 1 }
 }
 
 /**
@@ -318,17 +330,4 @@ export function lintSource({
   }
 
   return findings
-}
-
-export function formatLintFindings(findings, ctx) {
-  if (findings.length === 0) {
-    return `${ctx.targetName}: no lint violations.\n`
-  }
-  const lines = [`${ctx.targetName} (lint): ${findings.length} violation(s)\n`]
-  for (const f of findings) {
-    lines.push(
-      `  [${f.rule}] ${f.file}:${f.line}:${f.column}  destructured \`${f.name}\` from ${f.source}; expected \`${f.name}: ${f.expected}\``,
-    )
-  }
-  return lines.join('\n') + '\n'
 }

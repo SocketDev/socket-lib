@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- helper functions interleaved with module-level Set / Map constants of global identifiers they consume. */
 /**
  * @file Built-in JavaScript globals the audit tracks. Anything not in this set
  *   is treated as a user-defined identifier and skipped. Keep alphabetical so
@@ -248,6 +247,87 @@ export const NODE_MODULE_STATIC_METHODS = new Set([
 ])
 
 /**
+ * Statics on tracked globals that are known to be data properties or accessors
+ * — NOT callable functions — and therefore cannot be wrapped as a primordial.
+ * The audit and codemod skip them so they don't show up as actionable gaps.
+ *
+ * Each entry is `<Global>.<member>` joined by a dot. The notes point at the
+ * spec or platform doc that defines the property (so it's clear this is
+ * intentional, not an oversight). Entries are sorted alphanumerically.
+ *
+ * Error.captureStackTrace V8 method but it MUTATES the target (`err`) in place
+ * rather than being safely curryable. Wrapping as a primordial would still be
+ * correct in principle; callers wanting deterministic stack capture usually
+ * want the realm-anchored Error constructor instead.
+ * https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions.
+ *
+ * Error.prepareStackTrace V8 setter property; user code assigns a `(err,
+ * frames) => string` to override the default stack-formatting on `err.stack`
+ * access. Not standardized — V8 (Node, Chromium) only.
+ * https://v8.dev/docs/stack-trace-api#customizing-stack-traces.
+ *
+ * Error.stackTraceLimit V8 number property — the global cap on stack frames
+ * retained. Setting it from a primordial would have no effect; reading it
+ * returns the live value.
+ * https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions.
+ */
+export const INTENTIONAL_NON_PRIMORDIAL_STATICS = new Set([
+  'Error.captureStackTrace',
+  'Error.prepareStackTrace',
+  'Error.stackTraceLimit',
+])
+
+/**
+ * Static-method calls whose return type narrows based on the literal call site,
+ * in a way that breaks when the call is rewritten through an aliased variable.
+ * Specifically: `Symbol.for(literal)` returns `unique symbol`, so `class C {
+ * [Symbol.for('x')]() {} }` defines a named member; rewriting to
+ * `SymbolFor('x')` returns plain `symbol`, collapsing the keyed member into the
+ * unindexed-symbol bucket and making `c[Symbol.for('x')]()` ambiguous against
+ * any other symbol-keyed method on the class. The audit + codemod skip these
+ * sites entirely — both reading and writing them through a primordial would
+ * change the static type.
+ */
+export const TYPE_NARROWING_STATIC_CALLS = new Set(['Symbol.for'])
+
+export function ctorPrimordialName(global) {
+  return global + 'Ctor'
+}
+
+// Cache the runtime prototype-method set per global so we don't
+// recompute it for every call site.
+const prototypeMethodCache = new Map()
+
+export function getPrototypeMethods(globalName) {
+  let cached = prototypeMethodCache.get(globalName)
+  if (cached) {
+    return cached
+  }
+  const ctor = globalThis[globalName]
+  cached = new Set()
+  if (ctor && typeof ctor === 'function' && ctor.prototype) {
+    const names = Object.getOwnPropertyNames(ctor.prototype)
+    for (let i = 0, { length } = names; i < length; i++) {
+      cached.add(names[i])
+    }
+    // Buffer extends Uint8Array; include its prototype too.
+    if (
+      globalName === 'Buffer' &&
+      typeof globalThis.Uint8Array === 'function'
+    ) {
+      const u8names = Object.getOwnPropertyNames(
+        globalThis.Uint8Array.prototype,
+      )
+      for (let i = 0, { length } = u8names; i < length; i++) {
+        cached.add(u8names[i])
+      }
+    }
+  }
+  prototypeMethodCache.set(globalName, cached)
+  return cached
+}
+
+/**
  * Heuristic: when a method call's receiver isn't a known global AND the method
  * name isn't unambiguous, guess what built-in type it is from the identifier
  * name. Returns the global name (e.g. `'Array'`) or `undefined` if no guess.
@@ -328,95 +408,6 @@ export function guessReceiverType(name) {
 }
 
 /**
- * Statics on tracked globals that are known to be data properties or accessors
- * — NOT callable functions — and therefore cannot be wrapped as a primordial.
- * The audit and codemod skip them so they don't show up as actionable gaps.
- *
- * Each entry is `<Global>.<member>` joined by a dot. The notes point at the
- * spec or platform doc that defines the property (so it's clear this is
- * intentional, not an oversight). Entries are sorted alphanumerically.
- *
- * Error.captureStackTrace V8 method but it MUTATES the target (`err`) in place
- * rather than being safely curryable. Wrapping as a primordial would still be
- * correct in principle; callers wanting deterministic stack capture usually
- * want the realm-anchored Error constructor instead.
- * https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions.
- *
- * Error.prepareStackTrace V8 setter property; user code assigns a `(err,
- * frames) => string` to override the default stack-formatting on `err.stack`
- * access. Not standardized — V8 (Node, Chromium) only.
- * https://v8.dev/docs/stack-trace-api#customizing-stack-traces.
- *
- * Error.stackTraceLimit V8 number property — the global cap on stack frames
- * retained. Setting it from a primordial would have no effect; reading it
- * returns the live value.
- * https://v8.dev/docs/stack-trace-api#stack-trace-collection-for-custom-exceptions.
- */
-export const INTENTIONAL_NON_PRIMORDIAL_STATICS = new Set([
-  'Error.captureStackTrace',
-  'Error.prepareStackTrace',
-  'Error.stackTraceLimit',
-])
-
-/**
- * Static-method calls whose return type narrows based on the literal call site,
- * in a way that breaks when the call is rewritten through an aliased variable.
- * Specifically: `Symbol.for(literal)` returns `unique symbol`, so `class C {
- * [Symbol.for('x')]() {} }` defines a named member; rewriting to
- * `SymbolFor('x')` returns plain `symbol`, collapsing the keyed member into the
- * unindexed-symbol bucket and making `c[Symbol.for('x')]()` ambiguous against
- * any other symbol-keyed method on the class. The audit + codemod skip these
- * sites entirely — both reading and writing them through a primordial would
- * change the static type.
- */
-export const TYPE_NARROWING_STATIC_CALLS = new Set(['Symbol.for'])
-
-/**
- * Map a tracked global + property name to the corresponding primordial export
- * name in `@socketsecurity/lib/primordials`.
- */
-export function staticPrimordialName(global, member) {
-  return global + member[0].toUpperCase() + member.slice(1)
-}
-
-export function ctorPrimordialName(global) {
-  return global + 'Ctor'
-}
-
-// Cache the runtime prototype-method set per global so we don't
-// recompute it for every call site.
-const prototypeMethodCache = new Map()
-
-export function getPrototypeMethods(globalName) {
-  let cached = prototypeMethodCache.get(globalName)
-  if (cached) {
-    return cached
-  }
-  const ctor = globalThis[globalName]
-  cached = new Set()
-  if (ctor && typeof ctor === 'function' && ctor.prototype) {
-    const names = Object.getOwnPropertyNames(ctor.prototype)
-    for (let i = 0, { length } = names; i < length; i++) {
-      cached.add(names[i])
-    }
-    // Buffer extends Uint8Array; include its prototype too.
-    if (
-      globalName === 'Buffer' &&
-      typeof globalThis.Uint8Array === 'function'
-    ) {
-      const u8names = Object.getOwnPropertyNames(
-        globalThis.Uint8Array.prototype,
-      )
-      for (let i = 0, { length } = u8names; i < length; i++) {
-        cached.add(u8names[i])
-      }
-    }
-  }
-  prototypeMethodCache.set(globalName, cached)
-  return cached
-}
-
-/**
  * Returns the primordial name for `<global>.prototype.<method>` if the method
  * actually exists on the global's prototype. Returns `undefined` when it
  * doesn't — prevents fabricating names like `PromisePrototypeLoad` when `p` is
@@ -427,4 +418,12 @@ export function prototypePrimordialName(global, method) {
     return undefined
   }
   return global + 'Prototype' + method[0].toUpperCase() + method.slice(1)
+}
+
+/**
+ * Map a tracked global + property name to the corresponding primordial export
+ * name in `@socketsecurity/lib/primordials`.
+ */
+export function staticPrimordialName(global, member) {
+  return global + member[0].toUpperCase() + member.slice(1)
 }

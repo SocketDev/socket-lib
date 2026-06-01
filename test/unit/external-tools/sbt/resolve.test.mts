@@ -23,7 +23,9 @@ describe('external-tools/sbt/resolve', () => {
   })
 
   it('memoizes across calls', () => {
-    expect(resolveSbt()).toBe(resolveSbt())
+    const first = resolveSbt()
+    const second = resolveSbt()
+    expect(first).toBe(second)
   })
 
   it(

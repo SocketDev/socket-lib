@@ -5,8 +5,6 @@
  *   - downloadGitHubRelease TOCTOU race protection on cached binaries
  */
 
-// oxlint-disable socket/no-dynamic-import-outside-bundle -- per-test dynamic imports keep state inside each `it` block under `isolate: false`; see comment block above downloadGitHubRelease describe.
-
 import { existsSync } from 'node:fs'
 
 import { safeDelete } from '../../../src/fs/safe'

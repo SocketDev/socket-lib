@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- internal helpers ordered by call graph; type/const declarations sandwiched between them block autofix. */
 /**
  * @file Private internals for `compression/*` modules — `resolveFileArgs`
  *   disambiguates the `(src, dest, options?)` vs `(src, options)` calling
@@ -10,31 +9,10 @@
 import path from 'node:path'
 
 import { ErrorCtor } from '../primordials/error'
+import { ObjectFreeze } from '../primordials/object'
 import { StringPrototypeToLowerCase } from '../primordials/string'
 
 import type { CompressFileOptions, CompressOptions } from './types'
-
-import { ObjectFreeze } from '../primordials/object'
-
-/**
- * Strip the trailing extension from a filename when it matches one of `exts`.
- * Returns the input unchanged when the trailing extname isn't in the set.
- * Case-insensitive on the extension — preserves the rest of the path's casing.
- *
- * The `exts` set decides what counts. Pass `BROTLI_EXTS` / `GZIP_EXTS` for the
- * canonical compression sets, or your own set for custom classifiers.
- *
- * Generic — it does NOT know that `.tgz` is short for `.tar.gz`. Callers that
- * need that convention compose this with their own follow-up (see
- * `decompressGzipFile` for the canonical example).
- */
-export function stripExt(filePath: string, exts: ReadonlySet<string>): string {
-  const ext = path.extname(filePath)
-  if (!exts.has(StringPrototypeToLowerCase(ext))) {
-    return filePath
-  }
-  return filePath.slice(0, -ext.length)
-}
 
 export interface ResolvedFileArgs {
   destPath: string
@@ -81,4 +59,24 @@ export function resolveFileArgs(
   throw new ErrorCtor(
     `${fnName}: missing destPath; pass an explicit destination or { inPlace: true }`,
   )
+}
+
+/**
+ * Strip the trailing extension from a filename when it matches one of `exts`.
+ * Returns the input unchanged when the trailing extname isn't in the set.
+ * Case-insensitive on the extension — preserves the rest of the path's casing.
+ *
+ * The `exts` set decides what counts. Pass `BROTLI_EXTS` / `GZIP_EXTS` for the
+ * canonical compression sets, or your own set for custom classifiers.
+ *
+ * Generic — it does NOT know that `.tgz` is short for `.tar.gz`. Callers that
+ * need that convention compose this with their own follow-up (see
+ * `decompressGzipFile` for the canonical example).
+ */
+export function stripExt(filePath: string, exts: ReadonlySet<string>): string {
+  const ext = path.extname(filePath)
+  if (!exts.has(StringPrototypeToLowerCase(ext))) {
+    return filePath
+  }
+  return filePath.slice(0, -ext.length)
 }

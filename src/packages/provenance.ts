@@ -32,7 +32,7 @@ import {
 const SLSA_PROVENANCE_V0_2 = 'https://slsa.dev/provenance/v0.2'
 const SLSA_PROVENANCE_V1_0 = 'https://slsa.dev/provenance/v1'
 
-let _fetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
+let cachedFetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
 
 /**
  * Comparator ordering two trust statuses by ascending trust level. Sorts an
@@ -182,9 +182,9 @@ export function getAttestations(attestationData: unknown): unknown[] {
 }
 
 export function getFetcher() {
-  if (_fetcher === undefined) {
+  if (cachedFetcher === undefined) {
     // module is imported at the top
-    _fetcher = makeFetchHappen.defaults({
+    cachedFetcher = makeFetchHappen.defaults({
       cachePath: getPacoteCachePath(),
       // Prefer-offline: Staleness checks for cached data will be bypassed, but
       // missing data will be requested from the server.
@@ -192,7 +192,7 @@ export function getFetcher() {
       cache: 'force-cache',
     })
   }
-  return _fetcher
+  return cachedFetcher
 }
 
 /**

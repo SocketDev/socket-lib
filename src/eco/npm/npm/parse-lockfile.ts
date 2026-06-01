@@ -300,10 +300,10 @@ export function resolveDepType(pkg: RawPackage): DepType {
   return 'prod'
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
-export const parsePackageLock: (content: string) => ParsedLockfile = _smol
+export const parsePackageLock: (content: string) => ParsedLockfile = smol
   ? /* c8 ignore next 2 - smol Node binary only. */
     (content: string) =>
-      _smol.parseLockfile(content, 'npm', 'npm') as ParsedLockfile
+      smol.parseLockfile(content, 'npm', 'npm') as ParsedLockfile
   : jsParsePackageLock

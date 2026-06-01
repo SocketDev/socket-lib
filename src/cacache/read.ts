@@ -33,7 +33,7 @@ export async function get(
       'Cache key cannot contain wildcards (*). Wildcards are only supported in clear({ prefix: "pattern*" }).',
     )
   }
-  const cacache = getCacache() as any
+  const cacache = getCacache()
   /* c8 ignore next - External cacache call */
   return await cacache.get(getSocketCacacheDir(), key, options)
 }

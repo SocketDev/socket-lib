@@ -72,20 +72,20 @@ export function sniffLockfileFormat(
   return undefined
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
 export const parseLockfile: (
   content: string,
   ecosystem: EcosystemString,
   format?: LockfileFormat | undefined,
-) => ParsedLockfile = _smol
+) => ParsedLockfile = smol
   ? /* c8 ignore start - smol Node binary only. */
     (
       content: string,
       ecosystem: EcosystemString,
       format?: LockfileFormat | undefined,
     ) =>
-      _smol.parseLockfile(
+      smol.parseLockfile(
         content,
         ecosystem,
         format as 'npm' | 'yarn' | 'pnpm' | 'composer' | 'cargo' | undefined,

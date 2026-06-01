@@ -24,7 +24,9 @@ describe.sequential('external-tools/jre/resolve', () => {
   })
 
   it('memoizes across calls', () => {
-    expect(resolveJre()).toBe(resolveJre())
+    const first = resolveJre()
+    const second = resolveJre()
+    expect(first).toBe(second)
   })
 
   it('returns the JAVA_HOME path when set (skipping VFS on stock Node)', async () => {

@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- top-level order in this folder is spec-section order (TC39 Temporal clause numbering), not alphabetical, so a reader can scan the file alongside the spec PDF. See README.md "Adding a new operation". */
 /**
  * @file Spec clause 8 — Temporal.Instant Objects. Implements the class,
  *   constructor, and the validity predicate. Pass 1 of the rollout; statics
@@ -137,6 +136,7 @@ export class Instant {
 // 4. Return ns.
 // ─────────────────────────────────────────────────────────────────
 
+// oxlint-disable-next-line socket/sort-source-methods -- ordered by TC39 Temporal clause number (8.5.6), not alphabetically, so the file reads alongside the spec. See README.md "Adding a new operation".
 export function epochNanosecondsImpl(this: Instant): bigint {
   // Step 1. Spec: "Let instant be the this value." Keeping `instant`
   // as a named local preserves the step-for-step mapping the rest of
@@ -170,6 +170,7 @@ ObjectDefineProperty(Instant.prototype, 'epochNanoseconds', {
 /**
  * One-line description of an arbitrary value for error messages.
  */
+// oxlint-disable-next-line socket/sort-source-methods -- local error-message helper kept in the trailing "Local helpers" section after the spec operations that consume it, not in alphabetical order. See README.md "Adding a new operation".
 export function describe(value: unknown): string {
   if (value === null) {
     return 'null'

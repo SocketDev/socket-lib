@@ -14,8 +14,9 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { DEFAULT_BASE_DELAY_MS } from '@socketsecurity/lib-stable/releases/github-retry-config'
+
 import {
-  DEFAULT_BASE_DELAY_MS,
   GITHUB_RETRY_CONFIG,
   resolveBaseDelayMs,
 } from '../../../src/releases/github-retry-config.ts'

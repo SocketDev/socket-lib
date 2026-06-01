@@ -7,7 +7,7 @@ import type * as fastSortType from '../external/fast-sort'
 
 // Type for fast-sort sorter function.
 export type FastSortFunction = ReturnType<
-  typeof import('fast-sort').createNewSortInstance
+  typeof fastSortType.createNewSortInstance
 >
 
 export type { fastSortType }

@@ -19,7 +19,7 @@ export const spawnBinPathCache = new MapCtor<string, string>()
 
 export const windowsScriptExtRegExp = /\.(?:bat|cmd|ps1)$/i
 
-let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
+let npmCliPromiseSpawnCache: typeof npmCliPromiseSpawnType | undefined
 
 /**
  * Lazily load the `@npmcli/promise-spawn` module to avoid Webpack bundling
@@ -27,10 +27,10 @@ let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
  * patterns that Webpack flags.
  */
 export function getNpmCliPromiseSpawn() {
-  if (_npmCliPromiseSpawn === undefined) {
-    _npmCliPromiseSpawn = /*@__PURE__*/ require('../../external/@npmcli/promise-spawn')
+  if (npmCliPromiseSpawnCache === undefined) {
+    npmCliPromiseSpawnCache = /*@__PURE__*/ require('../../external/@npmcli/promise-spawn')
   }
-  return _npmCliPromiseSpawn!
+  return npmCliPromiseSpawnCache!
 }
 
 /**

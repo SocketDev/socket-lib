@@ -8,6 +8,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { pipVenvEntryPointPath } from '../../../src/external-tools/from-pip-venv'
 
+import type * as NodeFs from 'node:fs'
+
 vi.mock(import('../../../src/bin/which'), () => ({
   which:
     vi.fn<
@@ -23,7 +25,7 @@ vi.mock(import('../../../src/process/spawn/child'), () => ({
 }))
 
 vi.mock(import('node:fs'), async () => {
-  const actual = await vi.importActual<typeof import('node:fs')>('node:fs')
+  const actual = await vi.importActual<typeof NodeFs>('node:fs')
   return {
     ...actual,
     existsSync: vi.fn(),

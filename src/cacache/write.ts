@@ -53,7 +53,7 @@ export async function remove(key: string): Promise<unknown> {
       'Cache key cannot contain wildcards (*). Use clear({ prefix: "pattern*" }) to remove multiple entries.',
     )
   }
-  const cacache = getCacache() as any
+  const cacache = getCacache()
   /* c8 ignore next - External cacache call */
   return await cacache.rm.entry(getSocketCacacheDir(), key)
 }

@@ -46,7 +46,7 @@ export function jsAnalyzeLockfile(lockfile: ParsedLockfile): LockfileStats {
   }) as unknown as LockfileStats
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
 export const analyzeLockfile: (lockfile: ParsedLockfile) => LockfileStats =
-  _smol ? _smol.analyzeLockfile : jsAnalyzeLockfile
+  smol ? smol.analyzeLockfile : jsAnalyzeLockfile

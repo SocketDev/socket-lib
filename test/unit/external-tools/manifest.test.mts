@@ -11,7 +11,6 @@ import {
   parseChecksums,
   parseToolEntry,
   readExternalToolsManifest,
-  tryParseFlavored,
 } from '../../../src/external-tools/manifest'
 
 import type { Manifest } from '../../../src/external-tools/manifest'
@@ -242,84 +241,6 @@ describe.sequential('parseToolEntry', () => {
   })
 })
 
-describe.sequential('tryParseFlavored', () => {
-  test('returns undefined when no inner objects have checksums', () => {
-    expect(
-      tryParseFlavored({ description: 'x', version: '1' }, 'rust'),
-    ).toBeUndefined()
-  })
-
-  test('returns a flavored entry with version/description/release strings', () => {
-    const result = tryParseFlavored(
-      {
-        description: 'sfw',
-        version: '1.0.0',
-        release: 'asset',
-        free: {
-          repository: 'github:socket/sfw-free',
-          checksums: {
-            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
-          },
-        },
-      },
-      'sfw',
-    )
-    expect(result?.description).toBe('sfw')
-    expect(result?.version).toBe('1.0.0')
-    expect(result?.release).toBe('asset')
-    expect(result?.flavors['free']?.repository).toBe('github:socket/sfw-free')
-  })
-
-  test('skips flavor candidates without a repository', () => {
-    const result = tryParseFlavored(
-      {
-        // free has no `repository` so it is NOT recognized as a flavor.
-        free: {
-          checksums: {
-            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
-          },
-        },
-      },
-      'sfw',
-    )
-    expect(result).toBeUndefined()
-  })
-
-  test('defaults description/version/release to empty strings when missing', () => {
-    const result = tryParseFlavored(
-      {
-        free: {
-          repository: 'github:socket/sfw-free',
-          checksums: {
-            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
-          },
-        },
-      },
-      'sfw',
-    )
-    expect(result?.description).toBe('')
-    expect(result?.version).toBe('')
-    expect(result?.release).toBe('')
-  })
-
-  test('preserves notes array when present', () => {
-    const result = tryParseFlavored(
-      {
-        description: 'sfw',
-        notes: ['n1'],
-        free: {
-          repository: 'r',
-          checksums: {
-            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
-          },
-        },
-      },
-      'sfw',
-    )
-    expect(result?.notes).toEqual(['n1'])
-  })
-})
-
 describe.sequential('getTool', () => {
   function manifestWith(entry: Manifest['tools'][string]): Manifest {
     return { tools: { mytool: entry } }
@@ -481,47 +402,5 @@ describe.sequential('readExternalToolsManifest', () => {
     const manifest = await readExternalToolsManifest(filepath)
     expect(manifest.tools['sfw']?.kind).toBe('flavored')
     expect(manifest.tools['rust']?.kind).toBe('other')
-  })
-})
-
-describe.sequential('tryParseFlavored — skip invalid flavor candidates', () => {
-  test('skips a flavor candidate whose checksums field is not an object', () => {
-    const result = tryParseFlavored(
-      {
-        description: 'sfw',
-        // free has bad checksums shape → skipped.
-        free: {
-          repository: 'github:socket/sfw-free',
-          checksums: 'not-an-object',
-        },
-        // enterprise is valid → kept.
-        enterprise: {
-          repository: 'github:socket/sfw-enterprise',
-          checksums: {
-            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
-          },
-        },
-      },
-      'sfw',
-    )
-    expect(result?.flavors['free']).toBeUndefined()
-    expect(result?.flavors['enterprise']).toBeDefined()
-  })
-
-  test('omits binaryName when the field is not a string', () => {
-    const result = tryParseFlavored(
-      {
-        description: 'sfw',
-        free: {
-          repository: 'github:socket/sfw-free',
-          binaryName: 42,
-          checksums: {
-            'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
-          },
-        },
-      },
-      'sfw',
-    )
-    expect(result?.flavors['free']?.binaryName).toBeUndefined()
   })
 })

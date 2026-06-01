@@ -40,16 +40,16 @@ export const SymbolUnscopables = Symbol.unscopables
 // `description` is an accessor on `Symbol.prototype`, not a method.
 // `__lookupGetter__` resolves it cleanly across engines without
 // touching the live property descriptor.
-const _symbolDescriptionGetter = (
+const symbolDescriptionGetter = (
   Symbol.prototype as unknown as {
     __lookupGetter__: (key: string) => (() => string | undefined) | undefined
   }
 ).__lookupGetter__('description')
 export function SymbolPrototypeDescription(self: symbol): string | undefined {
-  // _symbolDescriptionGetter is always set in modern V8.
-  /* c8 ignore start */
-  return _symbolDescriptionGetter
-    ? _symbolDescriptionGetter.call(self)
+  // symbolDescriptionGetter is always set in modern V8.
+  /* c8 ignore start - description getter is always present in modern V8; the fallback branch is unreachable */
+  return symbolDescriptionGetter
+    ? symbolDescriptionGetter.call(self)
     : self.description
   /* c8 ignore stop */
 }

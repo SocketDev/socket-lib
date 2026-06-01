@@ -18,7 +18,7 @@ import {
 const stdout: NodeJS.WriteStream = process.stdout
 
 // Module-level flag for ensureCursorOnExit idempotency.
-let _cursorExitRegistered = false
+let cursorExitRegistered = false
 
 /**
  * Clear the current line on stdout. Only works in TTY environments.
@@ -79,10 +79,10 @@ export function cursorTo(x: number, y?: number | undefined): void {
  *   ```
  */
 export function ensureCursorOnExit(): void {
-  if (_cursorExitRegistered) {
+  if (cursorExitRegistered) {
     return
   }
-  _cursorExitRegistered = true
+  cursorExitRegistered = true
   process.on('exit', showCursor)
   process.on('SIGINT', () => {
     showCursor()
