@@ -6,8 +6,8 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeEvents from 'node:events'
 
-let _events: typeof NodeEvents | undefined
+let events: typeof NodeEvents | undefined
 
 export function getNodeEvents(): typeof NodeEvents {
-  return (_events ??= /*@__PURE__*/ require('node:events') as typeof NodeEvents)
+  return (events ??= /*@__PURE__*/ require('node:events') as typeof NodeEvents)
 }

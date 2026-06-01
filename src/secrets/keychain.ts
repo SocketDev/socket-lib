@@ -20,7 +20,7 @@
  *   2026-05-15.)
  */
 
-import { platform } from 'node:os'
+import os from 'node:os'
 
 import { ErrorCtor, TypeErrorCtor } from '../primordials/error'
 
@@ -179,7 +179,7 @@ type Platform = 'darwin' | 'linux' | 'win32' | 'other'
  * @internal
  */
 export function detectPlatform(): Platform {
-  const p = platform()
+  const p = os.platform()
   if (p === 'darwin' || p === 'linux' || p === 'win32') {
     return p
   }
@@ -223,7 +223,7 @@ export function getBackendAvailability(): BackendAvailability {
       return {
         available: false,
         toolName: 'n/a',
-        installHint: `Platform ${platform()} is not supported.`,
+        installHint: `Platform ${os.platform()} is not supported.`,
       }
   }
 }
@@ -358,7 +358,7 @@ export async function writeSecret({
   const platform_ = detectPlatform()
   if (platform_ === 'other') {
     throw new ErrorCtor(
-      `Unsupported platform: ${platform()}. ` +
+      `Unsupported platform: ${os.platform()}. ` +
         'Secret storage requires macOS, Linux, or Windows.',
     )
   }
@@ -399,7 +399,7 @@ export function writeSecretSync({
   const platform_ = detectPlatform()
   if (platform_ === 'other') {
     throw new ErrorCtor(
-      `Unsupported platform: ${platform()}. ` +
+      `Unsupported platform: ${os.platform()}. ` +
         'Secret storage requires macOS, Linux, or Windows.',
     )
   }

@@ -80,5 +80,6 @@ export function rsort(versions: readonly string[]): string[] {
  * `readonly string[]` even when the impl mutates internally.
  */
 export function sort(versions: readonly string[]): string[] {
-  return impl.toSorted([...versions])
+  // oxlint-disable-next-line unicorn/no-array-sort -- `impl.sort` is the smol/semver binding's own sort method, not Array#sort; the binding exposes no `toSorted`.
+  return impl.sort([...versions])
 }

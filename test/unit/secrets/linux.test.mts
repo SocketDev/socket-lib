@@ -3,6 +3,8 @@ import { Readable, Writable } from 'node:stream'
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import type childProcess from 'node:child_process'
+
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawn: vi.fn(),
   mockSpawnSync: vi.fn(),
@@ -10,9 +12,7 @@ const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
 
 vi.mock(import('node:child_process'), async () => {
   const actual =
-    await vi.importActual<typeof import('node:child_process')>(
-      'node:child_process',
-    )
+    await vi.importActual<typeof childProcess>('node:child_process')
   return {
     ...actual,
     default: actual,

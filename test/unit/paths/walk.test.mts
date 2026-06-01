@@ -59,7 +59,8 @@ describe('walkUp', () => {
 
   it('is lazy — can break early without computing the whole chain', () => {
     let count = 0
-    for (const _dir of walkUp('/a/b/c/d/e')) {
+    for (const dir of walkUp('/a/b/c/d/e')) {
+      void dir
       count += 1
       if (count === 2) {
         break

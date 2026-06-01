@@ -11,15 +11,19 @@ import { getSmolVersions } from '../../../src/smol/versions'
 describe('smol/versions', () => {
   describe('getSmolVersions', () => {
     it('returns undefined on stock Node', () => {
-      expect(getSmolVersions()).toBe(undefined)
+      const result = getSmolVersions()
+      expect(result).toBe(undefined)
     })
 
     it('is idempotent across repeated calls', () => {
-      expect(getSmolVersions()).toBe(getSmolVersions())
+      const first = getSmolVersions()
+      const second = getSmolVersions()
+      expect(first).toBe(second)
     })
 
     it('does not throw', () => {
-      expect(() => getSmolVersions()).not.toThrow()
+      const run = () => getSmolVersions()
+      expect(run).not.toThrow()
     })
   })
 })

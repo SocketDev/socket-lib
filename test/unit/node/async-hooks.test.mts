@@ -14,10 +14,18 @@ describe('node/async-hooks', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeAsyncHooks()).toBe(getNodeAsyncHooks())
+    const first = getNodeAsyncHooks()
+    const second = getNodeAsyncHooks()
+    expect(first).toBe(second)
   })
 
   it('does not throw', () => {
-    expect(() => getNodeAsyncHooks()).not.toThrow()
+    let thrown: unknown
+    try {
+      getNodeAsyncHooks()
+    } catch (e) {
+      thrown = e
+    }
+    expect(thrown).toBeUndefined()
   })
 })

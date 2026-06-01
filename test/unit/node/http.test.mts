@@ -14,10 +14,13 @@ describe('node/http', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeHttp()).toBe(getNodeHttp())
+    const first = getNodeHttp()
+    const second = getNodeHttp()
+    expect(first).toBe(second)
   })
 
   it('does not throw', () => {
-    expect(() => getNodeHttp()).not.toThrow()
+    const call = () => getNodeHttp()
+    expect(call).not.toThrow()
   })
 })

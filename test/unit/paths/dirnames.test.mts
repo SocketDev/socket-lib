@@ -8,6 +8,7 @@
  *     file system traversal, and caching throughout Socket tools.
  */
 
+import { NODE_MODULES as EXPECTED_NODE_MODULES } from '@socketsecurity/lib-stable/paths/dirnames'
 import {
   CACHE_DIR,
   CACHE_TTL_DIR,
@@ -97,7 +98,7 @@ describe('paths/dirnames', () => {
 
     it('should be a valid glob pattern', () => {
       expect(NODE_MODULES_GLOB_RECURSIVE).toContain('**')
-      expect(NODE_MODULES_GLOB_RECURSIVE).toContain(NODE_MODULES)
+      expect(NODE_MODULES_GLOB_RECURSIVE).toContain(EXPECTED_NODE_MODULES)
     })
   })
 
@@ -115,7 +116,7 @@ describe('paths/dirnames', () => {
     })
 
     it('should contain node_modules', () => {
-      expect(SLASH_NODE_MODULES_SLASH).toContain(NODE_MODULES)
+      expect(SLASH_NODE_MODULES_SLASH).toContain(EXPECTED_NODE_MODULES)
     })
   })
 

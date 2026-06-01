@@ -4,7 +4,7 @@
  *   under the fleet's 500-line soft cap.
  */
 
-import { createHash } from 'node:crypto'
+import crypto from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -66,7 +66,11 @@ describe('hash collision resistance', () => {
     const hashes = new Set<string>()
     for (let i = 0, { length } = specs; i < length; i += 1) {
       const spec = specs[i]!
-      const hash = createHash('sha256').update(spec).digest('hex').slice(0, 16)
+      const hash = crypto
+        .createHash('sha256')
+        .update(spec)
+        .digest('hex')
+        .slice(0, 16)
       hashes.add(hash)
     }
 
@@ -77,7 +81,11 @@ describe('hash collision resistance', () => {
   it('should handle unicode in package names', () => {
     // Some packages have unicode in names.
     const spec = 'emoji-😀@1.0.0'
-    const hash = createHash('sha256').update(spec).digest('hex').slice(0, 16)
+    const hash = crypto
+      .createHash('sha256')
+      .update(spec)
+      .digest('hex')
+      .slice(0, 16)
 
     expect(hash).toMatch(/^[0-9a-f]{16}$/)
     expect(hash).toHaveLength(16)

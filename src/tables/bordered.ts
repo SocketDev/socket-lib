@@ -89,12 +89,12 @@ export function formatTable(
   // Data rows
   for (let i = 0, { length } = data; i < length; i += 1) {
     const row = data[i]!
-    const cells = columns.map((col, i) => {
+    const cells = columns.map((col, colIndex) => {
       let value = String(row[col.key] ?? '')
       if (col.color) {
         value = col.color(value)
       }
-      return padText(value, widths[i] as number, col.align)
+      return padText(value, widths[colIndex] as number, col.align)
     })
     ArrayPrototypePush(
       lines,

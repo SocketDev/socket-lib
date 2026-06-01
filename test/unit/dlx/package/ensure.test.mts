@@ -4,7 +4,7 @@
  *   under the fleet's 500-line soft cap.
  */
 
-import { createHash } from 'node:crypto'
+import crypto from 'node:crypto'
 import {
   existsSync,
   mkdirSync,
@@ -55,7 +55,7 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
 
   function stageCachedPackage(packageSpec: string, packageName: string) {
     // generateCacheKey is sha512-hex-prefix(16) of the package spec.
-    const cacheKey = createHash('sha512')
+    const cacheKey = crypto.createHash('sha512')
       .update(packageSpec)
       .digest('hex')
       .slice(0, 16)
@@ -106,7 +106,7 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
       requires: true,
       packages: { '': { name: 'lf-test' } },
     })
-    const cacheKey = createHash('sha512')
+    const cacheKey = crypto.createHash('sha512')
       .update('lf-test@1.0.0')
       .digest('hex')
       .slice(0, 16)
@@ -185,7 +185,7 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
     )
 
     // Stage at default location (with cacheKey).
-    const cacheKey = createHash('sha512')
+    const cacheKey = crypto.createHash('sha512')
       .update('lodash@4.17.21')
       .digest('hex')
       .slice(0, 16)

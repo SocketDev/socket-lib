@@ -14,10 +14,18 @@ describe('node/crypto', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeCrypto()).toBe(getNodeCrypto())
+    const first = getNodeCrypto()
+    const second = getNodeCrypto()
+    expect(first).toBe(second)
   })
 
   it('does not throw', () => {
-    expect(() => getNodeCrypto()).not.toThrow()
+    let error: unknown
+    try {
+      getNodeCrypto()
+    } catch (e) {
+      error = e
+    }
+    expect(error).toBeUndefined()
   })
 })

@@ -6,6 +6,10 @@ import {
   binaryPathCacheSet,
 } from '../../../src/dlx/_internal'
 
+// Independent copy of the documented cap. The src value is the
+// system-under-test, so the expected value must not be derived from it.
+const EXPECTED_CACHE_MAX_SIZE = 200
+
 beforeEach(() => {
   binaryPathCache.clear()
 })
@@ -29,24 +33,25 @@ describe.sequential('dlx/_internal — binaryPathCacheSet (bounded LRU)', () => 
   })
 
   test('exports a 200-entry cap constant', () => {
-    expect(BINARY_PATH_CACHE_MAX_SIZE).toBe(200)
+    const cap = BINARY_PATH_CACHE_MAX_SIZE
+    expect(cap).toBe(EXPECTED_CACHE_MAX_SIZE)
   })
 
   test('evicts the LRU entry when the cap is exceeded', () => {
     // Fill to the cap.
-    for (let i = 0; i < BINARY_PATH_CACHE_MAX_SIZE; i += 1) {
+    for (let i = 0; i < EXPECTED_CACHE_MAX_SIZE; i += 1) {
       binaryPathCacheSet(`k${i}`, `/v${i}`)
     }
-    expect(binaryPathCache.size).toBe(BINARY_PATH_CACHE_MAX_SIZE)
+    expect(binaryPathCache.size).toBe(EXPECTED_CACHE_MAX_SIZE)
     // One more entry triggers LRU eviction of `k0`.
     binaryPathCacheSet('newest', '/newest')
-    expect(binaryPathCache.size).toBe(BINARY_PATH_CACHE_MAX_SIZE)
+    expect(binaryPathCache.size).toBe(EXPECTED_CACHE_MAX_SIZE)
     expect(binaryPathCache.has('k0')).toBe(false)
     expect(binaryPathCache.has('newest')).toBe(true)
   })
 
   test('touching an entry near the LRU prevents its eviction on next insert', () => {
-    for (let i = 0; i < BINARY_PATH_CACHE_MAX_SIZE; i += 1) {
+    for (let i = 0; i < EXPECTED_CACHE_MAX_SIZE; i += 1) {
       binaryPathCacheSet(`k${i}`, `/v${i}`)
     }
     // Bump k0 to MRU.

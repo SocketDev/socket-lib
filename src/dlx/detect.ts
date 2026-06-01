@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- helper functions are interleaved with `readPackageJson` and cache state needed by them; reordering would split that state or change initialization order. */
 /**
  * @file Executable type detection for DLX and local filesystem paths. Provides
  *   utilities to detect whether a path is a Node.js package or native binary
@@ -44,21 +43,6 @@ type PackageJsonPathEntry = {
 }
 const packageJsonPathCache = new MapCtor<string, PackageJsonPathEntry>()
 
-export function packageJsonPathCacheSet(
-  key: string,
-  value: string | undefined,
-): void {
-  if (packageJsonPathCache.has(key)) {
-    packageJsonPathCache.delete(key)
-  } else if (packageJsonPathCache.size >= PACKAGE_JSON_PATH_CACHE_MAX_SIZE) {
-    const oldest = packageJsonPathCache.keys().next().value
-    if (oldest !== undefined) {
-      packageJsonPathCache.delete(oldest)
-    }
-  }
-  packageJsonPathCache.set(key, { path: value, at: Date.now() })
-}
-
 // Cache for parsed package.json content keyed by path + mtime so stale
 // content is not served if the file is modified or replaced.
 type PackageJsonCacheEntry = {
@@ -74,95 +58,6 @@ export interface ExecutableDetectionResult {
   method: 'dlx-cache' | 'package-json' | 'file-extension'
   packageJsonPath?: string | undefined
   inDlxCache?: boolean | undefined
-}
-
-/**
- * Find package.json in the directory containing the file or parent directories.
- * Results are cached to avoid repeated directory traversal.
- *
- * @private
- *
- * @param filePath - Path to search from.
- *
- * @returns Path to package.json if found, undefined otherwise
- */
-export function findPackageJson(filePath: string): string | undefined {
-  const fs = getNodeFs()
-  const nodePath = getNodePath()
-
-  const startDir = nodePath.dirname(nodePath.resolve(filePath))
-
-  // Check cache first.
-  const cached = packageJsonPathCache.get(startDir)
-  if (cached !== undefined) {
-    // Negative entries expire after a short TTL so a directory that later
-    // gains a package.json (npm install in a sibling workspace, etc.) is
-    // re-probed instead of permanently stuck on the cached "not found".
-    if (cached.path === undefined) {
-      if (DateNow() - cached.at < PACKAGE_JSON_NEGATIVE_TTL_MS) {
-        return undefined
-      }
-      packageJsonPathCache.delete(startDir)
-    } else if (fs.existsSync(cached.path)) {
-      // Bump recency on hit.
-      packageJsonPathCacheSet(startDir, cached.path)
-      return cached.path
-    } else {
-      // Cached path no longer exists, remove stale entry.
-      packageJsonPathCache.delete(startDir)
-    }
-  }
-
-  // findUpSync walks ancestors (incl. filesystem root) and matches a
-  // file named package.json — the LRU + negative-TTL cache around it
-  // is this function's contribution. The previous inline
-  // `while (dir !== root)` loop never visited root, so a package.json
-  // at `/package.json` was missed; findUpSync includes root.
-  // findUpSync already returns a normalized (forward-slash) path, so the
-  // API output is identical across platforms without re-normalizing here.
-  const packageJsonPath = findUpSync('package.json', { cwd: startDir })
-  packageJsonPathCacheSet(startDir, packageJsonPath)
-  return packageJsonPath
-}
-
-/**
- * Read and parse package.json with caching. Results are cached to avoid
- * repeated file reads.
- *
- * @private
- *
- * @param packageJsonPath - Path to package.json.
- *
- * @returns Parsed package.json or null if invalid
- */
-export function readPackageJson(packageJsonPath: string): object | undefined {
-  const fs = getNodeFs()
-
-  let mtimeMs = 0
-  try {
-    // oxlint-disable-next-line socket/prefer-exists-sync -- need mtimeMs for cache invalidation, not just existence.
-    mtimeMs = fs.statSync(packageJsonPath).mtimeMs
-  } catch {
-    packageJsonContentCache.delete(packageJsonPath)
-    return undefined
-  }
-
-  const cached = packageJsonContentCache.get(packageJsonPath)
-  if (cached !== undefined && cached.mtimeMs === mtimeMs) {
-    return cached.content
-  }
-
-  try {
-    const content = JSONParse(fs.readFileSync(packageJsonPath, 'utf8'))
-    packageJsonContentCache.set(packageJsonPath, { mtimeMs, content })
-    return content
-  } catch {
-    packageJsonContentCache.set(packageJsonPath, {
-      mtimeMs,
-      content: undefined,
-    })
-    return undefined
-  }
 }
 
 /**
@@ -292,6 +187,55 @@ export function detectLocalExecutableType(
 }
 
 /**
+ * Find package.json in the directory containing the file or parent directories.
+ * Results are cached to avoid repeated directory traversal.
+ *
+ * @private
+ *
+ * @param filePath - Path to search from.
+ *
+ * @returns Path to package.json if found, undefined otherwise
+ */
+export function findPackageJson(filePath: string): string | undefined {
+  const fs = getNodeFs()
+  const nodePath = getNodePath()
+
+  const startDir = nodePath.dirname(nodePath.resolve(filePath))
+
+  // Check cache first.
+  const cached = packageJsonPathCache.get(startDir)
+  if (cached !== undefined) {
+    // Negative entries expire after a short TTL so a directory that later
+    // gains a package.json (npm install in a sibling workspace, etc.) is
+    // re-probed instead of permanently stuck on the cached "not found".
+    if (cached.path === undefined) {
+      if (DateNow() - cached.at < PACKAGE_JSON_NEGATIVE_TTL_MS) {
+        return undefined
+      }
+      packageJsonPathCache.delete(startDir)
+    } else if (fs.existsSync(cached.path)) {
+      // Bump recency on hit.
+      packageJsonPathCacheSet(startDir, cached.path)
+      return cached.path
+    } else {
+      // Cached path no longer exists, remove stale entry.
+      packageJsonPathCache.delete(startDir)
+    }
+  }
+
+  // findUpSync walks ancestors (incl. filesystem root) and matches a
+  // file named package.json — the LRU + negative-TTL cache around it
+  // is this function's contribution. The previous inline
+  // `while (dir !== root)` loop never visited root, so a package.json
+  // at `/package.json` was missed; findUpSync includes root.
+  // findUpSync already returns a normalized (forward-slash) path, so the
+  // API output is identical across platforms without re-normalizing here.
+  const packageJsonPath = findUpSync('package.json', { cwd: startDir })
+  packageJsonPathCacheSet(startDir, packageJsonPath)
+  return packageJsonPath
+}
+
+/**
  * Check if a file path indicates a Node.js script.
  *
  * @example
@@ -343,4 +287,68 @@ export function isNativeBinary(filePath: string): boolean {
  */
 export function isNodePackage(filePath: string): boolean {
   return detectExecutableType(filePath).type === 'package'
+}
+
+/**
+ * Set a package.json path cache entry, evicting the oldest when the LRU is
+ * full.
+ *
+ * @private
+ *
+ * @param key - Start directory used as the cache key.
+ * @param value - Resolved package.json path, or undefined for a negative entry.
+ */
+export function packageJsonPathCacheSet(
+  key: string,
+  value: string | undefined,
+): void {
+  if (packageJsonPathCache.has(key)) {
+    packageJsonPathCache.delete(key)
+  } else if (packageJsonPathCache.size >= PACKAGE_JSON_PATH_CACHE_MAX_SIZE) {
+    const oldest = packageJsonPathCache.keys().next().value
+    if (oldest !== undefined) {
+      packageJsonPathCache.delete(oldest)
+    }
+  }
+  packageJsonPathCache.set(key, { path: value, at: Date.now() })
+}
+
+/**
+ * Read and parse package.json with caching. Results are cached to avoid
+ * repeated file reads.
+ *
+ * @private
+ *
+ * @param packageJsonPath - Path to package.json.
+ *
+ * @returns Parsed package.json or null if invalid
+ */
+export function readPackageJson(packageJsonPath: string): object | undefined {
+  const fs = getNodeFs()
+
+  let mtimeMs = 0
+  try {
+    // oxlint-disable-next-line socket/prefer-exists-sync -- need mtimeMs for cache invalidation, not just existence.
+    mtimeMs = fs.statSync(packageJsonPath).mtimeMs
+  } catch {
+    packageJsonContentCache.delete(packageJsonPath)
+    return undefined
+  }
+
+  const cached = packageJsonContentCache.get(packageJsonPath)
+  if (cached !== undefined && cached.mtimeMs === mtimeMs) {
+    return cached.content
+  }
+
+  try {
+    const content = JSONParse(fs.readFileSync(packageJsonPath, 'utf8'))
+    packageJsonContentCache.set(packageJsonPath, { mtimeMs, content })
+    return content
+  } catch {
+    packageJsonContentCache.set(packageJsonPath, {
+      mtimeMs,
+      content: undefined,
+    })
+    return undefined
+  }
 }

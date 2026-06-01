@@ -47,7 +47,7 @@ export const GIT_CACHE_MAX_SIZE = 100
 export const GIT_CACHE_TTL_MS = 2000
 
 // Cached git binary path to avoid repeated PATH searches.
-let _gitPath: string | undefined
+let cachedGitPath: string | undefined
 
 export function getCachedGitDiff(key: string): string[] | undefined {
   const entry = gitDiffCache.get(key)
@@ -127,12 +127,12 @@ export function getGitDiffSpawnArgs(
 export function getGitPath(): string {
   // Lazy-init second-call + 'git' fallback when which fails.
   /* c8 ignore start */
-  if (_gitPath === undefined) {
+  if (cachedGitPath === undefined) {
     const resolved = whichSync('git', { nothrow: true })
-    _gitPath = typeof resolved === 'string' ? resolved : 'git'
+    cachedGitPath = typeof resolved === 'string' ? resolved : 'git'
   }
   /* c8 ignore stop */
-  return _gitPath
+  return cachedGitPath
 }
 
 /**

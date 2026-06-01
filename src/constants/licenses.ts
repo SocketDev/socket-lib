@@ -11,7 +11,7 @@ export const UNLICENCED = 'UNLICENCED'
 export const UNLICENSED = 'UNLICENSED'
 
 // Copy-left licenses.
-let _copyLeftLicenses: Set<string>
+let copyLeftLicenses: Set<string>
 /**
  * Get the set of SPDX identifiers considered copy-left (AGPL, GPL, EPL, EUPL,
  * CC-BY-SA variants). The set is lazily built and cached on first call.
@@ -19,8 +19,8 @@ let _copyLeftLicenses: Set<string>
  * @returns A `Set` of SPDX license identifier strings.
  */
 export function getCopyLeftLicenses(): Set<string> {
-  if (_copyLeftLicenses === undefined) {
-    _copyLeftLicenses = new SetCtor([
+  if (copyLeftLicenses === undefined) {
+    copyLeftLicenses = new SetCtor([
       'AGPL-1.0',
       'AGPL-1.0-only',
       'AGPL-1.0-or-later',
@@ -46,5 +46,5 @@ export function getCopyLeftLicenses(): Set<string> {
       'GPL-3.0-or-later',
     ])
   }
-  return _copyLeftLicenses
+  return copyLeftLicenses
 }

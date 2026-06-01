@@ -4,6 +4,8 @@
 
 import { describe, expect, it } from 'vitest'
 
+import { getNodeHttps as getNodeHttpsStable } from '@socketsecurity/lib-stable/node/https'
+
 import { getNodeHttps } from '../../../src/node/https'
 
 describe('node/https', () => {
@@ -14,7 +16,7 @@ describe('node/https', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeHttps()).toBe(getNodeHttps())
+    expect(getNodeHttps()).toBe(getNodeHttpsStable())
   })
 
   it('does not throw', () => {

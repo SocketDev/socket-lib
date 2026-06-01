@@ -20,8 +20,21 @@ import * as cacacheInternal from '../../../src/cacache/_internal'
 import * as cacacheRead from '../../../src/cacache/read'
 import * as cacacheWrite from '../../../src/cacache/write'
 
+import type { CacheEntry } from '../../../src/cacache/types'
+
 interface FakeStreamEntry {
   key: string
+}
+
+export function makeCacheEntry(key: string, data: Buffer): CacheEntry {
+  return {
+    data,
+    integrity: 'sha512-test',
+    key,
+    path: '/fake/path',
+    size: data.length,
+    time: Date.now(),
+  }
 }
 
 export function makeFakeStream(
@@ -101,19 +114,20 @@ describe.sequential('ttl-cache — getAll wildcard', () => {
             { key: 'pfx:expired' },
           ]),
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    } as unknown as ReturnType<typeof cacacheInternal.getCacache>
     vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
     vi.mocked(cacacheRead.safeGet).mockImplementation(async (key: string) => {
       if (key === 'pfx:keep-a') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return { data: Buffer.from(JSON.stringify(validEntry), 'utf8') } as any
+        return makeCacheEntry(
+          key,
+          Buffer.from(JSON.stringify(validEntry), 'utf8'),
+        )
       }
       if (key === 'pfx:expired') {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return {
-          data: Buffer.from(JSON.stringify(expiredEntry), 'utf8'),
-        } as any
+        return makeCacheEntry(
+          key,
+          Buffer.from(JSON.stringify(expiredEntry), 'utf8'),
+        )
       }
       return undefined
     })
@@ -138,12 +152,10 @@ describe.sequential('ttl-cache — getAll wildcard', () => {
       ls: {
         stream: () => makeFakeStream([{ key: 'memo:k1' }]),
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    } as unknown as ReturnType<typeof cacacheInternal.getCacache>
     vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
     vi.mocked(cacacheRead.safeGet).mockResolvedValue(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      { data: Buffer.from(JSON.stringify(validEntry), 'utf8') } as any,
+      makeCacheEntry('memo:k1', Buffer.from(JSON.stringify(validEntry), 'utf8')),
     )
 
     const result = await cache.getAll<string>('*')
@@ -170,8 +182,7 @@ describe.sequential('ttl-cache — getAll wildcard', () => {
       ls: {
         stream: () => makeFakeStream([{ key: 'dedup:shared' }]),
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    } as unknown as ReturnType<typeof cacacheInternal.getCacache>
     vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
     // safeGet should NOT be called for the dedup'd entry.
     vi.mocked(cacacheRead.safeGet).mockClear()
@@ -189,8 +200,7 @@ describe.sequential('ttl-cache — getAll wildcard', () => {
       ls: {
         stream: () => makeFakeStream([{ key: 'errs:bad' }]),
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    } as unknown as ReturnType<typeof cacacheInternal.getCacache>
     vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
     vi.mocked(cacacheRead.safeGet).mockRejectedValueOnce(
       new Error('safeGet-failed'),
@@ -209,8 +219,7 @@ describe.sequential('ttl-cache — getAll wildcard', () => {
       ls: {
         stream: () => makeFakeStream([{ key: 'gone:k' }]),
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    } as unknown as ReturnType<typeof cacacheInternal.getCacache>
     vi.mocked(cacacheInternal.getCacache).mockReturnValue(fakeCacache)
     vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce(undefined)
     const result = await cache.getAll<string>('*')

@@ -19,7 +19,7 @@ import { normalizePath } from '../paths/normalize'
 /**
  * Cached SEA detection result.
  */
-let _isSea: boolean | undefined
+let isSeaCache: boolean | undefined
 
 /**
  * Get the current SEA binary path. Only valid when running as a SEA binary.
@@ -50,18 +50,18 @@ export function getSeaBinaryPath(): string | undefined {
  *   ```
  */
 export function isSeaBinary(): boolean {
-  if (_isSea === undefined) {
+  if (isSeaCache === undefined) {
     try {
       // Use Node.js 24+ native SEA detection API.
       // eslint-disable-next-line n/no-unsupported-features/node-builtins
       const seaModule = require('node:sea')
-      _isSea = seaModule.isSea()
+      isSeaCache = seaModule.isSea()
       /* c8 ignore start - Node.js < 24 fallback; node:sea is in
          supported Node 22+ as of this codebase. */
     } catch {
-      _isSea = false
+      isSeaCache = false
     }
     /* c8 ignore stop */
   }
-  return _isSea ?? false
+  return isSeaCache ?? false
 }

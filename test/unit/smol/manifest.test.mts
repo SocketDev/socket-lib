@@ -15,7 +15,9 @@ describe('smol/manifest', () => {
     })
 
     it('is idempotent across repeated calls', () => {
-      expect(getSmolManifest()).toBe(getSmolManifest())
+      const first = getSmolManifest()
+      const second = getSmolManifest()
+      expect(first).toBe(second)
     })
 
     it('does not throw', () => {

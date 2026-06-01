@@ -1,4 +1,4 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
@@ -178,7 +178,6 @@ describe.sequential('writeRcFile', () => {
     const rcPath = path.join(tmpRoot, '.rcfile')
     writeRcFile(rcPath, 'hello')
     expect(readFileSync(rcPath, 'utf8')).toBe('hello')
-    const { statSync } = require('node:fs') as typeof import('node:fs')
     const mode = statSync(rcPath).mode & 0o777
     expect(mode).toBe(0o600)
   })

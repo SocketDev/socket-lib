@@ -56,7 +56,7 @@ export function parseLoggerOptions(args: unknown[]): ParsedLoggerOptions {
   const themeOption = (options as { theme?: unknown | undefined }).theme
   let theme: Theme | undefined
   if (typeof themeOption === 'string') {
-    theme = THEMES[themeOption as keyof typeof THEMES]
+    theme = THEMES[themeOption as keyof typeof THEMES] ?? undefined
   } else if (themeOption) {
     theme = themeOption as Theme
   }

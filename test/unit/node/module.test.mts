@@ -15,7 +15,9 @@ describe('node/module', () => {
     })
 
     it('is idempotent across repeated calls', () => {
-      expect(getNodeModule()).toBe(getNodeModule())
+      const first = getNodeModule()
+      const second = getNodeModule()
+      expect(first).toBe(second)
     })
 
     it('does not throw', () => {

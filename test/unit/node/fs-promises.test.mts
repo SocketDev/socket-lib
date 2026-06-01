@@ -15,10 +15,13 @@ describe('node/fs-promises', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeFsPromises()).toBe(getNodeFsPromises())
+    const first = getNodeFsPromises()
+    const second = getNodeFsPromises()
+    expect(first).toBe(second)
   })
 
   it('does not throw', () => {
-    expect(() => getNodeFsPromises()).not.toThrow()
+    const call = () => getNodeFsPromises()
+    expect(call).not.toThrow()
   })
 })

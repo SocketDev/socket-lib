@@ -8,6 +8,8 @@ import { mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import type * as NodeFs from 'node:fs'
+
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -20,7 +22,7 @@ import { runWithTempDir } from '../../util/temp-file-helper'
 // Helper that owns the `prefer-exists-sync` exemption once instead of
 // repeating it at every fs.statSync() call — these tests read the mode
 // bits to verify chmod ran, not existence.
-function readModeBits(fsMod: typeof import('node:fs'), p: string): number {
+function readModeBits(fsMod: typeof NodeFs, p: string): number {
   // oxlint-disable-next-line socket/prefer-exists-sync -- reading mode bits, not existence.
   return fsMod.statSync(p).mode & 0o777
 }

@@ -40,7 +40,7 @@ export function getCallerInfo(stackOffset: number = 3): string {
             // Extract the full line and trim it.
             const line = stack.slice(lineStart, i).trimStart()
             // Match the function name portion (e.g., "async runFix").
-            const match = /(?<=^at\s+).*?(?=\s+\(|$)/.exec(line)?.[0]
+            const match = /(?<=^at\s+).*?(?=$|\s+\()/.exec(line)?.[0]
             /* c8 ignore next - Defensive guard; real V8 stack frames
                always start with 'at '. */
             if (match) {

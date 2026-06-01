@@ -33,11 +33,14 @@ export function transform<T, U>(
   const result = siTransform(
     opts.concurrency,
     async (item: T) => {
-      const result = await pRetry((...args: unknown[]) => func(args[0] as T), {
-        ...opts.retries,
-        args: [item],
-      })
-      return result as U
+      const retryResult = await pRetry(
+        (...args: unknown[]) => func(args[0] as T),
+        {
+          ...opts.retries,
+          args: [item],
+        },
+      )
+      return retryResult as U
     },
     iterable,
   )

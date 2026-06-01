@@ -4,6 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
+// oxlint-disable-next-line socket/no-src-import-in-test-expect -- getNodeUtil is the system-under-test; the assertions exercise its return value and idempotent identity, not a builder of expected values.
 import { getNodeUtil } from '../../../src/node/util'
 
 describe('node/util', () => {

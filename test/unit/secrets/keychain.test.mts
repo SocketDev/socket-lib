@@ -1,11 +1,13 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import type * as nodeOs from 'node:os'
+
 const { mockPlatform } = vi.hoisted(() => ({
   mockPlatform: vi.fn(() => 'darwin'),
 }))
 
 vi.mock(import('node:os'), async () => {
-  const actual = await vi.importActual<typeof import('node:os')>('node:os')
+  const actual = await vi.importActual<typeof nodeOs>('node:os')
   return { ...actual, default: actual, platform: mockPlatform }
 })
 

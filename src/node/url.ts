@@ -6,8 +6,8 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeUrl from 'node:url'
 
-let _url: typeof NodeUrl | undefined
+let cachedUrl: typeof NodeUrl | undefined
 
 export function getNodeUrl(): typeof NodeUrl {
-  return (_url ??= /*@__PURE__*/ require('node:url') as typeof NodeUrl)
+  return (cachedUrl ??= /*@__PURE__*/ require('node:url') as typeof NodeUrl)
 }

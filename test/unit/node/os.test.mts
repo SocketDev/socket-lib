@@ -15,10 +15,13 @@ describe('node/os', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeOs()).toBe(getNodeOs())
+    const first = getNodeOs()
+    const second = getNodeOs()
+    expect(first).toBe(second)
   })
 
   it('does not throw', () => {
-    expect(() => getNodeOs()).not.toThrow()
+    const call = () => getNodeOs()
+    expect(call).not.toThrow()
   })
 })

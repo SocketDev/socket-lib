@@ -22,10 +22,10 @@ export function applyColor(
   if (typeof color === 'string') {
     // Named color like 'green', 'red', etc. The yoctocolors palette indexes to
     // a (text: string) => string formatter for each named color.
-    const formatter = (colors as Record<string, (text: string) => string>)[
-      color
-    ]
-    return formatter(text)
+    const formatter = (
+      colors as unknown as Record<string, ((text: string) => string) | undefined>
+    )[color]
+    return formatter ? formatter(text) : text
   }
   // RGB tuple [r, g, b] - manually construct ANSI escape codes.
   // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.

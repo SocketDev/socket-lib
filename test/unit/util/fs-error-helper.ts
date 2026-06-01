@@ -13,6 +13,7 @@
  *     first arg so only the targeted path errors out.
  */
 
+// oxlint-disable-next-line socket/prefer-node-builtin-imports -- vi.spyOn needs the whole node:fs namespace object to swap sync methods; cherry-picked named bindings are read-only and unspyable.
 import * as fsBuiltin from 'node:fs'
 import * as fsPromisesBuiltin from 'node:fs/promises'
 
@@ -97,17 +98,18 @@ export function makeErrnoError(
  * throws via a rejected Promise.
  */
 export function mockFsAsyncError(spec: FsAsyncErrorSpec): () => void {
-  const target = fsPromisesBuiltin as unknown as Record<string, unknown>
-  const original = target[spec.op] as (...args: unknown[]) => unknown
+  const target = fsPromisesBuiltin as unknown as Record<
+    string,
+    (...args: unknown[]) => unknown
+  >
+  const original = target[spec.op]
   if (typeof original !== 'function') {
     throw new Error(`fs.promises.${spec.op} is not a function`)
   }
   let used = false
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const spy: any = vi
-    .spyOn(fsPromisesBuiltin as never, spec.op as never)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .mockImplementation(async (...args: any[]) => {
+  const spy = vi
+    .spyOn(target, spec.op)
+    .mockImplementation(async (...args: unknown[]) => {
       const argPath = typeof args[0] === 'string' ? args[0] : String(args[0])
       const matches = argPath === spec.path || argPath.startsWith(spec.path)
       if (!matches || (spec.once && used)) {
@@ -127,17 +129,18 @@ export function mockFsAsyncError(spec: FsAsyncErrorSpec): () => void {
  * or afterEach) to undo the spy.
  */
 export function mockFsError(spec: FsErrorSpec): () => void {
-  const target = fsBuiltin as unknown as Record<string, unknown>
-  const original = target[spec.op] as (...args: unknown[]) => unknown
+  const target = fsBuiltin as unknown as Record<
+    string,
+    (...args: unknown[]) => unknown
+  >
+  const original = target[spec.op]
   if (typeof original !== 'function') {
     throw new Error(`fs.${spec.op} is not a function`)
   }
   let used = false
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const spy: any = vi
-    .spyOn(fsBuiltin as never, spec.op as never)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .mockImplementation((...args: any[]) => {
+  const spy = vi
+    .spyOn(target, spec.op)
+    .mockImplementation((...args: unknown[]) => {
       const argPath = typeof args[0] === 'string' ? args[0] : String(args[0])
       const matches = argPath === spec.path || argPath.startsWith(spec.path)
       if (!matches || (spec.once && used)) {
