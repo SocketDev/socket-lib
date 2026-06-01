@@ -17,10 +17,10 @@ export interface ResolvedSkillSpector {
   /**
    * Which resolver tier found this.
    *
-   *   - 'vfs'  — extracted from the SEA binary's VFS
-   *   - 'pipx' — `which skillspector` returned a pipx-installed venv binary
-   *   - 'path' — `which skillspector` returned a non-pipx binary on PATH
-   *   - 'dlx'  — created a venv under ~/.socket/_dlx/skillspector/<sha>/
+   * - 'vfs' — extracted from the SEA binary's VFS
+   * - 'pipx' — `which skillspector` returned a pipx-installed venv binary
+   * - 'path' — `which skillspector` returned a non-pipx binary on PATH
+   * - 'dlx' — created a venv under ~/.socket/_dlx/skillspector/<sha>/
    */
   readonly source: SkillSpectorSource
 }

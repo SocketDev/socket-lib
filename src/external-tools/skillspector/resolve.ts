@@ -3,12 +3,11 @@
  *   each source in order:
  *
  *   1. VFS — smol binary's embedded skillspector (if packed)
- *   2. PATH — `which skillspector` (pipx-installed binaries land here too;
- *      the source field distinguishes `'pipx'` vs `'path'`)
- *   3. DLX-venv — `~/.socket/_dlx/skillspector/<sha>/` with the pinned SHA
- *
- *   Returns `undefined` when all enabled sources miss. Memoized per
- *   sha+cacheDir+localOnly tuple.
+ *   2. PATH — `which skillspector` (pipx-installed binaries land here too; the
+ *      source field distinguishes `'pipx'` vs `'path'`)
+ *   3. DLX-venv — `~/.socket/_dlx/skillspector/<sha>/` with the pinned SHA Returns
+ *      `undefined` when all enabled sources miss. Memoized per
+ *      sha+cacheDir+localOnly tuple.
  */
 
 import { MapCtor } from '../../primordials/map-set'
@@ -21,13 +20,12 @@ import type { ResolvedSkillSpector } from './types'
 
 export interface ResolveSkillSpectorOptions {
   /**
-   * Tier-3 install spec — the pinned upstream SHA. Required when
-   * `localOnly` is unset (without a SHA, the DLX tier can't run).
+   * Tier-3 install spec — the pinned upstream SHA. Required when `localOnly` is
+   * unset (without a SHA, the DLX tier can't run).
    */
   readonly sha?: string | undefined
   /**
-   * Tier-3 cache override. Defaults to
-   * `~/.socket/_dlx/skillspector/<sha>`.
+   * Tier-3 cache override. Defaults to `~/.socket/_dlx/skillspector/<sha>`.
    */
   readonly cacheDir?: string | undefined
   /**

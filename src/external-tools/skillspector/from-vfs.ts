@@ -1,6 +1,6 @@
 /**
- * @file `skillspectorFromVfs()` — extracts SkillSpector from the smol Node
- *   VFS if it's bundled. Returns `undefined` when the binary doesn't carry
+ * @file `skillspectorFromVfs()` — extracts SkillSpector from the smol Node VFS
+ *   if it's bundled. Returns `undefined` when the binary doesn't carry
  *   skillspector.
  */
 
