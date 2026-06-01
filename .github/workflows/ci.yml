@@ -36,4 +36,4 @@ jobs:
         run: pnpm run build
 
       - name: Run isolated tests
-        run: pnpm exec vitest --config .config/vitest.config.isolated.mts run
+        run: pnpm exec vitest --config .config/repo/vitest.config.isolated.mts run
