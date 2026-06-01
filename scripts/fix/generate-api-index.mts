@@ -178,9 +178,9 @@ async function main(): Promise<void> {
         'exec',
         'oxfmt',
         '-c',
-        '.config/oxfmtrc.json',
+        '.config/fleet/oxfmtrc.json',
         '--ignore-path',
-        '.config/.prettierignore',
+        '.config/fleet/.prettierignore',
         outPath,
       ],
       {
