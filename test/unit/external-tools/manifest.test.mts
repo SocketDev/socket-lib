@@ -110,7 +110,10 @@ describe.sequential('parseChecksums', () => {
       },
       'mytool',
     )
-    expect(Object.keys(result).sort()).toEqual(['darwin-arm64', 'linux-x64'])
+    expect(Object.keys(result).toSorted()).toEqual([
+      'darwin-arm64',
+      'linux-x64',
+    ])
     expect(result['linux-x64']!.asset).toBe('a.tar.gz')
   })
 
@@ -226,7 +229,7 @@ describe.sequential('parseToolEntry', () => {
     )
     expect(result.kind).toBe('flavored')
     if (result.kind === 'flavored') {
-      expect(Object.keys(result.entry.flavors).sort()).toEqual([
+      expect(Object.keys(result.entry.flavors).toSorted()).toEqual([
         'enterprise',
         'free',
       ])

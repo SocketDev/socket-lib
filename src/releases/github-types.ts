@@ -38,11 +38,11 @@ export interface DownloadGitHubReleaseConfig {
   /**
    * Working directory (defaults to process.cwd()).
    */
-  cwd?: string
+  cwd?: string | undefined
   /**
    * Download destination directory. @default 'build/downloaded'
    */
-  downloadDir?: string
+  downloadDir?: string | undefined
   /**
    * GitHub repository owner/organization.
    */
@@ -54,11 +54,11 @@ export interface DownloadGitHubReleaseConfig {
   /**
    * Suppress log messages. @default false.
    */
-  quiet?: boolean
+  quiet?: boolean | undefined
   /**
    * Remove macOS quarantine attribute after download. @default true.
    */
-  removeMacOSQuarantine?: boolean
+  removeMacOSQuarantine?: boolean | undefined
   /**
    * GitHub repository name.
    */
@@ -66,7 +66,7 @@ export interface DownloadGitHubReleaseConfig {
   /**
    * Specific release tag to download.
    */
-  tag?: string
+  tag?: string | undefined
   /**
    * Tool name for directory structure.
    */
@@ -74,7 +74,7 @@ export interface DownloadGitHubReleaseConfig {
   /**
    * Tool prefix for finding latest release.
    */
-  toolPrefix?: string
+  toolPrefix?: string | undefined
 }
 
 /**

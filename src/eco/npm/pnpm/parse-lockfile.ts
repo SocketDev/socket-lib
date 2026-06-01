@@ -113,7 +113,7 @@ export function indentOf(line: string): number {
   let indent = 0
   while (
     indent < line.length &&
-    (line[indent] === ' ' || line[indent] === '\t')
+    (line[indent] === '\t' || line[indent] === ' ')
   ) {
     indent++
   }

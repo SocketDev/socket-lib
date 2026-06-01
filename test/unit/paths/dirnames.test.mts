@@ -11,8 +11,8 @@
 import {
   CACHE_DIR,
   CACHE_TTL_DIR,
-  DOT_GIT_DIR,
   DOT_GITHUB,
+  DOT_GIT_DIR,
   DOT_SOCKET_DIR,
   NODE_MODULES,
   NODE_MODULES_GLOB_RECURSIVE,
@@ -130,7 +130,8 @@ describe('paths/dirnames', () => {
         CACHE_TTL_DIR,
       ]
 
-      for (const constant of constants) {
+      for (let i = 0, { length } = constants; i < length; i += 1) {
+        const constant = constants[i]!
         expect(typeof constant).toBe('string')
         expect(constant.length).toBeGreaterThan(0)
       }
@@ -139,7 +140,8 @@ describe('paths/dirnames', () => {
     it('should have dot directories start with dot', () => {
       const dotDirs = [DOT_GIT_DIR, DOT_GITHUB, DOT_SOCKET_DIR]
 
-      for (const dir of dotDirs) {
+      for (let i = 0, { length } = dotDirs; i < length; i += 1) {
+        const dir = dotDirs[i]!
         expect(dir.startsWith('.')).toBe(true)
       }
     })
@@ -147,7 +149,8 @@ describe('paths/dirnames', () => {
     it('should have regular directories not start with dot', () => {
       const regularDirs = [NODE_MODULES, CACHE_DIR, CACHE_TTL_DIR]
 
-      for (const dir of regularDirs) {
+      for (let i = 0, { length } = regularDirs; i < length; i += 1) {
+        const dir = regularDirs[i]!
         expect(dir.startsWith('.')).toBe(false)
       }
     })
@@ -157,7 +160,8 @@ describe('paths/dirnames', () => {
     it('should all be non-empty strings', () => {
       const patterns = [NODE_MODULES_GLOB_RECURSIVE, SLASH_NODE_MODULES_SLASH]
 
-      for (const pattern of patterns) {
+      for (let i = 0, { length } = patterns; i < length; i += 1) {
+        const pattern = patterns[i]!
         expect(typeof pattern).toBe('string')
         expect(pattern.length).toBeGreaterThan(0)
       }

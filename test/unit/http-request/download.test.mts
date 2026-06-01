@@ -23,7 +23,7 @@ const { mockHttpRequestAttempt } = vi.hoisted(() => ({
   mockHttpRequestAttempt: vi.fn(),
 }))
 
-vi.mock('../../../src/http-request/request', async () => {
+vi.mock(import('../../../src/http-request/request'), async () => {
   const actual = await vi.importActual<
     typeof import('../../../src/http-request/request')
   >('../../../src/http-request/request')
@@ -31,11 +31,11 @@ vi.mock('../../../src/http-request/request', async () => {
 })
 
 function makeFakeResponse(opts: {
-  ok?: boolean
-  status?: number
-  statusText?: string
-  body?: string
-  headers?: Record<string, string | string[] | undefined>
+  ok?: boolean | undefined
+  status?: number | undefined
+  statusText?: string | undefined
+  body?: string | undefined
+  headers?: Record<string, string | string[] | undefined> | undefined
 }) {
   const { body = '', headers = {}, ok = true } = opts
   const status = opts.status ?? (ok ? 200 : 500)
@@ -215,20 +215,20 @@ describe.sequential('http-request/download — option pass-through', () => {
       ca: ['fake-ca'],
       headers: { Authorization: 'Bearer x' },
       maxRedirects: 2,
-      timeout: 5_000,
+      timeout: 5000,
     })
     const [, opts] = mockHttpRequestAttempt.mock.calls[0]!
     const o = opts as {
-      ca?: string[]
-      headers?: Record<string, string>
-      maxRedirects?: number
-      timeout?: number
-      stream?: boolean
+      ca?: string[] | undefined
+      headers?: Record<string, string> | undefined
+      maxRedirects?: number | undefined
+      timeout?: number | undefined
+      stream?: boolean | undefined
     }
     expect(o.ca).toEqual(['fake-ca'])
     expect(o.headers).toEqual({ Authorization: 'Bearer x' })
     expect(o.maxRedirects).toBe(2)
-    expect(o.timeout).toBe(5_000)
+    expect(o.timeout).toBe(5000)
     expect(o.stream).toBe(true)
   })
 
@@ -241,9 +241,9 @@ describe.sequential('http-request/download — option pass-through', () => {
     await httpDownload('https://example.com/x', dest)
     const [, opts] = mockHttpRequestAttempt.mock.calls[0]!
     const o = opts as {
-      followRedirects?: boolean
-      maxRedirects?: number
-      timeout?: number
+      followRedirects?: boolean | undefined
+      maxRedirects?: number | undefined
+      timeout?: number | undefined
     }
     expect(o.followRedirects).toBe(true)
     expect(o.maxRedirects).toBe(5)

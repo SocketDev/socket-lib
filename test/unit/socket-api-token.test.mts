@@ -16,9 +16,9 @@ import {
 
 export function snapshotEnv(): { restore: () => void } {
   const prevToken = process.env['SOCKET_API_TOKEN']
-  const prevKey = process.env['SOCKET_API_KEY']
+  const prevKey = process.env['SOCKET_API_TOKEN']
   delete process.env['SOCKET_API_TOKEN']
-  delete process.env['SOCKET_API_KEY']
+  delete process.env['SOCKET_API_TOKEN']
   return {
     restore: () => {
       if (prevToken === undefined) {
@@ -27,9 +27,9 @@ export function snapshotEnv(): { restore: () => void } {
         process.env['SOCKET_API_TOKEN'] = prevToken
       }
       if (prevKey === undefined) {
-        delete process.env['SOCKET_API_KEY']
+        delete process.env['SOCKET_API_TOKEN']
       } else {
-        process.env['SOCKET_API_KEY'] = prevKey
+        process.env['SOCKET_API_TOKEN'] = prevKey
       }
     },
   }
@@ -52,7 +52,7 @@ describe.sequential('secrets/socket-api-token', () => {
   })
 
   it('falls back to legacy SOCKET_API_KEY when canonical is unset', async () => {
-    process.env['SOCKET_API_KEY'] = 'legacy-value'
+    process.env['SOCKET_API_TOKEN'] = 'legacy-value'
     expect(await readSocketApiToken({ allowEnvOnly: true })).toBe(
       'legacy-value',
     )
@@ -60,7 +60,7 @@ describe.sequential('secrets/socket-api-token', () => {
 
   it('prefers canonical over legacy when both are set', async () => {
     process.env['SOCKET_API_TOKEN'] = 'canonical-wins'
-    process.env['SOCKET_API_KEY'] = 'legacy-loses'
+    process.env['SOCKET_API_TOKEN'] = 'legacy-loses'
     expect(await readSocketApiToken({ allowEnvOnly: true })).toBe(
       'canonical-wins',
     )
@@ -72,7 +72,7 @@ describe.sequential('secrets/socket-api-token', () => {
 
   it('treats whitespace-only env var as unset', async () => {
     process.env['SOCKET_API_TOKEN'] = '   '
-    process.env['SOCKET_API_KEY'] = 'real-legacy'
+    process.env['SOCKET_API_TOKEN'] = 'real-legacy'
     expect(await readSocketApiToken({ allowEnvOnly: true })).toBe('real-legacy')
   })
 
@@ -82,7 +82,7 @@ describe.sequential('secrets/socket-api-token', () => {
   })
 
   it('sync variant: legacy fallback', () => {
-    process.env['SOCKET_API_KEY'] = 'sync-legacy'
+    process.env['SOCKET_API_TOKEN'] = 'sync-legacy'
     expect(readSocketApiTokenSync({ allowEnvOnly: true })).toBe('sync-legacy')
   })
 

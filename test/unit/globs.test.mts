@@ -475,7 +475,7 @@ describe('globs', () => {
     it('should return same results as async glob', async () => {
       const syncFiles = globSync('*.json', { cwd: process.cwd() })
       const asyncFiles = await glob('*.json', { cwd: process.cwd() })
-      expect(syncFiles.sort()).toEqual(asyncFiles.sort())
+      expect(syncFiles.toSorted()).toEqual(asyncFiles.toSorted())
     })
 
     it('should handle empty pattern array', () => {
@@ -533,7 +533,7 @@ describe('globs', () => {
         cwd: tmpRoot,
         ignore: ['**/dist/'],
       })
-      expect(files.sort()).toEqual(['package.json', 'src/a.json'])
+      expect(files.toSorted()).toEqual(['package.json', 'src/a.json'])
     })
 
     it('globSync: directory ignored via trailing-slash pattern is excluded', () => {
@@ -541,7 +541,7 @@ describe('globs', () => {
         cwd: tmpRoot,
         ignore: ['**/dist/'],
       })
-      expect(files.sort()).toEqual(['package.json', 'src/a.json'])
+      expect(files.toSorted()).toEqual(['package.json', 'src/a.json'])
     })
 
     it('glob: still honors patterns without trailing slash', async () => {
@@ -549,7 +549,7 @@ describe('globs', () => {
         cwd: tmpRoot,
         ignore: ['**/dist/**'],
       })
-      expect(files.sort()).toEqual(['package.json', 'src/a.json'])
+      expect(files.toSorted()).toEqual(['package.json', 'src/a.json'])
     })
 
     // Mixed: one entry has the trailing slash, one does not. Both
@@ -562,7 +562,7 @@ describe('globs', () => {
         cwd: tmpRoot,
         ignore: ['**/dist/', '**/build'],
       })
-      expect(files.sort()).toEqual(['package.json', 'src/a.json'])
+      expect(files.toSorted()).toEqual(['package.json', 'src/a.json'])
     })
 
     // Empty ignore array must still produce a normalized empty array
@@ -574,7 +574,7 @@ describe('globs', () => {
         cwd: tmpRoot,
         ignore: [],
       })
-      expect(files.sort()).toEqual([
+      expect(files.toSorted()).toEqual([
         'dist/b.json',
         'package.json',
         'src/a.json',
@@ -594,7 +594,7 @@ describe('globs', () => {
       })
       // Same result as no ignore at all — `/` was preserved (not
       // stripped to '') and didn't accidentally match the cwd.
-      expect(files.sort()).toEqual([
+      expect(files.toSorted()).toEqual([
         'dist/b.json',
         'package.json',
         'src/a.json',
@@ -606,7 +606,7 @@ describe('globs', () => {
     // `options.ignore` (missing the optional chain) used to throw.
     it('glob: works with no ignore option', async () => {
       const files = await glob(['**/*.json'], { cwd: tmpRoot })
-      expect(files.sort()).toEqual([
+      expect(files.toSorted()).toEqual([
         'dist/b.json',
         'package.json',
         'src/a.json',

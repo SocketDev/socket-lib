@@ -38,7 +38,9 @@ describe.sequential('bin.ts — Volta resolution', () => {
   })
 
   function writePlatform(platform: {
-    node?: { runtime?: string; npm?: string }
+    node?:
+      | { runtime?: string | undefined; npm?: string | undefined }
+      | undefined
   }): void {
     writeFileSync(
       path.join(voltaRoot, 'tools', 'user', 'platform.json'),

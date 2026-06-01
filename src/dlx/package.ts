@@ -327,7 +327,7 @@ export async function ensurePackageInstalled(
         if (isError(e) && e.message.startsWith('Socket Firewall blocked')) {
           throw e
         }
-        const code = (e as { code?: string } | null)?.code
+        const code = (e as { code?: string | undefined } | null)?.code
         if (code === 'E404' || code === 'ETARGET') {
           throw new ErrorCtor(
             `Package not found: ${packageSpec}\n` +
@@ -337,9 +337,9 @@ export async function ensurePackageInstalled(
           )
         }
         if (
+          code === 'EAI_AGAIN' ||
           code === 'ENOTFOUND' ||
-          code === 'ETIMEDOUT' ||
-          code === 'EAI_AGAIN'
+          code === 'ETIMEDOUT'
         ) {
           throw new ErrorCtor(
             `Network error installing ${packageSpec}\n` +

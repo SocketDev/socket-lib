@@ -77,7 +77,7 @@ export function findBinaryPath(
         binName = getBinFromManifest({
           name: packageName,
           bin: binObj,
-          _id: `${packageName}@${(pkgJson as { version?: string }).version || 'unknown'}`,
+          _id: `${packageName}@${(pkgJson as { version?: string | undefined }).version || 'unknown'}`,
         })
         /* c8 ignore stop */
         binPath = binObj[binName]
@@ -175,7 +175,8 @@ export function makePackageBinsExecutable(
     }
 
     // Make all binaries executable
-    for (const binPath of binPaths) {
+    for (let i = 0, { length } = binPaths; i < length; i += 1) {
+      const binPath = binPaths[i]!
       const fullPath = normalizePath(path.join(installedDir, binPath))
       if (fs.existsSync(fullPath)) {
         try {
@@ -228,7 +229,8 @@ export function resolveBinaryPath(basePath: string): string {
   // Order matches npm bin-links creation: .cmd, .ps1, .exe, then bare
   const extensions = ['.cmd', '.bat', '.ps1', '.exe', '']
 
-  for (const ext of extensions) {
+  for (let i = 0, { length } = extensions; i < length; i += 1) {
+    const ext = extensions[i]!
     const testPath = basePath + ext
     if (fs.existsSync(testPath)) {
       // Cache the result.

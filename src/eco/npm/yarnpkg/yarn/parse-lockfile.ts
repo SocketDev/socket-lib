@@ -164,7 +164,7 @@ export function consumeEntryProperties(
     const eol = StringPrototypeIndexOf(content, '\n', pos)
     const end = eol === -1 ? content.length : eol
     const line = StringPrototypeSlice(content, pos, end)
-    if (line.length === 0 || (line[0] !== ' ' && line[0] !== '\t')) {
+    if (line.length === 0 || (line[0] !== '\t' && line[0] !== ' ')) {
       break
     }
     const propLine = StringPrototypeTrim(line)
@@ -240,7 +240,7 @@ export function jsParseYarnLock(content: string): ParsedLockfile {
       pos = skipIndentedBlock(content, pos)
       continue
     }
-    if (line[0] === ' ' || line[0] === '\t') {
+    if (line[0] === '\t' || line[0] === ' ') {
       continue
     }
     const trimmed = StringPrototypeTrim(line)
@@ -315,7 +315,7 @@ export function skipIndentedBlock(content: string, startPos: number): number {
     const eol = StringPrototypeIndexOf(content, '\n', pos)
     const end = eol === -1 ? content.length : eol
     const line = StringPrototypeSlice(content, pos, end)
-    if (line.length === 0 || (line[0] !== ' ' && line[0] !== '\t')) {
+    if (line.length === 0 || (line[0] !== '\t' && line[0] !== ' ')) {
       return pos
     }
     pos = end + 1

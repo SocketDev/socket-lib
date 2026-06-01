@@ -11,7 +11,7 @@ import process from 'node:process'
 import { getSocketDlxDir } from '../../paths/socket'
 import { downloadAndExtractTool } from '../from-download'
 
-import { getTrivyDownloadUrl, getTrivyAssetEntry } from './asset-names'
+import { getTrivyAssetEntry, getTrivyDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'

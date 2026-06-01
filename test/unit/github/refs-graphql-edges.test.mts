@@ -6,7 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('../../../src/http-request/request')
+vi.mock(import('../../../src/http-request/request'))
 
 import { fetchRefShaViaGraphQL } from '../../../src/github/refs-graphql'
 import { httpRequest } from '../../../src/http-request/request'
@@ -115,7 +115,7 @@ describe.sequential('github/refs-graphql — fetchRefShaViaGraphQL', () => {
     )
     await fetchRefShaViaGraphQL('o', 'r', 'main', { token: 'gh-tok-xyz' })
     const call = vi.mocked(httpRequest).mock.calls[0]
-    const opts = call?.[1] as { headers?: Record<string, string> }
+    const opts = call?.[1] as { headers?: Record<string, string> | undefined }
     expect(opts?.headers?.['Authorization']).toBe('Bearer gh-tok-xyz')
   })
 })

@@ -99,7 +99,7 @@ export function toUnixPath(pathLike: string | Buffer | URL): string {
   /* c8 ignore start */
   if (WIN32) {
     return normalized.replace(
-      /^([A-Z]):/i,
+      /^(?:[A-Z]):/i,
       (_, letter) => `/${letter.toLowerCase()}`,
     )
   }

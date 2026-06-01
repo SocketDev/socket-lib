@@ -50,7 +50,7 @@ interface YargsOptions {
  */
 interface YargsArguments extends Record<string, unknown> {
   _: string[]
-  $0?: string
+  $0?: string | undefined
 }
 
 /**

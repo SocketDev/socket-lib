@@ -8,21 +8,21 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { pipVenvEntryPointPath } from '../../../src/external-tools/from-pip-venv'
 
-vi.mock('../../../src/bin/which', () => ({
+vi.mock(import('../../../src/bin/which'), () => ({
   which:
     vi.fn<
       (
         name: string,
-        opts?: { nothrow?: boolean },
+        opts?: { nothrow?: boolean | undefined },
       ) => Promise<string | undefined>
     >(),
 }))
 
-vi.mock('../../../src/process/spawn/child', () => ({
+vi.mock(import('../../../src/process/spawn/child'), () => ({
   spawn: vi.fn(),
 }))
 
-vi.mock('node:fs', async () => {
+vi.mock(import('node:fs'), async () => {
   const actual = await vi.importActual<typeof import('node:fs')>('node:fs')
   return {
     ...actual,
@@ -30,7 +30,7 @@ vi.mock('node:fs', async () => {
   }
 })
 
-vi.mock('../../../src/fs/safe', () => ({
+vi.mock(import('../../../src/fs/safe'), () => ({
   safeMkdir: vi.fn(async () => undefined),
 }))
 

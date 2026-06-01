@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ManifestError } from '../../../../../src/eco/manifest/manifest-error'
+import type { ManifestError } from '../../../../../src/eco/manifest/manifest-error'
 import { parsePackageLock } from '../../../../../src/eco/npm/npm/parse-lockfile'
 
 describe('eco/npm/npm/parse-lockfile', () => {
@@ -105,7 +105,7 @@ describe('eco/npm/npm/parse-lockfile', () => {
           },
         }),
       )
-      const names = result.packages.map(p => p.name).sort()
+      const names = result.packages.map(p => p.name).toSorted()
       expect(names).toEqual(['a', 'b'])
     })
 
@@ -128,7 +128,7 @@ describe('eco/npm/npm/parse-lockfile', () => {
           },
         }),
       )
-      expect(result.packages.map(p => p.name).sort()).toEqual(['a', 'b'])
+      expect(result.packages.map(p => p.name).toSorted()).toEqual(['a', 'b'])
     })
 
     it('extracts real name + version from npm: aliased installs', () => {
@@ -237,7 +237,7 @@ describe('eco/npm/npm/parse-lockfile', () => {
           },
         }),
       )
-      const idxEntry = (result._index as { a?: unknown })['a']
+      const idxEntry = (result._index as { a?: unknown | undefined })['a']
       expect(idxEntry).toEqual([0, 1, 2])
     })
 
@@ -294,7 +294,7 @@ describe('eco/npm/npm/parse-lockfile', () => {
           },
         }),
       )
-      const pkg = result.packages[0] as { license?: string }
+      const pkg = result.packages[0] as { license?: string | undefined }
       expect(pkg.license).toBeUndefined()
     })
 

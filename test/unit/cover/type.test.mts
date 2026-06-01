@@ -17,7 +17,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // relative paths internally). Package-specifier mocks don't survive
 // vitest's threaded-pool dedup gaps. See:
 // test/unit/releases/*.test.mts for the canonical pattern.
-vi.mock('../../../src/process/spawn/child')
+vi.mock(import('../../../src/process/spawn/child'))
 
 import { spawn } from '../../../src/process/spawn/child'
 import { getTypeCoverage } from '../../../src/cover/type'

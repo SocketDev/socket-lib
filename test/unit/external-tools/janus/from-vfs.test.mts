@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  janusFromVfs,
   JANUS_VFS_KEY,
+  janusFromVfs,
 } from '../../../../src/external-tools/janus/from-vfs'
 
 describe.sequential('external-tools/janus/from-vfs', () => {

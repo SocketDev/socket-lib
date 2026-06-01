@@ -14,13 +14,15 @@ import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import { join } from 'node:path'
 import {
-  isPackageEntry,
-  isBinaryEntry,
   DlxManifest,
-  type DlxManifestEntry,
-  type PackageDetails,
-  type BinaryDetails,
-  type StoreRecord,
+  isBinaryEntry,
+  isPackageEntry,
+} from '../../../src/dlx/manifest'
+import type {
+  BinaryDetails,
+  DlxManifestEntry,
+  PackageDetails,
+  StoreRecord,
 } from '../../../src/dlx/manifest'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 

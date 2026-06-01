@@ -48,7 +48,11 @@ let _matchesGlobProbed = false
 /*@__NO_SIDE_EFFECTS__*/
 export function getGlobMatcher(
   glob: Pattern | Pattern[],
-  options?: { dot?: boolean; nocase?: boolean; ignore?: string[] },
+  options?: {
+    dot?: boolean | undefined
+    nocase?: boolean | undefined
+    ignore?: string[] | undefined
+  },
 ): (path: string) => boolean {
   const patterns = ArrayIsArray(glob) ? glob : [glob]
   // Create stable cache key by sorting patterns and option keys.
@@ -56,13 +60,13 @@ export function getGlobMatcher(
   // element-wise so `['a', 'b']` and `['b', 'a']` hit the same entry —
   // otherwise equivalent matchers re-compile and evict each other under
   // the 100-entry cap.
-  const sortedPatterns = [...patterns].sort()
+  const sortedPatterns = [...patterns].toSorted()
   const sortedOptions = options
     ? ObjectKeys(options)
-        .sort()
+        .toSorted()
         .map(k => {
           const value = options[k as keyof typeof options]
-          const normalized = ArrayIsArray(value) ? [...value].sort() : value
+          const normalized = ArrayIsArray(value) ? [...value].toSorted() : value
           return `${k}:${JSONStringify(normalized)}`
         })
         .join(',')
@@ -166,7 +170,7 @@ export function getMatchesGlob():
     // intermediate const sidesteps the reformat. See task #23.
     const pathMod =
       /*@__PURE__*/ require('node:path') as typeof import('node:path') & {
-        matchesGlob?: unknown
+        matchesGlob?: unknown | undefined
       }
     const fn = pathMod.matchesGlob
     // path.matchesGlob is present on Node 22+; missing-fn arm fires

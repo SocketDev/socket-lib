@@ -10,9 +10,9 @@ import type { IncomingResponse } from '../../../src/http-request/request-types'
 // the minimum shape our function reads (statusCode, statusMessage, headers).
 function makeMsg(opts: {
   chunks: readonly Buffer[]
-  statusCode?: number
-  statusMessage?: string
-  headers?: Record<string, string | string[] | undefined>
+  statusCode?: number | undefined
+  statusMessage?: string | undefined
+  headers?: Record<string, string | string[] | undefined> | undefined
 }): IncomingResponse {
   const { chunks, statusCode, statusMessage, headers = {} } = opts
   return {

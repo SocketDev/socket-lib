@@ -21,7 +21,7 @@ describe('which', () => {
       const result = whichSync('node')
       expect(result).toBeTruthy()
       expect(typeof result).toBe('string')
-      expect(result).toMatch(/node(\.exe)?$/i)
+      expect(result).toMatch(/node(?:\.exe)?$/i)
     })
 
     it('should return absolute paths as-is', () => {
@@ -80,7 +80,7 @@ describe('which', () => {
       const result = await which('node')
       expect(result).toBeTruthy()
       expect(typeof result).toBe('string')
-      expect(result).toMatch(/node(\.exe)?$/i)
+      expect(result).toMatch(/node(?:\.exe)?$/i)
     })
 
     it('should return absolute paths as-is', async () => {

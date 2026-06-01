@@ -159,7 +159,8 @@ describe('regexps', () => {
   // so the two paths are proven equivalent on identical inputs.
   describe('escapeRegExp — fallback implementation', () => {
     const hadNative =
-      typeof (RegExp as unknown as { escape?: unknown }).escape === 'function'
+      typeof (RegExp as unknown as { escape?: unknown | undefined }).escape ===
+      'function'
     const nativeEscape = hadNative
       ? (RegExp as unknown as { escape: (s: string) => string }).escape
       : undefined
@@ -177,7 +178,7 @@ describe('regexps', () => {
     async function loadFallback(): Promise<(s: string) => string> {
       // Delete the native method so the module's typeof check picks
       // the fallback on re-import.
-      delete (RegExp as unknown as { escape?: unknown }).escape
+      delete (RegExp as unknown as { escape?: unknown | undefined }).escape
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises fallback after deleting RegExp.escape.
       const mod = await import('../../src/regexps/escape')
@@ -272,7 +273,7 @@ describe('regexps', () => {
         return
       }
       const fallback = await loadFallback()
-      for (const cp of [0xa0, 0xfeff, 0x2028, 0x2029, 0xd800, 0xdc00]) {
+      for (const cp of [0xa0, 0xfe_ff, 0x20_28, 0x20_29, 0xd8_00, 0xdc_00]) {
         const s = String.fromCodePoint(cp)
         expect(fallback(s)).toBe(nativeEscape(s))
       }

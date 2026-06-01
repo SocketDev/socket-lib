@@ -82,17 +82,28 @@ export async function fetchReleaseAssetsViaGraphQL(
     )
   }
   let parsed: {
-    data?: {
-      repository?: {
-        release?: {
-          tagName: string
-          releaseAssets?: {
-            nodes?: Array<{ name: string; downloadUrl: string }>
-          }
-        } | null
-      }
-    }
-    errors?: Array<{ message: string }>
+    data?:
+      | {
+          repository?:
+            | {
+                release?:
+                  | {
+                      tagName: string
+                      releaseAssets?:
+                        | {
+                            nodes?:
+                              | Array<{ name: string; downloadUrl: string }>
+                              | undefined
+                          }
+                        | undefined
+                    }
+                  | null
+                  | undefined
+              }
+            | undefined
+        }
+      | undefined
+    errors?: Array<{ message: string }> | undefined
   }
   try {
     parsed = JSONParse(response.body.toString('utf8'))
@@ -151,7 +162,7 @@ export async function getReleaseAssetUrl(
   tag: string,
   assetPattern: string | AssetPattern,
   repoConfig: RepoConfig,
-  options: { nothrow?: boolean } = {},
+  options: { nothrow?: boolean | undefined } = {},
 ): Promise<string | undefined> {
   // The `quiet` option from previous releases is no longer accepted.
   // The helper is silent by design now (errors throw, success

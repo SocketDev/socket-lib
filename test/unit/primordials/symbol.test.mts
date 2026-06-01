@@ -49,9 +49,11 @@ describe('Symbol', () => {
     // Node 20.4+ has both; older Node lacks them. Either way, the
     // primordial must equal the live global when present.
     expect(SymbolAsyncDispose).toBe(
-      (Symbol as { asyncDispose?: symbol }).asyncDispose,
+      (Symbol as { asyncDispose?: symbol | undefined }).asyncDispose,
     )
-    expect(SymbolDispose).toBe((Symbol as { dispose?: symbol }).dispose)
+    expect(SymbolDispose).toBe(
+      (Symbol as { dispose?: symbol | undefined }).dispose,
+    )
   })
 
   it('SymbolFor returns registry symbols', () => {

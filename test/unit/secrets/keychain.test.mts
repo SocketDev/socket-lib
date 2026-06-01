@@ -4,12 +4,12 @@ const { mockPlatform } = vi.hoisted(() => ({
   mockPlatform: vi.fn(() => 'darwin'),
 }))
 
-vi.mock('node:os', async () => {
+vi.mock(import('node:os'), async () => {
   const actual = await vi.importActual<typeof import('node:os')>('node:os')
   return { ...actual, default: actual, platform: mockPlatform }
 })
 
-vi.mock('../../../src/secrets/macos', () => ({
+vi.mock(import('../../../src/secrets/macos'), () => ({
   deleteMacOS: vi.fn(),
   deleteMacOSSync: vi.fn(),
   isMacOSBackendAvailable: vi.fn(),
@@ -19,7 +19,7 @@ vi.mock('../../../src/secrets/macos', () => ({
   writeMacOSSync: vi.fn(),
 }))
 
-vi.mock('../../../src/secrets/linux', () => ({
+vi.mock(import('../../../src/secrets/linux'), () => ({
   deleteLinux: vi.fn(),
   deleteLinuxSync: vi.fn(),
   isLinuxBackendAvailable: vi.fn(),
@@ -29,7 +29,7 @@ vi.mock('../../../src/secrets/linux', () => ({
   writeLinuxSync: vi.fn(),
 }))
 
-vi.mock('../../../src/secrets/windows', () => ({
+vi.mock(import('../../../src/secrets/windows'), () => ({
   deleteWindows: vi.fn(),
   deleteWindowsSync: vi.fn(),
   isWindowsBackendAvailable: vi.fn(),

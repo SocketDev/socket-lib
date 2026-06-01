@@ -122,7 +122,7 @@ export async function processDirectory(
 
               // Recursively walk
               for (const key of Object.keys(node)) {
-                if (key === 'start' || key === 'end' || key === 'loc') {
+                if (key === 'end' || key === 'loc' || key === 'start') {
                   continue
                 }
                 const value = node[key]
@@ -148,7 +148,7 @@ export async function processDirectory(
               let removeEnd = exportCallEnd
               while (
                 removeEnd < content.length &&
-                (content[removeEnd] === ';' || content[removeEnd] === '\n')
+                (content[removeEnd] === '\n' || content[removeEnd] === ';')
               ) {
                 removeEnd++
               }
@@ -159,9 +159,9 @@ export async function processDirectory(
               let statementEnd = toCommonJSEnd
               while (
                 statementEnd < content.length &&
-                (content[statementEnd] === ';' ||
+                (content[statementEnd] === '\n' ||
                   content[statementEnd] === ' ' ||
-                  content[statementEnd] === '\n')
+                  content[statementEnd] === ';')
               ) {
                 if (content[statementEnd] === ';') {
                   statementEnd++

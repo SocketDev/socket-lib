@@ -17,8 +17,8 @@ import {
   gte,
   lt,
   lte,
-  sort,
   rsort,
+  sort,
 } from '../../src/versions/compare'
 import { incrementVersion, versionDiff } from '../../src/versions/modify'
 import {

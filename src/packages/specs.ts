@@ -100,7 +100,10 @@ export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
     // module is imported at the top
     parsedSpec = npmPackageArg(spec as string, where)
   }
-  const typedSpec = parsedSpec as { type?: string; saveSpec?: string }
+  const typedSpec = parsedSpec as {
+    type?: string | undefined
+    saveSpec?: string | undefined
+  }
   return (
     typedSpec.type === 'remote' && !!typedSpec.saveSpec?.endsWith('.tar.gz')
   )
@@ -125,9 +128,9 @@ export function isGitHubUrlSpec(spec: unknown, where?: string): boolean {
     parsedSpec = npmPackageArg(spec as string, where)
   }
   const typedSpec = parsedSpec as {
-    gitCommittish?: string
-    hosted?: { domain?: string }
-    type?: string
+    gitCommittish?: string | undefined
+    hosted?: { domain?: string | undefined } | undefined
+    type?: string | undefined
   }
   return (
     typedSpec.type === 'git' &&

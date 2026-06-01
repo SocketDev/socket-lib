@@ -45,7 +45,7 @@ import {
 describe('String (static)', () => {
   it('FromCharCode / FromCodePoint / Raw', () => {
     expect(StringFromCharCode(65, 66, 67)).toBe('ABC')
-    expect(StringFromCodePoint(0x1f600)).toBe('😀')
+    expect(StringFromCodePoint(0x1_f6_00)).toBe('😀')
     expect(StringRaw({ raw: ['a', 'b', 'c'] }, 1, 2)).toBe('a1b2c')
   })
 })
@@ -55,7 +55,7 @@ describe('String (prototype)', () => {
     expect(StringPrototypeAt('hello', -1)).toBe('o')
     expect(StringPrototypeCharAt('hello', 1)).toBe('e')
     expect(StringPrototypeCharCodeAt('A', 0)).toBe(65)
-    expect(StringPrototypeCodePointAt('😀', 0)).toBe(0x1f600)
+    expect(StringPrototypeCodePointAt('😀', 0)).toBe(0x1_f6_00)
   })
 
   it('CharCodeAt out-of-bounds returns NaN (matches spec)', () => {
@@ -73,12 +73,12 @@ describe('String (prototype)', () => {
     // hit the slow path (or stock JS on non-smol). Either way, the
     // observable result must match `String.prototype.charCodeAt`.
     expect(StringPrototypeCharCodeAt('é', 0)).toBe(233)
-    expect(StringPrototypeCharCodeAt('日本', 0)).toBe(0x65e5)
-    expect(StringPrototypeCharCodeAt('日本', 1)).toBe(0x672c)
+    expect(StringPrototypeCharCodeAt('日本', 0)).toBe(0x65_e5)
+    expect(StringPrototypeCharCodeAt('日本', 1)).toBe(0x67_2c)
     // Surrogate pair: charCodeAt returns the high/low surrogate
     // code unit, not the codepoint.
-    expect(StringPrototypeCharCodeAt('😀', 0)).toBe(0xd83d)
-    expect(StringPrototypeCharCodeAt('😀', 1)).toBe(0xde00)
+    expect(StringPrototypeCharCodeAt('😀', 0)).toBe(0xd8_3d)
+    expect(StringPrototypeCharCodeAt('😀', 1)).toBe(0xde_00)
   })
 
   it('Concat / EndsWith / StartsWith / Includes', () => {

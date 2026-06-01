@@ -223,7 +223,8 @@ describe('colors', () => {
 
       const rgbValues = new Set<string>()
 
-      for (const colorName of colorNames) {
+      for (let i = 0, { length } = colorNames; i < length; i += 1) {
+        const colorName = colorNames[i]!
         const rgb = toRgb(colorName)
         const key = rgb.join(',')
 

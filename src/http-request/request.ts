@@ -92,7 +92,7 @@ export async function httpRequest(
   const isStreamBody =
     body !== undefined &&
     typeof body === 'object' &&
-    typeof (body as { pipe?: unknown }).pipe === 'function'
+    typeof (body as { pipe?: unknown | undefined }).pipe === 'function'
 
   if (isStreamBody && retries > 0) {
     throw new ErrorCtor(

@@ -48,7 +48,7 @@ export function innerReadDirNames(
           })),
     )
     .map((d: Dirent) => d.name)
-  return sort ? names.sort(naturalCompare) : names
+  return sort ? names.toSorted(naturalCompare) : names
 }
 
 /**

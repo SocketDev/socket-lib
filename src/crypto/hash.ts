@@ -67,7 +67,7 @@ export function nativeHash(): typeof import('node:crypto').hash | undefined {
   if (!_hashProbed) {
     const fn = (
       getNodeCrypto() as typeof import('node:crypto') & {
-        hash?: unknown
+        hash?: unknown | undefined
       }
     ).hash
     if (typeof fn === 'function') {

@@ -34,7 +34,7 @@ export const CHAR_UPPERCASE_A = 65
 // 'Z'
 export const CHAR_UPPERCASE_Z = 90
 
-export const msysDriveRegExp = /^\/([a-zA-Z])(\/|$)/
+export const msysDriveRegExp = /^\/(?:[a-zA-Z])(?:\/|$)/
 export const nodeModulesPathRegExp = /(?:^|[/\\])node_modules(?:[/\\]|$)/
 export const slashRegExp = /[/\\]/
 

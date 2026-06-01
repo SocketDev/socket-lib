@@ -116,14 +116,18 @@ export function getPacoteCachePath(): string {
       const proto = ReflectGetPrototypeOf(
         (pacote as { RegistryFetcher: { prototype: object } }).RegistryFetcher
           .prototype,
-      ) as { constructor?: new (...args: unknown[]) => { cache: string } }
+      ) as {
+        constructor?:
+          | (new (...args: unknown[]) => { cache: string })
+          | undefined
+      }
       const PacoteFetcherBase = proto?.constructor
       // PacoteFetcherBase fallback fires only when pacote internals
       // change; cachePath fallback fires only when constructor returns
       // empty cache. Both defensive against pacote API drift.
       /* c8 ignore start */
       const cachePath = PacoteFetcherBase
-        ? new PacoteFetcherBase(/*dummy package spec*/ 'x', {}).cache
+        ? new PacoteFetcherBase(/*placeholder package spec*/ 'x', {}).cache
         : ''
       _pacoteCachePath = cachePath ? normalizePath(cachePath) : ''
       /* c8 ignore stop */

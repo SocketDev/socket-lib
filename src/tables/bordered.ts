@@ -87,7 +87,8 @@ export function formatTable(
   ArrayPrototypePush(lines, colors.dim(headerSep))
 
   // Data rows
-  for (const row of data) {
+  for (let i = 0, { length } = data; i < length; i += 1) {
+    const row = data[i]!
     const cells = columns.map((col, i) => {
       let value = String(row[col.key] ?? '')
       if (col.color) {

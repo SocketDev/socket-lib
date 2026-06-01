@@ -28,7 +28,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 // Constants for socket-lib
 const constants = {
   EXT_JSON: '.json',
-  registryPkgPath: path.join(__dirname, '..', '..'),
+  PACKAGE_DEFAULT_NODE_RANGE: '>=22',
   ignoreGlobs: [
     '**/node_modules/**',
     '**/.git/**',
@@ -39,7 +39,7 @@ const constants = {
     '**/tmp/**',
     '**/.DS_Store',
   ],
-  PACKAGE_DEFAULT_NODE_RANGE: '>=22',
+  registryPkgPath: path.join(__dirname, '..', '..'),
 }
 
 const { EXT_JSON } = constants
@@ -146,7 +146,7 @@ async function main(): Promise<void> {
     return path.extname(p)
   }
   const isDtsExt = (ext: string): boolean =>
-    ext === '.d.ts' || ext === '.d.mts' || ext === '.d.cts'
+    ext === '.d.cts' || ext === '.d.mts' || ext === '.d.ts'
   const subpathExports = registryPkgFiles.reduce((o, p) => {
     const ext = detectExt(p)
     // Strip 'dist/' prefix from export path but keep it in file path.

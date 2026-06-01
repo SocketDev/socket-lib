@@ -24,7 +24,8 @@
  */
 
 import { ANSI_RESET } from '../ansi/constants'
-import { frameColors, type RGB, type ShimmerSpec } from './shimmer'
+import { frameColors } from './shimmer'
+import type { RGB, ShimmerSpec } from './shimmer'
 
 /**
  * ANSI "reset all attributes" sequence. Re-exported from `../ansi` for

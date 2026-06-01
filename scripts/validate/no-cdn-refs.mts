@@ -95,7 +95,8 @@ export async function checkFileForCdnRefs(filePath) {
       const line = lines[i]
       const lineNumber = i + 1
 
-      for (const pattern of CDN_PATTERNS) {
+      for (let i = 0, { length } = CDN_PATTERNS; i < length; i += 1) {
+        const pattern = CDN_PATTERNS[i]!
         if (pattern.test(line)) {
           const match = line.match(pattern)
           violations.push({

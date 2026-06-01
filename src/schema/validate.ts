@@ -87,14 +87,14 @@ export function normalizeZodError(err: unknown): ValidationIssue[] {
   if (err === null || typeof err !== 'object') {
     return [{ path: [], message: String(err) }]
   }
-  const issues = (err as { issues?: unknown }).issues
+  const issues = (err as { issues?: unknown | undefined }).issues
   if (!ArrayIsArray(issues)) {
     return [{ path: [], message: 'Unknown validation error' }]
   }
   return issues.map(issue => {
     const i = issue as {
-      path?: Array<string | number>
-      message?: string
+      path?: Array<string | number> | undefined
+      message?: string | undefined
     }
     return {
       path: ArrayIsArray(i.path) ? i.path : [],
@@ -144,7 +144,8 @@ export function validateSchema<S>(
   if (
     schema !== null &&
     typeof schema === 'object' &&
-    typeof (schema as { safeParse?: unknown }).safeParse === 'function'
+    typeof (schema as { safeParse?: unknown | undefined }).safeParse ===
+      'function'
   ) {
     const result = (
       schema as unknown as {

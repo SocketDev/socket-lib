@@ -459,7 +459,7 @@ describe('env', () => {
         const base = { A: '1', B: '2', C: '3' }
         const overrides = { B: '20', D: '4' }
         const proxy = createEnvProxy(base, overrides)
-        const keys = Object.keys(proxy).sort()
+        const keys = Object.keys(proxy).toSorted()
         expect(keys).toEqual(['A', 'B', 'C', 'D'])
       })
 

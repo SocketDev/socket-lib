@@ -21,17 +21,17 @@ import {
 import { describe, expect, it } from 'vitest'
 
 const BASE_COLORS = {
-  primary: 'blue' as const,
-  secondary: 'green' as const,
-  success: 'green' as const,
   error: 'red' as const,
-  warning: 'yellow' as const,
   info: 'cyan' as const,
+  link: 'blue' as const,
+  primary: 'blue' as const,
+  prompt: 'cyan' as const,
+  secondary: 'green' as const,
   step: 'cyan' as const,
+  success: 'green' as const,
   text: 'white' as const,
   textDim: 'gray' as const,
-  link: 'blue' as const,
-  prompt: 'cyan' as const,
+  warning: 'yellow' as const,
 }
 
 describe('themes/resolve', () => {

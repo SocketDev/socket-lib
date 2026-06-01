@@ -18,14 +18,14 @@ import { invalidateCaches } from '../../../src/paths/rewire'
 import * as cacacheRead from '../../../src/cacache/read'
 import * as cacacheWrite from '../../../src/cacache/write'
 
-vi.mock('../../../src/cacache/read', async importOriginal => {
+vi.mock(import('../../../src/cacache/read'), async importOriginal => {
   const original = await importOriginal<typeof cacacheRead>()
   return {
     ...original,
     safeGet: vi.fn(original.safeGet),
   }
 })
-vi.mock('../../../src/cacache/write', async importOriginal => {
+vi.mock(import('../../../src/cacache/write'), async importOriginal => {
   const original = await importOriginal<typeof cacacheWrite>()
   return {
     ...original,

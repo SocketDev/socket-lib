@@ -53,12 +53,14 @@ const MANIFEST_FILE_NAME = '.dlx-manifest.json'
  */
 export interface PackageDetails {
   installed_version: string
-  size?: number
-  update_check?: {
-    last_check: number
-    last_notification: number
-    latest_known: string
-  }
+  size?: number | undefined
+  update_check?:
+    | {
+        last_check: number
+        last_notification: number
+        latest_known: string
+      }
+    | undefined
 }
 /**
  * Details for binary download entries.
@@ -73,17 +75,19 @@ export interface BinaryDetails {
   size: number
   source: {
     type: 'download' | 'extract'
-    url?: string
-    path?: string
+    url?: string | undefined
+    path?: string | undefined
   }
   /**
    * Update check metadata (same structure as packages).
    */
-  update_check?: {
-    last_check: number
-    last_notification: number
-    latest_known: string
-  }
+  update_check?:
+    | {
+        last_check: number
+        last_notification: number
+        latest_known: string
+      }
+    | undefined
 }
 
 /**
@@ -108,7 +112,7 @@ export interface DlxManifestOptions {
   /**
    * Custom manifest file path (defaults to ~/.socket/_dlx/.dlx-manifest.json).
    */
-  manifestPath?: string
+  manifestPath?: string | undefined
 }
 
 /**

@@ -605,11 +605,13 @@ describe.sequential('compression', () => {
     it('returns an empty options object when no level given', () => {
       const opts = resolveGzipOptions(undefined)
       expect(opts).toBeDefined()
-      expect((opts as { level?: number }).level).toBeUndefined()
+      expect((opts as { level?: number | undefined }).level).toBeUndefined()
     })
 
     it('forwards an explicit level', () => {
-      const opts = resolveGzipOptions({ level: 9 }) as { level?: number }
+      const opts = resolveGzipOptions({ level: 9 }) as {
+        level?: number | undefined
+      }
       expect(opts.level).toBe(9)
     })
 

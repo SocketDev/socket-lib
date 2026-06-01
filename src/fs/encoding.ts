@@ -60,7 +60,7 @@ export function normalizeEncoding(
 export function normalizeEncodingSlow(enc: string): BufferEncoding {
   const { length } = enc
   if (length === 4) {
-    if (enc === 'ucs2' || enc === 'UCS2') {
+    if (enc === 'UCS2' || enc === 'ucs2') {
       return 'utf16le'
     }
     if (enc.toLowerCase() === 'ucs2') {
@@ -96,20 +96,20 @@ export function normalizeEncodingSlow(enc: string): BufferEncoding {
     if (enc === 'base64') {
       return 'base64'
     }
-    if (enc === 'latin1' || enc === 'binary') {
+    if (enc === 'binary' || enc === 'latin1') {
       return 'latin1'
     }
     if (enc === 'BASE64') {
       return 'base64'
     }
-    if (enc === 'LATIN1' || enc === 'BINARY') {
+    if (enc === 'BINARY' || enc === 'LATIN1') {
       return 'latin1'
     }
     enc = enc.toLowerCase()
     if (enc === 'base64') {
       return 'base64'
     }
-    if (enc === 'latin1' || enc === 'binary') {
+    if (enc === 'binary' || enc === 'latin1') {
       return 'latin1'
     }
     // Length 7/8/9 branches handle utf16le, utf-16le, base64url. Each

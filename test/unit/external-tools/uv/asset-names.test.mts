@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'vitest'
 
 import {
+  UV_ASSET_MAP,
   getUvAssetEntry,
   getUvDownloadUrl,
-  UV_ASSET_MAP,
 } from '../../../../src/external-tools/uv/asset-names'
 
 describe('external-tools/uv/asset-names', () => {
   test('covers darwin/linux (gnu+musl) and win on both arm64 and x64', () => {
-    expect(Object.keys(UV_ASSET_MAP).sort()).toEqual([
+    expect(Object.keys(UV_ASSET_MAP).toSorted()).toEqual([
       'darwin-arm64',
       'darwin-x64',
       'linux-arm64',

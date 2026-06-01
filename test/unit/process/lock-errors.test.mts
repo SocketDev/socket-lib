@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { processLock } from '../../../src/process/lock-instance'
 import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
 
-vi.mock('../../../src/fs/safe', async importOriginal => {
+vi.mock(import('../../../src/fs/safe'), async importOriginal => {
   const original = await importOriginal<typeof import('../../../src/fs/safe')>()
   return {
     ...original,

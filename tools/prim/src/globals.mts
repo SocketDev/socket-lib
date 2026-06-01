@@ -270,10 +270,10 @@ export function guessReceiverType(name) {
   //   2. A clearly array-ish suffix that's unlikely to be a hash/object
   //      collection (Array, List, Vec, Tuple).
   if (
-    /^(arr|array|list|items|results|entries|values|keys|nodes|elements|matches|parts|chunks|paths|files|args|argv|tokens|lines|cols|rows|deps|tags|specs|errors|warnings|ancestors|children|siblings|tasks|jobs|requests|responses|messages|events|records|rows)$/.test(
+    /^(ancestors|args|argv|arr|array|children|chunks|cols|deps|elements|entries|errors|events|files|items|jobs|keys|lines|list|matches|messages|nodes|parts|paths|records|requests|responses|results|rows|rows|siblings|specs|tags|tasks|tokens|values|warnings)$/.test(
       name,
     ) ||
-    /(Array|List|Vec|Tuple)$/.test(name)
+    /(Array|List|Tuple|Vec)$/.test(name)
   ) {
     return 'Array'
   }
@@ -285,7 +285,7 @@ export function guessReceiverType(name) {
   // false-positive gap findings for primordials that already exist
   // under `BufferPrototype*` names.
   if (
-    /^(str|s|name|key|val|value|text|line|word|message|msg|input|output|header|path|url|ext|filename|prefix|suffix|substring|cmd|command|raw|label|title|description|version|hash|sha|tag|slug|spec|sourceCode|source|code)$/.test(
+    /^(cmd|code|command|description|ext|filename|hash|header|input|key|label|line|message|msg|name|output|path|prefix|raw|s|sha|slug|source|sourceCode|spec|str|substring|suffix|tag|text|title|url|val|value|version|word)$/.test(
       name,
     )
   ) {
@@ -293,7 +293,7 @@ export function guessReceiverType(name) {
   }
   // ─── Number hints ───────────────────────────────────────────────────
   if (
-    /^(n|num|number|count|len|length|size|index|idx|i|j|k|offset|width|height|depth|score|ratio|percent|millis|seconds|minutes|hours|year|month|day)$/.test(
+    /^(count|day|depth|height|hours|i|idx|index|j|k|len|length|millis|minutes|month|n|num|number|offset|percent|ratio|score|seconds|size|width|year)$/.test(
       name,
     )
   ) {
@@ -301,10 +301,10 @@ export function guessReceiverType(name) {
   }
   // ─── Date hints ─────────────────────────────────────────────────────
   if (
-    /^(date|d|now|timestamp|created|updated|modified|start|end|expires|deadline|when)$/.test(
+    /^(created|d|date|deadline|end|expires|modified|now|start|timestamp|updated|when)$/.test(
       name,
     ) ||
-    /(Date|At|Time)$/.test(name)
+    /(At|Date|Time)$/.test(name)
   ) {
     return 'Date'
   }
@@ -313,11 +313,11 @@ export function guessReceiverType(name) {
   // (a regex *source*, not a compiled RegExp) and the false-positives
   // from classifying string `.includes` / `.replace` / `.match` calls
   // as RegExp prototype methods drown out the rare real RegExp guess.
-  if (/^(re|regex|regexp)$/.test(name) || /Re(gex|gExp)$/.test(name)) {
+  if (/^(re|regex|regexp)$/.test(name) || /Re(gExp|gex)$/.test(name)) {
     return 'RegExp'
   }
   // ─── Promise hints ──────────────────────────────────────────────────
-  if (/^(promise|p|pending)$/.test(name) || name.endsWith('Promise')) {
+  if (/^(p|pending|promise)$/.test(name) || name.endsWith('Promise')) {
     return 'Promise'
   }
   // ─── Buffer hints ───────────────────────────────────────────────────

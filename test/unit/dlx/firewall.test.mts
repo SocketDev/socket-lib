@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { checkFirewallPurls, npmPurl } from '../../../src/dlx/firewall'
 
-vi.mock('../../../src/http-request/node', () => ({
+vi.mock(import('../../../src/http-request/node'), () => ({
   httpJson: vi.fn(),
 }))
 

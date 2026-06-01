@@ -443,7 +443,7 @@ describe.sequential('ttl-cache', () => {
       // respond" hang; the 2000ms / 3000ms pair leaves enough margin
       // that the TTL is observably expired before we re-read.
       const shortCache = createTtlCache({
-        ttl: 2_000,
+        ttl: 2000,
         prefix: 'expiry-test',
       })
 
@@ -451,7 +451,7 @@ describe.sequential('ttl-cache', () => {
       expect(await shortCache.get<string>('key')).toBe('value')
 
       // Wait for TTL to expire (3000ms > 2000ms TTL).
-      await new Promise(resolve => setTimeout(resolve, 3_000))
+      await new Promise(resolve => setTimeout(resolve, 3000))
 
       expect(await shortCache.get('key')).toBeUndefined()
 
@@ -498,7 +498,7 @@ describe.sequential('ttl-cache', () => {
       // memoized variant has the same Windows flakiness profile
       // because `get()` still hits cacache.get on cold lookups.
       const shortCache = createTtlCache({
-        ttl: 2_000,
+        ttl: 2000,
         prefix: 'short-memo-cache',
         memoize: true,
       })
@@ -506,7 +506,7 @@ describe.sequential('ttl-cache', () => {
       await shortCache.set('key', 'value')
       expect(await shortCache.get<string>('key')).toBe('value')
 
-      await new Promise(resolve => setTimeout(resolve, 3_000))
+      await new Promise(resolve => setTimeout(resolve, 3000))
       expect(await shortCache.get<string>('key')).toBeUndefined()
 
       await shortCache.clear()

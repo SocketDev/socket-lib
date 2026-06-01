@@ -14,7 +14,7 @@ const { httpStub, httpsStub } = vi.hoisted(() => ({
   httpsStub: { request: vi.fn() },
 }))
 
-vi.mock('../../../src/http-request/_internal', () => ({
+vi.mock(import('../../../src/http-request/_internal'), () => ({
   getHttp: () => httpStub,
   getHttps: () => httpsStub,
   getCrypto: () => require('node:crypto'),
@@ -24,7 +24,7 @@ vi.mock('../../../src/http-request/_internal', () => ({
 interface FakeClientRequest extends EventEmitter {
   end: ReturnType<typeof vi.fn>
   destroy: ReturnType<typeof vi.fn>
-  setHeader?: ReturnType<typeof vi.fn>
+  setHeader?: ReturnType<typeof vi.fn> | undefined
 }
 
 function makeFakeRequest(): FakeClientRequest {
@@ -88,7 +88,8 @@ describe.sequential('request-attempt — body cleanup on error', () => {
       (opts: Record<string, unknown>, _cb: unknown) => {
         // Capture the opts for assertion; settle with an error so the promise
         // resolves cleanly without needing a full response simulation.
-        ;(httpStub.request as { lastOpts?: unknown }).lastOpts = opts
+        ;(httpStub.request as { lastOpts?: unknown | undefined }).lastOpts =
+          opts
         queueMicrotask(() => fakeReq.emit('error', new Error('done')))
         return fakeReq
       },

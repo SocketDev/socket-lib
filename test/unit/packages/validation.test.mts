@@ -255,7 +255,8 @@ describe('packages/validation', () => {
         '@socketsecurity/lib',
       ]
 
-      for (const pkg of blessedPackages) {
+      for (let i = 0, { length } = blessedPackages; i < length; i += 1) {
+        const pkg = blessedPackages[i]!
         expect(isBlessedPackageName(pkg)).toBe(true)
         expect(isValidPackageName(pkg)).toBe(true)
       }
@@ -270,7 +271,8 @@ describe('packages/validation', () => {
         '@types/node',
       ]
 
-      for (const pkg of validButNotBlessed) {
+      for (let i = 0, { length } = validButNotBlessed; i < length; i += 1) {
+        const pkg = validButNotBlessed[i]!
         expect(isBlessedPackageName(pkg)).toBe(false)
         expect(isValidPackageName(pkg)).toBe(true)
       }
@@ -294,7 +296,8 @@ describe('packages/validation', () => {
     it('should support all registry fetcher types', () => {
       const registryTypes = ['alias', 'range', 'tag', 'version']
 
-      for (const type of registryTypes) {
+      for (let i = 0, { length } = registryTypes; i < length; i += 1) {
+        const type = registryTypes[i]!
         expect(isRegistryFetcherType(type)).toBe(true)
       }
     })
@@ -302,7 +305,8 @@ describe('packages/validation', () => {
     it('should reject non-registry fetcher types', () => {
       const nonRegistryTypes = ['git', 'remote', 'file', 'directory', 'http']
 
-      for (const type of nonRegistryTypes) {
+      for (let i = 0, { length } = nonRegistryTypes; i < length; i += 1) {
+        const type = nonRegistryTypes[i]!
         expect(isRegistryFetcherType(type)).toBe(false)
       }
     })

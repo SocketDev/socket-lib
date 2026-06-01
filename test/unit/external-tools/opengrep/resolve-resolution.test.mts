@@ -1,14 +1,17 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/opengrep/from-vfs', () => ({
+vi.mock(import('../../../../src/external-tools/opengrep/from-vfs'), () => ({
   opengrepFromVfs: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/opengrep/from-path', () => ({
+vi.mock(import('../../../../src/external-tools/opengrep/from-path'), () => ({
   opengrepFromPath: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/opengrep/from-download', () => ({
-  opengrepFromDownload: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/opengrep/from-download'),
+  () => ({
+    opengrepFromDownload: vi.fn(),
+  }),
+)
 
 async function loadFresh() {
   const vfsMod =

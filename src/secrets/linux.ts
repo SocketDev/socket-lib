@@ -12,7 +12,10 @@
  *   actionable hint — callers fall back to env variables for that session.
  */
 
-import { spawn, spawnSync } from 'node:child_process'
+import {
+  spawn,
+  spawnSync,
+} from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { ErrorCtor } from '../primordials/error'
 

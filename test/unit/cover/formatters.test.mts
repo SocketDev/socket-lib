@@ -11,10 +11,10 @@ import { describe, expect, it } from 'vitest'
 import { formatCoverage, getCoverageEmoji } from '../../../src/cover/formatters'
 
 const sampleCode = {
-  statements: { covered: 85, total: 100, percent: '85.00' },
   branches: { covered: 80, total: 100, percent: '80.00' },
   functions: { covered: 90, total: 100, percent: '90.00' },
   lines: { covered: 88, total: 100, percent: '88.00' },
+  statements: { covered: 85, total: 100, percent: '85.00' },
 }
 
 describe('cover/formatters', () => {

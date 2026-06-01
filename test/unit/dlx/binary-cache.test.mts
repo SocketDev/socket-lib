@@ -133,7 +133,7 @@ describe.sequential('dlx/binary-cache — readBinaryCacheMetadata', () => {
       'rt-cache-key',
       'https://example.com/tool.tar.gz',
       'sha512-rt==',
-      12345,
+      12_345,
     )
     const read = (await readBinaryCacheMetadata(entryPath)) as {
       version: string
@@ -146,7 +146,7 @@ describe.sequential('dlx/binary-cache — readBinaryCacheMetadata', () => {
     expect(read.version).toBe('1.0.0')
     expect(read.cache_key).toBe('rt-cache-key')
     expect(read.integrity).toBe('sha512-rt==')
-    expect(read.size).toBe(12345)
+    expect(read.size).toBe(12_345)
     expect(read.source).toEqual({
       type: 'download',
       url: 'https://example.com/tool.tar.gz',
@@ -240,7 +240,7 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
       writeFileSync(
         path.join(entryPath, '.dlx-metadata.json'),
         JSON.stringify({
-          timestamp: Date.now() - 5_000,
+          timestamp: Date.now() - 5000,
           integrity: 'sha512-abc',
           url: 'https://example.com/bin',
         }),

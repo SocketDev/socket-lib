@@ -94,10 +94,10 @@ export async function findPackageJsonFiles(dir) {
 
     // Skip node_modules, .git, and build directories.
     if (
-      entry.name === 'node_modules' ||
       entry.name === '.git' ||
       entry.name === 'build' ||
-      entry.name === 'dist'
+      entry.name === 'dist' ||
+      entry.name === 'node_modules'
     ) {
       continue
     }
@@ -129,7 +129,8 @@ async function main(): Promise<void> {
     )
     logger.log('')
 
-    for (const violation of allViolations) {
+    for (let i = 0, { length } = allViolations; i < length; i += 1) {
+      const violation = allViolations[i]!
       const relativePath = path.relative(rootPath, violation.file)
       logger.log(`  ${relativePath}`)
       logger.log(

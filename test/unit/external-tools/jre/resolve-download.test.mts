@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/jre/from-vfs', () => ({
+vi.mock(import('../../../../src/external-tools/jre/from-vfs'), () => ({
   jreFromVfs: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/jre/from-java-home', () => ({
+vi.mock(import('../../../../src/external-tools/jre/from-java-home'), () => ({
   jreFromJavaHome: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/jre/from-path', () => ({
+vi.mock(import('../../../../src/external-tools/jre/from-path'), () => ({
   jreFromPath: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/jre/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/jre/from-download'), () => ({
   jreFromDownload: vi.fn(),
 }))
 

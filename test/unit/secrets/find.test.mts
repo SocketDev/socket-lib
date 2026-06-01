@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../src/secrets/keychain', () => ({
+vi.mock(import('../../../src/secrets/keychain'), () => ({
   readSecret:
     vi.fn<
       (opts: {

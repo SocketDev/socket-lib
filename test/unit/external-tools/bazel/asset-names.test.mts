@@ -11,7 +11,7 @@ import {
 
 describe('external-tools/bazel/asset-names', () => {
   it('covers all 8 socket targets', () => {
-    expect(Object.keys(BAZEL_ASSET_MAP).sort()).toEqual(
+    expect(Object.keys(BAZEL_ASSET_MAP).toSorted()).toEqual(
       [
         'darwin-arm64',
         'darwin-x64',
@@ -21,7 +21,7 @@ describe('external-tools/bazel/asset-names', () => {
         'linux-x64-musl',
         'win-arm64',
         'win-x64',
-      ].sort(),
+      ].toSorted(),
     )
   })
 

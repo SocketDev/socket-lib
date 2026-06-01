@@ -13,9 +13,9 @@ interface StdioTestContext {
   originalColumns: number | undefined
   originalRows: number | undefined
   writeSpy: ReturnType<typeof vi.spyOn>
-  cursorToSpy?: ReturnType<typeof vi.spyOn>
-  clearLineSpy?: ReturnType<typeof vi.spyOn>
-  clearScreenDownSpy?: ReturnType<typeof vi.spyOn>
+  cursorToSpy?: ReturnType<typeof vi.spyOn> | undefined
+  clearLineSpy?: ReturnType<typeof vi.spyOn> | undefined
+  clearScreenDownSpy?: ReturnType<typeof vi.spyOn> | undefined
 }
 
 /**

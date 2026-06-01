@@ -20,17 +20,12 @@ import type { PluralForms, PluralizeOptions } from './types'
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/select
 const CLDR_TO_FIELD: Record<Intl.LDMLPluralRule, keyof PluralForms> = {
-  // CLDR's `one` and `other` are renamed to `singular` and `plural`
-  // for readability at call sites. The remaining categories keep
-  // their LDML names — they're already plain English and any caller
-  // pluralizing into Arabic/Russian/Welsh is locale-aware enough to
-  // recognize them.
-  one: 'singular',
-  other: 'plural',
-  zero: 'zero',
-  two: 'two',
   few: 'few',
   many: 'many',
+  one: 'singular',
+  other: 'plural',
+  two: 'two',
+  zero: 'zero',
 }
 
 // Per-locale-and-type cache. `new Intl.PluralRules(...)` is

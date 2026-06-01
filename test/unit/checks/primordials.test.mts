@@ -33,8 +33,8 @@ import {
   extractPrimordialsNames,
   extractTsExports,
   resolveSocketLibPrimordials,
-  type PrimordialsCheckConfig,
 } from '../../../src/checks/primordials'
+import type { PrimordialsCheckConfig } from '../../../src/checks/primordials'
 import { safeDelete } from '../../../src/fs/safe'
 
 let tmpDir: string
@@ -82,7 +82,7 @@ describe('checks/primordials', () => {
         const { Baz } = primordials
       `
       const names = extractPrimordialsNames(src)
-      expect(names.sort()).toEqual(['Bar', 'Baz', 'Foo'])
+      expect(names.toSorted()).toEqual(['Bar', 'Baz', 'Foo'])
     })
 
     it('strips line comments inside destructures', () => {
@@ -95,7 +95,7 @@ describe('checks/primordials', () => {
         } = primordials
       `
       const names = extractPrimordialsNames(src)
-      expect(names.sort()).toEqual(['Bar', 'Baz', 'Foo'])
+      expect(names.toSorted()).toEqual(['Bar', 'Baz', 'Foo'])
     })
 
     it('strips block comments', () => {
@@ -107,7 +107,7 @@ describe('checks/primordials', () => {
         } = primordials
       `
       const names = extractPrimordialsNames(src)
-      expect(names.sort()).toEqual(['Baz', 'Foo'])
+      expect(names.toSorted()).toEqual(['Baz', 'Foo'])
     })
 
     it('captures the source name on rename (Foo: BarAlias → Foo)', () => {
@@ -115,7 +115,7 @@ describe('checks/primordials', () => {
         const { Foo: localAlias, Baz } = primordials
       `
       const names = extractPrimordialsNames(src)
-      expect(names.sort()).toEqual(['Baz', 'Foo'])
+      expect(names.toSorted()).toEqual(['Baz', 'Foo'])
     })
 
     it('returns empty for files without a primordials destructure', () => {
@@ -139,7 +139,7 @@ describe('checks/primordials', () => {
     })
 
     it('captures `export { Foo, Bar }`', () => {
-      const names = extractTsExports('export { Foo, Bar }').sort()
+      const names = extractTsExports('export { Foo, Bar }').toSorted()
       expect(names).toEqual(['Bar', 'Foo'])
     })
 
@@ -162,7 +162,7 @@ describe('checks/primordials', () => {
         'export function Baz() {}',
         'export declare function Qux(): void',
       ].join('\n')
-      const names = extractTsExports(src).sort()
+      const names = extractTsExports(src).toSorted()
       expect(names).toEqual(['Bar', 'Baz', 'Foo', 'Qux'])
     })
 
@@ -262,7 +262,7 @@ describe('checks/primordials', () => {
 
       const result = checkPrimordials(makeConfig({}))
       expect(result.findings).toEqual([])
-      expect([...result.used].sort()).toEqual(['Bar', 'Foo'])
+      expect([...result.used].toSorted()).toEqual(['Bar', 'Foo'])
     })
 
     it('resolves a name through the alias map when alias target exists', () => {

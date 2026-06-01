@@ -10,17 +10,17 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../src/http-request/download', () => ({
+vi.mock(import('../../../src/http-request/download'), () => ({
   httpDownload: vi.fn(),
 }))
-vi.mock('../../../src/process/lock-instance', () => ({
+vi.mock(import('../../../src/process/lock-instance'), () => ({
   processLock: {
     withLock: vi.fn(async (_lockPath: string, fn: () => Promise<unknown>) =>
       fn(),
     ),
   },
 }))
-vi.mock('../../../src/dlx/binary-cache', async () => {
+vi.mock(import('../../../src/dlx/binary-cache'), async () => {
   const actual = await vi.importActual<
     typeof import('../../../src/dlx/binary-cache')
   >('../../../src/dlx/binary-cache')
@@ -201,7 +201,9 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     // Inline sha256 verification is delegated to httpDownload — assert
     // sha256 was forwarded in its opts.
     const [, , opts] = httpDownload.mock.calls[0]!
-    expect((opts as { sha256?: string } | undefined)?.sha256).toBe(sha256)
+    expect((opts as { sha256?: string | undefined } | undefined)?.sha256).toBe(
+      sha256,
+    )
   })
 
   test('uses platform-default binary name when none provided', async () => {
@@ -222,7 +224,7 @@ describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
   // resetModules + doMock + unmock to avoid leaking into siblings.
   async function loadWithMkdirError(code: string | undefined) {
     vi.resetModules()
-    vi.doMock('../../../src/fs/safe', async () => {
+    vi.doMock(import('../../../src/fs/safe'), async () => {
       const actual = await vi.importActual<
         typeof import('../../../src/fs/safe')
       >('../../../src/fs/safe')
@@ -241,7 +243,7 @@ describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
   }
 
   afterEach(() => {
-    vi.doUnmock('../../../src/fs/safe')
+    vi.doUnmock(import('../../../src/fs/safe'))
   })
 
   test('wraps EACCES with a permission-denied message', async () => {

@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  trivyFromVfs,
   TRIVY_VFS_KEY,
+  trivyFromVfs,
 } from '../../../../src/external-tools/trivy/from-vfs'
 
 describe.sequential('external-tools/trivy/from-vfs', () => {

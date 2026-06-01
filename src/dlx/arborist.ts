@@ -132,7 +132,7 @@ export function readSingleDependency(packageJsonPath: string): string {
   const fs = getNodeFs()
   const raw = fs.readFileSync(packageJsonPath, 'utf8')
   const pkg = JSONParse(raw) as {
-    dependencies?: Record<string, string>
+    dependencies?: Record<string, string> | undefined
   }
   const deps = pkg.dependencies ?? {}
   const names = ObjectKeys(deps)
@@ -158,14 +158,16 @@ export function readTopLevelFromIdealTree(
   integrity: string
 } {
   type Node = {
-    name?: string
-    version?: string
-    integrity?: string
-    depth?: number
-    isProjectRoot?: boolean
+    name?: string | undefined
+    version?: string | undefined
+    integrity?: string | undefined
+    depth?: number | undefined
+    isProjectRoot?: boolean | undefined
   }
   const root = tree as {
-    inventory?: Map<string, Node> & { values(): IterableIterator<Node> }
+    inventory?:
+      | (Map<string, Node> & { values(): IterableIterator<Node> })
+      | undefined
   } | null
   const inventory = root?.inventory
   if (!inventory || typeof inventory.values !== 'function') {

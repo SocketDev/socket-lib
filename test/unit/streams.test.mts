@@ -16,7 +16,8 @@ import { describe, expect, it } from 'vitest'
 
 // Helper to create async iterable from array
 export async function* asyncIterable<T>(items: T[]): AsyncIterable<T> {
-  for (const item of items) {
+  for (let i = 0, { length } = items; i < length; i += 1) {
+    const item = items[i]!
     yield item
   }
 }
@@ -171,7 +172,7 @@ describe('streams', () => {
       await parallelEach(input, async x => {
         results.push(x * 2)
       })
-      expect(results.sort()).toEqual([2, 4, 6])
+      expect(results.toSorted()).toEqual([2, 4, 6])
     })
 
     it('should work with async iterable', async () => {
@@ -180,7 +181,7 @@ describe('streams', () => {
       await parallelEach(input, async x => {
         results.push(x)
       })
-      expect(results.sort()).toEqual([1, 2, 3])
+      expect(results.toSorted()).toEqual([1, 2, 3])
     })
 
     it('should handle empty iterable', async () => {
@@ -202,7 +203,7 @@ describe('streams', () => {
         },
         2,
       )
-      expect(results.sort()).toEqual([1, 2, 3])
+      expect(results.toSorted()).toEqual([1, 2, 3])
     })
 
     it('should accept options object', async () => {
@@ -215,7 +216,7 @@ describe('streams', () => {
         },
         { concurrency: 2 },
       )
-      expect(results.sort()).toEqual([1, 2, 3])
+      expect(results.toSorted()).toEqual([1, 2, 3])
     })
 
     it('should handle side effects', async () => {
@@ -227,7 +228,7 @@ describe('streams', () => {
         await Promise.resolve()
         results.push(x.toUpperCase())
       })
-      expect(results.sort()).toEqual(['A', 'B', 'C'])
+      expect(results.toSorted()).toEqual(['A', 'B', 'C'])
     })
 
     it('should return promise that resolves', async () => {
@@ -466,7 +467,7 @@ describe('streams', () => {
         { concurrency: 3 },
       )
       expect(results.length).toBe(3)
-      expect(results.map(r => r.value).sort()).toEqual([1, 2, 3])
+      expect(results.map(r => r.value).toSorted()).toEqual([1, 2, 3])
     })
   })
 })

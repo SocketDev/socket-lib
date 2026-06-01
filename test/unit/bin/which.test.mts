@@ -110,10 +110,11 @@ describe('whichReal', () => {
   it('should resolve paths when all is true', async () => {
     const result = await whichReal('node', { all: true })
     if (Array.isArray(result) && result.length > 0) {
-      result.forEach(p => {
+      for (let i = 0, { length } = result; i < length; i += 1) {
+        const p = result[i]!
         expect(typeof p).toBe('string')
         expect(p).not.toContain('\\')
-      })
+      }
     }
   })
 

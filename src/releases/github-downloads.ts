@@ -173,7 +173,7 @@ export async function downloadReleaseAsset(
   assetPattern: string | AssetPattern,
   outputPath: string,
   repoConfig: RepoConfig,
-  options: { quiet?: boolean } = {},
+  options: { quiet?: boolean | undefined } = {},
 ): Promise<void> {
   const { owner, repo } = repoConfig
   const { quiet = false } = options

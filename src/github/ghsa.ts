@@ -123,21 +123,25 @@ export async function fetchGhsaDetails(
   const url = `https://api.github.com/advisories/${ghsaId}`
   try {
     const data = await fetchGitHub<{
-      aliases?: string[]
+      aliases?: string[] | undefined
       cvss: unknown
-      cwes?: Array<{ cweId: string; name: string; description: string }>
+      cwes?:
+        | Array<{ cweId: string; name: string; description: string }>
+        | undefined
       details: string
       ghsa_id: string
       published_at: string
-      references?: Array<{ url: string }>
+      references?: Array<{ url: string }> | undefined
       severity: string
       summary: string
       updated_at: string
-      vulnerabilities?: Array<{
-        package: { ecosystem: string; name: string }
-        vulnerableVersionRange: string
-        firstPatchedVersion: { identifier: string } | null
-      }>
+      vulnerabilities?:
+        | Array<{
+            package: { ecosystem: string; name: string }
+            vulnerableVersionRange: string
+            firstPatchedVersion: { identifier: string } | null
+          }>
+        | undefined
       withdrawn_at: string
     }>(url, options)
 
@@ -270,31 +274,51 @@ export async function fetchGhsaDetailsViaGraphQL(
     throw new GitHubEmptyBodyError(GITHUB_GRAPHQL_URL)
   }
   let parsed: {
-    data?: {
-      securityAdvisory?: {
-        ghsaId: string
-        summary: string
-        description: string
-        severity: string
-        publishedAt: string
-        updatedAt: string
-        withdrawnAt: string | null
-        cvss?: { score: number; vectorString: string } | null
-        cwes?: {
-          nodes?: Array<{ cweId: string; name: string; description: string }>
+    data?:
+      | {
+          securityAdvisory?:
+            | {
+                ghsaId: string
+                summary: string
+                description: string
+                severity: string
+                publishedAt: string
+                updatedAt: string
+                withdrawnAt: string | null
+                cvss?:
+                  | { score: number; vectorString: string }
+                  | null
+                  | undefined
+                cwes?:
+                  | {
+                      nodes?:
+                        | Array<{
+                            cweId: string
+                            name: string
+                            description: string
+                          }>
+                        | undefined
+                    }
+                  | undefined
+                references?: Array<{ url: string }> | undefined
+                vulnerabilities?:
+                  | {
+                      nodes?:
+                        | Array<{
+                            package: { ecosystem: string; name: string }
+                            vulnerableVersionRange: string
+                            firstPatchedVersion: { identifier: string } | null
+                          }>
+                        | undefined
+                    }
+                  | undefined
+                identifiers?: Array<{ type: string; value: string }> | undefined
+              }
+            | null
+            | undefined
         }
-        references?: Array<{ url: string }>
-        vulnerabilities?: {
-          nodes?: Array<{
-            package: { ecosystem: string; name: string }
-            vulnerableVersionRange: string
-            firstPatchedVersion: { identifier: string } | null
-          }>
-        }
-        identifiers?: Array<{ type: string; value: string }>
-      } | null
-    }
-    errors?: Array<{ message: string }>
+      | undefined
+    errors?: Array<{ message: string }> | undefined
   }
   try {
     parsed = JSONParse(response.body.toString('utf8'))

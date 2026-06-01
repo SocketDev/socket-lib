@@ -90,7 +90,7 @@ export function isSpecHexEscapeCp(cp: number): boolean {
     return true
   }
   // LineTerminator.
-  if (cp === 0x0a || cp === 0x0d || cp === 0x2028 || cp === 0x2029) {
+  if (cp === 0x0a || cp === 0x0d || cp === 0x20_28 || cp === 0x20_29) {
     return true
   }
   // Whitespace subset (ASCII/common — matches WhiteSpace production).
@@ -100,12 +100,12 @@ export function isSpecHexEscapeCp(cp: number): boolean {
     cp === 0x0c ||
     cp === 0x20 ||
     cp === 0xa0 ||
-    cp === 0xfeff
+    cp === 0xfe_ff
   ) {
     return true
   }
   // Lone surrogates.
-  if (cp >= 0xd800 && cp <= 0xdfff) {
+  if (cp >= 0xd8_00 && cp <= 0xdf_ff) {
     return true
   }
   return false

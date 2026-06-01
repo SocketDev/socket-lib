@@ -284,7 +284,7 @@ export function spawn(
       try {
         const result = await spawnPromise
         const strippedResult = stripAnsiFromSpawnResult(result)
-        if ('code' in (strippedResult as { code?: number })) {
+        if ('code' in (strippedResult as { code?: number | undefined })) {
           ;(strippedResult as { code: number; exitCode: number }).exitCode = (
             strippedResult as { code: number }
           ).code

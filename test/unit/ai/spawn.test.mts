@@ -49,7 +49,7 @@ function baseOpts(
 
 describe.sequential('backoffFor', () => {
   test('exponential backoff: 5s / 15s / 45s', () => {
-    expect(backoffFor(1)).toBe(5_000)
+    expect(backoffFor(1)).toBe(5000)
     expect(backoffFor(2)).toBe(15_000)
     expect(backoffFor(3)).toBe(45_000)
   })

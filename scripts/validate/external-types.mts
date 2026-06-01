@@ -10,7 +10,7 @@
  *   - Type definitions match the actual module structure
  */
 
-import { readdirSync, readFileSync } from 'node:fs'
+import { readFileSync, readdirSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
@@ -100,7 +100,8 @@ export function checkTypeDefinition(filePath) {
   if (fileName === 'semver') {
     // Ensure semver has key functions
     const requiredExports = ['coerce', 'compare', 'parse', 'valid', 'satisfies']
-    for (const exportName of requiredExports) {
+    for (let i = 0, { length } = requiredExports; i < length; i += 1) {
+      const exportName = requiredExports[i]!
       if (!content.includes(`export function ${exportName}`)) {
         issues.push(`Missing required export: 'export function ${exportName}'`)
       }

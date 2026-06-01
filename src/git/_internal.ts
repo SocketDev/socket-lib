@@ -44,7 +44,7 @@ export const gitDiffCache = new MapCtor<string, GitDiffCacheEntry>()
 export const GIT_CACHE_MAX_SIZE = 100
 // 2s — long enough to dedup rapid in-process callers, short enough that
 // edits made by the user feel reflected on the next call.
-export const GIT_CACHE_TTL_MS = 2_000
+export const GIT_CACHE_TTL_MS = 2000
 
 // Cached git binary path to avoid repeated PATH searches.
 let _gitPath: string | undefined
@@ -320,18 +320,18 @@ export function parseGitDiffStdout(
   const relPath = normalizePath(path.relative(rootPath, cwd))
   const matcher = getGlobMatcher([`${relPath}/**`], {
     ...(matcherOptions as {
-      dot?: boolean
-      ignore?: string[]
-      nocase?: boolean
+      dot?: boolean | undefined
+      ignore?: string[] | undefined
+      nocase?: boolean | undefined
     }),
     absolute,
     cwd: rootPath,
   } as {
-    absolute?: boolean
-    cwd?: string
-    dot?: boolean
-    ignore?: string[]
-    nocase?: boolean
+    absolute?: boolean | undefined
+    cwd?: string | undefined
+    dot?: boolean | undefined
+    ignore?: string[] | undefined
+    nocase?: boolean | undefined
   })
   const filtered: string[] = []
   for (const filepath of files) {
@@ -365,7 +365,7 @@ export function stableKey(value: unknown): string {
   return JSONStringify(value, (_key, val) => {
     if (val && typeof val === 'object' && !ArrayIsArray(val)) {
       const sorted: Record<string, unknown> = {}
-      for (const k of ObjectKeys(val as object).sort()) {
+      for (const k of ObjectKeys(val as object).toSorted()) {
         sorted[k] = (val as Record<string, unknown>)[k]
       }
       return sorted

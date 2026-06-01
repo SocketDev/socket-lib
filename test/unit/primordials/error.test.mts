@@ -18,7 +18,7 @@ describe('Error (static)', () => {
     if (typeof ErrorCaptureStackTrace !== 'function') {
       return
     }
-    const target: { stack?: string } = {}
+    const target: { stack?: string | undefined } = {}
     ErrorCaptureStackTrace(target)
     expect(typeof target.stack).toBe('string')
     expect(target.stack!.length).toBeGreaterThan(0)
@@ -28,10 +28,10 @@ describe('Error (static)', () => {
     if (typeof ErrorCaptureStackTrace !== 'function') {
       return
     }
-    function inner(target: { stack?: string }): void {
+    function inner(target: { stack?: string | undefined }): void {
       ErrorCaptureStackTrace!(target, inner)
     }
-    const target: { stack?: string } = {}
+    const target: { stack?: string | undefined } = {}
     inner(target)
     // The frame for `inner` itself should NOT appear since we passed
     // it as `constructorOpt`.
@@ -42,7 +42,8 @@ describe('Error (static)', () => {
     // V8 sets `Error.prepareStackTrace` to a function on Node 22+;
     // older engines leave it undefined. Either is correct for the
     // primordial — we just capture whatever the engine had.
-    const live = (Error as { prepareStackTrace?: unknown }).prepareStackTrace
+    const live = (Error as { prepareStackTrace?: unknown | undefined })
+      .prepareStackTrace
     expect(ErrorPrepareStackTrace).toBe(live)
   })
 

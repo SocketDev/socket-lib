@@ -20,7 +20,7 @@ export const PromiseResolve = Promise.resolve.bind(Promise)
 // `Promise.withResolvers` is ES2024 (Node 22.0+). Typed as
 // `Function | undefined` for safety even though Node 22+ always has it.
 export const PromiseWithResolvers: typeof Promise.withResolvers | undefined = (
-  Promise as { withResolvers?: typeof Promise.withResolvers }
+  Promise as { withResolvers?: typeof Promise.withResolvers | undefined }
 ).withResolvers?.bind(Promise) as typeof Promise.withResolvers | undefined
 
 // ─── Promise (prototype) ───────────────────────────────────────────────

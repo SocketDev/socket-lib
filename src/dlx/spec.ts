@@ -42,7 +42,7 @@ export function parsePackageSpec(spec: string): {
     const version =
       parsed.type === 'tag'
         ? parsed.fetchSpec
-        : parsed.type === 'version' || parsed.type === 'range'
+        : parsed.type === 'range' || parsed.type === 'version'
           ? parsed.fetchSpec
           : undefined
 

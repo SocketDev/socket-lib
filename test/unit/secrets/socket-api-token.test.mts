@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../src/secrets/find', () => ({
+vi.mock(import('../../../src/secrets/find'), () => ({
   resolve: vi.fn(),
   resolveSync: vi.fn(),
 }))
@@ -46,7 +46,7 @@ describe.sequential('secrets/socket-api-token — readSocketApiToken (async)', (
       accounts: readonly string[]
     }
     expect(callArg.service).toBe('socket-cli')
-    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
+    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_TOKEN'])
   })
 
   test('forwards allowEnvOnly to resolve', async () => {
@@ -70,7 +70,7 @@ describe.sequential('secrets/socket-api-token — readSocketApiTokenSync', () =>
     resolveSyncMock.mockReturnValueOnce({
       value: 'tok-xyz',
       source: 'keychain',
-      account: 'SOCKET_API_KEY',
+      account: 'SOCKET_API_TOKEN',
     })
     expect(readSocketApiTokenSync()).toBe('tok-xyz')
   })
@@ -84,7 +84,7 @@ describe.sequential('secrets/socket-api-token — readSocketApiTokenSync', () =>
       accounts: readonly string[]
     }
     expect(callArg.service).toBe('socket-cli')
-    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
+    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_TOKEN'])
   })
 
   test('forwards allowEnvOnly to resolveSync', async () => {

@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/janus/from-vfs', () => ({
+vi.mock(import('../../../../src/external-tools/janus/from-vfs'), () => ({
   janusFromVfs: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/janus/from-path', () => ({
+vi.mock(import('../../../../src/external-tools/janus/from-path'), () => ({
   janusFromPath: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/janus/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/janus/from-download'), () => ({
   janusFromDownload: vi.fn(),
 }))
 

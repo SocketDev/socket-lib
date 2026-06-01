@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/from-download'), () => ({
   downloadAndExtractTool: vi.fn(),
   downloadToolArchive: vi.fn(),
 }))
 
-vi.mock('../../../../src/paths/socket', () => ({
+vi.mock(import('../../../../src/paths/socket'), () => ({
   getSocketDlxDir: vi.fn(() => '/fake/dlx'),
 }))
 
@@ -149,10 +149,10 @@ describe.sequential('external-tools/opengrep/from-download', () => {
       // Re-mock getSocketDlxDir to point at our tmpdir so the default
       // cacheDir branch is exercised against a writable path.
       vi.resetModules()
-      vi.doMock('../../../../src/paths/socket', () => ({
+      vi.doMock(import('../../../../src/paths/socket'), () => ({
         getSocketDlxDir: vi.fn(() => tmp),
       }))
-      vi.doMock('../../../../src/external-tools/from-download', () => ({
+      vi.doMock(import('../../../../src/external-tools/from-download'), () => ({
         downloadAndExtractTool: vi.fn(),
         downloadToolArchive: vi.fn(),
       }))

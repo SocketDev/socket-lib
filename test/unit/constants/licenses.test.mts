@@ -11,10 +11,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  getCopyLeftLicenses,
   MIT,
   UNLICENCED,
   UNLICENSED,
+  getCopyLeftLicenses,
 } from '../../../src/constants/licenses'
 
 describe('constants/licenses', () => {
@@ -214,7 +214,7 @@ describe('constants/licenses', () => {
       for (const license of licenses) {
         if (license.includes('-only') || license.includes('-or-later')) {
           // Should have version number before modifier
-          expect(license).toMatch(/\d+\.\d+(-only|-or-later)/)
+          expect(license).toMatch(/\d+\.\d+(?:-only|-or-later)/)
         }
       }
     })

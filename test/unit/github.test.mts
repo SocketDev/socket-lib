@@ -455,9 +455,10 @@ describe.sequential('github', () => {
         getGitHubTokenFromGitConfig(),
         getGitHubTokenFromGitConfig(),
       ])
-      results.forEach(result => {
+      for (let i = 0, { length } = results; i < length; i += 1) {
+        const result = results[i]!
         expect(typeof result === 'string' || result === undefined).toBe(true)
-      })
+      }
     })
   })
 
@@ -469,11 +470,12 @@ describe.sequential('github', () => {
         'GHSA-abcd-efgh-ijkl',
         'ghsa-lowercase-test-id',
       ]
-      ids.forEach(id => {
+      for (let i = 0, { length } = ids; i < length; i += 1) {
+        const id = ids[i]!
         const url = getGhsaUrl(id)
         expect(url).toMatch(/^https:\/\/github\.com\/advisories\//)
         expect(url).toContain(id)
-      })
+      }
     })
 
     it('should handle GHSA IDs with URL-unsafe characters', () => {

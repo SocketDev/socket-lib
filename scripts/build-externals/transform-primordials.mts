@@ -54,7 +54,7 @@ import { applyCodemod, loadPrimordialsSurface } from 'prim'
 export async function transformPrimordials(
   distRoot: string,
   distExternalDir: string,
-  options: { quiet?: boolean } = {},
+  options: { quiet?: boolean | undefined } = {},
 ) {
   const { quiet = false } = options
 

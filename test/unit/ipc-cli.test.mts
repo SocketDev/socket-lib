@@ -48,9 +48,10 @@ describe('ipc-cli', () => {
       const ipc = await getIpc()
       const keys = Object.keys(ipc)
 
-      keys.forEach(key => {
+      for (let i = 0, { length } = keys; i < length; i += 1) {
+        const key = keys[i]!
         expect(key).toMatch(/^SOCKET_CLI_/)
-      })
+      }
     })
 
     it('should have correct property types', async () => {
@@ -86,9 +87,10 @@ describe('ipc-cli', () => {
       const ipc = await getIpc()
       const values = Object.values(ipc)
 
-      values.forEach(value => {
+      for (let i = 0, { length } = values; i < length; i += 1) {
+        const value = values[i]!
         expect(value).not.toBeUndefined()
-      })
+      }
     })
   })
 
@@ -123,7 +125,8 @@ describe('ipc-cli', () => {
         'SOCKET_CLI_SHADOW_SILENT',
       ]
 
-      for (const key of keys) {
+      for (let i = 0, { length } = keys; i < length; i += 1) {
+        const key = keys[i]!
         const value = await getIpc(key)
         const ipc = await getIpc()
         expect(value).toBe(ipc[key])
@@ -208,9 +211,10 @@ describe('ipc-cli', () => {
       ])
 
       // All should return the same reference
-      results.forEach(result => {
+      for (let i = 0, { length } = results; i < length; i += 1) {
+        const result = results[i]!
         expect(result).toBe(results[0])
-      })
+      }
     })
 
     it('should handle concurrent key accesses', async () => {
@@ -220,9 +224,10 @@ describe('ipc-cli', () => {
       if (keys.length > 0) {
         const results = await Promise.all(keys.map(key => getIpc(key)))
 
-        results.forEach((result, i) => {
+        for (let i = 0, { length } = results; i < length; i += 1) {
+          const result = results[i]!
           expect(result).toBe(ipc[keys[i]!])
-        })
+        }
       }
     })
   })
@@ -235,9 +240,10 @@ describe('ipc-cli', () => {
       }
 
       const results = await Promise.all(calls)
-      results.forEach(result => {
+      for (let i = 0, { length } = results; i < length; i += 1) {
+        const result = results[i]!
         expect(result).toBe(results[0])
-      })
+      }
     })
 
     it('should work with destructuring', async () => {
@@ -261,9 +267,10 @@ describe('ipc-cli', () => {
       const keys = Object.keys(ipc)
 
       expect(Array.isArray(keys)).toBe(true)
-      keys.forEach(key => {
+      for (let i = 0, { length } = keys; i < length; i += 1) {
+        const key = keys[i]!
         expect(key in ipc).toBe(true)
-      })
+      }
     })
 
     it('should work with Object.values', async () => {
@@ -284,7 +291,7 @@ describe('ipc-cli', () => {
       })
     })
 
-    it('should work with for...in loop', async () => {
+    it('should work with for…in loop', async () => {
       const ipc = await getIpc()
       const keys: string[] = []
 
@@ -299,9 +306,10 @@ describe('ipc-cli', () => {
       const ipc = await getIpc()
       const keys = Object.keys(ipc)
 
-      keys.forEach(key => {
+      for (let i = 0, { length } = keys; i < length; i += 1) {
+        const key = keys[i]!
         expect(Object.hasOwn(ipc, key)).toBe(true)
-      })
+      }
     })
 
     it('should not have prototype pollution', async () => {

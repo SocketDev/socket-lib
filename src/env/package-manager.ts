@@ -45,7 +45,7 @@ export function detectPackageManager(): PackageManagerType {
   if (userAgent) {
     // User agent format: "pnpm/8.15.1 npm/? node/v20.11.0 darwin arm64"
     // Extract the first part before the slash.
-    const match = userAgent.match(/^(npm|pnpm|yarn|bun)\//)
+    const match = userAgent.match(/^(bun|npm|pnpm|yarn)\//)
     if (match) {
       return match[1] as PackageManagerType
     }

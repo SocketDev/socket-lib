@@ -23,5 +23,5 @@ export interface ResolvedJanus {
   /**
    * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: ResolvedToolIntegrity
+  readonly integrity?: ResolvedToolIntegrity | undefined
 }

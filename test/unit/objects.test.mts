@@ -332,7 +332,7 @@ describe('objects', () => {
       const obj = { a: 1 }
       const frozen = objectFreeze(obj)
       expect(() => {
-        ;(frozen as { a: number; b?: number }).b = 2
+        ;(frozen as { a: number; b?: number | undefined }).b = 2
       }).toThrow()
     })
   })

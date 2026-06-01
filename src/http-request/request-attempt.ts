@@ -62,7 +62,8 @@ export async function httpRequestAttempt(
     body &&
     typeof body === 'object' &&
     'getHeaders' in body &&
-    typeof (body as { getHeaders?: unknown }).getHeaders === 'function'
+    typeof (body as { getHeaders?: unknown | undefined }).getHeaders ===
+      'function'
       ? (body as { getHeaders: () => Record<string, string> }).getHeaders()
       : undefined
 
@@ -107,7 +108,8 @@ export async function httpRequestAttempt(
       if (
         body &&
         typeof body === 'object' &&
-        typeof (body as { destroy?: unknown }).destroy === 'function'
+        typeof (body as { destroy?: unknown | undefined }).destroy ===
+          'function'
       ) {
         ;(body as { destroy: () => void }).destroy()
       }
@@ -368,7 +370,7 @@ export async function httpRequestAttempt(
       // Duck-type: streams have a `pipe` method.
       if (
         typeof body === 'object' &&
-        typeof (body as { pipe?: unknown }).pipe === 'function'
+        typeof (body as { pipe?: unknown | undefined }).pipe === 'function'
       ) {
         // Readable stream (including FormData) — pipe it.
         // The error listener is cleaned up implicitly: on failure rejectOnce

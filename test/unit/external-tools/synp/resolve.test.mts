@@ -2,13 +2,13 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { cacheKey } from '../../../../src/external-tools/synp/resolve'
 
-vi.mock('../../../../src/external-tools/synp/from-vfs', () => ({
+vi.mock(import('../../../../src/external-tools/synp/from-vfs'), () => ({
   synpFromVfs: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/synp/from-path', () => ({
+vi.mock(import('../../../../src/external-tools/synp/from-path'), () => ({
   synpFromPath: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/synp/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/synp/from-download'), () => ({
   synpFromDownload: vi.fn(),
 }))
 

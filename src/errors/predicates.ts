@@ -14,7 +14,8 @@ import { StringPrototypeCharCodeAt } from '../primordials/string'
  * the fast-path without re-probing.
  */
 export const isErrorBuiltin: ((value: unknown) => value is Error) | undefined =
-  (Error as unknown as { isError?: (v: unknown) => v is Error }).isError
+  (Error as unknown as { isError?: ((v: unknown) => v is Error) | undefined })
+    .isError
 
 /**
  * Narrow a caught value to a Node.js `ErrnoException` — an Error with a `.code`
@@ -40,7 +41,7 @@ export function isErrnoException(
   if (!isError(value)) {
     return false
   }
-  const code = (value as { code?: unknown }).code
+  const code = (value as { code?: unknown | undefined }).code
   if (typeof code !== 'string' || code.length === 0) {
     return false
   }

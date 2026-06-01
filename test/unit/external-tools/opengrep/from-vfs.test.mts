@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  opengrepFromVfs,
   OPENGREP_VFS_KEY,
+  opengrepFromVfs,
 } from '../../../../src/external-tools/opengrep/from-vfs'
 
 describe.sequential('external-tools/opengrep/from-vfs', () => {

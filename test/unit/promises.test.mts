@@ -787,7 +787,11 @@ describe('promises', () => {
       const fn = vi
         .fn()
         .mockImplementation(
-          async (a: number, b: number, _c: { signal?: AbortSignal }) => {
+          async (
+            a: number,
+            b: number,
+            _c: { signal?: AbortSignal | undefined },
+          ) => {
             return a + b
           },
         )
@@ -924,9 +928,10 @@ describe('promises', () => {
       })
 
       // All delays should be <= maxDelayMs
-      delays.forEach(delay => {
+      for (let i = 0, { length } = delays; i < length; i += 1) {
+        const delay = delays[i]!
         expect(delay).toBeLessThanOrEqual(500)
-      })
+      }
     })
   })
 
@@ -1200,7 +1205,7 @@ describe('promises', () => {
   // to pick the closure fallback.
   describe('withResolvers — fallback implementation', () => {
     const hadNative =
-      typeof (Promise as unknown as { withResolvers?: unknown })
+      typeof (Promise as unknown as { withResolvers?: unknown | undefined })
         .withResolvers === 'function'
     const nativeWithResolvers = hadNative
       ? (
@@ -1222,7 +1227,8 @@ describe('promises', () => {
     async function loadFallback(): Promise<
       () => { promise: Promise<unknown>; resolve: Function; reject: Function }
     > {
-      delete (Promise as unknown as { withResolvers?: unknown }).withResolvers
+      delete (Promise as unknown as { withResolvers?: unknown | undefined })
+        .withResolvers
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises the fallback path after deleting Promise.withResolvers, which requires re-evaluating the module post-vi.resetModules.
       const mod = await import('../../src/promises/resolvers')
@@ -1362,8 +1368,8 @@ describe('promises', () => {
   // feature-detect to pick the closure fallback.
   describe('fromAsync — fallback implementation', () => {
     const hadNative =
-      typeof (Array as unknown as { fromAsync?: unknown }).fromAsync ===
-      'function'
+      typeof (Array as unknown as { fromAsync?: unknown | undefined })
+        .fromAsync === 'function'
     const nativeFromAsync = hadNative
       ? (Array as unknown as { fromAsync: unknown }).fromAsync
       : undefined
@@ -1381,7 +1387,7 @@ describe('promises', () => {
         source: AsyncIterable<T> | Iterable<T | PromiseLike<T>>,
       ) => Promise<T[]>
     > {
-      delete (Array as unknown as { fromAsync?: unknown }).fromAsync
+      delete (Array as unknown as { fromAsync?: unknown | undefined }).fromAsync
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises the fallback path after deleting Array.fromAsync.
       const mod = await import('../../src/promises/resolvers')

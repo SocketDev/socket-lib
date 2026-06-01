@@ -6,7 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('../../../src/http-request/request')
+vi.mock(import('../../../src/http-request/request'))
 
 import { fetchGhsaDetailsViaGraphQL } from '../../../src/github/ghsa'
 import { GitHubEmptyBodyError } from '../../../src/github/errors'

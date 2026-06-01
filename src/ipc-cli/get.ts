@@ -42,14 +42,14 @@ export async function getIpc(
 
     if (env['SOCKET_CLI_OPTIMIZE']) {
       _ipcObject.SOCKET_CLI_OPTIMIZE =
-        env['SOCKET_CLI_OPTIMIZE'] === 'true' ||
-        env['SOCKET_CLI_OPTIMIZE'] === '1'
+        env['SOCKET_CLI_OPTIMIZE'] === '1' ||
+        env['SOCKET_CLI_OPTIMIZE'] === 'true'
     }
 
     if (env['SOCKET_CLI_SHADOW_ACCEPT_RISKS']) {
       _ipcObject.SOCKET_CLI_SHADOW_ACCEPT_RISKS =
-        env['SOCKET_CLI_SHADOW_ACCEPT_RISKS'] === 'true' ||
-        env['SOCKET_CLI_SHADOW_ACCEPT_RISKS'] === '1'
+        env['SOCKET_CLI_SHADOW_ACCEPT_RISKS'] === '1' ||
+        env['SOCKET_CLI_SHADOW_ACCEPT_RISKS'] === 'true'
     }
 
     if (env['SOCKET_CLI_SHADOW_API_TOKEN']) {
@@ -63,14 +63,14 @@ export async function getIpc(
 
     if (env['SOCKET_CLI_SHADOW_PROGRESS']) {
       _ipcObject.SOCKET_CLI_SHADOW_PROGRESS =
-        env['SOCKET_CLI_SHADOW_PROGRESS'] === 'true' ||
-        env['SOCKET_CLI_SHADOW_PROGRESS'] === '1'
+        env['SOCKET_CLI_SHADOW_PROGRESS'] === '1' ||
+        env['SOCKET_CLI_SHADOW_PROGRESS'] === 'true'
     }
 
     if (env['SOCKET_CLI_SHADOW_SILENT']) {
       _ipcObject.SOCKET_CLI_SHADOW_SILENT =
-        env['SOCKET_CLI_SHADOW_SILENT'] === 'true' ||
-        env['SOCKET_CLI_SHADOW_SILENT'] === '1'
+        env['SOCKET_CLI_SHADOW_SILENT'] === '1' ||
+        env['SOCKET_CLI_SHADOW_SILENT'] === 'true'
     }
 
     ObjectFreeze(_ipcObject)

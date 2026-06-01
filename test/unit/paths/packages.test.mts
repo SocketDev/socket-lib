@@ -135,7 +135,8 @@ describe('paths/packages', () => {
         resolvePackageJsonPath('/foo/bar'),
       ]
 
-      for (const p of paths) {
+      for (let i = 0, { length } = paths; i < length; i += 1) {
+        const p = paths[i]!
         // Should use forward slashes
         expect(p.includes('\\')).toBe(false)
       }

@@ -20,8 +20,8 @@ let tmpRoot: string
 function makePackage(opts: {
   packageDir: string
   packageName: string
-  bin?: string | Record<string, string>
-  version?: string
+  bin?: string | Record<string, string> | undefined
+  version?: string | undefined
 }): void {
   const installedDir = path.join(
     opts.packageDir,

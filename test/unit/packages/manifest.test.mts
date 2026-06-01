@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Mock pacote BEFORE importing src/packages/manifest so the mocked
 // pacote.manifest / pacote.packument are seen by the SUT.
-vi.mock('../../../src/external/pacote', () => ({
+vi.mock(import('../../../src/external/pacote'), () => ({
   default: {
     manifest: vi.fn(),
     packument: vi.fn(),
@@ -215,7 +215,7 @@ describe.sequential('packages/manifest — fetchPackageManifest', () => {
       } as unknown as ReturnType<typeof pacote.manifest>)
     const result = (await fetchPackageManifest('./local-pkg')) as {
       name: string
-      registryFetched?: boolean
+      registryFetched?: boolean | undefined
     }
     // Second pacote call should be against name@version form.
     const secondCallArg = vi.mocked(pacote.manifest).mock.calls[1]?.[0]

@@ -103,11 +103,11 @@ describe.sequential('dlx/arborist — readSingleDependency', () => {
 describe.sequential('dlx/arborist — readTopLevelFromIdealTree', () => {
   const makeTree = (
     nodes: Array<{
-      name?: string
-      version?: string
-      integrity?: string
-      depth?: number
-      isProjectRoot?: boolean
+      name?: string | undefined
+      version?: string | undefined
+      integrity?: string | undefined
+      depth?: number | undefined
+      isProjectRoot?: boolean | undefined
     }>,
   ) => ({ inventory: new Map(nodes.map((n, i) => [String(i), n])) })
 

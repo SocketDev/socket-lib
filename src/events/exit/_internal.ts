@@ -34,8 +34,8 @@ import type { EmittedSignals, SignalExitEmitter } from './types'
 
 export const globalProcess = globalThis.process as
   | (NodeJS.Process & {
-      __signal_exit_emitter__?: import('node:events').EventEmitter
-      reallyExit?: (code?: number | undefined) => never
+      __signal_exit_emitter__?: import('node:events').EventEmitter | undefined
+      reallyExit?: ((code?: number | undefined) => never) | undefined
     })
   | undefined
 export const originalProcessEmit = globalProcess?.emit

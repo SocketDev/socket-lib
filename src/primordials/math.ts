@@ -46,7 +46,7 @@ export const MathExpm1 = _smolPrimordial?.mathExpm1 ?? Math.expm1
 // at import time. No smol fast-path yet (would need a separate ES2025
 // type signature in the binding).
 export const MathF16round: ((value: number) => number) | undefined = (
-  Math as { f16round?: (value: number) => number }
+  Math as { f16round?: ((value: number) => number) | undefined }
 ).f16round
 export const MathFloor = _smolPrimordial?.mathFloor ?? Math.floor
 export const MathFround = _smolPrimordial?.mathFround ?? Math.fround

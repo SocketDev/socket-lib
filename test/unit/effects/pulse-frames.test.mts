@@ -11,10 +11,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  generateSocketSpinnerFrames,
-  type SocketFramesOptions,
-} from '../../../src/effects/pulse-frames'
+import { generateSocketSpinnerFrames } from '../../../src/effects/pulse-frames'
+import type { SocketFramesOptions } from '../../../src/effects/pulse-frames'
 
 describe('effects/pulse-frames', () => {
   describe('generateSocketSpinnerFrames', () => {

@@ -6,15 +6,15 @@
  */
 
 export interface DebugOptions {
-  namespaces?: string
-  spinner?: { isSpinning: boolean; stop(): void; start(): void }
+  namespaces?: string | undefined
+  spinner?: { isSpinning: boolean; stop(): void; start(): void } | undefined
   [key: string]: unknown
 }
 
 export type NamespacesOrOptions = string | DebugOptions
 
 export interface InspectOptions {
-  depth?: number | null
-  colors?: boolean
+  depth?: number | null | undefined
+  colors?: boolean | undefined
   [key: string]: unknown
 }

@@ -4,12 +4,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import {
-  configToSpec,
-  frameColors,
-  type RGB,
-  type ShimmerSpec,
-} from '../../../src/effects/shimmer'
+import { configToSpec, frameColors } from '../../../src/effects/shimmer'
+import type { RGB, ShimmerSpec } from '../../../src/effects/shimmer'
 import { toShimmerKeyframes } from '../../../src/effects/shimmer-keyframes'
 
 describe('effects/shimmer-keyframes', () => {

@@ -77,7 +77,7 @@ describe('eco/npm/yarnpkg/yarn/parse-lockfile', () => {
     })
 
     it('captures all entries', () => {
-      const names = result.packages.map(p => p.name).sort()
+      const names = result.packages.map(p => p.name).toSorted()
       expect(names).toEqual(['@scope/pkg', 'chained', 'lodash'])
     })
 
@@ -204,7 +204,7 @@ describe('eco/npm/yarnpkg/yarn/parse-lockfile', () => {
     it('promotes a 3-occurrence yarn entry into a [n, n, n] index', () => {
       const lock = `"foo@^1.0.0":\n  version "1.0.0"\n\n"foo@^2.0.0":\n  version "2.0.0"\n\n"foo@^3.0.0":\n  version "3.0.0"\n`
       const result = parseYarnLock(lock)
-      const fooIdx = (result._index as { foo?: unknown })['foo']
+      const fooIdx = (result._index as { foo?: unknown | undefined })['foo']
       expect(fooIdx).toEqual([0, 1, 2])
     })
 

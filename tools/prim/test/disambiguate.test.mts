@@ -142,7 +142,7 @@ describe('disambiguateReceiver', () => {
             [key]: {
               type: undefined,
               reason: 'cached: range is a semver Range',
-              timestamp: 1700000000000,
+              timestamp: 1_700_000_000_000,
             },
           },
         }),
@@ -190,7 +190,7 @@ describe('locked-down tool surface', () => {
     const m = /const BASE_TOOLS = (\[[^\]]+\])/m.exec(src)
     assert.ok(m, 'BASE_TOOLS array literal not found')
     const allowed = JSON.parse(m[1].replace(/'/g, '"'))
-    assert.deepEqual(allowed.sort(), ['Glob', 'Grep', 'Read'])
+    assert.deepEqual(allowed.toSorted(), ['Glob', 'Grep', 'Read'])
   })
 
   test('source passes BASE_TOOLS as the SDK `tools` option', async () => {

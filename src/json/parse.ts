@@ -13,9 +13,9 @@ import { ErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
 import { SetCtor } from '../primordials/map-set'
 import type {
-  ParseJsonOptions,
   JsonPrimitive,
   JsonValue,
+  ParseJsonOptions,
   ParseJsonSafeOptions,
 } from './types'
 
@@ -54,8 +54,8 @@ export function isBuffer(x: unknown): x is Buffer {
     return false
   }
 
-  const Ctor = (x as { constructor?: unknown }).constructor as
-    | { isBuffer?: unknown }
+  const Ctor = (x as { constructor?: unknown | undefined }).constructor as
+    | { isBuffer?: unknown | undefined }
     | undefined
   return !!(typeof Ctor?.isBuffer === 'function' && Ctor.isBuffer(x))
 }

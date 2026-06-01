@@ -401,7 +401,7 @@ describe('git extended tests', () => {
         const changed = await getChangedFiles({ cwd: tmpDir })
         // Git may quote filenames with spaces
         const hasFile = changed.some(
-          f => f === 'file with spaces.txt' || f === '"file with spaces.txt"',
+          f => f === '"file with spaces.txt"' || f === 'file with spaces.txt',
         )
         expect(hasFile).toBe(true)
 
@@ -409,7 +409,7 @@ describe('git extended tests', () => {
 
         const staged = await getStagedFiles({ cwd: tmpDir })
         const hasStagedFile = staged.some(
-          f => f === 'file with spaces.txt' || f === '"file with spaces.txt"',
+          f => f === '"file with spaces.txt"' || f === 'file with spaces.txt',
         )
         expect(hasStagedFile).toBe(true)
       }, 'git-spaces-')

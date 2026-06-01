@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'vitest'
 
 import {
+  TRIVY_ASSET_MAP,
   getTrivyAssetEntry,
   getTrivyDownloadUrl,
-  TRIVY_ASSET_MAP,
 } from '../../../../src/external-tools/trivy/asset-names'
 
 describe('external-tools/trivy/asset-names', () => {
   test('covers darwin/linux/win-x64', () => {
-    expect(Object.keys(TRIVY_ASSET_MAP).sort()).toEqual([
+    expect(Object.keys(TRIVY_ASSET_MAP).toSorted()).toEqual([
       'darwin-arm64',
       'darwin-x64',
       'linux-arm64',

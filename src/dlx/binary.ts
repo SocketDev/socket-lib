@@ -16,7 +16,7 @@
 
 import process from 'node:process'
 
-import { getArch, WIN32 } from '../constants/platform'
+import { WIN32, getArch } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 import { readJson } from '../fs/read-json'
 import { safeMkdir } from '../fs/safe'

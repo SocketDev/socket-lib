@@ -17,7 +17,7 @@
 import { Writable } from 'node:stream'
 
 import { Logger } from '../../../src/logger/node'
-import { describe, expect, it, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it } from 'vitest'
 
 // Disable concurrent execution for this suite to prevent state sharing between tests
 // The logger and stream state must be isolated for accurate testing

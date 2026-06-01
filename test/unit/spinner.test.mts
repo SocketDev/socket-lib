@@ -31,7 +31,7 @@ describe('spinner', () => {
       const originalColor = spinner.color
 
       await withSpinner({
-        message: 'Testing...',
+        message: 'Testing…',
         operation: async () => {
           // During operation, color should be red
           expect(spinner.color).toEqual([255, 0, 0])
@@ -51,7 +51,7 @@ describe('spinner', () => {
       const originalColor = spinner.color
 
       await withSpinner({
-        message: 'Testing...',
+        message: 'Testing…',
         // Empty body — the real assertion is restoration after the operation.
         operation: async () => {},
         spinner,
@@ -69,7 +69,7 @@ describe('spinner', () => {
       const originalShimmer = spinner.shimmerState
 
       await withSpinner({
-        message: 'Testing...',
+        message: 'Testing…',
         operation: async () => {
           // During operation, shimmer should be different
           expect(spinner.shimmerState?.direction).toBe('rtl')
@@ -89,7 +89,7 @@ describe('spinner', () => {
       const spinner = Spinner() // No shimmer
 
       await withSpinner({
-        message: 'Testing...',
+        message: 'Testing…',
         operation: async () => {
           // During operation, shimmer should be enabled
           expect(spinner.shimmerState).toBeDefined()
@@ -109,7 +109,7 @@ describe('spinner', () => {
       const originalColor = spinner.color
 
       await withSpinner({
-        message: 'Testing...',
+        message: 'Testing…',
         // Empty body — the assertion is color unchanged after.
         operation: async () => {},
         spinner,
@@ -121,7 +121,7 @@ describe('spinner', () => {
 
     it('should work without spinner instance', async () => {
       const result = await withSpinner({
-        message: 'Testing...',
+        message: 'Testing…',
         operation: async () => 42,
       })
 
@@ -134,7 +134,7 @@ describe('spinner', () => {
 
       await expect(
         withSpinner({
-          message: 'Testing...',
+          message: 'Testing…',
           operation: async () => {
             throw new Error('Test error')
           },
@@ -156,7 +156,7 @@ describe('spinner', () => {
       const originalColor = spinner.color
 
       withSpinnerSync({
-        message: 'Testing...',
+        message: 'Testing…',
         operation: () => {
           // During operation, color should be red
           expect(spinner.color).toEqual([255, 0, 0])
@@ -176,7 +176,7 @@ describe('spinner', () => {
       const originalShimmer = spinner.shimmerState
 
       withSpinnerSync({
-        message: 'Testing...',
+        message: 'Testing…',
         operation: () => {
           // During operation, shimmer should be different
           expect(spinner.shimmerState?.direction).toBe('rtl')
@@ -197,7 +197,7 @@ describe('spinner', () => {
       const originalColor = spinner.color
 
       withSpinnerSync({
-        message: 'Testing...',
+        message: 'Testing…',
         // Empty body — the assertion is color unchanged after.
         operation: () => {},
         spinner,
@@ -213,7 +213,7 @@ describe('spinner', () => {
 
       expect(() => {
         withSpinnerSync({
-          message: 'Testing...',
+          message: 'Testing…',
           operation: () => {
             throw new Error('Test error')
           },
@@ -660,7 +660,7 @@ describe('spinner', () => {
 
     it('should start spinner', () => {
       const spinner = Spinner()
-      const result = spinner.start('loading...')
+      const result = spinner.start('loading…')
       expect(result).toBe(spinner)
       expect(spinner.isSpinning).toBe(true)
     })
@@ -726,7 +726,7 @@ describe('spinner', () => {
     it('should chain multiple status methods', () => {
       const spinner = Spinner()
       const result = spinner
-        .start('Starting...')
+        .start('Starting…')
         .info('Info message')
         .warn('Warning message')
         .success('Success message')
@@ -737,7 +737,7 @@ describe('spinner', () => {
     it('should chain complex workflow', () => {
       const spinner = Spinner({ color: 'cyan' })
       const result = spinner
-        .start('Processing...')
+        .start('Processing…')
         .enableShimmer()
         .indent()
         .step('Step 1')
@@ -914,7 +914,7 @@ describe('spinner', () => {
 
     it('should allow progress updates while spinning', () => {
       const spinner = Spinner()
-      spinner.start('Processing...')
+      spinner.start('Processing…')
       spinner.progress(10, 100, 'items')
       spinner.progressStep(10)
       spinner.progressStep(10)
@@ -925,10 +925,10 @@ describe('spinner', () => {
     it('should chain progress with other methods', () => {
       const spinner = Spinner()
       const result = spinner
-        .start('Processing...')
+        .start('Processing…')
         .progress(50, 100, 'files')
         .progressStep(10)
-        .text('Still processing...')
+        .text('Still processing…')
         .stop()
       expect(result).toBe(spinner)
     })
@@ -941,7 +941,7 @@ describe('spinner', () => {
 
       await expect(
         withSpinner({
-          message: 'Testing error...',
+          message: 'Testing error…',
           operation: async () => {
             throw error
           },
@@ -965,7 +965,7 @@ describe('spinner', () => {
       const savedState = spinner.shimmerState
 
       const result = await withSpinner({
-        message: 'Testing shimmer...',
+        message: 'Testing shimmer…',
         operation: async () => 'done',
         spinner,
         withOptions: { shimmer: 'rtl' },
@@ -982,7 +982,7 @@ describe('spinner', () => {
       spinner.updateShimmer({ dir: 'ltr', speed: 2 })
 
       const result = await withSpinner({
-        message: 'Testing shimmer...',
+        message: 'Testing shimmer…',
         operation: async () => 'complete',
         spinner,
         withOptions: {
@@ -1003,7 +1003,7 @@ describe('spinner', () => {
 
       await expect(
         withSpinner({
-          message: 'Testing error...',
+          message: 'Testing error…',
           operation: async () => {
             throw new Error('Test error')
           },
@@ -1020,7 +1020,7 @@ describe('spinner', () => {
     it('should handle async errors in withSpinner', async () => {
       await expect(
         withSpinner({
-          message: 'Testing...',
+          message: 'Testing…',
           operation: async () => {
             await new Promise(resolve => setTimeout(resolve, 1))
             throw new Error('Async error')
@@ -1037,7 +1037,7 @@ describe('spinner', () => {
 
       expect(() =>
         withSpinnerSync({
-          message: 'Testing error...',
+          message: 'Testing error…',
           operation: () => {
             throw error
           },
@@ -1061,7 +1061,7 @@ describe('spinner', () => {
       const savedState = spinner.shimmerState
 
       const result = withSpinnerSync({
-        message: 'Testing shimmer...',
+        message: 'Testing shimmer…',
         operation: () => 'done',
         spinner,
         withOptions: { shimmer: 'rtl' },
@@ -1078,7 +1078,7 @@ describe('spinner', () => {
       spinner.updateShimmer({ dir: 'ltr', speed: 2 })
 
       const result = withSpinnerSync({
-        message: 'Testing shimmer...',
+        message: 'Testing shimmer…',
         operation: () => 'complete',
         spinner,
         withOptions: {
@@ -1099,7 +1099,7 @@ describe('spinner', () => {
 
       expect(() =>
         withSpinnerSync({
-          message: 'Testing error...',
+          message: 'Testing error…',
           operation: () => {
             throw new Error('Sync test error')
           },
@@ -1115,7 +1115,7 @@ describe('spinner', () => {
 
     it('should return operation result on success', () => {
       const result = withSpinnerSync({
-        message: 'Computing...',
+        message: 'Computing…',
         operation: () => 42,
       })
       expect(result).toBe(42)
@@ -1222,7 +1222,7 @@ describe('spinner', () => {
   describe('Complex spinner workflows', () => {
     it('should handle complex async workflow', async () => {
       const result = await withSpinner({
-        message: 'Processing...',
+        message: 'Processing…',
         operation: async () => {
           await new Promise(resolve => setTimeout(resolve, 1))
           return 'completed'
@@ -1242,10 +1242,10 @@ describe('spinner', () => {
       const spinner = Spinner()
       let opRan = false
       await withSpinner({
-        message: 'Starting...',
+        message: 'Starting…',
         operation: async () => {
-          spinner.text('Middle...')
-          spinner.text('Finishing...')
+          spinner.text('Middle…')
+          spinner.text('Finishing…')
           opRan = true
         },
         spinner,
@@ -1258,7 +1258,7 @@ describe('spinner', () => {
       // #progress is private — best observable is that the operation
       // completes and each progressStep() returns the spinner (chainable).
       const result = await withSpinner({
-        message: 'Processing files...',
+        message: 'Processing files…',
         operation: async () => {
           spinner.progress(0, 3, 'files')
           const a = spinner.progressStep()

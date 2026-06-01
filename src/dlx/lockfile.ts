@@ -117,7 +117,10 @@ export interface PinDetails {
  * invalid JSON) or drifts from its package.json.
  */
 export class DlxLockfileError extends Error {
-  constructor(message: string, options?: { cause?: unknown } | undefined) {
+  constructor(
+    message: string,
+    options?: { cause?: unknown | undefined } | undefined,
+  ) {
     super(message, options)
     this.name = 'DlxLockfileError'
   }

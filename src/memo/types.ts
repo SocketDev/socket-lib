@@ -12,27 +12,27 @@ export type MemoizeOptions<Args extends unknown[]> = {
   /**
    * Custom cache key generator (defaults to JSON.stringify)
    */
-  keyGen?: (...args: Args) => string
+  keyGen?: ((...args: Args) => string) | undefined
   /**
    * Maximum cache size (LRU eviction when exceeded)
    */
-  maxSize?: number
+  maxSize?: number | undefined
   /**
    * TTL in milliseconds (cache entries expire after this time)
    */
-  ttl?: number
+  ttl?: number | undefined
   /**
    * Cache name for debugging.
    */
-  name?: string
+  name?: string | undefined
   /**
    * Weak cache for object keys (enables GC)
    */
-  weak?: boolean
+  weak?: boolean | undefined
   /**
    * Custom equality check for cache hits.
    */
-  equals?: (a: Args, b: Args) => boolean
+  equals?: ((a: Args, b: Args) => boolean) | undefined
 }
 
 /**

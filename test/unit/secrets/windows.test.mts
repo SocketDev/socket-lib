@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { mkdtempSync, rmSync, writeFileSync, existsSync } from 'node:fs'
+import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { Readable, Writable } from 'node:stream'
@@ -11,7 +11,7 @@ const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock('node:child_process', async () => {
+vi.mock(import('node:child_process'), async () => {
   const actual =
     await vi.importActual<typeof import('node:child_process')>(
       'node:child_process',
@@ -31,10 +31,10 @@ interface FakeChild extends EventEmitter {
 }
 
 function makeFakeChild(opts: {
-  stdout?: string
-  stderr?: string
+  stdout?: string | undefined
+  stderr?: string | undefined
   exitCode?: number | null | undefined
-  emitError?: Error
+  emitError?: Error | undefined
 }): FakeChild {
   const emitter = new EventEmitter() as FakeChild
   emitter.stdin = new Writable({
@@ -159,7 +159,7 @@ describe.sequential('secrets/windows — validateKeychainComponent', () => {
 describe.sequential('secrets/windows — getDpapiFilePath', () => {
   test('joins APPDATA / service / account.enc', async () => {
     const { getDpapiFilePath } = await loadFresh()
-    expect(getDpapiFilePath('socket-cli', 'SOCKET_API_KEY')).toBe(
+    expect(getDpapiFilePath('socket-cli', 'SOCKET_API_TOKEN')).toBe(
       path.join(tmpRoot, 'socket-cli', 'SOCKET_API_KEY.enc'),
     )
   })
@@ -257,7 +257,11 @@ describe.sequential('secrets/windows — runPsSync', () => {
   test('passes input arg through to spawnSync', async () => {
     let capturedInput: unknown
     mockSpawnSync.mockImplementationOnce(
-      (_bin: string, _args: readonly string[], opts: { input?: unknown }) => {
+      (
+        _bin: string,
+        _args: readonly string[],
+        opts: { input?: unknown | undefined },
+      ) => {
         capturedInput = opts.input
         return { status: 0, stdout: '', stderr: '' }
       },

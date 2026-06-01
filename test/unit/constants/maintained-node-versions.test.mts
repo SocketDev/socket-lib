@@ -28,9 +28,10 @@ describe('maintained-node-versions', () => {
     })
 
     it('should contain only strings', () => {
-      maintainedNodeVersions.forEach(version => {
+      for (let i = 0, { length } = maintainedNodeVersions; i < length; i += 1) {
+        const version = maintainedNodeVersions[i]!
         expect(typeof version).toBe('string')
-      })
+      }
     })
   })
 
@@ -67,16 +68,17 @@ describe('maintained-node-versions', () => {
 
     it('should have valid semver format for all versions', () => {
       const semverPattern = /^\d+\.\d+\.\d+$/
-      maintainedNodeVersions.forEach(version => {
+      for (let i = 0, { length } = maintainedNodeVersions; i < length; i += 1) {
+        const version = maintainedNodeVersions[i]!
         expect(version).toMatch(semverPattern)
-      })
+      }
     })
 
     it('should have versions in ascending order', () => {
       const versions = [...maintainedNodeVersions]
       const sortedVersions = versions
         .map(v => v.split('.').map(Number))
-        .sort((a, b) => {
+        .toSorted((a, b) => {
           for (let i = 0; i < 3; i++) {
             if (a[i]! !== b[i]!) {
               return a[i]! - b[i]!
@@ -176,27 +178,30 @@ describe('maintained-node-versions', () => {
 
   describe('realistic version numbers', () => {
     it('should have major versions in reasonable range', () => {
-      maintainedNodeVersions.forEach(version => {
+      for (let i = 0, { length } = maintainedNodeVersions; i < length; i += 1) {
+        const version = maintainedNodeVersions[i]!
         const major = Number.parseInt(version.split('.')[0]!, 10)
         expect(major).toBeGreaterThanOrEqual(10)
         expect(major).toBeLessThanOrEqual(100)
-      })
+      }
     })
 
     it('should have minor versions in valid range', () => {
-      maintainedNodeVersions.forEach(version => {
+      for (let i = 0, { length } = maintainedNodeVersions; i < length; i += 1) {
+        const version = maintainedNodeVersions[i]!
         const minor = Number.parseInt(version.split('.')[1]!, 10)
         expect(minor).toBeGreaterThanOrEqual(0)
         expect(minor).toBeLessThanOrEqual(99)
-      })
+      }
     })
 
     it('should have patch versions in valid range', () => {
-      maintainedNodeVersions.forEach(version => {
+      for (let i = 0, { length } = maintainedNodeVersions; i < length; i += 1) {
+        const version = maintainedNodeVersions[i]!
         const patch = Number.parseInt(version.split('.')[2]!, 10)
         expect(patch).toBeGreaterThanOrEqual(0)
         expect(patch).toBeLessThanOrEqual(99)
-      })
+      }
     })
   })
 
@@ -258,11 +263,12 @@ describe('maintained-node-versions', () => {
 
   describe('edge cases', () => {
     it('should handle string operations on versions', () => {
-      maintainedNodeVersions.forEach(version => {
+      for (let i = 0, { length } = maintainedNodeVersions; i < length; i += 1) {
+        const version = maintainedNodeVersions[i]!
         expect(version.length).toBeGreaterThan(0)
         expect(version.includes('.')).toBe(true)
         expect(version.split('.').length).toBe(3)
-      })
+      }
     })
 
     it('should not have duplicates', () => {
@@ -271,10 +277,11 @@ describe('maintained-node-versions', () => {
     })
 
     it('should not have empty strings', () => {
-      maintainedNodeVersions.forEach(version => {
+      for (let i = 0, { length } = maintainedNodeVersions; i < length; i += 1) {
+        const version = maintainedNodeVersions[i]!
         expect(version.length).toBeGreaterThan(0)
         expect(version.trim()).toBe(version)
-      })
+      }
     })
   })
 })

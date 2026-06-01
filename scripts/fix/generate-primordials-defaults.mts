@@ -126,7 +126,7 @@ function main(): void {
   // export there automatically extends the default map on the next
   // codegen run.
   const aliasEntries: Array<[string, string]> = []
-  for (const name of [...candidates].sort()) {
+  for (const name of [...candidates].toSorted()) {
     if (ctorBaseNames.has(name)) {
       aliasEntries.push([name, `${name}Ctor`])
     } else if (globalAliases.has(name)) {

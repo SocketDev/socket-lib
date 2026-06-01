@@ -57,7 +57,7 @@ export function setupSuppression(): void {
            (Error / Warning instances). process.emitWarning rarely
            passes object form in test runs; covered when consumers
            pass real Warning subclasses. */
-        const warningObj = warning as { name?: string }
+        const warningObj = warning as { name?: string | undefined }
         if (warningObj.name && suppressedWarnings.has(warningObj.name)) {
           return
         }

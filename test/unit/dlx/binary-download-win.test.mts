@@ -10,13 +10,13 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('../../../src/constants/platform', async importOriginal => {
+vi.mock(import('../../../src/constants/platform'), async importOriginal => {
   const actual =
     await importOriginal<typeof import('../../../src/constants/platform')>()
   return { ...actual, WIN32: true }
 })
 
-vi.mock('../../../src/http-request/download', async importOriginal => {
+vi.mock(import('../../../src/http-request/download'), async importOriginal => {
   const original =
     await importOriginal<typeof import('../../../src/http-request/download')>()
   return {

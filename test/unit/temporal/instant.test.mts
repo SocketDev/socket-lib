@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  describe as describeValue,
   Instant,
+  describe as describeValue,
   isValidEpochNanoseconds,
 } from '../../../src/temporal/instant'
 

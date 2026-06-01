@@ -18,7 +18,7 @@ import { DlxManifest } from '../../../src/dlx/manifest'
 import { readFileUtf8Sync } from '../../../src/fs/read-file'
 import { safeDelete, safeDeleteSync, safeMkdirSync } from '../../../src/fs/safe'
 
-vi.mock('../../../src/fs/read-file', async importOriginal => {
+vi.mock(import('../../../src/fs/read-file'), async importOriginal => {
   const original =
     await importOriginal<typeof import('../../../src/fs/read-file')>()
   return {
@@ -27,7 +27,7 @@ vi.mock('../../../src/fs/read-file', async importOriginal => {
   }
 })
 
-vi.mock('../../../src/fs/safe', async importOriginal => {
+vi.mock(import('../../../src/fs/safe'), async importOriginal => {
   const original = await importOriginal<typeof import('../../../src/fs/safe')>()
   return {
     ...original,

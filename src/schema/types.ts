@@ -25,7 +25,7 @@ export interface ParseResult<T> {
   /**
    * Error information (only present when `success` is `false`)
    */
-  error?: unknown
+  error?: unknown | undefined
 }
 
 /**

@@ -23,5 +23,5 @@ export interface ResolvedTrivy {
   /**
    * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: ResolvedToolIntegrity
+  readonly integrity?: ResolvedToolIntegrity | undefined
 }

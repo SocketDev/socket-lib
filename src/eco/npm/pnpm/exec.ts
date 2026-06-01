@@ -14,17 +14,17 @@ import {
 import { isNpmProgressFlag } from '../npm/flags'
 
 import {
+  PNPM_INSTALL_LIKE_COMMANDS,
   isPnpmFrozenLockfileFlag,
   isPnpmIgnoreScriptsFlag,
   isPnpmInstallCommand,
   isPnpmLoglevelFlag,
-  PNPM_INSTALL_LIKE_COMMANDS,
 } from './flags'
 
 import type { SpawnOptions } from '../../../process/spawn/types'
 
 export interface PnpmOptions extends SpawnOptions {
-  allowLockfileUpdate?: boolean
+  allowLockfileUpdate?: boolean | undefined
 }
 
 /**

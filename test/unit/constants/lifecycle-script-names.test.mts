@@ -40,7 +40,8 @@ describe('lifecycle-script-names', () => {
       'postversion',
     ]
 
-    for (const script of expected) {
+    for (let i = 0, { length } = expected; i < length; i += 1) {
+      const script = expected[i]!
       expect(lifecycleScriptNames.has(script)).toBe(true)
     }
   })
@@ -62,7 +63,8 @@ describe('lifecycle-script-names', () => {
       'preversion',
     ]
 
-    for (const script of preScripts) {
+    for (let i = 0, { length } = preScripts; i < length; i += 1) {
+      const script = preScripts[i]!
       expect(lifecycleScriptNames.has(script)).toBe(true)
     }
   })
@@ -79,7 +81,8 @@ describe('lifecycle-script-names', () => {
       'postversion',
     ]
 
-    for (const script of postScripts) {
+    for (let i = 0, { length } = postScripts; i < length; i += 1) {
+      const script = postScripts[i]!
       expect(lifecycleScriptNames.has(script)).toBe(true)
     }
   })
@@ -96,7 +99,8 @@ describe('lifecycle-script-names', () => {
       'version',
     ]
 
-    for (const script of baseScripts) {
+    for (let i = 0, { length } = baseScripts; i < length; i += 1) {
+      const script = baseScripts[i]!
       expect(lifecycleScriptNames.has(script)).toBe(true)
     }
   })

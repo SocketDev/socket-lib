@@ -79,7 +79,11 @@ export function detectImportCycles(
     const plan = plans[i]!
     const startNode = nodeKey(plan.absPath)
     const startAbs = nodeAbsForKey(startNode, plan.absPath)
-    const stack: Array<{ node: string; abs: string; via?: string }> = []
+    const stack: Array<{
+      node: string
+      abs: string
+      via?: string | undefined
+    }> = []
     const onStack = new Set<string>()
     const visited = new Set<string>()
     const cycle = dfsForCycle(
@@ -117,7 +121,7 @@ export function dfsForCycle(
   startAbs: string,
   planByNode: ReadonlyMap<string, PlannedRewrite>,
   edgeCache: Map<string, readonly string[]>,
-  stack: Array<{ node: string; abs: string; via?: string }>,
+  stack: Array<{ node: string; abs: string; via?: string | undefined }>,
   onStack: Set<string>,
   visited: Set<string>,
 ): readonly string[] | undefined {
@@ -193,7 +197,7 @@ export function extractImports(
 ): readonly string[] {
   const ext = path.extname(absPath)
   const isTs =
-    ext === '.ts' || ext === '.mts' || ext === '.cts' || ext === '.tsx'
+    ext === '.cts' || ext === '.mts' || ext === '.ts' || ext === '.tsx'
   const parseSrc = isTs
     ? stripTypeScriptTypes(source, { mode: 'strip' })
     : source
@@ -208,7 +212,7 @@ export function extractImports(
   }) as {
     body: ReadonlyArray<{
       type: string
-      source?: { value?: unknown } | undefined
+      source?: { value?: unknown | undefined } | undefined
     }>
   }
   const specs: string[] = []
@@ -216,9 +220,9 @@ export function extractImports(
     const node = ast.body[i]
     if (
       node &&
-      (node.type === 'ImportDeclaration' ||
+      (node.type === 'ExportAllDeclaration' ||
         node.type === 'ExportNamedDeclaration' ||
-        node.type === 'ExportAllDeclaration') &&
+        node.type === 'ImportDeclaration') &&
       node.source &&
       typeof node.source.value === 'string'
     ) {
@@ -402,7 +406,7 @@ export interface ValidationFinding {
   /**
    * Extra detail surfaced to the user — e.g. the cycle path.
    */
-  readonly detail?: string
+  readonly detail?: string | undefined
 }
 
 /**

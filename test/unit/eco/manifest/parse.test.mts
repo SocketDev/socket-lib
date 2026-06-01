@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ManifestError } from '../../../../src/eco/manifest/manifest-error'
+import type { ManifestError } from '../../../../src/eco/manifest/manifest-error'
 import { parse } from '../../../../src/eco/manifest/parse'
 
 describe('eco/manifest/parse', () => {

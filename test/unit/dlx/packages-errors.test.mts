@@ -23,7 +23,7 @@ import {
 import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
 
 // Mock the fs helpers at the resolved path the SUT imports.
-vi.mock('../../../src/fs/safe', async importOriginal => {
+vi.mock(import('../../../src/fs/safe'), async importOriginal => {
   const original = await importOriginal<typeof import('../../../src/fs/safe')>()
   return {
     ...original,
@@ -139,7 +139,9 @@ describe.sequential('dlx/packages — error branches', () => {
       try {
         removeDlxPackageSync('pkg-cause')
       } catch (e) {
-        expect((e as Error & { cause?: unknown }).cause).toBe(original)
+        expect((e as Error & { cause?: unknown | undefined }).cause).toBe(
+          original,
+        )
       }
     })
   })

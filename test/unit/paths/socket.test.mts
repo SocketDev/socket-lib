@@ -325,7 +325,8 @@ describe('paths/socket', () => {
         getSocketRegistryDir(),
       ]
 
-      for (const p of paths) {
+      for (let i = 0, { length } = paths; i < length; i += 1) {
+        const p = paths[i]!
         // All should use forward slashes
         expect(p.includes('\\')).toBe(false)
       }

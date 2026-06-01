@@ -5,21 +5,21 @@
  */
 
 export interface CreateRelativeUrlOptions {
-  base?: string
+  base?: string | undefined
 }
 
 export interface UrlSearchParamsAsBooleanOptions {
-  defaultValue?: boolean
+  defaultValue?: boolean | undefined
 }
 
 export interface UrlSearchParamsAsNumberOptions {
-  defaultValue?: number
+  defaultValue?: number | undefined
 }
 
 export interface UrlSearchParamsAsStringOptions {
-  defaultValue?: string
+  defaultValue?: string | undefined
 }
 
 export interface UrlSearchParamsGetBooleanOptions {
-  defaultValue?: boolean
+  defaultValue?: boolean | undefined
 }

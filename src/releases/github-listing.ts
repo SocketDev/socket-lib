@@ -88,18 +88,28 @@ export async function fetchReleasesViaGraphQL(
     )
   }
   let parsed: {
-    data?: {
-      repository?: {
-        releases?: {
-          nodes?: Array<{
-            tagName: string
-            publishedAt: string
-            releaseAssets?: { nodes?: Array<{ name: string }> }
-          }>
+    data?:
+      | {
+          repository?:
+            | {
+                releases?:
+                  | {
+                      nodes?:
+                        | Array<{
+                            tagName: string
+                            publishedAt: string
+                            releaseAssets?:
+                              | { nodes?: Array<{ name: string }> | undefined }
+                              | undefined
+                          }>
+                        | undefined
+                    }
+                  | undefined
+              }
+            | undefined
         }
-      }
-    }
-    errors?: Array<{ message: string }>
+      | undefined
+    errors?: Array<{ message: string }> | undefined
   }
   try {
     parsed = JSONParse(response.body.toString('utf8'))
@@ -215,8 +225,8 @@ export async function getLatestRelease(
   toolPrefix: string,
   repoConfig: RepoConfig,
   options: {
-    assetPattern?: AssetPattern
-    nothrow?: boolean
+    assetPattern?: AssetPattern | undefined
+    nothrow?: boolean | undefined
   } = {},
 ): Promise<string | undefined> {
   // The `quiet` option from previous releases is no longer accepted.

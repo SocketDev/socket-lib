@@ -8,7 +8,7 @@
  *     other dlx flows without dragging in the install orchestrator.
  */
 
-import Arborist from '../external/@npmcli/arborist'
+import type Arborist from '../external/@npmcli/arborist'
 import { httpJson } from '../http-request/node'
 import { getSocketCallerUserAgent } from '../http-request/user-agent'
 
@@ -19,8 +19,8 @@ import { SetCtor } from '../primordials/map-set'
 import { PromiseAllSettled } from '../primordials/promise'
 
 import {
-  StringPrototypeSlice,
   StringPrototypeReplace,
+  StringPrototypeSlice,
   StringPrototypeStartsWith,
 } from '../primordials/string'
 
@@ -32,13 +32,13 @@ const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new SetCtor([
 ])
 
 interface FirewallAlert {
-  severity?: string
-  type?: string
-  key?: string
+  severity?: string | undefined
+  type?: string | undefined
+  key?: string | undefined
 }
 
 interface FirewallResponse {
-  alerts?: FirewallAlert[]
+  alerts?: FirewallAlert[] | undefined
 }
 
 /**

@@ -1,15 +1,18 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/skillspector/from-vfs', () => ({
+vi.mock(import('../../../../src/external-tools/skillspector/from-vfs'), () => ({
   skillspectorFromVfs: vi.fn(),
   SKILLSPECTOR_VFS_KEY: 'skillspector',
 }))
 
-vi.mock('../../../../src/external-tools/skillspector/from-path', () => ({
-  skillspectorFromPath: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/skillspector/from-path'),
+  () => ({
+    skillspectorFromPath: vi.fn(),
+  }),
+)
 
-vi.mock('../../../../src/external-tools/skillspector/from-dlx', () => ({
+vi.mock(import('../../../../src/external-tools/skillspector/from-dlx'), () => ({
   skillspectorFromDlx: vi.fn(),
 }))
 

@@ -121,7 +121,8 @@ describe('sea/detect', () => {
 
       // All results should be identical
       const first = results[0]
-      for (const result of results) {
+      for (let i = 0, { length } = results; i < length; i += 1) {
+        const result = results[i]!
         expect(result[0]).toBe(first?.[0])
         expect(result[1]).toBe(first?.[1])
       }

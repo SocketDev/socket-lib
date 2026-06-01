@@ -282,15 +282,18 @@ export async function readPackageJson(
 /*@__NO_SIDE_EFFECTS__*/
 export function readPackageJsonSync(
   filepath: string,
-  options?: NormalizeOptions & { editable?: boolean; throws?: boolean },
+  options?: NormalizeOptions & {
+    editable?: boolean | undefined
+    throws?: boolean | undefined
+  },
 ): PackageJson | undefined {
   const { editable, normalize, throws, ...normalizeOptions } = {
     __proto__: null,
     ...options,
   } as NormalizeOptions & {
-    editable?: boolean
-    throws?: boolean
-    normalize?: boolean
+    editable?: boolean | undefined
+    throws?: boolean | undefined
+    normalize?: boolean | undefined
   }
   const pkgJson = readJsonSync(resolvePackageJsonPath(filepath), { throws }) as
     | PackageJson
@@ -339,7 +342,7 @@ export async function resolveGitHubTgzUrl(
     return parsedSpec.saveSpec || ''
   }
   const isGitHubUrl = isGitHubUrlSpec(parsedSpec)
-  const repository = pkgJson.repository as { url?: string }
+  const repository = pkgJson.repository as { url?: string | undefined }
   const { project, user } = (isGitHubUrl
     ? parsedSpec.hosted
     : getRepoUrlDetails(repository?.url)) || { project: '', user: '' }
@@ -369,9 +372,13 @@ export async function resolveGitHubTgzUrl(
       // intercept that returns a non-JSON body). Treat that as "no
       // sha found" and fall through to the empty-string return; the
       // caller decides whether to retry without the GitHub URL.
-      let json: { object?: { sha?: string } } | undefined
+      let json:
+        | { object?: { sha?: string | undefined } | undefined }
+        | undefined
       try {
-        json = (await resp.json()) as { object?: { sha?: string } }
+        json = (await resp.json()) as {
+          object?: { sha?: string | undefined } | undefined
+        }
       } catch {
         json = undefined
       }
@@ -396,7 +403,7 @@ export async function resolveGitHubTgzUrl(
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function resolvePackageName(
-  purlObj: { name: string; namespace?: string },
+  purlObj: { name: string; namespace?: string | undefined },
   delimiter: string = '/',
 ): string {
   const { name, namespace } = purlObj

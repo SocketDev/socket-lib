@@ -67,7 +67,8 @@ export async function fixFileImports(filePath, verbose = false) {
 
   const externalPrefix = getExternalPathPrefix(filePath)
 
-  for (const pkg of allExternalPackages) {
+  for (let i = 0, { length } = allExternalPackages; i < length; i += 1) {
+    const pkg = allExternalPackages[i]!
     // Escape special regex characters in package name.
     const escapedPkg = pkg.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 

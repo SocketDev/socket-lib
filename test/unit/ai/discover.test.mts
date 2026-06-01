@@ -188,7 +188,9 @@ describe.sequential('discoverAiAgents', () => {
       repoRoot: tmpRoot,
     })
     // Same shape (real discovery is deterministic on a given machine).
-    expect(Object.keys(second).sort()).toEqual(Object.keys(first).sort())
+    expect(Object.keys(second).toSorted()).toEqual(
+      Object.keys(first).toSorted(),
+    )
   })
 
   test('reads the on-disk cache when in-process cache is empty', async () => {

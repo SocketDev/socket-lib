@@ -32,7 +32,7 @@ import type {
 } from './types.mts'
 
 const MAX_ATTEMPTS = 3
-const BACKOFF_BASE_MS = 5_000
+const BACKOFF_BASE_MS = 5000
 
 export function backoffFor(attempt: number): number {
   return BACKOFF_BASE_MS * 3 ** (attempt - 1)

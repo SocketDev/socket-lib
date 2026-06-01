@@ -19,7 +19,9 @@ describe.sequential('spinner/default — getCliSpinners', () => {
   it('returns the custom socket style by name', () => {
     const socket = getCliSpinners('socket')
     expect(socket).toBeDefined()
-    expect((socket as { frames?: unknown[] }).frames?.length).toBeGreaterThan(0)
+    expect(
+      (socket as { frames?: unknown[] | undefined }).frames?.length,
+    ).toBeGreaterThan(0)
   })
 
   it('returns undefined for an unknown style name', () => {
@@ -37,8 +39,10 @@ describe.sequential('spinner/default — getDefaultSpinner', () => {
   it('returns a SpinnerInstance', () => {
     const sp = getDefaultSpinner()
     expect(typeof sp).toBe('object')
-    expect(typeof (sp as { start?: unknown }).start).toBe('function')
-    expect(typeof (sp as { stop?: unknown }).stop).toBe('function')
+    expect(typeof (sp as { start?: unknown | undefined }).start).toBe(
+      'function',
+    )
+    expect(typeof (sp as { stop?: unknown | undefined }).stop).toBe('function')
   })
 
   it('returns the same instance across calls (singleton)', () => {

@@ -29,28 +29,29 @@ export function makeFakeStream(
 ): AsyncIterable<FakeStreamEntry> {
   return {
     async *[Symbol.asyncIterator]() {
-      for (const e of entries) {
+      for (let i = 0, { length } = entries; i < length; i += 1) {
+        const e = entries[i]!
         yield e
       }
     },
   }
 }
 
-vi.mock('../../../src/cacache/_internal', async importOriginal => {
+vi.mock(import('../../../src/cacache/_internal'), async importOriginal => {
   const original = await importOriginal<typeof cacacheInternal>()
   return {
     ...original,
     getCacache: vi.fn(original.getCacache),
   }
 })
-vi.mock('../../../src/cacache/read', async importOriginal => {
+vi.mock(import('../../../src/cacache/read'), async importOriginal => {
   const original = await importOriginal<typeof cacacheRead>()
   return {
     ...original,
     safeGet: vi.fn(original.safeGet),
   }
 })
-vi.mock('../../../src/cacache/write', async importOriginal => {
+vi.mock(import('../../../src/cacache/write'), async importOriginal => {
   const original = await importOriginal<typeof cacacheWrite>()
   return {
     ...original,

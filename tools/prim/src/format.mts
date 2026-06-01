@@ -32,7 +32,7 @@ export function formatHuman(findings, ctx) {
     arr.push(f)
     byPrimordial.set(f.primordial, arr)
   }
-  const sorted = [...byPrimordial.entries()].sort(
+  const sorted = [...byPrimordial.entries()].toSorted(
     (a, b) => b[1].length - a[1].length,
   )
 

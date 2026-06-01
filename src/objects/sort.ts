@@ -140,7 +140,7 @@ export function toSortedObjectFromEntries<T = unknown>(
   }
   return ObjectFromEntries([
     // The String constructor is safe to use with symbols.
-    ...symbolEntries.sort(entryKeyComparator),
-    ...otherEntries.sort(entryKeyComparator),
+    ...symbolEntries.toSorted(entryKeyComparator),
+    ...otherEntries.toSorted(entryKeyComparator),
   ])
 }

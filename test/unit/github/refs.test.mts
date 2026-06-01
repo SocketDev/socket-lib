@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../src/github/refs-rest', () => ({
+vi.mock(import('../../../src/github/refs-rest'), () => ({
   fetchRefSha: vi.fn(),
 }))
-vi.mock('../../../src/github/refs-cache', () => ({
+vi.mock(import('../../../src/github/refs-cache'), () => ({
   clearRefCache: vi.fn(),
   getGithubCache: vi.fn(() => ({
     getOrFetch: vi.fn(async (_key: string, fn: () => Promise<string>) => fn()),
   })),
 }))
-vi.mock('../../../src/github/refs-graphql', () => ({
+vi.mock(import('../../../src/github/refs-graphql'), () => ({
   fetchRefShaViaGraphQL: vi.fn(),
 }))
 
@@ -56,7 +56,7 @@ describe.sequential('github/refs — resolveRefToSha cache disabled', () => {
     fetchRefSha.mockResolvedValueOnce('def456')
     await resolveRefToSha('owner', 'repo', 'v1.0.0', { token: 'ghp_test' })
     const [, , , opts] = fetchRefSha.mock.calls[0]!
-    expect((opts as { token?: string }).token).toBe('ghp_test')
+    expect((opts as { token?: string | undefined }).token).toBe('ghp_test')
   })
 })
 

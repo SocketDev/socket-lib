@@ -1,9 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/bin/which', () => ({
+vi.mock(import('../../../../src/bin/which'), () => ({
   which:
     vi.fn<
-      (name: string, opts?: { nothrow?: boolean }) => Promise<string | null>
+      (
+        name: string,
+        opts?: { nothrow?: boolean | undefined },
+      ) => Promise<string | null>
     >(),
   whichSync: vi.fn(),
 }))

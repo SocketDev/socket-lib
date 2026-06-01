@@ -14,7 +14,7 @@
  *     the same visitor.
  */
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
@@ -69,12 +69,12 @@ const TS_EXTENSIONS = new Set(['.cts', '.mts', '.ts', '.tsx'])
 const JS_EXTENSIONS = new Set(['.cjs', '.js', '.jsx', '.mjs'])
 
 const PARSE_OPTIONS = {
-  ecmaVersion: 'latest',
-  sourceType: 'module',
-  locations: true,
-  allowImportExportEverywhere: true,
   allowAwaitOutsideFunction: true,
   allowHashBang: true,
+  allowImportExportEverywhere: true,
+  ecmaVersion: 'latest',
+  locations: true,
+  sourceType: 'module',
 }
 
 /**

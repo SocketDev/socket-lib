@@ -72,8 +72,8 @@ export type ExecutableType = 'package' | 'binary' | 'unknown'
 export interface ExecutableDetectionResult {
   type: ExecutableType
   method: 'dlx-cache' | 'package-json' | 'file-extension'
-  packageJsonPath?: string
-  inDlxCache?: boolean
+  packageJsonPath?: string | undefined
+  inDlxCache?: boolean | undefined
 }
 
 /**

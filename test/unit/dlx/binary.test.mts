@@ -1144,7 +1144,7 @@ describe.sequential('dlx-binary', () => {
           const list = await listDlxCache()
           expect(list.length).toBe(2)
 
-          const names = list.map(e => e.name).sort()
+          const names = list.map(e => e.name).toSorted()
           expect(names).toEqual(['binary-1', 'binary-2'])
         } finally {
           restoreHome()
@@ -1225,7 +1225,7 @@ describe.sequential('dlx-binary', () => {
                 // (e.g. PowerShell execution policy prompts).
                 await Promise.race([
                   result.spawnPromise.catch(() => {}),
-                  new Promise(resolve => setTimeout(resolve, 5_000)),
+                  new Promise(resolve => setTimeout(resolve, 5000)),
                 ])
               } finally {
                 restoreHome()

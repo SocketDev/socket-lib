@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ManifestError } from '../../../../src/eco/manifest/manifest-error'
+import type { ManifestError } from '../../../../src/eco/manifest/manifest-error'
 import {
   parseLockfile,
   sniffLockfileFormat,
