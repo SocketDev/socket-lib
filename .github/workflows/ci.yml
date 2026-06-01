@@ -21,7 +21,7 @@ concurrency:
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@a418e013d77aaa6079d5f0537cf6dcbced6aec1a # main (2026-06-01)
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@f09a1cd39868ae45d304cfcead2d4f19a5325d8a # main (2026-06-01)
     with:
       test-script: 'pnpm run build && pnpm exec vitest --config .config/vitest.config.mts run'
 
@@ -31,7 +31,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@a418e013d77aaa6079d5f0537cf6dcbced6aec1a # main (2026-06-01)
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@f09a1cd39868ae45d304cfcead2d4f19a5325d8a # main (2026-06-01)
       - name: Build project
         run: pnpm run build
 
