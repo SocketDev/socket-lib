@@ -98,14 +98,17 @@ export const boundConsoleEntries = [
       typeof (globalConsole as unknown as Record<string, unknown>)[n] ===
       'function',
   )
-  .map(n => [
-    n,
-    (
-      (globalConsole as unknown as Record<string, unknown>)[n] as (
-        ...args: unknown[]
-      ) => unknown
-    ).bind(globalConsole),
-  ])
+  .map(
+    n =>
+      [
+        n,
+        (
+          (globalConsole as unknown as Record<string, unknown>)[n] as (
+            ...args: unknown[]
+          ) => unknown
+        ).bind(globalConsole),
+      ] as [string, (...args: unknown[]) => unknown],
+  )
 
 /**
  * WeakMap storing the Console instance for each Logger.

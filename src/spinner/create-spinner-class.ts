@@ -43,8 +43,18 @@ export type SpinnerCtorType = {
 }
 
 export type YoctoSpinnerConstructor = new (...args: unknown[]) => {
-  color: ColorRgb | ColorValue
-  text: string
+  // `color` and `text` are typed as accessors (get/set pairs) rather than
+  // plain properties so SpinnerClass can override them with its own
+  // RGB-narrowing accessor / getter-setter method overloads — TypeScript
+  // forbids overriding a base *property* with a subclass *accessor*
+  // (TS2611), but allows accessor-over-accessor.
+  get color(): ColorRgb | ColorValue
+  set color(value: ColorRgb | ColorValue)
+  // `text` is intentionally NOT modeled as a named member: yocto-spinner
+  // exposes it as a property, but SpinnerClass owns the public `text()`
+  // getter/setter method, and TypeScript forbids overriding a base property
+  // with a subclass method. The base `text` is reached through the index
+  // signature, so internal writes use `super['text']` (bracket access).
   isSpinning: boolean
   [key: string]: unknown
 }
@@ -114,7 +124,7 @@ export function createSpinnerClass(
               // Parent's #skipRender flag prevents nested render calls.
               // Only update if we have base text to avoid blank frames.
               if (this.#baseText) {
-                super.text = this.#buildDisplayText()
+                super['text'] = this.#buildDisplayText()
               }
             }
           : undefined,
@@ -125,13 +135,13 @@ export function createSpinnerClass(
     }
 
     // Override color getter to ensure it's always RGB.
-    get color(): ColorRgb {
+    override get color(): ColorRgb {
       const value = super.color
       return isRgbTuple(value) ? value : toRgb(value)
     }
 
     // Override color setter to always convert to RGB before passing to yocto-spinner.
-    set color(value: ColorValue | ColorRgb) {
+    override set color(value: ColorValue | ColorRgb) {
       super.color = isRgbTuple(value) ? value : toRgb(value)
     }
 
@@ -166,10 +176,15 @@ export function createSpinnerClass(
       }
       const wasSpinning = this.isSpinning
       const normalized = normalizeText(text)
+      // Dynamic dispatch to a base yocto-spinner method; the base type's
+      // index signature is `unknown`, so cast to a callable locally.
+      const superMethod = super[methodName] as unknown as (
+        ...args: unknown[]
+      ) => unknown
       if (methodName === 'stop' && !normalized) {
-        super[methodName]()
+        superMethod.call(this)
       } else {
-        super[methodName](normalized)
+        superMethod.call(this, normalized)
       }
       if (methodName === 'stop') {
         if (wasSpinning && normalized) {
@@ -248,7 +263,7 @@ export function createSpinnerClass(
      */
     #updateSpinnerText() {
       // Call the parent class's text setter, which triggers render.
-      super.text = this.#buildDisplayText()
+      super['text'] = this.#buildDisplayText()
     }
 
     // Show a debug message (ℹ) without stopping; only when debug mode is on.
@@ -598,7 +613,7 @@ export function createSpinnerClass(
         const normalized = normalizeText(text)
         if (!normalized) {
           this.#baseText = ''
-          super.text = ''
+          super['text'] = ''
         } else {
           this.#baseText = normalized
         }

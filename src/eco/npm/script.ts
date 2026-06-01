@@ -28,6 +28,7 @@ import {
 import { findUpSync } from '../../fs/find-up'
 import { getOwn } from '../../objects/inspect'
 import { ArrayIsArray } from '../../primordials/array'
+import { ErrorCtor } from '../../primordials/error'
 import { spawn } from '../../process/spawn/child'
 
 import { execNpm } from './npm/exec'
@@ -106,14 +107,22 @@ export function execScript(
   // reaching this in unit tests requires a tmpdir whose ancestors have
   // no pnpm-lock/package-lock/yarn.lock.
   /* c8 ignore start */
+  // When `node --run` isn't usable we shell out to npm's real exec path;
+  // if npm itself can't be resolved there's no runner left, so fail with
+  // a clear message instead of spawning with an `undefined` argv entry.
+  if (!useNodeRun && !NPM_REAL_EXEC_PATH) {
+    throw new ErrorCtor(
+      `Cannot run script "${scriptName}": no npm executable found and ` +
+        'this Node.js lacks `node --run`. Install npm or upgrade to Node ' +
+        '22.5+ for `--run` support.',
+    )
+  }
+  const runnerArgs = useNodeRun
+    ? ['--run']
+    : [NPM_REAL_EXEC_PATH as string, 'run']
   return spawn(
     getExecPath(),
-    [
-      ...getNodeNoWarningsFlags(),
-      ...(useNodeRun ? ['--run'] : [NPM_REAL_EXEC_PATH, 'run']),
-      scriptName,
-      ...resolvedArgs,
-    ],
+    [...getNodeNoWarningsFlags(), ...runnerArgs, scriptName, ...resolvedArgs],
     {
       ...spawnOptions,
     },
