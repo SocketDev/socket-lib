@@ -29,7 +29,7 @@ jobs:
     outputs:
       has-updates: ${{ steps.check.outputs.has-updates }}
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@3db17f891a466d217eadc61da9d33093047f2015 # main (2026-05-28)
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@a418e013d77aaa6079d5f0537cf6dcbced6aec1a # main (2026-06-01)
       - name: Check for npm updates
         id: check
         shell: bash
@@ -53,7 +53,7 @@ jobs:
       contents: write
       pull-requests: write
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@3db17f891a466d217eadc61da9d33093047f2015 # main (2026-05-28)
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@a418e013d77aaa6079d5f0537cf6dcbced6aec1a # main (2026-06-01)
       - name: Create update branch
         id: branch
         env:
