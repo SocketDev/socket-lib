@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.0.6](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.6) - 2026-05-29
+## [6.0.6](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.6) - 2026-06-01
 
 ### Added
 
@@ -14,6 +14,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`http-request` retry instrumentation.** Adds `Retry-Attempt`, `Retry-Max`, and `Retry-After` request headers on retried attempts so server-side logs can correlate a retry chain.
 - **`prim` CLI bin.** `prim` is now published as a `bin` entry (`dist/bin/prim.cjs`); installs from `@socketsecurity/lib` make `npx prim` work. Also new in this release: `prim --diff` for unified line-diffs in dry-run mode, multi-hop cycle detection in `validateRewrites`, and a two-phase apply with cross-batch validation.
 - **`sanitizeHeaders` shape-based redaction.** `isSensitiveHeaderName` regex (`auth | cookie | credential | key | password | secret | token`) covers custom token headers (`x-amz-security-token`, `api-key`, …) without an explicit allowlist. Same reasoning as "a denylist is itself a leak."
+- **`packages/provenance` — staged-publish detection.** `getTrustStatus` now reads `_npmUser.approver` and surfaces `stagedPublish: true` when a registry version was promoted out of staging via the 2FA-gated approve step (pnpm/pnpm#12056). Adds a new top tier to the trust ladder: `stagedPublish` ranks above `trustedPublisher` and `provenance`. The `TRUST_LEVELS` tuple (`'none' | 'provenance' | 'trustedPublisher' | 'stagedPublish'`), `getTrustLevel`, `getTrustLevelName`, `compareTrust`, and `didTrustDecrease` all extend to level 3.
+- **`words/pluralize` — `Intl.PluralRules` dictionary mode.** New `options.forms` accepts a `{ singular?, plural, zero?, two?, few?, many? }` dictionary keyed by CLDR plural category for locale-aware pluralization of irregulars and non-English counts. `singular` and `plural` map to CLDR's `one` and `other`; the remaining four are optional and fall back to `plural`. New `options.locale` (BCP 47, default `'en-US'`) and `options.type` (`'cardinal' | 'ordinal'`, default `'cardinal'`) configure the underlying `Intl.PluralRules`. Defaults are unchanged — `pluralize('file', { count: n })` still uses the simple `+s` rule with zero `Intl` cost. Cache reuses one `Intl.PluralRules` instance per `<locale>:<type>` pair.
 
 ### Fixed
 
