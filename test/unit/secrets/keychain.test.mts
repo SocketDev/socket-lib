@@ -249,6 +249,12 @@ describe.sequential('secrets/keychain — writeSecret', () => {
   })
 
   test('uses an explicit label when provided', async () => {
+    // Safe to use single-letter placeholders here because both `macos` and
+    // `linux` modules are fully mocked via `vi.mock(import('.../macos'))`
+    // / `vi.mock(import('.../linux'))` at the top of this file — none of
+    // these args ever reach the real OS keychain. The label is unique
+    // enough to be greppable if it ever does, though.
+    const label = 'socket-lib-test:secrets/keychain:writeSecret-explicit-label'
     const { macos, mod } = await loadFresh('darwin')
     macos['readMacOS']!.mockResolvedValueOnce(undefined)
     macos['writeMacOS']!.mockResolvedValueOnce(undefined)
@@ -256,9 +262,9 @@ describe.sequential('secrets/keychain — writeSecret', () => {
       service: 's',
       account: 'a',
       value: 'v',
-      label: 'My Label',
+      label,
     })
-    expect(macos['writeMacOS']).toHaveBeenCalledWith('s', 'a', 'v', 'My Label')
+    expect(macos['writeMacOS']).toHaveBeenCalledWith('s', 'a', 'v', label)
   })
 
   test('routes to writeLinux on linux', async () => {
