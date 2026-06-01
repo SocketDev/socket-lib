@@ -134,6 +134,7 @@ describe('process/transient', () => {
       })
 
       it('should detect _npx in nested path', () => {
+        // oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- Fixture path exercises _npx detection inside a .cache dir; not a real repo tool-cache location.
         expect(isTransientProcess('/home/user/.cache/_npx/abc/def')).toBe(true)
       })
 

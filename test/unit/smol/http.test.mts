@@ -11,15 +11,19 @@ import { getSmolHttp } from '../../../src/smol/http'
 describe('smol/http', () => {
   describe('getSmolHttp', () => {
     it('returns undefined on stock Node', () => {
-      expect(getSmolHttp()).toBe(undefined)
+      const result = getSmolHttp()
+      expect(result).toBe(undefined)
     })
 
     it('is idempotent across repeated calls', () => {
-      expect(getSmolHttp()).toBe(getSmolHttp())
+      const first = getSmolHttp()
+      const second = getSmolHttp()
+      expect(first).toBe(second)
     })
 
     it('does not throw', () => {
-      expect(() => getSmolHttp()).not.toThrow()
+      const call = () => getSmolHttp()
+      expect(call).not.toThrow()
     })
   })
 })

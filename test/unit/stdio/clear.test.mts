@@ -1,12 +1,13 @@
 /**
- * @file Unit tests for terminal clearing and cursor utilities. Tests terminal
- *   control utilities:
+ * @file Unit tests for terminal line and screen clearing utilities. Tests
+ *   terminal control utilities:
  *
- *   - clearScreen() clears terminal display
- *   - clearLine() clears current line
- *   - moveCursor() repositions cursor
+ *   - clearScreen() / clearVisible() clear the terminal display
+ *   - clearLine() / clearLines() clear current and prior lines
+ *   - cursorToStart() repositions the cursor to column zero
  *   - ANSI escape sequences for terminal control Used by Socket CLI for
- *     interactive output, spinners, and progress indicators.
+ *     interactive output, spinners, and progress indicators. Cursor visibility
+ *     and save/restore tests live in clear.cursor.test.mts.
  */
 
 import { describe, expect, it, vi } from 'vitest'
@@ -17,10 +18,6 @@ import {
   clearScreen,
   clearVisible,
   cursorToStart,
-  hideCursor,
-  restoreCursor,
-  saveCursor,
-  showCursor,
 } from '../../../src/stdio/clear'
 
 describe('stdio/clear', () => {
@@ -332,227 +329,7 @@ describe('stdio/clear', () => {
     })
   })
 
-  describe('hideCursor', () => {
-    it('should write DECTCEM hide cursor sequence', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      hideCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b[?25l')
-    })
-
-    it('should default to process.stdout', () => {
-      expect(() => hideCursor()).not.toThrow()
-    })
-
-    it('should support custom stream', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      hideCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledTimes(1)
-    })
-
-    it('should write correct ANSI sequence', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      hideCursor(mockStream)
-
-      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
-      const written = mockStream.write.mock.calls[0][0] as string
-      expect(written).toBe('\x1b[?25l')
-    })
-
-    it('should work on any stream', () => {
-      const mockStream = {
-        isTTY: false,
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      hideCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalled()
-    })
-  })
-
-  describe('showCursor', () => {
-    it('should write DECTCEM show cursor sequence', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      showCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b[?25h')
-    })
-
-    it('should default to process.stdout', () => {
-      expect(() => showCursor()).not.toThrow()
-    })
-
-    it('should support custom stream', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      showCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledTimes(1)
-    })
-
-    it('should write correct ANSI sequence', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      showCursor(mockStream)
-
-      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
-      const written = mockStream.write.mock.calls[0][0] as string
-      expect(written).toBe('\x1b[?25h')
-    })
-
-    it('should work on any stream', () => {
-      const mockStream = {
-        isTTY: false,
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      showCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalled()
-    })
-  })
-
-  describe('saveCursor', () => {
-    it('should write DECSC save cursor sequence', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      saveCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b7')
-    })
-
-    it('should default to process.stdout', () => {
-      expect(() => saveCursor()).not.toThrow()
-    })
-
-    it('should support custom stream', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      saveCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledTimes(1)
-    })
-
-    it('should write correct ANSI sequence', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      saveCursor(mockStream)
-
-      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
-      const written = mockStream.write.mock.calls[0][0] as string
-      expect(written).toBe('\x1b7')
-    })
-
-    it('should work on any stream', () => {
-      const mockStream = {
-        isTTY: false,
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      saveCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalled()
-    })
-  })
-
-  describe('restoreCursor', () => {
-    it('should write DECRC restore cursor sequence', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      restoreCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b8')
-    })
-
-    it('should default to process.stdout', () => {
-      expect(() => restoreCursor()).not.toThrow()
-    })
-
-    it('should support custom stream', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      restoreCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledTimes(1)
-    })
-
-    it('should write correct ANSI sequence', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      restoreCursor(mockStream)
-
-      // @ts-expect-error - Vitest mock.mock property not recognized by TypeScript
-      const written = mockStream.write.mock.calls[0][0] as string
-      expect(written).toBe('\x1b8')
-    })
-
-    it('should work on any stream', () => {
-      const mockStream = {
-        isTTY: false,
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      restoreCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalled()
-    })
-  })
-
   describe('integration scenarios', () => {
-    it('should support hide/show cursor workflow', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      hideCursor(mockStream)
-      showCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenNthCalledWith(1, '\x1b[?25l')
-      expect(mockStream.write).toHaveBeenNthCalledWith(2, '\x1b[?25h')
-    })
-
-    it('should support save/restore cursor workflow', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      saveCursor(mockStream)
-      restoreCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenNthCalledWith(1, '\x1b7')
-      expect(mockStream.write).toHaveBeenNthCalledWith(2, '\x1b8')
-    })
-
     it('should support clearing multiple lines', () => {
       const mockStream = {
         write: vi.fn(),
@@ -567,20 +344,6 @@ describe('stdio/clear', () => {
           '\x1b[1A\x1b[2K',
         )
       }
-    })
-
-    it('should support progress indicator pattern', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      hideCursor(mockStream)
-      clearLine({ isTTY: false, write: mockStream.write } as NodeJS.WriteStream)
-      showCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b[?25l')
-      expect(mockStream.write).toHaveBeenCalledWith('\r\x1b[K')
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b[?25h')
     })
   })
 
@@ -598,30 +361,6 @@ describe('stdio/clear', () => {
       expect(written).toContain('\x1b[2K') // Clear line
     })
 
-    it('should use correct escape codes for cursor visibility', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      hideCursor(mockStream)
-      showCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b[?25l')
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b[?25h')
-    })
-
-    it('should use correct escape codes for cursor save/restore', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      saveCursor(mockStream)
-      restoreCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b7')
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b8')
-    })
-
     it('should use correct escape codes for screen clear', () => {
       const mockStream = {
         isTTY: true,
@@ -635,17 +374,6 @@ describe('stdio/clear', () => {
   })
 
   describe('error handling', () => {
-    it('should not throw when writing to streams', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      expect(() => hideCursor(mockStream)).not.toThrow()
-      expect(() => showCursor(mockStream)).not.toThrow()
-      expect(() => saveCursor(mockStream)).not.toThrow()
-      expect(() => restoreCursor(mockStream)).not.toThrow()
-    })
-
     it('should handle TTY detection gracefully', () => {
       const ttyStream = {
         isTTY: true,
@@ -696,19 +424,6 @@ describe('stdio/clear', () => {
 
       expect(mockStream.write).toHaveBeenCalledTimes(3)
     })
-
-    it('should support animation cleanup', () => {
-      const mockStream = {
-        write: vi.fn(),
-      } as unknown as NodeJS.WriteStream
-
-      hideCursor(mockStream)
-      // ... animation frames ...
-      showCursor(mockStream)
-
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b[?25l')
-      expect(mockStream.write).toHaveBeenCalledWith('\x1b[?25h')
-    })
   })
 
   describe('stream parameter defaults', () => {
@@ -718,10 +433,6 @@ describe('stdio/clear', () => {
       expect(() => clearScreen()).not.toThrow()
       expect(() => clearVisible()).not.toThrow()
       expect(() => cursorToStart()).not.toThrow()
-      expect(() => hideCursor()).not.toThrow()
-      expect(() => showCursor()).not.toThrow()
-      expect(() => saveCursor()).not.toThrow()
-      expect(() => restoreCursor()).not.toThrow()
     })
   })
 })

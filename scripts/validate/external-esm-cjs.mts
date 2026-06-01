@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- validator helpers interleaved with module-level config they consume; reordering would split state from its consumers. */
 /**
  * @file Comprehensive ESM/CJS validator for dist/external/* exports Validates
  *   that bundled dependencies work correctly with both CommonJS require() and

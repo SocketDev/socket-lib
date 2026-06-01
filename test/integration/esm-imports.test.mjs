@@ -7,29 +7,31 @@
  *   subpaths directly.
  */
 
-// oxlint-disable socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
-
 import { describe, expect, it } from 'vitest'
 
 describe('ESM imports from CommonJS', () => {
   describe('globs module', () => {
     it('should import glob function', async () => {
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
       const { glob } = await import('@socketsecurity/lib/globs/match')
       expect(typeof glob).toBe('function')
     })
 
     it('should import globSync function', async () => {
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
       const { globSync } = await import('@socketsecurity/lib/globs/match')
       expect(typeof globSync).toBe('function')
     })
 
     it('should import defaultIgnore', async () => {
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
       const { defaultIgnore } =
         await import('@socketsecurity/lib/globs/defaults')
       expect(Array.isArray(defaultIgnore)).toBe(true)
     })
 
     it('should import getGlobMatcher', async () => {
+      // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
       const { getGlobMatcher } =
         await import('@socketsecurity/lib/globs/matcher')
       expect(typeof getGlobMatcher).toBe('function')
@@ -37,8 +39,11 @@ describe('ESM imports from CommonJS', () => {
 
     it('should import all leaves together', async () => {
       const [globMod, defaultsMod, matcherMod] = await Promise.all([
+        // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
         import('@socketsecurity/lib/globs/match'),
+        // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
         import('@socketsecurity/lib/globs/defaults'),
+        // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
         import('@socketsecurity/lib/globs/matcher'),
       ])
       expect(typeof globMod.glob).toBe('function')

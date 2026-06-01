@@ -23,13 +23,12 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const rootPath = path.join(__dirname, '..')
 
 export const primBuildConfig: RolldownOptions = {
-  input: path.join(rootPath, 'tools/prim/bin/prim.mts'),
-  platform: 'node',
   // Inline everything from lib-stable + diff + acorn-wasm wrapper. The
   // only external dep is the wasm bindgen, which has to stay a runtime
   // `require('./acorn-bindgen.cjs')` so its `${__dirname}/./acorn.wasm`
   // sibling-load works after publish.
   external: ['./acorn-bindgen.cjs'],
+  input: path.join(rootPath, 'tools/prim/bin/prim.mts'),
   output: {
     file: path.join(rootPath, 'dist/bin/prim.cjs'),
     format: 'cjs',
@@ -37,4 +36,5 @@ export const primBuildConfig: RolldownOptions = {
     minify: false,
     banner: '"use strict";\n/* Socket Lib prim - bundled with rolldown */',
   },
+  platform: 'node',
 }

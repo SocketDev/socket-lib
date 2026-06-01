@@ -111,6 +111,7 @@ describe('paths/filenames', () => {
 
   describe('ESLINT_CONFIG_JS', () => {
     it('should be eslint.config.js', () => {
+      // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- asserting the literal value of the exported ESLINT_CONFIG_JS filename constant, not a real ESLint config reference.
       expect(ESLINT_CONFIG_JS).toBe('eslint.config.js')
     })
 

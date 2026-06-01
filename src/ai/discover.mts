@@ -49,7 +49,7 @@ interface OnDiskCache {
 }
 
 export function cachePathFor(repoRoot: string): string {
-  return path.join(repoRoot, '.cache', 'agent-discovery.json')
+  return path.join(repoRoot, 'node_modules', '.cache', 'agent-discovery.json')
 }
 
 /**

@@ -9,8 +9,6 @@
  *     package.json manipulation, and cache.
  */
 
-/* oxlint-disable socket/prefer-exists-sync -- tests verify stat output (isFile/isDirectory/mtime/size), not existence. */
-
 import fs from 'node:fs/promises'
 import os from 'node:os'
 import path from 'node:path'
@@ -118,6 +116,7 @@ describe('fs integration', () => {
 
         await safeMkdir(deepPath)
 
+        // oxlint-disable-next-line socket/prefer-exists-sync -- asserts isDirectory(), not mere existence.
         const stats = await fs.stat(deepPath)
         expect(stats.isDirectory()).toBe(true)
       }, 'fs-ensuredir-test-')
@@ -130,6 +129,7 @@ describe('fs integration', () => {
         await fs.mkdir(dirPath)
         await safeMkdir(dirPath)
 
+        // oxlint-disable-next-line socket/prefer-exists-sync -- asserts isDirectory(), not mere existence.
         const stats = await fs.stat(dirPath)
         expect(stats.isDirectory()).toBe(true)
       }, 'fs-existing-dir-')

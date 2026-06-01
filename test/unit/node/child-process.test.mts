@@ -15,10 +15,13 @@ describe('node/child-process', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeChildProcess()).toBe(getNodeChildProcess())
+    const first = getNodeChildProcess()
+    const second = getNodeChildProcess()
+    expect(first).toBe(second)
   })
 
   it('does not throw', () => {
-    expect(() => getNodeChildProcess()).not.toThrow()
+    const call = () => getNodeChildProcess()
+    expect(call).not.toThrow()
   })
 })

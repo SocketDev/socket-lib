@@ -11,6 +11,8 @@
  *     resolution across Socket tools.
  */
 
+import { getSocketUserDir as getSocketUserDirStable } from '@socketsecurity/lib-stable/paths/socket'
+
 import {
   getOsHomeDir,
   getOsTmpDir,
@@ -141,7 +143,7 @@ describe('paths/socket', () => {
 
   describe('getSocketHomePath', () => {
     it('should be alias for getSocketUserDir', () => {
-      expect(getSocketHomePath()).toBe(getSocketUserDir())
+      expect(getSocketHomePath()).toBe(getSocketUserDirStable())
     })
 
     it('should return same path consistently', () => {

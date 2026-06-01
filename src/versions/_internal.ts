@@ -15,7 +15,7 @@ import { getSmolVersions } from '../smol/versions'
 import type * as semverType from '../external/semver'
 import type { SmolVersionsBinding } from '../smol/versions'
 
-const _semver = require('../external/semver') as typeof semverType
+const semver = require('../external/semver') as typeof semverType
 
 /**
  * The vendored `semver` JS implementation. Always available — used directly by
@@ -23,7 +23,7 @@ const _semver = require('../external/semver') as typeof semverType
  * smol-versions doesn't expose).
  */
 export function getSemver(): typeof semverType {
-  return _semver
+  return semver
 }
 
 /**
@@ -31,4 +31,4 @@ export function getSemver(): typeof semverType {
  * otherwise the vendored `semver`. Bound once at module load.
  */
 export const impl: SmolVersionsBinding | typeof semverType =
-  getSmolVersions() ?? _semver
+  getSmolVersions() ?? semver

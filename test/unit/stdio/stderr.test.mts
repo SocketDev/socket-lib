@@ -1,22 +1,17 @@
 /**
- * @file Unit tests for stderr stream utilities. Tests stderr output utilities:
+ * @file Unit tests for stderr stream writer utilities. Tests stderr output:
  *
  *   - writeStderr() writes to stderr stream
  *   - Error message formatting
- *   - Stream detection (TTY vs pipe)
- *   - Color support detection for stderr Used by Socket tools for error reporting
- *     and diagnostic output.
+ *   - Warning and stack-trace formatting Used by Socket tools for error
+ *     reporting and diagnostic output. Terminal/stream-control coverage
+ *     (TTY detection, cursor, dimensions) lives in stderr-terminal.test.mts.
  */
 
-import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 
 import {
   clearLine,
-  cursorTo,
-  getColumns,
-  getRows,
-  isTTY,
   stderr,
   writeError,
   writeErrorFormatted,
@@ -28,17 +23,6 @@ import { setupStdioTestSuite } from '../util/stdio-test-helper'
 
 describe('stdio/stderr', () => {
   const getContext = setupStdioTestSuite(stderr)
-
-  describe('stderr', () => {
-    it('should export stderr stream', () => {
-      expect(stderr).toBeDefined()
-      expect(stderr).toBe(process.stderr)
-    })
-
-    it('should be a WriteStream', () => {
-      expect(stderr).toBeInstanceOf(Object)
-    })
-  })
 
   describe('writeErrorLine', () => {
     it('should export writeErrorLine function', () => {
@@ -76,15 +60,21 @@ describe('stdio/stderr', () => {
     })
 
     it('should handle ANSI color codes', () => {
-      writeErrorLine('\u001B[31mRed Error\u001B[0m')
+      writeErrorLine('[31mRed Error[0m')
       expect(getContext().writeSpy).toHaveBeenCalledWith(
-        '\u001B[31mRed Error\u001B[0m\n',
+        '[31mRed Error[0m\n',
       )
     })
 
     it('should not return a value', () => {
       const result = writeErrorLine('test')
       expect(result).toBeUndefined()
+    })
+
+    it('should handle very long error messages', () => {
+      const longMessage = 'x'.repeat(10_000)
+      writeErrorLine(longMessage)
+      expect(getContext().writeSpy).toHaveBeenCalledWith(`${longMessage}\n`)
     })
   })
 
@@ -104,219 +94,15 @@ describe('stdio/stderr', () => {
     })
 
     it('should handle ANSI escape sequences', () => {
-      writeError('\u001B[33mWarning\u001B[0m')
+      writeError('[33mWarning[0m')
       expect(getContext().writeSpy).toHaveBeenCalledWith(
-        '\u001B[33mWarning\u001B[0m',
+        '[33mWarning[0m',
       )
     })
 
     it('should not return a value', () => {
       const result = writeError('test')
       expect(result).toBeUndefined()
-    })
-  })
-
-  describe('clearLine', () => {
-    it('should export clearLine function', () => {
-      expect(typeof clearLine).toBe('function')
-    })
-
-    it('should clear line in TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      clearLine()
-      expect(getContext().cursorToSpy).toHaveBeenCalledWith(0)
-      expect(getContext().clearLineSpy).toHaveBeenCalledWith(0)
-    })
-
-    it('should not return a value', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      const result = clearLine()
-      expect(result).toBeUndefined()
-    })
-  })
-
-  describe('cursorTo', () => {
-    it('should export cursorTo function', () => {
-      expect(typeof cursorTo).toBe('function')
-    })
-
-    it('should move cursor to x position in TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      cursorTo(10)
-      expect(getContext().cursorToSpy).toHaveBeenCalledWith(10, undefined)
-    })
-
-    it('should move cursor to x,y position in TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      cursorTo(10, 5)
-      expect(getContext().cursorToSpy).toHaveBeenCalledWith(10, 5)
-    })
-
-    it('should move cursor to 0,0', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      cursorTo(0, 0)
-      expect(getContext().cursorToSpy).toHaveBeenCalledWith(0, 0)
-    })
-
-    it('should not return a value', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      const result = cursorTo(0)
-      expect(result).toBeUndefined()
-    })
-
-    it('should handle large coordinates', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      cursorTo(1000, 500)
-      expect(getContext().cursorToSpy).toHaveBeenCalledWith(1000, 500)
-    })
-
-    it('should handle negative coordinates', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      cursorTo(-1, -1)
-      expect(getContext().cursorToSpy).toHaveBeenCalledWith(-1, -1)
-    })
-  })
-
-  describe('isTTY', () => {
-    it('should export isTTY function', () => {
-      expect(typeof isTTY).toBe('function')
-    })
-
-    it('should return true when stderr is TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: true,
-        configurable: true,
-      })
-      expect(isTTY()).toBe(true)
-    })
-
-    it('should return false when stderr is not TTY', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: false,
-        configurable: true,
-      })
-      expect(isTTY()).toBe(false)
-    })
-
-    it('should return false when isTTY is undefined', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: undefined,
-        configurable: true,
-      })
-      expect(isTTY()).toBe(false)
-    })
-
-    it('should be a boolean', () => {
-      expect(typeof isTTY()).toBe('boolean')
-    })
-  })
-
-  describe('getColumns', () => {
-    it('should export getColumns function', () => {
-      expect(typeof getColumns).toBe('function')
-    })
-
-    it('should return actual columns when set', () => {
-      Object.defineProperty(stderr, 'columns', {
-        value: 120,
-        configurable: true,
-      })
-      expect(getColumns()).toBe(120)
-    })
-
-    it('should return default 80 when columns is undefined', () => {
-      Object.defineProperty(stderr, 'columns', {
-        value: undefined,
-        configurable: true,
-      })
-      expect(getColumns()).toBe(80)
-    })
-
-    it('should return default 80 when columns is 0', () => {
-      Object.defineProperty(stderr, 'columns', { value: 0, configurable: true })
-      expect(getColumns()).toBe(80)
-    })
-
-    it('should handle small terminal width', () => {
-      Object.defineProperty(stderr, 'columns', {
-        value: 40,
-        configurable: true,
-      })
-      expect(getColumns()).toBe(40)
-    })
-
-    it('should handle large terminal width', () => {
-      Object.defineProperty(stderr, 'columns', {
-        value: 300,
-        configurable: true,
-      })
-      expect(getColumns()).toBe(300)
-    })
-
-    it('should be a number', () => {
-      expect(typeof getColumns()).toBe('number')
-    })
-  })
-
-  describe('getRows', () => {
-    it('should export getRows function', () => {
-      expect(typeof getRows).toBe('function')
-    })
-
-    it('should return actual rows when set', () => {
-      Object.defineProperty(stderr, 'rows', { value: 50, configurable: true })
-      expect(getRows()).toBe(50)
-    })
-
-    it('should return default 24 when rows is undefined', () => {
-      Object.defineProperty(stderr, 'rows', {
-        value: undefined,
-        configurable: true,
-      })
-      expect(getRows()).toBe(24)
-    })
-
-    it('should return default 24 when rows is 0', () => {
-      Object.defineProperty(stderr, 'rows', { value: 0, configurable: true })
-      expect(getRows()).toBe(24)
-    })
-
-    it('should handle small terminal height', () => {
-      Object.defineProperty(stderr, 'rows', { value: 10, configurable: true })
-      expect(getRows()).toBe(10)
-    })
-
-    it('should handle large terminal height', () => {
-      Object.defineProperty(stderr, 'rows', { value: 100, configurable: true })
-      expect(getRows()).toBe(100)
-    })
-
-    it('should be a number', () => {
-      expect(typeof getRows()).toBe('number')
     })
   })
 
@@ -468,6 +254,14 @@ describe('stdio/stderr', () => {
       )
     })
 
+    it('should handle errors with no stack property', () => {
+      const error = { message: 'Not a real Error' } as Error
+      writeStackTrace(error)
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        'Error: Not a real Error\n',
+      )
+    })
+
     it('should not return a value', () => {
       const error = new Error('test')
       const result = writeStackTrace(error)
@@ -504,84 +298,14 @@ describe('stdio/stderr', () => {
       clearLine()
       expect(getContext().clearLineSpy).not.toHaveBeenCalled()
     })
-  })
 
-  describe('edge cases', () => {
-    it('should handle undefined isTTY', () => {
-      Object.defineProperty(stderr, 'isTTY', {
-        value: undefined,
-        configurable: true,
-      })
-      expect(isTTY()).toBe(false)
-      clearLine() // Should not throw
-      cursorTo(0) // Should not throw
-    })
-
-    it('should handle very long error messages', () => {
-      const longMessage = 'x'.repeat(10_000)
-      writeErrorLine(longMessage)
-      expect(getContext().writeSpy).toHaveBeenCalledWith(`${longMessage}\n`)
-    })
-
-    it('should handle terminal dimension changes', () => {
-      Object.defineProperty(stderr, 'columns', {
-        value: 80,
-        configurable: true,
-      })
-      expect(getColumns()).toBe(80)
-
-      Object.defineProperty(stderr, 'columns', {
-        value: 120,
-        configurable: true,
-      })
-      expect(getColumns()).toBe(120)
-    })
-
-    it('should handle null-like terminal dimensions', () => {
-      Object.defineProperty(stderr, 'columns', {
-        value: undefined,
-        configurable: true,
-      })
-      expect(getColumns()).toBe(80)
-
-      Object.defineProperty(stderr, 'rows', {
-        value: undefined,
-        configurable: true,
-      })
-      expect(getRows()).toBe(24)
-    })
-
-    it('should handle errors with no stack property', () => {
-      const error = { message: 'Not a real Error' } as Error
-      writeStackTrace(error)
-      expect(getContext().writeSpy).toHaveBeenCalledWith(
-        'Error: Not a real Error\n',
-      )
-    })
-  })
-
-  describe('real-world usage', () => {
-    it('should detect redirected error output', () => {
+    it('should write error output when piped', () => {
       Object.defineProperty(stderr, 'isTTY', {
         value: false,
         configurable: true,
       })
-      expect(isTTY()).toBe(false)
-      // When piped, should still write but skip terminal control
       writeErrorLine('Error line')
       expect(getContext().writeSpy).toHaveBeenCalled()
-    })
-
-    it('should handle terminal size queries', () => {
-      Object.defineProperty(stderr, 'columns', {
-        value: 120,
-        configurable: true,
-      })
-      Object.defineProperty(stderr, 'rows', { value: 40, configurable: true })
-      const width = getColumns()
-      const height = getRows()
-      expect(width).toBe(120)
-      expect(height).toBe(40)
     })
   })
 })

@@ -4,6 +4,7 @@
  *   verified by socket-btm's own tests running inside the smol binary.
  */
 
+import { getSmolPrimordial as getSmolPrimordialStable } from '@socketsecurity/lib-stable/smol/primordial'
 import { describe, expect, it } from 'vitest'
 
 import { getSmolPrimordial } from '../../../src/smol/primordial'
@@ -15,7 +16,7 @@ describe('smol/primordial', () => {
     })
 
     it('is idempotent across repeated calls', () => {
-      expect(getSmolPrimordial()).toBe(getSmolPrimordial())
+      expect(getSmolPrimordial()).toBe(getSmolPrimordialStable())
     })
 
     it('does not throw', () => {

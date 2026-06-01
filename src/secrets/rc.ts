@@ -39,7 +39,7 @@
  */
 
 import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { platform } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -84,7 +84,7 @@ export function clear(
   service: string,
   legacySentinels: readonly string[] = [],
 ): boolean {
-  if (platform() !== 'darwin') {
+  if (os.platform() !== 'darwin') {
     return false
   }
   const rcPath = pickRcFile()
@@ -247,7 +247,7 @@ export function shellSingleQuote(value: string): string {
  * dotfile-manager users or installers running under a non-default shell.
  */
 export function write(opts: WriteOptions): WriteResult {
-  if (platform() !== 'darwin') {
+  if (os.platform() !== 'darwin') {
     return {
       rcPath: undefined,
       outcome: 'skipped',

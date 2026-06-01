@@ -6,8 +6,6 @@
  *   current shape visits root, then breaks.
  */
 
-/* oxlint-disable socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory(). */
-
 import process from 'node:process'
 
 import { isArray } from '../arrays/predicates'
@@ -76,6 +74,7 @@ export async function findUp(
       const thePath = path.join(dir, n)
       try {
         // eslint-disable-next-line no-await-in-loop
+        // oxlint-disable-next-line socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory().
         const stats = await fs.promises.stat(thePath)
         if (!onlyDirectories && stats.isFile()) {
           return normalizePath(thePath)
@@ -155,6 +154,7 @@ export function findUpSync(
     for (const n of names) {
       const thePath = path.join(dir, n)
       try {
+        // oxlint-disable-next-line socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory().
         const stats = fs.statSync(thePath)
         if (!onlyDirectories && stats.isFile()) {
           return normalizePath(thePath)

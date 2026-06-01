@@ -249,7 +249,9 @@ describe('themes/context', () => {
     beforeEach(() => {
       setTheme('socket')
       // Clean up any leftover listeners
-      unsubscribers.forEach(u => u())
+      for (let i = 0, { length } = unsubscribers; i < length; i += 1) {
+        unsubscribers[i]!()
+      }
       unsubscribers.length = 0
     })
 

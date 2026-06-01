@@ -28,15 +28,15 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { resetPaths, setPath } from '../../../src/paths/rewire'
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
-import { join } from 'node:path'
+import path from 'node:path'
 
 describe('DLX Executable Type Detection', () => {
   let tempDir: string
   let mockDlxDir: string
 
   beforeEach(() => {
-    tempDir = mkdtempSync(join(os.tmpdir(), 'dlx-detect-test-'))
-    mockDlxDir = join(tempDir, '.socket', '_dlx')
+    tempDir = mkdtempSync(path.join(os.tmpdir(), 'dlx-detect-test-'))
+    mockDlxDir = path.join(tempDir, '.socket', '_dlx')
     mkdirSync(mockDlxDir, { recursive: true })
     // Use path rewire to override DLX directory for all modules
     setPath('socket-dlx-dir', mockDlxDir)
@@ -53,8 +53,8 @@ describe('DLX Executable Type Detection', () => {
 
   describe('detectExecutableType', () => {
     it('should route to detectDlxExecutableType for DLX cache paths', () => {
-      const dlxPath = join(mockDlxDir, 'abc123', 'bin', 'tool')
-      const nodeModulesDir = join(mockDlxDir, 'abc123', 'node_modules')
+      const dlxPath = path.join(mockDlxDir, 'abc123', 'bin', 'tool')
+      const nodeModulesDir = path.join(mockDlxDir, 'abc123', 'node_modules')
       mkdirSync(nodeModulesDir, { recursive: true })
 
       const result = detectExecutableType(dlxPath)
@@ -65,8 +65,8 @@ describe('DLX Executable Type Detection', () => {
     })
 
     it('should route to detectLocalExecutableType for non-DLX paths', () => {
-      const localPath = join(tempDir, 'local-tools', 'tool.js')
-      const localDir = join(tempDir, 'local-tools')
+      const localPath = path.join(tempDir, 'local-tools', 'tool.js')
+      const localDir = path.join(tempDir, 'local-tools')
       mkdirSync(localDir, { recursive: true })
       writeFileSync(localPath, '#!/usr/bin/env node\nconsole.log("test")')
 
@@ -81,8 +81,8 @@ describe('DLX Executable Type Detection', () => {
   describe('detectDlxExecutableType', () => {
     it('should detect package when node_modules exists', () => {
       const cacheKey = 'pkg-hash-123'
-      const filePath = join(mockDlxDir, cacheKey, 'bin', 'tool')
-      const nodeModulesDir = join(mockDlxDir, cacheKey, 'node_modules')
+      const filePath = path.join(mockDlxDir, cacheKey, 'bin', 'tool')
+      const nodeModulesDir = path.join(mockDlxDir, cacheKey, 'node_modules')
       mkdirSync(nodeModulesDir, { recursive: true })
 
       const result = detectDlxExecutableType(filePath)
@@ -96,8 +96,8 @@ describe('DLX Executable Type Detection', () => {
 
     it('should detect binary when node_modules does not exist', () => {
       const cacheKey = 'bin-hash-456'
-      const filePath = join(mockDlxDir, cacheKey, 'bin', 'tool')
-      const cacheDir = join(mockDlxDir, cacheKey)
+      const filePath = path.join(mockDlxDir, cacheKey, 'bin', 'tool')
+      const cacheDir = path.join(mockDlxDir, cacheKey)
       mkdirSync(cacheDir, { recursive: true })
 
       const result = detectDlxExecutableType(filePath)
@@ -111,7 +111,7 @@ describe('DLX Executable Type Detection', () => {
 
     it('should handle nested paths within cache directory', () => {
       const cacheKey = 'nested-pkg'
-      const filePath = join(
+      const filePath = path.join(
         mockDlxDir,
         cacheKey,
         'deep',
@@ -119,7 +119,7 @@ describe('DLX Executable Type Detection', () => {
         'path',
         'tool',
       )
-      const nodeModulesDir = join(mockDlxDir, cacheKey, 'node_modules')
+      const nodeModulesDir = path.join(mockDlxDir, cacheKey, 'node_modules')
       mkdirSync(nodeModulesDir, { recursive: true })
 
       const result = detectDlxExecutableType(filePath)
@@ -131,9 +131,9 @@ describe('DLX Executable Type Detection', () => {
 
   describe('detectLocalExecutableType', () => {
     it('should detect package from package.json with bin field', () => {
-      const projectDir = join(tempDir, 'with-bin')
-      const binDir = join(projectDir, 'bin')
-      const binPath = join(binDir, 'cli.js')
+      const projectDir = path.join(tempDir, 'with-bin')
+      const binDir = path.join(projectDir, 'bin')
+      const binPath = path.join(binDir, 'cli.js')
       mkdirSync(binDir, { recursive: true })
 
       const packageJson = {
@@ -141,7 +141,7 @@ describe('DLX Executable Type Detection', () => {
         name: 'test-package',
       }
       writeFileSync(
-        join(projectDir, 'package.json'),
+        path.join(projectDir, 'package.json'),
         JSON.stringify(packageJson),
       )
       writeFileSync(binPath, '#!/usr/bin/env node\nconsole.log("test")')
@@ -152,15 +152,15 @@ describe('DLX Executable Type Detection', () => {
       expect(result.method).toBe('package-json')
       // findPackageJson returns a normalized (forward-slash) path —
       // findUpSync runs all output through normalizePath. On POSIX this
-      // equals join(); on Windows it's the forward-slash form.
+      // equals path.join(); on Windows it's the forward-slash form.
       expect(result.packageJsonPath).toBe(
-        normalizePath(join(projectDir, 'package.json')),
+        normalizePath(path.join(projectDir, 'package.json')),
       )
       expect(result.inDlxCache).toBe(false)
     })
 
     it('should detect package from .js extension', () => {
-      const scriptPath = join(tempDir, 'script.js')
+      const scriptPath = path.join(tempDir, 'script.js')
       writeFileSync(scriptPath, 'console.log("test")')
 
       const result = detectLocalExecutableType(scriptPath)
@@ -171,7 +171,7 @@ describe('DLX Executable Type Detection', () => {
     })
 
     it('should detect package from .mjs extension', () => {
-      const scriptPath = join(tempDir, 'script.mjs')
+      const scriptPath = path.join(tempDir, 'script.mjs')
       writeFileSync(scriptPath, 'console.log("test")')
 
       const result = detectLocalExecutableType(scriptPath)
@@ -181,7 +181,7 @@ describe('DLX Executable Type Detection', () => {
     })
 
     it('should detect package from .cjs extension', () => {
-      const scriptPath = join(tempDir, 'script.cjs')
+      const scriptPath = path.join(tempDir, 'script.cjs')
       writeFileSync(scriptPath, 'console.log("test")')
 
       const result = detectLocalExecutableType(scriptPath)
@@ -191,7 +191,7 @@ describe('DLX Executable Type Detection', () => {
     })
 
     it('should detect binary for non-js executables', () => {
-      const binaryPath = join(tempDir, 'native-tool')
+      const binaryPath = path.join(tempDir, 'native-tool')
       writeFileSync(binaryPath, Buffer.from([0x7f, 0x45, 0x4c, 0x46]))
 
       const result = detectLocalExecutableType(binaryPath)
@@ -202,13 +202,13 @@ describe('DLX Executable Type Detection', () => {
     })
 
     it('should handle package.json without bin field', () => {
-      const projectDir = join(tempDir, 'no-bin')
-      const scriptPath = join(projectDir, 'index.js')
+      const projectDir = path.join(tempDir, 'no-bin')
+      const scriptPath = path.join(projectDir, 'index.js')
       mkdirSync(projectDir, { recursive: true })
 
       const packageJson = { name: 'test-package' }
       writeFileSync(
-        join(projectDir, 'package.json'),
+        path.join(projectDir, 'package.json'),
         JSON.stringify(packageJson),
       )
       writeFileSync(scriptPath, 'console.log("test")')
@@ -220,11 +220,11 @@ describe('DLX Executable Type Detection', () => {
     })
 
     it('should handle invalid package.json gracefully', () => {
-      const projectDir = join(tempDir, 'invalid-json')
-      const scriptPath = join(projectDir, 'tool.js')
+      const projectDir = path.join(tempDir, 'invalid-json')
+      const scriptPath = path.join(projectDir, 'tool.js')
       mkdirSync(projectDir, { recursive: true })
 
-      writeFileSync(join(projectDir, 'package.json'), 'invalid json {')
+      writeFileSync(path.join(projectDir, 'package.json'), 'invalid json {')
       writeFileSync(scriptPath, 'console.log("test")')
 
       const result = detectLocalExecutableType(scriptPath)
@@ -234,9 +234,9 @@ describe('DLX Executable Type Detection', () => {
     })
 
     it('should search up directory tree for package.json', () => {
-      const projectDir = join(tempDir, 'nested-project')
-      const deepDir = join(projectDir, 'src', 'commands', 'bin')
-      const scriptPath = join(deepDir, 'cli.js')
+      const projectDir = path.join(tempDir, 'nested-project')
+      const deepDir = path.join(projectDir, 'src', 'commands', 'bin')
+      const scriptPath = path.join(deepDir, 'cli.js')
       mkdirSync(deepDir, { recursive: true })
 
       const packageJson = {
@@ -244,7 +244,7 @@ describe('DLX Executable Type Detection', () => {
         name: 'nested-package',
       }
       writeFileSync(
-        join(projectDir, 'package.json'),
+        path.join(projectDir, 'package.json'),
         JSON.stringify(packageJson),
       )
       writeFileSync(scriptPath, '#!/usr/bin/env node\nconsole.log("test")')
@@ -255,15 +255,15 @@ describe('DLX Executable Type Detection', () => {
       expect(result.method).toBe('package-json')
       // findPackageJson returns a normalized (forward-slash) path —
       // findUpSync runs all output through normalizePath. On POSIX this
-      // equals join(); on Windows it's the forward-slash form.
+      // equals path.join(); on Windows it's the forward-slash form.
       expect(result.packageJsonPath).toBe(
-        normalizePath(join(projectDir, 'package.json')),
+        normalizePath(path.join(projectDir, 'package.json')),
       )
     })
 
     it('should handle paths without package.json in tree', () => {
-      const binaryPath = join(tempDir, 'standalone', 'binary')
-      mkdirSync(join(tempDir, 'standalone'), { recursive: true })
+      const binaryPath = path.join(tempDir, 'standalone', 'binary')
+      mkdirSync(path.join(tempDir, 'standalone'), { recursive: true })
       writeFileSync(binaryPath, Buffer.from([0x7f, 0x45, 0x4c, 0x46]))
 
       const result = detectLocalExecutableType(binaryPath)
@@ -307,22 +307,22 @@ describe('DLX Executable Type Detection', () => {
   describe('isNodePackage', () => {
     it('should return true for Node.js packages in DLX cache', () => {
       const cacheKey = 'pkg-test'
-      const filePath = join(mockDlxDir, cacheKey, 'bin', 'cli')
-      const nodeModulesDir = join(mockDlxDir, cacheKey, 'node_modules')
+      const filePath = path.join(mockDlxDir, cacheKey, 'bin', 'cli')
+      const nodeModulesDir = path.join(mockDlxDir, cacheKey, 'node_modules')
       mkdirSync(nodeModulesDir, { recursive: true })
 
       expect(isNodePackage(filePath)).toBe(true)
     })
 
     it('should return true for .js files', () => {
-      const jsPath = join(tempDir, 'script.js')
+      const jsPath = path.join(tempDir, 'script.js')
       writeFileSync(jsPath, 'console.log("test")')
 
       expect(isNodePackage(jsPath)).toBe(true)
     })
 
     it('should return false for binaries', () => {
-      const binaryPath = join(tempDir, 'native-binary')
+      const binaryPath = path.join(tempDir, 'native-binary')
       writeFileSync(binaryPath, Buffer.from([0x7f, 0x45, 0x4c, 0x46]))
 
       expect(isNodePackage(binaryPath)).toBe(false)
@@ -332,22 +332,22 @@ describe('DLX Executable Type Detection', () => {
   describe('isNativeBinary', () => {
     it('should return true for native binaries in DLX cache', () => {
       const cacheKey = 'bin-test'
-      const filePath = join(mockDlxDir, cacheKey, 'bin', 'tool')
-      const cacheDir = join(mockDlxDir, cacheKey)
+      const filePath = path.join(mockDlxDir, cacheKey, 'bin', 'tool')
+      const cacheDir = path.join(mockDlxDir, cacheKey)
       mkdirSync(cacheDir, { recursive: true })
 
       expect(isNativeBinary(filePath)).toBe(true)
     })
 
     it('should return true for executables without Node.js extensions', () => {
-      const binaryPath = join(tempDir, 'tool')
+      const binaryPath = path.join(tempDir, 'tool')
       writeFileSync(binaryPath, Buffer.from([0x7f, 0x45, 0x4c, 0x46]))
 
       expect(isNativeBinary(binaryPath)).toBe(true)
     })
 
     it('should return false for Node.js packages', () => {
-      const jsPath = join(tempDir, 'script.mjs')
+      const jsPath = path.join(tempDir, 'script.mjs')
       writeFileSync(jsPath, 'console.log("test")')
 
       expect(isNativeBinary(jsPath)).toBe(false)

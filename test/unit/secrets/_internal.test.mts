@@ -16,15 +16,20 @@ beforeEach(() => {
 
 describe.sequential('secrets/_internal — cacheKey', () => {
   test('combines service + account with a space separator', () => {
-    expect(cacheKey('svc', 'acct')).toBe('svc acct')
+    const key = cacheKey('svc', 'acct')
+    expect(key).toBe('svc acct')
   })
 
   test('keys differ when service differs', () => {
-    expect(cacheKey('svc1', 'a')).not.toBe(cacheKey('svc2', 'a'))
+    const key1 = cacheKey('svc1', 'a')
+    const key2 = cacheKey('svc2', 'a')
+    expect(key1).not.toBe(key2)
   })
 
   test('keys differ when account differs', () => {
-    expect(cacheKey('s', 'a1')).not.toBe(cacheKey('s', 'a2'))
+    const key1 = cacheKey('s', 'a1')
+    const key2 = cacheKey('s', 'a2')
+    expect(key1).not.toBe(key2)
   })
 })
 

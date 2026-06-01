@@ -286,9 +286,10 @@ describe('ipc-cli', () => {
       const entries = Object.entries(ipc)
 
       expect(Array.isArray(entries)).toBe(true)
-      entries.forEach(([key, value]) => {
+      for (let i = 0, { length } = entries; i < length; i += 1) {
+        const [key, value] = entries[i]!
         expect(ipc[key as keyof IpcObject]).toBe(value)
-      })
+      }
     })
 
     it('should work with for…in loop', async () => {

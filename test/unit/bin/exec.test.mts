@@ -40,7 +40,7 @@ describe('execBin', () => {
     } catch (e) {
       expect(e).toBeInstanceOf(Error)
       if (isError(e)) {
-        expect((e as any).code).toBe('ENOENT')
+        expect((e as NodeJS.ErrnoException).code).toBe('ENOENT')
       }
     }
   })

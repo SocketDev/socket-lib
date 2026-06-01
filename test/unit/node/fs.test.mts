@@ -20,10 +20,13 @@ describe('node/fs', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeFs()).toBe(getNodeFs())
+    const first = getNodeFs()
+    const second = getNodeFs()
+    expect(first).toBe(second)
   })
 
   it('does not throw', () => {
-    expect(() => getNodeFs()).not.toThrow()
+    const call = () => getNodeFs()
+    expect(call).not.toThrow()
   })
 })

@@ -10,10 +10,12 @@
 
 import { Writable } from 'node:stream'
 
-import { Logger } from '../../../src/logger/node'
-import { LOG_SYMBOLS } from '../../../src/logger/symbols'
-import { THEMES } from '../../../src/themes/themes'
 import { beforeEach, describe, expect, it } from 'vitest'
+
+import { LOG_SYMBOLS } from '@socketsecurity/lib-stable/logger/symbols'
+
+import { Logger } from '../../../src/logger/node'
+import { THEMES } from '../../../src/themes/themes'
 
 describe('Logger - Theme Handling', () => {
   let stdout: Writable

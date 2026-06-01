@@ -4,6 +4,7 @@
  *   tests.
  */
 
+import { getSmolHttps as getSmolHttpsStable } from '@socketsecurity/lib-stable/smol/https'
 import { describe, expect, it } from 'vitest'
 
 import { getSmolHttps } from '../../../src/smol/https'
@@ -15,7 +16,7 @@ describe('smol/https', () => {
     })
 
     it('is idempotent across repeated calls', () => {
-      expect(getSmolHttps()).toBe(getSmolHttps())
+      expect(getSmolHttps()).toBe(getSmolHttpsStable())
     })
 
     it('does not throw', () => {

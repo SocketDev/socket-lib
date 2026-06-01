@@ -30,7 +30,7 @@ export async function withTmp<T>(
   return (await cacache.tmp.withTmp(
     getSocketCacacheDir(),
     {},
-    callback as any,
+    callback as (tmpDirPath: string) => Promise<unknown>,
   )) as T
   /* c8 ignore stop */
 }

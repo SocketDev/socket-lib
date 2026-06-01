@@ -1,6 +1,8 @@
 import { EventEmitter } from 'node:events'
 import { Readable } from 'node:stream'
 
+import type * as ChildProcess from 'node:child_process'
+
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
@@ -10,9 +12,7 @@ const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
 
 vi.mock(import('node:child_process'), async () => {
   const actual =
-    await vi.importActual<typeof import('node:child_process')>(
-      'node:child_process',
-    )
+    await vi.importActual<typeof ChildProcess>('node:child_process')
   return {
     ...actual,
     default: actual,

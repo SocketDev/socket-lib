@@ -17,7 +17,9 @@ describe('node/events', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeEvents()).toBe(getNodeEvents())
+    const first = getNodeEvents()
+    const second = getNodeEvents()
+    expect(first).toBe(second)
   })
 
   it('does not throw', () => {

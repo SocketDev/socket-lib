@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- `makeFlagPredicate` factory is referenced by const declarations interleaved with it; reordering function decls would either split that state or change initialization order. */
 /**
  * @file Flag predicates — `is*` checks across parsed `FlagValues`, raw
  *   `process.argv`, or no input. Split out of `argv/flags.ts` for size hygiene.
@@ -19,6 +18,30 @@ import { ArrayIsArray, ArrayPrototypeIncludes } from '../primordials/array'
 import type { FlagInput, FlagValues } from './flag-types'
 
 const processArg = [...process.argv]
+
+/**
+ * Get the appropriate log level based on flags. Returns 'silent', 'error',
+ * 'warn', 'info', 'verbose', or 'debug'.
+ *
+ * @example
+ *   ;```typescript
+ *   getLogLevel() // 'info' (default)
+ *   getLogLevel({ quiet: true }) // 'silent'
+ *   getLogLevel(['--debug']) // 'debug'
+ *   ```
+ */
+export function getLogLevel(input?: FlagInput): string {
+  if (isQuiet(input)) {
+    return 'silent'
+  }
+  if (isDebug(input)) {
+    return 'debug'
+  }
+  if (isVerbose(input)) {
+    return 'verbose'
+  }
+  return 'info'
+}
 
 /**
  * Build a flag predicate that accepts `FlagValues`, `string[]`, or `undefined`
@@ -216,27 +239,3 @@ export const isVerbose = makeFlagPredicate(['--verbose'])
  *   ```
  */
 export const isWatch = makeFlagPredicate(['--watch'], ['-w'])
-
-/**
- * Get the appropriate log level based on flags. Returns 'silent', 'error',
- * 'warn', 'info', 'verbose', or 'debug'.
- *
- * @example
- *   ;```typescript
- *   getLogLevel() // 'info' (default)
- *   getLogLevel({ quiet: true }) // 'silent'
- *   getLogLevel(['--debug']) // 'debug'
- *   ```
- */
-export function getLogLevel(input?: FlagInput): string {
-  if (isQuiet(input)) {
-    return 'silent'
-  }
-  if (isDebug(input)) {
-    return 'debug'
-  }
-  if (isVerbose(input)) {
-    return 'verbose'
-  }
-  return 'info'
-}

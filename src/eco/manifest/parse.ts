@@ -30,12 +30,12 @@ export function jsParse(
   return parseLockfile(content, format.ecosystem, format.format)
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
 /* c8 ignore start - smol-fallback branch is smol Node binary only. */
-const smolParse = _smol
+const smolParse = smol
   ? (filename: string, content: string) =>
-      _smol.parse(filename, content) as ParsedManifest | ParsedLockfile
+      smol.parse(filename, content) as ParsedManifest | ParsedLockfile
   : undefined
 /* c8 ignore stop */
 

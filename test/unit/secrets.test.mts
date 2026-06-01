@@ -19,7 +19,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { platform, tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -40,8 +40,8 @@ import { resolve, resolveSync } from '../../src/secrets/find'
 
 import * as rc from '../../src/secrets/rc'
 
-const IS_MACOS = platform() === 'darwin'
-const IS_WINDOWS = platform() === 'win32'
+const IS_MACOS = os.platform() === 'darwin'
+const IS_WINDOWS = os.platform() === 'win32'
 const IS_CI = process.env['CI'] === '1' || process.env['CI'] === 'true'
 // Windows CI runners (GitHub Actions windows-latest) ship a PowerShell session
 // that cant reliably invoke DPAPI from inside vitest workers — the runPsAsync
@@ -137,7 +137,7 @@ export function withFakeHome(): {
   rcPath: string
   cleanup: () => void
 } {
-  const fake = mkdtempSync(path.join(tmpdir(), 'secrets-rc-test-'))
+  const fake = mkdtempSync(path.join(os.tmpdir(), 'secrets-rc-test-'))
   const prevHome = process.env['HOME']
   const prevShell = process.env['SHELL']
   process.env['HOME'] = fake

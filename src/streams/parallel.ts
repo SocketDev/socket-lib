@@ -62,11 +62,11 @@ export function parallelMap<T, U>(
   const result = siParallelMap(
     opts.concurrency,
     async (item: T) => {
-      const result = await pRetry((...args: unknown[]) => func(args[0] as T), {
+      const mapped = await pRetry((...args: unknown[]) => func(args[0] as T), {
         ...opts.retries,
         args: [item],
       })
-      return result as U
+      return mapped as U
     },
     iterable,
   )

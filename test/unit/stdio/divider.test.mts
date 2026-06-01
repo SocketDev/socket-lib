@@ -11,6 +11,7 @@
  *     output.
  */
 
+import { dividers as stableDividers } from '@socketsecurity/lib-stable/stdio/divider'
 import {
   divider,
   dividers,
@@ -91,7 +92,7 @@ describe('stdio/divider', () => {
     it('should have double divider (alias for thick)', () => {
       const result = dividers.double()
       expect(result).toBe('═'.repeat(55))
-      expect(result).toBe(dividers.thick())
+      expect(result).toBe(stableDividers.thick())
     })
 
     it('should have single divider', () => {
