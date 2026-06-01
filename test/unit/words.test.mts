@@ -263,4 +263,159 @@ describe('words', () => {
       )
     })
   })
+
+  describe('pluralize — dictionary mode', () => {
+    it('selects singular for count===1', () => {
+      expect(
+        pluralize('child', {
+          count: 1,
+          forms: { singular: 'child', plural: 'children' },
+        }),
+      ).toBe('child')
+    })
+
+    it('selects plural for count===0 (English `other` category)', () => {
+      expect(
+        pluralize('child', {
+          count: 0,
+          forms: { singular: 'child', plural: 'children' },
+        }),
+      ).toBe('children')
+    })
+
+    it('selects plural for count > 1', () => {
+      expect(
+        pluralize('mouse', {
+          count: 5,
+          forms: { singular: 'mouse', plural: 'mice' },
+        }),
+      ).toBe('mice')
+    })
+
+    it('falls back to plural when singular is omitted', () => {
+      // English count===1 hits CLDR `one` → `singular`; with `singular`
+      // absent, the lookup falls through to `plural`.
+      expect(pluralize('foo', { count: 1, forms: { plural: 'bars' } })).toBe(
+        'bars',
+      )
+    })
+
+    it('falls back to plural when locale-specific category is omitted', () => {
+      // Arabic count===0 hits CLDR `zero`; with `zero` absent, the
+      // lookup falls through to `plural`.
+      expect(
+        pluralize('item', {
+          count: 0,
+          locale: 'ar',
+          forms: { singular: 'item', plural: 'items' },
+        }),
+      ).toBe('items')
+    })
+
+    it('honors locale-specific zero/two/few/many when provided', () => {
+      // Arabic distinguishes zero/one/two/few/many/other.
+      const arabicForms = {
+        zero: 'صفر كتاب',
+        singular: 'كتاب واحد',
+        two: 'كتابان',
+        few: 'كتب قليلة',
+        many: 'كتب كثيرة',
+        plural: 'كتب',
+      }
+      expect(
+        pluralize('book', { count: 0, locale: 'ar', forms: arabicForms }),
+      ).toBe('صفر كتاب')
+      expect(
+        pluralize('book', { count: 1, locale: 'ar', forms: arabicForms }),
+      ).toBe('كتاب واحد')
+      expect(
+        pluralize('book', { count: 2, locale: 'ar', forms: arabicForms }),
+      ).toBe('كتابان')
+      // Arabic `few` is for counts 3..10.
+      expect(
+        pluralize('book', { count: 5, locale: 'ar', forms: arabicForms }),
+      ).toBe('كتب قليلة')
+      // Arabic `many` is for counts 11..99.
+      expect(
+        pluralize('book', { count: 25, locale: 'ar', forms: arabicForms }),
+      ).toBe('كتب كثيرة')
+    })
+
+    it('honors Russian few/many distinction', () => {
+      // Russian: 1 → one, 2/3/4 → few, 5+ → many.
+      const russianForms = {
+        singular: 'файл',
+        few: 'файла',
+        many: 'файлов',
+        plural: 'файлов',
+      }
+      expect(
+        pluralize('file', { count: 1, locale: 'ru', forms: russianForms }),
+      ).toBe('файл')
+      expect(
+        pluralize('file', { count: 3, locale: 'ru', forms: russianForms }),
+      ).toBe('файла')
+      expect(
+        pluralize('file', { count: 7, locale: 'ru', forms: russianForms }),
+      ).toBe('файлов')
+    })
+
+    it('honors ordinal type for English suffixes', () => {
+      // English ordinals: 1→one (st), 2→two (nd), 3→few (rd), other→th.
+      const enOrdinal = {
+        singular: 'st',
+        two: 'nd',
+        few: 'rd',
+        plural: 'th',
+      }
+      expect(
+        pluralize('', { count: 1, type: 'ordinal', forms: enOrdinal }),
+      ).toBe('st')
+      expect(
+        pluralize('', { count: 2, type: 'ordinal', forms: enOrdinal }),
+      ).toBe('nd')
+      expect(
+        pluralize('', { count: 3, type: 'ordinal', forms: enOrdinal }),
+      ).toBe('rd')
+      expect(
+        pluralize('', { count: 4, type: 'ordinal', forms: enOrdinal }),
+      ).toBe('th')
+      expect(
+        pluralize('', { count: 11, type: 'ordinal', forms: enOrdinal }),
+      ).toBe('th')
+      expect(
+        pluralize('', { count: 21, type: 'ordinal', forms: enOrdinal }),
+      ).toBe('st')
+    })
+
+    it('reuses cached Intl.PluralRules across calls', () => {
+      // No direct assertion on the cache (it's module-private), but
+      // many calls with the same locale + type must remain consistent
+      // and not throw — covers the cache hit path.
+      const forms = { singular: 'item', plural: 'items' }
+      for (let i = 0; i < 100; i += 1) {
+        expect(pluralize('item', { count: i, forms })).toBe(
+          i === 1 ? 'item' : 'items',
+        )
+      }
+    })
+
+    it('ignores `word` when forms is given', () => {
+      // The `word` arg is only the default-path suffix base. In
+      // dictionary mode, the forms supply the literal strings —
+      // `word` is unused.
+      expect(
+        pluralize('ignored', {
+          count: 2,
+          forms: { singular: 'mouse', plural: 'mice' },
+        }),
+      ).toBe('mice')
+    })
+
+    it('default path still works when forms is undefined', () => {
+      expect(pluralize('file', { count: 3, forms: undefined as never })).toBe(
+        'files',
+      )
+    })
+  })
 })
