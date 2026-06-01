@@ -48,5 +48,6 @@ export function jsAnalyzeLockfile(lockfile: ParsedLockfile): LockfileStats {
 
 const smol = getSmolManifest()
 
-export const analyzeLockfile: (lockfile: ParsedLockfile) => LockfileStats =
-  smol ? smol.analyzeLockfile : jsAnalyzeLockfile
+export const analyzeLockfile: (lockfile: ParsedLockfile) => LockfileStats = smol
+  ? smol.analyzeLockfile
+  : jsAnalyzeLockfile

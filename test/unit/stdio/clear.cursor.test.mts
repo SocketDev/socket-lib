@@ -3,9 +3,10 @@
  *   Tests cursor control utilities:
  *
  *   - hideCursor() / showCursor() toggle cursor visibility (DECTCEM)
- *   - saveCursor() / restoreCursor() persist and recall cursor position (DECSC/DECRC)
- *   - ANSI escape sequences for cursor control Used by Socket CLI for
- *     interactive output, spinners, and progress indicators.
+ *   - saveCursor() / restoreCursor() persist and recall cursor position
+ *     (DECSC/DECRC)
+ *   - ANSI escape sequences for cursor control Used by Socket CLI for interactive
+ *     output, spinners, and progress indicators.
  */
 
 import { describe, expect, it, vi } from 'vitest'

@@ -1,11 +1,11 @@
 /**
  * @file Unit tests for archive extraction across zip, tar, and tar.gz:
+ *
  *   - detectArchiveFormat() - identifies format from file extension
  *   - extractZip()/extractTar()/extractTarGz() - extract with optional strip
- *   - extractArchive() - auto-detects format and extracts
- *
- *   Security hardening (path traversal, zip bombs, symlinks) lives in the
- *   sibling archives-security.test.mts.
+ *   - extractArchive() - auto-detects format and extracts Security hardening
+ *     (path traversal, zip bombs, symlinks) lives in the sibling
+ *     archives-security.test.mts.
  */
 
 import { createWriteStream, promises as fs } from 'node:fs'

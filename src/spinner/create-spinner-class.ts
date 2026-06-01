@@ -450,7 +450,6 @@ export function createSpinnerClass(
       this.#updateSpinnerText()
       return this as unknown as SpinnerInstance
     }
-
   } as unknown as SpinnerCtorType
   // Install the status-presentation methods (debug/done/fail/info/skip/step/
   // substep/success/warn families + log) onto the prototype. They reach the

@@ -6,9 +6,8 @@
  *   - memoizeWeak() uses WeakMap for object key caching
  *   - once() ensures function executes exactly once
  *   - Memoize() decorator for class methods
- *   - clearAllMemoizationCaches() global cache clearing
- *
- *   Sync memoize() and its edge cases live in memo.test.mts.
+ *   - clearAllMemoizationCaches() global cache clearing Sync memoize() and its
+ *     edge cases live in memo.test.mts.
  */
 
 import { memoizeAsync } from '../../src/memo/async'

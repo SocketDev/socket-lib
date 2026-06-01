@@ -2,14 +2,14 @@
  * @file Unit tests for stdio prompt wrapping and prompt-function utilities.
  *   Tests the runtime prompt machinery rather than theme conversion:
  *
- *   - wrapPrompt() injects themes, abort signals, and spinner coordination,
- *     trims string results, and swallows non-TypeError rejections
+ *   - wrapPrompt() injects themes, abort signals, and spinner coordination, trims
+ *     string results, and swallows non-TypeError rejections
  *   - createSeparator() builds inquirer separator entries
  *   - Separator class is exported separately from select
  *   - The checkbox/confirm/input/password/search/select prompt functions are
  *     unwrapped from their module default exports and remain callable Used by
- *     Socket CLI tools for user interactions like selecting options,
- *     confirming actions.
+ *     Socket CLI tools for user interactions like selecting options, confirming
+ *     actions.
  */
 
 import process from 'node:process'

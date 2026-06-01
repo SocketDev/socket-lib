@@ -1,14 +1,13 @@
 /**
- * @file Unit tests for async iteration utilities. Tests promise-based
- *   iteration helpers and their option normalizer:
+ * @file Unit tests for async iteration utilities. Tests promise-based iteration
+ *   helpers and their option normalizer:
  *
  *   - pEach(), pEachChunk() iterate async operations with concurrency control
- *   - normalizeIterationOptions() iteration option normalizer
- *
- *   Filtering helpers (pFilter, pFilterChunk) live in promises-filter.test.mts;
- *   retry helpers (pRetry, normalizeRetryOptions, resolveRetryOptions) live in
- *   promises.test.mts / promises-options.test.mts; resolver helpers live in
- *   promises-resolvers.test.mts.
+ *   - normalizeIterationOptions() iteration option normalizer Filtering helpers
+ *     (pFilter, pFilterChunk) live in promises-filter.test.mts; retry helpers
+ *     (pRetry, normalizeRetryOptions, resolveRetryOptions) live in
+ *     promises.test.mts / promises-options.test.mts; resolver helpers live in
+ *     promises-resolvers.test.mts.
  */
 
 import { pEach, pEachChunk } from '../../src/promises/iterate'

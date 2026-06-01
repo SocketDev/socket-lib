@@ -1,9 +1,9 @@
 /**
  * @file Unit tests for HTTP/HTTPS request utilities — header utilities surface.
  *   Covers parseRetryAfterHeader and sanitizeHeaders. Split from
- *   http-request-advanced-2.test.mts to keep each test file under the
- *   file-size cap and scoped to a single domain (header parsing/redaction).
- *   Shares the test server with the sibling http-request-*.test.mts files via
+ *   http-request-advanced-2.test.mts to keep each test file under the file-size
+ *   cap and scoped to a single domain (header parsing/redaction). Shares the
+ *   test server with the sibling http-request-*.test.mts files via
  *   http-request-fixtures.
  */
 

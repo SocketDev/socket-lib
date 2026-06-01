@@ -3,10 +3,9 @@
  *
  *   - TTL expiration (entries expire after their time-to-live elapses)
  *   - Memoization (in-memory cache layer toggled by the `memoize` option)
- *   - Concurrent operations (parallel set/get/getOrFetch, inflight dedupe)
- *
- *   Split out of index.test.mts to keep each file under the file-size cap.
- *   Shares the per-test isolated cache-dir setup with the sibling files.
+ *   - Concurrent operations (parallel set/get/getOrFetch, inflight dedupe) Split
+ *     out of index.test.mts to keep each file under the file-size cap. Shares
+ *     the per-test isolated cache-dir setup with the sibling files.
  */
 
 import os from 'node:os'

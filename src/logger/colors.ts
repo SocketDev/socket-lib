@@ -23,7 +23,10 @@ export function applyColor(
     // Named color like 'green', 'red', etc. The yoctocolors palette indexes to
     // a (text: string) => string formatter for each named color.
     const formatter = (
-      colors as unknown as Record<string, ((text: string) => string) | undefined>
+      colors as unknown as Record<
+        string,
+        ((text: string) => string) | undefined
+      >
     )[color]
     return formatter ? formatter(text) : text
   }

@@ -53,8 +53,7 @@ export async function getIpc(
     }
 
     if (env['SOCKET_CLI_SHADOW_API_TOKEN']) {
-      ipcObject.SOCKET_CLI_SHADOW_API_TOKEN =
-        env['SOCKET_CLI_SHADOW_API_TOKEN']
+      ipcObject.SOCKET_CLI_SHADOW_API_TOKEN = env['SOCKET_CLI_SHADOW_API_TOKEN']
     }
 
     if (env['SOCKET_CLI_SHADOW_BIN']) {

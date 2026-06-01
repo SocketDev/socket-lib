@@ -319,10 +319,7 @@ describe('parseJson', () => {
 
     it('should handle Buffer with multiple BOMs in content', () => {
       // Only the first BOM should be stripped
-      const buffer = Buffer.from(
-        '﻿{"text":"\\uFEFF embedded BOM"}',
-        'utf8',
-      )
+      const buffer = Buffer.from('﻿{"text":"\\uFEFF embedded BOM"}', 'utf8')
       const result = parseJson(buffer)
       expect(result).toEqual({ text: '﻿ embedded BOM' })
     })
