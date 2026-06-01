@@ -7,7 +7,7 @@
 
 import path from 'node:path'
 
-import { whichSync } from '../../bin/which'
+import { which } from '../../bin/which'
 
 import type { ResolvedSkillSpector } from './types'
 
@@ -21,8 +21,8 @@ const PIPX_PATH_SEGMENT_RE = /pipx[/\\]venvs[/\\]/
 export async function skillspectorFromPath(): Promise<
   ResolvedSkillSpector | undefined
 > {
-  const resolved = whichSync('skillspector', { nothrow: true })
-  if (!resolved || typeof resolved !== 'string') {
+  const resolved = await which('skillspector', { nothrow: true })
+  if (typeof resolved !== 'string') {
     return undefined
   }
   const normalized = path.normalize(resolved)

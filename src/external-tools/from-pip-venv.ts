@@ -28,7 +28,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { whichSync } from '../bin/which'
+import { which } from '../bin/which'
 import { safeMkdir } from '../fs/safe'
 import { spawn } from '../process/spawn/child'
 
@@ -49,15 +49,16 @@ export function pipVenvEntryPointPath(
  * `python` (the Windows convention). Returns `undefined` when neither is on
  * PATH.
  */
-export function findPython(): string | undefined {
+export async function findPython(): Promise<string | undefined> {
   const candidates =
     process.platform === 'win32'
       ? ['python', 'python3']
       : ['python3', 'python']
   for (let i = 0, { length } = candidates; i < length; i += 1) {
-    const which = whichSync(candidates[i]!, { nothrow: true })
-    if (typeof which === 'string') {
-      return which
+    // eslint-disable-next-line no-await-in-loop -- short-circuit on first hit.
+    const found = await which(candidates[i]!, { nothrow: true })
+    if (typeof found === 'string') {
+      return found
     }
   }
   return undefined
@@ -119,7 +120,7 @@ export async function createPipVenv(
     return { entryPointPath: entryBin, created: false }
   }
 
-  const python = opts.python ?? findPython()
+  const python = opts.python ?? (await findPython())
   if (!python) {
     throw new Error(
       'createPipVenv: no Python interpreter on PATH (looked for python3, python)',
