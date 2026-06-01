@@ -1,17 +1,23 @@
 /**
- * @file Unit tests for crypto helpers. Covers `hash()` and the `nativeHash()`
- *   feature-detect:
+ * @file Unit tests for crypto helpers. Covers `hash()`, the `nativeHash()`
+ *   feature-detect, and the content-addressed blob helpers:
  *
  *   - one-shot hashing for sha256, sha512 across hex / base64 / base64url
  *   - native vs. fallback (createHash().update().digest()) parity
  *   - feature-detect tri-state: native present, native missing
+ *   - blobHashOf (Q + base64url sha256) and verifyBlobHash integrity check
  */
 
 import { Buffer } from 'node:buffer'
 import crypto from 'node:crypto'
 
 // oxlint-disable-next-line socket/no-src-import-in-test-expect -- nativeHash is the system-under-test for the nativeHash describe block (its feature-detect + memoized identity are what we assert on), not a builder of expected values.
-import { hash as hashOneShot, nativeHash } from '../../src/crypto/hash'
+import {
+  blobHashOf,
+  hash as hashOneShot,
+  nativeHash,
+  verifyBlobHash,
+} from '../../src/crypto/hash'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type * as HashModule from '../../src/crypto/hash'
@@ -138,6 +144,47 @@ describe('crypto', () => {
       const { nativeHash: gnh } = await loadFallback()
       expect(gnh()).toBeUndefined()
       expect(gnh()).toBeUndefined()
+    })
+  })
+
+  describe('blobHashOf', () => {
+    it('computes Q + base64url(sha256(bytes))', () => {
+      const bytes = new TextEncoder().encode('hello')
+      const expected =
+        'Q' + crypto.createHash('sha256').update(bytes).digest('base64url')
+      expect(blobHashOf(bytes)).toBe(expected)
+      // Stable, prefix-tagged value.
+      expect(blobHashOf(bytes)).toBe(
+        'QLPJNul-wow4m6DsqxbninhsWHlwfp0JecwQzYpOLmCQ',
+      )
+    })
+
+    it('differs for different content', () => {
+      const a = blobHashOf(new TextEncoder().encode('a'))
+      const b = blobHashOf(new TextEncoder().encode('b'))
+      expect(a).not.toBe(b)
+      expect(a.startsWith('Q')).toBe(true)
+    })
+  })
+
+  describe('verifyBlobHash', () => {
+    it('passes when content matches the Q hash', () => {
+      const bytes = new TextEncoder().encode('hello')
+      expect(() => verifyBlobHash(blobHashOf(bytes), bytes)).not.toThrow()
+    })
+
+    it('passes for an S-prefixed hash sharing the digest body', () => {
+      const bytes = new TextEncoder().encode('manifest')
+      const sHash = 'S' + blobHashOf(bytes).slice(1)
+      expect(() => verifyBlobHash(sHash, bytes)).not.toThrow()
+    })
+
+    it('throws on a content mismatch', () => {
+      const bytes = new TextEncoder().encode('hello')
+      const wrong = blobHashOf(new TextEncoder().encode('goodbye'))
+      expect(() => verifyBlobHash(wrong, bytes)).toThrow(
+        /blob integrity check failed/,
+      )
     })
   })
 })
