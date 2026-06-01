@@ -5,9 +5,8 @@
  *   'path'` otherwise (a one-off binary on PATH).
  */
 
-import path from 'node:path'
-
 import { which } from '../../bin/which'
+import { normalizePath } from '../../paths/normalize'
 
 import type { ResolvedSkillSpector } from './types'
 
@@ -15,8 +14,9 @@ import type { ResolvedSkillSpector } from './types'
 //   ~/.local/pipx/venvs/<pkg>/bin/<entry-point>           (linux/macOS)
 //   ~/.local/share/pipx/venvs/<pkg>/bin/<entry-point>     (XDG)
 //   %USERPROFILE%\pipx\venvs\<pkg>\Scripts\<entry-point>  (windows)
-// The shared substring is `pipx/venvs` (with path separators normalized).
-const PIPX_PATH_SEGMENT_RE = /pipx[/\\]venvs[/\\]/
+// Match against the forward-slash form only — normalizePath drops
+// the Windows backslash variant so the regex stays single-shape.
+const PIPX_PATH_SEGMENT_RE = /pipx\/venvs\//
 
 export async function skillspectorFromPath(): Promise<
   ResolvedSkillSpector | undefined
@@ -25,7 +25,7 @@ export async function skillspectorFromPath(): Promise<
   if (typeof resolved !== 'string') {
     return undefined
   }
-  const normalized = path.normalize(resolved)
+  const normalized = normalizePath(resolved)
   if (PIPX_PATH_SEGMENT_RE.test(normalized)) {
     return { path: normalized, source: 'pipx' }
   }
