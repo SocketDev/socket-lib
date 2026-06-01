@@ -19,8 +19,8 @@ export const DEFAULT_MAX_TOTAL_SIZE = 1024 * 1024 * 1024
 // Maximum number of entries to prevent inode exhaustion DoS.
 export const DEFAULT_MAX_ENTRIES = 100_000
 
-let _AdmZip: typeof AdmZipType | undefined
-let _tarFs: typeof tarFsType | undefined
+let admZip: typeof AdmZipType | undefined
+let tarFs: typeof tarFsType | undefined
 
 import { getNodePath } from '../node/path'
 
@@ -54,17 +54,17 @@ export function assertArchiveExists(archivePath: string): void {
 }
 
 export function getAdmZip() {
-  if (_AdmZip === undefined) {
-    _AdmZip = /*@__PURE__*/ require('../external/adm-zip.js')
+  if (admZip === undefined) {
+    admZip = /*@__PURE__*/ require('../external/adm-zip.js')
   }
-  return _AdmZip!
+  return admZip!
 }
 
 export function getTarFs() {
-  if (_tarFs === undefined) {
-    _tarFs = /*@__PURE__*/ require('../external/tar-fs.js')
+  if (tarFs === undefined) {
+    tarFs = /*@__PURE__*/ require('../external/tar-fs.js')
   }
-  return _tarFs!
+  return tarFs!
 }
 
 /**

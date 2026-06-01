@@ -1,4 +1,4 @@
-import { createHash } from 'node:crypto'
+import crypto from 'node:crypto'
 import {
   existsSync,
   mkdtempSync,
@@ -19,14 +19,16 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 //   2. Write the expected bytes to the temp file via that fake stream.
 import { PassThrough } from 'node:stream'
 
+import type * as HttpRequestModule from '../../../src/http-request/request'
+
 const { mockHttpRequestAttempt } = vi.hoisted(() => ({
   mockHttpRequestAttempt: vi.fn(),
 }))
 
 vi.mock(import('../../../src/http-request/request'), async () => {
-  const actual = await vi.importActual<
-    typeof import('../../../src/http-request/request')
-  >('../../../src/http-request/request')
+  const actual = await vi.importActual<typeof HttpRequestModule>(
+    '../../../src/http-request/request',
+  )
   return { ...actual, httpRequestAttempt: mockHttpRequestAttempt }
 })
 
@@ -68,7 +70,7 @@ async function loadFresh() {
 }
 
 function sha256Hex(content: string): string {
-  return createHash('sha256').update(content).digest('hex')
+  return crypto.createHash('sha256').update(content).digest('hex')
 }
 
 beforeEach(() => {

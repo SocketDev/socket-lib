@@ -7,19 +7,19 @@
 import type * as fastSortType from '../external/fast-sort'
 import type * as semverType from '../external/semver'
 
-let _fastSort: typeof fastSortType | undefined
-let _semver: typeof semverType | undefined
+let fastSort: typeof fastSortType | undefined
+let semver: typeof semverType | undefined
 
 export function getFastSort() {
-  if (_fastSort === undefined) {
-    _fastSort = /*@__PURE__*/ require('../external/fast-sort.js')
+  if (fastSort === undefined) {
+    fastSort = /*@__PURE__*/ require('../external/fast-sort.js')
   }
-  return _fastSort!
+  return fastSort!
 }
 
 export function getSemver() {
-  if (_semver === undefined) {
-    _semver = /*@__PURE__*/ require('../external/semver.js')
+  if (semver === undefined) {
+    semver = /*@__PURE__*/ require('../external/semver.js')
   }
-  return _semver!
+  return semver!
 }

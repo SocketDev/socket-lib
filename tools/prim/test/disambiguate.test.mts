@@ -13,7 +13,7 @@
  */
 
 import assert from 'node:assert/strict'
-import { createHash } from 'node:crypto'
+import crypto from 'node:crypto'
 import {
   existsSync,
   mkdirSync,
@@ -22,7 +22,7 @@ import {
   rmSync,
   writeFileSync,
 } from 'node:fs'
-import { tmpdir } from 'node:os'
+import os from 'node:os'
 import path from 'node:path'
 import { describe, test } from 'node:test'
 
@@ -36,7 +36,7 @@ if (range.test(version)) {
 `
 
 export function makeTempRoot() {
-  const dir = mkdtempSync(path.join(tmpdir(), 'prim-disambiguate-'))
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'prim-disambiguate-'))
   return dir
 }
 
@@ -125,7 +125,7 @@ describe('disambiguateReceiver', () => {
       // built cache entry that matches the key shape, then call again.
       // Instead: rely on the fact that cache key is sha256(method +
       // receiver + snippet); we can compute it inline.
-      const h = createHash('sha256')
+      const h = crypto.createHash('sha256')
       h.update('v1\n')
       h.update('test')
       h.update('\n')

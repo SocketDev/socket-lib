@@ -30,54 +30,6 @@ import { globalConsole } from './_internal'
 let consoleSymbols: symbol[] | undefined
 let kGroupIndentationWidthSymbol: symbol | undefined
 
-/**
- * Lazily get console symbols on first access.
- *
- * Deferred to avoid accessing global console during early Node.js bootstrap
- * before stdout is ready.
- */
-export function getConsoleSymbols(): symbol[] {
-  // Lazy-init second-call branch; module-singleton.
-  /* c8 ignore start */
-  if (consoleSymbols === undefined) {
-    consoleSymbols = ObjectGetOwnPropertySymbols(globalConsole)
-  }
-  /* c8 ignore stop */
-  return consoleSymbols
-}
-
-/**
- * Lazily get kGroupIndentationWidth symbol on first access.
- */
-export function getKGroupIndentationWidthSymbol(): symbol {
-  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
-  if (kGroupIndentationWidthSymbol === undefined) {
-    kGroupIndentationWidthSymbol =
-      getConsoleSymbols().find(
-        s =>
-          (s as { label?: string | undefined }).label === 'kGroupIndentWidth',
-      ) ?? Symbol('kGroupIndentWidth')
-  }
-  return kGroupIndentationWidthSymbol
-}
-
-/**
- * Symbol for incrementing the internal log call counter.
- *
- * This is an internal symbol used to track the number of times logging methods
- * have been called on a logger instance.
- */
-export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
-
-/**
- * Symbol for tracking whether the last logged line was blank.
- *
- * This is used internally to prevent multiple consecutive blank lines and to
- * determine whether to add spacing before certain messages.
- */
-export const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
-
-export function createLogSymbolsProxyPlaceholder(): void {}
 export function createLogSymbols(): Record<string, string> {
   const target: Record<string, string> = {
     __proto__: null,
@@ -120,8 +72,7 @@ export function createLogSymbols(): Record<string, string> {
   }
 
   const init = () => {
-    // Idempotent guard; init runs once.
-    /* c8 ignore start */
+    /* c8 ignore start - Idempotent guard; init runs once, second-call branch never re-enters. */
     if (initialized) {
       return
     }
@@ -138,8 +89,7 @@ export function createLogSymbols(): Record<string, string> {
   }
 
   const reset = () => {
-    // Defensive guard; reset only runs after init.
-    /* c8 ignore start */
+    /* c8 ignore start - Defensive guard; reset only runs after init, so the un-init branch is unreachable in tests. */
     if (!initialized) {
       return
     }
@@ -171,5 +121,53 @@ export function createLogSymbols(): Record<string, string> {
 
   return new ProxyCtor(target, handler)
 }
+
+export function createLogSymbolsProxyPlaceholder(): void {}
+
+/**
+ * Lazily get console symbols on first access.
+ *
+ * Deferred to avoid accessing global console during early Node.js bootstrap
+ * before stdout is ready.
+ */
+export function getConsoleSymbols(): symbol[] {
+  /* c8 ignore start - Lazy-init second-call branch; module-singleton, the re-init guard never re-enters in tests. */
+  if (consoleSymbols === undefined) {
+    consoleSymbols = ObjectGetOwnPropertySymbols(globalConsole)
+  }
+  /* c8 ignore stop */
+  return consoleSymbols
+}
+
+/**
+ * Lazily get kGroupIndentationWidth symbol on first access.
+ */
+export function getKGroupIndentationWidthSymbol(): symbol {
+  /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
+  if (kGroupIndentationWidthSymbol === undefined) {
+    kGroupIndentationWidthSymbol =
+      getConsoleSymbols().find(
+        s =>
+          (s as { label?: string | undefined }).label === 'kGroupIndentWidth',
+      ) ?? Symbol('kGroupIndentWidth')
+  }
+  return kGroupIndentationWidthSymbol
+}
+
+/**
+ * Symbol for incrementing the internal log call counter.
+ *
+ * This is an internal symbol used to track the number of times logging methods
+ * have been called on a logger instance.
+ */
+export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
+
+/**
+ * Symbol for tracking whether the last logged line was blank.
+ *
+ * This is used internally to prevent multiple consecutive blank lines and to
+ * determine whether to add spacing before certain messages.
+ */
+export const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
 
 export const LOG_SYMBOLS = /*@__PURE__*/ createLogSymbols()

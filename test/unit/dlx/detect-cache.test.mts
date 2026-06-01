@@ -3,10 +3,10 @@
  *   that aren't covered by the existing detect tests.
  */
 
+import crypto from 'node:crypto'
 import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { randomUUID } from 'node:crypto'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -14,18 +14,18 @@ import {
   detectLocalExecutableType,
   isJsFilePath,
 } from '../../../src/dlx/detect'
-import { safeDeleteSync } from '../../../src/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 
 describe.sequential('dlx/detect — cache + stale paths', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = path.join(os.tmpdir(), `socket-detect-cache-${randomUUID()}`)
+    testDir = path.join(os.tmpdir(), `socket-detect-cache-${crypto.randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
   })
 
-  afterEach(() => {
-    safeDeleteSync(testDir, { force: true })
+  afterEach(async () => {
+    await safeDelete(testDir, { force: true })
   })
 
   describe('detectLocalExecutableType', () => {

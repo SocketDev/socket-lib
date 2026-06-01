@@ -6,10 +6,12 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeModule from 'node:module'
 
-let _module: typeof NodeModule | undefined
+let cachedModule: typeof NodeModule | undefined
 
 export function getNodeModule(): typeof NodeModule {
-  return (_module ??= /*@__PURE__*/ require('node:module') as typeof NodeModule)
+  return (cachedModule ??= /*@__PURE__*/ require(
+    'node:module',
+  ) as typeof NodeModule)
 }
 
 /**
@@ -20,7 +22,7 @@ export function getNodeModule(): typeof NodeModule {
  * Single source of truth for "is this a Node builtin?" probes across socket-lib
  * (used by the smol-binding loaders to gate `require('node:smol-*')`).
  */
-let _isBuiltin: ((name: string) => boolean) | undefined
+let cachedIsBuiltin: ((name: string) => boolean) | undefined
 export function isNodeBuiltin(name: string): boolean {
-  return (_isBuiltin ??= getNodeModule().isBuiltin)(name)
+  return (cachedIsBuiltin ??= getNodeModule().isBuiltin)(name)
 }

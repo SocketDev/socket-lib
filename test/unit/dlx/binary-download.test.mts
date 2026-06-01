@@ -5,7 +5,7 @@
  *   making real network calls.
  */
 
-import { createHash } from 'node:crypto'
+import crypto from 'node:crypto'
 import { existsSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -16,25 +16,50 @@ import { downloadBinaryFile } from '../../../src/dlx/binary'
 import { safeDelete } from '../../../src/fs/safe'
 import { httpDownload } from '../../../src/http-request/download'
 
-vi.mock(import('../../../src/http-request/download'), async importOriginal => {
-  const original =
-    await importOriginal<typeof import('../../../src/http-request/download')>()
+import type * as DownloadModule from '../../../src/http-request/download'
+import type {
+  HttpDownloadOptions,
+  HttpDownloadResult,
+} from '../../../src/http-request/download-types'
+
+function mockDownloadResult(destPath: string): HttpDownloadResult {
   return {
-    ...original,
-    httpDownload: vi.fn(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      async (_url: string, destPath: string, _opts?: any) => {
-        // Default behavior: write a known payload.
-        writeFileSync(destPath, Buffer.from('default-payload'))
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return { ok: true, status: 200, path: destPath } as any
-      },
-    ),
+    headers: {},
+    ok: true,
+    path: destPath,
+    size: 0,
+    status: 200,
+    statusText: 'OK',
   }
-})
+}
+
+type DownloadModuleExports = typeof DownloadModule
+
+vi.mock(
+  import('../../../src/http-request/download'),
+  async (
+    importOriginal: <T>() => Promise<T>,
+  ): Promise<DownloadModuleExports> => {
+    const original = await importOriginal<DownloadModuleExports>()
+    return {
+      ...original,
+      httpDownload: vi.fn(
+        async (
+          _url: string,
+          destPath: string,
+          _opts?: HttpDownloadOptions | undefined,
+        ): Promise<HttpDownloadResult> => {
+          // Default behavior: write a known payload.
+          writeFileSync(destPath, Buffer.from('default-payload'))
+          return mockDownloadResult(destPath)
+        },
+      ),
+    }
+  },
+)
 
 export function sha512OfBuffer(buf: Buffer): string {
-  const h = createHash('sha512').update(buf).digest('base64')
+  const h = crypto.createHash('sha512').update(buf).digest('base64')
   return `sha512-${h}`
 }
 
@@ -78,8 +103,7 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     const payload = Buffer.from('expected-content')
     vi.mocked(httpDownload).mockImplementationOnce(async (_url, destPath) => {
       writeFileSync(destPath, payload)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return { ok: true, status: 200, path: destPath } as any
+      return mockDownloadResult(destPath)
     })
     const expectedIntegrity = sha512OfBuffer(payload)
     const destPath = path.join(testDir, 'verified')
@@ -95,8 +119,7 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     const payload = Buffer.from('actual-content')
     vi.mocked(httpDownload).mockImplementationOnce(async (_url, destPath) => {
       writeFileSync(destPath, payload)
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return { ok: true, status: 200, path: destPath } as any
+      return mockDownloadResult(destPath)
     })
     const wrongIntegrity = sha512OfBuffer(Buffer.from('different-content'))
     const destPath = path.join(testDir, 'mismatch')
@@ -131,7 +154,7 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
 
   it('verifies sha256 on cached file and accepts a matching hash', async () => {
     const payload = Buffer.from('cached-payload')
-    const sha256 = createHash('sha256').update(payload).digest('hex')
+    const sha256 = crypto.createHash('sha256').update(payload).digest('hex')
     const destPath = path.join(testDir, 'cached-ok')
     writeFileSync(destPath, payload)
     const result = await downloadBinaryFile(

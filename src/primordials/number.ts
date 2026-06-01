@@ -9,7 +9,7 @@ import { getSmolPrimordial } from '../smol/primordial'
 
 import { uncurryThis } from './uncurry'
 
-const _smolPrimordial = getSmolPrimordial()
+const smolPrimordial = getSmolPrimordial()
 
 export const NumberCtor: NumberConstructor = Number
 
@@ -26,12 +26,12 @@ export const NumberPOSITIVE_INFINITY = Number.POSITIVE_INFINITY
 // Predicates prefer the smol fast-path; static parse* keep the stock
 // builtins (their fast paths require Local<String> handling, deferred
 // to a future binding extension).
-export const NumberIsFinite = _smolPrimordial?.numberIsFinite ?? Number.isFinite
+export const NumberIsFinite = smolPrimordial?.numberIsFinite ?? Number.isFinite
 export const NumberIsInteger =
-  _smolPrimordial?.numberIsInteger ?? Number.isInteger
-export const NumberIsNaN = _smolPrimordial?.numberIsNaN ?? Number.isNaN
+  smolPrimordial?.numberIsInteger ?? Number.isInteger
+export const NumberIsNaN = smolPrimordial?.numberIsNaN ?? Number.isNaN
 export const NumberIsSafeInteger =
-  _smolPrimordial?.numberIsSafeInteger ?? Number.isSafeInteger
+  smolPrimordial?.numberIsSafeInteger ?? Number.isSafeInteger
 // `numberParseFloat` and `numberParseInt10` are FastOneByteString-typed
 // bindings — V8 only invokes the C++ fast path when the input string
 // is sequential one-byte (ASCII). Two-byte strings, BigInt-as-string,
@@ -42,15 +42,15 @@ export const NumberIsSafeInteger =
 // to stock Number.parseInt — only radix 10 (or omitted) hits the
 // Fast API path.
 export const NumberParseFloat =
-  _smolPrimordial?.numberParseFloat ?? Number.parseFloat
-const _smolParseInt10 = _smolPrimordial?.numberParseInt10
-// _smolParseInt10 fast-path fires only on socket-btm's smol Node binary;
+  smolPrimordial?.numberParseFloat ?? Number.parseFloat
+const smolParseInt10 = smolPrimordial?.numberParseInt10
+// smolParseInt10 fast-path fires only on socket-btm's smol Node binary;
 // stock Node falls through to Number.parseInt.
-/* c8 ignore start */
-export const NumberParseInt: typeof Number.parseInt = _smolParseInt10
+/* c8 ignore start - smol fast-path branch only reachable on socket-btm smol Node binary */
+export const NumberParseInt: typeof Number.parseInt = smolParseInt10
   ? (s, radix) =>
       radix === undefined || radix === 10
-        ? _smolParseInt10(s as string)
+        ? smolParseInt10(s as string)
         : Number.parseInt(s, radix)
   : Number.parseInt
 /* c8 ignore stop */

@@ -83,21 +83,21 @@ export interface SmolPurlBinding {
   equals(a: string, b: string): boolean
 }
 
-let _smolPurl: SmolPurlBinding | undefined
-let _smolPurlProbed = false
+let smolPurl: SmolPurlBinding | undefined
+let smolPurlProbed = false
 
 /**
  * Returns `node:smol-purl` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  */
 export function getSmolPurl(): SmolPurlBinding | undefined {
-  if (!_smolPurlProbed) {
-    _smolPurlProbed = true
+  if (!smolPurlProbed) {
+    smolPurlProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-purl')) {
-      _smolPurl = require('node:smol-purl') as SmolPurlBinding
+      smolPurl = require('node:smol-purl') as SmolPurlBinding
     }
     /* c8 ignore stop */
   }
-  return _smolPurl
+  return smolPurl
 }

@@ -101,7 +101,11 @@ describe('warnings/suppress', () => {
       // Assert the symbol is present before asserting its value — otherwise
       // a Node upgrade that renames the symbol would silently pass this test.
       expect(kMaxEventTargetListeners).toBeDefined()
-      expect((signal as any)[kMaxEventTargetListeners!]).toBe(20)
+      expect(
+        (signal as unknown as Record<symbol, number>)[
+          kMaxEventTargetListeners!
+        ],
+      ).toBe(20)
     })
 
     it('should use default value of 10', () => {
@@ -116,7 +120,11 @@ describe('warnings/suppress', () => {
       )
 
       expect(kMaxEventTargetListeners).toBeDefined()
-      expect((signal as any)[kMaxEventTargetListeners!]).toBe(10)
+      expect(
+        (signal as unknown as Record<symbol, number>)[
+          kMaxEventTargetListeners!
+        ],
+      ).toBe(10)
     })
 
     it('should handle EventTarget without the symbol', () => {

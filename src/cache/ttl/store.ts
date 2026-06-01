@@ -400,14 +400,14 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     return (removed ?? 0) as number
   }
 
-  async function clear(options?: ClearOptions | undefined): Promise<void> {
-    const opts = { __proto__: null, ...options } as ClearOptions
+  async function clear(clearOptions?: ClearOptions | undefined): Promise<void> {
+    const clearOpts = { __proto__: null, ...clearOptions } as ClearOptions
 
     // Clear in-memory cache.
     memoCache.clear()
 
     // If memoOnly, stop here.
-    if (opts.memoOnly) {
+    if (clearOpts.memoOnly) {
       return
     }
 

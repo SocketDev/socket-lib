@@ -131,9 +131,6 @@ export async function extractZip(
 
     zip.extractAllTo(normalizedOutputDir, true)
   } else {
-    const path = getPath()
-    const entries = zip.getEntries()
-
     const dirsToCreate = new SetCtor<string>()
     for (const entry of entries) {
       if (entry.isDirectory) {

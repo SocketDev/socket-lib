@@ -11,11 +11,36 @@ import process from 'node:process'
 
 import { toRgb } from '../colors/convert'
 
+import type { ColorInherit, ColorValue } from '../colors/types'
+import type { Palette, RGB } from '../effects/shimmer'
 import type {
   WithSpinnerOptions,
   WithSpinnerRestoreOptions,
   WithSpinnerSyncOptions,
 } from './types'
+
+/**
+ * Narrow a saved shimmer color (`'inherit' | ColorName | ColorRgb | Palette`)
+ * down to the `RGB | Palette | undefined` shape `ShimmerConfig.color` accepts.
+ * `'inherit'` becomes `undefined` so `setShimmer` falls back to its inherit
+ * default; named colors resolve to an RGB tuple; tuples and palettes pass
+ * through unchanged.
+ */
+export function toShimmerColor(
+  color: ColorInherit | ColorValue | Palette,
+): RGB | Palette | undefined {
+  if (color === 'inherit') {
+    return undefined
+  }
+  if (typeof color === 'string') {
+    return toRgb(color)
+  }
+  // An RGB tuple has numeric channels; a palette is an array of tuples.
+  if (typeof color[0] === 'number') {
+    return color as RGB
+  }
+  return color as Palette
+}
 
 /**
  * Execute an async operation with spinner lifecycle management. Ensures
@@ -113,7 +138,7 @@ export async function withSpinner<T>(
     if (withOptions?.shimmer !== undefined) {
       if (savedShimmerState) {
         spinner.setShimmer({
-          color: savedShimmerState.color as any,
+          color: toShimmerColor(savedShimmerState.color),
           dir: savedShimmerState.direction,
           speed: savedShimmerState.speed,
         })
@@ -254,7 +279,7 @@ export function withSpinnerSync<T>(options: WithSpinnerSyncOptions<T>): T {
     if (withOptions?.shimmer !== undefined) {
       if (savedShimmerState) {
         spinner.setShimmer({
-          color: savedShimmerState.color as any,
+          color: toShimmerColor(savedShimmerState.color),
           dir: savedShimmerState.direction,
           speed: savedShimmerState.speed,
         })

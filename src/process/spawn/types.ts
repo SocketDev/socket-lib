@@ -207,7 +207,6 @@ export interface SpawnSyncReturns<T> {
   error?: Error | undefined
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 // Duplicated from Node.js child_process.SpawnOptions
 // These are the options passed to child_process.spawn()
 export interface NodeSpawnOptions {
@@ -227,7 +226,6 @@ export interface NodeSpawnOptions {
   killSignal?: NodeJS.Signals | number | undefined
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 // Duplicated from Node.js child_process.SpawnSyncOptions. Mirrors
 // Node's split: the sync API adds `input`, `maxBuffer`, and `encoding`
 // on top of the common spawn options. Async spawn doesn't accept these

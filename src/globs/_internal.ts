@@ -23,8 +23,8 @@ export const MATCHER_CACHE_MAX_SIZE = 100
 // keeping the cache in recency order.
 export const matcherCache = new MapCtor<string, (path: string) => boolean>()
 
-let _fastGlob: typeof fastGlobType | undefined
-let _picomatch: typeof picomatchType | undefined
+let cachedFastGlob: typeof fastGlobType | undefined
+let cachedPicomatch: typeof picomatchType | undefined
 
 // Re-export canonical node:fs / node:fs/promises loaders under the
 // globs/ legacy names. New code should import getNodeFs /
@@ -33,17 +33,17 @@ export { getNodeFs as getFs } from '../node/fs'
 export { getNodeFsPromises as getFsPromises } from '../node/fs-promises'
 
 export function getFastGlob() {
-  if (_fastGlob === undefined) {
-    _fastGlob = /*@__PURE__*/ require('../external/fast-glob.js')
+  if (cachedFastGlob === undefined) {
+    cachedFastGlob = /*@__PURE__*/ require('../external/fast-glob.js')
   }
-  return _fastGlob!
+  return cachedFastGlob!
 }
 
 export function getPicomatch() {
-  if (_picomatch === undefined) {
-    _picomatch = /*@__PURE__*/ require('../external/picomatch.js')
+  if (cachedPicomatch === undefined) {
+    cachedPicomatch = /*@__PURE__*/ require('../external/picomatch.js')
   }
-  return _picomatch!
+  return cachedPicomatch!
 }
 
 /**

@@ -6,10 +6,10 @@
  *   file covers the actual exports.
  */
 
+import crypto from 'node:crypto'
 import { mkdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { randomUUID } from 'node:crypto'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -21,18 +21,18 @@ import {
   parsePackageSpec,
   resolveBinaryPath,
 } from '../../../src/dlx/package'
-import { safeDeleteSync } from '../../../src/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 
 describe.sequential('dlx/package — pure functions', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = path.join(os.tmpdir(), `socket-lib-dlx-pure-${randomUUID()}`)
+    testDir = path.join(os.tmpdir(), `socket-lib-dlx-pure-${crypto.randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
   })
 
-  afterEach(() => {
-    safeDeleteSync(testDir, { force: true })
+  afterEach(async () => {
+    await safeDelete(testDir, { force: true })
   })
 
   describe('parsePackageSpec', () => {

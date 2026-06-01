@@ -24,7 +24,7 @@
  *      https://github.com/CycloneDX/cdxgen/blob/v11.11.0/lib/parsers/js.js
  *      (parsePnpmLock)
  *   4. **pnpm lockfile spec** + reference implementation:
- *      https://github.com/pnpm/spec/blob/master/lockfile/9.0.md
+ *      https://github.com/pnpm/spec/blob/834f2815cc61917fa133e10869a2d4e9391c36bf/lockfile/9.0.md
  *      https://github.com/pnpm/pnpm/blob/main/packages/lockfile-file/ Bug fixes
  *      implemented here (and in the native parser):
  *
@@ -380,10 +380,10 @@ export function stripPeerSuffix(version: string): string {
     : noUnderscore
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
-export const parsePnpmLock: (content: string) => ParsedLockfile = _smol
+export const parsePnpmLock: (content: string) => ParsedLockfile = smol
   ? /* c8 ignore next 2 - smol Node binary only. */
     (content: string) =>
-      _smol.parseLockfile(content, 'npm', 'pnpm') as ParsedLockfile
+      smol.parseLockfile(content, 'npm', 'pnpm') as ParsedLockfile
   : jsParsePnpmLock

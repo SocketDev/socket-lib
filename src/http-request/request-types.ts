@@ -9,7 +9,7 @@
  *   - `HttpRequestOptions` — the main request configuration interface
  */
 
-import type { IncomingMessage } from 'node:http'
+import type { IncomingHttpHeaders, IncomingMessage } from 'node:http'
 import type { Readable } from 'node:stream'
 
 /**
@@ -40,7 +40,7 @@ export interface HttpHookRequestInfo {
 export interface HttpHookResponseInfo {
   duration: number
   error?: Error | undefined
-  headers?: import('node:http').IncomingHttpHeaders | undefined
+  headers?: IncomingHttpHeaders | undefined
   method: string
   status?: number | undefined
   statusText?: string | undefined

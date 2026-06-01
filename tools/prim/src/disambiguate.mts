@@ -46,7 +46,7 @@
  *      'static', reason: 'ai-defer-not-enabled' }`. No silent API calls.
  */
 
-import { createHash } from 'node:crypto'
+import crypto from 'node:crypto'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
@@ -222,7 +222,7 @@ export function cachePath(targetRoot) {
  * unrelated edit elsewhere in the file doesn't invalidate the cache.
  */
 export function computeKey(methodName, receiverName, snippet) {
-  const hash = createHash('sha256')
+  const hash = crypto.createHash('sha256')
   hash.update('v1\n')
   hash.update(methodName)
   hash.update('\n')
@@ -241,7 +241,7 @@ export function computeKey(methodName, receiverName, snippet) {
  * @param {number} opts.line 1-based.
  * @param {number} opts.column 1-based.
  * @param {string} opts.snippet ~10 lines of surrounding source.
- * @param {boolean} [opts.aiEnabled=false] Master switch. False = static-only.
+ * @param {boolean} [opts.aiEnabled=false] Primary switch. False = static-only.
  *
  * @returns {Promise<{
  *   type: string | undefined

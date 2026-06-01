@@ -9,7 +9,7 @@
 import { mkdirSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { randomUUID } from 'node:crypto'
+import crypto from 'node:crypto'
 
 import { resetEnv, setEnv } from '../../../src/env/rewire'
 import { invalidateCaches } from '../../../src/paths/rewire'
@@ -22,9 +22,11 @@ import {
 
 import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
 
+import type * as FsSafeModule from '../../../src/fs/safe'
+
 // Mock the fs helpers at the resolved path the SUT imports.
 vi.mock(import('../../../src/fs/safe'), async importOriginal => {
-  const original = await importOriginal<typeof import('../../../src/fs/safe')>()
+  const original = await importOriginal<typeof FsSafeModule>()
   return {
     ...original,
     safeDelete: vi.fn(original.safeDelete),
@@ -45,7 +47,7 @@ describe.sequential('dlx/packages — error branches', () => {
     invalidateCaches()
     testDlxDir = path.join(
       os.tmpdir(),
-      `socket-dlx-err-${randomUUID()}`,
+      `socket-dlx-err-${crypto.randomUUID()}`,
       '_dlx',
     )
     mkdirSync(testDlxDir, { recursive: true })

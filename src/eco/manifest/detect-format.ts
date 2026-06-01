@@ -72,7 +72,7 @@ const LOCKFILE_NAMES = ObjectFreeze([
   'composer.lock',
 ])
 
-const _jsSupportedFiles: SupportedFiles = ObjectFreeze({
+const jsSupportedFiles: SupportedFiles = ObjectFreeze({
   __proto__: null,
   manifests: MANIFEST_NAMES,
   lockfiles: LOCKFILE_NAMES,
@@ -105,10 +105,10 @@ export function jsDetectFormat(filename: string): FormatDescriptor | undefined {
   }
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
 export const detectFormat: (filename: string) => FormatDescriptor | undefined =
-  _smol?.detectFormat ?? jsDetectFormat
+  smol?.detectFormat ?? jsDetectFormat
 
 export const supportedFiles: SupportedFiles =
-  _smol?.supportedFiles ?? _jsSupportedFiles
+  smol?.supportedFiles ?? jsSupportedFiles
