@@ -111,25 +111,25 @@ export function runAsync(
   stderr: string
 }> {
   return new PromiseCtor(resolve => {
-    const child = spawn(SECURITY_BIN, args as string[], {
+    const { process: cp } = spawn(SECURITY_BIN, args as string[], {
       stdio: opts.stdio ?? ['ignore', 'pipe', 'pipe'],
     })
     let stdout = ''
     let stderr = ''
-    if (child.stdout) {
-      child.stdout.setEncoding('utf8')
-      child.stdout.on('data', chunk => {
+    if (cp.stdout) {
+      cp.stdout.setEncoding('utf8')
+      cp.stdout.on('data', chunk => {
         stdout += chunk
       })
     }
-    if (child.stderr) {
-      child.stderr.setEncoding('utf8')
-      child.stderr.on('data', chunk => {
+    if (cp.stderr) {
+      cp.stderr.setEncoding('utf8')
+      cp.stderr.on('data', chunk => {
         stderr += chunk
       })
     }
-    child.on('error', () => resolve({ status: -1, stdout, stderr }))
-    child.on('close', status => resolve({ status, stdout, stderr }))
+    cp.on('error', () => resolve({ status: -1, stdout, stderr }))
+    cp.on('close', status => resolve({ status, stdout, stderr }))
   })
 }
 

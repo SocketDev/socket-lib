@@ -8,11 +8,15 @@ import { DateNow } from '../primordials/date'
 
 import { ErrorCtor } from '../primordials/error'
 
+import { HeadersPrototypeForEach } from '../primordials/headers'
+
 import { JSONParse } from '../primordials/json'
 
 import { MathPow } from '../primordials/math'
 
 import { PromiseCtor } from '../primordials/promise'
+
+import { StringPrototypeToLowerCase } from '../primordials/string'
 
 /**
  * @file Browser-safe HTTP request layer — mirrors the public surface of
@@ -314,10 +318,9 @@ export interface BrowserHttpResponse {
 
 export function headersToRecord(headers: Headers): Record<string, string> {
   const out: Record<string, string> = {}
-  for (let key = 0, { length } = headers; key < length; key += 1) {
-    const value = headers[key]!
-    out[key.toLowerCase()] = value
-  }
+  HeadersPrototypeForEach(headers, (value: string, key: string) => {
+    out[StringPrototypeToLowerCase(key)] = value
+  })
   return out
 }
 

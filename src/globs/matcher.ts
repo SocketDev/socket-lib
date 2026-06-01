@@ -12,8 +12,8 @@ import { StringPrototypeStartsWith } from '../primordials/string'
 
 import { MATCHER_CACHE_MAX_SIZE, getPicomatch, matcherCache } from './_internal'
 
+import type { PicomatchOptions } from '../external/picomatch'
 import type NodePath from 'node:path'
-
 import type { Pattern } from './types'
 
 // `path.matchesGlob` was added in Node v22.5.0 / v20.17.0 (Stable).
@@ -129,7 +129,10 @@ export function getGlobMatcher(
       .filter(p => StringPrototypeStartsWith(p, '!'))
       .map(p => p.slice(1))
 
-    // Use ignore option for negation patterns.
+    // Use ignore option for negation patterns. Cast at the picomatch
+    // boundary: the caller's option props carry `| undefined`, which
+    // PicomatchOptions rejects under exactOptionalPropertyTypes even
+    // though the runtime values are valid.
     const matchOptions = {
       dot: true,
       nocase: true,
@@ -138,11 +141,11 @@ export function getGlobMatcher(
     }
 
     // External picomatch call
-    /* c8 ignore start */
+    /* c8 ignore start - external picomatch lib, exercised via integration */
     const picomatch = getPicomatch()
     matcher = picomatch(
       positivePatterns.length > 0 ? positivePatterns : patterns,
-      matchOptions,
+      matchOptions as PicomatchOptions,
     ) as (path: string) => boolean
     /* c8 ignore stop */
   }
