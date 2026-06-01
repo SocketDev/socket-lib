@@ -114,7 +114,7 @@ const vitestConfig = defineConfig({
     // pin --max-old-space-size here because Node's worker_threads
     // reject it in execArgv (ERR_WORKER_INVALID_EXEC_ARGV); tests
     // that need an explicit heap cap or per-file isolation live under
-    // test/isolated/ and run through vitest.config.isolated.mts
+    // test/isolated/ and run through .config/repo/vitest.config.isolated.mts
     // (forks pool, per-file heap cap, isolate: true). Note also that
     // vitest 4 silently ignores `poolOptions.X.execArgv` — even if
     // threads accepted heap flags, that key wouldn't reach the worker.

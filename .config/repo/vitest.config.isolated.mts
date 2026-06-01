@@ -8,10 +8,10 @@ import { fileURLToPath } from 'node:url'
 import process from 'node:process'
 import { defineConfig } from 'vitest/config'
 
-import { baseCoverageConfig } from './vitest.coverage.config.mts'
+import { baseCoverageConfig } from '../vitest.coverage.config.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const projectRoot = path.resolve(__dirname, '..')
+const projectRoot = path.resolve(__dirname, '..', '..')
 
 // Worker heap cap: smaller in CI (GitHub Actions ubuntu-latest has
 // ~7 GB total RAM — leave room for the runner + OS), generous locally
@@ -43,7 +43,7 @@ const vitestConfigIsolated = defineConfig({
   },
   test: {
     deps: { interopDefault: false },
-    globalSetup: [path.resolve(__dirname, 'vitest-global-setup.mts')],
+    globalSetup: [path.resolve(__dirname, '..', 'vitest-global-setup.mts')],
     globals: false,
     environment: 'node',
     include: [
