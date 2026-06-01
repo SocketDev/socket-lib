@@ -1,7 +1,13 @@
 {
   "$schema": "https://raw.githubusercontent.com/oxc-project/oxc/main/npm/oxlint/configuration_schema.json",
-  "plugins": ["typescript", "unicorn", "import"],
-  "jsPlugins": ["./oxlint-plugin/index.mts"],
+  "plugins": [
+    "typescript",
+    "unicorn",
+    "import"
+  ],
+  "jsPlugins": [
+    "./oxlint-plugin/index.mts"
+  ],
   "categories": {
     "correctness": "error",
     "suspicious": "error"
@@ -20,7 +26,10 @@
     "socket/prefer-undefined-over-null": "error",
     "socket/sort-set-args": "error",
     "socket/sort-source-methods": "error",
-    "eslint/curly": ["error", "all"],
+    "eslint/curly": [
+      "error",
+      "all"
+    ],
     "eslint/no-await-in-loop": "off",
     "eslint/no-console": "off",
     "eslint/no-control-regex": "off",
@@ -79,7 +88,9 @@
   },
   "overrides": [
     {
-      "files": ["**/src/logger/**"],
+      "files": [
+        "**/src/logger/**"
+      ],
       "rules": {
         "socket/no-console-prefer-logger": "off",
         "socket/no-inline-logger": "off"
@@ -107,7 +118,12 @@
       }
     },
     {
-      "files": ["**/*.ts", "**/*.tsx", "**/*.mts", "**/*.cts"],
+      "files": [
+        "**/*.ts",
+        "**/*.tsx",
+        "**/*.mts",
+        "**/*.cts"
+      ],
       "rules": {
         "eslint/no-unused-vars": "off"
       }
@@ -162,8 +178,10 @@
     "**/scripts/ai-lint-fix.mts",
     "**/scripts/ai-lint-fix/cli.mts",
     "**/scripts/ai-lint-fix/rule-guidance.mts",
+    "**/scripts/audit-skill-usage.mts",
     "**/scripts/audit-transcript.mts",
     "**/scripts/check-claude-md-informativeness.mts",
+    "**/scripts/check-claude-segmentation.mts",
     "**/scripts/check-fleet-soak-exclude-parity.mts",
     "**/scripts/check-lock-step-header.mts",
     "**/scripts/check-lock-step-refs.mts",
