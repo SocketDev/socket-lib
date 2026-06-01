@@ -19,7 +19,7 @@
  *   recycled, and there's no stale-port surprise.
  */
 
-import { createHash } from 'node:crypto'
+import crypto from 'node:crypto'
 import http from 'node:http'
 
 import { afterAll, beforeAll } from 'vitest'
@@ -159,13 +159,13 @@ export function setupHttpFixture(): void {
           res.end(content)
         } else if (url === '/checksums.txt') {
           const content = 'Test content for checksum verification'
-          const hash = createHash('sha256').update(content).digest('hex')
+          const hash = crypto.createHash('sha256').update(content).digest('hex')
           const checksums = `${hash}  checksum-file\nabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890  other-file\n`
           res.writeHead(200, { 'Content-Type': 'text/plain' })
           res.end(checksums)
         } else if (url === '/checksums-single-space.txt') {
           const content = 'Test content for checksum verification'
-          const hash = createHash('sha256').update(content).digest('hex')
+          const hash = crypto.createHash('sha256').update(content).digest('hex')
           const checksums = `${hash} checksum-file\n`
           res.writeHead(200, { 'Content-Type': 'text/plain' })
           res.end(checksums)
