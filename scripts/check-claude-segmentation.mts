@@ -32,6 +32,7 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const logger = getDefaultLogger()
 
@@ -60,7 +61,7 @@ interface DanglingEntry {
   // Resolution: 'dup-of-fleet' | 'rehome-to-fleet' | 'move-to-repo'.
   action: 'dup-of-fleet' | 'rehome-to-fleet' | 'move-to-repo'
   // Absolute destination (when action is rehome / move).
-  dest?: string
+  dest?: string | undefined
 }
 
 /**
@@ -91,7 +92,8 @@ export function getFleetSet(kind: string): Set<string> {
       'fleet',
     ),
   ]
-  for (const dir of candidates) {
+  for (let i = 0, { length } = candidates; i < length; i += 1) {
+    const dir = candidates[i]!
     if (existsSync(dir)) {
       const entries = readdirSync(dir).filter(n => !n.startsWith('_'))
       return new Set(entries.map(n => n.replace(/\.md$/, '')))
@@ -212,7 +214,7 @@ export function findDanglingEntries(repoRoot: string): DanglingEntry[] {
 async function applyFix(entries: readonly DanglingEntry[]): Promise<void> {
   for (const e of entries) {
     if (e.action === 'dup-of-fleet') {
-      await fs.rm(e.src, { recursive: true, force: true })
+      await safeDelete(e.src)
       logger.log(`  rm ${path.relative(REPO_ROOT, e.src)}`)
       continue
     }

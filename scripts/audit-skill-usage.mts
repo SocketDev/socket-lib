@@ -15,7 +15,7 @@
  *   - 1 — log directory missing / nothing to aggregate
  */
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -197,7 +197,9 @@ function main(): void {
 
   const filtered = withinDays(allEntries, days ?? 0)
   const stats = aggregate(filtered)
-  const sorted = Array.from(stats.values()).sort((a, b) => b.count - a.count)
+  const sorted = Array.from(stats.values()).toSorted(
+    (a, b) => b.count - a.count,
+  )
 
   process.stdout.write(`skill\tinvocations\tlast-seen\tunique-cwds\n`)
   for (let i = 0, { length } = sorted; i < length; i += 1) {
