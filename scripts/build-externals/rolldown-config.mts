@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 
 import type { Plugin, RolldownOptions } from 'rolldown'
 
-import { defineGuardedPlugin } from '../../.config/rolldown/define-guarded.mts'
+import { defineGuardedPlugin } from '../../.config/repo/rolldown/define-guarded.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const stubsDir = path.join(__dirname, 'stubs')
