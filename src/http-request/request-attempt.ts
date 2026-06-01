@@ -304,39 +304,39 @@ export async function httpRequestAttempt(
           void decodeBody(rawBody, res.headers['content-encoding'])
             .catch(() => rawBody)
             .then(responseBody => {
-          const ok =
-            res.statusCode !== undefined &&
-            res.statusCode >= 200 &&
-            res.statusCode < 300
+              const ok =
+                res.statusCode !== undefined &&
+                res.statusCode >= 200 &&
+                res.statusCode < 300
 
-          const response: HttpResponse = {
-            arrayBuffer(): ArrayBuffer {
-              return responseBody.buffer.slice(
-                responseBody.byteOffset,
-                responseBody.byteOffset + responseBody.byteLength,
-              ) as ArrayBuffer
-            },
-            body: responseBody,
-            headers: res.headers,
-            json<T = unknown>(): T {
-              return JSONParse(responseBody.toString('utf8')) as T
-            },
-            ok,
-            rawResponse: res,
-            status: res.statusCode || 0,
-            statusText: res.statusMessage || '',
-            text(): string {
-              return responseBody.toString('utf8')
-            },
-          }
+              const response: HttpResponse = {
+                arrayBuffer(): ArrayBuffer {
+                  return responseBody.buffer.slice(
+                    responseBody.byteOffset,
+                    responseBody.byteOffset + responseBody.byteLength,
+                  ) as ArrayBuffer
+                },
+                body: responseBody,
+                headers: res.headers,
+                json<T = unknown>(): T {
+                  return JSONParse(responseBody.toString('utf8')) as T
+                },
+                ok,
+                rawResponse: res,
+                status: res.statusCode || 0,
+                statusText: res.statusMessage || '',
+                text(): string {
+                  return responseBody.toString('utf8')
+                },
+              }
 
-          emitResponse({
-            headers: res.headers,
-            status: res.statusCode,
-            statusText: res.statusMessage,
-          })
+              emitResponse({
+                headers: res.headers,
+                status: res.statusCode,
+                statusText: res.statusMessage,
+              })
 
-          resolveOnce(response)
+              resolveOnce(response)
             })
         })
 
