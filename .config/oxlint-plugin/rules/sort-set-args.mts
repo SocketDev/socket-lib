@@ -9,6 +9,8 @@
  *   behavior).
  */
 
+import { stringComparator } from '../lib/comparators.mts'
+
 import type { AstNode, RuleContext, RuleFixer } from '../lib/rule-types.mts'
 
 const SET_NAMES = new Set(['SafeSet', 'Set'])
@@ -22,15 +24,7 @@ function isSortableElement(node: AstNode) {
 }
 
 function compareSortable(a: AstNode, b: AstNode): number {
-  const aVal = String(a.value)
-  const bVal = String(b.value)
-  if (aVal < bVal) {
-    return -1
-  }
-  if (aVal > bVal) {
-    return 1
-  }
-  return 0
+  return stringComparator(String(a.value), String(b.value))
 }
 
 /**

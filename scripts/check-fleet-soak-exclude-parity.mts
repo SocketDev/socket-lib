@@ -23,6 +23,9 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+
+const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const REPO_ROOT = path.join(__dirname, '..')
@@ -123,7 +126,7 @@ async function main(): Promise<void> {
   try {
     content = readFileSync(WORKSPACE_YAML, 'utf8')
   } catch (e) {
-    console.error(`[check-fleet-soak-exclude-parity] cannot read: ${e}`)
+    logger.fail(`[check-fleet-soak-exclude-parity] cannot read: ${e}`)
     process.exitCode = 1
     return
   }
@@ -140,7 +143,7 @@ async function main(): Promise<void> {
   if (missing.length === 0) {
     return
   }
-  console.error(
+  logger.fail(
     [
       '[check-fleet-soak-exclude-parity] Drift detected.',
       '',
@@ -164,7 +167,7 @@ async function main(): Promise<void> {
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   main().catch((e: unknown) => {
-    console.error(`[check-fleet-soak-exclude-parity] error: ${e}`)
+    logger.fail(`[check-fleet-soak-exclude-parity] error: ${e}`)
     process.exitCode = 1
   })
 }
