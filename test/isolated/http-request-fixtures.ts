@@ -21,6 +21,7 @@
 
 import crypto from 'node:crypto'
 import http from 'node:http'
+import { brotliCompressSync, gzipSync } from 'node:zlib'
 
 import { afterAll, beforeAll } from 'vitest'
 
@@ -66,6 +67,23 @@ export function setupHttpFixture(): void {
         } else if (url === '/text') {
           res.writeHead(200, { 'Content-Type': 'text/plain' })
           res.end('Plain text response')
+        } else if (url === '/gzip') {
+          // gzip-encoded JSON body — httpRequest advertises
+          // Accept-Encoding: gzip and must transparently decode so
+          // .json()/.text() see the inflated payload, not raw deflated bytes.
+          res.writeHead(200, {
+            'Content-Encoding': 'gzip',
+            'Content-Type': 'application/json',
+          })
+          res.end(gzipSync(JSON.stringify({ encoded: 'gzip', ok: true })))
+        } else if (url === '/brotli') {
+          res.writeHead(200, {
+            'Content-Encoding': 'br',
+            'Content-Type': 'application/json',
+          })
+          res.end(
+            brotliCompressSync(JSON.stringify({ encoded: 'br', ok: true })),
+          )
         } else if (url === '/redirect') {
           res.writeHead(302, { Location: '/text' })
           res.end()
