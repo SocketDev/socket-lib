@@ -204,25 +204,29 @@ export function runPsAsync(
   stderr: string
 }> {
   return new PromiseCtor(resolve => {
-    const child = spawn(POWERSHELL_BIN, ['-NoProfile', '-Command', script], {
-      stdio: ['pipe', 'pipe', 'pipe'],
-    })
+    const { process: cp } = spawn(
+      POWERSHELL_BIN,
+      ['-NoProfile', '-Command', script],
+      {
+        stdio: ['pipe', 'pipe', 'pipe'],
+      },
+    )
     let stdout = ''
     let stderr = ''
-    child.stdout.setEncoding('utf8')
-    child.stdout.on('data', chunk => {
+    cp.stdout!.setEncoding('utf8')
+    cp.stdout!.on('data', chunk => {
       stdout += chunk
     })
-    child.stderr.setEncoding('utf8')
-    child.stderr.on('data', chunk => {
+    cp.stderr!.setEncoding('utf8')
+    cp.stderr!.on('data', chunk => {
       stderr += chunk
     })
-    child.on('error', () => resolve({ status: -1, stdout, stderr }))
-    child.on('close', status => resolve({ status, stdout, stderr }))
+    cp.on('error', () => resolve({ status: -1, stdout, stderr }))
+    cp.on('close', status => resolve({ status, stdout, stderr }))
     if (input !== undefined) {
-      child.stdin.end(input)
+      cp.stdin!.end(input)
     } else {
-      child.stdin.end()
+      cp.stdin!.end()
     }
   })
 }

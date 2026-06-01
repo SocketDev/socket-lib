@@ -28,13 +28,13 @@ export async function deleteLinux(
   account: string,
 ): Promise<'removed' | 'absent'> {
   return new PromiseCtor(resolve => {
-    const child = spawn(
+    const { process: cp } = spawn(
       SECRET_TOOL_BIN,
       ['clear', 'service', service, 'user', account],
       { stdio: 'ignore' },
     )
-    child.on('error', () => resolve('absent'))
-    child.on('close', status => resolve(status === 0 ? 'removed' : 'absent'))
+    cp.on('error', () => resolve('absent'))
+    cp.on('close', status => resolve(status === 0 ? 'removed' : 'absent'))
   })
 }
 
@@ -60,18 +60,18 @@ export async function readLinux(
   account: string,
 ): Promise<string | undefined> {
   return new PromiseCtor(resolve => {
-    const child = spawn(
+    const { process: cp } = spawn(
       SECRET_TOOL_BIN,
       ['lookup', 'service', service, 'user', account],
       { stdio: ['ignore', 'pipe', 'pipe'] },
     )
     let stdout = ''
-    child.stdout.setEncoding('utf8')
-    child.stdout.on('data', chunk => {
+    cp.stdout!.setEncoding('utf8')
+    cp.stdout!.on('data', chunk => {
       stdout += chunk
     })
-    child.on('error', () => resolve(undefined))
-    child.on('close', status => {
+    cp.on('error', () => resolve(undefined))
+    cp.on('close', status => {
       if (status !== 0) {
         resolve(undefined)
         return
@@ -105,17 +105,17 @@ export async function writeLinux(
   label: string,
 ): Promise<void> {
   return new PromiseCtor((resolve, reject) => {
-    const child = spawn(
+    const { process: cp } = spawn(
       SECRET_TOOL_BIN,
       ['store', `--label=${label}`, 'service', service, 'user', account],
       { stdio: ['pipe', 'pipe', 'pipe'] },
     )
     let stderr = ''
-    child.stderr.setEncoding('utf8')
-    child.stderr.on('data', chunk => {
+    cp.stderr!.setEncoding('utf8')
+    cp.stderr!.on('data', chunk => {
       stderr += chunk
     })
-    child.on('error', err =>
+    cp.on('error', err =>
       reject(
         new Error(
           `secret-tool store failed: ${err.message}. ` +
@@ -124,7 +124,7 @@ export async function writeLinux(
         ),
       ),
     )
-    child.on('close', status => {
+    cp.on('close', status => {
       if (status === 0) {
         resolve()
         return
@@ -139,7 +139,7 @@ export async function writeLinux(
     })
     // `secret-tool store` reads the password from stdin so the value
     // never appears in `ps(1)` / `/proc/<pid>/cmdline`.
-    child.stdin.end(value)
+    cp.stdin!.end(value)
   })
 }
 

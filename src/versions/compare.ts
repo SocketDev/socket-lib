@@ -80,5 +80,5 @@ export function rsort(versions: readonly string[]): string[] {
  * `readonly string[]` even when the impl mutates internally.
  */
 export function sort(versions: readonly string[]): string[] {
-  return impl.toSorted([...versions])
+  return impl.sort([...versions])
 }
