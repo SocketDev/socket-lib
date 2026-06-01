@@ -23,7 +23,7 @@ jobs:
     name: Run CI Pipeline
     uses: SocketDev/socket-registry/.github/workflows/ci.yml@f09a1cd39868ae45d304cfcead2d4f19a5325d8a # main (2026-06-01)
     with:
-      test-script: 'pnpm run build && pnpm exec vitest --config .config/vitest.config.mts run'
+      test-script: 'pnpm run build && pnpm exec vitest --config .config/repo/vitest.config.mts run'
 
   test-isolated:
     name: Test (Isolated)
