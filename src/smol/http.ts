@@ -58,21 +58,21 @@ export interface SmolHttpBinding {
   readonly isMimallocAvailable: boolean
 }
 
-let _smolHttp: SmolHttpBinding | undefined
-let _smolHttpProbed = false
+let smolHttpBinding: SmolHttpBinding | undefined
+let smolHttpProbed = false
 
 /**
  * Returns `node:smol-http` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  */
 export function getSmolHttp(): SmolHttpBinding | undefined {
-  if (!_smolHttpProbed) {
-    _smolHttpProbed = true
+  if (!smolHttpProbed) {
+    smolHttpProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-http')) {
-      _smolHttp = require('node:smol-http') as SmolHttpBinding
+      smolHttpBinding = require('node:smol-http') as SmolHttpBinding
     }
     /* c8 ignore stop */
   }
-  return _smolHttp
+  return smolHttpBinding
 }

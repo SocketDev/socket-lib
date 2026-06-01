@@ -17,7 +17,7 @@ import {
   getSocketUserDir,
 } from '../paths/socket'
 
-let _cachedAllowedDirs: string[] | undefined
+let cachedAllowedDirs: string[] | undefined
 
 /**
  * Clear the cached allowed-directories list. Used by `invalidatePathCache()`
@@ -25,7 +25,7 @@ let _cachedAllowedDirs: string[] | undefined
  * picks up the new resolved values.
  */
 export function clearAllowedDirectories(): void {
-  _cachedAllowedDirs = undefined
+  cachedAllowedDirs = undefined
 }
 
 /**
@@ -33,14 +33,14 @@ export function clearAllowedDirectories(): void {
  * directories are resolved once and cached for the process lifetime.
  */
 export function getAllowedDirectories(): string[] {
-  if (_cachedAllowedDirs === undefined) {
+  if (cachedAllowedDirs === undefined) {
     const path = getNodePath()
 
-    _cachedAllowedDirs = [
+    cachedAllowedDirs = [
       path.resolve(getOsTmpDir()),
       path.resolve(getSocketCacacheDir()),
       path.resolve(getSocketUserDir()),
     ]
   }
-  return _cachedAllowedDirs
+  return cachedAllowedDirs
 }

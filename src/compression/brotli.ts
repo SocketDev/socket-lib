@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- functions ordered by call graph (compress/decompress variants share helpers); type / const declarations between them block autofix. */
 /**
  * @file Brotli compression / decompression — in-memory, file-to-file, and
  *   raw-stream variants. Default quality is 11 (max compression, slow) on the
@@ -37,27 +36,29 @@ import { SetCtor } from '../primordials/map-set'
 const brotliCompressAsync = promisify(brotliCompress)
 const brotliDecompressAsync = promisify(brotliDecompress)
 
+// Brotli has no defined magic bytes — the format starts with header
+// data that can technically be anything. The closest signal is the
+// last-byte stream-end pattern. We reject obviously-not-brotli input
+// (empty / under 4 bytes) and let the caller catch decode errors as
+// the authoritative "is it brotli?" check.
+//
+// Use this only for cheap pre-flight rejection; never as a security
+// or correctness gate.
+const BROTLI_MIN_LEN = 4
+
+// Use Sets — O(1) lookup, sorted alphanumerically per CLAUDE.md so
+// adding a new extension stays a one-line append. node:path's extname
+// is case-sensitive (it reflects the OS path semantics), but our
+// extension classifier is policy: ".BR" should classify the same as
+// ".br" regardless of host OS. Lowercase the extname before lookup.
+//
+// Exported so callers can introspect what counts as a "brotli"
+// extension without re-implementing the list, and so tests can pin
+// the recognized set.
+export const BROTLI_EXTS: ReadonlySet<string> = new SetCtor(['.br', '.brotli'])
+
 interface ResolvedBrotliOptions extends BrotliOptions {
   params: NonNullable<BrotliOptions['params']>
-}
-
-/**
- * Translate `CompressOptions` into the `BrotliOptions` zlib expects. Defaults
- * `quality` to 11 (max) when not provided, and forwards a positive `size` hint.
- * Exposed for callers building their own zlib pipelines and for unit-test
- * coverage.
- */
-export function resolveBrotliOptions(
-  options: CompressOptions | undefined,
-): ResolvedBrotliOptions {
-  const level = options?.level ?? 11
-  const params: NonNullable<BrotliOptions['params']> = {
-    [zlibConstants.BROTLI_PARAM_QUALITY]: level,
-  }
-  if (options?.size !== undefined && options.size > 0) {
-    params[zlibConstants.BROTLI_PARAM_SIZE_HINT] = options.size
-  }
-  return { params }
 }
 
 /**
@@ -76,13 +77,6 @@ export async function compressBrotli(
     opts.params[zlibConstants.BROTLI_PARAM_SIZE_HINT] = buf.byteLength
   }
   return await brotliCompressAsync(buf, opts)
-}
-
-/**
- * Decompress a brotli-compressed Buffer.
- */
-export async function decompressBrotli(input: Buffer): Promise<Buffer> {
-  return await brotliDecompressAsync(input)
 }
 
 /**
@@ -127,6 +121,29 @@ export async function compressBrotliFile(
     await safeDelete(srcPath)
   }
   return destPath
+}
+
+/**
+ * Create a brotli compress transform stream. Compose into your own pipeline.
+ * The `pipeline` from `node:stream/promises` is the safe way to wire it up — it
+ * handles error propagation across all stages.
+ */
+export function createBrotliCompressor(options?: CompressOptions | undefined) {
+  return createBrotliCompress(resolveBrotliOptions(options))
+}
+
+/**
+ * Create a brotli decompress transform stream.
+ */
+export function createBrotliDecompressor() {
+  return createBrotliDecompress()
+}
+
+/**
+ * Decompress a brotli-compressed Buffer.
+ */
+export async function decompressBrotli(input: Buffer): Promise<Buffer> {
+  return await brotliDecompressAsync(input)
 }
 
 /**
@@ -179,30 +196,12 @@ export async function decompressBrotliFile(
 }
 
 /**
- * Create a brotli compress transform stream. Compose into your own pipeline.
- * The `pipeline` from `node:stream/promises` is the safe way to wire it up — it
- * handles error propagation across all stages.
+ * Extension check for brotli paths — matches `.br` / `.brotli`
+ * (case-insensitive). Naming follows node:path's `extname`.
  */
-export function createBrotliCompressor(options?: CompressOptions | undefined) {
-  return createBrotliCompress(resolveBrotliOptions(options))
+export function hasBrotliExt(filePath: string): boolean {
+  return BROTLI_EXTS.has(StringPrototypeToLowerCase(path.extname(filePath)))
 }
-
-/**
- * Create a brotli decompress transform stream.
- */
-export function createBrotliDecompressor() {
-  return createBrotliDecompress()
-}
-
-// Brotli has no defined magic bytes — the format starts with header
-// data that can technically be anything. The closest signal is the
-// last-byte stream-end pattern. We reject obviously-not-brotli input
-// (empty / under 4 bytes) and let the caller catch decode errors as
-// the authoritative "is it brotli?" check.
-//
-// Use this only for cheap pre-flight rejection; never as a security
-// or correctness gate.
-const BROTLI_MIN_LEN = 4
 
 /**
  * Cheap pre-flight check: does the buffer look like it could be brotli? Returns
@@ -214,21 +213,21 @@ export function isBrotliCompressed(input: Buffer): boolean {
   return BufferIsBuffer!(input) && input.byteLength >= BROTLI_MIN_LEN
 }
 
-// Use Sets — O(1) lookup, sorted alphanumerically per CLAUDE.md so
-// adding a new extension stays a one-line append. node:path's extname
-// is case-sensitive (it reflects the OS path semantics), but our
-// extension classifier is policy: ".BR" should classify the same as
-// ".br" regardless of host OS. Lowercase the extname before lookup.
-//
-// Exported so callers can introspect what counts as a "brotli"
-// extension without re-implementing the list, and so tests can pin
-// the recognized set.
-export const BROTLI_EXTS: ReadonlySet<string> = new SetCtor(['.br', '.brotli'])
-
 /**
- * Extension check for brotli paths — matches `.br` / `.brotli`
- * (case-insensitive). Naming follows node:path's `extname`.
+ * Translate `CompressOptions` into the `BrotliOptions` zlib expects. Defaults
+ * `quality` to 11 (max) when not provided, and forwards a positive `size` hint.
+ * Exposed for callers building their own zlib pipelines and for unit-test
+ * coverage.
  */
-export function hasBrotliExt(filePath: string): boolean {
-  return BROTLI_EXTS.has(StringPrototypeToLowerCase(path.extname(filePath)))
+export function resolveBrotliOptions(
+  options: CompressOptions | undefined,
+): ResolvedBrotliOptions {
+  const level = options?.level ?? 11
+  const params: NonNullable<BrotliOptions['params']> = {
+    [zlibConstants.BROTLI_PARAM_QUALITY]: level,
+  }
+  if (options?.size !== undefined && options.size > 0) {
+    params[zlibConstants.BROTLI_PARAM_SIZE_HINT] = options.size
+  }
+  return { params }
 }

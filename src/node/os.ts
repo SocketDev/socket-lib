@@ -6,8 +6,8 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeOs from 'node:os'
 
-let _os: typeof NodeOs | undefined
+let cachedOs: typeof NodeOs | undefined
 
 export function getNodeOs(): typeof NodeOs {
-  return (_os ??= /*@__PURE__*/ require('node:os') as typeof NodeOs)
+  return (cachedOs ??= /*@__PURE__*/ require('node:os') as typeof NodeOs)
 }

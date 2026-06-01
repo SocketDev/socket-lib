@@ -5,7 +5,7 @@
  */
 
 // Abort controller and signal.
-let _abortController: AbortController
+let abortController: AbortController
 /**
  * Get the process-scoped shared `AbortController` singleton. Cooperating
  * modules use this to coordinate cancellation across the library.
@@ -13,10 +13,10 @@ let _abortController: AbortController
  * @returns The lazily-created shared `AbortController` instance.
  */
 export function getAbortController(): AbortController {
-  if (_abortController === undefined) {
-    _abortController = new AbortController()
+  if (abortController === undefined) {
+    abortController = new AbortController()
   }
-  return _abortController
+  return abortController
 }
 
 /**

@@ -9,7 +9,7 @@
  *   - readFileBinary() for reading binary files
  */
 
-import { randomUUID } from 'node:crypto'
+import crypto from 'node:crypto'
 import {
   existsSync,
   mkdirSync,
@@ -18,7 +18,7 @@ import {
   writeFileSync,
 } from 'node:fs'
 import os from 'node:os'
-import { join } from 'node:path'
+import path from 'node:path'
 
 import type { SafeReadOptions } from '../../../src/fs/types'
 
@@ -32,7 +32,7 @@ describe.sequential('fs - Sync Functions', () => {
   let testDir: string
 
   beforeEach(() => {
-    testDir = join(os.tmpdir(), `socket-lib-test-${randomUUID()}`)
+    testDir = path.join(os.tmpdir(), `socket-lib-test-${crypto.randomUUID()}`)
     mkdirSync(testDir, { recursive: true })
   })
 
@@ -44,8 +44,8 @@ describe.sequential('fs - Sync Functions', () => {
 
   describe('isSymlinkSync', () => {
     it('should return true for symlinks', () => {
-      const targetFile = join(testDir, 'target.txt')
-      const linkFile = join(testDir, 'link.txt')
+      const targetFile = path.join(testDir, 'target.txt')
+      const linkFile = path.join(testDir, 'link.txt')
 
       writeFileSync(targetFile, 'content')
       symlinkSync(targetFile, linkFile)
@@ -54,19 +54,19 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should return false for regular files', () => {
-      const regularFile = join(testDir, 'regular.txt')
+      const regularFile = path.join(testDir, 'regular.txt')
       writeFileSync(regularFile, 'content')
 
       expect(isSymlinkSync(regularFile)).toBe(false)
     })
 
     it('should return false for non-existent files', () => {
-      const nonExistent = join(testDir, 'does-not-exist.txt')
+      const nonExistent = path.join(testDir, 'does-not-exist.txt')
       expect(isSymlinkSync(nonExistent)).toBe(false)
     })
 
     it('should return false for directories', () => {
-      const subDir = join(testDir, 'subdir')
+      const subDir = path.join(testDir, 'subdir')
       mkdirSync(subDir)
 
       expect(isSymlinkSync(subDir)).toBe(false)
@@ -75,7 +75,7 @@ describe.sequential('fs - Sync Functions', () => {
 
   describe('readJsonSync', () => {
     it('should read valid JSON file', () => {
-      const jsonFile = join(testDir, 'data.json')
+      const jsonFile = path.join(testDir, 'data.json')
       const data = { name: 'test', value: 42 }
 
       writeFileSync(jsonFile, JSON.stringify(data))
@@ -85,7 +85,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should handle JSON with arrays', () => {
-      const jsonFile = join(testDir, 'array.json')
+      const jsonFile = path.join(testDir, 'array.json')
       const data = [1, 2, 3, 4, 5]
 
       writeFileSync(jsonFile, JSON.stringify(data))
@@ -95,7 +95,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should handle nested JSON objects', () => {
-      const jsonFile = join(testDir, 'nested.json')
+      const jsonFile = path.join(testDir, 'nested.json')
       const data = { outer: { inner: { value: 'nested' } } }
 
       writeFileSync(jsonFile, JSON.stringify(data))
@@ -105,21 +105,21 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should throw for invalid JSON', () => {
-      const jsonFile = join(testDir, 'invalid.json')
+      const jsonFile = path.join(testDir, 'invalid.json')
       writeFileSync(jsonFile, '{invalid json}')
 
       expect(() => readJsonSync(jsonFile)).toThrow()
     })
 
     it('should throw for non-existent files', () => {
-      const nonExistent = join(testDir, 'missing.json')
+      const nonExistent = path.join(testDir, 'missing.json')
       expect(() => readJsonSync(nonExistent)).toThrow()
     })
   })
 
   describe('writeJsonSync', () => {
     it('should write JSON file', () => {
-      const jsonFile = join(testDir, 'output.json')
+      const jsonFile = path.join(testDir, 'output.json')
       const data = { test: 'value', number: 123 }
 
       writeJsonSync(jsonFile, data)
@@ -130,7 +130,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should write array JSON', () => {
-      const jsonFile = join(testDir, 'array-output.json')
+      const jsonFile = path.join(testDir, 'array-output.json')
       const data = ['a', 'b', 'c']
 
       writeJsonSync(jsonFile, data)
@@ -140,7 +140,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should overwrite existing files', () => {
-      const jsonFile = join(testDir, 'overwrite.json')
+      const jsonFile = path.join(testDir, 'overwrite.json')
 
       writeJsonSync(jsonFile, { first: 1 })
       writeJsonSync(jsonFile, { second: 2 })
@@ -150,7 +150,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should handle nested objects', () => {
-      const jsonFile = join(testDir, 'nested-output.json')
+      const jsonFile = path.join(testDir, 'nested-output.json')
       const data = { a: { b: { c: 'deep' } } }
 
       writeJsonSync(jsonFile, data)
@@ -162,7 +162,7 @@ describe.sequential('fs - Sync Functions', () => {
 
   describe('readFileBinary', () => {
     it('should read binary file as Buffer', async () => {
-      const binFile = join(testDir, 'binary.bin')
+      const binFile = path.join(testDir, 'binary.bin')
       const data = Buffer.from([0x00, 0x01, 0x02, 0x03, 0xff])
 
       writeFileSync(binFile, data)
@@ -173,7 +173,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should read empty binary file', async () => {
-      const binFile = join(testDir, 'empty.bin')
+      const binFile = path.join(testDir, 'empty.bin')
       writeFileSync(binFile, Buffer.alloc(0))
 
       const result = await readFileBinary(binFile)
@@ -181,7 +181,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should read large binary file', async () => {
-      const binFile = join(testDir, 'large.bin')
+      const binFile = path.join(testDir, 'large.bin')
       const data = Buffer.alloc(1024 * 10, 0xab)
 
       writeFileSync(binFile, data)
@@ -191,14 +191,14 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should reject for non-existent files', async () => {
-      const nonExistent = join(testDir, 'missing.bin')
+      const nonExistent = path.join(testDir, 'missing.bin')
       await expect(readFileBinary(nonExistent)).rejects.toThrow()
     })
   })
 
   describe('safeReadFileSync', () => {
     it('should read existing file as utf8 string by default', () => {
-      const file = join(testDir, 'safe-read.txt')
+      const file = path.join(testDir, 'safe-read.txt')
       writeFileSync(file, 'safe content')
 
       const result = safeReadFileSync(file)
@@ -207,13 +207,13 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should return undefined for non-existent files', () => {
-      const nonExistent = join(testDir, 'does-not-exist.txt')
+      const nonExistent = path.join(testDir, 'does-not-exist.txt')
       const result = safeReadFileSync(nonExistent)
       expect(result).toBeUndefined()
     })
 
     it('should read empty files', () => {
-      const emptyFile = join(testDir, 'empty.txt')
+      const emptyFile = path.join(testDir, 'empty.txt')
       writeFileSync(emptyFile, '')
 
       const result = safeReadFileSync(emptyFile)
@@ -222,7 +222,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should read files with special characters', () => {
-      const file = join(testDir, 'special.txt')
+      const file = path.join(testDir, 'special.txt')
       const content = 'Special: \n\t\r漢字'
 
       writeFileSync(file, content)
@@ -233,7 +233,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should read as buffer when encoding is explicitly null', () => {
-      const file = join(testDir, 'buffer-read.txt')
+      const file = path.join(testDir, 'buffer-read.txt')
       const content = 'buffer content'
       writeFileSync(file, content)
 
@@ -248,7 +248,7 @@ describe.sequential('fs - Sync Functions', () => {
 
   describe('safeStatSync', () => {
     it('should return stats for existing file', () => {
-      const file = join(testDir, 'stats.txt')
+      const file = path.join(testDir, 'stats.txt')
       writeFileSync(file, 'content')
 
       const stats = safeStatSync(file)
@@ -257,7 +257,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should return stats for directory', () => {
-      const dir = join(testDir, 'stats-dir')
+      const dir = path.join(testDir, 'stats-dir')
       mkdirSync(dir)
 
       const stats = safeStatSync(dir)
@@ -266,7 +266,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should return undefined for non-existent paths', () => {
-      const nonExistent = join(testDir, 'no-stats.txt')
+      const nonExistent = path.join(testDir, 'no-stats.txt')
       const stats = safeStatSync(nonExistent)
       expect(stats).toBeUndefined()
     })
@@ -274,25 +274,25 @@ describe.sequential('fs - Sync Functions', () => {
     it('returns undefined when the path has an embedded null byte (statSync throws)', () => {
       // null bytes in path are an ERR_INVALID_ARG_VALUE thrown by Node before
       // any filesystem syscall — the safeStatSync catch swallows it.
-      const stats = safeStatSync(join(testDir, '\0bogus'))
+      const stats = safeStatSync(path.join(testDir, '\0bogus'))
       expect(stats).toBeUndefined()
     })
 
     it('isDir returns true for directories and false otherwise', async () => {
       // oxlint-disable-next-line socket/prefer-exists-sync -- isDir is the unit under test.
       const callIsDir = (p: string) => isDir(p)
-      const dir = join(testDir, 'is-dir-target')
+      const dir = path.join(testDir, 'is-dir-target')
       mkdirSync(dir)
       expect(await callIsDir(dir)).toBe(true)
-      const file = join(testDir, 'is-dir-file.txt')
+      const file = path.join(testDir, 'is-dir-file.txt')
       writeFileSync(file, 'x')
       expect(await callIsDir(file)).toBe(false)
-      expect(await callIsDir(join(testDir, 'no-such-thing'))).toBe(false)
+      expect(await callIsDir(path.join(testDir, 'no-such-thing'))).toBe(false)
     })
 
     it('should return stats for symlinks', () => {
-      const targetFile = join(testDir, 'stats-target.txt')
-      const linkFile = join(testDir, 'stats-link.txt')
+      const targetFile = path.join(testDir, 'stats-target.txt')
+      const linkFile = path.join(testDir, 'stats-link.txt')
 
       writeFileSync(targetFile, 'content')
       symlinkSync(targetFile, linkFile)
@@ -306,7 +306,7 @@ describe.sequential('fs - Sync Functions', () => {
 
   describe('integration', () => {
     it('should work with writeJsonSync and readJsonSync together', () => {
-      const jsonFile = join(testDir, 'roundtrip.json')
+      const jsonFile = path.join(testDir, 'roundtrip.json')
       const data = {
         string: 'value',
         number: 42,
@@ -323,9 +323,9 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('should handle multiple file operations', () => {
-      const file1 = join(testDir, 'multi1.txt')
-      const file2 = join(testDir, 'multi2.txt')
-      const file3 = join(testDir, 'multi3.txt')
+      const file1 = path.join(testDir, 'multi1.txt')
+      const file2 = path.join(testDir, 'multi2.txt')
+      const file3 = path.join(testDir, 'multi3.txt')
 
       writeFileSync(file1, 'content1')
       writeFileSync(file2, 'content2')

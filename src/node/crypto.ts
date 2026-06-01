@@ -6,8 +6,8 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeCrypto from 'node:crypto'
 
-let _crypto: typeof NodeCrypto | undefined
+let crypto: typeof NodeCrypto | undefined
 
 export function getNodeCrypto(): typeof NodeCrypto {
-  return (_crypto ??= /*@__PURE__*/ require('node:crypto') as typeof NodeCrypto)
+  return (crypto ??= /*@__PURE__*/ require('node:crypto') as typeof NodeCrypto)
 }

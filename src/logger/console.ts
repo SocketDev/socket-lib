@@ -144,3 +144,42 @@ export function ensurePrototypeInitialized() {
   }
   ObjectDefineProperties(Logger.prototype, ObjectFromEntries(entries))
 }
+
+/**
+ * Resolve (and lazily construct + cache) the per-instance `Console` for a
+ * logger. Ensures the prototype is initialized, then returns the cached Console
+ * from the `privateConsole` WeakMap, building one from the stored constructor
+ * args (or the default stdout/stderr pair) on first access. This lazy path is
+ * what lets the logger be imported during early Node.js bootstrap before stdout
+ * is ready, avoiding `ERR_CONSOLE_WRITABLE_STREAM`.
+ *
+ * @param logger - The logger whose Console to resolve.
+ */
+export function resolveConsole(
+  logger: Logger,
+): typeof console & Record<string, unknown> {
+  ensurePrototypeInitialized()
+
+  let con = privateConsole.get(logger)
+  /* c8 ignore start - ctorArgs.length-truthy fires when caller seeded
+     constructor args; both arms are exercised across tests but not always
+     in the same run. */
+  if (!con) {
+    const ctorArgs = privateConstructorArgs.get(logger) ?? []
+    if (ctorArgs.length) {
+      con = constructConsole(...ctorArgs)
+    } else {
+      con = constructConsole({
+        stdout: process.stdout,
+        stderr: process.stderr,
+      }) as typeof console & Record<string, unknown>
+      for (const { 0: key, 1: method } of boundConsoleEntries) {
+        con[key] = method
+      }
+    }
+    privateConsole.set(logger, con)
+    privateConstructorArgs.delete(logger)
+  }
+  /* c8 ignore stop */
+  return con as typeof console & Record<string, unknown>
+}

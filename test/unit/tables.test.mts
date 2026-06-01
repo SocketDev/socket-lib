@@ -10,12 +10,10 @@
  *     package lists, scan results, and reports.
  */
 
-/* oxlint-disable socket/no-status-emoji -- tests assert on emoji output / fixture data. */
-
+import { stripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
 import { describe, expect, it } from 'vitest'
 import colors from 'yoctocolors-cjs'
 
-import { stripAnsi } from '../../src/ansi/strip'
 import { formatTable } from '../../src/tables/bordered'
 import { formatSimpleTable } from '../../src/tables/simple'
 
@@ -369,10 +367,12 @@ describe('tables', () => {
     })
 
     it('should handle emoji', () => {
+      // oxlint-disable-next-line socket/no-status-emoji -- fixture data exercises emoji rendering in table cells.
       const data = [{ status: '✓ Done' }]
       const columns = [{ key: 'status', header: 'Status' }]
 
       const result = formatTable(data, columns)
+      // oxlint-disable-next-line socket/no-status-emoji -- asserts emoji round-trips through table output.
       expect(result).toContain('✓ Done')
     })
 

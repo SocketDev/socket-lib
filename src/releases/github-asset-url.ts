@@ -226,7 +226,7 @@ export async function getReleaseAssetUrl(
     //     intentional — if both transports fail we want
     //     backoff, not a blind error.
     // -------------------------------------------------------
-    let assets: Array<{ name: string; browser_download_url: string }>
+    let resolvedAssets: Array<{ name: string; browser_download_url: string }>
     if (response.body.byteLength === 0) {
       // REST is degraded — silently route to GraphQL. Only error
       // out (with a clear, informative message) if BOTH transports
@@ -256,7 +256,7 @@ export async function getReleaseAssetUrl(
         throw new ErrorCtor(`Release ${tag} not found in ${owner}/${repo}`)
         /* c8 ignore stop */
       }
-      assets = fallbackAssets
+      resolvedAssets = fallbackAssets
     } else {
       let release: {
         assets: Array<{ name: string; browser_download_url: string }>
@@ -273,10 +273,10 @@ export async function getReleaseAssetUrl(
       if (!ArrayIsArray(release.assets)) {
         throw new ErrorCtor(`Release ${tag} has no assets in ${owner}/${repo}`)
       }
-      assets = release.assets
+      resolvedAssets = release.assets
     }
 
-    return assets
+    return resolvedAssets
   }, RETRY_CONFIG)
 
   // pRetry returns undefined on signal-aborted; treat the same as the

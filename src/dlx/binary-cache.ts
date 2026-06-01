@@ -10,8 +10,6 @@
  *     `dlx/binary.ts` for size hygiene.
  */
 
-/* oxlint-disable socket/prefer-exists-sync -- DLX binary metadata uses stat for size/mtime; not existence-only checks. */
-
 import process from 'node:process'
 import { existsSync } from 'node:fs'
 
@@ -242,6 +240,7 @@ export async function listDlxCache(): Promise<
       if (binaryFile) {
         const binaryPath = path.join(entryPath, binaryFile)
         // eslint-disable-next-line no-await-in-loop
+        // oxlint-disable-next-line socket/prefer-exists-sync -- DLX binary metadata uses stat for size/mtime; not existence-only checks.
         const binaryStats = await fs.promises.stat(binaryPath)
 
         results.push({

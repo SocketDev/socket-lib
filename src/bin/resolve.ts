@@ -24,7 +24,6 @@ import { StringPrototypeStartsWith } from '../primordials/string'
 import { getFs, getPath, voltaBinCache } from './_internal'
 import { whichRealSync } from './which'
 
-/*@__NO_SIDE_EFFECTS__*/
 /**
  * Resolve a binary path to the real underlying script file. Handles Windows
  * .cmd wrappers and Unix shell scripts, resolving them to the actual .js files

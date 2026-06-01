@@ -66,7 +66,7 @@ interface EditablePackageJsonConstructor {
   prepare(path: string, opts?: unknown): Promise<EditablePackageJsonInstance>
 }
 
-let _EditablePackageJsonClass: EditablePackageJsonConstructor | undefined
+let cachedEditablePackageJsonClass: EditablePackageJsonConstructor | undefined
 
 /**
  * Get the EditablePackageJson class for package.json manipulation.
@@ -79,9 +79,9 @@ let _EditablePackageJsonClass: EditablePackageJsonConstructor | undefined
  *   ```
  */
 export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
-  if (_EditablePackageJsonClass === undefined) {
+  if (cachedEditablePackageJsonClass === undefined) {
     // module is imported at the top
-    _EditablePackageJsonClass =
+    cachedEditablePackageJsonClass =
       class EditablePackageJson extends (EditablePackageJsonBase as EditablePackageJsonConstructor) {
         static override fixSteps = EditablePackageJsonBase.fixSteps
         static override normalizeSteps = EditablePackageJsonBase.normalizeSteps
@@ -113,14 +113,14 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           opts: EditablePackageJsonOptions = {},
         ) {
           const p =
-            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.create(path)
           return opts.data ? p.update(opts.data) : p
         }
 
         static override async fix(path: string, opts: unknown) {
           const p =
-            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.load(path, true)
           return await p.fix(opts)
         }
@@ -130,7 +130,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           opts: EditablePackageJsonOptions = {},
         ) {
           const p =
-            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
           // Avoid try/catch if we aren't going to create
           if (!opts.create) {
             return await p.load(path)
@@ -149,14 +149,14 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
         static override async normalize(path: string, opts: NormalizeOptions) {
           const p =
-            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.load(path)
           return await p.normalize(opts)
         }
 
         static override async prepare(path: string, opts: unknown) {
           const p =
-            new (_EditablePackageJsonClass as EditablePackageJsonConstructor)()
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.load(path, true)
           return await p.prepare(opts)
         }
@@ -371,5 +371,5 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
         }
       } as EditablePackageJsonConstructor
   }
-  return _EditablePackageJsonClass as EditablePackageJsonConstructor
+  return cachedEditablePackageJsonClass as EditablePackageJsonConstructor
 }

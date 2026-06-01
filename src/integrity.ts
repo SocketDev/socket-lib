@@ -11,9 +11,9 @@
  *     The normalized form carried around internally is always the object.
  */
 
-import { timingSafeEqual } from 'node:crypto'
+import crypto from 'node:crypto'
 
-import { hash } from './crypto/hash'
+import { hash as computeHash } from './crypto/hash'
 
 import { BufferFrom } from './primordials/buffer'
 
@@ -76,8 +76,8 @@ const CHECKSUM_RE = /^[a-f0-9]{64}$/i
  * bytes.
  */
 export function computeHashes(bytes: Buffer): ComputedHashes {
-  const integrity = `sha512-${hash('sha512', bytes, 'base64')}`
-  const checksum = hash('sha256', bytes, 'hex')
+  const integrity = `sha512-${computeHash('sha512', bytes, 'base64')}`
+  const checksum = computeHash('sha256', bytes, 'hex')
   return { integrity, checksum }
 }
 
@@ -159,7 +159,7 @@ export function verifyHash(
   const actualBuf = BufferFrom!(actual)
   if (
     expectedBuf.length !== actualBuf.length ||
-    !timingSafeEqual(expectedBuf, actualBuf)
+    !crypto.timingSafeEqual(expectedBuf, actualBuf)
   ) {
     throw new DlxHashMismatchError(expected, computed)
   }

@@ -41,15 +41,15 @@ const defaultRemoveOptions = objectFreeze({
   retryDelay: 200,
 })
 
-let _del:
+let delModule:
   | { deleteAsync: typeof deleteAsyncType; deleteSync: typeof deleteSyncType }
   | undefined
 
 export function getDel() {
-  if (_del === undefined) {
-    _del = /*@__PURE__*/ require('../external/del')
+  if (delModule === undefined) {
+    delModule = /*@__PURE__*/ require('../external/del')
   }
-  return _del!
+  return delModule!
 }
 
 /**

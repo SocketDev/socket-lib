@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- functions ordered by call graph (compress/decompress variants share helpers); type / const declarations between them block autofix. */
 /**
  * @file Gzip compression / decompression — same calling shapes as brotli:
  *   in-memory, file-to-file, and raw-stream variants. Default level is 6 (zlib
@@ -32,21 +31,18 @@ import { SetCtor } from '../primordials/map-set'
 const gzipAsync = promisify(gzip)
 const gunzipAsync = promisify(gunzip)
 
-/**
- * Translate `CompressOptions` into the `ZlibOptions` zlib expects. Returns an
- * empty options object when no `level` is given (zlib uses its default, level
- * 6). Exposed for parity with `resolveBrotliOptions` and for unit-test
- * coverage.
- */
-export function resolveGzipOptions(
-  options: CompressOptions | undefined,
-): ZlibOptions {
-  const level = options?.level
-  if (level === undefined) {
-    return { __proto__: null } as unknown as ZlibOptions
-  }
-  return { __proto__: null, level } as unknown as ZlibOptions
-}
+// Gzip has a real magic-byte signature: 0x1f 0x8b.
+const GZIP_MAGIC_0 = 0x1f
+const GZIP_MAGIC_1 = 0x8b
+
+// Exported so callers can introspect what counts as a "gzip"
+// extension without re-implementing the list, and so tests can pin
+// the recognized set.
+export const GZIP_EXTS: ReadonlySet<string> = new SetCtor([
+  '.gz',
+  '.gzip',
+  '.tgz',
+])
 
 /**
  * Compress a string or Buffer with gzip. Strings are encoded as UTF-8 before
@@ -58,13 +54,6 @@ export async function compressGzip(
 ): Promise<Buffer> {
   const buf = typeof input === 'string' ? BufferFrom!(input, 'utf8') : input
   return await gzipAsync(buf, resolveGzipOptions(options))
-}
-
-/**
- * Decompress a gzip-compressed Buffer.
- */
-export async function decompressGzip(input: Buffer): Promise<Buffer> {
-  return await gunzipAsync(input)
 }
 
 /**
@@ -106,6 +95,27 @@ export async function compressGzipFile(
     await safeDelete(srcPath)
   }
   return destPath
+}
+
+/**
+ * Create a gzip compress transform stream.
+ */
+export function createGzipCompressor(options?: CompressOptions | undefined) {
+  return createGzip(resolveGzipOptions(options))
+}
+
+/**
+ * Create a gzip decompress transform stream.
+ */
+export function createGzipDecompressor() {
+  return createGunzip()
+}
+
+/**
+ * Decompress a gzip-compressed Buffer.
+ */
+export async function decompressGzip(input: Buffer): Promise<Buffer> {
+  return await gunzipAsync(input)
 }
 
 /**
@@ -161,22 +171,12 @@ export async function decompressGzipFile(
 }
 
 /**
- * Create a gzip compress transform stream.
+ * Extension check for gzip paths — matches `.gz` / `.gzip` / `.tgz`
+ * (case-insensitive). Naming follows node:path's `extname`.
  */
-export function createGzipCompressor(options?: CompressOptions | undefined) {
-  return createGzip(resolveGzipOptions(options))
+export function hasGzipExt(filePath: string): boolean {
+  return GZIP_EXTS.has(StringPrototypeToLowerCase(path.extname(filePath)))
 }
-
-/**
- * Create a gzip decompress transform stream.
- */
-export function createGzipDecompressor() {
-  return createGunzip()
-}
-
-// Gzip has a real magic-byte signature: 0x1f 0x8b.
-const GZIP_MAGIC_0 = 0x1f
-const GZIP_MAGIC_1 = 0x8b
 
 /**
  * Magic-byte check for gzip. Reads the first two bytes and matches the gzip
@@ -191,19 +191,18 @@ export function isGzipCompressed(input: Buffer): boolean {
   )
 }
 
-// Exported so callers can introspect what counts as a "gzip"
-// extension without re-implementing the list, and so tests can pin
-// the recognized set.
-export const GZIP_EXTS: ReadonlySet<string> = new SetCtor([
-  '.gz',
-  '.gzip',
-  '.tgz',
-])
-
 /**
- * Extension check for gzip paths — matches `.gz` / `.gzip` / `.tgz`
- * (case-insensitive). Naming follows node:path's `extname`.
+ * Translate `CompressOptions` into the `ZlibOptions` zlib expects. Returns an
+ * empty options object when no `level` is given (zlib uses its default, level
+ * 6). Exposed for parity with `resolveBrotliOptions` and for unit-test
+ * coverage.
  */
-export function hasGzipExt(filePath: string): boolean {
-  return GZIP_EXTS.has(StringPrototypeToLowerCase(path.extname(filePath)))
+export function resolveGzipOptions(
+  options: CompressOptions | undefined,
+): ZlibOptions {
+  const level = options?.level
+  if (level === undefined) {
+    return { __proto__: null } as unknown as ZlibOptions
+  }
+  return { __proto__: null, level } as unknown as ZlibOptions
 }

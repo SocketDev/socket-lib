@@ -6,8 +6,8 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeHttp from 'node:http'
 
-let _http: typeof NodeHttp | undefined
+let cachedHttp: typeof NodeHttp | undefined
 
 export function getNodeHttp(): typeof NodeHttp {
-  return (_http ??= /*@__PURE__*/ require('node:http') as typeof NodeHttp)
+  return (cachedHttp ??= /*@__PURE__*/ require('node:http') as typeof NodeHttp)
 }

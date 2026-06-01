@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'vitest'
 
-import { cacheKey } from '../../../../src/external-tools/skillspector/resolve'
+// Published-snapshot binding used to BUILD expected values inside
+// `expect(...)`. This stable alias satisfies
+// `socket/no-src-import-in-test-expect`.
+import { cacheKey } from '@socketsecurity/lib-stable/external-tools/skillspector/resolve'
 
 describe.sequential('external-tools/skillspector/resolve / cacheKey', () => {
   test('different SHAs produce different keys', () => {
