@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **`http-request` decompresses `gzip` / `br` response bodies.** Buffered requests advertise `Accept-Encoding: gzip, br` and now decode the body by its `Content-Encoding` before resolving. 6.0.6 sent the header but never decompressed, so a compressed response reached callers as raw deflated bytes. Streamed requests (`stream: true`, e.g. `httpDownload`) skip the header so piped-to-disk payloads stay raw and checksum cleanly. Callers can override with `'identity'`.
+- **`crypto/hash` blob content-address helpers.** `blobHashOf(bytes)` returns Socket's content-addressed blob hash (`Q` + base64url(sha256)), and `verifyBlobHash(hash, bytes)` throws when bytes don't hash to the expected address. Both build on the fast one-shot `hash()`; the `S` file-stream discriminator verifies against the same digest body. Lets blob consumers (the SDK, MCP server) verify integrity against one canonical implementation instead of re-deriving the scheme.
 
 ### Fixed
 
