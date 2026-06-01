@@ -37,7 +37,6 @@ import { isAbsolute, isPathSeparator } from './predicates'
  *
  * @returns {string} Relative path from `from` to `to`, or empty string if equal
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function relative(from: string, to: string): string {
   // Quick return if paths are already identical.
   if (from === to) {
@@ -155,7 +154,6 @@ export function relative(from: string, to: string): string {
  *
  * @returns {string} Normalized relative path, or empty string if equal
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function relativeResolve(from: string, to: string): string {
   const rel = relative(from, to)
   // Empty string means same path — don't normalize to '.'.
@@ -184,7 +182,6 @@ export function relativeResolve(from: string, to: string): string {
  *
  * @returns {string} The resolved absolute path
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolve(...segments: string[]): string {
   let resolvedPath = ''
   let resolvedAbsolute = false

@@ -76,7 +76,6 @@ export function getRules(
  *   }) // 'nd'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function pluralize(
   word: string,
   options?: PluralizeOptions | undefined,

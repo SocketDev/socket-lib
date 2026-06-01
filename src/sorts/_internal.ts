@@ -10,7 +10,6 @@ import type * as semverType from '../external/semver'
 let _fastSort: typeof fastSortType | undefined
 let _semver: typeof semverType | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getFastSort() {
   if (_fastSort === undefined) {
     _fastSort = /*@__PURE__*/ require('../external/fast-sort.js')
@@ -18,7 +17,6 @@ export function getFastSort() {
   return _fastSort!
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getSemver() {
   if (_semver === undefined) {
     _semver = /*@__PURE__*/ require('../external/semver.js')

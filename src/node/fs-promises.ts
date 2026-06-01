@@ -8,7 +8,6 @@ import type * as NodeFsPromises from 'node:fs/promises'
 
 let _fsPromises: typeof NodeFsPromises | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeFsPromises(): typeof NodeFsPromises {
   return (_fsPromises ??=
     /*@__PURE__*/ require('node:fs/promises') as typeof NodeFsPromises)

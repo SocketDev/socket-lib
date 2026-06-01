@@ -22,7 +22,6 @@
  *
  * @returns True if string is valid hex format
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isValidHex(value: string): boolean {
   return /^[a-f0-9]+$/i.test(value)
 }
@@ -43,7 +42,6 @@ export function isValidHex(value: string): boolean {
  *
  * @returns True if string matches SSRI format
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isValidSsri(value: string): boolean {
   return /^[a-z0-9]+-[A-Za-z0-9+/]{2,}=*$/i.test(value)
 }

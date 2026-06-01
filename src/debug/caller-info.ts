@@ -16,7 +16,6 @@ import {
  *
  * @private
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getCallerInfo(stackOffset: number = 3): string {
   let name = ''
   const captureStackTrace = Error.captureStackTrace

@@ -2,8 +2,8 @@
  * @file Unit tests for string utility edge cases (part 1). Split from
  *   strings.test.mts to stay under the file-line cap. Covers boundary
  *   conditions for applyLinePrefix(), indentString(), search(), trimNewlines(),
- *   toKebabCase(), stringWidth(), centerText(), repeatString(), isBlankString(),
- *   and fromCharCode().
+ *   toKebabCase(), stringWidth(), centerText(), repeatString(),
+ *   isBlankString(), and fromCharCode().
  */
 
 import {

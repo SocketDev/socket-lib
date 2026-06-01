@@ -32,7 +32,6 @@ import type { IterationOptions, RetryOptions } from './types'
  *
  * @returns Normalized options with concurrency, retries, and signal
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function normalizeIterationOptions(
   options?: number | IterationOptions | undefined,
 ): { concurrency: number; retries: RetryOptions; signal: AbortSignal } {
@@ -80,7 +79,6 @@ export function normalizeIterationOptions(
  *
  * @returns Normalized retry options with all properties set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function normalizeRetryOptions(
   options?: number | RetryOptions | undefined,
 ): RetryOptions {
@@ -141,7 +139,6 @@ export function normalizeRetryOptions(
  *
  * @returns Resolved retry options with defaults for basic properties
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolveRetryOptions(
   options?: number | RetryOptions | undefined,
 ): RetryOptions {

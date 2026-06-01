@@ -8,7 +8,6 @@ import type * as NodeAsyncHooks from 'node:async_hooks'
 
 let _asyncHooks: typeof NodeAsyncHooks | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeAsyncHooks(): typeof NodeAsyncHooks {
   return (_asyncHooks ??=
     /*@__PURE__*/ require('node:async_hooks') as typeof NodeAsyncHooks)

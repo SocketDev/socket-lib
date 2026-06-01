@@ -25,7 +25,6 @@ import type { IterationOptions } from '../promises/types'
  *   )
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function parallelEach<T>(
   iterable: Iterable<T> | AsyncIterable<T>,
   func: (item: T) => Promise<unknown>,
@@ -53,7 +52,6 @@ export async function parallelEach<T>(
  *   }
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function parallelMap<T, U>(
   iterable: Iterable<T> | AsyncIterable<T>,
   func: (item: T) => Promise<U>,

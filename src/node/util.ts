@@ -8,7 +8,6 @@ import type * as NodeUtil from 'node:util'
 
 let _util: typeof NodeUtil | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeUtil(): typeof NodeUtil {
   return (_util ??= /*@__PURE__*/ require('node:util') as typeof NodeUtil)
 }

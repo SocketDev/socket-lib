@@ -7,10 +7,10 @@
  *   - splitPath() splits paths into components
  *   - trimLeadingDotSlash() removes ./ prefix Tests extensively validate Windows
  *     vs Unix path handling, edge cases (empty paths, dots), and proper
- *     separation of path segments. Critical for cross-platform file
- *     operations. Path predicates (isAbsolute, isNodeModules, isPath,
- *     isRelative) live in test/unit/paths/predicates.test.mts;
- *     relativeResolve() lives in test/unit/paths/resolve.test.mts.
+ *     separation of path segments. Critical for cross-platform file operations.
+ *     Path predicates (isAbsolute, isNodeModules, isPath, isRelative) live in
+ *     test/unit/paths/predicates.test.mts; relativeResolve() lives in
+ *     test/unit/paths/resolve.test.mts.
  */
 
 import {

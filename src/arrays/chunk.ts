@@ -37,7 +37,6 @@ import { ErrorCtor } from '../primordials/error'
  *
  * @throws {Error} If chunk size is less than or equal to 0
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function arrayChunk<T>(
   arr: T[] | readonly T[],
   size?: number | undefined,

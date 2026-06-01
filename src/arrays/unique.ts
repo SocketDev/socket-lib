@@ -36,7 +36,6 @@ import { SetCtor } from '../primordials/map-set'
  *
  * @returns New array with duplicate values removed
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function arrayUnique<T>(arr: T[] | readonly T[]): T[] {
   return [...new SetCtor(arr)]
 }

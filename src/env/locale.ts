@@ -18,7 +18,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The system locale string, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getLang(): string | undefined {
   return getEnvValue('LANG')
 }
@@ -36,7 +35,6 @@ export function getLang(): string | undefined {
  *
  * @returns The locale override string, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getLcAll(): string | undefined {
   return getEnvValue('LC_ALL')
 }
@@ -54,7 +52,6 @@ export function getLcAll(): string | undefined {
  *
  * @returns The messages locale string, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getLcMessages(): string | undefined {
   return getEnvValue('LC_MESSAGES')
 }

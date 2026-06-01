@@ -29,7 +29,6 @@ const pnpmInstallCommands = new SetCtor(['install', 'i'])
  *   isPnpmFrozenLockfileFlag('--save') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isPnpmFrozenLockfileFlag(cmdArg: string): boolean {
   return pnpmFrozenLockfileFlags.has(cmdArg)
 }
@@ -44,7 +43,6 @@ export function isPnpmFrozenLockfileFlag(cmdArg: string): boolean {
  *   isPnpmIgnoreScriptsFlag('--save') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
   return pnpmIgnoreScriptsFlags.has(cmdArg)
 }
@@ -59,7 +57,6 @@ export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
  *   isPnpmInstallCommand('run') // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isPnpmInstallCommand(cmdArg: string): boolean {
   return pnpmInstallCommands.has(cmdArg)
 }

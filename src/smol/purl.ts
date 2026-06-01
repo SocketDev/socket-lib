@@ -90,7 +90,6 @@ let _smolPurlProbed = false
  * Returns `node:smol-purl` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSmolPurl(): SmolPurlBinding | undefined {
   if (!_smolPurlProbed) {
     _smolPurlProbed = true

@@ -8,7 +8,6 @@ import type * as NodeModule from 'node:module'
 
 let _module: typeof NodeModule | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeModule(): typeof NodeModule {
   return (_module ??= /*@__PURE__*/ require('node:module') as typeof NodeModule)
 }
@@ -22,7 +21,6 @@ export function getNodeModule(): typeof NodeModule {
  * (used by the smol-binding loaders to gate `require('node:smol-*')`).
  */
 let _isBuiltin: ((name: string) => boolean) | undefined
-/*@__NO_SIDE_EFFECTS__*/
 export function isNodeBuiltin(name: string): boolean {
   return (_isBuiltin ??= getNodeModule().isBuiltin)(name)
 }

@@ -19,7 +19,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The XDG cache directory path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getXdgCacheHome(): string | undefined {
   return getEnvValue('XDG_CACHE_HOME')
 }
@@ -38,7 +37,6 @@ export function getXdgCacheHome(): string | undefined {
  *
  * @returns The XDG config directory path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getXdgConfigHome(): string | undefined {
   return getEnvValue('XDG_CONFIG_HOME')
 }
@@ -57,7 +55,6 @@ export function getXdgConfigHome(): string | undefined {
  *
  * @returns The XDG data directory path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getXdgDataHome(): string | undefined {
   return getEnvValue('XDG_DATA_HOME')
 }

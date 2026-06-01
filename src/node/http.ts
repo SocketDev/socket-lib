@@ -8,7 +8,6 @@ import type * as NodeHttp from 'node:http'
 
 let _http: typeof NodeHttp | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeHttp(): typeof NodeHttp {
   return (_http ??= /*@__PURE__*/ require('node:http') as typeof NodeHttp)
 }

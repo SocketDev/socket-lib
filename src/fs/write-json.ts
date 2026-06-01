@@ -29,7 +29,6 @@ const NEWLINE_REGEX = /\n/g
  *
  * @returns Formatted JSON string
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function stringify(
   json: unknown,
   EOL: string,

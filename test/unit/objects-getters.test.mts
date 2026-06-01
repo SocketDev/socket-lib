@@ -1,8 +1,8 @@
 /**
  * @file Unit tests for lazy-getter and constants-object utilities from
  *   src/objects/getters. Covers createLazyGetter(), defineGetter(),
- *   defineLazyGetter(), defineLazyGetters(), and createConstantsObject().
- *   Tests validate lazy evaluation, memoization, stats tracking, symbol/number
+ *   defineLazyGetter(), defineLazyGetters(), and createConstantsObject(). Tests
+ *   validate lazy evaluation, memoization, stats tracking, symbol/number
  *   property keys, and frozen-constants behavior. Lazy getters are critical for
  *   performance - deferring expensive computations until needed.
  */

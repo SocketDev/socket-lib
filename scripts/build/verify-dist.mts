@@ -5,7 +5,6 @@
  *   `dist/external/normalize-package-data.js` truncated, surfacing later as a
  *   cryptic `SyntaxError: Unexpected token '{'` at test time) FAILS THE BUILD
  *   loudly and locally instead of becoming an opaque downstream test failure.
- *
  *   The check is a real parse: `new vm.Script(src)` for CJS / a
  *   `SourceTextModule`-free `--check`-equivalent via the V8 compile cache. We
  *   use `node --check <file>` per file (it parses without executing), which
@@ -44,8 +43,8 @@ async function collectJsFiles(dir: string): Promise<string[]> {
 }
 
 /**
- * Syntax-check one file with `node --check` (parse-only, no execution).
- * Returns the stderr on failure, or undefined on success.
+ * Syntax-check one file with `node --check` (parse-only, no execution). Returns
+ * the stderr on failure, or undefined on success.
  */
 async function checkFile(file: string): Promise<string | undefined> {
   try {
@@ -53,7 +52,9 @@ async function checkFile(file: string): Promise<string | undefined> {
       stdio: 'pipe',
       stdioString: true,
     })
-    return result.code === 0 ? undefined : String(result.stderr ?? 'parse failed')
+    return result.code === 0
+      ? undefined
+      : String(result.stderr ?? 'parse failed')
   } catch (e) {
     return String((e as { stderr?: unknown })?.stderr ?? e)
   }

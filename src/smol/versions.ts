@@ -64,7 +64,6 @@ let _smolVersionsProbed = false
  * Returns `node:smol-versions` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSmolVersions(): SmolVersionsBinding | undefined {
   if (!_smolVersionsProbed) {
     _smolVersionsProbed = true

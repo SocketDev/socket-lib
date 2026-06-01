@@ -1,13 +1,12 @@
 /**
  * @file Isolated tests for the Logger class's core logging surface: every
  *   logging level (log, info, warn, error, success, fail, done), indentation,
- *   grouping, newline/blank-line helpers, assertions, the stream-bound
- *   getters, and the logCallCount tracker. The data/timing/stream-control
- *   methods live in `logger-methods.test.mts`; the LOG_SYMBOLS surface,
- *   internal symbol hooks, and assorted edge cases live in
- *   `logger-symbols.test.mts`. The split keeps each file under the
- *   `socket/max-file-lines` cap; shared capture-stream plumbing is in
- *   `logger-fixtures.ts`.
+ *   grouping, newline/blank-line helpers, assertions, the stream-bound getters,
+ *   and the logCallCount tracker. The data/timing/stream-control methods live
+ *   in `logger-methods.test.mts`; the LOG_SYMBOLS surface, internal symbol
+ *   hooks, and assorted edge cases live in `logger-symbols.test.mts`. The split
+ *   keeps each file under the `socket/max-file-lines` cap; shared
+ *   capture-stream plumbing is in `logger-fixtures.ts`.
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
@@ -454,5 +453,4 @@ describe('Logger', () => {
       expect(result).toBe(testLogger)
     })
   })
-
 })

@@ -32,7 +32,6 @@ import type { PathLike } from 'node:fs'
  * @returns Normalized unique filepath (original if it doesn't exist, or with
  *   number suffix)
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function uniqueSync(filepath: PathLike): string {
   const fs = getNodeFs()
   const path = getNodePath()

@@ -2,9 +2,9 @@
  * @file Builds the lazy-init Socket `Spinner` class that extends the live
  *   `yocto-spinner` constructor. The class graph is constructed inside
  *   `createSpinnerClass()` so the `super()` call binds against the runtime
- *   `YoctoSpinner` constructor passed in by the factory; keeping it here (rather
- *   than at module scope) preserves the spinner's lazy-init guarantee while
- *   splitting the bulk of the class body out of the factory module.
+ *   `YoctoSpinner` constructor passed in by the factory; keeping it here
+ *   (rather than at module scope) preserves the spinner's lazy-init guarantee
+ *   while splitting the bulk of the class body out of the factory module.
  */
 
 import type { ColorInherit, ColorRgb, ColorValue } from '../colors/types'
@@ -17,10 +17,7 @@ import {
   incLogCallCountSymbol,
   lastWasBlankSymbol,
 } from '../logger/symbols'
-import {
-  ArrayPrototypeAt,
-  ArrayPrototypeSlice,
-} from '../primordials/array'
+import { ArrayPrototypeAt, ArrayPrototypeSlice } from '../primordials/array'
 import { MathMax } from '../primordials/math'
 import { ObjectDefineProperties } from '../primordials/object'
 import { isBlankString } from '../strings/predicates'
@@ -193,9 +190,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Build the complete display text with progress, shimmer, and
-     * indentation. Combines base text, progress bar, shimmer effects, and
-     * indentation.
+     * Build the complete display text with progress, shimmer, and indentation.
+     * Combines base text, progress bar, shimmer effects, and indentation.
      *
      * @private
      */
@@ -340,8 +336,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Enable shimmer effect. Restores saved config or uses defaults if no
-     * saved config exists.
+     * Enable shimmer effect. Restores saved config or uses defaults if no saved
+     * config exists.
      *
      * @example
      *   spinner.enableShimmer()
@@ -368,10 +364,10 @@ export function createSpinnerClass(
     }
 
     /**
-     * Show a failure message (✗) without stopping the spinner. DESIGN
-     * DECISION: Unlike yocto-spinner, our `fail()` does NOT stop the spinner.
-     * This allows displaying errors while continuing to spin. Use
-     * `failAndStop()` if you want to stop the spinner.
+     * Show a failure message (✗) without stopping the spinner. DESIGN DECISION:
+     * Unlike yocto-spinner, our `fail()` does NOT stop the spinner. This allows
+     * displaying errors while continuing to spin. Use `failAndStop()` if you
+     * want to stop the spinner.
      *
      * @param text - Error message to display.
      * @param extras - Additional values to log.
@@ -383,8 +379,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Show a failure message (✗) and stop the spinner. Auto-clears the
-     * spinner line before displaying the error message.
+     * Show a failure message (✗) and stop the spinner. Auto-clears the spinner
+     * line before displaying the error message.
      *
      * @param text - Error message to display.
      * @param extras - Additional values to log.
@@ -396,8 +392,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Increase indentation level by adding spaces to the left. Pass 0 to
-     * reset indentation to zero completely.
+     * Increase indentation level by adding spaces to the left. Pass 0 to reset
+     * indentation to zero completely.
      *
      * @default spaces=2
      *
@@ -419,8 +415,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Show an info message (ℹ) without stopping the spinner. Outputs to
-     * stderr and continues spinning.
+     * Show an info message (ℹ) without stopping the spinner. Outputs to stderr
+     * and continues spinning.
      *
      * @param text - Info message to display.
      * @param extras - Additional values to log.
@@ -445,8 +441,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Log a message to stdout without stopping the spinner. Unlike other
-     * status methods, this outputs to stdout for data logging.
+     * Log a message to stdout without stopping the spinner. Unlike other status
+     * methods, this outputs to stdout for data logging.
      *
      * @param args - Values to log to stdout.
      *
@@ -471,8 +467,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Update progress information displayed with the spinner. Shows a
-     * progress bar with percentage and optional unit label.
+     * Update progress information displayed with the spinner. Shows a progress
+     * bar with percentage and optional unit label.
      *
      * @param current - Current progress value.
      * @param total - Total/maximum progress value.
@@ -536,10 +532,10 @@ export function createSpinnerClass(
      * line before displaying the message.
      *
      * Implementation note: Unlike other *AndStop methods (successAndStop,
-     * failAndStop, etc.), this method cannot use #apply() with a 'skip'
-     * method name because yocto-spinner doesn't have a built-in 'skip'
-     * method. Instead, we manually stop the spinner then log the message with
-     * the skip symbol.
+     * failAndStop, etc.), this method cannot use #apply() with a 'skip' method
+     * name because yocto-spinner doesn't have a built-in 'skip' method.
+     * Instead, we manually stop the spinner then log the message with the skip
+     * symbol.
      *
      * @param text - Skip message to display.
      * @param extras - Additional values to log.
@@ -558,9 +554,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Set complete shimmer configuration. Replaces any existing shimmer
-     * config with the provided values. Undefined properties will use default
-     * values.
+     * Set complete shimmer configuration. Replaces any existing shimmer config
+     * with the provided values. Undefined properties will use default values.
      *
      * @example
      *   spinner.setShimmer({
@@ -636,8 +631,8 @@ export function createSpinnerClass(
 
     /**
      * Stop the spinner animation and clear internal state. Auto-clears the
-     * spinner line via yocto-spinner.stop(). Resets progress, shimmer, and
-     * text state.
+     * spinner line via yocto-spinner.stop(). Resets progress, shimmer, and text
+     * state.
      *
      * @param text - Optional final text to display after stopping.
      *
@@ -676,11 +671,11 @@ export function createSpinnerClass(
     }
 
     /**
-     * Show a success message (✓) without stopping the spinner. DESIGN
-     * DECISION: Unlike yocto-spinner, our `success()` does NOT stop the
-     * spinner. This allows displaying success messages while continuing to
-     * spin for multi-step operations. Use `successAndStop()` if you want to
-     * stop the spinner.
+     * Show a success message (✓) without stopping the spinner. DESIGN DECISION:
+     * Unlike yocto-spinner, our `success()` does NOT stop the spinner. This
+     * allows displaying success messages while continuing to spin for
+     * multi-step operations. Use `successAndStop()` if you want to stop the
+     * spinner.
      *
      * @param text - Success message to display.
      * @param extras - Additional values to log.
@@ -692,8 +687,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Show a success message (✓) and stop the spinner. Auto-clears the
-     * spinner line before displaying the success message.
+     * Show a success message (✓) and stop the spinner. Auto-clears the spinner
+     * line before displaying the success message.
      *
      * @param text - Success message to display.
      * @param extras - Additional values to log.
@@ -706,8 +701,8 @@ export function createSpinnerClass(
 
     /**
      * Get or set the spinner text. When called with no arguments, returns the
-     * current base text. When called with text, updates the display and
-     * returns the spinner for chaining.
+     * current base text. When called with text, updates the display and returns
+     * the spinner for chaining.
      *
      * @param value - Text to display (omit to get current text)
      *
@@ -807,8 +802,8 @@ export function createSpinnerClass(
     }
 
     /**
-     * Show a warning message (⚠) and stop the spinner. Auto-clears the
-     * spinner line before displaying the warning message.
+     * Show a warning message (⚠) and stop the spinner. Auto-clears the spinner
+     * line before displaying the warning message.
      *
      * @param text - Warning message to display.
      * @param extras - Additional values to log.

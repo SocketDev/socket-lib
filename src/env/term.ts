@@ -19,7 +19,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The terminal type identifier, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getTerm(): string | undefined {
   return getEnvValue('TERM')
 }

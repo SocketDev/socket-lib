@@ -19,7 +19,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The debug filter string, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getDebug(): string | undefined {
   return getEnvValue('DEBUG')
 }

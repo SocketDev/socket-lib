@@ -38,7 +38,6 @@ export function getEscapedScopeRegExp(): RegExp {
  *   const normalized = normalizePackageJson(pkgJson)
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function normalizePackageJson(
   pkgJson: PackageJson,
   options?: NormalizeOptions,
@@ -86,7 +85,6 @@ export function normalizePackageJson(
  *   resolveEscapedScope('lodash') // undefined
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolveEscapedScope(
   sockRegPkgName: string,
 ): string | undefined {
@@ -103,7 +101,6 @@ export function resolveEscapedScope(
  *   resolveOriginalPackageName('@socketregistry/is-number') // 'is-number'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function resolveOriginalPackageName(sockRegPkgName: string): string {
   const name = StringPrototypeStartsWith(
     sockRegPkgName,
@@ -125,7 +122,6 @@ export function resolveOriginalPackageName(sockRegPkgName: string): string {
  *   unescapeScope('babel__') // '@babel'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function unescapeScope(escapedScope: string): string {
   if (escapedScope.length < REGISTRY_SCOPE_DELIMITER.length) {
     return `@${escapedScope}`

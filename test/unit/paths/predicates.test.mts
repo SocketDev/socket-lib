@@ -5,8 +5,8 @@
  *   - isNodeModules() detects node_modules in paths (Unix and Windows separators)
  *   - isAbsolute() checks for absolute paths (handles both / and C:\ styles)
  *   - isPath() validates path-like strings
- *   - isRelative() validates relative paths Tests extensively validate Windows
- *     vs Unix path handling and edge cases (empty paths, dots). Critical for
+ *   - isRelative() validates relative paths Tests extensively validate Windows vs
+ *     Unix path handling and edge cases (empty paths, dots). Critical for
  *     cross-platform file operations.
  */
 

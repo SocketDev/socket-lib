@@ -8,7 +8,6 @@ import type * as NodePath from 'node:path'
 
 let _path: typeof NodePath | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodePath(): typeof NodePath {
   return (_path ??= /*@__PURE__*/ require('node:path') as typeof NodePath)
 }

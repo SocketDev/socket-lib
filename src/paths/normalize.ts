@@ -68,7 +68,6 @@ export function msysDriveToNative(normalized: string): string {
  * (HTTP requests, file uploads, URL parameters), you MUST validate for path traversal
  * attacks BEFORE calling this function.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function normalizePath(pathLike: string | Buffer | URL): string {
   const filepath = pathLikeToString(pathLike)
   const { length } = filepath

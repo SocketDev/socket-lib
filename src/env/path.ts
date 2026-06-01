@@ -19,7 +19,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The system executable search paths, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getPath(): string | undefined {
   return getEnvValue('PATH')
 }

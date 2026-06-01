@@ -4,10 +4,8 @@
  *   - Mutation: merge() deep-merge semantics, objectAssign, objectFreeze
  *   - Aliases: objectEntries (direct reference to Object.entries-like behavior)
  *   - Sorting: entryKeyComparator(), toSortedObject(),
- *     toSortedObjectFromEntries()
- *
- *   Inspection and predicate tests live in objects.test.mts; lazy-getter tests
- *   live in objects-getters.test.mts.
+ *     toSortedObjectFromEntries() Inspection and predicate tests live in
+ *     objects.test.mts; lazy-getter tests live in objects-getters.test.mts.
  */
 
 import { merge, objectAssign, objectFreeze } from '../../src/objects/mutate'

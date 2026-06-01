@@ -53,7 +53,6 @@ export function assertArchiveExists(archivePath: string): void {
   }
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getAdmZip() {
   if (_AdmZip === undefined) {
     _AdmZip = /*@__PURE__*/ require('../external/adm-zip.js')
@@ -61,7 +60,6 @@ export function getAdmZip() {
   return _AdmZip!
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getTarFs() {
   if (_tarFs === undefined) {
     _tarFs = /*@__PURE__*/ require('../external/tar-fs.js')

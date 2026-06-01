@@ -32,7 +32,6 @@ import type { EnvAsBooleanOptions } from './types'
  * @returns `true` if value is '1', 'true', or 'yes' (case-insensitive), `false`
  *   otherwise.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function envAsBoolean(
   value: unknown,
   defaultValueOrOptions: boolean | EnvAsBooleanOptions | undefined = false,

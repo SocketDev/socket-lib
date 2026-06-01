@@ -30,7 +30,6 @@ import type { EnvAsStringOptions } from './types'
  *
  * @returns The string value, or the default value
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function envAsString(
   value: unknown,
   defaultValueOrOptions: string | EnvAsStringOptions | undefined = '',

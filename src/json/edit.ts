@@ -46,7 +46,6 @@ let _EditableJsonClass: EditableJsonConstructor | undefined
  *   await config.save({ sort: true })
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getEditableJsonClass<
   T = Record<string, unknown>,
 >(): EditableJsonConstructor<T> {

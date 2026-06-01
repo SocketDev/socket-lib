@@ -19,7 +19,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The Windows AppData roaming directory, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getAppdata(): string | undefined {
   return getEnvValue('APPDATA')
 }
@@ -38,7 +37,6 @@ export function getAppdata(): string | undefined {
  *
  * @returns The path to the command processor, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getComspec(): string | undefined {
   return getEnvValue('COMSPEC')
 }
@@ -57,7 +55,6 @@ export function getComspec(): string | undefined {
  *
  * @returns The Windows local AppData directory, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getLocalappdata(): string | undefined {
   return getEnvValue('LOCALAPPDATA')
 }
@@ -75,7 +72,6 @@ export function getLocalappdata(): string | undefined {
  *
  * @returns The Windows user profile directory, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getUserprofile(): string | undefined {
   return getEnvValue('USERPROFILE')
 }

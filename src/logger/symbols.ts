@@ -54,7 +54,8 @@ export function getKGroupIndentationWidthSymbol(): symbol {
   if (kGroupIndentationWidthSymbol === undefined) {
     kGroupIndentationWidthSymbol =
       getConsoleSymbols().find(
-        s => (s as { label?: string | undefined }).label === 'kGroupIndentWidth',
+        s =>
+          (s as { label?: string | undefined }).label === 'kGroupIndentWidth',
       ) ?? Symbol('kGroupIndentWidth')
   }
   return kGroupIndentationWidthSymbol
@@ -76,7 +77,7 @@ export const incLogCallCountSymbol = Symbol.for('logger.logCallCount++')
  */
 export const lastWasBlankSymbol = Symbol.for('logger.lastWasBlank')
 
-function createLogSymbolsProxyPlaceholder(): void {}
+export function createLogSymbolsProxyPlaceholder(): void {}
 export function createLogSymbols(): Record<string, string> {
   const target: Record<string, string> = {
     __proto__: null,

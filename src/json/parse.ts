@@ -34,7 +34,6 @@ import type {
  *
  * @returns `true` if value is a Buffer, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isBuffer(x: unknown): x is Buffer {
   if (!x || typeof x !== 'object') {
     return false
@@ -79,7 +78,6 @@ export function isBuffer(x: unknown): x is Buffer {
  *
  * @returns `true` if value is a JSON primitive, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
   return (
     value === null ||
@@ -143,7 +141,6 @@ export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
  *
  * @throws {SyntaxError} When JSON is invalid and `throws` is `true` (default)
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function parseJson(
   content: string | Buffer,
   options?: ParseJsonOptions | undefined,
@@ -213,7 +210,6 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
  *   `allowPrototype` is not `true`).
  * @throws {Error} When schema validation fails.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function parseJsonSafe<T = unknown>(
   jsonString: string,
   schema?: Schema<T> | undefined,

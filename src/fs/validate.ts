@@ -41,7 +41,6 @@ import type { ValidateFilesResult } from './types'
  *
  * @returns Object with `validPaths` (readable) and `invalidPaths` (unreadable)
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function validateFiles(
   filepaths: string[] | readonly string[],
 ): ValidateFilesResult {

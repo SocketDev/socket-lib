@@ -65,7 +65,6 @@ let _smolHttpsProbed = false
  * Returns `node:smol-https` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSmolHttps(): SmolHttpsBinding | undefined {
   if (!_smolHttpsProbed) {
     _smolHttpsProbed = true

@@ -31,7 +31,6 @@ export function emitThemeChange(theme: Theme): void {
  *
  * @private
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getAsyncHooks() {
   if (_async_hooks === undefined) {
     // Use non-'node:' prefixed require to avoid Webpack errors.

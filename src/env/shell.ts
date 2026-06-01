@@ -19,7 +19,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The user's default shell path, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getShell(): string | undefined {
   return getEnvValue('SHELL')
 }

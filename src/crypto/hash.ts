@@ -65,9 +65,7 @@ export function hash(
  */
 export function nativeHash(): typeof NodeHash | undefined {
   if (!nativeHashProbed) {
-    const fn = (
-      getNodeCrypto() as { hash?: unknown | undefined }
-    ).hash
+    const fn = (getNodeCrypto() as { hash?: unknown | undefined }).hash
     if (typeof fn === 'function') {
       cachedNativeHash = fn as typeof NodeHash
     }

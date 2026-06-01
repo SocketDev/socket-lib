@@ -26,7 +26,6 @@ let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
  * issues. Required because the upstream module uses CJS dynamic-require
  * patterns that Webpack flags.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getNpmCliPromiseSpawn() {
   if (_npmCliPromiseSpawn === undefined) {
     _npmCliPromiseSpawn = /*@__PURE__*/ require('../../external/@npmcli/promise-spawn')
@@ -42,7 +41,6 @@ export function getNpmCliPromiseSpawn() {
  *
  * @returns {unknown} The modified result object
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function stripAnsiFromSpawnResult(result: unknown): unknown {
   const res = result as {
     stdout?: string | Buffer | undefined

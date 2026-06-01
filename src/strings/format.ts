@@ -41,7 +41,6 @@ export const fromCharCode = String.fromCharCode
  *
  * @returns The string with prefix applied to each line
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function applyLinePrefix(
   str: string,
   options?: ApplyLinePrefixOptions | undefined,
@@ -89,7 +88,6 @@ export function applyLinePrefix(
  *
  * @returns The centered text with padding
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function centerText(text: string, width: number): string {
   const textLength = stripAnsi(text).length
   if (textLength >= width) {
@@ -128,7 +126,6 @@ export function centerText(text: string, width: number): string {
  *
  * @returns The indented string
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function indentString(
   str: string,
   options?: IndentStringOptions | undefined,
@@ -156,7 +153,6 @@ export function indentString(
  *
  * @returns The repeated string, or empty string if count <= 0
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function repeatString(str: string, count: number): string {
   if (count <= 0) {
     return ''

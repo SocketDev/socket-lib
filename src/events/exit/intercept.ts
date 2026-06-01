@@ -17,7 +17,6 @@ import {
 
 /* c8 ignore start - processEmit + processReallyExit interceptors
    only fire on real process exit/emit; can't be triggered in-test. */
-/*@__NO_SIDE_EFFECTS__*/
 export function processEmit(
   this: NodeJS.Process,
   eventName: string,
@@ -51,7 +50,6 @@ export function processEmit(
   ) as boolean
 }
 
-/*@__NO_SIDE_EFFECTS__*/
 export function processReallyExit(code?: number | undefined): never {
   const exitCode = code || 0
   if (globalProcess) {

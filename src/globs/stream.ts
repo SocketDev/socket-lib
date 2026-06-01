@@ -30,7 +30,6 @@ import type { GlobOptions } from './types'
  *   }
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function globStreamLicenses(
   dirname: string,
   options?: GlobOptions,

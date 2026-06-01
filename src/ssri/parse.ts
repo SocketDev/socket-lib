@@ -24,7 +24,6 @@ import { ErrorCtor } from '../primordials/error'
  *
  * @throws Error if SSRI format is invalid
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function parseSsri(ssri: string): {
   algorithm: string
   base64Hash: string

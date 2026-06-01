@@ -15,7 +15,6 @@ import { parseUrl } from './parse'
  *   isUrl(null) // false
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function isUrl(value: string | URL | null | undefined): boolean {
   return (
     ((typeof value === 'string' && value !== '') ||

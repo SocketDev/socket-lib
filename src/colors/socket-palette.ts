@@ -98,7 +98,6 @@ const HEX_BY_THEME: Record<SocketPaletteTheme, SocketPaletteHex> = {
  * `\x1b[39m` resets fg to the terminal default — using `[0m` would also clear
  * bg / styles, which the caller may have set deliberately.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function colorizer(hex: string): (s: string) => string {
   const r = parseInt(hex.slice(1, 3), 16)
   const g = parseInt(hex.slice(3, 5), 16)
@@ -120,7 +119,6 @@ export function colorizer(hex: string): (s: string) => string {
  *   process.stdout.write(palette.success('Build complete\n'))
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getPalette(theme: SocketPaletteTheme = 'dark'): SocketPalette {
   const hex = HEX_BY_THEME[theme]
   return {

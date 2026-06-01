@@ -39,7 +39,6 @@ import type { SpawnOptions } from '../process/spawn/types'
  *   await execBin('/usr/local/bin/node', ['script.js'], { cwd: '/tmp' })
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export async function execBin(
   binPath: string,
   args?: string[],

@@ -23,7 +23,6 @@ import type { IterationOptions } from '../promises/types'
  *   }
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function transform<T, U>(
   iterable: Iterable<T> | AsyncIterable<T>,
   func: (item: T) => Promise<U>,

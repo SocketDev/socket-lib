@@ -29,7 +29,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The user's home directory path, or `undefined` if not resolvable
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getHome(): string | undefined {
   return getEnvValue('HOME') ?? getEnvValue('USERPROFILE')
 }

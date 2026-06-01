@@ -14,7 +14,6 @@
  *   compareStr('a', 'a') // 0
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function compareStr(a: string, b: string): number {
   return a < b ? -1 : a > b ? 1 : 0
 }

@@ -21,7 +21,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns `true` if running in a pre-commit hook, `false` otherwise
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getPreCommit(): boolean {
   return envAsBoolean(getEnvValue('PRE_COMMIT'))
 }

@@ -8,7 +8,6 @@ import type * as NodeUrl from 'node:url'
 
 let _url: typeof NodeUrl | undefined
 
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeUrl(): typeof NodeUrl {
   return (_url ??= /*@__PURE__*/ require('node:url') as typeof NodeUrl)
 }

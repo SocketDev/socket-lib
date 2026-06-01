@@ -34,7 +34,6 @@ import { pkgNameToSlug } from '../packages/operations'
  *   // 'sdxgen/0.5.0 node/v22.10.0 darwin/arm64 embedded-by-foo/1'
  *   ```
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function buildUserAgent(
   pkg: { name: string; version: string },
   caller?: string | undefined,

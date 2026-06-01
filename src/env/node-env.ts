@@ -19,7 +19,6 @@ import { getEnvValue } from './rewire'
  *
  * @returns The Node.js environment mode, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getNodeEnv(): string | undefined {
   return getEnvValue('NODE_ENV')
 }

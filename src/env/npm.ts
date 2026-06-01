@@ -37,7 +37,6 @@ export function getNpmConfigRegistry(): string | undefined {
  *
  * @returns The package manager user agent string, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getNpmConfigUserAgent(): string | undefined {
   return getEnvValue('npm_config_user_agent')
 }
@@ -56,7 +55,6 @@ export function getNpmConfigUserAgent(): string | undefined {
  *
  * @returns The current lifecycle event name, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getNpmLifecycleEvent(): string | undefined {
   return getEnvValue('npm_lifecycle_event')
 }
@@ -74,7 +72,6 @@ export function getNpmLifecycleEvent(): string | undefined {
  *
  * @returns The NPM registry URL override, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getNpmRegistry(): string | undefined {
   return getEnvValue('NPM_REGISTRY')
 }
@@ -92,7 +89,6 @@ export function getNpmRegistry(): string | undefined {
  *
  * @returns The NPM auth token, or `undefined` if not set
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getNpmToken(): string | undefined {
   return getEnvValue('NPM_TOKEN')
 }

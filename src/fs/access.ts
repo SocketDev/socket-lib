@@ -22,7 +22,6 @@ import type { PathLike } from 'node:fs'
  *
  * @returns True if the access check succeeds.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function canAccess(path: PathLike, mode?: number | undefined): boolean {
   // Native boolean access() via node:smol-path when available — skips the
   // throw/catch + V8 error-object materialization the JS wrapper pays on
@@ -46,7 +45,6 @@ export function canAccess(path: PathLike, mode?: number | undefined): boolean {
 /**
  * Can the process execute `path`? (`X_OK`)
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function canExecute(path: PathLike): boolean {
   return canAccess(path, getNodeFs().constants.X_OK)
 }
@@ -54,7 +52,6 @@ export function canExecute(path: PathLike): boolean {
 /**
  * Can the process read `path`? (`R_OK`)
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function canRead(path: PathLike): boolean {
   return canAccess(path, getNodeFs().constants.R_OK)
 }
@@ -62,7 +59,6 @@ export function canRead(path: PathLike): boolean {
 /**
  * Can the process write `path`? (`W_OK`)
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function canWrite(path: PathLike): boolean {
   return canAccess(path, getNodeFs().constants.W_OK)
 }

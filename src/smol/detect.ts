@@ -92,7 +92,6 @@ let _smolUtilProbed = false
  * Returns `node:smol-util` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  */
-/*@__NO_SIDE_EFFECTS__*/
 export function getSmolUtil(): SmolUtilBinding | undefined {
   if (!_smolUtilProbed) {
     _smolUtilProbed = true
