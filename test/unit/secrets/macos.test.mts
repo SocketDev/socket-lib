@@ -1,18 +1,33 @@
+// IMPORTANT: src/secrets/macos.ts imports `spawn` + `spawnSync` from
+// `@socketsecurity/lib-stable/process/spawn/child` — NOT from `node:child_process`.
+// A mock against `node:child_process` is a no-op here: every call would pass
+// through to the real `security(1)` binary and write a real entry to the
+// user's login keychain. The mock below targets the actual import surface so
+// the test runs hermetically; the afterAll() further down is a defense-in-
+// depth cleanup that wipes any keychain item the test placeholders might
+// have created if a future refactor breaks the mock again.
 import { EventEmitter } from 'node:events'
 import { Readable } from 'node:stream'
 
-import type * as ChildProcess from 'node:child_process'
-
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest'
 
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawn: vi.fn(),
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock(import('node:child_process'), async () => {
-  const actual =
-    await vi.importActual<typeof ChildProcess>('node:child_process')
+vi.mock('@socketsecurity/lib-stable/process/spawn/child', async () => {
+  const actual = await vi.importActual<
+    typeof import('@socketsecurity/lib-stable/process/spawn/child')
+  >('@socketsecurity/lib-stable/process/spawn/child')
   return {
     ...actual,
     default: actual,
@@ -21,18 +36,40 @@ vi.mock(import('node:child_process'), async () => {
   }
 })
 
+// Unique, traceable placeholders. The shape `socket-lib-test:secrets/macos:*`
+// is grep-able and tells you exactly which test file would have created a
+// leaked entry. If you ever see one in `security dump-keychain`, it came from
+// this file — the afterAll() below was bypassed (probably because the mock
+// regressed and the test was talking to the real keychain).
+const TEST_SERVICE_BASE = 'socket-lib-test:secrets/macos'
+const TEST_SERVICE_WRITE = `${TEST_SERVICE_BASE}:writeMacOS-args`
+const TEST_ACCOUNT = 'unit-test-account'
+const TEST_VALUE = 'unit-test-value-do-not-trust'
+const TEST_LABEL = 'socket-lib unit test (test/unit/secrets/macos.test.mts)'
+
+// All services this file might have written to. Used by the afterAll()
+// cleanup; add any new TEST_SERVICE_* constant here.
+const ALL_TEST_SERVICES: readonly string[] = [TEST_SERVICE_WRITE]
+
 interface FakeChild extends EventEmitter {
   stdout: Readable | null | undefined
   stderr: Readable | null | undefined
 }
 
+// `@socketsecurity/lib-stable/process/spawn/child`'s `spawn()` returns
+// `{ process: ChildProcess, ... }` (the lib wraps the raw child); src code
+// does `const { process: cp } = spawn(...)`. The helper here returns the
+// wrapped shape so call sites can stay terse — `mockSpawn.mockImplementationOnce(
+// () => makeFakeChild({ ... }))` Just Works without per-call destructuring.
+// On a regression where lib-stable's spawn wrapper grows new fields, this
+// helper is the single edit point.
 function makeFakeChild(opts: {
   stdout?: string | undefined
   stderr?: string | undefined
   exitCode?: number | null | undefined
   emitError?: Error | undefined
   noStreams?: boolean | undefined
-}): FakeChild {
+}): { process: FakeChild } {
   const emitter = new EventEmitter() as FakeChild
   if (opts.noStreams) {
     emitter.stdout = undefined
@@ -55,7 +92,7 @@ function makeFakeChild(opts: {
     }
     emitter.emit('close', opts.exitCode ?? 0)
   })
-  return emitter
+  return { process: emitter }
 }
 
 async function loadFresh() {
@@ -71,6 +108,34 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.clearAllMocks()
+})
+
+// Defense-in-depth: if a future refactor breaks the vi.mock above and the
+// test reaches the real `security(1)` binary, we still don't want to leave
+// turds in the user's login keychain. Spawn the REAL security CLI here
+// (NOT the mocked module — we go through node:child_process directly) to
+// delete any item this file might have created. Best-effort: silent on
+// non-macOS, silent if the item doesn't exist (exit 44).
+afterAll(async () => {
+  if (process.platform !== 'darwin') {
+    return
+  }
+  const { spawn: realSpawn } = await vi.importActual<
+    typeof import('node:child_process')
+  >('node:child_process')
+  await Promise.all(
+    ALL_TEST_SERVICES.map(svc =>
+      new Promise<void>(resolve => {
+        const child = realSpawn(
+          '/usr/bin/security',
+          ['delete-generic-password', '-s', svc, '-a', TEST_ACCOUNT],
+          { stdio: 'ignore' },
+        )
+        child.on('close', () => resolve())
+        child.on('error', () => resolve())
+      }),
+    ),
+  )
 })
 
 describe.sequential('secrets/macos — isMacOSBackendAvailable', () => {
@@ -153,7 +218,17 @@ describe.sequential('secrets/macos — writeMacOS', () => {
       },
     )
     const { writeMacOS } = await loadFresh()
-    await writeMacOS('my-svc', 'my-acc', 'my-val', 'My Label')
+    // Traceable placeholders: service / account / value / label all carry
+    // 'socket-lib unit test' lineage so an item that ever leaks to the real
+    // keychain points back at THIS test file unambiguously. The mock above
+    // intercepts before any real `security` call; the afterAll() at the top
+    // of this file is a defense-in-depth cleanup in case the mock regresses.
+    await writeMacOS(
+      TEST_SERVICE_WRITE,
+      TEST_ACCOUNT,
+      TEST_VALUE,
+      TEST_LABEL,
+    )
     expect(capturedArgs).toContain('add-generic-password')
     expect(capturedArgs).toContain('-U')
     expect(capturedArgs).toContain('-A')
@@ -162,8 +237,8 @@ describe.sequential('secrets/macos — writeMacOS', () => {
     expect(capturedArgs[tIdx + 1]).toBe('')
     expect(capturedArgs).toContain('-D')
     expect(capturedArgs).toContain('-l')
-    expect(capturedArgs).toContain('My Label')
-    expect(capturedArgs).toContain('my-val')
+    expect(capturedArgs).toContain(TEST_LABEL)
+    expect(capturedArgs).toContain(TEST_VALUE)
   })
 
   test('throws with stderr-trimmed detail on non-zero status', async () => {

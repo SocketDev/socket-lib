@@ -1,18 +1,35 @@
+// IMPORTANT: src/secrets/linux.ts imports `spawn` + `spawnSync` from
+// `@socketsecurity/lib-stable/process/spawn/child` — NOT from
+// `node:child_process`. A mock against `node:child_process` is a no-op:
+// every call would pass through to the real `secret-tool` binary. On
+// macOS that fails benignly (no secret-tool installed); on Linux it
+// would write a real entry to the user's libsecret keyring. The mock
+// below targets the actual import surface so the test runs hermetically;
+// the afterAll() further down is a defense-in-depth cleanup that wipes
+// any libsecret item the test placeholders might have created if a
+// future refactor breaks the mock again.
 import { EventEmitter } from 'node:events'
 import { Readable, Writable } from 'node:stream'
 
-import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
-
-import type childProcess from 'node:child_process'
+import {
+  afterAll,
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  test,
+  vi,
+} from 'vitest'
 
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawn: vi.fn(),
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock(import('node:child_process'), async () => {
-  const actual =
-    await vi.importActual<typeof childProcess>('node:child_process')
+vi.mock('@socketsecurity/lib-stable/process/spawn/child', async () => {
+  const actual = await vi.importActual<
+    typeof import('@socketsecurity/lib-stable/process/spawn/child')
+  >('@socketsecurity/lib-stable/process/spawn/child')
   return {
     ...actual,
     default: actual,
@@ -21,18 +38,37 @@ vi.mock(import('node:child_process'), async () => {
   }
 })
 
+// Unique, traceable placeholders. The shape `socket-lib-test:secrets/linux:*`
+// is grep-able and tells you exactly which test file would have created a
+// leaked entry. If you ever see one in `secret-tool search` (Linux) or
+// `security dump-keychain` (macOS — should never happen, secret-tool isn't
+// macOS), it came from this file — the afterAll() below was bypassed
+// (probably because the mock regressed).
+const TEST_SERVICE_BASE = 'socket-lib-test:secrets/linux'
+const TEST_SERVICE_WRITE = `${TEST_SERVICE_BASE}:writeLinux-args`
+const TEST_ACCOUNT = 'unit-test-account'
+const TEST_VALUE = 'unit-test-value-do-not-trust'
+const TEST_LABEL = 'socket-lib unit test (test/unit/secrets/linux.test.mts)'
+
+const ALL_TEST_SERVICES: readonly string[] = [TEST_SERVICE_WRITE]
+
 interface FakeChild extends EventEmitter {
   stdin: Writable
   stdout: Readable | null
   stderr: Readable | null
 }
 
+// `@socketsecurity/lib-stable/process/spawn/child`'s `spawn()` returns
+// `{ process: ChildProcess, ... }` (the lib wraps the raw child); src code
+// does `const { process: cp } = spawn(...)`. Returns the wrapped shape so
+// `mockSpawn.mockImplementationOnce(() => makeFakeChild({ ... }))` Just
+// Works without per-call destructuring.
 function makeFakeChild(opts: {
   stdout?: string | undefined
   stderr?: string | undefined
   exitCode?: number | null | undefined
   emitError?: Error | undefined
-}): FakeChild {
+}): { process: FakeChild } {
   const emitter = new EventEmitter() as FakeChild
   emitter.stdin = new Writable({
     write(_c, _e, cb) {
@@ -53,7 +89,7 @@ function makeFakeChild(opts: {
     }
     emitter.emit('close', opts.exitCode ?? 0)
   })
-  return emitter
+  return { process: emitter }
 }
 
 async function loadFresh() {
@@ -69,6 +105,33 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.clearAllMocks()
+})
+
+// Defense-in-depth: if a future refactor breaks the vi.mock above and
+// reaches the real `secret-tool` binary, we still don't want libsecret
+// turds. Spawns the REAL secret-tool here (NOT the mocked module — we go
+// through node:child_process directly) to clear any leaked entries.
+// Best-effort: silent on non-Linux, silent if the item doesn't exist.
+afterAll(async () => {
+  if (process.platform !== 'linux') {
+    return
+  }
+  const { spawn: realSpawn } = await vi.importActual<
+    typeof import('node:child_process')
+  >('node:child_process')
+  await Promise.all(
+    ALL_TEST_SERVICES.map(svc =>
+      new Promise<void>(resolve => {
+        const child = realSpawn(
+          'secret-tool',
+          ['clear', 'service', svc, 'account', TEST_ACCOUNT],
+          { stdio: 'ignore' },
+        )
+        child.on('close', () => resolve())
+        child.on('error', () => resolve())
+      }),
+    ),
+  )
 })
 
 describe.sequential('secrets/linux — isLinuxBackendAvailable', () => {
@@ -145,7 +208,10 @@ describe.sequential('secrets/linux — writeLinux', () => {
     const stdinWrites: string[] = []
     mockSpawn.mockImplementationOnce(() => {
       const c = makeFakeChild({ exitCode: 0 })
-      c.stdin = new Writable({
+      // makeFakeChild returns { process: FakeChild }; override stdin on
+      // the wrapped emitter so the test captures the secret bytes written
+      // to the child rather than the no-op default.
+      c.process.stdin = new Writable({
         write(chunk, _e, cb) {
           stdinWrites.push(String(chunk))
           cb()
@@ -154,10 +220,13 @@ describe.sequential('secrets/linux — writeLinux', () => {
       return c
     })
     const { writeLinux } = await loadFresh()
+    // Traceable placeholders: service / account / value / label all carry
+    // 'socket-lib unit test' lineage. The mock above intercepts before any
+    // real `secret-tool` call; the afterAll() is defense-in-depth.
     await expect(
-      writeLinux('svc', 'acc', 'secret-val', 'My Label'),
+      writeLinux(TEST_SERVICE_WRITE, TEST_ACCOUNT, TEST_VALUE, TEST_LABEL),
     ).resolves.toBeUndefined()
-    expect(stdinWrites.join('')).toBe('secret-val')
+    expect(stdinWrites.join('')).toBe(TEST_VALUE)
   })
 
   test('passes --label=<label> and service/user attributes', async () => {
