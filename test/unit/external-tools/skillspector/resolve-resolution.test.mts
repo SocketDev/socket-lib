@@ -14,18 +14,14 @@ vi.mock('../../../../src/external-tools/skillspector/from-dlx', () => ({
 }))
 
 async function loadFresh() {
-  const vfsMod = await import(
-    '../../../../src/external-tools/skillspector/from-vfs'
-  )
-  const pathMod = await import(
-    '../../../../src/external-tools/skillspector/from-path'
-  )
-  const dlxMod = await import(
-    '../../../../src/external-tools/skillspector/from-dlx'
-  )
-  const mod = await import(
-    '../../../../src/external-tools/skillspector/resolve'
-  )
+  const vfsMod =
+    await import('../../../../src/external-tools/skillspector/from-vfs')
+  const pathMod =
+    await import('../../../../src/external-tools/skillspector/from-path')
+  const dlxMod =
+    await import('../../../../src/external-tools/skillspector/from-dlx')
+  const mod =
+    await import('../../../../src/external-tools/skillspector/resolve')
   return {
     vfsMock: vfsMod.skillspectorFromVfs as ReturnType<typeof vi.fn>,
     pathMock: pathMod.skillspectorFromPath as ReturnType<typeof vi.fn>,

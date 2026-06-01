@@ -10,13 +10,10 @@ vi.mock('../../../../src/paths/socket', () => ({
 }))
 
 async function loadFresh() {
-  const venvMod = await import(
-    '../../../../src/external-tools/from-pip-venv'
-  )
+  const venvMod = await import('../../../../src/external-tools/from-pip-venv')
   const createMock = venvMod.createPipVenv as ReturnType<typeof vi.fn>
-  const mod = await import(
-    '../../../../src/external-tools/skillspector/from-dlx'
-  )
+  const mod =
+    await import('../../../../src/external-tools/skillspector/from-dlx')
   return { createMock, skillspectorFromDlx: mod.skillspectorFromDlx }
 }
 

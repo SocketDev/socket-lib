@@ -4,9 +4,7 @@ import { cacheKey } from '../../../../src/external-tools/skillspector/resolve'
 
 describe.sequential('external-tools/skillspector/resolve / cacheKey', () => {
   test('different SHAs produce different keys', () => {
-    expect(cacheKey({ sha: 'abc1234' })).not.toBe(
-      cacheKey({ sha: 'def5678' }),
-    )
+    expect(cacheKey({ sha: 'abc1234' })).not.toBe(cacheKey({ sha: 'def5678' }))
   })
 
   test('same SHA produces stable keys', () => {

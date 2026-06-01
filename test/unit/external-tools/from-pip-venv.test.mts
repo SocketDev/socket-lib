@@ -1,7 +1,7 @@
 /**
- * @file Tests for src/external-tools/from-pip-venv.ts. Pure helpers are
- *   covered directly; the venv-creation function is covered with mocked
- *   spawn + filesystem so the test never spawns Python.
+ * @file Tests for src/external-tools/from-pip-venv.ts. Pure helpers are covered
+ *   directly; the venv-creation function is covered with mocked spawn +
+ *   filesystem so the test never spawns Python.
  */
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
@@ -11,7 +11,10 @@ import { pipVenvEntryPointPath } from '../../../src/external-tools/from-pip-venv
 vi.mock('../../../src/bin/which', () => ({
   which:
     vi.fn<
-      (name: string, opts?: { nothrow?: boolean }) => Promise<string | undefined>
+      (
+        name: string,
+        opts?: { nothrow?: boolean },
+      ) => Promise<string | undefined>
     >(),
 }))
 
@@ -111,7 +114,8 @@ describe.sequential('external-tools/from-pip-venv / findPython', () => {
 
 describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
   test('cache hit: returns existing entry-point without spawning', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } = await loadFresh()
+    const { createPipVenv, existsMock, spawnMock, whichMock } =
+      await loadFresh()
     // First existsSync (entry-point) returns true → cache hit.
     existsMock.mockReturnValue(true)
     const result = await createPipVenv({
@@ -126,7 +130,8 @@ describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
   })
 
   test('cache miss: creates venv then pip-installs', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } = await loadFresh()
+    const { createPipVenv, existsMock, spawnMock, whichMock } =
+      await loadFresh()
     // 1st existsSync (entry-point check) → false (cache miss)
     // 2nd existsSync (venv python check) → true (venv created)
     // 3rd existsSync (post-install entry-point check) → true (install OK)
@@ -166,7 +171,8 @@ describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
   })
 
   test('throws when venv create succeeds but the venv python is missing', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } = await loadFresh()
+    const { createPipVenv, existsMock, spawnMock, whichMock } =
+      await loadFresh()
     // entry-point check → miss; venv python → missing (venv broken)
     existsMock.mockReturnValueOnce(false).mockReturnValueOnce(false)
     whichMock.mockResolvedValueOnce('/usr/bin/python3')
@@ -181,7 +187,8 @@ describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
   })
 
   test('throws when pip install succeeds but entry-point not created', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } = await loadFresh()
+    const { createPipVenv, existsMock, spawnMock, whichMock } =
+      await loadFresh()
     // entry-point check → miss; venv python → present; post-install entry-point → still missing
     existsMock
       .mockReturnValueOnce(false)
@@ -199,7 +206,8 @@ describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
   })
 
   test('caller-supplied python override skips findPython', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } = await loadFresh()
+    const { createPipVenv, existsMock, spawnMock, whichMock } =
+      await loadFresh()
     existsMock
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(true)
@@ -218,7 +226,8 @@ describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
   })
 
   test('passes --no-input + --disable-pip-version-check to pip install', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } = await loadFresh()
+    const { createPipVenv, existsMock, spawnMock, whichMock } =
+      await loadFresh()
     existsMock
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(true)
@@ -236,7 +245,8 @@ describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
   })
 
   test('git-SHA installSpec is passed through verbatim', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } = await loadFresh()
+    const { createPipVenv, existsMock, spawnMock, whichMock } =
+      await loadFresh()
     existsMock
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(true)

@@ -1,8 +1,8 @@
 /**
  * @file `skillspectorFromPath()` — `which skillspector` lookup. Reports
  *   `source: 'pipx'` when the resolved path lives under a `pipx/venvs/`
- *   directory (the dev's `pipx install skillspector` path); reports
- *   `source: 'path'` otherwise (a one-off binary on PATH).
+ *   directory (the dev's `pipx install skillspector` path); reports `source:
+ *   'path'` otherwise (a one-off binary on PATH).
  */
 
 import path from 'node:path'

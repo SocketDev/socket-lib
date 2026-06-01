@@ -3,7 +3,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 vi.mock('../../../../src/bin/which', () => ({
   which:
     vi.fn<
-      (name: string, opts?: { nothrow?: boolean }) => Promise<string | undefined>
+      (
+        name: string,
+        opts?: { nothrow?: boolean },
+      ) => Promise<string | undefined>
     >(),
   whichSync: vi.fn(),
 }))
@@ -11,9 +14,8 @@ vi.mock('../../../../src/bin/which', () => ({
 async function loadFresh() {
   const whichMod = await import('../../../../src/bin/which')
   const whichMock = whichMod.which as ReturnType<typeof vi.fn>
-  const mod = await import(
-    '../../../../src/external-tools/skillspector/from-path'
-  )
+  const mod =
+    await import('../../../../src/external-tools/skillspector/from-path')
   return { whichMock, skillspectorFromPath: mod.skillspectorFromPath }
 }
 
