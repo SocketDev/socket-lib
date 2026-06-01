@@ -62,7 +62,7 @@ describe('eco/npm/pnpm/parse-lockfile', () => {
     })
 
     it('captures both v5 entries', () => {
-      const names = result.packages.map(p => p.name).sort()
+      const names = result.packages.map(p => p.name).toSorted()
       expect(names).toEqual(['@babel/core', 'lodash'])
     })
 
@@ -95,7 +95,7 @@ describe('eco/npm/pnpm/parse-lockfile', () => {
     })
 
     it('captures importer + snapshot entries together', () => {
-      const names = result.packages.map(p => p.name).sort()
+      const names = result.packages.map(p => p.name).toSorted()
       expect(names).toContain('lodash')
       expect(names).toContain('vitest')
     })
@@ -210,7 +210,9 @@ describe('eco/npm/pnpm/parse-lockfile', () => {
       entry._inDeps = true
       const ref = freezeEntry(entry)
       expect(Object.isFrozen(ref)).toBe(true)
-      expect((ref as unknown as { _inDeps?: boolean })._inDeps).toBe(undefined)
+      expect(
+        (ref as unknown as { _inDeps?: boolean | undefined })._inDeps,
+      ).toBe(undefined)
     })
 
     it('addToPnpmIndex builds singletons + multi-version arrays', () => {

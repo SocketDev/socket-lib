@@ -45,7 +45,7 @@ export type ArrayFromAsync = <T>(
     | ArrayLike<T | PromiseLike<T>>,
 ) => Promise<T[]>
 export const ArrayFromAsync: ArrayFromAsync | undefined = (
-  Array as unknown as { fromAsync?: ArrayFromAsync }
+  Array as unknown as { fromAsync?: ArrayFromAsync | undefined }
 ).fromAsync
 // `arrayIsArray` is a Fast API binding — a single map-pointer
 // comparison that V8 inlines into JIT'd callers. Spec semantics
@@ -144,7 +144,7 @@ const _anyIterator = new Map().keys() as Iterator<unknown>
 let _iteratorLookup: object | null = Object.getPrototypeOf(_anyIterator)
 while (
   _iteratorLookup &&
-  typeof (_iteratorLookup as { next?: unknown }).next !== 'function'
+  typeof (_iteratorLookup as { next?: unknown | undefined }).next !== 'function'
 ) {
   /* c8 ignore next - Modern V8 puts Iterator.prototype one hop up the chain
      so the first check already finds .next; the walk-further branch fires
@@ -153,7 +153,9 @@ while (
 }
 const _iteratorProto = _iteratorLookup as {
   next: (this: Iterator<unknown>) => IteratorResult<unknown>
-  return?: (this: Iterator<unknown>, value?: unknown) => IteratorResult<unknown>
+  return?:
+    | ((this: Iterator<unknown>, value?: unknown) => IteratorResult<unknown>)
+    | undefined
 }
 export const IteratorPrototypeNext = uncurryThis(_iteratorProto.next)
 // Iterator.prototype.return is always a function in modern V8.

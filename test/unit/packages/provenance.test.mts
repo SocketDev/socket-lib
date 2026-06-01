@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // Mock make-fetch-happen BEFORE importing provenance so the SUT picks up
 // the mocked fetcher factory.
 const mockFetcher = vi.fn()
-vi.mock('../../../src/external/make-fetch-happen', () => ({
+vi.mock(import('../../../src/external/make-fetch-happen'), () => ({
   default: {
     defaults: vi.fn(() => mockFetcher),
   },

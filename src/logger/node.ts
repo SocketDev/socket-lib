@@ -69,10 +69,10 @@ export class Logger {
    */
   static LOG_SYMBOLS = LOG_SYMBOLS
 
-  #parent?: Logger
-  #boundStream?: 'stderr' | 'stdout'
-  #stderrLogger?: Logger
-  #stdoutLogger?: Logger
+  #parent?: Logger | undefined
+  #boundStream?: 'stderr' | 'stdout' | undefined
+  #stderrLogger?: Logger | undefined
+  #stdoutLogger?: Logger | undefined
   #stderrIndention = ''
   #stdoutIndention = ''
   #stderrLastWasBlank = false
@@ -80,7 +80,7 @@ export class Logger {
   #logCallCount = 0
   #options: Record<string, unknown>
   #originalStdout?: NodeJS.WritableStream | undefined
-  #theme?: import('../themes/types').Theme
+  #theme?: import('../themes/types').Theme | undefined
 
   /**
    * Creates a new Logger instance.
@@ -101,11 +101,11 @@ export class Logger {
       this.#options = { __proto__: null, ...options }
       // Store reference to original stdout stream to bypass Console formatting
       this.#originalStdout = (
-        options as { stdout?: NodeJS.WritableStream }
+        options as { stdout?: NodeJS.WritableStream | undefined }
       ).stdout
 
       // Handle theme option
-      const themeOption = (options as { theme?: unknown }).theme
+      const themeOption = (options as { theme?: unknown | undefined }).theme
       if (themeOption) {
         if (typeof themeOption === 'string') {
           // Theme name - resolve to Theme object
@@ -989,7 +989,11 @@ export class Logger {
     /* c8 ignore start */
     const stdout =
       this.#originalStdout ||
-      (ctorArgs[0] as { stdout?: NodeJS.WritableStream } | undefined)?.stdout ||
+      (
+        ctorArgs[0] as
+          | { stdout?: NodeJS.WritableStream | undefined }
+          | undefined
+      )?.stdout ||
       (con as unknown as { _stdout: NodeJS.WritableStream })._stdout
     /* c8 ignore stop */
     stdout.write(text)

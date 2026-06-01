@@ -94,8 +94,8 @@ describe('stdio/stderr', () => {
     })
 
     it('should write text without newline', () => {
-      writeError('Downloading...')
-      expect(getContext().writeSpy).toHaveBeenCalledWith('Downloading...')
+      writeError('Downloading…')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Downloading…')
     })
 
     it('should write empty string', () => {

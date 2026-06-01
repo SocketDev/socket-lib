@@ -35,9 +35,9 @@ export const globalConsole = console
  */
 export const consolePropAttributes = {
   __proto__: null,
-  writable: true,
-  enumerable: false,
   configurable: true,
+  enumerable: false,
+  writable: true,
 }
 
 /**

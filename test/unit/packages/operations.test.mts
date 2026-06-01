@@ -890,7 +890,7 @@ describe('packages/operations', () => {
         const tarball = await packPackage(extractDest)
         expect(Buffer.isBuffer(tarball)).toBe(true)
       }, 'integration-extract-read-pack-')
-    }, 60000)
+    }, 60_000)
   })
 
   describe('integration scenarios', () => {

@@ -8,7 +8,7 @@
  *   readable.pipe(createBrotliCompressor()).pipe(writable)
  */
 
-import { Buffer } from 'node:buffer'
+import type { Buffer } from 'node:buffer'
 import { createReadStream, createWriteStream } from 'node:fs'
 import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
@@ -19,8 +19,8 @@ import {
   constants as zlibConstants,
   createBrotliCompress,
   createBrotliDecompress,
-  type BrotliOptions,
 } from 'node:zlib'
+import type { BrotliOptions } from 'node:zlib'
 
 import { safeDelete } from '../fs/safe'
 import { ErrorCtor } from '../primordials/error'

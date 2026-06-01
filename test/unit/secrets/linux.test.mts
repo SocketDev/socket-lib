@@ -8,7 +8,7 @@ const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock('node:child_process', async () => {
+vi.mock(import('node:child_process'), async () => {
   const actual =
     await vi.importActual<typeof import('node:child_process')>(
       'node:child_process',
@@ -28,10 +28,10 @@ interface FakeChild extends EventEmitter {
 }
 
 function makeFakeChild(opts: {
-  stdout?: string
-  stderr?: string
+  stdout?: string | undefined
+  stderr?: string | undefined
   exitCode?: number | null | undefined
-  emitError?: Error
+  emitError?: Error | undefined
 }): FakeChild {
   const emitter = new EventEmitter() as FakeChild
   emitter.stdin = new Writable({
@@ -220,7 +220,11 @@ describe.sequential('secrets/linux — writeLinuxSync', () => {
   test('passes input: value so password never reaches argv', async () => {
     let capturedInput: unknown
     mockSpawnSync.mockImplementationOnce(
-      (_bin: string, _args: readonly string[], opts: { input?: unknown }) => {
+      (
+        _bin: string,
+        _args: readonly string[],
+        opts: { input?: unknown | undefined },
+      ) => {
         capturedInput = opts.input
         return { status: 0, stderr: '' }
       },

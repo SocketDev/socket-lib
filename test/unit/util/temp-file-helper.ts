@@ -129,8 +129,8 @@ export async function withTempDir(prefix: string): Promise<{
 export async function withTempFile(
   content: string,
   options: {
-    extension?: string
-    prefix?: string
+    extension?: string | undefined
+    prefix?: string | undefined
   } = {},
 ): Promise<{
   cleanup: () => Promise<void>

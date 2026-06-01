@@ -22,8 +22,8 @@ import { createMockHttpResponse } from '../util/http-mock'
 
 import type { HttpDownloadResult } from '../../../src/http-request/download-types'
 
-vi.mock('../../../src/http-request/download')
-vi.mock('../../../src/http-request/request')
+vi.mock(import('../../../src/http-request/download'))
+vi.mock(import('../../../src/http-request/request'))
 
 const JSONStringify = JSON.stringify
 

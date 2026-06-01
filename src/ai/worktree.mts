@@ -44,23 +44,23 @@ export interface WorktreeRunOptions {
   /**
    * Branch to merge results into. Default: current branch of baseRepo.
    */
-  readonly branch?: string
+  readonly branch?: string | undefined
   /**
    * Cleanup policy. Default 'always'.
    */
-  readonly cleanup?: WorktreeCleanup
+  readonly cleanup?: WorktreeCleanup | undefined
   /**
    * Parallel cap. Default 4, max 8.
    */
-  readonly concurrency?: number
+  readonly concurrency?: number | undefined
   /**
    * Prefix for worktree branch + dir names. Default 'agent-task'.
    */
-  readonly namePrefix?: string
+  readonly namePrefix?: string | undefined
   /**
    * Where worktrees live on disk. Default: `${tmpdir}/${prefix}-<n>`.
    */
-  readonly worktreeRoot?: string
+  readonly worktreeRoot?: string | undefined
 }
 
 export interface WorktreeRunContext {
@@ -80,7 +80,7 @@ export interface WorktreeRunContext {
 
 export interface WorktreeRunSettled<T> {
   readonly cleanup: 'removed' | 'kept'
-  readonly error?: unknown
+  readonly error?: unknown | undefined
   readonly merged: boolean
   readonly status: 'fulfilled' | 'rejected'
   readonly value?: T | undefined

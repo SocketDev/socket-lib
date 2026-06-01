@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/trivy/from-vfs', () => ({
+vi.mock(import('../../../../src/external-tools/trivy/from-vfs'), () => ({
   trivyFromVfs: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/trivy/from-path', () => ({
+vi.mock(import('../../../../src/external-tools/trivy/from-path'), () => ({
   trivyFromPath: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/trivy/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/trivy/from-download'), () => ({
   trivyFromDownload: vi.fn(),
 }))
 

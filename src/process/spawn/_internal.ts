@@ -17,7 +17,7 @@ export const stackCache = new WeakMapCtor<Error, string>()
 // Validated with existsSync() which is much cheaper than PATH search.
 export const spawnBinPathCache = new MapCtor<string, string>()
 
-export const windowsScriptExtRegExp = /\.(?:cmd|bat|ps1)$/i
+export const windowsScriptExtRegExp = /\.(?:bat|cmd|ps1)$/i
 
 let _npmCliPromiseSpawn: typeof npmCliPromiseSpawnType | undefined
 
@@ -45,8 +45,8 @@ export function getNpmCliPromiseSpawn() {
 /*@__NO_SIDE_EFFECTS__*/
 export function stripAnsiFromSpawnResult(result: unknown): unknown {
   const res = result as {
-    stdout?: string | Buffer
-    stderr?: string | Buffer
+    stdout?: string | Buffer | undefined
+    stderr?: string | Buffer | undefined
   }
   const { stderr, stdout } = res
   if (typeof stdout === 'string') {

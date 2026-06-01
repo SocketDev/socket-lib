@@ -21,7 +21,9 @@ const WIN32 = process.platform === 'win32'
 
 type PackageExports = Record<
   string,
-  string | { types?: string; default?: string } | undefined
+  | string
+  | { types?: string | undefined; default?: string | undefined }
+  | undefined
 >
 
 type Row = { subpath: string; file: string; summary: string }
@@ -90,7 +92,8 @@ export function extractSummary(srcPath: string): string {
 
 export function groupRows(rows: Row[]): Map<string, Row[]> {
   const groups = new Map<string, Row[]>()
-  for (const row of rows) {
+  for (let i = 0, { length } = rows; i < length; i += 1) {
+    const row = rows[i]!
     const key = row.subpath.includes('/')
       ? `${row.subpath.split('/')[0]}/`
       : 'Top-level'
@@ -102,7 +105,7 @@ export function groupRows(rows: Row[]): Map<string, Row[]> {
 }
 
 export function renderMarkdown(groups: Map<string, Row[]>): string {
-  const keys = [...groups.keys()].sort((a, b) => {
+  const keys = [...groups.keys()].toSorted((a, b) => {
     if (a === 'Top-level') {
       return -1
     }

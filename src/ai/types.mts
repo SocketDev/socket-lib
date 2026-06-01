@@ -59,15 +59,15 @@ export interface SpawnAiAgentOptions {
   /**
    * Optional explicit agent. Defaults to claude when discovered.
    */
-  readonly agent?: AiAgentName
+  readonly agent?: AiAgentName | undefined
   /**
    * Allow-list extras (Bash glob patterns, MCP tools, etc.).
    */
-  readonly allow?: readonly string[]
+  readonly allow?: readonly string[] | undefined
   /**
    * Extra dirs the agent can read (e.g. parent of cwd for monorepo).
    */
-  readonly addDirs?: readonly string[]
+  readonly addDirs?: readonly string[] | undefined
   /**
    * Tool denylist — required to enforce the lockdown.
    */
@@ -75,11 +75,11 @@ export interface SpawnAiAgentOptions {
   /**
    * Override the agent's flag list (rare; for one-off advanced cases).
    */
-  readonly extraArgs?: readonly string[]
+  readonly extraArgs?: readonly string[] | undefined
   /**
    * Model name override; agent default if absent.
    */
-  readonly model?: string
+  readonly model?: string | undefined
   /**
    * Permission mode — see PermissionMode docstring.
    */
@@ -95,7 +95,7 @@ export interface SpawnAiAgentOptions {
   /**
    * Per-call timeout (ms). Caller should set for predictable bounds.
    */
-  readonly timeoutMs?: number
+  readonly timeoutMs?: number | undefined
   /**
    * Tool allowlist. Required to enforce the lockdown.
    */

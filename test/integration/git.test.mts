@@ -66,7 +66,7 @@ describe('git integration', () => {
         const result = await spawn('git', ['branch', '--show-current'], {
           cwd: tmpDir,
         })
-        expect(result.stdout.toString().trim()).toMatch(/^(main|master)$/)
+        expect(result.stdout.toString().trim()).toMatch(/^(?:main|master)$/)
       }, 'git-branch-test-')
     })
 

@@ -68,21 +68,21 @@ const LIB_PRIMORDIALS = path.resolve(
 )
 
 interface ExpectedFile {
-  readonly rewrites?: number
-  readonly importAdded?: boolean
-  readonly contentIncludes?: readonly string[]
-  readonly contentExcludes?: readonly string[]
+  readonly rewrites?: number | undefined
+  readonly importAdded?: boolean | undefined
+  readonly contentIncludes?: readonly string[] | undefined
+  readonly contentExcludes?: readonly string[] | undefined
 }
 
 interface ExpectedFinding {
   readonly kind: string
-  readonly fileMatches?: string
+  readonly fileMatches?: string | undefined
 }
 
 interface Expected {
   readonly ok: boolean
-  readonly findings?: readonly ExpectedFinding[]
-  readonly files?: Readonly<Record<string, ExpectedFile>>
+  readonly findings?: readonly ExpectedFinding[] | undefined
+  readonly files?: Readonly<Record<string, ExpectedFile>> | undefined
 }
 
 /**

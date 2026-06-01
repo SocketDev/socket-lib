@@ -43,7 +43,7 @@ describe('sorts', () => {
 
     it('should sort strings correctly', () => {
       const arr = ['zebra', 'apple', 'banana']
-      const sorted = arr.slice().sort(localeCompare)
+      const sorted = arr.slice().toSorted(localeCompare)
       expect(sorted).toEqual(['apple', 'banana', 'zebra'])
     })
 
@@ -82,7 +82,7 @@ describe('sorts', () => {
 
     it('should sort files with numbers naturally', () => {
       const arr = ['file10', 'file2', 'file1', 'file20']
-      const sorted = arr.slice().sort(naturalCompare)
+      const sorted = arr.slice().toSorted(naturalCompare)
       expect(sorted).toEqual(['file1', 'file2', 'file10', 'file20'])
     })
 
@@ -94,7 +94,7 @@ describe('sorts', () => {
 
     it('should handle mixed alphanumeric strings', () => {
       const arr = ['v1.2', 'v1.10', 'v1.3']
-      const sorted = arr.slice().sort(naturalCompare)
+      const sorted = arr.slice().toSorted(naturalCompare)
       expect(sorted).toEqual(['v1.2', 'v1.3', 'v1.10'])
     })
 
@@ -205,7 +205,7 @@ describe('sorts', () => {
 
     it('should sort strings correctly', () => {
       const arr = ['zebra', 'apple', 'banana', 'Apple']
-      const sorted = arr.slice().sort(compareStr)
+      const sorted = arr.slice().toSorted(compareStr)
       expect(sorted).toEqual(['Apple', 'apple', 'banana', 'zebra'])
     })
 
@@ -268,7 +268,7 @@ describe('sorts', () => {
 
     it('should sort versions correctly', () => {
       const arr = ['2.0.0', '1.1.0', '1.0.0', '1.0.1']
-      const sorted = arr.slice().sort(compareSemver)
+      const sorted = arr.slice().toSorted(compareSemver)
       expect(sorted).toEqual(['1.0.0', '1.0.1', '1.1.0', '2.0.0'])
     })
 
@@ -284,7 +284,7 @@ describe('sorts', () => {
 
     it('should handle mixed valid and invalid versions', () => {
       const arr = ['2.0.0', 'invalid', '1.0.0', '1.5.0']
-      const sorted = arr.slice().sort(compareSemver)
+      const sorted = arr.slice().toSorted(compareSemver)
       expect(sorted[0]).toBe('invalid') // invalid sorts first
       expect(sorted.slice(1)).toEqual(['1.0.0', '1.5.0', '2.0.0'])
     })

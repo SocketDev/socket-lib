@@ -107,22 +107,22 @@ describe('Set composition primordials', () => {
 
   it('SetPrototypeDifference returns elements in a but not b', () => {
     const result = SetPrototypeDifference(a, b)
-    expect([...result].sort()).toEqual([1])
+    expect([...result].toSorted()).toEqual([1])
   })
 
   it('SetPrototypeIntersection returns elements in both', () => {
     const result = SetPrototypeIntersection(a, b)
-    expect([...result].sort()).toEqual([2, 3])
+    expect([...result].toSorted()).toEqual([2, 3])
   })
 
   it('SetPrototypeUnion returns elements in either', () => {
     const result = SetPrototypeUnion(a, b)
-    expect([...result].sort()).toEqual([1, 2, 3, 4])
+    expect([...result].toSorted()).toEqual([1, 2, 3, 4])
   })
 
   it('SetPrototypeSymmetricDifference returns elements in either but not both', () => {
     const result = SetPrototypeSymmetricDifference(a, b)
-    expect([...result].sort()).toEqual([1, 4])
+    expect([...result].toSorted()).toEqual([1, 4])
   })
 
   it('SetPrototypeIsSubsetOf returns true when all elements appear in the other', () => {

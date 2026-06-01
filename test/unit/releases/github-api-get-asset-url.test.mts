@@ -12,7 +12,7 @@ import { httpRequest } from '../../../src/http-request/request'
 
 import { createMockHttpResponse } from '../util/http-mock'
 
-vi.mock('../../../src/http-request/request')
+vi.mock(import('../../../src/http-request/request'))
 
 const JSONStringify = JSON.stringify
 

@@ -136,7 +136,7 @@ export function checkPrimordials(
 
   // Diff.
   const findings: PrimordialsFinding[] = []
-  for (const name of [...used].sort()) {
+  for (const name of [...used].toSorted()) {
     if (config.nodeInternalOnly.has(name)) {
       continue
     }
@@ -206,7 +206,8 @@ export function collectJsFiles(dir: string): string[] {
     } catch {
       continue
     }
-    for (const name of entries) {
+    for (let i = 0, { length } = entries; i < length; i += 1) {
+      const name = entries[i]!
       const full = path.join(cur, name)
       let stat
       try {

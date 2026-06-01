@@ -28,7 +28,8 @@ export function sh(cwd: string, cmd: string): string {
     }
   }
   let out = ''
-  for (const argv of segments) {
+  for (let i = 0, { length } = segments; i < length; i += 1) {
+    const argv = segments[i]!
     const file = argv[0]
     if (!file) {
       throw new Error(`sh: empty command segment in: ${cmd}`)

@@ -105,20 +105,22 @@ export interface GitHubTag {
   /**
    * Information about who created the tag. Undefined for lightweight tags.
    */
-  tagger?: {
-    /**
-     * Tag creation date in ISO 8601 format.
-     */
-    date: string
-    /**
-     * Tagger's email address.
-     */
-    email: string
-    /**
-     * Tagger's name.
-     */
-    name: string
-  }
+  tagger?:
+    | {
+        /**
+         * Tag creation date in ISO 8601 format.
+         */
+        date: string
+        /**
+         * Tagger's email address.
+         */
+        email: string
+        /**
+         * Tagger's name.
+         */
+        name: string
+      }
+    | undefined
   /**
    * API URL for this tag object.
    */

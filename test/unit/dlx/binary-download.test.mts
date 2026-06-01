@@ -16,7 +16,7 @@ import { downloadBinaryFile } from '../../../src/dlx/binary'
 import { safeDelete } from '../../../src/fs/safe'
 import { httpDownload } from '../../../src/http-request/download'
 
-vi.mock('../../../src/http-request/download', async importOriginal => {
+vi.mock(import('../../../src/http-request/download'), async importOriginal => {
   const original =
     await importOriginal<typeof import('../../../src/http-request/download')>()
   return {

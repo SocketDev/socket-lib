@@ -8,31 +8,31 @@
 export type Pattern = string
 
 export interface FastGlobOptions {
-  absolute?: boolean
-  baseNameMatch?: boolean
-  braceExpansion?: boolean
-  caseSensitiveMatch?: boolean
-  concurrency?: number
-  cwd?: string
-  deep?: number
-  dot?: boolean
-  extglob?: boolean
-  followSymbolicLinks?: boolean
-  fs?: unknown
-  globstar?: boolean
-  ignore?: string[]
-  ignoreFiles?: string[]
-  markDirectories?: boolean
-  objectMode?: boolean
-  onlyDirectories?: boolean
-  onlyFiles?: boolean
-  stats?: boolean
-  suppressErrors?: boolean
-  throwErrorOnBrokenSymbolicLink?: boolean
-  unique?: boolean
+  absolute?: boolean | undefined
+  baseNameMatch?: boolean | undefined
+  braceExpansion?: boolean | undefined
+  caseSensitiveMatch?: boolean | undefined
+  concurrency?: number | undefined
+  cwd?: string | undefined
+  deep?: number | undefined
+  dot?: boolean | undefined
+  extglob?: boolean | undefined
+  followSymbolicLinks?: boolean | undefined
+  fs?: unknown | undefined
+  globstar?: boolean | undefined
+  ignore?: string[] | undefined
+  ignoreFiles?: string[] | undefined
+  markDirectories?: boolean | undefined
+  objectMode?: boolean | undefined
+  onlyDirectories?: boolean | undefined
+  onlyFiles?: boolean | undefined
+  stats?: boolean | undefined
+  suppressErrors?: boolean | undefined
+  throwErrorOnBrokenSymbolicLink?: boolean | undefined
+  unique?: boolean | undefined
 }
 
 export interface GlobOptions extends FastGlobOptions {
-  ignoreOriginals?: boolean
-  recursive?: boolean
+  ignoreOriginals?: boolean | undefined
+  recursive?: boolean | undefined
 }

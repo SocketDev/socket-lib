@@ -74,12 +74,12 @@ const TIERS = [
 
 describe('all profiles', () => {
   it.each(TIERS)('%s tools are alphabetically sorted', (_name, profile) => {
-    const sorted = [...profile.tools].sort()
+    const sorted = [...profile.tools].toSorted()
     expect(profile.tools).toStrictEqual(sorted)
   })
 
   it.each(TIERS)('%s disallow is alphabetically sorted', (_name, profile) => {
-    const sorted = [...profile.disallow].sort()
+    const sorted = [...profile.disallow].toSorted()
     expect(profile.disallow).toStrictEqual(sorted)
   })
 

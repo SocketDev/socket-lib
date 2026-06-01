@@ -1,11 +1,11 @@
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/from-download'), () => ({
   downloadAndExtractTool: vi.fn(),
 }))
 
-vi.mock('../../../../src/paths/socket', () => ({
+vi.mock(import('../../../../src/paths/socket'), () => ({
   getSocketWheelhouseDir: vi.fn(() => '/fake/wheelhouse'),
 }))
 

@@ -231,7 +231,7 @@ export function sortKeys(
   obj: Record<string, unknown>,
 ): Record<string, unknown> {
   const sorted: Record<string, unknown> = { __proto__: null }
-  const keys = ObjectKeys(obj).sort()
+  const keys = ObjectKeys(obj).toSorted()
   for (const key of keys) {
     sorted[key] = obj[key]
   }

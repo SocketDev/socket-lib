@@ -8,7 +8,7 @@ const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock('node:child_process', async () => {
+vi.mock(import('node:child_process'), async () => {
   const actual =
     await vi.importActual<typeof import('node:child_process')>(
       'node:child_process',
@@ -27,11 +27,11 @@ interface FakeChild extends EventEmitter {
 }
 
 function makeFakeChild(opts: {
-  stdout?: string
-  stderr?: string
+  stdout?: string | undefined
+  stderr?: string | undefined
   exitCode?: number | null | undefined
-  emitError?: Error
-  noStreams?: boolean
+  emitError?: Error | undefined
+  noStreams?: boolean | undefined
 }): FakeChild {
   const emitter = new EventEmitter() as FakeChild
   if (opts.noStreams) {
@@ -218,9 +218,13 @@ describe.sequential('secrets/macos — deleteMacOS', () => {
   })
 
   test('uses stdio: ignore so no streams are read', async () => {
-    let capturedOpts: { stdio?: unknown } | undefined
+    let capturedOpts: { stdio?: unknown | undefined } | undefined
     mockSpawn.mockImplementationOnce(
-      (_bin: string, _args: readonly string[], opts: { stdio?: unknown }) => {
+      (
+        _bin: string,
+        _args: readonly string[],
+        opts: { stdio?: unknown | undefined },
+      ) => {
         capturedOpts = opts
         return makeFakeChild({ exitCode: 0, noStreams: true })
       },

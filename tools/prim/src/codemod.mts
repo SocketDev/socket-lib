@@ -23,8 +23,8 @@ import {
   closeSync,
   fsyncSync,
   openSync,
-  readdirSync,
   readFileSync,
+  readdirSync,
   renameSync,
   statSync,
   unlinkSync,
@@ -147,8 +147,8 @@ export async function applyCodemod({
     // validate / apply mode. The CLI's `--diff` flag reads this to render
     // unified diffs in dry-run mode without re-walking the tree.
     plans: PlannedRewrite[]
-    validationFailed?: boolean
-    validationFindings?: readonly ValidationFinding[]
+    validationFailed?: boolean | undefined
+    validationFindings?: readonly ValidationFinding[] | undefined
   } = {
     filesChanged: 0,
     rewriteCount: 0,
@@ -620,7 +620,8 @@ export async function rewriteFile({
       }
       return { line: lo + 1, column: offset - lineStarts[lo] + 1 }
     }
-    for (const item of pendingAmbiguous) {
+    for (let i = 0, { length } = pendingAmbiguous; i < length; i += 1) {
+      const item = pendingAmbiguous[i]!
       const { line, column } = lineColAt(item.offset)
       const verdict = await disambiguateReceiver({
         aiEnabled: true,
@@ -679,7 +680,8 @@ export async function rewriteFile({
   // Dedupe before applying, then sort back-to-front.
   const seen = new Set<string>()
   const deduped: typeof rewrites = []
-  for (const r of rewrites) {
+  for (let i = 0, { length } = rewrites; i < length; i += 1) {
+    const r = rewrites[i]!
     const key = `${r.start}:${r.end}`
     if (seen.has(key)) {
       continue
@@ -689,7 +691,8 @@ export async function rewriteFile({
   }
   deduped.sort((a, b) => b.start - a.start)
   let out = src
-  for (const r of deduped) {
+  for (let i = 0, { length } = deduped; i < length; i += 1) {
+    const r = deduped[i]!
     out = out.slice(0, r.start) + r.replacement + out.slice(r.end)
   }
 
@@ -702,7 +705,7 @@ export async function rewriteFile({
     // leaf-resolved specifier.
     const { exportToLeaf, leafSpecifier } = importStyle.splitByLeaf
     const byLeaf = new Map()
-    const idents = [...usedPrimordials].sort()
+    const idents = [...usedPrimordials].toSorted()
     for (const id of idents) {
       const leaf = exportToLeaf.get(id)
       if (!leaf) {
@@ -720,8 +723,8 @@ export async function rewriteFile({
       arr.push(id)
     }
     // Sort leaves so emitted blocks are deterministic.
-    for (const leaf of [...byLeaf.keys()].sort()) {
-      const leafIdents = byLeaf.get(leaf).sort()
+    for (const leaf of [...byLeaf.keys()].toSorted()) {
+      const leafIdents = byLeaf.get(leaf).toSorted()
       const leafSpec = leafSpecifier(absPath, leaf)
       const out2 = ensureImports(newSource, leafIdents, {
         kind: importStyle.kind,
@@ -738,7 +741,7 @@ export async function rewriteFile({
       typeof importStyle.specifier === 'function'
         ? importStyle.specifier(absPath)
         : importStyle.specifier
-    const result2 = ensureImports(newSource, [...usedPrimordials].sort(), {
+    const result2 = ensureImports(newSource, [...usedPrimordials].toSorted(), {
       kind: importStyle.kind,
       specifier: resolvedSpecifier,
       aliasPrefix,
@@ -961,9 +964,9 @@ export function buildByteToCharMap(src: string): number[] | undefined {
     let byteLen
     if (code < 0x80) {
       byteLen = 1
-    } else if (code < 0x800) {
+    } else if (code < 0x8_00) {
       byteLen = 2
-    } else if (code < 0x10000) {
+    } else if (code < 0x1_00_00) {
       byteLen = 3
     } else {
       byteLen = 4
@@ -1067,7 +1070,7 @@ export function ensureImports(src, identifiers, importStyle) {
     if (!addedAny) {
       return { newSource: src, importAdded: false }
     }
-    const merged = [...have].sort().map(renderEntry).join(', ')
+    const merged = [...have].toSorted().map(renderEntry).join(', ')
     const replacement =
       kind === 'esm'
         ? `import { ${merged} } from '${specifier}'`

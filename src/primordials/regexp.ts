@@ -16,7 +16,7 @@ export const RegExpCtor: RegExpConstructor = RegExp
 // for safety even though Node 22.18+ always has it. Callers needing a
 // portable shape should null-check.
 export const RegExpEscape: ((s: string) => string) | undefined = (
-  RegExp as { escape?: (s: string) => string }
+  RegExp as { escape?: ((s: string) => string) | undefined }
 ).escape
 
 // ─── RegExp (prototype) ────────────────────────────────────────────────

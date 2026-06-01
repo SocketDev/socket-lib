@@ -95,8 +95,8 @@ describe('stdio/stdout', () => {
     })
 
     it('should write text without newline', () => {
-      write('Loading...')
-      expect(getContext().writeSpy).toHaveBeenCalledWith('Loading...')
+      write('Loading…')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('Loading…')
     })
 
     it('should write empty string', () => {
@@ -560,11 +560,11 @@ describe('stdio/stdout', () => {
       })
       // Clear spy to ensure this test runs in isolation
       getContext().writeSpy.mockClear()
-      write('Loading...')
+      write('Loading…')
       clearLine()
-      write('Loading... 50%')
+      write('Loading… 50%')
       clearLine()
-      write('Loading... 100%')
+      write('Loading… 100%')
       writeLine(' Done!')
       // Actual calls: 3 writes + 1 writeLine = 4 calls (clearLine calls cursorTo and clearLine internally but not write)
       expect(getContext().writeSpy).toHaveBeenCalledTimes(4)
@@ -577,7 +577,8 @@ describe('stdio/stdout', () => {
       })
       hideCursor()
       const frames = ['⠋', '⠙', '⠹', '⠸']
-      for (const frame of frames) {
+      for (let i = 0, { length } = frames; i < length; i += 1) {
+        const frame = frames[i]!
         write(frame)
         clearLine()
       }

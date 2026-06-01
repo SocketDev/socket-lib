@@ -116,7 +116,8 @@ describe('constants/packages', () => {
     it('should have tuple entries when not empty', () => {
       const extensions = getPackageExtensions()
       const array = Array.from(extensions)
-      for (const entry of array) {
+      for (let i = 0, { length } = array; i < length; i += 1) {
+        const entry = array[i]!
         expect(Array.isArray(entry)).toBe(true)
         expect(entry.length).toBe(2)
         expect(typeof entry[0]).toBe('string')

@@ -40,7 +40,7 @@ export function generatePerformanceReport(): string {
   }
 
   const summary = getPerformanceSummary()
-  const operations = ObjectKeys(summary).sort()
+  const operations = ObjectKeys(summary).toSorted()
 
   let report = '\n╔═══════════════════════════════════════════════╗\n'
   report += '║         Performance Report                    ║\n'
@@ -88,7 +88,7 @@ export function printPerformanceSummary(): void {
   }
 
   const summary = getPerformanceSummary()
-  const operations = ObjectKeys(summary).sort()
+  const operations = ObjectKeys(summary).toSorted()
 
   debugLog('[perf]\n=== Performance Summary ===')
 

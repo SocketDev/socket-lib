@@ -16,7 +16,7 @@ class CaptureStream extends Writable {
   isTTY = false
   cursorTo: (x: number) => void
   clearLine: (dir: number) => void
-  constructor(opts: { isTTY?: boolean } = {}) {
+  constructor(opts: { isTTY?: boolean | undefined } = {}) {
     super()
     this.isTTY = opts.isTTY ?? false
     this.cursorTo = () => {}
@@ -36,8 +36,8 @@ class CaptureStream extends Writable {
 }
 
 export function makeLogger(opts?: {
-  stdoutTTY?: boolean
-  stderrTTY?: boolean
+  stdoutTTY?: boolean | undefined
+  stderrTTY?: boolean | undefined
 }) {
   const stdout = new CaptureStream({ isTTY: opts?.stdoutTTY ?? false })
   const stderr = new CaptureStream({ isTTY: opts?.stderrTTY ?? false })

@@ -24,13 +24,16 @@ const LOCK = parsePackageLock(
 describe('eco/manifest/find-packages', () => {
   it('matches against string patterns', () => {
     const result = findPackages(LOCK, '^l')
-    const names = result.map(p => p.name).sort()
+    const names = result.map(p => p.name).toSorted()
     expect(names).toEqual(['lodash', 'loose-envify'])
   })
 
   it('matches against RegExp patterns', () => {
     const result = findPackages(LOCK, /lo/)
-    expect(result.map(p => p.name).sort()).toEqual(['lodash', 'loose-envify'])
+    expect(result.map(p => p.name).toSorted()).toEqual([
+      'lodash',
+      'loose-envify',
+    ])
   })
 
   it('returns an empty array when nothing matches', () => {

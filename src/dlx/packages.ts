@@ -62,7 +62,7 @@ export async function listDlxPackagesAsync(): Promise<string[]> {
     })
     return ArrayPrototypeFilter(entries, e => e.isDirectory())
       .map(e => e.name)
-      .sort()
+      .toSorted()
   } catch {
     return []
   }

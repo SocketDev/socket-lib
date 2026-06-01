@@ -1,14 +1,17 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/trufflehog/from-vfs', () => ({
+vi.mock(import('../../../../src/external-tools/trufflehog/from-vfs'), () => ({
   trufflehogFromVfs: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/trufflehog/from-path', () => ({
+vi.mock(import('../../../../src/external-tools/trufflehog/from-path'), () => ({
   trufflehogFromPath: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/trufflehog/from-download', () => ({
-  trufflehogFromDownload: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/trufflehog/from-download'),
+  () => ({
+    trufflehogFromDownload: vi.fn(),
+  }),
+)
 
 async function loadFresh() {
   const vfsMod =

@@ -21,7 +21,8 @@
  *   ```
  */
 
-import { frameColors, type ShimmerSpec } from './shimmer'
+import { frameColors } from './shimmer'
+import type { ShimmerSpec } from './shimmer'
 
 // === Types ===
 

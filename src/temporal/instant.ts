@@ -178,7 +178,9 @@ export function describe(value: unknown): string {
     return `${value}n`
   }
   if (typeof value === 'object') {
-    const ctor = (value as { constructor?: { name?: string } }).constructor
+    const ctor = (
+      value as { constructor?: { name?: string | undefined } | undefined }
+    ).constructor
     return ctor && ctor.name ? `<${ctor.name}>` : '<object>'
   }
   return typeof value === 'string' ? JSONStringify(value) : String(value)

@@ -328,7 +328,8 @@ describe('signal-exit', () => {
 
       // Removing 100 handlers in sequence must not throw.
       expect(() => {
-        for (const remove of handlers) {
+        for (let i = 0, { length } = handlers; i < length; i += 1) {
+          const remove = handlers[i]!
           remove()
         }
       }).not.toThrow()

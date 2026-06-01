@@ -548,10 +548,11 @@ describe('node constants', () => {
         ...getNodeDisableSigusr1Flags(),
       ]
 
-      allFlags.forEach(flag => {
+      for (let i = 0, { length } = allFlags; i < length; i += 1) {
+        const flag = allFlags[i]!
         expect(typeof flag).toBe('string')
         expect(flag.startsWith('--')).toBe(true)
-      })
+      }
     })
 
     it('should verify constants are exportable and accessible', () => {

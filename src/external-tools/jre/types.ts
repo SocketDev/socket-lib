@@ -26,7 +26,7 @@ export interface ResolvedJre {
   /**
    * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: ResolvedToolIntegrity
+  readonly integrity?: ResolvedToolIntegrity | undefined
 }
 
 export type { AdoptiumAssetQuery }

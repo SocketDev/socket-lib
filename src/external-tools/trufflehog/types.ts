@@ -24,5 +24,5 @@ export interface ResolvedTrufflehog {
   /**
    * See {@link ResolvedToolIntegrity}.
    */
-  readonly integrity?: ResolvedToolIntegrity
+  readonly integrity?: ResolvedToolIntegrity | undefined
 }

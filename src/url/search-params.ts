@@ -70,9 +70,9 @@ export function urlSearchParamsAsBoolean(
     // flags behave predictably cross-context: '1', 'true', 'yes', 'on'.
     return (
       lowered === '1' ||
+      lowered === 'on' ||
       lowered === 'true' ||
-      lowered === 'yes' ||
-      lowered === 'on'
+      lowered === 'yes'
     )
   }
   if (value === null || value === undefined) {

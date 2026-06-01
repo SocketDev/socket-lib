@@ -131,8 +131,8 @@ describe('regexps/spec', () => {
     it('returns true for line terminators', () => {
       expect(isSpecHexEscapeCp(0x0a)).toBe(true) // LF
       expect(isSpecHexEscapeCp(0x0d)).toBe(true) // CR
-      expect(isSpecHexEscapeCp(0x2028)).toBe(true) // LS
-      expect(isSpecHexEscapeCp(0x2029)).toBe(true) // PS
+      expect(isSpecHexEscapeCp(0x20_28)).toBe(true) // LS
+      expect(isSpecHexEscapeCp(0x20_29)).toBe(true) // PS
     })
 
     it('returns true for whitespace code points', () => {
@@ -141,13 +141,13 @@ describe('regexps/spec', () => {
       expect(isSpecHexEscapeCp(0x0c)).toBe(true) // FF
       expect(isSpecHexEscapeCp(0x20)).toBe(true) // SP
       expect(isSpecHexEscapeCp(0xa0)).toBe(true) // NBSP
-      expect(isSpecHexEscapeCp(0xfeff)).toBe(true) // ZWNBSP
+      expect(isSpecHexEscapeCp(0xfe_ff)).toBe(true) // ZWNBSP
     })
 
     it('returns true for lone surrogates', () => {
-      expect(isSpecHexEscapeCp(0xd800)).toBe(true)
-      expect(isSpecHexEscapeCp(0xdc00)).toBe(true)
-      expect(isSpecHexEscapeCp(0xdfff)).toBe(true)
+      expect(isSpecHexEscapeCp(0xd8_00)).toBe(true)
+      expect(isSpecHexEscapeCp(0xdc_00)).toBe(true)
+      expect(isSpecHexEscapeCp(0xdf_ff)).toBe(true)
     })
 
     it('returns false for ordinary letters', () => {
@@ -157,7 +157,7 @@ describe('regexps/spec', () => {
     })
 
     it('returns false for high (non-surrogate, non-special) code points', () => {
-      expect(isSpecHexEscapeCp(0x1f30d)).toBe(false) // 🌍
+      expect(isSpecHexEscapeCp(0x1_f3_0d)).toBe(false) // 🌍
     })
   })
 })

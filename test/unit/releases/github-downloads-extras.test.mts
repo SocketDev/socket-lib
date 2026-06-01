@@ -21,29 +21,35 @@ import { httpDownload } from '../../../src/http-request/download'
 import { getReleaseAssetUrl } from '../../../src/releases/github-asset-url'
 import { getLatestRelease } from '../../../src/releases/github-listing'
 
-vi.mock('../../../src/releases/github-asset-url', async importOriginal => {
-  const original =
-    await importOriginal<
-      typeof import('../../../src/releases/github-asset-url')
-    >()
-  return {
-    ...original,
-    getReleaseAssetUrl: vi.fn(),
-  }
-})
+vi.mock(
+  import('../../../src/releases/github-asset-url'),
+  async importOriginal => {
+    const original =
+      await importOriginal<
+        typeof import('../../../src/releases/github-asset-url')
+      >()
+    return {
+      ...original,
+      getReleaseAssetUrl: vi.fn(),
+    }
+  },
+)
 
-vi.mock('../../../src/releases/github-listing', async importOriginal => {
-  const original =
-    await importOriginal<
-      typeof import('../../../src/releases/github-listing')
-    >()
-  return {
-    ...original,
-    getLatestRelease: vi.fn(),
-  }
-})
+vi.mock(
+  import('../../../src/releases/github-listing'),
+  async importOriginal => {
+    const original =
+      await importOriginal<
+        typeof import('../../../src/releases/github-listing')
+      >()
+    return {
+      ...original,
+      getLatestRelease: vi.fn(),
+    }
+  },
+)
 
-vi.mock('../../../src/http-request/download', async importOriginal => {
+vi.mock(import('../../../src/http-request/download'), async importOriginal => {
   const original =
     await importOriginal<typeof import('../../../src/http-request/download')>()
   return {

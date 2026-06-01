@@ -16,9 +16,8 @@ import {
   blockKernel,
   configToSpec,
   solidColor,
-  type RGB,
-  type ShimmerSpec,
 } from '../../../src/effects/shimmer'
+import type { RGB, ShimmerSpec } from '../../../src/effects/shimmer'
 import {
   ANSI_RESET,
   ansiTruecolor,

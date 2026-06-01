@@ -11,7 +11,7 @@ import { uncurryThis } from './uncurry'
 // that import it in browser code get a type-safe `undefined` rather than
 // a runtime ReferenceError.
 export const BufferCtor: typeof globalThis.Buffer | undefined = (
-  globalThis as { Buffer?: typeof globalThis.Buffer }
+  globalThis as { Buffer?: typeof globalThis.Buffer | undefined }
 ).Buffer
 
 // ─── Buffer (static) ───────────────────────────────────────────────────

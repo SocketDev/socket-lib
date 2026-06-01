@@ -65,7 +65,10 @@ export function cachePathFor(repoRoot: string): string {
  *   `'claude' in agents` for the existence check.
  */
 export async function discoverAiAgents(
-  options: { readonly refresh?: boolean; readonly repoRoot?: string } = {},
+  options: {
+    readonly refresh?: boolean | undefined
+    readonly repoRoot?: string | undefined
+  } = {},
 ): Promise<DiscoveredAgents> {
   const { refresh = false, repoRoot = process.cwd() } = options
 
@@ -91,7 +94,8 @@ export async function discoverAiAgents(
 
 export function discoverFresh(): DiscoveredAgents {
   const out: { -readonly [K in AiAgentName]?: string } = {}
-  for (const name of KNOWN_AGENTS) {
+  for (let i = 0, { length } = KNOWN_AGENTS; i < length; i += 1) {
+    const name = KNOWN_AGENTS[i]!
     const found = whichSync(name)
     if (typeof found === 'string' && found) {
       out[name] = found

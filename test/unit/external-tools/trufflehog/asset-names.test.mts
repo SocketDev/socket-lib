@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'vitest'
 
 import {
+  TRUFFLEHOG_ASSET_MAP,
   getTrufflehogAssetEntry,
   getTrufflehogDownloadUrl,
-  TRUFFLEHOG_ASSET_MAP,
 } from '../../../../src/external-tools/trufflehog/asset-names'
 
 describe('external-tools/trufflehog/asset-names', () => {
   test('covers darwin/linux/windows on both arm64 and x64', () => {
-    expect(Object.keys(TRUFFLEHOG_ASSET_MAP).sort()).toEqual([
+    expect(Object.keys(TRUFFLEHOG_ASSET_MAP).toSorted()).toEqual([
       'darwin-arm64',
       'darwin-x64',
       'linux-arm64',

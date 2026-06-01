@@ -50,7 +50,8 @@ export function checkFileExists(specifier, fromFile) {
   const extensions = ['', '.js', '.mjs', '.cjs', '.json', '.node']
 
   // Try with different extensions
-  for (const ext of extensions) {
+  for (let i = 0, { length } = extensions; i < length; i += 1) {
+    const ext = extensions[i]!
     const fullPath = path.resolve(fromDir, specifier + ext)
     if (existsSync(fullPath)) {
       return { exists: true, resolvedPath: fullPath }
@@ -293,7 +294,8 @@ async function main(): Promise<void> {
       return
     }
 
-    logger.fail('Found extraneous or missing dependencies:\n')
+    logger.fail('Found extraneous or missing dependencies:')
+    logger.error('')
 
     for (const error of errors) {
       if (error.type === 'missing-dependency') {
@@ -305,21 +307,25 @@ async function main(): Promise<void> {
           error.message.includes('is in devDependencies but required in dist/')
         ) {
           logger.log(
-            `    Fix: Move "${error.packageName}" to dependencies OR bundle it (add to esbuild external exclusion)\n`,
+            `    Fix: Move "${error.packageName}" to dependencies OR bundle it (add to esbuild external exclusion)`,
           )
+          logger.log('')
         } else {
           logger.log(
-            `    Fix: Add "${error.packageName}" to dependencies or peerDependencies\n`,
+            `    Fix: Add "${error.packageName}" to dependencies or peerDependencies`,
           )
+          logger.log('')
         }
       } else if (error.type === 'missing-file') {
         logger.log(
           `  ${error.file}:${error.line}:${error.column} - ${error.message}`,
         )
         logger.log(`    require('${error.specifier}')`)
-        logger.log('    Fix: Create the missing file or fix the path\n')
+        logger.log('    Fix: Create the missing file or fix the path')
+        logger.log('')
       } else if (error.type === 'parse-error') {
-        logger.log(`  ${error.file} - ${error.message}\n`)
+        logger.log(`  ${error.file} - ${error.message}`)
+        logger.log('')
       }
     }
 

@@ -36,9 +36,9 @@ describe('regexps/hex', () => {
     })
 
     it('returns four chars for typical 16-bit values', () => {
-      expect(hex4(0x100)).toBe('0100')
-      expect(hex4(0xabcd)).toBe('abcd')
-      expect(hex4(0xffff)).toBe('ffff')
+      expect(hex4(0x1_00)).toBe('0100')
+      expect(hex4(0xab_cd)).toBe('abcd')
+      expect(hex4(0xff_ff)).toBe('ffff')
     })
   })
 })

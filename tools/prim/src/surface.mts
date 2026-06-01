@@ -17,7 +17,7 @@
  *      that form.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 /**
@@ -98,13 +98,14 @@ export function capitalize(s) {
 export function deriveNodeBootstrapSurface() {
   const exports = new Set()
 
-  for (const ns of NODE_PRIMORDIAL_NAMESPACES) {
+  for (let i = 0, { length } = NODE_PRIMORDIAL_NAMESPACES; i < length; i += 1) {
+    const ns = NODE_PRIMORDIAL_NAMESPACES[i]!
     const original = globalThis[ns]
     if (!original) {
       continue
     }
     for (const propName of Object.getOwnPropertyNames(original)) {
-      if (propName === 'prototype' || propName === 'constructor') {
+      if (propName === 'constructor' || propName === 'prototype') {
         continue
       }
       const descriptor = Object.getOwnPropertyDescriptor(original, propName)
@@ -114,7 +115,8 @@ export function deriveNodeBootstrapSurface() {
     }
   }
 
-  for (const name of NODE_PRIMORDIAL_GLOBALS) {
+  for (let i = 0, { length } = NODE_PRIMORDIAL_GLOBALS; i < length; i += 1) {
+    const name = NODE_PRIMORDIAL_GLOBALS[i]!
     const original = globalThis[name]
     if (!original) {
       continue
@@ -124,9 +126,9 @@ export function deriveNodeBootstrapSurface() {
     exports.add(name)
     for (const propName of Object.getOwnPropertyNames(original)) {
       if (
-        propName === 'prototype' ||
+        propName === 'length' ||
         propName === 'name' ||
-        propName === 'length'
+        propName === 'prototype'
       ) {
         continue
       }
@@ -269,7 +271,7 @@ export function parseExports(sourcePath) {
   const exportToLeaf = new Map()
   if (stat.isDirectory()) {
     const parts = []
-    for (const name of readdirSync(sourcePath).sort()) {
+    for (const name of readdirSync(sourcePath).toSorted()) {
       if (
         !(
           name.endsWith('.ts') ||

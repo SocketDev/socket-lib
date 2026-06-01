@@ -118,10 +118,13 @@ export async function fetchPackageProvenance(
  * Find the first attestation with valid provenance data.
  */
 export function findProvenance(attestations: unknown[]): unknown {
-  for (const attestation of attestations) {
+  for (let i = 0, { length } = attestations; i < length; i += 1) {
+    const attestation = attestations[i]!
     const att = attestation as {
-      bundle?: { dsseEnvelope?: { payload?: string } }
-      predicate?: unknown
+      bundle?:
+        | { dsseEnvelope?: { payload?: string | undefined } | undefined }
+        | undefined
+      predicate?: unknown | undefined
     }
     try {
       let predicate = att.predicate
@@ -142,7 +145,9 @@ export function findProvenance(attestations: unknown[]): unknown {
       }
 
       const predicateData = predicate as {
-        buildDefinition?: { externalParameters?: unknown }
+        buildDefinition?:
+          | { externalParameters?: unknown | undefined }
+          | undefined
       }
       if (predicateData?.buildDefinition?.externalParameters) {
         return {
@@ -163,13 +168,13 @@ export function findProvenance(attestations: unknown[]): unknown {
  * Extract and filter SLSA provenance attestations from attestation data.
  */
 export function getAttestations(attestationData: unknown): unknown[] {
-  const data = attestationData as { attestations?: unknown[] }
+  const data = attestationData as { attestations?: unknown[] | undefined }
   if (!data.attestations || !ArrayIsArray(data.attestations)) {
     return []
   }
 
   return data.attestations.filter((attestation: unknown) => {
-    const att = attestation as { predicateType?: string }
+    const att = attestation as { predicateType?: string | undefined }
     return (
       att.predicateType === SLSA_PROVENANCE_V0_2 ||
       att.predicateType === SLSA_PROVENANCE_V1_0
@@ -213,21 +218,27 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
   }
 
   const provenanceData = provenance as {
-    externalParameters?: {
-      context?: string
-      ref?: string
-      repository?: string
-      run_id?: string
-      sha?: string
-      workflow?: {
-        ref?: string
-        repository?: string
-      }
-      workflow_ref?: string
-    }
-    predicate?: {
-      buildDefinition?: { buildType?: string }
-    }
+    externalParameters?:
+      | {
+          context?: string | undefined
+          ref?: string | undefined
+          repository?: string | undefined
+          run_id?: string | undefined
+          sha?: string | undefined
+          workflow?:
+            | {
+                ref?: string | undefined
+                repository?: string | undefined
+              }
+            | undefined
+          workflow_ref?: string | undefined
+        }
+      | undefined
+    predicate?:
+      | {
+          buildDefinition?: { buildType?: string | undefined } | undefined
+        }
+      | undefined
   }
   const { externalParameters, predicate } = provenanceData
   const def = predicate?.buildDefinition

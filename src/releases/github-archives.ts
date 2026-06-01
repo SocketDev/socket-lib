@@ -53,15 +53,15 @@ export async function downloadAndExtractArchive(
   outputDir: string,
   repoConfig: RepoConfig,
   options: {
-    cleanup?: boolean
-    format?: ArchiveFormat
-    quiet?: boolean
-    strip?: number
+    cleanup?: boolean | undefined
+    format?: ArchiveFormat | undefined
+    quiet?: boolean | undefined
+    strip?: number | undefined
   } = { __proto__: null } as {
-    cleanup?: boolean
-    format?: ArchiveFormat
-    quiet?: boolean
-    strip?: number
+    cleanup?: boolean | undefined
+    format?: ArchiveFormat | undefined
+    quiet?: boolean | undefined
+    strip?: number | undefined
   },
 ): Promise<string> {
   const { cleanup = true, format, quiet = false, strip } = options
@@ -158,9 +158,9 @@ export async function downloadAndExtractZip(
   assetPattern: string | AssetPattern,
   outputDir: string,
   repoConfig: RepoConfig,
-  options: { cleanup?: boolean; quiet?: boolean } = {
+  options: { cleanup?: boolean | undefined; quiet?: boolean | undefined } = {
     __proto__: null,
-  } as { cleanup?: boolean; quiet?: boolean },
+  } as { cleanup?: boolean | undefined; quiet?: boolean | undefined },
 ): Promise<string> {
   const { cleanup = true, quiet = false } = options
 

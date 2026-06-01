@@ -36,25 +36,55 @@ export type PackageJson = {
   bin?: string | Record<string, string> | undefined
 
   // Author and contributors
-  author?: string | { name?: string; email?: string; url?: string } | undefined
+  author?:
+    | string
+    | {
+        name?: string | undefined
+        email?: string | undefined
+        url?: string | undefined
+      }
+    | undefined
   contributors?:
-    | Array<string | { name?: string; email?: string; url?: string }>
+    | Array<
+        | string
+        | {
+            name?: string | undefined
+            email?: string | undefined
+            url?: string | undefined
+          }
+      >
     | undefined
   maintainers?:
-    | Array<string | { name?: string; email?: string; url?: string }>
+    | Array<
+        | string
+        | {
+            name?: string | undefined
+            email?: string | undefined
+            url?: string | undefined
+          }
+      >
     | undefined
 
   // Repository and URLs
   repository?:
     | string
-    | { type?: string; url?: string; directory?: string }
+    | {
+        type?: string | undefined
+        url?: string | undefined
+        directory?: string | undefined
+      }
     | undefined
   homepage?: string | undefined
-  bugs?: string | { url?: string; email?: string } | undefined
+  bugs?:
+    | string
+    | { url?: string | undefined; email?: string | undefined }
+    | undefined
 
   // License
   license?: string | undefined
-  licenses?: Array<{ type?: string; url?: string }> | undefined
+  licenses?:
+    | Array<{ type?: string | undefined; url?: string | undefined }>
+    | undefined
 
   // Scripts
   scripts?: Record<string, string> | undefined
@@ -93,13 +123,13 @@ export type PackageJson = {
   packageManager?: string | undefined
 
   // Workspaces
-  workspaces?: string[] | { packages?: string[] } | undefined
+  workspaces?: string[] | { packages?: string[] | undefined } | undefined
 
   // Socket.dev specific
   socket?:
     | {
-        categories?: CategoryString | CategoryString[]
-        interop?: string | string[]
+        categories?: CategoryString | CategoryString[] | undefined
+        interop?: string | string[] | undefined
         [key: string]: unknown
       }
     | undefined

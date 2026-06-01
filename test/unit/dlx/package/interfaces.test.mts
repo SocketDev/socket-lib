@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import {
+import type {
   DlxPackageOptions,
   DlxPackageResult,
 } from '../../../../src/dlx/package'

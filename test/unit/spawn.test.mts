@@ -144,7 +144,7 @@ describe('spawn', () => {
     it('should return command and args in result', async () => {
       const result = await spawn('echo', ['hello'])
       // cmd is now resolved to full path via which, e.g. '/bin/echo'
-      expect(result.cmd).toMatch(/echo(\.exe)?$/i)
+      expect(result.cmd).toMatch(/echo(?:\.exe)?$/i)
       expect(result.args).toEqual(['hello'])
     })
 

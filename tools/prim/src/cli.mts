@@ -245,11 +245,13 @@ export async function runCli(argv) {
       | undefined
       | {
           kind: 'esm'
-          specifier?: (absFile: string) => string
-          splitByLeaf?: {
-            exportToLeaf: Map<string, string>
-            leafSpecifier: (absFile: string, leaf: string) => string
-          }
+          specifier?: ((absFile: string) => string) | undefined
+          splitByLeaf?:
+            | {
+                exportToLeaf: Map<string, string>
+                leafSpecifier: (absFile: string, leaf: string) => string
+              }
+            | undefined
         }
     if (localPrimordialsPath) {
       if (isSplitPrimordials(localPrimordialsPath)) {
@@ -373,14 +375,16 @@ export async function runCli(argv) {
         if (parseFailureFiles.length > 0) {
           const header = `  parse-failed (${parseFailureFiles.length}):\n`
           process.stderr.write(header) // socket-hook: allow console
-          for (const f of parseFailureFiles) {
+          for (let i = 0, { length } = parseFailureFiles; i < length; i += 1) {
+            const f = parseFailureFiles[i]!
             process.stderr.write(`    ${f}\n`) // socket-hook: allow console
           }
         }
         if (stripFailureFiles.length > 0) {
           const header = `  ts-strip-failed (${stripFailureFiles.length}):\n`
           process.stderr.write(header) // socket-hook: allow console
-          for (const f of stripFailureFiles) {
+          for (let i = 0, { length } = stripFailureFiles; i < length; i += 1) {
+            const f = stripFailureFiles[i]!
             process.stderr.write(`    ${f}\n`) // socket-hook: allow console
           }
         }

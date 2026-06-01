@@ -41,7 +41,7 @@ const packageExtensions = ObjectFreeze(
         },
       ],
     ] as PackageExtension[]
-  ).sort((a_, b_) => {
+  ).toSorted((a_, b_) => {
     const aIndex = a_[0].lastIndexOf('@')
     const bIndex = b_[0].lastIndexOf('@')
     const a = aIndex === -1 ? a_[0] : a_[0].slice(0, aIndex)

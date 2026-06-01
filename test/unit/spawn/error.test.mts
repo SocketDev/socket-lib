@@ -112,7 +112,9 @@ describe('spawn — enhanceSpawnError', () => {
       code: 2,
       stderr: '',
     })
-    const result = enhanceSpawnError(original) as Error & { cause?: unknown }
+    const result = enhanceSpawnError(original) as Error & {
+      cause?: unknown | undefined
+    }
     expect(result).not.toBe(original)
     expect(result.cause).toBe(original)
     expect(result.message).toContain('Command failed: mybinary')

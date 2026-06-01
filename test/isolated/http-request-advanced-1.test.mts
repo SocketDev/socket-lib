@@ -329,7 +329,8 @@ describe('http-request', () => {
         expect(attemptCount).toBe(2)
         expect(requestInfos).toHaveLength(2)
         expect(responseInfos).toHaveLength(2)
-        for (const info of responseInfos) {
+        for (let i = 0, { length } = responseInfos; i < length; i += 1) {
+          const info = responseInfos[i]!
           expect(info.error).toBeDefined()
         }
       } finally {

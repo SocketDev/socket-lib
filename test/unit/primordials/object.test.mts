@@ -134,7 +134,7 @@ describe('Object (prototype)', () => {
   })
 
   it('Annex B accessors: __defineGetter__ / __lookupGetter__ round-trip', () => {
-    const target: { x?: number } = {}
+    const target: { x?: number | undefined } = {}
     let invoked = 0
     const getter = (): number => {
       invoked += 1
@@ -151,7 +151,7 @@ describe('Object (prototype)', () => {
   })
 
   it('Annex B accessors: __defineSetter__ / __lookupSetter__ round-trip', () => {
-    const target: { y?: number } = {}
+    const target: { y?: number | undefined } = {}
     let written: unknown
     const setter = (value: unknown): void => {
       written = value

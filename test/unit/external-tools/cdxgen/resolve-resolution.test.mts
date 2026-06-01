@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/cdxgen/from-vfs', () => ({
+vi.mock(import('../../../../src/external-tools/cdxgen/from-vfs'), () => ({
   cdxgenFromVfs: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/cdxgen/from-path', () => ({
+vi.mock(import('../../../../src/external-tools/cdxgen/from-path'), () => ({
   cdxgenFromPath: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/cdxgen/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/cdxgen/from-download'), () => ({
   cdxgenFromDownload: vi.fn(),
 }))
 

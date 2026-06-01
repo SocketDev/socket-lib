@@ -48,7 +48,7 @@ export function findTypesForSubpath(
       for (let i = 0, { length } = value; i < length; i += 1) {
         const item = value[i]
         if (item === subpath) {
-          return (value as { types?: string }).types
+          return (value as { types?: string | undefined }).types
         }
         if (isObject(item)) {
           queue.push(item)
@@ -60,7 +60,7 @@ export function findTypesForSubpath(
         const key = keys[i] as string
         const item = value[key]
         if (item === subpath) {
-          return (value as { types?: string }).types
+          return (value as { types?: string | undefined }).types
         }
         if (isObject(item)) {
           queue.push(item)

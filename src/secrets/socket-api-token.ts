@@ -11,7 +11,7 @@
 import { resolve, resolveSync } from './find'
 
 const SOCKET_CLI_SERVICE = 'socket-cli'
-const TOKEN_ACCOUNTS = ['SOCKET_API_TOKEN', 'SOCKET_API_KEY'] as const
+const TOKEN_ACCOUNTS = ['SOCKET_API_TOKEN', 'SOCKET_API_TOKEN'] as const
 
 export interface ReadSocketApiTokenOptions {
   /**

@@ -98,7 +98,8 @@ export function clear(
     `# BEGIN ${service} env (managed)`,
     ...legacySentinels,
   ]
-  for (const begin of sentinelsToStrip) {
+  for (let i = 0, { length } = sentinelsToStrip; i < length; i += 1) {
+    const begin = sentinelsToStrip[i]!
     const end = begin.replace(/\bBEGIN\b/, 'END')
     const endStripped = end.replace(/\s*\(managed\)\s*$/, '')
     const endAlt =
@@ -143,7 +144,7 @@ export interface WriteOptions {
    * "Rotate via: my-installer --rotate"). Each entry is prefixed with `# `
    * automatically.
    */
-  notes?: readonly string[]
+  notes?: readonly string[] | undefined
   /**
    * Legacy sentinel BEGIN strings to sweep before writing the new block. Used
    * during a rename/migration so an older managed block is removed rather than
@@ -151,7 +152,7 @@ export interface WriteOptions {
    * tolerates any line endings up to the matching END (same prefix with `END`
    * replacing `BEGIN`).
    */
-  legacySentinels?: readonly string[]
+  legacySentinels?: readonly string[] | undefined
   /**
    * Override the auto-detected shell. By default the helper reads `$SHELL` and
    * targets the matching rc file:

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/dlx/package', () => ({
+vi.mock(import('../../../../src/dlx/package'), () => ({
   downloadPackage: vi.fn(),
 }))
 
@@ -54,7 +54,9 @@ describe.sequential('external-tools/synp/from-download', () => {
     const { synpFromDownload, downloadMock } = await loadFresh()
     downloadMock.mockResolvedValueOnce({ binaryPath: '/dlx/synp' })
     await synpFromDownload({ version: '1.9.14' })
-    const callArg = downloadMock.mock.calls[0]![0] as { hash?: unknown }
+    const callArg = downloadMock.mock.calls[0]![0] as {
+      hash?: unknown | undefined
+    }
     expect('hash' in callArg).toBe(false)
   })
 })

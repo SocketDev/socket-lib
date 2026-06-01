@@ -77,48 +77,54 @@ export type ThemeEffects = {
   /**
    * Spinner configuration.
    */
-  spinner?: {
-    /**
-     * Color (supports theme references)
-     */
-    color?: ColorReference | undefined
-    /**
-     * Animation style.
-     */
-    style?: SpinnerStyle | string | undefined
-  }
+  spinner?:
+    | {
+        /**
+         * Color (supports theme references)
+         */
+        color?: ColorReference | undefined
+        /**
+         * Animation style.
+         */
+        style?: SpinnerStyle | string | undefined
+      }
+    | undefined
 
   /**
    * Shimmer configuration.
    */
-  shimmer?: {
-    /**
-     * Enable shimmer.
-     */
-    enabled?: boolean | undefined
-    /**
-     * Color (single, gradient, or keyword)
-     */
-    color?: ColorReference | ColorValue[] | undefined
-    /**
-     * Direction.
-     */
-    direction?: ShimmerDirection | undefined
-    /**
-     * Speed (steps per frame)
-     */
-    speed?: number | undefined
-  }
+  shimmer?:
+    | {
+        /**
+         * Enable shimmer.
+         */
+        enabled?: boolean | undefined
+        /**
+         * Color (single, gradient, or keyword)
+         */
+        color?: ColorReference | ColorValue[] | undefined
+        /**
+         * Direction.
+         */
+        direction?: ShimmerDirection | undefined
+        /**
+         * Speed (steps per frame)
+         */
+        speed?: number | undefined
+      }
+    | undefined
 
   /**
    * Pulse configuration.
    */
-  pulse?: {
-    /**
-     * Speed (milliseconds)
-     */
-    speed?: number | undefined
-  }
+  pulse?:
+    | {
+        /**
+         * Speed (milliseconds)
+         */
+        speed?: number | undefined
+      }
+    | undefined
 }
 
 /**

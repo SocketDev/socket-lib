@@ -99,7 +99,8 @@ export async function attempt(
     init.headers = options.headers
   }
   if (options.body !== undefined) {
-    ;(init as { body?: BodyInit | null }).body = options.body as BodyInit
+    ;(init as { body?: BodyInit | null | undefined }).body =
+      options.body as BodyInit
   }
   if (options.followRedirects === false) {
     init.redirect = 'manual'
@@ -313,9 +314,10 @@ export interface BrowserHttpResponse {
 
 export function headersToRecord(headers: Headers): Record<string, string> {
   const out: Record<string, string> = {}
-  headers.forEach((value, key) => {
+  for (let key = 0, { length } = headers; key < length; key += 1) {
+    const value = headers[key]!
     out[key.toLowerCase()] = value
-  })
+  }
   return out
 }
 

@@ -245,7 +245,7 @@ export interface ChildProcess extends EventEmitter {
   stdin: NodeJS.WritableStream | null
   stdout: NodeJS.ReadableStream | null
   stderr: NodeJS.ReadableStream | null
-  readonly channel?: unknown
+  readonly channel?: unknown | undefined
   readonly stdio: [
     NodeJS.WritableStream | null,
     NodeJS.ReadableStream | null,
@@ -331,8 +331,8 @@ export interface WritableStreamType {
 export type SpawnOptions = Remap<
   NodeSpawnOptions & {
     spinner?: SpinnerInstance | undefined
-    stdioString?: boolean
-    stripAnsi?: boolean
+    stdioString?: boolean | undefined
+    stripAnsi?: boolean | undefined
   }
 >
 export type SpawnResult<T = string | Buffer> = PromiseSpawnResult<T>
@@ -369,7 +369,7 @@ export type SpawnStdioResult = {
  */
 export type SpawnSyncOptions = Remap<
   NodeSpawnSyncOptions & {
-    stdioString?: boolean
-    stripAnsi?: boolean
+    stdioString?: boolean | undefined
+    stripAnsi?: boolean | undefined
   }
 >

@@ -12,9 +12,9 @@ export type EmittedSignals = {
 }
 
 export type SignalExitEmitter = import('node:events').EventEmitter & {
-  count?: number
-  emitted?: EmittedSignals
-  infinite?: boolean
+  count?: number | undefined
+  emitted?: EmittedSignals | undefined
+  infinite?: boolean | undefined
 }
 
 export type SignalListener = () => void
@@ -24,5 +24,5 @@ export type SignalListenerMap = {
 }
 
 export interface OnExitOptions {
-  alwaysLast?: boolean
+  alwaysLast?: boolean | undefined
 }

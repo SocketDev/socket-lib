@@ -15,7 +15,10 @@
  *      `service:account` (matching `cmdkey /generic:<target>` convention).
  */
 
-import { spawn, spawnSync } from 'node:child_process'
+import {
+  spawn,
+  spawnSync,
+} from '@socketsecurity/lib-stable/process/spawn/child'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { homedir } from 'node:os'
 import path from 'node:path'

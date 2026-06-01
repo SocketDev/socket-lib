@@ -92,7 +92,7 @@ export interface ParsedLockfile {
 export interface FormatDescriptor {
   readonly ecosystem: EcosystemString
   readonly type: 'manifest' | 'lockfile'
-  readonly format?: 'npm' | 'yarn' | 'pnpm' | 'composer' | 'cargo'
+  readonly format?: 'npm' | 'yarn' | 'pnpm' | 'composer' | 'cargo' | undefined
 }
 
 /**

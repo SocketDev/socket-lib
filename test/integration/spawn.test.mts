@@ -60,7 +60,7 @@ describe('spawn integration', () => {
       expect(result.code).toBe(0)
       // macOS uses /private/tmp symlink, Windows Git Bash uses /d/tmp or similar
       expect(result.stdout.toString().trim()).toMatch(
-        /^(\/tmp|\/private\/tmp|\/[a-z]\/tmp)$/,
+        /^(?:\/tmp|\/private\/tmp|\/[a-z]\/tmp)$/,
       )
     })
 

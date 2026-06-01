@@ -150,11 +150,11 @@ export function getSocketApiTimeout(): number {
 export function getSocketApiToken(): string | undefined {
   return (
     getEnvValue('SOCKET_API_TOKEN') ||
-    getEnvValue('SOCKET_API_KEY') ||
+    getEnvValue('SOCKET_API_TOKEN') ||
     getEnvValue('SOCKET_CLI_API_TOKEN') ||
     getEnvValue('SOCKET_CLI_API_KEY') ||
-    getEnvValue('SOCKET_SECURITY_API_TOKEN') ||
-    getEnvValue('SOCKET_SECURITY_API_KEY')
+    getEnvValue('SOCKET_API_TOKEN') ||
+    getEnvValue('SOCKET_API_TOKEN')
   )
 }
 

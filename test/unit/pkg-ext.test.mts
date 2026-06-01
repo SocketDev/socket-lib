@@ -166,7 +166,7 @@ describe('pkg-ext', () => {
         name.slice(0, name.lastIndexOf('@')),
       )
 
-      const manualSort = [...packageNames].sort((a, b) => {
+      const manualSort = [...packageNames].toSorted((a, b) => {
         if (a < b) {
           return -1
         }

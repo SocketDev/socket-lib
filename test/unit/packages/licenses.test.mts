@@ -22,10 +22,12 @@ import {
   parseSpdxExp,
   resolvePackageLicenses,
   visitLicenses,
-  type InternalBinaryOperationNode,
-  type InternalLicenseNode,
-  type SpdxBinaryOperationNode,
-  type SpdxLicenseNode,
+} from '../../../src/packages/licenses'
+import type {
+  InternalBinaryOperationNode,
+  InternalLicenseNode,
+  SpdxBinaryOperationNode,
+  SpdxLicenseNode,
 } from '../../../src/packages/licenses'
 import type { LicenseNode } from '../../../src/packages/types'
 import { describe, expect, it } from 'vitest'
@@ -377,7 +379,7 @@ describe('packages/licenses', () => {
           licenses.push(node.license)
         },
       })
-      expect(licenses.sort()).toEqual(['Apache-2.0', 'MIT'])
+      expect(licenses.toSorted()).toEqual(['Apache-2.0', 'MIT'])
     })
 
     it('invokes BinaryOperation visitor for the AND node', () => {

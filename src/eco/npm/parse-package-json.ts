@@ -24,15 +24,15 @@ const OPTIONAL: DepType = 'optional'
 const PEER: DepType = 'peer'
 
 interface RawManifest {
-  readonly name?: unknown
-  readonly version?: unknown
-  readonly description?: unknown
-  readonly license?: unknown
-  readonly repository?: unknown
-  readonly dependencies?: unknown
-  readonly devDependencies?: unknown
-  readonly peerDependencies?: unknown
-  readonly optionalDependencies?: unknown
+  readonly name?: unknown | undefined
+  readonly version?: unknown | undefined
+  readonly description?: unknown | undefined
+  readonly license?: unknown | undefined
+  readonly repository?: unknown | undefined
+  readonly dependencies?: unknown | undefined
+  readonly devDependencies?: unknown | undefined
+  readonly peerDependencies?: unknown | undefined
+  readonly optionalDependencies?: unknown | undefined
 }
 
 export function addDeps(
@@ -100,7 +100,7 @@ export function resolveRepository(value: unknown): string | undefined {
     return value.length > 0 ? value : undefined
   }
   if (value && typeof value === 'object') {
-    const url = (value as { url?: unknown }).url
+    const url = (value as { url?: unknown | undefined }).url
     if (typeof url === 'string' && url.length > 0) {
       return url
     }

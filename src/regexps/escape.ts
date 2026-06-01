@@ -24,7 +24,9 @@ import { escapeRegExpFallback } from './spec'
  *   new RegExp('[' + escapeRegExp('a-z') + ']') // matches 'a', '-', or 'z'
  *   ```
  */
-const maybeNativeEscape = (RegExp as unknown as { escape?: unknown }).escape
+const maybeNativeEscape = (
+  RegExp as unknown as { escape?: unknown | undefined }
+).escape
 export const escapeRegExp: (str: string) => string =
   typeof maybeNativeEscape === 'function'
     ? (maybeNativeEscape as (str: string) => string)

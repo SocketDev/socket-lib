@@ -85,7 +85,8 @@ describe('parsePackageSpec', () => {
       'lodash@>4.0.0 <5.0.0',
     ]
 
-    for (const spec of specs) {
+    for (let i = 0, { length } = specs; i < length; i += 1) {
+      const spec = specs[i]!
       expect(spec).toContain('@')
       const atIndex = spec.lastIndexOf('@')
       expect(atIndex).toBeGreaterThan(0)

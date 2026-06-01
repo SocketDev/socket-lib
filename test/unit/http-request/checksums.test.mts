@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { parseChecksums } from '../../../src/http-request/checksums'
 
-vi.mock('../../../src/http-request/request', () => ({
+vi.mock(import('../../../src/http-request/request'), () => ({
   httpRequest: vi.fn(),
 }))
 
@@ -15,7 +15,11 @@ async function loadFresh() {
   }
 }
 
-function makeResponse(opts: { ok: boolean; status?: number; body: string }) {
+function makeResponse(opts: {
+  ok: boolean
+  status?: number | undefined
+  body: string
+}) {
   const { body, ok, status = ok ? 200 : 500 } = opts
   return {
     ok,

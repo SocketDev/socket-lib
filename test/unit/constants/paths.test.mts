@@ -30,8 +30,8 @@ import {
 import {
   CACHE_DIR,
   CACHE_TTL_DIR,
-  DOT_GIT_DIR,
   DOT_GITHUB,
+  DOT_GIT_DIR,
   DOT_SOCKET_DIR,
   NODE_MODULES,
   NODE_MODULES_GLOB_RECURSIVE,
@@ -256,7 +256,8 @@ describe('constants/paths', () => {
         EXT_YAML,
         EXT_YML,
       ]
-      for (const ext of extensions) {
+      for (let i = 0, { length } = extensions; i < length; i += 1) {
+        const ext = extensions[i]!
         expect(ext.startsWith('.')).toBe(true)
       }
     })

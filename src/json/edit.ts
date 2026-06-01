@@ -344,7 +344,7 @@ export async function retryWrite(
       const isLastAttempt = attempt === retries
       const isRetriableError =
         isErrnoException(e) &&
-        (e.code === 'EPERM' || e.code === 'EBUSY' || e.code === 'ENOENT')
+        (e.code === 'EBUSY' || e.code === 'ENOENT' || e.code === 'EPERM')
 
       if (!isRetriableError || isLastAttempt) {
         throw e

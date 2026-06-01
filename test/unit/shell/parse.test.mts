@@ -250,7 +250,8 @@ describe('shell/parse eachSimpleCommand', () => {
     })
     // Implementation-defined whether `&&` mid-expression yields one or
     // two visits; just verify no empty tokens slipped through.
-    for (const t of visited) {
+    for (let i = 0, { length } = visited; i < length; i += 1) {
+      const t = visited[i]!
       expect(t.length).toBeGreaterThan(0)
     }
   })

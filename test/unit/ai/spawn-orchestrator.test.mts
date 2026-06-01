@@ -4,11 +4,11 @@ const { mockChildSpawn } = vi.hoisted(() => ({
   mockChildSpawn: vi.fn(),
 }))
 
-vi.mock('../../../src/process/spawn/child', () => ({
+vi.mock(import('../../../src/process/spawn/child'), () => ({
   spawn: mockChildSpawn,
 }))
 
-vi.mock('../../../src/ai/discover.mts', () => ({
+vi.mock(import('../../../src/ai/discover.mts'), () => ({
   discoverAiAgents: vi.fn(),
 }))
 
@@ -48,10 +48,10 @@ async function loadFresh() {
 const baseOpts = {
   agent: 'claude' as const,
   cwd: '/repo',
-  prompt: 'do the thing',
-  permissionMode: 'dontAsk' as const,
-  tools: [] as readonly string[],
   disallow: [] as readonly string[],
+  permissionMode: 'dontAsk' as const,
+  prompt: 'do the thing',
+  tools: [] as readonly string[],
 }
 
 beforeEach(() => {
@@ -135,8 +135,8 @@ describe.sequential('ai/spawn — spawnAiAgent happy path', () => {
     )
     await spawnAiAgent({ ...baseOpts, timeoutMs: 60_000 })
     const [, , spawnOpts] = mockChildSpawn.mock.calls[0]!
-    expect((spawnOpts as { timeout?: number }).timeout).toBe(60_000)
-    expect((spawnOpts as { cwd?: string }).cwd).toBe('/repo')
+    expect((spawnOpts as { timeout?: number | undefined }).timeout).toBe(60_000)
+    expect((spawnOpts as { cwd?: string | undefined }).cwd).toBe('/repo')
   })
 })
 

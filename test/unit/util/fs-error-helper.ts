@@ -62,14 +62,14 @@ export interface FsErrorSpec {
    * the real implementation. Default: false (every call matching the path
    * errors until restore).
    */
-  once?: boolean
+  once?: boolean | undefined
 }
 
 export interface FsAsyncErrorSpec {
   path: string
   op: AsyncOp
   code: FsErrorCode
-  once?: boolean
+  once?: boolean | undefined
 }
 
 export function makeErrnoError(

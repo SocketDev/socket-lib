@@ -22,10 +22,10 @@ import { normalizePath } from '../paths/normalize'
 import { ErrorCtor } from '../primordials/error'
 
 import {
-  assertArchiveExists,
   DEFAULT_MAX_ENTRIES,
   DEFAULT_MAX_FILE_SIZE,
   DEFAULT_MAX_TOTAL_SIZE,
+  assertArchiveExists,
   getTarFs,
 } from './_internal'
 
@@ -72,7 +72,11 @@ export async function extractTar(
 
   const tarFs = getTarFs()
   const extractStream = tarFs.extract(normalizedOutputDir, {
-    map: (header: { name: string; size?: number; type?: string }) => {
+    map: (header: {
+      name: string
+      size?: number | undefined
+      type?: string | undefined
+    }) => {
       /* c8 ignore start - destroyScheduled is set by the same map() when a
          security limit trips; only fires after the schedule. */
       if (destroyScheduled) {
@@ -113,7 +117,7 @@ export async function extractTar(
       }
 
       // Check for symlinks
-      if (header.type === 'symlink' || header.type === 'link') {
+      if (header.type === 'link' || header.type === 'symlink') {
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(
@@ -215,7 +219,11 @@ export async function extractTarGz(
 
   const tarFs = getTarFs()
   const extractStream = tarFs.extract(normalizedOutputDir, {
-    map: (header: { name: string; size?: number; type?: string }) => {
+    map: (header: {
+      name: string
+      size?: number | undefined
+      type?: string | undefined
+    }) => {
       /* c8 ignore start - destroyScheduled is set by the same map() when a
          security limit trips; only fires after the schedule. */
       if (destroyScheduled) {
@@ -256,7 +264,7 @@ export async function extractTarGz(
       }
 
       // Check for symlinks
-      if (header.type === 'symlink' || header.type === 'link') {
+      if (header.type === 'link' || header.type === 'symlink') {
         destroyScheduled = true
         process.nextTick(() => {
           extractStream.destroy(

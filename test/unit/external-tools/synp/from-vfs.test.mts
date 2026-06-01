@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  synpFromVfs,
   SYNP_VFS_KEY,
+  synpFromVfs,
 } from '../../../../src/external-tools/synp/from-vfs'
 
 describe.sequential('external-tools/synp/from-vfs', () => {

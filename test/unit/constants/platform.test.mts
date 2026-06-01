@@ -16,12 +16,12 @@ import process from 'node:process'
 
 import {
   DARWIN,
-  getArch,
-  getPlatform,
   S_IXGRP,
   S_IXOTH,
   S_IXUSR,
   WIN32,
+  getArch,
+  getPlatform,
 } from '../../../src/constants/platform'
 
 describe('constants/platform', () => {

@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  skillspectorFromVfs,
   SKILLSPECTOR_VFS_KEY,
+  skillspectorFromVfs,
 } from '../../../../src/external-tools/skillspector/from-vfs'
 
 describe.sequential('external-tools/skillspector/from-vfs', () => {

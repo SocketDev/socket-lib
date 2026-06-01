@@ -6,15 +6,15 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('../../../src/http-request/browser-fetch', () => ({
+vi.mock(import('../../../src/http-request/browser-fetch'), () => ({
   doFetch: vi.fn(),
 }))
 
 interface MockResponseInit {
-  status?: number
-  statusText?: string
-  headers?: Record<string, string>
-  body?: string
+  status?: number | undefined
+  statusText?: string | undefined
+  headers?: Record<string, string> | undefined
+  body?: string | undefined
 }
 
 function mockFetchResponse(init: MockResponseInit = {}): Response {
@@ -369,7 +369,7 @@ describe.sequential('http-request/browser', () => {
       ).rejects.toBeDefined()
       // onResponse was called with an Error wrapping the string
       expect(onResponse).toHaveBeenCalled()
-      const arg = onResponse.mock.calls[0]![0] as { error?: Error }
+      const arg = onResponse.mock.calls[0]![0] as { error?: Error | undefined }
       expect(arg.error).toBeInstanceOf(Error)
       expect(arg.error?.message).toBe('string-error')
     })

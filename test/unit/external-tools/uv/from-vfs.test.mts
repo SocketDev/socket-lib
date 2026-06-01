@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  uvFromVfs,
   UV_VFS_KEY,
+  uvFromVfs,
 } from '../../../../src/external-tools/uv/from-vfs'
 
 describe.sequential('external-tools/uv/from-vfs', () => {

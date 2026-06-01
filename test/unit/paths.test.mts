@@ -328,20 +328,23 @@ describe('paths', () => {
       ]
 
       // All paths should be non-empty strings
-      paths.forEach(path => {
+      for (let i = 0, { length } = paths; i < length; i += 1) {
+        const path = paths[i]!
         expect(typeof path).toBe('string')
         expect(path.length).toBeGreaterThan(0)
-      })
+      }
 
       // All paths should use forward slashes (normalized)
-      paths.forEach(path => {
+      for (let i = 0, { length } = paths; i < length; i += 1) {
+        const path = paths[i]!
         expect(path).not.toContain('\\')
-      })
+      }
 
       // All paths should contain .socket
-      paths.forEach(path => {
+      for (let i = 0, { length } = paths; i < length; i += 1) {
+        const path = paths[i]!
         expect(path).toContain('.socket')
-      })
+      }
     })
 
     it('should generate unique paths for different apps', () => {
@@ -377,13 +380,14 @@ describe('paths', () => {
         getSocketDlxDir(),
       ]
 
-      paths.forEach(path => {
+      for (let i = 0, { length } = paths; i < length; i += 1) {
+        const path = paths[i]!
         if (process.platform === 'win32') {
           expect(path).toMatch(/^[A-Za-z]:\//)
         } else {
           expect(path).toMatch(/^\//)
         }
-      })
+      }
     })
 
     it('should not contain backslashes in normalized paths', () => {
@@ -396,9 +400,10 @@ describe('paths', () => {
         getSocketAppCacheTtlDir('test'),
       ]
 
-      paths.forEach(path => {
+      for (let i = 0, { length } = paths; i < length; i += 1) {
+        const path = paths[i]!
         expect(path).not.toContain('\\')
-      })
+      }
     })
   })
 
@@ -413,11 +418,12 @@ describe('paths', () => {
         '123numeric',
       ]
 
-      testCases.forEach(appName => {
+      for (let i = 0, { length } = testCases; i < length; i += 1) {
+        const appName = testCases[i]!
         const result = getSocketAppDir(appName)
         expect(result).toContain(`_${appName}`)
         expect(result).toContain('.socket')
-      })
+      }
     })
 
     it('should handle empty string app name gracefully', () => {

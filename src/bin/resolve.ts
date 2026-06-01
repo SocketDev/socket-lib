@@ -87,7 +87,11 @@ export function resolveRealBinSync(binPath: string): string {
     const voltaPlatform = readJsonSync(
       path.join(voltaUserPath, 'platform.json'),
       { throws: false },
-    ) as { node?: { runtime?: string; npm?: string } } | null
+    ) as {
+      node?:
+        | { runtime?: string | undefined; npm?: string | undefined }
+        | undefined
+    } | null
     const voltaNodeVersion = voltaPlatform?.node?.runtime
     const voltaNpmVersion = voltaPlatform?.node?.npm
     let voltaBinPath = ''
@@ -117,7 +121,7 @@ export function resolveRealBinSync(binPath: string): string {
       const binInfo = readJsonSync(
         path.join(voltaUserBinPath, `${basename}.json`),
         { throws: false },
-      ) as { package?: string } | null
+      ) as { package?: string | undefined } | null
       const binPackage = binInfo?.package
       if (binPackage) {
         voltaBinPath = path.join(

@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  trufflehogFromVfs,
   TRUFFLEHOG_VFS_KEY,
+  trufflehogFromVfs,
 } from '../../../../src/external-tools/trufflehog/from-vfs'
 
 describe.sequential('external-tools/trufflehog/from-vfs', () => {

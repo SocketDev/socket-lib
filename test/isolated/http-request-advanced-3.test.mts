@@ -488,7 +488,8 @@ describe('http-request', () => {
       // The "too many redirects" rejection uses raw reject, not rejectOnce,
       // so no additional error hook fires. Exactly 3 hook calls total.
       expect(responseInfos).toHaveLength(3)
-      for (const info of responseInfos) {
+      for (let i = 0, { length } = responseInfos; i < length; i += 1) {
+        const info = responseInfos[i]!
         expect(info.status).toBeGreaterThanOrEqual(300)
         expect(info.status).toBeLessThan(400)
         expect(info.error).toBeUndefined()

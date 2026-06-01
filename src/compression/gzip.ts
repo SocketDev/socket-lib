@@ -9,18 +9,13 @@
  *   readable.pipe(createGzipCompressor()).pipe(writable)
  */
 
-import { Buffer } from 'node:buffer'
+import type { Buffer } from 'node:buffer'
 import { createReadStream, createWriteStream } from 'node:fs'
 import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
 import { promisify } from 'node:util'
-import {
-  createGunzip,
-  createGzip,
-  gunzip,
-  gzip,
-  type ZlibOptions,
-} from 'node:zlib'
+import { createGunzip, createGzip, gunzip, gzip } from 'node:zlib'
+import type { ZlibOptions } from 'node:zlib'
 
 import { safeDelete } from '../fs/safe'
 import { ErrorCtor } from '../primordials/error'

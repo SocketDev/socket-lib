@@ -39,7 +39,7 @@ describe('eco/manifest/get-package', () => {
 describe('eco/manifest/get-package-versions', () => {
   it('returns all entries that share a name', () => {
     const versions = getPackageVersions(LOCK, 'a')
-    expect(versions.map(v => v.version).sort()).toEqual(['1.0.0', '2.0.0'])
+    expect(versions.map(v => v.version).toSorted()).toEqual(['1.0.0', '2.0.0'])
   })
 
   it('returns a singleton array for single-version names', () => {

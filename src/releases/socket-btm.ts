@@ -2,13 +2,8 @@
  * @file Socket-btm release download utilities.
  */
 
-import {
-  type Arch,
-  getArch,
-  type Libc,
-  getPlatform,
-  type Platform,
-} from '../constants/platform'
+import { getArch, getPlatform } from '../constants/platform'
+import type { Arch, Libc, Platform } from '../constants/platform'
 import { getReleaseAssetUrl } from './github-asset-url'
 import { getLatestRelease } from './github-listing'
 import { downloadGitHubRelease } from './github-downloads'
@@ -39,7 +34,7 @@ export interface SocketBtmAssetConfig {
   /**
    * @internal Discriminator fields
    */
-  bin?: never
+  bin?: never | undefined
   /**
    * Working directory (defaults to process.cwd()).
    */
@@ -51,7 +46,7 @@ export interface SocketBtmAssetConfig {
   /**
    * @internal Discriminator fields
    */
-  libc?: never
+  libc?: never | undefined
   /**
    * Output filename. @default resolved asset name.
    */
@@ -71,11 +66,11 @@ export interface SocketBtmAssetConfig {
   /**
    * @internal Discriminator fields
    */
-  targetArch?: never
+  targetArch?: never | undefined
   /**
    * @internal Discriminator fields
    */
-  targetPlatform?: never
+  targetPlatform?: never | undefined
 }
 
 /**
@@ -85,7 +80,7 @@ export interface SocketBtmBinaryConfig {
   /**
    * @internal Discriminator field
    */
-  asset?: never
+  asset?: never | undefined
   /**
    * Binary/executable name (without extension). @default tool.
    */
@@ -186,7 +181,8 @@ export function detectLibc(): Libc | undefined {
       '/usr/lib/ld-musl-aarch64.so.1',
     ]
 
-    for (const path of muslPaths) {
+    for (let i = 0, { length } = muslPaths; i < length; i += 1) {
+      const path = muslPaths[i]!
       if (fs.existsSync(path)) {
         return 'musl'
       }

@@ -171,7 +171,7 @@ describe('stdio/progress', () => {
       })
       // To exercise the >60s branch we simulate elapsed by patching startTime.
       const inst: any = bar
-      inst.startTime = Date.now() - 120000 // 2 minutes ago
+      inst.startTime = Date.now() - 120_000 // 2 minutes ago
       bar.update(100) // 10% done after 2min → eta = 18min
       const out = stream._writes.join('')
       expect(out).toMatch(/\d+m\d+s/)

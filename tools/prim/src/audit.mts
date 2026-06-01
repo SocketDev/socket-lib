@@ -9,7 +9,7 @@
  *   - File / line / column / source pattern for human inspection.
  */
 
-import { readdirSync, readFileSync, statSync } from 'node:fs'
+import { readFileSync, readdirSync, statSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
@@ -77,12 +77,12 @@ export function isSourceFile(absPath) {
 }
 
 const PARSE_OPTIONS = {
-  ecmaVersion: 'latest',
-  sourceType: 'module',
-  locations: true,
-  allowImportExportEverywhere: true,
   allowAwaitOutsideFunction: true,
   allowHashBang: true,
+  allowImportExportEverywhere: true,
+  ecmaVersion: 'latest',
+  locations: true,
+  sourceType: 'module',
 }
 
 /**
@@ -266,9 +266,9 @@ export async function auditDirectory({
       // Don't cross function/program boundaries — only check the direct
       // VariableDeclarator if we're inside one.
       if (
+        a.type === 'ArrowFunctionExpression' ||
         a.type === 'FunctionDeclaration' ||
         a.type === 'FunctionExpression' ||
-        a.type === 'ArrowFunctionExpression' ||
         a.type === 'Program'
       ) {
         return false
@@ -404,9 +404,9 @@ export async function auditDirectory({
           break
         }
         if (
+          a.type === 'ArrowFunctionExpression' ||
           a.type === 'FunctionDeclaration' ||
-          a.type === 'FunctionExpression' ||
-          a.type === 'ArrowFunctionExpression'
+          a.type === 'FunctionExpression'
         ) {
           return
         }
@@ -700,7 +700,8 @@ export async function auditDirectory({
   // Sequential to keep API throughput predictable; parallelism
   // would need a token budget concept we don't have.
   if (aiDisambiguate && pendingAmbiguous.length > 0) {
-    for (const item of pendingAmbiguous) {
+    for (let i = 0, { length } = pendingAmbiguous; i < length; i += 1) {
+      const item = pendingAmbiguous[i]!
       const verdict = await disambiguateReceiver({
         aiEnabled: true,
         column: item.column,

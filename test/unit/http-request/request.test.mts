@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../src/http-request/request-attempt', () => ({
+vi.mock(import('../../../src/http-request/request-attempt'), () => ({
   httpRequestAttempt: vi.fn(),
 }))
 
@@ -17,7 +17,7 @@ async function loadFresh() {
   }
 }
 
-function makeResponse(opts: { ok: boolean; status?: number }) {
+function makeResponse(opts: { ok: boolean; status?: number | undefined }) {
   const { ok, status = ok ? 200 : 500 } = opts
   return {
     ok,

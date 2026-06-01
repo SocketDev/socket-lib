@@ -24,10 +24,12 @@ import {
   rtlSweep,
   smoothKernel,
   solidColor,
-  type Palette,
-  type RGB,
-  type ShimmerDirection,
-  type ShimmerSpec,
+} from '../../../src/effects/shimmer'
+import type {
+  Palette,
+  RGB,
+  ShimmerDirection,
+  ShimmerSpec,
 } from '../../../src/effects/shimmer'
 
 const RED: RGB = [255, 0, 0]
@@ -274,14 +276,14 @@ describe('effects/shimmer', () => {
 
     it('is deterministic given a seeded PRNG', () => {
       // Two calls with the same seeded sequence should produce identical paths.
-      const seed = (s = 0x5eed) => {
+      const seed = (s = 0x5e_ed) => {
         let state = s >>> 0
         return () => {
           state ^= state << 13
           state ^= state >>> 17
           state ^= state << 5
           state >>>= 0
-          return state / 0x100000000
+          return state / 0x1_00_00_00_00
         }
       }
       const a = randomSweep(10, 2, seed())

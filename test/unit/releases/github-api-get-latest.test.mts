@@ -13,7 +13,7 @@ import { httpRequest } from '../../../src/http-request/request'
 import { createMockHttpResponse } from '../util/http-mock'
 
 // Mock httpRequest so tests don't issue real network calls.
-vi.mock('../../../src/http-request/request')
+vi.mock(import('../../../src/http-request/request'))
 
 // Match the production source's primordials convention.
 const JSONStringify = JSON.stringify

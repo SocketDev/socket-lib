@@ -9,22 +9,22 @@
  */
 export interface FlagValues {
   [key: string]: unknown
-  quiet?: boolean
-  silent?: boolean
-  verbose?: boolean
-  help?: boolean
-  all?: boolean
-  fix?: boolean
-  force?: boolean
-  'dry-run'?: boolean
-  json?: boolean
-  debug?: boolean
-  watch?: boolean
-  coverage?: boolean
-  cover?: boolean
-  update?: boolean
-  staged?: boolean
-  changed?: boolean
+  quiet?: boolean | undefined
+  silent?: boolean | undefined
+  verbose?: boolean | undefined
+  help?: boolean | undefined
+  all?: boolean | undefined
+  fix?: boolean | undefined
+  force?: boolean | undefined
+  'dry-run'?: boolean | undefined
+  json?: boolean | undefined
+  debug?: boolean | undefined
+  watch?: boolean | undefined
+  coverage?: boolean | undefined
+  cover?: boolean | undefined
+  update?: boolean | undefined
+  staged?: boolean | undefined
+  changed?: boolean | undefined
 }
 
 /**
@@ -48,15 +48,15 @@ export const COMMON_FLAGS = {
     default: false,
     description: 'Target changed files',
   },
-  coverage: {
-    type: 'boolean' as const,
-    default: false,
-    description: 'Run with coverage',
-  },
   cover: {
     type: 'boolean' as const,
     default: false,
     description: 'Run with coverage (alias)',
+  },
+  coverage: {
+    type: 'boolean' as const,
+    default: false,
+    description: 'Run with coverage',
   },
   debug: {
     type: 'boolean' as const,

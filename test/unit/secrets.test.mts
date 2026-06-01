@@ -42,7 +42,7 @@ import * as rc from '../../src/secrets/rc'
 
 const IS_MACOS = platform() === 'darwin'
 const IS_WINDOWS = platform() === 'win32'
-const IS_CI = process.env['CI'] === 'true' || process.env['CI'] === '1'
+const IS_CI = process.env['CI'] === '1' || process.env['CI'] === 'true'
 // Windows CI runners (GitHub Actions windows-latest) ship a PowerShell session
 // that cant reliably invoke DPAPI from inside vitest workers — the runPsAsync
 // child either hangs at stdin or fails to load System.Security in CI. The

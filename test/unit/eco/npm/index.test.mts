@@ -301,7 +301,8 @@ describe('agent', () => {
           '-v',
         ]
 
-        for (const flag of validFlags) {
+        for (let i = 0, { length } = validFlags; i < length; i += 1) {
+          const flag = validFlags[i]!
           expect(isNpmLoglevelFlag(flag)).toBe(true)
         }
       })
@@ -319,7 +320,8 @@ describe('agent', () => {
           '--verbosee',
         ]
 
-        for (const flag of invalidFlags) {
+        for (let i = 0, { length } = invalidFlags; i < length; i += 1) {
+          const flag = invalidFlags[i]!
           expect(isNpmLoglevelFlag(flag)).toBe(false)
         }
       })
@@ -474,7 +476,8 @@ describe('agent', () => {
           '--unrelated',
           '',
         ]
-        for (const s of samples) {
+        for (let i = 0, { length } = samples; i < length; i += 1) {
+          const s = samples[i]!
           expect(isPnpmLoglevelFlag(s)).toBe(isNpmLoglevelFlag(s))
         }
       })

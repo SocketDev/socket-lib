@@ -30,7 +30,7 @@ describe('spinner integration', () => {
 
   describe('real-world spinner workflows', () => {
     it('should handle complete operation lifecycle', async () => {
-      const spinner = Spinner({ text: 'Starting operation...' })
+      const spinner = Spinner({ text: 'Starting operation…' })
 
       spinner.start()
       expect(spinner.isSpinning).toBe(true)
@@ -48,7 +48,7 @@ describe('spinner integration', () => {
 
     it('should show progress updates during operation', async () => {
       const spinner = Spinner()
-      spinner.start('Processing files...')
+      spinner.start('Processing files…')
 
       const totalFiles = 10
       for (let i = 0; i <= totalFiles; i++) {
@@ -81,7 +81,7 @@ describe('spinner integration', () => {
       let operationCompleted = false
 
       const result = await withSpinner({
-        message: 'Reading file...',
+        message: 'Reading file…',
         operation: async () => {
           operationCompleted = true
           return 'file-content'
@@ -94,7 +94,7 @@ describe('spinner integration', () => {
 
     it('should wrap async network operation', async () => {
       const result = await withSpinner({
-        message: 'Fetching data...',
+        message: 'Fetching data…',
         operation: async () => {
           return { status: 'success', data: [1, 2, 3] }
         },
@@ -106,7 +106,7 @@ describe('spinner integration', () => {
     it('should handle operation errors gracefully', async () => {
       await expect(
         withSpinner({
-          message: 'Running operation...',
+          message: 'Running operation…',
           operation: async () => {
             throw new Error('Operation failed')
           },
@@ -116,7 +116,7 @@ describe('spinner integration', () => {
 
     it('should work with shimmer effects', async () => {
       const result = await withSpinner({
-        message: 'Processing with shimmer...',
+        message: 'Processing with shimmer…',
         operation: async () => {
           return 'done'
         },
@@ -130,7 +130,7 @@ describe('spinner integration', () => {
 
     it('should work with color changes', async () => {
       const result = await withSpinner({
-        message: 'Processing with color...',
+        message: 'Processing with color…',
         operation: async () => {
           return 'complete'
         },
@@ -146,7 +146,7 @@ describe('spinner integration', () => {
   describe('error handling workflows', () => {
     it('should show error and continue on non-fatal error', async () => {
       const spinner = Spinner()
-      spinner.start('Running checks...')
+      spinner.start('Running checks…')
 
       try {
         // Simulate operation that can fail
@@ -156,7 +156,7 @@ describe('spinner integration', () => {
         // Continue with other operations
       }
 
-      spinner.text('Continuing with other checks...')
+      spinner.text('Continuing with other checks…')
 
       spinner.successAndStop('Checks completed with warnings')
       expect(spinner.isSpinning).toBe(false)
@@ -164,7 +164,7 @@ describe('spinner integration', () => {
 
     it('should stop spinner on fatal error', async () => {
       const spinner = Spinner()
-      spinner.start('Critical operation...')
+      spinner.start('Critical operation…')
 
       spinner.failAndStop('Critical failure - operation aborted')
       expect(spinner.isSpinning).toBe(false)

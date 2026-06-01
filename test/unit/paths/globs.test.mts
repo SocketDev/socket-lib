@@ -115,7 +115,8 @@ describe('paths/globs', () => {
         README_GLOB_RECURSIVE,
       ]
 
-      for (const pattern of patterns) {
+      for (let i = 0, { length } = patterns; i < length; i += 1) {
+        const pattern = patterns[i]!
         expect(typeof pattern).toBe('string')
         expect(pattern.length).toBeGreaterThan(0)
       }
@@ -128,7 +129,8 @@ describe('paths/globs', () => {
         README_GLOB_RECURSIVE,
       ]
 
-      for (const pattern of recursivePatterns) {
+      for (let i = 0, { length } = recursivePatterns; i < length; i += 1) {
+        const pattern = recursivePatterns[i]!
         expect(pattern.startsWith('**/')).toBe(true)
       }
     })
@@ -140,7 +142,8 @@ describe('paths/globs', () => {
         README_GLOB,
       ]
 
-      for (const pattern of nonRecursivePatterns) {
+      for (let i = 0, { length } = nonRecursivePatterns; i < length; i += 1) {
+        const pattern = nonRecursivePatterns[i]!
         expect(pattern).not.toContain('**/')
       }
     })

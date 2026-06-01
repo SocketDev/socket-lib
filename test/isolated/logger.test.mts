@@ -718,7 +718,7 @@ describe('Logger', () => {
     it('should show progress indicator', () => {
       // progress() writes directly to stream, not through standard logging
       // so it doesn't go through our mock in the same way
-      expect(() => testLogger.progress('Loading...')).not.toThrow()
+      expect(() => testLogger.progress('Loading…')).not.toThrow()
     })
 
     it('should write to stderr when on stderr stream', () => {
@@ -1058,7 +1058,7 @@ describe('Logger', () => {
     })
 
     it('should handle objects with circular references', () => {
-      const obj: { name: string; self?: unknown } = { name: 'test' }
+      const obj: { name: string; self?: unknown | undefined } = { name: 'test' }
       obj.self = obj
       expect(() => {
         testLogger.dir(obj)

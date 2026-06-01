@@ -15,11 +15,11 @@ export const SymbolCtor: SymbolConstructor = Symbol
 // Older engines lack them; use `| undefined` so importers don't crash
 // at load time.
 export const SymbolAsyncDispose: typeof Symbol.asyncDispose | undefined = (
-  Symbol as { asyncDispose?: typeof Symbol.asyncDispose }
+  Symbol as { asyncDispose?: typeof Symbol.asyncDispose | undefined }
 ).asyncDispose
 export const SymbolAsyncIterator = Symbol.asyncIterator
 export const SymbolDispose: typeof Symbol.dispose | undefined = (
-  Symbol as { dispose?: typeof Symbol.dispose }
+  Symbol as { dispose?: typeof Symbol.dispose | undefined }
 ).dispose
 export const SymbolFor = Symbol.for
 export const SymbolHasInstance = Symbol.hasInstance

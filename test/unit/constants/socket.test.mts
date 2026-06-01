@@ -130,10 +130,11 @@ describe('constants/socket', () => {
         SOCKET_STATUS_URL,
         SOCKET_DOCS_URL,
       ]
-      urls.forEach(url => {
+      for (let i = 0, { length } = urls; i < length; i += 1) {
+        const url = urls[i]!
         expect(url).toMatch(/^https:\/\//)
         expect(() => new URL(url)).not.toThrow()
-      })
+      }
     })
 
     it('should all contain socket.dev domain', () => {
@@ -146,9 +147,10 @@ describe('constants/socket', () => {
         SOCKET_STATUS_URL,
         SOCKET_DOCS_URL,
       ]
-      urls.forEach(url => {
+      for (let i = 0, { length } = urls; i < length; i += 1) {
+        const url = urls[i]!
         expect(url).toContain('socket.dev')
-      })
+      }
     })
 
     it('should not have trailing slashes', () => {
@@ -161,9 +163,10 @@ describe('constants/socket', () => {
         SOCKET_STATUS_URL,
         SOCKET_DOCS_URL,
       ]
-      urls.forEach(url => {
+      for (let i = 0, { length } = urls; i < length; i += 1) {
+        const url = urls[i]!
         expect(url.endsWith('/')).toBe(false)
-      })
+      }
     })
 
     it('should support URL path construction', () => {

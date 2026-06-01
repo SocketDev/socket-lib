@@ -143,15 +143,19 @@ export interface DlxMetadata {
   timestamp: number
   integrity: string
   size: number
-  source?: {
-    type: 'download' | 'extract' | 'package'
-    url?: string
-    path?: string
-    spec?: string
-  }
-  update_check?: {
-    last_check: number
-    last_notification: number
-    latest_known: string
-  }
+  source?:
+    | {
+        type: 'download' | 'extract' | 'package'
+        url?: string | undefined
+        path?: string | undefined
+        spec?: string | undefined
+      }
+    | undefined
+  update_check?:
+    | {
+        last_check: number
+        last_notification: number
+        latest_known: string
+      }
+    | undefined
 }

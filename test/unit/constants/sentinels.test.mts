@@ -16,7 +16,6 @@ import {
   COLUMN_LIMIT,
   EMPTY_FILE,
   EMPTY_VALUE,
-  kInternalsSymbol,
   LOOP_SENTINEL,
   NODE_AUTH_TOKEN,
   NODE_ENV,
@@ -24,6 +23,7 @@ import {
   UNKNOWN_ERROR,
   UNKNOWN_VALUE,
   V,
+  kInternalsSymbol,
 } from '../../../src/constants/sentinels'
 
 describe('constants/sentinels', () => {

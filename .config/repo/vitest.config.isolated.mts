@@ -17,7 +17,7 @@ const projectRoot = path.resolve(__dirname, '..', '..')
 // ~7 GB total RAM — leave room for the runner + OS), generous locally
 // where developer machines typically have plenty of RAM.
 const isCI = !!process.env['CI']
-const workerHeapMB = isCI ? 6144 : 12288
+const workerHeapMB = isCI ? 6144 : 12_288
 
 // Normalize paths for cross-platform glob patterns (forward slashes on Windows)
 const toGlobPath = (pathLike: string): string => pathLike.replaceAll('\\', '/')

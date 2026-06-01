@@ -24,7 +24,7 @@ export function getCallerInfo(stackOffset: number = 3): string {
   // on exotic embedders that strip Error.captureStackTrace.
   /* c8 ignore start */
   if (typeof captureStackTrace === 'function') {
-    const obj: { stack?: unknown } = {}
+    const obj: { stack?: unknown | undefined } = {}
     captureStackTrace(obj, getCallerInfo)
     const stack = obj.stack
     // obj.stack is always a string after captureStackTrace.

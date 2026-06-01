@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'vitest'
 
 import {
+  JANUS_ASSET_MAP,
   getJanusAssetEntry,
   getJanusDownloadUrl,
-  JANUS_ASSET_MAP,
 } from '../../../../src/external-tools/janus/asset-names'
 
 describe('external-tools/janus/asset-names', () => {
   test('JANUS_ASSET_MAP currently maps darwin-arm64 only', () => {
-    expect(Object.keys(JANUS_ASSET_MAP).sort()).toEqual(['darwin-arm64'])
+    expect(Object.keys(JANUS_ASSET_MAP).toSorted()).toEqual(['darwin-arm64'])
   })
 
   test('darwin-arm64 asset entry uses the aarch64-apple-darwin tarball', () => {

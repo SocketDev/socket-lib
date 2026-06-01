@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/sbt/from-vfs', () => ({
+vi.mock(import('../../../../src/external-tools/sbt/from-vfs'), () => ({
   sbtFromVfs: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/sbt/from-path', () => ({
+vi.mock(import('../../../../src/external-tools/sbt/from-path'), () => ({
   sbtFromPath: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/sbt/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/sbt/from-download'), () => ({
   sbtFromDownload: vi.fn(),
 }))
 

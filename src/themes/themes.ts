@@ -13,8 +13,6 @@ import type { Theme } from './types'
  * designed for focus and elegance.
  */
 export const SOCKET_THEME: Theme = {
-  name: 'socket',
-  displayName: 'Socket Security',
   colors: {
     primary: [140, 82, 255],
     success: 'greenBright',
@@ -27,6 +25,7 @@ export const SOCKET_THEME: Theme = {
     link: 'cyanBright',
     prompt: 'primary',
   },
+  displayName: 'Socket Security',
   effects: {
     spinner: {
       color: 'primary',
@@ -43,6 +42,7 @@ export const SOCKET_THEME: Theme = {
     description: 'Signature theme with refined violet and subtle shimmer',
     version: '1.0.0',
   },
+  name: 'socket',
 }
 
 /**
@@ -50,8 +50,6 @@ export const SOCKET_THEME: Theme = {
  * purple/pink tones.
  */
 export const SUNSET_THEME: Theme = {
-  name: 'sunset',
-  displayName: 'Sunset',
   colors: {
     primary: [255, 140, 100],
     secondary: [200, 100, 180],
@@ -65,6 +63,7 @@ export const SUNSET_THEME: Theme = {
     link: 'primary',
     prompt: 'primary',
   },
+  displayName: 'Sunset',
   effects: {
     spinner: {
       color: 'primary',
@@ -84,6 +83,7 @@ export const SUNSET_THEME: Theme = {
     description: 'Warm sunset theme with purple-to-orange gradient',
     version: '2.0.0',
   },
+  name: 'sunset',
 }
 
 /**
@@ -91,8 +91,6 @@ export const SUNSET_THEME: Theme = {
  * confidence.
  */
 export const TERRACOTTA_THEME: Theme = {
-  name: 'terracotta',
-  displayName: 'Terracotta',
   colors: {
     primary: [255, 100, 50],
     secondary: [255, 150, 100],
@@ -106,6 +104,7 @@ export const TERRACOTTA_THEME: Theme = {
     link: 'secondary',
     prompt: 'primary',
   },
+  displayName: 'Terracotta',
   effects: {
     spinner: {
       color: 'primary',
@@ -122,14 +121,13 @@ export const TERRACOTTA_THEME: Theme = {
     description: 'Solid theme with rich terracotta and ember warmth',
     version: '1.0.0',
   },
+  name: 'terracotta',
 }
 
 /**
  * Lush — Steel elegance. Python-inspired steel blue with golden accents.
  */
 export const LUSH_THEME: Theme = {
-  name: 'lush',
-  displayName: 'Lush',
   colors: {
     primary: [70, 130, 180],
     secondary: [255, 215, 0],
@@ -143,6 +141,7 @@ export const LUSH_THEME: Theme = {
     link: 'cyanBright',
     prompt: 'primary',
   },
+  displayName: 'Lush',
   effects: {
     spinner: {
       color: 'primary',
@@ -153,6 +152,7 @@ export const LUSH_THEME: Theme = {
     description: 'Elegant theme with steel blue and golden harmony',
     version: '1.0.0',
   },
+  name: 'lush',
 }
 
 /**
@@ -160,8 +160,6 @@ export const LUSH_THEME: Theme = {
  * complexity meets elegance.
  */
 export const ULTRA_THEME: Theme = {
-  name: 'ultra',
-  displayName: 'Ultra',
   colors: {
     primary: [140, 82, 255],
     success: 'greenBright',
@@ -174,6 +172,7 @@ export const ULTRA_THEME: Theme = {
     link: 'cyanBright',
     prompt: 'primary',
   },
+  displayName: 'Ultra',
   effects: {
     spinner: {
       color: 'inherit',
@@ -190,6 +189,7 @@ export const ULTRA_THEME: Theme = {
     description: 'Premium theme with prismatic shimmer for deep analysis',
     version: '1.0.0',
   },
+  name: 'ultra',
 }
 
 /**

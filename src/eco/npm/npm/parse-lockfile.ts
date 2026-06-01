@@ -68,23 +68,23 @@ import type { DepType, PackageRef, ParsedLockfile } from '../../manifest/types'
 const MAX_LOCKFILE_DEPTH = 64
 
 interface RawPackage {
-  readonly name?: unknown
-  readonly version?: unknown
-  readonly resolved?: unknown
-  readonly integrity?: unknown
-  readonly dev?: unknown
-  readonly optional?: unknown
-  readonly peer?: unknown
-  readonly inBundle?: unknown
-  readonly license?: unknown
-  readonly dependencies?: unknown
-  readonly requires?: unknown
+  readonly name?: unknown | undefined
+  readonly version?: unknown | undefined
+  readonly resolved?: unknown | undefined
+  readonly integrity?: unknown | undefined
+  readonly dev?: unknown | undefined
+  readonly optional?: unknown | undefined
+  readonly peer?: unknown | undefined
+  readonly inBundle?: unknown | undefined
+  readonly license?: unknown | undefined
+  readonly dependencies?: unknown | undefined
+  readonly requires?: unknown | undefined
 }
 
 interface RawLockfile {
-  readonly lockfileVersion?: unknown
-  readonly packages?: Record<string, RawPackage>
-  readonly dependencies?: Record<string, RawPackage>
+  readonly lockfileVersion?: unknown | undefined
+  readonly packages?: Record<string, RawPackage> | undefined
+  readonly dependencies?: Record<string, RawPackage> | undefined
 }
 
 type PackageIndex = Record<string, number | number[]>

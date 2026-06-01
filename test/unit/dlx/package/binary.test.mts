@@ -64,7 +64,8 @@ describe('hash collision resistance', () => {
     ]
 
     const hashes = new Set<string>()
-    for (const spec of specs) {
+    for (let i = 0, { length } = specs; i < length; i += 1) {
+      const spec = specs[i]!
       const hash = createHash('sha256').update(spec).digest('hex').slice(0, 16)
       hashes.add(hash)
     }

@@ -10,7 +10,7 @@
 import { Buffer } from 'node:buffer'
 import { createHash } from 'node:crypto'
 
-import { nativeHash, hash } from '../../src/crypto/hash'
+import { hash, nativeHash } from '../../src/crypto/hash'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('crypto', () => {
@@ -77,7 +77,7 @@ describe('crypto', () => {
   // re-import the module fresh.
   describe('hash — fallback implementation', () => {
     const cryptoMod = require('node:crypto') as {
-      hash?: unknown
+      hash?: unknown | undefined
     }
     const hadNative = typeof cryptoMod.hash === 'function'
     const savedNativeHash = hadNative ? cryptoMod.hash : undefined

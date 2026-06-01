@@ -661,11 +661,12 @@ describe('cacache', () => {
         // Concurrent gets
         // @ts-expect-error - safeGet signature doesn't match map callback but works at runtime
         const entries = await Promise.all(keys.map(safeGet))
-        entries.forEach(entry => {
+        for (let i = 0, { length } = entries; i < length; i += 1) {
+          const entry = entries[i]!
           if (entry) {
             expect(entry).toBeDefined()
           }
-        })
+        }
 
         // Concurrent removes
         await Promise.all(keys.map(remove))

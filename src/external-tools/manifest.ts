@@ -121,24 +121,24 @@ export type ManifestEntry =
   | { kind: 'other'; raw: unknown }
 
 interface RawChecksum {
-  asset?: unknown
-  integrity?: unknown
+  asset?: unknown | undefined
+  integrity?: unknown | undefined
 }
 
 interface RawFlavor {
-  repository?: unknown
-  binaryName?: unknown
-  checksums?: unknown
+  repository?: unknown | undefined
+  binaryName?: unknown | undefined
+  checksums?: unknown | undefined
 }
 
 interface RawToolEntry {
-  description?: unknown
-  version?: unknown
-  release?: unknown
-  repository?: unknown
-  binaryName?: unknown
-  notes?: unknown
-  checksums?: unknown
+  description?: unknown | undefined
+  version?: unknown | undefined
+  release?: unknown | undefined
+  repository?: unknown | undefined
+  binaryName?: unknown | undefined
+  notes?: unknown | undefined
+  checksums?: unknown | undefined
 }
 
 export function isObject(value: unknown): value is Record<string, unknown> {

@@ -282,7 +282,7 @@ export function parseInlineArray(value: string): string[] {
     // Skip whitespace + commas.
     while (
       i < inner.length &&
-      (inner[i] === ' ' || inner[i] === '\t' || inner[i] === ',')
+      (inner[i] === '\t' || inner[i] === ' ' || inner[i] === ',')
     ) {
       i++
     }

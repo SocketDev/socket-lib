@@ -22,7 +22,7 @@ export const URIErrorCtor: URIErrorConstructor = URIError
 // reference is typed `Function | undefined` so callers in older
 // environments don't crash at import time.
 export const ErrorIsError: ((value: unknown) => value is Error) | undefined = (
-  Error as { isError?: (v: unknown) => v is Error }
+  Error as { isError?: ((v: unknown) => v is Error) | undefined }
 ).isError
 
 // V8-specific stack trace API. See https://v8.dev/docs/stack-trace-api.
@@ -37,10 +37,9 @@ export const ErrorCaptureStackTrace:
   | ((targetObject: object, constructorOpt?: Function) => void)
   | undefined = (
   Error as {
-    captureStackTrace?: (
-      targetObject: object,
-      constructorOpt?: Function,
-    ) => void
+    captureStackTrace?:
+      | ((targetObject: object, constructorOpt?: Function) => void)
+      | undefined
   }
 ).captureStackTrace
 
@@ -54,10 +53,9 @@ export const ErrorPrepareStackTrace:
   | ((error: Error, structuredStackTrace: NodeJS.CallSite[]) => unknown)
   | undefined = (
   Error as {
-    prepareStackTrace?: (
-      error: Error,
-      structuredStackTrace: NodeJS.CallSite[],
-    ) => unknown
+    prepareStackTrace?:
+      | ((error: Error, structuredStackTrace: NodeJS.CallSite[]) => unknown)
+      | undefined
   }
 ).prepareStackTrace
 
@@ -90,6 +88,6 @@ export function ErrorStackTraceLimit(): number | undefined {
   if (_stackTraceLimitGetter) {
     return _stackTraceLimitGetter()
   }
-  return (Error as { stackTraceLimit?: number }).stackTraceLimit
+  return (Error as { stackTraceLimit?: number | undefined }).stackTraceLimit
   /* c8 ignore stop */
 }

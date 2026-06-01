@@ -16,6 +16,7 @@
 
 import process from 'node:process'
 import {
+  Separator,
   checkbox,
   confirm,
   createInquirerTheme,
@@ -24,12 +25,11 @@ import {
   password,
   search,
   select,
-  Separator,
   wrapPrompt,
-  type Choice,
-  type Context,
 } from '../../../src/stdio/prompts'
-import { THEMES, type ThemeName } from '../../../src/themes/themes'
+import type { Choice, Context } from '../../../src/stdio/prompts'
+import { THEMES } from '../../../src/themes/themes'
+import type { ThemeName } from '../../../src/themes/themes'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('stdio/prompts', () => {
@@ -502,7 +502,8 @@ describe('stdio/prompts', () => {
       // an object instead of a function for modules with multiple exports.
       // All wrapped prompts should be callable.
       const prompts = [checkbox, confirm, input, password, search, select]
-      for (const prompt of prompts) {
+      for (let i = 0, { length } = prompts; i < length; i += 1) {
+        const prompt = prompts[i]!
         expect(() => wrapPrompt(prompt)).not.toThrow()
       }
     })
@@ -574,7 +575,8 @@ describe('stdio/prompts', () => {
         'lush',
         'ultra',
       ]
-      for (const name of themeNames) {
+      for (let i = 0, { length } = themeNames; i < length; i += 1) {
+        const name = themeNames[i]!
         const theme = createInquirerTheme(name)
         expect(theme).toBeDefined()
         expect(theme['style']).toBeDefined()

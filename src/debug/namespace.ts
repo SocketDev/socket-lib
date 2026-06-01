@@ -15,6 +15,7 @@ import { StringPrototypeStartsWith } from '../primordials/string'
 import { customLog, debugByNamespace } from './_internal'
 
 import type { DebugOptions, NamespacesOrOptions } from './types'
+import { envAsBoolean } from '@socketsecurity/lib-stable/env/boolean'
 
 /**
  * Extract options from namespaces parameter.
@@ -62,7 +63,7 @@ export function getDebugJsInstance(namespace: string) {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isDebug(): boolean {
-  return !!getSocketDebug()
+  return envAsBoolean(getSocketDebug())
 }
 
 /**
@@ -70,7 +71,7 @@ export function isDebug(): boolean {
  */
 /*@__NO_SIDE_EFFECTS__*/
 export function isDebugNs(namespaces: string | undefined): boolean {
-  return !!getSocketDebug() && isEnabled(namespaces)
+  return envAsBoolean(getSocketDebug()) && isEnabled(namespaces)
 }
 
 /**

@@ -43,7 +43,8 @@ export async function getLocalPackagePath(packageName, rootDir) {
   }
 
   // Return first existing path.
-  for (const checkPath of checks) {
+  for (let i = 0, { length } = checks; i < length; i += 1) {
+    const checkPath = checks[i]!
     if (existsSync(path.join(checkPath, 'package.json'))) {
       return checkPath
     }

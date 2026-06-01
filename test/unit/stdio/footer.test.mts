@@ -155,7 +155,8 @@ describe('stdio/footer', () => {
         'red',
         'gray',
       ]
-      for (const color of colors) {
+      for (let i = 0, { length } = colors; i < length; i += 1) {
+        const color = colors[i]!
         const result = createFooter('Message', {
           color: color as
             | 'cyan'

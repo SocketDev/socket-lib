@@ -163,7 +163,8 @@ describe('constants/testing', () => {
 
     it('should work with environment variable patterns', () => {
       const envVars = [CI, PRE_COMMIT, VITEST]
-      for (const envVar of envVars) {
+      for (let i = 0, { length } = envVars; i < length; i += 1) {
+        const envVar = envVars[i]!
         expect(typeof envVar).toBe('string')
         expect(envVar.length).toBeGreaterThan(0)
       }

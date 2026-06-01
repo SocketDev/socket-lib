@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ManifestError } from '../../../../src/eco/manifest/manifest-error'
+import type { ManifestError } from '../../../../src/eco/manifest/manifest-error'
 import { parsePackageJson } from '../../../../src/eco/npm/parse-package-json'
 
 describe('eco/npm/parse-package-json', () => {

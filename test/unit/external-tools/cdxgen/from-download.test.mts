@@ -1,18 +1,18 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/from-download'), () => ({
   downloadToolArchive: vi.fn(),
 }))
 
-vi.mock('../../../../src/paths/socket', () => ({
+vi.mock(import('../../../../src/paths/socket'), () => ({
   getSocketDlxDir: vi.fn(() => '/fake/dlx'),
 }))
 
-vi.mock('../../../../src/fs/safe', () => ({
+vi.mock(import('../../../../src/fs/safe'), () => ({
   safeMkdir: vi.fn(async () => undefined),
 }))
 
-vi.mock('node:fs', async () => {
+vi.mock(import('node:fs'), async () => {
   const actual = await vi.importActual<typeof import('node:fs')>('node:fs')
   return {
     ...actual,

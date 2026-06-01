@@ -193,7 +193,8 @@ describe('paths/exts', () => {
         EXT_YML,
       ]
 
-      for (const ext of extensions) {
+      for (let i = 0, { length } = extensions; i < length; i += 1) {
+        const ext = extensions[i]!
         expect(ext.startsWith('.')).toBe(true)
       }
     })
@@ -216,7 +217,8 @@ describe('paths/exts', () => {
         EXT_YML,
       ]
 
-      for (const ext of extensions) {
+      for (let i = 0, { length } = extensions; i < length; i += 1) {
+        const ext = extensions[i]!
         expect(typeof ext).toBe('string')
         expect(ext.length).toBeGreaterThan(1)
       }
@@ -240,7 +242,8 @@ describe('paths/exts', () => {
         EXT_YML,
       ]
 
-      for (const ext of extensions) {
+      for (let i = 0, { length } = extensions; i < length; i += 1) {
+        const ext = extensions[i]!
         expect(ext).not.toContain('/')
         expect(ext).not.toContain('\\')
       }

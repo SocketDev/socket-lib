@@ -43,7 +43,7 @@ export const eq: (a: string, b: string) => boolean = impl.eq.bind(impl)
 /* c8 ignore start - smol-versions exposes .neq, so the bind arm is taken;
    the polyfill fallback fires only on a hypothetical impl that lacks .neq. */
 export const neq: (a: string, b: string) => boolean =
-  typeof (impl as { neq?: unknown }).neq === 'function'
+  typeof (impl as { neq?: unknown | undefined }).neq === 'function'
     ? (impl as { neq: (a: string, b: string) => boolean }).neq.bind(impl)
     : (a, b) => !impl.eq(a, b)
 /* c8 ignore stop */
@@ -80,5 +80,5 @@ export function rsort(versions: readonly string[]): string[] {
  * `readonly string[]` even when the impl mutates internally.
  */
 export function sort(versions: readonly string[]): string[] {
-  return impl.sort([...versions])
+  return impl.toSorted([...versions])
 }

@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  cdxgenFromVfs,
   CDXGEN_VFS_KEY,
+  cdxgenFromVfs,
 } from '../../../../src/external-tools/cdxgen/from-vfs'
 
 describe.sequential('external-tools/cdxgen/from-vfs', () => {

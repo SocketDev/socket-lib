@@ -26,7 +26,7 @@ import { isDir, isSymlinkSync, safeStatSync } from '../../../src/fs/inspect'
 import { readFileBinary, safeReadFileSync } from '../../../src/fs/read-file'
 import { readJsonSync } from '../../../src/fs/read-json'
 import { writeJsonSync } from '../../../src/fs/write-json'
-import { beforeEach, describe, expect, it, afterEach } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe.sequential('fs - Sync Functions', () => {
   let testDir: string

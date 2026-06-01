@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock('../../../../src/external-tools/bazel/from-path', () => ({
+vi.mock(import('../../../../src/external-tools/bazel/from-path'), () => ({
   bazelFromPath: vi.fn(),
 }))
-vi.mock('../../../../src/external-tools/bazel/from-download', () => ({
+vi.mock(import('../../../../src/external-tools/bazel/from-download'), () => ({
   bazelFromDownload: vi.fn(),
 }))
 

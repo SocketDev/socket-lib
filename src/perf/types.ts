@@ -12,5 +12,5 @@ export type PerformanceMetrics = {
   operation: string
   duration: number
   timestamp: number
-  metadata?: Record<string, unknown>
+  metadata?: Record<string, unknown> | undefined
 }

@@ -236,8 +236,8 @@ export function resolvePackageLicenses(
   // uses to validate license field values:
   // https://github.com/kemitchell/validate-npm-package-license.js/blob/v3.0.4/index.js#L40-L41
   if (
-    licenseFieldValue === 'UNLICENSED' ||
-    licenseFieldValue === 'UNLICENCED'
+    licenseFieldValue === 'UNLICENCED' ||
+    licenseFieldValue === 'UNLICENSED'
   ) {
     return [{ license: 'UNLICENSED' }]
   }

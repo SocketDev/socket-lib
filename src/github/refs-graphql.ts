@@ -124,19 +124,40 @@ export async function fetchRefShaViaGraphQL(
     return undefined
   }
   let parsed: {
-    data?: {
-      repository?: {
-        tagRef?: {
-          target?:
-            | { __typename: 'Tag'; target?: { oid: string } }
-            | { __typename: 'Commit'; oid: string }
+    data?:
+      | {
+          repository?:
+            | {
+                tagRef?:
+                  | {
+                      target?:
+                        | {
+                            __typename: 'Tag'
+                            target?: { oid: string } | undefined
+                          }
+                        | { __typename: 'Commit'; oid: string }
+                        | null
+                        | undefined
+                    }
+                  | null
+                  | undefined
+                branchRef?:
+                  | { target?: { oid: string } | null | undefined }
+                  | null
+                  | undefined
+                commit?:
+                  | {
+                      __typename?: string | undefined
+                      oid?: string | undefined
+                    }
+                  | null
+                  | undefined
+              }
             | null
-        } | null
-        branchRef?: { target?: { oid: string } | null } | null
-        commit?: { __typename?: string; oid?: string } | null
-      } | null
-    }
-    errors?: Array<{ message: string }>
+            | undefined
+        }
+      | undefined
+    errors?: Array<{ message: string }> | undefined
   }
   try {
     parsed = JSONParse(response.body.toString('utf8'))

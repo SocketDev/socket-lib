@@ -91,7 +91,7 @@ describe('eco/cargo/parse-lockfile', () => {
     })
 
     it('indexes multi-version names as arrays', () => {
-      const synIdx = (result._index as { syn?: unknown })['syn']
+      const synIdx = (result._index as { syn?: unknown | undefined })['syn']
       expect(Array.isArray(synIdx)).toBe(true)
       expect((synIdx as number[]).length).toBe(2)
     })
@@ -99,7 +99,7 @@ describe('eco/cargo/parse-lockfile', () => {
     it('extends the index array when a name has 3+ entries', () => {
       const lock = `[[package]]\nname = "foo"\nversion = "1.0.0"\n\n[[package]]\nname = "foo"\nversion = "2.0.0"\n\n[[package]]\nname = "foo"\nversion = "3.0.0"\n`
       const triple = parseCargoLock(lock)
-      const fooIdx = (triple._index as { foo?: unknown })['foo']
+      const fooIdx = (triple._index as { foo?: unknown | undefined })['foo']
       expect(Array.isArray(fooIdx)).toBe(true)
       expect(fooIdx).toEqual([0, 1, 2])
     })

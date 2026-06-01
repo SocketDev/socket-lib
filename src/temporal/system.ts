@@ -29,7 +29,11 @@ import { DateNow } from '../primordials/date'
 // Acceptable.
 
 const _hrtimeBigint: (() => bigint) | undefined = (
-  globalThis as { process?: { hrtime?: { bigint?: () => bigint } } }
+  globalThis as {
+    process?:
+      | { hrtime?: { bigint?: (() => bigint) | undefined } | undefined }
+      | undefined
+  }
 ).process?.hrtime?.bigint
 
 const _anchorWallMs: bigint = BigIntCtor(DateNow())

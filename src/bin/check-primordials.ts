@@ -25,11 +25,11 @@ import {
   DEFAULT_ALIAS_MAP,
   DEFAULT_NODE_INTERNAL_ONLY,
 } from '../checks/primordials-defaults'
-import {
-  type PrimordialsCheckConfig,
-  type PrimordialsCheckResult,
-  type PrimordialsFinding,
-  checkPrimordials,
+import { checkPrimordials } from '../checks/primordials'
+import type {
+  PrimordialsCheckConfig,
+  PrimordialsCheckResult,
+  PrimordialsFinding,
 } from '../checks/primordials'
 import { parseArgs as parseLibArgs } from '../argv/parse'
 
@@ -99,7 +99,8 @@ export function resolveConfigPath(explicit: string | undefined): string {
   if (explicit !== undefined) {
     return explicit
   }
-  for (const candidate of FALLBACK_CONFIG_PATHS) {
+  for (let i = 0, { length } = FALLBACK_CONFIG_PATHS; i < length; i += 1) {
+    const candidate = FALLBACK_CONFIG_PATHS[i]!
     if (existsSync(path.resolve(candidate))) {
       return candidate
     }
@@ -142,10 +143,10 @@ export function printHelp(): void {
 }
 
 interface RawConfig {
-  scanDirs?: unknown
-  aliasMap?: unknown
-  nodeInternalOnly?: unknown
-  socketLibPrimordialsPath?: unknown
+  scanDirs?: unknown | undefined
+  aliasMap?: unknown | undefined
+  nodeInternalOnly?: unknown | undefined
+  socketLibPrimordialsPath?: unknown | undefined
 }
 
 export function loadConfig(configPath: string): PrimordialsCheckConfig {

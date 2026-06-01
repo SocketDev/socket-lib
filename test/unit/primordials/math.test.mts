@@ -77,9 +77,9 @@ describe('Math', () => {
     // for values that overflow IEEE-754 safe integers.
     expect(MathImul(2, 4)).toBe(8)
     expect(MathImul(-1, 8)).toBe(-8)
-    expect(MathImul(0xffffffff, 5)).toBe(-5)
+    expect(MathImul(0xff_ff_ff_ff, 5)).toBe(-5)
     // 0xffff * 0xffff = 0xfffe0001 — but as int32 that's negative.
-    expect(MathImul(0xffff, 0xffff)).toBe(-131_071)
+    expect(MathImul(0xff_ff, 0xff_ff)).toBe(-131_071)
   })
 
   it('exposes Math constants with the correct values', () => {
@@ -133,7 +133,7 @@ describe('Math', () => {
   it('integer ops: clz32', () => {
     expect(MathClz32(1)).toBe(31)
     expect(MathClz32(0)).toBe(32)
-    expect(MathClz32(0xffff_ffff)).toBe(0)
+    expect(MathClz32(0xff_ff_ff_ff)).toBe(0)
   })
 
   it('MathF16round is undefined or rounds to float16', () => {

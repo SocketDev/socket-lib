@@ -38,38 +38,38 @@ const requireResolve = createRequire(import.meta.url)
  * importer to also match (used to scope relative-path stubs to a package).
  */
 const STUB_MAP: Record<string, string | [RegExp, string]> = {
+  '^(encoding|iconv-lite)$': 'encoding.cjs',
   '^@npmcli/metavuln-calculator$': 'empty.cjs',
-  '^@npmcli/query$': 'empty.cjs',
   '^@npmcli/node-gyp$': 'npmcli-node-gyp.cjs',
+  '^@npmcli/query$': 'empty.cjs',
   '^@sigstore/(bundle|core|protobuf-specs|sign|tuf|verify)$': 'empty.cjs',
   '^@tufjs/(canonical-json|models)$': 'empty.cjs',
-  '^(encoding|iconv-lite)$': 'encoding.cjs',
-  '^postcss-selector-parser$': 'empty.cjs',
-  '^proggy$': 'proggy.cjs',
-  '^sigstore$': 'empty.cjs',
-  '^tuf-js$': 'empty.cjs',
-  '^\\.\\./audit-report\\.js$': [
-    /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
-    'arborist-audit-report.cjs',
-  ],
-  '^\\./yarn-lock\\.js$': [
-    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
-    'arborist-yarn-lock.cjs',
-  ],
+  '^\\./browser\\.js$': [/debug[\\/]src[\\/]/, 'empty.cjs'],
   '^\\./isolated-reifier\\.js$': [
     /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
     'arborist-isolated-reifier.cjs',
-  ],
-  '^\\./query-selector-all\\.js$': [
-    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
-    'arborist-query-selector-all.cjs',
   ],
   '^\\./printable\\.js$': [
     /@npmcli[\\/]arborist[\\/]lib[\\/]/,
     'arborist-printable.cjs',
   ],
+  '^\\./query-selector-all\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
+    'arborist-query-selector-all.cjs',
+  ],
   '^\\./verify\\.js$': [/cacache[\\/]lib[\\/]/, 'empty.cjs'],
-  '^\\./browser\\.js$': [/debug[\\/]src[\\/]/, 'empty.cjs'],
+  '^\\./yarn-lock\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]/,
+    'arborist-yarn-lock.cjs',
+  ],
+  '^\\.\\./audit-report\\.js$': [
+    /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
+    'arborist-audit-report.cjs',
+  ],
+  '^postcss-selector-parser$': 'empty.cjs',
+  '^proggy$': 'proggy.cjs',
+  '^sigstore$': 'empty.cjs',
+  '^tuf-js$': 'empty.cjs',
 }
 
 /**
@@ -121,7 +121,7 @@ export function createForceNodeModulesPlugin(): Plugin {
           )
           const pkgDir = path.dirname(pkgJsonPath)
           const pkgJson = JSON.parse(readFileSync(pkgJsonPath, 'utf8')) as {
-            exports?: string | { default?: string } | undefined
+            exports?: string | { default?: string | undefined } | undefined
             main?: string | undefined
             module?: string | undefined
           }

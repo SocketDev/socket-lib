@@ -160,7 +160,8 @@ describe('paths/filenames', () => {
         DOT_PACKAGE_LOCK_JSON,
       ]
 
-      for (const constant of constants) {
+      for (let i = 0, { length } = constants; i < length; i += 1) {
+        const constant = constants[i]!
         expect(typeof constant).toBe('string')
         expect(constant.length).toBeGreaterThan(0)
       }
@@ -182,7 +183,8 @@ describe('paths/filenames', () => {
         DOT_PACKAGE_LOCK_JSON,
       ]
 
-      for (const constant of constants) {
+      for (let i = 0, { length } = constants; i < length; i += 1) {
+        const constant = constants[i]!
         expect(constant).not.toContain('/')
         expect(constant).not.toContain('\\')
       }

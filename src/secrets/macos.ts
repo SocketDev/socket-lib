@@ -19,7 +19,10 @@
  *   v6's first cut.
  */
 
-import { spawn, spawnSync } from 'node:child_process'
+import {
+  spawn,
+  spawnSync,
+} from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { ErrorCtor } from '../primordials/error'
 
@@ -96,7 +99,7 @@ export function readMacOSSync(
 }
 
 interface SpawnOpts {
-  stdio?: 'ignore' | 'pipe' | ['ignore', 'pipe', 'pipe']
+  stdio?: 'ignore' | 'pipe' | ['ignore', 'pipe', 'pipe'] | undefined
 }
 
 export function runAsync(

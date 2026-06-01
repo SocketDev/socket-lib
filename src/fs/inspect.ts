@@ -76,7 +76,12 @@ export function isDirEmptySync(
       ignore as string[],
       {
         cwd: pathLikeToString(dirname),
-      } as { cwd?: string; dot?: boolean; ignore?: string[]; nocase?: boolean },
+      } as {
+        cwd?: string | undefined
+        dot?: boolean | undefined
+        ignore?: string[] | undefined
+        nocase?: boolean | undefined
+      },
     )
     let ignoredCount = 0
     for (let i = 0; i < length; i += 1) {

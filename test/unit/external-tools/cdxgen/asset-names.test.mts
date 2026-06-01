@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  buildCdxgenAssetName,
   CDXGEN_FULL_ASSET_MAP,
   CDXGEN_SLIM_ASSET_MAP,
+  buildCdxgenAssetName,
   getCdxgenAssetEntry,
   getCdxgenDownloadUrl,
   makeCdxgenEntry,
@@ -49,8 +49,12 @@ describe('external-tools/cdxgen/asset-names — buildCdxgenAssetName', () => {
 
 describe('external-tools/cdxgen/asset-names — maps', () => {
   test('SLIM and FULL maps cover the same 8 platform-archs', () => {
-    expect(Object.keys(CDXGEN_SLIM_ASSET_MAP).sort()).toEqual([...PLATFORMS])
-    expect(Object.keys(CDXGEN_FULL_ASSET_MAP).sort()).toEqual([...PLATFORMS])
+    expect(Object.keys(CDXGEN_SLIM_ASSET_MAP).toSorted()).toEqual([
+      ...PLATFORMS,
+    ])
+    expect(Object.keys(CDXGEN_FULL_ASSET_MAP).toSorted()).toEqual([
+      ...PLATFORMS,
+    ])
   })
 
   test('SLIM map uses -slim asset names', () => {
@@ -158,6 +162,6 @@ describe('external-tools/cdxgen/asset-names — makeCdxgenEntry / makeCdxgenPlat
   test('makeCdxgenPlatformMap returns a frozen map for either variant', () => {
     const slim = makeCdxgenPlatformMap('slim')
     expect(Object.isFrozen(slim)).toBe(true)
-    expect(Object.keys(slim).sort()).toEqual([...PLATFORMS])
+    expect(Object.keys(slim).toSorted()).toEqual([...PLATFORMS])
   })
 })

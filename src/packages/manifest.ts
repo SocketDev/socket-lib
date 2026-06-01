@@ -153,7 +153,7 @@ export async function fetchPackageManifest(
     ...options,
     packumentCache,
     preferOffline: true,
-  } as PacoteOptions & { where?: string }
+  } as PacoteOptions & { where?: string | undefined }
   const { signal } = pacoteOptions
   if (signal?.aborted) {
     return undefined
