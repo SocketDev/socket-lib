@@ -37,7 +37,7 @@ import type { AstNode, RuleContext, RuleFixer } from '../lib/rule-types.mts'
 
 const rule = {
   meta: {
-    type: 'suggestion',
+    type: 'problem',
     docs: {
       description:
         'Sort string-equality disjunctions alphanumerically (`x === "a" || x === "b"`).',

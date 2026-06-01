@@ -179,7 +179,7 @@ export function trailingCommentEnd(
  */
 const rule = {
   meta: {
-    type: 'suggestion',
+    type: 'problem',
     docs: {
       description:
         'Top-level functions sorted by visibility (private→export) and alphanumerically within each group.',
