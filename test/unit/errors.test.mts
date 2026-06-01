@@ -7,9 +7,11 @@
 
 import vm from 'node:vm'
 
+import { UNKNOWN_ERROR } from '@socketsecurity/lib-stable/errors/message'
+
 import { describe, expect, it } from 'vitest'
 
-import { UNKNOWN_ERROR, errorMessage } from '../../src/errors/message'
+import { errorMessage } from '../../src/errors/message'
 import {
   isErrnoException,
   isError,

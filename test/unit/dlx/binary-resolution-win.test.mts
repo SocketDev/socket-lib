@@ -11,10 +11,11 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type * as PlatformConstants from '../../../src/constants/platform'
+
 // Mock the platform constant BEFORE importing the SUT so it sees WIN32=true.
 vi.mock(import('../../../src/constants/platform'), async importOriginal => {
-  const actual =
-    await importOriginal<typeof import('../../../src/constants/platform')>()
+  const actual = await importOriginal<typeof PlatformConstants>()
   return { ...actual, WIN32: true }
 })
 

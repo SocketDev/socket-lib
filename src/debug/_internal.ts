@@ -23,7 +23,7 @@ import { getNodeUtil } from '../node/util'
 // New code should import getNodeUtil from '@socketsecurity/lib/node/util'.
 export { getNodeUtil as getUtil } from '../node/util'
 
-let _pointingTriangle: string | undefined
+let pointingTriangle: string | undefined
 
 /**
  * Custom log function for debug output.
@@ -67,10 +67,10 @@ export function customLog(...args: unknown[]) {
    one of the 5 debug functions hits the body. The unicode-fallback
    arm also fires only on terminals without unicode support. */
 export function getPointingTriangle(): string {
-  if (_pointingTriangle === undefined) {
+  if (pointingTriangle === undefined) {
     const supported = isUnicodeSupported()
-    _pointingTriangle = supported ? '▸' : '>'
+    pointingTriangle = supported ? '▸' : '>'
   }
-  return _pointingTriangle
+  return pointingTriangle
 }
 /* c8 ignore stop */

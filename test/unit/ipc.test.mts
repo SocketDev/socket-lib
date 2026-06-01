@@ -6,9 +6,7 @@
  *     parent-child process communication.
  */
 
-/* oxlint-disable socket/prefer-exists-sync -- tests verify stat output (isFile/isDirectory/mtime/size), not existence. */
-
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -70,10 +68,7 @@ describe('ipc', () => {
         setPath('tmpdir', tmpDir)
         try {
           const stubPath = await writeIpcStub('new-app', { test: 'data' })
-          const dirExists = await fs
-            .stat(path.dirname(stubPath))
-            .then(() => true)
-            .catch(() => false)
+          const dirExists = existsSync(path.dirname(stubPath))
           expect(dirExists).toBe(true)
         } finally {
           resetPaths()
@@ -90,6 +85,7 @@ describe('ipc', () => {
         setPath('tmpdir', tmpDir)
         try {
           const stubPath = await writeIpcStub('perm-test', { x: 1 })
+          // oxlint-disable-next-line socket/prefer-exists-sync -- reads file mode bits, not existence.
           const stat = await fs.stat(stubPath)
           // File mode — lower 9 bits are permission bits. Expect 0o600.
           // eslint-disable-next-line no-bitwise

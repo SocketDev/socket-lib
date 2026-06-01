@@ -1,0 +1,400 @@
+/**
+ * @file Unit tests for async, weak, once, decorator, and cache-clearing
+ *   memoization utilities. Tests:
+ *
+ *   - memoizeAsync() caches async function results with promise deduplication
+ *   - memoizeWeak() uses WeakMap for object key caching
+ *   - once() ensures function executes exactly once
+ *   - Memoize() decorator for class methods
+ *   - clearAllMemoizationCaches() global cache clearing
+ *
+ *   Sync memoize() and its edge cases live in memo.test.mts.
+ */
+
+import { memoizeAsync } from '../../src/memo/async'
+import { clearAllMemoizationCaches } from '../../src/memo/clear'
+import { Memoize } from '../../src/memo/decorator'
+import { once } from '../../src/memo/once'
+import { memoizeWeak } from '../../src/memo/weak'
+import { describe, expect, it, vi } from 'vitest'
+
+describe('memoizeAsync', () => {
+  it('should cache async function results', async () => {
+    const fn = vi.fn(async (n: number) => n * 2)
+    const memoized = memoizeAsync(fn)
+
+    expect(await memoized(5)).toBe(10)
+    expect(await memoized(5)).toBe(10)
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('should handle multiple different arguments', async () => {
+    const fn = vi.fn(async (a: number, b: number) => a + b)
+    const memoized = memoizeAsync(fn)
+
+    expect(await memoized(1, 2)).toBe(3)
+    expect(await memoized(3, 4)).toBe(7)
+    expect(await memoized(1, 2)).toBe(3)
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('should cache promises to prevent duplicate calls', async () => {
+    let callCount = 0
+    const fn = async (n: number) => {
+      callCount++
+      await new Promise(resolve => setTimeout(resolve, 50))
+      return n * 2
+    }
+    const memoized = memoizeAsync(fn)
+
+    // Call concurrently
+    const [result1, result2, result3] = await Promise.all([
+      memoized(5),
+      memoized(5),
+      memoized(5),
+    ])
+
+    expect(result1).toBe(10)
+    expect(result2).toBe(10)
+    expect(result3).toBe(10)
+    // Should only be called once despite concurrent calls
+    expect(callCount).toBe(1)
+  })
+
+  it('should remove failed promises from cache', async () => {
+    let shouldFail = true
+    const fn = vi.fn(async (n: number) => {
+      if (shouldFail) {
+        throw new Error('Test error')
+      }
+      return n * 2
+    })
+    const memoized = memoizeAsync(fn)
+
+    await expect(memoized(5)).rejects.toThrow('Test error')
+    expect(fn).toHaveBeenCalledTimes(1)
+
+    // Retry should call function again (not cached)
+    shouldFail = false
+    expect(await memoized(5)).toBe(10)
+    expect(fn).toHaveBeenCalledTimes(2)
+
+    // Now it should be cached
+    expect(await memoized(5)).toBe(10)
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('should respect maxSize with LRU eviction', async () => {
+    const fn = vi.fn(async (n: number) => n * 2)
+    const memoized = memoizeAsync(fn, { maxSize: 2 })
+
+    await memoized(1) // cache: [1]
+    await memoized(2) // cache: [1, 2]
+    await memoized(3) // cache: [2, 3] (1 evicted)
+
+    expect(fn).toHaveBeenCalledTimes(3)
+
+    await memoized(2) // cache hit
+    await memoized(3) // cache hit
+    await memoized(1) // cache miss (was evicted)
+
+    expect(fn).toHaveBeenCalledTimes(4)
+  })
+
+  it('should respect TTL expiration', async () => {
+    const fn = vi.fn(async (n: number) => n * 2)
+    const memoized = memoizeAsync(fn, { ttl: 100 })
+
+    expect(await memoized(5)).toBe(10)
+    expect(fn).toHaveBeenCalledTimes(1)
+
+    // Should be cached immediately
+    expect(await memoized(5)).toBe(10)
+    expect(fn).toHaveBeenCalledTimes(1)
+
+    // Wait for TTL to expire
+    await new Promise(resolve => setTimeout(resolve, 500))
+
+    expect(await memoized(5)).toBe(10)
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('refreshes the entry timestamp on resolve, not just on initial set', async () => {
+    // Regression: the timestamp used to be set when fn() STARTED, so a
+    // slow fn (longer than TTL) would produce a resolved value already
+    // classified as expired, and every subsequent call past the first
+    // TTL window would re-fetch despite the cache having just landed a
+    // fresh value. The fix sets `entry.timestamp = Date.now()` in the
+    // resolve handler so the cached hit window starts when the result
+    // is available. Uses a stubbed `Date.now` (not fake timers) so we
+    // don't depend on Vitest's timer/microtask interleaving under
+    // parallel worker load.
+    const realNow = Date.now
+    let fakeTime = 1_000_000
+    const nowSpy = vi.spyOn(Date, 'now').mockImplementation(() => fakeTime)
+    try {
+      let callCount = 0
+      let resolveFn: ((v: number) => void) | undefined
+      const slowFn = async (n: number) => {
+        callCount++
+        const result = await new Promise<number>(r => {
+          resolveFn = r
+        })
+        return n * result
+      }
+      const memoized = memoizeAsync(slowFn, { ttl: 200 })
+      // Start call at t=1_000_000.
+      const p1 = memoized(5)
+      // Advance past TTL (500 > 200) BEFORE resolving the fn.
+      fakeTime += 500
+      resolveFn!(2)
+      expect(await p1).toBe(10)
+      expect(callCount).toBe(1)
+      // Without advancing further, the second call should hit because
+      // the resolve handler reset the entry timestamp to t=1_000_500.
+      // (Pre-fix: timestamp was 1_000_000 — age 500 > ttl 200 →
+      //  expired → second call would fire.)
+      expect(await memoized(5)).toBe(10)
+      expect(callCount).toBe(1)
+    } finally {
+      nowSpy.mockRestore()
+      // Belt-and-suspenders: restore original even if spy cleanup
+      // leaves a bound impl in place.
+      Date.now = realNow
+    }
+  })
+
+  it('should use custom keyGen when provided', async () => {
+    const fn = vi.fn(async (a: number, b: number) => a + b)
+    const memoized = memoizeAsync(fn, {
+      keyGen: (a, b) => `${a}-${b}`,
+    })
+
+    expect(await memoized(1, 2)).toBe(3)
+    expect(await memoized(1, 2)).toBe(3)
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('should update LRU order on cache hit', async () => {
+    const fn = vi.fn(async (n: number) => n * 2)
+    const memoized = memoizeAsync(fn, { maxSize: 2 })
+
+    await memoized(1) // cache: [1]
+    await memoized(2) // cache: [1, 2]
+    await memoized(1) // cache hit, moves 1 to end: [2, 1]
+    await memoized(3) // evicts 2, cache: [1, 3]
+
+    expect(fn).toHaveBeenCalledTimes(3)
+
+    await memoized(1) // cache hit
+    await memoized(2) // cache miss (was evicted)
+
+    expect(fn).toHaveBeenCalledTimes(4)
+  })
+})
+
+describe('Memoize decorator', () => {
+  it('should return a descriptor with memoized function', () => {
+    const fn = vi.fn((n: number) => n * 2)
+    const descriptor = {
+      value: fn,
+    }
+
+    const decorated = Memoize()({}, 'testMethod', descriptor)
+
+    expect(decorated).toBeDefined()
+    expect(decorated.value).toBeDefined()
+    expect(typeof decorated.value).toBe('function')
+  })
+
+  it('should memoize the wrapped function', () => {
+    const fn = vi.fn((n: number) => n * 2)
+    const descriptor = {
+      value: fn,
+    }
+
+    const decorated = Memoize()({}, 'testMethod', descriptor)
+    const memoizedFn = decorated.value as (n: number) => number
+
+    expect(memoizedFn(5)).toBe(10)
+    expect(memoizedFn(5)).toBe(10)
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('should use custom options', () => {
+    const fn = vi.fn((n: number) => n * 2)
+    const descriptor = {
+      value: fn,
+    }
+
+    const decorated = Memoize({ maxSize: 1 })({}, 'testMethod', descriptor)
+    const memoizedFn = decorated.value as (n: number) => number
+
+    memoizedFn(1)
+    memoizedFn(2) // Evicts 1
+    memoizedFn(1) // Cache miss
+
+    expect(fn).toHaveBeenCalledTimes(3)
+  })
+
+  it('should use method name from propertyKey', () => {
+    const fn = vi.fn((n: number) => n * 2)
+    const descriptor = {
+      value: fn,
+    }
+
+    const decorated = Memoize()({}, 'myMethod', descriptor)
+
+    // Just verify it doesn't throw and works
+    expect(decorated.value).toBeDefined()
+  })
+
+  it('should use custom name over propertyKey', () => {
+    const fn = vi.fn((n: number) => n * 2)
+    const descriptor = {
+      value: fn,
+    }
+
+    const decorated = Memoize({ name: 'customName' })(
+      {},
+      'myMethod',
+      descriptor,
+    )
+
+    // Just verify it doesn't throw and works
+    expect(decorated.value).toBeDefined()
+  })
+})
+
+describe('clearAllMemoizationCaches', () => {
+  it('should not throw when called', () => {
+    expect(() => clearAllMemoizationCaches()).not.toThrow()
+  })
+})
+
+describe('memoizeWeak', () => {
+  it('should cache results for object keys', () => {
+    const fn = vi.fn((obj: { x: number }) => obj.x * 2)
+    const memoized = memoizeWeak(fn)
+
+    const obj1 = { x: 5 }
+    const obj2 = { x: 10 }
+
+    expect(memoized(obj1)).toBe(10)
+    expect(memoized(obj1)).toBe(10)
+    expect(memoized(obj2)).toBe(20)
+
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('should use object identity for cache keys', () => {
+    const fn = vi.fn((obj: { x: number }) => obj.x * 2)
+    const memoized = memoizeWeak(fn)
+
+    const obj1 = { x: 5 }
+    const obj2 = { x: 5 } // Same value, different object
+
+    expect(memoized(obj1)).toBe(10)
+    expect(memoized(obj2)).toBe(10)
+
+    // Different objects, so called twice
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('should handle array objects', () => {
+    const fn = vi.fn((arr: number[]) => arr.reduce((a, b) => a + b, 0))
+    const memoized = memoizeWeak(fn)
+
+    const arr1 = [1, 2, 3]
+
+    expect(memoized(arr1)).toBe(6)
+    expect(memoized(arr1)).toBe(6)
+
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('should allow garbage collection of cached entries', () => {
+    const fn = vi.fn((obj: { x: number }) => obj.x * 2)
+    const memoized = memoizeWeak(fn)
+
+    let obj: { x: number } | undefined = { x: 5 }
+
+    expect(memoized(obj)).toBe(10)
+    expect(fn).toHaveBeenCalledTimes(1)
+
+    // Clear reference (in real scenario, GC would collect)
+    obj = undefined
+
+    // Create new object
+    const obj2 = { x: 5 }
+    expect(memoized(obj2)).toBe(10)
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+})
+
+describe('once', () => {
+  it('should only call function once', () => {
+    const fn = vi.fn(() => Math.random())
+    const onceFn = once(fn)
+
+    const result1 = onceFn()
+    const result2 = onceFn()
+    const result3 = onceFn()
+
+    expect(result1).toBe(result2)
+    expect(result2).toBe(result3)
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('should cache the result', () => {
+    let count = 0
+    const fn = () => ++count
+    const onceFn = once(fn)
+
+    expect(onceFn()).toBe(1)
+    expect(onceFn()).toBe(1)
+    expect(onceFn()).toBe(1)
+    expect(count).toBe(1)
+  })
+
+  it('should work with object return values', () => {
+    const obj = { x: 42 }
+    const fn = vi.fn(() => obj)
+    const onceFn = once(fn)
+
+    expect(onceFn()).toBe(obj)
+    expect(onceFn()).toBe(obj)
+    expect(fn).toHaveBeenCalledTimes(1)
+  })
+
+  it('should work with null and undefined', () => {
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- once() must memoize null returns the same as any other value.
+    const fn1 = vi.fn(() => null)
+    const once1 = once(fn1)
+
+    expect(once1()).toBe(null)
+    expect(once1()).toBe(null)
+    expect(fn1).toHaveBeenCalledTimes(1)
+
+    const fn2 = vi.fn(() => undefined)
+    const once2 = once(fn2)
+
+    expect(once2()).toBe(undefined)
+    expect(once2()).toBe(undefined)
+    expect(fn2).toHaveBeenCalledTimes(1)
+  })
+
+  it('should cache even if function throws', () => {
+    const fn = vi.fn(() => {
+      throw new Error('Test error')
+    })
+    const onceFn = once(fn)
+
+    expect(() => onceFn()).toThrow('Test error')
+    expect(fn).toHaveBeenCalledTimes(1)
+
+    // Second call should not throw (returns cached undefined from throw)
+    // Note: In the actual implementation, the result is cached before throw
+    // so this behavior depends on implementation details
+  })
+})

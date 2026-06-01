@@ -24,7 +24,9 @@ describe('external-tools/bazel/resolve', () => {
   })
 
   it('memoizes across calls', () => {
-    expect(resolveBazel()).toBe(resolveBazel())
+    const first = resolveBazel()
+    const second = resolveBazel()
+    expect(first).toBe(second)
   })
 
   it(

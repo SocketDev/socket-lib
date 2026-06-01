@@ -7,11 +7,9 @@
  *   while splitting the bulk of the class body out of the factory module.
  */
 
-import type { ColorInherit, ColorRgb, ColorValue } from '../colors/types'
+import type { ColorRgb, ColorValue } from '../colors/types'
 import { isRgbTuple, toRgb } from '../colors/convert'
 import { getAbortSignal } from '../process/abort'
-import { isDebug } from '../debug/namespace'
-import type { Palette, ShimmerConfig } from '../effects/shimmer'
 import {
   LOG_SYMBOLS,
   incLogCallCountSymbol,
@@ -23,12 +21,25 @@ import { ObjectDefineProperties } from '../primordials/object'
 import { isBlankString } from '../strings/predicates'
 import { stringWidth } from '../strings/width'
 
-import { COLOR_INHERIT, desc, formatProgress, normalizeText } from './format'
+import { desc, formatProgress, normalizeText } from './format'
 import {
   applyShimmer,
   parseShimmerOption,
   resolveSpinnerColorRgb,
 } from './spinner-internals'
+import {
+  getSavedShimmerSymbol,
+  getShimmerSymbol,
+  installShimmerMethods,
+  setSavedShimmerSymbol,
+  setShimmerSymbol,
+  updateTextSymbol,
+} from './spinner-shimmer-methods'
+import {
+  applyStatusSymbol,
+  installStatusMethods,
+  showStatusSymbol,
+} from './spinner-status-methods'
 
 import type {
   ProgressInfo,
@@ -145,27 +156,13 @@ export function createSpinnerClass(
       super.color = isRgbTuple(value) ? value : toRgb(value)
     }
 
-    // Getter to expose current shimmer state.
-    get shimmerState(): ShimmerInfo | undefined {
-      if (!this.#shimmer) {
-        return undefined
-      }
-      return {
-        __proto__: null,
-        color: this.#shimmer.color,
-        direction: this.#shimmer.direction,
-        speed: this.#shimmer.speed,
-        frame: this.#shimmer.frame,
-      } as ShimmerInfo
-    }
-
     /**
      * Apply a yocto-spinner method and update logger state. Handles text
-     * normalization, extra arguments, and logger tracking.
-     *
-     * @private
+     * normalization, extra arguments, and logger tracking. Exposed under
+     * `applyStatusSymbol` so the status methods installed from
+     * `spinner-status-methods.ts` can drive it.
      */
-    #apply(methodName: string, args: unknown[]) {
+    [applyStatusSymbol](methodName: string, args: unknown[]) {
       let extras: unknown[]
       let text = ArrayPrototypeAt(args, 0)
       if (typeof text === 'string') {
@@ -236,11 +233,11 @@ export function createSpinnerClass(
 
     /**
      * Show a status message without stopping the spinner. Outputs the symbol
-     * and message to stderr, then continues spinning.
-     *
-     * @private
+     * and message to stderr, then continues spinning. Exposed under
+     * `showStatusSymbol` so the status methods installed from
+     * `spinner-status-methods.ts` can drive it.
      */
-    #showStatusAndKeepSpinning(symbolType: SymbolType, args: unknown[]) {
+    [showStatusSymbol](symbolType: SymbolType, args: unknown[]) {
       let text = ArrayPrototypeAt(args, 0)
       let extras: unknown[]
       if (typeof text === 'string') {
@@ -266,20 +263,27 @@ export function createSpinnerClass(
       super['text'] = this.#buildDisplayText()
     }
 
-    // Show a debug message (ℹ) without stopping; only when debug mode is on.
-    debug(text?: string | undefined, ...extras: unknown[]) {
-      if (isDebug()) {
-        return this.#showStatusAndKeepSpinning('info', [text, ...extras])
-      }
-      return this
+    // Expose the shimmer state + render helper under well-known symbols so the
+    // shimmer methods installed from `spinner-shimmer-methods.ts` can read and
+    // write the private fields without crossing the private-field boundary.
+    [getShimmerSymbol]() {
+      return this.#shimmer
     }
 
-    // Show a debug message (ℹ) and stop; only when debug mode is on.
-    debugAndStop(text?: string | undefined, ...extras: unknown[]) {
-      if (isDebug()) {
-        return this.#apply('info', [text, ...extras])
-      }
-      return this
+    [setShimmerSymbol](value: ShimmerInfo | undefined) {
+      this.#shimmer = value
+    }
+
+    [getSavedShimmerSymbol]() {
+      return this.#shimmerSavedConfig
+    }
+
+    [setSavedShimmerSymbol](value: ShimmerInfo | undefined) {
+      this.#shimmerSavedConfig = value
+    }
+
+    [updateTextSymbol]() {
+      this.#updateSpinnerText()
     }
 
     /**
@@ -306,107 +310,6 @@ export function createSpinnerClass(
     }
 
     /**
-     * Disable shimmer effect. Preserves config for later re-enable via
-     * enableShimmer().
-     *
-     * @example
-     *   spinner.disableShimmer()
-     *
-     * @returns This spinner for chaining
-     */
-    disableShimmer(): SpinnerInstance {
-      // Disable shimmer but preserve config.
-      this.#shimmer = undefined
-      this.#updateSpinnerText()
-      return this as unknown as SpinnerInstance
-    }
-
-    /**
-     * Show a done/success message (✓) without stopping the spinner. Alias for
-     * `success()` with a shorter name.
-     *
-     * DESIGN DECISION: Unlike yocto-spinner, our `done()` does NOT stop the
-     * spinner. Use `doneAndStop()` if you want to stop the spinner.
-     *
-     * @param text - Message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    done(text?: string | undefined, ...extras: unknown[]) {
-      return this.#showStatusAndKeepSpinning('success', [text, ...extras])
-    }
-
-    /**
-     * Show a done/success message (✓) and stop the spinner. Auto-clears the
-     * spinner line before displaying the success message.
-     *
-     * @param text - Message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    doneAndStop(text?: string | undefined, ...extras: unknown[]) {
-      return this.#apply('success', [text, ...extras])
-    }
-
-    /**
-     * Enable shimmer effect. Restores saved config or uses defaults if no saved
-     * config exists.
-     *
-     * @example
-     *   spinner.enableShimmer()
-     *
-     * @returns This spinner for chaining
-     */
-    enableShimmer(): SpinnerInstance {
-      if (this.#shimmerSavedConfig) {
-        // Restore saved config (reset frame counter to 0).
-        this.#shimmer = { ...this.#shimmerSavedConfig, frame: 0 }
-      } else {
-        this.#shimmer = {
-          __proto__: null,
-          color: COLOR_INHERIT,
-          direction: 'ltr',
-          speed: 1 / 3,
-          frame: 0,
-        } as ShimmerInfo
-        this.#shimmerSavedConfig = this.#shimmer
-      }
-
-      this.#updateSpinnerText()
-      return this as unknown as SpinnerInstance
-    }
-
-    /**
-     * Show a failure message (✗) without stopping the spinner. DESIGN DECISION:
-     * Unlike yocto-spinner, our `fail()` does NOT stop the spinner. This allows
-     * displaying errors while continuing to spin. Use `failAndStop()` if you
-     * want to stop the spinner.
-     *
-     * @param text - Error message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    fail(text?: string | undefined, ...extras: unknown[]) {
-      return this.#showStatusAndKeepSpinning('fail', [text, ...extras])
-    }
-
-    /**
-     * Show a failure message (✗) and stop the spinner. Auto-clears the spinner
-     * line before displaying the error message.
-     *
-     * @param text - Error message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    failAndStop(text?: string | undefined, ...extras: unknown[]) {
-      return this.#apply('error', [text, ...extras])
-    }
-
-    /**
      * Increase indentation level by adding spaces to the left. Pass 0 to reset
      * indentation to zero completely.
      *
@@ -427,58 +330,6 @@ export function createSpinnerClass(
       /* c8 ignore stop */
       this.#updateSpinnerText()
       return this
-    }
-
-    /**
-     * Show an info message (ℹ) without stopping the spinner. Outputs to stderr
-     * and continues spinning.
-     *
-     * @param text - Info message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    info(text?: string | undefined, ...extras: unknown[]) {
-      return this.#showStatusAndKeepSpinning('info', [text, ...extras])
-    }
-
-    /**
-     * Show an info message (ℹ) and stop the spinner. Auto-clears the spinner
-     * line before displaying the message.
-     *
-     * @param text - Info message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    infoAndStop(text?: string | undefined, ...extras: unknown[]) {
-      return this.#apply('info', [text, ...extras])
-    }
-
-    /**
-     * Log a message to stdout without stopping the spinner. Unlike other status
-     * methods, this outputs to stdout for data logging.
-     *
-     * @param args - Values to log to stdout.
-     *
-     * @returns This spinner for chaining
-     */
-    log(...args: unknown[]) {
-      logger.log(...args)
-      return this
-    }
-
-    /**
-     * Log a message to stdout and stop the spinner. Auto-clears the spinner
-     * line before displaying the message.
-     *
-     * @param text - Message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    logAndStop(text?: string | undefined, ...extras: unknown[]) {
-      return this.#apply('stop', [text, ...extras])
     }
 
     /**
@@ -530,75 +381,6 @@ export function createSpinnerClass(
     }
 
     /**
-     * Show a skip message (↻) without stopping the spinner. Outputs to stderr
-     * and continues spinning.
-     *
-     * @param text - Skip message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    skip(text?: string | undefined, ...extras: unknown[]) {
-      return this.#showStatusAndKeepSpinning('skip', [text, ...extras])
-    }
-
-    /**
-     * Show a skip message (↻) and stop the spinner. Auto-clears the spinner
-     * line before displaying the message.
-     *
-     * Implementation note: Unlike other *AndStop methods (successAndStop,
-     * failAndStop, etc.), this method cannot use #apply() with a 'skip' method
-     * name because yocto-spinner doesn't have a built-in 'skip' method.
-     * Instead, we manually stop the spinner then log the message with the skip
-     * symbol.
-     *
-     * @param text - Skip message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    skipAndStop(text?: string | undefined, ...extras: unknown[]) {
-      this.#apply('stop', [])
-      const normalized = normalizeText(text)
-      /* c8 ignore start - empty-text no-op fires when text is undefined or whitespace-only */
-      if (normalized) {
-        logger.error(`${LOG_SYMBOLS['skip']} ${normalized}`, ...extras)
-      }
-      return this
-      /* c8 ignore stop */
-    }
-
-    /**
-     * Set complete shimmer configuration. Replaces any existing shimmer config
-     * with the provided values. Undefined properties will use default values.
-     *
-     * @example
-     *   spinner.setShimmer({
-     *     color: [255, 0, 0],
-     *     dir: 'rtl',
-     *     speed: 0.5,
-     *   })
-     *
-     * @param config - Complete shimmer configuration.
-     *
-     * @returns This spinner for chaining
-     */
-    setShimmer(config: ShimmerConfig): SpinnerInstance {
-      this.#shimmer = {
-        __proto__: null,
-        color:
-          (config.color as ColorInherit | ColorValue | Palette | undefined) ??
-          COLOR_INHERIT,
-        direction: config.dir ?? 'ltr',
-        speed: config.speed ?? 1 / 3,
-        frame: 0,
-      } as ShimmerInfo
-      this.#shimmerSavedConfig = this.#shimmer
-      this.#updateSpinnerText()
-      return this as unknown as SpinnerInstance
-    }
-
-    /**
      * Start the spinner animation with optional text. Begins displaying the
      * animated spinner on stderr.
      *
@@ -621,27 +403,7 @@ export function createSpinnerClass(
       /* c8 ignore stop */
 
       this.#updateSpinnerText()
-      return this.#apply('start', [])
-    }
-
-    /**
-     * Log a main step message to stderr without stopping the spinner. Adds a
-     * blank line before the message for visual separation. Aligns with
-     * `logger.step()` to use stderr for status messages.
-     *
-     * @param text - Step message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    step(text?: string | undefined, ...extras: unknown[]) {
-      /* c8 ignore start - text-omitted no-op arm fires when caller invokes step() bare */
-      if (typeof text === 'string') {
-        logger.error('')
-        logger.error(text, ...extras)
-      }
-      return this
-      /* c8 ignore stop */
+      return this[applyStatusSymbol]('start', [])
     }
 
     /**
@@ -661,57 +423,9 @@ export function createSpinnerClass(
       this.#shimmer = undefined
 
       // Call parent stop (clears screen, sets isSpinning = false).
-      const result = this.#apply('stop', args)
+      const result = this[applyStatusSymbol]('stop', args)
 
       return result
-    }
-
-    /**
-     * Log an indented substep message to stderr without stopping the spinner.
-     * Adds 2-space indentation to the message. Aligns with `logger.substep()`
-     * to use stderr for status messages.
-     *
-     * @param text - Substep message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    substep(text?: string | undefined, ...extras: unknown[]) {
-      /* c8 ignore start - text-omitted no-op arm fires when caller invokes substep() bare */
-      if (typeof text === 'string') {
-        logger.error(`  ${text}`, ...extras)
-      }
-      return this
-      /* c8 ignore stop */
-    }
-
-    /**
-     * Show a success message (✓) without stopping the spinner. DESIGN DECISION:
-     * Unlike yocto-spinner, our `success()` does NOT stop the spinner. This
-     * allows displaying success messages while continuing to spin for
-     * multi-step operations. Use `successAndStop()` if you want to stop the
-     * spinner.
-     *
-     * @param text - Success message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    success(text?: string | undefined, ...extras: unknown[]) {
-      return this.#showStatusAndKeepSpinning('success', [text, ...extras])
-    }
-
-    /**
-     * Show a success message (✓) and stop the spinner. Auto-clears the spinner
-     * line before displaying the success message.
-     *
-     * @param text - Success message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    successAndStop(text?: string | undefined, ...extras: unknown[]) {
-      return this.#apply('success', [text, ...extras])
     }
 
     /**
@@ -737,98 +451,15 @@ export function createSpinnerClass(
       return this as unknown as SpinnerInstance
     }
 
-    /**
-     * Update partial shimmer configuration. Merges with existing config,
-     * enabling shimmer if currently disabled.
-     *
-     * @example
-     *   // Update just the speed
-     *   spinner.updateShimmer({ speed: 0.5 })
-     *
-     *   // Update direction
-     *   spinner.updateShimmer({ dir: 'rtl' })
-     *
-     *   // Update multiple properties
-     *   spinner.updateShimmer({ color: [255, 0, 0], speed: 0.8 })
-     *
-     * @param config - Partial shimmer configuration to merge.
-     *
-     * @returns This spinner for chaining
-     */
-    updateShimmer(config: Partial<ShimmerConfig>): SpinnerInstance {
-      /* c8 ignore start - each partial-config field branch fires only when caller updates that field; shimmer-state cascade covers three init paths */
-      const partialConfig = {
-        __proto__: null,
-        ...config,
-      } as Partial<ShimmerConfig>
-
-      const update: Partial<ShimmerInfo> = {
-        __proto__: null,
-      } as Partial<ShimmerInfo>
-      if (partialConfig.color !== undefined) {
-        update.color = partialConfig.color as
-          | ColorInherit
-          | ColorValue
-          | Palette
-      }
-      if (partialConfig.dir !== undefined) {
-        update.direction = partialConfig.dir
-      }
-      if (partialConfig.speed !== undefined) {
-        update.speed = partialConfig.speed
-      }
-
-      if (this.#shimmer) {
-        this.#shimmer = { ...this.#shimmer, ...update } as ShimmerInfo
-      } else if (this.#shimmerSavedConfig) {
-        this.#shimmer = {
-          ...this.#shimmerSavedConfig,
-          ...update,
-          frame: 0,
-        } as ShimmerInfo
-      } else {
-        this.#shimmer = {
-          __proto__: null,
-          color: COLOR_INHERIT,
-          direction: 'ltr',
-          speed: 1 / 3,
-          frame: 0,
-          ...update,
-        } as ShimmerInfo
-      }
-      this.#shimmerSavedConfig = this.#shimmer
-
-      this.#updateSpinnerText()
-      return this as unknown as SpinnerInstance
-      /* c8 ignore stop */
-    }
-
-    /**
-     * Show a warning message (⚠) without stopping the spinner. Outputs to
-     * stderr and continues spinning.
-     *
-     * @param text - Warning message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    warn(text?: string | undefined, ...extras: unknown[]) {
-      return this.#showStatusAndKeepSpinning('warn', [text, ...extras])
-    }
-
-    /**
-     * Show a warning message (⚠) and stop the spinner. Auto-clears the spinner
-     * line before displaying the warning message.
-     *
-     * @param text - Warning message to display.
-     * @param extras - Additional values to log.
-     *
-     * @returns This spinner for chaining
-     */
-    warnAndStop(text?: string | undefined, ...extras: unknown[]) {
-      return this.#apply('warning', [text, ...extras])
-    }
   } as unknown as SpinnerCtorType
+  // Install the status-presentation methods (debug/done/fail/info/skip/step/
+  // substep/success/warn families + log) onto the prototype. They reach the
+  // class's #apply / #showStatusAndKeepSpinning helpers through the two
+  // well-known symbols the class exposes.
+  installStatusMethods(SpinnerCtor.prototype, logger)
+  // Install the shimmer-configuration methods + shimmerState getter. They reach
+  // the class's #shimmer / #shimmerSavedConfig state through well-known symbols.
+  installShimmerMethods(SpinnerCtor.prototype)
   // Add aliases.
   ObjectDefineProperties(SpinnerCtor.prototype, {
     error: desc((SpinnerCtor.prototype as { fail: unknown }).fail),

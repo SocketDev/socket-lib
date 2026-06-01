@@ -30,11 +30,11 @@ export function jsGetPackageVersions(
   return result
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
 export const getPackageVersions: (
   lockfile: ParsedLockfile,
   name: string,
-) => readonly PackageRef[] = _smol
-  ? _smol.getPackageVersions
+) => readonly PackageRef[] = smol
+  ? smol.getPackageVersions
   : jsGetPackageVersions

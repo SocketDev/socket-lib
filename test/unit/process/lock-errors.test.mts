@@ -13,8 +13,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { processLock } from '../../../src/process/lock-instance'
 import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
 
+import type * as SafeModule from '../../../src/fs/safe'
+
 vi.mock(import('../../../src/fs/safe'), async importOriginal => {
-  const original = await importOriginal<typeof import('../../../src/fs/safe')>()
+  const original = await importOriginal<typeof SafeModule>()
   return {
     ...original,
     safeDeleteSync: vi.fn(original.safeDeleteSync),

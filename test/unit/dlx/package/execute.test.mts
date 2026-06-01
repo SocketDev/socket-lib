@@ -13,13 +13,10 @@ import { executePackage } from '../../../../src/dlx/package'
 describe('executePackage', () => {
   it('returns a spawn promise from a binary path', async () => {
     // Use a real binary that should exist on every system.
-    const { promise } = (() => {
-      const promise = executePackage(process.execPath, [
-        '-e',
-        'process.exit(0)',
-      ])
-      return { promise }
-    })()
+    const promise = executePackage(process.execPath, [
+      '-e',
+      'process.exit(0)',
+    ])
     const result = await promise
     expect(result.code).toBe(0)
   })

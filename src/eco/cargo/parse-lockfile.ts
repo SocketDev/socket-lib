@@ -27,7 +27,7 @@
  *      (parseCargoLock)
  *   4. **Cargo's own lockfile encoder** — the source of truth for the format we're
  *      parsing:
- *      https://github.com/rust-lang/cargo/blob/master/src/cargo/core/resolver/encode.rs
+ *      https://github.com/rust-lang/cargo/blob/0.86.0/src/cargo/core/resolver/encode.rs
  *      Lockfile format docs:
  *      https://doc.rust-lang.org/cargo/guide/cargo-toml-vs-cargo-lock.html
  *      https://doc.rust-lang.org/cargo/reference/resolver.html#lockfile-format

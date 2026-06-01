@@ -14,7 +14,9 @@ describe('node/timers-promises', () => {
   })
 
   it('is idempotent across repeated calls', () => {
-    expect(getNodeTimersPromises()).toBe(getNodeTimersPromises())
+    const first = getNodeTimersPromises()
+    const second = getNodeTimersPromises()
+    expect(first).toBe(second)
   })
 
   it('does not throw', () => {

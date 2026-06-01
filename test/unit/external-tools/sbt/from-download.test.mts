@@ -9,6 +9,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   writeFileSync,
 } from 'node:fs'
 import os from 'node:os'
@@ -39,8 +40,7 @@ export async function buildSbtTarball(scratchDir: string): Promise<Buffer> {
     out.on('finish', () => resolve())
     out.on('error', reject)
   })
-  const fs = require('node:fs') as typeof import('node:fs')
-  return fs.readFileSync(archivePath)
+  return readFileSync(archivePath)
 }
 
 describe.sequential('external-tools/sbt/from-download', () => {

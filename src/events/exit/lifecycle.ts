@@ -21,18 +21,18 @@ import { processEmit, processReallyExit } from './intercept'
 
 import type { SignalListener, SignalListenerMap } from './types'
 
-let _sigListeners: SignalListenerMap | undefined
+let signalListenerMap: SignalListenerMap | undefined
 
 export function getSignalListeners() {
-  if (_sigListeners === undefined) {
-    _sigListeners = { __proto__: null } as unknown as SignalListenerMap
+  if (signalListenerMap === undefined) {
+    signalListenerMap = { __proto__: null } as unknown as SignalListenerMap
     const emitter = getEmitter()
     const sigs = getSignals()
     /* c8 ignore start - Signal-listener body fires only on real
        process signals; can't be triggered in-test without subprocess
        infrastructure. */
     for (const sig of sigs) {
-      _sigListeners[sig] = function listener() {
+      signalListenerMap[sig] = function listener() {
         // If there are no other listeners, an exit is coming!
         // Simplest way: remove us and then re-send the signal.
         // We know that this will kill the process, so we can
@@ -51,7 +51,7 @@ export function getSignalListeners() {
     }
     /* c8 ignore stop */
   }
-  return _sigListeners as SignalListenerMap
+  return signalListenerMap as SignalListenerMap
 }
 
 /**

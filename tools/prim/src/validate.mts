@@ -162,7 +162,7 @@ export function dfsForCycle(
       // Back-edge → cycle. Walk the stack from the back-edge target to the
       // current node + close it with the target again. The result is a
       // human-readable path like `array → map-set → array`.
-      const path: string[] = []
+      const cyclePath: string[] = []
       let started = false
       for (let i = 0, { length } = stack; i < length; i += 1) {
         const entry = stack[i]!
@@ -170,11 +170,11 @@ export function dfsForCycle(
           started = true
         }
         if (started) {
-          path.push(shortenForReport(entry.node))
+          cyclePath.push(shortenForReport(entry.node))
         }
       }
-      path.push(shortenForReport(target))
-      return path
+      cyclePath.push(shortenForReport(target))
+      return cyclePath
     }
     if (visited.has(target)) {
       // Already fully explored from a sibling path; safe to skip.

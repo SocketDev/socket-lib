@@ -51,9 +51,9 @@ export function jsFindPackages(
   return result
 }
 
-const _smol = getSmolManifest()
+const smol = getSmolManifest()
 
 export const findPackages: (
   lockfile: ParsedLockfile,
   pattern: string | RegExp,
-) => readonly PackageRef[] = _smol ? _smol.findPackages : jsFindPackages
+) => readonly PackageRef[] = smol ? smol.findPackages : jsFindPackages

@@ -64,7 +64,7 @@ export type LogSymbols = {
 export type LoggerMethods = {
   [K in keyof typeof console]: (typeof console)[K] extends (
     ...args: infer A
-  ) => any
+  ) => unknown
     ? (...args: A) => Logger
     : (typeof console)[K]
 }

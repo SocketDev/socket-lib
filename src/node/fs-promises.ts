@@ -6,9 +6,9 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeFsPromises from 'node:fs/promises'
 
-let _fsPromises: typeof NodeFsPromises | undefined
+let fsPromises: typeof NodeFsPromises | undefined
 
 export function getNodeFsPromises(): typeof NodeFsPromises {
-  return (_fsPromises ??=
+  return (fsPromises ??=
     /*@__PURE__*/ require('node:fs/promises') as typeof NodeFsPromises)
 }
