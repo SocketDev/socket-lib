@@ -19,6 +19,31 @@ import type { hash as NodeHash } from 'node:crypto'
 let cachedNativeHash: typeof NodeHash | undefined
 let nativeHashProbed = false
 
+// Socket's content-addressed blob hash is `Q` + base64url(sha256(bytes)). The
+// `S` (file-stream / chunked-manifest) discriminator shares the same digest
+// body — its content is stored at the `Q`-swapped hash. Canonical scheme:
+// depscan workspaces/lib/src/storage/hash.ts (blobHash). Keep in lock-step: if
+// the upstream scheme changes, update here too.
+const BLOB_HASH_PREFIX = 'Q'
+
+/**
+ * Compute the Socket content-address of `bytes`: `Q` +
+ * base64url(sha256(bytes)).
+ *
+ * Matches the blob store's hash scheme so a fetched blob can be verified
+ * against the hash it was requested by.
+ *
+ * @example
+ *   ;```typescript
+ *   import { blobHashOf } from '@socketsecurity/lib/crypto/hash'
+ *
+ *   blobHashOf(new TextEncoder().encode('hello'))
+ *   ```
+ */
+export function blobHashOf(bytes: NodeJS.ArrayBufferView): string {
+  return BLOB_HASH_PREFIX + hash('sha256', bytes, 'base64url')
+}
+
 /**
  * Compute a one-shot cryptographic hash.
  *
@@ -72,4 +97,26 @@ export function nativeHash(): typeof NodeHash | undefined {
     nativeHashProbed = true
   }
   return cachedNativeHash
+}
+
+/**
+ * Throw if `bytes` does not content-address to `blobHash`. Both `Q`-prefixed
+ * (single blob) and `S`-prefixed (file-stream) hashes share the sha256 digest
+ * body, so both verify against the same digest; the leading discriminator char
+ * is dropped before comparison.
+ *
+ * @throws {Error} When the recomputed digest does not match `blobHash`.
+ */
+export function verifyBlobHash(
+  blobHash: string,
+  bytes: NodeJS.ArrayBufferView,
+): void {
+  const expectedDigest = blobHash.slice(1)
+  const actualDigest = hash('sha256', bytes, 'base64url')
+  if (actualDigest !== expectedDigest) {
+    throw new Error(
+      `blob integrity check failed for ${blobHash}: content hashes to ` +
+        `${BLOB_HASH_PREFIX}${actualDigest}`,
+    )
+  }
 }
