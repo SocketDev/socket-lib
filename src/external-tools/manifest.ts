@@ -19,7 +19,7 @@
  */
 
 import { readJson } from '../fs/read-json'
-import { isIntegrityString } from '../integrity'
+import { isIntegrity } from '../integrity'
 
 import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
@@ -161,7 +161,7 @@ export function parseChecksum(
       `external-tools.json: tool '${toolName}' platform '${platformKey}' is missing a non-empty 'asset' string`,
     )
   }
-  if (typeof r.integrity !== 'string' || !isIntegrityString(r.integrity)) {
+  if (typeof r.integrity !== 'string' || !isIntegrity(r.integrity)) {
     throw new ErrorCtor(
       `external-tools.json: tool '${toolName}' platform '${platformKey}' has an invalid 'integrity' (expected SRI sha512 or sha256 form): ${r.integrity}`,
     )

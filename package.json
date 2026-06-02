@@ -2546,21 +2546,6 @@
       "types": "./dist/spinner/with.d.ts",
       "default": "./dist/spinner/with.js"
     },
-    "./ssri/convert": {
-      "source": "./src/ssri/convert.ts",
-      "types": "./dist/ssri/convert.d.ts",
-      "default": "./dist/ssri/convert.js"
-    },
-    "./ssri/parse": {
-      "source": "./src/ssri/parse.ts",
-      "types": "./dist/ssri/parse.d.ts",
-      "default": "./dist/ssri/parse.js"
-    },
-    "./ssri/validate": {
-      "source": "./src/ssri/validate.ts",
-      "types": "./dist/ssri/validate.d.ts",
-      "default": "./dist/ssri/validate.js"
-    },
     "./stdio/clear": {
       "source": "./src/stdio/clear.ts",
       "types": "./dist/stdio/clear.d.ts",
