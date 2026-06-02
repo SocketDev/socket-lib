@@ -44,7 +44,7 @@ afterEach(() => {
 })
 
 describe.sequential('cachePathFor', () => {
-  test('joins repo root + node_modules/.cache/agent-discovery.json', () => {
+  test('places cache under the node_modules cache dir', () => {
     const result = cachePathFor('/foo')
     expect(path.isAbsolute(result)).toBe(true)
     expect(path.relative('/foo', result).split(path.sep)).toEqual([

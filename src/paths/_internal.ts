@@ -36,7 +36,12 @@ export const CHAR_UPPERCASE_A = 65
 // 'Z'
 export const CHAR_UPPERCASE_Z = 90
 
-export const msysDriveRegExp = /^\/(?:[a-zA-Z])(?:$|\/)/
+// Captures the drive letter (group 1) and the trailing separator if any
+// (group 2). The replace callback in paths/normalize.ts:msysDriveToNative
+// reads both — non-capturing groups would leave `letter` undefined and
+// `.toUpperCase()` would throw on Windows MSYS-style paths like `/c/foo`.
+// oxlint-disable-next-line socket/prefer-non-capturing-group -- both groups are read by the replace callback in paths/normalize.ts:msysDriveToNative
+export const msysDriveRegExp = /^\/([a-zA-Z])($|\/)/
 export const nodeModulesPathRegExp = /(?:[/\\]|^)node_modules(?:$|[/\\])/
 export const slashRegExp = /[/\\]/
 

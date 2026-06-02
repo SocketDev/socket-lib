@@ -95,8 +95,12 @@ export function toUnixPath(pathLike: string | Buffer | URL): string {
   // Windows drive-letter conversion; tested on Windows runners.
   /* c8 ignore start */
   if (WIN32) {
+    // Capture the drive letter so the replace callback can lowercase it —
+    // non-capturing groups would leave `letter` undefined and the call
+    // would throw on Windows.
     return normalized.replace(
-      /^(?:[A-Z]):/i,
+      // oxlint-disable-next-line socket/prefer-non-capturing-group -- captured group is read by the replace callback below
+      /^([A-Z]):/i,
       (_, letter) => `/${letter.toLowerCase()}`,
     )
   }
