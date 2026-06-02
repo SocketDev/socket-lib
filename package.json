@@ -2386,6 +2386,11 @@
       "types": "./dist/sea/detect.d.ts",
       "default": "./dist/sea/detect.js"
     },
+    "./secrets/compare": {
+      "source": "./src/secrets/compare.ts",
+      "types": "./dist/secrets/compare.d.ts",
+      "default": "./dist/secrets/compare.js"
+    },
     "./secrets/find": {
       "source": "./src/secrets/find.ts",
       "types": "./dist/secrets/find.d.ts",

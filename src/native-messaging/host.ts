@@ -12,6 +12,34 @@
  *   (`chrome-extension://<id>/`). The `NATIVE_MESSAGING_HOST` constant in
  *   `src/constants/platform.ts` captures this check so other modules can skip
  *   TTY-only paths when running in this context.
+ *
+ *   ## Threat model
+ *
+ *   **The OS keychain is the trust boundary.** This host hands a Socket API
+ *   bearer token to a Chrome extension. If a process running as the user can
+ *   read the keychain, that process can read the token directly without going
+ *   through us — so we don't try to defend against keychain-level compromise.
+ *   We DO defend against:
+ *
+ *   1. **A hijacked extension hammering `get-api-token`.** A compromised CDN
+ *      dependency or XSS in a content script can call `connectNative` in a
+ *      tight loop. The token-bucket rate limit (capacity 60, refill 1s) gives a
+ *      typing-fast human all the headroom they need and bounds a bot to 1 req/s
+ *      sustained.
+ *   2. **Foreign extensions connecting to this host.** Chrome enforces
+ *      `allowed_origins` from the host manifest. The installer rejects `['*']`
+ *      in production mode (see `installNativeHost`'s `production` opt); dev
+ *      mode allows it for unsigned-extension testing.
+ *   3. **Token logging leaks.** `logger.error` writes to stderr; the token is
+ *      never passed through it. The only path the token traverses on its way
+ *      out is the protocol stdout write, which is binary-framed JSON.
+ *   4. **Protocol abuse.** Messages over 1 MiB are rejected; malformed JSON is
+ *      rejected with a structured error; unknown `type` values are echoed back
+ *      so the extension can detect contract drift. **Out of scope:** keychain
+ *      ACL bypass (out-of-process attacker reading our memory), Chrome itself
+ *      being malicious (then `connectNative` is the least of our problems), and
+ *      side-channel attacks on the length-prefix protocol (the protocol is
+ *      between Chrome and Node; we don't drive its timing).
  */
 
 import process from 'node:process'
@@ -19,8 +47,31 @@ import process from 'node:process'
 import { getDefaultLogger } from '../logger/default'
 import { readSocketApiToken } from '../secrets/socket-api-token'
 import { assertNodeStripTypesSupported } from './install'
+import { TokenBucketLimiter } from './rate-limit'
 
 const logger = getDefaultLogger()
+
+// One bucket per extension origin (`chrome-extension://<id>/`, passed by
+// Chrome as argv[2]). Capacity 60 + 1s refill = burst 60 then sustained
+// 1 req/s. A user pasting commands or rapid-clicking a panel button
+// never hits the limit; a botted extension burns through 60 in a few
+// frames then gets locked to 1/s, which is too slow to be useful.
+//
+// `maxKeys: 32` bounds memory: even if an attacker varies the origin
+// arg, we'll never carry more than 32 buckets in memory. The LRU evicts
+// the oldest first so legitimate origins stay hot.
+const limiter = new TokenBucketLimiter({
+  capacity: 60,
+  refillIntervalMs: 1000,
+  maxKeys: 32,
+})
+
+// Bucket key. `argv[2]` is the Chrome-passed extension origin; absent
+// during local CLI testing, in which case all requests share one
+// bucket under the 'cli' label.
+export function bucketKey(): string {
+  return process.argv[2] ?? 'cli'
+}
 
 export async function handleOne(): Promise<void> {
   const header = await readExact(4)
@@ -36,6 +87,16 @@ export async function handleOne(): Promise<void> {
     msg = JSON.parse(body.toString('utf8'))
   } catch {
     writeMessage({ error: 'message is not valid JSON' })
+    return
+  }
+
+  // Rate-limit per origin. Burst-friendly for humans, restrictive enough
+  // to bound a botted extension. The check runs AFTER framing + JSON
+  // parse so malformed traffic doesn't drain real callers' buckets.
+  if (!limiter.consume(bucketKey())) {
+    writeMessage({
+      error: 'rate limited; try again in a moment',
+    })
     return
   }
 
