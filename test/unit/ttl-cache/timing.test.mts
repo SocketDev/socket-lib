@@ -19,7 +19,7 @@ import { invalidateCaches } from '../../../src/paths/rewire'
 import {
   tolerantSleep,
   tolerantTimeout,
-} from '../../_shared/fleet/timing.mts'
+} from '../../_shared/fleet/lib/timing.mts'
 
 describe.sequential('ttl-cache — timing', () => {
   let cache: ReturnType<typeof createTtlCache>
