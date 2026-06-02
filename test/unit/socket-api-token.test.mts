@@ -38,6 +38,7 @@ export function clearTokenEnv(): void {
   // socket-api-token-getter: allow direct-env
   delete process.env[TOKEN_VAR]
   // socket-api-token-getter: allow direct-env
+  // socket-api-token-env: bootstrap -- compat test clears the legacy alias the getter falls back to
   delete process.env['SOCKET_API_KEY']
 }
 

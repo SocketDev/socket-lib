@@ -112,6 +112,8 @@ describe('socket env', () => {
     // SOCKET_API_KEY (or another alias) set in their shell for daily
     // use, which would leak into the fallback-chain tests below. Pin
     // each alias to undefined so only the one we set per-test wins.
+    // socket-api-token-env: bootstrap -- this suite tests the legacy-alias
+    // fallback chain itself, so it legitimately names every alias.
     const ALL_TOKEN_ALIASES = [
       'SOCKET_API_TOKEN',
       'SOCKET_API_KEY',
@@ -134,6 +136,7 @@ describe('socket env', () => {
 
     it('should fall back to SOCKET_API_KEY', () => {
       clearAllAliases()
+      // socket-api-token-env: bootstrap -- exercises the legacy-alias fallback
       setEnv('SOCKET_API_KEY', 'mcp-key')
       expect(getSocketApiToken()).toBe('mcp-key')
     })
@@ -152,12 +155,14 @@ describe('socket env', () => {
 
     it('should fall back to SOCKET_SECURITY_API_TOKEN', () => {
       clearAllAliases()
+      // socket-api-token-env: bootstrap -- exercises the legacy-alias fallback
       setEnv('SOCKET_SECURITY_API_TOKEN', 'security-token')
       expect(getSocketApiToken()).toBe('security-token')
     })
 
     it('should fall back to SOCKET_SECURITY_API_KEY', () => {
       clearAllAliases()
+      // socket-api-token-env: bootstrap -- exercises the legacy-alias fallback
       setEnv('SOCKET_SECURITY_API_KEY', 'security-key')
       expect(getSocketApiToken()).toBe('security-key')
     })
@@ -165,8 +170,10 @@ describe('socket env', () => {
     it('should prefer SOCKET_API_TOKEN over all legacy names', () => {
       clearAllAliases()
       setEnv('SOCKET_API_TOKEN', 'canonical-token')
+      // socket-api-token-env: bootstrap -- exercises the legacy-alias fallback
       setEnv('SOCKET_API_KEY', 'mcp-key')
       setEnv('SOCKET_CLI_API_TOKEN', 'cli-token')
+      // socket-api-token-env: bootstrap -- exercises the legacy-alias fallback
       setEnv('SOCKET_SECURITY_API_KEY', 'security-key')
       expect(getSocketApiToken()).toBe('canonical-token')
     })
