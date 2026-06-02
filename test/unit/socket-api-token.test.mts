@@ -32,8 +32,13 @@ export function setTokenEnv(value: string): void {
 }
 
 export function clearTokenEnv(): void {
+  // Clear BOTH the canonical name and the legacy SOCKET_API_KEY alias that
+  // readSocketApiToken falls back to — otherwise a SOCKET_API_KEY set in the
+  // runner's env (CI / dev) leaks into the "returns undefined when unset" cases.
   // socket-api-token-getter: allow direct-env
   delete process.env[TOKEN_VAR]
+  // socket-api-token-getter: allow direct-env
+  delete process.env['SOCKET_API_KEY']
 }
 
 export function snapshotEnv(): { restore: () => void } {
