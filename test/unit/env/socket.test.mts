@@ -114,11 +114,11 @@ describe('socket env', () => {
     // each alias to undefined so only the one we set per-test wins.
     const ALL_TOKEN_ALIASES = [
       'SOCKET_API_TOKEN',
-      'SOCKET_API_TOKEN',
+      'SOCKET_API_KEY',
       'SOCKET_CLI_API_TOKEN',
       'SOCKET_CLI_API_KEY',
-      'SOCKET_API_TOKEN',
-      'SOCKET_API_TOKEN',
+      'SOCKET_SECURITY_API_TOKEN',
+      'SOCKET_SECURITY_API_KEY',
     ] as const
     const clearAllAliases = () => {
       for (const alias of ALL_TOKEN_ALIASES) {
@@ -134,7 +134,7 @@ describe('socket env', () => {
 
     it('should fall back to SOCKET_API_KEY', () => {
       clearAllAliases()
-      setEnv('SOCKET_API_TOKEN', 'mcp-key')
+      setEnv('SOCKET_API_KEY', 'mcp-key')
       expect(getSocketApiToken()).toBe('mcp-key')
     })
 
@@ -152,33 +152,29 @@ describe('socket env', () => {
 
     it('should fall back to SOCKET_SECURITY_API_TOKEN', () => {
       clearAllAliases()
-      setEnv('SOCKET_API_TOKEN', 'security-token')
+      setEnv('SOCKET_SECURITY_API_TOKEN', 'security-token')
       expect(getSocketApiToken()).toBe('security-token')
     })
 
     it('should fall back to SOCKET_SECURITY_API_KEY', () => {
       clearAllAliases()
-      setEnv('SOCKET_API_TOKEN', 'security-key')
+      setEnv('SOCKET_SECURITY_API_KEY', 'security-key')
       expect(getSocketApiToken()).toBe('security-key')
     })
 
     it('should prefer SOCKET_API_TOKEN over all legacy names', () => {
+      clearAllAliases()
       setEnv('SOCKET_API_TOKEN', 'canonical-token')
-      setEnv('SOCKET_API_TOKEN', 'mcp-key')
+      setEnv('SOCKET_API_KEY', 'mcp-key')
       setEnv('SOCKET_CLI_API_TOKEN', 'cli-token')
-      setEnv('SOCKET_API_TOKEN', 'security-key')
+      setEnv('SOCKET_SECURITY_API_KEY', 'security-key')
       expect(getSocketApiToken()).toBe('canonical-token')
     })
 
     it('should return undefined when not set', () => {
       // Clear all token env vars that getSocketApiToken falls back to,
       // including the canonical SOCKET_API_TOKEN that CI runners may have set.
-      setEnv('SOCKET_API_TOKEN', undefined)
-      setEnv('SOCKET_API_TOKEN', undefined)
-      setEnv('SOCKET_CLI_API_TOKEN', undefined)
-      setEnv('SOCKET_CLI_API_KEY', undefined)
-      setEnv('SOCKET_API_TOKEN', undefined)
-      setEnv('SOCKET_API_TOKEN', undefined)
+      clearAllAliases()
       expect(getSocketApiToken()).toBeUndefined()
     })
   })
