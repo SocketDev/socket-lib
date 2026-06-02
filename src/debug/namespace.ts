@@ -15,7 +15,6 @@ import { StringPrototypeStartsWith } from '../primordials/string'
 import { customLog, debugByNamespace } from './_internal'
 
 import type { DebugOptions, NamespacesOrOptions } from './types'
-import { envAsBoolean } from '@socketsecurity/lib-stable/env/boolean'
 
 /**
  * Extract options from namespaces parameter.
@@ -60,14 +59,14 @@ export function getDebugJsInstance(namespace: string) {
  * Check if debug mode is enabled.
  */
 export function isDebug(): boolean {
-  return envAsBoolean(getSocketDebug())
+  return isSocketDebugEnabled()
 }
 
 /**
  * Check if debug mode is enabled.
  */
 export function isDebugNs(namespaces: string | undefined): boolean {
-  return envAsBoolean(getSocketDebug()) && isEnabled(namespaces)
+  return isSocketDebugEnabled() && isEnabled(namespaces)
 }
 
 /**
@@ -103,4 +102,22 @@ export function isEnabled(namespaces: string | undefined) {
     return false
   }
   return skips.every(ns => !getDebugJsInstance(ns).enabled)
+}
+
+/**
+ * Whether SOCKET_DEBUG enables debug output. A namespace value like `*` or
+ * `socket:foo` enables it (these aren't boolean literals, so `envAsBoolean`
+ * alone would wrongly read them as false); an explicit boolean-false (`0`,
+ * `false`, `no`) or an empty/unset value disables it.
+ */
+export function isSocketDebugEnabled(): boolean {
+  const value = getSocketDebug()
+  if (!value) {
+    return false
+  }
+  const lower = value.trim().toLowerCase()
+  if (lower === '0' || lower === 'false' || lower === 'no') {
+    return false
+  }
+  return true
 }
