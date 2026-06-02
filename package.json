@@ -2141,6 +2141,11 @@
       "types": "./dist/primordials/headers.d.ts",
       "default": "./dist/primordials/headers.js"
     },
+    "./primordials/intl": {
+      "source": "./src/primordials/intl.ts",
+      "types": "./dist/primordials/intl.d.ts",
+      "default": "./dist/primordials/intl.js"
+    },
     "./primordials/json": {
       "source": "./src/primordials/json.ts",
       "types": "./dist/primordials/json.d.ts",

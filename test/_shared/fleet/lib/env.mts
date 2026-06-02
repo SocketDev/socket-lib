@@ -33,5 +33,5 @@ export function envFlag(name: string): boolean {
     return false
   }
   const lower = raw.trim().toLowerCase()
-  return lower === '1' || lower === 'true' || lower === 'yes' || lower === 'on'
+  return lower === '1' || lower === 'on' || lower === 'true' || lower === 'yes'
 }

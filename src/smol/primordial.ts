@@ -86,6 +86,12 @@ export interface SmolPrimordialBinding {
   // unconditionally; UTF-16 strings hit the slow path's lone-surrogate
   // scan. See socket-btm primordial_binding.cc.
   stringIsWellFormed(s: string): boolean
+  // Intl constructor captures — not V8 Fast API, but co-located here
+  // as the single tamper-proof capture point for the smol runtime.
+  IntlCollator: typeof Intl.Collator
+  IntlListFormat: typeof Intl.ListFormat
+  IntlPluralRules: typeof Intl.PluralRules
+  IntlSegmenter: typeof Intl.Segmenter
 }
 
 let smolPrimordial: SmolPrimordialBinding | undefined

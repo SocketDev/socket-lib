@@ -7,6 +7,7 @@
  */
 
 import { getFastSort } from './_internal'
+import { IntlCollator } from '../primordials/intl'
 
 import type { FastSortFunction } from './types'
 
@@ -26,8 +27,8 @@ let cachedNaturalSorter: FastSortFunction | undefined
  */
 export function localeCompare(x: string, y: string): number {
   if (cachedLocaleCompare === undefined) {
-    // Lazily call new Intl.Collator() because in Node it can take 10-14ms.
-    cachedLocaleCompare = new Intl.Collator().compare
+    // Lazily call new IntlCollator() because in Node it can take 10-14ms.
+    cachedLocaleCompare = new IntlCollator().compare
   }
   return cachedLocaleCompare(x, y)
 }
@@ -43,8 +44,8 @@ export function localeCompare(x: string, y: string): number {
  */
 export function naturalCompare(x: string, y: string): number {
   if (cachedNaturalCompare === undefined) {
-    // Lazily call new Intl.Collator() because in Node it can take 10-14ms.
-    cachedNaturalCompare = new Intl.Collator(
+    // Lazily call new IntlCollator() because in Node it can take 10-14ms.
+    cachedNaturalCompare = new IntlCollator(
       // The `undefined` locale means it uses the default locale of the user's
       // environment.
       undefined,

@@ -4,6 +4,8 @@
  *   lazily because `new Intl.ListFormat(...)` is a measurable startup cost.
  */
 
+import { IntlListFormat } from '../primordials/intl'
+
 let conjunctionFormatter: Intl.ListFormat | undefined
 let disjunctionFormatter: Intl.ListFormat | undefined
 
@@ -29,7 +31,7 @@ export function getConjunctionFormatter() {
   if (conjunctionFormatter === undefined) {
     // Intl.ListFormat initialization
     /* c8 ignore start - lazy singleton init runs once; not worth a dedicated test */
-    conjunctionFormatter = new Intl.ListFormat('en', {
+    conjunctionFormatter = new IntlListFormat('en', {
       style: 'long',
       // "and" lists.
       type: 'conjunction',
@@ -61,7 +63,7 @@ export function getDisjunctionFormatter() {
   if (disjunctionFormatter === undefined) {
     // Intl.ListFormat initialization
     /* c8 ignore start - lazy singleton init runs once; not worth a dedicated test */
-    disjunctionFormatter = new Intl.ListFormat('en', {
+    disjunctionFormatter = new IntlListFormat('en', {
       style: 'long',
       // "or" lists.
       type: 'disjunction',

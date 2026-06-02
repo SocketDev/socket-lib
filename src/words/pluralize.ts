@@ -9,6 +9,8 @@
  *     for any category not explicitly listed.
  */
 
+import { IntlPluralRules } from '../primordials/intl'
+
 import type { PluralForms, PluralizeOptions } from './types'
 
 // CLDR (Common Locale Data Repository) is the Unicode Consortium's
@@ -45,7 +47,7 @@ export function getRules(
   const key = `${locale}:${type}`
   let r = RULES_CACHE.get(key)
   if (!r) {
-    r = new Intl.PluralRules(locale, { type })
+    r = new IntlPluralRules(locale, { type })
     RULES_CACHE.set(key, r)
   }
   return r
