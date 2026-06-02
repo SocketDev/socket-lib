@@ -159,6 +159,27 @@ describe('crypto', () => {
       )
     })
 
+    it('hashes empty input to the sha256-of-empty address', () => {
+      const expected =
+        'Q' + crypto.createHash('sha256').update('').digest('base64url')
+      expect(blobHashOf(new Uint8Array(0))).toBe(expected)
+    })
+
+    it('accepts a Buffer and matches the equivalent Uint8Array', () => {
+      const buf = Buffer.from([0xde, 0xad, 0xbe, 0xef])
+      expect(blobHashOf(buf)).toBe(blobHashOf(new Uint8Array(buf)))
+    })
+
+    it('always returns a 44-char URL-safe base64 value (Q + 43)', () => {
+      for (const s of ['', 'a', 'hello', 'x'.repeat(10_000)]) {
+        const h = blobHashOf(new TextEncoder().encode(s))
+        expect(h).toHaveLength(44)
+        expect(h[0]).toBe('Q')
+        // base64url: no '+', '/', or '=' padding.
+        expect(/^Q[A-Za-z0-9_-]{43}$/.test(h)).toBe(true)
+      }
+    })
+
     it('differs for different content', () => {
       const a = blobHashOf(new TextEncoder().encode('a'))
       const b = blobHashOf(new TextEncoder().encode('b'))
@@ -173,6 +194,19 @@ describe('crypto', () => {
       expect(() => verifyBlobHash(blobHashOf(bytes), bytes)).not.toThrow()
     })
 
+    it('passes against an independently-constructed hash (not just round-trip)', () => {
+      // Build the expected hash without blobHashOf so a shared bug can't hide.
+      const bytes = new TextEncoder().encode('integrity')
+      const independent =
+        'Q' + crypto.createHash('sha256').update(bytes).digest('base64url')
+      expect(() => verifyBlobHash(independent, bytes)).not.toThrow()
+    })
+
+    it('passes for empty content', () => {
+      const empty = new Uint8Array(0)
+      expect(() => verifyBlobHash(blobHashOf(empty), empty)).not.toThrow()
+    })
+
     it('passes for an S-prefixed hash sharing the digest body', () => {
       const bytes = new TextEncoder().encode('manifest')
       const sHash = 'S' + blobHashOf(bytes).slice(1)
@@ -185,6 +219,20 @@ describe('crypto', () => {
       expect(() => verifyBlobHash(wrong, bytes)).toThrow(
         /blob integrity check failed/,
       )
+    })
+
+    it('detects a single-byte difference', () => {
+      const hash = blobHashOf(new TextEncoder().encode('payload-v1'))
+      const tampered = new TextEncoder().encode('payload-v2')
+      expect(() => verifyBlobHash(hash, tampered)).toThrow(
+        /blob integrity check failed/,
+      )
+    })
+
+    it('reports the actual computed hash in the error', () => {
+      const bytes = new TextEncoder().encode('actual-content')
+      const wrong = blobHashOf(new TextEncoder().encode('something-else'))
+      expect(() => verifyBlobHash(wrong, bytes)).toThrow(blobHashOf(bytes))
     })
   })
 })
