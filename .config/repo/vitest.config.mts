@@ -51,6 +51,12 @@ export default defineConfig({
       'scripts/**/test/**',
       '.claude/hooks/**/test/**',
       'template/**',
+      // test/isolated/ tests require per-file process isolation (shared
+      // module state, heap caps) and run via the dedicated
+      // vitest.config.isolated.mts in CI's "Test (Isolated)" job. Running
+      // them here in the shared pool fails from cross-test state pollution
+      // (they pass standalone but not co-mingled).
+      'test/isolated/**',
     ],
     // Some repos in the fleet (scaffolding-only, hook-only, etc.) ship
     // this config but don't yet have a `test/` directory — vitest's
