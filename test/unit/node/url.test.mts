@@ -10,7 +10,7 @@ import { getNodeUrl } from '../../../src/node/url'
 
 describe('node/url', () => {
   it('returns the node:url module', () => {
-    const url = getNodeUrl()
+    const url = getNodeUrl()!
     expect(typeof url.URL).toBe('function')
     expect(typeof url.fileURLToPath).toBe('function')
     expect(typeof url.pathToFileURL).toBe('function')

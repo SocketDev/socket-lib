@@ -6,9 +6,14 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeTimersPromises from 'node:timers/promises'
 
+import { IS_NODE } from '../constants/runtime'
+
 let timersPromises: typeof NodeTimersPromises | undefined
 
-export function getNodeTimersPromises(): typeof NodeTimersPromises {
+export function getNodeTimersPromises(): typeof NodeTimersPromises | undefined {
+  if (!IS_NODE) {
+    return undefined
+  }
   return (timersPromises ??=
     /*@__PURE__*/ require('node:timers/promises') as typeof NodeTimersPromises)
 }

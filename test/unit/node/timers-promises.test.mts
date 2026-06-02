@@ -8,7 +8,7 @@ import { getNodeTimersPromises } from '../../../src/node/timers-promises'
 
 describe('node/timers-promises', () => {
   it('returns the node:timers/promises module', () => {
-    const tp = getNodeTimersPromises()
+    const tp = getNodeTimersPromises()!
     expect(typeof tp.setTimeout).toBe('function')
     expect(typeof tp.setImmediate).toBe('function')
   })
@@ -24,7 +24,7 @@ describe('node/timers-promises', () => {
   })
 
   it('setTimeout actually delays', async () => {
-    const tp = getNodeTimersPromises()
+    const tp = getNodeTimersPromises()!
     const start = performance.now()
     await tp.setTimeout(10)
     const elapsed = performance.now() - start

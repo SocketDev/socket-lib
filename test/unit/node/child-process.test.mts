@@ -8,7 +8,7 @@ import { getNodeChildProcess } from '../../../src/node/child-process'
 
 describe('node/child-process', () => {
   it('returns the node:child_process module', () => {
-    const cp = getNodeChildProcess()
+    const cp = getNodeChildProcess()!
     expect(typeof cp.spawn).toBe('function')
     expect(typeof cp.spawnSync).toBe('function')
     expect(typeof cp.exec).toBe('function')

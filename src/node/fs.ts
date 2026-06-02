@@ -10,8 +10,13 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeFs from 'node:fs'
 
+import { IS_NODE } from '../constants/runtime'
+
 let cachedFs: typeof NodeFs | undefined
 
-export function getNodeFs(): typeof NodeFs {
+export function getNodeFs(): typeof NodeFs | undefined {
+  if (!IS_NODE) {
+    return undefined
+  }
   return (cachedFs ??= /*@__PURE__*/ require('node:fs') as typeof NodeFs)
 }

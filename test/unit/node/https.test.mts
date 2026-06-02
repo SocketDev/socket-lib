@@ -10,7 +10,7 @@ import { getNodeHttps } from '../../../src/node/https'
 
 describe('node/https', () => {
   it('returns the node:https module', () => {
-    const https = getNodeHttps()
+    const https = getNodeHttps()!
     expect(typeof https.request).toBe('function')
     expect(typeof https.createServer).toBe('function')
   })

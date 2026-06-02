@@ -9,9 +9,14 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeChildProcess from 'node:child_process'
 
+import { IS_NODE } from '../constants/runtime'
+
 let childProcess: typeof NodeChildProcess | undefined
 
-export function getNodeChildProcess(): typeof NodeChildProcess {
+export function getNodeChildProcess(): typeof NodeChildProcess | undefined {
+  if (!IS_NODE) {
+    return undefined
+  }
   return (childProcess ??=
     /*@__PURE__*/ require('node:child_process') as typeof NodeChildProcess)
 }

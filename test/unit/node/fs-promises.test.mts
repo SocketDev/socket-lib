@@ -8,7 +8,7 @@ import { getNodeFsPromises } from '../../../src/node/fs-promises'
 
 describe('node/fs-promises', () => {
   it('returns the node:fs/promises module', () => {
-    const fsp = getNodeFsPromises()
+    const fsp = getNodeFsPromises()!
     expect(typeof fsp.readFile).toBe('function')
     expect(typeof fsp.writeFile).toBe('function')
     expect(typeof fsp.stat).toBe('function')

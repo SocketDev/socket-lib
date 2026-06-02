@@ -8,7 +8,7 @@ import { getNodeCrypto } from '../../../src/node/crypto'
 
 describe('node/crypto', () => {
   it('returns the node:crypto module', () => {
-    const crypto = getNodeCrypto()
+    const crypto = getNodeCrypto()!
     expect(typeof crypto.createHash).toBe('function')
     expect(typeof crypto.randomBytes).toBe('function')
   })

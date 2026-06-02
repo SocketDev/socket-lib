@@ -8,7 +8,7 @@ import { getNodeEvents } from '../../../src/node/events'
 
 describe('node/events', () => {
   it('returns the node:events module', () => {
-    const events = getNodeEvents()
+    const events = getNodeEvents()!
     expect(typeof events.EventEmitter).toBe('function')
     // `events.once` exists at runtime but isn't always on the
     // namespace TS type; check via `defaultMaxListeners` which IS

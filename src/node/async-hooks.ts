@@ -6,9 +6,14 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeAsyncHooks from 'node:async_hooks'
 
+import { IS_NODE } from '../constants/runtime'
+
 let asyncHooks: typeof NodeAsyncHooks | undefined
 
-export function getNodeAsyncHooks(): typeof NodeAsyncHooks {
+export function getNodeAsyncHooks(): typeof NodeAsyncHooks | undefined {
+  if (!IS_NODE) {
+    return undefined
+  }
   return (asyncHooks ??=
     /*@__PURE__*/ require('node:async_hooks') as typeof NodeAsyncHooks)
 }

@@ -9,7 +9,7 @@ import { getNodePath } from '../../../src/node/path'
 
 describe('node/path', () => {
   it('returns the node:path module', () => {
-    const path = getNodePath()
+    const path = getNodePath()!
     expect(typeof path.join).toBe('function')
     expect(typeof path.resolve).toBe('function')
     expect(typeof path.sep).toBe('string')

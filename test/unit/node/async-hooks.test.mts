@@ -8,7 +8,7 @@ import { getNodeAsyncHooks } from '../../../src/node/async-hooks'
 
 describe('node/async-hooks', () => {
   it('returns the node:async_hooks module', () => {
-    const ah = getNodeAsyncHooks()
+    const ah = getNodeAsyncHooks()!
     expect(typeof ah.AsyncLocalStorage).toBe('function')
     expect(typeof ah.executionAsyncId).toBe('function')
   })

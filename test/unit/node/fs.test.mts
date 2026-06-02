@@ -13,7 +13,7 @@ import { getNodeFs } from '../../../src/node/fs'
 
 describe('node/fs', () => {
   it('returns the node:fs module', () => {
-    const fs = getNodeFs()
+    const fs = getNodeFs()!
     expect(typeof fs.existsSync).toBe('function')
     expect(typeof fs.readFileSync).toBe('function')
     expect(typeof fs.statSync).toBe('function')

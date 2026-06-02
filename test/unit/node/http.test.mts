@@ -8,7 +8,7 @@ import { getNodeHttp } from '../../../src/node/http'
 
 describe('node/http', () => {
   it('returns the node:http module', () => {
-    const http = getNodeHttp()
+    const http = getNodeHttp()!
     expect(typeof http.request).toBe('function')
     expect(typeof http.createServer).toBe('function')
   })

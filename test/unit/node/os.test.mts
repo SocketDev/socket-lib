@@ -8,7 +8,7 @@ import { getNodeOs } from '../../../src/node/os'
 
 describe('node/os', () => {
   it('returns the node:os module', () => {
-    const os = getNodeOs()
+    const os = getNodeOs()!
     expect(typeof os.platform).toBe('function')
     expect(typeof os.tmpdir).toBe('function')
     expect(typeof os.homedir).toBe('function')
