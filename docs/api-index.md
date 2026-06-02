@@ -600,6 +600,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/primordials/function`](../src/primordials/function.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/globals`](../src/primordials/globals.ts)   | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/headers`](../src/primordials/headers.ts)   | _(no description)_ |
+| [`@socketsecurity/lib-stable/primordials/intl`](../src/primordials/intl.ts)         | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/json`](../src/primordials/json.ts)         | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/map-set`](../src/primordials/map-set.ts)   | _(no description)_ |
 | [`@socketsecurity/lib-stable/primordials/math`](../src/primordials/math.ts)         | _(no description)_ |
