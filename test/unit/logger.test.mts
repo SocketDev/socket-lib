@@ -72,7 +72,11 @@ describe('Logger', () => {
     })
 
     it('should be accessible from Logger.LOG_SYMBOLS', () => {
-      expect(Logger.LOG_SYMBOLS).toBe(LOG_SYMBOLS)
+      // LOG_SYMBOLS here comes from the -stable alias (a separate module
+      // instance from the local src that Logger uses) and is a Proxy, so
+      // compare by value, not reference. The per-key strings are primitives,
+      // so those stay identity-comparable.
+      expect(Logger.LOG_SYMBOLS).toEqual(LOG_SYMBOLS)
       expect(Logger.LOG_SYMBOLS['success']).toBe(LOG_SYMBOLS['success'])
     })
 
