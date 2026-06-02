@@ -6,6 +6,7 @@
 
 import type timersPromises from 'node:timers/promises'
 
+import { IS_NODE } from '../constants/runtime'
 import { getAbortSignal } from '../process/abort'
 
 export const abortSignal = getAbortSignal()
@@ -24,7 +25,9 @@ export const abortSignal = getAbortSignal()
  *
  * @returns The Node.js timers/promises module
  */
-export function getTimers() {
-  // Use non-'node:' prefixed require to avoid Webpack errors.
+export function getTimers(): typeof timersPromises | undefined {
+  if (!IS_NODE) {
+    return undefined
+  }
   return require('node:timers/promises') as typeof timersPromises
 }

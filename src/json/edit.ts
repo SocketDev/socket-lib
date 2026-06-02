@@ -3,7 +3,7 @@
  */
 
 import process from 'node:process'
-import { setTimeout as sleep } from 'node:timers/promises'
+import { sleep } from '../promises/timers'
 
 import { isErrnoException } from '../errors/predicates'
 import { getNodeFs } from '../node/fs'
