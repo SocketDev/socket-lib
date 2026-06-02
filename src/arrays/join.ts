@@ -46,7 +46,7 @@ export type JoinListOptions =
  *
  * @returns Formatted string with proper "and" conjunction
  */
-export function joinAnd(arr: readonly string[]): string {
+export function joinAnd(arr: string[] | readonly string[]): string {
   return joinList(arr, { conjunction: 'and' })
 }
 
@@ -121,6 +121,6 @@ export function joinList(
  *
  * @returns Formatted string with proper "or" disjunction
  */
-export function joinOr(arr: readonly string[]): string {
+export function joinOr(arr: string[] | readonly string[]): string {
   return joinList(arr, { conjunction: 'or' })
 }
