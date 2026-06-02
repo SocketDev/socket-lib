@@ -14,6 +14,7 @@
  */
 
 import { stripAnsi } from '../ansi/strip'
+import { IntlSegmenter } from '../primordials/intl'
 import { RegExpPrototypeTest } from '../primordials/regexp'
 import {
   StringPrototypeCharCodeAt,
@@ -58,7 +59,7 @@ export function getEastAsianWidth() {
 //
 // Performance: Creating this once and reusing it is more efficient than
 // creating a new Intl.Segmenter instance on every stringWidth() call.
-const segmenter = new Intl.Segmenter()
+const segmenter = new IntlSegmenter()
 
 // Feature-detect Unicode property escapes support and create regex patterns.
 // Hoisted outside stringWidth() for reuse across multiple calls.
