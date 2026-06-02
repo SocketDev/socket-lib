@@ -409,6 +409,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | --------------------------------------------------------------------------------- | ------------------ |
 | [`@socketsecurity/lib-stable/github/constants`](../src/github/constants.ts)       | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/errors`](../src/github/errors.ts)             | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/fetch`](../src/github/fetch.ts)               | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/ghsa`](../src/github/ghsa.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/refs`](../src/github/refs.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/refs-cache`](../src/github/refs-cache.ts)     | _(no description)_ |
