@@ -47,7 +47,7 @@ jobs:
       # Needed for npm provenance via OIDC trusted publishing.
       id-token: write
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@24bfc25dc04d579ef347b9f76c2153791e4e04ee # main (2026-06-02)
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@ced2f2d1f02c217b10ca7adecb84b3fe05dbf750 # main (2026-06-02)
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN || secrets.SOCKET_API_KEY }}
 
