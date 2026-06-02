@@ -69,4 +69,4 @@ jobs:
           if [ "$DRY_RUN" = "true" ]; then
             ARGS="$ARGS --dry-run"
           fi
-          node scripts/publish.mts $ARGS
+          node scripts/fleet/publish.mts $ARGS
