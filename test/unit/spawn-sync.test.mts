@@ -6,6 +6,9 @@
  *   commands, and external process execution.
  */
 
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
@@ -129,16 +132,31 @@ describe('spawnSync', () => {
   // Fleet pattern: pass `shell: WIN32` (not `shell: true`). On Windows
   // they're equivalent; on Unix `shell: WIN32 === false` is the right
   // value (no shell wrapping for the unreachable POSIX branch of a
-  // Windows-only test). `shell: true` on Windows CI is a known gotcha —
-  // GitHub Actions windows-latest runners mishandle the `.cmd` + `shell:
-  // true` combo unpredictably (status 1 on one attempt, 10s timeout on
-  // the next, same SHA). Every fleet src/scripts call site uses `shell:
-  // WIN32`; src/eco/npm/npm/exec.ts is the canonical reference.
+  // Windows-only test).
+  //
+  // Exercises the `.cmd`-extension-stripping code path in spawnSync
+  // (`src/process/spawn/child.ts:452`) using a self-written `.cmd`
+  // script in a tmpdir. The earlier `npm.cmd --version` reproducer
+  // reliably deadlocked `spawnSync` on the GitHub Actions windows-
+  // latest runner because pnpm's Socket Firewall shim wraps stdin in
+  // a way `spawnSync` can't drain — the async-spawn sibling in
+  // spawn.test.mts doesn't hit that because Node's async pipe
+  // machinery handles the shim's writes gracefully; the sync path
+  // blocks. Using our own `.cmd` script bypasses the sfw-shim trap
+  // while still exercising the same Node spawn-on-Windows mechanic.
   itWindowsOnly('should handle Windows script extensions on Windows', () => {
-    const result = spawnSync('npm.cmd', ['--version'], {
-      shell: WIN32,
-    })
-    expect(result.status).toBe(0)
+    const tmp = mkdtempSync(path.join(os.tmpdir(), 'spawn-sync-cmd-'))
+    try {
+      const cmdPath = path.join(tmp, 'hello.cmd')
+      writeFileSync(cmdPath, '@echo hello\r\n')
+      const result = spawnSync(cmdPath, [], {
+        shell: WIN32,
+      })
+      expect(result.status).toBe(0)
+      expect(String(result.stdout)).toContain('hello')
+    } finally {
+      rmSync(tmp, { force: true, recursive: true })
+    }
   })
 
   itUnixOnly('should handle shell as string path', () => {
