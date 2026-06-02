@@ -17,7 +17,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { jreFromDownload } from '../../../../src/external-tools/jre/from-download'
 import { safeDelete } from '../../../../src/fs/safe'
 
-import { windowsExe } from '../../../_shared/fleet/platform.mts'
+import { windowsExe } from '../../../_shared/fleet/lib/platform.mts'
 
 import { makeFakeDownloader } from '../../../lib/fake-downloader'
 

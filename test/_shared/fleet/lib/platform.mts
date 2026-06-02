@@ -4,13 +4,15 @@
  *   from `@socketsecurity/lib-stable` so tests have one import surface and
  *   any future change to the canonical detection flows through one place.
  *
- *   Pairs with `./timing.mts` (Windows-tolerant timing budgets) and
- *   `./tags.mts` (test-title prefixes). Adoption is opt-in by file presence —
- *   the `socket/prefer-windows-test-helpers` lint rule fires only when this
- *   directory is present in the repo.
+ *   Pairs with `./timing.mts` (Windows-tolerant timing budgets), `./tags.mts`
+ *   (test-title prefixes), and `./env.mts` (env-flag helpers). Adoption is
+ *   opt-in by directory presence — the `socket/prefer-windows-test-helpers`
+ *   lint rule fires only when `test/_shared/fleet/lib/` is present.
  */
 import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+
+import { envFlag } from './env.mts'
 
 /**
  * Re-exports of the fleet-canonical Windows predicate + path normalizer.
@@ -20,6 +22,15 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
  * through one source of truth.
  */
 export { WIN32, normalizePath }
+
+/**
+ * True when running under continuous integration. Reads the `CI` env var
+ * via {@link envFlag} so `CI=1` and `CI=true` (the two shapes GitHub
+ * Actions / generic CI runners set) both evaluate truthy, while
+ * unset / `CI=0` / `CI=false` evaluate false. Use this anywhere a test
+ * needs to widen a budget or skip a live integration on CI runners.
+ */
+export const IS_CI: boolean = envFlag('CI')
 
 /**
  * Native path separator for the current platform: `\\` on Windows, `/`

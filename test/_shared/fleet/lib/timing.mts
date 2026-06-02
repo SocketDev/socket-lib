@@ -40,7 +40,7 @@ export const MIN_TIMER_QUANTUM_MS: number = WIN32 ? 15.6 : 1
  *
  * @example
  *   ;```ts
- *   import { tolerantTimeout } from '../util/fleet/timing.mts'
+ *   import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
  *
  *   // 5s budget on Unix, 25s on Windows.
  *   it('should expire entries after TTL', async () => {
