@@ -156,58 +156,58 @@ describe('arrays', () => {
       expect(joinList(['dis', 'regard'], {})).toBe('disregard')
     })
 
-    it('list: three items comma-separated', () => {
-      expect(joinList(['a', 'b', 'c'], { list: true })).toBe('a, b, c')
+    it('with comma-space: three items', () => {
+      expect(joinList(['a', 'b', 'c'], { with: ', ' })).toBe('a, b, c')
     })
 
-    it('list: two items comma-separated', () => {
-      expect(joinList(['a', 'b'], { list: true })).toBe('a, b')
+    it('with comma-space: two items', () => {
+      expect(joinList(['a', 'b'], { with: ', ' })).toBe('a, b')
     })
 
-    it('list: single item', () => {
-      expect(joinList(['a'], { list: true })).toBe('a')
+    it('with comma-space: single item', () => {
+      expect(joinList(['a'], { with: ', ' })).toBe('a')
     })
 
-    it('list: empty array', () => {
-      expect(joinList([], { list: true })).toBe('')
+    it('with comma-space: empty array', () => {
+      expect(joinList([], { with: ', ' })).toBe('')
     })
 
-    it('conjunction and: three items', () => {
-      expect(joinList(['a', 'b', 'c'], { conjunction: 'and' })).toBe(
-        'a, b, and c',
-      )
+    it('with space: three items', () => {
+      expect(joinList(['a', 'b', 'c'], { with: ' ' })).toBe('a b c')
     })
 
-    it('conjunction and: two items', () => {
-      expect(joinList(['a', 'b'], { conjunction: 'and' })).toBe('a and b')
+    it('with and: three items', () => {
+      expect(joinList(['a', 'b', 'c'], { with: 'and' })).toBe('a, b, and c')
     })
 
-    it('conjunction or: three items', () => {
-      expect(joinList(['a', 'b', 'c'], { conjunction: 'or' })).toBe(
-        'a, b, or c',
-      )
+    it('with and: two items', () => {
+      expect(joinList(['a', 'b'], { with: 'and' })).toBe('a and b')
     })
 
-    it('conjunction or: two items', () => {
-      expect(joinList(['a', 'b'], { conjunction: 'or' })).toBe('a or b')
+    it('with or: three items', () => {
+      expect(joinList(['a', 'b', 'c'], { with: 'or' })).toBe('a, b, or c')
+    })
+
+    it('with or: two items', () => {
+      expect(joinList(['a', 'b'], { with: 'or' })).toBe('a or b')
     })
 
     it('single item: all modes return item', () => {
       expect(joinList(['x'])).toBe('x')
-      expect(joinList(['x'], { list: true })).toBe('x')
-      expect(joinList(['x'], { conjunction: 'and' })).toBe('x')
-      expect(joinList(['x'], { conjunction: 'or' })).toBe('x')
+      expect(joinList(['x'], { with: ', ' })).toBe('x')
+      expect(joinList(['x'], { with: 'and' })).toBe('x')
+      expect(joinList(['x'], { with: 'or' })).toBe('x')
     })
 
     it('empty array: all modes return empty string', () => {
       expect(joinList([])).toBe('')
-      expect(joinList([], { list: true })).toBe('')
-      expect(joinList([], { conjunction: 'and' })).toBe('')
-      expect(joinList([], { conjunction: 'or' })).toBe('')
+      expect(joinList([], { with: ', ' })).toBe('')
+      expect(joinList([], { with: 'and' })).toBe('')
+      expect(joinList([], { with: 'or' })).toBe('')
     })
 
-    it('non-string items with conjunction', () => {
-      expect(joinList([1, 2, 3], { conjunction: 'and' })).toBe('1, 2, and 3')
+    it('non-string items with and', () => {
+      expect(joinList([1, 2, 3], { with: 'and' })).toBe('1, 2, and 3')
     })
 
     it('non-string items bare join', () => {
@@ -216,7 +216,7 @@ describe('arrays', () => {
 
     it('works with readonly arrays and const assertions', () => {
       const arr = ['a', 'b', 'c'] as const
-      expect(joinList(arr, { conjunction: 'and' })).toBe('a, b, and c')
+      expect(joinList(arr, { with: 'and' })).toBe('a, b, and c')
     })
 
     it('joinAnd delegates to joinList', () => {

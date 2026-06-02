@@ -6,10 +6,9 @@
 
 import { getConjunctionFormatter, getDisjunctionFormatter } from './_internal'
 
-export type JoinListOptions =
-  | { conjunction: 'and' | 'or'; list?: undefined }
-  | { list: true; conjunction?: undefined }
-  | Record<string, never>
+export interface JoinListOptions {
+  with?: string | undefined
+}
 
 /**
  * Join array elements with proper "and" conjunction formatting.
@@ -47,19 +46,32 @@ export type JoinListOptions =
  * @returns Formatted string with proper "and" conjunction
  */
 export function joinAnd(arr: string[] | readonly string[]): string {
-  return joinList(arr, { conjunction: 'and' })
+  return joinList(arr, { with: 'and' })
 }
 
 /**
  * Generalized list joiner covering bare join, comma-list, and
  * conjunction/disjunction via `Intl.ListFormat`.
  *
- * - No options / empty object: bare concatenation (`items.map(String).join('')`)
- * - `{ list: true }`: comma-separated (`'a, b, c'`), no conjunction
- * - `{ conjunction: 'and' }`: Oxford-comma "and" list (`'a, b, and c'`)
- * - `{ conjunction: 'or' }`: Oxford-comma "or" list (`'a, b, or c'`)
+ * - No options: bare concatenation (`'abc'`)
+ * - `{ with: 'and' }`: Oxford-comma "and" list via `Intl.ListFormat` (`'a, b, and
+ *   c'`)
+ * - `{ with: 'or' }`: Oxford-comma "or" list via `Intl.ListFormat` (`'a, b, or
+ *   c'`)
+ * - `{ with: <any other string> }`: `items.join(sep)` — e.g. `','` → `'a,b,c'`,
+ *   `', '` → `'a, b, c'`, `' '` → `'a b c'`
  *
  * Each item is coerced via `String()` before formatting.
+ *
+ * @example
+ *   ;```ts
+ *   joinList(['a', 'b', 'c'])                  // 'abc'
+ *   joinList(['a', 'b', 'c'], { with: ', ' })  // 'a, b, c'
+ *   joinList(['a', 'b', 'c'], { with: ' ' })   // 'a b c'
+ *   joinList(['a', 'b', 'c'], { with: 'and' }) // 'a, b, and c'
+ *   joinList(['a', 'b', 'c'], { with: 'or' })  // 'a, b, or c'
+ *   joinList([1, 2, 3], { with: 'and' })        // '1, 2, and 3'
+ *   ```
  *
  * @param items - Items to join (can be readonly, any type)
  * @param options - Formatting options (optional)
@@ -70,18 +82,15 @@ export function joinList(
   items: readonly unknown[],
   options?: JoinListOptions,
 ): string {
-  if (
-    options &&
-    'conjunction' in options &&
-    options.conjunction !== undefined
-  ) {
-    const strs = items.map(String)
-    return options.conjunction === 'and'
-      ? getConjunctionFormatter().format(strs)
-      : getDisjunctionFormatter().format(strs)
+  const w = options?.with
+  if (w === 'and') {
+    return getConjunctionFormatter().format(items.map(String))
   }
-  if (options && 'list' in options && options.list === true) {
-    return items.map(String).join(', ')
+  if (w === 'or') {
+    return getDisjunctionFormatter().format(items.map(String))
+  }
+  if (w !== undefined) {
+    return items.map(String).join(w)
   }
   return items.map(String).join('')
 }
@@ -122,5 +131,5 @@ export function joinList(
  * @returns Formatted string with proper "or" disjunction
  */
 export function joinOr(arr: string[] | readonly string[]): string {
-  return joinList(arr, { conjunction: 'or' })
+  return joinList(arr, { with: 'or' })
 }
