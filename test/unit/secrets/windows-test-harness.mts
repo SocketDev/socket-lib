@@ -7,6 +7,7 @@ import { Readable, Writable } from 'node:stream'
 import { afterEach, beforeEach, vi } from 'vitest'
 
 import type { Mock } from 'vitest'
+import type * as SpawnChild from '@socketsecurity/lib-stable/process/spawn/child'
 
 export interface FakeChild extends EventEmitter {
   stdin: Writable
@@ -14,12 +15,42 @@ export interface FakeChild extends EventEmitter {
   stderr: Readable
 }
 
+/**
+ * Build the mocked `@socketsecurity/lib-stable/process/spawn/child` module for
+ * a `vi.mock` factory. src/secrets/windows.ts imports `spawn`/`spawnSync` from
+ * that module (NOT node:child_process), so this is the correct mock target —
+ * mocking node:child_process is a no-op and lets the real powershell binary
+ * run. The mocks sit on both the named and default exports. Usage:
+ *
+ * Vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), () =>
+ * spawnChildMockFactory(mockSpawn, mockSpawnSync))
+ */
+export async function spawnChildMockFactory(
+  mockSpawn: Mock,
+  mockSpawnSync: Mock,
+): Promise<typeof SpawnChild> {
+  const actual = await vi.importActual<typeof SpawnChild>(
+    '@socketsecurity/lib-stable/process/spawn/child',
+  )
+  const mocked = {
+    ...actual,
+    spawn: mockSpawn,
+    spawnSync: mockSpawnSync,
+  } as unknown as typeof SpawnChild
+  return { ...mocked, default: mocked } as unknown as typeof SpawnChild
+}
+
+// `@socketsecurity/lib-stable/process/spawn/child`'s `spawn()` returns
+// `{ process: ChildProcess, ... }` (the lib wraps the raw child), and
+// src/secrets/windows.ts destructures `const { process: cp } = spawn(...)`.
+// Return that wrapped shape so `mockSpawn.mockImplementationOnce(() =>
+// makeFakeChild({ ... }))` matches the real contract.
 export function makeFakeChild(opts: {
   stdout?: string | undefined
   stderr?: string | undefined
   exitCode?: number | null | undefined
   emitError?: Error | undefined
-}): FakeChild {
+}): { process: FakeChild } {
   const emitter = new EventEmitter() as FakeChild
   emitter.stdin = new Writable({
     write(_c, _e, cb) {
@@ -40,7 +71,7 @@ export function makeFakeChild(opts: {
     }
     emitter.emit('close', opts.exitCode ?? 0)
   })
-  return emitter
+  return { process: emitter }
 }
 
 export const harness = {

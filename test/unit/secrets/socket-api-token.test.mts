@@ -46,7 +46,9 @@ describe.sequential('secrets/socket-api-token — readSocketApiToken (async)', (
       accounts: readonly string[]
     }
     expect(callArg.service).toBe('socket-cli')
-    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_TOKEN'])
+    // socket-api-token-env: bootstrap — asserting the source's literal account
+    // fallback list, which includes the SOCKET_API_KEY legacy alias by design.
+    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
   })
 
   test('forwards allowEnvOnly to resolve', async () => {
@@ -84,7 +86,9 @@ describe.sequential('secrets/socket-api-token — readSocketApiTokenSync', () =>
       accounts: readonly string[]
     }
     expect(callArg.service).toBe('socket-cli')
-    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_TOKEN'])
+    // socket-api-token-env: bootstrap — asserting the source's literal account
+    // fallback list, which includes the SOCKET_API_KEY legacy alias by design.
+    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
   })
 
   test('forwards allowEnvOnly to resolveSync', async () => {
