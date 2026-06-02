@@ -41,12 +41,16 @@ describe('warnings/suppress', () => {
 
     it('should allow other warnings through', () => {
       restoreWarnings()
-      process.emitWarning = emitWarningSpy
+      process.emitWarning =
+        emitWarningSpy as unknown as typeof process.emitWarning
       suppressMaxListenersWarning()
 
       const wrapped = process.emitWarning
       process.emitWarning = (warning, ...args) => {
-        emitWarningSpy(warning, ...args)
+        ;(emitWarningSpy as unknown as (...a: unknown[]) => void)(
+          warning,
+          ...args,
+        )
         return (wrapped as (...a: unknown[]) => void)(warning, ...args)
       }
 
@@ -149,7 +153,8 @@ describe('warnings/suppress', () => {
       suppressMaxListenersWarning()
       restoreWarnings()
 
-      process.emitWarning = emitWarningSpy
+      process.emitWarning =
+        emitWarningSpy as unknown as typeof process.emitWarning
 
       suppressMaxListenersWarning()
       process.emitWarning('MaxListenersExceededWarning: test')

@@ -180,6 +180,8 @@ describe.sequential('dlx/manifest — error branches', () => {
       const fsMod = require('node:fs') as typeof nodeFs
       const originalRename = fsMod.renameSync
       fsMod.renameSync = ((src: string, dest: string) => {
+        void src
+        void dest
         throw makeFsError('EPERM')
       }) as typeof fsMod.renameSync
       try {

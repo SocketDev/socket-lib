@@ -20,11 +20,7 @@ import { clear } from '../../src/cacache/clear'
 import { get, safeGet } from '../../src/cacache/read'
 import { withTmp } from '../../src/cacache/tmp'
 import { put, remove } from '../../src/cacache/write'
-import type {
-  GetOptions,
-  PutOptions,
-  RemoveOptions,
-} from '../../src/cacache/types'
+import type { GetOptions, RemoveOptions } from '../../src/cacache/types'
 
 describe('cacache', () => {
   describe('getCacache', () => {

@@ -150,8 +150,8 @@ describe('Math', () => {
     if (typeof MathF16round !== 'function') {
       return
     }
-    expect(MathF16round(ExpectedMathF16round(0.1))).toBe(
-      ExpectedMathF16round(0.1),
+    expect(MathF16round(ExpectedMathF16round!(0.1))).toBe(
+      ExpectedMathF16round!(0.1),
     )
   })
 })

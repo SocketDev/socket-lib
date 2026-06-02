@@ -8,16 +8,16 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { pipVenvEntryPointPath } from '../../../src/external-tools/from-pip-venv'
 
+import type { which as WhichFn } from '../../../src/bin/which'
 import type * as NodeFs from 'node:fs'
 
 vi.mock(import('../../../src/bin/which'), () => ({
-  which:
-    vi.fn<
-      (
-        name: string,
-        opts?: { nothrow?: boolean | undefined },
-      ) => Promise<string | undefined>
-    >(),
+  which: vi.fn<
+    (
+      name: string,
+      opts?: { nothrow?: boolean | undefined },
+    ) => Promise<string | undefined>
+  >() as unknown as typeof WhichFn,
 }))
 
 vi.mock(import('../../../src/process/spawn/child'), () => ({

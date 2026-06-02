@@ -6,16 +6,22 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import type * as PacoteModule from '../../../src/external/pacote'
+
 // Mock pacote BEFORE importing src/packages/manifest so the mocked
 // pacote.manifest / pacote.packument are seen by the SUT.
-vi.mock(import('../../../src/external/pacote'), () => ({
-  default: {
-    manifest: vi.fn(),
-    packument: vi.fn(),
-    tarball: vi.fn(),
-    extract: vi.fn(),
-  },
-}))
+vi.mock(
+  import('../../../src/external/pacote'),
+  () =>
+    ({
+      default: {
+        manifest: vi.fn(),
+        packument: vi.fn(),
+        tarball: vi.fn(),
+        extract: vi.fn(),
+      },
+    }) as unknown as typeof PacoteModule,
+)
 
 import {
   createPackageJson,

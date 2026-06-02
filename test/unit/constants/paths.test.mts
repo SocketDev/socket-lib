@@ -22,7 +22,6 @@ import {
 import {
   CHANGELOG_MD,
   DOT_PACKAGE_LOCK_JSON,
-  ESLINT_CONFIG_JS,
   EXTENSIONS_JSON,
   GITIGNORE,
   LICENSE,
@@ -110,11 +109,6 @@ describe('constants/paths', () => {
 
     it('should export EXTENSIONS_JSON', () => {
       expect(EXTENSIONS_JSON).toBe('extensions.json')
-    })
-
-    it('should export ESLINT_CONFIG_JS', () => {
-      // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- asserting the literal value of the real exported ESLINT_CONFIG_JS constant, not a stale config reference.
-      expect(ESLINT_CONFIG_JS).toBe('eslint.config.js')
     })
 
     it('should export GITIGNORE', () => {

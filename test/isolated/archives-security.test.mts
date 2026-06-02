@@ -21,7 +21,6 @@ import { describe, expect, it } from 'vitest'
 import { extractArchive } from '../../src/archives/extract'
 import { extractTar, extractTarGz } from '../../src/archives/tar'
 import { extractZip } from '../../src/archives/zip'
-import { safeDelete } from '../../src/fs/safe'
 
 import { runWithTempDir } from '../unit/util/temp-file-helper'
 

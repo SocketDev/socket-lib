@@ -91,18 +91,18 @@ describe('pkg-ext', () => {
 
         if (name.startsWith('abab')) {
           expect(config).toHaveProperty('devDependencies')
-          const devDeps = (config as Record<string, unknown>)
-            .devDependencies as Record<string, unknown>
+          const devDeps = (config as Record<string, unknown>)[
+            'devDependencies'
+          ] as Record<string, unknown>
           expect(devDeps).toBeDefined()
           expect(devDeps['webpack']).toBe('^3.12.0')
         }
 
         if (name.startsWith('is-generator-function')) {
           expect(config).toHaveProperty('scripts')
-          const scripts = (config as Record<string, unknown>).scripts as Record<
-            string,
-            unknown
-          >
+          const scripts = (config as Record<string, unknown>)[
+            'scripts'
+          ] as Record<string, unknown>
           expect(scripts).toBeDefined()
           expect(scripts['test:uglified']).toBe('')
         }
@@ -139,7 +139,7 @@ describe('pkg-ext', () => {
       const [, config] = yarnExt!
       expect(config).toHaveProperty('peerDependencies')
       expect(
-        (config as Record<string, unknown>).peerDependencies,
+        (config as Record<string, unknown>)['peerDependencies'],
       ).toBeUndefined()
     })
 
@@ -150,8 +150,9 @@ describe('pkg-ext', () => {
       expect(ababExt).toBeDefined()
       const [, config] = ababExt!
       expect(config).toHaveProperty('devDependencies')
-      const devDeps = (config as Record<string, unknown>)
-        .devDependencies as Record<string, unknown>
+      const devDeps = (config as Record<string, unknown>)[
+        'devDependencies'
+      ] as Record<string, unknown>
       expect(devDeps).toHaveProperty('webpack')
       expect(devDeps['webpack']).toBe('^3.12.0')
     })
@@ -163,7 +164,7 @@ describe('pkg-ext', () => {
       expect(isGenFnExt).toBeDefined()
       const [, config] = isGenFnExt!
       expect(config).toHaveProperty('scripts')
-      const scripts = (config as Record<string, unknown>).scripts as Record<
+      const scripts = (config as Record<string, unknown>)['scripts'] as Record<
         string,
         unknown
       >

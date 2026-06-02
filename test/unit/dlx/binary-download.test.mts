@@ -35,28 +35,23 @@ function mockDownloadResult(destPath: string): HttpDownloadResult {
 
 type DownloadModuleExports = typeof DownloadModule
 
-vi.mock(
-  import('../../../src/http-request/download'),
-  async (
-    importOriginal: <T>() => Promise<T>,
-  ): Promise<DownloadModuleExports> => {
-    const original = await importOriginal<DownloadModuleExports>()
-    return {
-      ...original,
-      httpDownload: vi.fn(
-        async (
-          _url: string,
-          destPath: string,
-          _opts?: HttpDownloadOptions | undefined,
-        ): Promise<HttpDownloadResult> => {
-          // Default behavior: write a known payload.
-          writeFileSync(destPath, Buffer.from('default-payload'))
-          return mockDownloadResult(destPath)
-        },
-      ),
-    }
-  },
-)
+vi.mock(import('../../../src/http-request/download'), async importOriginal => {
+  const original = await importOriginal<DownloadModuleExports>()
+  return {
+    ...original,
+    httpDownload: vi.fn(
+      async (
+        _url: string,
+        destPath: string,
+        _opts?: HttpDownloadOptions | undefined,
+      ): Promise<HttpDownloadResult> => {
+        // Default behavior: write a known payload.
+        writeFileSync(destPath, Buffer.from('default-payload'))
+        return mockDownloadResult(destPath)
+      },
+    ) as unknown as DownloadModuleExports['httpDownload'],
+  }
+})
 
 export function sha512OfBuffer(buf: Buffer): string {
   const h = crypto.createHash('sha512').update(buf).digest('base64')

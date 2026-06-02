@@ -167,6 +167,7 @@ describe.sequential('compression — brotli', () => {
       const chunks: Buffer[] = []
       const sink = new Writable({
         write(chunk: Buffer, enc, cb) {
+          void enc
           chunks.push(chunk)
           cb()
         },

@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock(import('../../../../src/external-tools/skillspector/from-vfs'), () => ({
   skillspectorFromVfs: vi.fn(),
-  SKILLSPECTOR_VFS_KEY: 'skillspector',
+  SKILLSPECTOR_VFS_KEY: 'skillspector' as const,
 }))
 
 vi.mock(
