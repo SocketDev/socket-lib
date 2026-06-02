@@ -17,6 +17,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { jreFromDownload } from '../../../../src/external-tools/jre/from-download'
 import { safeDelete } from '../../../../src/fs/safe'
 
+import { windowsExe } from '../../../_shared/fleet/platform.mts'
+
 import { makeFakeDownloader } from '../../../lib/fake-downloader'
 
 /**
@@ -139,8 +141,9 @@ describe.sequential('external-tools/jre/from-download', () => {
       expect(result?.javaHome).toBe(path.join(cacheDir, 'Contents', 'Home'))
     } else {
       expect(result?.javaHome).toBe(cacheDir)
-      const javaBinary = process.platform === 'win32' ? 'java.exe' : 'java'
-      expect(result?.javaPath).toBe(path.join(cacheDir, 'bin', javaBinary))
+      expect(result?.javaPath).toBe(
+        path.join(cacheDir, 'bin', windowsExe('java')),
+      )
     }
   })
 
