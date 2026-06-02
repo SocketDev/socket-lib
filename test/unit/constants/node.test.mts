@@ -26,6 +26,8 @@ import {
   supportsNodePermissionFlag,
   supportsNodeRequireModule,
   supportsNodeRun,
+  supportsNodeStripTypes,
+  supportsNodeStripTypesDefault,
   supportsProcessSend,
 } from '../../../src/constants/node'
 import { describe, expect, it } from 'vitest'
@@ -226,6 +228,115 @@ describe('node constants', () => {
           expect(result).toBe(false)
         }
       }
+    })
+  })
+
+  describe('supportsNodeStripTypes', () => {
+    it('should return boolean', () => {
+      const result = supportsNodeStripTypes()
+      expect(typeof result).toBe('boolean')
+    })
+
+    it('should return true on the current runtime (Node 22.6+ floor)', () => {
+      // Tests run on Node 22.6+ (fleet floor), so this is always true here.
+      // The function exists to gate older runtimes that the lib still
+      // type-checks against.
+      expect(supportsNodeStripTypes()).toBe(true)
+    })
+
+    it('should return true for Node.js 23+', () => {
+      const major = getNodeMajorVersion()
+      if (major >= 23) {
+        expect(supportsNodeStripTypes()).toBe(true)
+      }
+    })
+
+    it('should check minor version for Node.js 22 (cutoff at 22.6)', () => {
+      const major = getNodeMajorVersion()
+      if (major === 22) {
+        const minor = getNodeMinorVersion()
+        const result = supportsNodeStripTypes()
+        if (minor >= 6) {
+          expect(result).toBe(true)
+        } else {
+          expect(result).toBe(false)
+        }
+      }
+    })
+  })
+
+  describe('supportsNodeStripTypesDefault', () => {
+    it('should return boolean', () => {
+      const result = supportsNodeStripTypesDefault()
+      expect(typeof result).toBe('boolean')
+    })
+
+    it('should return true for Node.js 24+', () => {
+      const major = getNodeMajorVersion()
+      const result = supportsNodeStripTypesDefault()
+      if (major >= 24) {
+        expect(result).toBe(true)
+      } else {
+        expect(result).toBe(false)
+      }
+    })
+
+    it('should be a subset of supportsNodeStripTypes', () => {
+      // If types are stripped by default (24+), the runtime trivially
+      // supports stripping with a flag too.
+      if (supportsNodeStripTypesDefault()) {
+        expect(supportsNodeStripTypes()).toBe(true)
+      }
+    })
+
+    it('should be false on Node 22', () => {
+      // 22.x is the line where stripping is stable-with-flag, NOT
+      // default-on. This anchors the lower boundary.
+      const major = getNodeMajorVersion()
+      if (major === 22) {
+        expect(supportsNodeStripTypesDefault()).toBe(false)
+      }
+    })
+
+    it('should be false on Node 23', () => {
+      // 23.x also requires the flag (it's a non-LTS bridge release).
+      // Default-on kicks in at 24.
+      const major = getNodeMajorVersion()
+      if (major === 23) {
+        expect(supportsNodeStripTypesDefault()).toBe(false)
+      }
+    })
+
+    it('agrees with the live runtime version', () => {
+      // Cross-check: whatever supportsNodeStripTypesDefault() returns,
+      // it must match `getNodeMajorVersion() >= 24`. Pins the impl
+      // contract so a future refactor (e.g. adding minor-version
+      // gating) doesn't quietly drift.
+      const major = getNodeMajorVersion()
+      expect(supportsNodeStripTypesDefault()).toBe(major >= 24)
+    })
+  })
+
+  describe('supportsNodeStripTypes ↔ supportsNodeStripTypesDefault relationship', () => {
+    it('default implies non-default support (one-way implication)', () => {
+      // The two helpers together form a 3-state ladder:
+      //   pre-22.6        → !supports & !default
+      //   22.6 – 23.x     →  supports & !default
+      //   24+             →  supports &  default
+      // Default-on implies basic support. Basic support does NOT
+      // imply default-on (22.6 / 23.x still need the flag).
+      if (supportsNodeStripTypesDefault()) {
+        expect(supportsNodeStripTypes()).toBe(true)
+      }
+    })
+
+    it('never reports default-on without basic support', () => {
+      // Belt-and-suspenders: if the file ever drifts so default-on is
+      // true on a runtime that can't strip at all, the helper pair
+      // is internally inconsistent.
+      expect(supportsNodeStripTypesDefault() && !supportsNodeStripTypes()).toBe(
+        false,
+      )
     })
   })
 

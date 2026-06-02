@@ -299,6 +299,38 @@ export function supportsNodeRun(): boolean {
 }
 
 /**
+ * Check whether the current runtime can execute TypeScript source directly
+ * (`.ts` files via `node foo.ts`), with or without a flag. Type-stripping went
+ * stable in Node.js 22.6 (under `--strip-types`, also accepted as the
+ * deprecated alias `--experimental-strip-types`) and default-on in Node 24.
+ *
+ * Pair with {@link supportsNodeStripTypesDefault} to decide whether a flag needs
+ * to be passed.
+ *
+ * @returns `true` when the runtime can run TypeScript (Node 22.6+).
+ */
+export function supportsNodeStripTypes(): boolean {
+  const major = getNodeMajorVersion()
+  /* c8 ignore start - 22-specific arm; tests run on a single Node major. */
+  return major >= 23 || (major === 22 && getNodeMinorVersion() >= 6)
+  /* c8 ignore stop */
+}
+
+/**
+ * Check whether the current runtime strips TypeScript types **by default** (no
+ * flag needed). Became default-on in Node.js 24.
+ *
+ * Use case: deciding whether a wrapper script needs to pass `--strip-types`
+ * when invoking `node foo.ts`. On Node 24+ the flag is redundant; on 22.6 –
+ * 23.x it's required.
+ *
+ * @returns `true` when no `--strip-types` flag is needed (Node 24+).
+ */
+export function supportsNodeStripTypesDefault(): boolean {
+  return getNodeMajorVersion() >= 24
+}
+
+/**
  * Check whether this process was spawned with an IPC channel. When `true`,
  * `process.send()` is callable to message the parent process.
  *
