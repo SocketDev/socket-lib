@@ -23,6 +23,17 @@ if (!process.env['SOCKET_LIB_RUN_NETWORK_TESTS']) {
   process.env['SOCKET_LIB_SKIP_NETWORK_TESTS'] = '1'
 }
 
+// Skip live-OS-keychain round-trip tests by default. They hit `security`(1) /
+// libsecret / DPAPI directly and either prompt for GUI auth or hang in
+// headless / parallel-worker environments, turning into 5s timeouts. The
+// per-platform mock suites at test/unit/secrets/{macos,linux,windows}.test.mts
+// cover the same code paths through mocked spawn boundaries.
+// `SOCKET_LIB_RUN_LIVE_KEYCHAIN_TESTS=1` opts a manual session in for the
+// live round-trip.
+if (!process.env['SOCKET_LIB_RUN_LIVE_KEYCHAIN_TESTS']) {
+  process.env['SOCKET_SKIP_KEYCHAIN_LIVE_TESTS'] = '1'
+}
+
 beforeAll(() => {
   // Block all network access by default. Tests must register
   // explicit nock interceptors to talk to anything.
