@@ -425,11 +425,6 @@
       "types": "./dist/constants/platform.d.ts",
       "default": "./dist/constants/platform.js"
     },
-    "./constants/runtime": {
-      "source": "./src/constants/runtime.ts",
-      "types": "./dist/constants/runtime.d.ts",
-      "default": "./dist/constants/runtime.js"
-    },
     "./constants/sentinels": {
       "source": "./src/constants/sentinels.ts",
       "types": "./dist/constants/sentinels.d.ts",
@@ -815,11 +810,6 @@
       "types": "./dist/env/github.d.ts",
       "default": "./dist/env/github.js"
     },
-    "./env/github-status": {
-      "source": "./src/env/github-status.ts",
-      "types": "./dist/env/github-status.d.ts",
-      "default": "./dist/env/github-status.js"
-    },
     "./env/home": {
       "source": "./src/env/home.ts",
       "types": "./dist/env/home.d.ts",
@@ -839,11 +829,6 @@
       "source": "./src/env/node-env.ts",
       "types": "./dist/env/node-env.d.ts",
       "default": "./dist/env/node-env.js"
-    },
-    "./env/node-version-managers": {
-      "source": "./src/env/node-version-managers.ts",
-      "types": "./dist/env/node-version-managers.d.ts",
-      "default": "./dist/env/node-version-managers.js"
     },
     "./env/npm": {
       "source": "./src/env/npm.ts",
@@ -1480,6 +1465,11 @@
       "types": "./dist/github/errors.d.ts",
       "default": "./dist/github/errors.js"
     },
+    "./github/fetch": {
+      "source": "./src/github/fetch.ts",
+      "types": "./dist/github/fetch.d.ts",
+      "default": "./dist/github/fetch.js"
+    },
     "./github/ghsa": {
       "source": "./src/github/ghsa.ts",
       "types": "./dist/github/ghsa.d.ts",
@@ -1504,11 +1494,6 @@
       "source": "./src/github/refs-rest.ts",
       "types": "./dist/github/refs-rest.d.ts",
       "default": "./dist/github/refs-rest.js"
-    },
-    "./github/request": {
-      "source": "./src/github/request.ts",
-      "types": "./dist/github/request.d.ts",
-      "default": "./dist/github/request.js"
     },
     "./github/token": {
       "source": "./src/github/token.ts",
@@ -1574,10 +1559,10 @@
       "types": "./dist/http-request/browser-fetch.d.ts",
       "default": "./dist/http-request/browser-fetch.js"
     },
-    "./http-request/checksums": {
-      "source": "./src/http-request/checksums.ts",
-      "types": "./dist/http-request/checksums.d.ts",
-      "default": "./dist/http-request/checksums.js"
+    "./http-request/checksum-file": {
+      "source": "./src/http-request/checksum-file.ts",
+      "types": "./dist/http-request/checksum-file.d.ts",
+      "default": "./dist/http-request/checksum-file.js"
     },
     "./http-request/download": {
       "source": "./src/http-request/download.ts",
@@ -1835,31 +1820,6 @@
       "source": "./src/memo/weak.ts",
       "types": "./dist/memo/weak.d.ts",
       "default": "./dist/memo/weak.js"
-    },
-    "./native-messaging": {
-      "source": "./src/native-messaging/index.ts",
-      "types": "./dist/native-messaging/index.d.ts",
-      "default": "./dist/native-messaging/index.js"
-    },
-    "./native-messaging/host": {
-      "source": "./src/native-messaging/host.ts",
-      "types": "./dist/native-messaging/host.d.ts",
-      "default": "./dist/native-messaging/host.js"
-    },
-    "./native-messaging/install": {
-      "source": "./src/native-messaging/install.ts",
-      "types": "./dist/native-messaging/install.d.ts",
-      "default": "./dist/native-messaging/install.js"
-    },
-    "./native-messaging/rate-limit": {
-      "source": "./src/native-messaging/rate-limit.ts",
-      "types": "./dist/native-messaging/rate-limit.d.ts",
-      "default": "./dist/native-messaging/rate-limit.js"
-    },
-    "./native-messaging/run": {
-      "source": "./src/native-messaging/run.ts",
-      "types": "./dist/native-messaging/run.d.ts",
-      "default": "./dist/native-messaging/run.js"
     },
     "./node/async-hooks": {
       "source": "./src/node/async-hooks.ts",
@@ -2321,11 +2281,6 @@
       "types": "./dist/promises/retry.d.ts",
       "default": "./dist/promises/retry.js"
     },
-    "./promises/timers": {
-      "source": "./src/promises/timers.ts",
-      "types": "./dist/promises/timers.d.ts",
-      "default": "./dist/promises/timers.js"
-    },
     "./promises/types": {
       "source": "./src/promises/types.ts",
       "types": "./dist/promises/types.d.ts",
@@ -2430,11 +2385,6 @@
       "source": "./src/sea/detect.ts",
       "types": "./dist/sea/detect.d.ts",
       "default": "./dist/sea/detect.js"
-    },
-    "./secrets/compare": {
-      "source": "./src/secrets/compare.ts",
-      "types": "./dist/secrets/compare.d.ts",
-      "default": "./dist/secrets/compare.js"
     },
     "./secrets/find": {
       "source": "./src/secrets/find.ts",

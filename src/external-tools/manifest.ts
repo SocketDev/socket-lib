@@ -9,10 +9,10 @@
  *   integrity-string validation. Shape: { "<tool-name>": { "description":
  *   "human-readable summary", "version": "1.7.2", "release": "asset" |
  *   "tarball" | ..., "repository": "github:owner/repo", "notes": [...],
- *   "checksums": { "<platform-arch>": { "asset": "<asset-filename>",
+ *   "platforms": { "<platform-arch>": { "asset": "<asset-filename>",
  *   "integrity": "sha256-base64=" } } } } Some tools have flavor variants (e.g.
  *   sfw's `free` / `enterprise`) that wrap the `{repository, binaryName,
- *   checksums}` triple under a flavor key. Use `getToolFlavor` for those. Some
+ *   platforms}` triple under a flavor key. Use `getToolFlavor` for those. Some
  *   entries (e.g. `rust`) describe a system tool with a different shape —
  *   they're skipped by `getTool` and fully readable only via the raw
  *   `readManifest` returning unknown.
@@ -72,7 +72,7 @@ export interface ToolChecksum {
 }
 
 /**
- * A downloadable-binary tool entry. `checksums` is keyed by the fleet's
+ * A downloadable-binary tool entry. `platforms` is keyed by the fleet's
  * platform-arch token (`darwin-arm64`, `linux-x64-musl`, `win-x64`, etc. — same
  * vocabulary as `getPlatformArch`).
  */
@@ -83,13 +83,13 @@ export interface ToolEntry {
   repository: string
   binaryName?: string | undefined
   notes?: readonly string[] | undefined
-  checksums: Readonly<Record<string, ToolChecksum>>
+  platforms: Readonly<Record<string, ToolChecksum>>
 }
 
 /**
  * A flavored tool entry — sfw is the canonical example, with `free` and
  * `enterprise` variants sharing the same outer `description` / `version` /
- * `release` but each carrying its own `{repository, binaryName, checksums}`.
+ * `release` but each carrying its own `{repository, binaryName, platforms}`.
  */
 export interface FlavoredToolEntry {
   description: string
@@ -102,7 +102,7 @@ export interface FlavoredToolEntry {
 export interface ToolFlavor {
   repository: string
   binaryName?: string | undefined
-  checksums: Readonly<Record<string, ToolChecksum>>
+  platforms: Readonly<Record<string, ToolChecksum>>
 }
 
 /**
@@ -128,7 +128,7 @@ interface RawChecksum {
 interface RawFlavor {
   repository?: unknown | undefined
   binaryName?: unknown | undefined
-  checksums?: unknown | undefined
+  platforms?: unknown | undefined
 }
 
 interface RawToolEntry {
@@ -138,7 +138,7 @@ interface RawToolEntry {
   repository?: unknown | undefined
   binaryName?: unknown | undefined
   notes?: unknown | undefined
-  checksums?: unknown | undefined
+  platforms?: unknown | undefined
 }
 
 export function isObject(value: unknown): value is Record<string, unknown> {
@@ -169,13 +169,13 @@ export function parseChecksum(
   return { asset: r.asset, integrity: r.integrity }
 }
 
-export function parseChecksums(
+export function parsePlatforms(
   raw: unknown,
   toolName: string,
 ): Record<string, ToolChecksum> {
   if (!isObject(raw)) {
     throw new ErrorCtor(
-      `external-tools.json: tool '${toolName}' is missing a 'checksums' object`,
+      `external-tools.json: tool '${toolName}' is missing a 'platforms' object`,
     )
   }
   const out: Record<string, ToolChecksum> = {}
@@ -190,10 +190,10 @@ export function parseToolEntry(raw: unknown, toolName: string): ManifestEntry {
     return { kind: 'other', raw }
   }
   const r = raw as RawToolEntry
-  // Heuristic: if there's a top-level `checksums` object, it's a
+  // Heuristic: if there's a top-level `platforms` object, it's a
   // plain tool entry. If not, try to parse as flavored. Otherwise
   // surface as 'other' so callers can opt in.
-  if (isObject(r.checksums)) {
+  if (isObject(r.platforms)) {
     if (
       typeof r.description !== 'string' ||
       typeof r.version !== 'string' ||
@@ -211,7 +211,7 @@ export function parseToolEntry(raw: unknown, toolName: string): ManifestEntry {
         repository: r.repository,
         binaryName: typeof r.binaryName === 'string' ? r.binaryName : undefined,
         notes: ArrayIsArray(r.notes) ? (r.notes as string[]) : undefined,
-        checksums: parseChecksums(r.checksums, toolName),
+        platforms: parsePlatforms(r.platforms, toolName),
       },
     }
   }
@@ -253,7 +253,7 @@ export function tryParseFlavored(
   toolName: string,
 ): FlavoredToolEntry | undefined {
   // Flavored entries have at least one nested object that itself has
-  // a 'checksums' field — those are the flavor variants.
+  // a 'platforms' field — those are the flavor variants.
   const flavors: Record<string, ToolFlavor> = {}
   for (const key of ObjectKeys(raw)) {
     const value = raw[key]
@@ -261,7 +261,7 @@ export function tryParseFlavored(
       continue
     }
     const rf = value as RawFlavor
-    if (!isObject(rf.checksums)) {
+    if (!isObject(rf.platforms)) {
       continue
     }
     if (typeof rf.repository !== 'string') {
@@ -270,7 +270,7 @@ export function tryParseFlavored(
     flavors[key] = {
       repository: rf.repository,
       binaryName: typeof rf.binaryName === 'string' ? rf.binaryName : undefined,
-      checksums: parseChecksums(rf.checksums, `${toolName}.${key}`),
+      platforms: parsePlatforms(rf.platforms, `${toolName}.${key}`),
     }
   }
   if (ObjectKeys(flavors).length === 0) {

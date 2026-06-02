@@ -3,7 +3,7 @@
  *   `http-request/types.ts` for size hygiene.
  *
  *   - `HttpDownloadOptions` / `HttpDownloadResult` — file-download surface
- *   - `Checksums` / `FetchChecksumsOptions` — checksum-file helpers
+ *   - `ChecksumFile` / `FetchChecksumFileOptions` — checksum-file helpers
  */
 
 import type { IncomingHttpHeaders } from 'node:http'
@@ -138,23 +138,22 @@ export interface HttpDownloadOptions {
    * fail if the computed hash doesn't match. The hash should be a lowercase hex
    * string (64 characters).
    *
-   * Use `fetchChecksums()` to fetch hashes from a checksums URL, then pass the
-   * specific hash here.
+   * Use `fetchChecksumFile()` to fetch hashes from a checksums URL, then pass
+   * the specific integrity string here.
    *
    * @example
-   *   ;```ts
-   *   // Verify download integrity with direct hash
+   *   ```ts
+   *   // Verify download integrity with an SRI string
    *   await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
-   *     sha256:
-   *       'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
+   *     integrity: 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
    *   })
    *
-   *   // Verify using checksums from a URL
-   *   const checksums = await fetchChecksums(
+   *   // Verify using a fetched checksum file
+   *   const sums = await fetchChecksumFile(
    *     'https://example.com/checksums.txt',
    *   )
    *   await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
-   *     sha256: checksums['file.zip'],
+   *     integrity: sums['file.zip'],
    *   })
    *   ```
    */
@@ -193,24 +192,25 @@ export interface HttpDownloadResult {
 }
 
 /**
- * Map of filenames to their SHA256 hashes. Keys are filenames (not paths),
- * values are lowercase hex-encoded SHA256 hashes.
+ * Map of filenames to SRI integrity strings (`sha256-<base64>=`).
+ * Returned by `parseChecksumFile` / `fetchChecksumFile`; values plug
+ * directly into `httpDownload({ integrity })` or
+ * `downloadBinary({ integrity })`.
  *
  * @example
- *   ;```ts
- *   const checksums: Checksums = {
- *     'file.zip':
- *       'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
- *     'other.tar.gz': 'abc123...',
+ *   ```ts
+ *   const sums: ChecksumFile = {
+ *     'file.zip': 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
+ *     'other.tar.gz': 'sha256-...',
  *   }
  *   ```
  */
-export type Checksums = Record<string, string>
+export type ChecksumFile = Record<string, string>
 
 /**
- * Options for fetching checksums from a URL.
+ * Options for fetching a checksum file from a URL.
  */
-export interface FetchChecksumsOptions {
+export interface FetchChecksumFileOptions {
   /**
    * Custom CA certificates for TLS connections. See `HttpRequestOptions.ca` for
    * details.

@@ -14,7 +14,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { fetchChecksums } from '../../src/http-request/checksums'
+import { fetchChecksumFile } from '../../src/http-request/checksum-file'
 import { httpJson, httpText } from '../../src/http-request/node'
 import { httpDownload } from '../../src/http-request/download'
 import { httpRequest } from '../../src/http-request/request'
@@ -203,8 +203,8 @@ describe('http-request', () => {
       })
     })
 
-    it('should accept ca option on fetchChecksums without error', async () => {
-      const checksums = await fetchChecksums(
+    it('should accept ca option on fetchChecksumFile without error', async () => {
+      const checksums = await fetchChecksumFile(
         `${fixture.baseUrl}/checksums.txt`,
         {
           ca: ['-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'],

@@ -6,7 +6,7 @@ import { tryParseFlavored } from '../../../src/external-tools/manifest'
 const VALID_INTEGRITY = 'sha512-' + 'A'.repeat(86) + '=='
 
 describe.sequential('tryParseFlavored', () => {
-  test('returns undefined when no inner objects have checksums', () => {
+  test('returns undefined when no inner objects have platforms', () => {
     expect(
       tryParseFlavored({ description: 'x', version: '1' }, 'rust'),
     ).toBeUndefined()
@@ -20,7 +20,7 @@ describe.sequential('tryParseFlavored', () => {
         release: 'asset',
         free: {
           repository: 'github:socket/sfw-free',
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
           },
         },
@@ -38,7 +38,7 @@ describe.sequential('tryParseFlavored', () => {
       {
         // free has no `repository` so it is NOT recognized as a flavor.
         free: {
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
           },
         },
@@ -53,7 +53,7 @@ describe.sequential('tryParseFlavored', () => {
       {
         free: {
           repository: 'github:socket/sfw-free',
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
           },
         },
@@ -72,7 +72,7 @@ describe.sequential('tryParseFlavored', () => {
         notes: ['n1'],
         free: {
           repository: 'r',
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
           },
         },
@@ -84,19 +84,19 @@ describe.sequential('tryParseFlavored', () => {
 })
 
 describe.sequential('tryParseFlavored — skip invalid flavor candidates', () => {
-  test('skips a flavor candidate whose checksums field is not an object', () => {
+  test('skips a flavor candidate whose platforms field is not an object', () => {
     const result = tryParseFlavored(
       {
         description: 'sfw',
-        // free has bad checksums shape → skipped.
+        // free has bad platforms shape → skipped.
         free: {
           repository: 'github:socket/sfw-free',
-          checksums: 'not-an-object',
+          platforms: 'not-an-object',
         },
         // enterprise is valid → kept.
         enterprise: {
           repository: 'github:socket/sfw-enterprise',
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
           },
         },
@@ -114,7 +114,7 @@ describe.sequential('tryParseFlavored — skip invalid flavor candidates', () =>
         free: {
           repository: 'github:socket/sfw-free',
           binaryName: 42,
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
           },
         },

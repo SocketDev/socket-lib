@@ -8,7 +8,7 @@ import {
   getToolFlavor,
   isObject,
   parseChecksum,
-  parseChecksums,
+  parsePlatforms,
   parseToolEntry,
   readExternalToolsManifest,
 } from '../../../src/external-tools/manifest'
@@ -100,9 +100,9 @@ describe.sequential('parseChecksum', () => {
   })
 })
 
-describe.sequential('parseChecksums', () => {
+describe.sequential('parsePlatforms', () => {
   test('returns a map keyed by platform-arch', () => {
-    const result = parseChecksums(
+    const result = parsePlatforms(
       {
         'linux-x64': { asset: 'a.tar.gz', integrity: VALID_INTEGRITY },
         'darwin-arm64': { asset: 'b.tar.gz', integrity: VALID_INTEGRITY },
@@ -117,24 +117,24 @@ describe.sequential('parseChecksums', () => {
   })
 
   test('throws when raw is not an object (undefined)', () => {
-    expect(() => parseChecksums(undefined, 'mytool')).toThrow(
-      /missing a 'checksums' object/,
+    expect(() => parsePlatforms(undefined, 'mytool')).toThrow(
+      /missing a 'platforms' object/,
     )
   })
 
   test('throws when raw is an array', () => {
-    expect(() => parseChecksums([], 'mytool')).toThrow(
-      /missing a 'checksums' object/,
+    expect(() => parsePlatforms([], 'mytool')).toThrow(
+      /missing a 'platforms' object/,
     )
   })
 
   test('returns empty when input has no platforms', () => {
-    expect(parseChecksums({}, 'mytool')).toEqual({})
+    expect(parsePlatforms({}, 'mytool')).toEqual({})
   })
 
   test('propagates per-platform validation errors with the platform key in the message', () => {
     expect(() =>
-      parseChecksums(
+      parsePlatforms(
         { 'linux-x64': { asset: '', integrity: VALID_INTEGRITY } },
         'mytool',
       ),
@@ -157,7 +157,7 @@ describe.sequential('parseToolEntry', () => {
         version: '1.0.0',
         release: 'asset',
         repository: 'github:owner/repo',
-        checksums: {
+        platforms: {
           'linux-x64': { asset: 'a.tar.gz', integrity: VALID_INTEGRITY },
         },
       },
@@ -168,14 +168,14 @@ describe.sequential('parseToolEntry', () => {
       expect(result.entry.description).toBe('demo')
       expect(result.entry.version).toBe('1.0.0')
       expect(result.entry.repository).toBe('github:owner/repo')
-      expect(result.entry.checksums['linux-x64']!.asset).toBe('a.tar.gz')
+      expect(result.entry.platforms['linux-x64']!.asset).toBe('a.tar.gz')
     }
   })
 
-  test('returns kind="other" when checksums is present but required strings are missing', () => {
+  test('returns kind="other" when platforms is present but required strings are missing', () => {
     const result = parseToolEntry(
       {
-        checksums: { 'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY } },
+        platforms: { 'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY } },
         // missing description / version / release / repository
       },
       'demo',
@@ -192,7 +192,7 @@ describe.sequential('parseToolEntry', () => {
         repository: 'github:owner/repo',
         binaryName: 'demo',
         notes: ['note one', 'note two'],
-        checksums: {
+        platforms: {
           'linux-x64': { asset: 'a.tar.gz', integrity: VALID_INTEGRITY },
         },
       },
@@ -205,7 +205,7 @@ describe.sequential('parseToolEntry', () => {
     }
   })
 
-  test('returns kind="flavored" when checksums is missing but inner objects have checksums', () => {
+  test('returns kind="flavored" when platforms is missing but inner objects have platforms', () => {
     const result = parseToolEntry(
       {
         description: 'sfw',
@@ -213,13 +213,13 @@ describe.sequential('parseToolEntry', () => {
         release: 'asset',
         free: {
           repository: 'github:socket/sfw-free',
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
           },
         },
         enterprise: {
           repository: 'github:socket/sfw-enterprise',
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'b', integrity: VALID_INTEGRITY },
           },
         },
@@ -252,7 +252,7 @@ describe.sequential('getTool', () => {
       version: '1',
       release: 'asset',
       repository: 'r',
-      checksums: {},
+      platforms: {},
     }
     const m = manifestWith({ kind: 'tool', entry })
     expect(getTool(m, 'mytool')).toBe(entry)
@@ -278,7 +278,7 @@ describe.sequential('getTool', () => {
 
 describe.sequential('getToolFlavor', () => {
   test('returns the flavor when kind="flavored" and flavor exists', () => {
-    const flavor = { repository: 'r', checksums: {} }
+    const flavor = { repository: 'r', platforms: {} }
     const m: Manifest = {
       tools: {
         sfw: {
@@ -317,7 +317,7 @@ describe.sequential('getToolFlavor', () => {
             version: '',
             release: '',
             repository: '',
-            checksums: {},
+            platforms: {},
           },
         },
       },
@@ -341,7 +341,7 @@ describe.sequential('readExternalToolsManifest', () => {
           version: '1.0.0',
           release: 'asset',
           repository: 'github:owner/repo',
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'a.tar.gz', integrity: VALID_INTEGRITY },
           },
         },
@@ -362,7 +362,7 @@ describe.sequential('readExternalToolsManifest', () => {
           version: '1.0.0',
           release: 'asset',
           repository: 'r',
-          checksums: {
+          platforms: {
             'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
           },
         },
@@ -391,7 +391,7 @@ describe.sequential('readExternalToolsManifest', () => {
           release: 'asset',
           free: {
             repository: 'github:socket/sfw-free',
-            checksums: {
+            platforms: {
               'linux-x64': { asset: 'a', integrity: VALID_INTEGRITY },
             },
           },

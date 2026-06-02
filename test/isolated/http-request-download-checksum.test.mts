@@ -14,7 +14,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { fetchChecksums } from '../../src/http-request/checksums'
+import { fetchChecksumFile } from '../../src/http-request/checksum-file'
 import { httpDownload } from '../../src/http-request/download'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures'
@@ -63,12 +63,12 @@ describe('http-request', () => {
       }, 'httpDownload-sha256-fail-')
     })
 
-    it('should verify checksum using fetchChecksums', async () => {
+    it('should verify checksum using fetchChecksumFile', async () => {
       await runWithTempDir(async tmpDir => {
         const destPath = path.join(tmpDir, 'checksum-url.txt')
 
         // Fetch checksums first, then use the hash.
-        const checksums = await fetchChecksums(
+        const checksums = await fetchChecksumFile(
           `${fixture.baseUrl}/checksums.txt`,
         )
         expect(checksums['checksum-file']).toBeDefined()
@@ -76,7 +76,7 @@ describe('http-request', () => {
         const result = await httpDownload(
           `${fixture.baseUrl}/checksum-file`,
           destPath,
-          { sha256: checksums['checksum-file'] },
+          { integrity: checksums['checksum-file'] },
         )
 
         expect(result.path).toBe(destPath)
