@@ -100,14 +100,19 @@ export function getSocketApiTimeout(): number {
  * @returns The API token, or `undefined` if no name in the chain is set
  */
 export function getSocketApiToken(): string | undefined {
-  // socket-api-token-env: bootstrap -- this IS the canonical resolver that
-  // reads the legacy-alias fallback chain, so it legitimately names them all.
+  // This IS the canonical resolver: it reads the legacy-alias fallback chain,
+  // so it legitimately names every alias. Per-line disables (not the custom
+  // `bootstrap` marker) so the suppression is honored regardless of the
+  // cascaded oxlint-plugin version.
   return (
     getEnvValue('SOCKET_API_TOKEN') ||
+    // oxlint-disable-next-line socket/socket-api-token-env -- canonical resolver fallback chain
     getEnvValue('SOCKET_API_KEY') ||
     getEnvValue('SOCKET_CLI_API_TOKEN') ||
     getEnvValue('SOCKET_CLI_API_KEY') ||
+    // oxlint-disable-next-line socket/socket-api-token-env -- canonical resolver fallback chain
     getEnvValue('SOCKET_SECURITY_API_TOKEN') ||
+    // oxlint-disable-next-line socket/socket-api-token-env -- canonical resolver fallback chain
     getEnvValue('SOCKET_SECURITY_API_KEY')
   )
 }
