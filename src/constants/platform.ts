@@ -47,6 +47,17 @@ export function getPlatform(): Platform {
 export const DARWIN = getPlatform() === 'darwin'
 export const WIN32 = getPlatform() === 'win32'
 
+/**
+ * True when this process was launched as a Chrome (or Chromium) native
+ * messaging host. Chrome passes the extension origin URL
+ * (`chrome-extension://<id>/`) as `process.argv[2]`; no other invocation shape
+ * produces that prefix.
+ */
+export const NATIVE_MESSAGING_HOST =
+  typeof process !== 'undefined' &&
+  typeof process.argv[2] === 'string' &&
+  process.argv[2].startsWith('chrome-extension://')
+
 // File permission modes.
 export const S_IXUSR = 0o100
 export const S_IXGRP = 0o010
