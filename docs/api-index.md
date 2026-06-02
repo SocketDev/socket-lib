@@ -251,6 +251,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/env/ci`](../src/env/ci.ts)                                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/debug`](../src/env/debug.ts)                                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/github`](../src/env/github.ts)                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/env/github-status`](../src/env/github-status.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/home`](../src/env/home.ts)                                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/locale`](../src/env/locale.ts)                               | _(no description)_ |
 | [`@socketsecurity/lib-stable/env/node-auth-token`](../src/env/node-auth-token.ts)             | _(no description)_ |
