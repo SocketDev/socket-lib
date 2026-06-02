@@ -8,10 +8,12 @@ import { getNodeModule, isNodeBuiltin } from '../../../src/node/module'
 
 describe('node/module', () => {
   describe('getNodeModule', () => {
-    it('returns the node:module module', () => {
+    it('returns the node:module module in Node.js', () => {
       const mod = getNodeModule()
-      expect(typeof mod.isBuiltin).toBe('function')
-      expect(typeof mod.createRequire).toBe('function')
+      // In Node.js (where this test runs) `require` exists so mod is defined.
+      expect(mod).toBeDefined()
+      expect(typeof mod!.isBuiltin).toBe('function')
+      expect(typeof mod!.createRequire).toBe('function')
     })
 
     it('is idempotent across repeated calls', () => {

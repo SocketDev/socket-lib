@@ -6,9 +6,17 @@
 // eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeModule from 'node:module'
 
+import { IS_NODE } from '../constants/runtime'
+
 let cachedModule: typeof NodeModule | undefined
 
-export function getNodeModule(): typeof NodeModule {
+export function getNodeModule(): typeof NodeModule | undefined {
+  // Skip in browser / non-Node runtimes — `node:module` is not available
+  // there and the static require() call would throw at runtime or produce an
+  // UNRESOLVED_IMPORT warning when a browser bundler walks the call.
+  if (!IS_NODE) {
+    return undefined
+  }
   return (cachedModule ??=
     /*@__PURE__*/ require('node:module') as typeof NodeModule)
 }
@@ -18,10 +26,16 @@ export function getNodeModule(): typeof NodeModule {
  * resolves the binding; subsequent calls dispatch through the cached function
  * reference. Safe to detach — `isBuiltin` is `this`-free.
  *
+ * Returns `false` in browser / non-CJS environments where `require` is
+ * undefined — no `node:` modules are built-in there.
+ *
  * Single source of truth for "is this a Node builtin?" probes across socket-lib
  * (used by the smol-binding loaders to gate `require('node:smol-*')`).
  */
 let cachedIsBuiltin: ((name: string) => boolean) | undefined
 export function isNodeBuiltin(name: string): boolean {
-  return (cachedIsBuiltin ??= getNodeModule().isBuiltin)(name)
+  if (!IS_NODE) {
+    return false
+  }
+  return (cachedIsBuiltin ??= getNodeModule()!.isBuiltin)(name)
 }
