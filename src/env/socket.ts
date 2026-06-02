@@ -100,6 +100,8 @@ export function getSocketApiTimeout(): number {
  * @returns The API token, or `undefined` if no name in the chain is set
  */
 export function getSocketApiToken(): string | undefined {
+  // socket-api-token-env: bootstrap -- this IS the canonical resolver that
+  // reads the legacy-alias fallback chain, so it legitimately names them all.
   return (
     getEnvValue('SOCKET_API_TOKEN') ||
     getEnvValue('SOCKET_API_KEY') ||
