@@ -105,7 +105,9 @@ describe('crypto', () => {
       vi.resetModules()
     })
 
-    async function loadFallback(): Promise<HashModule> {
+    async function loadFallback(): Promise<
+      Pick<typeof HashModule, 'hash' | 'nativeHash'>
+    > {
       delete cryptoMod.hash
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- re-import after vi.resetModules to exercise the native-hash fallback.

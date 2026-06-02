@@ -1,13 +1,20 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import type { TtlCache } from '../../../src/cache/ttl/types'
+
 vi.mock(import('../../../src/github/refs-rest'), () => ({
   fetchRefSha: vi.fn(),
 }))
 vi.mock(import('../../../src/github/refs-cache'), () => ({
   clearRefCache: vi.fn(),
-  getGithubCache: vi.fn(() => ({
-    getOrFetch: vi.fn(async (_key: string, fn: () => Promise<string>) => fn()),
-  })),
+  getGithubCache: vi.fn(
+    () =>
+      ({
+        getOrFetch: vi.fn(async (_key: string, fn: () => Promise<string>) =>
+          fn(),
+        ),
+      }) as unknown as TtlCache,
+  ),
 }))
 vi.mock(import('../../../src/github/refs-graphql'), () => ({
   fetchRefShaViaGraphQL: vi.fn(),

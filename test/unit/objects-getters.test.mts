@@ -294,9 +294,9 @@ describe('objects - getters', () => {
         },
       )
       // Access the getter
-      expect((obj as Record<PropertyKey, unknown>).computed).toBe('value')
+      expect((obj as Record<PropertyKey, unknown>)['computed']).toBe('value')
       // Accessing again should still work (memoized)
-      expect((obj as Record<PropertyKey, unknown>).computed).toBe('value')
+      expect((obj as Record<PropertyKey, unknown>)['computed']).toBe('value')
     })
 
     it('should handle multiple lazy getters', () => {
@@ -309,9 +309,9 @@ describe('objects - getters', () => {
           },
         },
       )
-      expect((obj as Record<PropertyKey, unknown>).first).toBe('one')
-      expect((obj as Record<PropertyKey, unknown>).second).toBe('two')
-      expect((obj as Record<PropertyKey, unknown>).base).toBe(1)
+      expect((obj as Record<PropertyKey, unknown>)['first']).toBe('one')
+      expect((obj as Record<PropertyKey, unknown>)['second']).toBe('two')
+      expect((obj as Record<PropertyKey, unknown>)['base']).toBe(1)
     })
 
     it('should memoize lazy getter results across multiple accesses', () => {
@@ -324,8 +324,8 @@ describe('objects - getters', () => {
           },
         },
       )
-      expect((obj as Record<PropertyKey, unknown>).counter).toBe(1)
-      expect((obj as Record<PropertyKey, unknown>).counter).toBe(1) // Should return cached value
+      expect((obj as Record<PropertyKey, unknown>)['counter']).toBe(1)
+      expect((obj as Record<PropertyKey, unknown>)['counter']).toBe(1) // Should return cached value
       expect(count).toBe(1) // Function only called once
     })
 

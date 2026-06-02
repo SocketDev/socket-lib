@@ -12,6 +12,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import type * as BinaryCacheModule from '../../../src/dlx/binary-cache'
 import type * as FsSafeModule from '../../../src/fs/safe'
+import type { processLock as ProcessLockType } from '../../../src/process/lock-instance'
 
 vi.mock(import('../../../src/http-request/download'), () => ({
   httpDownload: vi.fn(),
@@ -21,7 +22,7 @@ vi.mock(import('../../../src/process/lock-instance'), () => ({
     withLock: vi.fn(async (_lockPath: string, fn: () => Promise<unknown>) =>
       fn(),
     ),
-  },
+  } as unknown as typeof ProcessLockType,
 }))
 vi.mock(import('../../../src/dlx/binary-cache'), async () => {
   const actual = await vi.importActual<typeof BinaryCacheModule>(

@@ -1,15 +1,21 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/bin/which'), () => ({
-  which:
-    vi.fn<
-      (
-        name: string,
-        opts?: { nothrow?: boolean | undefined },
-      ) => Promise<string | undefined>
-    >(),
-  whichSync: vi.fn(),
-}))
+import type * as whichModule from '../../../../src/bin/which'
+
+vi.mock(
+  import('../../../../src/bin/which'),
+  () =>
+    ({
+      which:
+        vi.fn<
+          (
+            name: string,
+            opts?: { nothrow?: boolean | undefined },
+          ) => Promise<string | undefined>
+        >(),
+      whichSync: vi.fn(),
+    }) as unknown as typeof whichModule,
+)
 
 async function loadFresh() {
   const whichMod = await import('../../../../src/bin/which')

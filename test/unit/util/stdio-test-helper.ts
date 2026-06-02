@@ -45,23 +45,30 @@ export function setupStdioTest(
   if (!stream.cursorTo) {
     mutableStream['cursorTo'] = vi.fn()
   }
-  context.cursorToSpy = vi
-    .spyOn(stream as never, 'cursorTo' as never)
-    .mockImplementation(() => {}) as unknown as Spy
+  context.cursorToSpy = (
+    vi.spyOn(stream as never, 'cursorTo' as never) as unknown as ReturnType<
+      typeof vi.fn
+    >
+  ).mockImplementation(() => {}) as unknown as Spy
 
   if (!stream.clearLine) {
     mutableStream['clearLine'] = vi.fn()
   }
-  context.clearLineSpy = vi
-    .spyOn(stream as never, 'clearLine' as never)
-    .mockImplementation(() => {}) as unknown as Spy
+  context.clearLineSpy = (
+    vi.spyOn(stream as never, 'clearLine' as never) as unknown as ReturnType<
+      typeof vi.fn
+    >
+  ).mockImplementation(() => {}) as unknown as Spy
 
   if (!stream.clearScreenDown) {
     mutableStream['clearScreenDown'] = vi.fn()
   }
-  context.clearScreenDownSpy = vi
-    .spyOn(stream as never, 'clearScreenDown' as never)
-    .mockImplementation(() => {}) as unknown as Spy
+  context.clearScreenDownSpy = (
+    vi.spyOn(
+      stream as never,
+      'clearScreenDown' as never,
+    ) as unknown as ReturnType<typeof vi.fn>
+  ).mockImplementation(() => {}) as unknown as Spy
 
   return context
 }

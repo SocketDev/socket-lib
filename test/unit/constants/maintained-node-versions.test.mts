@@ -139,7 +139,7 @@ describe('maintained-node-versions', () => {
       expect(() => {
         // Testing runtime immutability (readonly properties)
         const obj = maintainedNodeVersions as unknown as Record<string, string>
-        obj.current = '99.99.99'
+        obj['current'] = '99.99.99'
       }).toThrow()
     })
   })

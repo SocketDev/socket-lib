@@ -9,17 +9,23 @@ import { EventEmitter } from 'node:events'
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import type * as HttpRequestInternal from '../../../src/http-request/_internal'
+
 const { httpStub, httpsStub } = vi.hoisted(() => ({
   httpStub: { request: vi.fn() },
   httpsStub: { request: vi.fn() },
 }))
 
-vi.mock(import('../../../src/http-request/_internal'), () => ({
-  getHttp: () => httpStub,
-  getHttps: () => httpsStub,
-  getCrypto: () => require('node:crypto'),
-  getFs: () => require('node:fs'),
-}))
+vi.mock(
+  import('../../../src/http-request/_internal'),
+  () =>
+    ({
+      getHttp: () => httpStub,
+      getHttps: () => httpsStub,
+      getCrypto: () => require('node:crypto'),
+      getFs: () => require('node:fs'),
+    }) as unknown as typeof HttpRequestInternal,
+)
 
 interface FakeClientRequest extends EventEmitter {
   end: ReturnType<typeof vi.fn>

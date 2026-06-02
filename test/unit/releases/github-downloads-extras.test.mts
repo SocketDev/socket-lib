@@ -61,7 +61,7 @@ vi.mock(import('../../../src/http-request/download'), async importOriginal => {
         writeFileSync(destPath, 'fake-binary-content')
         return { ok: true, status: 200, path: destPath }
       },
-    ),
+    ) as unknown as typeof httpDownload,
   }
 })
 

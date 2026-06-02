@@ -13,7 +13,6 @@
 import {
   CHANGELOG_MD,
   DOT_PACKAGE_LOCK_JSON,
-  ESLINT_CONFIG_JS,
   EXTENSIONS_JSON,
   GITIGNORE,
   LICENSE,
@@ -109,17 +108,6 @@ describe('paths/filenames', () => {
     })
   })
 
-  describe('ESLINT_CONFIG_JS', () => {
-    it('should be eslint.config.js', () => {
-      // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- asserting the literal value of the exported ESLINT_CONFIG_JS filename constant, not a real ESLint config reference.
-      expect(ESLINT_CONFIG_JS).toBe('eslint.config.js')
-    })
-
-    it('should end with .js', () => {
-      expect(ESLINT_CONFIG_JS.endsWith('.js')).toBe(true)
-    })
-  })
-
   describe('GITIGNORE', () => {
     it('should be .gitignore', () => {
       expect(GITIGNORE).toBe('.gitignore')
@@ -156,7 +144,6 @@ describe('paths/filenames', () => {
         CHANGELOG_MD,
         MANIFEST_JSON,
         EXTENSIONS_JSON,
-        ESLINT_CONFIG_JS,
         GITIGNORE,
         DOT_PACKAGE_LOCK_JSON,
       ]
@@ -179,7 +166,6 @@ describe('paths/filenames', () => {
         CHANGELOG_MD,
         MANIFEST_JSON,
         EXTENSIONS_JSON,
-        ESLINT_CONFIG_JS,
         GITIGNORE,
         DOT_PACKAGE_LOCK_JSON,
       ]
