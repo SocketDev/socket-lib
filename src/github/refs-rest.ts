@@ -10,7 +10,7 @@ import { errorMessage } from '../errors/message'
 
 import { ErrorCtor } from '../primordials/error'
 
-import { fetchGitHub } from './fetch'
+import { fetchGitHub } from './request'
 import { fetchRefShaViaGraphQL } from './refs-graphql'
 import { GITHUB_API_BASE_URL } from './constants'
 import { GitHubEmptyBodyError } from './errors'

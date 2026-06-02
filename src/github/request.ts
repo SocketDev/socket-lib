@@ -17,6 +17,8 @@
  */
 
 import { errorMessage } from '../errors/message'
+import { probeGitHubStatus } from '../env/github-status'
+// oxlint-disable-next-line socket/no-platform-specific-import -- node-only module; http-request/request is the correct internal path.
 import { httpRequest } from '../http-request/request'
 import { DateCtor } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'
@@ -121,6 +123,29 @@ export async function fetchGitHub<T = unknown>(
         error.resetTime = resetDate
         throw error
       }
+    }
+    // For 5xx responses probe githubstatus.com so the error message tells
+    // the caller whether it's a GitHub-side outage or something local.
+    if (response.status >= 500) {
+      /* c8 ignore start - External status probe, non-deterministic */
+      const ghStatus = await probeGitHubStatus(4000).catch(() => undefined)
+      /* c8 ignore stop */
+      let statusNote = ''
+      if (ghStatus) {
+        if (ghStatus.status === 'unknown') {
+          statusNote = ' (githubstatus.com unreachable — could not confirm platform health)'
+        } else if (ghStatus.degraded) {
+          const componentLines = ghStatus.components
+            .map(c => `  ${c.name}: ${c.status}`)
+            .join('\n')
+          statusNote = `\nGitHub platform status at time of failure:\n${componentLines}`
+        } else {
+          statusNote = '\nGitHub platform status: all monitored components operational — this may be a transient issue or a request-specific error.'
+        }
+      }
+      throw new ErrorCtor(
+        `GitHub API error ${response.status}: ${response.statusText}.${statusNote}`,
+      )
     }
     throw new ErrorCtor(
       `GitHub API error ${response.status}: ${response.statusText}`,

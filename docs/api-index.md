@@ -409,12 +409,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 | --------------------------------------------------------------------------------- | ------------------ |
 | [`@socketsecurity/lib-stable/github/constants`](../src/github/constants.ts)       | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/errors`](../src/github/errors.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/fetch`](../src/github/fetch.ts)               | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/ghsa`](../src/github/ghsa.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/refs`](../src/github/refs.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/refs-cache`](../src/github/refs-cache.ts)     | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/refs-graphql`](../src/github/refs-graphql.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/refs-rest`](../src/github/refs-rest.ts)       | _(no description)_ |
+| [`@socketsecurity/lib-stable/github/request`](../src/github/request.ts)           | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/token`](../src/github/token.ts)               | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/types`](../src/github/types.ts)               | _(no description)_ |
 

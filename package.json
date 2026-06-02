@@ -1480,11 +1480,6 @@
       "types": "./dist/github/errors.d.ts",
       "default": "./dist/github/errors.js"
     },
-    "./github/fetch": {
-      "source": "./src/github/fetch.ts",
-      "types": "./dist/github/fetch.d.ts",
-      "default": "./dist/github/fetch.js"
-    },
     "./github/ghsa": {
       "source": "./src/github/ghsa.ts",
       "types": "./dist/github/ghsa.d.ts",
@@ -1509,6 +1504,11 @@
       "source": "./src/github/refs-rest.ts",
       "types": "./dist/github/refs-rest.d.ts",
       "default": "./dist/github/refs-rest.js"
+    },
+    "./github/request": {
+      "source": "./src/github/request.ts",
+      "types": "./dist/github/request.d.ts",
+      "default": "./dist/github/request.js"
     },
     "./github/token": {
       "source": "./src/github/token.ts",
