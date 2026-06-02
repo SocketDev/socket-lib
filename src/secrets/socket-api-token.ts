@@ -2,15 +2,16 @@
  * @file Convenience helper for reading the Socket API token from the canonical
  *   env → keychain precedence order. Centralizes two constants every fleet
  *   consumer would otherwise hard-code: the keychain service name
- *   (`socket-cli`) and the env-var + account fallback list (`SOCKET_API_TOKEN`
- *   canonical, `SOCKET_API_KEY` legacy alias). Consumers like firewall and
- *   wheelhouse hooks call `readSocketApiToken()` instead of redoing the
- *   `resolve({ service, accounts })` boilerplate.
+ *   (`socketsecurity`) and the env-var + account fallback list
+ *   (`SOCKET_API_TOKEN` canonical, `SOCKET_API_KEY` legacy alias). Consumers
+ *   like firewall and wheelhouse hooks call `readSocketApiToken()` instead of
+ *   redoing the `resolve({ service, accounts })` boilerplate.
  */
 
 import { resolve, resolveSync } from './find'
 
-const SOCKET_CLI_SERVICE = 'socket-cli'
+const SOCKET_SERVICE = 'socketsecurity'
+const SOCKET_SERVICE_LEGACY = 'socket-cli'
 // The canonical fallback list the resolver reads (SOCKET_API_TOKEN first, then
 // the SOCKET_API_KEY legacy alias) — the one place the alias legitimately
 // appears as a literal.
@@ -33,21 +34,33 @@ export interface ReadSocketApiTokenOptions {
 export async function readSocketApiToken(
   options?: ReadSocketApiTokenOptions | undefined,
 ): Promise<string | undefined> {
-  const result = await resolve({
-    service: SOCKET_CLI_SERVICE,
-    accounts: TOKEN_ACCOUNTS,
-    allowEnvOnly: options?.allowEnvOnly,
-  })
+  const result =
+    (await resolve({
+      service: SOCKET_SERVICE,
+      accounts: TOKEN_ACCOUNTS,
+      allowEnvOnly: options?.allowEnvOnly,
+    })) ??
+    (await resolve({
+      service: SOCKET_SERVICE_LEGACY,
+      accounts: TOKEN_ACCOUNTS,
+      allowEnvOnly: options?.allowEnvOnly,
+    }))
   return result?.value
 }
 
 export function readSocketApiTokenSync(
   options?: ReadSocketApiTokenOptions | undefined,
 ): string | undefined {
-  const result = resolveSync({
-    service: SOCKET_CLI_SERVICE,
-    accounts: TOKEN_ACCOUNTS,
-    allowEnvOnly: options?.allowEnvOnly,
-  })
+  const result =
+    resolveSync({
+      service: SOCKET_SERVICE,
+      accounts: TOKEN_ACCOUNTS,
+      allowEnvOnly: options?.allowEnvOnly,
+    }) ??
+    resolveSync({
+      service: SOCKET_SERVICE_LEGACY,
+      accounts: TOKEN_ACCOUNTS,
+      allowEnvOnly: options?.allowEnvOnly,
+    })
   return result?.value
 }

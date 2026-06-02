@@ -48,9 +48,7 @@ export async function handleOne(): Promise<void> {
     } else {
       writeMessage({
         error:
-          'Socket API token not found. Set SOCKET_API_TOKEN in your ' +
-          'environment or store it in the OS keychain under service ' +
-          '"socket-cli", account "SOCKET_API_TOKEN".',
+          'Socket API token not found. Set SOCKET_API_TOKEN in your environment.',
       })
     }
     return
@@ -85,16 +83,6 @@ export function readExact(length: number): Promise<Buffer> {
   })
 }
 
-export function writeMessage(obj: unknown): void {
-  const payload = Buffer.from(JSON.stringify(obj), 'utf8')
-  const header = Buffer.allocUnsafe(4)
-  header.writeUInt32LE(payload.length, 0)
-  // Native messaging protocol requires raw binary writes to stdout.
-  // Chrome treats any non-protocol byte as a framing error, so the logger
-  // must not be used here. socket-hook: allow console
-  process.stdout.write(Buffer.concat([header, payload])) // socket-hook: allow console
-}
-
 export async function runHost(): Promise<void> {
   // Defense in depth: the installer already gates on Node version, but a
   // user could switch Node versions (e.g. via nvm) between install and the
@@ -115,4 +103,14 @@ export async function runHost(): Promise<void> {
       process.exit(0)
     }
   }
+}
+
+export function writeMessage(obj: unknown): void {
+  const payload = Buffer.from(JSON.stringify(obj), 'utf8')
+  const header = Buffer.allocUnsafe(4)
+  header.writeUInt32LE(payload.length, 0)
+  // Native messaging protocol requires raw binary writes to stdout.
+  // Chrome treats any non-protocol byte as a framing error, so the logger
+  // must not be used here. socket-hook: allow console
+  process.stdout.write(Buffer.concat([header, payload])) // socket-hook: allow console
 }
