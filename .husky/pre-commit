@@ -41,7 +41,20 @@ if [ -z "${DISABLE_PRECOMMIT_TEST}" ]; then
   # Repos whose `pnpm test` is bare vitest without a wrapper need a
   # local override (skills/.husky/pre-commit pre-filters with
   # `git diff --cached --name-only` then runs `pnpm test`).
-  if [ -n "${DISABLE_PRECOMMIT_LINT}" ]; then
+  #
+  # When the staged diff is test-only — i.e. every staged file lives
+  # under test/ or matches *.test.* / *.spec.* — pass --fast even when
+  # DISABLE_PRECOMMIT_LINT is unset. Test-only commits don't need the
+  # embedded format/lint pre-check (oxlint --staged already ran above),
+  # and skipping it shaves several seconds off the wait. The
+  # filter-from-git pipeline matches the same suffixes scripts/test.mts
+  # uses internally.
+  STAGED_NON_TEST=$(git diff --cached --name-only --diff-filter=ACMR \
+    | grep -Ev '^(test/|.*\.(test|spec)\.[cm]?[jt]sx?$)' || true)
+  if [ -z "${STAGED_NON_TEST}" ] && [ -n "$(git diff --cached --name-only)" ]; then
+    echo "Test-only commit — running pnpm test --staged --fast"
+    pnpm test --staged --fast
+  elif [ -n "${DISABLE_PRECOMMIT_LINT}" ]; then
     pnpm test --staged --fast
   else
     pnpm test --staged
