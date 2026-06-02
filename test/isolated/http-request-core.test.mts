@@ -12,8 +12,17 @@
 
 import http from 'node:http'
 
-import { getSocketCallerUserAgent } from '@socketsecurity/lib-stable/http-request/user-agent'
 import { describe, expect, it } from 'vitest'
+
+// Import from the local src under test, NOT @socketsecurity/lib-stable.
+// lib-stable bakes INLINED_LIB_VERSION into SOCKET_LIB_VERSION at publish
+// time; the local src/ falls back to '0.0.0' at test time because nothing
+// inlines it. Mixing the two yields a mismatched user-agent assertion
+// (lib-stable reports 6.0.6, local httpRequest sends 0.0.0). The assertion is a
+// self-consistency check — the header is built by the local httpRequest, so the
+// expected value must come from the SAME local module, not the -stable snapshot.
+// oxlint-disable-next-line socket/no-src-import-in-test-expect -- self-consistency check against the local httpRequest's own UA; -stable would mismatch the local SOCKET_LIB_VERSION.
+import { getSocketCallerUserAgent } from '../../src/http-request/user-agent'
 
 import { httpRequest } from '../../src/http-request/request'
 
