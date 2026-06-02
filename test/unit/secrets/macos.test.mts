@@ -19,15 +19,17 @@ import {
   vi,
 } from 'vitest'
 
+import type * as SpawnChild from '@socketsecurity/lib-stable/process/spawn/child'
+
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawn: vi.fn(),
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock('@socketsecurity/lib-stable/process/spawn/child', async () => {
-  const actual = await vi.importActual<
-    typeof import('@socketsecurity/lib-stable/process/spawn/child')
-  >('@socketsecurity/lib-stable/process/spawn/child')
+vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), async () => {
+  const actual = await vi.importActual<typeof SpawnChild>(
+    '@socketsecurity/lib-stable/process/spawn/child',
+  )
   return {
     ...actual,
     default: actual,
@@ -120,20 +122,24 @@ afterAll(async () => {
   if (process.platform !== 'darwin') {
     return
   }
-  const { spawn: realSpawn } = await vi.importActual<
-    typeof import('node:child_process')
-  >('node:child_process')
+  // Minimal shape for the real spawn used by the keychain cleanup below;
+  // avoids a node:child_process type import (prefer-async-spawn-guard) and the
+  // forbidden import() type annotation.
+  const { spawn: realSpawn } = (await vi.importActual(
+    'node:child_process',
+  )) as { spawn: (...args: unknown[]) => { on: (...a: unknown[]) => void } }
   await Promise.all(
-    ALL_TEST_SERVICES.map(svc =>
-      new Promise<void>(resolve => {
-        const child = realSpawn(
-          '/usr/bin/security',
-          ['delete-generic-password', '-s', svc, '-a', TEST_ACCOUNT],
-          { stdio: 'ignore' },
-        )
-        child.on('close', () => resolve())
-        child.on('error', () => resolve())
-      }),
+    ALL_TEST_SERVICES.map(
+      svc =>
+        new Promise<void>(resolve => {
+          const child = realSpawn(
+            '/usr/bin/security',
+            ['delete-generic-password', '-s', svc, '-a', TEST_ACCOUNT],
+            { stdio: 'ignore' },
+          )
+          child.on('close', () => resolve())
+          child.on('error', () => resolve())
+        }),
     ),
   )
 })
@@ -223,12 +229,7 @@ describe.sequential('secrets/macos — writeMacOS', () => {
     // keychain points back at THIS test file unambiguously. The mock above
     // intercepts before any real `security` call; the afterAll() at the top
     // of this file is a defense-in-depth cleanup in case the mock regresses.
-    await writeMacOS(
-      TEST_SERVICE_WRITE,
-      TEST_ACCOUNT,
-      TEST_VALUE,
-      TEST_LABEL,
-    )
+    await writeMacOS(TEST_SERVICE_WRITE, TEST_ACCOUNT, TEST_VALUE, TEST_LABEL)
     expect(capturedArgs).toContain('add-generic-password')
     expect(capturedArgs).toContain('-U')
     expect(capturedArgs).toContain('-A')

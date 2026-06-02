@@ -1,3 +1,4 @@
+/* max-file-lines: legitimate — one cohesive keychain-secrets suite (platform dispatch + get/set/delete across darwin/linux/win32); the per-platform cases share heavy mock scaffolding and read best together. */
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import type * as nodeOs from 'node:os'

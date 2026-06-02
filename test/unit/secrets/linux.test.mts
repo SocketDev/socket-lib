@@ -21,15 +21,17 @@ import {
   vi,
 } from 'vitest'
 
+import type * as SpawnChild from '@socketsecurity/lib-stable/process/spawn/child'
+
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawn: vi.fn(),
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock('@socketsecurity/lib-stable/process/spawn/child', async () => {
-  const actual = await vi.importActual<
-    typeof import('@socketsecurity/lib-stable/process/spawn/child')
-  >('@socketsecurity/lib-stable/process/spawn/child')
+vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), async () => {
+  const actual = await vi.importActual<typeof SpawnChild>(
+    '@socketsecurity/lib-stable/process/spawn/child',
+  )
   return {
     ...actual,
     default: actual,
@@ -131,20 +133,24 @@ afterAll(async () => {
   if (process.platform !== 'linux') {
     return
   }
-  const { spawn: realSpawn } = await vi.importActual<
-    typeof import('node:child_process')
-  >('node:child_process')
+  // Minimal shape for the real spawn used by the keychain cleanup below;
+  // avoids a node:child_process type import (prefer-async-spawn-guard) and the
+  // forbidden import() type annotation.
+  const { spawn: realSpawn } = (await vi.importActual(
+    'node:child_process',
+  )) as { spawn: (...args: unknown[]) => { on: (...a: unknown[]) => void } }
   await Promise.all(
-    ALL_TEST_SERVICES.map(svc =>
-      new Promise<void>(resolve => {
-        const child = realSpawn(
-          'secret-tool',
-          ['clear', 'service', svc, 'account', TEST_ACCOUNT],
-          { stdio: 'ignore' },
-        )
-        child.on('close', () => resolve())
-        child.on('error', () => resolve())
-      }),
+    ALL_TEST_SERVICES.map(
+      svc =>
+        new Promise<void>(resolve => {
+          const child = realSpawn(
+            'secret-tool',
+            ['clear', 'service', svc, 'account', TEST_ACCOUNT],
+            { stdio: 'ignore' },
+          )
+          child.on('close', () => resolve())
+          child.on('error', () => resolve())
+        }),
     ),
   )
 })
