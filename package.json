@@ -2231,6 +2231,11 @@
       "types": "./dist/process/spawn/errors.d.ts",
       "default": "./dist/process/spawn/errors.js"
     },
+    "./process/spawn/kill-tree": {
+      "source": "./src/process/spawn/kill-tree.ts",
+      "types": "./dist/process/spawn/kill-tree.d.ts",
+      "default": "./dist/process/spawn/kill-tree.js"
+    },
     "./process/spawn/stdio": {
       "source": "./src/process/spawn/stdio.ts",
       "types": "./dist/process/spawn/stdio.d.ts",
