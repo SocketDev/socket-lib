@@ -21,7 +21,7 @@ concurrency:
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@ced2f2d1f02c217b10ca7adecb84b3fe05dbf750 # main (2026-06-02)
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@0917ae539233e73930a1dc5c271cc7954c684fae # main (2026-06-02)
     with:
       test-script: 'pnpm run build && pnpm exec vitest --config .config/repo/vitest.config.mts run'
     # Pass the Socket API token so the install step runs sfw-enterprise,
@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@ced2f2d1f02c217b10ca7adecb84b3fe05dbf750 # main (2026-06-02)
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@0917ae539233e73930a1dc5c271cc7954c684fae # main (2026-06-02)
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN }}
       - name: Build project
