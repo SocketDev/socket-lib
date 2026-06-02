@@ -1,16 +1,22 @@
 /**
  * @file Grammatical list joiners via `Intl.ListFormat` — Oxford-comma aware and
- *   locale-correct. `joinAnd` ("a, b, and c"), `joinOr` ("a, b, or c").
+ *   locale-correct. `joinList` (generalized), `joinAnd` ("a, b, and c"),
+ *   `joinOr` ("a, b, or c").
  */
 
 import { getConjunctionFormatter, getDisjunctionFormatter } from './_internal'
+
+export type JoinListOptions =
+  | { conjunction: 'and' | 'or'; list?: undefined }
+  | { list: true; conjunction?: undefined }
+  | Record<string, never>
 
 /**
  * Join array elements with proper "and" conjunction formatting.
  *
  * Formats an array of strings into a grammatically correct list using "and" as
  * the conjunction. Uses `Intl.ListFormat` for proper English formatting with
- * Oxford comma support.
+ * Oxford comma support. Delegates to `joinList`.
  *
  * @example
  *   ```ts
@@ -40,8 +46,44 @@ import { getConjunctionFormatter, getDisjunctionFormatter } from './_internal'
  *
  * @returns Formatted string with proper "and" conjunction
  */
-export function joinAnd(arr: string[] | readonly string[]): string {
-  return getConjunctionFormatter().format(arr)
+export function joinAnd(arr: readonly string[]): string {
+  return joinList(arr, { conjunction: 'and' })
+}
+
+/**
+ * Generalized list joiner covering bare join, comma-list, and
+ * conjunction/disjunction via `Intl.ListFormat`.
+ *
+ * - No options / empty object: bare concatenation (`items.map(String).join('')`)
+ * - `{ list: true }`: comma-separated (`'a, b, c'`), no conjunction
+ * - `{ conjunction: 'and' }`: Oxford-comma "and" list (`'a, b, and c'`)
+ * - `{ conjunction: 'or' }`: Oxford-comma "or" list (`'a, b, or c'`)
+ *
+ * Each item is coerced via `String()` before formatting.
+ *
+ * @param items - Items to join (can be readonly, any type)
+ * @param options - Formatting options (optional)
+ *
+ * @returns Formatted string
+ */
+export function joinList(
+  items: readonly unknown[],
+  options?: JoinListOptions,
+): string {
+  if (
+    options &&
+    'conjunction' in options &&
+    options.conjunction !== undefined
+  ) {
+    const strs = items.map(String)
+    return options.conjunction === 'and'
+      ? getConjunctionFormatter().format(strs)
+      : getDisjunctionFormatter().format(strs)
+  }
+  if (options && 'list' in options && options.list === true) {
+    return items.map(String).join(', ')
+  }
+  return items.map(String).join('')
 }
 
 /**
@@ -49,7 +91,7 @@ export function joinAnd(arr: string[] | readonly string[]): string {
  *
  * Formats an array of strings into a grammatically correct list using "or" as
  * the disjunction. Uses `Intl.ListFormat` for proper English formatting with
- * Oxford comma support.
+ * Oxford comma support. Delegates to `joinList`.
  *
  * @example
  *   ```ts
@@ -79,6 +121,6 @@ export function joinAnd(arr: string[] | readonly string[]): string {
  *
  * @returns Formatted string with proper "or" disjunction
  */
-export function joinOr(arr: string[] | readonly string[]): string {
-  return getDisjunctionFormatter().format(arr)
+export function joinOr(arr: readonly string[]): string {
+  return joinList(arr, { conjunction: 'or' })
 }

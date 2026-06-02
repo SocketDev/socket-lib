@@ -16,7 +16,7 @@
  */
 
 import { arrayChunk } from '../../src/arrays/chunk'
-import { joinAnd, joinOr } from '../../src/arrays/join'
+import { joinAnd, joinList, joinOr } from '../../src/arrays/join'
 import { isArray } from '../../src/arrays/predicates'
 import { arrayUnique } from '../../src/arrays/unique'
 import { describe, expect, it } from 'vitest'
@@ -144,6 +144,87 @@ describe('arrays', () => {
     it('should return true for array-like typed arrays', () => {
       expect(isArray(new Uint8Array(0))).toBe(false)
       expect(isArray(new Int32Array(0))).toBe(false)
+    })
+  })
+
+  describe('joinList', () => {
+    it('bare join (no options): concatenates items', () => {
+      expect(joinList(['dis', 'regard'])).toBe('disregard')
+    })
+
+    it('bare join (empty object): concatenates items', () => {
+      expect(joinList(['dis', 'regard'], {})).toBe('disregard')
+    })
+
+    it('list: three items comma-separated', () => {
+      expect(joinList(['a', 'b', 'c'], { list: true })).toBe('a, b, c')
+    })
+
+    it('list: two items comma-separated', () => {
+      expect(joinList(['a', 'b'], { list: true })).toBe('a, b')
+    })
+
+    it('list: single item', () => {
+      expect(joinList(['a'], { list: true })).toBe('a')
+    })
+
+    it('list: empty array', () => {
+      expect(joinList([], { list: true })).toBe('')
+    })
+
+    it('conjunction and: three items', () => {
+      expect(joinList(['a', 'b', 'c'], { conjunction: 'and' })).toBe(
+        'a, b, and c',
+      )
+    })
+
+    it('conjunction and: two items', () => {
+      expect(joinList(['a', 'b'], { conjunction: 'and' })).toBe('a and b')
+    })
+
+    it('conjunction or: three items', () => {
+      expect(joinList(['a', 'b', 'c'], { conjunction: 'or' })).toBe(
+        'a, b, or c',
+      )
+    })
+
+    it('conjunction or: two items', () => {
+      expect(joinList(['a', 'b'], { conjunction: 'or' })).toBe('a or b')
+    })
+
+    it('single item: all modes return item', () => {
+      expect(joinList(['x'])).toBe('x')
+      expect(joinList(['x'], { list: true })).toBe('x')
+      expect(joinList(['x'], { conjunction: 'and' })).toBe('x')
+      expect(joinList(['x'], { conjunction: 'or' })).toBe('x')
+    })
+
+    it('empty array: all modes return empty string', () => {
+      expect(joinList([])).toBe('')
+      expect(joinList([], { list: true })).toBe('')
+      expect(joinList([], { conjunction: 'and' })).toBe('')
+      expect(joinList([], { conjunction: 'or' })).toBe('')
+    })
+
+    it('non-string items with conjunction', () => {
+      expect(joinList([1, 2, 3], { conjunction: 'and' })).toBe('1, 2, and 3')
+    })
+
+    it('non-string items bare join', () => {
+      expect(joinList([1, 2, 3])).toBe('123')
+    })
+
+    it('works with readonly arrays and const assertions', () => {
+      const arr = ['a', 'b', 'c'] as const
+      expect(joinList(arr, { conjunction: 'and' })).toBe('a, b, and c')
+    })
+
+    it('joinAnd delegates to joinList', () => {
+      expect(joinAnd(['a', 'b'])).toBe('a and b')
+    })
+
+    it('joinOr delegates to joinList', () => {
+      expect(joinOr(['a', 'b'])).toBe('a or b')
     })
   })
 
