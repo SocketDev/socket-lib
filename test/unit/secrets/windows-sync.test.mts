@@ -3,25 +3,21 @@ import path from 'node:path'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { harness, loadFresh, setupHarness } from './windows-test-harness.mts'
-
-import type * as ChildProcess from 'node:child_process'
+import {
+  harness,
+  loadFresh,
+  setupHarness,
+  spawnChildMockFactory,
+} from './windows-test-harness.mts'
 
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawn: vi.fn(),
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock(import('node:child_process'), async () => {
-  const actual =
-    await vi.importActual<typeof ChildProcess>('node:child_process')
-  return {
-    ...actual,
-    default: actual,
-    spawn: mockSpawn,
-    spawnSync: mockSpawnSync,
-  }
-})
+vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), () =>
+  spawnChildMockFactory(mockSpawn, mockSpawnSync),
+)
 
 setupHarness({ mockSpawn, mockSpawnSync })
 

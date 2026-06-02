@@ -49,7 +49,14 @@ const IS_CI = process.env['CI'] === '1' || process.env['CI'] === 'true'
 // round-trip test passes on local Windows installs but flakes on CI runners.
 // Skip the live-keychain tests in that environment; the mocked branches
 // elsewhere cover the code paths.
-const SKIP_KEYCHAIN_LIVE = IS_WINDOWS && IS_CI
+//
+// SOCKET_SKIP_KEYCHAIN_LIVE_TESTS is an explicit opt-out for any non-interactive
+// environment where the OS keychain would prompt for access (e.g. a locked
+// login keychain in a headless/automation shell) — there the `security`(1)
+// round-trip blocks on a GUI auth dialog and times out rather than failing fast.
+const SKIP_KEYCHAIN_LIVE =
+  (IS_WINDOWS && IS_CI) ||
+  process.env['SOCKET_SKIP_KEYCHAIN_LIVE_TESTS'] === '1'
 const BACKEND_OK = !SKIP_KEYCHAIN_LIVE && getBackendAvailability().available
 
 export function rng(): string {
@@ -317,13 +324,18 @@ describe('secrets/find', () => {
     },
   )
 
-  it('returns undefined when neither env nor keychain has the value', async () => {
-    const result = await resolve({
-      service: `nope-${rng()}`,
-      accounts: [`NOPE_${rng()}`],
-    })
-    expect(result).toBeUndefined()
-  })
+  // Gated on BACKEND_OK: with no env value this falls through to a live
+  // keychain lookup that blocks on an auth prompt in non-interactive envs.
+  it.skipIf(!BACKEND_OK)(
+    'returns undefined when neither env nor keychain has the value',
+    async () => {
+      const result = await resolve({
+        service: `nope-${rng()}`,
+        accounts: [`NOPE_${rng()}`],
+      })
+      expect(result).toBeUndefined()
+    },
+  )
 
   it('tries accounts in order; first non-empty env-var wins', async () => {
     const a = `CAN_${rng()}`
@@ -340,19 +352,25 @@ describe('secrets/find', () => {
     }
   })
 
-  it('empty / whitespace env-var values do NOT count as a hit', async () => {
-    const account = `EMPTY_${rng()}`
-    process.env[account] = '   '
-    try {
-      const result = await resolve({
-        service: `nope-${rng()}`,
-        accounts: [account],
-      })
-      expect(result).toBeUndefined()
-    } finally {
-      delete process.env[account]
-    }
-  })
+  // Gated on BACKEND_OK: an empty/whitespace env value makes resolve() fall
+  // through to a live keychain lookup for a nonexistent service, which blocks
+  // on a keychain auth prompt in non-interactive environments.
+  it.skipIf(!BACKEND_OK)(
+    'empty / whitespace env-var values do NOT count as a hit',
+    async () => {
+      const account = `EMPTY_${rng()}`
+      process.env[account] = '   '
+      try {
+        const result = await resolve({
+          service: `nope-${rng()}`,
+          accounts: [account],
+        })
+        expect(result).toBeUndefined()
+      } finally {
+        delete process.env[account]
+      }
+    },
+  )
 
   it('resolveSync mirrors resolve()', () => {
     const account = `SYNC_${rng()}`
