@@ -19,10 +19,8 @@ import { BufferFrom } from './primordials/buffer'
 
 import { TypeErrorCtor } from './primordials/error'
 
-import {
-  StringPrototypeSlice,
-  StringPrototypeStartsWith,
-} from './primordials/string'
+import { hexToSsri, ssriToHex } from './ssri/convert'
+import { parseSsri } from './ssri/parse'
 /**
  * Tagged union representing an expected hash.
  *
@@ -67,8 +65,10 @@ export interface ComputedHashes {
   checksum: string
 }
 
-const INTEGRITY_PREFIX = 'sha512-'
-const INTEGRITY_BODY_RE = /^[A-Za-z0-9+/=]+$/
+// SRI accepts sha256 / sha384 / sha512 by spec — the algorithm prefix is
+// part of the wire format, not a fleet convention. Restrict to those three
+// (the W3C-blessed set) rather than parsing arbitrary `<algo>-<base64>`.
+const INTEGRITY_RE = /^sha(?:256|384|512)-[A-Za-z0-9+/]+=*$/
 const CHECKSUM_RE = /^[a-f0-9]{64}$/i
 
 /**
@@ -86,11 +86,7 @@ export function isChecksumString(s: string): boolean {
 }
 
 export function isIntegrityString(s: string): boolean {
-  if (!StringPrototypeStartsWith(s, INTEGRITY_PREFIX)) {
-    return false
-  }
-  const body = StringPrototypeSlice(s, INTEGRITY_PREFIX.length)
-  return body.length > 0 && INTEGRITY_BODY_RE.test(body)
+  return INTEGRITY_RE.test(s)
 }
 
 /**
@@ -140,6 +136,74 @@ export function normalizeHash(spec: HashSpec): NormalizedHash {
   throw new TypeErrorCtor(
     `Unrecognized hash format. Expected SRI integrity ("sha512-<base64>") or sha256 hex (64 hex chars), got: ${spec}`,
   )
+}
+
+/**
+ * Convert a {@link HashSpec} to hex checksum form (`<64 hex chars>`).
+ *
+ * - Hex input is returned as-is (idempotent).
+ * - SRI input is unwrapped via {@link ssriToHex}. Only `sha256-` produces a
+ *   64-hex-char output that fits {@link isChecksumString}; `sha384`/`sha512`
+ *   SRI will throw — checksums are sha256-by-convention in the fleet.
+ *
+ * @example
+ *   ;```typescript
+ *   toChecksum('sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs=')
+ *   // '3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b'
+ *
+ *   toChecksum('3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b')
+ *   // '3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b' (idempotent)
+ *   ```
+ *
+ * @throws TypeError when the input is neither a valid SRI nor a valid hex
+ *   checksum, or when an SRI input uses a non-sha256 algorithm.
+ */
+export function toChecksum(spec: HashSpec): string {
+  const n = normalizeHash(spec)
+  if (n.type === 'checksum') {
+    return n.value
+  }
+  const { algorithm } = parseSsri(n.value)
+  if (algorithm !== 'sha256') {
+    throw new TypeErrorCtor(
+      `Cannot convert ${algorithm} integrity to a 64-hex-char checksum — checksums are sha256-only by fleet convention.`,
+    )
+  }
+  return ssriToHex(n.value)
+}
+
+/**
+ * Convert a {@link HashSpec} to SRI integrity form
+ * (`sha(256|384|512)-<base64>`).
+ *
+ * - SRI input is returned as-is (idempotent — call this on user-supplied data
+ *   without first sniffing the format).
+ * - Hex checksum input is wrapped via {@link hexToSsri} using `algorithm`
+ *   (defaults to `sha256` — the most common release-asset shape).
+ * - Object form is unwrapped first so `{ type: 'checksum', value: '<hex>' }`
+ *   converts the same way.
+ *
+ * @example
+ *   ;```typescript
+ *   toIntegrity(
+ *     '3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b',
+ *   )
+ *   // 'sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs='
+ *
+ *   toIntegrity('sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs=')
+ *   // 'sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs=' (idempotent)
+ *   ```
+ *
+ * @throws TypeError when the input is neither a valid SRI nor a valid hex
+ *   checksum, or when an explicit object's value doesn't match its declared
+ *   type.
+ */
+export function toIntegrity(spec: HashSpec, algorithm = 'sha256'): string {
+  const n = normalizeHash(spec)
+  if (n.type === 'integrity') {
+    return n.value
+  }
+  return hexToSsri(n.value, algorithm)
 }
 
 /**

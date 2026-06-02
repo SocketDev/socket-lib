@@ -8,6 +8,8 @@ import {
   DlxHashMismatchError,
   computeHashes,
   normalizeHash,
+  toChecksum,
+  toIntegrity,
   verifyHash,
 } from '../../src/integrity'
 
@@ -40,11 +42,17 @@ describe('integrity', () => {
       expect(result).toEqual({ type: 'checksum', value: hex })
     })
 
-    it('rejects sha256 SRI (only sha512 supported)', () => {
-      expect(() => normalizeHash('sha256-abc==')).toThrow(TypeError)
+    it('accepts sha256 SRI (W3C SRI permits sha256/sha384/sha512)', () => {
+      const sri = 'sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs='
+      expect(normalizeHash(sri)).toEqual({ type: 'integrity', value: sri })
     })
 
-    it('rejects sha1 SRI (insecure)', () => {
+    it('accepts sha384 SRI (W3C SRI permits sha256/sha384/sha512)', () => {
+      const sri = 'sha384-' + 'A'.repeat(64) + '='
+      expect(normalizeHash(sri)).toEqual({ type: 'integrity', value: sri })
+    })
+
+    it('rejects sha1 SRI (insecure, outside W3C SRI set)', () => {
       expect(() => normalizeHash('sha1-abc==')).toThrow(TypeError)
     })
 
@@ -152,6 +160,72 @@ describe('integrity', () => {
         expect(err.expected).toEqual(expected)
         expect(err.actual).toEqual(computed)
       }
+    })
+  })
+
+  describe('toIntegrity', () => {
+    // Known-correct pairs: hex digest of the actual pnpm v10 darwin-arm64
+    // tarball next to its `sha256-<base64>` SRI form.
+    const knownHex =
+      '3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b'
+    const knownSri = 'sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs='
+
+    it('converts hex checksum to sha256 SRI by default', () => {
+      expect(toIntegrity(knownHex)).toBe(knownSri)
+    })
+
+    it('is idempotent on SRI input', () => {
+      expect(toIntegrity(knownSri)).toBe(knownSri)
+    })
+
+    it('accepts an explicit checksum object', () => {
+      expect(toIntegrity({ type: 'checksum', value: knownHex })).toBe(knownSri)
+    })
+
+    it('accepts an explicit integrity object', () => {
+      expect(toIntegrity({ type: 'integrity', value: knownSri })).toBe(knownSri)
+    })
+
+    it('honors algorithm override for the hex path', () => {
+      // 'sha384' algorithm should be embedded in the prefix; the body is
+      // still the base64 of the input hex (not a real sha384 digest).
+      const got = toIntegrity(knownHex, 'sha384')
+      expect(got.startsWith('sha384-')).toBe(true)
+    })
+
+    it('rejects garbage strings', () => {
+      expect(() => toIntegrity('not-a-hash')).toThrow(TypeError)
+    })
+  })
+
+  describe('toChecksum', () => {
+    const knownHex =
+      '3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b'
+    const knownSri = 'sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs='
+
+    it('converts sha256 SRI to hex', () => {
+      expect(toChecksum(knownSri)).toBe(knownHex)
+    })
+
+    it('is idempotent on hex input', () => {
+      expect(toChecksum(knownHex)).toBe(knownHex)
+    })
+
+    it('accepts an explicit integrity object', () => {
+      expect(toChecksum({ type: 'integrity', value: knownSri })).toBe(knownHex)
+    })
+
+    it('accepts an explicit checksum object', () => {
+      expect(toChecksum({ type: 'checksum', value: knownHex })).toBe(knownHex)
+    })
+
+    it('rejects sha512 SRI (checksums are sha256-only)', () => {
+      const sri = 'sha512-' + 'A'.repeat(86) + '=='
+      expect(() => toChecksum(sri)).toThrow(TypeError)
+    })
+
+    it('round-trips: toIntegrity(toChecksum(sri)) === sri', () => {
+      expect(toIntegrity(toChecksum(knownSri))).toBe(knownSri)
     })
   })
 })
