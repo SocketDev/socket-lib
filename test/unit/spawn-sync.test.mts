@@ -10,6 +10,7 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
+import { WIN32 } from '../../src/constants/platform'
 import { spawnSync } from '../../src/process/spawn/child'
 
 import { itUnixOnly, itWindowsOnly } from './util/skip-helpers'
@@ -125,9 +126,17 @@ describe('spawnSync', () => {
     expect(Array.isArray(result.output)).toBe(true)
   })
 
+  // Fleet pattern: pass `shell: WIN32` (not `shell: true`). On Windows
+  // they're equivalent; on Unix `shell: WIN32 === false` is the right
+  // value (no shell wrapping for the unreachable POSIX branch of a
+  // Windows-only test). `shell: true` on Windows CI is a known gotcha —
+  // GitHub Actions windows-latest runners mishandle the `.cmd` + `shell:
+  // true` combo unpredictably (status 1 on one attempt, 10s timeout on
+  // the next, same SHA). Every fleet src/scripts call site uses `shell:
+  // WIN32`; src/eco/npm/npm/exec.ts is the canonical reference.
   itWindowsOnly('should handle Windows script extensions on Windows', () => {
     const result = spawnSync('npm.cmd', ['--version'], {
-      shell: true,
+      shell: WIN32,
     })
     expect(result.status).toBe(0)
   })
