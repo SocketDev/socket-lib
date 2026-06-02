@@ -75,7 +75,7 @@ describe.sequential('ttl-cache — timing', () => {
 
         await shortCache.clear()
       },
-      tolerantTimeout(8_000),
+      tolerantTimeout(8000),
     )
 
     it('should not expire entries before TTL', async () => {
@@ -133,7 +133,7 @@ describe.sequential('ttl-cache — timing', () => {
 
         await shortCache.clear()
       },
-      tolerantTimeout(8_000),
+      tolerantTimeout(8000),
     )
   })
 

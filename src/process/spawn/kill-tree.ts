@@ -78,12 +78,17 @@ export function killProcessTree(
   try {
     if (WIN32) {
       // No POSIX process groups on Windows; taskkill /T walks the tree.
-      getNodeChildProcess().spawnSync(
+      // taskkill never throws — it sets status. 0 = killed (or at least
+      // dispatched a kill); 128 = "process not found" (ERROR_PROC_NOT_FOUND).
+      // Treat non-zero as "nothing to do" to match the POSIX ESRCH branch.
+      const res = getNodeChildProcess().spawnSync(
         'taskkill',
         ['/T', '/F', '/pid', String(pid)],
         { stdio: 'ignore' },
       )
-    } else if (detached) {
+      return res.status === 0
+    }
+    if (detached) {
       // Negative pid → the whole process group led by the detached child.
       process.kill(-pid, signal)
     } else {
