@@ -5,21 +5,11 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.0.7](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.7) - 2026-06-01
-
-### Added
-
-- **`http-request` decompresses `gzip` / `br` response bodies.** Buffered requests advertise `Accept-Encoding: gzip, br` and now decode the body by its `Content-Encoding` before resolving. 6.0.6 sent the header but never decompressed, so a compressed response reached callers as raw deflated bytes. Streamed requests (`stream: true`, e.g. `httpDownload`) skip the header so piped-to-disk payloads stay raw and checksum cleanly. Callers can override with `'identity'`.
-- **`crypto/hash` blob content-address helpers.** `blobHashOf(bytes)` returns Socket's content-addressed blob hash (`Q` + base64url(sha256)), and `verifyBlobHash(hash, bytes)` throws when bytes don't hash to the expected address. Both build on the fast one-shot `hash()`; the `S` file-stream discriminator verifies against the same digest body. Lets blob consumers (the SDK, MCP server) verify integrity against one canonical implementation instead of re-deriving the scheme.
-
-### Fixed
-
-- **`external-tools/skillspector` pipx detection on Windows.** The PATH-tier resolver normalizes the resolved binary path with `normalizePath` and matches a forward-slash-only `pipx/venvs/` pattern, instead of `path.normalize` plus a dual-separator regex. On Windows the old form left backslashes in the path and missed pipx-installed binaries, tagging them `source: 'path'` rather than `source: 'pipx'`.
-
 ## [6.0.6](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.6) - 2026-06-01
 
 ### Added
 
+- **`http-request` now negotiates and decompresses `gzip` / `br` response bodies.** Buffered requests advertise `Accept-Encoding: gzip, br` and transparently decompress responses by `Content-Encoding`. Node's HTTP client does neither, so a compressed Socket API response previously reached callers as raw deflated bytes. Streamed requests (`stream: true`, e.g. `httpDownload`) intentionally skip the `Accept-Encoding` header so piped-to-disk payloads stay raw and checksum cleanly. Callers can override (e.g. `'identity'`).
 - **`http-request/headers` — `basicAuthHeader(token)`.** Builds the Socket API Basic-auth shape (token-as-username, empty password) so call sites stop hand-rolling `Basic ${base64(token + ':')}`.
 - **`http-request` retry instrumentation.** Adds `Retry-Attempt`, `Retry-Max`, and `Retry-After` request headers on retried attempts so server-side logs can correlate a retry chain.
 - **`prim` CLI bin.** `prim` is now published as a `bin` entry (`dist/bin/prim.cjs`); installs from `@socketsecurity/lib` make `npx prim` work. Also new in this release: `prim --diff` for unified line-diffs in dry-run mode, multi-hop cycle detection in `validateRewrites`, and a two-phase apply with cross-batch validation.

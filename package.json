@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "6.0.7",
+  "version": "6.0.6",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
     "Socket.dev",
@@ -425,6 +425,11 @@
       "types": "./dist/constants/platform.d.ts",
       "default": "./dist/constants/platform.js"
     },
+    "./constants/runtime": {
+      "source": "./src/constants/runtime.ts",
+      "types": "./dist/constants/runtime.d.ts",
+      "default": "./dist/constants/runtime.js"
+    },
     "./constants/sentinels": {
       "source": "./src/constants/sentinels.ts",
       "types": "./dist/constants/sentinels.d.ts",
@@ -829,6 +834,11 @@
       "source": "./src/env/node-env.ts",
       "types": "./dist/env/node-env.d.ts",
       "default": "./dist/env/node-env.js"
+    },
+    "./env/node-version-managers": {
+      "source": "./src/env/node-version-managers.ts",
+      "types": "./dist/env/node-version-managers.d.ts",
+      "default": "./dist/env/node-version-managers.js"
     },
     "./env/npm": {
       "source": "./src/env/npm.ts",
@@ -1821,6 +1831,31 @@
       "types": "./dist/memo/weak.d.ts",
       "default": "./dist/memo/weak.js"
     },
+    "./native-messaging": {
+      "source": "./src/native-messaging/index.ts",
+      "types": "./dist/native-messaging/index.d.ts",
+      "default": "./dist/native-messaging/index.js"
+    },
+    "./native-messaging/host": {
+      "source": "./src/native-messaging/host.ts",
+      "types": "./dist/native-messaging/host.d.ts",
+      "default": "./dist/native-messaging/host.js"
+    },
+    "./native-messaging/install": {
+      "source": "./src/native-messaging/install.ts",
+      "types": "./dist/native-messaging/install.d.ts",
+      "default": "./dist/native-messaging/install.js"
+    },
+    "./native-messaging/rate-limit": {
+      "source": "./src/native-messaging/rate-limit.ts",
+      "types": "./dist/native-messaging/rate-limit.d.ts",
+      "default": "./dist/native-messaging/rate-limit.js"
+    },
+    "./native-messaging/run": {
+      "source": "./src/native-messaging/run.ts",
+      "types": "./dist/native-messaging/run.d.ts",
+      "default": "./dist/native-messaging/run.js"
+    },
     "./node/async-hooks": {
       "source": "./src/node/async-hooks.ts",
       "types": "./dist/node/async-hooks.d.ts",
@@ -2280,6 +2315,11 @@
       "source": "./src/promises/retry.ts",
       "types": "./dist/promises/retry.d.ts",
       "default": "./dist/promises/retry.js"
+    },
+    "./promises/timers": {
+      "source": "./src/promises/timers.ts",
+      "types": "./dist/promises/timers.d.ts",
+      "default": "./dist/promises/timers.js"
     },
     "./promises/types": {
       "source": "./src/promises/types.ts",

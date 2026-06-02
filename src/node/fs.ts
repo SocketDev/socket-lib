@@ -14,9 +14,13 @@ import { IS_NODE } from '../constants/runtime'
 
 let cachedFs: typeof NodeFs | undefined
 
-export function getNodeFs(): typeof NodeFs | undefined {
+export function getNodeFs(): typeof NodeFs {
+  // Non-Node path returns undefined cast so bundlers still see no
+  // static `require` and tree-shake the module; Node callers (the
+  // entire `src/` tree) always traverse the `IS_NODE` branch and
+  // get the real module — so the type narrowing is sound in practice.
   if (!IS_NODE) {
-    return undefined
+    return undefined as unknown as typeof NodeFs
   }
   return (cachedFs ??= /*@__PURE__*/ require('node:fs') as typeof NodeFs)
 }
