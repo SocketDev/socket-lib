@@ -5,16 +5,39 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.0.7](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.7) - 2026-06-01
+## [6.0.7](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.7) - 2026-06-02
 
 ### Added
 
 - **`http-request` decompresses `gzip` / `br` response bodies.** Buffered requests advertise `Accept-Encoding: gzip, br` and now decode the body by its `Content-Encoding` before resolving. 6.0.6 sent the header but never decompressed, so a compressed response reached callers as raw deflated bytes. Streamed requests (`stream: true`, e.g. `httpDownload`) skip the header so piped-to-disk payloads stay raw and checksum cleanly. Callers can override with `'identity'`.
 - **`crypto/hash` blob content-address helpers.** `blobHashOf(bytes)` returns Socket's content-addressed blob hash (`Q` + base64url(sha256)), and `verifyBlobHash(hash, bytes)` throws when bytes don't hash to the expected address. Both build on the fast one-shot `hash()`; the `S` file-stream discriminator verifies against the same digest body. Lets blob consumers (the SDK, MCP server) verify integrity against one canonical implementation instead of re-deriving the scheme.
+- **`integrity` — unified checksum/integrity surface.** `checksumToIntegrity(hex, algorithm?)` and `integrityToChecksum(sri)` convert between the two named hash flavors and are idempotent on the destination format. `isIntegrity(s)` and `isChecksum(s)` are the predicates. `parseIntegrity(s)` returns `{ algorithm, body }` for the SRI structure. Replaces the `src/ssri/` directory (`hexToSsri`, `ssriToHex`, `isValidHex`, `isValidSsri`, `parseSsri`). `isIntegrity` now accepts the full W3C SRI set (`sha256` / `sha384` / `sha512`) — the previous predicate hardcoded `sha512` only.
+- **`process/spawn/kill-tree` — cross-platform process-tree termination.** `killProcessTree(target, { detached?, signal? })` walks and signals the whole descendant tree of a `pid` or `ChildProcess`: POSIX uses `process.kill(-pid, signal)` against the detached child's process group; Windows shells out to `taskkill /T /F /pid <pid>`. `isProcessAlive(pid)` probes liveness with `process.kill(pid, 0)`. Both helpers are best-effort and never throw — `ESRCH` or `EPERM` returns `false` so cleanup kills can't mask the caller's control flow.
+- **`arrays/joinList` — generalized Intl list joiner.** `joinList(items, { with: 'and' | 'or' })` wraps `Intl.ListFormat` for narrow conjunction/disjunction joins. `joinAnd` and `joinOr` keep their old call shapes but delegate to `joinList`.
+- **`primordials/intl` — frozen `Intl` constructor captures.** `IntlListFormat`, `IntlPluralRules`, `IntlCollator`, `IntlDateTimeFormat`, `IntlNumberFormat`, `IntlRelativeTimeFormat`, `IntlSegmenter`, and `IntlLocale` are pinned at module load. Lets internal callers reach Intl without paying a property-lookup cost on every call and without being affected by userland prototype tampering.
+- **`constants/node` — `supportsNodeStripTypes()` + `supportsNodeStripTypesDefault()`.** Two feature-detection helpers for runtimes that strip TypeScript types: stable-with-flag in Node 22.6 (`--strip-types`, accepted alias `--experimental-strip-types`), default-on in Node 24.
+- **`env/node-version-managers` — detect the active Node manager + emit upgrade hint.** `detectActiveNodeManager()` resolves to one of `'nvm' | 'fnm' | 'volta' | 'asdf' | 'n' | 'corepack' | 'system'` by inspecting `process.execPath` then falling back to manager env vars. `nodeManagerUpgradeHint(manager, version)` returns the exact one-liner to install/activate (`nvm install <v> && nvm use <v>`, `volta install node@<v>`, etc.).
+- **`env/github-status` — `probeGitHubStatus()` GitHub platform health probe.** Queries githubstatus.com and returns the aggregate health of Actions, Git Operations, and API Requests. Fails open (`status: 'unknown'`) when the probe itself fails. Used to augment GitHub API 5xx error messages with per-component status.
+- **`native-messaging` — Chrome native messaging host scaffold.** New `src/native-messaging/` subpath provides `installNativeHost({ allowedOrigins, wrapperDir? })`, which writes the per-OS `dev.socket.trusted_publisher_host.json` manifest plus a length-prefixed-protocol stdin/stdout loop (`runHost()`). Includes a token-bucket rate limiter (capacity 60, refill 1 s, LRU maxKeys 32) keyed on the Chrome extension origin, and enforces `production: true` to reject `allowedOrigins: ['*']`.
+- **`secrets/compare` — `compareSecrets(a, b)` constant-time comparison.** Wraps `crypto.timingSafeEqual` so every secret comparison in the codebase runs through one helper that refuses to short-circuit on the first byte mismatch. Handles string + Buffer mixed inputs and length mismatch (returns false instead of throwing).
 
 ### Fixed
 
 - **`external-tools/skillspector` pipx detection on Windows.** The PATH-tier resolver normalizes the resolved binary path with `normalizePath` and matches a forward-slash-only `pipx/venvs/` pattern, instead of `path.normalize` plus a dual-separator regex. On Windows the old form left backslashes in the path and missed pipx-installed binaries, tagging them `source: 'path'` rather than `source: 'pipx'`.
+- **`arrays/joinAnd` + `joinOr` — restore `string[] | readonly string[]` on params.** The 6.0.6 refactor narrowed the type to plain `string[]` and broke callers passing readonly arrays.
+- **`secrets/keychain` service rename `socket-cli` → `socketsecurity`.** Reads check the new name first then fall back to the legacy `socket-cli` slot, so existing installs keep finding their token. Writes go to the new name only.
+- **`github/request` 5xx errors include GitHub platform status.** When GitHub returns a 5xx response, the error message now appends a per-component status snapshot from githubstatus.com (4s probe, fails open). Degraded components appear as a bulleted list; all-operational adds a note that the failure may be transient.
+- **`debug` — namespace `SOCKET_DEBUG` values enable debug output.** `envAsBoolean(getSocketDebug())` returned false for `SOCKET_DEBUG=*` or `SOCKET_DEBUG=socket:foo` — those aren't boolean literals, so debug output was silently suppressed for the common namespace-selection shape. The new `isSocketDebugEnabled()` helper treats any non-empty value other than `0`/`false`/`no` (case-insensitive) as enabled.
+- **`node/*.ts` IS_NODE guards — narrow return types to non-undefined.** The IS_NODE rollout shipped `T|undefined` return types on all 14 node/* lazy-loaders and `getTimers()`, causing 347 TS18048 errors across 60 call sites and blocking `pnpm install` (prepare runs tsgo). Node-only call sites never hit the non-Node branch at runtime; cast updated to `T` to match.
+
+### Changed
+
+- **`github/fetch.ts` renamed to `github/request.ts`.** The old name collided with the browser global `fetch` and misnamed an authenticated REST layer. Public export updated from `./github/fetch` to `./github/request`.
+- **`http-request/http-request.ts` barrel deleted.** This misnamed file just re-exported `node.ts`. The `package.json` exports map IS the platform split — bundlers select `node` vs `browser` via the `"browser"` condition. The `./http-request/http-request` export has been removed; callers use `./http-request`.
+
+### Removed
+
+- **`@socketsecurity/lib/ssri/{convert,parse,validate}` package exports.** Folded into `@socketsecurity/lib/integrity` (see Added). No fleet consumers were using the `ssri` subpath imports — verified by grep across socket-* fleet repos.
 
 ## [6.0.6](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.6) - 2026-06-01
 
