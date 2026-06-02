@@ -4,30 +4,23 @@ import { Writable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
+import { WIN32 } from '../../../src/constants/platform'
 import {
   harness,
   loadFresh,
   makeFakeChild,
   setupHarness,
+  spawnChildMockFactory,
 } from './windows-test-harness.mts'
-
-import type * as ChildProcess from 'node:child_process'
 
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawn: vi.fn(),
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock(import('node:child_process'), async () => {
-  const actual =
-    await vi.importActual<typeof ChildProcess>('node:child_process')
-  return {
-    ...actual,
-    default: actual,
-    spawn: mockSpawn,
-    spawnSync: mockSpawnSync,
-  }
-})
+vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), () =>
+  spawnChildMockFactory(mockSpawn, mockSpawnSync),
+)
 
 setupHarness({ mockSpawn, mockSpawnSync })
 
@@ -101,11 +94,15 @@ describe.sequential('secrets/windows — validateKeychainComponent', () => {
   })
 })
 
-describe.sequential('secrets/windows — getDpapiFilePath', () => {
+// %APPDATA% / AppData\Roaming path composition is Windows-specific: the source
+// resolves it with Windows path semantics, so the join only matches a host
+// path.join() on win32. Run these on the windows-latest matrix leg only —
+// on Linux/macOS the separators diverge (CI Linux failure: "joins APPDATA …").
+describe.skipIf(!WIN32).sequential('secrets/windows — getDpapiFilePath', () => {
   test('joins APPDATA / service / account.enc', async () => {
     const { getDpapiFilePath } = await loadFresh()
     expect(getDpapiFilePath('socket-cli', 'SOCKET_API_TOKEN')).toBe(
-      path.join(harness.tmpRoot, 'socket-cli', 'SOCKET_API_KEY.enc'),
+      path.join(harness.tmpRoot, 'socket-cli', 'SOCKET_API_TOKEN.enc'),
     )
   })
 
@@ -158,7 +155,7 @@ describe.sequential('secrets/windows — runPsAsync', () => {
     const stdinWrites: string[] = []
     mockSpawn.mockImplementationOnce(() => {
       const c = makeFakeChild({ exitCode: 0 })
-      c.stdin = new Writable({
+      c.process.stdin = new Writable({
         write(chunk, _e, cb) {
           stdinWrites.push(String(chunk))
           cb()
@@ -275,7 +272,7 @@ describe.sequential('secrets/windows — writeDpapi', () => {
     mockSpawn.mockImplementationOnce(() => {
       const c = makeFakeChild({ exitCode: 0 })
       const writes: string[] = []
-      c.stdin = new Writable({
+      c.process.stdin = new Writable({
         write(chunk, _e, cb) {
           writes.push(String(chunk))
           cb()
