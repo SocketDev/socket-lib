@@ -2883,8 +2883,8 @@
     "cover": "node scripts/repo/cover.mts",
     "dev": "node scripts/build/cli.mts --watch",
     "fix": "node scripts/fleet/fix.mts",
-    "format": "oxfmt -c .config/fleet/oxfmtrc.json --ignore-path .config/fleet/.prettierignore --write .",
-    "format:check": "oxfmt -c .config/fleet/oxfmtrc.json --ignore-path .config/fleet/.prettierignore --check .",
+    "format": "oxfmt -c .config/fleet/oxfmtrc.json --write .",
+    "format:check": "oxfmt -c .config/fleet/oxfmtrc.json --check .",
     "lint": "node scripts/fleet/lint.mts",
     "prim": "node tools/prim/bin/prim.mts",
     "security": "node scripts/fleet/security.mts",
@@ -2984,9 +2984,9 @@
   "engines": {
     "node": ">=22",
     "npm": ">=11.16.0",
-    "pnpm": ">=11.5.0"
+    "pnpm": ">=11.5.1"
   },
-  "packageManager": "pnpm@11.5.0",
+  "packageManager": "pnpm@11.5.1",
   "allowScripts": {
     "cpu-features": false,
     "esbuild": true,

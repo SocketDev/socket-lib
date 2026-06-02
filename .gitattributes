@@ -57,10 +57,7 @@ packages/build-infra/lib/release-checksums/core.mts linguist-generated=true
 packages/build-infra/lib/release-checksums/producer.mts linguist-generated=true
 packages/build-infra/release-assets.schema.json linguist-generated=true
 scripts/fleet linguist-generated=true
-test/_shared/fleet/lib/env.mts linguist-generated=true
-test/_shared/fleet/lib/platform.mts linguist-generated=true
-test/_shared/fleet/lib/tags.mts linguist-generated=true
-test/_shared/fleet/lib/timing.mts linguist-generated=true
+test/_shared/fleet/lib linguist-generated=true
 
 # Vendored binary blobs (no diff, no merge, no text-mode).
 .claude/hooks/_shared/acorn/acorn.wasm binary
