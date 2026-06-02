@@ -9,7 +9,7 @@
  *     helpers live in github.test.mts and github-ghsa-url.test.mts.
  */
 
-import { fetchGitHub } from '../../src/github/fetch'
+import { fetchGitHub } from '../../src/github/request'
 import { clearRefCache, resolveRefToSha } from '../../src/github/refs'
 import { resetEnv, setEnv } from '../../src/env/rewire'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
