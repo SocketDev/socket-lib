@@ -16,6 +16,10 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createTtlCache } from '../../../src/cache/ttl/store'
 import { resetEnv, setEnv } from '../../../src/env/rewire'
 import { invalidateCaches } from '../../../src/paths/rewire'
+import {
+  tolerantSleep,
+  tolerantTimeout,
+} from '../../_shared/fleet/timing.mts'
 
 describe.sequential('ttl-cache — timing', () => {
   let cache: ReturnType<typeof createTtlCache>
@@ -49,29 +53,30 @@ describe.sequential('ttl-cache — timing', () => {
   })
 
   describe('TTL expiration', () => {
-    it('should expire entries after TTL', async () => {
-      // TTL test windows must be wide enough to survive Windows
-      // file-system latency and the vitest worker dispatch overhead
-      // (which spikes on Windows runners — observed up to ~2s under
-      // load on GitHub-hosted windows-latest). Earlier 500ms / 700ms
-      // values flaked there with a "Timeout waiting for worker to
-      // respond" hang; the 2000ms / 3000ms pair leaves enough margin
-      // that the TTL is observably expired before we re-read.
-      const shortCache = createTtlCache({
-        ttl: 2000,
-        prefix: 'expiry-test',
-      })
+    it(
+      'should expire entries after TTL',
+      async () => {
+        // 2000ms TTL + tolerantSleep(3000) wait. `tolerantSleep` keeps
+        // the 3000ms budget on Unix and bumps to 15000ms on Windows so
+        // file-system mtime caching + worker-dispatch overhead don't
+        // hide the expiry. Without that buffer, Windows runners see
+        // the entry still present at re-read time.
+        const shortCache = createTtlCache({
+          ttl: 2000,
+          prefix: 'expiry-test',
+        })
 
-      await shortCache.set('key', 'value')
-      expect(await shortCache.get<string>('key')).toBe('value')
+        await shortCache.set('key', 'value')
+        expect(await shortCache.get<string>('key')).toBe('value')
 
-      // Wait for TTL to expire (3000ms > 2000ms TTL).
-      await new Promise(resolve => setTimeout(resolve, 3000))
+        await new Promise(resolve => setTimeout(resolve, tolerantSleep(3000)))
 
-      expect(await shortCache.get('key')).toBeUndefined()
+        expect(await shortCache.get('key')).toBeUndefined()
 
-      await shortCache.clear()
-    }, 30_000)
+        await shortCache.clear()
+      },
+      tolerantTimeout(8_000),
+    )
 
     it('should not expire entries before TTL', async () => {
       const longCache = createTtlCache({
@@ -107,25 +112,29 @@ describe.sequential('ttl-cache — timing', () => {
       await refreshCache.clear()
     })
 
-    it('should expire entries and return undefined after TTL (memoized)', async () => {
-      // 2000ms TTL + 3000ms wait — see the timing rationale in the
-      // sibling `should expire entries after TTL` test above. The
-      // memoized variant has the same Windows flakiness profile
-      // because `get()` still hits cacache.get on cold lookups.
-      const shortCache = createTtlCache({
-        ttl: 2000,
-        prefix: 'short-memo-cache',
-        memoize: true,
-      })
+    it(
+      'should expire entries and return undefined after TTL (memoized)',
+      async () => {
+        // 2000ms TTL + tolerantSleep(3000) — same shape as the sibling
+        // `should expire entries after TTL`. The memoized variant has
+        // the same Windows flakiness profile because `get()` still
+        // hits cacache.get on cold lookups.
+        const shortCache = createTtlCache({
+          ttl: 2000,
+          prefix: 'short-memo-cache',
+          memoize: true,
+        })
 
-      await shortCache.set('key', 'value')
-      expect(await shortCache.get<string>('key')).toBe('value')
+        await shortCache.set('key', 'value')
+        expect(await shortCache.get<string>('key')).toBe('value')
 
-      await new Promise(resolve => setTimeout(resolve, 3000))
-      expect(await shortCache.get<string>('key')).toBeUndefined()
+        await new Promise(resolve => setTimeout(resolve, tolerantSleep(3000)))
+        expect(await shortCache.get<string>('key')).toBeUndefined()
 
-      await shortCache.clear()
-    }, 30_000)
+        await shortCache.clear()
+      },
+      tolerantTimeout(8_000),
+    )
   })
 
   describe('memoization', () => {
