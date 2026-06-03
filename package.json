@@ -425,6 +425,11 @@
       "types": "./dist/constants/platform.d.ts",
       "default": "./dist/constants/platform.js"
     },
+    "./constants/runtime": {
+      "source": "./src/constants/runtime.ts",
+      "types": "./dist/constants/runtime.d.ts",
+      "default": "./dist/constants/runtime.js"
+    },
     "./constants/sentinels": {
       "source": "./src/constants/sentinels.ts",
       "types": "./dist/constants/sentinels.d.ts",
@@ -810,6 +815,11 @@
       "types": "./dist/env/github.d.ts",
       "default": "./dist/env/github.js"
     },
+    "./env/github-status": {
+      "source": "./src/env/github-status.ts",
+      "types": "./dist/env/github-status.d.ts",
+      "default": "./dist/env/github-status.js"
+    },
     "./env/home": {
       "source": "./src/env/home.ts",
       "types": "./dist/env/home.d.ts",
@@ -829,6 +839,11 @@
       "source": "./src/env/node-env.ts",
       "types": "./dist/env/node-env.d.ts",
       "default": "./dist/env/node-env.js"
+    },
+    "./env/node-version-managers": {
+      "source": "./src/env/node-version-managers.ts",
+      "types": "./dist/env/node-version-managers.d.ts",
+      "default": "./dist/env/node-version-managers.js"
     },
     "./env/npm": {
       "source": "./src/env/npm.ts",
@@ -919,16 +934,6 @@
       "source": "./src/env/xdg.ts",
       "types": "./dist/env/xdg.d.ts",
       "default": "./dist/env/xdg.js"
-    },
-    "./env/github-status": {
-      "source": "./src/env/github-status.ts",
-      "types": "./dist/env/github-status.d.ts",
-      "default": "./dist/env/github-status.js"
-    },
-    "./env/node-version-managers": {
-      "source": "./src/env/node-version-managers.ts",
-      "types": "./dist/env/node-version-managers.d.ts",
-      "default": "./dist/env/node-version-managers.js"
     },
     "./errors": {
       "browser": {
@@ -1475,11 +1480,6 @@
       "types": "./dist/github/errors.d.ts",
       "default": "./dist/github/errors.js"
     },
-    "./github/request": {
-      "source": "./src/github/request.ts",
-      "types": "./dist/github/request.d.ts",
-      "default": "./dist/github/request.js"
-    },
     "./github/ghsa": {
       "source": "./src/github/ghsa.ts",
       "types": "./dist/github/ghsa.d.ts",
@@ -1504,6 +1504,11 @@
       "source": "./src/github/refs-rest.ts",
       "types": "./dist/github/refs-rest.d.ts",
       "default": "./dist/github/refs-rest.js"
+    },
+    "./github/request": {
+      "source": "./src/github/request.ts",
+      "types": "./dist/github/request.d.ts",
+      "default": "./dist/github/request.js"
     },
     "./github/token": {
       "source": "./src/github/token.ts",
@@ -2315,6 +2320,11 @@
       "source": "./src/promises/retry.ts",
       "types": "./dist/promises/retry.d.ts",
       "default": "./dist/promises/retry.js"
+    },
+    "./promises/timers": {
+      "source": "./src/promises/timers.ts",
+      "types": "./dist/promises/timers.d.ts",
+      "default": "./dist/promises/timers.js"
     },
     "./promises/types": {
       "source": "./src/promises/types.ts",

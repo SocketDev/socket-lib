@@ -409,7 +409,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | --------------------------------------------------------------------------------- | ------------------ |
 | [`@socketsecurity/lib-stable/github/constants`](../src/github/constants.ts)       | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/errors`](../src/github/errors.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/github/fetch`](../src/github/fetch.ts)               | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/ghsa`](../src/github/ghsa.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/refs`](../src/github/refs.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/github/refs-cache`](../src/github/refs-cache.ts)     | _(no description)_ |
@@ -435,7 +434,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | --------------------------------------------------------------------------------------------------- | ------------------ |
 | [`@socketsecurity/lib-stable/http-request/browser`](../src/http-request/browser.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/browser-fetch`](../src/http-request/browser-fetch.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/http-request/checksums`](../src/http-request/checksums.ts)             | _(no description)_ |
+| [`@socketsecurity/lib-stable/http-request/checksum-file`](../src/http-request/checksum-file.ts)     | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/download`](../src/http-request/download.ts)               | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/download-types`](../src/http-request/download-types.ts)   | _(no description)_ |
 | [`@socketsecurity/lib-stable/http-request/errors`](../src/http-request/errors.ts)                   | _(no description)_ |
