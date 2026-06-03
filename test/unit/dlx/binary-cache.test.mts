@@ -169,12 +169,18 @@ describe.sequential('dlx/binary-cache — readBinaryCacheMetadata', () => {
 })
 
 describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
-  // These exercise the global dlx dir (`getDlxCachePath()`), which lives
-  // under $HOME/.socket/_dlx. We use stubEnv to point HOME → tmpRoot so
-  // the global helpers operate against an isolated tree.
+  // These exercise the global dlx dir (`getDlxCachePath()`). Point
+  // SOCKET_DLX_DIR — the FIRST override getSocketDlxDir() honors — at a fresh
+  // path under tmpRoot. HOME alone is not enough: getSocketDlxDir checks
+  // SOCKET_DLX_DIR before homedir, and under `isolate: false` a concurrent
+  // test in the same worker can leave SOCKET_DLX_DIR set, redirecting these
+  // helpers to the wrong (or the real ~/.socket/_dlx) tree. Owning the env var
+  // here makes the sandbox deterministic regardless of sibling tests.
   function withMockHome<T>(fn: () => T): T {
+    const originalDlxDir = process.env['SOCKET_DLX_DIR']
     const originalHome = process.env['HOME']
     process.env['HOME'] = tmpRoot
+    process.env['SOCKET_DLX_DIR'] = path.join(tmpRoot, '.socket', '_dlx')
     try {
       return fn()
     } finally {
@@ -182,6 +188,11 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
         delete process.env['HOME']
       } else {
         process.env['HOME'] = originalHome
+      }
+      if (originalDlxDir === undefined) {
+        delete process.env['SOCKET_DLX_DIR']
+      } else {
+        process.env['SOCKET_DLX_DIR'] = originalDlxDir
       }
     }
   }
