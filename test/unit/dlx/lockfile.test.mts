@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for dlx/lockfile.ts pure helpers `specName` and `specRange`.
- *   The orchestrator `generatePackagePin` hits the registry via pacote and is
+ *   The orchestrator `generateNpmPackagePin` hits the registry via pacote and is
  *   covered separately in generate-package-pin.test.mts.
  */
 
