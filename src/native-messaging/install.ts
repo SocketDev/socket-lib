@@ -55,6 +55,11 @@ export interface InstallOptions {
    */
   allowedOrigins: string[]
   /**
+   * When `true`, reject wildcard origins (`['*']`) — production installs must
+   * pin to specific extension IDs.
+   */
+  production?: boolean | undefined
+  /**
    * Directory to write the wrapper script. Defaults to the same directory as
    * this file (`src/native-messaging/`).
    */
@@ -144,7 +149,19 @@ export function installNativeHost(opts: InstallOptions): InstallResult {
   // the installer is itself on a stale Node.
   assertNodeStripTypesSupported()
 
-  const { allowedOrigins, wrapperDir = __dirname } = opts
+  const { allowedOrigins, production = false, wrapperDir = __dirname } = opts
+
+  if (production && allowedOrigins.includes('*')) {
+    throw new Error(
+      'production mode rejects allowedOrigins \'*\' — pin to specific chrome-extension://<id>/ origins',
+    )
+  }
+
+  if (allowedOrigins.length === 0) {
+    throw new Error(
+      'allowedOrigins must contain at least one origin; pass [\'*\'] for development',
+    )
+  }
 
   const wrapperName = WIN32 ? `${HOST_NAME}.cmd` : `${HOST_NAME}.sh`
   const wrapperPath = path.join(wrapperDir, wrapperName)

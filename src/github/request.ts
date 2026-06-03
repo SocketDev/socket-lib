@@ -88,7 +88,7 @@ export async function fetchGitHub<T = unknown>(
   options?: GitHubFetchOptions | undefined,
 ): Promise<T> {
   const opts = { __proto__: null, ...options } as GitHubFetchOptions
-  const token = opts.token || getGitHubToken()
+  const token = opts.token ?? getGitHubToken()
 
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github.v3+json',
