@@ -1,23 +1,25 @@
 /**
- * @file `pipInstallTarget()` — install a pip spec into a TARGET DIRECTORY
- *   (`pip install --target <dir>`), the Python mirror of how `dlx/package.ts`
- *   installs npm deps into `<dlxDir>/<hash>/node_modules/`. The interpreter is
- *   left pristine; the package + its deps land in an isolated dir you own.
+ * @file `downloadPipPackage()` — the Python mirror of `dlx/package.ts`'s
+ *   `downloadNpmPackage()`. Installs a pip spec into a content-addressed dlx
+ *   directory (`pip install --target <dir>`), leaving the interpreter pristine:
+ *   the package + its deps land in `~/.socket/_dlx/<cacheKey(spec)>/site-packages`,
+ *   the exact analog of how `downloadNpmPackage` installs npm deps into
+ *   `<dlxDir>/<hash>/node_modules/`.
  *
  *   This is the bundle-safe / SEA-VFS-safe model:
  *   - No venv → no symlinks, no `pyvenv.cfg` with an absolute `home=`.
  *   - The target dir is plain files → embeddable in a SEA's VFS, relocatable at
  *     runtime.
- *   - One shared Python serves N isolated target dirs (true per-tool isolation
+ *   - One shared Python serves N isolated package dirs (true per-tool isolation
  *     without a venv) — exactly the `node_modules`-per-cacheKey shape.
  *
- *   Run the installed tool with the target dir on `PYTHONPATH`:
+ *   Run the installed tool with the package dir on `PYTHONPATH`:
  *     spawn(pythonBin, ['-m', '<module>', ...args],
- *       { env: { ...process.env, PYTHONPATH: targetDir } })
+ *       { env: { ...process.env, PYTHONPATH: packageDir } })
  *
  *   `spec` is a PyPI pin (`<pkg>==<version>`) or a git-SHA pin
- *   (`git+https://…@<sha>`). A TOCTOU lock guards concurrent installs into the
- *   same target; an `isInstalled` predicate makes the call idempotent.
+ *   (`git+https://…@<sha>`). A TOCTOU lock guards concurrent installs; an
+ *   existing non-empty package dir makes the call idempotent.
  *
  *   Contrast `createPipVenv` (external-tools/from-pip-venv): venv with a
  *   `bin/<entryPoint>` — convenient but symlink + absolute-`home`-dependent, so
@@ -39,11 +41,11 @@ import { generateCacheKey } from '../../dlx/cache'
 const MAX_RETRIES = 3
 const WAIT_TICKS = 30
 
-export interface PipInstallTargetOptions {
+export interface DownloadPipPackageOptions {
   /**
    * Absolute path to the Python interpreter used to run pip (and later the
-   * tool). The interpreter is NOT modified — packages go to `targetDir`.
-   * Typically from `resolvePython()`.
+   * tool). The interpreter is NOT modified — packages go to the dlx package
+   * dir. Typically from `resolvePython()`.
    */
   readonly pythonBin: string
   /**
@@ -51,26 +53,15 @@ export interface PipInstallTargetOptions {
    * `git+https://<url>@<sha>` (git-SHA pin).
    */
   readonly spec: string
-  /**
-   * Target directory for `pip install --target`. Defaults to
-   * `~/.socket/_dlx/<cacheKey(spec)>/site-packages` — the Python analog of
-   * `dlx/package.ts`'s `<hash>/node_modules`.
-   */
-  readonly targetDir?: string | undefined
-  /**
-   * Predicate returning true when the package is already importable from
-   * `targetDir`, so the install is skipped. Typically a marker-file check
-   * (`<targetDir>/<pkg>` exists) — cheaper than spawning Python.
-   */
-  readonly isInstalled?: (targetDir: string) => Promise<boolean> | boolean
 }
 
-export interface PipInstallTargetResult {
+export interface DownloadPipPackageResult {
   /**
    * Directory the package was installed into. Put this on `PYTHONPATH` to run
-   * the tool: `python -m <module>`.
+   * the tool: `python -m <module>`. The Python analog of
+   * `DownloadNpmPackageResult.packageDir`.
    */
-  readonly targetDir: string
+  readonly packageDir: string
   /**
    * `true` when this call ran pip; `false` when an existing install was reused.
    */
@@ -78,9 +69,11 @@ export interface PipInstallTargetResult {
 }
 
 /**
- * Default target dir for a spec: `~/.socket/_dlx/<cacheKey>/site-packages`.
+ * Content-addressed install dir for a spec:
+ * `~/.socket/_dlx/<cacheKey>/site-packages`. The Python analog of
+ * `downloadNpmPackage`'s `<hash>/node_modules`.
  */
-export function pipTargetDir(spec: string): string {
+export function pipPackageDir(spec: string): string {
   return path.join(getSocketDlxDir(), generateCacheKey(spec), 'site-packages')
 }
 
@@ -99,16 +92,10 @@ function isStaleLock(pid: number): boolean {
   }
 }
 
-async function alreadyInstalled(
-  targetDir: string,
-  isInstalled: PipInstallTargetOptions['isInstalled'],
-): Promise<boolean> {
-  if (isInstalled) {
-    return isInstalled(targetDir)
-  }
-  // Default: non-empty target dir counts as installed.
+async function isAlreadyInstalled(packageDir: string): Promise<boolean> {
+  // A non-empty package dir counts as installed.
   try {
-    const entries = await fs.readdir(targetDir)
+    const entries = await fs.readdir(packageDir)
     return entries.length > 0
   } catch {
     return false
@@ -116,27 +103,27 @@ async function alreadyInstalled(
 }
 
 /**
- * Install `spec` into a target dir via `pip install --target`. Lock-guarded +
- * idempotent. Throws on a failed pip install or if the lock can't be acquired
- * after MAX_RETRIES.
+ * Install `spec` into a content-addressed dlx dir via `pip install --target`.
+ * Lock-guarded + idempotent. Throws on a failed pip install or if the lock
+ * can't be acquired after MAX_RETRIES. Mirrors `downloadNpmPackage`.
  */
-export async function pipInstallTarget(
-  opts: PipInstallTargetOptions,
+export async function downloadPipPackage(
+  options: DownloadPipPackageOptions,
   retryCount = 0,
-): Promise<PipInstallTargetResult> {
-  const { isInstalled, pythonBin, spec } = opts
-  const targetDir = opts.targetDir ?? pipTargetDir(spec)
+): Promise<DownloadPipPackageResult> {
+  const { pythonBin, spec } = options
+  const packageDir = pipPackageDir(spec)
   if (retryCount >= MAX_RETRIES) {
     throw new Error(
-      `pipInstallTarget: could not acquire install lock after ${MAX_RETRIES} retries for ${targetDir}; a peer may be stuck or the lock is stale — remove it and retry`,
+      `downloadPipPackage: could not acquire install lock after ${MAX_RETRIES} retries for ${packageDir}; a peer may be stuck or the lock is stale — remove it and retry`,
     )
   }
-  if (await alreadyInstalled(targetDir, isInstalled)) {
-    return { targetDir, installed: false }
+  if (await isAlreadyInstalled(packageDir)) {
+    return { packageDir, installed: false }
   }
-  // The lock lives one level up so a `--clear`-style wipe of targetDir can't
+  // The lock lives one level up so a `--clear`-style wipe of packageDir can't
   // delete the lock mid-install.
-  const lockDir = path.dirname(targetDir)
+  const lockDir = path.dirname(packageDir)
   await safeMkdir(lockDir, { recursive: true })
   const lockFile = path.join(lockDir, '.installing')
 
@@ -159,7 +146,7 @@ export async function pipInstallTarget(
     }
     if (stale) {
       await safeDelete(lockFile, { force: true })
-      return pipInstallTarget(opts, retryCount + 1)
+      return downloadPipPackage(options, retryCount + 1)
     }
     for (let i = 0; i < WAIT_TICKS; i += 1) {
       // eslint-disable-next-line no-await-in-loop -- sequential poll by design.
@@ -167,26 +154,26 @@ export async function pipInstallTarget(
         setTimeout(resolve, 1000)
       })
       // eslint-disable-next-line no-await-in-loop -- sequential poll by design.
-      if (await alreadyInstalled(targetDir, isInstalled)) {
-        return { targetDir, installed: false }
+      if (await isAlreadyInstalled(packageDir)) {
+        return { packageDir, installed: false }
       }
     }
-    return pipInstallTarget(opts, retryCount + 1)
+    return downloadPipPackage(options, retryCount + 1)
   }
 
   try {
-    await safeMkdir(targetDir, { recursive: true })
+    await safeMkdir(packageDir, { recursive: true })
     await spawn(
       pythonBin,
-      ['-m', 'pip', 'install', '--no-input', '--quiet', '--target', targetDir, spec],
+      ['-m', 'pip', 'install', '--no-input', '--quiet', '--target', packageDir, spec],
       { shell: WIN32, stdio: 'inherit' },
     )
-    if (!(await alreadyInstalled(targetDir, isInstalled))) {
+    if (!(await isAlreadyInstalled(packageDir))) {
       throw new Error(
-        `pipInstallTarget: pip install --target ${targetDir} ${spec} reported success but the target is still empty`,
+        `downloadPipPackage: pip install --target ${packageDir} ${spec} reported success but the target is still empty`,
       )
     }
-    return { targetDir, installed: true }
+    return { packageDir, installed: true }
   } finally {
     await safeDelete(lockFile, { force: true })
   }

@@ -4,7 +4,7 @@
  *   shim.
  */
 
-import { downloadPackage } from '../../dlx/package'
+import { downloadNpmPackage } from '../../dlx/package'
 
 import { getSynpPackageSpec } from './asset-names'
 
@@ -27,7 +27,7 @@ export async function synpFromDownload(
 ): Promise<ResolvedSynp> {
   const { integrity, version } = opts
   const packageSpec = getSynpPackageSpec({ version })
-  const { binaryPath } = await downloadPackage({
+  const { binaryPath } = await downloadNpmPackage({
     package: packageSpec,
     binaryName: 'synp',
     ...(integrity ? { hash: integrity } : {}),

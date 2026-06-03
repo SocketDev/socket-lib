@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 vi.mock(import('../../../../src/dlx/package'), () => ({
-  downloadPackage: vi.fn(),
+  downloadNpmPackage: vi.fn(),
 }))
 
 async function loadFresh() {
   const dlxMod = await import('../../../../src/dlx/package')
-  const downloadMock = dlxMod.downloadPackage as ReturnType<typeof vi.fn>
+  const downloadMock = dlxMod.downloadNpmPackage as ReturnType<typeof vi.fn>
   const mod = await import('../../../../src/external-tools/synp/from-download')
   return { downloadMock, synpFromDownload: mod.synpFromDownload }
 }
@@ -30,7 +30,7 @@ describe.sequential('external-tools/synp/from-download', () => {
     })
   })
 
-  test('passes the synp package spec to downloadPackage', async () => {
+  test('passes the synp package spec to downloadNpmPackage', async () => {
     const { synpFromDownload, downloadMock } = await loadFresh()
     downloadMock.mockResolvedValueOnce({ binaryPath: '/dlx/synp' })
     await synpFromDownload({ version: '1.9.14' })

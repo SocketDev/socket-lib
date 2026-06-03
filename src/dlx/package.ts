@@ -20,9 +20,9 @@
  *   - dlx/binary.ts: Downloads standalone binaries from URLs
  *   - dlx/package.ts: Installs npm packages from registries Implementation:
  *   - Uses Arborist for package installation (like npx, no npm CLI required)
- *   - Split into downloadPackage() and executePackage() for flexibility
+ *   - Split into downloadNpmPackage() and executePackage() for flexibility
  *   - dlxPackage() combines both for convenience Module shape: this file holds
- *     the three async orchestrators (`dlxPackage`, `downloadPackage`,
+ *     the three async orchestrators (`dlxPackage`, `downloadNpmPackage`,
  *     `ensurePackageInstalled`) and the synchronous `executePackage`. The
  *     supporting surface lives in sibling leaves and is re-exported here so
  *     existing `dlx/package` importers keep working unchanged:
@@ -52,7 +52,7 @@ import { parsePackageSpec } from './spec'
 import type {
   DlxPackageOptions,
   DlxPackageResult,
-  DownloadPackageResult,
+  DownloadNpmPackageResult,
   EnsurePackageInstallOptions,
 } from './types'
 import type { SpawnExtra, SpawnOptions } from '../process/spawn/types'
@@ -90,7 +90,7 @@ export async function dlxPackage(
   spawnExtra?: SpawnExtra | undefined,
 ): Promise<DlxPackageResult> {
   // Download the package.
-  const downloadResult = await downloadPackage(options)
+  const downloadResult = await downloadNpmPackage(options)
 
   // Execute the binary.
   const spawnPromise = executePackage(
@@ -114,7 +114,7 @@ export async function dlxPackage(
  * @example
  *   ;```typescript
  *   // Install @socketsecurity/cli without running it
- *   const result = await downloadPackage({
+ *   const result = await downloadNpmPackage({
  *     package: '@socketsecurity/cli@1.2.0',
  *     force: true,
  *   })
@@ -122,9 +122,9 @@ export async function dlxPackage(
  *   console.log('Binary at:', result.binaryPath)
  *   ```
  */
-export async function downloadPackage(
+export async function downloadNpmPackage(
   options: DlxPackageOptions,
-): Promise<DownloadPackageResult> {
+): Promise<DownloadNpmPackageResult> {
   const {
     binaryName,
     force: userForce,
@@ -367,7 +367,7 @@ export async function ensurePackageInstalled(
 
 /**
  * Execute a package's binary with cross-platform shell handling. The package
- * must already be installed (use downloadPackage first).
+ * must already be installed (use downloadNpmPackage first).
  *
  * On Windows, script files (.bat, .cmd, .ps1) require shell: true. Matches
  * npm/npx execution behavior.
@@ -375,7 +375,7 @@ export async function ensurePackageInstalled(
  * @example
  *   ;```typescript
  *   // Execute an already-installed package
- *   const downloaded = await downloadPackage({ package: 'cowsay@1.5.0' })
+ *   const downloaded = await downloadNpmPackage({ package: 'cowsay@1.5.0' })
  *   const result = await executePackage(
  *     downloaded.binaryPath,
  *     ['Hello World'],
@@ -420,6 +420,6 @@ export { parsePackageSpec } from './spec'
 export type {
   DlxPackageOptions,
   DlxPackageResult,
-  DownloadPackageResult,
+  DownloadNpmPackageResult,
   EnsurePackageInstallOptions,
 } from './types'

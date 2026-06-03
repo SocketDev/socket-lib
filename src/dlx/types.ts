@@ -3,9 +3,9 @@
  *   of `dlx/package.ts` so consumers can import these types without pulling in
  *   the implementation.
  *
- *   - `DownloadPackageResult` — what `downloadPackage` returns
+ *   - `DownloadNpmPackageResult` — what `downloadNpmPackage` returns
  *   - `EnsurePackageInstallOptions` — shared install-pinning options
- *   - `DlxPackageOptions` — full options for `dlxPackage` / `downloadPackage`
+ *   - `DlxPackageOptions` — full options for `dlxPackage` / `downloadNpmPackage`
  *   - `DlxPackageResult` — what `dlxPackage` returns
  */
 
@@ -14,7 +14,7 @@ import type { LockfileSpec } from './lockfile'
 import type { spawn } from '../process/spawn/child'
 import type { SpawnOptions } from '../process/spawn/types'
 
-export interface DownloadPackageResult {
+export interface DownloadNpmPackageResult {
   /**
    * Path to the installed package directory.
    */

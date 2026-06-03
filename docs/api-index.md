@@ -337,6 +337,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/opengrep/from-vfs`](../src/external-tools/opengrep/from-vfs.ts)                         | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/opengrep/resolve`](../src/external-tools/opengrep/resolve.ts)                           | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/opengrep/types`](../src/external-tools/opengrep/types.ts)                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/python/asset-names`](../src/external-tools/python/asset-names.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/python/from-download`](../src/external-tools/python/from-download.ts)                   | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/python/from-path`](../src/external-tools/python/from-path.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/python/pip-install`](../src/external-tools/python/pip-install.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/python/resolve`](../src/external-tools/python/resolve.ts)                               | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/python/types`](../src/external-tools/python/types.ts)                                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/asset-names`](../src/external-tools/sbt/asset-names.ts)                             | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/from-download`](../src/external-tools/sbt/from-download.ts)                         | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/sbt/from-path`](../src/external-tools/sbt/from-path.ts)                                 | _(no description)_ |
@@ -366,12 +372,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/trufflehog/from-vfs`](../src/external-tools/trufflehog/from-vfs.ts)                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/trufflehog/resolve`](../src/external-tools/trufflehog/resolve.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/trufflehog/types`](../src/external-tools/trufflehog/types.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/asset-names`](../src/external-tools/uv/asset-names.ts)                               | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/from-download`](../src/external-tools/uv/from-download.ts)                           | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/from-path`](../src/external-tools/uv/from-path.ts)                                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/from-vfs`](../src/external-tools/uv/from-vfs.ts)                                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/resolve`](../src/external-tools/uv/resolve.ts)                                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/external-tools/uv/types`](../src/external-tools/uv/types.ts)                                           | _(no description)_ |
 
 ## fs/
 

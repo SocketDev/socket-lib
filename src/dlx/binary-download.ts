@@ -38,7 +38,7 @@ import { BufferFrom } from '../primordials/buffer'
 
 /**
  * Download a binary from a URL with caching (without execution). Similar to
- * downloadPackage from dlx/package.
+ * downloadNpmPackage from dlx/package.
  *
  * Returns `{binaryPath, downloaded, integrity}`. The `integrity` field is the
  * SRI-formatted `sha512-<base64>` hash of the cached file — computed by the

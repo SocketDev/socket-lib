@@ -4,7 +4,7 @@
  *   fetches its top-level tarball to return both hash formats plus the lockfile
  *   content — everything needed to vendor a reproducible install. The
  *   `LockfileSpec` type is also exported here for use as the `lockfile` option
- *   on `downloadPackage`. Sniff/write handling lives inline in `./package.ts` —
+ *   on `downloadNpmPackage`. Sniff/write handling lives inline in `./package.ts` —
  *   no helper.
  */
 
@@ -31,7 +31,7 @@ import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 
 /**
- * Lockfile source for the `lockfile` option on `downloadPackage`.
+ * Lockfile source for the `lockfile` option on `downloadNpmPackage`.
  *
  * Bare strings are sniffed: a leading `{` (after whitespace) means JSON
  * content, anything else is treated as a filesystem path. Pass the explicit `{
