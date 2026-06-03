@@ -30,12 +30,15 @@ import noProcessCwdInScriptsHooks from './rules/no-process-cwd-in-scripts-hooks.
 import noPromiseRace from './rules/no-promise-race.mts'
 import noPromiseRaceInLoop from './rules/no-promise-race-in-loop.mts'
 import noSrcImportInTestExpect from './rules/no-src-import-in-test-expect.mts'
-import noStableImportInTestActual from './rules/no-stable-import-in-test-actual.mts'
 import noStatusEmoji from './rules/no-status-emoji.mts'
 import noStructuredClonePreferJson from './rules/no-structured-clone-prefer-json.mts'
 import noSyncRmInTestLifecycle from './rules/no-sync-rm-in-test-lifecycle.mts'
 import noTopLevelAwait from './rules/no-top-level-await.mts'
 import noUnderscoreIdentifier from './rules/no-underscore-identifier.mts'
+import noVitestFocusedTests from './rules/no-vitest-focused-tests.mts'
+import noVitestIdenticalTitle from './rules/no-vitest-identical-title.mts'
+import noVitestSkippedTests from './rules/no-vitest-skipped-tests.mts'
+import noVitestStandaloneExpect from './rules/no-vitest-standalone-expect.mts'
 import noWhichForLocalBin from './rules/no-which-for-local-bin.mts'
 import optionalExplicitUndefined from './rules/optional-explicit-undefined.mts'
 import personalPathPlaceholders from './rules/personal-path-placeholders.mts'
@@ -69,6 +72,7 @@ import sortRegexAlternations from './rules/sort-regex-alternations.mts'
 import sortSetArgs from './rules/sort-set-args.mts'
 import sortSourceMethods from './rules/sort-source-methods.mts'
 import useFleetCanonicalApiTokenGetter from './rules/use-fleet-canonical-api-token-getter.mts'
+import vitestExpectExpect from './rules/vitest-expect-expect.mts'
 
 /**
  * @type {import('eslint').ESLint.Plugin}
@@ -100,12 +104,15 @@ const plugin = {
     'no-promise-race': noPromiseRace,
     'no-promise-race-in-loop': noPromiseRaceInLoop,
     'no-src-import-in-test-expect': noSrcImportInTestExpect,
-    'no-stable-import-in-test-actual': noStableImportInTestActual,
     'no-status-emoji': noStatusEmoji,
     'no-structured-clone-prefer-json': noStructuredClonePreferJson,
     'no-sync-rm-in-test-lifecycle': noSyncRmInTestLifecycle,
     'no-top-level-await': noTopLevelAwait,
     'no-underscore-identifier': noUnderscoreIdentifier,
+    'no-vitest-focused-tests': noVitestFocusedTests,
+    'no-vitest-identical-title': noVitestIdenticalTitle,
+    'no-vitest-skipped-tests': noVitestSkippedTests,
+    'no-vitest-standalone-expect': noVitestStandaloneExpect,
     'no-which-for-local-bin': noWhichForLocalBin,
     'optional-explicit-undefined': optionalExplicitUndefined,
     'personal-path-placeholders': personalPathPlaceholders,
@@ -139,6 +146,7 @@ const plugin = {
     'sort-set-args': sortSetArgs,
     'sort-source-methods': sortSourceMethods,
     'use-fleet-canonical-api-token-getter': useFleetCanonicalApiTokenGetter,
+    'vitest-expect-expect': vitestExpectExpect,
   },
 }
 
