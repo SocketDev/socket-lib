@@ -15,12 +15,12 @@
  */
 
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import type { RolldownOptions } from 'rolldown'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..')
+// Repo root comes from the canonical paths module (1 path, 1 reference) — never
+// hand-walked with `__dirname/../..`, which silently breaks when the file moves.
+import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
 export const primBuildConfig: RolldownOptions = {
   // Inline everything from lib-stable + diff + acorn-wasm wrapper. The
@@ -28,11 +28,14 @@ export const primBuildConfig: RolldownOptions = {
   // `require('./acorn-bindgen.cjs')` so its `${__dirname}/./acorn.wasm`
   // sibling-load works after publish.
   external: ['./acorn-bindgen.cjs'],
-  input: path.join(rootPath, 'tools/prim/bin/prim.mts'),
+  input: path.join(REPO_ROOT, 'tools/prim/bin/prim.mts'),
   output: {
-    file: path.join(rootPath, 'dist/bin/prim.cjs'),
+    file: path.join(REPO_ROOT, 'dist/bin/prim.cjs'),
     format: 'cjs',
-    inlineDynamicImports: true,
+    // `codeSplitting: false` inlines all dynamic imports into the single
+    // prim.cjs bundle — the rolldown 1.x replacement for the deprecated
+    // `inlineDynamicImports: true` (both produce one bundle).
+    codeSplitting: false,
     minify: false,
     banner: '"use strict";\n/* Socket Lib prim - bundled with rolldown */',
   },

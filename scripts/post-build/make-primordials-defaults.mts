@@ -12,7 +12,7 @@
  *   primordials check), and the bundler runs at publish time, before consumer
  *   install. Embedding the derived map keeps the published bundle
  *   self-contained. Re-run whenever globals bumps, or src/primordials/ exports
- *   change. Wired into scripts/fix/cli.mts.
+ *   change. Wired into scripts/post-build.mts.
  */
 
 import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
@@ -152,7 +152,7 @@ function main(): void {
   ]
 
   const banner = `/**
- * @file GENERATED — do not edit by hand. Run \`node scripts/fix/generate-primordials-defaults.mts\`
+ * @file GENERATED — do not edit by hand. Run \`node scripts/post-build/make-primordials-defaults.mts\`
  *   (also runs as part of \`pnpm run build\`) to regenerate from the
  *   \`globals\` npm package's globals.json crossed against
  *   src/primordials/*.ts \`Ctor\` exports.

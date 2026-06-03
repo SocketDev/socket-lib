@@ -31,7 +31,7 @@ Core infrastructure library for Socket.dev security tools.
 
 ## Package exports
 
-All modules exported via `package.json` exports field. When adding modules, update exports or run `scripts/fix/generate-package-exports.mts`.
+All modules exported via `package.json` exports field. When adding modules, update exports or run `scripts/post-build/make-package-exports.mts`.
 
 ## Testing
 

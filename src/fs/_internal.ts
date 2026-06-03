@@ -2,7 +2,7 @@
  * @file Private state shared between `fs/safe` and `fs/path-cache`. The `_`
  *   prefix keeps this module out of the generated package.json `exports` map
  *   (the `dist/**\/_*` ignore pattern in
- *   `scripts/fix/generate-package-exports.mts` filters it out), so it is not
+ *   `scripts/post-build/make-package-exports.mts` filters it out), so it is not
  *   part of the public surface — it exists only to give the two leaves above a
  *   common owner for the allowed-directory cache. The cache is invalidated by
  *   `invalidatePathCache()` in `fs/path-cache.ts` whenever paths are rewired in

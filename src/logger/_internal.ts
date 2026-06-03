@@ -3,7 +3,7 @@
  *   public `Logger` surface) and `logger/console-init` (which mutates
  *   `Logger.prototype` to mirror `globalConsole`). The `_` prefix keeps this
  *   module out of the generated package.json `exports` map (the `dist/**\/_*`
- *   ignore pattern in `scripts/fix/generate-package-exports.mts` filters it
+ *   ignore pattern in `scripts/post-build/make-package-exports.mts` filters it
  *   out), so it is not part of the public surface — it exists only to give the
  *   two leaves above a common owner for the WeakMap-backed lazy-init state. Why
  *   two WeakMaps instead of `#privateField` slots:

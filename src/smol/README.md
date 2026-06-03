@@ -62,7 +62,7 @@ socket-btm's smol binary exposes 12 user-facing `node:smol-*` modules. The 8 not
 
 1. Pick the binding from socket-btm's `additions/source-patched/lib/smol-<x>.js` and read the `module.exports` to extract the surface.
 2. Create `src/smol/<x>.ts` following the shape above. Export a typed `SmolXBinding` interface that mirrors the canonical shape.
-3. Add a `./smol/<x>` entry to `package.json` `exports`. The build's `scripts/fix/generate-package-exports.mts` writes the `source / types / default` triplet.
+3. Add a `./smol/<x>` entry to `package.json` `exports`. The build's `scripts/post-build/make-package-exports.mts` writes the `source / types / default` triplet.
 4. Add `test/unit/smol/<x>.test.mts` that pins `getSmolX()` returning `undefined` on stock Node (the test runtime). The fast-path integration is verified by socket-btm's own tests running inside the smol binary.
 5. Route the consumer site:
    - Hot per-call branching: `const _smol = getSmolX(); export const op = _smol?.op ?? jsOp`

@@ -17,7 +17,7 @@ import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { buildConfig } from '../../.config/rolldown.config.mts'
-import { primBuildConfig } from '../../.config/rolldown.prim.config.mts'
+import { primBuildConfig } from '../../.config/repo/rolldown.prim.config.mts'
 import { parseArgs } from '../fleet/util/parse-args.mts'
 import { runSequence } from '../fleet/util/run-command.mts'
 import { verifyDist } from './verify-dist.mts'
@@ -264,31 +264,32 @@ export async function buildExternals(
 }
 
 /**
- * Fix exports after build. Returns exitCode for external logging.
+ * Run the post-build dist-shaping steps (scripts/post-build.mts). Returns
+ * exitCode for external logging.
  */
-export async function fixExports(
+export async function runPostBuild(
   options: { quiet?: boolean; verbose?: boolean } = {},
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
 
-  const fixArgs = ['scripts/fix/cli.mts']
+  const postBuildArgs = ['scripts/post-build.mts']
   if (quiet) {
-    fixArgs.push('--quiet')
+    postBuildArgs.push('--quiet')
   }
   if (verbose) {
-    fixArgs.push('--verbose')
+    postBuildArgs.push('--verbose')
   }
 
   const exitCode = await runSequence([
     {
-      args: fixArgs,
+      args: postBuildArgs,
       command: 'node',
     },
   ])
 
   if (exitCode !== 0) {
     if (!quiet) {
-      logger.error('Build fixing failed')
+      logger.error('Post-build failed')
     }
   }
 
@@ -575,17 +576,18 @@ async function main(): Promise<void> {
               ? typesExitCode
               : primExitCode
 
-      // If all parallel builds succeeded, flush dist/ to disk and fix exports.
+      // If all parallel builds succeeded, flush dist/ to disk and run the
+      // post-build dist-shaping steps.
       if (exitCode === 0) {
         // Fsync barrier — see `fsyncDirRecursive` docstring. Runs between the
-        // parallel builders and downstream phases (fixExports, then tests) so
-        // no consumer reads stale page-cache state.
+        // parallel builders and downstream phases (runPostBuild, then tests)
+        // so no consumer reads stale page-cache state.
         const distDir = path.join(rootPath, 'dist')
         if (existsSync(distDir)) {
           await fsyncDirRecursive(distDir)
         }
-        const fixExitCode = await fixExports({ quiet, verbose })
-        exitCode = fixExitCode
+        const postBuildExitCode = await runPostBuild({ quiet, verbose })
+        exitCode = postBuildExitCode
         // Integrity guard: syntax-check the emitted JS so a corrupt /
         // half-written file (parallel-write race) fails the build here
         // rather than as a cryptic SyntaxError at test time.

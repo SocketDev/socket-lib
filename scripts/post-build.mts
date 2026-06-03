@@ -1,6 +1,10 @@
 /**
- * @file Orchestrates all post-build fix scripts. Runs generate-package-exports
- *   and fix-external-imports in sequence.
+ * @file Orchestrates the post-build steps that shape the published dist:
+ *   package-exports generation, CJS-export rewrite, external-import rewrite,
+ *   and the dist/export validators. Deliberately does NOT generate docs — the
+ *   api-index.md doc-gen is committed-source output unrelated to the dist, so
+ *   it lives in its own `pnpm run docs` script and must not run on every
+ *   `prepare`/install build (see scripts/repo/make-api-index-md.mts).
  */
 
 import process from 'node:process'
@@ -9,7 +13,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { runSequence } from '../fleet/util/run-command.mts'
+import { runSequence } from './fleet/util/run-command.mts'
 
 const logger = getDefaultLogger()
 
@@ -31,19 +35,15 @@ async function main(): Promise<void> {
 
   const exitCode = await runSequence([
     {
-      args: ['scripts/fix/generate-package-exports.mts', ...fixArgs],
+      args: ['scripts/post-build/make-package-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/fix/generate-api-index.mts', ...fixArgs],
+      args: ['scripts/post-build/rewrite-external-imports.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/fix/external-imports.mts', ...fixArgs],
-      command: 'node',
-    },
-    {
-      args: ['scripts/fix/commonjs-exports.mts', ...fixArgs],
+      args: ['scripts/post-build/rewrite-cjs-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
