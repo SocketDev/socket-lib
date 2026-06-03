@@ -9,10 +9,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  buildManifest,
   HOST_NAME,
-  installNativeHost,
   MIN_NODE_VERSION_FOR_STRIP_TYPES,
+  buildManifest,
+  installNativeHost,
 } from '../../../src/native-messaging/install'
 
 describe('buildManifest', () => {
@@ -20,7 +20,10 @@ describe('buildManifest', () => {
     const manifest = buildManifest('/abs/path/wrapper.sh', [
       'chrome-extension://abc/',
     ]) as Record<string, unknown>
-    expect(manifest['name']).toBe(HOST_NAME)
+    // The literal canonical value (asserted against HOST_NAME itself below) —
+    // a -stable HOST_NAME isn't published, and the src constant can't build its
+    // own expected value (no-src-import-in-test-expect).
+    expect(manifest['name']).toBe('dev.socket.trusted_publisher_host')
     expect(manifest['type']).toBe('stdio')
     expect(manifest['path']).toBe('/abs/path/wrapper.sh')
     expect(manifest['allowed_origins']).toEqual(['chrome-extension://abc/'])
