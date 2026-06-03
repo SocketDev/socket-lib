@@ -39,8 +39,16 @@ async function loadFresh() {
   return {
     downloadPipPackage: mod.downloadPipPackage,
     readdirMock: fsMod.promises.readdir as ReturnType<typeof vi.fn>,
+    readFileMock: fsMod.promises.readFile as ReturnType<typeof vi.fn>,
+    writeFileMock: fsMod.promises.writeFile as ReturnType<typeof vi.fn>,
     spawnMock: spawnMod.spawn as ReturnType<typeof vi.fn>,
   }
+}
+
+function eexist(): NodeJS.ErrnoException {
+  const e = new Error('exists') as NodeJS.ErrnoException
+  e.code = 'EEXIST'
+  return e
 }
 
 beforeEach(() => {
@@ -113,6 +121,53 @@ describe.sequential('external-tools/python/pip-install — downloadPipPackage', 
   test('skips the install when the package dir is already non-empty', async () => {
     const { downloadPipPackage, readdirMock, spawnMock } = await loadFresh()
     readdirMock.mockResolvedValueOnce(['skillspector'])
+    const result = await downloadPipPackage({
+      pythonBin: '/dlx/python/bin/python3',
+      spec: 'skillspector==1.0.0',
+    })
+    expect(result.installed).toBe(false)
+    expect(spawnMock).not.toHaveBeenCalled()
+  })
+
+  test('recovers from a stale lock: deletes it, retries, installs', async () => {
+    const {
+      downloadPipPackage,
+      readFileMock,
+      readdirMock,
+      spawnMock,
+      writeFileMock,
+    } = await loadFresh()
+    // readdir: not-installed (pre-check), not-installed (retry pre-check),
+    // installed (post-spawn verify).
+    readdirMock
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce([])
+      .mockResolvedValueOnce(['skillspector'])
+    // First writeFile loses the lock race (EEXIST); second (after retry) wins.
+    writeFileMock.mockRejectedValueOnce(eexist()).mockResolvedValueOnce(undefined)
+    // The lock holds a dead PID → isStaleLock true (process.kill throws ESRCH).
+    readFileMock.mockResolvedValueOnce('2147483646')
+    const result = await downloadPipPackage({
+      pythonBin: '/dlx/python/bin/python3',
+      spec: 'skillspector==1.0.0',
+    })
+    expect(result.installed).toBe(true)
+    expect(spawnMock).toHaveBeenCalledTimes(1)
+  })
+
+  test('a peer that finishes the install first is observed on retry (no double-install)', async () => {
+    const {
+      downloadPipPackage,
+      readFileMock,
+      readdirMock,
+      spawnMock,
+      writeFileMock,
+    } = await loadFresh()
+    // Pre-check empty; after the stale-lock retry the dir is now populated by
+    // the peer → installed:false, no spawn.
+    readdirMock.mockResolvedValueOnce([]).mockResolvedValueOnce(['skillspector'])
+    writeFileMock.mockRejectedValueOnce(eexist())
+    readFileMock.mockResolvedValueOnce('2147483646')
     const result = await downloadPipPackage({
       pythonBin: '/dlx/python/bin/python3',
       spec: 'skillspector==1.0.0',

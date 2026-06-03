@@ -162,4 +162,21 @@ describe.sequential('external-tools/python/pin — resolvePipPackagePin', () => 
       resolvePipPackagePin({ pythonBin: '/dlx/python/bin/python3', spec: '' }),
     ).rejects.toBeInstanceOf(PipPackagePinError)
   })
+
+  test('falls back to the first artifact when the git spec name matches none', async () => {
+    const { resolvePipPackagePin, readFileMock, readdirMock } =
+      await loadFresh()
+    // A git spec: the downloaded wheel is named after the project, not the URL.
+    readdirMock.mockResolvedValueOnce(['skillspector-0.1.0-py3-none-any.whl'])
+    readFileMock.mockResolvedValue(Buffer.from('wheel-bytes'))
+    const pin = await resolvePipPackagePin({
+      pythonBin: '/dlx/python/bin/python3',
+      spec: 'git+https://github.com/NVIDIA/skillspector.git@abc1234',
+    })
+    // specDistName can't extract a name from the bare git URL, so top falls
+    // back to the first (only) artifact.
+    expect(pin.name).toBe('skillspector')
+    expect(pin.version).toBe('0.1.0')
+    expect(pin.artifacts).toHaveLength(1)
+  })
 })
