@@ -9,18 +9,21 @@
 
 import process from 'node:process'
 
+import { getLibc } from '../../constants/platform'
 import { ObjectFreeze } from '../../primordials/object'
 
-// platform-arch → python-build-standalone target triple. The `install_only`
-// archives ship glibc Linux only (no musl variant), so linux-*-musl maps to
-// the gnu triple — fine for the relocatable runtime on most musl hosts via the
-// bundled libs, and the only option upstream provides.
+// platform-arch → python-build-standalone target triple. Upstream ships both
+// gnu (glibc) and musl Linux builds, so musl hosts get the real musl triple
+// (an Alpine interpreter linked against the right libc) rather than a glibc
+// fallback. Keys mirror the host tokens `getPythonArch` emits.
 const PLATFORM_TRIPLES: Readonly<Record<string, string>> = ObjectFreeze({
   __proto__: null,
   'darwin-arm64': 'aarch64-apple-darwin',
   'darwin-x64': 'x86_64-apple-darwin',
   'linux-arm64': 'aarch64-unknown-linux-gnu',
+  'linux-arm64-musl': 'aarch64-unknown-linux-musl',
   'linux-x64': 'x86_64-unknown-linux-gnu',
+  'linux-x64-musl': 'x86_64-unknown-linux-musl',
   'win-arm64': 'aarch64-pc-windows-msvc',
   'win-x64': 'x86_64-pc-windows-msvc',
 }) as unknown as Readonly<Record<string, string>>
@@ -45,26 +48,57 @@ const RELEASE_BASE =
   'https://github.com/astral-sh/python-build-standalone/releases/download'
 
 /**
+ * python-build-standalone default pin — the fleet-canonical CPython build,
+ * matching socket-cli's `bundle-tools.json`. Consumers that don't pass their
+ * own pin resolve against this. Bump it like any dependency (soak-aware), in
+ * lockstep with socket-cli (drift-watch). The `checksums` map is keyed by asset
+ * filename so the download tier verifies the exact tarball per platform.
+ */
+export const DEFAULT_PYTHON_PIN = ObjectFreeze({
+  __proto__: null,
+  version: '3.11.14',
+  tag: '20260203',
+  checksums: ObjectFreeze({
+    __proto__: null,
+    'cpython-3.11.14+20260203-aarch64-apple-darwin-install_only.tar.gz':
+      '63e3352fefd3b6494f73f46f51c6581c57a7e0d98775e6e00229d14a67ec3ce9',
+    'cpython-3.11.14+20260203-aarch64-pc-windows-msvc-install_only.tar.gz':
+      'cb7828c131a005da367f7dba3a561bed91619452de870e531ee03344b2ac346f',
+    'cpython-3.11.14+20260203-aarch64-unknown-linux-gnu-install_only.tar.gz':
+      '7341a5a0acd65f2c7c7a228d8bafa6561d220ffed26293d6a02c15ae2ee86af5',
+    'cpython-3.11.14+20260203-aarch64-unknown-linux-musl-install_only.tar.gz':
+      'f0e5988c108187b12eb4d53cbac33a499a8e38e1693104432e1faabbab14c664',
+    'cpython-3.11.14+20260203-x86_64-apple-darwin-install_only.tar.gz':
+      'f3b63051a9b1ffb4f663d928ebaec4311435cb67f3bdfa5634953df93397f25e',
+    'cpython-3.11.14+20260203-x86_64-pc-windows-msvc-install_only.tar.gz':
+      'd220beff465bdc97bf5874be8ffbf07278e5bdf9a064cab932b5d93b542e3e86',
+    'cpython-3.11.14+20260203-x86_64-unknown-linux-gnu-install_only.tar.gz':
+      '67abde21b6e074b58c0f738f0c4802b23827a7d49707dcaf3ed4dadf572f3f37',
+    'cpython-3.11.14+20260203-x86_64-unknown-linux-musl-install_only.tar.gz':
+      '290de5199a9647d4de4adcf13a79a7c59f060357853bf41fd6d1a69b4b5fd00c',
+  }),
+})
+
+/**
  * Resolve the current host to a python-build-standalone `platform-arch` key
- * (a `PLATFORM_TRIPLES` key, e.g. `darwin-arm64`, `win-x64`). Owns the
- * python-build-standalone vocabulary end to end: Node's `win32` becomes `win`,
- * and libc is intentionally ignored — the `install_only` archives are
- * glibc-only, so musl hosts map to the same `linux-<arch>` key (the relocatable
- * runtime works on most musl systems via bundled libs). Returns `undefined`
- * when the host platform/arch has no upstream prebuilt.
+ * (a `PLATFORM_TRIPLES` key, e.g. `darwin-arm64`, `linux-x64-musl`, `win-x64`).
+ * Owns the python-build-standalone vocabulary end to end: Node's `win32`
+ * becomes `win`, and an Alpine host gets a `-musl` suffix so it resolves to the
+ * real musl triple (upstream ships both gnu and musl Linux builds). Returns
+ * `undefined` when the host platform/arch has no upstream prebuilt.
  *
- * Separate from `getJreArch` (jre/Adoptium vocabulary, emits a `-musl` suffix)
- * and from the shared `getPlatformArch` — neither matches
- * python-build-standalone's key set.
+ * Separate from `getJreArch` (jre/Adoptium vocabulary) and from the shared
+ * `getPlatformArch` — neither matches python-build-standalone's key set.
  */
 export function getPythonArch(): string | undefined {
-  /* c8 ignore start - depends on process.platform/arch. */
+  /* c8 ignore start - depends on process.platform/arch + libc probe. */
   const platform = NODE_PLATFORM_TO_PY[process.platform]
   const arch = NODE_ARCH_TO_PY[process.arch]
   if (!platform || !arch) {
     return undefined
   }
-  const key = `${platform}-${arch}`
+  const muslSuffix = platform === 'linux' && getLibc() === 'musl' ? '-musl' : ''
+  const key = `${platform}-${arch}${muslSuffix}`
   return PLATFORM_TRIPLES[key] ? key : undefined
   /* c8 ignore stop */
 }

@@ -2,7 +2,7 @@
  * @file Socket-btm release download utilities.
  */
 
-import { getArch, getPlatform } from '../constants/platform'
+import { getArch, getOs } from '../constants/platform'
 import type { Arch, Libc, Platform } from '../constants/platform'
 import { getReleaseAssetUrl } from './github-asset-url'
 import { getLatestRelease } from './github-listing'
@@ -148,7 +148,7 @@ export function detectLibc(): Libc | undefined {
   // Non-linux early-return arm fires on macOS/Windows (the test
   // platform); linux-body is c8-ignored separately.
   /* c8 ignore next 3 */
-  if (getPlatform() !== 'linux') {
+  if (getOs() !== 'linux') {
     return undefined
   }
 
@@ -301,7 +301,7 @@ export async function downloadSocketBtmRelease(
       libc = detectLibc(),
       removeMacOSQuarantine = true,
       targetArch = getArch(),
-      targetPlatform = getPlatform(),
+      targetPlatform = getOs(),
     } = binaryConfig
 
     // Default bin to tool if not provided (like brew/cargo)

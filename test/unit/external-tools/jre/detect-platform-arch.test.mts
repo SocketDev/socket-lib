@@ -2,10 +2,7 @@ import process from 'node:process'
 
 import { describe, expect, test } from 'vitest'
 
-import {
-  getJreArch,
-  isMuslLinux,
-} from '../../../../src/external-tools/jre/detect-platform-arch'
+import { getJreArch } from '../../../../src/external-tools/jre/detect-platform-arch'
 
 const SUPPORTED = [
   'darwin-arm64',
@@ -55,14 +52,3 @@ describe('external-tools/jre/detect-platform-arch — getJreArch', () => {
   })
 })
 
-describe('external-tools/jre/detect-platform-arch — isMuslLinux', () => {
-  test('returns false on non-linux hosts', () => {
-    if (process.platform !== 'linux') {
-      expect(isMuslLinux()).toBe(false)
-    }
-  })
-
-  test('returns a boolean', () => {
-    expect(typeof isMuslLinux()).toBe('boolean')
-  })
-})

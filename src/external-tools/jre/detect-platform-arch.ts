@@ -10,9 +10,9 @@
  *   unsupported platform/arch.
  */
 
-import { existsSync } from 'node:fs'
 import process from 'node:process'
 
+import { getLibc } from '../../constants/platform'
 import { ObjectFreeze } from '../../primordials/object'
 
 // node platform → Adoptium platform segment. Node reports `win32`; the JRE keys
@@ -31,33 +31,6 @@ const NODE_ARCH_TO_JRE: Readonly<Record<string, string>> = ObjectFreeze({
   x64: 'x64',
 }) as unknown as Readonly<Record<string, string>>
 
-// musl dynamic-linker paths — present only on musl (Alpine-and-similar) hosts.
-const MUSL_LINKERS = ObjectFreeze([
-  '/lib/ld-musl-x86_64.so.1',
-  '/lib/ld-musl-aarch64.so.1',
-  '/usr/lib/ld-musl-x86_64.so.1',
-  '/usr/lib/ld-musl-aarch64.so.1',
-])
-
-/**
- * True when the host Linux uses musl libc (Alpine). Adoptium ships a separate
- * `alpine-linux` channel, keyed here as a `-musl` suffix. Non-Linux returns
- * false.
- */
-export function isMuslLinux(): boolean {
-  /* c8 ignore start - Linux-only filesystem probe. */
-  if (process.platform !== 'linux') {
-    return false
-  }
-  for (let i = 0, { length } = MUSL_LINKERS; i < length; i += 1) {
-    if (existsSync(MUSL_LINKERS[i]!)) {
-      return true
-    }
-  }
-  return false
-  /* c8 ignore stop */
-}
-
 export function getJreArch(): string | undefined {
   /* c8 ignore start - depends on process.platform/arch + libc probe. */
   const platform = NODE_PLATFORM_TO_JRE[process.platform]
@@ -65,7 +38,8 @@ export function getJreArch(): string | undefined {
   if (!platform || !arch) {
     return undefined
   }
-  const muslSuffix = platform === 'linux' && isMuslLinux() ? '-musl' : ''
+  // Adoptium ships a separate `alpine-linux` channel, keyed here as `-musl`.
+  const muslSuffix = platform === 'linux' && getLibc() === 'musl' ? '-musl' : ''
   return `${platform}-${arch}${muslSuffix}`
   /* c8 ignore stop */
 }

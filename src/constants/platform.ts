@@ -2,6 +2,8 @@
  * @file Platform detection and OS-specific constants.
  */
 
+import { existsSync } from 'node:fs'
+
 import { getNodeOs } from '../node/os'
 
 /**
@@ -22,7 +24,7 @@ export type Platform = NodeJS.Platform
 let memoizedArch: Arch | undefined
 
 /**
- * Get the current CPU architecture (memoized).
+ * Get the current CPU architecture (memoized), e.g. `x64`, `arm64`.
  */
 export function getArch(): Arch {
   if (memoizedArch === undefined) {
@@ -31,37 +33,81 @@ export function getArch(): Arch {
   return memoizedArch
 }
 
-let memoizedPlatform: Platform | undefined
+// musl dynamic-linker paths — present only on musl (Alpine-and-similar) hosts.
+const MUSL_LINKERS = [
+  '/lib/ld-musl-x86_64.so.1',
+  '/lib/ld-musl-aarch64.so.1',
+  '/usr/lib/ld-musl-x86_64.so.1',
+  '/usr/lib/ld-musl-aarch64.so.1',
+]
+
+let memoizedLibc: Libc | undefined
+let memoizedLibcProbed = false
 
 /**
- * Get the current platform (memoized).
+ * Get the host libc variant (memoized): `'musl'` on Alpine-and-similar,
+ * `'glibc'` on other Linux, `undefined` off-Linux. Detected by probing for the
+ * musl dynamic linker. The single source of truth for libc detection —
+ * tool-specific resolvers (`getPythonArch`, `getJreArch`) call this rather than
+ * re-probing.
  */
-export function getPlatform(): Platform {
-  if (memoizedPlatform === undefined) {
-    memoizedPlatform = getNodeOs().platform()
+export function getLibc(): Libc | undefined {
+  if (!memoizedLibcProbed) {
+    memoizedLibcProbed = true
+    /* c8 ignore start - Linux-only filesystem probe. */
+    if (getOs() !== 'linux') {
+      memoizedLibc = undefined
+    } else {
+      memoizedLibc = 'glibc'
+      for (let i = 0, { length } = MUSL_LINKERS; i < length; i += 1) {
+        if (existsSync(MUSL_LINKERS[i]!)) {
+          memoizedLibc = 'musl'
+          break
+        }
+      }
+    }
+    /* c8 ignore stop */
   }
-  return memoizedPlatform
+  return memoizedLibc
 }
 
-let memoizedPlatformAndArch: string | undefined
+let memoizedOs: Platform | undefined
 
 /**
- * Get the current `platform-arch` host token (memoized), e.g. `darwin-arm64`,
- * `linux-x64`, `win32-x64`. Raw Node vocabulary — `process.platform` joined to
- * `process.arch` with a `-`. Tool-specific resolvers that need a different
- * vocabulary (python-build-standalone's `win`, Adoptium's `-musl`) layer their
- * own mapping on top — see `getPythonArch` / `getJreArch`.
+ * Get the current OS (memoized), e.g. `darwin`, `linux`, `win32` — the raw
+ * `process.platform` value.
  */
-export function getPlatformAndArch(): string {
-  if (memoizedPlatformAndArch === undefined) {
-    memoizedPlatformAndArch = `${getPlatform()}-${getArch()}`
+export function getOs(): Platform {
+  if (memoizedOs === undefined) {
+    memoizedOs = getNodeOs().platform()
   }
-  return memoizedPlatformAndArch
+  return memoizedOs
+}
+
+let memoizedTarget: string | undefined
+
+/**
+ * Get the current host **target** in the pnpm `pack-app` vocabulary (memoized):
+ * `<os>-<arch>[-<libc>]`, e.g. `darwin-arm64`, `linux-x64`, `win32-x64`,
+ * `linux-x64-musl`. Raw Node `process.platform`/`process.arch` joined with `-`,
+ * plus a `-musl` suffix on Alpine. This is the fleet-general naming for
+ * non-python / non-JRE tools (matches pnpm's release assets,
+ * `pnpm-<os>-<arch>[-<libc>].{tar.gz,zip}`). Tool-specific resolvers that need a
+ * different vocabulary own their own helper — see `getPythonArch` (python-build-
+ * standalone) / `getJreArch` (Adoptium).
+ */
+export function getTarget(): string {
+  if (memoizedTarget === undefined) {
+    const libc = getLibc()
+    const libcSuffix = libc === 'musl' ? '-musl' : ''
+    memoizedTarget = `${getOs()}-${getArch()}${libcSuffix}`
+  }
+  return memoizedTarget
 }
 
 // Platform detection (memoized at module load).
-export const DARWIN = getPlatform() === 'darwin'
-export const WIN32 = getPlatform() === 'win32'
+export const DARWIN = getOs() === 'darwin'
+export const WIN32 = getOs() === 'win32'
 
 /**
  * True when this process was launched as a Chrome (or Chromium) native

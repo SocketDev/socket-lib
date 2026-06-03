@@ -19,13 +19,14 @@ import {
   S_IXOTH,
   S_IXUSR,
   getArch,
-  getPlatform,
 } from '@socketsecurity/lib-stable/constants/platform'
 
 import {
   DARWIN,
   WIN32,
-  getPlatformAndArch,
+  getLibc,
+  getOs,
+  getTarget,
 } from '../../../src/constants/platform'
 
 describe('constants/platform', () => {
@@ -102,21 +103,21 @@ describe('constants/platform', () => {
     })
   })
 
-  describe('getPlatform', () => {
+  describe('getOs', () => {
     it('should return a string', () => {
-      expect(typeof getPlatform()).toBe('string')
+      expect(typeof getOs()).toBe('string')
     })
 
     it('should match os.platform()', () => {
-      expect(getPlatform()).toBe(os.platform())
+      expect(getOs()).toBe(os.platform())
     })
 
     it('should match process.platform', () => {
-      expect(getPlatform()).toBe(process.platform)
+      expect(getOs()).toBe(process.platform)
     })
 
     it('should return consistent value across calls', () => {
-      expect(getPlatform()).toBe(getPlatform())
+      expect(getOs()).toBe(getOs())
     })
 
     it('should return a known platform', () => {
@@ -128,37 +129,62 @@ describe('constants/platform', () => {
         'openbsd',
         'sunos',
         'win32',
-      ]).toContain(getPlatform())
+      ]).toContain(getOs())
     })
 
     it('should be consistent with DARWIN constant', () => {
       if (DARWIN) {
-        expect(getPlatform()).toBe('darwin')
+        expect(getOs()).toBe('darwin')
       } else {
-        expect(getPlatform()).not.toBe('darwin')
+        expect(getOs()).not.toBe('darwin')
       }
     })
 
     it('should be consistent with WIN32 constant', () => {
       if (WIN32) {
-        expect(getPlatform()).toBe('win32')
+        expect(getOs()).toBe('win32')
       } else {
-        expect(getPlatform()).not.toBe('win32')
+        expect(getOs()).not.toBe('win32')
       }
     })
   })
 
-  describe('getPlatformAndArch', () => {
-    it('joins raw platform and arch with a dash', () => {
-      expect(getPlatformAndArch()).toBe(`${getPlatform()}-${getArch()}`)
+  describe('getLibc', () => {
+    it('returns undefined off Linux', () => {
+      if (process.platform !== 'linux') {
+        expect(getLibc()).toBeUndefined()
+      }
     })
 
-    it('uses raw Node vocabulary (win32, not win)', () => {
-      expect(getPlatformAndArch().startsWith(`${process.platform}-`)).toBe(true)
+    it('returns glibc or musl on Linux', () => {
+      if (process.platform === 'linux') {
+        expect(['glibc', 'musl']).toContain(getLibc())
+      }
     })
 
     it('returns a consistent value across calls', () => {
-      expect(getPlatformAndArch()).toBe(getPlatformAndArch())
+      expect(getLibc()).toBe(getLibc())
+    })
+  })
+
+  describe('getTarget', () => {
+    it('joins os and arch (raw Node vocabulary) with a dash', () => {
+      expect(getTarget().startsWith(`${getOs()}-${getArch()}`)).toBe(true)
+    })
+
+    it('uses win32 not win', () => {
+      expect(getTarget().startsWith(`${process.platform}-`)).toBe(true)
+    })
+
+    it('only carries a -musl suffix on musl Linux', () => {
+      if (getTarget().endsWith('-musl')) {
+        expect(getOs()).toBe('linux')
+        expect(getLibc()).toBe('musl')
+      }
+    })
+
+    it('returns a consistent value across calls', () => {
+      expect(getTarget()).toBe(getTarget())
     })
   })
 
