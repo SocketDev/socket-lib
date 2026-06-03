@@ -1210,6 +1210,11 @@
       "types": "./dist/external-tools/python/from-path.d.ts",
       "default": "./dist/external-tools/python/from-path.js"
     },
+    "./external-tools/python/pip-install": {
+      "source": "./src/external-tools/python/pip-install.ts",
+      "types": "./dist/external-tools/python/pip-install.d.ts",
+      "default": "./dist/external-tools/python/pip-install.js"
+    },
     "./external-tools/python/resolve": {
       "source": "./src/external-tools/python/resolve.ts",
       "types": "./dist/external-tools/python/resolve.d.ts",
