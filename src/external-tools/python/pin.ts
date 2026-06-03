@@ -199,7 +199,7 @@ export async function resolvePipPackagePin(
     const artifacts: PipArtifactPin[] = []
     const targetName = normalizeDistName(specDistName(spec))
     let top: { hash: ComputedHashes; name: string; version: string } | undefined
-    for (const file of files.sort()) {
+    for (const file of files.toSorted()) {
       // eslint-disable-next-line no-await-in-loop -- bounded by closure size.
       const bytes = await fs.readFile(path.join(scratch, file))
       const hash = computeHashes(bytes)
@@ -260,6 +260,6 @@ export function specDistName(spec: string): string {
   if (eggIdx !== -1) {
     return spec.slice(eggIdx + '#egg='.length)
   }
-  const match = /^([A-Za-z0-9._-]+)\s*(?:[=<>!~]=?|@)/.exec(spec)
+  const match = /^([A-Za-z0-9._-]+)\s*(?:@|[=<>!~]=?)/.exec(spec)
   return match ? match[1]! : spec
 }

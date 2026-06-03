@@ -74,25 +74,6 @@ export class DlxPythonUnavailableError extends Error {
   }
 }
 
-async function resolveOrThrow(opts: DlxPipOptions): Promise<string> {
-  const { preferDownload, python } = opts
-  const resolved = await resolvePython({
-    preferDownload,
-    downloadIfMissing: {
-      arch: python.arch,
-      integrity: python.integrity,
-      tag: python.tag,
-      version: python.version,
-    },
-  })
-  if (!resolved) {
-    throw new DlxPythonUnavailableError(
-      `dlx python: could not resolve a CPython interpreter for ${python.version}+${python.tag} — no host python3 and the python-build-standalone download tier missed (unsupported host arch?)`,
-    )
-  }
-  return resolved.path
-}
-
 /**
  * Resolve (or download) the dlx CPython for `python`, then pip-install `spec`
  * into a content-addressed dlx dir. One-call form of `resolvePython` +
@@ -123,4 +104,23 @@ export async function dlxPipPin(
   const pythonBin = await resolveOrThrow(opts)
   const pin = await resolvePipPackagePin({ pythonBin, spec: opts.spec })
   return { ...pin, pythonBin }
+}
+
+export async function resolveOrThrow(opts: DlxPipOptions): Promise<string> {
+  const { preferDownload, python } = opts
+  const resolved = await resolvePython({
+    preferDownload,
+    downloadIfMissing: {
+      arch: python.arch,
+      integrity: python.integrity,
+      tag: python.tag,
+      version: python.version,
+    },
+  })
+  if (!resolved) {
+    throw new DlxPythonUnavailableError(
+      `dlx python: could not resolve a CPython interpreter for ${python.version}+${python.tag} — no host python3 and the python-build-standalone download tier missed (unsupported host arch?)`,
+    )
+  }
+  return resolved.path
 }

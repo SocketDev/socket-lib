@@ -41,78 +41,6 @@ import { generateCacheKey } from '../../dlx/cache'
 const MAX_RETRIES = 3
 const WAIT_TICKS = 30
 
-export interface DownloadPipPackageOptions {
-  /**
-   * Optional sha256 hash (`sha256:<hex>` or bare `<hex>`) of the top-level
-   * artifact, the Python analog of `downloadNpmPackage`'s `hash`. When set, pip
-   * runs with `--require-hashes` and `--hash=sha256:<hex>`, which fails closed
-   * unless EVERY resolved artifact (the spec and its full dependency closure)
-   * carries a matching hash — so it only fits specs pip can hash-verify (a
-   * pinned `==<version>` or a direct wheel/sdist URL) with a hash-pinned
-   * closure. Omit it and rely on the immutable spec as the pin: `==<version>`
-   * (PyPI is immutable per version) or `@<full-sha>` (git is content-addressed).
-   */
-  readonly hash?: string | undefined
-  /**
-   * Absolute path to the Python interpreter used to run pip (and later the
-   * tool). The interpreter is NOT modified — packages go to the dlx package
-   * dir. Typically from `resolvePython()`.
-   */
-  readonly pythonBin: string
-  /**
-   * pip install spec: `<pkg>==<version>` (PyPI exact pin) or
-   * `git+https://<url>@<sha>` (git-SHA pin).
-   */
-  readonly spec: string
-}
-
-export interface DownloadPipPackageResult {
-  /**
-   * `true` when this call ran pip; `false` when an existing install was reused.
-   */
-  readonly installed: boolean
-  /**
-   * Directory the package was installed into. Put this on `PYTHONPATH` to run
-   * the tool: `python -m <module>`. The Python analog of
-   * `DownloadNpmPackageResult.packageDir`.
-   */
-  readonly packageDir: string
-}
-
-/**
- * Content-addressed install dir for a spec:
- * `~/.socket/_dlx/<cacheKey>/site-packages`. The Python analog of
- * `downloadNpmPackage`'s `<hash>/node_modules`.
- */
-export function pipPackageDir(spec: string): string {
-  return path.join(getSocketDlxDir(), generateCacheKey(spec), 'site-packages')
-}
-
-function isStaleLock(pid: number): boolean {
-  if (Number.isNaN(pid) || pid <= 0) {
-    return true
-  }
-  try {
-    // Signal 0 probes existence without delivering a signal.
-    process.kill(pid, 0)
-    return false
-  } catch (e) {
-    const err = e as NodeJS.ErrnoException
-    // EPERM = exists but not ours (alive); ESRCH = gone (stale).
-    return err.code !== 'EPERM'
-  }
-}
-
-async function isAlreadyInstalled(packageDir: string): Promise<boolean> {
-  // A non-empty package dir counts as installed.
-  try {
-    const entries = await fs.readdir(packageDir)
-    return entries.length > 0
-  } catch {
-    return false
-  }
-}
-
 /**
  * Install `spec` into a content-addressed dlx dir via `pip install --target`.
  * Lock-guarded + idempotent. Throws on a failed pip install or if the lock
@@ -209,4 +137,76 @@ export async function downloadPipPackage(
   } finally {
     await safeDelete(lockFile, { force: true })
   }
+}
+
+export async function isAlreadyInstalled(packageDir: string): Promise<boolean> {
+  // A non-empty package dir counts as installed.
+  try {
+    const entries = await fs.readdir(packageDir)
+    return entries.length > 0
+  } catch {
+    return false
+  }
+}
+
+export function isStaleLock(pid: number): boolean {
+  if (Number.isNaN(pid) || pid <= 0) {
+    return true
+  }
+  try {
+    // Signal 0 probes existence without delivering a signal.
+    process.kill(pid, 0)
+    return false
+  } catch (e) {
+    const err = e as NodeJS.ErrnoException
+    // EPERM = exists but not ours (alive); ESRCH = gone (stale).
+    return err.code !== 'EPERM'
+  }
+}
+
+export interface DownloadPipPackageOptions {
+  /**
+   * Optional sha256 hash (`sha256:<hex>` or bare `<hex>`) of the top-level
+   * artifact, the Python analog of `downloadNpmPackage`'s `hash`. When set, pip
+   * runs with `--require-hashes` and `--hash=sha256:<hex>`, which fails closed
+   * unless EVERY resolved artifact (the spec and its full dependency closure)
+   * carries a matching hash — so it only fits specs pip can hash-verify (a
+   * pinned `==<version>` or a direct wheel/sdist URL) with a hash-pinned
+   * closure. Omit it and rely on the immutable spec as the pin: `==<version>`
+   * (PyPI is immutable per version) or `@<full-sha>` (git is content-addressed).
+   */
+  readonly hash?: string | undefined
+  /**
+   * Absolute path to the Python interpreter used to run pip (and later the
+   * tool). The interpreter is NOT modified — packages go to the dlx package
+   * dir. Typically from `resolvePython()`.
+   */
+  readonly pythonBin: string
+  /**
+   * pip install spec: `<pkg>==<version>` (PyPI exact pin) or
+   * `git+https://<url>@<sha>` (git-SHA pin).
+   */
+  readonly spec: string
+}
+
+export interface DownloadPipPackageResult {
+  /**
+   * `true` when this call ran pip; `false` when an existing install was reused.
+   */
+  readonly installed: boolean
+  /**
+   * Directory the package was installed into. Put this on `PYTHONPATH` to run
+   * the tool: `python -m <module>`. The Python analog of
+   * `DownloadNpmPackageResult.packageDir`.
+   */
+  readonly packageDir: string
+}
+
+/**
+ * Content-addressed install dir for a spec:
+ * `~/.socket/_dlx/<cacheKey>/site-packages`. The Python analog of
+ * `downloadNpmPackage`'s `<hash>/node_modules`.
+ */
+export function pipPackageDir(spec: string): string {
+  return path.join(getSocketDlxDir(), generateCacheKey(spec), 'site-packages')
 }
