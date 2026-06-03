@@ -51,6 +51,28 @@ describe.sequential('secrets/socket-api-token — readSocketApiToken (async)', (
     expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
   })
 
+  test('falls back to the legacy service="socket-cli" when socketsecurity misses', async () => {
+    const { readSocketApiToken, resolveMock } = await loadFresh()
+    // Primary (socketsecurity) misses → the `??` triggers the legacy call.
+    resolveMock.mockResolvedValueOnce(undefined)
+    resolveMock.mockResolvedValueOnce({ value: 'legacy-token' })
+    const token = await readSocketApiToken()
+    expect(resolveMock.mock.calls).toHaveLength(2)
+    expect((resolveMock.mock.calls[1]![0] as { service: string }).service).toBe(
+      'socket-cli',
+    )
+    expect(token).toBe('legacy-token')
+  })
+
+  test('does not call the legacy service when socketsecurity resolves', async () => {
+    const { readSocketApiToken, resolveMock } = await loadFresh()
+    resolveMock.mockResolvedValueOnce({ value: 'primary-token' })
+    const token = await readSocketApiToken()
+    // The `??` short-circuits — no legacy fallback call.
+    expect(resolveMock.mock.calls).toHaveLength(1)
+    expect(token).toBe('primary-token')
+  })
+
   test('forwards allowEnvOnly to resolve', async () => {
     const { readSocketApiToken, resolveMock } = await loadFresh()
     resolveMock.mockResolvedValueOnce(undefined)
