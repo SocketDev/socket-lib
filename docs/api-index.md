@@ -338,8 +338,10 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/opengrep/resolve`](../src/external-tools/opengrep/resolve.ts)                           | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/opengrep/types`](../src/external-tools/opengrep/types.ts)                               | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/python/asset-names`](../src/external-tools/python/asset-names.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/python/dlx`](../src/external-tools/python/dlx.ts)                                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/python/from-download`](../src/external-tools/python/from-download.ts)                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/python/from-path`](../src/external-tools/python/from-path.ts)                           | _(no description)_ |
+| [`@socketsecurity/lib-stable/external-tools/python/pin`](../src/external-tools/python/pin.ts)                                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/python/pip-install`](../src/external-tools/python/pip-install.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/python/resolve`](../src/external-tools/python/resolve.ts)                               | _(no description)_ |
 | [`@socketsecurity/lib-stable/external-tools/python/types`](../src/external-tools/python/types.ts)                                   | _(no description)_ |

@@ -14,7 +14,7 @@
  */
 
 import process from 'node:process'
-import { getGhsaUrl } from '../../src/github/fetch'
+import { getGhsaUrl } from '../../src/github/request'
 import { clearRefCache } from '../../src/github/refs'
 import {
   getGitHubToken,

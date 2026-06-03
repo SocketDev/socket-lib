@@ -5,7 +5,7 @@
  *   github-http.test.mts.
  */
 
-import { getGhsaUrl } from '../../src/github/fetch'
+import { getGhsaUrl } from '../../src/github/request'
 import { describe, expect, it } from 'vitest'
 
 describe.sequential('github ghsa url', () => {

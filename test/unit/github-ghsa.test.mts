@@ -9,7 +9,7 @@
  *     github-ghsa-url.test.mts.
  */
 
-import { fetchGitHub } from '../../src/github/fetch'
+import { fetchGitHub } from '../../src/github/request'
 import { cacheFetchGhsa, fetchGhsaDetails } from '../../src/github/ghsa'
 import { clearRefCache } from '../../src/github/refs'
 import { resetEnv } from '../../src/env/rewire'

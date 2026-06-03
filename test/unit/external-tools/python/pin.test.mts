@@ -15,12 +15,12 @@ import {
 import type * as NodeFs from 'node:fs'
 
 vi.mock(import('../../../../src/process/spawn/child'), () => ({
-  spawn: vi.fn(async () => undefined),
+  spawn: vi.fn(),
 }))
 
 vi.mock(import('../../../../src/fs/safe'), () => ({
-  safeDelete: vi.fn(async () => undefined),
-  safeMkdir: vi.fn(async () => undefined),
+  safeDelete: vi.fn(),
+  safeMkdir: vi.fn(),
 }))
 
 vi.mock(import('node:fs'), async () => {

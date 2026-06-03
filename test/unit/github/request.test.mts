@@ -118,7 +118,9 @@ describe('fetchGitHub', () => {
           'X-RateLimit-Reset': '9999999999',
         },
       )
-    const err = await fetchGitHub(`${GITHUB_API}/repos/foo/bar`).catch(e => e)
+    const err = (await fetchGitHub(`${GITHUB_API}/repos/foo/bar`).catch(
+      e => e,
+    )) as { message: string; status: number }
     expect(err.message).toMatch(/rate limit exceeded/)
     expect(err.status).toBe(403)
   })

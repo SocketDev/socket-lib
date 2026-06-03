@@ -114,11 +114,13 @@ describe('external-tools/python/asset-names — pythonAsset', () => {
 describe('external-tools/python/asset-names — DEFAULT_PYTHON_PIN', () => {
   test('every supported arch asset name has a checksum entry', () => {
     const { tag, version } = DEFAULT_PYTHON_PIN
+    const checksums = DEFAULT_PYTHON_PIN.checksums as unknown as Record<
+      string,
+      string
+    >
     for (const arch of SUPPORTED_ARCHES) {
       const asset = pythonAsset({ arch, tag, version })!
-      expect(DEFAULT_PYTHON_PIN.checksums[asset.assetName]).toMatch(
-        /^[a-f0-9]{64}$/,
-      )
+      expect(checksums[asset.assetName]).toMatch(/^[a-f0-9]{64}$/)
     }
   })
 
