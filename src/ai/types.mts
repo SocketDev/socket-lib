@@ -29,6 +29,14 @@ export type AiAgentName = 'claude' | 'codex' | 'gemini' | 'opencode'
 export type PermissionMode = 'acceptEdits' | 'dontAsk' | 'plan'
 
 /**
+ * Reasoning-effort level for the agent session. Maps to the claude CLI
+ * `--effort <level>` flag (claude-specific; other agents ignore it). Pair a
+ * cheap model with low effort for mechanical work and reserve high/max for
+ * tasks that genuinely need deeper reasoning.
+ */
+export type AiEffort = 'high' | 'low' | 'max' | 'medium' | 'xhigh'
+
+/**
  * Result of an agent spawn. Consumers should inspect `exitCode` before using
  * `stdout` — non-zero usually means the agent's CLI itself rejected, not just
  * that the prompt failed.
@@ -72,6 +80,11 @@ export interface SpawnAiAgentOptions {
    * Tool denylist — required to enforce the lockdown.
    */
   readonly disallow: readonly string[]
+  /**
+   * Reasoning-effort level (claude `--effort`); agent default if absent.
+   * claude-specific — other agents ignore it.
+   */
+  readonly effort?: AiEffort | undefined
   /**
    * Override the agent's flag list (rare; for one-off advanced cases).
    */

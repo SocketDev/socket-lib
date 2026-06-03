@@ -109,6 +109,18 @@ describe.sequential('buildArgs — claude', () => {
     expect(args).toContain('sonnet-4-6')
   })
 
+  test('appends --effort when provided', () => {
+    const args = buildArgs('claude', baseOpts({ effort: 'low' }))
+    const i = args.indexOf('--effort')
+    expect(i).toBeGreaterThanOrEqual(0)
+    expect(args[i + 1]).toBe('low')
+  })
+
+  test('omits --effort when absent', () => {
+    const args = buildArgs('claude', baseOpts())
+    expect(args).not.toContain('--effort')
+  })
+
   test('appends --allowedTools when tools or allow set', () => {
     const args = buildArgs(
       'claude',

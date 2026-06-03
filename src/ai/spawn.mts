@@ -70,6 +70,9 @@ export function buildArgs(
       if (opts.model) {
         args.push('--model', opts.model)
       }
+      if (opts.effort) {
+        args.push('--effort', opts.effort)
+      }
       if (allAllowed.length > 0) {
         args.push('--allowedTools', ...allAllowed)
       }
