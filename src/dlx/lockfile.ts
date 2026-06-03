@@ -1,5 +1,5 @@
 /**
- * @file Package pin generation for dlx installs. `generateNpmPackagePin` resolves
+ * @file Package pin generation for dlx installs. `resolveNpmPackagePin` resolves
  *   an npm package against the registry using Arborist's lockfile-only mode and
  *   fetches its top-level tarball to return both hash formats plus the lockfile
  *   content — everything needed to vendor a reproducible install. The
@@ -61,7 +61,7 @@ export const DEFAULT_MIN_RELEASE_DAYS = 7
 /**
  * Options for generating a vendorable pin for an npm package.
  */
-export interface GenerateNpmPackagePinOptions {
+export interface ResolveNpmPackagePinOptions {
   /**
    * Minimum release age in days. Refuses to resolve any version (direct or
    * transitive) published more recently than `Date.now() - N days`.
@@ -87,10 +87,10 @@ export interface GenerateNpmPackagePinOptions {
 }
 
 /**
- * Result of {@link generateNpmPackagePin}. All file data is returned as content —
+ * Result of {@link resolveNpmPackagePin}. All file data is returned as content —
  * the caller decides whether/where to write it.
  */
-export interface PinDetails {
+export interface NpmPackagePin {
   /**
    * Resolved package name.
    */
@@ -141,7 +141,7 @@ export class DlxLockfileError extends Error {
  *
  * @example
  *   ;```ts
- *   const pin = await generateNpmPackagePin({
+ *   const pin = await resolveNpmPackagePin({
  *     spec: '@anthropic-ai/claude-code@2.1.92',
  *   })
  *   await fs.writeFile('./claude.lock.json', pin.lockfile, 'utf8')
@@ -149,18 +149,18 @@ export class DlxLockfileError extends Error {
  *   // pin.hash.checksum  → hex
  *   ```
  */
-export async function generateNpmPackagePin(
-  options: GenerateNpmPackagePinOptions,
-): Promise<PinDetails> {
+export async function resolveNpmPackagePin(
+  options: ResolveNpmPackagePinOptions,
+): Promise<NpmPackagePin> {
   const fs = getNodeFs()
   const path = getNodePath()
   const { minReleaseDays, minReleaseMins, spec } = options
   if (typeof spec !== 'string' || spec.length === 0) {
-    throw new DlxLockfileError('generateNpmPackagePin requires a package spec')
+    throw new DlxLockfileError('resolveNpmPackagePin requires a package spec')
   }
   if (minReleaseDays !== undefined && minReleaseMins !== undefined) {
     throw new DlxLockfileError(
-      'generateNpmPackagePin: minReleaseDays and minReleaseMins are mutually exclusive',
+      'resolveNpmPackagePin: minReleaseDays and minReleaseMins are mutually exclusive',
     )
   }
   const effectiveDays =
