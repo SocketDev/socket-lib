@@ -28,7 +28,7 @@ describe('dlx/lockfile/generatePackagePin', () => {
     })
 
     it('throws DlxLockfileError when package spec is empty', async () => {
-      await expect(generatePackagePin({ package: '' })).rejects.toThrow(
+      await expect(generatePackagePin({ spec: '' })).rejects.toThrow(
         DlxLockfileError,
       )
     })
@@ -36,9 +36,9 @@ describe('dlx/lockfile/generatePackagePin', () => {
     it('throws when both minReleaseDays and minReleaseMins are set', async () => {
       await expect(
         generatePackagePin({
-          package: 'is-odd@3.0.1',
           minReleaseDays: 7,
           minReleaseMins: 1440,
+          spec: 'is-odd@3.0.1',
         }),
       ).rejects.toThrow(/mutually exclusive/)
     })
@@ -47,7 +47,7 @@ describe('dlx/lockfile/generatePackagePin', () => {
       await expect(
         generatePackagePin({
           // @ts-expect-error — intentional invalid type.
-          package: 42,
+          spec: 42,
         }),
       ).rejects.toThrow(DlxLockfileError)
     })
@@ -56,8 +56,8 @@ describe('dlx/lockfile/generatePackagePin', () => {
   describeNetworkOnly('live registry (network)', () => {
     it('returns pin details with both hash formats', async () => {
       const pin = await generatePackagePin({
-        package: 'is-odd@3.0.1',
         minReleaseDays: 0,
+        spec: 'is-odd@3.0.1',
       })
       expect(pin.name).toBe('is-odd')
       expect(pin.version).toBe('3.0.1')
@@ -71,14 +71,14 @@ describe('dlx/lockfile/generatePackagePin', () => {
 
     it('applies default min-release-age of 7 days when no option is provided', async () => {
       // is-odd@3.0.1 was published in 2018 — easily older than 7 days.
-      const pin = await generatePackagePin({ package: 'is-odd@3.0.1' })
+      const pin = await generatePackagePin({ spec: 'is-odd@3.0.1' })
       expect(pin.version).toBe('3.0.1')
     }, 60_000)
 
     it('respects minReleaseMins path (pnpm-style unit)', async () => {
       const pin = await generatePackagePin({
-        package: 'is-odd@3.0.1',
         minReleaseMins: 10_080,
+        spec: 'is-odd@3.0.1',
       })
       expect(pin.version).toBe('3.0.1')
     }, 60_000)

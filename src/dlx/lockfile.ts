@@ -63,10 +63,6 @@ export const DEFAULT_MIN_RELEASE_DAYS = 7
  */
 export interface GeneratePackagePinOptions {
   /**
-   * Package spec, e.g. `'@anthropic-ai/claude-code@2.1.92'`.
-   */
-  package: string
-  /**
    * Minimum release age in days. Refuses to resolve any version (direct or
    * transitive) published more recently than `Date.now() - N days`.
    *
@@ -83,6 +79,11 @@ export interface GeneratePackagePinOptions {
    * exclusive with {@link minReleaseDays}.
    */
   minReleaseMins?: number | undefined
+  /**
+   * Package spec, e.g. `'@anthropic-ai/claude-code@2.1.92'`. Named `spec` to
+   * match `downloadNpmPackage`/`downloadPipPackage`.
+   */
+  spec: string
 }
 
 /**
@@ -141,7 +142,7 @@ export class DlxLockfileError extends Error {
  * @example
  *   ;```ts
  *   const pin = await generatePackagePin({
- *     package: '@anthropic-ai/claude-code@2.1.92',
+ *     spec: '@anthropic-ai/claude-code@2.1.92',
  *   })
  *   await fs.writeFile('./claude.lock.json', pin.lockfile, 'utf8')
  *   // pin.hash.integrity → 'sha512-…'
@@ -153,7 +154,7 @@ export async function generatePackagePin(
 ): Promise<PinDetails> {
   const fs = getNodeFs()
   const path = getNodePath()
-  const { minReleaseDays, minReleaseMins, package: spec } = options
+  const { minReleaseDays, minReleaseMins, spec } = options
   if (typeof spec !== 'string' || spec.length === 0) {
     throw new DlxLockfileError('generatePackagePin requires a package spec')
   }

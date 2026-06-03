@@ -14,10 +14,10 @@ import type {
 describe('DlxPackageOptions interface', () => {
   it('should accept valid package specs', () => {
     const options: DlxPackageOptions = {
-      package: 'cowsay@1.6.0',
+      spec: 'cowsay@1.6.0',
     }
 
-    expect(options.package).toBe('cowsay@1.6.0')
+    expect(options.spec).toBe('cowsay@1.6.0')
     expect(options.force).toBeUndefined()
     expect(options.spawnOptions).toBeUndefined()
   })
@@ -25,7 +25,7 @@ describe('DlxPackageOptions interface', () => {
   it('should accept force option', () => {
     const options: DlxPackageOptions = {
       force: true,
-      package: 'cowsay@1.6.0',
+      spec: 'cowsay@1.6.0',
     }
 
     expect(options.force).toBe(true)
@@ -33,7 +33,7 @@ describe('DlxPackageOptions interface', () => {
 
   it('should accept yes option (CLI-style)', () => {
     const options: DlxPackageOptions = {
-      package: 'cowsay@1.6.0',
+      spec: 'cowsay@1.6.0',
       yes: true,
     }
 
@@ -42,8 +42,8 @@ describe('DlxPackageOptions interface', () => {
 
   it('should accept quiet option (CLI-style, reserved)', () => {
     const options: DlxPackageOptions = {
-      package: 'cowsay@1.6.0',
       quiet: true,
+      spec: 'cowsay@1.6.0',
     }
 
     expect(options.quiet).toBe(true)
@@ -51,11 +51,11 @@ describe('DlxPackageOptions interface', () => {
 
   it('should accept spawn options', () => {
     const options: DlxPackageOptions = {
-      package: 'cowsay@1.6.0',
       spawnOptions: {
         cwd: '/tmp',
         env: { FOO: 'bar' },
       },
+      spec: 'cowsay@1.6.0',
     }
 
     expect(options.spawnOptions?.cwd).toBe('/tmp')
@@ -65,7 +65,7 @@ describe('DlxPackageOptions interface', () => {
   it('should handle yes and force together', () => {
     const options: DlxPackageOptions = {
       force: false,
-      package: 'cowsay@1.6.0',
+      spec: 'cowsay@1.6.0',
       yes: true,
     }
 
