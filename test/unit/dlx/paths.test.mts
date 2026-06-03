@@ -13,7 +13,6 @@
 import crypto from 'node:crypto'
 import os from 'node:os'
 import path from 'node:path'
-import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { getSocketDlxDir as canonicalGetSocketDlxDir } from '@socketsecurity/lib-stable/paths/socket'
@@ -26,35 +25,32 @@ import {
   isInSocketDlx,
 } from '../../../src/dlx/paths'
 import { safeDelete } from '../../../src/fs/safe'
+import { setPath } from '../../../src/paths/rewire'
 import { getSocketDlxDir } from '../../../src/paths/socket'
 
 describe.sequential('dlx paths', () => {
   const testPackageName = 'test-package'
-  let originalEnv: string | undefined
   let testDlxDir: string
 
   beforeEach(() => {
-    // Save original env and create isolated test directory
-    originalEnv = process.env['SOCKET_DLX_DIR']
+    // Sandbox the dlx dir via the path-rewire override, NOT process.env.
+    // Under `isolate: false` the worker shares process.env across files, so a
+    // raw `delete process.env.SOCKET_DLX_DIR` in afterEach would unset it for a
+    // concurrent test mid-run (making getSocketDlxDir() return undefined).
+    // setPath sets the memoized override directly; setPath(undefined) clears it
+    // back to the real factory — never an undefined.
     testDlxDir = path.join(
       os.tmpdir(),
       `socket-dlx-test-${crypto.randomUUID()}`,
     )
-    process.env['SOCKET_DLX_DIR'] = testDlxDir
+    setPath('socket-dlx-dir', testDlxDir)
   })
 
   afterEach(async () => {
-    // Remove test directory
     try {
       await safeDelete(testDlxDir)
     } catch {}
-
-    // Restore original env
-    if (originalEnv === undefined) {
-      delete process.env['SOCKET_DLX_DIR']
-    } else {
-      process.env['SOCKET_DLX_DIR'] = originalEnv
-    }
+    setPath('socket-dlx-dir', undefined)
   })
 
   describe('getDlxPackageDir', () => {
