@@ -79,7 +79,7 @@ const rangeOperatorsRegExp = /[~^><=xX* ]|\|\|/
  *   ;```typescript
  *   // Download and execute cdxgen
  *   const result = await dlxPackage(['--version'], {
- *     package: '@cyclonedx/cdxgen@10.0.0',
+ *     spec: '@cyclonedx/cdxgen@10.0.0',
  *   })
  *   await result.spawnPromise
  *   ```
@@ -115,7 +115,7 @@ export async function dlxPackage(
  *   ;```typescript
  *   // Install @socketsecurity/cli without running it
  *   const result = await downloadNpmPackage({
- *     package: '@socketsecurity/cli@1.2.0',
+ *     spec: '@socketsecurity/cli@1.2.0',
  *     force: true,
  *   })
  *   console.log('Installed to:', result.packageDir)
@@ -131,7 +131,7 @@ export async function downloadNpmPackage(
     hash,
     installRoot,
     lockfile,
-    package: packageSpec,
+    spec: packageSpec,
     yes,
   } = {
     __proto__: null,
@@ -375,7 +375,7 @@ export async function ensurePackageInstalled(
  * @example
  *   ;```typescript
  *   // Execute an already-installed package
- *   const downloaded = await downloadNpmPackage({ package: 'cowsay@1.5.0' })
+ *   const downloaded = await downloadNpmPackage({ spec: 'cowsay@1.5.0' })
  *   const result = await executePackage(
  *     downloaded.binaryPath,
  *     ['Hello World'],

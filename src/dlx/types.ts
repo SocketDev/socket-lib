@@ -16,10 +16,6 @@ import type { SpawnOptions } from '../process/spawn/types'
 
 export interface DownloadNpmPackageResult {
   /**
-   * Path to the installed package directory.
-   */
-  packageDir: string
-  /**
    * Path to the binary.
    */
   binaryPath: string
@@ -27,6 +23,10 @@ export interface DownloadNpmPackageResult {
    * Whether the package was newly installed.
    */
   installed: boolean
+  /**
+   * Path to the installed package directory.
+   */
+  packageDir: string
 }
 
 /**
@@ -87,40 +87,30 @@ export interface EnsurePackageInstallOptions {
 
 export interface DlxPackageOptions extends EnsurePackageInstallOptions {
   /**
-   * Package to install (e.g., '@cyclonedx/cdxgen@10.0.0'). Aligns with npx
-   * --package flag.
-   */
-  package: string
-
-  /**
    * Binary name to execute (optional - auto-detected in most cases).
    *
-   * Auto-detection logic: 1. If package has only one binary, uses it
+   * Auto-detection logic: 1. If the package has only one binary, uses it
    * automatically 2. Tries user-provided binaryName 3. Tries last segment of
-   * package name (e.g., 'cli' from '@socketsecurity/cli') 4. Falls back to
+   * the package name (e.g., 'cli' from '@socketsecurity/cli') 4. Falls back to
    * first binary.
    *
-   * Only needed when package has multiple binaries and auto-detection fails.
+   * Only needed when the package has multiple binaries and auto-detection
+   * fails.
    *
    * @example
    *   // Auto-detected (single binary)
-   *   { package: '@socketsecurity/cli' }  // Finds 'socket' binary automatically
+   *   { spec: '@socketsecurity/cli' }  // Finds 'socket' binary automatically
    *
    *   // Explicit (multiple binaries)
-   *   { package: 'some-tool', binaryName: 'specific-tool' }
+   *   { spec: 'some-tool', binaryName: 'specific-tool' }
    */
   binaryName?: string | undefined
 
   /**
-   * Force reinstallation even if package exists. Aligns with npx --yes/-y flag
-   * behavior.
+   * Force reinstallation even if the package exists. Aligns with npx --yes/-y
+   * flag behavior.
    */
   force?: boolean | undefined
-
-  /**
-   * Skip confirmation prompts (auto-approve). Aligns with npx --yes/-y flag.
-   */
-  yes?: boolean | undefined
 
   /**
    * Suppress output (quiet mode). Aligns with npx --quiet/-q and pnpm
@@ -132,13 +122,20 @@ export interface DlxPackageOptions extends EnsurePackageInstallOptions {
    * Additional spawn options for the execution.
    */
   spawnOptions?: SpawnOptions | undefined
+
+  /**
+   * Package spec to install (e.g., '@cyclonedx/cdxgen@10.0.0'). Aligns with npx
+   * --package flag. Named `spec` to match `downloadPipPackage({ spec })`.
+   */
+  spec: string
+
+  /**
+   * Skip confirmation prompts (auto-approve). Aligns with npx --yes/-y flag.
+   */
+  yes?: boolean | undefined
 }
 
 export interface DlxPackageResult {
-  /**
-   * Path to the installed package directory.
-   */
-  packageDir: string
   /**
    * Path to the binary that was executed.
    */
@@ -147,6 +144,10 @@ export interface DlxPackageResult {
    * Whether the package was newly installed.
    */
   installed: boolean
+  /**
+   * Path to the installed package directory.
+   */
+  packageDir: string
   /**
    * The spawn promise for the running process.
    */

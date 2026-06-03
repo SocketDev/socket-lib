@@ -28,7 +28,7 @@ export async function synpFromDownload(
   const { integrity, version } = opts
   const packageSpec = getSynpPackageSpec({ version })
   const { binaryPath } = await downloadNpmPackage({
-    package: packageSpec,
+    spec: packageSpec,
     binaryName: 'synp',
     ...(integrity ? { hash: integrity } : {}),
   })

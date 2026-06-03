@@ -43,6 +43,17 @@ const WAIT_TICKS = 30
 
 export interface DownloadPipPackageOptions {
   /**
+   * Optional sha256 hash (`sha256:<hex>` or bare `<hex>`) of the top-level
+   * artifact, the Python analog of `downloadNpmPackage`'s `hash`. When set, pip
+   * runs with `--require-hashes` and `--hash=sha256:<hex>`, which fails closed
+   * unless EVERY resolved artifact (the spec and its full dependency closure)
+   * carries a matching hash — so it only fits specs pip can hash-verify (a
+   * pinned `==<version>` or a direct wheel/sdist URL) with a hash-pinned
+   * closure. Omit it and rely on the immutable spec as the pin: `==<version>`
+   * (PyPI is immutable per version) or `@<full-sha>` (git is content-addressed).
+   */
+  readonly hash?: string | undefined
+  /**
    * Absolute path to the Python interpreter used to run pip (and later the
    * tool). The interpreter is NOT modified — packages go to the dlx package
    * dir. Typically from `resolvePython()`.
@@ -57,15 +68,15 @@ export interface DownloadPipPackageOptions {
 
 export interface DownloadPipPackageResult {
   /**
+   * `true` when this call ran pip; `false` when an existing install was reused.
+   */
+  readonly installed: boolean
+  /**
    * Directory the package was installed into. Put this on `PYTHONPATH` to run
    * the tool: `python -m <module>`. The Python analog of
    * `DownloadNpmPackageResult.packageDir`.
    */
   readonly packageDir: string
-  /**
-   * `true` when this call ran pip; `false` when an existing install was reused.
-   */
-  readonly installed: boolean
 }
 
 /**
@@ -111,7 +122,7 @@ export async function downloadPipPackage(
   options: DownloadPipPackageOptions,
   retryCount = 0,
 ): Promise<DownloadPipPackageResult> {
-  const { pythonBin, spec } = options
+  const { hash, pythonBin, spec } = options
   const packageDir = pipPackageDir(spec)
   if (retryCount >= MAX_RETRIES) {
     throw new Error(
@@ -119,7 +130,7 @@ export async function downloadPipPackage(
     )
   }
   if (await isAlreadyInstalled(packageDir)) {
-    return { packageDir, installed: false }
+    return { installed: false, packageDir }
   }
   // The lock lives one level up so a `--clear`-style wipe of packageDir can't
   // delete the lock mid-install.
@@ -155,7 +166,7 @@ export async function downloadPipPackage(
       })
       // eslint-disable-next-line no-await-in-loop -- sequential poll by design.
       if (await isAlreadyInstalled(packageDir)) {
-        return { packageDir, installed: false }
+        return { installed: false, packageDir }
       }
     }
     return downloadPipPackage(options, retryCount + 1)
@@ -163,9 +174,30 @@ export async function downloadPipPackage(
 
   try {
     await safeMkdir(packageDir, { recursive: true })
+    // A bare hex hash is normalized to pip's `sha256:<hex>` form. `--hash`
+    // requires `--require-hashes`, which fails closed unless every resolved
+    // artifact is hash-pinned.
+    const normalizedHash = hash
+      ? hash.startsWith('sha256:')
+        ? hash
+        : `sha256:${hash}`
+      : undefined
+    const hashArgs = normalizedHash
+      ? ['--require-hashes', `--hash=${normalizedHash}`]
+      : []
     await spawn(
       pythonBin,
-      ['-m', 'pip', 'install', '--no-input', '--quiet', '--target', packageDir, spec],
+      [
+        '-m',
+        'pip',
+        'install',
+        '--no-input',
+        '--quiet',
+        '--target',
+        packageDir,
+        ...hashArgs,
+        spec,
+      ],
       { shell: WIN32, stdio: 'inherit' },
     )
     if (!(await isAlreadyInstalled(packageDir))) {
@@ -173,7 +205,7 @@ export async function downloadPipPackage(
         `downloadPipPackage: pip install --target ${packageDir} ${spec} reported success but the target is still empty`,
       )
     }
-    return { packageDir, installed: true }
+    return { installed: true, packageDir }
   } finally {
     await safeDelete(lockFile, { force: true })
   }
