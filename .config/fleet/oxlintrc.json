@@ -208,7 +208,6 @@
     "**/.config/fleet/markdownlint-rules/socket-no-private-wheelhouse-leak.mjs",
     "**/.config/fleet/markdownlint-rules/socket-no-relative-sibling-script.mjs",
     "**/.config/fleet/markdownlint-rules/socket-readme-required-sections.mjs",
-    "**/.config/socket-registry-pins.json",
     "**/.config/socket-wheelhouse-schema.json",
     "**/.config/taze.config.mts",
     "**/.config/tsconfig.base.json",
