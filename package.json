@@ -1200,6 +1200,11 @@
       "types": "./dist/external-tools/python/asset-names.d.ts",
       "default": "./dist/external-tools/python/asset-names.js"
     },
+    "./external-tools/python/dlx": {
+      "source": "./src/external-tools/python/dlx.ts",
+      "types": "./dist/external-tools/python/dlx.d.ts",
+      "default": "./dist/external-tools/python/dlx.js"
+    },
     "./external-tools/python/from-download": {
       "source": "./src/external-tools/python/from-download.ts",
       "types": "./dist/external-tools/python/from-download.d.ts",
