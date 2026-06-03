@@ -13,7 +13,7 @@ import {
   fetchChecksumFile,
   parseChecksumFile,
 } from '../../src/http-request/checksum-file'
-import { isIntegrityString } from '@socketsecurity/lib-stable/integrity'
+import { isIntegrity } from '../../src/integrity'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures'
 
@@ -23,7 +23,6 @@ setupHttpFixture()
 const HEX_A = 'abc123def456789012345678901234567890123456789012345678901234abcd'
 const HEX_B = 'fedcba9876543210fedcba9876543210fedcba9876543210fedcba98765432ab'
 const HEX_C = '1234567890abcdef1234567890abcdef1234567890abcdef1234567890abcdef'
-const HEX_D = 'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890'
 
 // Pre-computed SRI equivalents (sha256-<base64>=).
 const INT_A = 'sha256-q8Ej3vRWeJASNFZ4kBI0VniQEjRWeJASNFZ4kBI0q80='
@@ -145,7 +144,7 @@ ${HEX_A}
       const checksums = await fetchChecksumFile(`${fixture.baseUrl}/checksums.txt`)
 
       expect(checksums['checksum-file']).toBeDefined()
-      expect(isIntegrityString(checksums['checksum-file']!)).toBe(true)
+      expect(isIntegrity(checksums['checksum-file']!)).toBe(true)
       expect(checksums['other-file']).toBe(INT_D)
     })
 
@@ -155,7 +154,7 @@ ${HEX_A}
       )
 
       expect(checksums['checksum-file']).toBeDefined()
-      expect(isIntegrityString(checksums['checksum-file']!)).toBe(true)
+      expect(isIntegrity(checksums['checksum-file']!)).toBe(true)
     })
 
     it('should throw when URL returns 404', async () => {
