@@ -1210,6 +1210,11 @@
       "types": "./dist/external-tools/python/from-path.d.ts",
       "default": "./dist/external-tools/python/from-path.js"
     },
+    "./external-tools/python/pin": {
+      "source": "./src/external-tools/python/pin.ts",
+      "types": "./dist/external-tools/python/pin.d.ts",
+      "default": "./dist/external-tools/python/pin.js"
+    },
     "./external-tools/python/pip-install": {
       "source": "./src/external-tools/python/pip-install.ts",
       "types": "./dist/external-tools/python/pip-install.d.ts",

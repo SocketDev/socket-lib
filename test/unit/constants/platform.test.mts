@@ -22,7 +22,11 @@ import {
   getPlatform,
 } from '@socketsecurity/lib-stable/constants/platform'
 
-import { DARWIN, WIN32 } from '../../../src/constants/platform'
+import {
+  DARWIN,
+  WIN32,
+  getPlatformAndArch,
+} from '../../../src/constants/platform'
 
 describe('constants/platform', () => {
   describe('platform detection', () => {
@@ -141,6 +145,20 @@ describe('constants/platform', () => {
       } else {
         expect(getPlatform()).not.toBe('win32')
       }
+    })
+  })
+
+  describe('getPlatformAndArch', () => {
+    it('joins raw platform and arch with a dash', () => {
+      expect(getPlatformAndArch()).toBe(`${getPlatform()}-${getArch()}`)
+    })
+
+    it('uses raw Node vocabulary (win32, not win)', () => {
+      expect(getPlatformAndArch().startsWith(`${process.platform}-`)).toBe(true)
+    })
+
+    it('returns a consistent value across calls', () => {
+      expect(getPlatformAndArch()).toBe(getPlatformAndArch())
     })
   })
 

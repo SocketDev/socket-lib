@@ -12,7 +12,7 @@ import process from 'node:process'
 import { getSocketDlxDir } from '../../paths/socket'
 import { downloadAndExtractTool } from '../from-download'
 
-import { pythonAsset } from './asset-names'
+import { getPythonArch, pythonAsset } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
 import type { HashSpec } from '../../integrity'
@@ -28,16 +28,17 @@ export interface PythonFromDownloadOptions {
    */
   tag: string
   /**
-   * Target `platform-arch`, e.g. `darwin-arm64`.
+   * Target `platform-arch`, e.g. `darwin-arm64`. Omit to auto-detect the
+   * current host via {@link getPythonArch}.
    */
-  platformArch: string
+  arch?: string | undefined
   /**
    * Optional pinned integrity (hex SHA-256 or SRI) for the tarball.
    */
   integrity?: HashSpec | undefined
   /**
    * Override the extraction directory. Defaults to
-   * `~/.socket/_dlx/python/<version>-<tag>-<platformArch>`.
+   * `~/.socket/_dlx/python/<version>-<tag>-<arch>`.
    */
   cacheDir?: string | undefined
   /**
@@ -63,24 +64,30 @@ export function pythonBinPath(extractedDir: string): string {
 export function pythonCacheDir(
   version: string,
   tag: string,
-  platformArch: string,
+  arch: string,
 ): string {
-  return path.join(getSocketDlxDir(), 'python', `${version}-${tag}-${platformArch}`)
+  return path.join(getSocketDlxDir(), 'python', `${version}-${tag}-${arch}`)
 }
 
 export async function pythonFromDownload(
   opts: PythonFromDownloadOptions,
 ): Promise<ResolvedPython | undefined> {
-  const { cacheDir, downloader, integrity, platformArch, tag, version } = opts
-  const asset = pythonAsset({ version, tag, platformArch })
+  const { cacheDir, downloader, integrity, tag, version } = opts
+  // Resolve the effective platform-arch ONCE so the asset URL and the cache
+  // path agree (a stray undefined here would poison the cache dir name).
+  const arch = opts.arch ?? getPythonArch()
+  if (!arch) {
+    return undefined
+  }
+  const asset = pythonAsset({ version, tag, arch })
   if (!asset) {
     return undefined
   }
-  const extractedDir = cacheDir ?? pythonCacheDir(version, tag, platformArch)
+  const extractedDir = cacheDir ?? pythonCacheDir(version, tag, arch)
   // No strip — the install_only archive already nests under `python/`.
   const archive = await downloadAndExtractTool({
     url: asset.url,
-    name: `python-${version}-${tag}-${platformArch}.tar.gz`,
+    name: `python-${version}-${tag}-${arch}.tar.gz`,
     integrity,
     extractedDir,
     downloader,

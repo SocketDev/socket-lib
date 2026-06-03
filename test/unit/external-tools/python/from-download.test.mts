@@ -19,7 +19,7 @@ describe('external-tools/python/from-download — path helpers', () => {
     expect(pythonBinPath(dir)).toBe(expected)
   })
 
-  test('pythonCacheDir encodes version-tag-platformArch under _dlx/python', () => {
+  test('pythonCacheDir encodes version-tag-arch under _dlx/python', () => {
     const dir = pythonCacheDir('3.11.14', '20260203', 'darwin-arm64')
     expect(dir.replace(/\\/g, '/')).toContain(
       '/_dlx/python/3.11.14-20260203-darwin-arm64',

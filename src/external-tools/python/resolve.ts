@@ -14,6 +14,7 @@
  *   tier here if that changes.
  */
 
+import { getPythonArch } from './asset-names'
 import { pythonFromDownload } from './from-download'
 import { pythonFromPath } from './from-path'
 
@@ -38,7 +39,10 @@ export interface ResolvePythonOptions {
     | {
         version: string
         tag: string
-        platformArch: string
+        /**
+         * Omit to auto-detect the current host via {@link getPythonArch}.
+         */
+        arch?: string | undefined
         integrity?: HashSpec | undefined
         cacheDir?: string | undefined
         downloader?: BinaryDownloader | undefined
@@ -56,15 +60,18 @@ export function cacheKey(opts: ResolvePythonOptions | undefined): string {
   if (!opts?.downloadIfMissing) {
     return `${prefer}local-only`
   }
-  const { cacheDir, integrity, platformArch, tag, version } =
-    opts.downloadIfMissing
+  const { cacheDir, integrity, tag, version } = opts.downloadIfMissing
+  // Resolve the effective platform-arch so a host-auto-detect call and an
+  // explicit-matching call share one cache slot (and don't key on `undefined`).
+  const arch =
+    opts.downloadIfMissing.arch ?? getPythonArch() ?? 'unknown'
   const integrityKey =
     typeof integrity === 'string'
       ? integrity
       : integrity
         ? `${integrity.type}:${integrity.value}`
         : ''
-  return `${prefer}dl:${version}:${tag}:${platformArch}:${integrityKey}:${cacheDir ?? ''}`
+  return `${prefer}dl:${version}:${tag}:${arch}:${integrityKey}:${cacheDir ?? ''}`
 }
 
 export async function doResolvePython(

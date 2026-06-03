@@ -19,7 +19,7 @@ describe('external-tools/python/resolve — cacheKey', () => {
     expect(
       cacheKey({
         downloadIfMissing: {
-          platformArch: 'linux-x64',
+          arch: 'linux-x64',
           tag: '20260203',
           version: '3.11.14',
         },
@@ -31,7 +31,7 @@ describe('external-tools/python/resolve — cacheKey', () => {
     expect(
       cacheKey({
         downloadIfMissing: {
-          platformArch: 'linux-x64',
+          arch: 'linux-x64',
           tag: '20260203',
           version: '3.11.14',
           integrity: 'sha256-py',
@@ -44,7 +44,7 @@ describe('external-tools/python/resolve — cacheKey', () => {
     expect(
       cacheKey({
         downloadIfMissing: {
-          platformArch: 'linux-x64',
+          arch: 'linux-x64',
           tag: '20260203',
           version: '3.11.14',
           integrity: { type: 'checksum', value: 'hex-val' },
@@ -58,7 +58,7 @@ describe('external-tools/python/resolve — cacheKey', () => {
       cacheKey({
         preferDownload: true,
         downloadIfMissing: {
-          platformArch: 'darwin-arm64',
+          arch: 'darwin-arm64',
           tag: '20260203',
           version: '3.11.14',
         },

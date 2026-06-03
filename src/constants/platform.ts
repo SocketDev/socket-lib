@@ -43,6 +43,22 @@ export function getPlatform(): Platform {
   return memoizedPlatform
 }
 
+let memoizedPlatformAndArch: string | undefined
+
+/**
+ * Get the current `platform-arch` host token (memoized), e.g. `darwin-arm64`,
+ * `linux-x64`, `win32-x64`. Raw Node vocabulary — `process.platform` joined to
+ * `process.arch` with a `-`. Tool-specific resolvers that need a different
+ * vocabulary (python-build-standalone's `win`, Adoptium's `-musl`) layer their
+ * own mapping on top — see `getPythonArch` / `getJreArch`.
+ */
+export function getPlatformAndArch(): string {
+  if (memoizedPlatformAndArch === undefined) {
+    memoizedPlatformAndArch = `${getPlatform()}-${getArch()}`
+  }
+  return memoizedPlatformAndArch
+}
+
 // Platform detection (memoized at module load).
 export const DARWIN = getPlatform() === 'darwin'
 export const WIN32 = getPlatform() === 'win32'

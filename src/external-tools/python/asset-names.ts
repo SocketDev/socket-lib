@@ -7,6 +7,8 @@
  *   extracted one directory deep (`python/bin/python3`).
  */
 
+import process from 'node:process'
+
 import { ObjectFreeze } from '../../primordials/object'
 
 // platform-arch → python-build-standalone target triple. The `install_only`
@@ -23,8 +25,49 @@ const PLATFORM_TRIPLES: Readonly<Record<string, string>> = ObjectFreeze({
   'win-x64': 'x86_64-pc-windows-msvc',
 }) as unknown as Readonly<Record<string, string>>
 
+// node platform → python-build-standalone platform segment. Node reports
+// `win32`; python-build-standalone keys on `win`. macOS/Linux pass through.
+const NODE_PLATFORM_TO_PY: Readonly<Record<string, string>> = ObjectFreeze({
+  __proto__: null,
+  darwin: 'darwin',
+  linux: 'linux',
+  win32: 'win',
+}) as unknown as Readonly<Record<string, string>>
+
+// node arch → python-build-standalone arch segment.
+const NODE_ARCH_TO_PY: Readonly<Record<string, string>> = ObjectFreeze({
+  __proto__: null,
+  arm64: 'arm64',
+  x64: 'x64',
+}) as unknown as Readonly<Record<string, string>>
+
 const RELEASE_BASE =
   'https://github.com/astral-sh/python-build-standalone/releases/download'
+
+/**
+ * Resolve the current host to a python-build-standalone `platform-arch` key
+ * (a `PLATFORM_TRIPLES` key, e.g. `darwin-arm64`, `win-x64`). Owns the
+ * python-build-standalone vocabulary end to end: Node's `win32` becomes `win`,
+ * and libc is intentionally ignored — the `install_only` archives are
+ * glibc-only, so musl hosts map to the same `linux-<arch>` key (the relocatable
+ * runtime works on most musl systems via bundled libs). Returns `undefined`
+ * when the host platform/arch has no upstream prebuilt.
+ *
+ * Separate from `getJreArch` (jre/Adoptium vocabulary, emits a `-musl` suffix)
+ * and from the shared `getPlatformArch` — neither matches
+ * python-build-standalone's key set.
+ */
+export function getPythonArch(): string | undefined {
+  /* c8 ignore start - depends on process.platform/arch. */
+  const platform = NODE_PLATFORM_TO_PY[process.platform]
+  const arch = NODE_ARCH_TO_PY[process.arch]
+  if (!platform || !arch) {
+    return undefined
+  }
+  const key = `${platform}-${arch}`
+  return PLATFORM_TRIPLES[key] ? key : undefined
+  /* c8 ignore stop */
+}
 
 export interface PythonAssetOptions {
   /**
@@ -36,11 +79,11 @@ export interface PythonAssetOptions {
    */
   readonly tag: string
   /**
-   * Target `platform-arch`, e.g. `darwin-arm64`. Defaults to the current host
-   * (`${os.platform-ish}-${os.arch}`) — but callers usually pass an explicit
-   * value derived from `process.platform` / `process.arch`.
+   * Target `platform-arch`, e.g. `darwin-arm64`. Omit to auto-detect the
+   * current host via {@link getPythonArch}; pass an explicit value to
+   * resolve the asset for a different target (e.g. cross-platform packaging).
    */
-  readonly platformArch: string
+  readonly arch?: string | undefined
 }
 
 export interface PythonAsset {
@@ -61,8 +104,9 @@ export interface PythonAsset {
  * no upstream prebuilt.
  */
 export function pythonAsset(opts: PythonAssetOptions): PythonAsset | undefined {
-  const { platformArch, tag, version } = opts
-  const triple = PLATFORM_TRIPLES[platformArch]
+  const { tag, version } = opts
+  const arch = opts.arch ?? getPythonArch()
+  const triple = arch ? PLATFORM_TRIPLES[arch] : undefined
   if (!triple) {
     return undefined
   }
