@@ -20,22 +20,26 @@ import { getDefaultLogger } from '../logger/default'
 import { readSocketApiToken } from '../secrets/socket-api-token'
 import { assertNodeStripTypesSupported } from './install'
 
+import type { Readable, Writable } from 'node:stream'
+
 const logger = getDefaultLogger()
 
-export async function handleOne(): Promise<void> {
-  const header = await readExact(4)
+export async function handleOne(stdin?: Readable, stdout?: Writable): Promise<void> {
+  const inStream = stdin ?? process.stdin
+  const outStream = stdout ?? process.stdout
+  const header = await readExact(4, inStream)
   const length = header.readUInt32LE(0)
   if (length === 0 || length > 1_048_576) {
-    writeMessage({ error: `invalid message length: ${length}` })
+    writeMessage({ error: `invalid message length: ${length}` }, outStream)
     return
   }
 
-  const body = await readExact(length)
+  const body = await readExact(length, inStream)
   let msg: unknown
   try {
     msg = JSON.parse(body.toString('utf8'))
   } catch {
-    writeMessage({ error: 'message is not valid JSON' })
+    writeMessage({ error: 'message is not valid JSON' }, outStream)
     return
   }
 
@@ -44,42 +48,58 @@ export async function handleOne(): Promise<void> {
   if (type === 'get-api-token') {
     const token = await readSocketApiToken()
     if (token) {
-      writeMessage({ token })
+      writeMessage({ token }, outStream)
     } else {
-      writeMessage({
-        error:
-          'Socket API token not found. Set SOCKET_API_TOKEN in your environment.',
-      })
+      writeMessage(
+        {
+          error:
+            'Socket API token not found. Set SOCKET_API_TOKEN in your environment.',
+        },
+        outStream,
+      )
     }
     return
   }
 
-  writeMessage({ error: `unknown message type: ${String(type)}` })
+  writeMessage({ error: `unknown message type: ${String(type)}` }, outStream)
 }
 
 // Native messaging: read exactly `length` bytes from stdin.
-export function readExact(length: number): Promise<Buffer> {
+export function readExact(length: number, stream?: Readable): Promise<Buffer> {
+  const src = stream ?? process.stdin
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
     let received = 0
+
+    function cleanup(): void {
+      src.off('data', onData)
+      src.off('error', onError)
+      src.off('end', onEnd)
+    }
 
     function onData(chunk: Buffer): void {
       chunks.push(chunk)
       received += chunk.length
       if (received >= length) {
-        process.stdin.off('data', onData)
-        process.stdin.off('error', reject)
+        cleanup()
         const full = Buffer.concat(chunks)
         resolve(full.subarray(0, length))
       }
     }
 
-    process.stdin.on('data', onData)
-    process.stdin.on('error', reject)
-    process.stdin.once('end', () => {
-      process.stdin.off('data', onData)
+    function onError(err: Error): void {
+      cleanup()
+      reject(err)
+    }
+
+    function onEnd(): void {
+      cleanup()
       reject(new Error('stdin closed before message was complete'))
-    })
+    }
+
+    src.on('data', onData)
+    src.on('error', onError)
+    src.once('end', onEnd)
   })
 }
 
@@ -105,12 +125,12 @@ export async function runHost(): Promise<void> {
   }
 }
 
-export function writeMessage(obj: unknown): void {
+export function writeMessage(obj: unknown, stream?: Writable): void {
   const payload = Buffer.from(JSON.stringify(obj), 'utf8')
   const header = Buffer.allocUnsafe(4)
   header.writeUInt32LE(payload.length, 0)
   // Native messaging protocol requires raw binary writes to stdout.
   // Chrome treats any non-protocol byte as a framing error, so the logger
   // must not be used here. socket-hook: allow console
-  process.stdout.write(Buffer.concat([header, payload])) // socket-hook: allow console
+  ;(stream ?? process.stdout).write(Buffer.concat([header, payload])) // socket-hook: allow console
 }

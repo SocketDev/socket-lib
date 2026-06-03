@@ -1,6 +1,5 @@
-import { Readable, Writable } from 'node:stream'
-import process from 'node:process'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { PassThrough, Readable } from 'node:stream'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { handleOne, readExact, writeMessage } from '../../../src/native-messaging/host'
 
@@ -8,9 +7,9 @@ vi.mock('../../../src/secrets/socket-api-token', () => ({
   readSocketApiToken: vi.fn(),
 }))
 
-function makeStdin(chunks: Buffer[]): void {
+function readableFrom(chunks: Buffer[]): Readable {
   let idx = 0
-  const readable = new Readable({
+  return new Readable({
     read() {
       if (idx < chunks.length) {
         this.push(chunks[idx++])
@@ -19,23 +18,18 @@ function makeStdin(chunks: Buffer[]): void {
       }
     },
   })
-  Object.defineProperty(process, 'stdin', { value: readable, writable: true, configurable: true })
 }
 
-function captureStdout(): { chunks: Buffer[]; restore: () => void } {
+function captureStdout(): { sink: PassThrough; collected: () => Buffer[] } {
+  const sink = new PassThrough()
   const chunks: Buffer[] = []
-  const original = process.stdout.write.bind(process.stdout)
-  const spy = vi.spyOn(process.stdout, 'write').mockImplementation((chunk: unknown) => {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk as string))
-    return true
-  })
-  return {
-    chunks,
-    restore: () => {
-      spy.mockRestore()
-      process.stdout.write = original
-    },
-  }
+  sink.on('data', c => chunks.push(c as Buffer))
+  return { sink, collected: () => chunks }
+}
+
+function decodeFrame(frame: Buffer): unknown {
+  const len = frame.readUInt32LE(0)
+  return JSON.parse(frame.subarray(4, 4 + len).toString('utf8'))
 }
 
 function makeMessage(obj: unknown): Buffer {
@@ -46,54 +40,36 @@ function makeMessage(obj: unknown): Buffer {
 }
 
 describe('writeMessage', () => {
-  it('writes a length-prefixed JSON frame to stdout', () => {
-    const { chunks, restore } = captureStdout()
-    try {
-      writeMessage({ token: 'sk-abc' })
-      expect(chunks).toHaveLength(1)
-      const frame = chunks[0]!
-      const len = frame.readUInt32LE(0)
-      const body = JSON.parse(frame.subarray(4, 4 + len).toString('utf8'))
-      expect(body).toEqual({ token: 'sk-abc' })
-    } finally {
-      restore()
-    }
+  it('writes a length-prefixed JSON frame to the given stream', () => {
+    const { sink, collected } = captureStdout()
+    writeMessage({ token: 'sk-abc' }, sink)
+    const chunks = collected()
+    expect(chunks).toHaveLength(1)
+    expect(decodeFrame(chunks[0]!)).toEqual({ token: 'sk-abc' })
   })
 
-  it('handles nested objects', () => {
-    const { chunks, restore } = captureStdout()
-    try {
-      writeMessage({ error: 'not found' })
-      const frame = chunks[0]!
-      const len = frame.readUInt32LE(0)
-      const body = JSON.parse(frame.subarray(4, 4 + len).toString('utf8'))
-      expect(body).toEqual({ error: 'not found' })
-    } finally {
-      restore()
-    }
+  it('encodes error objects too', () => {
+    const { sink, collected } = captureStdout()
+    writeMessage({ error: 'not found' }, sink)
+    expect(decodeFrame(collected()[0]!)).toEqual({ error: 'not found' })
   })
 })
 
 describe('readExact', () => {
-  afterEach(() => {
-    vi.restoreAllMocks()
-  })
-
-  it('reads exactly N bytes from stdin', async () => {
-    makeStdin([Buffer.from('hello world')])
-    const result = await readExact(5)
+  it('reads exactly N bytes from the given stream', async () => {
+    const result = await readExact(5, readableFrom([Buffer.from('hello world')]))
     expect(result.toString('utf8')).toBe('hello')
   })
 
   it('assembles across multiple chunks', async () => {
-    makeStdin([Buffer.from('hel'), Buffer.from('lo')])
-    const result = await readExact(5)
+    const result = await readExact(5, readableFrom([Buffer.from('hel'), Buffer.from('lo')]))
     expect(result.toString('utf8')).toBe('hello')
   })
 
-  it('rejects when stdin closes before length is met', async () => {
-    makeStdin([Buffer.from('hi')])
-    await expect(readExact(100)).rejects.toThrow('stdin closed before message was complete')
+  it('rejects when stream closes before length is met', async () => {
+    await expect(readExact(100, readableFrom([Buffer.from('hi')]))).rejects.toThrow(
+      'stdin closed before message was complete',
+    )
   })
 })
 
@@ -106,78 +82,42 @@ describe('handleOne', () => {
 
   it('returns token for get-api-token when token is found', async () => {
     vi.mocked(readSocketApiToken).mockResolvedValue('sktsec_test_token')
-    makeStdin([makeMessage({ type: 'get-api-token' })])
-    const { chunks, restore } = captureStdout()
-    try {
-      await handleOne()
-      const frame = chunks[0]!
-      const len = frame.readUInt32LE(0)
-      const body = JSON.parse(frame.subarray(4, 4 + len).toString('utf8'))
-      expect(body).toEqual({ token: 'sktsec_test_token' })
-    } finally {
-      restore()
-    }
+    const { sink, collected } = captureStdout()
+    await handleOne(readableFrom([makeMessage({ type: 'get-api-token' })]), sink)
+    expect(decodeFrame(collected()[0]!)).toEqual({ token: 'sktsec_test_token' })
   })
 
   it('returns error when no token found', async () => {
     vi.mocked(readSocketApiToken).mockResolvedValue(undefined)
-    makeStdin([makeMessage({ type: 'get-api-token' })])
-    const { chunks, restore } = captureStdout()
-    try {
-      await handleOne()
-      const frame = chunks[0]!
-      const len = frame.readUInt32LE(0)
-      const body = JSON.parse(frame.subarray(4, 4 + len).toString('utf8'))
-      expect(body.error).toMatch(/not found/i)
-    } finally {
-      restore()
-    }
+    const { sink, collected } = captureStdout()
+    await handleOne(readableFrom([makeMessage({ type: 'get-api-token' })]), sink)
+    expect((decodeFrame(collected()[0]!) as { error: string }).error).toMatch(/not found/i)
   })
 
   it('returns error for unknown message type', async () => {
-    makeStdin([makeMessage({ type: 'do-something-else' })])
-    const { chunks, restore } = captureStdout()
-    try {
-      await handleOne()
-      const frame = chunks[0]!
-      const len = frame.readUInt32LE(0)
-      const body = JSON.parse(frame.subarray(4, 4 + len).toString('utf8'))
-      expect(body.error).toMatch(/unknown message type/)
-    } finally {
-      restore()
-    }
+    const { sink, collected } = captureStdout()
+    await handleOne(readableFrom([makeMessage({ type: 'do-something-else' })]), sink)
+    expect((decodeFrame(collected()[0]!) as { error: string }).error).toMatch(
+      /unknown message type/,
+    )
   })
 
   it('returns error for non-JSON body', async () => {
     const payload = Buffer.from('not json at all')
     const header = Buffer.allocUnsafe(4)
     header.writeUInt32LE(payload.length, 0)
-    makeStdin([Buffer.concat([header, payload])])
-    const { chunks, restore } = captureStdout()
-    try {
-      await handleOne()
-      const frame = chunks[0]!
-      const len = frame.readUInt32LE(0)
-      const body = JSON.parse(frame.subarray(4, 4 + len).toString('utf8'))
-      expect(body.error).toMatch(/not valid JSON/)
-    } finally {
-      restore()
-    }
+    const { sink, collected } = captureStdout()
+    await handleOne(readableFrom([Buffer.concat([header, payload])]), sink)
+    expect((decodeFrame(collected()[0]!) as { error: string }).error).toMatch(/not valid JSON/)
   })
 
   it('returns error for invalid (zero) message length', async () => {
     const header = Buffer.allocUnsafe(4)
     header.writeUInt32LE(0, 0)
-    makeStdin([header])
-    const { chunks, restore } = captureStdout()
-    try {
-      await handleOne()
-      const frame = chunks[0]!
-      const len = frame.readUInt32LE(0)
-      const body = JSON.parse(frame.subarray(4, 4 + len).toString('utf8'))
-      expect(body.error).toMatch(/invalid message length/)
-    } finally {
-      restore()
-    }
+    const { sink, collected } = captureStdout()
+    await handleOne(readableFrom([header]), sink)
+    expect((decodeFrame(collected()[0]!) as { error: string }).error).toMatch(
+      /invalid message length/,
+    )
   })
 })
