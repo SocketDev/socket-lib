@@ -1195,6 +1195,31 @@
       "types": "./dist/external-tools/opengrep/types.d.ts",
       "default": "./dist/external-tools/opengrep/types.js"
     },
+    "./external-tools/python/asset-names": {
+      "source": "./src/external-tools/python/asset-names.ts",
+      "types": "./dist/external-tools/python/asset-names.d.ts",
+      "default": "./dist/external-tools/python/asset-names.js"
+    },
+    "./external-tools/python/from-download": {
+      "source": "./src/external-tools/python/from-download.ts",
+      "types": "./dist/external-tools/python/from-download.d.ts",
+      "default": "./dist/external-tools/python/from-download.js"
+    },
+    "./external-tools/python/from-path": {
+      "source": "./src/external-tools/python/from-path.ts",
+      "types": "./dist/external-tools/python/from-path.d.ts",
+      "default": "./dist/external-tools/python/from-path.js"
+    },
+    "./external-tools/python/resolve": {
+      "source": "./src/external-tools/python/resolve.ts",
+      "types": "./dist/external-tools/python/resolve.d.ts",
+      "default": "./dist/external-tools/python/resolve.js"
+    },
+    "./external-tools/python/types": {
+      "source": "./src/external-tools/python/types.ts",
+      "types": "./dist/external-tools/python/types.d.ts",
+      "default": "./dist/external-tools/python/types.js"
+    },
     "./external-tools/sbt/asset-names": {
       "source": "./src/external-tools/sbt/asset-names.ts",
       "types": "./dist/external-tools/sbt/asset-names.d.ts",
@@ -1339,36 +1364,6 @@
       "source": "./src/external-tools/trufflehog/types.ts",
       "types": "./dist/external-tools/trufflehog/types.d.ts",
       "default": "./dist/external-tools/trufflehog/types.js"
-    },
-    "./external-tools/uv/asset-names": {
-      "source": "./src/external-tools/uv/asset-names.ts",
-      "types": "./dist/external-tools/uv/asset-names.d.ts",
-      "default": "./dist/external-tools/uv/asset-names.js"
-    },
-    "./external-tools/uv/from-download": {
-      "source": "./src/external-tools/uv/from-download.ts",
-      "types": "./dist/external-tools/uv/from-download.d.ts",
-      "default": "./dist/external-tools/uv/from-download.js"
-    },
-    "./external-tools/uv/from-path": {
-      "source": "./src/external-tools/uv/from-path.ts",
-      "types": "./dist/external-tools/uv/from-path.d.ts",
-      "default": "./dist/external-tools/uv/from-path.js"
-    },
-    "./external-tools/uv/from-vfs": {
-      "source": "./src/external-tools/uv/from-vfs.ts",
-      "types": "./dist/external-tools/uv/from-vfs.d.ts",
-      "default": "./dist/external-tools/uv/from-vfs.js"
-    },
-    "./external-tools/uv/resolve": {
-      "source": "./src/external-tools/uv/resolve.ts",
-      "types": "./dist/external-tools/uv/resolve.d.ts",
-      "default": "./dist/external-tools/uv/resolve.js"
-    },
-    "./external-tools/uv/types": {
-      "source": "./src/external-tools/uv/types.ts",
-      "types": "./dist/external-tools/uv/types.d.ts",
-      "default": "./dist/external-tools/uv/types.js"
     },
     "./fs/access": {
       "source": "./src/fs/access.ts",
