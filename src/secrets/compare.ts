@@ -23,7 +23,7 @@
  *   everywhere, never byte-compare a secret directly.
  */
 
-import { timingSafeEqual } from 'node:crypto'
+import crypto from 'node:crypto'
 
 /**
  * Compare two secrets in constant time. Returns `true` when the inputs are
@@ -62,5 +62,5 @@ export function compareSecrets(
   if (ab.length !== bb.length) {
     return false
   }
-  return timingSafeEqual(ab, bb)
+  return crypto.timingSafeEqual(ab, bb)
 }

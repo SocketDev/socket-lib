@@ -200,6 +200,7 @@ export async function dlxBinary(
           ...spawnOptions?.env,
           PATH: `${cacheEntryDir}${path.delimiter}${process.env['PATH'] || ''}`,
         },
+        // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (WIN32 && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
         shell: true,
       }
     : spawnOptions
@@ -254,6 +255,7 @@ export function executeBinary(
           ...spawnOptions?.env,
           PATH: `${cacheEntryDir}${path.delimiter}${process.env['PATH'] || ''}`,
         },
+        // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (WIN32 && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
         shell: true,
       }
     : spawnOptions

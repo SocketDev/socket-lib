@@ -9,6 +9,7 @@
  */
 
 import type Arborist from '../external/@npmcli/arborist'
+// oxlint-disable-next-line socket/no-platform-specific-import -- the relative barrel '../http-request' has no index.ts and exports-map resolution only applies to the bare package name, so only the explicit /node path resolves here (the rule's autofix produces an unresolvable import — verified TS2307).
 import { httpJson } from '../http-request/node'
 import { getSocketCallerUserAgent } from '../http-request/user-agent'
 

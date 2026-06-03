@@ -89,7 +89,7 @@ export async function probeGitHubStatus(
   }
 
   const raw = body as {
-    components?: Array<{ id: string; name: string; status: string }>
+    components?: Array<{ id: string; name: string; status: string }> | undefined
   }
   const allComponents = raw.components ?? []
 
