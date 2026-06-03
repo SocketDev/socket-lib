@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { handleOne, readExact, writeMessage } from '../../../src/native-messaging/host'
 import { readSocketApiToken } from '../../../src/secrets/socket-api-token'
 
-vi.mock('../../../src/secrets/socket-api-token', () => ({
+vi.mock(import('../../../src/secrets/socket-api-token'), () => ({
   readSocketApiToken: vi.fn(),
 }))
 
@@ -15,7 +15,7 @@ function readableFrom(chunks: Buffer[]): Readable {
       if (idx < chunks.length) {
         this.push(chunks[idx++])
       } else {
-        this.push(null)
+        this.push(undefined)
       }
     },
   })

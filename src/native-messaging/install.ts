@@ -38,6 +38,7 @@ import {
   detectActiveNodeManager,
   nodeManagerUpgradeHint,
 } from '../env/node-version-managers'
+import { ErrorCtor } from '../primordials/error'
 
 export const HOST_NAME = 'dev.socket.trusted_publisher_host'
 
@@ -85,7 +86,7 @@ export function assertNodeStripTypesSupported(): void {
   }
   const manager = detectActiveNodeManager()
   const hint = nodeManagerUpgradeHint(manager, MIN_NODE_VERSION_FOR_STRIP_TYPES)
-  throw new Error(
+  throw new ErrorCtor(
     `Node ${getNodeVersion()} cannot run TypeScript directly. The Socket ` +
       `native-messaging host needs Node ${MIN_NODE_VERSION_FOR_STRIP_TYPES}+ ` +
       `(type-stripping is stable in Node 22.6 and default-on in Node 24).\n` +
@@ -111,7 +112,7 @@ export function buildManifest(
 export function chromeManifestDirs(): string[] {
   const home = getHome()
   if (!home) {
-    throw new Error('Cannot determine home directory.')
+    throw new ErrorCtor('Cannot determine home directory.')
   }
   if (DARWIN) {
     const lib = path.join(home, 'Library', 'Application Support')
@@ -152,13 +153,13 @@ export function installNativeHost(opts: InstallOptions): InstallResult {
   const { allowedOrigins, production = false, wrapperDir = __dirname } = opts
 
   if (production && allowedOrigins.includes('*')) {
-    throw new Error(
+    throw new ErrorCtor(
       'production mode rejects allowedOrigins \'*\' — pin to specific chrome-extension://<id>/ origins',
     )
   }
 
   if (allowedOrigins.length === 0) {
-    throw new Error(
+    throw new ErrorCtor(
       'allowedOrigins must contain at least one origin; pass [\'*\'] for development',
     )
   }

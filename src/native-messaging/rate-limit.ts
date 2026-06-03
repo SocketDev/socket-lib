@@ -28,6 +28,8 @@
  *   a 50-line bucket is easier to audit.
  */
 
+import { ErrorCtor } from '../primordials/error'
+
 export interface TokenBucketOptions {
   /**
    * How many tokens fit in a single bucket. The first `capacity` requests
@@ -69,13 +71,13 @@ export class TokenBucketLimiter {
 
   constructor(options: TokenBucketOptions) {
     if (options.capacity < 1) {
-      throw new Error('capacity must be >= 1')
+      throw new ErrorCtor('capacity must be >= 1')
     }
     if (options.refillIntervalMs <= 0) {
-      throw new Error('refillIntervalMs must be > 0')
+      throw new ErrorCtor('refillIntervalMs must be > 0')
     }
     if (options.maxKeys < 1) {
-      throw new Error('maxKeys must be >= 1')
+      throw new ErrorCtor('maxKeys must be >= 1')
     }
     this.#capacity = options.capacity
     this.#refillIntervalMs = options.refillIntervalMs

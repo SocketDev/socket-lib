@@ -16,7 +16,9 @@
 
 import process from 'node:process'
 
+import { errorMessage } from '../errors/message'
 import { getDefaultLogger } from '../logger/default'
+import { ErrorCtor } from '../primordials/error'
 import { readSocketApiToken } from '../secrets/socket-api-token'
 import { assertNodeStripTypesSupported } from './install'
 
@@ -110,7 +112,7 @@ export function readExact(length: number, stream?: Readable): Promise<Buffer> {
 
     function onEnd(): void {
       cleanup()
-      reject(new Error('stdin closed before message was complete'))
+      reject(new ErrorCtor('stdin closed before message was complete'))
     }
 
     src.on('readable', onReadable)
@@ -130,7 +132,7 @@ export async function runHost(): Promise<void> {
   try {
     assertNodeStripTypesSupported()
   } catch (e) {
-    logger.error((e as Error).message)
+    logger.error(errorMessage(e))
     process.exit(1)
   }
   while (true) {
