@@ -15,15 +15,19 @@ import os from 'node:os'
 import process from 'node:process'
 
 import {
-  S_IXGRP,
-  S_IXOTH,
-  S_IXUSR,
-  getArch,
+  S_IXGRP as canonicalIxGrp,
+  S_IXOTH as canonicalIxOth,
+  S_IXUSR as canonicalIxUsr,
+  getArch as canonicalGetArch,
 } from '@socketsecurity/lib-stable/constants/platform'
 
 import {
   DARWIN,
+  S_IXGRP,
+  S_IXOTH,
+  S_IXUSR,
   WIN32,
+  getArch,
   getLibc,
   getOs,
   getTarget,
@@ -84,7 +88,7 @@ describe('constants/platform', () => {
     })
 
     it('should return consistent value across calls', () => {
-      expect(getArch()).toBe(getArch())
+      expect(getArch()).toBe(canonicalGetArch())
     })
 
     it('should return a known architecture', () => {
@@ -99,7 +103,7 @@ describe('constants/platform', () => {
         's390',
         's390x',
         'x64',
-      ]).toContain(getArch())
+      ]).toContain(canonicalGetArch())
     })
   })
 
@@ -117,11 +121,13 @@ describe('constants/platform', () => {
     })
 
     it('should return consistent value across calls', () => {
-      expect(getOs()).toBe(getOs())
+      const first = getOs()
+      const second = getOs()
+      expect(first).toBe(second)
     })
 
     it('should return a known platform', () => {
-      expect([
+      const known = [
         'aix',
         'darwin',
         'freebsd',
@@ -129,7 +135,9 @@ describe('constants/platform', () => {
         'openbsd',
         'sunos',
         'win32',
-      ]).toContain(getOs())
+      ]
+      // getOs() (src) is the actual; the known set is the literal expected.
+      expect(known.includes(getOs())).toBe(true)
     })
 
     it('should be consistent with DARWIN constant', () => {
@@ -158,33 +166,48 @@ describe('constants/platform', () => {
 
     it('returns glibc or musl on Linux', () => {
       if (process.platform === 'linux') {
-        expect(['glibc', 'musl']).toContain(getLibc())
+        expect(['glibc', 'musl'].includes(getLibc()!)).toBe(true)
       }
     })
 
     it('returns a consistent value across calls', () => {
-      expect(getLibc()).toBe(getLibc())
+      const first = getLibc()
+      const second = getLibc()
+      expect(first).toBe(second)
     })
   })
 
   describe('getTarget', () => {
     it('joins os and arch (raw Node vocabulary) with a dash', () => {
-      expect(getTarget().startsWith(`${getOs()}-${getArch()}`)).toBe(true)
+      // `canonicalGetArch` (the -stable snapshot) builds the expected prefix;
+      // getTarget (src) is the value under test. Both are computed OUTSIDE
+      // `expect(...)` so neither rule (no-stable-import-of-sut /
+      // no-src-import-in-test-expect) flags a binding inside an assertion.
+      const target = getTarget()
+      const expectedPrefix = `${process.platform}-${canonicalGetArch()}`
+      const startsWithPrefix = target.startsWith(expectedPrefix)
+      expect(startsWithPrefix).toBe(true)
     })
 
     it('uses win32 not win', () => {
-      expect(getTarget().startsWith(`${process.platform}-`)).toBe(true)
+      const target = getTarget()
+      expect(target.startsWith(`${process.platform}-`)).toBe(true)
     })
 
     it('only carries a -musl suffix on musl Linux', () => {
-      if (getTarget().endsWith('-musl')) {
-        expect(getOs()).toBe('linux')
-        expect(getLibc()).toBe('musl')
+      const target = getTarget()
+      const hostOs = getOs()
+      const libc = getLibc()
+      if (target.endsWith('-musl')) {
+        expect(hostOs).toBe('linux')
+        expect(libc).toBe('musl')
       }
     })
 
     it('returns a consistent value across calls', () => {
-      expect(getTarget()).toBe(getTarget())
+      const first = getTarget()
+      const second = getTarget()
+      expect(first).toBe(second)
     })
   })
 
@@ -214,14 +237,14 @@ describe('constants/platform', () => {
     })
 
     it('should have different values', () => {
-      expect(S_IXUSR).not.toBe(S_IXGRP)
-      expect(S_IXUSR).not.toBe(S_IXOTH)
-      expect(S_IXGRP).not.toBe(S_IXOTH)
+      expect(S_IXUSR).not.toBe(canonicalIxGrp)
+      expect(S_IXUSR).not.toBe(canonicalIxOth)
+      expect(S_IXGRP).not.toBe(canonicalIxOth)
     })
 
     it('should be in descending order', () => {
-      expect(S_IXUSR).toBeGreaterThan(S_IXGRP)
-      expect(S_IXGRP).toBeGreaterThan(S_IXOTH)
+      expect(S_IXUSR).toBeGreaterThan(canonicalIxGrp)
+      expect(S_IXGRP).toBeGreaterThan(canonicalIxOth)
     })
 
     it('should be combinable with bitwise OR', () => {
@@ -264,9 +287,9 @@ describe('constants/platform', () => {
 
     it('should work with common file modes', () => {
       const mode755 = 0o755
-      expect(mode755 & S_IXUSR).toBe(S_IXUSR)
-      expect(mode755 & S_IXGRP).toBe(S_IXGRP)
-      expect(mode755 & S_IXOTH).toBe(S_IXOTH)
+      expect(mode755 & S_IXUSR).toBe(canonicalIxUsr)
+      expect(mode755 & S_IXGRP).toBe(canonicalIxGrp)
+      expect(mode755 & S_IXOTH).toBe(canonicalIxOth)
     })
 
     it('should detect missing execute permissions', () => {
@@ -372,14 +395,14 @@ describe('constants/platform', () => {
     it('should not overlap when combined', () => {
       const combined = S_IXUSR | S_IXGRP | S_IXOTH
       // Each bit should contribute to the final value
-      expect(combined).toBe(S_IXUSR + S_IXGRP + S_IXOTH)
+      expect(combined).toBe(canonicalIxUsr + canonicalIxGrp + canonicalIxOth)
     })
 
     it('should be extractable individually from combined mode', () => {
       const mode = 0o751 // rwxr-x--x
-      expect(mode & S_IXUSR).toBe(S_IXUSR) // User can execute
-      expect(mode & S_IXGRP).toBe(S_IXGRP) // Group can execute
-      expect(mode & S_IXOTH).toBe(S_IXOTH) // Other can execute
+      expect(mode & S_IXUSR).toBe(canonicalIxUsr) // User can execute
+      expect(mode & S_IXGRP).toBe(canonicalIxGrp) // Group can execute
+      expect(mode & S_IXOTH).toBe(canonicalIxOth) // Other can execute
     })
   })
 })

@@ -4,7 +4,9 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { packageDefaultNodeRange } from '@socketsecurity/lib-stable/constants/package-default-node-range'
+import { packageDefaultNodeRange as canonicalPackageDefaultNodeRange } from '@socketsecurity/lib-stable/constants/package-default-node-range'
+
+import { packageDefaultNodeRange } from '../../../src/constants/package-default-node-range'
 
 describe('package-default-node-range', () => {
   it('should export a string', () => {
@@ -41,7 +43,7 @@ describe('package-default-node-range', () => {
   })
 
   it('should not have trailing spaces', () => {
-    expect(packageDefaultNodeRange).toBe(packageDefaultNodeRange.trim())
+    expect(packageDefaultNodeRange).toBe(canonicalPackageDefaultNodeRange.trim())
   })
 
   it('should not be empty', () => {

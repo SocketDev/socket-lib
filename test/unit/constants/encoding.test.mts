@@ -11,6 +11,17 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  CHAR_BACKWARD_SLASH as canonicalCharBackwardSlash,
+  CHAR_COLON as canonicalCharColon,
+  CHAR_FORWARD_SLASH as canonicalCharForwardSlash,
+  CHAR_LOWERCASE_A as canonicalCharLowercaseA,
+  CHAR_LOWERCASE_Z as canonicalCharLowercaseZ,
+  CHAR_UPPERCASE_A as canonicalCharUppercaseA,
+  CHAR_UPPERCASE_Z as canonicalCharUppercaseZ,
+  UTF8 as canonicalUtf8,
+} from '@socketsecurity/lib-stable/constants/encoding'
+
+import {
   CHAR_BACKWARD_SLASH,
   CHAR_COLON,
   CHAR_FORWARD_SLASH,
@@ -19,7 +30,7 @@ import {
   CHAR_UPPERCASE_A,
   CHAR_UPPERCASE_Z,
   UTF8,
-} from '@socketsecurity/lib-stable/constants/encoding'
+} from '../../../src/constants/encoding'
 
 describe('constants/encoding', () => {
   describe('encoding', () => {
@@ -32,7 +43,7 @@ describe('constants/encoding', () => {
     })
 
     it('should be lowercase', () => {
-      expect(UTF8).toBe(UTF8.toLowerCase())
+      expect(UTF8).toBe(canonicalUtf8.toLowerCase())
     })
   })
 
@@ -86,28 +97,28 @@ describe('constants/encoding', () => {
     })
 
     it('should match character codes', () => {
-      expect('\\'.charCodeAt(0)).toBe(CHAR_BACKWARD_SLASH)
-      expect(':'.charCodeAt(0)).toBe(CHAR_COLON)
-      expect('/'.charCodeAt(0)).toBe(CHAR_FORWARD_SLASH)
-      expect('a'.charCodeAt(0)).toBe(CHAR_LOWERCASE_A)
-      expect('z'.charCodeAt(0)).toBe(CHAR_LOWERCASE_Z)
-      expect('A'.charCodeAt(0)).toBe(CHAR_UPPERCASE_A)
-      expect('Z'.charCodeAt(0)).toBe(CHAR_UPPERCASE_Z)
+      expect('\\'.charCodeAt(0)).toBe(canonicalCharBackwardSlash)
+      expect(':'.charCodeAt(0)).toBe(canonicalCharColon)
+      expect('/'.charCodeAt(0)).toBe(canonicalCharForwardSlash)
+      expect('a'.charCodeAt(0)).toBe(canonicalCharLowercaseA)
+      expect('z'.charCodeAt(0)).toBe(canonicalCharLowercaseZ)
+      expect('A'.charCodeAt(0)).toBe(canonicalCharUppercaseA)
+      expect('Z'.charCodeAt(0)).toBe(canonicalCharUppercaseZ)
     })
 
     it('should have lowercase before uppercase in ASCII', () => {
-      expect(CHAR_UPPERCASE_A).toBeLessThan(CHAR_LOWERCASE_A)
-      expect(CHAR_UPPERCASE_Z).toBeLessThan(CHAR_LOWERCASE_Z)
+      expect(CHAR_UPPERCASE_A).toBeLessThan(canonicalCharLowercaseA)
+      expect(CHAR_UPPERCASE_Z).toBeLessThan(canonicalCharLowercaseZ)
     })
 
     it('should have A before Z in each case', () => {
-      expect(CHAR_UPPERCASE_A).toBeLessThan(CHAR_UPPERCASE_Z)
-      expect(CHAR_LOWERCASE_A).toBeLessThan(CHAR_LOWERCASE_Z)
+      expect(CHAR_UPPERCASE_A).toBeLessThan(canonicalCharUppercaseZ)
+      expect(CHAR_LOWERCASE_A).toBeLessThan(canonicalCharLowercaseZ)
     })
 
     it('should have forward slash before colon before backward slash', () => {
-      expect(CHAR_FORWARD_SLASH).toBeLessThan(CHAR_COLON)
-      expect(CHAR_COLON).toBeLessThan(CHAR_BACKWARD_SLASH)
+      expect(CHAR_FORWARD_SLASH).toBeLessThan(canonicalCharColon)
+      expect(CHAR_COLON).toBeLessThan(canonicalCharBackwardSlash)
     })
   })
 
@@ -152,13 +163,13 @@ describe('constants/encoding', () => {
 
     it('should support path character detection', () => {
       const pathStr = '/usr/local/bin'
-      expect(pathStr.charCodeAt(0)).toBe(CHAR_FORWARD_SLASH)
+      expect(pathStr.charCodeAt(0)).toBe(canonicalCharForwardSlash)
     })
 
     it('should support Windows path detection', () => {
       const winPath = 'C:\\Windows\\System32'
-      expect(winPath.charCodeAt(2)).toBe(CHAR_BACKWARD_SLASH)
-      expect(winPath.charCodeAt(1)).toBe(CHAR_COLON)
+      expect(winPath.charCodeAt(2)).toBe(canonicalCharBackwardSlash)
+      expect(winPath.charCodeAt(1)).toBe(canonicalCharColon)
     })
 
     it('should support encoding specification', () => {
@@ -170,7 +181,7 @@ describe('constants/encoding', () => {
       const offset = CHAR_LOWERCASE_A - CHAR_UPPERCASE_A
       const aUpper = 'A'.charCodeAt(0)
       const aLower = aUpper + offset
-      expect(aLower).toBe(CHAR_LOWERCASE_A)
+      expect(aLower).toBe(canonicalCharLowercaseA)
     })
 
     it('should detect drive letters', () => {
@@ -183,42 +194,42 @@ describe('constants/encoding', () => {
     it('should detect URL protocols', () => {
       const url = 'http://example.com'
       const colonIndex = url.indexOf(':')
-      expect(url.charCodeAt(colonIndex)).toBe(CHAR_COLON)
-      expect(url.charCodeAt(colonIndex + 1)).toBe(CHAR_FORWARD_SLASH)
-      expect(url.charCodeAt(colonIndex + 2)).toBe(CHAR_FORWARD_SLASH)
+      expect(url.charCodeAt(colonIndex)).toBe(canonicalCharColon)
+      expect(url.charCodeAt(colonIndex + 1)).toBe(canonicalCharForwardSlash)
+      expect(url.charCodeAt(colonIndex + 2)).toBe(canonicalCharForwardSlash)
     })
   })
 
   describe('edge cases', () => {
     it('should handle character before A', () => {
       const atSignCode = '@'.charCodeAt(0)
-      expect(atSignCode).toBe(CHAR_UPPERCASE_A - 1)
+      expect(atSignCode).toBe(canonicalCharUppercaseA - 1)
     })
 
     it('should handle character after Z', () => {
       const bracketCode = '['.charCodeAt(0)
-      expect(bracketCode).toBe(CHAR_UPPERCASE_Z + 1)
+      expect(bracketCode).toBe(canonicalCharUppercaseZ + 1)
     })
 
     it('should handle character before a', () => {
       const backtickCode = '`'.charCodeAt(0)
-      expect(backtickCode).toBe(CHAR_LOWERCASE_A - 1)
+      expect(backtickCode).toBe(canonicalCharLowercaseA - 1)
     })
 
     it('should handle character after z', () => {
       const braceCode = '{'.charCodeAt(0)
-      expect(braceCode).toBe(CHAR_LOWERCASE_Z + 1)
+      expect(braceCode).toBe(canonicalCharLowercaseZ + 1)
     })
 
     it('should validate slash types are different', () => {
-      expect(CHAR_FORWARD_SLASH).not.toBe(CHAR_BACKWARD_SLASH)
+      expect(CHAR_FORWARD_SLASH).not.toBe(canonicalCharBackwardSlash)
       expect('/').not.toBe('\\')
     })
 
     it('should validate colon position in ASCII table', () => {
       // Colon is after digits (48-57) and before uppercase letters (65-90)
       expect(CHAR_COLON).toBeGreaterThan(57)
-      expect(CHAR_COLON).toBeLessThan(CHAR_UPPERCASE_A)
+      expect(CHAR_COLON).toBeLessThan(canonicalCharUppercaseA)
     })
   })
 })

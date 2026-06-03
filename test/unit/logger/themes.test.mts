@@ -12,9 +12,10 @@ import { Writable } from 'node:stream'
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { LOG_SYMBOLS } from '@socketsecurity/lib-stable/logger/symbols'
+import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/logger/symbols'
 
 import { Logger } from '../../../src/logger/node'
+import { LOG_SYMBOLS } from '../../../src/logger/symbols'
 import { THEMES } from '../../../src/themes/themes'
 
 describe('Logger - Theme Handling', () => {
@@ -96,7 +97,7 @@ describe('Logger - Theme Handling', () => {
 
     it('should support get operation on LOG_SYMBOLS', () => {
       const symbol = Reflect.get(LOG_SYMBOLS, 'success')
-      expect(symbol).toBe(LOG_SYMBOLS['success'])
+      expect(symbol).toBe(canonicalLogSymbols['success'])
     })
 
     it('should support getOwnPropertyDescriptor on LOG_SYMBOLS', () => {

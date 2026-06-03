@@ -11,7 +11,9 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { maintainedNodeVersions } from '@socketsecurity/lib-stable/constants/maintained-node-versions'
+import { maintainedNodeVersions as canonicalMaintainedNodeVersions } from '@socketsecurity/lib-stable/constants/maintained-node-versions'
+
+import { maintainedNodeVersions } from '../../../src/constants/maintained-node-versions'
 
 describe('maintained-node-versions', () => {
   describe('default export', () => {
@@ -60,10 +62,10 @@ describe('maintained-node-versions', () => {
   describe('array contents', () => {
     it('should have versions in order: last, previous, current, next', () => {
       const [first, second, third, fourth] = maintainedNodeVersions
-      expect(first).toBe(maintainedNodeVersions.last)
-      expect(second).toBe(maintainedNodeVersions.previous)
-      expect(third).toBe(maintainedNodeVersions.current)
-      expect(fourth).toBe(maintainedNodeVersions.next)
+      expect(first).toBe(canonicalMaintainedNodeVersions.last)
+      expect(second).toBe(canonicalMaintainedNodeVersions.previous)
+      expect(third).toBe(canonicalMaintainedNodeVersions.current)
+      expect(fourth).toBe(canonicalMaintainedNodeVersions.next)
     })
 
     it('should have valid semver format for all versions', () => {
@@ -94,19 +96,27 @@ describe('maintained-node-versions', () => {
 
   describe('version properties match array', () => {
     it('should have current in array', () => {
-      expect(maintainedNodeVersions).toContain(maintainedNodeVersions.current)
+      expect(maintainedNodeVersions).toContain(
+        canonicalMaintainedNodeVersions.current,
+      )
     })
 
     it('should have last in array', () => {
-      expect(maintainedNodeVersions).toContain(maintainedNodeVersions.last)
+      expect(maintainedNodeVersions).toContain(
+        canonicalMaintainedNodeVersions.last,
+      )
     })
 
     it('should have next in array', () => {
-      expect(maintainedNodeVersions).toContain(maintainedNodeVersions.next)
+      expect(maintainedNodeVersions).toContain(
+        canonicalMaintainedNodeVersions.next,
+      )
     })
 
     it('should have previous in array', () => {
-      expect(maintainedNodeVersions).toContain(maintainedNodeVersions.previous)
+      expect(maintainedNodeVersions).toContain(
+        canonicalMaintainedNodeVersions.previous,
+      )
     })
   })
 
@@ -231,9 +241,9 @@ describe('maintained-node-versions', () => {
 
     it('should support find operation', () => {
       const found = maintainedNodeVersions.find(
-        v => v === maintainedNodeVersions.current,
+        v => v === canonicalMaintainedNodeVersions.current,
       )
-      expect(found).toBe(maintainedNodeVersions.current)
+      expect(found).toBe(canonicalMaintainedNodeVersions.current)
     })
 
     it('should support includes operation', () => {
@@ -246,22 +256,22 @@ describe('maintained-node-versions', () => {
     it('should support slice operation', () => {
       const sliced = maintainedNodeVersions.slice(0, 2)
       expect(sliced).toHaveLength(2)
-      expect(sliced[0]).toBe(maintainedNodeVersions.last)
-      expect(sliced[1]).toBe(maintainedNodeVersions.previous)
+      expect(sliced[0]).toBe(canonicalMaintainedNodeVersions.last)
+      expect(sliced[1]).toBe(canonicalMaintainedNodeVersions.previous)
     })
 
     it('should support spread operator', () => {
       const spread = [...maintainedNodeVersions]
       expect(spread).toHaveLength(4)
-      expect(spread[0]).toBe(maintainedNodeVersions[0])
+      expect(spread[0]).toBe(canonicalMaintainedNodeVersions[0])
     })
 
     it('should support destructuring', () => {
       const [first, second, third, fourth] = maintainedNodeVersions
-      expect(first).toBe(maintainedNodeVersions.last)
-      expect(second).toBe(maintainedNodeVersions.previous)
-      expect(third).toBe(maintainedNodeVersions.current)
-      expect(fourth).toBe(maintainedNodeVersions.next)
+      expect(first).toBe(canonicalMaintainedNodeVersions.last)
+      expect(second).toBe(canonicalMaintainedNodeVersions.previous)
+      expect(third).toBe(canonicalMaintainedNodeVersions.current)
+      expect(fourth).toBe(canonicalMaintainedNodeVersions.next)
     })
   })
 
@@ -277,7 +287,7 @@ describe('maintained-node-versions', () => {
 
     it('should not have duplicates', () => {
       const unique = new Set(maintainedNodeVersions)
-      expect(unique.size).toBe(maintainedNodeVersions.length)
+      expect(unique.size).toBe(canonicalMaintainedNodeVersions.length)
     })
 
     it('should not have empty strings', () => {

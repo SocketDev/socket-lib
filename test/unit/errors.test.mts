@@ -7,11 +7,11 @@
 
 import vm from 'node:vm'
 
-import { UNKNOWN_ERROR } from '@socketsecurity/lib-stable/errors/message'
+import { UNKNOWN_ERROR as canonicalUnknownError } from '@socketsecurity/lib-stable/errors/message'
 
 import { describe, expect, it } from 'vitest'
 
-import { errorMessage } from '../../src/errors/message'
+import { UNKNOWN_ERROR, errorMessage } from '../../src/errors/message'
 import {
   isErrnoException,
   isError,
@@ -42,7 +42,7 @@ describe('errorMessage', () => {
 
   it('returns the stable sentinel for an Error with no message', () => {
     const e = new Error('')
-    expect(errorMessage(e)).toBe(UNKNOWN_ERROR)
+    expect(errorMessage(e)).toBe(canonicalUnknownError)
   })
 
   it('returns a string value as-is', () => {
@@ -58,20 +58,20 @@ describe('errorMessage', () => {
   })
 
   it('returns the sentinel for null', () => {
-    expect(errorMessage(undefined)).toBe(UNKNOWN_ERROR)
+    expect(errorMessage(undefined)).toBe(canonicalUnknownError)
   })
 
   it('returns the sentinel for undefined', () => {
-    expect(errorMessage(undefined)).toBe(UNKNOWN_ERROR)
+    expect(errorMessage(undefined)).toBe(canonicalUnknownError)
   })
 
   it('returns the sentinel for a plain object with no meaningful string', () => {
-    expect(errorMessage({})).toBe(UNKNOWN_ERROR)
-    expect(errorMessage({ foo: 'bar' })).toBe(UNKNOWN_ERROR)
+    expect(errorMessage({})).toBe(canonicalUnknownError)
+    expect(errorMessage({ foo: 'bar' })).toBe(canonicalUnknownError)
   })
 
   it('returns the sentinel for an empty string', () => {
-    expect(errorMessage('')).toBe(UNKNOWN_ERROR)
+    expect(errorMessage('')).toBe(canonicalUnknownError)
   })
 
   it('respects an object with a custom toString', () => {

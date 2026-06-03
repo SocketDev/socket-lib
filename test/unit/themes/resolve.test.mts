@@ -12,12 +12,13 @@
  */
 
 import {
+  RAINBOW_GRADIENT,
   createTheme,
   extendTheme,
   resolveColor,
   resolveShimmerColor,
 } from '../../../src/themes/resolve'
-import { RAINBOW_GRADIENT } from '@socketsecurity/lib-stable/themes/resolve'
+import { RAINBOW_GRADIENT as canonicalRainbowGradient } from '@socketsecurity/lib-stable/themes/resolve'
 import { describe, expect, it } from 'vitest'
 
 import type { ColorValue } from '../../../src/colors/types'
@@ -197,7 +198,7 @@ describe('themes/resolve', () => {
 
     it('should resolve rainbow keyword to RAINBOW_GRADIENT', () => {
       const result = resolveColor('rainbow', BASE_COLORS)
-      expect(result).toEqual(RAINBOW_GRADIENT)
+      expect(result).toEqual(canonicalRainbowGradient)
     })
   })
 
@@ -235,7 +236,7 @@ describe('themes/resolve', () => {
 
     it('returns RAINBOW_GRADIENT for rainbow keyword', () => {
       expect(resolveShimmerColor('rainbow', baseTheme)).toEqual(
-        RAINBOW_GRADIENT,
+        canonicalRainbowGradient,
       )
     })
 

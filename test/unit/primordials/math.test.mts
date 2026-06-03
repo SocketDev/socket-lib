@@ -135,7 +135,7 @@ describe('Math', () => {
     // `fround` rounds to the nearest float32. 0.1 isn't exactly
     // representable in either format, but the float32 result must
     // round-trip back to the same float32 value.
-    expect(MathFround(ExpectedMathFround(0.1))).toBe(ExpectedMathFround(0.1))
+    expect(MathFround(MathFround(0.1))).toBe(ExpectedMathFround(0.1))
   })
 
   it('integer ops: clz32', () => {
@@ -150,8 +150,6 @@ describe('Math', () => {
     if (typeof MathF16round !== 'function') {
       return
     }
-    expect(MathF16round(ExpectedMathF16round!(0.1))).toBe(
-      ExpectedMathF16round!(0.1),
-    )
+    expect(MathF16round(MathF16round!(0.1))).toBe(ExpectedMathF16round!(0.1))
   })
 })

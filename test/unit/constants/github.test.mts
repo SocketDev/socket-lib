@@ -10,10 +10,12 @@
 
 import { describe, expect, it } from 'vitest'
 
+import { CACHE_GITHUB_DIR as canonicalCacheGithubDir } from '@socketsecurity/lib-stable/constants/github'
+
 import {
   CACHE_GITHUB_DIR,
   GITHUB_API_BASE_URL,
-} from '@socketsecurity/lib-stable/constants/github'
+} from '../../../src/constants/github'
 
 describe('constants/github', () => {
   describe('GITHUB_API_BASE_URL', () => {
@@ -73,7 +75,7 @@ describe('constants/github', () => {
     })
 
     it('should be lowercase', () => {
-      expect(CACHE_GITHUB_DIR).toBe(CACHE_GITHUB_DIR.toLowerCase())
+      expect(CACHE_GITHUB_DIR).toBe(canonicalCacheGithubDir.toLowerCase())
     })
 
     it('should not contain path separators', () => {

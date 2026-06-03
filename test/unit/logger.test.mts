@@ -9,11 +9,13 @@
 import { Writable } from 'node:stream'
 
 import { Logger } from '../../src/logger/node'
+import { LOG_SYMBOLS } from '../../src/logger/symbols'
 import { beforeEach, describe, expect, it } from 'vitest'
 
-// LOG_SYMBOLS is used to BUILD expected values inside `expect(...)`, so it must
-// come from the published snapshot via the `-stable` alias, not local `src/`.
-import { LOG_SYMBOLS } from '@socketsecurity/lib-stable/logger/symbols'
+// The `-stable` alias provides a separate module instance used to BUILD the
+// expected value when comparing against `Logger.LOG_SYMBOLS`. The value under
+// test (the ACTUAL inside `expect(...)`) comes from local `src/` above.
+import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/logger/symbols'
 
 describe('Logger', () => {
   let stdout: Writable
@@ -72,12 +74,12 @@ describe('Logger', () => {
     })
 
     it('should be accessible from Logger.LOG_SYMBOLS', () => {
-      // LOG_SYMBOLS here comes from the -stable alias (a separate module
-      // instance from the local src that Logger uses) and is a Proxy, so
+      // canonicalLogSymbols here comes from the -stable alias (a separate
+      // module instance from the local src that Logger uses) and is a Proxy, so
       // compare by value, not reference. The per-key strings are primitives,
       // so those stay identity-comparable.
-      expect(Logger.LOG_SYMBOLS).toEqual(LOG_SYMBOLS)
-      expect(Logger.LOG_SYMBOLS['success']).toBe(LOG_SYMBOLS['success'])
+      expect(Logger.LOG_SYMBOLS).toEqual(canonicalLogSymbols)
+      expect(Logger.LOG_SYMBOLS['success']).toBe(canonicalLogSymbols['success'])
     })
 
     it('should have progress symbol containing therefore character', () => {

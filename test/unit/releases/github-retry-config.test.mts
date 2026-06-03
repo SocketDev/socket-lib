@@ -14,9 +14,10 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { DEFAULT_BASE_DELAY_MS } from '@socketsecurity/lib-stable/releases/github-retry-config'
+import { DEFAULT_BASE_DELAY_MS as CANONICAL_DEFAULT_BASE_DELAY_MS } from '@socketsecurity/lib-stable/releases/github-retry-config'
 
 import {
+  DEFAULT_BASE_DELAY_MS,
   GITHUB_RETRY_CONFIG,
   resolveBaseDelayMs,
 } from '../../../src/releases/github-retry-config.ts'
@@ -47,7 +48,7 @@ function withEnv(value: string | undefined): number {
 
 describe('resolveBaseDelayMs', () => {
   it('defaults to 5000 when the env var is unset', () => {
-    expect(withEnv(undefined)).toBe(DEFAULT_BASE_DELAY_MS)
+    expect(withEnv(undefined)).toBe(CANONICAL_DEFAULT_BASE_DELAY_MS)
     expect(DEFAULT_BASE_DELAY_MS).toBe(5000)
   })
 

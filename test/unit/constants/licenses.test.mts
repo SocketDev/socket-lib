@@ -11,12 +11,17 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  MIT as canonicalMit,
+  UNLICENCED as canonicalUnlicenced,
+  UNLICENSED as canonicalUnlicensed,
+} from '@socketsecurity/lib-stable/constants/licenses'
+
+import {
   MIT,
   UNLICENCED,
   UNLICENSED,
-} from '@socketsecurity/lib-stable/constants/licenses'
-
-import { getCopyLeftLicenses } from '../../../src/constants/licenses'
+  getCopyLeftLicenses,
+} from '../../../src/constants/licenses'
 
 describe('constants/licenses', () => {
   describe('license identifier constants', () => {
@@ -33,13 +38,13 @@ describe('constants/licenses', () => {
     })
 
     it('should be uppercase strings', () => {
-      expect(MIT).toBe(MIT.toUpperCase())
-      expect(UNLICENCED).toBe(UNLICENCED.toUpperCase())
-      expect(UNLICENSED).toBe(UNLICENSED.toUpperCase())
+      expect(MIT).toBe(canonicalMit.toUpperCase())
+      expect(UNLICENCED).toBe(canonicalUnlicenced.toUpperCase())
+      expect(UNLICENSED).toBe(canonicalUnlicensed.toUpperCase())
     })
 
     it('should have different spellings for unlicensed', () => {
-      expect(UNLICENCED).not.toBe(UNLICENSED)
+      expect(UNLICENCED).not.toBe(canonicalUnlicensed)
       // British vs American spelling
       expect(UNLICENCED).toContain('UNLICENC')
       expect(UNLICENSED).toContain('UNLICENS')

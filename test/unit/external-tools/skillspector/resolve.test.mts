@@ -1,34 +1,38 @@
 import { describe, expect, test } from 'vitest'
 
+import { cacheKey } from '../../../../src/external-tools/skillspector/resolve'
+
 // Published-snapshot binding used to BUILD expected values inside
 // `expect(...)`. This stable alias satisfies
 // `socket/no-src-import-in-test-expect`.
-import { cacheKey } from '@socketsecurity/lib-stable/external-tools/skillspector/resolve'
+import { cacheKey as canonicalCacheKey } from '@socketsecurity/lib-stable/external-tools/skillspector/resolve'
 
 describe.sequential('external-tools/skillspector/resolve / cacheKey', () => {
   test('different SHAs produce different keys', () => {
-    expect(cacheKey({ sha: 'abc1234' })).not.toBe(cacheKey({ sha: 'def5678' }))
+    expect(cacheKey({ sha: 'abc1234' })).not.toBe(
+      canonicalCacheKey({ sha: 'def5678' }),
+    )
   })
 
   test('same SHA produces stable keys', () => {
     const opts = { sha: 'abc1234' } as const
-    expect(cacheKey(opts)).toBe(cacheKey(opts))
+    expect(cacheKey(opts)).toBe(canonicalCacheKey(opts))
   })
 
   test('localOnly flag is part of the key', () => {
     expect(cacheKey({ sha: 'abc1234' })).not.toBe(
-      cacheKey({ sha: 'abc1234', localOnly: true }),
+      canonicalCacheKey({ sha: 'abc1234', localOnly: true }),
     )
   })
 
   test('cacheDir override is part of the key', () => {
     expect(cacheKey({ sha: 'abc1234' })).not.toBe(
-      cacheKey({ sha: 'abc1234', cacheDir: '/tmp/x' }),
+      canonicalCacheKey({ sha: 'abc1234', cacheDir: '/tmp/x' }),
     )
   })
 
   test('empty opts produces a stable key', () => {
-    expect(cacheKey({})).toBe(cacheKey({}))
+    expect(cacheKey({})).toBe(canonicalCacheKey({}))
   })
 
   test('opts with sha + cacheDir + localOnly produces a deterministic key', () => {

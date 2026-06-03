@@ -8,15 +8,18 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  DEFAULT_BASE_COLOR,
-  WHITE,
-  frameColors,
+  DEFAULT_BASE_COLOR as canonicalDefaultBaseColor,
+  WHITE as canonicalWhite,
+  frameColors as canonicalFrameColors,
 } from '@socketsecurity/lib-stable/effects/shimmer'
 
 import {
+  DEFAULT_BASE_COLOR,
+  WHITE,
   blendRgb,
   blockKernel,
   configToSpec,
+  frameColors,
   gradient,
   resolvePalette,
   smoothKernel,
@@ -76,9 +79,9 @@ describe('effects/shimmer', () => {
       const spec = configToSpec({ dir: 'none' }, 3)
       const colors = frameColors(spec, 3, 0)
       // dir='none' → wave never on text → every char shows base color.
-      expect(colors[0]).toEqual(DEFAULT_BASE_COLOR)
-      expect(colors[1]).toEqual(DEFAULT_BASE_COLOR)
-      expect(colors[2]).toEqual(DEFAULT_BASE_COLOR)
+      expect(colors[0]).toEqual(canonicalDefaultBaseColor)
+      expect(colors[1]).toEqual(canonicalDefaultBaseColor)
+      expect(colors[2]).toEqual(canonicalDefaultBaseColor)
     })
 
     it('configToSpec uses WHITE highlight by default', () => {
@@ -94,7 +97,7 @@ describe('effects/shimmer', () => {
       )
       // padding=0: wave starts at char 0. block kernel: char 0 is highlight.
       const colors = frameColors(spec, 3, 0)
-      expect(colors[0]).toEqual(WHITE)
+      expect(colors[0]).toEqual(canonicalWhite)
     })
   })
 
@@ -118,10 +121,10 @@ describe('effects/shimmer', () => {
     it('returns highlight when |distance| ≤ halfWidth, base otherwise', () => {
       const k = blockKernel(1)
       const ctx = { baseColor: RED, highlightColor: WHITE }
-      expect(k(0, ctx)).toEqual(WHITE)
-      expect(k(0.5, ctx)).toEqual(WHITE)
-      expect(k(-1, ctx)).toEqual(WHITE)
-      expect(k(1, ctx)).toEqual(WHITE)
+      expect(k(0, ctx)).toEqual(canonicalWhite)
+      expect(k(0.5, ctx)).toEqual(canonicalWhite)
+      expect(k(-1, ctx)).toEqual(canonicalWhite)
+      expect(k(1, ctx)).toEqual(canonicalWhite)
       expect(k(1.01, ctx)).toEqual(RED)
       expect(k(-2, ctx)).toEqual(RED)
     })
@@ -129,8 +132,8 @@ describe('effects/shimmer', () => {
     it('defaults halfWidth to 1 (3-char highlight)', () => {
       const k = blockKernel()
       const ctx = { baseColor: RED, highlightColor: WHITE }
-      expect(k(0, ctx)).toEqual(WHITE)
-      expect(k(1, ctx)).toEqual(WHITE)
+      expect(k(0, ctx)).toEqual(canonicalWhite)
+      expect(k(1, ctx)).toEqual(canonicalWhite)
       expect(k(2, ctx)).toEqual(RED)
     })
   })
@@ -145,7 +148,9 @@ describe('effects/shimmer', () => {
 
     it('returns highlight color at distance 0', () => {
       const k = smoothKernel(2.5)
-      expect(k(0, { baseColor: RED, highlightColor: WHITE })).toEqual(WHITE)
+      expect(k(0, { baseColor: RED, highlightColor: WHITE })).toEqual(
+        canonicalWhite,
+      )
     })
 
     it('blends symmetrically (positive and negative distance)', () => {
@@ -243,7 +248,9 @@ describe('effects/shimmer', () => {
       )
       // Both should produce identical output at every frame.
       for (let f = 0; f < 10; f++) {
-        expect(frameColors(slow, 10, f)).toEqual(frameColors(explicit, 10, f))
+        expect(frameColors(slow, 10, f)).toEqual(
+          canonicalFrameColors(explicit, 10, f),
+        )
       }
     })
 
@@ -281,7 +288,7 @@ describe('effects/shimmer', () => {
       const tightAt0 = frameColors(tight, 10, 0)
       const looseAt0 = frameColors(loose, 10, 0)
       // tight: char 0 is right at wave center → near-white.
-      expect(tightAt0[0]).toEqual(WHITE)
+      expect(tightAt0[0]).toEqual(canonicalWhite)
       // loose: char 0 is far from wave → still RED base.
       expect(looseAt0[0]).toEqual(RED)
     })

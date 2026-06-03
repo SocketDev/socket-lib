@@ -19,8 +19,6 @@ import path from 'node:path'
 import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { getSocketDlxDir } from '@socketsecurity/lib-stable/paths/socket'
-
 import { generateCacheKey } from '../../../src/dlx/cache'
 import {
   clearDlx,
@@ -41,6 +39,7 @@ import {
   getDlxPackageDir,
 } from '../../../src/dlx/paths'
 import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
+import { getSocketDlxDir } from '../../../src/paths/socket'
 
 describe.sequential('dlx', () => {
   const testPackageName = 'test-package'

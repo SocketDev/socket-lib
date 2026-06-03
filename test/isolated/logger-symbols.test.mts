@@ -8,13 +8,15 @@
 import { describe, expect, it } from 'vitest'
 import { Logger } from '../../src/logger/node'
 import {
+  LOG_SYMBOLS,
   incLogCallCountSymbol,
   lastWasBlankSymbol,
 } from '../../src/logger/symbols'
-// LOG_SYMBOLS is used to BUILD expected values inside `expect(...)`, so it must
-// come from the published surface rather than local `src/` (the isolated
-// vitest config aliases `@socketsecurity/lib-stable` back to `src`).
-import { LOG_SYMBOLS } from '@socketsecurity/lib-stable/logger/symbols'
+// The aliased LOG_SYMBOLS is used to BUILD the expected value inside the
+// matcher (`expect(actual).toEqual(canonicalLogSymbols)`), so it must come
+// from the published surface rather than local `src/` (the isolated vitest
+// config aliases `@socketsecurity/lib-stable` back to `src`).
+import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/logger/symbols'
 import { setTheme } from '@socketsecurity/lib/themes/context'
 import { THEMES } from '@socketsecurity/lib/themes/themes'
 import { setupLoggerHarness } from './logger-fixtures'
@@ -68,12 +70,12 @@ describe('LOG_SYMBOLS', () => {
   })
 
   it('should be accessible via Logger.LOG_SYMBOLS', () => {
-    // LOG_SYMBOLS here comes from the -stable alias (a separate module
+    // canonicalLogSymbols here comes from the -stable alias (a separate module
     // instance from the local src that Logger uses) and is a Proxy, so
-    // compare by value, not reference. Per-key strings are primitives,
-    // so callers like Logger.LOG_SYMBOLS['success'] === LOG_SYMBOLS['success']
+    // compare by value, not reference. Per-key strings are primitives, so
+    // callers like Logger.LOG_SYMBOLS['success'] === canonicalLogSymbols['success']
     // still hold.
-    expect(Logger.LOG_SYMBOLS).toEqual(LOG_SYMBOLS)
+    expect(Logger.LOG_SYMBOLS).toEqual(canonicalLogSymbols)
   })
 })
 

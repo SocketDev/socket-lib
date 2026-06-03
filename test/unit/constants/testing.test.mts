@@ -12,11 +12,18 @@ import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 
 import {
+  CI as canonicalCI,
+  PRE_COMMIT as canonicalPreCommit,
+  TEST as canonicalTest,
+  VITEST as canonicalVitest,
+} from '@socketsecurity/lib-stable/constants/testing'
+
+import {
   CI,
   PRE_COMMIT,
   TEST,
   VITEST,
-} from '@socketsecurity/lib-stable/constants/testing'
+} from '../../../src/constants/testing'
 
 describe('constants/testing', () => {
   describe('testing frameworks', () => {
@@ -34,16 +41,16 @@ describe('constants/testing', () => {
     })
 
     it('should have TEST in lowercase', () => {
-      expect(TEST).toBe(TEST.toLowerCase())
+      expect(TEST).toBe(canonicalTest.toLowerCase())
     })
 
     it('should have VITEST in uppercase', () => {
-      expect(VITEST).toBe(VITEST.toUpperCase())
+      expect(VITEST).toBe(canonicalVitest.toUpperCase())
     })
 
     it('should have unique values', () => {
-      expect(TEST).not.toBe(VITEST)
-      expect(TEST.toLowerCase()).not.toBe(VITEST.toLowerCase())
+      expect(TEST).not.toBe(canonicalVitest)
+      expect(TEST.toLowerCase()).not.toBe(canonicalVitest.toLowerCase())
     })
   })
 
@@ -62,12 +69,12 @@ describe('constants/testing', () => {
     })
 
     it('should be uppercase', () => {
-      expect(CI).toBe(CI.toUpperCase())
-      expect(PRE_COMMIT).toBe(PRE_COMMIT.toUpperCase())
+      expect(CI).toBe(canonicalCI.toUpperCase())
+      expect(PRE_COMMIT).toBe(canonicalPreCommit.toUpperCase())
     })
 
     it('should have unique values', () => {
-      expect(CI).not.toBe(PRE_COMMIT)
+      expect(CI).not.toBe(canonicalPreCommit)
     })
 
     it('should use underscore separator for multi-word constants', () => {
@@ -190,7 +197,7 @@ describe('constants/testing', () => {
     })
 
     it('should follow lowercase for runtime values', () => {
-      expect(TEST).toBe(TEST.toLowerCase())
+      expect(TEST).toBe(canonicalTest.toLowerCase())
     })
 
     it('should contain descriptive names', () => {

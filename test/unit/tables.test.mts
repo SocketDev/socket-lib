@@ -10,10 +10,11 @@
  *     package lists, scan results, and reports.
  */
 
-import { stripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
+import { stripAnsi as canonicalStripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
 import { describe, expect, it } from 'vitest'
 import colors from 'yoctocolors-cjs'
 
+import { stripAnsi } from '../../src/ansi/strip'
 import { formatTable } from '../../src/tables/bordered'
 import { formatSimpleTable } from '../../src/tables/simple'
 
@@ -110,7 +111,7 @@ describe('tables', () => {
       const result = formatTable(data, columns)
       expect(result).toContain('ok')
       // Result should have ANSI color codes
-      expect(result.length).toBeGreaterThan(stripAnsi(result).length)
+      expect(result.length).toBeGreaterThan(canonicalStripAnsi(result).length)
     })
 
     it('should handle missing values', () => {
@@ -284,7 +285,7 @@ describe('tables', () => {
       const result = formatSimpleTable(data, columns)
       expect(result).toContain('error')
       // Should have ANSI codes
-      expect(result.length).toBeGreaterThan(stripAnsi(result).length)
+      expect(result.length).toBeGreaterThan(canonicalStripAnsi(result).length)
     })
 
     it('should handle missing values', () => {
@@ -345,7 +346,9 @@ describe('tables', () => {
       const bordered = formatTable(data, columns)
       const simple = formatSimpleTable(data, columns)
 
-      expect(stripAnsi(simple).length).toBeLessThan(stripAnsi(bordered).length)
+      expect(stripAnsi(simple).length).toBeLessThan(
+        canonicalStripAnsi(bordered).length,
+      )
     })
   })
 

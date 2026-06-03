@@ -8,8 +8,6 @@
  *     manager context and HTTP client identification.
  */
 
-import { describe, expect, it } from 'vitest'
-
 import {
   BUN,
   BUN_LOCK,
@@ -34,7 +32,22 @@ import {
   YARN_BERRY,
   YARN_CLASSIC,
   YARN_LOCK,
+} from '../../../src/constants/agents'
+import {
+  BUN as stableBUN,
+  NPM as stableNPM,
+  NPX as stableNPX,
+  OVERRIDES as stableOVERRIDES,
+  PACKAGE_LOCK as stablePACKAGE_LOCK,
+  PACKAGE_LOCK_JSON as stablePACKAGE_LOCK_JSON,
+  PNPM as stablePNPM,
+  PNPM_LOCK as stablePNPM_LOCK,
+  RESOLUTIONS as stableRESOLUTIONS,
+  VLT as stableVLT,
+  YARN as stableYARN,
+  YARN_CLASSIC as stableYARN_CLASSIC,
 } from '@socketsecurity/lib-stable/constants/agents'
+import { describe, expect, it } from 'vitest'
 
 describe('constants/agents', () => {
   describe('agent names', () => {
@@ -72,12 +85,12 @@ describe('constants/agents', () => {
     })
 
     it('should be lowercase', () => {
-      expect(NPM).toBe(NPM.toLowerCase())
-      expect(PNPM).toBe(PNPM.toLowerCase())
-      expect(YARN).toBe(YARN.toLowerCase())
-      expect(BUN).toBe(BUN.toLowerCase())
-      expect(VLT).toBe(VLT.toLowerCase())
-      expect(NPX).toBe(NPX.toLowerCase())
+      expect(NPM).toBe(stableNPM.toLowerCase())
+      expect(PNPM).toBe(stablePNPM.toLowerCase())
+      expect(YARN).toBe(stableYARN.toLowerCase())
+      expect(BUN).toBe(stableBUN.toLowerCase())
+      expect(VLT).toBe(stableVLT.toLowerCase())
+      expect(NPX).toBe(stableNPX.toLowerCase())
     })
 
     it('should have unique values', () => {
@@ -102,7 +115,7 @@ describe('constants/agents', () => {
     })
 
     it('should be different variants', () => {
-      expect(YARN_BERRY).not.toBe(YARN_CLASSIC)
+      expect(YARN_BERRY).not.toBe(stableYARN_CLASSIC)
     })
 
     it('should use slash separator', () => {
@@ -259,22 +272,22 @@ describe('constants/agents', () => {
     })
 
     it('should be lowercase', () => {
-      expect(OVERRIDES).toBe(OVERRIDES.toLowerCase())
-      expect(RESOLUTIONS).toBe(RESOLUTIONS.toLowerCase())
+      expect(OVERRIDES).toBe(stableOVERRIDES.toLowerCase())
+      expect(RESOLUTIONS).toBe(stableRESOLUTIONS.toLowerCase())
     })
 
     it('should be different field names', () => {
-      expect(OVERRIDES).not.toBe(RESOLUTIONS)
+      expect(OVERRIDES).not.toBe(stableRESOLUTIONS)
     })
   })
 
   describe('constant relationships', () => {
     it('should have matching PACKAGE_LOCK and PACKAGE_LOCK_JSON', () => {
-      expect(PACKAGE_LOCK_JSON).toContain(PACKAGE_LOCK)
+      expect(PACKAGE_LOCK_JSON).toContain(stablePACKAGE_LOCK)
     })
 
     it('should have matching PNPM_LOCK and PNPM_LOCK_YAML', () => {
-      expect(PNPM_LOCK_YAML).toContain(PNPM_LOCK)
+      expect(PNPM_LOCK_YAML).toContain(stablePNPM_LOCK)
     })
 
     it('should have matching BUN_LOCK and BUN_LOCKB', () => {
@@ -283,8 +296,8 @@ describe('constants/agents', () => {
     })
 
     it('should have YARN_BERRY and YARN_CLASSIC share YARN prefix', () => {
-      expect(YARN_BERRY.split('/')[0]).toBe(YARN)
-      expect(YARN_CLASSIC.split('/')[0]).toBe(YARN)
+      expect(YARN_BERRY.split('/')[0]).toBe(stableYARN)
+      expect(YARN_CLASSIC.split('/')[0]).toBe(stableYARN)
     })
   })
 
@@ -381,12 +394,12 @@ describe('constants/agents', () => {
   describe('real-world usage', () => {
     it('should support lockfile matching', () => {
       const filename = 'package-lock.json'
-      expect(filename).toBe(PACKAGE_LOCK_JSON)
+      expect(filename).toBe(stablePACKAGE_LOCK_JSON)
     })
 
     it('should support agent type checking', () => {
       const agent = 'npm'
-      expect(agent).toBe(NPM)
+      expect(agent).toBe(stableNPM)
     })
 
     it('should support registry URL construction', () => {
@@ -395,8 +408,8 @@ describe('constants/agents', () => {
     })
 
     it('should support yarn variant detection', () => {
-      expect(YARN_BERRY).toContain(YARN)
-      expect(YARN_CLASSIC).toContain(YARN)
+      expect(YARN_BERRY).toContain(stableYARN)
+      expect(YARN_CLASSIC).toContain(stableYARN)
     })
   })
 })

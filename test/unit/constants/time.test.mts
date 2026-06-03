@@ -9,12 +9,20 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  DLX_BINARY_CACHE_TTL as canonicalDlxBinaryCacheTtl,
+  MILLISECONDS_PER_DAY as canonicalMillisecondsPerDay,
+  MILLISECONDS_PER_HOUR as canonicalMillisecondsPerHour,
+  MILLISECONDS_PER_MINUTE as canonicalMillisecondsPerMinute,
+  MILLISECONDS_PER_SECOND as canonicalMillisecondsPerSecond,
+} from '@socketsecurity/lib-stable/constants/time'
+
+import {
   DLX_BINARY_CACHE_TTL,
   MILLISECONDS_PER_DAY,
   MILLISECONDS_PER_HOUR,
   MILLISECONDS_PER_MINUTE,
   MILLISECONDS_PER_SECOND,
-} from '@socketsecurity/lib-stable/constants/time'
+} from '../../../src/constants/time'
 
 describe('constants/time', () => {
   describe('time multipliers', () => {
@@ -35,15 +43,15 @@ describe('constants/time', () => {
     })
 
     it('should have correct minute calculation', () => {
-      expect(MILLISECONDS_PER_MINUTE).toBe(60 * MILLISECONDS_PER_SECOND)
+      expect(MILLISECONDS_PER_MINUTE).toBe(60 * canonicalMillisecondsPerSecond)
     })
 
     it('should have correct hour calculation', () => {
-      expect(MILLISECONDS_PER_HOUR).toBe(60 * MILLISECONDS_PER_MINUTE)
+      expect(MILLISECONDS_PER_HOUR).toBe(60 * canonicalMillisecondsPerMinute)
     })
 
     it('should have correct day calculation', () => {
-      expect(MILLISECONDS_PER_DAY).toBe(24 * MILLISECONDS_PER_HOUR)
+      expect(MILLISECONDS_PER_DAY).toBe(24 * canonicalMillisecondsPerHour)
     })
 
     it('should be numbers', () => {
@@ -61,9 +69,9 @@ describe('constants/time', () => {
     })
 
     it('should be in ascending order', () => {
-      expect(MILLISECONDS_PER_SECOND).toBeLessThan(MILLISECONDS_PER_MINUTE)
-      expect(MILLISECONDS_PER_MINUTE).toBeLessThan(MILLISECONDS_PER_HOUR)
-      expect(MILLISECONDS_PER_HOUR).toBeLessThan(MILLISECONDS_PER_DAY)
+      expect(MILLISECONDS_PER_SECOND).toBeLessThan(canonicalMillisecondsPerMinute)
+      expect(MILLISECONDS_PER_MINUTE).toBeLessThan(canonicalMillisecondsPerHour)
+      expect(MILLISECONDS_PER_HOUR).toBeLessThan(canonicalMillisecondsPerDay)
     })
   })
 
@@ -73,7 +81,7 @@ describe('constants/time', () => {
     })
 
     it('should be 7 days in milliseconds', () => {
-      expect(DLX_BINARY_CACHE_TTL).toBe(7 * MILLISECONDS_PER_DAY)
+      expect(DLX_BINARY_CACHE_TTL).toBe(7 * canonicalMillisecondsPerDay)
     })
 
     it('should be correct value', () => {
@@ -89,7 +97,7 @@ describe('constants/time', () => {
     })
 
     it('should be greater than one day', () => {
-      expect(DLX_BINARY_CACHE_TTL).toBeGreaterThan(MILLISECONDS_PER_DAY)
+      expect(DLX_BINARY_CACHE_TTL).toBeGreaterThan(canonicalMillisecondsPerDay)
     })
   })
 
@@ -114,7 +122,7 @@ describe('constants/time', () => {
       const createdAt = Date.now()
       const expiresAt = createdAt + DLX_BINARY_CACHE_TTL
       const timeUntilExpiry = expiresAt - createdAt
-      expect(timeUntilExpiry).toBe(DLX_BINARY_CACHE_TTL)
+      expect(timeUntilExpiry).toBe(canonicalDlxBinaryCacheTtl)
     })
   })
 })
