@@ -1,8 +1,8 @@
 /**
- * @file Unit tests for src/fs/find-up — directory-tree-walking file lookup.
- *   Split out of the historical monolithic test/unit/fs.test.mts to keep each
- *   test file under the fleet's 500-line soft cap and let vitest's parallel
- *   thread pool schedule each source-module's tests independently.
+ * @file Unit tests for src/fs/find — directory-tree-walking file lookup. Split
+ *   out of the historical monolithic test/unit/fs.test.mts to keep each test
+ *   file under the fleet's 500-line soft cap and let vitest's parallel thread
+ *   pool schedule each source-module's tests independently.
  */
 
 import { promises as fs } from 'node:fs'
@@ -11,7 +11,7 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { findUp, findUpSync } from '../../../src/fs/find-up'
+import { findUp, findUpSync } from '../../../src/fs/find'
 
 import { runWithTempDir } from '../util/temp-file-helper'
 

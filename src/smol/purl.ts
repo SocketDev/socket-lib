@@ -7,7 +7,7 @@
  *   calls. Callers fall back to the JS `@socketregistry/packageurl-js` import
  *   on the undefined path.
  *
- * @internal — used by `src/packages/operations.ts` to resolve the
+ * @internal — used by `src/packages/specs.ts` to resolve the
  *   `pkg:npm/<name>` parse on `resolveRegistryPackageName`. Most
  *   callers should keep using `PackageURL` from
  *   `external/@socketregistry/packageurl-js` directly; this loader

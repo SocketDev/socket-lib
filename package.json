@@ -1385,25 +1385,25 @@
       "types": "./dist/fs/access.d.ts",
       "default": "./dist/fs/access.js"
     },
+    "./fs/allowed-dirs-cache": {
+      "source": "./src/fs/allowed-dirs-cache.ts",
+      "types": "./dist/fs/allowed-dirs-cache.d.ts",
+      "default": "./dist/fs/allowed-dirs-cache.js"
+    },
     "./fs/encoding": {
       "source": "./src/fs/encoding.ts",
       "types": "./dist/fs/encoding.d.ts",
       "default": "./dist/fs/encoding.js"
     },
-    "./fs/find-up": {
-      "source": "./src/fs/find-up.ts",
-      "types": "./dist/fs/find-up.d.ts",
-      "default": "./dist/fs/find-up.js"
+    "./fs/find": {
+      "source": "./src/fs/find.ts",
+      "types": "./dist/fs/find.d.ts",
+      "default": "./dist/fs/find.js"
     },
     "./fs/inspect": {
       "source": "./src/fs/inspect.ts",
       "types": "./dist/fs/inspect.d.ts",
       "default": "./dist/fs/inspect.js"
-    },
-    "./fs/path-cache": {
-      "source": "./src/fs/path-cache.ts",
-      "types": "./dist/fs/path-cache.d.ts",
-      "default": "./dist/fs/path-cache.js"
     },
     "./fs/read-dir": {
       "source": "./src/fs/read-dir.ts",
@@ -2016,6 +2016,16 @@
       "types": "./dist/packages/exports.d.ts",
       "default": "./dist/packages/exports.js"
     },
+    "./packages/fetch": {
+      "source": "./src/packages/fetch.ts",
+      "types": "./dist/packages/fetch.d.ts",
+      "default": "./dist/packages/fetch.js"
+    },
+    "./packages/find": {
+      "source": "./src/packages/find.ts",
+      "types": "./dist/packages/find.d.ts",
+      "default": "./dist/packages/find.js"
+    },
     "./packages/isolation": {
       "source": "./src/packages/isolation.ts",
       "types": "./dist/packages/isolation.d.ts",
@@ -2031,25 +2041,35 @@
       "types": "./dist/packages/manifest.d.ts",
       "default": "./dist/packages/manifest.js"
     },
+    "./packages/metadata-extensions": {
+      "source": "./src/packages/metadata-extensions.ts",
+      "types": "./dist/packages/metadata-extensions.d.ts",
+      "default": "./dist/packages/metadata-extensions.js"
+    },
     "./packages/normalize": {
       "source": "./src/packages/normalize.ts",
       "types": "./dist/packages/normalize.d.ts",
       "default": "./dist/packages/normalize.js"
-    },
-    "./packages/operations": {
-      "source": "./src/packages/operations.ts",
-      "types": "./dist/packages/operations.d.ts",
-      "default": "./dist/packages/operations.js"
     },
     "./packages/provenance": {
       "source": "./src/packages/provenance.ts",
       "types": "./dist/packages/provenance.d.ts",
       "default": "./dist/packages/provenance.js"
     },
+    "./packages/read": {
+      "source": "./src/packages/read.ts",
+      "types": "./dist/packages/read.d.ts",
+      "default": "./dist/packages/read.js"
+    },
     "./packages/specs": {
       "source": "./src/packages/specs.ts",
       "types": "./dist/packages/specs.d.ts",
       "default": "./dist/packages/specs.js"
+    },
+    "./packages/tarball": {
+      "source": "./src/packages/tarball.ts",
+      "types": "./dist/packages/tarball.d.ts",
+      "default": "./dist/packages/tarball.js"
     },
     "./packages/types": {
       "source": "./src/packages/types.ts",

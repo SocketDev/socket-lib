@@ -5,17 +5,25 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [6.0.7](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.7) - 2026-06-02
+## [6.0.7](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.7) - 2026-06-03
 
 ### Added
 
+- **`external-tools/python` — zero-host-dependency Python.** `resolvePython` (PATH → python-build-standalone download), `downloadPipPackage` (bundle-safe `pip install --target`), `resolvePipPackagePin` (hash-pinned closure), and the `dlxPipInstall` / `dlxPipPin` one-call wrappers. Removes the unused `external-tools/uv`.
+- **`constants/platform` — `getOs`, `getLibc`, `getTarget`.** OS, libc (`glibc`/`musl`/`undefined`), and the pnpm `pack-app` host token `<os>-<arch>[-<libc>]`.
 - **`http-request` decompresses `gzip` / `br` response bodies.** Buffered requests advertise `Accept-Encoding: gzip, br` and now decode the body by its `Content-Encoding` before resolving. 6.0.6 sent the header but never decompressed, so a compressed response reached callers as raw deflated bytes. Streamed requests (`stream: true`, e.g. `httpDownload`) skip the header so piped-to-disk payloads stay raw and checksum cleanly. Callers can override with `'identity'`.
 - **`crypto/hash` blob content-address helpers.** `blobHashOf(bytes)` returns Socket's content-addressed blob hash (`Q` + base64url(sha256)), and `verifyBlobHash(hash, bytes)` throws when bytes don't hash to the expected address. Both build on the fast one-shot `hash()`; the `S` file-stream discriminator verifies against the same digest body. Lets blob consumers (the SDK, MCP server) verify integrity against one canonical implementation instead of re-deriving the scheme.
 - **`integrity` — unified checksum/integrity surface.** `checksumToIntegrity(hex, algorithm?)` and `integrityToChecksum(sri)` convert between the two named hash flavors and are idempotent on the destination format (pass an SRI to `checksumToIntegrity`, get it back unchanged). `isIntegrity(s)` and `isChecksum(s)` are the predicates. `parseIntegrity(s)` returns `{ algorithm, body }` for the SRI structure. Replaces the `src/ssri/` directory (`hexToSsri`, `ssriToHex`, `isValidHex`, `isValidSsri`, `parseSsri`) — SSRI is just another name for Subresource Integrity, so the duplication confused readers. `isIntegrity` now accepts the full W3C SRI set (`sha256` / `sha384` / `sha512`) — the previous predicate hardcoded `sha512` only, which mismatched the contract `external-tools/manifest.ts` already promised and rejected the fleet's `sha256-<base64>` integrity strings.
 - **`process/spawn/kill-tree` — cross-platform process-tree termination.** `killProcessTree(target, { detached?, signal? })` walks and signals the whole descendant tree of a `pid` or `ChildProcess`: POSIX uses `process.kill(-pid, signal)` against the detached child's process group; Windows shells out to `taskkill /T /F /pid <pid>`. `isProcessAlive(pid)` probes liveness with `process.kill(pid, 0)`. Both helpers are best-effort and never throw — `ESRCH` (process gone) or `EPERM` (not ours) returns `false` so cleanup kills can't mask the caller's control flow.
 
+### Changed
+
+- **dlx + pin API renamed (breaking).** `downloadPackage` → `downloadNpmPackage`, `generatePackagePin` → `resolveNpmPackagePin`, the `package` option → `spec`. `downloadNpmPackage` gains an optional `hash` for tarball integrity.
+- **`packages/operations` split by concern (breaking).** The grab-bag `@socketsecurity/lib/packages/operations` export is gone; its members move to focused subpaths: `readPackageJson`/`readPackageJsonSync` → `packages/read`, the fetcher + GitHub tarball resolver → `packages/fetch`, `extractPackage`/`packPackage` → `packages/tarball`, the dependency-metadata override lookup → `packages/metadata-extensions`, and the name/spec helpers → `packages/specs`. `findUpPackageJson` now lives at `packages/find` (the `packages/find-up` subpath is removed). The `fs/find-up` subpath is renamed `fs/find`, and `fs/path-cache` is renamed `fs/allowed-dirs-cache` (it caches the safe-delete allowed-directories set, not arbitrary paths).
+
 ### Fixed
 
+- **Python downloads now work on Windows and Alpine.** python-build-standalone resolution previously returned no asset on `win32` and musl hosts; both now resolve.
 - **`debug` — namespace `SOCKET_DEBUG` values enable debug output.** `envAsBoolean(getSocketDebug())` returned false for `SOCKET_DEBUG=*` or `SOCKET_DEBUG=socket:foo` — those aren't boolean literals, so debug output was silently suppressed for the common namespace-selection shape. The new `isSocketDebugEnabled()` helper treats any non-empty value other than `0`/`false`/`no` (case-insensitive) as enabled.
 - **`external-tools/skillspector` pipx detection on Windows.** The PATH-tier resolver normalizes the resolved binary path with `normalizePath` and matches a forward-slash-only `pipx/venvs/` pattern, instead of `path.normalize` plus a dual-separator regex. On Windows the old form left backslashes in the path and missed pipx-installed binaries, tagging them `source: 'path'` rather than `source: 'pipx'`.
 

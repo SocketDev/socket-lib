@@ -49,7 +49,6 @@ import preferEllipsisChar from './rules/prefer-ellipsis-char.mts'
 import preferEnvAsBoolean from './rules/prefer-env-as-boolean.mts'
 import preferErrorMessage from './rules/prefer-error-message.mts'
 import preferExistsSync from './rules/prefer-exists-sync.mts'
-import preferFindUpPackageJson from './rules/prefer-find-up-package-json.mts'
 import preferFunctionDeclaration from './rules/prefer-function-declaration.mts'
 import preferMockImport from './rules/prefer-mock-import.mts'
 import preferNodeBuiltinImports from './rules/prefer-node-builtin-imports.mts'
@@ -124,7 +123,6 @@ const plugin = {
     'prefer-env-as-boolean': preferEnvAsBoolean,
     'prefer-error-message': preferErrorMessage,
     'prefer-exists-sync': preferExistsSync,
-    'prefer-find-up-package-json': preferFindUpPackageJson,
     'prefer-function-declaration': preferFunctionDeclaration,
     'prefer-mock-import': preferMockImport,
     'prefer-node-builtin-imports': preferNodeBuiltinImports,

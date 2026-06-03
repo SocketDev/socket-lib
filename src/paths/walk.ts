@@ -1,6 +1,6 @@
 /**
  * @file Walk parent directories. `walkUp` is the lazy ancestor generator that
- *   `fs/find-up` and package-root lookups build on: given a starting path it
+ *   `fs/find` and package-root lookups build on: given a starting path it
  *   yields that path, then each parent, up to and INCLUDING the filesystem root
  *   (or a caller-supplied `stopAt` boundary). Lazy so a caller can stop early
  *   without computing the whole chain.

@@ -23,7 +23,7 @@ import { getAllowedDirectories } from './_internal'
 // by safeDelete / safeDeleteSync below. Without this import, rewiring
 // the temp / cacache / socket-user dirs in a test would not affect
 // subsequent safeDelete calls — they'd see stale resolved paths.
-import './path-cache'
+import './allowed-dirs-cache'
 
 import type { MakeDirectoryOptions, PathLike } from 'node:fs'
 

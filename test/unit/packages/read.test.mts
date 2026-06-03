@@ -12,7 +12,7 @@ import path from 'node:path'
 import {
   readPackageJson,
   readPackageJsonSync,
-} from '../../../src/packages/operations'
+} from '../../../src/packages/read'
 import type { NormalizeOptions } from '../../../src/packages/types'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../util/temp-file-helper'

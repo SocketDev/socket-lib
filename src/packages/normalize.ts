@@ -9,7 +9,7 @@ import {
 import { escapeRegExp } from '../regexps/escape'
 import normalizePackageData from '../external/normalize-package-data'
 import { merge } from '../objects/mutate'
-import { findPackageExtensions } from './operations'
+import { findPackageExtensions } from './metadata-extensions'
 
 import type { NormalizeOptions, PackageJson } from './types'
 

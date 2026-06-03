@@ -13,7 +13,7 @@
  */
 
 import { isInSocketDlx } from './paths'
-import { findUpSync } from '../fs/find-up'
+import { findUpSync } from '../fs/find'
 import { getSocketDlxDir } from '../paths/socket'
 
 import { DateNow } from '../primordials/date'

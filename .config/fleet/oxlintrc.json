@@ -47,7 +47,6 @@
     "socket/prefer-env-as-boolean": "error",
     "socket/prefer-error-message": "error",
     "socket/prefer-exists-sync": "error",
-    "socket/prefer-find-up-package-json": "warn",
     "socket/prefer-function-declaration": "error",
     "socket/prefer-mock-import": "error",
     "socket/prefer-node-builtin-imports": "error",

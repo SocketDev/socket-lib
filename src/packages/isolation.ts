@@ -10,7 +10,7 @@ import { errorMessage } from '../errors/message'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize'
 import { getOsTmpDir } from '../paths/socket'
 import { spawn } from '../process/spawn/child'
-import { readPackageJson } from './operations'
+import { readPackageJson } from './read'
 
 import type { PackageJson } from './types'
 

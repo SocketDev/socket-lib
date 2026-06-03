@@ -1,5 +1,5 @@
 /**
- * @file Tests for packages/operations findUpPackageJson — boundary-anchored
+ * @file Tests for packages/find-up findUpPackageJson — boundary-anchored
  *   nearest-package-json lookup via findUpSync from import.meta.
  */
 
@@ -10,7 +10,7 @@ import { pathToFileURL } from 'node:url'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { findUpPackageJson } from '../../../src/packages/operations'
+import { findUpPackageJson } from '../../../src/packages/find'
 
 describe('findUpPackageJson', () => {
   let tmpDir: string
@@ -31,13 +31,7 @@ describe('findUpPackageJson', () => {
     mkdirSync(path.join(tmpDir, 'scripts', 'fleet', 'check'), {
       recursive: true,
     })
-    const scriptPath = path.join(
-      tmpDir,
-      'scripts',
-      'fleet',
-      'check',
-      'foo.mts',
-    )
+    const scriptPath = path.join(tmpDir, 'scripts', 'fleet', 'check', 'foo.mts')
     writeFileSync(scriptPath, '', 'utf8')
     const fakeMeta = { url: pathToFileURL(scriptPath).href } as ImportMeta
 

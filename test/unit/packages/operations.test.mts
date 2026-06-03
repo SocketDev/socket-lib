@@ -16,16 +16,15 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
+import { findPackageExtensions } from '../../../src/packages/metadata-extensions'
+import { readPackageJson } from '../../../src/packages/read'
 import {
-  extractPackage,
-  findPackageExtensions,
   getReleaseTag,
-  packPackage,
   pkgNameToSlug,
-  readPackageJson,
   resolvePackageName,
   resolveRegistryPackageName,
-} from '../../../src/packages/operations'
+} from '../../../src/packages/specs'
+import { extractPackage, packPackage } from '../../../src/packages/tarball'
 import type { PackageJson } from '../../../src/packages/types'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../util/temp-file-helper'

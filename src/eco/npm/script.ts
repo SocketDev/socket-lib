@@ -25,7 +25,7 @@ import {
   getNodeNoWarningsFlags,
   supportsNodeRun,
 } from '../../constants/node'
-import { findUpSync } from '../../fs/find-up'
+import { findUpSync } from '../../fs/find'
 import { getOwn } from '../../objects/inspect'
 import { ArrayIsArray } from '../../primordials/array'
 import { ErrorCtor } from '../../primordials/error'

@@ -15,7 +15,7 @@ import process from 'node:process'
 
 import { SOCKET_LIB_NAME, SOCKET_LIB_VERSION } from '../constants/socket'
 import { getEnvValue } from '../env/rewire'
-import { pkgNameToSlug } from '../packages/operations'
+import { pkgNameToSlug } from '../packages/specs'
 
 /**
  * Compose a three-token User-Agent string from a `{ name, version }` pair,

@@ -12,12 +12,9 @@ import { existsSync, promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
-import {
-  extractPackage,
-  packPackage,
-  readPackageJson,
-  resolveGitHubTgzUrl,
-} from '../../../src/packages/operations'
+import { readPackageJson } from '../../../src/packages/read'
+import { resolveGitHubTgzUrl } from '../../../src/packages/fetch'
+import { extractPackage, packPackage } from '../../../src/packages/tarball'
 import type { ExtractOptions, PackageJson } from '../../../src/packages/types'
 import { expect, it } from 'vitest'
 import { describeNetworkOnly } from '../util/skip-helpers'
