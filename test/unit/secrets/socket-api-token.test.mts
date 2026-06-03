@@ -37,7 +37,7 @@ describe.sequential('secrets/socket-api-token — readSocketApiToken (async)', (
     expect(await readSocketApiToken()).toBe('tok-xyz')
   })
 
-  test('passes service="socket-cli" and the canonical accounts list', async () => {
+  test('passes service="socketsecurity" and the canonical accounts list', async () => {
     const { readSocketApiToken, resolveMock } = await loadFresh()
     resolveMock.mockResolvedValueOnce(undefined)
     await readSocketApiToken()
@@ -45,7 +45,7 @@ describe.sequential('secrets/socket-api-token — readSocketApiToken (async)', (
       service: string
       accounts: readonly string[]
     }
-    expect(callArg.service).toBe('socket-cli')
+    expect(callArg.service).toBe('socketsecurity')
     // socket-api-token-env: bootstrap — asserting the source's literal account
     // fallback list, which includes the SOCKET_API_KEY legacy alias by design.
     expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
@@ -77,7 +77,7 @@ describe.sequential('secrets/socket-api-token — readSocketApiTokenSync', () =>
     expect(readSocketApiTokenSync()).toBe('tok-xyz')
   })
 
-  test('passes service="socket-cli" and the canonical accounts list', async () => {
+  test('passes service="socketsecurity" and the canonical accounts list', async () => {
     const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
     resolveSyncMock.mockReturnValueOnce(undefined)
     readSocketApiTokenSync()
@@ -85,7 +85,7 @@ describe.sequential('secrets/socket-api-token — readSocketApiTokenSync', () =>
       service: string
       accounts: readonly string[]
     }
-    expect(callArg.service).toBe('socket-cli')
+    expect(callArg.service).toBe('socketsecurity')
     // socket-api-token-env: bootstrap — asserting the source's literal account
     // fallback list, which includes the SOCKET_API_KEY legacy alias by design.
     expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
