@@ -10,7 +10,7 @@
  *   down status page never blocks a healthy workflow.
  */
 
-// oxlint-disable-next-line socket/no-platform-specific-http-import -- server-only module; node platform is intentional.
+// oxlint-disable-next-line socket/no-platform-specific-import -- server-only module; node platform is intentional.
 import { httpJson } from '../http-request/node'
 
 export type GitHubComponentStatus =

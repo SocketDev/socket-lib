@@ -2,6 +2,7 @@ import { PassThrough, Readable } from 'node:stream'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { handleOne, readExact, writeMessage } from '../../../src/native-messaging/host'
+import { readSocketApiToken } from '../../../src/secrets/socket-api-token'
 
 vi.mock('../../../src/secrets/socket-api-token', () => ({
   readSocketApiToken: vi.fn(),
@@ -74,8 +75,6 @@ describe('readExact', () => {
 })
 
 describe('handleOne', () => {
-  const { readSocketApiToken } = await import('../../../src/secrets/socket-api-token')
-
   afterEach(() => {
     vi.restoreAllMocks()
   })

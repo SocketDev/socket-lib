@@ -8,8 +8,8 @@
  *
  *   Comment lines (`#…`) and blank lines are skipped. Each hex digest is
  *   converted to an SRI integrity string (`sha256-<base64>=`) so callers
- *   always work in the same format as `external-tools.json` and
- *   `downloadBinary({ integrity })`.
+ *   always work in the same format as `external-tools.json` and other
+ *   integrity-string consumers.
  *
  *   `fetchChecksumFile` is the URL helper — fetches via `httpRequest` and
  *   runs the body through `parseChecksumFile`.
@@ -31,17 +31,20 @@ const CHECKSUM_GNU_RE = /^([a-fA-F0-9]{64})\s+(.+)$/
 /**
  * Fetch and parse a checksums file from a URL.
  *
- * Returns a map of filenames to SRI integrity strings (`sha256-<base64>=`),
- * ready to pass directly to `httpDownload({ integrity })` or
- * `downloadBinary({ integrity })`.
+ * Returns a map of filenames to SRI integrity strings (`sha256-<base64>=`).
+ * Feed `httpDownload({ sha256 })` by converting back to hex via
+ * `integrityToChecksum()`; pass the SRI string through verbatim to consumers
+ * that accept SRI directly.
  *
  * @example
  *   ```ts
+ *   import { integrityToChecksum } from '@socketsecurity/lib/integrity'
+ *
  *   const sums = await fetchChecksumFile(
  *     'https://github.com/org/repo/releases/download/v1.0.0/checksums.txt',
  *   )
  *   await httpDownload(url, '/tmp/tool.tar.gz', {
- *     integrity: sums['tool_linux.tar.gz'],
+ *     sha256: integrityToChecksum(sums['tool_linux.tar.gz']!),
  *   })
  *   ```
  */
@@ -79,7 +82,7 @@ export async function fetchChecksumFile(
  *
  * Lines starting with `#` are treated as comments and ignored. Empty lines
  * are ignored. Each 64-char hex digest is converted to an SRI integrity
- * string so the result plugs directly into `integrity:` options.
+ * string so the result is uniform regardless of source format.
  *
  * @example
  *   ```ts

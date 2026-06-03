@@ -26,17 +26,20 @@ describe('fetchGitHub', () => {
 
   it('passes Authorization header when token provided', async () => {
     nock(GITHUB_API, {
-      reqheaders: { authorization: 'token mytoken' },
+      reqheaders: { authorization: 'Bearer mytoken' },
     })
       .get('/repos/foo/bar')
       .reply(200, { id: 2 })
     await fetchGitHub(`${GITHUB_API}/repos/foo/bar`, { token: 'mytoken' })
   })
 
-  it('does not pass Authorization when empty-string token provided (uses env fallback)', async () => {
-    // With ?? fix: empty string is falsy but ?? only falls back on undefined/null
-    // so '' passes through as the token value. This test documents that behavior.
-    nock(GITHUB_API).get('/repos/foo/bar').reply(200, { id: 3 })
+  it('does not pass Authorization when empty-string token provided', async () => {
+    // Empty string passes through `??` but fails the truthy `if (token)`
+    // gate, so no Authorization header is added. Env fallback only fires
+    // when `token` is undefined / null.
+    nock(GITHUB_API, { badheaders: ['authorization'] })
+      .get('/repos/foo/bar')
+      .reply(200, { id: 3 })
     await fetchGitHub(`${GITHUB_API}/repos/foo/bar`, { token: '' })
   })
 
@@ -110,7 +113,10 @@ describe('fetchGitHub', () => {
       .reply(
         403,
         { message: 'API rate limit exceeded' },
-        { 'X-RateLimit-Reset': '9999999999' },
+        {
+          'X-RateLimit-Remaining': '0',
+          'X-RateLimit-Reset': '9999999999',
+        },
       )
     const err = await fetchGitHub(`${GITHUB_API}/repos/foo/bar`).catch(e => e)
     expect(err.message).toMatch(/rate limit exceeded/)

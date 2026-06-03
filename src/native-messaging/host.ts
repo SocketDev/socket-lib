@@ -64,7 +64,10 @@ export async function handleOne(stdin?: Readable, stdout?: Writable): Promise<vo
   writeMessage({ error: `unknown message type: ${String(type)}` }, outStream)
 }
 
-// Native messaging: read exactly `length` bytes from stdin.
+// Native messaging: read exactly `length` bytes from the stream. Uses
+// the paused-mode `readable` event so leftover bytes stay in the
+// stream's internal buffer between calls — flowing-mode `data` would
+// hand us oversized chunks with no way to put the tail back.
 export function readExact(length: number, stream?: Readable): Promise<Buffer> {
   const src = stream ?? process.stdin
   return new Promise((resolve, reject) => {
@@ -72,19 +75,32 @@ export function readExact(length: number, stream?: Readable): Promise<Buffer> {
     let received = 0
 
     function cleanup(): void {
-      src.off('data', onData)
+      src.off('readable', onReadable)
       src.off('error', onError)
       src.off('end', onEnd)
     }
 
-    function onData(chunk: Buffer): void {
-      chunks.push(chunk)
-      received += chunk.length
-      if (received >= length) {
-        cleanup()
-        const full = Buffer.concat(chunks)
-        resolve(full.subarray(0, length))
+    function tryRead(): void {
+      let needed = length - received
+      while (needed > 0) {
+        const chunk = src.read(needed) ?? src.read()
+        if (chunk === null) {
+          return
+        }
+        chunks.push(chunk)
+        received += chunk.length
+        needed = length - received
       }
+      cleanup()
+      const full = Buffer.concat(chunks)
+      if (received > length) {
+        src.unshift(full.subarray(length))
+      }
+      resolve(full.subarray(0, length))
+    }
+
+    function onReadable(): void {
+      tryRead()
     }
 
     function onError(err: Error): void {
@@ -97,9 +113,12 @@ export function readExact(length: number, stream?: Readable): Promise<Buffer> {
       reject(new Error('stdin closed before message was complete'))
     }
 
-    src.on('data', onData)
+    src.on('readable', onReadable)
     src.on('error', onError)
     src.once('end', onEnd)
+    // Drain anything already buffered (e.g. from a previous readExact
+    // unshift, or a synchronously-populated test stream).
+    tryRead()
   })
 }
 
@@ -114,7 +133,6 @@ export async function runHost(): Promise<void> {
     logger.error((e as Error).message)
     process.exit(1)
   }
-  process.stdin.resume()
   while (true) {
     try {
       await handleOne()

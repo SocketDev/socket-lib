@@ -72,7 +72,7 @@ describe('installNativeHost — input validation', () => {
       installNativeHost({
         allowedOrigins: [],
       }),
-    ).toThrow(/must contain at least one entry/)
+    ).toThrow(/must contain at least one origin/)
   })
 
   it('rejects an empty allowedOrigins list (production mode)', () => {
@@ -81,7 +81,7 @@ describe('installNativeHost — input validation', () => {
         allowedOrigins: [],
         production: true,
       }),
-    ).toThrow(/must contain at least one entry/)
+    ).toThrow(/must contain at least one origin/)
   })
 
   // The "happy path" (production: true with a real extension ID) writes

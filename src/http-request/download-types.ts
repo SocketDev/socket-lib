@@ -138,22 +138,14 @@ export interface HttpDownloadOptions {
    * fail if the computed hash doesn't match. The hash should be a lowercase hex
    * string (64 characters).
    *
-   * Use `fetchChecksumFile()` to fetch hashes from a checksums URL, then pass
-   * the specific integrity string here.
+   * Pair with `fetchChecksumFile()` + `integrityToChecksum()` when working from
+   * a checksums URL, since `fetchChecksumFile()` returns SRI strings.
    *
    * @example
    *   ```ts
-   *   // Verify download integrity with an SRI string
+   *   // Verify download with a sha256 hex digest
    *   await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
-   *     integrity: 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
-   *   })
-   *
-   *   // Verify using a fetched checksum file
-   *   const sums = await fetchChecksumFile(
-   *     'https://example.com/checksums.txt',
-   *   )
-   *   await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
-   *     integrity: sums['file.zip'],
+   *     sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
    *   })
    *   ```
    */
@@ -193,9 +185,9 @@ export interface HttpDownloadResult {
 
 /**
  * Map of filenames to SRI integrity strings (`sha256-<base64>=`).
- * Returned by `parseChecksumFile` / `fetchChecksumFile`; values plug
- * directly into `httpDownload({ integrity })` or
- * `downloadBinary({ integrity })`.
+ * Returned by `parseChecksumFile` / `fetchChecksumFile`. Pass through
+ * `integrityToChecksum()` to feed `httpDownload({ sha256 })`, or pass
+ * the SRI string directly to consumers that accept SRI.
  *
  * @example
  *   ```ts
