@@ -9,6 +9,7 @@ import { Buffer } from 'node:buffer'
 
 import { describe, expect, it } from 'vitest'
 
+// oxlint-disable-next-line socket/no-src-import-in-test-expect -- compareSecrets is the ACTUAL under test (expect(compareSecrets(...)).toBe(...)), not an expected-value builder; it has no -stable export to import from.
 import { compareSecrets } from '../../../src/secrets/compare'
 
 describe('compareSecrets', () => {
@@ -146,7 +147,7 @@ describe('compareSecrets', () => {
         const earlyMismatch = 'Z' + 'a'.repeat(len - 1)
         const lateMismatch = 'a'.repeat(len - 1) + 'Z'
 
-        const iterations = 5_000
+        const iterations = 5000
 
         function measure(other: string): number {
           const start = process.hrtime.bigint()

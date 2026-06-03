@@ -81,6 +81,7 @@ describe('agent execution', () => {
       })
 
       it('should pass through shell:true unchanged', () => {
+        // oxlint-disable-next-line socket/prefer-shell-win32 -- this test asserts shell:true is passed through unchanged; the literal is the value under test.
         const result = execScript('echo hi', [], { shell: true })
         result.catch(() => {})
         expect(result).toBeInstanceOf(Promise)

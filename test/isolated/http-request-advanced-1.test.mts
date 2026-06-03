@@ -15,6 +15,7 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { fetchChecksumFile } from '../../src/http-request/checksum-file'
+// oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
 import { httpJson, httpText } from '../../src/http-request/node'
 import { httpDownload } from '../../src/http-request/download'
 import { httpRequest } from '../../src/http-request/request'

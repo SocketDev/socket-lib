@@ -17,6 +17,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { HttpHookResponseInfo } from '@socketsecurity/lib/http-request/request-types'
 
+// oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
 import { httpJson, httpText } from '../../src/http-request/node'
 import {
   parseRetryAfterHeader,

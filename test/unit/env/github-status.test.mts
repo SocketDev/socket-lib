@@ -165,7 +165,7 @@ describe('probeGitHubStatus', () => {
 
     it('short timeout → status: unknown (fails open, not throwing)', async () => {
       // Simulate slow response by never replying
-      nock(STATUS_HOST).get(STATUS_PATH).delay(10000).reply(200, makeComponents())
+      nock(STATUS_HOST).get(STATUS_PATH).delay(10_000).reply(200, makeComponents())
       const result = await probeGitHubStatus(50) // 50ms timeout
       expect(result.status).toBe('unknown')
       expect(result.degraded).toBe(false)

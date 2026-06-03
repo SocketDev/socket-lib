@@ -28,7 +28,7 @@
     "socket/no-promise-race": "error",
     "socket/no-promise-race-in-loop": "error",
     "socket/no-src-import-in-test-expect": "error",
-    "socket/no-stable-import-of-sut": "error",
+    "socket/no-stable-import-in-test-actual": "error",
     "socket/no-status-emoji": "error",
     "socket/no-structured-clone-prefer-json": "error",
     "socket/no-sync-rm-in-test-lifecycle": "error",

@@ -290,6 +290,7 @@ describe('spawn', () => {
       'should handle Windows script extensions on Windows',
       async () => {
         const result = await spawn('npm.cmd', ['--version'], {
+          // oxlint-disable-next-line socket/prefer-shell-win32 -- itWindowsOnly: this runs only on Windows, where shell:true is the intended cmd.exe wrap being exercised.
           shell: true,
         })
         expect(result.code).toBe(0)
