@@ -101,8 +101,8 @@ describe('external-tools/python/asset-names — pythonAsset', () => {
   })
 
   test('maps every supported platform-arch to a triple', () => {
-    for (const pa of SUPPORTED_ARCHES) {
-      expect(pythonAsset({ ...pin, arch: pa })).toBeTruthy()
+    for (let i = 0, { length } = SUPPORTED_ARCHES; i < length; i += 1) {
+      expect(pythonAsset({ ...pin, arch: SUPPORTED_ARCHES[i]! })).toBeTruthy()
     }
   })
 
@@ -118,8 +118,8 @@ describe('external-tools/python/asset-names — DEFAULT_PYTHON_PIN', () => {
       string,
       string
     >
-    for (const arch of SUPPORTED_ARCHES) {
-      const asset = pythonAsset({ arch, tag, version })!
+    for (let i = 0, { length } = SUPPORTED_ARCHES; i < length; i += 1) {
+      const asset = pythonAsset({ arch: SUPPORTED_ARCHES[i]!, tag, version })!
       expect(checksums[asset.assetName]).toMatch(/^[a-f0-9]{64}$/)
     }
   })
@@ -131,8 +131,8 @@ describe('external-tools/python/asset-names — DEFAULT_PYTHON_PIN', () => {
     )
     const keys = Object.keys(DEFAULT_PYTHON_PIN.checksums)
     expect(keys).toHaveLength(SUPPORTED_ARCHES.length)
-    for (const key of keys) {
-      expect(reachable.has(key)).toBe(true)
+    for (let i = 0, { length } = keys; i < length; i += 1) {
+      expect(reachable.has(keys[i]!)).toBe(true)
     }
   })
 })

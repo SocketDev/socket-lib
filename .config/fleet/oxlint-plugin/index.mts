@@ -30,6 +30,7 @@ import noProcessCwdInScriptsHooks from './rules/no-process-cwd-in-scripts-hooks.
 import noPromiseRace from './rules/no-promise-race.mts'
 import noPromiseRaceInLoop from './rules/no-promise-race-in-loop.mts'
 import noSrcImportInTestExpect from './rules/no-src-import-in-test-expect.mts'
+import noStableImportOfSut from './rules/no-stable-import-of-sut.mts'
 import noStatusEmoji from './rules/no-status-emoji.mts'
 import noStructuredClonePreferJson from './rules/no-structured-clone-prefer-json.mts'
 import noSyncRmInTestLifecycle from './rules/no-sync-rm-in-test-lifecycle.mts'
@@ -99,6 +100,7 @@ const plugin = {
     'no-promise-race': noPromiseRace,
     'no-promise-race-in-loop': noPromiseRaceInLoop,
     'no-src-import-in-test-expect': noSrcImportInTestExpect,
+    'no-stable-import-of-sut': noStableImportOfSut,
     'no-status-emoji': noStatusEmoji,
     'no-structured-clone-prefer-json': noStructuredClonePreferJson,
     'no-sync-rm-in-test-lifecycle': noSyncRmInTestLifecycle,

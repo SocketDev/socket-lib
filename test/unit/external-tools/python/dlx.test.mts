@@ -35,7 +35,7 @@ async function loadFresh() {
   }
 }
 
-const PIN = { version: '3.11.14', tag: '20260203' }
+const PIN = { tag: '20260203', version: '3.11.14' }
 
 beforeEach(() => {
   vi.resetModules()
