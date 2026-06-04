@@ -25,12 +25,20 @@ import {
   isInSocketDlx,
 } from '../../../src/dlx/paths'
 import { safeDelete } from '../../../src/fs/safe'
+import { normalizePath } from '../../../src/paths/normalize'
 import { setPath } from '../../../src/paths/rewire'
 import { getSocketDlxDir } from '../../../src/paths/socket'
 
 describe.sequential('dlx paths', () => {
   const testPackageName = 'test-package'
   let testDlxDir: string
+
+  // getDlx*Dir() return forward-slash-normalized paths (see src/dlx/paths.ts),
+  // so the expected substring must be normalized too — on Windows the raw
+  // canonical dir has backslashes that a normalized path can never contain.
+  function expectedDlxDir(): string {
+    return normalizePath(canonicalGetSocketDlxDir())
+  }
 
   beforeEach(() => {
     // Sandbox the dlx dir via the path-rewire override, NOT process.env.
@@ -56,7 +64,7 @@ describe.sequential('dlx paths', () => {
   describe('getDlxPackageDir', () => {
     it('should return path to package directory', () => {
       const packageDir = getDlxPackageDir(testPackageName)
-      expect(packageDir).toContain(canonicalGetSocketDlxDir())
+      expect(packageDir).toContain(expectedDlxDir())
       expect(packageDir).toContain(testPackageName)
     })
 
@@ -69,27 +77,27 @@ describe.sequential('dlx paths', () => {
     it('should handle scoped package names', () => {
       const scopedPackage = '@socket/cli'
       const packageDir = getDlxPackageDir(scopedPackage)
-      expect(packageDir).toContain(canonicalGetSocketDlxDir())
+      expect(packageDir).toContain(expectedDlxDir())
       expect(packageDir).toContain('@socket/cli')
     })
 
     it('should handle package names with special characters', () => {
       const specialPackage = 'package-name_with.chars'
       const packageDir = getDlxPackageDir(specialPackage)
-      expect(packageDir).toContain(canonicalGetSocketDlxDir())
+      expect(packageDir).toContain(expectedDlxDir())
       expect(packageDir).toContain(specialPackage)
     })
 
     it('should handle empty package name', () => {
       const packageDir = getDlxPackageDir('')
-      expect(packageDir).toContain(canonicalGetSocketDlxDir())
+      expect(packageDir).toContain(expectedDlxDir())
     })
   })
 
   describe('getDlxPackageNodeModulesDir', () => {
     it('should return path to node_modules directory', () => {
       const nodeModulesDir = getDlxPackageNodeModulesDir(testPackageName)
-      expect(nodeModulesDir).toContain(canonicalGetSocketDlxDir())
+      expect(nodeModulesDir).toContain(expectedDlxDir())
       expect(nodeModulesDir).toContain(testPackageName)
       expect(nodeModulesDir).toContain('node_modules')
     })
@@ -97,13 +105,13 @@ describe.sequential('dlx paths', () => {
     it('should handle scoped packages', () => {
       const scopedPackage = '@socket/test'
       const nodeModulesDir = getDlxPackageNodeModulesDir(scopedPackage)
-      expect(nodeModulesDir).toContain(canonicalGetSocketDlxDir())
+      expect(nodeModulesDir).toContain(expectedDlxDir())
       expect(nodeModulesDir).toContain('node_modules')
     })
 
     it('should handle empty package name', () => {
       const nodeModulesDir = getDlxPackageNodeModulesDir('')
-      expect(nodeModulesDir).toContain(canonicalGetSocketDlxDir())
+      expect(nodeModulesDir).toContain(expectedDlxDir())
       expect(nodeModulesDir).toContain('node_modules')
     })
   })
@@ -111,7 +119,7 @@ describe.sequential('dlx paths', () => {
   describe('getDlxInstalledPackageDir', () => {
     it('should return path to installed package directory', () => {
       const installedDir = getDlxInstalledPackageDir(testPackageName)
-      expect(installedDir).toContain(canonicalGetSocketDlxDir())
+      expect(installedDir).toContain(expectedDlxDir())
       expect(installedDir).toContain(testPackageName)
       expect(installedDir).toContain('node_modules')
     })
@@ -119,7 +127,7 @@ describe.sequential('dlx paths', () => {
     it('should handle scoped packages', () => {
       const scopedPackage = '@socket/test'
       const installedDir = getDlxInstalledPackageDir(scopedPackage)
-      expect(installedDir).toContain(canonicalGetSocketDlxDir())
+      expect(installedDir).toContain(expectedDlxDir())
       expect(installedDir).toContain('@socket/test')
     })
   })
@@ -127,7 +135,7 @@ describe.sequential('dlx paths', () => {
   describe('getDlxPackageJsonPath', () => {
     it('should return path to package.json', () => {
       const packageJsonPath = getDlxPackageJsonPath(testPackageName)
-      expect(packageJsonPath).toContain(canonicalGetSocketDlxDir())
+      expect(packageJsonPath).toContain(expectedDlxDir())
       expect(packageJsonPath).toContain(testPackageName)
       expect(packageJsonPath).toContain('package.json')
     })
@@ -135,13 +143,13 @@ describe.sequential('dlx paths', () => {
     it('should handle scoped packages', () => {
       const scopedPackage = '@socket/test'
       const packageJsonPath = getDlxPackageJsonPath(scopedPackage)
-      expect(packageJsonPath).toContain(canonicalGetSocketDlxDir())
+      expect(packageJsonPath).toContain(expectedDlxDir())
       expect(packageJsonPath).toContain('package.json')
     })
 
     it('should handle empty package name', () => {
       const packageJsonPath = getDlxPackageJsonPath('')
-      expect(packageJsonPath).toContain(canonicalGetSocketDlxDir())
+      expect(packageJsonPath).toContain(expectedDlxDir())
       expect(packageJsonPath).toContain('package.json')
     })
   })
