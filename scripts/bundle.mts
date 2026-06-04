@@ -4,294 +4,38 @@
  *   scripts/bundle/ (clean, externals, verify-dist).
  */
 
-import { existsSync, promises as fsPromises, readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { rolldown, watch } from 'rolldown'
+import { watch } from 'rolldown'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
-import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { buildConfig } from '../.config/rolldown.config.mts'
-import { primBuildConfig } from '../.config/repo/rolldown.prim.config.mts'
 // Repo root from the canonical paths module (1 path, 1 reference).
 import { REPO_ROOT as rootPath } from './fleet/paths.mts'
 import { parseArgs } from './fleet/util/parse-args.mts'
 import { runSequence } from './fleet/util/run-command.mts'
+import { fsyncDist } from './bundle/fsync-dist.mts'
+import {
+  buildExternals,
+  buildPrim,
+  buildSource,
+  buildTypes,
+  runPostBuild,
+} from './bundle/steps.mts'
 import { verifyDist } from './bundle/verify-dist.mts'
 
 const logger = getDefaultLogger()
 
 /**
- * MacOS-only fsync barrier: walk `dist/` and `fsync()` every regular file so
- * downstream steps (tests, packagers) see fully-durable bytes rather than
- * page-cache state. esbuild + child-process builders resolve their write
- * Promises before the file system view is durable on darwin CI runners.
- *
- * Skipped on Linux + Windows: Linux's `fs.writeFile` already provides the
- * needed durability for our use, and Windows cannot `open(dir, 'r')` for the
- * directory-flush step (different file-handle semantics).
- *
- * **Why:** Past incident — socket-lib v6.0.1 + v6.0.2 macOS CI flakes where
- * `Build completed successfully` logged with 502 validated exports, then the
- * very next vitest run hit `Unexpected token '{'` on a `dist/external/*.js`
- * shim and `Cannot find module 'dist/packages/normalize.js'`. Files written but
- * not yet durable.
- */
-async function fsyncDirRecursive(dir: string): Promise<void> {
-  if (process.platform !== 'darwin') {
-    return
-  }
-  const entries = await fsPromises.readdir(dir, { withFileTypes: true })
-  const filePromises: Array<Promise<void>> = []
-  const subdirs: string[] = []
-  for (const entry of entries) {
-    const entryPath = path.join(dir, entry.name)
-    if (entry.isDirectory()) {
-      subdirs.push(entryPath)
-    } else if (entry.isFile()) {
-      filePromises.push(fsyncFile(entryPath))
-    }
-  }
-  await Promise.all(filePromises)
-  // Subdirs in parallel to keep the barrier cheap on wide trees.
-  await Promise.all(subdirs.map(fsyncDirRecursive))
-}
-
-async function fsyncFile(filePath: string): Promise<void> {
-  // Best-effort — a single failed fsync shouldn't tank the build. Macs
-  // occasionally surface EPERM on system-restored files; the bytes are
-  // already on disk, just unflushable from userspace.
-  try {
-    const fh = await fsPromises.open(filePath, 'r')
-    try {
-      await fh.sync()
-    } finally {
-      await fh.close()
-    }
-  } catch {
-    // ignore — best-effort barrier
-  }
-}
-
-/**
  * Build source code with rolldown. Returns { exitCode, buildTime } for external
  * logging.
  */
-interface BuildSourceOptions {
-  quiet?: boolean | undefined
-  skipClean?: boolean | undefined
-  verbose?: boolean | undefined
-  analyze?: boolean | undefined
-}
-
-interface BuildSourceResult {
-  exitCode: number
-  buildTime: number
-}
-
-export async function buildSource(
-  options: BuildSourceOptions = {},
-): Promise<BuildSourceResult> {
-  const { quiet = false, skipClean = false } = options
-
-  // Clean dist directory if needed
-  if (!skipClean) {
-    const exitCode = await runSequence([
-      {
-        args: ['scripts/bundle/clean.mts', '--dist', '--quiet'],
-        command: 'node',
-      },
-    ])
-    if (exitCode !== 0) {
-      if (!quiet) {
-        logger.error('Clean failed')
-      }
-      return { exitCode, buildTime: 0 }
-    }
-  }
-
-  try {
-    const startTime = Date.now()
-    const { output, ...inputOptions } = buildConfig
-    const bundle = await rolldown(inputOptions)
-    try {
-      await bundle.write(output)
-    } finally {
-      await bundle.close()
-    }
-    const buildTime = Date.now() - startTime
-
-    return { exitCode: 0, buildTime }
-  } catch (error) {
-    if (!quiet) {
-      logger.error('Source build failed')
-      logger.error(error)
-    }
-    return { exitCode: 1, buildTime: 0 }
-  }
-}
-
-/**
- * Build TypeScript declarations. Returns exitCode for external logging.
- */
-interface BuildTypesOptions {
-  quiet?: boolean | undefined
-  skipClean?: boolean | undefined
-  verbose?: boolean | undefined
-}
-
-export async function buildTypes(
-  options: BuildTypesOptions = {},
-): Promise<number> {
-  const {
-    quiet = false,
-    skipClean = false,
-    verbose: _verbose = false,
-  } = options
-
-  const commands = []
-
-  if (!skipClean) {
-    commands.push({
-      args: ['scripts/bundle/clean.mts', '--types', '--quiet'],
-      command: 'node',
-    })
-  }
-
-  commands.push({
-    args: ['exec', 'tsgo', '--project', 'tsconfig.dts.json'],
-    command: 'pnpm',
-    options: {
-      shell: WIN32,
-    },
-  })
-
-  const exitCode = await runSequence(commands)
-
-  if (exitCode !== 0) {
-    if (!quiet) {
-      logger.error('Type declarations build failed')
-    }
-  }
-
-  return exitCode
-}
-
-/**
- * Build the prim CLI: a true bundle (not per-file transpile) that inlines
- * lib-stable + diff + the acorn-wasm wrapper into a single `dist/bin/prim.cjs`.
- * The vendored `acorn-bindgen.cjs` + `acorn.wasm` are copied alongside so the
- * bindgen's `${__dirname}/./acorn.wasm` sibling-load resolves after publish.
- */
-export async function buildPrim(
-  options: { quiet?: boolean | undefined } = {},
-): Promise<number> {
-  const { quiet = false } = options
-  try {
-    const { output, ...inputOptions } = primBuildConfig
-    const bundle = await rolldown(inputOptions)
-    try {
-      await bundle.write(output)
-    } finally {
-      await bundle.close()
-    }
-    // Stage vendored wasm + bindgen next to the bundle. The bindgen
-    // uses `${__dirname}/./acorn.wasm`, so they must be siblings of
-    // `dist/bin/prim.cjs` at runtime.
-    const binDir = path.join(rootPath, 'dist/bin')
-    await fsPromises.mkdir(binDir, { recursive: true })
-    const vendor = path.join(rootPath, 'vendor/acorn')
-    await fsPromises.copyFile(
-      path.join(vendor, 'acorn-bindgen.cjs'),
-      path.join(binDir, 'acorn-bindgen.cjs'),
-    )
-    await fsPromises.copyFile(
-      path.join(vendor, 'acorn.wasm'),
-      path.join(binDir, 'acorn.wasm'),
-    )
-    // Make the bin executable so `pnpm exec prim` / direct invocation
-    // works without `node` prefix.
-    await fsPromises.chmod(path.join(binDir, 'prim.cjs'), 0o755)
-    return 0
-  } catch (error) {
-    if (!quiet) {
-      logger.error('prim bundle build failed')
-      logger.error(error)
-    }
-    return 1
-  }
-}
-
-/**
- * Build external dependencies. Returns exitCode for external logging.
- */
-export async function buildExternals(
-  options: { quiet?: boolean | undefined; verbose?: boolean | undefined } = {},
-): Promise<number> {
-  const { quiet = false, verbose = false } = options
-
-  const args = ['scripts/bundle/externals.mts']
-  if (quiet) {
-    args.push('--quiet')
-  }
-  if (verbose) {
-    args.push('--verbose')
-  }
-
-  const exitCode = await runSequence([
-    {
-      args,
-      command: 'node',
-    },
-  ])
-
-  if (exitCode !== 0) {
-    if (!quiet) {
-      logger.error('External dependencies build failed')
-    }
-  }
-
-  return exitCode
-}
-
-/**
- * Run the post-build dist-shaping steps (scripts/post-build.mts). Returns
- * exitCode for external logging.
- */
-export async function runPostBuild(
-  options: { quiet?: boolean | undefined; verbose?: boolean | undefined } = {},
-): Promise<number> {
-  const { quiet = false, verbose = false } = options
-
-  const postBuildArgs = ['scripts/post-build.mts']
-  if (quiet) {
-    postBuildArgs.push('--quiet')
-  }
-  if (verbose) {
-    postBuildArgs.push('--verbose')
-  }
-
-  const exitCode = await runSequence([
-    {
-      args: postBuildArgs,
-      command: 'node',
-    },
-  ])
-
-  if (exitCode !== 0) {
-    if (!quiet) {
-      logger.error('Post-build failed')
-    }
-  }
-
-  return exitCode
-}
-
 /**
  * Watch mode for development with incremental builds (68% faster rebuilds).
  */
@@ -373,7 +117,10 @@ export function isBuildNeeded(): boolean {
     if (!value || typeof value !== 'object') {
       continue
     }
-    const entry = value as { default?: unknown; types?: unknown }
+    const entry = value as {
+      default?: unknown | undefined
+      types?: unknown | undefined
+    }
     const targets = [entry.default, entry.types].filter(
       (t): t is string => typeof t === 'string' && t.startsWith('./dist/'),
     )
@@ -626,12 +373,12 @@ async function main(): Promise<void> {
       // If all parallel builds succeeded, flush dist/ to disk and run the
       // post-build dist-shaping steps.
       if (exitCode === 0) {
-        // Fsync barrier — see `fsyncDirRecursive` docstring. Runs between the
-        // parallel builders and downstream phases (runPostBuild, then tests)
-        // so no consumer reads stale page-cache state.
+        // Fsync barrier — see `fsync-dist.mts`. Runs between the parallel
+        // builders and downstream phases (runPostBuild, then tests) so no
+        // consumer reads stale page-cache state.
         const distDir = path.join(rootPath, 'dist')
         if (existsSync(distDir)) {
-          await fsyncDirRecursive(distDir)
+          await fsyncDist(distDir)
         }
         const postBuildExitCode = await runPostBuild({ quiet, verbose })
         exitCode = postBuildExitCode
