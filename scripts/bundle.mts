@@ -4,7 +4,7 @@
  *   scripts/bundle/ (clean, externals, verify-dist).
  */
 
-import { existsSync, promises as fsPromises } from 'node:fs'
+import { existsSync, promises as fsPromises, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -345,13 +345,46 @@ export async function watchBuild(
 }
 
 /**
- * Check if build is needed.
+ * Whether `--needed` should run a build — true when dist artifacts are absent.
+ *
+ * The old check looked for `dist/index.js` + `dist/types/index.d.ts`, but this
+ * package has NO root entry (no `main`/`exports["."]`) and declarations emit
+ * co-located in `dist/` (not `dist/types/`). Both paths never existed, so
+ * isBuildNeeded() ALWAYS returned true → `prepare`/`--needed` rebuilt on every
+ * `pnpm install` — a primary cause of the install slowdown. Instead, derive a
+ * real sentinel from the first `package.json` export's `default` (.js) +
+ * `types` (.d.ts) targets, so the check tracks the actual output layout and
+ * can't drift wrong again.
  */
 export function isBuildNeeded(): boolean {
-  const distPath = path.join(rootPath, 'dist', 'index.js')
-  const distTypesPath = path.join(rootPath, 'dist', 'types', 'index.d.ts')
-
-  return !existsSync(distPath) || !existsSync(distTypesPath)
+  let pkg: {
+    exports?: Record<string, unknown> | undefined
+  }
+  try {
+    pkg = JSON.parse(
+      readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
+    ) as typeof pkg
+  } catch {
+    // Can't read the manifest — fail safe by building.
+    return true
+  }
+  const exportsMap = pkg.exports ?? {}
+  for (const value of Object.values(exportsMap)) {
+    if (!value || typeof value !== 'object') {
+      continue
+    }
+    const entry = value as { default?: unknown; types?: unknown }
+    const targets = [entry.default, entry.types].filter(
+      (t): t is string => typeof t === 'string' && t.startsWith('./dist/'),
+    )
+    // First subpath export with concrete dist targets is the sentinel: if its
+    // .js + .d.ts both exist, dist is built.
+    if (targets.length > 0) {
+      return targets.some(t => !existsSync(path.join(rootPath, t)))
+    }
+  }
+  // No dist-backed exports found — nothing to build.
+  return false
 }
 
 async function main(): Promise<void> {
@@ -435,7 +468,21 @@ async function main(): Promise<void> {
     const quiet = isQuiet(values)
     const verbose = values.verbose
 
-    // Check if build is needed
+    // `--needed` is the `prepare`/install path. In CI, skip it entirely: CI
+    // runs explicit build/test/check steps, so the install-time `prepare`
+    // build is redundant work that only adds latency to every `pnpm install`
+    // in the pipeline. (Locally, `--needed` still builds when dist is absent.)
+    if (values.needed && process.env['CI'] === 'true') {
+      if (!quiet) {
+        logger.info('CI detected — skipping prepare-time build (CI builds explicitly)')
+      }
+      process.exitCode = 0
+      return
+    }
+
+    // Check if build is needed. isBuildNeeded() short-circuits when dist
+    // artifacts already exist, so a local `pnpm install` with a built dist/
+    // is near-instant instead of rebuilding every time.
     if (values.needed && !isBuildNeeded()) {
       if (!quiet) {
         logger.info('Build artifacts exist, skipping build')
