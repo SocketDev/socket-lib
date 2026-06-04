@@ -311,8 +311,8 @@ describe('env/node-version-managers', () => {
 
     it('detects corepack on Windows-style path', () => {
       maskAllManagerEnv()
-      // oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- fixture path mirrors corepack's real user-home install location, not a repo-root cache.
       withExecPath(
+        // oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- fixture path mirrors corepack's real user-home install location, not a repo-root cache.
         'C:\\Users\\<USERNAME>\\.cache\\node\\corepack\\shims\\node.exe',
       )
       expect(detectActiveNodeManager()).toBe('corepack')
