@@ -19,7 +19,11 @@ function readableFrom(chunks: Buffer[]): Readable {
       if (idx < chunks.length) {
         this.push(chunks[idx++])
       } else {
-        this.push(undefined)
+        // Node's Readable uses `null` as the mandatory end-of-stream sentinel —
+        // pushing `undefined` queues a value instead of signaling EOF, so the
+        // 'end' event never fires and readExact() hangs waiting for more bytes.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- Readable.push(null) is Node's required EOF sentinel.
+        this.push(null)
       }
     },
   })
