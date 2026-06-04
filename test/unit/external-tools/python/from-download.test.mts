@@ -43,6 +43,21 @@ describe('external-tools/python/from-download — path helpers', () => {
     expect(pythonBinPath(dir)).toBe(expected)
   })
 
+  test('pythonBinPath follows the TARGET arch, not the host', () => {
+    const dir = path.join('a', 'b')
+    // A win-* target always yields python.exe; any other target bin/python3 —
+    // independent of the host the resolution runs on (cross-compile-safe).
+    expect(pythonBinPath(dir, 'win-x64').replace(/\\/g, '/')).toBe(
+      'a/b/python/python.exe',
+    )
+    expect(pythonBinPath(dir, 'linux-x64').replace(/\\/g, '/')).toBe(
+      'a/b/python/bin/python3',
+    )
+    expect(pythonBinPath(dir, 'darwin-arm64').replace(/\\/g, '/')).toBe(
+      'a/b/python/bin/python3',
+    )
+  })
+
   test('pythonCacheDir encodes version-tag-arch under _dlx/python', () => {
     const dir = pythonCacheDir('3.11.14', '20260203', 'darwin-arm64')
     expect(dir.replace(/\\/g, '/')).toContain(
@@ -83,13 +98,11 @@ describe.sequential('external-tools/python/from-download — pythonFromDownload'
       tag: '20260203',
       version: '3.11.14',
     })
-    const expectedBin =
-      process.platform === 'win32'
-        ? '/custom/py/python/python.exe'
-        : '/custom/py/python/bin/python3'
-    // Result path uses the platform-native interpreter layout
-    // (python/python.exe on Windows, python/bin/python3 elsewhere).
-    expect(result!.path.replace(/\\/g, '/')).toBe(expectedBin)
+    // The interpreter layout follows the TARGET arch (linux-x64 here), not the
+    // host — so it's always python/bin/python3 regardless of where the test runs.
+    expect(result!.path.replace(/\\/g, '/')).toBe(
+      '/custom/py/python/bin/python3',
+    )
     expect(downloadAndExtractToolMock.mock.calls[0]![0].extractedDir).toBe(
       '/custom/py',
     )

@@ -49,10 +49,19 @@ export interface PythonFromDownloadOptions {
 
 /**
  * Return the absolute path to the interpreter inside an extracted
- * python-build-standalone tree.
+ * python-build-standalone tree. The layout follows the TARGET arch, not the
+ * host: a Windows target nests the interpreter at `python/python.exe`, every
+ * other target at `python/bin/python3`. Keying off `process.platform` would be
+ * wrong when cross-resolving (e.g. a Windows host downloading a linux-x64
+ * build). `arch` is a platform-arch key like `win-x64` / `linux-x64`; omit it
+ * to fall back to the host platform.
  */
-export function pythonBinPath(extractedDir: string): string {
-  if (process.platform === 'win32') {
+export function pythonBinPath(
+  extractedDir: string,
+  arch?: string | undefined,
+): string {
+  const isWin = arch ? arch.startsWith('win-') : process.platform === 'win32'
+  if (isWin) {
     return path.join(extractedDir, 'python', 'python.exe')
   }
   return path.join(extractedDir, 'python', 'bin', 'python3')
@@ -93,7 +102,7 @@ export async function pythonFromDownload(
     downloader,
   })
   return {
-    path: pythonBinPath(extractedDir),
+    path: pythonBinPath(extractedDir, arch),
     source: 'download',
     integrity: archive.integrity,
   }
