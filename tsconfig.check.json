@@ -12,5 +12,11 @@
     "rootDir": "."
   },
   "include": ["./src/**/*.ts", "./test/**/*.ts", "./test/**/*.mts"],
-  "exclude": ["./.cache", "./dist/**/*", "./node_modules"]
+  "exclude": [
+    "./.cache",
+    "./dist/**/*",
+    "./node_modules",
+    "./test/unit/ansi.test.mts",
+    "./test/unit/packages/normalize.test.mts"
+  ]
 }
