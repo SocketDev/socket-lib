@@ -1,4 +1,3 @@
-/* oxlint-disable socket/sort-source-methods -- build-runner helpers interleaved with config constants and module-level state; reordering would split state from its consumers. */
 /**
  * @file Build runner: rolldown for the per-file source + externals builds, tsgo
  *   for declarations.
@@ -12,6 +11,7 @@ import { fileURLToPath } from 'node:url'
 import { rolldown, watch } from 'rolldown'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
@@ -87,10 +87,10 @@ async function fsyncFile(filePath: string): Promise<void> {
  * logging.
  */
 interface BuildSourceOptions {
-  quiet?: boolean
-  skipClean?: boolean
-  verbose?: boolean
-  analyze?: boolean
+  quiet?: boolean | undefined
+  skipClean?: boolean | undefined
+  verbose?: boolean | undefined
+  analyze?: boolean | undefined
 }
 
 interface BuildSourceResult {
@@ -144,9 +144,9 @@ export async function buildSource(
  * Build TypeScript declarations. Returns exitCode for external logging.
  */
 interface BuildTypesOptions {
-  quiet?: boolean
-  skipClean?: boolean
-  verbose?: boolean
+  quiet?: boolean | undefined
+  skipClean?: boolean | undefined
+  verbose?: boolean | undefined
 }
 
 export async function buildTypes(
@@ -171,7 +171,7 @@ export async function buildTypes(
     args: ['exec', 'tsgo', '--project', 'tsconfig.dts.json'],
     command: 'pnpm',
     options: {
-      ...(process.platform === 'win32' && { shell: true }),
+      shell: WIN32,
     },
   })
 
@@ -193,7 +193,7 @@ export async function buildTypes(
  * bindgen's `${__dirname}/./acorn.wasm` sibling-load resolves after publish.
  */
 export async function buildPrim(
-  options: { quiet?: boolean } = {},
+  options: { quiet?: boolean | undefined } = {},
 ): Promise<number> {
   const { quiet = false } = options
   try {
@@ -235,7 +235,7 @@ export async function buildPrim(
  * Build external dependencies. Returns exitCode for external logging.
  */
 export async function buildExternals(
-  options: { quiet?: boolean; verbose?: boolean } = {},
+  options: { quiet?: boolean | undefined; verbose?: boolean | undefined } = {},
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
 
@@ -268,7 +268,7 @@ export async function buildExternals(
  * exitCode for external logging.
  */
 export async function runPostBuild(
-  options: { quiet?: boolean; verbose?: boolean } = {},
+  options: { quiet?: boolean | undefined; verbose?: boolean | undefined } = {},
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
 
@@ -300,13 +300,13 @@ export async function runPostBuild(
  * Watch mode for development with incremental builds (68% faster rebuilds).
  */
 export async function watchBuild(
-  options: { quiet?: boolean; verbose?: boolean } = {},
+  options: { quiet?: boolean | undefined; verbose?: boolean | undefined } = {},
 ): Promise<number> {
   const { quiet = false } = options
 
   if (!quiet) {
     logger.step('Starting watch mode with incremental builds')
-    logger.substep('Watching for file changes...')
+    logger.substep('Watching for file changes…')
   }
 
   try {
@@ -407,8 +407,10 @@ async function main(): Promise<void> {
     // Show help if requested
     if (values.help) {
       logger.log('Build Runner')
-      logger.log('\nUsage: pnpm build [options]')
-      logger.log('\nOptions:')
+      logger.log('')
+      logger.log('Usage: pnpm build [options]')
+      logger.log('')
+      logger.log('Options:')
       logger.log('  --help       Show this help message')
       logger.log('  --src        Build source code only')
       logger.log('  --types      Build TypeScript declarations only')
@@ -419,7 +421,8 @@ async function main(): Promise<void> {
       logger.log('  --analyze    Show bundle size analysis')
       logger.log('  --quiet, --silent  Suppress progress messages')
       logger.log('  --verbose    Show detailed build output')
-      logger.log('\nExamples:')
+      logger.log('')
+      logger.log('Examples:')
       logger.log('  pnpm build              # Full build (source + types)')
       logger.log('  pnpm build --src        # Build source only')
       logger.log('  pnpm build --types      # Build types only')
@@ -427,7 +430,8 @@ async function main(): Promise<void> {
         '  pnpm build --watch      # Watch mode with incremental builds',
       )
       logger.log('  pnpm build --analyze    # Build with size analysis')
-      logger.log('\nNote: Watch mode uses rolldown for incremental rebuilds')
+      logger.log('')
+      logger.log('Note: Watch mode uses rolldown for incremental rebuilds')
       process.exitCode = 0
       return
     }
