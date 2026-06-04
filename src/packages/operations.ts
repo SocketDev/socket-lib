@@ -2,6 +2,8 @@
  * @file Package operations including extraction, packing, and I/O.
  */
 
+import { fileURLToPath } from 'node:url'
+
 import {
   getPackageExtensions,
   getPackumentCache,
@@ -21,7 +23,9 @@ import * as semver from '../external/semver'
 
 import { getSmolPurl } from '../smol/purl'
 
+import { findUpSync } from '../fs/find-up'
 import { readJson, readJsonSync } from '../fs/read-json'
+import { getNodePath } from '../node/path'
 import { merge } from '../objects/mutate'
 import { isPlainObject } from '../objects/predicates'
 import type {
@@ -32,6 +36,7 @@ import type {
   ReadPackageJsonOptions,
 } from './types'
 import { normalizePackageJson } from './normalize'
+import { normalizePath } from '../paths/normalize'
 import { resolvePackageJsonPath } from '../paths/packages'
 import {
   getRepoUrlDetails,
@@ -229,6 +234,74 @@ export function pkgNameToSlug(pkgName: string): string {
   return StringPrototypeCharCodeAt(pkgName, 0) === 64 /* '@' */
     ? `${pkgName.slice(1).replace('/', '-')}`
     : pkgName
+}
+
+export interface FindUpPackageJsonOptions {
+  /**
+   * Names to look for. Defaults to `['package.json']`. Pass alternate
+   * markers for non-package roots (e.g. `['pnpm-workspace.yaml']` for the
+   * workspace root in a pnpm monorepo).
+   */
+  names?: readonly string[] | undefined
+  /**
+   * Optional ancestor boundary. Useful when a script is run from a deeply
+   * nested fixture and you don't want to escape the test's tmpdir.
+   * Defaults to the filesystem root.
+   */
+  stopAt?: string | undefined
+}
+
+/**
+ * Find the nearest `package.json` walking up from `import.meta`. Returns the
+ * absolute path to the file (normalized to forward slashes), matching the
+ * `findUp` / `findUpSync` return shape. Throws when no marker is found —
+ * every script using this helper lives inside a package and should resolve.
+ *
+ * Use this instead of `path.join(__dirname, '..', '..'[, '..'])`. The ascent
+ * count is computed at runtime from the actual filesystem layout, not
+ * hard-coded into the source, so the helper stays correct across refactors
+ * that move scripts between directories.
+ *
+ * Pair with `readPackageJson` to find AND parse the nearest package.json:
+ *
+ * @example
+ *   ;```ts
+ *   const pkgJsonPath = findUpPackageJson(import.meta)
+ *   // → '/abs/path/to/package.json'
+ *   const pkg = await readPackageJson(pkgJsonPath)
+ *   console.log(pkg?.name)
+ *
+ *   // Workspace root in a pnpm monorepo:
+ *   const wsRoot = findUpPackageJson(import.meta, {
+ *     names: ['pnpm-workspace.yaml'],
+ *   })
+ *   ```
+ *
+ * @param meta - `import.meta` from the calling script.
+ * @param options - Override marker name(s) or set a stopAt boundary.
+ *
+ * @returns Absolute, normalized path to the marker file.
+ * @throws When no marker is found between the script and the filesystem
+ *   root (or `stopAt`).
+ */
+export function findUpPackageJson(
+  meta: ImportMeta,
+  options?: FindUpPackageJsonOptions | undefined,
+): string {
+  const { names = ['package.json'], stopAt } = {
+    __proto__: null,
+    ...options,
+  } as FindUpPackageJsonOptions
+  const scriptPath = fileURLToPath(meta.url)
+  const path = getNodePath()
+  const scriptDir = path.dirname(scriptPath)
+  const found = findUpSync(names as string[], { cwd: scriptDir, stopAt })
+  if (found === undefined) {
+    throw new Error(
+      `findUpPackageJson: no ${names.join(' / ')} found between ${scriptPath} and ${stopAt ?? 'filesystem root'}`,
+    )
+  }
+  return normalizePath(found)
 }
 
 /**

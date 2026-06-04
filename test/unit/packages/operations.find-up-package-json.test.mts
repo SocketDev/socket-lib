@@ -1,5 +1,5 @@
 /**
- * @file Tests for paths/find-up-package-json — boundary-anchored
+ * @file Tests for packages/operations findUpPackageJson — boundary-anchored
  *   nearest-package-json lookup via findUpSync from import.meta.
  */
 
@@ -10,7 +10,7 @@ import { pathToFileURL } from 'node:url'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { findUpPackageJson } from '../../../src/paths/find-up-package-json'
+import { findUpPackageJson } from '../../../src/packages/operations'
 
 describe('findUpPackageJson', () => {
   let tmpDir: string
@@ -24,7 +24,7 @@ describe('findUpPackageJson', () => {
   })
 
   it('returns the path of the nearest package.json walking up from the script', () => {
-    // Layout: tmpDir/package.json + tmpDir/scripts/fleet/check/foo.mts
+    // Layout: tmpDir/package.json + tmpDir/scripts/fleet/check/foo.mts.
     // The script is 3 levels deep; result should be tmpDir/package.json,
     // regardless of the actual ascent count.
     writeFileSync(path.join(tmpDir, 'package.json'), '{}', 'utf8')
@@ -62,9 +62,9 @@ describe('findUpPackageJson', () => {
   })
 
   it('picks the nearest package.json when nested packages are present', () => {
-    // Inner package.json should be the nearest match — findUpSync
-    // returns the FIRST marker, not the outermost (matches the
-    // package-resolution semantics every module system uses).
+    // Inner package.json should be the nearest match — findUpSync returns
+    // the FIRST marker, not the outermost (matches the package-resolution
+    // semantics every module system uses).
     writeFileSync(path.join(tmpDir, 'package.json'), '{"name":"outer"}', 'utf8')
     mkdirSync(path.join(tmpDir, 'inner'), { recursive: true })
     writeFileSync(
@@ -119,8 +119,8 @@ describe('findUpPackageJson', () => {
   })
 
   it('resolves the calling lib script (smoke test against the real source tree)', () => {
-    // Self-test: findUpPackageJson(import.meta) from this test file
-    // resolves to the socket-lib package.json — never hard-coded.
+    // Self-test: findUpPackageJson(import.meta) from this test file resolves
+    // to the socket-lib package.json — never hard-coded.
     const found = findUpPackageJson(import.meta)
     expect(found).toMatch(/socket-lib\/package\.json$/)
   })
