@@ -67,6 +67,8 @@ Past pattern: multiple wasted commits per session, each one a "fix" that broke t
 
 Type-checking and test suites verify code correctness, not feature correctness. If you can't render-test (no browser available, headless environment), say so explicitly in the turn summary rather than claiming success.
 
+The mechanism for actually rendering and seeing the output is the `/fleet:seeing-rendered-output` skill, which covers both page mode and Chrome-extension mode. The technique itself (render to a PNG, then `Read` the pixels) and its caveats live in [`.claude/skills/fleet/_shared/visual-verify.md`](../../../.claude/skills/fleet/_shared/visual-verify.md).
+
 ## Fix warnings when you see them
 
 Lint warning, type warning, build warning, runtime warning in your reading window — fix it. Don't leave it for "later" or label it "pre-existing" / "unrelated" / "out of scope" — those labels are rationalizations. Enforced by `.claude/hooks/fleet/excuse-detector/`.

@@ -2938,7 +2938,7 @@
   "scripts": {
     "build": "node scripts/bundle.mts",
     "check": "node scripts/fleet/check.mts",
-    "check:paths": "node scripts/fleet/check-paths.mts",
+    "check:paths": "node scripts/fleet/check/paths.mts",
     "clean": "node scripts/bundle/clean.mts",
     "cover": "node scripts/fleet/cover.mts",
     "dev": "node scripts/bundle.mts --watch",

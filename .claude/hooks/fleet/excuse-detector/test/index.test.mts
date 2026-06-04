@@ -462,8 +462,7 @@ test('fires on relaying an unverified subagent claim (count)', async () => {
   const result = await runHook([
     {
       type: 'assistant',
-      content:
-        'The audit found 52 guards that only advise instead of blocking.',
+      content: 'The audit found 52 guards that only advise instead of blocking.',
     },
   ])
   assert.match(result.stdout, /unverified subagent claim/)

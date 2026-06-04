@@ -22,6 +22,11 @@ describe('socket/no-vitest-empty-test', () => {
           code: `${IMPORTS}it('x', () => { expect(1).toBe(1) })\n`,
         },
         {
+          name: 'test calling an expect<Upper> assertion helper is fine',
+          filename: 'test/unit/a.test.mts',
+          code: `${IMPORTS}it('x', () => { expectLiteralRoundtrip('a') })\n`,
+        },
+        {
           name: 'test with a nested expect (in a callback) is fine',
           filename: 'test/unit/a.test.mts',
           code: `${IMPORTS}it('x', () => { run(() => { expect(1).toBe(1) }) })\n`,

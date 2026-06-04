@@ -45,7 +45,7 @@ The fleet hooks each cite their own trigger + bypass surface in their `README.md
 - `prefer-rebase-over-revert-guard` — rebase unpushed commits, don't revert
 - `private-name-guard` — blocks private repo / company names in public surface
 - `programmatic-claude-lockdown-guard` — headless `claude`/`codex exec` must set the lockdown flags
-- `prose-antipattern-guard` — PreToolUse block on AI prose tells (em-dash chains, throat-clearing, "not X it's Y", hedging adverbs) in CHANGELOG.md / docs/\*_/_.md / README.md; bypass `Allow prose-antipattern bypass`
+- `prose-antipattern-guard` — PreToolUse block on AI prose tells (em-dash chains, throat-clearing, "not X it's Y", hedging adverbs) in CHANGELOG.md / docs/**/*.md / README.md; bypass `Allow prose-antipattern bypass`
 - `voice-and-tone-reminder` — merged Stop scan: teacher-tone comments + "the user" naming + speed-vs-depth choice menus + self-narration (status-recap padding, "now let me" openers, hedges, apology-padding); per-group disable env vars preserved
 - `provenance-publish-reminder` — `--staged` provenance lifecycle reminder
 - `public-surface-reminder` — Linear refs / private names / external issue refs
@@ -58,6 +58,7 @@ The fleet hooks each cite their own trigger + bypass surface in their `README.md
 - `socket-token-minifier-start` — auto-starts the token-minifier proxy fail-closed
 - `stale-process-sweeper` — Stop-time reaper for orphaned vitest workers
 - `sweep-ds-store` — Stop-time `.DS_Store` removal (no bypass)
+- `test-platform-coverage-reminder` — nudges to gate POSIX-vs-Windows path assertions in test edits
 - `token-guard` — redacts tokens/keys/JWTs in tool output
 - `uses-sha-verify-guard` — full-SHA reachability check for `uses:` pins
 - `version-bump-order-guard` — version bump → CHANGELOG → tag ordering

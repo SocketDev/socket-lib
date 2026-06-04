@@ -159,8 +159,7 @@ const SELF_NARRATION: ReminderGroup = {
       why: 'Narrating the next tool call adds no signal — make the call. Open on the result or the decision, not the intent.',
     },
     {
-      label:
-        'conversational hedge ("honestly / to be fair / be straight with you")',
+      label: 'conversational hedge ("honestly / to be fair / be straight with you")',
       regex:
         /\b(?:honestly|to be honest|honest caveat|honest notes?|to be fair|in all honesty|the reality is|truth be told|be straight with you)\b/i,
       why: 'Filler hedge that softens or pre-apologizes for a direct statement. State the fact, the limitation, or the recommendation plainly — no "honest caveat" preamble.',

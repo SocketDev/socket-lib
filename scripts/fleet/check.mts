@@ -34,17 +34,17 @@ const steps: Array<() => boolean> = [
   // stderr (gating varies by version), and never checks the rule COUNT. This
   // gate asserts both explicitly and fails closed. No-op in repos with no
   // plugin.
-  () => run('node', ['scripts/fleet/check-oxlint-plugin-loads.mts']),
+  () => run('node', ['scripts/fleet/check/oxlint-plugin-loads.mts']),
   // CLAUDE.md doc integrity: every cited hook + socket/ rule must exist (catches
   // stale citations after a rename/removal — the reverse of new-hook-claude-md-guard).
-  () => run('node', ['scripts/fleet/check-claude-md-citations.mts']),
+  () => run('node', ['scripts/fleet/check/claude-md-citations.mts']),
   // Cost routing: every mutating (fix) skill must declare a model: tier so
   // mechanical work runs cheap. See docs/claude.md/fleet/skill-model-routing.md.
-  () => run('node', ['scripts/fleet/check-mutating-skills-have-model.mts']),
+  () => run('node', ['scripts/fleet/check/mutating-skills-have-model.mts']),
   () => run('pnpm', ['exec', 'tsgo', '--noEmit', '-p', 'tsconfig.check.json']),
   // Path-hygiene check (1 path, 1 reference). Mantra-driven gate;
   // see .claude/skills/path-guard/ + .claude/hooks/fleet/path-guard/.
-  () => run('node', ['scripts/fleet/check-paths.mts', '--quiet']),
+  () => run('node', ['scripts/fleet/check/paths.mts', '--quiet']),
   // Lock-step reference hygiene. Opt-in gate that exits clean when the
   // repo-owned .config/repo/lock-step-refs.json (legacy top-level
   // .config/lock-step-refs.json) is absent; for repos that ship
@@ -52,19 +52,19 @@ const steps: Array<() => boolean> = [
   // it validates every `Lock-step with <Lang>: <path>` comment resolves
   // to an existing file. Forms documented in
   // docs/claude.md/fleet/parser-comments.md §5–6.
-  () => run('node', ['scripts/fleet/check-lock-step-refs.mts', '--quiet']),
+  () => run('node', ['scripts/fleet/check/lock-step-refs.mts', '--quiet']),
   // Lock-step header byte-equality. Same opt-in. Where the path-refs
   // gate above catches stale REFERENCES, this one catches drift in the
   // top-of-file `BEGIN LOCK-STEP HEADER` / `END LOCK-STEP HEADER` block
   // — the intent tripwire across the quadruplet. Spec:
   // docs/claude.md/fleet/parser-comments.md §7.
-  () => run('node', ['scripts/fleet/check-lock-step-header.mts', '--quiet']),
+  () => run('node', ['scripts/fleet/check/lock-step-header.mts', '--quiet']),
   // Soak-exclude date-annotation gate — pairs with
   // .claude/hooks/fleet/soak-exclude-date-annotation-guard/. Catches
   // pnpm-workspace.yaml `minimumReleaseAgeExclude` entries that landed
   // via non-Claude paths without the canonical
   // `# published: YYYY-MM-DD | removable: YYYY-MM-DD` annotation.
-  () => run('node', ['scripts/fleet/check-soak-exclude-dates.mts']),
+  () => run('node', ['scripts/fleet/check/soak-exclude-dates.mts']),
   // Fleet soak-exclude parity. Wheelhouse-only at runtime — the script
   // no-ops when `scripts/sync-scaffolding/manifest.mts` is absent (i.e.
   // in every cascaded fleet repo). Enforces that every versioned soak
@@ -75,7 +75,7 @@ const steps: Array<() => boolean> = [
   // @oxc-project/types@0.133.0 was in wheelhouse's soak block but not
   // EXPECTED_RELEASE_AGE_EXCLUDE — every fleet repo went red on the
   // next install.
-  () => run('node', ['scripts/fleet/check-fleet-soak-exclude-parity.mts']),
+  () => run('node', ['scripts/fleet/check/fleet-soak-exclude-parity.mts']),
   // CLAUDE.md informativeness audit. Every `###` section in the fleet
   // block must anchor to one of: a hook citation
   // (`.claude/hooks/...` reference), a docs link
@@ -85,22 +85,22 @@ const steps: Array<() => boolean> = [
   // context for every session; sections without an enforcement
   // anchor tend to rot. Per the Salesforce agentic-engineering
   // article, CLAUDE.md variance is a direct quality driver.
-  () => run('node', ['scripts/fleet/check-claude-md-informativeness.mts']),
+  () => run('node', ['scripts/fleet/check/claude-md-informativeness.mts']),
   // .claude/ segmentation gate. Every entry under
   // .claude/{agents,commands,hooks,skills}/ must live under fleet/<name>/
   // (when wheelhouse-canonical) or repo/<name>/ (everything else).
   // Dangling top-level entries shadow the canonical copy and break
   // skill resolution. Past incident (2026-06-01): fleet-wide audit found
   // ~200 dangling entries across 10 repos. Auto-fixable with
-  // `node scripts/fleet/check-claude-segmentation.mts --fix`.
-  () => run('node', ['scripts/fleet/check-claude-segmentation.mts']),
+  // `node scripts/fleet/check/claude-segmentation.mts --fix`.
+  () => run('node', ['scripts/fleet/check/claude-segmentation.mts']),
   // package.json `files:` allowlist hygiene. Flags publishes that leak
   // dev/test content (overshoot), `files:` entries that match nothing in
   // the publish surface (undershoot), and packages missing the canonical
   // README + LICENSE essentials. Skips workspaces marked
   // `"private": true`. Uses `npm pack --dry-run --json` as the source of
   // truth — same logic npm itself uses for publish.
-  () => run('node', ['scripts/fleet/check-package-files-allowlist.mts']),
+  () => run('node', ['scripts/fleet/check/package-files-allowlist.mts']),
   // Reminder/guard duplication gate. The fleet convention: a `-guard` hook
   // BLOCKS, a `-reminder` hook NUDGES — one surface per concern, never both.
   // Errors when a base name has both `<base>-guard` and `<base>-reminder`
@@ -109,7 +109,7 @@ const steps: Array<() => boolean> = [
   // reminder + guard overlapped; resolved by dropping the reminder.
   () =>
     run('node', [
-      'scripts/fleet/check-hook-reminder-guard-overlap.mts',
+      'scripts/fleet/check/hook-reminder-guard-overlap.mts',
       '--quiet',
     ]),
 ]

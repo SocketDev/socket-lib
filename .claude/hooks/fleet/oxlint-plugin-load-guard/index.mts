@@ -6,7 +6,7 @@
 // import in any rule or lib helper disables EVERY socket/ rule — oxlint only
 // warns and never checks the rule count, so a green lint can hide a dead
 // plugin. This is the edit-time complement to the commit-time gate
-// `scripts/fleet/check-oxlint-plugin-loads.mts` (defense in depth): catch the
+// `scripts/fleet/check/oxlint-plugin-loads.mts` (defense in depth): catch the
 // breakage the moment it's introduced, in the same session, before it rides a
 // cascade out to the fleet.
 //
@@ -62,7 +62,7 @@ await withEditGuard(filePath => {
   // breakage is impossible to miss right after the edit.
   if (result.status !== 0) {
     logger.error(
-      `🚨 oxlint-plugin-load-guard: the socket/ oxlint plugin no longer loads cleanly after editing ${filePath}. Every socket/ rule is disabled until this is fixed. Details above (from check-oxlint-plugin-loads.mts); run \`node scripts/fleet/check-oxlint-plugin-loads.mts\` to re-check.`,
+      `🚨 oxlint-plugin-load-guard: the socket/ oxlint plugin no longer loads cleanly after editing ${filePath}. Every socket/ rule is disabled until this is fixed. Details above (from check-oxlint-plugin-loads.mts); run \`node scripts/fleet/check/oxlint-plugin-loads.mts\` to re-check.`,
     )
     const detail = String(result.stdout ?? '').trim()
     if (detail) {

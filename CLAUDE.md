@@ -53,7 +53,7 @@ Full ruleset — open-PR edits, Bugbot replies, rebase-over-revert, no-empty-com
 
 ### Squash-history opt-in
 
-Some fleet repos squash the default branch on a cadence — currently socket-addon, socket-bin, socket-btm, sdxgen, stuie (declared via `optIns: ['squash-history']` in `template/.claude/skills/cascading-fleet/lib/fleet-repos.json`). When working in an opted-in repo, prefer one consolidated commit per logical change over a long fan of tiny WIP commits; the `squashing-history` skill is the documented way to collapse history when it grows long. Threshold reminder + bypass `Allow squash-history-reminder bypass` (enforced by `.claude/hooks/fleet/squash-history-reminder/`).
+Some fleet repos squash the default branch on a cadence — currently socket-addon, socket-bin, socket-btm, sdxgen, stuie (declared via `optIns: ['squash-history']` in `template/.claude/skills/cascading-fleet/lib/fleet-repos.json`). In an opted-in repo prefer one consolidated commit per logical change over a fan of tiny WIP commits; the `squashing-history` skill collapses long history. Threshold reminder + bypass `Allow squash-history-reminder bypass` (enforced by `.claude/hooks/fleet/squash-history-reminder/`).
 
 ### Version bumps & immutable releases
 
@@ -189,7 +189,7 @@ Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, spl
 
 ### Lint rules: errors over warnings, fixable over reporting
 
-🚨 Fleet lint rules are guardrails for AI-generated code — make them strict. Default new rules to `"error"` (never `"warn"`). Ship an autofix when the rewrite is deterministic (`fixable: 'code'` + `fix(fixer) => ...`). Defense in depth: skill (docs) + hook (edit-time) + lint (commit-time) — having one doesn't excuse the others. Tooling: oxlint + oxfmt only (no ESLint/Prettier); fleet socket-\* plugin at `template/.config/fleet/oxlint-plugin/`; always invoke with explicit `-c .config/...rc.json`. A broken import anywhere in the plugin disables EVERY `socket/` rule — oxlint only warns and never checks the rule count, so a green lint can hide a dead plugin; `scripts/fleet/check-oxlint-plugin-loads.mts` asserts load + rule-count (enforced by `.claude/hooks/fleet/oxlint-plugin-load-guard/`). No file-scope `oxlint-disable` blocks — use `oxlint-disable-next-line <rule> -- <reason>` per call site (enforced by `socket/no-file-scope-oxlint-disable`, enforced by `.claude/hooks/fleet/no-file-scope-oxlint-disable-guard/`). Don't stack byte-identical disables on adjacent lines — refactor to a helper or named constant. Full rationale + cascade behavior + recipes in [`docs/claude.md/fleet/lint-rules.md`](docs/claude.md/fleet/lint-rules.md).
+🚨 Fleet lint rules are guardrails for AI-generated code — make them strict. Default new rules to `"error"` (never `"warn"`); ship an autofix when the rewrite is deterministic (`fixable: 'code'`). Defense in depth: skill + hook + lint — having one doesn't excuse the others. Tooling: oxlint + oxfmt only (no ESLint/Prettier); plugin at `template/.config/fleet/oxlint-plugin/`; invoke with explicit `-c`. A broken import anywhere in the plugin disables EVERY `socket/` rule and oxlint never checks the rule count, so a green lint can hide a dead plugin; `scripts/fleet/check/oxlint-plugin-loads.mts` asserts load + rule-count (enforced by `.claude/hooks/fleet/oxlint-plugin-load-guard/`). No file-scope `oxlint-disable` — use `oxlint-disable-next-line <rule> -- <reason>` per call site (enforced by `socket/no-file-scope-oxlint-disable`, enforced by `.claude/hooks/fleet/no-file-scope-oxlint-disable-guard/`); don't stack byte-identical disables — refactor to a helper. Full rationale + recipes in [`docs/claude.md/fleet/lint-rules.md`](docs/claude.md/fleet/lint-rules.md).
 
 ### c8 / v8 coverage ignore directives
 
@@ -197,7 +197,7 @@ Soft cap **500 lines**, hard cap **1000 lines** per source file. Past those, spl
 
 ### 1 path, 1 reference
 
-🚨 A path is constructed exactly once; everywhere else references the constructed value. Per-package `scripts/paths.mts` is the canonical owner; sub-packages inherit via `export *`. Build outputs live at `<package-root>/build/<mode>/<platform-arch>/out/Final/<artifact>`. Enforced edit-time (`.claude/hooks/fleet/{path-guard,paths-mts-inherit-guard}/`) + commit-time (`scripts/fleet/check-paths.mts`). `/guarding-paths` is the audit-and-fix skill. Full ruleset + canonical layout in [`docs/claude.md/fleet/path-hygiene.md`](docs/claude.md/fleet/path-hygiene.md).
+🚨 A path is constructed exactly once; everywhere else references the constructed value. Per-package `scripts/paths.mts` is the canonical owner; sub-packages inherit via `export *`. Build outputs live at `<package-root>/build/<mode>/<platform-arch>/out/Final/<artifact>`. Enforced edit-time (`.claude/hooks/fleet/{path-guard,paths-mts-inherit-guard}/`) + commit-time (`scripts/fleet/check/paths.mts`). `/guarding-paths` is the audit-and-fix skill. Full ruleset + canonical layout in [`docs/claude.md/fleet/path-hygiene.md`](docs/claude.md/fleet/path-hygiene.md).
 
 ### Conformance runners
 
@@ -249,6 +249,7 @@ Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socket
 - `/fleet:scanning-security` — AgentShield + SkillSpector + Zizmor audit
 - `/fleet:scanning-quality` — single-pass quality scan → report
 - `/fleet:looping-quality` — loops scanning-quality, fixing until clean
+- `/fleet:seeing-rendered-output` — render a page or unpacked MV3 extension popup to PNG → `Read` the pixels (`_shared/visual-verify.md`)
 - Shared subskills in `.claude/skills/fleet/_shared/`
 - Skill telemetry (enforced by `.claude/hooks/fleet/skill-usage-logger/`)
 - **Handing off to another agent** — see [`docs/claude.md/fleet/agent-delegation.md`](docs/claude.md/fleet/agent-delegation.md).
@@ -256,7 +257,7 @@ Use `isError` / `isErrnoException` / `errorMessage` / `errorStack` from `@socket
 
 ### Hook registry
 
-Hooks under `.claude/hooks/fleet/<name>/` (fleet-canonical); host-repo-only hooks under `.claude/hooks/repo/<name>/` (exempt from citation gate). Each hook's README documents trigger + bypass. **Naming:** a `-guard` hook BLOCKS, a `-reminder` hook NUDGES — one surface per concern, never both a `-guard` and a `-reminder` for the same thing (enforced by `scripts/fleet/check-hook-reminder-guard-overlap.mts` in `check --all`: errors on a `<base>-guard` + `<base>-reminder` collision, advisory-lists 2-segment shared-prefix pairs). Full listing + per-hook enforcement details: [`docs/claude.md/fleet/hook-registry.md`](docs/claude.md/fleet/hook-registry.md).
+Hooks under `.claude/hooks/fleet/<name>/` (fleet-canonical); host-repo-only hooks under `.claude/hooks/repo/<name>/` (exempt from citation gate). Each hook's README documents trigger + bypass. **Naming:** a `-guard` hook BLOCKS, a `-reminder` hook NUDGES — one surface per concern, never both a `-guard` and a `-reminder` for the same thing (enforced by `scripts/fleet/check/hook-reminder-guard-overlap.mts` in `check --all`: errors on a `<base>-guard` + `<base>-reminder` collision, advisory-lists 2-segment shared-prefix pairs). Full listing + per-hook enforcement details: [`docs/claude.md/fleet/hook-registry.md`](docs/claude.md/fleet/hook-registry.md).
 
 <!-- END FLEET-CANONICAL -->
 
