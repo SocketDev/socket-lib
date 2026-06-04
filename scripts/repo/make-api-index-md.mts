@@ -173,7 +173,9 @@ async function main(): Promise<void> {
   // alignment behaviour) wins over oxfmt's built-in default config.
   try {
     await spawn(
-      'node_modules/.bin/oxfmt',
+      // Windows needs the .cmd shim — the extension-less .bin file is a POSIX
+      // sh script cmd.exe (shell: WIN32) can't run.
+      WIN32 ? 'node_modules\\.bin\\oxfmt.cmd' : 'node_modules/.bin/oxfmt',
       [
         '-c',
         '.config/fleet/oxfmtrc.json',

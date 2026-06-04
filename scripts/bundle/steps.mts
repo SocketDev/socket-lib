@@ -104,8 +104,11 @@ export async function buildTypes(
   }
 
   commands.push({
+    // npm writes a `.cmd` shim on Windows; the extension-less file is a POSIX
+    // sh script cmd.exe can't run ("'node_modules' is not recognized"), so pick
+    // the platform-correct shim. shell: WIN32 lets cmd.exe resolve the .cmd.
     args: ['--project', 'tsconfig.dts.json'],
-    command: 'node_modules/.bin/tsgo',
+    command: WIN32 ? 'node_modules\\.bin\\tsgo.cmd' : 'node_modules/.bin/tsgo',
     options: {
       shell: WIN32,
     },
