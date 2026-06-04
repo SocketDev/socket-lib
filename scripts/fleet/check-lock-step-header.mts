@@ -8,13 +8,13 @@
  *   stale path reference (which `check-lock-step-refs.mts` catches) — this gate
  *   is the _intent_ tripwire. Opt-in per repo: uses the same repo-owned config
  *   as the path gate (`.config/repo/lock-step-refs.json`, legacy top-level
- *   `.config/lock-step-refs.json` fallback). Without the config, the
- *   gate is a no-op. With the config, the gate walks every scanned source file,
- *   looks for a `BEGIN LOCK-STEP HEADER` marker on the canonical side (a file
- *   whose header contains one or more `Lock-step with <Lang>: <path>` refs),
- *   extracts the header content, then opens each named peer and demands its
- *   header block be byte-identical. "Canonical side" is determined by the
- *   header content itself:
+ *   `.config/lock-step-refs.json` fallback). Without the config, the gate is a
+ *   no-op. With the config, the gate walks every scanned source file, looks for
+ *   a `BEGIN LOCK-STEP HEADER` marker on the canonical side (a file whose
+ *   header contains one or more `Lock-step with <Lang>: <path>` refs), extracts
+ *   the header content, then opens each named peer and demands its header block
+ *   be byte-identical. "Canonical side" is determined by the header content
+ *   itself:
  *
  *   - A file with `Lock-step with <Lang>: <path>` is canonical for that peer.
  *     (The peer should reciprocate with `Lock-step from <Lang>: <my-path>`, but

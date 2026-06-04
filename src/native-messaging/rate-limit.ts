@@ -1,53 +1,43 @@
 /**
- * @file Token-bucket rate limit for the Chrome native-messaging host.
- *
- *   Why this exists:
- *
- *     A Chrome extension that has been hijacked (XSS in a content script, a
- *     compromised CDN dependency) can call `chrome.runtime.connectNative()`
- *     in a tight loop. Without a rate limit, the attacker can request our
- *     `get-api-token` message thousands of times a second — useful for
- *     scraping tokens from a multi-account user, or for keeping the bearer
- *     "fresh" in the page's memory after the user navigates away.
- *
- *     The bucket gives each origin (`chrome-extension://<id>/`, passed by
- *     Chrome as `process.argv[2]`) a budget. Burst is allowed; sustained
- *     hammering is denied with `{ error: 'rate limited' }`. A typing-fast
- *     human never sees the limit; a botted extension hits it on its second
- *     line of attack.
- *
- *   Why in-memory:
- *
- *     The NM host is a per-Chrome-launch subprocess — restarting Chrome
- *     restarts the bucket. That's exactly what we want: an attacker who
- *     can force Chrome to relaunch has bigger problems than rate-limiting.
- *
- *   Shape patterned after pilcrow's `ratelimit/limit.go` — minimal,
- *   in-memory, LRU-evicts at `maxKeys`. The fleet's `socket-lib` already
- *   has a TTL-cache module but it's overkill for this one use case;
- *   a 50-line bucket is easier to audit.
+ * @file Token-bucket rate limit for the Chrome native-messaging host. Why this
+ *   exists: A Chrome extension that has been hijacked (XSS in a content script,
+ *   a compromised CDN dependency) can call `chrome.runtime.connectNative()` in
+ *   a tight loop. Without a rate limit, the attacker can request our
+ *   `get-api-token` message thousands of times a second — useful for scraping
+ *   tokens from a multi-account user, or for keeping the bearer "fresh" in the
+ *   page's memory after the user navigates away. The bucket gives each origin
+ *   (`chrome-extension://<id>/`, passed by Chrome as `process.argv[2]`) a
+ *   budget. Burst is allowed; sustained hammering is denied with `{ error:
+ *   'rate limited' }`. A typing-fast human never sees the limit; a botted
+ *   extension hits it on its second line of attack. Why in-memory: The NM host
+ *   is a per-Chrome-launch subprocess — restarting Chrome restarts the bucket.
+ *   That's exactly what we want: an attacker who can force Chrome to relaunch
+ *   has bigger problems than rate-limiting. Shape patterned after pilcrow's
+ *   `ratelimit/limit.go` — minimal, in-memory, LRU-evicts at `maxKeys`. The
+ *   fleet's `socket-lib` already has a TTL-cache module but it's overkill for
+ *   this one use case; a 50-line bucket is easier to audit.
  */
 
 import { ErrorCtor } from '../primordials/error'
 
 export interface TokenBucketOptions {
   /**
-   * How many tokens fit in a single bucket. The first `capacity` requests
-   * from an origin pass without blocking; the (capacity + 1)th request only
-   * passes if at least one refill interval has elapsed since the last
-   * refill checkpoint.
+   * How many tokens fit in a single bucket. The first `capacity` requests from
+   * an origin pass without blocking; the (capacity + 1)th request only passes
+   * if at least one refill interval has elapsed since the last refill
+   * checkpoint.
    */
   capacity: number
   /**
-   * How many milliseconds it takes for one token to refill. With
-   * `capacity: 60` and `refillIntervalMs: 1000`, an origin gets up to 60
-   * requests of burst plus a steady-state 1 req/s.
+   * How many milliseconds it takes for one token to refill. With `capacity: 60`
+   * and `refillIntervalMs: 1000`, an origin gets up to 60 requests of burst
+   * plus a steady-state 1 req/s.
    */
   refillIntervalMs: number
   /**
-   * Maximum number of distinct keys (origins) to track at once. When the
-   * map fills, the least-recently-touched key is evicted. Caps memory
-   * against an attacker that varies the key on every request.
+   * Maximum number of distinct keys (origins) to track at once. When the map
+   * fills, the least-recently-touched key is evicted. Caps memory against an
+   * attacker that varies the key on every request.
    */
   maxKeys: number
 }
@@ -85,9 +75,9 @@ export class TokenBucketLimiter {
   }
 
   /**
-   * Try to consume one token for `key`. Returns `true` when the request
-   * is allowed; `false` when the bucket is empty and not enough time has
-   * elapsed to refill.
+   * Try to consume one token for `key`. Returns `true` when the request is
+   * allowed; `false` when the bucket is empty and not enough time has elapsed
+   * to refill.
    *
    * `now` is injectable so tests can advance the virtual clock without
    * sleeping. In production callers pass `Date.now()` (the default).

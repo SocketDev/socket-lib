@@ -4,15 +4,12 @@
  *
  *   - BSD style: `SHA256 (filename) = hash`
  *   - GNU style: `hash filename` (two spaces)
- *   - Simple: `hash filename` (single space)
- *
- *   Comment lines (`#…`) and blank lines are skipped. Each hex digest is
- *   converted to an SRI integrity string (`sha256-<base64>=`) so callers
- *   always work in the same format as `external-tools.json` and other
- *   integrity-string consumers.
- *
- *   `fetchChecksumFile` is the URL helper — fetches via `httpRequest` and
- *   runs the body through `parseChecksumFile`.
+ *   - Simple: `hash filename` (single space) Comment lines (`#…`) and blank lines
+ *     are skipped. Each hex digest is converted to an SRI integrity string
+ *     (`sha256-<base64>=`) so callers always work in the same format as
+ *     `external-tools.json` and other integrity-string consumers.
+ *     `fetchChecksumFile` is the URL helper — fetches via `httpRequest` and
+ *     runs the body through `parseChecksumFile`.
  */
 
 import { checksumToIntegrity } from '../integrity'
@@ -37,7 +34,7 @@ const CHECKSUM_GNU_RE = /^([a-fA-F0-9]{64})\s+(.+)$/
  * that accept SRI directly.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   import { integrityToChecksum } from '@socketsecurity/lib/integrity'
  *
  *   const sums = await fetchChecksumFile(
@@ -75,17 +72,16 @@ export async function fetchChecksumFile(
 /**
  * Parse a checksums file text into a filename-to-integrity map.
  *
- * Supports standard checksums file formats:
- * - BSD style: `SHA256 (filename) = hash`
- * - GNU style: `hash  filename` (two spaces)
- * - Simple style: `hash filename` (single space)
+ * Supports standard checksums file formats: - BSD style: `SHA256 (filename) =
+ * hash` - GNU style: `hash filename` (two spaces) - Simple style: `hash
+ * filename` (single space)
  *
- * Lines starting with `#` are treated as comments and ignored. Empty lines
- * are ignored. Each 64-char hex digest is converted to an SRI integrity
- * string so the result is uniform regardless of source format.
+ * Lines starting with `#` are treated as comments and ignored. Empty lines are
+ * ignored. Each 64-char hex digest is converted to an SRI integrity string so
+ * the result is uniform regardless of source format.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const sums = parseChecksumFile(
  *     'e3b0c44...  file.zip\nSHA256 (other.tar.gz) = abc123...\n',
  *   )

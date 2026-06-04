@@ -38,8 +38,8 @@ export interface OverlapReport {
 }
 
 /**
- * List the immediate `<name>` hook directories under a fleet hooks dir.
- * Returns an empty array when the dir is absent (a repo with no hooks).
+ * List the immediate `<name>` hook directories under a fleet hooks dir. Returns
+ * an empty array when the dir is absent (a repo with no hooks).
  */
 export function listHookNames(hooksDir: string): string[] {
   let entries: string[]
@@ -84,8 +84,8 @@ export function sharedPrefixSegments(
  * Classify hook names into reminder/guard overlap reports.
  *
  * - Exact collision: `<base>-guard` AND `<base>-reminder` both present.
- * - Prefix pair: a `*-guard` and a `*-reminder` share their first `-`
- *   segment but are not an exact-base collision (advisory only).
+ * - Prefix pair: a `*-guard` and a `*-reminder` share their first `-` segment but
+ *   are not an exact-base collision (advisory only).
  */
 export function findOverlap(names: readonly string[]): OverlapReport {
   const guards = new Set<string>()
@@ -164,7 +164,9 @@ function main(): void {
     )
     for (let i = 0, { length } = prefixPairs.length; i < length; i += 1) {
       const pair = prefixPairs[i]!
-      logger.warn(`  • ${pair.guard} / ${pair.reminder} (prefix "${pair.prefix}")`)
+      logger.warn(
+        `  • ${pair.guard} / ${pair.reminder} (prefix "${pair.prefix}")`,
+      )
     }
   }
 

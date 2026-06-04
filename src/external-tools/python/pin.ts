@@ -3,28 +3,25 @@
  *   `resolveNpmPackagePin()` (dlx/lockfile). Resolves a pip spec and its full
  *   dependency closure WITHOUT installing into the interpreter, then returns
  *   everything needed to pin a reproducible, hash-verified install:
+ *
  *   - the resolved top-level name + version,
  *   - the top-level artifact's hashes (sha512 SRI + sha256 hex), and
  *   - a fully-hashed `requirements.txt` body (`name==version --hash=sha256:<hex>`
  *     for every artifact in the closure) ready to feed back to
- *     `downloadPipPackage` / `pip install --require-hashes`.
- *
- *   Engine: `pip download --dest <scratch> <spec>` downloads the spec + its
- *   resolved closure as wheels/sdists into a scratch dir (no install, no venv),
- *   each file is hashed, then the scratch dir is torn down. This is pip's own
- *   recipe for producing hashed requirements — `pip-tools` is NOT required.
- *
- *   Contrast `resolveNpmPackagePin` (dlx/lockfile): same contract, npm engine
- *   (Arborist lockfile-only + pacote), emits a `package-lock.json`. The pip side
- *   emits a hashed `requirements.txt` because that — not a lockfile — is what
- *   `pip install --require-hashes` consumes.
- *
- *   NOTE on the soak window: `resolveNpmPackagePin` applies a min-release-age
- *   cutoff via Arborist's `before` date. pip has no native release-age gate, so
- *   this generator does NOT enforce one — callers that need a soak must vet the
- *   resolved versions out of band. The spec itself remains the primary pin:
- *   `==<version>` (PyPI is immutable per version) or `@<full-sha>` (git is
- *   content-addressed).
+ *     `downloadPipPackage` / `pip install --require-hashes`. Engine: `pip
+ *     download --dest <scratch> <spec>` downloads the spec + its resolved
+ *     closure as wheels/sdists into a scratch dir (no install, no venv), each
+ *     file is hashed, then the scratch dir is torn down. This is pip's own
+ *     recipe for producing hashed requirements — `pip-tools` is NOT required.
+ *     Contrast `resolveNpmPackagePin` (dlx/lockfile): same contract, npm engine
+ *     (Arborist lockfile-only + pacote), emits a `package-lock.json`. The pip
+ *     side emits a hashed `requirements.txt` because that — not a lockfile — is
+ *     what `pip install --require-hashes` consumes. NOTE on the soak window:
+ *     `resolveNpmPackagePin` applies a min-release-age cutoff via Arborist's
+ *     `before` date. pip has no native release-age gate, so this generator does
+ *     NOT enforce one — callers that need a soak must vet the resolved versions
+ *     out of band. The spec itself remains the primary pin: `==<version>` (PyPI
+ *     is immutable per version) or `@<full-sha>` (git is content-addressed).
  */
 
 // oxlint-disable-next-line socket/prefer-async-spawn -- pip download streams progress; the lib promise wrapper rejects on nonzero and hides output.
@@ -52,7 +49,7 @@ export interface ResolvePipPackagePinOptions {
    */
   readonly scratchDir?: string | undefined
   /**
-   * pip spec to pin: `<pkg>==<version>` (PyPI exact pin) or
+   * Pip spec to pin: `<pkg>==<version>` (PyPI exact pin) or
    * `git+https://<url>@<sha>` (git-SHA pin).
    */
   readonly spec: string
@@ -60,7 +57,7 @@ export interface ResolvePipPackagePinOptions {
 
 export interface PipArtifactPin {
   /**
-   * sha256 hex of the artifact, the `--hash=sha256:<hex>` value pip expects.
+   * Sha256 hex of the artifact, the `--hash=sha256:<hex>` value pip expects.
    */
   readonly checksum: string
   /**
@@ -180,7 +177,16 @@ export async function resolvePipPackagePin(
   try {
     await spawn(
       pythonBin,
-      ['-m', 'pip', 'download', '--no-input', '--quiet', '--dest', scratch, spec],
+      [
+        '-m',
+        'pip',
+        'download',
+        '--no-input',
+        '--quiet',
+        '--dest',
+        scratch,
+        spec,
+      ],
       { shell: WIN32, stdio: 'inherit' },
     )
     const files = (await fs.readdir(scratch)).filter(
@@ -252,8 +258,8 @@ export async function resolvePipPackagePin(
 
 /**
  * Best-effort distribution name from a pip spec for matching the top-level
- * artifact: strips a `==`/`>=`/etc. version and a `git+...#egg=<name>` fragment.
- * Falls back to the raw spec when neither is present.
+ * artifact: strips a `==`/`>=`/etc. version and a `git+...#egg=<name>`
+ * fragment. Falls back to the raw spec when neither is present.
  */
 export function specDistName(spec: string): string {
   const eggIdx = spec.indexOf('#egg=')

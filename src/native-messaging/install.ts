@@ -154,13 +154,13 @@ export function installNativeHost(opts: InstallOptions): InstallResult {
 
   if (production && allowedOrigins.includes('*')) {
     throw new ErrorCtor(
-      'production mode rejects allowedOrigins \'*\' — pin to specific chrome-extension://<id>/ origins',
+      "production mode rejects allowedOrigins '*' — pin to specific chrome-extension://<id>/ origins",
     )
   }
 
   if (allowedOrigins.length === 0) {
     throw new ErrorCtor(
-      'allowedOrigins must contain at least one origin; pass [\'*\'] for development',
+      "allowedOrigins must contain at least one origin; pass ['*'] for development",
     )
   }
 

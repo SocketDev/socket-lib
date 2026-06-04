@@ -19,15 +19,19 @@ vi.mock(import('../../../../src/external-tools/python/pin'), () => ({
 }))
 
 async function loadFresh() {
-  const resolveMod = await import('../../../../src/external-tools/python/resolve')
-  const pipMod = await import('../../../../src/external-tools/python/pip-install')
+  const resolveMod =
+    await import('../../../../src/external-tools/python/resolve')
+  const pipMod =
+    await import('../../../../src/external-tools/python/pip-install')
   const pinMod = await import('../../../../src/external-tools/python/pin')
   const mod = await import('../../../../src/external-tools/python/dlx')
   return {
     dlxPipInstall: mod.dlxPipInstall,
     dlxPipPin: mod.dlxPipPin,
     DlxPythonUnavailableError: mod.DlxPythonUnavailableError,
-    downloadPipPackageMock: pipMod.downloadPipPackage as ReturnType<typeof vi.fn>,
+    downloadPipPackageMock: pipMod.downloadPipPackage as ReturnType<
+      typeof vi.fn
+    >,
     resolvePipPackagePinMock: pinMod.resolvePipPackagePin as ReturnType<
       typeof vi.fn
     >,
@@ -47,11 +51,8 @@ afterEach(() => {
 
 describe.sequential('external-tools/python/dlx — dlxPipInstall', () => {
   test('resolves the interpreter then pip-installs, threading pythonBin', async () => {
-    const {
-      dlxPipInstall,
-      downloadPipPackageMock,
-      resolvePythonMock,
-    } = await loadFresh()
+    const { dlxPipInstall, downloadPipPackageMock, resolvePythonMock } =
+      await loadFresh()
     resolvePythonMock.mockResolvedValueOnce({
       path: '/dlx/python/bin/python3',
       source: 'download',
@@ -60,7 +61,10 @@ describe.sequential('external-tools/python/dlx — dlxPipInstall', () => {
       installed: true,
       packageDir: '/dlx/abc/site-packages',
     })
-    const result = await dlxPipInstall({ python: PIN, spec: 'skillspector==1.0.0' })
+    const result = await dlxPipInstall({
+      python: PIN,
+      spec: 'skillspector==1.0.0',
+    })
     // resolvePython got the pin as downloadIfMissing.
     const resolveArg = resolvePythonMock.mock.calls[0]![0]
     expect(resolveArg.downloadIfMissing.version).toBe('3.11.14')

@@ -20,10 +20,10 @@
  *     Hand-built workflow path outside a "Compute paths" step. D —
  *     Comment-encoded fully-qualified path. F — Same path shape constructed in
  *     2+ files. G — Hand-built paths in Makefiles, Dockerfiles, shell scripts.
- *     Allowlist: `pathsAllowlist` in `.config/socket-wheelhouse.json`. Each entry needs a `reason` so
- *     the list stays audit-able. Patterns are deliberately narrow — entries
- *     should be specific, not blanket. Usage: node
- *     scripts/fleet/check-paths.mts # default: report + fail node
+ *     Allowlist: `pathsAllowlist` in `.config/socket-wheelhouse.json`. Each
+ *     entry needs a `reason` so the list stays audit-able. Patterns are
+ *     deliberately narrow — entries should be specific, not blanket. Usage:
+ *     node scripts/fleet/check-paths.mts # default: report + fail node
  *     scripts/fleet/check-paths.mts --explain # long-form explanation node
  *     scripts/fleet/check-paths.mts --json # machine-readable node
  *     scripts/fleet/check-paths.mts --quiet # silent on clean Exit codes: 0 —

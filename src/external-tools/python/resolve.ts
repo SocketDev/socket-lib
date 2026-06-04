@@ -4,14 +4,11 @@
  *
  *   1. PATH — `python3` / `python` on the system PATH.
  *   2. download — python-build-standalone CPython into the DLX cache (only when
- *      `downloadIfMissing` is passed).
- *
- *   Returns `undefined` if all enabled sources miss. Memoized per option-shape
- *   so repeated calls in one process don't re-probe / re-download.
- *
- *   NOTE: unlike the JRE / removed-uv resolvers there is no VFS tier here — a
- *   CPython runtime is not embedded in the smol Node binary. Add a `from-vfs`
- *   tier here if that changes.
+ *      `downloadIfMissing` is passed). Returns `undefined` if all enabled
+ *      sources miss. Memoized per option-shape so repeated calls in one process
+ *      don't re-probe / re-download. NOTE: unlike the JRE / removed-uv
+ *      resolvers there is no VFS tier here — a CPython runtime is not embedded
+ *      in the smol Node binary. Add a `from-vfs` tier here if that changes.
  */
 
 import { getPythonArch } from './asset-names'
@@ -63,8 +60,7 @@ export function cacheKey(opts: ResolvePythonOptions | undefined): string {
   const { cacheDir, integrity, tag, version } = opts.downloadIfMissing
   // Resolve the effective platform-arch so a host-auto-detect call and an
   // explicit-matching call share one cache slot (and don't key on `undefined`).
-  const arch =
-    opts.downloadIfMissing.arch ?? getPythonArch() ?? 'unknown'
+  const arch = opts.downloadIfMissing.arch ?? getPythonArch() ?? 'unknown'
   const integrityKey =
     typeof integrity === 'string'
       ? integrity

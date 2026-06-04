@@ -2,9 +2,9 @@
  * @file Unit tests for HTTP/HTTPS request utilities — checksum parsing and
  *   fetching. Split out of test/isolated/http-request-core.test.mts to keep
  *   each test file under the per-worker heap ceiling and the source-line cap.
- *   This file covers parseChecksumFile and fetchChecksumFile; the rest of the core
- *   surface (httpRequest) lives in http-request-core.test.mts. Both files share
- *   the same test server via http-request-fixtures.mts.
+ *   This file covers parseChecksumFile and fetchChecksumFile; the rest of the
+ *   core surface (httpRequest) lives in http-request-core.test.mts. Both files
+ *   share the same test server via http-request-fixtures.mts.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -141,7 +141,9 @@ ${HEX_A}
 
   describe('fetchChecksumFile', () => {
     it('should fetch and parse checksums from URL', async () => {
-      const checksums = await fetchChecksumFile(`${fixture.baseUrl}/checksums.txt`)
+      const checksums = await fetchChecksumFile(
+        `${fixture.baseUrl}/checksums.txt`,
+      )
 
       expect(checksums['checksum-file']).toBeDefined()
       expect(isIntegrity(checksums['checksum-file']!)).toBe(true)
@@ -189,7 +191,9 @@ ${HEX_A}
     })
 
     it('should return object with null prototype', async () => {
-      const checksums = await fetchChecksumFile(`${fixture.baseUrl}/checksums.txt`)
+      const checksums = await fetchChecksumFile(
+        `${fixture.baseUrl}/checksums.txt`,
+      )
 
       expect(Object.getPrototypeOf(checksums)).toBeNull()
       expect(checksums['constructor']).toBeUndefined()

@@ -1,8 +1,8 @@
 /**
  * @file Unit tests for `compareSecrets`. Covers equality, inequality,
  *   length-mismatch handling, the string/Buffer mixed-input matrix, and
- *   sanity-checks on the timing-attack surface — see the comments inline
- *   for what the timing test does and doesn't prove.
+ *   sanity-checks on the timing-attack surface — see the comments inline for
+ *   what the timing test does and doesn't prove.
  */
 
 import { Buffer } from 'node:buffer'
@@ -19,7 +19,9 @@ describe('compareSecrets', () => {
     })
 
     it('returns true for two equal Buffers', () => {
-      expect(compareSecrets(Buffer.from('hunter2'), Buffer.from('hunter2'))).toBe(true)
+      expect(
+        compareSecrets(Buffer.from('hunter2'), Buffer.from('hunter2')),
+      ).toBe(true)
     })
 
     it('returns true for string + matching Buffer (mixed inputs)', () => {
@@ -84,7 +86,9 @@ describe('compareSecrets', () => {
     })
 
     it('returns false across Buffer length mismatch', () => {
-      expect(compareSecrets(Buffer.from('abc'), Buffer.from('abcd'))).toBe(false)
+      expect(compareSecrets(Buffer.from('abc'), Buffer.from('abcd'))).toBe(
+        false,
+      )
     })
   })
 

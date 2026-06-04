@@ -1,7 +1,11 @@
 import { PassThrough, Readable } from 'node:stream'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { handleOne, readExact, writeMessage } from '../../../src/native-messaging/host'
+import {
+  handleOne,
+  readExact,
+  writeMessage,
+} from '../../../src/native-messaging/host'
 import { readSocketApiToken } from '../../../src/secrets/socket-api-token'
 
 vi.mock(import('../../../src/secrets/socket-api-token'), () => ({
@@ -58,19 +62,25 @@ describe('writeMessage', () => {
 
 describe('readExact', () => {
   it('reads exactly N bytes from the given stream', async () => {
-    const result = await readExact(5, readableFrom([Buffer.from('hello world')]))
+    const result = await readExact(
+      5,
+      readableFrom([Buffer.from('hello world')]),
+    )
     expect(result.toString('utf8')).toBe('hello')
   })
 
   it('assembles across multiple chunks', async () => {
-    const result = await readExact(5, readableFrom([Buffer.from('hel'), Buffer.from('lo')]))
+    const result = await readExact(
+      5,
+      readableFrom([Buffer.from('hel'), Buffer.from('lo')]),
+    )
     expect(result.toString('utf8')).toBe('hello')
   })
 
   it('rejects when stream closes before length is met', async () => {
-    await expect(readExact(100, readableFrom([Buffer.from('hi')]))).rejects.toThrow(
-      'stdin closed before message was complete',
-    )
+    await expect(
+      readExact(100, readableFrom([Buffer.from('hi')])),
+    ).rejects.toThrow('stdin closed before message was complete')
   })
 })
 
@@ -82,20 +92,31 @@ describe('handleOne', () => {
   it('returns token for get-api-token when token is found', async () => {
     vi.mocked(readSocketApiToken).mockResolvedValue('sktsec_test_token')
     const { sink, collected } = captureStdout()
-    await handleOne(readableFrom([makeMessage({ type: 'get-api-token' })]), sink)
+    await handleOne(
+      readableFrom([makeMessage({ type: 'get-api-token' })]),
+      sink,
+    )
     expect(decodeFrame(collected()[0]!)).toEqual({ token: 'sktsec_test_token' })
   })
 
   it('returns error when no token found', async () => {
     vi.mocked(readSocketApiToken).mockResolvedValue(undefined)
     const { sink, collected } = captureStdout()
-    await handleOne(readableFrom([makeMessage({ type: 'get-api-token' })]), sink)
-    expect((decodeFrame(collected()[0]!) as { error: string }).error).toMatch(/not found/i)
+    await handleOne(
+      readableFrom([makeMessage({ type: 'get-api-token' })]),
+      sink,
+    )
+    expect((decodeFrame(collected()[0]!) as { error: string }).error).toMatch(
+      /not found/i,
+    )
   })
 
   it('returns error for unknown message type', async () => {
     const { sink, collected } = captureStdout()
-    await handleOne(readableFrom([makeMessage({ type: 'do-something-else' })]), sink)
+    await handleOne(
+      readableFrom([makeMessage({ type: 'do-something-else' })]),
+      sink,
+    )
     expect((decodeFrame(collected()[0]!) as { error: string }).error).toMatch(
       /unknown message type/,
     )
@@ -107,7 +128,9 @@ describe('handleOne', () => {
     header.writeUInt32LE(payload.length, 0)
     const { sink, collected } = captureStdout()
     await handleOne(readableFrom([Buffer.concat([header, payload])]), sink)
-    expect((decodeFrame(collected()[0]!) as { error: string }).error).toMatch(/not valid JSON/)
+    expect((decodeFrame(collected()[0]!) as { error: string }).error).toMatch(
+      /not valid JSON/,
+    )
   })
 
   it('returns error for invalid (zero) message length', async () => {

@@ -160,7 +160,8 @@ await runStopReminder({
         hits.push({
           label: 'relaying an unverified subagent claim (count)',
           why: 'CLAUDE.md "Verify subagent claims before relaying or acting": a subagent\'s counts / lists / behavior assertions are leads, not facts. grep/read the cited files and report only what you confirmed (plus an explicit disproved / unverified section). See docs/claude.md/fleet/agent-delegation.md.',
-          snippet: sentence.length > 80 ? sentence.slice(0, 77) + '…' : sentence,
+          snippet:
+            sentence.length > 80 ? sentence.slice(0, 77) + '…' : sentence,
         })
       }
     }

@@ -43,7 +43,9 @@ describe('package-default-node-range', () => {
   })
 
   it('should not have trailing spaces', () => {
-    expect(packageDefaultNodeRange).toBe(canonicalPackageDefaultNodeRange.trim())
+    expect(packageDefaultNodeRange).toBe(
+      canonicalPackageDefaultNodeRange.trim(),
+    )
   })
 
   it('should not be empty', () => {

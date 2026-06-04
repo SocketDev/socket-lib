@@ -1,9 +1,4 @@
-export {
-  handleOne,
-  readExact,
-  runHost,
-  writeMessage,
-} from './host'
+export { handleOne, readExact, runHost, writeMessage } from './host'
 export {
   HOST_NAME,
   MIN_NODE_VERSION_FOR_STRIP_TYPES,

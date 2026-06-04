@@ -142,7 +142,7 @@ export interface HttpDownloadOptions {
    * a checksums URL, since `fetchChecksumFile()` returns SRI strings.
    *
    * @example
-   *   ```ts
+   *   ;```ts
    *   // Verify download with a sha256 hex digest
    *   await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
    *     sha256: 'e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855',
@@ -184,13 +184,13 @@ export interface HttpDownloadResult {
 }
 
 /**
- * Map of filenames to SRI integrity strings (`sha256-<base64>=`).
- * Returned by `parseChecksumFile` / `fetchChecksumFile`. Pass through
- * `integrityToChecksum()` to feed `httpDownload({ sha256 })`, or pass
- * the SRI string directly to consumers that accept SRI.
+ * Map of filenames to SRI integrity strings (`sha256-<base64>=`). Returned by
+ * `parseChecksumFile` / `fetchChecksumFile`. Pass through
+ * `integrityToChecksum()` to feed `httpDownload({ sha256 })`, or pass the SRI
+ * string directly to consumers that accept SRI.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const sums: ChecksumFile = {
  *     'file.zip': 'sha256-47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
  *     'other.tar.gz': 'sha256-...',

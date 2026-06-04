@@ -1,11 +1,11 @@
 /**
- * @file Package pin generation for dlx installs. `resolveNpmPackagePin` resolves
- *   an npm package against the registry using Arborist's lockfile-only mode and
- *   fetches its top-level tarball to return both hash formats plus the lockfile
- *   content — everything needed to vendor a reproducible install. The
+ * @file Package pin generation for dlx installs. `resolveNpmPackagePin`
+ *   resolves an npm package against the registry using Arborist's lockfile-only
+ *   mode and fetches its top-level tarball to return both hash formats plus the
+ *   lockfile content — everything needed to vendor a reproducible install. The
  *   `LockfileSpec` type is also exported here for use as the `lockfile` option
- *   on `downloadNpmPackage`. Sniff/write handling lives inline in `./package.ts` —
- *   no helper.
+ *   on `downloadNpmPackage`. Sniff/write handling lives inline in
+ *   `./package.ts` — no helper.
  */
 
 import os from 'node:os'

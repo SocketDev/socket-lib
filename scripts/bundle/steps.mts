@@ -3,7 +3,8 @@
  *   source (rolldown per-file), TypeScript declarations (tsgo), the prim CLI
  *   bundle, external dependencies, and the post-build dist-shaping pass. Each
  *   returns an exit code (and source returns its build time) so the runner can
- *   log + sequence them; the runner owns orchestration, these own one step each.
+ *   log + sequence them; the runner owns orchestration, these own one step
+ *   each.
  */
 
 import { promises as fsPromises } from 'node:fs'

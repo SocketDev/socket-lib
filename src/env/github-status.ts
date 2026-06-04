@@ -2,12 +2,10 @@
  * @file Probe githubstatus.com to detect platform degradation before making
  *   GitHub API calls. Useful in scripts, release tooling, and CI pre-flight
  *   checks where a cryptic "operation was canceled" error would otherwise mask
- *   an upstream GitHub outage.
- *
- *   Component IDs are stable GitHub-assigned identifiers from
- *   githubstatus.com/api/v2/components.json. The probe adds at most 8 seconds
- *   to startup (configurable timeout) and fails open on network error so a
- *   down status page never blocks a healthy workflow.
+ *   an upstream GitHub outage. Component IDs are stable GitHub-assigned
+ *   identifiers from githubstatus.com/api/v2/components.json. The probe adds at
+ *   most 8 seconds to startup (configurable timeout) and fails open on network
+ *   error so a down status page never blocks a healthy workflow.
  */
 
 // oxlint-disable-next-line socket/no-platform-specific-import -- server-only module; node platform is intentional.
@@ -21,13 +19,21 @@ export type GitHubComponentStatus =
   | 'under_maintenance'
 
 export type GitHubStatusResult = {
-  /** Worst-case status across all monitored components. */
+  /**
+   * Worst-case status across all monitored components.
+   */
   status: GitHubComponentStatus | 'unknown'
-  /** Whether any monitored component is not fully operational. */
+  /**
+   * Whether any monitored component is not fully operational.
+   */
   degraded: boolean
-  /** Human-readable summary, e.g. "Actions: degraded_performance". */
+  /**
+   * Human-readable summary, e.g. "Actions: degraded_performance".
+   */
   summary: string
-  /** Per-component breakdown for the monitored set. */
+  /**
+   * Per-component breakdown for the monitored set.
+   */
   components: Array<{
     id: string
     name: string
@@ -59,17 +65,17 @@ const STATUS_API_URL = 'https://www.githubstatus.com/api/v2/components.json'
  * when the probe itself fails — so a down status page never blocks a healthy
  * workflow.
  *
- * @param timeoutMs - Maximum milliseconds to wait for the probe. Default 8000.
- *
  * @example
  *   ;```typescript
  *   import { probeGitHubStatus } from '@socketsecurity/lib/env/github-status'
  *
  *   const health = await probeGitHubStatus()
  *   if (health.degraded) {
- *     console.warn(`GitHub degraded: ${health.summary}`)
+ *   console.warn(`GitHub degraded: ${health.summary}`)
  *   }
  *   ```
+ *
+ * @param timeoutMs - Maximum milliseconds to wait for the probe. Default 8000.
  */
 export async function probeGitHubStatus(
   timeoutMs = 8000,
@@ -113,10 +119,9 @@ export async function probeGitHubStatus(
 
   const degradedComponents = monitored.filter(c => c.status !== 'operational')
   const degraded = degradedComponents.length > 0
-  const summary =
-    degraded
-      ? degradedComponents.map(c => `${c.name}: ${c.status}`).join(', ')
-      : 'All monitored GitHub components operational'
+  const summary = degraded
+    ? degradedComponents.map(c => `${c.name}: ${c.status}`).join(', ')
+    : 'All monitored GitHub components operational'
 
   return {
     status: worstStatus,

@@ -69,7 +69,9 @@ describe('constants/time', () => {
     })
 
     it('should be in ascending order', () => {
-      expect(MILLISECONDS_PER_SECOND).toBeLessThan(canonicalMillisecondsPerMinute)
+      expect(MILLISECONDS_PER_SECOND).toBeLessThan(
+        canonicalMillisecondsPerMinute,
+      )
       expect(MILLISECONDS_PER_MINUTE).toBeLessThan(canonicalMillisecondsPerHour)
       expect(MILLISECONDS_PER_HOUR).toBeLessThan(canonicalMillisecondsPerDay)
     })

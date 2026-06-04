@@ -159,8 +159,8 @@ describe.sequential('http-request/checksums — fetchChecksumFile', () => {
   test('returns empty object when response body is empty', async () => {
     const { fetchChecksumFile, httpRequest } = await loadFresh()
     httpRequest.mockResolvedValueOnce(makeResponse({ ok: true, body: '' }))
-    expect(await fetchChecksumFile('https://example.com/checksums.txt')).toEqual(
-      {},
-    )
+    expect(
+      await fetchChecksumFile('https://example.com/checksums.txt'),
+    ).toEqual({})
   })
 })

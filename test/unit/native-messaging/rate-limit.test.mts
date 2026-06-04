@@ -1,7 +1,7 @@
 /**
- * @file Unit tests for the native-messaging token-bucket rate limiter.
- *   Uses an injected virtual clock (`consume(key, now)`) so tests don't
- *   sleep — every refill is a clock advance.
+ * @file Unit tests for the native-messaging token-bucket rate limiter. Uses an
+ *   injected virtual clock (`consume(key, now)`) so tests don't sleep — every
+ *   refill is a clock advance.
  */
 
 import { describe, expect, it } from 'vitest'

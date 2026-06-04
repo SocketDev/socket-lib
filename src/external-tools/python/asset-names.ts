@@ -1,5 +1,5 @@
 /**
- * @file python-build-standalone release asset mapping. Astral publishes
+ * @file Python-build-standalone release asset mapping. Astral publishes
  *   per-platform CPython archives under
  *   https://github.com/astral-sh/python-build-standalone/releases/download/<tag>/.
  *   Asset name shape: `cpython-<version>+<tag>-<triple>-install_only.tar.gz`.
@@ -48,7 +48,7 @@ const RELEASE_BASE =
   'https://github.com/astral-sh/python-build-standalone/releases/download'
 
 /**
- * python-build-standalone default pin — the fleet-canonical CPython build,
+ * Python-build-standalone default pin — the fleet-canonical CPython build,
  * matching socket-cli's `bundle-tools.json`. Consumers that don't pass their
  * own pin resolve against this. Bump it like any dependency (soak-aware), in
  * lockstep with socket-cli (drift-watch). The `checksums` map is keyed by asset
@@ -80,8 +80,8 @@ export const DEFAULT_PYTHON_PIN = ObjectFreeze({
 })
 
 /**
- * Resolve the current host to a python-build-standalone `platform-arch` key
- * (a `PLATFORM_TRIPLES` key, e.g. `darwin-arm64`, `linux-x64-musl`, `win-x64`).
+ * Resolve the current host to a python-build-standalone `platform-arch` key (a
+ * `PLATFORM_TRIPLES` key, e.g. `darwin-arm64`, `linux-x64-musl`, `win-x64`).
  * Owns the python-build-standalone vocabulary end to end: Node's `win32`
  * becomes `win`, and an Alpine host gets a `-musl` suffix so it resolves to the
  * real musl triple (upstream ships both gnu and musl Linux builds). Returns
@@ -109,13 +109,13 @@ export interface PythonAssetOptions {
    */
   readonly version: string
   /**
-   * python-build-standalone release tag, e.g. `20260203`.
+   * Python-build-standalone release tag, e.g. `20260203`.
    */
   readonly tag: string
   /**
    * Target `platform-arch`, e.g. `darwin-arm64`. Omit to auto-detect the
-   * current host via {@link getPythonArch}; pass an explicit value to
-   * resolve the asset for a different target (e.g. cross-platform packaging).
+   * current host via {@link getPythonArch}; pass an explicit value to resolve
+   * the asset for a different target (e.g. cross-platform packaging).
    */
   readonly arch?: string | undefined
 }

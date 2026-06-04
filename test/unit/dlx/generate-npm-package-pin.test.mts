@@ -1,7 +1,7 @@
 /**
- * @file Unit tests for resolveNpmPackagePin. Option-validation tests run offline.
- *   The live registry test behind SOCKET_LIB_SKIP_NETWORK_TESTS=1 exercises the
- *   full pin generation flow against the real npm registry.
+ * @file Unit tests for resolveNpmPackagePin. Option-validation tests run
+ *   offline. The live registry test behind SOCKET_LIB_SKIP_NETWORK_TESTS=1
+ *   exercises the full pin generation flow against the real npm registry.
  */
 
 import { describe, expect, it } from 'vitest'

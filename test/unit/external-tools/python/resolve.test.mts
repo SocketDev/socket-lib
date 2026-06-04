@@ -11,20 +11,27 @@ vi.mock(import('../../../../src/external-tools/python/from-download'), () => ({
 }))
 
 async function loadFresh() {
-  const pathMod = await import('../../../../src/external-tools/python/from-path')
-  const dlMod = await import('../../../../src/external-tools/python/from-download')
+  const pathMod =
+    await import('../../../../src/external-tools/python/from-path')
+  const dlMod =
+    await import('../../../../src/external-tools/python/from-download')
   const mod = await import('../../../../src/external-tools/python/resolve')
   return {
     doResolvePython: mod.doResolvePython,
     resolvePython: mod.resolvePython,
     resetPythonResolution: mod.resetPythonResolution,
     pythonFromPathMock: pathMod.pythonFromPath as ReturnType<typeof vi.fn>,
-    pythonFromDownloadMock: dlMod.pythonFromDownload as ReturnType<typeof vi.fn>,
+    pythonFromDownloadMock: dlMod.pythonFromDownload as ReturnType<
+      typeof vi.fn
+    >,
   }
 }
 
 const ON_PATH = { path: '/usr/bin/python3', source: 'path' as const }
-const DOWNLOADED = { path: '/dlx/python/bin/python3', source: 'download' as const }
+const DOWNLOADED = {
+  path: '/dlx/python/bin/python3',
+  source: 'download' as const,
+}
 const PIN = { tag: '20260203', version: '3.11.14' }
 
 beforeEach(() => {

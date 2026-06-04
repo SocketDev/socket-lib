@@ -1,8 +1,8 @@
 /**
  * @file GENERATED — do not edit by hand. Run `node
- *   scripts/post-build/make-primordials-defaults.mts` (also runs as part of `pnpm
- *   run build`) to regenerate from the `globals` npm package's globals.json
- *   crossed against src/primordials/*.ts `Ctor` exports. Source:
+ *   scripts/post-build/make-primordials-defaults.mts` (also runs as part of
+ *   `pnpm run build`) to regenerate from the `globals` npm package's
+ *   globals.json crossed against src/primordials/*.ts `Ctor` exports. Source:
  *   globals@<bumped via taze>, env = builtin ∪ node. Filter: identifiers
  *   socket-lib exports as `<name>Ctor`.
  */

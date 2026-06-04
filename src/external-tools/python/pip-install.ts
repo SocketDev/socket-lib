@@ -2,28 +2,25 @@
  * @file `downloadPipPackage()` — the Python mirror of `dlx/package.ts`'s
  *   `downloadNpmPackage()`. Installs a pip spec into a content-addressed dlx
  *   directory (`pip install --target <dir>`), leaving the interpreter pristine:
- *   the package + its deps land in `~/.socket/_dlx/<cacheKey(spec)>/site-packages`,
- *   the exact analog of how `downloadNpmPackage` installs npm deps into
- *   `<dlxDir>/<hash>/node_modules/`.
+ *   the package + its deps land in
+ *   `~/.socket/_dlx/<cacheKey(spec)>/site-packages`, the exact analog of how
+ *   `downloadNpmPackage` installs npm deps into
+ *   `<dlxDir>/<hash>/node_modules/`. This is the bundle-safe / SEA-VFS-safe
+ *   model:
  *
- *   This is the bundle-safe / SEA-VFS-safe model:
  *   - No venv → no symlinks, no `pyvenv.cfg` with an absolute `home=`.
  *   - The target dir is plain files → embeddable in a SEA's VFS, relocatable at
  *     runtime.
  *   - One shared Python serves N isolated package dirs (true per-tool isolation
- *     without a venv) — exactly the `node_modules`-per-cacheKey shape.
- *
- *   Run the installed tool with the package dir on `PYTHONPATH`:
- *     spawn(pythonBin, ['-m', '<module>', ...args],
- *       { env: { ...process.env, PYTHONPATH: packageDir } })
- *
- *   `spec` is a PyPI pin (`<pkg>==<version>`) or a git-SHA pin
- *   (`git+https://…@<sha>`). A TOCTOU lock guards concurrent installs; an
- *   existing non-empty package dir makes the call idempotent.
- *
- *   Contrast `createPipVenv` (external-tools/from-pip-venv): venv with a
- *   `bin/<entryPoint>` — convenient but symlink + absolute-`home`-dependent, so
- *   DLX-only and NOT bundleable.
+ *     without a venv) — exactly the `node_modules`-per-cacheKey shape. Run the
+ *     installed tool with the package dir on `PYTHONPATH`: spawn(pythonBin,
+ *     ['-m', '<module>', ...args], { env: { ...process.env, PYTHONPATH:
+ *     packageDir } }) `spec` is a PyPI pin (`<pkg>==<version>`) or a git-SHA
+ *     pin (`git+https://…@<sha>`). A TOCTOU lock guards concurrent installs; an
+ *     existing non-empty package dir makes the call idempotent. Contrast
+ *     `createPipVenv` (external-tools/from-pip-venv): venv with a
+ *     `bin/<entryPoint>` — convenient but symlink + absolute-`home`-dependent,
+ *     so DLX-only and NOT bundleable.
  */
 
 // oxlint-disable-next-line socket/prefer-async-spawn -- pip needs streaming stdio; the lib promise wrapper rejects on nonzero and hides output.
@@ -173,7 +170,8 @@ export interface DownloadPipPackageOptions {
    * carries a matching hash — so it only fits specs pip can hash-verify (a
    * pinned `==<version>` or a direct wheel/sdist URL) with a hash-pinned
    * closure. Omit it and rely on the immutable spec as the pin: `==<version>`
-   * (PyPI is immutable per version) or `@<full-sha>` (git is content-addressed).
+   * (PyPI is immutable per version) or `@<full-sha>` (git is
+   * content-addressed).
    */
   readonly hash?: string | undefined
   /**
@@ -183,7 +181,7 @@ export interface DownloadPipPackageOptions {
    */
   readonly pythonBin: string
   /**
-   * pip install spec: `<pkg>==<version>` (PyPI exact pin) or
+   * Pip install spec: `<pkg>==<version>` (PyPI exact pin) or
    * `git+https://<url>@<sha>` (git-SHA pin).
    */
   readonly spec: string

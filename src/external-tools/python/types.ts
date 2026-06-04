@@ -8,7 +8,7 @@ import type { ResolvedToolIntegrity } from '../from-download'
 /**
  * Which resolver tier produced the interpreter.
  *
- * - `path`     — an interpreter already on PATH (system / pyenv / etc.).
+ * - `path` — an interpreter already on PATH (system / pyenv / etc.).
  * - `download` — a python-build-standalone CPython fetched into the DLX cache.
  */
 export type PythonSource = 'download' | 'path'
@@ -23,9 +23,9 @@ export interface ResolvedPython {
    */
   readonly source: PythonSource
   /**
-   * SRI integrity of the downloaded archive. Set only when
-   * `source === 'download'`; the PATH tier references an interpreter already on
-   * disk and computes no hash. See {@link ResolvedToolIntegrity}.
+   * SRI integrity of the downloaded archive. Set only when `source ===
+   * 'download'`; the PATH tier references an interpreter already on disk and
+   * computes no hash. See {@link ResolvedToolIntegrity}.
    */
   readonly integrity?: ResolvedToolIntegrity | undefined
 }
@@ -42,7 +42,7 @@ export interface PythonBuildPin {
    */
   readonly version: string
   /**
-   * python-build-standalone release tag, e.g. `20260203`.
+   * Python-build-standalone release tag, e.g. `20260203`.
    */
   readonly tag: string
   /**

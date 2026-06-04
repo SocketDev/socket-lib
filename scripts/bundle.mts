@@ -221,7 +221,9 @@ async function main(): Promise<void> {
     // in the pipeline. (Locally, `--needed` still builds when dist is absent.)
     if (values.needed && process.env['CI'] === 'true') {
       if (!quiet) {
-        logger.info('CI detected — skipping prepare-time build (CI builds explicitly)')
+        logger.info(
+          'CI detected — skipping prepare-time build (CI builds explicitly)',
+        )
       }
       process.exitCode = 0
       return

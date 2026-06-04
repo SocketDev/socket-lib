@@ -2,20 +2,17 @@
  * @file One-call dlx convenience wrappers for python: resolve (or download) a
  *   CPython into the known dlx location, then run a pip primitive against it —
  *   so callers don't thread `pythonBin` by hand. Mirrors how `dlx/package.ts`'s
- *   `dlxPackage` wraps `downloadNpmPackage`.
- *
- *   The dlx Python path is deterministic given the pin
- *   (`pythonCacheDir(version, tag, arch)` → `~/.socket/_dlx/python/...`), so the
- *   wrapper resolves to that known location and hands the interpreter path to
- *   the pip fn itself:
+ *   `dlxPackage` wraps `downloadNpmPackage`. The dlx Python path is
+ *   deterministic given the pin (`pythonCacheDir(version, tag, arch)` →
+ *   `~/.socket/_dlx/python/...`), so the wrapper resolves to that known
+ *   location and hands the interpreter path to the pip fn itself:
  *
  *   - `dlxPipInstall({ python, spec })` → `resolvePython` + `downloadPipPackage`
- *   - `dlxPipPin({ python, spec })`     → `resolvePython` + `resolvePipPackagePin`
- *
- *   The lower-level primitives (`downloadPipPackage`, `resolvePipPackagePin`)
- *   keep `pythonBin` required — they're the interpreter-agnostic layer. Use them
- *   directly when you already hold an interpreter path; use these wrappers when
- *   you have a pin and want one call.
+ *   - `dlxPipPin({ python, spec })` → `resolvePython` + `resolvePipPackagePin`
+ *     The lower-level primitives (`downloadPipPackage`, `resolvePipPackagePin`)
+ *     keep `pythonBin` required — they're the interpreter-agnostic layer. Use
+ *     them directly when you already hold an interpreter path; use these
+ *     wrappers when you have a pin and want one call.
  */
 
 import { downloadPipPackage } from './pip-install'
@@ -28,7 +25,7 @@ import type { PythonBuildPin } from './types'
 
 export interface DlxPipOptions {
   /**
-   * python-build-standalone pin (version + tag + optional integrity). The dlx
+   * Python-build-standalone pin (version + tag + optional integrity). The dlx
    * interpreter location is derived from this — that's why no `pythonBin` is
    * needed. Omit `arch` to auto-detect the host.
    */
@@ -48,14 +45,14 @@ export interface DlxPipInstallOptions extends DlxPipOptions {
    */
   readonly hash?: string | undefined
   /**
-   * pip install spec: `<pkg>==<version>` or `git+https://<url>@<sha>`.
+   * Pip install spec: `<pkg>==<version>` or `git+https://<url>@<sha>`.
    */
   readonly spec: string
 }
 
 export interface DlxPipPinOptions extends DlxPipOptions {
   /**
-   * pip spec to pin: `<pkg>==<version>` or `git+https://<url>@<sha>`.
+   * Pip spec to pin: `<pkg>==<version>` or `git+https://<url>@<sha>`.
    */
   readonly spec: string
 }

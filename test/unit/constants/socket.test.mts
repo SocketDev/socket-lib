@@ -305,7 +305,9 @@ describe('constants/socket', () => {
     })
 
     it('should be uppercase', () => {
-      expect(SOCKET_IPC_HANDSHAKE).toBe(canonicalSocketIpcHandshake.toUpperCase())
+      expect(SOCKET_IPC_HANDSHAKE).toBe(
+        canonicalSocketIpcHandshake.toUpperCase(),
+      )
     })
 
     it('should contain IPC and HANDSHAKE', () => {
@@ -328,7 +330,9 @@ describe('constants/socket', () => {
     })
 
     it('should be lowercase for directory names', () => {
-      expect(CACHE_SOCKET_API_DIR).toBe(canonicalCacheSocketApiDir.toLowerCase())
+      expect(CACHE_SOCKET_API_DIR).toBe(
+        canonicalCacheSocketApiDir.toLowerCase(),
+      )
       expect(REGISTRY).toBe(canonicalRegistry.toLowerCase())
     })
 

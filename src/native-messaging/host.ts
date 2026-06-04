@@ -26,7 +26,10 @@ import type { Readable, Writable } from 'node:stream'
 
 const logger = getDefaultLogger()
 
-export async function handleOne(stdin?: Readable, stdout?: Writable): Promise<void> {
+export async function handleOne(
+  stdin?: Readable,
+  stdout?: Writable,
+): Promise<void> {
   const inStream = stdin ?? process.stdin
   const outStream = stdout ?? process.stdout
   const header = await readExact(4, inStream)

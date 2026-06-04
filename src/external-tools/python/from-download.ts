@@ -24,7 +24,7 @@ export interface PythonFromDownloadOptions {
    */
   version: string
   /**
-   * python-build-standalone release tag, e.g. `20260203`.
+   * Python-build-standalone release tag, e.g. `20260203`.
    */
   tag: string
   /**

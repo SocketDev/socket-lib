@@ -14,7 +14,8 @@ vi.mock(import('../../../../src/external-tools/from-download'), () => ({
 
 async function loadFresh() {
   const fromDlMod = await import('../../../../src/external-tools/from-download')
-  const mod = await import('../../../../src/external-tools/python/from-download')
+  const mod =
+    await import('../../../../src/external-tools/python/from-download')
   return {
     downloadAndExtractToolMock: fromDlMod.downloadAndExtractTool as ReturnType<
       typeof vi.fn
@@ -82,7 +83,9 @@ describe.sequential('external-tools/python/from-download — pythonFromDownload'
       tag: '20260203',
       version: '3.11.14',
     })
-    expect(result!.path.replace(/\\/g, '/')).toBe('/custom/py/python/bin/python3')
+    expect(result!.path.replace(/\\/g, '/')).toBe(
+      '/custom/py/python/bin/python3',
+    )
     expect(downloadAndExtractToolMock.mock.calls[0]![0].extractedDir).toBe(
       '/custom/py',
     )

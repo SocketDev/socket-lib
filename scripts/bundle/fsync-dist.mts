@@ -1,13 +1,11 @@
 /**
  * @file MacOS-only fsync barrier for `dist/`. Walk the tree and `fsync()` every
  *   regular file so downstream steps (tests, packagers) see fully-durable bytes
- *   rather than page-cache state. esbuild + child-process builders resolve their
- *   write Promises before the file system view is durable on darwin CI runners.
- *
- *   Skipped on Linux + Windows: Linux's `fs.writeFile` already provides the
- *   needed durability for our use, and Windows cannot `open(dir, 'r')` for the
- *   directory-flush step (different file-handle semantics).
- *
+ *   rather than page-cache state. esbuild + child-process builders resolve
+ *   their write Promises before the file system view is durable on darwin CI
+ *   runners. Skipped on Linux + Windows: Linux's `fs.writeFile` already
+ *   provides the needed durability for our use, and Windows cannot `open(dir,
+ *   'r')` for the directory-flush step (different file-handle semantics).
  *   **Why:** Past incident — socket-lib v6.0.1 + v6.0.2 macOS CI flakes where
  *   `Build completed successfully` logged with 502 validated exports, then the
  *   very next vitest run hit `Unexpected token '{'` on a `dist/external/*.js`

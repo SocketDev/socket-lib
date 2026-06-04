@@ -161,19 +161,25 @@ describe.sequential('dlx/binary-resolution — makePackageBinsExecutable', () =>
     expect(statSync(path.join(dir, 'b.js')).mode & 0o777).toBe(0o755)
   })
 
-  test.skipIf(IS_WIN)('returns silently when the package has no bin field', () => {
-    makePackage({ packageDir: tmpRoot, packageName: 'no-bin' })
-    expect(() => makePackageBinsExecutable(tmpRoot, 'no-bin')).not.toThrow()
-  })
+  test.skipIf(IS_WIN)(
+    'returns silently when the package has no bin field',
+    () => {
+      makePackage({ packageDir: tmpRoot, packageName: 'no-bin' })
+      expect(() => makePackageBinsExecutable(tmpRoot, 'no-bin')).not.toThrow()
+    },
+  )
 
-  test.skipIf(IS_WIN)('returns silently when the bin path does not exist on disk', () => {
-    makePackage({
-      packageDir: tmpRoot,
-      packageName: 'tool',
-      bin: './bin/missing.js',
-    })
-    expect(() => makePackageBinsExecutable(tmpRoot, 'tool')).not.toThrow()
-  })
+  test.skipIf(IS_WIN)(
+    'returns silently when the bin path does not exist on disk',
+    () => {
+      makePackage({
+        packageDir: tmpRoot,
+        packageName: 'tool',
+        bin: './bin/missing.js',
+      })
+      expect(() => makePackageBinsExecutable(tmpRoot, 'tool')).not.toThrow()
+    },
+  )
 
   test.skipIf(IS_WIN)('returns silently when package.json is missing', () => {
     expect(() =>

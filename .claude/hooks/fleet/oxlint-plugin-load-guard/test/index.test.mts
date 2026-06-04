@@ -11,7 +11,9 @@ const here = path.dirname(fileURLToPath(import.meta.url))
 
 test('isPluginPath matches plugin source files', () => {
   assert.equal(
-    isPluginPath('/repo/.config/fleet/oxlint-plugin/rules/no-vitest-focused-tests.mts'),
+    isPluginPath(
+      '/repo/.config/fleet/oxlint-plugin/rules/no-vitest-focused-tests.mts',
+    ),
     true,
   )
   assert.equal(

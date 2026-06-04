@@ -2,8 +2,8 @@
  * @file Unit tests for `installNativeHost` — focused on the input-validation
  *   guards (production-mode wildcard rejection, empty allowedOrigins) plus
  *   `buildManifest` shape. The filesystem-write paths (chromeManifestDirs,
- *   wrapper writes, Windows registry add) are covered by integration tests
- *   that actually exercise the OS — keeping this file fast + hermetic.
+ *   wrapper writes, Windows registry add) are covered by integration tests that
+ *   actually exercise the OS — keeping this file fast + hermetic.
  */
 
 import { describe, expect, it } from 'vitest'

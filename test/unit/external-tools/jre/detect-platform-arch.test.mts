@@ -51,4 +51,3 @@ describe('external-tools/jre/detect-platform-arch — getJreArch', () => {
     }
   })
 })
-

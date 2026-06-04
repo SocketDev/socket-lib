@@ -71,9 +71,9 @@ describe('external-tools/python/asset-names — pythonAsset', () => {
   })
 
   test('builds the install_only asset name with the platform triple', () => {
-    expect(
-      pythonAsset({ ...pin, arch: 'darwin-arm64' })!.assetName,
-    ).toBe('cpython-3.11.14+20260203-aarch64-apple-darwin-install_only.tar.gz')
+    expect(pythonAsset({ ...pin, arch: 'darwin-arm64' })!.assetName).toBe(
+      'cpython-3.11.14+20260203-aarch64-apple-darwin-install_only.tar.gz',
+    )
     expect(pythonAsset({ ...pin, arch: 'linux-x64' })!.assetName).toBe(
       'cpython-3.11.14+20260203-x86_64-unknown-linux-gnu-install_only.tar.gz',
     )
@@ -95,9 +95,11 @@ describe('external-tools/python/asset-names — pythonAsset', () => {
     const { url } = pythonAsset({ ...pin, arch: 'darwin-arm64' })!
     expect(url).toContain('cpython-3.11.14%2B20260203-')
     expect(url).not.toContain('cpython-3.11.14+20260203-')
-    expect(url.startsWith(
-      'https://github.com/astral-sh/python-build-standalone/releases/download/20260203/',
-    )).toBe(true)
+    expect(
+      url.startsWith(
+        'https://github.com/astral-sh/python-build-standalone/releases/download/20260203/',
+      ),
+    ).toBe(true)
   })
 
   test('maps every supported platform-arch to a triple', () => {
@@ -127,7 +129,9 @@ describe('external-tools/python/asset-names — DEFAULT_PYTHON_PIN', () => {
   test('has no orphan checksum keys (8 assets, all reachable)', () => {
     const { tag, version } = DEFAULT_PYTHON_PIN
     const reachable = new Set(
-      SUPPORTED_ARCHES.map(arch => pythonAsset({ arch, tag, version })!.assetName),
+      SUPPORTED_ARCHES.map(
+        arch => pythonAsset({ arch, tag, version })!.assetName,
+      ),
     )
     const keys = Object.keys(DEFAULT_PYTHON_PIN.checksums)
     expect(keys).toHaveLength(SUPPORTED_ARCHES.length)

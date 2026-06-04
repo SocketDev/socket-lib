@@ -31,7 +31,11 @@ function makeTranscriptWithBypass(phrase: string): {
 
 function runGuard(
   toolInput: { file_path: string; content?: string; new_string?: string },
-  opts?: { toolName?: string; transcriptPath?: string; env?: NodeJS.ProcessEnv },
+  opts?: {
+    toolName?: string
+    transcriptPath?: string
+    env?: NodeJS.ProcessEnv
+  },
 ): { stderr: string; exitCode: number } {
   const payload: Record<string, unknown> = {
     tool_name: opts?.toolName ?? 'Write',
@@ -126,7 +130,9 @@ test('reads new_string for Edit payloads', () => {
 
 test('findProseAntipatterns returns matches, empty when clean', () => {
   assert.equal(findProseAntipatterns(CLEAN).length, 0)
-  assert.ok(findProseAntipatterns(DIRTY).some(p => p.label === 'hedging adverb'))
+  assert.ok(
+    findProseAntipatterns(DIRTY).some(p => p.label === 'hedging adverb'),
+  )
 })
 
 test('exported patterns match their target shapes', () => {

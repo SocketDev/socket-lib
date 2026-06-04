@@ -6,10 +6,10 @@
  *   - Keychain: live OS-keychain round-trips skip by default — they hit
  *     `security`(1) / libsecret / DPAPI and either prompt for GUI auth (locked
  *     keychain) or hang in parallel workers, turning into 5s timeouts. The
- *     per-platform mock suites at test/unit/secrets/{macos,linux,windows}.test.mts
- *     cover the same code paths through mocked spawn boundaries.
- *
- *   Override flags (set BEFORE invoking vitest):
+ *     per-platform mock suites at
+ *     test/unit/secrets/{macos,linux,windows}.test.mts cover the same code
+ *     paths through mocked spawn boundaries. Override flags (set BEFORE
+ *     invoking vitest):
  *   - `SOCKET_LIB_RUN_NETWORK_TESTS=1` opts in to `describeNetworkOnly` /
  *     `itNetworkOnly` blocks (live-registry integration suites).
  *   - `SOCKET_LIB_RUN_LIVE_KEYCHAIN_TESTS=1` opts in to live `security`(1) /

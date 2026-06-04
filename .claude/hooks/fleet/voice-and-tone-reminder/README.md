@@ -3,8 +3,9 @@
 Stop hook. Scans the most-recent assistant turn for voice/tone antipattern sets
 and emits an informational stderr reminder (never blocks). Merges
 `comment-tone-reminder` + `identifying-users-reminder` + `perfectionist-reminder`
-+ `self-narration-reminder` into one process via `runStopReminders` — one stdin
-drain + one transcript read for the turn instead of one per group.
+
+- `self-narration-reminder` into one process via `runStopReminders` — one stdin
+  drain + one transcript read for the turn instead of one per group.
 
 Distinct from `prose-antipattern-guard`: that PreToolUse hook BLOCKS AI-writing
 patterns in committed prose files (CHANGELOG / docs / README); this one nudges on

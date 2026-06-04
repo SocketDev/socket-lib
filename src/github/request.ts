@@ -133,14 +133,16 @@ export async function fetchGitHub<T = unknown>(
       let statusNote = ''
       if (ghStatus) {
         if (ghStatus.status === 'unknown') {
-          statusNote = ' (githubstatus.com unreachable — could not confirm platform health)'
+          statusNote =
+            ' (githubstatus.com unreachable — could not confirm platform health)'
         } else if (ghStatus.degraded) {
           const componentLines = ghStatus.components
             .map(c => `  ${c.name}: ${c.status}`)
             .join('\n')
           statusNote = `\nGitHub platform status at time of failure:\n${componentLines}`
         } else {
-          statusNote = '\nGitHub platform status: all monitored components operational — this may be a transient issue or a request-specific error.'
+          statusNote =
+            '\nGitHub platform status: all monitored components operational — this may be a transient issue or a request-specific error.'
         }
       }
       throw new ErrorCtor(

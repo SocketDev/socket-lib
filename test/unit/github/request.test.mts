@@ -20,7 +20,9 @@ describe('fetchGitHub', () => {
 
   it('returns parsed JSON on 200', async () => {
     nock(GITHUB_API).get('/repos/foo/bar').reply(200, { id: 1, name: 'bar' })
-    const result = await fetchGitHub<{ id: number }>(`${GITHUB_API}/repos/foo/bar`)
+    const result = await fetchGitHub<{ id: number }>(
+      `${GITHUB_API}/repos/foo/bar`,
+    )
     expect(result.id).toBe(1)
   })
 
@@ -59,7 +61,11 @@ describe('fetchGitHub', () => {
         .reply(200, {
           components: [
             { id: 'br0l2tvcx85d', name: 'Actions', status: 'operational' },
-            { id: '8l4ygp009s5s', name: 'Git Operations', status: 'operational' },
+            {
+              id: '8l4ygp009s5s',
+              name: 'Git Operations',
+              status: 'operational',
+            },
             { id: 'brv1bkgrwx7q', name: 'API Requests', status: 'operational' },
           ],
         })
@@ -78,8 +84,16 @@ describe('fetchGitHub', () => {
         .get('/api/v2/components.json')
         .reply(200, {
           components: [
-            { id: 'br0l2tvcx85d', name: 'Actions', status: 'degraded_performance' },
-            { id: '8l4ygp009s5s', name: 'Git Operations', status: 'operational' },
+            {
+              id: 'br0l2tvcx85d',
+              name: 'Actions',
+              status: 'degraded_performance',
+            },
+            {
+              id: '8l4ygp009s5s',
+              name: 'Git Operations',
+              status: 'operational',
+            },
             { id: 'brv1bkgrwx7q', name: 'API Requests', status: 'operational' },
           ],
         })
@@ -103,9 +117,9 @@ describe('fetchGitHub', () => {
 
   it('throws GitHubEmptyBodyError on 200 with zero-byte body', async () => {
     nock(GITHUB_API).get('/repos/foo/bar').reply(200, '')
-    await expect(fetchGitHub(`${GITHUB_API}/repos/foo/bar`)).rejects.toBeInstanceOf(
-      GitHubEmptyBodyError,
-    )
+    await expect(
+      fetchGitHub(`${GITHUB_API}/repos/foo/bar`),
+    ).rejects.toBeInstanceOf(GitHubEmptyBodyError)
   })
 
   it('throws on malformed JSON body', async () => {
@@ -116,16 +130,14 @@ describe('fetchGitHub', () => {
   })
 
   it('throws GitHubRateLimitError on 403 rate limit', async () => {
-    nock(GITHUB_API)
-      .get('/repos/foo/bar')
-      .reply(
-        403,
-        { message: 'API rate limit exceeded' },
-        {
-          'X-RateLimit-Remaining': '0',
-          'X-RateLimit-Reset': '9999999999',
-        },
-      )
+    nock(GITHUB_API).get('/repos/foo/bar').reply(
+      403,
+      { message: 'API rate limit exceeded' },
+      {
+        'X-RateLimit-Remaining': '0',
+        'X-RateLimit-Reset': '9999999999',
+      },
+    )
     const err = (await fetchGitHub(`${GITHUB_API}/repos/foo/bar`).catch(
       e => e,
     )) as { message: string; status: number }

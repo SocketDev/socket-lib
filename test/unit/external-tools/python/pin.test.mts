@@ -102,7 +102,9 @@ describe('external-tools/python/pin — specDistName', () => {
 
   test('extracts an #egg fragment from a git url', () => {
     expect(
-      specDistName('git+https://github.com/NVIDIA/skillspector.git@abc#egg=skillspector'),
+      specDistName(
+        'git+https://github.com/NVIDIA/skillspector.git@abc#egg=skillspector',
+      ),
     ).toBe('skillspector')
   })
 

@@ -18,8 +18,8 @@ import { escapeRegExp } from '../../src/regexps/escape'
 
 /**
  * Returns whether `new RegExp(escapeRegExp(input))` matches exactly `input`.
- * Call sites assert the result so the failure is attributed to their own
- * `it()` block.
+ * Call sites assert the result so the failure is attributed to their own `it()`
+ * block.
  */
 export function literalRoundtrips(input: string): boolean {
   const re = new RegExp(`^${escapeRegExp(input)}$`)

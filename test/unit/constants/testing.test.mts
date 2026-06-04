@@ -18,12 +18,7 @@ import {
   VITEST as canonicalVitest,
 } from '@socketsecurity/lib-stable/constants/testing'
 
-import {
-  CI,
-  PRE_COMMIT,
-  TEST,
-  VITEST,
-} from '../../../src/constants/testing'
+import { CI, PRE_COMMIT, TEST, VITEST } from '../../../src/constants/testing'
 
 describe('constants/testing', () => {
   describe('testing frameworks', () => {

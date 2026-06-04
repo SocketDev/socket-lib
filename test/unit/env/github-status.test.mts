@@ -1,17 +1,16 @@
 /**
- * @file Unit tests for probeGitHubStatus(). Uses nock to mock
- *   githubstatus.com so tests are hermetic and don't hit the network.
+ * @file Unit tests for probeGitHubStatus(). Uses nock to mock githubstatus.com
+ *   so tests are hermetic and don't hit the network. Covers:
  *
- *   Covers:
- *     - All operational → status: 'operational', degraded: false
- *     - One component degraded → status = that component's status
- *     - Multiple degraded → worst-case status
- *     - Unknown component IDs ignored (only monitored set)
- *     - Network failure → status: 'unknown', degraded: false (fails open)
- *     - 404 / non-JSON response → status: 'unknown'
- *     - Probe timeout → status: 'unknown'
- *     - summary string content
- *     - components array structure
+ *   - All operational → status: 'operational', degraded: false
+ *   - One component degraded → status = that component's status
+ *   - Multiple degraded → worst-case status
+ *   - Unknown component IDs ignored (only monitored set)
+ *   - Network failure → status: 'unknown', degraded: false (fails open)
+ *   - 404 / non-JSON response → status: 'unknown'
+ *   - Probe timeout → status: 'unknown'
+ *   - summary string content
+ *   - components array structure
  */
 
 import nock from 'nock'
@@ -25,9 +24,21 @@ const STATUS_PATH = '/api/v2/components.json'
 function makeComponents(overrides: Record<string, string> = {}) {
   return {
     components: [
-      { id: 'br0l2tvcx85d', name: 'Actions', status: overrides['Actions'] ?? 'operational' },
-      { id: '8l4ygp009s5s', name: 'Git Operations', status: overrides['Git Operations'] ?? 'operational' },
-      { id: 'brv1bkgrwx7q', name: 'API Requests', status: overrides['API Requests'] ?? 'operational' },
+      {
+        id: 'br0l2tvcx85d',
+        name: 'Actions',
+        status: overrides['Actions'] ?? 'operational',
+      },
+      {
+        id: '8l4ygp009s5s',
+        name: 'Git Operations',
+        status: overrides['Git Operations'] ?? 'operational',
+      },
+      {
+        id: 'brv1bkgrwx7q',
+        name: 'API Requests',
+        status: overrides['API Requests'] ?? 'operational',
+      },
       // Unmonitored component — should be ignored
       { id: 'kr09ddfgbfsf', name: 'Issues', status: 'partial_outage' },
     ],
@@ -58,13 +69,17 @@ describe('probeGitHubStatus', () => {
       const result = await probeGitHubStatus()
       expect(result.degraded).toBe(false)
       expect(result.components).toHaveLength(3)
-      expect(result.components.every(c => c.status === 'operational')).toBe(true)
+      expect(result.components.every(c => c.status === 'operational')).toBe(
+        true,
+      )
     })
   })
 
   describe('single component degraded', () => {
     it('Actions degraded → status: degraded_performance', async () => {
-      nock(STATUS_HOST).get(STATUS_PATH).reply(200, makeComponents({ 'Actions': 'degraded_performance' }))
+      nock(STATUS_HOST)
+        .get(STATUS_PATH)
+        .reply(200, makeComponents({ Actions: 'degraded_performance' }))
       const result = await probeGitHubStatus()
       expect(result.status).toBe('degraded_performance')
       expect(result.degraded).toBe(true)
@@ -73,21 +88,27 @@ describe('probeGitHubStatus', () => {
     })
 
     it('Git Operations partial_outage → status: partial_outage', async () => {
-      nock(STATUS_HOST).get(STATUS_PATH).reply(200, makeComponents({ 'Git Operations': 'partial_outage' }))
+      nock(STATUS_HOST)
+        .get(STATUS_PATH)
+        .reply(200, makeComponents({ 'Git Operations': 'partial_outage' }))
       const result = await probeGitHubStatus()
       expect(result.status).toBe('partial_outage')
       expect(result.degraded).toBe(true)
     })
 
     it('API Requests major_outage → status: major_outage', async () => {
-      nock(STATUS_HOST).get(STATUS_PATH).reply(200, makeComponents({ 'API Requests': 'major_outage' }))
+      nock(STATUS_HOST)
+        .get(STATUS_PATH)
+        .reply(200, makeComponents({ 'API Requests': 'major_outage' }))
       const result = await probeGitHubStatus()
       expect(result.status).toBe('major_outage')
       expect(result.degraded).toBe(true)
     })
 
     it('under_maintenance counts as degraded', async () => {
-      nock(STATUS_HOST).get(STATUS_PATH).reply(200, makeComponents({ 'Actions': 'under_maintenance' }))
+      nock(STATUS_HOST)
+        .get(STATUS_PATH)
+        .reply(200, makeComponents({ Actions: 'under_maintenance' }))
       const result = await probeGitHubStatus()
       expect(result.degraded).toBe(true)
     })
@@ -95,11 +116,16 @@ describe('probeGitHubStatus', () => {
 
   describe('multiple degraded — worst-case wins', () => {
     it('major_outage beats partial_outage', async () => {
-      nock(STATUS_HOST).get(STATUS_PATH).reply(200, makeComponents({
-        'Actions': 'partial_outage',
-        'Git Operations': 'major_outage',
-        'API Requests': 'degraded_performance',
-      }))
+      nock(STATUS_HOST)
+        .get(STATUS_PATH)
+        .reply(
+          200,
+          makeComponents({
+            Actions: 'partial_outage',
+            'Git Operations': 'major_outage',
+            'API Requests': 'degraded_performance',
+          }),
+        )
       const result = await probeGitHubStatus()
       expect(result.status).toBe('major_outage')
       expect(result.degraded).toBe(true)
@@ -110,10 +136,15 @@ describe('probeGitHubStatus', () => {
     })
 
     it('partial_outage beats degraded_performance', async () => {
-      nock(STATUS_HOST).get(STATUS_PATH).reply(200, makeComponents({
-        'Actions': 'degraded_performance',
-        'Git Operations': 'partial_outage',
-      }))
+      nock(STATUS_HOST)
+        .get(STATUS_PATH)
+        .reply(
+          200,
+          makeComponents({
+            Actions: 'degraded_performance',
+            'Git Operations': 'partial_outage',
+          }),
+        )
       const result = await probeGitHubStatus()
       expect(result.status).toBe('partial_outage')
     })
@@ -165,7 +196,10 @@ describe('probeGitHubStatus', () => {
 
     it('short timeout → status: unknown (fails open, not throwing)', async () => {
       // Simulate slow response by never replying
-      nock(STATUS_HOST).get(STATUS_PATH).delay(10_000).reply(200, makeComponents())
+      nock(STATUS_HOST)
+        .get(STATUS_PATH)
+        .delay(10_000)
+        .reply(200, makeComponents())
       const result = await probeGitHubStatus(50) // 50ms timeout
       expect(result.status).toBe('unknown')
       expect(result.degraded).toBe(false)
@@ -188,7 +222,9 @@ describe('probeGitHubStatus', () => {
     })
 
     it('degraded summary lists only degraded components', async () => {
-      nock(STATUS_HOST).get(STATUS_PATH).reply(200, makeComponents({ 'Actions': 'degraded_performance' }))
+      nock(STATUS_HOST)
+        .get(STATUS_PATH)
+        .reply(200, makeComponents({ Actions: 'degraded_performance' }))
       const result = await probeGitHubStatus()
       expect(result.summary).toContain('Actions')
       expect(result.summary).not.toContain('Git Operations')

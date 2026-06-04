@@ -23,8 +23,8 @@ export const IS_BROWSER =
   typeof window !== 'undefined' && typeof document !== 'undefined'
 
 /**
- * True when running inside a Web Worker / Chrome MV3 service worker.
- * `self` is defined without `window` in worker contexts.
+ * True when running inside a Web Worker / Chrome MV3 service worker. `self` is
+ * defined without `window` in worker contexts.
  */
 export const IS_WORKER =
   typeof self !== 'undefined' &&
