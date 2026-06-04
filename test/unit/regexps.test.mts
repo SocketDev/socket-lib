@@ -17,11 +17,13 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import { escapeRegExp } from '../../src/regexps/escape'
 
 /**
- * `new RegExp(escapeRegExp(input))` must match exactly `input`.
+ * Returns whether `new RegExp(escapeRegExp(input))` matches exactly `input`.
+ * Call sites assert the result so the failure is attributed to their own
+ * `it()` block.
  */
-export function expectLiteralRoundtrip(input: string): void {
+export function literalRoundtrips(input: string): boolean {
   const re = new RegExp(`^${escapeRegExp(input)}$`)
-  expect(re.test(input)).toBe(true)
+  return re.test(input)
 }
 
 describe('regexps', () => {
@@ -84,18 +86,18 @@ describe('regexps', () => {
     // itself literally after escape.
     it('every metacharacter round-trips as a literal match', () => {
       for (const ch of '\\|{}()[]^$+*?.-/') {
-        expectLiteralRoundtrip(ch)
+        expect(literalRoundtrips(ch)).toBe(true)
       }
     })
 
     it('paired metacharacters round-trip', () => {
       for (const pair of ['{}', '()', '[]', '{{', '}}']) {
-        expectLiteralRoundtrip(pair)
+        expect(literalRoundtrips(pair)).toBe(true)
       }
     })
 
     it('every metacharacter in one string round-trips', () => {
-      expectLiteralRoundtrip('.*+?^${}()|[]/\\-')
+      expect(literalRoundtrips('.*+?^${}()|[]/\\-')).toBe(true)
     })
 
     it('round-trips mixed plain + metacharacter strings', () => {
@@ -106,13 +108,13 @@ describe('regexps', () => {
         '*.{js,ts}',
         'a{1,3}',
       ]) {
-        expectLiteralRoundtrip(s)
+        expect(literalRoundtrips(s)).toBe(true)
       }
     })
 
     it('round-trips plain ASCII strings', () => {
       for (const s of ['abc123', 'hello world', 'foo', '123']) {
-        expectLiteralRoundtrip(s)
+        expect(literalRoundtrips(s)).toBe(true)
       }
     })
 
@@ -138,8 +140,8 @@ describe('regexps', () => {
     })
 
     it('round-trips unicode characters', () => {
-      expectLiteralRoundtrip('hello世界')
-      expectLiteralRoundtrip('test.世界')
+      expect(literalRoundtrips('hello世界')).toBe(true)
+      expect(literalRoundtrips('test.世界')).toBe(true)
     })
 
     // Spec guarantees safe concatenation into any Pattern context.

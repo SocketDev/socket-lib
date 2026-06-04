@@ -133,12 +133,7 @@ describe.sequential('dlx/binary-resolution — findBinaryPath', () => {
 const IS_WIN = os.platform() === 'win32'
 
 describe.sequential('dlx/binary-resolution — makePackageBinsExecutable', () => {
-  if (IS_WIN) {
-    test.skip('unix-only', () => {})
-    return
-  }
-
-  test('chmods the single bin entry to 0o755', () => {
+  test.skipIf(IS_WIN)('chmods the single bin entry to 0o755', () => {
     makePackage({
       packageDir: tmpRoot,
       packageName: 'tool',
@@ -151,7 +146,7 @@ describe.sequential('dlx/binary-resolution — makePackageBinsExecutable', () =>
     expect(statSync(binPath).mode & 0o777).toBe(0o755)
   })
 
-  test('chmods every entry of a multi-bin object', () => {
+  test.skipIf(IS_WIN)('chmods every entry of a multi-bin object', () => {
     makePackage({
       packageDir: tmpRoot,
       packageName: 'tool',
@@ -166,12 +161,12 @@ describe.sequential('dlx/binary-resolution — makePackageBinsExecutable', () =>
     expect(statSync(path.join(dir, 'b.js')).mode & 0o777).toBe(0o755)
   })
 
-  test('returns silently when the package has no bin field', () => {
+  test.skipIf(IS_WIN)('returns silently when the package has no bin field', () => {
     makePackage({ packageDir: tmpRoot, packageName: 'no-bin' })
     expect(() => makePackageBinsExecutable(tmpRoot, 'no-bin')).not.toThrow()
   })
 
-  test('returns silently when the bin path does not exist on disk', () => {
+  test.skipIf(IS_WIN)('returns silently when the bin path does not exist on disk', () => {
     makePackage({
       packageDir: tmpRoot,
       packageName: 'tool',
@@ -180,7 +175,7 @@ describe.sequential('dlx/binary-resolution — makePackageBinsExecutable', () =>
     expect(() => makePackageBinsExecutable(tmpRoot, 'tool')).not.toThrow()
   })
 
-  test('returns silently when package.json is missing', () => {
+  test.skipIf(IS_WIN)('returns silently when package.json is missing', () => {
     expect(() =>
       makePackageBinsExecutable(tmpRoot, 'never-installed'),
     ).not.toThrow()

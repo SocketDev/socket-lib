@@ -223,13 +223,15 @@ describe('node constants flags and runtime', () => {
 
   describe('edge cases and comprehensive coverage', () => {
     it('should handle all flag getters being called multiple times', () => {
-      // Call each getter multiple times to ensure caching works
-      for (let i = 0; i < 3; i++) {
-        getNodeHardenFlags()
-        getNodePermissionFlags()
-        getNodeNoWarningsFlags()
-        getNodeDisableSigusr1Flags()
-      }
+      // Call each getter multiple times to ensure caching works without throwing.
+      expect(() => {
+        for (let i = 0; i < 3; i++) {
+          getNodeHardenFlags()
+          getNodePermissionFlags()
+          getNodeNoWarningsFlags()
+          getNodeDisableSigusr1Flags()
+        }
+      }).not.toThrow()
     })
 
     it('should verify all flag arrays are non-empty or conditionally empty', () => {

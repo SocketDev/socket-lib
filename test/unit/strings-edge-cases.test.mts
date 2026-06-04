@@ -245,7 +245,7 @@ describe('strings edge cases (part 1)', () => {
     })
   })
 
-  describe('indentString edge cases', () => {
+  describe('indentString default count and empty-line handling', () => {
     it('should handle empty lines correctly', () => {
       // Tests line 186-187: regex with empty line handling
       const result = indentString('line1\n\nline3', { count: 2 })

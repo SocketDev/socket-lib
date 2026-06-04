@@ -196,14 +196,9 @@ describe.sequential('writeRcFile', () => {
   })
 })
 
-describe.sequential('write (rc-file insertion)', () => {
-  // The write/clear functions are darwin-gated. Skip on non-darwin to
-  // avoid testing the early-return-undefined branch only.
-  if (!IS_DARWIN) {
-    test.skip('darwin-only', () => {})
-    return
-  }
-
+// The write/clear functions are darwin-gated. Skip on non-darwin to
+// avoid testing the early-return-undefined branch only.
+describe.sequential.skipIf(!IS_DARWIN)('write (rc-file insertion)', () => {
   test('inserts a new block into a fresh rc file', () => {
     const rcPath = path.join(tmpRoot, '.zshenv')
     const result = write({
@@ -268,12 +263,7 @@ describe.sequential('write (rc-file insertion)', () => {
   })
 })
 
-describe.sequential('clear (rc-file removal)', () => {
-  if (!IS_DARWIN) {
-    test.skip('darwin-only', () => {})
-    return
-  }
-
+describe.sequential.skipIf(!IS_DARWIN)('clear (rc-file removal)', () => {
   test('returns false when the rc file does not exist', () => {
     vi.stubEnv('HOME', tmpRoot)
     vi.stubEnv('SHELL', '/bin/zsh')

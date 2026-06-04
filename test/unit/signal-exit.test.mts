@@ -188,7 +188,7 @@ describe('signal-exit', () => {
       const remove = onExit(callback)
       remove()
       // Should not throw when removing twice
-      remove()
+      expect(() => remove()).not.toThrow()
     })
 
     it('should unload when all handlers removed', () => {

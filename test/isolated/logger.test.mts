@@ -70,13 +70,13 @@ describe('Logger', () => {
     })
 
     it('should return logger instance for chaining', () => {
-      const result = testLogger.log('test')
+      const result = testLogger.log('chaining message')
       expect(result).toBe(testLogger)
     })
 
     it('should track log call count', () => {
       const initialCount = testLogger.logCallCount
-      testLogger.log('test')
+      testLogger.log('counted message')
       expect(testLogger.logCallCount).toBe(initialCount + 1)
     })
 
@@ -102,7 +102,7 @@ describe('Logger', () => {
     })
 
     it('should return logger instance for chaining', () => {
-      const result = testLogger.error('error')
+      const result = testLogger.error('chained error')
       expect(result).toBe(testLogger)
     })
   })
@@ -229,11 +229,11 @@ describe('Logger', () => {
 
     it('should support custom dedent amounts', () => {
       testLogger.indent(4)
-      testLogger.log('indented')
+      testLogger.log('custom indented')
       testLogger.dedent(4)
       testLogger.log('no indent')
       const outputs = stdoutChunks.join('')
-      expect(outputs).toContain('    indented')
+      expect(outputs).toContain('    custom indented')
       expect(outputs).toContain('no indent')
     })
 
@@ -330,7 +330,7 @@ describe('Logger', () => {
   describe('step() method', () => {
     it('should add blank line before step', () => {
       testLogger.log('previous')
-      testLogger.step('Step 1')
+      testLogger.step('first step')
       const outputs = stdoutChunks
       expect(outputs.length).toBeGreaterThan(2)
     })

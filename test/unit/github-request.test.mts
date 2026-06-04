@@ -108,9 +108,11 @@ describe.sequential('github fetch and refs', () => {
         .matchHeader('X-Custom-Header', 'custom-value')
         .reply(200, {})
 
-      await fetchGitHub('https://api.github.com/repos/owner/repo', {
-        headers: { 'X-Custom-Header': 'custom-value' },
-      })
+      await expect(
+        fetchGitHub('https://api.github.com/repos/owner/repo', {
+          headers: { 'X-Custom-Header': 'custom-value' },
+        }),
+      ).resolves.toEqual({})
     })
 
     it('should throw GitHubEmptyBodyError on 200 + zero-byte body', async () => {

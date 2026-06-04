@@ -90,8 +90,8 @@ describe.sequential('github', () => {
 
   describe('getGitHubTokenFromGitConfig', () => {
     it('should return string or undefined (integration test)', async () => {
-      await getGitHubTokenFromGitConfig()
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      const token = await getGitHubTokenFromGitConfig()
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
 
     it('should return undefined when git config throws', async () => {
@@ -102,8 +102,8 @@ describe.sequential('github', () => {
     })
 
     it('should accept spawn options', async () => {
-      await getGitHubTokenFromGitConfig({ cwd: process.cwd() })
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      const token = await getGitHubTokenFromGitConfig({ cwd: process.cwd() })
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
   })
 
@@ -122,12 +122,12 @@ describe.sequential('github', () => {
 
     it('should fallback to git config (integration test)', async () => {
       // Integration test - git config may or may not have token
-      await getGitHubTokenWithFallback()
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      const token = await getGitHubTokenWithFallback()
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
   })
 
-  describe('clearRefCache', () => {
+  describe('clearRefCache async behavior', () => {
     it('should clear cache asynchronously without throwing', async () => {
       await expect(clearRefCache()).resolves.not.toThrow()
     })
@@ -192,24 +192,24 @@ describe.sequential('github', () => {
     })
   })
 
-  describe('getGitHubTokenFromGitConfig', () => {
+  describe('getGitHubTokenFromGitConfig spawn options', () => {
     it('should handle empty cwd', async () => {
-      await getGitHubTokenFromGitConfig({ cwd: '' })
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      const token = await getGitHubTokenFromGitConfig({ cwd: '' })
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
 
     it('should handle missing git command', async () => {
-      await getGitHubTokenFromGitConfig({
+      const token = await getGitHubTokenFromGitConfig({
         cwd: '/tmp',
       })
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
 
     it('should handle stdio options', async () => {
-      await getGitHubTokenFromGitConfig({
+      const token = await getGitHubTokenFromGitConfig({
         stdio: 'pipe',
       })
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
 
     it('should not throw on errors', async () => {
@@ -221,7 +221,7 @@ describe.sequential('github', () => {
     })
   })
 
-  describe('getGitHubTokenWithFallback', () => {
+  describe('getGitHubTokenWithFallback source resolution', () => {
     it('should prefer environment over git config', async () => {
       setEnv('GITHUB_TOKEN', 'env-token')
       const token = await getGitHubTokenWithFallback()
@@ -229,13 +229,13 @@ describe.sequential('github', () => {
     })
 
     it('should handle when both sources are unavailable', async () => {
-      await getGitHubTokenWithFallback()
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      const token = await getGitHubTokenWithFallback()
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
 
     it('should return string or undefined', async () => {
-      await getGitHubTokenWithFallback()
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      const token = await getGitHubTokenWithFallback()
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
   })
 
@@ -399,17 +399,17 @@ describe.sequential('github', () => {
 
   describe('git config integration', () => {
     it('should handle non-git directories', async () => {
-      await getGitHubTokenFromGitConfig({
+      const token = await getGitHubTokenFromGitConfig({
         cwd: '/tmp',
       })
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
 
     it('should handle relative paths', async () => {
-      await getGitHubTokenFromGitConfig({
+      const token = await getGitHubTokenFromGitConfig({
         cwd: '.',
       })
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
 
     it('should handle multiple concurrent git config reads', async () => {
@@ -428,8 +428,8 @@ describe.sequential('github', () => {
   describe('fallback chain', () => {
     it('should complete fallback chain with no sources', async () => {
       resetEnv()
-      await getGitHubTokenWithFallback()
-      // Assertion is that await did not throw — return value is string|undefined by contract.
+      const token = await getGitHubTokenWithFallback()
+      expect(typeof token === 'string' || token === undefined).toBe(true)
     })
 
     it('should short-circuit on first found token', async () => {

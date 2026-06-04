@@ -30,7 +30,11 @@ describe('fetchGitHub', () => {
     })
       .get('/repos/foo/bar')
       .reply(200, { id: 2 })
-    await fetchGitHub(`${GITHUB_API}/repos/foo/bar`, { token: 'mytoken' })
+    const result = await fetchGitHub<{ id: number }>(
+      `${GITHUB_API}/repos/foo/bar`,
+      { token: 'mytoken' },
+    )
+    expect(result.id).toBe(2)
   })
 
   it('does not pass Authorization when empty-string token provided', async () => {
@@ -40,7 +44,11 @@ describe('fetchGitHub', () => {
     nock(GITHUB_API, { badheaders: ['authorization'] })
       .get('/repos/foo/bar')
       .reply(200, { id: 3 })
-    await fetchGitHub(`${GITHUB_API}/repos/foo/bar`, { token: '' })
+    const result = await fetchGitHub<{ id: number }>(
+      `${GITHUB_API}/repos/foo/bar`,
+      { token: '' },
+    )
+    expect(result.id).toBe(3)
   })
 
   describe('5xx responses — probes GitHubStatus', () => {

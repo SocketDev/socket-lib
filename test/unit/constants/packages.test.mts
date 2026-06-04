@@ -213,7 +213,7 @@ describe('constants/packages', () => {
       // Cannot reset module state from here, but calling twice exercises
       // the truthy-_packumentCache branch on the second call.
       clearPackumentCache()
-      clearPackumentCache()
+      expect(() => clearPackumentCache()).not.toThrow()
     })
   })
 

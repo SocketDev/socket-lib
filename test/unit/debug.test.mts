@@ -298,7 +298,7 @@ describe.sequential('debug', () => {
       t.end()
       // Cannot assert output (debuglog only writes when NODE_DEBUG=time).
       // The point is: end resets startTime so calling it again is a no-op.
-      t.end()
+      expect(() => t.end()).not.toThrow()
     })
 
     it('calling impl twice toggles start/end semantics', () => {

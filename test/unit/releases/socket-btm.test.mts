@@ -157,7 +157,7 @@ describe('releases/socket-btm', () => {
       expect(getBinaryName('node', 'win32')).toBe('node.exe')
     })
 
-    it('should return binary name with .exe extension for win32', () => {
+    it('should append .exe to non-node binary names on win32', () => {
       expect(getBinaryName('binject', 'win32')).toBe('binject.exe')
     })
   })

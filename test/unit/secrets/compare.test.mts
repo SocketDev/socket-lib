@@ -137,9 +137,7 @@ describe('compareSecrets', () => {
     // an order-of-magnitude difference on a long secret with an early-
     // byte mismatch). It's intentionally LENIENT and skipped under
     // coverage runs (instrumentation makes timing meaningless).
-    const skipIfCoverage = process.env['COVERAGE'] === 'true' ? it.skip : it
-
-    skipIfCoverage(
+    it.skipIf(process.env['COVERAGE'] === 'true')(
       'shows no order-of-magnitude difference between early- and late-byte mismatches',
       () => {
         const len = 1024
