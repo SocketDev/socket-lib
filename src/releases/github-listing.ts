@@ -112,7 +112,7 @@ export async function fetchReleasesViaGraphQL(
     errors?: Array<{ message: string }> | undefined
   }
   try {
-    parsed = JSONParse(response.body.toString('utf8'))
+    parsed = parseResponseBody(response.body) as typeof parsed
   } catch (cause) {
     throw new ErrorCtor(
       `Failed to parse GitHub GraphQL response for ${owner}/${repo} releases`,
@@ -173,24 +173,30 @@ export async function fetchReleasesViaRest(
       `Failed to fetch ${owner}/${repo} releases: ${response.status}`,
     )
   }
-  const text = response.body.toString('utf8')
-  if (text.length === 0) {
-    // 200 OK + empty body — the documented GitHub-search-degraded
-    // signature. Return [] so the caller can decide whether to fall
-    // back rather than throwing (we don't want pRetry to burn
-    // attempts on a known incident shape).
+  // `body` is declared Buffer, but the installed http layer may resolve it to
+  // an already-parsed object/array — widen to unknown so parseResponseBody can
+  // branch at runtime (see its docstring).
+  const body: unknown = response.body
+  // 200 OK + empty body — the documented GitHub-search-degraded signature.
+  // Return [] so the caller can decide whether to fall back rather than
+  // throwing (we don't want pRetry to burn attempts on a known incident
+  // shape). Only a Buffer/string body can be "empty"; an already-parsed
+  // object/array body is never the empty-body signal.
+  if (
+    (Buffer.isBuffer(body) && body.length === 0) ||
+    (typeof body === 'string' && body.length === 0)
+  ) {
     return []
   }
   let parsed: unknown
   try {
-    parsed = JSONParse(text)
+    parsed = parseResponseBody(body)
   } catch (cause) {
     throw new ErrorCtor(`Failed to parse ${owner}/${repo} releases response`, {
       cause,
     })
   }
-  // Empty-array fallback fires only if GraphQL returns non-array body.
-  /* c8 ignore start */
+  /* c8 ignore start - non-array fallback only reachable via the GraphQL path's shape, not REST */
   return ArrayIsArray(parsed) ? (parsed as ReleaseRow[]) : []
   /* c8 ignore stop */
 }
@@ -333,4 +339,25 @@ export async function getLatestRelease(
       return latestRelease.tag_name
     }, RETRY_CONFIG)) ?? undefined
   )
+}
+
+/**
+ * Normalize an `httpRequest` response body to a parsed value. `body` may be a
+ * Buffer / string (older paths) OR — depending on the response's content-type
+ * handling — an already-parsed object/array. Calling `body.toString('utf8')` +
+ * JSON.parse on an already-parsed object yields `"[object Object]"` and throws
+ * (the "Failed to parse … releases response" build failure). Pass through
+ * non-string/Buffer bodies; parse the rest. Throws on genuine parse failure.
+ */
+export function parseResponseBody(body: unknown): unknown {
+  if (body !== null && typeof body === 'object' && !Buffer.isBuffer(body)) {
+    // Already parsed by the http layer (object or array) — use as-is.
+    return body
+  }
+  const text = Buffer.isBuffer(body)
+    ? body.toString('utf8')
+    : typeof body === 'string'
+      ? body
+      : String(body)
+  return JSONParse(text)
 }
