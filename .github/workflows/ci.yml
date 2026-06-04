@@ -37,7 +37,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@62a065fbcfcd2c1a1f3a3e4d3a6abdda31bb4b56 # main (2026-06-03)
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@5298430fdc1c6a31d1301379e86c46b9c8343853 # main (2026-05-28)
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN }}
       - name: Build project
