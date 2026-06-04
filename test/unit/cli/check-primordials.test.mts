@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { runCheckPrimordials } from '../../../src/bin/check-primordials'
+import { runCheckPrimordials } from '../../../src/cli/check-primordials'
 import { safeDelete } from '../../../src/fs/safe'
 
 // Absolute path to socket-lib's own primordials source. Each test
@@ -291,13 +291,13 @@ describe('runCheckPrimordials', () => {
 describe('resolveConfigPath', () => {
   it('returns the explicit path verbatim when provided', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/bin/check-primordials')
+      await import('../../../src/cli/check-primordials')
     expect(resolveConfigPath('/explicit/path.json')).toBe('/explicit/path.json')
   })
 
   it('returns the first fallback when no explicit path is given', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/bin/check-primordials')
+      await import('../../../src/cli/check-primordials')
     // No explicit + none of the fallback paths exist → returns the head
     // of FALLBACK_CONFIG_PATHS so the "config file not found" error
     // names the canonical default.
@@ -309,14 +309,14 @@ describe('resolveConfigPath', () => {
 
 describe('printHelp', () => {
   it('writes usage text to stdout without throwing', async () => {
-    const { printHelp } = await import('../../../src/bin/check-primordials')
+    const { printHelp } = await import('../../../src/cli/check-primordials')
     expect(() => printHelp()).not.toThrow()
   })
 })
 
 describe('renderHuman', () => {
   it('emits success when no findings + silent=false', async () => {
-    const { renderHuman } = await import('../../../src/bin/check-primordials')
+    const { renderHuman } = await import('../../../src/cli/check-primordials')
     expect(() =>
       renderHuman(
         {
@@ -336,7 +336,7 @@ describe('renderHuman', () => {
   })
 
   it('emits nothing when silent + no findings', async () => {
-    const { renderHuman } = await import('../../../src/bin/check-primordials')
+    const { renderHuman } = await import('../../../src/cli/check-primordials')
     expect(() =>
       renderHuman(
         {
@@ -356,7 +356,7 @@ describe('renderHuman', () => {
   })
 
   it('renders findings with hint when --explain is set', async () => {
-    const { renderHuman } = await import('../../../src/bin/check-primordials')
+    const { renderHuman } = await import('../../../src/cli/check-primordials')
     expect(() =>
       renderHuman(
         {
@@ -383,7 +383,7 @@ describe('renderHuman', () => {
   })
 
   it('renders findings without files when files list is empty', async () => {
-    const { renderHuman } = await import('../../../src/bin/check-primordials')
+    const { renderHuman } = await import('../../../src/cli/check-primordials')
     expect(() =>
       renderHuman(
         {
@@ -410,7 +410,7 @@ describe('renderHuman', () => {
   })
 
   it('emits trailing "run with --explain" hint when not explaining', async () => {
-    const { renderHuman } = await import('../../../src/bin/check-primordials')
+    const { renderHuman } = await import('../../../src/cli/check-primordials')
     expect(() =>
       renderHuman(
         {

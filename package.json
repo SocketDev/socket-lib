@@ -21,7 +21,7 @@
   },
   "bin": {
     "prim": "./dist/bin/prim.cjs",
-    "socket-lib": "./dist/bin/socket-lib.js"
+    "socket-lib": "./dist/cli/socket-lib.js"
   },
   "files": [
     "dist",
@@ -225,16 +225,6 @@
       "types": "./dist/arrays/unique.d.ts",
       "default": "./dist/arrays/unique.js"
     },
-    "./bin/check": {
-      "source": "./src/bin/check.ts",
-      "types": "./dist/bin/check.d.ts",
-      "default": "./dist/bin/check.js"
-    },
-    "./bin/check-primordials": {
-      "source": "./src/bin/check-primordials.ts",
-      "types": "./dist/bin/check-primordials.d.ts",
-      "default": "./dist/bin/check-primordials.js"
-    },
     "./bin/exec": {
       "source": "./src/bin/exec.ts",
       "types": "./dist/bin/exec.d.ts",
@@ -254,11 +244,6 @@
       "source": "./src/bin/shadow.ts",
       "types": "./dist/bin/shadow.d.ts",
       "default": "./dist/bin/shadow.js"
-    },
-    "./bin/socket-lib": {
-      "source": "./src/bin/socket-lib.ts",
-      "types": "./dist/bin/socket-lib.d.ts",
-      "default": "./dist/bin/socket-lib.js"
     },
     "./bin/types": {
       "source": "./src/bin/types.ts",
@@ -314,6 +299,21 @@
       "source": "./src/checks/primordials-defaults.ts",
       "types": "./dist/checks/primordials-defaults.d.ts",
       "default": "./dist/checks/primordials-defaults.js"
+    },
+    "./cli/check": {
+      "source": "./src/cli/check.ts",
+      "types": "./dist/cli/check.d.ts",
+      "default": "./dist/cli/check.js"
+    },
+    "./cli/check-primordials": {
+      "source": "./src/cli/check-primordials.ts",
+      "types": "./dist/cli/check-primordials.d.ts",
+      "default": "./dist/cli/check-primordials.js"
+    },
+    "./cli/socket-lib": {
+      "source": "./src/cli/socket-lib.ts",
+      "types": "./dist/cli/socket-lib.d.ts",
+      "default": "./dist/cli/socket-lib.js"
     },
     "./colors/convert": {
       "browser": {

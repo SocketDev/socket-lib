@@ -2,7 +2,7 @@
 /**
  * @file `socket-lib` CLI entry point — top-level dispatcher. socket-lib — print
  *   help, list commands socket-lib check <name> [opts...] — run a fleet-wide
- *   check Subcommands live as siblings under `src/bin/`; each is its own file
+ *   check Subcommands live as siblings under `src/cli/`; each is its own file
  *   so a misbehaving check can't crash other commands at parse time. The
  *   dispatcher just routes; subcommands own their own arg parsing. The CLI is
  *   shipped via the `bin` field in package.json and intended to be invoked as

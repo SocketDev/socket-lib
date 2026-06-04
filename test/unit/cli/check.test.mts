@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { runCheck } from '../../../src/bin/check'
+import { runCheck } from '../../../src/cli/check'
 
 describe('socket-lib check dispatcher', () => {
   it('prints help and exits 0 when called with no args', async () => {

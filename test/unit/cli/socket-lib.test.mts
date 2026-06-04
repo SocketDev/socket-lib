@@ -3,13 +3,13 @@
  *   dispatcher's job is to route the first argv slot — print help when empty /
  *   --help, hand off to runCheck when 'check', error out otherwise. Tests call
  *   the exported `main` function directly so coverage attributes to
- *   src/bin/socket-lib.ts; the require.main === module entry guard is a no-op
+ *   src/cli/socket-lib.ts; the require.main === module entry guard is a no-op
  *   when imported.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { main, printHelp } from '../../../src/bin/socket-lib'
+import { main, printHelp } from '../../../src/cli/socket-lib'
 
 describe('socket-lib CLI dispatcher', () => {
   it('prints help and exits 0 with no args', async () => {
