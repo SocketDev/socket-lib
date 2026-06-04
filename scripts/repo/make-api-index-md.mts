@@ -173,14 +173,13 @@ async function main(): Promise<void> {
   // alignment behaviour) wins over oxfmt's built-in default config.
   try {
     await spawn(
-      'pnpm',
+      'node_modules/.bin/oxfmt',
       [
-        'exec',
-        'oxfmt',
         '-c',
         '.config/fleet/oxfmtrc.json',
         '--ignore-path',
         '.config/fleet/.prettierignore',
+        '--write',
         outPath,
       ],
       {
