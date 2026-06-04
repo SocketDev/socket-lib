@@ -2081,6 +2081,11 @@
       "types": "./dist/paths/filenames.d.ts",
       "default": "./dist/paths/filenames.js"
     },
+    "./paths/find-up-package-json": {
+      "source": "./src/paths/find-up-package-json.ts",
+      "types": "./dist/paths/find-up-package-json.d.ts",
+      "default": "./dist/paths/find-up-package-json.js"
+    },
     "./paths/globs": {
       "source": "./src/paths/globs.ts",
       "types": "./dist/paths/globs.d.ts",
@@ -2100,11 +2105,6 @@
       "source": "./src/paths/predicates.ts",
       "types": "./dist/paths/predicates.d.ts",
       "default": "./dist/paths/predicates.js"
-    },
-    "./paths/repo-root": {
-      "source": "./src/paths/repo-root.ts",
-      "types": "./dist/paths/repo-root.d.ts",
-      "default": "./dist/paths/repo-root.js"
     },
     "./paths/resolve": {
       "source": "./src/paths/resolve.ts",

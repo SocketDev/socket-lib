@@ -1,6 +1,6 @@
 /**
- * @file Tests for paths/repo-root — boundary-anchored repo root via
- *   findUpSync(package.json) from import.meta.
+ * @file Tests for paths/find-up-package-json — boundary-anchored
+ *   nearest-package-json lookup via findUpSync from import.meta.
  */
 
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
@@ -10,23 +10,23 @@ import { pathToFileURL } from 'node:url'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { findRepoRoot } from '../../../src/paths/repo-root'
+import { findUpPackageJson } from '../../../src/paths/find-up-package-json'
 
-describe('findRepoRoot', () => {
+describe('findUpPackageJson', () => {
   let tmpDir: string
 
   beforeEach(() => {
-    tmpDir = mkdtempSync(path.join(os.tmpdir(), 'find-repo-root-'))
+    tmpDir = mkdtempSync(path.join(os.tmpdir(), 'find-up-pkg-json-'))
   })
 
   afterEach(() => {
     rmSync(tmpDir, { recursive: true, force: true })
   })
 
-  it('returns the directory of the nearest package.json walking up from the script', () => {
+  it('returns the path of the nearest package.json walking up from the script', () => {
     // Layout: tmpDir/package.json + tmpDir/scripts/fleet/check/foo.mts
-    // The script is 3 levels deep; result should be tmpDir, regardless
-    // of the actual ascent count.
+    // The script is 3 levels deep; result should be tmpDir/package.json,
+    // regardless of the actual ascent count.
     writeFileSync(path.join(tmpDir, 'package.json'), '{}', 'utf8')
     mkdirSync(path.join(tmpDir, 'scripts', 'fleet', 'check'), {
       recursive: true,
@@ -41,10 +41,11 @@ describe('findRepoRoot', () => {
     writeFileSync(scriptPath, '', 'utf8')
     const fakeMeta = { url: pathToFileURL(scriptPath).href } as ImportMeta
 
-    const root = findRepoRoot(fakeMeta)
+    const found = findUpPackageJson(fakeMeta)
 
-    // Normalize for cross-platform comparison.
-    expect(root.replace(/\\/g, '/')).toBe(tmpDir.replace(/\\/g, '/'))
+    expect(found.replace(/\\/g, '/')).toBe(
+      path.join(tmpDir, 'package.json').replace(/\\/g, '/'),
+    )
   })
 
   it('handles a script directly under the package root', () => {
@@ -53,14 +54,17 @@ describe('findRepoRoot', () => {
     writeFileSync(scriptPath, '', 'utf8')
     const fakeMeta = { url: pathToFileURL(scriptPath).href } as ImportMeta
 
-    const root = findRepoRoot(fakeMeta)
+    const found = findUpPackageJson(fakeMeta)
 
-    expect(root.replace(/\\/g, '/')).toBe(tmpDir.replace(/\\/g, '/'))
+    expect(found.replace(/\\/g, '/')).toBe(
+      path.join(tmpDir, 'package.json').replace(/\\/g, '/'),
+    )
   })
 
-  it('walks past inner packages when stopAt is unset (no nearest-wins semantics by default)', () => {
-    // Inner package.json should be the nearest match per findUpSync —
-    // the helper picks up the FIRST marker, not the outermost.
+  it('picks the nearest package.json when nested packages are present', () => {
+    // Inner package.json should be the nearest match — findUpSync
+    // returns the FIRST marker, not the outermost (matches the
+    // package-resolution semantics every module system uses).
     writeFileSync(path.join(tmpDir, 'package.json'), '{"name":"outer"}', 'utf8')
     mkdirSync(path.join(tmpDir, 'inner'), { recursive: true })
     writeFileSync(
@@ -73,18 +77,16 @@ describe('findRepoRoot', () => {
     writeFileSync(scriptPath, '', 'utf8')
     const fakeMeta = { url: pathToFileURL(scriptPath).href } as ImportMeta
 
-    const root = findRepoRoot(fakeMeta)
+    const found = findUpPackageJson(fakeMeta)
 
-    expect(root.replace(/\\/g, '/')).toBe(
-      path.join(tmpDir, 'inner').replace(/\\/g, '/'),
+    expect(found.replace(/\\/g, '/')).toBe(
+      path.join(tmpDir, 'inner', 'package.json').replace(/\\/g, '/'),
     )
   })
 
-  it('accepts a custom marker name (.git) for monorepo roots', () => {
-    // .git is a DIRECTORY in a real repo; findUpSync defaults to files
-    // only. Use the names override + the helper's default onlyFiles=true
-    // will not pick this up unless we pass a file marker. Test the
-    // names override with a different file marker.
+  it('accepts a custom marker name for monorepo workspace roots', () => {
+    // A pnpm-workspace.yaml at the monorepo root is a common alternate
+    // anchor when the workspace root isn't itself an npm package.
     writeFileSync(path.join(tmpDir, 'pnpm-workspace.yaml'), '', 'utf8')
     mkdirSync(path.join(tmpDir, 'packages', 'foo'), { recursive: true })
     writeFileSync(
@@ -96,9 +98,13 @@ describe('findRepoRoot', () => {
     writeFileSync(scriptPath, '', 'utf8')
     const fakeMeta = { url: pathToFileURL(scriptPath).href } as ImportMeta
 
-    const root = findRepoRoot(fakeMeta, { names: ['pnpm-workspace.yaml'] })
+    const found = findUpPackageJson(fakeMeta, {
+      names: ['pnpm-workspace.yaml'],
+    })
 
-    expect(root.replace(/\\/g, '/')).toBe(tmpDir.replace(/\\/g, '/'))
+    expect(found.replace(/\\/g, '/')).toBe(
+      path.join(tmpDir, 'pnpm-workspace.yaml').replace(/\\/g, '/'),
+    )
   })
 
   it('throws when no marker is found between the script and stopAt', () => {
@@ -107,18 +113,15 @@ describe('findRepoRoot', () => {
     writeFileSync(scriptPath, '', 'utf8')
     const fakeMeta = { url: pathToFileURL(scriptPath).href } as ImportMeta
 
-    expect(() => findRepoRoot(fakeMeta, { stopAt: tmpDir })).toThrow(
+    expect(() => findUpPackageJson(fakeMeta, { stopAt: tmpDir })).toThrow(
       /no package.json found/,
     )
   })
 
   it('resolves the calling lib script (smoke test against the real source tree)', () => {
-    // Self-test: findRepoRoot(import.meta) from this test file should
-    // resolve to the socket-lib repo root (i.e. wherever this checkout
-    // lives — never hard-coded).
-    const root = findRepoRoot(import.meta)
-    // This test file is at test/unit/paths/repo-root.test.mts; the repo
-    // root contains a package.json with "@socketsecurity/lib".
-    expect(root).toMatch(/socket-lib/)
+    // Self-test: findUpPackageJson(import.meta) from this test file
+    // resolves to the socket-lib package.json — never hard-coded.
+    const found = findUpPackageJson(import.meta)
+    expect(found).toMatch(/socket-lib\/package\.json$/)
   })
 })
