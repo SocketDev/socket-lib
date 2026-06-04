@@ -2101,6 +2101,11 @@
       "types": "./dist/paths/predicates.d.ts",
       "default": "./dist/paths/predicates.js"
     },
+    "./paths/repo-root": {
+      "source": "./src/paths/repo-root.ts",
+      "types": "./dist/paths/repo-root.d.ts",
+      "default": "./dist/paths/repo-root.js"
+    },
     "./paths/resolve": {
       "source": "./src/paths/resolve.ts",
       "types": "./dist/paths/resolve.d.ts",
