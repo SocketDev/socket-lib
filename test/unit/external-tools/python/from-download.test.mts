@@ -83,9 +83,13 @@ describe.sequential('external-tools/python/from-download — pythonFromDownload'
       tag: '20260203',
       version: '3.11.14',
     })
-    expect(result!.path.replace(/\\/g, '/')).toBe(
-      '/custom/py/python/bin/python3',
-    )
+    const expectedBin =
+      process.platform === 'win32'
+        ? '/custom/py/python/python.exe'
+        : '/custom/py/python/bin/python3'
+    // Result path uses the platform-native interpreter layout
+    // (python/python.exe on Windows, python/bin/python3 elsewhere).
+    expect(result!.path.replace(/\\/g, '/')).toBe(expectedBin)
     expect(downloadAndExtractToolMock.mock.calls[0]![0].extractedDir).toBe(
       '/custom/py',
     )
