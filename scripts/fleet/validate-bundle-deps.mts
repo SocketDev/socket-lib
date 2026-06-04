@@ -21,7 +21,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 const logger = getDefaultLogger()
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..')
+const rootPath = path.join(__dirname, '..', '..')
 
 // Node.js builtins to ignore (including node: prefix variants).
 // node:smol-* are Socket SEA-bundled optional builtins (smol-util, smol-primordial);

@@ -50,7 +50,7 @@ const logger = getDefaultLogger()
 // <repo-root>/scripts/install-sfw.mts, so go one dir up.
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
-const REPO_ROOT = path.join(__dirname, '..')
+const REPO_ROOT = path.join(__dirname, '..', '..')
 const EXTERNAL_TOOLS_PATH = path.join(REPO_ROOT, 'external-tools.json')
 
 // Resolve the user-home wheelhouse umbrella via the canonical lib-stable
