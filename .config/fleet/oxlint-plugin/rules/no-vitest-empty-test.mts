@@ -46,7 +46,15 @@ function containsAssertion(node: AstNode): boolean {
     let cur: AstNode | undefined = node.callee
     while (cur) {
       if (cur.type === 'Identifier') {
-        if (ASSERTION_ROOTS.has(cur.name)) {
+        // `expect(...)` / `assert(...)`, OR a camelCase assertion helper named
+        // `expect<Upper>` / `assert<Upper>` (e.g. `expectLiteralRoundtrip`,
+        // `assertValidShape`) — a fleet convention for reusable assertions that
+        // wrap `expect` internally. The helper itself is linted, so treating a
+        // call to it as an assertion is sound, not a coverage dodge.
+        if (
+          ASSERTION_ROOTS.has(cur.name) ||
+          /^(?:expect|assert)[A-Z]/.test(cur.name)
+        ) {
           return true
         }
         break

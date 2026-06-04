@@ -204,6 +204,21 @@ export function classifyVitestCall(
   const localRoot = chain[0]!
   const imported = names.get(localRoot)
   if (!imported) {
+    // Custom test/describe wrappers: a fleet convention is to wrap
+    // `it.skipIf(...)` / `describe.skipIf(...)` in a name-encoded helper
+    // (`itWindowsOnly`, `itUnixOnly`, `itNetworkOnly`, `describeWindowsOnly`,
+    // …) so the gate condition is static and greppable rather than an inline
+    // boolean (see test/unit/util/skip-helpers). These aren't imported from
+    // 'vitest', so the import-binding pass above misses them — but the
+    // callback they take IS a real test/describe body, and an `expect` inside
+    // it is NOT standalone. Recognize the `it<Upper>` / `test<Upper>` /
+    // `describe<Upper>` camelCase shape as the corresponding kind.
+    if (/^(?:it|test)[A-Z]/.test(localRoot)) {
+      return { root: localRoot, kind: 'test', modifiers: chain.slice(1), localChain: chain }
+    }
+    if (/^describe[A-Z]/.test(localRoot)) {
+      return { root: localRoot, kind: 'describe', modifiers: chain.slice(1), localChain: chain }
+    }
     return undefined
   }
   const modifiers = chain.slice(1)
