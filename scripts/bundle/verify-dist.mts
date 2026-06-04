@@ -56,7 +56,7 @@ async function checkFile(file: string): Promise<string | undefined> {
       ? undefined
       : String(result.stderr ?? 'parse failed')
   } catch (e) {
-    return String((e as { stderr?: unknown })?.stderr ?? e)
+    return String((e as { stderr?: unknown | undefined })?.stderr ?? e)
   }
 }
 
@@ -99,7 +99,7 @@ export async function verifyDist(distDir: string): Promise<number> {
   return 0
 }
 
-// Allow running standalone: `node scripts/build/verify-dist.mts [distDir]`.
+// Allow running standalone: `node scripts/bundle/verify-dist.mts [distDir]`.
 if (process.argv[1]?.endsWith('verify-dist.mts')) {
   const distDir = path.resolve(process.argv[2] ?? 'dist')
   verifyDist(distDir).then(code => {

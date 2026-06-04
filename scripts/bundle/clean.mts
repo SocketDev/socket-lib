@@ -29,17 +29,18 @@ const rootPath = path.resolve(
  */
 interface CleanTask {
   name: string
-  pattern?: string
-  patterns?: string[]
+  pattern?: string | undefined
+  patterns?: string[] | undefined
 }
 
 export async function cleanDirectories(
   tasks: CleanTask[],
-  options: { quiet?: boolean } = {},
+  options: { quiet?: boolean | undefined } = {},
 ): Promise<number> {
   const { quiet = false } = options
 
-  for (const task of tasks) {
+  for (let i = 0, { length } = tasks; i < length; i += 1) {
+    const task = tasks[i]!
     const { name, pattern, patterns } = task
     const patternsToDelete = patterns || [pattern]
 
@@ -128,8 +129,10 @@ async function main(): Promise<void> {
     // Show help if requested
     if (values.help) {
       logger.log('Clean Runner')
-      logger.log('\nUsage: pnpm clean [options]')
-      logger.log('\nOptions:')
+      logger.log('')
+      logger.log('Usage: pnpm clean [options]')
+      logger.log('')
+      logger.log('Options:')
       logger.log('  --help              Show this help message')
       logger.log('  --all               Clean everything (default if no flags)')
       logger.log('  --cache             Clean cache directories')
@@ -138,7 +141,8 @@ async function main(): Promise<void> {
       logger.log('  --types             Clean TypeScript declarations only')
       logger.log('  --modules           Clean node_modules')
       logger.log('  --quiet, --silent   Suppress progress messages')
-      logger.log('\nExamples:')
+      logger.log('')
+      logger.log('Examples:')
       logger.log(
         '  pnpm clean                  # Clean everything except node_modules',
       )
@@ -166,7 +170,7 @@ async function main(): Promise<void> {
 
     // Build task list
     if (cleanAll || values.cache) {
-      tasks.push({ name: 'cache', pattern: '**/.cache' })
+      tasks.push({ name: 'cache', pattern: 'node_modules/.cache' })
     }
 
     if (cleanAll || values.coverage) {

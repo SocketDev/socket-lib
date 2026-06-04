@@ -1,12 +1,12 @@
 /**
- * @file Build runner: rolldown for the per-file source + externals builds, tsgo
- *   for declarations.
+ * @file Bundle runner (the `build` script): rolldown for the per-file source +
+ *   externals builds, tsgo for declarations. Step scripts live in
+ *   scripts/bundle/ (clean, externals, verify-dist).
  */
 
 import { existsSync, promises as fsPromises } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { rolldown, watch } from 'rolldown'
 
@@ -16,19 +16,15 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { buildConfig } from '../../.config/rolldown.config.mts'
-import { primBuildConfig } from '../../.config/repo/rolldown.prim.config.mts'
-import { parseArgs } from '../fleet/util/parse-args.mts'
-import { runSequence } from '../fleet/util/run-command.mts'
-import { verifyDist } from './verify-dist.mts'
+import { buildConfig } from '../.config/rolldown.config.mts'
+import { primBuildConfig } from '../.config/repo/rolldown.prim.config.mts'
+// Repo root from the canonical paths module (1 path, 1 reference).
+import { REPO_ROOT as rootPath } from './fleet/paths.mts'
+import { parseArgs } from './fleet/util/parse-args.mts'
+import { runSequence } from './fleet/util/run-command.mts'
+import { verifyDist } from './bundle/verify-dist.mts'
 
 const logger = getDefaultLogger()
-
-const rootPath = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  '..',
-  '..',
-)
 
 /**
  * MacOS-only fsync barrier: walk `dist/` and `fsync()` every regular file so
@@ -107,7 +103,7 @@ export async function buildSource(
   if (!skipClean) {
     const exitCode = await runSequence([
       {
-        args: ['scripts/build/clean.mts', '--dist', '--quiet'],
+        args: ['scripts/bundle/clean.mts', '--dist', '--quiet'],
         command: 'node',
       },
     ])
@@ -162,7 +158,7 @@ export async function buildTypes(
 
   if (!skipClean) {
     commands.push({
-      args: ['scripts/build/clean.mts', '--types', '--quiet'],
+      args: ['scripts/bundle/clean.mts', '--types', '--quiet'],
       command: 'node',
     })
   }
@@ -239,7 +235,7 @@ export async function buildExternals(
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
 
-  const args = ['scripts/build/externals.mts']
+  const args = ['scripts/bundle/externals.mts']
   if (quiet) {
     args.push('--quiet')
   }
@@ -515,7 +511,7 @@ async function main(): Promise<void> {
 
       exitCode = await runSequence([
         {
-          args: ['scripts/build/clean.mts', '--dist', '--types', '--quiet'],
+          args: ['scripts/bundle/clean.mts', '--dist', '--types', '--quiet'],
           command: 'node',
         },
       ])
