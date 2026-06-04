@@ -9,14 +9,13 @@
  *   `no-standalone-expect`, on lib/vitest-fn-call.mts.
  */
 
+import { TEST_FILE_RE } from '../lib/test-file.mts'
 import {
   classifyVitestCall,
   collectVitestNames,
 } from '../lib/vitest-fn-call.mts'
 
 import type { AstNode, RuleContext } from '../lib/rule-types.mts'
-
-const TEST_FILE_RE = /\.test\.(?:[mc]?[jt]s)$/
 
 const rule = {
   meta: {

@@ -13,14 +13,13 @@
  *   author's call. Built on lib/vitest-fn-call.mts.
  */
 
+import { TEST_FILE_RE } from '../lib/test-file.mts'
 import {
   classifyVitestCall,
   collectVitestNames,
 } from '../lib/vitest-fn-call.mts'
 
 import type { AstNode, RuleContext } from '../lib/rule-types.mts'
-
-const TEST_FILE_RE = /\.test\.(?:[mc]?[jt]s)$/
 
 // `xit` / `xtest` / `xdescribe` are unconditional-skip aliases.
 const SKIP_ALIASES: ReadonlySet<string> = new Set(['xdescribe', 'xit', 'xtest'])
