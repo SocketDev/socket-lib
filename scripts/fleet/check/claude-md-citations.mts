@@ -26,14 +26,13 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { REPO_ROOT } from '../paths.mts'
+
 const logger = getDefaultLogger()
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..', '..')
 
 // Citation shapes (mirror new-hook-claude-md-guard): inline + comma-listed both
 // contain the literal backticked path; brace-grouped is `{a,b,c}/` expansion.
@@ -100,17 +99,17 @@ function listRuleNames(dir: string): Set<string> {
 }
 
 async function main(): Promise<void> {
-  const claudeMdPath = path.join(rootPath, 'CLAUDE.md')
+  const claudeMdPath = path.join(REPO_ROOT, 'CLAUDE.md')
   if (!existsSync(claudeMdPath)) {
     logger.success('No CLAUDE.md to check.')
     return
   }
   const claudeMd = readFileSync(claudeMdPath, 'utf8')
 
-  const fleetHooks = listDirNames(path.join(rootPath, '.claude/hooks/fleet'))
-  const repoHooks = listDirNames(path.join(rootPath, '.claude/hooks/repo'))
+  const fleetHooks = listDirNames(path.join(REPO_ROOT, '.claude/hooks/fleet'))
+  const repoHooks = listDirNames(path.join(REPO_ROOT, '.claude/hooks/repo'))
   const rules = listRuleNames(
-    path.join(rootPath, '.config/fleet/oxlint-plugin/rules'),
+    path.join(REPO_ROOT, '.config/fleet/oxlint-plugin/rules'),
   )
 
   const failures: string[] = []

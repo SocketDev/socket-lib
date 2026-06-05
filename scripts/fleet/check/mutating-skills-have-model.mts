@@ -22,15 +22,14 @@
 import { existsSync, readFileSync, readdirSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { REPO_ROOT } from '../paths.mts'
+
 const logger = getDefaultLogger()
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..', '..')
-const skillsDir = path.join(rootPath, '.claude', 'skills', 'fleet')
+const skillsDir = path.join(REPO_ROOT, '.claude', 'skills', 'fleet')
 
 // Tools whose presence in allowed-tools means the skill changes the tree.
 const MUTATING_TOOL_RE = /\b(?:Edit|NotebookEdit|Write|git add|git commit)\b/

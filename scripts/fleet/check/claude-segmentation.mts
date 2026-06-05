@@ -34,16 +34,9 @@ import { fileURLToPath } from 'node:url'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
-const logger = getDefaultLogger()
+import { REPO_ROOT } from '../paths.mts'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// scripts/fleet/check/<this>.mts → ../../../ is the repo root.
-// (Pre-86c2e575 these scripts lived at scripts/fleet/check-*.mts and
-// two `..` reached the repo root; the move-into-check/ refactor added a
-// directory level without updating the ascent count. The check then
-// silently no-op'd because every `existsSync(REPO_ROOT/.claude/...)`
-// returned false against the wrong root.)
-const REPO_ROOT = path.resolve(__dirname, '..', '..', '..')
+const logger = getDefaultLogger()
 
 interface KindSpec {
   // Directory name under `.claude/`.

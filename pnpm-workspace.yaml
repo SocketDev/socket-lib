@@ -163,6 +163,9 @@ minimumReleaseAgeExclude:
   - '@stuie/*'
   - '@ultrathink/*'
   - '@yuku-parser/*'
+  - '@socketoverride/*'
+  # published: 2025-09-23 | removable: 2025-09-30
+  - 'playwright-core@1.55.1'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we

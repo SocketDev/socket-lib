@@ -5,12 +5,12 @@ Type-checking and tests verify code *correctness*, not *feature correctness*. A 
 or a render that throws partway and aborts. The only way to know what a UI actually looks
 like is to **look at it**. This is the technique for doing that.
 
-Referenced by the `seeing-rendered-output` skill and the "verify rendered output before
+Referenced by the `rendering-chromium-to-png` skill and the "verify rendered output before
 commit" rule (`docs/claude.md/fleet/judgment-and-self-evaluation.md`).
 
 ## The mechanism
 
-1. **Render to a PNG** with headless Chromium (the `seeing-rendered-output` skill, or a
+1. **Render to a PNG** with headless Chromium (the `rendering-chromium-to-png` skill, or a
    one-off `playwright-core` script). The page runs its real CSS + JS.
 2. **`Read` the PNG.** The harness decodes the image; the rendered pixels enter your context.
    You observe the UI the same way a human reads a screenshot — this is literal seeing, not
@@ -23,7 +23,7 @@ scan area empty — a `const { counts } = review.summary.fileCounts` destructure
 (`fileCounts` IS the counts; no `.counts`), aborting the render after the first section. The
 source read fine; the pixels exposed it instantly.
 
-## Two modes (via the seeing-rendered-output skill)
+## Two modes (via the rendering-chromium-to-png skill)
 
 - **Page mode** — any URL or local HTML file → PNG.
 - **Extension mode** — load an unpacked Chrome MV3 extension with its REAL powers (background

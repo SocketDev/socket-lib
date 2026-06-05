@@ -25,10 +25,10 @@
 
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { REPO_ROOT } from '../paths.mts'
 import {
   checkCrossRowConsistency,
   checkFeatureParity,
@@ -45,12 +45,7 @@ import type { Manifest, Report } from './types.mts'
 
 const logger = getDefaultLogger()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// scripts/fleet/lockstep/cli.mts → ../../../ is the repo root.
-// (Pre-73c691d9 this script lived at scripts/lockstep/ and two `..`
-// reached the repo root; the segment-into-fleet/ refactor moved it
-// deeper without updating this ascent count.)
-const rootDir = path.resolve(__dirname, '..', '..', '..')
+const rootDir = REPO_ROOT
 
 // ---------------------------------------------------------------------------
 // Dispatcher.

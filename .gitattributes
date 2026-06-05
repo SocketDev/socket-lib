@@ -14,6 +14,7 @@
 .config/fleet/markdownlint-rules linguist-generated=true
 .config/fleet/oxfmtrc.json linguist-generated=true
 .config/fleet/oxlint-plugin linguist-generated=true
+.config/fleet/oxlint.config.mts linguist-generated=true
 .config/fleet/oxlintrc.json linguist-generated=true
 .config/fleet/sfw-bypass-list.txt linguist-generated=true
 .config/fleet/taze.config.mts linguist-generated=true

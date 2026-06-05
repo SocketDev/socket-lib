@@ -159,16 +159,22 @@ const SELF_NARRATION: ReminderGroup = {
       why: 'Narrating the next tool call adds no signal — make the call. Open on the result or the decision, not the intent.',
     },
     {
-      label: 'conversational hedge ("honestly / to be fair / be straight with you")',
+      label: 'conversational hedge ("honest(ly/y) / to be fair / be straight with you")',
       regex:
-        /\b(?:honestly|to be honest|honest caveat|honest notes?|to be fair|in all honesty|the reality is|truth be told|be straight with you)\b/i,
-      why: 'Filler hedge that softens or pre-apologizes for a direct statement. State the fact, the limitation, or the recommendation plainly — no "honest caveat" preamble.',
+        /\bhonest(?:ly|y)?\b|\bto be fair\b|\bin all honesty\b|\bthe reality is\b|\btruth be told\b|\bbe straight with you\b/i,
+      why: 'Filler hedge that softens or pre-apologizes for a direct statement. Drop "honest" entirely (honest / honestly / honesty) — claiming honesty implies the rest is not. State the fact, the limitation, or the recommendation plainly.',
     },
     {
       label: 'apology-padding ("you\'re absolutely right / my apologies")',
       regex:
         /\b(?:you'?re\s+(?:absolutely\s+)?right|my\s+apologies|sorry\s+about\s+that)\b/i,
       why: 'Reflexive agreement/apology padding. Acknowledge the correction by fixing it, not by performing contrition.',
+    },
+    {
+      label: 'sugary enthusiasm padding ("great question / perfect / excellent / happy to")',
+      regex:
+        /\b(?:great\s+(?:question|point|idea|catch)|perfect[!.]|excellent[!.]|absolutely[!,]|happy\s+to|i'?d\s+be\s+(?:happy|glad)\s+to|sounds\s+(?:great|good)[!.])/i,
+      why: 'Overly sugary filler. Be pleasant but plain — no enthusiasm performance. Get to the point.',
     },
   ],
   closingHint:

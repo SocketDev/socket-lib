@@ -28,14 +28,14 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { REPO_ROOT } from './paths.mts'
+
 const logger = getDefaultLogger()
 
-const here = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(here, '..')
+const rootPath = REPO_ROOT
 
 interface MinifyViolation {
   config: string

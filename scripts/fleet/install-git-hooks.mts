@@ -20,18 +20,10 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
+
+import { REPO_ROOT } from './paths.mts'
 
 const HOOKS_DIR = '.git-hooks/fleet'
-
-// Anchor on the script's own location instead of process.cwd(). The
-// `prepare` hook normally runs from the package root, but some
-// invocations (e.g. `pnpm --filter <pkg> install` from a parent
-// dir, or workspace `prepare` chains) execute with a cwd that
-// differs from the script's repo root. `scripts/install-git-hooks.mts`
-// is always at `<repo-root>/scripts/install-git-hooks.mts`, so the
-// parent of __dirname is the repo root.
-const REPO_ROOT = path.join(path.dirname(fileURLToPath(import.meta.url)), '..')
 
 function main(): void {
   if (!existsSync(path.join(REPO_ROOT, '.git'))) {

@@ -22,17 +22,13 @@
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 // oxlint-disable-next-line socket/prefer-async-spawn -- sync stdin/stdout + typed string return matches the read-stdout-then-parse-JSON shape; v5 lib spawnSync omits 'encoding' from SpawnSyncOptions and returns string-or-Buffer.
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-const logger = getDefaultLogger()
+import { REPO_ROOT } from '../paths.mts'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// scripts/fleet/check/<this>.mts → ../../../ is the repo root.
-// (See claude-segmentation.mts for the bug class.)
-const REPO_ROOT = path.resolve(__dirname, '..', '..', '..')
+const logger = getDefaultLogger()
 
 export interface PackageJson {
   name?: string | undefined

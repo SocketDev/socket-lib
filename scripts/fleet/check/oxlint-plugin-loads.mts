@@ -35,15 +35,14 @@
 import { readdirSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { REPO_ROOT } from '../paths.mts'
+
 const logger = getDefaultLogger()
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..', '..')
-const pluginDir = path.join(rootPath, '.config', 'fleet', 'oxlint-plugin')
+const pluginDir = path.join(REPO_ROOT, '.config', 'fleet', 'oxlint-plugin')
 const indexPath = path.join(pluginDir, 'index.mts')
 const rulesDir = path.join(pluginDir, 'rules')
 

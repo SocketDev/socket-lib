@@ -23,14 +23,13 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+
+import { REPO_ROOT } from '../paths.mts'
 
 const logger = getDefaultLogger()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// scripts/fleet/check/<this>.mts → ../../../ is the repo root.
-// (See claude-segmentation.mts for the bug class.)
-const REPO_ROOT = path.resolve(__dirname, '..', '..', '..')
 const WORKSPACE_YAML = path.join(REPO_ROOT, 'pnpm-workspace.yaml')
 // `manifest.mts` lives under `scripts/repo/sync-scaffolding/` in the
 // wheelhouse host repo; downstream fleet repos don't ship it (the

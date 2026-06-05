@@ -15,7 +15,6 @@
 
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { stripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
@@ -35,10 +34,9 @@ import {
   resolveBuildEntry,
   resolveSuites,
 } from './cover/discovery.mts'
+import { REPO_ROOT } from './paths.mts'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// This script lives at scripts/fleet/, so the repo root is two levels up.
-const rootPath = path.join(__dirname, '..', '..')
+const rootPath = REPO_ROOT
 
 const logger = getDefaultLogger()
 

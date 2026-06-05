@@ -22,9 +22,10 @@
  */
 
 import { readFileSync, writeFileSync } from 'node:fs'
-import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
+
+import { PNPM_WORKSPACE_YAML } from '../paths.mts'
 
 const SECTION_HEADER = /^minimumReleaseAgeExclude:\s*$/
 const ANY_TOP_LEVEL_KEY = /^[A-Za-z_][\w-]*:\s*(\S.*)?$/
@@ -123,15 +124,9 @@ export function removeStaleEntries(content: string, stale: Finding[]): string {
 }
 
 function main(): void {
-  // Anchor on this script's location and walk up to the repo root
-  // (the dir containing pnpm-workspace.yaml). process.cwd() is unstable
-  // because the script may be invoked from any working directory.
-  const here = path.dirname(fileURLToPath(import.meta.url))
-  const repoRoot = path.resolve(here, '..')
-  const yamlPath = path.join(repoRoot, 'pnpm-workspace.yaml')
   let content: string
   try {
-    content = readFileSync(yamlPath, 'utf8')
+    content = readFileSync(PNPM_WORKSPACE_YAML, 'utf8')
   } catch {
     // No pnpm-workspace.yaml — not a workspace repo, nothing to check.
     process.exit(0)
@@ -145,7 +140,7 @@ function main(): void {
   if (stale.length > 0 && fix) {
     // Promote: the soak cleared, so the bypass is no longer needed.
     const promoted = removeStaleEntries(content, stale)
-    writeFileSync(yamlPath, promoted)
+    writeFileSync(PNPM_WORKSPACE_YAML, promoted)
     process.stdout.write(
       `[check-soak-exclude-dates] promoted ${stale.length} soaked ` +
         `entr${stale.length === 1 ? 'y' : 'ies'} out of minimumReleaseAgeExclude:\n`,

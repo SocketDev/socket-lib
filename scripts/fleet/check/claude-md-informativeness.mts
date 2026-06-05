@@ -24,6 +24,8 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
+import { REPO_ROOT } from '../paths.mts'
+
 // Match a `### ` heading line (level-3 heading). Levels 1+2 are
 // document chrome (h1 = doc title, h2 = top-level fleet/repo block);
 // the audit targets level-3 sections which are the actual rule units.
@@ -142,9 +144,7 @@ export function audit(text: string): AuditResult {
 }
 
 function main(): void {
-  const here = path.dirname(fileURLToPath(import.meta.url))
-  const repoRoot = path.resolve(here, '..')
-  const mdPath = path.join(repoRoot, 'CLAUDE.md')
+  const mdPath = path.join(REPO_ROOT, 'CLAUDE.md')
   if (!existsSync(mdPath)) {
     // No CLAUDE.md — nothing to audit, exit clean.
     process.exit(0)

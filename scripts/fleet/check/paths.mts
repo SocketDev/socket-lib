@@ -34,13 +34,14 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import { parseArgs } from 'node:util'
 
+import { REPO_ROOT } from '../paths.mts'
 import { isAllowlisted, loadAllowlist, snippetHash } from './paths/allowlist.mts'
 import { isExempt } from './paths/exempt.mts'
 import { checkRuleF } from './paths/rules.mts'
 import { scanCodeFile } from './paths/scan-code.mts'
+import { scanRepoRootFile } from './paths/scan-repo-root.mts'
 import { scanScriptFile } from './paths/scan-script.mts'
 import { scanWorkflowFile } from './paths/scan-workflow.mts'
 import { getFindings } from './paths/state.mts'
@@ -57,12 +58,6 @@ const logger = {
   success: (msg: string) => process.stdout.write(`✔ ${msg}\n`),
   substep: (msg: string) => process.stdout.write(`  ${msg}\n`),
 }
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-// This entry lives at scripts/fleet/check/paths.mts, so the repo root is three
-// parents up (check → fleet → scripts → root).
-const REPO_ROOT = path.resolve(__dirname, '..', '..', '..')
 
 const args = parseArgs({
   options: {
@@ -83,6 +78,11 @@ const main = (): number => {
     REPO_ROOT,
     p => p.endsWith('.mts') || p.endsWith('.cts'),
   )) {
+    // Rule H (repo-root re-derivation) has its own narrow exemption — only
+    // `paths.mts` may walk to root — so it runs on files the shared isExempt
+    // skips (the gate's own check/paths/ tree, the path-guard hook), which is
+    // exactly where the original stale-count bug lived.
+    scanRepoRootFile(REPO_ROOT, rel)
     if (isExempt(rel)) {
       continue
     }

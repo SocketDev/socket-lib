@@ -25,12 +25,9 @@ import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-const logger = getDefaultLogger()
+import { REPO_ROOT } from '../paths.mts'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-// scripts/fleet/ → repo root → .claude/hooks/fleet/. In the wheelhouse the
-// canonical hooks live under template/; downstream they sit at the repo root.
-const REPO_ROOT = path.resolve(__dirname, '..', '..')
+const logger = getDefaultLogger()
 
 export interface OverlapReport {
   exactCollisions: string[]
