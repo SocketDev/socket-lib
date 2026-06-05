@@ -13,10 +13,10 @@ import fastGlob from 'fast-glob'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { toSortedObject } from '@socketsecurity/lib-stable/objects/sort'
-// Scripts run against the RELEASED `-stable` surface (never src/). readPackageJson
-// lives at `packages/operations` in the released version; the WIP src/ rename to
-// `packages/read` only applies after 6.0.7 ships, at which point this bumps too.
-import { readPackageJson } from '@socketsecurity/lib-stable/packages/operations'
+// Scripts run against the RELEASED `-stable` surface (never src/).
+// readPackageJson moved from `packages/operations` to `packages/read` in the
+// 6.0.7 reorg (operations split by concern); -stable now pins 6.0.7.
+import { readPackageJson } from '@socketsecurity/lib-stable/packages/read'
 
 const logger = getDefaultLogger()
 
