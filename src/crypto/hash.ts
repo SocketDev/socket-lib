@@ -75,7 +75,8 @@ export function hash(
   if (native !== undefined) {
     return native(algorithm, data, outputEncoding) as string
   }
-  return getNodeCrypto()
+  const crypto = getNodeCrypto()
+  return crypto
     .createHash(algorithm)
     .update(data as string | Buffer)
     .digest(outputEncoding)

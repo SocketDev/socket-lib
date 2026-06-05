@@ -80,8 +80,10 @@ export function killProcessTree(
       // No POSIX process groups on Windows; taskkill /T walks the tree.
       // taskkill never throws — it sets status. 0 = killed (or at least
       // dispatched a kill); 128 = "process not found" (ERROR_PROC_NOT_FOUND).
+      const childProcess = getNodeChildProcess()
       // Treat non-zero as "nothing to do" to match the POSIX ESRCH branch.
-      const res = getNodeChildProcess().spawnSync(
+      // oxlint-disable-next-line socket/prefer-async-spawn -- synchronous taskkill in a best-effort cleanup path; async spawn would race teardown.
+      const res = childProcess.spawnSync(
         'taskkill',
         ['/T', '/F', '/pid', String(pid)],
         { stdio: 'ignore' },

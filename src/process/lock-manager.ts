@@ -174,8 +174,9 @@ export class ProcessLockManager {
     try {
       // Use single statSync call instead of existsSync + statSync.
       // throwIfNoEntry: false returns undefined if path doesn't exist.
+      const fs = getFs()
       // oxlint-disable-next-line socket/prefer-exists-sync -- need mtimeMs for staleness check; existsSync would discard the metadata.
-      const stats = getFs().statSync(lockPath, { throwIfNoEntry: false })
+      const stats = fs.statSync(lockPath, { throwIfNoEntry: false })
       if (!stats) {
         return false
       }
@@ -255,7 +256,8 @@ export class ProcessLockManager {
           // handled correctly — the previous Math.max(lastIndexOf('/'), '\\')
           // approach failed on relative paths and mixed-separator inputs.
           const fs = getFs()
-          const parent = getPath().dirname(lockPath)
+          const path = getPath()
+          const parent = path.dirname(lockPath)
           if (parent && parent !== '.' && parent !== lockPath) {
             fs.mkdirSync(parent, { recursive: true })
           }
@@ -372,7 +374,8 @@ export class ProcessLockManager {
     this.stopTouchTimer(lockPath)
 
     try {
-      if (getFs().existsSync(lockPath)) {
+      const fs = getFs()
+      if (fs.existsSync(lockPath)) {
         safeDeleteSync(lockPath, { recursive: true })
       }
       this.activeLocks.delete(lockPath)

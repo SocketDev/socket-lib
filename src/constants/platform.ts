@@ -28,7 +28,8 @@ let memoizedArch: Arch | undefined
  */
 export function getArch(): Arch {
   if (memoizedArch === undefined) {
-    memoizedArch = getNodeOs().arch()
+    const os = getNodeOs()
+    memoizedArch = os.arch()
   }
   return memoizedArch
 }
@@ -79,7 +80,8 @@ let memoizedOs: Platform | undefined
  */
 export function getOs(): Platform {
   if (memoizedOs === undefined) {
-    memoizedOs = getNodeOs().platform()
+    const os = getNodeOs()
+    memoizedOs = os.platform()
   }
   return memoizedOs
 }

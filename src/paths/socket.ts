@@ -38,7 +38,8 @@ import { getNodePath } from '../node/path'
  */
 export function getOsHomeDir(): string {
   // Always check for overrides - don't cache when using rewire
-  return getPathValue('homedir', () => getNodeOs().homedir())
+  const os = getNodeOs()
+  return getPathValue('homedir', () => os.homedir())
 }
 /**
  * Get the OS temporary directory. Can be overridden in tests using
@@ -51,7 +52,8 @@ export function getOsHomeDir(): string {
  */
 export function getOsTmpDir(): string {
   // Always check for overrides - don't cache when using rewire
-  return getPathValue('tmpdir', () => getNodeOs().tmpdir())
+  const os = getNodeOs()
+  return getPathValue('tmpdir', () => os.tmpdir())
 }
 /**
  * Get a Socket app cache directory (~/.socket/_<appName>/cache).
@@ -61,7 +63,8 @@ export function getOsTmpDir(): string {
  * Get a Socket app cache directory (~/.socket/_<appName>/cache).
  */
 export function getSocketAppCacheDir(appName: string): string {
-  return normalizePath(getNodePath().join(getSocketAppDir(appName), CACHE_DIR))
+  const path = getNodePath()
+  return normalizePath(path.join(getSocketAppDir(appName), CACHE_DIR))
 }
 /**
  * Get a Socket app TTL cache directory (~/.socket/_<appName>/cache/ttl).
@@ -71,9 +74,8 @@ export function getSocketAppCacheDir(appName: string): string {
  * Get a Socket app TTL cache directory (~/.socket/_<appName>/cache/ttl).
  */
 export function getSocketAppCacheTtlDir(appName: string): string {
-  return normalizePath(
-    getNodePath().join(getSocketAppCacheDir(appName), CACHE_TTL_DIR),
-  )
+  const path = getNodePath()
+  return normalizePath(path.join(getSocketAppCacheDir(appName), CACHE_TTL_DIR))
 }
 /**
  * Get a Socket app directory (~/.socket/_<appName>).
@@ -83,8 +85,9 @@ export function getSocketAppCacheTtlDir(appName: string): string {
  * Get a Socket app directory (~/.socket/_<appName>).
  */
 export function getSocketAppDir(appName: string): string {
+  const path = getNodePath()
   return normalizePath(
-    getNodePath().join(getSocketUserDir(), `${SOCKET_APP_PREFIX}${appName}`),
+    path.join(getSocketUserDir(), `${SOCKET_APP_PREFIX}${appName}`),
   )
 }
 /**
@@ -115,8 +118,9 @@ export function getSocketCacacheDir(): string {
     if (getSocketCacacheDirEnv()) {
       return normalizePath(getSocketCacacheDirEnv() as string)
     }
+    const path = getNodePath()
     return normalizePath(
-      getNodePath().join(getSocketUserDir(), `${SOCKET_APP_PREFIX}cacache`),
+      path.join(getSocketUserDir(), `${SOCKET_APP_PREFIX}cacache`),
     )
   })
 }
@@ -162,8 +166,9 @@ export function getSocketDlxDir(): string {
     if (getSocketDlxDirEnv()) {
       return normalizePath(getSocketDlxDirEnv() as string)
     }
+    const path = getNodePath()
     return normalizePath(
-      getNodePath().join(
+      path.join(
         getSocketUserDir(),
         `${SOCKET_APP_PREFIX}${SOCKET_DLX_APP_NAME}`,
       ),
@@ -202,8 +207,9 @@ export function getSocketRegistryDir(): string {
  * (~/.socket/_registry/cache/ttl/github).
  */
 export function getSocketRegistryGithubCacheDir(): string {
+  const path = getNodePath()
   return normalizePath(
-    getNodePath().join(
+    path.join(
       getSocketAppCacheTtlDir(SOCKET_REGISTRY_APP_NAME),
       CACHE_GITHUB_DIR,
     ),
@@ -243,7 +249,8 @@ export function getSocketUserDir(): string {
     if (socketHome) {
       return normalizePath(socketHome)
     }
-    return normalizePath(getNodePath().join(getUserHomeDir(), DOT_SOCKET_DIR))
+    const path = getNodePath()
+    return normalizePath(path.join(getUserHomeDir(), DOT_SOCKET_DIR))
   })
 }
 /**
@@ -272,8 +279,9 @@ export function getSocketUserDir(): string {
  */
 export function getSocketWheelhouseDir(): string {
   return getPathValue('socket-wheelhouse-dir', () => {
+    const path = getNodePath()
     return normalizePath(
-      getNodePath().join(
+      path.join(
         getSocketUserDir(),
         `${SOCKET_APP_PREFIX}${SOCKET_WHEELHOUSE_APP_NAME}`,
       ),

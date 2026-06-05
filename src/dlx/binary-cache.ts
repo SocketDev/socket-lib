@@ -116,7 +116,8 @@ export async function cleanDlxCache(
  *   ```
  */
 export function getBinaryCacheMetadataPath(cacheEntryPath: string): string {
-  return getNodePath().join(cacheEntryPath, '.dlx-metadata.json')
+  const path = getNodePath()
+  return path.join(cacheEntryPath, '.dlx-metadata.json')
 }
 
 /**

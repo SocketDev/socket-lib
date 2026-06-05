@@ -285,9 +285,10 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           } = this.content as Record<string | symbol, unknown>
           const content = sort ? packageSort(rest) : rest
 
+          const util = getNodeUtil()
           if (
             ignoreWhitespace &&
-            getNodeUtil().isDeepStrictEqual(content, this._readFileJson)
+            util.isDeepStrictEqual(content, this._readFileJson)
           ) {
             return false
           }
@@ -340,9 +341,10 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           } = this.content as Record<string | symbol, unknown>
           const content = sort ? packageSort(rest) : rest
 
+          const util = getNodeUtil()
           if (
             ignoreWhitespace &&
-            getNodeUtil().isDeepStrictEqual(content, this._readFileJson)
+            util.isDeepStrictEqual(content, this._readFileJson)
           ) {
             return false
           }

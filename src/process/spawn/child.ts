@@ -211,11 +211,9 @@ export function spawn(
     // executes the exact file. Stripping would fail for files in directories
     // not in PATH (e.g., temp directories, project-local bins).
     if (!isPath(actualCmd)) {
+      const path = getNodePath()
       // Extract just the command name without extension for PATH lookup.
-      actualCmd = getNodePath().basename(
-        actualCmd,
-        getNodePath().extname(actualCmd),
-      )
+      actualCmd = path.basename(actualCmd, path.extname(actualCmd))
     }
   }
   /* c8 ignore stop */
@@ -459,11 +457,9 @@ export function spawnSync(
     // executes the exact file. Stripping would fail for files in directories
     // not in PATH (e.g., temp directories, project-local bins).
     if (!isPath(actualCmd)) {
+      const path = getNodePath()
       // Extract just the command name without extension for PATH lookup.
-      actualCmd = getNodePath().basename(
-        actualCmd,
-        getNodePath().extname(actualCmd),
-      )
+      actualCmd = path.basename(actualCmd, path.extname(actualCmd))
     }
   }
   /* c8 ignore stop */
@@ -478,7 +474,9 @@ export function spawnSync(
     ...rawSpawnOptions,
   } as NodeSpawnOptions & { encoding: BufferEncoding | 'buffer' }
   const stdioString = spawnOptions.encoding !== 'buffer'
-  const result = getNodeChildProcess().spawnSync(actualCmd, args, spawnOptions)
+  const childProcess = getNodeChildProcess()
+  // oxlint-disable-next-line socket/prefer-async-spawn -- this IS the lib's sync spawn primitive; it must call the underlying spawnSync.
+  const result = childProcess.spawnSync(actualCmd, args, spawnOptions)
   if (stdioString) {
     const { stderr, stdout } = result
     if (stdout) {

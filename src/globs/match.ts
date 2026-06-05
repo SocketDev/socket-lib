@@ -87,8 +87,9 @@ export async function glob(
   // option surface lines up. Avoids loading fast-glob entirely.
   /* c8 ignore start */
   if (canUseNodeFsGlob(options)) {
+    const fsPromises = getFsPromises()
     const out = await fromAsync(
-      getFsPromises().glob(patterns as string | readonly string[], {
+      fsPromises.glob(patterns as string | readonly string[], {
         ...(options?.cwd ? { cwd: options.cwd } : {}),
         ...(normalizedIgnore ? { exclude: normalizedIgnore } : {}),
       }),
@@ -126,8 +127,9 @@ export function globSync(
   // surface lines up. Avoids loading fast-glob entirely.
   /* c8 ignore start */
   if (canUseNodeFsGlob(options)) {
+    const fs = getFs()
     return normalizeGlobResults([
-      ...getFs().globSync(patterns as string | readonly string[], {
+      ...fs.globSync(patterns as string | readonly string[], {
         ...(options?.cwd ? { cwd: options.cwd } : {}),
         ...(normalizedIgnore ? { exclude: normalizedIgnore } : {}),
       }),

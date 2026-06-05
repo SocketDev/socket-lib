@@ -57,7 +57,8 @@ export async function execBin(
     // previously cached binary is removed mid-session.
     /* c8 ignore start */
     if (cached) {
-      if (getFs().existsSync(cached)) {
+      const fs = getFs()
+      if (fs.existsSync(cached)) {
         resolvedPath = cached
       } else {
         binPathCache.delete(binPath)

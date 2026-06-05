@@ -46,19 +46,22 @@ export function canAccess(path: PathLike, mode?: number | undefined): boolean {
  * Can the process execute `path`? (`X_OK`)
  */
 export function canExecute(path: PathLike): boolean {
-  return canAccess(path, getNodeFs().constants.X_OK)
+  const fs = getNodeFs()
+  return canAccess(path, fs.constants.X_OK)
 }
 
 /**
  * Can the process read `path`? (`R_OK`)
  */
 export function canRead(path: PathLike): boolean {
-  return canAccess(path, getNodeFs().constants.R_OK)
+  const fs = getNodeFs()
+  return canAccess(path, fs.constants.R_OK)
 }
 
 /**
  * Can the process write `path`? (`W_OK`)
  */
 export function canWrite(path: PathLike): boolean {
-  return canAccess(path, getNodeFs().constants.W_OK)
+  const fs = getNodeFs()
+  return canAccess(path, fs.constants.W_OK)
 }
