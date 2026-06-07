@@ -416,7 +416,11 @@ test('Edit on a root-level file with NO template twin passes (e.g. pnpm-workspac
   }
 })
 
-test('Edit on a root-level file WITH a template twin is BLOCKED (e.g. CLAUDE.md)', async () => {
+test('Edit on CLAUDE.md (hybrid file WITH FLEET-CANONICAL markers) is ALLOWED', async () => {
+  // CLAUDE.md carries BEGIN/END FLEET-CANONICAL markers: only the block between
+  // them is canonical, so the preamble + project-specific postamble are
+  // repo-owned and editing them is not a fork. A fork inside the block is caught
+  // by the sync's claude_md_fleet_drift check at commit time.
   const repo = makeFakeFleetRepo()
   try {
     mkdirSync(path.join(repo, 'template'), { recursive: true })
@@ -424,6 +428,25 @@ test('Edit on a root-level file WITH a template twin is BLOCKED (e.g. CLAUDE.md)
     const file = path.join(repo, 'CLAUDE.md')
     const result = await runHook({
       tool_input: { file_path: file, new_string: 'x' },
+      tool_name: 'Edit',
+    })
+    assert.strictEqual(result.code, 0)
+  } finally {
+    rmSync(repo, { force: true, recursive: true })
+  }
+})
+
+test('Edit on a root-level canonical file WITHOUT fleet-block markers is BLOCKED', async () => {
+  // A root file that has a template/ twin but carries NO BEGIN/END markers is
+  // fully canonical (not a hybrid) — editing it downstream is a fork.
+  const repo = makeFakeFleetRepo()
+  try {
+    mkdirSync(path.join(repo, 'template'), { recursive: true })
+    writeFileSync(path.join(repo, 'template/oxlintrc.json'), '{}\n')
+    const file = path.join(repo, 'oxlintrc.json')
+    writeFileSync(file, '{}\n')
+    const result = await runHook({
+      tool_input: { file_path: file, new_string: '{"x":1}' },
       tool_name: 'Edit',
     })
     assert.strictEqual(result.code, 2)

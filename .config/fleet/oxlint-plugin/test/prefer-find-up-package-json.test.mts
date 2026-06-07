@@ -1,9 +1,8 @@
 /**
- * @file Unit tests for socket/prefer-find-up-package-json. The rule
- *   flags `path.join(__dirname, '..', '..'[, '..'])` and similar
- *   shapes that try to reach the enclosing package root by ascent
- *   count — fragile under refactors that move the file deeper or
- *   shallower.
+ * @file Unit tests for socket/prefer-find-up-package-json. The rule flags
+ *   `path.join(__dirname, '..', '..'[, '..'])` and similar shapes that try to
+ *   reach the enclosing package root by ascent count — fragile under refactors
+ *   that move the file deeper or shallower.
  */
 
 import { describe, test } from 'node:test'

@@ -30,7 +30,7 @@ Reusable test helpers belong in `test/_shared/fleet/lib/`, not a
 2026-06-04: the wheelhouse had 11 `scripts/fleet/test/` + 22
 `scripts/repo/sync-scaffolding/test/` node:test suites that never ran in CI —
 the cascade engine's own tests were dead. Moving them to `test/unit/` (vitest)
-surfaced a real regression (a `check-lock-step-refs` regex gone all-non-capturing
+surfaced a real regression (a `lock-step-refs-resolve` regex gone all-non-capturing
 so every reference resolved as `undefined`). This guard stops the pattern
 recurring at edit time.
 

@@ -8,15 +8,13 @@
  *   mechanical work. A skill "mutates" when its `allowed-tools` includes an
  *   editing tool (Edit / Write / NotebookEdit) or a state-changing git command
  *   (git commit / git add). Read-only skills (report / audit / scan) are exempt
- *   — they don't apply changes, so their model is the caller's choice.
- *
- *   Tier reference: docs/claude.md/fleet/skill-model-routing.md (haiku =
- *   mechanical, sonnet = judgment, opus = heavy reasoning). EFFORT stays a doc
- *   convention there, not a per-skill field (the harness reads $CLAUDE_EFFORT,
- *   not skill frontmatter).
- *
- *   Scope: `.claude/skills/fleet/<name>/SKILL.md`. Exit codes: 0 — every
- *   mutating skill declares model:; 1 — at least one mutating skill is missing it.
+ *   — they don't apply changes, so their model is the caller's choice. Tier
+ *   reference: docs/claude.md/fleet/skill-model-routing.md (haiku = mechanical,
+ *   sonnet = judgment, opus = heavy reasoning). EFFORT stays a doc convention
+ *   there, not a per-skill field (the harness reads $CLAUDE_EFFORT, not skill
+ *   frontmatter). Scope: `.claude/skills/fleet/<name>/SKILL.md`. Exit codes: 0
+ *   — every mutating skill declares model:; 1 — at least one mutating skill is
+ *   missing it.
  */
 
 import { existsSync, readFileSync, readdirSync } from 'node:fs'

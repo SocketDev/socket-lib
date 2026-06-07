@@ -6,7 +6,7 @@
  */
 
 export type Finding = {
-  rule: 'A' | 'B' | 'C' | 'D' | 'F' | 'G' | 'H'
+  rule: 'A' | 'B' | 'C' | 'D' | 'F' | 'G'
   file: string
   line: number
   snippet: string

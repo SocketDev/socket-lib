@@ -65,13 +65,25 @@ type ToolInput = {
   transcript_path?: string | undefined
 }
 
-// True when a string carries both fleet-block markers.
+// True when a string carries both fleet-block markers. Two marker dialects are
+// recognized: the lowercase parenthetical form used by gitignore / gitattributes
+// / workflows (`BEGIN fleet-canonical (managed by socket-wheelhouse …)`), and
+// the uppercase form CLAUDE.md uses (`<!-- BEGIN FLEET-CANONICAL … -->`). Both
+// mark a HYBRID file: only the content between the markers is canonical, so the
+// preamble + `🏗️ Project-Specific` postamble are repo-owned and editing them is
+// not a fork. A fork INSIDE the block is still caught by the sync's
+// claude_md_fleet_drift / *-fleet-block checks at commit time.
 function textHasFleetBlockMarkers(text: string | undefined): boolean {
-  return (
-    text !== undefined &&
+  if (text === undefined) {
+    return false
+  }
+  const lowerForm =
     text.includes('BEGIN fleet-canonical (managed by socket-wheelhouse') &&
     text.includes('END fleet-canonical')
-  )
+  const upperForm =
+    text.includes('BEGIN FLEET-CANONICAL') &&
+    text.includes('END FLEET-CANONICAL')
+  return lowerForm || upperForm
 }
 
 const BYPASS_PHRASE = 'Allow fleet-fork bypass'

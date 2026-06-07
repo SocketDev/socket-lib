@@ -17,7 +17,7 @@
 // 22 scripts/repo/sync-scaffolding/test/*.test.mts suites that imported
 // node:test and never ran in CI — the cascade engine's own tests were dead.
 // Moving them to test/unit/ (vitest) surfaced a real regression (a
-// check-lock-step-refs regex that had gone all-non-capturing). This guard
+// lock-step-refs-resolve regex that had gone all-non-capturing). This guard
 // stops the pattern recurring at edit time.
 //
 // Reusable test helpers belong in `test/_shared/fleet/lib/`, not a

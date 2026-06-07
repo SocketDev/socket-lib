@@ -38,7 +38,6 @@
 // Exit codes:
 //   0 — always. Informational; never blocks.
 //
-// Disabled via `SOCKET_PARALLEL_AGENT_REMOVAL_DISABLED=1`.
 
 import process from 'node:process'
 import { existsSync, readFileSync } from 'node:fs'
@@ -252,9 +251,6 @@ export function findVanishedSeenPaths(
 }
 
 async function main(): Promise<void> {
-  if (process.env['SOCKET_PARALLEL_AGENT_REMOVAL_DISABLED']) {
-    return
-  }
   const raw = await readStdin()
   let payload: StopPayload = {}
   try {

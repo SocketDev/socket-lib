@@ -4,7 +4,7 @@ The CLAUDE.md `### Judgment & self-evaluation` section is the headline. This fil
 
 ## Default to perfectionist
 
-When you have latitude (no explicit pragmatism signal from the user), default to perfectionist. "Works now" is not the same as "right." Don't offer "do it right" vs "ship fast" as a binary choice menu in your response — pick perfectionist and execute. The hook that nudges you back if you start drafting a tradeoff menu is `.claude/hooks/fleet/voice-and-tone-reminder/`.
+When you have latitude (no explicit pragmatism signal from the user), default to perfectionist. "Works now" is not the same as "right." Don't offer "do it right" vs "ship fast" as a binary choice menu in your response — pick perfectionist and execute. The hook that nudges you back if you start drafting a tradeoff menu is `.claude/hooks/fleet/yakback-reminder/`.
 
 Exceptions where pragmatism wins:
 
@@ -24,7 +24,7 @@ If you genuinely think the command is wrong, say so in one sentence, run it anyw
 
 ## Voice & brevity
 
-Be pithy. Lead with the point, then support it. Brief over complete. Pleasant but not sugary — no "great question," "perfect!," "happy to," enthusiasm performance, or apology padding. Cut warm-up and self-narration. The `voice-and-tone-reminder` hook flags the common tics (sugary filler, "honest"/"honestly"/"honesty," self-narrating tool use); treat a match as a prompt to tighten the sentence.
+Be pithy. Lead with the point, then support it. Brief over complete. Pleasant but not sugary — no "great question," "perfect!," "happy to," enthusiasm performance, or apology padding. Cut warm-up and self-narration. The `yakback-reminder` hook flags the common tics (sugary filler, "honest"/"honestly"/"honesty," self-narrating tool use); treat a match as a prompt to tighten the sentence.
 
 When discussing code or an abstraction, **lead with a small snippet or a concrete reference** so the reader anchors on the actual thing, not a description of it:
 
@@ -77,7 +77,7 @@ For UI / frontend / render-shape changes (`*.html`, `*.css`, `scripts/tour.mts`,
 3. Open / render / preview the output.
 4. THEN commit.
 
-Past pattern: multiple wasted commits per session, each one a "fix" that broke the next rebuild because the previous "fix" was never visually verified. Enforced by `.claude/hooks/fleet/verify-rendered-output-before-commit-reminder/`.
+Past pattern: multiple wasted commits per session, each one a "fix" that broke the next rebuild because the previous "fix" was never visually verified. Enforced by `.claude/hooks/fleet/verify-render-pre-commit-reminder/`.
 
 Type-checking and test suites verify code correctness, not feature correctness. If you can't render-test (no browser available, headless environment), say so explicitly in the turn summary rather than claiming success.
 

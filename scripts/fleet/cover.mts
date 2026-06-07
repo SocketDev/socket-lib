@@ -25,10 +25,7 @@ import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import type { AggregateCoverage } from './util/coverage-merge.mts'
 import { mergeCoverageFinal } from './util/coverage-merge.mts'
-import type {
-  CoverThresholds,
-  ResolvedSuite,
-} from './cover/discovery.mts'
+import type { CoverThresholds, ResolvedSuite } from './cover/discovery.mts'
 import {
   readCoverConfig,
   resolveBuildEntry,
@@ -262,7 +259,9 @@ export async function main(): Promise<void> {
     }
     logger.log('')
   } else {
-    logger.info('No build entry (scripts/build.mts | bundle.mts) — instrumenting sources directly.')
+    logger.info(
+      'No build entry (scripts/build.mts | bundle.mts) — instrumenting sources directly.',
+    )
     logger.log('')
   }
 

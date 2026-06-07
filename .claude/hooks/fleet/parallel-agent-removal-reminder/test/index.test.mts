@@ -170,23 +170,6 @@ test('escalates to LOUD warning when foreign-dirty signal also present', () => {
   assert.match(r.stderr, /PAUSE WORK/)
 })
 
-test('respects SOCKET_PARALLEL_AGENT_REMOVAL_DISABLED env', () => {
-  const filePath = path.join(tmpDir, 'a.ts')
-  writeFileSync(filePath, 'export {}')
-  const transcript = path.join(tmpDir, 't.jsonl')
-  writeTranscript(transcript, [
-    { tool: 'Read', input: { file_path: filePath } },
-  ])
-  unlinkSync(filePath)
-  const r = runHook({
-    cwd: tmpDir,
-    transcriptPath: transcript,
-    env: { SOCKET_PARALLEL_AGENT_REMOVAL_DISABLED: '1' },
-  })
-  assert.equal(r.code, 0)
-  assert.equal(r.stderr, '')
-})
-
 test('ignores vanished paths outside CLAUDE_PROJECT_DIR', () => {
   const outsidePath = path.join(os.tmpdir(), 'scratch-vanished.ts')
   const transcript = path.join(tmpDir, 't.jsonl')

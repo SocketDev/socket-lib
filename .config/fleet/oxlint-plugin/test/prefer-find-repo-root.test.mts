@@ -1,8 +1,8 @@
 /**
  * @file Unit tests for socket/prefer-find-repo-root. The rule flags
- *   `path.join(__dirname, '..', '..'[, '..'])` and similar shapes that
- *   try to reach the repo root by ascent count — fragile under refactors
- *   that move the file deeper or shallower.
+ *   `path.join(__dirname, '..', '..'[, '..'])` and similar shapes that try to
+ *   reach the repo root by ascent count — fragile under refactors that move the
+ *   file deeper or shallower.
  */
 
 import { describe, test } from 'node:test'

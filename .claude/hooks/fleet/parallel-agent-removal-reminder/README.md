@@ -44,9 +44,9 @@ signal. This hook closes that gap.
 This hook is the fourth surface in the family: the **read-then-gone**
 detector. The three together cover write/git/dirty/vanished.
 
-## Config
+## Bypass
 
-- Disable: `SOCKET_PARALLEL_AGENT_REMOVAL_DISABLED=1`.
+No bypass — it's a reminder (exit 0), not a block.
 
 ## Related
 

@@ -64,18 +64,12 @@ import {
   STAGE_SEGMENTS,
 } from './segments.mts'
 
-// `here` is a module anchor only when bound to
-// `path.dirname(fileURLToPath(import.meta.url))` in the same file — the bare
-// name is too common to assume. `__dirname` is always an anchor.
-const HERE_BINDING_RE =
-  /\bhere\b\s*=\s*path\.dirname\(\s*fileURLToPath\(\s*import\.meta\.url\s*\)\s*\)/
-
 const logger = getDefaultLogger()
 
 const EXEMPT_FILE_PATTERNS: RegExp[] = [
   /(?:^|\/)paths\.(?:cts|mts)$/,
-  /scripts\/check-paths\.mts$/,
-  /scripts\/check-paths\//,
+  /scripts\/fleet\/check\/paths-are-canonical\.mts$/,
+  /scripts\/fleet\/check\/paths\//,
   /\.claude\/hooks\/(?:fleet\/)?path-guard\/index\.(?:cts|mts)$/,
   /\.claude\/hooks\/(?:fleet\/)?path-guard\/test\//,
   /scripts\/check-consistency\.mts$/,
@@ -115,17 +109,6 @@ interface PathCall {
    */
   hasComputedArg: boolean
   /**
-   * Whether the FIRST argument is a module anchor (`__dirname`, an inline
-   * `path.dirname(fileURLToPath(import.meta.url))`, or a `here` identifier
-   * when the file binds it to that expression). Rule H.
-   */
-  firstArgIsAnchor: boolean
-  /**
-   * Whether every argument AFTER the first is a `'..'` string literal — the
-   * walk-to-root shape. With `firstArgIsAnchor`, this is Rule H.
-   */
-  restAllDotDot: boolean
-  /**
    * Source snippet around the call for the block message.
    */
   snippet: string
@@ -135,51 +118,8 @@ interface PathCall {
   line: number
 }
 
-/**
- * Is an argument node a module anchor? `__dirname` always; `here` only when
- * `hereIsAnchor` (the file binds it to dirname(fileURLToPath(import.meta.url)));
- * an inline `path.dirname(fileURLToPath(import.meta.url))` CallExpression.
- */
-function isAnchorArg(arg: AcornNode, hereIsAnchor: boolean): boolean {
-  if (arg.type === 'Identifier') {
-    const name = arg['name'] as string
-    if (name === '__dirname') {
-      return true
-    }
-    return name === 'here' && hereIsAnchor
-  }
-  // path.dirname(fileURLToPath(import.meta.url))
-  if (arg.type !== 'CallExpression') {
-    return false
-  }
-  const callee = arg['callee'] as AcornNode | undefined
-  if (
-    !callee ||
-    callee.type !== 'MemberExpression' ||
-    (callee['object'] as AcornNode | undefined)?.['name'] !== 'path' ||
-    (callee['property'] as AcornNode | undefined)?.['name'] !== 'dirname'
-  ) {
-    return false
-  }
-  const inner = ((arg['arguments'] as AcornNode[] | undefined) ?? [])[0]
-  if (!inner || inner.type !== 'CallExpression') {
-    return false
-  }
-  const innerCallee = inner['callee'] as AcornNode | undefined
-  return (
-    !!innerCallee &&
-    innerCallee.type === 'Identifier' &&
-    (innerCallee['name'] as string) === 'fileURLToPath'
-  )
-}
-
-function isDotDotArg(arg: AcornNode): boolean {
-  return arg.type === 'Literal' && arg['value'] === '..'
-}
-
 export function collectPathCalls(source: string): PathCall[] {
   const lines = source.split('\n')
-  const hereIsAnchor = HERE_BINDING_RE.test(source)
   const out: PathCall[] = []
   // Match both `path.join(...)` and `path.resolve(...)` via two passes.
   for (const property of ['join', 'resolve']) {
@@ -216,10 +156,6 @@ export function collectPathCalls(source: string): PathCall[] {
             hasComputedArg = true
           }
         }
-        const firstArgIsAnchor =
-          args.length >= 2 && isAnchorArg(args[0]!, hereIsAnchor)
-        const restAllDotDot =
-          args.length >= 2 && args.slice(1).every(isDotDotArg)
         const start = node['start'] as number | undefined
         const end = node['end'] as number | undefined
         if (typeof start !== 'number' || typeof end !== 'number') {
@@ -231,8 +167,6 @@ export function collectPathCalls(source: string): PathCall[] {
         out.push({
           literals,
           hasComputedArg,
-          firstArgIsAnchor,
-          restAllDotDot,
           // Prefer the single-line text when the call fits on one
           // line; otherwise show the slice (truncated by BlockError).
           snippet: snippet.includes('\n') ? snippet : trimmedLine,
@@ -288,19 +222,6 @@ export function checkRuleB(calls: PathCall[]) {
   }
 }
 
-export function checkRuleH(calls: PathCall[]) {
-  for (let i = 0, { length } = calls; i < length; i += 1) {
-    const call = calls[i]!
-    if (call.firstArgIsAnchor && call.restAllDotDot) {
-      throw new BlockError(
-        'H — repo root re-derived inline',
-        "Import the constructed REPO_ROOT from `paths.mts` (e.g. `import { REPO_ROOT } from './paths.mts'`) instead of counting `..` up from __dirname — the count silently breaks when the file moves directory depth. 1 path, 1 reference.",
-        call.snippet,
-      )
-    }
-  }
-}
-
 export function checkRuleATemplate(templates: TemplateLiteralSite[]) {
   for (let i = 0, { length } = templates; i < length; i += 1) {
     const tpl = templates[i]!
@@ -340,7 +261,6 @@ export function check(source: string) {
   if (calls.length > 0) {
     checkRuleA(calls)
     checkRuleB(calls)
-    checkRuleH(calls)
   }
   const templates = findTemplateLiterals(source)
   if (templates.length > 0) {

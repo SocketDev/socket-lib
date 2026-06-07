@@ -16,14 +16,12 @@
 // no `process.platform` / `WIN32` / `os.platform()` branch in the same
 // edit.
 //
-// Stderr reminder; never blocks. Disable via
-// SOCKET_TEST_PLATFORM_COVERAGE_REMINDER_DISABLED=1.
+// Stderr reminder; never blocks.
 
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { isHookDisabled } from '../_shared/hook-env.mts'
 import { withEditGuard } from '../_shared/payload.mts'
 
 const logger = getDefaultLogger()
@@ -67,9 +65,6 @@ function shouldRemind(filePath: string, content: string | undefined): boolean {
 }
 
 await withEditGuard((filePath, content) => {
-  if (isHookDisabled('SOCKET_TEST_PLATFORM_COVERAGE_REMINDER_DISABLED')) {
-    return
-  }
   if (!shouldRemind(filePath, content)) {
     return
   }
@@ -94,8 +89,6 @@ await withEditGuard((filePath, content) => {
       "        describe.skipIf(process.platform === 'win32')(...)",
       '    - Use the fleet path-normalizer if the assertion is about a',
       '      path the implementation already platformized.',
-      '',
-      '  Disable: SOCKET_TEST_PLATFORM_COVERAGE_REMINDER_DISABLED=1',
       '',
     ].join('\n'),
   )

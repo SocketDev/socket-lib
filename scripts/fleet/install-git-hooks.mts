@@ -20,10 +20,37 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-
-import { REPO_ROOT } from './paths.mts'
+import { fileURLToPath } from 'node:url'
 
 const HOOKS_DIR = '.git-hooks/fleet'
+
+// Resolve the repo root by walking up from this script's own location to the
+// nearest `package.json` ancestor. Inlined (not imported from paths.mts) on
+// purpose: this script runs at `pnpm prepare` time and gets copied/run in
+// isolation (tarball installs, the unit-test fixture), so it must stay
+// self-contained with no sibling-module dependency. The walk is
+// depth-independent — unlike a hardcoded `..` count, it survives the script
+// moving between directories (the 73c691d9 scripts-into-fleet/ refactor broke
+// the old count).
+function resolveRepoRoot(): string {
+  let cur = path.dirname(fileURLToPath(import.meta.url))
+  const root = path.parse(cur).root
+  while (cur && cur !== root) {
+    if (existsSync(path.join(cur, 'package.json'))) {
+      return cur
+    }
+    const parent = path.dirname(cur)
+    if (parent === cur) {
+      break
+    }
+    cur = parent
+  }
+  // No package.json ancestor (e.g. a bare copy with no manifest) — fall back to
+  // the script's own dir so the existsSync guards below simply skip.
+  return path.dirname(fileURLToPath(import.meta.url))
+}
+
+const REPO_ROOT = resolveRepoRoot()
 
 function main(): void {
   if (!existsSync(path.join(REPO_ROOT, '.git'))) {

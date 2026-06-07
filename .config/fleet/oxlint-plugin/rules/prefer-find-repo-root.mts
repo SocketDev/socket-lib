@@ -1,35 +1,29 @@
 /**
  * @file Forbid hard-coded `path.join(__dirname, '..', '..'[, '..'])` and
- *   `path.resolve(__dirname, '..', '..'[, '..'])` ascent shapes —
- *   especially common in `scripts/` and `.claude/hooks/` modules looking
- *   for the repo root. The ascent count is fragile: every refactor that
- *   moves the file deeper or shallower silently breaks the path
- *   resolution. The 73c691d9 scripts-into-fleet/ refactor + the
- *   86c2e575 check-*-into-check/ refactor combined to break 12 files
- *   across two waves before this lint rule landed.
- *
- *   Use `findRepoRoot(import.meta)` from
- *   `@socketsecurity/lib-stable/paths/repo-root` instead. It walks up
- *   to the nearest `package.json` from the script's own location, so
- *   the ascent count is computed at runtime and refactors don't break
- *   it.
- *
- *   Scope: only flags chains of TWO OR MORE `'..'` segments inside a
- *   `path.join`/`path.resolve` call whose FIRST argument is the
- *   identifier `__dirname`. A single `'..'` is allowed because most
- *   one-level walks are intentional and stable (e.g. `path.join(
- *   __dirname, '..', 'fixtures')` reaches a sibling of the calling
- *   script, not the repo root).
- *
- *   No autofix — the right substitute may need extra path segments
- *   appended (`path.join(findRepoRoot(import.meta), 'docs', 'foo.md')`)
- *   and the file may need a new import. Manual fix per call site.
- *
- *   Activation: currently `warn` because `findRepoRoot` shipped in
- *   `@socketsecurity/lib@6.0.7` which has not yet propagated through
- *   the fleet's `lib-stable` cascade. Once the cascade lands (i.e.
- *   every fleet repo's `pnpm-workspace.yaml` catalog pins lib-stable
- *   ≥ 6.0.7), promote to `error` in a follow-up commit.
+ *   `path.resolve(__dirname, '..', '..'[, '..'])` ascent shapes — especially
+ *   common in `scripts/` and `.claude/hooks/` modules looking for the repo
+ *   root. The ascent count is fragile: every refactor that moves the file
+ *   deeper or shallower silently breaks the path resolution. The 73c691d9
+ *   scripts-into-fleet/ refactor + the 86c2e575 check-*-into-check/ refactor
+ *   combined to break 12 files across two waves before this lint rule landed.
+ *   Two satisfying fixes, both depth-independent: import the repo's single
+ *   `REPO_ROOT` (the constructed value in `scripts/fleet/paths.mts`, which
+ *   walks to the nearest `package.json` via `resolveRepoRoot()`), or
+ *   `findRepoRoot(import.meta)` from
+ *   `@socketsecurity/lib-stable/paths/repo-root` once the lib export lands
+ *   fleet-wide. Either way the ascent count is computed at runtime, so a file
+ *   moving directory depth doesn't break it. Scope: only flags chains of TWO OR
+ *   MORE `'..'` segments inside a `path.join`/`path.resolve` call whose FIRST
+ *   argument is the identifier `__dirname`. A single `'..'` is allowed because
+ *   most one-level walks are intentional and stable (e.g. `path.join(
+ *   __dirname, '..', 'fixtures')` reaches a sibling of the calling script, not
+ *   the repo root). No autofix — the right substitute may need extra path
+ *   segments appended (`path.join(findRepoRoot(import.meta), 'docs',
+ *   'foo.md')`) and the file may need a new import. Manual fix per call site.
+ *   Activation: `error`. The `REPO_ROOT`-from-`paths.mts` fix is available in
+ *   every fleet repo today (it predates the lib helper), so the rule can gate
+ *   at full strength without waiting on the `findRepoRoot` export to propagate
+ *   through the `lib-stable` cascade.
  */
 
 import type { AstNode, RuleContext } from '../lib/rule-types.mts'
@@ -39,14 +33,14 @@ const rule = {
     type: 'suggestion',
     docs: {
       description:
-        'Prefer findRepoRoot(import.meta) over `path.join(__dirname, "..", "..")`. The ascent count drifts on every scripts-into-subdir refactor.',
+        'Prefer importing REPO_ROOT from paths.mts (or findRepoRoot(import.meta)) over `path.join(__dirname, "..", "..")`. The ascent count drifts on every scripts-into-subdir refactor.',
       category: 'Best Practices',
       recommended: true,
     },
     fixable: undefined,
     messages: {
       preferFindRepoRoot:
-        '`{{call}}(__dirname, {{ascent}})` is fragile — the {{count}}× `..` chain breaks every time this file moves between directories. Use `findRepoRoot(import.meta)` from `@socketsecurity/lib-stable/paths/repo-root`, which walks up to the nearest `package.json` and stays correct across refactors.',
+        '`{{call}}(__dirname, {{ascent}})` is fragile — the {{count}}× `..` chain breaks every time this file moves between directories. Import `REPO_ROOT` from `paths.mts` (or `findRepoRoot(import.meta)` once it ships in lib-stable), which walks up to the nearest `package.json` and stays correct across refactors.',
     },
     schema: [],
   },

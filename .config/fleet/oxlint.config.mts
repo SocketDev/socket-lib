@@ -60,22 +60,6 @@ export interface OxlintConfigOptions {
 const fleetConfigDir = fileURLToPath(new URL('.', import.meta.url))
 
 /**
- * Rewrite a fleet `jsPlugins` entry to an absolute path. Relative entries
- * (`./oxlint-plugin/index.mts`) are anchored at this file's directory so they
- * resolve no matter which config imports the factory; non-relative entries
- * (bare specifiers) pass through unchanged.
- */
-export function resolveFleetJsPlugin(entry: string): string {
-  if (entry.startsWith('./')) {
-    return `${fleetConfigDir}${entry.slice(2)}`
-  }
-  if (entry.startsWith('../')) {
-    return fileURLToPath(new URL(entry, import.meta.url))
-  }
-  return entry
-}
-
-/**
  * Build the fleet oxlint config object, optionally augmented for a repo.
  */
 export function config(options?: OxlintConfigOptions): Record<string, unknown> {
@@ -113,4 +97,21 @@ export function config(options?: OxlintConfigOptions): Record<string, unknown> {
   }
 }
 
+/**
+ * Rewrite a fleet `jsPlugins` entry to an absolute path. Relative entries
+ * (`./oxlint-plugin/index.mts`) are anchored at this file's directory so they
+ * resolve no matter which config imports the factory; non-relative entries
+ * (bare specifiers) pass through unchanged.
+ */
+export function resolveFleetJsPlugin(entry: string): string {
+  if (entry.startsWith('./')) {
+    return `${fleetConfigDir}${entry.slice(2)}`
+  }
+  if (entry.startsWith('../')) {
+    return fileURLToPath(new URL(entry, import.meta.url))
+  }
+  return entry
+}
+
+// oxlint-disable-next-line socket/no-default-export -- oxlint loads the config from this module's default export.
 export default config()

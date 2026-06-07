@@ -126,7 +126,7 @@ async function fetchPublishDate(
 ): Promise<string | undefined> {
   const url = `https://registry.npmjs.org/${encodeURIComponent(name).replace('%40', '@')}`
   try {
-    // socket-hook: allow global-fetch -- soak tooling probes the npm registry directly; the lib http-request helper isn't a dependency in scripts/.
+    // socket-lint: allow global-fetch -- soak tooling probes the npm registry directly; the lib http-request helper isn't a dependency in scripts/.
     const response = await fetch(url, {
       headers: { accept: 'application/json' },
     })

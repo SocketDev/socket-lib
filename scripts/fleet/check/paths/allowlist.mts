@@ -59,7 +59,7 @@ export const loadAllowlist = (repoRoot: string): AllowlistEntry[] => {
   }
   if (!Array.isArray(arr)) {
     process.stderr.write(
-      `[check-paths] pathsAllowlist in ${configPath} must be an array; ignoring.\n`,
+      `[check-paths-are-canonical] pathsAllowlist in ${configPath} must be an array; ignoring.\n`,
     )
     return []
   }
@@ -68,14 +68,14 @@ export const loadAllowlist = (repoRoot: string): AllowlistEntry[] => {
     const e = arr[i]!
     if (typeof e !== 'object' || e === null) {
       process.stderr.write(
-        `[check-paths] pathsAllowlist[${i}] in ${configPath} is not an object; skipping.\n`,
+        `[check-paths-are-canonical] pathsAllowlist[${i}] in ${configPath} is not an object; skipping.\n`,
       )
       continue
     }
     const obj = e as Record<string, unknown>
     if (typeof obj['reason'] !== 'string' || obj['reason'].length === 0) {
       process.stderr.write(
-        `[check-paths] pathsAllowlist[${i}] in ${configPath} missing required \`reason\`; skipping.\n`,
+        `[check-paths-are-canonical] pathsAllowlist[${i}] in ${configPath} missing required \`reason\`; skipping.\n`,
       )
       continue
     }

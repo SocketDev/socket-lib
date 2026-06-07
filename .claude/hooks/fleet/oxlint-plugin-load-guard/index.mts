@@ -21,7 +21,6 @@
 
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
@@ -30,15 +29,16 @@ import { withEditGuard } from '../_shared/payload.mts'
 
 const logger = getDefaultLogger()
 
-// The hook lives at .claude/hooks/fleet/oxlint-plugin-load-guard/; the repo
-// root is four levels up.
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const repoRoot = path.join(__dirname, '..', '..', '..', '..')
+// Anchor on CLAUDE_PROJECT_DIR (the repo root the session opened), falling back
+// to cwd. Stable regardless of how deep the hook lives — a hardcoded `..` count
+// from the hook's own location breaks the moment the hook dir moves.
+const repoRoot = process.env['CLAUDE_PROJECT_DIR'] ?? process.cwd()
 const checkScript = path.join(
   repoRoot,
   'scripts',
   'fleet',
-  'check-oxlint-plugin-loads.mts',
+  'check',
+  'oxlint-plugin-loads.mts',
 )
 
 // Only re-check when the edit touched a plugin source file.
