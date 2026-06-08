@@ -28,6 +28,7 @@ import {
 } from '../../../src/git/unstaged'
 import { spawnSync } from '../../../src/process/spawn/child'
 import { describe, expect, it, vi } from 'vitest'
+import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 import { runWithTempDir } from '../util/temp-file-helper'
 import { safeDelete } from '../../../src/fs/safe'
 
@@ -40,71 +41,75 @@ describe('git extended tests - real git operations', () => {
   // timeout flakes these — bump describe-scope default to 30s.
   vi.setConfig({ testTimeout: 30_000, hookTimeout: 30_000 })
 
-  it('should work with a temporary git repository', async () => {
-    await runWithTempDir(async tmpDir => {
-      // Initialize a git repo
-      spawnSync('git', ['init'], { cwd: tmpDir })
-      spawnSync('git', ['config', 'user.name', 'Test User'], {
-        cwd: tmpDir,
-      })
-      spawnSync('git', ['config', 'user.email', 'test@example.com'], {
-        cwd: tmpDir,
-      })
+  it(
+    'should work with a temporary git repository',
+    async () => {
+      await runWithTempDir(async tmpDir => {
+        // Initialize a git repo
+        spawnSync('git', ['init'], { cwd: tmpDir })
+        spawnSync('git', ['config', 'user.name', 'Test User'], {
+          cwd: tmpDir,
+        })
+        spawnSync('git', ['config', 'user.email', 'test@example.com'], {
+          cwd: tmpDir,
+        })
 
-      // Create a file
-      const testFile = path.join(tmpDir, 'test.txt')
-      await fs.writeFile(testFile, 'test content', 'utf8')
+        // Create a file
+        const testFile = path.join(tmpDir, 'test.txt')
+        await fs.writeFile(testFile, 'test content', 'utf8')
 
-      // File should appear as changed (untracked)
-      const changed = await getChangedFiles({ cache: false, cwd: tmpDir })
-      expect(changed).toContain('test.txt')
+        // File should appear as changed (untracked)
+        const changed = await getChangedFiles({ cache: false, cwd: tmpDir })
+        expect(changed).toContain('test.txt')
 
-      // Stage the file
-      spawnSync('git', ['add', 'test.txt'], { cwd: tmpDir })
+        // Stage the file
+        spawnSync('git', ['add', 'test.txt'], { cwd: tmpDir })
 
-      // File should now be staged
-      const staged = await getStagedFiles({ cwd: tmpDir })
-      expect(staged).toContain('test.txt')
+        // File should now be staged
+        const staged = await getStagedFiles({ cwd: tmpDir })
+        expect(staged).toContain('test.txt')
 
-      // Commit the file
-      spawnSync('git', ['commit', '-m', 'Initial commit'], { cwd: tmpDir })
+        // Commit the file
+        spawnSync('git', ['commit', '-m', 'Initial commit'], { cwd: tmpDir })
 
-      // Now there should be no changes (or at most just test.txt if git is showing it)
-      const afterCommit = await getChangedFiles({ cwd: tmpDir })
-      // In some git configurations, files may still appear, so just check it's an array
-      expect(Array.isArray(afterCommit)).toBe(true)
+        // Now there should be no changes (or at most just test.txt if git is showing it)
+        const afterCommit = await getChangedFiles({ cwd: tmpDir })
+        // In some git configurations, files may still appear, so just check it's an array
+        expect(Array.isArray(afterCommit)).toBe(true)
 
-      // Modify the file
-      await fs.writeFile(testFile, 'modified content', 'utf8')
+        // Modify the file
+        await fs.writeFile(testFile, 'modified content', 'utf8')
 
-      // Should show as unstaged
-      const unstaged = await getUnstagedFiles({ cwd: tmpDir })
-      expect(unstaged).toContain('test.txt')
+        // Should show as unstaged
+        const unstaged = await getUnstagedFiles({ cwd: tmpDir })
+        expect(unstaged).toContain('test.txt')
 
-      // Check isChanged
-      const isChangedResult = await isChanged(testFile, { cwd: tmpDir })
-      expect(isChangedResult).toBe(true)
+        // Check isChanged
+        const isChangedResult = await isChanged(testFile, { cwd: tmpDir })
+        expect(isChangedResult).toBe(true)
 
-      // Check isUnstaged
-      const isUnstagedResult = await isUnstaged(testFile, { cwd: tmpDir })
-      expect(isUnstagedResult).toBe(true)
+        // Check isUnstaged
+        const isUnstagedResult = await isUnstaged(testFile, { cwd: tmpDir })
+        expect(isUnstagedResult).toBe(true)
 
-      // Check isStaged (should be false)
-      const isStagedResult = await isStaged(testFile, { cwd: tmpDir })
-      expect(isStagedResult).toBe(false)
+        // Check isStaged (should be false)
+        const isStagedResult = await isStaged(testFile, { cwd: tmpDir })
+        expect(isStagedResult).toBe(false)
 
-      // Stage the changes
-      spawnSync('git', ['add', 'test.txt'], { cwd: tmpDir })
+        // Stage the changes
+        spawnSync('git', ['add', 'test.txt'], { cwd: tmpDir })
 
-      // Now it should be staged
-      const stagedAfter = await getStagedFiles({ cwd: tmpDir })
-      expect(stagedAfter).toContain('test.txt')
+        // Now it should be staged
+        const stagedAfter = await getStagedFiles({ cwd: tmpDir })
+        expect(stagedAfter).toContain('test.txt')
 
-      // And should still show as changed
-      const isChangedAfter = await isChanged(testFile, { cwd: tmpDir })
-      expect(typeof isChangedAfter).toBe('boolean')
-    }, 'git-ops-')
-  }, 30_000)
+        // And should still show as changed
+        const isChangedAfter = await isChanged(testFile, { cwd: tmpDir })
+        expect(typeof isChangedAfter).toBe('boolean')
+      }, 'git-ops-')
+    },
+    tolerantTimeout(30_000),
+  )
 
   it('should detect untracked files', async () => {
     await runWithTempDir(async tmpDir => {

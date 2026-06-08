@@ -276,7 +276,7 @@ describe('spawn', () => {
 
     it('should have stdin property on result', async () => {
       const result = spawn('cat', [])
-      expect(result.stdin).toBeTruthy()
+      expect(result.process.stdin).toBeTruthy()
       result.process.kill()
       // Wait for process to be killed
       try {
@@ -343,9 +343,9 @@ describe('spawn', () => {
   describe('security', () => {
     it('should safely handle user input in args array', async () => {
       const userInput = '; rm -rf /'
-      const result = await spawn('echo', [userInput])
-      expect(result.stdout).toContain(';')
-      expect(result.stdout).toContain('rm')
+      const { stdout } = await spawn('echo', [userInput])
+      expect(stdout).toContain(';')
+      expect(stdout).toContain('rm')
     })
 
     it('should safely handle special characters', async () => {

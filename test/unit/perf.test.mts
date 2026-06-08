@@ -11,6 +11,7 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
 import { resetEnv, setEnv } from '../../src/env/rewire'
 import {
   clearPerformanceMetrics,
@@ -74,7 +75,7 @@ describe.sequential('performance', () => {
 
     it('should measure duration accurately', async () => {
       const stop = perfTimer('timing-test')
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
       stop()
       const metrics = getPerformanceMetrics()
       expect(metrics[0]?.duration).toBeGreaterThan(0)
@@ -113,7 +114,7 @@ describe.sequential('performance', () => {
 
     it('should measure async function execution', async () => {
       const result = await measure('async-op', async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
         return 42
       })
       expect(result.result).toBe(42)

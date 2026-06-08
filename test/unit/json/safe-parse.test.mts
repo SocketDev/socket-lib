@@ -9,6 +9,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
+// socket-lint: allow schema-lib -- parseJsonSafe validates Zod-shaped schemas; this test must build a real zod schema to exercise that path.
 import { z } from 'zod'
 
 import { parseJsonSafe } from '../../../src/json/parse'

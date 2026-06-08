@@ -9,6 +9,8 @@ import process from 'node:process'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
+
 import { Spinner } from '../../../src/spinner/spinner'
 import { withSpinner, withSpinnerSync } from '../../../src/spinner/with'
 
@@ -311,7 +313,7 @@ describe('spinner — with wrappers', () => {
         withSpinner({
           message: 'Testing…',
           operation: async () => {
-            await new Promise(resolve => setTimeout(resolve, 1))
+            await new Promise(resolve => setTimeout(resolve, tolerantSleep(1)))
             throw new Error('Async error')
           },
         }),

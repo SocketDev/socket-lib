@@ -2814,6 +2814,16 @@
       "types": "./dist/themes/types.d.ts",
       "default": "./dist/themes/types.js"
     },
+    "./url/assert-safe": {
+      "browser": {
+        "source": "./src/url/assert-safe.ts",
+        "types": "./dist/url/assert-safe.d.ts",
+        "default": "./dist/url/assert-safe.js"
+      },
+      "source": "./src/url/assert-safe.ts",
+      "types": "./dist/url/assert-safe.d.ts",
+      "default": "./dist/url/assert-safe.js"
+    },
     "./url/parse": {
       "browser": {
         "source": "./src/url/parse.ts",

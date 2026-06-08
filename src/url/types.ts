@@ -4,6 +4,14 @@
  *   types, no runtime side effects.
  */
 
+export interface AssertSafeHttpUrlOptions {
+  // Human-readable subject for the thrown message, e.g. 'OAuth issuer'.
+  label?: string | undefined
+  // When true, localhost / 127.0.0.1 / ::1 pass instead of being refused —
+  // for local-stack development only.
+  allowLocalhost?: boolean | undefined
+}
+
 export interface CreateRelativeUrlOptions {
   base?: string | undefined
 }

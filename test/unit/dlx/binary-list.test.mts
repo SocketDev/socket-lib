@@ -15,6 +15,7 @@ import {
 } from '../../../src/dlx/binary'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
 import { safeDelete } from '../../../src/fs/safe'
 import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'
@@ -269,7 +270,7 @@ describe.sequential('dlx-binary cache enumeration', () => {
           await result.spawnPromise.catch(() => {})
 
           // Wait a bit
-          await new Promise(resolve => setTimeout(resolve, 100))
+          await new Promise(resolve => setTimeout(resolve, tolerantSleep(100)))
 
           const list = await listDlxCache()
           expect(list.length).toBe(1)

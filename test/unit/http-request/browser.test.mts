@@ -6,6 +6,8 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { minTimerQuantum } from '../../_shared/fleet/lib/timing.mts'
+
 vi.mock(import('../../../src/http-request/browser-fetch'), () => ({
   doFetch: vi.fn(),
 }))
@@ -347,7 +349,7 @@ describe.sequential('http-request/browser', () => {
           new Promise((_, reject) => {
             const signal = init?.signal as AbortSignal
             signal.addEventListener('abort', () => reject(new Error('aborted')))
-            setTimeout(() => controller.abort(), 5)
+            setTimeout(() => controller.abort(), minTimerQuantum(5))
           }),
       )
       await expect(

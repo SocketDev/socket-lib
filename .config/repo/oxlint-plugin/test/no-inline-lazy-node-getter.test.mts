@@ -58,8 +58,9 @@ function resolveOxlintBinary(): string | undefined {
 
 function runOxlint(
   code: string,
-  fix: boolean,
+  options?: { fix?: boolean | undefined } | undefined,
 ): { stdout: string; code: string } {
+  const fix = options?.fix ?? false
   const tmpdir = mkdtempSync(path.join(os.tmpdir(), 'oxlint-repo-rule-'))
   const fixture = path.join(tmpdir, 'fixture.ts')
   // Minimal isolated config: just this plugin + rule, no `extends`/
@@ -101,7 +102,6 @@ describe('socket-repo/no-inline-lazy-node-getter', () => {
     }
     const { stdout } = runOxlint(
       'function f() {\n  return getFs().existsSync("/x")\n}\n',
-      false,
     )
     assert.ok(
       hasRuleFinding(stdout),
@@ -115,7 +115,6 @@ describe('socket-repo/no-inline-lazy-node-getter', () => {
     }
     const { stdout } = runOxlint(
       'function f() {\n  const fs = getFs()\n  return fs.existsSync("/x")\n}\n',
-      false,
     )
     assert.ok(
       !hasRuleFinding(stdout),
@@ -129,7 +128,7 @@ describe('socket-repo/no-inline-lazy-node-getter', () => {
     }
     const { code } = runOxlint(
       'function f() {\n  return getNodePath().join("a", "b")\n}\n',
-      true,
+      { fix: true },
     )
     assert.ok(
       code.includes('const path = getNodePath()'),
@@ -151,7 +150,7 @@ describe('socket-repo/no-inline-lazy-node-getter', () => {
     }
     const { code } = runOxlint(
       'function f(x) {\n  return getNodePath().basename(x, getNodePath().extname(x))\n}\n',
-      true,
+      { fix: true },
     )
     const hoists = (code.match(/const path = getNodePath\(\)/g) ?? []).length
     assert.equal(
@@ -171,7 +170,7 @@ describe('socket-repo/no-inline-lazy-node-getter', () => {
     }
     const { code } = runOxlint(
       'function f(p) {\n  // oxlint-disable-next-line some/rule -- intentional\n  return getFs().statSync(p)\n}\n',
-      true,
+      { fix: true },
     )
     // The hoisted const must land BEFORE the disable comment, so the directive
     // still sits on the line directly above the statSync statement.

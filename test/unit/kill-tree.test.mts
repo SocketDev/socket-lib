@@ -17,6 +17,8 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
+import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
+
 import {
   isProcessAlive,
   killProcessTree,
@@ -111,7 +113,7 @@ describe('killProcessTree', () => {
       stdio: 'ignore',
     })
     await new Promise(resolve => {
-      setTimeout(resolve, 100)
+      setTimeout(resolve, tolerantSleep(100))
     })
     const { pid } = child
     expect(typeof pid).toBe('number')
@@ -122,7 +124,7 @@ describe('killProcessTree', () => {
     expect(attempted).toBe(true)
 
     await new Promise(resolve => {
-      setTimeout(resolve, 200)
+      setTimeout(resolve, tolerantSleep(200))
     })
     // Whole group gone — signalling it now throws ESRCH.
     expect(() => process.kill(-(pid as number), 0)).toThrow()

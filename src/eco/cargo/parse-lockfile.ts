@@ -144,7 +144,7 @@ export function jsParseCargoLock(content: string): ParsedLockfile {
     // Section header.
     if (trimmed[0] === '[') {
       // Flush prior entry.
-      if (currentEntry && currentEntry.name) {
+      if (currentEntry?.name) {
         const ref = freezeCargoEntry(currentEntry)
         ArrayPrototypePush(packages, ref)
         addToCargoIndex(packageIndex, currentEntry.name, packages.length - 1)
@@ -215,7 +215,7 @@ export function jsParseCargoLock(content: string): ParsedLockfile {
   }
 
   // Flush the last entry.
-  if (currentEntry && currentEntry.name) {
+  if (currentEntry?.name) {
     const ref = freezeCargoEntry(currentEntry)
     ArrayPrototypePush(packages, ref)
     addToCargoIndex(packageIndex, currentEntry.name, packages.length - 1)

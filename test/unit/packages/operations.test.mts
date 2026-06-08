@@ -27,6 +27,7 @@ import {
 import { extractPackage, packPackage } from '../../../src/packages/tarball'
 import type { PackageJson } from '../../../src/packages/types'
 import { describe, expect, it } from 'vitest'
+import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 import { runWithTempDir } from '../util/temp-file-helper'
 
 type EditablePackageJson = PackageJson & {
@@ -202,15 +203,23 @@ describe('packages/operations', () => {
   })
 
   describe('edge cases and error handling', () => {
-    it('should handle extractPackage with invalid spec', async () => {
-      await expect(
-        extractPackage('non-existent-package-xyz-123', { dest: '/tmp/test' }),
-      ).rejects.toThrow()
-    }, 30_000)
+    it(
+      'should handle extractPackage with invalid spec',
+      async () => {
+        await expect(
+          extractPackage('non-existent-package-xyz-123', { dest: '/tmp/test' }),
+        ).rejects.toThrow()
+      },
+      tolerantTimeout(30_000),
+    )
 
-    it('should handle packPackage with invalid path', async () => {
-      await expect(packPackage('/non/existent/path')).rejects.toThrow()
-    }, 30_000)
+    it(
+      'should handle packPackage with invalid path',
+      async () => {
+        await expect(packPackage('/non/existent/path')).rejects.toThrow()
+      },
+      tolerantTimeout(30_000),
+    )
 
     it('should handle getReleaseTag with special characters', () => {
       expect(getReleaseTag('package@1.0.0-beta.1')).toBe('1.0.0-beta.1')
@@ -224,15 +233,23 @@ describe('packages/operations', () => {
       expect(typeof tag).toBe('string')
     })
 
-    it('packPackage rejects for non-existent directory', async () => {
-      await expect(packPackage('/non/existent')).rejects.toThrow()
-    }, 30_000)
+    it(
+      'packPackage rejects for non-existent directory',
+      async () => {
+        await expect(packPackage('/non/existent')).rejects.toThrow()
+      },
+      tolerantTimeout(30_000),
+    )
 
-    it('extractPackage rejects for invalid spec', async () => {
-      await expect(
-        extractPackage('invalid-spec-xyz', { dest: '/tmp/test' }),
-      ).rejects.toThrow()
-    }, 30_000)
+    it(
+      'extractPackage rejects for invalid spec',
+      async () => {
+        await expect(
+          extractPackage('invalid-spec-xyz', { dest: '/tmp/test' }),
+        ).rejects.toThrow()
+      },
+      tolerantTimeout(30_000),
+    )
   })
 
   describe('integration scenarios', () => {

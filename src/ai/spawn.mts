@@ -227,6 +227,10 @@ export async function spawnAiAgent(
         stdioString: true,
         timeout: opts.timeoutMs,
       })
+      // `.stdin` is a typed convenience accessor on the fleet
+      // PromiseSpawnResult (`Promise<…> & { process; stdin }`); `await child`
+      // resolves the result, so the wrapper is kept rather than destructured.
+      // socket-lint: allow bare-spawn-access
       child.stdin?.end(opts.prompt)
       const result = await child
       stdout = String(result.stdout ?? '')

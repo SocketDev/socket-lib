@@ -17,6 +17,8 @@ import { once } from '../../src/memo/once'
 import { memoizeWeak } from '../../src/memo/weak'
 import { describe, expect, it, vi } from 'vitest'
 
+import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
+
 describe('memoizeAsync', () => {
   it('should cache async function results', async () => {
     const fn = vi.fn(async (n: number) => n * 2)
@@ -41,7 +43,7 @@ describe('memoizeAsync', () => {
     let callCount = 0
     const fn = async (n: number) => {
       callCount++
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(50)))
       return n * 2
     }
     const memoized = memoizeAsync(fn)

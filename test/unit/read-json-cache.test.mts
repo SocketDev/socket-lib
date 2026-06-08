@@ -18,6 +18,8 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
+
 import {
   clearReadJsonCache,
   getReadJsonCacheStats,
@@ -65,7 +67,7 @@ describe.sequential('readJson cache (async)', () => {
     const v1 = (await readJson(file)) as { v: number }
     expect(v1.v).toBe(1)
     // Wait a sliver to ensure mtimeMs changes on filesystems with 1ms resolution.
-    await new Promise(r => setTimeout(r, 20))
+    await new Promise(r => setTimeout(r, tolerantSleep(20)))
     await fs.writeFile(file, JSON.stringify({ v: 2 }))
     const v2 = (await readJson(file)) as { v: number }
     expect(v2.v).toBe(2)
@@ -155,7 +157,7 @@ describe.sequential('cache controls', () => {
       await readJson(file)
       const beforeStats = getReadJsonCacheStats()
       // Wait past the TTL.
-      await new Promise(r => setTimeout(r, 80))
+      await new Promise(r => setTimeout(r, tolerantSleep(80)))
       await readJson(file)
       const afterStats = getReadJsonCacheStats()
       // The post-TTL read should NOT be a hit.

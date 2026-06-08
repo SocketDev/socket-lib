@@ -273,7 +273,7 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
       (currentPkg === undefined || indent <= currentIndent)
 
     if (isPackageEntry) {
-      if (currentPkg && currentPkg.name) {
+      if (currentPkg?.name) {
         const ref = freezeEntry(currentPkg)
         ArrayPrototypePush(packages, ref)
         addToPnpmIndex(packageIndex, currentPkg.name, packages.length - 1)
@@ -335,7 +335,7 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
     }
   }
 
-  if (currentPkg && currentPkg.name) {
+  if (currentPkg?.name) {
     const ref = freezeEntry(currentPkg)
     ArrayPrototypePush(packages, ref)
     addToPnpmIndex(packageIndex, currentPkg.name, packages.length - 1)

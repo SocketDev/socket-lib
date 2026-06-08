@@ -3,6 +3,7 @@
  *   used for fail-fast trust boundaries.
  */
 
+// socket-lint: allow schema-lib
 import * as zodV3 from 'zod/v3'
 import { describe, expect, it } from 'vitest'
 

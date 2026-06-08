@@ -103,7 +103,7 @@ export function createForceNodeModulesPlugin(): Plugin {
     name: 'force-node-modules',
     resolveId(source, importer) {
       // Already inside node_modules — let rolldown's resolver handle it.
-      if (importer && importer.includes('node_modules')) {
+      if (importer?.includes('node_modules')) {
         return undefined
       }
       const match = matchers.find(m => m.re.test(source))

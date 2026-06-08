@@ -24,9 +24,9 @@ import { extractTar, extractTarGz } from '../../src/archives/tar'
 import { extractZip } from '../../src/archives/zip'
 import { safeDelete } from '../../src/fs/safe'
 
+import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 import { runWithTempDir } from '../unit/util/temp-file-helper'
 
-// Test archive fixtures
 let testZipPath: string
 let testTarPath: string
 let testTarGzPath: string
@@ -38,7 +38,6 @@ beforeAll(async () => {
   const tempDir = path.join(process.cwd(), 'test', 'temp')
   await fs.mkdir(tempDir, { recursive: true })
 
-  // Create test zip archive
   testZipPath = path.join(tempDir, 'test-archive.zip')
   const zip = new AdmZip()
   zip.addFile('file1.txt', Buffer.from('content1'))
@@ -46,7 +45,6 @@ beforeAll(async () => {
   zip.addFile('dir/nested/file3.txt', Buffer.from('content3'))
   zip.writeZip(testZipPath)
 
-  // Create test zip archive with strip prefix
   testZipWithStripPath = path.join(tempDir, 'test-strip.zip')
   const zipStrip = new AdmZip()
   zipStrip.addFile('prefix/file1.txt', Buffer.from('strip-content1'))
@@ -54,7 +52,6 @@ beforeAll(async () => {
   zipStrip.addFile('prefix/dir/nested/file3.txt', Buffer.from('strip-content3'))
   zipStrip.writeZip(testZipWithStripPath)
 
-  // Create test tar archive
   testTarPath = path.join(tempDir, 'test-archive.tar')
   const pack = tarStream.pack()
   pack.entry({ name: 'file1.txt' }, 'tar-content1')
@@ -69,7 +66,6 @@ beforeAll(async () => {
     tarWriteStream.on('error', reject)
   })
 
-  // Create test tar archive with strip prefix
   testTarWithStripPath = path.join(tempDir, 'test-strip.tar')
   const packStrip = tarStream.pack()
   packStrip.entry({ name: 'prefix/file1.txt' }, 'tar-strip-content1')
@@ -84,7 +80,6 @@ beforeAll(async () => {
     tarStripWriteStream.on('error', reject)
   })
 
-  // Create test tar.gz archive
   testTarGzPath = path.join(tempDir, 'test-archive.tar.gz')
   const packGz = tarStream.pack()
   packGz.entry({ name: 'file1.txt' }, 'targz-content1')
@@ -224,7 +219,6 @@ describe('archives', () => {
         const windowsStylePath = tempDir.replace(/\//g, '\\')
         await extractZip(testZipPath, windowsStylePath)
 
-        // Verify extraction worked
         const file1 = await fs.readFile(path.join(tempDir, 'file1.txt'), 'utf8')
         expect(file1).toBe('content1')
       }, 'extractZip-windows-path-')
@@ -313,7 +307,6 @@ describe('archives', () => {
         const windowsStylePath = tempDir.replace(/\//g, '\\')
         await extractTar(testTarPath, windowsStylePath)
 
-        // Verify extraction worked
         const file1 = await fs.readFile(path.join(tempDir, 'file1.txt'), 'utf8')
         expect(file1).toBe('tar-content1')
       }, 'extractTar-windows-path-')
@@ -456,14 +449,21 @@ describe('archives', () => {
       }, 'extractArchive-tar-')
     })
 
-    it('should auto-detect and extract tar.gz archive', async () => {
-      await runWithTempDir(async tempDir => {
-        await extractArchive(testTarGzPath, tempDir)
+    it(
+      'should auto-detect and extract tar.gz archive',
+      async () => {
+        await runWithTempDir(async tempDir => {
+          await extractArchive(testTarGzPath, tempDir)
 
-        const file1 = await fs.readFile(path.join(tempDir, 'file1.txt'), 'utf8')
-        expect(file1).toBe('targz-content1')
-      }, 'extractArchive-targz-')
-    }, 60_000)
+          const file1 = await fs.readFile(
+            path.join(tempDir, 'file1.txt'),
+            'utf8',
+          )
+          expect(file1).toBe('targz-content1')
+        }, 'extractArchive-targz-')
+      },
+      tolerantTimeout(60_000),
+    )
 
     it('should support strip option with auto-detection', async () => {
       await runWithTempDir(async tempDir => {

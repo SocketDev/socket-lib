@@ -22,6 +22,7 @@ class CaptureStream extends Writable {
     this.cursorTo = () => {}
     this.clearLine = () => {}
   }
+  // oxlint-disable-next-line socket/no-underscore-identifier -- `_write` is Node's `stream.Writable` override hook; the name is fixed by the Node API, not a privacy marker.
   override _write(
     chunk: Buffer | string,
     _encoding: BufferEncoding,

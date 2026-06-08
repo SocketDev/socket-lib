@@ -4,7 +4,7 @@ import { Writable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { WIN32 } from '../../../src/constants/platform'
+import { describeWindowsOnly } from '../util/skip-helpers'
 import {
   harness,
   loadFresh,
@@ -98,7 +98,7 @@ describe.sequential('secrets/windows — validateKeychainComponent', () => {
 // resolves it with Windows path semantics, so the join only matches a host
 // path.join() on win32. Run these on the windows-latest matrix leg only —
 // on Linux/macOS the separators diverge (CI Linux failure: "joins APPDATA …").
-describe.skipIf(!WIN32).sequential('secrets/windows — getDpapiFilePath', () => {
+describeWindowsOnly('secrets/windows — getDpapiFilePath', () => {
   test('joins APPDATA / service / account.enc', async () => {
     const { getDpapiFilePath } = await loadFresh()
     expect(getDpapiFilePath('socket-cli', 'SOCKET_API_TOKEN')).toBe(

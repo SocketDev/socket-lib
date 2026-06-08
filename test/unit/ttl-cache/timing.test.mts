@@ -88,7 +88,7 @@ describe.sequential('ttl-cache — timing', () => {
       expect(await longCache.get<string>('key')).toBe('value')
 
       // Wait a bit but not long enough to expire
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(50)))
 
       expect(await longCache.get<string>('key')).toBe('value')
 
@@ -102,10 +102,10 @@ describe.sequential('ttl-cache — timing', () => {
       })
 
       await refreshCache.set('key', 'value1')
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(200)))
       await refreshCache.set('key', 'value2') // Refresh TTL
 
-      await new Promise(resolve => setTimeout(resolve, 200))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(200)))
       // Should still be cached (200 + 200 = 400ms, but TTL refreshed at 200ms to 2000ms)
       expect(await refreshCache.get<string>('key')).toBe('value2')
 

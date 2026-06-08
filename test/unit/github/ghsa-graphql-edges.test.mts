@@ -14,6 +14,8 @@ import { httpRequest } from '../../../src/http-request/request'
 
 const JSONStringify = JSON.stringify
 
+// socket-lint: allow boolean-trap -- local test fixture builder; the
+// (body, ok, status) shape mirrors the httpRequest return it stands in for.
 function mkResponse(body: Buffer, ok: boolean, status: number) {
   return {
     body,

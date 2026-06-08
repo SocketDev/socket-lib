@@ -20,6 +20,8 @@ import { constants as zlibConstants } from 'node:zlib'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
+
 import {
   BROTLI_EXTS,
   compressBrotli,
@@ -74,18 +76,26 @@ describe.sequential('compression — brotli', () => {
     // Brotli level-11 on a 1 MB fixture is CPU-bound and can exceed the
     // default 5s vitest timeout on slower runners — bump to 30s. The
     // streaming-path / smaller-input tests stay on the default budget.
-    it('produces a smaller output for highly compressible input', async () => {
-      const compressed = await compressBrotli(LARGE_TEXT)
-      // Repeating JSON should compress to a small fraction of original
-      expect(compressed.byteLength).toBeLessThan(LARGE_TEXT.length / 5)
-    }, 30_000)
+    it(
+      'produces a smaller output for highly compressible input',
+      async () => {
+        const compressed = await compressBrotli(LARGE_TEXT)
+        // Repeating JSON should compress to a small fraction of original
+        expect(compressed.byteLength).toBeLessThan(LARGE_TEXT.length / 5)
+      },
+      tolerantTimeout(30_000),
+    )
 
-    it('honors the level option (lower level → larger output)', async () => {
-      const fast = await compressBrotli(LARGE_TEXT, { level: 1 })
-      const max = await compressBrotli(LARGE_TEXT, { level: 11 })
-      // Level 11 should be at least as small as level 1
-      expect(max.byteLength).toBeLessThanOrEqual(fast.byteLength)
-    }, 30_000)
+    it(
+      'honors the level option (lower level → larger output)',
+      async () => {
+        const fast = await compressBrotli(LARGE_TEXT, { level: 1 })
+        const max = await compressBrotli(LARGE_TEXT, { level: 11 })
+        // Level 11 should be at least as small as level 1
+        expect(max.byteLength).toBeLessThanOrEqual(fast.byteLength)
+      },
+      tolerantTimeout(30_000),
+    )
 
     it('handles empty input', async () => {
       const compressed = await compressBrotli('')

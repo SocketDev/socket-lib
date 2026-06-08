@@ -17,6 +17,7 @@ import {
   setReadJsonCacheMax,
   setReadJsonCacheTtlMs,
 } from '../../../src/fs/read-json-cache'
+import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 
 beforeEach(() => {
   clearReadJsonCache()
@@ -146,7 +147,7 @@ describe.sequential('fs/read-json-cache — TTL eviction', () => {
     setReadJsonCacheTtlMs(1) // 1ms TTL — easy to overshoot
     setCachedJson('/a', 1, 1, 1, { v: 'a' })
     // Wait long enough that the entry definitely exceeds TTL.
-    await new Promise(resolve => setTimeout(resolve, 20))
+    await new Promise(resolve => setTimeout(resolve, tolerantSleep(20)))
     expect(getCachedJson('/a', 1, 1, 1)).toBeUndefined()
     expect(getReadJsonCacheStats().size).toBe(0)
   })

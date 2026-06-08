@@ -29,6 +29,8 @@ const NEWLINE_REGEX = /\n/g
  *
  * @returns Formatted JSON string
  */
+// socket-lint: allow boolean-trap -- public API; callers across other files
+// pass `finalEOL` positionally, so an options object would be a breaking change.
 export function stringify(
   json: unknown,
   EOL: string,

@@ -9,9 +9,10 @@ import process from 'node:process'
 import { defineConfig } from 'vitest/config'
 
 import { baseCoverageConfig } from '../vitest.coverage.config.mts'
+import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const projectRoot = path.resolve(__dirname, '..', '..')
+const projectRoot = REPO_ROOT
 
 // Worker heap cap: smaller in CI (GitHub Actions ubuntu-latest has
 // ~7 GB total RAM — leave room for the runner + OS), generous locally
@@ -20,7 +21,9 @@ const isCI = !!process.env['CI']
 const workerHeapMB = isCI ? 6144 : 12_288
 
 // Normalize paths for cross-platform glob patterns (forward slashes on Windows)
-const toGlobPath = (pathLike: string): string => pathLike.replaceAll('\\', '/')
+export function toGlobPath(pathLike: string) {
+  return pathLike.replaceAll('\\', '/')
+}
 
 const vitestConfigIsolated = defineConfig({
   cacheDir: path.resolve(projectRoot, 'node_modules/.cache/vitest-isolated'),
@@ -89,4 +92,3 @@ const vitestConfigIsolated = defineConfig({
 })
 
 export { vitestConfigIsolated }
-export default vitestConfigIsolated

@@ -193,6 +193,8 @@ export async function downloadNpmPackage(
  *   console.log(`Installed: ${installed}, dir: ${packageDir}`)
  *   ```
  */
+// socket-lint: allow boolean-trap -- public API; callers across other files
+// pass `force` positionally, so an options object would be a breaking change.
 export async function ensurePackageInstalled(
   packageName: string,
   packageSpec: string,

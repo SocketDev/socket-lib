@@ -10,6 +10,7 @@
  *     promises-resolvers.test.mts.
  */
 
+import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
 import { pEach, pEachChunk } from '../../src/promises/iterate'
 import { normalizeIterationOptions } from '../../src/promises/options'
 import { describe, expect, it, vi } from 'vitest'
@@ -58,7 +59,7 @@ describe('promises', () => {
         async item => {
           active.push(item)
           maxActive.push(active.length)
-          await new Promise(resolve => setTimeout(resolve, 10))
+          await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
           active.splice(active.indexOf(item), 1)
         },
         { concurrency: 2 },

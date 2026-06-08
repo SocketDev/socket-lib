@@ -13,6 +13,7 @@ import {
   createCompositeAbortSignal,
   createTimeoutSignal,
 } from '../../src/abort/signal'
+import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
 import { describe, expect, it } from 'vitest'
 
 describe('abort', () => {
@@ -225,7 +226,7 @@ describe('abort', () => {
         controller2.signal,
       )
 
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
 
       expect(signal.aborted).toBe(false)
     })
@@ -279,7 +280,7 @@ describe('abort', () => {
       expect(signal.aborted).toBe(false)
 
       // Wait well under timeout — generous margin for slow CI.
-      await new Promise(resolve => setTimeout(resolve, 30))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(30)))
 
       expect(signal.aborted).toBe(false)
     })
@@ -328,7 +329,7 @@ describe('abort', () => {
       const signal = createTimeoutSignal(1)
       expect(signal.aborted).toBe(false)
 
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
 
       expect(signal.aborted).toBe(true)
     })
@@ -337,7 +338,7 @@ describe('abort', () => {
       const signal = createTimeoutSignal(10.5)
       expect(signal.aborted).toBe(false)
 
-      await new Promise(resolve => setTimeout(resolve, 20))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(20)))
 
       expect(signal.aborted).toBe(true)
     })
@@ -390,7 +391,7 @@ describe('abort', () => {
       const signal = createTimeoutSignal(50)
       expect(signal.aborted).toBe(false)
 
-      await new Promise(resolve => setTimeout(resolve, 70))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(70)))
 
       expect(signal.aborted).toBe(true)
     })
@@ -402,12 +403,12 @@ describe('abort', () => {
       expect(signal1.aborted).toBe(false)
       expect(signal2.aborted).toBe(false)
 
-      await new Promise(resolve => setTimeout(resolve, 70))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(70)))
 
       expect(signal1.aborted).toBe(true)
       expect(signal2.aborted).toBe(false)
 
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(100)))
 
       expect(signal2.aborted).toBe(true)
     })

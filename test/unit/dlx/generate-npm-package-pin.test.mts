@@ -12,6 +12,8 @@ import {
   resolveNpmPackagePin,
 } from '../../../src/dlx/lockfile'
 
+import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
+
 import { describeNetworkOnly } from '../util/skip-helpers'
 
 describe('dlx/lockfile/resolveNpmPackagePin', () => {
@@ -54,33 +56,45 @@ describe('dlx/lockfile/resolveNpmPackagePin', () => {
   })
 
   describeNetworkOnly('live registry (network)', () => {
-    it('returns pin details with both hash formats', async () => {
-      const pin = await resolveNpmPackagePin({
-        minReleaseDays: 0,
-        spec: 'is-odd@3.0.1',
-      })
-      expect(pin.name).toBe('is-odd')
-      expect(pin.version).toBe('3.0.1')
-      expect(pin.hash.integrity).toMatch(/^sha512-[A-Za-z0-9+/=]+$/)
-      expect(pin.hash.checksum).toMatch(/^[a-f0-9]{64}$/)
-      expect(pin.packageJson).toContain('"is-odd": "3.0.1"')
-      const lock = JSON.parse(pin.lockfile)
-      expect(lock.lockfileVersion).toBeGreaterThanOrEqual(2)
-      expect(lock.packages).toBeTypeOf('object')
-    }, 60_000)
+    it(
+      'returns pin details with both hash formats',
+      async () => {
+        const pin = await resolveNpmPackagePin({
+          minReleaseDays: 0,
+          spec: 'is-odd@3.0.1',
+        })
+        expect(pin.name).toBe('is-odd')
+        expect(pin.version).toBe('3.0.1')
+        expect(pin.hash.integrity).toMatch(/^sha512-[A-Za-z0-9+/=]+$/)
+        expect(pin.hash.checksum).toMatch(/^[a-f0-9]{64}$/)
+        expect(pin.packageJson).toContain('"is-odd": "3.0.1"')
+        const lock = JSON.parse(pin.lockfile)
+        expect(lock.lockfileVersion).toBeGreaterThanOrEqual(2)
+        expect(lock.packages).toBeTypeOf('object')
+      },
+      tolerantTimeout(60_000),
+    )
 
-    it('applies default min-release-age of 7 days when no option is provided', async () => {
-      // is-odd@3.0.1 was published in 2018 — easily older than 7 days.
-      const pin = await resolveNpmPackagePin({ spec: 'is-odd@3.0.1' })
-      expect(pin.version).toBe('3.0.1')
-    }, 60_000)
+    it(
+      'applies default min-release-age of 7 days when no option is provided',
+      async () => {
+        // is-odd@3.0.1 was published in 2018 — easily older than 7 days.
+        const pin = await resolveNpmPackagePin({ spec: 'is-odd@3.0.1' })
+        expect(pin.version).toBe('3.0.1')
+      },
+      tolerantTimeout(60_000),
+    )
 
-    it('respects minReleaseMins path (pnpm-style unit)', async () => {
-      const pin = await resolveNpmPackagePin({
-        minReleaseMins: 10_080,
-        spec: 'is-odd@3.0.1',
-      })
-      expect(pin.version).toBe('3.0.1')
-    }, 60_000)
+    it(
+      'respects minReleaseMins path (pnpm-style unit)',
+      async () => {
+        const pin = await resolveNpmPackagePin({
+          minReleaseMins: 10_080,
+          spec: 'is-odd@3.0.1',
+        })
+        expect(pin.version).toBe('3.0.1')
+      },
+      tolerantTimeout(60_000),
+    )
   })
 })

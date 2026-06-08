@@ -28,50 +28,10 @@ import { parseAst } from 'rolldown/parseAst'
 
 import type { Plugin } from 'rolldown'
 
-// oxc parser dialect, picked from a module's file extension. `parseAst`
-// defaults to plain JS and rejects TypeScript syntax, so we must tell it the
-// dialect or every `.ts`/`.tsx` module silently fails to parse (and the define
-// is skipped). `.mts`/`.cts` are TS; `.tsx` keeps JSX; `.jsx`/`.mjs`/`.cjs`/`.js`
-// are JS(X); anything unknown falls back to 'js'.
-type OxcLang = 'js' | 'jsx' | 'ts' | 'tsx'
-
-function langForId(id: string | undefined): OxcLang {
-  // Strip any query suffix (e.g. `foo.ts?inline`) before reading the ext.
-  const clean = (id ?? '').split('?')[0] ?? ''
-  if (clean.endsWith('.tsx')) {
-    return 'tsx'
-  }
-  if (clean.endsWith('.jsx')) {
-    return 'jsx'
-  }
-  if (
-    clean.endsWith('.ts') ||
-    clean.endsWith('.mts') ||
-    clean.endsWith('.cts')
-  ) {
-    return 'ts'
-  }
-  return 'js'
-}
-
-interface DefineEntry {
-  // Dotted chain split into segments, e.g. ['process', 'env', 'DEBUG'] or
-  // ['__DEV__'] for a bare identifier.
-  segments: string[]
-  value: string
-}
-
-function toEntries(define: Record<string, string>): DefineEntry[] {
-  return Object.entries(define).map(([key, value]) => ({
-    segments: key.split('.'),
-    value,
-  }))
-}
-
 // A match is a read unless its immediate parent uses it as a write/delete/
 // binding target. parent.type + the key under which the node hangs identify
 // the position unambiguously.
-function isReadPosition(parentType: string, parentKey: string): boolean {
+export function isReadPosition(parentType: string, parentKey: string): boolean {
   // `x = …` / `x += …` — left side is a write target.
   if (parentType === 'AssignmentExpression' && parentKey === 'left') {
     return false
@@ -90,28 +50,30 @@ function isReadPosition(parentType: string, parentKey: string): boolean {
   return true
 }
 
-// Read the property name off a member-expression node, normalizing the three
-// equivalent spellings to a bare identifier string:
-//   `obj.prop`          → StaticMemberExpression, property = Identifier
-//   `obj['prop']`       → ComputedMemberExpression, property = string Literal
-//   `obj["prop"]`       → ComputedMemberExpression, property = string Literal
-// Returns undefined for anything else (e.g. `obj[expr]` dynamic access), which
-// can't be a constant define target.
-function memberPropName(node: Record<string, unknown>): string | undefined {
-  const property = node['property'] as Record<string, unknown> | undefined
-  if (!property) {
-    return undefined
+// oxc parser dialect, picked from a module's file extension. `parseAst`
+// defaults to plain JS and rejects TypeScript syntax, so we must tell it the
+// dialect or every `.ts`/`.tsx` module silently fails to parse (and the define
+// is skipped). `.mts`/`.cts` are TS; `.tsx` keeps JSX; `.jsx`/`.mjs`/`.cjs`/`.js`
+// are JS(X); anything unknown falls back to 'js'.
+type OxcLang = 'js' | 'jsx' | 'ts' | 'tsx'
+
+export function langForId(id: string | undefined): OxcLang {
+  // Strip any query suffix (e.g. `foo.ts?inline`) before reading the ext.
+  const clean = (id ?? '').split('?')[0] ?? ''
+  if (clean.endsWith('.tsx')) {
+    return 'tsx'
   }
-  if (property['type'] === 'Identifier') {
-    return property['name'] as string
+  if (clean.endsWith('.jsx')) {
+    return 'jsx'
   }
-  // String-literal computed access (`obj['prop']` / `obj["prop"]`). oxc tags
-  // the node `Literal` with a string `value`; a dynamic `obj[expr]` has a
-  // non-Literal property and is correctly rejected here.
-  if (property['type'] === 'Literal' && typeof property['value'] === 'string') {
-    return property['value']
+  if (
+    clean.endsWith('.ts') ||
+    clean.endsWith('.mts') ||
+    clean.endsWith('.cts')
+  ) {
+    return 'ts'
   }
-  return undefined
+  return 'js'
 }
 
 /**
@@ -122,7 +84,7 @@ function memberPropName(node: Record<string, unknown>): string | undefined {
  * `process.env["X"]` source alike — important because `process.env` is an
  * index-signature type and TypeScript (TS4111) forces quoted bracket access.
  */
-function matchesChain(
+export function matchesChain(
   node: Record<string, unknown>,
   segments: string[],
 ): boolean {
@@ -152,6 +114,46 @@ function matchesChain(
     current['type'] === 'Identifier' &&
     current['name'] === segments[0]
   )
+}
+
+// Read the property name off a member-expression node, normalizing the three
+// equivalent spellings to a bare identifier string:
+//   `obj.prop`          → StaticMemberExpression, property = Identifier
+//   `obj['prop']`       → ComputedMemberExpression, property = string Literal
+//   `obj["prop"]`       → ComputedMemberExpression, property = string Literal
+// Returns undefined for anything else (e.g. `obj[expr]` dynamic access), which
+// can't be a constant define target.
+export function memberPropName(
+  node: Record<string, unknown>,
+): string | undefined {
+  const property = node['property'] as Record<string, unknown> | undefined
+  if (!property) {
+    return undefined
+  }
+  if (property['type'] === 'Identifier') {
+    return property['name'] as string
+  }
+  // String-literal computed access (`obj['prop']` / `obj["prop"]`). oxc tags
+  // the node `Literal` with a string `value`; a dynamic `obj[expr]` has a
+  // non-Literal property and is correctly rejected here.
+  if (property['type'] === 'Literal' && typeof property['value'] === 'string') {
+    return property['value']
+  }
+  return undefined
+}
+
+interface DefineEntry {
+  // Dotted chain split into segments, e.g. ['process', 'env', 'DEBUG'] or
+  // ['__DEV__'] for a bare identifier.
+  segments: string[]
+  value: string
+}
+
+export function toEntries(define: Record<string, string>): DefineEntry[] {
+  return Object.entries(define).map(([key, value]) => ({
+    segments: key.split('.'),
+    value,
+  }))
 }
 
 /**

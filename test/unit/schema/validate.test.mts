@@ -10,8 +10,8 @@
  *     conversion) and the unsupported-schema TypeError branch.
  */
 
-import * as zodV3 from 'zod/v3'
-import * as zodV4 from 'zod/v4'
+import * as zodV3 from 'zod/v3' // socket-lint: allow schema-lib
+import * as zodV4 from 'zod/v4' // socket-lint: allow schema-lib
 import { describe, expect, it } from 'vitest'
 
 import { validateSchema } from '../../../src/schema/validate'

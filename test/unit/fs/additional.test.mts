@@ -29,6 +29,7 @@ import {
 import { readJson, readJsonSync } from '../../../src/fs/read-json'
 import { writeJson, writeJsonSync } from '../../../src/fs/write-json'
 import { describe, expect, it } from 'vitest'
+import { minTimerQuantum } from '../../_shared/fleet/lib/timing.mts'
 import { runWithTempDir } from '../util/temp-file-helper'
 
 describe('fs - Additional Coverage', () => {
@@ -55,7 +56,7 @@ describe('fs - Additional Coverage', () => {
       const result = await new Promise<string | undefined>(resolve => {
         setTimeout(() => {
           controller.abort()
-        }, 10)
+        }, minTimerQuantum(10))
 
         findUp('nonexistent-file-that-will-trigger-loop', {
           cwd: process.cwd(),

@@ -14,6 +14,7 @@ import type { HttpResponse } from '../../../src/http-request/response-types'
  *
  * @returns Complete mock HttpResponse object
  */
+// socket-lint: allow boolean-trap -- ok positional matches HttpResponse.ok; changing to options object would require updating many call sites in sibling test files
 export function createMockHttpResponse(
   body: Buffer,
   ok: boolean,

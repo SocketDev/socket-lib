@@ -53,18 +53,18 @@ export function getEditableJsonClass<
     editableJsonClass = class EditableJson<
       InstanceData = Record<string, unknown>,
     > implements EditableJsonInstance<InstanceData> {
-      _canSave = true
-      _content: InstanceData = {} as InstanceData
-      _path: string | undefined = undefined
-      _readFileContent = ''
-      _readFileJson: unknown = undefined
+      canSave = true
+      contentData: InstanceData = {} as InstanceData
+      pathValue: string | undefined = undefined
+      readFileContent = ''
+      readFileJson: unknown = undefined
 
       get content(): Readonly<InstanceData> {
-        return this._content
+        return this.contentData
       }
 
       get filename(): string {
-        const path = this._path
+        const path = this.pathValue
         if (!path) {
           return ''
         }
@@ -72,7 +72,7 @@ export function getEditableJsonClass<
       }
 
       get path(): string | undefined {
-        return this._path
+        return this.pathValue
       }
 
       static async create<T = Record<string, unknown>>(
@@ -112,15 +112,15 @@ export function getEditableJsonClass<
       }
 
       create(path: string): this {
-        this._path = path
-        this._content = {} as InstanceData
-        this._canSave = true
+        this.pathValue = path
+        this.contentData = {} as InstanceData
+        this.canSave = true
         return this
       }
 
       fromContent(data: unknown): this {
-        this._content = data as InstanceData
-        this._canSave = false
+        this.contentData = data as InstanceData
+        this.canSave = false
         return this
       }
 
@@ -134,21 +134,21 @@ export function getEditableJsonClass<
         ;(parsed as Record<symbol, unknown>)[identSymbol] = indent
         ;(parsed as Record<symbol, unknown>)[newlineSymbol] = newline
 
-        this._content = parsed as InstanceData
+        this.contentData = parsed as InstanceData
         return this
       }
 
       async load(path: string): Promise<this> {
-        this._path = path
-        this._readFileContent = await readFile(this.filename)
-        this.fromJSON(this._readFileContent)
+        this.pathValue = path
+        this.readFileContent = await readFile(this.filename)
+        this.fromJSON(this.readFileContent)
         // Add AFTER fromJSON is called in case it errors.
-        this._readFileJson = JSONParse(this._readFileContent)
+        this.readFileJson = JSONParse(this.readFileContent)
         return this
       }
 
       async save(options?: EditableJsonSaveOptions): Promise<boolean> {
-        if (!this._canSave || this.content === undefined) {
+        if (!this.canSave || this.content === undefined) {
           throw new ErrorCtor('No file path to save to')
         }
 
@@ -156,8 +156,8 @@ export function getEditableJsonClass<
         if (
           !shouldSaveUtil(
             this.content as Record<string | symbol, unknown>,
-            this._readFileJson as Record<string | symbol, unknown>,
-            this._readFileContent,
+            this.readFileJson as Record<string | symbol, unknown>,
+            this.readFileContent,
             options,
           )
         ) {
@@ -168,8 +168,7 @@ export function getEditableJsonClass<
         const content = stripFormattingSymbols(
           this.content as Record<string | symbol, unknown>,
         )
-        // sort:true arm fires only when caller opts in.
-        /* c8 ignore next */
+        /* c8 ignore next - sort:true arm fires only when caller opts in */
         const sortedContent = options?.sort ? sortKeys(content) : content
         const formatting = getFormattingFromContent(
           this.content as Record<string | symbol, unknown>,
@@ -180,13 +179,13 @@ export function getEditableJsonClass<
 
         // Save to disk with retry logic for Windows file locking issues
         await retryWrite(this.filename, fileContent)
-        this._readFileContent = fileContent
-        this._readFileJson = JSONParse(fileContent)
+        this.readFileContent = fileContent
+        this.readFileJson = JSONParse(fileContent)
         return true
       }
 
       saveSync(options?: EditableJsonSaveOptions): boolean {
-        if (!this._canSave || this.content === undefined) {
+        if (!this.canSave || this.content === undefined) {
           throw new ErrorCtor('No file path to save to')
         }
 
@@ -194,8 +193,8 @@ export function getEditableJsonClass<
         if (
           !shouldSaveUtil(
             this.content as Record<string | symbol, unknown>,
-            this._readFileJson as Record<string | symbol, unknown>,
-            this._readFileContent,
+            this.readFileJson as Record<string | symbol, unknown>,
+            this.readFileContent,
             options,
           )
         ) {
@@ -206,8 +205,7 @@ export function getEditableJsonClass<
         const content = stripFormattingSymbols(
           this.content as Record<string | symbol, unknown>,
         )
-        // sort:true arm fires only when caller opts in.
-        /* c8 ignore next */
+        /* c8 ignore next - sort:true arm fires only when caller opts in */
         const sortedContent = options?.sort ? sortKeys(content) : content
         const formatting = getFormattingFromContent(
           this.content as Record<string | symbol, unknown>,
@@ -219,28 +217,28 @@ export function getEditableJsonClass<
         // Save to disk
         const fs = getNodeFs()
         fs.writeFileSync(this.filename, fileContent)
-        this._readFileContent = fileContent
-        this._readFileJson = JSONParse(fileContent)
+        this.readFileContent = fileContent
+        this.readFileJson = JSONParse(fileContent)
         return true
       }
 
       update(content: Partial<InstanceData>): this {
-        this._content = {
-          ...this._content,
+        this.contentData = {
+          ...this.contentData,
           ...content,
         } as InstanceData
         return this
       }
 
       willSave(options?: EditableJsonSaveOptions): boolean {
-        if (!this._canSave || this.content === undefined) {
+        if (!this.canSave || this.content === undefined) {
           return false
         }
 
         return shouldSaveUtil(
           this.content as Record<string | symbol, unknown>,
-          this._readFileJson as Record<string | symbol, unknown>,
-          this._readFileContent,
+          this.readFileJson as Record<string | symbol, unknown>,
+          this.readFileContent,
           options,
         )
       }

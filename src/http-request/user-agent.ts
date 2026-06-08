@@ -76,7 +76,7 @@ export function getSocketCallerUserAgent(): string {
     })
   }
   const caller = getEnvValue('SOCKET_CALLER_USER_AGENT')
-  return caller && caller.trim()
+  return caller?.trim()
     ? `${cachedBaseUserAgent} ${caller}`
     : cachedBaseUserAgent
 }

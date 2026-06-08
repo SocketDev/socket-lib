@@ -3,6 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
+import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 import {
   currentBranch,
   git,
@@ -210,7 +211,7 @@ describe.sequential('spawnAiAgentsInWorktrees', () => {
       async () => {
         active += 1
         maxActive = Math.max(maxActive, active)
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
         active -= 1
         return 'ok'
       },
@@ -232,7 +233,7 @@ describe.sequential('spawnAiAgentsInWorktrees', () => {
       async () => {
         active += 1
         maxActive = Math.max(maxActive, active)
-        await new Promise(resolve => setTimeout(resolve, 5))
+        await new Promise(resolve => setTimeout(resolve, tolerantSleep(5)))
         active -= 1
         return 'ok'
       },

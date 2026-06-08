@@ -1,7 +1,7 @@
 /**
  * @file The `EditablePackageJson` class factory. Split out of
  *   `packages/edit.ts` for size hygiene. Wraps `@npmcli/package-json` with
- *   Socket-specific knobs: path tracking, a `_canSave` guard for content-only
+ *   Socket-specific knobs: path tracking, a `canSave` guard for content-only
  *   instances, async + sync save paths that honor `EditablePackageJsonOptions`
  *   formatting.
  *
@@ -87,25 +87,25 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
         static override normalizeSteps = EditablePackageJsonBase.normalizeSteps
         static override prepareSteps = EditablePackageJsonBase.prepareSteps
 
-        _canSave = true
-        _path: string | undefined = undefined
-        _readFileContent = ''
-        _readFileJson: unknown = undefined
+        canSave = true
+        pkgPath: string | undefined = undefined
+        readFileContent = ''
+        readFileJson: unknown = undefined
 
         override get content(): Readonly<PackageJson> {
           return super.content
         }
 
         get filename(): string {
-          const path = this._path
-          if (!path) {
+          const pkgPath = this.pkgPath
+          if (!pkgPath) {
             return ''
           }
-          if (StringPrototypeEndsWith(path, 'package.json')) {
-            return path
+          if (StringPrototypeEndsWith(pkgPath, 'package.json')) {
+            return pkgPath
           }
           const nodePath = getNodePath()
-          return nodePath.join(path, 'package.json')
+          return nodePath.join(pkgPath, 'package.json')
         }
 
         static override async create(
@@ -163,7 +163,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
         override create(path: string) {
           super.create(path)
-          ;(this as unknown as { _path: string })._path = path
+          ;(this as unknown as { pkgPath: string }).pkgPath = path
           return this
         }
 
@@ -174,7 +174,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
         override fromContent(data: unknown) {
           super.fromContent(data)
-          ;(this as unknown as { _canSave: boolean })._canSave = false
+          ;(this as unknown as { canSave: boolean }).canSave = false
           return this
         }
 
@@ -183,12 +183,13 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           return this
         }
 
+        // socket-lint: allow boolean-trap -- matches EditablePackageJsonInstance interface which declares create?: boolean
         override async load(path: string, create?: boolean): Promise<this> {
-          this._path = path
+          this.pkgPath = path
           const { promises: fsPromises } = getNodeFs()
           let parseErr: unknown
           try {
-            this._readFileContent = await read(this.filename)
+            this.readFileContent = await read(this.filename)
           } catch (e) {
             if (!create) {
               throw e
@@ -210,12 +211,12 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
               throw parseErr
             }
             // This wasn't a package.json so prevent saving
-            this._canSave = false
+            this.canSave = false
             return this
           }
-          this.fromJSON(this._readFileContent)
+          this.fromJSON(this.readFileContent)
           // Add AFTER fromJSON is called in case it errors.
-          this._readFileJson = parse(this._readFileContent)
+          this.readFileJson = parse(this.readFileContent)
           return this
         }
 
@@ -225,7 +226,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
         }
 
         get path() {
-          return this._path
+          return this.pkgPath
         }
 
         override async prepare(opts: unknown = {}): Promise<this> {
@@ -234,7 +235,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
         }
 
         override async save(options?: SaveOptions): Promise<boolean> {
-          if (!this._canSave || this.content === undefined) {
+          if (!this.canSave || this.content === undefined) {
             throw new ErrorCtor('No package.json to save to')
           }
 
@@ -242,8 +243,8 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           if (
             !shouldSaveUtil(
               this.content as Record<string | symbol, unknown>,
-              this._readFileJson as Record<string | symbol, unknown>,
-              this._readFileContent,
+              this.readFileJson as Record<string | symbol, unknown>,
+              this.readFileContent,
               { ...options, sortFn: options?.sort ? packageSort : undefined },
             )
           ) {
@@ -265,13 +266,13 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           // Save to disk
           const { promises: fsPromises } = getNodeFs()
           await fsPromises.writeFile(this.filename, fileContent)
-          this._readFileContent = fileContent
-          this._readFileJson = parse(fileContent)
+          this.readFileContent = fileContent
+          this.readFileJson = parse(fileContent)
           return true
         }
 
         override saveSync(options?: SaveOptions): boolean {
-          if (!this._canSave || this.content === undefined) {
+          if (!this.canSave || this.content === undefined) {
             throw new ErrorCtor('No package.json to save to')
           }
           const { ignoreWhitespace = false, sort = false } = {
@@ -288,7 +289,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           const util = getNodeUtil()
           if (
             ignoreWhitespace &&
-            util.isDeepStrictEqual(content, this._readFileJson)
+            util.isDeepStrictEqual(content, this.readFileJson)
           ) {
             return false
           }
@@ -309,15 +310,15 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
           if (
             !ignoreWhitespace &&
-            fileContent.trim() === this._readFileContent.trim()
+            fileContent.trim() === this.readFileContent.trim()
           ) {
             return false
           }
 
           const fs = getNodeFs()
           fs.writeFileSync(this.filename, fileContent)
-          this._readFileContent = fileContent
-          this._readFileJson = parse(fileContent)
+          this.readFileContent = fileContent
+          this.readFileJson = parse(fileContent)
           return true
         }
 
@@ -331,7 +332,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
             __proto__: null,
             ...options,
           } as SaveOptions as SaveOptions
-          if (!this._canSave || this.content === undefined) {
+          if (!this.canSave || this.content === undefined) {
             return false
           }
           const {
@@ -344,7 +345,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           const util = getNodeUtil()
           if (
             ignoreWhitespace &&
-            util.isDeepStrictEqual(content, this._readFileJson)
+            util.isDeepStrictEqual(content, this.readFileJson)
           ) {
             return false
           }
@@ -365,7 +366,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
 
           if (
             !ignoreWhitespace &&
-            fileContent.trim() === this._readFileContent.trim()
+            fileContent.trim() === this.readFileContent.trim()
           ) {
             return false
           }

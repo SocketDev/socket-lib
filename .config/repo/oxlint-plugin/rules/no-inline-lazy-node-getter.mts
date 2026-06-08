@@ -60,7 +60,7 @@ const GETTER_TO_BINDING: Record<string, string> = {
  * parent is a block / program / switch-case body. The hoisted `const` is
  * inserted before it.
  */
-function findEnclosingStatement(node: AstNode): AstNode | undefined {
+export function findEnclosingStatement(node: AstNode): AstNode | undefined {
   let current = node
   let parent = current.parent
   while (parent) {
@@ -184,4 +184,5 @@ const rule = {
   },
 }
 
+// oxlint-disable-next-line socket/no-default-export -- oxlint plugin contract requires default-exported rule object.
 export default rule

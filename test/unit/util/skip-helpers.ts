@@ -59,6 +59,7 @@ export function describeNetworkOnly(name: string, fn: SuiteFn): void {
  *   )
  *   ```
  */
+// socket-lint: allow boolean-trap -- callers pass a positional boolean; changing to options object would break existing call sites in other files
 export function describeRequires(
   capability: string,
   available: boolean,
@@ -93,6 +94,7 @@ export function itNetworkOnly(name: string, fn: TestFn): void {
 /**
  * Test gated on a runtime capability. Same shape as `describeRequires`.
  */
+// socket-lint: allow boolean-trap -- callers pass a positional boolean; changing to options object would break existing call sites in other files
 export function itRequires(
   capability: string,
   available: boolean,

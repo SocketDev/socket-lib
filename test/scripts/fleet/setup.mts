@@ -1,57 +1,54 @@
 /**
- * @file Fleet-canonical per-worker vitest setup.
- *
- *   - Network: `nock` fails closed (no test can hit the real internet); loopback
- *     stays reachable for the few tests that spin up local servers.
- *   - Keychain: live OS-keychain round-trips skip by default — they hit
- *     `security`(1) / libsecret / DPAPI and either prompt for GUI auth (locked
- *     keychain) or hang in parallel workers, turning into 5s timeouts. The
- *     per-platform mock suites at
- *     test/unit/secrets/{macos,linux,windows}.test.mts cover the same code
- *     paths through mocked spawn boundaries. Override flags (set BEFORE
- *     invoking vitest):
- *   - `SOCKET_LIB_RUN_NETWORK_TESTS=1` opts in to `describeNetworkOnly` /
- *     `itNetworkOnly` blocks (live-registry integration suites).
- *   - `SOCKET_LIB_RUN_LIVE_KEYCHAIN_TESTS=1` opts in to live `security`(1) /
- *     libsecret / DPAPI round-trips.
+ * @file Fleet-canonical vitest setup, wired via `setupFiles` in
+ *   `.config/repo/vitest.config.mts` (loaded only when present). Registers the
+ *   fleet's custom matchers globally with `expect.extend` so every test under
+ *   `test/**` can use them without an import. Currently: `toContainPath` — a
+ *   separator-agnostic path-substring assertion (see ./../../_shared/fleet/lib/
+ *   matchers.mts). Also isolates git so a test's git ops can't touch the live
+ *   repo. Repo-specific setup belongs in `test/scripts/repo/setup.mts`.
  */
-import { afterEach, beforeAll } from 'vitest'
 
-import nock from 'nock'
+import { expect } from 'vitest'
 
-// Skip `describeNetworkOnly` / `itNetworkOnly` blocks by default.
-// `SOCKET_LIB_RUN_NETWORK_TESTS=1` opts a CI lane in for live-registry
-// integration suites. The flag uses _SKIP_ semantics (set = skip) per
-// the existing skip-helpers convention.
-if (!process.env['SOCKET_LIB_RUN_NETWORK_TESTS']) {
-  process.env['SOCKET_LIB_SKIP_NETWORK_TESTS'] = '1'
+import { toContainPathResult } from '../../_shared/fleet/lib/matchers.mts'
+
+// Isolate git from the live repo. When the suite runs from the pre-commit
+// hook, git exports GIT_DIR / GIT_WORK_TREE / GIT_INDEX_FILE (etc.) pointing
+// at THIS repo, and git honors them above cwd-based discovery — so a test
+// that spawns `git` with `cwd: tmpDir` would still commit onto the live
+// HEAD and rewrite the real .git/config. Strip the inherited context so
+// every git spawn resolves from its own cwd, and pin the config files to
+// /dev/null so `git config` in a test can never touch a real config.
+for (const name of [
+  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
+  'GIT_CEILING_DIRECTORIES',
+  'GIT_COMMON_DIR',
+  'GIT_DIR',
+  'GIT_INDEX_FILE',
+  'GIT_NAMESPACE',
+  'GIT_OBJECT_DIRECTORY',
+  'GIT_PREFIX',
+  'GIT_WORK_TREE',
+]) {
+  delete process.env[name]
 }
+process.env['GIT_CONFIG_GLOBAL'] = '/dev/null'
+process.env['GIT_CONFIG_SYSTEM'] = '/dev/null'
 
-// Skip live-OS-keychain round-trip tests by default. See file-level
-// docstring for the rationale.
-if (!process.env['SOCKET_LIB_RUN_LIVE_KEYCHAIN_TESTS']) {
-  process.env['SOCKET_SKIP_KEYCHAIN_LIVE_TESTS'] = '1'
-}
-
-beforeAll(() => {
-  // Block all network access by default. Tests must register
-  // explicit nock interceptors to talk to anything.
-  nock.disableNetConnect()
-  // Loopback stays reachable so local-server tests work.
-  nock.enableNetConnect((host: string) => {
-    return (
-      host === '127.0.0.1' ||
-      host === 'localhost' ||
-      host === '[::1]' ||
-      host.startsWith('127.0.0.1:') ||
-      host.startsWith('localhost:') ||
-      host.startsWith('[::1]:')
-    )
-  })
+expect.extend({
+  toContainPath(received: unknown, expected: string) {
+    return toContainPathResult(received, expected)
+  },
 })
 
-afterEach(() => {
-  // Clear any leftover interceptors so a test's missed `.cleanAll()`
-  // doesn't pollute the next test's mock surface.
-  nock.cleanAll()
-})
+declare module 'vitest' {
+  // Type params must match vitest's own `Matchers<T = any>` exactly, or the
+  // declaration merge fails with TS2428.
+  // oxlint-disable-next-line typescript/no-explicit-any -- must mirror vitest's `Matchers<T = any>` for the declaration merge.
+  interface Matchers<T = any> {
+    // Assert the received path string contains `expected` after both are
+    // normalized to "/" separators — cross-platform path assertions without
+    // per-OS branching.
+    toContainPath: (expected: string) => T
+  }
+}

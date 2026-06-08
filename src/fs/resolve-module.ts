@@ -94,7 +94,7 @@ export function requireResolveFromCwd(
   specifier: string,
   options?: { nothrow?: boolean | undefined } | undefined,
 ): string | undefined {
-  return options && options.nothrow
+  return options?.nothrow
     ? requireResolveFrom(process.cwd(), specifier, { nothrow: true })
     : requireResolveFrom(process.cwd(), specifier)
 }

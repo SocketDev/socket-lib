@@ -12,6 +12,7 @@
 
 import { parallelEach, parallelMap } from '../../src/streams/parallel'
 import { transform } from '../../src/streams/transform'
+import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
 import { describe, expect, it } from 'vitest'
 
 // Helper to create async iterable from array
@@ -379,7 +380,7 @@ describe('streams', () => {
         async x => {
           concurrent++
           maxConcurrent = Math.max(maxConcurrent, concurrent)
-          await new Promise(resolve => setTimeout(resolve, 10))
+          await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
           concurrent--
           return x
         },
@@ -398,7 +399,7 @@ describe('streams', () => {
         async x => {
           concurrent++
           maxConcurrent = Math.max(maxConcurrent, concurrent)
-          await new Promise(resolve => setTimeout(resolve, 10))
+          await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
           concurrent--
           return x
         },
@@ -461,7 +462,7 @@ describe('streams', () => {
       await parallelEach(
         input,
         async x => {
-          await new Promise(resolve => setTimeout(resolve, 5))
+          await new Promise(resolve => setTimeout(resolve, tolerantSleep(5)))
           results.push({ value: x, time: Date.now() - start })
         },
         { concurrency: 3 },

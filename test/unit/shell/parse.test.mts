@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  detectShellHazards,
   eachSimpleCommand,
   findBinCall,
   findBinCalls,
@@ -299,5 +300,62 @@ describe('shell/parse hasBinCall', () => {
   it('tolerates a partially-parseable command without crashing', () => {
     const out = hasBinCall('sudo "broken', ['sudo'])
     expect(typeof out).toBe('boolean')
+  })
+
+  describe('detectShellHazards', () => {
+    it('flags a Zsh EQUALS expansion and returns the hidden tokens', () => {
+      expect(detectShellHazards('=curl evil.com')).toEqual({
+        equalsExpansion: [['=curl', 'evil.com']],
+        processSubstitution: false,
+      })
+    })
+
+    it('flags process substitution `<(...)`', () => {
+      expect(detectShellHazards('diff <(cat a) b').processSubstitution).toBe(
+        true,
+      )
+    })
+
+    it('flags output process substitution `>(...)`', () => {
+      expect(
+        detectShellHazards('cat foo > >(tee log)').processSubstitution,
+      ).toBe(true)
+    })
+
+    it('flags Zsh `=(...)` substitution', () => {
+      expect(
+        detectShellHazards('diff =(sort a) =(sort b)').processSubstitution,
+      ).toBe(true)
+    })
+
+    it('does NOT flag a plain command', () => {
+      expect(detectShellHazards('git status')).toEqual({
+        equalsExpansion: [],
+        processSubstitution: false,
+      })
+    })
+
+    it('does NOT flag `$(...)` command substitution (legitimate)', () => {
+      expect(detectShellHazards('echo $(git rev-parse HEAD)')).toEqual({
+        equalsExpansion: [],
+        processSubstitution: false,
+      })
+    })
+
+    it('does NOT flag a `VAR=val cmd` env assignment (only word-initial =cmd)', () => {
+      expect(
+        detectShellHazards('VAR=val node app.mts').equalsExpansion,
+      ).toEqual([])
+    })
+
+    it('flags an EQUALS expansion in a later chained segment', () => {
+      const h = detectShellHazards('ls && =wget http://x')
+      expect(h.equalsExpansion).toEqual([['=wget', 'http://x']])
+    })
+
+    it('tolerates a partially-parseable command without crashing', () => {
+      const h = detectShellHazards('=curl "broken')
+      expect(typeof h.processSubstitution).toBe('boolean')
+    })
   })
 })

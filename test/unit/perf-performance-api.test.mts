@@ -11,11 +11,13 @@
 
 import { describe, expect, it } from 'vitest'
 
+import { minTimerQuantum } from '../_shared/fleet/lib/timing.mts'
+
 describe('performance API', () => {
   describe('basic performance measurements', () => {
     it('should measure elapsed time', { retry: 3 }, async () => {
       const start = performance.now()
-      await new Promise(resolve => setTimeout(resolve, 10))
+      await new Promise(resolve => setTimeout(resolve, minTimerQuantum(10)))
       const end = performance.now()
       const elapsed = end - start
       expect(elapsed).toBeGreaterThan(0)

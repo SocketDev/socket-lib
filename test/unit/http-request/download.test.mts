@@ -19,6 +19,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 //   2. Write the expected bytes to the temp file via that fake stream.
 import { PassThrough } from 'node:stream'
 
+import { minTimerQuantum } from '../../_shared/fleet/lib/timing.mts'
+
 import type * as HttpRequestModule from '../../../src/http-request/request'
 
 const { mockHttpRequestAttempt } = vi.hoisted(() => ({
@@ -292,7 +294,10 @@ describe.sequential('http-request/download — temp/stream cleanup branches', ()
       arrayBuffer: () => new ArrayBuffer(0),
     })
     const { httpDownload } = await loadFresh()
-    setTimeout(() => rawResponse.emit('error', new Error('network-blip')), 10)
+    setTimeout(
+      () => rawResponse.emit('error', new Error('network-blip')),
+      minTimerQuantum(10),
+    )
     await expect(httpDownload('https://example.com/x', dest)).rejects.toThrow(
       /network-blip/,
     )

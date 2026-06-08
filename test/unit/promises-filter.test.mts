@@ -9,6 +9,7 @@
  */
 
 import { pFilter, pFilterChunk } from '../../src/promises/iterate'
+import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
 import { describe, expect, it } from 'vitest'
 
 describe('promises', () => {
@@ -34,7 +35,7 @@ describe('promises', () => {
         async item => {
           active += 1
           maxActive = Math.max(maxActive, active)
-          await new Promise(resolve => setTimeout(resolve, 10))
+          await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
           active -= 1
           return item % 2 === 0
         },

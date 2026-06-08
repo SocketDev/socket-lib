@@ -18,6 +18,7 @@ import {
   withSuppressedWarnings,
 } from '../../../src/events/warning/suppress'
 import { setMaxEventTargetListeners } from '../../../src/events/warning/handler'
+import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('warnings/suppress', () => {
@@ -213,7 +214,7 @@ describe('warnings/suppress', () => {
 
     it('should handle async callbacks', async () => {
       const result = await withSuppressedWarnings('TestWarning', async () => {
-        await new Promise(resolve => setTimeout(resolve, 10))
+        await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
         return 'async result'
       })
 

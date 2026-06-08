@@ -2,13 +2,14 @@
  * @file Unit tests for URL parsing and validation utilities:
  *
  *   - isUrl() validates URL strings
+ *   - isLoopbackHost() / isPrivateHost() classify a hostname for SSRF guards
  *   - parseUrl() parses URLs with error handling
  *   - createRelativeUrl() constructs relative URLs Used by Socket tools for API
  *     URL construction.
  */
 
 import { createRelativeUrl, parseUrl } from '../../src/url/parse'
-import { isUrl } from '../../src/url/predicates'
+import { isLoopbackHost, isPrivateHost, isUrl } from '../../src/url/predicates'
 import { describe, expect, it } from 'vitest'
 
 describe('url', () => {
@@ -189,6 +190,71 @@ describe('url', () => {
 
     it('should handle empty base option', () => {
       expect(createRelativeUrl('/path', { base: '' })).toBe('path')
+    })
+  })
+
+  describe('isLoopbackHost', () => {
+    it('should return true for loopback hostnames', () => {
+      expect(isLoopbackHost('localhost')).toBe(true)
+      expect(isLoopbackHost('127.0.0.1')).toBe(true)
+      expect(isLoopbackHost('::1')).toBe(true)
+    })
+
+    it('should be case-insensitive', () => {
+      expect(isLoopbackHost('LOCALHOST')).toBe(true)
+      expect(isLoopbackHost('LocalHost')).toBe(true)
+    })
+
+    it('should return false for public hosts', () => {
+      expect(isLoopbackHost('example.com')).toBe(false)
+      expect(isLoopbackHost('8.8.8.8')).toBe(false)
+    })
+
+    it('should return false for other private ranges that are not loopback', () => {
+      expect(isLoopbackHost('10.0.0.1')).toBe(false)
+      expect(isLoopbackHost('192.168.1.1')).toBe(false)
+    })
+  })
+
+  describe('isPrivateHost', () => {
+    it('should return true for loopback hosts', () => {
+      expect(isPrivateHost('localhost')).toBe(true)
+      expect(isPrivateHost('127.0.0.1')).toBe(true)
+      expect(isPrivateHost('::1')).toBe(true)
+    })
+
+    it('should return true for RFC 1918 IPv4 ranges', () => {
+      expect(isPrivateHost('10.0.0.5')).toBe(true)
+      expect(isPrivateHost('172.16.0.1')).toBe(true)
+      expect(isPrivateHost('172.31.255.254')).toBe(true)
+      expect(isPrivateHost('192.168.1.1')).toBe(true)
+    })
+
+    it('should return true for link-local and cloud-metadata ranges', () => {
+      expect(isPrivateHost('169.254.169.254')).toBe(true)
+      expect(isPrivateHost('0.0.0.0')).toBe(true)
+    })
+
+    it('should return true for IPv6 loopback, ULA, and link-local', () => {
+      expect(isPrivateHost('fc00::1')).toBe(true)
+      expect(isPrivateHost('fd12:3456::1')).toBe(true)
+      expect(isPrivateHost('fe80::1')).toBe(true)
+    })
+
+    it('should be case-insensitive for IPv6', () => {
+      expect(isPrivateHost('FE80::1')).toBe(true)
+      expect(isPrivateHost('FC00::1')).toBe(true)
+    })
+
+    it('should return false for public hosts', () => {
+      expect(isPrivateHost('example.com')).toBe(false)
+      expect(isPrivateHost('8.8.8.8')).toBe(false)
+      expect(isPrivateHost('1.1.1.1')).toBe(false)
+    })
+
+    it('should not flag public 172.x outside the 16-31 second octet', () => {
+      expect(isPrivateHost('172.15.0.1')).toBe(false)
+      expect(isPrivateHost('172.32.0.1')).toBe(false)
     })
   })
 })

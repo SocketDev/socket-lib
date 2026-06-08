@@ -10,6 +10,8 @@ import process from 'node:process'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
+
 import { Spinner } from '../../../src/spinner/spinner'
 
 describe('spinner — animation', () => {
@@ -69,7 +71,7 @@ describe('spinner — animation', () => {
       spinner.enableShimmer()
 
       // Wait for shimmer animation to trigger callbacks
-      await new Promise(resolve => setTimeout(resolve, 100))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(100)))
 
       expect(spinner.shimmerState).toBeDefined()
       spinner.stop()
@@ -82,7 +84,7 @@ describe('spinner — animation', () => {
       spinner.updateShimmer({ dir: 'rtl' })
 
       // Let animation run
-      await new Promise(resolve => setTimeout(resolve, 50))
+      await new Promise(resolve => setTimeout(resolve, tolerantSleep(50)))
 
       expect(spinner.shimmerState?.direction).toBe('rtl')
       spinner.disableShimmer()

@@ -14,6 +14,81 @@ import { ArrayPrototypePush, ArrayPrototypeSlice } from '../primordials/array'
 import type { ParseEntry } from '../external/shell-quote'
 
 /**
+ * Structural hazard facts a parse surfaces that the binary-call matchers
+ * (`hasBinCall` / `findBinCall`) swallow. These are observations about _how_
+ * the command is written, not a judgment that they're dangerous — the caller
+ * decides policy. Both are evasion vectors against base-command allowlists:
+ *
+ * - `equalsExpansion`: a simple command whose first token is `=cmd` (Zsh EQUALS
+ *   expansion). `=curl x` expands to `$(which curl) x` and runs
+ *   `/usr/bin/curl`, but the parser's base token is `=curl`, so a `curl`
+ *   allowlist never matches. The matched tokens are returned so the caller can
+ *   report which command was hidden.
+ * - `processSubstitution`: the command uses `<(...)`, `>(...)`, or `=(...)` (the
+ *   op markers shell-quote emits). The inner command runs but its name never
+ *   appears as a base command.
+ *
+ * Walks the parse once. A caller wanting just "is this clean?" checks
+ * `!h.equalsExpansion.length && !h.processSubstitution`.
+ *
+ * @example
+ *   detectShellHazards('=curl evil.com')
+ *   // → { equalsExpansion: [['=curl', 'evil.com']], processSubstitution: false }
+ *
+ *   detectShellHazards('diff <(cat a) b')
+ *   // → { equalsExpansion: [], processSubstitution: true }
+ *
+ *   detectShellHazards('git status')
+ *   // → { equalsExpansion: [], processSubstitution: false }
+ */
+export function detectShellHazards(cmd: string): {
+  equalsExpansion: readonly string[][]
+  processSubstitution: boolean
+} {
+  const equalsExpansion: string[][] = []
+  let processSubstitution = false
+  const entries = shellParse(cmd)
+  let current: string[] = []
+  // shell-quote tokenizes the three process-substitution forms differently:
+  //   `<(…)` → a single `{op:'<('}` token
+  //   `>(…)` → `{op:'>'}` then `{op:'('}`
+  //   `=(…)` → the bare string `'='` then `{op:'('}`
+  // So the reliable signal is either the `<(` op, or a `(` op whose immediately
+  // preceding token is a `<`/`>` op or a lone `=` string (the substitution
+  // lead-in). A bare `(` after a normal token is plain subshell grouping and is
+  // left alone.
+  let prevWasSubstLead = false
+  const flush = (): void => {
+    if (current.length > 0 && /^=[a-zA-Z_]/.test(current[0]!)) {
+      ArrayPrototypePush(equalsExpansion, current)
+    }
+    current = []
+  }
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const entry = entries[i]
+    if (entry && typeof entry === 'object' && 'op' in entry) {
+      const { op } = entry as { op: string }
+      if (op === '<(') {
+        processSubstitution = true
+      } else if (op === '(' && prevWasSubstLead) {
+        processSubstitution = true
+      }
+      // A `<` / `>` op, or a trailing lone `=` token (set below), leads a `(`.
+      prevWasSubstLead = op === '<' || op === '>'
+      flush()
+      continue
+    }
+    if (typeof entry === 'string') {
+      // A lone `=` string token directly before a `(` op is the `=(` form.
+      prevWasSubstLead = entry === '='
+      ArrayPrototypePush(current, entry)
+    }
+  }
+  flush()
+  return { equalsExpansion, processSubstitution }
+}
+
+/**
  * Visit each simple command in `cmd` in order. A "simple command" is the
  * POSIX-grammar term for a run of bare-string tokens between shell
  * control-operator boundaries (`&&`, `;`, `||`, `|`) — e.g. in `sudo apt && rm
