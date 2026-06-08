@@ -95,6 +95,13 @@ export function buildArgs(
       if (opts.model) {
         args.push('--model', opts.model)
       }
+      if (opts.effort) {
+        // Codex takes reasoning effort as a `-c` config override, not a
+        // flag. Its vocab tops out at xhigh (no `max`), so clamp the shared
+        // AiEffort `max` down to xhigh — codex's ceiling.
+        const codexEffort = opts.effort === 'max' ? 'xhigh' : opts.effort
+        args.push('-c', `model_reasoning_effort=${codexEffort}`)
+      }
       if (allAllowed.length > 0) {
         args.push('--tools', allAllowed.join(','))
       }

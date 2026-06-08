@@ -195,6 +195,25 @@ describe.sequential('buildArgs — codex', () => {
     expect(args).toContain('gpt-5')
   })
 
+  test('maps effort to a -c model_reasoning_effort override', () => {
+    const args = buildArgs('codex', baseOpts({ effort: 'high' }))
+    const i = args.indexOf('-c')
+    expect(i).toBeGreaterThanOrEqual(0)
+    expect(args[i + 1]).toBe('model_reasoning_effort=high')
+  })
+
+  test('clamps the claude-only `max` effort down to codex xhigh', () => {
+    const args = buildArgs('codex', baseOpts({ effort: 'max' }))
+    const i = args.indexOf('-c')
+    expect(i).toBeGreaterThanOrEqual(0)
+    expect(args[i + 1]).toBe('model_reasoning_effort=xhigh')
+  })
+
+  test('omits the effort override when absent', () => {
+    const args = buildArgs('codex', baseOpts())
+    expect(args).not.toContain('-c')
+  })
+
   test('appends extraArgs', () => {
     const args = buildArgs('codex', baseOpts({ extraArgs: ['--xx'] }))
     expect(args).toContain('--xx')

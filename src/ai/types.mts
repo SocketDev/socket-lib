@@ -29,8 +29,14 @@ export type AiAgentName = 'claude' | 'codex' | 'gemini' | 'opencode'
 export type PermissionMode = 'acceptEdits' | 'dontAsk' | 'plan'
 
 /**
- * Reasoning-effort level for the agent session. Maps to the claude CLI
- * `--effort <level>` flag (claude-specific; other agents ignore it). Pair a
+ * Reasoning-effort level for the agent session. Two agents consume it, each via
+ * its own flag — `buildArgs` translates per-agent:
+ *
+ * - Claude: `--effort <level>`, accepts low/medium/high/xhigh/max.
+ * - Codex: `-c model_reasoning_effort=<level>`, accepts minimal/low/medium/high/
+ *   xhigh (no `max` — `buildArgs` clamps `max` → `xhigh`, codex's ceiling).
+ *
+ * Gemini / opencode have no reasoning-effort flag, so they ignore it. Pair a
  * cheap model with low effort for mechanical work and reserve high/max for
  * tasks that genuinely need deeper reasoning.
  */
