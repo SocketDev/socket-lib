@@ -14,13 +14,13 @@ import { Readable } from 'node:stream'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
-  GZIP_EXTS,
   compressGzip,
   compressGzipFile,
   createGzipCompressor,
   createGzipDecompressor,
   decompressGzip,
   decompressGzipFile,
+  GZIP_EXTS,
   hasGzipExt,
   isGzipCompressed,
   resolveGzipOptions,

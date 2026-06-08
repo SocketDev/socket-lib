@@ -77,7 +77,7 @@ export function getPackageExtensions(): Iterable<[string, unknown]> {
 
 const PACKUMENT_CACHE_MAX = 500
 
-class BoundedPackumentCache extends Map<string, unknown> {
+export class BoundedPackumentCache extends Map<string, unknown> {
   override set(key: string, value: unknown): this {
     // LRU touch/eviction: has-existing tested via Wave 4; fill-to-max
     // requires 500 distinct keys (impractical in test). The

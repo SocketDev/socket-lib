@@ -12,10 +12,10 @@ import { SetCtor } from '../primordials/map-set'
 import { PromiseAll } from '../primordials/promise'
 
 import {
+  assertArchiveExists,
   DEFAULT_MAX_ENTRIES,
   DEFAULT_MAX_FILE_SIZE,
   DEFAULT_MAX_TOTAL_SIZE,
-  assertArchiveExists,
   getAdmZip,
   getPath,
   validatePathWithinBase,

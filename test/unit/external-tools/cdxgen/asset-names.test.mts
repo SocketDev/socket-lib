@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
 
 import {
+  buildCdxgenAssetName,
   CDXGEN_FULL_ASSET_MAP,
   CDXGEN_SLIM_ASSET_MAP,
-  buildCdxgenAssetName,
   getCdxgenAssetEntry,
   getCdxgenDownloadUrl,
   makeCdxgenEntry,

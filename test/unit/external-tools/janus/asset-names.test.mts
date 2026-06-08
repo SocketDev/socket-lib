@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  JANUS_ASSET_MAP,
   getJanusAssetEntry,
   getJanusDownloadUrl,
+  JANUS_ASSET_MAP,
 } from '../../../../src/external-tools/janus/asset-names'
 
 describe('external-tools/janus/asset-names', () => {

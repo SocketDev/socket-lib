@@ -16,7 +16,7 @@ import { StringPrototypeStartsWith } from '../primordials/string'
 /**
  * Yargs parser options interface.
  */
-interface YargsOptions {
+export interface YargsOptions {
   // Array of option names that should be treated as booleans.
   boolean?: string[] | undefined
   // Array of option names that should be treated as strings.
@@ -48,7 +48,7 @@ interface YargsOptions {
 /**
  * Yargs parser result interface.
  */
-interface YargsArguments extends Record<string, unknown> {
+export interface YargsArguments extends Record<string, unknown> {
   _: string[]
   $0?: string | undefined
 }

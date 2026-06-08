@@ -1,15 +1,15 @@
 /**
- * @file Unit tests for browser-safe http-request layer. Mocks the `doFetch`
- *   helper module (not globalThis.fetch) so the project's nock-based test setup
- *   doesn't interfere.
+ * @file Unit tests for browser-safe http-request layer. Mocks the
+ *   `fetchResponse` helper module (not globalThis.fetch) so the project's
+ *   nock-based test setup doesn't interfere.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { minTimerQuantum } from '../../_shared/fleet/lib/timing.mts'
 
-vi.mock(import('../../../src/http-request/browser-fetch'), () => ({
-  doFetch: vi.fn(),
+vi.mock(import('../../../src/http-request/fetch/browser'), () => ({
+  fetchResponse: vi.fn(),
 }))
 
 interface MockResponseInit {
@@ -28,10 +28,10 @@ function mockFetchResponse(init: MockResponseInit = {}): Response {
 }
 
 async function loadFresh() {
-  const fetchMod = await import('../../../src/http-request/browser-fetch')
+  const fetchMod = await import('../../../src/http-request/fetch/browser')
   const mod = await import('../../../src/http-request/browser')
   return {
-    fetchSpy: fetchMod.doFetch as ReturnType<typeof vi.fn>,
+    fetchSpy: fetchMod.fetchResponse as ReturnType<typeof vi.fn>,
     HttpResponseError: mod.HttpResponseError,
     httpJson: mod.httpJson,
     httpRequest: mod.httpRequest,

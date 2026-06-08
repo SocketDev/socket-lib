@@ -197,4 +197,4 @@ For modules that NEED a separate browser implementation (because their Node vers
 
 - `docs/getting-started.md` — top-level intro
 - `docs/http-utilities.md` — Node-side httpJson / httpText / httpRequest
-- `docs/api-index.md` — auto-generated subpath catalog
+- `docs/api.md` — auto-generated subpath catalog

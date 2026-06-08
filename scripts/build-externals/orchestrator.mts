@@ -5,10 +5,10 @@
 
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { REPO_ROOT } from '../fleet/paths.mts'
 import { bundlePackage } from './bundler.mts'
 import { externalPackages, scopedPackages } from './config.mts'
 import { ensureDir } from './copy-files.mts'
@@ -16,8 +16,7 @@ import { transformPrimordials } from './transform-primordials.mts'
 
 const logger = getDefaultLogger()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootDir = path.resolve(__dirname, '..', '..')
+const rootDir = REPO_ROOT
 const distExternalDir = path.join(rootDir, 'dist', 'external')
 
 /**

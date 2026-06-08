@@ -2,7 +2,7 @@
 
 /**
  * @file Thin wrapper over the global `fetch()` so tests can mock the network
- *   layer via `vi.mock('@socketsecurity/lib/http-request/browser-fetch')`
+ *   layer via `vi.mock('@socketsecurity/lib/http-request/fetch/browser')`
  *   without monkey-patching `globalThis.fetch` (which conflicts with the
  *   project's nock-based test setup). The wrapper itself is `c8 ignore`-marked
  *   because the body is a single uncoverable fetch call; coverage credit is
@@ -11,7 +11,7 @@
  */
 
 /* c8 ignore start - native fetch call; tests mock this module wholesale */
-export function doFetch(
+export function fetchResponse(
   input: RequestInfo | URL,
   init?: RequestInit,
 ): Promise<Response> {

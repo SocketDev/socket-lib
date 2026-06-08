@@ -31,7 +31,7 @@ const PRIVATE_HOST_REGEXP =
  */
 export function isLoopbackHost(hostname: string): boolean {
   const host = StringPrototypeToLowerCase(hostname)
-  return host === '127.0.0.1' || host === '::1' || host === 'localhost'
+  return host === '::1' || host === '127.0.0.1' || host === 'localhost'
 }
 
 /**

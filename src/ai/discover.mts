@@ -43,7 +43,7 @@ const CACHE_TTL_MS = 60 * 60 * 1000
 
 let inProcessCache: DiscoveredAgents | undefined
 
-interface OnDiskCache {
+export interface OnDiskCache {
   readonly agents: DiscoveredAgents
   readonly writtenAt: number
 }

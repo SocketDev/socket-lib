@@ -57,7 +57,7 @@ const BROTLI_MIN_LEN = 4
 // the recognized set.
 export const BROTLI_EXTS: ReadonlySet<string> = new SetCtor(['.br', '.brotli'])
 
-interface ResolvedBrotliOptions extends BrotliOptions {
+export interface ResolvedBrotliOptions extends BrotliOptions {
   params: NonNullable<BrotliOptions['params']>
 }
 

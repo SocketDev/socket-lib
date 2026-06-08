@@ -12,9 +12,9 @@
  */
 
 import {
-  RAINBOW_GRADIENT,
   createTheme,
   extendTheme,
+  RAINBOW_GRADIENT,
   resolveColor,
   resolveShimmerColor,
 } from '../../../src/themes/resolve'

@@ -13,12 +13,12 @@ import { describe, expect, it } from 'vitest'
 import { getTrustLevelName as stableGetTrustLevelName } from '@socketsecurity/lib-stable/packages/provenance'
 
 import {
-  TRUST_LEVELS,
   compareTrust,
   didTrustDecrease,
   getTrustLevel,
   getTrustLevelName,
   getTrustStatus,
+  TRUST_LEVELS,
 } from '../../../src/packages/provenance'
 
 const fullyTrustedDoc = {

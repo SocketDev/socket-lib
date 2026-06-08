@@ -9,21 +9,21 @@ import { describe, expect, it } from 'vitest'
 
 import {
   DEFAULT_BASE_COLOR as canonicalDefaultBaseColor,
-  WHITE as canonicalWhite,
   frameColors as canonicalFrameColors,
+  WHITE as canonicalWhite,
 } from '@socketsecurity/lib-stable/effects/shimmer'
 
 import {
-  DEFAULT_BASE_COLOR,
-  WHITE,
   blendRgb,
   blockKernel,
   configToSpec,
+  DEFAULT_BASE_COLOR,
   frameColors,
   gradient,
   resolvePalette,
   smoothKernel,
   solidColor,
+  WHITE,
 } from '../../../src/effects/shimmer'
 import type { Palette, RGB, ShimmerSpec } from '../../../src/effects/shimmer'
 

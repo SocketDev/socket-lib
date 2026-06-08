@@ -23,7 +23,7 @@ import { ciSpinner } from './format'
 
 import type { SpinnerInstance, SpinnerOptions, SpinnerStyle } from './types'
 
-type YoctoSpinnerFactory = (options: Record<string, unknown>) => {
+export type YoctoSpinnerFactory = (options: Record<string, unknown>) => {
   constructor: YoctoSpinnerConstructor
 }
 

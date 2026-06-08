@@ -56,7 +56,7 @@ export const applySafe: <T, A extends readonly unknown[], R>(
 // Native form is single-dispatch; JS fallback is `Function.prototype.bind`,
 // which goes through V8's BoundFunction adapter on every invocation.
 // 2x per call when the bound function is hot.
-type BindCall = <
+export type BindCall = <
   T,
   P extends readonly unknown[],
   A extends readonly unknown[],

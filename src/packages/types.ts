@@ -9,7 +9,7 @@ import type { CategoryString } from '../eco/types'
 import type { EditablePackageJsonInstance } from './edit'
 
 // Type for package.json exports field.
-type PackageExports = {
+export type PackageExports = {
   [path: string]: unknown
 }
 

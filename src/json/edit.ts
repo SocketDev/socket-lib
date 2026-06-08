@@ -11,11 +11,11 @@ import { getNodeFs } from '../node/fs'
 import { ErrorCtor } from '../primordials/error'
 import { JSONParse } from '../primordials/json'
 import {
-  INDENT_SYMBOL,
-  NEWLINE_SYMBOL,
   detectIndent,
   detectNewline,
   getFormattingFromContent,
+  INDENT_SYMBOL,
+  NEWLINE_SYMBOL,
   shouldSave as shouldSaveUtil,
   sortKeys,
   stringifyWithFormatting,

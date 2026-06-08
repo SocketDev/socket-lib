@@ -12,7 +12,6 @@
 import process from 'node:process'
 import {
   ESNEXT,
-  NODE_SEA_FUSE,
   getExecPath,
   getMaintainedNodeVersions,
   getNodeDisableSigusr1Flags,
@@ -21,6 +20,7 @@ import {
   getNodeNoWarningsFlags,
   getNodePermissionFlags,
   getNodeVersion,
+  NODE_SEA_FUSE,
   supportsNodeCompileCacheApi,
   supportsNodeCompileCacheEnvVar,
   supportsNodeDisableSigusr1Flag,

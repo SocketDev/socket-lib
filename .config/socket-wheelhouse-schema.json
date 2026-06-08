@@ -159,6 +159,20 @@
       "description": "Claude Code opt-ins.",
       "type": "object",
       "properties": {
+        "capabilities": {
+          "description": "Repo capabilities that gate off-by-default fleet hooks. Each is a trait the repo HAS (e.g. `cargo` = builds Rust via cargo), not a hook name — the wheelhouse `CAPABILITY_HOOKS` map decides which hooks each capability installs. Declared here once; cascade installs the gated hooks + wires settings.json only for repos that list the capability. Enum-constrained so a typo fails validation instead of silently no-op-ing.",
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "anyOf": [
+              {
+                "const": "cargo",
+                "description": "Repo builds Rust via `cargo build --release` (or a fleet build-prod alias). Installs `concurrent-cargo-build-guard`, which blocks a second release build while one is in flight.",
+                "type": "string"
+              }
+            ]
+          }
+        },
         "includeSecurityScanSkill": {
           "description": "Ship `.claude/skills/fleet/scanning-security/SKILL.md`.",
           "type": "boolean"

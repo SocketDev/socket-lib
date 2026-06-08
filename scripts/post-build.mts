@@ -2,9 +2,9 @@
  * @file Orchestrates the post-build steps that shape the published dist:
  *   package-exports generation, CJS-export rewrite, external-import rewrite,
  *   and the dist/export validators. Deliberately does NOT generate docs — the
- *   api-index.md doc-gen is committed-source output unrelated to the dist, so
- *   it lives in its own `pnpm run docs` script and must not run on every
- *   `prepare`/install build (see scripts/repo/make-api-index-md.mts).
+ *   api.md doc-gen is committed-source output unrelated to the dist, so it
+ *   lives in its own `pnpm run docs` script and must not run on every
+ *   `prepare`/install build (see scripts/repo/make-api-md.mts).
  */
 
 import process from 'node:process'
@@ -35,7 +35,7 @@ async function main(): Promise<void> {
 
   const exitCode = await runSequence([
     {
-      args: ['scripts/post-build/make-package-exports.mts', ...fixArgs],
+      args: ['scripts/fleet/make-package-exports.mts', ...fixArgs],
       command: 'node',
     },
     {

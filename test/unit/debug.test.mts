@@ -16,9 +16,9 @@ import {
   debugDir,
   debugDirNs,
   debugLog,
+  debuglog,
   debugLogNs,
   debugNs,
-  debuglog,
   debugtime,
 } from '../../src/debug/output'
 import { clearEnv, resetEnv, setEnv } from '../../src/env/rewire'

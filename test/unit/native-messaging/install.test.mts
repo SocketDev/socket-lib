@@ -9,10 +9,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  HOST_NAME,
-  MIN_NODE_VERSION_FOR_STRIP_TYPES,
   buildManifest,
+  HOST_NAME,
   installNativeHost,
+  MIN_NODE_VERSION_FOR_STRIP_TYPES,
 } from '../../../src/native-messaging/install'
 
 describe('buildManifest', () => {

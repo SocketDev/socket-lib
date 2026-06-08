@@ -6,17 +6,16 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { externalPackages, scopedPackages } from '../build-externals/config.mts'
+import { REPO_ROOT } from '../fleet/paths.mts'
 
 const logger = getDefaultLogger()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const distDir = path.resolve(__dirname, '..', '..', 'dist')
+const distDir = path.join(REPO_ROOT, 'dist')
 const distExternalDir = path.join(distDir, 'external')
 
 // Build list of all external packages to rewrite

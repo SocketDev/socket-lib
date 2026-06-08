@@ -23,7 +23,7 @@ const DEV: DepType = 'dev'
 const OPTIONAL: DepType = 'optional'
 const PEER: DepType = 'peer'
 
-interface RawManifest {
+export interface RawManifest {
   readonly name?: unknown | undefined
   readonly version?: unknown | undefined
   readonly description?: unknown | undefined

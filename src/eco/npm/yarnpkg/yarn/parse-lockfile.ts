@@ -63,7 +63,7 @@ export interface YarnEntryState {
   linkType: string | undefined
 }
 
-type PackageIndex = Record<string, number | number[]>
+export type PackageIndex = Record<string, number | number[]>
 
 export function addToYarnIndex(
   packageIndex: PackageIndex,

@@ -14,11 +14,12 @@
 import { createRequire } from 'node:module'
 import { readdirSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath, pathToFileURL } from 'node:url'
+import { pathToFileURL } from 'node:url'
 import process from 'node:process'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const externalDir = path.resolve(__dirname, '..', '..', 'dist', 'external')
+import { REPO_ROOT } from '../fleet/paths.mts'
+
+const externalDir = path.join(REPO_ROOT, 'dist', 'external')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require

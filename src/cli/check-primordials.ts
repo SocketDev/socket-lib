@@ -54,7 +54,7 @@ const FALLBACK_CONFIG_PATHS: readonly string[] = [
 ]
 const CONFIG_SECTION = 'primordials'
 
-interface ParsedArgs {
+export interface ParsedArgs {
   readonly config: string | undefined
   readonly json: boolean
   readonly explain: boolean
@@ -62,14 +62,14 @@ interface ParsedArgs {
   readonly help: boolean
 }
 
-interface RawConfig {
+export interface RawConfig {
   scanDirs?: unknown | undefined
   aliasMap?: unknown | undefined
   nodeInternalOnly?: unknown | undefined
   socketLibPrimordialsPath?: unknown | undefined
 }
 
-interface SerializedFinding {
+export interface SerializedFinding {
   kind: PrimordialsFinding['kind']
   name: string
   files: readonly string[]

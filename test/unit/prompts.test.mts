@@ -12,13 +12,13 @@
  */
 
 import {
-  Separator,
   confirm,
   createSeparator,
   input,
   password,
   search,
   select,
+  Separator,
 } from '../../src/stdio/prompts'
 import type { Choice } from '../../src/stdio/prompts'
 import { describe, expect, it } from 'vitest'

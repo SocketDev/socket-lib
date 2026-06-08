@@ -43,7 +43,7 @@ import type { JsonValue } from '../json/types'
 const DEFAULT_MAX_ENTRIES = 256
 const DEFAULT_TTL_MS = 5 * 60 * 1000
 
-interface CacheEntry {
+export interface CacheEntry {
   ino: number
   size: number
   mtimeMs: number

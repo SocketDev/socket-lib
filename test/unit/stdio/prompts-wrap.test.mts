@@ -14,7 +14,6 @@
 
 import process from 'node:process'
 import {
-  Separator,
   checkbox,
   confirm,
   createSeparator,
@@ -22,6 +21,7 @@ import {
   password,
   search,
   select,
+  Separator,
   wrapPrompt,
 } from '../../../src/stdio/prompts'
 import type { Context } from '../../../src/stdio/prompts'

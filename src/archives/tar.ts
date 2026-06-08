@@ -22,10 +22,10 @@ import { normalizePath } from '../paths/normalize'
 import { ErrorCtor } from '../primordials/error'
 
 import {
+  assertArchiveExists,
   DEFAULT_MAX_ENTRIES,
   DEFAULT_MAX_FILE_SIZE,
   DEFAULT_MAX_TOTAL_SIZE,
-  assertArchiveExists,
   getTarFs,
 } from './_internal'
 

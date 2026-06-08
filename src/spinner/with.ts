@@ -129,7 +129,7 @@ export async function withSpinner<T>(
     // corresponding option; tests cover paths individually.
     /* c8 ignore start */
     if (wasSpinning) {
-      process.stderr.write('\r\x1B[2K') // socket-hook: allow logger
+      process.stderr.write('\r\x1B[2K') // socket-lint: allow
     }
 
     if (savedColor !== undefined) {

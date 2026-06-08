@@ -11,7 +11,7 @@ import { UNKNOWN_ERROR as canonicalUnknownError } from '@socketsecurity/lib-stab
 
 import { describe, expect, it } from 'vitest'
 
-import { UNKNOWN_ERROR, errorMessage } from '../../src/errors/message'
+import { errorMessage, UNKNOWN_ERROR } from '../../src/errors/message'
 import {
   isErrnoException,
   isError,

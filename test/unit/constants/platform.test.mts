@@ -15,22 +15,22 @@ import os from 'node:os'
 import process from 'node:process'
 
 import {
+  getArch as canonicalGetArch,
   S_IXGRP as canonicalIxGrp,
   S_IXOTH as canonicalIxOth,
   S_IXUSR as canonicalIxUsr,
-  getArch as canonicalGetArch,
 } from '@socketsecurity/lib-stable/constants/platform'
 
 import {
   DARWIN,
-  S_IXGRP,
-  S_IXOTH,
-  S_IXUSR,
-  WIN32,
   getArch,
   getLibc,
   getOs,
   getTarget,
+  S_IXGRP,
+  S_IXOTH,
+  S_IXUSR,
+  WIN32,
 } from '../../../src/constants/platform'
 
 describe('constants/platform', () => {

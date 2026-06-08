@@ -38,8 +38,8 @@ import {
   cpSync,
   existsSync,
   mkdtempSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   rmSync,
   statSync,
 } from 'node:fs'

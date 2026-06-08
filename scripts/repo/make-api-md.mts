@@ -1,8 +1,8 @@
 /**
- * @file Generate docs/api-index.md from package.json exports. Walks every
- *   subpath export, finds the matching source file under src/, and emits a
- *   grouped markdown table with the first line of each module's
- *   `@fileoverview`. Regenerate whenever exports change.
+ * @file Generate docs/api.md from package.json exports. Walks every subpath
+ *   export, finds the matching source file under src/, and emits a grouped
+ *   markdown table with the first line of each module's `@fileoverview`.
+ *   Regenerate whenever exports change.
  */
 
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -116,7 +116,7 @@ export function renderMarkdown(groups: Map<string, Row[]>): string {
   })
 
   const lines: string[] = []
-  lines.push('# API Index')
+  lines.push('# API')
   lines.push('')
   lines.push(
     'Every subpath exported by **@socketsecurity/lib-stable**, grouped by namespace.',
@@ -165,7 +165,7 @@ async function main(): Promise<void> {
   const rows = buildRows(pkg.exports)
   const groups = groupRows(rows)
   const markdown = renderMarkdown(groups)
-  const outPath = path.join(rootPath, 'docs', 'api-index.md')
+  const outPath = path.join(rootPath, 'docs', 'api.md')
   writeFileSync(outPath, markdown)
   // Run oxfmt so the checked-in file matches the formatter's expectations
   // (table column alignment, etc.) — otherwise lint fails on every build.
@@ -193,8 +193,7 @@ async function main(): Promise<void> {
   } catch {
     // Formatting is best-effort — don't fail the build if oxfmt is missing.
   }
-  // eslint-disable-next-line no-console
-  logger.log(`Wrote ${rows.length} exports to docs/api-index.md`)
+  logger.log(`Wrote ${rows.length} exports to docs/api.md`)
 }
 
 main().catch(err => {

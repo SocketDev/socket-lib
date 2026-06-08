@@ -32,7 +32,7 @@ import type { AssetPattern, RepoConfig } from './github-types'
  * output to this shape so downstream code is unaware of which transport
  * produced the data.
  */
-interface ReleaseRow {
+export interface ReleaseRow {
   tag_name: string
   published_at: string
   assets: Array<{ name: string }>

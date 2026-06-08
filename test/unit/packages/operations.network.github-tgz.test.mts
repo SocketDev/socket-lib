@@ -4,18 +4,20 @@
  *   under the 500-line cap. Skipped when SOCKET_LIB_SKIP_NETWORK_TESTS is set.
  */
 
-import { promises as fs } from 'node:fs'
+import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 
 import { expect, it } from 'vitest'
 
 import { readPackageJson } from '../../../src/packages/read'
 import { resolveGitHubTgzUrl } from '../../../src/packages/fetch'
-import { extractPackage } from '../../../src/packages/tarball'
-import type { PackageJson } from '../../../src/packages/types'
+import { extractPackage, packPackage } from '../../../src/packages/tarball'
+import type { ExtractOptions, PackageJson } from '../../../src/packages/types'
 import { describeNetworkOnly } from '../util/skip-helpers'
 import { runWithTempDir } from '../util/temp-file-helper'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
+
+type ExtractCallback = (destPath: string) => Promise<unknown>
 
 describeNetworkOnly('resolveGitHubTgzUrl', () => {
   it('should return empty string when package.json not found', async () => {

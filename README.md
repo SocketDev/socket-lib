@@ -39,7 +39,7 @@ import { httpJson } from '@socketsecurity/lib/http-request'
 import { safeDelete } from '@socketsecurity/lib/fs'
 ```
 
-Start with the [API Index](./docs/api-index.md) — every subpath export with a one-line description.
+Start with the [API reference](./docs/api.md) — every subpath export with a one-line description.
 
 ## Development
 

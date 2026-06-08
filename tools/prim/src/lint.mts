@@ -13,7 +13,7 @@
  *     the same visitor.
  */
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
@@ -38,9 +38,9 @@ const CTOR_NAMES = new Set([
   'Float32Array',
   'Float64Array',
   'Function',
+  'Int8Array',
   'Int16Array',
   'Int32Array',
-  'Int8Array',
   'Map',
   'Number',
   'Object',
@@ -54,11 +54,11 @@ const CTOR_NAMES = new Set([
   'Symbol',
   'SyntaxError',
   'TypeError',
-  'URIError',
-  'Uint16Array',
-  'Uint32Array',
   'Uint8Array',
   'Uint8ClampedArray',
+  'Uint16Array',
+  'Uint32Array',
+  'URIError',
   'WeakMap',
   'WeakRef',
   'WeakSet',

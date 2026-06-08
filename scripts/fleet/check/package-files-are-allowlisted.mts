@@ -19,7 +19,13 @@
  *      Exit 0 = clean. Exit 1 = drift, with per-package finding lists.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 // oxlint-disable-next-line socket/prefer-async-spawn -- sync stdin/stdout + typed string return matches the read-stdout-then-parse-JSON shape; v5 lib spawnSync omits 'encoding' from SpawnSyncOptions and returns string-or-Buffer.
@@ -262,12 +268,47 @@ export function checkPackage(
   }
 }
 
+// npm includes these unconditionally regardless of `files:`; they never need a
+// `files:` entry, so the canonical allowlist omits them.
+const ALWAYS_PUBLISHED_RE =
+  /^(?:CHANGELOG(?:\.md)?|LICEN[CS]E(?:\.md|\.txt)?|README(?:\.md)?|package\.json)$/i
+
 /**
- * Run the check on every workspace package in `repoRoot`. Returns exit code (0
- * = clean, 1 = findings).
+ * Derive a tight, canonical `files:` allowlist from a package's publish output.
+ * Drops forbidden dev/test content and the always-published essentials, then
+ * collapses each top-level directory that ships any file into a single `dir`
+ * entry (npm's `files:` semantics include the whole subtree). Top-level files
+ * that aren't essentials are listed explicitly. Result is sorted (ASCII).
  */
-export function runCheck(repoRoot: string): number {
+export function computeCanonicalFiles(packOut: PackOutput): string[] {
+  const dirs = new Set<string>()
+  const topFiles = new Set<string>()
+  for (let i = 0, { length } = packOut.files; i < length; i += 1) {
+    const p = packOut.files[i]!.path
+    if (
+      ALWAYS_PUBLISHED_RE.test(p) ||
+      FORBIDDEN_PUBLISHED_PATTERNS.some(re => re.test(p))
+    ) {
+      continue
+    }
+    const slash = p.indexOf('/')
+    if (slash === -1) {
+      topFiles.add(p)
+    } else {
+      dirs.add(p.slice(0, slash))
+    }
+  }
+  return [...dirs, ...topFiles].toSorted()
+}
+
+/**
+ * Run the check on every workspace package in `repoRoot`. With `fix`, rewrites
+ * each package.json `files:` to {@link computeCanonicalFiles}. Returns exit
+ * code (0 = clean / fixed, 1 = findings remain in report mode).
+ */
+export function runCheck(repoRoot: string, fix = false): number {
   const findings: Finding[] = []
+  const fixed: string[] = []
   const pkgDirs = findWorkspacePackages(repoRoot)
   for (let i = 0, { length } = pkgDirs; i < length; i += 1) {
     const pkgDir = pkgDirs[i]!
@@ -285,7 +326,37 @@ export function runCheck(repoRoot: string): number {
       })
       continue
     }
+    if (fix) {
+      const canonical = computeCanonicalFiles(packOut)
+      const current = JSON.stringify(pkg.files ?? [])
+      if (JSON.stringify(canonical) !== current) {
+        const pkgPath = path.join(pkgDir, 'package.json')
+        const raw = JSON.parse(readFileSync(pkgPath, 'utf8')) as Record<
+          string,
+          unknown
+        >
+        raw['files'] = canonical
+        writeFileSync(pkgPath, `${JSON.stringify(raw, null, 2)}\n`, 'utf8')
+        fixed.push(`${pkg.name}: files = ${JSON.stringify(canonical)}`)
+      }
+      continue
+    }
     checkPackage(pkgDir, pkg, packOut, findings)
+  }
+  if (fix) {
+    if (fixed.length) {
+      logger.success(
+        `[check-package-files-are-allowlisted] rewrote files: in ${fixed.length} package(s):`,
+      )
+      for (let i = 0, { length } = fixed; i < length; i += 1) {
+        logger.log(`  ${fixed[i]!}`)
+      }
+    } else {
+      logger.log(
+        '[check-package-files-are-allowlisted] all files: lists already canonical',
+      )
+    }
+    return 0
   }
   if (findings.length === 0) {
     logger.log(
@@ -305,5 +376,5 @@ export function runCheck(repoRoot: string): number {
 }
 
 if (import.meta.url === `file://${process.argv[1]}`) {
-  process.exit(runCheck(REPO_ROOT))
+  process.exit(runCheck(REPO_ROOT, process.argv.includes('--fix')))
 }

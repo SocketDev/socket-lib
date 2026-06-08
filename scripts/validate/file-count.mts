@@ -7,19 +7,18 @@
  */
 
 import { exec } from 'node:child_process'
-import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 import { promisify } from 'node:util'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+
+import { REPO_ROOT } from '../fleet/paths.mts'
 
 const logger = getDefaultLogger()
 
 const execAsync = promisify(exec)
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..', '..')
+const rootPath = REPO_ROOT
 
 // Maximum number of files in a single commit
 const MAX_FILES_PER_COMMIT = 50

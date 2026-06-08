@@ -37,7 +37,7 @@ const NODE_JS_EXTENSIONS = new SetCtor(['.js', '.mjs', '.cjs'] as const)
 // a package.json isn't permanently stuck at "none found".
 const PACKAGE_JSON_PATH_CACHE_MAX_SIZE = 200
 const PACKAGE_JSON_NEGATIVE_TTL_MS = 10_000
-type PackageJsonPathEntry = {
+export type PackageJsonPathEntry = {
   path: string | undefined
   at: number
 }
@@ -45,7 +45,7 @@ const packageJsonPathCache = new MapCtor<string, PackageJsonPathEntry>()
 
 // Cache for parsed package.json content keyed by path + mtime so stale
 // content is not served if the file is modified or replaced.
-type PackageJsonCacheEntry = {
+export type PackageJsonCacheEntry = {
   mtimeMs: number
   content: object | undefined
 }

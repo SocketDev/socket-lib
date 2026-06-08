@@ -5,14 +5,14 @@
  *   '@socketsecurity/lib-stable/module'
  */
 
-import { readFileSync, readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const distDir = path.resolve(__dirname, '..', '..', 'dist')
+import { REPO_ROOT } from '../fleet/paths.mts'
+
+const distDir = path.join(REPO_ROOT, 'dist')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
@@ -37,21 +37,20 @@ export function checkEsmNamedExports(filePath) {
   if (normalizedPath.startsWith('external/')) {
     return { path: filePath, ok: true, skipped: true }
   }
-  // Skip CLI entry points (files with a `#!/usr/bin/env node` shebang
-  // under bin/) — they're scripts that side-effect-run at load time,
-  // not modules with named exports. The package.json `bin` field
-  // points at them; consumers invoke via `pnpm exec`. Sibling
-  // files in bin/ that DO have named exports (subcommand handlers
-  // imported by the entry) still go through the regular check.
-  if (normalizedPath.startsWith('bin/')) {
-    try {
-      const head = readFileSync(filePath, 'utf-8').slice(0, 256)
-      if (head.startsWith('#!/usr/bin/env node')) {
-        return { path: filePath, ok: true, skipped: true }
-      }
-    } catch {
-      // Fall through — let the regular check report a real read error.
+  // Skip CLI entry points (any file with a `#!/usr/bin/env node` shebang) —
+  // they side-effect-run at load time, not modules with named exports. A
+  // shebang is the unambiguous signal regardless of location: `bin/` entries
+  // the package.json `bin` field points at, but also stand-alone hosts like
+  // `native-messaging/run.js` that an OS manifest invokes directly. Sibling
+  // files that DO export named symbols (subcommand handlers imported by the
+  // entry) have no shebang and still go through the regular check.
+  try {
+    const head = readFileSync(filePath, 'utf-8').slice(0, 256)
+    if (head.startsWith('#!/usr/bin/env node')) {
+      return { path: filePath, ok: true, skipped: true }
     }
+  } catch {
+    // Fall through — let the regular check report a real read error.
   }
 
   try {

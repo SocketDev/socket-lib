@@ -1,6 +1,6 @@
 /// <reference lib="dom" />
 
-import { doFetch } from './browser-fetch'
+import { fetchResponse } from './fetch/browser'
 
 import { Uint8ArrayCtor } from '../primordials/array'
 
@@ -123,7 +123,7 @@ export async function attempt(
     })
   }
   try {
-    const response = await doFetch(url, init)
+    const response = await fetchResponse(url, init)
     const buffer = await response.arrayBuffer()
     if (
       options.maxResponseSize !== undefined &&

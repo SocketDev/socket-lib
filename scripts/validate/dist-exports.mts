@@ -8,10 +8,10 @@ import { readdirSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const distDir = path.resolve(__dirname, '..', '..', 'dist')
+import { REPO_ROOT } from '../fleet/paths.mts'
+
+const distDir = path.join(REPO_ROOT, 'dist')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require

@@ -65,7 +65,7 @@ export interface Schema<T = unknown> {
  *
  * @internal
  */
-interface ZodV4LikeSchema<O = unknown> {
+export interface ZodV4LikeSchema<O = unknown> {
   _zod: { output: O }
   safeParse(data: unknown): unknown
 }
@@ -76,7 +76,7 @@ interface ZodV4LikeSchema<O = unknown> {
  *
  * @internal
  */
-interface ZodV3LikeSchema<O = unknown> {
+export interface ZodV3LikeSchema<O = unknown> {
   _output: O
   safeParse(data: unknown): unknown
 }
@@ -88,7 +88,7 @@ interface ZodV3LikeSchema<O = unknown> {
  *
  * @internal
  */
-interface TypeBoxLikeSchema {
+export interface TypeBoxLikeSchema {
   static: unknown
 }
 

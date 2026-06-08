@@ -32,13 +32,13 @@ const FIREWALL_BLOCK_SEVERITIES: ReadonlySet<string> = new SetCtor([
   'high',
 ])
 
-interface FirewallAlert {
+export interface FirewallAlert {
   severity?: string | undefined
   type?: string | undefined
   key?: string | undefined
 }
 
-interface FirewallResponse {
+export interface FirewallResponse {
   alerts?: FirewallAlert[] | undefined
 }
 

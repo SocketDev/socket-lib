@@ -20,7 +20,7 @@ import { ObjectEntries } from '../primordials/object'
 
 import type * as asyncHooksModule from 'node:async_hooks'
 
-type EnvOverrides = Map<string, string | undefined>
+export type EnvOverrides = Map<string, string | undefined>
 
 let asyncHooks: typeof asyncHooksModule | undefined
 

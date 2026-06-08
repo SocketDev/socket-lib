@@ -16,7 +16,7 @@ import { MapCtor } from '../primordials/map-set'
 // Both must share the same Maps for rewiring to work correctly.
 // Only initialize in test environment to avoid polluting production runtime.
 // Vitest automatically sets VITEST=true when running tests.
-interface PathRewireState {
+export interface PathRewireState {
   testOverrides: Map<string, string | undefined>
   valueCache: Map<string, string>
   cacheInvalidationCallbacks: Array<() => void>

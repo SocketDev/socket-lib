@@ -165,7 +165,7 @@ export type {
 } from './types'
 export type { SecretSlot } from './types'
 
-type Platform = 'darwin' | 'linux' | 'win32' | 'other'
+export type Platform = 'darwin' | 'linux' | 'win32' | 'other'
 
 /**
  * Resolve the current OS to one of our four backend categories.

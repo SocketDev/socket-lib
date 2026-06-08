@@ -14,8 +14,8 @@ import { getSocketWheelhouseDir } from '../../paths/socket'
 import { downloadAndExtractTool } from '../from-download'
 
 import {
-  JANUS_SUPPORTED_PLATFORM_ARCHES,
   getJanusDownloadUrl,
+  JANUS_SUPPORTED_PLATFORM_ARCHES,
 } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'

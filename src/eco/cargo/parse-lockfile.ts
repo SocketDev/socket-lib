@@ -51,7 +51,7 @@ import {
 
 import type { PackageRef, ParsedLockfile } from '../manifest/types'
 
-type PackageIndex = Record<string, number | number[]>
+export type PackageIndex = Record<string, number | number[]>
 
 export interface CargoEntryState {
   name: string

@@ -67,7 +67,7 @@ import type { DepType, PackageRef, ParsedLockfile } from '../../manifest/types'
 // Real npm nesting is ~10 levels; 64 is a safe ceiling.
 const MAX_LOCKFILE_DEPTH = 64
 
-interface RawPackage {
+export interface RawPackage {
   readonly name?: unknown | undefined
   readonly version?: unknown | undefined
   readonly resolved?: unknown | undefined
@@ -81,13 +81,13 @@ interface RawPackage {
   readonly requires?: unknown | undefined
 }
 
-interface RawLockfile {
+export interface RawLockfile {
   readonly lockfileVersion?: unknown | undefined
   readonly packages?: Record<string, RawPackage> | undefined
   readonly dependencies?: Record<string, RawPackage> | undefined
 }
 
-type PackageIndex = Record<string, number | number[]>
+export type PackageIndex = Record<string, number | number[]>
 
 export function addToIndex(
   packageIndex: PackageIndex,

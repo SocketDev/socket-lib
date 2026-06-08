@@ -12,9 +12,6 @@ import { describe, expect, it } from 'vitest'
 
 import {
   AT_LATEST,
-  LATEST,
-  PACKAGE,
-  PACKAGE_DEFAULT_VERSION,
   clearPackumentCache,
   getLifecycleScriptNames,
   getPackageDefaultNodeRange,
@@ -22,6 +19,9 @@ import {
   getPackageExtensions,
   getPackumentCache,
   getPacoteCachePath,
+  LATEST,
+  PACKAGE,
+  PACKAGE_DEFAULT_VERSION,
 } from '../../../src/constants/packages'
 
 describe('constants/packages', () => {

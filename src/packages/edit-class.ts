@@ -45,7 +45,7 @@ import type { EditablePackageJsonInstance } from './edit'
  * class. Not exported because consumers go through
  * `getEditablePackageJsonClass()`.
  */
-interface EditablePackageJsonConstructor {
+export interface EditablePackageJsonConstructor {
   new (): EditablePackageJsonInstance
   fixSteps: unknown[]
   normalizeSteps: unknown[]

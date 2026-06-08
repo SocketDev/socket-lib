@@ -42,7 +42,7 @@ export interface TokenBucketOptions {
   maxKeys: number
 }
 
-interface BucketEntry {
+export interface BucketEntry {
   tokens: number
   lastRefillAt: number
   // Linked-list pointers for LRU eviction. `null` at the ends.

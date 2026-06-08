@@ -98,7 +98,7 @@ export function readMacOSSync(
   return out || undefined
 }
 
-interface SpawnOpts {
+export interface SpawnOpts {
   stdio?: 'ignore' | 'pipe' | ['ignore', 'pipe', 'pipe'] | undefined
 }
 

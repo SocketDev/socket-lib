@@ -15,15 +15,15 @@ import {
 } from './audit-helpers.mts'
 import { buildSnippet } from './disambiguate.mts'
 import {
+  ctorPrimordialName,
+  guessReceiverType,
   INTENTIONAL_NON_PRIMORDIAL_STATICS,
   NODE_MODULE_STATIC_METHODS,
+  prototypePrimordialName,
+  staticPrimordialName,
   TRACKED_GLOBALS,
   TYPE_NARROWING_STATIC_CALLS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
-  ctorPrimordialName,
-  guessReceiverType,
-  prototypePrimordialName,
-  staticPrimordialName,
 } from './globals.mts'
 
 /**

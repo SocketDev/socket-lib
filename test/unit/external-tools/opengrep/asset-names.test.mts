@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  OPENGREP_ASSET_MAP,
   getOpengrepAssetEntry,
   getOpengrepDownloadUrl,
+  OPENGREP_ASSET_MAP,
 } from '../../../../src/external-tools/opengrep/asset-names'
 
 describe('external-tools/opengrep/asset-names', () => {

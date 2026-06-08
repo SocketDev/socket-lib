@@ -4,9 +4,9 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  DlxHashMismatchError,
   checksumToIntegrity,
   computeHashes,
+  DlxHashMismatchError,
   integrityToChecksum,
   isChecksum,
   isIntegrity,

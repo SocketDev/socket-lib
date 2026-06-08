@@ -15,18 +15,18 @@
  *   change. Wired into scripts/post-build.mts.
  */
 
-import { readFileSync, readdirSync, writeFileSync } from 'node:fs'
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import globals from 'globals'
 
+import { REPO_ROOT } from '../fleet/paths.mts'
+
 const logger = getDefaultLogger()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.resolve(__dirname, '..', '..')
+const rootPath = REPO_ROOT
 const primordialsDir = path.join(rootPath, 'src', 'primordials')
 const outputPath = path.join(
   rootPath,

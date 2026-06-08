@@ -8,8 +8,8 @@
 import { describe, expect, it, vi } from 'vitest'
 
 import {
-  ProgressBar,
   createProgressIndicator,
+  ProgressBar,
 } from '../../../src/stdio/progress'
 
 import type { ProgressBarOptions } from '../../../src/stdio/progress'

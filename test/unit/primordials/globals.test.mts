@@ -13,17 +13,17 @@ import { DateCtor } from '../../../src/primordials/date'
 import { ErrorCtor } from '../../../src/primordials/error'
 
 import {
+  atob as GlobalAtob,
   BigIntCtor,
   BooleanCtor,
-  InfinityValue,
-  NaNValue,
-  ProxyCtor,
-  SharedArrayBufferCtor,
-  atob as GlobalAtob,
   btoa as GlobalBtoa,
   decodeURIComponent as GlobalDecodeURIComponent,
   encodeURIComponent as GlobalEncodeURIComponent,
   globalThis as GlobalThis,
+  InfinityValue,
+  NaNValue,
+  ProxyCtor,
+  SharedArrayBufferCtor,
 } from '../../../src/primordials/globals'
 
 import { JSONParse, JSONStringify } from '../../../src/primordials/json'

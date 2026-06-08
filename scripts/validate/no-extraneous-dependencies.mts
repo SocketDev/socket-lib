@@ -20,7 +20,6 @@ import { existsSync, promises as fs } from 'node:fs'
 import { builtinModules } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { parse } from '@babel/parser'
 import traverseModule from '@babel/traverse'
@@ -31,10 +30,11 @@ const traverse = traverseModule.default
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { REPO_ROOT } from '../fleet/paths.mts'
+
 const logger = getDefaultLogger()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const rootPath = path.join(__dirname, '..', '..')
+const rootPath = REPO_ROOT
 
 // Node.js builtins to recognize (including node: prefix variants)
 const BUILTIN_MODULES = new Set([

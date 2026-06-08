@@ -153,7 +153,7 @@ const ARG_OPTIONS = {
 export async function runCli(argv) {
   // Bare `prim` / `prim help` / `prim --help` → print help.
   if (argv.length === 0 || argv[0] === 'help') {
-    process.stdout.write(HELP) // socket-hook: allow console
+    process.stdout.write(HELP) // socket-lint: allow
     return
   }
 
@@ -172,7 +172,7 @@ export async function runCli(argv) {
   const { values, positionals } = parsed
 
   if (values.help || positionals.length === 0) {
-    process.stdout.write(HELP) // socket-hook: allow console
+    process.stdout.write(HELP) // socket-lint: allow
     return
   }
 
@@ -366,21 +366,21 @@ export async function runCli(argv) {
         // CLI tool: stderr for human warnings keeps stdout pure
         // machine-pipeable JSON / findings text.
         const warnMsg = `prim: warning — ${totalSkipped} file(s) skipped and excluded from findings. Audit is incomplete.\n`
-        process.stderr.write(warnMsg) // socket-hook: allow console
+        process.stderr.write(warnMsg) // socket-lint: allow
         if (parseFailureFiles.length > 0) {
           const header = `  parse-failed (${parseFailureFiles.length}):\n`
-          process.stderr.write(header) // socket-hook: allow console
+          process.stderr.write(header) // socket-lint: allow
           for (let i = 0, { length } = parseFailureFiles; i < length; i += 1) {
             const f = parseFailureFiles[i]!
-            process.stderr.write(`    ${f}\n`) // socket-hook: allow console
+            process.stderr.write(`    ${f}\n`) // socket-lint: allow
           }
         }
         if (stripFailureFiles.length > 0) {
           const header = `  ts-strip-failed (${stripFailureFiles.length}):\n`
-          process.stderr.write(header) // socket-hook: allow console
+          process.stderr.write(header) // socket-lint: allow
           for (let i = 0, { length } = stripFailureFiles; i < length; i += 1) {
             const f = stripFailureFiles[i]!
-            process.stderr.write(`    ${f}\n`) // socket-hook: allow console
+            process.stderr.write(`    ${f}\n`) // socket-lint: allow
           }
         }
       }

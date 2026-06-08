@@ -61,9 +61,9 @@ import type { DepType, PackageRef, ParsedLockfile } from '../../manifest/types'
 const RE_INTEGRITY = /integrity:\s*([a-zA-Z0-9+/=-]+)/
 const RE_TARBALL = /tarball:\s*['"]?([^'"}\s]+)['"]?/
 
-type PackageIndex = Record<string, number | number[]>
+export type PackageIndex = Record<string, number | number[]>
 
-interface PnpmEntry {
+export interface PnpmEntry {
   name: string
   version: string
   resolved: string | undefined
@@ -80,7 +80,7 @@ interface PnpmEntry {
   _inDeps: boolean
 }
 
-interface ImporterState {
+export interface ImporterState {
   section: 'prod' | 'dev' | 'optional' | undefined
 }
 

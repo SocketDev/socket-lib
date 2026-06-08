@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  TRUFFLEHOG_ASSET_MAP,
   getTrufflehogAssetEntry,
   getTrufflehogDownloadUrl,
+  TRUFFLEHOG_ASSET_MAP,
 } from '../../../../src/external-tools/trufflehog/asset-names'
 
 describe('external-tools/trufflehog/asset-names', () => {

@@ -77,7 +77,7 @@ export interface Choice<Value = unknown> {
  * Context for inquirer prompts. Minimal context interface used by Inquirer
  * prompts. Duplicated from `@inquirer/type` - InquirerContext.
  */
-interface InquirerContext {
+export interface InquirerContext {
   /**
    * Abort signal for cancelling the prompt.
    */
@@ -124,7 +124,7 @@ export type Context = Remap<
  *     { name: 'Option 2', value: 2 },
  *   ]
  */
-declare class SeparatorType {
+export declare class SeparatorType {
   readonly separator: string
   readonly type: 'separator'
   constructor(separator?: string)

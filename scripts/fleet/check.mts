@@ -93,6 +93,13 @@ const steps: Array<() => boolean> = [
   // script leaves the doc instruction dead. Past incident (2026-06-06):
   // setup-repo/SKILL.md cited 3 setup scripts that didn't exist.
   () => run('node', ['scripts/fleet/check/doc-references-resolve.mts']),
+  // A package's `exports` map and its public file surface must agree: every
+  // exports target resolves to a real file (no stale map entry that throws
+  // ERR_MODULE_NOT_FOUND for consumers), and every public built file (privacy
+  // taxonomy applied — not external/, not _-prefixed) is reachable through some
+  // exports entry (no orphaned public module). Complements files[] allowlist
+  // hygiene and runtime require-ability; this is the map ↔ files check.
+  () => run('node', ['scripts/fleet/check/exports-cover-public-files.mts']),
   // Every external-tools.json / bundle-tools.json must match the shared
   // TypeBox schema (scripts/fleet/lib/external-tools-schema.mts). These files
   // pin tool versions + integrities; an unvalidated shape drift surfaces only

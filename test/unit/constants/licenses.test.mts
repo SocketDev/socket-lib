@@ -17,10 +17,10 @@ import {
 } from '@socketsecurity/lib-stable/constants/licenses'
 
 import {
+  getCopyLeftLicenses,
   MIT,
   UNLICENCED,
   UNLICENSED,
-  getCopyLeftLicenses,
 } from '../../../src/constants/licenses'
 
 describe('constants/licenses', () => {

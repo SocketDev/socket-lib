@@ -36,12 +36,6 @@
     "_http_incoming": false,
     "_http_outgoing": false,
     "_http_server": false,
-    "_stream_duplex": false,
-    "_stream_passthrough": false,
-    "_stream_readable": false,
-    "_stream_transform": false,
-    "_stream_wrap": false,
-    "_stream_writable": false,
     "_tls_common": false,
     "_tls_wrap": false,
     "assert": false,
@@ -68,6 +62,64 @@
     "inspector/promises": false,
     "module": false,
     "net": false,
+    "node:assert": false,
+    "node:assert/strict": false,
+    "node:async_hooks": false,
+    "node:buffer": false,
+    "node:child_process": false,
+    "node:cluster": false,
+    "node:console": false,
+    "node:constants": false,
+    "node:crypto": false,
+    "node:dgram": false,
+    "node:diagnostics_channel": false,
+    "node:dns": false,
+    "node:dns/promises": false,
+    "node:domain": false,
+    "node:events": false,
+    "node:fs": false,
+    "node:fs/promises": false,
+    "node:http": false,
+    "node:http2": false,
+    "node:https": false,
+    "node:inspector": false,
+    "node:inspector/promises": false,
+    "node:module": false,
+    "node:net": false,
+    "node:os": false,
+    "node:path": false,
+    "node:path/posix": false,
+    "node:path/win32": false,
+    "node:perf_hooks": false,
+    "node:process": false,
+    "node:punycode": false,
+    "node:querystring": false,
+    "node:readline": false,
+    "node:readline/promises": false,
+    "node:repl": false,
+    "node:sea": false,
+    "node:sqlite": false,
+    "node:stream": false,
+    "node:stream/consumers": false,
+    "node:stream/promises": false,
+    "node:stream/web": false,
+    "node:string_decoder": false,
+    "node:sys": false,
+    "node:test": false,
+    "node:test/reporters": false,
+    "node:timers": false,
+    "node:timers/promises": false,
+    "node:tls": false,
+    "node:trace_events": false,
+    "node:tty": false,
+    "node:url": false,
+    "node:util": false,
+    "node:util/types": false,
+    "node:v8": false,
+    "node:vm": false,
+    "node:wasi": false,
+    "node:worker_threads": false,
+    "node:zlib": false,
     "os": false,
     "path": false,
     "path/posix": false,
@@ -186,42 +238,38 @@
       "default": "./dist/argv/parse-args-string.js"
     },
     "./arrays/chunk": {
+      "source": "./src/arrays/chunk.ts",
       "browser": {
-        "source": "./src/arrays/chunk.ts",
         "types": "./dist/arrays/chunk.d.ts",
         "default": "./dist/arrays/chunk.js"
       },
-      "source": "./src/arrays/chunk.ts",
       "types": "./dist/arrays/chunk.d.ts",
       "default": "./dist/arrays/chunk.js"
     },
     "./arrays/join": {
+      "source": "./src/arrays/join.ts",
       "browser": {
-        "source": "./src/arrays/join.ts",
         "types": "./dist/arrays/join.d.ts",
         "default": "./dist/arrays/join.js"
       },
-      "source": "./src/arrays/join.ts",
       "types": "./dist/arrays/join.d.ts",
       "default": "./dist/arrays/join.js"
     },
     "./arrays/predicates": {
+      "source": "./src/arrays/predicates.ts",
       "browser": {
-        "source": "./src/arrays/predicates.ts",
         "types": "./dist/arrays/predicates.d.ts",
         "default": "./dist/arrays/predicates.js"
       },
-      "source": "./src/arrays/predicates.ts",
       "types": "./dist/arrays/predicates.d.ts",
       "default": "./dist/arrays/predicates.js"
     },
     "./arrays/unique": {
+      "source": "./src/arrays/unique.ts",
       "browser": {
-        "source": "./src/arrays/unique.ts",
         "types": "./dist/arrays/unique.d.ts",
         "default": "./dist/arrays/unique.js"
       },
-      "source": "./src/arrays/unique.ts",
       "types": "./dist/arrays/unique.d.ts",
       "default": "./dist/arrays/unique.js"
     },
@@ -316,42 +364,38 @@
       "default": "./dist/cli/socket-lib.js"
     },
     "./colors/convert": {
+      "source": "./src/colors/convert.ts",
       "browser": {
-        "source": "./src/colors/convert.ts",
         "types": "./dist/colors/convert.d.ts",
         "default": "./dist/colors/convert.js"
       },
-      "source": "./src/colors/convert.ts",
       "types": "./dist/colors/convert.d.ts",
       "default": "./dist/colors/convert.js"
     },
     "./colors/palette": {
+      "source": "./src/colors/palette.ts",
       "browser": {
-        "source": "./src/colors/palette.ts",
         "types": "./dist/colors/palette.d.ts",
         "default": "./dist/colors/palette.js"
       },
-      "source": "./src/colors/palette.ts",
       "types": "./dist/colors/palette.d.ts",
       "default": "./dist/colors/palette.js"
     },
     "./colors/socket-palette": {
+      "source": "./src/colors/socket-palette.ts",
       "browser": {
-        "source": "./src/colors/socket-palette.ts",
         "types": "./dist/colors/socket-palette.d.ts",
         "default": "./dist/colors/socket-palette.js"
       },
-      "source": "./src/colors/socket-palette.ts",
       "types": "./dist/colors/socket-palette.d.ts",
       "default": "./dist/colors/socket-palette.js"
     },
     "./colors/types": {
+      "source": "./src/colors/types.ts",
       "browser": {
-        "source": "./src/colors/types.ts",
         "types": "./dist/colors/types.d.ts",
         "default": "./dist/colors/types.js"
       },
-      "source": "./src/colors/types.ts",
       "types": "./dist/colors/types.d.ts",
       "default": "./dist/colors/types.js"
     },
@@ -936,42 +980,38 @@
       "default": "./dist/env/xdg.js"
     },
     "./errors": {
+      "source": "./src/errors/message.ts",
       "browser": {
-        "source": "./src/errors/message.ts",
         "types": "./dist/errors/message.d.ts",
         "default": "./dist/errors/message.js"
       },
-      "source": "./src/errors/message.ts",
       "types": "./dist/errors/message.d.ts",
       "default": "./dist/errors/message.js"
     },
     "./errors/message": {
+      "source": "./src/errors/message.ts",
       "browser": {
-        "source": "./src/errors/message.ts",
         "types": "./dist/errors/message.d.ts",
         "default": "./dist/errors/message.js"
       },
-      "source": "./src/errors/message.ts",
       "types": "./dist/errors/message.d.ts",
       "default": "./dist/errors/message.js"
     },
     "./errors/predicates": {
+      "source": "./src/errors/predicates.ts",
       "browser": {
-        "source": "./src/errors/predicates.ts",
         "types": "./dist/errors/predicates.d.ts",
         "default": "./dist/errors/predicates.js"
       },
-      "source": "./src/errors/predicates.ts",
       "types": "./dist/errors/predicates.d.ts",
       "default": "./dist/errors/predicates.js"
     },
     "./errors/stack": {
+      "source": "./src/errors/stack.ts",
       "browser": {
-        "source": "./src/errors/stack.ts",
         "types": "./dist/errors/stack.d.ts",
         "default": "./dist/errors/stack.js"
       },
-      "source": "./src/errors/stack.ts",
       "types": "./dist/errors/stack.d.ts",
       "default": "./dist/errors/stack.js"
     },
@@ -1565,24 +1605,13 @@
       "default": "./dist/http-request/node.js"
     },
     "./http-request/browser": {
+      "source": "./src/http-request/browser.ts",
       "browser": {
-        "source": "./src/http-request/browser.ts",
         "types": "./dist/http-request/browser.d.ts",
         "default": "./dist/http-request/browser.js"
       },
-      "source": "./src/http-request/browser.ts",
       "types": "./dist/http-request/browser.d.ts",
       "default": "./dist/http-request/browser.js"
-    },
-    "./http-request/browser-fetch": {
-      "browser": {
-        "source": "./src/http-request/browser-fetch.ts",
-        "types": "./dist/http-request/browser-fetch.d.ts",
-        "default": "./dist/http-request/browser-fetch.js"
-      },
-      "source": "./src/http-request/browser-fetch.ts",
-      "types": "./dist/http-request/browser-fetch.d.ts",
-      "default": "./dist/http-request/browser-fetch.js"
     },
     "./http-request/checksum-file": {
       "source": "./src/http-request/checksum-file.ts",
@@ -1603,6 +1632,15 @@
       "source": "./src/http-request/errors.ts",
       "types": "./dist/http-request/errors.d.ts",
       "default": "./dist/http-request/errors.js"
+    },
+    "./http-request/fetch/browser": {
+      "source": "./src/http-request/fetch/browser.ts",
+      "browser": {
+        "types": "./dist/http-request/fetch/browser.d.ts",
+        "default": "./dist/http-request/fetch/browser.js"
+      },
+      "types": "./dist/http-request/fetch/browser.d.ts",
+      "default": "./dist/http-request/fetch/browser.js"
     },
     "./http-request/headers": {
       "source": "./src/http-request/headers.ts",
@@ -1728,12 +1766,11 @@
       "default": "./dist/logger/node.js"
     },
     "./logger/browser": {
+      "source": "./src/logger/browser.ts",
       "browser": {
-        "source": "./src/logger/browser.ts",
         "types": "./dist/logger/browser.d.ts",
         "default": "./dist/logger/browser.js"
       },
-      "source": "./src/logger/browser.ts",
       "types": "./dist/logger/browser.d.ts",
       "default": "./dist/logger/browser.js"
     },
@@ -1942,62 +1979,56 @@
       "default": "./dist/node/util.js"
     },
     "./objects/getters": {
+      "source": "./src/objects/getters.ts",
       "browser": {
-        "source": "./src/objects/getters.ts",
         "types": "./dist/objects/getters.d.ts",
         "default": "./dist/objects/getters.js"
       },
-      "source": "./src/objects/getters.ts",
       "types": "./dist/objects/getters.d.ts",
       "default": "./dist/objects/getters.js"
     },
     "./objects/inspect": {
+      "source": "./src/objects/inspect.ts",
       "browser": {
-        "source": "./src/objects/inspect.ts",
         "types": "./dist/objects/inspect.d.ts",
         "default": "./dist/objects/inspect.js"
       },
-      "source": "./src/objects/inspect.ts",
       "types": "./dist/objects/inspect.d.ts",
       "default": "./dist/objects/inspect.js"
     },
     "./objects/mutate": {
+      "source": "./src/objects/mutate.ts",
       "browser": {
-        "source": "./src/objects/mutate.ts",
         "types": "./dist/objects/mutate.d.ts",
         "default": "./dist/objects/mutate.js"
       },
-      "source": "./src/objects/mutate.ts",
       "types": "./dist/objects/mutate.d.ts",
       "default": "./dist/objects/mutate.js"
     },
     "./objects/predicates": {
+      "source": "./src/objects/predicates.ts",
       "browser": {
-        "source": "./src/objects/predicates.ts",
         "types": "./dist/objects/predicates.d.ts",
         "default": "./dist/objects/predicates.js"
       },
-      "source": "./src/objects/predicates.ts",
       "types": "./dist/objects/predicates.d.ts",
       "default": "./dist/objects/predicates.js"
     },
     "./objects/sort": {
+      "source": "./src/objects/sort.ts",
       "browser": {
-        "source": "./src/objects/sort.ts",
         "types": "./dist/objects/sort.d.ts",
         "default": "./dist/objects/sort.js"
       },
-      "source": "./src/objects/sort.ts",
       "types": "./dist/objects/sort.d.ts",
       "default": "./dist/objects/sort.js"
     },
     "./objects/types": {
+      "source": "./src/objects/types.ts",
       "browser": {
-        "source": "./src/objects/types.ts",
         "types": "./dist/objects/types.d.ts",
         "default": "./dist/objects/types.js"
       },
-      "source": "./src/objects/types.ts",
       "types": "./dist/objects/types.d.ts",
       "default": "./dist/objects/types.js"
     },
@@ -2362,32 +2393,29 @@
       "default": "./dist/promises/types.js"
     },
     "./regexps/escape": {
+      "source": "./src/regexps/escape.ts",
       "browser": {
-        "source": "./src/regexps/escape.ts",
         "types": "./dist/regexps/escape.d.ts",
         "default": "./dist/regexps/escape.js"
       },
-      "source": "./src/regexps/escape.ts",
       "types": "./dist/regexps/escape.d.ts",
       "default": "./dist/regexps/escape.js"
     },
     "./regexps/hex": {
+      "source": "./src/regexps/hex.ts",
       "browser": {
-        "source": "./src/regexps/hex.ts",
         "types": "./dist/regexps/hex.d.ts",
         "default": "./dist/regexps/hex.js"
       },
-      "source": "./src/regexps/hex.ts",
       "types": "./dist/regexps/hex.d.ts",
       "default": "./dist/regexps/hex.js"
     },
     "./regexps/spec": {
+      "source": "./src/regexps/spec.ts",
       "browser": {
-        "source": "./src/regexps/spec.ts",
         "types": "./dist/regexps/spec.d.ts",
         "default": "./dist/regexps/spec.js"
       },
-      "source": "./src/regexps/spec.ts",
       "types": "./dist/regexps/spec.d.ts",
       "default": "./dist/regexps/spec.js"
     },
@@ -2687,62 +2715,56 @@
       "default": "./dist/streams/transform.js"
     },
     "./strings/format": {
+      "source": "./src/strings/format.ts",
       "browser": {
-        "source": "./src/strings/format.ts",
         "types": "./dist/strings/format.d.ts",
         "default": "./dist/strings/format.js"
       },
-      "source": "./src/strings/format.ts",
       "types": "./dist/strings/format.d.ts",
       "default": "./dist/strings/format.js"
     },
     "./strings/predicates": {
+      "source": "./src/strings/predicates.ts",
       "browser": {
-        "source": "./src/strings/predicates.ts",
         "types": "./dist/strings/predicates.d.ts",
         "default": "./dist/strings/predicates.js"
       },
-      "source": "./src/strings/predicates.ts",
       "types": "./dist/strings/predicates.d.ts",
       "default": "./dist/strings/predicates.js"
     },
     "./strings/search": {
+      "source": "./src/strings/search.ts",
       "browser": {
-        "source": "./src/strings/search.ts",
         "types": "./dist/strings/search.d.ts",
         "default": "./dist/strings/search.js"
       },
-      "source": "./src/strings/search.ts",
       "types": "./dist/strings/search.d.ts",
       "default": "./dist/strings/search.js"
     },
     "./strings/transform": {
+      "source": "./src/strings/transform.ts",
       "browser": {
-        "source": "./src/strings/transform.ts",
         "types": "./dist/strings/transform.d.ts",
         "default": "./dist/strings/transform.js"
       },
-      "source": "./src/strings/transform.ts",
       "types": "./dist/strings/transform.d.ts",
       "default": "./dist/strings/transform.js"
     },
     "./strings/types": {
+      "source": "./src/strings/types.ts",
       "browser": {
-        "source": "./src/strings/types.ts",
         "types": "./dist/strings/types.d.ts",
         "default": "./dist/strings/types.js"
       },
-      "source": "./src/strings/types.ts",
       "types": "./dist/strings/types.d.ts",
       "default": "./dist/strings/types.js"
     },
     "./strings/width": {
+      "source": "./src/strings/width.ts",
       "browser": {
-        "source": "./src/strings/width.ts",
         "types": "./dist/strings/width.d.ts",
         "default": "./dist/strings/width.js"
       },
-      "source": "./src/strings/width.ts",
       "types": "./dist/strings/width.d.ts",
       "default": "./dist/strings/width.js"
     },
@@ -2791,9 +2813,6 @@
       "types": "./dist/temporal/temporal.d.ts",
       "default": "./dist/temporal/temporal.js"
     },
-    "./test/integration/esm-imports.test": {
-      "default": "./test/integration/esm-imports.test.mjs"
-    },
     "./themes/context": {
       "source": "./src/themes/context.ts",
       "types": "./dist/themes/context.d.ts",
@@ -2815,151 +2834,133 @@
       "default": "./dist/themes/types.js"
     },
     "./url/assert-safe": {
+      "source": "./src/url/assert-safe.ts",
       "browser": {
-        "source": "./src/url/assert-safe.ts",
         "types": "./dist/url/assert-safe.d.ts",
         "default": "./dist/url/assert-safe.js"
       },
-      "source": "./src/url/assert-safe.ts",
       "types": "./dist/url/assert-safe.d.ts",
       "default": "./dist/url/assert-safe.js"
     },
     "./url/parse": {
+      "source": "./src/url/parse.ts",
       "browser": {
-        "source": "./src/url/parse.ts",
         "types": "./dist/url/parse.d.ts",
         "default": "./dist/url/parse.js"
       },
-      "source": "./src/url/parse.ts",
       "types": "./dist/url/parse.d.ts",
       "default": "./dist/url/parse.js"
     },
     "./url/predicates": {
+      "source": "./src/url/predicates.ts",
       "browser": {
-        "source": "./src/url/predicates.ts",
         "types": "./dist/url/predicates.d.ts",
         "default": "./dist/url/predicates.js"
       },
-      "source": "./src/url/predicates.ts",
       "types": "./dist/url/predicates.d.ts",
       "default": "./dist/url/predicates.js"
     },
     "./url/search-params": {
+      "source": "./src/url/search-params.ts",
       "browser": {
-        "source": "./src/url/search-params.ts",
         "types": "./dist/url/search-params.d.ts",
         "default": "./dist/url/search-params.js"
       },
-      "source": "./src/url/search-params.ts",
       "types": "./dist/url/search-params.d.ts",
       "default": "./dist/url/search-params.js"
     },
     "./url/types": {
+      "source": "./src/url/types.ts",
       "browser": {
-        "source": "./src/url/types.ts",
         "types": "./dist/url/types.d.ts",
         "default": "./dist/url/types.js"
       },
-      "source": "./src/url/types.ts",
       "types": "./dist/url/types.d.ts",
       "default": "./dist/url/types.js"
     },
     "./versions/compare": {
+      "source": "./src/versions/compare.ts",
       "browser": {
-        "source": "./src/versions/compare.ts",
         "types": "./dist/versions/compare.d.ts",
         "default": "./dist/versions/compare.js"
       },
-      "source": "./src/versions/compare.ts",
       "types": "./dist/versions/compare.d.ts",
       "default": "./dist/versions/compare.js"
     },
     "./versions/modify": {
+      "source": "./src/versions/modify.ts",
       "browser": {
-        "source": "./src/versions/modify.ts",
         "types": "./dist/versions/modify.d.ts",
         "default": "./dist/versions/modify.js"
       },
-      "source": "./src/versions/modify.ts",
       "types": "./dist/versions/modify.d.ts",
       "default": "./dist/versions/modify.js"
     },
     "./versions/parse": {
+      "source": "./src/versions/parse.ts",
       "browser": {
-        "source": "./src/versions/parse.ts",
         "types": "./dist/versions/parse.d.ts",
         "default": "./dist/versions/parse.js"
       },
-      "source": "./src/versions/parse.ts",
       "types": "./dist/versions/parse.d.ts",
       "default": "./dist/versions/parse.js"
     },
     "./versions/range": {
+      "source": "./src/versions/range.ts",
       "browser": {
-        "source": "./src/versions/range.ts",
         "types": "./dist/versions/range.d.ts",
         "default": "./dist/versions/range.js"
       },
-      "source": "./src/versions/range.ts",
       "types": "./dist/versions/range.d.ts",
       "default": "./dist/versions/range.js"
     },
     "./versions/types": {
+      "source": "./src/versions/types.ts",
       "browser": {
-        "source": "./src/versions/types.ts",
         "types": "./dist/versions/types.d.ts",
         "default": "./dist/versions/types.js"
       },
-      "source": "./src/versions/types.ts",
       "types": "./dist/versions/types.d.ts",
       "default": "./dist/versions/types.js"
     },
     "./words/article": {
+      "source": "./src/words/article.ts",
       "browser": {
-        "source": "./src/words/article.ts",
         "types": "./dist/words/article.d.ts",
         "default": "./dist/words/article.js"
       },
-      "source": "./src/words/article.ts",
       "types": "./dist/words/article.d.ts",
       "default": "./dist/words/article.js"
     },
     "./words/capitalize": {
+      "source": "./src/words/capitalize.ts",
       "browser": {
-        "source": "./src/words/capitalize.ts",
         "types": "./dist/words/capitalize.d.ts",
         "default": "./dist/words/capitalize.js"
       },
-      "source": "./src/words/capitalize.ts",
       "types": "./dist/words/capitalize.d.ts",
       "default": "./dist/words/capitalize.js"
     },
     "./words/pluralize": {
+      "source": "./src/words/pluralize.ts",
       "browser": {
-        "source": "./src/words/pluralize.ts",
         "types": "./dist/words/pluralize.d.ts",
         "default": "./dist/words/pluralize.js"
       },
-      "source": "./src/words/pluralize.ts",
       "types": "./dist/words/pluralize.d.ts",
       "default": "./dist/words/pluralize.js"
     },
     "./words/types": {
+      "source": "./src/words/types.ts",
       "browser": {
-        "source": "./src/words/types.ts",
         "types": "./dist/words/types.d.ts",
         "default": "./dist/words/types.js"
       },
-      "source": "./src/words/types.ts",
       "types": "./dist/words/types.d.ts",
       "default": "./dist/words/types.js"
     },
     "./data/extensions.json": "./data/extensions.json",
-    "./package.json": "./package.json",
-    "./tsconfig.check.json": "./tsconfig.check.json",
-    "./tsconfig.dts.json": "./tsconfig.dts.json",
-    "./tsconfig.json": "./tsconfig.json",
-    "./tsconfig.test.json": "./tsconfig.test.json"
+    "./package.json": "./package.json"
   },
   "publishConfig": {
     "access": "public",
@@ -2972,7 +2973,7 @@
     "clean": "node scripts/bundle/clean.mts",
     "cover": "node scripts/fleet/cover.mts",
     "dev": "node scripts/bundle.mts --watch",
-    "docs": "node scripts/repo/make-api-index-md.mts",
+    "docs": "node scripts/repo/make-api-md.mts",
     "fix": "node scripts/fleet/fix.mts",
     "format": "oxfmt -c .config/fleet/oxfmtrc.json --write .",
     "format:check": "oxfmt -c .config/fleet/oxfmtrc.json --check .",

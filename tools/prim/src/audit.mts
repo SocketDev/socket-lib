@@ -8,7 +8,7 @@
  *   - File / line / column / source pattern for human inspection.
  */
 
-import { readFileSync, readdirSync, statSync } from 'node:fs'
+import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
@@ -34,11 +34,11 @@ process.emitWarning = function emitWarning(...args) {
 }
 
 import {
-  PARSE_OPTIONS,
-  TS_EXTENSIONS,
   buildLineStarts,
   isSourceFile,
   lineColumnAt,
+  PARSE_OPTIONS,
+  TS_EXTENSIONS,
 } from './audit-helpers.mts'
 import { buildVisitors } from './audit-visitors.mts'
 import { disambiguateReceiver } from './disambiguate.mts'

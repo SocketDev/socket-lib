@@ -27,6 +27,7 @@ import noInlineDeferAsync from './rules/no-inline-defer-async.mts'
 import noInlineLogger from './rules/no-inline-logger.mts'
 import noLoggerNewlineLiteral from './rules/no-logger-newline-literal.mts'
 import noNpxDlx from './rules/no-npx-dlx.mts'
+import noPackageManagerAutoUpdateReenable from './rules/no-package-manager-auto-update-reenable.mts'
 import noPlaceholders from './rules/no-placeholders.mts'
 import noPlatformSpecificImport from './rules/no-platform-specific-import.mts'
 import noProcessChdir from './rules/no-process-chdir.mts'
@@ -112,6 +113,8 @@ const plugin = {
     'no-inline-logger': noInlineLogger,
     'no-logger-newline-literal': noLoggerNewlineLiteral,
     'no-npx-dlx': noNpxDlx,
+    'no-package-manager-auto-update-reenable':
+      noPackageManagerAutoUpdateReenable,
     'no-placeholders': noPlaceholders,
     'no-platform-specific-import': noPlatformSpecificImport,
     'no-process-chdir': noProcessChdir,

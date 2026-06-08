@@ -120,18 +120,18 @@ export type ManifestEntry =
   | { kind: 'flavored'; entry: FlavoredToolEntry }
   | { kind: 'other'; raw: unknown }
 
-interface RawChecksum {
+export interface RawChecksum {
   asset?: unknown | undefined
   integrity?: unknown | undefined
 }
 
-interface RawFlavor {
+export interface RawFlavor {
   repository?: unknown | undefined
   binaryName?: unknown | undefined
   platforms?: unknown | undefined
 }
 
-interface RawToolEntry {
+export interface RawToolEntry {
   description?: unknown | undefined
   version?: unknown | undefined
   release?: unknown | undefined

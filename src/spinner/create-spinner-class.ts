@@ -11,9 +11,9 @@ import type { ColorRgb, ColorValue } from '../colors/types'
 import { isRgbTuple, toRgb } from '../colors/convert'
 import { getAbortSignal } from '../process/abort'
 import {
-  LOG_SYMBOLS,
   incLogCallCountSymbol,
   lastWasBlankSymbol,
+  LOG_SYMBOLS,
 } from '../logger/symbols'
 import { ArrayPrototypeAt, ArrayPrototypeSlice } from '../primordials/array'
 import { MathMax } from '../primordials/math'

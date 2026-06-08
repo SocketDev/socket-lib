@@ -19,27 +19,6 @@ vi.mock(import('../../../src/http-request/request'))
 const JSONStringify = JSON.stringify
 
 describe.sequential('releases/github-api: getReleaseAssetUrl (GraphQL fallback)', () => {
-  const mockRelease = {
-    assets: [
-      {
-        browser_download_url:
-          'https://github.com/test/repo/releases/download/v1.0.0/yoga-sync-20260107-abc123.mjs',
-        name: 'yoga-sync-20260107-abc123.mjs',
-      },
-      {
-        browser_download_url:
-          'https://github.com/test/repo/releases/download/v1.0.0/yoga-layout-20260107-abc123.mjs',
-        name: 'yoga-layout-20260107-abc123.mjs',
-      },
-      {
-        browser_download_url:
-          'https://github.com/test/repo/releases/download/v1.0.0/models-data.tar.gz',
-        name: 'models-data.tar.gz',
-      },
-    ],
-    tag_name: 'v1.0.0',
-  }
-
   afterEach(() => {
     // resetAllMocks clears both call history AND any
     // mockImplementation set by tests above. Some of the new

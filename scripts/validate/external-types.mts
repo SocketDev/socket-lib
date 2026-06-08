@@ -10,14 +10,14 @@
  *   - Type definitions match the actual module structure
  */
 
-import { readFileSync, readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const externalDir = path.resolve(__dirname, '..', '..', 'src', 'external')
+import { REPO_ROOT } from '../fleet/paths.mts'
+
+const externalDir = path.join(REPO_ROOT, 'src', 'external')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require

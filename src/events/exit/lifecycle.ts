@@ -6,7 +6,6 @@
  */
 
 import {
-  WIN32,
   emit,
   getEmitter,
   getSignals,
@@ -16,6 +15,7 @@ import {
   originalProcessReallyExit,
   setLoaded,
   setSignals,
+  WIN32,
 } from './_internal'
 import { processEmit, processReallyExit } from './intercept'
 

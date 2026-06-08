@@ -18,9 +18,9 @@ import { getTheme } from '../themes/context'
 import { privateConstructorArgs } from './_internal'
 import { buildLoggerSymbols } from './symbols-builder'
 import {
-  LOG_SYMBOLS,
   incLogCallCountSymbol,
   lastWasBlankSymbol,
+  LOG_SYMBOLS,
 } from './symbols'
 
 import { resolveConsole } from './console'

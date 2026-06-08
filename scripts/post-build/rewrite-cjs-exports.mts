@@ -6,7 +6,6 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { parse } from '@babel/parser'
 import MagicString from 'magic-string'
@@ -14,10 +13,11 @@ import MagicString from 'magic-string'
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { REPO_ROOT } from '../fleet/paths.mts'
+
 const logger = getDefaultLogger()
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const distDir = path.resolve(__dirname, '..', '..', 'dist')
+const distDir = path.join(REPO_ROOT, 'dist')
 
 export async function fixConstantExports() {
   const verbose = process.argv.includes('--verbose')

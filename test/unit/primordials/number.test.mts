@@ -16,9 +16,9 @@ import {
   NumberMIN_SAFE_INTEGER,
   NumberMIN_VALUE,
   NumberNEGATIVE_INFINITY,
-  NumberPOSITIVE_INFINITY,
   NumberParseFloat,
   NumberParseInt,
+  NumberPOSITIVE_INFINITY,
   NumberPrototypeToFixed,
   NumberPrototypeToString,
 } from '../../../src/primordials/number'
