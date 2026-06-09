@@ -65,13 +65,22 @@ interface FakeChild extends EventEmitter {
 // () => makeFakeChild({ ... }))` Just Works without per-call destructuring.
 // On a regression where lib-stable's spawn wrapper grows new fields, this
 // helper is the single edit point.
+// The lib's `spawn()` returns `{ process: ChildProcess } & Promise<{ code,
+// stdout, stderr }>` — awaitable AND carrying the raw child on `.process`. The
+// runners now `await` the spawn result (stdioString → string stdout/stderr) and
+// read stdin via `.process.stdin`; a non-zero exit REJECTS, carrying the result
+// on the error. Emit the raw child's events too, for any event-style consumer.
 function makeFakeChild(opts: {
   stdout?: string | undefined
   stderr?: string | undefined
   exitCode?: number | null | undefined
   emitError?: Error | undefined
   noStreams?: boolean | undefined
-}): { process: FakeChild } {
+}): { process: FakeChild } & Promise<{
+  code: number | null
+  stdout: string
+  stderr: string
+}> {
   const emitter = new EventEmitter() as FakeChild
   if (opts.noStreams) {
     emitter.stdout = undefined
@@ -80,21 +89,43 @@ function makeFakeChild(opts: {
     emitter.stdout = Readable.from(opts.stdout ? [opts.stdout] : [])
     emitter.stderr = Readable.from(opts.stderr ? [opts.stderr] : [])
   }
-  const stdoutDone =
-    !emitter.stdout || !opts.stdout
-      ? Promise.resolve()
-      : new Promise<void>(resolve => emitter.stdout!.on('end', () => resolve()))
-  const stderrDone =
-    !emitter.stderr || !opts.stderr
-      ? Promise.resolve()
-      : new Promise<void>(resolve => emitter.stderr!.on('end', () => resolve()))
-  Promise.all([stdoutDone, stderrDone]).then(() => {
-    if (opts.emitError) {
-      emitter.emit('error', opts.emitError)
-    }
-    emitter.emit('close', opts.exitCode ?? 0)
+  const stdout = opts.stdout ?? ''
+  const stderr = opts.stderr ?? ''
+  const code = opts.exitCode ?? 0
+  const settled = new Promise<{
+    code: number | null
+    stdout: string
+    stderr: string
+  }>((resolve, reject) => {
+    queueMicrotask(() => {
+      if (opts.emitError) {
+        // Only emit the EventEmitter `error` if something listens — an
+        // `error` event with no listener throws as an uncaught exception
+        // (Node semantics). The await-style runners DON'T listen on
+        // `.process.on('error')`; the event-style ones (deleteX) do.
+        if (emitter.listenerCount('error') > 0) {
+          emitter.emit('error', opts.emitError)
+        }
+        // A spawn error (e.g. ENOENT) carries a non-numeric `.code` (e.g.
+        // "ENOENT") on the lib's rejection — the runner's catch maps a
+        // non-numeric code to status -1.
+        reject(Object.assign(opts.emitError, { stderr, stdout }))
+        return
+      }
+      emitter.emit('close', code)
+      if (code !== 0) {
+        reject(
+          Object.assign(new Error(`exit ${code}`), { code, stderr, stdout }),
+        )
+        return
+      }
+      resolve({ code, stderr, stdout })
+    })
   })
-  return { process: emitter }
+  settled.catch(() => {})
+  return Object.assign(settled, { process: emitter }) as {
+    process: FakeChild
+  } & Promise<{ code: number | null; stdout: string; stderr: string }>
 }
 
 async function loadFresh() {

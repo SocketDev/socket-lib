@@ -83,30 +83,73 @@ function makeWritableStdin(captureInto?: string[]): Writable {
 // Works without per-call destructuring. Pass `stdinCapture: []` to swap
 // the no-op stdin for a sink that records every chunk written to the
 // child.
+// The lib's `spawn()` returns `{ process: ChildProcess } & Promise<{ code,
+// stdout, stderr }>` — awaitable AND carrying the raw child on `.process`. The
+// secrets runners now `await` the spawn result (stdioString → string stdout/
+// stderr) and read stdin via `.process.stdin`, so the fake must be a thenable
+// too. A non-zero exit code REJECTS (the lib's contract), carrying the same
+// `{ code, stdout, stderr }` on the error.
 function makeFakeChild(opts: {
   stdout?: string | undefined
   stderr?: string | undefined
   exitCode?: number | null | undefined
   emitError?: Error | undefined
   stdinCapture?: string[] | undefined
-}): { process: FakeChild } {
+}): { process: FakeChild } & Promise<{
+  code: number | null
+  stdout: string
+  stderr: string
+}> {
   const emitter = new EventEmitter() as FakeChild
   emitter.stdin = makeWritableStdin(opts.stdinCapture)
   emitter.stdout = Readable.from(opts.stdout ? [opts.stdout] : [])
   emitter.stderr = Readable.from(opts.stderr ? [opts.stderr] : [])
-  const stdoutDone = !opts.stdout
-    ? Promise.resolve()
-    : new Promise<void>(r => emitter.stdout!.on('end', () => r()))
-  const stderrDone = !opts.stderr
-    ? Promise.resolve()
-    : new Promise<void>(r => emitter.stderr!.on('end', () => r()))
-  Promise.all([stdoutDone, stderrDone]).then(() => {
-    if (opts.emitError) {
-      emitter.emit('error', opts.emitError)
-    }
-    emitter.emit('close', opts.exitCode ?? 0)
+  const stdout = opts.stdout ?? ''
+  const stderr = opts.stderr ?? ''
+  const code = opts.exitCode ?? 0
+  const settled = new Promise<{
+    code: number | null
+    stdout: string
+    stderr: string
+  }>((resolve, reject) => {
+    // Resolve on next tick so callers can attach `.process.stdin` writes first.
+    // Also emit the raw child's `error`/`close` events: some runners (deleteX)
+    // still consume the event-style child via `.process.on('close')`, while
+    // read/write await the Promise — the lib's shape supports both.
+    queueMicrotask(() => {
+      if (opts.emitError) {
+        // Only emit the EventEmitter `error` if something listens — an
+        // `error` event with no listener throws as an uncaught exception
+        // (Node semantics). The await-style runners DON'T listen on
+        // `.process.on('error')`; the event-style ones (deleteX) do.
+        if (emitter.listenerCount('error') > 0) {
+          emitter.emit('error', opts.emitError)
+        }
+        // A spawn error (e.g. ENOENT) carries a non-numeric `.code` (e.g.
+        // "ENOENT") on the lib's rejection — the runner's catch maps a
+        // non-numeric code to status -1.
+        reject(Object.assign(opts.emitError, { stderr, stdout }))
+        return
+      }
+      emitter.emit('close', code)
+      // The lib rejects on a non-zero exit, carrying the result on the error.
+      if (code !== 0) {
+        reject(
+          Object.assign(new Error(`exit ${code}`), { code, stderr, stdout }),
+        )
+        return
+      }
+      resolve({ code, stderr, stdout })
+    })
   })
-  return { process: emitter }
+  // A non-zero rejection nobody awaits (the event-style delete path) must not
+  // surface as an unhandled rejection.
+  settled.catch(() => {})
+  // Attach `.process` to the Promise so the awaitable AND `{ process }`
+  // destructure both work, matching the lib's `{ process } & Promise` shape.
+  return Object.assign(settled, { process: emitter }) as {
+    process: FakeChild
+  } & Promise<{ code: number | null; stdout: string; stderr: string }>
 }
 
 async function loadFresh() {
