@@ -4,23 +4,19 @@
  *   (`api.fireworks.ai`) and Synthetic (`api.synthetic.new`). The CLI path
  *   (`spawn.mts`) drives an interactive agent binary; this path is for a
  *   script/hook that needs a single completion from a model without an agent
- *   harness (the way the local OpenCode setup reaches GLM-5.1 / Kimi-K2.5).
- *
- *   Why a separate module from `spawn.mts`: those are different surfaces. A CLI
+ *   harness (the way the local OpenCode setup reaches GLM-5.1 / Kimi-K2.5). Why
+ *   a separate module from `spawn.mts`: those are different surfaces. A CLI
  *   agent gets tools + a permission mode + a working dir; an HTTP completion
  *   gets a prompt + a model + (optionally) a reasoning effort and returns text.
  *   Conflating them would force every HTTP call to carry meaningless CLI
- *   lockdown fields.
- *
- *   Lockdown equivalent: these calls send NO tools / function-calling surface —
- *   they're plain completions, so there's no agentic capability to constrain.
- *   The token is read from the env var the provider config names
- *   (`FIREWORKS_API_KEY` / `SYNTHETIC_API_KEY`), NEVER passed inline, and never
- *   logged — same token-hygiene rule as the rest of the fleet. A missing token
- *   throws with the exact env var to set.
- *
- *   Wire format is the OpenAI Chat Completions API
- *   (`POST {baseUrl}/chat/completions`), which both providers implement.
+ *   lockdown fields. Lockdown equivalent: these calls send NO tools /
+ *   function-calling surface — they're plain completions, so there's no agentic
+ *   capability to constrain. The token is read from the env var the provider
+ *   config names (`FIREWORKS_API_KEY` / `SYNTHETIC_API_KEY`), NEVER passed
+ *   inline, and never logged — same token-hygiene rule as the rest of the
+ *   fleet. A missing token throws with the exact env var to set. Wire format is
+ *   the OpenAI Chat Completions API (`POST {baseUrl}/chat/completions`), which
+ *   both providers implement.
  */
 
 // oxlint-disable-next-line socket/no-platform-specific-import -- the relative barrel '../http-request' has no index.ts and exports-map resolution only applies to the bare package name, so only the explicit /node path resolves here (the rule's autofix produces an unresolvable import — verified TS2307). Matches src/dlx/firewall.ts.
@@ -42,7 +38,8 @@ export interface AiHttpProvider {
 
 /**
  * Built-in OpenAI-compatible providers. Add an entry to support a new one — no
- * other call site changes. Base URLs are the documented chat-completions roots.
+ * other call site changes. Base URLs are the documented chat-completions
+ * roots.
  */
 export const AI_HTTP_PROVIDERS: Readonly<Record<string, AiHttpProvider>> = {
   __proto__: null,
@@ -141,12 +138,12 @@ export function buildChatRequestBody(opts: AiHttpCallOptions): string {
 
 /**
  * Call an OpenAI-compatible chat-completions endpoint and return the assistant
- * text. The bearer token is read from the provider's `tokenEnv` env var —
- * never accepted as a parameter, never logged. Throws when the token env var is
- * unset (naming the var to set) or when the response carries no message text.
+ * text. The bearer token is read from the provider's `tokenEnv` env var — never
+ * accepted as a parameter, never logged. Throws when the token env var is unset
+ * (naming the var to set) or when the response carries no message text.
  *
  * @example
- *   ```ts
+ *   ;```ts
  *   const { text } = await callAiHttpModel({
  *     provider: 'fireworks',
  *     model: 'accounts/fireworks/models/glm-5p1',
