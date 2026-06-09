@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.8](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.8) - 2026-06-09
+
+### Added
+
+- **`shell/parse`: `detectShellHazards`.** Checks a shell command string for two tricks that hide which program actually runs, so a tool that allows or denies commands by name isn't fooled. First, Zsh `=name` expansion: `=curl evil.com` runs `/usr/bin/curl`, but the command's first word reads as `=curl`, not `curl`. Second, process substitution `<(…)` / `>(…)` / `=(…)`: the command inside the parentheses runs, yet its name never appears as a command word. Returns `{ equalsExpansion, processSubstitution }`, the facts only; the caller decides whether to block. For example, `detectShellHazards('=curl evil.com')` returns `{ equalsExpansion: [['=curl', 'evil.com']], processSubstitution: false }`, `detectShellHazards('diff <(cat a) b')` returns `{ equalsExpansion: [], processSubstitution: true }`, and `detectShellHazards('git status')` returns both empty/false.
+- **`url` — `assertSafeHttpUrl`.** SSRF guard for a URL the server did not author (an OAuth issuer, a metadata-advertised introspection endpoint, a webhook target): parses the value, rejects non-`http(s)` schemes, and refuses hosts in loopback / private / link-local ranges (cloud metadata, redis, internal services). Returns the parsed `URL`; throws otherwise. `allowLocalhost` permits `localhost` / `127.0.0.1` / `::1` for local-stack dev; `label` names the subject in the thrown message.
+
+### Changed
+
+- **`http-request` browser entry — `fetch/browser`.** The browser build of `httpJson` / `httpText` now resolves through `http-request/fetch/browser` (was `http-request/browser-fetch`), and the package's `browser` field maps Node-only builtins to their browser stubs. Bundlers targeting the browser pick the right entry automatically.
+
+### Fixed
+
+- **`ai` — codex reasoning effort.** Setting `effort` on a `spawnAiAgent` call now reaches the codex backend (emitted as codex's reasoning-effort config), where it was previously accepted but silently ignored for every agent except claude. The claude-only `max` level maps to codex's `xhigh` ceiling.
+
 ## [6.0.7](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.7) - 2026-06-03
 
 ### Added
