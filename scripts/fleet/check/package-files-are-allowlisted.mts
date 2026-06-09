@@ -240,10 +240,26 @@ export function checkPackage(
   }
 
   // Undershoot: each `files:` glob must match at least one path.
+  //
+  // A `files:` entry naming a build-output dir (`dist` / `build`) legitimately
+  // matches nothing in an UNBUILT checkout — `npm pack` finds no built files
+  // because none were produced. CI's lint/check job runs without guaranteeing a
+  // build, so don't flag a build-output entry as undershoot when that dir is
+  // absent on disk; a populated build still gets checked. The entry's first
+  // path segment names the dir to probe.
+  const BUILD_OUTPUT_DIRS = new Set(['build', 'dist'])
+  function isUnbuiltOutputEntry(entry: string): boolean {
+    // `files:` entries are package.json globs — always forward-slash, so the
+    // first path segment is the leading dir. No path normalization needed.
+    const firstSeg = entry.replace(/^\.\//, '').split('/')[0]!
+    return (
+      BUILD_OUTPUT_DIRS.has(firstSeg) && !existsSync(path.join(pkgDir, firstSeg))
+    )
+  }
   if (Array.isArray(pkg.files)) {
     for (let i = 0, { length } = pkg.files; i < length; i += 1) {
       const entry = pkg.files[i]!
-      if (!matchesAny(paths, entry)) {
+      if (!matchesAny(paths, entry) && !isUnbuiltOutputEntry(entry)) {
         findings.push({
           kind: 'undershoot',
           pkgDir,
