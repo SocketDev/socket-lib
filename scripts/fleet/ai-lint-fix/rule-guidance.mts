@@ -16,6 +16,8 @@
  *      becomes a concern.
  */
 
+import type { AiEffort } from '@socketsecurity/lib-stable/ai/types'
+
 // Rules below need an AI-driven fix because the right rewrite
 // depends on surrounding code structure that a regex / AST pass can't
 // safely infer. Each one IS fixable — the AI step does the work.
@@ -87,6 +89,26 @@ export const TIER_MODEL: Readonly<Record<'haiku' | 'opus' | 'sonnet', string>> =
     sonnet: 'claude-sonnet-4-6',
     opus: 'claude-opus-4-8',
   } as Readonly<Record<'haiku' | 'opus' | 'sonnet', string>>
+
+/**
+ * Map a tier label to its reasoning-effort level (claude `--effort`). Effort
+ * rides alongside the model per the CLAUDE.md token-spend rule ("match model
+ * AND effort to the job") — a cheap model on max effort still burns reasoning
+ * tokens a mechanical rewrite never needs. The tier ladder already encodes the
+ * job's complexity, so effort tracks it: regex-shaped Haiku rewrites run `low`;
+ * caller-chain Sonnet rewrites run `medium`; Opus module splits (the one tier
+ * that genuinely reasons over the whole file) run `high`. The lib's
+ * `spawnAiAgent` passes this through as the claude `--effort` flag; other agents
+ * ignore it. Resolved via `AiEffort` from `@socketsecurity/lib-stable/ai/types`.
+ */
+export const TIER_EFFORT: Readonly<
+  Record<'haiku' | 'opus' | 'sonnet', AiEffort>
+> = {
+  __proto__: null,
+  haiku: 'low',
+  sonnet: 'medium',
+  opus: 'high',
+} as unknown as Readonly<Record<'haiku' | 'opus' | 'sonnet', AiEffort>>
 
 /**
  * Pick the highest tier present in a per-file batch's rule set. Returns a tier

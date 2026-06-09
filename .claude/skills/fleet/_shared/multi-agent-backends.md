@@ -37,14 +37,31 @@ Document skips inline in whatever output the skill produces (`> Skipped pass: <r
 
 ## Env-var conventions
 
-| Var               | Default       | Purpose                                        |
-| ----------------- | ------------- | ---------------------------------------------- |
-| `CODEX_MODEL`     | `gpt-5.4`     | Codex model when codex is the active backend   |
-| `CODEX_REASONING` | `xhigh`       | Codex reasoning effort                         |
-| `CLAUDE_MODEL`    | `opus`        | Claude model when claude is the active backend |
-| `KIMI_MODEL`      | `kimi-latest` | Kimi model when kimi is the active backend     |
+| Var               | Default       | Purpose                                          |
+| ----------------- | ------------- | ------------------------------------------------ |
+| `CLAUDE_EFFORT`   | `high`        | Claude reasoning effort (claude `--effort`)      |
+| `CLAUDE_MODEL`    | `opus`        | Claude model when claude is the active backend   |
+| `CODEX_MODEL`     | `gpt-5.4`     | Codex model when codex is the active backend     |
+| `CODEX_REASONING` | `xhigh`       | Codex reasoning effort                           |
+| `KIMI_MODEL`      | `kimi-latest` | Kimi model when kimi is the active backend       |
+
+Pair model with effort, never just model: a cheap model left on the session's default effort still burns reasoning tokens, and a premium model on `low` underthinks. Both codex (`CODEX_REASONING`) and claude (`CLAUDE_EFFORT`) carry an effort knob — set both axes when a backend supports it. Kimi has no effort flag, so it inherits its CLI default.
 
 Don't invent per-skill env var names — reuse these. Skills that need a non-default model for a specific run accept a `--model` flag rather than introducing new env vars.
+
+## Effort-capability matrix
+
+Reasoning effort is NOT one flat vocabulary across backends — only map an effort onto a backend that actually accepts that level, or you'll pass an invalid value. The lib's `spawnAiAgent` translates the shared `AiEffort` (`@socketsecurity/lib/ai/types`) per-agent; this table is the source of truth for what each accepts.
+
+| Backend  | Effort flag                        | Accepted levels                       | `max` handling          |
+| -------- | ---------------------------------- | ------------------------------------- | ----------------------- |
+| claude   | `--effort <level>`                 | low / medium / high / xhigh / max     | passes through          |
+| codex    | `-c model_reasoning_effort=<level>`| minimal / low / medium / high / xhigh | clamped to `xhigh`      |
+| gemini   | (none)                             | —                                     | ignored                 |
+| kimi     | (none)                             | —                                     | ignored                 |
+| opencode | (none — provider-internal)         | —                                     | ignored                 |
+
+`AiEffort` = `low | medium | high | xhigh | max`. `minimal` is codex-only and outside `AiEffort`; `max` is claude-only, so `buildArgs` clamps it to codex's `xhigh` ceiling. A backend with no effort flag silently ignores the value — never gate behavior on a backend honoring effort it doesn't support. When you hand-roll a backend runner (not via `spawnAiAgent`), pick the effort default from this table's vocab for that backend, not a flat constant.
 
 ## Canonical implementation
 

@@ -75,6 +75,10 @@ const BACKENDS: Readonly<Record<BackendName, BackendDescriptor>> = {
     name: 'claude',
     run(_promptFile, _outFile) {
       const model = process.env['CLAUDE_MODEL'] ?? 'opus'
+      // Pair the model with a reasoning effort (claude `--effort`) — see
+      // _shared/multi-agent-backends.md. Review is judgment-heavy, so the
+      // default is `high`; codex's sibling knob is CODEX_REASONING.
+      const effort = process.env['CLAUDE_EFFORT'] ?? 'high'
       // Programmatic-Claude lockdown — all four flags per CLAUDE.md
       // (tools / allowedTools / disallowedTools / permission-mode).
       // The official permission flow is hooks → deny → mode → allow →
@@ -89,6 +93,8 @@ const BACKENDS: Readonly<Record<BackendName, BackendDescriptor>> = {
           '--print',
           '--model',
           model,
+          '--effort',
+          effort,
           '--no-session-persistence',
           '--permission-mode',
           'dontAsk',

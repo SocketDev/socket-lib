@@ -50,6 +50,11 @@ const steps: Array<() => boolean> = [
   // Cost routing: every mutating (fix) skill must declare a model: tier so
   // mechanical work runs cheap. See docs/claude.md/fleet/skill-model-routing.md.
   () => run('node', ['scripts/fleet/check/mutating-skills-have-model.mts']),
+  // Cost routing twin: a programmatic AI spawn that pins a model must also pin
+  // reasoning effort (CLAUDE.md token-spend). The lib makes effort optional —
+  // this gate is the enforcement the optional field can't provide. Vocab per
+  // backend: .claude/skills/fleet/_shared/multi-agent-backends.md.
+  () => run('node', ['scripts/fleet/check/ai-spawns-have-paired-effort.mts']),
   // Code is law: every hook + socket/* rule ships thorough tests (both arms,
   // every branch). A token or absent test fails the gate.
   () => run('node', ['scripts/fleet/check/enforcers-have-thorough-tests.mts']),
@@ -99,7 +104,7 @@ const steps: Array<() => boolean> = [
   // taxonomy applied — not external/, not _-prefixed) is reachable through some
   // exports entry (no orphaned public module). Complements files[] allowlist
   // hygiene and runtime require-ability; this is the map ↔ files check.
-  () => run('node', ['scripts/fleet/check/exports-cover-public-files.mts']),
+  () => run('node', ['scripts/fleet/check/public-files-are-exported.mts']),
   // Every external-tools.json / bundle-tools.json must match the shared
   // TypeBox schema (scripts/fleet/lib/external-tools-schema.mts). These files
   // pin tool versions + integrities; an unvalidated shape drift surfaces only
