@@ -16,10 +16,10 @@ import { safeDelete } from '../../../src/fs/safe'
 import { getEditableJsonClass } from '../../../src/json/edit'
 
 // EditableJson keeps the last-read/written file contents on an internal
-// `_readFileContent` field. The tests reach for it to assert on-disk shape
+// `readFileContent` field. The tests reach for it to assert on-disk shape
 // without re-reading the file. Narrow `unknown` instead of casting to `any`.
 function readInternalFileContent(instance: object): string {
-  return (instance as { _readFileContent: string })._readFileContent
+  return (instance as { readFileContent: string }).readFileContent
 }
 
 describe('EditableJson persistence', () => {
