@@ -92,10 +92,16 @@ const CHECKSUM_RE = /^[a-f0-9]{64}$/i
  * Idempotent on integrity input — call this on user-supplied data without first
  * sniffing the format.
  *
- * The default algorithm is `'sha256'` because that's the fleet's checksum
- * convention; pass an explicit algorithm if you have a hex digest from `sha384`
- * or `sha512` (the function does not verify hex length against the algorithm —
- * caller's responsibility).
+ * The default algorithm is `'sha256'` because this converts a _checksum_, and
+ * checksums are sha256 by fleet convention (the GitHub-SHA256SUMS interop shape
+ * its only caller, `checksum-file.ts`, parses). Do NOT flip this default to
+ * sha512: this function only relabels the hex bytes, it does not re-hash, so a
+ * sha512 label on a 256-bit digest would be a lie. The canonical algorithm for
+ * OUR-side integrity values is sha512 — emitted by `computeHashes` as the
+ * `integrity` (`sha512-<base64>`) field; sha256 is reserved for
+ * upstream-SHASUMS interop and content addressing. Pass an explicit algorithm
+ * if you have a hex digest from `sha384` or `sha512` (the function does not
+ * verify hex length against the algorithm — caller's responsibility).
  *
  * @example
  *   ;```typescript
