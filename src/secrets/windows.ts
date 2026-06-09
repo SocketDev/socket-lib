@@ -30,8 +30,6 @@ import { ErrorCtor } from '../primordials/error'
 
 import { JSONStringify } from '../primordials/json'
 
-import { PromiseCtor } from '../primordials/promise'
-
 const POWERSHELL_BIN = 'powershell'
 
 export function buildTarget(service: string, account: string): string {
@@ -195,7 +193,7 @@ export function readWindowsSync(
   return readDpapiSync(getDpapiFilePath(service, account))
 }
 
-export function runPsAsync(
+export async function runPsAsync(
   script: string,
   input?: string,
 ): Promise<{
@@ -203,32 +201,38 @@ export function runPsAsync(
   stdout: string
   stderr: string
 }> {
-  return new PromiseCtor(resolve => {
-    const { process: cp } = spawn(
-      POWERSHELL_BIN,
-      ['-NoProfile', '-Command', script],
-      {
-        stdio: ['pipe', 'pipe', 'pipe'],
-      },
-    )
-    let stdout = ''
-    let stderr = ''
-    cp.stdout!.setEncoding('utf8')
-    cp.stdout!.on('data', chunk => {
-      stdout += chunk
-    })
-    cp.stderr!.setEncoding('utf8')
-    cp.stderr!.on('data', chunk => {
-      stderr += chunk
-    })
-    cp.on('error', () => resolve({ status: -1, stdout, stderr }))
-    cp.on('close', status => resolve({ status, stdout, stderr }))
-    if (input !== undefined) {
-      cp.stdin!.end(input)
-    } else {
-      cp.stdin!.end()
-    }
+  // Let the lib spawn own output buffering (stdioString → string stdout/
+  // stderr). Don't attach `.setEncoding('utf8')` + `.on('data')`: that flips
+  // the streams to string chunks while the lib buffers them as Buffers + does
+  // Buffer.concat on close, throwing `TypeError: list[0] must be a Buffer`.
+  // The lib rejects on a non-zero exit; capture its `{ code, stdout, stderr }`.
+  const child = spawn(POWERSHELL_BIN, ['-NoProfile', '-Command', script], {
+    stdio: ['pipe', 'pipe', 'pipe'],
+    stdioString: true,
   })
+  child.process.stdin!.end(input ?? '')
+  try {
+    const r = await child
+    return {
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- the return contract is `status: number | null` (matches Node's ChildProcess exit-code shape); callers branch on `=== 0`.
+      status: typeof r.code === 'number' ? r.code : null,
+      stderr: String(r.stderr ?? ''),
+      stdout: String(r.stdout ?? ''),
+    }
+  } catch (e) {
+    const err = e as
+      | {
+          code?: number | undefined
+          stdout?: unknown | undefined
+          stderr?: unknown | undefined
+        }
+      | undefined
+    return {
+      status: typeof err?.code === 'number' ? err.code : -1,
+      stderr: String(err?.stderr ?? ''),
+      stdout: String(err?.stdout ?? ''),
+    }
+  }
 }
 
 export function runPsSync(

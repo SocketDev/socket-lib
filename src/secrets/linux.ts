@@ -59,27 +59,22 @@ export async function readLinux(
   service: string,
   account: string,
 ): Promise<string | undefined> {
-  return new PromiseCtor(resolve => {
-    const { process: cp } = spawn(
+  // Let the lib spawn own output buffering (stdioString → string stdout). Don't
+  // attach `.setEncoding('utf8')` + `.on('data')` — that flips the stream to
+  // string chunks while the lib buffers it as Buffers + does Buffer.concat on
+  // close, throwing `TypeError: list[0] must be a Buffer`. The lib rejects on a
+  // non-zero exit (a missing entry), which is just "undefined" here.
+  try {
+    const r = await spawn(
       SECRET_TOOL_BIN,
       ['lookup', 'service', service, 'user', account],
-      { stdio: ['ignore', 'pipe', 'pipe'] },
+      { stdio: ['ignore', 'pipe', 'pipe'], stdioString: true },
     )
-    let stdout = ''
-    cp.stdout!.setEncoding('utf8')
-    cp.stdout!.on('data', chunk => {
-      stdout += chunk
-    })
-    cp.on('error', () => resolve(undefined))
-    cp.on('close', status => {
-      if (status !== 0) {
-        resolve(undefined)
-        return
-      }
-      const out = stdout.trim()
-      resolve(out || undefined)
-    })
-  })
+    const out = String(r.stdout ?? '').trim()
+    return out || undefined
+  } catch {
+    return undefined
+  }
 }
 
 export function readLinuxSync(
@@ -104,43 +99,37 @@ export async function writeLinux(
   value: string,
   label: string,
 ): Promise<void> {
-  return new PromiseCtor((resolve, reject) => {
-    const { process: cp } = spawn(
-      SECRET_TOOL_BIN,
-      ['store', `--label=${label}`, 'service', service, 'user', account],
-      { stdio: ['pipe', 'pipe', 'pipe'] },
+  const hint =
+    'Install libsecret-tools (apt install libsecret-tools / dnf install libsecret) ' +
+    'or ensure a Secret Service provider (gnome-keyring, kwallet) is running.'
+  // Let the lib spawn own output buffering (stdioString); write the value to
+  // stdin via the returned `process` so it stays out of the process listing
+  // (`ps`) and the kernel argv view. Don't attach `.setEncoding`/`.on('data')`
+  // — that races the lib's Buffer.concat-on-close (see readLinux). The lib
+  // rejects on a non-zero exit with `{ code, stderr }`; re-throw it as the
+  // helpful error.
+  const child = spawn(
+    SECRET_TOOL_BIN,
+    ['store', `--label=${label}`, 'service', service, 'user', account],
+    { stdio: ['pipe', 'pipe', 'pipe'], stdioString: true },
+  )
+  child.process.stdin!.end(value)
+  try {
+    await child
+  } catch (e) {
+    const err = e as
+      | {
+          code?: number | undefined
+          stderr?: unknown | undefined
+          message?: string | undefined
+        }
+      | undefined
+    const status = typeof err?.code === 'number' ? err.code : -1
+    const stderr = String(err?.stderr ?? err?.message ?? '').trim()
+    throw new ErrorCtor(
+      `secret-tool store failed (status=${status}, user=${account}): ${stderr}. ${hint}`,
     )
-    let stderr = ''
-    cp.stderr!.setEncoding('utf8')
-    cp.stderr!.on('data', chunk => {
-      stderr += chunk
-    })
-    cp.on('error', err =>
-      reject(
-        new Error(
-          `secret-tool store failed: ${err.message}. ` +
-            'Install libsecret-tools (apt install libsecret-tools / dnf install libsecret) ' +
-            'or ensure a Secret Service provider (gnome-keyring, kwallet) is running.',
-        ),
-      ),
-    )
-    cp.on('close', status => {
-      if (status === 0) {
-        resolve()
-        return
-      }
-      reject(
-        new Error(
-          `secret-tool store failed (status=${status}, user=${account}): ${stderr.trim()}. ` +
-            'Install libsecret-tools (apt install libsecret-tools / dnf install libsecret) ' +
-            'or ensure a Secret Service provider (gnome-keyring, kwallet) is running.',
-        ),
-      )
-    })
-    // `secret-tool store` reads the password from stdin so the value
-    // never appears in `ps(1)` / `/proc/<pid>/cmdline`.
-    cp.stdin!.end(value)
-  })
+  }
 }
 
 export function writeLinuxSync(

@@ -26,8 +26,6 @@ import {
 
 import { ErrorCtor } from '../primordials/error'
 
-import { PromiseCtor } from '../primordials/promise'
-
 const SECURITY_BIN = 'security'
 
 export async function deleteMacOS(
@@ -102,7 +100,7 @@ export interface SpawnOpts {
   stdio?: 'ignore' | 'pipe' | ['ignore', 'pipe', 'pipe'] | undefined
 }
 
-export function runAsync(
+export async function runAsync(
   args: readonly string[],
   opts: SpawnOpts = {},
 ): Promise<{
@@ -110,27 +108,42 @@ export function runAsync(
   stdout: string
   stderr: string
 }> {
-  return new PromiseCtor(resolve => {
-    const { process: cp } = spawn(SECURITY_BIN, args as string[], {
-      stdio: opts.stdio ?? ['ignore', 'pipe', 'pipe'],
-    })
-    let stdout = ''
-    let stderr = ''
-    if (cp.stdout) {
-      cp.stdout.setEncoding('utf8')
-      cp.stdout.on('data', chunk => {
-        stdout += chunk
-      })
-    }
-    if (cp.stderr) {
-      cp.stderr.setEncoding('utf8')
-      cp.stderr.on('data', chunk => {
-        stderr += chunk
-      })
-    }
-    cp.on('error', () => resolve({ status: -1, stdout, stderr }))
-    cp.on('close', status => resolve({ status, stdout, stderr }))
+  // Let the lib's spawn own output buffering. It collects stdout/stderr as
+  // Buffer chunks and returns them as strings (stdioString) on the awaited
+  // result. Do NOT also attach `.setEncoding('utf8')` + `.on('data')` here:
+  // setEncoding flips the stream to emit STRING chunks, but the lib is
+  // concurrently buffering the same stream as Buffers and does
+  // `Buffer.concat(chunks)` on close — a string in that array throws
+  // `TypeError: list[0] argument must be an instance of Buffer` (the
+  // `security` CLI's "security: SecKeychainSearch…" stderr was the trigger).
+  // The lib REJECTS on a non-zero exit, so a failed `security` call (e.g. a
+  // missing entry) arrives in the catch with its `{ code, stdout, stderr }`.
+  const child = spawn(SECURITY_BIN, args as string[], {
+    stdio: opts.stdio ?? ['ignore', 'pipe', 'pipe'],
+    stdioString: true,
   })
+  try {
+    const r = await child
+    return {
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- the return contract is `status: number | null` (matches Node's ChildProcess exit-code shape); callers branch on `=== 0`.
+      status: typeof r.code === 'number' ? r.code : null,
+      stderr: String(r.stderr ?? ''),
+      stdout: String(r.stdout ?? ''),
+    }
+  } catch (e) {
+    const err = e as
+      | {
+          code?: number | undefined
+          stdout?: unknown | undefined
+          stderr?: unknown | undefined
+        }
+      | undefined
+    return {
+      status: typeof err?.code === 'number' ? err.code : -1,
+      stderr: String(err?.stderr ?? ''),
+      stdout: String(err?.stdout ?? ''),
+    }
+  }
 }
 
 export async function writeMacOS(
