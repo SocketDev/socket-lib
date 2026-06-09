@@ -95,10 +95,18 @@ export async function watchBuild(
  * package has NO root entry (no `main`/`exports["."]`) and declarations emit
  * co-located in `dist/` (not `dist/types/`). Both paths never existed, so
  * isBuildNeeded() ALWAYS returned true → `prepare`/`--needed` rebuilt on every
- * `pnpm install` — a primary cause of the install slowdown. Instead, derive a
- * real sentinel from the first `package.json` export's `default` (.js) +
- * `types` (.d.ts) targets, so the check tracks the actual output layout and
- * can't drift wrong again.
+ * `pnpm install` — a primary cause of the install slowdown. Instead, derive the
+ * sentinel from the `package.json` exports' `default` (.js) + `types` (.d.ts)
+ * dist targets, so the check tracks the actual output layout and can't drift
+ * wrong again.
+ *
+ * Checks EVERY dist-backed target, not just the first export's: a single
+ * sentinel let `--needed` skip the rebuild whenever the FIRST export's files
+ * existed, so adding a NEW export (e.g. external-tools/python) left its dist
+ * output unbuilt — `pnpm install --needed` saw the first sentinel, returned
+ * false, and CI's public-files-are-exported check then flagged the new export
+ * as stale. Requiring all targets to exist makes a newly-added export force a
+ * rebuild.
  */
 export function isBuildNeeded(): boolean {
   let pkg: {
@@ -124,13 +132,16 @@ export function isBuildNeeded(): boolean {
     const targets = [entry.default, entry.types].filter(
       (t): t is string => typeof t === 'string' && t.startsWith('./dist/'),
     )
-    // First subpath export with concrete dist targets is the sentinel: if its
-    // .js + .d.ts both exist, dist is built.
-    if (targets.length > 0) {
-      return targets.some(t => !existsSync(path.join(rootPath, t)))
+    // Every dist-backed target must exist. A missing one (a fresh export, a
+    // cleaned dir) means the build is needed — don't stop at the first export.
+    for (let i = 0, { length } = targets; i < length; i += 1) {
+      if (!existsSync(path.join(rootPath, targets[i]!))) {
+        return true
+      }
     }
   }
-  // No dist-backed exports found — nothing to build.
+  // Either every dist-backed export target exists (built), or there are no
+  // dist-backed exports (nothing to build). Both mean: no build needed.
   return false
 }
 

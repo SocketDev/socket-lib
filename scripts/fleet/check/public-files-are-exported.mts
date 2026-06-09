@@ -161,11 +161,29 @@ export function checkPackageExports(
   const findings: ExportsFinding[] = []
   const targets = collectExportTargets(exportsValue)
 
-  // 1. Stale exports — every target file must exist.
+  // A target points into built output (`./dist/…` / `./build/…`) when its first
+  // path segment is an OUTPUT_DIR. Such a target only exists AFTER a build, so
+  // we can't judge it stale in an unbuilt checkout (CI's lint/check job runs
+  // without building — only provenance/release build dist/). Skip dist-target
+  // staleness when that output root is absent; `source` (./src/…) targets are
+  // always present and stay checked.
+  const builtRoots = new Set(
+    OUTPUT_DIRS.filter(d => existsSync(path.join(pkgDir, d))),
+  )
+  function pointsAtUnbuiltOutput(rel: string): boolean {
+    const firstSeg = normalizePath(rel).split('/')[0]!
+    return OUTPUT_DIRS.includes(firstSeg) && !builtRoots.has(firstSeg)
+  }
+
+  // 1. Stale exports — every target file must exist. A target into an unbuilt
+  // output dir is skipped (can't validate output that was never produced).
   const exportedFiles = new Set<string>()
   for (const target of targets) {
     const rel = target.replace(/^\.\//, '')
     exportedFiles.add(normalizePath(rel))
+    if (pointsAtUnbuiltOutput(rel)) {
+      continue
+    }
     if (!existsSync(path.join(pkgDir, rel))) {
       findings.push({
         kind: 'stale_export',
