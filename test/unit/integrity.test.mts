@@ -304,6 +304,17 @@ describe('integrity', () => {
       const sri = checksumToIntegrity(checksum)
       expect(integrityToChecksum(sri)).toBe(checksum)
     })
+
+    it('emits integrity as sha512 (the canonical OUR-side algorithm)', () => {
+      // Load-bearing invariant: OUR integrity values are sha512, not sha256.
+      // The whole fleet's integrity convention depends on this. A refactor that
+      // downgrades the integrity field would silently weaken every consumer's
+      // pin; this assertion fails loudly if that happens.
+      const { checksum, integrity } = computeHashes(Buffer.from('x'))
+      expect(integrity.startsWith('sha512-')).toBe(true)
+      // The checksum field stays sha256 hex — the upstream-SHASUMS interop shape.
+      expect(checksum).toMatch(/^[a-f0-9]{64}$/)
+    })
   })
 
   describe('verifyHash', () => {
