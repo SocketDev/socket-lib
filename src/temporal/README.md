@@ -66,7 +66,7 @@ don't fall back to the equivalent `Date` form.
    `ErrorCtor` from `../primordials/error`, never the bare globals.
 6. **Throw messages follow the fleet's four-ingredient rule** (What /
    Where / Saw / Fix). The spec only says "throw a `RangeError`"; we
-   pick the message. See `../../docs/claude.md/fleet/error-messages.md`.
+   pick the message. See `../../docs/agents.md/fleet/error-messages.md`.
 7. **Internal slot reads/writes** go through `slots.ts` — never store
    state on `this.<field>` directly. The spec models slots as private,
    non-introspectable storage; the `WeakMap`-based helpers preserve
@@ -142,7 +142,7 @@ No rule, no where, no saw, no fix. Also: bare global `RangeError`
 instead of the primordial — fails the primordials lint.
 
 Full rule and worked examples:
-[`../../docs/claude.md/fleet/error-messages.md`](../../docs/claude.md/fleet/error-messages.md).
+[`../../docs/agents.md/fleet/error-messages.md`](../../docs/agents.md/fleet/error-messages.md).
 
 ## Spec revision pinning
 
