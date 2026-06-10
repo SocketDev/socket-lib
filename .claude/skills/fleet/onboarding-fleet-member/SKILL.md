@@ -77,7 +77,7 @@ Detect and record (the marker groups these as `repo` + `build`):
 
 5. **Linter/formatter → oxlint + oxfmt.** Remove `.eslintrc*` / `eslint.config.*` /
    `biome.json` / `.prettierrc*` and their deps. Install the fleet oxlint plugin
-   (cascaded under `.config/fleet/oxlint-plugin/`) + `oxlintrc.json` (comes via the
+   (cascaded under `.config/oxlint-plugin/`) + `oxlintrc.json` (comes via the
    cascade in step 6). Rewrite `lint`/`fix` scripts to the fleet form. Genuinely
    repo-specific rules → `.config/repo/` overrides, never inline disables.
 

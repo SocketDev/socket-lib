@@ -54,6 +54,7 @@ catalog:
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
   'playwright-core': 1.55.1
+  'regjsparser': 0.13.1
   'rolldown': 1.1.0
   'shell-quote': 1.8.4
   'taze': 19.11.0

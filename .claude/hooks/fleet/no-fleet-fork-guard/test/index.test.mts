@@ -125,7 +125,7 @@ test('Edit on a canonical path outside a fleet repo passes', async () => {
   // Tmp dir without CLAUDE.md → the walk-up never finds a fleet root.
   const dir = mkdtempSync(path.join(os.tmpdir(), 'non-fleet-'))
   try {
-    const file = path.join(dir, '.config/fleet/oxlint-plugin/rules/foo.mts')
+    const file = path.join(dir, '.config/oxlint-plugin/fleet/foo/index.mts')
     mkdirSync(path.dirname(file), { recursive: true })
     writeFileSync(file, '// content\n')
     const result = await runHook({
@@ -138,12 +138,12 @@ test('Edit on a canonical path outside a fleet repo passes', async () => {
   }
 })
 
-test('Edit on .config/fleet/oxlint-plugin/rules/* in a fleet repo is BLOCKED', async () => {
+test('Edit on .config/oxlint-plugin/fleet/* in a fleet repo is BLOCKED', async () => {
   const repo = makeFakeFleetRepo()
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/fleet/oxlint-plugin/rules/example.mts',
+      '.config/oxlint-plugin/fleet/example/index.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, new_string: 'x' },
@@ -226,7 +226,7 @@ test('Write tool also blocked, not just Edit', async () => {
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/fleet/oxlint-plugin/rules/new-rule.mts',
+      '.config/oxlint-plugin/fleet/new-rule/index.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, content: 'export default {}' },
@@ -243,7 +243,7 @@ test('MultiEdit tool also blocked', async () => {
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/fleet/oxlint-plugin/rules/foo.mts',
+      '.config/oxlint-plugin/fleet/foo/index.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, edits: [] },
@@ -262,7 +262,7 @@ test('repo without FLEET-CANONICAL marker passes through', async () => {
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/fleet/oxlint-plugin/rules/x.mts',
+      '.config/oxlint-plugin/fleet/x/index.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, new_string: 'x' },

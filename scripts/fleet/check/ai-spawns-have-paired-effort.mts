@@ -111,6 +111,7 @@ export function scanSpawnCalls(
     //                 `model}` as the last property). This is what lets the
     //                 check see both `model: foo` and the shorthand `model`.
     const hasModel = /(?:[\s,{]|^)model\s*[:,}]/.test(span)
+    // Same key-boundary shape as the `model` probe above, for the `effort` key.
     const hasEffort = /(?:[\s,{]|^)effort\s*[:,}]/.test(span)
     if (hasModel && !hasEffort) {
       hits.push({
@@ -140,6 +141,8 @@ export function scanBackendArgv(
   // Match the property-key / env-var that identifies a claude or codex backend
   // block: CLAUDE_MODEL / CODEX_MODEL, or a `bin: 'claude'|'codex'` literal.
   const CLAUDE_BLOCK_RE = /CLAUDE_MODEL|bin:\s*['"]claude['"]/
+  // Same shape for the codex backend: the CODEX_MODEL env var OR a quoted
+  // `bin: 'codex'` / `bin: "codex"` literal.
   const CODEX_BLOCK_RE = /CODEX_MODEL|bin:\s*['"]codex['"]/
   const modelFlagRe = /['"]--model['"]/g
   let m: RegExpExecArray | null

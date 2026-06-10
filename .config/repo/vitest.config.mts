@@ -55,7 +55,8 @@ export default defineConfig({
     include: ['test/**/*.test.{js,ts,mjs,mts,cjs}'],
     // Vitest treats `test/**` as `**/test/**`, so without an explicit
     // exclude it picks up every nested `test/` directory in the repo
-    // — including the `.git-hooks/test/`, `.config/fleet/oxlint-plugin/test/`,
+    // — including the `.git-hooks/test/`, the oxlint plugin's per-rule
+    // `.config/oxlint-plugin/fleet/<id>/test/` suites,
     // and `scripts/**/test/` suites that run under `node --test`, not
     // vitest. Those tests use `import { test } from 'node:test'` and
     // produce zero vitest suites, which vitest reports as failures.
@@ -74,7 +75,7 @@ export default defineConfig({
       '**/test/fixtures/**',
       '**/.{idea,git,cache,output,temp}/**',
       '.git-hooks/**',
-      '.config/fleet/oxlint-plugin/test/**',
+      '.config/oxlint-plugin/**',
       'scripts/**/test/**',
       '.claude/hooks/**/test/**',
       'template/**',
