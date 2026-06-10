@@ -34,13 +34,25 @@ export const SOCKET_REGISTRY_REPO_NAME = 'socket-registry'
 export const SOCKET_REGISTRY_PACKAGE_NAME = '@socketsecurity/registry'
 export const SOCKET_REGISTRY_NPM_ORG = 'socketregistry'
 
-// Socket.dev application names.
-export const SOCKET_CLI_APP_NAME = 'socket'
-export const SOCKET_DLX_APP_NAME = 'dlx'
-export const SOCKET_FIREWALL_APP_NAME = 'sfw'
-export const SOCKET_REGISTRY_APP_NAME = 'registry'
-export const SOCKET_WHEELHOUSE_APP_NAME = 'wheelhouse'
-export const SOCKET_APP_PREFIX = '_'
+// The `_` prefix that marks a Socket-managed subdir of ~/.socket/. Applies to
+// BOTH app dirs (_socket, _registry) and infra/storage dirs (_cacache, _dlx,
+// _state) — so it is a DIR prefix, not an "app" prefix.
+export const SOCKET_DIR_PREFIX = '_'
+
+// Full names of the Socket-managed infra/storage DIRS under ~/.socket/ (the `_`
+// prefix included — these are dirs, not apps, and the bare form is never used
+// on its own). `_cacache` content-addressable cache; `_dlx` name+version binary
+// store (node, jre, python, sfw, …); `_state` version-LESS persistent app state
+// (= pnpm `state-dir` / XDG_STATE_HOME); `_wheelhouse` cross-fleet shared bin.
+export const SOCKET_DIR = {
+  __proto__: null,
+  cacache: `${SOCKET_DIR_PREFIX}cacache`,
+  dlx: `${SOCKET_DIR_PREFIX}dlx`,
+  state: `${SOCKET_DIR_PREFIX}state`,
+  wheelhouse: `${SOCKET_DIR_PREFIX}wheelhouse`,
+} as unknown as Readonly<
+  Record<'cacache' | 'dlx' | 'state' | 'wheelhouse', string>
+>
 
 // Socket.dev lib.
 export const SOCKET_LIB_NAME = '@socketsecurity/lib'

@@ -414,6 +414,16 @@ export function getSocketRepositoryName(): string | undefined {
 }
 
 /**
+ * SOCKET_STATE_DIR environment variable getter. Overrides the default Socket
+ * state directory (~/.socket/_state) location.
+ *
+ * @returns The state directory path, or `undefined` if not set
+ */
+export function getSocketStateDirEnv(): string | undefined {
+  return getEnvValue('SOCKET_STATE_DIR')
+}
+
+/**
  * SOCKET_VIEW_ALL_RISKS environment variable getter. Whether to view all Socket
  * Security risks.
  *
