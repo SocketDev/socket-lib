@@ -7,13 +7,12 @@
  *   - getSocketAppCacheDir() - app-level cache storage
  *   - getSocketAppCacheTtlDir() - TTL-based cache directory
  *   - getSocketCacacheDir() - cacache (content-addressable cache) directory
- *   - getSocketCliDir() - CLI-specific directory
- *   - getSocketDlxDir() - dlx (download and execute) directory
- *   - getSocketRegistryDir() - registry data storage
- *   - getSocketRegistryGithubCacheDir() - GitHub API response cache Tests
- *     validate path existence, normalization, cross-platform consistency, and
- *     aliasing. These paths are critical for Socket tool state management and
- *     caching strategies.
+ *   - getSocketDlxDir() - dlx (name+version binary store) directory
+ *   - getSocketStateDir() - _state (version-less persistent app state) directory
+ *   - getSocketAppStateDir() / getSocketAppRuntimeDir() - per-app state + run/
+ *     dir (daemon socket + lock) Tests validate path existence, normalization,
+ *     cross-platform consistency, and aliasing. These paths are critical for
+ *     Socket tool state management and caching strategies.
  */
 
 import process from 'node:process'
@@ -21,12 +20,12 @@ import {
   getSocketAppCacheDir,
   getSocketAppCacheTtlDir,
   getSocketAppDir,
+  getSocketAppRuntimeDir,
+  getSocketAppStateDir,
   getSocketCacacheDir,
-  getSocketCliDir,
   getSocketDlxDir,
   getSocketHomePath,
-  getSocketRegistryDir,
-  getSocketRegistryGithubCacheDir,
+  getSocketStateDir,
   getSocketUserDir,
 } from '../../src/paths/socket'
 import { describe, expect, it } from 'vitest'
@@ -222,76 +221,50 @@ describe('paths', () => {
     })
   })
 
-  describe('getSocketCliDir', () => {
-    it('should return Socket CLI directory', () => {
-      const result = getSocketCliDir()
-      expect(result).toContain('.socket/_socket')
-    })
-
-    it('should be an app directory', () => {
-      const cliDir = getSocketCliDir()
-      const appDir = getSocketAppDir('socket')
-      expect(cliDir).toBe(appDir)
+  describe('getSocketStateDir', () => {
+    it('should return the _state infra directory', () => {
+      const result = getSocketStateDir()
+      expect(result).toContain('.socket/_state')
     })
 
     it('should return normalized path', () => {
-      const result = getSocketCliDir()
+      const result = getSocketStateDir()
       expect(result).not.toContain('\\')
     })
 
     it('should be under Socket user directory', () => {
       const userDir = getSocketUserDir()
-      const cliDir = getSocketCliDir()
-      expect(cliDir).toContain(userDir)
+      const stateDir = getSocketStateDir()
+      expect(stateDir).toContain(userDir)
     })
   })
 
-  describe('getSocketRegistryDir', () => {
-    it('should return Socket Registry directory', () => {
-      const result = getSocketRegistryDir()
-      expect(result).toContain('.socket/_registry')
+  describe('getSocketAppStateDir', () => {
+    it('should nest the app inside _state', () => {
+      const result = getSocketAppStateDir('proteus')
+      expect(result).toContain('.socket/_state/proteus')
     })
 
-    it('should be an app directory', () => {
-      const registryDir = getSocketRegistryDir()
-      const appDir = getSocketAppDir('registry')
-      expect(registryDir).toBe(appDir)
-    })
-
-    it('should return normalized path', () => {
-      const result = getSocketRegistryDir()
-      expect(result).not.toContain('\\')
-    })
-
-    it('should be under Socket user directory', () => {
-      const userDir = getSocketUserDir()
-      const registryDir = getSocketRegistryDir()
-      expect(registryDir).toContain(userDir)
+    it('should nest under the _state dir', () => {
+      const result = getSocketAppStateDir('proteus')
+      expect(result).toMatch(/\/_state\/proteus$/)
     })
   })
 
-  describe('getSocketRegistryGithubCacheDir', () => {
-    it('should return Socket Registry GitHub cache directory', () => {
-      const result = getSocketRegistryGithubCacheDir()
-      expect(result).toContain('.socket/_registry/cache/ttl/github')
+  describe('getSocketAppRuntimeDir', () => {
+    it('should return the app run/ dir under _state', () => {
+      const result = getSocketAppRuntimeDir('proteus')
+      expect(result).toContain('.socket/_state/proteus/run')
     })
 
-    it('should be under Registry TTL cache directory', () => {
-      const ttlDir = getSocketAppCacheTtlDir('registry')
-      const githubDir = getSocketRegistryGithubCacheDir()
-      expect(githubDir).toContain(ttlDir)
-      expect(githubDir).toMatch(/github$/)
+    it('should end with the app state dir + /run', () => {
+      const runDir = getSocketAppRuntimeDir('proteus')
+      expect(runDir).toMatch(/\/_state\/proteus\/run$/)
     })
 
     it('should return normalized path', () => {
-      const result = getSocketRegistryGithubCacheDir()
+      const result = getSocketAppRuntimeDir('proteus')
       expect(result).not.toContain('\\')
-    })
-
-    it('should be under Socket user directory', () => {
-      const userDir = getSocketUserDir()
-      const githubDir = getSocketRegistryGithubCacheDir()
-      expect(githubDir).toContain(userDir)
     })
   })
 
@@ -320,11 +293,11 @@ describe('paths', () => {
         getSocketAppDir('test'),
         getSocketCacacheDir(),
         getSocketDlxDir(),
-        getSocketCliDir(),
-        getSocketRegistryDir(),
+        getSocketStateDir(),
+        getSocketAppStateDir('test'),
         getSocketAppCacheDir('test'),
         getSocketAppCacheTtlDir('test'),
-        getSocketRegistryGithubCacheDir(),
+        getSocketAppRuntimeDir('test'),
       ]
 
       // All paths should be non-empty strings
@@ -452,16 +425,16 @@ describe('paths', () => {
   })
 
   describe('specific app directories', () => {
-    it('should generate correct CLI directory', () => {
-      const cliDir = getSocketCliDir()
+    it('should generate correct app directory from a bare name', () => {
+      const cliDir = getSocketAppDir('socket')
       expect(cliDir).toContain('_socket')
       expect(cliDir).toMatch(/\/_socket$/)
     })
 
-    it('should generate correct Registry directory', () => {
-      const registryDir = getSocketRegistryDir()
-      expect(registryDir).toContain('_registry')
-      expect(registryDir).toMatch(/\/_registry$/)
+    it('should generate correct state directory', () => {
+      const stateDir = getSocketStateDir()
+      expect(stateDir).toContain('_state')
+      expect(stateDir).toMatch(/\/_state$/)
     })
 
     it('should generate correct DLX directory', () => {

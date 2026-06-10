@@ -12,12 +12,8 @@
 import {
   CACHE_SOCKET_API_DIR as canonicalCacheSocketApiDir,
   REGISTRY as canonicalRegistry,
-  SOCKET_CLI_APP_NAME as canonicalSocketCliAppName,
-  SOCKET_DLX_APP_NAME as canonicalSocketDlxAppName,
-  SOCKET_FIREWALL_APP_NAME as canonicalSocketFirewallAppName,
   SOCKET_IPC_HANDSHAKE as canonicalSocketIpcHandshake,
   SOCKET_PUBLIC_API_KEY as canonicalSocketPublicApiKey,
-  SOCKET_REGISTRY_APP_NAME as canonicalSocketRegistryAppName,
 } from '@socketsecurity/lib-stable/constants/socket'
 import { describe, expect, it } from 'vitest'
 
@@ -27,20 +23,17 @@ import {
   REGISTRY_SCOPE_DELIMITER,
   SOCKET_API_BASE_URL,
   SOCKET_API_TOKENS_URL,
-  SOCKET_APP_PREFIX,
-  SOCKET_CLI_APP_NAME,
   SOCKET_CONTACT_URL,
   SOCKET_DASHBOARD_URL,
-  SOCKET_DLX_APP_NAME,
+  SOCKET_DIR,
+  SOCKET_DIR_PREFIX,
   SOCKET_DOCS_URL,
-  SOCKET_FIREWALL_APP_NAME,
   SOCKET_GITHUB_ORG,
   SOCKET_IPC_HANDSHAKE,
   SOCKET_OVERRIDE_SCOPE,
   SOCKET_PRICING_URL,
   SOCKET_PUBLIC_API_KEY,
   SOCKET_PUBLIC_API_TOKEN,
-  SOCKET_REGISTRY_APP_NAME,
   SOCKET_REGISTRY_NPM_ORG,
   SOCKET_REGISTRY_PACKAGE_NAME,
   SOCKET_REGISTRY_REPO_NAME,
@@ -255,47 +248,32 @@ describe('constants/socket', () => {
     })
   })
 
-  describe('Socket.dev application names', () => {
-    it('should export SOCKET_CLI_APP_NAME', () => {
-      expect(SOCKET_CLI_APP_NAME).toBe('socket')
+  describe('Socket.dev managed directory names', () => {
+    it('should export SOCKET_DIR_PREFIX', () => {
+      expect(SOCKET_DIR_PREFIX).toBe('_')
     })
 
-    it('should export SOCKET_DLX_APP_NAME', () => {
-      expect(SOCKET_DLX_APP_NAME).toBe('dlx')
+    it('should map each infra dir to its full _-prefixed name', () => {
+      expect(SOCKET_DIR.cacache).toBe('_cacache')
+      expect(SOCKET_DIR.dlx).toBe('_dlx')
+      expect(SOCKET_DIR.state).toBe('_state')
+      expect(SOCKET_DIR.wheelhouse).toBe('_wheelhouse')
     })
 
-    it('should export SOCKET_FIREWALL_APP_NAME', () => {
-      expect(SOCKET_FIREWALL_APP_NAME).toBe('sfw')
+    it('should prefix every dir with SOCKET_DIR_PREFIX', () => {
+      for (const dir of Object.values(SOCKET_DIR)) {
+        expect(dir.startsWith(SOCKET_DIR_PREFIX)).toBe(true)
+      }
     })
 
-    it('should export SOCKET_REGISTRY_APP_NAME', () => {
-      expect(SOCKET_REGISTRY_APP_NAME).toBe('registry')
+    it('should have unique dir names', () => {
+      const dirs = Object.values(SOCKET_DIR)
+      const unique = [...new Set(dirs)]
+      expect(unique.length).toBe(dirs.length)
     })
 
-    it('should export SOCKET_APP_PREFIX', () => {
-      expect(SOCKET_APP_PREFIX).toBe('_')
-    })
-
-    it('should all be lowercase', () => {
-      expect(SOCKET_CLI_APP_NAME).toBe(canonicalSocketCliAppName.toLowerCase())
-      expect(SOCKET_DLX_APP_NAME).toBe(canonicalSocketDlxAppName.toLowerCase())
-      expect(SOCKET_FIREWALL_APP_NAME).toBe(
-        canonicalSocketFirewallAppName.toLowerCase(),
-      )
-      expect(SOCKET_REGISTRY_APP_NAME).toBe(
-        canonicalSocketRegistryAppName.toLowerCase(),
-      )
-    })
-
-    it('should have unique app names', () => {
-      const apps = [
-        SOCKET_CLI_APP_NAME,
-        SOCKET_DLX_APP_NAME,
-        SOCKET_FIREWALL_APP_NAME,
-        SOCKET_REGISTRY_APP_NAME,
-      ]
-      const uniqueApps = [...new Set(apps)]
-      expect(uniqueApps.length).toBe(apps.length)
+    it('should be a null-prototype map', () => {
+      expect(Object.getPrototypeOf(SOCKET_DIR)).toBe(null)
     })
   })
 
@@ -349,7 +327,6 @@ describe('constants/socket', () => {
       expect(SOCKET_REGISTRY_SCOPE).toContain('registry')
       expect(SOCKET_REGISTRY_REPO_NAME).toContain('registry')
       expect(SOCKET_REGISTRY_PACKAGE_NAME).toContain('registry')
-      expect(SOCKET_REGISTRY_APP_NAME).toContain('registry')
     })
 
     it('should have socket in API and scope names', () => {

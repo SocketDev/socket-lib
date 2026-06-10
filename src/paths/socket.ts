@@ -1,31 +1,26 @@
 /**
- * @file Path utilities for Socket ecosystem directories. Provides
- *   platform-aware path resolution for Socket tools' shared directory
- *   structure. Directory Structure: ~/.socket/ ├── _cacache/ #
- *   Content-addressable cache for npm packages ├── _dlx/ # DLX installations
- *   (content-addressed by hash) │ ├── <hash>/ # npm package installs
- *   (dlx-package) │ └── <hash>/ # binary downloads (dlx-binary) ├── _socket/ #
- *   Socket CLI app directory ├── _registry/ # Socket Registry app directory └──
- *   _sfw/ # Socket Firewall app directory.
+ * @file Path utilities for Socket ecosystem directories. Platform-aware
+ *   resolution for the shared ~/.socket/ layout. The `_`-prefixed entries are
+ *   Socket-managed DIRS (not apps): `_cacache` content-addressable cache;
+ *   `_dlx/<hash>/` name+version binary store (node, jre, python, sfw, …);
+ *   `_state/<app>/` version-LESS persistent app state (daemon socket + lock +
+ *   OAuth refresh; mirrors pnpm `state-dir` / XDG_STATE_HOME), with
+ *   `_state/<app>/run/` for a daemon's socket/lock/pid; `_wheelhouse`
+ *   cross-fleet shared bin. Generic per-app dirs (`getSocketAppDir('<name>')`)
+ *   nest under the same `_`-prefix.
  */
 
-import { CACHE_GITHUB_DIR } from '../constants/github'
-import {
-  SOCKET_APP_PREFIX,
-  SOCKET_CLI_APP_NAME,
-  SOCKET_DLX_APP_NAME,
-  SOCKET_REGISTRY_APP_NAME,
-  SOCKET_WHEELHOUSE_APP_NAME,
-} from '../constants/socket'
+import { SOCKET_DIR, SOCKET_DIR_PREFIX } from '../constants/socket'
 import { getHome } from '../env/home'
 import {
   getSocketCacacheDirEnv,
   getSocketDlxDirEnv,
   getSocketHome,
+  getSocketStateDirEnv,
 } from '../env/socket'
 import { getUserprofile } from '../env/windows'
 
-import { CACHE_DIR, CACHE_TTL_DIR, DOT_SOCKET_DIR } from './dirnames'
+import { CACHE_DIR, CACHE_TTL_DIR, DOT_SOCKET_DIR, RUN_DIR } from './dirnames'
 import { normalizePath } from './normalize'
 import { getPathValue } from './rewire'
 
@@ -78,40 +73,60 @@ export function getSocketAppCacheTtlDir(appName: string): string {
   return normalizePath(path.join(getSocketAppCacheDir(appName), CACHE_TTL_DIR))
 }
 /**
- * Get a Socket app directory (~/.socket/_<appName>).
+ * Get a Socket app directory (~/.socket/_<appName>). The `_` prefix is applied
+ * here; pass the bare app name (e.g. 'socket', 'registry').
  */
 
 /**
- * Get a Socket app directory (~/.socket/_<appName>).
+ * Get a Socket app directory (~/.socket/_<appName>). The `_` prefix is applied
+ * here; pass the bare app name (e.g. 'socket', 'registry').
  */
 export function getSocketAppDir(appName: string): string {
   const path = getNodePath()
   return normalizePath(
-    path.join(getSocketUserDir(), `${SOCKET_APP_PREFIX}${appName}`),
+    path.join(getSocketUserDir(), `${SOCKET_DIR_PREFIX}${appName}`),
   )
 }
 /**
- * Get the Socket cacache directory (~/.socket/_cacache). Can be overridden with
- * SOCKET_CACACHE_DIR environment variable or via setPath() for testing. Result
- * is cached via getPathValue for performance.
- *
- * Priority order:
- *
- * 1. Test override via setPath('socket-cacache-dir', ...)
- * 2. SOCKET_CACACHE_DIR - Full override of cacache directory
- * 3. Default: $SOCKET_HOME/_cacache or $HOME/.socket/_cacache
+ * Get the Socket cacache directory (~/.socket/_cacache). Override precedence:
+ * setPath('socket-cacache-dir', …) → SOCKET_CACACHE_DIR env →
+ * $SOCKET_HOME/_cacache → $HOME/.socket/_cacache.
  */
 
 /**
- * Get the Socket cacache directory (~/.socket/_cacache). Can be overridden with
- * SOCKET_CACACHE_DIR environment variable or via setPath() for testing. Result
- * is cached via getPathValue for performance.
- *
- * Priority order:
- *
- * 1. Test override via setPath('socket-cacache-dir', ...)
- * 2. SOCKET_CACACHE_DIR - Full override of cacache directory
- * 3. Default: $SOCKET_HOME/_cacache or $HOME/.socket/_cacache
+ * Get an app's runtime directory (~/.socket/_state/<app>/run/) — the home for a
+ * daemon's Unix socket + `concurrency.lock` + `<socket>.pid`. Version-less so
+ * the socket path is stable across binary upgrades.
+ */
+export function getSocketAppRuntimeDir(appName: string): string {
+  const path = getNodePath()
+  return normalizePath(path.join(getSocketAppStateDir(appName), RUN_DIR))
+}
+/**
+ * Get the Socket user directory (~/.socket). Override precedence:
+ * setPath('socket-user-dir', …) → SOCKET_HOME env → $HOME/.socket →
+ * /tmp/.socket (Unix) or %TEMP%.socket (Windows).
+ */
+
+/**
+ * Get an app's persistent state directory (~/.socket/_state/<app>/). The
+ * `<app>` is a real app (proteus, acorn) nesting its version-less state inside
+ * the `_state` infra dir.
+ */
+export function getSocketAppStateDir(appName: string): string {
+  const path = getNodePath()
+  return normalizePath(path.join(getSocketStateDir(), appName))
+}
+/**
+ * Get an app's runtime directory (~/.socket/_state/<app>/run/) — the home for a
+ * daemon's Unix socket + `concurrency.lock` + `<socket>.pid`. Version-less so
+ * the socket path is stable across binary upgrades.
+ */
+
+/**
+ * Get the Socket cacache directory (~/.socket/_cacache). Override precedence:
+ * setPath('socket-cacache-dir', …) → SOCKET_CACACHE_DIR env →
+ * $SOCKET_HOME/_cacache → $HOME/.socket/_cacache.
  */
 export function getSocketCacacheDir(): string {
   return getPathValue('socket-cacache-dir', () => {
@@ -119,47 +134,19 @@ export function getSocketCacacheDir(): string {
       return normalizePath(getSocketCacacheDirEnv() as string)
     }
     const path = getNodePath()
-    return normalizePath(
-      path.join(getSocketUserDir(), `${SOCKET_APP_PREFIX}cacache`),
-    )
+    return normalizePath(path.join(getSocketUserDir(), SOCKET_DIR.cacache))
   })
 }
 /**
- * Get the Socket CLI directory (~/.socket/_socket).
+ * Get the Socket DLX directory (~/.socket/_dlx) — the name+version binary store
+ * (node, jre, python, sfw, …). Override precedence: setPath('socket-dlx-dir',
+ * …) → SOCKET_DLX_DIR env → $SOCKET_HOME/_dlx → $HOME/.socket/_dlx.
  */
 
 /**
- * Get the Socket CLI directory (~/.socket/_socket).
- */
-export function getSocketCliDir(): string {
-  return getSocketAppDir(SOCKET_CLI_APP_NAME)
-}
-/**
- * Get the Socket DLX directory (~/.socket/_dlx). Can be overridden with
- * SOCKET_DLX_DIR environment variable or via setPath() for testing. Result is
- * cached via getPathValue for performance.
- *
- * Priority order:
- *
- * 1. Test override via setPath('socket-dlx-dir', ...)
- * 2. SOCKET_DLX_DIR - Full override of DLX cache directory
- * 3. SOCKET_HOME/_dlx - Base directory override (inherits from getSocketUserDir)
- * 4. Default: $HOME/.socket/_dlx
- * 5. Fallback: /tmp/.socket/_dlx (Unix) or %TEMP%.socket_dlx (Windows)
- */
-
-/**
- * Get the Socket DLX directory (~/.socket/_dlx). Can be overridden with
- * SOCKET_DLX_DIR environment variable or via setPath() for testing. Result is
- * cached via getPathValue for performance.
- *
- * Priority order:
- *
- * 1. Test override via setPath('socket-dlx-dir', ...)
- * 2. SOCKET_DLX_DIR - Full override of DLX cache directory
- * 3. SOCKET_HOME/_dlx - Base directory override (inherits from getSocketUserDir)
- * 4. Default: $HOME/.socket/_dlx
- * 5. Fallback: /tmp/.socket/_dlx (Unix) or %TEMP%.socket_dlx (Windows)
+ * Get the Socket DLX directory (~/.socket/_dlx) — the name+version binary store
+ * (node, jre, python, sfw, …). Override precedence: setPath('socket-dlx-dir',
+ * …) → SOCKET_DLX_DIR env → $SOCKET_HOME/_dlx → $HOME/.socket/_dlx.
  */
 export function getSocketDlxDir(): string {
   return getPathValue('socket-dlx-dir', () => {
@@ -167,12 +154,7 @@ export function getSocketDlxDir(): string {
       return normalizePath(getSocketDlxDirEnv() as string)
     }
     const path = getNodePath()
-    return normalizePath(
-      path.join(
-        getSocketUserDir(),
-        `${SOCKET_APP_PREFIX}${SOCKET_DLX_APP_NAME}`,
-      ),
-    )
+    return normalizePath(path.join(getSocketUserDir(), SOCKET_DIR.dlx))
   })
 }
 /**
@@ -188,60 +170,39 @@ export function getSocketHomePath(): string {
   return getSocketUserDir()
 }
 /**
- * Get the Socket Registry directory (~/.socket/_registry).
+ * Get the Socket state directory (~/.socket/_state) — version-LESS persistent
+ * app state (the home for daemon sockets, locks, OAuth refresh, durable caches
+ * that survive version bumps; mirrors pnpm `state-dir` / XDG_STATE_HOME).
+ * Override precedence: setPath('socket-state-dir', …) → SOCKET_STATE_DIR env →
+ * $SOCKET_HOME/_state → $HOME/.socket/_state.
  */
 
 /**
- * Get the Socket Registry directory (~/.socket/_registry).
+ * Get the Socket state directory (~/.socket/_state) — version-LESS persistent
+ * app state (the home for daemon sockets, locks, OAuth refresh, durable caches
+ * that survive version bumps; mirrors pnpm `state-dir` / XDG_STATE_HOME).
+ * Override precedence: setPath('socket-state-dir', …) → SOCKET_STATE_DIR env →
+ * $SOCKET_HOME/_state → $HOME/.socket/_state.
  */
-export function getSocketRegistryDir(): string {
-  return getSocketAppDir(SOCKET_REGISTRY_APP_NAME)
+export function getSocketStateDir(): string {
+  return getPathValue('socket-state-dir', () => {
+    if (getSocketStateDirEnv()) {
+      return normalizePath(getSocketStateDirEnv() as string)
+    }
+    const path = getNodePath()
+    return normalizePath(path.join(getSocketUserDir(), SOCKET_DIR.state))
+  })
 }
 /**
- * Get the Socket Registry GitHub cache directory
- * (~/.socket/_registry/cache/ttl/github).
+ * Get an app's persistent state directory (~/.socket/_state/<app>/). The
+ * `<app>` is a real app (proteus, acorn) nesting its version-less state inside
+ * the `_state` infra dir.
  */
 
 /**
- * Get the Socket Registry GitHub cache directory
- * (~/.socket/_registry/cache/ttl/github).
- */
-export function getSocketRegistryGithubCacheDir(): string {
-  const path = getNodePath()
-  return normalizePath(
-    path.join(
-      getSocketAppCacheTtlDir(SOCKET_REGISTRY_APP_NAME),
-      CACHE_GITHUB_DIR,
-    ),
-  )
-}
-/**
- * Get the Socket Wheelhouse directory (~/.socket/_wheelhouse). Shared
- * cross-fleet location for binaries that every fleet member can reach without
- * each one re-downloading and re-extracting per-repo. Tool installers (janus,
- * sfw, etc.) drop their resolved executables under
- * `<wheelhouse>/<tool>/<version>/<platform-arch>/`; consumers add the
- * appropriate `bin/` to PATH or invoke the binary by absolute path.
- *
- * Priority order:
- *
- * 1. Test override via setPath('socket-wheelhouse-dir', ...)
- * 2. SOCKET_HOME/_wheelhouse - Base directory override (inherits from
- *    getSocketUserDir)
- * 3. Default: $HOME/.socket/_wheelhouse
- */
-
-/**
- * Get the Socket user directory (~/.socket). Can be overridden with SOCKET_HOME
- * environment variable or via setPath() for testing. Result is cached via
- * getPathValue for performance.
- *
- * Priority order:
- *
- * 1. Test override via setPath('socket-user-dir', ...)
- * 2. SOCKET_HOME - Base directory override
- * 3. Default: $HOME/.socket
- * 4. Fallback: /tmp/.socket (Unix) or %TEMP%.socket (Windows)
+ * Get the Socket user directory (~/.socket). Override precedence:
+ * setPath('socket-user-dir', …) → SOCKET_HOME env → $HOME/.socket →
+ * /tmp/.socket (Unix) or %TEMP%.socket (Windows).
  */
 export function getSocketUserDir(): string {
   return getPathValue('socket-user-dir', () => {
@@ -254,12 +215,14 @@ export function getSocketUserDir(): string {
   })
 }
 /**
- * Get the user's home directory. Uses environment variables directly to support
- * test mocking. Falls back to temporary directory if home is not available.
- *
- * Priority order: 1. HOME environment variable (Unix) 2. USERPROFILE
- * environment variable (Windows) 3. getNodeOs().homedir() 4. Fallback:
- * getNodeOs().tmpdir() (rarely used, for restricted environments)
+ * Get the Socket Wheelhouse directory (~/.socket/_wheelhouse). Shared
+ * cross-fleet location for binaries that every fleet member can reach without
+ * each one re-downloading and re-extracting per-repo. Tool installers (janus,
+ * sfw, etc.) drop their resolved executables under
+ * `<wheelhouse>/<tool>/<version>/<platform-arch>/`; consumers add the
+ * appropriate `bin/` to PATH or invoke the binary by absolute path. Override
+ * precedence: setPath('socket-wheelhouse-dir', …) → $SOCKET_HOME/_wheelhouse →
+ * $HOME/.socket/_wheelhouse.
  */
 
 /**
@@ -268,46 +231,30 @@ export function getSocketUserDir(): string {
  * each one re-downloading and re-extracting per-repo. Tool installers (janus,
  * sfw, etc.) drop their resolved executables under
  * `<wheelhouse>/<tool>/<version>/<platform-arch>/`; consumers add the
- * appropriate `bin/` to PATH or invoke the binary by absolute path.
- *
- * Priority order:
- *
- * 1. Test override via setPath('socket-wheelhouse-dir', ...)
- * 2. SOCKET_HOME/_wheelhouse - Base directory override (inherits from
- *    getSocketUserDir)
- * 3. Default: $HOME/.socket/_wheelhouse
+ * appropriate `bin/` to PATH or invoke the binary by absolute path. Override
+ * precedence: setPath('socket-wheelhouse-dir', …) → $SOCKET_HOME/_wheelhouse →
+ * $HOME/.socket/_wheelhouse.
  */
 export function getSocketWheelhouseDir(): string {
   return getPathValue('socket-wheelhouse-dir', () => {
     const path = getNodePath()
-    return normalizePath(
-      path.join(
-        getSocketUserDir(),
-        `${SOCKET_APP_PREFIX}${SOCKET_WHEELHOUSE_APP_NAME}`,
-      ),
-    )
+    return normalizePath(path.join(getSocketUserDir(), SOCKET_DIR.wheelhouse))
   })
 }
 /**
- * Get the Socket user directory (~/.socket). Can be overridden with SOCKET_HOME
- * environment variable or via setPath() for testing. Result is cached via
- * getPathValue for performance.
+ * Get the user's home directory. Uses environment variables directly to support
+ * test mocking. Falls back to temporary directory if home is not available.
  *
- * Priority order:
- *
- * 1. Test override via setPath('socket-user-dir', ...)
- * 2. SOCKET_HOME - Base directory override
- * 3. Default: $HOME/.socket
- * 4. Fallback: /tmp/.socket (Unix) or %TEMP%.socket (Windows)
+ * Priority order: 1. HOME (Unix) 2. USERPROFILE (Windows) 3.
+ * getNodeOs().homedir() 4. Fallback: getNodeOs().tmpdir() (restricted envs).
  */
 
 /**
  * Get the user's home directory. Uses environment variables directly to support
  * test mocking. Falls back to temporary directory if home is not available.
  *
- * Priority order: 1. HOME environment variable (Unix) 2. USERPROFILE
- * environment variable (Windows) 3. getNodeOs().homedir() 4. Fallback:
- * getNodeOs().tmpdir() (rarely used, for restricted environments)
+ * Priority order: 1. HOME (Unix) 2. USERPROFILE (Windows) 3.
+ * getNodeOs().homedir() 4. Fallback: getNodeOs().tmpdir() (restricted envs).
  */
 export function getUserHomeDir(): string {
   // Try HOME first (Unix)
