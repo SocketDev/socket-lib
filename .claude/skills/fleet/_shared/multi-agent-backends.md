@@ -44,6 +44,7 @@ Document skips inline in whatever output the skill produces (`> Skipped pass: <r
 | `CODEX_MODEL`     | `gpt-5.4`     | Codex model when codex is the active backend     |
 | `CODEX_REASONING` | `xhigh`       | Codex reasoning effort                           |
 | `KIMI_MODEL`      | `kimi-latest` | Kimi model when kimi is the active backend       |
+| `OPENCODE_MODEL`  | (opencode config) | `provider/model` slug opencode routes to (Fireworks / Synthetic / …) |
 
 Pair model with effort, never just model: a cheap model left on the session's default effort still burns reasoning tokens, and a premium model on `low` underthinks. Both codex (`CODEX_REASONING`) and claude (`CLAUDE_EFFORT`) carry an effort knob — set both axes when a backend supports it. Kimi has no effort flag, so it inherits its CLI default.
 
@@ -62,6 +63,26 @@ Reasoning effort is NOT one flat vocabulary across backends — only map an effo
 | opencode | (none — provider-internal)         | —                                     | ignored                 |
 
 `AiEffort` = `low | medium | high | xhigh | max`. `minimal` is codex-only and outside `AiEffort`; `max` is claude-only, so `buildArgs` clamps it to codex's `xhigh` ceiling. A backend with no effort flag silently ignores the value — never gate behavior on a backend honoring effort it doesn't support. When you hand-roll a backend runner (not via `spawnAiAgent`), pick the effort default from this table's vocab for that backend, not a flat constant.
+
+## Reaching Fireworks / Synthetic / other providers (via opencode)
+
+Fireworks (`api.fireworks.ai/inference/v1`) and Synthetic (`api.synthetic.new/openai/v1`) are OpenAI-compatible HTTP endpoints, not standalone CLIs. The fleet reaches them two ways:
+
+1. **Through `opencode`** (the hybrid backend). Set `OPENCODE_MODEL` to a `provider/model` slug and the opencode runner passes `--model <slug>`. opencode owns the provider auth + base-URL config; the slug just picks the model. This is the path that matches the local OpenCode setup.
+2. **Directly from Node** via `@socketsecurity/lib/ai/spawn`'s HTTP backends (`fireworks` / `synthetic`) — for scripts/hooks that call a model programmatically without an interactive CLI. Same OpenAI-compatible wire format; the lib owns the base URL + `Authorization` header (token from env, never inline) + the `reasoning_effort` field.
+
+**Provider/model slug catalog** (the shapes opencode + the lib accept):
+
+| Provider     | Slug shape                                              | Notable models                                  |
+| ------------ | ------------------------------------------------------- | ----------------------------------------------- |
+| anthropic    | `anthropic/<model>`                                     | `claude-opus-4-8`, `claude-haiku-4-5`           |
+| fireworks-ai | `fireworks-ai/accounts/fireworks/models/<id>`           | `glm-5p1` (Opus/Sonnet stand-in), `deepseek-v3p2` |
+| synthetic    | `synthetic/hf:<org>/<model>`                            | `hf:moonshotai/Kimi-K2.5` (text/vision/UI), `hf:zai-org/GLM-5.1` |
+| moonshotai   | `moonshotai/<model>` (or the `kimi` direct CLI)         | `Kimi-K2.5`, `Kimi-K2-Thinking`                 |
+
+Model choice by job (the local convention): GLM-5.1 is a fast Opus/Sonnet stand-in for plan execution; Kimi K2.5 fits text/vision, UI work, and lower-complexity tasks; reserve Anthropic for planning + deep reasoning. Reasoning effort on the HTTP providers is per-model (the OpenAI `reasoning_effort` field where the model supports it) — only set it for a model that accepts it.
+
+Tokens for these providers live in env / the keychain (`FIREWORKS_API_KEY`, `SYNTHETIC_API_KEY`), never inline — same token-hygiene rule as `SOCKET_API_KEY`.
 
 ## Canonical implementation
 

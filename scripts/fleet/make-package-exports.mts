@@ -15,7 +15,7 @@
  *   list so it is unit-testable without a real build. The CLI wrapper globs the
  *   package, calls the engine, and writes package.json. Validation that the map
  *   and the on-disk public files agree lives in the companion check
- *   `scripts/fleet/check/exports-cover-public-files.mts`.
+ *   `scripts/fleet/check/public-files-are-exported.mts`.
  */
 
 import { promises as fs } from 'node:fs'

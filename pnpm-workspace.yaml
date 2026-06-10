@@ -54,7 +54,7 @@ catalog:
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
   'playwright-core': 1.55.1
-  'rolldown': 1.0.3
+  'rolldown': 1.1.0
   'shell-quote': 1.8.4
   'taze': 19.11.0
   'vitest': 4.1.6
@@ -90,8 +90,6 @@ minimumReleaseAgeExclude:
   - '@ultrathink/*'
   - '@yuku-parser/*'
   - '@socketoverride/*'
-  # published: 2026-05-22 | removable: 2026-05-29
-  - 'shell-quote@1.8.4'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we

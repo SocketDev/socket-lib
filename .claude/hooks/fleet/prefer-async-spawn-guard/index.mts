@@ -52,9 +52,12 @@ const CHILD_PROCESS_REQUIRE_RE =
 
 /**
  * Files where importing `node:child_process` is legitimate: this hook's own
- * files, the oxlint rules that match the banned shapes, and the markdownlint
+ * files, the oxlint rules that match the banned shapes, the markdownlint
  * self-skip shim (a `.mjs` rule loaded by markdownlint-cli2, which can't await
- * the async lib wrapper, so its documented fallback is the sync builtin).
+ * the async lib wrapper, so its documented fallback is the sync builtin), and
+ * the broken-hook-detector recovery net (built-ins-ONLY by charter: it is the
+ * safety net for "the lib is unresolvable", so it cannot route its spawn
+ * through `@socketsecurity/lib-stable` — the very thing it repairs).
  */
 export function isExemptPath(filePath: string): boolean {
   return (
@@ -63,6 +66,7 @@ export function isExemptPath(filePath: string): boolean {
     filePath.includes('/build/') ||
     filePath.includes('/node_modules/') ||
     filePath.includes('/.claude/hooks/fleet/prefer-async-spawn-guard/') ||
+    filePath.includes('/.claude/hooks/fleet/broken-hook-detector/') ||
     filePath.includes(
       '/.config/fleet/oxlint-plugin/rules/prefer-async-spawn.',
     ) ||

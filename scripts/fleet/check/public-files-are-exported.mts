@@ -3,25 +3,22 @@
  *   agree. Two failure modes, for every non-private workspace package that
  *   declares `exports`:
  *
- *   1. **Stale export** — an `exports` target points at a file that does not
- *      exist on disk. Rots silently after a rename/delete until a consumer's
- *      `import` throws ERR_MODULE_NOT_FOUND.
+ *   1. **Stale export** — an `exports` target points at a file that does not exist
+ *      on disk. Rots silently after a rename/delete until a consumer's `import`
+ *      throws ERR_MODULE_NOT_FOUND.
  *   2. **Orphaned public file** — a published file that IS public (survives the
- *      privacy taxonomy: not `external/`, not `_`-prefixed, not dev-junk) but is
- *      reachable through NO `exports` entry. Either it should be exported, or it
- *      should be marked private (`_`-prefix / `external/`) so the intent is
- *      explicit.
- *
- *   Complements (does not duplicate): `package-files-are-allowlisted` (files[]
- *   tarball hygiene) and socket-lib's repo-tier `dist-exports` (runtime
- *   require-ability). This check is about the MAP ↔ FILES correspondence.
- *
- *   Skips: private packages, packages with no `exports`, binary platform
- *   packages (`os`/`cpu` gated, no JS API), and packages with no built output.
- *   Per-package opt-out for a deliberately-unexported public file: prefix it
- *   `_` or place it under `external/`.
- *
- *   Usage: node scripts/fleet/check/public-files-are-exported.mts [--quiet]
+ *      privacy taxonomy: not `external/`, not `_`-prefixed, not dev-junk) but
+ *      is reachable through NO `exports` entry. Either it should be exported,
+ *      or it should be marked private (`_`-prefix / `external/`) so the intent
+ *      is explicit. Complements (does not duplicate):
+ *      `package-files-are-allowlisted` (files[] tarball hygiene) and
+ *      socket-lib's repo-tier `dist-exports` (runtime require-ability). This
+ *      check is about the MAP ↔ FILES correspondence. Skips: private packages,
+ *      packages with no `exports`, binary platform packages (`os`/`cpu` gated,
+ *      no JS API), and packages with no built output. Per-package opt-out for a
+ *      deliberately-unexported public file: prefix it `_` or place it under
+ *      `external/`. Usage: node
+ *      scripts/fleet/check/public-files-are-exported.mts [--quiet]
  */
 
 import { existsSync, readdirSync, statSync } from 'node:fs'
@@ -56,6 +53,10 @@ const PUBLIC_EXT_RE = /\.(?:c?js|d\.c?ts|d\.mts|mjs)$/
 // Dev-junk dirs never part of the public surface (mirrors the generator's
 // DEFAULT_IGNORE_GLOBS without dragging fast-glob into a sync check).
 const JUNK_SEGMENT_RE =
+  // Matches a junk directory segment anywhere in a normalized (unix-slash) path.
+  // (\/|^) — literal "/" or start-of-string (segment boundary on the left)
+  // (?:coverage|…|vendor) — non-capturing alternation of the known junk dir names
+  // ($|\/) — end-of-string or "/" (segment boundary on the right)
   /(\/|^)(?:coverage|node_modules|scripts|src|test|tests|tools|vendor)($|\/)/
 
 /**
@@ -248,7 +249,10 @@ export function binTargetsOf(pkg: Record<string, unknown>): string[] {
 // Best-effort: a package without the config yields none. Imported dynamically
 // so the sync callers stay simple; returns [] on any failure.
 export async function ignoreGlobsOf(pkgDir: string): Promise<string[]> {
-  const configPath = path.join(pkgDir, 'scripts/repo/package-exports.config.mts')
+  const configPath = path.join(
+    pkgDir,
+    'scripts/repo/package-exports.config.mts',
+  )
   if (!existsSync(configPath)) {
     return []
   }

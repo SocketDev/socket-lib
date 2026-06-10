@@ -73,6 +73,7 @@
     "socket/prefer-undefined-over-null": "error",
     "socket/prefer-windows-test-helpers": "error",
     "socket/require-async-iife-entry": "error",
+    "socket/require-regex-comment": "error",
     "socket/socket-api-token-env": "error",
     "socket/sort-array-literals": "error",
     "socket/sort-boolean-chains": "error",

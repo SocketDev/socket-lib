@@ -75,6 +75,7 @@ import preferTypeboxSchema from './rules/prefer-typebox-schema.mts'
 import preferUndefinedOverNull from './rules/prefer-undefined-over-null.mts'
 import preferWindowsTestHelpers from './rules/prefer-windows-test-helpers.mts'
 import requireAsyncIifeEntry from './rules/require-async-iife-entry.mts'
+import requireRegexComment from './rules/require-regex-comment.mts'
 import socketApiTokenEnv from './rules/socket-api-token-env.mts'
 import sortArrayLiterals from './rules/sort-array-literals.mts'
 import sortBooleanChains from './rules/sort-boolean-chains.mts'
@@ -162,6 +163,7 @@ const plugin = {
     'prefer-undefined-over-null': preferUndefinedOverNull,
     'prefer-windows-test-helpers': preferWindowsTestHelpers,
     'require-async-iife-entry': requireAsyncIifeEntry,
+    'require-regex-comment': requireRegexComment,
     'socket-api-token-env': socketApiTokenEnv,
     'sort-array-literals': sortArrayLiterals,
     'sort-boolean-chains': sortBooleanChains,

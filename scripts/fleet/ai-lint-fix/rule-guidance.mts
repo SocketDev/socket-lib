@@ -33,6 +33,7 @@ export const AI_HANDLED_RULES: ReadonlySet<string> = new Set([
   'socket/prefer-exists-sync',
   'socket/prefer-node-builtin-imports',
   'socket/prefer-undefined-over-null',
+  'socket/require-regex-comment',
 ])
 
 /**
@@ -71,6 +72,10 @@ export const RULE_MODEL_TIER: Readonly<
   'socket/no-fetch-prefer-http-request': 'sonnet',
   'socket/prefer-async-spawn': 'sonnet',
   'socket/prefer-exists-sync': 'sonnet',
+  // Reading a regex and writing a part-by-part breakdown comment is reasoning
+  // about pattern semantics — Sonnet's the right depth (Haiku tends to write a
+  // shallow restatement; Opus is overkill).
+  'socket/require-regex-comment': 'sonnet',
   // Module decomposition. The model has to read the whole file, partition
   // by domain, decide what each new module exports, and rewrite imports
   // in every consumer. Real refactoring; Opus's depth pays back.
@@ -209,4 +214,24 @@ export const RULE_GUIDANCE: Readonly<Record<string, string>> = {
     'Implement the placeholder. If the work is too large, do NOT delete the marker — leave the file unchanged and explain in your final reply.',
   'socket/no-fetch-prefer-http-request':
     'Replace `fetch(url, opts)` with the right helper from `@socketsecurity/lib-stable/http-request`: `httpJson` when the caller calls `.json()` on the response, `httpText` when it calls `.text()`, `httpRequest` for raw access. Add the named import.',
+  'socket/require-regex-comment': `Add a \`//\` comment that explains the flagged regex for a junior reader who won't mentally execute it. Put it on the line directly ABOVE the regex (preferred) or trailing the same line. Break the pattern into its parts and say what each MATCHES, not just what the variable is for.
+
+<process>
+  1. Read the whole regex. Identify its parts: anchors (\`^\`/\`$\`), character classes (\`[\\s,{]\`), groups (\`(?:…)\`), quantifiers (\`*\`/\`+\`/\`?\`/\`{n}\`), alternations (\`a|b\`), escapes (\`\\d\`, \`\\.\`).
+  2. Write 1–6 short lines: for each meaningful part, "<the syntax> <what it matches>". Lead with the overall intent in one phrase.
+  3. Place the comment ABOVE the regex line at the same indentation. Don't restate the variable name — explain the PATTERN.
+  4. Don't change the regex itself. If after reading it you judge it genuinely trivial/obvious, append \`// socket-lint: allow uncommented-regex\` on its line instead of a breakdown.
+</process>
+
+<good-fix description="A property-key matcher, broken into boundary / name / terminator.">
++ // Match a \`model\` property KEY: a boundary before the name (whitespace,
++ // comma, opening brace, or start), the literal \`model\`, then \`:\` / \`,\` / \`}\`
++ // after it — so it sees \`model: x\` and the shorthand \`model\` but not \`customModel\`.
+  const hasModel = /(?:[\\s,{]|^)model\\s*[:,}]/.test(span)
+</good-fix>
+
+<bad-fix description="Restates the variable, explains nothing about the pattern.">
++ // check for model
+  const hasModel = /(?:[\\s,{]|^)model\\s*[:,}]/.test(span)
+</bad-fix>`,
 } as unknown as Readonly<Record<string, string>>

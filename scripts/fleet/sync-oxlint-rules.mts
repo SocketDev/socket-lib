@@ -37,6 +37,10 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+// prefer-async-spawn: sync-required — this is a sequential CLI generator that
+// formats its output inline before the drift comparison; no concurrency.
+import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
+
 import { REPO_ROOT } from './paths.mts'
 
 const PLUGIN_DIR = path.join(REPO_ROOT, '.config', 'fleet', 'oxlint-plugin')
@@ -44,8 +48,38 @@ const RULES_DIR = path.join(PLUGIN_DIR, 'rules')
 const TEST_DIR = path.join(PLUGIN_DIR, 'test')
 const INDEX_PATH = path.join(PLUGIN_DIR, 'index.mts')
 const OXLINTRC_PATH = path.join(REPO_ROOT, '.config', 'fleet', 'oxlintrc.json')
+const OXFMT_BIN = path.join(REPO_ROOT, 'node_modules', '.bin', 'oxfmt')
+const OXFMT_CONFIG = path.join(REPO_ROOT, '.config', 'fleet', 'oxfmtrc.json')
 
 const SOCKET_PREFIX = 'socket/'
+
+// Run a generated source string through oxfmt (stdin → stdout) so the
+// regenerated text matches the committed, oxfmt-formatted style. Without this,
+// the generator's own line-wrapping differs from oxfmt's, so a freshly
+// regenerated index.mts/oxlintrc.json reports as drift on every run even when no
+// rule changed (and a write commits a 100+-line reformat). Applied to BOTH the
+// write path and the `--check` comparison so the two never diverge. `filename`
+// only tells oxfmt which parser to use (.mts vs .json); the file isn't read.
+// Returns the input unchanged if oxfmt is unavailable or errors, so a missing
+// binary degrades to the prior (unformatted) behavior rather than crashing.
+function formatViaOxfmt(source: string, filename: string): string {
+  if (!existsSync(OXFMT_BIN)) {
+    return source
+  }
+  const result = spawnSync(
+    OXFMT_BIN,
+    [`--stdin-filepath=${filename}`, '-c', OXFMT_CONFIG],
+    { input: source, encoding: 'utf8' },
+  )
+  const formatted = String(result.stdout ?? '')
+  if (result.status !== 0 || !formatted) {
+    return source
+  }
+  // oxfmt's stdin mode omits the trailing newline that its file mode (and the
+  // committed files) keep; normalize to exactly one so the formatted output
+  // matches on-disk style instead of introducing a no-final-newline drift.
+  return `${formatted.replace(/\n+$/, '')}\n`
+}
 
 // Rules deliberately registered in the plugin but NOT activated at `error` in
 // oxlintrc's top-level `rules` block. Keyed by rule id with a one-line reason
@@ -121,6 +155,10 @@ function rewriteIndex(source: string, ids: readonly string[]): string {
     .map(id => `    '${id}': ${toCamel(id)},`)
     .join('\n')
   return withImports.replace(
+    // Splice the rules block: capture group 1 = `\n<indent>rules: {\n` (opening brace line);
+    // `[\s\S]*?` = lazy-any — skips existing entries non-greedily;
+    // capture group 2 = `\n<indent>},\n` (closing brace line with trailing newline).
+    // Both captured delimiters are re-emitted verbatim; only the body between them is replaced.
     /(\n\s*rules:\s*\{\n)[\s\S]*?(\n\s*\},\n)/,
     (_m, open: string, close: string) => `${open}${registryEntries}${close}`,
   )
@@ -230,7 +268,7 @@ function main(): number {
   // 1. index.mts
   if (existsSync(INDEX_PATH)) {
     const current = readFileSync(INDEX_PATH, 'utf8')
-    const next = rewriteIndex(current, ids)
+    const next = formatViaOxfmt(rewriteIndex(current, ids), 'index.mts')
     if (current !== next) {
       drift = true
       if (check) {
@@ -246,7 +284,7 @@ function main(): number {
   // 2. oxlintrc.json activations
   if (existsSync(OXLINTRC_PATH)) {
     const current = readFileSync(OXLINTRC_PATH, 'utf8')
-    const next = rewriteOxlintrc(current, ids)
+    const next = formatViaOxfmt(rewriteOxlintrc(current, ids), 'oxlintrc.json')
     if (current !== next) {
       drift = true
       if (check) {

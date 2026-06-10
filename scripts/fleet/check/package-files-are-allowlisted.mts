@@ -111,6 +111,9 @@ export function findWorkspacePackages(repoRoot: string): string[] {
     if (ln === '' || (ln.length > 0 && !/^\s/.test(ln))) {
       break
     }
+    // Match a pnpm-workspace.yaml list item: optional leading whitespace, `- `,
+    // optional quote chars, capture group 1 = the glob value (non-greedy, stops
+    // before `'`, `"`, or `#`), optional trailing quote, optional `# comment`.
     const m = /^\s*-\s*['"]?([^'"#]+?)['"]?\s*(?:#.*)?$/.exec(ln)
     if (m?.[1]) {
       globs.push(m[1].trim())
@@ -253,7 +256,8 @@ export function checkPackage(
     // first path segment is the leading dir. No path normalization needed.
     const firstSeg = entry.replace(/^\.\//, '').split('/')[0]!
     return (
-      BUILD_OUTPUT_DIRS.has(firstSeg) && !existsSync(path.join(pkgDir, firstSeg))
+      BUILD_OUTPUT_DIRS.has(firstSeg) &&
+      !existsSync(path.join(pkgDir, firstSeg))
     )
   }
   if (Array.isArray(pkg.files)) {
@@ -286,8 +290,12 @@ export function checkPackage(
 
 // npm includes these unconditionally regardless of `files:`; they never need a
 // `files:` entry, so the canonical allowlist omits them.
-const ALWAYS_PUBLISHED_RE =
-  /^(?:CHANGELOG(?:\.md)?|LICEN[CS]E(?:\.md|\.txt)?|README(?:\.md)?|package\.json)$/i
+// `^` / `$` anchor the full filename; outer `(?:…|…|…|…)` alternates the four
+// unconditional names; each inner `(?:\.md)?` / `(?:\.md|\.txt)?` group covers
+// the optional extension; `[CS]` char class matches both LICENSE and LICENCE;
+// `i` flag makes the whole match case-insensitive.
+// prettier-ignore
+const ALWAYS_PUBLISHED_RE = /^(?:CHANGELOG(?:\.md)?|LICEN[CS]E(?:\.md|\.txt)?|README(?:\.md)?|package\.json)$/i
 
 /**
  * Derive a tight, canonical `files:` allowlist from a package's publish output.
@@ -319,8 +327,8 @@ export function computeCanonicalFiles(packOut: PackOutput): string[] {
 
 /**
  * Run the check on every workspace package in `repoRoot`. With `fix`, rewrites
- * each package.json `files:` to {@link computeCanonicalFiles}. Returns exit
- * code (0 = clean / fixed, 1 = findings remain in report mode).
+ * each package.json `files:` to {@link computeCanonicalFiles}. Returns exit code
+ * (0 = clean / fixed, 1 = findings remain in report mode).
  */
 export function runCheck(repoRoot: string, fix = false): number {
   const findings: Finding[] = []

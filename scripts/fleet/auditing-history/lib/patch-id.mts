@@ -90,5 +90,10 @@ export function findUntaggedReverts(
  * `WindowCommit.isRevertTagged`. Case-insensitive on the type.
  */
 export function isRevertSubject(subject: string): boolean {
+  // Matches a Conventional Commit `revert` type at start of subject (case-insensitive).
+  // `^revert` — literal word anchored to start
+  // `(?:\([^)]*\))?` — non-capturing group: optional scope `(…)`, `[^)]*` matches any chars except `)`
+  // `!?` — optional breaking-change marker
+  // `:` — required colon terminating the type prefix
   return /^revert(?:\([^)]*\))?!?:/i.test(subject.trimStart())
 }

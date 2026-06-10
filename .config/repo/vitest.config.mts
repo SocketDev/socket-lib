@@ -131,7 +131,7 @@ export default defineConfig({
     coverage: {
       enabled: isCoverageEnabled,
       provider: 'v8',
-      reporter: ['text', 'json', 'html', 'lcov', 'clover'],
+      reporter: ['text', 'json', 'json-summary', 'html', 'lcov', 'clover'],
       exclude: [
         '**/*.config.*',
         '**/node_modules/**',
