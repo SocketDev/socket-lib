@@ -269,4 +269,4 @@ Core infrastructure library for Socket.dev security tools.
 
 🚨 **Vitest OOM with `tests 0ms` = infinite stream, not memory.** `Readable.push(undefined)` doesn't end the stream (only `null` does). Bisect with `node_modules/.bin/vitest -t '<describe>'` **before** raising heap.
 
-Full architecture, commands, code-quality tools, build system, package-exports, testing, CI, env-var conventions in [`docs/claude.md/repo/architecture.md`](docs/claude.md/repo/architecture.md).
+Full architecture, commands, code-quality tools, build system, package-exports, testing, CI, env-var conventions in [`docs/agents.md/repo/architecture.md`](docs/agents.md/repo/architecture.md).
