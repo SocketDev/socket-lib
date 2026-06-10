@@ -266,6 +266,9 @@ export function specDistName(spec: string): string {
   if (eggIdx !== -1) {
     return spec.slice(eggIdx + '#egg='.length)
   }
+  // Pull the package name off the front of a pip requirement spec: group 1 is
+  // the name (letters/digits/`._-`), stopping at the first version/URL operator
+  // — `@` (PEP 508 URL/extra) or a comparator (`==`, `>=`, `<`, `!=`, `~=`).
   const match = /^([A-Za-z0-9._-]+)\s*(?:@|[=<>!~]=?)/.exec(spec)
   return match ? match[1]! : spec
 }

@@ -22,7 +22,11 @@ import { httpRequest } from './request'
 
 import type { ChecksumFile, FetchChecksumFileOptions } from './download-types'
 
+// BSD `shasum -a 256` line: `SHA256 (<filename>) = <64-hex digest>`.
+// Group 1 = filename (anything inside the parens), group 2 = the 64-char hex.
 const CHECKSUM_BSD_RE = /^SHA256\s+\((.+)\)\s+=\s+([a-fA-F0-9]{64})$/
+// GNU `sha256sum` line: `<64-hex digest>  <filename>`.
+// Group 1 = the 64-char hex digest, group 2 = the filename (rest of line).
 const CHECKSUM_GNU_RE = /^([a-fA-F0-9]{64})\s+(.+)$/
 
 /**

@@ -46,6 +46,7 @@ for (let i = 0, { length } = entryFiles; i < length; i += 1) {
   const abs = entryFiles[i]!
   const rel = path
     .relative(srcPath, abs)
+    // Strip a trailing TypeScript extension — `.ts`, `.cts`, or `.mts`.
     .replace(/\.(?:c|m)?ts$/, '')
     .split(path.sep)
     .join('/')
@@ -65,6 +66,8 @@ export const buildConfig: RolldownOptions = {
   // this is exactly what esbuild's bundle:false avoided by treating every
   // import as external).
   external: (id: string) =>
+    // Treat any path with an `external/` segment as external: bounded by a
+    // separator (either platform) or string start before, and a separator after.
     /(?:[/\\]|^)external[/\\]/.test(id) ||
     (!id.startsWith('.') && !path.isAbsolute(id)),
   input,

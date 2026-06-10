@@ -264,11 +264,14 @@ export function extractPrimordialsNames(src: string): string[] {
  */
 export function extractTsExports(src: string): string[] {
   const out = new Set<string>()
+  // `export [declare] const <name>` at line start (multiline): group 1 is the
+  // identifier (JS ident chars, can't start with a digit). `declare` optional.
   for (const m of src.matchAll(
     /^export\s+(?:declare\s+)?const\s+([A-Za-z_$][A-Za-z0-9_$]*)/gm,
   )) {
     out.add(m[1]!)
   }
+  // Same as above for `export [declare] function <name>`: group 1 is the name.
   for (const m of src.matchAll(
     /^export\s+(?:declare\s+)?function\s+([A-Za-z_$][A-Za-z0-9_$]*)/gm,
   )) {

@@ -127,6 +127,9 @@ export function displayCodeCoverage(
       logger.log('')
     }
 
+    // Grab vitest's v8 coverage table header: the `% Coverage report from v8`
+    // banner, then a separator row (group 1 = the `-|` rule), the header row
+    // (group 2), and the same separator again via backreference `\1`.
     const coverageHeaderMatch = mainOutput.match(
       / % Coverage report from v8\n([-|]+)\n([^\n]+)\n\1/,
     )
@@ -198,6 +201,9 @@ export async function updateReadmeBadge(percent: number): Promise<boolean> {
     logger.warn(`Failed to read ${readmePath}: ${errorMessage(e)}`)
     return false
   }
+  // Match the README shields.io coverage badge so the percentage can be
+  // swapped: group 1 = the markdown + URL prefix up to `coverage-`, group 2 =
+  // the current percentage, group 3 = the `%25-<color>)` suffix.
   const badgeRegex =
     /(!\[Coverage\]\(https:\/\/img\.shields\.io\/badge\/coverage-)([\d.]+)(%25-[a-z]+\))/
   if (!badgeRegex.test(content)) {

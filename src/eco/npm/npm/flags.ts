@@ -16,6 +16,7 @@
  *   ```
  */
 export function isNpmAuditFlag(cmdArg: string): boolean {
+  // Matches `--audit`, `--no-audit`, and either with an `=<value>` suffix.
   return /^--(?:no-)?audit(?:=.*)?$/.test(cmdArg)
 }
 
@@ -30,6 +31,7 @@ export function isNpmAuditFlag(cmdArg: string): boolean {
  *   ```
  */
 export function isNpmFundFlag(cmdArg: string): boolean {
+  // Matches `--fund`, `--no-fund`, and either with an `=<value>` suffix.
   return /^--(?:no-)?fund(?:=.*)?$/.test(cmdArg)
 }
 
@@ -81,5 +83,6 @@ export function isNpmNodeOptionsFlag(cmdArg: string): boolean {
  *   ```
  */
 export function isNpmProgressFlag(cmdArg: string): boolean {
+  // Matches `--progress`, `--no-progress`, and either with an `=<value>` suffix.
   return /^--(?:no-)?progress(?:=.*)?$/.test(cmdArg)
 }

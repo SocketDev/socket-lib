@@ -42,6 +42,9 @@ export const CHAR_UPPERCASE_Z = 90
 // `.toUpperCase()` would throw on Windows MSYS-style paths like `/c/foo`.
 // oxlint-disable-next-line socket/prefer-non-capturing-group -- both groups are read by the replace callback in paths/normalize.ts:msysDriveToNative
 export const msysDriveRegExp = /^\/([a-zA-Z])($|\/)/
+// Matches a `node_modules` path segment: bounded by a slash (either separator)
+// or string start before, and a slash or string end after — so it hits
+// `node_modules` as a whole segment, not a substring like `my_node_modules`.
 export const nodeModulesPathRegExp = /(?:[/\\]|^)node_modules(?:$|[/\\])/
 export const slashRegExp = /[/\\]/
 

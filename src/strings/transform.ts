@@ -70,6 +70,9 @@ export function toKebabCase(str: string): string {
     return str
   }
   return (
+    // camelCase→kebab boundary: group 1 = a lowercase run (optional trailing
+    // digits), group 2 = the following uppercase letter; insert `-` between
+    // them (`fooBar` → `foo-Bar`, later lowercased).
     StringPrototypeReplace(str, /([a-z]+[0-9]*)([A-Z])/g, '$1-$2')
       // Convert underscores to hyphens
       .replace(/_/g, '-')

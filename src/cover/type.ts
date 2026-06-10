@@ -40,8 +40,9 @@ export async function getTypeCoverage(
       stdio: ['ignore', 'pipe', 'pipe'],
     })
 
-    // Parse output: "1234 / 5678 48.92%"
     const outputText = result.stdout ? result.stdout.toString() : ''
+    // Parse type-coverage's summary line `1234 / 5678 48.92%`: group 1 =
+    // covered count, group 2 = total count, group 3 = the percentage.
     const match = /(\d+) \/ (\d+) ([\d.]+)%/.exec(outputText)
 
     if (!match || !match[1] || !match[2] || !match[3]) {
