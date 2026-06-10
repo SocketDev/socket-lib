@@ -12,6 +12,13 @@
 import { config } from '../fleet/oxlint.config.mts'
 
 export default config({
+  // The active plugin is the one-dir-per-rule tree at `.config/oxlint-plugin/`
+  // (cascading in). A pre-migration flat tree still lingers at
+  // `.config/fleet/oxlint-plugin/` — its rule sources + test fixtures contain
+  // the bad patterns each rule detects by design, so linting them self-flags.
+  // Ignore it until the upstream migration removes the stale tree (the fleet
+  // factory already ignores `**/.config/oxlint-plugin/**`).
+  ignorePatterns: ['**/.config/fleet/oxlint-plugin/**'],
   jsPlugins: ['./oxlint-plugin/index.mts'],
   rules: {
     'socket-repo/no-inline-lazy-node-getter': 'error',
