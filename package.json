@@ -157,6 +157,11 @@
       "types": "./dist/abort/signal.d.ts",
       "default": "./dist/abort/signal.js"
     },
+    "./ai/agent-context": {
+      "source": "./src/ai/agent-context.mts",
+      "types": "./dist/ai/agent-context.d.mts",
+      "default": "./dist/ai/agent-context.js"
+    },
     "./ai/backends": {
       "source": "./src/ai/backends.mts",
       "types": "./dist/ai/backends.d.mts",
