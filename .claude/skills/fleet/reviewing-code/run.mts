@@ -17,147 +17,27 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
-import { which } from '@socketsecurity/lib/bin/which'
+import {
+  BACKENDS,
+  detectAvailableBackends,
+  isBackendName,
+  resolveBackendForRole,
+} from '@socketsecurity/lib/ai/backends'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 import { isSpawnError } from '@socketsecurity/lib/process/spawn/errors'
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
+import type { BackendName } from '@socketsecurity/lib/ai/backends'
+
 const logger = getDefaultLogger()
 
 type Role = 'discovery' | 'discovery-secondary' | 'remediation' | 'verify'
 
-type BackendName = 'codex' | 'claude' | 'opencode' | 'kimi'
-
-type BackendDescriptor = {
-  readonly bin: string
-  readonly hybrid: boolean
-  readonly name: BackendName
-  // Build the CLI argv given a prompt-file path and the temp output
-  // path the runner will read after the process exits. Backends that
-  // emit to stdout instead of an output file return outMode: 'stdout'
-  // so the runner captures stdout into the output path itself.
-  readonly run: (
-    promptFile: string,
-    outFile: string,
-  ) => { argv: readonly string[]; outMode: 'file' | 'stdout' }
-}
-
-const BACKENDS: Readonly<Record<BackendName, BackendDescriptor>> = {
-  __proto__: null,
-  codex: {
-    bin: 'codex',
-    hybrid: false,
-    name: 'codex',
-    run(promptFile, outFile) {
-      const model = process.env['CODEX_MODEL'] ?? 'gpt-5.4'
-      const reasoning = process.env['CODEX_REASONING'] ?? 'xhigh'
-      return {
-        argv: [
-          'exec',
-          '--model',
-          model,
-          '-c',
-          `model_reasoning_effort=${reasoning}`,
-          '--full-auto',
-          '--ephemeral',
-          '-o',
-          outFile,
-          '-',
-        ],
-        outMode: 'file',
-      }
-    },
-  },
-  claude: {
-    bin: 'claude',
-    hybrid: false,
-    name: 'claude',
-    run(_promptFile, _outFile) {
-      const model = process.env['CLAUDE_MODEL'] ?? 'opus'
-      // Pair the model with a reasoning effort (claude `--effort`) — see
-      // _shared/multi-agent-backends.md. Review is judgment-heavy, so the
-      // default is `high`; codex's sibling knob is CODEX_REASONING.
-      const effort = process.env['CLAUDE_EFFORT'] ?? 'high'
-      // Programmatic-Claude lockdown — all four flags per CLAUDE.md
-      // (tools / allowedTools / disallowedTools / permission-mode).
-      // The official permission flow is hooks → deny → mode → allow →
-      // canUseTool; in dontAsk mode the last step is skipped, so any
-      // tool not listed in `tools` is invisible to the model and any
-      // tool in `disallowedTools` is denied even on bypass. Verify
-      // pass is read-only by design: tools is the same set as
-      // allowedTools (read + git introspection only), with Edit /
-      // Write / destructive Bash explicitly denied.
-      return {
-        argv: [
-          '--print',
-          '--model',
-          model,
-          '--effort',
-          effort,
-          '--no-session-persistence',
-          '--permission-mode',
-          'dontAsk',
-          '--tools',
-          'Read',
-          'Glob',
-          'Grep',
-          'Bash(git:*)',
-          '--allowedTools',
-          'Read',
-          'Glob',
-          'Grep',
-          'Bash(git:*)',
-          '--disallowedTools',
-          'Edit',
-          'Write',
-          'Bash(rm:*)',
-          'Bash(mv:*)',
-        ],
-        outMode: 'stdout',
-      }
-    },
-  },
-  opencode: {
-    bin: 'opencode',
-    hybrid: true,
-    name: 'opencode',
-    run(_promptFile, _outFile) {
-      // opencode reads the prompt from stdin and writes to stdout in its
-      // non-interactive `run` form. It is hybrid — it dispatches to whatever
-      // provider its own config selects — so by default model selection lives
-      // outside this runner (opencode's config / its `recent` model).
-      //
-      // `OPENCODE_MODEL` lets a caller pin a `provider/model` slug for this run
-      // — the way the Fireworks + Synthetic providers are reached (e.g.
-      // `fireworks-ai/accounts/fireworks/models/glm-5p1`,
-      // `synthetic/hf:moonshotai/Kimi-K2.5`); see
-      // _shared/multi-agent-backends.md for the provider-slug catalog. Absent
-      // the env, opencode picks per its own config.
-      const model = process.env['OPENCODE_MODEL']
-      const argv = model ? ['run', '--model', model] : ['run']
-      return {
-        argv,
-        outMode: 'stdout',
-      }
-    },
-  },
-  kimi: {
-    bin: 'kimi',
-    hybrid: false,
-    name: 'kimi',
-    run(_promptFile, _outFile) {
-      const model = process.env['KIMI_MODEL'] ?? 'kimi-latest'
-      // Tentative shape: kimi reads prompt from stdin, writes to stdout.
-      // Adjust when the actual CLI surface is known.
-      return {
-        argv: ['chat', '--model', model, '--no-stream'],
-        outMode: 'stdout',
-      }
-    },
-  },
-} as const
-
+// The CLI registry, detection, and role resolution live in
+// @socketsecurity/lib/ai/backends — shared across the fleet's multi-agent
+// skills. This skill keeps only its own role table (prompts + per-role
+// preference order + timeouts) below and passes the order into the lib.
 type RoleSpec = {
   readonly buildPrompt: (ctx: ReviewContext) => string
   readonly headingForVerify?: string | undefined
@@ -372,22 +252,6 @@ export function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1)
 }
 
-export async function detectAvailableBackends(): Promise<
-  ReadonlySet<BackendName>
-> {
-  // Fan out the `which` lookups instead of awaiting one at a time.
-  // Cheap parallelism — N filesystem stats run concurrently rather
-  // than serially.
-  const names = Object.keys(BACKENDS) as BackendName[]
-  const results = await Promise.all(
-    names.map(async name => ({
-      name,
-      available: await isCommandAvailable(BACKENDS[name].bin),
-    })),
-  )
-  return new Set(results.filter(r => r.available).map(r => r.name))
-}
-
 export async function git(
   args: readonly string[],
   cwd?: string,
@@ -398,18 +262,6 @@ export async function git(
     stdioString: true,
   })
   return String(result.stdout ?? '').trim()
-}
-
-export function isBackendName(s: string): s is BackendName {
-  return s in BACKENDS
-}
-
-export async function isCommandAvailable(bin: string): Promise<boolean> {
-  // Use `which` from @socketsecurity/lib/bin instead of spawning
-  // `command -v` with shell: true. The shell:true variant invokes
-  // cmd.exe on Windows and mangles `command -v`; `which` is
-  // cross-platform and avoids the shell entirely.
-  return (await which(bin)) !== null
 }
 
 export function isRole(s: string): s is Role {
@@ -512,25 +364,20 @@ export function pickBackend(
   available: ReadonlySet<BackendName>,
   override: BackendName | undefined,
 ): BackendName | undefined {
-  if (override) {
-    if (!available.has(override)) {
-      logger.warn(
-        `${role}: requested backend "${override}" is not installed; falling back to preference order`,
-      )
-    } else {
-      return override
-    }
+  // Routing policy (override → preference → skip; hybrid only via override)
+  // lives in the shared lib; this wrapper supplies the role's preference order
+  // and logs the one human-facing case the pure resolver reports structurally.
+  const resolution = resolveBackendForRole({
+    available,
+    override,
+    preferenceOrder: ROLES[role].preferenceOrder,
+  })
+  if (resolution.reason === 'preference' && 'overrideMissing' in resolution) {
+    logger.warn(
+      `${role}: requested backend "${resolution.overrideMissing}" is not installed; falling back to preference order`,
+    )
   }
-  for (const candidate of ROLES[role].preferenceOrder) {
-    // opencode is hybrid — only used when explicitly selected via --pass.
-    if (BACKENDS[candidate].hybrid) {
-      continue
-    }
-    if (available.has(candidate)) {
-      return candidate
-    }
-  }
-  return undefined
+  return resolution.backend
 }
 
 export function printHelp(): void {

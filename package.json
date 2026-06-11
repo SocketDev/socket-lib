@@ -157,6 +157,11 @@
       "types": "./dist/abort/signal.d.ts",
       "default": "./dist/abort/signal.js"
     },
+    "./ai/backends": {
+      "source": "./src/ai/backends.mts",
+      "types": "./dist/ai/backends.d.mts",
+      "default": "./dist/ai/backends.js"
+    },
     "./ai/discover": {
       "source": "./src/ai/discover.mts",
       "types": "./dist/ai/discover.d.mts",
