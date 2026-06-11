@@ -17,6 +17,12 @@ import { SharedArrayBufferCtor } from '../primordials/globals'
 import { StringPrototypeStartsWith } from '../primordials/string'
 import { pRetry } from '../promises/retry'
 
+import {
+  getSubmodulePaths,
+  isTracked,
+  pathIsUnderSubmodule,
+} from '../git/tracked'
+import { getCwd } from '../git/repo'
 import { getAllowedDirectories } from './_internal'
 // Side-effect import: registers invalidatePathCache with paths/rewire
 // so test-time path overrides flush the allowed-directories cache used
@@ -50,6 +56,48 @@ export function getDel() {
     delModule = /*@__PURE__*/ require('../external/del')
   }
   return delModule!
+}
+
+/**
+ * Whether `targetPath` is safe for cleanup tooling to delete: git does NOT
+ * track it AND it does not live inside a submodule. A tracked path is a
+ * deliberate file; a submodule-internal path belongs to that submodule's own
+ * git (deleting it would dirty the submodule). Fails closed — any check error
+ * resolves to `false` (keep).
+ *
+ * Resolves the repo's submodule list itself; for a batch sweep, call
+ * `getSubmodulePaths` (from `git/tracked`) once and compose `isTracked` +
+ * `pathIsUnderSubmodule` per path to avoid re-reading `.gitmodules` each time.
+ *
+ * @example
+ *   ;```typescript
+ *   await isPathSafeToDelete('.DS_Store', { cwd: repoRoot })           // => true
+ *   await isPathSafeToDelete('src/index.ts', { cwd: repoRoot })        // => false (tracked)
+ *   await isPathSafeToDelete('vendor/sub/x.pyc', { cwd: repoRoot })    // => false (submodule)
+ *   ```
+ */
+export async function isPathSafeToDelete(
+  targetPath: string,
+  options?: { cwd?: string | undefined } | undefined,
+): Promise<boolean> {
+  const { cwd = getCwd() } = { __proto__: null, ...options } as {
+    cwd?: string | undefined
+  }
+  const tracked = await isTracked(targetPath, { cwd }).catch(() => true)
+  if (tracked) {
+    return false
+  }
+  const path = getNodePath()
+  const submodulePaths = await getSubmodulePaths({ cwd }).catch(
+    () => [] as string[],
+  )
+  if (submodulePaths.length) {
+    const rel = path.relative(cwd, path.resolve(cwd, targetPath))
+    if (pathIsUnderSubmodule(rel, submodulePaths)) {
+      return false
+    }
+  }
+  return true
 }
 
 /**

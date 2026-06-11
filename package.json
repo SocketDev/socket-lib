@@ -1520,6 +1520,11 @@
       "types": "./dist/git/staged.d.ts",
       "default": "./dist/git/staged.js"
     },
+    "./git/tracked": {
+      "source": "./src/git/tracked.ts",
+      "types": "./dist/git/tracked.d.ts",
+      "default": "./dist/git/tracked.js"
+    },
     "./git/types": {
       "source": "./src/git/types.ts",
       "types": "./dist/git/types.d.ts",
