@@ -3080,6 +3080,7 @@
     "picomatch": "4.0.4",
     "pony-cause": "2.1.11",
     "prim": "workspace:*",
+    "regjsparser": "catalog:",
     "rolldown": "catalog:",
     "semver": "7.7.2",
     "shell-quote": "1.8.4",
