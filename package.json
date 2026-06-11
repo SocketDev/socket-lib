@@ -162,6 +162,11 @@
       "types": "./dist/ai/discover.d.mts",
       "default": "./dist/ai/discover.js"
     },
+    "./ai/http": {
+      "source": "./src/ai/http.mts",
+      "types": "./dist/ai/http.d.mts",
+      "default": "./dist/ai/http.js"
+    },
     "./ai/profiles": {
       "source": "./src/ai/profiles.mts",
       "types": "./dist/ai/profiles.d.mts",
@@ -171,6 +176,11 @@
       "source": "./src/ai/spawn.mts",
       "types": "./dist/ai/spawn.d.mts",
       "default": "./dist/ai/spawn.js"
+    },
+    "./ai/tier": {
+      "source": "./src/ai/tier.mts",
+      "types": "./dist/ai/tier.d.mts",
+      "default": "./dist/ai/tier.js"
     },
     "./ai/types": {
       "source": "./src/ai/types.mts",

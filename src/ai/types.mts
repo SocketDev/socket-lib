@@ -51,6 +51,13 @@ export interface AgentSpawnResult {
   readonly attempts: number
   readonly durationMs: number
   readonly exitCode: number
+  /**
+   * True when the spawn failed because the API stayed overloaded (HTTP 529 /
+   * "Overloaded") through every retry. Lets a caller distinguish "back off and
+   * retry later" from "the work genuinely failed" — both surface as a non-zero
+   * `exitCode`, so this is the only way to tell them apart.
+   */
+  readonly overloaded: boolean
   readonly stderr: string
   readonly stdout: string
 }

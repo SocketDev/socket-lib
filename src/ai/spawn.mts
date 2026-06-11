@@ -260,10 +260,14 @@ export async function spawnAiAgent(
     await new PromiseCtor(resolve => setTimeout(resolve, backoffFor(attempts)))
   }
 
+  // `overloaded` is true only when the LAST attempt was still an overload —
+  // i.e. retries were exhausted on 529, not a real failure. A run that
+  // recovered on a retry exits with the recovered result and overloaded=false.
   return {
     attempts,
     durationMs: DateNow() - start,
     exitCode,
+    overloaded: isOverloaded(stdout, stderr),
     stderr,
     stdout,
   }

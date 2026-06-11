@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { AI_PROFILE } from '../../../src/ai/profiles.mts'
+import { AI_PROFILE, BASH_ALLOW } from '../../../src/ai/profiles.mts'
 
 describe('AI_PROFILE.read', () => {
   it('denies all mutation tools', () => {
@@ -50,6 +50,29 @@ describe('AI_PROFILE.create', () => {
   })
 })
 
+describe('AI_PROFILE.verify', () => {
+  it('allows Bash + Write (author + self-verify)', () => {
+    expect(AI_PROFILE.verify.tools).toContain('Bash')
+    expect(AI_PROFILE.verify.tools).toContain('Write')
+  })
+
+  it('allows running code + tests but NOT landing (no git add/commit)', () => {
+    const allow = AI_PROFILE.verify.allow
+    expect(allow).toContain('Bash(node:*)')
+    expect(allow).toContain('Bash(pnpm test:*)')
+    expect(allow).toContain('Bash(git status:*)')
+    // The bright line: verify must not be able to land its own work.
+    expect(allow).not.toContain('Bash(git add:*)')
+    expect(allow).not.toContain('Bash(git commit:*)')
+  })
+
+  it('every allow entry is a Bash glob', () => {
+    for (const entry of AI_PROFILE.verify.allow) {
+      expect(entry).toMatch(/^Bash\(/)
+    }
+  })
+})
+
 describe('AI_PROFILE.full', () => {
   it('allows bash but allowlists shell calls', () => {
     expect(AI_PROFILE.full.tools).toContain('Bash')
@@ -59,9 +82,35 @@ describe('AI_PROFILE.full', () => {
     }
   })
 
+  it('adds the mutating git commands verify withholds', () => {
+    expect(AI_PROFILE.full.allow).toContain('Bash(git add:*)')
+    expect(AI_PROFILE.full.allow).toContain('Bash(git commit:*)')
+  })
+
   it('denies webfetch and websearch', () => {
     expect(AI_PROFILE.full.disallow).toContain('WebFetch')
     expect(AI_PROFILE.full.disallow).toContain('WebSearch')
+  })
+})
+
+describe('BASH_ALLOW building blocks', () => {
+  it('every entry across every group is a Bash glob', () => {
+    for (const group of Object.values(BASH_ALLOW)) {
+      for (const entry of group) {
+        expect(entry).toMatch(/^Bash\([^)]+:\*\)$/)
+      }
+    }
+  })
+
+  it('full = verify-surface ∪ gitWrite ∪ pkgExec (composed, no drift)', () => {
+    const expected = new Set([
+      ...BASH_ALLOW.gitRead,
+      ...BASH_ALLOW.node,
+      ...BASH_ALLOW.test,
+      ...BASH_ALLOW.gitWrite,
+      ...BASH_ALLOW.pkgExec,
+    ])
+    expect(new Set(AI_PROFILE.full.allow)).toStrictEqual(expected)
   })
 })
 
@@ -69,6 +118,7 @@ const TIERS = [
   ['read', AI_PROFILE.read],
   ['edit', AI_PROFILE.edit],
   ['create', AI_PROFILE.create],
+  ['verify', AI_PROFILE.verify],
   ['full', AI_PROFILE.full],
 ] as const
 
@@ -88,7 +138,7 @@ describe('all profiles', () => {
   })
 })
 
-describe('capability ladder (read ⊂ edit ⊂ create ⊂ full)', () => {
+describe('capability ladder (read ⊂ edit ⊂ create ⊂ verify ⊂ full)', () => {
   it('each tier mutation-tool set is a superset of the previous', () => {
     // Compare the editing/writing/bash tools only — read's Web* tools
     // are orthogonal (research surface, dropped once we start mutating).
@@ -98,16 +148,25 @@ describe('capability ladder (read ⊂ edit ⊂ create ⊂ full)', () => {
       )
     const edit = mutating(AI_PROFILE.edit)
     const create = mutating(AI_PROFILE.create)
+    const verify = mutating(AI_PROFILE.verify)
     const full = mutating(AI_PROFILE.full)
     // edit ⊂ create
     for (const t of edit) {
       expect(create.has(t)).toBe(true)
     }
     expect(create.size).toBeGreaterThan(edit.size)
-    // create ⊂ full
+    // create ⊂ verify (verify adds Bash)
     for (const t of create) {
+      expect(verify.has(t)).toBe(true)
+    }
+    expect(verify.size).toBeGreaterThan(create.size)
+    // verify ⊆ full at the tool level; the Bash ALLOWLIST is the true
+    // widening (full adds git add/commit + pnpm exec).
+    for (const t of verify) {
       expect(full.has(t)).toBe(true)
     }
-    expect(full.size).toBeGreaterThan(create.size)
+    expect(AI_PROFILE.full.allow.length).toBeGreaterThan(
+      AI_PROFILE.verify.allow.length,
+    )
   })
 })
