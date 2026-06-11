@@ -62,9 +62,12 @@ export interface JanusDownloadOptions {
  * Reference: https://github.com/divmain/janus/releases.
  */
 export function getJanusDownloadUrl(
-  opts: JanusDownloadOptions,
+  options: JanusDownloadOptions,
 ): string | undefined {
-  const { platformArch, version } = { __proto__: null, ...opts } as typeof opts
+  const { platformArch, version } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
   const entry = JANUS_ASSET_MAP[platformArch]
   if (!entry) {
     return undefined

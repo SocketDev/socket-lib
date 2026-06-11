@@ -38,12 +38,13 @@ const resolutionCache = new MapCtor<
   Promise<ResolvedJanus | undefined>
 >()
 
-export function cacheKey(opts: ResolveJanusOptions | undefined): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  if (!opts?.downloadIfMissing) {
+export function cacheKey(options: ResolveJanusOptions | undefined): string {
+  options = { __proto__: null, ...options } as typeof options
+  if (!options?.downloadIfMissing) {
     return 'local-only'
   }
-  const { cacheDir, integrity, platformArch, version } = opts.downloadIfMissing
+  const { cacheDir, integrity, platformArch, version } =
+    options.downloadIfMissing
   const integrityKey =
     typeof integrity === 'string'
       ? integrity
@@ -54,9 +55,9 @@ export function cacheKey(opts: ResolveJanusOptions | undefined): string {
 }
 
 export async function doResolveJanus(
-  opts?: ResolveJanusOptions | undefined,
+  options?: ResolveJanusOptions | undefined,
 ): Promise<ResolvedJanus | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   const fromVfs = await janusFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -67,8 +68,8 @@ export async function doResolveJanus(
   if (fromPath) {
     return fromPath
   }
-  if (opts?.downloadIfMissing) {
-    return janusFromDownload(opts.downloadIfMissing)
+  if (options?.downloadIfMissing) {
+    return janusFromDownload(options.downloadIfMissing)
   }
   return undefined
 }
@@ -80,12 +81,12 @@ export function resetJanusResolution(): void {
 /* c8 ignore stop */
 
 export function resolveJanus(
-  opts?: ResolveJanusOptions | undefined,
+  options?: ResolveJanusOptions | undefined,
 ): Promise<ResolvedJanus | undefined> {
-  const key = cacheKey(opts)
+  const key = cacheKey(options)
   let cached = resolutionCache.get(key)
   if (!cached) {
-    cached = doResolveJanus(opts)
+    cached = doResolveJanus(options)
     resolutionCache.set(key, cached)
   }
   return cached

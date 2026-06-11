@@ -30,7 +30,7 @@ export interface SbtDownloadOptions {
  *   // → 'https://github.com/sbt/sbt/releases/download/v1.10.7/sbt-1.10.7.tgz'
  *   ```
  */
-export function getSbtDownloadUrl(opts: SbtDownloadOptions): string {
-  const { version } = { __proto__: null, ...opts } as typeof opts
+export function getSbtDownloadUrl(options: SbtDownloadOptions): string {
+  const { version } = { __proto__: null, ...options } as typeof options
   return `https://github.com/sbt/sbt/releases/download/v${version}/sbt-${version}.tgz`
 }

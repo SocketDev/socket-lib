@@ -38,12 +38,12 @@ export interface ResolveSbtOptions {
 
 const resolutionCache = new MapCtor<string, Promise<ResolvedSbt | undefined>>()
 
-export function cacheKey(opts: ResolveSbtOptions | undefined): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  if (!opts?.downloadIfMissing) {
+export function cacheKey(options: ResolveSbtOptions | undefined): string {
+  options = { __proto__: null, ...options } as typeof options
+  if (!options?.downloadIfMissing) {
     return 'local-only'
   }
-  const { cacheDir, integrity, version } = opts.downloadIfMissing
+  const { cacheDir, integrity, version } = options.downloadIfMissing
   const integrityKey =
     typeof integrity === 'string'
       ? integrity
@@ -54,9 +54,9 @@ export function cacheKey(opts: ResolveSbtOptions | undefined): string {
 }
 
 export async function doResolveSbt(
-  opts?: ResolveSbtOptions | undefined,
+  options?: ResolveSbtOptions | undefined,
 ): Promise<ResolvedSbt | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   const fromVfs = await sbtFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -67,8 +67,8 @@ export async function doResolveSbt(
   if (fromPath) {
     return fromPath
   }
-  if (opts?.downloadIfMissing) {
-    return sbtFromDownload(opts.downloadIfMissing)
+  if (options?.downloadIfMissing) {
+    return sbtFromDownload(options.downloadIfMissing)
   }
   return undefined
 }
@@ -80,12 +80,12 @@ export function resetSbtResolution(): void {
 /* c8 ignore stop */
 
 export function resolveSbt(
-  opts?: ResolveSbtOptions | undefined,
+  options?: ResolveSbtOptions | undefined,
 ): Promise<ResolvedSbt | undefined> {
-  const key = cacheKey(opts)
+  const key = cacheKey(options)
   let cached = resolutionCache.get(key)
   if (!cached) {
-    cached = doResolveSbt(opts)
+    cached = doResolveSbt(options)
     resolutionCache.set(key, cached)
   }
   return cached

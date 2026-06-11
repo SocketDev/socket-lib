@@ -40,12 +40,15 @@ const resolutionCache = new MapCtor<
   Promise<ResolvedTrufflehog | undefined>
 >()
 
-export function cacheKey(opts: ResolveTrufflehogOptions | undefined): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  if (!opts?.downloadIfMissing) {
+export function cacheKey(
+  options: ResolveTrufflehogOptions | undefined,
+): string {
+  options = { __proto__: null, ...options } as typeof options
+  if (!options?.downloadIfMissing) {
     return 'local-only'
   }
-  const { cacheDir, integrity, platformArch, version } = opts.downloadIfMissing
+  const { cacheDir, integrity, platformArch, version } =
+    options.downloadIfMissing
   const integrityKey =
     typeof integrity === 'string'
       ? integrity
@@ -56,9 +59,9 @@ export function cacheKey(opts: ResolveTrufflehogOptions | undefined): string {
 }
 
 export async function doResolveTrufflehog(
-  opts?: ResolveTrufflehogOptions | undefined,
+  options?: ResolveTrufflehogOptions | undefined,
 ): Promise<ResolvedTrufflehog | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   const fromVfs = await trufflehogFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -69,8 +72,8 @@ export async function doResolveTrufflehog(
   if (fromPath) {
     return fromPath
   }
-  if (opts?.downloadIfMissing) {
-    return trufflehogFromDownload(opts.downloadIfMissing)
+  if (options?.downloadIfMissing) {
+    return trufflehogFromDownload(options.downloadIfMissing)
   }
   return undefined
 }
@@ -82,12 +85,12 @@ export function resetTrufflehogResolution(): void {
 /* c8 ignore stop */
 
 export function resolveTrufflehog(
-  opts?: ResolveTrufflehogOptions | undefined,
+  options?: ResolveTrufflehogOptions | undefined,
 ): Promise<ResolvedTrufflehog | undefined> {
-  const key = cacheKey(opts)
+  const key = cacheKey(options)
   let cached = resolutionCache.get(key)
   if (!cached) {
-    cached = doResolveTrufflehog(opts)
+    cached = doResolveTrufflehog(options)
     resolutionCache.set(key, cached)
   }
   return cached

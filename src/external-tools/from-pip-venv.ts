@@ -75,12 +75,13 @@ export interface CreatePipVenvResult {
  *   wrong `entryPoint` name, or the package has no console script).
  */
 export async function createPipVenv(
-  opts: CreatePipVenvOptions,
+  options: CreatePipVenvOptions,
 ): Promise<CreatePipVenvResult> {
+  options = { __proto__: null, ...options } as typeof options
   const { cacheDir, entryPoint, installSpec } = {
     __proto__: null,
-    ...opts,
-  } as typeof opts
+    ...options,
+  } as typeof options
   const entryBin = pipVenvEntryPointPath(cacheDir, entryPoint)
 
   // Cache hit: existing venv, existing entry-point. Skip install.
@@ -88,7 +89,7 @@ export async function createPipVenv(
     return { entryPointPath: entryBin, created: false }
   }
 
-  const python = opts.python ?? (await findPython())
+  const python = options.python ?? (await findPython())
   if (!python) {
     throw new Error(
       'createPipVenv: no Python interpreter on PATH (looked for python3, python)',

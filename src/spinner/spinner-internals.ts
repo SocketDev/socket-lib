@@ -121,16 +121,16 @@ export function parseShimmerOption(
  *
  * @returns Resolved RGB color tuple.
  */
-export function resolveSpinnerColorRgb(opts: SpinnerOptions): ColorRgb {
+export function resolveSpinnerColorRgb(options: SpinnerOptions): ColorRgb {
   // Get theme from options or current theme.
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   let theme = getTheme()
-  if (opts.theme) {
+  if (options.theme) {
     // Resolve theme name or use Theme object directly.
-    if (typeof opts.theme === 'string') {
-      theme = THEMES[opts.theme] ?? theme
+    if (typeof options.theme === 'string') {
+      theme = THEMES[options.theme] ?? theme
     } else {
-      theme = opts.theme
+      theme = options.theme
     }
   }
 
@@ -148,7 +148,7 @@ export function resolveSpinnerColorRgb(opts: SpinnerOptions): ColorRgb {
   }
 
   // Convert color option to RGB (default from theme).
-  const spinnerColor = opts.color ?? defaultColor
+  const spinnerColor = options.color ?? defaultColor
 
   // Validate RGB tuple if provided.
   if (

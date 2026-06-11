@@ -32,14 +32,15 @@ export interface SkillSpectorFromDlxOptions {
 const UPSTREAM_REPO = 'https://github.com/NVIDIA/skillspector.git'
 
 export async function skillspectorFromDlx(
-  opts: SkillSpectorFromDlxOptions,
+  options: SkillSpectorFromDlxOptions,
 ): Promise<ResolvedSkillSpector | undefined> {
-  const { sha } = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
+  const { sha } = { __proto__: null, ...options } as typeof options
   if (!sha) {
     return undefined
   }
   const cacheDir =
-    opts.cacheDir ?? path.join(getSocketDlxDir(), 'skillspector', sha)
+    options.cacheDir ?? path.join(getSocketDlxDir(), 'skillspector', sha)
   const installSpec = `git+${UPSTREAM_REPO}@${sha}`
 
   try {

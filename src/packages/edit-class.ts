@@ -118,11 +118,11 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           return opts.data ? p.update(opts.data) : p
         }
 
-        static override async fix(path: string, opts: unknown) {
+        static override async fix(path: string, options: unknown) {
           const p =
             new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.load(path, true)
-          return await p.fix(opts)
+          return await p.fix(options)
         }
 
         static override async load(
@@ -147,18 +147,21 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           }
         }
 
-        static override async normalize(path: string, opts: NormalizeOptions) {
+        static override async normalize(
+          path: string,
+          options: NormalizeOptions,
+        ) {
           const p =
             new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.load(path)
-          return await p.normalize(opts)
+          return await p.normalize(options)
         }
 
-        static override async prepare(path: string, opts: unknown) {
+        static override async prepare(path: string, options: unknown) {
           const p =
             new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
           await p.load(path, true)
-          return await p.prepare(opts)
+          return await p.prepare(options)
         }
 
         override create(path: string) {

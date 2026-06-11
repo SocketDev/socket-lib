@@ -73,13 +73,13 @@ export function getCdxgenAssetEntry(
  * Returns `undefined` when no entry exists for the requested platform-arch.
  */
 export function getCdxgenDownloadUrl(
-  opts: CdxgenDownloadOptions,
+  options: CdxgenDownloadOptions,
 ): string | undefined {
   const {
     platformArch,
     variant = 'slim',
     version,
-  } = { __proto__: null, ...opts } as typeof opts
+  } = { __proto__: null, ...options } as typeof options
   const entry = getCdxgenAssetEntry(platformArch, variant)
   if (!entry) {
     return undefined

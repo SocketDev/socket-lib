@@ -44,12 +44,12 @@ const resolutionCache = new MapCtor<
   Promise<ResolvedBazel | undefined>
 >()
 
-export function cacheKey(opts: ResolveBazelOptions | undefined): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  if (!opts?.downloadIfMissing) {
+export function cacheKey(options: ResolveBazelOptions | undefined): string {
+  options = { __proto__: null, ...options } as typeof options
+  if (!options?.downloadIfMissing) {
     return 'local-only'
   }
-  const { integrity, platformArch, version } = opts.downloadIfMissing
+  const { integrity, platformArch, version } = options.downloadIfMissing
   const integrityKey =
     typeof integrity === 'string'
       ? integrity
@@ -60,15 +60,15 @@ export function cacheKey(opts: ResolveBazelOptions | undefined): string {
 }
 
 export async function doResolveBazel(
-  opts?: ResolveBazelOptions | undefined,
+  options?: ResolveBazelOptions | undefined,
 ): Promise<ResolvedBazel | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   const fromPath = await bazelFromPath()
   if (fromPath) {
     return fromPath
   }
-  if (opts?.downloadIfMissing) {
-    return bazelFromDownload(opts.downloadIfMissing)
+  if (options?.downloadIfMissing) {
+    return bazelFromDownload(options.downloadIfMissing)
   }
   return undefined
 }
@@ -80,12 +80,12 @@ export function resetBazelResolution(): void {
 /* c8 ignore stop */
 
 export function resolveBazel(
-  opts?: ResolveBazelOptions | undefined,
+  options?: ResolveBazelOptions | undefined,
 ): Promise<ResolvedBazel | undefined> {
-  const key = cacheKey(opts)
+  const key = cacheKey(options)
   let cached = resolutionCache.get(key)
   if (!cached) {
-    cached = doResolveBazel(opts)
+    cached = doResolveBazel(options)
     resolutionCache.set(key, cached)
   }
   return cached

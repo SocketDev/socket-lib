@@ -85,12 +85,12 @@ export function readEnv(name: string): string | undefined {
  * the user or surface a setup hint.
  */
 export async function resolve(
-  opts: ResolveOptions,
+  options: ResolveOptions,
 ): Promise<ResolveResult | undefined> {
   const { accounts, allowEnvOnly, service } = {
     __proto__: null,
-    ...opts,
-  } as typeof opts
+    ...options,
+  } as typeof options
   for (let i = 0, { length } = accounts; i < length; i += 1) {
     const account = accounts[i]!
     const fromEnv = readEnv(account)
@@ -115,11 +115,13 @@ export async function resolve(
  * Sync variant for non-async callers (hook initializers, schema validators that
  * run before any `await` machinery exists).
  */
-export function resolveSync(opts: ResolveOptions): ResolveResult | undefined {
+export function resolveSync(
+  options: ResolveOptions,
+): ResolveResult | undefined {
   const { accounts, allowEnvOnly, service } = {
     __proto__: null,
-    ...opts,
-  } as typeof opts
+    ...options,
+  } as typeof options
   for (let i = 0, { length } = accounts; i < length; i += 1) {
     const account = accounts[i]!
     const fromEnv = readEnv(account)

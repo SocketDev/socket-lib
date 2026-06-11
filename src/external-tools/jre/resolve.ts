@@ -48,12 +48,13 @@ export interface ResolveJreOptions {
 
 const resolutionCache = new MapCtor<string, Promise<ResolvedJre | undefined>>()
 
-export function cacheKey(opts: ResolveJreOptions | undefined): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  if (!opts?.downloadIfMissing) {
+export function cacheKey(options: ResolveJreOptions | undefined): string {
+  options = { __proto__: null, ...options } as typeof options
+  if (!options?.downloadIfMissing) {
     return 'local-only'
   }
-  const { cacheDir, integrity, platformArch, version } = opts.downloadIfMissing
+  const { cacheDir, integrity, platformArch, version } =
+    options.downloadIfMissing
   const integrityKey =
     typeof integrity === 'string'
       ? integrity
@@ -64,9 +65,9 @@ export function cacheKey(opts: ResolveJreOptions | undefined): string {
 }
 
 export async function doResolveJre(
-  opts?: ResolveJreOptions | undefined,
+  options?: ResolveJreOptions | undefined,
 ): Promise<ResolvedJre | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   const fromVfs = await jreFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -81,8 +82,8 @@ export async function doResolveJre(
   if (fromPath) {
     return fromPath
   }
-  if (opts?.downloadIfMissing) {
-    return jreFromDownload(opts.downloadIfMissing)
+  if (options?.downloadIfMissing) {
+    return jreFromDownload(options.downloadIfMissing)
   }
   return undefined
 }
@@ -94,12 +95,12 @@ export function resetJreResolution(): void {
 /* c8 ignore stop */
 
 export function resolveJre(
-  opts?: ResolveJreOptions | undefined,
+  options?: ResolveJreOptions | undefined,
 ): Promise<ResolvedJre | undefined> {
-  const key = cacheKey(opts)
+  const key = cacheKey(options)
   let cached = resolutionCache.get(key)
   if (!cached) {
-    cached = doResolveJre(opts)
+    cached = doResolveJre(options)
     resolutionCache.set(key, cached)
   }
   return cached

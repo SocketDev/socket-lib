@@ -137,9 +137,12 @@ export interface PythonAsset {
  * Returns the asset filename and URL, or `undefined` when the platform-arch has
  * no upstream prebuilt.
  */
-export function pythonAsset(opts: PythonAssetOptions): PythonAsset | undefined {
-  const { tag, version } = { __proto__: null, ...opts } as typeof opts
-  const arch = opts.arch ?? getPythonArch()
+export function pythonAsset(
+  options: PythonAssetOptions,
+): PythonAsset | undefined {
+  options = { __proto__: null, ...options } as typeof options
+  const { tag, version } = { __proto__: null, ...options } as typeof options
+  const arch = options.arch ?? getPythonArch()
   const triple = arch ? PLATFORM_TRIPLES[arch] : undefined
   if (!triple) {
     return undefined

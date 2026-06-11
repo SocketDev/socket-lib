@@ -135,14 +135,14 @@ export interface AdoptiumDownloadOptions {
  *   ```
  */
 export function getAdoptiumDownloadUrl(
-  opts: AdoptiumDownloadOptions,
+  options: AdoptiumDownloadOptions,
 ): string | undefined {
   const {
     platformArch,
     releaseType = 'ga',
     type = 'jre',
     version,
-  } = { __proto__: null, ...opts } as typeof opts
+  } = { __proto__: null, ...options } as typeof options
   const query = ADOPTIUM_QUERY_MAP[platformArch]
   if (!query) {
     return undefined

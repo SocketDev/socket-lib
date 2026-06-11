@@ -86,13 +86,13 @@ export interface DownloadAndExtractOptions extends DownloadOptions {
  *   ```
  */
 export async function downloadAndExtractTool(
-  opts: DownloadAndExtractOptions,
+  options: DownloadAndExtractOptions,
 ): Promise<ExtractedTool> {
-  const archive = await downloadToolArchive(opts)
+  const archive = await downloadToolArchive(options)
   const { extractOptions, extractedDir } = {
     __proto__: null,
-    ...opts,
-  } as typeof opts
+    ...options,
+  } as typeof options
   // Skip extraction when the target dir already has content. Empty
   // dir → treat as not-yet-extracted (handles a half-created mkdir).
   let extracted = false
@@ -203,12 +203,12 @@ export interface DownloadOptions {
  *   ```
  */
 export async function downloadToolArchive(
-  opts: DownloadOptions,
+  options: DownloadOptions,
 ): Promise<DownloadedArchive> {
   const { downloader, integrity, name, url } = {
     __proto__: null,
-    ...opts,
-  } as typeof opts
+    ...options,
+  } as typeof options
   const download = downloader ?? downloadBinary
   const result = await download({
     url,

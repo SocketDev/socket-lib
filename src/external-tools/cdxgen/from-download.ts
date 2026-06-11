@@ -54,7 +54,7 @@ export interface CdxgenFromDownloadOptions {
 }
 
 export async function cdxgenFromDownload(
-  opts: CdxgenFromDownloadOptions,
+  options: CdxgenFromDownloadOptions,
 ): Promise<ResolvedCdxgen | undefined> {
   const {
     cacheDir,
@@ -63,7 +63,7 @@ export async function cdxgenFromDownload(
     platformArch,
     variant = 'slim',
     version,
-  } = { __proto__: null, ...opts } as typeof opts
+  } = { __proto__: null, ...options } as typeof options
   const url = getCdxgenDownloadUrl({ platformArch, variant, version })
   const entry = getCdxgenAssetEntry(platformArch, variant)
   if (!url || !entry) {

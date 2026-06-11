@@ -143,7 +143,7 @@ export function chromeManifestDirs(): string[] {
   ]
 }
 
-export function installNativeHost(opts: InstallOptions): InstallResult {
+export function installNativeHost(options: InstallOptions): InstallResult {
   // Refuse to install on a Node too old to run the TypeScript host. The
   // host's own runtime check is defensive (handles nvm switches between
   // install and Chrome-exec); this one catches the obvious case where
@@ -154,7 +154,7 @@ export function installNativeHost(opts: InstallOptions): InstallResult {
     allowedOrigins,
     production = false,
     wrapperDir = __dirname,
-  } = { __proto__: null, ...opts } as typeof opts
+  } = { __proto__: null, ...options } as typeof options
 
   if (production && allowedOrigins.includes('*')) {
     throw new ErrorCtor(

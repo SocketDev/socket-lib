@@ -54,12 +54,12 @@ export interface BazelFromDownloadOptions {
  *   ```
  */
 export async function bazelFromDownload(
-  opts: BazelFromDownloadOptions,
+  options: BazelFromDownloadOptions,
 ): Promise<ResolvedBazel | undefined> {
   const { downloader, integrity, platformArch, version } = {
     __proto__: null,
-    ...opts,
-  } as typeof opts
+    ...options,
+  } as typeof options
   const url = getBazelDownloadUrl({ version, platformArch })
   if (!url) {
     return undefined

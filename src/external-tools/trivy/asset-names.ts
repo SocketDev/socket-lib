@@ -66,9 +66,12 @@ export interface TrivyDownloadOptions {
  * Reference: https://github.com/aquasecurity/trivy/releases.
  */
 export function getTrivyDownloadUrl(
-  opts: TrivyDownloadOptions,
+  options: TrivyDownloadOptions,
 ): string | undefined {
-  const { platformArch, version } = { __proto__: null, ...opts } as typeof opts
+  const { platformArch, version } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
   const entry = TRIVY_ASSET_MAP[platformArch]
   if (!entry) {
     return undefined

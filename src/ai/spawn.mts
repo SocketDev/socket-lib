@@ -49,10 +49,10 @@ export function backoffFor(attempt: number): number {
  */
 export function buildArgs(
   agent: AiAgentName,
-  opts: SpawnAiAgentOptions,
+  options: SpawnAiAgentOptions,
 ): string[] {
-  opts = { __proto__: null, ...opts } as typeof opts
-  const allAllowed = [...opts.tools, ...(opts.allow ?? [])]
+  options = { __proto__: null, ...options } as typeof options
+  const allAllowed = [...options.tools, ...(options.allow ?? [])]
 
   switch (agent) {
     case 'claude': {
@@ -61,27 +61,27 @@ export function buildArgs(
         '--print',
         '--no-session-persistence',
         '--permission-mode',
-        opts.permissionMode,
+        options.permissionMode,
         '--add-dir',
-        opts.cwd,
+        options.cwd,
       ]
-      for (const dir of opts.addDirs ?? []) {
+      for (const dir of options.addDirs ?? []) {
         args.push('--add-dir', dir)
       }
-      if (opts.model) {
-        args.push('--model', opts.model)
+      if (options.model) {
+        args.push('--model', options.model)
       }
-      if (opts.effort) {
-        args.push('--effort', opts.effort)
+      if (options.effort) {
+        args.push('--effort', options.effort)
       }
       if (allAllowed.length > 0) {
         args.push('--allowedTools', ...allAllowed)
       }
-      if (opts.disallow.length > 0) {
-        args.push('--disallowedTools', ...opts.disallow)
+      if (options.disallow.length > 0) {
+        args.push('--disallowedTools', ...options.disallow)
       }
-      if (opts.extraArgs) {
-        args.push(...opts.extraArgs)
+      if (options.extraArgs) {
+        args.push(...options.extraArgs)
       }
       return args
     }
@@ -90,65 +90,65 @@ export function buildArgs(
       // (it has a separate --read-only flag instead). Plan-mode maps
       // to --read-only; acceptEdits and dontAsk both run normally.
       const args: string[] = ['--print']
-      if (opts.permissionMode === 'plan') {
+      if (options.permissionMode === 'plan') {
         args.push('--read-only')
       }
-      if (opts.model) {
-        args.push('--model', opts.model)
+      if (options.model) {
+        args.push('--model', options.model)
       }
-      if (opts.effort) {
+      if (options.effort) {
         // Codex takes reasoning effort as a `-c` config override, not a
         // flag. Its vocab tops out at xhigh (no `max`), so clamp the shared
         // AiEffort `max` down to xhigh — codex's ceiling.
-        const codexEffort = opts.effort === 'max' ? 'xhigh' : opts.effort
+        const codexEffort = options.effort === 'max' ? 'xhigh' : options.effort
         args.push('-c', `model_reasoning_effort=${codexEffort}`)
       }
       if (allAllowed.length > 0) {
         args.push('--tools', allAllowed.join(','))
       }
-      if (opts.disallow.length > 0) {
-        args.push('--disallow-tools', opts.disallow.join(','))
+      if (options.disallow.length > 0) {
+        args.push('--disallow-tools', options.disallow.join(','))
       }
-      args.push('--cwd', opts.cwd)
-      if (opts.extraArgs) {
-        args.push(...opts.extraArgs)
+      args.push('--cwd', options.cwd)
+      if (options.extraArgs) {
+        args.push(...options.extraArgs)
       }
       return args
     }
     case 'gemini': {
       // Gemini CLI: --no-interactive for headless, --workspace for cwd.
-      const args: string[] = ['--no-interactive', '--workspace', opts.cwd]
-      if (opts.model) {
-        args.push('--model', opts.model)
+      const args: string[] = ['--no-interactive', '--workspace', options.cwd]
+      if (options.model) {
+        args.push('--model', options.model)
       }
       if (allAllowed.length > 0) {
         args.push('--allowed-tools', allAllowed.join(','))
       }
-      if (opts.disallow.length > 0) {
-        args.push('--denied-tools', opts.disallow.join(','))
+      if (options.disallow.length > 0) {
+        args.push('--denied-tools', options.disallow.join(','))
       }
-      if (opts.permissionMode === 'plan') {
+      if (options.permissionMode === 'plan') {
         args.push('--read-only')
       }
-      if (opts.extraArgs) {
-        args.push(...opts.extraArgs)
+      if (options.extraArgs) {
+        args.push(...options.extraArgs)
       }
       return args
     }
     case 'opencode': {
       // OpenCode CLI: --print, --tools, --no-tools.
-      const args: string[] = ['--print', '--cwd', opts.cwd]
-      if (opts.model) {
-        args.push('--model', opts.model)
+      const args: string[] = ['--print', '--cwd', options.cwd]
+      if (options.model) {
+        args.push('--model', options.model)
       }
       if (allAllowed.length > 0) {
         args.push('--tools', allAllowed.join(','))
       }
-      if (opts.disallow.length > 0) {
-        args.push('--no-tools', opts.disallow.join(','))
+      if (options.disallow.length > 0) {
+        args.push('--no-tools', options.disallow.join(','))
       }
-      if (opts.extraArgs) {
-        args.push(...opts.extraArgs)
+      if (options.extraArgs) {
+        args.push(...options.extraArgs)
       }
       return args
     }
@@ -211,11 +211,11 @@ export async function pickAgent(
  *   is requested, when none of the known agents are on PATH).
  */
 export async function spawnAiAgent(
-  opts: SpawnAiAgentOptions,
+  options: SpawnAiAgentOptions,
 ): Promise<AgentSpawnResult> {
-  opts = { __proto__: null, ...opts } as typeof opts
-  const agent = await pickAgent(opts.agent, opts.cwd)
-  const args = buildArgs(agent, opts)
+  options = { __proto__: null, ...options } as typeof options
+  const agent = await pickAgent(options.agent, options.cwd)
+  const args = buildArgs(agent, options)
 
   let stdout = ''
   let stderr = ''
@@ -231,16 +231,16 @@ export async function spawnAiAgent(
 
     try {
       const child = spawn(agent, args, {
-        cwd: opts.cwd,
+        cwd: options.cwd,
         stdio: 'pipe',
         stdioString: true,
-        timeout: opts.timeoutMs,
+        timeout: options.timeoutMs,
       })
       // `.stdin` is a typed convenience accessor on the fleet
       // PromiseSpawnResult (`Promise<…> & { process; stdin }`); `await child`
       // resolves the result, so the wrapper is kept rather than destructured.
       // socket-lint: allow bare-spawn-access
-      child.stdin?.end(opts.prompt)
+      child.stdin?.end(options.prompt)
       const result = await child
       stdout = String(result.stdout ?? '')
       stderr = String(result.stderr ?? '')
