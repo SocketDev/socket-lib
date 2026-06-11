@@ -13,7 +13,8 @@ const TIERS: readonly AiTier[] = ['haiku', 'sonnet', 'opus']
 
 describe('AI_TIER', () => {
   it('maps each tier to a model + effort', () => {
-    for (const tier of TIERS) {
+    for (let i = 0, { length } = TIERS; i < length; i += 1) {
+      const tier = TIERS[i]!
       expect(AI_TIER[tier].model).toMatch(/^claude-/)
       expect(AI_TIER[tier].effort).toBeDefined()
     }
@@ -36,21 +37,31 @@ describe('AI_TIER', () => {
 
   it('effort escalates with the tier (low → medium → high)', () => {
     const rank = { high: 2, low: 0, medium: 1 } as const
-    expect(rank[AI_TIER.haiku.effort as keyof typeof rank]).toBeLessThan(
-      rank[AI_TIER.sonnet.effort as keyof typeof rank],
-    )
-    expect(rank[AI_TIER.sonnet.effort as keyof typeof rank]).toBeLessThan(
-      rank[AI_TIER.opus.effort as keyof typeof rank],
-    )
+    // Capture each tier's effort rank into a local so the matcher argument is
+    // a plain number, not a src-member-expression (no-src-import-in-test-expect).
+    const haikuRank = rank[AI_TIER.haiku.effort as keyof typeof rank]
+    const sonnetRank = rank[AI_TIER.sonnet.effort as keyof typeof rank]
+    const opusRank = rank[AI_TIER.opus.effort as keyof typeof rank]
+    expect(haikuRank).toBeLessThan(sonnetRank)
+    expect(sonnetRank).toBeLessThan(opusRank)
   })
 })
 
 describe('tierToSpawn', () => {
+  // Expected values are LITERALS, not built from AI_TIER — a test must not
+  // validate src against itself (no-src-import-in-test-expect), and these
+  // symbols are too new to import from the -stable snapshot yet.
   it('returns the tier row for a known tier', () => {
-    expect(tierToSpawn('opus')).toStrictEqual(AI_TIER.opus)
+    expect(tierToSpawn('opus')).toStrictEqual({
+      effort: 'high',
+      model: 'claude-opus-4-8',
+    })
   })
 
   it('falls back to sonnet for an unknown label', () => {
-    expect(tierToSpawn('bogus' as AiTier)).toStrictEqual(AI_TIER.sonnet)
+    expect(tierToSpawn('bogus' as AiTier)).toStrictEqual({
+      effort: 'medium',
+      model: 'claude-sonnet-4-6',
+    })
   })
 })

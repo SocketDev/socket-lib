@@ -95,22 +95,35 @@ describe('AI_PROFILE.full', () => {
 
 describe('BASH_ALLOW building blocks', () => {
   it('every entry across every group is a Bash glob', () => {
-    for (const group of Object.values(BASH_ALLOW)) {
-      for (const entry of group) {
-        expect(entry).toMatch(/^Bash\([^)]+:\*\)$/)
+    const groups = Object.values(BASH_ALLOW)
+    for (let i = 0, { length } = groups; i < length; i += 1) {
+      const group = groups[i]!
+      for (let j = 0, { length: glen } = group; j < glen; j += 1) {
+        expect(group[j]).toMatch(/^Bash\([^)]+:\*\)$/)
       }
     }
   })
 
+  // Expected value is a LITERAL of the exact full-tier surface — not built
+  // from BASH_ALLOW (no-src-import-in-test-expect: a test must not validate
+  // src against itself, and these symbols are too new for the -stable
+  // snapshot). If the composition in profiles.mts changes, this literal must
+  // be updated in lockstep — which is the point: the literal is the
+  // independent oracle.
   it('full = verify-surface ∪ gitWrite ∪ pkgExec (composed, no drift)', () => {
-    const expected = new Set([
-      ...BASH_ALLOW.gitRead,
-      ...BASH_ALLOW.node,
-      ...BASH_ALLOW.test,
-      ...BASH_ALLOW.gitWrite,
-      ...BASH_ALLOW.pkgExec,
-    ])
-    expect(new Set(AI_PROFILE.full.allow)).toStrictEqual(expected)
+    expect(new Set(AI_PROFILE.full.allow)).toStrictEqual(
+      new Set([
+        'Bash(git add:*)',
+        'Bash(git commit:*)',
+        'Bash(git diff:*)',
+        'Bash(git log:*)',
+        'Bash(git status:*)',
+        'Bash(node:*)',
+        'Bash(pnpm exec:*)',
+        'Bash(pnpm run:*)',
+        'Bash(pnpm test:*)',
+      ]),
+    )
   })
 })
 
@@ -165,8 +178,10 @@ describe('capability ladder (read ⊂ edit ⊂ create ⊂ verify ⊂ full)', () 
     for (const t of verify) {
       expect(full.has(t)).toBe(true)
     }
-    expect(AI_PROFILE.full.allow.length).toBeGreaterThan(
-      AI_PROFILE.verify.allow.length,
-    )
+    // Capture the counts into locals so the matcher argument is a plain
+    // number, not a src-member-expression (no-src-import-in-test-expect).
+    const fullAllowCount = AI_PROFILE.full.allow.length
+    const verifyAllowCount = AI_PROFILE.verify.allow.length
+    expect(fullAllowCount).toBeGreaterThan(verifyAllowCount)
   })
 })
