@@ -79,15 +79,16 @@ export function pythonCacheDir(
 }
 
 export async function pythonFromDownload(
-  opts: PythonFromDownloadOptions,
+  options: PythonFromDownloadOptions,
 ): Promise<ResolvedPython | undefined> {
+  options = { __proto__: null, ...options } as typeof options
   const { cacheDir, downloader, integrity, tag, version } = {
     __proto__: null,
-    ...opts,
-  } as typeof opts
+    ...options,
+  } as typeof options
   // Resolve the effective platform-arch ONCE so the asset URL and the cache
   // path agree (a stray undefined here would poison the cache dir name).
-  const arch = opts.arch ?? getPythonArch()
+  const arch = options.arch ?? getPythonArch()
   if (!arch) {
     return undefined
   }

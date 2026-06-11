@@ -13,7 +13,7 @@ export interface SynpPackageOptions {
 /**
  * Build the npm package spec string for the requested synp version.
  */
-export function getSynpPackageSpec(opts: SynpPackageOptions): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  return `synp@${opts.version}`
+export function getSynpPackageSpec(options: SynpPackageOptions): string {
+  options = { __proto__: null, ...options } as typeof options
+  return `synp@${options.version}`
 }

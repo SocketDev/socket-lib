@@ -79,14 +79,14 @@ export class DlxPythonUnavailableError extends Error {
  * PYTHONPATH: packageDir } })`.
  */
 export async function dlxPipInstall(
-  opts: DlxPipInstallOptions,
+  options: DlxPipInstallOptions,
 ): Promise<DownloadPipPackageResult & { pythonBin: string }> {
-  opts = { __proto__: null, ...opts } as typeof opts
-  const pythonBin = await resolveOrThrow(opts)
+  options = { __proto__: null, ...options } as typeof options
+  const pythonBin = await resolveOrThrow(options)
   const result = await downloadPipPackage({
-    hash: opts.hash,
+    hash: options.hash,
     pythonBin,
-    spec: opts.spec,
+    spec: options.spec,
   })
   return { ...result, pythonBin }
 }
@@ -97,16 +97,19 @@ export async function dlxPipInstall(
  * `resolvePipPackagePin`.
  */
 export async function dlxPipPin(
-  opts: DlxPipPinOptions,
+  options: DlxPipPinOptions,
 ): Promise<PipPackagePin & { pythonBin: string }> {
-  opts = { __proto__: null, ...opts } as typeof opts
-  const pythonBin = await resolveOrThrow(opts)
-  const pin = await resolvePipPackagePin({ pythonBin, spec: opts.spec })
+  options = { __proto__: null, ...options } as typeof options
+  const pythonBin = await resolveOrThrow(options)
+  const pin = await resolvePipPackagePin({ pythonBin, spec: options.spec })
   return { ...pin, pythonBin }
 }
 
-export async function resolveOrThrow(opts: DlxPipOptions): Promise<string> {
-  const { preferDownload, python } = { __proto__: null, ...opts } as typeof opts
+export async function resolveOrThrow(options: DlxPipOptions): Promise<string> {
+  const { preferDownload, python } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
   const resolved = await resolvePython({
     preferDownload,
     downloadIfMissing: {

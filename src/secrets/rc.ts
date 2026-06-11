@@ -51,7 +51,7 @@ import { RegExpCtor } from '../primordials/regexp'
 
 import { StringPrototypeEndsWith } from '../primordials/string'
 
-export function buildBlock(opts: WriteOptions): {
+export function buildBlock(options: WriteOptions): {
   begin: string
   end: string
   body: string
@@ -60,11 +60,11 @@ export function buildBlock(opts: WriteOptions): {
   // Symmetric BEGIN/END sentinels — the `(managed)` suffix is on
   // both so a `BEGIN → END` text-substitution swap produces the
   // matching END string for migration regexes.
-  opts = { __proto__: null, ...opts } as typeof opts
-  const begin = `# BEGIN ${opts.service} env (managed)`
-  const end = `# END ${opts.service} env (managed)`
-  const noteLines = (opts.notes ?? []).map(line => `# ${line}`)
-  const exportLines = ObjectEntries(opts.exports).map(
+  options = { __proto__: null, ...options } as typeof options
+  const begin = `# BEGIN ${options.service} env (managed)`
+  const end = `# END ${options.service} env (managed)`
+  const noteLines = (options.notes ?? []).map(line => `# ${line}`)
+  const exportLines = ObjectEntries(options.exports).map(
     ([name, value]) => `export ${name}=${shellSingleQuote(value)}`,
   )
   const body = [...noteLines, ...exportLines].join('\n')
@@ -247,8 +247,8 @@ export function shellSingleQuote(value: string): string {
  * `shell` and `rcPath` override the auto-detected target — useful for chezmoi /
  * dotfile-manager users or installers running under a non-default shell.
  */
-export function write(opts: WriteOptions): WriteResult {
-  opts = { __proto__: null, ...opts } as typeof opts
+export function write(options: WriteOptions): WriteResult {
+  options = { __proto__: null, ...options } as typeof options
   if (os.platform() !== 'darwin') {
     return {
       rcPath: undefined,
@@ -256,11 +256,11 @@ export function write(opts: WriteOptions): WriteResult {
       reason: 'unsupported-platform',
     }
   }
-  const rcPath = opts.rcPath ?? pickRcFile(opts.shell)
+  const rcPath = options.rcPath ?? pickRcFile(options.shell)
   if (!rcPath) {
     return { rcPath: undefined, outcome: 'skipped', reason: 'unknown-shell' }
   }
-  const { begin, end, full: desiredBlock } = buildBlock(opts)
+  const { begin, end, full: desiredBlock } = buildBlock(options)
 
   let onDisk = ''
   if (existsSync(rcPath)) {
@@ -273,7 +273,7 @@ export function write(opts: WriteOptions): WriteResult {
   // accept the same string with a trailing ` (managed)` stripped,
   // since older sentinels were asymmetric (BEGIN had the qualifier,
   // END didn't).
-  for (const legacyBegin of opts.legacySentinels ?? []) {
+  for (const legacyBegin of options.legacySentinels ?? []) {
     const legacyEnd = legacyBegin.replace(/\bBEGIN\b/, 'END')
     const legacyEndStripped = legacyEnd.replace(/\s*\(managed\)\s*$/, '')
     const endAlt =

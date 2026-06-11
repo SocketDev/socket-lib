@@ -28,19 +28,19 @@ export interface ResolveSynpOptions {
 
 const resolutionCache = new MapCtor<string, Promise<ResolvedSynp | undefined>>()
 
-export function cacheKey(opts: ResolveSynpOptions | undefined): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  if (!opts?.downloadIfMissing) {
+export function cacheKey(options: ResolveSynpOptions | undefined): string {
+  options = { __proto__: null, ...options } as typeof options
+  if (!options?.downloadIfMissing) {
     return 'local-only'
   }
-  const { integrity, version } = opts.downloadIfMissing
+  const { integrity, version } = options.downloadIfMissing
   return `dl:${version}:${integrity ?? ''}`
 }
 
 export async function doResolveSynp(
-  opts?: ResolveSynpOptions | undefined,
+  options?: ResolveSynpOptions | undefined,
 ): Promise<ResolvedSynp | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   const fromVfs = await synpFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -51,8 +51,8 @@ export async function doResolveSynp(
   if (fromPath) {
     return fromPath
   }
-  if (opts?.downloadIfMissing) {
-    return synpFromDownload(opts.downloadIfMissing)
+  if (options?.downloadIfMissing) {
+    return synpFromDownload(options.downloadIfMissing)
   }
   return undefined
 }
@@ -64,12 +64,12 @@ export function resetSynpResolution(): void {
 /* c8 ignore stop */
 
 export function resolveSynp(
-  opts?: ResolveSynpOptions | undefined,
+  options?: ResolveSynpOptions | undefined,
 ): Promise<ResolvedSynp | undefined> {
-  const key = cacheKey(opts)
+  const key = cacheKey(options)
   let cached = resolutionCache.get(key)
   if (!cached) {
-    cached = doResolveSynp(opts)
+    cached = doResolveSynp(options)
     resolutionCache.set(key, cached)
   }
   return cached

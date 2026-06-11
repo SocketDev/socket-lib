@@ -132,22 +132,22 @@ export interface OpenAiChatResponse {
  * `reasoning_effort` mapping + system-message prepend are the parts worth
  * asserting without a network call.
  */
-export function buildChatRequestBody(opts: AiHttpCallOptions): string {
-  opts = { __proto__: null, ...opts } as typeof opts
+export function buildChatRequestBody(options: AiHttpCallOptions): string {
+  options = { __proto__: null, ...options } as typeof options
   const messages: Array<{ role: string; content: string }> = []
-  if (opts.system) {
-    messages.push({ content: opts.system, role: 'system' })
+  if (options.system) {
+    messages.push({ content: options.system, role: 'system' })
   }
-  messages.push({ content: opts.prompt, role: 'user' })
+  messages.push({ content: options.prompt, role: 'user' })
   const body: Record<string, unknown> = {
     messages,
-    model: opts.model,
+    model: options.model,
   }
-  if (opts.effort) {
-    body['reasoning_effort'] = opts.effort
+  if (options.effort) {
+    body['reasoning_effort'] = options.effort
   }
-  if (typeof opts.temperature === 'number') {
-    body['temperature'] = opts.temperature
+  if (typeof options.temperature === 'number') {
+    body['temperature'] = options.temperature
   }
   return JSON.stringify(body)
 }
@@ -169,20 +169,20 @@ export function buildChatRequestBody(opts: AiHttpCallOptions): string {
  *   ```
  */
 export async function callAiHttpModel(
-  opts: AiHttpCallOptions,
+  options: AiHttpCallOptions,
 ): Promise<AiHttpResult> {
-  opts = { __proto__: null, ...opts } as typeof opts
-  const provider = resolveAiHttpProvider(opts.provider)
+  options = { __proto__: null, ...options } as typeof options
+  const provider = resolveAiHttpProvider(options.provider)
   // Resolve via the layered resolver (explicit → env → keychain) when the
   // provider is a known CredentialProvider; otherwise fall back to its env var
   // directly (a caller-supplied custom provider not in the credential map).
   const token = isCredentialProvider(provider.id)
     ? await resolveProviderCredential({
-        allowEnvOnly: opts.allowEnvOnly,
-        explicit: opts.token,
+        allowEnvOnly: options.allowEnvOnly,
+        explicit: options.token,
         provider: provider.id,
       })
-    : (opts.token ?? process.env[provider.tokenEnv])
+    : (options.token ?? process.env[provider.tokenEnv])
   if (!token) {
     throw new ErrorCtor(
       `Missing API token for AI HTTP provider "${provider.id}". Set the ${provider.tokenEnv} environment variable (a bearer token) or store it in the keychain — never pass it inline.`,
@@ -190,19 +190,19 @@ export async function callAiHttpModel(
   }
   const url = `${provider.baseUrl}/chat/completions`
   const raw = await httpJson<OpenAiChatResponse>(url, {
-    body: buildChatRequestBody(opts),
+    body: buildChatRequestBody(options),
     headers: {
       // The token is interpolated into the Authorization header only; it is
       // never logged or echoed back to the caller.
       Authorization: `Bearer ${token}`,
     },
     method: 'POST',
-    ...(opts.timeoutMs === undefined ? {} : { timeout: opts.timeoutMs }),
+    ...(options.timeoutMs === undefined ? {} : { timeout: options.timeoutMs }),
   })
   const text = raw.choices?.[0]?.message?.content
   if (typeof text !== 'string') {
     throw new ErrorCtor(
-      `AI HTTP provider "${provider.id}" returned no message text for model "${opts.model}". The response had no choices[0].message.content — check the model id and the provider's status.`,
+      `AI HTTP provider "${provider.id}" returned no message text for model "${options.model}". The response had no choices[0].message.content — check the model id and the provider's status.`,
     )
   }
   return { raw, text }

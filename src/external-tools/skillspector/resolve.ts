@@ -40,15 +40,15 @@ const resolutionCache = new MapCtor<
   Promise<ResolvedSkillSpector | undefined>
 >()
 
-export function cacheKey(opts: ResolveSkillSpectorOptions): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  return `${opts.sha ?? ''}|${opts.cacheDir ?? ''}|${opts.localOnly ? 'local' : 'full'}`
+export function cacheKey(options: ResolveSkillSpectorOptions): string {
+  options = { __proto__: null, ...options } as typeof options
+  return `${options.sha ?? ''}|${options.cacheDir ?? ''}|${options.localOnly ? 'local' : 'full'}`
 }
 
 export async function doResolveSkillSpector(
-  opts: ResolveSkillSpectorOptions,
+  options: ResolveSkillSpectorOptions,
 ): Promise<ResolvedSkillSpector | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   const fromVfs = await skillspectorFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -59,10 +59,10 @@ export async function doResolveSkillSpector(
   if (fromPath) {
     return fromPath
   }
-  if (opts.localOnly || !opts.sha) {
+  if (options.localOnly || !options.sha) {
     return undefined
   }
-  return skillspectorFromDlx({ sha: opts.sha, cacheDir: opts.cacheDir })
+  return skillspectorFromDlx({ sha: options.sha, cacheDir: options.cacheDir })
 }
 
 /**

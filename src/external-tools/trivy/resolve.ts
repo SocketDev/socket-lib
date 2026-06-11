@@ -36,12 +36,13 @@ const resolutionCache = new MapCtor<
   Promise<ResolvedTrivy | undefined>
 >()
 
-export function cacheKey(opts: ResolveTrivyOptions | undefined): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  if (!opts?.downloadIfMissing) {
+export function cacheKey(options: ResolveTrivyOptions | undefined): string {
+  options = { __proto__: null, ...options } as typeof options
+  if (!options?.downloadIfMissing) {
     return 'local-only'
   }
-  const { cacheDir, integrity, platformArch, version } = opts.downloadIfMissing
+  const { cacheDir, integrity, platformArch, version } =
+    options.downloadIfMissing
   const integrityKey =
     typeof integrity === 'string'
       ? integrity
@@ -52,9 +53,9 @@ export function cacheKey(opts: ResolveTrivyOptions | undefined): string {
 }
 
 export async function doResolveTrivy(
-  opts?: ResolveTrivyOptions | undefined,
+  options?: ResolveTrivyOptions | undefined,
 ): Promise<ResolvedTrivy | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   const fromVfs = await trivyFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -65,8 +66,8 @@ export async function doResolveTrivy(
   if (fromPath) {
     return fromPath
   }
-  if (opts?.downloadIfMissing) {
-    return trivyFromDownload(opts.downloadIfMissing)
+  if (options?.downloadIfMissing) {
+    return trivyFromDownload(options.downloadIfMissing)
   }
   return undefined
 }
@@ -78,12 +79,12 @@ export function resetTrivyResolution(): void {
 /* c8 ignore stop */
 
 export function resolveTrivy(
-  opts?: ResolveTrivyOptions | undefined,
+  options?: ResolveTrivyOptions | undefined,
 ): Promise<ResolvedTrivy | undefined> {
-  const key = cacheKey(opts)
+  const key = cacheKey(options)
   let cached = resolutionCache.get(key)
   if (!cached) {
-    cached = doResolveTrivy(opts)
+    cached = doResolveTrivy(options)
     resolutionCache.set(key, cached)
   }
   return cached

@@ -52,16 +52,16 @@ const resolutionCache = new MapCtor<
   Promise<ResolvedPython | undefined>
 >()
 
-export function cacheKey(opts: ResolvePythonOptions | undefined): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  const prefer = opts?.preferDownload ? 'prefer:' : ''
-  if (!opts?.downloadIfMissing) {
+export function cacheKey(options: ResolvePythonOptions | undefined): string {
+  options = { __proto__: null, ...options } as typeof options
+  const prefer = options?.preferDownload ? 'prefer:' : ''
+  if (!options?.downloadIfMissing) {
     return `${prefer}local-only`
   }
-  const { cacheDir, integrity, tag, version } = opts.downloadIfMissing
+  const { cacheDir, integrity, tag, version } = options.downloadIfMissing
   // Resolve the effective platform-arch so a host-auto-detect call and an
   // explicit-matching call share one cache slot (and don't key on `undefined`).
-  const arch = opts.downloadIfMissing.arch ?? getPythonArch() ?? 'unknown'
+  const arch = options.downloadIfMissing.arch ?? getPythonArch() ?? 'unknown'
   const integrityKey =
     typeof integrity === 'string'
       ? integrity
@@ -72,11 +72,11 @@ export function cacheKey(opts: ResolvePythonOptions | undefined): string {
 }
 
 export async function doResolvePython(
-  opts?: ResolvePythonOptions | undefined,
+  options?: ResolvePythonOptions | undefined,
 ): Promise<ResolvedPython | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
-  const dl = opts?.downloadIfMissing
-  if (opts?.preferDownload && dl) {
+  options = { __proto__: null, ...options } as typeof options
+  const dl = options?.downloadIfMissing
+  if (options?.preferDownload && dl) {
     const fromDownload = await pythonFromDownload(dl)
     if (fromDownload) {
       return fromDownload
@@ -99,12 +99,12 @@ export function resetPythonResolution(): void {
 /* c8 ignore stop */
 
 export function resolvePython(
-  opts?: ResolvePythonOptions | undefined,
+  options?: ResolvePythonOptions | undefined,
 ): Promise<ResolvedPython | undefined> {
-  const key = cacheKey(opts)
+  const key = cacheKey(options)
   let cached = resolutionCache.get(key)
   if (!cached) {
-    cached = doResolvePython(opts)
+    cached = doResolvePython(options)
     resolutionCache.set(key, cached)
   }
   return cached

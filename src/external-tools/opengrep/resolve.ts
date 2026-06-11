@@ -36,12 +36,13 @@ const resolutionCache = new MapCtor<
   Promise<ResolvedOpengrep | undefined>
 >()
 
-export function cacheKey(opts: ResolveOpengrepOptions | undefined): string {
-  opts = { __proto__: null, ...opts } as typeof opts
-  if (!opts?.downloadIfMissing) {
+export function cacheKey(options: ResolveOpengrepOptions | undefined): string {
+  options = { __proto__: null, ...options } as typeof options
+  if (!options?.downloadIfMissing) {
     return 'local-only'
   }
-  const { cacheDir, integrity, platformArch, version } = opts.downloadIfMissing
+  const { cacheDir, integrity, platformArch, version } =
+    options.downloadIfMissing
   const integrityKey =
     typeof integrity === 'string'
       ? integrity
@@ -52,9 +53,9 @@ export function cacheKey(opts: ResolveOpengrepOptions | undefined): string {
 }
 
 export async function doResolveOpengrep(
-  opts?: ResolveOpengrepOptions | undefined,
+  options?: ResolveOpengrepOptions | undefined,
 ): Promise<ResolvedOpengrep | undefined> {
-  opts = { __proto__: null, ...opts } as typeof opts
+  options = { __proto__: null, ...options } as typeof options
   const fromVfs = await opengrepFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -65,8 +66,8 @@ export async function doResolveOpengrep(
   if (fromPath) {
     return fromPath
   }
-  if (opts?.downloadIfMissing) {
-    return opengrepFromDownload(opts.downloadIfMissing)
+  if (options?.downloadIfMissing) {
+    return opengrepFromDownload(options.downloadIfMissing)
   }
   return undefined
 }
@@ -78,12 +79,12 @@ export function resetOpengrepResolution(): void {
 /* c8 ignore stop */
 
 export function resolveOpengrep(
-  opts?: ResolveOpengrepOptions | undefined,
+  options?: ResolveOpengrepOptions | undefined,
 ): Promise<ResolvedOpengrep | undefined> {
-  const key = cacheKey(opts)
+  const key = cacheKey(options)
   let cached = resolutionCache.get(key)
   if (!cached) {
-    cached = doResolveOpengrep(opts)
+    cached = doResolveOpengrep(options)
     resolutionCache.set(key, cached)
   }
   return cached
