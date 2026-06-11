@@ -34,6 +34,15 @@ A `curl`/`wget`/`fetch` to an off-allowlist host is blocked — fetch only from 
 
 Every package manager the fleet uses for tooling (`brew`/`choco`/`winget`/`scoop`/`npm`/`pnpm`) must have auto-update disabled, so an invocation can't change a tool version mid-task or pull an unsoaked package. Knobs set by `setup-security-tools`, audited in `check --all`, enforced at invocation. Bypass `Allow package-manager-auto-update bypass` (or `Allow <name> auto-update bypass` per manager) (`.claude/hooks/fleet/package-manager-auto-update-guard/`).
 
+## Homebrew supply-chain hardening (macOS)
+
+Homebrew 6.0.0 added two opt-in supply-chain controls. The fleet requires both, plus the version floor they depend on — a `brew` below 6.0.0 or with a knob unset is blocked at invocation (`.claude/hooks/fleet/brew-supply-chain-guard/`), audited in `check --all` (`scripts/fleet/check/brew-supply-chain-is-hardened.mts`), and set by `setup-security-tools` (persists both knobs into the managed shell-rc block). All three read `_shared/brew-supply-chain.mts`.
+
+- **`HOMEBREW_REQUIRE_TAP_TRUST=1`** — refuse to evaluate a third-party tap's code until it is explicitly trusted (`brew trust user/repo`, or `--formula`/`--cask`/`--command` for a single item). Closes the tap-as-RCE surface. Official taps stay trusted by default. See <https://docs.brew.sh/Tap-Trust>.
+- **`HOMEBREW_CASK_OPTS_REQUIRE_SHA=1`** — refuse a cask whose download has no pinned checksum (`sha256 :no_check`). See <https://docs.brew.sh/Supply-Chain-Security>.
+
+Both env knobs are silently ignored by an older Homebrew, so the **≥6.0.0 version floor is the real gate**. The guard reads the installed version from `brew --version`; on a machine below the floor every `brew` invocation is blocked until `brew update && brew upgrade` clears it. Bypass `Allow brew-supply-chain bypass`. This is a distinct concern from auto-update (which owns `HOMEBREW_NO_AUTO_UPDATE`) — two single-purpose guards on `brew`, one per concern.
+
 ## Docs lead with pnpm
 
 User-facing install commands in fenced code blocks must show the pnpm form first (`pnpm install <pkg>`, `pnpm add <pkg>`). npm / yarn fallbacks are fine but come after, or in a separate block introduced as a fallback. The pre-commit `scanDocsPnpmFirst` scanner emits a warning (not a hard fail) for `.md` / `.mdx` blocks that lead with npm or yarn without a pnpm leader. Suppress per-block with `socket-lint: allow pnpm-first` (HTML comment above the fence or any line inside it).

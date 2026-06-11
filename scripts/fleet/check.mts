@@ -76,6 +76,12 @@ const steps: Array<() => boolean> = [
   // pointing the fix at the researching-recency skill. Turns the prose
   // "re-verify if stale" note into an enforced surface (code is law).
   () => run('node', ['scripts/fleet/check/pricing-data-is-current.mts']),
+  // Multi-agent routing is legal: every skill's per-role `preferenceOrder`
+  // names a known backend and never lists a hybrid one (opencode), which the
+  // resolver never auto-picks. Catches a dead/no-op entry at commit time that
+  // the runtime would silently skip. Mirrors the @socketsecurity/lib/ai/backends
+  // registry; see _shared/multi-agent-backends.md.
+  () => run('node', ['scripts/fleet/check/backend-routing-is-legal.mts']),
   // Code is law: every hook + socket/* rule ships thorough tests (both arms,
   // every branch). A token or absent test fails the gate.
   () => run('node', ['scripts/fleet/check/enforcers-have-thorough-tests.mts']),
@@ -210,6 +216,11 @@ const steps: Array<() => boolean> = [
   // EXPECTED_RELEASE_AGE_EXCLUDE — every fleet repo went red on the
   // next install.
   () => run('node', ['scripts/fleet/check/fleet-soak-exclude-parity.mts']),
+  // Homebrew supply-chain posture (macOS). Asserts brew >= 6.0.0 with
+  // tap-trust + cask-SHA enforcement; `absent` (no brew) is a pass — CI
+  // runners lack brew. Shares detection with the brew-supply-chain-guard
+  // hook + setup-security-tools via _shared/brew-supply-chain.mts.
+  () => run('node', ['scripts/fleet/check/brew-supply-chain-is-hardened.mts']),
   // CLAUDE.md informativeness audit. Every `###` section in the fleet
   // block must anchor to one of: a hook citation
   // (`.claude/hooks/...` reference), a docs link

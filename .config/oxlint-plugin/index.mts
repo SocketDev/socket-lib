@@ -80,6 +80,7 @@ import preferUndefinedOverNull from './fleet/prefer-undefined-over-null/index.mt
 import preferWindowsTestHelpers from './fleet/prefer-windows-test-helpers/index.mts'
 import requireAsyncIifeEntry from './fleet/require-async-iife-entry/index.mts'
 import requireRegexComment from './fleet/require-regex-comment/index.mts'
+import requireVitestGlobalsImport from './fleet/require-vitest-globals-import/index.mts'
 import socketApiTokenEnv from './fleet/socket-api-token-env/index.mts'
 import sortArrayLiterals from './fleet/sort-array-literals/index.mts'
 import sortBooleanChains from './fleet/sort-boolean-chains/index.mts'
@@ -169,6 +170,7 @@ const plugin = {
     'prefer-windows-test-helpers': preferWindowsTestHelpers,
     'require-async-iife-entry': requireAsyncIifeEntry,
     'require-regex-comment': requireRegexComment,
+    'require-vitest-globals-import': requireVitestGlobalsImport,
     'socket-api-token-env': socketApiTokenEnv,
     'sort-array-literals': sortArrayLiterals,
     'sort-boolean-chains': sortBooleanChains,
