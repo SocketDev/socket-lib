@@ -70,6 +70,12 @@ const steps: Array<() => boolean> = [
   // this gate is the enforcement the optional field can't provide. Vocab per
   // backend: .claude/skills/fleet/_shared/multi-agent-backends.md.
   () => run('node', ['scripts/fleet/check/ai-spawns-have-paired-effort.mts']),
+  // Model-pricing data stays fresh: the cost-ladder figures in skill-model-
+  // routing.md drive tier routing, and vendor prices move. Parses the doc's
+  // MODEL-PRICING-SNAPSHOT date and REMINDS (non-fatal) when it's >35 days old,
+  // pointing the fix at the researching-recency skill. Turns the prose
+  // "re-verify if stale" note into an enforced surface (code is law).
+  () => run('node', ['scripts/fleet/check/pricing-data-is-current.mts']),
   // Code is law: every hook + socket/* rule ships thorough tests (both arms,
   // every branch). A token or absent test fails the gate.
   () => run('node', ['scripts/fleet/check/enforcers-have-thorough-tests.mts']),

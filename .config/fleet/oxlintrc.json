@@ -46,6 +46,7 @@
     "socket/no-vitest-standalone-expect": "error",
     "socket/no-which-for-local-bin": "error",
     "socket/optional-explicit-undefined": "error",
+    "socket/options-null-proto": "error",
     "socket/personal-path-placeholders": "error",
     "socket/prefer-async-spawn": "error",
     "socket/prefer-cached-for-loop": "error",

@@ -252,6 +252,7 @@ An error message is UI — the reader fixes the problem from the message alone. 
 - **Security loop** — `threat-modeling`→`scanning-vulns`→`triaging-findings`→`patching-findings` ([`security-stack.md`](docs/agents.md/fleet/security-stack.md))
 - `/fleet:rendering-chromium-to-png` — render a page / MV3 popup to PNG → `Read` the pixels (`_shared/visual-verify.md`)
 - `/fleet:researching-recency` — dev-community signal on a tool/lib/maintainer, last 30 days ([`researching-recency`](docs/agents.md/fleet/researching-recency.md))
+- `/fleet:tidying-worktrees` — fleet-wide conservative sweep of spent git worktrees; no-prompt, `/loop`-able ([`worktree-hygiene`](docs/agents.md/fleet/worktree-hygiene.md))
 - Shared subskills in `.claude/skills/fleet/_shared/`; telemetry via `.claude/hooks/fleet/skill-usage-logger/`
 - Agent handoff: [`agent-delegation`](docs/agents.md/fleet/agent-delegation.md). Scope tiers, `updating-*` siblings, cross-fleet runner: [`agents-and-skills`](docs/agents.md/fleet/agents-and-skills.md).
 
