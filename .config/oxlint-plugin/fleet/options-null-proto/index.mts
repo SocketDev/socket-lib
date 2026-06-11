@@ -10,12 +10,15 @@
  *   with a param named `options` / `opts` whose body reads it (a `const { … } =
  *   options` destructure, or an `options.x` / `options?.x` member access)
  *   without a `{ __proto__: null, ...options }` spread present in the body.
- *   Fixable for the destructure form: rewrites `const { … } = options` to
- *   `const { … } = { __proto__: null, ...options }`. Member-access-only readers
- *   are reported (the fix would change more than one site, so it's left to the
- *   author). A function that passes `options` straight through untouched (never
- *   reads a property) is not flagged. Bypass: a `socket-lint: allow
- *   options-null-proto` comment on the function.
+ *   Autofixed both ways with an `as typeof <name>` cast (a closed options type
+ *   rejects the `__proto__` excess property without it): the destructure form
+ *   rewrites `const { … } = options` to `const { … } = { __proto__: null,
+ *   ...options } as typeof options`; a member-access reader gets a normalizing
+ *   reassignment `options = { __proto__: null, ...options } as typeof options`
+ *   prepended to the body. A function that passes `options` straight through
+ *   untouched (never reads a property) is not flagged. Test files (`*.test.*`,
+ *   `/test/`) are skipped — they mock options-shaped literals, not production
+ *   readers. Bypass: a `socket-lint: allow options-null-proto` comment.
  */
 
 import { makeBypassChecker } from '../../lib/comment-markers.mts'
@@ -64,6 +67,15 @@ const rule = {
   create(context: RuleContext) {
     const hasBypassComment = makeBypassChecker(context, BYPASS_RE)
     const source = context.sourceCode ?? context.getSourceCode?.()
+
+    // Test files mock options-shaped objects freely (a `function(opts)` test
+    // helper isn't a production options reader, and a mock's closed literal type
+    // rejects the `__proto__` spread). The prototype-pollution defense is for
+    // shipped src; skip `*.test.*` and `/test/` trees.
+    const filename = context.filename ?? context.getFilename?.() ?? ''
+    if (/\.test\.[cm]?[jt]sx?$/.test(filename) || /[/\\]test[/\\]/.test(filename)) {
+      return {}
+    }
 
     function check(node: AstNode): void {
       if (node.body == null) {
@@ -153,17 +165,22 @@ const rule = {
           replaceText: (n: AstNode, text: string) => unknown
           insertTextBefore: (n: AstNode, text: string) => unknown
         }) {
+          // Both forms append `as typeof <name>`: a closed options type (one
+          // with no index signature) rejects the `__proto__` excess property
+          // (TS2353) on the bare spread, and the param's own type erases it.
+          // This matches the canonical fleet form `{ __proto__: null, ...opts }
+          // as Opts` (here `typeof opts`, since the rule can't name the type).
           if (firstDestructure?.init) {
             return fixer.replaceText(
               firstDestructure.init,
-              `{ __proto__: null, ...${name} }`,
+              `{ __proto__: null, ...${name} } as typeof ${name}`,
             )
           }
           const first = canInsert ? body.body[0] : undefined
           if (first) {
             return fixer.insertTextBefore(
               first,
-              `${name} = { __proto__: null, ...${name} }\n${indent}`,
+              `${name} = { __proto__: null, ...${name} } as typeof ${name}\n${indent}`,
             )
           }
           return undefined

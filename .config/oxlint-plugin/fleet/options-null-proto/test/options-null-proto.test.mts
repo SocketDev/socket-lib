@@ -31,27 +31,37 @@ describe('socket/options-null-proto', () => {
           name: 'commented opt-out',
           code: '// socket-lint: allow options-null-proto\nfunction f(options: { a: number }) {\n  return options.a\n}\n',
         },
+        {
+          name: 'test file is skipped (mocks, not production readers)',
+          code: 'function f(options: { a: number }) {\n  return options.a\n}\n',
+          filename: 'foo.test.mts',
+        },
+        {
+          name: 'file under a /test/ tree is skipped',
+          code: 'function f(opts: { a: number }) {\n  return opts.a\n}\n',
+          filename: 'test/unit/foo.mts',
+        },
       ],
       invalid: [
         {
-          name: 'destructures options raw (fixable)',
+          name: 'destructures options raw (fixable with cast)',
           code: 'function f(options?: { cwd?: string }) {\n  const { cwd } = options\n  return cwd\n}\n',
           output:
-            'function f(options?: { cwd?: string }) {\n  const { cwd } = { __proto__: null, ...options }\n  return cwd\n}\n',
+            'function f(options?: { cwd?: string }) {\n  const { cwd } = { __proto__: null, ...options } as typeof options\n  return cwd\n}\n',
           errors: [{ messageId: 'banned' }],
         },
         {
-          name: 'reads options by member access (fixable via top-of-body reassignment)',
+          name: 'reads options by member access (fixable via cast reassignment)',
           code: 'function f(options: { a: number }) {\n  return options.a\n}\n',
           output:
-            'function f(options: { a: number }) {\n  options = { __proto__: null, ...options }\n  return options.a\n}\n',
+            'function f(options: { a: number }) {\n  options = { __proto__: null, ...options } as typeof options\n  return options.a\n}\n',
           errors: [{ messageId: 'banned' }],
         },
         {
           name: '`opts` param name is also covered',
           code: 'function f(opts?: { n?: number }) {\n  const { n } = opts\n  return n\n}\n',
           output:
-            'function f(opts?: { n?: number }) {\n  const { n } = { __proto__: null, ...opts }\n  return n\n}\n',
+            'function f(opts?: { n?: number }) {\n  const { n } = { __proto__: null, ...opts } as typeof opts\n  return n\n}\n',
           errors: [{ messageId: 'banned' }],
         },
       ],
