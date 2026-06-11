@@ -2287,6 +2287,11 @@
       "types": "./dist/primordials/object.d.ts",
       "default": "./dist/primordials/object.js"
     },
+    "./primordials/process": {
+      "source": "./src/primordials/process.ts",
+      "types": "./dist/primordials/process.d.ts",
+      "default": "./dist/primordials/process.js"
+    },
     "./primordials/promise": {
       "source": "./src/primordials/promise.ts",
       "types": "./dist/primordials/promise.d.ts",

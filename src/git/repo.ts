@@ -6,9 +6,8 @@
  *   public-surface leaves all import from here.
  */
 
-import process from 'node:process'
-
 import { MapCtor } from '../primordials/map-set'
+import { processCwd } from '../primordials/process'
 
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
@@ -141,7 +140,7 @@ export function getCachedRealpath(pathname: string): string {
  * @returns The resolved real path of `process.cwd()`.
  */
 export function getCwd(): string {
-  return getCachedRealpath(process.cwd())
+  return getCachedRealpath(processCwd())
 }
 
 // Re-export canonical node lazy loaders under the `git/repo` legacy
