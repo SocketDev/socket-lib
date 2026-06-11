@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for the require-vitest-globals-import oxlint rule. Flags a
- *   vitest global called in a *.test.* file without importing it from 'vitest'
+ *   vitest global called in a _.test._ file without importing it from 'vitest'
  *   (fleet vitest is globals:false → un-imported global is undefined at
  *   runtime). Spawns real oxlint via RuleTester; skips when oxlint is absent.
  */
@@ -34,6 +34,13 @@ describe('socket/require-vitest-globals-import', () => {
           code:
             "import { it as t, expect } from 'vitest'\n" +
             "t('x', () => { expect(1).toBe(1) })\n",
+        },
+        {
+          name: 'camelCase wrapper imported from a local module (not vitest)',
+          filename: 'test/unit/a.test.mts',
+          code:
+            "import { describeNetworkOnly } from '../util/skip-helpers'\n" +
+            "describeNetworkOnly('s', () => {})\n",
         },
         {
           name: 'node:test file — globals concept does not apply, stand down',

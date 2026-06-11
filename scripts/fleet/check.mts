@@ -61,6 +61,13 @@ const steps: Array<() => boolean> = [
   // Cost routing: every mutating (fix) skill must declare a model: tier so
   // mechanical work runs cheap. See docs/agents.md/fleet/skill-model-routing.md.
   () => run('node', ['scripts/fleet/check/mutating-skills-have-model.mts']),
+  // Cross-tool skills: the generated .agents/skills/ mirror (flat <tier>-<name>
+  // so Codex + OpenCode's one-level discovery finds every fleet/repo skill)
+  // stays in sync with the segmented .claude/skills/ source. Fails if a skill
+  // was added/renamed/removed without regenerating, or the mirror was
+  // hand-edited. Fix: node scripts/fleet/gen-agents-skills-mirror.mts.
+  () =>
+    run('node', ['scripts/fleet/check/agents-skills-mirror-is-current.mts']),
   // Code is law for the onboarding skill's CI step: the ci:local script keeps
   // its canonical agent-ci flag set, and the agent-ci Dockerfile (when adopted)
   // stays byte-identical to the template.
@@ -221,6 +228,24 @@ const steps: Array<() => boolean> = [
   // runners lack brew. Shares detection with the brew-supply-chain-guard
   // hook + setup-security-tools via _shared/brew-supply-chain.mts.
   () => run('node', ['scripts/fleet/check/brew-supply-chain-is-hardened.mts']),
+  // Sparkle GUI-app auto-update OFF (macOS). Asserts apps that self-update via
+  // Sparkle (e.g. OrbStack, bundle dev.kdrag0n.MacVirt) have SUEnableAutomatic-
+  // Checks + SUAutomaticallyUpdate set false; `absent` (not installed / not
+  // macOS) is a pass. Shares detection with setup-security-tools via
+  // _shared/sparkle-auto-update.mts. No guard twin — a GUI app self-updates
+  // with no Bash invocation to gate, so persist + audit are the surfaces.
+  () =>
+    run('node', ['scripts/fleet/check/sparkle-auto-update-is-disabled.mts']),
+  // uv (Python) reproducibility: every pyproject.toml with a [tool.uv] table
+  // ships a hash-verified uv.lock + an exclude-newer soak pin (the Python
+  // analog of pnpm --frozen-lockfile + minimumReleaseAge). Vacuous pass in
+  // repos with no uv project. Shares policy with _shared/uv-config.mts.
+  () => run('node', ['scripts/fleet/check/uv-lockfiles-are-current.mts']),
+  // gh-aw agentic workflows: each `<name>.md` source has a compiled
+  // `<name>.lock.yml` (what Actions runs) whose embedded body_hash matches
+  // the .md body — catches a prompt edited without `gh aw compile`. Pure
+  // node, no gh-aw dependency; vacuous pass with no agentic workflows.
+  () => run('node', ['scripts/fleet/check/gh-aw-locks-are-current.mts']),
   // CLAUDE.md informativeness audit. Every `###` section in the fleet
   // block must anchor to one of: a hook citation
   // (`.claude/hooks/...` reference), a docs link

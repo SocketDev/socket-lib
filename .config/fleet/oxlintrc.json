@@ -194,6 +194,7 @@
     }
   ],
   "ignorePatterns": [
+    "**/.agents",
     "**/.cache",
     "**/.claude",
     "**/coverage",
@@ -210,6 +211,7 @@
     "**/*.d.ts.map",
     "**/*.tsbuildinfo",
     "#fleet-canonical-begin (managed by socket-wheelhouse sync)",
+    "**/.agents/**",
     "**/.claude/**",
     "**/.config/oxlint-plugin/**",
     "**/.config/rolldown/**",
