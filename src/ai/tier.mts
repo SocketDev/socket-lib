@@ -16,12 +16,17 @@
 import type { AiEffort } from './types.mts'
 
 /**
- * The three capability tiers, least → most capable. Orchestrators classify each
- * unit of work into one of these (a regex-shaped rewrite → `haiku`; a
- * caller-chain rewrite → `sonnet`; a module split / new-enforcer authoring →
- * `opus`).
+ * The capability tiers, least → most capable. Orchestrators classify each unit
+ * of work into one of these (a regex-shaped rewrite → `haiku`; a caller-chain
+ * rewrite → `sonnet`; a module split / new-enforcer authoring → `opus`).
+ * `fable` is the apex escalation tier — reserve it for the hardest cases (a
+ * stuck compiler / native problem, planning + decomposition of a large task),
+ * never a first reach, and prefer to ask before selecting it. It is the most
+ * expensive model on the board (~2× opus, ~10× haiku output), so an
+ * orchestrator should pick the LEAST-capable tier that does the job and
+ * escalate to `fable` only after cheaper tiers fail.
  */
-export type AiTier = 'haiku' | 'opus' | 'sonnet'
+export type AiTier = 'fable' | 'haiku' | 'opus' | 'sonnet'
 
 /**
  * Resolved spawn parameters for a tier — spread alongside an `AI_PROFILE` into
@@ -44,9 +49,14 @@ export interface TierSpawn {
  *   sync→async), a check script, a doc edit.
  * - `opus` / high — real authoring / refactoring (module split, a brand-new hook
  *   or lint rule with its test).
+ * - `fable` / xhigh — apex escalation only: a stuck compiler / native problem
+ *   after cheaper tiers fail, or planning + decomposition of a large task whose
+ *   chunks then run on cheaper tiers. Most expensive model on the board; never
+ *   a default.
  */
 export const AI_TIER: Readonly<Record<AiTier, TierSpawn>> = {
   __proto__: null,
+  fable: { effort: 'xhigh', model: 'claude-fable-5' },
   haiku: { effort: 'low', model: 'claude-haiku-4-5' },
   opus: { effort: 'high', model: 'claude-opus-4-8' },
   sonnet: { effort: 'medium', model: 'claude-sonnet-4-6' },

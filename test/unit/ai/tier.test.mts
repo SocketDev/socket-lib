@@ -9,7 +9,7 @@ import { AI_TIER, tierToSpawn } from '../../../src/ai/tier.mts'
 
 import type { AiTier } from '../../../src/ai/tier.mts'
 
-const TIERS: readonly AiTier[] = ['haiku', 'sonnet', 'opus']
+const TIERS: readonly AiTier[] = ['haiku', 'sonnet', 'opus', 'fable']
 
 describe('AI_TIER', () => {
   it('maps each tier to a model + effort', () => {
@@ -33,17 +33,23 @@ describe('AI_TIER', () => {
       effort: 'high',
       model: 'claude-opus-4-8',
     })
+    expect(AI_TIER.fable).toStrictEqual({
+      effort: 'xhigh',
+      model: 'claude-fable-5',
+    })
   })
 
-  it('effort escalates with the tier (low → medium → high)', () => {
-    const rank = { high: 2, low: 0, medium: 1 } as const
+  it('effort escalates with the tier (low → medium → high → xhigh)', () => {
+    const rank = { low: 0, medium: 1, high: 2, xhigh: 3 } as const
     // Capture each tier's effort rank into a local so the matcher argument is
     // a plain number, not a src-member-expression (no-src-import-in-test-expect).
     const haikuRank = rank[AI_TIER.haiku.effort as keyof typeof rank]
     const sonnetRank = rank[AI_TIER.sonnet.effort as keyof typeof rank]
     const opusRank = rank[AI_TIER.opus.effort as keyof typeof rank]
+    const fableRank = rank[AI_TIER.fable.effort as keyof typeof rank]
     expect(haikuRank).toBeLessThan(sonnetRank)
     expect(sonnetRank).toBeLessThan(opusRank)
+    expect(opusRank).toBeLessThan(fableRank)
   })
 })
 
