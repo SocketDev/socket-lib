@@ -162,6 +162,11 @@
       "types": "./dist/ai/backends.d.mts",
       "default": "./dist/ai/backends.js"
     },
+    "./ai/credentials": {
+      "source": "./src/ai/credentials.mts",
+      "types": "./dist/ai/credentials.d.mts",
+      "default": "./dist/ai/credentials.js"
+    },
     "./ai/discover": {
       "source": "./src/ai/discover.mts",
       "types": "./dist/ai/discover.d.mts",

@@ -22,6 +22,10 @@
 // oxlint-disable-next-line socket/no-platform-specific-import -- the relative barrel '../http-request' has no index.ts and exports-map resolution only applies to the bare package name, so only the explicit /node path resolves here (the rule's autofix produces an unresolvable import — verified TS2307). Matches src/dlx/firewall.ts.
 import { httpJson } from '../http-request/node'
 import { ErrorCtor } from '../primordials/error'
+import {
+  isCredentialProvider,
+  resolveProviderCredential,
+} from './credentials.mts'
 
 import type { AiEffort } from './types.mts'
 
@@ -92,6 +96,17 @@ export interface AiHttpCallOptions {
    * Per-call timeout (ms).
    */
   readonly timeoutMs?: number | undefined
+  /**
+   * An explicit bearer token that wins over env + keychain. When absent the
+   * token resolves via `resolveProviderCredential` (env → keychain).
+   */
+  readonly token?: string | undefined
+  /**
+   * Skip the keychain fallback when resolving the token — env var only. Set in
+   * headless contexts (CI, hooks) where a keychain auth prompt is
+   * unacceptable.
+   */
+  readonly allowEnvOnly?: boolean | undefined
 }
 
 /**
@@ -158,10 +173,19 @@ export async function callAiHttpModel(
 ): Promise<AiHttpResult> {
   opts = { __proto__: null, ...opts } as typeof opts
   const provider = resolveAiHttpProvider(opts.provider)
-  const token = process.env[provider.tokenEnv]
+  // Resolve via the layered resolver (explicit → env → keychain) when the
+  // provider is a known CredentialProvider; otherwise fall back to its env var
+  // directly (a caller-supplied custom provider not in the credential map).
+  const token = isCredentialProvider(provider.id)
+    ? await resolveProviderCredential({
+        allowEnvOnly: opts.allowEnvOnly,
+        explicit: opts.token,
+        provider: provider.id,
+      })
+    : (opts.token ?? process.env[provider.tokenEnv])
   if (!token) {
     throw new ErrorCtor(
-      `Missing API token for AI HTTP provider "${provider.id}". Set the ${provider.tokenEnv} environment variable (a bearer token) — never pass it inline.`,
+      `Missing API token for AI HTTP provider "${provider.id}". Set the ${provider.tokenEnv} environment variable (a bearer token) or store it in the keychain — never pass it inline.`,
     )
   }
   const url = `${provider.baseUrl}/chat/completions`
