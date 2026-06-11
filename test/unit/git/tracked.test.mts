@@ -1,10 +1,9 @@
 /**
  * @file Tests for git/tracked — isTracked / getSubmodulePaths /
- *   pathIsUnderSubmodule / isInSubmodule, plus fs/safe's isPathSafeToDelete
- *   that composes them. Pure-predicate cases run without a repo; the
- *   git-touching helpers run against a fresh temp repo with a tracked file, an
- *   untracked junk file, and a declared (uninitialized) submodule in
- *   .gitmodules.
+ *   pathIsUnderSubmodule / isInSubmodule / isUntrackedNonSubmodulePath. Pure-
+ *   predicate cases run without a repo; the git-touching helpers run against a
+ *   fresh temp repo with a tracked file, an untracked junk file, and a declared
+ *   (uninitialized) submodule in .gitmodules.
  */
 
 import { promises as fs } from 'node:fs'
@@ -12,11 +11,11 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { isPathSafeToDelete } from '../../../src/fs/safe'
 import {
   getSubmodulePaths,
   isInSubmodule,
   isTracked,
+  isUntrackedNonSubmodulePath,
   pathIsUnderSubmodule,
 } from '../../../src/git/tracked'
 import { spawnSync } from '../../../src/process/spawn/child'
@@ -64,7 +63,9 @@ describe('getSubmodulePaths edge cases (real temp repo)', () => {
       expect(await isInSubmodule('anything/x', { cwd: tmpDir })).toBe(false)
       // A junk file in a no-submodule repo is still safe to delete.
       await fs.writeFile(path.join(tmpDir, 'foo.orig'), 'x')
-      expect(await isPathSafeToDelete('foo.orig', { cwd: tmpDir })).toBe(true)
+      expect(
+        await isUntrackedNonSubmodulePath('foo.orig', { cwd: tmpDir }),
+      ).toBe(true)
     }, 'git-tracked-no-sub')
   })
 
@@ -101,7 +102,7 @@ describe('cwd defaulting (runs against this repo)', () => {
   })
 })
 
-describe('isTracked + isPathSafeToDelete (real temp repo)', () => {
+describe('isTracked + isUntrackedNonSubmodulePath (real temp repo)', () => {
   it('tracks committed files, leaves junk untracked, guards submodule paths', async () => {
     await runWithTempDir(async tmpDir => {
       initRepo(tmpDir)
@@ -128,12 +129,16 @@ describe('isTracked + isPathSafeToDelete (real temp repo)', () => {
       )
 
       // The tracked file is NOT safe to delete.
-      expect(await isPathSafeToDelete('src.ts', { cwd: tmpDir })).toBe(false)
+      expect(await isUntrackedNonSubmodulePath('src.ts', { cwd: tmpDir })).toBe(
+        false,
+      )
       // The untracked junk file IS safe.
-      expect(await isPathSafeToDelete('.DS_Store', { cwd: tmpDir })).toBe(true)
+      expect(
+        await isUntrackedNonSubmodulePath('.DS_Store', { cwd: tmpDir }),
+      ).toBe(true)
       // The submodule-internal junk is NOT safe (belongs to the submodule).
       expect(
-        await isPathSafeToDelete('vendor/sub/x.pyc', { cwd: tmpDir }),
+        await isUntrackedNonSubmodulePath('vendor/sub/x.pyc', { cwd: tmpDir }),
       ).toBe(false)
     }, 'git-tracked-test')
   })

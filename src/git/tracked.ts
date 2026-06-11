@@ -2,11 +2,12 @@
  * @file Tracked-status + submodule-membership probes for a working-tree path.
  *   `isTracked` answers "does git track this exact path?"; `getSubmodulePaths`
  *   lists the repo's submodule mount points; `isInSubmodule` answers "does this
- *   path live inside one?". Built for cleanup tooling that must never delete a
- *   tracked file or reach into a submodule's own tree (which would dirty it) —
- *   compose them in `fs/safe`'s `isPathSafeToDelete`.
+ *   path live inside one?"; `isUntrackedNonSubmodulePath` composes them into
+ *   the safe-to-touch condition for cleanup tooling — never delete a tracked
+ *   file or reach into a submodule's own tree (which would dirty it).
  */
 
+import { getNodePath } from '../node/path'
 import { normalizePath } from '../paths/normalize'
 import { ArrayPrototypeSome } from '../primordials/array'
 import {
@@ -123,6 +124,46 @@ export async function isTracked(
     () => true,
     () => false,
   )
+}
+
+/**
+ * Whether `targetPath` is git does NOT track AND does not live inside a
+ * submodule — the safe-to-touch condition for cleanup tooling. A tracked path
+ * is a deliberate file; a submodule-internal path belongs to that submodule's
+ * own git (touching it would dirty the submodule). Composes `isTracked` +
+ * `getSubmodulePaths`/`pathIsUnderSubmodule`. Fails closed — any check error
+ * resolves to `false`.
+ *
+ * For a batch sweep, call `getSubmodulePaths` once and compose `isTracked` +
+ * `pathIsUnderSubmodule` per path to avoid re-reading `.gitmodules` each time.
+ *
+ * @example
+ *   ;```typescript
+ *   await isUntrackedNonSubmodulePath('.DS_Store')        // => true
+ *   await isUntrackedNonSubmodulePath('src/index.ts')     // => false (tracked)
+ *   await isUntrackedNonSubmodulePath('vendor/sub/x.pyc') // => false (submodule)
+ *   ```
+ */
+export async function isUntrackedNonSubmodulePath(
+  targetPath: string,
+  options?: GitPathOptions | undefined,
+): Promise<boolean> {
+  const { cwd = getCwd() } = { __proto__: null, ...options } as GitPathOptions
+  const tracked = await isTracked(targetPath, { cwd }).catch(() => true)
+  if (tracked) {
+    return false
+  }
+  const submodulePaths = await getSubmodulePaths({ cwd }).catch(
+    () => [] as string[],
+  )
+  if (submodulePaths.length) {
+    const path = getNodePath()
+    const rel = path.relative(cwd, path.resolve(cwd, targetPath))
+    if (pathIsUnderSubmodule(rel, submodulePaths)) {
+      return false
+    }
+  }
+  return true
 }
 
 /**
