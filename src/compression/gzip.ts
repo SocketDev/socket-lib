@@ -200,6 +200,7 @@ export function isGzipCompressed(input: Buffer): boolean {
 export function resolveGzipOptions(
   options: CompressOptions | undefined,
 ): ZlibOptions {
+  options = { __proto__: null, ...options } as typeof options
   const level = options?.level
   if (level === undefined) {
     return { __proto__: null } as unknown as ZlibOptions

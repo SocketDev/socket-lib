@@ -97,6 +97,7 @@ export async function attempt(
   url: string,
   options: BrowserHttpRequestOptions,
 ): Promise<BrowserHttpResponse> {
+  options = { __proto__: null, ...options } as typeof options
   const method = options.method ?? 'GET'
   const init: RequestInit = { method }
   if (options.headers) {

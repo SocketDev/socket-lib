@@ -59,7 +59,7 @@ export function collectRewrites(options: {
     src,
     toChar,
     usedPrimordials,
-  } = options
+  } = { __proto__: null, ...options } as typeof options
   let skipped = 0
 
   walkAst(ast, node => {

@@ -25,7 +25,7 @@ export interface SynpFromDownloadOptions {
 export async function synpFromDownload(
   opts: SynpFromDownloadOptions,
 ): Promise<ResolvedSynp> {
-  const { integrity, version } = opts
+  const { integrity, version } = { __proto__: null, ...opts } as typeof opts
   const packageSpec = getSynpPackageSpec({ version })
   const { binaryPath } = await downloadNpmPackage({
     spec: packageSpec,

@@ -64,7 +64,7 @@ export interface JanusDownloadOptions {
 export function getJanusDownloadUrl(
   opts: JanusDownloadOptions,
 ): string | undefined {
-  const { platformArch, version } = opts
+  const { platformArch, version } = { __proto__: null, ...opts } as typeof opts
   const entry = JANUS_ASSET_MAP[platformArch]
   if (!entry) {
     return undefined

@@ -47,7 +47,10 @@ export async function downloadPipPackage(
   options: DownloadPipPackageOptions,
   retryCount = 0,
 ): Promise<DownloadPipPackageResult> {
-  const { hash, pythonBin, spec } = options
+  const { hash, pythonBin, spec } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
   const packageDir = pipPackageDir(spec)
   if (retryCount >= MAX_RETRIES) {
     throw new Error(

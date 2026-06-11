@@ -39,6 +39,7 @@ const resolutionCache = new MapCtor<
 >()
 
 export function cacheKey(opts: ResolveJanusOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
@@ -55,6 +56,7 @@ export function cacheKey(opts: ResolveJanusOptions | undefined): string {
 export async function doResolveJanus(
   opts?: ResolveJanusOptions | undefined,
 ): Promise<ResolvedJanus | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromVfs = await janusFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {

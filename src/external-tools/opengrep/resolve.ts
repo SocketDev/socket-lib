@@ -37,6 +37,7 @@ const resolutionCache = new MapCtor<
 >()
 
 export function cacheKey(opts: ResolveOpengrepOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
@@ -53,6 +54,7 @@ export function cacheKey(opts: ResolveOpengrepOptions | undefined): string {
 export async function doResolveOpengrep(
   opts?: ResolveOpengrepOptions | undefined,
 ): Promise<ResolvedOpengrep | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromVfs = await opengrepFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {

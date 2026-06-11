@@ -56,7 +56,10 @@ export interface BazelFromDownloadOptions {
 export async function bazelFromDownload(
   opts: BazelFromDownloadOptions,
 ): Promise<ResolvedBazel | undefined> {
-  const { downloader, integrity, platformArch, version } = opts
+  const { downloader, integrity, platformArch, version } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   const url = getBazelDownloadUrl({ version, platformArch })
   if (!url) {
     return undefined

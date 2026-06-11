@@ -235,6 +235,7 @@ export async function spawnAiAgentsInWorktrees<I, T>(
   fn: (item: I, ctx: WorktreeRunContext) => Promise<T>,
   options: WorktreeRunOptions,
 ): Promise<ReadonlyArray<WorktreeRunSettled<T>>> {
+  options = { __proto__: null, ...options } as typeof options
   const cleanup = options.cleanup ?? 'always'
   const namePrefix = options.namePrefix ?? 'agent-task'
   const concurrency = MathMax(

@@ -34,6 +34,7 @@ export interface ReadSocketApiTokenOptions {
 export async function readSocketApiToken(
   options?: ReadSocketApiTokenOptions | undefined,
 ): Promise<string | undefined> {
+  options = { __proto__: null, ...options } as typeof options
   const result =
     (await resolve({
       service: SOCKET_SERVICE,
@@ -51,6 +52,7 @@ export async function readSocketApiToken(
 export function readSocketApiTokenSync(
   options?: ReadSocketApiTokenOptions | undefined,
 ): string | undefined {
+  options = { __proto__: null, ...options } as typeof options
   const result =
     resolveSync({
       service: SOCKET_SERVICE,

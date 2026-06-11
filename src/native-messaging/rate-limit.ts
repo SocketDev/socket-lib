@@ -60,6 +60,7 @@ export class TokenBucketLimiter {
   #oldest: BucketEntry | undefined = undefined
 
   constructor(options: TokenBucketOptions) {
+    options = { __proto__: null, ...options } as typeof options
     if (options.capacity < 1) {
       throw new ErrorCtor('capacity must be >= 1')
     }

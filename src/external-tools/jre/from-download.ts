@@ -75,7 +75,10 @@ export interface JreFromDownloadOptions {
 export async function jreFromDownload(
   opts: JreFromDownloadOptions,
 ): Promise<ResolvedJre | undefined> {
-  const { cacheDir, downloader, integrity, platformArch, version } = opts
+  const { cacheDir, downloader, integrity, platformArch, version } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   const url = getAdoptiumDownloadUrl({ version, platformArch })
   if (!url) {
     return undefined

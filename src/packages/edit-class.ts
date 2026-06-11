@@ -235,6 +235,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
         }
 
         override async save(options?: SaveOptions): Promise<boolean> {
+          options = { __proto__: null, ...options } as typeof options
           if (!this.canSave || this.content === undefined) {
             throw new ErrorCtor('No package.json to save to')
           }

@@ -48,7 +48,10 @@ export interface TrufflehogFromDownloadOptions {
 export async function trufflehogFromDownload(
   opts: TrufflehogFromDownloadOptions,
 ): Promise<ResolvedTrufflehog | undefined> {
-  const { cacheDir, downloader, integrity, platformArch, version } = opts
+  const { cacheDir, downloader, integrity, platformArch, version } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   const url = getTrufflehogDownloadUrl({ version, platformArch })
   if (!url) {
     return undefined

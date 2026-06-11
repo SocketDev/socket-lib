@@ -44,6 +44,7 @@ import type { GitDiffOptions } from './types'
 export async function getUnstagedFiles(
   options?: GitDiffOptions | undefined,
 ): Promise<string[]> {
+  options = { __proto__: null, ...options } as typeof options
   const args = getGitDiffSpawnArgs(options?.cwd).unstaged
   return await innerDiff(args, options)
 }
@@ -82,6 +83,7 @@ export async function getUnstagedFiles(
 export function getUnstagedFilesSync(
   options?: GitDiffOptions | undefined,
 ): string[] {
+  options = { __proto__: null, ...options } as typeof options
   const args = getGitDiffSpawnArgs(options?.cwd).unstaged
   return innerDiffSync(args, options)
 }

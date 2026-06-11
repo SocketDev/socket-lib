@@ -128,7 +128,7 @@ export interface BazelDownloadOptions {
 export function getBazelDownloadUrl(
   opts: BazelDownloadOptions,
 ): string | undefined {
-  const { platformArch, version } = opts
+  const { platformArch, version } = { __proto__: null, ...opts } as typeof opts
   const entry = BAZEL_ASSET_MAP[platformArch]
   if (!entry) {
     return undefined

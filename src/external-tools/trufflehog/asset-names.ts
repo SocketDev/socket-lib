@@ -73,7 +73,7 @@ export interface TrufflehogDownloadOptions {
 export function getTrufflehogDownloadUrl(
   opts: TrufflehogDownloadOptions,
 ): string | undefined {
-  const { platformArch, version } = opts
+  const { platformArch, version } = { __proto__: null, ...opts } as typeof opts
   const entry = TRUFFLEHOG_ASSET_MAP[platformArch]
   if (!entry) {
     return undefined

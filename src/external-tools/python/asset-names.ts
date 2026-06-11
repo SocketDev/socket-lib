@@ -138,7 +138,7 @@ export interface PythonAsset {
  * no upstream prebuilt.
  */
 export function pythonAsset(opts: PythonAssetOptions): PythonAsset | undefined {
-  const { tag, version } = opts
+  const { tag, version } = { __proto__: null, ...opts } as typeof opts
   const arch = opts.arch ?? getPythonArch()
   const triple = arch ? PLATFORM_TRIPLES[arch] : undefined
   if (!triple) {

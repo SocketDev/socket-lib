@@ -49,6 +49,7 @@ export interface ResolveJreOptions {
 const resolutionCache = new MapCtor<string, Promise<ResolvedJre | undefined>>()
 
 export function cacheKey(opts: ResolveJreOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
@@ -65,6 +66,7 @@ export function cacheKey(opts: ResolveJreOptions | undefined): string {
 export async function doResolveJre(
   opts?: ResolveJreOptions | undefined,
 ): Promise<ResolvedJre | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromVfs = await jreFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {

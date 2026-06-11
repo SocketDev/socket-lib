@@ -109,6 +109,7 @@ export function getBaseArboristOptions(
   installPath: string,
   options: { quiet: boolean },
 ) {
+  options = { __proto__: null, ...options } as typeof options
   return {
     __proto__: null,
     path: installPath,
@@ -213,7 +214,11 @@ export async function safeIdealTree(
 ): Promise<SafeIdealTreeResult> {
   const fs = getNodeFs()
   const path = getNodePath()
-  const { before, path: installPath, quiet = true } = options
+  const {
+    before,
+    path: installPath,
+    quiet = true,
+  } = { __proto__: null, ...options } as typeof options
   const targetName = readSingleDependency(
     path.join(installPath, 'package.json'),
   )
@@ -244,7 +249,11 @@ export async function safeIdealTree(
  * This is the strongest form of pinning pnpm/npm offer.
  */
 export async function safeReify(options: SafeReifyOptions): Promise<void> {
-  const { packageLock = true, path: installPath, quiet = true } = options
+  const {
+    packageLock = true,
+    path: installPath,
+    quiet = true,
+  } = { __proto__: null, ...options } as typeof options
   const arb = new Arborist({
     ...(getBaseArboristOptions(installPath, { quiet }) as object),
     packageLock,

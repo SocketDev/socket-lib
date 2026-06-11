@@ -82,6 +82,7 @@ export async function glob(
   // Strip trailing slashes from ignore patterns before fast-glob sees
   // them; otherwise `dist/` from a .gitignore-derived list silently
   // walks the whole subtree. See the file header above.
+  options = { __proto__: null, ...options } as typeof options
   const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
   // Prefer node:fs/promises.glob (added v22.0.0, Stable) when the
   // option surface lines up. Avoids loading fast-glob entirely.
@@ -122,6 +123,7 @@ export function globSync(
 ): string[] {
   // Strip trailing slashes from ignore patterns; same workaround as
   // the async `glob` above, see file header.
+  options = { __proto__: null, ...options } as typeof options
   const normalizedIgnore = normalizeIgnorePatterns(options?.ignore)
   // Prefer node:fs.globSync (added v22.0.0, Stable) when the option
   // surface lines up. Avoids loading fast-glob entirely.

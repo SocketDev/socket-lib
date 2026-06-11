@@ -43,6 +43,7 @@ const resolutionCache = new MapCtor<
 >()
 
 export function cacheKey(opts: ResolveCdxgenOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
@@ -60,6 +61,7 @@ export function cacheKey(opts: ResolveCdxgenOptions | undefined): string {
 export async function doResolveCdxgen(
   opts?: ResolveCdxgenOptions | undefined,
 ): Promise<ResolvedCdxgen | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromVfs = await cdxgenFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {

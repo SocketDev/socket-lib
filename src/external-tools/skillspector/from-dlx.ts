@@ -34,7 +34,7 @@ const UPSTREAM_REPO = 'https://github.com/NVIDIA/skillspector.git'
 export async function skillspectorFromDlx(
   opts: SkillSpectorFromDlxOptions,
 ): Promise<ResolvedSkillSpector | undefined> {
-  const { sha } = opts
+  const { sha } = { __proto__: null, ...opts } as typeof opts
   if (!sha) {
     return undefined
   }

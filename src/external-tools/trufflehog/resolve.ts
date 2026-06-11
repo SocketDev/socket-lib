@@ -41,6 +41,7 @@ const resolutionCache = new MapCtor<
 >()
 
 export function cacheKey(opts: ResolveTrufflehogOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
@@ -57,6 +58,7 @@ export function cacheKey(opts: ResolveTrufflehogOptions | undefined): string {
 export async function doResolveTrufflehog(
   opts?: ResolveTrufflehogOptions | undefined,
 ): Promise<ResolvedTrufflehog | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromVfs = await trufflehogFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {

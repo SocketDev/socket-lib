@@ -54,6 +54,7 @@ export async function fetchRefShaViaGraphQL(
   ref: string,
   options: GitHubFetchOptions,
 ): Promise<string | undefined> {
+  options = { __proto__: null, ...options } as typeof options
   const token = options.token || getGitHubToken()
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github.v3+json',

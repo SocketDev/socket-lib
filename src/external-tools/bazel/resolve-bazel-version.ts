@@ -26,6 +26,7 @@ export interface ResolveBazelVersionOptions {
 export async function resolveBazelVersion(
   options?: ResolveBazelVersionOptions | undefined,
 ): Promise<string | undefined> {
+  options = { __proto__: null, ...options } as typeof options
   const cwd = options?.cwd ?? process.cwd()
 
   const envOverride = process.env['USE_BAZEL_VERSION']

@@ -37,6 +37,7 @@ const resolutionCache = new MapCtor<
 >()
 
 export function cacheKey(opts: ResolveTrivyOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
@@ -53,6 +54,7 @@ export function cacheKey(opts: ResolveTrivyOptions | undefined): string {
 export async function doResolveTrivy(
   opts?: ResolveTrivyOptions | undefined,
 ): Promise<ResolvedTrivy | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromVfs = await trivyFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {

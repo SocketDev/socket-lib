@@ -137,7 +137,12 @@ export interface AdoptiumDownloadOptions {
 export function getAdoptiumDownloadUrl(
   opts: AdoptiumDownloadOptions,
 ): string | undefined {
-  const { platformArch, releaseType = 'ga', type = 'jre', version } = opts
+  const {
+    platformArch,
+    releaseType = 'ga',
+    type = 'jre',
+    version,
+  } = { __proto__: null, ...opts } as typeof opts
   const query = ADOPTIUM_QUERY_MAP[platformArch]
   if (!query) {
     return undefined

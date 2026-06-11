@@ -118,6 +118,7 @@ export interface OpenAiChatResponse {
  * asserting without a network call.
  */
 export function buildChatRequestBody(opts: AiHttpCallOptions): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   const messages: Array<{ role: string; content: string }> = []
   if (opts.system) {
     messages.push({ content: opts.system, role: 'system' })
@@ -155,6 +156,7 @@ export function buildChatRequestBody(opts: AiHttpCallOptions): string {
 export async function callAiHttpModel(
   opts: AiHttpCallOptions,
 ): Promise<AiHttpResult> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const provider = resolveAiHttpProvider(opts.provider)
   const token = process.env[provider.tokenEnv]
   if (!token) {

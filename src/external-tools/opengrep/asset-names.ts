@@ -88,7 +88,7 @@ export interface OpengrepDownloadOptions {
 export function getOpengrepDownloadUrl(
   opts: OpengrepDownloadOptions,
 ): string | undefined {
-  const { platformArch, version } = opts
+  const { platformArch, version } = { __proto__: null, ...opts } as typeof opts
   const entry = OPENGREP_ASSET_MAP[platformArch]
   if (!entry) {
     return undefined

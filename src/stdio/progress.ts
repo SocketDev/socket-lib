@@ -106,6 +106,7 @@ export class ProgressBar {
    * @param options - Configuration options for the progress bar.
    */
   constructor(total: number, options?: ProgressBarOptions) {
+    options = { __proto__: null, ...options } as typeof options
     this.total = total
     this.startTime = DateNow()
     this.stream = options?.stream || process.stderr

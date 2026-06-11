@@ -54,7 +54,10 @@ export interface SbtFromDownloadOptions {
 export async function sbtFromDownload(
   opts: SbtFromDownloadOptions,
 ): Promise<ResolvedSbt | undefined> {
-  const { cacheDir, downloader, integrity, version } = opts
+  const { cacheDir, downloader, integrity, version } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   const url = getSbtDownloadUrl({ version })
   const extractedDir = cacheDir ?? path.join(getSocketDlxDir(), 'sbt', version)
   // strip:1 unwraps the top-level `sbt/` directory the tgz contains,

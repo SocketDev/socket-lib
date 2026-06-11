@@ -28,7 +28,10 @@ export interface TrivyFromDownloadOptions {
 export async function trivyFromDownload(
   opts: TrivyFromDownloadOptions,
 ): Promise<ResolvedTrivy | undefined> {
-  const { cacheDir, downloader, integrity, platformArch, version } = opts
+  const { cacheDir, downloader, integrity, platformArch, version } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   const url = getTrivyDownloadUrl({ version, platformArch })
   if (!url) {
     return undefined

@@ -123,6 +123,7 @@ export function parseShimmerOption(
  */
 export function resolveSpinnerColorRgb(opts: SpinnerOptions): ColorRgb {
   // Get theme from options or current theme.
+  opts = { __proto__: null, ...opts } as typeof opts
   let theme = getTheme()
   if (opts.theme) {
     // Resolve theme name or use Theme object directly.

@@ -82,6 +82,7 @@ export function joinList(
   items: readonly unknown[],
   options?: JoinListOptions,
 ): string {
+  options = { __proto__: null, ...options } as typeof options
   const w = options?.with
   if (w === 'and') {
     return getConjunctionFormatter().format(items.map(String))

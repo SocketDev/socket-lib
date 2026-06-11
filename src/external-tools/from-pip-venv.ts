@@ -77,7 +77,10 @@ export interface CreatePipVenvResult {
 export async function createPipVenv(
   opts: CreatePipVenvOptions,
 ): Promise<CreatePipVenvResult> {
-  const { cacheDir, entryPoint, installSpec } = opts
+  const { cacheDir, entryPoint, installSpec } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   const entryBin = pipVenvEntryPointPath(cacheDir, entryPoint)
 
   // Cache hit: existing venv, existing entry-point. Skip install.

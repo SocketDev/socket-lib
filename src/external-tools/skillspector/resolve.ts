@@ -41,12 +41,14 @@ const resolutionCache = new MapCtor<
 >()
 
 export function cacheKey(opts: ResolveSkillSpectorOptions): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   return `${opts.sha ?? ''}|${opts.cacheDir ?? ''}|${opts.localOnly ? 'local' : 'full'}`
 }
 
 export async function doResolveSkillSpector(
   opts: ResolveSkillSpectorOptions,
 ): Promise<ResolvedSkillSpector | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromVfs = await skillspectorFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {

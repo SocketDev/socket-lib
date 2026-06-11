@@ -43,6 +43,7 @@ export async function fetchRefSha(
   ref: string,
   options: ResolveRefOptions,
 ): Promise<string> {
+  options = { __proto__: null, ...options } as typeof options
   const fetchOptions: GitHubFetchOptions = {
     token: options.token,
   }

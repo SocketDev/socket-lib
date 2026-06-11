@@ -68,7 +68,7 @@ export interface TrivyDownloadOptions {
 export function getTrivyDownloadUrl(
   opts: TrivyDownloadOptions,
 ): string | undefined {
-  const { platformArch, version } = opts
+  const { platformArch, version } = { __proto__: null, ...opts } as typeof opts
   const entry = TRIVY_ASSET_MAP[platformArch]
   if (!entry) {
     return undefined

@@ -41,7 +41,10 @@ export interface JanusFromDownloadOptions {
 export async function janusFromDownload(
   opts: JanusFromDownloadOptions,
 ): Promise<ResolvedJanus> {
-  const { cacheDir, downloader, integrity, platformArch, version } = opts
+  const { cacheDir, downloader, integrity, platformArch, version } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   if (!JANUS_SUPPORTED_PLATFORM_ARCHES.includes(platformArch)) {
     const supported = JANUS_SUPPORTED_PLATFORM_ARCHES.map(p => `\`${p}\``).join(
       ', ',

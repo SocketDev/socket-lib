@@ -222,6 +222,7 @@ export function isBrotliCompressed(input: Buffer): boolean {
 export function resolveBrotliOptions(
   options: CompressOptions | undefined,
 ): ResolvedBrotliOptions {
+  options = { __proto__: null, ...options } as typeof options
   const level = options?.level ?? 11
   const params: NonNullable<BrotliOptions['params']> = {
     [zlibConstants.BROTLI_PARAM_QUALITY]: level,

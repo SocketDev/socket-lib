@@ -45,6 +45,7 @@ const resolutionCache = new MapCtor<
 >()
 
 export function cacheKey(opts: ResolveBazelOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
@@ -61,6 +62,7 @@ export function cacheKey(opts: ResolveBazelOptions | undefined): string {
 export async function doResolveBazel(
   opts?: ResolveBazelOptions | undefined,
 ): Promise<ResolvedBazel | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromPath = await bazelFromPath()
   if (fromPath) {
     return fromPath

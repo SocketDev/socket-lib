@@ -60,6 +60,7 @@ export function buildBlock(opts: WriteOptions): {
   // Symmetric BEGIN/END sentinels — the `(managed)` suffix is on
   // both so a `BEGIN → END` text-substitution swap produces the
   // matching END string for migration regexes.
+  opts = { __proto__: null, ...opts } as typeof opts
   const begin = `# BEGIN ${opts.service} env (managed)`
   const end = `# END ${opts.service} env (managed)`
   const noteLines = (opts.notes ?? []).map(line => `# ${line}`)
@@ -247,6 +248,7 @@ export function shellSingleQuote(value: string): string {
  * dotfile-manager users or installers running under a non-default shell.
  */
 export function write(opts: WriteOptions): WriteResult {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (os.platform() !== 'darwin') {
     return {
       rcPath: undefined,

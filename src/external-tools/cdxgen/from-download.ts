@@ -63,7 +63,7 @@ export async function cdxgenFromDownload(
     platformArch,
     variant = 'slim',
     version,
-  } = opts
+  } = { __proto__: null, ...opts } as typeof opts
   const url = getCdxgenDownloadUrl({ platformArch, variant, version })
   const entry = getCdxgenAssetEntry(platformArch, variant)
   if (!url || !entry) {

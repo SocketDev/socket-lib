@@ -69,7 +69,7 @@ export async function drainPendingAmbiguous(options: {
     src,
     targetRoot,
     usedPrimordials,
-  } = options
+  } = { __proto__: null, ...options } as typeof options
   let skipped = 0
   const lineStarts: number[] = []
   lineStarts.push(0)

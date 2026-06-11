@@ -90,6 +90,7 @@ export async function dlxPackage(
   spawnExtra?: SpawnExtra | undefined,
 ): Promise<DlxPackageResult> {
   // Download the package.
+  options = { __proto__: null, ...options } as typeof options
   const downloadResult = await downloadNpmPackage(options)
 
   // Execute the binary.

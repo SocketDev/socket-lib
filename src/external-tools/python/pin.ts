@@ -166,7 +166,7 @@ export function parseArtifactFilename(
 export async function resolvePipPackagePin(
   options: ResolvePipPackagePinOptions,
 ): Promise<PipPackagePin> {
-  const { pythonBin, spec } = options
+  const { pythonBin, spec } = { __proto__: null, ...options } as typeof options
   if (typeof spec !== 'string' || spec.length === 0) {
     throw new PipPackagePinError('resolvePipPackagePin requires a package spec')
   }

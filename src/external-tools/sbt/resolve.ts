@@ -39,6 +39,7 @@ export interface ResolveSbtOptions {
 const resolutionCache = new MapCtor<string, Promise<ResolvedSbt | undefined>>()
 
 export function cacheKey(opts: ResolveSbtOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
@@ -55,6 +56,7 @@ export function cacheKey(opts: ResolveSbtOptions | undefined): string {
 export async function doResolveSbt(
   opts?: ResolveSbtOptions | undefined,
 ): Promise<ResolvedSbt | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromVfs = await sbtFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {

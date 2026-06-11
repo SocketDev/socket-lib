@@ -51,6 +51,7 @@ export function buildArgs(
   agent: AiAgentName,
   opts: SpawnAiAgentOptions,
 ): string[] {
+  opts = { __proto__: null, ...opts } as typeof opts
   const allAllowed = [...opts.tools, ...(opts.allow ?? [])]
 
   switch (agent) {
@@ -212,6 +213,7 @@ export async function pickAgent(
 export async function spawnAiAgent(
   opts: SpawnAiAgentOptions,
 ): Promise<AgentSpawnResult> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const agent = await pickAgent(opts.agent, opts.cwd)
   const args = buildArgs(agent, opts)
 

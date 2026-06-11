@@ -154,7 +154,10 @@ export async function resolveNpmPackagePin(
 ): Promise<NpmPackagePin> {
   const fs = getNodeFs()
   const path = getNodePath()
-  const { minReleaseDays, minReleaseMins, spec } = options
+  const { minReleaseDays, minReleaseMins, spec } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
   if (typeof spec !== 'string' || spec.length === 0) {
     throw new DlxLockfileError('resolveNpmPackagePin requires a package spec')
   }

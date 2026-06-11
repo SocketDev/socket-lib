@@ -29,7 +29,10 @@ export interface OpengrepFromDownloadOptions {
 export async function opengrepFromDownload(
   opts: OpengrepFromDownloadOptions,
 ): Promise<ResolvedOpengrep | undefined> {
-  const { cacheDir, downloader, integrity, platformArch, version } = opts
+  const { cacheDir, downloader, integrity, platformArch, version } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   const url = getOpengrepDownloadUrl({ version, platformArch })
   const entry = getOpengrepAssetEntry(platformArch)
   if (!url || !entry) {

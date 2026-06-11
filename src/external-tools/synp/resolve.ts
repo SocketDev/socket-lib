@@ -29,6 +29,7 @@ export interface ResolveSynpOptions {
 const resolutionCache = new MapCtor<string, Promise<ResolvedSynp | undefined>>()
 
 export function cacheKey(opts: ResolveSynpOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   if (!opts?.downloadIfMissing) {
     return 'local-only'
   }
@@ -39,6 +40,7 @@ export function cacheKey(opts: ResolveSynpOptions | undefined): string {
 export async function doResolveSynp(
   opts?: ResolveSynpOptions | undefined,
 ): Promise<ResolvedSynp | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const fromVfs = await synpFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {

@@ -53,6 +53,7 @@ const resolutionCache = new MapCtor<
 >()
 
 export function cacheKey(opts: ResolvePythonOptions | undefined): string {
+  opts = { __proto__: null, ...opts } as typeof opts
   const prefer = opts?.preferDownload ? 'prefer:' : ''
   if (!opts?.downloadIfMissing) {
     return `${prefer}local-only`
@@ -73,6 +74,7 @@ export function cacheKey(opts: ResolvePythonOptions | undefined): string {
 export async function doResolvePython(
   opts?: ResolvePythonOptions | undefined,
 ): Promise<ResolvedPython | undefined> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const dl = opts?.downloadIfMissing
   if (opts?.preferDownload && dl) {
     const fromDownload = await pythonFromDownload(dl)

@@ -81,6 +81,7 @@ export class DlxPythonUnavailableError extends Error {
 export async function dlxPipInstall(
   opts: DlxPipInstallOptions,
 ): Promise<DownloadPipPackageResult & { pythonBin: string }> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const pythonBin = await resolveOrThrow(opts)
   const result = await downloadPipPackage({
     hash: opts.hash,
@@ -98,13 +99,14 @@ export async function dlxPipInstall(
 export async function dlxPipPin(
   opts: DlxPipPinOptions,
 ): Promise<PipPackagePin & { pythonBin: string }> {
+  opts = { __proto__: null, ...opts } as typeof opts
   const pythonBin = await resolveOrThrow(opts)
   const pin = await resolvePipPackagePin({ pythonBin, spec: opts.spec })
   return { ...pin, pythonBin }
 }
 
 export async function resolveOrThrow(opts: DlxPipOptions): Promise<string> {
-  const { preferDownload, python } = opts
+  const { preferDownload, python } = { __proto__: null, ...opts } as typeof opts
   const resolved = await resolvePython({
     preferDownload,
     downloadIfMissing: {

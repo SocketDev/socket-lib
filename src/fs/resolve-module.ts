@@ -94,6 +94,7 @@ export function requireResolveFromCwd(
   specifier: string,
   options?: { nothrow?: boolean | undefined } | undefined,
 ): string | undefined {
+  options = { __proto__: null, ...options } as typeof options
   return options?.nothrow
     ? requireResolveFrom(process.cwd(), specifier, { nothrow: true })
     : requireResolveFrom(process.cwd(), specifier)

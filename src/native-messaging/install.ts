@@ -150,7 +150,11 @@ export function installNativeHost(opts: InstallOptions): InstallResult {
   // the installer is itself on a stale Node.
   assertNodeStripTypesSupported()
 
-  const { allowedOrigins, production = false, wrapperDir = __dirname } = opts
+  const {
+    allowedOrigins,
+    production = false,
+    wrapperDir = __dirname,
+  } = { __proto__: null, ...opts } as typeof opts
 
   if (production && allowedOrigins.includes('*')) {
     throw new ErrorCtor(

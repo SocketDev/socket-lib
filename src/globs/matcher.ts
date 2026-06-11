@@ -55,6 +55,7 @@ export function getGlobMatcher(
     ignore?: string[] | undefined
   },
 ): (path: string) => boolean {
+  options = { __proto__: null, ...options } as typeof options
   const patterns = ArrayIsArray(glob) ? glob : [glob]
   // Create stable cache key by sorting patterns and option keys.
   // Option values that are arrays (e.g. `ignore: ['a', 'b']`) get sorted

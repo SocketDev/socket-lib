@@ -75,7 +75,11 @@ export function getCdxgenAssetEntry(
 export function getCdxgenDownloadUrl(
   opts: CdxgenDownloadOptions,
 ): string | undefined {
-  const { platformArch, variant = 'slim', version } = opts
+  const {
+    platformArch,
+    variant = 'slim',
+    version,
+  } = { __proto__: null, ...opts } as typeof opts
   const entry = getCdxgenAssetEntry(platformArch, variant)
   if (!entry) {
     return undefined

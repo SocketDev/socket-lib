@@ -87,7 +87,10 @@ export function readEnv(name: string): string | undefined {
 export async function resolve(
   opts: ResolveOptions,
 ): Promise<ResolveResult | undefined> {
-  const { accounts, allowEnvOnly, service } = opts
+  const { accounts, allowEnvOnly, service } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   for (let i = 0, { length } = accounts; i < length; i += 1) {
     const account = accounts[i]!
     const fromEnv = readEnv(account)
@@ -113,7 +116,10 @@ export async function resolve(
  * run before any `await` machinery exists).
  */
 export function resolveSync(opts: ResolveOptions): ResolveResult | undefined {
-  const { accounts, allowEnvOnly, service } = opts
+  const { accounts, allowEnvOnly, service } = {
+    __proto__: null,
+    ...opts,
+  } as typeof opts
   for (let i = 0, { length } = accounts; i < length; i += 1) {
     const account = accounts[i]!
     const fromEnv = readEnv(account)
