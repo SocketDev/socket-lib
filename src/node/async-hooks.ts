@@ -15,5 +15,6 @@ export function getNodeAsyncHooks(): typeof NodeAsyncHooks {
     return undefined as unknown as typeof NodeAsyncHooks
   }
   return (asyncHooks ??=
-    /*@__PURE__*/ require('node:async_hooks') as typeof NodeAsyncHooks)
+    // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
+    /*@__PURE__*/ require('async_hooks') as typeof NodeAsyncHooks)
 }

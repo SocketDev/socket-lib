@@ -14,5 +14,6 @@ export function getNodeEvents(): typeof NodeEvents {
   if (!IS_NODE) {
     return undefined as unknown as typeof NodeEvents
   }
-  return (events ??= /*@__PURE__*/ require('node:events') as typeof NodeEvents)
+  // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
+  return (events ??= /*@__PURE__*/ require('events') as typeof NodeEvents)
 }

@@ -15,5 +15,6 @@ export function getNodeTimersPromises(): typeof NodeTimersPromises {
     return undefined as unknown as typeof NodeTimersPromises
   }
   return (timersPromises ??=
-    /*@__PURE__*/ require('node:timers/promises') as typeof NodeTimersPromises)
+    // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
+    /*@__PURE__*/ require('timers/promises') as typeof NodeTimersPromises)
 }

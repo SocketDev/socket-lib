@@ -15,5 +15,6 @@ export function getNodeHttps(): typeof NodeHttps {
     return undefined as unknown as typeof NodeHttps
   }
   return (cachedHttps ??=
-    /*@__PURE__*/ require('node:https') as typeof NodeHttps)
+    // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
+    /*@__PURE__*/ require('https') as typeof NodeHttps)
 }
