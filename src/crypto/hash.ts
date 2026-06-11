@@ -1,7 +1,10 @@
 /**
  * @file Crypto hash helpers that prefer Node builtins where available. Probes
  *   `node:crypto.hash()` (added v21.7.0 / v20.12.0) and falls back to the
- *   streaming `createHash().update().digest()` chain on older runtimes.
+ *   streaming `createHash().update().digest()` chain on older runtimes. Which
+ *   digest goes where (integrity = sha512 trust boundary; checksum = sha256
+ *   interop shape; cache keys = truncated, never trust): see
+ *   `docs/hash-algorithms.md`.
  */
 
 import { getNodeCrypto } from '../node/crypto'
