@@ -11,8 +11,10 @@ import {
   processArch,
   processArgv,
   processCwd,
+  processEmitWarning,
   processEnv,
   processExecPath,
+  processNextTick,
   processPid,
   processPlatform,
   processStderr,
@@ -43,5 +45,18 @@ describe('primordials/process', () => {
     // The accessor calls process.cwd at call time, so the spy intercepts.
     expect(processCwd()).toBe('/mocked/dir')
     expect(spy).toHaveBeenCalled()
+  })
+
+  it('processEmitWarning delegates to process.emitWarning', () => {
+    const spy = vi.spyOn(process, 'emitWarning').mockImplementation(() => {})
+    processEmitWarning('a deprecation note')
+    expect(spy).toHaveBeenCalledWith('a deprecation note')
+  })
+
+  it('processNextTick delegates to process.nextTick', () => {
+    const spy = vi.spyOn(process, 'nextTick').mockImplementation(() => {})
+    const cb = (): void => {}
+    processNextTick(cb)
+    expect(spy).toHaveBeenCalledWith(cb)
   })
 })
