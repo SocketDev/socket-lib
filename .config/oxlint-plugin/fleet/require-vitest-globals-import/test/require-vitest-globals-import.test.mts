@@ -43,6 +43,27 @@ describe('socket/require-vitest-globals-import', () => {
             "describeNetworkOnly('s', () => {})\n",
         },
         {
+          name: 'camelCase wrapper imported AND used as a titled test (itUnixOnly)',
+          filename: 'test/unit/a.test.mts',
+          code:
+            "import { expect, it } from 'vitest'\n" +
+            "import { itUnixOnly } from '../util/skip-helpers'\n" +
+            "itUnixOnly('x', () => { expect(1).toBe(1) })\n",
+        },
+        {
+          name: 'test<Upper>-named local that is NOT a titled test (createRequire result, string arg)',
+          filename: 'test/unit/a.test.mts',
+          code:
+            "import { createRequire } from 'node:module'\n" +
+            'const testRequire = createRequire(import.meta.url)\n' +
+            "testRequire('@npmcli/arborist')\n",
+        },
+        {
+          name: 'test<Upper>-named local var member access is not a test call',
+          filename: 'test/unit/a.test.mts',
+          code: "let testServer\ntestServer = { baseUrl: 'x' }\nconst u = testServer.baseUrl\n",
+        },
+        {
           name: 'node:test file — globals concept does not apply, stand down',
           filename: 'test/unit/a.test.mts',
           code:
