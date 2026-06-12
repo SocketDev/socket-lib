@@ -13,7 +13,7 @@ import {
   createCompositeAbortSignal,
   createTimeoutSignal,
 } from '../../src/abort/signal'
-import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
+import { tolerantSleep, tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 import { describe, expect, it } from 'vitest'
 
 describe('abort', () => {
@@ -397,8 +397,13 @@ describe('abort', () => {
     })
 
     it('should create independent signals', async () => {
-      const signal1 = createTimeoutSignal(50)
-      const signal2 = createTimeoutSignal(150)
+      // Scale the signal deadlines with the same Windows tolerance as the
+      // sleeps below. With a fixed 150ms signal2 and a tolerant 70ms sleep that
+      // inflates to 350ms on Windows, signal2 would already have fired by the
+      // mid-point assertion — the ordering only holds when deadlines and sleeps
+      // share the multiplier.
+      const signal1 = createTimeoutSignal(tolerantTimeout(50))
+      const signal2 = createTimeoutSignal(tolerantTimeout(150))
 
       expect(signal1.aborted).toBe(false)
       expect(signal2.aborted).toBe(false)
