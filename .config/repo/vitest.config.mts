@@ -34,6 +34,9 @@ export interface VitestRepoConfig {
   nonIsolated?: string[] | undefined
   nodeTestExclude?: string[] | undefined
 }
+export function readNonIsolatedGlobs(): string[] {
+  return resolveVitestKey('nonIsolated')
+}
 export function readVitestConfigTier(file: string): VitestRepoConfig {
   if (!existsSync(file)) {
     return {}
@@ -45,6 +48,9 @@ export function readVitestConfigTier(file: string): VitestRepoConfig {
     return {}
   }
 }
+export function repoNodeTestExcludeGlobs(): string[] {
+  return resolveVitestKey('nodeTestExclude')
+}
 export function resolveVitestKey(key: keyof VitestRepoConfig): string[] {
   const fleet = readVitestConfigTier('.config/fleet/vitest.json')[key]
   const repo = readVitestConfigTier('.config/repo/vitest.json')[key]
@@ -52,12 +58,6 @@ export function resolveVitestKey(key: keyof VitestRepoConfig): string[] {
     ...(Array.isArray(fleet) ? fleet : []),
     ...(Array.isArray(repo) ? repo : []),
   ].filter(g => typeof g === 'string')
-}
-export function readNonIsolatedGlobs(): string[] {
-  return resolveVitestKey('nonIsolated')
-}
-export function repoNodeTestExcludeGlobs(): string[] {
-  return resolveVitestKey('nodeTestExclude')
 }
 const nonIsolatedGlobs = readNonIsolatedGlobs()
 

@@ -4,9 +4,10 @@
  *   path (manual `git checkout`, external editor, a merge):
  *
  *   - `trust-downgrade-guard` — the pnpm/npm trust-gate FLOORS. This script
- *     asserts the repo's `pnpm-workspace.yaml` still carries `minimumReleaseAge
- *     >= 10080`, `trustPolicy: no-downgrade`, and `blockExoticSubdeps: true`,
- *     and that `.npmrc` `min-release-age` (if set) meets the 7-day floor.
+ *     asserts the repo's `pnpm-workspace.yaml` still carries a
+ *     `minimumReleaseAge` of at least 10080, `trustPolicy: no-downgrade`, and
+ *     `blockExoticSubdeps: true`, and that `.npmrc` `min-release-age` (if set)
+ *     meets the 7-day floor.
  *   - `npmrc-trust-optout-guard` — the pnpm trust-aware env-expansion opt-out.
  *     This script scans tracked scripts / workflows / configs for a committed
  *     `PNPM_CONFIG_NPMRC_AUTH_FILE` / `NPM_CONFIG_USERCONFIG=<repo .npmrc>`
@@ -80,14 +81,26 @@ function trackedFiles(): string[] {
     .filter(f => !isTestFile(f))
 }
 
+// The detector SOURCE legitimately names the opt-out env vars (the
+// npmrc-trust-optout-guard hook + the _shared/npmrc-trust.mts module it and
+// this check import). Those files ARE the detector — they'd self-flag this
+// gate. Mirrors env-kill-switches-are-absent's SELF_EXEMPT_HOOKS.
+const SELF_EXEMPT_PATH_RE =
+  /(?:^|\/)(?:\.claude\/hooks\/fleet\/npmrc-trust-optout-guard\/|\.claude\/hooks\/fleet\/_shared\/npmrc-trust\.mts$)/
+
 // Test files legitimately CONTAIN the opt-out env-var patterns as detector
 // INPUT (e.g. trust-gates-detectors.test.mts feeds
-// `PNPM_CONFIG_NPMRC_AUTH_FILE=.npmrc pnpm i` to detectOptoutInCommands), so
-// they'd self-flag this gate. Skip them — same exemption env-kill-switches-
-// are-absent applies to its own fixtures.
+// `PNPM_CONFIG_NPMRC_AUTH_FILE=.npmrc pnpm i` to detectOptoutInCommands), and
+// the detector source itself names them — both would self-flag this gate. Skip
+// them, same exemption env-kill-switches-are-absent applies to its own.
 function isTestFile(relPath: string): boolean {
-  const base = relPath.replace(/\\/g, '/').split('/').pop() ?? ''
-  return base.endsWith('.test.mts') || base.endsWith('.test.ts')
+  const p = relPath.replace(/\\/g, '/')
+  const base = p.split('/').pop() ?? ''
+  return (
+    base.endsWith('.test.mts') ||
+    base.endsWith('.test.ts') ||
+    SELF_EXEMPT_PATH_RE.test(p)
+  )
 }
 
 interface OptoutHit {
