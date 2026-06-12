@@ -87,12 +87,9 @@ minimumReleaseAgeExclude:
   # rolldown's AST/types layer. rolldown 1.0.2 pins `=0.132.0`.
   # Zero-dep shell tokenizer + quoter. Vendored to power shell/parse +
   - '@socketdev/*'
-  - 'ecc-agentshield'
   - 'sfw'
-  - 'socket-*'
   - '@stuie/*'
   - '@ultrathink/*'
-  - '@yuku-parser/*'
   - '@socketoverride/*'
   - 'socket'
   # published: 2026-06-09 | removable: 2026-06-16
