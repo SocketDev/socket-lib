@@ -177,6 +177,11 @@
       "types": "./dist/ai/discover.d.mts",
       "default": "./dist/ai/discover.js"
     },
+    "./ai/exec": {
+      "source": "./src/ai/exec.mts",
+      "types": "./dist/ai/exec.d.mts",
+      "default": "./dist/ai/exec.js"
+    },
     "./ai/http": {
       "source": "./src/ai/http.mts",
       "types": "./dist/ai/http.d.mts",
