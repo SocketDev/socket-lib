@@ -5,14 +5,15 @@
  *   so a config/dep that slipped in before the hook existed (or via
  *   --no-verify) is caught at `check --all` time. The hook is the edit-time
  *   block; this is the committed-state gate;
- *   `socket/no-eslint-biome-config-ref` reports source refs. Fails (exit 1) on:
+ *   `socket/no-eslint-biome-config-ref` reports source refs. Fails (exit 1) on
  *   a tracked biome.json(c) / .eslintrc* / eslint.config.* / .prettierrc* /
- *   prettier.config.* / .dprint.json* config, or a tracked package.json with
- *   @biomejs/biome / eslint / @eslint/* / @typescript-eslint/* / prettier /
- *   dprint / rome (+ the eslint-config-* / eslint-plugin-* / prettier-plugin-*
- *   / @<scope>/eslint-* families) in any dependency block. EXEMPT: vendored
- *   upstream trees (upstream/, vendor/, third_party/, external/, a path segment
- *   ending `-upstream`). We never touch upstream files.
+ *   prettier.config.* / .dprint.json* config, or a tracked package.json
+ *   declaring any of the biome / eslint / @eslint/* / @typescript-eslint/* /
+ *   prettier / dprint / rome packages (plus the eslint-config-* /
+ *   eslint-plugin-* / prettier-plugin-* / @scope/eslint-* families) in any
+ *   dependency block. EXEMPT: vendored upstream trees (upstream/, vendor/,
+ *   third_party/, external/, a path segment ending in -upstream). We never
+ *   touch upstream files.
  */
 
 import { readFileSync } from 'node:fs'
@@ -26,23 +27,36 @@ import { REPO_ROOT } from '../paths.mts'
 
 const logger = getDefaultLogger()
 
+// Foreign linter/formatter CONFIG filenames, alternation sorted per
+// socket/sort-regex-alternations: dprint config, eslintrc (any ext),
+// prettierrc (any ext), biome json(c), eslint flat config (.[cm]?[jt]s),
+// prettier config (.[cm]?[jt]s).
 const CONFIG_FILE_RE =
-  /^(?:biome\.jsonc?|\.eslintrc(?:\.[a-z]+)?|eslint\.config\.[cm]?[jt]s|\.prettierrc(?:\.[a-z]+)?|prettier\.config\.[cm]?[jt]s|\.dprint\.jsonc?)$/
+  /^(?:\.dprint\.jsonc?|\.eslintrc(?:\.[a-z]+)?|\.prettierrc(?:\.[a-z]+)?|biome\.jsonc?|eslint\.config\.[cm]?[jt]s|prettier\.config\.[cm]?[jt]s)$/
 
 function isForeignToolPackage(name: string): boolean {
+  // This is the DETECTOR for foreign linter/formatter deps, so it must name
+  // them; socket/no-eslint-biome-config-ref (which flags those very strings) is
+  // disabled per-line here — these aren't stale refs, they're the patterns the
+  // check matches against. Operands sorted per socket/sort-equality-disjunctions.
   if (
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detector literal, not a stale ref
     name === '@biomejs/biome' ||
+    name === 'dprint' ||
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detector literal, not a stale ref
     name === 'eslint' ||
     name === 'prettier' ||
-    name === 'dprint' ||
     name === 'rome'
   ) {
     return true
   }
   return (
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detector prefix, not a stale ref
     name.startsWith('@eslint/') ||
     name.startsWith('@typescript-eslint/') ||
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detector prefix, not a stale ref
     name.startsWith('eslint-config-') ||
+    // oxlint-disable-next-line socket/no-eslint-biome-config-ref -- detector prefix, not a stale ref
     name.startsWith('eslint-plugin-') ||
     name.startsWith('prettier-plugin-') ||
     /^@[^/]+\/eslint-/.test(name)
@@ -52,7 +66,10 @@ function isForeignToolPackage(name: string): boolean {
 export function isVendoredUpstream(relPath: string): boolean {
   const p = relPath.replace(/\\/g, '/')
   return (
-    /(?:^|\/)(?:upstream|vendor|third_party|external)(?:\/|$)/.test(p) ||
+    // A path segment that is exactly a vendored-tree dir name (start-of-string
+    // or after a `/`, then `/` or end-of-string). Alternation sorted.
+    /(?:^|\/)(?:external|third_party|upstream|vendor)(?:\/|$)/.test(p) ||
+    // …or a segment ending in `-upstream` (e.g. `acme-upstream/`).
     /(?:^|\/)[^/]+-upstream(?:\/|$)/.test(p)
   )
 }
@@ -112,7 +129,9 @@ function main(): void {
       }
       const found = foreignToolDeps(text)
       if (found.length) {
-        failures.push(`${rel}: foreign tool dep(s) ${found.sort().join(', ')}`)
+        failures.push(
+          `${rel}: foreign tool dep(s) ${found.toSorted().join(', ')}`,
+        )
       }
     }
   }
