@@ -23,6 +23,8 @@ import type { ProcessLockOptions } from '../../../src/process/lock-types'
 import { safeDelete } from '../../../src/fs/safe'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
+
 // process-lock lazily does `require('node:fs')` inside getFs(). The require'd
 // CommonJS module's properties are writable/configurable, unlike the ESM
 // namespace import. We grab the same module via createRequire and patch
@@ -242,8 +244,11 @@ describe.sequential('process/lock', () => {
       ).rejects.toThrow()
 
       const elapsed = Date.now() - startTime
-      // Even with high baseDelayMs, should be capped by maxDelayMs
-      expect(elapsed).toBeLessThan(500)
+      // Even with high baseDelayMs, should be capped by maxDelayMs. The ceiling
+      // is tolerance-scaled: without the cap, baseDelayMs 1000 x 3 retries would
+      // be ~3s, so tolerantTimeout(500) (2500ms on Windows's 5x timer budget)
+      // still proves the 50ms cap held while absorbing slow-runner overhead.
+      expect(elapsed).toBeLessThan(tolerantTimeout(500))
 
       release1()
     })
