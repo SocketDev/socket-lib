@@ -113,6 +113,7 @@ Detect and record (the marker groups these as `repo` + `build`):
     `repo/` tier: `.claude/hooks/repo/`, `docs/agents.md/repo/`, `scripts/repo/`,
     `.config/repo/` — so they survive the cascade and aren't fleet-canonical forks.
 
+<!-- socket-lint: allow cross-repo -- run from the wheelhouse, not the member repo -->
 13. **CLAUDE.md.** Run `node scripts/repo/migrate-claude-md.mts --target <repo> --apply`
     — it parses the repo's existing CLAUDE.md, drops sections the fleet block now owns,
     keeps project-specific content under the `🏗️ <Repo>-Specific` postamble, and inserts
@@ -163,7 +164,7 @@ Detect and record (the marker groups these as `repo` + `build`):
 
 19. **Verify GREEN.** `pnpm install`, then `pnpm run check --all` + `pnpm test` +
     `pnpm run build` must all pass. Fix what fails. Run
-    `node scripts/repo/check/fleet-members-are-onboarded.mts` (from the wheelhouse) —
+    `node scripts/repo/check/fleet-members-are-onboarded.mts` (from the wheelhouse) <!-- socket-lint: allow cross-repo -->
     no coherence FAIL, adoption-gap reports addressed. Do NOT proceed to land otherwise.
 
 20. **Land.** Commit the conversion in fleet-clean commits — Conventional Commits,
