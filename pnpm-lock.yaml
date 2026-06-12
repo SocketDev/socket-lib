@@ -410,6 +410,8 @@ importers:
 
   .config/oxlint-plugin/fleet/options-null-proto: {}
 
+  .config/oxlint-plugin/fleet/options-param-naming: {}
+
   .config/oxlint-plugin/fleet/personal-path-placeholders: {}
 
   .config/oxlint-plugin/fleet/prefer-async-spawn: {}
