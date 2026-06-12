@@ -24,6 +24,8 @@
 
 import { which } from '../bin/which'
 
+import { isAdaptiveOnlyModel } from './spawn.mts'
+
 /**
  * A CLI backend the fleet can delegate a pass to.
  */
@@ -68,13 +70,15 @@ export const BACKENDS: Readonly<Record<BackendName, BackendDescriptor>> = {
       // Programmatic-Claude lockdown — all four flags (tools / allowedTools /
       // disallowedTools / permission-mode) per CLAUDE.md. The caller layers any
       // skill-specific tool allowlist on top; this is the read-only-safe floor.
+      // Fable / Mythos are adaptive-thinking-only, so omit --effort for them
+      // rather than pass a level they ignore (see spawn.mts buildArgs).
+      const effortArgs = isAdaptiveOnlyModel(model) ? [] : ['--effort', effort]
       return {
         argv: [
           '--print',
           '--model',
           model,
-          '--effort',
-          effort,
+          ...effortArgs,
           '--no-session-persistence',
           '--permission-mode',
           'dontAsk',
@@ -88,7 +92,7 @@ export const BACKENDS: Readonly<Record<BackendName, BackendDescriptor>> = {
     hybrid: false,
     name: 'codex',
     run(_promptFile: string, outFile: string): BackendRun {
-      const model = process.env['CODEX_MODEL'] ?? 'gpt-5.4'
+      const model = process.env['CODEX_MODEL'] ?? 'gpt-5.5'
       const reasoning = process.env['CODEX_REASONING'] ?? 'xhigh'
       return {
         argv: [
