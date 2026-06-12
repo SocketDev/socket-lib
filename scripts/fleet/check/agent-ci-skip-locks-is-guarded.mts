@@ -33,7 +33,7 @@ const REQUIRED_EXPORTS = [
   'main',
 ]
 
-export async function checkAgentCiSkipsLockYml(): Promise<number> {
+export async function checkAgentCiSkipLocksIsGuarded(): Promise<number> {
   if (!existsSync(WRAPPER_PATH)) {
     logger.error('Agent-CI lock-skip wrapper is missing.')
     logger.error(`  Where: ${WRAPPER_PATH}`)
@@ -75,8 +75,8 @@ export async function checkAgentCiSkipsLockYml(): Promise<number> {
   return 0
 }
 
-if (process.argv[1]?.endsWith('agent-ci-skips-lock-yml.mts')) {
+if (process.argv[1]?.endsWith('agent-ci-skip-locks-is-guarded.mts')) {
   void (async () => {
-    process.exitCode = await checkAgentCiSkipsLockYml()
+    process.exitCode = await checkAgentCiSkipLocksIsGuarded()
   })()
 }
