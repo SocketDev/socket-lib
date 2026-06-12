@@ -52,6 +52,7 @@ import noVitestStandaloneExpect from './fleet/no-vitest-standalone-expect/index.
 import noWhichForLocalBin from './fleet/no-which-for-local-bin/index.mts'
 import optionalExplicitUndefined from './fleet/optional-explicit-undefined/index.mts'
 import optionsNullProto from './fleet/options-null-proto/index.mts'
+import optionsParamNaming from './fleet/options-param-naming/index.mts'
 import personalPathPlaceholders from './fleet/personal-path-placeholders/index.mts'
 import preferAsyncSpawn from './fleet/prefer-async-spawn/index.mts'
 import preferCachedForLoop from './fleet/prefer-cached-for-loop/index.mts'
@@ -142,6 +143,7 @@ const plugin = {
     'no-which-for-local-bin': noWhichForLocalBin,
     'optional-explicit-undefined': optionalExplicitUndefined,
     'options-null-proto': optionsNullProto,
+    'options-param-naming': optionsParamNaming,
     'personal-path-placeholders': personalPathPlaceholders,
     'prefer-async-spawn': preferAsyncSpawn,
     'prefer-cached-for-loop': preferCachedForLoop,
