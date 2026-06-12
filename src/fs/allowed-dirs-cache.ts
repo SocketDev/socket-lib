@@ -17,9 +17,9 @@
  *   fires).
  */
 
-import { registerCacheInvalidation } from '../paths/rewire'
+import { registerCacheInvalidation } from "../paths/rewire";
 
-import { clearAllowedDirectories } from './_internal'
+import { clearAllowedDirectories } from "./_internal";
 
 /**
  * Invalidate the cached allowed directories. Called automatically by the
@@ -34,18 +34,41 @@ import { clearAllowedDirectories } from './_internal'
  * @internal Used for test rewiring
  */
 export function invalidatePathCache(): void {
-  clearAllowedDirectories()
+  clearAllowedDirectories();
 }
 
 /**
  * Register `invalidatePathCache` with the rewire module after the current
  * module-init turn, so the circular import is fully wired before the call.
+ * Guarded + self-rescheduling: in the require cycle (`allowed-dirs-cache →
+ * _internal → paths/socket → … → rewire`) the `registerCacheInvalidation` live
+ * binding can still be in its temporal dead zone when the first microtask
+ * fires under some import orders (vitest loads many modules concurrently),
+ * throwing `registerCacheInvalidation is not defined`. So check the binding is
+ * callable; if not, re-defer to the next microtask. The registration is a
+ * test-seam best-effort (it lets path-rewire flush this cache), so a bounded
+ * retry that lands on a later turn is correct — and a never-resolving binding
+ * (production, where rewire is unused) simply stops retrying without throwing.
  *
  * @internal
  */
-export function registerInvalidationCallback(): void {
-  registerCacheInvalidation(invalidatePathCache)
+export function registerInvalidationCallback(attempt: number = 0): void {
+  // The access is wrapped: a still-uninitialized live binding throws ReferenceError
+  // (bundled CJS, where it reads `undefined`) or a TDZ error (transformed ESM under
+  // vitest). Catch both, re-defer a bounded number of turns, and give up silently
+  // if it never resolves (production, where rewire is unused) — never throw.
+  try {
+    if (typeof registerCacheInvalidation === "function") {
+      registerCacheInvalidation(invalidatePathCache);
+      return;
+    }
+  } catch {
+    // binding not yet initialized — fall through to re-defer
+  }
+  if (attempt < 10) {
+    queueMicrotask(() => registerInvalidationCallback(attempt + 1));
+  }
 }
 
 // Defer registration past module-init to clear the require cycle (see @file).
-queueMicrotask(registerInvalidationCallback)
+queueMicrotask(() => registerInvalidationCallback());
