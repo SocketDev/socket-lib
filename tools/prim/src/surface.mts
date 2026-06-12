@@ -313,6 +313,13 @@ export function parseExports(sourcePath) {
       )) {
         exportToLeaf.set(m[1], leafName)
       }
+      // Lower-case function exports — the Node-platform `process` primordials
+      // (`processCwd`, `processNextTick`, …) are `export function`, not const.
+      for (const m of leafContent.matchAll(
+        /^export function ([a-z][a-zA-Z0-9]+)/gm,
+      )) {
+        exportToLeaf.set(m[1], leafName)
+      }
       parts.push(leafContent)
     }
     src = parts.join('\n')
@@ -323,6 +330,13 @@ export function parseExports(sourcePath) {
   const nullable = new Set()
   // ESM inline form: `export const Foo = …`
   for (const m of src.matchAll(/^export const ([A-Z][a-zA-Z0-9]+)/gm)) {
+    exports.add(m[1])
+  }
+  // Lower-case function exports: the Node-platform `process` primordials
+  // (`processCwd`, `processNextTick`, …) are `export function`, not const, and
+  // lower-case. The codemod's `process.cwd()` → `processCwd()` rewrite needs
+  // them in the surface so the `exported.has(...)` guard passes.
+  for (const m of src.matchAll(/^export function ([a-z][a-zA-Z0-9]+)/gm)) {
     exports.add(m[1])
   }
   // ESM grouped form: `export { Foo, Bar, Baz }` (with or without trailing
