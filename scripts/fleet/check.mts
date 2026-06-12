@@ -301,10 +301,7 @@ const steps: Array<() => boolean> = [
   // Errors when a `-guard` never blocks (→ should be `-reminder`) or a
   // `-reminder` blocks (→ should be `-guard`).
   () =>
-    run('node', [
-      'scripts/fleet/check/hook-names-match-blocking.mts',
-      '--quiet',
-    ]),
+    run('node', ['scripts/fleet/check/hook-names-are-accurate.mts', '--quiet']),
 ]
 
 for (let i = 0, { length } = steps; i < length; i += 1) {
