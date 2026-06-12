@@ -8,6 +8,7 @@ import { getPackumentCache, getPacoteCachePath } from '../constants/packages'
 import cacache from '../external/cacache'
 import libnpmpack from '../external/libnpmpack'
 import pacote from '../external/pacote'
+import { normalizePath } from '../paths/normalize'
 import { getAbortSignal } from '../process/abort'
 
 import type { ExtractOptions, PacoteOptions } from './types'
@@ -48,9 +49,14 @@ export async function extractPackage(
   /* c8 ignore start - External package registry extraction */
   // pacote is imported at the top
   if (typeof dest === 'string') {
-    await pacote.extract(pkgNameOrId, dest, extractOptions)
+    // Normalize to forward slashes so the path pacote extracts to and the path
+    // the caller later checks are the same string. pacote normalizes internally
+    // before writing, so a raw `C:\…\extracted` dest is written as `C:/…/extracted`
+    // and a caller asserting the backslash form finds nothing on Windows.
+    const normalizedDest = normalizePath(dest)
+    await pacote.extract(pkgNameOrId, normalizedDest, extractOptions)
     if (typeof actualCallback === 'function') {
-      await actualCallback(dest)
+      await actualCallback(normalizedDest)
     }
   } else {
     // The DefinitelyTyped types for cacache.tmp.withTmp are incorrect.

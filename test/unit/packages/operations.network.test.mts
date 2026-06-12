@@ -14,6 +14,7 @@ import path from 'node:path'
 
 import { extractPackage, packPackage } from '../../../src/packages/tarball'
 import type { ExtractOptions } from '../../../src/packages/types'
+import { normalizePath } from '../../../src/paths/normalize'
 import { expect, it } from 'vitest'
 import { describeNetworkOnly } from '../util/skip-helpers'
 import { runWithTempDir } from '../util/temp-file-helper'
@@ -304,12 +305,30 @@ describeNetworkOnly('pacote fetcher coverage', () => {
       const testRequire = createRequire(import.meta.url)
       const Arborist = testRequire('@npmcli/arborist')
       await runWithTempDir(async tmpDir => {
-        const extractDest = path.join(tmpDir, 'extracted')
+        // normalizePath so the dest passed to pacote and the path asserted below
+        // are the same forward-slash string — pacote writes to the normalized
+        // form, so a raw backslash path.join() would miss it on Windows.
+        const extractDest = normalizePath(path.join(tmpDir, 'extracted'))
         await fs.mkdir(extractDest, { recursive: true })
-        await extractPackage('github:jonschlinkert/is-number#7.0.0', {
-          dest: extractDest,
-          Arborist,
-        } as ExtractOptions & { Arborist: unknown })
+        try {
+          await extractPackage('github:jonschlinkert/is-number#7.0.0', {
+            dest: extractDest,
+            Arborist,
+          } as ExtractOptions & { Arborist: unknown })
+        } catch (e) {
+          // @npmcli/git wraps git failures as a generic "unknown git error",
+          // swallowing the real stderr. Surface the underlying git output so a
+          // CI-only failure names its cause instead of staying opaque.
+          const er = e as {
+            stderr?: unknown | undefined
+            cmd?: unknown | undefined
+            code?: unknown | undefined
+          }
+          throw new Error(
+            `extractPackage(git spec) failed: code=${String(er.code)} cmd=${String(er.cmd)}\nstderr=${String(er.stderr)}`,
+            { cause: e },
+          )
+        }
         expect(existsSync(path.join(extractDest, 'package.json'))).toBe(true)
       }, 'git-fetcher-')
     },
