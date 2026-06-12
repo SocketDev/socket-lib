@@ -49,6 +49,7 @@ catalog:
   '@vitest/ui': 4.1.8
   'dtu-github-actions': 0.16.2
   'ecc-agentshield': 1.4.0
+  'just-bash': 3.0.1
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
   'npm-run-all2': 9.0.1
@@ -64,8 +65,13 @@ catalog:
   'vitest': 4.1.8
 
 allowBuilds:
+  # Native-build transitive deps pulled via just-bash → @socketsecurity/lib
+  # devDependencies. We use just-bash's runtime only, never their native
+  # builds, so deny the install scripts (matches cpu-features / ssh2 below).
+  '@mongodb-js/zstd': false
   cpu-features: false
   esbuild: true
+  node-liblzma: false
   protobufjs: false
   rolldown: true
   ssh2: false

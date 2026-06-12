@@ -177,6 +177,11 @@
       "types": "./dist/ai/discover.d.mts",
       "default": "./dist/ai/discover.js"
     },
+    "./ai/exec": {
+      "source": "./src/ai/exec.mts",
+      "types": "./dist/ai/exec.d.mts",
+      "default": "./dist/ai/exec.js"
+    },
     "./ai/http": {
       "source": "./src/ai/http.mts",
       "types": "./dist/ai/http.d.mts",
@@ -3065,6 +3070,7 @@
     "get-east-asian-width": "1.3.0",
     "globals": "17.6.0",
     "has-flag": "5.0.1",
+    "just-bash": "catalog:",
     "libnpmexec": "10.2.3",
     "libnpmpack": "9.0.9",
     "lint-staged": "15.2.11",
