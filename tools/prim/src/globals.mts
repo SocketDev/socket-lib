@@ -3,7 +3,15 @@
  *   is treated as a user-defined identifier and skipped. Keep alphabetical so
  *   additions are easy to spot. Source of truth: TC39 spec globals
  *   (https://tc39.es/ecma262/) plus the WHATWG / Web-platform globals that Node
- *   ships (`URL`, `URLSearchParams`, `Buffer`).
+ *   ships (`URL`, `URLSearchParams`, `Buffer`) and the Node-platform `process`
+ *   global. Only the CALLABLE members of a tracked global are rewritten — the
+ *   `exported.has(staticPrimordialName(...))` guard in collect-rewrites skips
+ *   any member without a matching primordial export. For `process` that means
+ *   method calls (`process.cwd()` → `processCwd()`, `process.nextTick(fn)` →
+ *   `processNextTick(fn)`) are rewritten, while property reads (`process.env`,
+ *   `process.argv`) are never visited (the codemod only walks CallExpressions)
+ *   and stay as-is; use the `processEnv()` / `processArgv()` helpers by hand
+ *   where tamper-safety on those is wanted.
  */
 
 export const TRACKED_GLOBALS = new Set([
@@ -33,6 +41,10 @@ export const TRACKED_GLOBALS = new Set([
   'Math',
   'Number',
   'Object',
+  // Node-platform global (the only non-ECMAScript entry). Only its callable
+  // members with a matching primordial export are rewritten; property reads
+  // like `process.env` are left untouched (the codemod walks CallExpressions).
+  'process',
   'Promise',
   'Proxy',
   'RangeError',

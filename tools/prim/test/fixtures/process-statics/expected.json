@@ -1,0 +1,11 @@
+{
+  "ok": true,
+  "files": {
+    "src/consumer.ts": {
+      "rewrites": 1,
+      "importAdded": true,
+      "contentIncludes": ["from './primordials/process'", "processCwd()"],
+      "contentExcludes": ["process.cwd()"]
+    }
+  }
+}
