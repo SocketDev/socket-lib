@@ -121,6 +121,33 @@ describe.sequential('buildArgs — claude', () => {
     expect(args).not.toContain('--effort')
   })
 
+  test('omits --effort for fable (adaptive-thinking-only)', () => {
+    const args = buildArgs(
+      'claude',
+      baseOpts({ effort: 'xhigh', model: 'claude-fable-5' }),
+    )
+    expect(args).not.toContain('--effort')
+    expect(args).toContain('claude-fable-5')
+  })
+
+  test('omits --effort for mythos (adaptive-thinking-only)', () => {
+    const args = buildArgs(
+      'claude',
+      baseOpts({ effort: 'max', model: 'claude-mythos-5' }),
+    )
+    expect(args).not.toContain('--effort')
+  })
+
+  test('still appends --effort for a non-fable model', () => {
+    const args = buildArgs(
+      'claude',
+      baseOpts({ effort: 'high', model: 'claude-opus-4-8' }),
+    )
+    const i = args.indexOf('--effort')
+    expect(i).toBeGreaterThanOrEqual(0)
+    expect(args[i + 1]).toBe('high')
+  })
+
   test('appends --allowedTools when tools or allow set', () => {
     const args = buildArgs(
       'claude',
