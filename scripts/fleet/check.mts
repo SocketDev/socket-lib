@@ -40,7 +40,7 @@ const steps: Array<() => boolean> = [
   // dep — the committed-state gate paired with the edit-time
   // no-other-linters-guard hook. Vendored upstream (upstream/, vendor/, *-upstream)
   // is exempt; we never touch upstream tooling.
-  () => run('node', ['scripts/fleet/check/only-oxlint-oxfmt.mts']),
+  () => run('node', ['scripts/fleet/check/linters-are-oxlint-oxfmt-only.mts']),
   // CLAUDE.md doc integrity: every cited hook + socket/ rule must exist (catches
   // stale citations after a rename/removal — the reverse of new-hook-claude-md-guard).
   () => run('node', ['scripts/fleet/check/claude-md-citations-resolve.mts']),
@@ -98,7 +98,7 @@ const steps: Array<() => boolean> = [
   // agent-delegation.md must list the same four states, so an orchestrator
   // reading the doc routes on a contract the code honors (code is law).
   () =>
-    run('node', ['scripts/fleet/check/subagent-status-doc-matches-code.mts']),
+    run('node', ['scripts/fleet/check/subagent-status-doc-is-current.mts']),
   // Review-pipeline ordering is a contract: the reviewing-code skill's
   // spec-compliance pass must precede the quality passes (discovery /
   // remediation) in ALL_ROLES, so a quality review never runs on out-of-scope
