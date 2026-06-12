@@ -43,6 +43,37 @@ describe('BACKENDS registry', () => {
     expect(run.argv).toContain('--permission-mode')
     expect(run.argv).toContain('dontAsk')
   })
+
+  it('omits --effort for a fable CLAUDE_MODEL (adaptive-thinking-only)', () => {
+    const prev = process.env['CLAUDE_MODEL']
+    process.env['CLAUDE_MODEL'] = 'claude-fable-5'
+    try {
+      const run = BACKENDS.claude.run('/tmp/prompt', '/tmp/out')
+      expect(run.argv).not.toContain('--effort')
+      expect(run.argv).toContain('claude-fable-5')
+    } finally {
+      if (prev === undefined) {
+        delete process.env['CLAUDE_MODEL']
+      } else {
+        process.env['CLAUDE_MODEL'] = prev
+      }
+    }
+  })
+
+  it('keeps --effort for a non-fable CLAUDE_MODEL', () => {
+    const prev = process.env['CLAUDE_MODEL']
+    process.env['CLAUDE_MODEL'] = 'claude-opus-4-8'
+    try {
+      const run = BACKENDS.claude.run('/tmp/prompt', '/tmp/out')
+      expect(run.argv).toContain('--effort')
+    } finally {
+      if (prev === undefined) {
+        delete process.env['CLAUDE_MODEL']
+      } else {
+        process.env['CLAUDE_MODEL'] = prev
+      }
+    }
+  })
 })
 
 describe('isBackendName', () => {
