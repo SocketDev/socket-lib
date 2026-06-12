@@ -4,22 +4,18 @@
  *   path (manual `git checkout`, external editor, a merge):
  *
  *   - `trust-downgrade-guard` — the pnpm/npm trust-gate FLOORS. This script
- *     asserts the repo's `pnpm-workspace.yaml` still carries
- *     `minimumReleaseAge >= 10080`, `trustPolicy: no-downgrade`, and
- *     `blockExoticSubdeps: true`, and that `.npmrc` `min-release-age` (if set)
- *     meets the 7-day floor.
+ *     asserts the repo's `pnpm-workspace.yaml` still carries `minimumReleaseAge
+ *     >= 10080`, `trustPolicy: no-downgrade`, and `blockExoticSubdeps: true`,
+ *     and that `.npmrc` `min-release-age` (if set) meets the 7-day floor.
  *   - `npmrc-trust-optout-guard` — the pnpm trust-aware env-expansion opt-out.
  *     This script scans tracked scripts / workflows / configs for a committed
  *     `PNPM_CONFIG_NPMRC_AUTH_FILE` / `NPM_CONFIG_USERCONFIG=<repo .npmrc>`
  *     assignment and for a `${ENV}` placeholder beside an `_authToken` /
- *     `registry` key in a committed `.npmrc`.
- *
- *   Defense in depth (code is law): the hooks block in-session; this catches
- *   anything that lands another way. All detection logic is imported from the
- *   SAME `_shared/` modules the hooks use, so the edit-time and commit-time
- *   surfaces never drift.
- *
- *   Exit codes:
+ *     `registry` key in a committed `.npmrc`. Defense in depth (code is law):
+ *     the hooks block in-session; this catches anything that lands another way.
+ *     All detection logic is imported from the SAME `_shared/` modules the
+ *     hooks use, so the edit-time and commit-time surfaces never drift. Exit
+ *     codes:
  *   - 0 — clean.
  *   - 1 — a floor is below spec, or a committed opt-out was found.
  */
@@ -78,7 +74,20 @@ function trackedFiles(): string[] {
   }
   const out =
     typeof result.stdout === 'string' ? result.stdout : String(result.stdout)
-  return out.split('\n').filter(Boolean)
+  return out
+    .split('\n')
+    .filter(Boolean)
+    .filter(f => !isTestFile(f))
+}
+
+// Test files legitimately CONTAIN the opt-out env-var patterns as detector
+// INPUT (e.g. trust-gates-detectors.test.mts feeds
+// `PNPM_CONFIG_NPMRC_AUTH_FILE=.npmrc pnpm i` to detectOptoutInCommands), so
+// they'd self-flag this gate. Skip them — same exemption env-kill-switches-
+// are-absent applies to its own fixtures.
+function isTestFile(relPath: string): boolean {
+  const base = relPath.replace(/\\/g, '/').split('/').pop() ?? ''
+  return base.endsWith('.test.mts') || base.endsWith('.test.ts')
 }
 
 interface OptoutHit {
@@ -134,9 +143,7 @@ export function main(): void {
     )
     for (let i = 0, { length } = floorViolations; i < length; i += 1) {
       const v = floorViolations[i]!
-      logger.error(
-        `  ✗ ${v.file} ${v.gate}: saw ${v.saw}, want ${v.wanted}`,
-      )
+      logger.error(`  ✗ ${v.file} ${v.gate}: saw ${v.saw}, want ${v.wanted}`)
     }
     logger.error('')
     logger.error(
