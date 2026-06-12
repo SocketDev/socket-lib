@@ -314,10 +314,19 @@ describeNetworkOnly('pacote fetcher coverage', () => {
         const extractDest = normalizePath(path.join(tmpDir, 'extracted'))
         await fs.mkdir(extractDest, { recursive: true })
         try {
-          await extractPackage('github:jonschlinkert/is-number#7.0.0', {
-            dest: extractDest,
-            Arborist,
-          } as ExtractOptions & { Arborist: unknown })
+          // Use the explicit git+https form, not the `github:` shorthand: on the
+          // Windows runner hosted-git-info resolves `github:` to the SSH url
+          // (git@github.com:…), which fails with "Permission denied (publickey)"
+          // since the runner has no SSH key. git+https clones the public repo
+          // over HTTPS (no auth) and exercises the same GitFetcher/@npmcli/git
+          // path on every platform.
+          await extractPackage(
+            'git+https://github.com/jonschlinkert/is-number.git#7.0.0',
+            {
+              dest: extractDest,
+              Arborist,
+            } as ExtractOptions & { Arborist: unknown },
+          )
         } catch (e) {
           // @npmcli/git wraps git failures as a generic "unknown git error",
           // swallowing the real stderr. Surface the underlying git output so a
