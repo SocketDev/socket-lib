@@ -105,10 +105,15 @@ export function itRequires(
 }
 
 /**
- * Test that only runs on Unix-likes (Linux, macOS). Skipped on Windows.
+ * Test that only runs on Unix-likes (Linux, macOS). Skipped on Windows. An
+ * optional `timeout` (ms) is forwarded to vitest for long-running cases.
  */
-export function itUnixOnly(name: string, fn: TestFn): void {
-  it.skipIf(WIN32)(tagged(name, TAG_UNIX), fn)
+export function itUnixOnly(
+  name: string,
+  fn: TestFn,
+  timeout?: number | undefined,
+): void {
+  it.skipIf(WIN32)(tagged(name, TAG_UNIX), fn, timeout)
 }
 
 /**

@@ -12,12 +12,11 @@ import { existsSync, promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 
-import { WIN32 } from '../../../src/constants/platform'
 import { extractPackage, packPackage } from '../../../src/packages/tarball'
 import type { ExtractOptions } from '../../../src/packages/types'
 import { normalizePath } from '../../../src/paths/normalize'
 import { expect, it } from 'vitest'
-import { describeNetworkOnly } from '../util/skip-helpers'
+import { describeNetworkOnly, itUnixOnly } from '../util/skip-helpers'
 import { runWithTempDir } from '../util/temp-file-helper'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
@@ -299,13 +298,13 @@ describeNetworkOnly('pacote fetcher coverage', () => {
     tolerantTimeout(60_000),
   )
 
-  // Skipped on Windows: the GitHub Actions windows runner's git is configured
-  // to rewrite github.com HTTPS urls to SSH (an `insteadOf` rule), so both the
-  // `github:` shorthand and an explicit `git+https://…` spec resolve to
-  // git@github.com:… and fail with "Permission denied (publickey)" — the runner
-  // has no SSH key. The GitFetcher path is identical across platforms, so the
-  // unix lanes cover it; there's no Windows-specific code to exercise here.
-  it.skipIf(WIN32)(
+  // Unix-only: the GitHub Actions windows runner's git is configured to rewrite
+  // github.com HTTPS urls to SSH (an `insteadOf` rule), so both the `github:`
+  // shorthand and an explicit `git+https://…` spec resolve to git@github.com:…
+  // and fail with "Permission denied (publickey)" — the runner has no SSH key.
+  // The GitFetcher path is identical across platforms, so the unix lanes cover
+  // it; there's no Windows-specific code to exercise here.
+  itUnixOnly(
     'git specs use pacote/lib/git.js + @npmcli/git',
     async () => {
       // Git archives are fetched via pacote/lib/git.js which wraps
