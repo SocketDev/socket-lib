@@ -52,7 +52,10 @@ describeNetworkOnly('extractPackage', () => {
     'should call callback with destination path',
     async () => {
       await runWithTempDir(async tmpDir => {
-        const dest = path.join(tmpDir, 'extracted')
+        // extractPackage normalizes the dest to forward slashes before handing
+        // it to pacote + the callback, so assert against the normalized form
+        // (a raw path.join() dest is backslash-separated on Windows).
+        const dest = normalizePath(path.join(tmpDir, 'extracted'))
         await fs.mkdir(dest, { recursive: true })
 
         let callbackPath = ''
