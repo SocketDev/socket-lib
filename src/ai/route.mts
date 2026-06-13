@@ -176,3 +176,22 @@ export function resolveTier(
   }
   return undefined
 }
+
+/**
+ * The ORDERED list of usable candidates for a tier — the runtime-fallback
+ * sequence. `resolveTier` returns only the single best pick (good when you
+ * trust it will work); this returns every usable candidate in preference order
+ * so a caller can advance to the next when one fails AT RUNTIME — e.g. the
+ * preferred model is installed + keyed (so it passes `isCandidateUsable`) yet
+ * its CLI reports it offline at spawn ("Claude Fable 5 is currently
+ * unavailable"). The static check can't predict an outage; only the spawn
+ * result can, so the caller walks this list until a spawn returns without the
+ * `unavailable` flag. Empty when nothing in the chain is usable.
+ */
+export function usableTierCandidates(
+  tier: AiTier,
+  ctx: RouteContext,
+): TierCandidate[] {
+  const chain = TIER_CHAINS[tier] ?? TIER_CHAINS.sonnet
+  return chain.filter(c => isCandidateUsable(c, ctx))
+}

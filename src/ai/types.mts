@@ -60,6 +60,16 @@ export interface AgentSpawnResult {
   readonly overloaded: boolean
   readonly stderr: string
   readonly stdout: string
+  /**
+   * True when the selected MODEL could not serve the request — it is offline
+   * (e.g. "Claude Fable 5 is currently unavailable") or gated/absent for this
+   * account ("issue with the selected model … may not exist or you may not have
+   * access"). Distinct from `overloaded`: the model is not coming back within a
+   * retry window, so the right response is to FALL OVER to the next agent in
+   * the tier chain rather than retry the same one. Both surface as a non-zero
+   * `exitCode`; this flag is how a caller knows to route elsewhere.
+   */
+  readonly unavailable: boolean
 }
 
 /**
