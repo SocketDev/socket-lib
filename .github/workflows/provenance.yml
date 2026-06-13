@@ -46,6 +46,9 @@ jobs:
     permissions:
       # Needed for npm provenance via OIDC trusted publishing.
       id-token: write
+      # publish.mts creates the version tag (if missing) + the GitHub release
+      # (draft → upload → undraft) after a successful registry write.
+      contents: write
     steps:
       - uses: SocketDev/socket-registry/.github/actions/setup-and-install@5298430fdc1c6a31d1301379e86c46b9c8343853 # main (2026-05-28)
         with:
@@ -64,6 +67,8 @@ jobs:
         env:
           DRY_RUN: ${{ inputs.dry-run }}
           MODE: ${{ inputs.mode }}
+          # gh CLI auth for the post-publish tag + release steps.
+          GH_TOKEN: ${{ github.token }}
         run: |
           ARGS="--${MODE:-staged}"
           if [ "$DRY_RUN" = "true" ]; then
