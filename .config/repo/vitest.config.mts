@@ -16,8 +16,6 @@ import { envAsBoolean } from '@socketsecurity/lib-stable/env/boolean'
 import { getCI } from '@socketsecurity/lib-stable/env/ci'
 import { defineConfig } from 'vitest/config'
 
-import { baseCoverageConfig } from '../vitest.coverage.config.mts'
-
 const isCoverageEnabled =
   envAsBoolean(process.env['COVERAGE']) ||
   process.argv.some(arg => arg.includes('coverage'))
@@ -160,14 +158,23 @@ export default defineConfig({
     hookTimeout: 10_000,
     bail: getCI() ? 1 : 0,
     coverage: {
-      // Compose the fleet base (include: src/**, excludeAfterRemap, full
-      // exclude list + lib-specific excludes) so the shared suite scopes v8 to
-      // src/ like the isolated suite does. Without the base's `include`, v8's
-      // `all: true` tries to instrument the whole project (dist/, externals) at
-      // 484-file scale and the coverage report fails to write — leaving the
-      // merge with isolated-only coverage.
-      ...baseCoverageConfig,
       enabled: isCoverageEnabled,
+      provider: 'v8',
+      reporter: ['text', 'json', 'json-summary', 'html', 'lcov', 'clover'],
+      exclude: [
+        '**/*.config.*',
+        '**/node_modules/**',
+        '**/[.]**',
+        '**/*.d.ts',
+        '**/virtual:*',
+        'coverage/**',
+        'dist/**',
+        'scripts/**',
+        'test/**',
+      ],
+      all: true,
+      clean: true,
+      skipFull: false,
     },
   },
 })

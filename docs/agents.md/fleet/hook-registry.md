@@ -19,6 +19,7 @@ The fleet hooks each cite their own trigger + bypass surface in their `README.md
 - `avoid-cd-reminder` — keeps `cd` out of Bash, use `{ cwd }` instead
 - `broken-hook-detector` — SessionStart probe for sibling hooks with missing imports
 - `c8-ignore-reason-guard` — blocks a c8/v8 coverage-ignore directive with no reason
+- `changelog-entry-shape-nudge` — PreToolUse Edit/Write, non-blocking. Warns when a `CHANGELOG.md` edit adds a column-0 entry bullet that links no detail into `docs/agents.md/{fleet,repo}/<topic>.md`. A CHANGELOG entry is a one-line bullet with the rationale linked to an agents.md doc (same diet pattern as the CLAUDE.md card); inline prose drifts from the doc. Sub-bullets/headings ignored. No bypass (never blocks)
 - `claude-md-rule-add-guard` — blocks hand-adding a CLAUDE.md rule; routes it through `scripts/fleet/codify-rule.mts` (which writes the terse bullet within the 40KB cap + the `agents.md/{fleet,repo}/` detail doc via the AI helper)
 - `codex-no-write-guard` — blocks `codex` invocations with write-intent flags
 - `commit-author-guard` — canonical-identity gate on git author email
@@ -35,6 +36,7 @@ The fleet hooks each cite their own trigger + bypass surface in their `README.md
 - `no-blanket-file-exclusion-guard` — blocks a `max-file-lines:` exemption marker that names a self-judgment word (`legitimate`, `ok`, …) instead of a real category; no bypass
 - `no-blind-keychain-read-guard` — blocks Bash reads of platform keychain tokens
 - `no-cascade-transient-git-guard` — blocks cascade commits on a cherry-pick/detached/rebase HEAD
+- `no-direct-linter-guard` — PreToolUse Bash: blocks invoking a linter/formatter binary directly (`oxlint`/`oxfmt`/`eslint`/`prettier`/`biome`/`dprint`/`rustfmt`/`gofmt`, the `node_modules/.bin/` path form, and `cargo fmt`/`cargo clippy` subcommands), matched on basename via AST parse. The fleet runs lint/format only through the script wrappers (`pnpm run lint`/`fix`/`check`/`format`, `scripts/fleet/*`), which own the `-c .config/fleet/…` flag plus ignore set. A bare formatter is configless (corrupts files) and unscoped (reformats vendored `upstream/`). Bypass `Allow direct-linter bypass`
 - `no-empty-commit-guard` — blocks `--allow-empty` commits without bypass
 - `no-env-kill-switch-guard` — blocks adding a `disabledEnvVar` / `SOCKET_*_DISABLED` kill switch to a hook
 - `no-ext-issue-ref-guard` — blocks `<owner>/<repo>#<num>` from non-SocketDev orgs
