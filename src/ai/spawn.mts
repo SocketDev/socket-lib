@@ -185,19 +185,78 @@ export function isAdaptiveOnlyModel(model: string): boolean {
 //      you may not have access to it. Run --model to pick a different model."
 // Unlike `isOverloaded`, the right response is to FALL OVER to the next agent
 // in the tier chain, not to retry the same one — the model isn't coming back
-// within a backoff window. Also covers the API-shaped forms (HTTP 403
-// permission, 404 model_not_found) for the http/programmatic backends.
+// within a backoff window.
+//
+// Match the GIST, not a literal sentence: CLI wording drifts across versions
+// and providers (claude-code alone emits "currently unavailable", "is
+// unavailable", "isn't available", "is temporarily unavailable", "does not
+// exist", "not found", "may not have access", "issue with the selected
+// model"), so detect the recurring SIGNAL PHRASES, not the exact captured
+// strings. Plain lowercased substring checks — simpler + faster than regex and
+// no alternation-ordering to maintain.
+
+// Signal phrases that on their own mean "this model can't serve" regardless of
+// surrounding wording. Lowercase; matched as substrings.
+const MODEL_UNAVAILABLE_PHRASES: readonly string[] = [
+  'access denied',
+  'currently unavailable',
+  'forbidden',
+  'have access', // "don't/doesn't/may not have access"
+  'is unavailable',
+  'isn’t available',
+  "isn't available",
+  'may not exist',
+  'no access to',
+  'no such model',
+  'not authorized',
+  'not authorised',
+  'not available',
+  'permission denied',
+  'permission_denied',
+  'temporarily unavailable',
+  'unauthorized',
+  'unauthorised',
+]
+
+// Existence phrases that must be ANCHORED to "model" — a bare "not found" /
+// "does not exist" / "unknown" in genuine work output (a missing file, a failed
+// `require`) must NOT trigger a fall-over, so require "model" nearby.
+const MODEL_EXISTENCE_PHRASES: readonly string[] = [
+  'does not exist',
+  "doesn't exist",
+  'no such',
+  'not exist',
+  'not found',
+  'unavailable',
+  'unknown',
+  'unreachable',
+]
+
 export function isModelUnavailable(stdout: string, stderr: string): boolean {
-  const text = `${stdout}\n${stderr}`
-  // 403 (no access) / 404 (model_not_found) — alternation sorted per
-  // socket/sort-regex-alternations.
-  return (
-    /\bis currently unavailable\b/i.test(text) ||
-    /issue with the selected model\b/i.test(text) ||
-    /\b(?:may not exist|you may not have access)\b/i.test(text) ||
-    /\bmodel_not_found\b/i.test(text) ||
-    /API Error:\s*(?:403|404)\b/i.test(text)
-  )
+  const text = `${stdout}\n${stderr}`.toLowerCase()
+  for (let i = 0, { length } = MODEL_UNAVAILABLE_PHRASES; i < length; i += 1) {
+    if (text.includes(MODEL_UNAVAILABLE_PHRASES[i]!)) {
+      return true
+    }
+  }
+  // model_not_found (any separator) + the API status codes (403 no-access,
+  // 404 model-not-found) the http/programmatic backends surface.
+  if (
+    /\bmodel[_-]?not[_-]?found\b/i.test(text) ||
+    /\bapi error:\s*(?:403|404)\b/i.test(text)
+  ) {
+    return true
+  }
+  // Existence words count only when "model" appears too (avoids false fall-over
+  // on an unrelated not-found). Cheap: only scan if a candidate word is present.
+  if (text.includes('model')) {
+    for (let i = 0, { length } = MODEL_EXISTENCE_PHRASES; i < length; i += 1) {
+      if (text.includes(MODEL_EXISTENCE_PHRASES[i]!)) {
+        return true
+      }
+    }
+  }
+  return false
 }
 
 export function isOverloaded(stdout: string, stderr: string): boolean {

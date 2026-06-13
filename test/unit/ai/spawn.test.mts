@@ -111,12 +111,34 @@ describe.sequential('isModelUnavailable', () => {
     )
   })
 
+  // The gist, not a literal string — varied phrasings that mean the same thing.
+  // (Wording drifts across CLI versions + providers; claude-code itself emits
+  // several of these.)
+  test('detects varied phrasings of the same condition', () => {
+    for (const msg of [
+      'The model is temporarily unavailable, try again later.',
+      "Model 'claude-opus-9' not found.",
+      'Error: unknown model claude-foo',
+      'This model is unavailable in your region.',
+      "You don't have access to claude-fable-5.",
+      'Access denied for the requested model.',
+      'invalid_request_error: the model does not exist',
+    ]) {
+      expect(isModelUnavailable(msg, ''), msg).toBe(true)
+    }
+  })
+
   test('does NOT fire on an overload (that retries, not falls over)', () => {
     expect(isModelUnavailable('API Error: 529 Overloaded', '')).toBe(false)
   })
 
-  test('does NOT fire on a genuine work failure or empty output', () => {
-    expect(isModelUnavailable('Error: test assertion failed', '')).toBe(false)
+  test('does NOT fire on genuine work output that merely says "not found"', () => {
+    // A bare not-found unrelated to a model must not trigger a fall-over.
+    expect(isModelUnavailable('Error: file config.json not found', '')).toBe(
+      false,
+    )
+    expect(isModelUnavailable('test failed: expected 3, got 4', '')).toBe(false)
+    expect(isModelUnavailable('Cannot find module ./foo', '')).toBe(false)
     expect(isModelUnavailable('', '')).toBe(false)
   })
 })
