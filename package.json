@@ -1460,6 +1460,11 @@
       "types": "./dist/external-tools/trufflehog/types.d.ts",
       "default": "./dist/external-tools/trufflehog/types.js"
     },
+    "./fleet/repo-config": {
+      "source": "./src/fleet/repo-config.ts",
+      "types": "./dist/fleet/repo-config.d.ts",
+      "default": "./dist/fleet/repo-config.js"
+    },
     "./fs/access": {
       "source": "./src/fs/access.ts",
       "types": "./dist/fs/access.d.ts",
@@ -3127,9 +3132,9 @@
   "engines": {
     "node": ">=22",
     "npm": ">=11.16.0",
-    "pnpm": ">=11.5.1"
+    "pnpm": ">=11.6.0"
   },
-  "packageManager": "pnpm@11.5.1",
+  "packageManager": "pnpm@11.6.0",
   "allowScripts": {
     "cpu-features": false,
     "esbuild": true,

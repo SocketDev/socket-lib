@@ -114,5 +114,6 @@ Prompt-injection + agent-DoS:
 - `claude-code-action-lockdown-guard` — enforces Agents-Rule-of-Two on CI agent workflows
 - `no-shell-injection-bypass-guard` — blocks allowlist-evasion shell constructs (`=cmd`, `<()`/`>()`/`=()`, zsh-module builtins); bypass `Allow shell-injection bypass`
 - `proc-environ-exfil-guard` — blocks reads of `/proc/*/environ`-style secret exfil
+- `untrusted-coauthor-guard` — blocks a `Co-authored-by:` trailer crediting an identity not on the cascaded `git-authors.json` allowlist (a drive-by issue/PR from a new low-history account is untrusted input, not a contributor to auto-credit); bypass `Allow untrusted-coauthor bypass`
 
 The set drifts; the citation gate (`new-hook-claude-md-guard`) catches additions that ship without a CLAUDE.md reference.

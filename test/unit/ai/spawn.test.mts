@@ -10,6 +10,7 @@ import {
 import {
   backoffFor,
   buildArgs,
+  isModelUnavailable,
   isOverloaded,
   pickAgent,
 } from '../../../src/ai/spawn.mts'
@@ -79,6 +80,66 @@ describe.sequential('isOverloaded', () => {
 
   test('returns false on empty strings', () => {
     expect(isOverloaded('', '')).toBe(false)
+  })
+})
+
+describe.sequential('isModelUnavailable', () => {
+  // Real CLI output captured while Fable 5 was down.
+  test('detects a model offline ("currently unavailable")', () => {
+    expect(
+      isModelUnavailable(
+        'Claude Fable 5 is currently unavailable. Learn more: https://www.anthropic.com/news/fable-mythos-access',
+        '',
+      ),
+    ).toBe(true)
+  })
+
+  // Real CLI output for a gated/absent model (Mythos / no-access).
+  test('detects a gated/absent model ("issue with the selected model")', () => {
+    expect(
+      isModelUnavailable(
+        "There's an issue with the selected model (claude-mythos-5). It may not exist or you may not have access to it. Run --model to pick a different model.",
+        '',
+      ),
+    ).toBe(true)
+  })
+
+  test('detects the API-shaped forms (model_not_found / 404 / 403)', () => {
+    expect(isModelUnavailable('', 'API Error: 404 model_not_found')).toBe(true)
+    expect(isModelUnavailable('API Error: 403 permission denied', '')).toBe(
+      true,
+    )
+  })
+
+  // The gist, not a literal string — varied phrasings that mean the same thing.
+  // (Wording drifts across CLI versions + providers; claude-code itself emits
+  // several of these.)
+  test('detects varied phrasings of the same condition', () => {
+    for (const msg of [
+      'The model is temporarily unavailable, try again later.',
+      "Model 'claude-opus-9' not found.",
+      'Error: unknown model claude-foo',
+      'This model is unavailable in your region.',
+      "You don't have access to claude-fable-5.",
+      'Access denied for the requested model.',
+      'invalid_request_error: the model does not exist',
+    ]) {
+      expect(isModelUnavailable(msg, ''), msg).toBe(true)
+    }
+  })
+
+  test('does NOT fire on an overload (that retries, not falls over)', () => {
+    expect(isModelUnavailable('API Error: 529 Overloaded', '')).toBe(false)
+  })
+
+  test('does NOT fire on genuine work output that merely says "not found"', () => {
+    // A bare not-found unrelated to a model must not trigger a fall-over.
+    expect(isModelUnavailable('Error: file config.json not found', '')).toBe(
+      false,
+    )
+    expect(isModelUnavailable('test failed: expected 3, got 4', '')).toBe(false)
+    expect(isModelUnavailable('Cannot find module ./foo', '')).toBe(false)
+    expect(isModelUnavailable('', '')).toBe(false)
   })
 })
 

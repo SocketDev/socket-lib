@@ -1,7 +1,7 @@
 /**
- * @file Unit tests for src/fleet/repo-config — resolveRepoConfig (read the
- *   fleet + repo tiers of a `.config` entry) and mergeRepoConfigArray (the
- *   common concat merge).
+ * @file Unit tests for src/fleet/repo-config — readConfigLayers (the generic
+ *   N-layer reader), mergeConfigArray (concat across any layers),
+ *   resolveRepoConfig (the fleet fleet+repo wrapper) and mergeRepoConfigArray.
  */
 
 import { promises as fs } from 'node:fs'
@@ -10,11 +10,29 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import {
+  mergeConfigArray,
   mergeRepoConfigArray,
+  readConfigLayers,
   resolveRepoConfig,
 } from '../../../src/fleet/repo-config'
 
 import { runWithTempDir } from '../util/temp-file-helper'
+
+async function writeLayer(
+  root: string,
+  dir: string,
+  name: string,
+  data: unknown,
+  ext = '.json',
+): Promise<void> {
+  const full = path.join(root, dir)
+  await fs.mkdir(full, { recursive: true })
+  await fs.writeFile(
+    path.join(full, `${name}${ext}`),
+    JSON.stringify(data),
+    'utf8',
+  )
+}
 
 async function writeTier(
   root: string,
@@ -105,5 +123,76 @@ describe('mergeRepoConfigArray', () => {
       repo: { k: ['x'] },
     }
     expect(mergeRepoConfigArray(tiers, 'k')).toEqual(['x'])
+  })
+})
+
+describe('readConfigLayers', () => {
+  it('reads N arbitrary layer dirs in precedence order', async () => {
+    await runWithTempDir(async root => {
+      await writeLayer(root, '.config/base', 'app', { v: 1 })
+      await writeLayer(root, '.config/team', 'app', { v: 2 })
+      await writeLayer(root, '.config/local', 'app', { v: 3 })
+
+      const layers = readConfigLayers<{ v: number }>('app', {
+        dirs: ['.config/base', '.config/team', '.config/local'],
+        rootDir: root,
+      })
+      expect(layers).toEqual([{ v: 1 }, { v: 2 }, { v: 3 }])
+    }, 'read-layers-order-')
+  })
+
+  it('skips absent layers, preserving order of present ones', async () => {
+    await runWithTempDir(async root => {
+      await writeLayer(root, '.config/base', 'app', { v: 1 })
+      // no team layer
+      await writeLayer(root, '.config/local', 'app', { v: 3 })
+
+      const layers = readConfigLayers<{ v: number }>('app', {
+        dirs: ['.config/base', '.config/team', '.config/local'],
+        rootDir: root,
+      })
+      expect(layers).toEqual([{ v: 1 }, { v: 3 }])
+    }, 'read-layers-gap-')
+  })
+
+  it('honors a custom extension', async () => {
+    await runWithTempDir(async root => {
+      await writeLayer(root, 'cfg', 'thing', { ok: true }, '.config.json')
+
+      const layers = readConfigLayers<{ ok: boolean }>('thing', {
+        dirs: ['cfg'],
+        rootDir: root,
+        ext: '.config.json',
+      })
+      expect(layers).toEqual([{ ok: true }])
+    }, 'read-layers-ext-')
+  })
+
+  it('returns [] when no layer exists', async () => {
+    await runWithTempDir(async root => {
+      const layers = readConfigLayers('absent', {
+        dirs: ['.config/base', '.config/local'],
+        rootDir: root,
+      })
+      expect(layers).toEqual([])
+    }, 'read-layers-none-')
+  })
+})
+
+describe('mergeConfigArray', () => {
+  it('concatenates an array key across N layers in order', () => {
+    const layers = [{ k: ['a'] }, { k: ['b', 'c'] }, { k: ['d'] }]
+    expect(mergeConfigArray(layers, 'k')).toEqual(['a', 'b', 'c', 'd'])
+  })
+
+  it('skips undefined layers and non-array values', () => {
+    const layers = [undefined, { k: 'nope' }, { k: ['x'] }] as Array<
+      { k: unknown } | undefined
+    >
+    expect(mergeConfigArray(layers, 'k')).toEqual(['x'])
+  })
+
+  it('returns [] for an empty layer list', () => {
+    expect(mergeConfigArray([], 'k' as never)).toEqual([])
   })
 })

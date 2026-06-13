@@ -91,4 +91,4 @@ const vitestConfigIsolated = defineConfig({
   },
 })
 
-export { vitestConfigIsolated }
+export default vitestConfigIsolated

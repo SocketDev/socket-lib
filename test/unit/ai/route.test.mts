@@ -10,6 +10,7 @@ import {
   isCandidateUsable,
   resolveTier,
   TIER_CHAINS,
+  usableTierCandidates,
 } from '../../../src/ai/route.mts'
 
 import type { CredentialProvider } from '../../../src/ai/credentials.mts'
@@ -106,5 +107,38 @@ describe('resolveTier', () => {
     expect(resolveTier('haiku', claudeEverywhere)?.candidate.model).toBe(
       'claude-haiku-4-5',
     )
+  })
+})
+
+describe('usableTierCandidates', () => {
+  it('returns the ordered fallback sequence when several engines are usable', () => {
+    const seq = usableTierCandidates(
+      'fable',
+      ctx(
+        ['claude', 'codex', 'opencode'],
+        ['anthropic', 'openai', 'fireworks'],
+      ),
+    )
+    expect(seq.map(c => c.engine)).toStrictEqual([
+      'claude',
+      'codex',
+      'opencode',
+    ])
+    // The preferred (Claude/Fable) is first — the fallback target second.
+    expect(seq[0]!.model).toBe('claude-fable-5')
+    expect(seq[1]!.model).toBe('gpt-5.5')
+  })
+
+  it('drops candidates whose engine is absent or unkeyed', () => {
+    // Claude installed but UNKEYED + codex usable → only codex survives.
+    const seq = usableTierCandidates(
+      'fable',
+      ctx(['claude', 'codex'], ['openai']),
+    )
+    expect(seq.map(c => c.engine)).toStrictEqual(['codex'])
+  })
+
+  it('is empty when nothing is usable (caller skips / errors)', () => {
+    expect(usableTierCandidates('fable', ctx([], []))).toStrictEqual([])
   })
 })
