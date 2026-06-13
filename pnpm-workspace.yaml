@@ -71,6 +71,16 @@ allowBuilds:
   ssh2: false
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
+#
+# Do NOT add `esbuild` to minimumReleaseAgeExclude to clear a Dependabot
+# esbuild alert. esbuild is a transitive build-time dep resolved on the Node
+# path; the open high-severity advisory is in esbuild's Deno module
+# (lib/deno/mod.ts — missing binary integrity check, exploitable only under
+# Deno with an attacker-controlled NPM_CONFIG_REGISTRY). This repo runs Node,
+# never Deno, so that code path is unreachable and the real exposure is zero.
+# Bypassing the soak to pull an unsoaked esbuild for a non-reachable vuln
+# weakens the supply-chain gate for no benefit. Let the patched version land
+# normally once it clears the 7-day soak; never soak-exclude it.
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@socketaddon/*'
