@@ -1460,6 +1460,11 @@
       "types": "./dist/external-tools/trufflehog/types.d.ts",
       "default": "./dist/external-tools/trufflehog/types.js"
     },
+    "./fleet/repo-config": {
+      "source": "./src/fleet/repo-config.ts",
+      "types": "./dist/fleet/repo-config.d.ts",
+      "default": "./dist/fleet/repo-config.js"
+    },
     "./fs/access": {
       "source": "./src/fs/access.ts",
       "types": "./dist/fs/access.d.ts",
