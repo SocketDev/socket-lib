@@ -1,14 +1,13 @@
 {
   "env": {
     "//": [
-      "CLAUDE_CODE_NO_FLICKER works around a Claude Code TUI bug where",
-      "streamed assistant text overprints tool-output blocks and corrupts",
-      "scrollback (worst in long sessions with rapid Bash + subagents on",
-      "macOS/iTerm2). Search the claude-code issue tracker for 'rendering",
-      "overlap scrollback'. settings.json is strict JSON (no JSONC/JSON5),",
-      "so this is a dummy '//' key — Claude Code ignores unknown keys."
-    ],
-    "CLAUDE_CODE_NO_FLICKER": "1"
+      "Deliberately NOT setting CLAUDE_CODE_NO_FLICKER: that enables fullscreen",
+      "(alternate-screen) rendering, which does not write to the terminal's",
+      "scrollback — fast output scrolls past and is unrecoverable. Classic",
+      "rendering keeps all output in real scrollback so it can be reviewed.",
+      "settings.json is strict JSON (no JSONC/JSON5), so this is a dummy '//'",
+      "key — Claude Code ignores unknown keys."
+    ]
   },
   "hooks": {
     "PreToolUse": [
