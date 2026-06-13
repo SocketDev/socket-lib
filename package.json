@@ -192,10 +192,20 @@
       "types": "./dist/ai/profiles.d.mts",
       "default": "./dist/ai/profiles.js"
     },
+    "./ai/route": {
+      "source": "./src/ai/route.mts",
+      "types": "./dist/ai/route.d.mts",
+      "default": "./dist/ai/route.js"
+    },
     "./ai/spawn": {
       "source": "./src/ai/spawn.mts",
       "types": "./dist/ai/spawn.d.mts",
       "default": "./dist/ai/spawn.js"
+    },
+    "./ai/subagent-status": {
+      "source": "./src/ai/subagent-status.mts",
+      "types": "./dist/ai/subagent-status.d.mts",
+      "default": "./dist/ai/subagent-status.js"
     },
     "./ai/tier": {
       "source": "./src/ai/tier.mts",
