@@ -170,6 +170,30 @@ export function getSocketHomePath(): string {
   return getSocketUserDir()
 }
 /**
+ * Get the Wheelhouse repo-clones directory (~/.socket/_wheelhouse/repo-clones).
+ * Sits beside the per-tool dirs (sfw, codedb, janus, bin) under `_wheelhouse`.
+ * The home for reference clones of EXTERNAL repos an agent reviews, each as
+ * `<org>-<repo>` lowercased + dash-cased (e.g. `justrach-codedb`).
+ *
+ * Smallest-practical clone form (smallest disk + fastest initial fetch without
+ * the treeless tax): git clone --depth=1 --single-branch --filter=blob:none
+ * <url> <dest> `--depth=1` truncates history, `--single-branch` skips other
+ * refs, and `--filter=blob:none` (a BLOBLESS partial clone) fetches file blobs
+ * lazily on first access — so the initial download is tree-metadata only.
+ * (Treeless `--filter=tree:0` is smaller still but refetches trees on every
+ * walk, which is slow + breaks offline, so it is NOT the default.)
+ *
+ * Deliberately OUTSIDE `~/projects/` so the fleet's sibling-walk tooling (e.g.
+ * cascade `--all`) never mistakes a reference clone for a fleet member
+ * checkout. Disposable: a reference cache, not a working tree. Inherits the
+ * `_wheelhouse` override chain (SOCKET_HOME /
+ * setPath('socket-wheelhouse-dir')).
+ */
+export function getSocketRepoClonesDir(): string {
+  const path = getNodePath()
+  return normalizePath(path.join(getSocketWheelhouseDir(), 'repo-clones'))
+}
+/**
  * Get the Socket state directory (~/.socket/_state) — version-LESS persistent
  * app state (the home for daemon sockets, locks, OAuth refresh, durable caches
  * that survive version bumps; mirrors pnpm `state-dir` / XDG_STATE_HOME).

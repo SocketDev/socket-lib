@@ -24,6 +24,7 @@ import {
   getSocketCacacheDir,
   getSocketDlxDir,
   getSocketHomePath,
+  getSocketRepoClonesDir,
   getSocketStateDir,
   getSocketUserDir,
   getSocketWheelhouseDir,
@@ -213,6 +214,19 @@ describe('paths/socket', () => {
     it('honors a setPath override', () => {
       setPath('socket-wheelhouse-dir', '/custom/wheelhouse')
       expect(getSocketWheelhouseDir()).toBe('/custom/wheelhouse')
+    })
+  })
+
+  describe('getSocketRepoClonesDir', () => {
+    it('returns repo-clones under _wheelhouse', () => {
+      clearPath('socket-wheelhouse-dir')
+      const result = getSocketRepoClonesDir()
+      expect(result).toContain('.socket/_wheelhouse/repo-clones')
+    })
+
+    it('nests under the wheelhouse override (inherits the chain)', () => {
+      setPath('socket-wheelhouse-dir', '/custom/wheelhouse')
+      expect(getSocketRepoClonesDir()).toBe('/custom/wheelhouse/repo-clones')
     })
   })
 
