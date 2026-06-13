@@ -11,16 +11,56 @@
 import { existsSync, promises as fs } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
+import process from 'node:process'
 
 import { extractPackage, packPackage } from '../../../src/packages/tarball'
 import type { ExtractOptions } from '../../../src/packages/types'
 import { normalizePath } from '../../../src/paths/normalize'
 import { expect, it } from 'vitest'
-import { describeNetworkOnly, itUnixOnly } from '../util/skip-helpers'
+import { describeNetworkOnly } from '../util/skip-helpers'
 import { runWithTempDir } from '../util/temp-file-helper'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
 type ExtractCallback = (destPath: string) => Promise<unknown>
+
+// Pin an HTTPS github url so it survives a host `insteadOf` rewrite. The GitHub
+// Actions windows runner's global git config rewrites `https://github.com/` to
+// `git@github.com:`, so an auth-less HTTPS clone resolves to SSH and fails with
+// "Permission denied (publickey)". git resolves `insteadOf` by LONGEST matching
+// prefix, so injecting a rule that maps the FULL repo url to itself out-specs
+// the runner's shorter `git@github.com:` rule and forces HTTPS. (A same-length
+// or inverse SSH->HTTPS rule does NOT win — verified against git 2.50.) The
+// rule is injected via git's GIT_CONFIG_COUNT/KEY/VALUE env protocol (git
+// >=2.31), which any git subprocess pacote spawns inherits; entries append to
+// any the harness already set. Returns a restore function.
+function pinHttpsGitUrl(httpsUrl: string): () => void {
+  const prevCount = process.env['GIT_CONFIG_COUNT']
+  const n = Number(prevCount ?? '0') || 0
+  const keyVar = `GIT_CONFIG_KEY_${n}`
+  const valVar = `GIT_CONFIG_VALUE_${n}`
+  const prevKey = process.env[keyVar]
+  const prevVal = process.env[valVar]
+  process.env['GIT_CONFIG_COUNT'] = String(n + 1)
+  process.env[keyVar] = `url.${httpsUrl}.insteadOf`
+  process.env[valVar] = httpsUrl
+  return function restore() {
+    if (prevCount === undefined) {
+      delete process.env['GIT_CONFIG_COUNT']
+    } else {
+      process.env['GIT_CONFIG_COUNT'] = prevCount
+    }
+    if (prevKey === undefined) {
+      delete process.env[keyVar]
+    } else {
+      process.env[keyVar] = prevKey
+    }
+    if (prevVal === undefined) {
+      delete process.env[valVar]
+    } else {
+      process.env[valVar] = prevVal
+    }
+  }
+}
 
 // Network-only: extractPackage delegates to pacote, which fetches
 // the tarball from registry.npmjs.org. There's no useful unit-test
@@ -298,13 +338,7 @@ describeNetworkOnly('pacote fetcher coverage', () => {
     tolerantTimeout(60_000),
   )
 
-  // Unix-only: the GitHub Actions windows runner's git is configured to rewrite
-  // github.com HTTPS urls to SSH (an `insteadOf` rule), so both the `github:`
-  // shorthand and an explicit `git+https://…` spec resolve to git@github.com:…
-  // and fail with "Permission denied (publickey)" — the runner has no SSH key.
-  // The GitFetcher path is identical across platforms, so the unix lanes cover
-  // it; there's no Windows-specific code to exercise here.
-  itUnixOnly(
+  it(
     'git specs use pacote/lib/git.js + @npmcli/git',
     async () => {
       // Git archives are fetched via pacote/lib/git.js which wraps
@@ -313,6 +347,15 @@ describeNetworkOnly('pacote fetcher coverage', () => {
       // time — pass it explicitly so the fetcher can run.
       const testRequire = createRequire(import.meta.url)
       const Arborist = testRequire('@npmcli/arborist')
+      // Pin the clone url to HTTPS so it survives the GitHub Actions windows
+      // runner's global `insteadOf` rewrite (https://github.com/ ->
+      // git@github.com:), which would otherwise send an auth-less clone over SSH
+      // and fail with "Permission denied (publickey)". This makes the test run
+      // on every platform (no Windows skip) by exercising the real
+      // GitFetcher/@npmcli/git path over HTTPS.
+      const restoreGitConfigEnv = pinHttpsGitUrl(
+        'https://github.com/jonschlinkert/is-number.git',
+      )
       await runWithTempDir(async tmpDir => {
         // normalizePath so the dest passed to pacote and the path asserted below
         // are the same forward-slash string — pacote writes to the normalized
@@ -320,12 +363,10 @@ describeNetworkOnly('pacote fetcher coverage', () => {
         const extractDest = normalizePath(path.join(tmpDir, 'extracted'))
         await fs.mkdir(extractDest, { recursive: true })
         try {
-          // Use the explicit git+https form, not the `github:` shorthand: on the
-          // Windows runner hosted-git-info resolves `github:` to the SSH url
-          // (git@github.com:…), which fails with "Permission denied (publickey)"
-          // since the runner has no SSH key. git+https clones the public repo
-          // over HTTPS (no auth) and exercises the same GitFetcher/@npmcli/git
-          // path on every platform.
+          // Explicit git+https form (not the `github:` shorthand): combined with
+          // the GIT_CONFIG injection above it clones the public repo over HTTPS
+          // with no auth and exercises the same GitFetcher/@npmcli/git path on
+          // every platform, Windows included.
           await extractPackage(
             'git+https://github.com/jonschlinkert/is-number.git#7.0.0',
             {
@@ -346,6 +387,8 @@ describeNetworkOnly('pacote fetcher coverage', () => {
             `extractPackage(git spec) failed: code=${String(er.code)} cmd=${String(er.cmd)}\nstderr=${String(er.stderr)}`,
             { cause: e },
           )
+        } finally {
+          restoreGitConfigEnv()
         }
         expect(existsSync(path.join(extractDest, 'package.json'))).toBe(true)
       }, 'git-fetcher-')
