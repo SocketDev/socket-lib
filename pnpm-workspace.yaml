@@ -61,6 +61,10 @@ catalog:
   'rolldown': 1.1.0
   'shell-quote': 1.8.4
   'taze': 19.14.1
+  # Vite 8.x is rolldown-native (keeps the fleet bundler rolldown end-to-end,
+  # so esbuild never enters the tree). vitest 4.1.x pulls vite transitively;
+  # the override below forces that transitive vite to this pin.
+  'vite': 8.0.14
   'vitest': 4.1.8
 
 allowBuilds:
@@ -72,15 +76,12 @@ allowBuilds:
 
 # Wait 7 days (10080 minutes) before installing newly published packages.
 #
-# Do NOT add `esbuild` to minimumReleaseAgeExclude to clear a Dependabot
-# esbuild alert. esbuild is a transitive build-time dep resolved on the Node
-# path; the open high-severity advisory is in esbuild's Deno module
-# (lib/deno/mod.ts — missing binary integrity check, exploitable only under
-# Deno with an attacker-controlled NPM_CONFIG_REGISTRY). This repo runs Node,
-# never Deno, so that code path is unreachable and the real exposure is zero.
-# Bypassing the soak to pull an unsoaked esbuild for a non-reachable vuln
-# weakens the supply-chain gate for no benefit. Let the patched version land
-# normally once it clears the 7-day soak; never soak-exclude it.
+# esbuild is NOT in this tree: vite is pinned to 8.x (rolldown-native) via the
+# catalog + the `'vite': 'catalog:'` override above, so the transitive vite that
+# vitest pulls is 8.x — which bundles rolldown, not esbuild. The esbuild
+# Dependabot advisories are therefore moot here (no esbuild resolves at all).
+# Do NOT soak-exclude esbuild to chase an alert: the structurally-correct fix is
+# keeping vite on the rolldown-native major, never pulling an unsoaked esbuild.
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
   - '@socketaddon/*'
@@ -235,6 +236,10 @@ overrides:
   'postcss': '8.5.10'
   'proc-log': '6.1.0'
   'qs': '6.15.2'
+  # Unify every rolldown resolution to the catalog pin (1.1.0). vite 8.0.14
+  # bundles its own rolldown (1.0.2) transitively; without this override the
+  # tree would carry two rolldown versions + two sets of platform bindings.
+  'rolldown': 'catalog:'
   'semver': '7.7.2'
   'signal-exit': '4.1.0'
   'spdx-expression-parse': '4.0.0'
@@ -243,6 +248,9 @@ overrides:
   'strip-ansi': '7.1.2'
   'supports-color': '10.2.2'
   'tar': '7.5.11'
+  # Force EVERY transitive vite (via vitest, plugins) to the rolldown-native
+  # 8.x catalog pin so esbuild never resolves into the tree.
+  'vite': 'catalog:'
   'which': '5.0.0'
   'wrap-ansi': '9.0.2'
   'yaml': '2.9.0'
@@ -278,6 +286,14 @@ trustPolicyExclude:
 # Auto-install missing peer deps (pnpm default). Declared explicitly
 # so a future default flip can't silently change install behavior.
 autoInstallPeers: true
+
+# Never install esbuild. vite 8 declares it as an OPTIONAL peer
+# (peerDependenciesMeta.esbuild) but the fleet bundler is rolldown, which vite
+# 8 bundles natively — esbuild is dead weight here and only surfaces as noisy,
+# non-reachable Dependabot advisories (the vuln is in esbuild's Deno module;
+# this repo runs Node). Suppressing the optional dep keeps it out of the tree.
+ignoredOptionalDependencies:
+  - esbuild
 
 # Run pre/post lifecycle scripts on the workspace root (e.g.
 # prepare -> husky). This is the pnpm default; declared explicitly
