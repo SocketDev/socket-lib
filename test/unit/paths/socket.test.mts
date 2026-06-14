@@ -24,9 +24,12 @@ import {
   getSocketCacacheDir,
   getSocketDlxDir,
   getSocketHomePath,
+  getSocketRackDir,
+  getSocketRackToolDir,
   getSocketRepoClonesDir,
   getSocketStateDir,
   getSocketUserDir,
+  getSocketWheelhouseBinDir,
   getSocketWheelhouseDir,
   getUserHomeDir,
 } from '../../../src/paths/socket'
@@ -227,6 +230,50 @@ describe('paths/socket', () => {
     it('nests under the wheelhouse override (inherits the chain)', () => {
       setPath('socket-wheelhouse-dir', '/custom/wheelhouse')
       expect(getSocketRepoClonesDir()).toBe('/custom/wheelhouse/repo-clones')
+    })
+  })
+
+  describe('getSocketRackDir', () => {
+    it('returns rack under _wheelhouse', () => {
+      clearPath('socket-wheelhouse-dir')
+      const result = getSocketRackDir()
+      expect(result).toContain('.socket/_wheelhouse/rack')
+    })
+
+    it('nests under the wheelhouse override (inherits the chain)', () => {
+      setPath('socket-wheelhouse-dir', '/custom/wheelhouse')
+      expect(getSocketRackDir()).toBe('/custom/wheelhouse/rack')
+    })
+  })
+
+  describe('getSocketRackToolDir', () => {
+    it('nests <tool>/<version> under the rack', () => {
+      clearPath('socket-wheelhouse-dir')
+      const result = getSocketRackToolDir({
+        tool: 'codedb',
+        version: '0.2.5825',
+      })
+      expect(result).toContain('.socket/_wheelhouse/rack/codedb/0.2.5825')
+    })
+
+    it('inherits the wheelhouse override chain', () => {
+      setPath('socket-wheelhouse-dir', '/custom/wheelhouse')
+      expect(getSocketRackToolDir({ tool: 'sfw', version: '1.7.2' })).toBe(
+        '/custom/wheelhouse/rack/sfw/1.7.2',
+      )
+    })
+  })
+
+  describe('getSocketWheelhouseBinDir', () => {
+    it('returns bin under _wheelhouse', () => {
+      clearPath('socket-wheelhouse-dir')
+      const result = getSocketWheelhouseBinDir()
+      expect(result).toContain('.socket/_wheelhouse/bin')
+    })
+
+    it('nests under the wheelhouse override (inherits the chain)', () => {
+      setPath('socket-wheelhouse-dir', '/custom/wheelhouse')
+      expect(getSocketWheelhouseBinDir()).toBe('/custom/wheelhouse/bin')
     })
   })
 
