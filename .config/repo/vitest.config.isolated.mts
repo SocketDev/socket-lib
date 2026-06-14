@@ -91,4 +91,5 @@ const vitestConfigIsolated = defineConfig({
   },
 })
 
+// oxlint-disable-next-line socket/no-default-export -- vitest's config loader resolves the config from the module's DEFAULT export; a named export is not picked up.
 export default vitestConfigIsolated
