@@ -13,20 +13,17 @@ import process from 'node:process'
 
 import { hasOwn } from '../objects/predicates'
 import { envAsBoolean } from './boolean'
+import { getNodeAsyncHooks } from '../node/async-hooks'
 
 import { MapCtor } from '../primordials/map-set'
 
 import { ObjectEntries } from '../primordials/object'
 
-import type * as asyncHooksModule from 'node:async_hooks'
-
 export type EnvOverrides = Map<string, string | undefined>
-
-let asyncHooks: typeof asyncHooksModule | undefined
 
 // Isolated execution context storage for nested overrides (withEnv/withEnvSync)
 // AsyncLocalStorage creates isolated contexts that don't leak between concurrent code
-const { AsyncLocalStorage } = getAsyncHooks()
+const { AsyncLocalStorage } = getNodeAsyncHooks()
 const isolatedOverridesStorage = new AsyncLocalStorage<EnvOverrides>()
 
 // Shared test hook overrides (setEnv/clearEnv/resetEnv in beforeEach/afterEach)
@@ -69,18 +66,13 @@ export function clearEnv(key: string): void {
 }
 
 /**
- * Lazily load the async_hooks module to avoid Webpack errors.
+ * Lazily load the async_hooks module. Aliases the canonical `node/async-hooks`
+ * accessor (single owner of the bundler-safe require); kept as an export so
+ * this module's surface is unchanged.
  *
  * @private
  */
-export function getAsyncHooks() {
-  if (asyncHooks === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    asyncHooks = /*@__PURE__*/ require('node:async_hooks')
-  }
-  return asyncHooks as typeof asyncHooksModule
-}
+export const getAsyncHooks = getNodeAsyncHooks
 
 /**
  * Get an environment variable value, checking overrides first.

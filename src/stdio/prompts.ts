@@ -17,7 +17,7 @@ import passwordRaw from '../external/@inquirer/password'
 import * as searchModule from '../external/@inquirer/search'
 // @ts-expect-error - external vendored module
 import * as selectModuleImport from '../external/@inquirer/select'
-import yoctocolorsCjs from '../external/yoctocolors-cjs'
+import { applyColor } from '../logger/colors'
 
 import type { ColorValue } from '../colors/types'
 import type { Remap } from '../objects/types'
@@ -131,27 +131,6 @@ export declare class SeparatorType {
 }
 
 export type Separator = SeparatorType
-
-/**
- * Apply a color to text using yoctocolors. Handles both named colors and RGB
- * tuples.
- *
- * @private
- */
-export function applyColor(text: string, color: ColorValue): string {
-  if (typeof color === 'string') {
-    // Named color like 'green', 'red', etc.
-    const colorFns = yoctocolorsCjs as unknown as Record<
-      string,
-      (text: string) => string
-    >
-    return colorFns[color]!(text)
-  }
-  // RGB tuple [r, g, b] - manually construct ANSI escape codes.
-  // yoctocolors-cjs doesn't have an rgb() method, so we build it ourselves.
-  const { 0: r, 1: g, 2: b } = color
-  return `\u001B[38;2;${r};${g};${b}m${text}\u001B[39m`
-}
 
 /**
  * Convert Socket theme to @inquirer theme format. Maps our theme colors to

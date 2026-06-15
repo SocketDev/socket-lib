@@ -5,21 +5,18 @@
  */
 
 import type * as fastSortType from '../external/fast-sort'
-import type * as semverType from '../external/semver'
+
+// `getSemver` is re-exported from `versions/_internal` — the single owner of
+// the vendored-semver accessor, where the smol-versions fallback alignment
+// lives. `sorts/semver` needs only `.compare`, which that accessor provides.
+// Don't add a second vendored-semver require here.
+export { getSemver } from '../versions/_internal'
 
 let fastSort: typeof fastSortType | undefined
-let semver: typeof semverType | undefined
 
 export function getFastSort() {
   if (fastSort === undefined) {
     fastSort = /*@__PURE__*/ require('../external/fast-sort.js')
   }
   return fastSort!
-}
-
-export function getSemver() {
-  if (semver === undefined) {
-    semver = /*@__PURE__*/ require('../external/semver.js')
-  }
-  return semver!
 }

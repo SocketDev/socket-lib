@@ -14,16 +14,12 @@ import type { ColorValue } from '../colors/types'
  * Apply a color to text using yoctocolors. Handles both named colors and RGB
  * tuples.
  */
-export function applyColor(
-  text: string,
-  color: ColorValue,
-  colors: typeof yoctocolorsCjs,
-): string {
+export function applyColor(text: string, color: ColorValue): string {
   if (typeof color === 'string') {
     // Named color like 'green', 'red', etc. The yoctocolors palette indexes to
     // a (text: string) => string formatter for each named color.
     const formatter = (
-      colors as unknown as Record<
+      yoctocolorsCjs as unknown as Record<
         string,
         ((text: string) => string) | undefined
       >

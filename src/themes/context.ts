@@ -8,10 +8,7 @@ import { SOCKET_THEME, THEMES } from './themes'
 import type { ThemeName } from './themes'
 
 import { SetCtor } from '../primordials/map-set'
-
-import type * as AsyncHooks from 'node:async_hooks'
-
-let asyncHooks: typeof AsyncHooks | undefined
+import { getNodeAsyncHooks } from '../node/async-hooks'
 
 /**
  * Theme change event listener signature.
@@ -30,18 +27,13 @@ export function emitThemeChange(theme: Theme): void {
 }
 
 /**
- * Lazily load the async_hooks module to avoid Webpack errors.
+ * Lazily load the async_hooks module. Aliases the canonical `node/async-hooks`
+ * accessor (single owner of the bundler-safe require); kept as an export so
+ * this module's surface is unchanged.
  *
  * @private
  */
-export function getAsyncHooks() {
-  if (asyncHooks === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    asyncHooks = /*@__PURE__*/ require('node:async_hooks')
-  }
-  return asyncHooks as typeof AsyncHooks
-}
+export const getAsyncHooks = getNodeAsyncHooks
 
 /**
  * AsyncLocalStorage for theme context isolation.

@@ -21,20 +21,17 @@ import {
   StringPrototypeStartsWith,
 } from '../primordials/string'
 
-// '\'
-export const CHAR_BACKWARD_SLASH = 92
-// ':'
-export const CHAR_COLON = 58
-// '/'
-export const CHAR_FORWARD_SLASH = 47
-// 'a'
-export const CHAR_LOWERCASE_A = 97
-// 'z'
-export const CHAR_LOWERCASE_Z = 122
-// 'A'
-export const CHAR_UPPERCASE_A = 65
-// 'Z'
-export const CHAR_UPPERCASE_Z = 90
+// Char-code constants are owned by `constants/encoding` (the single source);
+// re-exported here so `paths/*` keeps its local import site unchanged.
+export {
+  CHAR_BACKWARD_SLASH,
+  CHAR_COLON,
+  CHAR_FORWARD_SLASH,
+  CHAR_LOWERCASE_A,
+  CHAR_LOWERCASE_Z,
+  CHAR_UPPERCASE_A,
+  CHAR_UPPERCASE_Z,
+} from '../constants/encoding'
 
 // Captures the drive letter (group 1) and the trailing separator if any
 // (group 2). The replace callback in paths/normalize.ts:msysDriveToNative

@@ -56,18 +56,18 @@ export function createLogSymbols(): Record<string, string> {
 
     /* c8 ignore start - ASCII-fallback symbol arms only fire on
        terminals without unicode support; tests run on unicode TTYs. */
-    target['fail'] = applyColor(supported ? '✖' : '×', errorColor, colors)
-    target['info'] = applyColor(supported ? 'ℹ' : 'i', infoColor, colors)
-    target['progress'] = applyColor(supported ? '∴' : ':.', stepColor, colors)
+    target['fail'] = applyColor(supported ? '✖' : '×', errorColor)
+    target['info'] = applyColor(supported ? 'ℹ' : 'i', infoColor)
+    target['progress'] = applyColor(supported ? '∴' : ':.', stepColor)
     target['reason'] = colors.dim(
-      applyColor(supported ? '∴' : ':.', warningColor, colors),
+      applyColor(supported ? '∴' : ':.', warningColor),
     )
-    target['skip'] = applyColor(supported ? '↻' : '@', stepColor, colors)
-    target['step'] = applyColor(supported ? '→' : '>', stepColor, colors)
+    target['skip'] = applyColor(supported ? '↻' : '@', stepColor)
+    target['step'] = applyColor(supported ? '→' : '>', stepColor)
     // oxlint-disable-next-line socket/no-status-emoji -- This module is the canonical owner of LOG_SYMBOLS.success; it constructs the symbol the rule points callers at.
-    target['success'] = applyColor(supported ? '✔' : '√', successColor, colors)
+    target['success'] = applyColor(supported ? '✔' : '√', successColor)
     // oxlint-disable-next-line socket/no-status-emoji -- This module is the canonical owner of LOG_SYMBOLS.warn; it constructs the symbol the rule points callers at.
-    target['warn'] = applyColor(supported ? '⚠' : '‼', warningColor, colors)
+    target['warn'] = applyColor(supported ? '⚠' : '‼', warningColor)
     /* c8 ignore stop */
   }
 

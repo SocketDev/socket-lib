@@ -18,7 +18,7 @@ import isUnicodeSupported from '../external/@socketregistry/is-unicode-supported
 
 import { StringPrototypeReplace } from '../primordials/string'
 
-import { applyColor, getYoctocolors } from './colors'
+import { applyColor } from './colors'
 
 import type { LogSymbols } from './types'
 import type { Theme } from '../themes/types'
@@ -32,26 +32,25 @@ import type { Theme } from '../themes/types'
  */
 export function buildLoggerSymbols(theme: Theme): LogSymbols {
   const supported = isUnicodeSupported()
-  const colors = getYoctocolors()
 
   /* c8 ignore start - ASCII-fallback symbol arms only fire on
      terminals without unicode support; tests run on unicode TTYs. */
   return {
     __proto__: null,
     // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
-    fail: applyColor(supported ? '✖' : '×', theme.colors.error, colors),
+    fail: applyColor(supported ? '✖' : '×', theme.colors.error),
     // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
-    info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info, colors),
+    info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info),
     // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
-    progress: applyColor(supported ? '∴' : ':.', theme.colors.step, colors),
+    progress: applyColor(supported ? '∴' : ':.', theme.colors.step),
     // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
-    skip: applyColor(supported ? '↻' : '@', theme.colors.step, colors),
+    skip: applyColor(supported ? '↻' : '@', theme.colors.step),
     // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
-    step: applyColor(supported ? '→' : '>', theme.colors.step, colors),
+    step: applyColor(supported ? '→' : '>', theme.colors.step),
     // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
-    success: applyColor(supported ? '✔' : '√', theme.colors.success, colors),
+    success: applyColor(supported ? '✔' : '√', theme.colors.success),
     // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
-    warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning, colors),
+    warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning),
   } as LogSymbols
   /* c8 ignore stop */
 }
