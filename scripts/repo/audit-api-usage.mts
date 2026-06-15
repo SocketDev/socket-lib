@@ -35,6 +35,8 @@ import {
 } from '../../.claude/hooks/fleet/_shared/acorn/index.mts'
 import type { AcornNode } from '../../.claude/hooks/fleet/_shared/acorn/index.mts'
 
+import { renderReport } from './audit-api-usage/render.mts'
+
 const logger = getDefaultLogger()
 
 // The package whose exports we audit, and the bare specifiers consumers use to
@@ -71,7 +73,10 @@ const SOURCE_EXTS = new Set([
 const SKIP_DIRS = new Set(['.git', 'build', 'coverage', 'dist', 'node_modules'])
 
 // A single reference to a lib subpath, tagged with the syntactic shape that
-// produced it (so the report can separate clean imports from blind spots).
+// produced it (so the report can separate clean imports from blind spots) and
+// where it came from: which consumer repo, and whether it is a cascade-source
+// path (the wheelhouse `template/` tree, which SHIPS to every member — so a
+// subpath used only there is live fleet-wide, not "directly adopted").
 export interface UsageRef {
   readonly subpath: string
   readonly kind:
@@ -82,6 +87,8 @@ export interface UsageRef {
     | 're-export'
     | 'require'
   readonly file: string
+  readonly repo: string
+  readonly cascadeSource: boolean
 }
 
 // Strip a `@socketsecurity/lib[-stable]/<subpath>` specifier to its subpath, or
@@ -143,13 +150,25 @@ function literalValue(node: AcornNode | undefined): string | undefined {
   return undefined
 }
 
+// True when a file lives in the wheelhouse cascade source (the `template/`
+// tree), which the cascade ships to every member — usage there is fleet-wide,
+// not a single repo's direct adoption.
+export function isCascadeSource(repo: string, file: string): boolean {
+  return repo === 'socket-wheelhouse' && /[/\\]template[/\\]/.test(file)
+}
+
 // AST-walk one file, returning every lib reference it makes (any shape).
-export function collectRefs(source: string, file: string): UsageRef[] {
+export function collectRefs(
+  source: string,
+  file: string,
+  repo: string,
+): UsageRef[] {
   const refs: UsageRef[] = []
+  const cascadeSource = isCascadeSource(repo, file)
   const add = (specifier: string, kind: UsageRef['kind']): void => {
     const subpath = libSubpathOf(specifier)
     if (subpath !== undefined) {
-      refs.push({ subpath, kind, file })
+      refs.push({ subpath, kind, file, repo, cascadeSource })
     }
   }
   walkSimple(source, {
@@ -266,7 +285,7 @@ function main(): number {
       if (!parsed) {
         continue
       }
-      allRefs.push(...collectRefs(source, file))
+      allRefs.push(...collectRefs(source, file, repo))
     }
   }
 
@@ -291,29 +310,63 @@ function main(): number {
     }
   }
 
-  const used = subpaths.filter(s => refsBySubpath.has(s))
+  // Per-subpath repo fan-out (which MEMBER repos import it directly) and the
+  // cascade-only flag (used solely in the wheelhouse template/ tree).
+  const reposBySubpath = new Map<string, Set<string>>()
+  const cascadeOnlySet = new Set<string>()
+  for (const [sub, refs] of refsBySubpath) {
+    const directRepos = new Set<string>()
+    let anyDirect = false
+    for (let i = 0, { length } = refs; i < length; i += 1) {
+      const r = refs[i]!
+      if (r.cascadeSource) {
+        continue
+      }
+      anyDirect = true
+      directRepos.add(r.repo)
+    }
+    reposBySubpath.set(sub, directRepos)
+    if (!anyDirect) {
+      cascadeOnlySet.add(sub)
+    }
+  }
+
+  // 3-way classification:
+  //   adopted     — a MEMBER repo imports it directly (real downstream demand)
+  //   cascadeOnly — used only in the wheelhouse template/ (shipped fleet-wide
+  //                 by the cascade, but no member imports it itself)
+  //   unused      — no reference anywhere
+  const adopted = subpaths.filter(
+    s => refsBySubpath.has(s) && !cascadeOnlySet.has(s),
+  )
+  const cascadeOnly = subpaths.filter(s => cascadeOnlySet.has(s))
   const unused = subpaths.filter(s => !refsBySubpath.has(s))
-  // Blind spots: subpaths reached ONLY through a blind-spot kind (no plain
-  // named import), plus bare-root refs (which reach an unattributed surface).
+  const used = subpaths.filter(s => refsBySubpath.has(s))
   const blindSubpaths = used.filter(s =>
     (refsBySubpath.get(s) ?? []).every(r => BLIND.has(r.kind)),
   )
-  const bareRootRefs = allRefs.filter(r => r.kind === 'bare-root')
   const namespaceRefs = allRefs.filter(r => r.kind === 'namespace-import')
   const reExportRefs = allRefs.filter(r => r.kind === 're-export')
+  const bareRootRefs = allRefs.filter(r => r.kind === 'bare-root')
 
   if (json) {
     logger.log(
       JSON.stringify(
         {
           total: subpaths.length,
-          used: used.length,
+          adopted: adopted.length,
+          cascadeOnly: cascadeOnly.length,
           unused: unused.length,
+          adoptedList: adopted,
+          cascadeOnlyList: cascadeOnly,
           unusedList: unused,
+          reposBySubpath: Object.fromEntries(
+            [...reposBySubpath].map(([k, v]) => [k, [...v].toSorted()]),
+          ),
           blindSpotSubpaths: blindSubpaths,
-          bareRootRefs: bareRootRefs.length,
           namespaceRefs: namespaceRefs.length,
           reExportRefs: reExportRefs.length,
+          bareRootRefs: bareRootRefs.length,
         },
         null,
         2,
@@ -322,34 +375,19 @@ function main(): number {
     return 0
   }
 
-  const pct = (n: number): string =>
-    `${Math.round((n / subpaths.length) * 100)}%`
-  logger.log(`socket-lib API usage across ${consumers.length} consumers`)
-  logger.log('')
-  logger.log(`  total export subpaths : ${subpaths.length}`)
-  logger.log(`  used                  : ${used.length} (${pct(used.length)})`)
-  logger.log(
-    `  unused                : ${unused.length} (${pct(unused.length)})`,
-  )
-  logger.log('')
-  logger.log('  blind spots (defeat per-name dead-code analysis):')
-  logger.log(`    namespace imports   : ${namespaceRefs.length} ref(s)`)
-  logger.log(`    re-exports          : ${reExportRefs.length} ref(s)`)
-  logger.log(`    bare-root imports   : ${bareRootRefs.length} ref(s)`)
-  logger.log(
-    `    subpaths reached ONLY via a blind spot : ${blindSubpaths.length}`,
-  )
-  logger.log('')
-  logger.log('  unused subpaths (no consumer reference, by area):')
-  const byArea = new Map<string, number>()
-  for (let i = 0, { length } = unused; i < length; i += 1) {
-    const area = unused[i]!.split('/')[0]!
-    byArea.set(area, (byArea.get(area) ?? 0) + 1)
-  }
-  const areas = [...byArea.entries()].toSorted((a, b) => b[1] - a[1])
-  for (let i = 0, { length } = areas; i < length; i += 1) {
-    logger.log(`    ${areas[i]![0]} : ${areas[i]![1]}`)
-  }
+  renderReport({
+    subpaths,
+    adopted,
+    cascadeOnly,
+    unused,
+    consumers,
+    reposBySubpath,
+    cascadeOnlySet,
+    blindSubpaths,
+    namespaceRefs: namespaceRefs.length,
+    reExportRefs: reExportRefs.length,
+    bareRootRefs: bareRootRefs.length,
+  })
   return 0
 }
 
