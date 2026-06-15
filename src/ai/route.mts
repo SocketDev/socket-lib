@@ -37,17 +37,18 @@ export interface TierCandidate {
 
 /**
  * Why the resolver returned what it did. - `preferred` — the tier's
- * first-choice engine was available + keyed. - `fellback` — the preferred
- * engine was missing/unkeyed; an equivalent on another engine was used (`from`
- * names the original tier).
+ * first-choice engine was available + keyed. - `fell-over` — the preferred
+ * engine was missing/unkeyed; an equivalent on another engine was used
+ * (`requestedTier` names the tier originally asked for). Matches the
+ * `fellOver` vocabulary `spawnTierWithFallback` (spawn.mts) reports.
  */
-export type TierResolveReason = 'fellback' | 'preferred'
+export type TierResolveReason = 'fell-over' | 'preferred'
 
 export interface TierResolution {
   readonly candidate: TierCandidate
   readonly reason: TierResolveReason
-  // Present only when `reason === 'fellback'`: the tier originally asked for.
-  readonly from?: AiTier | undefined
+  // Present only when `reason === 'fell-over'`: the tier originally asked for.
+  readonly requestedTier?: AiTier | undefined
 }
 
 /**
@@ -157,9 +158,9 @@ export function isCandidateUsable(
  * Resolve a tier to the best available concrete target. Prefers the tier's
  * first-choice (Claude) candidate; if its engine is missing or unkeyed, walks
  * the cross-engine equivalence ladder and returns the first usable equivalent,
- * tagging the result `fellback` with the original tier in `from`. Returns
- * `undefined` only when NOTHING in the chain is usable — the caller then skips
- * the work or surfaces a "no AI engine available" message.
+ * tagging the result `fell-over` with the original tier in `requestedTier`.
+ * Returns `undefined` only when NOTHING in the chain is usable — the caller
+ * then skips the work or surfaces a "no AI engine available" message.
  */
 export function resolveTier(
   tier: AiTier,
@@ -171,7 +172,7 @@ export function resolveTier(
     if (isCandidateUsable(candidate, ctx)) {
       return i === 0
         ? { candidate, reason: 'preferred' }
-        : { candidate, from: tier, reason: 'fellback' }
+        : { candidate, requestedTier: tier, reason: 'fell-over' }
     }
   }
   return undefined

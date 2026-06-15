@@ -71,8 +71,8 @@ describe('resolveTier', () => {
 
   it('falls back to codex gpt-5.5 xhigh when claude is unavailable', () => {
     const res = resolveTier('fable', ctx(['codex'], ['openai']))
-    expect(res?.reason).toBe('fellback')
-    expect(res?.from).toBe('fable')
+    expect(res?.reason).toBe('fell-over')
+    expect(res?.requestedTier).toBe('fable')
     expect(res?.candidate.engine).toBe('codex')
     expect(res?.candidate.model).toBe('gpt-5.5')
     expect(res?.candidate.effort).toBe('xhigh')
@@ -80,7 +80,7 @@ describe('resolveTier', () => {
 
   it('falls back when claude is present but UNKEYED (expired/no key)', () => {
     const res = resolveTier('fable', ctx(['claude', 'codex'], ['openai']))
-    expect(res?.reason).toBe('fellback')
+    expect(res?.reason).toBe('fell-over')
     expect(res?.candidate.engine).toBe('codex')
   })
 

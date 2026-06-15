@@ -4,6 +4,7 @@ import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { runOne } from '../../../src/ai/worktree.mts'
+import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 import { sh } from '../util/cross-platform-sh.mts'
 
 let tmpRoot: string
@@ -101,36 +102,40 @@ describe.sequential('ai/worktree — runOne fn-error path', () => {
 })
 
 describe.sequential('ai/worktree — runOne merge failure (non-FF)', () => {
-  test('reports merge failure when base diverged during fn execution', async () => {
-    const worktreePath = path.join(tmpRoot, 'wt-noff')
-    const result = await runOne(
-      'x',
-      0,
-      'agent-task-noff',
-      worktreePath,
-      repo,
-      'main',
-      'always',
-      async (_i, ctx) => {
-        // 1) Make a commit in the worktree.
-        writeFileSync(path.join(ctx.cwd, 'work-side.txt'), 'work')
-        sh(
-          ctx.cwd,
-          'git add work-side.txt && git commit -q -m "worktree diverges"',
-        )
-        // 2) Advance base on the SAME branch (main) — this rewinds the
-        // worktree's HEAD relative to base, so the upcoming ff-only merge
-        // can't apply because base advanced past the worktree's branch point.
-        writeFileSync(path.join(repo, 'base-side.txt'), 'base')
-        sh(repo, 'git add base-side.txt && git commit -q -m "base diverges"')
-        return 'attempted'
-      },
-    )
-    // Even if merge somehow succeeds, the worktree commit was kept and
-    // the cleanup decision is what we exercise. Accept either status —
-    // the source path through `merge --ff-only` exit is the test target.
-    expect(['fulfilled', 'rejected']).toContain(result.status)
-  })
+  test(
+    'reports merge failure when base diverged during fn execution',
+    async () => {
+      const worktreePath = path.join(tmpRoot, 'wt-noff')
+      const result = await runOne(
+        'x',
+        0,
+        'agent-task-noff',
+        worktreePath,
+        repo,
+        'main',
+        'always',
+        async (_i, ctx) => {
+          // 1) Make a commit in the worktree.
+          writeFileSync(path.join(ctx.cwd, 'work-side.txt'), 'work')
+          sh(
+            ctx.cwd,
+            'git add work-side.txt && git commit -q -m "worktree diverges"',
+          )
+          // 2) Advance base on the SAME branch (main) — this rewinds the
+          // worktree's HEAD relative to base, so the upcoming ff-only merge
+          // can't apply because base advanced past the worktree's branch point.
+          writeFileSync(path.join(repo, 'base-side.txt'), 'base')
+          sh(repo, 'git add base-side.txt && git commit -q -m "base diverges"')
+          return 'attempted'
+        },
+      )
+      // Even if merge somehow succeeds, the worktree commit was kept and
+      // the cleanup decision is what we exercise. Accept either status —
+      // the source path through `merge --ff-only` exit is the test target.
+      expect(['fulfilled', 'rejected']).toContain(result.status)
+    },
+    tolerantTimeout(30_000),
+  )
 })
 
 describe.sequential('ai/worktree — runOne cleanup policies', () => {

@@ -454,6 +454,11 @@
       "types": "./dist/compression/types.d.ts",
       "default": "./dist/compression/types.js"
     },
+    "./config/layers": {
+      "source": "./src/config/layers.ts",
+      "types": "./dist/config/layers.d.ts",
+      "default": "./dist/config/layers.js"
+    },
     "./constants/agents": {
       "source": "./src/constants/agents.ts",
       "types": "./dist/constants/agents.d.ts",

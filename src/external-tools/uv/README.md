@@ -17,8 +17,8 @@ import { resolveUv } from '@socketsecurity/lib/external-tools/uv/resolve'
 
 const uv = await resolveUv({
   downloadIfMissing: {
-    version: '0.5.13',
-    platformArch: 'aarch64-apple-darwin',
+    version: '0.11.21',
+    platformArch: 'darwin-arm64',
   },
 })
 // → { path, source } | undefined
