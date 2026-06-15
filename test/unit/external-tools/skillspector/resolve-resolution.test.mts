@@ -16,6 +16,10 @@ vi.mock(import('../../../../src/external-tools/skillspector/from-dlx'), () => ({
   skillspectorFromDlx: vi.fn(),
 }))
 
+vi.mock(import('../../../../src/external-tools/skillspector/from-uv'), () => ({
+  skillspectorFromUv: vi.fn(),
+}))
+
 async function loadFresh() {
   const vfsMod =
     await import('../../../../src/external-tools/skillspector/from-vfs')
@@ -23,12 +27,15 @@ async function loadFresh() {
     await import('../../../../src/external-tools/skillspector/from-path')
   const dlxMod =
     await import('../../../../src/external-tools/skillspector/from-dlx')
+  const uvMod =
+    await import('../../../../src/external-tools/skillspector/from-uv')
   const mod =
     await import('../../../../src/external-tools/skillspector/resolve')
   return {
     vfsMock: vfsMod.skillspectorFromVfs as ReturnType<typeof vi.fn>,
     pathMock: pathMod.skillspectorFromPath as ReturnType<typeof vi.fn>,
     dlxMock: dlxMod.skillspectorFromDlx as ReturnType<typeof vi.fn>,
+    uvMock: uvMod.skillspectorFromUv as ReturnType<typeof vi.fn>,
     doResolveSkillSpector: mod.doResolveSkillSpector,
     resolveSkillSpector: mod.resolveSkillSpector,
   }
@@ -136,6 +143,76 @@ describe.sequential('external-tools/skillspector/resolve resolution order', () =
       sha: 'abc1234',
       cacheDir: '/custom/cache',
     })
+  })
+
+  test('runs the UV tier before DLX when uvProjectDir + uvBin are set', async () => {
+    const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
+      await loadFresh()
+    vfsMock.mockResolvedValueOnce(undefined)
+    pathMock.mockResolvedValueOnce(undefined)
+    uvMock.mockResolvedValueOnce({
+      path: '/proj/.venv/bin/skillspector',
+      source: 'uv',
+    })
+    const result = await doResolveSkillSpector({
+      sha: 'abc1234',
+      uvProjectDir: '/proj',
+      uvBin: '/uv',
+    })
+    expect(result?.source).toBe('uv')
+    expect(uvMock).toHaveBeenCalledWith({ projectDir: '/proj', uvBin: '/uv' })
+    // UV hit short-circuits — DLX never runs.
+    expect(dlxMock).not.toHaveBeenCalled()
+  })
+
+  test('UV-tier miss falls through to DLX', async () => {
+    const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
+      await loadFresh()
+    vfsMock.mockResolvedValueOnce(undefined)
+    pathMock.mockResolvedValueOnce(undefined)
+    uvMock.mockResolvedValueOnce(undefined)
+    dlxMock.mockResolvedValueOnce({
+      path: '/dlx/bin/skillspector',
+      source: 'dlx',
+    })
+    const result = await doResolveSkillSpector({
+      sha: 'abc1234',
+      uvProjectDir: '/proj',
+      uvBin: '/uv',
+    })
+    expect(result?.source).toBe('dlx')
+    expect(uvMock).toHaveBeenCalledTimes(1)
+  })
+
+  test('UV tier is skipped without both uvProjectDir AND uvBin', async () => {
+    const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
+      await loadFresh()
+    vfsMock.mockResolvedValueOnce(undefined)
+    pathMock.mockResolvedValueOnce(undefined)
+    dlxMock.mockResolvedValueOnce({
+      path: '/dlx/bin/skillspector',
+      source: 'dlx',
+    })
+    // uvProjectDir set but uvBin missing → uv tier never runs, DLX does.
+    await doResolveSkillSpector({ sha: 'abc1234', uvProjectDir: '/proj' })
+    expect(uvMock).not.toHaveBeenCalled()
+    expect(dlxMock).toHaveBeenCalledTimes(1)
+  })
+
+  test('localOnly skips the UV tier even with a project configured', async () => {
+    const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
+      await loadFresh()
+    vfsMock.mockResolvedValueOnce(undefined)
+    pathMock.mockResolvedValueOnce(undefined)
+    const result = await doResolveSkillSpector({
+      sha: 'abc1234',
+      uvProjectDir: '/proj',
+      uvBin: '/uv',
+      localOnly: true,
+    })
+    expect(result).toBeUndefined()
+    expect(uvMock).not.toHaveBeenCalled()
+    expect(dlxMock).not.toHaveBeenCalled()
   })
 
   test('memoizes via the public resolveSkillSpector — second call reuses the first', async () => {

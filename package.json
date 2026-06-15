@@ -1360,6 +1360,11 @@
       "types": "./dist/external-tools/skillspector/from-path.d.ts",
       "default": "./dist/external-tools/skillspector/from-path.js"
     },
+    "./external-tools/skillspector/from-uv": {
+      "source": "./src/external-tools/skillspector/from-uv.ts",
+      "types": "./dist/external-tools/skillspector/from-uv.d.ts",
+      "default": "./dist/external-tools/skillspector/from-uv.js"
+    },
     "./external-tools/skillspector/from-vfs": {
       "source": "./src/external-tools/skillspector/from-vfs.ts",
       "types": "./dist/external-tools/skillspector/from-vfs.d.ts",

@@ -5,15 +5,20 @@
  *   1. VFS — smol binary's embedded skillspector (if packed)
  *   2. PATH — `which skillspector` (pipx-installed binaries land here too; the
  *      source field distinguishes `'pipx'` vs `'path'`)
- *   3. DLX-venv — `~/.socket/_dlx/skillspector/<sha>/` with the pinned SHA Returns
+ *   3. UV-project — `uv sync --locked` against a uv project (the most locked-down
+ *      tier; every transitive version pinned in uv.lock). Only runs when
+ *      `uvProjectDir` + `uvBin` are supplied.
+ *   4. DLX-venv — `~/.socket/_dlx/skillspector/<sha>/` with the pinned SHA (the
+ *      pip-from-git-SHA fallback when no uv project is available). Returns
  *      `undefined` when all enabled sources miss. Memoized per
- *      sha+cacheDir+localOnly tuple.
+ *      sha+cacheDir+uvProjectDir+localOnly tuple.
  */
 
 import { MapCtor } from '../../primordials/map-set'
 
 import { skillspectorFromDlx } from './from-dlx'
 import { skillspectorFromPath } from './from-path'
+import { skillspectorFromUv } from './from-uv'
 import { skillspectorFromVfs } from './from-vfs'
 
 import type { ResolvedSkillSpector } from './types'
@@ -25,9 +30,20 @@ export interface ResolveSkillSpectorOptions {
    */
   readonly sha?: string | undefined
   /**
-   * Tier-3 cache override. Defaults to `~/.socket/_dlx/skillspector/<sha>`.
+   * DLX cache override. Defaults to `~/.socket/_dlx/skillspector/<sha>`.
    */
   readonly cacheDir?: string | undefined
+  /**
+   * UV-project tier: absolute path to a uv project dir (a `pyproject.toml` +
+   * `uv.lock` pinning the SHA + its closure). When set together with `uvBin`,
+   * the locked-uv tier runs ahead of the DLX-venv tier.
+   */
+  readonly uvProjectDir?: string | undefined
+  /**
+   * UV-project tier: absolute path to the `uv` executable
+   * (typically `resolveUv().path`). Required to run the locked-uv tier.
+   */
+  readonly uvBin?: string | undefined
   /**
    * When true, only the VFS + PATH tiers run. Use for check-mode invocations
    * that want to fail-fast if the tool isn't already installed.
@@ -41,14 +57,14 @@ const resolutionCache = new MapCtor<
 >()
 
 export function cacheKey(options: ResolveSkillSpectorOptions): string {
-  options = { __proto__: null, ...options } as typeof options
-  return `${options.sha ?? ''}|${options.cacheDir ?? ''}|${options.localOnly ? 'local' : 'full'}`
+  const opts = { __proto__: null, ...options } as typeof options
+  return `${opts.sha ?? ''}|${opts.cacheDir ?? ''}|${opts.uvProjectDir ?? ''}|${opts.localOnly ? 'local' : 'full'}`
 }
 
 export async function doResolveSkillSpector(
   options: ResolveSkillSpectorOptions,
 ): Promise<ResolvedSkillSpector | undefined> {
-  options = { __proto__: null, ...options } as typeof options
+  const opts = { __proto__: null, ...options } as typeof options
   const fromVfs = await skillspectorFromVfs()
   /* c8 ignore start - smol Node binary only. */
   if (fromVfs) {
@@ -59,10 +75,25 @@ export async function doResolveSkillSpector(
   if (fromPath) {
     return fromPath
   }
-  if (options.localOnly || !options.sha) {
+  // localOnly stops after the already-installed tiers (VFS + PATH) — no install.
+  if (opts.localOnly) {
     return undefined
   }
-  return skillspectorFromDlx({ sha: options.sha, cacheDir: options.cacheDir })
+  // UV-project tier (preferred): the locked closure, when a project + uv exist.
+  if (opts.uvProjectDir && opts.uvBin) {
+    const fromUv = await skillspectorFromUv({
+      projectDir: opts.uvProjectDir,
+      uvBin: opts.uvBin,
+    })
+    if (fromUv) {
+      return fromUv
+    }
+  }
+  // DLX-venv fallback: pip-from-git-SHA when no uv project is available.
+  if (!opts.sha) {
+    return undefined
+  }
+  return skillspectorFromDlx({ sha: opts.sha, cacheDir: opts.cacheDir })
 }
 
 /**

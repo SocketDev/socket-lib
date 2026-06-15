@@ -4,7 +4,7 @@
  *   because upstream has no PyPI release or GH tags as of 2026-06-01.
  */
 
-export type SkillSpectorSource = 'vfs' | 'pipx' | 'path' | 'dlx'
+export type SkillSpectorSource = 'vfs' | 'pipx' | 'path' | 'uv' | 'dlx'
 
 /**
  * A resolved SkillSpector installation.
@@ -20,6 +20,8 @@ export interface ResolvedSkillSpector {
    * - 'vfs' — extracted from the SEA binary's VFS
    * - 'pipx' — `which skillspector` returned a pipx-installed venv binary
    * - 'path' — `which skillspector` returned a non-pipx binary on PATH
+   * - 'uv' — `uv sync --locked` against a uv project's .venv (the most
+   *   locked-down tier; every transitive version pinned in uv.lock)
    * - 'dlx' — created a venv under ~/.socket/_dlx/skillspector/<sha>/
    */
   readonly source: SkillSpectorSource

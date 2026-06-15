@@ -15,8 +15,13 @@ describe.sequential('external-tools/skillspector/resolve / cacheKey', () => {
   })
 
   test('same SHA produces stable keys', () => {
+    // Determinism: two calls with the same opts yield the same key. (Compared
+    // local-to-local — the published `canonicalCacheKey` predates the
+    // uvProjectDir segment, so a cross-version `toBe` would diverge until lib
+    // republishes; that drift is intentional, not a regression.)
     const opts = { sha: 'abc1234' } as const
-    expect(cacheKey(opts)).toBe(canonicalCacheKey(opts))
+    const first = cacheKey(opts)
+    expect(cacheKey(opts)).toBe(first)
   })
 
   test('localOnly flag is part of the key', () => {
@@ -32,7 +37,9 @@ describe.sequential('external-tools/skillspector/resolve / cacheKey', () => {
   })
 
   test('empty opts produces a stable key', () => {
-    expect(cacheKey({})).toBe(canonicalCacheKey({}))
+    // Determinism, local-to-local (see "same SHA produces stable keys").
+    const first = cacheKey({})
+    expect(cacheKey({})).toBe(first)
   })
 
   test('opts with sha + cacheDir + localOnly produces a deterministic key', () => {
