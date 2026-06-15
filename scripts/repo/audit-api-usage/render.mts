@@ -21,11 +21,13 @@ const ANSI = {
   yellow: '[33m',
 }
 
-// A proportional unicode bar of `width` cells split into colored segments.
-// `segments` is [count, ansiColor][]; the last segment absorbs rounding so the
+// A proportional bar of `width` cells split into segments. Each segment is
+// [count, ansiColor, glyph] — a DISTINCT glyph per segment so the split reads in
+// monochrome too (not only by color): adopted uses a full block, cascade a
+// medium shade, unused a light shade. The last segment absorbs rounding so the
 // bar always fills exactly `width` cells.
 export function stackedBar(
-  segments: ReadonlyArray<readonly [number, string]>,
+  segments: ReadonlyArray<readonly [number, string, string]>,
   total: number,
   width: number,
 ): string {
@@ -35,15 +37,24 @@ export function stackedBar(
   let out = ''
   let used = 0
   for (let i = 0, { length } = segments; i < length; i += 1) {
-    const [count, color] = segments[i]!
+    const [count, color, glyph] = segments[i]!
     const cells =
       i === length - 1 ? width - used : Math.round((count / total) * width)
     if (cells > 0) {
-      out += color + '█'.repeat(cells) + ANSI.reset
+      out += color + glyph.repeat(cells) + ANSI.reset
       used += cells
     }
   }
   return out
+}
+
+// Per-segment glyphs (monochrome-readable): adopted █, cascade ▒, unused ░.
+const GLYPH = { adopted: '█', cascade: '▒', unused: '░' } as const
+
+export interface PassThroughReExport {
+  repo: string
+  file: string
+  subpath: string
 }
 
 export interface ReportData {
@@ -56,8 +67,8 @@ export interface ReportData {
   cascadeOnlySet: Set<string>
   blindSubpaths: string[]
   namespaceRefs: number
-  reExportRefs: number
   bareRootRefs: number
+  passThroughReExports: PassThroughReExport[]
 }
 
 export function renderReport(d: ReportData): void {
@@ -72,23 +83,23 @@ export function renderReport(d: ReportData): void {
   )
   logger.log('')
 
-  // Summary stacked bar: adopted (green) / cascade-only (cyan) / unused (red).
+  // Summary stacked bar: adopted █ green / cascade-only ▒ cyan / unused ░ red.
   const SUMMARY_WIDTH = 48
   logger.log(
     `  ${stackedBar(
       [
-        [d.adopted.length, c.green],
-        [d.cascadeOnly.length, c.cyan],
-        [d.unused.length, c.red],
+        [d.adopted.length, c.green, GLYPH.adopted],
+        [d.cascadeOnly.length, c.cyan, GLYPH.cascade],
+        [d.unused.length, c.red, GLYPH.unused],
       ],
       total,
       SUMMARY_WIDTH,
     )}`,
   )
   logger.log(
-    `  ${c.green}█${c.reset} adopted ${c.bold}${d.adopted.length}${c.reset} (${pct(d.adopted.length)})   ` +
-      `${c.cyan}█${c.reset} cascade-only ${c.bold}${d.cascadeOnly.length}${c.reset} (${pct(d.cascadeOnly.length)})   ` +
-      `${c.red}█${c.reset} unused ${c.bold}${d.unused.length}${c.reset} (${pct(d.unused.length)})`,
+    `  ${c.green}${GLYPH.adopted} adopted${c.reset} ${c.bold}${d.adopted.length}${c.reset} (${pct(d.adopted.length)})   ` +
+      `${c.cyan}${GLYPH.cascade} cascade-only${c.reset} ${c.bold}${d.cascadeOnly.length}${c.reset} (${pct(d.cascadeOnly.length)})   ` +
+      `${c.red}${GLYPH.unused} unused${c.reset} ${c.bold}${d.unused.length}${c.reset} (${pct(d.unused.length)})`,
   )
   logger.log(
     `  ${c.dim}adopted = a member repo imports it · cascade-only = used only in the wheelhouse template/ (shipped fleet-wide) · unused = no reference${c.reset}`,
@@ -98,14 +109,59 @@ export function renderReport(d: ReportData): void {
   renderAreas(d)
   renderFanOut(d)
   renderCascadeOnly(d)
+  renderPassThrough(d)
 
-  // Blind spots + caveats.
+  // Blind spots: ONLY namespace + bare-root reference the package without
+  // naming a subpath, so per-name analysis can't see through them. (Re-exports,
+  // dynamic import(), and require() all name the subpath → counted as usage.)
   logger.log(
-    `  ${c.bold}blind spots${c.reset} ${c.dim}(defeat per-name dead-code analysis)${c.reset}`,
+    `  ${c.bold}blind spots${c.reset} ${c.dim}(reference the package without naming a subpath)${c.reset}`,
   )
   logger.log(
-    `    namespace imports ${d.namespaceRefs}   re-exports ${d.reExportRefs}   bare-root ${d.bareRootRefs}   only-via-blind-spot subpaths ${d.blindSubpaths.length}`,
+    `    namespace imports ${d.namespaceRefs}   bare-root ${d.bareRootRefs}   only-via-blind-spot subpaths ${d.blindSubpaths.length}`,
   )
+}
+
+// Pass-through re-exports: a consumer forwards a lib subpath through its own
+// surface (`export { x } from '@socketsecurity/lib/x'`). The subpath is used,
+// but the hop adds nothing — downstream could import lib directly. Cleanup
+// candidate to minimize. Grouped by repo.
+function renderPassThrough(d: ReportData): void {
+  const c = ANSI
+  if (!d.passThroughReExports.length) {
+    return
+  }
+  const byRepo = new Map<string, PassThroughReExport[]>()
+  for (let i = 0, { length } = d.passThroughReExports; i < length; i += 1) {
+    const p = d.passThroughReExports[i]!
+    const list = byRepo.get(p.repo)
+    if (list) {
+      list.push(p)
+    } else {
+      byRepo.set(p.repo, [p])
+    }
+  }
+  logger.log(
+    `  ${c.yellow}${c.bold}pass-through re-exports${c.reset} ${c.dim}— a consumer forwards a lib subpath; downstream could import lib directly (minimize)${c.reset}`,
+  )
+  const repos = [...byRepo.entries()].toSorted(
+    (a, b) => b[1].length - a[1].length,
+  )
+  for (let i = 0, { length } = repos; i < length; i += 1) {
+    const [repo, list] = repos[i]!
+    logger.log(
+      `    ${c.yellow}${repo.replace(/^socket-/, '')}${c.reset} ${c.dim}(${list.length})${c.reset}`,
+    )
+    for (let j = 0, jlen = Math.min(list.length, 6); j < jlen; j += 1) {
+      logger.log(
+        `      ${list[j]!.file} ${c.dim}→${c.reset} ${list[j]!.subpath}`,
+      )
+    }
+    if (list.length > 6) {
+      logger.log(`      ${c.dim}… +${list.length - 6} more${c.reset}`)
+    }
+  }
+  logger.log('')
 }
 
 // Per-area breakdown: one stacked bar per top-level area, sorted by size.
@@ -150,9 +206,9 @@ function renderAreas(d: ReportData): void {
     const [name, a] = areas[i]!
     const bar = stackedBar(
       [
-        [a.adopted, c.green],
-        [a.cascade, c.cyan],
-        [a.unused, c.red],
+        [a.adopted, c.green, GLYPH.adopted],
+        [a.cascade, c.cyan, GLYPH.cascade],
+        [a.unused, c.red, GLYPH.unused],
       ],
       a.total,
       AREA_BAR,

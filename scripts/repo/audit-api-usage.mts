@@ -2,25 +2,25 @@
 /**
  * @file Audit which `@socketsecurity/lib` export subpaths the fleet + wheelhouse
  *   actually import — AST-accurately, via the vendored acorn/wasm parser, not
- *   grep. Grep over-reports "unused" because it can't see the BLIND SPOTS that
- *   hide real usage:
+ *   grep. Resolves the import shapes grep miscounts:
  *
- *   - namespace imports (`import * as lib from '@socketsecurity/lib/x'`) — the
- *     subpath IS used, but no member-access grep proves which names;
- *   - dynamic `import('@socketsecurity/lib/x')` (ImportExpression) and
- *     `require('@socketsecurity/lib/x')` (CallExpression);
- *   - re-export chains (`export * from '@socketsecurity/lib/x'`) — the subpath
- *     leaks transitively through a consumer's own surface;
- *   - bare-root imports (`from '@socketsecurity/lib'`) that pull the package
- *     index, reaching exports no subpath grep attributes. Reports three
- *     buckets: USED (an import/export/dynamic ref names the subpath), UNUSED
- *     (no consumer references it), and BLIND SPOTS (references that defeat
- *     per-name dead-code analysis — namespace/re-export/dynamic/bare). The
- *     blind-spot list is the honest caveat on the unused count: a subpath
- *     reached only through a blind spot is "used" but its named exports can't
- *     be proven live, and the unused count can't be trusted as "safe to remove"
- *     until the blind spots are accounted for. Usage: node
- *     scripts/repo/audit-api-usage.mts [--json] [--consumers <dir,…>]
+ *   - re-exports (`export { x } from '@socketsecurity/lib/x'`), dynamic
+ *     `import('@socketsecurity/lib/x')`, and `require('@socketsecurity/lib/x')`
+ *     all NAME the subpath → counted as real usage;
+ *   - a type-only namespace import (`import type * as x`) is erased at compile,
+ *     so it counts as a plain reference, not a blind spot;
+ *   - the only true BLIND SPOTS are a runtime namespace import (`import * as x`,
+ *     uses an unknown subset of names) and a bare-root import (`from
+ *     '@socketsecurity/lib'`, no subpath at all) — they reference the package
+ *     without naming a subpath, so per-name dead-code analysis can't see
+ *     through them. Classifies each export 3 ways: ADOPTED (a member repo
+ *     imports it directly), CASCADE-ONLY (used only in the wheelhouse
+ *     `template/`, shipped fleet-wide by the cascade — live, NOT removable),
+ *     UNUSED (no reference). Also flags pass-through re-exports (a consumer
+ *     forwarding a lib subpath through its own surface — a cleanup candidate).
+ *     Renders the picture as terminal bars (see audit-api-usage/render.mts).
+ *     Usage: node scripts/repo/audit-api-usage.mts [--json] [--consumers
+ *     <dir,…>]
  */
 
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
@@ -180,7 +180,11 @@ export function collectRefs(
         return
       }
       // A namespace import (`import * as x from …`) hides which named exports
-      // are used — flag it distinctly from a plain named import.
+      // are used — flag it distinctly from a plain named import. BUT a
+      // type-only namespace import (`import type * as x`) is erased at compile
+      // (no runtime surface, no tree-shaking impact), so it's NOT a blind spot
+      // — treat it as a plain named ref. The acorn-wasm parser doesn't expose
+      // `importKind`, so detect `import type` from the statement's source text.
       const specifiers =
         (node as { specifiers?: AcornNode[] | undefined }).specifiers ?? []
       const isNamespace = specifiers.some(
@@ -188,7 +192,14 @@ export function collectRefs(
           (s as { type?: string | undefined }).type ===
           'ImportNamespaceSpecifier',
       )
-      add(spec, isNamespace ? 'namespace-import' : 'named-import')
+      const start = (node as { start?: number | undefined }).start ?? 0
+      const isTypeOnly = /^import\s+type\b/.test(
+        source.slice(start, start + 16),
+      )
+      add(
+        spec,
+        isNamespace && !isTypeOnly ? 'namespace-import' : 'named-import',
+      )
     },
     ExportAllDeclaration(node) {
       const spec = literalValue(
@@ -289,15 +300,17 @@ function main(): number {
     }
   }
 
-  // A subpath is USED if any ref names it exactly. Blind-spot KINDS
-  // (namespace / re-export / dynamic / require / bare-root) mean named-export
-  // dead-code analysis can't see through them.
+  // A subpath is USED if any ref names it exactly. Only TWO kinds are genuine
+  // blind spots — they reference the package WITHOUT naming a subpath's
+  // members, so per-name dead-code analysis can't see through them:
+  //   - namespace-import (`import * as x`) — uses an unknown subset of names
+  //   - bare-root (`from '@socketsecurity/lib'`) — no subpath at all
+  // A re-export (`export { x } from '…/foo'`), a dynamic `import('…/foo')`, and
+  // a `require('…/foo')` all NAME the subpath, so they resolve cleanly — they
+  // are real usage, not blind spots.
   const BLIND: ReadonlySet<UsageRef['kind']> = new Set([
     'bare-root',
-    'dynamic-import',
     'namespace-import',
-    're-export',
-    'require',
   ])
   const refsBySubpath = new Map<string, UsageRef[]>()
   for (let i = 0, { length } = allRefs; i < length; i += 1) {
@@ -346,8 +359,21 @@ function main(): number {
     (refsBySubpath.get(s) ?? []).every(r => BLIND.has(r.kind)),
   )
   const namespaceRefs = allRefs.filter(r => r.kind === 'namespace-import')
-  const reExportRefs = allRefs.filter(r => r.kind === 're-export')
   const bareRootRefs = allRefs.filter(r => r.kind === 'bare-root')
+
+  // Pass-through re-exports: a consumer `export { x } from '@socketsecurity/lib/x'`
+  // that just forwards a lib subpath through its own surface. The subpath IS
+  // used (counted as adopted), but the forwarding adds nothing — downstream
+  // could import lib directly. A cleanup candidate (minimize). Keyed by
+  // "<repo>: <file>:<subpath>" so the report can point at each site. The
+  // wheelhouse template/ is excluded (its re-exports are intentional shims).
+  const passThroughReExports = allRefs
+    .filter(r => r.kind === 're-export' && !r.cascadeSource)
+    .map(r => ({
+      repo: r.repo,
+      file: path.relative(path.join(PROJECTS_DIR, r.repo), r.file),
+      subpath: r.subpath,
+    }))
 
   if (json) {
     logger.log(
@@ -365,8 +391,8 @@ function main(): number {
           ),
           blindSpotSubpaths: blindSubpaths,
           namespaceRefs: namespaceRefs.length,
-          reExportRefs: reExportRefs.length,
           bareRootRefs: bareRootRefs.length,
+          passThroughReExports,
         },
         null,
         2,
@@ -385,8 +411,8 @@ function main(): number {
     cascadeOnlySet,
     blindSubpaths,
     namespaceRefs: namespaceRefs.length,
-    reExportRefs: reExportRefs.length,
     bareRootRefs: bareRootRefs.length,
+    passThroughReExports,
   })
   return 0
 }
