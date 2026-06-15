@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.9](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.9) - 2026-06-15
+
+### Added
+
+- **`external-tools/uv` — uv resolver.** Resolves Astral's `uv` Python package manager across three tiers (embedded VFS, then system PATH, then a downloaded GitHub release), matching the shape of the other `external-tools/*` tool resolvers. Exports `resolveUv`, `ResolvedUv`, `UvSource`, plus the per-platform asset map and download helpers.
+- **`external-tools/python/uv-install` — reproducible uv-project install helpers.** `uvSyncProject` installs a uv project at its exact pinned versions and refuses to proceed when those have drifted, so every machine gets the same result. `uvExportMaterialize` installs the same pinned versions into a content-addressed directory with no virtualenv, so the result is relocatable and embeddable in a single-file build. Concurrent callers serialize so two installs can't collide. The Python analog of the npm dlx install model.
+- **`external-tools/skillspector` — pinned-project resolution tier.** `skillspectorFromUv` installs SkillSpector from a fully pinned uv project (every version fixed) and returns its entry point, resolved ahead of the existing git-SHA fallback when a project directory and `uv` binary are supplied. Adds a `'uv'` source to the resolution result.
+- **`config/layers` — generic layered-config reader.** `readConfigLayers(name, { dirs })` reads a named config file from an ordered list of layer directories (lowest precedence first) and returns the layers that exist; absent or unparseable layers are skipped. `mergeConfigArray` concatenates one array-valued key across all layers, for lists that higher layers extend rather than replace. It carries no project-convention knowledge: the caller supplies the directories and the merge policy.
+- **`paths` — `_wheelhouse` tool-layout dirs and the agent-clone dir.** `getSocketRackDir` and `getSocketRackToolDir` locate the racked tool store, `getSocketWheelhouseBinDir` the PATH-handle directory that points into it, and `getSocketRepoClonesDir` the directory where agents clone external repos for reference (kept out of the projects tree so sibling-walking tooling never treats a clone as a fleet member).
+- **`ai` — offline/gated-model detection and fall-over.** `spawnTierWithFallback` walks a tier's cross-engine equivalence chain and runs the first engine that is both installed and authenticated, so a request still completes when the preferred model is down, gated, or unkeyed. `isModelUnavailable` recognizes a down-or-gated model from the engine's actual output rather than a brittle literal-string match. The `ai/route` resolver and `ai/subagent-status` reader are exposed as their own entry points.
+
+### Changed
+
+- **`fleet/repo-config` is now a thin wrapper over `config/layers`.** `resolveRepoConfig` (the fleet default layered under a per-repo override) and `mergeRepoConfigArray` stay at `fleet/repo-config`; the generic, convention-free primitives moved to the new `config/layers` entry. `resolveRepoConfig` callers see no behavior change.
+
 ## [6.0.8](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.8) - 2026-06-11
 
 ### Added
