@@ -58,3 +58,23 @@ export function getXdgConfigHome(): string | undefined {
 export function getXdgDataHome(): string | undefined {
   return getEnvValue('XDG_DATA_HOME')
 }
+
+/**
+ * XDG_RUNTIME_DIR environment variable. XDG Base Directory specification
+ * runtime directory — the home for ephemeral, owner-only runtime objects
+ * (daemon sockets, locks). Set by systemd to `/run/user/<uid>`; absent on
+ * macOS and many non-systemd setups, so callers must provide a fallback.
+ *
+ * @example
+ *   ;```typescript
+ *   import { getXdgRuntimeDir } from '@socketsecurity/lib/env/xdg'
+ *
+ *   const runtimeDir = getXdgRuntimeDir()
+ *   // e.g. '/run/user/1000' or undefined
+ *   ```
+ *
+ * @returns The XDG runtime directory path, or `undefined` if not set
+ */
+export function getXdgRuntimeDir(): string | undefined {
+  return getEnvValue('XDG_RUNTIME_DIR')
+}

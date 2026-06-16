@@ -10,6 +10,7 @@
  *   nest under the same `_`-prefix.
  */
 
+import { WIN32 } from '../constants/platform'
 import { SOCKET_DIR, SOCKET_DIR_PREFIX } from '../constants/socket'
 import { getHome } from '../env/home'
 import {
@@ -19,6 +20,7 @@ import {
   getSocketStateDirEnv,
 } from '../env/socket'
 import { getUserprofile } from '../env/windows'
+import { getXdgRuntimeDir } from '../env/xdg'
 
 import { CACHE_DIR, CACHE_TTL_DIR, DOT_SOCKET_DIR, RUN_DIR } from './dirnames'
 import { normalizePath } from './normalize'
@@ -49,6 +51,38 @@ export function getOsTmpDir(): string {
   // Always check for overrides - don't cache when using rewire
   const os = getNodeOs()
   return getPathValue('tmpdir', () => os.tmpdir())
+}
+/**
+ * Resolve the runtime socket path for a local daemon named `name`. Distinct
+ * from getSocketAppRuntimeDir (the persistent ~/.socket/_state/<app>/run/
+ * home): the SOCKET endpoint itself belongs in the ephemeral, owner-only XDG
+ * runtime dir — correctly permissioned and auto-cleaned on logout — while the
+ * downloaded daemon binary + durable token cache live under ~/.socket. The
+ * daemon and every client MUST compute the identical path (1 path, 1
+ * reference), so this is the single resolver both sides call.
+ *
+ * Resolution:
+ *
+ * - Windows: `\\.\pipe\<name>-sock` (named pipe; Unix sockets are unavailable
+ *   pre-Win10 1803, same framing/semantics). Returned raw — a pipe path is not
+ *   a filesystem path and must not be slash-normalized.
+ * - `$XDG_RUNTIME_DIR/<name>.sock` when XDG_RUNTIME_DIR is set (systemd
+ *   `/run/user/<uid>/`).
+ * - Else `$TMPDIR/<name>-<uid>.sock` (the `<uid>` suffix avoids collisions when
+ *   TMPDIR is shared across users on a multi-tenant box).
+ */
+export function getRuntimeSocketPath(name: string): string {
+  if (WIN32) {
+    return `\\\\.\\pipe\\${name}-sock`
+  }
+  const path = getNodePath()
+  const xdgRuntimeDir = getXdgRuntimeDir()
+  if (xdgRuntimeDir) {
+    return normalizePath(path.join(xdgRuntimeDir, `${name}.sock`))
+  }
+  const os = getNodeOs()
+  const { uid } = os.userInfo()
+  return normalizePath(path.join(getOsTmpDir(), `${name}-${uid}.sock`))
 }
 /**
  * Get a Socket app cache directory (~/.socket/_<appName>/cache).

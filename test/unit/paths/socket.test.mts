@@ -16,6 +16,7 @@ import { getSocketUserDir as getSocketUserDirStable } from '@socketsecurity/lib-
 import {
   getOsHomeDir,
   getOsTmpDir,
+  getRuntimeSocketPath,
   getSocketAppCacheDir,
   getSocketAppCacheTtlDir,
   getSocketAppDir,
@@ -367,6 +368,21 @@ describe('paths/socket', () => {
     it('should end with the app state dir + /run', () => {
       const runDir = getSocketAppRuntimeDir('proteus')
       expect(runDir).toMatch(/\/_state\/proteus\/run$/)
+    })
+  })
+
+  describe('getRuntimeSocketPath', () => {
+    it('should use $XDG_RUNTIME_DIR when set', () => {
+      setEnv('XDG_RUNTIME_DIR', '/run/user/1000')
+      const result = getRuntimeSocketPath('proteus')
+      expect(result).toBe('/run/user/1000/proteus.sock')
+    })
+
+    it('should fall back to $TMPDIR/<name>-<uid>.sock without XDG_RUNTIME_DIR', () => {
+      clearEnv('XDG_RUNTIME_DIR')
+      setPath('tmpdir', '/tmp/run')
+      const result = getRuntimeSocketPath('proteus')
+      expect(result).toMatch(/^\/tmp\/run\/proteus-\d+\.sock$/)
     })
   })
 
