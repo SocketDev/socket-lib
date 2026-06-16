@@ -21,6 +21,7 @@
  *   covers the read.
  */
 
+import { requestFromBroker } from './broker'
 import { readSecret, readSecretSync } from './keychain'
 
 export interface ResolveOptions {
@@ -55,10 +56,11 @@ export interface ResolveResult {
   value: string
   /**
    * Where the value came from: 'env' — `process.env[<account>]` had a non-empty
-   * value. 'keychain' — env-var was empty/missing; the value was read from the
-   * OS credential store under the matching account.
+   * value. 'broker' — the proteus daemon vended it after a biometric unlock.
+   * 'keychain' — env-var was empty and no broker was running; the value was
+   * read from the OS credential store under the matching account.
    */
-  source: 'env' | 'keychain'
+  source: 'broker' | 'env' | 'keychain'
   /**
    * Which account in `accounts` was the actual hit.
    */
@@ -101,6 +103,18 @@ export async function resolve(
   if (allowEnvOnly) {
     return undefined
   }
+  // proteus broker layer: a running daemon vends the value after a single
+  // biometric unlock, ahead of the direct keychain read. Dormant (returns
+  // undefined without prompting) when no daemon is running, so this is a
+  // transparent fall-through to the keychain below. Skipped under allowEnvOnly
+  // since that path returned already. Async-only — resolveSync has no broker.
+  for (let i = 0, { length } = accounts; i < length; i += 1) {
+    const account = accounts[i]!
+    const fromBroker = await requestFromBroker({ account, service })
+    if (fromBroker) {
+      return { value: fromBroker, source: 'broker', account }
+    }
+  }
   for (let i = 0, { length } = accounts; i < length; i += 1) {
     const account = accounts[i]!
     const fromKeychain = await readSecret({ service, account })
@@ -113,7 +127,8 @@ export async function resolve(
 
 /**
  * Sync variant for non-async callers (hook initializers, schema validators that
- * run before any `await` machinery exists).
+ * run before any `await` machinery exists). Has no proteus broker tier — the
+ * broker socket round-trip is async — so this path is env → keychain only.
  */
 export function resolveSync(
   options: ResolveOptions,
