@@ -194,7 +194,7 @@ export function renderLlmsTxt(
   lines.push('')
   lines.push(
     'Import any namespace by its subpath, e.g. ' +
-      '`import { callAiHttpModel } from \'@socketsecurity/lib/ai/http\'`. ' +
+      "`import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. " +
       'Each link below points at the TypeScript declarations shipped in the ' +
       'package, where the full signature for that subpath lives.',
   )
@@ -206,9 +206,7 @@ export function renderLlmsTxt(
     lines.push('')
     for (const row of groups.get(key) ?? []) {
       const desc = row.summary ? `: ${row.summary}` : ''
-      lines.push(
-        `- [@socketsecurity/lib/${row.subpath}](${row.types})${desc}`,
-      )
+      lines.push(`- [@socketsecurity/lib/${row.subpath}](${row.types})${desc}`)
     }
     lines.push('')
   }
