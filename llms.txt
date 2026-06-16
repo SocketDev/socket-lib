@@ -1,0 +1,749 @@
+# @socketsecurity/lib
+
+> Core utilities and infrastructure for Socket.dev security tools. 543 subpath exports, grouped by namespace.
+
+Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
+
+## Top-level
+
+- [@socketsecurity/lib/errors](./dist/errors/message.d.ts)
+- [@socketsecurity/lib/http-request](./dist/http-request/node.d.ts)
+- [@socketsecurity/lib/integrity](./dist/integrity.d.ts)
+- [@socketsecurity/lib/logger](./dist/logger/node.d.ts)
+- [@socketsecurity/lib/native-messaging](./dist/native-messaging/index.d.ts)
+
+## abort/
+
+- [@socketsecurity/lib/abort/signal](./dist/abort/signal.d.ts)
+
+## ai/
+
+- [@socketsecurity/lib/ai/agent-context](./dist/ai/agent-context.d.mts)
+- [@socketsecurity/lib/ai/backends](./dist/ai/backends.d.mts)
+- [@socketsecurity/lib/ai/credentials](./dist/ai/credentials.d.mts)
+- [@socketsecurity/lib/ai/discover](./dist/ai/discover.d.mts)
+- [@socketsecurity/lib/ai/exec](./dist/ai/exec.d.mts)
+- [@socketsecurity/lib/ai/http](./dist/ai/http.d.mts)
+- [@socketsecurity/lib/ai/profiles](./dist/ai/profiles.d.mts)
+- [@socketsecurity/lib/ai/route](./dist/ai/route.d.mts)
+- [@socketsecurity/lib/ai/spawn](./dist/ai/spawn.d.mts)
+- [@socketsecurity/lib/ai/subagent-status](./dist/ai/subagent-status.d.mts)
+- [@socketsecurity/lib/ai/tier](./dist/ai/tier.d.mts)
+- [@socketsecurity/lib/ai/types](./dist/ai/types.d.mts)
+- [@socketsecurity/lib/ai/worktree](./dist/ai/worktree.d.mts)
+
+## ansi/
+
+- [@socketsecurity/lib/ansi/constants](./dist/ansi/constants.d.ts)
+- [@socketsecurity/lib/ansi/strip](./dist/ansi/strip.d.ts)
+
+## archives/
+
+- [@socketsecurity/lib/archives/detect](./dist/archives/detect.d.ts)
+- [@socketsecurity/lib/archives/extract](./dist/archives/extract.d.ts)
+- [@socketsecurity/lib/archives/tar](./dist/archives/tar.d.ts)
+- [@socketsecurity/lib/archives/types](./dist/archives/types.d.ts)
+- [@socketsecurity/lib/archives/zip](./dist/archives/zip.d.ts)
+
+## argv/
+
+- [@socketsecurity/lib/argv/flag-predicates](./dist/argv/flag-predicates.d.ts)
+- [@socketsecurity/lib/argv/flag-types](./dist/argv/flag-types.d.ts)
+- [@socketsecurity/lib/argv/parse](./dist/argv/parse.d.ts)
+- [@socketsecurity/lib/argv/parse-args-string](./dist/argv/parse-args-string.d.ts)
+
+## arrays/
+
+- [@socketsecurity/lib/arrays/chunk](./dist/arrays/chunk.d.ts)
+- [@socketsecurity/lib/arrays/join](./dist/arrays/join.d.ts)
+- [@socketsecurity/lib/arrays/predicates](./dist/arrays/predicates.d.ts)
+- [@socketsecurity/lib/arrays/unique](./dist/arrays/unique.d.ts)
+
+## bin/
+
+- [@socketsecurity/lib/bin/exec](./dist/bin/exec.d.ts)
+- [@socketsecurity/lib/bin/find](./dist/bin/find.d.ts)
+- [@socketsecurity/lib/bin/resolve](./dist/bin/resolve.d.ts)
+- [@socketsecurity/lib/bin/shadow](./dist/bin/shadow.d.ts)
+- [@socketsecurity/lib/bin/types](./dist/bin/types.d.ts)
+- [@socketsecurity/lib/bin/which](./dist/bin/which.d.ts)
+
+## cacache/
+
+- [@socketsecurity/lib/cacache/clear](./dist/cacache/clear.d.ts)
+- [@socketsecurity/lib/cacache/read](./dist/cacache/read.d.ts)
+- [@socketsecurity/lib/cacache/tmp](./dist/cacache/tmp.d.ts)
+- [@socketsecurity/lib/cacache/types](./dist/cacache/types.d.ts)
+- [@socketsecurity/lib/cacache/write](./dist/cacache/write.d.ts)
+
+## cache/
+
+- [@socketsecurity/lib/cache/ttl/store](./dist/cache/ttl/store.d.ts)
+- [@socketsecurity/lib/cache/ttl/types](./dist/cache/ttl/types.d.ts)
+
+## checks/
+
+- [@socketsecurity/lib/checks/primordials](./dist/checks/primordials.d.ts)
+- [@socketsecurity/lib/checks/primordials-defaults](./dist/checks/primordials-defaults.d.ts)
+
+## cli/
+
+- [@socketsecurity/lib/cli/check](./dist/cli/check.d.ts)
+- [@socketsecurity/lib/cli/check-primordials](./dist/cli/check-primordials.d.ts)
+- [@socketsecurity/lib/cli/socket-lib](./dist/cli/socket-lib.d.ts)
+
+## colors/
+
+- [@socketsecurity/lib/colors/convert](./dist/colors/convert.d.ts)
+- [@socketsecurity/lib/colors/palette](./dist/colors/palette.d.ts)
+- [@socketsecurity/lib/colors/socket-palette](./dist/colors/socket-palette.d.ts)
+- [@socketsecurity/lib/colors/types](./dist/colors/types.d.ts)
+
+## compression/
+
+- [@socketsecurity/lib/compression/brotli](./dist/compression/brotli.d.ts)
+- [@socketsecurity/lib/compression/gzip](./dist/compression/gzip.d.ts)
+- [@socketsecurity/lib/compression/types](./dist/compression/types.d.ts)
+
+## config/
+
+- [@socketsecurity/lib/config/layers](./dist/config/layers.d.ts)
+
+## constants/
+
+- [@socketsecurity/lib/constants/agents](./dist/constants/agents.d.ts)
+- [@socketsecurity/lib/constants/encoding](./dist/constants/encoding.d.ts)
+- [@socketsecurity/lib/constants/github](./dist/constants/github.d.ts)
+- [@socketsecurity/lib/constants/licenses](./dist/constants/licenses.d.ts)
+- [@socketsecurity/lib/constants/lifecycle-script-names](./dist/constants/lifecycle-script-names.d.ts)
+- [@socketsecurity/lib/constants/maintained-node-versions](./dist/constants/maintained-node-versions.d.ts)
+- [@socketsecurity/lib/constants/node](./dist/constants/node.d.ts)
+- [@socketsecurity/lib/constants/package-default-node-range](./dist/constants/package-default-node-range.d.ts)
+- [@socketsecurity/lib/constants/package-default-socket-categories](./dist/constants/package-default-socket-categories.d.ts)
+- [@socketsecurity/lib/constants/packages](./dist/constants/packages.d.ts)
+- [@socketsecurity/lib/constants/platform](./dist/constants/platform.d.ts)
+- [@socketsecurity/lib/constants/runtime](./dist/constants/runtime.d.ts)
+- [@socketsecurity/lib/constants/sentinels](./dist/constants/sentinels.d.ts)
+- [@socketsecurity/lib/constants/socket](./dist/constants/socket.d.ts)
+- [@socketsecurity/lib/constants/testing](./dist/constants/testing.d.ts)
+- [@socketsecurity/lib/constants/time](./dist/constants/time.d.ts)
+- [@socketsecurity/lib/constants/typescript](./dist/constants/typescript.d.ts)
+
+## cover/
+
+- [@socketsecurity/lib/cover/code](./dist/cover/code.d.ts)
+- [@socketsecurity/lib/cover/formatters](./dist/cover/formatters.d.ts)
+- [@socketsecurity/lib/cover/type](./dist/cover/type.d.ts)
+- [@socketsecurity/lib/cover/types](./dist/cover/types.d.ts)
+
+## crypto/
+
+- [@socketsecurity/lib/crypto/hash](./dist/crypto/hash.d.ts)
+
+## debug/
+
+- [@socketsecurity/lib/debug/caller-info](./dist/debug/caller-info.d.ts)
+- [@socketsecurity/lib/debug/namespace](./dist/debug/namespace.d.ts)
+- [@socketsecurity/lib/debug/output](./dist/debug/output.d.ts)
+- [@socketsecurity/lib/debug/types](./dist/debug/types.d.ts)
+
+## dlx/
+
+- [@socketsecurity/lib/dlx/arborist](./dist/dlx/arborist.d.ts)
+- [@socketsecurity/lib/dlx/binary](./dist/dlx/binary.d.ts)
+- [@socketsecurity/lib/dlx/binary-cache](./dist/dlx/binary-cache.d.ts)
+- [@socketsecurity/lib/dlx/binary-download](./dist/dlx/binary-download.d.ts)
+- [@socketsecurity/lib/dlx/binary-resolution](./dist/dlx/binary-resolution.d.ts)
+- [@socketsecurity/lib/dlx/binary-types](./dist/dlx/binary-types.d.ts)
+- [@socketsecurity/lib/dlx/cache](./dist/dlx/cache.d.ts)
+- [@socketsecurity/lib/dlx/detect](./dist/dlx/detect.d.ts)
+- [@socketsecurity/lib/dlx/dir](./dist/dlx/dir.d.ts)
+- [@socketsecurity/lib/dlx/firewall](./dist/dlx/firewall.d.ts)
+- [@socketsecurity/lib/dlx/lockfile](./dist/dlx/lockfile.d.ts)
+- [@socketsecurity/lib/dlx/manifest](./dist/dlx/manifest.d.ts)
+- [@socketsecurity/lib/dlx/package](./dist/dlx/package.d.ts)
+- [@socketsecurity/lib/dlx/packages](./dist/dlx/packages.d.ts)
+- [@socketsecurity/lib/dlx/paths](./dist/dlx/paths.d.ts)
+- [@socketsecurity/lib/dlx/spec](./dist/dlx/spec.d.ts)
+- [@socketsecurity/lib/dlx/types](./dist/dlx/types.d.ts)
+
+## eco/
+
+- [@socketsecurity/lib/eco/cargo/lockfile-format](./dist/eco/cargo/lockfile-format.d.ts)
+- [@socketsecurity/lib/eco/cargo/manifest-format](./dist/eco/cargo/manifest-format.d.ts)
+- [@socketsecurity/lib/eco/cargo/parse-lockfile](./dist/eco/cargo/parse-lockfile.d.ts)
+- [@socketsecurity/lib/eco/manifest/analyze-lockfile](./dist/eco/manifest/analyze-lockfile.d.ts)
+- [@socketsecurity/lib/eco/manifest/detect-format](./dist/eco/manifest/detect-format.d.ts)
+- [@socketsecurity/lib/eco/manifest/find-packages](./dist/eco/manifest/find-packages.d.ts)
+- [@socketsecurity/lib/eco/manifest/get-package](./dist/eco/manifest/get-package.d.ts)
+- [@socketsecurity/lib/eco/manifest/get-package-versions](./dist/eco/manifest/get-package-versions.d.ts)
+- [@socketsecurity/lib/eco/manifest/manifest-error](./dist/eco/manifest/manifest-error.d.ts)
+- [@socketsecurity/lib/eco/manifest/parse](./dist/eco/manifest/parse.d.ts)
+- [@socketsecurity/lib/eco/manifest/parse-lockfile](./dist/eco/manifest/parse-lockfile.d.ts)
+- [@socketsecurity/lib/eco/manifest/parse-manifest](./dist/eco/manifest/parse-manifest.d.ts)
+- [@socketsecurity/lib/eco/manifest/types](./dist/eco/manifest/types.d.ts)
+- [@socketsecurity/lib/eco/npm/bun/exec](./dist/eco/npm/bun/exec.d.ts)
+- [@socketsecurity/lib/eco/npm/manifest-format](./dist/eco/npm/manifest-format.d.ts)
+- [@socketsecurity/lib/eco/npm/npm/exec](./dist/eco/npm/npm/exec.d.ts)
+- [@socketsecurity/lib/eco/npm/npm/extract-package-name-from-path](./dist/eco/npm/npm/extract-package-name-from-path.d.ts)
+- [@socketsecurity/lib/eco/npm/npm/flags](./dist/eco/npm/npm/flags.d.ts)
+- [@socketsecurity/lib/eco/npm/npm/lockfile-format](./dist/eco/npm/npm/lockfile-format.d.ts)
+- [@socketsecurity/lib/eco/npm/npm/parse-git-url](./dist/eco/npm/npm/parse-git-url.d.ts)
+- [@socketsecurity/lib/eco/npm/npm/parse-lockfile](./dist/eco/npm/npm/parse-lockfile.d.ts)
+- [@socketsecurity/lib/eco/npm/parse-package-json](./dist/eco/npm/parse-package-json.d.ts)
+- [@socketsecurity/lib/eco/npm/pnpm/detect-pnpm-version](./dist/eco/npm/pnpm/detect-pnpm-version.d.ts)
+- [@socketsecurity/lib/eco/npm/pnpm/exec](./dist/eco/npm/pnpm/exec.d.ts)
+- [@socketsecurity/lib/eco/npm/pnpm/flags](./dist/eco/npm/pnpm/flags.d.ts)
+- [@socketsecurity/lib/eco/npm/pnpm/lockfile-format](./dist/eco/npm/pnpm/lockfile-format.d.ts)
+- [@socketsecurity/lib/eco/npm/pnpm/parse-lockfile](./dist/eco/npm/pnpm/parse-lockfile.d.ts)
+- [@socketsecurity/lib/eco/npm/pnpm/parse-pnpm-package-id-v5](./dist/eco/npm/pnpm/parse-pnpm-package-id-v5.d.ts)
+- [@socketsecurity/lib/eco/npm/pnpm/parse-pnpm-package-id-v6-v9](./dist/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.d.ts)
+- [@socketsecurity/lib/eco/npm/script](./dist/eco/npm/script.d.ts)
+- [@socketsecurity/lib/eco/npm/vlt/exec](./dist/eco/npm/vlt/exec.d.ts)
+- [@socketsecurity/lib/eco/npm/yarnpkg/yarn/exec](./dist/eco/npm/yarnpkg/yarn/exec.d.ts)
+- [@socketsecurity/lib/eco/npm/yarnpkg/yarn/lockfile-format](./dist/eco/npm/yarnpkg/yarn/lockfile-format.d.ts)
+- [@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-lockfile](./dist/eco/npm/yarnpkg/yarn/parse-lockfile.d.ts)
+- [@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-yarn-descriptor](./dist/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.d.ts)
+- [@socketsecurity/lib/eco/purl](./dist/eco/purl.d.ts)
+- [@socketsecurity/lib/eco/types](./dist/eco/types.d.ts)
+
+## effects/
+
+- [@socketsecurity/lib/effects/pulse-frames](./dist/effects/pulse-frames.d.ts)
+- [@socketsecurity/lib/effects/shimmer](./dist/effects/shimmer.d.ts)
+- [@socketsecurity/lib/effects/shimmer-keyframes](./dist/effects/shimmer-keyframes.d.ts)
+- [@socketsecurity/lib/effects/shimmer-terminal](./dist/effects/shimmer-terminal.d.ts)
+
+## env/
+
+- [@socketsecurity/lib/env/boolean](./dist/env/boolean.d.ts)
+- [@socketsecurity/lib/env/case-insensitive](./dist/env/case-insensitive.d.ts)
+- [@socketsecurity/lib/env/ci](./dist/env/ci.d.ts)
+- [@socketsecurity/lib/env/debug](./dist/env/debug.d.ts)
+- [@socketsecurity/lib/env/github](./dist/env/github.d.ts)
+- [@socketsecurity/lib/env/github-status](./dist/env/github-status.d.ts)
+- [@socketsecurity/lib/env/home](./dist/env/home.d.ts)
+- [@socketsecurity/lib/env/locale](./dist/env/locale.d.ts)
+- [@socketsecurity/lib/env/node-auth-token](./dist/env/node-auth-token.d.ts)
+- [@socketsecurity/lib/env/node-env](./dist/env/node-env.d.ts)
+- [@socketsecurity/lib/env/node-version-managers](./dist/env/node-version-managers.d.ts)
+- [@socketsecurity/lib/env/npm](./dist/env/npm.d.ts)
+- [@socketsecurity/lib/env/number](./dist/env/number.d.ts)
+- [@socketsecurity/lib/env/package-manager](./dist/env/package-manager.d.ts)
+- [@socketsecurity/lib/env/path](./dist/env/path.d.ts)
+- [@socketsecurity/lib/env/pre-commit](./dist/env/pre-commit.d.ts)
+- [@socketsecurity/lib/env/proxy](./dist/env/proxy.d.ts)
+- [@socketsecurity/lib/env/rewire](./dist/env/rewire.d.ts)
+- [@socketsecurity/lib/env/shell](./dist/env/shell.d.ts)
+- [@socketsecurity/lib/env/socket](./dist/env/socket.d.ts)
+- [@socketsecurity/lib/env/socket-cli](./dist/env/socket-cli.d.ts)
+- [@socketsecurity/lib/env/socket-mcp](./dist/env/socket-mcp.d.ts)
+- [@socketsecurity/lib/env/string](./dist/env/string.d.ts)
+- [@socketsecurity/lib/env/temp-dir](./dist/env/temp-dir.d.ts)
+- [@socketsecurity/lib/env/term](./dist/env/term.d.ts)
+- [@socketsecurity/lib/env/test](./dist/env/test.d.ts)
+- [@socketsecurity/lib/env/types](./dist/env/types.d.ts)
+- [@socketsecurity/lib/env/windows](./dist/env/windows.d.ts)
+- [@socketsecurity/lib/env/xdg](./dist/env/xdg.d.ts)
+
+## errors/
+
+- [@socketsecurity/lib/errors/message](./dist/errors/message.d.ts)
+- [@socketsecurity/lib/errors/predicates](./dist/errors/predicates.d.ts)
+- [@socketsecurity/lib/errors/stack](./dist/errors/stack.d.ts)
+
+## events/
+
+- [@socketsecurity/lib/events/exit/handler](./dist/events/exit/handler.d.ts)
+- [@socketsecurity/lib/events/exit/intercept](./dist/events/exit/intercept.d.ts)
+- [@socketsecurity/lib/events/exit/lifecycle](./dist/events/exit/lifecycle.d.ts)
+- [@socketsecurity/lib/events/exit/signals](./dist/events/exit/signals.d.ts)
+- [@socketsecurity/lib/events/exit/types](./dist/events/exit/types.d.ts)
+- [@socketsecurity/lib/events/warning/handler](./dist/events/warning/handler.d.ts)
+- [@socketsecurity/lib/events/warning/suppress](./dist/events/warning/suppress.d.ts)
+
+## external-tools/
+
+- [@socketsecurity/lib/external-tools/bazel/asset-names](./dist/external-tools/bazel/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/bazel/from-download](./dist/external-tools/bazel/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/bazel/from-path](./dist/external-tools/bazel/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/bazel/read-bazel-version-file](./dist/external-tools/bazel/read-bazel-version-file.d.ts)
+- [@socketsecurity/lib/external-tools/bazel/resolve](./dist/external-tools/bazel/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/bazel/resolve-asset-url](./dist/external-tools/bazel/resolve-asset-url.d.ts)
+- [@socketsecurity/lib/external-tools/bazel/resolve-bazel-version](./dist/external-tools/bazel/resolve-bazel-version.d.ts)
+- [@socketsecurity/lib/external-tools/bazel/types](./dist/external-tools/bazel/types.d.ts)
+- [@socketsecurity/lib/external-tools/cdxgen/asset-names](./dist/external-tools/cdxgen/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/cdxgen/from-download](./dist/external-tools/cdxgen/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/cdxgen/from-path](./dist/external-tools/cdxgen/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/cdxgen/from-vfs](./dist/external-tools/cdxgen/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/cdxgen/resolve](./dist/external-tools/cdxgen/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/cdxgen/types](./dist/external-tools/cdxgen/types.d.ts)
+- [@socketsecurity/lib/external-tools/from-download](./dist/external-tools/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/from-pip-venv](./dist/external-tools/from-pip-venv.d.ts)
+- [@socketsecurity/lib/external-tools/janus/asset-names](./dist/external-tools/janus/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/janus/from-download](./dist/external-tools/janus/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/janus/from-path](./dist/external-tools/janus/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/janus/from-vfs](./dist/external-tools/janus/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/janus/resolve](./dist/external-tools/janus/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/janus/types](./dist/external-tools/janus/types.d.ts)
+- [@socketsecurity/lib/external-tools/jre/asset-names](./dist/external-tools/jre/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/jre/detect-platform-arch](./dist/external-tools/jre/detect-platform-arch.d.ts)
+- [@socketsecurity/lib/external-tools/jre/from-download](./dist/external-tools/jre/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/jre/from-java-home](./dist/external-tools/jre/from-java-home.d.ts)
+- [@socketsecurity/lib/external-tools/jre/from-path](./dist/external-tools/jre/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/jre/from-vfs](./dist/external-tools/jre/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/jre/resolve](./dist/external-tools/jre/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/jre/types](./dist/external-tools/jre/types.d.ts)
+- [@socketsecurity/lib/external-tools/manifest](./dist/external-tools/manifest.d.ts)
+- [@socketsecurity/lib/external-tools/opengrep/asset-names](./dist/external-tools/opengrep/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/opengrep/from-download](./dist/external-tools/opengrep/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/opengrep/from-path](./dist/external-tools/opengrep/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/opengrep/from-vfs](./dist/external-tools/opengrep/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/opengrep/resolve](./dist/external-tools/opengrep/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/opengrep/types](./dist/external-tools/opengrep/types.d.ts)
+- [@socketsecurity/lib/external-tools/python/asset-names](./dist/external-tools/python/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/python/dlx](./dist/external-tools/python/dlx.d.ts)
+- [@socketsecurity/lib/external-tools/python/from-download](./dist/external-tools/python/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/python/from-path](./dist/external-tools/python/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/python/pin](./dist/external-tools/python/pin.d.ts)
+- [@socketsecurity/lib/external-tools/python/pip-install](./dist/external-tools/python/pip-install.d.ts)
+- [@socketsecurity/lib/external-tools/python/resolve](./dist/external-tools/python/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/python/types](./dist/external-tools/python/types.d.ts)
+- [@socketsecurity/lib/external-tools/python/uv-install](./dist/external-tools/python/uv-install.d.ts)
+- [@socketsecurity/lib/external-tools/sbt/asset-names](./dist/external-tools/sbt/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/sbt/from-download](./dist/external-tools/sbt/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/sbt/from-path](./dist/external-tools/sbt/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/sbt/from-vfs](./dist/external-tools/sbt/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/sbt/resolve](./dist/external-tools/sbt/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/sbt/types](./dist/external-tools/sbt/types.d.ts)
+- [@socketsecurity/lib/external-tools/skillspector/from-dlx](./dist/external-tools/skillspector/from-dlx.d.ts)
+- [@socketsecurity/lib/external-tools/skillspector/from-path](./dist/external-tools/skillspector/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/skillspector/from-uv](./dist/external-tools/skillspector/from-uv.d.ts)
+- [@socketsecurity/lib/external-tools/skillspector/from-vfs](./dist/external-tools/skillspector/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/skillspector/resolve](./dist/external-tools/skillspector/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/skillspector/types](./dist/external-tools/skillspector/types.d.ts)
+- [@socketsecurity/lib/external-tools/synp/asset-names](./dist/external-tools/synp/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/synp/from-download](./dist/external-tools/synp/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/synp/from-path](./dist/external-tools/synp/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/synp/from-vfs](./dist/external-tools/synp/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/synp/resolve](./dist/external-tools/synp/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/synp/types](./dist/external-tools/synp/types.d.ts)
+- [@socketsecurity/lib/external-tools/trivy/asset-names](./dist/external-tools/trivy/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/trivy/from-download](./dist/external-tools/trivy/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/trivy/from-path](./dist/external-tools/trivy/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/trivy/from-vfs](./dist/external-tools/trivy/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/trivy/resolve](./dist/external-tools/trivy/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/trivy/types](./dist/external-tools/trivy/types.d.ts)
+- [@socketsecurity/lib/external-tools/trufflehog/asset-names](./dist/external-tools/trufflehog/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/trufflehog/from-download](./dist/external-tools/trufflehog/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/trufflehog/from-path](./dist/external-tools/trufflehog/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/trufflehog/from-vfs](./dist/external-tools/trufflehog/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/trufflehog/resolve](./dist/external-tools/trufflehog/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/trufflehog/types](./dist/external-tools/trufflehog/types.d.ts)
+- [@socketsecurity/lib/external-tools/uv/asset-names](./dist/external-tools/uv/asset-names.d.ts)
+- [@socketsecurity/lib/external-tools/uv/from-download](./dist/external-tools/uv/from-download.d.ts)
+- [@socketsecurity/lib/external-tools/uv/from-path](./dist/external-tools/uv/from-path.d.ts)
+- [@socketsecurity/lib/external-tools/uv/from-vfs](./dist/external-tools/uv/from-vfs.d.ts)
+- [@socketsecurity/lib/external-tools/uv/resolve](./dist/external-tools/uv/resolve.d.ts)
+- [@socketsecurity/lib/external-tools/uv/types](./dist/external-tools/uv/types.d.ts)
+
+## fleet/
+
+- [@socketsecurity/lib/fleet/repo-config](./dist/fleet/repo-config.d.ts)
+
+## fs/
+
+- [@socketsecurity/lib/fs/access](./dist/fs/access.d.ts)
+- [@socketsecurity/lib/fs/allowed-dirs-cache](./dist/fs/allowed-dirs-cache.d.ts)
+- [@socketsecurity/lib/fs/encoding](./dist/fs/encoding.d.ts)
+- [@socketsecurity/lib/fs/find](./dist/fs/find.d.ts)
+- [@socketsecurity/lib/fs/inspect](./dist/fs/inspect.d.ts)
+- [@socketsecurity/lib/fs/read-dir](./dist/fs/read-dir.d.ts)
+- [@socketsecurity/lib/fs/read-file](./dist/fs/read-file.d.ts)
+- [@socketsecurity/lib/fs/read-json](./dist/fs/read-json.d.ts)
+- [@socketsecurity/lib/fs/read-json-cache](./dist/fs/read-json-cache.d.ts)
+- [@socketsecurity/lib/fs/resolve-module](./dist/fs/resolve-module.d.ts)
+- [@socketsecurity/lib/fs/safe](./dist/fs/safe.d.ts)
+- [@socketsecurity/lib/fs/types](./dist/fs/types.d.ts)
+- [@socketsecurity/lib/fs/unique](./dist/fs/unique.d.ts)
+- [@socketsecurity/lib/fs/validate](./dist/fs/validate.d.ts)
+- [@socketsecurity/lib/fs/write-json](./dist/fs/write-json.d.ts)
+
+## git/
+
+- [@socketsecurity/lib/git/changed](./dist/git/changed.d.ts)
+- [@socketsecurity/lib/git/repo](./dist/git/repo.d.ts)
+- [@socketsecurity/lib/git/staged](./dist/git/staged.d.ts)
+- [@socketsecurity/lib/git/tracked](./dist/git/tracked.d.ts)
+- [@socketsecurity/lib/git/types](./dist/git/types.d.ts)
+- [@socketsecurity/lib/git/unstaged](./dist/git/unstaged.d.ts)
+
+## github/
+
+- [@socketsecurity/lib/github/constants](./dist/github/constants.d.ts)
+- [@socketsecurity/lib/github/errors](./dist/github/errors.d.ts)
+- [@socketsecurity/lib/github/ghsa](./dist/github/ghsa.d.ts)
+- [@socketsecurity/lib/github/refs](./dist/github/refs.d.ts)
+- [@socketsecurity/lib/github/refs-cache](./dist/github/refs-cache.d.ts)
+- [@socketsecurity/lib/github/refs-graphql](./dist/github/refs-graphql.d.ts)
+- [@socketsecurity/lib/github/refs-rest](./dist/github/refs-rest.d.ts)
+- [@socketsecurity/lib/github/request](./dist/github/request.d.ts)
+- [@socketsecurity/lib/github/token](./dist/github/token.d.ts)
+- [@socketsecurity/lib/github/types](./dist/github/types.d.ts)
+
+## globs/
+
+- [@socketsecurity/lib/globs/defaults](./dist/globs/defaults.d.ts)
+- [@socketsecurity/lib/globs/match](./dist/globs/match.d.ts)
+- [@socketsecurity/lib/globs/matcher](./dist/globs/matcher.d.ts)
+- [@socketsecurity/lib/globs/stream](./dist/globs/stream.d.ts)
+- [@socketsecurity/lib/globs/types](./dist/globs/types.d.ts)
+
+## http-request/
+
+- [@socketsecurity/lib/http-request/browser](./dist/http-request/browser.d.ts)
+- [@socketsecurity/lib/http-request/checksum-file](./dist/http-request/checksum-file.d.ts)
+- [@socketsecurity/lib/http-request/download](./dist/http-request/download.d.ts)
+- [@socketsecurity/lib/http-request/download-types](./dist/http-request/download-types.d.ts)
+- [@socketsecurity/lib/http-request/errors](./dist/http-request/errors.d.ts)
+- [@socketsecurity/lib/http-request/fetch/browser](./dist/http-request/fetch/browser.d.ts)
+- [@socketsecurity/lib/http-request/headers](./dist/http-request/headers.d.ts)
+- [@socketsecurity/lib/http-request/http-request](./dist/http-request/node.d.ts)
+- [@socketsecurity/lib/http-request/node](./dist/http-request/node.d.ts)
+- [@socketsecurity/lib/http-request/request](./dist/http-request/request.d.ts)
+- [@socketsecurity/lib/http-request/request-attempt](./dist/http-request/request-attempt.d.ts)
+- [@socketsecurity/lib/http-request/request-types](./dist/http-request/request-types.d.ts)
+- [@socketsecurity/lib/http-request/response-reader](./dist/http-request/response-reader.d.ts)
+- [@socketsecurity/lib/http-request/response-types](./dist/http-request/response-types.d.ts)
+- [@socketsecurity/lib/http-request/user-agent](./dist/http-request/user-agent.d.ts)
+
+## ipc-cli/
+
+- [@socketsecurity/lib/ipc-cli/get](./dist/ipc-cli/get.d.ts)
+- [@socketsecurity/lib/ipc-cli/types](./dist/ipc-cli/types.d.ts)
+
+## ipc/
+
+- [@socketsecurity/lib/ipc/directory](./dist/ipc/directory.d.ts)
+- [@socketsecurity/lib/ipc/paths](./dist/ipc/paths.d.ts)
+- [@socketsecurity/lib/ipc/types](./dist/ipc/types.d.ts)
+- [@socketsecurity/lib/ipc/write](./dist/ipc/write.d.ts)
+
+## json/
+
+- [@socketsecurity/lib/json/edit](./dist/json/edit.d.ts)
+- [@socketsecurity/lib/json/format](./dist/json/format.d.ts)
+- [@socketsecurity/lib/json/parse](./dist/json/parse.d.ts)
+- [@socketsecurity/lib/json/types](./dist/json/types.d.ts)
+
+## links/
+
+- [@socketsecurity/lib/links/create](./dist/links/create.d.ts)
+- [@socketsecurity/lib/links/types](./dist/links/types.d.ts)
+
+## logger/
+
+- [@socketsecurity/lib/logger/browser](./dist/logger/browser.d.ts)
+- [@socketsecurity/lib/logger/colors](./dist/logger/colors.d.ts)
+- [@socketsecurity/lib/logger/console](./dist/logger/console.d.ts)
+- [@socketsecurity/lib/logger/console-methods](./dist/logger/console-methods.d.ts)
+- [@socketsecurity/lib/logger/default](./dist/logger/default.d.ts)
+- [@socketsecurity/lib/logger/indentation-methods](./dist/logger/indentation-methods.d.ts)
+- [@socketsecurity/lib/logger/logger](./dist/logger/node.d.ts)
+- [@socketsecurity/lib/logger/node](./dist/logger/node.d.ts)
+- [@socketsecurity/lib/logger/options](./dist/logger/options.d.ts)
+- [@socketsecurity/lib/logger/semantic-methods](./dist/logger/semantic-methods.d.ts)
+- [@socketsecurity/lib/logger/stream](./dist/logger/stream.d.ts)
+- [@socketsecurity/lib/logger/stream-methods](./dist/logger/stream-methods.d.ts)
+- [@socketsecurity/lib/logger/symbols](./dist/logger/symbols.d.ts)
+- [@socketsecurity/lib/logger/symbols-builder](./dist/logger/symbols-builder.d.ts)
+- [@socketsecurity/lib/logger/types](./dist/logger/types.d.ts)
+
+## memo/
+
+- [@socketsecurity/lib/memo/async](./dist/memo/async.d.ts)
+- [@socketsecurity/lib/memo/clear](./dist/memo/clear.d.ts)
+- [@socketsecurity/lib/memo/decorator](./dist/memo/decorator.d.ts)
+- [@socketsecurity/lib/memo/memoize](./dist/memo/memoize.d.ts)
+- [@socketsecurity/lib/memo/once](./dist/memo/once.d.ts)
+- [@socketsecurity/lib/memo/types](./dist/memo/types.d.ts)
+- [@socketsecurity/lib/memo/weak](./dist/memo/weak.d.ts)
+
+## native-messaging/
+
+- [@socketsecurity/lib/native-messaging/host](./dist/native-messaging/host.d.ts)
+- [@socketsecurity/lib/native-messaging/install](./dist/native-messaging/install.d.ts)
+- [@socketsecurity/lib/native-messaging/rate-limit](./dist/native-messaging/rate-limit.d.ts)
+- [@socketsecurity/lib/native-messaging/run](./dist/native-messaging/run.d.ts)
+
+## node/
+
+- [@socketsecurity/lib/node/async-hooks](./dist/node/async-hooks.d.ts)
+- [@socketsecurity/lib/node/child-process](./dist/node/child-process.d.ts)
+- [@socketsecurity/lib/node/crypto](./dist/node/crypto.d.ts)
+- [@socketsecurity/lib/node/events](./dist/node/events.d.ts)
+- [@socketsecurity/lib/node/fs](./dist/node/fs.d.ts)
+- [@socketsecurity/lib/node/fs-promises](./dist/node/fs-promises.d.ts)
+- [@socketsecurity/lib/node/http](./dist/node/http.d.ts)
+- [@socketsecurity/lib/node/https](./dist/node/https.d.ts)
+- [@socketsecurity/lib/node/module](./dist/node/module.d.ts)
+- [@socketsecurity/lib/node/os](./dist/node/os.d.ts)
+- [@socketsecurity/lib/node/path](./dist/node/path.d.ts)
+- [@socketsecurity/lib/node/timers-promises](./dist/node/timers-promises.d.ts)
+- [@socketsecurity/lib/node/url](./dist/node/url.d.ts)
+- [@socketsecurity/lib/node/util](./dist/node/util.d.ts)
+
+## objects/
+
+- [@socketsecurity/lib/objects/getters](./dist/objects/getters.d.ts)
+- [@socketsecurity/lib/objects/inspect](./dist/objects/inspect.d.ts)
+- [@socketsecurity/lib/objects/mutate](./dist/objects/mutate.d.ts)
+- [@socketsecurity/lib/objects/predicates](./dist/objects/predicates.d.ts)
+- [@socketsecurity/lib/objects/sort](./dist/objects/sort.d.ts)
+- [@socketsecurity/lib/objects/types](./dist/objects/types.d.ts)
+
+## packages/
+
+- [@socketsecurity/lib/packages/edit](./dist/packages/edit.d.ts)
+- [@socketsecurity/lib/packages/edit-class](./dist/packages/edit-class.d.ts)
+- [@socketsecurity/lib/packages/exports](./dist/packages/exports.d.ts)
+- [@socketsecurity/lib/packages/fetch](./dist/packages/fetch.d.ts)
+- [@socketsecurity/lib/packages/find](./dist/packages/find.d.ts)
+- [@socketsecurity/lib/packages/isolation](./dist/packages/isolation.d.ts)
+- [@socketsecurity/lib/packages/licenses](./dist/packages/licenses.d.ts)
+- [@socketsecurity/lib/packages/manifest](./dist/packages/manifest.d.ts)
+- [@socketsecurity/lib/packages/metadata-extensions](./dist/packages/metadata-extensions.d.ts)
+- [@socketsecurity/lib/packages/normalize](./dist/packages/normalize.d.ts)
+- [@socketsecurity/lib/packages/provenance](./dist/packages/provenance.d.ts)
+- [@socketsecurity/lib/packages/read](./dist/packages/read.d.ts)
+- [@socketsecurity/lib/packages/specs](./dist/packages/specs.d.ts)
+- [@socketsecurity/lib/packages/tarball](./dist/packages/tarball.d.ts)
+- [@socketsecurity/lib/packages/types](./dist/packages/types.d.ts)
+- [@socketsecurity/lib/packages/validation](./dist/packages/validation.d.ts)
+
+## paths/
+
+- [@socketsecurity/lib/paths/conversion](./dist/paths/conversion.d.ts)
+- [@socketsecurity/lib/paths/dirnames](./dist/paths/dirnames.d.ts)
+- [@socketsecurity/lib/paths/exts](./dist/paths/exts.d.ts)
+- [@socketsecurity/lib/paths/filenames](./dist/paths/filenames.d.ts)
+- [@socketsecurity/lib/paths/globs](./dist/paths/globs.d.ts)
+- [@socketsecurity/lib/paths/normalize](./dist/paths/normalize.d.ts)
+- [@socketsecurity/lib/paths/packages](./dist/paths/packages.d.ts)
+- [@socketsecurity/lib/paths/predicates](./dist/paths/predicates.d.ts)
+- [@socketsecurity/lib/paths/resolve](./dist/paths/resolve.d.ts)
+- [@socketsecurity/lib/paths/rewire](./dist/paths/rewire.d.ts)
+- [@socketsecurity/lib/paths/socket](./dist/paths/socket.d.ts)
+- [@socketsecurity/lib/paths/walk](./dist/paths/walk.d.ts)
+
+## perf/
+
+- [@socketsecurity/lib/perf/enabled](./dist/perf/enabled.d.ts)
+- [@socketsecurity/lib/perf/metrics](./dist/perf/metrics.d.ts)
+- [@socketsecurity/lib/perf/report](./dist/perf/report.d.ts)
+- [@socketsecurity/lib/perf/timer](./dist/perf/timer.d.ts)
+- [@socketsecurity/lib/perf/types](./dist/perf/types.d.ts)
+
+## pkg-ext/
+
+- [@socketsecurity/lib/pkg-ext/data](./dist/pkg-ext/data.d.ts)
+- [@socketsecurity/lib/pkg-ext/types](./dist/pkg-ext/types.d.ts)
+
+## primordials/
+
+- [@socketsecurity/lib/primordials/array](./dist/primordials/array.d.ts)
+- [@socketsecurity/lib/primordials/buffer](./dist/primordials/buffer.d.ts)
+- [@socketsecurity/lib/primordials/date](./dist/primordials/date.d.ts)
+- [@socketsecurity/lib/primordials/error](./dist/primordials/error.d.ts)
+- [@socketsecurity/lib/primordials/function](./dist/primordials/function.d.ts)
+- [@socketsecurity/lib/primordials/globals](./dist/primordials/globals.d.ts)
+- [@socketsecurity/lib/primordials/headers](./dist/primordials/headers.d.ts)
+- [@socketsecurity/lib/primordials/intl](./dist/primordials/intl.d.ts)
+- [@socketsecurity/lib/primordials/json](./dist/primordials/json.d.ts)
+- [@socketsecurity/lib/primordials/map-set](./dist/primordials/map-set.d.ts)
+- [@socketsecurity/lib/primordials/math](./dist/primordials/math.d.ts)
+- [@socketsecurity/lib/primordials/number](./dist/primordials/number.d.ts)
+- [@socketsecurity/lib/primordials/object](./dist/primordials/object.d.ts)
+- [@socketsecurity/lib/primordials/process](./dist/primordials/process.d.ts)
+- [@socketsecurity/lib/primordials/promise](./dist/primordials/promise.d.ts)
+- [@socketsecurity/lib/primordials/reflect](./dist/primordials/reflect.d.ts)
+- [@socketsecurity/lib/primordials/regexp](./dist/primordials/regexp.d.ts)
+- [@socketsecurity/lib/primordials/string](./dist/primordials/string.d.ts)
+- [@socketsecurity/lib/primordials/symbol](./dist/primordials/symbol.d.ts)
+- [@socketsecurity/lib/primordials/uncurry](./dist/primordials/uncurry.d.ts)
+- [@socketsecurity/lib/primordials/url](./dist/primordials/url.d.ts)
+
+## process/
+
+- [@socketsecurity/lib/process/abort](./dist/process/abort.d.ts)
+- [@socketsecurity/lib/process/lock-instance](./dist/process/lock-instance.d.ts)
+- [@socketsecurity/lib/process/lock-manager](./dist/process/lock-manager.d.ts)
+- [@socketsecurity/lib/process/lock-types](./dist/process/lock-types.d.ts)
+- [@socketsecurity/lib/process/spawn/child](./dist/process/spawn/child.d.ts)
+- [@socketsecurity/lib/process/spawn/errors](./dist/process/spawn/errors.d.ts)
+- [@socketsecurity/lib/process/spawn/kill-tree](./dist/process/spawn/kill-tree.d.ts)
+- [@socketsecurity/lib/process/spawn/stdio](./dist/process/spawn/stdio.d.ts)
+- [@socketsecurity/lib/process/spawn/types](./dist/process/spawn/types.d.ts)
+- [@socketsecurity/lib/process/transient](./dist/process/transient.d.ts)
+
+## promises/
+
+- [@socketsecurity/lib/promises/iterate](./dist/promises/iterate.d.ts)
+- [@socketsecurity/lib/promises/options](./dist/promises/options.d.ts)
+- [@socketsecurity/lib/promises/queue](./dist/promises/queue.d.ts)
+- [@socketsecurity/lib/promises/resolvers](./dist/promises/resolvers.d.ts)
+- [@socketsecurity/lib/promises/retry](./dist/promises/retry.d.ts)
+- [@socketsecurity/lib/promises/timers](./dist/promises/timers.d.ts)
+- [@socketsecurity/lib/promises/types](./dist/promises/types.d.ts)
+
+## regexps/
+
+- [@socketsecurity/lib/regexps/escape](./dist/regexps/escape.d.ts)
+- [@socketsecurity/lib/regexps/hex](./dist/regexps/hex.d.ts)
+- [@socketsecurity/lib/regexps/spec](./dist/regexps/spec.d.ts)
+
+## releases/
+
+- [@socketsecurity/lib/releases/github-archives](./dist/releases/github-archives.d.ts)
+- [@socketsecurity/lib/releases/github-asset-url](./dist/releases/github-asset-url.d.ts)
+- [@socketsecurity/lib/releases/github-assets](./dist/releases/github-assets.d.ts)
+- [@socketsecurity/lib/releases/github-auth](./dist/releases/github-auth.d.ts)
+- [@socketsecurity/lib/releases/github-downloads](./dist/releases/github-downloads.d.ts)
+- [@socketsecurity/lib/releases/github-listing](./dist/releases/github-listing.d.ts)
+- [@socketsecurity/lib/releases/github-retry-config](./dist/releases/github-retry-config.d.ts)
+- [@socketsecurity/lib/releases/github-types](./dist/releases/github-types.d.ts)
+- [@socketsecurity/lib/releases/socket-btm](./dist/releases/socket-btm.d.ts)
+- [@socketsecurity/lib/releases/socket-btm-binary-naming](./dist/releases/socket-btm-binary-naming.d.ts)
+
+## schema/
+
+- [@socketsecurity/lib/schema/parse](./dist/schema/parse.d.ts)
+- [@socketsecurity/lib/schema/types](./dist/schema/types.d.ts)
+- [@socketsecurity/lib/schema/validate](./dist/schema/validate.d.ts)
+
+## sea/
+
+- [@socketsecurity/lib/sea/detect](./dist/sea/detect.d.ts)
+
+## secrets/
+
+- [@socketsecurity/lib/secrets/compare](./dist/secrets/compare.d.ts)
+- [@socketsecurity/lib/secrets/find](./dist/secrets/find.d.ts)
+- [@socketsecurity/lib/secrets/keychain](./dist/secrets/keychain.d.ts)
+- [@socketsecurity/lib/secrets/linux](./dist/secrets/linux.d.ts)
+- [@socketsecurity/lib/secrets/macos](./dist/secrets/macos.d.ts)
+- [@socketsecurity/lib/secrets/rc](./dist/secrets/rc.d.ts)
+- [@socketsecurity/lib/secrets/socket-api-token](./dist/secrets/socket-api-token.d.ts)
+- [@socketsecurity/lib/secrets/types](./dist/secrets/types.d.ts)
+- [@socketsecurity/lib/secrets/windows](./dist/secrets/windows.d.ts)
+
+## shadow/
+
+- [@socketsecurity/lib/shadow/skip](./dist/shadow/skip.d.ts)
+- [@socketsecurity/lib/shadow/types](./dist/shadow/types.d.ts)
+
+## shell/
+
+- [@socketsecurity/lib/shell/parse](./dist/shell/parse.d.ts)
+- [@socketsecurity/lib/shell/quote](./dist/shell/quote.d.ts)
+
+## smol/
+
+- [@socketsecurity/lib/smol/detect](./dist/smol/detect.d.ts)
+- [@socketsecurity/lib/smol/http](./dist/smol/http.d.ts)
+- [@socketsecurity/lib/smol/https](./dist/smol/https.d.ts)
+- [@socketsecurity/lib/smol/manifest](./dist/smol/manifest.d.ts)
+- [@socketsecurity/lib/smol/path](./dist/smol/path.d.ts)
+- [@socketsecurity/lib/smol/primordial](./dist/smol/primordial.d.ts)
+- [@socketsecurity/lib/smol/purl](./dist/smol/purl.d.ts)
+- [@socketsecurity/lib/smol/versions](./dist/smol/versions.d.ts)
+- [@socketsecurity/lib/smol/vfs](./dist/smol/vfs.d.ts)
+
+## sorts/
+
+- [@socketsecurity/lib/sorts/natural](./dist/sorts/natural.d.ts)
+- [@socketsecurity/lib/sorts/semver](./dist/sorts/semver.d.ts)
+- [@socketsecurity/lib/sorts/strings](./dist/sorts/strings.d.ts)
+- [@socketsecurity/lib/sorts/types](./dist/sorts/types.d.ts)
+
+## spinner/
+
+- [@socketsecurity/lib/spinner/create-spinner-class](./dist/spinner/create-spinner-class.d.ts)
+- [@socketsecurity/lib/spinner/default](./dist/spinner/default.d.ts)
+- [@socketsecurity/lib/spinner/format](./dist/spinner/format.d.ts)
+- [@socketsecurity/lib/spinner/spinner](./dist/spinner/spinner.d.ts)
+- [@socketsecurity/lib/spinner/spinner-internals](./dist/spinner/spinner-internals.d.ts)
+- [@socketsecurity/lib/spinner/spinner-shimmer-methods](./dist/spinner/spinner-shimmer-methods.d.ts)
+- [@socketsecurity/lib/spinner/spinner-status-methods](./dist/spinner/spinner-status-methods.d.ts)
+- [@socketsecurity/lib/spinner/types](./dist/spinner/types.d.ts)
+- [@socketsecurity/lib/spinner/with](./dist/spinner/with.d.ts)
+
+## stdio/
+
+- [@socketsecurity/lib/stdio/clear](./dist/stdio/clear.d.ts)
+- [@socketsecurity/lib/stdio/divider](./dist/stdio/divider.d.ts)
+- [@socketsecurity/lib/stdio/footer](./dist/stdio/footer.d.ts)
+- [@socketsecurity/lib/stdio/header](./dist/stdio/header.d.ts)
+- [@socketsecurity/lib/stdio/progress](./dist/stdio/progress.d.ts)
+- [@socketsecurity/lib/stdio/prompts](./dist/stdio/prompts.d.ts)
+- [@socketsecurity/lib/stdio/stderr](./dist/stdio/stderr.d.ts)
+- [@socketsecurity/lib/stdio/stdout](./dist/stdio/stdout.d.ts)
+
+## streams/
+
+- [@socketsecurity/lib/streams/parallel](./dist/streams/parallel.d.ts)
+- [@socketsecurity/lib/streams/transform](./dist/streams/transform.d.ts)
+
+## strings/
+
+- [@socketsecurity/lib/strings/format](./dist/strings/format.d.ts)
+- [@socketsecurity/lib/strings/predicates](./dist/strings/predicates.d.ts)
+- [@socketsecurity/lib/strings/search](./dist/strings/search.d.ts)
+- [@socketsecurity/lib/strings/transform](./dist/strings/transform.d.ts)
+- [@socketsecurity/lib/strings/types](./dist/strings/types.d.ts)
+- [@socketsecurity/lib/strings/width](./dist/strings/width.d.ts)
+
+## tables/
+
+- [@socketsecurity/lib/tables/bordered](./dist/tables/bordered.d.ts)
+- [@socketsecurity/lib/tables/padding](./dist/tables/padding.d.ts)
+- [@socketsecurity/lib/tables/simple](./dist/tables/simple.d.ts)
+- [@socketsecurity/lib/tables/types](./dist/tables/types.d.ts)
+
+## temporal/
+
+- [@socketsecurity/lib/temporal/instant](./dist/temporal/instant.d.ts)
+- [@socketsecurity/lib/temporal/now](./dist/temporal/now.d.ts)
+- [@socketsecurity/lib/temporal/slots](./dist/temporal/slots.d.ts)
+- [@socketsecurity/lib/temporal/system](./dist/temporal/system.d.ts)
+- [@socketsecurity/lib/temporal/temporal](./dist/temporal/temporal.d.ts)
+
+## themes/
+
+- [@socketsecurity/lib/themes/context](./dist/themes/context.d.ts)
+- [@socketsecurity/lib/themes/resolve](./dist/themes/resolve.d.ts)
+- [@socketsecurity/lib/themes/themes](./dist/themes/themes.d.ts)
+- [@socketsecurity/lib/themes/types](./dist/themes/types.d.ts)
+
+## url/
+
+- [@socketsecurity/lib/url/assert-safe](./dist/url/assert-safe.d.ts)
+- [@socketsecurity/lib/url/parse](./dist/url/parse.d.ts)
+- [@socketsecurity/lib/url/predicates](./dist/url/predicates.d.ts)
+- [@socketsecurity/lib/url/search-params](./dist/url/search-params.d.ts)
+- [@socketsecurity/lib/url/types](./dist/url/types.d.ts)
+
+## versions/
+
+- [@socketsecurity/lib/versions/compare](./dist/versions/compare.d.ts)
+- [@socketsecurity/lib/versions/modify](./dist/versions/modify.d.ts)
+- [@socketsecurity/lib/versions/parse](./dist/versions/parse.d.ts)
+- [@socketsecurity/lib/versions/range](./dist/versions/range.d.ts)
+- [@socketsecurity/lib/versions/types](./dist/versions/types.d.ts)
+
+## words/
+
+- [@socketsecurity/lib/words/article](./dist/words/article.d.ts)
+- [@socketsecurity/lib/words/capitalize](./dist/words/capitalize.d.ts)
+- [@socketsecurity/lib/words/pluralize](./dist/words/pluralize.d.ts)
+- [@socketsecurity/lib/words/types](./dist/words/types.d.ts)

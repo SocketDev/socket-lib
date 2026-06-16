@@ -1,8 +1,10 @@
 /**
- * @file Generate docs/api.md from package.json exports. Walks every subpath
- *   export, finds the matching source file under src/, and emits a grouped
- *   markdown table with the first line of each module's `@fileoverview`.
- *   Regenerate whenever exports change.
+ * @file Generate docs/api.md and the published llms.txt from package.json
+ *   exports. Walks every subpath export, finds the matching source file under
+ *   src/, and emits (1) a grouped markdown table for humans (docs/api.md,
+ *   linking to src/) and (2) a publish-safe llms.txt discovery index for AI
+ *   agents (linking to the shipped .d.mts declarations). Regenerate whenever
+ *   exports change.
  */
 
 import { readFileSync, writeFileSync } from 'node:fs'
@@ -26,7 +28,12 @@ type PackageExports = Record<
   | undefined
 >
 
-type Row = { subpath: string; file: string; summary: string }
+type Row = {
+  subpath: string
+  file: string
+  types: string
+  summary: string
+}
 
 export function buildRows(exports: PackageExports): Row[] {
   const rows: Row[] = []
@@ -45,9 +52,15 @@ export function buildRows(exports: PackageExports): Row[] {
       .replace(/^\.\/dist\//, path.join(rootPath, 'src') + path.sep)
       .replace(/\.js$/, '.ts')
     const display = subpath.slice(2)
+    // Link llms.txt at the shipped declaration file (./dist/**/*.d.mts) — the
+    // genuinely useful target in a published tarball, where `src/` is absent.
+    // Fall back to the runtime entry's `.d.mts` sibling when `types` is unset.
+    const types =
+      value.types ?? def.replace(/\.js$/, '.d.mts').replace(/\.cjs$/, '.d.cts')
     rows.push({
       subpath: display,
       file: path.relative(rootPath, srcPath).replaceAll(path.sep, '/'),
+      types,
       summary: extractSummary(srcPath),
     })
   }
@@ -157,6 +170,52 @@ export function renderMarkdown(groups: Map<string, Row[]>): string {
   return lines.join('\n')
 }
 
+export function renderLlmsTxt(
+  groups: Map<string, Row[]>,
+  exportCount: number,
+): string {
+  const keys = [...groups.keys()].toSorted((a, b) => {
+    if (a === 'Top-level') {
+      return -1
+    }
+    if (b === 'Top-level') {
+      return 1
+    }
+    return a.localeCompare(b)
+  })
+
+  const lines: string[] = []
+  lines.push('# @socketsecurity/lib')
+  lines.push('')
+  lines.push(
+    '> Core utilities and infrastructure for Socket.dev security tools. ' +
+      `${exportCount} subpath exports, grouped by namespace.`,
+  )
+  lines.push('')
+  lines.push(
+    'Import any namespace by its subpath, e.g. ' +
+      '`import { callAiHttpModel } from \'@socketsecurity/lib/ai/http\'`. ' +
+      'Each link below points at the TypeScript declarations shipped in the ' +
+      'package, where the full signature for that subpath lives.',
+  )
+  lines.push('')
+
+  for (const key of keys) {
+    const heading = key === 'Top-level' ? 'Top-level' : key
+    lines.push(`## ${heading}`)
+    lines.push('')
+    for (const row of groups.get(key) ?? []) {
+      const desc = row.summary ? `: ${row.summary}` : ''
+      lines.push(
+        `- [@socketsecurity/lib/${row.subpath}](${row.types})${desc}`,
+      )
+    }
+    lines.push('')
+  }
+
+  return lines.join('\n')
+}
+
 async function main(): Promise<void> {
   const pkg = JSON.parse(
     readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
@@ -164,10 +223,14 @@ async function main(): Promise<void> {
 
   const rows = buildRows(pkg.exports)
   const groups = groupRows(rows)
-  const markdown = renderMarkdown(groups)
-  const outPath = path.join(rootPath, 'docs', 'api.md')
-  writeFileSync(outPath, markdown)
-  // Run oxfmt so the checked-in file matches the formatter's expectations
+
+  const apiPath = path.join(rootPath, 'docs', 'api.md')
+  writeFileSync(apiPath, renderMarkdown(groups))
+
+  const llmsPath = path.join(rootPath, 'llms.txt')
+  writeFileSync(llmsPath, renderLlmsTxt(groups, rows.length))
+
+  // Run oxfmt so the checked-in files match the formatter's expectations
   // (table column alignment, etc.) — otherwise lint fails on every build.
   // Must pass -c so the fleet's oxfmtrc.json (single-quote, no-semi, table
   // alignment behaviour) wins over oxfmt's built-in default config.
@@ -182,7 +245,8 @@ async function main(): Promise<void> {
         '--ignore-path',
         '.config/fleet/.prettierignore',
         '--write',
-        outPath,
+        apiPath,
+        llmsPath,
       ],
       {
         cwd: rootPath,
@@ -193,7 +257,7 @@ async function main(): Promise<void> {
   } catch {
     // Formatting is best-effort — don't fail the build if oxfmt is missing.
   }
-  logger.log(`Wrote ${rows.length} exports to docs/api.md`)
+  logger.log(`Wrote ${rows.length} exports to docs/api.md and llms.txt`)
 }
 
 main().catch(err => {

@@ -26,7 +26,8 @@
   "files": [
     "dist",
     "data/extensions.json",
-    "CHANGELOG.md"
+    "CHANGELOG.md",
+    "llms.txt"
   ],
   "sideEffects": false,
   "browser": {
