@@ -4,7 +4,7 @@
  *   (Arborist orchestration + DLX heavy paths that need integration tests, not
  *   units) and lib's cumulative thresholds. The aggregate gate lives in
  *   scripts/test/cover.mts, which reads coverage-final.json from both the main
- *   + isolated suites and merges via max-hit-count before checking
+ *   \+ isolated suites and merges via max-hit-count before checking
  *   aggregateCoverageThresholds below.
  */
 
