@@ -31,7 +31,7 @@ export function getNodeModule(): typeof NodeModule {
  * undefined — no `node:` modules are built-in there.
  *
  * Single source of truth for "is this a Node builtin?" probes across socket-lib
- * (used by the smol-binding loaders to gate `require('node:smol-*')`).
+ * (used by the smol-binding loaders to gate their `node:smol-*` loads).
  */
 let cachedIsBuiltin: ((name: string) => boolean) | undefined
 export function isNodeBuiltin(name: string): boolean {
@@ -39,4 +39,28 @@ export function isNodeBuiltin(name: string): boolean {
     return false
   }
   return (cachedIsBuiltin ??= getNodeModule()!.isBuiltin)(name)
+}
+
+/**
+ * Load an optional `node:`-prefixed native builtin by *computed* specifier.
+ *
+ * The specifier arrives as a parameter, never a string literal at the
+ * `require()` call site, so ahead-of-time bundlers and native compilers treat
+ * it as a deferred dynamic load rather than a hard static dependency. A
+ * `node:smol-*` binding is registered only by socket-btm's smol Node binary; on
+ * stock Node it must not become a mandatory module. Callers gate this behind
+ * `isNodeBuiltin(specifier)`, so the load runs only where the binding exists.
+ *
+ * Single source of truth for the smol-binding loaders' guarded
+ * `node:smol-*` loads.
+ *
+ * Use this only for optional, feature-detected native builtins. A normal
+ * dependency you want bundled must use a static `import`: a non-literal
+ * specifier is invisible to bundlers, so they would exclude it from the output.
+ */
+export function requireBuiltin(specifier: string): unknown {
+  if (!IS_NODE) {
+    return undefined
+  }
+  return require(specifier)
 }

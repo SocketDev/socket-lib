@@ -15,7 +15,7 @@
  * @see https://v8.dev/blog/v8-release-99 — V8 Fast API Calls overview
  */
 
-import { isNodeBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../node/module'
 
 /**
  * Surface of `node:smol-primordial`. See socket-btm's
@@ -106,7 +106,9 @@ export function getSmolPrimordial(): SmolPrimordialBinding | undefined {
     smolPrimordialProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-primordial')) {
-      smolPrimordial = require('node:smol-primordial') as SmolPrimordialBinding
+      // requireBuiltin passes a non-literal specifier so AOT bundlers and
+      // compilers keep this optional binding external; unreached on stock Node.
+      smolPrimordial = requireBuiltin('node:smol-primordial') as SmolPrimordialBinding
     }
     /* c8 ignore stop */
   }

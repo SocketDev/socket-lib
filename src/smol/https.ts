@@ -11,7 +11,7 @@
  *   route through this when smol is present.
  */
 
-import { isNodeBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../node/module'
 
 /**
  * TLS options accepted by `smol-https`'s `serve()`. Mirrors Node's
@@ -70,7 +70,9 @@ export function getSmolHttps(): SmolHttpsBinding | undefined {
     smolHttpsProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-https')) {
-      smolHttps = require('node:smol-https') as SmolHttpsBinding
+      // requireBuiltin passes a non-literal specifier so AOT bundlers and
+      // compilers keep this optional binding external; unreached on stock Node.
+      smolHttps = requireBuiltin('node:smol-https') as SmolHttpsBinding
     }
     /* c8 ignore stop */
   }

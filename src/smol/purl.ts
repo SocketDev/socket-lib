@@ -14,7 +14,7 @@
  *   only matters where the hot path warrants the native acceleration.
  */
 
-import { isNodeBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../node/module'
 
 /**
  * Surface of a parsed PURL — the shape both smol-purl's `parse()` and
@@ -95,7 +95,9 @@ export function getSmolPurl(): SmolPurlBinding | undefined {
     smolPurlProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-purl')) {
-      smolPurl = require('node:smol-purl') as SmolPurlBinding
+      // requireBuiltin passes a non-literal specifier so AOT bundlers and
+      // compilers keep this optional binding external; unreached on stock Node.
+      smolPurl = requireBuiltin('node:smol-purl') as SmolPurlBinding
     }
     /* c8 ignore stop */
   }

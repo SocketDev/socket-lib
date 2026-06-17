@@ -11,7 +11,7 @@
  *   paths run.
  */
 
-import { isNodeBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../node/module'
 
 import type { PathLike } from 'node:fs'
 
@@ -65,7 +65,9 @@ export function getSmolPath(): SmolPathBinding | undefined {
     smolPathProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-path')) {
-      smolPathCache = require('node:smol-path') as SmolPathBinding
+      // requireBuiltin passes a non-literal specifier so AOT bundlers and
+      // compilers keep this optional binding external; unreached on stock Node.
+      smolPathCache = requireBuiltin('node:smol-path') as SmolPathBinding
     }
     /* c8 ignore stop */
   }

@@ -13,7 +13,7 @@
  *   is present.
  */
 
-import { isNodeBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../node/module'
 
 /**
  * Options accepted by `smol-http`'s `request()`. The full surface is larger;
@@ -70,7 +70,9 @@ export function getSmolHttp(): SmolHttpBinding | undefined {
     smolHttpProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-http')) {
-      smolHttpBinding = require('node:smol-http') as SmolHttpBinding
+      // requireBuiltin passes a non-literal specifier so AOT bundlers and
+      // compilers keep this optional binding external; unreached on stock Node.
+      smolHttpBinding = requireBuiltin('node:smol-http') as SmolHttpBinding
     }
     /* c8 ignore stop */
   }

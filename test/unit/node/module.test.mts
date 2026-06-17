@@ -4,7 +4,11 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeModule, isNodeBuiltin } from '../../../src/node/module'
+import {
+  getNodeModule,
+  isNodeBuiltin,
+  requireBuiltin,
+} from '../../../src/node/module'
 
 describe('node/module', () => {
   describe('getNodeModule', () => {
@@ -49,6 +53,29 @@ describe('node/module', () => {
       const first = isNodeBuiltin('node:fs')
       const second = isNodeBuiltin('node:fs')
       expect(first).toBe(second)
+    })
+  })
+
+  describe('requireBuiltin', () => {
+    it('loads a present Node built-in by specifier', () => {
+      const nodePath = requireBuiltin('node:path') as typeof import('node:path')
+      expect(typeof nodePath.join).toBe('function')
+    })
+
+    it('resolves the specifier dynamically', () => {
+      const os = requireBuiltin('node:os') as typeof import('node:os')
+      expect(typeof os.platform).toBe('function')
+    })
+
+    it('returns the cached module instance across calls', () => {
+      expect(requireBuiltin('node:path')).toBe(requireBuiltin('node:path'))
+    })
+
+    it('throws for an absent builtin (callers gate with isNodeBuiltin)', () => {
+      // The smol loaders only call this after isNodeBuiltin() confirms the
+      // binding exists. On stock Node the binding is absent and require throws,
+      // which is why every call site is guarded.
+      expect(() => requireBuiltin('node:smol-vfs')).toThrow()
     })
   })
 })

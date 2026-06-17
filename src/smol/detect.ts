@@ -19,7 +19,7 @@
  *   the smol binary that exposes the `node:smol-util` binding.
  */
 
-import { isNodeBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../node/module'
 
 // ─── types ─────────────────────────────────────────────────────────────
 
@@ -97,7 +97,9 @@ export function getSmolUtil(): SmolUtilBinding | undefined {
     smolUtilProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-util')) {
-      smolUtilCache = require('node:smol-util') as SmolUtilBinding
+      // requireBuiltin passes a non-literal specifier so AOT bundlers and
+      // compilers keep this optional binding external; unreached on stock Node.
+      smolUtilCache = requireBuiltin('node:smol-util') as SmolUtilBinding
     }
     /* c8 ignore stop */
   }

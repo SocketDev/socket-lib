@@ -13,7 +13,7 @@
  *   through this when smol is present.
  */
 
-import { isNodeBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../node/module'
 
 import type { EcosystemString } from '../eco/purl'
 
@@ -175,7 +175,9 @@ export function getSmolManifest(): SmolManifestBinding | undefined {
     smolManifestProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-manifest')) {
-      cachedSmolManifest = require('node:smol-manifest') as SmolManifestBinding
+      // requireBuiltin passes a non-literal specifier so AOT bundlers and
+      // compilers keep this optional binding external; unreached on stock Node.
+      cachedSmolManifest = requireBuiltin('node:smol-manifest') as SmolManifestBinding
     }
     /* c8 ignore stop */
   }

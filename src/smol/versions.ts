@@ -11,7 +11,7 @@
  *   which already route through this when smol is present.
  */
 
-import { isNodeBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../node/module'
 
 /**
  * Surface of `node:smol-versions`. See socket-btm's
@@ -69,7 +69,9 @@ export function getSmolVersions(): SmolVersionsBinding | undefined {
     smolVersionsProbed = true
     /* c8 ignore start - smol Node binary only. */
     if (isNodeBuiltin('node:smol-versions')) {
-      smolVersions = require('node:smol-versions') as SmolVersionsBinding
+      // requireBuiltin passes a non-literal specifier so AOT bundlers and
+      // compilers keep this optional binding external; unreached on stock Node.
+      smolVersions = requireBuiltin('node:smol-versions') as SmolVersionsBinding
     }
     /* c8 ignore stop */
   }
