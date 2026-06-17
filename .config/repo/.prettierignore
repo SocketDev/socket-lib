@@ -1,0 +1,15 @@
+# Repo-specific format-ignore overlay. scripts/fleet/lint.mts concatenates this
+# with .config/fleet/.prettierignore and passes the result to oxfmt via
+# --ignore-path. Use it for socket-lib's OWN verbatim / corpus trees that the
+# fleet-canonical file can't know about.
+
+# Test-corpus fixtures — intentional, exact content (e.g. the Perry
+# native-compile fixture + its .perry-cache build output, pnpm/npm lockfile
+# inputs). Reformatting them can change the test input and break the test.
+**/test/fixtures/**
+test/fixtures/**
+
+# Vendored sources synced verbatim from upstream (e.g. acorn). Kept
+# byte-faithful to their origin, not reformatted to socket's style.
+**/vendor/**
+vendor/**
