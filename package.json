@@ -2590,6 +2590,11 @@
       "types": "./dist/sea/detect.d.ts",
       "default": "./dist/sea/detect.js"
     },
+    "./secrets/broker": {
+      "source": "./src/secrets/broker.ts",
+      "types": "./dist/secrets/broker.d.ts",
+      "default": "./dist/secrets/broker.js"
+    },
     "./secrets/compare": {
       "source": "./src/secrets/compare.ts",
       "types": "./dist/secrets/compare.d.ts",
@@ -3108,6 +3113,7 @@
     "@npmcli/arborist": "9.1.4",
     "@npmcli/package-json": "7.0.0",
     "@npmcli/promise-spawn": "8.0.3",
+    "@perryts/perry": "0.5.1129",
     "@redwoodjs/agent-ci": "catalog:",
     "@sinclair/typebox": "0.34.49",
     "@socketregistry/is-unicode-supported": "1.0.5",

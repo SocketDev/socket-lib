@@ -170,6 +170,9 @@ importers:
       '@npmcli/promise-spawn':
         specifier: 9.0.1
         version: 9.0.1
+      '@perryts/perry':
+        specifier: 0.5.1129
+        version: 0.5.1129
       '@redwoodjs/agent-ci':
         specifier: 'catalog:'
         version: 0.16.2(supports-color@10.2.2)
@@ -1299,6 +1302,50 @@ packages:
     engines: {node: ^20.19.0 || >=22.12.0}
     cpu: [x64]
     os: [win32]
+
+  '@perryts/perry-darwin-arm64@0.5.1129':
+    resolution: {integrity: sha512-VgJQXTSmFr4U/pj7QCJKO0Oy3SdPFqjgGxWrrOrP/fkTkIjgfxKiI7HfjiAFMrP/2fjCGPy+XtW7JwUQjp82ig==}
+    cpu: [arm64]
+    os: [darwin]
+
+  '@perryts/perry-darwin-x64@0.5.1129':
+    resolution: {integrity: sha512-kTZaE44MXdKjUSqrTXwD1MdFqWPsv1uyrytMUHp6Tohy1x6lB/CB1lIi3HzZCTrfmAf8923/skcij4dIbAzdMw==}
+    cpu: [x64]
+    os: [darwin]
+
+  '@perryts/perry-linux-arm64-musl@0.5.1129':
+    resolution: {integrity: sha512-dkEqdu2pVnzh4w2in1pIzbeFkmNn34qfWl3EITzjbSx1LHrNBapgkMUfUVgNFXvAQ8nLq2gLYecCy5S4PbZwVQ==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [musl]
+
+  '@perryts/perry-linux-arm64@0.5.1129':
+    resolution: {integrity: sha512-NPbgc1mp23fcYwP+irdoZRrQqudgfBw9yZ1sZcGBUs6VjhLZYhf6nTUEEVHLSDgDj14v+GeCEjAlfEPJtFCzsA==}
+    cpu: [arm64]
+    os: [linux]
+    libc: [glibc]
+
+  '@perryts/perry-linux-x64-musl@0.5.1129':
+    resolution: {integrity: sha512-64+mvnHm8kTiV7NNFLAkuKb7tu1UjWK298U949UKjxcP3Ta46hGKqlQn6+dECPlbJGk0kr5DWtJDAljttcKCQg==}
+    cpu: [x64]
+    os: [linux]
+    libc: [musl]
+
+  '@perryts/perry-linux-x64@0.5.1129':
+    resolution: {integrity: sha512-KTxcRcDbUyD5+TBasWHlk1IHcfJ3UAOPPsaC0tIXIAES3fO+jKsHcI01NiRzxX8wHIIRbr4TPHInzGZd4VQ7wQ==}
+    cpu: [x64]
+    os: [linux]
+    libc: [glibc]
+
+  '@perryts/perry-win32-x64@0.5.1129':
+    resolution: {integrity: sha512-bNheYztHWlJzb1LDssgBI7ubZaQJ6xtPa47MYL04J5HX/HWoKWCnJuYUnlpI8t92X6WiZ1cF01yrdxbac/N60w==}
+    cpu: [x64]
+    os: [win32]
+
+  '@perryts/perry@0.5.1129':
+    resolution: {integrity: sha512-whnSSToBdAp6Vxtz8gwE91R/ZkX5OVOoK48jV36bGr6KQ6iLQv62y3jfWW5owJR4T+YSqhbYsxAYF4TLRE4Rrg==}
+    engines: {node: '>=16'}
+    hasBin: true
 
   '@polka/url@0.5.0':
     resolution: {integrity: sha512-oZLYFEAzUKyi3SKnXvj32ZCEGH6RDnao7COuCVhDydMS9NrCSVXhM79VaKyP5+Zc33m0QXEd2DN3UkU7OsHcfw==}
@@ -4168,6 +4215,37 @@ snapshots:
 
   '@oxlint/binding-win32-x64-msvc@1.63.0':
     optional: true
+
+  '@perryts/perry-darwin-arm64@0.5.1129':
+    optional: true
+
+  '@perryts/perry-darwin-x64@0.5.1129':
+    optional: true
+
+  '@perryts/perry-linux-arm64-musl@0.5.1129':
+    optional: true
+
+  '@perryts/perry-linux-arm64@0.5.1129':
+    optional: true
+
+  '@perryts/perry-linux-x64-musl@0.5.1129':
+    optional: true
+
+  '@perryts/perry-linux-x64@0.5.1129':
+    optional: true
+
+  '@perryts/perry-win32-x64@0.5.1129':
+    optional: true
+
+  '@perryts/perry@0.5.1129':
+    optionalDependencies:
+      '@perryts/perry-darwin-arm64': 0.5.1129
+      '@perryts/perry-darwin-x64': 0.5.1129
+      '@perryts/perry-linux-arm64': 0.5.1129
+      '@perryts/perry-linux-arm64-musl': 0.5.1129
+      '@perryts/perry-linux-x64': 0.5.1129
+      '@perryts/perry-linux-x64-musl': 0.5.1129
+      '@perryts/perry-win32-x64': 0.5.1129
 
   '@polka/url@0.5.0': {}
 

@@ -1,0 +1,13 @@
+{
+  "name": "@socketsecurity/lib-perry-fixture",
+  "private": true,
+  "perry": {
+    "compilePackages": ["@socketsecurity/lib"],
+    "allow": {
+      "compilePackages": ["@socketsecurity/lib"]
+    },
+    "lockdown": true,
+    "strict": true,
+    "emitAttest": true
+  }
+}
