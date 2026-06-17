@@ -58,17 +58,19 @@ describe('node/module', () => {
 
   describe('requireBuiltin', () => {
     it('loads a present Node built-in by specifier', () => {
-      const nodePath = requireBuiltin('node:path') as typeof import('node:path')
-      expect(typeof nodePath.join).toBe('function')
+      const nodePath = requireBuiltin('node:path') as Record<string, unknown>
+      expect(typeof nodePath['join']).toBe('function')
     })
 
     it('resolves the specifier dynamically', () => {
-      const os = requireBuiltin('node:os') as typeof import('node:os')
-      expect(typeof os.platform).toBe('function')
+      const nodeOs = requireBuiltin('node:os') as Record<string, unknown>
+      expect(typeof nodeOs['platform']).toBe('function')
     })
 
     it('returns the cached module instance across calls', () => {
-      expect(requireBuiltin('node:path')).toBe(requireBuiltin('node:path'))
+      const first = requireBuiltin('node:path')
+      const second = requireBuiltin('node:path')
+      expect(first).toBe(second)
     })
 
     it('throws for an absent builtin (callers gate with isNodeBuiltin)', () => {

@@ -6,18 +6,19 @@
  *   `@perryts/perry` platform binary is unavailable (unsupported host).
  */
 import { existsSync, mkdirSync, rmSync, symlinkSync } from 'node:fs'
-import { tmpdir } from 'node:os'
-import { dirname, join, resolve } from 'node:path'
+import os from 'node:os'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
 import { spawn } from '../../src/process/spawn/child'
+import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 
-const testDir = dirname(fileURLToPath(import.meta.url))
-const repoRoot = resolve(testDir, '..', '..')
-const fixtureDir = resolve(repoRoot, 'test', 'fixtures', 'perry')
-const perryBin = resolve(repoRoot, 'node_modules', '.bin', 'perry')
+const testDir = path.dirname(fileURLToPath(import.meta.url))
+const repoRoot = path.resolve(testDir, '..', '..')
+const fixtureDir = path.resolve(repoRoot, 'test', 'fixtures', 'perry')
+const perryBin = path.resolve(repoRoot, 'node_modules', '.bin', 'perry')
 
 // Fail-closed: telemetry off, no background update checks (fleet rule).
 const perryEnv = {
@@ -32,12 +33,15 @@ const perryEnv = {
 // compile exercises local `src`. With the package in perry.compilePackages,
 // Perry resolves and compiles its TypeScript source directly.
 function linkLocalLib(): void {
-  const scopeDir = join(fixtureDir, 'node_modules', '@socketsecurity')
+  const scopeDir = path.join(fixtureDir, 'node_modules', '@socketsecurity')
   mkdirSync(scopeDir, { recursive: true })
-  const link = join(scopeDir, 'lib')
+  const link = path.join(scopeDir, 'lib')
   rmSync(link, { force: true })
   symlinkSync(repoRoot, link, 'dir')
-  rmSync(join(fixtureDir, '.perry-cache'), { force: true, recursive: true })
+  rmSync(path.join(fixtureDir, '.perry-cache'), {
+    force: true,
+    recursive: true,
+  })
 }
 
 describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
@@ -45,7 +49,7 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
     'compiles a socket-lib surface natively under lockdown, then runs it',
     async () => {
       linkLocalLib()
-      const out = join(tmpdir(), 'socket-lib-perry-e2e')
+      const out = path.join(os.tmpdir(), 'socket-lib-perry-e2e')
       rmSync(out, { force: true })
       rmSync(`${out}.attest.json`, { force: true })
 
@@ -71,6 +75,6 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
         `binary errored at runtime:\n${ran.stdout ?? ''}${ran.stderr ?? ''}`,
       ).toBe(0)
     },
-    180_000,
+    tolerantTimeout(180_000),
   )
 })

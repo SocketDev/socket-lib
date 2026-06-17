@@ -111,7 +111,9 @@ export function getSmolVfs(): SmolVirtualFileSystem | undefined {
     if (isNodeBuiltin('node:smol-vfs')) {
       // requireBuiltin passes a non-literal specifier so AOT bundlers and
       // compilers keep this optional binding external; unreached on stock Node.
-      const binding = requireBuiltin('node:smol-vfs') as SmolVirtualFileSystemBinding
+      const binding = requireBuiltin(
+        'node:smol-vfs',
+      ) as SmolVirtualFileSystemBinding
       cachedSmolVfs = binding.getSmolVfs()
     }
     /* c8 ignore stop */

@@ -108,7 +108,9 @@ export function getSmolPrimordial(): SmolPrimordialBinding | undefined {
     if (isNodeBuiltin('node:smol-primordial')) {
       // requireBuiltin passes a non-literal specifier so AOT bundlers and
       // compilers keep this optional binding external; unreached on stock Node.
-      smolPrimordial = requireBuiltin('node:smol-primordial') as SmolPrimordialBinding
+      smolPrimordial = requireBuiltin(
+        'node:smol-primordial',
+      ) as SmolPrimordialBinding
     }
     /* c8 ignore stop */
   }

@@ -177,7 +177,9 @@ export function getSmolManifest(): SmolManifestBinding | undefined {
     if (isNodeBuiltin('node:smol-manifest')) {
       // requireBuiltin passes a non-literal specifier so AOT bundlers and
       // compilers keep this optional binding external; unreached on stock Node.
-      cachedSmolManifest = requireBuiltin('node:smol-manifest') as SmolManifestBinding
+      cachedSmolManifest = requireBuiltin(
+        'node:smol-manifest',
+      ) as SmolManifestBinding
     }
     /* c8 ignore stop */
   }
