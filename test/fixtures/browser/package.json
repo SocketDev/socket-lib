@@ -1,0 +1,6 @@
+{
+  "name": "@socketsecurity/lib-browser-fixture",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Browser-bundle e2e fixture — imports a socket-lib surface that reaches node/module.ts's bare `module` import."
+}

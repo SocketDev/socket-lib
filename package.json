@@ -3170,6 +3170,7 @@
     "typescript": "5.9.2",
     "validate-npm-package-name": "6.0.2",
     "vitest": "4.1.8",
+    "webpack": "5.107.2",
     "which": "5.0.0",
     "yargs-parser": "22.0.0",
     "yoctocolors-cjs": "2.1.3",
