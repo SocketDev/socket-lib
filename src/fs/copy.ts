@@ -10,8 +10,8 @@
 
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
-import { objectFreeze } from '../objects/mutate'
 import { pathLikeToString } from '../paths/normalize'
+import { ObjectFreeze } from '../primordials/object'
 
 import { safeDelete, safeMkdir } from './safe'
 import { uniqueSync } from './unique'
@@ -22,7 +22,7 @@ import type { PathLike } from 'node:fs'
  * Named values for {@link CopyMode}. A frozen object rather than a TypeScript
  * `enum` so the declaration is erasable (enums emit runtime helper code).
  */
-export const CopyMode = objectFreeze({
+export const CopyMode = ObjectFreeze({
   Fill: 'fill',
   Overlay: 'overlay',
   Pave: 'pave',
@@ -33,13 +33,13 @@ export const CopyMode = objectFreeze({
  *
  * - `'overlay'` (default) — overwrite files present in the source but leave any
  *   pre-existing destination-only files in place (a recursive `fs.cp`).
- * - `'pave'` — replace the destination so it becomes an exact copy of the
- *   source; destination entries absent from the source do not survive. The
- *   swap is atomic (a sibling temp directory is renamed into place), so a
- *   partial tree is never observable.
+ * - `'pave'` — replace the destination so it becomes an exact copy of the source;
+ *   destination entries absent from the source do not survive. The swap is
+ *   atomic (a sibling temp directory is renamed into place), so a partial tree
+ *   is never observable.
  * - `'fill'` — copy only what the destination lacks: existing files stay
- *   untouched (no-clobber), missing ones are added. Never throws on an
- *   existing file.
+ *   untouched (no-clobber), missing ones are added. Never throws on an existing
+ *   file.
  *
  * Maps to `cp` (overlay), `rsync --delete` / robocopy `/MIR` (pave), and
  * `cp -n` (fill).
