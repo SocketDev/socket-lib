@@ -64,7 +64,7 @@ Sort alphanumerically (literal byte order, ASCII before letters). Applies to: ob
 
 ## Logger
 
-`getDefaultLogger()` from `@socketsecurity/lib-stable/logger` over `console.*` / `process.stderr.write` / `process.stdout.write` (enforced by `.claude/hooks/fleet/logger-guard/`). The logger wraps level routing, transcript-safe rendering, and the token-minifier proxy.
+`getDefaultLogger()` from `@socketsecurity/lib-stable/logger` over `console.*` / `process.stderr.write` / `process.stdout.write` (enforced by `.claude/hooks/fleet/logger-guard/`). The logger wraps level routing and transcript-safe rendering.
 
 ## Doc filenames
 

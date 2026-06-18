@@ -85,10 +85,6 @@ Hooks `.claude/hooks/fleet/{dirty-lockfile-reminder,package-manager-auto-update-
 
 🚨 Fleet-blessed Claude Code plugins are SHA-pinned in the wheelhouse-canonical [`.claude-plugin/marketplace.json`](../.claude-plugin/marketplace.json), with companion metadata (pin date, pinner) in [`.claude-plugin/README.md`](../.claude-plugin/README.md). Enforced together: every `plugins[].source.sha` must have a README-table row with matching `version` + `sha` + ISO-8601 `date` — bump the SHA → bump the row. `pnpm run install-claude-plugins` reconciles a machine to the pinned set, then reapplies `scripts/fleet/plugin-patches/*.patch` (fleet `# @`-header + plain `diff -u` body, `patch -p1`; regenerate via `regenerating-patches`; [`plugin-cache-patches`](docs/agents.md/fleet/plugin-cache-patches.md)) (`.claude/hooks/fleet/{marketplace-comment-guard,plugin-patch-format-guard}/`).
 
-### Token minification
-
-Wire-level proxy `@socketsecurity/token-minifier` + MCP-result rewriter compress tool_result losslessly. `.claude/hooks/fleet/{minify-mcp-out,socket-token-minifier-start}/`.
-
 ### Fix it, don't defer
 
 🚨 See a lint/type/test error or broken comment in your reading window — fix it. Stop current task, fix the issue in a sibling commit, resume. Don't label as "pre-existing", "unrelated", or "out of scope" — the labels are rationalizations. **Don't spend cycles proving an error pre-existed** (no `git log -S` / stash-and-rerun to assign blame) — if it's in the `fix`/`check`/lint output, fix it; provenance is irrelevant (`.claude/hooks/fleet/excuse-detector/`).

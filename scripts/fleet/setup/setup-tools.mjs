@@ -322,7 +322,7 @@ function installCodedb(platform) {
 // ./setup-tools-sfw.mjs (split out for file size).
 function regenerateShims(sfwBin, enterprise) {
   // BIN_DIR is the SHARED handle dir (_wheelhouse/bin) — it also holds the
-  // codedb / sfw / socket-token-minifier handles, so NEVER rm the whole dir.
+  // codedb / sfw handles, so NEVER rm the whole dir.
   // Just ensure it exists and overwrite the pm-shims in place (idempotent).
   mkdirSync(BIN_DIR, { recursive: true })
   const cmds = shimCommands(enterprise)

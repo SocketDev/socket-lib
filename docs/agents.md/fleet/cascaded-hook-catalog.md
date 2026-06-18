@@ -112,9 +112,6 @@ phrase (where one exists):
   lines lacking the `# <tag-or-branch> (YYYY-MM-DD)` staleness comment.
 - **marketplace-comment-guard** — PreToolUse(Edit|Write) for edits to
   `.claude-plugin/marketplace.json` + sibling README that desync the SHA-pin pair.
-- **minify-mcp-out** — PostToolUse(mcp__.*) lossless MCP-output minifier.
-- **socket-token-minifier-start** — SessionStart auto-start of the wire-level
-  proxy (fail-closed: only sets `ANTHROPIC_BASE_URL` if the proxy is healthy on :7779).
 - **check-new-deps** — PreToolUse(Edit|Write) refusing new dependency additions
   without a Socket score check.
 - **cross-repo-guard** — PreToolUse(Edit|Write) refusing path references to another

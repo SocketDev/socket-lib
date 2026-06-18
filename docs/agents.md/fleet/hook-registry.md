@@ -74,7 +74,6 @@ The fleet hooks each cite their own trigger + bypass surface in their `README.md
 - `setup-claude-scanners` — SessionStart installer for the Claude scanner toolchain
 - `setup-firewall` — SessionStart installer/starter for Socket Firewall
 - `setup-misc-tools` — SessionStart installer for miscellaneous fleet tools
-- `socket-token-minifier-start` — auto-starts the token-minifier proxy fail-closed
 - `stale-process-sweeper` — Stop-time reaper for orphaned vitest workers
 - `sweep-ds-store` — Stop-time `.DS_Store` removal (no bypass)
 - `synthesized-script-edit-guard` — blocks editing a cascade-synthesized `package.json` `scripts` entry (lives in `CANONICAL_SCRIPT_BODIES`) directly, since the next cascade reverts it; edit the manifest + cascade instead. Bypass: `Allow synthesized-script-edit bypass`

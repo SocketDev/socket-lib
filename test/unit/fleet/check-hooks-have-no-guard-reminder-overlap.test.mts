@@ -64,7 +64,6 @@ test('an exact collision is not also reported as a prefix pair', () => {
 test('ignores non-guard/reminder hook names', () => {
   const report = findOverlap([
     'setup-firewall',
-    'token-minifier-start',
     'sweep-ds-store',
   ])
   assert.equal(report.exactCollisions.length, 0)
