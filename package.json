@@ -1521,6 +1521,11 @@
       "types": "./dist/fs/allowed-dirs-cache.d.ts",
       "default": "./dist/fs/allowed-dirs-cache.js"
     },
+    "./fs/copy": {
+      "source": "./src/fs/copy.ts",
+      "types": "./dist/fs/copy.d.ts",
+      "default": "./dist/fs/copy.js"
+    },
     "./fs/encoding": {
       "source": "./src/fs/encoding.ts",
       "types": "./dist/fs/encoding.d.ts",
