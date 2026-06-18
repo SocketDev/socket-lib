@@ -80,11 +80,19 @@ export function extractSummary(srcPath: string): string {
     return ''
   }
   const block = match[1] ?? ''
-  const overviewIdx = block.indexOf('@fileoverview')
+  // Accept both `@file` (the fleet convention) and `@fileoverview`. Check the
+  // longer tag first so a `@fileoverview` block isn't matched as `@file` with a
+  // leftover "overview" prefix bleeding into the description.
+  let overviewIdx = block.indexOf('@fileoverview')
+  let tagLength = '@fileoverview'.length
+  if (overviewIdx < 0) {
+    overviewIdx = block.indexOf('@file')
+    tagLength = '@file'.length
+  }
   if (overviewIdx < 0) {
     return ''
   }
-  const afterTag = block.slice(overviewIdx + '@fileoverview'.length)
+  const afterTag = block.slice(overviewIdx + tagLength)
   // Strip leading-asterisk continuation and collapse whitespace.
   const flat = afterTag
     .split('\n')
