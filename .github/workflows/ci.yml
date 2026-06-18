@@ -29,4 +29,4 @@ concurrency:
 jobs:
   ci:
     name: Run CI Pipeline
-    uses: SocketDev/socket-registry/.github/workflows/ci.yml@1c633fb12cf27b12f06f9d685e89d34e302822c3 # main (2026-06-13)
+    uses: SocketDev/socket-registry/.github/workflows/ci.yml@03eb6e42c12866e25289745b8f5eb2f90bb79c95 # main (2026-06-13)
