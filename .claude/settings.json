@@ -482,11 +482,6 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/socket-token-minifier-start/index.mts",
-            "timeout": 5
-          },
-          {
-            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/broken-hook-detector/index.mts",
             "timeout": 8
           },
@@ -504,15 +499,6 @@
       }
     ],
     "PostToolUse": [
-      {
-        "matcher": "mcp__.*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/minify-mcp-out/index.mts"
-          }
-        ]
-      },
       {
         "matcher": "Edit|Write",
         "hooks": [
