@@ -39,6 +39,8 @@ import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
+import { REPO_ROOT } from './paths.mts'
+
 const logger = getDefaultLogger()
 
 // The print width the fleet oxfmtrc wraps at; a description line at/over this
@@ -161,6 +163,7 @@ export async function restoreFile(file: string): Promise<boolean> {
   ].join('\n')
   const { exitCode, stderr } = await spawnAiAgent({
     ...AI_PROFILE.edit,
+    cwd: REPO_ROOT,
     effort: 'low',
     prompt,
     timeoutMs: 3 * 60 * 1000,

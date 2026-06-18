@@ -176,7 +176,7 @@ export function sirenParagraphs(
   body: string,
   options: ParagraphScanOptions,
 ): RuleParagraph[] {
-  const { fleetOnly } = { __proto__: null, ...options }
+  const { fleetOnly } = { ...options }
   const lines = body.split('\n')
   const out: RuleParagraph[] = []
   let inFleet = !fleetOnly
@@ -284,14 +284,13 @@ export function linkedDetailDocs(text: string): string[] {
   return [...new Set(out)]
 }
 
-// True when a 🚨 paragraph is enforced: the paragraph OR its enclosing section
-// directly cites a resolving enforcer, OR a fleet detail doc linked from the
-// paragraph or section does. `readDoc` returns a linked doc's text (undefined if
-// missing). The section + doc fallbacks are what let CLAUDE.md stay under its
-// 40 KB cap — a rule states the why inline and defers the citation to the
-// section's one detail link.
+// True when a 🚨 paragraph is enforced: its enclosing section text (which
+// includes the paragraph) directly cites a resolving enforcer, OR a fleet detail
+// doc linked from that section does. `readDoc` returns a linked doc's text
+// (undefined if missing). The section + doc fallbacks are what let CLAUDE.md stay
+// under its 40 KB cap — a rule states the why inline and defers the citation to
+// the section's one detail link.
 export function paragraphIsEnforced(
-  text: string,
   sectionText: string,
   inv: EnforcerInventory,
   readDoc: (relPath: string) => string | undefined,
@@ -328,7 +327,7 @@ export function auditFile(
   inv: EnforcerInventory,
   options: AuditOptions,
 ): AuditResult {
-  const { fleetOnly, readDoc } = { __proto__: null, ...options }
+  const { fleetOnly, readDoc } = { ...options }
   const findings: Finding[] = []
   const optOuts: OptOut[] = []
   const paras = sirenParagraphs(file, body, { fleetOnly })
@@ -339,7 +338,7 @@ export function auditFile(
       optOuts.push({ file: p.file, line: p.line, category })
       continue
     }
-    if (!paragraphIsEnforced(p.text, p.sectionText, inv, readDoc)) {
+    if (!paragraphIsEnforced(p.sectionText, inv, readDoc)) {
       const firstLine = p.text.split('\n')[0] ?? ''
       findings.push({
         file: p.file,

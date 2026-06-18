@@ -154,7 +154,7 @@ test('linkedDetailDocs ignores non-fleet docs links', () => {
 test('paragraphIsEnforced passes when the SECTION (not the paragraph) cites an enforcer', () => {
   const para = `${SIREN} the rule with no inline cite`
   const section = `### Topic\n\n${para}\n\nFull ruleset (\`.claude/hooks/fleet/my-guard/\`).`
-  assert.equal(paragraphIsEnforced(para, section, inv(), noDoc), true)
+  assert.equal(paragraphIsEnforced(section, inv(), noDoc), true)
 })
 
 test('paragraphIsEnforced passes when a linked detail doc cites an enforcer', () => {
@@ -163,7 +163,7 @@ test('paragraphIsEnforced passes when a linked detail doc cites an enforcer', ()
     rel === 'docs/agents.md/fleet/topic.md'
       ? 'enforced by `socket/my-rule`'
       : undefined
-  assert.equal(paragraphIsEnforced(para, para, inv(), readDoc), true)
+  assert.equal(paragraphIsEnforced(para, inv(), readDoc), true)
 })
 
 test('paragraphIsEnforced passes when a linked SKILL.md cites an enforcer', () => {
@@ -172,18 +172,18 @@ test('paragraphIsEnforced passes when a linked SKILL.md cites an enforcer', () =
     rel === '.claude/skills/fleet/x/SKILL.md'
       ? 'enforced at edit time by `.claude/hooks/fleet/my-guard/`'
       : undefined
-  assert.equal(paragraphIsEnforced(para, para, inv(), readDoc), true)
+  assert.equal(paragraphIsEnforced(para, inv(), readDoc), true)
 })
 
 test('paragraphIsEnforced FAILS when neither paragraph, section, nor doc cites an enforcer', () => {
   const para = `${SIREN} a hard rule with only a prose detail link [d](docs/agents.md/fleet/topic.md)`
   const readDoc = (): string => 'this detail page is pure prose, no enforcer'
-  assert.equal(paragraphIsEnforced(para, para, inv(), readDoc), false)
+  assert.equal(paragraphIsEnforced(para, inv(), readDoc), false)
 })
 
 test('paragraphIsEnforced FAILS when a linked doc is missing (readDoc undefined)', () => {
   const para = `${SIREN} rule [gone](docs/agents.md/fleet/missing.md)`
-  assert.equal(paragraphIsEnforced(para, para, inv(), noDoc), false)
+  assert.equal(paragraphIsEnforced(para, inv(), noDoc), false)
 })
 
 // ── optOutCategory ──────────────────────────────────────────────

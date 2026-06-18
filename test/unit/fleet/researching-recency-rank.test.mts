@@ -18,7 +18,6 @@ import {
 import type {
   QueryPlan,
   SourceItem,
-  SourceName,
   SubQuery,
 } from '../../../scripts/fleet/researching-recency/lib/types.mts'
 

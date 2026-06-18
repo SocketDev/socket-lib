@@ -81,10 +81,13 @@ export function readSourcedPrices(
   const inline = flag(argv, '--prices')
   const raw = inline ?? (stdin.trim() ? stdin : '')
   if (!raw) {
-    return { __proto__: null } as Record<string, ModelPrice>
+    return Object.create(null) as Record<string, ModelPrice>
   }
   const parsed = JSON.parse(raw) as Record<string, ModelPrice>
-  return { __proto__: null, ...parsed }
+  return Object.assign(Object.create(null), parsed) as Record<
+    string,
+    ModelPrice
+  >
 }
 
 // Merge sourced prices over the current pricing and restamp the snapshot.
@@ -95,10 +98,10 @@ export function applyPricingUpdate(
   options: UpdatePricingOptions,
 ): PricingData {
   options = { __proto__: null, ...options } as typeof options
-  const models: Record<string, ModelPrice> = {
-    __proto__: null,
-    ...current.models,
-  }
+  const models: Record<string, ModelPrice> = Object.assign(
+    Object.create(null),
+    current.models,
+  )
   for (const [model, price] of Object.entries(options.prices)) {
     models[model] = {
       inputPerMtok: price.inputPerMtok,
