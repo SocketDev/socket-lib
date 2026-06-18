@@ -29,6 +29,13 @@ node_modules/
 # and re-runs are free; not portable across machines (verdicts
 # depend on an account's API key budget) so it's gitignored.
 .prim-cache/
+
+# `perry`'s per-module object cache. Perry hardcodes it to
+# `<project_root>/.perry-cache/` (no env/flag relocates it; only
+# PERRY_NO_CACHE disables it) and its own source treats the dir as a
+# machine-local, gitignored cache. The perry native-compile e2e runs
+# with `cwd` at the fixture, so it lands under test/fixtures/.
+.perry-cache/
 npm-debug.log*
 pnpm-debug.log*
 yarn-error.log*
