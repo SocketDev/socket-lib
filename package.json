@@ -3139,7 +3139,6 @@
     "debug": "4.4.3",
     "del": "8.0.1",
     "ecc-agentshield": "1.4.0",
-    "esbuild": "0.28.1",
     "fast-glob": "3.3.3",
     "fast-sort": "3.4.1",
     "get-east-asian-width": "1.3.0",
@@ -3198,7 +3197,6 @@
   "packageManager": "pnpm@11.6.0",
   "allowScripts": {
     "cpu-features": false,
-    "esbuild": true,
     "protobufjs": false,
     "rolldown": true,
     "ssh2": false
