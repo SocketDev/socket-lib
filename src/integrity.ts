@@ -1,43 +1,69 @@
 /**
- * @file Integrity + checksum helpers. The fleet uses two named hash flavors:
+ * @file Integrity + checksum helpers. One concept — a {@link Hash} (algorithm +
+ *   digest) — in two encodings:
  *
- *   - **integrity** — W3C Subresource Integrity string:
- *     `sha(256|384|512)-<base64>`. The same shape the npm registry returns and
- *     the `<script integrity>` HTML attribute accepts. Algorithm is embedded.
- *   - **checksum** — sha256 hex digest, exactly 64 lowercase chars. The shape
- *     produced by `shasum -a 256` and used in GitHub-release SHA256SUMS files.
- *     Conversion is direction-specific so the names read in English:
- *     `checksumToIntegrity(hex)` and `integrityToChecksum(sri)`. Both are
- *     idempotent on the destination format (pass an SRI to
- *     `checksumToIntegrity`, get the same SRI back) so callers can apply them
- *     without first sniffing the input shape. "SSRI" is just another name for
- *     Subresource Integrity — this module is the only one that should mention
- *     it, and only inside `parseIntegrity` to extract the embedded algorithm +
- *     body.
+ *   - **hex** — lowercase hex digest (`shasum -a 256` / GitHub `SHA256SUMS`).
+ *   - **sri** — W3C Subresource Integrity `sha(256|384|512)-<base64>` (npm
+ *     `dist.integrity`, the `<script integrity>` attribute). Both are views of
+ *     the same digest. The algorithm is EXPLICIT on every `Hash` — never
+ *     inferred from which function produced it or sniffed from a string's
+ *     shape. `verifyHash(bytes, expected)` honors whatever algorithm the
+ *     expected hash declares, so a sha256 `SHA256SUMS` digest and a sha512 npm
+ *     integrity both "just verify" with no manual conversion. Role split (see
+ *     `docs/hash-algorithms.md`, unchanged): we PIN sha512 (`computeHash`
+ *     default, `computeHashes().integrity`); sha256 is the upstream-interop
+ *     shape (`fetchChecksumFile`, `computeHashes().checksum`). The two only
+ *     meet at verify-upstream-256 → pin-512. Algorithms are never flipped —
+ *     relabeling a 256-bit digest as sha512 would be a lie, and you can't
+ *     re-hash without the bytes. "SSRI" is just another name for Subresource
+ *     Integrity — only this module should mention it, inside `parseIntegrity`.
  */
 import crypto from 'node:crypto'
 
-import { hash as computeHash } from './crypto/hash'
+import { hash as computeDigest } from './crypto/hash'
 
 import { BufferFrom, BufferPrototypeToString } from './primordials/buffer'
 
 import { ErrorCtor, TypeErrorCtor } from './primordials/error'
 
+import { ObjectFreeze } from './primordials/object'
+
+/**
+ * SRI-blessed hash algorithms. The W3C set; the prefix is part of the wire
+ * format, not a fleet convention.
+ */
+export type HashAlgorithm = 'sha256' | 'sha384' | 'sha512'
+
+/**
+ * A cryptographic hash: an algorithm plus the digest in both encodings. Frozen,
+ * plain, self-describing — `h.algorithm` removes every "is this 256 or 512?"
+ * guess, and `h.hex` / `h.sri` are precomputed views (cheap transcodes of the
+ * digest, eager so the value stays serializable and structurally comparable).
+ */
+export interface Hash {
+  readonly algorithm: HashAlgorithm
+  /**
+   * Lowercase hex digest (64 chars sha256, 96 sha384, 128 sha512).
+   */
+  readonly hex: string
+  /**
+   * W3C SRI string: `<algorithm>-<base64>`.
+   */
+  readonly sri: string
+}
+
+/**
+ * Anything a caller can hand verify/convert as "the expected hash": a parsed
+ * {@link Hash}, an SRI string, or a bare hex digest (algorithm inferred by
+ * length).
+ */
+export type HashInput = string | Hash
+
 /**
  * Tagged union representing an expected hash.
  *
- * @example
- *   // Bare SRI (sniffed as integrity):
- *   'sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs='
- *
- * @example
- *   // Bare sha256 hex (sniffed as checksum):
- *   'a1b2c3...'
- *
- * @example
- *   // Explicit:
- *   { type: 'integrity', value: 'sha512-...' }
- *   { type: 'checksum', value: 'a1b2c3...' }
+ * @deprecated Prefer {@link HashInput} + {@link parseHash}. Kept for the
+ *   `integrity?: HashSpec` option fields across dlx / external-tools.
  */
 export type HashSpec =
   | string
@@ -45,7 +71,7 @@ export type HashSpec =
   | { type: 'checksum'; value: string }
 
 /**
- * Normalized internal form. Always an object.
+ * Normalized internal form of a {@link HashSpec}. Always an object.
  */
 export interface NormalizedHash {
   type: 'integrity' | 'checksum'
@@ -53,8 +79,9 @@ export interface NormalizedHash {
 }
 
 /**
- * Both hash formats for the same bytes. Returned from downloads so callers can
- * record whichever format their config uses.
+ * Both pinned hash formats for the same bytes: the sha512 SRI we pin against
+ * and the sha256 hex upstream tools emit. Returned from downloads so callers
+ * record whichever their config uses.
  */
 export interface ComputedHashes {
   /**
@@ -68,7 +95,7 @@ export interface ComputedHashes {
 }
 
 /**
- * Parsed components of an integrity string.
+ * Parsed components of an SRI integrity string.
  */
 export interface ParsedIntegrity {
   /**
@@ -81,86 +108,123 @@ export interface ParsedIntegrity {
   body: string
 }
 
-// SRI accepts sha256 / sha384 / sha512 by spec — the algorithm prefix is
-// part of the wire format, not a fleet convention. Restrict to those three
-// (the W3C-blessed set) rather than parsing arbitrary `<algo>-<base64>`.
+// SRI: sha256/384/512 + base64 body. The algorithm lives in the prefix, so it
+// is read, never inferred.
 const INTEGRITY_RE = /^(sha(?:256|384|512))-([A-Za-z0-9+/]+=*)$/
+// Bare lowercase-or-upper hex digest of any length; the length picks the algo.
+const HEX_RE = /^[a-f0-9]+$/i
+// Exactly 64 hex chars — the sha256 checksum shape, by fleet convention.
 const CHECKSUM_RE = /^[a-f0-9]{64}$/i
 
+// Hex-digest length (chars) per algorithm, and the reverse map for inferring an
+// algorithm from a bare hex digest. The lengths are distinct, so the inference
+// is unambiguous.
+const ALGORITHM_HEX_LENGTH: Record<HashAlgorithm, number> = {
+  sha256: 64,
+  sha384: 96,
+  sha512: 128,
+}
+const HEX_LENGTH_TO_ALGORITHM: { [length: number]: HashAlgorithm | undefined } =
+  {
+    64: 'sha256',
+    96: 'sha384',
+    128: 'sha512',
+  }
+
 /**
- * Convert a sha256 hex checksum to its SRI integrity form (`sha256-<base64>`).
- * Idempotent on integrity input — call this on user-supplied data without first
- * sniffing the format.
+ * Convert a hex checksum to its SRI integrity form.
  *
- * The default algorithm is `'sha256'` because this converts a _checksum_, and
- * checksums are sha256 by fleet convention (the GitHub-SHA256SUMS interop shape
- * its only caller, `checksum-file.ts`, parses). Do NOT flip this default to
- * sha512: this function only relabels the hex bytes, it does not re-hash, so a
- * sha512 label on a 256-bit digest would be a lie. The canonical algorithm for
- * OUR-side integrity values is sha512 — emitted by `computeHashes` as the
- * `integrity` (`sha512-<base64>`) field; sha256 is reserved for
- * upstream-SHASUMS interop and content addressing. Pass an explicit algorithm
- * if you have a hex digest from `sha384` or `sha512` (the function does not
- * verify hex length against the algorithm — caller's responsibility).
- *
- * @example
- *   ;```typescript
- *   checksumToIntegrity(
- *     '3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b',
- *   )
- *   // 'sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs='
- *
- *   checksumToIntegrity('sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs=')
- *   // 'sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs=' (idempotent)
- *   ```
+ * @deprecated Prefer `parseHash(x).sri`, which is total across all algorithms
+ *   and infers the algorithm from a bare hex digest. This shim defaults to
+ *   `'sha256'` because it only relabels the hex bytes — it does NOT re-hash, so
+ *   a sha512 label on a 256-bit digest would be a lie. Idempotent on SRI input.
  *
  * @throws TypeError when the input is neither a recognized SRI nor a hex
  *   digest.
  */
 export function checksumToIntegrity(
   input: string,
-  algorithm = 'sha256',
+  algorithm: HashAlgorithm = 'sha256',
 ): string {
   if (isIntegrity(input)) {
     return input
   }
-  if (!/^[a-f0-9]+$/i.test(input)) {
+  if (!HEX_RE.test(input)) {
     throw new TypeErrorCtor(
       `checksumToIntegrity: expected a hex digest or SRI string, got: ${input}`,
     )
   }
-  const body = BufferPrototypeToString!(BufferFrom!(input, 'hex'), 'base64')
-  return `${algorithm}-${body}`
+  return makeHash(algorithm, input).sri
 }
 
 /**
- * Compute both integrity (sha512 SRI) and checksum (sha256 hex) for a buffer of
- * bytes.
- */
-export function computeHashes(bytes: Buffer): ComputedHashes {
-  const integrity = `sha512-${computeHash('sha512', bytes, 'base64')}`
-  const checksum = computeHash('sha256', bytes, 'hex')
-  return { integrity, checksum }
-}
-
-/**
- * Convert a sha256 SRI integrity string to its hex checksum form (64 lowercase
- * chars). Idempotent on checksum input.
- *
- * Throws on `sha384` and `sha512` SRI — checksums are sha256-only by fleet
- * convention. Callers that need a hex digest for those algorithms can call
- * `parseIntegrity(sri)` and decode `.body` manually.
+ * Compute a single {@link Hash} of `bytes`. Defaults to sha512 — the canonical
+ * trust string we pin against. Pass `'sha256'` for the upstream-interop digest.
  *
  * @example
  *   ;```typescript
- *   integrityToChecksum('sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs=')
- *   // '3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b'
- *
- *   integrityToChecksum(
- *     '3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b',
- *   )
- *   // '3620a0fcaf81ecd3aaeccd5965919d90dbc913f4d07a96e11e7cafc2c785054b' (idempotent)
+ *   computeHash(bytes).sri        // 'sha512-…'  (pin this)
+ *   computeHash(bytes, 'sha256').hex  // '3620a0…' (compare to SHA256SUMS)
  *   ```
+ */
+export function computeHash(
+  bytes: NodeJS.ArrayBufferView,
+  algorithm: HashAlgorithm = 'sha512',
+): Hash {
+  return makeHash(algorithm, computeDigest(algorithm, bytes, 'hex'))
+}
+
+/**
+ * Compute both pinned formats for `bytes`: the sha512 SRI integrity and the
+ * sha256 hex checksum. Use when a config records both (e.g.
+ * `external-tools.json`, dlx lockfiles).
+ */
+export function computeHashes(bytes: Buffer): ComputedHashes {
+  return {
+    integrity: computeHash(bytes, 'sha512').sri,
+    checksum: computeHash(bytes, 'sha256').hex,
+  }
+}
+
+/**
+ * Compare two hashes for equality, ENCODING-agnostically. Parses both and —
+ * only when they share an algorithm — timing-safe compares the digests.
+ *
+ * Returns false when the algorithms differ. A sha512 and a sha256 are different
+ * functions of the same bytes: their digests are unrelated values, so they can
+ * never be "equal", and you CANNOT derive or check one against the other
+ * without the original bytes. To confirm a sha256 and a sha512 describe the
+ * same content, hash the bytes both ways (`computeHashes`) or `verifyHash` the
+ * bytes against each — there is no hash-to-hash shortcut across algorithms.
+ *
+ * What this DOES solve is the cross-ENCODING case that bites string `===`: a
+ * sha256 SRI and the same sha256 hex compare equal here.
+ *
+ * @example
+ *   ;```typescript
+ *   equalHashes('sha256-NiCg…', '3620a0fc…')  // true  (same digest, SRI vs hex)
+ *   equalHashes('sha512-…', '3620a0fc…')       // false (different algorithms)
+ *   ```
+ *
+ * @throws TypeError when either input is not a recognized hash.
+ */
+export function equalHashes(a: HashInput, b: HashInput): boolean {
+  const aHash = parseHash(a)
+  const bHash = parseHash(b)
+  if (aHash.algorithm !== bHash.algorithm) {
+    return false
+  }
+  const aBuf = BufferFrom!(aHash.hex, 'hex')
+  const bBuf = BufferFrom!(bHash.hex, 'hex')
+  return aBuf.length === bBuf.length && crypto.timingSafeEqual(aBuf, bBuf)
+}
+
+/**
+ * Convert an SRI integrity string to its hex checksum form.
+ *
+ * @deprecated Prefer `parseHash(x).hex`, which is total across all algorithms.
+ *   This shim is sha256-only (throws on sha384 / sha512) to preserve its
+ *   historical "checksums are sha256" contract. Idempotent on hex input.
  *
  * @throws TypeError when the input is neither a recognized SRI nor a hex
  *   checksum, or when the input is a non-sha256 SRI.
@@ -172,7 +236,7 @@ export function integrityToChecksum(input: string): string {
   const parsed = parseIntegrity(input)
   if (parsed.algorithm !== 'sha256') {
     throw new TypeErrorCtor(
-      `integrityToChecksum: ${parsed.algorithm} integrity has no 64-hex-char checksum form — checksums are sha256-only by fleet convention.`,
+      `integrityToChecksum: ${parsed.algorithm} integrity has no 64-hex-char checksum form — checksums are sha256-only by fleet convention. Use parseHash(x).hex for any algorithm.`,
     )
   }
   return BufferPrototypeToString!(BufferFrom!(parsed.body, 'base64'), 'hex')
@@ -186,6 +250,14 @@ export function isChecksum(s: string): boolean {
 }
 
 /**
+ * True when `s` is a bare hex digest of a recognized length (sha256 / sha384 /
+ * sha512).
+ */
+export function isHex(s: string): boolean {
+  return HEX_RE.test(s) && HEX_LENGTH_TO_ALGORITHM[s.length] !== undefined
+}
+
+/**
  * True when `s` is a W3C SRI integrity string: `sha(256|384|512)-<base64>`.
  */
 export function isIntegrity(s: string): boolean {
@@ -193,12 +265,28 @@ export function isIntegrity(s: string): boolean {
 }
 
 /**
+ * Build a frozen {@link Hash} from an algorithm and a hex digest. The internal
+ * constructor — trusts its inputs (lowercases the hex, computes the SRI view);
+ * use {@link parseHash} for untrusted strings, which validates first.
+ */
+export function makeHash(algorithm: HashAlgorithm, hex: string): Hash {
+  const lowerHex = hex.toLowerCase()
+  const base64 = BufferPrototypeToString!(
+    BufferFrom!(lowerHex, 'hex'),
+    'base64',
+  )
+  return ObjectFreeze({
+    algorithm,
+    hex: lowerHex,
+    sri: `${algorithm}-${base64}`,
+  })
+}
+
+/**
  * Normalize a {@link HashSpec} to its canonical `{ type, value }` form.
  *
- * - Object form is trusted (its `value` is validated for shape).
- * - Bare string matching SRI → integrity.
- * - Bare string of 64 hex chars → checksum.
- * - Anything else throws TypeError.
+ * @deprecated Prefer {@link parseHash}, which returns an algorithm-tagged
+ *   {@link Hash}. Kept for callers that branch on integrity-vs-checksum type.
  *
  * @throws TypeError if the string is not a recognized format, or if an explicit
  *   object's value doesn't match its declared type.
@@ -242,14 +330,53 @@ export function normalizeHash(spec: HashSpec): NormalizedHash {
 }
 
 /**
- * Split an integrity string into its `{ algorithm, body }` components. `body`
- * is the base64-encoded digest (everything after the algorithm + dash).
+ * Parse any {@link HashInput} into a canonical {@link Hash}. The one entry
+ * point for untrusted input — validates shape + length, then freezes.
  *
- * @example
- *   ;```typescript
- *   parseIntegrity('sha256-NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs=')
- *   // { algorithm: 'sha256', body: 'NiCg/K+B7NOq7M1ZZZGdkNvJE/TQepbhHnyvwseFBUs=' }
- *   ```
+ * - A {@link Hash} object is re-canonicalized from its `algorithm` + `hex`.
+ * - An SRI string carries its algorithm in the prefix (the body length is checked
+ *   against it).
+ * - A bare hex digest infers the algorithm from its length (64 / 96 / 128).
+ *
+ * @throws TypeError when the input is not a recognized SRI or hex digest, or
+ *   when an SRI body's length doesn't match its declared algorithm.
+ */
+export function parseHash(input: HashInput): Hash {
+  if (typeof input === 'object' && input !== null) {
+    return makeHash(input.algorithm, input.hex)
+  }
+  const sriMatch = INTEGRITY_RE.exec(input)
+  if (sriMatch) {
+    const algorithm = sriMatch[1] as HashAlgorithm
+    const hex = BufferPrototypeToString!(
+      BufferFrom!(sriMatch[2]!, 'base64'),
+      'hex',
+    )
+    const expectedLength = ALGORITHM_HEX_LENGTH[algorithm]
+    if (hex.length !== expectedLength) {
+      throw new TypeErrorCtor(
+        `parseHash: ${algorithm} SRI body decodes to ${hex.length} hex chars, expected ${expectedLength}: ${input}`,
+      )
+    }
+    return makeHash(algorithm, hex)
+  }
+  if (HEX_RE.test(input)) {
+    const algorithm = HEX_LENGTH_TO_ALGORITHM[input.length]
+    if (algorithm === undefined) {
+      throw new TypeErrorCtor(
+        `parseHash: hex digest is ${input.length} chars; expected 64 (sha256), 96 (sha384), or 128 (sha512): ${input}`,
+      )
+    }
+    return makeHash(algorithm, input)
+  }
+  throw new TypeErrorCtor(
+    `parseHash: expected an SRI string ("sha(256|384|512)-<base64>") or a hex digest, got: ${input}`,
+  )
+}
+
+/**
+ * Split an SRI integrity string into its `{ algorithm, body }` components.
+ * `body` is the base64-encoded digest.
  *
  * @throws Error when the input is not a valid SRI integrity string.
  */
@@ -262,44 +389,51 @@ export function parseIntegrity(sri: string): ParsedIntegrity {
 }
 
 /**
- * Verify computed hashes against an expected {@link NormalizedHash}. Uses
- * `crypto.timingSafeEqual` for constant-time comparison.
+ * Verify `bytes` against an expected hash. Reads the algorithm the expected
+ * hash declares, computes only that digest, and compares with
+ * `crypto.timingSafeEqual` — so any encoding (hex / SRI / {@link Hash}) and any
+ * algorithm (sha256 / sha384 / sha512) verifies without the caller reconciling
+ * formats first.
  *
- * @throws DlxHashMismatchError when the hash of the matching type doesn't match
- *   the expected value.
+ * @throws HashMismatchError when the recomputed digest doesn't match.
+ * @throws TypeError when `expected` is not a recognized hash.
  */
 export function verifyHash(
-  expected: NormalizedHash,
-  computed: ComputedHashes,
+  bytes: NodeJS.ArrayBufferView,
+  expected: HashInput,
 ): void {
-  const actual =
-    expected.type === 'integrity' ? computed.integrity : computed.checksum
-  const expectedBuf = BufferFrom!(expected.value)
-  const actualBuf = BufferFrom!(actual)
+  const expectedHash = parseHash(expected)
+  const actualHash = computeHash(bytes, expectedHash.algorithm)
+  const expectedBuf = BufferFrom!(expectedHash.hex, 'hex')
+  const actualBuf = BufferFrom!(actualHash.hex, 'hex')
   if (
     expectedBuf.length !== actualBuf.length ||
     !crypto.timingSafeEqual(expectedBuf, actualBuf)
   ) {
-    throw new DlxHashMismatchError(expected, computed)
+    throw new HashMismatchError(expectedHash, actualHash)
   }
 }
 
 /**
- * Thrown when an expected hash doesn't match the computed hash of the
- * downloaded bytes. Carries both sides for diagnostics.
+ * Thrown when an expected hash doesn't match the computed hash of the verified
+ * bytes. Carries both sides (as {@link Hash}) for diagnostics.
  */
-export class DlxHashMismatchError extends Error {
-  readonly expected: NormalizedHash
-  readonly actual: ComputedHashes
+export class HashMismatchError extends Error {
+  readonly expected: Hash
+  readonly actual: Hash
 
-  constructor(expected: NormalizedHash, actual: ComputedHashes) {
-    const actualValue =
-      expected.type === 'integrity' ? actual.integrity : actual.checksum
+  constructor(expected: Hash, actual: Hash) {
     super(
-      `Hash mismatch (${expected.type}): expected ${expected.value}, got ${actualValue}`,
+      `Hash mismatch (${expected.algorithm}): expected ${expected.sri}, got ${actual.sri}`,
     )
-    this.name = 'DlxHashMismatchError'
+    this.name = 'HashMismatchError'
     this.expected = expected
     this.actual = actual
   }
 }
+
+/**
+ * @deprecated Renamed to {@link HashMismatchError}. Alias kept for callers that
+ *   catch the old name.
+ */
+export const DlxHashMismatchError = HashMismatchError

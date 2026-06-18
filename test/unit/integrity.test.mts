@@ -5,17 +5,21 @@ import { describe, expect, it } from 'vitest'
 
 import {
   checksumToIntegrity,
+  computeHash,
   computeHashes,
   DlxHashMismatchError,
+  equalHashes,
+  HashMismatchError,
   integrityToChecksum,
   isChecksum,
+  isHex,
   isIntegrity,
+  makeHash,
   normalizeHash,
+  parseHash,
   parseIntegrity,
   verifyHash,
 } from '../../src/integrity'
-
-import type { ComputedHashes, NormalizedHash } from '../../src/integrity'
 
 // Known-correct pair for pnpm v10 darwin-arm64 release asset:
 // the actual sha256 hex digest of the tarball next to its sha256 SRI form.
@@ -317,68 +321,164 @@ describe('integrity', () => {
     })
   })
 
+  describe('parseHash', () => {
+    it('parses a sha256 SRI into algorithm + hex + sri', () => {
+      const h = parseHash(KNOWN_SRI)
+      expect(h.algorithm).toBe('sha256')
+      expect(h.hex).toBe(KNOWN_HEX)
+      expect(h.sri).toBe(KNOWN_SRI)
+    })
+
+    it('infers sha256 from a 64-char hex digest', () => {
+      const h = parseHash(KNOWN_HEX)
+      expect(h.algorithm).toBe('sha256')
+      expect(h.sri).toBe(KNOWN_SRI)
+    })
+
+    it('infers sha384 (96) and sha512 (128) from hex length', () => {
+      expect(parseHash('a'.repeat(96)).algorithm).toBe('sha384')
+      expect(parseHash('a'.repeat(128)).algorithm).toBe('sha512')
+    })
+
+    it('lowercases hex and is idempotent on a Hash', () => {
+      const h = parseHash(KNOWN_HEX.toUpperCase())
+      expect(h.hex).toBe(KNOWN_HEX)
+      expect(parseHash(h)).toEqual(h)
+    })
+
+    it('returns a frozen value', () => {
+      expect(Object.isFrozen(parseHash(KNOWN_HEX))).toBe(true)
+    })
+
+    it('throws on a hex digest of unrecognized length (e.g. sha1)', () => {
+      expect(() => parseHash('a'.repeat(40))).toThrow(TypeError)
+    })
+
+    it('throws when an SRI body length contradicts its algorithm', () => {
+      // sha512 prefix but a 32-byte (sha256-length) body.
+      expect(() => parseHash(`sha512-${KNOWN_SRI.slice(7)}`)).toThrow(TypeError)
+    })
+
+    it('throws on garbage', () => {
+      expect(() => parseHash('not-a-hash')).toThrow(TypeError)
+    })
+  })
+
+  describe('computeHash', () => {
+    it('defaults to sha512', () => {
+      const h = computeHash(Buffer.from('x'))
+      expect(h.algorithm).toBe('sha512')
+      expect(h.sri.startsWith('sha512-')).toBe(true)
+    })
+
+    it('computes sha256 when asked, matching computeHashes().checksum', () => {
+      const h = computeHash(Buffer.from('hello world', 'utf8'), 'sha256')
+      expect(h.hex).toBe(
+        'b94d27b9934d3e08a52e52d7da7dabfac484efe37a5380ee9088f7ace2efcde9',
+      )
+    })
+
+    it('is deterministic', () => {
+      const bytes = Buffer.from('determinism')
+      const a = computeHash(bytes)
+      const b = computeHash(bytes)
+      expect(a).toEqual(b)
+    })
+  })
+
+  describe('makeHash', () => {
+    it('builds a frozen Hash with both encodings', () => {
+      const h = makeHash('sha256', KNOWN_HEX)
+      expect(h).toEqual({ algorithm: 'sha256', hex: KNOWN_HEX, sri: KNOWN_SRI })
+      expect(Object.isFrozen(h)).toBe(true)
+    })
+
+    it('lowercases the hex', () => {
+      expect(makeHash('sha256', KNOWN_HEX.toUpperCase()).hex).toBe(KNOWN_HEX)
+    })
+  })
+
+  describe('isHex', () => {
+    it('accepts recognized digest lengths (64/96/128)', () => {
+      expect(isHex('a'.repeat(64))).toBe(true)
+      expect(isHex('a'.repeat(96))).toBe(true)
+      expect(isHex('a'.repeat(128))).toBe(true)
+    })
+
+    it('rejects other lengths, non-hex, and SRI', () => {
+      expect(isHex('a'.repeat(40))).toBe(false)
+      expect(isHex('xyz')).toBe(false)
+      expect(isHex(KNOWN_SRI)).toBe(false)
+    })
+  })
+
+  describe('equalHashes', () => {
+    it('true for the same digest across encodings (SRI vs hex)', () => {
+      expect(equalHashes(KNOWN_SRI, KNOWN_HEX)).toBe(true)
+    })
+
+    it('false for different digests of the same algorithm', () => {
+      expect(equalHashes(KNOWN_HEX, '0'.repeat(64))).toBe(false)
+    })
+
+    it('false across algorithms (a sha512 is never equal to a sha256)', () => {
+      const bytes = Buffer.from('x')
+      const big = computeHash(bytes, 'sha512')
+      const small = computeHash(bytes, 'sha256')
+      expect(equalHashes(big, small)).toBe(false)
+    })
+
+    it('accepts Hash objects on either side', () => {
+      expect(equalHashes(parseHash(KNOWN_HEX), KNOWN_SRI)).toBe(true)
+    })
+
+    it('throws on unparseable input', () => {
+      expect(() => equalHashes('garbage', KNOWN_HEX)).toThrow(TypeError)
+    })
+  })
+
   describe('verifyHash', () => {
     const bytes = Buffer.from('verify me')
-    const computed: ComputedHashes = computeHashes(bytes)
+    const sha512 = computeHash(bytes, 'sha512')
+    const sha256 = computeHash(bytes, 'sha256')
 
-    it('accepts matching integrity', () => {
-      const expected: NormalizedHash = {
-        type: 'integrity',
-        value: computed.integrity,
-      }
-      expect(() => verifyHash(expected, computed)).not.toThrow()
+    it('accepts a matching sha512 SRI', () => {
+      expect(() => verifyHash(bytes, sha512.sri)).not.toThrow()
     })
 
-    it('accepts matching checksum', () => {
-      const expected: NormalizedHash = {
-        type: 'checksum',
-        value: computed.checksum,
-      }
-      expect(() => verifyHash(expected, computed)).not.toThrow()
+    it('accepts a matching sha256 hex (SHA256SUMS shape)', () => {
+      expect(() => verifyHash(bytes, sha256.hex)).not.toThrow()
     })
 
-    it('throws DlxHashMismatchError when integrity differs', () => {
-      const expected: NormalizedHash = {
-        type: 'integrity',
-        value: 'sha512-' + 'W'.repeat(86) + '==',
-      }
-      expect(() => verifyHash(expected, computed)).toThrow(DlxHashMismatchError)
+    it('accepts a matching sha256 SRI (encoding-agnostic)', () => {
+      expect(() => verifyHash(bytes, sha256.sri)).not.toThrow()
     })
 
-    it('throws DlxHashMismatchError when checksum differs', () => {
-      const expected: NormalizedHash = {
-        type: 'checksum',
-        value: '0'.repeat(64),
-      }
-      expect(() => verifyHash(expected, computed)).toThrow(DlxHashMismatchError)
+    it('accepts a Hash object and honors its declared algorithm', () => {
+      expect(() => verifyHash(bytes, sha256)).not.toThrow()
+      expect(() => verifyHash(bytes, sha512)).not.toThrow()
     })
 
-    it('error carries expected and actual', () => {
-      const expected: NormalizedHash = {
-        type: 'integrity',
-        value: 'sha512-' + 'W'.repeat(86) + '==',
-      }
+    it('throws HashMismatchError when the digest differs', () => {
+      const wrong = makeHash('sha512', 'a'.repeat(128))
+      expect(() => verifyHash(bytes, wrong)).toThrow(/Hash mismatch/)
+    })
+
+    it('DlxHashMismatchError is an alias for HashMismatchError', () => {
+      const isAlias = DlxHashMismatchError === HashMismatchError
+      expect(isAlias).toBe(true)
+    })
+
+    it('error carries expected + actual as Hash; message names the algorithm', () => {
       try {
-        verifyHash(expected, computed)
+        verifyHash(bytes, makeHash('sha256', '0'.repeat(64)))
         expect.fail('should have thrown')
       } catch (e) {
-        expect(e).toBeInstanceOf(DlxHashMismatchError)
-        const err = e as DlxHashMismatchError
-        expect(err.expected).toEqual(expected)
-        expect(err.actual).toEqual(computed)
-      }
-    })
-
-    it('error message names the mismatched type', () => {
-      const expected: NormalizedHash = {
-        type: 'checksum',
-        value: '0'.repeat(64),
-      }
-      try {
-        verifyHash(expected, computed)
-        expect.fail('should have thrown')
-      } catch (e) {
-        expect((e as Error).message).toMatch(/Hash mismatch \(checksum\)/)
+        const err = e as HashMismatchError
+        expect(err.name).toBe('HashMismatchError')
+        expect(err.expected.algorithm).toBe('sha256')
+        expect(err.actual.hex).toBe(sha256.hex)
+        expect(err.message).toMatch(/Hash mismatch \(sha256\)/)
       }
     })
   })
