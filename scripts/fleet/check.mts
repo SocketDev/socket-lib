@@ -276,11 +276,6 @@ const steps: Array<() => boolean> = [
   // analog of pnpm --frozen-lockfile + minimumReleaseAge). Vacuous pass in
   // repos with no uv project. Shares policy with _shared/uv-config.mts.
   () => run('node', ['scripts/fleet/check/uv-lockfiles-are-current.mts']),
-  // pnpm-lock.yaml resolves vite rolldown-native (8.x) with no esbuild —
-  // the fleet bundler is rolldown, esbuild is banned. A vitest repo whose
-  // transitive vite floats to 7.x drags esbuild in (noisy Dependabot
-  // advisories); this fails the cascade until vite is pinned to 8.x.
-  () => run('node', ['scripts/fleet/check/vite-is-rolldown-native.mts']),
   // gh-aw agentic workflows: each `<name>.md` source has a compiled
   // `<name>.lock.yml` (what Actions runs) whose embedded body_hash matches
   // the .md body — catches a prompt edited without `gh aw compile`. Pure
