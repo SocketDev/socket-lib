@@ -28,6 +28,8 @@ import { ErrorCtor, TypeErrorCtor } from './primordials/error'
 
 import { ObjectFreeze } from './primordials/object'
 
+import { StringPrototypeToLowerCase } from './primordials/string'
+
 /**
  * SRI-blessed hash algorithms. The W3C set; the prefix is part of the wire
  * format, not a fleet convention.
@@ -270,7 +272,7 @@ export function isIntegrity(s: string): boolean {
  * use {@link parseHash} for untrusted strings, which validates first.
  */
 export function makeHash(algorithm: HashAlgorithm, hex: string): Hash {
-  const lowerHex = hex.toLowerCase()
+  const lowerHex = StringPrototypeToLowerCase(hex)
   const base64 = BufferPrototypeToString!(
     BufferFrom!(lowerHex, 'hex'),
     'base64',
