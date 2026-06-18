@@ -69,6 +69,7 @@ catalog:
   'vitest': 4.1.8
 
 allowBuilds:
+  '@anthropic-ai/claude-code': false
   cpu-features: false
   esbuild: true
   protobufjs: false
@@ -300,6 +301,9 @@ overrides:
   'hosted-git-info': '8.1.0'
   'ip-address': '10.1.1'
   'isexe': '3.1.1'
+  # 4.2.0 clears GHSA-h67p-54hq-rp68 (js-yaml quadratic merge-key DoS, <=4.1.1),
+  # pulled transitively via @yarnpkg/core.
+  'js-yaml': '4.2.0'
   'json-parse-even-better-errors': '5.0.0'
   'lru-cache': '11.2.2'
   'make-fetch-happen': '15.0.5'
