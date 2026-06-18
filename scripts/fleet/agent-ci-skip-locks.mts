@@ -76,6 +76,23 @@ export function listLockYmls(workflowsDir: string): string[] {
     .toSorted()
 }
 
+/**
+ * Resolve a GitHub token from the gh CLI. Agent CI verifies a fetched reusable
+ * workflow's action-SHA pins against GitHub (its impostor-commit audit); with no
+ * token it cannot verify them and fails the run, while CI passes because
+ * GITHUB_TOKEN is present. Returns undefined when gh is absent or
+ * unauthenticated, in which case the caller leaves the environment untouched.
+ */
+export async function resolveGithubToken(): Promise<string | undefined> {
+  try {
+    const result = await spawn('gh', ['auth', 'token'])
+    const token = String(result.stdout).trim()
+    return token || undefined
+  } catch {
+    return undefined
+  }
+}
+
 export async function main(): Promise<number> {
   const argv = process.argv.slice(2)
   const target = extractWorkflowTarget(argv)
@@ -101,7 +118,21 @@ export async function main(): Promise<number> {
     }
   }
 
+  // Give Agent CI a GitHub token so its impostor-commit audit can verify the
+  // fetched reusable workflow's SHAs online (offline it fails the run). Only
+  // resolve one when the env has none, and only on success — gh being absent or
+  // unauthenticated must not break a local run.
+  const env: NodeJS.ProcessEnv = { ...process.env }
+  if (!env['GH_TOKEN'] && !env['GITHUB_TOKEN']) {
+    const token = await resolveGithubToken()
+    if (token) {
+      env['GH_TOKEN'] = token
+      env['GITHUB_TOKEN'] = token
+    }
+  }
+
   const result = await spawn(AGENT_CI_BIN, argv, {
+    env,
     shell: WIN32,
     stdio: 'inherit',
   })
