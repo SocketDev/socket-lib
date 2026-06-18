@@ -63,8 +63,9 @@ catalog:
   'taze': 19.14.1
   # Vite 8.x is rolldown-native (keeps the fleet bundler rolldown end-to-end,
   # so esbuild never enters the tree). vitest 4.1.x pulls vite transitively;
-  # the override below forces that transitive vite to this pin.
-  'vite': 8.0.14
+  # the override below forces that transitive vite to this pin. Pinned to
+  # 8.0.16+ to clear GHSA-fx2h-pf6j-xcff (server.fs.deny bypass, fixed 8.0.16).
+  'vite': 8.0.16
   'vitest': 4.1.8
 
 allowBuilds:
@@ -293,7 +294,9 @@ overrides:
   'execa': '5.1.1'
   'fast-uri': '3.1.2'
   'has-flag': '5.0.1'
-  'hono': '4.12.23'
+  # 4.12.25+ clears GHSA-88fw-hqm2-52qc (hono CORS wildcard+credentials reflect),
+  # pulled transitively via @anthropic-ai/claude-agent-sdk.
+  'hono': '4.12.25'
   'hosted-git-info': '8.1.0'
   'ip-address': '10.1.1'
   'isexe': '3.1.1'
@@ -328,7 +331,8 @@ overrides:
   'string-width': '8.1.0'
   'strip-ansi': '7.1.2'
   'supports-color': '10.2.2'
-  'tar': '7.5.11'
+  # 7.5.16+ clears GHSA (node-tar PAX size-override parser differential, <=7.5.15).
+  'tar': '7.5.16'
   # Force EVERY transitive vite (via vitest, plugins) to the rolldown-native
   # 8.x catalog pin so esbuild never resolves into the tree.
   'vite': 'catalog:'
