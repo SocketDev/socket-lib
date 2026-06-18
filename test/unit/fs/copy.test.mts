@@ -8,7 +8,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { CopyMode, copy } from '../../../src/fs/copy'
+import { copy, CopyMode } from '../../../src/fs/copy'
 
 import { runWithTempDir } from '../util/temp-file-helper'
 
