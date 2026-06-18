@@ -2,12 +2,15 @@
  * @file Unit tests for src/node/module.ts.
  */
 
+import path from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import {
   getNodeModule,
   isNodeBuiltin,
   requireBuiltin,
+  requireFrom,
 } from '../../../src/node/module'
 
 describe('node/module', () => {
@@ -78,6 +81,29 @@ describe('node/module', () => {
       // binding exists. On stock Node the binding is absent and require throws,
       // which is why every call site is guarded.
       expect(() => requireBuiltin('node:smol-vfs')).toThrow()
+    })
+  })
+
+  describe('requireFrom', () => {
+    it('loads a builtin from a caller-supplied base', () => {
+      const nodePath = requireFrom(import.meta.url, 'node:path') as Record<
+        string,
+        unknown
+      >
+      expect(typeof nodePath['join']).toBe('function')
+    })
+
+    it('resolves a relative specifier from the supplied base directory', () => {
+      // Base = a path at the repo root (process.cwd() is the root under vitest).
+      // requireFrom resolves the relative './package.json' from THAT directory,
+      // proving it honors the caller's base, not this module's location. The
+      // base file itself need not exist — createRequire only uses its dir.
+      const base = path.join(process.cwd(), 'index.js')
+      const manifest = requireFrom(base, './package.json') as Record<
+        string,
+        unknown
+      >
+      expect(manifest['name']).toBe('@socketsecurity/lib')
     })
   })
 })

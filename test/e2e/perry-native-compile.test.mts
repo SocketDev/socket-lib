@@ -21,13 +21,12 @@ const fixtureDir = path.resolve(repoRoot, 'test', 'fixtures', 'perry')
 const perryBin = path.resolve(repoRoot, 'node_modules', '.bin', 'perry')
 
 // Fail-closed: telemetry off, no background update checks (fleet rule).
-const perryEnv = {
-  __proto__: null,
+const perryEnv: NodeJS.ProcessEnv = {
   ...process.env,
   CI: 'true',
   PERRY_NO_TELEMETRY: '1',
   PERRY_NO_UPDATE_CHECK: '1',
-} as NodeJS.ProcessEnv
+}
 
 // Resolve @socketsecurity/lib to THIS repo (not the published version) so the
 // compile exercises local `src`. With the package in perry.compilePackages,
