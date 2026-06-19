@@ -20,6 +20,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`secrets` — proteus broker credential tier.** The credential resolver gains a broker layer in the documented order (explicit, then env, then broker, then keychain): it connects to the broker's runtime socket, requests the value, and self-gates. No socket means no broker, so it returns `undefined` and falls through to the keychain. Async only (absent from `resolveSync`) and skipped under `allowEnvOnly`. Existing `resolveProviderCredential` call sites are unchanged.
 - **`paths` — `getRuntimeSocketPath` and `getXdgRuntimeDir` for daemon sockets.** One resolver a daemon and its clients both call to locate a runtime socket: the XDG runtime dir when present, a `$TMPDIR/<name>-<uid>` fallback, or a named pipe on Windows.
 - **`llms.txt` — discovery index for AI agents.** `pnpm run docs` now also emits a publish-safe `llms.txt` at the package root that links each export subpath to its shipped `.d.mts` declaration, giving an agent one file to read after installing. It ships in the published tarball.
+- **`packages/manifest` — `trimPublishManifest`.** Returns a shallow copy of a `package.json` that omits dev/build-only top-level fields (`devDependencies`, `scripts` by default) so a published tarball and its npm metadata stay lean. `drop` overrides the field set; `keep` retains a field even when dropped (e.g. a runtime `postinstall`). The original object is left intact.
 
 ### Changed
 
