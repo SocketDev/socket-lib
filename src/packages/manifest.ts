@@ -25,7 +25,7 @@ import { isRegistryFetcherType } from './validation'
 
 import type { PackageJson, PacoteOptions } from './types'
 
-import { ObjectFromEntries } from '../primordials/object'
+import { ObjectFromEntries, ObjectKeys } from '../primordials/object'
 const abortSignal = getAbortSignal()
 const packageDefaultNodeRange = getPackageDefaultNodeRange()
 const PACKAGE_DEFAULT_SOCKET_CATEGORIES = getPackageDefaultSocketCategories()
@@ -205,4 +205,56 @@ export async function fetchPackagePackument(
     })
   } catch {}
   return undefined
+}
+
+/**
+ * Dev/build-only top-level package.json fields not needed at runtime. The
+ * conservative default for {@link trimPublishManifest}; extend per-package via
+ * its `drop` option.
+ */
+export const DEFAULT_TRIM_FIELDS: readonly string[] = [
+  'devDependencies',
+  'scripts',
+]
+
+export interface TrimPublishManifestOptions {
+  /**
+   * Top-level fields to omit (defaults to {@link DEFAULT_TRIM_FIELDS}).
+   */
+  readonly drop?: readonly string[] | undefined
+  /**
+   * Fields to KEEP even when listed in `drop` (e.g. a runtime postinstall).
+   */
+  readonly keep?: readonly string[] | undefined
+}
+
+/**
+ * Return a shallow copy of `manifest` that omits dev/build-only top-level
+ * fields so a published tarball + its npm metadata stay lean (npm caps total
+ * per-package metadata at 100 MB). The original object is left intact; persist
+ * the result only for the publish, never over the repo's own package.json.
+ *
+ * @example
+ *   ;```typescript
+ *   const lean = trimPublishManifest(pkg) // omits devDependencies + scripts
+ *   const kept = trimPublishManifest(pkg, { keep: ['scripts'] })
+ *   ```
+ */
+export function trimPublishManifest(
+  manifest: PackageJson,
+  options?: TrimPublishManifestOptions | undefined,
+): PackageJson {
+  const opts = { __proto__: null, ...options } as TrimPublishManifestOptions
+  const drop = new Set(opts.drop ?? DEFAULT_TRIM_FIELDS)
+  const keep = new Set(opts.keep ?? [])
+  const source = manifest as Record<string, unknown>
+  const keys = ObjectKeys(source)
+  const out: Record<string, unknown> = {}
+  for (let i = 0, { length } = keys; i < length; i += 1) {
+    const key = keys[i]!
+    if (!drop.has(key) || keep.has(key)) {
+      out[key] = source[key]
+    }
+  }
+  return out as PackageJson
 }

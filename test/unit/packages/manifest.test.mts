@@ -23,10 +23,13 @@ vi.mock(
     }) as unknown as typeof PacoteModule,
 )
 
+import type { PackageJson } from '../../../src/packages/types'
 import {
   createPackageJson,
+  DEFAULT_TRIM_FIELDS,
   fetchPackageManifest,
   fetchPackagePackument,
+  trimPublishManifest,
 } from '../../../src/packages/manifest'
 import pacote from '../../../src/external/pacote'
 
@@ -250,5 +253,54 @@ describe.sequential('packages/manifest — fetchPackagePackument', () => {
   it('returns undefined when pacote.packument throws', async () => {
     vi.mocked(pacote.packument).mockRejectedValueOnce(new Error('network'))
     expect(await fetchPackagePackument('does-not-exist')).toBeUndefined()
+  })
+})
+
+describe('packages/manifest — trimPublishManifest', () => {
+  it('omits devDependencies + scripts by default, keeps runtime fields', () => {
+    const pkg = {
+      name: 'x',
+      version: '1.0.0',
+      dependencies: { a: '1' },
+      devDependencies: { b: '2' },
+      scripts: { test: 'vitest' },
+    } as unknown as PackageJson
+    const out = trimPublishManifest(pkg) as unknown as Record<string, unknown>
+    expect(out).toEqual({
+      name: 'x',
+      version: '1.0.0',
+      dependencies: { a: '1' },
+    })
+  })
+
+  it('leaves the input intact', () => {
+    const pkg = { name: 'x', scripts: {} } as unknown as PackageJson
+    trimPublishManifest(pkg)
+    expect((pkg as unknown as Record<string, unknown>)['scripts']).toBeDefined()
+  })
+
+  it('honors a custom drop set', () => {
+    const pkg = { name: 'x', taskr: {}, scripts: {} } as unknown as PackageJson
+    const out = trimPublishManifest(pkg, {
+      drop: ['taskr'],
+    }) as unknown as Record<string, unknown>
+    expect(out['taskr']).toBeUndefined()
+    expect(out['scripts']).toBeDefined()
+  })
+
+  it('keep overrides drop (retains a runtime script)', () => {
+    const pkg = {
+      name: 'x',
+      scripts: { postinstall: 'node x' },
+    } as unknown as PackageJson
+    const out = trimPublishManifest(pkg, {
+      drop: ['scripts'],
+      keep: ['scripts'],
+    }) as unknown as Record<string, unknown>
+    expect(out['scripts']).toBeDefined()
+  })
+
+  it('DEFAULT_TRIM_FIELDS is devDependencies + scripts', () => {
+    expect([...DEFAULT_TRIM_FIELDS]).toEqual(['devDependencies', 'scripts'])
   })
 })
