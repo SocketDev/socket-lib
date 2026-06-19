@@ -50,7 +50,7 @@ jobs:
       # (draft → upload → undraft) after a successful registry write.
       contents: write
     steps:
-      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@5298430fdc1c6a31d1301379e86c46b9c8343853 # main (2026-05-28)
+      - uses: SocketDev/socket-registry/.github/actions/setup-and-install@a12d6deb2b9c3841607faa37ab53a20ea3a46916 # main (2026-06-19)
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN || secrets.SOCKET_API_KEY }}
 

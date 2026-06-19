@@ -3193,9 +3193,9 @@
   "engines": {
     "node": ">=22",
     "npm": ">=11.16.0",
-    "pnpm": ">=11.6.0"
+    "pnpm": ">=11.8.0"
   },
-  "packageManager": "pnpm@11.6.0",
+  "packageManager": "pnpm@11.8.0",
   "allowScripts": {
     "cpu-features": false,
     "esbuild": true,
