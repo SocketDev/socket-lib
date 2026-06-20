@@ -107,7 +107,11 @@ describe('billingFromKeyed', () => {
   })
 
   it('returns an empty context for an empty keyed set', () => {
-    expect(billingFromKeyed({ keyed: new Set() })).toStrictEqual({})
+    // billingFromKeyed builds a null-proto accounts map; toStrictEqual checks
+    // the prototype, so the empty expectation must be null-proto too.
+    expect(billingFromKeyed({ keyed: new Set() })).toStrictEqual({
+      __proto__: null,
+    })
   })
 })
 
