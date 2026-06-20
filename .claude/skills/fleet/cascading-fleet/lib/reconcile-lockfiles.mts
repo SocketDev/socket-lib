@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Reconcile + push `pnpm-lock.yaml` across the fleet after a cascade wave
  *   that landed catalog / dependency changes but committed WITHOUT the lockfile
  *   (the cascade excludes a stale lockfile when its `pnpm install` can't

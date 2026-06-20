@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Audit the dev machine for prompt-less secret / signing setup. Each
  *   check has a `fix` suggestion the operator can copy-paste. Exit code 0 = all
  *   good. Exit code 1 = at least one check failed. Use `--fix` to attempt

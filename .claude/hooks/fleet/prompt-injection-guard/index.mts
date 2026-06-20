@@ -40,15 +40,15 @@
 //
 // Fails open on regex / parse errors.
 
-import { readFileSync } from 'node:fs'
-import process from 'node:process'
+import { safeReadFileSync } from '@socketsecurity/lib-stable/fs/read-file'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withEditGuard } from '../_shared/payload.mts'
+import {
+  invisibleSmugglingLabel,
+  normalizeForScan,
+} from '../_shared/evasion-normalize.mts'
+import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
+import { resolveEditedText } from '../_shared/payload.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
 
 const BYPASS_PHRASE = 'Allow prompt-injection bypass'
 
@@ -137,61 +137,6 @@ interface Finding {
 
 export function isSelfFile(filePath: string): boolean {
   return SELF_DIR_RE.test(filePath.replace(/\\/g, '/'))
-}
-
-// Invisible / format characters with no legitimate use in the prose or
-// source we author: soft hyphen, zero-width space/non-joiner/joiner,
-// word joiner, the various bidi controls and isolates, the invisible
-// math operators, and the BOM / zero-width no-break space.
-const INVISIBLE_RE = /[­​-‏‪-‮⁠-⁤⁦-⁯﻿]/g
-
-const HOMOGLYPHS: ReadonlyMap<string, string> = new Map([
-  ['а', 'a'],
-  ['е', 'e'],
-  ['о', 'o'],
-  ['с', 'c'],
-  ['р', 'p'],
-  ['х', 'x'],
-  ['у', 'y'],
-  ['ѕ', 's'],
-  ['і', 'i'],
-  ['ј', 'j'],
-  ['ο', 'o'],
-  ['ι', 'i'],
-])
-
-// Strip invisible chars + Unicode Tag-block codepoints, fold homoglyphs.
-// Iterating by code point (for…of) handles the astral Tag block.
-export function normalizeForScan(text: string): string {
-  const stripped = text.replace(INVISIBLE_RE, '')
-  let out = ''
-  for (const ch of stripped) {
-    const cp = ch.codePointAt(0) ?? 0
-    if (cp >= 0xe0000 && cp <= 0xe007f) {
-      continue
-    }
-    out += HOMOGLYPHS.get(ch) ?? ch
-  }
-  return out
-}
-
-// Returns a label when the text carries an invisible-Unicode smuggling
-// channel that has no legitimate use in our sources/docs: Tag-block
-// chars, bidi overrides, or a run of zero-width characters.
-export function invisibleSmugglingLabel(text: string): string | undefined {
-  for (const ch of text) {
-    const cp = ch.codePointAt(0) ?? 0
-    if (cp >= 0xe0000 && cp <= 0xe007f) {
-      return 'Unicode Tag-block character (invisible text-smuggling channel)'
-    }
-  }
-  if (/[‪-‮⁦-⁩]/.test(text)) {
-    return 'Unicode bidi override (visible-text reordering channel)'
-  }
-  if (/[​-‍⁠﻿]{3,}/.test(text)) {
-    return 'run of zero-width characters (text-smuggling channel)'
-  }
-  return undefined
 }
 
 function matchPatterns(text: string): string[] {
@@ -374,35 +319,15 @@ function clip(s: string): string {
   return s.length > 160 ? `${s.slice(0, 157)}...` : s
 }
 
-export function readFileSafe(p: string): string {
-  try {
-    return readFileSync(p, 'utf8')
-  } catch {
-    return ''
-  }
-}
-
-// withEditGuard handles the stdin drain, tool_name gate, file_path narrow,
-// content extraction (new_string / content), and fail-open on any throw.
-await withEditGuard((filePath, content, payload) => {
+export const check = editGuard((filePath, content, payload) => {
   if (isSelfFile(filePath)) {
-    return
+    return undefined
   }
 
-  const currentText = readFileSafe(filePath)
-  let afterText: string
-  if (payload.tool_name === 'Write') {
-    afterText = content ?? ''
-  } else {
-    const oldStr = (payload.tool_input?.old_string as string | undefined) ?? ''
-    const newStr = content ?? ''
-    if (!oldStr) {
-      return
-    }
-    if (!currentText.includes(oldStr)) {
-      return
-    }
-    afterText = currentText.replace(oldStr, newStr)
+  const currentText = safeReadFileSync(filePath) ?? ''
+  const afterText = resolveEditedText(payload)
+  if (afterText === undefined) {
+    return undefined
   }
 
   // Only NEW findings — pre-existing injection text in the file (e.g.
@@ -415,12 +340,12 @@ await withEditGuard((filePath, content, payload) => {
     f => !beforeKeys.has(`${f.label}:${f.source}`),
   )
   if (newFindings.length === 0) {
-    return
+    return undefined
   }
 
   const transcript = payload.transcript_path
   if (transcript && bypassPhrasePresent(transcript, BYPASS_PHRASE)) {
-    return
+    return undefined
   }
 
   const lines: string[] = [
@@ -451,6 +376,14 @@ await withEditGuard((filePath, content, payload) => {
     `  doc): type "${BYPASS_PHRASE}" in a new message.`,
     '',
   )
-  logger.error(lines.join('\n'))
-  process.exitCode = 2
+  return block(lines.join('\n'))
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

@@ -45,6 +45,7 @@ import {
   shouldSkipFile,
   socketLintMarkerFor,
   splitLines,
+  stripTemplateLayer,
 } from '../_shared/helpers.mts'
 
 const logger = getDefaultLogger()
@@ -429,6 +430,12 @@ const scanFilesInRange = (range: string): number => {
       continue
     }
 
+    // Layer-agnostic form of the path for the `template/...` exemptions: the
+    // archetype move buries the canonical sources under template/<layer>/, so
+    // the prefix exemptions test this collapsed form (template/base/.git-hooks/x
+    // → template/.git-hooks/x) instead of the raw moved path.
+    const layerless = stripTemplateLayer(file)
+
     const pathHits = scanPersonalPaths(text)
     if (pathHits.length > 0) {
       logger.fail(`Hardcoded personal path found in: ${file}`)
@@ -490,10 +497,11 @@ const scanFilesInRange = (range: string): number => {
       // fleet repos. The same exemption that applies at the
       // destination has to apply at the source; otherwise wheelhouse
       // template edits get flagged for code that's intentionally raw
-      // where it actually runs.
-      !file.startsWith('template/.claude/hooks/') &&
-      !file.startsWith('template/.git-hooks/') &&
-      !file.startsWith('template/scripts/') &&
+      // where it actually runs. `layerless` collapses the archetype
+      // layer segment so the move (template/base/...) stays exempt.
+      !layerless.startsWith('template/.claude/hooks/') &&
+      !layerless.startsWith('template/.git-hooks/') &&
+      !layerless.startsWith('template/scripts/') &&
       !file.includes('/external/') &&
       !file.includes('/vendor/') &&
       !file.includes('/upstream/') &&
@@ -562,8 +570,8 @@ const scanFilesInRange = (range: string): number => {
       /\.(?:m?ts|cts)$/.test(file) &&
       !file.startsWith('.claude/hooks/') &&
       !file.startsWith('.git-hooks/') &&
-      !file.startsWith('template/.claude/hooks/') &&
-      !file.startsWith('template/.git-hooks/') &&
+      !layerless.startsWith('template/.claude/hooks/') &&
+      !layerless.startsWith('template/.git-hooks/') &&
       !file.includes('/external/') &&
       !file.includes('/vendor/') &&
       !file.includes('/upstream/')
@@ -686,9 +694,7 @@ const scanFastChecks = (): number => {
   // clean checkout, so skipping here loses nothing.
   let toplevel = ''
   try {
-    toplevel = normalizePath(
-      gitLines('rev-parse', '--show-toplevel')[0] ?? '',
-    )
+    toplevel = normalizePath(gitLines('rev-parse', '--show-toplevel')[0] ?? '')
   } catch {
     // bare repo / detached context — proceed (no skip).
   }

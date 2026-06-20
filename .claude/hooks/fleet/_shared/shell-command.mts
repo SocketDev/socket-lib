@@ -1,4 +1,4 @@
-/**
+/*
  * @file Shell-command parsing for Bash-allowlist hooks. Wraps `shell-quote` (a
  *   maintained, zero-dep JS tokenizer) so structure-sensitive guards can reason
  *   about "what binary actually runs, at each command position" instead of
@@ -42,6 +42,26 @@ import type { ParseEntry } from '@socketsecurity/lib-stable/shell/parse'
 // shell-quote emits operator objects ({ op }), comment objects ({ comment }),
 // and bare strings. These ops separate one command from the next.
 const COMMAND_SEPARATORS = new Set(['\n', '&', '&&', ';', '|', '||'])
+
+// Redirect operators shell-quote emits as `{ op }`. The fd/target around them
+// (`2>&1` → bare `'2'`, {op:'>&'}, bare `'1'`; `> /dev/null` → {op:'>'}, bare
+// `'/dev/null'`) are NOT command args — they must not leak into the parsed arg
+// list (a leaked `'2'`/`'1'`/`'/dev/null'` trips arg-shape guards). Excludes the
+// `$` substitution sigil (handled as plain indirection, not a redirect).
+const REDIRECT_OPS = new Set([
+  '<',
+  '<&',
+  '<<',
+  '<<<',
+  '<>',
+  '>',
+  '>&',
+  '>>',
+  '&>',
+  '&>>',
+])
+
+const FD_DIGIT_RE = /^\d+$/
 
 export interface Command {
   /**
@@ -148,13 +168,21 @@ export function parseCommands(command: string): Command[] {
     if (isOp(e)) {
       if (COMMAND_SEPARATORS.has(e.op) || e.op === '(' || e.op === ')') {
         flush()
+      } else if (REDIRECT_OPS.has(e.op)) {
+        // A redirect is not a command arg. shell-quote emits the fd/target as
+        // bare tokens AROUND the op (`2>&1` → `'2'`, {op:'>&'}, `'1'`; `> file`
+        // → {op:'>'}, `'file'`). Drop a preceding bare fd digit (the source fd)
+        // and skip the operand entry that follows (target file or fd) so
+        // neither leaks into args.
+        if (tokens.length > 0 && FD_DIGIT_RE.test(tokens[tokens.length - 1]!)) {
+          tokens.pop()
+        }
+        const next = entries[i + 1]
+        if (next !== undefined && !isOp(next) && !isComment(next)) {
+          i += 1
+        }
       }
-      // Redirect ops (`>`, `>>`, `<`, etc.) and the `$` substitution sigil
-      // are not separators; the redirect TARGET that follows is dropped by
-      // not being a command token we care about. Simplest correct behavior:
-      // treat a redirect op as ending the meaningful args (skip the rest of
-      // this segment's tokens until a separator). We keep it lenient — args
-      // after a redirect aren't binaries.
+      // Other ops (the `$` substitution sigil) are plain indirection — ignore.
       continue
     }
     // Bare string token.

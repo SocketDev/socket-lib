@@ -1,4 +1,4 @@
-/**
+/*
  * @file Socket-owned package scope patterns that bypass the fleet's soak /
  *   maturity windows. The cooldown (7-day soak on npm `minimumReleaseAge`,
  *   matching `maturityPeriod` on taze, matching GitHub-release soak in
@@ -56,6 +56,29 @@ export const SOCKET_PACKAGE_PATTERNS: readonly string[] = [
 ]
 
 /**
+ * Socket-owned scope/name patterns taze updates with NO maturity cooldown
+ * (`update.mts` pass 2 + `.config/fleet/taze.config.mts` `exclude`). DISTINCT
+ * from SOCKET_PACKAGE_PATTERNS: that one is the soak-bypass allow-list. This one
+ * governs UPDATE CADENCE for deps already in the manifest. The two USED to be
+ * hand-copied in two files ("MUST match"); they are now this single source.
+ *
+ * Scoped globs (`@scope/*`) only admit packages under a scope WE own. Every
+ * NON-namespaced Socket package is listed by its EXACT name
+ * (`ecc-agentshield`, `sfw`) — NO unscoped prefix glob: a `socket-*` would
+ * fast-update (skip the maturity cooldown for) any attacker-published
+ * `socket-<anything>` already in the manifest, the same supply-chain shape the
+ * soak invariant below forbids. Add new non-namespaced Socket packages here by
+ * exact name as they ship.
+ */
+export const SOCKET_SCOPES: readonly string[] = [
+  '@socketdev/*',
+  '@socketregistry/*',
+  '@socketsecurity/*',
+  'ecc-agentshield',
+  'sfw',
+]
+
+/**
  * GitHub organizations whose releases are Socket-published and bypass the soak
  * window in `update-external-tools.mts`. Matched against the `owner` segment of
  * an `external-tools.json` entry's `repository: 'github:owner/repo'` field.
@@ -90,23 +113,33 @@ export function isSocketSourcedRepository(repository: string): boolean {
 
 /**
  * Security invariant: only SCOPED globs (`@scope/*`) are allowed to wildcard —
- * an `@scope/*` only ever admits packages under an npm scope WE own, so the
- * soak-bypass can't be abused. An UNSCOPED prefix glob (`socket-*`) would
- * soak-bypass any package an attacker publishes as `socket-<anything>`, so it
- * is forbidden — assert at load so a future edit can't smuggle one in. Every
- * unscoped Socket package is listed by its EXACT name instead.
+ * an `@scope/*` only ever admits packages under an npm scope WE own, so neither
+ * the soak-bypass (SOCKET_PACKAGE_PATTERNS) nor the maturity-cooldown bypass
+ * (SOCKET_SCOPES) can be abused. An UNSCOPED prefix glob (`socket-*`) would
+ * match any package an attacker publishes as `socket-<anything>`, so it is
+ * forbidden in BOTH lists — assert at load so a future edit can't smuggle one
+ * in. Every unscoped Socket package is listed by its EXACT name instead.
  */
-for (let i = 0, { length } = SOCKET_PACKAGE_PATTERNS; i < length; i += 1) {
-  const pattern = SOCKET_PACKAGE_PATTERNS[i]!
-  if (pattern.includes('*') && !pattern.startsWith('@')) {
-    throw new Error(
-      `[socket-scopes] SOCKET_PACKAGE_PATTERNS entry "${pattern}" is an ` +
-        `unscoped wildcard, which would soak-bypass any attacker-published ` +
-        `package matching it. Only @scope/* globs may wildcard; name every ` +
-        `unscoped Socket package exactly (e.g. "socket-cli", not "socket-*").`,
-    )
+export function assertNoUnscopedWildcard(
+  listName: string,
+  patterns: readonly string[],
+): void {
+  for (let i = 0, { length } = patterns; i < length; i += 1) {
+    const pattern = patterns[i]!
+    if (pattern.includes('*') && !pattern.startsWith('@')) {
+      throw new Error(
+        `[socket-scopes] ${listName} entry "${pattern}" is an unscoped ` +
+          `wildcard, which would match any attacker-published package matching ` +
+          `it (bypassing the soak / maturity cooldown). Only @scope/* globs may ` +
+          `wildcard; name every unscoped Socket package exactly (e.g. ` +
+          `"sfw", not "socket-*").`,
+      )
+    }
   }
 }
+
+assertNoUnscopedWildcard('SOCKET_PACKAGE_PATTERNS', SOCKET_PACKAGE_PATTERNS)
+assertNoUnscopedWildcard('SOCKET_SCOPES', SOCKET_SCOPES)
 
 /**
  * Return true when an npm purl (or bare package name) matches a Socket-owned

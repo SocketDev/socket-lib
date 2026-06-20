@@ -33,20 +33,9 @@
 
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
-
-interface PreToolUsePayload {
-  readonly tool_name?: string | undefined
-  readonly tool_input?: { readonly file_path?: unknown | undefined } | undefined
-  readonly transcript_path?: string | undefined
-  readonly cwd?: string | undefined
-}
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
+import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 
 const BYPASS_PHRASES = [
   'Allow new-hook bypass',
@@ -62,7 +51,7 @@ const BYPASS_PHRASES = [
 // covers the wheelhouse path; the optional `fleet/` or `repo/` segment
 // covers the docs-style `.claude/hooks/{fleet,repo}/<name>/` layout
 // (matches the parallel docs/agents.md/{fleet,repo}/ convention).
-// hookName is the LEAF name (e.g. `avoid-cd-reminder`), not the
+// hookName is the LEAF name (e.g. `avoid-cd-nudge`), not the
 // segment-qualified path — citations and registry refs use the full
 // canonical path (`\`.claude/hooks/fleet/<name>/\``) so the guard's
 // expectedRefs uses that path verbatim when checking.
@@ -79,7 +68,7 @@ const WHEELHOUSE_ONLY_HOOKS: ReadonlySet<string> = new Set([
   // logic + "open a chore(wheelhouse): cascade" advice only apply when authoring
   // the wheelhouse template. Wheelhouse-only in intent — kept in fleet/ for
   // dispatch reach, not for downstream policy.
-  'drift-check-reminder',
+  'drift-check-nudge',
 ])
 
 export function findCanonicalClaudeMd(
@@ -113,31 +102,11 @@ export function findCanonicalClaudeMd(
   return undefined
 }
 
-export function readPayload(raw: string): PreToolUsePayload | undefined {
-  try {
-    return JSON.parse(raw) as PreToolUsePayload
-  } catch {
-    return undefined
-  }
-}
-
-async function main(): Promise<void> {
-  const payloadRaw = await readStdin()
-  const payload = readPayload(payloadRaw)
-  if (!payload) {
-    return
-  }
+export const check = editGuard((filePath, _content, payload) => {
   const toolName = payload.tool_name
-  if (toolName !== 'Edit' && toolName !== 'Write') {
-    return
-  }
-  const filePath = payload.tool_input?.['file_path']
-  if (typeof filePath !== 'string') {
-    return
-  }
   const match = HOOK_INDEX_PATH_RE.exec(filePath)
   if (!match) {
-    return
+    return undefined
   }
   // match[1] = "fleet" | "repo" | undefined (legacy top-level layout).
   // match[2] = leaf hook name.
@@ -151,30 +120,30 @@ async function main(): Promise<void> {
   const hookPathSuffix = segment ? `${segment}/${hookName}` : hookName
   // Skip _shared (helpers, not a hook) and wheelhouse-only hooks.
   if (hookName === '_shared' || WHEELHOUSE_ONLY_HOOKS.has(hookName)) {
-    return
+    return undefined
   }
   // Per-repo hooks at `.claude/hooks/repo/<name>/` are NOT cascaded
   // and live entirely in the host repo. Skip the CLAUDE.md citation
   // requirement — repo hooks document themselves in their own README
   // + the host repo's CLAUDE.md decides whether to cite them.
   if (segment === 'repo') {
-    return
+    return undefined
   }
   // Bypass via canonical user phrase.
   if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASES)) {
-    return
+    return undefined
   }
   const claudeMdPath = findCanonicalClaudeMd(filePath, payload.cwd)
   if (!claudeMdPath || !existsSync(claudeMdPath)) {
     // Can't find CLAUDE.md; fail-open rather than blocking on
     // infrastructure problems.
-    return
+    return undefined
   }
   let content: string
   try {
     content = readFileSync(claudeMdPath, 'utf8')
   } catch {
-    return
+    return undefined
   }
   // Three citation shapes recognized (the backticked path is the citation —
   // no prose wrapper required; minimal `(\`.claude/hooks/fleet/<name>/\`)` is
@@ -221,7 +190,7 @@ async function main(): Promise<void> {
   }
 
   if (citedIn(content) || registryCited) {
-    return
+    return undefined
   }
 
   const lines = [
@@ -246,12 +215,13 @@ async function main(): Promise<void> {
     '  message.',
     '',
   ]
-  logger.error(lines.join('\n') + '\n')
-  process.exitCode = 2
-}
-
-main().catch(() => {
-  // Fail-open: never block a session on this hook's own bug.
-  // Loop drains naturally to exit 0; explicit set for clarity.
-  process.exitCode = 0
+  return block(lines.join('\n') + '\n')
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

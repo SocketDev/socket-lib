@@ -1,4 +1,4 @@
-/**
+/*
  * @file Shared detector for the pnpm "trust-aware env expansion" opt-out — the
  *   escape hatch pnpm 10.34.2 / 11.5.3 added when it stopped expanding
  *   `${ENV_VAR}` in repo-controlled credential settings. Consumed by BOTH the

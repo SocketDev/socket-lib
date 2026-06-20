@@ -16,24 +16,18 @@
 // incident: a script imported `{ spawnSync } from 'node:child_process'`,
 // which the lint rule would only have caught at commit).
 //
-// Exit code 2 makes Claude Code refuse the tool call.
-//
-// Reads a Claude Code PreToolUse JSON payload from stdin:
+// Reads a Claude Code PreToolUse JSON payload:
 //   { "tool_name": "Edit"|"Write",
 //     "tool_input": { "file_path": "...", "content"|"new_string": "..." } }
 //
-// Fails open on malformed payloads (exit 0 + stderr log).
+// Fails open on malformed payloads.
 //
 // Bypass (per call): user types `Allow async-spawn bypass`.
 
-import process from 'node:process'
-
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { withEditGuard } from '../_shared/payload.mts'
+import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
 
 interface Finding {
   readonly line: number
@@ -68,12 +62,12 @@ export function isExemptPath(filePath: string): boolean {
     filePath.includes('/build/') ||
     filePath.includes('/node_modules/') ||
     filePath.includes('/.claude/hooks/fleet/prefer-async-spawn-guard/') ||
-    // The two spawn rules live at .config/oxlint-plugin/fleet/<id>/ (index.mts +
+    // The two spawn rules live at .config/fleet/oxlint-plugin/fleet/<id>/ (index.mts +
     // test/), embedding the banned execSync/spawnSync shape as rule data; the
     // per-rule dir prefix exempts both files at once.
-    filePath.includes('/.config/oxlint-plugin/fleet/prefer-async-spawn/') ||
+    filePath.includes('/.config/fleet/oxlint-plugin/fleet/prefer-async-spawn/') ||
     filePath.includes(
-      '/.config/oxlint-plugin/fleet/prefer-spawn-over-execsync/',
+      '/.config/fleet/oxlint-plugin/fleet/prefer-spawn-over-execsync/',
     ) ||
     filePath.includes(
       '/.config/fleet/markdownlint-rules/_shared/wheelhouse-self-skip.',
@@ -100,42 +94,37 @@ export function findChildProcessImports(text: string): Finding[] {
   return findings
 }
 
-// withEditGuard handles the stdin drain, tool_name gate, file_path narrow,
-// content extraction (new_string / content), and fail-open on any throw.
-//
-// Gate the top-level invocation on argv[1] so unit tests can import the
-// exported detectors without the harness blocking on stdin.
-if (process.argv[1]?.endsWith('index.mts')) {
-  await withEditGuard((filePath, content, payload) => {
+export const check = editGuard(
+  (filePath, content, payload) => {
     if (isExemptPath(filePath)) {
-      return
+      return undefined
     }
     // Only police JS/TS source.
     if (!/\.(?:c|m)?[jt]sx?$/.test(filePath)) {
-      return
+      return undefined
     }
 
     const text = content ?? ''
     if (!text) {
-      return
+      return undefined
     }
 
     const findings = findChildProcessImports(text)
     if (findings.length === 0) {
-      return
+      return undefined
     }
 
     if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
-      logger.error(
+      getDefaultLogger().error(
         `prefer-async-spawn-guard: ${findings.length} child_process import(s) — bypassed via "${BYPASS_PHRASE}"\n`,
       )
-      return
+      return undefined
     }
 
     const lines = findings
       .map(f => `  ${filePath}:${f.line}  ${f.text}`)
       .join('\n')
-    logger.error(
+    return block(
       `prefer-async-spawn-guard: refusing to import from 'node:child_process'.\n` +
         `\n${lines}\n\n` +
         `Use the fleet wrapper instead:\n` +
@@ -144,6 +133,14 @@ if (process.argv[1]?.endsWith('index.mts')) {
         `are genuinely required (still from the lib, not the builtin).\n` +
         `Bypass: type "${BYPASS_PHRASE}".\n`,
     )
-    process.exitCode = 2
-  }, { fleetOnly: true })
-}
+  },
+  { fleetOnly: true },
+)
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

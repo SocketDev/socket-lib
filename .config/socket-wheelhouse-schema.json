@@ -27,14 +27,14 @@
       "required": ["type"],
       "properties": {
         "type": {
-          "description": "Package layout. `single-package` = one `package.json` at root, no `packages/`. `monorepo` = pnpm workspaces under `packages/`.",
+          "description": "Package layout. `solo` = one `package.json` at root, no `packages/`. `mono` = pnpm workspaces under `packages/`.",
           "anyOf": [
             {
-              "const": "single-package",
+              "const": "solo",
               "type": "string"
             },
             {
-              "const": "monorepo",
+              "const": "mono",
               "type": "string"
             }
           ]

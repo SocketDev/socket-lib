@@ -125,6 +125,20 @@ A delegated subagent ends in one of four terminal states. Orchestrators route on
 
 Two rules fall out of the contract. Never force the same model to retry an unchanged prompt on a non-`done` state: `needs-context` means change the input, `blocked` means hand off. And never silently swallow a `done-with-concerns` — the concern is the point of having a distinct state from `done`.
 
+## A hook block inside a subagent is a lead, not a diagnosis
+
+When a spawned subagent trips a PreToolUse hook, it reports the block **verbatim** — quotes the `[<guard-name>] …` line the hook emitted, sets `blocked` (or `needs-context` when the cause is a missing env knob), and stops. It does not diagnose the block, attribute it to a "bug" or "incomplete fix", or guess which guard fired and why. Every block message already names its own guard; the interpretation is the orchestrator's job, and the orchestrator owes it the same verify-before-trust it owes any subagent claim: reproduce the block itself before acting on it.
+
+A subagent's confident-but-wrong block diagnosis is expensive. It costs the orchestrator a full verify cycle and can send it editing a guard that was never broken. In one case a subagent reported `node --test … blocked` and invented a shell-quote `2>&1` tokenizer bug; neither reproduced. The only real block was an unrelated package-manager auto-update guard firing because the off-knob was absent from the subagent's env. So every spawn prompt carries the rule explicitly: on a hook block, quote it verbatim and stop — do not diagnose.
+
+## Transformation subagents preserve source verbatim; verify content, not counts
+
+When you delegate a content TRANSFORM (rewrite, reformat, thin, migrate, or anything carrying citations, names, or links, above all the CLAUDE.md law file and the docs), the subagent copies the structured tokens VERBATIM from the source: hook citations, file and symbol names, doc links, version pins. It may compress the prose. It must never regenerate a token from memory. A model paraphrasing "the token-minifier hook" from its training, when the source says `headroom-proxy-start`, silently substitutes a wrong or removed reference that reads plausibly.
+
+The orchestrator's verify-before-trust here is content, not counts. A tally match ("54 bullets, 52 links, all preserved") proves nothing about whether each token is the RIGHT one. A single citation can be silently rewritten to a removed hook while every count still matches. Run the resolving gate (`claude-md-citations-resolve` checks every cited hook and doc exists on disk) and diff preserved tokens against the source. Never sign off on tallies alone. In one case a thin-CLAUDE.md transform subagent rewrote a rule's hook citation from memory to a removed hook name. The counts matched exactly, and only the citation-resolve gate caught the stale token.
+
+Encode both in the spawn prompt: preserve every citation, name, and link verbatim from the source, and do not regenerate from memory. On return, run the resolve gate before landing the subagent's output.
+
 ## When the surfaces overlap
 
 A skill that wants `codex` output should call the CLI (Surface 1) so the result lands in a structured report. A live conversation that wants Codex's opinion on the _current_ problem should use the subagent (Surface 2) so the result flows back into the conversation. Same model, different orchestration.

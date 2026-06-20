@@ -937,6 +937,9 @@ function printReport(
     `  • Commit comments must be disabled: ${settingsUrl} → General → Commits\n`,
   )
   process.stdout.write(
+    `  • Copilot Memory (store/retrieve repository facts) disabled: ${settingsUrl} → Copilot → Memory\n`,
+  )
+  process.stdout.write(
     `  • Release immutability enabled: ${settingsUrl} → General → Releases\n`,
   )
   process.stdout.write(

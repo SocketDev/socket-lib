@@ -1,12 +1,12 @@
 #!/usr/bin/env node
 // Claude Code Stop hook — dirty-worktree-stop-guard.
 //
-// renamed-from: dirty-worktree-stop-reminder
+// renamed-from: dirty-worktree-stop-nudge
 //
 // Fires at turn-end. Checks `git status --porcelain` in the harness
 // project dir. If anything is modified, untracked, or staged but
-// uncommitted, it BLOCKS the stop (Stop-hook `{decision:'block'}`) so
-// the agent must resolve the dirty state — commit it, revert what it
+// uncommitted, it BLOCKS the stop (guard `block()` verdict) so the
+// agent must resolve the dirty state — commit it, revert what it
 // didn't author, or explicitly announce an intentional pause — before
 // ending the turn.
 //
@@ -18,10 +18,10 @@
 //
 // Why a BLOCK, not a reminder: a stderr nudge at turn-end is easy to
 // scroll past, so dirty worktrees still leaked into the next session.
-// A Stop-hook block re-prompts the model to finish the job (commit /
-// revert / announce) before it can stop. The block is suppressed when
-// Claude Code reports `stop_hook_active: true`, so it fires at most
-// once per turn and can't loop.
+// A block re-prompts the model to finish the job (commit / revert /
+// announce) before it can stop. The block is suppressed when Claude
+// Code reports `stop_hook_active: true`, so it fires at most once per
+// turn and can't loop — that case degrades to a non-blocking notice.
 //
 // Three escapes (any one allows the stop):
 //   1. Clean worktree — nothing to do.
@@ -40,36 +40,17 @@
 // additions/source-patched/) are filtered out — they're under
 // .gitignore rules and not the failure mode this hook targets.
 //
-// Fail-open: any error in the hook exits 0 (a guard bug must not wedge
-// every Stop).
+// Fail-open: any error in the hook allows the stop (a guard bug must
+// not wedge every Stop) — runGuard swallows throws.
 
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
-import process from 'node:process'
 
+import { block, defineHook, notify, runHook } from '../_shared/guard.mts'
+import type { GuardResult } from '../_shared/guard.mts'
+import type { ToolCallPayload } from '../_shared/payload.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
 const BYPASS_PHRASE = 'Allow dirty-worktree bypass'
-
-interface StopPayload {
-  readonly transcript_path?: string | undefined
-  readonly stop_hook_active?: boolean | undefined
-}
-
-export async function readStdinRaw(): Promise<string> {
-  return await new Promise<string>(resolve => {
-    let chunks = ''
-    process.stdin.on('data', d => {
-      chunks += d.toString('utf8')
-    })
-    process.stdin.on('end', () => resolve(chunks))
-    process.stdin.on('error', () => resolve(chunks))
-    // .unref() so this fallback timer can't keep the event loop alive past
-    // the work — a Stop hook must exit deterministically (it's spawned once
-    // per turn, and under `node --test --test-isolation=process` a live timer
-    // hangs the runner waiting on a child that never drains).
-    setTimeout(() => resolve(chunks), 200).unref()
-  })
-}
 
 export function getProjectDir(): string | undefined {
   return process.env['CLAUDE_PROJECT_DIR'] || process.cwd()
@@ -78,7 +59,8 @@ export function getProjectDir(): string | undefined {
 /**
  * True when `dir` is the PRIMARY checkout (not a linked worktree). In a linked
  * worktree `git rev-parse --git-dir` resolves under `.git/worktrees/<name>`; in
- * the primary it's the repo's own `.git`. Mirrors `primary-checkout-branch-guard`.
+ * the primary it's the repo's own `.git`. Mirrors
+ * `primary-checkout-branch-guard`.
  */
 export function isPrimaryCheckout(dir: string): boolean {
   const r = spawnSync('git', ['rev-parse', '--git-dir'], {
@@ -197,7 +179,7 @@ export interface StopInputs {
 //   'note-active'   — dirty primary, would block, but stop_hook_active is set
 //                     (a block already fired this turn) → degrade to a note to
 //                     avoid a loop.
-//   'block'         — dirty primary, no escape: emit the Stop block decision.
+//   'block'         — dirty primary, no escape: emit the block verdict.
 export type StopAction =
   | 'allow'
   | 'note-active'
@@ -226,73 +208,50 @@ export function decideStopAction(inputs: StopInputs): StopAction {
   return 'block'
 }
 
-async function main(): Promise<void> {
-  const payloadRaw = await readStdinRaw()
-  let payload: StopPayload = {}
-  try {
-    payload = JSON.parse(payloadRaw) as StopPayload
-  } catch {
-    // No / malformed payload — nothing to key the bypass + loop-guard
-    // off; fall through with empty payload (treated as no bypass, not
-    // already-active).
-  }
-
+export const check = (payload: ToolCallPayload): GuardResult => {
   const repoDir = getProjectDir()
   if (!repoDir) {
-    return
+    return undefined
   }
 
   const dirty = listDirtyEntries(repoDir)
+  // `stop_hook_active` is a Stop-payload field absent from ToolCallPayload's
+  // declared shape; narrow it defensively off the raw payload.
+  const stopHookActive =
+    (payload as { stop_hook_active?: unknown }).stop_hook_active === true
   const action = decideStopAction({
     dirtyCount: dirty.length,
     isPrimary: isPrimaryCheckout(repoDir),
     bypassPresent: bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE),
-    stopHookActive: payload.stop_hook_active === true,
+    stopHookActive,
   })
 
   if (action === 'allow') {
-    return
+    return undefined
   }
   if (action === 'note-worktree') {
-    process.stderr.write(
+    return notify(
       `[dirty-worktree-stop-guard] ${dirty.length} dirty path(s) in a linked worktree — ` +
-        'commit when ready (`git commit --no-verify` to defer the gates here).\n',
+        'commit when ready (`git commit --no-verify` to defer the gates here).',
     )
-    return
   }
   if (action === 'note-bypass') {
-    process.stderr.write(
+    return notify(
       `[dirty-worktree-stop-guard] ${dirty.length} dirty path(s); ` +
-        `allowed by \`${BYPASS_PHRASE}\`.\n`,
+        `allowed by \`${BYPASS_PHRASE}\`.`,
     )
-    return
   }
 
   const message = formatDirtyBlock(dirty)
   if (action === 'note-active') {
-    process.stderr.write(message + '\n')
-    return
+    return notify(message)
   }
-  process.stdout.write(
-    JSON.stringify({ decision: 'block', reason: message }) + '\n',
-  )
+  return block(message)
 }
 
-// Run, then exit DETERMINISTICALLY: a Stop hook must not depend on the event
-// loop draining (open stdin listeners / timers would hang the harness + the
-// node --test runner). All `return` paths above fall through to exit 0; a
-// block writes its stdout JSON then exits 0 too (the decision is in the JSON,
-// not the exit code).
-// Entrypoint-guarded: run main() only when invoked directly, NOT when the test
-// imports this module for its pure helpers (else main() runs at import and its
-// deterministic process.exit(0) can abort the node --test runner mid-suite).
-if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
-  main()
-    .then(() => process.exit(0))
-    .catch(e => {
-      process.stderr.write(
-        `[dirty-worktree-stop-guard] hook bug — fail-open. ${e instanceof Error ? e.message : String(e)}\n`,
-      )
-      process.exit(0)
-    })
-}
+export const hook = defineHook({
+  check,
+  event: 'Stop',
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

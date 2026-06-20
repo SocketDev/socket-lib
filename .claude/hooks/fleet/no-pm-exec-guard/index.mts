@@ -24,15 +24,14 @@
 //
 // Exit codes: 0 — pass; 2 — block. Fails open on any throw.
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withBashGuard } from '../_shared/payload.mts'
 import { findInvocation } from '../_shared/shell-command.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
+import {
+  bashGuard,
+  block,
+  defineHook,
+  runHook,
+} from '../_shared/guard.mts'
 
 const BYPASS_PHRASE = 'Allow pm-exec bypass'
 
@@ -76,48 +75,53 @@ export function bannedFetchExec(command: string): string | undefined {
   return undefined
 }
 
-void (async () => {
-  await withBashGuard((command, payload) => {
-    const execLabel = bannedPmExec(command)
-    const fetchLabel = bannedFetchExec(command)
-    if (!execLabel && !fetchLabel) {
-      return
-    }
-    if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
-      return
-    }
-    if (fetchLabel) {
-      logger.error(
-        [
-          `[no-pm-exec-guard] Blocked: \`${fetchLabel}\`.`,
-          '',
-          `  \`${fetchLabel} <pkg>\` FETCHES + executes unpinned code — a`,
-          '  supply-chain risk the fleet bans (CLAUDE.md Tooling).',
-          '',
-          '  Add the dep and run it installed, or use pipx / node_modules/.bin:',
-          `    pnpm add -D <pkg> && node_modules/.bin/<tool>   not  ${fetchLabel} <pkg>`,
-          '',
-          `  Bypass: type \`${BYPASS_PHRASE}\` if this is genuinely intended.`,
-          '',
-        ].join('\n'),
-      )
-    } else {
-      logger.error(
-        [
-          `[no-pm-exec-guard] Blocked: \`${execLabel}\`.`,
-          '',
-          `  \`${execLabel} <tool>\` wraps the installed bin in package-manager +`,
-          '  Socket Firewall startup overhead on every call.',
-          '',
-          '  Run the bin directly, or via a script:',
-          `    node_modules/.bin/<tool>      not  ${execLabel} <tool>`,
-          '    pnpm run <script>',
-          '',
-          `  Bypass: type \`${BYPASS_PHRASE}\` if this is genuinely intended.`,
-          '',
-        ].join('\n'),
-      )
-    }
-    process.exitCode = 2
-  }, { fleetOnly: true })
-})()
+export const check = bashGuard((command, payload) => {
+  const execLabel = bannedPmExec(command)
+  const fetchLabel = bannedFetchExec(command)
+  if (!execLabel && !fetchLabel) {
+    return undefined
+  }
+  if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
+    return undefined
+  }
+  if (fetchLabel) {
+    return block(
+      [
+        `[no-pm-exec-guard] Blocked: \`${fetchLabel}\`.`,
+        '',
+        `  \`${fetchLabel} <pkg>\` FETCHES + executes unpinned code — a`,
+        '  supply-chain risk the fleet bans (CLAUDE.md Tooling).',
+        '',
+        '  Add the dep and run it installed, or use pipx / node_modules/.bin:',
+        `    pnpm add -D <pkg> && node_modules/.bin/<tool>   not  ${fetchLabel} <pkg>`,
+        '',
+        `  Bypass: type \`${BYPASS_PHRASE}\` if this is genuinely intended.`,
+        '',
+      ].join('\n'),
+    )
+  }
+  return block(
+    [
+      `[no-pm-exec-guard] Blocked: \`${execLabel}\`.`,
+      '',
+      `  \`${execLabel} <tool>\` wraps the installed bin in package-manager +`,
+      '  Socket Firewall startup overhead on every call.',
+      '',
+      '  Run the bin directly, or via a script:',
+      `    node_modules/.bin/<tool>      not  ${execLabel} <tool>`,
+      '    pnpm run <script>',
+      '',
+      `  Bypass: type \`${BYPASS_PHRASE}\` if this is genuinely intended.`,
+      '',
+    ].join('\n'),
+  )
+}, { fleetOnly: true })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Render a page (or a real Chrome extension popup) to a PNG so an agent
  *   can SEE it — open the PNG with the Read tool and the rendered pixels go
  *   into context, catching layout / color / empty-state / render-throw bugs

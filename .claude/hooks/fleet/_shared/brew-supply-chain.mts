@@ -1,4 +1,4 @@
-/**
+/*
  * @file Single source of truth for "is this machine's Homebrew hardened to the
  *   6.0.0 supply-chain posture?" — shared by the brew-supply-chain-guard hook
  *   (point-of-use block), the brew-supply-chain-is-hardened.mts check (drift

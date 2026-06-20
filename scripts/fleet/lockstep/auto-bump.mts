@@ -16,17 +16,29 @@
  *       carries the already-resolved targetTag (or a skipReason for locked /
  *       no-newer / major-gate-major-diff). Collapses Phases 2 + 3a + 3b.
  *
- * The --apply orchestration (checkout the tag, edit lockstep.json, call
- * gen-gitmodules-hash.mts --set, re-run the harness, assert the row is ok) is
- * documented in the skill; it shells git + the harness and is left to the skill
- * so the test-gate + commit stay model-driven.
+ *   --apply --id <row-id> --target-tag <tag> [--manifest <lockstep.json>]
+ *       Lands ONE resolved bump: checkout the target tag inside the row's
+ *       submodule, rewrite that version-pin row's `pinned_tag` + `pinned_sha`
+ *       in `lockstep.json`, regenerate the `.gitmodules` `# <name>-<version>
+ *       sha256:…` annotation via gen-gitmodules-hash.mts --set, and commit
+ *       `chore(deps): bump <upstream> to <tag>`. Collapses reference.md Phase 3
+ *       (the bash the skill used to inline). The skill still owns the per-row
+ *       test gate + the locked-row human approval (it only calls --apply for an
+ *       already-approved, validated row); the deterministic git + edit + commit
+ *       mechanics live here so they are tested, not re-typed per run.
  */
 
 import process from 'node:process'
-import { readFileSync } from 'node:fs'
+import { readFileSync, writeFileSync } from 'node:fs'
+import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
-import type { Report, VersionPinReport } from './types.mts'
+import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
+
+import { REPO_ROOT } from '../paths.mts'
+import { readManifest } from './manifest.mts'
+
+import type { Manifest, Report, VersionPinReport } from './types.mts'
 
 export type UpgradePolicy = 'track-latest' | 'major-gate' | 'locked'
 
@@ -206,6 +218,189 @@ export function planFromReport(
   return { advisory, auto }
 }
 
+// ---------------------------------------------------------------------------
+// --apply orchestration. The deterministic git + edit + commit mechanics for
+// landing one already-resolved, already-approved bump. Shared annotation helper
+// (`gitmodulesLabelForTag`) is used by both the apply path and the skill's
+// advisory prose so the `# <name>-<version>` label is computed one way.
+// ---------------------------------------------------------------------------
+
+export interface ApplyOptions {
+  id: string
+  manifestPath: string
+  repoRoot: string
+  targetTag: string
+}
+
+export interface ApplyResult {
+  committed: boolean
+  gitmodulesLabel: string
+  pinnedSha: string
+  state: 'bumped' | 'skipped-no-row' | 'skipped-no-submodule'
+  submodulePath: string | undefined
+  targetTag: string
+}
+
+// The `# <name>-<version>` label gen-gitmodules-hash.mts --set stamps above the
+// submodule block: the submodule's basename + the target tag. Pure so the
+// advisory prose and the apply write agree on one label.
+export function gitmodulesLabelForTag(
+  submodulePath: string,
+  targetTag: string,
+): string {
+  return `${path.basename(submodulePath)}-${targetTag}`
+}
+
+function runGit(repoRoot: string, args: readonly string[]): string {
+  const result = spawnSync('git', ['-C', repoRoot, ...args], {
+    stdio: ['ignore', 'pipe', 'pipe'],
+    stdioString: true,
+  })
+  if (result.error) {
+    throw result.error
+  }
+  if (result.status !== 0) {
+    throw new Error(
+      `git ${args.join(' ')} failed (status ${result.status}): ${String(result.stderr).trim()}`,
+    )
+  }
+  return String(result.stdout)
+}
+
+// Locate the version-pin row + its submodule path in the manifest. Returns
+// undefined for either when the id is unknown or its upstream has no submodule
+// — the apply path turns those into a skipped (not thrown) result so a stale id
+// from a re-run plan is a no-op, not a crash.
+function findVersionPinRow(
+  manifest: Manifest,
+  id: string,
+): { submodulePath: string | undefined; upstreamAlias: string } | undefined {
+  for (let i = 0, rows = manifest.rows, { length } = rows; i < length; i += 1) {
+    const row = rows[i]!
+    if (row.kind === 'version-pin' && row.id === id) {
+      const upstream = manifest.upstreams?.[row.upstream]
+      return {
+        submodulePath: upstream?.submodule,
+        upstreamAlias: row.upstream,
+      }
+    }
+  }
+  return undefined
+}
+
+// Rewrite ONE version-pin row's `pinned_tag` + `pinned_sha` in the manifest
+// JSON, preserving the file's existing 2-space formatting + trailing newline.
+function writePinnedFields(
+  manifestPath: string,
+  id: string,
+  options: { pinnedSha: string; pinnedTag: string },
+): void {
+  const { pinnedSha, pinnedTag } = { __proto__: null, ...options } as {
+    pinnedSha: string
+    pinnedTag: string
+  }
+  const raw = readFileSync(manifestPath, 'utf8')
+  const trailingNewline = raw.endsWith('\n')
+  const parsed: unknown = JSON.parse(raw)
+  const manifest = parsed as Manifest
+  for (let i = 0, rows = manifest.rows, { length } = rows; i < length; i += 1) {
+    const row = rows[i]!
+    if (row.kind === 'version-pin' && row.id === id) {
+      row.pinned_sha = pinnedSha
+      row.pinned_tag = pinnedTag
+    }
+  }
+  const serialized = JSON.stringify(manifest, undefined, 2)
+  writeFileSync(manifestPath, trailingNewline ? `${serialized}\n` : serialized)
+}
+
+// Land one resolved bump. Checkout the target tag in the submodule, resolve its
+// commit SHA, rewrite the manifest row, regenerate the .gitmodules annotation,
+// then commit. The caller (skill) is responsible for the test gate + locked-row
+// approval BEFORE calling this — apply is the deterministic write half.
+export function applyBump(options: ApplyOptions): ApplyResult {
+  const opts = { __proto__: null, ...options } as ApplyOptions
+  const { id, manifestPath, repoRoot, targetTag } = opts
+  const manifest = readManifest(manifestPath)
+  const found = findVersionPinRow(manifest, id)
+  if (!found) {
+    return {
+      committed: false,
+      gitmodulesLabel: '',
+      pinnedSha: '',
+      state: 'skipped-no-row',
+      submodulePath: undefined,
+      targetTag,
+    }
+  }
+  const { submodulePath } = found
+  if (!submodulePath) {
+    return {
+      committed: false,
+      gitmodulesLabel: '',
+      pinnedSha: '',
+      state: 'skipped-no-submodule',
+      submodulePath: undefined,
+      targetTag,
+    }
+  }
+  const submoduleDir = path.join(repoRoot, submodulePath)
+  // Fetch tags then checkout — a shallow submodule may not have the tag yet.
+  runGit(submoduleDir, ['fetch', '--tags', '--quiet'])
+  runGit(submoduleDir, ['checkout', '--quiet', targetTag])
+  const pinnedSha = runGit(submoduleDir, ['rev-parse', 'HEAD']).trim()
+  const gitmodulesLabel = gitmodulesLabelForTag(submodulePath, targetTag)
+
+  writePinnedFields(manifestPath, id, { pinnedSha, pinnedTag: targetTag })
+
+  // Regenerate the `# <name>-<version> sha256:…` annotation. gen-gitmodules-hash
+  // --set bumps the block's ref AND recomputes the archive hash in one write —
+  // the only annotation path uses-sha-verify-guard accepts.
+  const gen = spawnSync(
+    'node',
+    [
+      'scripts/fleet/gen-gitmodules-hash.mts',
+      '--set',
+      submodulePath,
+      pinnedSha,
+      '--label',
+      gitmodulesLabel,
+      path.join(repoRoot, '.gitmodules'),
+    ],
+    { cwd: repoRoot, stdio: ['ignore', 'pipe', 'pipe'], stdioString: true },
+  )
+  if (gen.error) {
+    throw gen.error
+  }
+  if (gen.status !== 0) {
+    throw new Error(
+      `gen-gitmodules-hash --set failed (status ${gen.status}): ${String(gen.stderr).trim()}`,
+    )
+  }
+
+  const upstreamAlias = found.upstreamAlias
+  runGit(repoRoot, [
+    'commit',
+    '-o',
+    submodulePath,
+    '-o',
+    manifestPath,
+    '-o',
+    path.join(repoRoot, '.gitmodules'),
+    '-m',
+    `chore(deps): bump ${upstreamAlias} to ${targetTag}`,
+  ])
+
+  return {
+    committed: true,
+    gitmodulesLabel,
+    pinnedSha,
+    state: 'bumped',
+    submodulePath,
+    targetTag,
+  }
+}
+
 function readReport(src: string | undefined): Report[] {
   const raw =
     src && src !== '-'
@@ -225,13 +420,33 @@ function readReport(src: string | undefined): Report[] {
   )
 }
 
-export function main(argv: readonly string[]): number {
-  if (!argv.includes('--plan')) {
+function flagValue(argv: readonly string[], flag: string): string | undefined {
+  const idx = argv.indexOf(flag)
+  return idx !== -1 ? argv[idx + 1] : undefined
+}
+
+function runApply(argv: readonly string[]): number {
+  const id = flagValue(argv, '--id')
+  const targetTag = flagValue(argv, '--target-tag')
+  if (!id || !targetTag) {
     process.stderr.write(
-      'usage: auto-bump.mts --plan --report <lockstep.json|-> [--tags <tags.json>] [--json]\n',
+      'usage: auto-bump.mts --apply --id <row-id> --target-tag <tag> [--manifest <lockstep.json>]\n',
     )
     return 1
   }
+  const manifestPath =
+    flagValue(argv, '--manifest') ?? path.join(REPO_ROOT, 'lockstep.json')
+  const result = applyBump({
+    id,
+    manifestPath,
+    repoRoot: REPO_ROOT,
+    targetTag,
+  })
+  process.stdout.write(`${JSON.stringify(result, undefined, 2)}\n`)
+  return result.state === 'bumped' ? 0 : 1
+}
+
+function runPlan(argv: readonly string[]): number {
   const reportIdx = argv.indexOf('--report')
   const reports = readReport(reportIdx !== -1 ? argv[reportIdx + 1] : undefined)
   const tagsIdx = argv.indexOf('--tags')
@@ -240,6 +455,20 @@ export function main(argv: readonly string[]): number {
   const plan = planFromReport(reports, tagsByUpstream)
   process.stdout.write(`${JSON.stringify(plan, undefined, 2)}\n`)
   return 0
+}
+
+export function main(argv: readonly string[]): number {
+  if (argv.includes('--apply')) {
+    return runApply(argv)
+  }
+  if (argv.includes('--plan')) {
+    return runPlan(argv)
+  }
+  process.stderr.write(
+    'usage: auto-bump.mts --plan --report <lockstep.json|-> [--tags <tags.json>] [--json]\n' +
+      '       auto-bump.mts --apply --id <row-id> --target-tag <tag> [--manifest <lockstep.json>]\n',
+  )
+  return 1
 }
 
 if (process.argv[1] === fileURLToPath(import.meta.url)) {

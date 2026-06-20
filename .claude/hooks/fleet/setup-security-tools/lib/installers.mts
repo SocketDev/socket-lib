@@ -15,6 +15,7 @@
 import { existsSync, promises as fs, readFileSync } from 'node:fs'
 
 import { findApiToken as findApiTokenCanonical } from './api-token.mts'
+import { setupHeadroom } from './headroom.mts'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -25,7 +26,7 @@ import { Type } from '@sinclair/typebox'
 
 import { whichSync } from '@socketsecurity/lib-stable/bin/which'
 import { downloadBinary } from '@socketsecurity/lib-stable/dlx/binary'
-import { downloadPackage } from '@socketsecurity/lib-stable/dlx/package'
+import { downloadNpmPackage } from '@socketsecurity/lib-stable/dlx/package'
 import { errorMessage } from '@socketsecurity/lib-stable/errors'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
@@ -89,6 +90,7 @@ const OPENGREP = config.tools['opengrep']!
 const UV = config.tools['uv']!
 const JANUS = config.tools['janus']!
 const SKILLSPECTOR = config.tools['skillspector']!
+const HEADROOM = config.tools['headroom']!
 
 // ── Shared helpers ──
 
@@ -389,8 +391,8 @@ export async function setupAgentShield(): Promise<boolean> {
   const packageSpec = version ? `${npmPackage}@${version}` : npmPackage
 
   logger.log(`Installing ${packageSpec} via dlx…`)
-  const { binaryPath, installed } = await downloadPackage({
-    package: packageSpec,
+  const { binaryPath, installed } = await downloadNpmPackage({
+    spec: packageSpec,
     binaryName: 'agentshield',
   })
 
@@ -502,7 +504,7 @@ interface NpmToolInstallOptions {
 
 /**
  * Install an npm-only tool via dlx. Mirrors the upper half of
- * `setupAgentShield()` — purl → package spec → `downloadPackage`. No
+ * `setupAgentShield()` — purl → package spec → `downloadNpmPackage`. No
  * version-mismatch verification: the dlx layer SRI-verifies the tarball against
  * the `integrity` from external-tools.json, which is the authoritative answer
  * (binary --version self-reports can drift from package.json — see the
@@ -529,8 +531,8 @@ export async function setupNpmTool(
   const version = tool.version ?? purl.version
   const packageSpec = version ? `${npmPackage}@${version}` : npmPackage
   logger.log(`Installing ${packageSpec} via dlx…`)
-  const { binaryPath, installed } = await downloadPackage({
-    package: packageSpec,
+  const { binaryPath, installed } = await downloadNpmPackage({
+    spec: packageSpec,
     binaryName: name,
   })
   logger.log(
@@ -844,22 +846,26 @@ export async function checkSkillSpectorVersion(
   }
 }
 
-// SkillSpector — pipx-from-git install. Upstream NVIDIA/skillspector has
-// no PyPI release / no GH releases / no tags as of 2026-06-01, so the SHA
-// IS the pin. pipx isolates the install in its own venv — no host Python
-// site-packages pollution.
+// SkillSpector — installed from a LOCKED uv project (no pipx). Upstream
+// NVIDIA/skillspector has no PyPI release / no GH releases / no tags, so a git
+// SHA IS the pin — but a bare `pipx install git+…@sha` re-resolves the whole
+// dependency closure freshly on every machine. Instead we ship a uv project
+// (`skillspector/pyproject.toml` + `skillspector/uv.lock`) that manifests every
+// transitive version; `uv sync --locked` installs that exact closure into the
+// project's own `.venv` and FAILS if the lock drifts from the manifest. The
+// fleet uv pin (0.11.21) + the lock's `exclude-newer` make the install
+// reproducible across machines and across time. The three-way pin (lock ⇔
+// pyproject rev ⇔ external-tools.json version) is enforced by
+// skillspector-pin-is-consistent.mts.
 //
 // Requirements:
-//   - pipx on PATH. If absent, log a clear error pointing at the install
-//     command (`uv tool install pipx` or `python3 -m pip install --user
-//     pipx`). We do not auto-bootstrap pipx because that's a separate
-//     security-relevant decision (touches the user's Python toolchain).
-//   - Python 3.12+ (upstream requirement). pipx will fail with a clear
-//     message if the host's Python is older.
+//   - uv on PATH (the bootstrap installs it). If absent, point at the bootstrap.
+//   - Python 3.12+ (upstream requirement) — uv provisions one if missing.
 export async function setupSkillSpector(): Promise<boolean> {
   logger.log('=== SkillSpector ===')
 
-  // Pinned SHA — see SKILLSPECTOR.version in external-tools.json.
+  // Pinned SHA — see SKILLSPECTOR.version in external-tools.json. Surfaced in
+  // logs + asserted against the lock by skillspector-pin-is-consistent.mts.
   const sha = SKILLSPECTOR.version
   if (!sha) {
     logger.error(
@@ -867,62 +873,68 @@ export async function setupSkillSpector(): Promise<boolean> {
     )
     return false
   }
-  const repo = SKILLSPECTOR.repository?.replace(/^[^:]+:/, '') ?? ''
-  if (!repo) {
+
+  // The locked uv project sits beside this lib dir's parent (the hook root),
+  // next to external-tools.json: setup-security-tools/skillspector/.
+  const projectDir = path.join(__dirname, '..', 'skillspector')
+  const pyproject = path.join(projectDir, 'pyproject.toml')
+  const uvLock = path.join(projectDir, 'uv.lock')
+  if (!existsSync(pyproject) || !existsSync(uvLock)) {
     logger.error(
-      'skillspector entry in external-tools.json is missing `repository`',
+      'SkillSpector uv project is missing its pyproject.toml/uv.lock',
+    )
+    logger.error(`  where: ${projectDir}`)
+    logger.error(
+      '  fix:   restore the project files (run `uv lock` to rebuild)',
     )
     return false
   }
 
-  // Check PATH first — a system install via `pipx install skillspector`
-  // or a venv-pinned install on PATH would already satisfy this.
-  const systemBin = whichSync('skillspector', { nothrow: true })
-  if (systemBin && typeof systemBin === 'string') {
-    if (await checkSkillSpectorVersion(systemBin)) {
-      logger.log(`Found on PATH: ${systemBin}`)
-      return true
-    }
-    logger.log('Found on PATH but --version check failed; reinstalling')
-  }
-
-  // Verify pipx is available before attempting install.
-  const pipxBin = whichSync('pipx', { nothrow: true })
-  if (!pipxBin || typeof pipxBin !== 'string') {
-    logger.error('pipx not on PATH. Install pipx first:')
-    logger.error('  uv tool install pipx                  # if uv present')
-    logger.error('  python3 -m pip install --user pipx    # vanilla path')
-    logger.error('Then re-run this installer.')
+  // Resolve uv (the bootstrap installs it to PATH). No auto-bootstrap here —
+  // uv provisioning is the from-scratch setup's job, not a security-tool step.
+  const uvBin = whichSync('uv', { nothrow: true })
+  if (!uvBin || typeof uvBin !== 'string') {
+    logger.error('uv not on PATH. Run the from-scratch bootstrap first:')
+    logger.error('  pnpm run setup    # installs uv (+ node, pnpm, sfw, …)')
     return false
   }
 
-  const gitUrl = `git+https://github.com/${repo}.git@${sha}`
-  logger.log(`Installing via pipx: ${gitUrl}`)
+  // `uv sync --locked` installs the lock's exact closure into the project venv
+  // and hard-fails on lock drift — the verification-grade, reproducible path.
+  logger.log(`Syncing locked uv project (skillspector@${sha})`)
   try {
-    const result = await spawn(pipxBin, ['install', '--force', gitUrl], {
-      stdio: 'pipe',
-    })
+    const result = await spawn(
+      uvBin,
+      ['sync', '--locked', '--project', projectDir],
+      { stdio: 'pipe' },
+    )
     const stdout = String(result.stdout).trim()
     if (stdout) {
       logger.log(stdout)
     }
   } catch (e) {
-    logger.error(`pipx install failed: ${errorMessage(e)}`)
+    logger.error(`uv sync --locked failed: ${errorMessage(e)}`)
     return false
   }
 
-  // Confirm by re-running --version.
-  const installedBin = whichSync('skillspector', { nothrow: true })
-  if (!installedBin || typeof installedBin !== 'string') {
-    logger.error('pipx install succeeded but `skillspector` is not on PATH.')
-    logger.error('Try `pipx ensurepath` and reopen your shell.')
+  // The entry point lands in the project's venv. POSIX: .venv/bin/skillspector;
+  // Windows: .venv/Scripts/skillspector.exe.
+  const venvBin =
+    process.platform === 'win32'
+      ? path.join(projectDir, '.venv', 'Scripts', 'skillspector.exe')
+      : path.join(projectDir, '.venv', 'bin', 'skillspector')
+  if (!existsSync(venvBin)) {
+    logger.error(
+      'uv sync succeeded but the skillspector entry point is absent.',
+    )
+    logger.error(`  expected: ${venvBin}`)
     return false
   }
-  if (!(await checkSkillSpectorVersion(installedBin))) {
-    logger.error(`Installed but --version check failed: ${installedBin}`)
+  if (!(await checkSkillSpectorVersion(venvBin))) {
+    logger.error(`Installed but --version check failed: ${venvBin}`)
     return false
   }
-  logger.log(`Installed at: ${installedBin}`)
+  logger.log(`Installed at: ${venvBin}`)
   return true
 }
 
@@ -946,6 +958,7 @@ async function main(): Promise<void> {
   // they don't share state.
   const [
     cdxgenOk,
+    headroomOk,
     janusOk,
     opengrepOk,
     skillspectorOk,
@@ -955,6 +968,7 @@ async function main(): Promise<void> {
     uvOk,
   ] = await Promise.all([
     setupCdxgen(),
+    setupHeadroom(HEADROOM.version!),
     setupJanus(),
     setupOpengrep(),
     setupSkillSpector(),
@@ -968,14 +982,19 @@ async function main(): Promise<void> {
   logger.log('=== Summary ===')
   logger.log(`AgentShield:  ${agentshieldOk ? 'ready' : 'NOT AVAILABLE'}`)
   logger.log(`cdxgen:       ${cdxgenOk ? 'ready' : 'FAILED'}`)
+  // headroom-ai is opt-in like SkillSpector — installs from a locked uv project
+  // into the _dlx store (needs uv on PATH). OPTIONAL, not part of allOk.
+  logger.log(
+    `headroom-ai:  ${headroomOk ? 'ready' : 'OPTIONAL (uv required)'}`,
+  )
   logger.log(`janus:        ${janusOk ? 'ready' : 'FAILED'}`)
   logger.log(`OpenGrep:     ${opengrepOk ? 'ready' : 'FAILED'}`)
   logger.log(`SFW:          ${sfwOk ? 'ready' : 'FAILED'}`)
-  // SkillSpector is opt-in — pipx-dependent. Don't fail the umbrella
-  // run if it isn't installed; surface it as "OPTIONAL" so the
-  // operator knows it's an extra they can enable.
+  // SkillSpector is opt-in — installs from a locked uv project (needs uv on
+  // PATH). Don't fail the umbrella run if it isn't installed; surface it as
+  // "OPTIONAL" so the operator knows it's an extra they can enable.
   logger.log(
-    `SkillSpector: ${skillspectorOk ? 'ready' : 'OPTIONAL (pipx required)'}`,
+    `SkillSpector: ${skillspectorOk ? 'ready' : 'OPTIONAL (uv required)'}`,
   )
   logger.log(`synp:         ${synpOk ? 'ready' : 'FAILED'}`)
   logger.log(`Trivy:        ${trivyOk ? 'ready' : 'FAILED'}`)

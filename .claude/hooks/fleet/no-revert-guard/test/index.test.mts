@@ -427,6 +427,60 @@ test('multi-line user turn with phrase embedded works', async () => {
   assert.strictEqual(result.code, 0)
 })
 
+// ── lockfile-only reconcile allowlist ───────────────────────────────
+
+test('git commit -o pnpm-lock.yaml --no-verify is allowed (lockfile reconcile)', async () => {
+  const result = await runHook({
+    tool_input: {
+      command:
+        'git commit -o pnpm-lock.yaml --no-verify -m "chore: reconcile lockfile"',
+    },
+    tool_name: 'Bash',
+  })
+  assert.strictEqual(result.code, 0)
+  assert.strictEqual(result.stderr, '')
+})
+
+test('git commit --only <dir>/pnpm-lock.yaml --no-verify is allowed (nested)', async () => {
+  const result = await runHook({
+    tool_input: {
+      command:
+        'git commit --only packages/app/pnpm-lock.yaml --no-verify -m "x"',
+    },
+    tool_name: 'Bash',
+  })
+  assert.strictEqual(result.code, 0)
+})
+
+test('git commit -o pnpm-lock.yaml + a code file --no-verify is still blocked', async () => {
+  const result = await runHook({
+    tool_input: {
+      command: 'git commit -o pnpm-lock.yaml src/sneak.ts --no-verify -m "x"',
+    },
+    tool_name: 'Bash',
+  })
+  assert.strictEqual(result.code, 2)
+  assert.ok(String(result.stderr).includes('Allow no-verify bypass'))
+})
+
+test('bare git commit --no-verify (no -o pathspec) is still blocked', async () => {
+  const result = await runHook({
+    tool_input: { command: 'git commit --no-verify -m "all staged"' },
+    tool_name: 'Bash',
+  })
+  assert.strictEqual(result.code, 2)
+})
+
+test('git commit --no-verify whose message mentions pnpm-lock.yaml (no -o) is still blocked', async () => {
+  const result = await runHook({
+    tool_input: {
+      command: 'git commit --no-verify -m "fix pnpm-lock.yaml drift"',
+    },
+    tool_name: 'Bash',
+  })
+  assert.strictEqual(result.code, 2)
+})
+
 // ── FLEET_SYNC=1 cascade allowlist ──────────────────────────────────
 
 test('FLEET_SYNC=1 allows the cascade commit without bypass phrase', async () => {

@@ -43,14 +43,8 @@
 //
 // Fails open on malformed payloads (exit 0 + stderr log).
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withEditGuard } from '../_shared/payload.mts'
+import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
 
 // Match declarations that introduce a leading-underscore identifier.
 // We don't try to AST-parse; the regex set covers the surface forms
@@ -84,6 +78,12 @@ const BYPASS_PHRASE = 'Allow underscore-identifier bypass'
 // up in a `const ...` declaration. Skip those — they're matching Node's
 // published names, not a `_internal` marker.
 const ALLOWED_FREE_VARS = new Set(['__dirname', '__filename'])
+
+export interface Finding {
+  readonly line: number
+  readonly identifier: string
+  readonly text: string
+}
 
 export function findBannedIdentifiers(text: string): Finding[] {
   const findings: Finding[] = []
@@ -126,12 +126,6 @@ export function isGeneratedPath(filePath: string): boolean {
   )
 }
 
-interface Finding {
-  readonly line: number
-  readonly identifier: string
-  readonly text: string
-}
-
 export function isInternalDirPath(filePath: string): boolean {
   return filePath.includes('/_internal/')
 }
@@ -142,18 +136,16 @@ export function isInternalDirPath(filePath: string): boolean {
 export function isPluginOrHookTestPath(filePath: string): boolean {
   return (
     filePath.includes('/.claude/hooks/fleet/no-underscore-ident-guard/') ||
-    // The rule lives at .config/oxlint-plugin/fleet/no-underscore-identifier/
+    // The rule lives at .config/fleet/oxlint-plugin/fleet/no-underscore-identifier/
     // (index.mts + test/), carrying banned `_`-prefixed identifiers as fixture
     // data; the per-rule dir prefix exempts both files.
     filePath.includes(
-      '/.config/oxlint-plugin/fleet/no-underscore-identifier/',
+      '/.config/fleet/oxlint-plugin/fleet/no-underscore-identifier/',
     )
   )
 }
 
-// withEditGuard handles the stdin drain, tool_name gate, file_path narrow,
-// content extraction (new_string / content), and fail-open on any throw.
-await withEditGuard((filePath, content, payload) => {
+export const check = editGuard((filePath, content, payload) => {
   // Allowlist: _internal/ dirs, generated output, this rule's own
   // test/lint fixtures.
   if (
@@ -161,35 +153,32 @@ await withEditGuard((filePath, content, payload) => {
     isGeneratedPath(filePath) ||
     isPluginOrHookTestPath(filePath)
   ) {
-    return
+    return undefined
   }
 
   // Only police TS/JS source.
   if (!/\.(?:c|m)?[jt]sx?$/.test(filePath)) {
-    return
+    return undefined
   }
 
   const text = content ?? ''
   if (!text) {
-    return
+    return undefined
   }
 
   const findings = findBannedIdentifiers(text)
   if (findings.length === 0) {
-    return
+    return undefined
   }
 
   if (hasRecentBypass(payload.transcript_path)) {
-    logger.error(
-      `no-underscore-ident-guard: ${findings.length} underscore identifier(s) — bypassed via "${BYPASS_PHRASE}"\n`,
-    )
-    return
+    return undefined
   }
 
   const lines = findings
     .map(f => `  ${filePath}:${f.line}  ${f.identifier}\n    ${f.text}`)
     .join('\n')
-  logger.error(
+  return block(
     `no-underscore-ident-guard: refusing to introduce underscore-prefixed identifier(s).\n` +
       `\n` +
       `${lines}\n` +
@@ -200,5 +189,13 @@ await withEditGuard((filePath, content, payload) => {
       `\n` +
       `Bypass: type "${BYPASS_PHRASE}" in a recent message.\n`,
   )
-  process.exitCode = 2
 }, { fleetOnly: true })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

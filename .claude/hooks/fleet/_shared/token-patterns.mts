@@ -1,4 +1,4 @@
-/**
+/*
  * @file Shared catalog of secret-bearing env-var key names. Used by every hook
  *   that scans for accidentally-checked-in or accidentally-printed
  *   credentials:

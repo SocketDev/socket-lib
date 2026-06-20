@@ -31,16 +31,15 @@
 //
 // Fails open on any internal error (exit 0 + stderr log).
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import process from 'node:process'
-
 import { extractGitCwd } from '../_shared/git-cwd.mts'
 import { isInTransientGitState } from '../_shared/git-state.mts'
-import { withBashGuard } from '../_shared/payload.mts'
+import {
+  block,
+  bashGuard,
+  defineHook,
+  runHook,
+} from '../_shared/guard.mts'
 import { commandsFor } from '../_shared/shell-command.mts'
-
-const logger = getDefaultLogger()
 
 const CASCADE_PREFIX = 'chore(wheelhouse): cascade template@'
 
@@ -66,16 +65,16 @@ export function commitMessage(command: string): string | undefined {
   return undefined
 }
 
-await withBashGuard((command, _payload) => {
+export const check = bashGuard(command => {
   const message = commitMessage(command)
   if (message === undefined || !message.startsWith(CASCADE_PREFIX)) {
-    return
+    return undefined
   }
   const repoDir = extractGitCwd(command)
   if (!isInTransientGitState(repoDir)) {
-    return
+    return undefined
   }
-  logger.error(
+  return block(
     [
       '[no-cascade-transient-git-guard] Blocked: cascade commit on a transient git ref.',
       '',
@@ -92,5 +91,13 @@ await withBashGuard((command, _payload) => {
       '',
     ].join('\n'),
   )
-  process.exitCode = 2
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Checkpoint helper for the security runbook skills (scanning-vulns,
  *   triaging-findings, threat-modeling, patching-findings).
  *

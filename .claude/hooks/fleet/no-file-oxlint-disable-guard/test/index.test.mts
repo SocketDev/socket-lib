@@ -46,7 +46,7 @@ async function runHook(payload: Record<string, unknown>): Promise<Result> {
   })
 }
 
-// A non-exempt source file: outside `.config/oxlint-plugin/{fleet,repo}/`.
+// A non-exempt source file: outside `.config/fleet/oxlint-plugin/{fleet,repo}/`.
 const SRC_FILE = '/Users/x/projects/socket-foo/src/widget.mts'
 
 // FIRES — block-comment file-scope disable `/* oxlint-disable <rule> */`.
@@ -173,7 +173,7 @@ test('allows file-scope disable under oxlint-plugin/fleet/<id>/', async () => {
     tool_name: 'Write',
     tool_input: {
       file_path:
-        '/Users/x/socket-foo/.config/oxlint-plugin/fleet/no-foo/index.mts',
+        '/Users/x/socket-foo/.config/fleet/oxlint-plugin/fleet/no-foo/index.mts',
       content: '/* oxlint-disable socket/no-foo */\n',
     },
   })
@@ -186,7 +186,7 @@ test('allows file-scope disable under oxlint-plugin/fleet/<id>/test/', async () 
     tool_name: 'Write',
     tool_input: {
       file_path:
-        '/Users/x/socket-foo/.config/oxlint-plugin/fleet/no-foo/test/no-foo.test.mts',
+        '/Users/x/socket-foo/.config/fleet/oxlint-plugin/fleet/no-foo/test/no-foo.test.mts',
       content: '// oxlint-disable socket/no-foo\n',
     },
   })

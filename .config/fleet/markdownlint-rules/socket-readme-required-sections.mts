@@ -1,4 +1,4 @@
-/**
+/*
  * @file Enforce the canonical fleet README section list. Fires only on the
  *   repo-root `README.md` (skipped for nested READMEs under `packages/`,
  *   `docs/`, `.claude/`, etc. — those are scoped docs with their own shape).

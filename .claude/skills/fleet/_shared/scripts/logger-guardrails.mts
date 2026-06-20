@@ -1,4 +1,4 @@
-/**
+/*
  * Lint guardrails the fleet enforces beyond what oxlint covers natively.
  *
  * Five checks, one pass:

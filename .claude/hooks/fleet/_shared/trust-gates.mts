@@ -83,9 +83,9 @@ export interface GateFloorViolation {
   readonly wanted: string
 }
 
-const TRUST_POLICY_RE = /^trustPolicy\s*:\s*(\S+)/m
-const BLOCK_EXOTIC_RE = /^blockExoticSubdeps\s*:\s*(\S+)/m
-const MIN_RELEASE_AGE_YAML_RE = /^minimumReleaseAge\s*:\s*(\d+)/m
+const TRUST_POLICY_RE = /^trustPolicy\s*:\s*(?<value>\S+)/m
+const BLOCK_EXOTIC_RE = /^blockExoticSubdeps\s*:\s*(?<value>\S+)/m
+const MIN_RELEASE_AGE_YAML_RE = /^minimumReleaseAge\s*:\s*(?<value>\d+)/m
 
 /**
  * Whole-file floor check for a repo's policy files (no BEFORE — this is the
@@ -102,7 +102,7 @@ export function checkGateFloors(
   const out: GateFloorViolation[] = []
   if (pnpmWorkspaceText !== undefined) {
     const mraMatch = MIN_RELEASE_AGE_YAML_RE.exec(pnpmWorkspaceText)
-    const mra = mraMatch ? Number(mraMatch[1]) : undefined
+    const mra = mraMatch ? Number(mraMatch.groups!.value) : undefined
     if (mra === undefined) {
       out.push({
         file: 'pnpm-workspace.yaml',
@@ -118,7 +118,7 @@ export function checkGateFloors(
         wanted: `>= ${MIN_RELEASE_AGE_MINUTES}`,
       })
     }
-    const tp = TRUST_POLICY_RE.exec(pnpmWorkspaceText)?.[1]
+    const tp = TRUST_POLICY_RE.exec(pnpmWorkspaceText)?.groups?.value
     if (tp !== 'no-downgrade') {
       out.push({
         file: 'pnpm-workspace.yaml',
@@ -127,7 +127,7 @@ export function checkGateFloors(
         wanted: 'no-downgrade',
       })
     }
-    const bes = BLOCK_EXOTIC_RE.exec(pnpmWorkspaceText)?.[1]
+    const bes = BLOCK_EXOTIC_RE.exec(pnpmWorkspaceText)?.groups?.value
     if (bes !== 'true') {
       out.push({
         file: 'pnpm-workspace.yaml',

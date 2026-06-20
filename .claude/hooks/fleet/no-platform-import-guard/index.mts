@@ -32,14 +32,13 @@
 // Bypass: user types `Allow platform-http-import bypass` in a recent turn,
 // OR add `// no-platform-http-import: <reason>` on the preceding line.
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withEditGuard } from '../_shared/payload.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
+import {
+  block,
+  defineHook,
+  editGuard,
+  runHook,
+} from '../_shared/guard.mts'
 
 const BYPASS_PHRASE = 'Allow platform-http-import bypass'
 
@@ -87,56 +86,58 @@ export function findViolations(
   return results
 }
 
-async function main(): Promise<void> {
-  await withEditGuard((filePath, content, payload) => {
-    const transcriptPath = payload.transcript_path
-    if (!content) {
-      return
-    }
-    if (isExemptPath(filePath)) {
-      return
-    }
+export const check = editGuard((filePath, content, payload) => {
+  const transcriptPath = payload.transcript_path
+  if (!content) {
+    return undefined
+  }
+  if (isExemptPath(filePath)) {
+    return undefined
+  }
 
-    const violations = findViolations(content, filePath)
-    if (violations.length === 0) {
-      return
-    }
+  const violations = findViolations(content, filePath)
+  if (violations.length === 0) {
+    return undefined
+  }
 
-    if (bypassPhrasePresent(transcriptPath, BYPASS_PHRASE)) {
-      return
-    }
+  if (bypassPhrasePresent(transcriptPath, BYPASS_PHRASE)) {
+    return undefined
+  }
 
-    const lines: string[] = []
-    lines.push(
-      '[no-platform-import-guard] Blocked: platform-specific http-request import.',
-    )
-    lines.push('')
-    lines.push(
-      '  The fleet routes HTTP through the platform-agnostic entry point.',
-    )
-    lines.push(
-      '  Importing /node or /browser directly bypasses the bundler\'s "browser"',
-    )
-    lines.push('  condition and hard-codes the platform.')
-    lines.push('')
-    for (const v of violations) {
-      lines.push(`  Line ${v.line}: ${v.match}`)
-    }
-    lines.push('')
-    lines.push('  Fix: import from the directory (no suffix):')
-    lines.push("    import { httpJson } from '../http-request'")
-    lines.push('')
-    lines.push(
-      '  If this file genuinely runs on one platform only, add before the import:',
-    )
-    lines.push('    // no-platform-http-import: <reason>')
-    lines.push('')
-    lines.push(`  Or type "${BYPASS_PHRASE}" to bypass for this edit.`)
-    process.stderr.write(lines.join('\n') + '\n')
-    process.exit(2)
-  })
-}
-
-main().catch(err => {
-  logger.error('no-platform-import-guard: unexpected error', err)
+  const lines: string[] = []
+  lines.push(
+    '[no-platform-import-guard] Blocked: platform-specific http-request import.',
+  )
+  lines.push('')
+  lines.push(
+    '  The fleet routes HTTP through the platform-agnostic entry point.',
+  )
+  lines.push(
+    '  Importing /node or /browser directly bypasses the bundler\'s "browser"',
+  )
+  lines.push('  condition and hard-codes the platform.')
+  lines.push('')
+  for (const v of violations) {
+    lines.push(`  Line ${v.line}: ${v.match}`)
+  }
+  lines.push('')
+  lines.push('  Fix: import from the directory (no suffix):')
+  lines.push("    import { httpJson } from '../http-request'")
+  lines.push('')
+  lines.push(
+    '  If this file genuinely runs on one platform only, add before the import:',
+  )
+  lines.push('    // no-platform-http-import: <reason>')
+  lines.push('')
+  lines.push(`  Or type "${BYPASS_PHRASE}" to bypass for this edit.`)
+  return block(lines.join('\n'))
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

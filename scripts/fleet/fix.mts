@@ -1,4 +1,4 @@
-/**
+/*
  * @file Auto-fix script — runs linters with --fix, then security tools (zizmor,
  *   agentshield) if available, then an AI-assisted pass for the lint findings
  *   the deterministic fixer can't safely handle. Steps:

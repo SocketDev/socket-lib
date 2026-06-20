@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Code-is-law backing for the onboarding skill's CI step (step 18 of
  *   `.claude/skills/fleet/onboarding-fleet-member/SKILL.md`). The skill
  *   DESCRIBES the local-CI path; this check ENFORCES it so the prose can't

@@ -24,18 +24,19 @@
 //
 // Fails open on parse / payload errors.
 
-import process from 'node:process'
-
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
+import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
 import { parseCommands } from '../_shared/shell-command.mts'
 
 const BYPASS_PHRASE = 'Allow vitest-double-dash bypass' as const
 
-interface Payload {
-  tool_name?: unknown | undefined
-  tool_input?: { command?: unknown | undefined } | undefined
-  transcript_path?: unknown | undefined
-}
+// Pre-flight triggers: the dispatcher skips importing this guard unless the
+// raw payload contains one of these substrings. Every blocking path requires
+// BOTH a `--` token AND a matched binary — either `vitest`
+// (`vitest`/`node_modules/.bin/vitest`) or a `pnpm`/`npm`/`yarn` `test` script
+// runner — so a command naming none of these binaries can never block. (`npm`
+// is also a substring of `pnpm`; both are listed for clarity.)
+export const triggers: readonly string[] = ['npm', 'pnpm', 'vitest', 'yarn']
 
 // A vitest binary path (bare `vitest` or `node_modules/.bin/vitest`).
 function isVitestBinary(binary: string): boolean {
@@ -92,28 +93,14 @@ export function vitestDoubleDash(command: string): string | undefined {
   return undefined
 }
 
-async function main(): Promise<void> {
-  const raw = await readStdin()
-  let payload: Payload
-  try {
-    payload = JSON.parse(raw) as Payload
-  } catch {
-    process.exit(0)
-  }
-  if (payload.tool_name !== 'Bash') {
-    process.exit(0)
-  }
-  const command =
-    typeof payload.tool_input?.command === 'string'
-      ? payload.tool_input.command
-      : ''
+export const check = bashGuard((command, payload) => {
   if (!command.trim()) {
-    process.exit(0)
+    return undefined
   }
 
   const offender = vitestDoubleDash(command)
   if (!offender) {
-    process.exit(0)
+    return undefined
   }
 
   const transcriptPath =
@@ -124,10 +111,10 @@ async function main(): Promise<void> {
     transcriptPath &&
     bypassPhrasePresent(transcriptPath, [BYPASS_PHRASE], 3)
   ) {
-    process.exit(0)
+    return undefined
   }
 
-  process.stderr.write(
+  return block(
     [
       '[no-vitest-double-dash-guard] Blocked: `--` before a vitest test path.',
       '',
@@ -141,19 +128,15 @@ async function main(): Promise<void> {
       '    node_modules/.bin/vitest run test/foo.test.mts',
       '',
       `  Bypass: type "${BYPASS_PHRASE}" to allow this invocation.`,
-    ].join('\n') + '\n',
+    ].join('\n'),
   )
-  process.exit(2)
-}
+})
 
-if (process.argv[1]?.endsWith('index.mts')) {
-  // Async IIFE: await inside the function (no top-level await — CJS bundle
-  // target), promise still awaited. Fails open on any throw.
-  void (async () => {
-    try {
-      await main()
-    } catch {
-      process.exit(0)
-    }
-  })()
-}
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  triggers,
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

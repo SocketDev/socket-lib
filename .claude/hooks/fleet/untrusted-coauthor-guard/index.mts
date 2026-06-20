@@ -31,21 +31,20 @@
 // 2 — block. AST-free: trailers are matched on the message text, which is
 // commit content, not shell structure.
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
 import { readIdentityPolicy } from '../../../../.git-hooks/_shared/git-identity.mts'
 import { extractCommitMessage, isGitCommit } from '../_shared/commit-command.mts'
 import { defaultRepoDir } from '../_shared/git-identity.mts'
-import { withBashGuard } from '../_shared/payload.mts'
+import {
+  bashGuard,
+  block,
+  defineHook,
+  runHook,
+} from '../_shared/guard.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
 
 const BYPASS_PHRASES = ['Allow untrusted-coauthor bypass']
 
-const COAUTHOR_RE = /^\s*Co-authored-by:\s*(.+?)\s*<([^>]+)>\s*$/gim
+const COAUTHOR_RE = /^\s*Co-authored-by:\s*(?<name>.+?)\s*<(?<email>[^>]+)>\s*$/gim
 
 export interface Coauthor {
   readonly name: string
@@ -57,7 +56,7 @@ export function extractCoauthors(message: string): Coauthor[] {
   COAUTHOR_RE.lastIndex = 0
   let m: RegExpExecArray | null
   while ((m = COAUTHOR_RE.exec(message))) {
-    out.push({ email: m[2]!.trim(), name: m[1]!.trim() })
+    out.push({ email: m.groups!.email!.trim(), name: m.groups!.name!.trim() })
   }
   return out
 }
@@ -86,17 +85,17 @@ export function isKnownCoauthor(
   return false
 }
 
-await withBashGuard((command, payload) => {
+export const check = bashGuard((command, payload) => {
   if (!isGitCommit(command)) {
-    return
+    return undefined
   }
   const message = extractCommitMessage(command)
   if (!message || !/Co-authored-by:/i.test(message)) {
-    return
+    return undefined
   }
   const coauthors = extractCoauthors(message)
   if (coauthors.length === 0) {
-    return
+    return undefined
   }
 
   const repoDir = defaultRepoDir(payload.cwd)
@@ -108,26 +107,24 @@ await withBashGuard((command, payload) => {
     if (isKnownCoauthor(c.email, policy)) {
       return false
     }
-    // With an allowlist configured, anything not on it is untrusted.
     if (hasAllowlist) {
       return true
     }
-    // No allowlist: still catch the fresh-account GitHub-noreply shape.
     return isGithubNoreply(c.email)
   })
 
   if (untrusted.length === 0) {
-    return
+    return undefined
   }
 
   if (
     payload.transcript_path &&
     bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASES)
   ) {
-    return
+    return undefined
   }
 
-  logger.error(
+  return block(
     [
       '[untrusted-coauthor-guard] Blocked: Co-authored-by an unvetted identity',
       '',
@@ -147,5 +144,13 @@ await withBashGuard((command, payload) => {
       '',
     ].join('\n'),
   )
-  process.exitCode = 2
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

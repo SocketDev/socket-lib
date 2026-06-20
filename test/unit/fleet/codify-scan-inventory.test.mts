@@ -6,7 +6,7 @@
 
 import { describe, test } from 'vitest'
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -18,29 +18,29 @@ import {
 import { REPO_ROOT } from '../../../scripts/fleet/paths.mts'
 
 describe('splitHooks', () => {
-  test('buckets by -guard / -reminder suffix; else installer', () => {
+  test('buckets by -guard / -nudge suffix; else installer', () => {
     const out = splitHooks([
       'foo-guard',
-      'bar-reminder',
+      'bar-nudge',
       'setup-signing',
       'baz-guard',
     ])
     assert.deepEqual(out.guards, ['baz-guard', 'foo-guard'])
-    assert.deepEqual(out.reminders, ['bar-reminder'])
+    assert.deepEqual(out.reminders, ['bar-nudge'])
     assert.deepEqual(out.installers, ['setup-signing'])
   })
 
   test('each bucket is sorted', () => {
-    const out = splitHooks(['z-guard', 'a-guard', 'm-reminder', 'b-reminder'])
+    const out = splitHooks(['z-guard', 'a-guard', 'm-nudge', 'b-nudge'])
     assert.deepEqual(out.guards, ['a-guard', 'z-guard'])
-    assert.deepEqual(out.reminders, ['b-reminder', 'm-reminder'])
+    assert.deepEqual(out.reminders, ['b-nudge', 'm-nudge'])
   })
 })
 
 describe('collectLintRules (regression: real plugin layout)', () => {
   test('finds socket rules from fleet/<rule-id>/ directories', () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), 'plugin-'))
-    const pluginDir = path.join(dir, '.config', 'oxlint-plugin', 'fleet')
+    const pluginDir = path.join(dir, '.config', 'fleet', 'oxlint-plugin', 'fleet')
     mkdirSync(path.join(pluginDir, 'my-rule'), { recursive: true })
     mkdirSync(path.join(pluginDir, 'other-rule'), { recursive: true })
     const { socketRules } = collectLintRules(dir)

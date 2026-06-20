@@ -51,7 +51,7 @@ test('blocks node --test <file>', () => {
   const { code, stderr } = run('node --test test/unit/foo.test.mts')
   assert.equal(code, 2)
   assert.match(stderr, /prefer-vitest-guard/)
-  assert.match(stderr, /node_modules\/\.bin\/vitest run/)
+  assert.ok(stderr.includes('pnpm test'))
   assert.match(stderr, /test\/unit\/foo\.test\.mts/)
 })
 
@@ -84,7 +84,7 @@ test('blocks node --require hook --test file', () => {
 test('blocks node --test --import tsx <file>', () => {
   const { code, stderr } = run('node --test --import tsx test/foo.test.mts')
   assert.equal(code, 2)
-  assert.match(stderr, /node_modules\/\.bin\/vitest run/)
+  assert.ok(stderr.includes('pnpm test'))
 })
 
 test('blocks bare tsx running a test file', () => {
@@ -122,18 +122,34 @@ test('allows node --test for a hook test (full .claude/hooks path)', () => {
 })
 
 test('allows node --test for an oxlint-plugin rule test', () => {
-  // .config/oxlint-plugin/<tier>/<rule>/test/** is vitest-excluded → node --test tier.
+  // .config/fleet/oxlint-plugin/<tier>/<rule>/test/** is vitest-excluded → node --test tier.
   const { code } = run(
-    'node --test .config/oxlint-plugin/fleet/max-file-lines/test/max-file-lines.test.mts',
+    'node --test .config/fleet/oxlint-plugin/fleet/max-file-lines/test/max-file-lines.test.mts',
   )
   assert.equal(code, 0)
 })
 
 test('allows node --test for an oxlint-plugin test glob', () => {
   const { code } = run(
-    'node --test .config/oxlint-plugin/fleet/max-file-lines/test/*.test.mts',
+    'node --test .config/fleet/oxlint-plugin/fleet/max-file-lines/test/*.test.mts',
   )
   assert.equal(code, 0)
+})
+
+test('allows node --test for a scripts/**/test/ suite', () => {
+  // scripts/**/test/** is vitest-excluded → node --test tier.
+  assert.equal(run('node --test scripts/fleet/test/release-doctor.test.mts').code, 0)
+  assert.equal(run('node --test scripts/test/build.test.mts').code, 0)
+  assert.equal(run('node --test scripts/a/b/test/deep.test.mts').code, 0)
+})
+
+test('allows node --test for a .git-hooks/ test', () => {
+  assert.equal(run('node --test .git-hooks/test/pre-commit.test.mts').code, 0)
+})
+
+test('still blocks node --test for a scripts file outside a test/ dir', () => {
+  // scripts/foo.test.mts (no test/ dir segment) is NOT vitest-excluded → vitest tier.
+  assert.equal(run('node --test scripts/fleet/release-doctor.test.mts').code, 2)
 })
 
 test('allows a repo-owned extra-exclude node:test tier; blocks it without the file', () => {
@@ -173,13 +189,41 @@ test('blocks node --test mixing a hook test with a src test', () => {
   assert.equal(code, 2)
 })
 
-test('allows node_modules/.bin/vitest run', () => {
-  const { code } = run('node_modules/.bin/vitest run test/unit/foo.test.mts')
+test('blocks raw node_modules/.bin/vitest run, steers to pnpm test', () => {
+  const { code, stderr } = run(
+    'node_modules/.bin/vitest run test/unit/foo.test.mts',
+  )
+  assert.equal(code, 2)
+  assert.ok(stderr.includes('raw `vitest` binary'))
+  assert.ok(stderr.includes('pnpm test test/unit/foo.test.mts'))
+})
+
+test('blocks bare vitest', () => {
+  const { code } = run('vitest run')
+  assert.equal(code, 2)
+})
+
+test('raw vitest honors the bypass phrase', () => {
+  const { code } = run('node_modules/.bin/vitest run test/unit/foo.test.mts', [
+    'Allow node-test-runner bypass',
+  ])
   assert.equal(code, 0)
 })
 
 test('allows pnpm test', () => {
   const { code } = run('pnpm test')
+  assert.equal(code, 0)
+})
+
+test('allows pnpm test <file> (the fast scoped form)', () => {
+  const { code } = run('pnpm test test/unit/foo.test.mts')
+  assert.equal(code, 0)
+})
+
+test('does not trip on a vitest.config path arg to node', () => {
+  const { code } = run(
+    'node --run test --config .config/repo/vitest.config.mts',
+  )
   assert.equal(code, 0)
 })
 

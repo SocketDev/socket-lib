@@ -6,10 +6,61 @@ import assert from 'node:assert/strict'
 import { describe, test } from 'vitest'
 
 import {
+  assertNoUnscopedWildcard,
   isSocketSourcedPackage,
   isSocketSourcedRepository,
   SOCKET_PACKAGE_PATTERNS,
+  SOCKET_SCOPES,
 } from '../../../scripts/fleet/constants/socket-scopes.mts'
+
+describe('socket-scopes / assertNoUnscopedWildcard', () => {
+  test('passes for scoped globs and exact names', () => {
+    assert.doesNotThrow(() =>
+      assertNoUnscopedWildcard('t', ['@socketsecurity/*', 'ecc-agentshield', 'sfw']),
+    )
+  })
+
+  test('throws for an unscoped prefix glob, naming the list + offender', () => {
+    assert.throws(
+      () => assertNoUnscopedWildcard('MY_LIST', ['socket-*']),
+      /MY_LIST entry "socket-\*" is an unscoped/,
+    )
+  })
+
+  test('both shipped lists are clean (load-time invariant already ran)', () => {
+    // Importing the module ran the two assertNoUnscopedWildcard() calls; if a
+    // `socket-*` had slipped into either list the import above would have thrown.
+    assert.doesNotThrow(() =>
+      assertNoUnscopedWildcard('SOCKET_PACKAGE_PATTERNS', SOCKET_PACKAGE_PATTERNS),
+    )
+    assert.doesNotThrow(() =>
+      assertNoUnscopedWildcard('SOCKET_SCOPES', SOCKET_SCOPES),
+    )
+  })
+})
+
+describe('socket-scopes / SOCKET_SCOPES (taze cadence list)', () => {
+  test('lists non-namespaced Socket pkgs by exact name, never a socket-* glob', () => {
+    assert.ok(SOCKET_SCOPES.includes('ecc-agentshield'))
+    assert.ok(SOCKET_SCOPES.includes('sfw'))
+    assert.ok(!SOCKET_SCOPES.includes('socket-*'))
+    // socket-mcp is NOT listed: the published package is @socketsecurity/mcp
+    // (under the @socketsecurity/* glob); a bare `socket-mcp` is a name we
+    // don't own, so listing it would soak/cooldown-bypass an attacker's pkg.
+    assert.ok(!SOCKET_SCOPES.includes('socket-mcp'))
+  })
+
+  test('every wildcard entry is scoped', () => {
+    for (const pattern of SOCKET_SCOPES) {
+      if (pattern.includes('*')) {
+        assert.ok(
+          pattern.startsWith('@'),
+          `unscoped wildcard "${pattern}" would bypass the maturity cooldown`,
+        )
+      }
+    }
+  })
+})
 
 describe('socket-scopes / SOCKET_PACKAGE_PATTERNS security invariant', () => {
   test('contains NO unscoped wildcard (a socket-* glob is a soak-bypass hole)', () => {

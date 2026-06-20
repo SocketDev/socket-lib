@@ -1,7 +1,8 @@
 /* eslint-disable no-shadow -- nested cached-length for-loops intentionally reuse `i`/`length` names for the fleet-wide cached-loop idiom; renaming would diverge from the codebase pattern. */
 /**
  * @file Canonical minimal lint runner for socket-* repos. Scope modes:
- *   (default) Lint files modified in the working tree vs HEAD. --staged Lint
+ *   (default, or explicit --modified / its alias --changed) Lint files modified
+ *   in the working tree vs HEAD. --staged Lint
  *   files in the git index (used by .git-hooks/pre-commit). --all Lint the
  *   entire workspace. Flags: --fix Auto-fix issues. --quiet Suppress progress
  *   output. If the chosen scope has no lintable files, the script is a no-op.
@@ -19,20 +20,18 @@
 // flow is sync (sequential gates, exit-code aggregation).
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from 'node:child_process'
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
-import os from 'node:os'
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { buildOxfmtArgs } from './_shared/format-scope.mts'
+import { resolveScopeMode } from './_shared/scope-flags.mts'
+
 const logger = getDefaultLogger()
 
 const args = process.argv.slice(2)
-const mode: 'staged' | 'all' | 'modified' = args.includes('--all')
-  ? 'all'
-  : args.includes('--staged')
-    ? 'staged'
-    : 'modified'
+const mode = resolveScopeMode(args)
 const fix = args.includes('--fix')
 const quiet = args.includes('--quiet') || args.includes('--silent')
 const stdio: SpawnSyncOptions['stdio'] = quiet ? 'pipe' : 'inherit'
@@ -43,62 +42,6 @@ const stdio: SpawnSyncOptions['stdio'] = quiet ? 'pipe' : 'inherit'
 const useShell = process.platform === 'win32'
 
 const LINTABLE_EXTS = new Set(['.cjs', '.cts', '.js', '.mjs', '.mts', '.ts'])
-
-// Two-file extends layout: `.config/fleet/<config>.json` is fleet-canonical
-// (byte-identical across the fleet, owned by the wheelhouse cascade).
-// A repo with overrides ships `.config/repo/<config>.json` that uses
-// `extends: ['../fleet/<config>.json']` + a small `overrides` block.
-// Auto-discover: prefer the repo overlay if it exists, else the fleet
-// canonical. Picks at invocation time — adding the overlay doesn't
-// require touching scripts. The basename (oxlintrc.json / oxfmtrc.json)
-// stays identical on both sides; only the directory differs.
-function pickConfig(basename: string): string {
-  const repoOverlay = path.join('.config', 'repo', basename)
-  if (existsSync(repoOverlay)) {
-    return repoOverlay
-  }
-  return path.join('.config', 'fleet', basename)
-}
-
-// Resolve the oxfmt `--ignore-path`. The fleet canonical
-// `.config/fleet/.prettierignore` excludes `.claude/`, `**/fleet/**`, and the
-// vendored acorn blob — the patterns every repo shares. A repo with its OWN
-// verbatim trees (e.g. socket-btm's `additions/source-patched/` synced into the
-// Node build, or `test/fixtures/` corpora) declares them in a repo overlay at
-// `.config/repo/.prettierignore`. oxfmt takes a single `--ignore-path` and does
-// NOT honor the flag twice, so when an overlay exists we concatenate fleet +
-// repo into one temp file and pass that. The fleet file alone is returned when
-// there is no overlay (the common case). Cached so both oxfmt call sites
-// (runAll + the changed-files path) share one temp file per invocation.
-const FLEET_IGNORE_PATH = path.join('.config', 'fleet', '.prettierignore')
-let cachedIgnorePath: string | undefined
-function pickIgnorePath(): string {
-  if (cachedIgnorePath !== undefined) {
-    return cachedIgnorePath
-  }
-  const repoOverlay = path.join('.config', 'repo', '.prettierignore')
-  if (!existsSync(repoOverlay)) {
-    cachedIgnorePath = FLEET_IGNORE_PATH
-    return cachedIgnorePath
-  }
-  let fleetBody = ''
-  let repoBody = ''
-  try {
-    fleetBody = readFileSync(FLEET_IGNORE_PATH, 'utf8')
-  } catch {}
-  try {
-    repoBody = readFileSync(repoOverlay, 'utf8')
-  } catch {}
-  const dir = mkdtempSync(path.join(os.tmpdir(), 'fleet-prettierignore-'))
-  const combined = path.join(dir, '.prettierignore')
-  writeFileSync(
-    combined,
-    `${fleetBody}\n# --- .config/repo/.prettierignore (repo-specific verbatim trees) ---\n${repoBody}\n`,
-    'utf8',
-  )
-  cachedIgnorePath = combined
-  return cachedIgnorePath
-}
 
 // oxlint config picker. Prefers the composable `oxlint.config.mts` factory
 // (a repo's `.config/repo/oxlint.config.mts` imports the fleet factory and
@@ -211,7 +154,7 @@ function filterLintable(files: string[]): string[] {
 //
 // `template/**` ships byte-identical to every fleet repo via the
 // sync-scaffolding cascade — including `template/.claude/hooks/`
-// (the actual fleet hook code) and `template/.config/oxlint-plugin/`
+// (the actual fleet hook code) and `template/.config/fleet/oxlint-plugin/`
 // (the canonical rule definitions). The wheelhouse must lint these
 // here, before they propagate, because downstream repos can't
 // independently fix drift in fleet-canonical files.
@@ -221,7 +164,13 @@ function filterLintable(files: string[]): string[] {
 // fleet-canonical. It's a copy of `template/.claude/` plus per-machine
 // overrides; linting it would double-flag every issue once in
 // `template/` and once in `.claude/`.
-const DOGFOOD_LINT_PATHS = ['.config/oxlint-plugin', 'template']
+const DOGFOOD_LINT_PATHS = ['.config/fleet/oxlint-plugin', 'template']
+
+// The dogfood oxlint config is wheelhouse-only — it re-includes `template/`
+// (the fleet source), a path that exists only in the wheelhouse — so it lives
+// in `.config/repo/`, never the cascaded `.config/fleet/` tier. Absent in member
+// repos, where the dogfood pass is skipped.
+const DOGFOOD_CONFIG = '.config/repo/oxlintrc.dogfood.json'
 
 // Markdown lint pass — gated behind LINT_MARKDOWN=1 so existing fleet
 // repos with pre-existing markdown hygiene findings aren't blocked
@@ -267,16 +216,7 @@ function runAll(): number {
   // socket/prefer-spawn-over-execsync rule: shell-string execSync is
   // banned because every interpolated value is a potential injection
   // vector; the array form structurally can't shell-expand its args.
-  const oxfmtArgs = [
-    'exec',
-    'oxfmt',
-    '-c',
-    pickConfig('oxfmtrc.json'),
-    '--ignore-path',
-    pickIgnorePath(),
-    fix ? '--write' : '--check',
-    '.',
-  ]
+  const oxfmtArgs = buildOxfmtArgs({ check: !fix })
   const fmtRes = spawnSync('pnpm', oxfmtArgs, { shell: useShell, stdio })
   if (fmtRes.status !== 0) {
     return 1
@@ -296,7 +236,7 @@ function runAll(): number {
   if (assertPluginLoaded() !== 0) {
     return 1
   }
-  // Wheelhouse-self dogfood: lint the .config/oxlint-plugin/ + template/
+  // Wheelhouse-self dogfood: lint the .config/fleet/oxlint-plugin/ + template/
   // trees too. The canonical .config/fleet/oxlintrc.json ignores those paths so
   // downstream fleet repos don't waste cycles linting opaque tooling, but
   // the wheelhouse is the author — every change here lands in every
@@ -310,7 +250,7 @@ function runAll(): number {
   // is gated behind LINT_DOGFOOD=1 so it doesn't break the default
   // workflow while the exemption list is being curated. Set the env var
   // to opt in.
-  if (process.env['LINT_DOGFOOD'] === '1') {
+  if (process.env['LINT_DOGFOOD'] === '1' && existsSync(DOGFOOD_CONFIG)) {
     if (!quiet) {
       logger.log('Running oxlint on wheelhouse-self dogfood paths…')
     }
@@ -327,7 +267,8 @@ function runAll(): number {
         'exec',
         'oxlint',
         '-c',
-        '.config/fleet/oxlintrc.dogfood.json',
+        DOGFOOD_CONFIG,
+        '--no-error-on-unmatched-pattern',
       ]
       if (fix) {
         args.push('--fix')
@@ -352,17 +293,7 @@ function runFiles(files: string[]): number {
     return 0
   }
   log(`Formatting ${files.length} file(s)...`)
-  const oxfmtArgs = [
-    'exec',
-    'oxfmt',
-    '-c',
-    pickConfig('oxfmtrc.json'),
-    '--ignore-path',
-    pickIgnorePath(),
-    fix ? '--write' : '--check',
-    '--no-error-on-unmatched-pattern',
-    ...files,
-  ]
+  const oxfmtArgs = buildOxfmtArgs({ check: !fix, files })
   const fmtRes = spawnSync('pnpm', oxfmtArgs, { shell: useShell, stdio })
   if (fmtRes.status !== 0) {
     return 1

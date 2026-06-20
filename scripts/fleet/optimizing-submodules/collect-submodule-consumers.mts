@@ -1,4 +1,4 @@
-/**
+/*
  * Collect the consumer evidence the optimizing-submodules skill needs to
  * classify each `.gitmodules` submodule — WITHOUT rendering a verdict.
  *

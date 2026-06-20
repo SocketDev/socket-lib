@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Tool-version layered-pin cascade orchestrator — the EXECUTABLE law for
  *   the "bump a core/security tool (pnpm, zizmor, sfw, …) and thread it through
  *   the fleet" procedure that the socket-registry `updating-workflows` SKILL

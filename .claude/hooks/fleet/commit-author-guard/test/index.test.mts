@@ -148,8 +148,8 @@ test('ALLOWS a real email when no allowlist is configured (denylist-only repo)',
 
 test('BLOCKS an off-allowlist real email when an allowlist IS configured', () => {
   const r = makeFakeRepo({
-    canonical: { name: 'jdalton', email: 'john.david.dalton@gmail.com' },
-    aliases: [{ name: 'jdalton', email: 'jdalton@socket.dev' }],
+    canonical: { name: 'test-user', email: 'dev@socket.dev' },
+    aliases: [{ name: 'test-user', email: 'test-email@socket.dev' }],
   })
   try {
     const { stderr, exitCode } = runHook({
@@ -169,15 +169,14 @@ test('BLOCKS an off-allowlist real email when an allowlist IS configured', () =>
 
 test('ALLOWS the canonical email when an allowlist is configured', () => {
   const r = makeFakeRepo({
-    canonical: { name: 'jdalton', email: 'john.david.dalton@gmail.com' },
-    aliases: [{ name: 'jdalton', email: 'jdalton@socket.dev' }],
+    canonical: { name: 'test-user', email: 'dev@socket.dev' },
+    aliases: [{ name: 'test-user', email: 'test-email@socket.dev' }],
   })
   try {
     const { exitCode } = runHook({
       tool_name: 'Bash',
       tool_input: {
-        command:
-          'git commit --author="jdalton <john.david.dalton@gmail.com>" -m "fix"',
+        command: 'git commit --author="test-user <dev@socket.dev>" -m "fix"',
       },
       transcript_path: makeTranscript(r.repo),
       cwd: r.repo,
@@ -190,14 +189,15 @@ test('ALLOWS the canonical email when an allowlist is configured', () => {
 
 test('ALLOWS an allowlisted alias email', () => {
   const r = makeFakeRepo({
-    canonical: { name: 'jdalton', email: 'john.david.dalton@gmail.com' },
-    aliases: [{ name: 'jdalton', email: 'jdalton@socket.dev' }],
+    canonical: { name: 'test-user', email: 'dev@socket.dev' },
+    aliases: [{ name: 'test-user', email: 'test-email@socket.dev' }],
   })
   try {
     const { exitCode } = runHook({
       tool_name: 'Bash',
       tool_input: {
-        command: 'git commit --author="jdalton <jdalton@socket.dev>" -m "fix"',
+        command:
+          'git commit --author="test-user <test-email@socket.dev>" -m "fix"',
       },
       transcript_path: makeTranscript(r.repo),
       cwd: r.repo,

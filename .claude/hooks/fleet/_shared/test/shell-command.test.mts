@@ -193,3 +193,26 @@ test('commandWorkingDir: no cd → CLAUDE_PROJECT_DIR', () => {
     }
   }
 })
+
+test('commandsFor: drops redirect operands (2>&1 fd dup)', () => {
+  const [cmd] = commandsFor('node --test foo/test/a.test.mts 2>&1', 'node')
+  assert.deepStrictEqual(cmd!.args, ['--test', 'foo/test/a.test.mts'])
+})
+
+test('commandsFor: drops a file redirect target and the trailing fd dup', () => {
+  const [cmd] = commandsFor(
+    'node --test foo/test/a.test.mts > /dev/null 2>&1',
+    'node',
+  )
+  assert.deepStrictEqual(cmd!.args, ['--test', 'foo/test/a.test.mts'])
+})
+
+test('commandsFor: drops an input-redirect operand', () => {
+  const [cmd] = commandsFor('cat < input.txt', 'cat')
+  assert.deepStrictEqual(cmd!.args, [])
+})
+
+test('commandsFor: drops an output-redirect operand but keeps real args', () => {
+  const [cmd] = commandsFor('echo hi > out.log', 'echo')
+  assert.deepStrictEqual(cmd!.args, ['hi'])
+})

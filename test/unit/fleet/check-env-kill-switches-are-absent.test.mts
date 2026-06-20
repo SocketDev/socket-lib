@@ -149,6 +149,7 @@ test('scanHooks flags a kill-switch in any of index / README / test', () => {
       "test('respects SOCKET_C_GUARD_DISABLED', () => {})\n",
   })
   const hits = scanHooks(dir)
+  const files = hits.map(h => path.basename(path.dirname(h.file))).toSorted()
   // hit dirnames: a-guard (index), b-guard (README), c-guard's test/ dir
   assert.equal(hits.length, 3)
   assert.ok(hits.some(h => h.file.includes('a-guard')))

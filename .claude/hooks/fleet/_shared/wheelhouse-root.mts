@@ -1,4 +1,4 @@
-/**
+/*
  * @file Locate socket-wheelhouse's source-of-truth tree from any fleet repo
  *   session. Hooks that enforce wheelhouse-level invariants (e.g.
  *   new-hook-claude-md-guard ensuring every fleet hook has a CLAUDE.md

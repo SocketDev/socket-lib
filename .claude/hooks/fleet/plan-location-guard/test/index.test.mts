@@ -203,7 +203,8 @@ test('fails open on malformed stdin', async () => {
     child.process.on('exit', c => resolve(c ?? 0))
   })
   assert.strictEqual(code, 0)
-  assert.match(stderr, /fail-open/)
+  // The shared runGuard fails open SILENTLY (no stderr) — it must not block.
+  assert.doesNotMatch(stderr, /plan-location-guard: blocked/)
 })
 
 test('fails open on empty stdin', async () => {

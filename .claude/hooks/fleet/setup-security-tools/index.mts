@@ -44,6 +44,8 @@ import process from 'node:process'
 
 import { getSocketAppDir } from '@socketsecurity/lib-stable/paths/socket'
 
+import { getShimsDir } from './lib/shims.mts'
+
 interface Finding {
   readonly kind:
     | 'broken-shim'
@@ -115,7 +117,7 @@ export function checkEdition(): Finding[] {
 }
 
 export async function checkShims(): Promise<Finding[]> {
-  const shimsDir = path.join(getSocketAppDir('wheelhouse'), 'shims')
+  const shimsDir = getShimsDir()
   if (!existsSync(shimsDir)) {
     return []
   }
@@ -135,11 +137,11 @@ export async function checkShims(): Promise<Finding[]> {
     } catch {
       continue
     }
-    const m = content.match(/"([^"]*\/_dlx\/[^"]+\/sfw-(?:enterprise|free))"/)
+    const m = content.match(/"(?<target>[^"]*\/_dlx\/[^"]+\/sfw-(?:enterprise|free))"/)
     if (!m) {
       continue
     }
-    if (!existsSync(m[1]!)) {
+    if (!existsSync(m.groups!.target!)) {
       broken.push(name)
     }
   }
@@ -348,8 +350,10 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(e => {
-  process.stderr.write(
-    `[setup-security-tools] health-check error (allowing): ${e}\n`,
-  )
-})
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(e => {
+    process.stderr.write(
+      `[setup-security-tools] health-check error (allowing): ${e}\n`,
+    )
+  })
+}

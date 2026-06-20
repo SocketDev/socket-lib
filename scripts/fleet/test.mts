@@ -17,9 +17,11 @@
  *   - `--all` — run the full suite (`vitest run`). Used in CI and on explicit
  *     opt-in. Flags: `--quiet` / `--silent` suppress progress output. Config /
  *     infrastructure changes (`vitest.config*`, `tsconfig*`, `.oxlintrc.json`,
- *     `.oxfmtrc.json`, `pnpm-lock.yaml`, `package.json`, anything under
- *     `.config/` or `scripts/`) still escalate to `all` — module-graph
- *     traversal doesn't capture config-derived discovery + alias changes. See
+ *     `.oxfmtrc.json`, `pnpm-lock.yaml`, `package.json`, the vitest setup
+ *     files, and the test runner itself) still escalate to `all` — module-graph
+ *     traversal doesn't capture config-derived discovery + alias changes. An
+ *     ordinary source file under `scripts/` or `.config/` does NOT escalate;
+ *     its tests are reachable via `vitest related`. See
  *     https://vitest.dev/guide/cli.html#vitest-related.
  */
 
@@ -34,6 +36,8 @@ import { globSync } from '@socketsecurity/lib-stable/globs/match'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from '@socketsecurity/lib-stable/process/spawn/types'
+
+import { resolveScopeMode } from './_shared/scope-flags.mts'
 
 const logger = getDefaultLogger()
 
@@ -72,11 +76,7 @@ const ROOT_WORKSPACE_MANIFEST = 'pnpm-workspace.yaml'
 const ROOT_VITEST_CONFIG = '.config/repo/vitest.config.mts'
 
 const args = process.argv.slice(2)
-const mode: 'staged' | 'all' | 'modified' = args.includes('--all')
-  ? 'all'
-  : args.includes('--staged')
-    ? 'staged'
-    : 'modified'
+const mode = resolveScopeMode(args)
 const quiet = args.includes('--quiet') || args.includes('--silent')
 const stdio: SpawnSyncOptions['stdio'] = quiet ? 'pipe' : 'inherit'
 // On Windows, `pnpm` is a .cmd shim that Node refuses to exec directly via
@@ -86,14 +86,21 @@ const useShell = process.platform === 'win32'
 
 // Paths that, when changed, force the full suite to run.
 const ESCALATION_PATTERNS = [
-  /^\.config\//,
-  /^scripts\//,
+  // Discovery / resolution config only — a change here is invisible to the
+  // module-graph walk (no source file imports it) yet changes which tests run
+  // or how specifiers resolve, so the scoped run can't be trusted. An ordinary
+  // source file under scripts/ or .config/ is NOT here: its tests are reachable
+  // via `vitest related`, so escalating on it just runs the whole suite for
+  // nothing.
+  /(?:^|\/)vitest\.config\.(?:js|mjs|mts|ts)$/,
+  /(?:^|\/)vitest\.json$/,
+  /(?:^|\/)tsconfig.*\.json$/,
+  /(?:^|\/)package\.json$/,
   /^pnpm-lock\.yaml$/,
-  /^tsconfig.*\.json$/,
-  /^\.oxlintrc\.json$/,
-  /^\.oxfmtrc\.json$/,
-  /^vitest\.config\.(?:js|mjs|mts|ts)$/,
-  /^package\.json$/,
+  /(?:^|\/)\.oxlintrc\.json$/,
+  /(?:^|\/)\.oxfmtrc\.json$/,
+  /^scripts\/fleet\/test\.mts$/,
+  /(?:^|\/)test\/scripts\/(?:fleet|repo)\/setup\.mts$/,
   /^lockstep\.schema\.json$/,
 ]
 
@@ -266,7 +273,32 @@ function runRelated(files: string[]): number {
   )
 }
 
+// Explicit positional file paths → the fast, file-scoped run. This is the
+// fleet-canonical replacement for a raw `node_modules/.bin/vitest run <file>`:
+// `pnpm test <file…>` runs exactly those files (vitest `run <files>`), so no
+// one ever needs to reach past the script to the bare binary. Flags (scope +
+// --quiet/--silent) are filtered out; what remains is treated as file paths.
+function fileArgs(): string[] {
+  return args.filter(a => !a.startsWith('-'))
+}
+
+function runFiles(files: string[]): number {
+  // `vitest run <files…>` executes exactly the named test files (no watch),
+  // the fast path for "test this one file". --passWithNoTests keeps a path
+  // that resolves to no test file from erroring.
+  return runVitest(
+    ['run', ...files, '--passWithNoTests'],
+    `files (${files.length})`,
+  )
+}
+
 function main(): void {
+  const explicitFiles = fileArgs()
+  if (explicitFiles.length > 0) {
+    process.exitCode = runFiles(explicitFiles)
+    return
+  }
+
   if (mode === 'all') {
     process.exitCode = runAll()
     return

@@ -7,7 +7,7 @@
 //
 // The fleet rule (CLAUDE.md "Judgment & self-evaluation" → "Verify before you
 // claim"): never assert a check passed without a tool call this session that ran
-// it. The Stop-time `stop-claim-verify-reminder` nudges at turn-end; this is the
+// it. The Stop-time `stop-claim-verify-nudge` nudges at turn-end; this is the
 // hard half — it stops the unverified claim from LANDING in a commit/push.
 //
 // DRY: detection (findUnbackedClaims / sessionBashCommands / CLAIM_RULES) is the
@@ -16,22 +16,27 @@
 //
 // Bypass: `Allow unbacked-claim bypass` in a recent user turn (for the case
 // where the claim is true but verified outside this session, or is fine to land).
-//
-// Exit codes:
-//   2 — commit/push with an unbacked claim in the last turn (blocked).
-//   0 — otherwise, or on any error (fail-open).
 
-import process from 'node:process'
-
-import { withBashGuard } from '../_shared/payload.mts'
+import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
 import { findInvocation } from '../_shared/shell-command.mts'
-import { bypassPhrasePresent, readLastAssistantText } from '../_shared/transcript.mts'
+import {
+  bypassPhrasePresent,
+  readLastAssistantText,
+} from '../_shared/transcript.mts'
 import {
   findUnbackedClaims,
   sessionBashCommands,
 } from '../_shared/unbacked-claims.mts'
 
 const BYPASS_PHRASE = 'Allow unbacked-claim bypass'
+
+// Pre-flight: this guard can ONLY block when the command invokes `git commit`
+// or `git push` (see isLandingCommand → findInvocation, whose own substring
+// gate requires the binary `git` verbatim). The subcommands `commit`/`push`
+// are subsumed — they matter only once `git` is present — so the binary name
+// is the complete, minimal trigger. The dispatcher skips importing this guard
+// when `git` is absent from the payload.
+export const triggers: readonly string[] = ['git']
 
 // True when the command lands work — git commit or git push. Pull/fetch/status
 // don't land anything, so an unverified claim sitting next to them is harmless.
@@ -42,43 +47,45 @@ export function isLandingCommand(command: string): boolean {
   )
 }
 
-async function main(): Promise<void> {
-  await withBashGuard((command, payload) => {
-    if (!isLandingCommand(command)) {
-      return
-    }
-    const transcriptPath = payload.transcript_path
-    const text = readLastAssistantText(transcriptPath)
-    if (!text) {
-      return
-    }
-    const unbacked = findUnbackedClaims(text, sessionBashCommands(transcriptPath))
-    if (!unbacked.length) {
-      return
-    }
-    if (bypassPhrasePresent(transcriptPath, BYPASS_PHRASE)) {
-      return
-    }
-    const lines = [
-      '[unbacked-claim-commit-guard] Blocked: landing a commit/push with an',
-      'unverified success claim in this turn:',
-      '',
-    ]
-    for (let i = 0, { length } = unbacked; i < length; i += 1) {
-      const u = unbacked[i]!
-      lines.push(`  • "${u.label}" — ${u.hint}`)
-    }
-    lines.push('')
-    lines.push('  Run the command that backs the claim (and let its output show)')
-    lines.push('  before committing, or qualify the statement. Verify before you')
-    lines.push('  claim — and before you land.')
-    lines.push('')
-    lines.push(`  Bypass: type "${BYPASS_PHRASE}" in a recent message.`)
-    process.stderr.write(lines.join('\n') + '\n')
-    process.exitCode = 2
-  })
-}
+export const check = bashGuard((command, payload) => {
+  if (!isLandingCommand(command)) {
+    return undefined
+  }
+  const transcriptPath = payload.transcript_path
+  const text = readLastAssistantText(transcriptPath)
+  if (!text) {
+    return undefined
+  }
+  const unbacked = findUnbackedClaims(text, sessionBashCommands(transcriptPath))
+  if (!unbacked.length) {
+    return undefined
+  }
+  if (bypassPhrasePresent(transcriptPath, BYPASS_PHRASE)) {
+    return undefined
+  }
+  const lines = [
+    '[unbacked-claim-commit-guard] Blocked: landing a commit/push with an',
+    'unverified success claim in this turn:',
+    '',
+  ]
+  for (let i = 0, { length } = unbacked; i < length; i += 1) {
+    const u = unbacked[i]!
+    lines.push(`  • "${u.label}" — ${u.hint}`)
+  }
+  lines.push('')
+  lines.push('  Run the command that backs the claim (and let its output show)')
+  lines.push('  before committing, or qualify the statement. Verify before you')
+  lines.push('  claim — and before you land.')
+  lines.push('')
+  lines.push(`  Bypass: type "${BYPASS_PHRASE}" in a recent message.`)
+  return block(lines.join('\n'))
+})
 
-if (process.argv[1]?.endsWith('index.mts')) {
-  await main()
-}
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  triggers,
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

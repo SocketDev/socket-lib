@@ -39,14 +39,12 @@ async function runHook(
   })
 }
 
-const PROLOG = `# Header\n\n<!-- BEGIN FLEET-CANONICAL -->\n\n`
-const EPILOG = `\n<!-- END FLEET-CANONICAL -->\n\nAfter the block.\n`
+const PROLOG = `# Header\n\n<!-- BEGIN <fleet-canonical> -->\n\n`
+const EPILOG = `\n<!-- END </fleet-canonical> -->\n\nAfter the block.\n`
 
-function buildClaudeMd(
-  sections: Array<{ heading: string; body: string }>,
-): string {
-  const body = sections.map(s => `### ${s.heading}\n\n${s.body}\n`).join('\n')
-  return PROLOG + body + EPILOG
+// The thin CLAUDE.md is a flat bullet index — one `- ` line per rule.
+function buildClaudeMd(bullets: string[]): string {
+  return PROLOG + bullets.map(b => `- ${b}`).join('\n') + '\n' + EPILOG
 }
 
 test('non-Edit/Write tool calls pass through', async () => {
@@ -60,20 +58,18 @@ test('non-Edit/Write tool calls pass through', async () => {
 test('non-CLAUDE.md targets pass through', async () => {
   const result = await runHook({
     tool_input: {
-      file_path: '/Users/x/projects/foo/README.md',
-      content:
-        '# README\n\n<!-- BEGIN FLEET-CANONICAL -->\n### s1\n' +
-        'a\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\n<!-- END FLEET-CANONICAL -->',
+      file_path: '/tmp/foo/README.md',
+      content: buildClaudeMd(['x'.repeat(4000)]),
     },
     tool_name: 'Write',
   })
   assert.strictEqual(result.code, 0)
 })
 
-test('allows short sections under the default cap', async () => {
+test('allows short rule bullets under the default caps', async () => {
   const content = buildClaudeMd([
-    { heading: 'Tooling', body: 'Use pnpm.\n\nNever use npx.' },
-    { heading: 'Token hygiene', body: 'Redact tokens. Always.' },
+    'Use pnpm; never use npx. [`tooling`](docs/agents.md/fleet/tooling.md)',
+    'Redact tokens always. [`token-hygiene`](docs/agents.md/fleet/token-hygiene.md)',
   ])
   const result = await runHook({
     tool_input: { file_path: '/x/CLAUDE.md', content },
@@ -82,71 +78,19 @@ test('allows short sections under the default cap', async () => {
   assert.strictEqual(result.code, 0)
 })
 
-test('blocks a section that exceeds the default 12-line cap', async () => {
-  const longBody = Array(16).fill('one detail line').join('\n')
-  const content = buildClaudeMd([{ heading: 'Long rule', body: longBody }])
+test('blocks a rule bullet that exceeds the default 1500-byte cap', async () => {
+  const content = buildClaudeMd([`Overgrown rule ${'x'.repeat(1600)}`])
   const result = await runHook({
     tool_input: { file_path: '/x/CLAUDE.md', content },
     tool_name: 'Write',
   })
   assert.strictEqual(result.code, 2)
-  assert.match(result.stderr, /Long rule/)
-  assert.match(result.stderr, /16 lines/)
-})
-
-test('blocks a section that exceeds the default 1500-byte cap on few lines', async () => {
-  // 3 lines, each ~600 bytes = ~1800 bytes > 1500-byte cap, but only 3
-  // lines (well under the 12-line cap). The byte cap is the binding one.
-  const longLine = 'x'.repeat(600)
-  const body = [longLine, longLine, longLine].join('\n')
-  const content = buildClaudeMd([{ heading: 'Dense one-liner rule', body }])
-  const result = await runHook({
-    tool_input: { file_path: '/x/CLAUDE.md', content },
-    tool_name: 'Write',
-  })
-  assert.strictEqual(result.code, 2)
-  assert.match(result.stderr, /Dense one-liner rule/)
+  assert.match(result.stderr, /Overgrown rule/)
   assert.match(result.stderr, /bytes/)
 })
 
-test('blank lines do not count toward the line cap', async () => {
-  // 12 non-blank lines with blanks between — exactly at cap, should pass.
-  const lines: string[] = []
-  for (let i = 1; i <= 12; i++) {
-    lines.push(`line ${i}`)
-    lines.push('')
-  }
-  const body = lines.join('\n').trimEnd()
-  const content = buildClaudeMd([{ heading: 'Right at cap', body }])
-  const result = await runHook({
-    tool_input: { file_path: '/x/CLAUDE.md', content },
-    tool_name: 'Write',
-  })
-  assert.strictEqual(result.code, 0)
-})
-
-test('code-fence lines do count toward the line cap', async () => {
-  // 1 prose + 14 code lines = 15 non-blank > 12-line cap. Should block.
-  const codeLines: string[] = []
-  codeLines.push('```ts')
-  for (let i = 0; i < 12; i++) {
-    codeLines.push(`const v${i} = ${i}`)
-  }
-  codeLines.push('```')
-  const body = ['Use this pattern:', '', ...codeLines].join('\n')
-  const content = buildClaudeMd([{ heading: 'Has code block', body }])
-  const result = await runHook({
-    tool_input: { file_path: '/x/CLAUDE.md', content },
-    tool_name: 'Write',
-  })
-  assert.strictEqual(result.code, 2)
-})
-
 test('respects CLAUDE_MD_FLEET_SECTION_MAX_BYTES env override', async () => {
-  // A dense section that exceeds the default 1500-byte cap (~1800 bytes)
-  // passes when the byte cap is raised, as long as it stays under the line cap.
-  const body = ['y'.repeat(900), 'y'.repeat(900)].join('\n')
-  const content = buildClaudeMd([{ heading: 'Raised byte cap', body }])
+  const content = buildClaudeMd([`Dense rule ${'y'.repeat(1600)}`])
   const result = await runHook(
     {
       tool_input: { file_path: '/x/CLAUDE.md', content },
@@ -157,88 +101,73 @@ test('respects CLAUDE_MD_FLEET_SECTION_MAX_BYTES env override', async () => {
   assert.strictEqual(result.code, 0)
 })
 
-test('reports MULTIPLE too-long sections in one error message', async () => {
-  const longBody = Array(30).fill('detail').join('\n')
+test('reports MULTIPLE too-long bullets in one error message', async () => {
   const content = buildClaudeMd([
-    { heading: 'Section A', body: longBody },
-    { heading: 'Section B', body: 'short' },
-    { heading: 'Section C', body: longBody },
+    `Rule A ${'a'.repeat(1600)}`,
+    'Rule B is short.',
+    `Rule C ${'c'.repeat(1600)}`,
   ])
   const result = await runHook({
     tool_input: { file_path: '/x/CLAUDE.md', content },
     tool_name: 'Write',
   })
   assert.strictEqual(result.code, 2)
-  assert.match(result.stderr, /Section A/)
-  assert.match(result.stderr, /Section C/)
-  assert.doesNotMatch(result.stderr, /Section B/)
+  assert.match(result.stderr, /Rule A/)
+  assert.match(result.stderr, /Rule C/)
+  assert.doesNotMatch(result.stderr, /Rule B/)
 })
 
-test('only checks ### sections, not ## or #', async () => {
-  // ## sections are uncapped; should pass even with 30 body lines.
-  const longBody = Array(30).fill('detail').join('\n')
-  const content =
-    PROLOG +
-    `## Top-level section\n\n${longBody}\n\n### Subsection\n\nshort\n` +
-    EPILOG
-  const result = await runHook({
-    tool_input: { file_path: '/x/CLAUDE.md', content },
-    tool_name: 'Write',
-  })
-  assert.strictEqual(result.code, 0)
-})
-
-test('content OUTSIDE the fleet markers is uncapped', async () => {
-  const longBody = Array(50).fill('per-repo detail').join('\n')
-  const content =
-    `# Repo CLAUDE.md\n\n### Repo-specific rule\n\n${longBody}\n\n` +
-    PROLOG +
-    `### Fleet rule\n\nshort.\n` +
-    EPILOG +
-    `\n### Another repo section\n\n${longBody}`
-  const result = await runHook({
-    tool_input: { file_path: '/x/CLAUDE.md', content },
-    tool_name: 'Write',
-  })
-  assert.strictEqual(result.code, 0)
-})
-
-test('respects CLAUDE_MD_FLEET_SECTION_MAX_LINES env override', async () => {
-  const body = Array(35).fill('line').join('\n')
-  const content = buildClaudeMd([{ heading: 'Bigger section', body }])
+test('blocks when the fleet block exceeds 75% of the 40 KB budget', async () => {
+  // Many ordinary bullets, each under the per-bullet cap, but together over
+  // a low fleet-block cap. The block-budget check fires first.
+  const content = buildClaudeMd(
+    Array(50).fill('A reasonably sized rule bullet.'),
+  )
   const result = await runHook(
     {
       tool_input: { file_path: '/x/CLAUDE.md', content },
       tool_name: 'Write',
     },
-    { CLAUDE_MD_FLEET_SECTION_MAX_LINES: '40' },
+    { CLAUDE_MD_FLEET_BLOCK_MAX_BYTES: '500' },
   )
-  // Cap raised to 40; 35 lines is fine.
-  assert.strictEqual(result.code, 0)
+  assert.strictEqual(result.code, 2)
+  assert.match(result.stderr, /fleet block too large/)
+  assert.match(result.stderr, /75% of the 40 KB/)
 })
 
-test('passes through when fleet markers are absent', async () => {
+test('per-repo bullets (after the END marker) ARE capped', async () => {
   const content =
-    '# No fleet block\n\n### Rule\n\n' + Array(100).fill('line').join('\n')
+    PROLOG +
+    `- Fleet rule. [\`x\`](docs/agents.md/fleet/x.md)\n` +
+    EPILOG +
+    `\n## 🏗️ Project-Specific\n\n- Repo rule ${'r'.repeat(1600)}`
   const result = await runHook({
     tool_input: { file_path: '/x/CLAUDE.md', content },
     tool_name: 'Write',
   })
-  assert.strictEqual(result.code, 0)
+  assert.strictEqual(result.code, 2)
+  assert.match(result.stderr, /Repo rule/)
+})
+
+test('a markerless CLAUDE.md is checked as all-per-repo', async () => {
+  const content = '# No fleet block\n\n- Rule ' + 'z'.repeat(1600)
+  const result = await runHook({
+    tool_input: { file_path: '/x/CLAUDE.md', content },
+    tool_name: 'Write',
+  })
+  assert.strictEqual(result.code, 2)
+  assert.match(result.stderr, /Rule/)
 })
 
 test('Edit: when on-disk file is unreadable, falls back to new_string', async () => {
-  // The /nonexistent path will cause applyEditToFile to return
-  // undefined; the hook then scans new_string alone.
-  const longSection =
-    `<!-- BEGIN FLEET-CANONICAL -->\n### overgrown\n\n` +
-    Array(30).fill('x').join('\n') +
-    `\n<!-- END FLEET-CANONICAL -->`
+  const newString =
+    `<!-- BEGIN <fleet-canonical> -->\n- overgrown ${'x'.repeat(1600)}\n` +
+    `<!-- END </fleet-canonical> -->`
   const result = await runHook({
     tool_input: {
       file_path: '/nonexistent/CLAUDE.md',
       old_string: 'a',
-      new_string: longSection,
+      new_string: newString,
     },
     tool_name: 'Edit',
   })
@@ -257,7 +186,6 @@ test('fails open on malformed stdin', async () => {
     child.process.on('exit', c => resolve(c ?? 0))
   })
   assert.strictEqual(code, 0)
-  assert.match(stderr, /fail-open/)
 })
 
 test('fails open on empty stdin', async () => {

@@ -154,7 +154,7 @@ test('linkedDetailDocs ignores non-fleet docs links', () => {
 test('paragraphIsEnforced passes when the SECTION (not the paragraph) cites an enforcer', () => {
   const para = `${SIREN} the rule with no inline cite`
   const section = `### Topic\n\n${para}\n\nFull ruleset (\`.claude/hooks/fleet/my-guard/\`).`
-  assert.equal(paragraphIsEnforced(section, inv(), noDoc), true)
+  assert.equal(paragraphIsEnforced(para, section, inv(), noDoc), true)
 })
 
 test('paragraphIsEnforced passes when a linked detail doc cites an enforcer', () => {
@@ -163,7 +163,7 @@ test('paragraphIsEnforced passes when a linked detail doc cites an enforcer', ()
     rel === 'docs/agents.md/fleet/topic.md'
       ? 'enforced by `socket/my-rule`'
       : undefined
-  assert.equal(paragraphIsEnforced(para, inv(), readDoc), true)
+  assert.equal(paragraphIsEnforced(para, para, inv(), readDoc), true)
 })
 
 test('paragraphIsEnforced passes when a linked SKILL.md cites an enforcer', () => {
@@ -172,18 +172,18 @@ test('paragraphIsEnforced passes when a linked SKILL.md cites an enforcer', () =
     rel === '.claude/skills/fleet/x/SKILL.md'
       ? 'enforced at edit time by `.claude/hooks/fleet/my-guard/`'
       : undefined
-  assert.equal(paragraphIsEnforced(para, inv(), readDoc), true)
+  assert.equal(paragraphIsEnforced(para, para, inv(), readDoc), true)
 })
 
 test('paragraphIsEnforced FAILS when neither paragraph, section, nor doc cites an enforcer', () => {
   const para = `${SIREN} a hard rule with only a prose detail link [d](docs/agents.md/fleet/topic.md)`
   const readDoc = (): string => 'this detail page is pure prose, no enforcer'
-  assert.equal(paragraphIsEnforced(para, inv(), readDoc), false)
+  assert.equal(paragraphIsEnforced(para, para, inv(), readDoc), false)
 })
 
 test('paragraphIsEnforced FAILS when a linked doc is missing (readDoc undefined)', () => {
   const para = `${SIREN} rule [gone](docs/agents.md/fleet/missing.md)`
-  assert.equal(paragraphIsEnforced(para, inv(), noDoc), false)
+  assert.equal(paragraphIsEnforced(para, para, inv(), noDoc), false)
 })
 
 // ── optOutCategory ──────────────────────────────────────────────
@@ -248,9 +248,9 @@ test('sirenParagraphs attaches the enclosing ### section text', () => {
 test('sirenParagraphs with fleetOnly ignores 🚨 outside the FLEET-CANONICAL block', () => {
   const body = [
     `${SIREN} preamble rule outside the block`,
-    '<!-- BEGIN FLEET-CANONICAL -->',
-    `${SIREN} in-block rule`,
-    '<!-- END FLEET-CANONICAL -->',
+    '<!-- BEGIN <fleet-canonical> -->',
+    `- ${SIREN} in-block rule`,
+    '<!-- END </fleet-canonical> -->',
     `${SIREN} postamble rule outside the block`,
   ].join('\n')
   const paras = sirenParagraphs('CLAUDE.md', body, { fleetOnly: true })
@@ -289,6 +289,25 @@ test('auditFile ignores non-🚨 paragraphs entirely', () => {
   const r = auditFile('CLAUDE.md', body, inv(), { fleetOnly: false, readDoc: noDoc })
   assert.equal(r.findings.length, 0)
   assert.equal(r.checked, 0)
+})
+
+test('auditFile (fleetOnly bullets) enforces 🚨 bullets via their inline citation', () => {
+  // The thin CLAUDE.md is a bullet index; each 🚨 `- ` bullet is a rule whose
+  // enforcer citation rides on the same line. One enforced, one not.
+  const body = [
+    '<!-- BEGIN <fleet-canonical> -->',
+    '## 📚 Fleet',
+    `- ${SIREN} enforced bullet (\`.claude/hooks/fleet/my-guard/\`)`,
+    `- ${SIREN} unenforced bullet with no anchor`,
+    '<!-- END </fleet-canonical> -->',
+  ].join('\n')
+  const r = auditFile('CLAUDE.md', body, inv(), {
+    fleetOnly: true,
+    readDoc: noDoc,
+  })
+  assert.equal(r.checked, 2)
+  assert.equal(r.findings.length, 1)
+  assert.match(r.findings[0]!.excerpt, /unenforced bullet/)
 })
 
 test('auditFile is fail-open on empty input', () => {

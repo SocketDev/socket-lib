@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Path-hygiene gate. Mantra: 1 path, 1 reference. A path is constructed
  *   exactly once; everywhere else references the constructed value. Whole-repo
  *   scan complementing the per-edit `.claude/hooks/path-guard` hook. The hook

@@ -47,18 +47,21 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { readSessionTouchedPaths } from '../_shared/foreign-paths.mts'
+import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
 import {
   commandsFor,
   detectBroadGitAdd,
   findInvocation,
 } from '../_shared/shell-command.mts'
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
+import { squashSentinelAllows } from '../_shared/squash-sentinel.mts'
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
-interface ToolInput {
-  readonly tool_name?: string | undefined
-  readonly tool_input?: { readonly command?: unknown | undefined } | undefined
-  readonly transcript_path?: string | undefined
-}
+// Pre-flight trigger for the dispatcher: every block path runs through a
+// `git`-binary detector (`detectBroadGitAdd` → `commandsFor(_, 'git')`, and
+// `isGitCommit` → `findInvocation(_, { binary: 'git', … })`), each of which
+// short-circuits unless the raw command contains the substring `git`. So a
+// command with no `git` can never block — skip importing this guard for it.
+export const triggers: readonly string[] = ['git']
 
 const BYPASS_PHRASES = ['Allow add-all bypass'] as const
 // Separate phrase for the index-sweep block: it's a different decision from the
@@ -112,24 +115,7 @@ export function listStagedFiles(repoDir: string): string[] {
     .filter(Boolean)
 }
 
-async function main(): Promise<void> {
-  const raw = await readStdin()
-  let payload: ToolInput
-  try {
-    payload = JSON.parse(raw) as ToolInput
-  } catch {
-    process.exit(0)
-  }
-  if (payload.tool_name !== 'Bash') {
-    process.exit(0)
-  }
-  const command = (
-    payload.tool_input as { command?: unknown | undefined } | undefined
-  )?.command
-  if (typeof command !== 'string' || !command.trim()) {
-    process.exit(0)
-  }
-
+export const check = bashGuard((command, payload) => {
   const repoDir = getRepoDir()
   const transcriptPath = payload.transcript_path
 
@@ -141,15 +127,15 @@ async function main(): Promise<void> {
     // hazard because the worktree is empty otherwise. Same opt-in
     // sentinel the no-revert-guard recognizes (`FLEET_SYNC=1` prefix).
     if (/(?:^|\s)FLEET_SYNC\s*=\s*1\b/.test(command)) {
-      process.exit(0)
+      return undefined
     }
     if (
       transcriptPath &&
       bypassPhrasePresent(transcriptPath, BYPASS_PHRASES, 3)
     ) {
-      process.exit(0)
+      return undefined
     }
-    process.stderr.write(
+    return block(
       [
         `[overeager-staging-guard] Blocked: ${broad}`,
         '',
@@ -162,9 +148,8 @@ async function main(): Promise<void> {
         '',
         '  Bypass (only if you genuinely need a sweep):',
         '    user types "Allow add-all bypass" in chat, then retry.',
-      ].join('\n') + '\n',
+      ].join('\n'),
     )
-    process.exit(2)
   }
 
   // ── Layer 2: BLOCK a plain `git commit` that would sweep the whole index
@@ -182,15 +167,20 @@ async function main(): Promise<void> {
     // no-revert-guard already recognizes for cascade `--no-verify` commits —
     // opts out of the sweep block too.
     if (/(?:^|\s)FLEET_SYNC\s*=\s*1\b/.test(command)) {
-      process.exit(0)
+      return undefined
+    }
+    // The squashing-history collapse commit stages the whole tree on purpose;
+    // the hardened SQUASH_HISTORY=1 sentinel authorizes it (no phrase needed).
+    if (squashSentinelAllows(command)) {
+      return undefined
     }
     // Pathspec-bearing commit is the safe form — never blocked.
     if (commitHasPathspec(command)) {
-      process.exit(0)
+      return undefined
     }
     const staged = listStagedFiles(repoDir)
     if (staged.length === 0) {
-      process.exit(0)
+      return undefined
     }
     const touched = readSessionTouchedPaths(transcriptPath)
     const unfamiliar: string[] = []
@@ -202,16 +192,16 @@ async function main(): Promise<void> {
       }
     }
     if (unfamiliar.length === 0) {
-      process.exit(0)
+      return undefined
     }
     if (
       transcriptPath &&
       bypassPhrasePresent(transcriptPath, COMMIT_SWEEP_BYPASS, 3)
     ) {
-      process.exit(0)
+      return undefined
     }
     const touchedStaged = staged.filter(f => !unfamiliar.includes(f))
-    process.stderr.write(
+    return block(
       [
         '[overeager-staging-guard] Blocked: bare `git commit` would sweep in files this session did not touch:',
         '',
@@ -231,17 +221,18 @@ async function main(): Promise<void> {
         '',
         '  Bypass (only if you genuinely mean to commit the whole index):',
         '    user types "Allow index-sweep bypass" in chat, then retry.',
-      ].join('\n') + '\n',
+      ].join('\n'),
     )
-    process.exit(2)
   }
 
-  process.exit(0)
-}
-
-main().catch(e => {
-  process.stderr.write(
-    `[overeager-staging-guard] hook bug — fail-open. ${e instanceof Error ? e.message : String(e)}\n`,
-  )
-  process.exit(0)
+  return undefined
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  triggers,
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

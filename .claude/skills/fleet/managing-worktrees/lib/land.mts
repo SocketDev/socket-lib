@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Fast-land engine: move already-verified commits from a feature branch /
  *   worktree onto `origin/<default>` with the least ceremony that's still safe.
  *   The fleet lints AS IT EDITS (oxlint + oxfmt at edit time, the edit-time

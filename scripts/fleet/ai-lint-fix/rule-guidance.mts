@@ -1,4 +1,4 @@
-/**
+/*
  * @file Rule allowlist + per-rule prompt guidance for the AI-fix orchestrator.
  *   Kept separate from `cli.mts` because:
  *

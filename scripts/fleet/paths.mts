@@ -114,7 +114,7 @@ export const PNPM_LOCK = path.join(REPO_ROOT, 'pnpm-lock.yaml')
  */
 export const VENDORED_ACORN_DIR = path.join(
   REPO_ROOT,
-  'template/.claude/hooks/fleet/_shared/acorn',
+  'template/base/.claude/hooks/fleet/_shared/acorn',
 )
 
 /**

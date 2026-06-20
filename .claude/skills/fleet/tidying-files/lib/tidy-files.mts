@@ -20,7 +20,8 @@
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
-import { existsSync, readdirSync, statSync } from 'node:fs'
+import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs'
+import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'

@@ -1,5 +1,9 @@
 // Tests for no-other-linters-guard.
 
+// Isolate git fixtures from the live repo (strips GIT_* discovery vars on load).
+// Must be the FIRST import — see no-unisolated-git-fixture-guard.
+import '../../../../../.git-hooks/_shared/isolate-git-env.mts'
+
 // prefer-async-spawn: streaming-stdio-required — test spawns child subprocess
 // and pipes stdin/stdout/stderr; Node spawn returns the streaming surface.
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
@@ -204,6 +208,19 @@ test('malformed JSON package.json fails open (no block)', async () => {
   const r = await runHook({
     tool_name: 'Write',
     tool_input: { file_path: p, content: '{ not json' },
+  })
+  assert.strictEqual(r.code, 0, r.stderr)
+})
+
+test('no-ops on a foreign config OUTSIDE a fleet repo', async () => {
+  // A real git repo with no remote + no fleet-canonical marker → non-fleet, so
+  // the guard must NOT block its eslint config: the project owns its linters.
+  // (The cases above prove the same config blocks inside the fleet.)
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'nol-nonfleet-'))
+  await spawn('git', ['init', dir])
+  const r = await runHook({
+    tool_name: 'Write',
+    tool_input: { file_path: path.join(dir, '.eslintrc.json'), content: '{}' },
   })
   assert.strictEqual(r.code, 0, r.stderr)
 })

@@ -162,17 +162,17 @@ const AGENT_PATTERNS: Array<{ name: string; rx: RegExp }> = [
 ]
 
 // Processes the sweep must NEVER kill, in ANY mode (not even --all),
-// checked before classify(). The token-minifier proxy is the live
+// checked before classify(). The headroom proxy is the live
 // ANTHROPIC_BASE_URL backend the current session routes through; it runs
 // detached (PPID 1) ON PURPOSE as a persistent daemon, so the orphan
 // heuristic would otherwise make it a prime --all target. Killing it
 // breaks the session that's running the sweep. Add any other
 // session-critical daemon here.
 const SESSION_CRITICAL_PATTERNS: RegExp[] = [
-  // socket-token-minifier proxy: `node …/socket-token-minifier/bin/socket-token-minifier.mts`
-  // (or a built .js). Match the package path so a rename of the entry
-  // file still protects it.
-  /socket-token-minifier\//,
+  // headroom proxy: `…/_dlx/<hash>/.venv/bin/headroom proxy --port …`. Match
+  // the `headroom` binary so a venv/hash/port change still protects it
+  // (over-matching only ever SKIPS a kill, the safe direction).
+  /headroom/,
 ]
 
 export function isSessionCriticalDaemon(command: string): boolean {
@@ -368,7 +368,7 @@ export function sweep(options?: SweepOptions): {
     if (row.pid === myPid || row.pid === myPpid) {
       continue
     }
-    // Never touch a session-critical daemon (e.g. the token-minifier
+    // Never touch a session-critical daemon (e.g. the headroom
     // proxy), even in --all — see SESSION_CRITICAL_PATTERNS.
     if (isSessionCriticalDaemon(row.command)) {
       continue

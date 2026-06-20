@@ -110,13 +110,13 @@ describe('isExemptPath', () => {
   it('exempts oxlint rule + test fixtures', () => {
     assert.equal(
       isExemptPath(
-        '/foo/.config/oxlint-plugin/fleet/prefer-function-declaration/index.mts',
+        '/foo/.config/fleet/oxlint-plugin/fleet/prefer-function-declaration/index.mts',
       ),
       true,
     )
     assert.equal(
       isExemptPath(
-        '/foo/.config/oxlint-plugin/fleet/prefer-function-declaration/test/prefer-function-declaration.test.mts',
+        '/foo/.config/fleet/oxlint-plugin/fleet/prefer-function-declaration/test/prefer-function-declaration.test.mts',
       ),
       true,
     )

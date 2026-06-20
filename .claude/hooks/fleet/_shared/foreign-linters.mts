@@ -1,4 +1,4 @@
-/**
+/*
  * @file Shared foreign-linter detection — the single classifier consumed by
  *   the `no-other-linters-guard` hook (edit-time) and the
  *   `linters-are-oxlint-oxfmt-only` check (committed state). The fleet lints +

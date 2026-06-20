@@ -1,4 +1,4 @@
-/**
+/*
  * @file Unit tests for overeager-staging-guard hook. Two layers under test:
  *
  *   1. Layer 1 — block `git add -A` / `.` / `-u` (exit 2).

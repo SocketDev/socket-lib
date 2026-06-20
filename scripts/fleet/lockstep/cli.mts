@@ -1,4 +1,4 @@
-/**
+/*
  * @file Lockstep harness CLI entry — dispatcher + `main()`. Reads
  *   `lockstep.json` (+ any `includes[]` sub-manifests) and validates each row
  *   against its upstream or sibling ports. Every supported `kind` has a

@@ -8,9 +8,7 @@
 // fleet's own tooling never needs clipboard access, so any attempt is either a
 // mistake or a poisoning fingerprint.
 //
-// Two surfaces, gated on tool_name (the payload is read once; stdin can't be
-// consumed twice, so this doesn't compose the withBashGuard/withEditGuard
-// harnesses — it reads the raw payload and branches):
+// Two surfaces, gated on tool_name:
 //
 //   1. Bash — a clipboard CLI in the command line. AST-parsed via the
 //      fleet shell parser (findInvocation), not a loose regex, so a path
@@ -21,25 +19,33 @@
 //
 //   2. Edit / Write — source that emits an OSC-52 clipboard escape
 //      (`ESC ] 52 ; ...`) in any of its literal spellings (\x1b / \033 /
-//       / the raw control byte). That's the sequence the earlier
+//       / the raw control byte). That's the sequence the earlier
 //      Terminal "attempted to access the clipboard" denial came from.
 //
 // Bypass: `Allow clipboard-access bypass` in a recent user turn — for a
 // genuine, operator-driven clipboard need (rare).
-//
-// Exit codes: 0 — pass; 2 — block. Fails open on a malformed payload
-// (exit 0 + stderr log), the fleet's hook contract.
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
+import { block, defineHook, runHook } from '../_shared/guard.mts'
+import type { ToolCallPayload } from '../_shared/payload.mts'
 import { findInvocation } from '../_shared/shell-command.mts'
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
 const BYPASS_PHRASE = 'Allow clipboard-access bypass'
+
+// Pre-flight skip set: the dispatcher only imports this guard when the raw
+// payload contains one of these. Every block path requires one — a clipboard
+// binary name (`clip` also covers `clip.exe`) for the Bash arm, or the `]52;`
+// OSC-52 prefix (present under every escape spelling) for the Edit/Write arm.
+export const triggers: readonly string[] = [
+  ']52;',
+  'clip',
+  'pbcopy',
+  'pbpaste',
+  'wl-copy',
+  'wl-paste',
+  'xclip',
+  'xsel',
+]
 
 // Clipboard CLIs, by platform, with the label surfaced in the error.
 const CLIPBOARD_BINARIES: ReadonlyArray<{
@@ -57,22 +63,10 @@ const CLIPBOARD_BINARIES: ReadonlyArray<{
 ]
 
 // OSC-52 clipboard escape in any literal spelling a source file might carry:
-// the raw ESC byte, or an escaped \x1b / \033 / , immediately followed
+// the raw ESC byte, or an escaped \x1b / \033 / , immediately followed
 // by `]52;`. Matching the prefix is enough — the payload after `52;` is the
 // clipboard data and need not be parsed.
 const OSC52_RE = /(?:\x1b|\\x1b|\\u001b|\\033|\\e)\]52;/i
-
-export interface PayloadShape {
-  tool_name?: string | undefined
-  tool_input?:
-    | {
-        command?: string | undefined
-        content?: string | undefined
-        new_string?: string | undefined
-      }
-    | undefined
-  transcript_path?: string | undefined
-}
 
 // The clipboard CLI invoked in a Bash command line, or undefined when none.
 export function clipboardBinaryIn(command: string): string | undefined {
@@ -92,7 +86,9 @@ export function hasOsc52(text: string): boolean {
 
 // Decide what (if anything) to block for a payload. Returns the block reason,
 // or undefined to pass. Pure — the test drives it directly.
-export function clipboardViolation(payload: PayloadShape): string | undefined {
+export function clipboardViolation(
+  payload: ToolCallPayload,
+): string | undefined {
   const toolName = payload.tool_name
   const input = payload.tool_input
   if (!input) {
@@ -117,25 +113,18 @@ export function clipboardViolation(payload: PayloadShape): string | undefined {
   return undefined
 }
 
-async function main(): Promise<void> {
-  let payload: PayloadShape
-  try {
-    payload = JSON.parse(await readStdin()) as PayloadShape
-  } catch {
-    // Malformed payload: fail open.
-    return
-  }
+export const check = (payload: ToolCallPayload) => {
   const reason = clipboardViolation(payload)
   if (!reason) {
-    return
+    return undefined
   }
   if (
     payload.transcript_path &&
     bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)
   ) {
-    return
+    return undefined
   }
-  logger.error(
+  return block(
     [
       '[no-clipboard-access-guard] Blocked: clipboard access',
       '',
@@ -149,15 +138,13 @@ async function main(): Promise<void> {
       `  message: ${BYPASS_PHRASE}`,
     ].join('\n'),
   )
-  process.exitCode = 2
 }
 
-if (process.argv[1]?.endsWith('index.mts')) {
-  // Async IIFE: the await lives inside the function (no top-level await — the
-  // CJS bundle target forbids it), and main()'s promise is still awaited
-  // rather than floated. main() reads stdin + sets process.exitCode; a throw
-  // fails open per the hook contract.
-  void (async () => {
-    await main()
-  })()
-}
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  triggers,
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

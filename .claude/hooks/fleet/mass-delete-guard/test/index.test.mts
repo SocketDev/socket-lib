@@ -1,4 +1,4 @@
-/**
+/*
  * @file Unit tests for mass-delete-guard hook.
  *
  *   - catastrophicReason() thresholds (pure).

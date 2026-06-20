@@ -30,14 +30,14 @@
 //
 // Exit codes: 0 pass, 2 block. Fails open on malformed payloads.
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withEditGuard } from '../_shared/payload.mts'
+import {
+  block,
+  defineHook,
+  editGuard,
+  notify,
+  runHook,
+} from '../_shared/guard.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
 
 const BYPASS_PHRASE = 'Allow boolean-trap bypass'
 
@@ -99,32 +99,31 @@ export function isExemptPath(filePath: string): boolean {
   )
 }
 
-if (process.argv[1]?.endsWith('index.mts')) {
-  await withEditGuard((filePath, content, payload) => {
+export const check = editGuard(
+  (filePath, content, payload) => {
     if (isExemptPath(filePath)) {
-      return
+      return undefined
     }
     if (!/\.(?:c|m)?tsx?$/.test(filePath)) {
-      return
+      return undefined
     }
     const text = content ?? ''
     if (!text) {
-      return
+      return undefined
     }
     const findings = findBooleanTrapParams(text)
     if (findings.length === 0) {
-      return
+      return undefined
     }
     if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
-      logger.error(
+      return notify(
         `no-boolean-trap-guard: ${findings.length} boolean-trap param(s) — bypassed via "${BYPASS_PHRASE}"\n`,
       )
-      return
     }
     const lines = findings
       .map(f => `  ${filePath}:${f.line}  param \`${f.param}\`\n    ${f.text}`)
       .join('\n')
-    logger.error(
+    return block(
       `no-boolean-trap-guard: refusing to introduce a boolean positional parameter.\n` +
         `\n` +
         `${lines}\n` +
@@ -143,6 +142,15 @@ if (process.argv[1]?.endsWith('index.mts')) {
         `See docs/agents.md/fleet/options-object.md for the full recipe.\n` +
         `Bypass: type "${BYPASS_PHRASE}" in a recent message.\n`,
     )
-    process.exitCode = 2
-  }, { fleetOnly: true })
-}
+  },
+  { fleetOnly: true },
+)
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

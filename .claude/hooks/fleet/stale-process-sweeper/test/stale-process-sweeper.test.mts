@@ -109,17 +109,16 @@ test('stale-process-sweeper: classifyAgent does not match innocuous commands', (
   }
 })
 
-test('stale-process-sweeper: never sweeps the token-minifier proxy', () => {
+test('stale-process-sweeper: never sweeps the headroom proxy', () => {
   // The proxy is the live ANTHROPIC_BASE_URL backend; it runs detached
   // (PPID 1) on purpose, so without this guard --all would reap it and
   // break the session running the sweep. isSessionCriticalDaemon wins over every
   // classifier.
-  const proxy =
-    'node /Users/u/.socket/_wheelhouse/socket-token-minifier/bin/socket-token-minifier.mts'
+  const proxy = '~/.socket/_dlx/7ae62e8e1dd846a0/.venv/bin/headroom proxy --port 7779'
   assert.equal(isSessionCriticalDaemon(proxy), true)
-  // A built .js entry under the same package path is still protected.
+  // The rack/bin wrapper handle is also protected (matches `headroom`).
   assert.equal(
-    isSessionCriticalDaemon('node /opt/socket-token-minifier/dist/proxy.js'),
+    isSessionCriticalDaemon('~/.socket/_wheelhouse/bin/headroom proxy'),
     true,
   )
   // Unrelated processes are not protected.

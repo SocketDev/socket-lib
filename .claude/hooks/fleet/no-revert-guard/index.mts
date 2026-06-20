@@ -39,18 +39,13 @@
 //
 // Fails open on hook bugs (exit 0 + stderr log).
 
-import process from 'node:process'
+import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
+import type { GuardResult } from '../_shared/guard.mts'
+import { commandsFor } from '../_shared/shell-command.mts'
+import { squashSentinelAllows } from '../_shared/squash-sentinel.mts'
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
-import { commandsFor, parseCommands } from '../_shared/shell-command.mts'
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
-
-type ToolInput = {
-  tool_input?: { command?: string | undefined } | undefined
-  tool_name?: string | undefined
-  transcript_path?: string | undefined
-}
-
-type GuardCheck = {
+type RevertCheck = {
   // Canonical phrase the user must type to bypass.
   readonly bypassPhrase: string
   // Optional extra phrases that ALSO authorize this rule — used when a
@@ -71,7 +66,34 @@ type GuardCheck = {
   readonly matches?: (command: string) => string | undefined
 }
 
-const CHECKS: readonly GuardCheck[] = [
+// Pre-flight triggers: the dispatcher imports + runs this guard only when the
+// raw command contains at least one of these substrings. Every blocking branch
+// requires one verbatim:
+//   - all git-structure checks (checkout/restore/reset/stash/clean/rm,
+//     bare-stash, force-with-lease, force-push) go through
+//     `commandsFor(command, 'git')`, which short-circuits unless the line
+//     contains `git`.
+//   - the --no-verify check is gated by a `--no-verify` regex.
+//   - the gpg check matches `--no-gpg-sign` or `commit.gpgsign`.
+//   - SKIP_ASSET_DOWNLOAD is its own literal.
+//   - bash-write alternates over python / sed / cat (heredoc) / tee / dd.
+// Keep COMPLETE: a missing trigger would silently skip the guard for a case it
+// should block. Broad short tokens (`dd`, `tee`, `cat`, `sed`) are fine — over-
+// triggering only re-runs the guard (status quo), it never disables it.
+export const triggers: readonly string[] = [
+  '--no-gpg-sign',
+  '--no-verify',
+  'SKIP_ASSET_DOWNLOAD',
+  'cat',
+  'commit.gpgsign',
+  'dd',
+  'git',
+  'python',
+  'sed',
+  'tee',
+]
+
+const CHECKS: readonly RevertCheck[] = [
   {
     bypassPhrase: 'Allow revert bypass',
     label: 'git revert (checkout/restore/reset/stash/clean)',
@@ -237,6 +259,57 @@ const CHECKS: readonly GuardCheck[] = [
 // Blocked: `git commit --no-verify`, `git push --no-verify`, env-var
 // inline (`--no-verify` as a value), any other subcommand. The bypass
 // phrase is still the way through for those.
+// A `git commit` whose `-o`/`--only` pathspec is exactly a pnpm-lock.yaml (any
+// dir) — the sanctioned lockfile-reconcile commit (see dirty-lockfile-nudge).
+// `-o` restricts the commit to the named path, so nothing but the regenerated
+// lockfile can land; that is what makes skipping the pre-commit chain safe.
+// Conservative: requires `-o`/`--only` AND exactly one pathspec that is a
+// pnpm-lock.yaml. Any extra pathspec, or a bare `git commit --no-verify` (which
+// commits all staged files), is NOT exempt.
+export function isLockfileOnlyReconcile(rest: readonly string[]): boolean {
+  if (!rest.some(a => a === '-o' || a === '--only')) {
+    return false
+  }
+  // Flags that consume the NEXT arg as their value (so it is not a pathspec).
+  const VALUE_FLAGS = new Set([
+    '--author',
+    '--date',
+    '--file',
+    '--fixup',
+    '--message',
+    '--reedit-message',
+    '--reuse-message',
+    '--squash',
+    '--template',
+    '-C',
+    '-F',
+    '-c',
+    '-m',
+    '-t',
+  ])
+  const positionals: string[] = []
+  for (let i = 0, { length } = rest; i < length; i += 1) {
+    const a = rest[i]!
+    if (a === '--') {
+      for (let j = i + 1; j < length; j += 1) {
+        positionals.push(rest[j]!)
+      }
+      break
+    }
+    if (a.startsWith('-')) {
+      if (!a.includes('=') && VALUE_FLAGS.has(a)) {
+        i += 1
+      }
+      continue
+    }
+    positionals.push(a)
+  }
+  return (
+    positionals.length === 1 &&
+    /(?:^|\/)pnpm-lock\.yaml$/.test(positionals[0]!.replace(/\\/g, '/'))
+  )
+}
+
 export function matchNoVerify(command: string): string | undefined {
   if (!/(?:^|\s)--no-verify\b/.test(command)) {
     return undefined
@@ -258,6 +331,15 @@ export function matchNoVerify(command: string): string | undefined {
       // Allowed shape — keep scanning. A chain like
       // `git rebase --no-verify && git commit --no-verify` still
       // has a forbidden second invocation we need to catch.
+      continue
+    }
+    if (sub === 'commit' && isLockfileOnlyReconcile(rest)) {
+      // Lockfile-only reconcile: `git commit -o pnpm-lock.yaml --no-verify`.
+      // The `-o`/`--only` pathspec restricts the commit to the regenerated
+      // lockfile and nothing else, so skipping the pre-commit chain on it is
+      // safe. This is the sanctioned remedy from dirty-lockfile-nudge — a
+      // dirty lockfile is never "someone else's"; `pnpm i` reconciles it, then
+      // land it on its own — so it does not need the bypass phrase.
       continue
     }
     return `git ${sub} --no-verify`
@@ -306,130 +388,11 @@ export function matchDestructiveGit(command: string): string | undefined {
   return undefined
 }
 
-// The exact, full message the squash collapse commit must carry. Anchored
-// so a longer message (`chore: initial commit && rm -rf …` smuggled into the
-// `-m` value) cannot satisfy it.
-const SQUASH_COMMIT_MESSAGE = 'chore: initial commit'
-
-// Push forms that are NEVER part of a squash and could weaponize the
-// sentinel into clobbering many refs at once or deleting a branch.
-const FORBIDDEN_PUSH_FLAGS = new Set([
-  '--all',
-  '--mirror',
-  '--tags',
-  '--delete',
-  '-d',
-  '--prune',
-  '--no-verify',
-])
-
-// Reads the `-m` / `--message` value out of a parsed git arg list. Supports
-// both `-m value` (two tokens) and `--message=value` (one token). Returns
-// undefined when no message flag is present.
-export function readCommitMessageArg(
-  args: readonly string[],
-): string | undefined {
-  for (let i = 0, { length } = args; i < length; i += 1) {
-    const a = args[i]!
-    if (a === '-m' || a === '--message') {
-      return args[i + 1]
-    }
-    if (a.startsWith('--message=')) {
-      return a.slice('--message='.length)
-    }
-    if (a.startsWith('-m=')) {
-      return a.slice('-m='.length)
-    }
-  }
-  return undefined
-}
-
-/**
- * Decide whether an inline `SQUASH_HISTORY=1` sentinel authorizes this exact
- * command. Hardened against malicious bypass: a poisoned prompt must not be
- * able to ride the sentinel to clobber an arbitrary remote, delete refs, or
- * chain extra destructive work.
- *
- * The sentinel is honored ONLY when ALL of these hold. The line must parse to
- * EXACTLY ONE command segment (no `&&` / `;` / `|` chaining and no `$(…)`
- * substitution, which both parse to extra segments); that segment must be a
- * statically-resolved `git` binary (not `$VAR`/eval); the `SQUASH_HISTORY=1`
- * sentinel must be its ONLY inline env assignment (no smuggled
- * `GIT_SSH_COMMAND=…`); and the git subcommand must be one of the two squash
- * shapes — a `commit --amend` whose `-m` message is EXACTLY `chore: initial
- * commit`, or a `push` carrying `--force` / `--force-with-lease` / `-f` to a
- * bare remote with at most one plain positional branch ref (no `src:dst`
- * refspec, no `HEAD:`) and none of the multi-ref / delete / verify-skipping
- * flags in FORBIDDEN_PUSH_FLAGS.
- *
- * Any deviation returns false → the command falls through to the normal
- * blocking checks, where it still needs a typed bypass phrase.
- */
-export function squashSentinelAllows(command: string): boolean {
-  // (1) Sentinel must be present as a structural assignment, confirmed below
-  // via the parsed segment's `assignments`. The cheap regex is just a gate.
-  if (!/(?:^|\s)SQUASH_HISTORY\s*=\s*1\b/.test(command)) {
-    return false
-  }
-  // (2) The line must parse to EXACTLY ONE command segment. A chain
-  // (`&& rm -rf …`), a pipe, or a `$(…)` substitution all yield extra
-  // segments — any of those voids the sentinel.
-  const segments = parseCommands(command)
-  if (segments.length !== 1) {
-    return false
-  }
-  const c = segments[0]!
-  // (3) Statically-resolved `git`, never variable/eval-sourced.
-  if (c.binary !== 'git' || c.viaVariable || c.viaEval) {
-    return false
-  }
-  // (4) The sentinel must be the sole inline assignment.
-  if (
-    c.assignments.length !== 1 ||
-    !/^SQUASH_HISTORY\s*=\s*1$/.test(c.assignments[0]!)
-  ) {
-    return false
-  }
-  const [sub, ...rest] = c.args
-  // (5a) Squash collapse commit.
-  if (sub === 'commit') {
-    if (!rest.includes('--amend')) {
-      return false
-    }
-    const msg = readCommitMessageArg(rest)
-    return msg === SQUASH_COMMIT_MESSAGE
-  }
-  // (5b) Squash force-push.
-  if (sub === 'push') {
-    const hasForce = rest.some(
-      a => a === '--force' || a === '-f' || a.startsWith('--force-with-lease'),
-    )
-    if (!hasForce) {
-      return false
-    }
-    if (rest.some(a => FORBIDDEN_PUSH_FLAGS.has(a))) {
-      return false
-    }
-    // Positional (non-flag) args = remote + optional ref. Allow a bare
-    // remote with at most one plain branch ref; reject refspecs (`a:b`),
-    // `HEAD:`, and globs.
-    const positionals = rest.filter(a => !a.startsWith('-'))
-    if (positionals.length < 1 || positionals.length > 2) {
-      return false
-    }
-    if (positionals.some(a => a.includes(':') || a.includes('*'))) {
-      return false
-    }
-    return true
-  }
-  return false
-}
-
-export function emitBlock(
+export function blockMessage(
   command: string,
-  match: GuardCheck,
+  match: RevertCheck,
   matchedSubstring: string,
-): void {
+): string {
   const lines: string[] = []
   lines.push('[no-revert-guard] Blocked: destructive / hook-bypass command.')
   lines.push(`  Rule:    ${match.label}`)
@@ -448,28 +411,10 @@ export function emitBlock(
     '  The phrase is case-sensitive. Inferring intent from a paraphrase',
   )
   lines.push('  ("go ahead", "skip the hook", "fine") does NOT count.')
-  process.stderr.write(lines.join('\n') + '\n')
+  return lines.join('\n')
 }
 
-async function main(): Promise<void> {
-  const raw = await readStdin()
-  if (!raw) {
-    return
-  }
-  let payload: ToolInput
-  try {
-    payload = JSON.parse(raw) as ToolInput
-  } catch {
-    return
-  }
-  if (payload.tool_name !== 'Bash') {
-    return
-  }
-  const command = payload.tool_input?.command ?? ''
-  if (!command) {
-    return
-  }
-
+export const check = bashGuard((command, payload): GuardResult => {
   // Allowlist: fleet-sync cascade commands run in batches across every
   // repo and would otherwise need a fresh bypass phrase per repo. The
   // caller marks intent by setting `FLEET_SYNC=1` inline (the same way
@@ -490,7 +435,7 @@ async function main(): Promise<void> {
       /chore\(wheelhouse\):\s*cascade\s+template@/.test(command)
     const isCascadePush = /\bgit\s+push\b/.test(command)
     if (isCascadeCommit || isCascadePush) {
-      return
+      return undefined
     }
   }
 
@@ -510,31 +455,31 @@ async function main(): Promise<void> {
   // eval/var indirection, extra invocation, or off-default-branch push
   // voids it and falls through to the normal blocking checks below.
   if (squashSentinelAllows(command)) {
-    return
+    return undefined
   }
 
   // Find the first matching destructive pattern. A check is either a
   // regex (`pattern`, matched anywhere — flags / env vars) or a parser
   // detector (`matches`, command-structure — git subcommands).
-  let triggered: { check: GuardCheck; matchedSubstring: string } | undefined
+  let triggered: { check: RevertCheck; matchedSubstring: string } | undefined
   for (let i = 0, { length } = CHECKS; i < length; i += 1) {
-    const check = CHECKS[i]!
-    if (check.matches) {
-      const hit = check.matches(command)
+    const revertCheck = CHECKS[i]!
+    if (revertCheck.matches) {
+      const hit = revertCheck.matches(command)
       if (hit) {
-        triggered = { check, matchedSubstring: hit }
+        triggered = { check: revertCheck, matchedSubstring: hit }
         break
       }
-    } else if (check.pattern) {
-      const m = command.match(check.pattern)
+    } else if (revertCheck.pattern) {
+      const m = command.match(revertCheck.pattern)
       if (m) {
-        triggered = { check, matchedSubstring: m[0].trim() }
+        triggered = { check: revertCheck, matchedSubstring: m[0].trim() }
         break
       }
     }
   }
   if (!triggered) {
-    return
+    return undefined
   }
 
   // Look for the canonical bypass phrase (or any phrase that subsumes it)
@@ -549,16 +494,19 @@ async function main(): Promise<void> {
       bypassPhrasePresent(payload.transcript_path, phrase),
     )
   ) {
-    return
+    return undefined
   }
 
-  emitBlock(command, triggered.check, triggered.matchedSubstring)
-  process.exitCode = 2
-}
-
-main().catch(e => {
-  // Fail open on hook bugs.
-  process.stderr.write(
-    `[no-revert-guard] hook error (continuing): ${(e as Error).message}\n`,
+  return block(
+    blockMessage(command, triggered.check, triggered.matchedSubstring),
   )
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  triggers,
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

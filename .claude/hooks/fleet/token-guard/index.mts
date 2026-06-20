@@ -2,9 +2,10 @@
 // Claude Code PreToolUse hook — token-guard firewall.
 //
 // Blocks Bash commands that would echo token-bearing env vars into
-// tool output. This fires BEFORE the command runs; exit code 2 makes
-// Claude Code refuse the tool call. The model sees the rejection
-// reason on stderr and retries with a redacted formulation.
+// tool output. This fires BEFORE the command runs; the block verdict
+// makes Claude Code refuse the tool call (the runner prints the
+// message + sets exitCode 2). The model sees the rejection reason on
+// stderr and retries with a redacted formulation.
 //
 // Blocked patterns:
 //   - Literal token shapes in the command string (vtwn_, lin_api_,
@@ -19,13 +20,13 @@
 //     *SECRET*, *PASSWORD*, *API_KEY*, *SIGNING_KEY*, *PRIVATE_KEY*,
 //     *AUTH*, *CREDENTIAL*) that write to stdout without redaction
 //
-// Control flow uses a `BlockError` thrown from check helpers so every
-// short-circuit path goes through a single `process.exitCode = 2`
-// drop at the top-level catch — no scattered `process.exit(2)` that
-// can race with buffered stderr.
+// `findViolation` returns a `BlockError` describing the first match so
+// the single verdict path formats it into a `block()` — one runner-owned
+// exit-code drop instead of scattered short-circuit exits that can race
+// with buffered stderr.
 
-import process from 'node:process'
-
+import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
+import type { GuardResult } from '../_shared/guard.mts'
 import {
   SECRET_VALUE_PATTERNS,
   SENSITIVE_NAME_FRAGMENTS,
@@ -75,7 +76,7 @@ const CURL_WITH_AUTH =
 // secret-content-guard and the commit-time scanners read, so a new vendor
 // shape is added once and every gate picks it up (code is law, DRY).
 
-class BlockError extends Error {
+export class BlockError extends Error {
   public readonly rule: string
   public readonly suggestion: string
   public readonly showCommand: boolean
@@ -86,20 +87,6 @@ class BlockError extends Error {
     this.suggestion = suggestion
     this.showCommand = showCommand
   }
-}
-
-export function stdin(): Promise<string> {
-  return new Promise<string>(resolve => {
-    let buf = ''
-    process.stdin.setEncoding('utf8')
-    process.stdin.on('data', chunk => (buf += chunk))
-    process.stdin.on('end', () => resolve(buf))
-  })
-}
-
-type ToolInput = {
-  tool_name?: string | undefined
-  tool_input?: { command?: string | undefined } | undefined
 }
 
 export function hasRedaction(command: string) {
@@ -162,13 +149,18 @@ export function matchesAlwaysDangerous(command: string) {
   return undefined
 }
 
-export function check(command: string) {
+/**
+ * Scan a Bash command for the first token-leak violation. Returns a
+ * `BlockError` describing the matched rule + suggested fix, or `undefined`
+ * when the command is clean.
+ */
+export function findViolation(command: string): BlockError | undefined {
   // 0. Literal token-shape in the command string — hardest block.
   // A real token value already landed in the command, which itself is
   // logged. We refuse to echo it further and urge rotation.
   for (const { label, re } of SECRET_VALUE_PATTERNS) {
     if (re.test(command)) {
-      throw new BlockError(
+      return new BlockError(
         `literal ${label} found in command string`,
         'Rotate the exposed token immediately. Never paste tokens into commands; read them from .env.local or a keychain at subprocess spawn time.',
         false,
@@ -181,7 +173,7 @@ export function check(command: string) {
   // which would itself match ALWAYS_DANGEROUS without this guard.
   const dangerous = matchesAlwaysDangerous(command)
   if (dangerous && !hasRedaction(command)) {
-    throw new BlockError(
+    return new BlockError(
       `\`${dangerous.source}\` dumps env to stdout`,
       'Pipe through redaction, e.g. `env | sed "s/=.*/=<redacted>/"` or filter specific keys.',
     )
@@ -189,7 +181,7 @@ export function check(command: string) {
 
   // 2. .env file reads without redaction.
   if (ENV_FILE_READ.test(command) && !hasRedaction(command)) {
-    throw new BlockError(
+    return new BlockError(
       '.env file read without a redaction pipeline',
       'Use `sed "s/=.*/=<redacted>/" .env.local` or `grep -v "^#" .env.local | cut -d= -f1` for key names only.',
     )
@@ -203,7 +195,7 @@ export function check(command: string) {
       command,
     )
   if (curlHasAuth && !curlOutputSafe) {
-    throw new BlockError(
+    return new BlockError(
       'curl with Authorization header and unsanitized stdout',
       'Redirect response to /dev/null, pipe to jq/grep/head, or save to a file.',
     )
@@ -221,59 +213,43 @@ export function check(command: string) {
       command,
     )
     if (!isPureWrite) {
-      throw new BlockError(
+      return new BlockError(
         'command references sensitive env var name and writes to stdout without redaction',
         'Redirect to a file, pipe through `sed "s/=.*/=<redacted>/"`, or ensure only key names (not values) are printed.',
       )
     }
   }
+  return undefined
 }
 
-export function emitBlock(command: string, err: BlockError) {
+/**
+ * Format the block message for a violation. When the matched rule found a
+ * literal token, the command is suppressed so the secret value isn't
+ * re-logged.
+ */
+export function blockMessage(command: string, err: BlockError): string {
   const safeCommand = err.showCommand
     ? command.slice(0, 200) + (command.length > 200 ? '…' : '')
     : '<command suppressed to avoid re-logging the literal token>'
-  process.stderr.write(
+  return (
     `\n[token-guard] Blocked: ${err.rule}\n` +
-      `  Command: ${safeCommand}\n` +
-      `  Fix: ${err.suggestion}\n\n`,
+    `  Command: ${safeCommand}\n` +
+    `  Fix: ${err.suggestion}\n`
   )
 }
 
-async function main() {
-  const raw = await stdin()
-  if (!raw) {
-    return
+export const check = bashGuard((command: string): GuardResult => {
+  const err = findViolation(command)
+  if (err) {
+    return block(blockMessage(command, err))
   }
-  let payload: ToolInput
-  try {
-    payload = JSON.parse(raw) as ToolInput
-  } catch {
-    return
-  }
-  if (payload.tool_name !== 'Bash') {
-    return
-  }
-  const command = payload.tool_input?.command ?? ''
-  if (!command) {
-    return
-  }
-
-  try {
-    check(command)
-  } catch (e) {
-    if (e instanceof BlockError) {
-      emitBlock(command, e)
-      process.exitCode = 2
-      return
-    }
-    throw e
-  }
-}
-
-main().catch(e => {
-  // Never block a tool call due to a bug in the hook itself. Log it
-  // so we notice, but fail open.
-  process.stderr.write(`[token-guard] hook error (allowing): ${e}\n`)
-  process.exitCode = 0
+  return undefined
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

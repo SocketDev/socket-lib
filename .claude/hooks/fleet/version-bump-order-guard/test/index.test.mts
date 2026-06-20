@@ -216,7 +216,7 @@ test('GATE BLOCKS a `git commit -m "chore: bump version"` when lint --all fails'
   const repo = makeRepoWithLintScript(1)
   try {
     const { stderr, exitCode } = runHook(
-      'git commit -o package.json -m "chore: bump version to 1.2.3"',
+      'git commit -o package.json CHANGELOG.md -m "chore: bump version to 1.2.3"',
       repo.root,
     )
     assert.equal(exitCode, 2)
@@ -231,7 +231,7 @@ test('GATE ALLOWS the bump commit when lint --all passes', () => {
   const repo = makeRepoWithLintScript(0)
   try {
     const { exitCode } = runHook(
-      'git commit -m "chore: bump version to 1.2.3"',
+      'git commit -o package.json CHANGELOG.md -m "chore: bump version to 1.2.3"',
       repo.root,
     )
     assert.equal(exitCode, 0)
@@ -244,12 +244,12 @@ test('bump-commit gate honors --message= form + SKIP_GATE env', () => {
   const repo = makeRepoWithLintScript(1)
   try {
     const blocked = runHook(
-      'git commit --message="chore: bump version to 1.2.3"',
+      'git commit -o package.json CHANGELOG.md --message="chore: bump version to 1.2.3"',
       repo.root,
     )
     assert.equal(blocked.exitCode, 2, 'failing lint blocks via --message= form')
     const skipped = runHook(
-      'git commit -m "chore: bump version to 1.2.3"',
+      'git commit -o package.json CHANGELOG.md -m "chore: bump version to 1.2.3"',
       repo.root,
       undefined,
       { SOCKET_VERSION_BUMP_SKIP_GATE: '1' },
@@ -268,6 +268,65 @@ test('IGNORES a non-bump commit (no gate, no block)', () => {
       repo.root,
     )
     assert.equal(exitCode, 0, 'a normal commit is not gated')
+  } finally {
+    repo.cleanup()
+  }
+})
+
+// ── bump-commit must bundle package.json + CHANGELOG.md ──────────
+
+test('STAGING BLOCKS a bump commit naming only package.json', () => {
+  const repo = makeRepoWithHeadSubject('chore: prior work')
+  try {
+    const { stderr, exitCode } = runHook(
+      'git commit -o package.json -m "chore: bump version to 2.0.0"',
+      repo.root,
+    )
+    assert.equal(exitCode, 2)
+    assert.match(stderr, /must stage package\.json AND CHANGELOG\.md/)
+    assert.match(stderr, /Missing\s*:.*CHANGELOG\.md/)
+  } finally {
+    repo.cleanup()
+  }
+})
+
+test('STAGING BLOCKS a bump commit with an empty staged set', () => {
+  const repo = makeRepoWithHeadSubject('chore: prior work')
+  try {
+    const { stderr, exitCode } = runHook(
+      'git commit -m "chore: bump version to 2.0.0"',
+      repo.root,
+    )
+    assert.equal(exitCode, 2)
+    assert.match(stderr, /must stage package\.json AND CHANGELOG\.md/)
+  } finally {
+    repo.cleanup()
+  }
+})
+
+test('STAGING ALLOWS a bump commit naming both package.json + CHANGELOG.md', () => {
+  const repo = makeRepoWithHeadSubject('chore: prior work')
+  try {
+    const { exitCode } = runHook(
+      'git commit -o package.json CHANGELOG.md -m "chore: bump version to 2.0.0"',
+      repo.root,
+    )
+    assert.equal(exitCode, 0)
+  } finally {
+    repo.cleanup()
+  }
+})
+
+test('STAGING check holds even with SKIP_GATE (only the bypass phrase skips it)', () => {
+  const repo = makeRepoWithHeadSubject('chore: prior work')
+  try {
+    const { exitCode } = runHook(
+      'git commit -o package.json -m "chore: bump version to 2.0.0"',
+      repo.root,
+      undefined,
+      { SOCKET_VERSION_BUMP_SKIP_GATE: '1' },
+    )
+    assert.equal(exitCode, 2, 'SKIP_GATE skips the lint gate, not the bundling check')
   } finally {
     repo.cleanup()
   }

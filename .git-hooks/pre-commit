@@ -1,0 +1,12 @@
+#!/bin/sh
+# Git pre-commit dispatcher (Option A). core.hooksPath points at .git-hooks/;
+# fleet/ and repo/ are peers under it. Runs the fleet hook first, then the
+# repo hook if present. Either returning non-zero blocks the commit (escape
+# with --no-verify, gated by the `Allow no-verify bypass` phrase). No stdin.
+DIR=$(dirname "$0")
+if [ -x "$DIR/fleet/pre-commit" ]; then
+  "$DIR/fleet/pre-commit" "$@" || exit $?
+fi
+if [ -x "$DIR/repo/pre-commit" ]; then
+  "$DIR/repo/pre-commit" "$@" || exit $?
+fi

@@ -105,10 +105,10 @@ test('commit-msg: BLOCKS a foreign owner/repo#num issue reference', async () => 
   const { result } = await runHook(
     'fix(scan): handle empty manifest\n\nMatches behavior in spencermountain/compromise#1203.\n',
     {
-      GIT_AUTHOR_NAME: 'John-David Dalton',
-      GIT_AUTHOR_EMAIL: 'john.david.dalton@gmail.com',
-      GIT_COMMITTER_NAME: 'John-David Dalton',
-      GIT_COMMITTER_EMAIL: 'john.david.dalton@gmail.com',
+      GIT_AUTHOR_NAME: 'Test User',
+      GIT_AUTHOR_EMAIL: 'test-email@example.com',
+      GIT_COMMITTER_NAME: 'Test User',
+      GIT_COMMITTER_EMAIL: 'test-email@example.com',
     },
   )
   assert.strictEqual(result.code, 1)
@@ -120,10 +120,10 @@ test('commit-msg: ALLOWS a SocketDev-owned owner/repo#num reference', async () =
   const { result } = await runHook(
     'fix(scan): align with SocketDev/socket-lib#42\n',
     {
-      GIT_AUTHOR_NAME: 'John-David Dalton',
-      GIT_AUTHOR_EMAIL: 'john.david.dalton@gmail.com',
-      GIT_COMMITTER_NAME: 'John-David Dalton',
-      GIT_COMMITTER_EMAIL: 'john.david.dalton@gmail.com',
+      GIT_AUTHOR_NAME: 'Test User',
+      GIT_AUTHOR_EMAIL: 'test-email@example.com',
+      GIT_COMMITTER_NAME: 'Test User',
+      GIT_COMMITTER_EMAIL: 'test-email@example.com',
     },
   )
   assert.strictEqual(result.code, 0)
@@ -173,10 +173,10 @@ test('commit-msg: BLOCKS a placeholder author NAME (Test) with a real email', as
 
 test('commit-msg: ALLOWS a real identity (no allowlist configured → only denylist gates)', async () => {
   const { result } = await runHook('feat(x): real subject\n', {
-    GIT_AUTHOR_NAME: 'John-David Dalton',
-    GIT_AUTHOR_EMAIL: 'john.david.dalton@gmail.com',
-    GIT_COMMITTER_NAME: 'John-David Dalton',
-    GIT_COMMITTER_EMAIL: 'john.david.dalton@gmail.com',
+    GIT_AUTHOR_NAME: 'Test User',
+    GIT_AUTHOR_EMAIL: 'test-email@example.com',
+    GIT_COMMITTER_NAME: 'Test User',
+    GIT_COMMITTER_EMAIL: 'test-email@example.com',
   })
   assert.strictEqual(result.code, 0)
 })

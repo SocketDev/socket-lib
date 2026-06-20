@@ -1,4 +1,4 @@
-/**
+/*
  * Audit logging + slopsquatting (Threat 2.2) tracking for the check-new-deps
  * hook.
  *

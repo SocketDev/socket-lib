@@ -4,8 +4,9 @@
 // Blocks Edit/Write to `pnpm-workspace.yaml` that add a non-Socket-
 // scoped entry to `minimumReleaseAgeExclude:`. The soak gate is
 // malware protection; bypassing it for third-party packages
-// weakens the policy without justification. Third-party version
-// pins go in `overrides:` instead.
+// weakens the policy without justification. Such a dep should wait
+// out the soak — `overrides:` pins a version but does NOT bypass
+// minimumReleaseAge.
 //
 // Sibling guard: `soak-exclude-date-guard` enforces
 // `# published: ... | removable: ...` annotations on entries. This
@@ -16,16 +17,18 @@
 //
 // Fails open on YAML parse errors.
 
-import { readFileSync } from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { safeReadFileSync } from '@socketsecurity/lib-stable/fs/read-file'
 
-import { withEditGuard } from '../_shared/payload.mts'
+import {
+  block,
+  defineHook,
+  editGuard,
+  runHook,
+} from '../_shared/guard.mts'
+import { resolveEditedText } from '../_shared/payload.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
 
 const BYPASS_PHRASE = 'Allow soak-exclude-third-party bypass'
 
@@ -51,7 +54,7 @@ const ANY_TOP_LEVEL_KEY = /^[A-Za-z_][\w-]*:\s*(?:\S.*)?$/
 //   - 'bare-name@1.2.3'
 //   - 'bare-name'
 // Quoted or unquoted. Captures group 1 = full entry (no quotes).
-const ENTRY_RE = /^\s*-\s*['"]?([^'"\s]+)['"]?\s*$/
+const ENTRY_RE = /^\s*-\s*['"]?(?<entry>[^'"\s]+)['"]?\s*$/
 
 interface OffendingEntry {
   readonly line: number
@@ -85,7 +88,7 @@ export function parseExcludeEntries(text: string): Map<string, number> {
     }
     const m = ENTRY_RE.exec(line)
     if (m) {
-      out.set(m[1]!, i + 1)
+      out.set(m.groups!.entry!, i + 1)
     }
   }
   return out
@@ -110,35 +113,15 @@ export function isAllowedScope(scope: string | null): boolean {
   return scope !== null && ALLOWED_SCOPES.has(scope)
 }
 
-export function readFileSafe(p: string): string {
-  try {
-    return readFileSync(p, 'utf8')
-  } catch {
-    return ''
-  }
-}
-
-// withEditGuard handles the stdin drain, tool_name gate, file_path narrow,
-// content extraction (new_string / content), and fail-open on any throw.
-await withEditGuard((filePath, content, payload) => {
+export const check = editGuard((filePath, _content, payload) => {
   if (!isPnpmWorkspaceYaml(filePath)) {
-    return
+    return undefined
   }
 
-  const currentText = readFileSafe(filePath)
-  let afterText: string
-  if (payload.tool_name === 'Write') {
-    afterText = content ?? ''
-  } else {
-    const oldStr = (payload.tool_input?.old_string as string | undefined) ?? ''
-    const newStr = content ?? ''
-    if (!oldStr) {
-      return
-    }
-    if (!currentText.includes(oldStr)) {
-      return
-    }
-    afterText = currentText.replace(oldStr, newStr)
+  const currentText = safeReadFileSync(filePath) ?? ''
+  const afterText = resolveEditedText(payload)
+  if (afterText === undefined) {
+    return undefined
   }
 
   let beforeEntries: Map<string, number>
@@ -147,7 +130,7 @@ await withEditGuard((filePath, content, payload) => {
     beforeEntries = parseExcludeEntries(currentText)
     afterEntries = parseExcludeEntries(afterText)
   } catch {
-    return
+    return undefined
   }
 
   const offending: OffendingEntry[] = []
@@ -161,13 +144,13 @@ await withEditGuard((filePath, content, payload) => {
     }
   }
   if (offending.length === 0) {
-    return
+    return undefined
   }
   if (
     payload.transcript_path &&
     bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)
   ) {
-    return
+    return undefined
   }
 
   const lines: string[] = [
@@ -188,15 +171,26 @@ await withEditGuard((filePath, content, payload) => {
     '',
     '  Adding a third-party package weakens the malware-protection soak gate.',
     '',
-    '  Fix: move the entry to `overrides:` in the same file. Overrides bypass',
-    '  the soak check without weakening the policy:',
+    '  Fix: wait for the package to clear the 7-day soak — the gate is doing its',
+    '  job. (`overrides:` pins a version but does NOT bypass minimumReleaseAge,',
+    '  so it is not a soak escape hatch.)',
     '',
-    '    overrides:',
-    `      ${offending[0]!.entry.split('@')[0]}: '>=X.Y.Z'`,
+    '  Last resort — to use it before the soak clears, type the bypass phrase',
+    '  below, then add it (and any `@scope/*` platform binaries) here with a',
+    '  `# published: <date> | removable: <date + 7d>` annotation. That knowingly',
+    '  weakens the soak for those exact pins.',
     '',
     `  Bypass: type "${BYPASS_PHRASE}" in a new message, then retry.`,
     '',
   )
-  logger.error(lines.join('\n'))
-  process.exitCode = 2
+  return block(lines.join('\n'))
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

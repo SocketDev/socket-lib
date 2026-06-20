@@ -1,9 +1,39 @@
 // node --test specs for the no-corepack-guard hook.
 
+// Isolate git fixtures from the live repo. Must be the FIRST import —
+// see no-unisolated-git-fixture-guard.
+import '../../../../../.git-hooks/_shared/isolate-git-env.mts'
+
 import test from 'node:test'
 import assert from 'node:assert/strict'
+// prefer-async-spawn: streaming-stdio-required — spawns the hook subprocess.
+import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
+import { mkdtempSync, rmSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 
 import { detectCorepack, formatBlock } from '../index.mts'
+
+const HOOK = path.join(path.dirname(fileURLToPath(import.meta.url)), '..', 'index.mts')
+
+function runHook(
+  command: string,
+  cwd?: string,
+): Promise<{ code: number; stderr: string }> {
+  return new Promise(resolve => {
+    const child = spawn(process.execPath, [HOOK], { stdio: ['pipe', 'ignore', 'pipe'] })
+    void child.catch(() => undefined)
+    let stderr = ''
+    child.process.stderr!.on('data', d => {
+      stderr += d.toString()
+    })
+    child.process.on('exit', code => resolve({ code: code ?? -1, stderr }))
+    child.stdin!.end(
+      JSON.stringify({ tool_name: 'Bash', tool_input: { command }, cwd }),
+    )
+  })
+}
 
 test('detectCorepack: corepack enable', () => {
   const d = detectCorepack('corepack enable')
@@ -91,4 +121,23 @@ test('formatBlock: message names the subcommand + the SRI install path + bypass'
   assert.match(msg, /corepack enable/)
   assert.match(msg, /setup-tools\.mjs/)
   assert.match(msg, /Allow corepack bypass/)
+})
+
+test('no-ops on corepack OUTSIDE a fleet repo', async () => {
+  // Real git repo, no remote, no fleet marker → non-fleet; corepack is the
+  // project's own package-manager-version choice there.
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'ncp-nonfleet-'))
+  try {
+    await spawn('git', ['init', dir])
+    const { code } = await runHook('corepack enable', dir)
+    assert.equal(code, 0)
+  } finally {
+    rmSync(dir, { force: true, recursive: true })
+  }
+})
+
+test('still blocks corepack inside a fleet repo', async () => {
+  // No cwd → process.cwd() is the wheelhouse (a fleet repo) → the ban applies.
+  const { code } = await runHook('corepack enable')
+  assert.equal(code, 2)
 })

@@ -1,4 +1,4 @@
-/**
+/*
  * @file Enforce `.claude/{agents,commands,hooks,skills}/` segmentation. Every
  *   entry in those four directories must live under `fleet/<name>/` (when the
  *   wheelhouse template ships an entry with that name) or `repo/<name>/`

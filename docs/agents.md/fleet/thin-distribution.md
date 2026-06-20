@@ -1,0 +1,65 @@
+# Thin distribution — fetch the fleet payload, don't git-track it
+
+A fleet member can go **thin**: stop git-tracking the wholly-fleet payload (the
+hooks, skills, configs, scripts the cascade copies verbatim) and let the
+**install-fleet bundle** repopulate it from a pinned GitHub Release. The member's
+git history then carries only what it owns, not thousands of mirrored files.
+
+## What's tracked vs untracked
+
+- **Untracked (`.gitignore`d + `git rm --cached`)** — every *wholly-fleet* file
+  the bundle copies verbatim: the `fleet/` tiers (`.claude/{hooks,skills,commands,agents}/fleet`,
+  `docs/agents.md/fleet`, `.config/fleet`, `scripts/fleet`), the dir-mirror roots,
+  root files like `.npmrc`, and the regenerated `.agents/` mirror. These come
+  from the download/fetch action, not from git-synced commits.
+- **Tracked (stays in git)** — *hybrid* files the cascade MERGES, where the repo
+  owns part: `CLAUDE.md` (fleet block + repo postamble), `pnpm-workspace.yaml`
+  (fleet sections + repo `packages:`), `package.json`. Plus
+  `scripts/fleet/install-fleet.mts` itself — the dep-0 bootstrap, the one wire
+  point a thin repo must retain (`.gitignore` keeps it with a `!` negation).
+
+The untrack set is computed by `install-fleet --thin` (`thinIgnoreEntries`):
+it collapses only to the `fleet/` tier (convention-guaranteed all-fleet) and
+lists every other wholly-fleet file EXACTLY — so it can NEVER catch a repo-owned
+sibling (`.claude/hooks/repo/`, `.config/repo/`, the member's own
+`.github/workflows/ci.yml`).
+
+## The ref pin
+
+A thin member pins which bundle to fetch in its wheelhouse settings file:
+`.config/socket-wheelhouse.json` → `"bundle": { "ref": "fleet-<sha>" }`. That
+file is the single member-owned config surface. `install-fleet` defaults its
+`--ref` from there, so the pin lives in exactly one place.
+
+## Belt-and-suspenders fetch
+
+A thin member repopulates its payload BOTH ways — neither alone is enough, so
+both are required (and enforced):
+
+- **Belt (dev / clone)** — `package.json` `prepare` starts with
+  `node scripts/fleet/install-fleet.mts --if-current`. A fresh clone / `pnpm install`
+  fetches + applies the pinned bundle BEFORE the (itself-untracked)
+  install-git-hooks step + any chained build. `--if-current` is idempotent: it
+  skips when the pinned ref is already applied (a local, gitignored
+  `.config/fleet/.bundle-applied` marker), so warm installs do no network, and it
+  no-ops in a non-thin repo (nothing pinned → nothing to fetch).
+- **Suspenders (CI)** — the canonical `ci.yml` delegates to socket-registry's
+  shared reusable, whose `setup-and-install` composite runs the same fetch after
+  checkout, before lint/test. CI never runs against a missing payload.
+
+## Enforcement (code-is-law)
+
+`checks/thin-consumer-wiring.mts` (`thin_wiring_missing`) fails when a member
+that went thin (its `.gitignore` carries the untrack block — detected by the
+unique `!scripts/fleet/install-fleet.mts` negation) is missing the prepare belt.
+A non-thin member (it tracks the payload) is exempt. Run
+`node scripts/fleet/install-fleet.mts --wire` to add the belt + `sync-fleet`
+script. The CI suspenders are enforced by the `ci.yml`-shape check
+(workflow-fleet-block) plus socket-registry's own CI on the shared composite.
+
+## Commands
+
+- `install-fleet --ref fleet-<sha> --thin --wire` — convert a repo to thin:
+  fetch + apply, untrack the payload, write the belt.
+- `install-fleet --if-current` — the belt/CI fetch (idempotent, ref from settings).
+- `pnpm run sync-fleet` — manual full re-fetch.

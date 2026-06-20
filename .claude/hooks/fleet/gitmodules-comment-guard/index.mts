@@ -29,24 +29,18 @@
 // The hook fails OPEN on its own bugs (exit 0 + stderr log) so a bad
 // hook deploy can't brick the session.
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withEditGuard } from '../_shared/payload.mts'
-
-const logger = getDefaultLogger()
+import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 
 const ALLOW_MARKER = '# socket-lint: allow gitmodules-no-comment'
 
 // Match `[submodule "PATH"]` with PATH captured. Tolerant of
 // whitespace and quoting variations.
-const SUBMODULE_RE = /^\s*\[submodule\s+"([^"]+)"\s*\]\s*$/
+const SUBMODULE_RE = /^\s*\[submodule\s+"(?<name>[^"]+)"\s*\]\s*$/
 
 // Match `# <slug>-<version>` where the version is whatever follows
 // the first hyphen. We only require: starts with `# `, contains a
 // hyphen, has non-empty version part.
-const COMMENT_RE = /^#\s+[a-z0-9]+([a-z0-9-]*[a-z0-9])?-[^\s]/
+const COMMENT_RE = /^#\s+[a-z0-9]+(?:[a-z0-9-]*[a-z0-9])?-[^\s]/
 
 // Read newline-separated lines for analysis.
 export function findOrphanSubmoduleSections(text: string): string[] {
@@ -72,17 +66,15 @@ export function findOrphanSubmoduleSections(text: string): string[] {
     // The previous line must be a comment matching `# <slug>-<ver>`.
     const prev = i > 0 ? lines[i - 1] : ''
     if (!prev || !COMMENT_RE.test(prev)) {
-      orphans.push(match[1] ?? line)
+      orphans.push(match.groups?.name ?? line)
     }
   }
   return orphans
 }
 
-// withEditGuard handles the stdin drain, tool_name gate, file_path narrow,
-// content extraction (new_string / content), and fail-open on any throw.
-await withEditGuard((filePath, content) => {
+export const check = editGuard((filePath, content) => {
   if (!filePath.endsWith('/.gitmodules')) {
-    return
+    return undefined
   }
   // Edit gives us new_string (the replacement); Write gives us
   // content (the full new file). Either way, we scan the proposed
@@ -92,11 +84,11 @@ await withEditGuard((filePath, content) => {
   const proposed = content ?? ''
   const orphans = findOrphanSubmoduleSections(proposed)
   if (orphans.length === 0) {
-    return
+    return undefined
   }
   // Block the tool call. Exit code 2 makes Claude Code refuse and
   // surface the stderr to the model so it can retry.
-  logger.error(
+  return block(
     `[gitmodules-comment-guard] refusing edit: ${orphans.length} ` +
       `submodule section(s) lack the canonical ` +
       `# <slug>-<version> comment immediately above:\n` +
@@ -109,5 +101,13 @@ await withEditGuard((filePath, content) => {
       '\nOne-off override: append `# socket-lint: allow gitmodules-no-comment`\n' +
       'to the [submodule] line.\n',
   )
-  process.exitCode = 2
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

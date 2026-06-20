@@ -27,15 +27,16 @@
 // Exit codes: 0 — pass; 2 — block. Fails open on any throw.
 
 import path from 'node:path'
-import process from 'node:process'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withBashGuard } from '../_shared/payload.mts'
+import {
+  block,
+  bashGuard,
+  defineHook,
+  runHook,
+} from '../_shared/guard.mts'
+import { isFleetTarget } from '../_shared/fleet-context.mts'
 import { parseCommands } from '../_shared/shell-command.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
 
 const BYPASS_PHRASE = 'Allow direct-linter bypass'
 
@@ -79,33 +80,46 @@ export function bannedLinterInvocation(command: string): string | undefined {
   return undefined
 }
 
-void (async () => {
-  await withBashGuard((command, payload) => {
-    const tool = bannedLinterInvocation(command)
-    if (!tool) {
-      return
-    }
-    if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
-      return
-    }
-    logger.error(
-      [
-        `[no-direct-linter-guard] Blocked: direct \`${tool}\` invocation.`,
-        '',
-        '  The fleet runs lint/format ONLY through the repo scripts, which own',
-        '  the `-c .config/fleet/…` flag + ignore set. A bare formatter falls',
-        '  back to its own defaults (corrupts fleet files) and has no ignore',
-        '  scoping (reformats vendored upstream/ we must never touch).',
-        '',
-        '  Use a script wrapper instead:',
-        '    pnpm run lint        pnpm run fix --all',
-        '    pnpm run check       pnpm run format',
-        `    not  ${tool} …`,
-        '',
-        `  Bypass: type \`${BYPASS_PHRASE}\` if this is genuinely intended.`,
-        '',
-      ].join('\n'),
-    )
-    process.exitCode = 2
-  })
-})()
+export const check = bashGuard((command, payload) => {
+  const tool = bannedLinterInvocation(command)
+  if (!tool) {
+    return undefined
+  }
+  // Fleet CONVENTION: outside a fleet repo the project owns its own
+  // formatter/linter — don't block a direct invocation there (the fleet
+  // wrappers + ignore sets don't exist, and the operator can't self-authorize
+  // a bypass repeatedly). See _shared/fleet-context.mts.
+  if (!isFleetTarget(payload)) {
+    return undefined
+  }
+  if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
+    return undefined
+  }
+  return block(
+    [
+      `[no-direct-linter-guard] Blocked: direct \`${tool}\` invocation.`,
+      '',
+      '  The fleet runs lint/format ONLY through the repo scripts, which own',
+      '  the `-c .config/fleet/…` flag + ignore set. A bare formatter falls',
+      '  back to its own defaults (corrupts fleet files) and has no ignore',
+      '  scoping (reformats vendored upstream/ we must never touch).',
+      '',
+      '  Use a script wrapper instead:',
+      '    pnpm run lint        pnpm run fix --all',
+      '    pnpm run check       pnpm run format',
+      `    not  ${tool} …`,
+      '',
+      `  Bypass: type \`${BYPASS_PHRASE}\` if this is genuinely intended.`,
+      '',
+    ].join('\n'),
+  )
+})
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

@@ -149,3 +149,5 @@ It does NOT apply to:
 - Code that doesn't have an upstream reference
 
 Default rules apply for those. The exception buys verbosity only when the verbosity is load-bearing (cross-impl alignment).
+
+File-doc uses `@file`, never `@fileoverview` (socket/no-fileoverview-prefer-file) — a doc generator reading `@fileoverview` while the fleet writes `@file` produced empty API descriptions.

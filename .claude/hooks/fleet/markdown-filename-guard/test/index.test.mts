@@ -1,7 +1,13 @@
 // node --test specs for the markdown-filename-guard hook.
 
+// Isolate git fixtures from the live repo. Must be the FIRST import —
+// see no-unisolated-git-fixture-guard.
+import '../../../../../.git-hooks/_shared/isolate-git-env.mts'
+
 import test from 'node:test'
 import assert from 'node:assert/strict'
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
 // prefer-async-spawn: streaming-stdio-required — test spawns child
 // subprocess and pipes stdin/stdout/stderr; Node spawn returns the
 // ChildProcess streaming surface the lib promise wrapper does not.
@@ -386,5 +392,96 @@ test('a .md under .github/workflows/ is a gh-aw source, not a doc — allowed', 
       0,
       `${filename} should be allowed as a gh-aw workflow source (got code ${result.code}: ${result.stderr})`,
     )
+  }
+})
+
+test('cross-harness rule adapters are allowed (host-named tool config, not docs)', async () => {
+  for (const filename of [
+    '/Users/x/projects/foo/.cursor/rules/socket.mdc',
+    '/Users/x/projects/foo/.windsurf/rules/socket.md',
+    '/Users/x/projects/foo/.clinerules/socket.md',
+    '/Users/x/projects/foo/.kiro/steering/socket.md',
+    '/Users/x/projects/foo/.github/copilot-instructions.md',
+    '/Users/x/projects/socket-wheelhouse/template/.windsurf/rules/socket.md',
+    '/Users/x/projects/socket-wheelhouse/template/.kiro/steering/socket.md',
+  ]) {
+    const result = await runHook({
+      tool_input: { content: '# rules', file_path: filename },
+      tool_name: 'Write',
+    })
+    assert.strictEqual(
+      result.code,
+      0,
+      `${filename} should be allowed as a harness adapter (got code ${result.code}: ${result.stderr})`,
+    )
+  }
+})
+
+test('allows EDITING an existing non-canonical .md (name predates the rule)', async () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'mdfn-exists-'))
+  try {
+    const f = path.join(dir, 'Weird_Name.md')
+    writeFileSync(f, '# existing\n')
+    const r = await runHook({
+      tool_name: 'Edit',
+      tool_input: { file_path: f, old_string: 'existing', new_string: 'updated' },
+    })
+    assert.strictEqual(r.code, 0, r.stderr)
+  } finally {
+    rmSync(dir, { force: true, recursive: true })
+  }
+})
+
+test('blocks CREATING a new non-canonical .md in a fleet repo', async () => {
+  // Non-git temp dir → isFleetTarget fail-safe true (fleet); path absent →
+  // creation → blocked on the non-canonical name.
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'mdfn-create-'))
+  try {
+    const r = await runHook({
+      tool_name: 'Write',
+      tool_input: { file_path: path.join(dir, 'Weird_Name.md'), content: '# new\n' },
+    })
+    assert.strictEqual(r.code, 2, r.stderr)
+    assert.match(r.stderr, /markdown-filename-guard/)
+  } finally {
+    rmSync(dir, { force: true, recursive: true })
+  }
+})
+
+test('no-ops on a non-canonical .md OUTSIDE a fleet repo', async () => {
+  // A real git repo with no remote + no fleet marker → non-fleet. `Home.md` is
+  // the correct GitHub-wiki slug there; the fleet convention must not apply.
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'mdfn-nonfleet-'))
+  try {
+    await spawn('git', ['init', dir])
+    const r = await runHook({
+      tool_name: 'Write',
+      tool_input: { file_path: path.join(dir, 'Home.md'), content: '# Home\n' },
+    })
+    assert.strictEqual(r.code, 0, r.stderr)
+  } finally {
+    rmSync(dir, { force: true, recursive: true })
+  }
+})
+
+test('bypass phrase lets a flagged creation through', async () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'mdfn-bypass-'))
+  try {
+    const tp = path.join(dir, 'session.jsonl')
+    writeFileSync(
+      tp,
+      JSON.stringify({
+        type: 'user',
+        message: { content: 'Allow markdown-filename bypass' },
+      }) + '\n',
+    )
+    const r = await runHook({
+      tool_name: 'Write',
+      tool_input: { file_path: path.join(dir, 'Weird_Name.md'), content: '# x\n' },
+      transcript_path: tp,
+    })
+    assert.strictEqual(r.code, 0, r.stderr)
+  } finally {
+    rmSync(dir, { force: true, recursive: true })
   }
 })

@@ -25,6 +25,7 @@ This skill runs in two modes. Both strip the AI-slop the Core Rules target; the 
 **Documentation mode applies to:**
 
 - CHANGELOG entries, README sections, `docs/` markdown, GitHub Release notes, API-reference prose. Complete + precise + durable; length serves correctness.
+- Code-format bare library/tool names in prose (e.g. `rustls`, `rolldown`, `reqwest`) — they read as code, not prose. The `prose-code-format-nudge` hook flags them on `*.md` edits, off a shared dictionary (`.claude/hooks/fleet/_shared/known-names.mts`) derived from the repo's own manifests; that lib is the single source of truth for this check.
 
 **Conversational mode applies to:**
 

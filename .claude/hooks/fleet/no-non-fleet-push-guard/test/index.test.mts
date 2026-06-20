@@ -1,5 +1,9 @@
 // node --test specs for the no-non-fleet-push-guard hook.
 
+// Isolate git fixtures from the live repo. Must be the FIRST import —
+// see no-unisolated-git-fixture-guard.
+import '../../../../../.git-hooks/_shared/isolate-git-env.mts'
+
 // prefer-async-spawn: streaming-stdio-required — test spawns the hook
 // subprocess and pipes stdin/stdout/stderr.
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
@@ -168,4 +172,29 @@ test('bypass phrase in transcript — non-fleet push allowed', async () => {
     dir,
   )
   assert.strictEqual(r.code, 0)
+})
+
+test('scoped bypass accepts owner/repo, bare repo, and case variants', async () => {
+  // origin PerryTS/perry → slug `perry`, owner/repo `PerryTS/perry`. The
+  // operator may type any of these; all authorize the same push (#45).
+  const phrases = [
+    'Allow non-fleet-push bypass: PerryTS/perry',
+    'Allow non-fleet-push bypass: perry',
+    'Allow non-fleet-push bypass: perryts/perry',
+  ]
+  for (let i = 0, { length } = phrases; i < length; i += 1) {
+    const phrase = phrases[i]!
+    const dir = gitRepoWithOrigin('git@github.com:PerryTS/perry.git')
+    const txDir = mkdtempSync(path.join(os.tmpdir(), 'nfp-tx-'))
+    const transcriptPath = path.join(txDir, 'session.jsonl')
+    writeFileSync(
+      transcriptPath,
+      JSON.stringify({ type: 'user', message: { content: phrase } }) + '\n',
+    )
+    const r = await runHook(
+      { ...bash('git push origin main'), transcript_path: transcriptPath },
+      dir,
+    )
+    assert.strictEqual(r.code, 0, `phrase should authorize: ${phrase}`)
+  }
 })

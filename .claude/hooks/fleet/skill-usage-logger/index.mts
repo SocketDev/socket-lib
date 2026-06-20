@@ -151,7 +151,9 @@ async function main(): Promise<void> {
   process.exit(0)
 }
 
-main().catch(() => {
-  // Last-resort fall-open. Telemetry must never cost the user a tool call.
-  process.exit(0)
-})
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  main().catch(() => {
+    // Last-resort fall-open. Telemetry must never cost the user a tool call.
+    process.exit(0)
+  })
+}

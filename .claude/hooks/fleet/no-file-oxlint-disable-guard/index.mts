@@ -22,7 +22,7 @@
 //   /* oxlint-enable <rule> */               (re-enables; pairs with disables)
 //
 // Exemption: files under the plugin's rule subtree
-// (`.config/oxlint-plugin/{fleet,repo}/<id>/`, holding each rule's index.mts +
+// (`.config/fleet/oxlint-plugin/{fleet,repo}/<id>/`, holding each rule's index.mts +
 // its test/) are allowed to file-scope-disable their own rule (the banned
 // shape is lookup-table data in the rule definition or in test fixtures).
 //
@@ -36,24 +36,23 @@
 //
 // Fails open on malformed payloads (exit 0 + stderr log).
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withEditGuard } from '../_shared/payload.mts'
-
-const logger = getDefaultLogger()
+import {
+  block,
+  defineHook,
+  editGuard,
+  runHook,
+} from '../_shared/guard.mts'
 
 const FILE_SCOPE_DISABLE_RE =
   /^[ \t]*(?:\/\*|\/\/)[ \t]*oxlint-disable(?!-next-line)[ \t]+/
 
 // Plugin-internal rule + test files are exempt — the banned shape is
 // lookup-table data in the rule definition or test fixture. Each rule lives at
-// `.config/oxlint-plugin/{fleet,repo}/<id>/` with its index.mts + test/, so the
+// `.config/fleet/oxlint-plugin/{fleet,repo}/<id>/` with its index.mts + test/, so the
 // tier prefix covers both.
 const EXEMPT_PATH_SUFFIXES: readonly string[] = [
-  '.config/oxlint-plugin/fleet/',
-  '.config/oxlint-plugin/repo/',
+  '.config/fleet/oxlint-plugin/fleet/',
+  '.config/repo/oxlint-plugin/',
 ]
 
 interface Finding {
@@ -82,17 +81,14 @@ export function isExemptPath(filePath: string): boolean {
   return false
 }
 
-
-// withEditGuard handles the stdin drain, tool_name gate, file_path narrow,
-// content extraction (new_string / content), and fail-open on any throw.
-await withEditGuard((filePath, content) => {
+export const check = editGuard((filePath, content) => {
   if (isExemptPath(filePath)) {
-    return
+    return undefined
   }
   const newContent = content ?? ''
   const findings = findFileScopeDisables(newContent)
   if (findings.length === 0) {
-    return
+    return undefined
   }
   const lines: string[] = []
   lines.push(
@@ -118,6 +114,14 @@ await withEditGuard((filePath, content) => {
     "If the entire file legitimately can't comply, the file needs a refactor",
   )
   lines.push('— not a blanket exemption.')
-  logger.error(lines.join('\n') + '\n')
-  process.exitCode = 2
+  return block(lines.join('\n') + '\n')
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

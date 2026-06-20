@@ -13,6 +13,7 @@
 
 import { existsSync, readFileSync, statSync } from 'node:fs'
 
+import { SOCKET_PUBLIC_API_KEY } from '@socketsecurity/lib-stable/constants/socket'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 // Personal-path matcher lives in the gate-free _shared/personal-path.mts so the
@@ -57,11 +58,6 @@ if (nodeMajor < NODE_MIN_MAJOR) {
 // allowlist entry is a substring; if the matched line contains it,
 // the line is dropped from the findings.
 
-// Real public API key shipped in socket-lib test fixtures. Safe to
-// appear anywhere in the fleet.
-export const ALLOWED_PUBLIC_KEY =
-  'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api'
-
 // Substring marker used in test fixtures (see
 // socket-lib/test/unit/utils/fake-tokens.ts). Lines containing this
 // are treated as test fixtures.
@@ -103,6 +99,19 @@ export const SOCKET_SECURITY_ENV = SOCKET_TOKEN_ENV_NAMES[0]!
 // matching assumes forward slashes. Cheap to convert once.
 export const normalizePath = (p: string): string => p.replace(/\\/g, '/')
 
+// Collapse a template archetype-layer path back to its flat repo-relative form:
+// `template/base/.git-hooks/x` → `template/.git-hooks/x`, same for `solo/` /
+// `mono/` / `overrides/<repo>/`. The archetype move (template/* →
+// template/{base,solo,mono,overrides/<repo>}/*) inserts a layer segment that
+// every `startsWith('template/.claude/hooks/')`-style exemption would otherwise
+// miss, re-flagging code that's intentionally raw where it actually runs. One
+// strip here lets all the prefix exemptions stay layer-agnostic (and keeps the
+// pre-move flat `template/` path matching for downstream repos not yet moved).
+export const stripTemplateLayer = (p: string): string =>
+  p
+    .replace(/^template\/(?:base|solo|mono)\//, 'template/')
+    .replace(/^template\/overrides\/[^/]+\//, 'template/')
+
 /**
  * Split text into lines, normalizing CRLF (`\r\n`) to LF (`\n`) first.
  *
@@ -135,7 +144,7 @@ export const splitLines = (text: string): string[] =>
 // the canonical fixture filename pattern `.env.example`.
 const SOCKET_API_KEY_ALLOW_MARKER = 'socket-lint: allow socket-api-key'
 const isAllowedApiKey = (line: string): boolean =>
-  line.includes(ALLOWED_PUBLIC_KEY) ||
+  line.includes(SOCKET_PUBLIC_API_KEY) ||
   line.includes(FAKE_TOKEN_MARKER) ||
   line.includes(FAKE_TOKEN_LEGACY) ||
   SOCKET_TOKEN_ENV_NAMES.some(name => line.includes(name)) ||

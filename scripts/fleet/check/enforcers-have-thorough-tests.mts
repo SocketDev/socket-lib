@@ -8,11 +8,11 @@
 //
 // What it scans:
 //   - Hooks under .claude/hooks/{fleet,repo}/<name>/ that have an index.mts.
-//   - Lint rules under .config/oxlint-plugin/fleet/<name>/index.mts.
+//   - Lint rules under .config/fleet/oxlint-plugin/fleet/<name>/index.mts.
 //
 // ERROR when, for an enforcer:
 //   - no test file exists (hook: <dir>/test/*.test.mts; rule:
-//     .config/oxlint-plugin/fleet/<name>/test/<name>.test.mts), OR
+//     .config/fleet/oxlint-plugin/fleet/<name>/test/<name>.test.mts), OR
 //   - the test is a TOKEN test (not thorough):
 //       * hook test with fewer than MIN_HOOK_CASES `test(`/`it(` cases, or
 //       * lint-rule test missing a `valid:` array OR an `invalid:` array
@@ -133,8 +133,8 @@ export function scanHooks(repoRoot: string): TestGap[] {
 
 export function scanRules(repoRoot: string): TestGap[] {
   // Each rule is a dir under the cascaded fleet/ tier:
-  // .config/oxlint-plugin/fleet/<id>/{index.mts, test/<id>.test.mts}.
-  const fleetDir = path.join(repoRoot, '.config/oxlint-plugin/fleet')
+  // .config/fleet/oxlint-plugin/fleet/<id>/{index.mts, test/<id>.test.mts}.
+  const fleetDir = path.join(repoRoot, '.config/fleet/oxlint-plugin/fleet')
   const gaps: TestGap[] = []
   let rules: string[]
   try {

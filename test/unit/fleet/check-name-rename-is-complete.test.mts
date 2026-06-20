@@ -28,7 +28,7 @@ function makeRepo(opts: {
   // extra file content that references a name (a "live reference")
   referenceText?: string | undefined
 }): string {
-  opts = { ...opts }
+  opts = { __proto__: null, ...opts }
   const root = mkdtempSync(path.join(os.tmpdir(), 'rename-'))
   mkdirSync(path.join(root, 'scripts', 'fleet', 'check'), { recursive: true })
   mkdirSync(path.join(root, 'scripts', 'repo'), { recursive: true })

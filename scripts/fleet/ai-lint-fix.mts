@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file AI-assisted lint fix step. Runs after `pnpm run lint --fix` (oxlint +
  *   oxfmt deterministic autofix) to handle the lint findings that aren't safely
  *   mechanically fixable. The CLAUDE.md "Lint rules" guidance is to autofix

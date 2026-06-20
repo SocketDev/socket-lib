@@ -4,17 +4,20 @@
     {
       "name": "socket-addon",
       "description": "NAPI .node binaries for @socketaddon/* npm packages",
-      "optIns": ["squash-history"]
+      "optIns": ["squash-history"],
+      "publishes": "node"
     },
     {
       "name": "socket-bin",
       "description": "SEA-packed CLI distributions for @socketbin/* packages",
-      "optIns": ["squash-history"]
+      "optIns": ["squash-history"],
+      "publishes": "binary"
     },
     {
       "name": "socket-btm",
       "description": "Build toolchain — produces signed prebuilt binaries for @socketaddon/* and @socketbin/*",
-      "optIns": ["squash-history"]
+      "optIns": ["squash-history"],
+      "publishes": "custom"
     },
     {
       "name": "socket-cli",
@@ -22,23 +25,28 @@
     },
     {
       "name": "socket-lib",
-      "description": "Core library: fs, processes, HTTP, logging, env detection"
+      "description": "Core library: fs, processes, HTTP, logging, env detection",
+      "publishes": "js"
     },
     {
       "name": "socket-mcp",
-      "description": "Model Context Protocol server for socket.dev integration"
+      "description": "Model Context Protocol server for socket.dev integration",
+      "publishes": "js"
     },
     {
       "name": "socket-packageurl-js",
-      "description": "purl spec implementation for JavaScript"
+      "description": "purl spec implementation for JavaScript",
+      "publishes": "js"
     },
     {
       "name": "socket-registry",
-      "description": "Optimized package overrides for Socket Optimize"
+      "description": "Optimized package overrides for Socket Optimize",
+      "publishes": "js"
     },
     {
       "name": "socket-sdk-js",
-      "description": "JavaScript SDK for the socket.dev API"
+      "description": "JavaScript SDK for the socket.dev API",
+      "publishes": "js"
     },
     {
       "name": "sdxgen",
@@ -56,7 +64,9 @@
     },
     {
       "name": "socket-wheelhouse",
-      "description": "Internal scaffolding template for socket-* repos"
+      "description": "Internal scaffolding template for socket-* repos",
+      "optIns": ["squash-history"],
+      "publishes": "none"
     }
   ]
 }

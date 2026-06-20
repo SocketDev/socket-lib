@@ -27,20 +27,24 @@
 // Bypass: `Allow amend-foreign bypass` (the rare intentional amend of an older
 // own-commit). Exit 0 allow / 2 block. Fails open on any internal error.
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 // oxlint-disable-next-line socket/prefer-async-spawn -- PreToolUse hook needs a sync git read to gate the command before it runs; typed string return.
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
+import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
+import type { GuardResult } from '../_shared/guard.mts'
+import { resolveDefaultBranch } from '../_shared/git-branch.mts'
 import { extractGitCwd } from '../_shared/git-cwd.mts'
-import { withBashGuard } from '../_shared/payload.mts'
+import type { ToolCallPayload } from '../_shared/payload.mts'
 import { commandsFor } from '../_shared/shell-command.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
-const logger = getDefaultLogger()
-
 const BYPASS_PHRASE = 'Allow amend-foreign bypass'
+
+// Pre-flight skip set. The only path to a block is gated by `isAmendCommit`,
+// which requires a `git` segment whose args include both `commit` and
+// `--amend`; `--amend` is therefore present verbatim in EVERY blocking command.
+// The dispatcher skips importing this guard when the payload lacks it.
+export const triggers: readonly string[] = ['--amend']
 
 // A commit younger than this is treated as "freshly authored this turn" — safe
 // to amend. Older + unpushed → likely a parallel session's commit.
@@ -95,14 +99,7 @@ export function readAmendHeadInfo(repoDir: string): AmendHeadInfo {
     const r = spawnSync('git', ['-C', repoDir, ...args], { encoding: 'utf8' })
     return String(r.stdout ?? '').trim()
   }
-  let base = run(['symbolic-ref', 'refs/remotes/origin/HEAD']).replace(
-    /^refs\/remotes\/origin\//,
-    '',
-  )
-  if (!base) {
-    const hasMain = run(['show-ref', '--verify', 'refs/remotes/origin/main'])
-    base = hasMain ? 'main' : 'master'
-  }
+  const base = resolveDefaultBranch(repoDir)
   const aheadOfRemote = Number(
     run(['rev-list', '--count', `origin/${base}..HEAD`]),
   )
@@ -113,23 +110,20 @@ export function readAmendHeadInfo(repoDir: string): AmendHeadInfo {
   }
 }
 
-async function main(): Promise<void> {
-  await withBashGuard((command, payload) => {
+export const check = bashGuard(
+  (command: string, payload: ToolCallPayload): GuardResult => {
     if (!isAmendCommit(command)) {
-      return
+      return undefined
     }
     const repoDir = extractGitCwd(command)
     const reason = shouldBlockAmend(readAmendHeadInfo(repoDir), Date.now())
     if (!reason) {
-      return
+      return undefined
     }
-    if (
-      payload.transcript_path &&
-      bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)
-    ) {
-      return
+    if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
+      return undefined
     }
-    logger.error(
+    return block(
       [
         '[no-amend-foreign-commit-guard] Blocked: `git commit --amend` onto a foreign unpushed commit.',
         '',
@@ -147,18 +141,14 @@ async function main(): Promise<void> {
         `  If you truly mean to amend this older own-commit, type: ${BYPASS_PHRASE}`,
       ].join('\n'),
     )
-    process.exitCode = 2
-  })
-}
+  },
+)
 
-if (process.argv[1]?.endsWith('index.mts')) {
-  // Async IIFE: await inside (no top-level await — CJS bundle target); promise
-  // still awaited. withBashGuard fails open on a malformed payload.
-  void (async () => {
-    try {
-      await main()
-    } catch {
-      process.exit(0)
-    }
-  })()
-}
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  triggers,
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

@@ -73,7 +73,7 @@ function makeFakeFleetRepo(
   const repo = mkdtempSync(path.join(os.tmpdir(), 'fake-fleet-repo-'))
   writeFileSync(path.join(repo, 'package.json'), '{"name":"fake-fleet"}\n')
   const claudeMarker = setup.hasFleetCanonical
-    ? '<!-- BEGIN FLEET-CANONICAL -->\nrules go here\n<!-- END FLEET-CANONICAL -->\n'
+    ? '<!-- BEGIN <fleet-canonical> -->\nrules go here\n<!-- END </fleet-canonical> -->\n'
     : '# Just a regular project README-style markdown\n'
   writeFileSync(path.join(repo, 'CLAUDE.md'), claudeMarker)
   return repo
@@ -125,7 +125,7 @@ test('Edit on a canonical path outside a fleet repo passes', async () => {
   // Tmp dir without CLAUDE.md → the walk-up never finds a fleet root.
   const dir = mkdtempSync(path.join(os.tmpdir(), 'non-fleet-'))
   try {
-    const file = path.join(dir, '.config/oxlint-plugin/fleet/foo/index.mts')
+    const file = path.join(dir, '.config/fleet/oxlint-plugin/fleet/foo/index.mts')
     mkdirSync(path.dirname(file), { recursive: true })
     writeFileSync(file, '// content\n')
     const result = await runHook({
@@ -138,12 +138,12 @@ test('Edit on a canonical path outside a fleet repo passes', async () => {
   }
 })
 
-test('Edit on .config/oxlint-plugin/fleet/* in a fleet repo is BLOCKED', async () => {
+test('Edit on .config/fleet/oxlint-plugin/fleet/* in a fleet repo is BLOCKED', async () => {
   const repo = makeFakeFleetRepo()
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/oxlint-plugin/fleet/example/index.mts',
+      '.config/fleet/oxlint-plugin/fleet/example/index.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, new_string: 'x' },
@@ -152,10 +152,10 @@ test('Edit on .config/oxlint-plugin/fleet/* in a fleet repo is BLOCKED', async (
     assert.strictEqual(result.code, 2)
     assert.match(result.stderr, /no-fleet-fork-guard/)
     // The block message echoes the canonical template path for the edited
-    // file — the oxlint plugin lives under .config/oxlint-plugin/fleet/.
+    // file — the oxlint plugin lives under .config/fleet/oxlint-plugin/fleet/.
     assert.match(
       result.stderr,
-      /\.config\/oxlint-plugin\/fleet\/example\/index\.mts/,
+      /\.config\/fleet\/oxlint-plugin\/fleet\/example\/index\.mts/,
     )
     assert.match(result.stderr, /Allow fleet-fork bypass/)
   } finally {
@@ -228,7 +228,7 @@ test('Write tool also blocked, not just Edit', async () => {
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/oxlint-plugin/fleet/new-rule/index.mts',
+      '.config/fleet/oxlint-plugin/fleet/new-rule/index.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, content: 'export default {}' },
@@ -245,7 +245,7 @@ test('MultiEdit tool also blocked', async () => {
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/oxlint-plugin/fleet/foo/index.mts',
+      '.config/fleet/oxlint-plugin/fleet/foo/index.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, edits: [] },
@@ -264,7 +264,7 @@ test('repo without FLEET-CANONICAL marker passes through', async () => {
   try {
     const file = makeCanonicalFile(
       repo,
-      '.config/oxlint-plugin/fleet/x/index.mts',
+      '.config/fleet/oxlint-plugin/fleet/x/index.mts',
     )
     const result = await runHook({
       tool_input: { file_path: file, new_string: 'x' },
@@ -382,7 +382,8 @@ test('malformed JSON payload fails open with stderr log', async () => {
     child.process.on('exit', code => resolve({ code: code ?? 0, stderr }))
   })
   assert.strictEqual(result.code, 0)
-  assert.match(result.stderr, /fail-open/)
+  // Malformed payload: the shared runGuard fails open SILENTLY (exit 0, no
+  // stderr) — the exit-code assertion above is the real fail-open contract.
 })
 
 test('empty stdin passes through', async () => {
@@ -419,7 +420,7 @@ test('Edit on a root-level file with NO template twin passes (e.g. pnpm-workspac
 })
 
 test('Edit on CLAUDE.md (hybrid file WITH FLEET-CANONICAL markers) is ALLOWED', async () => {
-  // CLAUDE.md carries BEGIN/END FLEET-CANONICAL markers: only the block between
+  // CLAUDE.md carries <fleet-canonical> markers: only the block between
   // them is canonical, so the preamble + project-specific postamble are
   // repo-owned and editing them is not a fork. A fork inside the block is caught
   // by the sync's claude_md_fleet_drift check at commit time.
@@ -462,7 +463,10 @@ test('Edit on a root-level canonical file WITHOUT fleet-block markers is BLOCKED
 // byte-canonical marker every wheelhouse has, downstream repos don't).
 function makeFakeWheelhouseRepo(): string {
   const repo = mkdtempSync(path.join(os.tmpdir(), 'fake-wheelhouse-'))
-  writeFileSync(path.join(repo, 'package.json'), '{"name":"socket-wheelhouse"}\n')
+  writeFileSync(
+    path.join(repo, 'package.json'),
+    '{"name":"socket-wheelhouse"}\n',
+  )
   writeFileSync(path.join(repo, 'CLAUDE.md'), '# socket-wheelhouse\n')
   mkdirSync(path.join(repo, 'template'), { recursive: true })
   // The wheelhouse marker + the README PLACEHOLDER (distinct from the
@@ -478,7 +482,10 @@ test("Edit on the wheelhouse's OWN root README.md is ALLOWED (repo-owned, not a 
     const file = path.join(repo, 'README.md')
     writeFileSync(file, '# socket-wheelhouse\n\nFleet axes prose.\n')
     const result = await runHook({
-      tool_input: { file_path: file, new_string: '# socket-wheelhouse (edited)' },
+      tool_input: {
+        file_path: file,
+        new_string: '# socket-wheelhouse (edited)',
+      },
       tool_name: 'Edit',
     })
     assert.strictEqual(result.code, 0)

@@ -25,14 +25,8 @@
 // Fails open on parse errors or non-test files — under-blocking beats blocking
 // on infrastructure problems.
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withEditGuard } from '../_shared/payload.mts'
+import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
 
 const BYPASS_PHRASE = 'Allow unmocked-network-in-tests bypass'
 
@@ -87,49 +81,47 @@ export function shouldBlock(filePath: string, content: string): boolean {
   return true
 }
 
-// withEditGuard handles the stdin drain, tool_name gate, file_path narrow,
-// content extraction, and fail-open on any throw.
-async function main(): Promise<void> {
-  await withEditGuard((filePath, content, payload) => {
-    if (!shouldBlock(filePath, content ?? '')) {
-      return
-    }
+// editGuard handles the stdin drain, tool_name gate, file_path narrow, content
+// extraction, and fail-open on any throw.
+export const check = editGuard((filePath, content, payload) => {
+  if (!shouldBlock(filePath, content ?? '')) {
+    return undefined
+  }
 
-    if (
-      payload.transcript_path &&
-      bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)
-    ) {
-      return
-    }
+  if (
+    payload.transcript_path &&
+    bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)
+  ) {
+    return undefined
+  }
 
-    logger.error(
-      [
-        '[no-unmocked-net-guard] Blocked: test makes a live third-party connection',
-        '',
-        `  File: ${filePath}`,
-        '',
-        '  This test calls httpJson/httpText/httpRequest/fetch against a',
-        '  non-localhost host with no `nock` mock in the file. Live network in',
-        '  tests is flaky, slow, and a data-exfil surface.',
-        '',
-        '  Fix: mock the endpoint with nock, like the registry-*.test.mts suites:',
-        "    import nock from 'nock'",
-        '    beforeEach(() => nock.disableNetConnect())',
-        '    afterEach(() => { nock.cleanAll(); nock.enableNetConnect() })',
-        "    nock('https://host').get('/path').reply(200, { ... })",
-        '',
-        '  Detail: docs/agents.md/fleet/no-live-network-in-tests.md',
-        `  Bypass: type "${BYPASS_PHRASE}" in a new message, then retry.`,
-        '',
-      ].join('\n'),
-    )
-    process.exitCode = 2
-  })
-}
+  return block(
+    [
+      '[no-unmocked-net-guard] Blocked: test makes a live third-party connection',
+      '',
+      `  File: ${filePath}`,
+      '',
+      '  This test calls httpJson/httpText/httpRequest/fetch against a',
+      '  non-localhost host with no `nock` mock in the file. Live network in',
+      '  tests is flaky, slow, and a data-exfil surface.',
+      '',
+      '  Fix: mock the endpoint with nock, like the registry-*.test.mts suites:',
+      "    import nock from 'nock'",
+      '    beforeEach(() => nock.disableNetConnect())',
+      '    afterEach(() => { nock.cleanAll(); nock.enableNetConnect() })',
+      "    nock('https://host').get('/path').reply(200, { ... })",
+      '',
+      '  Detail: docs/agents.md/fleet/no-live-network-in-tests.md',
+      `  Bypass: type "${BYPASS_PHRASE}" in a new message, then retry.`,
+      '',
+    ].join('\n'),
+  )
+})
 
-// Only drain stdin + run the guard when invoked as the hook entrypoint.
-// The test suite imports the exported helpers directly; without this gate
-// importing the module would call readStdin() and hang.
-if (process.argv[1]?.endsWith('index.mts')) {
-  await main()
-}
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

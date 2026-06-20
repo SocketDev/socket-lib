@@ -1,4 +1,4 @@
-/**
+/*
  * @file Shared heuristic for "which dirty paths in this checkout were authored
  *   by ANOTHER agent, not this session". Two responsibilities the
  *   parallel-agent hooks (and overeager-staging-guard) share:

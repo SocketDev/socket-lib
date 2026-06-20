@@ -1,12 +1,12 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Single source of truth for wiring fleet `socket/*` oxlint rules. Each
- *   rule is its own directory `.config/oxlint-plugin/fleet/<id>/` (holding
+ *   rule is its own directory `.config/fleet/oxlint-plugin/fleet/<id>/` (holding
  *   `index.mts` + `package.json` + `test/<id>.test.mts`, mirroring
  *   `.claude/hooks/fleet/<name>/`); that dir inventory is canonical and
  *   everything that references a rule by id is derived from it:
  *
- *   1. `.config/oxlint-plugin/index.mts` — the plugin's import list + `rules: {}`
+ *   1. `.config/fleet/oxlint-plugin/index.mts` — the plugin's import list + `rules: {}`
  *      registry. Every rule dir gets a camelCase default import
  *      (`./fleet/<id>/index.mts`) and a kebab-id registry entry; both blocks
  *      are sorted by rule id. Only those two regions are rewritten — the file's
@@ -45,7 +45,7 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { REPO_ROOT } from './paths.mts'
 
-const PLUGIN_DIR = path.join(REPO_ROOT, '.config', 'oxlint-plugin')
+const PLUGIN_DIR = path.join(REPO_ROOT, '.config', 'fleet', 'oxlint-plugin')
 // Each rule is its own dir under the cascaded `fleet/` tier (mirrors
 // .claude/hooks/fleet/<name>/): fleet/<id>/index.mts + fleet/<id>/test/.
 const FLEET_RULES_DIR = path.join(PLUGIN_DIR, 'fleet')
@@ -298,7 +298,7 @@ function main(): number {
       drift = true
       if (check) {
         problems.push(
-          '.config/oxlint-plugin/index.mts is out of sync with fleet/. Run `pnpm run sync-oxlint-rules`.',
+          '.config/fleet/oxlint-plugin/index.mts is out of sync with fleet/. Run `pnpm run sync-oxlint-rules`.',
         )
       } else {
         writeFileSync(INDEX_PATH, next)

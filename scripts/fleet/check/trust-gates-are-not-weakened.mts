@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Commit-time gate mirroring two edit-time hooks for the non-Claude edit
  *   path (manual `git checkout`, external editor, a merge):
  *

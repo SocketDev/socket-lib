@@ -23,15 +23,16 @@
 //
 // Fails open on regex errors.
 
-import { readFileSync } from 'node:fs'
-import process from 'node:process'
+import { safeReadFileSync } from '@socketsecurity/lib-stable/fs/read-file'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { withEditGuard } from '../_shared/payload.mts'
+import {
+  block,
+  defineHook,
+  editGuard,
+  runHook,
+} from '../_shared/guard.mts'
+import { resolveEditedText } from '../_shared/payload.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
 
 const BYPASS_PHRASE = 'Allow target-arch-env bypass'
 
@@ -76,57 +77,37 @@ export function classifyText(text: string): {
   }
 }
 
-export function readFileSafe(p: string): string {
-  try {
-    return readFileSync(p, 'utf8')
-  } catch {
-    return ''
-  }
-}
-
-// withEditGuard handles the stdin drain, tool_name gate, file_path narrow,
-// content extraction (new_string / content), and fail-open on any throw.
-await withEditGuard((filePath, content, payload) => {
+export const check = editGuard((filePath, _content, payload) => {
   if (!isBuilderScript(filePath)) {
-    return
+    return undefined
   }
 
-  const currentText = readFileSafe(filePath)
-  let afterText: string
-  if (payload.tool_name === 'Write') {
-    afterText = content ?? ''
-  } else {
-    const oldStr = (payload.tool_input?.old_string as string | undefined) ?? ''
-    const newStr = content ?? ''
-    if (!oldStr) {
-      return
-    }
-    if (!currentText.includes(oldStr)) {
-      return
-    }
-    afterText = currentText.replace(oldStr, newStr)
+  const currentText = safeReadFileSync(filePath) ?? ''
+  const afterText = resolveEditedText(payload)
+  if (afterText === undefined) {
+    return undefined
   }
 
   const c = classifyText(afterText)
   // Only block when ALL three conditions hold:
   //   reads TARGET_ARCH AND spawns make/configure AND has no delete.
   if (!c.reads || !c.spawnsTarget || c.deletes) {
-    return
+    return undefined
   }
   // Don't block if the same combination was already present in the
   // before-text — the regression isn't this edit.
   const cb = classifyText(currentText)
   if (cb.reads && cb.spawnsTarget && !cb.deletes) {
-    return
+    return undefined
   }
   if (
     payload.transcript_path &&
     bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)
   ) {
-    return
+    return undefined
   }
 
-  logger.error(
+  return block(
     [
       '[target-arch-env-guard] Blocked: TARGET_ARCH env-var collision risk',
       '',
@@ -153,5 +134,13 @@ await withEditGuard((filePath, content, payload) => {
       '',
     ].join('\n'),
   )
-  process.exitCode = 2
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

@@ -69,6 +69,7 @@ export function renderCompact(options: {
   savedPath: string
 }): string {
   const { candidates, fromDate, results, savedPath, syncedDate, topic } = {
+    __proto__: null,
     ...options,
   }
   const activeSources = results

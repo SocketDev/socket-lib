@@ -10,7 +10,7 @@
 //
 // The only legitimate co-located test homes are the tooling trees that own
 // their own suites and have their own runners: the oxlint plugin's per-rule
-// `.config/oxlint-plugin/fleet/<id>/test/`, `.claude/hooks/**/test/`,
+// `.config/fleet/oxlint-plugin/fleet/<id>/test/`, `.claude/hooks/**/test/`,
 // `.git-hooks/**/test/`. Those are NOT under scripts/, so this guard never
 // touches them.
 //
@@ -28,15 +28,15 @@
 //
 // Exit codes: 0 — pass; 2 — block. Fails open on any throw.
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-import { withEditGuard } from '../_shared/payload.mts'
 import { bypassPhrasePresent } from '../_shared/transcript.mts'
-
-const logger = getDefaultLogger()
+import {
+  block,
+  defineHook,
+  editGuard,
+  runHook,
+} from '../_shared/guard.mts'
 
 const BYPASS_PHRASE = 'Allow test-in-scripts bypass'
 
@@ -50,38 +50,41 @@ export function isTestInScripts(filePath: string): boolean {
   return TEST_IN_SCRIPTS_RE.test(normalizePath(filePath))
 }
 
-// Async IIFE rather than top-level await: directly-run `.mts` hooks aren't
-// CJS-bundled, but the fleet `no-top-level-await` rule is on for this path, and
-// weakening it globally is the wrong fix (no-disable-lint-rule).
-void (async () => {
-  await withEditGuard((filePath, _content, payload) => {
-    if (!isTestInScripts(filePath)) {
-      return
-    }
-    if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
-      return
-    }
-    logger.error(
-      [
-        '[no-test-in-scripts-guard] Blocked: test file under scripts/.',
-        '',
-        `  Path: ${normalizePath(filePath)}`,
-        '',
-        '  Tests live under `test/` (test/unit/, test/isolated/, …). A test',
-        '  under scripts/** is excluded by the vitest config and silently',
-        '  never runs. Move it:',
-        '',
-        '    test/unit/<name>.test.mts   not   scripts/**/test/<name>.test.mts',
-        '',
-        '  Reusable test helpers go in test/_shared/fleet/lib/.',
-        '  Co-located test homes (NOT under scripts/) are the only exception:',
-        '  .config/oxlint-plugin/fleet/<id>/test/, .claude/hooks/**/test/,',
-        '  .git-hooks/**/test/.',
-        '',
-        `  Bypass: type \`${BYPASS_PHRASE}\` if this is genuinely intended.`,
-        '',
-      ].join('\n'),
-    )
-    process.exitCode = 2
-  })
-})()
+export const check = editGuard((filePath, _content, payload) => {
+  if (!isTestInScripts(filePath)) {
+    return undefined
+  }
+  if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
+    return undefined
+  }
+  return block(
+    [
+      '[no-test-in-scripts-guard] Blocked: test file under scripts/.',
+      '',
+      `  Path: ${normalizePath(filePath)}`,
+      '',
+      '  Tests live under `test/` (test/unit/, test/isolated/, …). A test',
+      '  under scripts/** is excluded by the vitest config and silently',
+      '  never runs. Move it:',
+      '',
+      '    test/unit/<name>.test.mts   not   scripts/**/test/<name>.test.mts',
+      '',
+      '  Reusable test helpers go in test/_shared/fleet/lib/.',
+      '  Co-located test homes (NOT under scripts/) are the only exception:',
+      '  .config/fleet/oxlint-plugin/fleet/<id>/test/, .claude/hooks/**/test/,',
+      '  .git-hooks/**/test/.',
+      '',
+      `  Bypass: type \`${BYPASS_PHRASE}\` if this is genuinely intended.`,
+      '',
+    ].join('\n'),
+  )
+})
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

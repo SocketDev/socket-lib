@@ -1,4 +1,4 @@
-/**
+/*
  * @file Shared helpers for Claude Code PreToolUse / Stop hooks. Two
  *   responsibilities the fleet's hooks were each duplicating:
  *
@@ -204,7 +204,7 @@ export function countBypassPhrases(
  * as a separate string. The leading language tag (e.g. ` ```ts `) is stripped —
  * only the code lines are kept.
  *
- * Used by hooks (error-message-quality-reminder) that need to inspect the code
+ * Used by hooks (error-message-quality-nudge) that need to inspect the code
  * the assistant wrote rather than the prose around it.
  */
 export interface CodeFence {
@@ -218,12 +218,12 @@ export function extractCodeFences(text: string): CodeFence[] {
   // The lang tag is optional; the content is anything (non-greedy) up
   // to the closing fence. We're permissive — bad markdown still gets
   // captured as a block.
-  const re = /```([a-zA-Z0-9_+-]*)\n?([\s\S]*?)```/g
+  const re = /```(?<lang>[a-zA-Z0-9_+-]*)\n?(?<body>[\s\S]*?)```/g
   let match: RegExpExecArray | null
   while ((match = re.exec(text)) !== null) {
-    const body = match[2]
+    const body = match.groups?.body
     if (body !== undefined) {
-      out.push({ lang: match[1] ?? '', body })
+      out.push({ lang: match.groups?.lang ?? '', body })
     }
   }
   return out
@@ -283,8 +283,8 @@ type Role = 'user' | 'assistant'
  * SECURITY: `tool_result` and `tool_use` blocks are EXCLUDED. A `role: user`
  * message in the transcript carries two very different kinds of content —
  * genuine user typing (`{type:'text'}`) and tool results the harness injected
- * (`{type:'tool_result', content:…}`, e.g. the bytes of a file the agent read or
- * a command's stdout). Counting tool-result text as "user text" makes every
+ * (`{type:'tool_result', content:…}`, e.g. the bytes of a file the agent read
+ * or a command's stdout). Counting tool-result text as "user text" makes every
  * bypass-phrase check spoofable: a dependency file or command output containing
  * "Allow <X> bypass" would defeat the guard. So we only collect genuine `text`
  * blocks (and bare strings) and never a block's `content` field. Same reasoning
@@ -329,7 +329,7 @@ export function readLastAssistantText(
  * Walk the transcript newest → oldest, return every tool-use event from the
  * most recent assistant turn. Returns an empty array if the transcript is
  * missing or the most recent assistant turn has no tool uses. Used by hooks
- * that gate on what the assistant just did (e.g. file-size-reminder reading
+ * that gate on what the assistant just did (e.g. file-size-nudge reading
  * Write/Edit events).
  */
 export function readLastAssistantToolUses(
@@ -358,7 +358,7 @@ export function readLastAssistantToolUses(
  * far back to walk in assistant turns; pass a small N (e.g. 5) so the scan
  * stays cheap on long transcripts. Used by hooks that compare what the
  * assistant is doing now to what it did earlier in the session — e.g.
- * compound-lessons-reminder detecting repeated edits to the same hook/skill
+ * compound-lessons-nudge detecting repeated edits to the same hook/skill
  * without rule promotion.
  */
 export function readPriorAssistantToolUses(
@@ -462,14 +462,30 @@ export function readRoleText(
  * Read the entire stdin buffer into a string. Used by every PreToolUse hook to
  * slurp the JSON payload Claude Code sends.
  */
+// A per-event dispatcher reads stdin ONCE and re-exposes the raw payload via
+// this env var, so many guards run in a single process without each racing for
+// the already-consumed stdin fd. Not a kill switch — it carries the payload, it
+// doesn't gate behavior.
+const STDIN_ENV = 'CLAUDE_HOOK_STDIN'
+let cachedStdin: string | undefined
 export function readStdin(): Promise<string> {
+  const injected = process.env[STDIN_ENV]
+  if (typeof injected === 'string') {
+    return Promise.resolve(injected)
+  }
+  if (cachedStdin !== undefined) {
+    return Promise.resolve(cachedStdin)
+  }
   return new Promise(resolve => {
     let buf = ''
     process.stdin.setEncoding('utf8')
     process.stdin.on('data', chunk => {
       buf += chunk
     })
-    process.stdin.on('end', () => resolve(buf))
+    process.stdin.on('end', () => {
+      cachedStdin = buf
+      resolve(buf)
+    })
   })
 }
 
@@ -559,7 +575,7 @@ export function stripQuotedSpans(text: string): string {
   // the ASCII charset and benefit from a separate, simpler regex.
   return text
     .replace(/"[^"\n]{1,80}"/g, ' ')
-    .replace(/(^|[\s([{,;:>])'[^'\n]{1,80}'/g, '$1 ')
+    .replace(/(?<boundary>^|[\s([{,;:>])'[^'\n]{1,80}'/g, '$<boundary> ')
     .replace(/“[^”\n]{1,80}”/g, ' ')
     .replace(/‘[^’\n]{1,80}’/g, ' ')
 }

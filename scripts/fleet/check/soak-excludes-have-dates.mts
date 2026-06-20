@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Whole-file commit-time gate that mirrors the edit-time
  *   `.claude/hooks/fleet/soak-exclude-date-guard/`. Scans the repo's
  *   `pnpm-workspace.yaml` `minimumReleaseAgeExclude:` block and reports any
@@ -35,7 +35,7 @@ const ENTRY_RE =
 const GLOB_ENTRY_RE = /^\s*-\s*['"]?[^'"\s]*\*[^'"\s]*['"]?\s*$/
 const BARE_NAME_ENTRY_RE = /^\s*-\s*['"]?[^@'"\s]+['"]?\s*$/
 // In-repo workspace-member PATH globs (`packages/*`, `.claude/hooks/**`,
-// `.config/oxlint-plugin/**`, `template/**`) aren't npm packages — they never
+// `.config/fleet/oxlint-plugin/**`, `template/**`) aren't npm packages — they never
 // soak, so they're always exempt. Everything ELSE that's exempt must be
 // Socket-OWNED (decided by the canonical SOCKET_PACKAGE_PATTERNS via
 // isSocketSourcedPackage), not hardcoded here. A third-party scope glob (e.g.

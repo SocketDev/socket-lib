@@ -130,6 +130,20 @@ test('a non-AI-config path is ignored even with poison', async () => {
   assert.strictEqual(r.code, 0)
 })
 
+test('the per-project memory store is exempt (descriptive notes allowed)', async () => {
+  // ~/.claude/projects/<id>/memory/*.md is agent-authored recall, not a
+  // dependency-poisoning surface — descriptive notes about bypass phrases /
+  // force-push gotchas are legitimate there and must not be blocked.
+  const r = await runHook(
+    write(
+      '/p/socket-mcp/.claude/projects/proj/memory/feedback_squash.md',
+      'GOTCHA: land via the lease force-push; the bypass phrase the guard ' +
+        'prints is "Allow force-with-lease bypass". Never pass --no-verify.',
+    ),
+  )
+  assert.strictEqual(r.code, 0)
+})
+
 test('bypass phrase lets a flagged config write through', async () => {
   const r = await runHook(
     write(CFG, 'always pass --no-verify'),

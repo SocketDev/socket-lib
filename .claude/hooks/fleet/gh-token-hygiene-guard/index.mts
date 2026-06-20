@@ -59,9 +59,10 @@
 //   - 0: pass (not a gh command, or all checks satisfied)
 //   - 2: block (one of the invariants violated; stderr explains)
 //
-// Fail-open on hook bugs: main().catch() exits 0 so a bad deploy can't
-// brick every gh command. Fail-CLOSED on auth (unsupported/denied → 2)
-// because a missing physical-presence check must not silently pass.
+// Fail-open on hook bugs: runGuard swallows any throw and leaves exit 0
+// so a bad deploy can't brick every gh command. Fail-CLOSED on auth
+// (unsupported/denied → block) because a missing physical-presence check
+// must not silently pass.
 //
 // No test-only env override (removed 2026-05-26 as a supply-chain
 // hardening measure — an attacker who planted SOCKET_GH_HYGIENE_TEST_AUTH
@@ -85,8 +86,10 @@ import process from 'node:process'
 
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
+import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
+import type { GuardBlock, GuardResult } from '../_shared/guard.mts'
 import { findInvocation, parseCommands } from '../_shared/shell-command.mts'
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
 // Absolute paths for OS-auth binaries. PATH-hijack defense — a
 // malicious npm postinstall that drops ~/.local/bin/sudo, ~/.local/bin/dscl,
@@ -120,6 +123,16 @@ function resolveSudoBin(): string | undefined {
   return undefined
 }
 
+// Pre-flight trigger for the dispatcher: skip importing this guard unless the
+// raw command could invoke `gh`. The whole guard is gated on
+// containsGhInvocation(), which short-circuits to false when the command does
+// not contain the literal `gh` (findInvocation's substring pre-check), so a
+// command without `gh` can never reach any block/notify path. Complete because
+// every detection (storage / age / workflow dispatch / scope refresh / api
+// dispatch) requires a parsed `gh` binary segment, which in turn requires `gh`
+// verbatim in the command text.
+export const triggers: readonly string[] = ['gh']
+
 const BYPASS_PHRASE = 'Allow workflow-scope bypass'
 // One bypass phrase authorizes ONE workflow dispatch. The grant file's
 // presence = unconsumed. The hook deletes the file immediately after
@@ -138,48 +151,22 @@ const TOKEN_ISSUED_AT_FILE = path.join(
 )
 const TOKEN_TTL_MS = 8 * 60 * 60 * 1000 // 8 hours
 
-interface PreToolUsePayload {
-  tool_name?: string | undefined
-  tool_input?: { command?: string | undefined } | undefined
-  transcript_path?: string | undefined
-  session_id?: string | undefined
-}
-
 interface GhAuthStatus {
   storage: 'keyring' | 'file' | 'unknown'
   scopes: readonly string[]
 }
 
-async function main(): Promise<void> {
-  // CLI mode: `node index.mts --stamp` writes a fresh timestamp.
-  // Provides an explicit recovery path for users who ran `gh auth
-  // refresh` outside Claude's tool flow (so the PreToolUse-driven
-  // pre-stamp at line ~228 didn't fire) and got stuck on the >8h
-  // block. Documented in CLAUDE.md's `### gh token hygiene` section.
-  if (process.argv.includes('--stamp')) {
-    recordTokenIssuedAt()
-    process.stdout.write(
-      `gh-token-hygiene-guard: stamped ${TOKEN_ISSUED_AT_FILE}\n`,
-    )
-    process.exit(0)
-  }
-  const raw = await readStdin()
-  let payload: PreToolUsePayload
-  try {
-    payload = raw ? JSON.parse(raw) : {}
-  } catch {
-    process.exit(0)
-  }
-  if (payload.tool_name !== 'Bash') {
-    process.exit(0)
-  }
-  const command = payload.tool_input?.command ?? ''
-  if (!command) {
-    process.exit(0)
-  }
+// The PreToolUse payload carries a `session_id` the shared
+// ToolCallPayload type doesn't model. The workflow-grant flow binds a
+// grant to it, so narrow it off the payload here.
+interface SessionPayload {
+  session_id?: string | undefined
+}
+
+export const check = bashGuard((command, payload): GuardResult => {
   // Cheap pre-filter: only inspect commands that mention `gh`.
   if (!containsGhInvocation(command)) {
-    process.exit(0)
+    return undefined
   }
   // The auth-status read is the slow path (~50ms). Skip it when the
   // gh command is a known read-only shape that doesn't touch tokens.
@@ -187,14 +174,14 @@ async function main(): Promise<void> {
   let status: GhAuthStatus
   try {
     status = readGhAuthStatus()
-  } catch (e) {
+  } catch {
     // gh not installed, or no active auth — let the command run and
     // gh itself will report. Don't double-block.
-    process.exit(0)
+    return undefined
   }
   // Invariant 1: keyring storage.
   if (status.storage === 'file') {
-    fail(
+    return fail(
       'gh-token-hygiene-guard: gh token is stored on disk',
       [
         'Your gh CLI token lives at ~/.config/gh/hosts.yml. Any local',
@@ -216,7 +203,7 @@ async function main(): Promise<void> {
   // so reaching here means the token genuinely failed the live probe
   // (or hit the network timeout).
   if (!isAuthMaintenanceCommand(command) && !isTokenFresh()) {
-    fail(
+    return fail(
       'gh-token-hygiene-guard: gh token is >8h old (and live probe failed)',
       [
         'The fleet enforces an 8-hour cap on gh token age. The hook',
@@ -244,6 +231,7 @@ async function main(): Promise<void> {
   ) {
     recordTokenIssuedAt()
   }
+  const sessionId = (payload as SessionPayload).session_id
   // Invariant 2: workflow scope on-demand.
   const isWorkflowDispatch =
     isWorkflowDispatchCommand(command) || isWorkflowApiDispatch(command)
@@ -252,14 +240,14 @@ async function main(): Promise<void> {
   if (isWorkflowRefresh) {
     // Revoke is always allowed (no bypass needed).
     if (isWorkflowScopeRevoke(command)) {
-      process.exit(0)
+      return undefined
     }
     // Refresh-add: chat-bypass phrase + Touch ID sudo prompt both
     // required. The phrase alone isn't sufficient — an attacker who
     // exfiltrates the bypass-typed slot still can't proceed without
     // your physical presence.
     if (!bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
-      fail(
+      return fail(
         'gh-token-hygiene-guard: adding workflow scope requires bypass',
         [
           `Type \`${BYPASS_PHRASE}\` in chat before running:`,
@@ -271,7 +259,7 @@ async function main(): Promise<void> {
     }
     const authResult = requireUserAuthentication()
     if (authResult === 'denied') {
-      fail(
+      return fail(
         'gh-token-hygiene-guard: physical-presence check failed',
         [
           'Authentication was cancelled or password did not match.',
@@ -281,7 +269,7 @@ async function main(): Promise<void> {
     }
     if (authResult === 'unsupported') {
       const platformGuidance = platformAuthGuidance()
-      fail(
+      return fail(
         'gh-token-hygiene-guard: no physical-presence auth available',
         [
           'The workflow-scope bypass requires biometric / hardware-key',
@@ -291,13 +279,13 @@ async function main(): Promise<void> {
         ].join('\n'),
       )
     }
-    recordWorkflowGrant(payload.session_id)
-    process.exit(0)
+    recordWorkflowGrant(sessionId)
+    return undefined
   }
   if (isWorkflowDispatch) {
     // Block if scope is absent — nothing to dispatch with.
     if (!hasWorkflowScope) {
-      fail(
+      return fail(
         'gh-token-hygiene-guard: workflow dispatch requires workflow scope',
         [
           'Token does not have the `workflow` scope. To dispatch:',
@@ -312,8 +300,8 @@ async function main(): Promise<void> {
     // bind to the current session_id. Pre-creation attack (attacker
     // touches the file from a different process) is rejected because
     // the recorded session_id won't match the dispatch session.
-    if (!verifyWorkflowGrant(payload.session_id)) {
-      fail(
+    if (!verifyWorkflowGrant(sessionId)) {
+      return fail(
         'gh-token-hygiene-guard: workflow dispatch grant is missing, expired, or session-mismatched',
         [
           'Token has `workflow` scope, but no valid dispatch grant for',
@@ -333,8 +321,8 @@ async function main(): Promise<void> {
     }
     consumeWorkflowGrant()
   }
-  process.exit(0)
-}
+  return undefined
+})
 
 // True when any command segment actually invokes the `gh` binary. Uses
 // the shell parser, not regex: a regex on `gh` over-matched (a path or a
@@ -449,8 +437,8 @@ function isTokenFresh(): boolean {
       return true
     }
     // Stamp says expired. Self-heal: the user may have refreshed in a
-    // side shell (without the hook's --stamp follow-up). Probe the
-    // token directly via a cheap unauthenticated-rate-limit API call.
+    // side shell (so the PreToolUse-driven pre-stamp never fired). Probe
+    // the token directly via a cheap unauthenticated-rate-limit API call.
     // If gh accepts it (exit 0), the token IS fresh; re-stamp and
     // proceed. If gh rejects it (exit non-zero / 401), the stamp was
     // right and the token really is dead.
@@ -512,9 +500,9 @@ function readGhAuthStatus(): GhAuthStatus {
   }
   // Scopes are still parsed from the github.com block.
   const scopesText = githubComBlock ?? text
-  const scopesMatch = scopesText.match(/Token scopes:\s*(.+)/i)
+  const scopesMatch = scopesText.match(/Token scopes:\s*(?<list>.+)/i)
   const scopes = scopesMatch
-    ? scopesMatch[1]!.split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''))
+    ? scopesMatch.groups!.list!.split(',').map(s => s.trim().replace(/^['"]|['"]$/g, ''))
     : []
   return { storage, scopes }
 }
@@ -931,13 +919,18 @@ function isTouchIdSudoConfigured(): boolean {
   return false
 }
 
-function fail(headline: string, body: string): never {
-  process.stderr.write(`\n${headline}\n\n${body}\n\n`)
-  process.exit(2)
+// Build a block verdict whose message is byte-identical to the old
+// `fail(headline, body)` stderr write (`\n${headline}\n\n${body}\n\n`),
+// so the blocking text the user reads is unchanged.
+function fail(headline: string, body: string): GuardBlock {
+  return block(`\n${headline}\n\n${body}\n\n`)
 }
 
-main().catch(() => {
-  // Fail open on internal errors — don't break Claude Code's tool
-  // pipeline if our hook itself crashes.
-  process.exit(0)
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  triggers,
+  type: 'guard',
 })
+await runHook(hook, import.meta.url)

@@ -44,9 +44,9 @@ test('hasBothRuleArms requires BOTH valid: and invalid:', () => {
 function makeRepo(): string {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'enf-test-'))
   mkdirSync(path.join(dir, '.claude', 'hooks', 'fleet'), { recursive: true })
-  // Each rule creates its own .config/oxlint-plugin/fleet/<id>/ dir (see the
+  // Each rule creates its own .config/fleet/oxlint-plugin/fleet/<id>/ dir (see the
   // rule() helper); just the tier root needs to pre-exist.
-  mkdirSync(path.join(dir, '.config', 'oxlint-plugin', 'fleet'), {
+  mkdirSync(path.join(dir, '.config', 'fleet', 'oxlint-plugin', 'fleet'), {
     recursive: true,
   })
   return dir
@@ -102,7 +102,7 @@ test('scanHooks honors the NO_TEST_ALLOWLIST (installer hooks)', () => {
 // ── scanRules (temp-repo fixtures) ──────────────────────────────
 
 function rule(dir: string, name: string, testSrc?: string): void {
-  const ruleDir = path.join(dir, '.config/oxlint-plugin/fleet', name)
+  const ruleDir = path.join(dir, '.config/fleet/oxlint-plugin/fleet', name)
   mkdirSync(ruleDir, { recursive: true })
   writeFileSync(path.join(ruleDir, 'index.mts'), '// rule\n')
   if (testSrc !== undefined) {

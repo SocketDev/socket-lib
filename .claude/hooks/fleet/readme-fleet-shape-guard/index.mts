@@ -34,38 +34,12 @@
 //
 // This hook is the edit-time enforcement — it fires when the README is
 // being written, catching the failure mode at its earliest surface.
-//
-// Reads a Claude Code PreToolUse JSON payload from stdin:
-//   { "tool_name": "Edit" | "MultiEdit" | "Write",
-//     "tool_input": { "file_path": "...",
-//                     "content"?: "...",
-//                     "new_string"?: "...",
-//                     "old_string"?: "..." },
-//     "transcript_path": "/.../session.jsonl" }
-//
-// Exits:
-//   0 — allowed.
-//   2 — blocked (with stderr message that explains rule + fix + bypass).
-//   0 (with stderr log) — fail-open on hook bugs.
 
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
 
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
-
-type ToolInput = {
-  tool_input?:
-    | {
-        content?: string | undefined
-        file_path?: string | undefined
-        new_string?: string | undefined
-        old_string?: string | undefined
-      }
-    | undefined
-  tool_name?: string | undefined
-  transcript_path?: string | undefined
-}
+import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
 const BYPASS_PHRASE = 'Allow readme-fleet-shape bypass'
 const BYPASS_LOOKBACK_USER_TURNS = 8
@@ -176,9 +150,9 @@ export function findShapeViolations(text: string): ShapeFinding[] {
 
   const headings: string[] = []
   for (let i = 0, { length } = lines; i < length; i += 1) {
-    const m = /^##\s+(.+?)\s*$/.exec(lines[i] ?? '')
-    if (m && m[1]) {
-      headings.push(m[1])
+    const m = /^##\s+(?<heading>.+?)\s*$/.exec(lines[i] ?? '')
+    if (m && m.groups?.heading) {
+      headings.push(m.groups.heading)
     }
   }
   let cursor = 0
@@ -241,46 +215,32 @@ export function findShapeViolations(text: string): ShapeFinding[] {
   return findings
 }
 
-async function main(): Promise<number> {
-  const raw = await readStdin()
-  if (!raw.trim()) {
-    return 0
+export const check = editGuard((filePath, content, payload) => {
+  if (!isRootReadme(filePath)) {
+    return undefined
   }
 
-  let payload: ToolInput
-  try {
-    payload = JSON.parse(raw) as ToolInput
-  } catch {
-    process.stderr.write(
-      'readme-fleet-shape-guard: failed to parse stdin payload — fail-open\n',
-    )
-    return 0
-  }
-
-  const tool = payload.tool_name
-  if (tool !== 'Edit' && tool !== 'MultiEdit' && tool !== 'Write') {
-    return 0
-  }
-
-  const filePath = payload.tool_input?.file_path
-  if (!filePath || !isRootReadme(filePath)) {
-    return 0
-  }
+  const tool = payload.tool_name!
+  const input = payload.tool_input
+  const newString =
+    typeof input?.new_string === 'string' ? input.new_string : undefined
+  const oldString =
+    typeof input?.old_string === 'string' ? input.old_string : undefined
 
   const postEdit = computePostEditText(
     tool,
     filePath,
-    payload.tool_input?.new_string,
-    payload.tool_input?.old_string,
-    payload.tool_input?.content,
+    newString,
+    oldString,
+    content,
   )
   if (postEdit === undefined) {
-    return 0
+    return undefined
   }
 
   const findings = findShapeViolations(postEdit)
   if (findings.length === 0) {
-    return 0
+    return undefined
   }
 
   if (
@@ -290,7 +250,7 @@ async function main(): Promise<number> {
       BYPASS_LOOKBACK_USER_TURNS,
     )
   ) {
-    return 0
+    return undefined
   }
 
   const lines: string[] = [
@@ -319,16 +279,13 @@ async function main(): Promise<number> {
     `One-shot bypass (rare): user types "${BYPASS_PHRASE}" verbatim in a recent message.`,
   )
   lines.push(``)
-  process.stderr.write(`${lines.join('\n')}`)
-  return 2
-}
+  return block(lines.join('\n'))
+})
 
-main().then(
-  code => process.exit(code),
-  err => {
-    process.stderr.write(
-      `readme-fleet-shape-guard: hook error — fail-open: ${String(err)}\n`,
-    )
-    process.exit(0)
-  },
-)
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+await runHook(hook, import.meta.url)

@@ -43,7 +43,7 @@
 //
 // Fail-open: probe + repair never block. On any internal error (timeout,
 // permission, a guard tripping, install failure) the hook silently exits 0
-// and lets the session proceed — same posture as socket-token-minifier-start.
+// and lets the session proceed — same posture as headroom-proxy-start.
 // The repair is bounded and guarded: it only fires on the precise GUTTED
 // signature, skips when a pnpm install is already running (no double-install
 // collision — that collision is what CAUSES the gutting), runs at most once
@@ -100,9 +100,12 @@ function emitAdditionalContext(message: string): void {
   process.stdout.write(JSON.stringify(out))
 }
 
-function findHookEntrypoints(): readonly string[] {
+export function findHookEntrypoints(): readonly string[] {
   const entries: string[] = []
-  // Each hook lives at <hooks-dir>/<name>/index.mts.
+  // Hooks live one tier down: <hooks-dir>/<tier>/<name>/index.mts, where tier
+  // is `fleet` or `repo`. A flat <hooks-dir>/<name>/index.mts is also honored
+  // so a pre-tier layout still probes (the bare top-level scan found only the
+  // tier dirs and probed zero hooks).
   let topLevel: readonly string[]
   try {
     topLevel = readdirSync(HOOKS_DIR)
@@ -110,20 +113,44 @@ function findHookEntrypoints(): readonly string[] {
     // No hooks dir; nothing to probe.
     return []
   }
-  for (const name of topLevel) {
+  for (const top of topLevel) {
     if (entries.length >= MAX_PROBES) {
       break
     }
-    if (name === '_shared') {
+    if (top === '_shared') {
       continue
     }
-    const candidate = path.join(HOOKS_DIR, name, 'index.mts')
+    // Flat layout: <hooks-dir>/<name>/index.mts.
+    const flat = path.join(HOOKS_DIR, top, 'index.mts')
     try {
-      if (statSync(candidate).isFile()) {
-        entries.push(candidate)
+      if (statSync(flat).isFile()) {
+        entries.push(flat)
+        continue
       }
     } catch {
-      // Hook dir without index.mts is fine; skip.
+      // Not a flat hook; treat `top` as a tier dir and descend.
+    }
+    let names: readonly string[]
+    try {
+      names = readdirSync(path.join(HOOKS_DIR, top))
+    } catch {
+      continue
+    }
+    for (const name of names) {
+      if (entries.length >= MAX_PROBES) {
+        break
+      }
+      if (name === '_shared') {
+        continue
+      }
+      const candidate = path.join(HOOKS_DIR, top, name, 'index.mts')
+      try {
+        if (statSync(candidate).isFile()) {
+          entries.push(candidate)
+        }
+      } catch {
+        // Tier entry without index.mts (a non-hook dir); skip.
+      }
     }
   }
   return entries
@@ -159,11 +186,7 @@ function isGuttedNodeModules(): boolean {
 
 // The catalog alias every fleet hook imports. pnpm links it as a symlink into
 // the .pnpm store (`@socketsecurity/lib-stable -> ../.pnpm/@socketsecurity+lib@…`).
-const LIB_STABLE_LINK = path.join(
-  NODE_MODULES,
-  '@socketsecurity',
-  'lib-stable',
-)
+const LIB_STABLE_LINK = path.join(NODE_MODULES, '@socketsecurity', 'lib-stable')
 
 // MODE B — a DANGLING lib-stable symlink (distinct from the full gut above).
 // When a git worktree exists under the repo and a `pnpm install` runs, pnpm can
@@ -260,12 +283,12 @@ function repairGutted(): string {
 function parseMissingPackages(stderr: string): readonly string[] {
   const pkgs = new Set<string>()
   // ESM form: Cannot find package '<name>' …
-  for (const m of stderr.matchAll(/Cannot find package '([^']+)'/g)) {
-    pkgs.add(m[1]!)
+  for (const m of stderr.matchAll(/Cannot find package '(?<pkg>[^']+)'/g)) {
+    pkgs.add(m.groups!.pkg!)
   }
   // CJS form: Cannot find module '<name>'
-  for (const m of stderr.matchAll(/Cannot find module '([^']+)'/g)) {
-    const name = m[1]!
+  for (const m of stderr.matchAll(/Cannot find module '(?<pkg>[^']+)'/g)) {
+    const name = m.groups!.pkg!
     // Skip relative + absolute paths (those are import-path bugs, not
     // missing-dep bugs, and the user can't `pnpm i` a relative path).
     if (!name.startsWith('.') && !name.startsWith('/')) {
@@ -442,10 +465,12 @@ function main(): void {
   emitAdditionalContext(formatReport(failures))
 }
 
-try {
-  main()
-} catch {
-  // Fail-open: never block a session on this hook's own bug.
-  // No exitCode write needed — Node defaults to 0 when the loop
-  // drains naturally, and we explicitly never want a non-zero here.
+if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+  try {
+    main()
+  } catch {
+    // Fail-open: never block a session on this hook's own bug.
+    // No exitCode write needed — Node defaults to 0 when the loop
+    // drains naturally, and we explicitly never want a non-zero here.
+  }
 }

@@ -66,9 +66,9 @@ export function readSoakWindowMs(): number {
     if (existsSync(candidate)) {
       try {
         const content = readFileSync(candidate, 'utf8')
-        const match = /^minimumReleaseAge:\s*(\d+)/m.exec(content)
+        const match = /^minimumReleaseAge:\s*(?<value>\d+)/m.exec(content)
         if (match) {
-          return Number(match[1]) * MS_PER_MINUTE
+          return Number(match.groups!.value) * MS_PER_MINUTE
         }
       } catch {
         // Read error.
@@ -270,9 +270,9 @@ export async function updateGithubReleaseTool(
       if (resp.ok) {
         checksumMap = { __proto__: null } as unknown as Record<string, string>
         for (const line of resp.text().split('\n')) {
-          const match = /^([a-f0-9]{64})\s+(.+)$/.exec(line.trim())
+          const match = /^(?<hash>[a-f0-9]{64})\s+(?<filename>.+)$/.exec(line.trim())
           if (match) {
-            checksumMap[match[2]!] = match[1]!
+            checksumMap[match.groups!.filename!] = match.groups!.hash!
           }
         }
       }

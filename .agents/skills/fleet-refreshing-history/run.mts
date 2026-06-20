@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * Refreshing-history runner.
  *
  * Squashes a Socket fleet repo's default branch to a single signed "Initial
@@ -28,11 +28,15 @@ import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 const logger = getDefaultLogger()
 import process from 'node:process'
 
+import { errorMessage } from '@socketsecurity/lib/errors'
 import { isError } from '@socketsecurity/lib/errors/predicates'
 
 import { resolveDefaultBranch } from '../_shared/scripts/git-default-branch.mts'
 // Shared run/timestamp/header helpers — one owner, not a per-runner copy.
 import { header, run, timestamp } from '../_shared/scripts/run-helpers.mts'
+// Shared squash engine — the reset/amend/count/integrity dance lives in
+// squashing-history; refreshing-history layers dep-refresh + sign on top.
+import { squashSingleCommit } from '../squashing-history/run.mts'
 
 export { header, run, timestamp }
 
@@ -93,42 +97,16 @@ async function main(): Promise<number> {
     worktree,
   )
 
-  // Phase 4 — squash to one signed parentless commit.
-  const tree = (await run('git', ['rev-parse', 'HEAD^{tree}'], worktree)).stdout
-  const newSha = (
-    await run(
-      'git',
-      ['commit-tree', '-S', tree, '-m', 'Initial commit'],
-      worktree,
-    )
-  ).stdout
-  await run('git', ['reset', '--hard', newSha], worktree)
-
-  const newCount = (await run('git', ['rev-list', '--count', 'HEAD'], worktree))
-    .stdout
-  if (newCount !== '1') {
-    throw new Error(`post-squash commit count is ${newCount}, expected 1`)
-  }
-  const sig = (await run('git', ['log', '--format=%G?', '-1'], worktree)).stdout
-  if (sig !== 'G') {
-    throw new Error(`squashed commit not signed (got ${sig})`)
-  }
-  logger.success(`squashed ${origCount} commits → 1 signed commit (${newSha})`)
-
-  // Phase 5 — integrity check.
-  const diff = await run(
-    'git',
-    ['diff', '--ignore-submodules', origHead],
+  // Squash + integrity run through the shared squashing-history engine.
+  // sign: true asserts the %G? == 'G' that required_signatures branch
+  // protection demands; a tree mismatch is a HARD process.exit(1) in the engine.
+  const { newHead: newSha } = await squashSingleCommit({
+    message: 'Initial commit',
+    origHead,
+    sign: true,
     worktree,
-    {
-      allowFailure: true,
-    },
-  )
-  if (diff.stdout.length > 0) {
-    logger.error(`post-squash diff vs ${origHead} non-empty; aborting`)
-    logger.error(diff.stdout.split('\n').slice(0, 20).join('\n'))
-    return 1
-  }
+  })
+  logger.success(`squashed ${origCount} commits → 1 signed commit (${newSha})`)
   logger.success(`integrity: post-squash tree == origin/${base} tree`)
 
   // Phase 6 — refresh deps + format + check.

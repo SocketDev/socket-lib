@@ -30,7 +30,7 @@ test('isAssertionName accepts the -have-<state> tail', () => {
   assert.equal(isAssertionName('enforcers-have-thorough-tests'), true)
   assert.equal(isAssertionName('soak-excludes-have-dates'), true)
   assert.equal(isAssertionName('mutating-skills-have-model'), true)
-  assert.equal(isAssertionName('hooks-have-no-guard-reminder-overlap'), true)
+  assert.equal(isAssertionName('hooks-have-no-guard-nudge-overlap'), true)
 })
 
 test('isAssertionName accepts -resolve / -match verb tails', () => {
@@ -59,7 +59,7 @@ test('isAssertionName REJECTS bare-topic names (the pre-rename forms)', () => {
   assert.equal(isAssertionName('soak-exclude-dates'), false)
   assert.equal(isAssertionName('claude-segmentation'), false)
   assert.equal(isAssertionName('lock-step-header'), false)
-  assert.equal(isAssertionName('hook-reminder-guard-overlap'), false)
+  assert.equal(isAssertionName('hook-nudge-guard-overlap'), false)
 })
 
 test('isAssertionName REJECTS a dangling tail (no state after are/is/have)', () => {

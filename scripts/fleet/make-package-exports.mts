@@ -449,6 +449,7 @@ async function runGenerator(): Promise<void> {
   const publicFiles = await fastGlob.glob([...fileGlobs], {
     cwd: packageDir,
     ignore,
+    gitignore: false,
   })
 
   const srcRoot = path.join(packageDir, 'src')
@@ -456,6 +457,7 @@ async function runGenerator(): Promise<void> {
     await fastGlob.glob(['**/*.{ts,mts,cts}'], {
       cwd: srcRoot,
       ignore: ['**/*.d.ts', 'external/**'],
+      gitignore: false,
     }),
   )
 

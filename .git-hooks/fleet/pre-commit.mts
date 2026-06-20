@@ -36,6 +36,7 @@ import {
   shouldSkipFile,
   socketLintMarkerFor,
   stagedIndexIsEmpty,
+  stripTemplateLayer,
 } from '../_shared/helpers.mts'
 
 const logger = getDefaultLogger()
@@ -83,9 +84,7 @@ const main = (): number => {
     logger.info('  to anchor a release tag forward, tag the real content')
     logger.info('  commit instead: git tag -f vX.Y.Z <real-content-commit>.')
     logger.info('')
-    logger.info(
-      '  A genuine no-content waypoint needs git commit --no-verify.',
-    )
+    logger.info('  A genuine no-content waypoint needs git commit --no-verify.')
     return 1
   }
 
@@ -432,10 +431,12 @@ const main = (): number => {
       file.startsWith('scripts/') ||
       // template/ is the canonical source for code that cascades to
       // .claude/hooks/, .git-hooks/, and scripts/. Apply the same
-      // exemption at the source.
-      file.startsWith('template/.claude/hooks/') ||
-      file.startsWith('template/.git-hooks/') ||
-      file.startsWith('template/scripts/') ||
+      // exemption at the source. stripTemplateLayer collapses the
+      // archetype layer segment (template/base/... → template/...) so
+      // the move stays exempt.
+      stripTemplateLayer(file).startsWith('template/.claude/hooks/') ||
+      stripTemplateLayer(file).startsWith('template/.git-hooks/') ||
+      stripTemplateLayer(file).startsWith('template/scripts/') ||
       file.includes('/external/') ||
       file.includes('/vendor/') ||
       file.includes('/upstream/') ||

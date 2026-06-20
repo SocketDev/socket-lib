@@ -1,9 +1,9 @@
 /**
  * @file Unit tests for `_shared/git-identity.mts`. Covers the pure
  *   placeholder-email classifier (the patterns shared by git-config-write-guard
- *   and git-identity-drift-reminder). The git-config-reading helpers
- *   (effectiveUserEmail / hasGlobalIdentity) shell out and are exercised through
- *   the consuming hooks' integration tests, not here.
+ *   and git-identity-drift-nudge). The git-config-reading helpers
+ *   (effectiveUserEmail / hasGlobalIdentity) shell out and are exercised
+ *   through the consuming hooks' integration tests, not here.
  */
 
 import assert from 'node:assert/strict'
@@ -17,6 +17,9 @@ test('isPlaceholderEmail: flags the real incident (agent-ci@example.com)', () =>
 
 test('isPlaceholderEmail: flags test fixtures + reserved domains', () => {
   assert.equal(isPlaceholderEmail('test@example.com'), true)
+  // `test-email@example.com` is the mandated test identity (fixtures.mts);
+  // example.com/org/net are RFC-2606 reserved, so it IS a placeholder.
+  assert.equal(isPlaceholderEmail('test-email@example.com'), true)
   assert.equal(isPlaceholderEmail('x@example.org'), true)
   assert.equal(isPlaceholderEmail('y@example.net'), true)
   assert.equal(isPlaceholderEmail('bot@ci.example'), true)
@@ -29,8 +32,7 @@ test('isPlaceholderEmail: flags localhost / invalid / test pseudo-domains', () =
 })
 
 test('isPlaceholderEmail: passes real human / org emails', () => {
-  assert.equal(isPlaceholderEmail('john.david.dalton@gmail.com'), false)
-  assert.equal(isPlaceholderEmail('jdalton@socket.dev'), false)
+  assert.equal(isPlaceholderEmail('test-email@socket.dev'), false)
   assert.equal(isPlaceholderEmail('dev@company.io'), false)
 })
 

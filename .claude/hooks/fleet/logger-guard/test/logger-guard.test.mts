@@ -212,3 +212,64 @@ test('does not run on .js files (out of scope)', async () => {
   })
   assert.equal(code, 0)
 })
+
+test('blocks a hand-rolled status glyph in a logger call (string literal)', async () => {
+  const { code, stderr } = await runHook({
+    tool_name: 'Write',
+    tool_input: {
+      file_path: 'scripts/fleet/foo.mts',
+      content: "export function f() { logger.error('✗ failed') }",
+    },
+  })
+  assert.equal(code, 2, `expected exit 2; got ${code}; stderr=${stderr}`)
+  assert.ok(stderr.includes('hand-rolled logger decoration'))
+  assert.ok(stderr.includes('logger.fail'))
+})
+
+test('blocks a hand-rolled status glyph in a TEMPLATE literal', async () => {
+  const { code, stderr } = await runHook({
+    tool_name: 'Write',
+    tool_input: {
+      file_path: 'scripts/fleet/foo.mts',
+      content: 'export function f(x) { logger.error(`  ✗ ${x}`) }',
+    },
+  })
+  assert.equal(code, 2, `expected exit 2; got ${code}; stderr=${stderr}`)
+  assert.ok(stderr.includes('hand-rolled logger decoration'))
+})
+
+test('blocks a hand-rolled leading indent in a logger call', async () => {
+  const { code, stderr } = await runHook({
+    tool_name: 'Write',
+    tool_input: {
+      file_path: 'scripts/fleet/foo.mts',
+      content: "export function f() { logger.error('  Fix: run sync') }",
+    },
+  })
+  assert.equal(code, 2, `expected exit 2; got ${code}; stderr=${stderr}`)
+  assert.ok(stderr.includes('group()'))
+})
+
+test('allows clean logger calls (no glyph, no indent)', async () => {
+  const { code } = await runHook({
+    tool_name: 'Write',
+    tool_input: {
+      file_path: 'scripts/fleet/foo.mts',
+      content:
+        "export function f(d) { logger.fail('header:'); logger.group(); logger.fail(d); logger.groupEnd(); logger.substep(d) }",
+    },
+  })
+  assert.equal(code, 0)
+})
+
+test('decoration: allows a line with the allow-marker', async () => {
+  const { code } = await runHook({
+    tool_name: 'Write',
+    tool_input: {
+      file_path: 'scripts/fleet/foo.mts',
+      content:
+        "export function f() { logger.error('✗ ok here') /* socket-lint: allow logger-decoration */ }",
+    },
+  })
+  assert.equal(code, 0)
+})

@@ -1,6 +1,12 @@
+// Isolate git fixtures from the live repo. Must be the FIRST import —
+// see no-unisolated-git-fixture-guard.
+import '../../../../../.git-hooks/_shared/isolate-git-env.mts'
+
 // prefer-async-spawn: streaming-stdio-required — spawns the hook subprocess and
 // pipes a Bash payload on stdin, asserting on exit (2 = block, 0 = pass).
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
+import { mkdtempSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { test } from 'node:test'
@@ -9,7 +15,10 @@ import assert from 'node:assert/strict'
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const HOOK = path.resolve(__dirname, '..', 'index.mts')
 
-function runHook(command: string): Promise<{ code: number; stderr: string }> {
+function runHook(
+  command: string,
+  cwd?: string,
+): Promise<{ code: number; stderr: string }> {
   return new Promise((resolve, reject) => {
     const child = spawn(process.execPath, [HOOK], {
       stdio: ['pipe', 'ignore', 'pipe'],
@@ -24,7 +33,7 @@ function runHook(command: string): Promise<{ code: number; stderr: string }> {
       resolve({ code: code ?? -1, stderr })
     })
     child.stdin!.end(
-      JSON.stringify({ tool_name: 'Bash', tool_input: { command } }),
+      JSON.stringify({ tool_name: 'Bash', tool_input: { command }, cwd }),
     )
   })
 }
@@ -125,5 +134,15 @@ test('malformed payload fails open (exit 0)', async () => {
     child.process.on('exit', c => resolve(c ?? -1))
     child.stdin!.end('{ not json')
   })
+  assert.equal(code, 0)
+})
+
+test('no-ops on a bare oxlint OUTSIDE a fleet repo', async () => {
+  // A real git repo with no remote + no fleet-canonical marker → non-fleet, so
+  // a direct oxlint/eslint invocation there is the project's own business.
+  // (The cases above prove the same command blocks inside the fleet.)
+  const dir = mkdtempSync(path.join(os.tmpdir(), 'ndl-nonfleet-'))
+  await spawn('git', ['init', dir])
+  const { code } = await runHook('oxlint .', dir)
   assert.equal(code, 0)
 })

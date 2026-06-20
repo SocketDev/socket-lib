@@ -1,11 +1,13 @@
 // node --test specs for the claude-md-rule-add-guard hook.
 //
 // PreToolUse(Edit|Write|MultiEdit) guard. Blocks an Edit/Write to a CLAUDE.md
-// whose added content introduces a new rule surface (a `### ` heading or a
-// `- ` bullet carrying 🚨 / an enforcer citation), routing to codify-rule.mts.
-// Does NOT fire on rewording, non-CLAUDE.md files, the FLEET_SYNC / codify
-// sanctioned writers, or when the bypass phrase is present. Fails open on a
-// malformed payload.
+// that adds a rule surface — a NEW `### ` section OR a marked `- ` bullet
+// (🚨 / enforcer citation) — whose text does NOT link a
+// docs/agents.md/{fleet,repo}/<topic>.md detail doc. A doc-pointing rule is the
+// canonical terse-index shape (allowed); PLAIN bullets and rewording are always
+// allowed; section bloat is capped by claude-md-section-size-guard. Does NOT
+// fire on non-CLAUDE.md files, the FLEET_SYNC / codify sanctioned writers, or
+// when the bypass phrase is present. Fails open on a malformed payload.
 
 import test from 'node:test'
 import assert from 'node:assert/strict'
@@ -54,22 +56,49 @@ async function runHook(
 const CLAUDE_MD = '/Users/x/projects/socket-foo/template/CLAUDE.md'
 const OTHER = '/Users/x/projects/socket-foo/src/widget.mts'
 
-// FIRES — a new `### ` section heading added to CLAUDE.md.
-test('blocks adding a new ### section', async () => {
+// FIRES — a new `### ` section that does NOT link a detail doc.
+test('blocks a new ### section with no detail-doc link', async () => {
   const result = await runHook({
     tool_name: 'Edit',
     tool_input: {
       file_path: CLAUDE_MD,
-      new_string: '### New shiny rule\n\nAlways do the thing.',
+      new_string: '### New shiny rule\n\nAlways do the thing, in detail, inline.',
     },
   })
   assert.strictEqual(result.code, 2)
   assert.match(result.stderr, /claude-md-rule-add-guard/)
-  assert.match(result.stderr, /codify-rule\.mts/)
+  assert.match(result.stderr, /docs\/agents\.md/)
 })
 
-// FIRES — a new `- ` bullet carrying a 🚨 hard-rule marker.
-test('blocks adding a 🚨 rule bullet', async () => {
+// DOES-NOT-FIRE — a new section that links a fleet detail doc (canonical shape).
+test('allows a new ### section linking a fleet doc', async () => {
+  const result = await runHook({
+    tool_name: 'Edit',
+    tool_input: {
+      file_path: CLAUDE_MD,
+      new_string:
+        '### Workflow-run retention\n\n🚨 Pruned weekly. Detail: [`workflow-run-retention`](docs/agents.md/fleet/workflow-run-retention.md).',
+    },
+  })
+  assert.strictEqual(result.code, 0)
+  assert.strictEqual(result.stderr, '')
+})
+
+// DOES-NOT-FIRE — a per-repo section linking a repo detail doc.
+test('allows a new ### section linking a repo doc', async () => {
+  const result = await runHook({
+    tool_name: 'Edit',
+    tool_input: {
+      file_path: CLAUDE_MD,
+      new_string:
+        '### Local build quirk\n\nSee [`build-quirk`](docs/agents.md/repo/build-quirk.md).',
+    },
+  })
+  assert.strictEqual(result.code, 0)
+})
+
+// FIRES — a marked 🚨 bullet with no detail-doc link.
+test('blocks a 🚨 bullet with no doc link', async () => {
   const result = await runHook({
     tool_name: 'Edit',
     tool_input: {
@@ -80,8 +109,21 @@ test('blocks adding a 🚨 rule bullet', async () => {
   assert.strictEqual(result.code, 2)
 })
 
-// FIRES — a new `- ` bullet citing a hook enforcer.
-test('blocks a bullet citing a .claude/hooks enforcer', async () => {
+// DOES-NOT-FIRE — a marked bullet that links its detail doc (canonical shape).
+test('allows a 🚨 bullet that links a doc', async () => {
+  const result = await runHook({
+    tool_name: 'Edit',
+    tool_input: {
+      file_path: CLAUDE_MD,
+      new_string:
+        '- 🚨 Never commit a secret — [`token-hygiene`](docs/agents.md/fleet/token-hygiene.md).',
+    },
+  })
+  assert.strictEqual(result.code, 0)
+})
+
+// FIRES — a bullet citing a hook enforcer but no detail-doc link.
+test('blocks a hook-citing bullet with no doc link', async () => {
   const result = await runHook({
     tool_name: 'Write',
     tool_input: {
@@ -92,8 +134,8 @@ test('blocks a bullet citing a .claude/hooks enforcer', async () => {
   assert.strictEqual(result.code, 2)
 })
 
-// FIRES — a new `- ` bullet citing a socket/<rule>.
-test('blocks a bullet citing a socket/ lint rule', async () => {
+// FIRES — a bullet citing a socket/<rule> but no detail-doc link.
+test('blocks a socket-citing bullet with no doc link', async () => {
   const result = await runHook({
     tool_name: 'Edit',
     tool_input: {
@@ -104,8 +146,8 @@ test('blocks a bullet citing a socket/ lint rule', async () => {
   assert.strictEqual(result.code, 2)
 })
 
-// DOES-NOT-FIRE — rewording an existing line (no heading / marked bullet).
-test('allows rewording prose with no new rule surface', async () => {
+// DOES-NOT-FIRE — rewording an existing line (no new heading).
+test('allows rewording prose with no new section', async () => {
   const result = await runHook({
     tool_name: 'Edit',
     tool_input: {
@@ -117,7 +159,7 @@ test('allows rewording prose with no new rule surface', async () => {
   assert.strictEqual(result.stderr, '')
 })
 
-// DOES-NOT-FIRE — a plain bullet with no marker / citation is prose, not a rule.
+// DOES-NOT-FIRE — a plain bullet with no marker is prose.
 test('allows a plain unmarked bullet', async () => {
   const result = await runHook({
     tool_name: 'Edit',
@@ -130,18 +172,19 @@ test('allows a plain unmarked bullet', async () => {
 })
 
 // DOES-NOT-FIRE — edit to a non-CLAUDE.md file.
-test('allows a rule-shaped edit to a non-CLAUDE.md file', async () => {
+test('allows a section-shaped edit to a non-CLAUDE.md file', async () => {
   const result = await runHook({
     tool_name: 'Edit',
     tool_input: {
       file_path: OTHER,
-      new_string: '### heading inside a source doc\n- 🚨 not a CLAUDE.md',
+      new_string: '### heading inside a source doc, no link',
     },
   })
   assert.strictEqual(result.code, 0)
 })
 
-// DOES-NOT-FIRE — the cascade (FLEET_SYNC=1) copies CLAUDE.md verbatim.
+// DOES-NOT-FIRE — the cascade (FLEET_SYNC=1) copies CLAUDE.md verbatim, even an
+// un-deferred section.
 test('allows the cascade writer (FLEET_SYNC=1)', async () => {
   const result = await runHook(
     {
@@ -165,8 +208,8 @@ test('allows the codify-rule writer (SOCKET_CODIFY_RULE=1)', async () => {
   assert.strictEqual(result.code, 0)
 })
 
-// BYPASS — the phrase lets a genuine manual edit through.
-test('bypass phrase allows the manual edit', async () => {
+// BYPASS — the phrase lets a genuine doc-less section through.
+test('bypass phrase allows the undeferred section', async () => {
   const transcript = makeTranscript('Allow claude-md-rule-add bypass')
   const result = await runHook({
     tool_name: 'Edit',

@@ -34,15 +34,15 @@
 //
 // Fails open on malformed payloads (exit 0 + stderr log).
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 // oxlint-disable-next-line no-explicit-any -- shell-quote ships no types; runtime contract is stable.
 import { parse as shellQuoteParse } from 'shell-quote'
 
-import { withBashGuard } from '../_shared/payload.mts'
-
-const logger = getDefaultLogger()
+import {
+  bashGuard,
+  block,
+  defineHook,
+  runHook,
+} from '../_shared/guard.mts'
 
 type ParseEntry = string | { op: string } | { comment: string }
 
@@ -201,14 +201,14 @@ function describeInstallShape(tokens: string[]): string | undefined {
   return undefined
 }
 
-// withBashGuard handles the stdin drain, tool_name gate, command narrow,
-// and fail-open on any throw.
-await withBashGuard(command => {
+// bashGuard handles the tool_name gate, command narrow, and fail-open on any
+// throw.
+export const check = bashGuard(command => {
   const hit = findOffendingPipe(command)
   if (!hit) {
-    return
+    return undefined
   }
-  logger.error(
+  return block(
     [
       '[no-tail-install-out-guard] Blocked: install/check output piped to ' +
         `\`${hit.truncator}\`.`,
@@ -230,5 +230,13 @@ await withBashGuard(command => {
       '',
     ].join('\n'),
   )
-  process.exitCode = 2
 })
+
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)

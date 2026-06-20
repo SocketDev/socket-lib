@@ -1,4 +1,4 @@
-/**
+/*
  * @file Single source of truth for fleet-repo membership, shared by the hooks
  *   that need to know "is this one of ours?":
  *
@@ -73,4 +73,22 @@ export function slugFromRemoteUrl(url: string): string | undefined {
     return undefined
   }
   return match[2]!.toLowerCase()
+}
+
+/**
+ * Like {@link slugFromRemoteUrl}, but returns the case-preserved `owner/repo`
+ * (e.g. `PerryTS/perry`), or `undefined` when the URL isn't a recognizable
+ * GitHub remote. Owner is KEPT (unlike the membership slug, which drops it) so
+ * a scoped bypass can be matched against the exact `owner/repo` the user sees.
+ */
+export function ownerRepoFromRemoteUrl(url: string): string | undefined {
+  const trimmed = url.trim()
+  if (!trimmed) {
+    return undefined
+  }
+  const match = /[:/]([^/:]+)\/([^/]+?)(?:\.git)?\/?$/.exec(trimmed)
+  if (!match) {
+    return undefined
+  }
+  return `${match[1]!}/${match[2]!}`
 }

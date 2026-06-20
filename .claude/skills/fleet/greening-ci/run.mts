@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Watch a repo's GitHub Actions CI run, surface the first failure log,
  *   and exit. The fix-and-push loop is driven by the human (or the agent
  *   invoking this skill) — this runner is the eyes. Three modes the skill

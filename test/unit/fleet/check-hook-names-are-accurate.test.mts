@@ -1,79 +1,69 @@
-// vitest specs for check-hook-names-are-accurate — the pure block-idiom
-// detector (sourceBlocks / dropCommentLines), which decides whether a `-guard`
-// or `-reminder` hook's name matches its real blocking behavior.
+// vitest specs for check-hook-names-are-accurate. The check IMPORTS each hook
+// and compares its declared `defineHook` `.type` against the directory-name
+// suffix — it reads the typed export, never source text.
 
-import { describe, test } from 'vitest'
+import { test } from 'vitest'
 import assert from 'node:assert/strict'
+import { mkdtempSync, writeFileSync } from 'node:fs'
+import { tmpdir } from 'node:os'
+import path from 'node:path'
 
 import {
-  dropCommentLines,
-  sourceBlocks,
+  declaredType,
+  typeMismatch,
 } from '../../../scripts/fleet/check/hook-names-are-accurate.mts'
 
-describe('dropCommentLines', () => {
-  test('removes whole-line // comments and * JSDoc continuations', () => {
-    const src = [
-      '// it BLOCKS the edit by setting process.exitCode = 2',
-      ' * decision: block the commit',
-      'const x = 1',
-    ].join('\n')
-    const out = dropCommentLines(src)
-    assert.ok(!out.includes('BLOCKS'))
-    assert.ok(!out.includes('decision'))
-    assert.ok(out.includes('const x = 1'))
+test('typeMismatch: a matching name + type is clean', () => {
+  assert.equal(typeMismatch('foo-guard', 'guard'), undefined)
+  assert.equal(typeMismatch('foo-nudge', 'nudge'), undefined)
+})
+
+test('typeMismatch: a -guard declaring type:nudge is flagged', () => {
+  assert.deepEqual(typeMismatch('foo-guard', 'nudge'), {
+    name: 'foo-guard',
+    kind: 'type-mismatch',
+    declaredType: 'nudge',
   })
 })
 
-describe('sourceBlocks — detects the 4 block idioms on CODE lines', () => {
-  test('process.exitCode = 2 (the canonical with*Guard form)', () => {
-    assert.ok(
-      sourceBlocks('await withEditGuard(() => {\n  process.exitCode = 2\n})'),
-    )
-  })
-
-  test('process.exit(2) / process.exit(1)', () => {
-    assert.ok(sourceBlocks('if (bad) process.exit(2)'))
-    assert.ok(sourceBlocks('process.exit(1)'))
-  })
-
-  test('return 2 (main returning a non-zero code)', () => {
-    assert.ok(sourceBlocks('function main() {\n  return 2\n}'))
-  })
-
-  test("decision: 'block' stdout JSON", () => {
-    assert.ok(
-      sourceBlocks(
-        `process.stdout.write(JSON.stringify({ decision: 'block', reason }))`,
-      ),
-    )
+test('typeMismatch: a -nudge declaring type:guard is flagged', () => {
+  assert.deepEqual(typeMismatch('foo-nudge', 'guard'), {
+    name: 'foo-nudge',
+    kind: 'type-mismatch',
+    declaredType: 'guard',
   })
 })
 
-describe('sourceBlocks — does NOT false-match prose / variables (the bug v1 had)', () => {
-  test('the words block/decision/exit in COMMENTS do not count', () => {
-    const reminderSrc = [
-      '// This hook BLOCKS nothing — reporting only.',
-      '// Per CLAUDE.md the decision is informational; never process.exit(2).',
-      "logger.error('left a breadcrumb')",
-    ].join('\n')
-    assert.ok(!sourceBlocks(reminderSrc))
+test('typeMismatch: a -guard/-nudge with no hook export is flagged', () => {
+  assert.deepEqual(typeMismatch('foo-guard', undefined), {
+    name: 'foo-guard',
+    kind: 'no-hook-export',
+    declaredType: undefined,
   })
+})
 
-  test('a `const blocks = []` variable is not a block decision', () => {
-    assert.ok(!sourceBlocks('const blocks = []\nblocks.push(x)\nreturn blocks'))
-  })
+test('typeMismatch: a non-guard/nudge name has no opinion', () => {
+  assert.equal(typeMismatch('setup-firewall', undefined), undefined)
+  assert.equal(typeMismatch('sweep-ds-store', 'guard'), undefined)
+})
 
-  test('a regex literal mentioning the words does not false-match', () => {
-    // v1 mis-lexed regex literals and corrupted the scan; v2 drops comment
-    // lines only and matches specific code shapes, so this stays clean.
-    assert.ok(
-      !sourceBlocks('const RE = /blocks|decision|exits/i\nreturn RE.test(s)'),
-    )
-  })
+test('declaredType: reads the typed .type off an imported module', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'hook-type-'))
+  const guard = path.join(dir, 'guard.mjs')
+  writeFileSync(
+    guard,
+    "export const hook = { type: 'guard', event: 'PreToolUse' }\n",
+  )
+  assert.equal(await declaredType(guard), 'guard')
+})
 
-  test('a plain reminder (stderr write, no exit) does not block', () => {
-    assert.ok(
-      !sourceBlocks('await withBashGuard(() => {\n  logger.error("nudge")\n})'),
-    )
-  })
+test('declaredType: undefined when there is no hook export', async () => {
+  const dir = mkdtempSync(path.join(tmpdir(), 'hook-type-'))
+  const plain = path.join(dir, 'plain.mjs')
+  writeFileSync(plain, 'export const notAHook = 1\n')
+  assert.equal(await declaredType(plain), undefined)
+})
+
+test('declaredType: undefined when the module does not exist', async () => {
+  assert.equal(await declaredType('/no/such/hook-index.mjs'), undefined)
 })

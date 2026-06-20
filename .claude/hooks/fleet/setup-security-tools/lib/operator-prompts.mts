@@ -1,4 +1,4 @@
-/**
+/*
  * @file Operator-prompt helpers shared between the setup-security-tools
  *   umbrella's install.mts and the scoped leaves (setup-firewall, etc.). Each
  *   helper here is library-shaped: no top-level side effects, no process.exit,

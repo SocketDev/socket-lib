@@ -80,7 +80,7 @@ export default defineConfig({
     // Vitest treats `test/**` as `**/test/**`, so without an explicit
     // exclude it picks up every nested `test/` directory in the repo
     // — including the `.git-hooks/test/`, the oxlint plugin's per-rule
-    // `.config/oxlint-plugin/fleet/<id>/test/` suites,
+    // `.config/fleet/oxlint-plugin/fleet/<id>/test/` suites,
     // and `scripts/**/test/` suites that run under `node --test`, not
     // vitest. Those tests use `import { test } from 'node:test'` and
     // produce zero vitest suites, which vitest reports as failures.
@@ -99,7 +99,7 @@ export default defineConfig({
       '**/test/fixtures/**',
       '**/.{idea,git,cache,output,temp}/**',
       '.git-hooks/**',
-      '.config/oxlint-plugin/**',
+      '.config/fleet/oxlint-plugin/**',
       'scripts/**/test/**',
       '.claude/hooks/**/test/**',
       'template/**',
@@ -107,15 +107,6 @@ export default defineConfig({
       // `nodeTestExclude` key of .config/{fleet,repo}/vitest.json. The same key
       // feeds prefer-vitest-guard's allowlist so the two never drift.
       ...repoNodeTestExcludeGlobs(),
-      // Coverage measures source coverage from unit/integration tests. The e2e
-      // tier spawns external runtimes (agent-ci/Docker, perry, esbuild) that add
-      // no meaningful source coverage and are environment-fragile (agent-ci-local
-      // needs a healthy local CI runner), so exclude it from coverage runs. Keeps
-      // `pnpm run cover` deterministic with no manual CI=true; run e2e explicitly
-      // via `pnpm test test/e2e/` (non-coverage runs include them).
-      ...(isCoverageEnabled
-        ? ['test/e2e/**', 'test/unit/fleet/agent-ci-local.test.mts']
-        : []),
     ],
     // Some repos in the fleet (scaffolding-only, hook-only, etc.) ship
     // this config but don't yet have a `test/` directory — vitest's

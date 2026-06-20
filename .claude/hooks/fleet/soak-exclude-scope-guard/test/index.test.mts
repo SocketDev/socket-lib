@@ -102,7 +102,9 @@ test('adding bare-name third-party entry blocks', async () => {
   assert.strictEqual(r.code, 2)
   assert.match(r.stderr, /soak-exclude-scope-guard.*Blocked/)
   assert.match(r.stderr, /defu/)
-  assert.match(r.stderr, /overrides:/)
+  // The message must steer to waiting out the soak, not to the (ineffective)
+  // overrides workaround it used to recommend.
+  assert.match(r.stderr, /wait for the package to clear/)
 })
 
 test('adding @anthropic-ai/* third-party scope blocks', async () => {

@@ -1,13 +1,13 @@
 // vitest specs for scripts/fleet/install-git-hooks.mts.
 //
 // The installer is invoked from `prepare` at `pnpm install` time. Its
-// job: set `core.hooksPath = .git-hooks/fleet` in the local git config
-// when run inside a git checkout that has a `.git-hooks/fleet/` dir.
+// job: set `core.hooksPath = .git-hooks` in the local git config
+// when run inside a git checkout that has a `.git-hooks/` dir.
 // Replaces husky's auto-install side effect with a 60-LOC dependency-free
 // script.
 //
 // Each test spawns the installer in a tmpdir with a controlled
-// .git/ + .git-hooks/fleet/ layout, then inspects the resulting
+// .git/ + .git-hooks/ layout, then inspects the resulting
 // core.hooksPath value via `git config`. Idempotency is verified by
 // running the installer twice and confirming the second run is silent.
 //
@@ -86,10 +86,10 @@ function makeTmpRepo(): TmpRepo {
     'dir',
   )
   // Construct once; tests reference `repo.hooksDir` everywhere they need it.
-  // The installer sets `core.hooksPath = .git-hooks/fleet`, so the `fleet/`
-  // subdir is the actual hook host; create it explicitly so existsSync(...)
-  // succeeds in tests that mkdir hooksDir.
-  const hooksDir = path.join(dir, '.git-hooks', 'fleet')
+  // The installer sets `core.hooksPath = .git-hooks` (the root, where the
+  // per-hook dispatchers live and run fleet/ then repo/); create that dir so
+  // existsSync(...) succeeds in tests that mkdir hooksDir.
+  const hooksDir = path.join(dir, '.git-hooks')
   return {
     dir,
     installerPath,
@@ -159,7 +159,7 @@ function runInstaller(
   return { code: r.status ?? 0, stderr: r.stderr ? String(r.stderr) : '' }
 }
 
-test('install-git-hooks: sets core.hooksPath when .git + .git-hooks/fleet both present', () => {
+test('install-git-hooks: sets core.hooksPath when .git + .git-hooks both present', () => {
   const repo = makeTmpRepo()
   try {
     gitInit(repo.dir)
@@ -170,7 +170,7 @@ test('install-git-hooks: sets core.hooksPath when .git + .git-hooks/fleet both p
     assert.strictEqual(result.code, 0, `installer stderr: ${result.stderr}`)
     assert.strictEqual(
       readLocalConfig(repo.dir, 'core.hooksPath'),
-      '.git-hooks/fleet',
+      '.git-hooks',
     )
   } finally {
     repo.cleanup()
@@ -187,15 +187,15 @@ test('install-git-hooks: idempotent — second run is a silent no-op', () => {
     assert.strictEqual(first.code, 0)
     assert.strictEqual(
       readLocalConfig(repo.dir, 'core.hooksPath'),
-      '.git-hooks/fleet',
+      '.git-hooks',
     )
 
     const second = runInstaller(repo.installerPath, repo.dir)
     assert.strictEqual(second.code, 0)
-    // Still set, still pointing at .git-hooks/fleet.
+    // Still set, still pointing at .git-hooks.
     assert.strictEqual(
       readLocalConfig(repo.dir, 'core.hooksPath'),
-      '.git-hooks/fleet',
+      '.git-hooks',
     )
     // Second run produced no stderr (truly silent on the no-op path).
     assert.strictEqual(second.stderr.trim(), '')
@@ -207,7 +207,7 @@ test('install-git-hooks: idempotent — second run is a silent no-op', () => {
 test('install-git-hooks: skips when .git dir is absent (e.g. tarball install)', () => {
   const repo = makeTmpRepo()
   try {
-    // No `git init` — just create .git-hooks/fleet/ alone.
+    // No `git init` — just create .git-hooks/ alone.
     mkdirSync(repo.hooksDir, { recursive: true })
 
     const result = runInstaller(repo.installerPath, repo.dir)
@@ -219,11 +219,11 @@ test('install-git-hooks: skips when .git dir is absent (e.g. tarball install)', 
   }
 })
 
-test('install-git-hooks: skips when .git-hooks/fleet dir is absent (pre-cascade state)', () => {
+test('install-git-hooks: skips when .git-hooks dir is absent (pre-cascade state)', () => {
   const repo = makeTmpRepo()
   try {
     gitInit(repo.dir)
-    // No .git-hooks/fleet dir.
+    // No .git-hooks dir.
 
     const result = runInstaller(repo.installerPath, repo.dir)
     assert.strictEqual(result.code, 0)

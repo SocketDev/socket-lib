@@ -1,4 +1,4 @@
-/**
+/*
  * @file Canonical TypeBox schema for the fleet's external-tools data files.
  *   Every tool-data file across the fleet uses one container shape — `{ tools:
  *   { <name>: ToolEntry } }`:
@@ -28,12 +28,16 @@ export const PackageManager = Type.Union([
   Type.Literal('pnpm'),
 ])
 
-// How a GitHub-hosted tool ships: a release asset, a source archive, or a
-// pipx-installed git ref (security-hook tools).
+// How a GitHub-hosted tool ships: a release asset, a source archive, a
+// pipx-installed git ref, or a locked uv project (security-hook tools). The
+// `uv-project` kind is a PyPI package pinned via a committed pyproject.toml +
+// uv.lock closure, installed with `uv sync --locked` into the `_dlx/<hash>/`
+// store (e.g. headroom-ai — see scripts/fleet/install-headroom.mts).
 export const ReleaseKind = Type.Union([
   Type.Literal('asset'),
   Type.Literal('archive'),
   Type.Literal('pipx-git'),
+  Type.Literal('uv-project'),
 ])
 
 // One platform's downloadable artifact + its SRI integrity (sha256-…).

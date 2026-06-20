@@ -26,9 +26,19 @@ test('expiredExpectedPins flags a version-pin whose removable date has passed', 
   ])
 })
 
-test('expiredExpectedPins treats removable === today as cleared (inclusive)', () => {
+test('expiredExpectedPins treats removable === today as still soaking (exclusive)', () => {
+  // pnpm clears the 7×24h window at the publish TIMESTAMP + 7d, which lands
+  // somewhere on the `removable` date (not at 00:00). So on removable === today
+  // the unpinned install may still be rejected — keep the pin one more day.
   const annotations = {
     'pkg@1.0.0': { published: '2026-06-02', removable: TODAY },
+  }
+  assert.deepEqual(expiredExpectedPins(['pkg@1.0.0'], annotations, TODAY), [])
+})
+
+test('expiredExpectedPins flags a pin whose removable date is strictly before today', () => {
+  const annotations = {
+    'pkg@1.0.0': { published: '2026-06-01', removable: '2026-06-08' },
   }
   assert.deepEqual(expiredExpectedPins(['pkg@1.0.0'], annotations, TODAY), [
     'pkg@1.0.0',

@@ -16,24 +16,10 @@
 // Bypass: `Allow pip-install bypass` typed verbatim in a recent
 // user turn. Fails open on regex / parse errors.
 
-import { readFileSync } from 'node:fs'
-import process from 'node:process'
+import { safeReadFileSync } from '@socketsecurity/lib-stable/fs/read-file'
 
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
-
-interface ToolInput {
-  readonly tool_name?: string | undefined
-  readonly tool_input?:
-    | {
-        readonly command?: string | undefined
-        readonly file_path?: string | undefined
-        readonly new_string?: string | undefined
-        readonly old_string?: string | undefined
-        readonly content?: string | undefined
-      }
-    | undefined
-  readonly transcript_path?: string | undefined
-}
+import { block, defineHook, runHook } from '../_shared/guard.mts'
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
 const BYPASS_PHRASE = 'Allow pip-install bypass'
 
@@ -152,98 +138,14 @@ export function findPipInstalls(text: string): Finding[] {
   return findings
 }
 
-export function readFileSafe(p: string): string {
-  try {
-    return readFileSync(p, 'utf8')
-  } catch {
-    return ''
-  }
-}
-
-function isFileInScope(filePath: string): boolean {
+export function isFileInScope(filePath: string): boolean {
   return FILE_SCOPE_RE.test(filePath)
 }
 
-async function main(): Promise<void> {
-  let raw: string
-  try {
-    raw = await readStdin()
-  } catch {
-    process.exit(0)
-  }
-  if (!raw) {
-    process.exit(0)
-  }
-  let payload: ToolInput
-  try {
-    payload = JSON.parse(raw) as ToolInput
-  } catch {
-    process.exit(0)
-  }
-
-  let scanText = ''
-  let context = ''
-  if (payload.tool_name === 'Bash') {
-    const cmd = payload.tool_input?.command
-    if (!cmd) {
-      process.exit(0)
-    }
-    scanText = cmd
-    context = '<Bash command>'
-  } else if (payload.tool_name === 'Edit' || payload.tool_name === 'Write') {
-    const filePath = payload.tool_input?.file_path
-    if (!filePath || !isFileInScope(filePath)) {
-      process.exit(0)
-    }
-    if (payload.tool_name === 'Write') {
-      scanText =
-        payload.tool_input?.content ?? payload.tool_input?.new_string ?? ''
-    } else {
-      const oldStr = payload.tool_input?.old_string ?? ''
-      const newStr = payload.tool_input?.new_string ?? ''
-      if (!oldStr) {
-        process.exit(0)
-      }
-      const currentText = readFileSafe(filePath)
-      if (!currentText.includes(oldStr)) {
-        process.exit(0)
-      }
-      const afterText = currentText.replace(oldStr, newStr)
-      // Only flag NEW violations the edit introduces.
-      const beforeFindings = findPipInstalls(currentText).map(
-        f => `${f.line}:${f.source}`,
-      )
-      const beforeSet = new Set(beforeFindings)
-      const afterFindings = findPipInstalls(afterText)
-      const newFindings = afterFindings.filter(
-        f => !beforeSet.has(`${f.line}:${f.source}`),
-      )
-      if (newFindings.length === 0) {
-        process.exit(0)
-      }
-      reportFindings(filePath, newFindings, payload.transcript_path)
-      return
-    }
-    context = filePath
-  } else {
-    process.exit(0)
-  }
-
-  const findings = findPipInstalls(scanText)
-  if (findings.length === 0) {
-    process.exit(0)
-  }
-  reportFindings(context, findings, payload.transcript_path)
-}
-
-function reportFindings(
+export function buildBlockMessage(
   context: string,
   findings: Finding[],
-  transcriptPath: string | undefined,
-): void {
-  if (transcriptPath && bypassPhrasePresent(transcriptPath, BYPASS_PHRASE)) {
-    process.exit(0)
-  }
+): string {
   const lines: string[] = [
     '[prefer-pipx-over-pip-guard] Blocked: `pip install <pkg>` is not the fleet path',
     '',
@@ -273,12 +175,87 @@ function reportFindings(
     `  Bypass: type "${BYPASS_PHRASE}" in a new message, then retry.`,
     '',
   )
-  process.stderr.write(lines.join('\n'))
-  process.exit(2)
+  return lines.join('\n')
 }
 
-main().catch(e => {
-  process.stderr.write(
-    `[prefer-pipx-over-pip-guard] hook error (allowing): ${(e as Error).message}\n`,
-  )
+export const hook = defineHook({
+  check(payload) {
+    const tool = payload?.tool_name
+    if (tool !== 'Bash' && tool !== 'Edit' && tool !== 'Write') {
+      return undefined
+    }
+    const input = payload.tool_input as
+      | {
+          command?: string | undefined
+          file_path?: string | undefined
+          new_string?: string | undefined
+          old_string?: string | undefined
+          content?: string | undefined
+        }
+      | undefined
+    let scanText = ''
+    let context = ''
+    if (tool === 'Bash') {
+      const cmd = input?.command
+      if (!cmd) {
+        return undefined
+      }
+      scanText = cmd
+      context = '<Bash command>'
+    } else {
+      const filePath = input?.file_path
+      if (!filePath || !isFileInScope(filePath)) {
+        return undefined
+      }
+      if (tool === 'Write') {
+        scanText = input?.content ?? input?.new_string ?? ''
+        context = filePath
+      } else {
+        const oldStr = input?.old_string ?? ''
+        const newStr = input?.new_string ?? ''
+        if (!oldStr) {
+          return undefined
+        }
+        const currentText = safeReadFileSync(filePath) ?? ''
+        if (!currentText.includes(oldStr)) {
+          return undefined
+        }
+        const afterText = currentText.replace(oldStr, newStr)
+        // Only flag NEW violations the edit introduces.
+        const beforeFindings = findPipInstalls(currentText).map(
+          f => `${f.line}:${f.source}`,
+        )
+        const beforeSet = new Set(beforeFindings)
+        const afterFindings = findPipInstalls(afterText)
+        const newFindings = afterFindings.filter(
+          f => !beforeSet.has(`${f.line}:${f.source}`),
+        )
+        if (newFindings.length === 0) {
+          return undefined
+        }
+        if (
+          payload.transcript_path &&
+          bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)
+        ) {
+          return undefined
+        }
+        return block(buildBlockMessage(filePath, newFindings))
+      }
+    }
+    const findings = findPipInstalls(scanText)
+    if (findings.length === 0) {
+      return undefined
+    }
+    if (
+      payload.transcript_path &&
+      bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)
+    ) {
+      return undefined
+    }
+    return block(buildBlockMessage(context, findings))
+  },
+  event: 'PreToolUse',
+  matcher: ['Bash', 'Edit', 'Write'],
+  type: 'guard',
 })
+await runHook(hook, import.meta.url)

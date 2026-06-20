@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file User-invoked installer / health-fixer for the Socket security tools
  *   (AgentShield, SkillSpector, Zizmor, SFW, + TruffleHog/Trivy/OpenGrep/uv/
  *   janus/cdxgen/synp). Runs interactively. Differs from `index.mts` (the Stop
@@ -41,6 +41,7 @@ import {
   promptAndPersist,
   wireBridgeIntoShellRc,
 } from './lib/operator-prompts.mts'
+import { getShimsDir } from './lib/shims.mts'
 
 const logger = getDefaultLogger()
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -52,12 +53,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
  * no longer resolves.
  */
 export async function findBrokenShims(): Promise<string[]> {
-  const shimsDir = path.join(
-    process.env['HOME'] ?? '',
-    '.socket',
-    'sfw',
-    'shims',
-  )
+  const shimsDir = getShimsDir()
   if (!existsSync(shimsDir)) {
     return []
   }
@@ -74,11 +70,11 @@ export async function findBrokenShims(): Promise<string[]> {
     }
     // Each shim has the form: exec "<dlx-path>/sfw-{free,enterprise}" ...
     // Pull out the dlx target and check existsSync.
-    const m = content.match(/"([^"]*\/_dlx\/[^"]+\/sfw-(?:enterprise|free))"/)
+    const m = content.match(/"(?<target>[^"]*\/_dlx\/[^"]+\/sfw-(?:enterprise|free))"/)
     if (!m) {
       continue
     }
-    const target = m[1]!
+    const target = m.groups!.target!
     if (!existsSync(target)) {
       broken.push(entry)
     }
@@ -208,7 +204,7 @@ async function main(): Promise<void> {
   logger.log(`OpenGrep:     ${opengrepOk ? 'ready' : 'FAILED'}`)
   logger.log(`SFW:          ${sfwOk ? 'ready' : 'FAILED'}`)
   logger.log(
-    `SkillSpector: ${skillspectorOk ? 'ready' : 'OPTIONAL (pipx required)'}`,
+    `SkillSpector: ${skillspectorOk ? 'ready' : 'OPTIONAL (uv required)'}`,
   )
   logger.log(`synp:         ${synpOk ? 'ready' : 'FAILED'}`)
   logger.log(`Trivy:        ${trivyOk ? 'ready' : 'FAILED'}`)

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file One-shot soak-bypass: add a dated `minimumReleaseAgeExclude` entry for
  *   a package whose 7-day soak hasn't cleared yet, so an install can proceed
  *   now. Bakes in the manual dance the user would otherwise repeat:

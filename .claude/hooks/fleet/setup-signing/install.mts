@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Install-only entry point for commit-signing setup. Detects which
  *   signing method is locally available (SSH keys via 1Password / agent /
  *   ~/.ssh, GPG via gpg-agent, plain GPG key), and walks the user through `git

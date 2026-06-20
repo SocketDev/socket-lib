@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Lock-step header byte-equality gate. Mantra: the four impls of a
  *   quadruplet agree about WHAT THE FILE IS FOR. The `BEGIN LOCK-STEP HEADER` /
  *   `END LOCK-STEP HEADER` block names that contract; every member of the

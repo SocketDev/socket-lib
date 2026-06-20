@@ -50,21 +50,15 @@
 //
 // The hook fails OPEN on its own bugs (exit 0 + stderr log).
 
-import process from 'node:process'
-
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
 import { findTemplateLiterals, walkSimple } from '../_shared/acorn/index.mts'
 import type { AcornNode, TemplateLiteralSite } from '../_shared/acorn/index.mts'
-import { withEditGuard } from '../_shared/payload.mts'
+import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
 import {
   BUILD_ROOT_SEGMENTS,
   KNOWN_SIBLING_PACKAGES,
   MODE_SEGMENTS,
   STAGE_SEGMENTS,
 } from './segments.mts'
-
-const logger = getDefaultLogger()
 
 const EXEMPT_FILE_PATTERNS: RegExp[] = [
   /(?:^|\/)paths\.(?:cts|mts)$/,
@@ -268,34 +262,37 @@ export function check(source: string) {
   }
 }
 
-export function emitBlock(filePath: string, err: BlockError) {
-  logger.error(
+export function formatBlockMessage(filePath: string, err: BlockError): string {
+  return (
     `\n[path-guard] Blocked: ${err.rule}\n` +
-      `  Mantra: 1 path, 1 reference\n` +
-      `  File:    ${filePath}\n` +
-      `  Snippet: ${err.snippet}\n` +
-      `  Fix:     ${err.suggestion}\n\n`,
+    `  Mantra: 1 path, 1 reference\n` +
+    `  File:    ${filePath}\n` +
+    `  Snippet: ${err.snippet}\n` +
+    `  Fix:     ${err.suggestion}\n\n`
   )
 }
 
-// withEditGuard handles the stdin drain, tool_name gate, file_path narrow,
-// content extraction (new_string / content), and fail-open on any throw.
-await withEditGuard((filePath, content) => {
-  if (!isInScope(filePath)) {
-    return
-  }
-  const source = content ?? ''
-  if (!source) {
-    return
-  }
-  try {
-    check(source)
-  } catch (e) {
-    if (e instanceof BlockError) {
-      emitBlock(filePath, e)
-      process.exitCode = 2
-      return
+export const hook = defineHook({
+  check: editGuard((filePath, content) => {
+    if (!isInScope(filePath)) {
+      return undefined
     }
-    throw e
-  }
+    const source = content ?? ''
+    if (!source) {
+      return undefined
+    }
+    try {
+      check(source)
+    } catch (e) {
+      if (e instanceof BlockError) {
+        return block(formatBlockMessage(filePath, e))
+      }
+      throw e
+    }
+    return undefined
+  }),
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
 })
+await runHook(hook, import.meta.url)

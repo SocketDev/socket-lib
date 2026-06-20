@@ -52,21 +52,9 @@
 //   0 (with stderr log) — fail-open on hook bugs.
 
 import path from 'node:path'
-import process from 'node:process'
 
-import { bypassPhrasePresent, readStdin } from '../_shared/transcript.mts'
-
-type ToolInput = {
-  tool_input?:
-    | {
-        content?: string | undefined
-        file_path?: string | undefined
-        new_string?: string | undefined
-      }
-    | undefined
-  tool_name?: string | undefined
-  transcript_path?: string | undefined
-}
+import { block, defineHook, editGuard, runHook } from '../_shared/guard.mts'
+import { bypassPhrasePresent } from '../_shared/transcript.mts'
 
 const BYPASS_PHRASE = 'Allow report-location bypass'
 const BYPASS_LOOKBACK_USER_TURNS = 8
@@ -182,34 +170,9 @@ export function filenameLooksLikeReport(filePath: string): boolean {
   return REPORT_FILENAME_TOKENS.some(token => stem.includes(token))
 }
 
-async function main(): Promise<number> {
-  const raw = await readStdin()
-  if (!raw.trim()) {
-    return 0
-  }
-
-  let payload: ToolInput
-  try {
-    payload = JSON.parse(raw) as ToolInput
-  } catch {
-    process.stderr.write(
-      'report-location-guard: failed to parse stdin payload — fail-open\n',
-    )
-    return 0
-  }
-
-  const tool = payload.tool_name
-  if (tool !== 'Edit' && tool !== 'MultiEdit' && tool !== 'Write') {
-    return 0
-  }
-
-  const filePath = payload.tool_input?.file_path
-  if (!filePath) {
-    return 0
-  }
-
+export const check = editGuard((filePath, content, payload) => {
   if (!filePath.toLowerCase().endsWith('.md')) {
-    return 0
+    return undefined
   }
 
   const classification = classifyPath(filePath)
@@ -218,14 +181,13 @@ async function main(): Promise<number> {
     classification !== 'blocked-bare-reports' &&
     classification !== 'blocked-sub-claude-reports'
   ) {
-    return 0
+    return undefined
   }
 
-  const content = payload.tool_input?.new_string ?? payload.tool_input?.content
   const looksLikeReport =
     filenameLooksLikeReport(filePath) || contentLooksLikeReport(content)
   if (!looksLikeReport) {
-    return 0
+    return undefined
   }
 
   if (
@@ -235,10 +197,10 @@ async function main(): Promise<number> {
       BYPASS_LOOKBACK_USER_TURNS,
     )
   ) {
-    return 0
+    return undefined
   }
 
-  process.stderr.write(
+  return block(
     [
       `🚨 report-location-guard: blocked report-shaped .md write at a committable location.`,
       ``,
@@ -260,15 +222,13 @@ async function main(): Promise<number> {
       ``,
     ].join('\n'),
   )
-  return 2
-}
+})
 
-main().then(
-  code => process.exit(code),
-  err => {
-    process.stderr.write(
-      `report-location-guard: hook error — fail-open: ${String(err)}\n`,
-    )
-    process.exit(0)
-  },
-)
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Edit', 'Write', 'MultiEdit'],
+  type: 'guard',
+})
+
+await runHook(hook, import.meta.url)
