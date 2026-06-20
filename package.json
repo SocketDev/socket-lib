@@ -198,6 +198,11 @@
       "types": "./dist/ai/route.d.mts",
       "default": "./dist/ai/route.js"
     },
+    "./ai/route-heuristic": {
+      "source": "./src/ai/route-heuristic.mts",
+      "types": "./dist/ai/route-heuristic.d.mts",
+      "default": "./dist/ai/route-heuristic.js"
+    },
     "./ai/spawn": {
       "source": "./src/ai/spawn.mts",
       "types": "./dist/ai/spawn.d.mts",
