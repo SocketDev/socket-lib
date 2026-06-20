@@ -264,6 +264,41 @@ export function isOverloaded(stdout: string, stderr: string): boolean {
   return re.test(stdout) || re.test(stderr)
 }
 
+// Quota / rate-limit exhaustion — the seat or budget is SPENT (an HTTP 429, a
+// rate-limit error, or a usage/quota cap). Distinct from a transient 529
+// overload (`isOverloaded`, which retries the same agent) and a missing model
+// (`isModelUnavailable`): the cheaper ration is gone, so the right response is
+// to FALL OVER to a different provider/account, not retry the same one. This is
+// the reactive cap signal for subscription seats (Claude Max, ChatGPT Pro) and
+// metered accounts that have hit their rate/spend limit.
+const QUOTA_EXHAUSTED_PHRASES: readonly string[] = [
+  'exceeded your current quota',
+  'insufficient_quota',
+  'quota exceeded',
+  'rate limit',
+  'rate-limited',
+  'rate_limit_error',
+  'usage limit',
+]
+
+export function isQuotaExhausted(stdout: string, stderr: string): boolean {
+  const text = `${stdout}\n${stderr}`.toLowerCase()
+  // HTTP 429 from any backend, anchored so a stray "429" in work output (a port,
+  // a line number) does not trigger a spurious fall-over.
+  if (
+    /\bapi error:\s*429\b/.test(text) ||
+    text.includes('429 too many requests')
+  ) {
+    return true
+  }
+  for (let i = 0, { length } = QUOTA_EXHAUSTED_PHRASES; i < length; i += 1) {
+    if (text.includes(QUOTA_EXHAUSTED_PHRASES[i]!)) {
+      return true
+    }
+  }
+  return false
+}
+
 export async function pickAgent(
   requested: AiAgentName | undefined,
   cwd: string,
@@ -433,15 +468,19 @@ export async function spawnTierWithFallback(
       model: candidate.model,
     } as SpawnAiAgentOptions)
     last = { candidate, result }
-    if (!result.unavailable) {
+    if (
+      !result.unavailable &&
+      !isQuotaExhausted(result.stdout, result.stderr)
+    ) {
       // Reached a model that could serve (success or a genuine failure) —
       // stop; don't downgrade a real failure onto a weaker model.
       return { candidate, fellOver, result }
     }
-    // This model is offline/gated — record it and try the next candidate.
+    // This model is offline/gated, or its seat/budget is exhausted (429 / quota)
+    // — record it and try the next candidate (a different provider/account).
     fellOver.push(candidate)
   }
-  // Every candidate was unavailable — return the last attempt (unavailable set).
+  // Every candidate was down or quota-exhausted — return the last attempt.
   return {
     candidate: last!.candidate,
     fellOver: fellOver.slice(0, -1),

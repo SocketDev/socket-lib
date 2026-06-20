@@ -12,6 +12,7 @@ import {
   buildArgs,
   isModelUnavailable,
   isOverloaded,
+  isQuotaExhausted,
   pickAgent,
 } from '../../../src/ai/spawn.mts'
 
@@ -80,6 +81,41 @@ describe.sequential('isOverloaded', () => {
 
   test('returns false on empty strings', () => {
     expect(isOverloaded('', '')).toBe(false)
+  })
+})
+
+describe.sequential('isQuotaExhausted', () => {
+  test('detects an HTTP 429 in stdout or stderr', () => {
+    expect(isQuotaExhausted('API Error: 429 Too Many Requests', '')).toBe(true)
+    expect(isQuotaExhausted('', '429 Too Many Requests')).toBe(true)
+  })
+
+  test('detects rate-limit / quota / usage-limit phrases', () => {
+    expect(isQuotaExhausted('rate limit reached', '')).toBe(true)
+    expect(isQuotaExhausted('', 'error: rate_limit_error')).toBe(true)
+    expect(isQuotaExhausted('quota exceeded for this key', '')).toBe(true)
+    expect(isQuotaExhausted('', 'insufficient_quota')).toBe(true)
+    expect(isQuotaExhausted('You exceeded your current quota', '')).toBe(true)
+    expect(isQuotaExhausted('weekly usage limit hit', '')).toBe(true)
+  })
+
+  test('is case-insensitive', () => {
+    expect(isQuotaExhausted('API ERROR: 429', '')).toBe(true)
+    expect(isQuotaExhausted('RATE LIMIT', '')).toBe(true)
+  })
+
+  test('does not treat a 529 overload as quota exhaustion', () => {
+    expect(isQuotaExhausted('API Error: 529 Overloaded', '')).toBe(false)
+  })
+
+  test('does not fire on an unanchored stray 429', () => {
+    expect(isQuotaExhausted('build exited with code 429', '')).toBe(false)
+    expect(isQuotaExhausted('listening on port 4290', '')).toBe(false)
+  })
+
+  test('returns false for unrelated text and empty strings', () => {
+    expect(isQuotaExhausted('all is well', 'nothing here')).toBe(false)
+    expect(isQuotaExhausted('', '')).toBe(false)
   })
 })
 
