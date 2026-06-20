@@ -168,6 +168,11 @@
       "types": "./dist/ai/backends.d.mts",
       "default": "./dist/ai/backends.js"
     },
+    "./ai/billing-context": {
+      "source": "./src/ai/billing-context.mts",
+      "types": "./dist/ai/billing-context.d.mts",
+      "default": "./dist/ai/billing-context.js"
+    },
     "./ai/credentials": {
       "source": "./src/ai/credentials.mts",
       "types": "./dist/ai/credentials.d.mts",
