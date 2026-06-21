@@ -55,9 +55,10 @@ export interface OxlintJsonOutput {
 
 /**
  * Normalize oxlint's `{diagnostics:[...]}` payload into the ESLint-style
- * `OxlintFile[]` shape the rest of the step expects. Strip the `socket(...)`
- * wrapper around the rule code so AI_HANDLED_RULES (which stores bare rule
- * names) matches.
+ * `OxlintFile[]` shape the rest of the step expects. Convert the oxlint code
+ * form `socket(rule)` into the `socket/rule` form that AI_HANDLED_RULES,
+ * RULE_GUIDANCE, and RULE_MODEL_TIER are keyed on (the same id used in
+ * oxlintrc `rules`). Stripping to a bare `rule` would never match those sets.
  */
 export function normalizeOxlintJson(payload: OxlintJsonOutput): OxlintFile[] {
   const byFile = new Map<string, OxlintMessage[]>()
@@ -70,7 +71,7 @@ export function normalizeOxlintJson(payload: OxlintJsonOutput): OxlintFile[] {
     // "eslint(no-unused-vars)"; strip the plugin wrapper.
     const ruleId =
       typeof d.code === 'string' && d.code.includes('(')
-        ? d.code.replace(/^[^(]+\(([^)]+)\).*$/, '$1') // `^[^(]+` plugin name; `([^)]+)` captures rule id; `\).*$` discards the rest
+        ? d.code.replace(/^([^(]+)\(([^)]+)\).*$/, '$1/$2') // `([^(]+)` plugin; `([^)]+)` rule -> `plugin/rule` to match the keyed sets
         : d.code
     const msg: OxlintMessage = {
       ruleId,
