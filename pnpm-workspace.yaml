@@ -61,7 +61,7 @@ catalog:
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
   'playwright-core': 1.60.0
-  'regjsparser': 0.13.1
+  'regjsparser': 0.13.2
   'rolldown': 1.1.0
   'shell-quote': 1.8.4
   'taze': 19.14.1
@@ -113,6 +113,48 @@ minimumReleaseAgeExclude:
   # esbuild + its platform binaries — test-only browser-bundle e2e dep (the build
   # bundler is rolldown). All published 2026-06-11; the 7-day soak clears
   # 2026-06-18, after which this whole block is removable.
+  # published: 2026-06-18 | removable: 2026-06-25
+  - 'typescript@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-aix-ppc64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-darwin-arm64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-darwin-x64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-freebsd-arm64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-freebsd-x64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-linux-arm@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-linux-arm64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-linux-loong64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-linux-mips64el@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-linux-ppc64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-linux-riscv64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-linux-s390x@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-linux-x64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-netbsd-arm64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-netbsd-x64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-openbsd-arm64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-openbsd-x64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-sunos-x64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-win32-arm64@7.0.1-rc'
+  # published: 2026-06-18 | removable: 2026-06-25
+  - '@typescript/typescript-win32-x64@7.0.1-rc'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
