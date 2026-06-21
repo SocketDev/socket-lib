@@ -59,10 +59,13 @@ export function checkEsmNamedExports(filePath) {
 
     // Check for problematic patterns
     const hasDefaultExport =
+      // oxlint-disable-next-line socket/no-source-sniffing -- dist files are compiled CJS; text-matching detects single-value exports invisible at require() time
       /module\.exports\s*=\s*\w+\s*;?\s*$/.test(source) ||
+      // oxlint-disable-next-line socket/no-source-sniffing -- dist files are compiled CJS; text-matching detects module.exports.default= which require() cannot distinguish from named exports
       /module\.exports\.default\s*=/.test(source)
 
     // Check for proper named exports pattern
+    // oxlint-disable-next-line socket/no-source-sniffing -- dist files are compiled CJS; text-matching distinguishes object-form exports from single-value form, complementing the require() shape check
     const hasNamedExportsObject = /module\.exports\s*=\s*{/.test(source)
 
     // Also check by actually requiring the module

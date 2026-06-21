@@ -6,6 +6,7 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { normalizePath } from '../../../../src/paths/normalize'
 import { pipPackageDir } from '../../../../src/external-tools/python/pip-install'
 
 import type * as NodeFs from 'node:fs'
@@ -64,7 +65,7 @@ describe('external-tools/python/pip-install — pipPackageDir', () => {
     const dir = pipPackageDir(
       'git+https://github.com/NVIDIA/skillspector.git@abc1234',
     )
-    const norm = dir.replace(/\\/g, '/')
+    const norm = normalizePath(dir)
     expect(norm).toMatch(/\/_dlx\/[a-f0-9]{16}\/site-packages$/)
   })
 

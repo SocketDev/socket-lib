@@ -14,9 +14,9 @@ import inputRaw from '../external/@inquirer/input'
 // @ts-expect-error - external vendored module
 import passwordRaw from '../external/@inquirer/password'
 // @ts-expect-error - external vendored module
-import * as searchModule from '../external/@inquirer/search'
+import * as searchModule from '../external/@inquirer/search' // oxlint-disable-line socket/no-namespace-import -- untyped vendored @inquirer module; namespace + cast is the access pattern
 // @ts-expect-error - external vendored module
-import * as selectModuleImport from '../external/@inquirer/select'
+import * as selectModuleImport from '../external/@inquirer/select' // oxlint-disable-line socket/no-namespace-import -- untyped vendored @inquirer module; namespace + cast is the access pattern
 import { applyColor } from '../logger/colors'
 
 import type { ColorValue } from '../colors/types'

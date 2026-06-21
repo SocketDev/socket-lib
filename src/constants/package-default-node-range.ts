@@ -3,9 +3,9 @@
  */
 
 import { maintainedNodeVersions } from './maintained-node-versions'
-import * as semver from '../external/semver'
+import { parse } from '../external/semver'
 
 /* c8 ignore next - External semver call */
-const packageDefaultNodeRange = `>=${semver.parse(maintainedNodeVersions.last)!.major}`
+const packageDefaultNodeRange = `>=${parse(maintainedNodeVersions.last)!.major}`
 
 export { packageDefaultNodeRange }

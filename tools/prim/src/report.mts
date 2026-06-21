@@ -17,7 +17,7 @@ import { formatLintFindings } from './lint.mts'
 import { formatValidationReport } from './validate.mts'
 
 export function fail(msg) {
-  process.stderr.write(`prim: ${msg}\n`) // socket-lint: allow
+  process.stderr.write(`prim: ${msg}\n`) // socket-lint: allow logger
   process.exit(1)
 }
 
@@ -44,9 +44,9 @@ export function report(
       stripFailures: stripFailureFiles.length,
       stripFailureFiles,
     })
-    process.stdout.write(`${payload}\n`) // socket-lint: allow
+    process.stdout.write(`${payload}\n`) // socket-lint: allow logger
   } else {
-    process.stdout.write(formatHuman(findings, { mode, targetName }) + '\n') // socket-lint: allow
+    process.stdout.write(formatHuman(findings, { mode, targetName }) + '\n') // socket-lint: allow logger
   }
 }
 
@@ -58,10 +58,10 @@ export function reportLint(findings, json, targetName) {
       count: findings.length,
       findings,
     })
-    process.stdout.write(`${payload}\n`) // socket-lint: allow
+    process.stdout.write(`${payload}\n`) // socket-lint: allow logger
     return
   }
-  process.stdout.write(formatLintFindings(findings, { targetName })) // socket-lint: allow
+  process.stdout.write(formatLintFindings(findings, { targetName })) // socket-lint: allow logger
 }
 
 export function reportMod(result, json, applied, showDiff = false) {
@@ -79,9 +79,9 @@ export function reportMod(result, json, applied, showDiff = false) {
         validationFailed: true,
         validationFindings: result.validationFindings,
       })
-      process.stdout.write(`${payload}\n`) // socket-lint: allow
+      process.stdout.write(`${payload}\n`) // socket-lint: allow logger
     } else {
-      process.stderr.write(`${validationReport}\n`) // socket-lint: allow
+      process.stderr.write(`${validationReport}\n`) // socket-lint: allow logger
     }
     process.exitCode = 1
     return
@@ -94,26 +94,26 @@ export function reportMod(result, json, applied, showDiff = false) {
       skipped: result.skipped,
       files: result.files,
     })
-    process.stdout.write(`${payload}\n`) // socket-lint: allow
+    process.stdout.write(`${payload}\n`) // socket-lint: allow logger
     return
   }
   const verb = applied ? 'Wrote' : 'Would write'
   if (result.rewriteCount === 0) {
-    process.stdout.write('mod: no rewrites needed.\n') // socket-lint: allow
+    process.stdout.write('mod: no rewrites needed.\n') // socket-lint: allow logger
     return
   }
   const summary = `mod: ${verb} ${result.rewriteCount} rewrite(s) across ${result.filesChanged} file(s).\n`
-  process.stdout.write(summary) // socket-lint: allow
+  process.stdout.write(summary) // socket-lint: allow logger
   if (result.skipped > 0) {
     const skippedMsg = `mod: skipped ${result.skipped} candidate(s) — pass --include-guessed to rewrite receiver-guessed sites too.\n`
-    process.stdout.write(skippedMsg) // socket-lint: allow
+    process.stdout.write(skippedMsg) // socket-lint: allow logger
   }
   if (!applied) {
-    process.stdout.write('mod: dry run — pass --apply to write changes.\n') // socket-lint: allow
+    process.stdout.write('mod: dry run — pass --apply to write changes.\n') // socket-lint: allow logger
   }
   for (const f of result.files) {
     const fileLine = `  ${f.file}: ${f.rewrites} rewrite(s), import added: ${f.importAdded ? 'yes' : 'no'}\n`
-    process.stdout.write(fileLine) // socket-lint: allow
+    process.stdout.write(fileLine) // socket-lint: allow logger
   }
   if (showDiff && !applied) {
     // Dry-run preview: render unified line-diff per planned rewrite by

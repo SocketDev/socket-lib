@@ -5,7 +5,7 @@
 'use strict'
 
 // `export` is invalid in CJS — this file is inlined as text by esbuild.
-// oxlint-disable-next-line socket/export-top-level-functions
+// oxlint-disable-next-line socket/export-top-level-functions -- CJS stub inlined as text; export syntax invalid
 function throwStub(moduleName) {
   throw new Error(
     `Module '${moduleName}' is stubbed and should not be called. ` +

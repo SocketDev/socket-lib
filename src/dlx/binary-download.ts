@@ -155,7 +155,7 @@ export async function downloadBinary(
     )
 
     // Get file size for metadata (intentional: need stats.size, not just existence).
-    // oxlint-disable-next-line socket/prefer-exists-sync
+    // oxlint-disable-next-line socket/prefer-exists-sync -- need stats.size for metadata, not just existence check
     const stats = await fs.promises.stat(binaryPath)
     await writeBinaryCacheMetadata(
       cacheEntryDir,
@@ -264,7 +264,7 @@ export async function downloadBinaryFile(
       // Check if file was downloaded while waiting for lock.
       if (fs.existsSync(destPath)) {
         // Need stats.size to validate file is non-empty before reuse.
-        // oxlint-disable-next-line socket/prefer-exists-sync
+        // oxlint-disable-next-line socket/prefer-exists-sync -- need stats.size to validate file is non-empty
         const stats = await fs.promises.stat(destPath)
         if (stats.size > 0) {
           const fileBuffer = await fs.promises.readFile(destPath)

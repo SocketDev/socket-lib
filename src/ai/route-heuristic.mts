@@ -203,7 +203,7 @@ export function allocateBudget(
     totalWeight += weights[TASK_CLASSES[i]!] ?? 0
   }
   const divisor = totalWeight > 0 ? totalWeight : 1
-  const out = { __proto__: null } as Record<TaskClass, number>
+  const out = { __proto__: null } as unknown as Record<TaskClass, number>
   for (let i = 0, { length } = TASK_CLASSES; i < length; i += 1) {
     const taskClass = TASK_CLASSES[i]!
     out[taskClass] = (perMember * (weights[taskClass] ?? 0)) / divisor

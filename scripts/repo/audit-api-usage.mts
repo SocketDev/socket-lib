@@ -289,6 +289,7 @@ function main(): number {
     for (let j = 0, flen = files.length; j < flen; j += 1) {
       const file = files[j]!
       const source = readFileSync(file, 'utf8')
+      // oxlint-disable-next-line socket/no-source-sniffing -- fast-path pre-filter only; not inferring behavior — it skips files that cannot contain a lib specifier before the real AST walk in collectRefs
       if (!source.includes(PKG)) {
         continue
       }

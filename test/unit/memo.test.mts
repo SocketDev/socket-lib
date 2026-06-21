@@ -141,7 +141,7 @@ describe('memoization', () => {
       // oxlint-disable-next-line socket/prefer-undefined-over-null -- intentionally testing that null and undefined map to distinct cache keys.
       expect(memoized(null)).toBe('null')
       expect(memoized(undefined)).toBe('undefined')
-      // oxlint-disable-next-line socket/prefer-undefined-over-null
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- intentionally testing that null and undefined map to distinct cache keys.
       expect(memoized(null)).toBe('null')
       expect(fn).toHaveBeenCalledTimes(2)
     })

@@ -80,7 +80,7 @@ export function createConstantsObject(
       : undefined,
     internals: options.internals
       ? ObjectFreeze(
-          // oxlint-disable-next-line socket/prefer-undefined-over-null
+          // oxlint-disable-next-line socket/prefer-undefined-over-null -- Object.setPrototypeOf requires `null` for null-prototype objects.
           ObjectSetPrototypeOf(toSortedObject(options.internals), null),
         )
       : undefined,
@@ -93,7 +93,7 @@ export function createConstantsObject(
         )
       : undefined,
     props: props
-      ? // oxlint-disable-next-line socket/prefer-undefined-over-null
+      ? // oxlint-disable-next-line socket/prefer-undefined-over-null -- Object.setPrototypeOf requires `null` for null-prototype objects.
         ObjectFreeze(ObjectSetPrototypeOf(toSortedObject(props), null))
       : undefined,
   })

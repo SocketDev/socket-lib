@@ -13,6 +13,8 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 import {
   resolvePackageJsonDirname,
   resolvePackageJsonPath,
@@ -77,7 +79,7 @@ describe('packages/paths', () => {
       )
       // Normalize for cross-platform comparison
       const expected = path.dirname('C:\\path\\to\\project\\package.json')
-      expect(result).toBe(expected.replace(/\\/g, '/'))
+      expect(result).toBe(normalizePath(expected))
     })
 
     it('should handle empty string', () => {
@@ -169,7 +171,7 @@ describe('packages/paths', () => {
       const result = resolvePackageJsonPath('C:\\path\\to\\project')
       // Normalize for cross-platform comparison
       const expected = path.join('C:\\path\\to\\project', 'package.json')
-      expect(result).toBe(expected.replace(/\\/g, '/'))
+      expect(result).toBe(normalizePath(expected))
     })
 
     it('should handle paths with trailing slashes', () => {

@@ -12,17 +12,16 @@
 
 import { getSmolVersions } from '../smol/versions'
 
-import type * as semverType from '../external/semver'
 import type { SmolVersionsBinding } from '../smol/versions'
 
-const semver = require('../external/semver') as typeof semverType
+const semver = require('../external/semver')
 
 /**
  * The vendored `semver` JS implementation. Always available — used directly by
  * the leaves that need the parsed `{major, minor, patch}` shape (which
  * smol-versions doesn't expose).
  */
-export function getSemver(): typeof semverType {
+export function getSemver(): typeof semver {
   return semver
 }
 
@@ -30,5 +29,5 @@ export function getSemver(): typeof semverType {
  * Resolved version implementation: smol-versions on the smol Node binary,
  * otherwise the vendored `semver`. Bound once at module load.
  */
-export const impl: SmolVersionsBinding | typeof semverType =
+export const impl: SmolVersionsBinding | typeof semver =
   getSmolVersions() ?? semver

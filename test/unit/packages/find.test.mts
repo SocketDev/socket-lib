@@ -10,6 +10,8 @@ import { pathToFileURL } from 'node:url'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 import { findUpPackageJson } from '../../../src/packages/find'
 
 describe('findUpPackageJson', () => {
@@ -37,8 +39,8 @@ describe('findUpPackageJson', () => {
 
     const found = findUpPackageJson(fakeMeta)
 
-    expect(found.replace(/\\/g, '/')).toBe(
-      path.join(tmpDir, 'package.json').replace(/\\/g, '/'),
+    expect(normalizePath(found)).toBe(
+      normalizePath(path.join(tmpDir, 'package.json')),
     )
   })
 
@@ -50,8 +52,8 @@ describe('findUpPackageJson', () => {
 
     const found = findUpPackageJson(fakeMeta)
 
-    expect(found.replace(/\\/g, '/')).toBe(
-      path.join(tmpDir, 'package.json').replace(/\\/g, '/'),
+    expect(normalizePath(found)).toBe(
+      normalizePath(path.join(tmpDir, 'package.json')),
     )
   })
 
@@ -73,8 +75,8 @@ describe('findUpPackageJson', () => {
 
     const found = findUpPackageJson(fakeMeta)
 
-    expect(found.replace(/\\/g, '/')).toBe(
-      path.join(tmpDir, 'inner', 'package.json').replace(/\\/g, '/'),
+    expect(normalizePath(found)).toBe(
+      normalizePath(path.join(tmpDir, 'inner', 'package.json')),
     )
   })
 
@@ -96,8 +98,8 @@ describe('findUpPackageJson', () => {
       names: ['pnpm-workspace.yaml'],
     })
 
-    expect(found.replace(/\\/g, '/')).toBe(
-      path.join(tmpDir, 'pnpm-workspace.yaml').replace(/\\/g, '/'),
+    expect(normalizePath(found)).toBe(
+      normalizePath(path.join(tmpDir, 'pnpm-workspace.yaml')),
     )
   })
 

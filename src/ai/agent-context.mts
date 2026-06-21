@@ -29,6 +29,7 @@ import { WIN32 } from '../constants/platform'
 import { getHome } from '../env/home'
 import { getEnvValue } from '../env/rewire'
 import { getXdgConfigHome } from '../env/xdg'
+import { normalizePath } from '../paths/normalize'
 
 import path from 'node:path'
 
@@ -119,7 +120,12 @@ export function agentPaths(
       // replaced by `-` (a leading `/` becomes a leading `-`).
       const cwd = opts.cwd
       const memoryDir = cwd
-        ? path.join(configDir, 'projects', cwd.replace(/[/\\]/g, '-'), 'memory')
+        ? path.join(
+            configDir,
+            'projects',
+            normalizePath(cwd).replace(/\//g, '-'),
+            'memory',
+          )
         : undefined
       return { agent, configDir, memoryDir }
     }

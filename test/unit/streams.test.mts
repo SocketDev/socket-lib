@@ -427,7 +427,7 @@ describe('streams', () => {
     })
 
     it('should handle null-like values in data', async () => {
-      // oxlint-disable-next-line socket/prefer-undefined-over-null
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- test intentionally includes null to verify null-like handling
       const input = [null, undefined, 0, '', false]
       const result = parallelMap(input, async x => String(x))
       const output = await collect(result)

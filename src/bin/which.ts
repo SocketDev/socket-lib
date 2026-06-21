@@ -75,7 +75,7 @@ export async function which(
     // package contract — public callers `instanceof check` distinguish
     // null vs string, so the lint rule's `undefined` recommendation
     // would break them.
-    // oxlint-disable-next-line socket/prefer-undefined-over-null
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- matches upstream which package contract
     return null
   }
 }
@@ -278,7 +278,7 @@ export function whichSync(
   } catch {
     // Binary not found in PATH. Return type matches upstream `which`
     // package contract.
-    // oxlint-disable-next-line socket/prefer-undefined-over-null
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- matches upstream which package contract
     return null
   }
 }

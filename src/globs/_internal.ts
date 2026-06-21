@@ -12,6 +12,7 @@ import { normalizePath } from '../paths/normalize'
 
 import { defaultIgnore } from './defaults'
 
+// oxlint-disable-next-line socket/no-namespace-import -- type-only namespace for `typeof` of a dynamically required module; no named import yields the whole-module type
 import type * as fastGlobType from '../external/fast-glob'
 import type picomatchType from '../external/picomatch'
 

@@ -128,7 +128,7 @@ describe('arrays', () => {
     it('should return true for arrays', () => {
       expect(isArray([])).toBe(true)
       expect(isArray([1, 2, 3])).toBe(true)
-      // oxlint-disable-next-line unicorn/no-new-array
+      // oxlint-disable-next-line unicorn/no-new-array -- testing that new Array() is correctly identified as an array
       expect(isArray(new Array(5))).toBe(true)
     })
 
@@ -413,7 +413,7 @@ describe('arrays', () => {
       // oxlint-disable-next-line socket/prefer-undefined-over-null -- intentionally testing that null and undefined are distinct values in Set.
       const arr = [null, null, undefined, undefined, 1, null]
       const result = arrayUnique(arr)
-      // oxlint-disable-next-line socket/prefer-undefined-over-null
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- spec result includes null to verify Set treated it as distinct from undefined
       expect(result).toEqual([null, undefined, 1])
     })
 

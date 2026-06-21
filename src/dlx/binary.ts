@@ -168,7 +168,7 @@ export async function dlxBinary(
     )
 
     // Get file size for metadata (intentional: need stats.size, not just existence).
-    // oxlint-disable-next-line socket/prefer-exists-sync
+    // oxlint-disable-next-line socket/prefer-exists-sync -- need stats.size for metadata, not just existence check
     const stats = await fs.promises.stat(binaryPath)
     await writeBinaryCacheMetadata(
       cacheEntryDir,

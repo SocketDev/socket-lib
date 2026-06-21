@@ -23,7 +23,7 @@ import process from 'node:process'
 
 import { parse } from '@babel/parser'
 import traverseModule from '@babel/traverse'
-import * as t from '@babel/types'
+import { isIdentifier, isStringLiteral } from '@babel/types'
 
 // Handle @babel/traverse CommonJS/ESM interop
 const traverse = traverseModule.default
@@ -89,9 +89,9 @@ export async function extractRequireSpecifiers(filePath) {
 
       // Check if this is a require() call
       if (
-        t.isIdentifier(node.callee, { name: 'require' }) &&
+        isIdentifier(node.callee, { name: 'require' }) &&
         node.arguments.length > 0 &&
-        t.isStringLiteral(node.arguments[0])
+        isStringLiteral(node.arguments[0])
       ) {
         const specifier = node.arguments[0].value
         const { column, line } = node.loc.start

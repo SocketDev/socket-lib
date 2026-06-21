@@ -6,6 +6,8 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 import { walkUp } from '../../../src/paths/walk'
 
 // On Windows, `path.resolve('/a/b/c')` returns `D:\a\b\c` (current drive).
@@ -13,7 +15,7 @@ import { walkUp } from '../../../src/paths/walk'
 // Windows so the assertion compares the path tail, not the drive letter.
 const DRIVE_PREFIX =
   process.platform === 'win32'
-    ? path.parse(path.resolve('/')).root.replace(/\\/g, '/').replace(/\/$/, '')
+    ? normalizePath(path.parse(path.resolve('/')).root).replace(/\/$/, '')
     : ''
 const withDrive = (p: string): string => `${DRIVE_PREFIX}${p}`
 
@@ -25,7 +27,7 @@ describe('walkUp', () => {
     expect(got[0]).toBe(withDrive('/a/b/c'))
     expect(got).toContain(withDrive('/a/b'))
     expect(got).toContain(withDrive('/a'))
-    expect(got.at(-1)).toBe(path.parse(start).root.replace(/\\/g, '/'))
+    expect(got.at(-1)).toBe(normalizePath(path.parse(start).root))
   })
 
   it('stops (inclusive) at stopAt', () => {
@@ -46,9 +48,7 @@ describe('walkUp', () => {
 
   it('terminates at root even with no stopAt', () => {
     const got = [...walkUp('/x')]
-    expect(got.at(-1)).toBe(
-      path.parse(path.resolve('/x')).root.replace(/\\/g, '/'),
-    )
+    expect(got.at(-1)).toBe(normalizePath(path.parse(path.resolve('/x')).root))
     // No duplicate root at the tail.
     expect(got.filter(d => d === got.at(-1))).toHaveLength(1)
   })

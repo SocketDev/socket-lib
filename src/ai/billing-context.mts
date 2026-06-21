@@ -77,7 +77,10 @@ export function billingFromKeyed(
   options: BillingFromKeyedOptions,
 ): BillingContext {
   const opts = { __proto__: null, ...options } as BillingFromKeyedOptions
-  const out = { __proto__: null } as Record<CredentialProvider, BillingAccount>
+  const out = { __proto__: null } as unknown as Record<
+    CredentialProvider,
+    BillingAccount
+  >
   for (const provider of opts.keyed) {
     const kind = opts.kinds?.[provider] ?? DEFAULT_PROVIDER_KIND[provider]
     if (!kind) {
