@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.1.0) - 2026-06-21
+
+### Added
+
+- **`ai`** — add writeProviderCredential / deleteProviderCredential
+- **`ai`** — add billing-context discovery (generic, no-admin, reactive)
+- **`ai`** — detect quota/rate-limit exhaustion and fall over (isQuotaExhausted)
+- **`ai`** — add billing-aware route-heuristic (tier reorder + budget allocation)
+
+### Fixed
+
+- waive raw process.* writes with the process-stdio lint marker id
+- **`lint`** — resolve socket-rule violations surfaced by fleet onboarding
+
 ## [6.0.9](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.9) - 2026-06-18
 
 ### Added
