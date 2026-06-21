@@ -397,6 +397,19 @@ const steps: Array<() => boolean> = [
   // `"private": true`. Uses `npm pack --dry-run --json` as the source of
   // truth — same logic npm itself uses for publish.
   () => run('node', ['scripts/fleet/check/package-files-are-allowlisted.mts']),
+  // Pre-publish source gate: every publishable package.json declares
+  // publishConfig.access:"public" + provenance:true (and registry-if-set =
+  // npmjs) — the source-config preconditions for a public, provenance-attested
+  // release under OIDC trusted publishing. Skips `"private": true` workspaces.
+  // The post-publish registry audit is provenance-is-attested.mts.
+  () => run('node', ['scripts/fleet/check/publish-config-is-hardened.mts']),
+  // A PENDING release's CHANGELOG entry must be DERIVED from the commits it
+  // releases (run `node scripts/fleet/bump.mts`), never hand-written ahead of the
+  // tag. Fires only when package.json is ahead of the last v<semver> tag;
+  // regenerates the entry from the commits since that tag and fails on drift.
+  // Catches the failure mode that shipped a CHANGELOG entry describing work that
+  // landed after its tag. Published versions are historical and not re-checked.
+  () => run('node', ['scripts/fleet/check/changelog-is-commit-derived.mts']),
   // No tracked symlink is self-referential or points at an absolute path
   // inside the repo (a `node_modules → /abs/<repo>/node_modules` self-loop
   // bricked fresh clones fleet-wide with ELOOP; git kept it tracked despite
