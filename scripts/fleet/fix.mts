@@ -25,6 +25,19 @@ import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 const WIN32 = process.platform === 'win32'
 const logger = getDefaultLogger()
 
+// Pull the numeric exit code out of a lib-spawn rejection. The rejection
+// carries `{ code }` — a number for a normal non-zero exit, a string (e.g.
+// 'ENOENT') for a spawn failure. Non-numeric → 1 (treat as a generic failure).
+function exitCodeOf(e: unknown): number {
+  if (e && typeof e === 'object' && 'code' in e) {
+    const { code } = e as { code: unknown }
+    if (typeof code === 'number') {
+      return code
+    }
+  }
+  return 1
+}
+
 async function run(
   cmd: string,
   args: string[],
@@ -38,37 +51,34 @@ async function run(
       shell: WIN32,
       stdio: 'inherit',
     })
-    if (result.code !== 0 && required) {
-      logger.error(`${label || cmd} failed (exit ${result.code})`)
-      return result.code
-    }
-    if (result.code !== 0) {
-      // Non-blocking: log warning and continue.
-      logger.warn(`${label || cmd}: exited ${result.code} (non-blocking)`)
-    }
-    return 0
+    return result.code ?? 0
   } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e)
-    if (!required) {
-      logger.warn(`${label || cmd}: ${msg} (non-blocking)`)
-      return 0
+    // The lib `spawn` REJECTS on a non-zero exit (carrying `{ code }`), so a
+    // "failing" command lands here, not the resolved branch. Surface the real
+    // exit code instead of throwing — the caller decides what non-zero means.
+    // Throwing here would abort the pipeline and skip later steps (notably
+    // ai-lint-fix after `lint --fix` exits non-zero with AI-fixable errors).
+    const code = exitCodeOf(e)
+    if (required) {
+      logger.error(`${label || cmd} failed (exit ${code})`)
+    } else {
+      logger.warn(`${label || cmd}: exited ${code} (non-blocking)`)
     }
-    throw e
+    return code
   }
 }
 
 async function main(): Promise<void> {
-  // Step 1: Lint fix — delegates to scripts/fleet/lint.mts which runs both
-  // oxfmt and oxlint. Forward extra argv so `--all` / `--staged` /
-  // explicit file paths reach the lint runner unchanged.
-  const lintExit = await run(
-    'pnpm',
-    ['run', 'lint', '--fix', ...process.argv.slice(2)],
-    { label: 'lint --fix' },
-  )
-  if (lintExit) {
-    process.exitCode = lintExit
-  }
+  // Lint fix (oxfmt + oxlint via scripts/fleet/lint.mts). Forward extra argv so
+  // `--all` / `--staged` / explicit file paths reach the runner unchanged.
+  // NON-required: oxlint can't autofix custom socket/* JS-plugin rules, so a
+  // non-zero exit is the EXPECTED case — those violations are what ai-lint-fix
+  // (below) handles, and gating the pipeline here would skip it when it's needed
+  // most. The real pass/fail is the verify run at the end of this function.
+  await run('pnpm', ['run', 'lint', '--fix', ...process.argv.slice(2)], {
+    label: 'lint --fix',
+    required: false,
+  })
 
   // Step 2: zizmor — fixes GitHub Actions workflow security issues.
   // Only runs if .github/ directory exists (some repos don't have workflows).
@@ -106,6 +116,15 @@ async function main(): Promise<void> {
       label: 'ai-lint-fix',
       required: false,
     },
+  )
+
+  // Verify: re-run lint (no --fix) to set the real exit code. `fix` succeeds
+  // only when nothing remains after the deterministic + AI passes; a lingering
+  // violation (or a genuine lint crash) surfaces here as a non-zero exit.
+  process.exitCode = await run(
+    'pnpm',
+    ['run', 'lint', ...process.argv.slice(2)],
+    { label: 'lint (verify)', required: false },
   )
 }
 

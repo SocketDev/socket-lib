@@ -124,8 +124,18 @@ export async function runLintJson(
   if (!stdout.trim()) {
     return []
   }
+  // The Socket Firewall (sfw) install wrapper prepends a "Protected by Socket
+  // Firewall" banner (and may append a trailer) to stdout, so the captured
+  // payload is not pure JSON. Extract the root object span — first `{` to last
+  // `}` — before parsing. A no-banner environment slices to the whole string.
+  const jsonStart = stdout.indexOf('{')
+  const jsonEnd = stdout.lastIndexOf('}')
+  if (jsonStart === -1 || jsonEnd <= jsonStart) {
+    return []
+  }
+  const jsonText = stdout.slice(jsonStart, jsonEnd + 1)
   try {
-    const parsed = JSON.parse(stdout) as OxlintJsonOutput
+    const parsed = JSON.parse(jsonText) as OxlintJsonOutput
     if (!parsed || !Array.isArray(parsed.diagnostics)) {
       return []
     }
