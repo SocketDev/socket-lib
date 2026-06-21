@@ -136,7 +136,18 @@ test('respects bare # socket-lint: allow marker', async () => {
   assert.equal(code, 0)
 })
 
-test('respects // socket-lint: allow console marker (slash-slash prefix)', async () => {
+test('respects // socket-lint: allow process-stdio marker on a process.* write', async () => {
+  const { code } = await runHook({
+    tool_name: 'Edit',
+    tool_input: {
+      file_path: 'src/foo.ts',
+      new_string: 'process.stderr.write(buf) // socket-lint: allow process-stdio',
+    },
+  })
+  assert.equal(code, 0)
+})
+
+test('a process.* write waived with the console id is still flagged (needs process-stdio)', async () => {
   const { code } = await runHook({
     tool_name: 'Edit',
     tool_input: {
@@ -144,7 +155,7 @@ test('respects // socket-lint: allow console marker (slash-slash prefix)', async
       new_string: 'process.stderr.write(buf) // socket-lint: allow console',
     },
   })
-  assert.equal(code, 0)
+  assert.equal(code, 2)
 })
 
 test('respects /* socket-lint: allow console */ marker (block-comment prefix)', async () => {

@@ -521,8 +521,10 @@ const scanFilesInRange = (range: string): number => {
         }
         logger.info(
           'Use `getDefaultLogger()` from `@socketsecurity/lib-stable/logger/default`. ' +
-            'For documentation lines that need the literal call, append ' +
-            `the marker \`${socketLintMarkerFor(file, 'logger')}\`.`,
+            'For a deliberate raw write, append the per-line marker: ' +
+            '`// socket-lint: allow console` for `console.*`, or ' +
+            '`// socket-lint: allow process-stdio` for `process.std{out,err}.write` ' +
+            '(the id must match the call kind — that is what `scanLoggerLeaks` keys on).',
         )
         errors++
       }

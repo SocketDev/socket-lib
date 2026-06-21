@@ -82,7 +82,9 @@ export function emitBlock(filePath: string, hits: Hit[]): string {
     out.push(`  …and ${hits.length - 3} more.`)
   }
   out.push(
-    '  Opt-out for one line (rare): append `// socket-lint: allow console`.',
+    '  Opt-out for one line (rare): append `// socket-lint: allow console` for a ' +
+      '`console.*` call, or `// socket-lint: allow process-stdio` for a raw ' +
+      '`process.std{out,err}.write` (the id must match the call kind).',
   )
   out.push('')
   return out.join('\n')
@@ -115,10 +117,16 @@ export function scan(source: string): Hit[] {
   const lines = source.split('\n')
   const hits: Hit[] = []
   for (const leak of findLoggerLeaks(source)) {
-    // Per-line allow marker: `// socket-lint: allow console`. The marker
-    // must appear on the same source line as the call.
+    // Per-line allow marker, keyed by leak kind so the edit-time guard agrees
+    // with the pre-push `scanLoggerLeaks`: `console.*` waives with
+    // `// socket-lint: allow console`, raw `process.std*.write` waives with the
+    // more deliberate `// socket-lint: allow process-stdio`. The marker must be
+    // on the same source line as the call.
+    const rule = leak.fullCall.startsWith('process.')
+      ? 'process-stdio'
+      : 'console'
     const sourceLine = lines[leak.line - 1] ?? ''
-    if (lineIsSuppressed(sourceLine, 'console')) {
+    if (lineIsSuppressed(sourceLine, rule)) {
       continue
     }
     hits.push({
