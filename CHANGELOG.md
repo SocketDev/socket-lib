@@ -16,7 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- waive raw process.* writes with the process-stdio lint marker id
+- waive raw process.\* writes with the process-stdio lint marker id
 - **`lint`** — resolve socket-rule violations surfaced by fleet onboarding
 
 ## [6.0.9](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.9) - 2026-06-18
