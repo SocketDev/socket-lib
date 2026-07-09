@@ -541,7 +541,7 @@ const data = response.json()
 
 ```typescript
 import { httpDownload } from '@socketsecurity/lib/http-request'
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = Spinner({ text: 'Downloading large file...' })
 spinner.start()

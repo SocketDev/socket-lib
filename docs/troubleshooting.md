@@ -20,7 +20,7 @@ Common issues and solutions when using @socketsecurity/lib.
 
    ```typescript
    // Correct
-   import { Spinner } from '@socketsecurity/lib/spinner'
+   import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
    // Wrong
    import { Spinner } from '@socketsecurity/lib'
@@ -481,7 +481,7 @@ Check your `tsconfig.json`:
 2. Limit concurrency for very large sets:
 
    ```typescript
-   import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
+   import { PromiseQueue } from '@socketsecurity/lib/promises/queue'
 
    const queue = new PromiseQueue(10)
    await Promise.all(files.map(file => queue.add(() => readFileUtf8(file))))

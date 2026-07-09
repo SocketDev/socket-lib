@@ -13,7 +13,7 @@ Utilities for working with npm, pnpm, and yarn, including package manager detect
 
 ```typescript
 import { detectPackageManager } from '@socketsecurity/lib/env/package-manager'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 // Detect which package manager is currently running (from environment)
 const pm = detectPackageManager()
@@ -22,7 +22,7 @@ if (pm) {
 }
 
 // For detecting project's package manager, check lock files
-import { findUpSync } from '@socketsecurity/lib/fs'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
 const lockFile = findUpSync([
   'pnpm-lock.yaml',
   'yarn.lock',
@@ -73,7 +73,7 @@ if (pm) {
 - To detect a project's package manager, check lock files instead:
 
 ```typescript
-import { findUpSync } from '@socketsecurity/lib/fs'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
 
 function getProjectPackageManager(
   cwd: string,
@@ -100,8 +100,8 @@ function getProjectPackageManager(
 ### Running Commands with Different Package Managers
 
 ```typescript
-import { findUpSync } from '@socketsecurity/lib/fs'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 function getProjectPackageManager(
   cwd: string,
@@ -130,8 +130,8 @@ await runScript('./project', 'test')
 ### Installing Specific Packages
 
 ```typescript
-import { findUpSync } from '@socketsecurity/lib/fs'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 function getProjectPackageManager(
   cwd: string,
@@ -172,7 +172,7 @@ await addPackage('./project', 'typescript', { dev: true, exact: true })
 ### Reading package.json
 
 ```typescript
-import { readJson } from '@socketsecurity/lib/fs'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
 
 interface PackageJson {
   name: string
@@ -201,7 +201,8 @@ if (pkg.scripts) {
 ### Updating package.json
 
 ```typescript
-import { readJson, writeJson } from '@socketsecurity/lib/fs'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
+import { writeJson } from '@socketsecurity/lib/fs/write-json'
 
 async function updateVersion(newVersion: string) {
   const pkg = await readJson('./package.json')
@@ -220,7 +221,8 @@ await updateVersion('2.0.0')
 ### Adding Scripts
 
 ```typescript
-import { readJson, writeJson } from '@socketsecurity/lib/fs'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
+import { writeJson } from '@socketsecurity/lib/fs/write-json'
 
 async function addScript(name: string, command: string) {
   const pkg = await readJson('./package.json')
@@ -244,7 +246,7 @@ await addScript('build', 'tsc && vite build')
 ### Checking Lock File Integrity
 
 ```typescript
-import { findUpSync } from '@socketsecurity/lib/fs'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
 
 function getLockFile(projectPath: string): string | undefined {
   return findUpSync(['pnpm-lock.yaml', 'yarn.lock', 'package-lock.json'], {
@@ -263,8 +265,9 @@ if (lockFile) {
 ### Regenerating Lock Files
 
 ```typescript
-import { findUpSync, safeDelete } from '@socketsecurity/lib/fs'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 function getProjectPackageManager(
   cwd: string,
@@ -298,9 +301,9 @@ async function regenerateLockFile(projectPath: string) {
 ### Smart Package Installer
 
 ```typescript
-import { findUpSync } from '@socketsecurity/lib/fs'
-import { spawn } from '@socketsecurity/lib/spawn'
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 function getProjectPackageManager(
@@ -355,7 +358,7 @@ await smartInstall('./project', ['typescript', '@types/node'], { dev: true })
 ### Dependency Version Checker
 
 ```typescript
-import { readJson } from '@socketsecurity/lib/fs'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
 import { httpJson } from '@socketsecurity/lib/http-request'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
@@ -401,7 +404,8 @@ await checkOutdated('./my-project')
 ### Workspace Management
 
 ```typescript
-import { readJson, readDirNames } from '@socketsecurity/lib/fs'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
+import { readDirNames } from '@socketsecurity/lib/fs/read-dir'
 import path from 'node:path'
 
 interface Workspace {
@@ -447,8 +451,8 @@ workspaces.forEach(ws => {
 ### Package Manager Command Runner
 
 ```typescript
-import { findUpSync } from '@socketsecurity/lib/fs'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 class PackageManager {
   constructor(

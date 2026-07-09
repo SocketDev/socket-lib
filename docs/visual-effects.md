@@ -12,7 +12,7 @@ Visual feedback is essential for CLI tools. This library provides spinners, logg
 ## Quick Start
 
 ```typescript
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
 
 const spinner = Spinner({ text: 'Processing...' })
@@ -30,7 +30,7 @@ logger.fail('Build failed')
 ### Creating a Spinner
 
 ```typescript
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = Spinner({
   text: 'Loading data...',
@@ -56,7 +56,7 @@ const spinner = Spinner({
 **Example:**
 
 ```typescript
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = Spinner({ text: 'Fetching data from API...' })
 spinner.start()
@@ -407,8 +407,8 @@ setTheme({
 ### Progress Tracking for File Processing
 
 ```typescript
-import { Spinner } from '@socketsecurity/lib/spinner'
-import { readDirNames } from '@socketsecurity/lib/fs'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
+import { readDirNames } from '@socketsecurity/lib/fs/read-dir'
 
 const spinner = Spinner({ text: 'Processing files...' })
 spinner.start()
@@ -427,7 +427,7 @@ spinner.successAndStop(`Processed ${files.length} files`)
 ### Multi-Step Build Process
 
 ```typescript
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = Spinner()
 

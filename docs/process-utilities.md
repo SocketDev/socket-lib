@@ -13,8 +13,8 @@ Spawn child processes, manage inter-process communication (IPC), handle process 
 ## Quick Start
 
 ```typescript
-import { spawn } from '@socketsecurity/lib/spawn'
-import { processLock } from '@socketsecurity/lib/process-lock'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
+import { processLock } from '@socketsecurity/lib/process/lock-instance'
 
 // Run a command
 const result = await spawn('git', ['status'])
@@ -48,7 +48,7 @@ await processLock.withLock('/tmp/my-operation.lock', async () => {
 **Example:**
 
 ```typescript
-import { spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 // Basic usage
 const result = await spawn('git', ['status'])
@@ -106,7 +106,7 @@ try {
 **Example:**
 
 ```typescript
-import { spawnSync } from '@socketsecurity/lib/spawn'
+import { spawnSync } from '@socketsecurity/lib/process/spawn/child'
 
 // Basic synchronous spawn
 const result = spawnSync('git', ['status'])
@@ -252,7 +252,7 @@ await spawn('colored-command', [], {
 Spinner instance to pause during execution.
 
 ```typescript
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = Spinner({ text: 'Working...' })
 spinner.start()
@@ -295,7 +295,8 @@ await spawn(`git commit -m "${userMessage}"`, { shell: true })
 **Example:**
 
 ```typescript
-import { spawn, isSpawnError } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
+import { isSpawnError } from '@socketsecurity/lib/process/spawn/errors'
 
 try {
   await spawn('nonexistent-command')
@@ -315,7 +316,7 @@ try {
 **Example:**
 
 ```typescript
-import { enhanceSpawnError } from '@socketsecurity/lib/spawn'
+import { enhanceSpawnError } from '@socketsecurity/lib/process/spawn/errors'
 
 try {
   await spawn('failing-command', ['--flag'])
@@ -340,7 +341,7 @@ The module exports a singleton `processLock` (type `ProcessLockManager`). There 
 **Example:**
 
 ```typescript
-import { processLock } from '@socketsecurity/lib/process-lock'
+import { processLock } from '@socketsecurity/lib/process/lock-instance'
 
 const lockPath = '/tmp/my-critical-operation.lock'
 
@@ -360,7 +361,7 @@ try {
 Prefer `withLock` for automatic release:
 
 ```typescript
-import { processLock } from '@socketsecurity/lib/process-lock'
+import { processLock } from '@socketsecurity/lib/process/lock-instance'
 
 await processLock.withLock('/tmp/build.lock', async () => {
   await buildProject()
@@ -405,12 +406,13 @@ const result = await processLock.withLock('/tmp/my.lock', async () => {
 
 Two complementary IPC modules are provided:
 
-### Filesystem stub IPC (`@socketsecurity/lib/ipc`)
+### Filesystem stub IPC (`@socketsecurity/lib/ipc/write`, `@socketsecurity/lib/ipc/paths`)
 
 For passing data between parent and child processes when the payload may exceed environment-variable size limits or needs restricted-perm (0o600) storage.
 
 ```typescript
-import { writeIpcStub, getIpcStubPath } from '@socketsecurity/lib/ipc'
+import { writeIpcStub } from '@socketsecurity/lib/ipc/write'
+import { getIpcStubPath } from '@socketsecurity/lib/ipc/paths'
 
 // Parent: write payload to stub file and pass path to child
 const stubPath = await writeIpcStub('socket-cli', {
@@ -426,12 +428,12 @@ import { readFile } from 'node:fs/promises'
 const data = JSON.parse(await readFile(process.argv[2], 'utf8'))
 ```
 
-### CLI env-var IPC (`@socketsecurity/lib/ipc-cli`)
+### CLI env-var IPC (`@socketsecurity/lib/ipc-cli/get`)
 
 For reading `SOCKET_CLI_*` environment variables forwarded by a parent Socket CLI.
 
 ```typescript
-import { getIpc } from '@socketsecurity/lib/ipc-cli'
+import { getIpc } from '@socketsecurity/lib/ipc-cli/get'
 
 const { SOCKET_CLI_FIX, SOCKET_CLI_OPTIMIZE } = await getIpc()
 ```
@@ -441,8 +443,8 @@ const { SOCKET_CLI_FIX, SOCKET_CLI_OPTIMIZE } = await getIpc()
 ### Running Package Manager Commands
 
 ```typescript
-import { spawn } from '@socketsecurity/lib/spawn'
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = Spinner({ text: 'Installing dependencies...' })
 spinner.start()
@@ -463,8 +465,8 @@ try {
 ### Build Process with Multiple Steps
 
 ```typescript
-import { spawn } from '@socketsecurity/lib/spawn'
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = Spinner()
 
@@ -484,8 +486,8 @@ spinner.successAndStop('All steps complete')
 ### Atomic Operations with Locks
 
 ```typescript
-import { processLock } from '@socketsecurity/lib/process-lock'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { processLock } from '@socketsecurity/lib/process/lock-instance'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 async function atomicBuild() {
   // withLock auto-releases on success or error. acquire() throws if the
@@ -506,7 +508,7 @@ async function atomicBuild() {
 ### Git Operations
 
 ```typescript
-import { spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 // Get current branch
 const result = await spawn('git', ['branch', '--show-current'], {
@@ -535,7 +537,7 @@ console.log(`Last commit: ${result.stdout}`)
 ### Parallel Execution with Error Handling
 
 ```typescript
-import { spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 const tasks = [
   spawn('npm', ['run', 'test:unit']),
@@ -603,7 +605,7 @@ Prefer `processLock.withLock()` which auto-releases; or use the release
 function returned by `acquire()` inside a `try/finally`:
 
 ```typescript
-import { processLock } from '@socketsecurity/lib/process-lock'
+import { processLock } from '@socketsecurity/lib/process/lock-instance'
 
 // Preferred: scoped helper
 await processLock.withLock('/tmp/operation.lock', async () => {

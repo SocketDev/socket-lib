@@ -13,12 +13,10 @@ Comprehensive file system utilities with cross-platform support, safe deletion, 
 ## Quick Start
 
 ```typescript
-import {
-  readFileUtf8,
-  writeJson,
-  safeDelete,
-  findUpSync,
-} from '@socketsecurity/lib/fs'
+import { readFileUtf8 } from '@socketsecurity/lib/fs/read-file'
+import { writeJson } from '@socketsecurity/lib/fs/write-json'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
 
 // Read a text file
 const content = await readFileUtf8('./README.md')
@@ -51,7 +49,7 @@ const pkgPath = findUpSync('package.json')
 **Example:**
 
 ```typescript
-import { readFileUtf8 } from '@socketsecurity/lib/fs'
+import { readFileUtf8 } from '@socketsecurity/lib/fs/read-file'
 
 // Read a text file
 const content = await readFileUtf8('./README.md')
@@ -74,7 +72,7 @@ const content = await readFileUtf8('./large-file.txt', {
 Synchronous version of `readFileUtf8()`:
 
 ```typescript
-import { readFileUtf8Sync } from '@socketsecurity/lib/fs'
+import { readFileUtf8Sync } from '@socketsecurity/lib/fs/read-file'
 
 const content = readFileUtf8Sync('./config.txt')
 ```
@@ -90,7 +88,7 @@ const content = readFileUtf8Sync('./config.txt')
 **Example:**
 
 ```typescript
-import { readFileBinary } from '@socketsecurity/lib/fs'
+import { readFileBinary } from '@socketsecurity/lib/fs/read-file'
 
 // Read an image
 const imageBuffer = await readFileBinary('./logo.png')
@@ -116,7 +114,7 @@ const archive = await readFileBinary('./backup.tar.gz')
 **Example:**
 
 ```typescript
-import { readJson } from '@socketsecurity/lib/fs'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
 
 // Read and parse package.json
 const pkg = await readJson('./package.json')
@@ -148,7 +146,7 @@ if (config === undefined) {
 Synchronous version of `readJson()`:
 
 ```typescript
-import { readJsonSync } from '@socketsecurity/lib/fs'
+import { readJsonSync } from '@socketsecurity/lib/fs/read-json'
 
 const tsconfig = readJsonSync('./tsconfig.json')
 ```
@@ -164,7 +162,7 @@ const tsconfig = readJsonSync('./tsconfig.json')
 **Example:**
 
 ```typescript
-import { safeReadFile } from '@socketsecurity/lib/fs'
+import { safeReadFile } from '@socketsecurity/lib/fs/read-file'
 
 // Try to read, get undefined if it doesn't exist
 const config = await safeReadFile('./optional-config.txt')
@@ -197,7 +195,7 @@ const buffer = await safeReadFile('./image.png', { encoding: null })
 **Example:**
 
 ```typescript
-import { writeJson } from '@socketsecurity/lib/fs'
+import { writeJson } from '@socketsecurity/lib/fs/write-json'
 
 // Write with default 2-space indentation
 await writeJson('./config.json', {
@@ -228,7 +226,7 @@ await writeJson('./compact.json', data, { finalEOL: false })
 Synchronous version of `writeJson()`:
 
 ```typescript
-import { writeJsonSync } from '@socketsecurity/lib/fs'
+import { writeJsonSync } from '@socketsecurity/lib/fs/write-json'
 
 writeJsonSync('./config.json', { version: '2.0.0' })
 ```
@@ -251,7 +249,7 @@ writeJsonSync('./config.json', { version: '2.0.0' })
 **Example:**
 
 ```typescript
-import { readDirNames } from '@socketsecurity/lib/fs'
+import { readDirNames } from '@socketsecurity/lib/fs/read-dir'
 
 // Get all subdirectories
 const dirs = await readDirNames('./packages')
@@ -276,7 +274,7 @@ const unsorted = await readDirNames('./src', { sort: false })
 Synchronous version of `readDirNames()`:
 
 ```typescript
-import { readDirNamesSync } from '@socketsecurity/lib/fs'
+import { readDirNamesSync } from '@socketsecurity/lib/fs/read-dir'
 
 const dirs = readDirNamesSync('./packages')
 ```
@@ -301,7 +299,7 @@ Not yet implemented (only `isDirEmptySync` is available).
 **Example:**
 
 ```typescript
-import { isDirEmptySync } from '@socketsecurity/lib/fs'
+import { isDirEmptySync } from '@socketsecurity/lib/fs/inspect'
 
 if (isDirEmptySync('./cache')) {
   console.log('Cache is empty')
@@ -322,7 +320,7 @@ const isEmpty = isDirEmptySync('./temp', {
 **Example:**
 
 ```typescript
-import { isDir } from '@socketsecurity/lib/fs'
+import { isDir } from '@socketsecurity/lib/fs/inspect'
 
 if (await isDir('./src')) {
   console.log('src is a directory')
@@ -334,7 +332,7 @@ if (await isDir('./src')) {
 Synchronous version of `isDir()`:
 
 ```typescript
-import { isDirSync } from '@socketsecurity/lib/fs'
+import { isDirSync } from '@socketsecurity/lib/fs/inspect'
 
 if (isDirSync('./dist')) {
   console.log('dist exists and is a directory')
@@ -357,7 +355,7 @@ if (isDirSync('./dist')) {
 **Example:**
 
 ```typescript
-import { safeMkdir } from '@socketsecurity/lib/fs'
+import { safeMkdir } from '@socketsecurity/lib/fs/safe'
 
 // Create directory (defaults to recursive: true)
 await safeMkdir('./data/cache')
@@ -379,7 +377,7 @@ await safeMkdir('./single-level', { recursive: false })
 Synchronous version of `safeMkdir()`:
 
 ```typescript
-import { safeMkdirSync } from '@socketsecurity/lib/fs'
+import { safeMkdirSync } from '@socketsecurity/lib/fs/safe'
 
 safeMkdirSync('./output')
 ```
@@ -409,7 +407,7 @@ safeMkdirSync('./output')
 **Example:**
 
 ```typescript
-import { safeDelete } from '@socketsecurity/lib/fs'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 // Delete a directory (safe by default)
 await safeDelete('./build')
@@ -441,7 +439,7 @@ await safeDelete('./flaky-dir', {
 Synchronous version of `safeDelete()`:
 
 ```typescript
-import { safeDeleteSync } from '@socketsecurity/lib/fs'
+import { safeDeleteSync } from '@socketsecurity/lib/fs/safe'
 
 safeDeleteSync('./temp')
 ```
@@ -464,7 +462,7 @@ safeDeleteSync('./temp')
 **Example:**
 
 ```typescript
-import { findUp } from '@socketsecurity/lib/fs'
+import { findUp } from '@socketsecurity/lib/fs/find'
 
 // Find package.json starting from current directory
 const pkgPath = await findUp('package.json')
@@ -498,7 +496,7 @@ const path = await findUp('tsconfig.json', {
 **Example:**
 
 ```typescript
-import { findUpSync } from '@socketsecurity/lib/fs'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
 
 // Find .git directory
 const gitPath = findUpSync('.git', { onlyDirectories: true })
@@ -511,7 +509,7 @@ const eslintPath = findUpSync('.eslintrc', {
 
 ## Path Utilities
 
-### isSymLinkSync()
+### isSymlinkSync()
 
 **What it does:** Checks if a path is a symbolic link.
 
@@ -520,9 +518,9 @@ const eslintPath = findUpSync('.eslintrc', {
 **Example:**
 
 ```typescript
-import { isSymLinkSync } from '@socketsecurity/lib/fs'
+import { isSymlinkSync } from '@socketsecurity/lib/fs/inspect'
 
-if (isSymLinkSync('./my-link')) {
+if (isSymlinkSync('./my-link')) {
   console.log('Path is a symbolic link')
 }
 ```
@@ -538,7 +536,7 @@ if (isSymLinkSync('./my-link')) {
 **Example:**
 
 ```typescript
-import { uniqueSync } from '@socketsecurity/lib/fs'
+import { uniqueSync } from '@socketsecurity/lib/fs/unique'
 
 // If 'report.pdf' exists, returns 'report-1.pdf'
 const path = uniqueSync('./report.pdf')
@@ -560,7 +558,7 @@ const uniquePath = uniqueSync('./data.json')
 **Example:**
 
 ```typescript
-import { validateFiles } from '@socketsecurity/lib/fs'
+import { validateFiles } from '@socketsecurity/lib/fs/validate'
 
 const files = ['package.json', '.pnp.cjs/virtual-file.json']
 const { validPaths, invalidPaths } = validateFiles(files)
@@ -576,7 +574,7 @@ for (const path of validPaths) {
 
 ## Stats and Checking
 
-### safeStats()
+### safeStat()
 
 **What it does:** Gets file stats, returning `undefined` on error.
 
@@ -585,9 +583,9 @@ for (const path of validPaths) {
 **Example:**
 
 ```typescript
-import { safeStats } from '@socketsecurity/lib/fs'
+import { safeStat } from '@socketsecurity/lib/fs/inspect'
 
-const stats = await safeStats('./file.txt')
+const stats = await safeStat('./file.txt')
 if (stats) {
   console.log('Size:', stats.size)
   console.log('Modified:', stats.mtime)
@@ -595,14 +593,14 @@ if (stats) {
 }
 ```
 
-### safeStatsSync()
+### safeStatSync()
 
-Synchronous version of `safeStats()`:
+Synchronous version of `safeStat()`:
 
 ```typescript
-import { safeStatsSync } from '@socketsecurity/lib/fs'
+import { safeStatSync } from '@socketsecurity/lib/fs/inspect'
 
-const stats = safeStatsSync('./file.txt')
+const stats = safeStatSync('./file.txt')
 ```
 
 ## Real-World Examples
@@ -610,7 +608,8 @@ const stats = safeStatsSync('./file.txt')
 ### Safe Configuration Loading
 
 ```typescript
-import { readJson, safeReadFile } from '@socketsecurity/lib/fs'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
+import { safeReadFile } from '@socketsecurity/lib/fs/read-file'
 
 // Try custom config first, fall back to defaults
 const customConfig = await readJson('./config.json', { throws: false })
@@ -622,7 +621,8 @@ const config = customConfig || defaultConfig
 ### Build Artifact Cleanup
 
 ```typescript
-import { safeDelete, isDirEmptySync } from '@socketsecurity/lib/fs'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { isDirEmptySync } from '@socketsecurity/lib/fs/inspect'
 
 // Clean build artifacts
 await safeDelete(['./dist', './coverage', './.next'])
@@ -636,7 +636,7 @@ if (isDirEmptySync('./cache')) {
 ### Finding Project Root
 
 ```typescript
-import { findUpSync } from '@socketsecurity/lib/fs'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
 import { dirname } from 'node:path'
 
 // Find project root by looking for package.json
@@ -652,7 +652,8 @@ if (pkgPath) {
 ```typescript
 // Note: fast-glob is an external dependency - install it separately
 import { glob } from 'fast-glob'
-import { validateFiles, readFileUtf8 } from '@socketsecurity/lib/fs'
+import { validateFiles } from '@socketsecurity/lib/fs/validate'
+import { readFileUtf8 } from '@socketsecurity/lib/fs/read-file'
 
 // Get all TypeScript files
 const allFiles = await glob('src/**/*.ts')
@@ -670,10 +671,8 @@ for (const file of validPaths) {
 ### Extracting Archives
 
 ```typescript
-import {
-  extractArchive,
-  detectArchiveFormat,
-} from '@socketsecurity/lib/archives'
+import { extractArchive } from '@socketsecurity/lib/archives/extract'
+import { detectArchiveFormat } from '@socketsecurity/lib/archives/detect'
 
 // Detect archive format
 const format = detectArchiveFormat('package.tar.gz')

@@ -174,7 +174,7 @@ test('specific test', () => {
 
 ```typescript
 import { getCI } from '@socketsecurity/lib/env/ci'
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = getCI()
   ? { start: () => {}, successAndStop: () => {} } // Noop in CI
