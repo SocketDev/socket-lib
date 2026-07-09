@@ -30,7 +30,6 @@ async function collectJsFiles(dir: string): Promise<string[]> {
   for (const entry of entries) {
     const full = path.join(dir, entry.name)
     if (entry.isDirectory()) {
-      // eslint-disable-next-line no-await-in-loop
       out.push(...(await collectJsFiles(full)))
     } else if (
       entry.isFile() &&
@@ -71,7 +70,6 @@ export async function verifyDist(distDir: string): Promise<number> {
   const CONCURRENCY = 16
   for (let i = 0; i < files.length; i += CONCURRENCY) {
     const chunk = files.slice(i, i + CONCURRENCY)
-    // eslint-disable-next-line no-await-in-loop
     const results = await Promise.all(
       chunk.map(async file => ({ file, error: await checkFile(file) })),
     )
@@ -99,7 +97,7 @@ export async function verifyDist(distDir: string): Promise<number> {
   return 0
 }
 
-// Allow running standalone: `node scripts/bundle/verify-dist.mts [distDir]`.
+// Allow running standalone: `node scripts/repo/bundle/verify-dist.mts [distDir]`.
 if (process.argv[1]?.endsWith('verify-dist.mts')) {
   const distDir = path.resolve(process.argv[2] ?? 'dist')
   verifyDist(distDir).then(code => {

@@ -1,4 +1,4 @@
-/**
+/*
  * @file Validate that external .d.ts files use proper module export patterns.
  *   Ensures type definitions are compatible with static ES6 imports and don't
  *   require ESLint disables or @ts-expect-error comments. Key validations:
@@ -15,7 +15,7 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 
-import { REPO_ROOT } from '../fleet/paths.mts'
+import { REPO_ROOT } from '../../fleet/paths.mts'
 
 const externalDir = path.join(REPO_ROOT, 'src', 'external')
 const require = createRequire(import.meta.url)
@@ -182,7 +182,8 @@ async function main(): Promise<void> {
       logger.fail(
         `Found ${failures.length} .d.ts ${pluralize('file', { count: failures.length })} with issues:`,
       )
-      for (const failure of failures) {
+      for (let i = 0, { length } = failures; i < length; i += 1) {
+        const failure = failures[i]!
         logger.log(`  ${failure.path}`)
         for (const issue of failure.issues) {
           logger.substep(issue)

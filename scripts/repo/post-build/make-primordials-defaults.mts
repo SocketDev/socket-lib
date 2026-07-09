@@ -12,7 +12,7 @@
  *   primordials check), and the bundler runs at publish time, before consumer
  *   install. Embedding the derived map keeps the published bundle
  *   self-contained. Re-run whenever globals bumps, or src/primordials/ exports
- *   change. Wired into scripts/post-build.mts.
+ *   change. Wired into scripts/repo/post-build.mts.
  */
 
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
@@ -22,7 +22,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import globals from 'globals'
 
-import { REPO_ROOT } from '../fleet/paths.mts'
+import { REPO_ROOT } from '../../fleet/paths.mts'
 
 const logger = getDefaultLogger()
 
@@ -126,7 +126,9 @@ function main(): void {
   // export there automatically extends the default map on the next
   // codegen run.
   const aliasEntries: Array<[string, string]> = []
-  for (const name of [...candidates].toSorted()) {
+  const sortedCandidates = [...candidates].toSorted()
+  for (let i = 0, { length } = sortedCandidates; i < length; i += 1) {
+    const name = sortedCandidates[i]!
     if (ctorBaseNames.has(name)) {
       aliasEntries.push([name, `${name}Ctor`])
     } else if (globalAliases.has(name)) {
@@ -152,7 +154,7 @@ function main(): void {
   ]
 
   const banner = `/**
- * @file GENERATED — do not edit by hand. Run \`node scripts/post-build/make-primordials-defaults.mts\`
+ * @file GENERATED — do not edit by hand. Run \`node scripts/repo/post-build/make-primordials-defaults.mts\`
  *   (also runs as part of \`pnpm run build\`) to regenerate from the
  *   \`globals\` npm package's globals.json crossed against
  *   src/primordials/*.ts \`Ctor\` exports.

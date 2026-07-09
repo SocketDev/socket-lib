@@ -1,7 +1,7 @@
 /**
  * @file Bundle runner (the `build` script): rolldown for the per-file source +
  *   externals builds, tsgo for declarations. Step scripts live in
- *   scripts/bundle/ (clean, externals, verify-dist).
+ *   scripts/repo/bundle/ (clean, externals, verify-dist).
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -15,11 +15,11 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { buildConfig } from '../.config/rolldown.config.mts'
+import { buildConfig } from '../../.config/rolldown.config.mts'
 // Repo root from the canonical paths module (1 path, 1 reference).
-import { REPO_ROOT as rootPath } from './fleet/paths.mts'
-import { parseArgs } from './fleet/util/parse-args.mts'
-import { runSequence } from './fleet/util/run-command.mts'
+import { REPO_ROOT as rootPath } from '../fleet/paths.mts'
+import { parseArgs } from '../fleet/util/parse-args.mts'
+import { runSequence } from '../fleet/util/run-command.mts'
 import { fsyncDist } from './bundle/fsync-dist.mts'
 import {
   buildExternals,
@@ -121,7 +121,9 @@ export function isBuildNeeded(): boolean {
     return true
   }
   const exportsMap = pkg.exports ?? {}
-  for (const value of Object.values(exportsMap)) {
+  const exportValues = Object.values(exportsMap)
+  for (let i = 0, { length } = exportValues; i < length; i += 1) {
+    const value = exportValues[i]!
     if (!value || typeof value !== 'object') {
       continue
     }
@@ -134,8 +136,12 @@ export function isBuildNeeded(): boolean {
     )
     // Every dist-backed target must exist. A missing one (a fresh export, a
     // cleaned dir) means the build is needed — don't stop at the first export.
-    for (let i = 0, { length } = targets; i < length; i += 1) {
-      if (!existsSync(path.join(rootPath, targets[i]!))) {
+    for (
+      let j = 0, { length: targetsLength } = targets;
+      j < targetsLength;
+      j += 1
+    ) {
+      if (!existsSync(path.join(rootPath, targets[j]!))) {
         return true
       }
     }
@@ -292,7 +298,7 @@ async function main(): Promise<void> {
       }
 
       // Validate external type definitions before building
-      const validateArgs = ['scripts/validate/external-types.mts']
+      const validateArgs = ['scripts/repo/validate/external-types.mts']
       if (quiet) {
         validateArgs.push('--quiet')
       }
@@ -318,7 +324,12 @@ async function main(): Promise<void> {
 
       exitCode = await runSequence([
         {
-          args: ['scripts/bundle/clean.mts', '--dist', '--types', '--quiet'],
+          args: [
+            'scripts/repo/bundle/clean.mts',
+            '--dist',
+            '--types',
+            '--quiet',
+          ],
           command: 'node',
         },
       ])

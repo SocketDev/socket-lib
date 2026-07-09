@@ -9,9 +9,10 @@ import process from 'node:process'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { externalPackages, scopedPackages } from '../build-externals/config.mts'
-import { REPO_ROOT } from '../fleet/paths.mts'
+import { REPO_ROOT } from '../../fleet/paths.mts'
 
 const logger = getDefaultLogger()
 
@@ -111,7 +112,7 @@ export function getExternalPathPrefix(filePath) {
   const dir = path.dirname(filePath)
   const relativePath = path.relative(dir, distExternalDir)
   // Normalize to forward slashes and ensure it starts with ./ or ../
-  const normalized = relativePath.replace(/\\/g, '/')
+  const normalized = normalizePath(relativePath)
   return normalized.startsWith('.') ? normalized : `./${normalized}`
 }
 

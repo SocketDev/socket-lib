@@ -13,7 +13,7 @@ import MagicString from 'magic-string'
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { REPO_ROOT } from '../fleet/paths.mts'
+import { REPO_ROOT } from '../../fleet/paths.mts'
 
 const logger = getDefaultLogger()
 
@@ -121,7 +121,9 @@ export async function processDirectory(
               }
 
               // Recursively walk
-              for (const key of Object.keys(node)) {
+              const nodeKeys = Object.keys(node)
+              for (let i = 0, { length } = nodeKeys; i < length; i += 1) {
+                const key = nodeKeys[i]!
                 if (key === 'end' || key === 'loc' || key === 'start') {
                   continue
                 }

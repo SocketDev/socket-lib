@@ -3,10 +3,11 @@
  *   generator (scripts/fleet/make-package-exports.mts). socket-lib publishes.
  *
  * @socketsecurity/lib(-stable) as a per-leaf subpath surface: every dist file
- *   is its own export, browser-safe leaves carry a `browser` condition, three
- *   barrels re-point for fleet compatibility, and the top-level `browser` field
- *   stubs Node builtins for downstream browser bundlers (webpack / esbuild /
- *   rolldown) since socket-lib ships NO browser build of its own.
+ *   is its own export, browser-safe leaves carry a `browser` condition, and the
+ *   top-level `browser` field stubs Node builtins for downstream browser bundlers
+ *   (webpack / esbuild / rolldown) since socket-lib ships NO browser build of its
+ *   own. The `./errors` convenience barrel is removed — use `./errors/message`
+ *   (or `./errors/predicates` / `./errors/stack`) directly.
  *
  *   The browser-safe surface is a VERIFIED-compat claim — its source of truth
  *   is docs/browser-compatibility.md (the audit matrix). Add a prefix here only
@@ -19,13 +20,12 @@ import { REPO_ROOT } from '../fleet/paths.mts'
 export const packageDir: string = REPO_ROOT
 
 export const config: ExportsConfig = {
-  // Fleet-compat barrel re-pointers. The bare/explicit forms route to the Node
-  // leaf by default; `browserTo` adds a `browser` condition sending browser
-  // bundlers to the dedicated browser leaf instead (so they don't pull node:*
-  // via the Node default). `./errors` has no separate browser impl — plain
-  // re-point.
+  // Capability/env-swap aliases. The bare/explicit forms route to the Node leaf
+  // by default; `browserTo` adds a `browser` condition sending browser bundlers
+  // to the dedicated browser leaf instead (so they don't pull node:* via the
+  // Node default). The former `./errors` barrel is removed — consumers migrate
+  // to `./errors/message`.
   aliases: [
-    { from: './errors', to: './errors/message' },
     {
       browserTo: './http-request/browser',
       from: './http-request',
@@ -53,7 +53,10 @@ export const config: ExportsConfig = {
   browser: [
     './arrays/**',
     './colors/**',
+    './debug/**',
     './errors/**',
+    './memo/**',
+    './npm/**',
     './objects/**',
     './regexps/**',
     './strings/**',

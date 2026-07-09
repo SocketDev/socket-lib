@@ -10,7 +10,7 @@ import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { REPO_ROOT } from '../fleet/paths.mts'
+import { REPO_ROOT } from '../../fleet/paths.mts'
 
 const externalDir = path.join(REPO_ROOT, 'dist', 'external')
 const require = createRequire(import.meta.url)
@@ -178,7 +178,8 @@ async function main(): Promise<void> {
       logger.fail(
         `Found ${failures.length} external ${pluralize('module', { count: failures.length })} with export issues:`,
       )
-      for (const failure of failures) {
+      for (let i = 0, { length } = failures; i < length; i += 1) {
+        const failure = failures[i]!
         logger.log(`  ${failure.path}`)
         logger.substep(failure.reason)
       }

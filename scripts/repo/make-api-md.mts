@@ -161,7 +161,8 @@ export function renderMarkdown(groups: Map<string, Row[]>): string {
   lines.push(`**Jump to:** ${jumpLinks.join(' · ')}`)
   lines.push('')
 
-  for (const key of keys) {
+  for (let i = 0, { length } = keys; i < length; i += 1) {
+    const key = keys[i]!
     lines.push(`## ${key}`)
     lines.push('')
     lines.push('| Subpath | Description |')
@@ -208,7 +209,8 @@ export function renderLlmsTxt(
   )
   lines.push('')
 
-  for (const key of keys) {
+  for (let i = 0, { length } = keys; i < length; i += 1) {
+    const key = keys[i]!
     const heading = key === 'Top-level' ? 'Top-level' : key
     lines.push(`## ${heading}`)
     lines.push('')
@@ -267,7 +269,6 @@ async function main(): Promise<void> {
 }
 
 main().catch(err => {
-  // eslint-disable-next-line no-console
   logger.fail(err)
   process.exitCode = 1
 })

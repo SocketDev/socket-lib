@@ -1,5 +1,5 @@
 /**
- * @file Individual build steps for the `build` runner (scripts/bundle.mts):
+ * @file Individual build steps for the `build` runner (scripts/repo/bundle.mts):
  *   source (rolldown per-file), TypeScript declarations (tsgo), the prim CLI
  *   bundle, external dependencies, and the post-build dist-shaping pass. Each
  *   returns an exit code (and source returns its build time) so the runner can
@@ -15,10 +15,10 @@ import { rolldown } from 'rolldown'
 import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { buildConfig } from '../../.config/rolldown.config.mts'
-import { primBuildConfig } from '../../.config/repo/rolldown.prim.config.mts'
-import { REPO_ROOT as rootPath } from '../fleet/paths.mts'
-import { runSequence } from '../fleet/util/run-command.mts'
+import { buildConfig } from '../../../.config/rolldown.config.mts'
+import { primBuildConfig } from '../../../.config/repo/rolldown.prim.config.mts'
+import { REPO_ROOT as rootPath } from '../../fleet/paths.mts'
+import { runSequence } from '../../fleet/util/run-command.mts'
 
 const logger = getDefaultLogger()
 
@@ -43,7 +43,7 @@ export async function buildSource(
   if (!skipClean) {
     const exitCode = await runSequence([
       {
-        args: ['scripts/bundle/clean.mts', '--dist', '--quiet'],
+        args: ['scripts/repo/bundle/clean.mts', '--dist', '--quiet'],
         command: 'node',
       },
     ])
@@ -98,7 +98,7 @@ export async function buildTypes(
 
   if (!skipClean) {
     commands.push({
-      args: ['scripts/bundle/clean.mts', '--types', '--quiet'],
+      args: ['scripts/repo/bundle/clean.mts', '--types', '--quiet'],
       command: 'node',
     })
   }
@@ -178,7 +178,7 @@ export async function buildExternals(
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
 
-  const args = ['scripts/bundle/externals.mts']
+  const args = ['scripts/repo/bundle/externals.mts']
   if (quiet) {
     args.push('--quiet')
   }
@@ -203,7 +203,7 @@ export async function buildExternals(
 }
 
 /**
- * Run the post-build dist-shaping steps (scripts/post-build.mts). Returns
+ * Run the post-build dist-shaping steps (scripts/repo/post-build.mts). Returns
  * exitCode for external logging.
  */
 export async function runPostBuild(
@@ -211,7 +211,7 @@ export async function runPostBuild(
 ): Promise<number> {
   const { quiet = false, verbose = false } = options
 
-  const postBuildArgs = ['scripts/post-build.mts']
+  const postBuildArgs = ['scripts/repo/post-build.mts']
   if (quiet) {
     postBuildArgs.push('--quiet')
   }

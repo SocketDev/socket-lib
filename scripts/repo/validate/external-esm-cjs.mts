@@ -1,4 +1,4 @@
-/**
+/*
  * @file Comprehensive ESM/CJS validator for dist/external/* exports Validates
  *   that bundled dependencies work correctly with both CommonJS require() and
  *   ESM import, including proper handling of default exports and named exports.
@@ -17,7 +17,7 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import process from 'node:process'
 
-import { REPO_ROOT } from '../fleet/paths.mts'
+import { REPO_ROOT } from '../../fleet/paths.mts'
 
 const externalDir = path.join(REPO_ROOT, 'dist', 'external')
 const require = createRequire(import.meta.url)
@@ -176,7 +176,8 @@ export async function checkModuleExports(filePath) {
 
       // Named exports should be accessible in ESM's default import
       const nonDefaultCjsKeys = cjsKeys.filter(k => k !== 'default')
-      for (const key of nonDefaultCjsKeys) {
+      for (let i = 0, { length } = nonDefaultCjsKeys; i < length; i += 1) {
+        const key = nonDefaultCjsKeys[i]!
         // In ESM, named exports appear as properties of the default import
         // when importing a CJS module
         if (!(key in esmModule) && !(key in (esmDefault || {}))) {
@@ -276,7 +277,8 @@ async function main(): Promise<void> {
       logger.fail(
         `Found ${failures.length} external ${pluralize('module', { count: failures.length })} with ESM/CJS export issues:`,
       )
-      for (const failure of failures) {
+      for (let i = 0, { length } = failures; i < length; i += 1) {
+        const failure = failures[i]!
         logger.log(`  ${failure.path}`)
         for (const issue of failure.issues) {
           logger.substep(issue)
@@ -324,7 +326,8 @@ async function main(): Promise<void> {
           logger.success(
             `Verified ${inquirerResults.length} @inquirer ${pluralize('module', { count: inquirerResults.length })}:`,
           )
-          for (const result of inquirerResults) {
+          for (let i = 0, { length } = inquirerResults; i < length; i += 1) {
+            const result = inquirerResults[i]!
             // oxlint-disable-next-line socket/no-status-emoji -- inline diagnostic label, not a status line.
             const hasDefault = result.hasEsmDefault ? '✓ default' : ''
             const hasSeparator =

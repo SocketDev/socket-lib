@@ -4,14 +4,15 @@
  */
 
 import { promises as fs } from 'node:fs'
+import { builtinModules } from 'node:module'
 import path from 'node:path'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { REPO_ROOT } from '../fleet/paths.mts'
+import { REPO_ROOT } from '../../fleet/paths.mts'
 import { bundlePackage } from './bundler.mts'
 import { externalPackages, scopedPackages } from './config.mts'
-import { ensureDir } from './copy-files.mts'
+import { copyLocalFiles, ensureDir } from './copy-files.mts'
 import { transformPrimordials } from './transform-primordials.mts'
 
 const logger = getDefaultLogger()
@@ -47,6 +48,12 @@ export async function buildExternals(options = {}) {
   // Post-process: Fix node-gyp strings to prevent bundler issues for consumers
   await fixNodeGypStrings(distExternalDir, { quiet })
 
+  // Post-process: rewrite `require("node:X")` to the bare builtin form so
+  // browser bundlers can stub the specifier via the package.json `browser`
+  // field (webpack throws UnhandledSchemeError on the `node:` scheme before
+  // the stubs apply — same doctrine as src/node/module.ts's bare `module`).
+  await rewriteBareBuiltinRequires(distExternalDir, { quiet })
+
   // Post-process: rewrite well-known global calls (Buffer.from, Date.now,
   // Object.keys, …) to socket-lib's primordials surface so the bundled
   // externals don't depend on a clean caller realm. The codemod has a
@@ -56,6 +63,16 @@ export async function buildExternals(options = {}) {
   // unreliable — see tools/prim/src/codemod.mts).
   const distRoot = path.dirname(distExternalDir)
   await transformPrimordials(distRoot, distExternalDir, { quiet })
+
+  // Ship hand-authored .d.ts stubs (e.g. src/external/std-env.d.ts) next to the
+  // bundled .js so public re-exports of an external's type surface resolve for
+  // consumers — an inlined devDependency has no downstream types otherwise. Runs
+  // last so the .js-only transform passes above never parse a .d.ts.
+  await copyLocalFiles(
+    path.join(rootDir, 'src', 'external'),
+    distExternalDir,
+    quiet || !showDetails,
+  )
 
   return { bundledCount, totalSize }
 }
@@ -251,6 +268,64 @@ export async function fixNodeGypStrings(dir, options = {}) {
         if (!quiet) {
           logger.log(
             `  Fixed node-gyp string in ${path.relative(path.join(dir, '..', '..'), filePath)}`,
+          )
+        }
+      }
+    }
+  }
+}
+
+// Builtins that resolve in BOTH bare and node:-prefixed form. `node:`-only
+// builtins (node:test, node:sqlite, …) appear in builtinModules WITH the
+// prefix and must keep it — their bare form doesn't resolve.
+const dualFormBuiltins = new Set(builtinModules)
+
+/**
+ * Post-process bundled files to rewrite `require("node:X")` into
+ * `require("X")` when the bare form is also a builtin. Browser bundlers
+ * (webpack) throw UnhandledSchemeError on `node:` specifiers before the
+ * package.json `browser`-field stubs can apply; bare builtin specifiers
+ * resolve identically on Node and stay stubbable.
+ *
+ * @param {string} dir - Directory to process.
+ * @param {object} options - Options.
+ * @param {boolean} options.quiet - Suppress output.
+ */
+export async function rewriteBareBuiltinRequires(dir, options = {}) {
+  const { quiet = false } = options
+
+  const files = await fs.readdir(dir, { withFileTypes: true })
+
+  for (const file of files) {
+    const filePath = path.join(dir, file.name)
+
+    if (file.isDirectory()) {
+      // Recursively process subdirectories
+      await rewriteBareBuiltinRequires(filePath, options)
+    } else if (file.name.endsWith('.js')) {
+      const contents = await fs.readFile(filePath, 'utf8')
+      if (!contents.includes('node:')) {
+        continue
+      }
+      let rewrites = 0
+      // Matches require("node:X") / require('node:X'): (["']) captures the
+      // opening quote, node: is literal, ([^"']+) captures the builtin name,
+      // \1 requires the same closing quote.
+      const fixed = contents.replace(
+        /require\((["'])node:([^"']+)\1\)/g,
+        (match, quote, name) => {
+          if (!dualFormBuiltins.has(name)) {
+            return match
+          }
+          rewrites += 1
+          return `require(${quote}${name}${quote})`
+        },
+      )
+      if (rewrites > 0) {
+        await fs.writeFile(filePath, fixed, 'utf8')
+        if (!quiet) {
+          logger.log(
+            `  Rewrote ${rewrites} node:-prefixed require(s) in ${path.relative(path.join(dir, '..', '..'), filePath)}`,
           )
         }
       }
