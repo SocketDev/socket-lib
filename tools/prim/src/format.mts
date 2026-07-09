@@ -51,7 +51,9 @@ export function formatHuman(findings, ctx) {
       verb = `add \`${primordial}\` to socket-lib/src/primordials.ts (${items.length} call site${items.length === 1 ? '' : 's'})`
     }
     lines.push(verb)
-    for (const item of items.slice(0, 3)) {
+    const topItems = items.slice(0, 3)
+    for (let i = 0, { length } = topItems; i < length; i += 1) {
+      const item = topItems[i]!
       lines.push(`    ${item.file}:${item.line}  ${item.pattern}`)
     }
     if (items.length > 3) {

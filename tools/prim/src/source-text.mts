@@ -195,7 +195,9 @@ export function repairEndPositions(node) {
     // Not an AST node (e.g. a literal value, a token list). Recurse
     // through nested objects/arrays so we still reach AST descendants.
     let m = 0
-    for (const key of Object.keys(node)) {
+    const objectKeys = Object.keys(node)
+    for (let i = 0, { length } = objectKeys; i < length; i += 1) {
+      const key = objectKeys[i]!
       if (key === 'loc' || key === 'range' || key.startsWith('_')) {
         continue
       }
@@ -208,7 +210,9 @@ export function repairEndPositions(node) {
   }
 
   let maxChildEnd = 0
-  for (const key of Object.keys(node)) {
+  const nodeKeys = Object.keys(node)
+  for (let i = 0, { length } = nodeKeys; i < length; i += 1) {
+    const key = nodeKeys[i]!
     if (
       key === 'loc' ||
       key === 'range' ||
@@ -254,7 +258,9 @@ export function walkAst(node, visit) {
   if (typeof node.type === 'string') {
     visit(node)
   }
-  for (const key of Object.keys(node)) {
+  const keys = Object.keys(node)
+  for (let i = 0, { length } = keys; i < length; i += 1) {
+    const key = keys[i]!
     if (key === 'loc' || key === 'range' || key.startsWith('_')) {
       continue
     }
