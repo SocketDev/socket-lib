@@ -7,6 +7,8 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 import { uvProjectTargetDir } from '../../../../src/external-tools/python/uv-install'
 
 import type * as NodeFs from 'node:fs'
@@ -67,7 +69,7 @@ afterEach(() => {
 describe('external-tools/python/uv-install — uvProjectTargetDir', () => {
   test('lands under _dlx/<cacheKey>/site-packages', () => {
     const dir = uvProjectTargetDir(PROJECT)
-    const norm = dir.replace(/\\/g, '/')
+    const norm = normalizePath(dir)
     expect(norm).toMatch(/\/_dlx\/[a-f0-9]{16}\/site-packages$/)
   })
 

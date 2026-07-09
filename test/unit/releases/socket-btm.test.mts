@@ -84,9 +84,14 @@ describe('releases/socket-btm', () => {
       )
     })
 
-    it('should return correct asset name for win32-arm64', () => {
+    it('uses the release platform token for node-smol windows assets', () => {
+      // Published node-smol assets are node-win-<arch>.exe (release-platform
+      // naming), unlike the binject/binflate families which keep win32.
       expect(getBinaryAssetName('node', 'win32', 'arm64')).toBe(
-        'node-win32-arm64.exe',
+        'node-win-arm64.exe',
+      )
+      expect(getBinaryAssetName('node', 'win32', 'x64')).toBe(
+        'node-win-x64.exe',
       )
     })
 
@@ -246,7 +251,8 @@ describe('releases/socket-btm', () => {
 
       const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
       expect(cfg).toMatchObject({
-        assetName: 'node-win32-x64.exe',
+        // Published node-smol windows assets use the release platform token.
+        assetName: 'node-win-x64.exe',
         binaryName: 'node.exe',
         platformArch: 'win32-x64',
       })

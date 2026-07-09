@@ -103,7 +103,7 @@ describe('callAiHttpModel — token hygiene', () => {
   test('throws naming the token env var when it is unset (no network)', async () => {
     await expect(
       callAiHttpModel({
-        model: 'accounts/fireworks/models/glm-5p1',
+        model: 'accounts/fireworks/models/glm-5p2',
         prompt: 'hi',
         provider: 'fireworks',
       }),

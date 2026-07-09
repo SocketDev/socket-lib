@@ -40,10 +40,7 @@ test('expandNames expands a brace group and passes a bare name through', () => {
   assert.deepEqual(expandNames('{a-guard,b-guard}'), ['a-guard', 'b-guard'])
   assert.deepEqual(expandNames('my-guard'), ['my-guard'])
   // whitespace inside the brace group is trimmed; empties dropped
-  assert.deepEqual(expandNames('{ a-guard , b-guard }'), [
-    'a-guard',
-    'b-guard',
-  ])
+  assert.deepEqual(expandNames('{ a-guard , b-guard }'), ['a-guard', 'b-guard'])
 })
 
 // ── textCitesEnforcer: each arm ─────────────────────────────────
@@ -92,9 +89,15 @@ test('textCitesEnforcer matches a typescript/ config rule', () => {
 })
 
 test('textCitesEnforcer matches a resolving scripts/ path (fleet and repo tiers)', () => {
-  assert.equal(textCitesEnforcer('run `scripts/fleet/check/foo.mts`', inv()), true)
   assert.equal(
-    textCitesEnforcer('socket-wheelhouse/scripts/repo/cascade-fleet.mts', inv()),
+    textCitesEnforcer('run `scripts/fleet/check/foo.mts`', inv()),
+    true,
+  )
+  assert.equal(
+    textCitesEnforcer(
+      'socket-wheelhouse/scripts/repo/cascade-fleet.mts',
+      inv(),
+    ),
     true,
   )
 })
@@ -194,7 +197,9 @@ test('optOutCategory recognizes each allowed category with an em-dash or hyphen 
     'human-review',
   )
   assert.equal(
-    optOutCategory('<!-- enforcement: off-machine - GitHub required_signatures -->'),
+    optOutCategory(
+      '<!-- enforcement: off-machine - GitHub required_signatures -->',
+    ),
     'off-machine',
   )
   assert.equal(
@@ -248,9 +253,9 @@ test('sirenParagraphs attaches the enclosing ### section text', () => {
 test('sirenParagraphs with fleetOnly ignores 🚨 outside the FLEET-CANONICAL block', () => {
   const body = [
     `${SIREN} preamble rule outside the block`,
-    '<!-- BEGIN FLEET-CANONICAL -->',
-    `${SIREN} in-block rule`,
-    '<!-- END FLEET-CANONICAL -->',
+    '<!-- <fleet-canonical> -->',
+    `- ${SIREN} in-block rule`,
+    '<!-- </fleet-canonical> -->',
     `${SIREN} postamble rule outside the block`,
   ].join('\n')
   const paras = sirenParagraphs('CLAUDE.md', body, { fleetOnly: true })
@@ -262,7 +267,10 @@ test('sirenParagraphs with fleetOnly ignores 🚨 outside the FLEET-CANONICAL bl
 
 test('auditFile reports an unenforced 🚨 rule as a finding', () => {
   const body = `### Topic\n\n${SIREN} unenforced hard rule\n`
-  const r = auditFile('CLAUDE.md', body, inv(), { fleetOnly: false, readDoc: noDoc })
+  const r = auditFile('CLAUDE.md', body, inv(), {
+    fleetOnly: false,
+    readDoc: noDoc,
+  })
   assert.equal(r.findings.length, 1)
   assert.equal(r.optOuts.length, 0)
   assert.equal(r.checked, 1)
@@ -271,14 +279,20 @@ test('auditFile reports an unenforced 🚨 rule as a finding', () => {
 
 test('auditFile passes an enforced 🚨 rule (no finding)', () => {
   const body = `### Topic\n\n${SIREN} rule (\`.claude/hooks/fleet/my-guard/\`)\n`
-  const r = auditFile('CLAUDE.md', body, inv(), { fleetOnly: false, readDoc: noDoc })
+  const r = auditFile('CLAUDE.md', body, inv(), {
+    fleetOnly: false,
+    readDoc: noDoc,
+  })
   assert.equal(r.findings.length, 0)
   assert.equal(r.checked, 1)
 })
 
 test('auditFile routes an opted-out 🚨 rule to optOuts, not findings', () => {
   const body = `### Topic\n\n${SIREN} cannot be coded\n<!-- enforcement: human-review — judgment -->\n`
-  const r = auditFile('CLAUDE.md', body, inv(), { fleetOnly: false, readDoc: noDoc })
+  const r = auditFile('CLAUDE.md', body, inv(), {
+    fleetOnly: false,
+    readDoc: noDoc,
+  })
   assert.equal(r.findings.length, 0)
   assert.equal(r.optOuts.length, 1)
   assert.equal(r.optOuts[0]!.category, 'human-review')
@@ -286,12 +300,37 @@ test('auditFile routes an opted-out 🚨 rule to optOuts, not findings', () => {
 
 test('auditFile ignores non-🚨 paragraphs entirely', () => {
   const body = '### Topic\n\nan ordinary rule with no siren, no enforcer\n'
-  const r = auditFile('CLAUDE.md', body, inv(), { fleetOnly: false, readDoc: noDoc })
+  const r = auditFile('CLAUDE.md', body, inv(), {
+    fleetOnly: false,
+    readDoc: noDoc,
+  })
   assert.equal(r.findings.length, 0)
   assert.equal(r.checked, 0)
 })
 
+test('auditFile (fleetOnly bullets) enforces 🚨 bullets via their inline citation', () => {
+  // The thin CLAUDE.md is a bullet index; each 🚨 `- ` bullet is a rule whose
+  // enforcer citation rides on the same line. One enforced, one not.
+  const body = [
+    '<!-- <fleet-canonical> -->',
+    '## 📚 Fleet',
+    `- ${SIREN} enforced bullet (\`.claude/hooks/fleet/my-guard/\`)`,
+    `- ${SIREN} unenforced bullet with no anchor`,
+    '<!-- </fleet-canonical> -->',
+  ].join('\n')
+  const r = auditFile('CLAUDE.md', body, inv(), {
+    fleetOnly: true,
+    readDoc: noDoc,
+  })
+  assert.equal(r.checked, 2)
+  assert.equal(r.findings.length, 1)
+  assert.match(r.findings[0]!.excerpt, /unenforced bullet/)
+})
+
 test('auditFile is fail-open on empty input', () => {
-  const r = auditFile('CLAUDE.md', '', inv(), { fleetOnly: true, readDoc: noDoc })
+  const r = auditFile('CLAUDE.md', '', inv(), {
+    fleetOnly: true,
+    readDoc: noDoc,
+  })
   assert.deepEqual([r.findings.length, r.optOuts.length, r.checked], [0, 0, 0])
 })

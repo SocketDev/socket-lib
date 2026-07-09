@@ -53,7 +53,12 @@ function makeRepo(): string {
   return dir
 }
 
-function hookDir(dir: string, seg: string, name: string, files: string[]): void {
+function hookDir(
+  dir: string,
+  seg: string,
+  name: string,
+  files: string[],
+): void {
   const base = path.join(dir, '.claude', 'hooks', seg, name)
   if (files.length === 0) {
     mkdirSync(base, { recursive: true })

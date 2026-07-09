@@ -27,12 +27,19 @@ describe('AI_PROFILE.read', () => {
 })
 
 describe('AI_PROFILE.edit', () => {
-  it('allows Edit but NOT Write / MultiEdit (in-place only)', () => {
+  it('allows Edit but NOT Write (in-place only)', () => {
     expect(AI_PROFILE.edit.tools).toContain('Edit')
     expect(AI_PROFILE.edit.tools).not.toContain('Write')
-    expect(AI_PROFILE.edit.tools).not.toContain('MultiEdit')
     expect(AI_PROFILE.edit.disallow).toContain('Write')
-    expect(AI_PROFILE.edit.disallow).toContain('MultiEdit')
+  })
+
+  it('names no unknown tools — the CLI hard-errors on a deny rule for a tool it does not recognize', () => {
+    const profiles = Object.values(AI_PROFILE)
+    for (let i = 0, { length } = profiles; i < length; i += 1) {
+      const profile = profiles[i]!
+      expect(profile.tools).not.toContain('MultiEdit')
+      expect(profile.disallow).not.toContain('MultiEdit')
+    }
   })
 
   it('denies bash and uses acceptEdits', () => {
@@ -42,9 +49,8 @@ describe('AI_PROFILE.edit', () => {
 })
 
 describe('AI_PROFILE.create', () => {
-  it('allows Write + MultiEdit (can create files) but not Bash', () => {
+  it('allows Write (can create files) but not Bash', () => {
     expect(AI_PROFILE.create.tools).toContain('Write')
-    expect(AI_PROFILE.create.tools).toContain('MultiEdit')
     expect(AI_PROFILE.create.tools).not.toContain('Bash')
     expect(AI_PROFILE.create.disallow).toContain('Bash')
   })

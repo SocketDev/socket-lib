@@ -1,3 +1,4 @@
+// socket-lint: mirror-exempt — imports from 8 source adapter modules; split deferred
 // vitest specs for the researching-recency source adapters. Every test mocks
 // HTTP with nock and runs under disableNetConnect(), so a missing interceptor
 // fails closed instead of hitting the live internet (fleet rule: tests never
@@ -6,14 +7,30 @@
 import assert from 'node:assert/strict'
 
 import nock from 'nock'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, test } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  test,
+} from 'vitest'
 
 import { blueskyAdapter } from '../../../scripts/fleet/researching-recency/lib/sources/bluesky.mts'
-import { devtoAdapter, tagsForQuery as devtoTags } from '../../../scripts/fleet/researching-recency/lib/sources/devto.mts'
+import {
+  devtoAdapter,
+  tagsForQuery as devtoTags,
+} from '../../../scripts/fleet/researching-recency/lib/sources/devto.mts'
 import { githubAdapter } from '../../../scripts/fleet/researching-recency/lib/sources/github.mts'
 import { hackernewsAdapter } from '../../../scripts/fleet/researching-recency/lib/sources/hackernews.mts'
-import { lobstersAdapter, tagsForQuery as lobstersTags } from '../../../scripts/fleet/researching-recency/lib/sources/lobsters.mts'
-import { parseFeed, redditAdapter } from '../../../scripts/fleet/researching-recency/lib/sources/reddit.mts'
+import {
+  lobstersAdapter,
+  tagsForQuery as lobstersTags,
+} from '../../../scripts/fleet/researching-recency/lib/sources/lobsters.mts'
+import {
+  parseFeed,
+  redditAdapter,
+} from '../../../scripts/fleet/researching-recency/lib/sources/reddit.mts'
 import { parseWebHits } from '../../../scripts/fleet/researching-recency/lib/sources/web.mts'
 import {
   DEFAULT_DEV_HANDLES,

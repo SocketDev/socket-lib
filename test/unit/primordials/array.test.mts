@@ -48,6 +48,9 @@ import {
   ArrayPrototypeUnshift,
   ArrayPrototypeValues,
   ArrayPrototypeWith,
+  AtomicsWait,
+  IteratorPrototypeNext,
+  IteratorPrototypeReturn,
 } from '../../../src/primordials/array'
 
 describe('Array (static)', () => {
@@ -257,5 +260,46 @@ describe('Array (prototype)', () => {
     expect(ArrayPrototypeWith(a, -1, 99)).toEqual([10, 20, 99])
     // Source unchanged.
     expect(a).toEqual([10, 20, 30])
+  })
+})
+
+describe('Atomics', () => {
+  it('AtomicsWait returns "timed-out" when no notify arrives', () => {
+    const sab = new SharedArrayBuffer(4)
+    const view = new Int32Array(sab)
+    expect(AtomicsWait(view, 0, 0, 0)).toBe('timed-out')
+  })
+
+  it('AtomicsWait returns "not-equal" when value mismatches', () => {
+    const sab = new SharedArrayBuffer(4)
+    const view = new Int32Array(sab)
+    view[0] = 7
+    expect(AtomicsWait(view, 0, 0, 0)).toBe('not-equal')
+  })
+})
+
+describe('Iterator (prototype)', () => {
+  it('IteratorPrototypeNext pulls values from any built-in iterator', () => {
+    const m = new Map([
+      ['a', 1],
+      ['b', 2],
+    ])
+    const iter = m.keys()
+    expect(IteratorPrototypeNext(iter)).toEqual({ value: 'a', done: false })
+    expect(IteratorPrototypeNext(iter)).toEqual({ value: 'b', done: false })
+    expect(IteratorPrototypeNext(iter).done).toBe(true)
+  })
+
+  it('IteratorPrototypeReturn short-circuits an iterator when present', () => {
+    if (!IteratorPrototypeReturn) {
+      return
+    }
+    const m = new Map([
+      ['a', 1],
+      ['b', 2],
+    ])
+    const iter = m.keys()
+    IteratorPrototypeReturn(iter)
+    expect(IteratorPrototypeNext(iter).done).toBe(true)
   })
 })

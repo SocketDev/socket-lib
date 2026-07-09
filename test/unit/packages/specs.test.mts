@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for package spec parsing and GitHub URL utilities. Tests
+ * @file Unit tests for GitHub URL utilities in package spec parsing. Tests
  *   npm-package-arg integration for parsing package specifiers:
  *
  *   - getRepoUrlDetails() extracts user/project from GitHub URLs
@@ -10,6 +10,8 @@
  *     Socket CLI for package installation and validation.
  */
 
+import { describe, expect, it } from 'vitest'
+
 import {
   getRepoUrlDetails,
   gitHubTagRefUrl,
@@ -17,7 +19,6 @@ import {
   isGitHubTgzSpec,
   isGitHubUrlSpec,
 } from '../../../src/packages/specs'
-import { describe, expect, it } from 'vitest'
 
 describe('packages/specs', () => {
   describe('getRepoUrlDetails', () => {
@@ -66,17 +67,16 @@ describe('packages/specs', () => {
     })
 
     it('returns empty strings for invalid URL', () => {
-      // Previously the loose `/^.+github.com\//` replace left garbage in
-      // user/project for non-GitHub or malformed inputs. Now returns a
-      // clean empty result so callers can branch on it.
+      // Non-GitHub or malformed inputs return a clean empty result so
+      // callers can branch on it.
       const result = getRepoUrlDetails('not-a-valid-url')
       expect(result.user).toBe('')
       expect(result.project).toBe('')
     })
 
     it('rejects github.com lookalike hosts', () => {
-      // Previously `/^.+github.com\//` matched any host that happened to
-      // end with `github.com` literally because `.` was unescaped.
+      // The host match requires an exact `github.com` domain segment —
+      // a host that merely ends with the literal string does not match.
       expect(getRepoUrlDetails('https://githubXcom/a/b')).toEqual({
         user: '',
         project: '',

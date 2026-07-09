@@ -185,14 +185,14 @@ describe('parseJson error handling and edge cases', () => {
 
     it('should handle JSON with null values', () => {
       const result = parseJson('{"key":null}')
-      // oxlint-disable-next-line socket/prefer-undefined-over-null
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- JSON spec returns null
       expect(result).toEqual({ key: null })
     })
 
     it('should handle mixed types in array', () => {
       const result = parseJson('[null,true,42,"string",{"key":"value"},[1,2]]')
       expect(result).toEqual([
-        // oxlint-disable-next-line socket/prefer-undefined-over-null
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- JSON spec returns null
         null,
         true,
         42,

@@ -216,6 +216,25 @@ describe.sequential('http-request/request — retry loop', () => {
     expect(onRetry).toHaveBeenCalledTimes(1)
   })
 
+  test('caps the exponential backoff delay at retryDelayMax', async () => {
+    const { httpRequest, httpRequestAttempt } = await loadFresh()
+    httpRequestAttempt.mockRejectedValue(new Error('boom'))
+    // onRetry returns 0 to skip the real wait; its 3rd arg is the computed
+    // (capped) delay, so we can assert the cap without timers.
+    const onRetry = vi.fn().mockReturnValue(0)
+    await expect(
+      httpRequest('https://example.com', {
+        retries: 4,
+        retryDelay: 1000,
+        retryDelayMax: 1500,
+        onRetry,
+      }),
+    ).rejects.toThrow('boom')
+    // delay = min(1000 * 2^attempt, 1500): 1000, 1500, 1500, 1500
+    const delays = onRetry.mock.calls.map(c => c[2])
+    expect(delays).toStrictEqual([1000, 1500, 1500, 1500])
+  })
+
   test('honors a mid-retry caller abort (signal.aborted between attempts)', async () => {
     const { httpRequest, httpRequestAttempt } = await loadFresh()
     const controller = new AbortController()

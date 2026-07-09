@@ -2,7 +2,10 @@
 
 import { expect, test } from 'vitest'
 
-import { cleanOutput, stripDecoration } from '../../_shared/fleet/lib/output.mts'
+import {
+  cleanOutput,
+  stripDecoration,
+} from '../../_shared/fleet/lib/output.mts'
 
 const ESC = String.fromCharCode(27)
 

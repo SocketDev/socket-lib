@@ -1,3 +1,4 @@
+// socket-lint: mirror-exempt — imports from relevance.mts + signals.mts; split deferred
 // vitest specs for the researching-recency local-scoring signals. Locks the
 // recency curve, the per-source engagement weights, min-max normalization, and
 // the 0.65/0.25/0.10 local-rank blend against the upstream last30days

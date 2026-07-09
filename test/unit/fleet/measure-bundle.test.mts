@@ -38,7 +38,9 @@ describe('checkPreconditions', () => {
   test('detects dist, the stub import, and the lib-stub file', () => {
     const dir = mkdtempSync(path.join(os.tmpdir(), 'mb-'))
     mkdirSync(path.join(dir, 'dist'), { recursive: true })
-    mkdirSync(path.join(dir, '.config', 'repo', 'rolldown'), { recursive: true })
+    mkdirSync(path.join(dir, '.config', 'repo', 'rolldown'), {
+      recursive: true,
+    })
     writeFileSync(
       path.join(dir, '.config', 'repo', 'rolldown.config.mts'),
       "import { createLibStubPlugin } from './rolldown/lib-stub.mts'",

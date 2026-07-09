@@ -320,5 +320,28 @@ describe('objects - mutate & sort', () => {
       const result = merge(target, source)
       expect(result.a).toEqual([1, 2])
     })
+
+    it('skips falsy currentSource/currentTarget at queue level (undefined source)', () => {
+      // oxlint-disable-next-line typescript/no-explicit-any -- testing undefined source path
+      const target: any = { a: { b: 1 } }
+      // oxlint-disable-next-line typescript/no-explicit-any -- testing undefined source path
+      const source: any = { a: undefined }
+      const result = merge(target, source) as { a: unknown }
+      expect(result.a).toBeUndefined()
+    })
+
+    it('skips array-array at queue level (skip if either is array)', () => {
+      const target = { a: { b: 1 } }
+      const source = { a: [1, 2, 3] }
+      const result = merge(target, source)
+      expect(result.a).toEqual([1, 2, 3])
+    })
+
+    it('handles nested array within object (skip array iteration)', () => {
+      const target = { x: { items: [1, 2] } }
+      const source = { x: { items: [3, 4, 5] } }
+      const result = merge(target, source)
+      expect(result.x.items).toEqual([3, 4, 5])
+    })
   })
 })

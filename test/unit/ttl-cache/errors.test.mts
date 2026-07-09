@@ -18,6 +18,10 @@ import { invalidateCaches } from '../../../src/paths/rewire'
 import * as cacacheRead from '../../../src/cacache/read'
 import * as cacacheWrite from '../../../src/cacache/write'
 
+// Partial cacache entries (only `data`) stand in for full GetCacheObject
+// results in the mocks below.
+type SafeGetResult = Awaited<ReturnType<typeof cacacheRead.safeGet>>
+
 vi.mock(import('../../../src/cacache/read'), async importOriginal => {
   const original = await importOriginal<typeof cacacheRead>()
   return {
@@ -66,8 +70,7 @@ describe.sequential('ttl-cache — error branches', () => {
       // Return a valid cacache entry shape with malformed JSON in data.
       vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from('this is not valid json{{{', 'utf8'),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as SafeGetResult)
       const result = await cache.get('any-key')
       expect(result).toBeUndefined()
       // The catch branch attempts to remove the corrupt entry.
@@ -82,8 +85,7 @@ describe.sequential('ttl-cache — error branches', () => {
       })
       vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from('garbage', 'utf8'),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as SafeGetResult)
       vi.mocked(cacacheWrite.remove).mockRejectedValueOnce(
         new Error('rm-failed'),
       )
@@ -106,8 +108,7 @@ describe.sequential('ttl-cache — error branches', () => {
       }
       vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from(JSON.stringify(expiredEntry), 'utf8'),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as SafeGetResult)
       const result = await cache.get('expired-key')
       expect(result).toBeUndefined()
       expect(cacacheWrite.remove).toHaveBeenCalled()
@@ -125,8 +126,7 @@ describe.sequential('ttl-cache — error branches', () => {
       }
       vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from(JSON.stringify(expiredEntry), 'utf8'),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as SafeGetResult)
       vi.mocked(cacacheWrite.remove).mockRejectedValueOnce(
         new Error('rm-failed-2'),
       )
@@ -149,8 +149,7 @@ describe.sequential('ttl-cache — error branches', () => {
       }
       vi.mocked(cacacheRead.safeGet).mockResolvedValueOnce({
         data: Buffer.from(JSON.stringify(skewedEntry), 'utf8'),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as SafeGetResult)
       const result = await cache.get('skew-key')
       expect(result).toBeUndefined()
     })

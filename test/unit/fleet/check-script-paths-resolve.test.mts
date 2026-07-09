@@ -41,6 +41,7 @@ test('extractNodeScriptPath skips inline node -e / --eval', () => {
 
 test('extractNodeScriptPath skips non-node commands', () => {
   assert.equal(extractNodeScriptPath('oxfmt -c x --write .'), undefined)
+  // oxlint-disable-next-line socket/no-glob-in-ordered-run-s -- test fixture: asserts the check ignores non-node scripts.
   assert.equal(extractNodeScriptPath('run-s install:*'), undefined)
   assert.equal(extractNodeScriptPath('agent-ci run --all'), undefined)
   assert.equal(extractNodeScriptPath('pnpm exec tsgo'), undefined)
@@ -94,6 +95,7 @@ test('scanScriptMap ignores non-node + inline-eval scripts', () => {
     {
       format: 'oxfmt -c x --write .',
       clean: 'node -e "require(1)"',
+      // oxlint-disable-next-line socket/no-glob-in-ordered-run-s -- test fixture: scanScriptMap ignores non-node scripts.
       'install-all': 'run-s install:*',
     },
     repo,

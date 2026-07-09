@@ -3,6 +3,8 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 import {
   pythonBinPath,
   pythonCacheDir,
@@ -47,20 +49,20 @@ describe('external-tools/python/from-download — path helpers', () => {
     const dir = path.join('a', 'b')
     // A win-* target always yields python.exe; any other target bin/python3 —
     // independent of the host the resolution runs on (cross-compile-safe).
-    expect(pythonBinPath(dir, 'win-x64').replace(/\\/g, '/')).toBe(
+    expect(normalizePath(pythonBinPath(dir, 'win-x64'))).toBe(
       'a/b/python/python.exe',
     )
-    expect(pythonBinPath(dir, 'linux-x64').replace(/\\/g, '/')).toBe(
+    expect(normalizePath(pythonBinPath(dir, 'linux-x64'))).toBe(
       'a/b/python/bin/python3',
     )
-    expect(pythonBinPath(dir, 'darwin-arm64').replace(/\\/g, '/')).toBe(
+    expect(normalizePath(pythonBinPath(dir, 'darwin-arm64'))).toBe(
       'a/b/python/bin/python3',
     )
   })
 
   test('pythonCacheDir encodes version-tag-arch under _dlx/python', () => {
     const dir = pythonCacheDir('3.11.14', '20260203', 'darwin-arm64')
-    expect(dir.replace(/\\/g, '/')).toContain(
+    expect(normalizePath(dir)).toContain(
       '/_dlx/python/3.11.14-20260203-darwin-arm64',
     )
   })
@@ -80,7 +82,7 @@ describe.sequential('external-tools/python/from-download — pythonFromDownload'
     expect(result!.source).toBe('download')
     expect(result!.integrity).toBe('sha512-deadbeef')
     // path points inside the default cache dir, at the per-OS interpreter.
-    expect(result!.path.replace(/\\/g, '/')).toContain(
+    expect(normalizePath(result!.path)).toContain(
       '/_dlx/python/3.11.14-20260203-darwin-arm64/python/',
     )
     // The download was pointed at the upstream asset URL with the matching name.
@@ -100,9 +102,7 @@ describe.sequential('external-tools/python/from-download — pythonFromDownload'
     })
     // The interpreter layout follows the TARGET arch (linux-x64 here), not the
     // host — so it's always python/bin/python3 regardless of where the test runs.
-    expect(result!.path.replace(/\\/g, '/')).toBe(
-      '/custom/py/python/bin/python3',
-    )
+    expect(normalizePath(result!.path)).toBe('/custom/py/python/bin/python3')
     expect(downloadAndExtractToolMock.mock.calls[0]![0].extractedDir).toBe(
       '/custom/py',
     )

@@ -57,12 +57,14 @@ test('ciLocalScript returns undefined when no package.json', () => {
 
 test('templateDockerfilePath finds the in-repo template copy (wheelhouse)', () => {
   const dir = tmpRepo()
-  const ghDir = path.join(dir, 'template', '.github')
+  // The canonical seed lives under template/base/ (not the old top-level
+  // template/), matching templateDockerfilePath's probe.
+  const ghDir = path.join(dir, 'template', 'base', '.github')
   mkdirSync(ghDir, { recursive: true })
   writeFileSync(path.join(ghDir, 'agent-ci.Dockerfile'), 'FROM x\n')
   assert.equal(
     templateDockerfilePath(dir),
-    path.join(dir, 'template', '.github', 'agent-ci.Dockerfile'),
+    path.join(dir, 'template', 'base', '.github', 'agent-ci.Dockerfile'),
   )
 })
 

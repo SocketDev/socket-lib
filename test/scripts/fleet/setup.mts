@@ -5,35 +5,51 @@
  *   `test/**` can use them without an import. Currently: `toContainPath` — a
  *   separator-agnostic path-substring assertion (see ./../../_shared/fleet/lib/
  *   matchers.mts). Also isolates git so a test's git ops can't touch the live
- *   repo. Repo-specific setup belongs in `test/scripts/repo/setup.mts`.
+ *   repo, and FAILS NETWORK CLOSED (nock.disableNetConnect; loopback allowed)
+ *   so any test hitting an unmocked third-party server throws — the fleet
+ *   "tests never connect to third-party servers" rule, enforced fleet-wide here
+ *   so it isn't per-repo. This is transport-complete: nock (>=14) intercepts
+ *   `fetch`/undici as well as `http`/`https`, so `disableNetConnect()` blocks
+ *   every client — no separate `fetch` wrapper is needed. Repo-specific setup
+ *   belongs in `test/scripts/repo/setup.mts`.
  */
 
-import { expect } from 'vitest'
+import nock from 'nock'
+import { afterAll, afterEach, beforeAll, expect } from 'vitest'
 
+import { isolateGitEnv } from '../../../.git-hooks/_shared/isolate-git-env.mts'
 import { toContainPathResult } from '../../_shared/fleet/lib/matchers.mts'
 
-// Isolate git from the live repo. When the suite runs from the pre-commit
-// hook, git exports GIT_DIR / GIT_WORK_TREE / GIT_INDEX_FILE (etc.) pointing
-// at THIS repo, and git honors them above cwd-based discovery — so a test
-// that spawns `git` with `cwd: tmpDir` would still commit onto the live
-// HEAD and rewrite the real .git/config. Strip the inherited context so
-// every git spawn resolves from its own cwd, and pin the config files to
-// /dev/null so `git config` in a test can never touch a real config.
-for (const name of [
-  'GIT_ALTERNATE_OBJECT_DIRECTORIES',
-  'GIT_CEILING_DIRECTORIES',
-  'GIT_COMMON_DIR',
-  'GIT_DIR',
-  'GIT_INDEX_FILE',
-  'GIT_NAMESPACE',
-  'GIT_OBJECT_DIRECTORY',
-  'GIT_PREFIX',
-  'GIT_WORK_TREE',
-]) {
-  delete process.env[name]
-}
-process.env['GIT_CONFIG_GLOBAL'] = '/dev/null'
-process.env['GIT_CONFIG_SYSTEM'] = '/dev/null'
+// Neutralize the inherited git env so a test's `git` spawns can't touch the
+// live repo. The stronger `pinConfigToNull` form is safe here — no vitest
+// fixture manipulates a controlled global git config (the signing-gate tests
+// that do live under node:test, which strips-only). Single source of truth in
+// .git-hooks/_shared/isolate-git-env.mts.
+isolateGitEnv({ pinConfigToNull: true })
+
+// Fail network CLOSED fleet-wide: block every real connection so an unmocked
+// third-party request throws instead of reaching the internet. Loopback stays
+// reachable for local fixture servers. Tests mock remote endpoints with nock;
+// everything else fails closed. (Was repo-only — promoted here so every fleet
+// repo inherits it.)
+beforeAll(() => {
+  nock.disableNetConnect()
+  // Matches loopback hostnames optionally followed by a port.
+  // `^` start-of-string anchor
+  // `(?:127\.0\.0\.1|localhost)` non-capturing group: IPv4 loopback or "localhost"
+  // `(?::\d+)?` non-capturing group: optional colon + decimal port digits
+  // `$` end-of-string anchor
+  nock.enableNetConnect(/^(?:127\.0\.0\.1|localhost)(?::\d+)?$/)
+})
+
+afterEach(() => {
+  // Reset nock interceptors between tests so a registration cannot leak forward.
+  nock.cleanAll()
+})
+
+afterAll(() => {
+  nock.enableNetConnect()
+})
 
 expect.extend({
   toContainPath(received: unknown, expected: string) {
@@ -42,9 +58,7 @@ expect.extend({
 })
 
 declare module 'vitest' {
-  // Type params must match vitest's own `Matchers<T = any>` exactly, or the
-  // declaration merge fails with TS2428.
-  // oxlint-disable-next-line typescript/no-explicit-any -- must mirror vitest's `Matchers<T = any>` for the declaration merge.
+  // oxlint-disable-next-line typescript/no-explicit-any -- declaration merging requires the exact upstream type parameters (vitest's Matchers<T = any>).
   interface Matchers<T = any> {
     // Assert the received path string contains `expected` after both are
     // normalized to "/" separators — cross-platform path assertions without

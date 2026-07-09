@@ -51,8 +51,7 @@ describe.sequential('spinner — extras', () => {
       // than a string color name.
       const result = spinner.setShimmer({
         color: [255, 0, 0],
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+      } as unknown as Parameters<typeof spinner.setShimmer>[0])
       expect(result).toBe(spinner)
     })
 
@@ -81,8 +80,7 @@ describe.sequential('spinner — extras', () => {
       spinner.start = ((...args: unknown[]) => {
         started += 1
         return originalStart(...(args as []))
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }) as any
+      }) as unknown as typeof spinner.start
       await withSpinnerRestore({
         spinner,
         wasSpinning: true,
@@ -97,8 +95,7 @@ describe.sequential('spinner — extras', () => {
       spinner.start = (() => {
         started += 1
         return spinner
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }) as any
+      }) as unknown as typeof spinner.start
       await withSpinnerRestore({
         spinner,
         wasSpinning: false,
@@ -123,8 +120,7 @@ describe.sequential('spinner — extras', () => {
       spinner.start = (() => {
         started += 1
         return spinner
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }) as any
+      }) as unknown as typeof spinner.start
       await expect(
         withSpinnerRestore({
           spinner,

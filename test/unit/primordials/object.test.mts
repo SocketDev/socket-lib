@@ -128,7 +128,7 @@ describe('Object (prototype)', () => {
     expect(ObjectPrototypeToString([])).toBe('[object Array]')
     expect(ObjectPrototypeToString(new Error())).toBe('[object Error]')
     expect(ObjectPrototypeToString(/re/)).toBe('[object RegExp]')
-    // oxlint-disable-next-line socket/prefer-undefined-over-null
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- spec requires handling null as input
     expect(ObjectPrototypeToString(null)).toBe('[object Null]')
     expect(ObjectPrototypeToString(undefined)).toBe('[object Undefined]')
   })

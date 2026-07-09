@@ -69,7 +69,7 @@ test('exempts the shared classifier + the reminder that names the phrases', () =
     true,
   )
   assert.equal(
-    isExempt('.claude/hooks/fleet/error-message-quality-reminder/index.mts'),
+    isExempt('.claude/hooks/fleet/error-message-quality-nudge/index.mts'),
     true,
   )
 })

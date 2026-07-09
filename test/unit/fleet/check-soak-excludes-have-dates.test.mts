@@ -34,6 +34,20 @@ catalog:
   'x': 1.0.0
 `
 
+// Both list blocks present: a stale trust waiver, a still-active one, and a
+// soak entry — to prove scan tags each finding with its originating block.
+const BOTH_BLOCKS_YAML = `trustPolicy: no-downgrade
+trustPolicyExclude:
+  # published: 2026-05-01 | removable: 2026-05-08
+  - 'waived-pkg@1.0.2'
+  # published: 2026-05-25 | removable: 2026-06-01
+  - 'still-waived@3.0.0'
+minimumReleaseAge: 10080
+minimumReleaseAgeExclude:
+  # published: 2026-05-01 | removable: 2026-05-08
+  - 'old-pkg@1.0.0'
+`
+
 describe('check-soak-excludes-have-dates / scan', () => {
   test('flags a stale entry (removable in the past)', () => {
     const stale = scan(YAML, '2026-05-20').filter(f => f.kind === 'stale')
@@ -95,6 +109,40 @@ describe('check-soak-excludes-have-dates / scan', () => {
     const all = scan(YAML, '2026-12-31')
     // `sfw` ships as a GitHub-release binary, no npm @version to pin.
     assert.ok(!all.some(f => f.name === 'sfw'))
+  })
+
+  test('tags soak-block findings with block=minimumReleaseAgeExclude', () => {
+    const stale = scan(YAML, '2026-05-20').filter(f => f.kind === 'stale')
+    assert.equal(stale.length, 1)
+    assert.equal(stale[0]!.block, 'minimumReleaseAgeExclude')
+  })
+})
+
+describe('check-soak-excludes-have-dates / trustPolicyExclude block', () => {
+  test('flags a stale trust waiver, tagged block=trustPolicyExclude', () => {
+    // On 2026-05-15: waived-pkg (removable 2026-05-08) is stale; still-waived
+    // (removable 2026-06-01) is not yet; old-pkg (soak) is stale too.
+    const trustStale = scan(BOTH_BLOCKS_YAML, '2026-05-15').filter(
+      f => f.kind === 'stale' && f.block === 'trustPolicyExclude',
+    )
+    assert.equal(trustStale.length, 1)
+    assert.equal(trustStale[0]!.name, 'waived-pkg')
+    assert.equal(trustStale[0]!.version, '1.0.2')
+  })
+
+  test('does not flag a not-yet-removable trust waiver', () => {
+    const names = scan(BOTH_BLOCKS_YAML, '2026-05-15')
+      .filter(f => f.kind === 'stale' && f.block === 'trustPolicyExclude')
+      .map(f => f.name)
+    assert.ok(!names.includes('still-waived'))
+  })
+
+  test('keeps the two blocks distinct — a soak entry is not tagged trust', () => {
+    const soakStale = scan(BOTH_BLOCKS_YAML, '2026-05-15').filter(
+      f => f.kind === 'stale' && f.block === 'minimumReleaseAgeExclude',
+    )
+    assert.equal(soakStale.length, 1)
+    assert.equal(soakStale[0]!.name, 'old-pkg')
   })
 })
 

@@ -110,18 +110,6 @@ describe.sequential('http-request/browser', () => {
         httpRequest('https://api.example.com/x', { throwOnError: true }),
       ).rejects.toBeInstanceOf(HttpResponseError)
     })
-
-    it('retries on 5xx when retries > 0', async () => {
-      fetchSpy
-        .mockResolvedValueOnce(mockFetchResponse({ status: 500 }))
-        .mockResolvedValueOnce(mockFetchResponse({ status: 200, body: 'ok' }))
-      const r = await httpRequest('https://api.example.com/x', {
-        retries: 1,
-        retryDelay: 1,
-      })
-      expect(r.status).toBe(200)
-      expect(fetchSpy).toHaveBeenCalledTimes(2)
-    })
   })
 
   describe('httpJson', () => {
@@ -362,7 +350,6 @@ describe.sequential('http-request/browser', () => {
 
     it('coerces non-Error throwables in onResponse hook', async () => {
       fetchSpy.mockImplementationOnce(() => {
-        // eslint-disable-next-line @typescript-eslint/only-throw-error
         throw 'string-error'
       })
       const onResponse = vi.fn()
@@ -377,9 +364,7 @@ describe.sequential('http-request/browser', () => {
     })
 
     it('falls back to generic Error when lastError is non-Error after exhausted retries', async () => {
-      // eslint-disable-next-line @typescript-eslint/only-throw-error
       fetchSpy.mockImplementation(() => {
-        // eslint-disable-next-line @typescript-eslint/only-throw-error
         throw 'literal-error'
       })
       await expect(

@@ -10,7 +10,7 @@ import { isJsonPrimitive } from '../../../src/json/parse'
 
 describe('isJsonPrimitive', () => {
   it('should return true for null', () => {
-    // oxlint-disable-next-line socket/prefer-undefined-over-null
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- null is a valid JSON primitive value
     expect(isJsonPrimitive(null)).toBe(true)
   })
 
@@ -64,7 +64,7 @@ describe('isJsonPrimitive', () => {
   describe('edge cases', () => {
     it('should handle all falsy values correctly', () => {
       // Tests line 200: value === null
-      // oxlint-disable-next-line socket/prefer-undefined-over-null
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- null is a valid JSON primitive value
       expect(isJsonPrimitive(null)).toBe(true)
       expect(isJsonPrimitive(undefined)).toBe(false)
       expect(isJsonPrimitive(0)).toBe(true)

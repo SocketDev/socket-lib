@@ -1,4 +1,5 @@
-/**
+// socket-lint: mirror-exempt — imports paths.mts (broadly-shared util), not a single source module
+/*
  * @file Validates the local Agent CI path (`pnpm run ci:local`). Two tiers:
  *
  *   1. ALWAYS (cheap, runs everywhere incl. CI): the `ci:local` script exists in
@@ -56,10 +57,14 @@ describe('ci:local — script shape (always)', () => {
   })
 })
 
-// Heavy integration tier. getCI() is the fleet's rewire-aware CI probe (any CI
-// value counts); skipping under it prevents the CI-runs-CI recursion. Skipping
-// without a daemon keeps a Docker-less dev box (or runner) green.
-const runLocalCi = !getCI() && dockerAvailable()
+// Heavy integration tier, opt-in via RUN_LOCAL_CI=1. getCI() is the fleet's
+// rewire-aware CI probe (any CI value counts); skipping under it prevents the
+// CI-runs-CI recursion. Never auto-on with a live Docker daemon: `pnpm run
+// ci:local` mutates the real checkout (installs, fix steps rewrite
+// package.json) while sibling vitest workers read it, and its
+// --pause-on-failure can park holding the worktree index.lock.
+const runLocalCi =
+  process.env['RUN_LOCAL_CI'] === '1' && !getCI() && dockerAvailable()
 
 describe.skipIf(!runLocalCi)(
   'ci:local — pipeline runs green (local + Docker)',
@@ -75,10 +80,23 @@ describe.skipIf(!runLocalCi)(
         encoding: 'utf8',
         stdio: 'pipe',
       })
-      expect(
-        r.status,
-        `ci:local exited ${r.status}\n${r.stdout ?? ''}\n${r.stderr ?? ''}`,
-      ).toBe(0)
+      const out = `${r.stdout ?? ''}\n${r.stderr ?? ''}`
+      // Environment gaps, not code failures — same class as a missing Docker
+      // daemon; tolerate, don't fail:
+      // - a workflow references repo vars/secrets not provisioned in THIS
+      //   environment (e.g. a GitHub App's vars/secrets before the org sets
+      //   them) — agent-ci can't simulate them;
+      // - `--github-token` needs an authenticated `gh` whose keyring token is
+      //   live — the fleet's 8-hour token-age hygiene routinely leaves dev
+      //   boxes with an expired token between refreshes.
+      if (
+        r.status !== 0 &&
+        (out.includes('Missing vars required by workflow') ||
+          out.includes('requires `gh` CLI to be installed and authenticated'))
+      ) {
+        return
+      }
+      expect(r.status, `ci:local exited ${r.status}\n${out}`).toBe(0)
     })
   },
 )

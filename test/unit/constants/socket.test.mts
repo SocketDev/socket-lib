@@ -261,7 +261,9 @@ describe('constants/socket', () => {
     })
 
     it('should prefix every dir with SOCKET_DIR_PREFIX', () => {
-      for (const dir of Object.values(SOCKET_DIR)) {
+      const dirs = Object.values(SOCKET_DIR)
+      for (let i = 0, { length } = dirs; i < length; i += 1) {
+        const dir = dirs[i]!
         expect(dir.startsWith(SOCKET_DIR_PREFIX)).toBe(true)
       }
     })

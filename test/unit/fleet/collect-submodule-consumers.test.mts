@@ -56,10 +56,7 @@ describe('isInsideSubmodule (the internal-self-reference filter)', () => {
     assert.equal(isInsideSubmodule('upstream/blake3', 'upstream/blake3'), true)
   })
   test('a hit outside the submodule dir is external (real consumption)', () => {
-    assert.equal(
-      isInsideSubmodule('Cargo.toml', 'upstream/blake3'),
-      false,
-    )
+    assert.equal(isInsideSubmodule('Cargo.toml', 'upstream/blake3'), false)
     assert.equal(
       isInsideSubmodule('crates/host/build.rs', 'upstream/blake3'),
       false,

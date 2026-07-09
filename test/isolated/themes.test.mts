@@ -45,13 +45,15 @@ describe('themes', () => {
     })
 
     it('should have valid theme structures', () => {
-      for (const theme of Object.values(THEMES)) {
+      const themes = Object.values(THEMES)
+      for (let i = 0, { length } = themes; i < length; i += 1) {
+        const theme = themes[i]!
         expect(theme).toHaveProperty('name')
         expect(theme).toHaveProperty('displayName')
         expect(theme).toHaveProperty('colors')
-        expect(theme!.colors).toHaveProperty('primary')
-        expect(theme!.colors).toHaveProperty('success')
-        expect(theme!.colors).toHaveProperty('error')
+        expect(theme.colors).toHaveProperty('primary')
+        expect(theme.colors).toHaveProperty('success')
+        expect(theme.colors).toHaveProperty('error')
       }
     })
   })

@@ -60,7 +60,9 @@ describe.sequential('discoverFresh', () => {
     const out = discoverFresh()
     expect(typeof out).toBe('object')
     expect(out).not.toBeNull()
-    for (const value of Object.values(out)) {
+    const values = Object.values(out)
+    for (let i = 0, { length } = values; i < length; i += 1) {
+      const value = values[i]!
       expect(typeof value).toBe('string')
       expect(value.length).toBeGreaterThan(0)
     }
@@ -69,7 +71,9 @@ describe.sequential('discoverFresh', () => {
   test('only includes known agent names', () => {
     const out = discoverFresh()
     const known = new Set(['claude', 'codex', 'gemini', 'opencode'])
-    for (const key of Object.keys(out)) {
+    const keys = Object.keys(out)
+    for (let i = 0, { length } = keys; i < length; i += 1) {
+      const key = keys[i]!
       expect(known.has(key)).toBe(true)
     }
   })

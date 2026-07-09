@@ -5,7 +5,10 @@
 import { describe, test } from 'vitest'
 import assert from 'node:assert/strict'
 
-import { computeGrade, renderHandoff } from '../../../scripts/fleet/lib/security-report.mts'
+import {
+  computeGrade,
+  renderHandoff,
+} from '../../../scripts/fleet/lib/security-report.mts'
 import type { FindingCounts } from '../../../scripts/fleet/lib/security-report.mts'
 
 function counts(over: Partial<FindingCounts>): FindingCounts {

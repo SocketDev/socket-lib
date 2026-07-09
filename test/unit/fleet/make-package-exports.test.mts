@@ -12,6 +12,7 @@ import {
   isDtsExt,
   isPrivatePath,
   matchesGlob,
+  NODE_BUILTINS,
   privatePathMatcher,
   publicPathFor,
   resolveSourcePath,
@@ -276,9 +277,16 @@ test('buildBrowserField defaults to the full Node builtin set (engine owns it)',
   assert.equal(field['fs'], false)
   assert.equal(field['node:fs'], false)
   assert.equal(field['path'], false)
-  // Deprecated _stream_* ghosts (absent from node:module builtinModules) are
-  // correctly NOT stubbed.
-  assert.equal(field['_stream_duplex'], undefined)
+  // `builtinModules` reports legacy underscore-internals (`_stream_*`,
+  // `_http_*`) on some Node versions — stubbed bare-only (no `node:` twin,
+  // matching the underscore-internal rule). Node has been trimming this set
+  // across versions (v26 dropped `_stream_*` entirely), so pick whichever
+  // one the running Node still reports rather than hardcoding a name.
+  const underscoreInternal = NODE_BUILTINS.find(name => name.startsWith('_'))
+  if (underscoreInternal) {
+    assert.equal(field[underscoreInternal], false)
+    assert.equal(field[`node:${underscoreInternal}`], undefined)
+  }
   assert.ok(Object.keys(field).length > 100, 'covers the builtin set + twins')
 })
 

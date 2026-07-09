@@ -1,3 +1,4 @@
+// socket-lint: mirror-exempt — imports from fetch.mts + rank.mts; split deferred
 // vitest specs for the researching-recency fan-out orchestrator. Mocks HTTP
 // with nock under disableNetConnect(); verifies that fetchAll expands the plan
 // into per-(label, source) streams, annotates them with local scores, and
@@ -19,7 +20,9 @@ import type {
 const NOW = Date.parse('2026-06-07T00:00:00Z')
 const CTX: FetchContext = { days: 30, now: NOW, perStream: 15 }
 
-function planWith(sources: QueryPlan['subqueries'][number]['sources']): QueryPlan {
+function planWith(
+  sources: QueryPlan['subqueries'][number]['sources'],
+): QueryPlan {
   return {
     intent: 'overview',
     freshnessMode: 'balancedRecent',
@@ -97,7 +100,14 @@ test('fetchAll surveys multiple sources, one dead source not sinking the rest', 
     .query(true)
     .reply(200, {
       hits: [
-        { objectID: '1', title: 'rolldown', url: 'https://x.test', points: 50, num_comments: 5, created_at_i: Math.floor(NOW / 1000) - 86_400 },
+        {
+          objectID: '1',
+          title: 'rolldown',
+          url: 'https://x.test',
+          points: 50,
+          num_comments: 5,
+          created_at_i: Math.floor(NOW / 1000) - 86_400,
+        },
       ],
     })
   nock('https://lobste.rs').get('/t/programming.json').reply(500)

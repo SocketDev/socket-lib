@@ -36,6 +36,12 @@ describe('matchesAny', () => {
     assert.equal(matchesAny(['dist'], 'dist'), true)
   })
 
+  test('trailing-slash dir form matches like the bare name (npm treats them identically)', () => {
+    assert.equal(matchesAny(['bin/.gitkeep'], 'bin/'), true)
+    assert.equal(matchesAny(['bin'], 'bin/'), true)
+    assert.equal(matchesAny(['src/index.js'], 'bin/'), false)
+  })
+
   test('bare name does not match unrelated paths', () => {
     assert.equal(matchesAny(['src/index.js'], 'dist'), false)
   })

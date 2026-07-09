@@ -1,3 +1,4 @@
+// socket-lint: mirror-exempt — deferred rename to patch-id.test.mts (pending review)
 /**
  * @file Unit tests for the auditing-history untagged-revert detector (the
  *   load-bearing, near-zero- false-positive signal). Drives the pure functions

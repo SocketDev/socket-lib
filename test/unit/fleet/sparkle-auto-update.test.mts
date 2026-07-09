@@ -24,10 +24,10 @@ test('OrbStack is a tracked Sparkle app on the canonical bundle domain', () => {
 })
 
 test('both Sparkle disable keys are tracked, alphabetized', () => {
-  assert.deepEqual([...SPARKLE_DISABLE_KEYS], [
-    'SUAutomaticallyUpdate',
-    'SUEnableAutomaticChecks',
-  ])
+  assert.deepEqual(
+    [...SPARKLE_DISABLE_KEYS],
+    ['SUAutomaticallyUpdate', 'SUEnableAutomaticChecks'],
+  )
 })
 
 // ── defaultIsFalse (decode `defaults read` bool) ─────────────────

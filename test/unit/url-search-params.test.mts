@@ -378,4 +378,13 @@ describe('url search params', () => {
       expect(urlSearchParamsAsNumber(params, 'value')).toBe(42)
     })
   })
+
+  describe('urlSearchParamsAsBoolean — non-string non-null edge cases', () => {
+    it('returns coerced boolean for non-string non-null values (number)', () => {
+      // oxlint-disable-next-line typescript/no-explicit-any -- testing non-string non-null path
+      expect(urlSearchParamsAsBoolean(0 as any)).toBe(false)
+      // oxlint-disable-next-line typescript/no-explicit-any -- testing non-string non-null path
+      expect(urlSearchParamsAsBoolean(1 as any)).toBe(true)
+    })
+  })
 })

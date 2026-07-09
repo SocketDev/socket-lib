@@ -44,7 +44,8 @@ describe.sequential('dlx-binary', () => {
       expect(cachePath).toBeDefined()
       expect(cachePath).toContain('.socket')
       expect(cachePath).toContain('_dlx')
-      // Should not contain backslashes on any platform
+      // Should not contain backslashes on any platform.
+      // oxlint-disable-next-line socket/normalize-path-before-match -- asserts backslash ABSENCE; normalizing first would make the check vacuous.
       expect(cachePath.includes('\\')).toBe(false)
     })
 

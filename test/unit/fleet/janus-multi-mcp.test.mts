@@ -1,8 +1,8 @@
 /**
  * @file Tests for the multi-Janus MCP shim — the JSON-RPC dispatch
- *   (handleRequest), the tool→janus-argv mappings, and workspace discovery.
- *   The live `janus`-shelling path (runJanus) is exercised by the smoke test in
- *   the README, not here (it needs the binary + a real .janus/); these cover the
+ *   (handleRequest), the tool→janus-argv mappings, and workspace discovery. The
+ *   live `janus`-shelling path (runJanus) is exercised by the smoke test in the
+ *   README, not here (it needs the binary + a real .janus/); these cover the
  *   pure logic.
  */
 
@@ -76,7 +76,9 @@ describe('janus-multi JSON-RPC dispatch', () => {
     expect(
       handleRequest({ jsonrpc: '2.0', method: 'notifications/initialized' }),
     ).toBeUndefined()
-    expect(handleRequest({ jsonrpc: '2.0', method: 'tools/list' })).toBeUndefined()
+    expect(
+      handleRequest({ jsonrpc: '2.0', method: 'tools/list' }),
+    ).toBeUndefined()
   })
 
   test('tools/list returns every tool with a workspace param (except list_workspaces)', () => {
@@ -102,7 +104,10 @@ describe('janus-multi JSON-RPC dispatch', () => {
       id: 3,
       jsonrpc: '2.0',
       method: 'tools/call',
-      params: { arguments: { title: 'x', workspace: 'definitely-not-a-repo' }, name: 'create_ticket' },
+      params: {
+        arguments: { title: 'x', workspace: 'definitely-not-a-repo' },
+        name: 'create_ticket',
+      },
     })
     expect(res).toBeDefined()
     const result = res!['result'] as {
