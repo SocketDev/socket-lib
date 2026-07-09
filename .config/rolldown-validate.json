@@ -1,6 +1,6 @@
 {
   "configs": [
     ".config/rolldown.config.mts",
-    "scripts/build-externals/rolldown-config.mts"
+    "scripts/repo/build-externals/rolldown-config.mts"
   ]
 }

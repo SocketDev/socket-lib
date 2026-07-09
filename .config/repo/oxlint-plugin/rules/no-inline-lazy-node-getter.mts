@@ -80,6 +80,22 @@ export function findEnclosingStatement(node: AstNode): AstNode | undefined {
 }
 
 const rule = {
+  meta: {
+    type: 'suggestion',
+    docs: {
+      description:
+        'Bind a lazy node-module getter to a const once (`const fs = getFs()`) instead of calling it inline at each use (`getFs().existsSync(x)`).',
+      category: 'Best Practices',
+      recommended: true,
+    },
+    fixable: 'code',
+    messages: {
+      inlineGetter:
+        '`{{getter}}().{{member}}` calls the lazy node-module getter inline. Bind it once — `const {{binding}} = {{getter}}()` — then use `{{binding}}.{{member}}(…)`. Re-invoking the getter at every call site is noisy and defeats the single-read convention.',
+    },
+    schema: [],
+  },
+
   create(context: RuleContext) {
     const sourceCode = context.getSourceCode
       ? context.getSourceCode()
@@ -165,22 +181,6 @@ const rule = {
         })
       },
     }
-  },
-
-  meta: {
-    type: 'suggestion',
-    docs: {
-      description:
-        'Bind a lazy node-module getter to a const once (`const fs = getFs()`) instead of calling it inline at each use (`getFs().existsSync(x)`).',
-      category: 'Best Practices',
-      recommended: true,
-    },
-    fixable: 'code',
-    messages: {
-      inlineGetter:
-        '`{{getter}}().{{member}}` calls the lazy node-module getter inline. Bind it once — `const {{binding}} = {{getter}}()` — then use `{{binding}}.{{member}}(…)`. Re-invoking the getter at every call site is noisy and defeats the single-read convention.',
-    },
-    schema: [],
   },
 }
 
