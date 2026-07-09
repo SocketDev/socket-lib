@@ -1,23 +1,22 @@
-// Fleet check — reminder/guard duplication.
+// Fleet check — nudge/guard duplication.
 //
 // Fleet convention (CLAUDE.md hook naming): a `-guard` hook BLOCKS, a
-// `-reminder` hook NUDGES. One surface per concern — never both a `-guard`
-// and a `-reminder` for the same thing. Duplication crept in once (the prose
-// antipattern reminder + guard overlap, 2026-06-03) and was resolved by
-// dropping the reminder in favor of the hard guard. This check stops it from
-// recurring.
+// `-nudge` hook NUDGES. One surface per concern — never both a `-guard`
+// and a `-nudge` for the same thing. Duplication has crept in before (a
+// prose-antipattern nudge overlapping its guard) and was resolved by dropping
+// the nudge in favor of the hard guard. This check stops it from recurring.
 //
-// ERROR: a base name has BOTH `<base>-guard` and `<base>-reminder`. That is an
+// ERROR: a base name has BOTH `<base>-guard` and `<base>-nudge`. That is an
 // exact same-concern duplicate — collapse to one (prefer the guard).
 //
 // ADVISORY: two hooks share a leading name segment but differ after it (e.g.
-// `ai-config-poisoning-guard` + `ai-config-drift-reminder`, or
-// `parallel-agent-edit-guard` + `parallel-agent-on-stop-reminder`). These MAY
+// `ai-config-poisoning-guard` + `ai-config-drift-nudge`, or
+// `parallel-agent-edit-guard` + `parallel-agent-on-stop-nudge`). These MAY
 // be distinct facets or a latent duplicate — the check cannot tell semantic
 // overlap from a shared prefix, so it lists them for a human glance without
 // failing.
 //
-// Usage: node scripts/fleet/check/hooks-have-no-guard-reminder-overlap.mts [--quiet]
+// Usage: node scripts/fleet/check/hooks-have-no-guard-nudge-overlap.mts [--quiet]
 
 import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
@@ -32,7 +31,7 @@ const logger = getDefaultLogger()
 
 export interface OverlapReport {
   exactCollisions: string[]
-  prefixPairs: Array<{ guard: string; reminder: string; prefix: string }>
+  prefixPairs: Array<{ guard: string; nudge: string; prefix: string }>
 }
 
 /**
@@ -79,26 +78,26 @@ export function sharedPrefixSegments(
 }
 
 /**
- * Classify hook names into reminder/guard overlap reports.
+ * Classify hook names into nudge/guard overlap reports.
  *
- * - Exact collision: `<base>-guard` AND `<base>-reminder` both present.
- * - Prefix pair: a `*-guard` and a `*-reminder` share their first `-` segment but
+ * - Exact collision: `<base>-guard` AND `<base>-nudge` both present.
+ * - Prefix pair: a `*-guard` and a `*-nudge` share their first `-` segment but
  *   are not an exact-base collision (advisory only).
  */
 export function findOverlap(names: readonly string[]): OverlapReport {
   const guards = new Set<string>()
-  const reminders = new Set<string>()
+  const nudges = new Set<string>()
   for (let i = 0, { length } = names; i < length; i += 1) {
     const name = names[i]!
     if (name.endsWith('-guard')) {
       guards.add(name.slice(0, -'-guard'.length))
-    } else if (name.endsWith('-reminder')) {
-      reminders.add(name.slice(0, -'-reminder'.length))
+    } else if (name.endsWith('-nudge')) {
+      nudges.add(name.slice(0, -'-nudge'.length))
     }
   }
   const exactCollisions: string[] = []
   for (const base of guards) {
-    if (reminders.has(base)) {
+    if (nudges.has(base)) {
       exactCollisions.push(base)
     }
   }
@@ -108,12 +107,12 @@ export function findOverlap(names: readonly string[]): OverlapReport {
   const prefixPairs: OverlapReport['prefixPairs'] = []
   for (const guardBase of guards) {
     const guardSegs = guardBase.split('-')
-    for (const reminderBase of reminders) {
+    for (const nudgeBase of nudges) {
       // Skip the exact-collision case (reported above).
       if (
-        guardBase === reminderBase ||
+        guardBase === nudgeBase ||
         collisionSet.has(guardBase) ||
-        collisionSet.has(reminderBase)
+        collisionSet.has(nudgeBase)
       ) {
         continue
       }
@@ -122,13 +121,13 @@ export function findOverlap(names: readonly string[]): OverlapReport {
       // concerns that merely share a namespace. Two segments
       // (`claude-md-*`, `parallel-agent-*`) is a strong enough signal that the
       // pair might be the same concern, worth a human glance.
-      const reminderSegs = reminderBase.split('-')
-      const shared = sharedPrefixSegments(guardSegs, reminderSegs)
+      const nudgeSegs = nudgeBase.split('-')
+      const shared = sharedPrefixSegments(guardSegs, nudgeSegs)
       if (shared >= 2) {
         prefixPairs.push({
           guard: `${guardBase}-guard`,
+          nudge: `${nudgeBase}-nudge`,
           prefix: guardSegs.slice(0, shared).join('-'),
-          reminder: `${reminderBase}-reminder`,
         })
       }
     }
@@ -145,12 +144,12 @@ function main(): void {
 
   if (exactCollisions.length) {
     logger.fail(
-      '[check-hooks-have-no-guard-reminder-overlap] same-concern reminder + guard:',
+      '[check-hooks-have-no-guard-nudge-overlap] same-concern nudge + guard:',
     )
     for (let i = 0, { length } = exactCollisions; i < length; i += 1) {
       const base = exactCollisions[i]!
       logger.error(
-        `  ✗ ${base}-guard AND ${base}-reminder both exist — collapse to one (prefer the guard; -guard blocks, -reminder nudges, one surface per concern).`,
+        `  ✗ ${base}-guard AND ${base}-nudge both exist — collapse to one (prefer the guard; -guard blocks, -nudge nudges, one surface per concern).`,
       )
     }
     process.exitCode = 1
@@ -158,19 +157,17 @@ function main(): void {
 
   if (!quiet && prefixPairs.length) {
     logger.warn(
-      '[check-hooks-have-no-guard-reminder-overlap] shared-prefix pairs (advisory — verify they are distinct concerns, not a latent duplicate):',
+      '[check-hooks-have-no-guard-nudge-overlap] shared-prefix pairs (advisory — verify they are distinct concerns, not a latent duplicate):',
     )
     for (let i = 0, { length } = prefixPairs; i < length; i += 1) {
       const pair = prefixPairs[i]!
-      logger.warn(
-        `  • ${pair.guard} / ${pair.reminder} (prefix "${pair.prefix}")`,
-      )
+      logger.warn(`  • ${pair.guard} / ${pair.nudge} (prefix "${pair.prefix}")`)
     }
   }
 
   if (!quiet && !exactCollisions.length) {
     logger.success(
-      `[check-hooks-have-no-guard-reminder-overlap] no same-concern reminder/guard duplicates across ${names.length} hooks.`,
+      `[check-hooks-have-no-guard-nudge-overlap] no same-concern nudge/guard duplicates across ${names.length} hooks.`,
     )
   }
 }
