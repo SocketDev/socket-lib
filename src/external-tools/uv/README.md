@@ -7,8 +7,8 @@ socket-basics to bootstrap Python projects for scanning.
 
 `uv` replaced `pip` + `pip-tools` + `virtualenv` + `pyenv` in our scanning
 pipelines because it's an order of magnitude faster on cold caches and
-ships a single static binary per platform. We pin one version across the
-fleet so resolver results are reproducible.
+ships a single static binary per platform. We pin one version across
+Socket so resolver results are reproducible.
 
 ## API at a glance
 

@@ -44,6 +44,9 @@ export const TRUFFLEHOG_ASSET_MAP: Readonly<
   }) as unknown as TrufflehogAssetEntry,
 }) as unknown as Readonly<Record<string, TrufflehogAssetEntry>>
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function getTrufflehogAssetEntry(
   platformArch: string,
 ): TrufflehogAssetEntry | undefined {
@@ -57,7 +60,7 @@ export interface TrufflehogDownloadOptions {
    */
   version: string
   /**
-   * Fleet platform-arch token — looked up in `TRUFFLEHOG_ASSET_MAP`. Returns
+   * Socket platform-arch token — looked up in `TRUFFLEHOG_ASSET_MAP`. Returns
    * `undefined` when no entry exists for the target.
    */
   platformArch: string

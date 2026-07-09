@@ -36,21 +36,24 @@ import { MapCtor, SetCtor } from '../primordials/map-set'
 
 const logger = getDefaultLogger()
 
-// Default config name. We accept both the root-level dotfile (the
-// canonical `.<tool>rc.json` shape) and the `.config/`-rooted variant
-// (the fleet pattern for tooling configs). Look up in this order when
-// `--config` was not explicitly passed, falling through to the next
-// candidate if the file is missing — first hit wins. One file per
-// repo for all socket-lib checks; section per check.
+// Default config name. We accept the root-level dotfile (the canonical
+// `.<tool>rc.json` shape), the `.config/`-rooted variant (the Socket
+// pattern for tooling configs), and the fleet-segmented `.config/repo/`
+// location (repo-owned config now that fleet configs are split into
+// fleet/ vs repo/ tiers). Look up in this order when `--config` was not
+// explicitly passed, falling through to the next candidate if the file
+// is missing — first hit wins. One file per repo for all socket-lib
+// checks; section per check.
 // At the repo root we use the canonical `.<tool>.json` dotfile shape.
 // Inside `.config/`, the directory itself is already hidden, so the
-// fleet convention drops the leading dot — every existing file under
+// Socket convention drops the leading dot — every existing file under
 // `.config/` (taze.config.mts, vitest.config.mts, tsconfig.base.json,
 // ...) is bare-named. Match that.
 const DEFAULT_CONFIG_PATH = '.socket-lib.json'
-const FALLBACK_CONFIG_PATHS: readonly string[] = [
+export const FALLBACK_CONFIG_PATHS: readonly string[] = [
   '.socket-lib.json',
   '.config/socket-lib.json',
+  '.config/repo/socket-lib.json',
 ]
 const CONFIG_SECTION = 'primordials'
 
@@ -86,7 +89,7 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
   } catch (e) {
     throw new ErrorCtor(`config file is not valid JSON: ${errorMessage(e)}`)
   }
-  // The fleet convention is `.socket-lib.json` with a section per
+  // The Socket convention is `.socket-lib.json` with a section per
   // check (primordials, paths, public-surface, ...). When the file
   // has the section, use it; otherwise treat the whole file as the
   // primordials config (back-compat with single-check setups).
@@ -125,9 +128,9 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
     throw new ErrorCtor('config.nodeInternalOnly must be an array of strings')
   }
 
-  // Merge the fleet-canonical defaults with the user's config. The user
+  // Merge the Socket-canonical defaults with the user's config. The user
   // map overlays the defaults — any key the user defines wins, but they
-  // don't have to repeat the 26-entry boilerplate that every fleet repo
+  // don't have to repeat the 26-entry boilerplate that every Socket repo
   // shares. The Map constructor consumes the entries in order, so the
   // user's later entries naturally overwrite the earlier defaults.
   const aliasMap = new MapCtor<string, string>([
@@ -192,7 +195,9 @@ export function printHelp(): void {
   logger.log(
     `  --config, -c <path>   Config file. Default: ${DEFAULT_CONFIG_PATH}`,
   )
-  logger.log(`                        (falls back to .config/socket-lib.json)`)
+  logger.log(
+    `                        (falls back to .config/socket-lib.json, then .config/repo/socket-lib.json)`,
+  ) // socket-lint: allow logger-decoration -- aligned --help usage text, matching the surrounding option lines
   logger.log('  --explain             Print one detailed line per finding.')
   logger.log('  --json                Machine-readable JSON output.')
   logger.log('  --silent              Silent on success.')
@@ -208,7 +213,7 @@ export function printHelp(): void {
   logger.log('  }')
   logger.log('')
   logger.log('Only `scanDirs` is required. `aliasMap` and `nodeInternalOnly`')
-  logger.log('default to the fleet-canonical sets and only need entries when')
+  logger.log('default to the Socket-canonical sets and only need entries when')
   logger.log('your repo extends or overrides them.')
   logger.log('')
   logger.log('A bare object (no `primordials` section) is also accepted for')
@@ -251,14 +256,21 @@ export function renderHuman(
  * they typed). Otherwise probes the fallback list in order and returns the
  * first hit. Returns the head of the list when none exist, so the caller's
  * "config file not found" error message names the canonical default.
+ *
+ * `baseDir` is the directory the relative candidates resolve against; it
+ * defaults to `process.cwd()` (the repo root the user runs from) and is a
+ * parameter so callers/tests can probe a fixture tree without `process.chdir`.
  */
-export function resolveConfigPath(explicit: string | undefined): string {
+export function resolveConfigPath(
+  explicit: string | undefined,
+  baseDir: string = process.cwd(),
+): string {
   if (explicit !== undefined) {
     return explicit
   }
   for (let i = 0, { length } = FALLBACK_CONFIG_PATHS; i < length; i += 1) {
     const candidate = FALLBACK_CONFIG_PATHS[i]!
-    if (existsSync(path.resolve(candidate))) {
+    if (existsSync(path.resolve(baseDir, candidate))) {
       return candidate
     }
   }

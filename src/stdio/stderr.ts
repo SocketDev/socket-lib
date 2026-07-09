@@ -13,7 +13,8 @@ import {
   isTTYOf,
 } from './_internal'
 
-// Get the actual stderr stream
+// Get the actual stderr stream.
+// oxlint-disable-next-line socket/no-module-eval-side-effects -- the raw stream IS this module's public API (`export { stderr }` below); lazifying is a breaking contract change.
 const stderr: NodeJS.WriteStream = process.stderr
 
 /**

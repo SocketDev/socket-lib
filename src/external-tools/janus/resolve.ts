@@ -75,6 +75,9 @@ export async function doResolveJanus(
 }
 
 /* c8 ignore start - test-only escape hatch. */
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function resetJanusResolution(): void {
   resolutionCache.clear()
 }

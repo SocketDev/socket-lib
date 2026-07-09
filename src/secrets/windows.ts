@@ -262,6 +262,7 @@ export function runPsSync(
  */
 export function validateKeychainComponent(value: string, name: string): void {
   if (
+    // oxlint-disable-next-line socket/prefer-normalize-path -- screens an IDENTIFIER for separator characters (security reject); not a path match.
     /[\\/]/.test(value) ||
     value.includes('..') ||
     value.includes('\0') ||

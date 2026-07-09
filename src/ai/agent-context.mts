@@ -22,13 +22,14 @@
  *     the human-authored AGENTS.md. So `agentPaths(...).memoryDir` is defined
  *     only for `claude`; for the others it is `undefined` (there is no memory
  *     dir to point at), and the shared cross-tool memory surface is the
- *     committed AGENTS.md (which the fleet symlinks to CLAUDE.md).
+ *     committed AGENTS.md (which Socket symlinks to CLAUDE.md).
  */
 
 import { WIN32 } from '../constants/platform'
 import { getHome } from '../env/home'
 import { getEnvValue } from '../env/rewire'
 import { getXdgConfigHome } from '../env/xdg'
+import { normalizePath } from '../paths/normalize'
 
 import path from 'node:path'
 
@@ -119,7 +120,12 @@ export function agentPaths(
       // replaced by `-` (a leading `/` becomes a leading `-`).
       const cwd = opts.cwd
       const memoryDir = cwd
-        ? path.join(configDir, 'projects', cwd.replace(/[/\\]/g, '-'), 'memory')
+        ? path.join(
+            configDir,
+            'projects',
+            normalizePath(cwd).replace(/\//g, '-'),
+            'memory',
+          )
         : undefined
       return { agent, configDir, memoryDir }
     }

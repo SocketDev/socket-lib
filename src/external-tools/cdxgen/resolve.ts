@@ -6,7 +6,7 @@
  *   2. PATH — `cdxgen` on the system PATH
  *   3. download — upstream SEA binary from the GitHub release (slim by default;
  *      pass `variant: 'full'` for the bun+deno-bundled flavor) Single source of
- *      truth: SEA binary only. No npm-package fallback — every fleet
+ *      truth: SEA binary only. No npm-package fallback — every Socket
  *      platform-arch is covered by the SEA matrix, and routing through npm
  *      would split the install surface in two for no benefit. Returns
  *      `undefined` if all of the enabled sources miss. Memoized per
@@ -79,6 +79,9 @@ export async function doResolveCdxgen(
 }
 
 /* c8 ignore start - test-only escape hatch. */
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function resetCdxgenResolution(): void {
   resolutionCache.clear()
 }

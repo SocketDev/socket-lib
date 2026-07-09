@@ -26,7 +26,7 @@ export interface BazelFromDownloadOptions {
    */
   version: string
   /**
-   * Fleet platform-arch token, e.g. `'darwin-arm64'`.
+   * Socket platform-arch token, e.g. `'darwin-arm64'`.
    */
   platformArch: string
   /**

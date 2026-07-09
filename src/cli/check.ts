@@ -27,7 +27,7 @@ const ALIASES: ReadonlyMap<string, readonly string[]> = new MapCtor([
 ])
 
 export function printHelp(): void {
-  logger.log('socket-lib check — fleet-wide static-analysis checks')
+  logger.log('socket-lib check — Socket-wide static-analysis checks')
   logger.log('')
   logger.log('Usage:')
   logger.log('  socket-lib check <name> [...opts]')

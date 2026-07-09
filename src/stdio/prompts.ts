@@ -14,9 +14,9 @@ import inputRaw from '../external/@inquirer/input'
 // @ts-expect-error - external vendored module
 import passwordRaw from '../external/@inquirer/password'
 // @ts-expect-error - external vendored module
-import * as searchModule from '../external/@inquirer/search'
+import * as searchModule from '../external/@inquirer/search' // oxlint-disable-line socket/no-namespace-import -- untyped vendored @inquirer module; namespace + cast is the access pattern
 // @ts-expect-error - external vendored module
-import * as selectModuleImport from '../external/@inquirer/select'
+import * as selectModuleImport from '../external/@inquirer/select' // oxlint-disable-line socket/no-namespace-import -- untyped vendored @inquirer module; namespace + cast is the access pattern
 import { applyColor } from '../logger/colors'
 
 import type { ColorValue } from '../colors/types'
@@ -28,9 +28,6 @@ import { THEMES } from '../themes/themes'
 import type { ThemeName } from '../themes/themes'
 import type { Theme } from '../themes/types'
 import { resolveColor } from '../themes/resolve'
-
-const abortSignal = getAbortSignal()
-const spinner = getDefaultSpinner()
 
 // Modules imported at the top - extract default and Separator.
 // The @inquirer/select shim exposes the namespaced CJS module, so we
@@ -284,9 +281,13 @@ export function wrapPrompt<T = unknown>(
       | undefined
     const { spinner: contextSpinner, ...contextWithoutSpinner } =
       origContext ?? ({} as Context)
+    // Lazily acquire the default spinner at call time rather than capturing it
+    // at module-eval. Constructing it at import time pins a native handle into
+    // the module, which aborts V8 --build-snapshot of anything that
+    // transitively imports this module. An explicit context spinner still wins.
     const spinnerInstance =
-      contextSpinner !== undefined ? contextSpinner : spinner
-    const signal = abortSignal
+      contextSpinner !== undefined ? contextSpinner : getDefaultSpinner()
+    const signal = getAbortSignal()
 
     // Inject theme into config (args[0])
     const config = args[0] as Record<string, unknown>

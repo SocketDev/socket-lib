@@ -1,6 +1,6 @@
 /**
  * @file Run AI agents in parallel, each in its own git worktree, and merge
- *   results back to the base branch. The fleet's CLAUDE.md "Parallel Claude
+ *   results back to the base branch. Socket's CLAUDE.md "Parallel Claude
  *   sessions" rule mandates worktree isolation when multiple agents touch the
  *   same checkout. This helper enforces that contract: each item gets a fresh
  *   worktree branched from the base, the per-item function runs inside it, then

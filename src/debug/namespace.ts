@@ -9,10 +9,9 @@
 
 import { getDebug } from '../env/debug'
 import { getSocketDebug } from '../env/socket'
-import debugJs from '../external/debug'
 import { StringPrototypeStartsWith } from '../primordials/string'
 
-import { customLog, debugByNamespace } from './_internal'
+import { customLog, debugByNamespace, getDebugJs } from './_internal'
 
 import type { DebugOptions, NamespacesOrOptions } from './types'
 
@@ -36,10 +35,13 @@ export function getDebugJsInstance(namespace: string) {
   let inst = debugByNamespace.get(namespace)
   // Per-namespace cache hit; first-call always misses. Same-namespace
   // hit fires only when isEnabled() reuses the cached probe.
-  /* c8 ignore start */
+  /* c8 ignore start - cache-hit arm needs a repeated same-namespace probe */
   if (inst) {
     return inst
   }
+  /* c8 ignore stop */
+  const debugJs = getDebugJs()
+  /* c8 ignore start - error/notice auto-enable needs SOCKET_DEBUG without DEBUG */
   if (
     !getDebug() &&
     getSocketDebug() &&
@@ -91,7 +93,8 @@ export function isEnabled(namespaces: string | undefined) {
     .filter(Boolean)
   const names = []
   const skips = []
-  for (const ns of split) {
+  for (let i = 0, { length } = split; i < length; i += 1) {
+    const ns = split[i]!
     if (StringPrototypeStartsWith(ns, '-')) {
       skips.push(ns.slice(1))
     } else {

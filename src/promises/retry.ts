@@ -147,7 +147,6 @@ export async function pRetry<T>(
     /* c8 ignore stop */
 
     try {
-      // eslint-disable-next-line no-await-in-loop
       return await callbackFn(...(args || []), { signal })
     } catch (e) {
       error = e
@@ -183,7 +182,6 @@ export async function pRetry<T>(
       /* c8 ignore stop */
 
       try {
-        // eslint-disable-next-line no-await-in-loop
         await timers.setTimeout(waitTime, undefined, { signal })
         // Abort during setTimeout fires only when signal is aborted
         // mid-delay; tests cover abort during fn but not during delay.

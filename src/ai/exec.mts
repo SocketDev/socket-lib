@@ -3,7 +3,7 @@
  *   WHICH model produced it (`ai/backends`). The lib owns the INTERFACE plus
  *   the cheap built-in `real` runner (the host shell via lib `spawn`); a
  *   SANDBOXED runner is INJECTED by the caller, never imported here. That keeps
- *   the small-dist lib free of a heavy sandbox dependency — the fleet's sandbox
+ *   the small-dist lib free of a heavy sandbox dependency — Socket's sandbox
  *   of choice (`just-bash`, ~40MB incl. WASM) is owned by the wheelhouse hook /
  *   CI tooling and passed in, so a lib consumer that never sandboxes pays
  *   nothing. Layering: ExecRunner.run() — the injectable primitive (real |

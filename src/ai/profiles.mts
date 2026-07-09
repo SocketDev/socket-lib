@@ -11,11 +11,10 @@
  *     WebSearch. No Edit, no Write, no Bash. Static-analysis skills
  *     (scanning-quality, scanning-security).
  *   - `AI_PROFILE.edit` — in-place edits only. Read + Edit + Grep + Glob. NO
- *     Write (can't create files), NO MultiEdit, NO Bash. Lint autofix /
- *     codemods constrained to existing files.
- *   - `AI_PROFILE.create` — edit AND create files. Adds MultiEdit + Write on top
- *     of `.edit`. Still no Bash. Codegen, adding a test, refactors that split
- *     modules.
+ *     Write (can't create files), NO Bash. Lint autofix / codemods constrained
+ *     to existing files.
+ *   - `AI_PROFILE.create` — edit AND create files. Adds Write on top of `.edit`.
+ *     Still no Bash. Codegen, adding a test, refactors that split modules.
  *   - `AI_PROFILE.verify` — `.create` plus a READ-ONLY Bash allowlist (node /
  *     pnpm test+run / git status·diff·log). Lets an agent author files AND run
  *     the verifier (its own tests, a check script) — but it CANNOT mutate the
@@ -78,23 +77,23 @@ const VERIFY_BASH_ALLOW = [
 export const AI_PROFILE = {
   read: {
     allow: [],
-    disallow: ['Agent', 'Bash', 'Edit', 'MultiEdit', 'Write'],
+    disallow: ['Agent', 'Bash', 'Edit', 'Write'],
     permissionMode: 'dontAsk',
     tools: ['Glob', 'Grep', 'Read', 'WebFetch', 'WebSearch'],
   },
-  // No Write / MultiEdit: edits land in existing files, never create new ones.
+  // No Write: edits land in existing files, never create new ones.
   edit: {
     allow: [],
-    disallow: ['Agent', 'Bash', 'MultiEdit', 'WebFetch', 'WebSearch', 'Write'],
+    disallow: ['Agent', 'Bash', 'WebFetch', 'WebSearch', 'Write'],
     permissionMode: 'acceptEdits',
     tools: ['Edit', 'Glob', 'Grep', 'Read'],
   },
-  // MultiEdit + Write added: may create files. Bash still denied.
+  // Write added: may create files. Bash still denied.
   create: {
     allow: [],
     disallow: ['Agent', 'Bash', 'WebFetch', 'WebSearch'],
     permissionMode: 'acceptEdits',
-    tools: ['Edit', 'Glob', 'Grep', 'MultiEdit', 'Read', 'Write'],
+    tools: ['Edit', 'Glob', 'Grep', 'Read', 'Write'],
   },
   // `.create` + a READ-ONLY Bash allowlist: run code / tests / inspect git, so
   // the agent can self-verify what it authored — but NO `git add`/`git commit`,
@@ -103,7 +102,7 @@ export const AI_PROFILE = {
     allow: [...VERIFY_BASH_ALLOW],
     disallow: ['Agent', 'WebFetch', 'WebSearch'],
     permissionMode: 'acceptEdits',
-    tools: ['Bash', 'Edit', 'Glob', 'Grep', 'MultiEdit', 'Read', 'Write'],
+    tools: ['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Write'],
   },
   // `.verify` + the MUTATING git commands + `pnpm exec`; anything else denied.
   // Composed from the BASH_ALLOW blocks so the surface stays one source.
@@ -115,6 +114,6 @@ export const AI_PROFILE = {
     ],
     disallow: ['Agent', 'WebFetch', 'WebSearch'],
     permissionMode: 'acceptEdits',
-    tools: ['Bash', 'Edit', 'Glob', 'Grep', 'MultiEdit', 'Read', 'Write'],
+    tools: ['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Write'],
   },
 } as const satisfies Readonly<Record<string, AiProfile>>

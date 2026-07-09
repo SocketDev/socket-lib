@@ -20,7 +20,8 @@
  *     evaluated. Same pattern as `fs/path-cache` ↔ `fs/_internal`.
  */
 
-import process from 'node:process'
+// oxlint-disable-next-line unicorn/prefer-node-protocol -- bare `process` is browser-stubbable (resolve.fallback / browser field); a `node:` prefix throws UnhandledSchemeError in webpack browser bundles.
+import process from 'process'
 
 import type { Console } from 'node:console'
 
@@ -32,8 +33,8 @@ import {
 
 import { ReflectConstruct } from '../primordials/reflect'
 import {
-  boundConsoleEntries,
   consolePropAttributes,
+  getBoundConsoleEntries,
   globalConsole,
   privateConsole,
   privateConstructorArgs,
@@ -50,9 +51,8 @@ let prototypeInitialized = false
 export function constructConsole(...args: unknown[]) {
   /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (cachedConsole === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    const nodeConsole = /*@__PURE__*/ require('node:console')
+    // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare `console` is browser-stubbable (resolve.fallback / browser field); a `node:` prefix throws UnhandledSchemeError in webpack browser bundles.
+    const nodeConsole = /*@__PURE__*/ require('console')
     cachedConsole = nodeConsole.Console
   }
   return ReflectConstruct(
@@ -115,7 +115,7 @@ export function ensurePrototypeInitialized() {
                 stdout: process.stdout,
                 stderr: process.stderr,
               }) as typeof console & Record<string, unknown>
-              for (const { 0: k, 1: method } of boundConsoleEntries) {
+              for (const { 0: k, 1: method } of getBoundConsoleEntries()) {
                 con[k] = method
               }
             }
@@ -173,7 +173,7 @@ export function resolveConsole(
         stdout: process.stdout,
         stderr: process.stderr,
       }) as typeof console & Record<string, unknown>
-      for (const { 0: key, 1: method } of boundConsoleEntries) {
+      for (const { 0: key, 1: method } of getBoundConsoleEntries()) {
         con[key] = method
       }
     }

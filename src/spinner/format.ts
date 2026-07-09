@@ -6,7 +6,7 @@
  *   `withSpinner*` wrappers.
  */
 
-import colors from '../external/yoctocolors-cjs'
+import { getYoctocolors } from '../logger/colors'
 
 import { MathMax, MathRound } from '../primordials/math'
 import type { ProgressInfo, SpinnerStyle } from './types'
@@ -100,7 +100,8 @@ export function renderProgressBar(
   )
   const empty = MathMax(0, width - filled)
   const bar = '█'.repeat(filled) + '░'.repeat(empty)
-  // Use cyan color for the progress bar
-  // colors is imported at the top
-  return colors.cyan(bar)
+  // Cyan progress bar; the palette loads lazily on first render (see
+  // logger/colors.getYoctocolors) so importing this leaf stays cheap and
+  // browser-load-safe.
+  return getYoctocolors().cyan(bar)
 }

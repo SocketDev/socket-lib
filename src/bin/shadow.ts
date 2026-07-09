@@ -5,6 +5,8 @@
  *   the real interpreter.
  */
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 /**
  * Check if a directory path contains any shadow bin patterns.
  *
@@ -19,6 +21,6 @@ export function isShadowBinPath(dirPath: string | undefined): boolean {
     return false
   }
   // Check for node_modules/.bin pattern (Unix and Windows)
-  const normalized = dirPath.replace(/\\/g, '/')
+  const normalized = normalizePath(dirPath)
   return normalized.includes('node_modules/.bin')
 }

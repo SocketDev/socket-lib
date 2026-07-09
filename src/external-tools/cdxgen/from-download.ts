@@ -5,7 +5,7 @@
  *   wrapper) with sidecar `.sha256` files; this helper passes the pinned
  *   integrity through `downloadToolArchive`, then copies the downloaded blob to
  *   `cdxgen[.exe]` and chmods it 0o755. Platforms upstream doesn't ship a SEA
- *   for (none today; the asset map covers all 8 fleet targets) return
+ *   for (none today; the asset map covers all 8 Socket targets) return
  *   `undefined` — callers should fall back to `cdxgenFromNpm()` for those.
  */
 
@@ -30,7 +30,7 @@ export interface CdxgenFromDownloadOptions {
    */
   version: string
   /**
-   * Fleet platform-arch token, e.g. `'darwin-arm64'`.
+   * Socket platform-arch token, e.g. `'darwin-arm64'`.
    */
   platformArch: string
   /**

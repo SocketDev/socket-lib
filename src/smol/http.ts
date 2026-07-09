@@ -64,6 +64,8 @@ let smolHttpProbed = false
 /**
  * Returns `node:smol-http` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function getSmolHttp(): SmolHttpBinding | undefined {
   if (!smolHttpProbed) {

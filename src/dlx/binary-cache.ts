@@ -64,12 +64,10 @@ export async function cleanDlxCache(
     const metaPath = getBinaryCacheMetadataPath(entryPath)
 
     try {
-      // eslint-disable-next-line no-await-in-loop
       if (!(await existsSync(entryPath))) {
         continue
       }
 
-      // eslint-disable-next-line no-await-in-loop
       const metadata = await readJson(metaPath, { throws: false })
       if (!metadata || typeof metadata !== 'object' || ArrayIsArray(metadata)) {
         continue
@@ -84,18 +82,15 @@ export async function cleanDlxCache(
       // Treat future timestamps (clock skew) as expired
       if (age < 0 || age > maxAge) {
         // Remove entire cache entry directory.
-        // eslint-disable-next-line no-await-in-loop
         await safeDelete(entryPath, { force: true, recursive: true })
         cleaned += 1
       }
     } catch {
       // If we can't read metadata, check if directory is empty or corrupted.
       try {
-        // eslint-disable-next-line no-await-in-loop
         const contents = await fs.promises.readdir(entryPath)
         if (!contents.length) {
           // Remove empty directory.
-          // eslint-disable-next-line no-await-in-loop
           await safeDelete(entryPath)
           cleaned += 1
         }
@@ -210,13 +205,11 @@ export async function listDlxCache(): Promise<
   for (const entry of entries) {
     const entryPath = path.join(cacheDir, entry)
     try {
-      // eslint-disable-next-line no-await-in-loop
       if (!(await existsSync(entryPath))) {
         continue
       }
 
       const metaPath = getBinaryCacheMetadataPath(entryPath)
-      // eslint-disable-next-line no-await-in-loop
       const metadata = await readJson(metaPath, { throws: false })
       if (!metadata || typeof metadata !== 'object' || ArrayIsArray(metadata)) {
         continue
@@ -231,7 +224,6 @@ export async function listDlxCache(): Promise<
         (source?.['url'] as string) || (metaObj['url'] as string) || ''
 
       // Find the binary file in the directory.
-      // eslint-disable-next-line no-await-in-loop
       const files = await fs.promises.readdir(entryPath)
       const binaryFile = ArrayPrototypeFind(
         files,
@@ -240,7 +232,6 @@ export async function listDlxCache(): Promise<
 
       if (binaryFile) {
         const binaryPath = path.join(entryPath, binaryFile)
-        // eslint-disable-next-line no-await-in-loop
         // oxlint-disable-next-line socket/prefer-exists-sync -- DLX binary metadata uses stat for size/mtime; not existence-only checks.
         const binaryStats = await fs.promises.stat(binaryPath)
 

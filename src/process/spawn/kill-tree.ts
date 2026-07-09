@@ -70,7 +70,7 @@ export function killProcessTree(
     return false
   }
   // Null-prototype spread so a poisoned Object.prototype (e.g. a malicious
-  // `detached` getter) can't influence option resolution — the fleet
+  // `detached` getter) can't influence option resolution — the Socket
   // options-object idiom.
   const opts = { __proto__: null, ...options } as KillProcessTreeOptions
   const detached = opts.detached !== false

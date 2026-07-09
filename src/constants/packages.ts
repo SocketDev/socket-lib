@@ -33,6 +33,8 @@ export const PACKAGE_DEFAULT_VERSION = '1.0.0'
 /**
  * Clear the packument cache. Useful for long-running processes that want to
  * force a re-fetch of registry metadata.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function clearPackumentCache(): void {
   // First-call branch fires only when cache is uninitialized; tests
@@ -43,6 +45,9 @@ export function clearPackumentCache(): void {
   }
 }
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function getLifecycleScriptNames(): string[] {
   if (cachedLifecycleScriptNames === undefined) {
     // lifecycleScriptNames is imported at the top

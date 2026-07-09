@@ -111,6 +111,8 @@ export function discoverFresh(): DiscoveredAgents {
  *
  * Useful in fast paths where the caller has already populated the cache and
  * just wants to read it back.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function getDiscoveredAiAgents(): DiscoveredAgents | undefined {
   return inProcessCache
@@ -141,6 +143,8 @@ export function readDiskCache(cachePath: string): DiscoveredAgents | undefined {
 /**
  * Reset the in-process cache. Tests use this; production callers shouldn't need
  * it (use `refresh: true` on discoverAiAgents()).
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function resetAiAgentDiscoveryCache(): void {
   inProcessCache = undefined

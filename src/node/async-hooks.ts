@@ -3,7 +3,6 @@
  *   rationale shared across all `node/*.ts` lazy-loaders.
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeAsyncHooks from 'node:async_hooks'
 
 import { IS_NODE } from '../constants/runtime'

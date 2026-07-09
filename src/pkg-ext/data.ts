@@ -4,7 +4,7 @@
  *   issues, missing peer dependencies, etc.
  */
 
-import * as yarnPkgExtensions from '../external/@yarnpkg/extensions'
+import { packageExtensions as yarnPackageExtensions } from '../external/@yarnpkg/extensions'
 
 import type { PackageExtension } from './types'
 
@@ -14,7 +14,7 @@ const packageExtensions = ObjectFreeze(
   (
     [
       /* c8 ignore next - External @yarnpkg/extensions data */
-      ...yarnPkgExtensions.packageExtensions,
+      ...yarnPackageExtensions,
       [
         '@yarnpkg/extensions@>=1.1.0',
         {

@@ -54,13 +54,11 @@ export async function ensureIpcDirectory(filePath: string): Promise<void> {
   }
   // Permission bits only (mask out file-type bits). Reject any group or
   // other access — only owner bits may be set.
-  // eslint-disable-next-line no-bitwise
   const mode = stats.mode & 0o777
   /* c8 ignore next 7 - chmod-tightening fires only if umask leaves
      group/other bits set; default Node umask 0o022 strips group-write
      but keeps group/other read+execute, so the value depends on the
      CI runner's umask. */
-  // eslint-disable-next-line no-bitwise
   if ((mode & 0o077) !== 0) {
     // Tighten an over-permissive directory we just inherited. Use chmod
     // rather than fail outright so a first-run that inherits e.g. 0o755

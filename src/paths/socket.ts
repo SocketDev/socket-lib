@@ -5,8 +5,8 @@
  *   `_dlx/<hash>/` name+version binary store (node, jre, python, sfw, …);
  *   `_state/<app>/` version-LESS persistent app state (daemon socket + lock +
  *   OAuth refresh; mirrors pnpm `state-dir` / XDG_STATE_HOME), with
- *   `_state/<app>/run/` for a daemon's socket/lock/pid; `_wheelhouse`
- *   cross-fleet shared bin. Generic per-app dirs (`getSocketAppDir('<name>')`)
+ *   `_state/<app>/run/` for a daemon's socket/lock/pid; `_wheelhouse` shared
+ *   bin across Socket tools. Generic per-app dirs (`getSocketAppDir('<name>')`)
  *   nest under the same `_`-prefix.
  */
 
@@ -248,8 +248,8 @@ export function getSocketRackToolDir(options: {
  * (Treeless `--filter=tree:0` is smaller still but refetches trees on every
  * walk, which is slow + breaks offline, so it is NOT the default.)
  *
- * Deliberately OUTSIDE `~/projects/` so the fleet's sibling-walk tooling (e.g.
- * cascade `--all`) never mistakes a reference clone for a fleet member
+ * Deliberately OUTSIDE `~/projects/` so Socket's sibling-walk tooling (e.g.
+ * cascade `--all`) never mistakes a reference clone for a Socket repo
  * checkout. Disposable: a reference cache, not a working tree. Inherits the
  * `_wheelhouse` override chain (SOCKET_HOME /
  * setPath('socket-wheelhouse-dir')).
@@ -304,10 +304,10 @@ export function getSocketWheelhouseBinDir(): string {
   return normalizePath(path.join(getSocketWheelhouseDir(), 'bin'))
 }
 /**
- * Get the Socket Wheelhouse directory (~/.socket/_wheelhouse). Shared
- * cross-fleet location for binaries that every fleet member can reach without
- * each one re-downloading and re-extracting per-repo. Tool installers (janus,
- * sfw, etc.) rack their resolved executables under
+ * Get the Socket Wheelhouse directory (~/.socket/_wheelhouse). Shared location,
+ * common across Socket repos, for binaries that every Socket repo can reach
+ * without each one re-downloading and re-extracting per-repo. Tool installers
+ * (janus, sfw, etc.) rack their resolved executables under
  * `<wheelhouse>/rack/<tool>/<version>/…` (getSocketRackToolDir) and expose a
  * handle in `<wheelhouse>/bin` (getSocketWheelhouseBinDir); consumers add that
  * one `bin/` to PATH. Override precedence: setPath('socket-wheelhouse-dir', …)

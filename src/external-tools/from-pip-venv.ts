@@ -142,7 +142,6 @@ export async function findPython(): Promise<string | undefined> {
   const candidates =
     process.platform === 'win32' ? ['python', 'python3'] : ['python3', 'python']
   for (let i = 0, { length } = candidates; i < length; i += 1) {
-    // eslint-disable-next-line no-await-in-loop -- short-circuit on first hit.
     const found = await which(candidates[i]!, { nothrow: true })
     if (typeof found === 'string') {
       return found

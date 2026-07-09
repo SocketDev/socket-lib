@@ -1,6 +1,6 @@
 /**
  * @file Lazy-getter primitives + `createConstantsObject`.
- *   `createConstantsObject` is the most-used factory in this module — fleet
+ *   `createConstantsObject` is the most-used factory in this module — Socket
  *   repos use it to assemble frozen settings objects with a mix of eager
  *   values, lazy-computed values, and internals reachable through
  *   `kInternalsSymbol`. The `defineLazyGetter*` helpers underneath are the
@@ -80,7 +80,7 @@ export function createConstantsObject(
       : undefined,
     internals: options.internals
       ? ObjectFreeze(
-          // oxlint-disable-next-line socket/prefer-undefined-over-null
+          // oxlint-disable-next-line socket/prefer-undefined-over-null -- Object.setPrototypeOf requires `null` for null-prototype objects.
           ObjectSetPrototypeOf(toSortedObject(options.internals), null),
         )
       : undefined,
@@ -93,7 +93,7 @@ export function createConstantsObject(
         )
       : undefined,
     props: props
-      ? // oxlint-disable-next-line socket/prefer-undefined-over-null
+      ? // oxlint-disable-next-line socket/prefer-undefined-over-null -- Object.setPrototypeOf requires `null` for null-prototype objects.
         ObjectFreeze(ObjectSetPrototypeOf(toSortedObject(props), null))
       : undefined,
   })

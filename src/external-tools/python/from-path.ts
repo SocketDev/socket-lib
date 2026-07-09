@@ -10,7 +10,6 @@ import type { ResolvedPython } from './types'
 
 export async function pythonFromPath(): Promise<ResolvedPython | undefined> {
   for (const bin of ['python3', 'python']) {
-    // eslint-disable-next-line no-await-in-loop
     const onPath = await which(bin, { nothrow: true })
     if (typeof onPath === 'string') {
       return { path: onPath, source: 'path' }

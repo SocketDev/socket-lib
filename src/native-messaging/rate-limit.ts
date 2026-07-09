@@ -14,7 +14,7 @@
  *   That's exactly what we want: an attacker who can force Chrome to relaunch
  *   has bigger problems than rate-limiting. Shape patterned after pilcrow's
  *   `ratelimit/limit.go` — minimal, in-memory, LRU-evicts at `maxKeys`. The
- *   fleet's `socket-lib` already has a TTL-cache module but it's overkill for
+ *   Socket's `socket-lib` already has a TTL-cache module but it's overkill for
  *   this one use case; a 50-line bucket is easier to audit.
  */
 
@@ -51,6 +51,9 @@ export interface BucketEntry {
   key: string
 }
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export class TokenBucketLimiter {
   readonly #capacity: number
   readonly #refillIntervalMs: number

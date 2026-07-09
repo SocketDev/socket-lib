@@ -3,7 +3,7 @@
  *   public `Logger` surface) and `logger/console-init` (which mutates
  *   `Logger.prototype` to mirror `globalConsole`). The `_` prefix keeps this
  *   module out of the generated package.json `exports` map (the `dist/**\/_*`
- *   ignore pattern in `scripts/post-build/make-package-exports.mts` filters it
+ *   ignore pattern in `scripts/fleet/make-package-exports.mts` filters it
  *   out), so it is not part of the public surface — it exists only to give the
  *   two leaves above a common owner for the WeakMap-backed lazy-init state. Why
  *   two WeakMaps instead of `#privateField` slots:
@@ -46,24 +46,20 @@ export const consolePropAttributes = {
  */
 export const maxIndentation = 1000
 
-/**
- * Pre-bound copies of the console methods that need their original `this` to
- * function (e.g., `console.error.bind(globalConsole)`). Mapping `[name,
- * boundFn]` so `console-init.ts` can apply them onto the per-instance Console
- * without re-binding on every call.
- *
- * Notes from the upstream Node implementation:
- *
- * - `_stderrErrorHandler` / `_stdoutErrorHandler` are `kBindProperties`
- *   properties — they live on the per-instance Console and need their `this`
- *   set to `globalConsole`.
- *   https://github.com/nodejs/node/blob/v24.0.1/lib/internal/console/constructor.js#L230-L265
- * - `group` / `groupCollapsed` / `groupEnd` are explicitly skipped because Node
- *   20 with `--frozen-intrinsics` makes `Symbol(kGroupIndent)` read-only, which
- *   the Logger's own group methods avoid by tracking indentation at the prefix
- *   layer.
- */
-export const boundConsoleEntries = [
+// Console method names that need their original `this` bound to function on a
+// per-instance Console.
+//
+// Notes from the upstream Node implementation:
+//
+// - `_stderrErrorHandler` / `_stdoutErrorHandler` are `kBindProperties`
+//   properties — they live on the per-instance Console and need their `this`
+//   set to `globalConsole`.
+//   https://github.com/nodejs/node/blob/v24.0.1/lib/internal/console/constructor.js#L230-L265
+// - `group` / `groupCollapsed` / `groupEnd` are explicitly skipped because Node
+//   20 with `--frozen-intrinsics` makes `Symbol(kGroupIndent)` read-only, which
+//   the Logger's own group methods avoid by tracking indentation at the prefix
+//   layer.
+const boundConsoleMethodNames = [
   // Add bound properties from console[kBindProperties](ignoreErrors, colorMode, groupIndentation).
   // https://github.com/nodejs/node/blob/v24.0.1/lib/internal/console/constructor.js#L230-L265
   '_stderrErrorHandler',
@@ -93,22 +89,47 @@ export const boundConsoleEntries = [
   'trace',
   'warn',
 ]
-  .filter(
-    n =>
-      typeof (globalConsole as unknown as Record<string, unknown>)[n] ===
-      'function',
-  )
-  .map(
-    n =>
-      [
-        n,
-        (
-          (globalConsole as unknown as Record<string, unknown>)[n] as (
-            ...args: unknown[]
-          ) => unknown
-        ).bind(globalConsole),
-      ] as [string, (...args: unknown[]) => unknown],
-  )
+
+let boundConsoleEntries:
+  | Array<[string, (...args: unknown[]) => unknown]>
+  | undefined
+
+/**
+ * Pre-bound copies of the console methods that need their original `this` to
+ * function (e.g., `console.error.bind(globalConsole)`). Returns `[name,
+ * boundFn]` pairs so `console-init.ts` can apply them onto the per-instance
+ * Console without re-binding on every call.
+ *
+ * Built LAZILY (memoized) rather than at module-eval: `fn.bind(globalConsole)`
+ * of a native console method produces a bound function wrapping a native C++
+ * function pointer, which serializes as an unresolvable external reference and
+ * aborts V8 --build-snapshot. Deferring construction to first Console build
+ * keeps the bind-once/reuse win while leaving module import snapshot-safe.
+ */
+export function getBoundConsoleEntries(): Array<
+  [string, (...args: unknown[]) => unknown]
+> {
+  if (boundConsoleEntries === undefined) {
+    boundConsoleEntries = boundConsoleMethodNames
+      .filter(
+        n =>
+          typeof (globalConsole as unknown as Record<string, unknown>)[n] ===
+          'function',
+      )
+      .map(
+        n =>
+          [
+            n,
+            (
+              (globalConsole as unknown as Record<string, unknown>)[n] as (
+                ...args: unknown[]
+              ) => unknown
+            ).bind(globalConsole),
+          ] as [string, (...args: unknown[]) => unknown],
+      )
+  }
+  return boundConsoleEntries
+}
 
 /**
  * WeakMap storing the Console instance for each Logger.

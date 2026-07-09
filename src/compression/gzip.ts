@@ -106,6 +106,8 @@ export function createGzipCompressor(options?: CompressOptions | undefined) {
 
 /**
  * Create a gzip decompress transform stream.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function createGzipDecompressor() {
   return createGunzip()
@@ -181,6 +183,8 @@ export function hasGzipExt(filePath: string): boolean {
 /**
  * Magic-byte check for gzip. Reads the first two bytes and matches the gzip
  * spec's 0x1f 0x8b signature. Authoritative.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function isGzipCompressed(input: Buffer): boolean {
   return (

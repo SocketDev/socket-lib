@@ -93,6 +93,9 @@ export async function doResolvePython(
 }
 
 /* c8 ignore start - test-only escape hatch. */
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function resetPythonResolution(): void {
   resolutionCache.clear()
 }

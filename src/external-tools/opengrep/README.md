@@ -6,7 +6,7 @@ socket-basics for SAST.
 ## Why it's here
 
 semgrep upstream went license-changed and pricey; OpenGrep keeps the open
-toolchain alive. We pin a known-good OpenGrep across the fleet so SAST
+toolchain alive. We pin a known-good OpenGrep across Socket repos so SAST
 results are reproducible.
 
 ## API at a glance

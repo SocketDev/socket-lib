@@ -75,7 +75,6 @@ export async function writeIpcStub(
   // dirs (e.g. /tmp on Linux) could otherwise redirect this write into
   // the victim's own files. O_NOFOLLOW is a no-op on Windows, where the
   // per-user $TEMP makes the attack moot anyway.
-  // eslint-disable-next-line no-bitwise
   const flags =
     fs.constants.O_CREAT |
     fs.constants.O_WRONLY |

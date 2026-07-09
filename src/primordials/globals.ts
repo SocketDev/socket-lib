@@ -25,7 +25,6 @@ export const NaNValue: number = NaN
 // pattern they use for other captured globals:
 //   `import { globalThis as GlobalThis } from '@socketsecurity/lib/primordials/globals'`
 const capturedGlobalThis: typeof globalThis = globalThis
-// eslint-disable-next-line no-shadow-restricted-names
 export { capturedGlobalThis as globalThis }
 
 // ─── Captured globals (functions / methods) ────────────────────────────

@@ -84,7 +84,7 @@ export interface AdoptiumDownloadOptions {
    */
   version: number
   /**
-   * Fleet platform-arch token — same vocabulary as `getPlatformArch` output.
+   * Socket platform-arch token — same vocabulary as `getPlatformArch` output.
    * Looked up in `ADOPTIUM_QUERY_MAP`; returns `undefined` when Adoptium
    * doesn't publish a build for that target (e.g. `win-arm64` for older
    * majors).
@@ -156,6 +156,8 @@ export function getAdoptiumDownloadUrl(
 /**
  * Returns the Adoptium query parameters for a given platform-arch, or
  * `undefined` if no Adoptium build exists for that target.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function getAdoptiumQuery(
   platformArch: string,

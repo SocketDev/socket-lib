@@ -36,6 +36,9 @@ export const JANUS_SUPPORTED_PLATFORM_ARCHES: readonly string[] = ObjectFreeze(
   ObjectKeys(JANUS_ASSET_MAP),
 ) as readonly string[]
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function getJanusAssetEntry(
   platformArch: string,
 ): JanusAssetEntry | undefined {
@@ -49,7 +52,7 @@ export interface JanusDownloadOptions {
    */
   version: string
   /**
-   * Fleet platform-arch token — looked up in `JANUS_ASSET_MAP`. Returns
+   * Socket platform-arch token — looked up in `JANUS_ASSET_MAP`. Returns
    * `undefined` for any platform-arch janus doesn't ship a build for.
    */
   platformArch: string

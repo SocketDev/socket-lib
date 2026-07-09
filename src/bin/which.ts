@@ -8,15 +8,19 @@
  *   through `resolveRealBinSync` so the caller gets the underlying script path
  *   (e.g., `npm-cli.js`) rather than the wrapper. Default `nothrow: true` so a
  *   missing binary returns `undefined` instead of bubbling a `which` package
- *   error. Caching matches `_internal.binPathCache` and `binPathAllCache`. Both
- *   caches validate hits with `existsSync` so a tool reinstall mid-session
- *   doesn't return a stale path.
+ *   error. `whichLocalBin` resolves a tool from the project-local
+ *   `node_modules/.bin` (the inverse of `findRealBin`, which skips it). Caching
+ *   matches `_internal.binPathCache` and `binPathAllCache`. Both caches
+ *   validate hits with `existsSync` so a tool reinstall mid-session doesn't
+ *   return a stale path.
  */
+
+import process from 'node:process'
 
 import whichModule from '../external/which'
 import { isPath } from '../paths/normalize'
 import { ArrayIsArray, ArrayPrototypeMap } from '../primordials/array'
-import { binPathAllCache, binPathCache, getFs } from './_internal'
+import { binPathAllCache, binPathCache, getFs, getPath } from './_internal'
 import { resolveRealBinSync } from './resolve'
 
 import type { WhichOptions as ExternalWhichOptions } from '../external/which'
@@ -75,9 +79,47 @@ export async function which(
     // package contract — public callers `instanceof check` distinguish
     // null vs string, so the lint rule's `undefined` recommendation
     // would break them.
-    // oxlint-disable-next-line socket/prefer-undefined-over-null
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- matches upstream which package contract
     return null
   }
+}
+
+/**
+ * Resolve a tool installed in the project-local `node_modules/.bin` to its
+ * ABSOLUTE path. This is the inverse of findRealBin: that helper SKIPS
+ * node_modules/.bin (shadow bins) to find the real package manager behind a
+ * tool's shim, whereas whichLocalBin WANTS the local bin — it is for spawning a
+ * dev dependency's own CLI (oxlint, vitest, tsc) directly instead of through
+ * `pnpm exec`. Returns the platform-correct absolute path (the .cmd / .exe shim
+ * on Windows, the symlink on POSIX), falling back to a plain PATH lookup, or
+ * undefined when the tool resolves nowhere. `options.cwd` overrides the project
+ * root whose node_modules/.bin is searched (default process.cwd()); an explicit
+ * `options.path` replaces that local bin dir entirely.
+ *
+ * In npm's terminology this is "local" (vs "global" with `-g`): a locally
+ * installed package's executables are linked into node_modules/.bin. See
+ * https://docs.npmjs.com/cli/v11/configuring-npm/folders#executables.
+ *
+ * @example
+ *   ;```typescript
+ *   whichLocalBin('oxlint') // '/repo/node_modules/.bin/oxlint'
+ *   whichLocalBin('missing') // undefined
+ *   ```
+ */
+export function whichLocalBin(
+  binName: string,
+  options?: WhichOptions,
+): string | undefined {
+  const opts = { __proto__: null, ...options } as WhichOptions
+  const path = getPath()
+  const localBin =
+    opts.path ?? path.join(opts.cwd ?? process.cwd(), 'node_modules', '.bin')
+  const local = whichSync(binName, { nothrow: true, path: localBin })
+  if (typeof local === 'string') {
+    return local
+  }
+  const found = whichSync(binName, { nothrow: true })
+  return typeof found === 'string' ? found : undefined
 }
 
 /**
@@ -278,7 +320,7 @@ export function whichSync(
   } catch {
     // Binary not found in PATH. Return type matches upstream `which`
     // package contract.
-    // oxlint-disable-next-line socket/prefer-undefined-over-null
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- matches upstream which package contract
     return null
   }
 }

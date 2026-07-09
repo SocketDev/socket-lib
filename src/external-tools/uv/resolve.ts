@@ -68,6 +68,9 @@ export async function doResolveUv(
 }
 
 /* c8 ignore start - test-only escape hatch. */
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function resetUvResolution(): void {
   resolutionCache.clear()
 }

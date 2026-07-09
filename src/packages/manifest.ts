@@ -26,7 +26,6 @@ import { isRegistryFetcherType } from './validation'
 import type { PackageJson, PacoteOptions } from './types'
 
 import { ObjectFromEntries, ObjectKeys } from '../primordials/object'
-const abortSignal = getAbortSignal()
 const packageDefaultNodeRange = getPackageDefaultNodeRange()
 const PACKAGE_DEFAULT_SOCKET_CATEGORIES = getPackageDefaultSocketCategories()
 const packumentCache = getPackumentCache()
@@ -147,7 +146,7 @@ export async function fetchPackageManifest(
 ): Promise<unknown> {
   const pacoteOptions = {
     __proto__: null,
-    signal: abortSignal,
+    signal: getAbortSignal(),
     ...options,
     packumentCache,
     preferOffline: true,
@@ -198,7 +197,7 @@ export async function fetchPackagePackument(
   try {
     return await pacote.packument(pkgNameOrId, {
       __proto__: null,
-      signal: abortSignal,
+      signal: getAbortSignal(),
       ...options,
       packumentCache,
       preferOffline: true,

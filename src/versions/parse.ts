@@ -7,7 +7,7 @@
  *   `semver` directly — smol-versions doesn't expose the parsed shape.
  */
 
-import { getSemver, impl } from './_internal'
+import { getImpl, getSemver } from './_internal'
 
 import type { ParsedVersion } from './types'
 
@@ -87,8 +87,7 @@ export function isValidVersion(version: string): boolean {
   // semver.valid returns string | null; smol-versions returns
   // string | undefined. Both branch correctly under loose-equality
   // truthiness check, so a generic `!= null` (loose) covers both.
-  // eslint-disable-next-line eqeqeq
-  return impl.valid(version) != null
+  return getImpl().valid(version) != null
 }
 
 /**

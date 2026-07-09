@@ -205,8 +205,9 @@ export async function resolvePipPackagePin(
     const artifacts: PipArtifactPin[] = []
     const targetName = normalizeDistName(specDistName(spec))
     let top: { hash: ComputedHashes; name: string; version: string } | undefined
-    for (const file of files.toSorted()) {
-      // eslint-disable-next-line no-await-in-loop -- bounded by closure size.
+    const sortedFiles = files.toSorted()
+    for (let i = 0, { length } = sortedFiles; i < length; i += 1) {
+      const file = sortedFiles[i]!
       const bytes = await fs.readFile(path.join(scratch, file))
       const hash = computeHashes(bytes)
       const parsed = parseArtifactFilename(file)

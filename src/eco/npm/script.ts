@@ -87,8 +87,8 @@ export function execScript(
   }
 
   // package-lock.json and yarn.lock fallback paths fire only in
-  // npm/yarn workspaces; the fleet uses pnpm, so the pnpm-lock branch
-  // hits and these are unreachable in fleet test runs.
+  // npm/yarn workspaces; Socket repos use pnpm, so the pnpm-lock branch
+  // hits and these are unreachable in Socket's test runs.
   /* c8 ignore start */
   const packageLockPath = findUpSync(PACKAGE_LOCK_JSON, { cwd }) as
     | string

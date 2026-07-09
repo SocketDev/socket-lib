@@ -49,7 +49,7 @@ export function createCompositeAbortSignal(
  * @example
  *   ;```typescript
  *   const signal = createTimeoutSignal(5000) // aborts after 5 seconds
- *   fetch('https://example.com', { signal })
+ *   httpJson(url, { signal })
  *   ```
  *
  * @throws {TypeError} If `ms` is not a number, is NaN, is not finite, or is not

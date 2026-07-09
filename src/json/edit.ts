@@ -264,7 +264,6 @@ export async function readFile(filepath: string): Promise<string> {
   const maxRetries = process.platform === 'win32' ? 5 : 1
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
-      // eslint-disable-next-line no-await-in-loop
       return await fsPromises.readFile(filepath, 'utf8')
     } catch (e) {
       const isLastAttempt = attempt === maxRetries
@@ -275,7 +274,6 @@ export async function readFile(filepath: string): Promise<string> {
       }
 
       const delay = process.platform === 'win32' ? 50 * (attempt + 1) : 20
-      // eslint-disable-next-line no-await-in-loop
       await sleep(delay)
     }
   }
@@ -306,7 +304,6 @@ export async function retryWrite(
 
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      // eslint-disable-next-line no-await-in-loop
       await fsPromises.writeFile(filepath, content)
       /* c8 ignore start - Windows-only flush+verify loop. Tested on
          Windows runners. */
@@ -315,7 +312,6 @@ export async function retryWrite(
       // Windows CI runners are significantly slower than local development
       if (process.platform === 'win32') {
         // Initial delay to allow OS to flush the write
-        // eslint-disable-next-line no-await-in-loop
         await sleep(50)
         // Verify the file is actually present with retries
         let accessRetries = 0
@@ -323,13 +319,11 @@ export async function retryWrite(
         while (accessRetries < maxAccessRetries) {
           if (fs.existsSync(filepath)) {
             // Small final delay to ensure stability
-            // eslint-disable-next-line no-await-in-loop
             await sleep(10)
             break
           }
           // If file isn't present yet, wait with increasing delays
           const delay = 20 * (accessRetries + 1)
-          // eslint-disable-next-line no-await-in-loop
           await sleep(delay)
           accessRetries++
         }
@@ -350,7 +344,6 @@ export async function retryWrite(
       }
 
       const delay = baseDelay * 2 ** attempt
-      // eslint-disable-next-line no-await-in-loop
       await sleep(delay)
     }
     /* c8 ignore stop */

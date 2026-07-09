@@ -3,7 +3,6 @@
  *   rationale shared across all `node/*.ts` lazy-loaders.
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeCrypto from 'node:crypto'
 
 import { IS_NODE } from '../constants/runtime'

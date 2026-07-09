@@ -6,15 +6,16 @@
  *   credential for it is resolvable; otherwise the resolver walks a
  *   cross-engine equivalence ladder (Claude → Codex → an open-weight provider
  *   via opencode) and returns the best available equivalent. Why gate on
- *   existence: a fleet machine may have Claude but no Codex, or Codex but an
- *   expired Claude key, or neither plus an opencode/synthetic seat. Hard-coding
- *   `fable` then fails at spawn time; routing here degrades gracefully and
- *   tells the caller WHY (the `reason`), so a skill can log "fell back to codex
- *   gpt-5.5 (claude unavailable)" instead of crashing. Pure given an
- *   availability/keyed context — no I/O — so callers fan out their `which` +
- *   credential probes once and pass the result in. Pairs with `buildArgs` in
- *   `spawn.mts`: a Fable candidate carries `effort: undefined` because Fable is
- *   adaptive-thinking-only and the spawn layer omits `--effort` for it anyway.
+ *   existence: a Socket dev machine may have Claude but no Codex, or Codex but
+ *   an expired Claude key, or neither plus an opencode/synthetic seat.
+ *   Hard-coding `fable` then fails at spawn time; routing here degrades
+ *   gracefully and tells the caller WHY (the `reason`), so a skill can log
+ *   "fell back to codex gpt-5.5 (claude unavailable)" instead of crashing. Pure
+ *   given an availability/keyed context — no I/O — so callers fan out their
+ *   `which` + credential probes once and pass the result in. Pairs with
+ *   `buildArgs` in `spawn.mts`: a Fable candidate carries `effort: undefined`
+ *   because Fable is adaptive-thinking-only and the spawn layer omits
+ *   `--effort` for it anyway.
  */
 
 import { AI_TIER } from './tier.mts'
@@ -89,7 +90,7 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
     {
       effort: 'xhigh',
       engine: 'opencode',
-      model: 'fireworks-ai/accounts/fireworks/models/glm-5p1',
+      model: 'fireworks-ai/accounts/fireworks/models/glm-5p2',
       provider: 'fireworks',
     },
   ],
@@ -104,7 +105,7 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
     {
       effort: 'high',
       engine: 'opencode',
-      model: 'fireworks-ai/accounts/fireworks/models/glm-5p1',
+      model: 'fireworks-ai/accounts/fireworks/models/glm-5p2',
       provider: 'fireworks',
     },
   ],
@@ -119,7 +120,7 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
     {
       effort: 'medium',
       engine: 'opencode',
-      model: 'synthetic/hf:moonshotai/Kimi-K2.5',
+      model: 'synthetic/hf:moonshotai/Kimi-K2.6',
       provider: 'synthetic',
     },
   ],
@@ -134,7 +135,7 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
     {
       effort: 'low',
       engine: 'opencode',
-      model: 'synthetic/hf:moonshotai/Kimi-K2.5',
+      model: 'synthetic/hf:moonshotai/Kimi-K2.6',
       provider: 'synthetic',
     },
   ],

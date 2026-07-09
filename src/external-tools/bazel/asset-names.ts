@@ -100,7 +100,7 @@ export interface BazelDownloadOptions {
    */
   version: string
   /**
-   * Fleet platform-arch token — looked up in `BAZEL_ASSET_MAP`. Returns
+   * Socket platform-arch token — looked up in `BAZEL_ASSET_MAP`. Returns
    * `undefined` when no entry exists for the target.
    */
   platformArch: string

@@ -14,7 +14,7 @@
 import { setTimeout as delay } from 'node:timers/promises'
 
 import { ErrorCtor } from '../primordials/error'
-import { MathMax, MathRound } from '../primordials/math'
+import { MathMax, MathMin, MathRound } from '../primordials/math'
 import { NumberIsNaN } from '../primordials/number'
 
 import { httpRequestAttempt } from './request-attempt'
@@ -81,6 +81,7 @@ export async function httpRequest(
     onRetry,
     retries = 0,
     retryDelay = 1000,
+    retryDelayMax = 30_000,
     signal,
     stream = false,
     throwOnError = false,
@@ -141,7 +142,6 @@ export async function httpRequest(
           }
         : baseAttemptOpts
     try {
-      // eslint-disable-next-line no-await-in-loop
       const response = await httpRequestAttempt(url, attemptOpts)
 
       // When throwOnError is enabled, non-2xx responses become errors
@@ -165,8 +165,9 @@ export async function httpRequest(
         break
       }
 
-      // Consult onRetry callback if provided.
-      const delayMs = retryDelay * 2 ** attempt
+      // Consult onRetry callback if provided. Exponential backoff is capped at
+      // retryDelayMax so a high `retries` count can't produce multi-minute waits.
+      const delayMs = MathMin(retryDelay * 2 ** attempt, retryDelayMax)
       if (onRetry) {
         const retryResult = onRetry(attempt + 1, e, delayMs)
         // false = stop retrying, rethrow immediately.
@@ -179,12 +180,10 @@ export async function httpRequest(
             ? MathMax(0, retryResult)
             : delayMs
         lastDelaySeconds = MathRound(actualDelay / 1000)
-        // eslint-disable-next-line no-await-in-loop
         await delay(actualDelay)
       } else {
         // Default: retry with exponential backoff
         lastDelaySeconds = MathRound(delayMs / 1000)
-        // eslint-disable-next-line no-await-in-loop
         await delay(delayMs)
       }
     }

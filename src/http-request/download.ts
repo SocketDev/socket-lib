@@ -137,7 +137,6 @@ export async function httpDownload(
   let lastError: Error | undefined
   for (let attempt = 0; attempt <= retries; attempt++) {
     try {
-      // eslint-disable-next-line no-await-in-loop
       const result = await httpDownloadAttempt(url, tempPath, {
         ca,
         followRedirects,
@@ -149,7 +148,6 @@ export async function httpDownload(
 
       // Verify checksum if sha256 hash is provided.
       if (sha256) {
-        // eslint-disable-next-line no-await-in-loop
         const fileContent = await fs.promises.readFile(tempPath)
         const computedHash = crypto
           .createHash('sha256')
@@ -166,7 +164,6 @@ export async function httpDownload(
             Buffer.from(expectedHash),
           )
         ) {
-          // eslint-disable-next-line no-await-in-loop
           await safeDelete(tempPath)
           throw new ErrorCtor(
             `Checksum verification failed for ${url}\n` +
@@ -178,7 +175,6 @@ export async function httpDownload(
 
       // Download succeeded - atomically rename temp file to destination.
       // This overwrites any existing file at destPath.
-      // eslint-disable-next-line no-await-in-loop
       await fs.promises.rename(tempPath, destPath)
 
       return {
@@ -190,7 +186,6 @@ export async function httpDownload(
 
       // Clean up failed temp file before retry.
       if (fs.existsSync(tempPath)) {
-        // eslint-disable-next-line no-await-in-loop
         await safeDelete(tempPath)
       }
 
@@ -201,7 +196,6 @@ export async function httpDownload(
 
       // Retry with exponential backoff
       const delayMs = retryDelay * 2 ** attempt
-      // eslint-disable-next-line no-await-in-loop
       await delay(delayMs)
     }
   }
@@ -276,6 +270,12 @@ export async function httpDownloadAttempt(
     }
 
     fileStream.on('error', (error: Error) => {
+      // `.pipe()` never tears down the SOURCE when the destination errors
+      // (only stream.pipeline does) — without this, a disk-write failure
+      // (ENOSPC, EACCES) leaves the response socket streaming into a dead
+      // pipe until the server hangs up.
+      res.unpipe(fileStream)
+      res.destroy()
       fileStream.destroy()
       cleanupPartial()
       reject(

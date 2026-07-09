@@ -1,6 +1,6 @@
 /**
  * @file Convenience helper for reading the Socket API token from the canonical
- *   env → keychain precedence order. Centralizes two constants every fleet
+ *   env → keychain precedence order. Centralizes two constants every Socket
  *   consumer would otherwise hard-code: the keychain service name
  *   (`socketsecurity`) and the env-var + account fallback list
  *   (`SOCKET_API_TOKEN` canonical, `SOCKET_API_KEY` legacy alias). Consumers

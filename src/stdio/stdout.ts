@@ -14,7 +14,8 @@ import {
   isTTYOf,
 } from './_internal'
 
-// Get the actual stdout stream
+// Get the actual stdout stream.
+// oxlint-disable-next-line socket/no-module-eval-side-effects -- the raw stream IS this module's public API (`export { stdout }` below); lazifying is a breaking contract change.
 const stdout: NodeJS.WriteStream = process.stdout
 
 // Module-level flag for ensureCursorOnExit idempotency.
@@ -86,12 +87,10 @@ export function ensureCursorOnExit(): void {
   process.on('exit', showCursor)
   process.on('SIGINT', () => {
     showCursor()
-    // eslint-disable-next-line n/no-process-exit
     process.exit(130)
   })
   process.on('SIGTERM', () => {
     showCursor()
-    // eslint-disable-next-line n/no-process-exit
     process.exit(143)
   })
 }

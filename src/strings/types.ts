@@ -9,6 +9,9 @@ export type BlankString = string & { [BlankStringBrand]: true }
 declare const EmptyStringBrand: unique symbol
 export type EmptyString = string & { [EmptyStringBrand]: true }
 
+declare const NonEmptyStringBrand: unique symbol
+export type NonEmptyString = string & { [NonEmptyStringBrand]: true }
+
 export interface ApplyLinePrefixOptions {
   /**
    * The prefix to add to each line.

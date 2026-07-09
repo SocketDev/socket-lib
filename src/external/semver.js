@@ -1,5 +1,4 @@
 'use strict'
 
-// Re-export from npm-pack bundle for better deduplication.
-const { semver } = require('./npm-pack')
-module.exports = semver
+// Self-contained semver bundle entry point.
+module.exports = require('semver')

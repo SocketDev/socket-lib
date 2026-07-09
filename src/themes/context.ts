@@ -3,6 +3,8 @@
  *   context isolation via AsyncLocalStorage.
  */
 
+import type { AsyncLocalStorage } from 'node:async_hooks'
+
 import type { Theme } from './types'
 import { SOCKET_THEME, THEMES } from './themes'
 import type { ThemeName } from './themes'
@@ -35,11 +37,10 @@ export function emitThemeChange(theme: Theme): void {
  */
 export const getAsyncHooks = getNodeAsyncHooks
 
-/**
- * AsyncLocalStorage for theme context isolation.
- */
-const { AsyncLocalStorage } = getAsyncHooks()
-const themeStorage = new AsyncLocalStorage<Theme>()
+// AsyncLocalStorage singleton for theme context isolation. Construction is
+// DEFERRED to first use (see getThemeStorage below) to keep module import
+// snapshot-safe.
+let themeStorage: AsyncLocalStorage<Theme> | undefined
 
 /**
  * Fallback theme for global context.
@@ -63,7 +64,26 @@ const listeners: Set<ThemeChangeListener> = new SetCtor()
  * @returns Current theme
  */
 export function getTheme(): Theme {
-  return themeStorage.getStore() ?? fallbackTheme
+  return getThemeStorage().getStore() ?? fallbackTheme
+}
+
+/**
+ * Get the process-scoped AsyncLocalStorage used for theme context isolation.
+ *
+ * Constructed LAZILY (memoized) rather than at module-eval: an
+ * AsyncLocalStorage holds a live native handle, and constructing it at import
+ * time pins that handle into every module transitively importing this leaf —
+ * aborting V8 --build-snapshot serialization. Deferring to first use keeps the
+ * single-store semantics while leaving module import snapshot-safe.
+ *
+ * @private
+ */
+export function getThemeStorage(): AsyncLocalStorage<Theme> {
+  if (themeStorage === undefined) {
+    const { AsyncLocalStorage } = getAsyncHooks()
+    themeStorage = new AsyncLocalStorage<Theme>()
+  }
+  return themeStorage
 }
 
 /**
@@ -130,7 +150,7 @@ export async function withTheme<T>(
 ): Promise<T> {
   const resolvedTheme: Theme =
     typeof theme === 'string' ? (THEMES[theme] ?? fallbackTheme) : theme
-  return await themeStorage.run(resolvedTheme, async () => {
+  return await getThemeStorage().run(resolvedTheme, async () => {
     emitThemeChange(resolvedTheme)
     return await fn()
   })
@@ -157,7 +177,7 @@ export async function withTheme<T>(
 export function withThemeSync<T>(theme: Theme | ThemeName, fn: () => T): T {
   const resolvedTheme: Theme =
     typeof theme === 'string' ? (THEMES[theme] ?? fallbackTheme) : theme
-  return themeStorage.run(resolvedTheme, () => {
+  return getThemeStorage().run(resolvedTheme, () => {
     emitThemeChange(resolvedTheme)
     return fn()
   })

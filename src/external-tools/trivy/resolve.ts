@@ -72,6 +72,9 @@ export async function doResolveTrivy(
   return undefined
 }
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 /* c8 ignore start - test-only escape hatch. */
 export function resetTrivyResolution(): void {
   resolutionCache.clear()

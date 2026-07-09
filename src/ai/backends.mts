@@ -1,5 +1,5 @@
 /**
- * @file Multi-agent CLI backend registry + role routing. The fleet's review /
+ * @file Multi-agent CLI backend registry + role routing. Socket's review /
  *   scan / fix skills delegate work to whichever agent CLIs are installed
  *   (`codex`, `claude`, `kimi`, `opencode`), falling back through a per-role
  *   preference order and skipping a pass when nothing usable is present. Before
@@ -27,7 +27,7 @@ import { which } from '../bin/which'
 import { isAdaptiveOnlyModel } from './spawn.mts'
 
 /**
- * A CLI backend the fleet can delegate a pass to.
+ * A CLI backend Socket can delegate a pass to.
  */
 export type BackendName = 'claude' | 'codex' | 'kimi' | 'opencode'
 
@@ -55,7 +55,7 @@ export interface BackendDescriptor {
   readonly run: (promptFile: string, outFile: string) => BackendRun
 }
 
-// Env-var conventions are shared fleet-wide (see _shared/multi-agent-backends.md):
+// Env-var conventions are shared Socket-wide (see _shared/multi-agent-backends.md):
 // pair a model with its effort knob where the backend has one. Kimi / opencode
 // have no effort flag and inherit their CLI default.
 export const BACKENDS: Readonly<Record<BackendName, BackendDescriptor>> = {
@@ -131,8 +131,8 @@ export const BACKENDS: Readonly<Record<BackendName, BackendDescriptor>> = {
       // opencode reads the prompt from stdin and writes to stdout in its
       // non-interactive `run` form. `OPENCODE_MODEL` pins a `provider/model`
       // slug for this run — how Fireworks + Synthetic are reached (e.g.
-      // `fireworks-ai/accounts/fireworks/models/glm-5p1`,
-      // `synthetic/hf:moonshotai/Kimi-K2.5`); see _shared/multi-agent-backends.md
+      // `fireworks-ai/accounts/fireworks/models/glm-5p2`,
+      // `synthetic/hf:moonshotai/Kimi-K2.6`); see _shared/multi-agent-backends.md
       // for the slug catalog. Absent the env, opencode picks per its own config.
       const model = process.env['OPENCODE_MODEL']
       return {
@@ -199,7 +199,7 @@ export interface ResolveBackendOptions {
 }
 
 /**
- * Resolve which backend runs a pass, encoding the fleet detection policy
+ * Resolve which backend runs a pass, encoding Socket's detection policy
  * (`_shared/multi-agent-backends.md`): an installed explicit override wins;
  * else the first installed non-hybrid entry in the preference order; else
  * nothing (skip the pass). Pure — returns the decision + why, never logs. An

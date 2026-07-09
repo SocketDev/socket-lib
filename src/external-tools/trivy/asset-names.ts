@@ -54,7 +54,7 @@ export interface TrivyDownloadOptions {
    */
   version: string
   /**
-   * Fleet platform-arch token — looked up in `TRIVY_ASSET_MAP`.
+   * Socket platform-arch token — looked up in `TRIVY_ASSET_MAP`.
    */
   platformArch: string
 }

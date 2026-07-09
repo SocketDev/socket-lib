@@ -141,7 +141,7 @@ export function epochNanosecondsImpl(this: Instant): bigint {
   // Step 1. Spec: "Let instant be the this value." Keeping `instant`
   // as a named local preserves the step-for-step mapping the rest of
   // this folder follows.
-  // oxlint-disable-next-line typescript-eslint/no-this-alias
+  // oxlint-disable-next-line typescript-eslint/no-this-alias -- spec step-for-step mapping requires named `instant` local
   const instant = this
   // Step 2.
   if (!hasInstantSlot(instant)) {

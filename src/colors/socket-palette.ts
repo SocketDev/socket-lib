@@ -1,6 +1,6 @@
 /**
  * @file Socket terminal-color palette — mirrors the CSS design tokens defined
- *   in the fleet's `template/styles/tokens.css` (light / dark / synthwave
+ *   in Socket's `template/styles/tokens.css` (light / dark / synthwave
  *   themes). Each helper returns the input string wrapped in a 24-bit ANSI
  *   escape sequence so the rendered hex matches the brand exactly; no rounding
  *   to the legacy 8-color palette. Picocolors / yoctocolors only ship a fixed

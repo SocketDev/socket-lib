@@ -9,8 +9,9 @@
  *   - Thread-safe for concurrent test execution
  */
 
-import process from 'node:process'
+import type { AsyncLocalStorage } from 'node:async_hooks'
 
+import { IS_NODE } from '../constants/runtime'
 import { hasOwn } from '../objects/predicates'
 import { envAsBoolean } from './boolean'
 import { getNodeAsyncHooks } from '../node/async-hooks'
@@ -21,10 +22,11 @@ import { ObjectEntries } from '../primordials/object'
 
 export type EnvOverrides = Map<string, string | undefined>
 
-// Isolated execution context storage for nested overrides (withEnv/withEnvSync)
-// AsyncLocalStorage creates isolated contexts that don't leak between concurrent code
-const { AsyncLocalStorage } = getNodeAsyncHooks()
-const isolatedOverridesStorage = new AsyncLocalStorage<EnvOverrides>()
+// Isolated execution context storage for nested overrides (withEnv/withEnvSync).
+// AsyncLocalStorage creates isolated contexts that don't leak between concurrent
+// code. Construction is DEFERRED to first use (see getIsolatedOverridesStorage
+// below) to keep module import snapshot-safe.
+let isolatedOverridesStorage: AsyncLocalStorage<EnvOverrides> | undefined
 
 // Shared test hook overrides (setEnv/clearEnv/resetEnv in beforeEach/afterEach)
 // IMPORTANT: Use globalThis to ensure singleton across duplicate module instances
@@ -36,7 +38,7 @@ const sharedOverridesSymbol = Symbol.for(
   '@socketsecurity/lib/env/rewire/test-overrides',
 )
 const globalThisRef = globalThis as Record<symbol, unknown>
-const isVitestEnv = envAsBoolean(process.env['VITEST'])
+const isVitestEnv = envAsBoolean(safeProcessEnv()?.['VITEST'])
 if (isVitestEnv && !globalThisRef[sharedOverridesSymbol]) {
   globalThisRef[sharedOverridesSymbol] = new MapCtor<
     string,
@@ -93,7 +95,7 @@ export const getAsyncHooks = getNodeAsyncHooks
  */
 export function getEnvValue(key: string): string | undefined {
   // Check isolated overrides first (highest priority - temporary via withEnv)
-  const isolatedOverrides = isolatedOverridesStorage.getStore()
+  const isolatedOverrides = getIsolatedOverrides()
   if (isolatedOverrides?.has(key)) {
     return isolatedOverrides.get(key)
   }
@@ -104,7 +106,38 @@ export function getEnvValue(key: string): string | undefined {
   }
 
   // Fall back to process.env (works with vi.stubEnv)
-  return process.env[key]
+  return safeProcessEnv()?.[key]
+}
+
+/**
+ * Get the current isolated-override map, or undefined when none is active.
+ * Off Node (browser bundles) there is no AsyncLocalStorage and no isolated
+ * context — env getters fall straight through to the other tiers.
+ *
+ * @private
+ */
+export function getIsolatedOverrides(): EnvOverrides | undefined {
+  return IS_NODE ? getIsolatedOverridesStorage().getStore() : undefined
+}
+
+/**
+ * Get the process-scoped AsyncLocalStorage used for nested env overrides
+ * (withEnv/withEnvSync).
+ *
+ * Constructed LAZILY (memoized) rather than at module-eval: an
+ * AsyncLocalStorage holds a live native handle, and constructing it at import
+ * time pins that handle into every module transitively importing this leaf —
+ * aborting V8 --build-snapshot serialization. Deferring to first use keeps the
+ * single-store semantics while leaving module import snapshot-safe.
+ *
+ * @private
+ */
+export function getIsolatedOverridesStorage(): AsyncLocalStorage<EnvOverrides> {
+  if (isolatedOverridesStorage === undefined) {
+    const { AsyncLocalStorage } = getNodeAsyncHooks()
+    isolatedOverridesStorage = new AsyncLocalStorage<EnvOverrides>()
+  }
+  return isolatedOverridesStorage
 }
 
 /**
@@ -124,7 +157,7 @@ export function getEnvValue(key: string): string | undefined {
  * @returns `true` if the variable has been overridden, `false` otherwise
  */
 export function hasOverride(key: string): boolean {
-  const isolatedOverrides = isolatedOverridesStorage.getStore()
+  const isolatedOverrides = getIsolatedOverrides()
   return !!(isolatedOverrides?.has(key) || sharedOverrides?.has(key))
 }
 
@@ -148,7 +181,7 @@ export function hasOverride(key: string): boolean {
  */
 export function isInEnv(key: string): boolean {
   // Check isolated overrides first (highest priority - temporary via withEnv)
-  const isolatedOverrides = isolatedOverridesStorage.getStore()
+  const isolatedOverrides = getIsolatedOverrides()
   if (isolatedOverrides?.has(key)) {
     return true
   }
@@ -159,7 +192,8 @@ export function isInEnv(key: string): boolean {
   }
 
   // Fall back to process.env (works with vi.stubEnv)
-  return hasOwn(process.env, key)
+  const env = safeProcessEnv()
+  return env ? hasOwn(env, key) : false
 }
 
 /**
@@ -177,6 +211,21 @@ export function isInEnv(key: string): boolean {
  */
 export function resetEnv(): void {
   sharedOverrides?.clear()
+}
+
+/**
+ * Read `process.env` without assuming a real Node `process`. Probes the
+ * GLOBAL `process` via `typeof` (no `node:process` import — webpack throws
+ * UnhandledSchemeError on `node:` specifiers before the `browser`-field stubs
+ * apply), so browser bundles load this leaf cleanly and env getters read as
+ * unset instead of throwing.
+ *
+ * @private
+ */
+export function safeProcessEnv():
+  | Record<string, string | undefined>
+  | undefined {
+  return typeof process !== 'undefined' && process ? process.env : undefined
 }
 
 /**
@@ -244,7 +293,7 @@ export async function withEnv<T>(
   fn: () => T | Promise<T>,
 ): Promise<T> {
   const map = new MapCtor(ObjectEntries(overrides))
-  return await isolatedOverridesStorage.run(map, fn)
+  return await getIsolatedOverridesStorage().run(map, fn)
 }
 
 /**
@@ -266,5 +315,5 @@ export function withEnvSync<T>(
   fn: () => T,
 ): T {
   const map = new MapCtor(ObjectEntries(overrides))
-  return isolatedOverridesStorage.run(map, fn)
+  return getIsolatedOverridesStorage().run(map, fn)
 }

@@ -104,6 +104,8 @@ export interface ParsedArgs<T = Record<string, unknown>> {
 
 /**
  * Common parseArgs configuration for Socket registry scripts.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export const commonParseArgsConfig: ParseArgsConfig = {
   options: {

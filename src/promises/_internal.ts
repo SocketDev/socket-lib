@@ -7,9 +7,8 @@
 import type timersPromises from 'node:timers/promises'
 
 import { IS_NODE } from '../constants/runtime'
-import { getAbortSignal } from '../process/abort'
 
-export const abortSignal = getAbortSignal()
+export { getAbortSignal } from '../process/abort'
 
 /**
  * Get the timers/promises module. Lazy `require` (not a top-level import) to

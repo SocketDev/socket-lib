@@ -47,7 +47,7 @@ const cdx = await resolveCdxgen({
 cdxgen ships two flavors per platform:
 
 - **`slim`** — the language analyzers Socket needs day-to-day. Default for
-  fleet use.
+  everyday use.
 - **`full`** — every analyzer including the ones we don't run.
 
 Pick `slim` unless you have a reason — saves ~70MB per cached binary.

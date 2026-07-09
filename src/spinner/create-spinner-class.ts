@@ -108,7 +108,6 @@ export function createSpinnerClass(
       // Parse shimmer config - can be object or direction string.
       const shimmerInfo = parseShimmerOption(opts.shimmer)
 
-      // eslint-disable-next-line constructor-super
       super({
         signal: getAbortSignal(),
         ...opts,

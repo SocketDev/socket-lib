@@ -29,6 +29,18 @@ const ARCH_MAP = {
 } as unknown as Record<string, string>
 
 /**
+ * Windows platform token per binary family. The node-smol pipeline names its
+ * Windows assets with the RELEASE platform token (`node-win-x64.exe`), while
+ * the binject/binflate/boringssl families keep `process.platform` verbatim
+ * (`binject-win32-x64.exe`). Published releases are immutable, so this table
+ * encodes the split rather than pretending one style exists.
+ */
+const WIN_TOKEN_BY_BASENAME = {
+  __proto__: null,
+  node: 'win',
+} as unknown as Record<string, string>
+
+/**
  * Get asset name for a socket-btm binary.
  *
  * @example
@@ -65,7 +77,8 @@ export function getBinaryAssetName(
     return `${binaryBaseName}-linux-${mappedArch}${muslSuffix}${ext}`
   }
   if (platform === 'win32') {
-    return `${binaryBaseName}-win32-${mappedArch}${ext}`
+    const winToken = WIN_TOKEN_BY_BASENAME[binaryBaseName] ?? 'win32'
+    return `${binaryBaseName}-${winToken}-${mappedArch}${ext}`
   }
 
   throw new ErrorCtor(`Unsupported platform: ${platform}`)
