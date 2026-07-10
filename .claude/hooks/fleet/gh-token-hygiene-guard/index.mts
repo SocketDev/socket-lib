@@ -154,6 +154,18 @@ const WORKFLOW_GRANT_FILE = path.join(
   '.claude',
   'gh-workflow-grant',
 )
+// Pending grant request, written by THIS hook when a dispatch/elevation is
+// denied for lack of a grant while the bypass phrase is on record and no
+// physical-presence prompt can surface (headless shell, MDM-blocked
+// osascript). `scripts/fleet/gh-grant.mts` — which refuses to run without a
+// real TTY, so an agent shell can never drive it — reads this request,
+// shows it to the human, and mints the session-bound grant on confirm.
+// Body mirrors the grant: `<session_id>\n<unix_ms>`.
+const WORKFLOW_GRANT_REQUEST_FILE = path.join(
+  os.homedir(),
+  '.claude',
+  'gh-workflow-grant-request',
+)
 // Marks an elevation as SPENT: written when the single dispatch consumes its
 // grant, cleared when the scope is next observed absent (the user de-elevated).
 // Presence = "this elevation was already used." The OAuth `workflow` scope
@@ -321,14 +333,21 @@ export const check = bashGuard((command, payload): GuardResult => {
     }
     /* c8 ignore stop */
     if (authResult === 'unsupported') {
-      const platformGuidance = platformAuthGuidance()
+      recordGrantRequest(sessionId)
       return fail(
         'gh-token-hygiene-guard: no physical-presence auth available',
         [
           'The workflow-scope bypass requires biometric / hardware-key',
-          'confirmation. Nothing was reachable in this environment.',
+          'confirmation. Nothing was reachable in this shell (no TTY for',
+          'Touch ID; osascript unusable under MDM).',
           '',
-          ...platformGuidance,
+          'A grant request for this session was recorded. To approve it,',
+          'run this in YOUR OWN terminal window (it refuses to run without',
+          'a real TTY, so an agent shell cannot drive it):',
+          '',
+          '  node scripts/fleet/gh-grant.mts',
+          '',
+          'Confirm the prompt, then re-run the elevation + dispatch here.',
         ].join('\n'),
       )
     }
@@ -373,6 +392,28 @@ export const check = bashGuard((command, payload): GuardResult => {
     // touches the file from a different process) is rejected because
     // the recorded session_id won't match the dispatch session.
     if (!verifyWorkflowGrant(sessionId)) {
+      // Phrase on record but no mintable grant (the elevation happened in a
+      // shell this hook could not observe, or physical-presence auth cannot
+      // surface here). Hand the human the TTY-gated approval path.
+      if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
+        recordGrantRequest(sessionId)
+        return fail(
+          'gh-token-hygiene-guard: dispatch grant not minted — approve it from your own terminal',
+          [
+            'Token has `workflow` scope and the bypass phrase is on record,',
+            'but no session-bound grant exists (physical-presence auth',
+            'cannot surface in this shell).',
+            '',
+            'A grant request for this session was recorded. To approve it,',
+            'run this in YOUR OWN terminal window (it refuses to run without',
+            'a real TTY, so an agent shell cannot drive it):',
+            '',
+            '  node scripts/fleet/gh-grant.mts',
+            '',
+            'Confirm the prompt, then re-run the dispatch here.',
+          ].join('\n'),
+        )
+      }
       return fail(
         'gh-token-hygiene-guard: workflow dispatch grant is missing, expired, or session-mismatched',
         [
@@ -638,6 +679,29 @@ function recordWorkflowGrant(sessionId: string | undefined): void {
   } catch {
     // best-effort; if we can't write, the next dispatch will still
     // require a fresh bypass phrase, so no security regression.
+  }
+}
+
+// Records a pending grant request for the TTY-gated approval script
+// (`scripts/fleet/gh-grant.mts`). Written only on a denial where the bypass
+// phrase is already on record — the human's next action is to approve or
+// ignore it from a real terminal. Last-writer-wins: each denial overwrites
+// any stale (or planted) request with THIS session's id, so the id the
+// human approves is the one the denial they just saw was for.
+export function recordGrantRequest(sessionId: string | undefined): void {
+  if (!sessionId) {
+    return
+  }
+  try {
+    mkdirSync(path.dirname(WORKFLOW_GRANT_REQUEST_FILE), { recursive: true })
+    writeFileSync(
+      WORKFLOW_GRANT_REQUEST_FILE,
+      `${sessionId}\n${Date.now()}`,
+      'utf8',
+    )
+  } catch {
+    // best-effort; without a request the approval script simply reports
+    // nothing pending, which fails closed.
   }
 }
 
