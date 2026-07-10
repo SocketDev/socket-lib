@@ -85,6 +85,7 @@ import {
 } from '../_shared/guard.mts'
 import { commandsFor, parseCommands } from '../_shared/shell-command.mts'
 import { bypassPhraseRemaining } from '../_shared/transcript.mts'
+import { verifyWorkflowGrant } from '../gh-token-hygiene-guard/index.mts'
 
 // Pre-flight triggers: the dispatcher imports + runs this guard only when the
 // raw command contains at least one of these substrings. They mirror
@@ -683,6 +684,23 @@ export const check = bashGuard((command, payload) => {
       )
     }
     return undefined
+  }
+
+  // A TTY-approved session grant covering THIS exact command (minted by a
+  // human running `scripts/fleet/gh-grant.mts` in their own terminal after
+  // reading the command) is a STRONGER intent signal than a chat phrase, so
+  // it satisfies this guard too. gh-token-hygiene-guard owns the grant's
+  // session binding + single-use consumption.
+  if (
+    verifyWorkflowGrant(
+      (payload as { session_id?: string | undefined }).session_id,
+      command,
+    )
+  ) {
+    return notify(
+      /* c8 ignore next - workflow is always defined when blocked:true */
+      `[release-workflow-guard] ALLOWED: ${shape} on ${workflow ?? '<unknown>'} — human-approved TTY grant covers this command`,
+    )
   }
 
   // Per-trigger phrase bypass. The user types

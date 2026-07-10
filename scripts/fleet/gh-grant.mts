@@ -30,6 +30,7 @@ const logger = getDefaultLogger()
 const CLAUDE_DIR = path.join(os.homedir(), '.claude')
 const REQUEST_FILE = path.join(CLAUDE_DIR, 'gh-workflow-grant-request')
 const GRANT_FILE = path.join(CLAUDE_DIR, 'gh-workflow-grant')
+const SPENT_FILE = path.join(CLAUDE_DIR, 'gh-workflow-spent')
 
 // A request older than this is stale — the denial that wrote it is no longer
 // the human's immediate context, so approving it would be blind.
@@ -80,6 +81,7 @@ async function main(): Promise<number> {
   const requestLines = body.split('\n')
   const sessionId = requestLines[0]?.trim() ?? ''
   const requestedAtMs = Number(requestLines[1]?.trim() ?? '')
+  const requestedCommand = requestLines.slice(2).join('\n').trim()
   if (!sessionId || !Number.isFinite(requestedAtMs)) {
     await safeDelete(REQUEST_FILE)
     logger.fail(
@@ -100,21 +102,15 @@ async function main(): Promise<number> {
     return 1
   }
 
-  if (!ghHasWorkflowScope()) {
-    logger.fail(
-      'The gh token does not carry the `workflow` scope, so a grant would be ' +
-        'useless. Fix: run `gh auth refresh -h github.com -s workflow` first, ' +
-        'then re-run this script.',
-    )
-    return 1
-  }
-
   logger.log('Pending workflow-dispatch grant request:')
   logger.substep(`session: ${sessionId}`)
   logger.substep(`age: ${Math.round(ageMs / 1000)}s`)
+  if (requestedCommand) {
+    logger.substep(`command: ${requestedCommand}`)
+  }
   logger.log(
-    'Approving lets that Claude session run EXACTLY ONE `gh workflow run` ' +
-      'dispatch. Only approve if you just saw its denial message.',
+    'Approving lets that Claude session run EXACTLY the command above, once. ' +
+      'Only approve if you just saw its denial message.',
   )
   const answer = await ask(`Type "${CONFIRM_WORD}" to approve (anything else aborts): `)
   if (answer !== CONFIRM_WORD) {
@@ -122,12 +118,40 @@ async function main(): Promise<number> {
     return 1
   }
 
+  if (!ghHasWorkflowScope()) {
+    logger.info(
+      'The gh token lacks the `workflow` scope — elevating now (device flow).',
+    )
+    // Interactive device flow in THIS terminal — the whole point of running
+    // here is that a TTY is available.
+    const refresh = spawnSync(
+      'gh',
+      ['auth', 'refresh', '-h', 'github.com', '-s', 'workflow'],
+      { stdio: 'inherit' },
+    )
+    if (refresh.status !== 0 || !ghHasWorkflowScope()) {
+      logger.fail(
+        'Scope elevation did not complete; no grant written. ' +
+          'Re-run this script after `gh auth refresh -h github.com -s workflow` succeeds.',
+      )
+      return 1
+    }
+  }
+
   mkdirSync(CLAUDE_DIR, { recursive: true })
-  writeFileSync(GRANT_FILE, `${sessionId}\n${Date.now()}`, 'utf8')
+  writeFileSync(
+    GRANT_FILE,
+    `${sessionId}\n${Date.now()}\n${requestedCommand}`,
+    'utf8',
+  )
+  // A fresh human approval supersedes the previous elevation's single-use:
+  // the spent marker exists to stop the AGENT from reusing a hot scope
+  // unilaterally, and this confirm IS a new authorization.
+  await safeDelete(SPENT_FILE)
   await safeDelete(REQUEST_FILE)
   logger.success(
-    'Grant minted. The session can now re-run its dispatch (single-use; ' +
-      'the guard consumes the grant on the way through).',
+    'Grant minted for that exact command. The session can now re-run its ' +
+      'dispatch (single-use; consumed after the dispatch actually runs).',
   )
   return 0
 }

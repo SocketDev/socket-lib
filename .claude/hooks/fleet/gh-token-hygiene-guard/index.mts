@@ -333,7 +333,7 @@ export const check = bashGuard((command, payload): GuardResult => {
     }
     /* c8 ignore stop */
     if (authResult === 'unsupported') {
-      recordGrantRequest(sessionId)
+      recordGrantRequest(sessionId, command)
       return fail(
         'gh-token-hygiene-guard: no physical-presence auth available',
         [
@@ -355,35 +355,34 @@ export const check = bashGuard((command, payload): GuardResult => {
     return undefined
   }
   if (isWorkflowDispatch) {
-    // Block if scope is absent — nothing to dispatch with.
+    // Scope absent → the approval script elevates it as part of the
+    // human confirm, so this is the same handshake as a missing grant.
     if (!hasWorkflowScope) {
+      recordGrantRequest(sessionId, command)
       return fail(
         'gh-token-hygiene-guard: workflow dispatch requires workflow scope',
         [
-          'Token does not have the `workflow` scope. To dispatch:',
-          `  1. Type \`${BYPASS_PHRASE}\` in chat.`,
-          '  2. Run: gh auth refresh -h github.com -s workflow',
-          '  3. Re-run your dispatch command.',
-          '  4. When done, de-elevate: gh auth refresh -h github.com -r workflow',
+          'Token does not have the `workflow` scope. A grant request for',
+          'this session + command was recorded. Have the user run',
+          '`node scripts/fleet/gh-grant.mts` in their own terminal — it',
+          'elevates the scope (device flow) and mints the single-use grant',
+          'in one pass. Then re-run the dispatch here.',
         ].join('\n'),
       )
     }
     // Single-use elevation: the one dispatch this elevation authorized is
-    // already used, but the scope is still live. Force a real de-elevation
-    // before another dispatch rather than letting the hot scope be reused.
+    // already used, but the scope is still live. A fresh human TTY approval
+    // (`scripts/fleet/gh-grant.mts`) supersedes it — the approval script
+    // clears this marker when minting a new grant.
     if (isElevationSpent()) {
+      recordGrantRequest(sessionId, command)
       return fail(
-        'gh-token-hygiene-guard: elevation already spent — de-elevate before another dispatch',
+        'gh-token-hygiene-guard: elevation already spent — a fresh human approval is required',
         [
-          'This `workflow` elevation already authorized its one dispatch. The',
-          'scope lingers on the token (a hook cannot silently drop it), so a',
-          'second dispatch must start from a fresh, de-elevated token.',
-          '',
-          'To dispatch again:',
-          '  1. Run: gh auth refresh -h github.com -r workflow',
-          `  2. Type \`${BYPASS_PHRASE}\` in chat (this session).`,
-          '  3. Run: gh auth refresh -h github.com -s workflow',
-          '  4. Re-run your dispatch command in the SAME session.',
+          'This `workflow` elevation already authorized its one dispatch.',
+          'A grant request for this session + command was recorded. Have the',
+          'user run `node scripts/fleet/gh-grant.mts` in their own terminal',
+          'and confirm; then re-run the dispatch here.',
         ].join('\n'),
       )
     }
@@ -391,48 +390,33 @@ export const check = bashGuard((command, payload): GuardResult => {
     // bind to the current session_id. Pre-creation attack (attacker
     // touches the file from a different process) is rejected because
     // the recorded session_id won't match the dispatch session.
-    if (!verifyWorkflowGrant(sessionId)) {
-      // Phrase on record but no mintable grant (the elevation happened in a
-      // shell this hook could not observe, or physical-presence auth cannot
-      // surface here). Hand the human the TTY-gated approval path.
-      if (bypassPhrasePresent(payload.transcript_path, BYPASS_PHRASE)) {
-        recordGrantRequest(sessionId)
-        return fail(
-          'gh-token-hygiene-guard: dispatch grant not minted — approve it from your own terminal',
-          [
-            'Token has `workflow` scope and the bypass phrase is on record,',
-            'but no session-bound grant exists (physical-presence auth',
-            'cannot surface in this shell).',
-            '',
-            'A grant request for this session was recorded. To approve it,',
-            'run this in YOUR OWN terminal window (it refuses to run without',
-            'a real TTY, so an agent shell cannot drive it):',
-            '',
-            '  node scripts/fleet/gh-grant.mts',
-            '',
-            'Confirm the prompt, then re-run the dispatch here.',
-          ].join('\n'),
-        )
-      }
+    if (!verifyWorkflowGrant(sessionId, command)) {
+      // No grant covering THIS command in THIS session. Record the request
+      // (session + the exact command) and hand the human the TTY-gated
+      // approval path — the typed confirm at a real terminal is the human
+      // factor; no chat phrase is required (or sufficient).
+      recordGrantRequest(sessionId, command)
       return fail(
-        'gh-token-hygiene-guard: workflow dispatch grant is missing, expired, or session-mismatched',
+        'gh-token-hygiene-guard: dispatch needs a human-approved grant',
         [
-          'Token has `workflow` scope, but no valid dispatch grant for',
-          'this Claude session was found.',
+          'A workflow dispatch runs only after a human approves THIS exact',
+          'command from a real terminal (agent shells have no TTY, so the',
+          'approval cannot be driven from here).',
           '',
-          'Each bypass phrase authorizes ONE dispatch in the SAME',
-          'session it was typed. A grant from a different session, or',
-          'a grant file planted by another process, will not match.',
+          'A grant request for this session + command was recorded. To',
+          'approve it, run this in YOUR OWN terminal window:',
           '',
-          'To dispatch:',
-          '  1. Run: gh auth refresh -h github.com -r workflow',
-          `  2. Type \`${BYPASS_PHRASE}\` in chat (this session).`,
-          '  3. Run: gh auth refresh -h github.com -s workflow',
-          '  4. Re-run your dispatch command in the SAME session.',
+          '  node scripts/fleet/gh-grant.mts',
+          '',
+          'It shows the exact command, asks you to type "grant", elevates',
+          'the workflow scope if needed, and mints a single-use grant.',
+          'Then re-run the dispatch here.',
         ].join('\n'),
       )
     }
-    consumeWorkflowGrant()
+    // Verified only — consumption happens in the PostToolUse companion
+    // (`gh-workflow-grant-consume`) AFTER the dispatch actually runs, so a
+    // sibling guard denying this same command cannot burn the grant.
   }
   return undefined
 })
@@ -451,7 +435,7 @@ function containsGhInvocation(command: string): boolean {
 // A `gh` segment whose args contain `workflow` then `run`/`dispatch`.
 // Parser-confirmed `gh` binary + structured arg check (the args list,
 // not a raw-string regex, so a quoted "workflow run" can't trip it).
-function isWorkflowDispatchCommand(command: string): boolean {
+export function isWorkflowDispatchCommand(command: string): boolean {
   return parseCommands(command).some(
     c =>
       c.binary === 'gh' &&
@@ -462,7 +446,7 @@ function isWorkflowDispatchCommand(command: string): boolean {
 
 // `gh api …/actions/workflows/<id>/dispatches`. Parser-confirms the `gh`
 // binary, then checks the args for the dispatches API path.
-function isWorkflowApiDispatch(command: string): boolean {
+export function isWorkflowApiDispatch(command: string): boolean {
   return parseCommands(command).some(
     c =>
       c.binary === 'gh' &&
@@ -683,12 +667,16 @@ function recordWorkflowGrant(sessionId: string | undefined): void {
 }
 
 // Records a pending grant request for the TTY-gated approval script
-// (`scripts/fleet/gh-grant.mts`). Written only on a denial where the bypass
-// phrase is already on record — the human's next action is to approve or
-// ignore it from a real terminal. Last-writer-wins: each denial overwrites
-// any stale (or planted) request with THIS session's id, so the id the
-// human approves is the one the denial they just saw was for.
-export function recordGrantRequest(sessionId: string | undefined): void {
+// (`scripts/fleet/gh-grant.mts`): `<session_id>\n<unix_ms>\n<command>`.
+// The command line lets the human see EXACTLY what they are approving, and
+// scopes the minted grant to that command. Last-writer-wins: each denial
+// overwrites any stale (or planted) request with THIS session's id +
+// command, so what the human approves is what the denial they just saw
+// was for.
+export function recordGrantRequest(
+  sessionId: string | undefined,
+  command: string,
+): void {
   if (!sessionId) {
     return
   }
@@ -696,7 +684,7 @@ export function recordGrantRequest(sessionId: string | undefined): void {
     mkdirSync(path.dirname(WORKFLOW_GRANT_REQUEST_FILE), { recursive: true })
     writeFileSync(
       WORKFLOW_GRANT_REQUEST_FILE,
-      `${sessionId}\n${Date.now()}`,
+      `${sessionId}\n${Date.now()}\n${command}`,
       'utf8',
     )
   } catch {
@@ -705,10 +693,15 @@ export function recordGrantRequest(sessionId: string | undefined): void {
   }
 }
 
-// Returns true iff the grant file exists AND its session_id matches
-// the current session. An attacker-planted grant from a different
-// (or no) session is rejected.
-function verifyWorkflowGrant(sessionId: string | undefined): boolean {
+// Returns true iff the grant file exists, its session_id matches the
+// current session, AND its recorded command matches the command being
+// dispatched. An attacker-planted grant from a different (or no) session
+// is rejected; a valid grant cannot be replayed for a DIFFERENT command
+// than the one the human read and approved.
+export function verifyWorkflowGrant(
+  sessionId: string | undefined,
+  command: string,
+): boolean {
   if (!sessionId) {
     return false
   }
@@ -717,15 +710,17 @@ function verifyWorkflowGrant(sessionId: string | undefined): boolean {
   }
   try {
     const body = readFileSync(WORKFLOW_GRANT_FILE, 'utf8')
+    const lines = body.split('\n')
     /* c8 ignore next - split('\n') always returns at least one element; [0] is never undefined */
-    const recordedSessionId = body.split('\n')[0]?.trim() ?? ''
-    return recordedSessionId === sessionId
+    const recordedSessionId = lines[0]?.trim() ?? ''
+    const recordedCommand = lines.slice(2).join('\n').trim()
+    return recordedSessionId === sessionId && recordedCommand === command.trim()
   } catch {
     return false
   }
 }
 
-function consumeWorkflowGrant(): void {
+export function consumeWorkflowGrant(): void {
   try {
     rmSync(WORKFLOW_GRANT_FILE, { force: true })
   } catch {
