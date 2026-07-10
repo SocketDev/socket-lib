@@ -659,11 +659,17 @@ export function readRoleText(
       continue
     }
     const pieces = extractTurnPieces(r.content)
-    if (pieces.length) {
-      // Buffer this turn's blocks together so the final reverse swaps
-      // *turn order*, not intra-turn block order.
-      out.push(pieces.join('\n'))
+    if (!pieces.length) {
+      // Tool-result carrier events share the user role but hold no author
+      // prose. They must not consume lookback slots — a lookback of "8 user
+      // turns" means 8 things the USER said, not 8 tool calls; otherwise a
+      // busy turn evicts a freshly typed bypass phrase before the very
+      // command it authorizes runs.
+      continue
     }
+    // Buffer this turn's blocks together so the final reverse swaps
+    // *turn order*, not intra-turn block order.
+    out.push(pieces.join('\n'))
     matched += 1
     if (lookback !== undefined && matched >= lookback) {
       break
