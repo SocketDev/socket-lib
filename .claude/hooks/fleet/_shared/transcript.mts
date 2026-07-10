@@ -52,7 +52,7 @@ import {
  * through this so separator variations don't break the phrase match: only the
  * letters + their order are load-bearing.
  */
-function normalizeBypassText(text: string): string {
+export function normalizeBypassText(text: string): string {
   // NFKC: canonical-decompose + compose + compatibility-fold so
   // visually-similar variants collapse — smart quotes, full-width,
   // ligatures all map to ASCII-canonical.
@@ -83,7 +83,7 @@ function normalizeBypassText(text: string): string {
  * `nonfleet`. Regex metacharacters in the phrase (`:` targets, dots) are
  * escaped literally.
  */
-function phrasePattern(normalizedPhrase: string): RegExp {
+export function phrasePattern(normalizedPhrase: string): RegExp {
   const escaped = normalizedPhrase.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
   return new RegExp(escaped.replace(/ /g, ' ?'), 'g')
 }

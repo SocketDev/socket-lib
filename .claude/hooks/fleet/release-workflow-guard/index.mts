@@ -84,8 +84,14 @@ import {
   runHook,
 } from '../_shared/guard.mts'
 import { commandsFor, parseCommands } from '../_shared/shell-command.mts'
-import { bypassPhraseRemaining } from '../_shared/transcript.mts'
-import { verifyWorkflowGrant } from '../gh-token-hygiene-guard/index.mts'
+import {
+  extractTurnPieces,
+  normalizeBypassText,
+  phrasePattern,
+  resolveRoleAndContent,
+  stripCodeFences,
+  stripQuotedSpans,
+} from '../_shared/transcript.mts'
 
 // Pre-flight triggers: the dispatcher imports + runs this guard only when the
 // raw command contains at least one of these substrings. They mirror
@@ -232,6 +238,100 @@ export function countPriorDispatches(
     }
   }
   return count
+}
+
+// Chronological credit/debit ledger over the whole transcript: each user turn
+// containing an accepted phrase adds one credit; each PRIOR non-denied
+// dispatch of the same workflow consumes one (floored at zero, so a dispatch
+// that ran outside this gate — web UI, user terminal — never eats a future
+// credit). Windowing phrases while counting dispatches unwindowed was the
+// prior design's defect: as phrases aged out of the window the un-aged
+// dispatch debits ate every fresh phrase, and the budget could never go
+// positive again.
+export function dispatchLedgerRemaining(
+  transcriptPath: string | undefined,
+  phrases: readonly string[],
+  workflow: string,
+): number {
+  if (!transcriptPath || !workflow) {
+    return 0
+  }
+  let raw: string
+  try {
+    raw = readFileSync(transcriptPath, 'utf8')
+  } catch {
+    return 0
+  }
+  const lines = raw.split('\n')
+  const deniedIds = collectHookDeniedToolUseIds(lines)
+  // oxlint-disable-next-line socket/sort-set-args -- two derived forms of one workflow name; membership order is immaterial.
+  const accepted = new Set([workflow, workflow.replace(/\.(?:yaml|yml)$/i, '')])
+  const needles = phrases.map(p => normalizeBypassText(p))
+  let credits = 0
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
+    if (!line) {
+      continue
+    }
+    let evt: unknown
+    try {
+      evt = JSON.parse(line)
+    } catch {
+      continue
+    }
+    const r = resolveRoleAndContent(evt)
+    if (r?.role === 'user' && !r.isSidechain) {
+      const pieces = extractTurnPieces(r.content)
+      if (pieces.length) {
+        const haystack = normalizeBypassText(
+          stripQuotedSpans(stripCodeFences(pieces.join('\n'))),
+        )
+        for (let j = 0, needlesLength = needles.length; j < needlesLength; j += 1) {
+          if (phrasePattern(needles[j]!).test(haystack)) {
+            credits += 1
+            break
+          }
+        }
+      }
+      continue
+    }
+    if ((evt as Record<string, unknown>)['type'] !== 'assistant') {
+      continue
+    }
+    const message = (evt as Record<string, unknown>)['message']
+    const content =
+      message && typeof message === 'object'
+        ? (message as Record<string, unknown>)['content']
+        : undefined
+    if (!Array.isArray(content)) {
+      continue
+    }
+    for (let j = 0, blocksLen = content.length; j < blocksLen; j += 1) {
+      const block = content[j]
+      if (!block || typeof block !== 'object') {
+        continue
+      }
+      const b = block as Record<string, unknown>
+      if (b['type'] !== 'tool_use' || b['name'] !== 'Bash') {
+        continue
+      }
+      const cmd = (b['input'] as Record<string, unknown> | undefined)?.[
+        'command'
+      ]
+      if (typeof cmd !== 'string') {
+        continue
+      }
+      const id = b['id']
+      if (typeof id === 'string' && deniedIds.has(id)) {
+        continue
+      }
+      const dispatch = detectDispatch(cmd)
+      if (dispatch.workflow && accepted.has(dispatch.workflow)) {
+        credits = credits > 0 ? credits - 1 : 0
+      }
+    }
+  }
+  return credits
 }
 
 // Marker every PreToolUse denial carries in its tool_result content. The
@@ -743,22 +843,6 @@ export const check = bashGuard((command, payload) => {
     return undefined
   }
 
-  // A TTY-approved session grant covering THIS exact command (minted by a
-  // human running `scripts/fleet/gh-grant.mts` in their own terminal after
-  // reading the command) is a STRONGER intent signal than a chat phrase, so
-  // it satisfies this guard too. gh-token-hygiene-guard owns the grant's
-  // session binding + single-use consumption.
-  if (
-    verifyWorkflowGrant(
-      (payload as { session_id?: string | undefined }).session_id,
-      command,
-    )
-  ) {
-    return notify(
-      /* c8 ignore next - workflow is always defined when blocked:true */
-      `[release-workflow-guard] ALLOWED: ${shape} on ${workflow ?? '<unknown>'} — human-approved TTY grant covers this command`,
-    )
-  }
 
   // Per-trigger phrase bypass. The user types
   // `Allow workflow-dispatch bypass: <workflow>` verbatim — one
@@ -771,16 +855,10 @@ export const check = bashGuard((command, payload) => {
   // dispatch consumes one slot and is allowed.
   /* c8 ignore next - workflow is always defined when detectDispatch returns blocked:true; defensive guard for future code paths */
   if (workflow) {
-    const acceptedPhrases = buildAcceptedPhrases(workflow)
-    const priorDispatches = countPriorDispatches(
+    const remaining = dispatchLedgerRemaining(
       payload.transcript_path,
+      buildAcceptedPhrases(workflow),
       workflow,
-    )
-    const remaining = bypassPhraseRemaining(
-      payload.transcript_path,
-      acceptedPhrases,
-      priorDispatches,
-      BYPASS_LOOKBACK_USER_TURNS,
     )
     if (remaining > 0) {
       return notify(
