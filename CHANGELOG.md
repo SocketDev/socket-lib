@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.0.10](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.10) - 2026-07-10
+
+### Added
+
+- **`ci`** — npm-publish workflow owns the bump — consumes the committed version hint via the release app
+- **`hooks`** — committed prerelease hint pre-authorizes a non-major bump
+- **`hooks`** — chat phrase opens the workflow-dispatch gate — one phrase for both guards
+- **`hooks`** — one-stop TTY grant — command-scoped, post-run consumption, self-elevating approval
+- **`hooks`** — TTY-gated gh-grant approval path for workflow dispatch
+
+### Fixed
+
+- **`ci`** — run the publish job in the npm-publish environment the trusted publisher pins
+- **`hooks`** — lookback counts prose-bearing user turns, not tool-result carriers
+- **`hooks`** — denied dispatch attempts no longer consume bypass-phrase budget
+- **`fleet`** — widen gh-grant approval window to 30 min
+
 ## [6.0.9](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.9) - 2026-06-18
 
 ### Added
