@@ -54,7 +54,21 @@ jobs:
       # resolves to dist/), and `files` ships dist/, so the tarball needs it.
       - name: Build
         run: pnpm run build
+      # The release App signs the bump commit via the GitHub API — the
+      # workflow's own GITHUB_TOKEN stays contents: read.
+      - name: Mint release App token
+        id: release-app
+        uses: ./.github/actions/fleet/github-release-app-token
+        with:
+          client-id: ${{ vars.SOCKET_RELEASE_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_RELEASE_APP_PRIVATE_KEY }}
+      # --bump consumes the committed version hint (X.Y.Z-prerelease →
+      # X.Y.Z), writes CHANGELOG, commits via the release App (verified,
+      # signed), and resets the checkout so the publish targets the bumped
+      # tree. The version decision stays with the human: it is whatever the
+      # committed hint names.
       - name: Publish
         env:
           DIST_TAG: ${{ inputs.dist-tag }}
-        run: node scripts/fleet/npm-publish.mts --staged --tag "$DIST_TAG" ${{ inputs.publish != true && '--dry-run' || '' }}
+          RELEASE_APP_TOKEN: ${{ steps.release-app.outputs.token }}
+        run: node scripts/fleet/npm-publish.mts --staged --bump --tag "$DIST_TAG" ${{ inputs.publish != true && '--dry-run' || '' }}
