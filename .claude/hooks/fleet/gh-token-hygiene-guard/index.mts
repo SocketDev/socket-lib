@@ -355,6 +355,21 @@ export const check = bashGuard((command, payload): GuardResult => {
     return undefined
   }
   if (isWorkflowDispatch) {
+    // Chat-phrase path: the user's typed phrase authorizes the dispatch
+    // directly — either this guard's own phrase or the release guard's
+    // per-workflow phrase (`Allow workflow-dispatch bypass: <workflow>`),
+    // so ONE phrase opens both gates. The TTY-grant handshake below stays
+    // as the alternative for phrase-averse setups.
+    if (
+      hasWorkflowScope &&
+      bypassPhrasePresent(
+        payload.transcript_path,
+        dispatchBypassPhrases(command),
+      )
+    ) {
+      clearElevationSpent()
+      return undefined
+    }
     // Scope absent → the approval script elevates it as part of the
     // human confirm, so this is the same handshake as a missing grant.
     if (!hasWorkflowScope) {
@@ -430,6 +445,65 @@ export const check = bashGuard((command, payload): GuardResult => {
 // (chained) is caught.
 function containsGhInvocation(command: string): boolean {
   return findInvocation(command, { binary: 'gh' })
+}
+
+// Flags on `gh workflow run` that take a value, so the value is never
+// mistaken for the workflow target (mirrors release-workflow-guard).
+const GH_WORKFLOW_VALUE_FLAGS = new Set([
+  '--field',
+  '--json',
+  '--raw-field',
+  '--ref',
+  '--repo',
+  '-F',
+  '-f',
+  '-R',
+  '-r',
+])
+
+// The phrases that authorize a workflow dispatch from chat: this guard's
+// own phrase plus the release guard's per-workflow forms for the command's
+// actual target (with and without the .yml extension), so the user types
+// ONE phrase to open both gates.
+export function dispatchBypassPhrases(command: string): string[] {
+  const phrases = [BYPASS_PHRASE]
+  const target = workflowDispatchTarget(command)
+  if (target) {
+    phrases.push(
+      `Allow workflow-dispatch bypass: ${target}`,
+      `Allow workflow-dispatch bypass: ${target.replace(/\.ya?ml$/i, '')}`,
+    )
+  }
+  return phrases
+}
+
+// The workflow target of a `gh workflow run <target> …` segment: the first
+// positional arg after `run`, skipping flags and their values.
+export function workflowDispatchTarget(command: string): string | undefined {
+  const segments = parseCommands(command)
+  for (let i = 0, { length } = segments; i < length; i += 1) {
+    const segment = segments[i]!
+    if (segment.binary !== 'gh') {
+      continue
+    }
+    const { args } = segment
+    const runIdx = args.indexOf('workflow') >= 0 ? args.indexOf('run') : -1
+    if (runIdx < 0) {
+      continue
+    }
+    for (let j = runIdx + 1, argsLength = args.length; j < argsLength; j += 1) {
+      const arg = args[j]!
+      if (GH_WORKFLOW_VALUE_FLAGS.has(arg)) {
+        j += 1
+        continue
+      }
+      if (arg.startsWith('-')) {
+        continue
+      }
+      return arg
+    }
+  }
+  return undefined
 }
 
 // A `gh` segment whose args contain `workflow` then `run`/`dispatch`.
