@@ -172,6 +172,11 @@ export function countPriorDispatches(
   const accepted = new Set([workflow, workflow.replace(/\.(?:yaml|yml)$/i, '')])
   let count = 0
   const lines = raw.split('\n')
+  // First pass: tool_use ids whose tool_result was a PreToolUse hook denial.
+  // A DENIED dispatch never reached GitHub, so it must not consume a bypass
+  // slot — without this, blocked attempts eat every future phrase and the
+  // budget can never go positive again.
+  const deniedIds = collectHookDeniedToolUseIds(lines)
   for (let i = 0, { length } = lines; i < length; i += 1) {
     const line = lines[i]!
     if (!line) {
@@ -216,6 +221,10 @@ export function countPriorDispatches(
       if (typeof cmd !== 'string') {
         continue
       }
+      const id = b['id']
+      if (typeof id === 'string' && deniedIds.has(id)) {
+        continue
+      }
       const dispatch = detectDispatch(cmd)
       if (dispatch.workflow && accepted.has(dispatch.workflow)) {
         count += 1
@@ -223,6 +232,54 @@ export function countPriorDispatches(
     }
   }
   return count
+}
+
+// Marker every PreToolUse denial carries in its tool_result content. The
+// harness renders hook blocks as `PreToolUse:Bash hook error: …`.
+const HOOK_DENIAL_MARKER = 'PreToolUse:Bash hook error'
+
+export function collectHookDeniedToolUseIds(
+  lines: readonly string[],
+): Set<string> {
+  const denied = new Set<string>()
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
+    if (!line || !line.includes(HOOK_DENIAL_MARKER)) {
+      continue
+    }
+    let evt: unknown
+    try {
+      evt = JSON.parse(line)
+    } catch {
+      continue
+    }
+    const message = (evt as Record<string, unknown> | undefined)?.['message']
+    if (!message || typeof message !== 'object') {
+      continue
+    }
+    const content = (message as Record<string, unknown>)['content']
+    if (!Array.isArray(content)) {
+      continue
+    }
+    for (let j = 0, blocksLen = content.length; j < blocksLen; j += 1) {
+      const block = content[j]
+      if (!block || typeof block !== 'object') {
+        continue
+      }
+      const b = block as Record<string, unknown>
+      if (b['type'] !== 'tool_result') {
+        continue
+      }
+      const toolUseId = b['tool_use_id']
+      if (
+        typeof toolUseId === 'string' &&
+        JSON.stringify(b['content'] ?? '').includes(HOOK_DENIAL_MARKER)
+      ) {
+        denied.add(toolUseId)
+      }
+    }
+  }
+  return denied
 }
 
 // Flags on `gh workflow run/dispatch` that take a value argument — so
