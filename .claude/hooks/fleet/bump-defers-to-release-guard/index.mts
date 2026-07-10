@@ -22,6 +22,8 @@ import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import { parseVersion } from '@socketsecurity/lib-stable/versions/parse'
+
 import { block, defineHook, runHook } from '../_shared/guard.mts'
 import type { GuardResult } from '../_shared/guard.mts'
 import type { ToolCallPayload } from '../_shared/payload.mts'
@@ -37,13 +39,14 @@ export function committedVersionHint(): boolean {
     'package.json',
   )
   try {
-    const parsed = JSON.parse(readFileSync(pkgPath, 'utf8')) as {
+    const pkg = JSON.parse(readFileSync(pkgPath, 'utf8')) as {
       version?: string
     }
-    return (
-      typeof parsed.version === 'string' &&
-      /^\d+\.\d+\.\d+-prerelease$/.test(parsed.version)
-    )
+    if (typeof pkg.version !== 'string') {
+      return false
+    }
+    const parsed = parseVersion(pkg.version)
+    return parsed?.prerelease.join('.') === 'prerelease'
   } catch {
     return false
   }
