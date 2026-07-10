@@ -33,7 +33,7 @@ const GRANT_FILE = path.join(CLAUDE_DIR, 'gh-workflow-grant')
 
 // A request older than this is stale — the denial that wrote it is no longer
 // the human's immediate context, so approving it would be blind.
-const REQUEST_MAX_AGE_MS = 10 * 60 * 1000
+const REQUEST_MAX_AGE_MS = 30 * 60 * 1000
 
 const CONFIRM_WORD = 'grant'
 
