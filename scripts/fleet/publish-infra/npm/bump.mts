@@ -9,9 +9,9 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { commitViaGithubApi } from '../commit-via-github-api.mts'
-import { runCapture, runInherit } from '../../publish-shared.mts'
-import { logger, readPackageJson, rootPath } from './shared.mts'
+import { commitViaGithubApi } from '../../lib/commit-via-github-api.mts'
+import { logger, rootPath, runCapture, runInherit } from '../shared.mts'
+import { readPackageJson } from './shared.mts'
 
 /**
  * Resolve the bump script overlay-first: a repo-specific scripts/repo/bump.mts

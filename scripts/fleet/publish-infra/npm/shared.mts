@@ -1,6 +1,6 @@
 /**
- * @file Shared staging/registry helpers for the npm-publish modes:
- *   the staged-entry shape, package.json + staged-shasum readers, the
+ * @file Npm-specific shared helpers for the npm-publish modes: the
+ *   staged-entry shape, package.json + staged-shasum readers, the
  *   `pnpm stage list` fetch, prior-provenance lookup, and the
  *   staging-expected trust check consumed by both --staged and --direct.
  */
@@ -8,17 +8,8 @@
 import { readFileSync } from 'node:fs'
 import path from 'node:path'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-
-import { REPO_ROOT } from '../../paths.mts'
-import {
-  extractFirstJson,
-  fetchVersionTrustInfo,
-  runCapture,
-} from '../../publish-shared.mts'
-
-export const logger = getDefaultLogger()
-export const rootPath = REPO_ROOT
+import { extractFirstJson, rootPath, runCapture } from '../shared.mts'
+import { fetchVersionTrustInfo } from './registry.mts'
 
 export interface StageListEntry {
   name?: string | undefined

@@ -1,8 +1,8 @@
 /**
- * @file Post-publish release orchestration for npm-publish: derive the
+ * @file Registry-agnostic post-publish release orchestration: derive the
  *   GitHub release body from CHANGELOG.md, then create the git tag + the
  *   IMMUTABLE (draft → upload → undraft) GitHub release carrying the tarball
- *   \+ a checksums file.
+ *   \+ a checksums file. A future cargo publish reuses this tier verbatim.
  */
 
 import crypto from 'node:crypto'
@@ -11,8 +11,7 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
-import { runCapture } from '../../publish-shared.mts'
-import { logger, rootPath } from './shared.mts'
+import { logger, rootPath, runCapture } from './shared.mts'
 
 /**
  * Extract the CHANGELOG.md section for `version` (from its `## <version>`

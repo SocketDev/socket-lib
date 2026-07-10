@@ -8,21 +8,19 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import type {
+  HashSource,
+  TarballDigest,
+} from '../../lib/verify-release-hashes.mts'
 import {
-  isAlreadyPublished,
-  runCapture,
-  runInherit,
-} from '../../publish-shared.mts'
-import type { HashSource, TarballDigest } from '../verify-release-hashes.mts'
-import { compareHashSources, hashTarball } from '../verify-release-hashes.mts'
-import { ensureTagAndRelease } from './release.mts'
+  compareHashSources,
+  hashTarball,
+} from '../../lib/verify-release-hashes.mts'
+import { ensureTagAndRelease } from '../release.mts'
+import { logger, rootPath, runCapture, runInherit } from '../shared.mts'
+import { isAlreadyPublished } from './registry.mts'
 import type { StageListEntry } from './shared.mts'
-import {
-  isStagingExpected,
-  logger,
-  readPackageJson,
-  rootPath,
-} from './shared.mts'
+import { isStagingExpected, readPackageJson } from './shared.mts'
 
 /**
  * `--staged` mode: stage this package's tarball.

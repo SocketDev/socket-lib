@@ -32,12 +32,13 @@
  *      simple single-package publishing consume this one byte-identical via the
  *      sync-scaffolding cascade.
  *
- *   This file is the thin entry: arg parsing + mode dispatch. Each mode's
- *   implementation lives under `lib/npm-publish/` (shared staging/registry
- *   helpers, the bump step, the staged/direct publish + pre-approve verify
- *   helpers, post-publish tag/release, and the approve flow) — see
- *   `lib/npm-publish/shared.mts`, `bump.mts`, `staged.mts`, `release.mts`,
- *   and `approve.mts`.
+ *   This file is the thin entry: arg parsing + mode dispatch. The
+ *   implementation lives under `publish-infra/`, organized in registry tiers
+ *   so a future `cargo-publish.mts` slots in beside npm: the agnostic core
+ *   (`publish-infra/shared.mts` — spawn/git/JSON helpers,
+ *   `publish-infra/release.mts` — git tag + GitHub release) and the npm tier
+ *   (`publish-infra/npm/` — registry reads, staged/direct modes, the bump
+ *   step, and the approve flow).
  */
 
 import process from 'node:process'
@@ -45,22 +46,22 @@ import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 
-import { runApprove } from './lib/npm-publish/approve.mts'
-import { resolveBumpScript, runBump } from './lib/npm-publish/bump.mts'
-import {
-  ensureTagAndRelease,
-  extractChangelogSection,
-} from './lib/npm-publish/release.mts'
+import { runApprove } from './publish-infra/npm/approve.mts'
+import { resolveBumpScript, runBump } from './publish-infra/npm/bump.mts'
 import {
   isStagingExpected,
-  logger,
   readStagedShasum,
-} from './lib/npm-publish/shared.mts'
+} from './publish-infra/npm/shared.mts'
 import {
   runDirect,
   runStaged,
   verifyStagedEntry,
-} from './lib/npm-publish/staged.mts'
+} from './publish-infra/npm/staged.mts'
+import {
+  ensureTagAndRelease,
+  extractChangelogSection,
+} from './publish-infra/release.mts'
+import { logger } from './publish-infra/shared.mts'
 
 export {
   ensureTagAndRelease,

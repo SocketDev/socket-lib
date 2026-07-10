@@ -11,7 +11,7 @@ import {
   compareSemverDesc,
   toReportRow,
 } from '../../../scripts/fleet/check/provenance-is-attested.mts'
-import type { RegistryVersionInfo } from '../../../scripts/fleet/publish-shared.mts'
+import type { RegistryVersionInfo } from '../../../scripts/fleet/publish-infra/npm/registry.mts'
 
 // ---------------------------------------------------------------------------
 // helpers

@@ -9,15 +9,14 @@ import process from 'node:process'
 
 import { checkbox, password } from '@socketsecurity/lib/stdio/prompts'
 
-import { isAlreadyPublished, runInherit } from '../../publish-shared.mts'
-import { ensureTagAndRelease } from './release.mts'
+import { ensureTagAndRelease } from '../release.mts'
+import { logger, rootPath, runInherit } from '../shared.mts'
+import { isAlreadyPublished } from './registry.mts'
 import type { StageListEntry } from './shared.mts'
 import {
   fetchPriorProvenanceMap,
   formatPriorProvenance,
   listStagedPackages,
-  logger,
-  rootPath,
 } from './shared.mts'
 import { verifyStagedEntry } from './staged.mts'
 
