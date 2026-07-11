@@ -2,8 +2,6 @@
  * @file Unit tests for package name validation utilities. Tests package
  *   validation utilities:
  *
- *   - isBlessedPackageName() checks if package is Socket official (socket, sfw,
- *     @socket*)
  *   - isValidPackageName() validates npm package name format and rules
  *   - isRegistryFetcherType() checks if type is registry-based
  *     (alias/range/tag/version)
@@ -14,89 +12,11 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  isBlessedPackageName,
   isRegistryFetcherType,
   isValidPackageName,
 } from '../../../src/packages/validation'
 
 describe('packages/validation', () => {
-  describe('isBlessedPackageName', () => {
-    it('should export isBlessedPackageName function', () => {
-      expect(typeof isBlessedPackageName).toBe('function')
-    })
-
-    it('should return true for "socket" package', () => {
-      expect(isBlessedPackageName('socket')).toBe(true)
-    })
-
-    it('should return true for "sfw" package', () => {
-      expect(isBlessedPackageName('sfw')).toBe(true)
-    })
-
-    it('should return true for @socketoverride/* packages', () => {
-      expect(isBlessedPackageName('@socketoverride/lodash')).toBe(true)
-      expect(isBlessedPackageName('@socketoverride/react')).toBe(true)
-      expect(isBlessedPackageName('@socketoverride/express')).toBe(true)
-    })
-
-    it('should return true for @socketregistry/* packages', () => {
-      expect(isBlessedPackageName('@socketregistry/lodash')).toBe(true)
-      expect(isBlessedPackageName('@socketregistry/react')).toBe(true)
-      expect(isBlessedPackageName('@socketregistry/express')).toBe(true)
-    })
-
-    it('should return true for @socketsecurity/* packages', () => {
-      expect(isBlessedPackageName('@socketsecurity/registry')).toBe(true)
-      expect(isBlessedPackageName('@socketsecurity/cli')).toBe(true)
-      expect(isBlessedPackageName('@socketsecurity/lib')).toBe(true)
-    })
-
-    it('should return false for non-blessed packages', () => {
-      expect(isBlessedPackageName('lodash')).toBe(false)
-      expect(isBlessedPackageName('react')).toBe(false)
-      expect(isBlessedPackageName('express')).toBe(false)
-    })
-
-    it('should return false for packages with similar names', () => {
-      expect(isBlessedPackageName('socket-io')).toBe(false)
-      expect(isBlessedPackageName('sfw-cli')).toBe(false)
-      expect(isBlessedPackageName('socketio')).toBe(false)
-    })
-
-    it('should return false for scopes that do not match exactly', () => {
-      expect(isBlessedPackageName('@socket/package')).toBe(false)
-      expect(isBlessedPackageName('@socketregistry-fork/package')).toBe(false)
-      expect(isBlessedPackageName('@socketsecurity-fork/package')).toBe(false)
-    })
-
-    it('should return false for non-string values', () => {
-      expect(isBlessedPackageName(undefined)).toBe(false)
-      expect(isBlessedPackageName(undefined)).toBe(false)
-      expect(isBlessedPackageName(123)).toBe(false)
-      expect(isBlessedPackageName({})).toBe(false)
-      expect(isBlessedPackageName([])).toBe(false)
-      expect(isBlessedPackageName(true)).toBe(false)
-    })
-
-    it('should return false for empty string', () => {
-      expect(isBlessedPackageName('')).toBe(false)
-    })
-
-    it('should be case-sensitive', () => {
-      expect(isBlessedPackageName('Socket')).toBe(false)
-      expect(isBlessedPackageName('SFW')).toBe(false)
-      expect(isBlessedPackageName('@SocketSecurity/lib')).toBe(false)
-    })
-
-    it('should handle packages with multiple path segments', () => {
-      expect(isBlessedPackageName('@socketregistry/node/fs')).toBe(true)
-      expect(isBlessedPackageName('@socketsecurity/lib/packages')).toBe(true)
-      expect(isBlessedPackageName('@socketoverride/react/jsx-runtime')).toBe(
-        true,
-      )
-    })
-  })
-
   describe('isRegistryFetcherType', () => {
     it('should export isRegistryFetcherType function', () => {
       expect(typeof isRegistryFetcherType).toBe('function')
@@ -246,24 +166,13 @@ describe('packages/validation', () => {
   })
 
   describe('integration', () => {
-    it('should correctly identify blessed packages that are also valid', () => {
-      const blessedPackages = [
+    it('should validate Socket and third-party packages alike', () => {
+      const packages = [
         'socket',
         'sfw',
         '@socketregistry/lodash',
         '@socketoverride/react',
         '@socketsecurity/lib',
-      ]
-
-      for (let i = 0, { length } = blessedPackages; i < length; i += 1) {
-        const pkg = blessedPackages[i]!
-        expect(isBlessedPackageName(pkg)).toBe(true)
-        expect(isValidPackageName(pkg)).toBe(true)
-      }
-    })
-
-    it('should handle packages that are valid but not blessed', () => {
-      const validButNotBlessed = [
         'lodash',
         'react',
         'express',
@@ -271,26 +180,9 @@ describe('packages/validation', () => {
         '@types/node',
       ]
 
-      for (let i = 0, { length } = validButNotBlessed; i < length; i += 1) {
-        const pkg = validButNotBlessed[i]!
-        expect(isBlessedPackageName(pkg)).toBe(false)
-        expect(isValidPackageName(pkg)).toBe(true)
+      for (let i = 0, { length } = packages; i < length; i += 1) {
+        expect(isValidPackageName(packages[i]!)).toBe(true)
       }
-    })
-
-    it('should handle invalid packages that are also not blessed', () => {
-      // validForOldPackages allows uppercase and underscores
-      expect(isBlessedPackageName('Invalid Package')).toBe(false)
-      expect(isValidPackageName('Invalid Package')).toBe(false) // spaces not allowed
-
-      expect(isBlessedPackageName('UPPERCASE')).toBe(false)
-      expect(isValidPackageName('UPPERCASE')).toBe(true) // uppercase OK in old packages
-
-      expect(isBlessedPackageName('.hidden')).toBe(false)
-      expect(isValidPackageName('.hidden')).toBe(false) // starts with dot
-
-      expect(isBlessedPackageName('_underscore')).toBe(false)
-      expect(isValidPackageName('_underscore')).toBe(false) // starts with underscore
     })
 
     it('should support all registry fetcher types', () => {
@@ -313,32 +205,6 @@ describe('packages/validation', () => {
   })
 
   describe('edge cases', () => {
-    it('should handle null and undefined for isBlessedPackageName', () => {
-      expect(isBlessedPackageName(undefined)).toBe(false)
-      expect(isBlessedPackageName(undefined)).toBe(false)
-    })
-
-    it('should handle boolean values for isBlessedPackageName', () => {
-      expect(isBlessedPackageName(true)).toBe(false)
-      expect(isBlessedPackageName(false)).toBe(false)
-    })
-
-    it('should handle numeric values for isBlessedPackageName', () => {
-      expect(isBlessedPackageName(0)).toBe(false)
-      expect(isBlessedPackageName(123)).toBe(false)
-      expect(isBlessedPackageName(NaN)).toBe(false)
-    })
-
-    it('should handle object values for isBlessedPackageName', () => {
-      expect(isBlessedPackageName({})).toBe(false)
-      expect(isBlessedPackageName({ name: 'socket' })).toBe(false)
-    })
-
-    it('should handle array values for isBlessedPackageName', () => {
-      expect(isBlessedPackageName([])).toBe(false)
-      expect(isBlessedPackageName(['socket'])).toBe(false)
-    })
-
     it('should handle special npm package name edge cases', () => {
       expect(isValidPackageName('node_modules')).toBe(false)
       expect(isValidPackageName('favicon.ico')).toBe(false) // .ico is invalid
@@ -360,14 +226,8 @@ describe('packages/validation', () => {
 
   describe('real-world usage', () => {
     it('should validate actual Socket packages', () => {
-      expect(isBlessedPackageName('socket')).toBe(true)
-      expect(isBlessedPackageName('sfw')).toBe(true)
       expect(isValidPackageName('socket')).toBe(true)
       expect(isValidPackageName('sfw')).toBe(true)
-    })
-
-    it('should validate Socket registry packages', () => {
-      expect(isBlessedPackageName('@socketregistry/lodash')).toBe(true)
       expect(isValidPackageName('@socketregistry/lodash')).toBe(true)
     })
 

@@ -4,27 +4,6 @@
 
 import validateNpmPackageName from '../external/validate-npm-package-name'
 
-import { StringPrototypeStartsWith } from '../primordials/string'
-/**
- * Check if package name is a blessed Socket.dev package.
- *
- * @example
- *   ;```typescript
- *   isBlessedPackageName('@socketregistry/is-number') // true
- *   isBlessedPackageName('lodash') // false
- *   ```
- */
-export function isBlessedPackageName(name: unknown): boolean {
-  return (
-    typeof name === 'string' &&
-    (name === 'sfw' ||
-      name === 'socket' ||
-      StringPrototypeStartsWith(name, '@socketoverride/') ||
-      StringPrototypeStartsWith(name, '@socketregistry/') ||
-      StringPrototypeStartsWith(name, '@socketsecurity/'))
-  )
-}
-
 /**
  * Check if a type string represents a registry fetcher type.
  *
