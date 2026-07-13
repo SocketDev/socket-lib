@@ -3,6 +3,8 @@
  *   uvSyncProject + existsSync so the test never spawns uv or touches disk.
  */
 
+import process from 'node:process'
+
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
@@ -106,7 +108,11 @@ describe.sequential('skillspector/from-uv — skillspectorFromUv', () => {
     syncMock.mockResolvedValueOnce(undefined)
     const r = await skillspectorFromUv({ projectDir: PROJECT, uvBin: UV })
     expect(r?.source).toBe('uv')
-    expect(normalizePath(r?.path ?? '')).toContain('/.venv/bin/skillspector')
+    expect(normalizePath(r?.path ?? '')).toContain(
+      process.platform === 'win32'
+        ? '/.venv/Scripts/skillspector.exe'
+        : '/.venv/bin/skillspector',
+    )
     expect(syncMock).toHaveBeenCalledWith({ projectDir: PROJECT, uvBin: UV })
   })
 })
