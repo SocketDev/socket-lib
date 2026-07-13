@@ -155,7 +155,7 @@ jobs:
             exit 0
           fi
 
-          pnpm test 2>&1 | tee test-output.log
+          pnpm test --all 2>&1 | tee test-output.log
           TEST_EXIT=${PIPESTATUS[0]}
           set -e
 
