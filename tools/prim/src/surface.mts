@@ -6,9 +6,9 @@
  *   1. Explicit `--surface <path>` flag — overrides everything else. Use this to
  *      point at Node.js's `lib/internal/per_context/primordials.js`, a vendored
  *      copy, or any other primordials file.
- *   2. From a sibling socket-lib checkout (`../socket-lib/src/primordials/` after
- *      the split, with a `../socket-lib/src/primordials.ts` legacy fallback).
- *      Used during fleet development — picks up unreleased exports.
+ *   2. From a sibling socket-lib checkout (its `src/primordials/` directory after
+ *      the split, with a `src/primordials.ts` legacy fallback). Used during
+ *      fleet development — picks up unreleased exports.
  *   3. From the installed `@socketsecurity/lib/dist/primordials/` (or legacy
  *      `dist/primordials.js`). Used when running the audit on a target that has
  *      lib as a dep. Either way, we parse out the `export const Foo` symbol
@@ -271,7 +271,9 @@ export function parseExports(sourcePath) {
   const exportToLeaf = new Map()
   if (stat.isDirectory()) {
     const parts = []
-    for (const name of readdirSync(sourcePath).toSorted()) {
+    const names = readdirSync(sourcePath).toSorted()
+    for (let i = 0, { length } = names; i < length; i += 1) {
+      const name = names[i]!
       if (
         !(
           name.endsWith('.ts') ||
@@ -342,7 +344,9 @@ export function parseExports(sourcePath) {
   // ESM grouped form: `export { Foo, Bar, Baz }` (with or without trailing
   // `from '...'`).
   for (const m of src.matchAll(/^export\s*\{\s*([\s\S]+?)\s*\}/gm)) {
-    for (const ident of m[1].split(',')) {
+    const idents = m[1].split(',')
+    for (let i = 0, { length } = idents; i < length; i += 1) {
+      const ident = idents[i]!
       const cleaned = ident.trim().replace(/^([A-Z][a-zA-Z0-9]+).*$/, '$1')
       if (/^[A-Z][a-zA-Z0-9]+$/.test(cleaned)) {
         exports.add(cleaned)

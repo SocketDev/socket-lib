@@ -9,7 +9,7 @@
  */
 
 /**
- * Apply collected rewrites to `src`, then emit the primordials import block.
+ * Apply collected rewrites to `source`, then emit the primordials import block.
  *
  * Dedupes rewrite spans by `[start, end]` (acorn-wasm's compact_serialize can
  * surface the same node multiple times in the JSON tree), sorts them
@@ -24,7 +24,7 @@
  * Returns the rewritten source plus whether an import was added.
  */
 export function applyPrimordialsImports(
-  src: string,
+  source: string,
   rewrites: Array<{ start: number; end: number; replacement: string }>,
   usedPrimordials: Set<string>,
   importStyle,
@@ -52,7 +52,7 @@ export function applyPrimordialsImports(
     deduped.push(r)
   }
   deduped.sort((a, b) => b.start - a.start)
-  let out = src
+  let out = source
   for (let i = 0, { length } = deduped; i < length; i += 1) {
     const r = deduped[i]!
     out = out.slice(0, r.start) + r.replacement + out.slice(r.end)
@@ -68,7 +68,8 @@ export function applyPrimordialsImports(
     const { exportToLeaf, leafSpecifier } = importStyle.splitByLeaf
     const byLeaf = new Map()
     const idents = [...usedPrimordials].toSorted()
-    for (const id of idents) {
+    for (let i = 0, { length } = idents; i < length; i += 1) {
+      const id = idents[i]!
       const leaf = exportToLeaf.get(id)
       if (!leaf) {
         // A used primordial not in the leaf map means the surface
@@ -85,7 +86,9 @@ export function applyPrimordialsImports(
       arr.push(id)
     }
     // Sort leaves so emitted blocks are deterministic.
-    for (const leaf of [...byLeaf.keys()].toSorted()) {
+    const leaves = [...byLeaf.keys()].toSorted()
+    for (let i = 0, { length } = leaves; i < length; i += 1) {
+      const leaf = leaves[i]!
       const leafIdents = byLeaf.get(leaf).toSorted()
       const leafSpec = leafSpecifier(absPath, leaf)
       const out2 = ensureImports(newSource, leafIdents, {
@@ -119,15 +122,15 @@ export function applyPrimordialsImports(
  *
  * In ESM mode emits `import { X, Y } from '<specifier>'`. In CJS mode emits
  * `const { X, Y } = require('<specifier>')`. If a matching import (same shape,
- * same specifier) already exists in `src`, the new identifiers are merged into
- * its destructure list and we re-sort the keys; otherwise the new statement is
- * inserted after the last existing import/require, or prepended if neither
- * exists.
+ * same specifier) already exists in `source`, the new identifiers are merged
+ * into its destructure list and we re-sort the keys; otherwise the new
+ * statement is inserted after the last existing import/require, or prepended if
+ * neither exists.
  *
  * Returns the rewritten source and a boolean indicating whether anything was
  * added/changed (vs already-present-and-complete).
  */
-export function ensureImports(src, identifiers, importStyle) {
+export function ensureImports(source, identifiers, importStyle) {
   const { kind, specifier } = importStyle
   const aliasPrefix: string = importStyle.aliasPrefix ?? ''
   // Render one identifier as a destructure entry: `Foo` if no alias,
@@ -144,14 +147,14 @@ export function ensureImports(src, identifiers, importStyle) {
   const escSpec = escapeRegex(specifier)
   // Trailing `;?` is matched without leading `\s*` so the regex stops
   // at the optional semicolon — anything after (newline, the next
-  // import) stays in `src` and isn't clobbered by the replacement.
+  // import) stays in `source` and isn't clobbered by the replacement.
   const existingRe =
     kind === 'esm'
       ? new RegExp(`import\\s*\\{([^}]*)\\}\\s*from\\s*['"]${escSpec}['"];?`)
       : new RegExp(
           `(?:const|let|var)\\s*\\{([^}]*)\\}\\s*=\\s*require\\(\\s*['"]${escSpec}['"]\\s*\\);?`,
         )
-  const existing = src.match(existingRe)
+  const existing = source.match(existingRe)
   if (existing) {
     const have = new Set(existing[1].split(',').map(parseEntry).filter(Boolean))
     let addedAny = false
@@ -162,7 +165,7 @@ export function ensureImports(src, identifiers, importStyle) {
       }
     }
     if (!addedAny) {
-      return { newSource: src, importAdded: false }
+      return { newSource: source, importAdded: false }
     }
     const merged = [...have].toSorted().map(renderEntry).join(', ')
     const replacement =
@@ -170,7 +173,7 @@ export function ensureImports(src, identifiers, importStyle) {
         ? `import { ${merged} } from '${specifier}'`
         : `const { ${merged} } = require('${specifier}')`
     return {
-      newSource: src.replace(existingRe, replacement),
+      newSource: source.replace(existingRe, replacement),
       importAdded: true,
     }
   }
@@ -178,17 +181,18 @@ export function ensureImports(src, identifiers, importStyle) {
   // No matching import — insert after the last existing import-or-require.
   // We match either ESM imports or CJS require-shaped declarations so the
   // inserted block lands alongside the existing module-loading prologue.
-  const lastEnd = findInsertionPoint(src)
+  const lastEnd = findInsertionPoint(source)
   const list = identifiers.map(renderEntry).join(', ')
   const newStmt =
     kind === 'esm'
       ? `import { ${list} } from '${specifier}'\n`
       : `const { ${list} } = require('${specifier}')\n`
   if (lastEnd === 0) {
-    return { newSource: newStmt + src, importAdded: true }
+    return { newSource: newStmt + source, importAdded: true }
   }
   return {
-    newSource: src.slice(0, lastEnd) + '\n' + newStmt + src.slice(lastEnd),
+    newSource:
+      source.slice(0, lastEnd) + '\n' + newStmt + source.slice(lastEnd),
     importAdded: true,
   }
 }
@@ -206,7 +210,7 @@ export function escapeRegex(s) {
  * JSDoc / shebang block when no import/require is found, so callers prepend
  * BELOW the `@fileoverview` block instead of clobbering it.
  */
-export function findInsertionPoint(src) {
+export function findInsertionPoint(source) {
   // ESM: `import ... from '...'`.
   const importRe = /^import\s.+?from\s+['"][^'"]+['"]\s*;?\s*$/gm
   // CJS: `const|let|var ... = require('...')`. We don't try to handle
@@ -215,13 +219,13 @@ export function findInsertionPoint(src) {
   const requireRe =
     /^(?:const|let|var)\s+[^=]+?=\s*require\(\s*['"][^'"]+['"]\s*\)\s*;?\s*$/gm
   let lastEnd = 0
-  for (const m of src.matchAll(importRe)) {
+  for (const m of source.matchAll(importRe)) {
     const end = m.index + m[0].length
     if (end > lastEnd) {
       lastEnd = end
     }
   }
-  for (const m of src.matchAll(requireRe)) {
+  for (const m of source.matchAll(requireRe)) {
     const end = m.index + m[0].length
     if (end > lastEnd) {
       lastEnd = end
@@ -235,33 +239,33 @@ export function findInsertionPoint(src) {
   // `@fileoverview` doc, not above it.
   let pos = 0
   // Shebang line.
-  if (src.startsWith('#!')) {
-    const nl = src.indexOf('\n', pos)
-    pos = nl === -1 ? src.length : nl + 1
+  if (source.startsWith('#!')) {
+    const nl = source.indexOf('\n', pos)
+    pos = nl === -1 ? source.length : nl + 1
   }
   // Leading whitespace.
-  while (pos < src.length && /\s/.test(src[pos]!)) {
+  while (pos < source.length && /\s/.test(source[pos]!)) {
     pos++
   }
   // Leading block comment (`/** … */` or `/* … */`).
-  if (src.startsWith('/*', pos)) {
-    const close = src.indexOf('*/', pos)
+  if (source.startsWith('/*', pos)) {
+    const close = source.indexOf('*/', pos)
     if (close !== -1) {
       pos = close + 2
       // Consume the trailing newline so the inserted import goes on a
       // fresh line.
-      if (src[pos] === '\n') {
+      if (source[pos] === '\n') {
         pos++
       }
     } else {
       // Unterminated — fall back to prepend.
       pos = 0
     }
-  } else if (src.startsWith('//', pos)) {
+  } else if (source.startsWith('//', pos)) {
     // Leading line-comment block.
-    while (src.startsWith('//', pos)) {
-      const nl = src.indexOf('\n', pos)
-      pos = nl === -1 ? src.length : nl + 1
+    while (source.startsWith('//', pos)) {
+      const nl = source.indexOf('\n', pos)
+      pos = nl === -1 ? source.length : nl + 1
     }
   } else {
     // No leading comment — prepend at top.
