@@ -260,11 +260,13 @@ describe('socket-cli env', () => {
       expect(getSocketCliGithubToken()).toBe('ghp_legacy')
     })
 
-    it('getSocketCliGithubToken falls back to GITHUB_TOKEN', () => {
+    it('getSocketCliGithubToken does NOT fall back to GITHUB_TOKEN', () => {
+      // The generic GITHUB_TOKEN is intentionally not part of this CLI-specific
+      // getter; callers compose getGitHubToken() on top when they want it.
       setEnv('SOCKET_CLI_GITHUB_TOKEN', undefined)
       setEnv('SOCKET_SECURITY_GITHUB_PAT', undefined)
       setEnv('GITHUB_TOKEN', 'ghp_default')
-      expect(getSocketCliGithubToken()).toBe('ghp_default')
+      expect(getSocketCliGithubToken()).toBeUndefined()
     })
 
     it('getSocketCliOrgSlug falls back to SOCKET_ORG_SLUG', () => {

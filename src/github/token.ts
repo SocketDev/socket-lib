@@ -7,7 +7,6 @@
  */
 
 import { getGhToken, getGithubToken } from '../env/github'
-import { getSocketCliGithubToken } from '../env/socket-cli'
 import { spawn } from '../process/spawn/child'
 
 import type { SpawnOptions } from '../process/spawn/types'
@@ -20,7 +19,10 @@ import type { SpawnOptions } from '../process/spawn/types'
  *
  * 1. `GITHUB_TOKEN` - Standard GitHub token variable
  * 2. `GH_TOKEN` - Alternative GitHub CLI token variable
- * 3. `SOCKET_CLI_GITHUB_TOKEN` - Socket-specific token variable
+ *
+ * The Socket-CLI-specific `SOCKET_CLI_GITHUB_TOKEN` is intentionally NOT read
+ * here — that variable is the CLI's concern (`getSocketCliGithubToken`), so
+ * this generic resolver stays limited to the standard GitHub token names.
  *
  * @example
  *   ;```ts
@@ -33,9 +35,7 @@ import type { SpawnOptions } from '../process/spawn/types'
  * @returns The first available GitHub token, or `undefined` if none found
  */
 export function getGitHubToken(): string | undefined {
-  return (
-    getGithubToken() || getGhToken() || getSocketCliGithubToken() || undefined
-  )
+  return getGithubToken() || getGhToken() || undefined
 }
 
 /**
@@ -89,7 +89,7 @@ export async function getGitHubTokenFromGitConfig(
  *
  * Priority order:
  *
- * 1. Environment variables (GITHUB_TOKEN, GH_TOKEN, SOCKET_CLI_GITHUB_TOKEN)
+ * 1. Environment variables (GITHUB_TOKEN, GH_TOKEN)
  * 2. Git config (github.token)
  *
  * @example

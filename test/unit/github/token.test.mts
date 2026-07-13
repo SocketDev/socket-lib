@@ -24,12 +24,7 @@ describe.sequential('github/token', () => {
   // process.env (not setEnv overrides): several tests call resetEnv() in their
   // body, which clears overrides but not process.env — a beforeEach mask would
   // be wiped by those. Restored in afterAll so sibling test files are unaffected.
-  const TOKEN_ENV = [
-    'GITHUB_TOKEN',
-    'GH_TOKEN',
-    'SOCKET_CLI_GITHUB_TOKEN',
-    'SOCKET_SECURITY_GITHUB_PAT',
-  ]
+  const TOKEN_ENV = ['GITHUB_TOKEN', 'GH_TOKEN']
   const savedTokenEnv: Record<string, string | undefined> = { __proto__: null }
 
   beforeAll(() => {
@@ -74,22 +69,9 @@ describe.sequential('github/token', () => {
       expect(token).toBe('gh-test-token')
     })
 
-    it('should return SOCKET_CLI_GITHUB_TOKEN from environment', () => {
-      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'cli-token')
-      const token = getGitHubToken()
-      expect(token).toBe('cli-token')
-    })
-
     it('should prefer GITHUB_TOKEN over GH_TOKEN', () => {
       setEnv('GITHUB_TOKEN', 'github-token')
       setEnv('GH_TOKEN', 'gh-token')
-      const token = getGitHubToken()
-      expect(token).toBe('github-token')
-    })
-
-    it('should prefer GITHUB_TOKEN over SOCKET_CLI_GITHUB_TOKEN', () => {
-      setEnv('GITHUB_TOKEN', 'github-token')
-      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'cli-token')
       const token = getGitHubToken()
       expect(token).toBe('github-token')
     })
@@ -142,7 +124,6 @@ describe.sequential('github/token', () => {
     it('should prioritize GITHUB_TOKEN over other env vars', () => {
       setEnv('GITHUB_TOKEN', 'token1')
       setEnv('GH_TOKEN', 'token2')
-      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'token3')
 
       const token = getGitHubToken()
       expect(token).toBe('token1')
@@ -150,17 +131,9 @@ describe.sequential('github/token', () => {
 
     it('should use GH_TOKEN when GITHUB_TOKEN is not set', () => {
       setEnv('GH_TOKEN', 'token2')
-      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'token3')
 
       const token = getGitHubToken()
       expect(token).toBe('token2')
-    })
-
-    it('should use SOCKET_CLI_GITHUB_TOKEN as last resort', () => {
-      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'token3')
-
-      const token = getGitHubToken()
-      expect(token).toBe('token3')
     })
 
     it('should handle empty string tokens', () => {
@@ -289,7 +262,7 @@ describe.sequential('github/token', () => {
   })
 
   describe('token resolution', () => {
-    it('should handle all three token sources independently', () => {
+    it('should resolve each token source independently', () => {
       resetEnv()
       setEnv('GITHUB_TOKEN', 'token1')
       expect(getGitHubToken()).toBe('token1')
@@ -297,21 +270,15 @@ describe.sequential('github/token', () => {
       resetEnv()
       setEnv('GH_TOKEN', 'token2')
       expect(getGitHubToken()).toBe('token2')
-
-      resetEnv()
-      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'token3')
-      expect(getGitHubToken()).toBe('token3')
     })
 
     it('should handle token priority with all permutations', () => {
       resetEnv()
       setEnv('GH_TOKEN', 'gh')
-      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'cli')
       expect(getGitHubToken()).toBe('gh')
 
       resetEnv()
       setEnv('GITHUB_TOKEN', 'github')
-      setEnv('SOCKET_CLI_GITHUB_TOKEN', 'cli')
       expect(getGitHubToken()).toBe('github')
 
       resetEnv()

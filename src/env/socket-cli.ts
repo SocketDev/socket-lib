@@ -161,8 +161,11 @@ export function getSocketCliFix(): string | undefined {
 }
 
 /**
- * Socket CLI GitHub authentication token. Checks SOCKET_CLI_GITHUB_TOKEN,
- * SOCKET_SECURITY_GITHUB_PAT, then falls back to GITHUB_TOKEN.
+ * Socket CLI GitHub authentication token. Checks SOCKET_CLI_GITHUB_TOKEN, then
+ * SOCKET_SECURITY_GITHUB_PAT. It does NOT fall back to the generic GITHUB_TOKEN
+ * — callers wanting the standard token compose `getGitHubToken()` on top (as
+ * the CLI's own token wrapper does), keeping the CLI-specific and generic token
+ * concerns separate.
  *
  * @example
  *   ;```typescript
@@ -178,7 +181,7 @@ export function getSocketCliGithubToken(): string | undefined {
   return (
     getEnvValue('SOCKET_CLI_GITHUB_TOKEN') ||
     getEnvValue('SOCKET_SECURITY_GITHUB_PAT') ||
-    getEnvValue('GITHUB_TOKEN')
+    undefined
   )
 }
 
