@@ -159,3 +159,5 @@ scripts/fleet/lib/registry-pin-cascade.mts linguist-generated=true
 test/_shared/fleet/lib linguist-generated=true
 test/scripts/fleet/setup.mts linguist-generated=true
 # </fleet-canonical>
+
+.github/workflows/*.lock.yml linguist-generated=true merge=ours
