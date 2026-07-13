@@ -13,7 +13,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { runSequence } from './fleet/util/run-command.mts'
+import { runSequence } from '../fleet/util/run-command.mts'
 
 const logger = getDefaultLogger()
 
@@ -39,11 +39,14 @@ async function main(): Promise<void> {
       command: 'node',
     },
     {
-      args: ['scripts/post-build/rewrite-external-imports.mts', ...fixArgs],
+      args: [
+        'scripts/repo/post-build/rewrite-external-imports.mts',
+        ...fixArgs,
+      ],
       command: 'node',
     },
     {
-      args: ['scripts/post-build/rewrite-cjs-exports.mts', ...fixArgs],
+      args: ['scripts/repo/post-build/rewrite-cjs-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
@@ -55,11 +58,11 @@ async function main(): Promise<void> {
       command: 'node',
     },
     {
-      args: ['scripts/validate/external-exports.mts', ...fixArgs],
+      args: ['scripts/repo/validate/external-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
-      args: ['scripts/validate/external-esm-cjs.mts', ...fixArgs],
+      args: ['scripts/repo/validate/external-esm-cjs.mts', ...fixArgs],
       command: 'node',
     },
   ])

@@ -1,4 +1,4 @@
-/**
+/*
  * @file Post-bundle transform that rewrites bundled CJS externals to call
  *   socket-lib's primordials surface instead of mutable globals. Pipeline:
  *   rolldown produces dist/external/*.js (CJS bundles) → this transform parses

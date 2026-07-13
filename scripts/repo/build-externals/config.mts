@@ -21,7 +21,7 @@ export const externalPackages = [
   { name: 'libnpmpack', bundle: false },
   { name: 'npm-package-arg', bundle: false },
   { name: 'normalize-package-data', bundle: false },
-  { name: 'semver', bundle: false },
+  { name: 'semver', bundle: true },
   // Utilities
   { name: 'adm-zip', bundle: true },
   { name: 'debug', bundle: true },
@@ -46,6 +46,7 @@ export const externalPackages = [
   { name: 'spdx-correct', bundle: false },
   { name: 'spdx-expression-parse', bundle: false },
   { name: 'signal-exit', bundle: false },
+  { name: 'std-env', bundle: true },
   { name: 'streaming-iterables', bundle: true },
   { name: 'supports-color', bundle: false },
   { name: 'validate-npm-package-name', bundle: false },

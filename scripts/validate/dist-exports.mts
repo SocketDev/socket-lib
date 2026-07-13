@@ -109,7 +109,8 @@ async function main(): Promise<void> {
       logger.fail(
         `Found ${failures.length} public ${pluralize('export', { count: failures.length })} with incorrect exports:`,
       )
-      for (const failure of failures) {
+      for (let i = 0, { length } = failures; i < length; i += 1) {
+        const failure = failures[i]!
         const relativePath = path.relative(distDir, failure.path)
         logger.log(`  ${relativePath}`)
         logger.substep(failure.reason)

@@ -14,12 +14,13 @@ import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { parseArgs } from '../fleet/util/parse-args.mts'
+import { parseArgs } from '../../fleet/util/parse-args.mts'
 
 const logger = getDefaultLogger()
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
+  '..',
   '..',
   '..',
 )

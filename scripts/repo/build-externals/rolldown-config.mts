@@ -15,7 +15,7 @@ import { fileURLToPath } from 'node:url'
 
 import type { Plugin, RolldownOptions } from 'rolldown'
 
-import { defineGuardedPlugin } from '../../.config/repo/rolldown/define-guarded.mts'
+import { defineGuardedPlugin } from '../../../.config/repo/rolldown/define-guarded.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const stubsDir = path.join(__dirname, 'stubs')
@@ -304,6 +304,10 @@ export function getPackageSpecificOptions(packageName: string): PackageOpts {
 
   if (packageName === 'browserslist') {
     opts.define = { 'process.versions.node': '"18.0.0"' }
+  } else if (packageName === 'npm-pack') {
+    // semver has its own self-contained bundle (dist/external/semver.js).
+    // Mark it external here so npm-pack doesn't inline a second copy.
+    opts.external = [...(opts.external || []), 'semver']
   } else if (packageName === '@socketregistry/packageurl-js-stable') {
     // packageurl-js imports from socket-lib, creating a circular dependency.
     // Mark socket-lib imports as external to avoid bundling issues.

@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Audit which `@socketsecurity/lib` export subpaths the fleet + wheelhouse
  *   actually import — AST-accurately, via the vendored acorn/wasm parser, not
  *   grep. Resolves the import shapes grep miscounts:
@@ -289,6 +289,7 @@ function main(): number {
     for (let j = 0, flen = files.length; j < flen; j += 1) {
       const file = files[j]!
       const source = readFileSync(file, 'utf8')
+      // oxlint-disable-next-line socket/no-source-sniffing -- fast-path pre-filter only; not inferring behavior — it skips files that cannot contain a lib specifier before the real AST walk in collectRefs
       if (!source.includes(PKG)) {
         continue
       }
