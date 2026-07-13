@@ -13,6 +13,8 @@ Eliminate AI writing patterns from prose.
 
 Hardik Pandya wrote the upstream version (`stop-slop`). MIT-licensed. Source: https://github.com/hardikpandya/stop-slop. Core rules + references run verbatim. Edit only in `socket-wheelhouse/template/`; the cascade refreshes downstream copies.
 
+Fleet doctrine (voice, evidence standard, anti-patterns, surface routing) is codified in `.claude/rules/fleet/prose-style-and-doctrine.md` and `docs/agents.md/fleet/prose-style-and-doctrine.md`. Both are loaded by the skill; future skills (to-pr, to-tickets, to-spec) reuse the same reference.
+
 ## Fleet surfaces — two modes
 
 This skill runs in two modes. Both strip the AI-slop the Core Rules target; the conversational mode adds brevity + voice on top.
@@ -20,11 +22,12 @@ This skill runs in two modes. Both strip the AI-slop the Core Rules target; the 
 **Route by surface:**
 
 - Targeting a `docs/**` file, README, CHANGELOG, GitHub Release notes, or API-reference prose → **documentation mode** (the Core Rules below, unchanged).
-- Targeting a PR description / comment (`gh pr create/edit/comment --body`), an issue body or reply (`gh issue create/comment`), a review comment, a Linear issue/comment, a status summary, or a multi-paragraph commit *body* → **conversational mode**: the Core Rules **plus** [references/conversational.md](references/conversational.md) (lead with the point, be brief, show the receipt, drop the AI scaffolding).
+- Targeting a PR description / comment (`gh pr create/edit/comment --body`), an issue body or reply (`gh issue create/comment`), a review comment, a Linear issue/comment, a status summary, or a multi-paragraph commit *body* → **conversational mode**: the Core Rules **plus** [references/conversational.md](references/conversational.md) (lead with the point, be brief, show the receipt, drop the AI scaffolding; when a body earns structure, use GitHub advanced formatting — `<details>` folds with specific summaries, at most one `> [!NOTE]`-family alert, `- [ ]` task lists, autolinks/permalinks, sparing footnotes).
 
 **Documentation mode applies to:**
 
 - CHANGELOG entries, README sections, `docs/` markdown, GitHub Release notes, API-reference prose. Complete + precise + durable; length serves correctness.
+- Code-format bare library/tool names in prose (e.g. `rustls`, `rolldown`, `reqwest`) — they read as code, not prose. The `prose-code-format-nudge` hook flags them on `*.md` edits, off a shared dictionary (`.claude/hooks/fleet/_shared/known-names.mts`) derived from the repo's own manifests; that lib is the single source of truth for this check.
 
 **Conversational mode applies to:**
 
