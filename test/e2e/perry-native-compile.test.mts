@@ -76,10 +76,12 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
       // emitAttest writes a provenance sidecar (SHA-256 + perry version).
       expect(existsSync(`${out}.attest.json`)).toBe(true)
 
-      const ran = await spawn(out, [], {
-        shell: WIN32,
-        stdioString: true,
-      }).catch(error => error)
+      // No shell here: `out` is the compiled native binary (a PE on Windows),
+      // which Node executes directly by path. Routing it through cmd.exe
+      // (shell) fails — cmd.exe can't run an extensionless executable.
+      const ran = await spawn(out, [], { stdioString: true }).catch(
+        error => error,
+      )
       expect(
         ran.code,
         `binary errored at runtime:\n${ran.stdout ?? ''}${ran.stderr ?? ''}`,
