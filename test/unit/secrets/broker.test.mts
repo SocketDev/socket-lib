@@ -39,8 +39,18 @@ beforeEach(() => {
   setEnv('XDG_RUNTIME_DIR', tmpDir)
 })
 
-afterEach(() => {
-  server?.close()
+afterEach(async () => {
+  // Await the close so the socket / Windows named pipe is fully released before
+  // the next test re-listens. On Windows getRuntimeSocketPath ignores the
+  // per-test tmpDir and returns a FIXED \\.\pipe\proteus-sock, so a non-awaited
+  // close let the next listen() race the still-closing pipe (intermittent EADDRINUSE).
+  await new Promise<void>(resolve => {
+    if (server) {
+      server.close(() => resolve())
+    } else {
+      resolve()
+    }
+  })
   server = undefined
   clearEnv('XDG_RUNTIME_DIR')
   resetEnv()
