@@ -409,44 +409,46 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
     }
   })
 
-  // strings/width is verifiably snapshot-clean on every platform: Intl.Segmenter
-  // and get-east-asian-width are both loaded lazily, and primordials/intl only
-  // holds a REFERENCE to the Intl.Segmenter constructor, never an instance. Even
-  // so, `node --build-snapshot` on Windows aborts (std::length_error) merely
-  // serializing a heap that references the ICU-backed Intl.Segmenter constructor
-  // — a Node/Windows platform limitation, not an eager native handle this guard
-  // is meant to catch. Linux + macOS still enforce the contract for this module.
-  const WINDOWS_UNSNAPSHOTTABLE = new Set(['strings/width'])
+  // The e2e `node --build-snapshot` proof is skipped on Windows. Node's Windows
+  // snapshot serializer aborts (std::length_error / node::Environment::Serialize)
+  // on several of these modules even though they are verifiably snapshot-clean on
+  // Linux + macOS — e.g. strings/width and spinner/default only REFERENCE
+  // ICU-backed constructors (Intl.Segmenter) at import, never construct them, yet
+  // Windows can't serialize a heap that merely references them. This is a
+  // Node/Windows platform limitation, not an eager native handle this guard is
+  // meant to catch. The unit-layer assertions above (import must not trigger the
+  // deferred construction) still run on Windows; Linux + macOS run the e2e proof.
+  const isWindows = process.platform === 'win32'
 
   for (let i = 0, { length } = modules; i < length; i += 1) {
     const mod = modules[i]!
-    it.skipIf(
-      !hasDist ||
-        (process.platform === 'win32' && WINDOWS_UNSNAPSHOTTABLE.has(mod)),
-    )(`${mod} does not pin a native handle at import`, () => {
-      const entry = path.join(workDir, 'snap-entry.cjs')
-      writeFileSync(
-        entry,
-        `const { createRequire } = require('node:module')\n` +
-          `globalThis.SharedArrayBuffer = globalThis.SharedArrayBuffer || ArrayBuffer\n` +
-          `const req = createRequire(${JSON.stringify(distDir + path.sep)})\n` +
-          `req(${JSON.stringify('./' + mod + '.js')})\n`,
-      )
-      const { status, stderr } = spawnSync(
-        process.execPath,
-        [
-          '--snapshot-blob',
-          path.join(workDir, 'snap.blob'),
-          '--build-snapshot',
+    it.skipIf(!hasDist || isWindows)(
+      `${mod} does not pin a native handle at import`,
+      () => {
+        const entry = path.join(workDir, 'snap-entry.cjs')
+        writeFileSync(
           entry,
-        ],
-        { encoding: 'utf8' },
-      )
-      // Self-debugging: surface the exact serialization error on failure.
-      expect(
-        status,
-        `node --build-snapshot of dist/${mod}.js aborted:\n${stderr}`,
-      ).toBe(0)
-    })
+          `const { createRequire } = require('node:module')\n` +
+            `globalThis.SharedArrayBuffer = globalThis.SharedArrayBuffer || ArrayBuffer\n` +
+            `const req = createRequire(${JSON.stringify(distDir + path.sep)})\n` +
+            `req(${JSON.stringify('./' + mod + '.js')})\n`,
+        )
+        const { status, stderr } = spawnSync(
+          process.execPath,
+          [
+            '--snapshot-blob',
+            path.join(workDir, 'snap.blob'),
+            '--build-snapshot',
+            entry,
+          ],
+          { encoding: 'utf8' },
+        )
+        // Self-debugging: surface the exact serialization error on failure.
+        expect(
+          status,
+          `node --build-snapshot of dist/${mod}.js aborted:\n${stderr}`,
+        ).toBe(0)
+      },
+    )
   }
 })
