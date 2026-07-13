@@ -10,9 +10,9 @@
 # `../../../vendor/...` relative paths.
 packages:
   - .claude/hooks/*
-  - .config/oxlint-plugin
-  - .config/oxlint-plugin/fleet/*
-  - .config/oxlint-plugin/repo/*
+  - .config/fleet/oxlint-plugin
+  - .config/fleet/oxlint-plugin/fleet/*
+  - .config/repo/oxlint-plugin/*
   - tools/*
   - vendor/*
 
@@ -21,10 +21,12 @@ packages:
 # repo itself ships. Pinning them here keeps the entire hook tree in
 # lockstep with the parent without each hook duplicating literal pins.
 catalog:
+  '@anthropic-ai/claude-code': 2.1.201
   '@redwoodjs/agent-ci': 0.16.2
   '@sinclair/typebox': 0.34.49
   '@socketregistry/packageurl-js': 'npm:@socketregistry/packageurl-js@1.4.2'
   '@types/shell-quote': 1.7.5
+  '@ultrathink/acorn.wasm': npm:@ultrathink/acorn-wasm@0.0.1
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used inside that same package — Node ESM treats it as a
   # self-reference and resolves through the local `exports` map, not
@@ -37,36 +39,50 @@ catalog:
   # src/.
   '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.2'
   '@socketsecurity/lib': 'npm:@socketsecurity/lib@6.0.7'
-  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.0.8'
+  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.0.9'
   '@socketsecurity/registry': 'npm:@socketsecurity/registry@2.0.2'
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.2'
   '@socketsecurity/sdk': 'npm:@socketsecurity/sdk@4.0.1'
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.0.1'
   '@types/mdast': 4.0.4
-  '@types/node': 24.9.2
+  '@types/node': 26.1.0
+  '@types/semver': 7.7.1
   '@typescript/native-preview': 7.0.0-dev.20260510.1
-  '@vitest/coverage-v8': 4.1.8
-  '@vitest/ui': 4.1.8
+  '@vitest/coverage-v8': 4.1.9
+  '@vitest/ui': 4.1.9
+  'compromise': 14.15.1
   'dtu-github-actions': 0.16.2
   'ecc-agentshield': 1.4.0
+  'html5parser': 3.0.0
+  'markdownlint-cli2': 0.23.0
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
-  'npm-run-all2': 9.0.1
-  'oxfmt': 0.48.0
-  'oxlint': 1.63.0
+  'neosanitize': 0.3.0
+  'nock': 15.0.0
+  'npm-run-all2': 9.0.2
+  'oxfmt': 0.57.0
+  'oxlint': 1.72.0
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
-  'playwright-core': 1.60.0
-  'regjsparser': 0.13.1
-  'rolldown': 1.1.0
-  'shell-quote': 1.8.4
+  'playwright-core': 1.61.1
+  'regjsparser': 0.13.2
+  'rolldown': 1.1.4
+  'semver': 7.8.5
+  'shell-quote': 1.9.0
+  # Source of truth for CI-provider + AI-agent env-var detection. devDep only:
+  # the build-time codemod inlines its isCI/isAgent boolean expressions into
+  # dist, so it never enters the runtime dependency tree. Published 2026-04-15,
+  # well past the 7-day soak — no minimumReleaseAgeExclude needed.
+  'std-env': 4.1.0
+  'svgo': 4.0.1
   'taze': 19.14.1
   # Vite 8.x is rolldown-native (keeps the fleet bundler rolldown end-to-end,
   # so esbuild never enters the tree). vitest 4.1.x pulls vite transitively;
   # the override below forces that transitive vite to this pin. Pinned to
   # 8.0.16+ to clear GHSA-fx2h-pf6j-xcff (server.fs.deny bypass, fixed 8.0.16).
-  'vite': 8.0.16
-  'vitest': 4.1.8
+  'typescript': 7.0.2
+  'vite': 8.1.0
+  'vitest': 4.1.9
 
 allowBuilds:
   '@anthropic-ai/claude-code': false
@@ -99,7 +115,6 @@ minimumReleaseAgeExclude:
   # per the fleet "no scope globs in soak excludes" rule.
   # rolldown's AST/types layer. rolldown 1.0.2 pins `=0.132.0`.
   # Zero-dep shell tokenizer + quoter. Vendored to power shell/parse +
-  - '@socketdev/*'
   - 'sfw'
   - '@stuie/*'
   - '@ultrathink/*'
@@ -108,122 +123,51 @@ minimumReleaseAgeExclude:
   # esbuild + its platform binaries — test-only browser-bundle e2e dep (the build
   # bundler is rolldown). All published 2026-06-11; the 7-day soak clears
   # 2026-06-18, after which this whole block is removable.
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/aix-ppc64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/android-arm@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/android-arm64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/android-x64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/darwin-arm64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/darwin-x64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/freebsd-arm64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/freebsd-x64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/linux-arm@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/linux-arm64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/linux-ia32@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/linux-loong64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/linux-mips64el@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/linux-ppc64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/linux-riscv64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/linux-s390x@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/linux-x64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/netbsd-arm64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/netbsd-x64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/openbsd-arm64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/openbsd-x64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/openharmony-arm64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/sunos-x64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/win32-arm64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/win32-ia32@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - '@esbuild/win32-x64@0.28.1'
-  # published: 2026-06-11 | removable: 2026-06-18
-  - 'esbuild@0.28.1'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-darwin-arm64@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-darwin-x64@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-freebsd-x64@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-linux-arm-gnu@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-linux-arm-musl@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-linux-arm64-gnu@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-linux-arm64-musl@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-linux-x64-gnu@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-linux-x64-musl@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-win32-arm64@0.5.31'
-  # published: 2026-06-09 | removable: 2026-06-16
-  - '@yuku-parser/binding-win32-x64@0.5.31'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - 'oxfmt@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-android-arm-eabi@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-android-arm64@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-darwin-arm64@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-darwin-x64@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-freebsd-x64@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-arm-gnueabihf@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-arm-musleabihf@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-arm64-gnu@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-arm64-musl@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-ppc64-gnu@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-riscv64-gnu@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-riscv64-musl@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-s390x-gnu@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-x64-gnu@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-linux-x64-musl@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-openharmony-arm64@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-win32-arm64-msvc@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-win32-ia32-msvc@0.54.0'
-  # published: 2026-06-08 | removable: 2026-06-15
-  - '@oxfmt/binding-win32-x64-msvc@0.54.0'
+  - '@sdxgen/*'
+  - 'sdxgen'
+  - 'stuie'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-aix-ppc64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-darwin-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-darwin-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-freebsd-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-freebsd-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-arm@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-loong64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-mips64el@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-ppc64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-riscv64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-s390x@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-linux-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-netbsd-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-netbsd-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-openbsd-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-openbsd-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-sunos-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-win32-arm64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - '@typescript/typescript-win32-x64@7.0.2'
+  # published: 2026-07-08 | removable: 2026-07-15
+  - 'typescript@7.0.2'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
@@ -233,6 +177,7 @@ minimumReleaseAgeExclude:
 # this). pnpm's current default is `false`; declared explicitly so a
 # future flip can't silently change install behavior.
 blockExoticSubdeps: true
+confirmModulesPurge: false
 
 # Force every consumer of Socket's own packages to resolve through the
 # catalog-pinned published versions. The `catalog:` form rewrites
@@ -269,7 +214,7 @@ overrides:
   'string-width@>=5': '8.1.0'
   'update-notifier@>=4.0.0': '7.3.1'
   'uuid': '11.1.1'
-  'which@>=4': '7.0.0'
+  'which': '7.0.0'
   'wrap-ansi@>=8': '9.0.2'
   'yaml@2': '2.9.0'
 
@@ -285,14 +230,12 @@ overrides:
   '@npmcli/promise-spawn': '9.0.1'
   '@npmcli/redact': '4.0.0'
   '@npmcli/run-script': '10.0.0'
-  '@sigstore/core': '3.1.0'
+  '@sigstore/core': '3.2.1'
   '@sigstore/sign': '4.1.0'
   'ansi-regex': '6.2.2'
   'brace-expansion': '5.0.6'
   'chownr': '3.0.0'
   'debug': '4.4.3'
-  'diff': '9.0.0'
-  'execa': '5.1.1'
   'fast-uri': '3.1.2'
   'has-flag': '5.0.1'
   # 4.12.25+ clears GHSA-88fw-hqm2-52qc (hono CORS wildcard+credentials reflect),
@@ -340,26 +283,47 @@ overrides:
   # Force EVERY transitive vite (via vitest, plugins) to the rolldown-native
   # 8.x catalog pin so esbuild never resolves into the tree.
   'vite': 'catalog:'
-  'which': '5.0.0'
+  'which@>=4': '7.0.0'
   'wrap-ansi': '9.0.2'
   'yaml': '2.9.0'
   'yoctocolors-cjs': '2.1.3'
 
 patchedDependencies:
+  # Indirects the `node-gyp/bin/node-gyp.js` require.resolve so the rolldown
+  # bundle doesn't statically inline node-gyp; consumer: pacote → run-script
+  # in the bundled dist tree.
   '@npmcli/run-script@10.0.0': patches/@npmcli__run-script@10.0.0.patch
+  # Replaces the node:http2 constants import with inline lowercase header
+  # literals so the browser bundle (which stubs http2 to false) can load the
+  # sigstore signer; consumer: packages/provenance via the browser field.
   '@sigstore/sign@4.1.0': patches/@sigstore__sign@4.1.0.patch
-  execa@5.1.1: patches/execa@5.1.1.patch
+  # minipass 7 ships a named export ({ Minipass }) where 3.x was a default;
+  # these three re-pin the import shape + peer range so the deduped minipass 7
+  # tree works; consumer: cacache/make-fetch-happen in src/external.
   minipass-flush@1.0.7: patches/minipass-flush@1.0.7.patch
+  # Same minipass 7 named-export fix, plus buffer.length → bufferLength for
+  # minipass 7's accessor rename; consumer: make-fetch-happen pipelines.
   minipass-pipeline@1.2.4: patches/minipass-pipeline@1.2.4.patch
+  # Same minipass 7 named-export + peer-range fix; consumer: cacache writes.
   minipass-sized@1.0.3: patches/minipass-sized@1.0.3.patch
+  # Drops the unused Find-VisualStudio.cs C# helper so the packed tree carries
+  # no compiled-language source a scanner would flag; consumer: optional gyp
+  # builds under allowBuilds.
   node-gyp@11.5.0: patches/node-gyp@11.5.0.patch
+  # Swaps `instanceof Error` for the cross-realm Error.isError (with shim) so
+  # cause chains survive vm/worker realms; consumer: errors/predicates parity
+  # with src's own isError semantics.
   pony-cause@2.1.11: patches/pony-cause@2.1.11.patch
 
-# Refuse to run if the pnpm version on PATH differs from the packageManager
-# field in package.json. Our setup action pins pnpm via external-tools.json;
-# any drift should fail fast, not silently auto-download via @pnpm/exe
-# (which in rc.5 leaves a placeholder launcher that errors at runtime).
-pmOnFail: error
+# Opt out of pnpm's packageManager-version self-check. CI installs pnpm from
+# its native bin via the shared setup workflow, not corepack, so the runner's
+# pnpm legitimately differs from the `packageManager` pin (which is a forgiving
+# floor `pnpm@>=<x>`, informational — not a version to enforce).
+managePackageManagerVersions: false
+
+# pnpm 11's packageManager-version-check failure policy. `warn` lets the install
+# proceed with a mismatched pnpm (emitting a warning) rather than hard-failing.
+pmOnFail: warn
 trustPolicy: no-downgrade
 trustPolicyExclude:
   # Transitive dep of @vitest/coverage-v8@4.1.6. Same maintainer
