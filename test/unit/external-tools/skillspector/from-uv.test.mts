@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import { venvEntryPoint } from '../../../../src/external-tools/skillspector/from-uv'
+import { describeUnixOnly } from '../../util/skip-helpers'
 
 import type * as NodeFs from 'node:fs'
 
@@ -43,7 +44,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe('skillspector/from-uv — venvEntryPoint', () => {
+describeUnixOnly('skillspector/from-uv — venvEntryPoint', () => {
   test('POSIX form is .venv/bin/skillspector', () => {
     const p = normalizePath(venvEntryPoint('/x'))
     // On the test host (non-win32) the POSIX branch is taken.
