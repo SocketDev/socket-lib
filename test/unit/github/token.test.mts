@@ -25,7 +25,7 @@ describe.sequential('github/token', () => {
   // body, which clears overrides but not process.env — a beforeEach mask would
   // be wiped by those. Restored in afterAll so sibling test files are unaffected.
   const TOKEN_ENV = ['GITHUB_TOKEN', 'GH_TOKEN']
-  const savedTokenEnv = { __proto__: null } as Record<
+  const savedTokenEnv = { __proto__: null } as unknown as Record<
     string,
     string | undefined
   >
