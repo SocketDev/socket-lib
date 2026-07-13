@@ -53,9 +53,6 @@ import type {
 // @ts-expect-error - external vendored module
 import type npmCliPromiseSpawnType from '../../external/@npmcli/promise-spawn'
 
-const abortSignal = getAbortSignal()
-const spinner = getDefaultSpinner()
-
 /**
  * Spawn a child process and return a promise that resolves when it completes.
  * Provides enhanced error handling, output capture, and cross-platform
@@ -135,11 +132,15 @@ export function spawn(
   extra?: SpawnExtra | undefined,
 ): SpawnResult {
   const {
-    spinner: optionsSpinner = spinner,
+    spinner: optionsSpinner,
     stripAnsi: shouldStripAnsi = true,
     ...rawSpawnOptions
   } = { __proto__: null, ...options } as SpawnOptions
-  const spinnerInstance = optionsSpinner
+  // Lazily acquire the default spinner at call time rather than capturing it at
+  // module-eval. Constructing it at import time pins a native handle into the
+  // module, which aborts V8 --build-snapshot of anything that transitively
+  // imports this module. An explicit options.spinner still wins.
+  const spinnerInstance = optionsSpinner ?? getDefaultSpinner()
   const spawnOptions = { __proto__: null, ...rawSpawnOptions }
   const { env, shell, stdio, stdioString = true } = spawnOptions
   const cwd = spawnOptions.cwd ? String(spawnOptions.cwd) : undefined
@@ -249,7 +250,7 @@ export function spawn(
     __proto__: null,
     cwd: typeof spawnOptions.cwd === 'string' ? spawnOptions.cwd : undefined,
     env: envToUse,
-    signal: abortSignal,
+    signal: getAbortSignal(),
     stdio: spawnOptions.stdio,
     stdioString,
     shell: spawnOptions.shell,

@@ -48,11 +48,13 @@ const RELEASE_BASE =
   'https://github.com/astral-sh/python-build-standalone/releases/download'
 
 /**
- * Python-build-standalone default pin — the fleet-canonical CPython build,
+ * Python-build-standalone default pin — the Socket-canonical CPython build,
  * matching socket-cli's `bundle-tools.json`. Consumers that don't pass their
  * own pin resolve against this. Bump it like any dependency (soak-aware), in
  * lockstep with socket-cli (drift-watch). The `checksums` map is keyed by asset
  * filename so the download tier verifies the exact tarball per platform.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export const DEFAULT_PYTHON_PIN = ObjectFreeze({
   __proto__: null,

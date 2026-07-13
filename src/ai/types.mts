@@ -1,5 +1,5 @@
 /**
- * @file Shared types for the locked-down AI agent surface. The fleet runs
+ * @file Shared types for the locked-down AI agent surface. Socket runs
  *   Claude / Codex / OpenCode / Gemini through CLI subprocesses, never via SDK
  *   calls. These types model the cross- agent contract: a permission mode, a
  *   tool allowlist, a tool denylist, a prompt, a working directory. Per-agent
@@ -15,7 +15,7 @@
 export type AiAgentName = 'claude' | 'codex' | 'gemini' | 'opencode'
 
 /**
- * Permission mode passed to the agent's CLI. The fleet rule (CLAUDE.md
+ * Permission mode passed to the agent's CLI. Socket's rule (CLAUDE.md
  * "Programmatic Claude calls") requires every headless call to set one of these
  * explicitly — never the agent's default.
  *
@@ -108,6 +108,13 @@ export interface SpawnAiAgentOptions {
    * claude-specific — other agents ignore it.
    */
   readonly effort?: AiEffort | undefined
+  /**
+   * Extra environment variables for the spawned agent process, merged over the
+   * inherited env. Gated off by default (inherit-only when absent). Used by
+   * egress-containment callers to inject `HTTP_PROXY` / `NODE_OPTIONS`; no
+   * effect when omitted.
+   */
+  readonly env?: Readonly<Record<string, string>> | undefined
   /**
    * Override the agent's flag list (rare; for one-off advanced cases).
    */

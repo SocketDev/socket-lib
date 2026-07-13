@@ -1,5 +1,5 @@
 /**
- * @file Public type surface for `secrets/*`. Secrets in the fleet are stored
+ * @file Public type surface for `secrets/*`. Secrets in Socket tools are stored
  *   under the OS's native credential store keyed by `{ service, account }`:
  *
  *   - macOS: Keychain generic-password items (service = `-s`, account = `-a`

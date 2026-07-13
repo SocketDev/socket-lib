@@ -9,7 +9,11 @@ export interface SemVerParsed {
 
 export function coerce(version: string | number): { version: string } | null
 export function compare(v1: string, v2: string): -1 | 0 | 1
-export function satisfies(version: string, range: string): boolean
+export function satisfies(
+  version: string,
+  range: string,
+  options?: RangeOptions | boolean,
+): boolean
 export function parse(version: string): SemVerParsed | null
 export function inc(
   version: string,
@@ -21,7 +25,10 @@ export function gt(version1: string, version2: string): boolean
 export function gte(version1: string, version2: string): boolean
 export function lt(version1: string, version2: string): boolean
 export function lte(version1: string, version2: string): boolean
-export function valid(version: string): string | null
+export function valid(
+  version: string,
+  options?: RangeOptions | boolean,
+): string | null
 export interface RangeOptions {
   includePrerelease?: boolean
   loose?: boolean

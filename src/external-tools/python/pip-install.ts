@@ -88,11 +88,9 @@ export async function downloadPipPackage(
       return downloadPipPackage(options, retryCount + 1)
     }
     for (let i = 0; i < WAIT_TICKS; i += 1) {
-      // eslint-disable-next-line no-await-in-loop -- sequential poll by design.
       await new Promise(resolve => {
         setTimeout(resolve, 1000)
       })
-      // eslint-disable-next-line no-await-in-loop -- sequential poll by design.
       if (await isAlreadyInstalled(packageDir)) {
         return { installed: false, packageDir }
       }

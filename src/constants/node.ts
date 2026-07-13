@@ -145,6 +145,8 @@ export function getNodeNoWarningsFlags(): string[] {
  * Get the patch component of the current Node.js version.
  *
  * @returns The patch version number, or `0` if it cannot be parsed.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function getNodePatchVersion(): number {
   // Defensive `?? '0'` against malformed process.version.
@@ -200,6 +202,8 @@ export function getNodeVersion(): string {
  * API. The API is available on Node.js 24+.
  *
  * @returns `true` when the current runtime is Node.js 24 or newer.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function supportsNodeCompileCacheApi(): boolean {
   const major = getNodeMajorVersion()
@@ -211,6 +215,8 @@ export function supportsNodeCompileCacheApi(): boolean {
  * Env-var-based compile caching is available on Node.js 22+.
  *
  * @returns `true` when the current runtime is Node.js 22 or newer.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function supportsNodeCompileCacheEnvVar(): boolean {
   const major = getNodeMajorVersion()
@@ -252,6 +258,8 @@ export function supportsNodeDisableSigusr1Flag(): boolean {
  * The flag is available on Node.js 21+.
  *
  * @returns `true` when the current runtime is Node.js 21 or newer.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function supportsNodeDisableWarningFlag(): boolean {
   const major = getNodeMajorVersion()
@@ -263,6 +271,8 @@ export function supportsNodeDisableWarningFlag(): boolean {
  * (`--experimental-permission` on Node 20-23, `--permission` on Node 24+).
  *
  * @returns `true` when the current runtime is Node.js 20 or newer.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function supportsNodePermissionFlag(): boolean {
   const major = getNodeMajorVersion()
@@ -274,6 +284,8 @@ export function supportsNodePermissionFlag(): boolean {
  * Node.js 22.12+ or Node.js 23+.
  *
  * @returns `true` when the runtime supports `require()`-ing ES modules.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function supportsNodeRequireModule(): boolean {
   const major = getNodeMajorVersion()
@@ -335,6 +347,8 @@ export function supportsNodeStripTypesDefault(): boolean {
  * `process.send()` is callable to message the parent process.
  *
  * @returns `true` when the current process has an IPC channel to its parent.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function supportsProcessSend(): boolean {
   return typeof process.send === 'function'

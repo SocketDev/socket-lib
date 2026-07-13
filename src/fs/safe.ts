@@ -250,14 +250,19 @@ export function safeDeleteSync(
       lastError = e as Error
       if (attempt < maxRetries) {
         // Sync sleep using Atomics.wait on a SharedArrayBuffer.
-        // This is a blocking wait that doesn't spin the CPU.
+        // This is a blocking wait that doesn't spin the CPU. Without
+        // SharedArrayBuffer (non-cross-origin-isolated browsers; the V8
+        // snapshot builder) skip the sleep and retry immediately — the
+        // backoff is an optimization, not a correctness requirement.
         const waitMs = delay
-        AtomicsWait(
-          new Int32ArrayCtor(new SharedArrayBufferCtor(4)),
-          0,
-          0,
-          waitMs,
-        )
+        if (SharedArrayBufferCtor !== undefined) {
+          AtomicsWait(
+            new Int32ArrayCtor(new SharedArrayBufferCtor(4)),
+            0,
+            0,
+            waitMs,
+          )
+        }
         delay *= 2 // Exponential backoff
       }
     }

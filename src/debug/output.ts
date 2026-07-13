@@ -7,19 +7,21 @@
  *   for the divider.
  */
 
-import debugJs from '../external/debug'
+import { IS_NODE } from '../constants/runtime'
+import { getDefaultLogger } from '../logger/default'
 import { ArrayPrototypeAt, ArrayPrototypeSlice } from '../primordials/array'
 import { DateNow } from '../primordials/date'
 import { ReflectApply } from '../primordials/reflect'
 import { getDefaultSpinner } from '../spinner/default'
 import { applyLinePrefix } from '../strings/format'
 
-import { getPointingTriangle, getUtil, logger } from './_internal'
+import { getDebugJs, getPointingTriangle, getUtil } from './_internal'
 import { getCallerInfo } from './caller-info'
 import { extractOptions, isEnabled } from './namespace'
 
 import { getSocketDebug } from '../env/socket'
 
+import type { SpinnerInstance } from '../spinner/types'
 import type { InspectOptions, NamespacesOrOptions } from './types'
 
 /**
@@ -57,6 +59,7 @@ export function debugCache(
   const pointingTriangle = getPointingTriangle()
   const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
   const args = meta !== undefined ? [prefix, meta] : [prefix]
+  const logger = getDefaultLogger()
   ReflectApply(logger.info, logger, args)
 }
 
@@ -86,9 +89,10 @@ export function debugCacheNs(
   const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
   const logArgs = meta !== undefined ? [prefix, meta] : [prefix]
 
-  const spinnerInstance = options.spinner || getDefaultSpinner()
+  const spinnerInstance = options.spinner || getSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
+  const logger = getDefaultLogger()
   ReflectApply(logger.info, logger, logArgs)
   if (wasSpinning) {
     spinnerInstance?.start()
@@ -132,9 +136,9 @@ export function debugDirNs(
   // caller omits inspectOpts AND debugJs has populated its global
   // inspectOpts (DEBUG_INSPECT_OPTIONS env var, etc.) — not the
   // common test path.
-  /* c8 ignore start */
+  /* c8 ignore start - inspectOpts fallback needs DEBUG_INSPECT_OPTIONS env */
   if (opts === undefined) {
-    const debugOpts = debugJs.inspectOpts
+    const debugOpts = getDebugJs().inspectOpts
     if (debugOpts) {
       opts = {
         ...debugOpts,
@@ -148,9 +152,10 @@ export function debugDirNs(
     }
   }
   /* c8 ignore stop */
-  const spinnerInstance = options.spinner || getDefaultSpinner()
+  const spinnerInstance = options.spinner || getSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
+  const logger = getDefaultLogger()
   logger.info(`[DEBUG] ${callerName} ${pointingTriangle} object inspection:`)
   logger.dir(obj, inspectOpts)
   if (wasSpinning) {
@@ -195,9 +200,10 @@ export function debugLogNs(
         ]
       : [`[DEBUG] ${callerName} ${pointingTriangle}`, ...args]
 
-  const spinnerInstance = options.spinner || getDefaultSpinner()
+  const spinnerInstance = options.spinner || getSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
+  const logger = getDefaultLogger()
   ReflectApply(logger.info, logger, logArgs)
   if (wasSpinning) {
     spinnerInstance?.start()
@@ -232,9 +238,10 @@ export function debugNs(
           ...ArrayPrototypeSlice(args, 1),
         ]
       : args
-  const spinnerInstance = options.spinner || getDefaultSpinner()
+  const spinnerInstance = options.spinner || getSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
+  const logger = getDefaultLogger()
   ReflectApply(logger.info, logger, logArgs)
   if (wasSpinning) {
     spinnerInstance?.start()
@@ -278,4 +285,17 @@ export function debugtime(label: string) {
     }
   }
   return impl
+}
+
+/**
+ * Resolve the default spinner on Node; off Node (browser bundles) there is no
+ * spinner — callers no-op through their optional chains. Construction is
+ * deferred to first debug write (every call site sits behind the `isEnabled`
+ * / `getSocketDebug` gates), so a browser bundle never constructs the
+ * node-bound spinner even when debug output is force-enabled.
+ *
+ * @private
+ */
+export function getSpinner(): SpinnerInstance | undefined {
+  return IS_NODE ? getDefaultSpinner() : undefined
 }

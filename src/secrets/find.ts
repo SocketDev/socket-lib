@@ -1,8 +1,8 @@
 /**
- * @file Resolve a secret from the canonical fleet precedence order: process env
+ * @file Resolve a secret from the canonical Socket precedence order: process env
  *   → OS keychain. Returns the value + the source it came from so the caller
  *   can log which slot won. Why a helper instead of inlining: every consumer of
- *   the fleet's Socket API token does the same dance — check
+ *   the Socket API token does the same dance — check
  *   `process.env.SOCKET_API_TOKEN`, fall back to a legacy env-var alias, fall
  *   back to `readSecret({...})` from the keychain. Tools drift on the exact
  *   order and on which aliases they consider. This helper centralizes the

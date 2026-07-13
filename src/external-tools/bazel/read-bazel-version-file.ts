@@ -27,7 +27,6 @@ export async function readBazelVersionFile(
   let current = path.resolve(startDir)
   while (true) {
     const candidate = path.join(current, BAZEL_VERSION_FILE)
-    // eslint-disable-next-line no-await-in-loop
     const content = await safeReadFile(candidate, { encoding: 'utf8' })
     if (content !== undefined) {
       // Strip comments (anything after `#` on a line) + trim.

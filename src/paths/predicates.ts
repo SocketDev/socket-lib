@@ -144,6 +144,7 @@ export function isPath(pathLike: string | Buffer | URL): boolean {
     return true
   }
 
+  // oxlint-disable-next-line socket/normalize-path-before-match -- classifier inspects RAW separators by design; normalizing would erase the backslash signal branched on below.
   if (filepath.includes('/') || filepath.includes('\\')) {
     // Distinguish scoped package names from paths starting with '@'.
     // Scoped packages: @scope/name (exactly 2 parts, no backslashes).
@@ -152,6 +153,7 @@ export function isPath(pathLike: string | Buffer | URL): boolean {
       StringPrototypeStartsWith(filepath, '@') &&
       !StringPrototypeStartsWith(filepath, '@/')
     ) {
+      // oxlint-disable-next-line socket/normalize-path-before-match -- raw input intentionally split; a backslash here means Windows path, not scoped package.
       const parts = filepath.split('/')
       if (parts.length <= 2 && !parts[1]?.includes('\\')) {
         return false

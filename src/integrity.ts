@@ -32,7 +32,7 @@ import { StringPrototypeToLowerCase } from './primordials/string'
 
 /**
  * SRI-blessed hash algorithms. The W3C set; the prefix is part of the wire
- * format, not a fleet convention.
+ * format, not a Socket convention.
  */
 export type HashAlgorithm = 'sha256' | 'sha384' | 'sha512'
 
@@ -115,7 +115,7 @@ export interface ParsedIntegrity {
 const INTEGRITY_RE = /^(sha(?:256|384|512))-([A-Za-z0-9+/]+=*)$/
 // Bare lowercase-or-upper hex digest of any length; the length picks the algo.
 const HEX_RE = /^[a-f0-9]+$/i
-// Exactly 64 hex chars — the sha256 checksum shape, by fleet convention.
+// Exactly 64 hex chars — the sha256 checksum shape, by Socket convention.
 const CHECKSUM_RE = /^[a-f0-9]{64}$/i
 
 // Hex-digest length (chars) per algorithm, and the reverse map for inferring an
@@ -238,7 +238,7 @@ export function integrityToChecksum(input: string): string {
   const parsed = parseIntegrity(input)
   if (parsed.algorithm !== 'sha256') {
     throw new TypeErrorCtor(
-      `integrityToChecksum: ${parsed.algorithm} integrity has no 64-hex-char checksum form — checksums are sha256-only by fleet convention. Use parseHash(x).hex for any algorithm.`,
+      `integrityToChecksum: ${parsed.algorithm} integrity has no 64-hex-char checksum form — checksums are sha256-only by Socket convention. Use parseHash(x).hex for any algorithm.`,
     )
   }
   return BufferPrototypeToString!(BufferFrom!(parsed.body, 'base64'), 'hex')
@@ -437,5 +437,7 @@ export class HashMismatchError extends Error {
 /**
  * @deprecated Renamed to {@link HashMismatchError}. Alias kept for callers that
  *   catch the old name.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export const DlxHashMismatchError = HashMismatchError

@@ -46,7 +46,9 @@ export function search(
 ): number {
   const { fromIndex = 0 } = { __proto__: null, ...options } as SearchOptions
   const { length } = str
-  if (fromIndex >= length) {
+  // `fromIndex === length` is still a valid start: a zero-width pattern
+  // (e.g. /c?/) can match the empty tail. Only past-the-end is a miss.
+  if (fromIndex > length) {
     return -1
   }
   if (fromIndex === 0) {

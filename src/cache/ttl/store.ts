@@ -24,13 +24,19 @@ import { TypeErrorCtor } from '../../primordials/error'
 import { JSONParse, JSONStringify } from '../../primordials/json'
 import { MapCtor } from '../../primordials/map-set'
 import { MathMax } from '../../primordials/math'
-import { RegExpCtor, RegExpPrototypeTest } from '../../primordials/regexp'
 import {
   StringPrototypeIncludes,
-  StringPrototypeReplaceAll,
   StringPrototypeSlice,
-  StringPrototypeStartsWith,
 } from '../../primordials/string'
+
+import {
+  createKeyMatcher,
+  DEFAULT_MEMO_MAX_SIZE,
+  DEFAULT_PREFIX,
+  DEFAULT_TTL_MS,
+  isExpiredEntry,
+  lruSet,
+} from './_internal'
 
 import type {
   ClearOptions,
@@ -38,15 +44,6 @@ import type {
   TtlCacheEntry,
   TtlCacheOptions,
 } from './types'
-
-// 5 minutes
-const DEFAULT_TTL_MS = 5 * 60 * 1000
-const DEFAULT_PREFIX = 'ttl-cache'
-// Cap the in-memory memoization layer. Without this, a long-running
-// daemon (devserver, editor extension) that queries many distinct keys
-// accumulates entries forever — expired entries are only reclaimed when
-// that exact key is read again. Cacache on disk is unaffected.
-const DEFAULT_MEMO_MAX_SIZE = 1000
 
 /**
  * Create a TTL-based cache instance.
@@ -76,32 +73,17 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
   }
 
   // In-memory cache for hot data. Capped via opts.memoMaxSize using a
-  // Map's insertion-order semantics as the LRU list: `memoSet` deletes
-  // the key first so a re-insert moves it to the tail, and when size
-  // exceeds the cap we evict the oldest entry (first key in iteration).
+  // Map's insertion-order semantics as the LRU list (see `lruSet`).
   const memoCache = new MapCtor<string, TtlCacheEntry<unknown>>()
   const memoMaxSize = MathMax(1, opts.memoMaxSize ?? DEFAULT_MEMO_MAX_SIZE)
 
   function memoSet(fullKey: string, entry: TtlCacheEntry<unknown>): void {
-    // LRU has-existing tested via re-set; size>=max requires the cache
-    // to fill (default 100). The oldest!==undefined guard is defensive
-    // and unreachable when size>=max.
-    /* c8 ignore start */
-    if (memoCache.has(fullKey)) {
-      memoCache.delete(fullKey)
-    } else if (memoCache.size >= memoMaxSize) {
-      const oldest = memoCache.keys().next().value
-      if (oldest !== undefined) {
-        memoCache.delete(oldest)
-      }
-    }
-    /* c8 ignore stop */
-    memoCache.set(fullKey, entry)
+    lruSet(memoCache, memoMaxSize, fullKey, entry)
   }
 
   // Ensure ttl is defined. opts.ttl-undefined arm fires for default-ttl
   // callers which is the common case.
-  /* c8 ignore next */
+  /* c8 ignore next - default-ttl fallback arm */
   const ttl = opts.ttl ?? DEFAULT_TTL_MS
 
   /**
@@ -111,44 +93,12 @@ export function createTtlCache(options?: TtlCacheOptions): TtlCache {
     return `${opts.prefix}:${key}`
   }
 
-  /**
-   * Check if entry is expired. Also detects clock skew by treating suspiciously
-   * far-future expiresAt as expired.
-   */
   function isExpired(entry: TtlCacheEntry<unknown>): boolean {
-    const now = DateNow()
-    // Detect future expiresAt (clock skew or corruption).
-    // If expiresAt is more than 10 seconds past expected expiry, treat as expired.
-    const maxFutureMs = 10_000
-    if (entry.expiresAt > now + ttl + maxFutureMs) {
-      return true
-    }
-    return now > entry.expiresAt
+    return isExpiredEntry(entry, ttl)
   }
 
-  /**
-   * Create a matcher function for a pattern (with wildcard support). Returns a
-   * function that tests if a key matches the pattern.
-   */
   function createMatcher(pattern: string): (key: string) => boolean {
-    const fullPattern = buildKey(pattern)
-    const hasWildcard = pattern.includes('*')
-
-    if (!hasWildcard) {
-      // Simple prefix matching (fast path).
-      return (key: string) => StringPrototypeStartsWith(key, fullPattern)
-    }
-
-    // Wildcard matching with regex. Anchor both ends so `foo*bar` matches
-    // exactly `foo<anything>bar` and not `foo<anything>bar<anything else>`.
-    const escaped = StringPrototypeReplaceAll(
-      fullPattern,
-      /[.+?^${}()|[\]\\]/g,
-      '\\$&',
-    )
-    const regexPattern = StringPrototypeReplaceAll(escaped, '*', '.*')
-    const regex = new RegExpCtor(`^${regexPattern}$`)
-    return (key: string) => RegExpPrototypeTest(regex, key)
+    return createKeyMatcher(opts.prefix ?? DEFAULT_PREFIX, pattern)
   }
 
   async function get<T>(key: string): Promise<T | undefined> {

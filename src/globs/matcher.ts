@@ -103,7 +103,7 @@ export function getGlobMatcher(
   // out of both defaults (`nocase: false` AND `dot: false`),
   // signaling "I want strict, case-sensitive, no-dotfile-match" —
   // which is exactly what `path.matchesGlob` provides. No caller in
-  // the fleet does this today, but the path is correct + auditable.
+  // Socket does this today, but the path is correct + auditable.
   let matcher: ((path: string) => boolean) | undefined
   /* c8 ignore start */
   if (

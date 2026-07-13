@@ -25,7 +25,7 @@ const RETRY_AFTER_INT_RE = /^\d+$/
  * Build an HTTP Basic `Authorization` header value from a Socket API token.
  *
  * The Socket API uses the token as the username with an empty password, so the
- * credential pair is `<token>:`. Centralized here so every fleet caller emits
+ * credential pair is `<token>:`. Centralized here so every Socket caller emits
  * the identical shape instead of hand-rolling `btoa(\`${token}:`)`.
  *
  * @example
@@ -45,7 +45,7 @@ export function basicAuthHeader(token: string): string {
 // Match credential-bearing header names by shape rather than an enumerated
 // list. A fixed list reads as complete while silently missing real headers
 // (x-amz-security-token, api-key, x-functions-key, …); a name pattern catches
-// the family. Same reasoning as the fleet's "a denylist is itself a leak" —
+// the family. Same reasoning as Socket's "a denylist is itself a leak" —
 // don't try to name every secret, recognize the shape. The standard auth /
 // cookie / proxy headers all contain one of these tokens, so they stay covered.
 const SENSITIVE_HEADER_NAME_RE =

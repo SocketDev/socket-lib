@@ -61,7 +61,6 @@ export function applyShimmer(
       chars.length,
     )
     const colors = frameColors(spec, chars.length, shimmer.frame)
-    // eslint-disable-next-line no-param-reassign
     shimmer.frame++
     return colorsToAnsi(displayText, colors)
   }

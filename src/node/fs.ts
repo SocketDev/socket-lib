@@ -12,11 +12,10 @@
  *   load-time snapshot. Two surfaces: `getNodeFs()` returns the module object
  *   with LATE method lookup (spy-able — the test seam); the `fs<Method>` consts
  *   (`fsExistsSync`, `fsReadFileSync`, …) are method references FROZEN at load
- *   (tamper-proof against a method swap, not spy-able), for the fleet's hot fs
+ *   (tamper-proof against a method swap, not spy-able), for Socket's hot fs
  *   calls. Both stay browser-safe behind IS_NODE + `/*@__PURE__*\/`.
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeFs from 'node:fs'
 
 import { IS_NODE } from '../constants/runtime'
@@ -40,7 +39,7 @@ export function getNodeFs(): typeof NodeFs {
 }
 
 // ── Frozen hot-method snapshots ──────────────────────────────────────
-// The fleet's hottest fs methods, captured by reference at load off the
+// Socket's hottest fs methods, captured by reference at load off the
 // IS_NODE-gated module (undefined in a browser, where the browser field stubs
 // `fs` to false). Node's fs sync methods are standalone functions (no `this`
 // binding needed — verified), so a plain member read freezes the reference:

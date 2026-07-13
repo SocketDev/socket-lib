@@ -38,8 +38,8 @@ export function getEastAsianWidth() {
   return cachedEastAsianWidth!
 }
 
-// Initialize Intl.Segmenter for proper grapheme cluster segmentation.
-// Hoisted outside stringWidth() for reuse across multiple calls.
+// Intl.Segmenter for proper grapheme cluster segmentation, created once and
+// reused across calls.
 //
 // A grapheme cluster is what a user perceives as a single character, but may
 // be composed of multiple Unicode code points.
@@ -53,13 +53,22 @@ export function getEastAsianWidth() {
 // Without Intl.Segmenter, simple iteration treats each code point separately,
 // leading to incorrect width calculations for complex sequences.
 //
-// Intl.Segmenter is available in:
-// - Node.js 16.0.0+ (our minimum is 18.0.0, so always available)
-// - All modern browsers
+// Intl.Segmenter is available in Node.js 16+ (our floor is 18) and all modern
+// browsers.
 //
-// Performance: Creating this once and reusing it is more efficient than
-// creating a new Intl.Segmenter instance on every stringWidth() call.
-const segmenter = new IntlSegmenter()
+// Construction is DEFERRED to first stringWidth() call (not module-eval): an
+// Intl.Segmenter holds a live ICU [Foreign] handle, and constructing it at
+// import time pins that handle into every module transitively importing this
+// leaf — aborting V8 --build-snapshot serialization. The memoized getter keeps
+// the create-once/reuse performance win while staying snapshot-safe (mirrors
+// the lazy getEastAsianWidth() accessor above).
+let segmenter: Intl.Segmenter | undefined
+export function getSegmenter(): Intl.Segmenter {
+  if (segmenter === undefined) {
+    segmenter = new IntlSegmenter()
+  }
+  return segmenter
+}
 
 // Feature-detect Unicode property escapes support and create regex patterns.
 // Hoisted outside stringWidth() for reuse across multiple calls.
@@ -137,7 +146,7 @@ export function stringWidth(text: string): number {
   const eastAsianWidth = getEastAsianWidth()
 
   // Segment the string into grapheme clusters and calculate width for each.
-  for (const { segment } of segmenter.segment(plainText)) {
+  for (const { segment } of getSegmenter().segment(plainText)) {
     // Skip zero-width / non-printing clusters (controls, combining marks).
     if (RegExpPrototypeTest(zeroWidthClusterRegex, segment)) {
       continue
@@ -167,7 +176,9 @@ export function stringWidth(text: string): number {
     // These are spacing characters (not combining marks) so they add
     // their own column(s) when following another character.
     if (segment.length > 1) {
-      for (const char of segment.slice(1)) {
+      const trailingChars = segment.slice(1)
+      for (let i = 0, { length } = trailingChars; i < length; i += 1) {
+        const char = trailingChars[i]!
         const charCode = StringPrototypeCharCodeAt(char, 0)
         if (charCode >= 0xff_00 && charCode <= 0xff_ef) {
           const trailingCodePoint = StringPrototypeCodePointAt(char, 0)

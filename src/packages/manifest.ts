@@ -15,7 +15,6 @@ import {
 
 import npmPackageArg from '../external/npm-package-arg'
 import pacote from '../external/pacote'
-import semver from '../external/semver'
 
 import { isArray } from '../arrays/predicates'
 import { isPlainObject } from '../objects/predicates'
@@ -26,7 +25,7 @@ import { isRegistryFetcherType } from './validation'
 import type { PackageJson, PacoteOptions } from './types'
 
 import { ObjectFromEntries, ObjectKeys } from '../primordials/object'
-const abortSignal = getAbortSignal()
+import { getSemver } from '../versions/_internal'
 const packageDefaultNodeRange = getPackageDefaultNodeRange()
 const PACKAGE_DEFAULT_SOCKET_CATEGORIES = getPackageDefaultSocketCategories()
 const packumentCache = getPackumentCache()
@@ -105,6 +104,7 @@ export function createPackageJson(
                 ) {
                   // Roughly check Node range as semver.coerce will strip leading
                   // v's, carets (^), comparators (<,<=,>,>=,=), and tildes (~).
+                  const semver = getSemver()
                   const coercedRange = semver.coerce(range)
                   if (
                     !semver.satisfies(
@@ -147,7 +147,7 @@ export async function fetchPackageManifest(
 ): Promise<unknown> {
   const pacoteOptions = {
     __proto__: null,
-    signal: abortSignal,
+    signal: getAbortSignal(),
     ...options,
     packumentCache,
     preferOffline: true,
@@ -198,7 +198,7 @@ export async function fetchPackagePackument(
   try {
     return await pacote.packument(pkgNameOrId, {
       __proto__: null,
-      signal: abortSignal,
+      signal: getAbortSignal(),
       ...options,
       packumentCache,
       preferOffline: true,

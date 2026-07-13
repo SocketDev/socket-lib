@@ -68,7 +68,7 @@ export interface UvDownloadOptions {
    */
   version: string
   /**
-   * Fleet platform-arch token — looked up in `UV_ASSET_MAP`.
+   * Socket platform-arch token — looked up in `UV_ASSET_MAP`.
    */
   platformArch: string
 }

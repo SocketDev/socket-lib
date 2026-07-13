@@ -6,7 +6,7 @@ socket-basics uses it for container and filesystem scanning.
 ## Why it's here
 
 Trivy is a single Go binary that does a lot — container scanning, IaC misconfig
-detection, SBOM generation, secret scanning. We pin one version per fleet
+detection, SBOM generation, secret scanning. We pin one version per Socket
 release; this resolver lets every Socket product use the same pinned copy
 without each one re-implementing the download dance.
 

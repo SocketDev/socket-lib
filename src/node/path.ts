@@ -5,7 +5,6 @@
  *   load-time snapshot in Node while staying browser-safe.
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
 import type * as NodePath from 'node:path'
 
 import { IS_NODE } from '../constants/runtime'
@@ -21,7 +20,7 @@ export function getNodePath(): typeof NodePath {
 }
 
 // ── Frozen hot-method snapshots ──────────────────────────────────────
-// The fleet's hottest path methods, captured by reference at load off the
+// Socket's hottest path methods, captured by reference at load off the
 // IS_NODE-gated module (undefined in a browser). path methods are standalone
 // (no `this`), so a member read freezes the reference; a later
 // `nodePath.join = evil` can't redirect these. Frozen refs aren't spy-able —

@@ -364,7 +364,7 @@ export function resolveRealBinSync(binPath: string): string {
         // to a directory. The lint rule recommends existsSync, but
         // that loses the file-vs-directory signal.
         try {
-          // oxlint-disable-next-line socket/prefer-exists-sync
+          // oxlint-disable-next-line socket/prefer-exists-sync -- statSync needed to discriminate files from directories
           const stats = fs.statSync(baseBinPath)
           // Only use this path if it's a file (the shell script).
           if (stats.isFile()) {

@@ -212,7 +212,7 @@ export interface HttpRequestOptions {
     | undefined
   /**
    * Number of retry attempts for failed requests. Uses exponential backoff:
-   * delay = `retryDelay` * 2^attempt.
+   * delay = min(`retryDelay` * 2^attempt, `retryDelayMax`).
    *
    * @default 0
    */
@@ -224,6 +224,15 @@ export interface HttpRequestOptions {
    * @default 1000
    */
   retryDelay?: number | undefined
+  /**
+   * Maximum delay in milliseconds for a single backoff wait. Caps the
+   * exponential growth (`retryDelay` * 2^attempt) so a high `retries` count
+   * can't produce multi-minute waits. An explicit `onRetry`-returned delay is
+   * not capped — that is the caller's deliberate choice.
+   *
+   * @default 30000
+   */
+  retryDelayMax?: number | undefined
   /**
    * AbortSignal forwarded to the underlying `http.request` / `https.request`
    * call. Supported in Node 22+ via `node:http` request options. When both

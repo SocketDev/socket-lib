@@ -3,7 +3,7 @@
  *   accessor so callers don't have to thread the lazy-load themselves.
  */
 
-import { getSemver } from './_internal'
+import { getSemver } from '../versions/_internal'
 
 /**
  * Compare semantic versions.

@@ -9,6 +9,8 @@
  * project by probing `typescript/lib`.
  *
  * @returns `true` when the `typescript` package's libs can be resolved.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function getTsLibsAvailable(): boolean {
   try {
@@ -19,6 +21,9 @@ export function getTsLibsAvailable(): boolean {
   }
 }
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function getTsTypesAvailable(): boolean {
   try {
     require.resolve('typescript/lib/lib.d.ts')

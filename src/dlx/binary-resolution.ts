@@ -93,7 +93,8 @@ export function findBinaryPath(
           packageName.replace(/^@[^/]+\//, ''),
         ].filter(Boolean)
 
-        for (const candidate of candidates) {
+        for (let i = 0, { length } = candidates; i < length; i += 1) {
+          const candidate = candidates[i]!
           if (candidate && binObj[candidate]) {
             binName = candidate
             binPath = binObj[candidate]

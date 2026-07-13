@@ -12,9 +12,9 @@
  *   https://github.com/CycloneDX/cdxgen/releases/download/v<X.Y.Z>/cdxgen-<os>-<arch>[-musl][-slim][.exe]
  *   Reference: https://github.com/CycloneDX/cdxgen/releases. Single source of
  *   truth: the SEA binary IS the install path. The legacy `@cyclonedx/cdxgen`
- *   npm package is not used as a fallback — every platform-arch the fleet
- *   supports has a SEA build, and routing through npm for unsupported targets
- *   would silently use a different distribution (different bundle composition,
+ *   npm package is not used as a fallback — every platform-arch Socket supports
+ *   has a SEA build, and routing through npm for unsupported targets would
+ *   silently use a different distribution (different bundle composition,
  *   different startup cost, different version-pin surface). One install path;
  *   one cached binary.
  */
@@ -41,8 +41,8 @@ export interface CdxgenDownloadOptions {
    */
   version: string
   /**
-   * Fleet platform-arch token — looked up in the asset map. Returns `undefined`
-   * when no entry exists for the target.
+   * Socket platform-arch token — looked up in the asset map. Returns
+   * `undefined` when no entry exists for the target.
    */
   platformArch: string
   /**

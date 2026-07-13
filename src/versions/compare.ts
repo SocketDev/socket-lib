@@ -14,10 +14,14 @@
  *     "invalid version" throw into `undefined` for the caller's convenience;
  *     all other ops surface whatever the underlying impl returns. The vendored
  *     `semver` export has no `neq` helper, so when we fall back to it we route
- *     `neq` through `!eq` to match smol's semantics.
+ *     `neq` through `!eq` to match smol's semantics. Snapshot safety: each
+ *     export is a thin forwarding function that resolves `getImpl()` at FIRST
+ *     CALL, not at module-eval. Binding the impl methods at module load
+ *     (`impl.eq.bind(impl)`) pinned the native-handle-bearing semver/npm-pack
+ *     bundle into the heap and aborted `node --build-snapshot`.
  */
 
-import { impl } from './_internal'
+import { getImpl } from './_internal'
 
 /**
  * Compare two semantic version strings.
@@ -26,7 +30,7 @@ import { impl } from './_internal'
  */
 export function compare(a: string, b: string): -1 | 0 | 1 | undefined {
   try {
-    return impl.compare(a, b) as -1 | 0 | 1
+    return getImpl().compare(a, b) as -1 | 0 | 1
   } catch {
     return undefined
   }
@@ -35,44 +39,59 @@ export function compare(a: string, b: string): -1 | 0 | 1 | undefined {
 /**
  * Check if a equals b.
  */
-export const eq: (a: string, b: string) => boolean = impl.eq.bind(impl)
-
-/**
- * Check if a does not equal b.
- */
-/* c8 ignore start - smol-versions exposes .neq, so the bind arm is taken;
-   the polyfill fallback fires only on a hypothetical impl that lacks .neq. */
-export const neq: (a: string, b: string) => boolean =
-  typeof (impl as { neq?: unknown | undefined }).neq === 'function'
-    ? (impl as { neq: (a: string, b: string) => boolean }).neq.bind(impl)
-    : (a, b) => !impl.eq(a, b)
-/* c8 ignore stop */
+export function eq(a: string, b: string): boolean {
+  return getImpl().eq(a, b)
+}
 
 /**
  * Check if a is greater than b.
  */
-export const gt: (a: string, b: string) => boolean = impl.gt.bind(impl)
+export function gt(a: string, b: string): boolean {
+  return getImpl().gt(a, b)
+}
 
 /**
  * Check if a is greater than or equal to b.
  */
-export const gte: (a: string, b: string) => boolean = impl.gte.bind(impl)
+export function gte(a: string, b: string): boolean {
+  return getImpl().gte(a, b)
+}
 
 /**
  * Check if a is less than b.
  */
-export const lt: (a: string, b: string) => boolean = impl.lt.bind(impl)
+export function lt(a: string, b: string): boolean {
+  return getImpl().lt(a, b)
+}
 
 /**
  * Check if a is less than or equal to b.
  */
-export const lte: (a: string, b: string) => boolean = impl.lte.bind(impl)
+export function lte(a: string, b: string): boolean {
+  return getImpl().lte(a, b)
+}
+
+/**
+ * Check if a does not equal b. The vendored `semver` export exposes no `neq`
+ * helper, so on the fallback path we route through `!eq` to match smol's
+ * semantics; smol-versions has a native `.neq` and uses it directly.
+ */
+export function neq(a: string, b: string): boolean {
+  const impl = getImpl()
+  /* c8 ignore start - smol-versions exposes .neq, so the native arm is taken;
+     the polyfill fallback fires only on a hypothetical impl that lacks .neq. */
+  if (typeof (impl as { neq?: unknown | undefined }).neq === 'function') {
+    return (impl as { neq: (a: string, b: string) => boolean }).neq(a, b)
+  }
+  return !impl.eq(a, b)
+  /* c8 ignore stop */
+}
 
 /**
  * Sort versions in descending order.
  */
 export function rsort(versions: readonly string[]): string[] {
-  return impl.rsort([...versions])
+  return getImpl().rsort([...versions])
 }
 
 /**
@@ -80,6 +99,6 @@ export function rsort(versions: readonly string[]): string[] {
  * `readonly string[]` even when the impl mutates internally.
  */
 export function sort(versions: readonly string[]): string[] {
-  // oxlint-disable-next-line unicorn/no-array-sort -- `impl.sort` is the smol/semver binding's own sort method, not Array#sort; the binding exposes no `toSorted`.
-  return impl.sort([...versions])
+  // oxlint-disable-next-line unicorn/no-array-sort -- the smol/semver binding's own sort method, not Array#sort; the binding exposes no `toSorted`.
+  return getImpl().sort([...versions])
 }

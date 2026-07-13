@@ -1,6 +1,6 @@
 /**
  * @file Canonical model + reasoning-effort ladder for AI orchestrators. The
- *   fleet's AI-fix / AI-codify orchestrators pick a capability TIER per unit of
+ *   Socket AI-fix / AI-codify orchestrators pick a capability TIER per unit of
  *   work (a lint rule, a hook, a doc edit) and resolve it to a concrete `{
  *   model, effort }` pair. Before this module each orchestrator redefined the
  *   same three-row table, so a model-generation bump (Sonnet 4.6 → 5.0, Opus

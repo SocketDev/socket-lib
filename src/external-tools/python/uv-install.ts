@@ -92,11 +92,9 @@ export async function uvExportMaterialize(
       return uvExportMaterialize(options, retryCount + 1)
     }
     for (let i = 0; i < WAIT_TICKS; i += 1) {
-      // eslint-disable-next-line no-await-in-loop -- sequential poll by design.
       await new Promise(resolve => {
         setTimeout(resolve, 1000)
       })
-      // eslint-disable-next-line no-await-in-loop -- sequential poll by design.
       if (await isAlreadyInstalled(targetDir)) {
         return { installed: false, targetDir }
       }

@@ -3,7 +3,6 @@
  *   shared across all `node/*.ts` lazy-loaders.
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeHttp from 'node:http'
 
 import { IS_NODE } from '../constants/runtime'

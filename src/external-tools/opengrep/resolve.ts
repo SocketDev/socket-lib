@@ -73,6 +73,9 @@ export async function doResolveOpengrep(
 }
 
 /* c8 ignore start - test-only escape hatch. */
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function resetOpengrepResolution(): void {
   resolutionCache.clear()
 }

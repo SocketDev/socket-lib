@@ -12,7 +12,7 @@ import { HeadersPrototypeForEach } from '../primordials/headers'
 
 import { JSONParse } from '../primordials/json'
 
-import { MathPow } from '../primordials/math'
+import { MathMin, MathPow } from '../primordials/math'
 
 import { PromiseCtor } from '../primordials/promise'
 
@@ -256,6 +256,12 @@ export interface BrowserHttpRequestOptions {
    */
   retryDelay?: number | undefined
   /**
+   * Maximum delay (ms) for a single backoff wait. Caps the exponential growth
+   * (`retryDelay` * 2^attempt) so a high `retries` count can't produce
+   * multi-minute waits. Defaults to 30000ms.
+   */
+  retryDelayMax?: number | undefined
+  /**
    * Abort signal forwarded to fetch. Combined with `timeout` via
    * AbortController when both are present.
    */
@@ -362,13 +368,15 @@ export async function httpRequest(
   const opts = options ?? {}
   const maxAttempts = (opts.retries ?? 0) + 1
   const baseDelay = opts.retryDelay ?? 250
+  // Cap each backoff wait so a high `retries` count can't stall for minutes.
+  const maxDelay = opts.retryDelayMax ?? 30_000
   let lastError: unknown
   for (let i = 0; i < maxAttempts; i++) {
     try {
       const response = await attempt(url, opts)
       // 5xx → eligible for retry
       if (response.status >= 500 && i + 1 < maxAttempts) {
-        await sleep(baseDelay * MathPow(2, i))
+        await sleep(MathMin(baseDelay * MathPow(2, i), maxDelay))
         continue
       }
       if (opts.throwOnError && !response.ok) {
@@ -383,7 +391,7 @@ export async function httpRequest(
         throw err
       }
       if (i + 1 < maxAttempts) {
-        await sleep(baseDelay * MathPow(2, i))
+        await sleep(MathMin(baseDelay * MathPow(2, i), maxDelay))
         continue
       }
     }

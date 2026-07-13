@@ -74,7 +74,7 @@ export interface OpengrepDownloadOptions {
    */
   version: string
   /**
-   * Fleet platform-arch token — looked up in `OPENGREP_ASSET_MAP`.
+   * Socket platform-arch token — looked up in `OPENGREP_ASSET_MAP`.
    */
   platformArch: string
 }

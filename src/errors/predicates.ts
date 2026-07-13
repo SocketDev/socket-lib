@@ -5,17 +5,18 @@
  *   slot semantics rather than `instanceof Error`).
  */
 
+import { ErrorIsError } from '../primordials/error'
 import { ObjectPrototypeToString } from '../primordials/object'
 import { StringPrototypeCharCodeAt } from '../primordials/string'
 
 /**
  * Reference to the native ES2025 `Error.isError` when the running engine ships
- * it, otherwise `undefined`. Exposed separately so tests and callers can detect
- * the fast-path without re-probing.
+ * it, otherwise `undefined`. Consumes the single primordial snapshot
+ * ({@link ErrorIsError}) rather than re-probing the global — one capture point.
+ * Exposed separately so tests and callers can detect the fast-path.
  */
 export const isErrorBuiltin: ((value: unknown) => value is Error) | undefined =
-  (Error as unknown as { isError?: ((v: unknown) => v is Error) | undefined })
-    .isError
+  ErrorIsError
 
 /**
  * Narrow a caught value to a Node.js `ErrnoException` — an Error with a `.code`

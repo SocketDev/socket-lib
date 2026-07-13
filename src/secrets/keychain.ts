@@ -124,6 +124,9 @@ export async function deleteSecretFromSlots({
   return results
 }
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function deleteSecretFromSlotsSync({
   service,
   accounts,
@@ -170,7 +173,7 @@ export type Platform = 'darwin' | 'linux' | 'win32' | 'other'
 /**
  * Resolve the current OS to one of our four backend categories.
  *
- * Exported only because the fleet's `export-top-level-functions` lint rule
+ * Exported only because Socket's `export-top-level-functions` lint rule
  * requires top-level functions to be exported for testability. Not part of the
  * public `secrets/keychain` API surface — consumers should call `readSecret` /
  * `writeSecret` / `getBackendAvailability` instead, which handle the dispatch
@@ -286,6 +289,9 @@ export async function readSecretFromSlots({
   return undefined
 }
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function readSecretFromSlotsSync({
   service,
   accounts,
@@ -454,6 +460,9 @@ export async function writeSecretToSlots({
   return results
 }
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function writeSecretToSlotsSync({
   service,
   accounts,

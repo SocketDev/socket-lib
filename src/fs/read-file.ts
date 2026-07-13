@@ -17,8 +17,6 @@ import type { ObjectEncodingOptions, PathLike } from 'node:fs'
 
 import type { ReadFileOptions, ReadOptions, SafeReadOptions } from './types'
 
-const abortSignal = getAbortSignal()
-
 /**
  * Read a file as binary data asynchronously. Returns a Buffer without encoding
  * the contents. Useful for reading images, archives, or other binary formats.
@@ -45,7 +43,7 @@ export async function readFileBinary(
   const opts = typeof options === 'string' ? { encoding: options } : options
   const fs = getNodeFs()
   return await fs.promises.readFile(filepath, {
-    signal: abortSignal,
+    signal: getAbortSignal(),
     ...opts,
     encoding: undefined,
   })
@@ -107,7 +105,7 @@ export async function readFileUtf8(
   const opts = typeof options === 'string' ? { encoding: options } : options
   const fs = getNodeFs()
   return await fs.promises.readFile(filepath, {
-    signal: abortSignal,
+    signal: getAbortSignal(),
     ...opts,
     encoding: 'utf8',
   })
@@ -203,7 +201,7 @@ export async function safeReadFile(
   try {
     return await fs.promises.readFile(filepath, {
       __proto__: null,
-      signal: abortSignal,
+      signal: getAbortSignal(),
       ...readOpts,
       encoding,
     } as Abortable)

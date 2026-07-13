@@ -64,7 +64,7 @@ Bazel adds `read-bazel-version-file.ts` + `resolve-asset-url.ts` +
   `downloadAndExtractTool()`. Every per-tool `from-download.ts` is a thin
   wrapper around these. Returns `integrity` (SRI `sha512-<base64>`) on every
   call for trust-on-first-use pinning.
-- **`manifest.ts`** — reader for `external-tools.json` (the fleet's
+- **`manifest.ts`** — reader for `external-tools.json` (Socket's
   hand-maintained pin file). Used by CI workflows + sync scaffolding; the
   per-tool resolvers don't read it directly — callers pick which version/
   integrity to pass into `downloadIfMissing`.

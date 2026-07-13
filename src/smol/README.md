@@ -39,12 +39,12 @@ export const MathAbs = _smolPrimordial?.mathAbs ?? Math.abs
 
 ## Adopted modules
 
-| File            | Binding                | What it accelerates                                                                                                                                                                     | Consumers                                                       |
-| --------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
-| `detect.ts`     | `node:smol-util`       | `uncurryThis`, `applyBind`, `applySafe`, `bindCall`, `weakRefSafe` — V8 Fast API replacements for the JS `bind.bind(call)(fn)` idiom.                                                   | `src/primordials/uncurry.ts`, `src/primordials/reflect.ts`      |
-| `primordial.ts` | `node:smol-primordial` | `Math.*`, `Number.is*`, `Array.isArray`, `Date.now`, `String.prototype.charCodeAt`, `Number.parseInt/parseFloat` — registered as `v8::CFunction` so V8 inlines them into JIT'd callers. | `src/primordials/{math,number,date,array,string}.ts`            |
-| `purl.ts`       | `node:smol-purl`       | PURL parse / build / normalize / equals — C++-accelerated with a 10 000-entry result cache.                                                                                             | `src/packages/specs.ts` (`resolveRegistryPackageName`)          |
-| `versions.ts`   | `node:smol-versions`   | Multi-ecosystem version comparison + range-satisfies — npm hot path goes through `internalBinding('smol_versions_native')`.                                                             | `src/versions/_internal.ts` (eager-bound `impl` at module load) |
+| File            | Binding                | What it accelerates                                                                                                                                                                     | Consumers                                                              |
+| --------------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `detect.ts`     | `node:smol-util`       | `uncurryThis`, `applyBind`, `applySafe`, `bindCall`, `weakRefSafe` — V8 Fast API replacements for the JS `bind.bind(call)(fn)` idiom.                                                   | `src/primordials/uncurry.ts`, `src/primordials/reflect.ts`             |
+| `primordial.ts` | `node:smol-primordial` | `Math.*`, `Number.is*`, `Array.isArray`, `Date.now`, `String.prototype.charCodeAt`, `Number.parseInt/parseFloat` — registered as `v8::CFunction` so V8 inlines them into JIT'd callers. | `src/primordials/{math,number,date,array,string}.ts`                   |
+| `purl.ts`       | `node:smol-purl`       | PURL parse / build / normalize / equals — C++-accelerated with a 10 000-entry result cache.                                                                                             | `src/packages/specs.ts` (`resolveRegistryPackageName`)                 |
+| `versions.ts`   | `node:smol-versions`   | Multi-ecosystem version comparison + range-satisfies — npm hot path goes through `internalBinding('smol_versions_native')`.                                                             | `src/versions/_internal.ts` (`getImpl()` resolves lazily on first use) |
 
 ## Not adopted (and why)
 
@@ -62,12 +62,12 @@ socket-btm's smol binary exposes 12 user-facing `node:smol-*` modules. The 8 not
 
 1. Pick the binding from socket-btm's `additions/source-patched/lib/smol-<x>.js` and read the `module.exports` to extract the surface.
 2. Create `src/smol/<x>.ts` following the shape above. Export a typed `SmolXBinding` interface that mirrors the canonical shape.
-3. Add a `./smol/<x>` entry to `package.json` `exports`. The build's `scripts/post-build/make-package-exports.mts` writes the `source / types / default` triplet.
+3. Add a `./smol/<x>` entry to `package.json` `exports`. The build's `scripts/fleet/make-package-exports.mts` writes the `source / types / default` triplet.
 4. Add `test/unit/smol/<x>.test.mts` that pins `getSmolX()` returning `undefined` on stock Node (the test runtime). The fast-path integration is verified by socket-btm's own tests running inside the smol binary.
 5. Route the consumer site:
    - Hot per-call branching: `const _smol = getSmolX(); export const op = _smol?.op ?? jsOp`
    - One-shot (e.g. PURL parse on `resolveRegistryPackageName`): `const smol = getSmolX(); const result = smol ? smol.parse(input) : jsParse(input)`
-   - Whole-module swap: eager-bind at module load (`src/versions/_internal.ts` — `impl = getSmolVersions() ?? semver`).
+   - Whole-module swap: resolve lazily on first use, not at module load, so importing a leaf stays V8-snapshot-safe (`src/versions/_internal.ts` — `getImpl()` memoizes `getSmolVersions() ?? getSemver()`; the vendored fallback's `require` is deferred to first call because it pins a native `[Foreign]` handle at module-eval).
 
 ## See also
 

@@ -1,8 +1,8 @@
 /**
- * @file Reader for `external-tools.json` — the fleet manifest describing
+ * @file Reader for `external-tools.json` — the Socket manifest describing
  *   downloadable external binaries (sfw, zizmor, etc.) with pinned versions,
  *   per-platform asset names, and integrity hashes. The manifest itself is
- *   hand-maintained in each fleet repo's root (`<repo>/external-tools.json`)
+ *   hand-maintained in each Socket repo's root (`<repo>/external-tools.json`)
  *   and consumed by the setup-and-install GitHub action. This reader gives
  *   in-process consumers (external- tools resolvers, ad-hoc scripts) the same
  *   typed view without each one re-implementing the JSON-parse + shape check +
@@ -72,7 +72,7 @@ export interface ToolChecksum {
 }
 
 /**
- * A downloadable-binary tool entry. `platforms` is keyed by the fleet's
+ * A downloadable-binary tool entry. `platforms` is keyed by Socket's
  * platform-arch token (`darwin-arm64`, `linux-x64-musl`, `win-x64`, etc. — same
  * vocabulary as `getPlatformArch`).
  */
@@ -227,6 +227,8 @@ export function parseToolEntry(raw: unknown, toolName: string): ManifestEntry {
  * Throws on malformed JSON or invalid integrity strings; unknown-shape entries
  * (rust components, future variants) come back as `{kind: 'other', raw}` so
  * callers can handle them out-of-band without blocking the manifest read.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export async function readExternalToolsManifest(
   filepath: string,

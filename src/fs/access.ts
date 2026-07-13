@@ -44,6 +44,8 @@ export function canAccess(path: PathLike, mode?: number | undefined): boolean {
 
 /**
  * Can the process execute `path`? (`X_OK`)
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function canExecute(path: PathLike): boolean {
   const fs = getNodeFs()

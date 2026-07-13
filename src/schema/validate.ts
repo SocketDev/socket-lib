@@ -65,7 +65,10 @@ export function normalizeTypeBoxErrors(
 ): ValidationIssue[] {
   const out: ValidationIssue[] = []
   for (const err of errors) {
-    const segs = err.path.split('/').filter(Boolean)
+    // TypeBox error paths are JSON pointers (`/a/0/b`), not filesystem
+    // paths — "/" is their spec separator on every platform.
+    const pointer = err.path
+    const segs = pointer.split('/').filter(Boolean)
     out.push({
       path: segs.map(s => {
         const n = Number(s)
@@ -121,7 +124,6 @@ export function validateSchema<S>(
   // `[Kind]: string` marker. Not a supported consumer API. The runtime
   // is loaded lazily from the bundled external under `src/external/`.
   if (isTypeBoxSchema(schema)) {
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
     const { Value } = require('../external/@sinclair/typebox/value') as {
       Value: {
         Check(schema: unknown, value: unknown): boolean

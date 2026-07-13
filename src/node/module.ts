@@ -20,9 +20,7 @@
  */
 
 // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare `module` is browser-stubbable (resolve.fallback / browser field); a `node:` prefix breaks browser bundles. Named exports resolve on Node + Perry.
-// eslint-disable-next-line n/prefer-node-protocol
 import { createRequire, isBuiltin as nodeIsBuiltin } from 'module'
-// eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeModule from 'node:module'
 
 import { IS_NODE } from '../constants/runtime'

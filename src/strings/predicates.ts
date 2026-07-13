@@ -4,7 +4,7 @@
  *   `BlankString` / non-empty string) without an extra cast.
  */
 
-import type { BlankString, EmptyString } from './types'
+import type { BlankString, NonEmptyString } from './types'
 
 /**
  * Check if a value is a blank string (empty or only whitespace).
@@ -54,8 +54,9 @@ export function isBlankString(value: unknown): value is BlankString {
  *
  * @returns `true` if the value is a non-empty string, `false` otherwise
  */
-export function isNonEmptyString(
-  value: unknown,
-): value is Exclude<string, EmptyString> {
+export function isNonEmptyString(value: unknown): value is NonEmptyString {
+  // The branded type is the only way to carry the non-empty fact:
+  // `Exclude<string, EmptyString>` resolves to plain `string` (Exclude only
+  // removes union members, and `string` is not a union).
   return typeof value === 'string' && value.length > 0
 }

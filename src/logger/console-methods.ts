@@ -49,7 +49,7 @@ export function assertMethod<T extends LoggerTrackable>(
   value: unknown,
   message: unknown[],
 ): T {
-  con.assert(value, message[0] as string, ...message.slice(1))
+  con.assert(Boolean(value), message[0] as string, ...message.slice(1))
   logger[lastWasBlankSymbol](false)
   return value ? logger : (logger[incLogCallCountSymbol]() as T)
 }
@@ -131,7 +131,7 @@ export function tableMethod<T extends LoggerTrackable>(
   tabularData: unknown,
   properties?: readonly string[] | undefined,
 ): T {
-  con.table(tabularData, properties)
+  con.table(tabularData, properties ? [...properties] : undefined)
   logger[lastWasBlankSymbol](false)
   return logger[incLogCallCountSymbol]() as T
 }

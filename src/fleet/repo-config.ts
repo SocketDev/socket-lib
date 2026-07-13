@@ -2,12 +2,12 @@
  * @file Fleet-convention config reader: a per-repo override (`.config/repo`)
  *   layered over the cascaded fleet default (`.config/fleet`). A thin wrapper
  *   over the generic `config/layers` reader that returns the named `{ fleet,
- *   repo }` shape fleet callers use, plus the `{ fleet, repo }` array-merge
- *   convenience. The generic, fleet-agnostic primitives (`readConfigLayers`,
- *   `mergeConfigArray`) live in `config/layers`. Lives in the published lib
- *   because it is the only import root the `.git-hooks/_shared` and
- *   `.claude/hooks/_shared` trees (which do not cross-import) plus `.config/*`
- *   can all reach.
+ *   repo }` shape Socket callers use, plus the `{ fleet, repo }` array-merge
+ *   convenience. The generic, convention-agnostic primitives
+ *   (`readConfigLayers`, `mergeConfigArray`) live in `config/layers`. Lives in
+ *   the published lib because it is the only import root the
+ *   `.git-hooks/_shared` and `.claude/hooks/_shared` trees (which do not
+ *   cross-import) plus `.config/*` can all reach.
  */
 
 import { mergeConfigArray, readConfigLayers } from '../config/layers'
@@ -47,6 +47,8 @@ export interface ResolveRepoConfigOptions {
  *
  * @returns Fleet entries followed by repo entries; `[]` when neither is an
  *   array.
+ *
+ * @unused No internal or Socket consumers.
  */
 export function mergeRepoConfigArray<
   T extends Record<string, unknown>,

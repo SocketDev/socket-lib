@@ -134,6 +134,8 @@ export function createBrotliCompressor(options?: CompressOptions | undefined) {
 
 /**
  * Create a brotli decompress transform stream.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function createBrotliDecompressor() {
   return createBrotliDecompress()
@@ -208,6 +210,8 @@ export function hasBrotliExt(filePath: string): boolean {
  * false for inputs too short to be valid. Brotli has no fixed magic bytes, so
  * this is intentionally permissive — the authoritative test is
  * `decompressBrotli(buf)` succeeding. Use for UI hints, not correctness.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function isBrotliCompressed(input: Buffer): boolean {
   return BufferIsBuffer!(input) && input.byteLength >= BROTLI_MIN_LEN

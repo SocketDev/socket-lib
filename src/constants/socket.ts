@@ -43,7 +43,7 @@ export const SOCKET_DIR_PREFIX = '_'
 // prefix included — these are dirs, not apps, and the bare form is never used
 // on its own). `_cacache` content-addressable cache; `_dlx` name+version binary
 // store (node, jre, python, sfw, …); `_state` version-LESS persistent app state
-// (= pnpm `state-dir` / XDG_STATE_HOME); `_wheelhouse` cross-fleet shared bin.
+// (= pnpm `state-dir` / XDG_STATE_HOME); `_wheelhouse` bin shared across Socket tools.
 export const SOCKET_DIR = {
   __proto__: null,
   cacache: `${SOCKET_DIR_PREFIX}cacache`,

@@ -3,13 +3,15 @@
  *   shared across all `node/*.ts` lazy-loaders.
  */
 
-// eslint-disable-next-line n/prefer-node-protocol
 import type * as NodeUrl from 'node:url'
 
 import { IS_NODE } from '../constants/runtime'
 
 let cachedUrl: typeof NodeUrl | undefined
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function getNodeUrl(): typeof NodeUrl {
   if (!IS_NODE) {
     return undefined as unknown as typeof NodeUrl

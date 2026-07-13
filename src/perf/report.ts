@@ -46,7 +46,8 @@ export function generatePerformanceReport(): string {
   report += '║         Performance Report                    ║\n'
   report += '╚═══════════════════════════════════════════════╝\n\n'
 
-  for (const operation of operations) {
+  for (let i = 0, { length } = operations; i < length; i += 1) {
+    const operation = operations[i]!
     const stats = summary[operation] as {
       count: number
       total: number
@@ -92,7 +93,8 @@ export function printPerformanceSummary(): void {
 
   debugLog('[perf]\n=== Performance Summary ===')
 
-  for (const operation of operations) {
+  for (let i = 0, { length } = operations; i < length; i += 1) {
+    const operation = operations[i]!
     const stats = summary[operation] as {
       count: number
       total: number

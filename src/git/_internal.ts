@@ -365,7 +365,9 @@ export function stableKey(value: unknown): string {
   return JSONStringify(value, (_key, val) => {
     if (val && typeof val === 'object' && !ArrayIsArray(val)) {
       const sorted: Record<string, unknown> = {}
-      for (const k of ObjectKeys(val as object).toSorted()) {
+      const sortedKeys = ObjectKeys(val as object).toSorted()
+      for (let i = 0, { length } = sortedKeys; i < length; i += 1) {
+        const k = sortedKeys[i]!
         sorted[k] = (val as Record<string, unknown>)[k]
       }
       return sorted

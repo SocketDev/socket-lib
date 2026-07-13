@@ -53,7 +53,6 @@ export function isSeaBinary(): boolean {
   if (isSeaCache === undefined) {
     try {
       // Use Node.js 24+ native SEA detection API.
-      // eslint-disable-next-line n/no-unsupported-features/node-builtins
       const seaModule = require('node:sea')
       isSeaCache = seaModule.isSea()
       /* c8 ignore start - Node.js < 24 fallback; node:sea is in

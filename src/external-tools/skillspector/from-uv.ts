@@ -29,7 +29,7 @@ export interface SkillSpectorFromUvOptions {
   readonly uvBin: string
   /**
    * Absolute path to the SkillSpector uv project dir (holds `pyproject.toml` +
-   * `uv.lock`). The fleet ships this under
+   * `uv.lock`). Socket ships this under
    * `setup-security-tools/skillspector/`.
    */
   readonly projectDir: string

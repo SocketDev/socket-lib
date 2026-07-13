@@ -13,7 +13,6 @@ import { getAbortSignal } from '../process/abort'
 
 import type { ExtractOptions, PacoteOptions } from './types'
 
-const abortSignal = getAbortSignal()
 const packumentCache = getPackumentCache()
 const pacoteCachePath = getPacoteCachePath()
 
@@ -92,7 +91,7 @@ export async function packPackage(
   // libnpmpack is imported at the top as libnpmpack
   return await libnpmpack(spec, {
     __proto__: null,
-    signal: abortSignal,
+    signal: getAbortSignal(),
     ...options,
     packumentCache,
     preferOffline: true,

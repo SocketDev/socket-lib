@@ -7,7 +7,7 @@
  */
 
 import { MathMax } from '../primordials/math'
-import { abortSignal } from './_internal'
+import { getAbortSignal } from './_internal'
 
 import type { IterationOptions, RetryOptions } from './types'
 
@@ -44,7 +44,7 @@ export function normalizeIterationOptions(
     // Retries as a number or options object.
     retries,
     // AbortSignal used to support cancellation.
-    signal = abortSignal,
+    signal = getAbortSignal(),
   } = { __proto__: null, ...opts } as IterationOptions
 
   // Ensure concurrency is at least 1
@@ -104,7 +104,7 @@ export function normalizeRetryOptions(
     // Number of retry attempts (0 = no retries, only initial attempt).
     retries = 0,
     // AbortSignal used to support cancellation.
-    signal = abortSignal,
+    signal = getAbortSignal(),
   } = resolved
   return {
     args,

@@ -6,8 +6,8 @@ upstream adds builds.
 
 ## Why it's here
 
-janus is invoked from a handful of automation scripts across the fleet; the
-shared `~/.socket/_wheelhouse/janus/` cache means every fleet member resolves
+janus is invoked from a handful of automation scripts across Socket repos; the
+shared `~/.socket/_wheelhouse/janus/` cache means every Socket repo resolves
 to the same binary instead of each repo downloading its own copy.
 
 ## API at a glance
@@ -32,7 +32,7 @@ const janus = await resolveJanus({
 
 ## When you'd reach for this
 
-- Fleet-wide automation steps that compose janus into a pipeline.
+- Socket-wide automation steps that compose janus into a pipeline.
 
 ## Caveats
 

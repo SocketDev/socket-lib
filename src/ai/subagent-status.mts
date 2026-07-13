@@ -80,6 +80,8 @@ export function escalationFor(status: SubagentStatus): SubagentEscalation {
 
 /**
  * True when `value` names a status in the contract.
+ *
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function isSubagentStatus(value: string): value is SubagentStatus {
   return SUBAGENT_STATUSES.includes(value as SubagentStatus)

@@ -1,5 +1,5 @@
 /**
- * @file Primordials drift check — generic core. Each fleet repo that
+ * @file Primordials drift check — generic core. Each Socket repo that
  *   destructures from Node's internal `primordials` global needs to keep its
  *   usage shape-aligned with socket-lib's userland mirror
  *   (`@socketsecurity/lib/primordials`). This module is the parser + diff
@@ -105,7 +105,7 @@ export function checkPrimordials(
         // readFileSync rarely throws on files we just enumerated; the
         // includes()-false and names-empty arms fire only on files
         // that don't actually destructure primordials.
-        /* c8 ignore start */
+        /* c8 ignore start - readFileSync rarely throws on files already enumerated */
       } catch {
         continue
       }
@@ -136,7 +136,9 @@ export function checkPrimordials(
 
   // Diff.
   const findings: PrimordialsFinding[] = []
-  for (const name of [...used].toSorted()) {
+  const usedNames = [...used].toSorted()
+  for (let i = 0, { length } = usedNames; i < length; i += 1) {
+    const name = usedNames[i]!
     if (config.nodeInternalOnly.has(name)) {
       continue
     }
@@ -148,7 +150,7 @@ export function checkPrimordials(
     // `usedToFiles.get(name) ?? []` defensive fallback fires only when
     // a name is in `used` but not `usedToFiles` (impossible by
     // construction).
-    /* c8 ignore start */
+    /* c8 ignore start - usedToFiles fallback is unreachable by construction */
     if (aliased) {
       if (socketLibNames.has(aliased)) {
         continue
@@ -237,7 +239,9 @@ export function extractPrimordialsNames(src: string): string[] {
   const out: string[] = []
   let m: RegExpExecArray | null
   while ((m = re.exec(cleaned)) !== null) {
-    for (const raw of m[1]!.split(',')) {
+    const rawNames = m[1]!.split(',')
+    for (let i = 0, { length } = rawNames; i < length; i += 1) {
+      const raw = rawNames[i]!
       const trimmed = raw.trim()
       if (!trimmed) {
         continue
@@ -246,7 +250,7 @@ export function extractPrimordialsNames(src: string): string[] {
       const nameMatch = NAME_HEAD_RE.exec(trimmed)
       // nameMatch null arm fires on malformed export-list segments,
       // which tests don't simulate.
-      /* c8 ignore start */
+      /* c8 ignore start - malformed export-list segments aren't tested */
       if (nameMatch) {
         out.push(nameMatch[1]!)
       }
@@ -278,7 +282,9 @@ export function extractTsExports(src: string): string[] {
     out.add(m[1]!)
   }
   for (const m of src.matchAll(/^export\s*\{\s*([^}]+)\}/gm)) {
-    for (const raw of m[1]!.split(',')) {
+    const rawNames = m[1]!.split(',')
+    for (let i = 0, { length } = rawNames; i < length; i += 1) {
+      const raw = rawNames[i]!
       const trimmed = raw.trim()
       if (!trimmed) {
         continue
@@ -286,7 +292,7 @@ export function extractTsExports(src: string): string[] {
       const nameMatch = NAME_HEAD_RE.exec(trimmed)
       // nameMatch null arm fires on malformed export-list segments,
       // which tests don't simulate.
-      /* c8 ignore start */
+      /* c8 ignore start - malformed export-list segments aren't tested */
       if (nameMatch) {
         out.add(nameMatch[1]!)
       }
@@ -310,7 +316,7 @@ export function readSocketLibPrimordialNames(resolved: string): Set<string> {
   const out = new Set<string>()
   // Each scanned leaf either has TS exports or is a leftover declaration
   // file; we don't separate them — the parser handles both forms.
-  /* c8 ignore start */
+  /* c8 ignore start - leaf-classification branches aren't tested separately */
   for (const name of readdirSync(resolved)) {
     if (!name.endsWith('.ts') && !name.endsWith('.d.ts')) {
       continue
@@ -350,7 +356,7 @@ export function resolveSocketLibPrimordials(
   // Each resolver branch (explicit path, sibling clone, installed
   // fallback) needs a specific test setup; the branch tracker reports
   // them sub-arms separately even when the primary path is hit.
-  /* c8 ignore start */
+  /* c8 ignore start - resolver branch needs dedicated test setup per candidate */
   if (config.socketLibPrimordialsPath) {
     if (!existsSync(config.socketLibPrimordialsPath)) {
       throw new ErrorCtor(

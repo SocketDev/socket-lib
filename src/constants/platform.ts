@@ -92,7 +92,7 @@ let memoizedTarget: string | undefined
  * Get the current host **target** in the pnpm `pack-app` vocabulary (memoized):
  * `<os>-<arch>[-<libc>]`, e.g. `darwin-arm64`, `linux-x64`, `win32-x64`,
  * `linux-x64-musl`. Raw Node `process.platform`/`process.arch` joined with `-`,
- * plus a `-musl` suffix on Alpine. This is the fleet-general naming for
+ * plus a `-musl` suffix on Alpine. This is the Socket-wide naming for
  * non-python / non-JRE tools (matches pnpm's release assets,
  * `pnpm-<os>-<arch>[-<libc>].{tar.gz,zip}`). Tool-specific resolvers that need
  * a different vocabulary own their own helper — see `getPythonArch`

@@ -41,7 +41,10 @@ export const globalProcess = globalThis.process as
       reallyExit?: ((code?: number | undefined) => never) | undefined
     })
   | undefined
-export const originalProcessEmit = globalProcess?.emit
+// Explicit annotation: the inferred type names node:process's unexported
+// ProcessEventMap, which breaks declaration emit (TS4023).
+export const originalProcessEmit: NodeJS.Process['emit'] | undefined =
+  globalProcess?.emit
 export const platform = globalProcess?.platform ?? ''
 export const originalProcessReallyExit = globalProcess?.reallyExit as
   | ((code?: number | undefined) => never)

@@ -18,8 +18,6 @@ import { getSmolPath } from '../smol/path'
 
 import type { FindUpOptions, FindUpSyncOptions } from './types'
 
-const abortSignal = getAbortSignal()
-
 /**
  * Find a file or directory by traversing up parent directories. Searches from
  * the starting directory upward to the filesystem root. Useful for finding
@@ -46,7 +44,7 @@ export async function findUp(
   name: string | string[] | readonly string[],
   options?: FindUpOptions | undefined,
 ): Promise<string | undefined> {
-  const { cwd = process.cwd(), signal = abortSignal } = {
+  const { cwd = process.cwd(), signal = getAbortSignal() } = {
     __proto__: null,
     ...options,
   } as FindUpOptions
@@ -73,7 +71,6 @@ export async function findUp(
       }
       const thePath = path.join(dir, n)
       try {
-        // eslint-disable-next-line no-await-in-loop
         // oxlint-disable-next-line socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory().
         const stats = await fs.promises.stat(thePath)
         if (!onlyDirectories && stats.isFile()) {

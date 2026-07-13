@@ -31,12 +31,12 @@ or the `@js-temporal/polyfill` package directly:
 - **Polyfill as runtime dep adds an attack surface we don't need.**
   socket-lib's whole point is being a minimal-dep base layer. Adding
   `@js-temporal/polyfill` would put a multi-thousand-line dep on the
-  hot path of every fleet consumer for the four operations the fleet
+  hot path of every Socket consumer for the four operations Socket
   actually uses (`Now.instant`, `Instant.from`, `Instant.fromEpochMs`,
   `Instant.prototype.epochMilliseconds`).
 - **`new Date()` is unsafe at scale.** Mutable, locale-dependent
   serialization, `Date.parse` accepts garbage, no real nanosecond
-  precision. We've hit this enough times across the fleet that
+  precision. We've hit this enough times across Socket repos that
   centralizing the replacement is worth the upfront cost.
 
 ## When to add to this folder
@@ -64,7 +64,7 @@ don't fall back to the equivalent `Date` form.
    every spec step gets a corresponding line.
 5. **Throws use primordials.** `RangeErrorCtor` / `TypeErrorCtor` /
    `ErrorCtor` from `../primordials/error`, never the bare globals.
-6. **Throw messages follow the fleet's four-ingredient rule** (What /
+6. **Throw messages follow Socket's four-ingredient rule** (What /
    Where / Saw / Fix). The spec only says "throw a `RangeError`"; we
    pick the message. See `../../docs/agents.md/fleet/error-messages.md`.
 7. **Internal slot reads/writes** go through `slots.ts` — never store
@@ -117,7 +117,7 @@ the two move together.
 The Temporal spec says many places: _"throw a RangeError exception"_
 or _"throw a TypeError exception"_. The spec is silent on the message
 text. Our throws use the **primordial** constructor and follow the
-fleet's **four-ingredient** message rule.
+Socket's **four-ingredient** message rule.
 
 **✓**:
 
@@ -186,7 +186,7 @@ spec requires.
 
 ## When a test262 runner lands here
 
-The fleet convention for test262-corpus runners (today: socket-btm,
+The Socket convention for test262-corpus runners (today: socket-btm,
 ultrathink acorn) is:
 
 - Runner library lives at `test/scripts/test262-<scope>-runner.mts`.
@@ -215,7 +215,7 @@ We do **not** detect `globalThis.Temporal` and delegate to it. Reasons:
 - **Annotations diverge.** Our spec-step annotations describe our
   code. A native fast path means the annotated code doesn't run in
   production, weakening the audit value of the annotations.
-- **The fleet's Temporal usage isn't hot.** Roughly 50 timestamp
+- **Socket's Temporal usage isn't hot.** Roughly 50 timestamp
   operations per script run. Native perf wins are dwarfed by the
   network calls those scripts make.
 

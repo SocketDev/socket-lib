@@ -358,7 +358,7 @@ export async function fetchGhsaDetailsViaGraphQL(
     // GhsaDetails.cvss is typed `... | null` to match the REST
     // `/advisories/:id` shape. Preserving `null` here is the external-
     // API-contract exception called out in the lint rule docs.
-    // oxlint-disable-next-line socket/prefer-undefined-over-null
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- external API contract requires null over undefined
     cvss: adv.cvss ?? null,
     cwes: adv.cwes?.nodes ?? [],
   }

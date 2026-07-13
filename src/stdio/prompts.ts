@@ -4,19 +4,6 @@
  */
 
 import { getAbortSignal } from '../process/abort'
-
-// @ts-expect-error - external vendored module
-import checkboxRaw from '../external/@inquirer/checkbox'
-// @ts-expect-error - external vendored module
-import confirmRaw from '../external/@inquirer/confirm'
-// @ts-expect-error - external vendored module
-import inputRaw from '../external/@inquirer/input'
-// @ts-expect-error - external vendored module
-import passwordRaw from '../external/@inquirer/password'
-// @ts-expect-error - external vendored module
-import * as searchModule from '../external/@inquirer/search'
-// @ts-expect-error - external vendored module
-import * as selectModuleImport from '../external/@inquirer/select'
 import { applyColor } from '../logger/colors'
 
 import type { ColorValue } from '../colors/types'
@@ -28,20 +15,6 @@ import { THEMES } from '../themes/themes'
 import type { ThemeName } from '../themes/themes'
 import type { Theme } from '../themes/types'
 import { resolveColor } from '../themes/resolve'
-
-const abortSignal = getAbortSignal()
-const spinner = getDefaultSpinner()
-
-// Modules imported at the top - extract default and Separator.
-// The @inquirer/select shim exposes the namespaced CJS module, so we
-// narrow instead of `as any` to stay within CLAUDE.md's no-any rule.
-const searchRaw = searchModule.default
-const selectModule = selectModuleImport as unknown as {
-  default: typeof selectModuleImport.default
-  Separator: typeof selectModuleImport.Separator
-}
-const selectRaw = selectModule.default
-const ActualSeparator = selectModule.Separator
 
 // Type definitions
 
@@ -226,10 +199,8 @@ export function createInquirerTheme(
  *
  * @returns Separator instance
  */
-export function createSeparator(
-  text?: string,
-): InstanceType<typeof ActualSeparator> {
-  return new ActualSeparator(text)
+export function createSeparator(text?: string): Separator {
+  return new (require('../external/@inquirer/select').Separator)(text)
 }
 
 /**
@@ -284,9 +255,13 @@ export function wrapPrompt<T = unknown>(
       | undefined
     const { spinner: contextSpinner, ...contextWithoutSpinner } =
       origContext ?? ({} as Context)
+    // Lazily acquire the default spinner at call time rather than capturing it
+    // at module-eval. Constructing it at import time pins a native handle into
+    // the module, which aborts V8 --build-snapshot of anything that
+    // transitively imports this module. An explicit context spinner still wins.
     const spinnerInstance =
-      contextSpinner !== undefined ? contextSpinner : spinner
-    const signal = abortSignal
+      contextSpinner !== undefined ? contextSpinner : getDefaultSpinner()
+    const signal = getAbortSignal()
 
     // Inject theme into config (args[0])
     const config = args[0] as Record<string, unknown>
@@ -343,7 +318,19 @@ export function wrapPrompt<T = unknown>(
  *     ],
  *   })
  */
-export const checkbox: typeof checkboxRaw = wrapPrompt(checkboxRaw)
+// The vendored @inquirer prompts are required LAZILY, inline inside each
+// wrapper, never imported at module scope. Requiring any @inquirer bundle
+// evaluates @inquirer/core's hook engine, which constructs an AsyncLocalStorage
+// singleton — a live native handle that aborts V8 `node --build-snapshot` of
+// every module that transitively imports this one (guarded by
+// test/unit/snapshot-safety.test.mts). The raw prompt is only needed when the
+// prompt actually runs, so deferring the require keeps this module
+// snapshot-clean; each specifier stays a string literal so the build still
+// vendors it (the same `require('../external/...')` idiom the versions/* leaves
+// use to defer the native-handle-bearing semver bundle).
+export const checkbox = wrapPrompt((...args: unknown[]) =>
+  require('../external/@inquirer/checkbox').default(...args),
+)
 
 /**
  * Prompt for a yes/no confirmation. Wrapped with spinner handling and abort
@@ -353,7 +340,9 @@ export const checkbox: typeof checkboxRaw = wrapPrompt(checkboxRaw)
  *   const answer = await confirm({ message: 'Continue?' })
  *   if (answer) { // user confirmed }
  */
-export const confirm: typeof confirmRaw = wrapPrompt(confirmRaw)
+export const confirm = wrapPrompt((...args: unknown[]) =>
+  require('../external/@inquirer/confirm').default(...args),
+)
 
 /**
  * Prompt for text input. Wrapped with spinner handling and abort signal
@@ -362,7 +351,9 @@ export const confirm: typeof confirmRaw = wrapPrompt(confirmRaw)
  * @example
  *   const name = await input({ message: 'Enter your name:' })
  */
-export const input: typeof inputRaw = wrapPrompt(inputRaw)
+export const input = wrapPrompt((...args: unknown[]) =>
+  require('../external/@inquirer/input').default(...args),
+)
 
 /**
  * Prompt for password input (hidden characters). Wrapped with spinner handling
@@ -371,7 +362,9 @@ export const input: typeof inputRaw = wrapPrompt(inputRaw)
  * @example
  *   const token = await password({ message: 'Enter API token:' })
  */
-export const password: typeof passwordRaw = wrapPrompt(passwordRaw)
+export const password = wrapPrompt((...args: unknown[]) =>
+  require('../external/@inquirer/password').default(...args),
+)
 
 /**
  * Prompt with searchable/filterable choices. Wrapped with spinner handling and
@@ -383,7 +376,9 @@ export const password: typeof passwordRaw = wrapPrompt(passwordRaw)
  *     source: async input => fetchPackages(input),
  *   })
  */
-export const search: typeof searchRaw = wrapPrompt(searchRaw)
+export const search = wrapPrompt((...args: unknown[]) =>
+  require('../external/@inquirer/search').default(...args),
+)
 
 /**
  * Prompt to select from a list of choices. Wrapped with spinner handling and
@@ -398,6 +393,29 @@ export const search: typeof searchRaw = wrapPrompt(searchRaw)
  *     ],
  *   })
  */
-export const select: typeof selectRaw = wrapPrompt(selectRaw)
+export const select = wrapPrompt((...args: unknown[]) =>
+  require('../external/@inquirer/select').default(...args),
+)
 
-export { ActualSeparator as Separator }
+// Lazy value export (snapshot-safety, see the note above): front the real
+// @inquirer Separator class with a Proxy so the vendored-bundle require is
+// deferred until the class is constructed or a static is read — importing this
+// module never evaluates @inquirer.
+export const Separator = new Proxy(
+  function () {} as unknown as typeof SeparatorType,
+  {
+    construct(_target, args) {
+      return Reflect.construct(
+        require('../external/@inquirer/select').Separator,
+        args,
+      )
+    },
+    get(_target, prop, receiver) {
+      return Reflect.get(
+        require('../external/@inquirer/select').Separator,
+        prop,
+        receiver,
+      )
+    },
+  },
+)

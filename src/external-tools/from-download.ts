@@ -20,7 +20,7 @@
  *     `external-tools.json` (or wherever the pin lives).
  *   - Subsequent calls with `integrity` set: downloads, verifies against the pin,
  *     returns the same value. Customization:
- *   - `downloader?` lets tests inject a fake fetch, and gives fleet consumers an
+ *   - `downloader?` lets tests inject a fake fetch, and gives Socket consumers an
  *     escape hatch for alternate cache backends, retry logic, or progress
  *     reporters.
  */
@@ -153,7 +153,7 @@ export interface DownloadedArchive {
  * Optional downloader injection. Default: `dlx/binary-download.downloadBinary`.
  * Replace when: - Writing unit tests that need a fake fetch (no network). -
  * Wiring an alternate cache backend or progress reporter. - Adding
- * fleet-specific instrumentation (metrics, retry).
+ * tool-specific instrumentation (metrics, retry).
  */
 export type BinaryDownloader = typeof downloadBinary
 

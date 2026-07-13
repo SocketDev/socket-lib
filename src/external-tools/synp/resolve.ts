@@ -57,6 +57,9 @@ export async function doResolveSynp(
   return undefined
 }
 
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 /* c8 ignore start - test-only escape hatch. */
 export function resetSynpResolution(): void {
   resolutionCache.clear()

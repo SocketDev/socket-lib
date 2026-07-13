@@ -74,6 +74,9 @@ export async function doResolveBazel(
 }
 
 /* c8 ignore start - test-only escape hatch. */
+/**
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
+ */
 export function resetBazelResolution(): void {
   resolutionCache.clear()
 }

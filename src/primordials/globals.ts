@@ -10,8 +10,13 @@
 export const BigIntCtor: BigIntConstructor = BigInt
 export const BooleanCtor: BooleanConstructor = Boolean
 export const ProxyCtor: ProxyConstructor = Proxy
-export const SharedArrayBufferCtor: SharedArrayBufferConstructor =
-  SharedArrayBuffer
+// Guarded capture: `SharedArrayBuffer` is NOT a defined global everywhere —
+// browsers without cross-origin isolation don't expose it, and V8's
+// `--build-snapshot` builder context omits it — so a bare reference here was
+// a module-eval ReferenceError in both. Same capture-once-at-load semantics
+// wherever the global exists; consumers own the undefined case.
+export const SharedArrayBufferCtor: SharedArrayBufferConstructor | undefined =
+  typeof SharedArrayBuffer === 'undefined' ? undefined : SharedArrayBuffer
 
 // ─── Global values ─────────────────────────────────────────────────────
 // `Infinity` and `NaN` are the language's two non-finite number primitives.
@@ -25,7 +30,6 @@ export const NaNValue: number = NaN
 // pattern they use for other captured globals:
 //   `import { globalThis as GlobalThis } from '@socketsecurity/lib/primordials/globals'`
 const capturedGlobalThis: typeof globalThis = globalThis
-// eslint-disable-next-line no-shadow-restricted-names
 export { capturedGlobalThis as globalThis }
 
 // ─── Captured globals (functions / methods) ────────────────────────────

@@ -5,8 +5,8 @@
  */
 
 import { getPackageExtensions } from '../constants/packages'
-import * as semver from '../external/semver'
 import { merge } from '../objects/mutate'
+import { getSemver } from '../versions/_internal'
 
 const packageExtensions = getPackageExtensions()
 
@@ -31,6 +31,7 @@ export function findPackageExtensions(
     if (pkgName === name) {
       // semver is imported at the top
       const range = selector.slice(lastAtSignIndex + 1)
+      const semver = getSemver()
       if (semver.satisfies(pkgVer, range)) {
         if (result === undefined) {
           result = {}
