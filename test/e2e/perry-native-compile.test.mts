@@ -65,8 +65,14 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
         os.tmpdir(),
         WIN32 ? 'socket-lib-perry-e2e.exe' : 'socket-lib-perry-e2e',
       )
+      // perry names the attest sidecar off the -o path; on Windows the .exe
+      // stem may or may not be kept, so track both candidates.
+      const outStem = out.replace(/\.exe$/, '')
+      const attestCandidates = [`${out}.attest.json`, `${outStem}.attest.json`]
       rmSync(out, { force: true })
-      rmSync(`${out}.attest.json`, { force: true })
+      for (let i = 0, { length } = attestCandidates; i < length; i += 1) {
+        rmSync(attestCandidates[i]!, { force: true })
+      }
 
       // `lockdown` + `strict` + `emitAttest` come from the fixture package.json.
       const compiled = await spawn(
@@ -80,7 +86,7 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
       ).toBe(0)
       expect(existsSync(out)).toBe(true)
       // emitAttest writes a provenance sidecar (SHA-256 + perry version).
-      expect(existsSync(`${out}.attest.json`)).toBe(true)
+      expect(attestCandidates.some(p => existsSync(p))).toBe(true)
 
       // No shell here: `out` is the compiled native binary (a PE on Windows),
       // which Node executes directly by path. Routing it through cmd.exe
