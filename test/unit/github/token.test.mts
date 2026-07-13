@@ -1,6 +1,14 @@
 import process from 'node:process'
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest'
 
 import { resetEnv, setEnv } from '../../../src/env/rewire'
 import { clearRefCache } from '../../../src/github/refs'
@@ -11,6 +19,39 @@ import {
 } from '../../../src/github/token'
 
 describe.sequential('github/token', () => {
+  // Neutralize the ambient token vars at the process.env level so a real CI
+  // GITHUB_TOKEN can't leak in and outrank a per-test value. This must live in
+  // process.env (not setEnv overrides): several tests call resetEnv() in their
+  // body, which clears overrides but not process.env — a beforeEach mask would
+  // be wiped by those. Restored in afterAll so sibling test files are unaffected.
+  const TOKEN_ENV = [
+    'GITHUB_TOKEN',
+    'GH_TOKEN',
+    'SOCKET_CLI_GITHUB_TOKEN',
+    'SOCKET_SECURITY_GITHUB_PAT',
+  ]
+  const savedTokenEnv: Record<string, string | undefined> = { __proto__: null }
+
+  beforeAll(() => {
+    for (let i = 0, { length } = TOKEN_ENV; i < length; i += 1) {
+      const key = TOKEN_ENV[i]!
+      savedTokenEnv[key] = process.env[key]
+      delete process.env[key]
+    }
+  })
+
+  afterAll(() => {
+    for (let i = 0, { length } = TOKEN_ENV; i < length; i += 1) {
+      const key = TOKEN_ENV[i]!
+      const saved = savedTokenEnv[key]
+      if (saved === undefined) {
+        delete process.env[key]
+      } else {
+        process.env[key] = saved
+      }
+    }
+  })
+
   beforeEach(() => {
     resetEnv()
     clearRefCache()
