@@ -20,7 +20,7 @@ Common issues and solutions when using @socketsecurity/lib.
 
    ```typescript
    // Correct
-   import { Spinner } from '@socketsecurity/lib/spinner'
+   import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
    // Wrong
    import { Spinner } from '@socketsecurity/lib'
@@ -215,13 +215,17 @@ const filePath = `${dir}/subdir/file.txt`
 
 1. Check the URL is correct
 2. Verify network connection:
+
    ```bash
    ping example.com
    ```
+
 3. Check DNS:
+
    ```bash
    nslookup example.com
    ```
+
 4. Try a different DNS server (8.8.8.8 or 1.1.1.1)
 
 ### ECONNREFUSED: Connection refused
@@ -311,6 +315,7 @@ Better solution: Install proper SSL certificates or use a certificate authority.
    ```
 
 3. For Windows `.cmd`/`.bat` files:
+
    ```typescript
    await spawn('command.cmd', [], {
      shell: true, // Required on Windows
@@ -332,6 +337,7 @@ Better solution: Install proper SSL certificates or use a certificate authority.
    ```
 
 2. Check stdio configuration:
+
    ```typescript
    // If command waits for input, ignore stdin
    await spawn('command', [], {
@@ -481,7 +487,7 @@ Check your `tsconfig.json`:
 2. Limit concurrency for very large sets:
 
    ```typescript
-   import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
+   import { PromiseQueue } from '@socketsecurity/lib/promises/queue'
 
    const queue = new PromiseQueue(10)
    await Promise.all(files.map(file => queue.add(() => readFileUtf8(file))))
@@ -518,7 +524,7 @@ If your issue isn't covered here:
 
 1. **Check the API documentation** for your specific function
 2. **Review the examples** in `/docs/examples.md`
-3. **Search existing GitHub issues**: https://github.com/SocketDev/socket-lib/issues
+3. **Search existing GitHub issues**: <https://github.com/SocketDev/socket-lib/issues>
 4. **Create a new issue** with:
    - Node.js version (`node --version`)
    - Package version

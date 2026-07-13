@@ -71,6 +71,20 @@ defaults write dev.kdrag0n.MacVirt SUEnableAutomaticChecks -bool false
 
 `SUEnableAutomaticChecks=false` stops the background update check; `SUAutomaticallyUpdate=false` stops silent install of a found update. Add a new Sparkle app by appending to `SPARKLE_APPS` in `_shared/sparkle-auto-update.mts` (id, name, bundle-id domain); the persist and audit pick it up automatically.
 
+## Lint/fix scope: modified by default, `--all` for waves
+
+`pnpm run lint` and `pnpm run fix` default to **modified scope** — only files
+git sees as changed (plus `--staged` in pre-commit). A repo-wide autofix
+campaign run that way is a **silent no-op on the whole backlog**: the run exits
+green having fixed nothing outside your edits (two delegated wave runs reported
+success while fixing zero backlog files, 2026-07-07). For a wave, pass `--all`:
+`pnpm run lint --fix --all` (`pnpm run fix --all` forwards it and adds the
+doctor). The `template/` tree is OFF the default lint surface everywhere —
+in the wheelhouse it only lints under `LINT_DOGFOOD=1`, so a wave that must
+reach canonical sources is `LINT_DOGFOOD=1 pnpm run lint --fix --all`. Every
+scoped `--fix` run now ends with a loud reminder naming the wave form
+(`fixScopeReminder` in `scripts/fleet/lint.mts`).
+
 ## Docs lead with pnpm
 
 User-facing install commands in fenced code blocks must show the pnpm form first (`pnpm install <pkg>`, `pnpm add <pkg>`). npm / yarn fallbacks are fine but come after, or in a separate block introduced as a fallback. The pre-commit `scanDocsPnpmFirst` scanner emits a warning (not a hard fail) for `.md` / `.mdx` blocks that lead with npm or yarn without a pnpm leader. Suppress per-block with `socket-lint: allow pnpm-first` (HTML comment above the fence or any line inside it).
@@ -103,14 +117,16 @@ FORBIDDEN to maintain. Remove when encountered.
 
 ## `packageManager` field
 
-Bare `pnpm@<version>` is correct for pnpm 11+. pnpm 11 stores the integrity hash in `pnpm-lock.yaml` (separate YAML document) instead of inlining it in `packageManager`. On install pnpm rewrites the field to its bare form and migrates legacy inline hashes automatically. Don't fight the strip. Older repos may still ship `pnpm@<version>+sha512.<hex>`. Leave it; pnpm migrates on first install. The lockfile is the integrity source of truth.
+The fleet pins `packageManager` to a **forgiving floor**, `pnpm@>=<floor>` (currently `pnpm@>=11.0.5`), matching the `engines.pnpm` floor. `pnpm-workspace.yaml` sets `managePackageManagerVersions: false` plus `pmOnFail: warn`, so pnpm treats the field as a minimum hint rather than a version lock: it never switches pnpm versions and only warns on a mismatch. The exact pnpm for CI comes from the setup action (`external-tools.json`), not this field. `derivePins` (`sync-package-manager-pins.mts`) emits the floor from root `engines.pnpm`, and the cascade propagates both pins via `sync.mts package-manager --fleet`. A `packageManager` drift is always benign (`isBehindSource`) because the field is only a hint; the enforced gate is `engines.pnpm`.
+
+pnpm 11 stores the integrity hash in `pnpm-lock.yaml` (a separate YAML document) rather than inline. The lockfile is the integrity source of truth, and a legacy `pnpm@<version>+sha512.<hex>` migrates on first install.
 
 ## Bumping a versioned tool fleet-wide (pnpm, zizmor, sfw)
 
-🚨 **Single entry point: `socket-wheelhouse/scripts/fleet/cascade-fleet.mts`.** Run from the wheelhouse repo:
+🚨 **Single entry point: `scripts/repo/cascade-fleet.mts`.** Run from the wheelhouse repo:
 
 ```bash
-node socket-wheelhouse/scripts/fleet/cascade-fleet.mts \
+node scripts/repo/cascade-fleet.mts \
   --pnpm 11.3.0 \
   [--skip-ci-wait] \
   [--dry-run]
@@ -135,7 +151,7 @@ If Stage A+B+C landed (registry has a new tip) but Stage D didn't run, pass `--f
 
 ### What this does NOT do
 
-- It does NOT bump `socket-wheelhouse/external-tools.json` (the wheelhouse's own at-repo-root copy, consumed by `scripts/install-sfw.mts`). The live source of truth for cascade purposes is `socket-registry/external-tools.json`. The wheelhouse file uses a different schema (tools nested under `.tools.<name>` with `sha256` field; registry uses top-level keys with `integrity` field) and a different consumer (the local SFW installer + zizmor setup). When SFW or zizmor bumps, the wheelhouse file's checksums go stale. Today refreshing them is manual (run `node scripts/update-external-tools.mts` from the wheelhouse repo). Wiring this into the cascade orchestrator is a known gap. For now, treat wheelhouse's external-tools.json as a "sibling source of truth" that needs its own update step after a tool bump.
+- It does NOT bump the fleet source repo's root `external-tools.json` (the wheelhouse's own at-repo-root copy, consumed by `scripts/install-sfw.mts`). The live source of truth for cascade purposes is `socket-registry/external-tools.json`. The wheelhouse file uses a different schema (tools nested under `.tools.<name>` with `sha256` field; registry uses top-level keys with `integrity` field) and a different consumer (the local SFW installer + zizmor setup). When SFW or zizmor bumps, the wheelhouse file's checksums go stale. Today refreshing them is manual (run `node scripts/update-external-tools.mts` from the wheelhouse repo). Wiring this into the cascade orchestrator is a known gap. For now, treat wheelhouse's external-tools.json as a "sibling source of truth" that needs its own update step after a tool bump.
 - It does NOT bump `.node-version`. Node bumps follow a different cadence (the Node ecosystem doesn't ship the same per-platform binary model; `.node-version` is just a string).
 
 ## Monorepo internal `engines.node`
@@ -196,7 +212,7 @@ Every entry in `.gitmodules` MUST set `shallow = true`. Every `git submodule upd
 
 The fleet pins `npm-run-all2: 9.0.0` in the wheelhouse catalog. Every repo that depends on it MUST also declare the top-level `"npm-run-all2": { "nodeRun": true }` key in its own `package.json`. That key tells npm-run-all2 9.x to execute each script via `node --run` instead of the package manager CLI. `run-s build:*` and `run-p test:*` chains skip the per-script pnpm startup cost, which is non-trivial for N-script fan-outs. Inherited limitations from `node --run` (no `pre`/`post` lifecycle hooks; no `npm_*` env injection: `NODE_RUN_SCRIPT_NAME` + `NODE_RUN_PACKAGE_JSON_PATH` replace them; `node_modules/.bin` still on PATH) are acceptable for the fleet because none of our canonical scripts rely on those features. Enforced by `scripts/sync-scaffolding/checks/package-npm-run-all2-noderun.mts`: `npm_run_all2_node_run_missing` findings auto-fix.
 
-## Backward compatibility
+## Backward compatibility (npm-run-all2)
 
 FORBIDDEN to maintain. Remove when encountered.
 
@@ -257,4 +273,4 @@ it on an **interactive TTY**. The `!` / headless channel has no TTY, so the
 prompt is swallowed and the command dies with `EOTP`. Tell the user to run
 the op in a **real terminal** where the prompt can appear; fall back to
 `--otp=<code>` only when no TTY is available and the user supplies a fresh
-code. Reminder hook: `.claude/hooks/fleet/npm-otp-flow-reminder/`.
+code. Reminder hook: `.claude/hooks/fleet/npm-otp-flow-nudge/`.

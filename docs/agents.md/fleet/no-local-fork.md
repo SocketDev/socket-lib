@@ -1,28 +1,28 @@
 # Never fork fleet-canonical files locally
 
-Fleet-canonical files (anything tracked by `socket-wheelhouse/scripts/sync-scaffolding/manifest.mts`) MUST be edited in `socket-wheelhouse/template/...` and cascaded out. Never branched locally in a downstream fleet repo.
+Fleet-canonical files (anything tracked by `scripts/sync-scaffolding/manifest.mts`) MUST be edited in `template/...` and cascaded out. Never branched locally in a downstream fleet repo.
 
 ## Canonical surfaces
 
 These directories and files cascade fleet-wide. They are **not** repo-local:
 
-- `.config/oxlint-plugin/`: plugin index + rules
+- `.config/fleet/oxlint-plugin/`: plugin index + rules
 - `.git-hooks/`: commit-msg / pre-commit / pre-push entry shims + .mts helpers (git invokes the shims when `core.hooksPath` is set to this directory; wired by `scripts/install-git-hooks.mts` at `pnpm install` time)
 - `.claude/hooks/`: PreToolUse / PostToolUse hooks
 - `.claude/skills/fleet/_shared/`: shared skill helpers
-- `CLAUDE.md` fleet block (between `BEGIN/END FLEET-CANONICAL` markers)
+- `CLAUDE.md` fleet block (between the `<fleet-canonical>` markers)
 - `docs/agents.md/fleet/`: fleet-canonical CLAUDE.md offshoot references (applies to every socket-\* repo)
 - `docs/agents.md/wheelhouse/`: docs about the wheelhouse cascade mechanism itself (this file lives here)
 - Downstream repos may add their own `docs/agents.md/<repo>/` subdirectory for repo-specific docs. Those are NOT fleet-canonical.
 - Anything else listed in the sync manifest
 
-If unsure, check `socket-wheelhouse/scripts/sync-scaffolding/manifest.mts`. Tracked = canonical.
+If unsure, check `scripts/sync-scaffolding/manifest.mts`. Tracked = canonical.
 
 ## How to apply
 
 If a downstream repo needs a behavior change in one of these files:
 
-1. Edit the file in `socket-wheelhouse/template/...`.
+1. Edit the file in `template/...`.
 2. Commit the template change.
 3. Run `node scripts/sync-scaffolding/cli.mts --target <downstream-repo> --fix` to cascade.
 
@@ -50,7 +50,7 @@ The fleet's value is the shared canon. Branching locally splits the canon and er
 
 Companion behavior to the no-fork rule: **don't read, grep, or debug wheelhouse-canonical files in a downstream repo to verify what they contain or how they behave**.
 
-- **DO NOT** grep a downstream repo's copy of `.config/oxlint-plugin/`, `.claude/hooks/fleet/`, `.git-hooks/`, `docs/agents.md/fleet/`, or the `CLAUDE.md` fleet block to check what's in it. Read from `socket-wheelhouse/template/...` instead.
+- **DO NOT** grep a downstream repo's copy of `.config/fleet/oxlint-plugin/`, `.claude/hooks/fleet/`, `.git-hooks/`, `docs/agents.md/fleet/`, or the `CLAUDE.md` fleet block to check what's in it. Read from `template/...` instead.
 - **DO NOT** debug the behavior of a cascaded hook by reading its downstream copy. The cascade overwrites those files; their content is the wheelhouse's content. Read upstream.
 - **DO** treat any divergence as the downstream being stale. The wheelhouse is the oracle.
 
@@ -62,7 +62,7 @@ This matters because:
 
 When the user says "the wheelhouse has X," X is true. Act on it without verification.
 
-If a cascaded file genuinely seems wrong, the fix lives in `socket-wheelhouse/template/...`, never in the downstream copy. Open the template file in `socket-wheelhouse/`, read it there, edit it there, cascade.
+If a cascaded file genuinely seems wrong, the fix lives in `template/...`, never in the downstream copy. Open the template file in the fleet source repo, read it there, edit it there, cascade.
 
 ## Cascade-first triage
 
@@ -72,23 +72,23 @@ When a member repo errors that a canonical artifact is "not found" / "missing" /
 node scripts/repo/sync-scaffolding/cli.mts --target <repo> --fix
 ```
 
-Never debug or hand-patch the member's copy of code that's byte-copied from the wheelhouse. The `cascade-first-triage-reminder` hook nudges this when the failure shape looks like a missing canonical artifact.
+Never debug or hand-patch the member's copy of code that's byte-copied from the wheelhouse. The `cascade-first-triage-nudge` hook nudges this when the failure shape looks like a missing canonical artifact.
 
 ## Composite-file exception: CLAUDE.md is part-canonical, part-repo
 
 **Don't apply the no-fork or trust-the-wheelhouse rules blindly to `CLAUDE.md`.** It's a composite file:
 
-```
+```text
 # CLAUDE.md
   ← preamble (repo-owned: header + the doc-shape blurb)
-<!-- BEGIN FLEET-CANONICAL -->
+<!-- <fleet-canonical> -->
   ← canonical block (wheelhouse-owned: byte-identical across the fleet)
-<!-- END FLEET-CANONICAL -->
+<!-- </fleet-canonical> -->
 ## 🏗️ Project-Specific
   ← postamble (repo-owned: architecture, commands, domain rules)
 ```
 
-- The **canonical block** between `BEGIN/END FLEET-CANONICAL` markers IS fleet-canonical. Apply the no-fork rule + the trust-the-wheelhouse rule there. Edit only in `socket-wheelhouse/template/CLAUDE.md` and cascade.
+- The **canonical block** between the `<fleet-canonical>` markers IS fleet-canonical. Apply the no-fork rule + the trust-the-wheelhouse rule there. Edit only in `template/CLAUDE.md` and cascade.
 - The **preamble** (file header, fleet/repo split blurb) and the **postamble** (`🏗️ Project-Specific` section after the END marker) are **repo-owned**. You CAN and SHOULD edit them in a downstream repo.
 
 ### When to trim preamble + postamble
@@ -105,14 +105,14 @@ When a downstream repo's combined CLAUDE.md size approaches (or exceeds) 40 KB, 
 
 A "fork" creates **divergence between the downstream's canonical copy and the wheelhouse's version of the same canonical content**. Trimming a downstream's `🏗️ Project-Specific` section doesn't fork anything — that content NEVER existed in the wheelhouse template's canonical block. Each repo's postamble is unique to that repo.
 
-The cascade's `extractFleetBlock` + `spliceFleetBlock` only touches the content between the BEGIN/END markers. Preamble + postamble pass through untouched. So a postamble trim is a local edit to local content, not a divergence from the shared canon.
+The cascade's `extractFleetBlock` + `spliceFleetBlock` only touches the content between the `<fleet-canonical>` markers. Preamble + postamble pass through untouched. So a postamble trim is a local edit to local content, not a divergence from the shared canon.
 
 ### What the cascade does and doesn't replace
 
-| Section                                   | Cascade behavior                                    |
-| ----------------------------------------- | --------------------------------------------------- |
-| Preamble (before `BEGIN FLEET-CANONICAL`) | Passes through untouched                            |
-| Canonical block                           | Replaced with wheelhouse template's canonical block |
-| Postamble (after `END FLEET-CANONICAL`)   | Passes through untouched                            |
+| Section | Cascade behavior |
+| ------------------------------------------- | --------------------------------------------------- |
+| Preamble (before `<fleet-canonical>`) | Passes through untouched |
+| Canonical block | Replaced with wheelhouse template's canonical block |
+| Postamble (after `</fleet-canonical>`) | Passes through untouched |
 
 So if the cascade pushes a downstream CLAUDE.md back over 40 KB, the fix is to trim the downstream's preamble or postamble — never the canonical block. The cascade preserves what you've trimmed there.

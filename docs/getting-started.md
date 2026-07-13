@@ -36,9 +36,9 @@ yarn add @socketsecurity/lib
 Let's create a simple script that uses a few core features:
 
 ```typescript
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { readJson } from '@socketsecurity/lib/fs'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
 
 // Create a logger instance
 const logger = getDefaultLogger()
@@ -71,21 +71,23 @@ This library uses **tree-shakeable exports**, which means you import exactly wha
 
 ```typescript
 // Good: Import only what you need
-import { Spinner } from '@socketsecurity/lib/spinner'
-import { readJson } from '@socketsecurity/lib/fs'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
 
 // Avoid: Don't import from the root
 // import { Spinner, readJson } from '@socketsecurity/lib'
 ```
 
-**Why subpath imports?** This library is designed for selective imports to keep bundle sizes minimal. Each subpath (like `/spinner` or `/fs`) is a separate export point defined in `package.json` exports field. The root import (`@socketsecurity/lib`) doesn't re-export all modules - you must use specific subpaths.
+**Why subpath imports?** This library is designed for selective imports to keep bundle sizes minimal. Each subpath (like `/spinner/spinner` or `/fs/read-json`) is a separate export point defined in `package.json` exports field. The root import (`@socketsecurity/lib`) doesn't re-export all modules - you must use specific subpaths.
 
 ## Common Use Cases
 
 ### Working with Files
 
 ```typescript
-import { readFileUtf8, writeJson, safeDelete } from '@socketsecurity/lib/fs'
+import { readFileUtf8 } from '@socketsecurity/lib/fs/read-file'
+import { writeJson } from '@socketsecurity/lib/fs/write-json'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
 // Read a text file
 const content = await readFileUtf8('./README.md')
@@ -100,7 +102,7 @@ await safeDelete('./temp-dir')
 ### Spawning Processes
 
 ```typescript
-import { spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 // Run a command and get the output
 const result = await spawn('git', ['status'])

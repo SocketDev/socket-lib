@@ -128,7 +128,7 @@ function getConfigDir(): string {
 Gets the global abort signal for canceling operations.
 
 ```typescript
-import { getAbortSignal } from '@socketsecurity/lib/constants/process'
+import { getAbortSignal } from '@socketsecurity/lib/process/abort'
 
 const signal = getAbortSignal()
 
@@ -176,7 +176,7 @@ checkNodeVersion()
 
 ```typescript
 import { httpJson, httpDownload } from '@socketsecurity/lib/http-request'
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const NPM_REGISTRY = 'https://registry.npmjs.org'
 
@@ -320,9 +320,9 @@ console.log(registry.searchUrl('testing framework'))
 ### Abort Signal Usage
 
 ```typescript
-import { getAbortSignal } from '@socketsecurity/lib/constants/process'
+import { getAbortSignal } from '@socketsecurity/lib/process/abort'
 import { httpDownload } from '@socketsecurity/lib/http-request'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 const signal = getAbortSignal()
 

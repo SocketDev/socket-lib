@@ -7,16 +7,13 @@ Complete examples showing how to combine multiple utilities from @socketsecurity
 A complete CLI tool that downloads a file, processes it, and provides visual feedback:
 
 ```typescript
-import { Spinner } from '@socketsecurity/lib/spinner'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { httpDownload } from '@socketsecurity/lib/http-request'
-import {
-  readFileBinary,
-  safeDelete,
-  safeMkdir,
-  safeStats,
-} from '@socketsecurity/lib/fs'
-import { spawn } from '@socketsecurity/lib/spawn'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { httpDownload } from '@socketsecurity/lib/http-request/download'
+import { readFileBinary } from '@socketsecurity/lib/fs/read-file'
+import { safeDelete, safeMkdir } from '@socketsecurity/lib/fs/safe'
+import { safeStat } from '@socketsecurity/lib/fs/inspect'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 const logger = getDefaultLogger()
 const spinner = Spinner()
@@ -38,7 +35,7 @@ async function downloadAndProcess(url: string, destPath: string) {
       },
     })
     spinner.success(
-      `Downloaded ${(await safeStats(downloadPath))?.size || 0} bytes`,
+      `Downloaded ${(await safeStat(downloadPath))?.size || 0} bytes`,
     )
   } catch (error) {
     spinner.failAndStop('Download failed')
@@ -67,10 +64,10 @@ await downloadAndProcess('https://example.com/archive.tar.gz', './output')
 A wrapper that detects and runs the appropriate package manager:
 
 ```typescript
-import { spawn } from '@socketsecurity/lib/spawn'
-import { findUpSync } from '@socketsecurity/lib/fs'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 async function detectPackageManager(
   cwd: string,
@@ -113,10 +110,11 @@ await installDependencies('./my-project')
 A build system that tries multiple strategies on failure:
 
 ```typescript
-import { spawn } from '@socketsecurity/lib/spawn'
-import { Spinner } from '@socketsecurity/lib/spinner'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { safeDelete, isDirSync } from '@socketsecurity/lib/fs'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { safeDelete } from '@socketsecurity/lib/fs/safe'
+import { isDirSync } from '@socketsecurity/lib/fs/inspect'
 
 async function buildProject(projectPath: string) {
   const logger = getDefaultLogger()
@@ -190,7 +188,9 @@ await buildProject('./my-project')
 Load configuration from multiple sources with fallbacks:
 
 ```typescript
-import { readJson, findUpSync, safeReadFile } from '@socketsecurity/lib/fs'
+import { readJson } from '@socketsecurity/lib/fs/read-json'
+import { findUpSync } from '@socketsecurity/lib/fs/find'
+import { safeReadFile } from '@socketsecurity/lib/fs/read-file'
 import { getHome } from '@socketsecurity/lib/env/home'
 import { getNodeEnv } from '@socketsecurity/lib/env/node-env'
 import path from 'node:path'
@@ -263,9 +263,11 @@ console.log('Using config:', config)
 Process multiple files in parallel with progress tracking:
 
 ```typescript
-import { Spinner } from '@socketsecurity/lib/spinner'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { readDirNames, readFileUtf8, safeMkdir } from '@socketsecurity/lib/fs'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { readDirNames } from '@socketsecurity/lib/fs/read-dir'
+import { readFileUtf8 } from '@socketsecurity/lib/fs/read-file'
+import { safeMkdir } from '@socketsecurity/lib/fs/safe'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
@@ -324,8 +326,9 @@ await processFiles('./input', './output')
 Common git operations with error handling:
 
 ```typescript
-import { spawn, isSpawnError } from '@socketsecurity/lib/spawn'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { spawn } from '@socketsecurity/lib/process/spawn/child'
+import { isSpawnError } from '@socketsecurity/lib/process/spawn/errors'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 async function gitStatus(repoPath: string) {
   const result = await spawn('git', ['status', '--porcelain'], {
@@ -394,8 +397,8 @@ Monitor multiple services with retries:
 
 ```typescript
 import { httpJson } from '@socketsecurity/lib/http-request'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 interface HealthCheck {
   name: string
@@ -461,10 +464,10 @@ import fs from 'node:fs/promises'
 // Note: fast-glob is an external dependency - install it separately (pnpm add -D fast-glob)
 import { glob } from 'fast-glob'
 
-import { readFileUtf8 } from '@socketsecurity/lib/fs'
-import { PromiseQueue } from '@socketsecurity/lib/promise-queue'
-import { Spinner } from '@socketsecurity/lib/spinner'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { readFileUtf8 } from '@socketsecurity/lib/fs/read-file'
+import { PromiseQueue } from '@socketsecurity/lib/promises/queue'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 async function processBatch<T>(
   items: T[],

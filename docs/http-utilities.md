@@ -42,7 +42,7 @@ await httpDownload('https://example.com/file.zip', '/tmp/file.zip')
 - `url` (string): The URL to request (http:// or https://)
 - `options` (HttpRequestOptions): Request configuration
 
-**Returns:** Promise<T> with parsed JSON (T defaults to `unknown`)
+**Returns:** `Promise<T>` with parsed JSON (T defaults to `unknown`)
 
 **Example:**
 
@@ -101,7 +101,7 @@ const data = await httpJson('https://api.example.com/data', {
 - `url` (string): The URL to request
 - `options` (HttpRequestOptions): Request configuration
 
-**Returns:** Promise<string>
+**Returns:** `Promise<string>`
 
 **Example:**
 
@@ -148,7 +148,7 @@ const content = await httpText('https://example.com/data.txt', {
 - `url` (string): The URL to request
 - `options` (HttpRequestOptions): Request configuration
 
-**Returns:** Promise<HttpResponse> with methods for accessing the response
+**Returns:** `Promise<HttpResponse>` with methods for accessing the response
 
 **Example:**
 
@@ -541,7 +541,7 @@ const data = response.json()
 
 ```typescript
 import { httpDownload } from '@socketsecurity/lib/http-request'
-import { Spinner } from '@socketsecurity/lib/spinner'
+import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = Spinner({ text: 'Downloading large file...' })
 spinner.start()

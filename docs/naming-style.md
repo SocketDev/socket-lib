@@ -45,7 +45,7 @@ Only when the resulting name is still self-describing:
 
 For functions that DO things:
 
-```
+```text
 parseJson      not  jsonParse
 parseJsonSafe  not  safeJsonParse
 toEditablePackageJson  not  pkgJsonToEditable
@@ -58,7 +58,7 @@ operates on.
 
 When wrapping a class or noun, match its plurality:
 
-```
+```text
 urlSearchParamsAsArray   not  urlSearchParamAsArray  // matches URLSearchParams
 ```
 
@@ -86,7 +86,7 @@ Within a module:
 When both shapes exist, the async is the canonical name and sync gets a
 suffix:
 
-```
+```text
 readSecret      / readSecretSync
 writeSecret     / writeSecretSync
 parseJson       / (no sync variant — it's already sync)
@@ -103,7 +103,7 @@ load-bearing: it signals "config for the function with the same prefix."
 Type for an instance shape gets `Instance` suffix when there's a name
 collision with a factory:
 
-```
+```text
 function Spinner(opts): SpinnerInstance     // factory and instance both named Spinner before
 ```
 
