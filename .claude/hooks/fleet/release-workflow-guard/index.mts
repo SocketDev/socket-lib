@@ -74,19 +74,33 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
+import {
+  bashGuard,
+  block,
+  defineHook,
+  notify,
+  runHook,
+} from '../_shared/guard.mts'
 import { commandsFor, parseCommands } from '../_shared/shell-command.mts'
-import { bypassPhraseRemaining } from '../_shared/transcript.mts'
+import {
+  extractTurnPieces,
+  normalizeBypassText,
+  phrasePattern,
+  resolveRoleAndContent,
+  stripCodeFences,
+  stripQuotedSpans,
+} from '../_shared/transcript.mts'
 
-type ToolInput = {
-  tool_input?:
-    | {
-        command?: string | undefined
-      }
-    | undefined
-  tool_name?: string | undefined
-  transcript_path?: string | undefined
-}
+// Pre-flight triggers: the dispatcher imports + runs this guard only when the
+// raw command contains at least one of these substrings. They mirror
+// `detectDispatch`'s own cheap gate exactly — a command with neither `workflow`
+// nor `dispatches` can never reach a block/notify verdict (the two dispatch
+// shapes are `gh workflow run/dispatch <id>` and
+// `gh api .../actions/workflows/<id>/dispatches`). Keep in lock-step with that
+// gate: narrowing this set would silently disable the guard.
+export const triggers: readonly string[] = ['dispatches', 'workflow']
 
 // Bypass phrase: `Allow workflow-dispatch bypass: <workflow>`.
 // Authorizes EXACTLY ONE dispatch of the named workflow when the
@@ -160,9 +174,15 @@ export function countPriorDispatches(
   } catch {
     return 0
   }
+  // oxlint-disable-next-line socket/sort-set-args -- two derived forms of one workflow name (the value + its extension-stripped form); Set membership order is immaterial.
   const accepted = new Set([workflow, workflow.replace(/\.(?:yaml|yml)$/i, '')])
   let count = 0
   const lines = raw.split('\n')
+  // First pass: tool_use ids whose tool_result was a PreToolUse hook denial.
+  // A DENIED dispatch never reached GitHub, so it must not consume a bypass
+  // slot — without this, blocked attempts eat every future phrase and the
+  // budget can never go positive again.
+  const deniedIds = collectHookDeniedToolUseIds(lines)
   for (let i = 0, { length } = lines; i < length; i += 1) {
     const line = lines[i]!
     if (!line) {
@@ -207,6 +227,10 @@ export function countPriorDispatches(
       if (typeof cmd !== 'string') {
         continue
       }
+      const id = b['id']
+      if (typeof id === 'string' && deniedIds.has(id)) {
+        continue
+      }
       const dispatch = detectDispatch(cmd)
       if (dispatch.workflow && accepted.has(dispatch.workflow)) {
         count += 1
@@ -214,6 +238,159 @@ export function countPriorDispatches(
     }
   }
   return count
+}
+
+// Chronological credit/debit ledger over the whole transcript: each accepted
+// phrase OCCURRENCE in a user turn adds one credit; each PRIOR non-denied
+// dispatch of the same workflow consumes one (floored at zero, so a dispatch
+// that ran outside this gate — web UI, user terminal — never eats a future
+// credit). Windowing phrases while counting dispatches unwindowed was the
+// prior design's defect: as phrases aged out of the window the un-aged
+// dispatch debits ate every fresh phrase, and the budget could never go
+// positive again.
+export function dispatchLedgerRemaining(
+  transcriptPath: string | undefined,
+  phrases: readonly string[],
+  workflow: string,
+): number {
+  if (!transcriptPath || !workflow) {
+    return 0
+  }
+  let raw: string
+  try {
+    raw = readFileSync(transcriptPath, 'utf8')
+  } catch {
+    return 0
+  }
+  const lines = raw.split('\n')
+  const deniedIds = collectHookDeniedToolUseIds(lines)
+  // oxlint-disable-next-line socket/sort-set-args -- two derived forms of one workflow name; membership order is immaterial.
+  const accepted = new Set([workflow, workflow.replace(/\.(?:yaml|yml)$/i, '')])
+  const needles = phrases.map(p => normalizeBypassText(p))
+  let credits = 0
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
+    if (!line) {
+      continue
+    }
+    let evt: unknown
+    try {
+      evt = JSON.parse(line)
+    } catch {
+      continue
+    }
+    const r = resolveRoleAndContent(evt)
+    if (r?.role === 'user' && !r.isSidechain) {
+      const pieces = extractTurnPieces(r.content)
+      if (pieces.length) {
+        const haystack = normalizeBypassText(
+          stripQuotedSpans(stripCodeFences(pieces.join('\n'))),
+        )
+        // One credit per typed phrase occurrence. A needle set holds
+        // VARIANTS of the same phrase (exact, extension-stripped), so one
+        // typed phrase can match several needles — take the max occurrence
+        // count across needles instead of summing, or a single phrase
+        // would mint multiple credits.
+        let occurrences = 0
+        for (
+          let j = 0, needlesLength = needles.length;
+          j < needlesLength;
+          j += 1
+        ) {
+          const matched = haystack.match(phrasePattern(needles[j]!))
+          if (matched && matched.length > occurrences) {
+            occurrences = matched.length
+          }
+        }
+        credits += occurrences
+      }
+      continue
+    }
+    if ((evt as Record<string, unknown>)['type'] !== 'assistant') {
+      continue
+    }
+    const message = (evt as Record<string, unknown>)['message']
+    const content =
+      message && typeof message === 'object'
+        ? (message as Record<string, unknown>)['content']
+        : undefined
+    if (!Array.isArray(content)) {
+      continue
+    }
+    for (let j = 0, blocksLen = content.length; j < blocksLen; j += 1) {
+      const block = content[j]
+      if (!block || typeof block !== 'object') {
+        continue
+      }
+      const b = block as Record<string, unknown>
+      if (b['type'] !== 'tool_use' || b['name'] !== 'Bash') {
+        continue
+      }
+      const cmd = (b['input'] as Record<string, unknown> | undefined)?.[
+        'command'
+      ]
+      if (typeof cmd !== 'string') {
+        continue
+      }
+      const id = b['id']
+      if (typeof id === 'string' && deniedIds.has(id)) {
+        continue
+      }
+      const dispatch = detectDispatch(cmd)
+      if (dispatch.workflow && accepted.has(dispatch.workflow)) {
+        credits = credits > 0 ? credits - 1 : 0
+      }
+    }
+  }
+  return credits
+}
+
+// Marker every PreToolUse denial carries in its tool_result content. The
+// harness renders hook blocks as `PreToolUse:Bash hook error: …`.
+const HOOK_DENIAL_MARKER = 'PreToolUse:Bash hook error'
+
+export function collectHookDeniedToolUseIds(
+  lines: readonly string[],
+): Set<string> {
+  const denied = new Set<string>()
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
+    if (!line || !line.includes(HOOK_DENIAL_MARKER)) {
+      continue
+    }
+    let evt: unknown
+    try {
+      evt = JSON.parse(line)
+    } catch {
+      continue
+    }
+    const message = (evt as Record<string, unknown> | undefined)?.['message']
+    if (!message || typeof message !== 'object') {
+      continue
+    }
+    const content = (message as Record<string, unknown>)['content']
+    if (!Array.isArray(content)) {
+      continue
+    }
+    for (let j = 0, blocksLen = content.length; j < blocksLen; j += 1) {
+      const block = content[j]
+      if (!block || typeof block !== 'object') {
+        continue
+      }
+      const b = block as Record<string, unknown>
+      if (b['type'] !== 'tool_result') {
+        continue
+      }
+      const toolUseId = b['tool_use_id']
+      if (
+        typeof toolUseId === 'string' &&
+        JSON.stringify(b['content'] ?? '').includes(HOOK_DENIAL_MARKER)
+      ) {
+        denied.add(toolUseId)
+      }
+    }
+  }
+  return denied
 }
 
 // Flags on `gh workflow run/dispatch` that take a value argument — so
@@ -226,15 +403,16 @@ const GH_WORKFLOW_VALUE_FLAGS = new Set([
   '--ref',
   '--repo',
   '-F',
-  '-R',
   '-f',
+  '-R',
   '-r',
 ])
 
 // `gh api` path that names a workflow dispatch endpoint:
 // `.../actions/workflows/<id>/dispatches`. The path component implies
 // dispatch — no need to also inspect -X.
-const GH_API_DISPATCH_PATH_RE = /\/actions\/workflows\/([^/\s]+)\/dispatches\b/
+const GH_API_DISPATCH_PATH_RE =
+  /\/actions\/workflows\/(?<workflowId>[^/\s]+)\/dispatches\b/
 
 // Dry-run input detection. The fleet standardized on `dry-run`
 // (kebab-case) — see socket-registry's shared actions and every
@@ -280,7 +458,7 @@ const WORKFLOW_GH_RELEASE_RE =
 // slash). Used to gate the dry-run bypass: a dispatch targeting a
 // repo other than the current $CLAUDE_PROJECT_DIR can't be verified
 // from disk, so we conservatively block it.
-const GH_REPO_FLAG_RE = /\s--repo\s+\S*?\/([^\s/]+)/
+const GH_REPO_FLAG_RE = /\s--repo\s+\S*?\/(?<repoName>[^\s/]+)/
 
 // Inline `cd <path> && …` parser. Captures the destination path so
 // the search-roots resolver can include it. Claude Code's Bash tool
@@ -289,10 +467,8 @@ const GH_REPO_FLAG_RE = /\s--repo\s+\S*?\/([^\s/]+)/
 // parse the hook can't locate a workflow YAML that lives in the
 // sibling clone the user is targeting via `cd`. The path may be
 // quoted ("..." or '...'); strip the quotes for the resolver.
-const INLINE_CD_RE = /(?:^|[;&])\s*cd\s+(?:'([^']+)'|"([^"]+)"|(\S+))\s*&&/
-// (Use a single capture in the consumer by checking groups 1..3 — the
-// regex syntax requires three alternation groups; the resolver picks
-// the first non-undefined.)
+const INLINE_CD_RE =
+  /(?:^|[;&])\s*cd\s+(?:'(?<sq>[^']+)'|"(?<dq>[^"]+)"|(?<bare>\S+))\s*&&/
 
 type DispatchResult = {
   // When `blocked` is false, populated with the reason the dispatch
@@ -427,33 +603,36 @@ export function workflowDeclaresDryRunInput(
 //     checkout can't false-positive a cross-repo dispatch.
 export function resolveSearchRoots(command: string): string[] {
   // Resolution order: $CLAUDE_PROJECT_DIR (Claude Code sets this when
-  // it remembers to) → derive from this hook script's path (the hook
+  // it remembers to) → derive from this module's own path (the hook
   // lives at <project>/.claude/hooks/fleet/release-workflow-guard/index.mts,
-  // so go three levels up from __dirname) → $PWD as last resort.
-  // The script-path derivation is the most robust because it doesn't
-  // depend on the runner exporting env vars correctly.
+  // so go four levels up from its directory) → $PWD as last resort.
+  // The module-path derivation is the most robust because it doesn't
+  // depend on the runner exporting env vars correctly, and — unlike the
+  // launched-script path — points at THIS file even when many guards
+  // share one dispatcher process.
   let projectDir = process.env['CLAUDE_PROJECT_DIR']
   if (!projectDir) {
-    // process.argv[1] is the absolute path of this hook script when
-    // invoked via `node <path>`. Walk up to the repo root.
-    const scriptPath = process.argv[1]
-    if (scriptPath) {
-      // .claude/hooks/fleet/release-workflow-guard/index.mts → ../../../ = repo
-      const candidate = path.resolve(scriptPath, '..', '..', '..', '..')
-      if (existsSync(path.join(candidate, '.github', 'workflows'))) {
-        projectDir = candidate
-      }
+    // import.meta.url is this module's URL; resolve to the absolute
+    // hook-script path and walk up to the repo root. Matches the prior
+    // launched-script-path derivation level-for-level.
+    const scriptPath = fileURLToPath(import.meta.url)
+    // .claude/hooks/fleet/release-workflow-guard/index.mts → ../../../ = repo
+    const candidate = path.resolve(scriptPath, '..', '..', '..', '..')
+    /* c8 ignore start - candidate path (.github/workflows existence) depends on import.meta.url location at runtime; both arms are structurally unreachable from in-process tests */
+    if (existsSync(path.join(candidate, '.github', 'workflows'))) {
+      projectDir = candidate
     }
+    /* c8 ignore stop */
   }
   if (!projectDir) {
     projectDir = process.cwd()
   }
   const repoMatch = GH_REPO_FLAG_RE.exec(command)
-  if (repoMatch && path.basename(projectDir) !== repoMatch[1]!) {
+  if (repoMatch && path.basename(projectDir) !== repoMatch.groups!.repoName!) {
     // Cross-repo dispatch: only look in the sibling clone. Excluding
     // projectDir keeps a same-name workflow in the current checkout
     // from false-positiving the verification.
-    return [path.join(path.dirname(projectDir), repoMatch[1]!)]
+    return [path.join(path.dirname(projectDir), repoMatch.groups!.repoName!)]
   }
   // Same-repo (no --repo, or --repo names the current project): add
   // process.cwd() when it differs from projectDir AND any inline
@@ -476,10 +655,12 @@ export function resolveSearchRoots(command: string): string[] {
     // `cd path && gh workflow run ...` — resolve path relative to
     // projectDir (most common: a sibling clone). Absolute paths are
     // honored as-is; `~` is left literal because the hook can't
-    // expand the user's $HOME safely. The capture-group pick handles
+    // expand the user's $HOME safely. The named-group pick handles
     // single-quoted / double-quoted / bare forms via three
     // alternation groups in INLINE_CD_RE.
-    const cdPath = inlineCd[1] ?? inlineCd[2] ?? inlineCd[3]
+    const cdPath =
+      inlineCd.groups?.sq ?? inlineCd.groups?.dq ?? inlineCd.groups?.bare
+    /* c8 ignore next - cdPath is always defined when INLINE_CD_RE matches; all three alternation groups guarantee at least one capture */
     if (cdPath) {
       const resolved = path.isAbsolute(cdPath)
         ? cdPath
@@ -548,9 +729,11 @@ export function isGhReleaseOnly(
 function extractWorkflowTarget(args: readonly string[]): string | undefined {
   // Locate the run/dispatch subcommand index after the `workflow` word.
   const wfIdx = args.indexOf('workflow')
+  /* c8 ignore start - defensive guard; caller (detectDispatch) always passes args that include 'workflow' */
   if (wfIdx === -1) {
     return undefined
   }
+  /* c8 ignore stop */
   let i = wfIdx + 1
   // The subcommand may be `run` or `dispatch`; skip exactly one.
   if (args[i] === 'dispatch' || args[i] === 'run') {
@@ -646,7 +829,7 @@ export function detectDispatch(command: string): DispatchResult {
           return {
             blocked: true,
             shape: 'gh api .../dispatches',
-            workflow: m[1],
+            workflow: m.groups!.workflowId,
           }
         }
       }
@@ -656,41 +839,19 @@ export function detectDispatch(command: string): DispatchResult {
   return { blocked: false }
 }
 
-function main(): void {
-  let raw = ''
-  try {
-    raw = readFileSync(0, 'utf8')
-  } catch {
-    return
-  }
-
-  let input: ToolInput
-  try {
-    input = JSON.parse(raw)
-  } catch {
-    return
-  }
-
-  if (input.tool_name !== 'Bash') {
-    return
-  }
-  const command = input.tool_input?.command
-  if (!command || typeof command !== 'string') {
-    return
-  }
-
+export const check = bashGuard((command, payload) => {
   const { allowedReason, blocked, shape, workflow } = detectDispatch(command)
   if (!blocked) {
     if (allowedReason) {
       // Transparently log the bypass so the user sees why the guard
-      // let it through. Stderr only — no exit-code change, hook
-      // behaves as if it never fired.
-      process.stderr.write(
-        // socket-lint: allow console
-        `[release-workflow-guard] ALLOWED: ${shape} on ${workflow ?? '<unknown>'} — ${allowedReason}\n`,
+      // let it through. Notify only — no block, hook behaves as if it
+      // never fired.
+      return notify(
+        /* c8 ignore next - workflow is always defined when allowedReason is set; detectDispatch populates both fields together */
+        `[release-workflow-guard] ALLOWED: ${shape} on ${workflow ?? '<unknown>'} — ${allowedReason}`,
       )
     }
-    return
+    return undefined
   }
 
   // Per-trigger phrase bypass. The user types
@@ -702,58 +863,62 @@ function main(): void {
   // and subtract the number of prior dispatches against the same
   // workflow already in the transcript. If anything's left, this
   // dispatch consumes one slot and is allowed.
+  /* c8 ignore next - workflow is always defined when detectDispatch returns blocked:true; defensive guard for future code paths */
   if (workflow) {
-    const acceptedPhrases = buildAcceptedPhrases(workflow)
-    const priorDispatches = countPriorDispatches(
-      input.transcript_path,
+    const remaining = dispatchLedgerRemaining(
+      payload.transcript_path,
+      buildAcceptedPhrases(workflow),
       workflow,
     )
-    const remaining = bypassPhraseRemaining(
-      input.transcript_path,
-      acceptedPhrases,
-      priorDispatches,
-      BYPASS_LOOKBACK_USER_TURNS,
-    )
     if (remaining > 0) {
-      process.stderr.write(
-        // socket-lint: allow console
-        `[release-workflow-guard] ALLOWED: ${shape} on ${workflow} — bypass phrase consumed (${remaining - 1} remaining for this workflow)\n`,
+      return notify(
+        `[release-workflow-guard] ALLOWED: ${shape} on ${workflow} — bypass phrase consumed (${remaining - 1} remaining for this workflow)`,
       )
-      return
     }
   }
 
+  /* c8 ignore start - workflow is always defined when blocked:true; the else/null arms here are defensive fallbacks unreachable from detectDispatch */
   const phraseExample = workflow
     ? `${BYPASS_PHRASE_PREFIX} ${workflow.replace(/\.(?:yaml|yml)$/i, '')}`
     : `${BYPASS_PHRASE_PREFIX} <workflow>`
-  const lines = [
-    '[release-workflow-guard] BLOCKED: this command would dispatch a',
-    `  GitHub Actions workflow (${shape}, target: ${workflow ?? '<unknown>'}).`,
-    '',
-    '  Workflow dispatches often have irreversible prod side effects:',
-    '    - Publish workflows push npm versions (unpublishable after 24h).',
-    '    - Build/Release workflows create GitHub releases pinned by SHA.',
-    '    - Container workflows push immutable image tags.',
-    '',
-    '  Bypass options:',
-    '    (a) Verifiable dry-run:',
-    '        - Pass `-f dry-run=true` explicitly, AND',
-    '        - The workflow YAML must declare a `dry-run:` input under',
-    '          its workflow_dispatch.inputs block.',
-    '        - No force-prod overrides may be set',
-    '          (e.g. -f release=true / -f publish=true).',
-    `    (b) Per-trigger phrase bypass: the user types`,
-    `        \`${phraseExample}\``,
-    '        verbatim in a recent message. ONE phrase authorizes ONE',
-    '        dispatch of that exact workflow. A second dispatch (or a',
-    '        different workflow) needs its own phrase.',
-    '',
-    '  Without a bypass, the user runs workflow_dispatch jobs',
-    '  manually. Tell the user to run the command in their own',
-    '  terminal (or via the GitHub Actions UI), then resume.',
-  ]
-  process.stderr.write(lines.join('\n') + '\n') // socket-lint: allow console
-  process.exitCode = 2
-}
+  /* c8 ignore stop */
+  return block(
+    [
+      '[release-workflow-guard] BLOCKED: this command would dispatch a',
+      /* c8 ignore start - workflow ?? fallback unreachable: detectDispatch always sets workflow when blocked:true */
+      `  GitHub Actions workflow (${shape}, target: ${workflow ?? '<unknown>'}).`,
+      /* c8 ignore stop */
+      '',
+      '  Workflow dispatches often have irreversible prod side effects:',
+      '    - Publish workflows push npm versions (unpublishable after 24h).',
+      '    - Build/Release workflows create GitHub releases pinned by SHA.',
+      '    - Container workflows push immutable image tags.',
+      '',
+      '  Bypass options:',
+      '    (a) Verifiable dry-run:',
+      '        - Pass `-f dry-run=true` explicitly, AND',
+      '        - The workflow YAML must declare a `dry-run:` input under',
+      '          its workflow_dispatch.inputs block.',
+      '        - No force-prod overrides may be set',
+      '          (e.g. -f release=true / -f publish=true).',
+      `    (b) Per-trigger phrase bypass: the user types`,
+      `        \`${phraseExample}\``,
+      '        verbatim in a recent message. ONE phrase authorizes ONE',
+      '        dispatch of that exact workflow. A second dispatch (or a',
+      '        different workflow) needs its own phrase.',
+      '',
+      '  Without a bypass, the user runs workflow_dispatch jobs',
+      '  manually. Tell the user to run the command in their own',
+      '  terminal (or via the GitHub Actions UI), then resume.',
+    ].join('\n'),
+  )
+})
 
-main()
+export const hook = defineHook({
+  check,
+  event: 'PreToolUse',
+  matcher: ['Bash'],
+  triggers,
+  type: 'guard',
+})
+void runHook(hook, import.meta.url)
