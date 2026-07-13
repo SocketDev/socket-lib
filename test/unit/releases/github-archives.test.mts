@@ -229,3 +229,13 @@ describe.sequential('releases/github-archives', () => {
     })
   })
 })
+
+describe('releases/github-archives — exports', () => {
+  it('downloadAndExtractZip is exported for backward compatibility', () => {
+    expect(typeof downloadAndExtractZip).toBe('function')
+  })
+
+  it('downloadAndExtractArchive is exported for all archive formats', () => {
+    expect(typeof downloadAndExtractArchive).toBe('function')
+  })
+})

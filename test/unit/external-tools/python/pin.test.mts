@@ -140,7 +140,9 @@ describe.sequential('external-tools/python/pin — resolvePipPackagePin', () => 
     expect(pin.version).toBe('3.0.1')
     expect(pin.artifacts).toHaveLength(2)
     // Requirements lines are name==version --hash=sha256:<hex>.
-    for (const line of pin.requirements.trim().split('\n')) {
+    const lines = pin.requirements.trim().split('\n')
+    for (let i = 0, { length } = lines; i < length; i += 1) {
+      const line = lines[i]!
       expect(line).toMatch(/^[\w-]+==[\d.]+ --hash=sha256:[a-f0-9]{64}$/)
     }
     expect(pin.hash.integrity).toMatch(/^sha512-/)

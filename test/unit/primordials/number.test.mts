@@ -75,7 +75,7 @@ describe('Number', () => {
   })
 
   it('prototype toFixed / toString via uncurry', () => {
-    expect(NumberPrototypeToFixed(3.141_59, 2)).toBe('3.14')
+    expect(NumberPrototypeToFixed(3.14159, 2)).toBe('3.14')
     expect(NumberPrototypeToString(255, 16)).toBe('ff')
   })
 })

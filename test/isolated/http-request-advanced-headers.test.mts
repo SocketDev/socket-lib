@@ -87,7 +87,9 @@ describe('http-request', () => {
         'www-authenticate': 'Bearer',
       })
 
-      for (const value of Object.values(result)) {
+      const values = Object.values(result)
+      for (let i = 0, { length } = values; i < length; i += 1) {
+        const value = values[i]!
         expect(value).toBe('[REDACTED]')
       }
     })

@@ -19,6 +19,8 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 import { ensurePackageInstalled } from '../../../../src/dlx/package'
 import { setPath } from '../../../../src/paths/rewire'
 
@@ -82,9 +84,7 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
     )
     expect(result.installed).toBe(false)
     // packageDir matches exactly (modulo path normalization).
-    expect(result.packageDir.replace(/\\/g, '/')).toBe(
-      packageDir.replace(/\\/g, '/'),
-    )
+    expect(normalizePath(result.packageDir)).toBe(normalizePath(packageDir))
     // The cached package.json is untouched.
     expect(existsSync(path.join(installedDir, 'package.json'))).toBe(true)
   })
@@ -166,9 +166,7 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
     )
 
     expect(result.installed).toBe(false)
-    expect(result.packageDir.replace(/\\/g, '/')).toBe(
-      installRoot.replace(/\\/g, '/'),
-    )
+    expect(normalizePath(result.packageDir)).toBe(normalizePath(installRoot))
   })
 
   it('does not collide with the default cache layout', async () => {
@@ -211,8 +209,8 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
       false,
       { installRoot: customPath },
     )
-    expect(customResult.packageDir.replace(/\\/g, '/')).toBe(
-      customPath.replace(/\\/g, '/'),
+    expect(normalizePath(customResult.packageDir)).toBe(
+      normalizePath(customPath),
     )
 
     // Resolve via default (point SOCKET_DLX_DIR at our default-dlx tmp).
@@ -225,8 +223,8 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
         'lodash@4.17.21',
         false,
       )
-      expect(defaultResult.packageDir.replace(/\\/g, '/')).toBe(
-        path.join(defaultDlxDir, cacheKey).replace(/\\/g, '/'),
+      expect(normalizePath(defaultResult.packageDir)).toBe(
+        normalizePath(path.join(defaultDlxDir, cacheKey)),
       )
       // Distinct paths — proves the option doesn't accidentally fold
       // into the default layout.
@@ -258,8 +256,6 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
     )
 
     expect(result.installed).toBe(false)
-    expect(result.packageDir.replace(/\\/g, '/')).toBe(
-      installRoot.replace(/\\/g, '/'),
-    )
+    expect(normalizePath(result.packageDir)).toBe(normalizePath(installRoot))
   })
 })

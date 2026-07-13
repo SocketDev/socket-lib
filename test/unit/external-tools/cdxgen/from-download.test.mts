@@ -2,6 +2,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import type nodeFs from 'node:fs'
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 vi.mock(import('../../../../src/external-tools/from-download'), () => ({
   downloadToolArchive: vi.fn(),
 }))
@@ -129,7 +131,8 @@ describe.sequential('external-tools/cdxgen/from-download', () => {
     // linux / win32. `path.join` on win32 produces backslashes for ALL
     // separators (including ones in the input), so a literal `/fake/dlx`
     // prefix would become `\fake\dlx` on Windows.
-    const normalized = result?.path.replace(/\\/g, '/')
+    const normalized =
+      result !== undefined ? normalizePath(result.path) : undefined
     expect(normalized).toMatch(/\/fake\/dlx\/cdxgen\/12\.4\.1\/linux-x64-slim/)
   })
 

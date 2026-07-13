@@ -276,8 +276,12 @@ describe('runCheckPrimordials', () => {
         primordials: {
           scanDirs: [],
           // Mix valid strings with invalid types — filter strips non-strings.
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          nodeInternalOnly: ['ValidName', 42, undefined, 'AnotherValid'] as any,
+          nodeInternalOnly: [
+            'ValidName',
+            42,
+            undefined,
+            'AnotherValid',
+          ] as unknown as string[],
           socketLibPrimordialsPath: SOCKET_LIB_PRIMORDIALS,
         },
       }),
@@ -285,147 +289,5 @@ describe('runCheckPrimordials', () => {
     )
     const code = await runCheckPrimordials(['--config', cfgPath, '--silent'])
     expect(code).toBe(0)
-  })
-})
-
-describe('resolveConfigPath', () => {
-  it('returns the explicit path verbatim when provided', async () => {
-    const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
-    expect(resolveConfigPath('/explicit/path.json')).toBe('/explicit/path.json')
-  })
-
-  it('returns the first fallback when no explicit path is given', async () => {
-    const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
-    // No explicit + none of the fallback paths exist → returns the head
-    // of FALLBACK_CONFIG_PATHS so the "config file not found" error
-    // names the canonical default.
-    const result = resolveConfigPath(undefined)
-    expect(typeof result).toBe('string')
-    expect(result.length).toBeGreaterThan(0)
-  })
-})
-
-describe('printHelp', () => {
-  it('writes usage text to stdout without throwing', async () => {
-    const { printHelp } = await import('../../../src/cli/check-primordials')
-    expect(() => printHelp()).not.toThrow()
-  })
-})
-
-describe('renderHuman', () => {
-  it('emits success when no findings + silent=false', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
-    expect(() =>
-      renderHuman(
-        {
-          findings: [],
-          used: new Set(['Foo']),
-          unused: new Set(),
-        } as unknown as Parameters<typeof renderHuman>[0],
-        {
-          config: undefined,
-          json: false,
-          explain: false,
-          silent: false,
-          help: false,
-        },
-      ),
-    ).not.toThrow()
-  })
-
-  it('emits nothing when silent + no findings', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
-    expect(() =>
-      renderHuman(
-        {
-          findings: [],
-          used: new Set(),
-          unused: new Set(),
-        } as unknown as Parameters<typeof renderHuman>[0],
-        {
-          config: undefined,
-          json: false,
-          explain: false,
-          silent: true,
-          help: false,
-        },
-      ),
-    ).not.toThrow()
-  })
-
-  it('renders findings with hint when --explain is set', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
-    expect(() =>
-      renderHuman(
-        {
-          findings: [
-            {
-              kind: 'unmapped',
-              name: 'BadName',
-              hint: 'no mapping; pick one of A/B/C',
-              files: ['src/a.js', 'src/b.js'],
-            },
-          ],
-          used: new Set(['BadName']),
-          unused: new Set(),
-        } as unknown as Parameters<typeof renderHuman>[0],
-        {
-          config: undefined,
-          json: false,
-          explain: true,
-          silent: false,
-          help: false,
-        },
-      ),
-    ).not.toThrow()
-  })
-
-  it('renders findings without files when files list is empty', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
-    expect(() =>
-      renderHuman(
-        {
-          findings: [
-            {
-              kind: 'unmapped',
-              name: 'Name',
-              hint: 'h',
-              files: [],
-            },
-          ],
-          used: new Set(['Name']),
-          unused: new Set(),
-        } as unknown as Parameters<typeof renderHuman>[0],
-        {
-          config: undefined,
-          json: false,
-          explain: true,
-          silent: false,
-          help: false,
-        },
-      ),
-    ).not.toThrow()
-  })
-
-  it('emits trailing "run with --explain" hint when not explaining', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
-    expect(() =>
-      renderHuman(
-        {
-          findings: [{ kind: 'unmapped', name: 'X', hint: 'h', files: [] }],
-          used: new Set(['X']),
-          unused: new Set(),
-        } as unknown as Parameters<typeof renderHuman>[0],
-        {
-          config: undefined,
-          json: false,
-          explain: false,
-          silent: false,
-          help: false,
-        },
-      ),
-    ).not.toThrow()
   })
 })

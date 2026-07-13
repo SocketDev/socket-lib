@@ -422,7 +422,7 @@ describe.sequential('process/lock', () => {
     // Each test patches mkdirSync on the CJS-loaded node:fs module, runs
     // acquire() with a synthetic errno, and restores the original.
     function withMkdirError<T>(
-      code: NodeJS.ErrnoException['code'],
+      code: NonNullable<NodeJS.ErrnoException['code']>,
       message: string,
       fn: () => T | Promise<T>,
     ): Promise<T> {

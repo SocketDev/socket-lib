@@ -1,0 +1,337 @@
+/**
+ * @file Core tests for the `Logger` class in src/logger/node.ts. Covers
+ *   construction, basic logging methods (log/error/warn/info/debug),
+ *   stream-bound loggers (stdout/stderr accessors), indentation,
+ *   success/fail/progress/step, table, time/count/group methods, multiple
+ *   arguments, general edge cases, and substep().
+ */
+
+import { Writable } from 'node:stream'
+
+import { beforeEach, describe, expect, it } from 'vitest'
+
+import { Logger } from '../../../src/logger/node'
+
+describe('Logger — core', () => {
+  let stdout: Writable
+  let stderr: Writable
+  let stdoutData: string[]
+  let stderrData: string[]
+  let logger: Logger
+
+  beforeEach(() => {
+    stdoutData = []
+    stderrData = []
+
+    stdout = new Writable({
+      write(chunk, _encoding, callback) {
+        stdoutData.push(chunk.toString())
+        callback()
+      },
+    })
+
+    stderr = new Writable({
+      write(chunk, _encoding, callback) {
+        stderrData.push(chunk.toString())
+        callback()
+      },
+    })
+
+    logger = new Logger({ stdout, stderr })
+  })
+
+  describe('constructor', () => {
+    it('should create logger with default constructor', () => {
+      const defaultLogger = new Logger()
+      expect(defaultLogger).toBeInstanceOf(Logger)
+    })
+
+    it('should create logger with custom streams', () => {
+      expect(logger).toBeInstanceOf(Logger)
+    })
+
+    it('should create logger with options', () => {
+      const optionsLogger = new Logger({ stdout, stderr, theme: 'dark' })
+      expect(optionsLogger).toBeInstanceOf(Logger)
+    })
+  })
+
+  describe('basic logging', () => {
+    it('should log to stdout', () => {
+      logger.log('test message')
+      expect(stdoutData.join('')).toContain('test message')
+    })
+
+    it('should support method chaining', () => {
+      const result = logger.log('message 1').log('message 2')
+      expect(result).toBe(logger)
+      expect(stdoutData.length).toBeGreaterThan(0)
+    })
+
+    it('should log error to stderr', () => {
+      logger.error('error message')
+      expect(stderrData.join('')).toContain('error message')
+    })
+
+    it('should log warn', () => {
+      logger.warn('warning message')
+      expect(stderrData.join('')).toContain('warning message')
+    })
+
+    it('should log info', () => {
+      logger.info('info message')
+      expect(stderrData.join('')).toContain('info message')
+    })
+
+    it('should log debug', () => {
+      const dynamicLogger = logger as unknown as Record<
+        string,
+        (...args: unknown[]) => unknown
+      >
+      if (typeof dynamicLogger['debug'] === 'function') {
+        dynamicLogger['debug']('debug message')
+        expect(stdoutData.join('')).toContain('debug message')
+      }
+    })
+  })
+
+  describe('stream-bound loggers', () => {
+    it('should provide stderr property', () => {
+      expect(logger.stderr).toBeInstanceOf(Logger)
+    })
+
+    it('should provide stdout property', () => {
+      expect(logger.stdout).toBeInstanceOf(Logger)
+    })
+
+    it('should cache stderr instance', () => {
+      const stderr1 = logger.stderr
+      const stderr2 = logger.stderr
+      expect(stderr1).toBe(stderr2)
+    })
+
+    it('should cache stdout instance', () => {
+      const stdout1 = logger.stdout
+      const stdout2 = logger.stdout
+      expect(stdout1).toBe(stdout2)
+    })
+
+    it('should write to stderr via stderr logger', () => {
+      logger.stderr.error('stderr message')
+      expect(stderrData.join('')).toContain('stderr message')
+    })
+
+    it('should write to stdout via stdout logger', () => {
+      logger.stdout.log('stdout message')
+      expect(stdoutData.join('')).toContain('stdout message')
+    })
+  })
+
+  describe('indentation', () => {
+    it('should support indent method', () => {
+      const result = logger.indent()
+      expect(result).toBe(logger)
+    })
+
+    it('should support dedent method', () => {
+      const result = logger.dedent()
+      expect(result).toBe(logger)
+    })
+
+    it('should support method chaining with indentation', () => {
+      logger
+        .log('level 0')
+        .indent()
+        .log('level 1')
+        .dedent()
+        .log('level 0 again')
+      expect(stdoutData.length).toBeGreaterThan(0)
+    })
+
+    it('indent and dedent run without throwing', () => {
+      expect(() => {
+        logger.indent()
+        logger.dedent()
+      }).not.toThrow()
+    })
+  })
+
+  describe('special logging methods', () => {
+    it('should support success method', () => {
+      const result = logger.success('success message')
+      expect(result).toBe(logger)
+    })
+
+    it('should support fail method', () => {
+      const result = logger.fail('fail message')
+      expect(result).toBe(logger)
+    })
+
+    it('should support progress method', () => {
+      const result = logger.progress('progress message')
+      expect(result).toBe(logger)
+      expect(stderrData.join('')).toContain('progress message')
+    })
+
+    it('should support step method', () => {
+      const result = logger.step('step message')
+      expect(result).toBe(logger)
+    })
+
+    it('should include progress symbol in progress output', () => {
+      logger.progress('test')
+      const output = stderrData.join('')
+      expect(output).toMatch(/[∴:]/)
+    })
+
+    it('should write progress to stderr by default', () => {
+      stdoutData = []
+      stderrData = []
+      logger.progress('testing stderr')
+      expect(stderrData.length).toBeGreaterThan(0)
+      expect(stderrData.join('')).toContain('testing stderr')
+    })
+
+    it('should support stdout logger progress method', () => {
+      const result = logger.stdout.progress('testing stdout')
+      expect(result).toBe(logger.stdout)
+    })
+  })
+
+  describe('table method', () => {
+    it('should support table method', () => {
+      const result = logger.table([{ name: 'test', value: 123 }])
+      expect(result).toBe(logger)
+    })
+  })
+
+  describe('time methods', () => {
+    it('should support time method', () => {
+      const result = logger.time('timer')
+      expect(result).toBe(logger)
+    })
+
+    it('should support timeEnd method', () => {
+      logger.time('timer')
+      const result = logger.timeEnd('timer')
+      expect(result).toBe(logger)
+    })
+
+    it('should support timeLog method', () => {
+      logger.time('timer')
+      const result = logger.timeLog('timer')
+      expect(result).toBe(logger)
+    })
+  })
+
+  describe('count methods', () => {
+    it('should support count method', () => {
+      const result = logger.count('counter')
+      expect(result).toBe(logger)
+    })
+
+    it('should support countReset method', () => {
+      const dynamicLogger = logger as unknown as Record<
+        string,
+        (...args: unknown[]) => unknown
+      >
+      if (typeof dynamicLogger['countReset'] === 'function') {
+        logger.count('counter')
+        const result = dynamicLogger['countReset']('counter')
+        expect(result).toBe(logger)
+      }
+    })
+  })
+
+  describe('group methods', () => {
+    it('should support group method', () => {
+      const result = logger.group('group name')
+      expect(result).toBe(logger)
+    })
+
+    it('should support groupCollapsed method', () => {
+      const result = logger.groupCollapsed('collapsed group')
+      expect(result).toBe(logger)
+    })
+
+    it('should support groupEnd method', () => {
+      logger.group('test')
+      const result = logger.groupEnd()
+      expect(result).toBe(logger)
+    })
+
+    it('should support group() with no label (length=0 branch)', () => {
+      const result = logger.group()
+      expect(result).toBe(logger)
+      logger.groupEnd()
+    })
+
+    it('should support groupCollapsed() with no label', () => {
+      const result = logger.groupCollapsed()
+      expect(result).toBe(logger)
+      logger.groupEnd()
+    })
+  })
+
+  describe('multiple arguments', () => {
+    it('should handle multiple arguments in log', () => {
+      logger.log('arg1', 'arg2', 'arg3')
+      const output = stdoutData.join('')
+      expect(output).toContain('arg1')
+      expect(output).toContain('arg2')
+      expect(output).toContain('arg3')
+    })
+
+    it('should handle objects and arrays', () => {
+      logger.log({ key: 'value' }, [1, 2, 3])
+      expect(stdoutData.length).toBeGreaterThan(0)
+    })
+  })
+
+  describe('edge cases', () => {
+    it('should handle empty log calls', () => {
+      const result = logger.log()
+      expect(result).toBe(logger)
+    })
+
+    it('should handle null and undefined', () => {
+      logger.log(undefined)
+      logger.log(undefined)
+      expect(stdoutData.length).toBeGreaterThan(0)
+    })
+
+    it('should handle numbers', () => {
+      logger.log(42, 3.14, -1)
+      const output = stdoutData.join('')
+      expect(output).toContain('42')
+    })
+
+    it('should handle booleans', () => {
+      logger.log(true, false)
+      const output = stdoutData.join('')
+      expect(output).toContain('true')
+      expect(output).toContain('false')
+    })
+  })
+
+  describe('substep()', () => {
+    it('prepends a 2-space indent to the message', () => {
+      logger.substep('subitem')
+      const output = stdoutData.join('')
+      expect(output).toContain('  subitem')
+    })
+
+    it('returns the logger for chaining', () => {
+      const result = logger.substep('chained')
+      expect(result).toBe(logger)
+    })
+
+    it('forwards extras to log()', () => {
+      logger.substep('with-extras', 42, 'tail')
+      const output = stdoutData.join('')
+      expect(output).toContain('with-extras')
+      expect(output).toContain('42')
+      expect(output).toContain('tail')
+    })
+  })
+})

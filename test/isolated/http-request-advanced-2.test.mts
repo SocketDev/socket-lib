@@ -152,7 +152,7 @@ describe('http-request', () => {
       const fakeMsg = new Readable({
         read() {
           this.push('body')
-          // oxlint-disable-next-line socket/prefer-undefined-over-null
+          // oxlint-disable-next-line socket/prefer-undefined-over-null -- null sentinel required to properly terminate the stream
           this.push(null)
         },
       }) as unknown as IncomingResponse

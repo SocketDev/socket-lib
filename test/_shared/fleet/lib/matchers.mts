@@ -4,9 +4,9 @@
  *   `toContainPath` — a separator-agnostic substring assertion for filesystem
  *   paths. Both the received and expected paths are run through the canonical
  *   `normalizePath` (folding `\` → `/`) before the `.includes()` check, so a
- *   test written once passes on darwin / linux / win32 without per-OS branching.
- *   Pairs with `./platform.mts` (the `normalizePath` source) — reach for this
- *   instead of hand-normalizing both sides at every call site.
+ *   test written once passes on darwin / linux / win32 without per-OS
+ *   branching. Pairs with `./platform.mts` (the `normalizePath` source) — reach
+ *   for this instead of hand-normalizing both sides at every call site.
  */
 
 import { normalizePath } from './platform.mts'

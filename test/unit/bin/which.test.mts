@@ -3,9 +3,12 @@
  *   the historical monolithic test/unit/bin.test.mts.
  */
 
+import path from 'node:path'
+import process from 'node:process'
+
 import { describe, expect, it } from 'vitest'
 
-import { whichReal, whichRealSync } from '../../../src/bin/which'
+import { whichLocalBin, whichReal, whichRealSync } from '../../../src/bin/which'
 
 describe('whichReal (async)', () => {
   it('resolves node to a real path and caches it', async () => {
@@ -157,5 +160,43 @@ describe('whichRealSync and whichReal - options coverage', () => {
     if (result && Array.isArray(result)) {
       expect(result.length).toBeGreaterThan(0)
     }
+  })
+})
+
+describe('whichLocalBin', () => {
+  it('resolves a project-local dep bin from node_modules/.bin', () => {
+    // vitest is this package's own dev dependency, so its bin is always
+    // linked into the project-local node_modules/.bin.
+    const result = whichLocalBin('vitest')
+    expect(typeof result).toBe('string')
+    expect(result).toContain('vitest')
+    expect(result).toContain('.bin')
+  })
+
+  it('honors an explicit cwd as the project root', () => {
+    const result = whichLocalBin('vitest', { cwd: process.cwd() })
+    expect(typeof result).toBe('string')
+    expect(result).toContain('vitest')
+  })
+
+  it('uses an explicit options.path as the local bin dir', () => {
+    const localBin = path.join(process.cwd(), 'node_modules', '.bin')
+    const result = whichLocalBin('vitest', { path: localBin })
+    expect(typeof result).toBe('string')
+    expect(result).toContain('vitest')
+  })
+
+  it('falls back to PATH for a tool not in node_modules/.bin', () => {
+    // node is a system binary, never linked into node_modules/.bin, so it
+    // exercises the PATH-fallback branch (local miss → plain whichSync hit).
+    const result = whichLocalBin('node')
+    expect(typeof result).toBe('string')
+    expect(result).toContain('node')
+  })
+
+  it('returns undefined when the tool resolves nowhere', () => {
+    expect(
+      whichLocalBin('totally-nonexistent-binary-zxy-98765'),
+    ).toBeUndefined()
   })
 })

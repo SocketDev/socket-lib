@@ -5,6 +5,8 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+
 import { venvEntryPoint } from '../../../../src/external-tools/skillspector/from-uv'
 
 import type * as NodeFs from 'node:fs'
@@ -43,7 +45,7 @@ afterEach(() => {
 
 describe('skillspector/from-uv — venvEntryPoint', () => {
   test('POSIX form is .venv/bin/skillspector', () => {
-    const p = venvEntryPoint('/x').replace(/\\/g, '/')
+    const p = normalizePath(venvEntryPoint('/x'))
     // On the test host (non-win32) the POSIX branch is taken.
     expect(p.endsWith('/.venv/bin/skillspector')).toBe(true)
   })
@@ -103,7 +105,7 @@ describe.sequential('skillspector/from-uv — skillspectorFromUv', () => {
     syncMock.mockResolvedValueOnce(undefined)
     const r = await skillspectorFromUv({ projectDir: PROJECT, uvBin: UV })
     expect(r?.source).toBe('uv')
-    expect(r?.path.replace(/\\/g, '/')).toContain('/.venv/bin/skillspector')
+    expect(normalizePath(r?.path ?? '')).toContain('/.venv/bin/skillspector')
     expect(syncMock).toHaveBeenCalledWith({ projectDir: PROJECT, uvBin: UV })
   })
 })

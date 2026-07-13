@@ -7,7 +7,7 @@
  *   - cursorToStart() repositions the cursor to column zero
  *   - ANSI escape sequences for terminal control Used by Socket CLI for
  *     interactive output, spinners, and progress indicators. Cursor visibility
- *     and save/restore tests live in clear.cursor.test.mts.
+ *     and save/restore tests live in clear-cursor.test.mts.
  */
 
 import { describe, expect, it, vi } from 'vitest'

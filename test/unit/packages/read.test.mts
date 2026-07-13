@@ -313,3 +313,32 @@ describe('packages/operations readPackageJson', () => {
     })
   })
 })
+
+type EditablePackageJson = { [key: string]: unknown } & {
+  save: () => Promise<unknown>
+  update: (data: Record<string, unknown>) => unknown
+}
+
+describe('packages/read — editable integration', () => {
+  it('should handle editable package.json workflow', async () => {
+    await runWithTempDir(async tmpDir => {
+      const pkgData = { name: 'test', version: '1.0.0' }
+      await fs.writeFile(
+        path.join(tmpDir, 'package.json'),
+        JSON.stringify(pkgData),
+      )
+
+      const editable = (await readPackageJson(tmpDir, {
+        editable: true,
+      })) as EditablePackageJson | undefined
+      expect(editable).toBeDefined()
+      expect(typeof editable?.save).toBe('function')
+
+      editable!.update({ version: '2.0.0' })
+      await editable!.save()
+
+      const updated = await readPackageJson(tmpDir)
+      expect(updated?.version).toBe('2.0.0')
+    }, 'integration-editable-workflow-')
+  })
+})

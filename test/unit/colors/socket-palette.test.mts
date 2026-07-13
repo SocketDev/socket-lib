@@ -68,7 +68,8 @@ describe('socket-palette', () => {
       const wraps = themes.map(t => getPalette(t).socketPink('x'))
       // #ff00aa is theme-stable.
       const expected = '[38;2;255;0;170mx[39m'
-      for (const w of wraps) {
+      for (let i = 0, { length } = wraps; i < length; i += 1) {
+        const w = wraps[i]!
         expect(w).toBe(expected)
       }
     })

@@ -2,7 +2,7 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { GitHubEmptyBodyError } from '../../../src/github/errors'
-import { fetchGitHub } from '../../../src/github/request'
+import { fetchGitHub, getGhsaUrl } from '../../../src/github/request'
 
 const GITHUB_API = 'https://api.github.com'
 
@@ -150,5 +150,45 @@ describe('fetchGitHub', () => {
     await expect(fetchGitHub(`${GITHUB_API}/repos/foo/bar`)).rejects.toThrow(
       /GitHub API error 404/,
     )
+  })
+})
+
+describe('getGhsaUrl', () => {
+  it('formats a standard GHSA ID into the advisories URL', () => {
+    const url = getGhsaUrl('GHSA-1234-5678-90ab')
+    expect(url).toBe('https://github.com/advisories/GHSA-1234-5678-90ab')
+  })
+
+  it('returns the same URL for repeated calls with the same ID', () => {
+    const ghsaId = 'GHSA-1234-5678-90ab'
+    const url1 = getGhsaUrl(ghsaId)
+    const url2 = getGhsaUrl(ghsaId)
+    expect(url1).toBe(url2)
+    expect(url1).toContain(ghsaId)
+  })
+
+  it('returns a string type', () => {
+    const url = getGhsaUrl('GHSA-test-test-test')
+    expect(typeof url).toBe('string')
+  })
+
+  it('handles GHSA IDs with mixed case', () => {
+    const url = getGhsaUrl('GhSa-MiXeD-CaSe-TeSt')
+    expect(url).toBe('https://github.com/advisories/GhSa-MiXeD-CaSe-TeSt')
+  })
+
+  it('handles GHSA IDs with dashes only', () => {
+    const url = getGhsaUrl('----')
+    expect(url).toBe('https://github.com/advisories/----')
+  })
+
+  it('handles unicode in GHSA IDs', () => {
+    const url = getGhsaUrl('GHSA-你好-世界-测试')
+    expect(url).toContain('GHSA-你好-世界-测试')
+  })
+
+  it('handles GHSA IDs with unusual characters', () => {
+    const url = getGhsaUrl('GHSA-@@@-###-$$$')
+    expect(url).toContain('GHSA-@@@-###-$$$')
   })
 })

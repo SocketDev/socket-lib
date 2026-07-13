@@ -101,3 +101,32 @@ describe.sequential('github/refs — re-exports', () => {
     expect(typeof mod.fetchRefSha).toBe('function')
   })
 })
+
+describe.sequential('github/refs — clearRefCache smoke tests', () => {
+  test('clearRefCache is callable without throwing', async () => {
+    const mod = await import('../../../src/github/refs')
+    expect(() => mod.clearRefCache()).not.toThrow()
+  })
+
+  test('multiple sequential clears do not throw', async () => {
+    const mod = await import('../../../src/github/refs')
+    await expect(
+      (async () => {
+        await mod.clearRefCache()
+        await mod.clearRefCache()
+        await mod.clearRefCache()
+      })(),
+    ).resolves.not.toThrow()
+  })
+
+  test('concurrent clears resolve without throwing', async () => {
+    const mod = await import('../../../src/github/refs')
+    await expect(
+      Promise.all([
+        mod.clearRefCache(),
+        mod.clearRefCache(),
+        mod.clearRefCache(),
+      ]),
+    ).resolves.toBeDefined()
+  })
+})
