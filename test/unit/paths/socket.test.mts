@@ -379,7 +379,11 @@ describe('paths/socket', () => {
     })
 
     it('should fall back to $TMPDIR/<name>-<uid>.sock without XDG_RUNTIME_DIR', () => {
-      clearEnv('XDG_RUNTIME_DIR')
+      // Mask, don't clearEnv: clearEnv deletes the override and falls through
+      // to the real process.env, so a CI runner's XDG_RUNTIME_DIR leaks in and
+      // defeats the fallback. setEnv(…, undefined) masks it (the resolver
+      // returns undefined for a set-but-undefined override).
+      setEnv('XDG_RUNTIME_DIR', undefined)
       setPath('tmpdir', '/tmp/run')
       const result = getRuntimeSocketPath('proteus')
       expect(result).toMatch(/^\/tmp\/run\/proteus-\d+\.sock$/)
