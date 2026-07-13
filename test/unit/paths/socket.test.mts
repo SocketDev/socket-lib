@@ -38,6 +38,8 @@ import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 import { clearPath, resetPaths, setPath } from '../../../src/paths/rewire'
 import { afterEach, describe, expect, it } from 'vitest'
 
+import { describeUnixOnly } from '../util/skip-helpers'
+
 describe('paths/socket', () => {
   afterEach(() => {
     resetPaths()
@@ -371,7 +373,10 @@ describe('paths/socket', () => {
     })
   })
 
-  describe('getRuntimeSocketPath', () => {
+  // Unix-only: on Windows getRuntimeSocketPath returns a named pipe
+  // (\\.\pipe\<name>-sock) regardless of XDG/TMPDIR — Windows has no
+  // filesystem unix sockets. These assert the unix socket-path branches.
+  describeUnixOnly('getRuntimeSocketPath', () => {
     it('should use $XDG_RUNTIME_DIR when set', () => {
       setEnv('XDG_RUNTIME_DIR', '/run/user/1000')
       const result = getRuntimeSocketPath('proteus')
