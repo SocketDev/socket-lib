@@ -17,6 +17,7 @@
     "./dist/**/*",
     "./node_modules",
     "./test/unit/ansi.test.mts",
+    "./test/unit/fleet/ai-backends-status.test.mts",
     "./test/unit/packages/normalize.test.mts"
   ]
 }
