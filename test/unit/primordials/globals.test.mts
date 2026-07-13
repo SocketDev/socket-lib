@@ -104,7 +104,8 @@ describe('constructors', () => {
   })
 
   it('SharedArrayBufferCtor allocates a fixed-size buffer', () => {
-    const sab = new SharedArrayBufferCtor(8)
+    const Ctor = SharedArrayBufferCtor!
+    const sab = new Ctor(8)
     expect(sab.byteLength).toBe(8)
     expect(sab).toBeInstanceOf(SharedArrayBuffer)
   })
