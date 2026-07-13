@@ -1,10 +1,10 @@
 # socket-lib
 
-> Core utilities for [Socket.dev](https://socket.dev/) tools: file system, processes, HTTP, env detection, logging, spinners, and more. Tree-shakeable, TypeScript-first, cross-platform.
+> <a href="https://socket.dev/npm/package/@socketsecurity/lib"><img src="https://socket.dev/api/badge/npm/package/@socketsecurity/lib" alt="Socket Badge" height="20"></a> ![Coverage](assets/repo/coverage.svg)
 
 | key | value |
 | --- | --- |
-| version | 6.0.9 |
+| version | 6.0.10-prerelease |
 | node | >=22 |
 | layout | monorepo |
 | license | MIT |
@@ -12,7 +12,8 @@
 
 ## Docs
 
-- [README](README.md): Core utilities for [Socket.dev](https://socket.dev/) tools: file system, processes, HTTP, env detection, logging, spinners, and more. Tree-shakeable, TypeScript-first, cross-platform.
+- [README](README.md): <a href="https://socket.dev/npm/package/@socketsecurity/lib"><img src="https://socket.dev/api/badge/npm/package/@socketsecurity/lib" alt="Socket Badge" height="20"></a> ![Coverage](assets/repo/coverage.svg)
+- [adversarial-self-review](docs/agents.md/fleet/adversarial-self-review.md): A clean automated review is one reviewer shape finding nothing. On a
 - [agent-delegation](docs/agents.md/fleet/agent-delegation.md): When a task fits one of the patterns below, hand it off instead of doing it in the current session. The point is to get a _different model's_ take, or to keep heavy work out of the main context. Don't…
 - [agents-and-skills](docs/agents.md/fleet/agents-and-skills.md): The CLAUDE.md `### Agents & skills` section names the entry-point skills. This file is the full taxonomy and the cross-fleet runner. Before authoring a new skill, read…
 - [binary-vs-napi-naming](docs/agents.md/fleet/binary-vs-napi-naming.md): Per-platform artifacts split into two naming domains **by design** (ratified
@@ -41,7 +42,6 @@
 - [gh-token-hygiene](docs/agents.md/fleet/gh-token-hygiene.md): GitHub CLI auth tokens are the highest-blast-radius credential most developers carry. The Nx Console supply-chain compromise (May 2026) exfiltrated `~/.config/gh/hosts.yml` and used the token against…
 - [git-config-write-guard](docs/agents.md/fleet/git-config-write-guard.md): A fleet repo's local `.git/config` carries **per-clone** state. Identity, signing keys, and core invariants like `core.bare` live in the **global** git config (and in `~/.gitconfig`); the local config…
 - [github-token-limitations](docs/agents.md/fleet/github-token-limitations.md): GitHub Actions suppresses every event created with the default `GITHUB_TOKEN` — pushes, `pull_request` open/close/reopen, issue events, tag creation. The only events that still fire are…
-- [hook-bundle](docs/agents.md/fleet/hook-bundle.md): Faster warm dispatch for import-safe fleet hooks via a CJS rolldown bundle plus a V8 compile-cache loader. Hook sources stay `.mts`.
 
 ## API
 

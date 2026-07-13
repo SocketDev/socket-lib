@@ -1,0 +1,8 @@
+{
+  "allow": [
+    {
+      "path": ".claude/hooks/fleet/_dispatch/excluded-bundle.cjs",
+      "reason": "Fleet-canonical generated hook-dispatch bundle, sibling of bundle.cjs + snapshot-bundle.cjs which the check already allows built-in; this third bundle landed via a cascade before it was added to that built-in allowlist upstream."
+    }
+  ]
+}
