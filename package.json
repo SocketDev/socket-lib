@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "6.0.9",
+  "version": "6.0.10-prerelease",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
     "Socket.dev",
@@ -168,6 +168,11 @@
       "types": "./dist/ai/backends.d.mts",
       "default": "./dist/ai/backends.js"
     },
+    "./ai/billing-context": {
+      "source": "./src/ai/billing-context.mts",
+      "types": "./dist/ai/billing-context.d.mts",
+      "default": "./dist/ai/billing-context.js"
+    },
     "./ai/credentials": {
       "source": "./src/ai/credentials.mts",
       "types": "./dist/ai/credentials.d.mts",
@@ -193,10 +198,20 @@
       "types": "./dist/ai/profiles.d.mts",
       "default": "./dist/ai/profiles.js"
     },
+    "./ai/role": {
+      "source": "./src/ai/role.mts",
+      "types": "./dist/ai/role.d.mts",
+      "default": "./dist/ai/role.js"
+    },
     "./ai/route": {
       "source": "./src/ai/route.mts",
       "types": "./dist/ai/route.d.mts",
       "default": "./dist/ai/route.js"
+    },
+    "./ai/route-heuristic": {
+      "source": "./src/ai/route-heuristic.mts",
+      "types": "./dist/ai/route-heuristic.d.mts",
+      "default": "./dist/ai/route-heuristic.js"
     },
     "./ai/spawn": {
       "source": "./src/ai/spawn.mts",
@@ -368,6 +383,15 @@
       "source": "./src/cacache/write.ts",
       "types": "./dist/cacache/write.d.ts",
       "default": "./dist/cacache/write.js"
+    },
+    "./cache/ttl/browser": {
+      "source": "./src/cache/ttl/browser.ts",
+      "browser": {
+        "types": "./dist/cache/ttl/browser.d.ts",
+        "default": "./dist/cache/ttl/browser.js"
+      },
+      "types": "./dist/cache/ttl/browser.d.ts",
+      "default": "./dist/cache/ttl/browser.js"
     },
     "./cache/ttl/store": {
       "source": "./src/cache/ttl/store.ts",
@@ -572,21 +596,37 @@
     },
     "./debug/caller-info": {
       "source": "./src/debug/caller-info.ts",
+      "browser": {
+        "types": "./dist/debug/caller-info.d.ts",
+        "default": "./dist/debug/caller-info.js"
+      },
       "types": "./dist/debug/caller-info.d.ts",
       "default": "./dist/debug/caller-info.js"
     },
     "./debug/namespace": {
       "source": "./src/debug/namespace.ts",
+      "browser": {
+        "types": "./dist/debug/namespace.d.ts",
+        "default": "./dist/debug/namespace.js"
+      },
       "types": "./dist/debug/namespace.d.ts",
       "default": "./dist/debug/namespace.js"
     },
     "./debug/output": {
       "source": "./src/debug/output.ts",
+      "browser": {
+        "types": "./dist/debug/output.d.ts",
+        "default": "./dist/debug/output.js"
+      },
       "types": "./dist/debug/output.d.ts",
       "default": "./dist/debug/output.js"
     },
     "./debug/types": {
       "source": "./src/debug/types.ts",
+      "browser": {
+        "types": "./dist/debug/types.d.ts",
+        "default": "./dist/debug/types.js"
+      },
       "types": "./dist/debug/types.d.ts",
       "default": "./dist/debug/types.js"
     },
@@ -880,6 +920,11 @@
       "types": "./dist/effects/shimmer-terminal.d.ts",
       "default": "./dist/effects/shimmer-terminal.js"
     },
+    "./env/agents": {
+      "source": "./src/env/agents.ts",
+      "types": "./dist/env/agents.d.ts",
+      "default": "./dist/env/agents.js"
+    },
     "./env/boolean": {
       "source": "./src/env/boolean.ts",
       "types": "./dist/env/boolean.d.ts",
@@ -899,6 +944,11 @@
       "source": "./src/env/debug.ts",
       "types": "./dist/env/debug.d.ts",
       "default": "./dist/env/debug.js"
+    },
+    "./env/flags": {
+      "source": "./src/env/flags.ts",
+      "types": "./dist/env/flags.d.ts",
+      "default": "./dist/env/flags.js"
     },
     "./env/github": {
       "source": "./src/env/github.ts",
@@ -960,6 +1010,11 @@
       "types": "./dist/env/pre-commit.d.ts",
       "default": "./dist/env/pre-commit.js"
     },
+    "./env/providers": {
+      "source": "./src/env/providers.ts",
+      "types": "./dist/env/providers.d.ts",
+      "default": "./dist/env/providers.js"
+    },
     "./env/proxy": {
       "source": "./src/env/proxy.ts",
       "types": "./dist/env/proxy.d.ts",
@@ -969,6 +1024,11 @@
       "source": "./src/env/rewire.ts",
       "types": "./dist/env/rewire.d.ts",
       "default": "./dist/env/rewire.js"
+    },
+    "./env/runtimes": {
+      "source": "./src/env/runtimes.ts",
+      "types": "./dist/env/runtimes.d.ts",
+      "default": "./dist/env/runtimes.js"
     },
     "./env/shell": {
       "source": "./src/env/shell.ts",
@@ -1024,15 +1084,6 @@
       "source": "./src/env/xdg.ts",
       "types": "./dist/env/xdg.d.ts",
       "default": "./dist/env/xdg.js"
-    },
-    "./errors": {
-      "source": "./src/errors/message.ts",
-      "browser": {
-        "types": "./dist/errors/message.d.ts",
-        "default": "./dist/errors/message.js"
-      },
-      "types": "./dist/errors/message.d.ts",
-      "default": "./dist/errors/message.js"
     },
     "./errors/message": {
       "source": "./src/errors/message.ts",
@@ -1621,6 +1672,11 @@
       "types": "./dist/git/unstaged.d.ts",
       "default": "./dist/git/unstaged.js"
     },
+    "./github/commit": {
+      "source": "./src/github/commit.ts",
+      "types": "./dist/github/commit.d.ts",
+      "default": "./dist/github/commit.js"
+    },
     "./github/constants": {
       "source": "./src/github/constants.ts",
       "types": "./dist/github/constants.d.ts",
@@ -1670,6 +1726,11 @@
       "source": "./src/github/types.ts",
       "types": "./dist/github/types.d.ts",
       "default": "./dist/github/types.js"
+    },
+    "./github/workflow-runs": {
+      "source": "./src/github/workflow-runs.ts",
+      "types": "./dist/github/workflow-runs.d.ts",
+      "default": "./dist/github/workflow-runs.js"
     },
     "./globs/defaults": {
       "source": "./src/globs/defaults.ts",
@@ -1951,36 +2012,64 @@
     },
     "./memo/async": {
       "source": "./src/memo/async.ts",
+      "browser": {
+        "types": "./dist/memo/async.d.ts",
+        "default": "./dist/memo/async.js"
+      },
       "types": "./dist/memo/async.d.ts",
       "default": "./dist/memo/async.js"
     },
     "./memo/clear": {
       "source": "./src/memo/clear.ts",
+      "browser": {
+        "types": "./dist/memo/clear.d.ts",
+        "default": "./dist/memo/clear.js"
+      },
       "types": "./dist/memo/clear.d.ts",
       "default": "./dist/memo/clear.js"
     },
     "./memo/decorator": {
       "source": "./src/memo/decorator.ts",
+      "browser": {
+        "types": "./dist/memo/decorator.d.ts",
+        "default": "./dist/memo/decorator.js"
+      },
       "types": "./dist/memo/decorator.d.ts",
       "default": "./dist/memo/decorator.js"
     },
     "./memo/memoize": {
       "source": "./src/memo/memoize.ts",
+      "browser": {
+        "types": "./dist/memo/memoize.d.ts",
+        "default": "./dist/memo/memoize.js"
+      },
       "types": "./dist/memo/memoize.d.ts",
       "default": "./dist/memo/memoize.js"
     },
     "./memo/once": {
       "source": "./src/memo/once.ts",
+      "browser": {
+        "types": "./dist/memo/once.d.ts",
+        "default": "./dist/memo/once.js"
+      },
       "types": "./dist/memo/once.d.ts",
       "default": "./dist/memo/once.js"
     },
     "./memo/types": {
       "source": "./src/memo/types.ts",
+      "browser": {
+        "types": "./dist/memo/types.d.ts",
+        "default": "./dist/memo/types.js"
+      },
       "types": "./dist/memo/types.d.ts",
       "default": "./dist/memo/types.js"
     },
     "./memo/weak": {
       "source": "./src/memo/weak.ts",
+      "browser": {
+        "types": "./dist/memo/weak.d.ts",
+        "default": "./dist/memo/weak.js"
+      },
       "types": "./dist/memo/weak.d.ts",
       "default": "./dist/memo/weak.js"
     },
@@ -2078,6 +2167,51 @@
       "source": "./src/node/util.ts",
       "types": "./dist/node/util.d.ts",
       "default": "./dist/node/util.js"
+    },
+    "./npm/meta": {
+      "source": "./src/npm/meta.ts",
+      "browser": {
+        "types": "./dist/npm/meta.d.ts",
+        "default": "./dist/npm/meta.js"
+      },
+      "types": "./dist/npm/meta.d.ts",
+      "default": "./dist/npm/meta.js"
+    },
+    "./npm/meta-cache": {
+      "source": "./src/npm/meta-cache.ts",
+      "browser": {
+        "types": "./dist/npm/meta-cache.d.ts",
+        "default": "./dist/npm/meta-cache.js"
+      },
+      "types": "./dist/npm/meta-cache.d.ts",
+      "default": "./dist/npm/meta-cache.js"
+    },
+    "./npm/meta-slice": {
+      "source": "./src/npm/meta-slice.ts",
+      "browser": {
+        "types": "./dist/npm/meta-slice.d.ts",
+        "default": "./dist/npm/meta-slice.js"
+      },
+      "types": "./dist/npm/meta-slice.d.ts",
+      "default": "./dist/npm/meta-slice.js"
+    },
+    "./npm/meta-types": {
+      "source": "./src/npm/meta-types.ts",
+      "browser": {
+        "types": "./dist/npm/meta-types.d.ts",
+        "default": "./dist/npm/meta-types.js"
+      },
+      "types": "./dist/npm/meta-types.d.ts",
+      "default": "./dist/npm/meta-types.js"
+    },
+    "./npm/registry": {
+      "source": "./src/npm/registry.ts",
+      "browser": {
+        "types": "./dist/npm/registry.d.ts",
+        "default": "./dist/npm/registry.js"
+      },
+      "types": "./dist/npm/registry.d.ts",
+      "default": "./dist/npm/registry.js"
     },
     "./objects/getters": {
       "source": "./src/objects/getters.ts",
@@ -3078,22 +3212,22 @@
     "provenance": true
   },
   "scripts": {
-    "build": "node scripts/bundle.mts",
+    "build": "node scripts/repo/bundle.mts",
     "check": "node scripts/fleet/check.mts",
     "check:paths": "node scripts/fleet/check/paths-are-canonical.mts",
-    "clean": "node scripts/bundle/clean.mts",
+    "clean": "node -e \"require('node:fs').rmSync('node_modules/.cache', { recursive: true, force: true })\"",
     "cover": "node scripts/fleet/cover.mts",
-    "dev": "node scripts/bundle.mts --watch",
+    "dev": "node scripts/repo/bundle.mts --watch",
     "docs": "node scripts/repo/make-api-md.mts",
     "fix": "node scripts/fleet/fix.mts",
-    "format": "oxfmt -c .config/fleet/oxfmtrc.json --write .",
-    "format:check": "oxfmt -c .config/fleet/oxfmtrc.json --check .",
+    "format": "node scripts/fleet/format.mts",
+    "format:check": "node scripts/fleet/format.mts --check",
     "lint": "node scripts/fleet/lint.mts",
     "prim": "node tools/prim/bin/prim.mts",
     "security": "node scripts/fleet/security.mts",
-    "prepare": "node scripts/fleet/install-git-hooks.mts && node scripts/bundle.mts --needed --quiet",
+    "prepare": "node scripts/fleet/install-git-hooks.mts",
     "prepublishOnly": "pnpm run build",
-    "publish": "node scripts/fleet/publish.mts",
+    "publish": "node scripts/fleet/npm-publish.mts",
     "test": "node scripts/fleet/test.mts",
     "update": "node scripts/fleet/update.mts",
     "lockstep": "node scripts/fleet/lockstep.mts",
@@ -3101,10 +3235,20 @@
     "setup-security-tools": "node .claude/hooks/fleet/setup-security-tools/install.mts",
     "ci:local": "node scripts/fleet/agent-ci-skip-locks.mts run --all --quiet --pause-on-failure --github-token",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
-    "weekly-update:ci": "node scripts/fleet/weekly-update-workflow.mts run"
+    "weekly-update:ci": "node scripts/fleet/weekly-update-workflow.mts run",
+    "doctor:auth": "node scripts/fleet/check/setup-is-prompt-less.mts",
+    "sync-oxlint-rules": "node scripts/fleet/sync-oxlint-rules.mts",
+    "sync-package-manager-pins": "node scripts/fleet/sync-package-manager-pins.mts",
+    "doctor": "node scripts/fleet/doctor.mts",
+    "gen:llms-txt": "node scripts/fleet/make-llms-txt.mts --no-ai",
+    "setup:brew": "node scripts/fleet/setup/setup-brew.mts",
+    "setup:go": "node scripts/fleet/setup/setup-go.mts",
+    "setup:python": "node scripts/fleet/setup/setup-python.mts",
+    "setup:refero": "node scripts/fleet/setup/setup-refero.mts",
+    "setup:rust": "node scripts/fleet/setup/setup-rust.mts"
   },
   "devDependencies": {
-    "@anthropic-ai/claude-code": "2.1.163",
+    "@anthropic-ai/claude-code": "catalog:",
     "@babel/core": "7.29.7",
     "@babel/parser": "7.29.7",
     "@babel/traverse": "7.29.7",
@@ -3120,7 +3264,7 @@
     "@npmcli/promise-spawn": "8.0.3",
     "@perryts/perry": "0.5.1129",
     "@redwoodjs/agent-ci": "catalog:",
-    "@sinclair/typebox": "0.34.49",
+    "@sinclair/typebox": "catalog:",
     "@socketregistry/is-unicode-supported": "1.0.5",
     "@socketregistry/packageurl-js": "catalog:",
     "@socketregistry/packageurl-js-stable": "catalog:",
@@ -3129,53 +3273,64 @@
     "@socketsecurity/lib-stable": "catalog:",
     "@socketsecurity/sdk": "catalog:",
     "@socketsecurity/sdk-stable": "catalog:",
-    "@types/node": "24.9.2",
-    "@typescript/native-preview": "7.0.0-dev.20260511.1",
-    "@vitest/coverage-v8": "4.1.8",
-    "@vitest/ui": "4.1.8",
+    "@types/mdast": "catalog:",
+    "@types/node": "catalog:",
+    "@types/semver": "catalog:",
+    "@types/shell-quote": "catalog:",
+    "@typescript/native-preview": "catalog:",
+    "@vitest/coverage-v8": "catalog:",
+    "@vitest/ui": "catalog:",
     "@yarnpkg/extensions": "2.0.6",
     "adm-zip": "0.5.16",
     "cacache": "20.0.1",
     "debug": "4.4.3",
     "del": "8.0.1",
-    "ecc-agentshield": "1.4.0",
+    "ecc-agentshield": "catalog:",
     "esbuild": "0.28.1",
     "fast-glob": "3.3.3",
     "fast-sort": "3.4.1",
     "get-east-asian-width": "1.3.0",
     "globals": "17.6.0",
     "has-flag": "5.0.1",
+    "html5parser": "catalog:",
     "libnpmexec": "10.2.3",
     "libnpmpack": "9.0.9",
-    "lint-staged": "15.2.11",
     "magic-string": "0.30.17",
     "make-fetch-happen": "15.0.5",
-    "nock": "14.0.10",
+    "markdownlint-cli2": "catalog:",
+    "mdast-util-from-markdown": "catalog:",
+    "micromark": "catalog:",
+    "neosanitize": "catalog:",
+    "nock": "catalog:",
     "normalize-package-data": "8.0.0",
     "npm-package-arg": "13.0.0",
-    "oxfmt": "0.48.0",
-    "oxlint": "1.63.0",
+    "npm-run-all2": "catalog:",
+    "oxfmt": "catalog:",
+    "oxlint": "catalog:",
     "p-map": "7.0.4",
     "pacote": "21.5.0",
     "picomatch": "4.0.4",
+    "playwright-core": "catalog:",
     "pony-cause": "2.1.11",
     "prim": "workspace:*",
     "regjsparser": "catalog:",
     "rolldown": "catalog:",
-    "semver": "7.7.2",
-    "shell-quote": "1.8.4",
+    "semver": "catalog:",
+    "shell-quote": "catalog:",
     "signal-exit": "4.1.0",
     "spdx-correct": "3.2.0",
     "spdx-expression-parse": "4.0.0",
+    "std-env": "catalog:",
     "streaming-iterables": "8.0.1",
     "supports-color": "10.2.2",
+    "svgo": "catalog:",
     "tar-fs": "3.1.2",
     "tar-stream": "3.1.8",
-    "taze": "19.11.0",
+    "taze": "catalog:",
     "type-coverage": "2.29.7",
-    "typescript": "5.9.2",
+    "typescript": "catalog:",
     "validate-npm-package-name": "6.0.2",
-    "vitest": "4.1.8",
+    "vitest": "catalog:",
     "webpack": "5.107.2",
     "which": "5.0.0",
     "yargs-parser": "22.0.0",
@@ -3190,17 +3345,26 @@
       "optional": true
     }
   },
+  "devEngines": {
+    "packageManager": {
+      "name": "pnpm",
+      "version": ">=11.0.0 <12.0.0",
+      "onFail": "error"
+    }
+  },
   "engines": {
     "node": ">=22",
-    "npm": ">=11.16.0",
-    "pnpm": ">=11.8.0"
+    "npm": ">=12.0.0",
+    "pnpm": ">=11.0.5"
   },
-  "packageManager": "pnpm@11.8.0",
   "allowScripts": {
     "cpu-features": false,
     "esbuild": true,
     "protobufjs": false,
     "rolldown": true,
     "ssh2": false
+  },
+  "npm-run-all2": {
+    "nodeRun": true
   }
 }
