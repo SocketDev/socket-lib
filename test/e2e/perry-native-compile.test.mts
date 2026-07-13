@@ -12,13 +12,23 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
+import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+
 import { spawn } from '../../src/process/spawn/child'
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(testDir, '..', '..')
 const fixtureDir = path.resolve(repoRoot, 'test', 'fixtures', 'perry')
-const perryBin = path.resolve(repoRoot, 'node_modules', '.bin', 'perry')
+// On Windows the runnable shim is perry.cmd; the extensionless `perry` is a
+// POSIX sh script Windows can't exec directly. spawn() runs the .cmd via
+// cmd.exe when shell: true (see below).
+const perryBin = path.resolve(
+  repoRoot,
+  'node_modules',
+  '.bin',
+  WIN32 ? 'perry.cmd' : 'perry',
+)
 
 // Fail-closed: telemetry off, no background update checks (fleet rule).
 const perryEnv: NodeJS.ProcessEnv = {
@@ -56,7 +66,7 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
       const compiled = await spawn(
         perryBin,
         ['compile', 'entry.ts', '-o', out],
-        { cwd: fixtureDir, env: perryEnv, stdioString: true },
+        { cwd: fixtureDir, env: perryEnv, shell: WIN32, stdioString: true },
       ).catch(error => error)
       expect(
         compiled.code,
@@ -66,9 +76,10 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
       // emitAttest writes a provenance sidecar (SHA-256 + perry version).
       expect(existsSync(`${out}.attest.json`)).toBe(true)
 
-      const ran = await spawn(out, [], { stdioString: true }).catch(
-        error => error,
-      )
+      const ran = await spawn(out, [], {
+        shell: WIN32,
+        stdioString: true,
+      }).catch(error => error)
       expect(
         ran.code,
         `binary errored at runtime:\n${ran.stdout ?? ''}${ran.stderr ?? ''}`,
