@@ -7,8 +7,7 @@
  *   downstream `require()`s depend on it): CJS, no minification, directory
  *   structure mirrored under `dist/`, `INLINED_LIB_VERSION` + `NODE_ENV`
  *   inlined. Rolldown emits `.js` specifiers for relative imports, so no
- *   source-extension rewrite is needed (esbuild emitted extensionless
- *   specifiers and required a post-pass).
+ *   source-extension post-pass is needed.
  */
 
 import { readFileSync } from 'node:fs'
@@ -30,8 +29,8 @@ const rootPkgJson = JSON.parse(
 const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
 
-// Mirror the esbuild entry-point glob: every runtime source file, minus
-// declaration files and the vendored externals (built separately).
+// Entry-point glob: every runtime source file, minus declaration files and
+// the vendored externals (built separately).
 const entryFiles = fg.sync('**/*.{ts,mts,cts}', {
   cwd: srcPath,
   absolute: true,
@@ -56,15 +55,14 @@ for (let i = 0, { length } = entryFiles; i < length; i += 1) {
 const version = JSON.stringify(rootPkgJson.version)
 
 export const buildConfig: RolldownOptions = {
-  // bundle:false equivalent — keep each source file as its own module with
-  // inter-file requires intact (verified: rolldown does not inline siblings
-  // under preserveModules). The `src/external/*` tree is built separately into
-  // CJS `module.exports = X` bundles; externalize requires into it so rolldown
-  // emits a bare runtime `require('../external/foo.js')` instead of resolving
-  // the source file and rewriting consumers to `.default` (the source uses
-  // `module.exports =`, so the injected `.default` is undefined at runtime —
-  // this is exactly what esbuild's bundle:false avoided by treating every
-  // import as external).
+  // Keep each source file as its own module with inter-file requires intact
+  // (verified: rolldown does not inline siblings under preserveModules). The
+  // `src/external/*` tree is built separately into CJS `module.exports = X`
+  // bundles; externalize requires into it so rolldown emits a bare runtime
+  // `require('../external/foo.js')` instead of resolving the source file and
+  // rewriting consumers to `.default` (the source uses `module.exports =`, so
+  // the injected `.default` would be undefined at runtime — externalizing
+  // avoids that).
   external: (id: string) =>
     // Treat any path with an `external/` segment as external: bounded by a
     // separator (either platform) or string start before, and a separator after.
@@ -84,9 +82,9 @@ export const buildConfig: RolldownOptions = {
   },
   platform: 'node',
   // oxc define lives under `transform` (top-level `define` is rejected by
-  // rolldown 1.0.2). Values are already-quoted source text, same contract as
-  // esbuild's `define`. oxc normalizes the member-access shape, so the dotted
-  // key matches both `process.env.X` and `process.env['X']` reads.
+  // rolldown 1.0.2). Values are already-quoted source text injected verbatim.
+  // oxc normalizes the member-access shape, so the dotted key matches both
+  // `process.env.X` and `process.env['X']` reads.
   transform: {
     define: {
       'process.env.INLINED_LIB_VERSION': version,

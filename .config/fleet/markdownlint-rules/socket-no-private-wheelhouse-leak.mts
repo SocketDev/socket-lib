@@ -1,4 +1,4 @@
-/**
+/*
  * @file Flag mentions of `socket-wheelhouse` in public-facing markdown.
  *   socket-wheelhouse is a private repo. Public READMEs / docs / release notes
  *   that link to it leak the internal tooling layout to users who can't access
@@ -15,13 +15,19 @@
 
 import { isInsideWheelhouse } from './_shared/wheelhouse-self-skip.mts'
 
+import type { MarkdownlintRule } from './_shared/rule-types.mts'
+
 const RULE_NAME = 'socket-no-private-wheelhouse-leak'
 const FORBIDDEN_TOKEN_RE = /socket-wheelhouse/i
+// Two LOCAL-DISK forms carry the name functionally and must stay mentionable:
+// the per-repo settings file (socket-wheelhouse.json / the root
+// .socket-wheelhouse.json alternative) and the dep-0 bootstrap cache dir
+// (node_modules/.cache/socket-wheelhouse/). Both are artifacts on the
+// reader's own machine, not links to the private repo.
+const SETTINGS_FILENAME_RE =
+  /\.?socket-wheelhouse\.json|\.cache\/socket-wheelhouse\b/i
 
-/**
- * @type {import('markdownlint').Rule}
- */
-const rule = {
+const rule: MarkdownlintRule = {
   description:
     'socket-wheelhouse is a private repo — never reference it in public markdown',
   function(params, onError) {
@@ -39,16 +45,27 @@ const rule = {
       if (inFence) {
         continue
       }
-      const match = FORBIDDEN_TOKEN_RE.exec(line)
+      // Strip settings-filename forms BEFORE matching so a doc naming the
+      // config file it describes doesn't flag; any other mention on the
+      // same line still does.
+      const scannable = line.replace(
+        new RegExp(SETTINGS_FILENAME_RE.source, 'gi'),
+        '',
+      )
+      const match = FORBIDDEN_TOKEN_RE.exec(scannable)
       if (!match) {
         continue
       }
+      const displayIndex = line.search(FORBIDDEN_TOKEN_RE)
       onError({
         lineNumber: i + 1,
         detail:
           'Rewrite to not mention socket-wheelhouse — it is a private repo and the link will 404 for outside readers.',
         context: line.trim().slice(0, 120),
-        range: [match.index + 1, match[0].length],
+        range: [
+          (displayIndex >= 0 ? displayIndex : match.index) + 1,
+          match[0].length,
+        ],
       })
     }
   },
