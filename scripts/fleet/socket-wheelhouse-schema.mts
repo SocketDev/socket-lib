@@ -1,4 +1,4 @@
-/**
+/*
  * @file TypeBox schema for the per-fleet-repo socket-wheelhouse config consumed
  *   by `sync-scaffolding`. Two valid locations:
  *   `.config/socket-wheelhouse.json` (primary) or `.socket-wheelhouse.json` at
@@ -25,7 +25,7 @@ import type { Static } from '@sinclair/typebox'
 // ---------------------------------------------------------------------------
 // Two orthogonal axes describe a fleet repo:
 //
-//   layout  — package shape: single-package vs monorepo.
+//   layout  — package shape: solo vs mono.
 //   native  — native-binary supply-chain role: none / consumer /
 //             producer / both.
 //
@@ -36,13 +36,10 @@ import type { Static } from '@sinclair/typebox'
 
 const RepoSchema = Type.Object(
   {
-    type: Type.Union(
-      [Type.Literal('single-package'), Type.Literal('monorepo')],
-      {
-        description:
-          'Package layout. `single-package` = one `package.json` at root, no `packages/`. `monorepo` = pnpm workspaces under `packages/`.',
-      },
-    ),
+    type: Type.Union([Type.Literal('solo'), Type.Literal('mono')], {
+      description:
+        'Package layout. `solo` = one `package.json` at root, no `packages/`. `mono` = pnpm workspaces under `packages/`.',
+    }),
   },
   {
     description: 'Repo shape.',
@@ -150,6 +147,32 @@ const LintSchema = Type.Object(
     ),
   },
   { description: 'oxlint profile.' },
+)
+
+// ---------------------------------------------------------------------------
+// Vitest block — test-suite tuning the canonical vitest config reads.
+// ---------------------------------------------------------------------------
+
+const VitestSchema = Type.Object(
+  {
+    conformanceExclude: Type.Optional(
+      Type.Array(Type.String(), {
+        description:
+          'Heavy external-suite / cross-impl conformance wrapper globs excluded from the DEFAULT (unit) + cover suites, keeping the unit pass inside the fleet under-a-minute budget. A repo setting this MUST pair it with an explicit `test:conformance` runner so the tier never silently drops.',
+      }),
+    ),
+    unitBudgetMs: Type.Optional(
+      Type.Number({
+        minimum: 1000,
+        description:
+          'Wall-clock budget for the unit test suites under cover.mts, in milliseconds. Fleet default 60000 (under a minute). A suite exceeding the budget gets a loud report-only warning pointing at conformanceExclude; the gate ratchets to a hard failure once the fleet conforms.',
+      }),
+    ),
+  },
+  {
+    description:
+      'Tuning for the canonical vitest config (.config/repo/vitest.config.mts).',
+  },
 )
 
 // ---------------------------------------------------------------------------
@@ -319,6 +342,233 @@ const PathsAllowlistEntrySchema = Type.Object(
   },
 )
 
+const ReleaseSchema = Type.Object(
+  {
+    versionPolicy: Type.Optional(
+      Type.Union([Type.Literal('standard'), Type.Literal('patch-only')], {
+        description:
+          'Version-bump policy enforced by bump.mts. `standard` (default): derive major/minor/patch from Conventional Commits. `patch-only`: reject any major/minor bump — only the patch may increment (e.g. socket-wheelhouse stays 1.0.x).',
+      }),
+    ),
+  },
+  {
+    additionalProperties: false,
+    description: 'Release / version-bump policy.',
+  },
+)
+
+// ---------------------------------------------------------------------------
+// Design block — per-repo UI/asset design budgets (a repo opts in only if it
+// ships UI assets). `contrast` is the WCAG color-contrast budget: each file
+// names selector/background pairs a lint gate verifies clear a minimum ratio.
+// ---------------------------------------------------------------------------
+
+const ContrastCheckSchema = Type.Object(
+  {
+    selector: Type.String({
+      description:
+        'CSS selector (regex-escaped) whose foreground color is checked.',
+    }),
+    bg: Type.String({
+      description: 'Background color (hex) the foreground is measured against.',
+    }),
+    minRatio: Type.Optional(
+      Type.Number({
+        description: 'Minimum contrast ratio. Defaults to 4.5 (WCAG AA).',
+      }),
+    ),
+    label: Type.Optional(
+      Type.String({ description: 'Human-readable label for the check.' }),
+    ),
+  },
+  {
+    additionalProperties: false,
+    description: 'One foreground/background contrast pair to verify.',
+  },
+)
+
+const ContrastFileSchema = Type.Object(
+  {
+    path: Type.String({
+      description: 'Repo-relative path to the file whose colors are checked.',
+    }),
+    checks: Type.Array(ContrastCheckSchema, {
+      description: 'The contrast pairs to verify in this file.',
+    }),
+  },
+  {
+    additionalProperties: false,
+    description: 'A file and the set of contrast pairs to verify within it.',
+  },
+)
+
+const ContrastSchema = Type.Object(
+  {
+    files: Type.Array(ContrastFileSchema, {
+      description: 'Files with contrast pairs to verify.',
+    }),
+  },
+  {
+    additionalProperties: false,
+    description: 'WCAG color-contrast budget for the repo.',
+  },
+)
+
+const DesignSchema = Type.Object(
+  {
+    contrast: Type.Optional(ContrastSchema),
+  },
+  {
+    additionalProperties: false,
+    description:
+      'Per-repo design budgets (opt-in; only repos shipping UI assets set this).',
+  },
+)
+
+// ---------------------------------------------------------------------------
+// Docker block — per-repo Docker infrastructure declared as data. `prebakes`
+// is the layered base-image manifest (bases named by toolchain), driving the
+// prebake build + the downstream `FROM` references.
+// ---------------------------------------------------------------------------
+
+const PrebakePinsGoSchema = Type.Object(
+  {
+    version: Type.String(),
+    sha256: Type.Object(
+      {
+        amd64: Type.String({ pattern: '^[0-9a-f]{64}$' }),
+        arm64: Type.String({ pattern: '^[0-9a-f]{64}$' }),
+      },
+      { additionalProperties: false },
+    ),
+  },
+  {
+    additionalProperties: false,
+    description: 'Go toolchain version + per-arch sha256.',
+  },
+)
+
+const PrebakePinsSchema = Type.Object(
+  {
+    description: Type.Optional(Type.String()),
+    ubuntuDigest: Type.Optional(
+      Type.String({
+        pattern: '^sha256:[0-9a-f]{64}$',
+        description: 'Digest the ubuntu roots FROM, pinning the OS layer.',
+      }),
+    ),
+    ubuntuTag: Type.Optional(
+      Type.String({
+        description: 'Human-readable ubuntu tag the digest corresponds to.',
+      }),
+    ),
+    aptSnapshot: Type.Optional(
+      Type.String({
+        pattern: '^[0-9]{8}T[0-9]{6}Z$',
+        description:
+          'Snapshot timestamp (YYYYMMDDTHHMMSSZ) apt is pinned to, freezing transitive deps.',
+      }),
+    ),
+    go: Type.Optional(PrebakePinsGoSchema),
+    emsdkVersion: Type.Optional(Type.String()),
+  },
+  {
+    additionalProperties: false,
+    description: 'Maximally-pinned build inputs injected as build-args.',
+  },
+)
+
+const PrebakeEntrySchema = Type.Object(
+  {
+    name: Type.String({
+      pattern: '^[a-z0-9][a-z0-9._/-]*$',
+      description: 'Image name. Toolchain-named, not output-named.',
+    }),
+    status: Type.Union([Type.Literal('active'), Type.Literal('planned')], {
+      description:
+        '`active` = built + pushed today; `planned` = designed only.',
+    }),
+    from: Type.String({
+      description:
+        'Parent image: another prebake `name`, or an external `<image>:<tag>`.',
+    }),
+    vendorSource: Type.Optional(
+      Type.String({
+        description:
+          'Upstream recipe this layer is built from when vendored rather than pulled.',
+      }),
+    ),
+    dockerfile: Type.Optional(
+      Type.String({
+        pattern: '^docker/fleet-bases/[a-z0-9-]+\\.Dockerfile$',
+        description: 'Repo-relative path to the Dockerfile that builds it.',
+      }),
+    ),
+    installs: Type.Array(Type.String(), {
+      description: 'Toolchains/packages this layer adds on top of `from`.',
+    }),
+    libc: Type.Optional(
+      Type.Array(Type.Union([Type.Literal('glibc'), Type.Literal('musl')]), {
+        description: 'libc variants built.',
+      }),
+    ),
+    platforms: Type.Optional(
+      Type.Array(Type.String(), {
+        description: 'Target platforms (Docker `os/arch`).',
+      }),
+    ),
+    tagFrom: Type.Optional(
+      Type.String({
+        description: 'Source of the content hash deciding when to rebuild.',
+      }),
+    ),
+    project: Type.Optional(
+      Type.String({ description: 'Build-cache project id, if any.' }),
+    ),
+    consumers: Type.Optional(
+      Type.Array(Type.String(), {
+        description: 'Repos / builders that FROM this base.',
+      }),
+    ),
+    purpose: Type.String({
+      minLength: 1,
+      description: 'Why this layer exists and what lands on it.',
+    }),
+  },
+  {
+    additionalProperties: false,
+    description: 'One prebaked base image.',
+  },
+)
+
+const PrebakesSchema = Type.Object(
+  {
+    description: Type.Optional(Type.String()),
+    registry: Type.String({
+      description: 'Registry images are pushed to / pulled from.',
+    }),
+    pins: Type.Optional(PrebakePinsSchema),
+    prebakes: Type.Array(PrebakeEntrySchema, {
+      description: 'Each prebaked base image, ordered bottom-up.',
+    }),
+  },
+  {
+    additionalProperties: false,
+    description: 'Layered prebaked base-image manifest.',
+  },
+)
+
+const DockerSchema = Type.Object(
+  {
+    prebakes: Type.Optional(PrebakesSchema),
+  },
+  {
+    additionalProperties: false,
+    description:
+      'Per-repo Docker infrastructure (opt-in; only repos maintaining base images set this).',
+  },
+)
+
 // ---------------------------------------------------------------------------
 // Top-level config.
 // ---------------------------------------------------------------------------
@@ -342,9 +592,13 @@ export const SocketWheelhouseConfigSchema = Type.Object(
     }),
     repo: RepoSchema,
     build: BuildSchema,
+    release: Type.Optional(ReleaseSchema),
+    design: Type.Optional(DesignSchema),
+    docker: Type.Optional(DockerSchema),
     hooks: Type.Optional(HooksSchema),
     scripts: Type.Optional(ScriptsSchema),
     lint: Type.Optional(LintSchema),
+    vitest: Type.Optional(VitestSchema),
     workflows: Type.Optional(WorkflowsSchema),
     claude: Type.Optional(ClaudeSchema),
     workspace: Type.Optional(WorkspaceSchema),
@@ -365,3 +619,4 @@ export const SocketWheelhouseConfigSchema = Type.Object(
 export type SocketWheelhouseConfig = Static<typeof SocketWheelhouseConfigSchema>
 export type Repo = Static<typeof RepoSchema>
 export type Build = Static<typeof BuildSchema>
+export type Vitest = Static<typeof VitestSchema>

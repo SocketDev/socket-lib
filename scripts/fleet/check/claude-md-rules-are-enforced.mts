@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Code-is-law coverage gate: every HARD rule (a 🚨-marked paragraph) in
  *   the fleet block of CLAUDE.md and in docs/agents.md/fleet/_.md must resolve
  *   to an EXECUTABLE enforcer — a hook, a `socket/`+`typescript/` lint rule, or
@@ -46,9 +46,13 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { errorMessage } from '@socketsecurity/lib-stable/errors'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import {
+  isFleetMarkerBeginLine,
+  isFleetMarkerEndLine,
+} from '../../../.claude/hooks/fleet/_shared/fleet-markers.mts'
 import {
   collectFleetDocs,
   collectHookEnforcers,
@@ -64,8 +68,6 @@ const logger = getDefaultLogger()
 const SIREN = '🚨'
 
 // Fleet-block delimiters (mirror claude-md-rules-are-informative.mts).
-const FLEET_BEGIN_RE = /<!--\s*BEGIN FLEET-CANONICAL/
-const FLEET_END_RE = /<!--\s*END FLEET-CANONICAL/
 
 // A hook citation anywhere in a paragraph: `.claude/hooks/{fleet,repo}/<name>/`.
 // Brace-grouped `{a,b,c}/` is expanded by expandNames (imported below via the
@@ -176,12 +178,34 @@ export function sirenParagraphs(
   body: string,
   options: ParagraphScanOptions,
 ): RuleParagraph[] {
-  const { fleetOnly } = { ...options }
+  const { fleetOnly } = { __proto__: null, ...options } as typeof options
   const lines = body.split('\n')
   const out: RuleParagraph[] = []
-  let inFleet = !fleetOnly
-  // Buffer of (paragraph) awaiting its section text, which is only complete at
-  // the next heading / block end. Collect paragraphs per section, then flush.
+
+  // CLAUDE.md (fleetOnly) is a thin bullet index: each 🚨 `- ` bullet IS a rule,
+  // carrying its own enforcer citation / doc link on the line. The line is both
+  // the rule text and its own sectionText (no enclosing `###` section anymore).
+  if (fleetOnly) {
+    let inFleet = false
+    for (let i = 0, { length } = lines; i < length; i += 1) {
+      const line = lines[i] ?? ''
+      if (isFleetMarkerBeginLine(line)) {
+        inFleet = true
+        continue
+      }
+      if (isFleetMarkerEndLine(line)) {
+        inFleet = false
+        continue
+      }
+      if (inFleet && line.startsWith('- ') && line.includes(SIREN)) {
+        out.push({ file, line: i + 1, text: line, sectionText: line })
+      }
+    }
+    return out
+  }
+
+  // Docs (whole body): 🚨 paragraphs within `###` sections; sectionText is the
+  // enclosing section, for the detail-link fallback.
   let sectionLines: string[] = []
   let pending: Array<{ line: number; text: string }> = []
   let para: string[] = []
@@ -207,20 +231,6 @@ export function sirenParagraphs(
   }
   for (let i = 0, { length } = lines; i < length; i += 1) {
     const line = lines[i] ?? ''
-    if (fleetOnly) {
-      if (FLEET_BEGIN_RE.test(line)) {
-        inFleet = true
-        continue
-      }
-      if (FLEET_END_RE.test(line)) {
-        endSection()
-        inFleet = false
-        continue
-      }
-    }
-    if (!inFleet) {
-      continue
-    }
     if (SECTION_HEADER_RE.test(line)) {
       endSection()
       sectionLines.push(line)
@@ -284,12 +294,12 @@ export function linkedDetailDocs(text: string): string[] {
   return [...new Set(out)]
 }
 
-// True when a 🚨 paragraph is enforced: its enclosing section text (which
-// includes the paragraph) directly cites a resolving enforcer, OR a fleet detail
-// doc linked from that section does. `readDoc` returns a linked doc's text
-// (undefined if missing). The section + doc fallbacks are what let CLAUDE.md stay
-// under its 40 KB cap — a rule states the why inline and defers the citation to
-// the section's one detail link.
+// True when a 🚨 paragraph is enforced: the paragraph OR its enclosing section
+// directly cites a resolving enforcer, OR a fleet detail doc linked from the
+// paragraph or section does. `readDoc` returns a linked doc's text (undefined if
+// missing). The section + doc fallbacks are what let CLAUDE.md stay under its
+// 40 KB cap — a rule states the why inline and defers the citation to the
+// section's one detail link.
 export function paragraphIsEnforced(
   sectionText: string,
   inv: EnforcerInventory,
@@ -327,7 +337,10 @@ export function auditFile(
   inv: EnforcerInventory,
   options: AuditOptions,
 ): AuditResult {
-  const { fleetOnly, readDoc } = { ...options }
+  const { fleetOnly, readDoc } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
   const findings: Finding[] = []
   const optOuts: OptOut[] = []
   const paras = sirenParagraphs(file, body, { fleetOnly })

@@ -1,4 +1,4 @@
-/**
+/*
  * @file Lockstep harness CLI entry — dispatcher + `main()`. Reads
  *   `lockstep.json` (+ any `includes[]` sub-manifests) and validates each row
  *   against its upstream or sibling ports. Every supported `kind` has a
@@ -23,7 +23,6 @@
  *     semantics: ultrathink/acorn/scripts/xlang-harness.mts.
  */
 
-import path from 'node:path'
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
@@ -37,8 +36,9 @@ import {
   checkSpecConformance,
   checkVersionPin,
 } from './checks.mts'
-import { loadManifestTree } from './manifest.mts'
+import { loadManifestTree, resolveManifestRoot } from './manifest.mts'
 import { emitHuman, summarize } from './report.mts'
+import { isMainModule } from '../_shared/is-main-module.mts'
 
 import type { Row } from './schema.mts'
 import type { Manifest, Report } from './types.mts'
@@ -94,8 +94,8 @@ function evaluate(
   return reports
 }
 
-function main(): void {
-  const rootManifestPath = path.join(rootDir, 'lockstep.json')
+export function main(): void {
+  const rootManifestPath = resolveManifestRoot(rootDir)
   const { areas, merged } = loadManifestTree(rootManifestPath)
 
   const rowsWithArea: Array<{ row: Row; area: string }> = []
@@ -141,4 +141,9 @@ function main(): void {
   }
 }
 
-main()
+// Direct execution (`node scripts/fleet/lockstep/cli.mts`) still runs the CLI;
+// importing this module no longer does — the lockstep.mts shim calls main()
+// explicitly under its own guard.
+if (isMainModule(import.meta.url)) {
+  void main()
+}
