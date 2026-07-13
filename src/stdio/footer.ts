@@ -3,7 +3,6 @@
  *   and summary formatting for CLI applications.
  */
 
-import colors from '../external/yoctocolors-cjs'
 import { repeatString } from '../strings/format'
 
 import { ArrayPrototypePush } from '../primordials/array'
@@ -126,6 +125,12 @@ export function createFooter(
     width = 80,
   } = { __proto__: null, ...options } as FooterOptions
 
+  // Require the vendored colors bundle lazily, at call time. Importing it at
+  // module scope aborts V8 `node --build-snapshot` of any module that
+  // transitively imports this one on x64 (std::length_error), so it stays out
+  // of the import graph (guarded by test/unit/snapshot-safety.test.mts).
+  const colors = require('../external/yoctocolors-cjs')
+
   const border = repeatString(borderChar, width)
   const lines: string[] = []
 
@@ -236,6 +241,8 @@ export function printFooter(message?: string | undefined): void {
   const border = repeatString('─', 55)
   logger.log(border)
   if (message) {
+    // Lazy require — see the note in createFooter (snapshot-safety).
+    const colors = require('../external/yoctocolors-cjs')
     logger.log(colors.green(message))
   }
 }
