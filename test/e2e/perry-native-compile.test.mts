@@ -58,7 +58,13 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
     'compiles a socket-lib surface natively under lockdown, then runs it',
     async () => {
       linkLocalLib()
-      const out = path.join(os.tmpdir(), 'socket-lib-perry-e2e')
+      // Windows executables need a .exe extension to be launchable; perry
+      // writes exactly the -o path, so ask for .exe there (the .attest.json
+      // sidecar derives from the same path).
+      const out = path.join(
+        os.tmpdir(),
+        WIN32 ? 'socket-lib-perry-e2e.exe' : 'socket-lib-perry-e2e',
+      )
       rmSync(out, { force: true })
       rmSync(`${out}.attest.json`, { force: true })
 
