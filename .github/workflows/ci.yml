@@ -1,10 +1,8 @@
-# <fleet-canonical>
-# Managed by socket-wheelhouse. Don't edit this block locally — edit
-# template/base/.github/workflows/ci.yml upstream and re-cascade via
-# `pnpm run sync`. Fleet CI runs check + test using the LOCAL composite actions
-# under .github/actions/ (inlined — no cross-repo reusable, no `uses:@sha` for
-# first-party). Repo-owned jobs go BELOW the END marker (still under the
-# top-level `jobs:` key). See scripts/repo/sync-scaffolding/checks/workflow-fleet-block.mts.
+# Baseline CI — seeded once by socket-wheelhouse (template/presets/), then
+# repo-owned: edit freely. Runs check + test via the LOCAL composite actions
+# under .github/actions/fleet/ (cascade-updated), referenced by ./ path — no
+# cross-repo reusable workflow, no first-party `uses:@sha`. Add repo-specific
+# jobs anywhere under `jobs:`.
 name: ⚡ CI
 
 on:
@@ -84,4 +82,3 @@ jobs:
         with:
           setup-script: pnpm run build
           main-script: pnpm run test --all
-  # </fleet-canonical>
