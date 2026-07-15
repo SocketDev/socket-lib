@@ -37,6 +37,12 @@
     "_http_incoming": false,
     "_http_outgoing": false,
     "_http_server": false,
+    "_stream_duplex": false,
+    "_stream_passthrough": false,
+    "_stream_readable": false,
+    "_stream_transform": false,
+    "_stream_wrap": false,
+    "_stream_writable": false,
     "_tls_common": false,
     "_tls_wrap": false,
     "assert": false,
@@ -1456,6 +1462,26 @@
       "source": "./src/external-tools/skillspector/types.ts",
       "types": "./dist/external-tools/skillspector/types.d.ts",
       "default": "./dist/external-tools/skillspector/types.js"
+    },
+    "./external-tools/socket-keychain/asset-names": {
+      "source": "./src/external-tools/socket-keychain/asset-names.ts",
+      "types": "./dist/external-tools/socket-keychain/asset-names.d.ts",
+      "default": "./dist/external-tools/socket-keychain/asset-names.js"
+    },
+    "./external-tools/socket-keychain/from-download": {
+      "source": "./src/external-tools/socket-keychain/from-download.ts",
+      "types": "./dist/external-tools/socket-keychain/from-download.d.ts",
+      "default": "./dist/external-tools/socket-keychain/from-download.js"
+    },
+    "./external-tools/socket-keychain/resolve": {
+      "source": "./src/external-tools/socket-keychain/resolve.ts",
+      "types": "./dist/external-tools/socket-keychain/resolve.d.ts",
+      "default": "./dist/external-tools/socket-keychain/resolve.js"
+    },
+    "./external-tools/socket-keychain/types": {
+      "source": "./src/external-tools/socket-keychain/types.ts",
+      "types": "./dist/external-tools/socket-keychain/types.d.ts",
+      "default": "./dist/external-tools/socket-keychain/types.js"
     },
     "./external-tools/synp/asset-names": {
       "source": "./src/external-tools/synp/asset-names.ts",
