@@ -35,6 +35,11 @@ export type BufferEncoding = globalThis.BufferEncoding
  *   process.
  * @property {number | undefined} gid - Group identity of the process (POSIX
  *   only)
+ * @property {number | undefined} localTimeout - Like `timeout`, but scaled for
+ *   the current platform: win32 gets headroom for its slower process-spawn
+ *   latency (default 6x, env-overridable), POSIX keeps the value. Use for a
+ *   LOCAL process; use `timeout` for a fixed or network budget. Passing BOTH
+ *   throws.
  * @property {boolean | string | undefined} shell - Whether to run command in
  *   shell, or path to shell.
  * @property {AbortSignal | undefined} signal - Signal to abort the process.
@@ -54,6 +59,7 @@ export type PromiseSpawnOptions = {
   cwd?: string | undefined
   env?: NodeJS.ProcessEnv | undefined
   gid?: number | undefined
+  localTimeout?: number | undefined
   shell?: boolean | string | undefined
   signal?: AbortSignal | undefined
   stdio?: StdioType | undefined
@@ -328,6 +334,7 @@ export interface WritableStreamType {
  */
 export type SpawnOptions = Remap<
   NodeSpawnOptions & {
+    localTimeout?: number | undefined
     spinner?: SpinnerInstance | undefined
     stdioString?: boolean | undefined
     stripAnsi?: boolean | undefined
@@ -367,6 +374,7 @@ export type SpawnStdioResult = {
  */
 export type SpawnSyncOptions = Remap<
   NodeSpawnSyncOptions & {
+    localTimeout?: number | undefined
     stdioString?: boolean | undefined
     stripAnsi?: boolean | undefined
   }

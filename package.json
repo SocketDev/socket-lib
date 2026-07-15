@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "6.0.10",
+  "version": "6.1.0-prerelease",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
     "Socket.dev",
@@ -158,10 +158,20 @@
       "types": "./dist/abort/signal.d.ts",
       "default": "./dist/abort/signal.js"
     },
+    "./ai/advisor": {
+      "source": "./src/ai/advisor.mts",
+      "types": "./dist/ai/advisor.d.mts",
+      "default": "./dist/ai/advisor.js"
+    },
     "./ai/agent-context": {
       "source": "./src/ai/agent-context.mts",
       "types": "./dist/ai/agent-context.d.mts",
       "default": "./dist/ai/agent-context.js"
+    },
+    "./ai/assist": {
+      "source": "./src/ai/assist.mts",
+      "types": "./dist/ai/assist.d.mts",
+      "default": "./dist/ai/assist.js"
     },
     "./ai/backends": {
       "source": "./src/ai/backends.mts",
@@ -173,6 +183,11 @@
       "types": "./dist/ai/billing-context.d.mts",
       "default": "./dist/ai/billing-context.js"
     },
+    "./ai/cost": {
+      "source": "./src/ai/cost.mts",
+      "types": "./dist/ai/cost.d.mts",
+      "default": "./dist/ai/cost.js"
+    },
     "./ai/credentials": {
       "source": "./src/ai/credentials.mts",
       "types": "./dist/ai/credentials.d.mts",
@@ -182,6 +197,11 @@
       "source": "./src/ai/discover.mts",
       "types": "./dist/ai/discover.d.mts",
       "default": "./dist/ai/discover.js"
+    },
+    "./ai/enforce": {
+      "source": "./src/ai/enforce.mts",
+      "types": "./dist/ai/enforce.d.mts",
+      "default": "./dist/ai/enforce.js"
     },
     "./ai/exec": {
       "source": "./src/ai/exec.mts",
@@ -2586,6 +2606,11 @@
       "source": "./src/process/spawn/stdio.ts",
       "types": "./dist/process/spawn/stdio.d.ts",
       "default": "./dist/process/spawn/stdio.js"
+    },
+    "./process/spawn/timeout": {
+      "source": "./src/process/spawn/timeout.ts",
+      "types": "./dist/process/spawn/timeout.d.ts",
+      "default": "./dist/process/spawn/timeout.js"
     },
     "./process/spawn/types": {
       "source": "./src/process/spawn/types.ts",

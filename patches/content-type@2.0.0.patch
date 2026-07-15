@@ -1,0 +1,44 @@
+diff --git a/dist/index.js b/dist/index.js
+index 4026f973dafb1cbfde16dfe0ee72c48492fb299c..e6f3bd29906a7fa5adb75ef1cdb9c5e221160e06 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -48,10 +48,39 @@ function format(obj) {
+     }
+     return result;
+ }
++/**
++ * Get the content-type header value off a req/res-like object.
++ */
++function getContentTypeFromObject(obj) {
++    let header;
++    if (typeof obj.getHeader === 'function') {
++        // res-like
++        header = obj.getHeader('content-type');
++    }
++    else if (obj.headers && typeof obj.headers === 'object') {
++        // req-like
++        header = obj.headers['content-type'];
++    }
++    if (typeof header !== 'string') {
++        throw new TypeError('content-type header is missing from object');
++    }
++    return header;
++}
+ /**
+  * Parse a `Content-Type` header.
+  */
+ function parse(header, options) {
++    if (!header) {
++        throw new TypeError('argument string is required');
++    }
++    // compat shim: content-type@1 accepted a req/res-like object in place of
++    // a raw header string (getcontenttype()); content-type@2 dropped that,
++    // requiring the caller to read the header itself first. body-parser@2.2.2
++    // still calls `contentType.parse(req)` directly, so restore the
++    // passthrough here for object input; string input is unchanged.
++    if (typeof header === 'object') {
++        header = getContentTypeFromObject(header);
++    }
+     const len = header.length;
+     let index = skipOWS(header, 0, len);
+     const valueStart = index;

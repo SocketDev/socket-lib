@@ -1,0 +1,51 @@
+diff --git a/package.json b/package.json
+index c9e0dc52ba744b864aa0b8ae2b3081c81b1c22ab..10c45b509d3e9033f725b3d7b75fd84fc925ba54 100644
+--- a/package.json
++++ b/package.json
+@@ -6,8 +6,12 @@
+ 	"repository": "chalk/chalk",
+ 	"funding": "https://github.com/chalk/chalk?sponsor=1",
+ 	"type": "module",
+-	"main": "./source/index.js",
+-	"exports": "./source/index.js",
++	"main": "./source/index.cjs",
++	"exports": {
++		"types": "./source/index.d.ts",
++		"import": "./source/index.js",
++		"require": "./source/index.cjs"
++	},
+ 	"imports": {
+ 		"#ansi-styles": "./source/vendor/ansi-styles/index.js",
+ 		"#supports-color": {
+diff --git a/source/index.cjs b/source/index.cjs
+new file mode 100644
+index 0000000000000000000000000000000000000000..d666be9a2b3632d787a554d9ab0f569f6c85bc3f
+--- /dev/null
++++ b/source/index.cjs
+@@ -0,0 +1,26 @@
++'use strict';
++
++// compat shim: chalk@5 is ESM-only — its `exports` map offered no `require`
++// condition, so a CommonJS `require('chalk')` on Node's require(ESM) path
++// receives the module namespace ({ default, Chalk, ... }) instead of the
++// callable chalk instance the chalk@4 API exposed as `module.exports`. CJS
++// consumers (`@yarnpkg/core`, `@yarnpkg/shell`, `type-coverage`) still do
++// `const chalk = require('chalk')` then `chalk.red(...)`, so re-export the
++// default instance as `module.exports` and re-attach chalk@5's named exports.
++const namespace = require('./index.js');
++const chalk = namespace.default;
++
++module.exports = chalk;
++module.exports.default = chalk;
++module.exports.Chalk = namespace.Chalk;
++module.exports.chalkStderr = namespace.chalkStderr;
++module.exports.supportsColor = namespace.supportsColor;
++module.exports.supportsColorStderr = namespace.supportsColorStderr;
++module.exports.modifierNames = namespace.modifierNames;
++module.exports.foregroundColorNames = namespace.foregroundColorNames;
++module.exports.backgroundColorNames = namespace.backgroundColorNames;
++module.exports.colorNames = namespace.colorNames;
++module.exports.modifiers = namespace.modifiers;
++module.exports.foregroundColors = namespace.foregroundColors;
++module.exports.backgroundColors = namespace.backgroundColors;
++module.exports.colors = namespace.colors;

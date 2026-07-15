@@ -38,6 +38,7 @@ import {
 } from './_internal'
 import { enhanceSpawnError } from './errors'
 import { isStdioType } from './stdio'
+import { resolveSpawnTimeout } from './timeout'
 
 import type {
   BufferEncoding,
@@ -255,7 +256,8 @@ export function spawn(
     stdioString,
     shell: spawnOptions.shell,
     windowsVerbatimArguments: spawnOptions.windowsVerbatimArguments,
-    timeout: spawnOptions.timeout,
+    // localTimeout (scaled) beats timeout (fixed); both throws. See ./timeout.
+    timeout: resolveSpawnTimeout(spawnOptions),
     uid: spawnOptions.uid,
     gid: spawnOptions.gid,
   } as unknown as PromiseSpawnOptions
@@ -473,6 +475,9 @@ export function spawnSync(
   const spawnOptions = {
     encoding: rawEncoding,
     ...rawSpawnOptions,
+    // localTimeout (scaled) beats timeout (fixed); both throws. Node ignores the
+    // stray localTimeout key on the options it receives. See ./timeout.
+    timeout: resolveSpawnTimeout(rawSpawnOptions),
   } as NodeSpawnOptions & { encoding: BufferEncoding | 'buffer' }
   const stdioString = spawnOptions.encoding !== 'buffer'
   const childProcess = getNodeChildProcess()
