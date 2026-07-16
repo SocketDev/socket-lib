@@ -17,17 +17,24 @@ import { runWithTempDir } from '../util/temp-file-helper'
 
 function stagePackage(installRoot: string, packageName: string): string {
   const installedDir = path.join(installRoot, 'node_modules', packageName)
-  const binaryPath = path.join(installedDir, 'cli.js')
+  const isWindows = process.platform === 'win32'
+  const binaryName = isWindows ? 'cli.cmd' : 'cli.js'
+  const binaryPath = path.join(installedDir, binaryName)
   mkdirSync(installedDir, { recursive: true })
   writeFileSync(
     path.join(installedDir, 'package.json'),
     JSON.stringify({
-      bin: './cli.js',
+      bin: `./${binaryName}`,
       name: packageName,
       version: '1.0.0',
     }),
   )
-  writeFileSync(binaryPath, '#!/usr/bin/env node\nprocess.exit(0)\n')
+  writeFileSync(
+    binaryPath,
+    isWindows
+      ? '@echo off\r\nexit /b 0\r\n'
+      : '#!/usr/bin/env node\nprocess.exit(0)\n',
+  )
   return normalizePath(binaryPath)
 }
 
