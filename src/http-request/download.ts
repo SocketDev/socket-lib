@@ -16,7 +16,7 @@ import { safeDelete } from '../fs/safe'
 import { BufferFrom } from '../primordials/buffer'
 import { ErrorCtor } from '../primordials/error'
 import { MathFloor } from '../primordials/math'
-import { NumberParseInt } from '../primordials/number'
+import { NumberIsSafeInteger, NumberParseInt } from '../primordials/number'
 import { PromiseCtor } from '../primordials/promise'
 import { getCrypto, getFs } from './_internal'
 import { httpRequestAttempt } from './request'
@@ -85,8 +85,10 @@ export async function httpDownload(
 ): Promise<HttpDownloadResult> {
   const {
     ca,
+    createWriteStream,
     followRedirects = true,
     headers = {},
+    integrity,
     logger,
     maxRedirects = 5,
     onProgress,
@@ -139,6 +141,7 @@ export async function httpDownload(
     try {
       const result = await httpDownloadAttempt(url, tempPath, {
         ca,
+        createWriteStream,
         followRedirects,
         headers,
         maxRedirects,
@@ -146,21 +149,16 @@ export async function httpDownload(
         timeout,
       })
 
-      // Verify checksum if sha256 hash is provided.
+      // Both digests were computed over the response chunks before they reached
+      // the destination stream, so verification does not reread the temp file.
       if (sha256) {
-        const fileContent = await fs.promises.readFile(tempPath)
-        const computedHash = crypto
-          .createHash('sha256')
-          .update(fileContent)
-          .digest('hex')
-
         const expectedHash = sha256.toLowerCase()
 
         // Use constant-time comparison to prevent timing attacks.
         if (
-          computedHash.length !== expectedHash.length ||
+          result.sha256.length !== expectedHash.length ||
           !crypto.timingSafeEqual(
-            BufferFrom!(computedHash),
+            BufferFrom!(result.sha256),
             Buffer.from(expectedHash),
           )
         ) {
@@ -168,9 +166,24 @@ export async function httpDownload(
           throw new ErrorCtor(
             `Checksum verification failed for ${url}\n` +
               `Expected: ${expectedHash}\n` +
-              `Computed: ${computedHash}`,
+              `Computed: ${result.sha256}`,
           )
         }
+      }
+      if (
+        integrity &&
+        (result.integrity.length !== integrity.length ||
+          !crypto.timingSafeEqual(
+            BufferFrom!(result.integrity),
+            Buffer.from(integrity),
+          ))
+      ) {
+        await safeDelete(tempPath)
+        throw new ErrorCtor(
+          `Integrity verification failed for ${url}\n` +
+            `Expected: ${integrity}\n` +
+            `Computed: ${result.integrity}`,
+        )
       }
 
       // Download succeeded - atomically rename temp file to destination.
@@ -213,6 +226,7 @@ export async function httpDownloadAttempt(
 ): Promise<HttpDownloadResult> {
   const {
     ca,
+    createWriteStream: createDownloadWriteStream,
     followRedirects = true,
     headers = {},
     maxRedirects = 5,
@@ -244,15 +258,24 @@ export async function httpDownloadAttempt(
     throw new ErrorCtor('Stream response missing rawResponse')
   }
 
+  const crypto = getCrypto()
   const { createWriteStream } = getFs()
-  const totalSize = NumberParseInt(
-    (response.headers['content-length'] as string) || '0',
+  const contentLength = response.headers['content-length']
+  const parsedSize = NumberParseInt(
+    typeof contentLength === 'string' ? contentLength : '',
     10,
   )
+  const totalSize =
+    NumberIsSafeInteger(parsedSize) && parsedSize >= 0 ? parsedSize : undefined
 
   return await new PromiseCtor((resolve, reject) => {
     let downloadedSize = 0
-    const fileStream = createWriteStream(destPath)
+    const sha256Hash = crypto.createHash('sha256')
+    const sha512Hash = crypto.createHash('sha512')
+    const fileStream =
+      createDownloadWriteStream && totalSize !== undefined
+        ? createDownloadWriteStream(destPath, { size: totalSize })
+        : createWriteStream(destPath)
 
     const cleanupPartial = () => {
       // Fire-and-forget: caller doesn't await. The async IIFE keeps
@@ -287,7 +310,9 @@ export async function httpDownloadAttempt(
 
     res.on('data', (chunk: Buffer) => {
       downloadedSize += chunk.length
-      if (onProgress && totalSize > 0) {
+      sha256Hash.update(chunk)
+      sha512Hash.update(chunk)
+      if (onProgress && totalSize !== undefined && totalSize > 0) {
         onProgress(downloadedSize, totalSize)
       }
     })
@@ -302,8 +327,10 @@ export async function httpDownloadAttempt(
     fileStream.on('finish', () => {
       resolve({
         headers: response.headers,
+        integrity: `sha512-${sha512Hash.digest('base64')}`,
         ok: true,
         path: destPath,
+        sha256: sha256Hash.digest('hex'),
         size: downloadedSize,
         status: response.status,
         statusText: response.statusText,

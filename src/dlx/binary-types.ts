@@ -9,6 +9,7 @@
  */
 
 import type { HashSpec } from '../integrity'
+import type { HttpDownloadWriteStreamFactory } from '../http-request/download-types'
 import type { spawn } from '../process/spawn/child'
 import type { SpawnOptions } from '../process/spawn/types'
 
@@ -17,6 +18,12 @@ export interface DlxBinaryOptions {
    * URL to download the binary from.
    */
   url: string
+
+  /**
+   * Create the stream that receives freshly downloaded bytes. This allows
+   * callers to write directly into filesystem compression such as decmpfs.
+   */
+  createWriteStream?: HttpDownloadWriteStreamFactory | undefined
 
   /**
    * Optional name for the cached binary (defaults to URL hash).

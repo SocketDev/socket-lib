@@ -7,7 +7,24 @@
  */
 
 import type { IncomingHttpHeaders } from 'node:http'
+import type { Writable } from 'node:stream'
 import type { Logger } from '../logger/node'
+
+export interface HttpDownloadWriteStreamOptions {
+  /**
+   * Validated response Content-Length. The factory is bypassed in favor of a
+   * regular file stream when the server does not provide an exact length.
+   */
+  size: number
+}
+
+/**
+ * Injectable destination stream used for direct-to-filesystem transforms.
+ */
+export type HttpDownloadWriteStreamFactory = (
+  path: string,
+  options: HttpDownloadWriteStreamOptions,
+) => Writable
 
 /**
  * Configuration options for file downloads.
@@ -19,6 +36,13 @@ export interface HttpDownloadOptions {
    * for details.
    */
   ca?: string[] | undefined
+  /**
+   * Create the stream that receives response bytes. The path is the download's
+   * sibling temp path, not the final destination, so hash verification and the
+   * final atomic rename retain their existing safety guarantees. Responses
+   * without a valid Content-Length use the regular file writer instead.
+   */
+  createWriteStream?: HttpDownloadWriteStreamFactory | undefined
   /**
    * Whether to automatically follow HTTP redirects (3xx status codes). This is
    * essential for downloading from services that use CDN redirects, such as
@@ -50,6 +74,11 @@ export interface HttpDownloadOptions {
    *   ```
    */
   headers?: Record<string, string> | undefined
+  /**
+   * Expected SHA-512 SRI string. If provided, the download fails before
+   * publication when the streamed digest does not match.
+   */
+  integrity?: string | undefined
   /**
    * Logger instance for automatic progress logging. When provided with
    * `progressInterval`, will automatically log download progress. If both
@@ -161,6 +190,10 @@ export interface HttpDownloadResult {
    */
   headers: IncomingHttpHeaders
   /**
+   * SHA-512 SRI digest computed while the response streamed.
+   */
+  integrity: string
+  /**
    * Whether the download succeeded (status 200-299). Always true on success
    * (non-2xx throws).
    */
@@ -169,6 +202,10 @@ export interface HttpDownloadResult {
    * Absolute path where the file was saved.
    */
   path: string
+  /**
+   * Lowercase SHA-256 digest computed while the response streamed.
+   */
+  sha256: string
   /**
    * Total size of downloaded file in bytes.
    */

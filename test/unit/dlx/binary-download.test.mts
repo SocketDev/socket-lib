@@ -20,13 +20,19 @@ import type * as DownloadModule from '../../../src/http-request/download'
 import type {
   HttpDownloadOptions,
   HttpDownloadResult,
+  HttpDownloadWriteStreamFactory,
 } from '../../../src/http-request/download-types'
 
-function mockDownloadResult(destPath: string): HttpDownloadResult {
+function mockDownloadResult(
+  destPath: string,
+  payload = Buffer.from('default-payload'),
+): HttpDownloadResult {
   return {
     headers: {},
+    integrity: sha512OfBuffer(payload),
     ok: true,
     path: destPath,
+    sha256: crypto.createHash('sha256').update(payload).digest('hex'),
     size: 0,
     status: 200,
     statusText: 'OK',
@@ -89,6 +95,20 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     expect(existsSync(destPath)).toBe(true)
   })
 
+  it('uses the download stream integrity without rereading the fresh file', async () => {
+    const streamedIntegrity = `sha512-${Buffer.from('stream-digest').toString('base64')}`
+    vi.mocked(httpDownload).mockImplementationOnce(async (_url, destPath) => {
+      writeFileSync(destPath, Buffer.from('different-on-disk-payload'))
+      return {
+        ...mockDownloadResult(destPath),
+        integrity: streamedIntegrity,
+      }
+    })
+    const destPath = path.join(testDir, 'streamed-integrity')
+    const result = await downloadBinaryFile('https://example.com/x', destPath)
+    expect(result).toBe(streamedIntegrity)
+  })
+
   it('returns existing-file integrity when destPath already has content', async () => {
     const destPath = path.join(testDir, 'pre-existing')
     const payload = Buffer.from('already-here')
@@ -104,7 +124,7 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     const payload = Buffer.from('expected-content')
     vi.mocked(httpDownload).mockImplementationOnce(async (_url, destPath) => {
       writeFileSync(destPath, payload)
-      return mockDownloadResult(destPath)
+      return mockDownloadResult(destPath, payload)
     })
     const expectedIntegrity = sha512OfBuffer(payload)
     const destPath = path.join(testDir, 'verified')
@@ -120,7 +140,7 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     const payload = Buffer.from('actual-content')
     vi.mocked(httpDownload).mockImplementationOnce(async (_url, destPath) => {
       writeFileSync(destPath, payload)
-      return mockDownloadResult(destPath)
+      return mockDownloadResult(destPath, payload)
     })
     const wrongIntegrity = sha512OfBuffer(Buffer.from('different-content'))
     const destPath = path.join(testDir, 'mismatch')
@@ -150,7 +170,27 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
       'a'.repeat(64),
     )
     const args = vi.mocked(httpDownload).mock.calls[0]!
-    expect(args[2]).toEqual({ sha256: 'a'.repeat(64) })
+    expect(args[2]).toEqual({
+      createWriteStream: undefined,
+      integrity: undefined,
+      sha256: 'a'.repeat(64),
+    })
+  })
+
+  it('passes the injected write stream through to httpDownload', async () => {
+    const destPath = path.join(testDir, 'with-custom-stream')
+    const createWriteStream =
+      vi.fn() as unknown as HttpDownloadWriteStreamFactory
+    await downloadBinaryFile(
+      'https://example.com/x',
+      destPath,
+      undefined,
+      undefined,
+      createWriteStream,
+    )
+    expect(vi.mocked(httpDownload).mock.calls[0]![2]?.createWriteStream).toBe(
+      createWriteStream,
+    )
   })
 
   it('verifies sha256 on cached file and accepts a matching hash', async () => {

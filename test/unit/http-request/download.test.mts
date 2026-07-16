@@ -1,5 +1,6 @@
 import crypto from 'node:crypto'
 import {
+  createWriteStream,
   existsSync,
   mkdtempSync,
   readFileSync,
@@ -75,6 +76,10 @@ function sha256Hex(content: string): string {
   return crypto.createHash('sha256').update(content).digest('hex')
 }
 
+function sha512Integrity(content: string): string {
+  return `sha512-${crypto.createHash('sha512').update(content).digest('base64')}`
+}
+
 beforeEach(() => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'http-download-test-'))
   vi.resetModules()
@@ -112,6 +117,45 @@ describe.sequential('http-request/download — happy path', () => {
     expect(result.status).toBe(200)
     expect(result.headers['content-type']).toBe('application/octet-stream')
     expect(result.size).toBe(1)
+    expect(result.sha256).toBe(sha256Hex('x'))
+    expect(result.integrity).toBe(sha512Integrity('x'))
+  })
+
+  test('uses an injected write stream with the temp path and response size', async () => {
+    const dest = path.join(tmpRoot, 'custom-stream.bin')
+    const body = 'streamed-directly'
+    const createDownloadStream = vi.fn(
+      (streamPath: string, options: { size: number }) => {
+        expect(options.size).toBe(body.length)
+        return createWriteStream(streamPath)
+      },
+    )
+    mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
+    const { httpDownload } = await loadFresh()
+    const result = await httpDownload('https://example.com/tool', dest, {
+      createWriteStream: createDownloadStream,
+    })
+    expect(createDownloadStream).toHaveBeenCalledOnce()
+    expect(createDownloadStream.mock.calls[0]![0]).toMatch(/\.download$/)
+    expect(result.integrity).toBe(sha512Integrity(body))
+    expect(readFileSync(dest, 'utf8')).toBe(body)
+  })
+
+  test('uses the regular file writer when Content-Length is unavailable', async () => {
+    const dest = path.join(tmpRoot, 'unknown-size.bin')
+    const createDownloadStream = vi.fn(() => createWriteStream(dest))
+    mockHttpRequestAttempt.mockResolvedValueOnce(
+      makeFakeResponse({
+        body: 'unknown-size',
+        headers: { 'content-length': undefined },
+      }),
+    )
+    const { httpDownload } = await loadFresh()
+    await httpDownload('https://example.com/tool', dest, {
+      createWriteStream: createDownloadStream,
+    })
+    expect(createDownloadStream).not.toHaveBeenCalled()
+    expect(readFileSync(dest, 'utf8')).toBe('unknown-size')
   })
 
   test('throws HttpResponseError when response.ok is false', async () => {
@@ -176,6 +220,33 @@ describe.sequential('http-request/download — sha256 verification', () => {
       sha256: expected.toUpperCase(),
     })
     expect(result.path).toBe(dest)
+  })
+})
+
+describe.sequential('http-request/download — SRI verification', () => {
+  test('accepts a matching streamed SHA-512 integrity', async () => {
+    const dest = path.join(tmpRoot, 'integrity-ok.bin')
+    const body = 'verified-integrity'
+    mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
+    const { httpDownload } = await loadFresh()
+    const result = await httpDownload('https://example.com/x', dest, {
+      integrity: sha512Integrity(body),
+    })
+    expect(result.path).toBe(dest)
+  })
+
+  test('rejects a mismatch before publishing the destination', async () => {
+    const dest = path.join(tmpRoot, 'integrity-bad.bin')
+    mockHttpRequestAttempt.mockResolvedValueOnce(
+      makeFakeResponse({ body: 'wrong-integrity' }),
+    )
+    const { httpDownload } = await loadFresh()
+    await expect(
+      httpDownload('https://example.com/x', dest, {
+        integrity: sha512Integrity('expected-integrity'),
+      }),
+    ).rejects.toThrow(/Integrity verification failed/)
+    expect(existsSync(dest)).toBe(false)
   })
 })
 

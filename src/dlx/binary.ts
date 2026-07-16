@@ -62,6 +62,7 @@ export async function dlxBinary(
 ): Promise<DlxBinaryResult> {
   const {
     cacheTtl = DLX_BINARY_CACHE_TTL,
+    createWriteStream,
     force: userForce = false,
     hash,
     integrity: rawIntegrity,
@@ -165,6 +166,7 @@ export async function dlxBinary(
       binaryPath,
       integrity,
       sha256,
+      createWriteStream,
     )
 
     // Get file size for metadata (intentional: need stats.size, not just existence).

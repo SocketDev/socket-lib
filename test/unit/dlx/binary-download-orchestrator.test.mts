@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 import {
   mkdirSync,
   mkdtempSync,
@@ -34,6 +35,20 @@ vi.mock(import('../../../src/dlx/binary-cache'), async () => {
 const IS_WIN = os.platform() === 'win32'
 
 let tmpRoot: string
+
+function mockDownloadResult(outputPath: string, content: string) {
+  const payload = Buffer.from(content)
+  return {
+    headers: {},
+    integrity: `sha512-${crypto.createHash('sha512').update(payload).digest('base64')}`,
+    ok: true as const,
+    path: outputPath,
+    sha256: crypto.createHash('sha256').update(payload).digest('hex'),
+    size: payload.length,
+    status: 200,
+    statusText: 'OK',
+  }
+}
 
 async function loadFresh() {
   const httpMod = await import('../../../src/http-request/download')
@@ -113,7 +128,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     const { downloadBinary, httpDownload } = await loadFresh()
     httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
       writeFileSync(p, 'new-bytes')
-      return { path: p, size: 9 }
+      return mockDownloadResult(p, 'new-bytes')
     })
     const result = await downloadBinary({
       url: 'https://example.com/tool',
@@ -140,7 +155,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     // mocked httpDownload writes the file.
     httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
       writeFileSync(p, 'fresh-bytes')
-      return { path: p, size: 11 }
+      return mockDownloadResult(p, 'fresh-bytes')
     })
     const result = await downloadBinary({ url, name, force: true })
     expect(result.downloaded).toBe(true)
@@ -167,7 +182,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     )
     httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
       writeFileSync(p, 'fresh-bytes')
-      return { path: p, size: 11 }
+      return mockDownloadResult(p, 'fresh-bytes')
     })
     const result = await downloadBinary({ url, name, cacheTtl: 1000 })
     expect(result.downloaded).toBe(true)
@@ -178,7 +193,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     const { downloadBinary, httpDownload } = await loadFresh()
     httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
       writeFileSync(p, 'bytes')
-      return { path: p, size: 5 }
+      return mockDownloadResult(p, 'bytes')
     })
     const fake = 'sha512-' + 'B'.repeat(86) + '=='
     await expect(
@@ -194,7 +209,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     const { downloadBinary, httpDownload } = await loadFresh()
     httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
       writeFileSync(p, 'bytes')
-      return { path: p, size: 5 }
+      return mockDownloadResult(p, 'bytes')
     })
     const sha256 = 'a'.repeat(64)
     await downloadBinary({
@@ -214,7 +229,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     const { downloadBinary, httpDownload } = await loadFresh()
     httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
       writeFileSync(p, 'bytes')
-      return { path: p, size: 5 }
+      return mockDownloadResult(p, 'bytes')
     })
     const result = await downloadBinary({
       url: 'https://example.com/no-name',

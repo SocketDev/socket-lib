@@ -263,8 +263,11 @@ describe('releases/github-downloads', () => {
             await fs.writeFile(outputPath, '#!/bin/bash\necho "test"', 'utf8')
             return {
               headers: {},
+              integrity: 'sha512-test',
               ok: true as const,
               path: outputPath,
+              sha256:
+                '0000000000000000000000000000000000000000000000000000000000000000',
               size: 22,
               status: 200,
               statusText: 'OK',
@@ -332,8 +335,11 @@ describe('releases/github-downloads', () => {
             await fs.writeFile(outputPath, 'fresh-binary', 'utf8')
             return {
               headers: {},
+              integrity: 'sha512-test',
               ok: true as const,
               path: outputPath,
+              sha256:
+                '0000000000000000000000000000000000000000000000000000000000000000',
               size: 12,
               status: 200,
               statusText: 'OK',

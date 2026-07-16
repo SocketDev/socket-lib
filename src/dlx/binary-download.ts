@@ -11,7 +11,7 @@ import process from 'node:process'
 
 import { getArch, WIN32 } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
-import { hash } from '../crypto/hash'
+import { isError } from '../errors/predicates'
 import { safeDelete, safeMkdir } from '../fs/safe'
 import { httpDownload } from '../http-request/download'
 import { normalizePath } from '../paths/normalize'
@@ -21,6 +21,7 @@ import { generateCacheKey } from './cache'
 import { normalizeHash } from '../integrity'
 
 import { ErrorCtor } from '../primordials/error'
+import { StringPrototypeStartsWith } from '../primordials/string'
 
 import { getNodeCrypto } from '../node/crypto'
 import { getNodeFs } from '../node/fs'
@@ -33,6 +34,7 @@ import {
 } from './binary-cache'
 
 import type { DlxBinaryOptions } from './binary-types'
+import type { HttpDownloadWriteStreamFactory } from '../http-request/download-types'
 
 import { BufferFrom } from '../primordials/buffer'
 
@@ -70,6 +72,7 @@ export async function downloadBinary(
 ): Promise<{ binaryPath: string; downloaded: boolean; integrity: string }> {
   const {
     cacheTtl = DLX_BINARY_CACHE_TTL,
+    createWriteStream,
     force = false,
     hash: hashSpec,
     integrity: rawIntegrity,
@@ -117,8 +120,7 @@ export async function downloadBinary(
     } else {
       // Metadata missing or malformed — recompute from the on-disk
       // binary so the caller still gets a usable integrity string.
-      const fileBuffer = await fs.promises.readFile(binaryPath)
-      actualIntegrity = `sha512-${hash('sha512', fileBuffer, 'base64')}`
+      actualIntegrity = (await hashBinaryFile(binaryPath)).integrity
     }
   } else {
     // Ensure cache directory exists before downloading.
@@ -152,6 +154,7 @@ export async function downloadBinary(
       binaryPath,
       integrity,
       sha256,
+      createWriteStream,
     )
 
     // Get file size for metadata (intentional: need stats.size, not just existence).
@@ -181,12 +184,11 @@ export async function downloadBinary(
  *
  * Supports two integrity verification methods:
  *
- * - Sha256: Hex SHA-256 checksum (verified inline during download via
+ * - Sha256: Hex SHA-256 checksum (verified from the download stream via
  *   httpDownload)
- * - Integrity: SRI format sha512-<base64> (verified post-download)
+ * - Integrity: SRI format sha512-<base64> (verified from the same stream)
  *
- * The sha256 option is preferred as it fails early during download if the
- * checksum doesn't match.
+ * Both checks happen before the download temp is atomically published.
  *
  * @example
  *   ```typescript
@@ -202,6 +204,7 @@ export async function downloadBinaryFile(
   destPath: string,
   integrity?: string | undefined,
   sha256?: string | undefined,
+  createWriteStream?: HttpDownloadWriteStreamFactory | undefined,
 ): Promise<string> {
   // Use process lock to prevent concurrent downloads.
   // Lock is placed in the cache entry directory as 'concurrency.lock'.
@@ -235,15 +238,13 @@ export async function downloadBinaryFile(
     }
   }
 
-  // Verify a buffer's sha256 matches caller pinning. ONLY called on the
-  // cached-file path — the fresh-download path delegates sha256 to
-  // httpDownload's inline verification (which fails early during the
-  // download itself, before the byte stream finishes).
-  const verifyCachedSha256 = async (fileBuffer: Buffer): Promise<void> => {
+  // Verify a streamed sha256 matches caller pinning. This is only called on the
+  // cached-file path; fresh downloads are verified by httpDownload before its
+  // atomic publication.
+  const verifyCachedSha256 = async (actualSha256: string): Promise<void> => {
     if (!sha256) {
       return
     }
-    const actualSha256 = hash('sha256', fileBuffer, 'hex')
     const sha256Match =
       actualSha256.length === sha256.length &&
       crypto.timingSafeEqual(
@@ -267,21 +268,33 @@ export async function downloadBinaryFile(
         // oxlint-disable-next-line socket/prefer-exists-sync -- need stats.size to validate file is non-empty
         const stats = await fs.promises.stat(destPath)
         if (stats.size > 0) {
-          const fileBuffer = await fs.promises.readFile(destPath)
-          const actualIntegrity = `sha512-${hash('sha512', fileBuffer, 'base64')}`
+          const digests = await hashBinaryFile(destPath)
           // Verify the cached file against caller pinning.
-          await verifyIntegrity(actualIntegrity)
-          await verifyCachedSha256(fileBuffer)
-          return actualIntegrity
+          await verifyIntegrity(digests.integrity)
+          await verifyCachedSha256(digests.sha256)
+          return digests.integrity
         }
       }
 
-      // Download the file with optional SHA-256 verification.
-      // The sha256 option enables inline verification during download,
-      // which is more secure as it fails early if the checksum doesn't match.
+      // Download the file while computing both verification digests in the
+      // response pass.
+      let result
       try {
-        await httpDownload(url, destPath, sha256 ? { sha256 } : undefined)
+        result = await httpDownload(url, destPath, {
+          createWriteStream,
+          integrity,
+          sha256,
+        })
       } catch (e) {
+        if (
+          integrity &&
+          isError(e) &&
+          StringPrototypeStartsWith(e.message, 'Integrity verification failed')
+        ) {
+          throw new ErrorCtor(`Integrity mismatch: expected ${integrity}`, {
+            cause: e,
+          })
+        }
         throw new ErrorCtor(
           `Failed to download binary from ${url}\n` +
             `Destination: ${destPath}\n` +
@@ -289,20 +302,14 @@ export async function downloadBinaryFile(
           { cause: e },
         )
       }
-
-      // Compute SRI integrity hash of downloaded file + verify against
-      // caller pinning. sha256 was already verified inline by
-      // httpDownload during the stream, so we don't re-check it here.
-      const fileBuffer = await fs.promises.readFile(destPath)
-      const actualIntegrity = `sha512-${hash('sha512', fileBuffer, 'base64')}`
-      await verifyIntegrity(actualIntegrity)
+      await verifyIntegrity(result.integrity)
 
       // Make executable on POSIX systems.
       if (!WIN32) {
         await fs.promises.chmod(destPath, 0o755)
       }
 
-      return actualIntegrity
+      return result.integrity
     },
     {
       // Align with npm npx locking strategy.
@@ -310,4 +317,30 @@ export async function downloadBinaryFile(
       touchIntervalMs: 2000,
     },
   )
+}
+
+export interface BinaryFileDigests {
+  integrity: string
+  sha256: string
+}
+
+/**
+ * Compute both DLX digests in one bounded-memory file pass.
+ */
+export async function hashBinaryFile(
+  filePath: string,
+): Promise<BinaryFileDigests> {
+  const crypto = getNodeCrypto()
+  const fs = getNodeFs()
+  const sha256Hash = crypto.createHash('sha256')
+  const sha512Hash = crypto.createHash('sha512')
+  const stream = fs.createReadStream(filePath)
+  for await (const chunk of stream) {
+    sha256Hash.update(chunk as Buffer)
+    sha512Hash.update(chunk as Buffer)
+  }
+  return {
+    integrity: `sha512-${sha512Hash.digest('base64')}`,
+    sha256: sha256Hash.digest('hex'),
+  }
 }

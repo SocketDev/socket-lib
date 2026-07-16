@@ -4,6 +4,7 @@
  *   actually changing platform.
  */
 
+import crypto from 'node:crypto'
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -25,10 +26,18 @@ vi.mock(import('../../../src/http-request/download'), async importOriginal => {
     httpDownload: vi.fn(
       async (_url: string, destPath: string, _opts?: unknown) => {
         // Write a known payload so SRI integrity computes deterministically.
-        writeFileSync(destPath, Buffer.from('win-payload'))
-        return { ok: true, status: 200, path: destPath } as unknown as Awaited<
-          ReturnType<typeof DownloadModule.httpDownload>
-        >
+        const payload = Buffer.from('win-payload')
+        writeFileSync(destPath, payload)
+        return {
+          headers: {},
+          integrity: `sha512-${crypto.createHash('sha512').update(payload).digest('base64')}`,
+          ok: true,
+          path: destPath,
+          sha256: crypto.createHash('sha256').update(payload).digest('hex'),
+          size: payload.length,
+          status: 200,
+          statusText: 'OK',
+        } as Awaited<ReturnType<typeof DownloadModule.httpDownload>>
       },
     ),
   }
