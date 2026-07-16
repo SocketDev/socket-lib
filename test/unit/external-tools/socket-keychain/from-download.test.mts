@@ -5,6 +5,8 @@ import path from 'node:path'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+
 import { safeDelete } from '../../../../src/fs/safe'
 import { socketKeychainFromDownload } from '../../../../src/external-tools/socket-keychain/from-download'
 import {
@@ -40,7 +42,7 @@ describe('external-tools/socket-keychain/from-download', () => {
 
     expect(result).toEqual({
       integrity: FAKE_INTEGRITY_VALUE,
-      path: path.join(targetDir, 'socket-keychain'),
+      path: normalizePath(path.join(targetDir, 'socket-keychain')),
       source: 'download',
     })
     expect(readFileSync(result.path, 'utf8')).toBe('native-binary')
@@ -82,7 +84,9 @@ describe('external-tools/socket-keychain/from-download', () => {
       platformArch: 'win32-x64',
       version: '1.2.3',
     })
-    expect(result.path).toBe(path.join(targetDir, 'socket-keychain.exe'))
+    expect(result.path).toBe(
+      normalizePath(path.join(targetDir, 'socket-keychain.exe')),
+    )
     expect(existsSync(result.path)).toBe(true)
   })
 })
