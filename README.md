@@ -1,7 +1,7 @@
 # @socketsecurity/lib
 
 <a href="https://socket.dev/npm/package/@socketsecurity/lib"><img src="https://socket.dev/api/badge/npm/package/@socketsecurity/lib" alt="Socket Badge" height="20"></a>
-![Coverage](assets/repo/coverage.svg)
+![Coverage](assets/repo/badges/coverage.svg)
 
 [![Follow @SocketSecurity](assets/fleet/badge-follow-x.svg)](https://twitter.com/SocketSecurity)
 [![Follow @socket.dev on Bluesky](assets/fleet/badge-follow-bluesky.svg)](https://bsky.app/profile/socket.dev)
