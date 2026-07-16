@@ -46,7 +46,9 @@ describe('external-tools/socket-keychain/from-download', () => {
       source: 'download',
     })
     expect(readFileSync(result.path, 'utf8')).toBe('native-binary')
-    expect(statSync(result.path).mode & 0o777).toBe(0o700)
+    if (process.platform !== 'win32') {
+      expect(statSync(result.path).mode & 0o777).toBe(0o700)
+    }
     expect(fake.calls).toEqual([
       {
         name: 'socket-keychain-1.2.3-darwin-arm64',
