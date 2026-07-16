@@ -3302,7 +3302,6 @@
     "setup:rust": "node scripts/fleet/setup/setup-rust.mts"
   },
   "devDependencies": {
-    "@anthropic-ai/claude-code": "catalog:",
     "@babel/core": "7.29.7",
     "@babel/parser": "7.29.7",
     "@babel/traverse": "7.29.7",

@@ -21,7 +21,6 @@ packages:
 # repo itself ships. Pinning them here keeps the entire hook tree in
 # lockstep with the parent without each hook duplicating literal pins.
 catalog:
-  '@anthropic-ai/claude-code': 2.1.201
   '@redwoodjs/agent-ci': 0.16.2
   '@sinclair/typebox': 0.34.49
   '@socketregistry/packageurl-js': 'npm:@socketregistry/packageurl-js@1.4.2'
@@ -85,7 +84,6 @@ catalog:
   'vitest': 4.1.9
 
 allowBuilds:
-  '@anthropic-ai/claude-code': false
   cpu-features: false
   esbuild: true
   protobufjs: false
