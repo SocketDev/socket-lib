@@ -28,7 +28,10 @@ describe.sequential('dlx/binary hash normalization', () => {
   it('accepts an integrity hash object', async () => {
     await runWithTempDir(async tmpDir => {
       const restoreHome = mockHomeDir(tmpDir)
-      const content = '#!/bin/bash\necho "verified binary"'
+      const isWindows = process.platform === 'win32'
+      const content = isWindows
+        ? '@echo off\necho "windows script"'
+        : '#!/bin/bash\necho "verified binary"'
       const integrity = `sha512-${crypto
         .createHash('sha512')
         .update(content)
@@ -37,8 +40,8 @@ describe.sequential('dlx/binary hash normalization', () => {
       try {
         const result = await dlxBinary([], {
           hash: { type: 'integrity', value: integrity },
-          name: 'integrity-hash-binary',
-          url: `${testServer.baseUrl}/binary-with-integrity`,
+          name: `integrity-hash-binary${isWindows ? '.cmd' : ''}`,
+          url: `${testServer.baseUrl}/${isWindows ? 'binary-windows.cmd' : 'binary-with-integrity'}`,
         })
 
         expect(result.downloaded).toBe(true)
@@ -52,14 +55,17 @@ describe.sequential('dlx/binary hash normalization', () => {
   it('accepts a checksum hash object', async () => {
     await runWithTempDir(async tmpDir => {
       const restoreHome = mockHomeDir(tmpDir)
-      const content = '#!/bin/bash\necho "test binary"'
+      const isWindows = process.platform === 'win32'
+      const content = isWindows
+        ? '@echo off\necho "windows script"'
+        : '#!/bin/bash\necho "test binary"'
       const checksum = crypto.createHash('sha256').update(content).digest('hex')
 
       try {
         const result = await dlxBinary([], {
           hash: { type: 'checksum', value: checksum },
-          name: 'checksum-hash-binary',
-          url: `${testServer.baseUrl}/binary`,
+          name: `checksum-hash-binary${isWindows ? '.cmd' : ''}`,
+          url: `${testServer.baseUrl}/${isWindows ? 'binary-windows.cmd' : 'binary'}`,
         })
 
         expect(result.downloaded).toBe(true)
