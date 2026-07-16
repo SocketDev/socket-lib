@@ -10,7 +10,28 @@
  *     visual structure and section markers in terminal output.
  */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
+
+import type { YoctoColors } from '../../../src/external/yoctocolors-cjs'
+
+const forcedColors = vi.hoisted(() => {
+  const format = (open: number, close: number) => (value: string) =>
+    `\x1b[${open}m${value}\x1b[${close}m`
+  return {
+    blue: format(34, 39),
+    bold: format(1, 22),
+    cyan: format(36, 39),
+    gray: format(90, 39),
+    green: format(32, 39),
+    magenta: format(35, 39),
+    red: format(31, 39),
+    yellow: format(33, 39),
+  }
+})
+
+vi.mock(import('../../../src/external/yoctocolors-cjs'), () => ({
+  default: forcedColors as unknown as YoctoColors,
+}))
 
 import { stripAnsi } from '../../../src/ansi/strip'
 import { printFooter } from '../../../src/stdio/footer'

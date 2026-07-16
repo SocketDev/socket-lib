@@ -1,6 +1,22 @@
 import { stripAnsi as canonicalStripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
-import { describe, expect, it } from 'vitest'
-import colors from 'yoctocolors-cjs'
+import { describe, expect, it, vi } from 'vitest'
+
+import type { YoctoColors } from '../../../src/external/yoctocolors-cjs'
+
+const colors = vi.hoisted(() => {
+  const format = (open: number, close: number) => (value: string) =>
+    `\x1b[${open}m${value}\x1b[${close}m`
+  return {
+    bold: format(1, 22),
+    dim: format(2, 22),
+    green: format(32, 39),
+    red: format(31, 39),
+  }
+})
+
+vi.mock(import('../../../src/external/yoctocolors-cjs'), () => ({
+  default: colors as unknown as YoctoColors,
+}))
 
 import { stripAnsi } from '../../../src/ansi/strip'
 import { formatTable } from '../../../src/tables/bordered'
