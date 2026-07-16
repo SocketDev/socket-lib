@@ -10,12 +10,43 @@
  *     other external commands.
  */
 
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import process from 'node:process'
+
 import { spawn, spawnSync } from '@socketsecurity/lib/process/spawn/child'
 import { describe, expect, it } from 'vitest'
 
+import { WIN32 } from '../_shared/fleet/lib/platform.mts'
+import { itWindowsOnly } from '../unit/util/skip-helpers'
+
 describe('spawn integration', () => {
   describe('spawn', () => {
+    itWindowsOnly(
+      'executes a PATH-resolved .cmd shim through cmd.exe',
+      async () => {
+        const dir = mkdtempSync(path.join(os.tmpdir(), 'spawn-cmd-'))
+        const command = 'socket-lib-spawn-fixture'
+        try {
+          writeFileSync(
+            path.join(dir, `${command}.cmd`),
+            '@echo off\r\necho %1\r\n',
+          )
+          const result = await spawn(command, ['works'], {
+            env: {
+              ...process.env,
+              PATH: `${dir}${path.delimiter}${process.env['PATH'] ?? ''}`,
+            },
+            shell: WIN32,
+          })
+          expect(result.stdout.trim()).toBe('works')
+        } finally {
+          rmSync(dir, { force: true, recursive: true })
+        }
+      },
+    )
+
     it('should execute echo command and capture output', async () => {
       const result = await spawn('echo', ['hello world'])
       expect(result.code).toBe(0)
@@ -78,6 +109,27 @@ describe('spawn integration', () => {
   })
 
   describe('spawnSync', () => {
+    itWindowsOnly('executes a PATH-resolved .cmd shim through cmd.exe', () => {
+      const dir = mkdtempSync(path.join(os.tmpdir(), 'spawn-sync-cmd-'))
+      const command = 'socket-lib-spawn-sync-fixture'
+      try {
+        writeFileSync(
+          path.join(dir, `${command}.cmd`),
+          '@echo off\r\necho %1\r\n',
+        )
+        const result = spawnSync(command, ['works'], {
+          env: {
+            ...process.env,
+            PATH: `${dir}${path.delimiter}${process.env['PATH'] ?? ''}`,
+          },
+          shell: WIN32,
+        })
+        expect(result.stdout.trim()).toBe('works')
+      } finally {
+        rmSync(dir, { force: true, recursive: true })
+      }
+    })
+
     it('should execute echo command synchronously', () => {
       const result = spawnSync('echo', ['hello sync'])
       expect(result.status).toBe(0)

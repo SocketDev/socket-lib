@@ -145,11 +145,12 @@ export function spawn(
   const spawnOptions = { __proto__: null, ...rawSpawnOptions }
   const { env, shell, stdio, stdioString = true } = spawnOptions
   const cwd = spawnOptions.cwd ? String(spawnOptions.cwd) : undefined
+  const commandWasPath = isPath(cmd)
   // Resolve binary names to full paths using which.
   // If cmd is not a path (absolute or relative), resolve it via PATH.
   // If cmd is already a path, use it as-is.
   let actualCmd = cmd
-  if (!isPath(cmd)) {
+  if (!commandWasPath) {
     // Binary name - check cache first, validate with existsSync().
     const fs = getNodeFs()
     const cached = spawnBinPathCache.get(cmd)
@@ -208,11 +209,10 @@ export function spawn(
     shell &&
     RegExpPrototypeTest(windowsScriptExtRegExp, actualCmd)
   ) {
-    // Only strip the extension if the command doesn't contain a path.
-    // If it's an absolute or relative path, keep it intact so cmd.exe
-    // executes the exact file. Stripping would fail for files in directories
-    // not in PATH (e.g., temp directories, project-local bins).
-    if (!isPath(actualCmd)) {
+    // Bare PATH command: cmd='gh' → whichSync() gives C:\\temp\\gh.cmd →
+    // basename removes .cmd → actualCmd='gh' → cmd.exe/PATHEXT finds gh.cmd.
+    // Keep explicit paths intact because their parent may not be on PATH.
+    if (!commandWasPath) {
       const path = getNodePath()
       // Extract just the command name without extension for PATH lookup.
       actualCmd = path.basename(actualCmd, path.extname(actualCmd))
@@ -431,7 +431,8 @@ export function spawnSync(
   // If cmd is not a path (absolute or relative), resolve it via PATH.
   // If cmd is already a path, use it as-is.
   let actualCmd = cmd
-  if (!isPath(cmd)) {
+  const commandWasPath = isPath(cmd)
+  if (!commandWasPath) {
     // Binary name - resolve via PATH using whichSync
     const resolved = whichSync(cmd, {
       cwd: getOwn(options, 'cwd') as string | undefined,
@@ -455,11 +456,10 @@ export function spawnSync(
     shell &&
     RegExpPrototypeTest(windowsScriptExtRegExp, actualCmd)
   ) {
-    // Only strip the extension if the command doesn't contain a path.
-    // If it's an absolute or relative path, keep it intact so cmd.exe
-    // executes the exact file. Stripping would fail for files in directories
-    // not in PATH (e.g., temp directories, project-local bins).
-    if (!isPath(actualCmd)) {
+    // Bare PATH command: cmd='gh' → whichSync() gives C:\\temp\\gh.cmd →
+    // basename removes .cmd → actualCmd='gh' → cmd.exe/PATHEXT finds gh.cmd.
+    // Keep explicit paths intact because their parent may not be on PATH.
+    if (!commandWasPath) {
       const path = getNodePath()
       // Extract just the command name without extension for PATH lookup.
       actualCmd = path.basename(actualCmd, path.extname(actualCmd))
