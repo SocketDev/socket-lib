@@ -1,16 +1,13 @@
 /**
- * @file Unit tests for platform-aware spawn-timeout scaling — `spawnTimeoutMs`,
- *   `getWin32SpawnTimeoutMultiplier`, `resolveSpawnTimeout` — and the
- *   `localTimeout` spawn-option wiring in child.ts. `process.platform` and
- *   `SOCKET_SPAWN_TIMEOUT_MULTIPLIER` are stubbed so both platform branches and
- *   the env override are covered without a real Windows host.
+ * @file Unit tests for platform-aware spawn-timeout scaling. The suite stubs
+ *   `process.platform` and `SOCKET_SPAWN_TIMEOUT_MULTIPLIER` so both platform
+ *   branches and the environment override run without a Windows host.
  */
 
 import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { spawn, spawnSync } from '../../../src/process/spawn/child'
 import {
   DEFAULT_WIN32_SPAWN_TIMEOUT_MULTIPLIER,
   getWin32SpawnTimeoutMultiplier,
@@ -62,24 +59,6 @@ describe('getWin32SpawnTimeoutMultiplier', () => {
   })
 })
 
-describe('spawnTimeoutMs', () => {
-  it('returns the base value off Windows', () => {
-    setPlatform('linux')
-    expect(spawnTimeoutMs(5000)).toBe(5000)
-  })
-
-  it('scales by the default multiplier on win32', () => {
-    setPlatform('win32')
-    expect(spawnTimeoutMs(5000)).toBe(30_000)
-  })
-
-  it('honors the env override on win32', () => {
-    setPlatform('win32')
-    process.env['SOCKET_SPAWN_TIMEOUT_MULTIPLIER'] = '4'
-    expect(spawnTimeoutMs(5000)).toBe(20_000)
-  })
-})
-
 describe('resolveSpawnTimeout', () => {
   it('scales a localTimeout on win32', () => {
     setPlatform('win32')
@@ -107,21 +86,20 @@ describe('resolveSpawnTimeout', () => {
   })
 })
 
-describe('localTimeout option wiring', () => {
-  it('spawnSync accepts localTimeout and runs', () => {
-    const result = spawnSync('echo', ['ok'], { localTimeout: 5000 })
-    expect(result.status).toBe(0)
-    expect(String(result.stdout)).toContain('ok')
+describe('spawnTimeoutMs', () => {
+  it('returns the base value off Windows', () => {
+    setPlatform('linux')
+    expect(spawnTimeoutMs(5000)).toBe(5000)
   })
 
-  it('spawnSync throws when both timeout and localTimeout are passed', () => {
-    expect(() =>
-      spawnSync('echo', ['x'], { localTimeout: 5000, timeout: 1000 }),
-    ).toThrow(/not both/)
+  it('scales by the default multiplier on win32', () => {
+    setPlatform('win32')
+    expect(spawnTimeoutMs(5000)).toBe(30_000)
   })
 
-  it('spawn (async) accepts localTimeout and resolves', async () => {
-    const result = await spawn('echo', ['ok'], { localTimeout: 5000 })
-    expect(String(result.stdout)).toContain('ok')
+  it('honors the env override on win32', () => {
+    setPlatform('win32')
+    process.env['SOCKET_SPAWN_TIMEOUT_MULTIPLIER'] = '4'
+    expect(spawnTimeoutMs(5000)).toBe(20_000)
   })
 })

@@ -19,6 +19,18 @@ import { spawnSync } from '../../../src/process/spawn/child'
 import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers'
 
 describe('spawnSync', () => {
+  it('accepts a platform-scaled localTimeout', () => {
+    const result = spawnSync('echo', ['ok'], { localTimeout: 5000 })
+    expect(result.status).toBe(0)
+    expect(String(result.stdout)).toContain('ok')
+  })
+
+  it('rejects timeout with localTimeout', () => {
+    expect(() =>
+      spawnSync('echo', ['x'], { localTimeout: 5000, timeout: 1000 }),
+    ).toThrow(/not both/)
+  })
+
   it('should spawn a simple command synchronously', () => {
     const result = spawnSync('echo', ['hello'])
     expect(result.status).toBe(0)

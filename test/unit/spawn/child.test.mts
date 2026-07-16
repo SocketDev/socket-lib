@@ -8,6 +8,11 @@ import { isSpawnError } from '../../../src/process/spawn/errors'
 import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers'
 
 describe('spawn/child — spawn', () => {
+  it('accepts a platform-scaled localTimeout', async () => {
+    const result = await spawn('echo', ['ok'], { localTimeout: 5000 })
+    expect(result.stdout).toContain('ok')
+  })
+
   it('spawns a simple command successfully', async () => {
     const result = await spawn('echo', ['hello'])
     expect(result.code).toBe(0)
