@@ -10,6 +10,8 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+
 import { dlxPackage, downloadNpmPackage } from '../../../src/dlx/package'
 import { runWithTempDir } from '../util/temp-file-helper'
 
@@ -26,7 +28,7 @@ function stagePackage(installRoot: string, packageName: string): string {
     }),
   )
   writeFileSync(binaryPath, '#!/usr/bin/env node\nprocess.exit(0)\n')
-  return binaryPath
+  return normalizePath(binaryPath)
 }
 
 describe.sequential('dlx/package orchestrators', () => {
@@ -43,7 +45,7 @@ describe.sequential('dlx/package orchestrators', () => {
       expect(result).toEqual({
         binaryPath: expectedBinaryPath,
         installed: false,
-        packageDir: installRoot,
+        packageDir: normalizePath(installRoot),
       })
     }, 'dlx-package-download-')
   })
