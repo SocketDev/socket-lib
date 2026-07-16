@@ -189,6 +189,15 @@
       "types": "./dist/ai/billing-context.d.mts",
       "default": "./dist/ai/billing-context.js"
     },
+    "./ai/builtin": {
+      "source": "./src/ai/builtin.mts",
+      "browser": {
+        "types": "./dist/ai/builtin.d.mts",
+        "default": "./dist/ai/builtin.js"
+      },
+      "types": "./dist/ai/builtin.d.mts",
+      "default": "./dist/ai/builtin.js"
+    },
     "./ai/cost": {
       "source": "./src/ai/cost.mts",
       "types": "./dist/ai/cost.d.mts",

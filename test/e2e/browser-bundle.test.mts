@@ -35,6 +35,7 @@ const repoRoot = path.resolve(testDir, '..', '..')
 const fixtureDir = path.resolve(repoRoot, 'test', 'fixtures', 'browser')
 const entry = path.join(fixtureDir, 'entry.mjs')
 const entryDebug = path.join(fixtureDir, 'entry-debug.mjs')
+const entryBuiltinAi = path.join(fixtureDir, 'entry-builtin-ai.mjs')
 const entryNpm = path.join(fixtureDir, 'entry-npm.mjs')
 const localRequire = createRequire(import.meta.url)
 
@@ -56,7 +57,7 @@ function linkLocalLib(): void {
   const scopeDir = path.join(fixtureDir, 'node_modules', '@socketsecurity')
   mkdirSync(scopeDir, { recursive: true })
   const link = path.join(scopeDir, 'lib')
-  rmSync(link, { force: true })
+  rmSync(link, { force: true, recursive: true })
   symlinkSync(repoRoot, link, 'dir')
 }
 
@@ -165,6 +166,68 @@ describe('browser-bundle e2e', () => {
         calls: 1,
         debugLogThrew: false,
       })
+    },
+    tolerantTimeout(120_000),
+  )
+
+  it(
+    'language-model resolver returns the browser global without a Node runtime',
+    async () => {
+      linkLocalLib()
+      const outDir = path.join(
+        os.tmpdir(),
+        'socket-lib-webpack-e2e-language-model',
+      )
+      rmSync(outDir, { force: true, recursive: true })
+      const config: webpack.Configuration = {
+        entry: entryBuiltinAi,
+        target: 'web',
+        mode: 'production',
+        output: {
+          filename: 'language-model-bundle.js',
+          globalObject: 'globalThis',
+          library: { name: 'socketLibLanguageModelE2e', type: 'var' },
+          path: outDir,
+          publicPath: '',
+        },
+        resolve: {
+          conditionNames: ['browser', 'import', 'require', 'default'],
+        },
+      }
+      const stats = await new Promise<webpack.Stats | undefined>(
+        (resolve, reject) => {
+          webpack(config, (error, result) => {
+            if (error) {
+              reject(error)
+            } else {
+              resolve(result)
+            }
+          })
+        },
+      )
+      expect(
+        stats?.hasErrors(),
+        stats?.toString({ all: false, errors: true }),
+      ).toBe(false)
+
+      const source = readFileSync(
+        path.join(outDir, 'language-model-bundle.js'),
+        'utf8',
+      )
+      const browserFactory = {
+        availability: async () => 'available',
+        create: async () => Object.create(null),
+      }
+      const sandbox: Record<string, unknown> = {
+        LanguageModel: browserFactory,
+        console,
+      }
+      vm.createContext(sandbox)
+      vm.runInContext(source, sandbox)
+      const bundled = sandbox['socketLibLanguageModelE2e'] as {
+        getFactory(): unknown
+      }
+      expect(bundled.getFactory()).toBe(browserFactory)
     },
     tolerantTimeout(120_000),
   )

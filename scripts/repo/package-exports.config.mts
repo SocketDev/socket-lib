@@ -51,6 +51,7 @@ export const config: ExportsConfig = {
   // list — socket-lib ships no browser build but must tell downstream browser
   // bundlers to stub node:* reachable from these entries).
   browser: [
+    './ai/builtin',
     './arrays/**',
     './colors/**',
     './debug/**',
