@@ -26,7 +26,7 @@
  *   `internal/socketsecurity/safe-references`, `safe-references`.
  */
 
-import { existsSync, statSync } from 'node:fs'
+import { existsSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { parseArgs } from 'node:util'
@@ -424,17 +424,17 @@ export function findLocalPrimordials(scanDir): string | undefined {
       }
     }
     // 2. Split-surface shape: primordials/ directory containing per-leaf
-    //    files (`array.ts`, `string.ts`, etc.). Detect by probing for a
-    //    known leaf — `array` is the most-likely one to exist. Returning
-    //    the directory path lets the caller compute `../primordials/array`
-    //    style imports via splitByLeaf.
+    //    files (`array.ts`, `process.ts`, etc.). Returning the directory path
+    //    lets the caller compute `../primordials/array` style imports via
+    //    splitByLeaf.
     const dirCandidate = path.join(dir, 'primordials')
-    if (existsSync(dirCandidate)) {
-      for (let j = 0, { length: el } = PRIMORDIALS_FILE_EXTS; j < el; j++) {
+    if (existsSync(dirCandidate) && statSync(dirCandidate).isDirectory()) {
+      const entries = readdirSync(dirCandidate, { withFileTypes: true })
+      for (let j = 0, { length: el } = entries; j < el; j++) {
+        const entry = entries[j]!
         if (
-          existsSync(
-            path.join(dirCandidate, `array${PRIMORDIALS_FILE_EXTS[j]}`),
-          )
+          entry.isFile() &&
+          PRIMORDIALS_FILE_EXTS.includes(path.extname(entry.name))
         ) {
           return dirCandidate
         }

@@ -1,7 +1,7 @@
 /**
- * @file Tests for the Claude-deferred disambiguation layer. Run via: `node
- *   --experimental-strip-types --test tools/prim/test/disambiguate.test.mts`
- *   Mocks the SDK via a self-contained queue file so no network hits.
+ * @file Tests for the Claude-deferred disambiguation layer. Run via the Prim
+ *   package's test script. Mocks the SDK via a self-contained queue file so no
+ *   network hits.
  *   Coverage:
  *
  *   - "ai-defer-not-enabled" short-circuit (no SDK loaded)

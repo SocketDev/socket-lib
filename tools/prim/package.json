@@ -18,7 +18,7 @@
     ".": "./src/index.mts"
   },
   "scripts": {
-    "test": "node --experimental-strip-types --test test/*.test.mts"
+    "test": "node scripts/test.mts"
   },
   "dependencies": {
     "@socketsecurity/lib-stable": "catalog:",

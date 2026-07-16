@@ -5,7 +5,7 @@
       "rewrites": 1,
       "importAdded": true,
       "contentIncludes": ["from './primordials/process'", "processCwd()"],
-      "contentExcludes": ["process.cwd()"]
+      "contentExcludes": ["const dir = process.cwd()"]
     }
   }
 }
