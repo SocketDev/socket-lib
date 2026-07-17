@@ -9,12 +9,12 @@
 # tools can reference it via `workspace:*` instead of brittle
 # `../../../vendor/...` relative paths.
 packages:
-  - .claude/hooks/*
   - .config/fleet/oxlint-plugin
   - .config/fleet/oxlint-plugin/fleet/*
   - .config/repo/oxlint-plugin/*
   - tools/*
   - vendor/*
+  - '.claude/hooks/fleet/*'
 
 # Catalog entries shared across hook workspaces. The hooks live in
 # `.claude/hooks/*` and depend on the same Socket fleet packages the
