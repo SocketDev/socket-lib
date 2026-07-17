@@ -3287,7 +3287,7 @@
     "security": "node scripts/fleet/security.mts",
     "prepare": "node scripts/fleet/install-git-hooks.mts",
     "prepublishOnly": "pnpm run build",
-    "publish": "node scripts/fleet/npm-publish.mts",
+    "npm:publish": "node scripts/fleet/npm-publish.mts",
     "test": "node scripts/fleet/test.mts",
     "update": "node scripts/fleet/update.mts",
     "lockstep": "node scripts/fleet/lockstep.mts",
