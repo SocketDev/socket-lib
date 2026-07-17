@@ -2,7 +2,7 @@
 /*
  * @file Fail-closed gate for the cargo min-publish-age soak posture. Rust ships
  *   NATIVE soak enforcement via nightly `-Zmin-publish-age`
- *   (rust-lang/cargo#15973, RFC 3923), so — unlike Go, which has no native
+ *   (RFC 3923), so — unlike Go, which has no native
  *   equivalent (see go-deps-are-soaked.mts) — this gate never resolves
  *   crates.io itself. It asserts two things:
  *
@@ -29,7 +29,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { pathToFileURL } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
@@ -37,6 +36,7 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { SOAK_DAYS } from '../constants/soak.mts'
 import { REPO_ROOT } from '../paths.mts'
 import { findOwnCargoManifests } from '../update/cargo.mts'
+import { isMainModule } from '../_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 
@@ -180,9 +180,6 @@ function main(): void {
   }
 }
 
-if (
-  process.argv[1] !== undefined &&
-  import.meta.url === pathToFileURL(process.argv[1]).href
-) {
+if (isMainModule(import.meta.url)) {
   main()
 }

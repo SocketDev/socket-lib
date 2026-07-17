@@ -15,10 +15,10 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+import { isMainModule } from './_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
 
@@ -119,6 +119,10 @@ function main(): void {
       `fmt-rust: cargo fmt --all (${path.relative(repoRoot, manifest)})`,
     )
     const result = spawnSync('cargo', buildCargoFmtArgs(manifest, { check }), {
+      // Cargo/rustup discover rust-toolchain.toml and .cargo/config.toml from
+      // cwd, not from --manifest-path. Run at the workspace so a nested pin or
+      // target config is honored consistently.
+      cwd: path.dirname(manifest),
       stdio: 'inherit',
     })
     if (result.status !== 0) {
@@ -137,6 +141,6 @@ function main(): void {
   logger.info('fmt-rust: clean.')
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (isMainModule(import.meta.url)) {
   main()
 }

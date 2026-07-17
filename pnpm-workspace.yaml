@@ -22,7 +22,7 @@ packages:
 # lockstep with the parent without each hook duplicating literal pins.
 catalog:
   '@redwoodjs/agent-ci': 0.16.2
-  '@sinclair/typebox': 0.34.49
+  '@sinclair/typebox': 0.34.50
   '@socketregistry/packageurl-js': 'npm:@socketregistry/packageurl-js@1.4.2'
   '@types/shell-quote': 1.7.5
   '@ultrathink/acorn.wasm': npm:@ultrathink/acorn-wasm@0.0.1
@@ -38,17 +38,19 @@ catalog:
   # src/.
   '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.2'
   '@socketsecurity/lib': 'npm:@socketsecurity/lib@6.0.7'
-  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.0.9'
+  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.0.10'
   '@socketsecurity/registry': 'npm:@socketsecurity/registry@2.0.2'
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.2'
   '@socketsecurity/sdk': 'npm:@socketsecurity/sdk@4.0.1'
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.0.1'
   '@types/mdast': 4.0.4
-  '@types/node': 26.1.0
+  '@types/node': 26.1.1
   '@types/semver': 7.7.1
   '@typescript/native-preview': 7.0.0-dev.20260510.1
-  '@vitest/coverage-v8': 4.1.9
-  '@vitest/ui': 4.1.9
+  '@vitest/coverage-v8': 4.1.10
+  '@vitest/ui': 4.1.10
+  'c8': 11.0.0
+  'chrome-devtools-mcp': 1.5.0
   'compromise': 14.15.1
   'dtu-github-actions': 0.16.2
   'ecc-agentshield': 1.4.0
@@ -59,8 +61,8 @@ catalog:
   'neosanitize': 0.3.0
   'nock': 15.0.0
   'npm-run-all2': 9.0.2
-  'oxfmt': 0.57.0
-  'oxlint': 1.72.0
+  'oxfmt': 0.58.0
+  'oxlint': 1.73.0
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
   'playwright-core': 1.61.1
@@ -81,7 +83,7 @@ catalog:
   # 8.0.16+ to clear GHSA-fx2h-pf6j-xcff (server.fs.deny bypass, fixed 8.0.16).
   'typescript': 7.0.2
   'vite': 8.1.0
-  'vitest': 4.1.9
+  'vitest': 4.1.10
 
 allowBuilds:
   cpu-features: false
@@ -124,48 +126,6 @@ minimumReleaseAgeExclude:
   - '@sdxgen/*'
   - 'sdxgen'
   - 'stuie'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-aix-ppc64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-darwin-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-darwin-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-freebsd-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-freebsd-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-arm@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-loong64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-mips64el@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-ppc64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-riscv64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-s390x@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-linux-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-netbsd-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-netbsd-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-openbsd-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-openbsd-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-sunos-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-win32-arm64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - '@typescript/typescript-win32-x64@7.0.2'
-  # published: 2026-07-08 | removable: 2026-07-15
-  - 'typescript@7.0.2'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
@@ -200,7 +160,7 @@ overrides:
   'iconv-lite': '0.7.2'
   'isexe@>=3': '4.0.0'
   'lru-cache@>=10': '11.3.6'
-  'magic-string': '0.30.21'
+  'magic-string': '1.0.0'
   'mime-db': '1.54.0'
   'mime-types@>=3': '3.0.2'
   'minipass@>=4': '7.1.3'

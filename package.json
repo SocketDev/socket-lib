@@ -3305,7 +3305,8 @@
     "setup:go": "node scripts/fleet/setup/setup-go.mts",
     "setup:python": "node scripts/fleet/setup/setup-python.mts",
     "setup:refero": "node scripts/fleet/setup/setup-refero.mts",
-    "setup:rust": "node scripts/fleet/setup/setup-rust.mts"
+    "setup:rust": "node scripts/fleet/setup/setup-rust.mts",
+    "setup:mcp": "node scripts/fleet/setup/setup-mcp.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -3341,7 +3342,9 @@
     "@vitest/ui": "catalog:",
     "@yarnpkg/extensions": "2.0.6",
     "adm-zip": "0.5.16",
+    "c8": "catalog:",
     "cacache": "20.0.1",
+    "chrome-devtools-mcp": "catalog:",
     "debug": "4.4.3",
     "del": "8.0.1",
     "ecc-agentshield": "catalog:",

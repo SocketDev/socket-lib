@@ -16,20 +16,26 @@
 import {
   existsSync,
   mkdirSync,
-  readFileSync,
   readdirSync,
+  readFileSync,
   statSync,
   writeFileSync,
 } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import { performance } from 'node:perf_hooks'
 import process from 'node:process'
+import { fileURLToPath } from 'node:url'
 
 import { stripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+import {
+  spawn,
+  spawnSync,
+} from '@socketsecurity/lib-stable/process/spawn/child'
 
 import {
   registerActiveRun,
@@ -39,9 +45,10 @@ import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import type { AggregateCoverage } from './util/coverage-merge.mts'
 import {
-  MissingTierCoverageError,
   mergeCoverageFinal,
+  MissingTierCoverageError,
 } from './util/coverage-merge.mts'
+import { resolveCoverageConfig } from '../../.config/fleet/vitest.coverage.fleet.config.mts'
 import type { CoverThresholds, ResolvedSuite } from './cover/discovery.mts'
 import {
   readCoverConfig,
@@ -49,7 +56,11 @@ import {
   resolveSuites,
 } from './cover/discovery.mts'
 import { ensurePinnedNode } from './lib/ensure-node.mts'
-import { REPO_ROOT } from './paths.mts'
+import {
+  COVERAGE_CHILDREN_DIR,
+  COVERAGE_CHILDREN_RAW_DIR,
+  REPO_ROOT,
+} from './paths.mts'
 import { isMainModule } from './_shared/is-main-module.mts'
 
 const rootPath = REPO_ROOT
@@ -127,23 +138,9 @@ export async function runQuiet(
 ): Promise<SuiteResult> {
   options = { __proto__: null, ...options } as typeof options
   try {
-    // `pnpm` is commonly a `#!/usr/bin/env node` shim. Spawning that shim by
-    // name can select a different Node from PATH than the one running cover
-    // (for example Node 24 instead of the pinned Node 26), changing test
-    // semantics mid-run. npm_execpath is pnpm's JS entrypoint, so launch it
-    // with this process's executable. Keep that executable's directory first
-    // in PATH too: `pnpm exec` launches `node` by name for local binaries.
-    const pnpmEntry = process.env['npm_execpath']
-    const command = pnpmEntry ? process.execPath : 'pnpm'
-    const commandArgs = pnpmEntry ? [pnpmEntry, ...args] : args
-    const env = options.env ?? process.env
-    const nodeBin = path.dirname(process.execPath)
-    const result = await spawn(command, commandArgs, {
+    const result = await spawn('pnpm', args, {
       cwd: options.cwd,
-      env: {
-        ...env,
-        PATH: [nodeBin, env['PATH']].filter(Boolean).join(path.delimiter),
-      },
+      env: options.env ?? process.env,
     })
     return {
       exitCode: result.code ?? 0,
@@ -172,6 +169,10 @@ const DEFAULT_UNIT_BUDGET_MS = 60_000
  */
 export function resolveUnitBudgetMs(): number {
   for (const file of [
+    // Canonical settings home (matches paths.mts's resolver order). Omitting it
+    // — as this reader did — silently ignored `vitest.unitBudgetMs` set in the
+    // repo's real settings file, pinning the budget to the 60s default.
+    '.config/repo/socket-wheelhouse.json',
     '.config/socket-wheelhouse.json',
     '.socket-wheelhouse.json',
   ]) {
@@ -214,7 +215,52 @@ export function warnIfOverBudget(suiteMs: number, budgetMs: number): boolean {
   logger.warn(
     '  `test:conformance` runner script. Tune the budget via `vitest.unitBudgetMs`.',
   )
+  logger.warn(
+    '  If the run instead HUNG (no completion), investigate a wedge — see the live',
+  )
+  logger.warn('  watchdog guidance above.')
   return true
+}
+
+/**
+ * LIVE wall-clock watchdog for the unit suites. `warnIfOverBudget` only fires
+ * AFTER the suites return, which is useless in the case that actually burns an
+ * operator: a suite that HANGS (a stuck child spawn, a missing nock mock
+ * blocking on a real socket — tests fail-closed on network, an infinite loop)
+ * never completes, so the post-hoc check never runs and whoever launched it
+ * waits blind. This fires WHILE the run is live — at the budget, then again
+ * each budget interval — telling them to INVESTIGATE rather than keep waiting.
+ * It never kills the run: a legitimately heavy suite still finishes and the nag
+ * is just noise; a wedged one becomes visible instead of silent. The timer is
+ * `unref`'d so a clean finish exits immediately with no pending-tick delay.
+ * Returns a disposer that clears it (call from a `finally`).
+ */
+export function startUnitBudgetWatchdog(budgetMs: number): () => void {
+  let elapsedMs = 0
+  const timer = setInterval(() => {
+    elapsedMs += budgetMs
+    logger.warn(
+      `[cover] unit suites STILL RUNNING after ${(elapsedMs / 1000).toFixed(0)}s (budget ${(budgetMs / 1000).toFixed(0)}s) — INVESTIGATE, do not just wait.`,
+    )
+    logger.warn(
+      '  A run this far over budget is usually WEDGED, not merely heavy: a hung',
+    )
+    logger.warn(
+      '  child spawn, a missing nock mock blocking on a real socket, or an infinite',
+    )
+    logger.warn(
+      '  loop. Check for a stuck vitest/node child (ps); narrow scope to bisect the',
+    )
+    logger.warn(
+      '  offending file. Genuinely heavy? Move it to the conformance tier or raise',
+    )
+    logger.warn('  vitest.unitBudgetMs.')
+  }, budgetMs)
+  // Do not let a pending tick hold the process open past a clean finish.
+  timer.unref?.()
+  return () => {
+    clearInterval(timer)
+  }
 }
 
 export function parseTypeCoveragePercent(output: string): number | undefined {
@@ -337,9 +383,9 @@ export function describeLiveActors(windowMs: number): string[] {
         const parsed = JSON.parse(
           readFileSync(path.join(dir, entry), 'utf8'),
         ) as {
-          actorId?: string
-          paths?: Record<string, number>
-          updatedAt?: number
+          actorId?: string | undefined
+          paths?: Record<string, number> | undefined
+          updatedAt?: number | undefined
         }
         const updatedAt = parsed.updatedAt ?? 0
         const age = Date.now() - updatedAt
@@ -350,7 +396,7 @@ export function describeLiveActors(windowMs: number): string[] {
           p.startsWith(rootPath),
         )
         out.push(
-          `actor ${String(parsed.actorId).slice(0, 8)} last edited ${Math.round(age / 60000)}min ago (${repoPaths.length} path(s) in this repo)`,
+          `actor ${String(parsed.actorId).slice(0, 8)} last edited ${Math.round(age / 60_000)}min ago (${repoPaths.length} path(s) in this repo)`,
         )
       } catch {
         // Unreadable ledger entry — skip it.
@@ -386,10 +432,27 @@ export async function runTestSuites(
   mainArgs: string[],
   isolatedArgs: string[] | undefined,
 ): Promise<TestSuitesResult> {
+  // Subprocess coverage capture: the fleet vitest setup bridges this variable
+  // into NODE_V8_COVERAGE inside each worker (workers read it only at process
+  // START, so they never dump their own coverage) and every node child the
+  // tests spawn inherits it, writing raw V8 coverage here on exit. c8 converts
+  // the raw dir after the suites finish (convertChildrenCoverage).
+  // Purge any prior run's child coverage first: every spawned node child dumps a
+  // raw V8 profile here and nothing cleaned it, so the dir accumulated tens of
+  // thousands of files (multiple GB) across runs. The merge loads the whole dir
+  // into memory at once, so a stale pile OOMs the process and grinds the run.
+  // Start each run with only its own children's profiles.
+  const childRawDir = COVERAGE_CHILDREN_RAW_DIR
+  safeDeleteSync(COVERAGE_CHILDREN_DIR, { force: true, recursive: true })
+  mkdirSync(childRawDir, { recursive: true })
   const run = (args: string[]): Promise<SuiteResult> =>
     runQuiet(args, {
       cwd: rootPath,
-      env: { ...process.env, COVERAGE: 'true' },
+      env: {
+        ...process.env,
+        COVERAGE: 'true',
+        FLEET_CHILD_V8_COVERAGE_DIR: childRawDir,
+      },
     })
 
   const mainResult = await run(mainArgs)
@@ -489,10 +552,74 @@ export function displayCodeCoverage(
   logger.log('')
 }
 
+/**
+ * Convert the raw NODE_V8_COVERAGE output spawned children wrote during the
+ * suites into coverage-children/coverage-final.json via c8's programmatic
+ * Report API (the istanbul-org converter built for exactly this format; the
+ * library path — its yargs-driven CLI shim does not load on Node 26).
+ * Best-effort: no raw output or no c8 installed → skip with a note; the
+ * merge simply proceeds without the children tier. Returns true when a
+ * report was produced.
+ */
+export async function convertChildrenCoverage(): Promise<boolean> {
+  const childrenDir = COVERAGE_CHILDREN_DIR
+  const rawDir = COVERAGE_CHILDREN_RAW_DIR
+  const rawFiles = existsSync(rawDir)
+    ? readdirSync(rawDir).filter(f => f.endsWith('.json'))
+    : []
+  if (rawFiles.length === 0) {
+    return false
+  }
+  let ReportCtor:
+    | ((options: object) => { run: () => Promise<void> })
+    | undefined
+  try {
+    const c8 = (await import('c8')) as unknown as {
+      Report: (options: object) => { run: () => Promise<void> }
+    }
+    ReportCtor = c8.Report
+  } catch {
+    logger.warn(
+      `${rawFiles.length} raw subprocess coverage file(s) captured but c8 is not installed — skipping the children tier (install the c8 devDependency to include it).`,
+    )
+    return false
+  }
+  // Shape the children report with the SAME include/exclude set the vitest
+  // tiers use (fleet base + .config/repo/coverage.json overlay). Children
+  // load files far outside the measured set — config, dist, fixtures — and
+  // without this filter those gap-fill into the aggregate and inflate the
+  // denominator (run 14 live: 3710 children dragged the aggregate BELOW the
+  // in-process baseline until the filter landed).
+  const coverageShape = resolveCoverageConfig()
+  await ReportCtor({
+    exclude: coverageShape.exclude,
+    excludeAfterRemap: true,
+    // c8's default extension list omits .mts/.cts — without them every fleet
+    // script is filtered out and the report comes back empty.
+    extension: ['.js', '.cjs', '.mjs', '.ts', '.mts', '.cts', '.tsx', '.jsx'],
+    include: coverageShape.include,
+    reporter: ['json'],
+    reportsDirectory: childrenDir,
+    src: [rootPath],
+    tempDirectory: rawDir,
+  }).run()
+  const produced = existsSync(path.join(childrenDir, 'coverage-final.json'))
+  if (produced) {
+    // The converted report is the only child artifact the aggregate merge
+    // consumes. Raw V8 profiles are a large intermediate (multiple GB in the
+    // wheelhouse suite), so do not retain them until the next coverage run.
+    safeDeleteSync(rawDir, { force: true, recursive: true })
+    logger.info(
+      `Merged subprocess coverage from ${rawFiles.length} spawned child process(es).`,
+    )
+  }
+  return produced
+}
+
 export async function main(): Promise<void> {
   // Re-exec under the pinned node when a stale PATH node (below the hook floor)
   // is active, so the coverage vitest + the hooks it spawns run on the fleet
-  // runtime instead of failing "Hook requires Node >= 25".
+  // runtime instead of failing "Hook requires Node >= 24".
   ensurePinnedNode()
   const { values } = parseArgs({
     options: {
@@ -597,12 +724,17 @@ export async function main(): Promise<void> {
         logger.log('')
       }
     } else {
+      const budgetMs = resolveUnitBudgetMs()
       const suiteStart = performance.now()
-      const { combined, isolatedResult, mainResult } = await runTestSuites(
-        mainVitestArgs,
-        isolatedVitestArgs,
-      )
-      warnIfOverBudget(performance.now() - suiteStart, resolveUnitBudgetMs())
+      const stopWatchdog = startUnitBudgetWatchdog(budgetMs)
+      let suites: TestSuitesResult
+      try {
+        suites = await runTestSuites(mainVitestArgs, isolatedVitestArgs)
+      } finally {
+        stopWatchdog()
+      }
+      warnIfOverBudget(performance.now() - suiteStart, budgetMs)
+      const { combined, isolatedResult, mainResult } = suites
       exitCode = combined.exitCode
 
       const mainOutput = cleanOutput(mainResult.stdout + mainResult.stderr)
@@ -630,6 +762,13 @@ export async function main(): Promise<void> {
         process.env['FLEET_COVER_STRICT_TIERS'] === '1'
           ? ['shared', ...(isolatedSuite ? ['isolated'] : [])]
           : undefined
+      // Convert the raw subprocess coverage the suites' children wrote before
+      // the merge reads the children tier.
+      try {
+        await convertChildrenCoverage()
+      } catch (e) {
+        logger.warn(`Subprocess coverage conversion failed: ${errorMessage(e)}`)
+      }
       let aggregateCoverage: AggregateCoverage | undefined
       try {
         aggregateCoverage = await mergeCoverageFinal({
@@ -646,6 +785,30 @@ export async function main(): Promise<void> {
             `Could not compute aggregate coverage: ${errorMessage(e)}`,
           )
         }
+      }
+
+      // Persist the merged aggregate in the vitest json-summary shape. The
+      // badge generator (lib/coverage-badge.mts readCoveragePct) prefers this
+      // file over the raw per-tier coverage-summary.json, so the badge shows
+      // the twin-folded, children-inclusive number — not the single-tier one.
+      if (aggregateCoverage) {
+        writeFileSync(
+          path.join(rootPath, 'coverage', 'aggregate-summary.json'),
+          JSON.stringify({
+            total: {
+              branches: {
+                pct: Number.parseFloat(aggregateCoverage.branches),
+              },
+              functions: {
+                pct: Number.parseFloat(aggregateCoverage.functions),
+              },
+              lines: { pct: Number.parseFloat(aggregateCoverage.lines) },
+              statements: {
+                pct: Number.parseFloat(aggregateCoverage.statements),
+              },
+            },
+          }),
+        )
       }
 
       displayCodeCoverage(mainOutput, combinedOutput, aggregateCoverage, {
@@ -717,11 +880,44 @@ export async function main(): Promise<void> {
 // run whose startup cleans the shared coverage/.tmp and ENOENTs the outer
 // run's v8 reports (four cover runs died this way on 2026-07-11).
 //
+// The coverage merge holds every workspace project's coverage-final.json in
+// memory at once; across a large workspace that exceeds node's default old-space
+// ceiling and the parent process OOMs mid-merge (observed near 4 GB). Re-exec
+// once with a raised heap — 75% of host RAM, floored at 4 GB, capped at 8 GB —
+// before any work. The env guard prevents a re-exec loop; an already-raised
+// --max-old-space-size (execArgv or NODE_OPTIONS) is left as the operator set it.
+const HEAP_ELEVATED_ENV = 'FLEET_COVER_HEAP_ELEVATED'
+function reexecWithHeapHeadroom(): void {
+  if (process.env[HEAP_ELEVATED_ENV]) {
+    return
+  }
+  const alreadyRaised = [
+    ...process.execArgv,
+    ...(process.env['NODE_OPTIONS'] ?? '').split(/\s+/),
+  ].some(arg => arg.startsWith('--max-old-space-size'))
+  if (alreadyRaised) {
+    return
+  }
+  const totalMb = Math.floor(os.totalmem() / (1024 * 1024))
+  const heapMb = Math.max(4096, Math.min(8192, Math.floor(totalMb * 0.75)))
+  const result = spawnSync(
+    process.execPath,
+    [
+      `--max-old-space-size=${heapMb}`,
+      fileURLToPath(import.meta.url),
+      ...process.argv.slice(2),
+    ],
+    { stdio: 'inherit', env: { ...process.env, [HEAP_ELEVATED_ENV]: '1' } },
+  )
+  process.exit(result.status ?? 1)
+}
+
 // Coverage legitimately runs vitest workers hot for many minutes; the
 // active-run marker tells the stale-process-sweeper's stuck heuristic this
 // worker tree is healthy on-purpose work, not a wedge (see
 // scripts/fleet/_shared/active-run-marker.mts for the contract).
 if (isMainModule(import.meta.url)) {
+  reexecWithHeapHeadroom()
   registerActiveRun()
   main()
     .catch((e: unknown) => {

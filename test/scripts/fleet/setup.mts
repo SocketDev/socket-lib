@@ -18,6 +18,7 @@ import nock from 'nock'
 import { afterAll, afterEach, beforeAll, expect } from 'vitest'
 
 import { isolateGitEnv } from '../../../.git-hooks/_shared/isolate-git-env.mts'
+import { prepareSubprocessCoverageEnv } from '../../_shared/fleet/lib/coverage-env.mts'
 import { toContainPathResult } from '../../_shared/fleet/lib/matchers.mts'
 
 // Neutralize the inherited git env so a test's `git` spawns can't touch the
@@ -26,6 +27,11 @@ import { toContainPathResult } from '../../_shared/fleet/lib/matchers.mts'
 // that do live under node:test, which strips-only). Single source of truth in
 // .git-hooks/_shared/isolate-git-env.mts.
 isolateGitEnv({ pinConfigToNull: true })
+
+// Subprocess coverage capture (cover.mts sets FLEET_CHILD_V8_COVERAGE_DIR).
+// This also drops the already-consumed COVERAGE flag so a test-spawned Vitest
+// child cannot clean the outer run's shared coverage/.tmp reports.
+prepareSubprocessCoverageEnv(process.env)
 
 // Fail network CLOSED fleet-wide: block every real connection so an unmocked
 // third-party request throws instead of reaching the internet. Loopback stays

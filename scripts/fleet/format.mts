@@ -18,14 +18,15 @@
 // prefer-async-spawn: sync-required — top-level CLI runner, single oxfmt gate.
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import process from 'node:process'
-import { fileURLToPath } from 'node:url'
 
 import {
   buildOxfmtArgs,
+  filterFormatIgnored,
   getModifiedFiles,
   getStagedFiles,
   pickConfig,
 } from './_shared/format-scope.mts'
+import { isMainModule } from './_shared/is-main-module.mts'
 
 // On Windows, `pnpm` is a .cmd shim Node refuses to exec directly via spawnSync
 // (CVE-2024-27980 hardening); the shell wrapper resolves it. On POSIX we keep
@@ -48,17 +49,22 @@ export function resolveFormatPlan(
   argv: readonly string[],
   options?:
     | {
+        filterFormatIgnored?:
+          | ((files: readonly string[]) => string[])
+          | undefined
         getModifiedFiles?: (() => string[]) | undefined
         getStagedFiles?: (() => string[]) | undefined
       }
     | undefined,
 ): FormatPlan {
   const opts = { __proto__: null, ...options } as {
+    filterFormatIgnored?: ((files: readonly string[]) => string[]) | undefined
     getModifiedFiles?: (() => string[]) | undefined
     getStagedFiles?: (() => string[]) | undefined
   }
   const listStaged = opts.getStagedFiles ?? getStagedFiles
   const listModified = opts.getModifiedFiles ?? getModifiedFiles
+  const filterIgnored = opts.filterFormatIgnored ?? filterFormatIgnored
 
   const check = argv.includes('--check')
 
@@ -75,13 +81,17 @@ export function resolveFormatPlan(
   }
 
   let files = argv.filter(arg => !arg.startsWith('--'))
-  if (argv.includes('--staged') || argv.includes('--modified')) {
+  const hasExplicitFiles = files.length > 0
+  const hasGitScope = argv.includes('--staged') || argv.includes('--modified')
+  if (hasGitScope) {
     files = argv.includes('--staged') ? listStaged() : listModified()
-    // Nothing in scope — do NOT fall through to a whole-tree format (an empty
-    // file list would default to `.`). oxfmt skips paths it doesn't recognize.
-    if (!files.length) {
-      return { kind: 'skip' }
-    }
+  }
+  files = filterIgnored(files)
+  // Nothing in an explicit or Git-derived scope — do NOT fall through to a
+  // whole-tree format (an empty file list defaults to `.`). Pre-filter explicit
+  // paths because oxfmt does not apply --ignore-path to argv-named files.
+  if ((hasExplicitFiles || hasGitScope) && !files.length) {
+    return { kind: 'skip' }
   }
   return { kind: 'run', args: buildOxfmtArgs({ check, files }) }
 }
@@ -113,6 +123,6 @@ function main(): void {
   process.exitCode = res.status ?? 1
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (isMainModule(import.meta.url)) {
   main()
 }

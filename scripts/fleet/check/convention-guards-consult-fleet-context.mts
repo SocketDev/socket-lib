@@ -28,11 +28,13 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { REPO_ROOT } from '../paths.mts'
+import { isMainModule } from '../_shared/is-main-module.mts'
 
 // Guards that MUST consult `isFleetTarget` (they lighten outside a fleet repo).
 // Sorted. Thread the detector into a guard, then add it here — the check fails
 // until both are true.
 export const CONVENTION_GUARDS: readonly string[] = [
+  'golden-fixture-naming-guard',
   'markdown-filename-guard',
   'module-noun-name-guard',
   'no-corepack-guard',
@@ -154,6 +156,6 @@ function main(): void {
   process.exit(1)
 }
 
-if (process.argv[1] && import.meta.url === `file://${process.argv[1]}`) {
+if (isMainModule(import.meta.url)) {
   main()
 }

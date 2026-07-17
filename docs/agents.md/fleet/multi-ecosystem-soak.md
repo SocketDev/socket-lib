@@ -18,14 +18,14 @@ provenance pipeline) bypass the window via dated excludes, mirroring
 
 ## Per-ecosystem enforcement
 
-| Ecosystem | Manifest + lock | Soak mechanism | Enforced by |
-| --- | --- | --- | --- |
-| npm | package.json + pnpm-lock.yaml | pnpm `minimumReleaseAge` (minutes) + `.npmrc` `min-release-age` | pnpm rejects unsoaked at install; parity: `check/soak-time-is-consistent.mts` |
-| python | pyproject.toml + uv.lock | `[tool.uv] exclude-newer` | uv rejects newer; `check/uv-lockfiles-are-current.mts` |
-| rust | Cargo.toml + Cargo.lock | `.cargo/config.toml` min-publish-age (nightly-native; inert on stable, where the LOCK is build-time enforcement and the nightly updater `update/cargo.mts` is the only lock-mover) | `check/cargo-soak-config-is-current.mts`: config parity unconditional, tracked Cargo.lock required with own rust |
-| go | go.mod + go.sum | none native, so an external gate reads the GOPROXY publish time | `check/go-deps-are-soaked.mts` fails on an under-soak require |
-| brew | generated `Brewfile` + `constants/brew-tap-pins.mts` | one dated tap SHA at least SOAK_DAYS old per tap; every formula version at that SHA is definitionally soaked | `check/brew-install-is-pinned.mts` (offline): Brewfile sync, pin age, no bare installs. Brewfile presence = enrollment; unenrolled repos never redden |
-| docker images | Dockerfile FROM digests | `update/docker.mts` repins only to tags older than the window | `FROM image:tag@sha256:...` pins; prebake gate below |
+| Ecosystem     | Manifest + lock                                      | Soak mechanism                                                                                                                                                                     | Enforced by                                                                                                                                                                                                              |
+| ------------- | ---------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| npm           | package.json + pnpm-lock.yaml                        | pnpm `minimumReleaseAge` (minutes) + `.npmrc` `min-release-age`                                                                                                                    | pnpm rejects unsoaked at install; parity: `check/soak-time-is-consistent.mts`                                                                                                                                            |
+| python        | pyproject.toml + uv.lock                             | `[tool.uv] exclude-newer`                                                                                                                                                          | uv rejects newer; `check/uv-lockfiles-are-current.mts`                                                                                                                                                                   |
+| rust          | Cargo.toml + Cargo.lock                              | `.cargo/config.toml` min-publish-age (nightly-native; inert on stable, where the LOCK is build-time enforcement and the nightly updater `update/cargo.mts` is the only lock-mover) | `check/cargo-soak-config-is-current.mts`: config parity unconditional, tracked Cargo.lock required with own rust. Repo-only Cargo settings live in optional `.cargo/config.repo.toml`, included by the canonical config. |
+| go            | go.mod + go.sum                                      | none native, so an external gate reads the GOPROXY publish time                                                                                                                    | `check/go-deps-are-soaked.mts` fails on an under-soak require                                                                                                                                                            |
+| brew          | generated `Brewfile` + `constants/brew-tap-pins.mts` | one dated tap SHA at least SOAK_DAYS old per tap; every formula version at that SHA is definitionally soaked                                                                       | `check/brew-install-is-pinned.mts` (offline): Brewfile sync, pin age, no bare installs. Brewfile presence = enrollment; unenrolled repos never redden                                                                    |
+| docker images | Dockerfile FROM digests                              | `update/docker.mts` repins only to tags older than the window                                                                                                                      | `FROM image:tag@sha256:...` pins; prebake gate below                                                                                                                                                                     |
 
 Every gate no-ops on ecosystem absence (no own go.mod / Cargo.toml /
 Brewfile), so the fleet-wide cascade never reddens a repo that lacks the
@@ -70,3 +70,12 @@ A missing/drifted derived artifact heals through the doctor, never by hand:
 Cargo.lock under the nightly gate. Scanner false-positive lesson: text
 scanners must not harvest prose. `brew-parse.mts`'s quote-state scanner exists
 because echo-hint strings once became "installed tools".
+
+## Rust toolchain
+
+Rust's soak needs cargo's `minimum-release-age`, which only stable cargo lacks
+today — so the fleet Rust toolchain is pinned to a nightly (`nightly-2026-07-12`
+at time of writing) in `rust-toolchain.toml` (the canonical pin), held until a
+stable release ships that support. The CLAUDE.md bullet states only the
+invariant ("Rust pins the toolchain nightly"); the exact nightly and its
+removal condition live here.
