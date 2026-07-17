@@ -11,7 +11,7 @@
  *
  *   1. Hooks (none here)
  *   2. Deny rules from `disallowedTools` — match → blocked, even in
- *      bypassPermissions mode
+ *      bypass-permissions mode
  *   3. Permission mode — `dontAsk` denies anything not pre-approved without
  *      calling `canUseTool`
  *   4. Allow rules from `allowedTools` — match → approved
@@ -27,7 +27,7 @@
  *      step 4 of the eval flow. Tools in this list are approved without
  *      invoking `canUseTool`. We list the same names as BASE_TOOLS so the three
  *      permitted tools run end-to-end. • `disallowedTools: DENIED_TOOLS` — step
- *      2 of the eval flow. Deny rules win even against bypassPermissions.
+ *      2 of the eval flow. Deny rules win even against bypass-permissions mode.
  *      Defense-in-depth: even if a future edit removes `tools` and accidentally
  *      exposes the full claude_code preset, this list still blocks
  *      Bash/Edit/Write/ WebFetch/WebSearch. • `permissionMode: 'dontAsk'` — the
@@ -334,7 +334,7 @@ export async function disambiguateReceiver({
         //   - `allowedTools` is the AUTO-APPROVE list (step 4 of the
         //     eval flow); listed tools run without canUseTool.
         //   - `disallowedTools` is DENY-FIRST (step 2); blocks even
-        //     in bypassPermissions.
+        //     in bypass-permissions mode.
         //   - `permissionMode: 'dontAsk'` is the official lockdown
         //     recipe for headless agents. Anything not pre-approved
         //     is DENIED (not prompted, not falling through to a
