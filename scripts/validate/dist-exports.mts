@@ -4,18 +4,20 @@
  *   default: value }
  */
 
-import { readdirSync } from 'node:fs'
+import { readdirSync, readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 
 import { REPO_ROOT } from '../fleet/paths.mts'
+import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 
 const distDir = path.join(REPO_ROOT, 'dist')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
 const { isQuiet } = require('@socketsecurity/lib-stable/argv/flag-predicates')
+const { errorMessage } = require('@socketsecurity/lib-stable/errors/message')
 const {
   getDefaultLogger,
 } = require('@socketsecurity/lib-stable/logger/default')
@@ -27,7 +29,7 @@ const logger = getDefaultLogger()
 /**
  * Check if a module export needs .default or works directly.
  */
-export function checkExport(filePath) {
+export function checkExport(filePath: string) {
   // Skip external packages - they are internal implementation details
   // used by public dist/* modules. We only validate public exports.
   const relativePath = path.relative(distDir, filePath)
@@ -35,6 +37,18 @@ export function checkExport(filePath) {
   const normalizedPath = normalizePath(relativePath)
   if (normalizedPath.startsWith('external/')) {
     return { path: filePath, ok: true, skipped: true }
+  }
+
+  // Executables intentionally run at module load (for example, Chrome's
+  // native-messaging host reads stdin forever). Requiring one here would turn
+  // a validation pass into the executable itself. A node shebang is the
+  // package-wide marker for an entrypoint, regardless of its directory.
+  try {
+    if (readFileSync(filePath, 'utf8').startsWith('#!/usr/bin/env node')) {
+      return { path: filePath, ok: true, skipped: true }
+    }
+  } catch {
+    // Let require() below report an unreadable or missing public export.
   }
 
   try {
@@ -66,7 +80,7 @@ export function checkExport(filePath) {
     return {
       path: filePath,
       ok: false,
-      reason: `Failed to require: ${e.message}`,
+      reason: `Failed to require: ${errorMessage(e)}`,
     }
   }
 }
@@ -74,7 +88,7 @@ export function checkExport(filePath) {
 /**
  * Get all .js files in a directory recursively.
  */
-export function getJsFiles(dir, files = []) {
+export function getJsFiles(dir: string, files: string[] = []): string[] {
   const entries = readdirSync(dir, { withFileTypes: true })
 
   for (const entry of entries) {
@@ -126,7 +140,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(error => {
-  logger.fail(`Validation failed: ${error.message}`)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch(error => {
+    logger.fail(`Validation failed: ${error.message}`)
+    process.exitCode = 1
+  })
+}

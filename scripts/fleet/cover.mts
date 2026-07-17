@@ -127,9 +127,23 @@ export async function runQuiet(
 ): Promise<SuiteResult> {
   options = { __proto__: null, ...options } as typeof options
   try {
-    const result = await spawn('pnpm', args, {
+    // `pnpm` is commonly a `#!/usr/bin/env node` shim. Spawning that shim by
+    // name can select a different Node from PATH than the one running cover
+    // (for example Node 24 instead of the pinned Node 26), changing test
+    // semantics mid-run. npm_execpath is pnpm's JS entrypoint, so launch it
+    // with this process's executable. Keep that executable's directory first
+    // in PATH too: `pnpm exec` launches `node` by name for local binaries.
+    const pnpmEntry = process.env['npm_execpath']
+    const command = pnpmEntry ? process.execPath : 'pnpm'
+    const commandArgs = pnpmEntry ? [pnpmEntry, ...args] : args
+    const env = options.env ?? process.env
+    const nodeBin = path.dirname(process.execPath)
+    const result = await spawn(command, commandArgs, {
       cwd: options.cwd,
-      env: options.env ?? process.env,
+      env: {
+        ...env,
+        PATH: [nodeBin, env['PATH']].filter(Boolean).join(path.delimiter),
+      },
     })
     return {
       exitCode: result.code ?? 0,
