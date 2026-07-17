@@ -79,7 +79,6 @@ export const BACKENDS: Readonly<Record<BackendName, BackendDescriptor>> = {
           '--model',
           model,
           ...effortArgs,
-          '--no-session-persistence',
           '--permission-mode',
           'dontAsk',
         ],

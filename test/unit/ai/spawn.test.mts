@@ -180,10 +180,10 @@ describe.sequential('isModelUnavailable', () => {
 })
 
 describe.sequential('buildArgs — claude', () => {
-  test('includes --print, --no-session-persistence, permission-mode, --add-dir', () => {
+  test('includes --print, permission-mode, and --add-dir', () => {
     const args = buildArgs('claude', baseOpts())
     expect(args).toContain('--print')
-    expect(args).toContain('--no-session-persistence')
+    expect(args).not.toContain('--no-session-persistence')
     expect(args).toContain('--permission-mode')
     expect(args).toContain('dontAsk')
     expect(args).toContain('--add-dir')

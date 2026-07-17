@@ -2,7 +2,7 @@
  * @file Locked-down spawn for AI agent CLIs (Claude / Codex / Gemini /
  *   OpenCode). Per the CLAUDE.md "Programmatic Claude calls" rule: every
  *   headless invocation MUST set the four lockdown flags (tools / disallow /
- *   permissionMode / no-session-persistence). The helper enforces this at the
+ *   permissionMode). The helper enforces this at the
  *   type level (`SpawnAiAgentOptions` requires the relevant fields) AND at the
  *   spawn site (per-agent flag translator). Why CLI subprocess instead of an
  *   SDK call: Socket's contract matches what the local user sees when
@@ -47,7 +47,7 @@ export function backoffFor(attempt: number): number {
 /**
  * Build CLI arg list for a given agent. The flag names differ across agents but
  * the conceptual surface is the same: "here are the allowed tools, here are the
- * denied tools, here is the permission mode, do not persist a session." This
+ * denied tools, and here is the permission mode." This
  * translator is the single source of truth for how each agent's flags map.
  *
  * Update sites (when an agent changes its flag surface): 1. The relevant case
@@ -65,7 +65,6 @@ export function buildArgs(
       // https://code.claude.com/docs/en/cli-reference
       const args: string[] = [
         '--print',
-        '--no-session-persistence',
         '--permission-mode',
         options.permissionMode,
         '--add-dir',

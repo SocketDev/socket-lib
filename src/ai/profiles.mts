@@ -1,7 +1,7 @@
 /**
  * @file Pre-built lockdown profiles for spawnAiAgent. Per CLAUDE.md
  *   "Programmatic Claude calls" rule: every spawn must set tools / disallow /
- *   permissionMode (and the helper always sets --no-session-persistence +
+ *   permissionMode (and the helper always sets --print +
  *   --add-dir cwd). `AI_PROFILE` is a capability ladder — each tier permits
  *   everything the tier above it does, plus one more capability. Spread a tier
  *   and override per call (`tools`/`disallow` to tighten further, `model`,
