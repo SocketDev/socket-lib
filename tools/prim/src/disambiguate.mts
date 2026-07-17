@@ -41,9 +41,10 @@
  *      `<targetRoot>/.prim-cache/disambiguate.json`. Subsequent audit runs are
  *      free; the cache only grows when a new ambiguous site appears or the
  *      surrounding source changes. Opt-in: callers must pass `aiDisambiguate:
- *      true` AND have `ANTHROPIC_API_KEY` in env. Without both, this module's
- *      `disambiguateReceiver()` short-circuits to `{ type: undefined, source:
- *      'static', reason: 'ai-defer-not-enabled' }`. No silent API calls.
+ *      true` AND have `ANTHROPIC_API_KEY` in env. The Claude SDK integration
+ *      stays disabled without both, and this module's `disambiguateReceiver()`
+ *      short-circuits to `{ type: undefined, source: 'static', reason:
+ *      'ai-defer-not-enabled' }`. No silent API calls.
  */
 
 import crypto from 'node:crypto'
@@ -191,7 +192,7 @@ Examples:
 
 /**
  * Build a source snippet around (line, column). Used by audit/codemod to gather
- * the context Claude needs.
+ * the context the model needs.
  *
  * @param {string} src Full source text.
  * @param {number[]} lineStarts Start-of-line offsets (1-indexed view).

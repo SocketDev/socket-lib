@@ -502,12 +502,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## ipc/
 
-| Subpath                                                               | Description                                                                                      |
+| Subpath | Description |
 | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`@socketsecurity/lib-stable/ipc/directory`](../src/ipc/directory.ts) | Stub-directory creation + permission audit.                                                      |
-| [`@socketsecurity/lib-stable/ipc/paths`](../src/ipc/paths.ts)         | IPC stub path resolution.                                                                        |
-| [`@socketsecurity/lib-stable/ipc/types`](../src/ipc/types.ts)         | Public type surface for `ipc/*` modules — the `IpcStub` shape that backs the file-based handoff. |
-| [`@socketsecurity/lib-stable/ipc/write`](../src/ipc/write.ts)         | Atomic stub write — `O_CREAT                                                                     | O_WRONLY | O_EXCL | O_NOFOLLOW` so we refuse to overwrite a pre-existing stub (collision with attacker-planted file or PID reuse) and refuse to follow symlinks at the final path component. |
+| [`@socketsecurity/lib-stable/ipc/directory`](../src/ipc/directory.ts) | Stub-directory creation + permission audit. |
+| [`@socketsecurity/lib-stable/ipc/paths`](../src/ipc/paths.ts) | IPC stub path resolution. |
+| [`@socketsecurity/lib-stable/ipc/types`](../src/ipc/types.ts) | Public type surface for `ipc/*` modules — the `IpcStub` shape that backs the file-based handoff. |
+| [`@socketsecurity/lib-stable/ipc/write`](../src/ipc/write.ts) | Atomic stub write — `O_CREAT                                                                     | O_WRONLY | O_EXCL | O_NOFOLLOW` so we refuse to overwrite a pre-existing stub (collision with attacker-planted file or PID reuse) and refuse to follow symlinks at the final path component. |
 
 ## json/
 
@@ -878,23 +878,23 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## url/
 
-| Subpath                                                                       | Description                                                                                                                                                                                                                  |
+| Subpath | Description |
 | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | --------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib-stable/url/assert-safe`](../src/url/assert-safe.ts)     | SSRF guard for operator- or issuer-supplied URLs — `assertSafeHttpUrl` parses a raw URL, rejects non-HTTP(S) schemes, and refuses hosts that resolve to loopback / private / link-local ranges (cloud metadata, redis, in... |
-| [`@socketsecurity/lib-stable/url/parse`](../src/url/parse.ts)                 | URL parsing helpers — `parseUrl` (safe `new URL(...)` wrapper that returns `undefined` instead of throwing) and `createRelativeUrl` (compose a relative path against an optional base).                                      |
-| [`@socketsecurity/lib-stable/url/predicates`](../src/url/predicates.ts)       | URL type-guard predicates — `isUrl` answers whether a value parses as a valid URL via `parseUrl`.                                                                                                                            |
+| [`@socketsecurity/lib-stable/url/assert-safe`](../src/url/assert-safe.ts) | SSRF guard for operator- or issuer-supplied URLs — `assertSafeHttpUrl` parses a raw URL, rejects non-HTTP(S) schemes, and refuses hosts that resolve to loopback / private / link-local ranges (cloud metadata, redis, in... |
+| [`@socketsecurity/lib-stable/url/parse`](../src/url/parse.ts) | URL parsing helpers — `parseUrl` (safe `new URL(...)` wrapper that returns `undefined` instead of throwing) and `createRelativeUrl` (compose a relative path against an optional base). |
+| [`@socketsecurity/lib-stable/url/predicates`](../src/url/predicates.ts) | URL type-guard predicates — `isUrl` answers whether a value parses as a valid URL via `parseUrl`. |
 | [`@socketsecurity/lib-stable/url/search-params`](../src/url/search-params.ts) | URL search-param coercion helpers — `urlSearchParamsAs*` normalise a raw `string                                                                                                                                             | null | undefined` value into a typed shape (array / boolean / number / string) with a default. |
-| [`@socketsecurity/lib-stable/url/types`](../src/url/types.ts)                 | Public type surface for `url/*` modules — option interfaces consumed by `createRelativeUrl`, `urlSearchParamsAs*`, and `urlSearchParamsGet*`.                                                                                |
+| [`@socketsecurity/lib-stable/url/types`](../src/url/types.ts) | Public type surface for `url/*` modules — option interfaces consumed by `createRelativeUrl`, `urlSearchParamsAs*`, and `urlSearchParamsGet*`. |
 
 ## versions/
 
-| Subpath                                                                     | Description                                                                                                                                                                                                                  |
+| Subpath | Description |
 | --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------- | -------------------------------------------------------------------------- |
-| [`@socketsecurity/lib-stable/versions/compare`](../src/versions/compare.ts) | Version comparison operators aligned with `node:smol-versions` (the C++-accelerated multi-ecosystem version helper shipped by the smol Node binary).                                                                         |
-| [`@socketsecurity/lib-stable/versions/modify`](../src/versions/modify.ts)   | Mutation helpers — `incrementVersion` bumps a version by release type ('major'                                                                                                                                               | 'minor' | 'patch' | 'pre\*'), and `versionDiff` returns the kind of step between two versions. |
-| [`@socketsecurity/lib-stable/versions/parse`](../src/versions/parse.ts)     | Parsing helpers — `coerceVersion` rounds a sloppy input ("1.2") up to a valid semver triple, `parseVersion` returns `{major, minor, patch, prerelease, build}`, and the `getMajor*` / `getMinor*` / `getPatchVersion` acc... |
-| [`@socketsecurity/lib-stable/versions/range`](../src/versions/range.ts)     | Range / set helpers — `satisfiesVersion` / `filterVersions` check membership against a semver range, `maxVersion` / `minVersion` pick the bounds of an arbitrary version array.                                              |
-| [`@socketsecurity/lib-stable/versions/types`](../src/versions/types.ts)     | Public type surface for `versions/*` modules — the parsed-version shape returned by `parseVersion` (a stable subset of semver's SemVer instance, exposed as a structural type rather than leaking the upstream class).       |
+| [`@socketsecurity/lib-stable/versions/compare`](../src/versions/compare.ts) | Version comparison operators aligned with `node:smol-versions` (the C++-accelerated multi-ecosystem version helper shipped by the smol Node binary). |
+| [`@socketsecurity/lib-stable/versions/modify`](../src/versions/modify.ts) | Mutation helpers — `incrementVersion` bumps a version by release type ('major' | 'minor' | 'patch' | 'pre\*'), and `versionDiff` returns the kind of step between two versions. |
+| [`@socketsecurity/lib-stable/versions/parse`](../src/versions/parse.ts) | Parsing helpers — `coerceVersion` rounds a sloppy input ("1.2") up to a valid semver triple, `parseVersion` returns `{major, minor, patch, prerelease, build}`, and the `getMajor*` / `getMinor*` / `getPatchVersion` acc... |
+| [`@socketsecurity/lib-stable/versions/range`](../src/versions/range.ts) | Range / set helpers — `satisfiesVersion` / `filterVersions` check membership against a semver range, `maxVersion` / `minVersion` pick the bounds of an arbitrary version array. |
+| [`@socketsecurity/lib-stable/versions/types`](../src/versions/types.ts) | Public type surface for `versions/*` modules — the parsed-version shape returned by `parseVersion` (a stable subset of semver's SemVer instance, exposed as a structural type rather than leaking the upstream class). |
 
 ## words/
 

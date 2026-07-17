@@ -417,9 +417,7 @@ import { getIpcStubPath } from '@socketsecurity/lib/ipc/paths'
 // Parent: write payload to stub file and pass path to child
 const stubPath = await writeIpcStub('socket-cli', {
   apiToken: 'secret',
-  config: {
-    /* ... */
-  },
+  config: {/* ... */},
 })
 spawn('node', ['child.js', stubPath])
 

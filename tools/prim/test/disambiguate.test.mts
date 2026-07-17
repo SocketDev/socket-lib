@@ -1,5 +1,6 @@
 /**
- * @file Tests for the Claude-deferred disambiguation layer. Run via the Prim
+ * @file Tests for the Claude SDK-deferred disambiguation layer. Run via the
+ *   Prim
  *   package's test script. Mocks the SDK via a self-contained queue file so no
  *   network hits.
  *   Coverage:
@@ -211,7 +212,7 @@ describe('locked-down tool surface', () => {
   })
 
   test('source passes permissionMode: "dontAsk" (the headless lockdown recipe)', async () => {
-    // The official Claude Agent SDK docs say: "For a locked-down
+    // The official `@anthropic-ai/claude-agent-sdk` docs say: "For a locked-down
     // agent, pair `allowedTools` with `permissionMode: 'dontAsk'`.
     // Listed tools are approved; anything else is denied outright
     // instead of prompting." With `'default'`, unmatched tools fall
