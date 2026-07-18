@@ -66,10 +66,11 @@ catalog:
   # Fleet bundler (replaces esbuild). Single-sourced to match the
   # wheelhouse catalog pin + the rolldown vite 8.0.14 bundles natively.
   'playwright-core': 1.61.1
+  'portless': 0.15.4
   'regjsparser': 0.13.2
   'rolldown': 1.1.4
   'semver': 7.8.5
-  'shell-quote': 1.9.0
+  'shell-quote': 1.10.0
   # Source of truth for CI-provider + AI-agent env-var detection. devDep only:
   # the build-time codemod inlines its isCI/isAgent boolean expressions into
   # dist, so it never enters the runtime dependency tree. Published 2026-04-15,
@@ -89,6 +90,7 @@ allowBuilds:
   cpu-features: false
   esbuild: true
   protobufjs: false
+  puppeteer: false
   rolldown: true
   ssh2: false
 
@@ -132,6 +134,8 @@ minimumReleaseAgeExclude:
   - 'dtu-github-actions@0.17.1'
   # published: 2026-07-16 | removable: 2026-07-23
   - 'magic-string@1.0.0'
+  # published: 2026-07-16 | removable: 2026-07-23
+  - 'portless@0.15.4'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
