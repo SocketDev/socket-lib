@@ -3424,6 +3424,7 @@
     "cpu-features": false,
     "esbuild": true,
     "protobufjs": false,
+    "puppeteer": false,
     "rolldown": true,
     "ssh2": false
   },
