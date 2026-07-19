@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "6.1.0-prerelease",
+  "version": "6.1.0",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
     "Socket.dev",
@@ -37,12 +37,6 @@
     "_http_incoming": false,
     "_http_outgoing": false,
     "_http_server": false,
-    "_stream_duplex": false,
-    "_stream_passthrough": false,
-    "_stream_readable": false,
-    "_stream_transform": false,
-    "_stream_wrap": false,
-    "_stream_writable": false,
     "_tls_common": false,
     "_tls_wrap": false,
     "assert": false,

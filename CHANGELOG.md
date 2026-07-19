@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.1.0) - 2026-07-19
+
+### Fixed
+
+- **`tooling`** — lock fleet hook workspaces
+- **`types`** — exclude built-artifact tests
+- **`ci`** — restore the Socket Lib quality gates
+- **`prim`** — avoid lockdown scanner sentinel
+- **`prim`** — identify Claude SDK integration
+- **`ai`** — drop retired Claude session flag
+- **`cover`** — preserve runner Node runtime
+- **`spawn`** — resolve Windows PATH batch shims
+
 ## [6.0.10](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.10) - 2026-07-13
 
 ### Fixed
