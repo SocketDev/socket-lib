@@ -43,25 +43,6 @@ ThinLTO is usually the first whole-program experiment for larger Rust/C++ builds
 it can expose cross-module optimization at lower link-time cost than full LTO. Keep it
 only if the deployed metric benefits enough to pay its build and debugging cost.
 
-## macOS native build and test execution
-
-On macOS, XProtect can scan newly built executables before their first execution. This can
-dominate a Rust build-script, `cargo run`, integration-test, doctest, Go-test, or C++ test
-loop that launches many small fresh binaries. First prove it with a clean, repeatable
-baseline: for Rust, inspect `cargo build --timings` and compare build-script/test-binary
-time; for other native languages, separate compile/link time from executing the resulting
-test binaries.
-
-macOS lets a user add their terminal application to **Developer Tools**, which excludes
-processes started by that terminal from XProtect checks. This is a security trade-off, not a
-compiler flag and not an automated fleet setup action. Explain the trade-off, require the
-developer to opt in through System Settings, restart the terminal, and re-measure the same
-workload. Keep a normal-security baseline for CI and for developers who decline the change.
-
-See [cargo-nextest's macOS instructions](https://nexte.st/docs/installation/macos/) for the
-current user-driven steps. Nicholas Nethercote's
-[measurement and analysis](https://nnethercote.github.io/2025/09/04/faster-rust-builds-on-mac.html)
-shows why the effect is especially large when many newly built executables run once.
 
 ## Sources
 

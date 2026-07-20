@@ -19,9 +19,6 @@ channel contention, and `sync.Pool` used as a default cache.
   bottleneck. It is not an ownership mechanism and pooled contents can be discarded.
 - Use CPU-profile-driven PGO from representative production/whole-program workload, not an
   isolated microbenchmark. Compare build time and binary size as PGO can increase inlining.
-- On macOS, separate `go test` compile time from fresh test-binary execution time. The shared
-  [macOS native build and test guidance](compiler.md#macos-native-build-and-test-execution)
-  describes an optional, user-owned XProtect trade-off that may help binary-heavy loops.
 
 ## Concurrency
 

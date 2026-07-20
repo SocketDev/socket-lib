@@ -17,10 +17,6 @@ adapters or error construction.
   growth and inspect the release artifact after the benchmark proves value.
 - Benchmark `lto = "thin"`, `codegen-units`, and PGO separately. `target-cpu=native` is a
   local experiment, not a portable release setting; gate target features safely.
-- On macOS, profile build-script and test-binary execution before changing compiler settings.
-  Read the shared [macOS native build and test guidance](compiler.md#macos-native-build-and-test-execution):
-  a user-selected Developer Tools exemption may remove XProtect launch cost, but it is an
-  explicit security trade-off and must never be automated.
 - Treat `unsafe`, manual SIMD, custom allocators, and interior mutability as escalation
   paths with invariants, fuzz/property tests, and measured wins.
 

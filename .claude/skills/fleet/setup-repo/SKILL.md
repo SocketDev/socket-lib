@@ -137,21 +137,6 @@ pnpm run check --all    # verify the repo is green
 
 If `pnpm run check` fails, surface the failures and stop — the repo needs fixing before it's usable.
 
----
-
-### Optional — macOS native build/test performance
-
-Do not run this automatically. It only applies when a developer has profiled a Rust, Go, C++,
-or other native build/test loop and found time in first execution of many freshly built
-binaries (for Rust, inspect `cargo build --timings`).
-
-macOS can exclude processes launched by a user-selected terminal from XProtect checks through
-**System Settings → Privacy & Security → Developer Tools**. This improves some native build and
-test loops, but changes the local security posture. Explain the trade-off, direct the developer
-to [cargo-nextest's current macOS instructions](https://nexte.st/docs/installation/macos/), and
-require an explicit opt-in. After they change the setting, restart the terminal and re-measure
-the identical workload. Do not add the terminal, run `spctl`, or weaken XProtect from a setup
-script, hook, or agent.
 
 ---
 
@@ -168,7 +153,6 @@ Shell RC Bridge         ✓ ~/.zshrc
 Native Messaging Host   ✓ ~/Library/...NativeMessagingHosts/...json
 Security Tools          ✓ AgentShield · Zizmor · SFW · 7 more
 Repo Init               ✓ pnpm install + check passed
-macOS native performance not changed (optional, user-owned)
 ```
 
 ---

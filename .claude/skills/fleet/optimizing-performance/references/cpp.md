@@ -20,9 +20,6 @@ accidental copies.
   for profile-proven facts, behind portability wrappers. PGO is preferable to stale hints.
 - Consider SIMD only after proving a vectorizable bulk operation and supplying a baseline
   implementation/runtime dispatch for every deployed CPU.
-- On macOS, measure compile/link time separately from fresh test-binary execution. The shared
-  [macOS native build and test guidance](compiler.md#macos-native-build-and-test-execution)
-  describes an optional, user-owned XProtect trade-off for binary-heavy loops.
 
 ## Native Node code
 
