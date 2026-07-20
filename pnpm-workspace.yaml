@@ -23,7 +23,7 @@ packages:
 catalog:
   '@redwoodjs/agent-ci': 0.17.1
   '@sinclair/typebox': 0.34.52
-  '@socketregistry/packageurl-js': 'npm:@socketregistry/packageurl-js@1.4.2'
+  '@socketregistry/packageurl-js': 1.4.4
   '@types/shell-quote': 1.7.5
   '@ultrathink/acorn.wasm': npm:@ultrathink/acorn-wasm@0.0.1
   # -stable aliases: pnpm `overrides:` can't redirect a package's own

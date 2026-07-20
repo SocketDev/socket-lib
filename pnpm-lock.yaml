@@ -315,7 +315,7 @@ catalogs:
       version: 4.1.10
 
 overrides:
-  '@socketregistry/packageurl-js': npm:@socketregistry/packageurl-js@1.4.2
+  '@socketregistry/packageurl-js': 1.4.4
   '@socketsecurity/lib': npm:@socketsecurity/lib@6.0.7
   '@socketsecurity/registry': npm:@socketsecurity/registry@2.0.2
   '@socketsecurity/sdk': npm:@socketsecurity/sdk@4.0.1
@@ -493,8 +493,8 @@ importers:
         specifier: 1.0.5
         version: 1.0.5
       '@socketregistry/packageurl-js':
-        specifier: npm:@socketregistry/packageurl-js@1.4.2
-        version: 1.4.2
+        specifier: 1.4.4
+        version: 1.4.4
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
         version: '@socketregistry/packageurl-js@1.4.2'
@@ -3444,6 +3444,10 @@ packages:
   '@socketregistry/packageurl-js@1.4.2':
     resolution: {integrity: sha512-yt9UfUzD02wZ7kwb67oe4jxG2D9JtgPqjrK/ans2BovFyeie0w8hvRR0MuOWM4mUt2371oFPp7NB6O5ZjYJmlw==}
     engines: {node: '>=18.20.8', pnpm: '>=11.0.0-rc.0'}
+
+  '@socketregistry/packageurl-js@1.4.4':
+    resolution: {integrity: sha512-yC/FL9o4IhTcAn5BILV2L9kCzbopESefffLFbvkWsYUdXSyRbWmmw8+mLhiEL7Zck0A6C1D9rgf8+r4T1WVPLA==}
+    engines: {node: '>=24', npm: '>=12.0.0', pnpm: '>=11.0.5'}
 
   '@socketregistry/safe-buffer@1.0.9':
     resolution: {integrity: sha512-eV4uYchI1+vQeKpFG+aBlhVQ/AaaPTTXaan+ReiNn/izy8U9hfT4WC8l4g8o8BC3zaeNnsNVxec14hJH/y2y3g==}
@@ -6774,6 +6778,8 @@ snapshots:
   '@socketregistry/is-unicode-supported@1.0.5': {}
 
   '@socketregistry/packageurl-js@1.4.2': {}
+
+  '@socketregistry/packageurl-js@1.4.4': {}
 
   '@socketregistry/safe-buffer@1.0.9': {}
 
