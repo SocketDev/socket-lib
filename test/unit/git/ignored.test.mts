@@ -73,4 +73,21 @@ describe('getTrackedIgnoredFiles', () => {
       expect(await getTrackedIgnoredFiles({ cwd: dir })).toEqual([])
     })
   })
+
+  it('returns a non-ASCII tracked-ignored path verbatim (not \\NNN-escaped)', async () => {
+    await runWithTempDir(async dir => {
+      initRepo(dir)
+      await fs.mkdir(path.join(dir, 'dist'))
+      await fs.writeFile(path.join(dir, 'dist', 'café.js'), '//x\n')
+      spawnSync('git', ['add', '-A'], { cwd: dir })
+      spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
+      await fs.writeFile(path.join(dir, '.gitignore'), 'dist/\n')
+      spawnSync('git', ['add', '.gitignore'], { cwd: dir })
+      spawnSync('git', ['commit', '-m', 'ignore dist'], { cwd: dir })
+      // Without `-z`, git would return the escaped `"dist/caf\303\251.js"`.
+      expect(await getTrackedIgnoredFiles({ cwd: dir })).toEqual([
+        'dist/café.js',
+      ])
+    })
+  })
 })

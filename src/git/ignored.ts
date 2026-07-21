@@ -30,21 +30,26 @@ export async function getTrackedIgnoredFiles(
   options?: GitPathOptions | undefined,
 ): Promise<string[]> {
   const { cwd = getCwd() } = { __proto__: null, ...options } as GitPathOptions
-  const stdout = await spawn('git', ['ls-files', '-ci', '--exclude-standard'], {
-    cwd,
-    stdioString: true,
-  }).then(
+  // `-z`: NUL-terminate paths so a path with an embedded newline, a space, a
+  // quote, or a non-ASCII byte is returned verbatim — WITHOUT `-z`, git escapes
+  // + double-quotes such a path (core.quotePath), so the raw split would yield a
+  // corrupted `"dist/caf\303\251.js"` instead of the real UTF-8 path.
+  const stdout = await spawn(
+    'git',
+    ['ls-files', '-ci', '--exclude-standard', '-z'],
+    { cwd, stdioString: true },
+  ).then(
     result => String((result as { stdout?: string | undefined })?.stdout ?? ''),
     () => '',
   )
   const out: string[] = []
-  const lines = StringPrototypeSplit(stdout, '\n')
-  for (let i = 0, { length } = lines; i < length; i += 1) {
-    const line = lines[i]!
-    if (line === '') {
+  const entries = StringPrototypeSplit(stdout, '\0')
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const entry = entries[i]!
+    if (entry === '') {
       continue
     }
-    out[out.length] = normalizePath(line)
+    out[out.length] = normalizePath(entry)
   }
   return ArrayPrototypeSort(out)
 }

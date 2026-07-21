@@ -32,14 +32,23 @@ export async function getTreeManifest(
   options?: GitPathOptions | undefined,
 ): Promise<string> {
   const { cwd = getCwd() } = { __proto__: null, ...options } as GitPathOptions
-  const result = (await spawn('git', ['ls-tree', '-r', ref], {
-    cwd,
-    stdioString: true,
-  })) as { stdout?: string | undefined }
+  // `-c core.quotePath=false`: emit non-ASCII path bytes verbatim instead of the
+  // config-dependent `\NNN`-escaped form. Without it the manifest — and thus the
+  // content pin hashed from it — would shift with the caller's git config for a
+  // tree containing a non-ASCII path, defeating the "unmovable" guarantee. It is
+  // a no-op for an all-ASCII tree, so pins already computed stay valid.
+  const result = (await spawn(
+    'git',
+    ['-c', 'core.quotePath=false', 'ls-tree', '-r', ref],
+    { cwd, stdioString: true },
+  )) as { stdout?: string | undefined }
+  // An absent ref (unknown commit / unmaterialized submodule) exits non-zero, so
+  // `spawn` already rejected above; reaching here with empty output means the
+  // ref IS present but resolves to an empty tree (e.g. an empty commit).
   const manifest = String(result?.stdout ?? '')
   if (StringPrototypeTrim(manifest) === '') {
     throw new Error(
-      `git ls-tree produced no output for ${ref} in ${cwd} — the ref is not present (unmaterialized submodule or unknown commit)`,
+      `git ls-tree produced no output for ${ref} in ${cwd} — the ref resolves to an empty tree (nothing to pin)`,
     )
   }
   return manifest

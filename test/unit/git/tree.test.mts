@@ -51,7 +51,7 @@ describe('getTreeManifest', () => {
     })
   })
 
-  it('rejects for an unknown ref', async () => {
+  it('rejects for an unknown ref (git exits non-zero → spawn rejects)', async () => {
     await runWithTempDir(async dir => {
       initRepo(dir)
       await fs.writeFile(path.join(dir, 'a.txt'), 'x\n')
@@ -62,6 +62,35 @@ describe('getTreeManifest', () => {
           cwd: dir,
         }),
       ).rejects.toThrow()
+    })
+  })
+
+  it('throws the empty-tree message for a present ref resolving to an empty tree', async () => {
+    await runWithTempDir(async dir => {
+      initRepo(dir)
+      await fs.writeFile(path.join(dir, 'a.txt'), 'x\n')
+      spawnSync('git', ['add', '-A'], { cwd: dir })
+      spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
+      // The well-known empty-tree object is present in every repo and exits 0
+      // with zero output — the ONLY input that reaches the custom throw (an
+      // unknown ref exits non-zero and rejects in spawn before it).
+      await expect(
+        getTreeManifest('4b825dc642cb6eb9a060e54bf8d69288fbee4904', {
+          cwd: dir,
+        }),
+      ).rejects.toThrow(/empty tree/)
+    })
+  })
+
+  it('emits a non-ASCII path verbatim (config-independent, not \\NNN-escaped)', async () => {
+    await runWithTempDir(async dir => {
+      initRepo(dir)
+      await fs.writeFile(path.join(dir, 'café.txt'), 'accent\n')
+      spawnSync('git', ['add', '-A'], { cwd: dir })
+      spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
+      const manifest = await getTreeManifest('HEAD', { cwd: dir })
+      expect(manifest).toContain('café.txt')
+      expect(manifest).not.toContain('\\303\\251')
     })
   })
 })
