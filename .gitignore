@@ -239,3 +239,11 @@ pnpm-debug.log
 !/vendor/
 # re-ignore generated/junk that lives under a re-included dir
 /vendor/acorn/acorn.wasm
+
+# ─── vitiate coverage-guided fuzz lane (`pnpm run test:fuzz`) caches ───
+# `.swc/` is the SWC instrument plugin's WASM cache; `.vitiate/` holds the
+# regenerable corpus + run results. Both are rebuilt on every fuzz run — never
+# commit them. (A crash-repro artifact worth keeping as a regression guard
+# would be re-included here explicitly; none exist yet.)
+/.swc/
+/.vitiate/
