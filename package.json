@@ -1696,6 +1696,11 @@
       "types": "./dist/git/changed.d.ts",
       "default": "./dist/git/changed.js"
     },
+    "./git/ignored": {
+      "source": "./src/git/ignored.ts",
+      "types": "./dist/git/ignored.d.ts",
+      "default": "./dist/git/ignored.js"
+    },
     "./git/repo": {
       "source": "./src/git/repo.ts",
       "types": "./dist/git/repo.d.ts",
@@ -1710,6 +1715,11 @@
       "source": "./src/git/tracked.ts",
       "types": "./dist/git/tracked.d.ts",
       "default": "./dist/git/tracked.js"
+    },
+    "./git/tree": {
+      "source": "./src/git/tree.ts",
+      "types": "./dist/git/tree.d.ts",
+      "default": "./dist/git/tree.js"
     },
     "./git/types": {
       "source": "./src/git/types.ts",
