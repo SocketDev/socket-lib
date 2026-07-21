@@ -15,6 +15,8 @@
  *   `bash`).
  */
 
+import { ArrayPrototypeFilter } from '../primordials/array'
+import { StringPrototypeSplit } from '../primordials/string'
 import { parse as shellParse } from '../external/shell-quote'
 
 /**
@@ -33,8 +35,19 @@ import { parse as shellParse } from '../external/shell-quote'
  *   // → ['echo', 'one two', 'three']
  */
 export function parseArgsString(cmd: string): string[] {
+  let entries: ReturnType<typeof shellParse>
+  try {
+    entries = shellParse(cmd)
+  } catch {
+    // The vendored shell-quote parser THROWS on a malformed `${...}`
+    // substitution ("Bad substitution" — e.g. `${`, `${}`, `${x`). This
+    // tokenizer's contract is to turn ANY command string into argv, so degrade
+    // to a naive whitespace split rather than propagate: pathological input
+    // still yields usable tokens instead of crashing the caller.
+    return ArrayPrototypeFilter(StringPrototypeSplit(cmd, /\s+/), Boolean)
+  }
   const argv: string[] = []
-  for (const entry of shellParse(cmd)) {
+  for (const entry of entries) {
     if (typeof entry === 'string') {
       argv.push(entry)
     }
