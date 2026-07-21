@@ -7,7 +7,12 @@
  */
 
 import { RegExpPrototypeTest } from '../primordials/regexp'
-import { StringPrototypeToLowerCase } from '../primordials/string'
+import {
+  StringPrototypeEndsWith,
+  StringPrototypeSlice,
+  StringPrototypeStartsWith,
+  StringPrototypeToLowerCase,
+} from '../primordials/string'
 
 import { parseUrl } from './parse'
 
@@ -30,7 +35,16 @@ const PRIVATE_HOST_REGEXP =
  *   ```
  */
 export function isLoopbackHost(hostname: string): boolean {
-  const host = StringPrototypeToLowerCase(hostname)
+  let host = StringPrototypeToLowerCase(hostname)
+  // `URL` reports an IPv6 hostname bracketed (e.g. `[::1]`); compare the bare
+  // form so `allowLocalhost` can permit IPv6 loopback, matching `isPrivateHost`
+  // (whose regex already tolerates the brackets).
+  if (
+    StringPrototypeStartsWith(host, '[') &&
+    StringPrototypeEndsWith(host, ']')
+  ) {
+    host = StringPrototypeSlice(host, 1, -1)
+  }
   return host === '::1' || host === '127.0.0.1' || host === 'localhost'
 }
 
