@@ -8,6 +8,7 @@
  */
 
 import { promises as fsPromises } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 
 import { rolldown } from 'rolldown'
@@ -19,6 +20,8 @@ import { buildConfig } from '../../../.config/rolldown.config.mts'
 import { primBuildConfig } from '../../../.config/repo/rolldown.prim.config.mts'
 import { REPO_ROOT as rootPath } from '../../fleet/paths.mts'
 import { runSequence } from '../../fleet/util/run-command.mts'
+
+const require = createRequire(import.meta.url)
 
 const logger = getDefaultLogger()
 
@@ -127,9 +130,10 @@ export async function buildTypes(
 
 /**
  * Build the prim CLI: a true bundle (not per-file transpile) that inlines
- * lib-stable + diff + the acorn-wasm wrapper into a single `dist/bin/prim.cjs`.
- * The vendored `acorn-bindgen.cjs` + `acorn.wasm` are copied alongside so the
- * bindgen's `${__dirname}/./acorn.wasm` sibling-load resolves after publish.
+ * lib-stable + diff into a single `dist/bin/prim.cjs`. The
+ * `@ultrathink/acorn.wasm` parser's `acorn-wasm.cjs` entry + `acorn.wasm` are
+ * copied alongside so its `${__dirname}/./acorn.wasm` sibling-load resolves
+ * after publish.
  */
 export async function buildPrim(
   options: { quiet?: boolean | undefined } = {},
@@ -143,18 +147,16 @@ export async function buildPrim(
     } finally {
       await bundle.close()
     }
-    // Stage vendored wasm + bindgen next to the bundle. The bindgen
-    // uses `${__dirname}/./acorn.wasm`, so they must be siblings of
-    // `dist/bin/prim.cjs` at runtime.
+    // Stage the `@ultrathink/acorn.wasm` parser next to the bundle. Its CJS
+    // entry loads `${__dirname}/./acorn.wasm`, so entry + wasm must sit beside
+    // `dist/bin/prim.cjs` at runtime (prim.cjs requires `./acorn-wasm.cjs`).
     const binDir = path.join(rootPath, 'dist/bin')
     await fsPromises.mkdir(binDir, { recursive: true })
-    const vendor = path.join(rootPath, 'vendor/acorn')
+    const acornEntry = require.resolve('@ultrathink/acorn.wasm')
+    const acornDir = path.dirname(acornEntry)
+    await fsPromises.copyFile(acornEntry, path.join(binDir, 'acorn-wasm.cjs'))
     await fsPromises.copyFile(
-      path.join(vendor, 'acorn-bindgen.cjs'),
-      path.join(binDir, 'acorn-bindgen.cjs'),
-    )
-    await fsPromises.copyFile(
-      path.join(vendor, 'acorn.wasm'),
+      path.join(acornDir, 'acorn.wasm'),
       path.join(binDir, 'acorn.wasm'),
     )
     // Make the bin executable so direct invocation works without a `node`

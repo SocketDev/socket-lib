@@ -82,7 +82,7 @@ export const config: ExportsConfig = {
   // runtime-only bundled CLI artifacts under dist/bin (exposed via `bin`, not
   // as subpath exports).
   ignore: [
-    'dist/bin/acorn-bindgen.cjs',
+    'dist/bin/acorn-wasm.cjs',
     'dist/bin/prim.cjs',
     'dist/external/**',
     // `./logger/logger` is aliased to `./logger/node` (with a browser-condition

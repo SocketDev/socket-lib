@@ -4,16 +4,11 @@
 #
 # tools/* — developer-only utilities (audit/codemod scripts). Not
 # published, not part of the dist tree.
-#
-# vendor/* — vendored upstream code shipped as workspace packages so
-# tools can reference it via `workspace:*` instead of brittle
-# `../../../vendor/...` relative paths.
 packages:
   - .config/fleet/oxlint-plugin
   - .config/fleet/oxlint-plugin/fleet/*
   - .config/repo/oxlint-plugin/*
   - tools/*
-  - vendor/*
   - '.claude/hooks/fleet/*'
 
 # Catalog entries shared across hook workspaces. The hooks live in

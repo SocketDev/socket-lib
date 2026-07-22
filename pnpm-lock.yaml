@@ -534,6 +534,9 @@ importers:
       '@typescript/native-preview':
         specifier: 'catalog:'
         version: 7.0.0-dev.20260510.1
+      '@ultrathink/acorn.wasm':
+        specifier: 'catalog:'
+        version: '@ultrathink/acorn-wasm@0.0.1'
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 4.1.10(vitest@4.1.10)
@@ -2431,14 +2434,12 @@ importers:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.1.0(typescript@7.0.2)'
-      acorn:
-        specifier: workspace:*
-        version: link:../../vendor/acorn
+      '@ultrathink/acorn.wasm':
+        specifier: 'catalog:'
+        version: '@ultrathink/acorn-wasm@0.0.1'
       diff:
         specifier: 9.0.0
         version: 9.0.0
-
-  vendor/acorn: {}
 
 packages:
 

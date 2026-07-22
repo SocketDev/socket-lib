@@ -240,9 +240,6 @@ pnpm-debug.log
 !/src/external/
 !/test/fixtures/
 !/tools/prim/test/fixtures/
-!/vendor/
-# re-ignore generated/junk that lives under a re-included dir
-/vendor/acorn/acorn.wasm
 
 # ─── vitiate coverage-guided fuzz lane (`pnpm run test:fuzz`) caches ───
 # `.swc/` is the SWC instrument plugin's WASM cache; `.vitiate/` holds the

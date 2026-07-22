@@ -21,7 +21,7 @@ import { getCwd } from './repo'
 
 /**
  * The repo's submodule mount points as normalized, repo-root-relative paths
- * (e.g. `vendor/acorn`). Reads `git config` on `.gitmodules`, so it lists
+ * (e.g. `upstream/foo`). Reads `git config` on `.gitmodules`, so it lists
  * declared submodules whether or not they are initialized — the case a
  * stderr-message check on `git ls-files` misses.
  *

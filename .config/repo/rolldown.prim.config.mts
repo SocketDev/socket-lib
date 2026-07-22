@@ -2,16 +2,17 @@
  * @file Rolldown configuration for the `prim` CLI bundle. Unlike the main
  *   socket-lib build (per-file transpile), this is a real bundle: every import
  *   — including `@socketsecurity/lib-stable/*` and `diff` — gets inlined into a
- *   single `dist/bin/prim.cjs`. The vendored `acorn-wasm` wrapper is also
- *   inlined, but its CJS `acorn-bindgen.cjs` binding (which reads
- *   `${__dirname}/./acorn.wasm` synchronously at module load) stays external
- *   and is copied next to the bundle by the build runner, so `__dirname` at
- *   runtime resolves to `dist/bin/` where both files sit. Output contract:
+ *   single `dist/bin/prim.cjs`. The `@ultrathink/acorn.wasm` parser stays
+ *   external: its CJS entry reads `${__dirname}/./acorn.wasm` synchronously at
+ *   module load, so it is required as a `./acorn-wasm.cjs` sibling the build
+ *   runner copies next to the bundle — `__dirname` at runtime resolves to
+ *   `dist/bin/`, where both files sit. Output contract:
  *
  *   - `dist/bin/prim.cjs` — the bundled CLI
- *   - `dist/bin/acorn-bindgen.cjs` — copied from vendor/acorn
- *   - `dist/bin/acorn.wasm` — copied from vendor/acorn The bin entry in
- *     `package.json` points at `dist/bin/prim.cjs`.
+ *   - `dist/bin/acorn-wasm.cjs` — copied from the `@ultrathink/acorn.wasm`
+ *     package
+ *   - `dist/bin/acorn.wasm` — copied from the `@ultrathink/acorn.wasm` package
+ *     The bin entry in `package.json` points at `dist/bin/prim.cjs`.
  */
 
 import path from 'node:path'
@@ -23,11 +24,11 @@ import type { RolldownOptions } from 'rolldown'
 import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
 export const primBuildConfig: RolldownOptions = {
-  // Inline everything from lib-stable + diff + acorn-wasm wrapper. The
-  // only external dep is the wasm bindgen, which has to stay a runtime
-  // `require('./acorn-bindgen.cjs')` so its `${__dirname}/./acorn.wasm`
-  // sibling-load works after publish.
-  external: ['./acorn-bindgen.cjs'],
+  // The wasm parser stays external so prim.cjs keeps a runtime
+  // `require('@ultrathink/acorn.wasm')`; `output.paths` rewrites that to the
+  // `./acorn-wasm.cjs` sibling the build runner copies into dist/bin, so its
+  // `${__dirname}/./acorn.wasm` load resolves next to the bundle.
+  external: ['@ultrathink/acorn.wasm'],
   input: path.join(REPO_ROOT, 'tools/prim/bin/prim.mts'),
   output: {
     file: path.join(REPO_ROOT, 'dist/bin/prim.cjs'),
@@ -38,6 +39,7 @@ export const primBuildConfig: RolldownOptions = {
     codeSplitting: false,
     minify: false,
     banner: '"use strict";\n/* Socket Lib prim - bundled with rolldown */',
+    paths: { '@ultrathink/acorn.wasm': './acorn-wasm.cjs' },
   },
   platform: 'node',
 }

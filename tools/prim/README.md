@@ -101,10 +101,10 @@ bootstrap via `copyPropsRenamed` + `copyPrototype` reflection.
 
 ## Design
 
-- **Parser**: vendored acorn-wasm at `<socket-lib>/vendor/acorn-wasm`
-  (originally from
-  [sdxgen](https://github.com/SocketDev/sdxgen/tree/main/vendor/acorn-wasm))
-  — no npm install needed, no network access.
+- **Parser**: the `@ultrathink/acorn.wasm` package (a WASM build of the
+  ultrathink acorn parser), whose `acorn-wasm.cjs` entry + `acorn.wasm` are
+  copied next to the bundled CLI so the shipped `prim.cjs` parses with no
+  install step and no network access.
 - **TypeScript support**: `.ts`/`.mts`/`.cts`/`.tsx` files are stripped
   via Node's `module.stripTypeScriptTypes()` before parsing, so the
   audit walks source trees regardless of compilation state.
