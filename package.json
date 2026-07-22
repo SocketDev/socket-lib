@@ -3347,7 +3347,7 @@
     "@vitest/ui": "catalog:",
     "@vitiate/core": "catalog:",
     "@yarnpkg/extensions": "2.0.6",
-    "adm-zip": "0.5.16",
+    "adm-zip": "0.6.0",
     "c8": "catalog:",
     "cacache": "20.0.1",
     "chrome-devtools-mcp": "catalog:",

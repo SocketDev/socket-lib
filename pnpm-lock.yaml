@@ -212,8 +212,8 @@ catalogs:
       specifier: 0.34.52
       version: 0.34.52
     '@socketregistry/packageurl-js-stable':
-      specifier: npm:@socketregistry/packageurl-js@1.4.2
-      version: 1.4.2
+      specifier: npm:@socketregistry/packageurl-js@1.4.4
+      version: 1.4.4
     '@socketsecurity/lib-stable':
       specifier: npm:@socketsecurity/lib@6.1.0
       version: 6.1.0
@@ -503,7 +503,7 @@ importers:
         version: 1.4.4
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.2'
+        version: '@socketregistry/packageurl-js@1.4.4'
       '@socketregistry/yocto-spinner':
         specifier: 1.0.25
         version: 1.0.25
@@ -547,8 +547,8 @@ importers:
         specifier: 2.0.6
         version: 2.0.6(@yarnpkg/core@4.8.0(typanion@3.14.0))
       adm-zip:
-        specifier: 0.5.16
-        version: 0.5.16
+        specifier: 0.6.0
+        version: 0.6.0
       c8:
         specifier: 'catalog:'
         version: 12.0.0
@@ -892,7 +892,7 @@ importers:
     dependencies:
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.2'
+        version: '@socketregistry/packageurl-js@1.4.4'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.1.0(typescript@7.0.2)'
@@ -2036,7 +2036,7 @@ importers:
         version: 0.34.52
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.2'
+        version: '@socketregistry/packageurl-js@1.4.4'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.1.0(typescript@7.0.2)'
@@ -3475,10 +3475,6 @@ packages:
     resolution: {integrity: sha512-l3wz0cknjyGlI2iCyZxp50FJhtUFXkdZR6CfUU7OfNxE7I4CRBdsvORLgV+JPwqQQErRO/CZgKsbDHefd3puYA==}
     engines: {node: '>=18'}
 
-  '@socketregistry/packageurl-js@1.4.2':
-    resolution: {integrity: sha512-yt9UfUzD02wZ7kwb67oe4jxG2D9JtgPqjrK/ans2BovFyeie0w8hvRR0MuOWM4mUt2371oFPp7NB6O5ZjYJmlw==}
-    engines: {node: '>=18.20.8', pnpm: '>=11.0.0-rc.0'}
-
   '@socketregistry/packageurl-js@1.4.4':
     resolution: {integrity: sha512-yC/FL9o4IhTcAn5BILV2L9kCzbopESefffLFbvkWsYUdXSyRbWmmw8+mLhiEL7Zck0A6C1D9rgf8+r4T1WVPLA==}
     engines: {node: '>=24', npm: '>=12.0.0', pnpm: '>=11.0.5'}
@@ -4056,9 +4052,9 @@ packages:
     engines: {node: '>=0.4.0'}
     hasBin: true
 
-  adm-zip@0.5.16:
-    resolution: {integrity: sha512-TGw5yVi4saajsSEgz25grObGHEUaDrniwvA2qwSC060KfqGPdglhvPMA2lPIoxs3PQIItj2iag35fONcQqgUaQ==}
-    engines: {node: '>=12.0'}
+  adm-zip@0.6.0:
+    resolution: {integrity: sha512-XleryMhbuksdKtofnWZ9Sk+4CUTbms4Mb/EU32SZwToAyZ5RgVos/ki8n+yr0LWHOGKuakbXTuuYNHLQjhddgg==}
+    engines: {node: '>=14.0'}
 
   agent-base@7.1.4:
     resolution: {integrity: sha512-MnA+YT8fwfJPgBx3m60MNqakm30XOkyIoH1y6huTQvC0PwZG7ki8NacLBcrPbNoo8vEZy7Jpuk7+jMO+CUovTQ==}
@@ -6994,8 +6990,6 @@ snapshots:
 
   '@socketregistry/is-unicode-supported@1.0.5': {}
 
-  '@socketregistry/packageurl-js@1.4.2': {}
-
   '@socketregistry/packageurl-js@1.4.4': {}
 
   '@socketregistry/safe-buffer@1.0.9': {}
@@ -7514,7 +7508,7 @@ snapshots:
 
   acorn@8.16.0: {}
 
-  adm-zip@0.5.16: {}
+  adm-zip@0.6.0: {}
 
   agent-base@7.1.4: {}
 
