@@ -1,7 +1,7 @@
 /**
  * @file Package-extension lookup: match a package name + version against the
- *   `packageExtensions` overrides table (the same data pnpm/yarn use to patch
- *   missing dependency metadata) and merge the matching entries.
+ *   `packageExtensions` overrides table and merge the matching entries. That
+ *   table is the same data pnpm/yarn use to patch missing dependency metadata.
  */
 
 import { getPackageExtensions } from '../constants/packages'

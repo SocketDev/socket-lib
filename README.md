@@ -10,7 +10,7 @@ Core utilities for [Socket.dev](https://socket.dev/) tools: file system, process
 
 ## Why this repo exists
 
-`@socketsecurity/lib` is the shared utility layer for every Socket.dev tool (the CLI, SDK, registry, MCP server, build infrastructure). It exists so we ship one battle-tested implementation of "spawn a child", "fetch JSON with retries", "delete a path safely on Windows + POSIX", etc. — rather than ten subtly different ones across the fleet. Every export is reachable via a subpath import, so tree-shaking keeps your bundle lean.
+`@socketsecurity/lib` is the shared utility layer for every Socket.dev tool: the CLI, SDK, registry, MCP server, and build infrastructure. It exists so we ship one battle-tested implementation of "spawn a child", "fetch JSON with retries", "delete a path safely on Windows + POSIX", etc. — rather than ten subtly different ones across the fleet. Every export is reachable via a subpath import, so tree-shaking keeps your bundle lean.
 
 ## Install
 

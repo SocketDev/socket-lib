@@ -1,7 +1,7 @@
 /**
- * @file Public type surface for `cache/ttl/*` modules — the `TtlCache`
- *   interface (the seven-method API returned by `createTtlCache` and
- *   `createBrowserTtlCache`), the `TtlCacheEntry` storage shape, the
+ * @file Public type surface for `cache/ttl/*` modules — the seven-method
+ *   `TtlCache` interface returned by `createTtlCache` and
+ *   `createBrowserTtlCache`, plus the `TtlCacheEntry` storage shape, the
  *   `TtlCacheStorage` adapter contract for the browser store's persistent
  *   tier, and the `TtlCacheOptions` / `BrowserTtlCacheOptions` /
  *   `ClearOptions` configuration records. Pure types, no runtime side

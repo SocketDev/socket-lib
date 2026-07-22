@@ -1,7 +1,7 @@
 /**
- * @file Version comparison operators aligned with `node:smol-versions` (the
+ * @file Version comparison operators aligned with `node:smol-versions`, the
  *   C++-accelerated multi-ecosystem version helper shipped by the smol Node
- *   binary). The same names + signatures also match the vendored `semver` JS
+ *   binary. The same names + signatures also match the vendored `semver` JS
  *   lib — both impls expose this surface, so we pick one at module load (`impl
  *   = smol ?? semver`) and each export just forwards to it.
  *

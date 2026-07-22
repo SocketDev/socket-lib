@@ -96,7 +96,7 @@ const logger = getDefaultLogger()
 logger.success('hello from the SW')
 ```
 
-Your bundler picks `dist/logger/browser.js` (the shim) instead of `dist/logger/default.js` (the Node Logger class).
+Your bundler picks the browser shim `dist/logger/browser.js` instead of the Node `dist/logger/default.js`.
 
 For rolldown specifically:
 

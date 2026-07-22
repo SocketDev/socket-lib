@@ -26,14 +26,20 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 | Subpath                                                                         | Description        |
 | ------------------------------------------------------------------------------- | ------------------ |
+| [`@socketsecurity/lib-stable/ai/advisor`](../src/ai/advisor.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/agent-context`](../src/ai/agent-context.ts)     | _(no description)_ |
+| [`@socketsecurity/lib-stable/ai/assist`](../src/ai/assist.ts)                   | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/backends`](../src/ai/backends.ts)               | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/billing-context`](../src/ai/billing-context.ts) | _(no description)_ |
+| [`@socketsecurity/lib-stable/ai/builtin`](../src/ai/builtin.ts)                 | _(no description)_ |
+| [`@socketsecurity/lib-stable/ai/cost`](../src/ai/cost.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/credentials`](../src/ai/credentials.ts)         | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/discover`](../src/ai/discover.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/ai/enforce`](../src/ai/enforce.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/exec`](../src/ai/exec.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/http`](../src/ai/http.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/profiles`](../src/ai/profiles.ts)               | _(no description)_ |
+| [`@socketsecurity/lib-stable/ai/role`](../src/ai/role.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/route`](../src/ai/route.ts)                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/route-heuristic`](../src/ai/route-heuristic.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/spawn`](../src/ai/spawn.ts)                     | _(no description)_ |
@@ -104,7 +110,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib-stable/cache/ttl/browser`](../src/cache/ttl/browser.ts) | `createBrowserTtlCache` — browser-safe sibling of `createTtlCache` (`./store`).                                                                                                                                              |
 | [`@socketsecurity/lib-stable/cache/ttl/store`](../src/cache/ttl/store.ts)     | `createTtlCache` — generic TTL-based cache built on top of cacache (persistent) plus an in-memory LRU memo layer.                                                                                                            |
-| [`@socketsecurity/lib-stable/cache/ttl/types`](../src/cache/ttl/types.ts)     | Public type surface for `cache/ttl/*` modules — the `TtlCache` interface (the seven-method API returned by `createTtlCache` and `createBrowserTtlCache`), the `TtlCacheEntry` storage shape, the `TtlCacheStorage` adapte... |
+| [`@socketsecurity/lib-stable/cache/ttl/types`](../src/cache/ttl/types.ts)     | Public type surface for `cache/ttl/*` modules — the seven-method `TtlCache` interface returned by `createTtlCache` and `createBrowserTtlCache`, plus the `TtlCacheEntry` storage shape, the `TtlCacheStorage` adapter con... |
 
 ## checks/
 
@@ -328,7 +334,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/bazel/asset-names`](../src/external-tools/bazel/asset-names.ts)                         | Upstream Bazel release asset-name mapping per `platform-arch`.                                                                                                                                |
 | [`@socketsecurity/lib-stable/external-tools/bazel/from-download`](../src/external-tools/bazel/from-download.ts)                     | `bazelFromDownload()` — fetches the upstream Bazel binary and returns a `ResolvedBazel` pointing at the cached executable.                                                                    |
 | [`@socketsecurity/lib-stable/external-tools/bazel/from-path`](../src/external-tools/bazel/from-path.ts)                             | `bazelFromPath()` — looks for `bazelisk` first, then `bazel`, on the system PATH.                                                                                                             |
-| [`@socketsecurity/lib-stable/external-tools/bazel/read-bazel-version-file`](../src/external-tools/bazel/read-bazel-version-file.ts) | `readBazelVersionFile(workspaceDir)` — walks up from `workspaceDir` looking for a `.bazelversion` file (the Bazel/Bazelisk convention for pinning the project's Bazel version).               |
+| [`@socketsecurity/lib-stable/external-tools/bazel/read-bazel-version-file`](../src/external-tools/bazel/read-bazel-version-file.ts) | `readBazelVersionFile(workspaceDir)` — walks up from `workspaceDir` looking for a `.bazelversion` file, the Bazel/Bazelisk convention for pinning the project's Bazel version.                |
 | [`@socketsecurity/lib-stable/external-tools/bazel/resolve`](../src/external-tools/bazel/resolve.ts)                                 | `resolveBazel()` — Bazel resolution entry point.                                                                                                                                              |
 | [`@socketsecurity/lib-stable/external-tools/bazel/resolve-asset-url`](../src/external-tools/bazel/resolve-asset-url.ts)             | `resolveBazelAssetUrl(version, platformArch)` — builds the upstream GitHub Releases download URL for a Bazel binary.                                                                          |
 | [`@socketsecurity/lib-stable/external-tools/bazel/resolve-bazel-version`](../src/external-tools/bazel/resolve-bazel-version.ts)     | `resolveBazelVersion({ cwd })` — picks the Bazel version to run for a project, matching the bazelisk precedence: 1.                                                                           |
@@ -383,6 +389,10 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/skillspector/from-vfs`](../src/external-tools/skillspector/from-vfs.ts)                 | `skillspectorFromVfs()` — extracts SkillSpector from the smol Node VFS if it's bundled.                                                                                                       |
 | [`@socketsecurity/lib-stable/external-tools/skillspector/resolve`](../src/external-tools/skillspector/resolve.ts)                   | `resolveSkillSpector()` — SkillSpector resolution entry point.                                                                                                                                |
 | [`@socketsecurity/lib-stable/external-tools/skillspector/types`](../src/external-tools/skillspector/types.ts)                       | Shared types for SkillSpector resolution.                                                                                                                                                     |
+| [`@socketsecurity/lib-stable/external-tools/socket-keychain/asset-names`](../src/external-tools/socket-keychain/asset-names.ts)     | GitHub Release names for the standalone socket-keychain executable.                                                                                                                           |
+| [`@socketsecurity/lib-stable/external-tools/socket-keychain/from-download`](../src/external-tools/socket-keychain/from-download.ts) | Download one exact socket-keychain release asset, verify its pinned integrity, and copy it into the shared Wheelhouse rack.                                                                   |
+| [`@socketsecurity/lib-stable/external-tools/socket-keychain/resolve`](../src/external-tools/socket-keychain/resolve.ts)             | Security-sensitive resolver for socket-keychain.                                                                                                                                              |
+| [`@socketsecurity/lib-stable/external-tools/socket-keychain/types`](../src/external-tools/socket-keychain/types.ts)                 | Result type for a checksum-pinned socket-keychain installation.                                                                                                                               |
 | [`@socketsecurity/lib-stable/external-tools/synp/asset-names`](../src/external-tools/synp/asset-names.ts)                           | Upstream synp package coordinates.                                                                                                                                                            |
 | [`@socketsecurity/lib-stable/external-tools/synp/from-download`](../src/external-tools/synp/from-download.ts)                       | `synpFromDownload()` — installs the pinned synp npm package via `dlx/package` and returns a `ResolvedSynp` pointing at the resolved bin shim.                                                 |
 | [`@socketsecurity/lib-stable/external-tools/synp/from-path`](../src/external-tools/synp/from-path.ts)                               | `synpFromPath()` — looks for `synp` on the system PATH.                                                                                                                                       |
@@ -440,9 +450,11 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath                                                             | Description                                                                                                                                         |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib-stable/git/changed`](../src/git/changed.ts)   | "Anything different from HEAD" helpers — the broad-strokes `git status --porcelain` view that lumps staged, unstaged, and untracked paths together. |
+| [`@socketsecurity/lib-stable/git/ignored`](../src/git/ignored.ts)   | `getTrackedIgnoredFiles` — the paths git TRACKS that the repo's own `.gitignore` also IGNORES.                                                      |
 | [`@socketsecurity/lib-stable/git/repo`](../src/git/repo.ts)         | Git repository discovery + foundational lazy fs/path/cwd helpers shared across `git/*` leaves.                                                      |
 | [`@socketsecurity/lib-stable/git/staged`](../src/git/staged.ts)     | "Ready for the next commit" helpers — `git diff --cached` over only the index.                                                                      |
 | [`@socketsecurity/lib-stable/git/tracked`](../src/git/tracked.ts)   | Tracked-status + submodule-membership probes for a working-tree path.                                                                               |
+| [`@socketsecurity/lib-stable/git/tree`](../src/git/tree.ts)         | `getTreeManifest` — the `git ls-tree -r <ref>` manifest of a commit.                                                                                |
 | [`@socketsecurity/lib-stable/git/types`](../src/git/types.ts)       | Public type surface for `git/*` modules — the `FilterPackagesByChangesOptions` and `GitDiffOptions` configuration records.                          |
 | [`@socketsecurity/lib-stable/git/unstaged`](../src/git/unstaged.ts) | "Edited but not yet staged" helpers — `git diff` over the working tree only.                                                                        |
 
@@ -502,12 +514,12 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## ipc/
 
-| Subpath | Description |
-| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | -------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [`@socketsecurity/lib-stable/ipc/directory`](../src/ipc/directory.ts) | Stub-directory creation + permission audit. |
-| [`@socketsecurity/lib-stable/ipc/paths`](../src/ipc/paths.ts) | IPC stub path resolution. |
-| [`@socketsecurity/lib-stable/ipc/types`](../src/ipc/types.ts) | Public type surface for `ipc/*` modules — the `IpcStub` shape that backs the file-based handoff. |
-| [`@socketsecurity/lib-stable/ipc/write`](../src/ipc/write.ts) | Atomic stub write — `O_CREAT                                                                     | O_WRONLY | O_EXCL | O_NOFOLLOW` so we refuse to overwrite a pre-existing stub (collision with attacker-planted file or PID reuse) and refuse to follow symlinks at the final path component. |
+| Subpath                                                               | Description                                                                                      |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| [`@socketsecurity/lib-stable/ipc/directory`](../src/ipc/directory.ts) | Stub-directory creation + permission audit.                                                      |
+| [`@socketsecurity/lib-stable/ipc/paths`](../src/ipc/paths.ts)         | IPC stub path resolution.                                                                        |
+| [`@socketsecurity/lib-stable/ipc/types`](../src/ipc/types.ts)         | Public type surface for `ipc/*` modules — the `IpcStub` shape that backs the file-based handoff. |
+| [`@socketsecurity/lib-stable/ipc/write`](../src/ipc/write.ts)         | Atomic stub write — `O_CREAT                                                                     | O_WRONLY | O_EXCL | O_NOFOLLOW` so we refuse to overwrite a pre-existing stub (collision with attacker-planted file or PID reuse) and refuse to follow symlinks at the final path component. |
 
 ## json/
 
@@ -618,7 +630,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/packages/isolation`](../src/packages/isolation.ts)                     | Package isolation utilities for testing.                                                                                                                                                                                   |
 | [`@socketsecurity/lib-stable/packages/licenses`](../src/packages/licenses.ts)                       | SPDX license parsing and analysis utilities.                                                                                                                                                                               |
 | [`@socketsecurity/lib-stable/packages/manifest`](../src/packages/manifest.ts)                       | Package manifest and packument fetching utilities.                                                                                                                                                                         |
-| [`@socketsecurity/lib-stable/packages/metadata-extensions`](../src/packages/metadata-extensions.ts) | Package-extension lookup: match a package name + version against the `packageExtensions` overrides table (the same data pnpm/yarn use to patch missing dependency metadata) and merge the matching entries.                |
+| [`@socketsecurity/lib-stable/packages/metadata-extensions`](../src/packages/metadata-extensions.ts) | Package-extension lookup: match a package name + version against the `packageExtensions` overrides table and merge the matching entries.                                                                                   |
 | [`@socketsecurity/lib-stable/packages/normalize`](../src/packages/normalize.ts)                     | Package.json normalization utilities.                                                                                                                                                                                      |
 | [`@socketsecurity/lib-stable/packages/provenance`](../src/packages/provenance.ts)                   | Package provenance and attestation verification utilities.                                                                                                                                                                 |
 | [`@socketsecurity/lib-stable/packages/read`](../src/packages/read.ts)                               | Read + parse a package.json.                                                                                                                                                                                               |
@@ -699,6 +711,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/process/spawn/errors`](../src/process/spawn/errors.ts)       | Spawn error classification and enhancement.                                                                                                   |
 | [`@socketsecurity/lib-stable/process/spawn/kill-tree`](../src/process/spawn/kill-tree.ts) | Cross-platform process-tree termination.                                                                                                      |
 | [`@socketsecurity/lib-stable/process/spawn/stdio`](../src/process/spawn/stdio.ts)         | Stdio configuration helpers for `spawn` callers.                                                                                              |
+| [`@socketsecurity/lib-stable/process/spawn/timeout`](../src/process/spawn/timeout.ts)     | Platform-aware spawn-timeout scaling.                                                                                                         |
 | [`@socketsecurity/lib-stable/process/spawn/types`](../src/process/spawn/types.ts)         | Public type surface for `spawn/*` modules.                                                                                                    |
 | [`@socketsecurity/lib-stable/process/transient`](../src/process/transient.ts)             | Temporary package executor detection utilities for Socket ecosystem.                                                                          |
 
@@ -720,7 +733,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | ----------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib-stable/regexps/escape`](../src/regexps/escape.ts) | Public `escapeRegExp` entry — binds to native `RegExp.escape` (TC39 Stage 4, Node 24+ / V8 13.7) when available, otherwise falls back to the spec-compliant implementation in `./spec`. |
 | [`@socketsecurity/lib-stable/regexps/hex`](../src/regexps/hex.ts)       | Hex-encoding helpers — fixed-width `\xHH` (`hex2`) and `\uHHHH` (`hex4`) producers used by the spec-compliant `RegExp.escape` fallback to emit canonical escape sequences.              |
-| [`@socketsecurity/lib-stable/regexps/spec`](../src/regexps/spec.ts)     | Spec-compliant fallback for the TC39 `RegExp.escape` (<https://tc39.es/ecma262/#sec-regexp.escape>).                                                                                    |
+| [`@socketsecurity/lib-stable/regexps/spec`](../src/regexps/spec.ts)     | Spec-compliant fallback for the TC39 `RegExp.escape` (https://tc39.es/ecma262/#sec-regexp.escape).                                                                                      |
 
 ## releases/
 
@@ -878,23 +891,23 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## url/
 
-| Subpath | Description |
-| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---- | --------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib-stable/url/assert-safe`](../src/url/assert-safe.ts) | SSRF guard for operator- or issuer-supplied URLs — `assertSafeHttpUrl` parses a raw URL, rejects non-HTTP(S) schemes, and refuses hosts that resolve to loopback / private / link-local ranges (cloud metadata, redis, in... |
-| [`@socketsecurity/lib-stable/url/parse`](../src/url/parse.ts) | URL parsing helpers — `parseUrl` (safe `new URL(...)` wrapper that returns `undefined` instead of throwing) and `createRelativeUrl` (compose a relative path against an optional base). |
-| [`@socketsecurity/lib-stable/url/predicates`](../src/url/predicates.ts) | URL type-guard predicates — `isUrl` answers whether a value parses as a valid URL via `parseUrl`. |
+| Subpath                                                                       | Description                                                                                                                                                                                                                  |
+| ----------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib-stable/url/assert-safe`](../src/url/assert-safe.ts)     | SSRF guard for operator- or issuer-supplied URLs — `assertSafeHttpUrl` parses a raw URL, rejects non-HTTP(S) schemes, and refuses hosts that resolve to loopback / private / link-local ranges (cloud metadata, redis, in... |
+| [`@socketsecurity/lib-stable/url/parse`](../src/url/parse.ts)                 | URL parsing helpers — `parseUrl` (safe `new URL(...)` wrapper that returns `undefined` instead of throwing) and `createRelativeUrl` (compose a relative path against an optional base).                                      |
+| [`@socketsecurity/lib-stable/url/predicates`](../src/url/predicates.ts)       | URL type-guard predicates — `isUrl` answers whether a value parses as a valid URL via `parseUrl`.                                                                                                                            |
 | [`@socketsecurity/lib-stable/url/search-params`](../src/url/search-params.ts) | URL search-param coercion helpers — `urlSearchParamsAs*` normalise a raw `string                                                                                                                                             | null | undefined` value into a typed shape (array / boolean / number / string) with a default. |
-| [`@socketsecurity/lib-stable/url/types`](../src/url/types.ts) | Public type surface for `url/*` modules — option interfaces consumed by `createRelativeUrl`, `urlSearchParamsAs*`, and `urlSearchParamsGet*`. |
+| [`@socketsecurity/lib-stable/url/types`](../src/url/types.ts)                 | Public type surface for `url/*` modules — option interfaces consumed by `createRelativeUrl`, `urlSearchParamsAs*`, and `urlSearchParamsGet*`.                                                                                |
 
 ## versions/
 
-| Subpath | Description |
-| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------- | ------- | -------------------------------------------------------------------------- |
-| [`@socketsecurity/lib-stable/versions/compare`](../src/versions/compare.ts) | Version comparison operators aligned with `node:smol-versions` (the C++-accelerated multi-ecosystem version helper shipped by the smol Node binary). |
-| [`@socketsecurity/lib-stable/versions/modify`](../src/versions/modify.ts) | Mutation helpers — `incrementVersion` bumps a version by release type ('major' | 'minor' | 'patch' | 'pre\*'), and `versionDiff` returns the kind of step between two versions. |
-| [`@socketsecurity/lib-stable/versions/parse`](../src/versions/parse.ts) | Parsing helpers — `coerceVersion` rounds a sloppy input ("1.2") up to a valid semver triple, `parseVersion` returns `{major, minor, patch, prerelease, build}`, and the `getMajor*` / `getMinor*` / `getPatchVersion` acc... |
-| [`@socketsecurity/lib-stable/versions/range`](../src/versions/range.ts) | Range / set helpers — `satisfiesVersion` / `filterVersions` check membership against a semver range, `maxVersion` / `minVersion` pick the bounds of an arbitrary version array. |
-| [`@socketsecurity/lib-stable/versions/types`](../src/versions/types.ts) | Public type surface for `versions/*` modules — the parsed-version shape returned by `parseVersion` (a stable subset of semver's SemVer instance, exposed as a structural type rather than leaking the upstream class). |
+| Subpath                                                                     | Description                                                                                                                                                                                                                  |
+| --------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib-stable/versions/compare`](../src/versions/compare.ts) | Version comparison operators aligned with `node:smol-versions`, the C++-accelerated multi-ecosystem version helper shipped by the smol Node binary.                                                                          |
+| [`@socketsecurity/lib-stable/versions/modify`](../src/versions/modify.ts)   | Mutation helpers — `incrementVersion` bumps a version by release type ('major'                                                                                                                                               | 'minor' | 'patch' | 'pre*'), and `versionDiff` returns the kind of step between two versions. |
+| [`@socketsecurity/lib-stable/versions/parse`](../src/versions/parse.ts)     | Parsing helpers — `coerceVersion` rounds a sloppy input ("1.2") up to a valid semver triple, `parseVersion` returns `{major, minor, patch, prerelease, build}`, and the `getMajor*` / `getMinor*` / `getPatchVersion` acc... |
+| [`@socketsecurity/lib-stable/versions/range`](../src/versions/range.ts)     | Range / set helpers — `satisfiesVersion` / `filterVersions` check membership against a semver range, `maxVersion` / `minVersion` pick the bounds of an arbitrary version array.                                              |
+| [`@socketsecurity/lib-stable/versions/types`](../src/versions/types.ts)     | Public type surface for `versions/*` modules — the parsed-version shape returned by `parseVersion`, a stable subset of semver's SemVer instance exposed as a structural type rather than leaking the upstream class.         |
 
 ## words/
 
