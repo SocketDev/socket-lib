@@ -434,6 +434,14 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
             `const req = createRequire(${JSON.stringify(distDir + path.sep)})\n` +
             `req(${JSON.stringify('./' + mod + '.js')})\n`,
         )
+        // Strip inherited coverage collection: `node --build-snapshot` aborts
+        // when NODE_V8_COVERAGE is set (the cover tier exports it to every
+        // child), and coverage of a snapshot-builder child is meaningless.
+        const childEnv: Record<string, string | undefined> = {
+          ...process.env,
+        }
+        delete childEnv['NODE_V8_COVERAGE']
+        delete childEnv['NODE_OPTIONS']
         const { status, stderr } = spawnSync(
           process.execPath,
           [
@@ -442,7 +450,7 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
             '--build-snapshot',
             entry,
           ],
-          { encoding: 'utf8' },
+          { encoding: 'utf8', env: childEnv },
         )
         // Self-debugging: surface the exact serialization error on failure.
         expect(
