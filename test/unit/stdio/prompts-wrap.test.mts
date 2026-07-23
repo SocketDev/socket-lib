@@ -269,7 +269,16 @@ describe('stdio/prompts - wrapping', () => {
       // This test verifies the fix for the bug where wrapPrompt received.
       // an object instead of a function for modules with multiple exports.
       // All wrapped prompts should be callable.
-      const prompts = [checkbox, confirm, input, password, search, select]
+      // The exports are asserted to their typed @inquirer signatures; erase
+      // back to wrapPrompt's runtime-shaped signature for re-wrapping.
+      const prompts = [
+        checkbox,
+        confirm,
+        input,
+        password,
+        search,
+        select,
+      ] as unknown as Array<(...args: unknown[]) => Promise<unknown>>
       for (let i = 0, { length } = prompts; i < length; i += 1) {
         const prompt = prompts[i]!
         expect(() => wrapPrompt(prompt)).not.toThrow()

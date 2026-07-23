@@ -7,102 +7,49 @@ import { getAbortSignal } from '../process/abort'
 import { applyColor } from '../logger/colors'
 
 import type { ColorValue } from '../colors/types'
-import type { Remap } from '../objects/types'
 import { getDefaultSpinner } from '../spinner/default'
-import type { SpinnerInstance } from '../spinner/types'
 import { getTheme } from '../themes/context'
 import { THEMES } from '../themes/themes'
 import type { ThemeName } from '../themes/themes'
 import type { Theme } from '../themes/types'
 import { resolveColor } from '../themes/resolve'
 
-// Type definitions
+import type {
+  CheckboxPrompt,
+  ConfirmPrompt,
+  Context,
+  InputPrompt,
+  PasswordPrompt,
+  SearchPrompt,
+  SelectPrompt,
+  SeparatorType,
+} from './prompts-types'
 
-/**
- * Choice option for select and search prompts.
- *
- * @template Value - Type of the choice value.
- */
-export interface Choice<Value = unknown> {
-  /**
-   * The value returned when this choice is selected.
-   */
-  value: Value
-  /**
-   * Display name for the choice (defaults to value.toString())
-   */
-  name?: string | undefined
-  /**
-   * Additional description text shown below the choice.
-   */
-  description?: string | undefined
-  /**
-   * Short text shown after selection (defaults to name)
-   */
-  short?: string | undefined
-  /**
-   * Whether this choice is disabled, or a reason string.
-   */
-  disabled?: boolean | string | undefined
-}
+// Re-export the prompt type surface so consumers keep importing from
+// '@socketsecurity/lib/stdio/prompts'. Definitions live in ./prompts-types.
+export type {
+  CheckboxChoice,
+  CheckboxConfig,
+  CheckboxPrompt,
+  Choice,
+  ConfirmConfig,
+  ConfirmPrompt,
+  Context,
+  InputConfig,
+  InputPrompt,
+  InquirerContext,
+  PasswordConfig,
+  PasswordPrompt,
+  PromptTheme,
+  SearchConfig,
+  SearchPrompt,
+  SelectConfig,
+  SelectPrompt,
+  SeparatorType,
+} from './prompts-types'
 
-/**
- * Context for inquirer prompts. Minimal context interface used by Inquirer
- * prompts. Duplicated from `@inquirer/type` - InquirerContext.
- */
-export interface InquirerContext {
-  /**
-   * Abort signal for cancelling the prompt.
-   */
-  signal?: AbortSignal | undefined
-  /**
-   * Input stream (defaults to process.stdin)
-   */
-  input?: NodeJS.ReadableStream | undefined
-  /**
-   * Output stream (defaults to process.stdout)
-   */
-  output?: NodeJS.WritableStream | undefined
-  /**
-   * Clear the prompt from terminal when done.
-   */
-  clearPromptOnDone?: boolean | undefined
-}
-
-/**
- * Extended context with spinner support. Allows passing a spinner instance to
- * be managed during prompts.
- */
-export type Context = Remap<
-  InquirerContext & {
-    /**
-     * Optional spinner to stop/start during prompt display.
-     */
-    spinner?: SpinnerInstance | undefined
-  }
->
-
-/**
- * Separator for visual grouping in select/checkbox prompts. Creates a
- * non-selectable visual separator line. Duplicated from `@inquirer/select` -
- * Separator. This type definition ensures the Separator type is available in
- * published packages.
- *
- * @example
- *   import { Separator } from './prompts'
- *
- *   const choices = [
- *     { name: 'Option 1', value: 1 },
- *     new Separator(),
- *     { name: 'Option 2', value: 2 },
- *   ]
- */
-export declare class SeparatorType {
-  readonly separator: string
-  readonly type: 'separator'
-  constructor(separator?: string)
-}
-
+// A separate alias rather than a re-export: `export type { Separator }` would
+// collide with the `Separator` proxy const exported below.
 export type Separator = SeparatorType
 
 /**
@@ -199,7 +146,7 @@ export function createInquirerTheme(
  *
  * @returns Separator instance
  */
-export function createSeparator(text?: string): Separator {
+export function createSeparator(text?: string): SeparatorType {
   return new (require('../external/@inquirer/select').Separator)(text)
 }
 
@@ -330,7 +277,7 @@ export function wrapPrompt<T = unknown>(
 // use to defer the native-handle-bearing semver bundle).
 export const checkbox = wrapPrompt((...args: unknown[]) =>
   require('../external/@inquirer/checkbox').default(...args),
-)
+) as CheckboxPrompt
 
 /**
  * Prompt for a yes/no confirmation. Wrapped with spinner handling and abort
@@ -342,7 +289,7 @@ export const checkbox = wrapPrompt((...args: unknown[]) =>
  */
 export const confirm = wrapPrompt((...args: unknown[]) =>
   require('../external/@inquirer/confirm').default(...args),
-)
+) as ConfirmPrompt
 
 /**
  * Prompt for text input. Wrapped with spinner handling and abort signal
@@ -353,7 +300,7 @@ export const confirm = wrapPrompt((...args: unknown[]) =>
  */
 export const input = wrapPrompt((...args: unknown[]) =>
   require('../external/@inquirer/input').default(...args),
-)
+) as InputPrompt
 
 /**
  * Prompt for password input (hidden characters). Wrapped with spinner handling
@@ -364,7 +311,7 @@ export const input = wrapPrompt((...args: unknown[]) =>
  */
 export const password = wrapPrompt((...args: unknown[]) =>
   require('../external/@inquirer/password').default(...args),
-)
+) as PasswordPrompt
 
 /**
  * Prompt with searchable/filterable choices. Wrapped with spinner handling and
@@ -378,7 +325,7 @@ export const password = wrapPrompt((...args: unknown[]) =>
  */
 export const search = wrapPrompt((...args: unknown[]) =>
   require('../external/@inquirer/search').default(...args),
-)
+) as SearchPrompt
 
 /**
  * Prompt to select from a list of choices. Wrapped with spinner handling and
@@ -395,7 +342,7 @@ export const search = wrapPrompt((...args: unknown[]) =>
  */
 export const select = wrapPrompt((...args: unknown[]) =>
   require('../external/@inquirer/select').default(...args),
-)
+) as SelectPrompt
 
 // Lazy value export (snapshot-safety, see the note above): front the real
 // @inquirer Separator class with a Proxy so the vendored-bundle require is

@@ -3003,6 +3003,11 @@
       "types": "./dist/stdio/prompts.d.ts",
       "default": "./dist/stdio/prompts.js"
     },
+    "./stdio/prompts-types": {
+      "source": "./src/stdio/prompts-types.ts",
+      "types": "./dist/stdio/prompts-types.d.ts",
+      "default": "./dist/stdio/prompts-types.js"
+    },
     "./stdio/stderr": {
       "source": "./src/stdio/stderr.ts",
       "types": "./dist/stdio/stderr.d.ts",
