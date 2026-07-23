@@ -434,14 +434,12 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
             `const req = createRequire(${JSON.stringify(distDir + path.sep)})\n` +
             `req(${JSON.stringify('./' + mod + '.js')})\n`,
         )
-        // Strip inherited coverage collection: `node --build-snapshot` aborts
-        // when NODE_V8_COVERAGE is set (the cover tier exports it to every
-        // child), and coverage of a snapshot-builder child is meaningless.
-        const childEnv: Record<string, string | undefined> = {
-          ...process.env,
-        }
-        delete childEnv['NODE_V8_COVERAGE']
-        delete childEnv['NODE_OPTIONS']
+        // Neutralize inherited coverage collection: `node --build-snapshot`
+        // SEGFAULTS when NODE_V8_COVERAGE points at a directory (the cover
+        // tier exports it to every child), and coverage of a snapshot-builder
+        // child is meaningless. The spawn wrapper MERGES env over process.env,
+        // so deleted keys re-inject — override with empty strings instead
+        // (empty disables collection; verified: dir => exit 139, '' => 0).
         const { status, stderr } = spawnSync(
           process.execPath,
           [
@@ -450,7 +448,10 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
             '--build-snapshot',
             entry,
           ],
-          { encoding: 'utf8', env: childEnv },
+          {
+            encoding: 'utf8',
+            env: { NODE_OPTIONS: '', NODE_V8_COVERAGE: '' },
+          },
         )
         // Self-debugging: surface the exact serialization error on failure.
         expect(
