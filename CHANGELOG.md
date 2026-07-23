@@ -10,6 +10,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **`stdio`** — restore typed prompt signatures in published d.ts
+- **`prim`** — consume @ultrathink/acorn.wasm dep, drop vendored acorn
+- **`deps`** — bump adm-zip 0.5.16 → 0.6.0 (crafted-ZIP 4GB alloc, dev dep)
+
+## [6.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v6.2.1) - 2026-07-23
+
+### Fixed
+
+- **`stdio`** — restore typed prompt signatures in published d.ts
 
 ## [6.2.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.2.0) - 2026-07-23
 
