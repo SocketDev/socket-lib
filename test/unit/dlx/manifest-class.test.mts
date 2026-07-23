@@ -12,7 +12,7 @@
  *     manifest-legacy.test.mts.
  */
 
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import {
@@ -22,13 +22,14 @@ import {
 } from '../../../src/dlx/manifest'
 import type { BinaryDetails, PackageDetails } from '../../../src/dlx/manifest'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe.sequential('DlxManifest class', () => {
   let testDir: string
   let manifestPath: string
   let manifest: DlxManifest
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Create unique temp directory for each test
     testDir = path.join(
       os.tmpdir(),
@@ -39,11 +40,11 @@ describe.sequential('DlxManifest class', () => {
     manifest = new DlxManifest({ manifestPath })
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Clean up test directory
     try {
       if (existsSync(testDir)) {
-        rmSync(testDir, { recursive: true, force: true })
+        await safeDelete(testDir)
       }
     } catch {}
   })
@@ -282,7 +283,7 @@ describe.sequential('DlxManifest class', () => {
       const details2: PackageDetails = { installed_version: '2.0.0' }
       const details3: PackageDetails = { installed_version: '3.0.0' }
 
-      await Promise.all([
+      await Promise.allSettled([
         manifest.setPackageEntry('pkg1', 'key1', details1),
         manifest.setPackageEntry('pkg2', 'key2', details2),
         manifest.setPackageEntry('pkg3', 'key3', details3),

@@ -10,13 +10,7 @@
  */
 
 import crypto from 'node:crypto'
-import {
-  existsSync,
-  mkdirSync,
-  rmSync,
-  symlinkSync,
-  writeFileSync,
-} from 'node:fs'
+import { existsSync, mkdirSync, symlinkSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -27,6 +21,7 @@ import { readFileBinary, safeReadFileSync } from '../../../src/fs/read-file'
 import { readJsonSync } from '../../../src/fs/read-json'
 import { writeJsonSync } from '../../../src/fs/write-json'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe.sequential('fs - Sync Functions', () => {
   let testDir: string
@@ -36,9 +31,9 @@ describe.sequential('fs - Sync Functions', () => {
     mkdirSync(testDir, { recursive: true })
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     if (existsSync(testDir)) {
-      rmSync(testDir, { recursive: true, force: true })
+      await safeDelete(testDir)
     }
   })
 

@@ -6,7 +6,7 @@
  *   paths.
  */
 
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -20,6 +20,7 @@ vi.mock(import('../../../src/process/spawn/child'))
 
 import { spawn } from '../../../src/process/spawn/child'
 import { getCodeCoverage } from '../../../src/cover/code'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpDir: string
 
@@ -35,8 +36,8 @@ describe.sequential('cover/code', () => {
     vi.mocked(spawn).mockReset()
   })
 
-  afterEach(() => {
-    rmSync(tmpDir, { recursive: true, force: true })
+  afterEach(async () => {
+    await safeDelete(tmpDir)
     vi.restoreAllMocks()
   })
 

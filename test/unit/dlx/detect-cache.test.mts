@@ -4,7 +4,7 @@
  */
 
 import crypto from 'node:crypto'
-import { mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -15,6 +15,7 @@ import {
   isJsFilePath,
 } from '../../../src/dlx/detect'
 import { safeDelete } from '../../../src/fs/safe'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 describe.sequential('dlx/detect — cache + stale paths', () => {
   let testDir: string
@@ -80,7 +81,7 @@ describe.sequential('dlx/detect — cache + stale paths', () => {
       // Prime cache.
       detectLocalExecutableType(path.join(projDir, 'cli.js'))
       // Remove the package.json — next call should re-probe.
-      rmSync(pkgJson)
+      safeDeleteSync(pkgJson)
       const result = detectLocalExecutableType(path.join(projDir, 'cli.js'))
       // Falls back to file-extension because package.json is gone.
       expect(result.method).toBe('file-extension')

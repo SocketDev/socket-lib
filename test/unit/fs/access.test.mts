@@ -2,7 +2,7 @@
  * @file Tests for fs/access — sync permission predicates.
  */
 
-import { chmodSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { chmodSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -14,19 +14,20 @@ import {
   canRead,
   canWrite,
 } from '../../../src/fs/access'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string
 let file: string
 
-beforeAll(() => {
+beforeAll(async () => {
   tmp = mkdtempSync(path.join(os.tmpdir(), 'access-test-'))
   file = path.join(tmp, 'f.txt')
   writeFileSync(file, 'hi')
 })
 
-afterAll(() => {
+afterAll(async () => {
   try {
-    rmSync(tmp, { force: true, recursive: true })
+    await safeDelete(tmp)
   } catch {}
 })
 

@@ -1,20 +1,21 @@
-import { chmodSync, mkdirSync, mkdtempSync, rmSync, statSync } from 'node:fs'
+import { chmodSync, mkdirSync, mkdtempSync, statSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import { ensureIpcDirectory } from '../../../src/ipc/directory'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const IS_WIN = os.platform() === 'win32'
 
 let tmpRoot: string
 
-beforeEach(() => {
+beforeEach(async () => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'ipc-dir-test-'))
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
 })
 
 describe.sequential('ipc/directory — ensureIpcDirectory', () => {

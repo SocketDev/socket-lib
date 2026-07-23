@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import net from 'node:net'
 import os from 'node:os'
 import path from 'node:path'
@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 import { getRuntimeSocketPath } from '../../../src/paths/socket'
 import { requestFromBroker } from '../../../src/secrets/broker'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpDir = ''
 let server: net.Server | undefined
@@ -32,7 +33,7 @@ function startMockDaemon(response: string): Promise<void> {
   })
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   // A short prefix keeps the Unix socket path under the platform length cap.
   tmpDir = mkdtempSync(path.join(os.tmpdir(), 'pb-'))
   // Pin the runtime dir so the client and the mock daemon agree on the path.
@@ -54,7 +55,7 @@ afterEach(async () => {
   server = undefined
   clearEnv('XDG_RUNTIME_DIR')
   resetEnv()
-  rmSync(tmpDir, { force: true, recursive: true })
+  await safeDelete(tmpDir)
 })
 
 describe('secrets/broker', () => {

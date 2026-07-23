@@ -1,11 +1,5 @@
 import crypto from 'node:crypto'
-import {
-  mkdirSync,
-  mkdtempSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs'
+import { mkdirSync, mkdtempSync, statSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -14,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import type * as BinaryCacheModule from '../../../src/dlx/binary-cache'
 import type * as FsSafeModule from '../../../src/fs/safe'
 import type { processLock as ProcessLockType } from '../../../src/process/lock-instance'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 vi.mock(import('../../../src/http-request/download'), () => ({
   httpDownload: vi.fn(),
@@ -63,13 +58,13 @@ async function loadFresh() {
   }
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'binary-download-orch-test-'))
   vi.resetModules()
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
   vi.clearAllMocks()
 })
 
@@ -261,7 +256,7 @@ describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
     return { downloadBinary: mod.downloadBinary }
   }
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.doUnmock(import('../../../src/fs/safe'))
   })
 

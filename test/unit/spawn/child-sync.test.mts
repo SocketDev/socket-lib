@@ -6,7 +6,7 @@
  *   commands, and external process execution.
  */
 
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -17,6 +17,7 @@ import { WIN32 } from '../../../src/constants/platform'
 import { spawnSync } from '../../../src/process/spawn/child'
 
 import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('spawnSync', () => {
   it('accepts a platform-scaled localTimeout', () => {
@@ -167,7 +168,7 @@ describe('spawnSync', () => {
       expect(result.status).toBe(0)
       expect(String(result.stdout)).toContain('hello')
     } finally {
-      rmSync(tmp, { force: true, recursive: true })
+      safeDeleteSync(tmp)
     }
   })
 

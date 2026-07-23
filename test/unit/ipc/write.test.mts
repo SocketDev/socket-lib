@@ -1,10 +1,4 @@
-import {
-  existsSync,
-  promises as fs,
-  readFileSync,
-  rmSync,
-  statSync,
-} from 'node:fs'
+import { existsSync, promises as fs, readFileSync, statSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -12,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { getIpcStubPath } from '../../../src/ipc/paths'
 import { writeIpcStub } from '../../../src/ipc/write'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const IS_WIN = os.platform() === 'win32'
 
@@ -19,7 +14,7 @@ let appName: string
 let stubPath: string
 let appDir: string
 
-beforeEach(() => {
+beforeEach(async () => {
   appName = `socket-lib-test-${process.pid}-${Date.now()}-${Math.floor(
     Math.random() * 1_000_000,
   )}`
@@ -27,8 +22,8 @@ beforeEach(() => {
   appDir = path.dirname(stubPath)
 })
 
-afterEach(() => {
-  rmSync(appDir, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(appDir)
 })
 
 describe.sequential('ipc/write — writeIpcStub', () => {

@@ -1,10 +1,4 @@
-import {
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs'
+import { mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
@@ -18,6 +12,7 @@ import {
   write,
   writeRcFile,
 } from '../../../src/secrets/rc'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const IS_DARWIN = os.platform() === 'darwin'
 const IS_WIN32 = os.platform() === 'win32'
@@ -28,8 +23,8 @@ beforeEach(() => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'rc-test-'))
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
   vi.unstubAllEnvs()
 })
 

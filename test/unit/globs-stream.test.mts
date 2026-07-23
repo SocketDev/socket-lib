@@ -9,7 +9,7 @@
  *   - Integration: matcher caching/consistency across calls
  */
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -17,6 +17,7 @@ import { glob, globSync } from '../../src/globs/match'
 import { getGlobMatcher } from '../../src/globs/matcher'
 import { globStreamLicenses } from '../../src/globs/stream'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('globStreamLicenses', () => {
   it('should return a readable stream', () => {
@@ -151,7 +152,7 @@ describe('globStreamLicenses', () => {
 describe.sequential('trailing-slash ignore patterns', () => {
   let tmpRoot: string
 
-  beforeEach(() => {
+  beforeEach(async () => {
     tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'socket-lib-globs-'))
     mkdirSync(path.join(tmpRoot, 'dist'), { recursive: true })
     mkdirSync(path.join(tmpRoot, 'src'), { recursive: true })
@@ -160,8 +161,8 @@ describe.sequential('trailing-slash ignore patterns', () => {
     writeFileSync(path.join(tmpRoot, 'dist', 'b.json'), '{}')
   })
 
-  afterEach(() => {
-    rmSync(tmpRoot, { recursive: true, force: true })
+  afterEach(async () => {
+    await safeDelete(tmpRoot)
   })
 
   // fast-glob silently drops `ignore` entries that end in `/` — the

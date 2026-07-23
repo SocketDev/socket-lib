@@ -4,8 +4,6 @@
  *   result construction, and cleanup behavior run in the ordinary unit tier.
  */
 
-import { rmSync } from 'node:fs'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { safeIdealTree, writeSafeNpmrc } from '../../../src/dlx/arborist'
@@ -16,6 +14,7 @@ import { safeDelete } from '../../../src/fs/safe'
 import type * as ArboristModule from '../../../src/dlx/arborist'
 import type * as PacoteModule from '../../../src/external/pacote'
 import type * as FsSafeModule from '../../../src/fs/safe'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 vi.mock(import('../../../src/dlx/arborist'), async importOriginal => {
   const original = await importOriginal<typeof ArboristModule>()
@@ -108,6 +107,6 @@ describe.sequential('dlx/lockfile orchestrator', () => {
 
     expect(result.version).toBe('1.2.3')
     expect(idealOptions.before).toBeUndefined()
-    rmSync(idealOptions.path, { force: true, recursive: true })
+    safeDeleteSync(idealOptions.path)
   })
 })

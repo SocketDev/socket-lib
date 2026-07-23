@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
@@ -12,6 +12,7 @@ import {
   readBinaryCacheMetadata,
   writeBinaryCacheMetadata,
 } from '../../../src/dlx/binary-cache'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpRoot: string
 
@@ -23,12 +24,12 @@ function writeMeta(entryPath: string, meta: unknown): void {
   )
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'dlx-cache-test-'))
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
 })
 
 describe.sequential('dlx/binary-cache — getBinaryCacheMetadataPath', () => {

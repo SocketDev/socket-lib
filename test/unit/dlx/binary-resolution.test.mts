@@ -1,10 +1,4 @@
-import {
-  mkdirSync,
-  mkdtempSync,
-  rmSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs'
+import { mkdirSync, mkdtempSync, statSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
@@ -14,6 +8,7 @@ import {
   makePackageBinsExecutable,
   resolveBinaryPath,
 } from '../../../src/dlx/binary-resolution'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpRoot: string
 
@@ -39,12 +34,12 @@ function makePackage(opts: {
   writeFileSync(path.join(installedDir, 'package.json'), JSON.stringify(pkg))
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'dlx-binres-test-'))
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
 })
 
 describe.sequential('dlx/binary-resolution — findBinaryPath', () => {

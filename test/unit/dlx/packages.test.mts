@@ -4,13 +4,7 @@
  *   filesystem state. Each test isolates with its own tmpdir.
  */
 
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -24,12 +18,13 @@ import {
   removeDlxPackageSync,
 } from '../../../src/dlx/packages'
 import { setPath } from '../../../src/paths/rewire'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpDir: string
 let savedDlxDir: string | undefined
 
 describe.sequential('dlx/packages', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'socket-dlx-test-'))
     savedDlxDir = process.env['SOCKET_DLX_DIR']
     process.env['SOCKET_DLX_DIR'] = tmpDir
@@ -37,7 +32,7 @@ describe.sequential('dlx/packages', () => {
     setPath('socket-dlx-dir', tmpDir)
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     if (savedDlxDir === undefined) {
       delete process.env['SOCKET_DLX_DIR']
     } else {
@@ -45,7 +40,7 @@ describe.sequential('dlx/packages', () => {
     }
     setPath('socket-dlx-dir', undefined)
     try {
-      rmSync(tmpDir, { recursive: true, force: true })
+      await safeDelete(tmpDir)
     } catch {}
   })
 
@@ -61,7 +56,7 @@ describe.sequential('dlx/packages', () => {
       expect(result).toEqual([])
     })
 
-    it('returns sorted entries when DLX dir has subdirectories', () => {
+    it('returns sorted entries when DLX dir has subdirectories', async () => {
       const dlxRoot = tmpDir
       mkdirSync(path.join(dlxRoot, 'zzz'), { recursive: true })
       mkdirSync(path.join(dlxRoot, 'aaa'), { recursive: true })
@@ -70,23 +65,23 @@ describe.sequential('dlx/packages', () => {
       expect(result).toEqual(['aaa', 'mmm', 'zzz'])
     })
 
-    it('returns empty array when DLX dir does not exist', () => {
+    it('returns empty array when DLX dir does not exist', async () => {
       // Remove the pre-created _dlx directory.
-      rmSync(tmpDir, { recursive: true, force: true })
+      await safeDelete(tmpDir)
       const result = listDlxPackages()
       expect(result).toEqual([])
     })
 
-    it('returns [] when DLX dir is a regular file (readdir throws ENOTDIR)', () => {
+    it('returns [] when DLX dir is a regular file (readdir throws ENOTDIR)', async () => {
       // Point socket-dlx-dir at a regular file so readDirNamesSync throws
       // and the catch arm returns []. Exercises the defensive try/catch.
-      rmSync(tmpDir, { recursive: true, force: true })
+      await safeDelete(tmpDir)
       writeFileSync(tmpDir, 'not a directory')
       setPath('socket-dlx-dir', tmpDir)
       try {
         expect(listDlxPackages()).toEqual([])
       } finally {
-        rmSync(tmpDir, { force: true })
+        await safeDelete(tmpDir)
       }
     })
   })
@@ -110,7 +105,7 @@ describe.sequential('dlx/packages', () => {
     })
 
     it('returns empty array when DLX dir does not exist', async () => {
-      rmSync(tmpDir, { recursive: true, force: true })
+      await safeDelete(tmpDir)
       const result = await listDlxPackagesAsync()
       expect(result).toEqual([])
     })

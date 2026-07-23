@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
@@ -17,16 +17,17 @@ import {
 } from '../../../src/ai/spawn.mts'
 
 import type { SpawnAiAgentOptions } from '../../../src/ai/types.mts'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpRoot: string
 
-beforeEach(() => {
+beforeEach(async () => {
   resetAiAgentDiscoveryCache()
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'ai-spawn-test-'))
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
   resetAiAgentDiscoveryCache()
 })
 

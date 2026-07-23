@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
@@ -6,6 +6,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import { runOne } from '../../../src/ai/worktree.mts'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 import { sh } from '../util/cross-platform-sh.mts'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpRoot: string
 let repo: string
@@ -17,15 +18,15 @@ function initRepo(dir: string): void {
   sh(dir, 'git commit --allow-empty -q -m "initial"')
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'ai-worktree-runone-test-'))
   repo = path.join(tmpRoot, 'repo')
   mkdirSync(repo, { recursive: true })
   initRepo(repo)
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
 })
 
 describe.sequential('ai/worktree — runOne success path', () => {

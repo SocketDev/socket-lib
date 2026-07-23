@@ -1,5 +1,5 @@
 import { EventEmitter } from 'node:events'
-import { mkdtempSync, rmSync } from 'node:fs'
+import { mkdtempSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { Readable, Writable } from 'node:stream'
@@ -8,6 +8,7 @@ import { afterEach, beforeEach, vi } from 'vitest'
 
 import type { Mock } from 'vitest'
 import type * as SpawnChild from '@socketsecurity/lib-stable/process/spawn/child'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 export interface FakeChild extends EventEmitter {
   stdin: Writable
@@ -121,7 +122,7 @@ export function setupHarness(mocks: {
   mockSpawnSync: Mock
 }): void {
   let origAppData: string | undefined
-  beforeEach(() => {
+  beforeEach(async () => {
     harness.tmpRoot = mkdtempSync(
       path.join(os.tmpdir(), 'secrets-windows-test-'),
     )
@@ -131,8 +132,8 @@ export function setupHarness(mocks: {
     mocks.mockSpawn.mockReset()
     mocks.mockSpawnSync.mockReset()
   })
-  afterEach(() => {
-    rmSync(harness.tmpRoot, { force: true, recursive: true })
+  afterEach(async () => {
+    await safeDelete(harness.tmpRoot)
     if (origAppData === undefined) {
       delete process.env['APPDATA']
     } else {

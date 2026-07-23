@@ -5,7 +5,7 @@
  *   tier + the cache-recency-bump path.
  */
 
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -23,15 +23,16 @@ import {
   makePackageBinsExecutable,
   resolveBinaryPath,
 } from '../../../src/dlx/binary-resolution'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string
 
-beforeEach(() => {
+beforeEach(async () => {
   tmp = mkdtempSync(path.join(os.tmpdir(), 'bin-resolve-win-test-'))
 })
 
-afterEach(() => {
-  rmSync(tmp, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmp)
 })
 
 describe.sequential('dlx/binary-resolution — resolveBinaryPath (WIN32 stub)', () => {
@@ -79,11 +80,11 @@ describe.sequential('dlx/binary-resolution — resolveBinaryPath (WIN32 stub)', 
     expect(second).toBe(`${base}.cmd`)
   })
 
-  it('drops the cached path when the cached file disappears', () => {
+  it('drops the cached path when the cached file disappears', async () => {
     const base = path.join(tmp, 'tool-stale')
     writeFileSync(`${base}.cmd`, 'rem')
     expect(resolveBinaryPath(base)).toBe(`${base}.cmd`)
-    rmSync(`${base}.cmd`)
+    await safeDelete(`${base}.cmd`)
     // Subsequent lookup invalidates the stale cache entry.
     // With no wrapper present, falls back to basePath.
     expect(resolveBinaryPath(base)).toBe(base)

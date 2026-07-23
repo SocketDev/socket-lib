@@ -2,13 +2,7 @@
  * @file Tests for fs/resolve-module — require.resolve from an arbitrary base.
  */
 
-import {
-  mkdirSync,
-  mkdtempSync,
-  realpathSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs'
+import { mkdirSync, mkdtempSync, realpathSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -18,10 +12,11 @@ import {
   requireResolveFrom,
   requireResolveFromCwd,
 } from '../../../src/fs/resolve-module'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string
 
-beforeAll(() => {
+beforeAll(async () => {
   // Build a tiny fake package the resolver can find:
   //   <tmp>/node_modules/fixture-pkg/{package.json,index.js}
   // realpathSync resolves the macOS /var → /private/var symlink so the
@@ -36,9 +31,9 @@ beforeAll(() => {
   writeFileSync(path.join(pkgDir, 'index.js'), 'module.exports = 1\n')
 })
 
-afterAll(() => {
+afterAll(async () => {
   try {
-    rmSync(tmp, { force: true, recursive: true })
+    await safeDelete(tmp)
   } catch {}
 })
 

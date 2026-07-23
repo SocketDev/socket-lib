@@ -26,9 +26,10 @@ import {
 } from '../../../src/dlx/detect'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { resetPaths, setPath } from '../../../src/paths/rewire'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('DLX Executable Type Detection', () => {
   let tempDir: string
@@ -42,10 +43,10 @@ describe('DLX Executable Type Detection', () => {
     setPath('socket-dlx-dir', mockDlxDir)
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     resetPaths()
     try {
-      rmSync(tempDir, { force: true, recursive: true })
+      await safeDelete(tempDir)
     } catch {
       // Ignore cleanup errors.
     }

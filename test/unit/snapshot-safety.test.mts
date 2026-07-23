@@ -21,7 +21,7 @@
 
 import * as realAsyncHooks from 'node:async_hooks'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
-import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -30,6 +30,7 @@ import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { SpinnerInstance } from '../../src/spinner/types'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // Minimal fake covering the spinner surface the wrapped consumers touch
 // (isSpinning / start / stop). Cast through the real type so the partial mock
@@ -64,7 +65,7 @@ vi.mock(import('../../src/primordials/intl'), async importOriginal => ({
   IntlSegmenter,
 }))
 
-beforeEach(() => {
+beforeEach(async () => {
   vi.clearAllMocks()
   // Drop the module registry so the next dynamic import re-evaluates the module
   // top-level under clean spies, letting us observe import-time side effects.
@@ -193,14 +194,14 @@ describe('snapshot safety — lazy AsyncLocalStorage singletons', () => {
   // the store constructed at import time".
   const getNodeAsyncHooks = vi.fn(() => realAsyncHooks)
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.doMock(import('../../src/node/async-hooks'), () => ({
       getNodeAsyncHooks,
     }))
     getNodeAsyncHooks.mockClear()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.doUnmock(import('../../src/node/async-hooks'))
   })
 
@@ -240,7 +241,7 @@ describe('snapshot safety — lazy bound console methods (logger/_internal)', ()
   let bindCount = 0
   let originalBind: typeof Function.prototype.bind
 
-  beforeEach(() => {
+  beforeEach(async () => {
     bindCount = 0
     originalBind = Function.prototype.bind
     // oxlint-disable-next-line no-extend-native -- deliberate test instrumentation: counts console binds at module-eval; restored in afterEach.
@@ -256,7 +257,7 @@ describe('snapshot safety — lazy bound console methods (logger/_internal)', ()
     } as typeof Function.prototype.bind
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // oxlint-disable-next-line no-extend-native -- restores the original bind captured in beforeEach.
     Function.prototype.bind = originalBind
   })
@@ -292,12 +293,12 @@ describe('snapshot safety — lazy vendored-semver require (versions/*)', () => 
   // observable: it stays unread at import and is read on the first op.
   const getSmolVersions = vi.fn(() => undefined)
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.doMock(import('../../src/smol/versions'), () => ({ getSmolVersions }))
     getSmolVersions.mockClear()
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     vi.doUnmock(import('../../src/smol/versions'))
   })
 
@@ -397,15 +398,15 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
 
   let workDir: string
 
-  beforeEach(() => {
+  beforeEach(async () => {
     if (hasDist) {
       workDir = mkdtempSync(path.join(os.tmpdir(), 'sl-snap-'))
     }
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     if (workDir) {
-      rmSync(workDir, { force: true, recursive: true })
+      await safeDelete(workDir)
     }
   })
 

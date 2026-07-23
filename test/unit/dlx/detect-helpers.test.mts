@@ -6,7 +6,7 @@
  *   executable-type detectors covered in detect.test.mts.
  */
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -15,15 +15,16 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { findPackageJson, readPackageJson } from '../../../src/dlx/detect'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string
 
-beforeEach(() => {
+beforeEach(async () => {
   tmp = mkdtempSync(path.join(os.tmpdir(), 'detect-helpers-test-'))
 })
 
-afterEach(() => {
-  rmSync(tmp, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmp)
 })
 
 describe.sequential('dlx/detect — findPackageJson', () => {
@@ -65,13 +66,13 @@ describe.sequential('dlx/detect — findPackageJson', () => {
     expect(second).toBe(first)
   })
 
-  it('drops the positive cache when the cached path no longer exists', () => {
+  it('drops the positive cache when the cached path no longer exists', async () => {
     const pkgPath = path.join(tmp, 'package.json')
     writeFileSync(pkgPath, '{}')
     expect(findPackageJson(path.join(tmp, 'index.ts'))).toBe(
       normalizePath(pkgPath),
     )
-    rmSync(pkgPath)
+    await safeDelete(pkgPath)
     expect(findPackageJson(path.join(tmp, 'index.ts'))).toBeUndefined()
   })
 

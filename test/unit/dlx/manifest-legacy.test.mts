@@ -12,19 +12,20 @@
  *     isBinaryEntry) live in manifest.test.mts.
  */
 
-import { existsSync, mkdirSync, rmSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { DlxManifest } from '../../../src/dlx/manifest'
 import type { PackageDetails, StoreRecord } from '../../../src/dlx/manifest'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe.sequential('DlxManifest legacy', () => {
   let testDir: string
   let manifestPath: string
   let manifest: DlxManifest
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Create unique temp directory for each test
     testDir = path.join(
       os.tmpdir(),
@@ -35,11 +36,11 @@ describe.sequential('DlxManifest legacy', () => {
     manifest = new DlxManifest({ manifestPath })
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     // Clean up test directory
     try {
       if (existsSync(testDir)) {
-        rmSync(testDir, { recursive: true, force: true })
+        await safeDelete(testDir)
       }
     } catch {}
   })

@@ -12,13 +12,7 @@
  *     shape (no real ~/.zshenv touched).
  */
 
-import {
-  existsSync,
-  mkdtempSync,
-  readFileSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs'
+import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
@@ -39,6 +33,7 @@ import {
 import { resolve, resolveSync } from '../../src/secrets/find'
 
 import * as rc from '../../src/secrets/rc'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 const IS_MACOS = os.platform() === 'darwin'
 const IS_WINDOWS = os.platform() === 'win32'
@@ -163,7 +158,7 @@ export function withFakeHome(): {
       } else {
         process.env['SHELL'] = prevShell
       }
-      rmSync(fake, { recursive: true, force: true })
+      safeDeleteSync(fake)
     },
   }
 }

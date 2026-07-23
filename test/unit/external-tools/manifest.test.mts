@@ -1,4 +1,4 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
@@ -14,18 +14,19 @@ import {
 } from '../../../src/external-tools/manifest'
 
 import type { Manifest } from '../../../src/external-tools/manifest'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // SRI integrity per src/integrity.ts: prefix `sha512-` followed by base64.
 const VALID_INTEGRITY = 'sha512-' + 'A'.repeat(86) + '=='
 
 let tmpRoot: string
 
-beforeEach(() => {
+beforeEach(async () => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'manifest-test-'))
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
 })
 
 describe.sequential('isObject', () => {

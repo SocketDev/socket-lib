@@ -10,7 +10,6 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
-  rmSync,
   writeFileSync,
 } from 'node:fs'
 import os from 'node:os'
@@ -23,6 +22,7 @@ import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import { ensurePackageInstalled } from '../../../../src/dlx/package'
 import { setPath } from '../../../../src/paths/rewire'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // `tmpDir` and `process.env['SOCKET_DLX_DIR']` are mutated at describe
 // scope and beforeEach. Under vitest's default
@@ -36,14 +36,14 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
   // Pre-stage a node_modules/<pkg>/package.json under <dlxDir>/<sha512-prefix>/
   // matching what generateCacheKey produces. The early-return path inside
   // ensurePackageInstalled then short-circuits Arborist entirely.
-  beforeEach(() => {
+  beforeEach(async () => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dlx-pkg-cached-'))
     savedDlxDir = process.env['SOCKET_DLX_DIR']
     process.env['SOCKET_DLX_DIR'] = tmpDir
     setPath('socket-dlx-dir', tmpDir)
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     if (savedDlxDir === undefined) {
       delete process.env['SOCKET_DLX_DIR']
     } else {
@@ -51,7 +51,7 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
     }
     setPath('socket-dlx-dir', undefined)
     try {
-      rmSync(tmpDir, { recursive: true, force: true })
+      await safeDelete(tmpDir)
     } catch {}
   })
 
@@ -136,13 +136,13 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
 describe.sequential('ensurePackageInstalled (installRoot option)', () => {
   let tmpDir: string
 
-  beforeEach(() => {
+  beforeEach(async () => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dlx-pkg-installRoot-'))
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     try {
-      rmSync(tmpDir, { recursive: true, force: true })
+      await safeDelete(tmpDir)
     } catch {}
   })
 

@@ -1,15 +1,16 @@
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, describe, expect, it } from 'vitest'
 
 import { checkExport } from '../../../scripts/validate/dist-exports.mts'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpDir: string | undefined
 
-afterEach(() => {
+afterEach(async () => {
   if (tmpDir) {
-    rmSync(tmpDir, { force: true, recursive: true })
+    await safeDelete(tmpDir)
     tmpDir = undefined
   }
 })

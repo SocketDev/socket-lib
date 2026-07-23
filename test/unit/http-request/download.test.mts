@@ -4,7 +4,6 @@ import {
   existsSync,
   mkdtempSync,
   readFileSync,
-  rmSync,
   writeFileSync,
 } from 'node:fs'
 import os from 'node:os'
@@ -23,6 +22,7 @@ import { PassThrough } from 'node:stream'
 import { minTimerQuantum } from '../../_shared/fleet/lib/timing.mts'
 
 import type * as HttpRequestModule from '../../../src/http-request/request'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const { mockHttpRequestAttempt } = vi.hoisted(() => ({
   mockHttpRequestAttempt: vi.fn(),
@@ -80,14 +80,14 @@ function sha512Integrity(content: string): string {
   return `sha512-${crypto.createHash('sha512').update(content).digest('base64')}`
 }
 
-beforeEach(() => {
+beforeEach(async () => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'http-download-test-'))
   vi.resetModules()
   mockHttpRequestAttempt.mockReset()
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
   vi.clearAllMocks()
 })
 

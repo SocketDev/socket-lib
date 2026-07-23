@@ -3,7 +3,6 @@ import {
   mkdirSync,
   mkdtempSync,
   readFileSync,
-  rmSync,
   writeFileSync,
 } from 'node:fs'
 import os from 'node:os'
@@ -23,6 +22,7 @@ import {
   resetAiAgentDiscoveryCache,
   writeDiskCache,
 } from '../../../src/ai/discover.mts'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // No vi.mock — these tests exercise the real module against the real fs.
 // `discoverFresh` uses `whichSync` from src/bin/which against PATH; on a
@@ -33,13 +33,13 @@ import {
 
 let tmpRoot: string
 
-beforeEach(() => {
+beforeEach(async () => {
   resetAiAgentDiscoveryCache()
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'ai-discover-test-'))
 })
 
-afterEach(() => {
-  rmSync(tmpRoot, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmpRoot)
   resetAiAgentDiscoveryCache()
 })
 

@@ -3,7 +3,7 @@
  *   nearest-package-json lookup via findUpSync from import.meta.
  */
 
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { pathToFileURL } from 'node:url'
@@ -13,16 +13,17 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import { findUpPackageJson } from '../../../src/packages/find'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('findUpPackageJson', () => {
   let tmpDir: string
 
-  beforeEach(() => {
+  beforeEach(async () => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'find-up-pkg-json-'))
   })
 
-  afterEach(() => {
-    rmSync(tmpDir, { recursive: true, force: true })
+  afterEach(async () => {
+    await safeDelete(tmpDir)
   })
 
   it('returns the path of the nearest package.json walking up from the script', () => {

@@ -3,8 +3,8 @@
  */
 export interface PackageManifest {
   name: string
-  bin?: string | Record<string, string>
-  _id?: string
+  bin?: string | Record<string, string> | undefined
+  _id?: string | undefined
 }
 
 /**
@@ -32,4 +32,5 @@ export interface LibnpmexecDefault {
 }
 
 declare const libnpmexec: LibnpmexecDefault
+// oxlint-disable-next-line socket/no-default-export -- ambient shim for a CJS lib whose real export IS the default; a named re-shape would misdescribe the module.
 export default libnpmexec

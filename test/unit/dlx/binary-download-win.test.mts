@@ -5,7 +5,7 @@
  */
 
 import crypto from 'node:crypto'
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -44,15 +44,16 @@ vi.mock(import('../../../src/http-request/download'), async importOriginal => {
 })
 
 import { downloadBinaryFile } from '../../../src/dlx/binary-download'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string
 
-beforeEach(() => {
+beforeEach(async () => {
   tmp = mkdtempSync(path.join(os.tmpdir(), 'dlx-bin-dl-win-'))
 })
 
-afterEach(() => {
-  rmSync(tmp, { force: true, recursive: true })
+afterEach(async () => {
+  await safeDelete(tmp)
 })
 
 describe.sequential('dlx/binary-download — Windows branch (WIN32=true stub)', () => {
