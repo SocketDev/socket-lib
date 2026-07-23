@@ -6,7 +6,7 @@
  *   the CLI prints what these return.
  */
 
-import { RUN_STAGE_ORDER, STAGE_DESCRIPTIONS } from './stages.mts'
+import { STAGE_DESCRIPTIONS, STATUS_STAGE_ORDER } from './stages.mts'
 
 import type { StageId } from './stages.mts'
 import type { PipelineState, StageReceipt } from './state.mts'
@@ -56,7 +56,9 @@ export function renderStageLine(
 }
 
 /**
- * Full status table over every run stage plus the approve receipt.
+ * Full status table over every stage in canonical execution order —
+ * readiness → bump → stage-publish → verify → approve → release (the release
+ * is LAST: it only follows a confirmed, live registry publish).
  */
 export function renderStatus(state: PipelineState): string {
   const lines: string[] = [
@@ -66,10 +68,9 @@ export function renderStatus(state: PipelineState): string {
       : 'Target version: NOT NAMED YET (bump hard-stop pending)',
     '',
   ]
-  for (const stage of RUN_STAGE_ORDER) {
+  for (const stage of STATUS_STAGE_ORDER) {
     lines.push(renderStageLine(stage, state.stages[stage]))
   }
-  lines.push(renderStageLine('approve', state.stages['approve']))
   return lines.join('\n')
 }
 
@@ -94,11 +95,13 @@ export function renderAwaitingVersion(
     '',
     '  node scripts/fleet/release-pipeline.mts --version X.Y.Z',
     '',
-    'That resumes with: CHANGELOG + bump commit (bump.mts), tag vX.Y.Z +',
-    'immutable GitHub release, then `pnpm stage publish` to npm staging.',
-    'Promotion to public stays a separate explicit step afterwards:',
+    'That resumes with the CHANGELOG + bump commit (bump.mts). Then stage +',
+    'verify with `node scripts/fleet/publish-pipeline.mts`. Promotion to',
+    'public stays a separate explicit step afterwards — and once the publish',
+    'is live, the SAME invocation cuts the tag vX.Y.Z + immutable GitHub',
+    'release LAST:',
     '',
-    '  node scripts/fleet/release-pipeline.mts --approve',
+    '  node scripts/fleet/publish-pipeline.mts --approve',
     '',
     '(Browser 2FA only — web-OTP; never pass a one-time code on the CLI.)',
   ].join('\n')
@@ -120,8 +123,10 @@ export function renderRunRecap(
   if (verify?.status === 'passed' && !verify.dryRun) {
     lines.push(
       '',
-      'Staged + verified. Promote to public with the separate explicit step:',
-      '  node scripts/fleet/release-pipeline.mts --approve',
+      'Staged + verified. Promote to public with the separate explicit step',
+      '(after a successful promote the same invocation cuts the tag +',
+      'immutable GH release):',
+      '  node scripts/fleet/publish-pipeline.mts --approve',
     )
   }
   return lines.join('\n')

@@ -399,9 +399,11 @@ export async function runCiGate(config: {
 }
 
 /**
- * True when `sha` is an ancestor of the origin default branch.
+ * True when `sha` is an ancestor of the origin default branch. Exported for
+ * the stage-publish runner: a workflow dispatch stages from the ORIGIN default
+ * branch, so an unpushed bump commit would stage the wrong version.
  */
-async function headIsOnOrigin(
+export async function headIsOnOrigin(
   sha: string,
   cwd: string,
   seams: ResolvedSeams,

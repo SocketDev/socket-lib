@@ -1,11 +1,15 @@
 /*
  * @file Claude-driveable staged-RELEASE pipeline orchestrator (release
- *   program #214). A "release" is a GitHub release — tag + immutable release
- *   artifact — and NEVER stages or publishes a package to a registry. Staging
- *   npm/cargo/python packages is the separate PUBLISH pipeline
- *   (publish-pipeline.mts), which resumes from this pipeline's shared state
- *   once the `release` stage has completed. Runs the release chain as EXPLICIT,
- *   RESUMABLE, RECEIPT-PRODUCING stages, each deferring to its owning script:
+ *   program #214). This pipeline runs the READINESS chain through the bump
+ *   commit; it NEVER stages/publishes a package and NEVER cuts the GitHub
+ *   release. The tag + immutable GH release are the FINAL markers of a
+ *   release — the publish pipeline (publish-pipeline.mts) cuts them LAST, in
+ *   the same `--approve` invocation that confirms the registry publish
+ *   (canonical order: readiness → bump-stop → bump → stage-publish → verify →
+ *   approve → release). A STAGED package is not published — staging may never
+ *   be approved — so a release cut earlier can mark a version that never
+ *   shipped (the v6.2.0 near-miss). Runs the chain as EXPLICIT, RESUMABLE,
+ *   RECEIPT-PRODUCING stages, each deferring to its owning script:
  *
  *   1. preflight — pnpm run update → pnpm i → fix --all → check --all
  *   2. cover — pnpm run cover + make-coverage-badge refresh (the badge is a
@@ -16,8 +20,7 @@
  *      "local-only, CI deferred" (the pipeline NEVER pushes)
  *   6. bump-stop — HARD STOP: the USER names X.Y.Z (bump-defers-to-release-guard);
  *      `--version X.Y.Z` resumes
- *   7. bump — bump.mts writes CHANGELOG + the bump commit (LAST)
- *   8. release — tag vX.Y.Z + immutable GH release (ensureTagAndRelease)
+ *   7. bump — bump.mts writes CHANGELOG + the bump commit (LAST commit)
  *
  *   Receipts live in a state file under
  *   node_modules/.cache/fleet/socket-release-pipeline/ (shared with publish-pipeline)
@@ -26,7 +29,8 @@
  *   tmp-dir packs allowed).
  *   Usage: node scripts/fleet/release-pipeline.mts [--dry-run] [--version
  *   X.Y.Z] [--status] [--reset] [--ci-timeout <seconds>]
- *   Then publish the cut version with: node scripts/fleet/publish-pipeline.mts
+ *   Then publish the bumped version with: node scripts/fleet/publish-pipeline.mts
+ *   (stage-publish → verify), and promote + release with its `--approve`.
  */
 
 import process from 'node:process'
@@ -53,6 +57,7 @@ import {
 import { readPkg } from './release-pipeline/seams.mts'
 import {
   deriveReleaseLevel,
+  isReceiptCurrent,
   localGatesGreenAt,
   planRun,
   restampTreeReceipts,
@@ -74,7 +79,7 @@ import {
 } from './release-pipeline/summary.mts'
 import { isMainModule } from './_shared/is-main-module.mts'
 
-import type { StageOutcome } from './release-pipeline/seams.mts'
+import type { RunnerSeams, StageOutcome } from './release-pipeline/seams.mts'
 import type { RunStageId, StageId } from './release-pipeline/stages.mts'
 import type { PipelineState } from './release-pipeline/state.mts'
 
@@ -85,7 +90,7 @@ const USAGE = `Usage: node scripts/fleet/release-pipeline.mts [options]
   (no flags)             run/resume the readiness stages; stops at the bump
                          hard-stop until the USER names a version
   --version X.Y.Z        record the user-named version and resume through
-                         bump + tag + immutable GH release
+                         the bump (CHANGELOG + bump commit)
   --dry-run              walk stages without mutations (registry reads OK)
   --status               print the receipt table (with per-stage wall time)
                          and exit
@@ -98,8 +103,10 @@ const USAGE = `Usage: node scripts/fleet/release-pipeline.mts [options]
   --preflight-all        run the full-tree fix --all + check --all preflight
                          (default: changed-file scope)
 
-  A "release" NEVER stages/publishes a package. Publish the cut version with:
-  node scripts/fleet/publish-pipeline.mts`
+  This pipeline NEVER stages/publishes a package or cuts the GH release.
+  Publish the bumped version with: node scripts/fleet/publish-pipeline.mts
+  (stage-publish → verify); its \`--approve\` promotes AND — once the publish
+  is live — cuts the tag + immutable GH release in the same invocation.`
 
 export interface CliOptions {
   approve: boolean
@@ -107,6 +114,9 @@ export interface CliOptions {
   ciWait: boolean
   distTag: string
   dryRun: boolean
+  // Publish pipeline --local: stage from this machine (npm-publish.mts
+  // --staged) instead of the default dispatch-and-watch of npm-publish.yml.
+  localPublish: boolean
   namedVersion: string | undefined
   preflightAll: boolean
 }
@@ -184,9 +194,23 @@ export async function runStage(
     case 'bump':
       return await runBumpStage({ cwd, dryRun, targetVersion })
     case 'release':
-      return await runReleaseStage({ cwd, dryRun, targetVersion })
+      // Never part of a planned run — only the post-approve continuation
+      // reaches here (see runApproveMode). The runner itself re-checks the
+      // approve receipt, so a miswired plan still refuses.
+      return await runReleaseStage({
+        approveReceipt: state.stages['approve'],
+        cwd,
+        dryRun,
+        releaseChecksums: state.releaseChecksums,
+        targetVersion,
+      })
     case 'stage-publish':
-      return await runStagePublish({ cwd, distTag, dryRun })
+      return await runStagePublish({
+        cwd,
+        distTag,
+        dryRun,
+        local: cli.localPublish,
+      })
     case 'verify':
       return await runVerifyStage({ cwd, dryRun, targetVersion })
     default:
@@ -259,12 +283,25 @@ export async function runPipeline(
 }
 
 /**
- * The separate explicit approve step (gated on a real verify receipt).
+ * The separate explicit approve step (gated on a real verify receipt) — ONE
+ * promote command. After a successful approve the SAME invocation continues
+ * into the release stage, so the tag + immutable GH release follow the
+ * confirmed registry publish without a second command. The release stage
+ * itself refuses without a passed approve receipt and without registry
+ * liveness (gate inversion: publish never waits on a release; the release
+ * waits on the publish). `options.persist`/`options.seams` are injectable for
+ * tests (defaults: persistOutcome + the real runner seams).
  */
 export async function runApproveMode(
   state: PipelineState,
   cli: CliOptions,
+  options?: {
+    persist?: typeof persistOutcome | undefined
+    seams?: RunnerSeams | undefined
+  },
 ): Promise<void> {
+  const opts = { __proto__: null, ...options } as NonNullable<typeof options>
+  const persist = opts.persist ?? persistOutcome
   const verify = state.stages['verify']
   if (!verify || verify.status !== 'passed' || verify.dryRun) {
     const saw = verify
@@ -274,20 +311,69 @@ export async function runApproveMode(
       `No passing verify receipt — refusing to approve.\n` +
         `  Where: ${statePath(REPO_ROOT)}\n` +
         `  Saw ${saw}; wanted a real passed verify.\n` +
-        `  Fix: run \`node scripts/fleet/release-pipeline.mts\` through the verify stage first ` +
+        `  Fix: run \`node scripts/fleet/publish-pipeline.mts\` through the verify stage first ` +
         `(out-of-band staging can use \`node scripts/fleet/npm-publish.mts --approve\` directly — it re-verifies).`,
     )
     process.exitCode = 1
     return
   }
-  const approveStartMs = Date.now()
-  const outcome = await runApproveStep({ cwd: REPO_ROOT, dryRun: cli.dryRun })
-  persistOutcome(state, 'approve', outcome, {
-    dryRun: cli.dryRun,
-    key: state.targetVersion ?? '',
-    ms: Date.now() - approveStartMs,
+  let state_ = state
+  const targetVersion = state_.targetVersion ?? ''
+  const approveCurrent = isReceiptCurrent(state_.stages['approve'], {
+    headSha: '',
+    stage: 'approve',
+    targetVersion: state_.targetVersion,
   })
-  if (outcome.status === 'failed') {
+  if (approveCurrent) {
+    logger.log(
+      'approve already satisfied by a current receipt — continuing into the release stage.',
+    )
+  } else {
+    logger.log('── stage: approve ──')
+    const approveStartMs = Date.now()
+    const outcome = await runApproveStep({
+      cwd: REPO_ROOT,
+      dryRun: cli.dryRun,
+      seams: opts.seams,
+    })
+    state_ = persist(state_, 'approve', outcome, {
+      dryRun: cli.dryRun,
+      key: targetVersion,
+      ms: Date.now() - approveStartMs,
+    })
+    if (outcome.status === 'failed') {
+      process.exitCode = 1
+      return
+    }
+  }
+  // Continue into the release stage: the tag + immutable GH release are cut
+  // LAST, as the final marker behind the now-confirmed publish.
+  if (
+    isReceiptCurrent(state_.stages['release'], {
+      headSha: '',
+      stage: 'release',
+      targetVersion: state_.targetVersion,
+    })
+  ) {
+    logger.log('release already satisfied by a current receipt — done.')
+    return
+  }
+  logger.log('── stage: release ──')
+  const releaseStartMs = Date.now()
+  const releaseOutcome = await runReleaseStage({
+    approveReceipt: state_.stages['approve'],
+    cwd: REPO_ROOT,
+    dryRun: cli.dryRun,
+    releaseChecksums: state_.releaseChecksums,
+    seams: opts.seams,
+    targetVersion,
+  })
+  persist(state_, 'release', releaseOutcome, {
+    dryRun: cli.dryRun,
+    key: targetVersion,
+    ms: Date.now() - releaseStartMs,
+  })
+  if (releaseOutcome.status === 'failed') {
     process.exitCode = 1
   }
 }
@@ -325,6 +411,7 @@ async function main(): Promise<void> {
     ciWait: !!values['ci-wait'],
     distTag: 'latest',
     dryRun: !!values['dry-run'],
+    localPublish: false,
     namedVersion:
       typeof values['version'] === 'string' ? values['version'] : undefined,
     preflightAll: !!values['preflight-all'],
