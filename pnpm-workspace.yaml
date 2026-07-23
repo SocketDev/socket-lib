@@ -103,8 +103,6 @@ allowBuilds:
 # keeping vite on the rolldown-native major, never pulling an unsoaked esbuild.
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
-  - '@socketaddon/*'
-  - '@socketbin/*'
   - '@socketregistry/*'
   - '@socketsecurity/*'
   # rolldown is the fleet bundler (CLAUDE.md "Tooling": bundler =
