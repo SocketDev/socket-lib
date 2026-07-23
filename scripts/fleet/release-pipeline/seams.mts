@@ -87,6 +87,9 @@ export function resolveSeams(seams: RunnerSeams | undefined): ResolvedSeams {
  */
 export function readPkg(cwd: string): { name: string; version: string } {
   const raw = readFileSync(path.join(cwd, 'package.json'), 'utf8')
-  const pkg = JSON.parse(raw) as { name?: string; version?: string }
+  const pkg = JSON.parse(raw) as {
+    name?: string | undefined
+    version?: string | undefined
+  }
   return { name: pkg.name ?? '', version: pkg.version ?? '' }
 }

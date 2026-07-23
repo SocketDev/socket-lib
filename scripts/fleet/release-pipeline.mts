@@ -8,17 +8,19 @@
  *   RESUMABLE, RECEIPT-PRODUCING stages, each deferring to its owning script:
  *
  *   1. preflight — pnpm run update → pnpm i → fix --all → check --all
- *   2. exports — make-package-exports (opt-in) + public-files-are-exported
- *   3. files — pnpm pack tarball inspected via pack-contents-are-clean
- *   4. ci — surgical commit of staged fixes; green CI on a pushed head, or
+ *   2. cover — pnpm run cover + make-coverage-badge refresh (the badge is a
+ *      tracked asset the ci stage commits, so it rides ahead of the bump)
+ *   3. exports — make-package-exports (opt-in) + public-files-are-exported
+ *   4. files — pnpm pack tarball inspected via pack-contents-are-clean
+ *   5. ci — surgical commit of staged fixes; green CI on a pushed head, or
  *      "local-only, CI deferred" (the pipeline NEVER pushes)
- *   5. bump-stop — HARD STOP: the USER names X.Y.Z (bump-defers-to-release-guard);
+ *   6. bump-stop — HARD STOP: the USER names X.Y.Z (bump-defers-to-release-guard);
  *      `--version X.Y.Z` resumes
- *   6. bump — bump.mts writes CHANGELOG + the bump commit (LAST)
- *   7. release — tag vX.Y.Z + immutable GH release (ensureTagAndRelease)
+ *   7. bump — bump.mts writes CHANGELOG + the bump commit (LAST)
+ *   8. release — tag vX.Y.Z + immutable GH release (ensureTagAndRelease)
  *
  *   Receipts live in a state file under
- *   node_modules/.cache/socket-release-pipeline/ (shared with publish-pipeline)
+ *   node_modules/.cache/fleet/socket-release-pipeline/ (shared with publish-pipeline)
  *   — never the tracked tree — so a re-run resumes at the first missing/stale
  *   stage. `--dry-run` walks the stages without mutations (registry reads +
  *   tmp-dir packs allowed).
@@ -36,6 +38,7 @@ import { REPO_ROOT } from './paths.mts'
 import { runCapture } from './publish-infra/shared.mts'
 import {
   runCiGate,
+  runCoverGate,
   runExportsGate,
   runFilesGate,
   runPreflight,
@@ -50,6 +53,7 @@ import {
 import { readPkg } from './release-pipeline/seams.mts'
 import {
   deriveReleaseLevel,
+  localGatesGreenAt,
   planRun,
   restampTreeReceipts,
   stageKeyKind,
@@ -83,9 +87,16 @@ const USAGE = `Usage: node scripts/fleet/release-pipeline.mts [options]
   --version X.Y.Z        record the user-named version and resume through
                          bump + tag + immutable GH release
   --dry-run              walk stages without mutations (registry reads OK)
-  --status               print the receipt table and exit
+  --status               print the receipt table (with per-stage wall time)
+                         and exit
   --reset                discard pipeline state and exit
   --ci-timeout <seconds> CI poll budget for a pushed head (default 900)
+  --ci-wait              block on the remote CI run even when every local
+                         gate passed at this sha (default: record the ci
+                         receipt as deferred-pending-remote and proceed;
+                         the remote run stays an async back-check)
+  --preflight-all        run the full-tree fix --all + check --all preflight
+                         (default: changed-file scope)
 
   A "release" NEVER stages/publishes a package. Publish the cut version with:
   node scripts/fleet/publish-pipeline.mts`
@@ -93,9 +104,11 @@ const USAGE = `Usage: node scripts/fleet/release-pipeline.mts [options]
 export interface CliOptions {
   approve: boolean
   ciTimeoutMs: number
+  ciWait: boolean
   distTag: string
   dryRun: boolean
   namedVersion: string | undefined
+  preflightAll: boolean
 }
 
 /**
@@ -117,14 +130,15 @@ export function persistOutcome(
   state: PipelineState,
   stage: StageId,
   outcome: StageOutcome,
-  options: { dryRun: boolean; key: string },
+  config: { dryRun: boolean; key: string; ms?: number | undefined },
 ): PipelineState {
-  const opts = { __proto__: null, ...options } as typeof options
+  const cfg = { __proto__: null, ...config } as typeof config
   const next = recordReceipt(state, stage, {
     at: nowIso(),
     detail: outcome.detail,
-    dryRun: opts.dryRun,
-    key: opts.key,
+    dryRun: cfg.dryRun,
+    key: cfg.key,
+    ms: cfg.ms,
     status: outcome.status,
   })
   saveState(statePath(REPO_ROOT), next)
@@ -149,13 +163,24 @@ export async function runStage(
   const targetVersion = state.targetVersion ?? ''
   switch (stage) {
     case 'preflight':
-      return await runPreflight({ cwd, dryRun })
+      return await runPreflight({ all: cli.preflightAll, cwd, dryRun })
+    case 'cover':
+      return await runCoverGate({ cwd, dryRun })
     case 'exports':
       return await runExportsGate({ cwd, dryRun })
     case 'files':
       return await runFilesGate({ cwd, dryRun })
     case 'ci':
-      return await runCiGate({ ciTimeoutMs, cwd, dryRun })
+      // The sanctioned non-blocking receipt: when every LOCAL gate passed at
+      // this exact sha, the ci stage defers pending the remote run instead of
+      // blocking on it (--ci-wait restores the strict blocking behavior).
+      return await runCiGate({
+        ciTimeoutMs,
+        cwd,
+        dryRun,
+        localGatesGreen: localGatesGreenAt(state, await headSha()),
+        waitForRemote: cli.ciWait,
+      })
     case 'bump':
       return await runBumpStage({ cwd, dryRun, targetVersion })
     case 'release':
@@ -188,7 +213,11 @@ export async function runPipeline(
   const ran: StageId[] = []
   for (const stage of plan.toRun) {
     logger.log(`── stage: ${stage} ──`)
+    // Wall-time the stage: the receipt records how long it took so the
+    // --status table names the long poles of the release chain.
+    const stageStartMs = Date.now()
     const outcome = await runStage(stage, state, cli)
+    const ms = Date.now() - stageStartMs
     // The ci stage may commit fixes, moving HEAD; re-read and re-key the
     // earlier tree receipts (the committed content is what they verified).
     if (stage === 'ci') {
@@ -203,6 +232,7 @@ export async function runPipeline(
     state = persistOutcome(state, stage, outcome, {
       dryRun: cli.dryRun,
       key,
+      ms,
     })
     ran.push(stage)
     if (outcome.status === 'failed') {
@@ -250,10 +280,12 @@ export async function runApproveMode(
     process.exitCode = 1
     return
   }
+  const approveStartMs = Date.now()
   const outcome = await runApproveStep({ cwd: REPO_ROOT, dryRun: cli.dryRun })
   persistOutcome(state, 'approve', outcome, {
     dryRun: cli.dryRun,
     key: state.targetVersion ?? '',
+    ms: Date.now() - approveStartMs,
   })
   if (outcome.status === 'failed') {
     process.exitCode = 1
@@ -264,8 +296,10 @@ async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
       'ci-timeout': { default: '900', type: 'string' },
+      'ci-wait': { default: false, type: 'boolean' },
       'dry-run': { default: false, type: 'boolean' },
       help: { default: false, type: 'boolean' },
+      'preflight-all': { default: false, type: 'boolean' },
       reset: { default: false, type: 'boolean' },
       status: { default: false, type: 'boolean' },
       version: { type: 'string' },
@@ -288,10 +322,12 @@ async function main(): Promise<void> {
     // publish pipeline. The shared CliOptions carries the fields regardless.
     approve: false,
     ciTimeoutMs: Number.parseInt(String(values['ci-timeout']), 10) * 1000,
+    ciWait: !!values['ci-wait'],
     distTag: 'latest',
     dryRun: !!values['dry-run'],
     namedVersion:
       typeof values['version'] === 'string' ? values['version'] : undefined,
+    preflightAll: !!values['preflight-all'],
   }
   if (!Number.isFinite(cli.ciTimeoutMs) || cli.ciTimeoutMs <= 0) {
     logger.fail('--ci-timeout must be a positive number of seconds.')

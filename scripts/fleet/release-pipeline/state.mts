@@ -1,9 +1,9 @@
 /**
  * @file Release-pipeline state store. One JSON file under
- *   `node_modules/.cache/socket-release-pipeline/` (runtime state NEVER lives
- *   in the tracked tree) records a receipt per completed stage so a pipeline
- *   run is resumable: a re-run skips stages whose receipts are still current
- *   and picks up at the first missing/stale one. Pure helpers
+ *   `node_modules/.cache/fleet/socket-release-pipeline/` (runtime state NEVER
+ *   lives in the tracked tree) records a receipt per completed stage so a
+ *   pipeline run is resumable: a re-run skips stages whose receipts are still
+ *   current and picks up at the first missing/stale one. Pure helpers
  *   (`recordReceipt`, `parseState`) are separated from the fs edges
  *   (`loadState`, `saveState`) so tests round-trip against a temp dir.
  */
@@ -40,6 +40,11 @@ export interface StageReceipt {
    * stages (see stages.mts `stageKeyKind`).
    */
   key: string
+  /**
+   * Stage wall time in milliseconds (absent on receipts written before the
+   * timing field existed — rendering tolerates that).
+   */
+  ms?: number | undefined
   status: ReceiptStatus
 }
 
@@ -75,6 +80,7 @@ export function statePath(repoRoot: string): string {
     repoRoot,
     'node_modules',
     '.cache',
+    'fleet',
     STATE_DIR_NAME,
     STATE_FILE_NAME,
   )

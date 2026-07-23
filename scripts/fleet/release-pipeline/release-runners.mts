@@ -12,7 +12,7 @@ import { deriveReleaseLevel } from './stages.mts'
 
 import type { RunnerSeams, StageOutcome } from './seams.mts'
 
-// ── stage 6: bump ──────────────────────────────────────────────────────────
+// ── stage 7: bump ──────────────────────────────────────────────────────────
 
 /**
  * Bump stage: translate the USER-named version into the `--release-as` level
@@ -20,30 +20,30 @@ import type { RunnerSeams, StageOutcome } from './seams.mts'
  * the version write + CHANGELOG + bump commit), then verify package.json
  * actually reads the named version. The pipeline never writes a version.
  */
-export async function runBumpStage(options: {
+export async function runBumpStage(config: {
   cwd: string
   dryRun: boolean
   seams?: RunnerSeams | undefined
   targetVersion: string
 }): Promise<StageOutcome> {
-  const opts = { __proto__: null, ...options } as typeof options
-  const seams = resolveSeams(opts.seams)
-  const pkg = readPkg(opts.cwd)
-  if (pkg.version === opts.targetVersion) {
+  const cfg = { __proto__: null, ...config } as typeof config
+  const seams = resolveSeams(cfg.seams)
+  const pkg = readPkg(cfg.cwd)
+  if (pkg.version === cfg.targetVersion) {
     return {
-      detail: `package.json already reads ${opts.targetVersion} — bump previously applied`,
+      detail: `package.json already reads ${cfg.targetVersion} — bump previously applied`,
       status: 'passed',
     }
   }
-  const derived = deriveReleaseLevel(pkg.version, opts.targetVersion)
+  const derived = deriveReleaseLevel(pkg.version, cfg.targetVersion)
   if (derived.error !== undefined) {
     return { detail: derived.error, status: 'failed' }
   }
   const args = ['scripts/fleet/bump.mts', '--release-as', derived.level]
-  if (opts.dryRun) {
+  if (cfg.dryRun) {
     args.push('--dry-run')
   }
-  const code = await seams.runInherit('node', args, opts.cwd)
+  const code = await seams.runInherit('node', args, cfg.cwd)
   if (code !== 0) {
     return {
       detail:
@@ -52,30 +52,30 @@ export async function runBumpStage(options: {
       status: 'failed',
     }
   }
-  if (opts.dryRun) {
+  if (cfg.dryRun) {
     return {
-      detail: `[dry-run] bump.mts preview for ${opts.targetVersion} (--release-as ${derived.level})`,
+      detail: `[dry-run] bump.mts preview for ${cfg.targetVersion} (--release-as ${derived.level})`,
       status: 'passed',
     }
   }
-  const after = readPkg(opts.cwd)
-  if (after.version !== opts.targetVersion) {
+  const after = readPkg(cfg.cwd)
+  if (after.version !== cfg.targetVersion) {
     return {
       detail:
         `bump landed on the wrong version.\n` +
         `  Where: package.json after bump.mts --release-as ${derived.level}\n` +
-        `  Saw ${after.version}, wanted ${opts.targetVersion}.\n` +
+        `  Saw ${after.version}, wanted ${cfg.targetVersion}.\n` +
         `  Fix: reconcile the named version with bump.mts's computation (it increments from ${pkg.version}).`,
       status: 'failed',
     }
   }
   return {
-    detail: `bump.mts committed chore: bump version to ${opts.targetVersion} (--release-as ${derived.level})`,
+    detail: `bump.mts committed chore: bump version to ${cfg.targetVersion} (--release-as ${derived.level})`,
     status: 'passed',
   }
 }
 
-// ── stage 7: tag + immutable GH release ────────────────────────────────────
+// ── stage 8: tag + immutable GH release ────────────────────────────────────
 
 /**
  * Release stage: tag vX.Y.Z + the IMMUTABLE GitHub release (3-step draft →
@@ -84,25 +84,25 @@ export async function runBumpStage(options: {
  * exists afterwards (`gh release view` — read the published state, don't
  * assume).
  */
-export async function runReleaseStage(options: {
+export async function runReleaseStage(config: {
   cwd: string
   dryRun: boolean
   seams?: RunnerSeams | undefined
   targetVersion: string
 }): Promise<StageOutcome> {
-  const opts = { __proto__: null, ...options } as typeof options
-  const seams = resolveSeams(opts.seams)
-  const pkg = readPkg(opts.cwd)
-  if (pkg.version !== opts.targetVersion) {
+  const cfg = { __proto__: null, ...config } as typeof config
+  const seams = resolveSeams(cfg.seams)
+  const pkg = readPkg(cfg.cwd)
+  if (pkg.version !== cfg.targetVersion) {
     return {
       detail:
-        `package.json reads ${pkg.version}, not the named ${opts.targetVersion}.\n` +
+        `package.json reads ${pkg.version}, not the named ${cfg.targetVersion}.\n` +
         `  Fix: the bump stage must land first; re-run the pipeline.`,
       status: 'failed',
     }
   }
-  const tagName = `v${opts.targetVersion}`
-  if (opts.dryRun) {
+  const tagName = `v${cfg.targetVersion}`
+  if (cfg.dryRun) {
     return {
       detail: `[dry-run] would ensure tag ${tagName} + immutable GH release (draft → upload → undraft)`,
       status: 'deferred',
@@ -112,7 +112,7 @@ export async function runReleaseStage(options: {
   const view = await seams.runCapture(
     'gh',
     ['release', 'view', tagName, '--json', 'tagName,isDraft'],
-    opts.cwd,
+    cfg.cwd,
   )
   if (view.code !== 0) {
     return {
@@ -128,7 +128,7 @@ export async function runReleaseStage(options: {
   }
 }
 
-// ── stage 8: staged npm publish ────────────────────────────────────────────
+// ── stage 9: staged npm publish ────────────────────────────────────────────
 
 /**
  * Stage-publish: defer to the owning publish runner
@@ -136,24 +136,24 @@ export async function runReleaseStage(options: {
  * (registry read first) and adds --provenance under GITHUB_ACTIONS. Nothing
  * goes public here; auth is browser-based (web) — never an --otp flag.
  */
-export async function runStagePublish(options: {
+export async function runStagePublish(config: {
   cwd: string
   distTag: string
   dryRun: boolean
   seams?: RunnerSeams | undefined
 }): Promise<StageOutcome> {
-  const opts = { __proto__: null, ...options } as typeof options
-  const seams = resolveSeams(opts.seams)
+  const cfg = { __proto__: null, ...config } as typeof config
+  const seams = resolveSeams(cfg.seams)
   const args = [
     'scripts/fleet/npm-publish.mts',
     '--staged',
     '--tag',
-    opts.distTag,
+    cfg.distTag,
   ]
-  if (opts.dryRun) {
+  if (cfg.dryRun) {
     args.push('--dry-run')
   }
-  const code = await seams.runInherit('node', args, opts.cwd)
+  const code = await seams.runInherit('node', args, cfg.cwd)
   if (code !== 0) {
     return {
       detail:
@@ -163,14 +163,14 @@ export async function runStagePublish(options: {
     }
   }
   return {
-    detail: opts.dryRun
+    detail: cfg.dryRun
       ? '[dry-run] pnpm stage publish validated pack + manifest, no upload'
-      : `staged to npm (tag ${opts.distTag}); not public until --approve`,
+      : `staged to npm (tag ${cfg.distTag}); not public until --approve`,
     status: 'passed',
   }
 }
 
-// ── stage 9: pre-approve verify ────────────────────────────────────────────
+// ── stage 10: pre-approve verify ───────────────────────────────────────────
 
 /**
  * Verify stage: the pre-approve integrity gate. Finds this package's staged
@@ -178,29 +178,29 @@ export async function runStagePublish(options: {
  * sha1 vs npm's staged shasum, with the extracted-contents fallback. A
  * mismatch fails loud; approve is unreachable until this passes.
  */
-export async function runVerifyStage(options: {
+export async function runVerifyStage(config: {
   cwd: string
   dryRun: boolean
   seams?: RunnerSeams | undefined
   targetVersion: string
 }): Promise<StageOutcome> {
-  const opts = { __proto__: null, ...options } as typeof options
-  const seams = resolveSeams(opts.seams)
-  if (opts.dryRun) {
+  const cfg = { __proto__: null, ...config } as typeof config
+  const seams = resolveSeams(cfg.seams)
+  if (cfg.dryRun) {
     return {
       detail: '[dry-run] nothing staged under dry-run; verify has no subject',
       status: 'deferred',
     }
   }
-  const pkg = readPkg(opts.cwd)
+  const pkg = readPkg(cfg.cwd)
   const staged = await seams.listStaged()
   const entry = staged.find(
-    e => e.name === pkg.name && e.version === opts.targetVersion,
+    e => e.name === pkg.name && e.version === cfg.targetVersion,
   )
   if (!entry) {
     return {
       detail:
-        `no staged entry for ${pkg.name}@${opts.targetVersion}.\n` +
+        `no staged entry for ${pkg.name}@${cfg.targetVersion}.\n` +
         `  Where: pnpm stage list --json (${staged.length} entr${staged.length === 1 ? 'y' : 'ies'} total)\n` +
         `  Fix: run the stage-publish stage first, and check npm auth (pnpm stage list).`,
       status: 'failed',
@@ -210,13 +210,13 @@ export async function runVerifyStage(options: {
   if (!ok) {
     return {
       detail:
-        `pre-approve verify FAILED for ${pkg.name}@${opts.targetVersion} (see the gate's log above).\n` +
+        `pre-approve verify FAILED for ${pkg.name}@${cfg.targetVersion} (see the gate's log above).\n` +
         `  Fix: reject the staged upload (pnpm stage reject ${entry.stageId}) and re-stage — never approve divergent bytes.`,
       status: 'failed',
     }
   }
   return {
-    detail: `staged shasum verified for ${pkg.name}@${opts.targetVersion} (stageId ${entry.stageId})`,
+    detail: `staged shasum verified for ${pkg.name}@${cfg.targetVersion} (stageId ${entry.stageId})`,
     status: 'passed',
   }
 }
@@ -230,18 +230,18 @@ export async function runVerifyStage(options: {
  * Socket full-scan gate before any `pnpm stage approve`; 2FA is browser
  * web-OTP — the pipeline never passes a one-time code on the CLI.
  */
-export async function runApproveStep(options: {
+export async function runApproveStep(config: {
   cwd: string
   dryRun: boolean
   seams?: RunnerSeams | undefined
 }): Promise<StageOutcome> {
-  const opts = { __proto__: null, ...options } as typeof options
-  const seams = resolveSeams(opts.seams)
+  const cfg = { __proto__: null, ...config } as typeof config
+  const seams = resolveSeams(cfg.seams)
   const args = ['scripts/fleet/npm-publish.mts', '--approve']
-  if (opts.dryRun) {
+  if (cfg.dryRun) {
     args.push('--dry-run')
   }
-  const code = await seams.runInherit('node', args, opts.cwd)
+  const code = await seams.runInherit('node', args, cfg.cwd)
   if (code !== 0) {
     return {
       detail:
@@ -251,7 +251,7 @@ export async function runApproveStep(options: {
     }
   }
   return {
-    detail: opts.dryRun
+    detail: cfg.dryRun
       ? '[dry-run] approve preview (no promote)'
       : 'staged package approved — public on npm',
     status: 'passed',
