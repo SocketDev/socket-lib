@@ -237,6 +237,12 @@
       "rules": {
         "eslint/no-unused-vars": "off"
       }
+    },
+    {
+      "files": ["**/src/**"],
+      "rules": {
+        "socket/no-required-in-options-bag": "off"
+      }
     }
   ],
   "ignorePatterns": [
