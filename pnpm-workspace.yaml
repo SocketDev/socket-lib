@@ -79,7 +79,7 @@ catalog:
   # well past the 7-day soak — no minimumReleaseAgeExclude needed.
   'std-env': 4.1.0
   'svgo': 4.0.1
-  'taze': 19.14.1
+  'taze': 19.16.0
   # Vite 8.x is rolldown-native (keeps the fleet bundler rolldown end-to-end,
   # so esbuild never enters the tree). vitest 4.1.x pulls vite transitively;
   # the override below forces that transitive vite to this pin. Pinned to
@@ -156,6 +156,15 @@ minimumReleaseAgeExclude:
   - '@oxlint-tsgolint/win32-arm64@7.0.2001'
   # published: 2026-07-21 | removable: 2026-07-28
   - '@oxlint-tsgolint/win32-x64@7.0.2001'
+  # taze 19.16.0 — the dep updater itself; forced ahead of the soak by owner
+  # directive so the regenerated single-registry patch (patchedDependencies)
+  # tracks the current release. Exact-pinned so a future version re-soaks.
+  # published: 2026-07-22 | removable: 2026-07-29
+  - 'taze@19.16.0'
+  # verkit — new dev-only transitive of taze 19.16.0 (same owner directive);
+  # exact-pinned so future versions re-soak.
+  # published: 2026-07-19 | removable: 2026-07-26
+  - 'verkit@0.1.2'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
@@ -370,6 +379,9 @@ patchedDependencies:
   # cause chains survive vm/worker realms; consumer: errors/predicates parity
   # with src's own isError semantics.
   pony-cause@2.1.11: patches/pony-cause@2.1.11.patch
+  # Single-registry: drops taze's default-registry fast path in
+  # getVersionsForContext so version lookups stay on the configured registry.
+  taze@19.16.0: patches/taze@19.16.0.patch
 
 # Opt out of pnpm's packageManager-version self-check. CI installs pnpm from
 # its native bin via the shared setup workflow, not corepack, so the runner's
