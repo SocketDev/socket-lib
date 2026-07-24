@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
@@ -43,7 +43,7 @@ beforeEach(() => {
 
 afterEach(() => {
   // `git worktree remove` may have left behind some dirs that we manage at
-  // the test level. rmSync force/recursive handles both clean + leftover state.
+  // the test level. safeDeleteSync handles both clean + leftover state.
   safeDeleteSync(tmpRoot)
 })
 

@@ -12,13 +12,7 @@
  *   proof to the npm registry module: pure parsers and encoding helpers must
  *   evaluate and run in a process-less context.
  */
-import {
-  existsSync,
-  mkdirSync,
-  readFileSync,
-  rmSync,
-  symlinkSync,
-} from 'node:fs'
+import { existsSync, mkdirSync, readFileSync, symlinkSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import os from 'node:os'
 import path from 'node:path'

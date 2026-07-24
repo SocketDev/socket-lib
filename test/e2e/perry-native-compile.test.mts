@@ -5,7 +5,7 @@
  *   regressions (both "compiles" and "runs"). Skipped when the pinned
  *   `@perryts/perry` platform binary is unavailable (unsupported host).
  */
-import { existsSync, mkdirSync, rmSync, symlinkSync } from 'node:fs'
+import { existsSync, mkdirSync, symlinkSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
