@@ -1,5 +1,6 @@
 /**
- * @file Unit tests for socket-btm release utilities.
+ * @file Unit tests for socket-btm release download utilities. The naming
+ *   helpers are covered in socket-btm-binary-naming.test.mts.
  */
 
 import process from 'node:process'
@@ -9,9 +10,6 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   detectLibc,
   downloadSocketBtmRelease,
-  getBinaryAssetName,
-  getBinaryName,
-  getPlatformArch,
 } from '../../../src/releases/socket-btm'
 
 import { getReleaseAssetUrl } from '../../../src/releases/github-asset-url'
@@ -47,126 +45,6 @@ describe('releases/socket-btm', () => {
     })
   })
 
-  describe('getBinaryAssetName', () => {
-    it('should return correct asset name for darwin-arm64', () => {
-      expect(getBinaryAssetName('binject', 'darwin', 'arm64')).toBe(
-        'binject-darwin-arm64',
-      )
-    })
-
-    it('should return correct asset name for darwin-x64', () => {
-      expect(getBinaryAssetName('node', 'darwin', 'x64')).toBe(
-        'node-darwin-x64',
-      )
-    })
-
-    it('should return correct asset name for linux-x64 with glibc', () => {
-      expect(getBinaryAssetName('binject', 'linux', 'x64', 'glibc')).toBe(
-        'binject-linux-x64',
-      )
-    })
-
-    it('should return correct asset name for linux-x64 with musl', () => {
-      expect(getBinaryAssetName('node', 'linux', 'x64', 'musl')).toBe(
-        'node-linux-x64-musl',
-      )
-    })
-
-    it('should return correct asset name for linux-arm64 with musl', () => {
-      expect(getBinaryAssetName('binflate', 'linux', 'arm64', 'musl')).toBe(
-        'binflate-linux-arm64-musl',
-      )
-    })
-
-    it('should return correct asset name for win32-x64', () => {
-      expect(getBinaryAssetName('binject', 'win32', 'x64')).toBe(
-        'binject-win32-x64.exe',
-      )
-    })
-
-    it('uses the release platform token for node-smol windows assets', () => {
-      // Published node-smol assets are node-win-<arch>.exe (release-platform
-      // naming), unlike the binject/binflate families which keep win32.
-      expect(getBinaryAssetName('node', 'win32', 'arm64')).toBe(
-        'node-win-arm64.exe',
-      )
-      expect(getBinaryAssetName('node', 'win32', 'x64')).toBe(
-        'node-win-x64.exe',
-      )
-    })
-
-    it('should throw for unsupported architecture', () => {
-      expect(() =>
-        getBinaryAssetName('node', 'darwin', 'ia32' as 'x64'),
-      ).toThrow('Unsupported architecture')
-    })
-
-    it('should throw for unsupported platform', () => {
-      expect(() =>
-        getBinaryAssetName('node', 'freebsd' as 'darwin', 'x64'),
-      ).toThrow('Unsupported platform')
-    })
-  })
-
-  describe('getPlatformArch', () => {
-    it('should return correct identifier for darwin-arm64', () => {
-      expect(getPlatformArch('darwin', 'arm64')).toBe('darwin-arm64')
-    })
-
-    it('should return correct identifier for darwin-x64', () => {
-      expect(getPlatformArch('darwin', 'x64')).toBe('darwin-x64')
-    })
-
-    it('should return correct identifier for linux-x64 without libc', () => {
-      expect(getPlatformArch('linux', 'x64')).toBe('linux-x64')
-    })
-
-    it('should return correct identifier for linux-x64 with glibc', () => {
-      expect(getPlatformArch('linux', 'x64', 'glibc')).toBe('linux-x64')
-    })
-
-    it('should return correct identifier for linux-x64 with musl', () => {
-      expect(getPlatformArch('linux', 'x64', 'musl')).toBe('linux-x64-musl')
-    })
-
-    it('should return correct identifier for linux-arm64 with musl', () => {
-      expect(getPlatformArch('linux', 'arm64', 'musl')).toBe('linux-arm64-musl')
-    })
-
-    it('should return correct identifier for win32-x64', () => {
-      expect(getPlatformArch('win32', 'x64')).toBe('win32-x64')
-    })
-
-    it('should ignore libc for non-linux platforms', () => {
-      expect(getPlatformArch('darwin', 'arm64', 'musl')).toBe('darwin-arm64')
-      expect(getPlatformArch('win32', 'x64', 'musl')).toBe('win32-x64')
-    })
-
-    it('should throw for unsupported architecture', () => {
-      expect(() => getPlatformArch('darwin', 'ia32' as 'x64')).toThrow(
-        'Unsupported architecture',
-      )
-    })
-  })
-
-  describe('getBinaryName', () => {
-    it('should return binary name without extension for darwin', () => {
-      expect(getBinaryName('node', 'darwin')).toBe('node')
-    })
-
-    it('should return binary name without extension for linux', () => {
-      expect(getBinaryName('binject', 'linux')).toBe('binject')
-    })
-
-    it('should return binary name with .exe extension for win32', () => {
-      expect(getBinaryName('node', 'win32')).toBe('node.exe')
-    })
-
-    it('should append .exe to non-node binary names on win32', () => {
-      expect(getBinaryName('binject', 'win32')).toBe('binject.exe')
-    })
-  })
-
   describe.sequential('downloadSocketBtmRelease', () => {
     beforeEach(() => {
       vi.mocked(downloadGitHubRelease).mockReset()
@@ -175,6 +53,7 @@ describe('releases/socket-btm', () => {
     })
 
     it('should pass binary config to downloadGitHubRelease for current platform', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce('binject-20250101-abc')
       vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
         '/tmp/dl/binject-darwin-arm64/binject',
       )
@@ -193,15 +72,20 @@ describe('releases/socket-btm', () => {
         repo: 'socket-btm',
         toolName: 'binject',
         toolPrefix: 'binject-',
-        assetName: 'binject-darwin-arm64',
+        assetName: [
+          'binject-darwin-arm64',
+          'binject-20250101-abc-darwin-arm64.node',
+        ],
         binaryName: 'binject',
         platformArch: 'darwin-arm64',
         downloadDir: '/tmp/dl',
         quiet: true,
+        tag: 'binject-20250101-abc',
       })
     })
 
     it('should encode libc in asset + platform for linux with musl', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce('node-20250101-abc')
       vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
         '/tmp/dl/node-linux-x64-musl/node',
       )
@@ -216,7 +100,10 @@ describe('releases/socket-btm', () => {
 
       const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
       expect(cfg).toMatchObject({
-        assetName: 'node-linux-x64-musl',
+        assetName: [
+          'node-linux-x64-musl',
+          'node-20250101-abc-linux-x64-musl.node',
+        ],
         platformArch: 'linux-x64-musl',
         binaryName: 'node',
       })
@@ -234,11 +121,51 @@ describe('releases/socket-btm', () => {
         targetArch: 'arm64',
       })
 
+      // Explicit tag skips the latest-release lookup entirely.
+      expect(getLatestRelease).not.toHaveBeenCalled()
       const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
       expect(cfg.tag).toBe('bin-20250101-abc')
+      expect(cfg.assetName).toEqual([
+        'bin-darwin-arm64',
+        'bin-20250101-abc-darwin-arm64.node',
+      ])
+    })
+
+    it('should include the tag-infixed .node prebuilt candidate after the plain asset name', async () => {
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        '/tmp/dl/opentui-linux-x64-musl/opentui',
+      )
+
+      await downloadSocketBtmRelease('opentui', {
+        quiet: true,
+        tag: 'opentui-20260424-18f0f46',
+        targetPlatform: 'linux',
+        targetArch: 'x64',
+        libc: 'musl',
+      })
+
+      const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
+      expect(cfg.assetName).toEqual([
+        'opentui-linux-x64-musl',
+        'opentui-20260424-18f0f46-linux-x64-musl.node',
+      ])
+    })
+
+    it('should throw when no release exists for the binary tool prefix', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce(undefined)
+
+      await expect(
+        downloadSocketBtmRelease('ghost', {
+          quiet: true,
+          targetPlatform: 'darwin',
+          targetArch: 'arm64',
+        }),
+      ).rejects.toThrow('No ghost- release found in SocketDev/socket-btm')
+      expect(downloadGitHubRelease).not.toHaveBeenCalled()
     })
 
     it('should use .exe binary name on windows', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce('node-20250101-abc')
       vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
         'C:\\dl\\node-win32-x64\\node.exe',
       )
@@ -251,14 +178,16 @@ describe('releases/socket-btm', () => {
 
       const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
       expect(cfg).toMatchObject({
-        // Published node-smol windows assets use the release platform token.
-        assetName: 'node-win-x64.exe',
+        // Published node-smol windows assets use the release platform token,
+        // as do the .node prebuilt families.
+        assetName: ['node-win-x64.exe', 'node-20250101-abc-win-x64.node'],
         binaryName: 'node.exe',
         platformArch: 'win32-x64',
       })
     })
 
     it('should default bin to tool name when bin is unset', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce('lief-20250101-abc')
       vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/x/lief')
 
       await downloadSocketBtmRelease('lief', {
@@ -269,10 +198,14 @@ describe('releases/socket-btm', () => {
 
       const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
       expect(cfg.binaryName).toBe('lief')
-      expect(cfg.assetName).toBe('lief-darwin-arm64')
+      expect(cfg.assetName).toEqual([
+        'lief-darwin-arm64',
+        'lief-20250101-abc-darwin-arm64.node',
+      ])
     })
 
     it('should use explicit bin name when different from tool', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce('tool-20250101-abc')
       vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/x/other')
 
       await downloadSocketBtmRelease('tool', {
@@ -287,7 +220,10 @@ describe('releases/socket-btm', () => {
         toolName: 'tool',
         toolPrefix: 'tool-',
         binaryName: 'other',
-        assetName: 'other-darwin-arm64',
+        assetName: [
+          'other-darwin-arm64',
+          'tool-20250101-abc-darwin-arm64.node',
+        ],
       })
     })
 
@@ -360,6 +296,7 @@ describe('releases/socket-btm', () => {
     })
 
     it('forwards an explicit cwd through to downloadGitHubRelease config', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce('bin-20250101-abc')
       vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/x')
       await downloadSocketBtmRelease('bin', {
         cwd: '/my/repo/root',
@@ -372,6 +309,7 @@ describe('releases/socket-btm', () => {
     })
 
     it('forwards an explicit downloadDir through to downloadGitHubRelease config', async () => {
+      vi.mocked(getLatestRelease).mockResolvedValueOnce('bin-20250101-abc')
       vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/x/dl/y')
       await downloadSocketBtmRelease('bin', {
         downloadDir: '/x/dl',

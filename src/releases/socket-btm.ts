@@ -10,6 +10,7 @@ import { downloadGitHubRelease } from './github-downloads'
 import {
   getBinaryAssetName,
   getBinaryName,
+  getNodePrebuildAssetName,
   getPlatformArch,
 } from './socket-btm-binary-naming'
 
@@ -19,7 +20,12 @@ import type { AssetPattern, DownloadGitHubReleaseConfig } from './github-types'
 
 import { ErrorCtor } from '../primordials/error'
 export type { Arch, Libc, Platform }
-export { getBinaryAssetName, getBinaryName, getPlatformArch }
+export {
+  getBinaryAssetName,
+  getBinaryName,
+  getNodePrebuildAssetName,
+  getPlatformArch,
+}
 
 /**
  * Socket-btm GitHub repository configuration.
@@ -316,6 +322,28 @@ export async function downloadSocketBtmRelease(
     const platformArch = getPlatformArch(targetPlatform, targetArch, libc)
     const binaryName = getBinaryName(baseName, targetPlatform)
 
+    // Resolve the tag up front: the `.node` prebuilt asset candidate below is
+    // tag-infixed, so the latest tag must be known before the download.
+    let resolvedTag = tag
+    if (resolvedTag === undefined) {
+      resolvedTag =
+        (await getLatestRelease(toolPrefix, SOCKET_BTM_REPO)) ?? undefined
+      if (!resolvedTag) {
+        throw new ErrorCtor(
+          `No ${toolPrefix} release found in ${SOCKET_BTM_REPO.owner}/${SOCKET_BTM_REPO.repo}`,
+        )
+      }
+    }
+
+    // Ordered asset candidates: the plain `<bin>-<platformArch>` shape the
+    // executable tool families publish, then the tag-infixed
+    // `<tag>-<platformArch>.node` shape the `.node` prebuilt families publish
+    // (e.g. opentui-20260424-18f0f46-linux-x64-musl.node).
+    const assetNames = [
+      assetName,
+      getNodePrebuildAssetName(resolvedTag, targetPlatform, targetArch, libc),
+    ]
+
     downloadConfig = {
       owner: SOCKET_BTM_REPO.owner,
       repo: SOCKET_BTM_REPO.repo,
@@ -324,9 +352,9 @@ export async function downloadSocketBtmRelease(
       toolName: tool,
       platformArch,
       binaryName,
-      assetName,
+      assetName: assetNames,
       toolPrefix,
-      ...(tag !== undefined && { tag }),
+      tag: resolvedTag,
       quiet,
       removeMacOSQuarantine,
     }

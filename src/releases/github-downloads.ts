@@ -15,6 +15,7 @@ import {
 import { spawn } from '../process/spawn/child'
 
 import { getReleaseAssetUrl } from './github-asset-url'
+import { describeAssetPatterns } from './github-assets'
 import { getLatestRelease } from './github-listing'
 
 import type {
@@ -163,14 +164,15 @@ export async function downloadGitHubRelease(
  *
  * @param tag - Release tag name.
  * @param assetPattern - Asset name or pattern (glob string, prefix/suffix
- *   object, or RegExp)
+ *   object, or RegExp), or an ordered candidate list — the first candidate that
+ *   matches any release asset wins.
  * @param outputPath - Path to write the downloaded file.
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options.
  */
 export async function downloadReleaseAsset(
   tag: string,
-  assetPattern: string | AssetPattern,
+  assetPattern: AssetPattern | readonly AssetPattern[],
   outputPath: string,
   repoConfig: RepoConfig,
   options: { quiet?: boolean | undefined } = {},
@@ -185,9 +187,9 @@ export async function downloadReleaseAsset(
   })
 
   if (!downloadUrl) {
-    const patternDesc =
-      typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
-    throw new ErrorCtor(`Asset ${patternDesc} not found in release ${tag}`)
+    throw new ErrorCtor(
+      `Asset ${describeAssetPatterns(assetPattern)} not found in release ${tag}`,
+    )
   }
 
   const path = getNodePath()

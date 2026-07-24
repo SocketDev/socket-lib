@@ -17,7 +17,7 @@ import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
 import { JSONParse, JSONStringify } from '../primordials/json'
 
-import { createAssetMatcher } from './github-assets'
+import { createAssetMatcher, describeAssetPatterns } from './github-assets'
 import { getAuthHeaders } from './github-auth'
 import { GITHUB_RETRY_CONFIG as RETRY_CONFIG } from './github-retry-config'
 
@@ -147,7 +147,8 @@ export async function fetchReleaseAssetsViaGraphQL(
  *
  * @param tag - Release tag name.
  * @param assetPattern - Asset name or pattern (glob string, prefix/suffix
- *   object, or RegExp)
+ *   object, or RegExp), or an ordered candidate list — the first candidate that
+ *   matches any release asset wins.
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options.
  * @param options.nothrow - If true, return undefined instead of throwing when
@@ -160,7 +161,7 @@ export async function fetchReleaseAssetsViaGraphQL(
  */
 export async function getReleaseAssetUrl(
   tag: string,
-  assetPattern: string | AssetPattern,
+  assetPattern: AssetPattern | readonly AssetPattern[],
   repoConfig: RepoConfig,
   options: { nothrow?: boolean | undefined } = {},
 ): Promise<string | undefined> {
@@ -170,16 +171,11 @@ export async function getReleaseAssetUrl(
   const { nothrow = false } = options
   const { owner, repo } = repoConfig
 
-  // Create matcher function for the pattern. Glob-pattern arm fires
-  // for AssetPattern objects; string-equality arm for plain strings.
-  /* c8 ignore start */
-  const isMatch =
-    typeof assetPattern === 'string' &&
-    !assetPattern.includes('*') &&
-    !assetPattern.includes('{')
-      ? (input: string) => input === assetPattern
-      : createAssetMatcher(assetPattern as AssetPattern)
-  /* c8 ignore stop */
+  // Normalize to an ordered candidate list; a single pattern is a
+  // one-candidate list.
+  const candidates: readonly AssetPattern[] = ArrayIsArray(assetPattern)
+    ? assetPattern
+    : [assetPattern]
 
   // Fetch the assets list with retry semantics for transient errors.
   // Matching the asset name happens AFTER the retry block — a no-match
@@ -288,20 +284,39 @@ export async function getReleaseAssetUrl(
     throw new ErrorCtor(`Release ${tag} not found in ${owner}/${repo}`)
   }
 
-  const asset = assets.find(a => isMatch(a.name))
+  // Try each candidate in order — the FIRST candidate that matches any
+  // release asset wins (candidate priority, not asset-list order).
+  let asset: { name: string; browser_download_url: string } | undefined
+  for (let i = 0, { length } = candidates; i < length; i += 1) {
+    const candidate = candidates[i]!
+    // Wildcard-free strings match by equality; glob/object/RegExp
+    // candidates go through createAssetMatcher.
+    /* c8 ignore start - Glob-vs-exact matcher split; both arms fire only
+       across the full pattern-shape test matrix. */
+    const isMatch =
+      typeof candidate === 'string' &&
+      !candidate.includes('*') &&
+      !candidate.includes('{')
+        ? (input: string) => input === candidate
+        : createAssetMatcher(candidate)
+    /* c8 ignore stop */
+    asset = assets.find(a => isMatch(a.name))
+    if (asset) {
+      break
+    }
+  }
 
-  // No-asset throw + AssetPattern-string-vs-object describer fire
-  // only on no-match cases; tests cover the happy path.
-  /* c8 ignore start */
   if (!asset) {
+    // Nothrow arm fires only for callers opting out of the throw.
+    /* c8 ignore start - Nothrow no-match arm; covered via nothrow callers. */
     if (nothrow) {
       return undefined
     }
-    const patternDesc =
-      typeof assetPattern === 'string' ? assetPattern : 'matching pattern'
-    throw new ErrorCtor(`Asset ${patternDesc} not found in release ${tag}`)
+    /* c8 ignore stop */
+    throw new ErrorCtor(
+      `Asset ${describeAssetPatterns(candidates)} not found in release ${tag}`,
+    )
   }
-  /* c8 ignore stop */
 
   return asset.browser_download_url
 }
