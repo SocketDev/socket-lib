@@ -230,7 +230,7 @@ export async function runApprove(config: {
     if (
       entry.name &&
       entry.version &&
-      !(await isAlreadyPublished(entry.name, entry.version, rootPath))
+      !(await isAlreadyPublished(entry.name, entry.version))
     ) {
       eligible.push(entry)
     }
@@ -429,7 +429,7 @@ export async function runApprove(config: {
       // the approved version is actually resolvable on the registry.
       // eslint-disable-next-line no-await-in-loop
       const released = await releaseBehindLiveGate({
-        isLive: () => isAlreadyPublished(entry.name!, entry.version!, rootPath),
+        isLive: () => isAlreadyPublished(entry.name!, entry.version!),
         pkg: { name: entry.name, version: entry.version },
         registry: 'npm',
       })

@@ -81,7 +81,7 @@ export interface RunnerSeams {
     | ((name: string, version: string) => Promise<string | undefined>)
     | undefined
   registryLive?:
-    | ((name: string, version: string, cwd: string) => Promise<boolean>)
+    | ((name: string, version: string) => Promise<boolean>)
     | undefined
   runCapture?:
     | ((
@@ -115,7 +115,7 @@ export interface ResolvedSeams {
   fetchRegistryDist: (name: string) => Promise<Record<string, RegistryDistInfo>>
   listStaged: () => Promise<StageListEntry[]>
   packTarball: (name: string, version: string) => Promise<string | undefined>
-  registryLive: (name: string, version: string, cwd: string) => Promise<boolean>
+  registryLive: (name: string, version: string) => Promise<boolean>
   runCapture: (
     cmd: string,
     args: string[],
@@ -161,13 +161,9 @@ async function defaultDownloadRegistryTarball(
 // Default registry-liveness probe for the release stage: the version must be
 // resolvable on npm (with the requireRegistryLive retry window for registry
 // propagation) before the tag + immutable GH release may exist.
-function defaultRegistryLive(
-  name: string,
-  version: string,
-  cwd: string,
-): Promise<boolean> {
+function defaultRegistryLive(name: string, version: string): Promise<boolean> {
   return requireRegistryLive({
-    isLive: () => isAlreadyPublished(name, version, cwd),
+    isLive: () => isAlreadyPublished(name, version),
     registry: 'npm',
     subject: `${name}@${version}`,
   })

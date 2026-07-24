@@ -698,7 +698,7 @@ export async function runReleaseStage(config: {
   }
   // Belt-and-braces: the version must be LIVE on the registry — an approve
   // exit code alone is not proof the publish landed.
-  const live = await seams.registryLive(pkg.name, pkg.version, cfg.cwd)
+  const live = await seams.registryLive(pkg.name, pkg.version)
   if (!live) {
     return {
       detail:
