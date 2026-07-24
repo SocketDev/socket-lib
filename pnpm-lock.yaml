@@ -326,7 +326,7 @@ catalogs:
 overrides:
   '@socketregistry/packageurl-js': 1.4.7
   '@socketsecurity/lib': 6.2.3
-  '@socketsecurity/registry': npm:@socketsecurity/registry@2.0.2
+  '@socketsecurity/registry': npm:@socketsecurity/registry@2.0.4
   '@socketsecurity/sdk': npm:@socketsecurity/sdk@4.0.3
   chalk@>=5: 5.6.2
   es-define-property: npm:@socketregistry/es-define-property@1.0.7
