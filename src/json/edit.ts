@@ -147,7 +147,9 @@ export function getEditableJsonClass<
         return this
       }
 
-      async save(options?: EditableJsonSaveOptions): Promise<boolean> {
+      async save(
+        options?: EditableJsonSaveOptions | undefined,
+      ): Promise<boolean> {
         options = { __proto__: null, ...options } as typeof options
         if (!this.canSave || this.content === undefined) {
           throw new ErrorCtor('No file path to save to')
@@ -185,7 +187,7 @@ export function getEditableJsonClass<
         return true
       }
 
-      saveSync(options?: EditableJsonSaveOptions): boolean {
+      saveSync(options?: EditableJsonSaveOptions | undefined): boolean {
         options = { __proto__: null, ...options } as typeof options
         if (!this.canSave || this.content === undefined) {
           throw new ErrorCtor('No file path to save to')
@@ -232,7 +234,7 @@ export function getEditableJsonClass<
         return this
       }
 
-      willSave(options?: EditableJsonSaveOptions): boolean {
+      willSave(options?: EditableJsonSaveOptions | undefined): boolean {
         if (!this.canSave || this.content === undefined) {
           return false
         }

@@ -65,7 +65,7 @@ interface FakeChild extends EventEmitter {
 // so a test can assert what bytes the source wrote to the child. One
 // shape covers both call sites — the FakeChild default + the test that
 // overrides stdin to capture writeLinux's secret payload.
-function makeWritableStdin(captureInto?: string[]): Writable {
+function makeWritableStdin(captureInto?: string[] | undefined): Writable {
   return new Writable({
     write(chunk, _enc, cb) {
       if (captureInto) {

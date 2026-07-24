@@ -37,7 +37,7 @@ function factory(id: string): TestFactory {
   }
 }
 
-function setBrowserFactory(value?: unknown): void {
+function setBrowserFactory(value?: unknown | undefined): void {
   if (value === undefined) {
     Reflect.deleteProperty(globalThis, 'LanguageModel')
     return

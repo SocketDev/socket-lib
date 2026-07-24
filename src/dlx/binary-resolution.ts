@@ -42,7 +42,7 @@ import { binaryPathCache, binaryPathCacheSet } from './_internal'
 export function findBinaryPath(
   packageDir: string,
   packageName: string,
-  binaryName?: string,
+  binaryName?: string | undefined,
 ): string {
   const path = getNodePath()
   const installedDir = normalizePath(

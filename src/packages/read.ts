@@ -27,7 +27,7 @@ import type {
  */
 export async function readPackageJson(
   filepath: string,
-  options?: ReadPackageJsonOptions,
+  options?: ReadPackageJsonOptions | undefined,
 ): Promise<PackageJson | undefined> {
   const { editable, normalize, throws, ...normalizeOptions } = {
     __proto__: null,
@@ -60,10 +60,12 @@ export async function readPackageJson(
  */
 export function readPackageJsonSync(
   filepath: string,
-  options?: NormalizeOptions & {
-    editable?: boolean | undefined
-    throws?: boolean | undefined
-  },
+  options?:
+    | (NormalizeOptions & {
+        editable?: boolean | undefined
+        throws?: boolean | undefined
+      })
+    | undefined,
 ): PackageJson | undefined {
   const { editable, normalize, throws, ...normalizeOptions } = {
     __proto__: null,

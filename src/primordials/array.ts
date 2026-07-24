@@ -107,7 +107,7 @@ export const ArrayPrototypeSort = uncurryThis(Array.prototype.sort)
 export const ArrayPrototypeSplice = uncurryThis(Array.prototype.splice) as <T>(
   self: T[],
   start: number,
-  deleteCount?: number,
+  deleteCount?: number | undefined,
   ...items: T[]
 ) => T[]
 export const ArrayPrototypeToLocaleString = uncurryThis(
@@ -118,7 +118,12 @@ export const ArrayPrototypeToSorted = uncurryThis(Array.prototype.toSorted)
 // `toSpliced` is a copying variant of `splice`; same `(start, deleteCount, ...items)` signature.
 export const ArrayPrototypeToSpliced = uncurryThis(
   Array.prototype.toSpliced,
-) as <T>(self: T[], start: number, deleteCount?: number, ...items: T[]) => T[]
+) as <T>(
+  self: T[],
+  start: number,
+  deleteCount?: number | undefined,
+  ...items: T[]
+) => T[]
 export const ArrayPrototypeToString = uncurryThis(Array.prototype.toString)
 export const ArrayPrototypeUnshift = uncurryThis(Array.prototype.unshift) as <
   T,
@@ -154,7 +159,10 @@ while (
 const iteratorProto = iteratorLookup as {
   next: (this: Iterator<unknown>) => IteratorResult<unknown>
   return?:
-    | ((this: Iterator<unknown>, value?: unknown) => IteratorResult<unknown>)
+    | ((
+        this: Iterator<unknown>,
+        value?: unknown | undefined,
+      ) => IteratorResult<unknown>)
     | undefined
 }
 export const IteratorPrototypeNext = uncurryThis(iteratorProto.next)

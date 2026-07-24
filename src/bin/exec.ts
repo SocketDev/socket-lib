@@ -41,8 +41,8 @@ import type { SpawnOptions } from '../process/spawn/types'
  */
 export async function execBin(
   binPath: string,
-  args?: string[],
-  options?: SpawnOptions,
+  args?: string[] | undefined,
+  options?: SpawnOptions | undefined,
 ) {
   // Resolve the binary path, using cache for binary names (not paths).
   let resolvedPath: string | string[] | undefined

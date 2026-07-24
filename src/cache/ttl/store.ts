@@ -55,7 +55,9 @@ import type {
  *   const data = await cache.get('key') // { value: 42 }
  *   ```
  */
-export function createTtlCache(options?: TtlCacheOptions): TtlCache {
+export function createTtlCache(
+  options?: TtlCacheOptions | undefined,
+): TtlCache {
   const opts = {
     __proto__: null,
     memoize: true,

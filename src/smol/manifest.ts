@@ -139,7 +139,7 @@ export interface SmolManifestBinding {
   parseLockfile(
     content: string,
     ecosystem: EcosystemString,
-    format?: 'npm' | 'yarn' | 'pnpm' | 'composer' | 'cargo',
+    format?: 'npm' | 'yarn' | 'pnpm' | 'composer' | 'cargo' | undefined,
   ): ParsedLockfile
   createStreamingParser(
     content: string,

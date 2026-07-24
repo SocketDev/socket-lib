@@ -114,7 +114,7 @@ export interface SummaryStats {
  */
 export function createFooter(
   message?: string | undefined,
-  options?: FooterOptions,
+  options?: FooterOptions | undefined,
 ): string {
   const {
     borderChar = '=',
@@ -181,7 +181,7 @@ export function createFooter(
  */
 export function createSummaryFooter(
   stats: SummaryStats,
-  options?: FooterOptions,
+  options?: FooterOptions | undefined,
 ): string {
   const parts: string[] = []
 

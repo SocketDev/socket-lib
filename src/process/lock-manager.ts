@@ -410,7 +410,7 @@ export class ProcessLockManager {
   async withLock<T>(
     lockPath: string,
     fn: () => Promise<T>,
-    options?: ProcessLockOptions,
+    options?: ProcessLockOptions | undefined,
   ): Promise<T> {
     const release = await this.acquire(lockPath, options)
     try {

@@ -43,7 +43,7 @@ export interface DividerOptions {
  *
  * @returns Divider string
  */
-export function divider(options?: DividerOptions): string {
+export function divider(options?: DividerOptions | undefined): string {
   const opts = { __proto__: null, ...options } as DividerOptions
   const { char = '═', width = 55 } = opts
   return repeatString(char, width)
@@ -114,7 +114,7 @@ export const dividers = {
  *
  * @param options - Divider formatting options.
  */
-export function printDivider(options?: DividerOptions): void {
+export function printDivider(options?: DividerOptions | undefined): void {
   logger.log(divider(options))
 }
 
@@ -143,7 +143,7 @@ export function printDottedDivider(): void {
  *
  * @param options - Divider formatting options.
  */
-export function printSectionBreak(options?: DividerOptions): void {
+export function printSectionBreak(options?: DividerOptions | undefined): void {
   logger.log(sectionBreak(options))
 }
 
@@ -195,7 +195,7 @@ export function printThinDivider(): void {
  *
  * @returns Section break string with newlines
  */
-export function sectionBreak(options?: DividerOptions): string {
+export function sectionBreak(options?: DividerOptions | undefined): string {
   const div = divider(options)
   return `\n${div}\n`
 }

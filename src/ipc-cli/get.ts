@@ -28,7 +28,7 @@ export async function getIpc<K extends keyof IpcObject>(
   key: K,
 ): Promise<IpcObject[K]>
 export async function getIpc(
-  key?: keyof IpcObject,
+  key?: keyof IpcObject | undefined,
 ): Promise<IpcObject | IpcObject[keyof IpcObject]> {
   if (ipcObject === undefined) {
     ipcObject = {}

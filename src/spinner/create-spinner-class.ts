@@ -438,7 +438,7 @@ export function createSpinnerClass(
      */
     text(): string
     text(value: string): SpinnerInstance
-    text(value?: string): string | SpinnerInstance {
+    text(value?: string | undefined): string | SpinnerInstance {
       // biome-ignore lint/complexity/noArguments: Function overload for getter/setter pattern.
       if (arguments.length === 0) {
         // Getter: return current base text

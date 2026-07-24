@@ -36,7 +36,7 @@ vi.mock(import('../../../src/secrets/macos'), () => macosMockFactory())
 vi.mock(import('../../../src/secrets/linux'), () => linuxMockFactory())
 vi.mock(import('../../../src/secrets/windows'), () => windowsMockFactory())
 
-const loadFresh = (plat?: KeychainPlatform) =>
+const loadFresh = (plat?: KeychainPlatform | undefined) =>
   loadFreshKeychain(mockPlatform, plat)
 
 beforeEach(() => {

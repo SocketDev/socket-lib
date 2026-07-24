@@ -24,7 +24,7 @@ vi.mock(import('../../../src/http-request/download'), async importOriginal => {
   return {
     ...original,
     httpDownload: vi.fn(
-      async (_url: string, destPath: string, _opts?: unknown) => {
+      async (_url: string, destPath: string, _opts?: unknown | undefined) => {
         // Write a known payload so SRI integrity computes deterministically.
         const payload = Buffer.from('win-payload')
         writeFileSync(destPath, payload)

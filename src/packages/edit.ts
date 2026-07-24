@@ -79,21 +79,21 @@ export interface EditablePackageJsonInstance {
    * @param path - The directory containing the package.json.
    * @param create - Whether to create the file if it doesn't exist.
    */
-  load(path: string, create?: boolean): Promise<this>
+  load(path: string, create?: boolean | undefined): Promise<this>
 
   /**
    * Normalize the package.json content according to npm standards.
    *
    * @param opts - Normalization options.
    */
-  normalize(opts?: NormalizeOptions): Promise<this>
+  normalize(opts?: NormalizeOptions | undefined): Promise<this>
 
   /**
    * Prepare the package.json for publishing.
    *
    * @param opts - Preparation options.
    */
-  prepare(opts?: unknown): Promise<this>
+  prepare(opts?: unknown | undefined): Promise<this>
 
   /**
    * Update the package.json content with new values.
@@ -141,7 +141,7 @@ export interface EditablePackageJsonInstance {
  */
 export async function toEditablePackageJson(
   pkgJson: PackageJson,
-  options?: EditablePackageJsonOptions,
+  options?: EditablePackageJsonOptions | undefined,
 ): Promise<unknown> {
   const { path: filepath, ...restOptions } = {
     __proto__: null,
@@ -185,7 +185,7 @@ export async function toEditablePackageJson(
  */
 export function toEditablePackageJsonSync(
   pkgJson: PackageJson,
-  options?: EditablePackageJsonOptions,
+  options?: EditablePackageJsonOptions | undefined,
 ): unknown {
   const { path: filepath, ...restOptions } = {
     __proto__: null,

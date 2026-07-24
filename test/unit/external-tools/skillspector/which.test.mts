@@ -10,7 +10,7 @@ vi.mock(
         vi.fn<
           (
             name: string,
-            opts?: { nothrow?: boolean | undefined },
+            opts?: { nothrow?: boolean | undefined } | undefined,
           ) => Promise<string | undefined>
         >(),
       whichSync: vi.fn(),

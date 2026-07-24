@@ -21,8 +21,10 @@ export type LanguageModelAvailability =
  * changing across browser versions.
  */
 export interface LanguageModelFactory {
-  availability(options?: unknown): Promise<LanguageModelAvailability>
-  create(options?: unknown): Promise<unknown>
+  availability(
+    options?: unknown | undefined,
+  ): Promise<LanguageModelAvailability>
+  create(options?: unknown | undefined): Promise<unknown>
 }
 
 export interface SmolAiModule {

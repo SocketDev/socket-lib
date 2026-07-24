@@ -26,7 +26,7 @@ import type { IterationOptions } from '../promises/types'
 export function transform<T, U>(
   iterable: Iterable<T> | AsyncIterable<T>,
   func: (item: T) => Promise<U>,
-  options?: number | IterationOptions,
+  options?: number | IterationOptions | undefined,
 ): AsyncIterable<U> {
   const opts = normalizeIterationOptions(options)
   /* c8 ignore next - External streaming-iterables call */

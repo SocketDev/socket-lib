@@ -78,7 +78,10 @@ export interface HeaderOptions {
  *
  * @returns Formatted header string with borders and centered title
  */
-export function createHeader(title: string, options?: HeaderOptions): string {
+export function createHeader(
+  title: string,
+  options?: HeaderOptions | undefined,
+): string {
   const {
     bold = true,
     borderChar = '=',
@@ -143,7 +146,7 @@ export function createHeader(title: string, options?: HeaderOptions): string {
  */
 export function createSectionHeader(
   title: string,
-  options?: HeaderOptions,
+  options?: HeaderOptions | undefined,
 ): string {
   const {
     borderChar = '-',

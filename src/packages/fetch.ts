@@ -50,7 +50,8 @@ export function getFetcher(): ReturnType<typeof makeFetchHappen.defaults> {
  */
 export async function resolveGitHubTgzUrl(
   pkgNameOrId: string,
-  where?: unknown,
+  // oxlint-disable-next-line typescript/no-redundant-type-constituents -- fleet optional-explicit-undefined convention: the explicit | undefined on an optional is intentional, not redundant.
+  where?: unknown | undefined,
 ): Promise<string> {
   const whereIsPkgJson = isPlainObject(where)
   const pkgJson = whereIsPkgJson

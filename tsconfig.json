@@ -7,7 +7,7 @@
     "declarationMap": false,
     "module": "preserve",
     "moduleResolution": "bundler",
-    "noEmit": false,
+    "noEmit": true,
     "noEmitOnError": false,
     "outDir": "./dist",
     "paths": {

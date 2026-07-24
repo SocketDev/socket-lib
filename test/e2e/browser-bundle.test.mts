@@ -29,6 +29,7 @@ import { describe, expect, it } from 'vitest'
 import webpack from 'webpack'
 
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(testDir, '..', '..')
@@ -57,7 +58,7 @@ function linkLocalLib(): void {
   const scopeDir = path.join(fixtureDir, 'node_modules', '@socketsecurity')
   mkdirSync(scopeDir, { recursive: true })
   const link = path.join(scopeDir, 'lib')
-  rmSync(link, { force: true, recursive: true })
+  safeDeleteSync(link)
   symlinkSync(repoRoot, link, 'dir')
 }
 
@@ -76,7 +77,7 @@ describe('browser-bundle e2e', () => {
     async () => {
       linkLocalLib()
       const outDir = path.join(os.tmpdir(), 'socket-lib-webpack-e2e')
-      rmSync(outDir, { force: true, recursive: true })
+      safeDeleteSync(outDir)
       const config: webpack.Configuration = {
         entry,
         target: 'web',
@@ -111,7 +112,7 @@ describe('browser-bundle e2e', () => {
     async () => {
       linkLocalLib()
       const outDir = path.join(os.tmpdir(), 'socket-lib-webpack-e2e-debug')
-      rmSync(outDir, { force: true, recursive: true })
+      safeDeleteSync(outDir)
       const config: webpack.Configuration = {
         entry: entryDebug,
         target: 'web',
@@ -178,7 +179,7 @@ describe('browser-bundle e2e', () => {
         os.tmpdir(),
         'socket-lib-webpack-e2e-language-model',
       )
-      rmSync(outDir, { force: true, recursive: true })
+      safeDeleteSync(outDir)
       const config: webpack.Configuration = {
         entry: entryBuiltinAi,
         target: 'web',
@@ -237,7 +238,7 @@ describe('browser-bundle e2e', () => {
     async () => {
       linkLocalLib()
       const outDir = path.join(os.tmpdir(), 'socket-lib-webpack-e2e-npm')
-      rmSync(outDir, { force: true, recursive: true })
+      safeDeleteSync(outDir)
       const config: webpack.Configuration = {
         entry: entryNpm,
         target: 'web',

@@ -27,7 +27,7 @@ class CaptureStream extends Writable {
   override _write(
     chunk: Buffer | string,
     _encoding: BufferEncoding,
-    cb: (err?: Error | null) => void,
+    cb: (err?: Error | null | undefined) => void,
   ): void {
     this.chunks.push(typeof chunk === 'string' ? chunk : chunk.toString('utf8'))
     cb()
@@ -37,10 +37,14 @@ class CaptureStream extends Writable {
   }
 }
 
-export function makeLogger(opts?: {
-  stdoutTTY?: boolean | undefined
-  stderrTTY?: boolean | undefined
-}) {
+export function makeLogger(
+  opts?:
+    | {
+        stdoutTTY?: boolean | undefined
+        stderrTTY?: boolean | undefined
+      }
+    | undefined,
+) {
   const stdout = new CaptureStream({ isTTY: opts?.stdoutTTY ?? false })
   const stderr = new CaptureStream({ isTTY: opts?.stderrTTY ?? false })
   const logger = new Logger({

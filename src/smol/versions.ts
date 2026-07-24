@@ -20,41 +20,51 @@ import { isNodeBuiltin, requireBuiltin } from '../node/module'
  * versions; npm callers can omit.
  */
 export interface SmolVersionsBinding {
-  compare(a: string, b: string, ecosystem?: string): -1 | 0 | 1
-  eq(a: string, b: string, ecosystem?: string): boolean
-  gt(a: string, b: string, ecosystem?: string): boolean
-  gte(a: string, b: string, ecosystem?: string): boolean
+  compare(a: string, b: string, ecosystem?: string | undefined): -1 | 0 | 1
+  eq(a: string, b: string, ecosystem?: string | undefined): boolean
+  gt(a: string, b: string, ecosystem?: string | undefined): boolean
+  gte(a: string, b: string, ecosystem?: string | undefined): boolean
   inc(
     version: string,
     release: 'major' | 'minor' | 'patch' | 'prerelease',
-    ecosystem?: string,
-    identifier?: string,
+    ecosystem?: string | undefined,
+    identifier?: string | undefined,
   ): string | undefined
-  lt(a: string, b: string, ecosystem?: string): boolean
-  lte(a: string, b: string, ecosystem?: string): boolean
-  max(versions: readonly string[], ecosystem?: string): string | undefined
+  lt(a: string, b: string, ecosystem?: string | undefined): boolean
+  lte(a: string, b: string, ecosystem?: string | undefined): boolean
+  max(
+    versions: readonly string[],
+    ecosystem?: string | undefined,
+  ): string | undefined
   maxSatisfying(
     versions: readonly string[],
     range: string,
-    ecosystem?: string,
+    ecosystem?: string | undefined,
   ): string | undefined
-  min(versions: readonly string[], ecosystem?: string): string | undefined
+  min(
+    versions: readonly string[],
+    ecosystem?: string | undefined,
+  ): string | undefined
   minSatisfying(
     versions: readonly string[],
     range: string,
-    ecosystem?: string,
+    ecosystem?: string | undefined,
   ): string | undefined
-  neq(a: string, b: string, ecosystem?: string): boolean
-  rsort(versions: readonly string[], ecosystem?: string): string[]
-  satisfies(version: string, range: string, ecosystem?: string): boolean
-  sort(versions: readonly string[], ecosystem?: string): string[]
-  valid(version: string, ecosystem?: string): string | undefined
+  neq(a: string, b: string, ecosystem?: string | undefined): boolean
+  rsort(versions: readonly string[], ecosystem?: string | undefined): string[]
+  satisfies(
+    version: string,
+    range: string,
+    ecosystem?: string | undefined,
+  ): boolean
+  sort(versions: readonly string[], ecosystem?: string | undefined): string[]
+  valid(version: string, ecosystem?: string | undefined): string | undefined
   filter(
     versions: readonly string[],
     range: string,
-    ecosystem?: string,
+    ecosystem?: string | undefined,
   ): string[]
-  coerce(version: string, ecosystem?: string): string | undefined
+  coerce(version: string, ecosystem?: string | undefined): string | undefined
 }
 
 let smolVersions: SmolVersionsBinding | undefined

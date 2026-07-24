@@ -80,7 +80,7 @@ export function joinAnd(arr: string[] | readonly string[]): string {
  */
 export function joinList(
   items: readonly unknown[],
-  options?: JoinListOptions,
+  options?: JoinListOptions | undefined,
 ): string {
   options = { __proto__: null, ...options } as typeof options
   const w = options?.with

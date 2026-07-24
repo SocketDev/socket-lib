@@ -50,7 +50,11 @@ import type { LinkOptions } from './types'
  *
  * @returns Colored link text
  */
-export function link(text: string, url: string, options?: LinkOptions): string {
+export function link(
+  text: string,
+  url: string,
+  options?: LinkOptions | undefined,
+): string {
   const opts = { __proto__: null, fallback: false, ...options } as LinkOptions
 
   // Resolve theme
@@ -105,7 +109,7 @@ export function link(text: string, url: string, options?: LinkOptions): string {
  */
 export function links(
   linkSpecs: Array<[text: string, url: string]>,
-  options?: LinkOptions,
+  options?: LinkOptions | undefined,
 ): string[] {
   return linkSpecs.map(([text, url]) => link(text, url, options))
 }

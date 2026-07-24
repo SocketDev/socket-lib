@@ -120,7 +120,7 @@ export const StringPrototypeSlice = uncurryThis(String.prototype.slice)
 export const StringPrototypeSplit = uncurryThis(String.prototype.split) as (
   self: string,
   separator: string | RegExp,
-  limit?: number,
+  limit?: number | undefined,
 ) => string[]
 export const StringPrototypeStartsWith = uncurryThis(
   String.prototype.startsWith,

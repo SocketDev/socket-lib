@@ -16,6 +16,7 @@ import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 
 import { spawn } from '../../src/process/spawn/child'
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
 const repoRoot = path.resolve(testDir, '..', '..')
@@ -45,12 +46,9 @@ function linkLocalLib(): void {
   const scopeDir = path.join(fixtureDir, 'node_modules', '@socketsecurity')
   mkdirSync(scopeDir, { recursive: true })
   const link = path.join(scopeDir, 'lib')
-  rmSync(link, { force: true })
+  safeDeleteSync(link)
   symlinkSync(repoRoot, link, 'dir')
-  rmSync(path.join(fixtureDir, '.perry-cache'), {
-    force: true,
-    recursive: true,
-  })
+  safeDeleteSync(path.join(fixtureDir, '.perry-cache'))
 }
 
 describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
@@ -69,9 +67,9 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
       // stem may or may not be kept, so track both candidates.
       const outStem = out.replace(/\.exe$/, '')
       const attestCandidates = [`${out}.attest.json`, `${outStem}.attest.json`]
-      rmSync(out, { force: true })
+      safeDeleteSync(out)
       for (let i = 0, { length } = attestCandidates; i < length; i += 1) {
-        rmSync(attestCandidates[i]!, { force: true })
+        safeDeleteSync(attestCandidates[i]!)
       }
 
       // `lockdown` + `strict` + `emitAttest` come from the fixture package.json.

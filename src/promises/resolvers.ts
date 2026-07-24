@@ -84,7 +84,7 @@ export const withResolvers: <T>() => PromiseWithResolvers<T> =
         // because Promise's executor runs synchronously, so both handles
         // are assigned before the constructor returns.
         let resolve!: (value: T | PromiseLike<T>) => void
-        let reject!: (reason?: unknown) => void
+        let reject!: (reason?: unknown | undefined) => void
         const promise = new PromiseCtor<T>((res, rej) => {
           resolve = res
           reject = rej

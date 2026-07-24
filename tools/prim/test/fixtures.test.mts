@@ -51,6 +51,7 @@ import { describe, test } from 'node:test'
 import { applyCodemod } from '../src/codemod.mts'
 import { findLocalPrimordials, isSplitPrimordials } from '../src/cli.mts'
 import { loadPrimordialsSurface } from '../src/surface.mts'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 const here = path.dirname(fileURLToPath(import.meta.url))
 const FIXTURES_DIR = path.join(here, 'fixtures')
@@ -163,7 +164,7 @@ async function runFixture(fixturePath: string): Promise<{
     scanDir,
     targetRoot,
     result,
-    cleanup: () => rmSync(tmp, { recursive: true, force: true }),
+    cleanup: () => safeDeleteSync(tmp),
   }
 }
 

@@ -38,7 +38,7 @@ import type { PerformanceMetrics } from './types'
 export async function measure<T>(
   operation: string,
   fn: () => Promise<T>,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown> | undefined,
 ): Promise<{ result: T; duration: number }> {
   const stop = perfTimer(operation, metadata)
 
@@ -76,7 +76,7 @@ export async function measure<T>(
 export function measureSync<T>(
   operation: string,
   fn: () => T,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown> | undefined,
 ): { result: T; duration: number } {
   const stop = perfTimer(operation, metadata)
 
@@ -114,7 +114,7 @@ export function measureSync<T>(
  */
 export function perfCheckpoint(
   checkpoint: string,
-  metadata?: Record<string, unknown>,
+  metadata?: Record<string, unknown> | undefined,
 ): void {
   if (!isPerfEnabled()) {
     return
@@ -149,8 +149,8 @@ export function perfCheckpoint(
  */
 export function perfTimer(
   operation: string,
-  metadata?: Record<string, unknown>,
-): (additionalMetadata?: Record<string, unknown>) => void {
+  metadata?: Record<string, unknown> | undefined,
+): (additionalMetadata?: Record<string, unknown> | undefined) => void {
   if (!isPerfEnabled()) {
     // No-op if perf tracking disabled
     return () => {}
@@ -159,7 +159,7 @@ export function perfTimer(
   const start = performance.now()
   debugLog(`[perf] [START] ${operation}`)
 
-  return (additionalMetadata?: Record<string, unknown>) => {
+  return (additionalMetadata?: Record<string, unknown> | undefined) => {
     const duration = performance.now() - start
     const metric: PerformanceMetrics = {
       operation,

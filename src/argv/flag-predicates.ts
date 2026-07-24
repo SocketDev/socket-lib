@@ -30,7 +30,7 @@ const processArg = [...process.argv]
  *   getLogLevel(['--debug']) // 'debug'
  *   ```
  */
-export function getLogLevel(input?: FlagInput): string {
+export function getLogLevel(input?: FlagInput | undefined): string {
   if (isQuiet(input)) {
     return 'silent'
   }
@@ -59,9 +59,9 @@ export function makeFlagPredicate(
   longFlags: readonly string[],
   shortFlags: readonly string[] = [],
   keys: readonly string[] = [longFlags[0]!.replace(/^--/, '')],
-): (input?: FlagInput) => boolean {
+): (input?: FlagInput | undefined) => boolean {
   const argvForms = [...longFlags, ...shortFlags]
-  return function check(input?: FlagInput): boolean {
+  return function check(input?: FlagInput | undefined): boolean {
     // processArg is module-frozen process.argv slice; no-input branch only
     // reachable when invoked from a process whose argv contains the flag,
     // which test runners can't simulate.

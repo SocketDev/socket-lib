@@ -28,7 +28,7 @@ import type { IterationOptions } from '../promises/types'
 export async function parallelEach<T>(
   iterable: Iterable<T> | AsyncIterable<T>,
   func: (item: T) => Promise<unknown>,
-  options?: number | IterationOptions,
+  options?: number | IterationOptions | undefined,
 ): Promise<void> {
   for await (const _ of parallelMap(iterable, func, options)) {
     /* empty block */
@@ -55,7 +55,7 @@ export async function parallelEach<T>(
 export function parallelMap<T, U>(
   iterable: Iterable<T> | AsyncIterable<T>,
   func: (item: T) => Promise<U>,
-  options?: number | IterationOptions,
+  options?: number | IterationOptions | undefined,
 ): AsyncIterable<U> {
   const opts = normalizeIterationOptions(options)
   /* c8 ignore next - External streaming-iterables call */

@@ -36,14 +36,18 @@ export const BufferIsEncoding: typeof Buffer.isEncoding | undefined =
 // BufferCtor undefined arm fires only on runtimes without Buffer.
 /* c8 ignore start */
 export const BufferPrototypeSlice:
-  | ((buf: Buffer, start?: number, end?: number) => Buffer)
+  | ((
+      buf: Buffer,
+      start?: number | undefined,
+      end?: number | undefined,
+    ) => Buffer)
   | undefined = BufferCtor ? uncurryThis(BufferCtor.prototype.slice) : undefined
 export const BufferPrototypeToString:
   | ((
       buf: Buffer,
-      encoding?: BufferEncoding,
-      start?: number,
-      end?: number,
+      encoding?: BufferEncoding | undefined,
+      start?: number | undefined,
+      end?: number | undefined,
     ) => string)
   | undefined = BufferCtor
   ? uncurryThis(BufferCtor.prototype.toString)

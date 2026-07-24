@@ -61,7 +61,7 @@ import type { WhichOptions } from './types'
  */
 export async function which(
   binName: string,
-  options?: WhichOptions,
+  options?: WhichOptions | undefined,
 ): Promise<string | string[] | null> {
   // If binName is already a path (absolute or relative), return it as-is
   if (isPath(binName)) {
@@ -108,7 +108,7 @@ export async function which(
  */
 export function whichLocalBin(
   binName: string,
-  options?: WhichOptions,
+  options?: WhichOptions | undefined,
 ): string | undefined {
   const opts = { __proto__: null, ...options } as WhichOptions
   const path = getPath()
@@ -137,7 +137,7 @@ export function whichLocalBin(
  */
 export async function whichReal(
   binName: string,
-  options?: WhichOptions,
+  options?: WhichOptions | undefined,
 ): Promise<string | string[] | undefined> {
   const fs = getFs()
   // Default to nothrow: true if not specified to return undefined instead of throwing
@@ -213,7 +213,7 @@ export async function whichReal(
  */
 export function whichRealSync(
   binName: string,
-  options?: WhichOptions,
+  options?: WhichOptions | undefined,
 ): string | string[] | undefined {
   const fs = getFs()
   // Default to nothrow: true if not specified to return undefined instead of throwing
@@ -305,7 +305,7 @@ export function whichRealSync(
  */
 export function whichSync(
   binName: string,
-  options?: WhichOptions,
+  options?: WhichOptions | undefined,
 ): string | string[] | null {
   // If binName is already a path (absolute or relative), return it as-is
   if (isPath(binName)) {

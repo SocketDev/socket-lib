@@ -13,7 +13,7 @@
 /* c8 ignore start - native fetch call; tests mock this module wholesale */
 export function fetchResponse(
   input: RequestInfo | URL,
-  init?: RequestInit,
+  init?: RequestInit | undefined,
 ): Promise<Response> {
   // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- browser entrypoint; fetch IS the underlying API
   return fetch(input, init)

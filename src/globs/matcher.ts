@@ -49,11 +49,13 @@ let matchesGlobProbed = false
  */
 export function getGlobMatcher(
   glob: Pattern | Pattern[],
-  options?: {
-    dot?: boolean | undefined
-    nocase?: boolean | undefined
-    ignore?: string[] | undefined
-  },
+  options?:
+    | {
+        dot?: boolean | undefined
+        nocase?: boolean | undefined
+        ignore?: string[] | undefined
+      }
+    | undefined,
 ): (path: string) => boolean {
   options = { __proto__: null, ...options } as typeof options
   const patterns = ArrayIsArray(glob) ? glob : [glob]
@@ -172,10 +174,9 @@ export function getMatchesGlob():
     // reformats `(/*@__PURE__*/ require(…) as T).x` back into the
     // outside-paren form that rolldown doesn't honor; using an
     // intermediate const sidesteps the reformat. See task #23.
-    const pathMod =
-      /*@__PURE__*/ require('node:path') as typeof NodePath & {
-        matchesGlob?: unknown | undefined
-      }
+    const pathMod = /*@__PURE__*/ require('node:path') as typeof NodePath & {
+      matchesGlob?: unknown | undefined
+    }
     const fn = pathMod.matchesGlob
     // path.matchesGlob is present on Node 22+; missing-fn arm fires
     // only on older runtimes.

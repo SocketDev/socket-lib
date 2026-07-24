@@ -27,8 +27,8 @@ import type { Readable, Writable } from 'node:stream'
 const logger = getDefaultLogger()
 
 export async function handleOne(
-  stdin?: Readable,
-  stdout?: Writable,
+  stdin?: Readable | undefined,
+  stdout?: Writable | undefined,
 ): Promise<void> {
   const inStream = stdin ?? process.stdin
   const outStream = stdout ?? process.stdout
@@ -73,7 +73,10 @@ export async function handleOne(
 // the paused-mode `readable` event so leftover bytes stay in the
 // stream's internal buffer between calls — flowing-mode `data` would
 // hand us oversized chunks with no way to put the tail back.
-export function readExact(length: number, stream?: Readable): Promise<Buffer> {
+export function readExact(
+  length: number,
+  stream?: Readable | undefined,
+): Promise<Buffer> {
   const src = stream ?? process.stdin
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
@@ -148,7 +151,10 @@ export async function runHost(): Promise<void> {
   }
 }
 
-export function writeMessage(obj: unknown, stream?: Writable): void {
+export function writeMessage(
+  obj: unknown,
+  stream?: Writable | undefined,
+): void {
   const payload = Buffer.from(JSON.stringify(obj), 'utf8')
   const header = Buffer.allocUnsafe(4)
   header.writeUInt32LE(payload.length, 0)

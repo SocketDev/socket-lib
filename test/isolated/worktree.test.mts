@@ -13,6 +13,7 @@ import {
   tryGit,
 } from '../../src/ai/worktree.mts'
 import { sh } from '../unit/util/cross-platform-sh.mts'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 // These tests stand up a real git repo per test. Real git, real worktrees —
 // the spawn surface is too tangled with the lib's own helpers to mock cleanly.
@@ -43,7 +44,7 @@ beforeEach(() => {
 afterEach(() => {
   // `git worktree remove` may have left behind some dirs that we manage at
   // the test level. rmSync force/recursive handles both clean + leftover state.
-  rmSync(tmpRoot, { force: true, recursive: true })
+  safeDeleteSync(tmpRoot)
 })
 
 describe.sequential('git', () => {

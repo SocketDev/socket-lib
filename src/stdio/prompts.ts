@@ -146,7 +146,7 @@ export function createInquirerTheme(
  *
  * @returns Separator instance
  */
-export function createSeparator(text?: string): SeparatorType {
+export function createSeparator(text?: string | undefined): SeparatorType {
   return new (require('../external/@inquirer/select').Separator)(text)
 }
 

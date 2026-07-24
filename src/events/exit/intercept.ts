@@ -58,7 +58,7 @@ export function processReallyExit(code?: number | undefined): never {
   emit('exit', exitCode, undefined)
   emit('afterexit', exitCode, undefined)
   ReflectApply(
-    originalProcessReallyExit as (code?: number) => never,
+    originalProcessReallyExit as (code?: number | undefined) => never,
     globalProcess,
     [exitCode],
   )

@@ -102,7 +102,7 @@ export async function compressBrotliFile(
 ): Promise<string>
 export async function compressBrotliFile(
   srcPath: string,
-  destOrOptions?: string | CompressFileOptions,
+  destOrOptions?: string | CompressFileOptions | undefined,
   maybeOptions?: CompressOptions | undefined,
 ): Promise<string> {
   const { destPath, options, inPlace } = resolveFileArgs(
@@ -170,7 +170,7 @@ export async function decompressBrotliFile(
 ): Promise<string>
 export async function decompressBrotliFile(
   srcPath: string,
-  destOrOptions?: string | CompressFileOptions,
+  destOrOptions?: string | CompressFileOptions | undefined,
 ): Promise<string> {
   const { destPath, inPlace } = resolveFileArgs(
     'decompressBrotliFile',

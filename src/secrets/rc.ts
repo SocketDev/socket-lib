@@ -188,7 +188,7 @@ export type WriteResult =
     }
 
 export function pickRcFile(
-  shellOverride?: 'zsh' | 'bash' | 'fish',
+  shellOverride?: 'zsh' | 'bash' | 'fish' | undefined,
 ): string | undefined {
   const home = getHome()
   if (!home) {

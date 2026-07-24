@@ -435,7 +435,7 @@ describe.sequential('process/lock', () => {
       // call succeed so the error fires on the lock-dir creation only.
       ;(fsCjs as { mkdirSync: typeof fsCjs.mkdirSync }).mkdirSync = ((
         pathArg: string,
-        opts?: object,
+        opts?: object | undefined,
       ) => {
         mkdirCallCount += 1
         if (mkdirCallCount === 1 && opts) {

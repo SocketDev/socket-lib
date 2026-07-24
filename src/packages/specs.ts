@@ -127,7 +127,10 @@ export function gitHubTgzUrl(
  *   isGitHubTgzSpec('lodash@4.17.21') // false
  *   ```
  */
-export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
+export function isGitHubTgzSpec(
+  spec: unknown,
+  where?: string | undefined,
+): boolean {
   let parsedSpec: unknown
   if (isPlainObject(spec)) {
     parsedSpec = spec
@@ -153,7 +156,10 @@ export function isGitHubTgzSpec(spec: unknown, where?: string): boolean {
  *   isGitHubUrlSpec('lodash@4.17.21') // false
  *   ```
  */
-export function isGitHubUrlSpec(spec: unknown, where?: string): boolean {
+export function isGitHubUrlSpec(
+  spec: unknown,
+  where?: string | undefined,
+): boolean {
   let parsedSpec: unknown
   if (isPlainObject(spec)) {
     parsedSpec = spec
@@ -187,7 +193,7 @@ export function isGitHubUrlSpec(spec: unknown, where?: string): boolean {
  */
 export function pkgNameToSlug(pkgName: string): string {
   return StringPrototypeCharCodeAt(pkgName, 0) === 64 /* '@' */
-    ? `${pkgName.slice(1).replace('/', '-')}`
+    ? pkgName.slice(1).replace('/', '-')
     : pkgName
 }
 

@@ -16,7 +16,10 @@ import { ErrorCtor } from '../../../primordials/error'
  * @internal When implementing, model after eco/npm/npm/exec.ts
  * (array-based args, Windows shell handling, debug-level filtering).
  */
-export function execVlt(_args: string[], _options?: unknown): never {
+export function execVlt(
+  _args: string[],
+  _options?: unknown | undefined,
+): never {
   throw new ErrorCtor(
     'execVlt is not yet implemented in @socketsecurity/lib/eco/npm/vlt. Track at task #58 (socket-lib 6.x: implement execVlt).',
   )

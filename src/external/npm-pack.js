@@ -24,21 +24,21 @@ const validateNpmPackageName = require('validate-npm-package-name')
 // Re-create pacote surface with the methods we consume.
 const pacote = {
   extract: (spec, dest, opts) => pacoteFetcherGet(spec, opts).extract(dest),
-  tarball: pacoteIndex.tarball,
   manifest: pacoteIndex.manifest,
   packument: pacoteIndex.packument,
+  tarball: pacoteIndex.tarball,
 }
 
 // Re-create cacache structure
 const cacache = {
   get: cacacheGet,
+  ls: {
+    stream: lsStream,
+  },
   put: cacachePut,
   rm: {
     entry: cacacheRm.entry,
     all: cacacheRm.all,
-  },
-  ls: {
-    stream: lsStream,
   },
   tmp: {
     withTmp: cacacheTmp.withTmp,

@@ -34,11 +34,11 @@ export const ErrorIsError: ((value: unknown) => value is Error) | undefined = (
 // `.stack` property to `targetObject`. Captured at load time so callers
 // can't intercept by overwriting the global later.
 export const ErrorCaptureStackTrace:
-  | ((targetObject: object, constructorOpt?: Function) => void)
+  | ((targetObject: object, constructorOpt?: Function | undefined) => void)
   | undefined = (
   Error as {
     captureStackTrace?:
-      | ((targetObject: object, constructorOpt?: Function) => void)
+      | ((targetObject: object, constructorOpt?: Function | undefined) => void)
       | undefined
   }
 ).captureStackTrace

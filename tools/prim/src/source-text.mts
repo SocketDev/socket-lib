@@ -15,6 +15,7 @@ import {
   unlinkSync,
   writeSync,
 } from 'node:fs'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 /**
  * Atomic write: write to `<path>.tmp-<pid>-<rand>`, fsync, rename. Guarantees
@@ -46,7 +47,7 @@ export function atomicWrite(absPath: string, content: string): void {
       }
     }
     try {
-      unlinkSync(tmpPath)
+      safeDeleteSync(tmpPath)
     } catch {
       // ignore unlink error
     }

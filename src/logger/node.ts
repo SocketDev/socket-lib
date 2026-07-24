@@ -103,7 +103,7 @@ export class Logger {
   #apply(
     methodName: string,
     args: unknown[],
-    stream?: 'stderr' | 'stdout',
+    stream?: 'stderr' | 'stdout' | undefined,
   ): this {
     const targetStream = stream || (methodName === 'log' ? 'stdout' : 'stderr')
     return applyMethod(
@@ -253,7 +253,10 @@ export class Logger {
   // Sets whether the last logged line was blank. An explicit `stream` targets
   // that stream; otherwise the bound stream (or both, on the root) is updated.
   // Called automatically by logging methods.
-  [lastWasBlankSymbol](value: unknown, stream?: 'stderr' | 'stdout'): this {
+  [lastWasBlankSymbol](
+    value: unknown,
+    stream?: 'stderr' | 'stdout' | undefined,
+  ): this {
     if (stream) {
       this.#setLastWasBlank(stream, !!value)
     } else if (this.#boundStream) {

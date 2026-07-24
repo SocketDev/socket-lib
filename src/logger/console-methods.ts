@@ -28,7 +28,10 @@ export type ConsoleLike = typeof console & Record<string, unknown>
  */
 export interface LoggerTrackable {
   [incLogCallCountSymbol](): LoggerTrackable
-  [lastWasBlankSymbol](value: unknown, stream?: 'stderr' | 'stdout'): unknown
+  [lastWasBlankSymbol](
+    value: unknown,
+    stream?: 'stderr' | 'stdout' | undefined,
+  ): unknown
 }
 
 /**

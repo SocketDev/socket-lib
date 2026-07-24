@@ -26,8 +26,8 @@ const pacoteCachePath = getPacoteCachePath()
  */
 export async function extractPackage(
   pkgNameOrId: string,
-  options?: ExtractOptions,
-  callback?: (destPath: string) => Promise<unknown>,
+  options?: ExtractOptions | undefined,
+  callback?: ((destPath: string) => Promise<unknown>) | undefined,
 ): Promise<void> {
   let actualCallback = callback
   let actualOptions = options
@@ -85,7 +85,7 @@ export async function extractPackage(
  */
 export async function packPackage(
   spec: string,
-  options?: PacoteOptions,
+  options?: PacoteOptions | undefined,
 ): Promise<unknown> {
   /* c8 ignore start - External package registry packing */
   // libnpmpack is imported at the top as libnpmpack

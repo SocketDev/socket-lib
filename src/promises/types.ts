@@ -216,7 +216,7 @@ export interface PromiseWithResolvers<T> {
   /**
    * Rejects {@link promise} with the given reason.
    */
-  reject: (reason?: unknown) => void
+  reject: (reason?: unknown | undefined) => void
 }
 
 /**

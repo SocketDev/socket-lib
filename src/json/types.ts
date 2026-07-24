@@ -274,21 +274,21 @@ export interface EditableJsonInstance<T = Record<string, unknown>> {
    *
    * @param options - Save options for formatting and sorting.
    */
-  save(options?: EditableJsonSaveOptions): Promise<boolean>
+  save(options?: EditableJsonSaveOptions | undefined): Promise<boolean>
 
   /**
    * Synchronously save the JSON file to disk.
    *
    * @param options - Save options for formatting and sorting.
    */
-  saveSync(options?: EditableJsonSaveOptions): boolean
+  saveSync(options?: EditableJsonSaveOptions | undefined): boolean
 
   /**
    * Check if the JSON will be saved based on current changes.
    *
    * @param options - Save options to evaluate.
    */
-  willSave(options?: EditableJsonSaveOptions): boolean
+  willSave(options?: EditableJsonSaveOptions | undefined): boolean
 
   /**
    * The full path to the JSON file.
@@ -312,10 +312,10 @@ export interface EditableJsonConstructor<T = Record<string, unknown>> {
   new (): EditableJsonInstance<T>
   create(
     path: string,
-    opts?: EditableJsonOptions<T>,
+    opts?: EditableJsonOptions<T> | undefined,
   ): Promise<EditableJsonInstance<T>>
   load(
     path: string,
-    opts?: EditableJsonOptions<T>,
+    opts?: EditableJsonOptions<T> | undefined,
   ): Promise<EditableJsonInstance<T>>
 }

@@ -67,7 +67,7 @@ const caseInsensitiveKeys = new SetCtor([
  */
 export function createEnvProxy(
   base: NodeJS.ProcessEnv,
-  overrides?: Record<string, string | undefined>,
+  overrides?: Record<string, string | undefined> | undefined,
 ): NodeJS.ProcessEnv {
   function lookupEnvValue(prop: string): string | undefined {
     // Priority 1: Check overrides for exact match.

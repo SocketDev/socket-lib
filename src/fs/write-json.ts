@@ -75,7 +75,7 @@ export function stringify(
 export async function writeJson(
   filepath: PathLike,
   jsonContent: unknown,
-  options?: WriteJsonOptions | string,
+  options?: WriteJsonOptions | string | undefined,
 ): Promise<void> {
   const opts = typeof options === 'string' ? { encoding: options } : options
   const { EOL, finalEOL, replacer, spaces, ...fsOptions } = {

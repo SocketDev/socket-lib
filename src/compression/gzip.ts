@@ -76,7 +76,7 @@ export async function compressGzipFile(
 ): Promise<string>
 export async function compressGzipFile(
   srcPath: string,
-  destOrOptions?: string | CompressFileOptions,
+  destOrOptions?: string | CompressFileOptions | undefined,
   maybeOptions?: CompressOptions | undefined,
 ): Promise<string> {
   const { destPath, options, inPlace } = resolveFileArgs(
@@ -140,7 +140,7 @@ export async function decompressGzipFile(
 ): Promise<string>
 export async function decompressGzipFile(
   srcPath: string,
-  destOrOptions?: string | CompressFileOptions,
+  destOrOptions?: string | CompressFileOptions | undefined,
 ): Promise<string> {
   const { destPath, inPlace } = resolveFileArgs(
     'decompressGzipFile',

@@ -122,7 +122,10 @@ export async function assistWhenStuck(
 /**
  * Compose the agent prompt from the task and optional context. Pure.
  */
-export function buildAssistPrompt(task: string, context?: string): string {
+export function buildAssistPrompt(
+  task: string,
+  context?: string | undefined,
+): string {
   const trimmedTask = task.trim()
   const trimmedContext = context?.trim()
   return trimmedContext

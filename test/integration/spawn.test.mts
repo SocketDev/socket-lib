@@ -20,6 +20,7 @@ import { describe, expect, it } from 'vitest'
 
 import { WIN32 } from '../_shared/fleet/lib/platform.mts'
 import { itWindowsOnly } from '../unit/util/skip-helpers'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('spawn integration', () => {
   describe('spawn', () => {
@@ -42,7 +43,7 @@ describe('spawn integration', () => {
           })
           expect(result.stdout.trim()).toBe('works')
         } finally {
-          rmSync(dir, { force: true, recursive: true })
+          safeDeleteSync(dir)
         }
       },
     )
@@ -126,7 +127,7 @@ describe('spawn integration', () => {
         })
         expect(result.stdout.trim()).toBe('works')
       } finally {
-        rmSync(dir, { force: true, recursive: true })
+        safeDeleteSync(dir)
       }
     })
 

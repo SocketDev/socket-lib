@@ -52,18 +52,24 @@ export interface EditablePackageJsonConstructor {
   prepareSteps: unknown[]
   create(
     path: string,
-    opts?: EditablePackageJsonOptions,
+    opts?: EditablePackageJsonOptions | undefined,
   ): Promise<EditablePackageJsonInstance>
-  fix(path: string, opts?: unknown): Promise<EditablePackageJsonInstance>
+  fix(
+    path: string,
+    opts?: unknown | undefined,
+  ): Promise<EditablePackageJsonInstance>
   load(
     path: string,
-    opts?: EditablePackageJsonOptions,
+    opts?: EditablePackageJsonOptions | undefined,
   ): Promise<EditablePackageJsonInstance>
   normalize(
     path: string,
-    opts?: NormalizeOptions,
+    opts?: NormalizeOptions | undefined,
   ): Promise<EditablePackageJsonInstance>
-  prepare(path: string, opts?: unknown): Promise<EditablePackageJsonInstance>
+  prepare(
+    path: string,
+    opts?: unknown | undefined,
+  ): Promise<EditablePackageJsonInstance>
 }
 
 let cachedEditablePackageJsonClass: EditablePackageJsonConstructor | undefined
@@ -187,7 +193,10 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
         }
 
         // socket-lint: allow boolean-trap -- matches EditablePackageJsonInstance interface which declares create?: boolean
-        override async load(path: string, create?: boolean): Promise<this> {
+        override async load(
+          path: string,
+          create?: boolean | undefined,
+        ): Promise<this> {
           this.pkgPath = path
           const { promises: fsPromises } = getNodeFs()
           let parseErr: unknown
@@ -237,7 +246,9 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           return this
         }
 
-        override async save(options?: SaveOptions): Promise<boolean> {
+        override async save(
+          options?: SaveOptions | undefined,
+        ): Promise<boolean> {
           options = { __proto__: null, ...options } as typeof options
           if (!this.canSave || this.content === undefined) {
             throw new ErrorCtor('No package.json to save to')
@@ -275,7 +286,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           return true
         }
 
-        override saveSync(options?: SaveOptions): boolean {
+        override saveSync(options?: SaveOptions | undefined): boolean {
           if (!this.canSave || this.content === undefined) {
             throw new ErrorCtor('No package.json to save to')
           }
@@ -331,7 +342,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           return this
         }
 
-        override willSave(options?: SaveOptions): boolean {
+        override willSave(options?: SaveOptions | undefined): boolean {
           const { ignoreWhitespace = false, sort = false } = {
             __proto__: null,
             ...options,

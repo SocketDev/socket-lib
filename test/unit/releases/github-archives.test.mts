@@ -32,7 +32,8 @@ vi.mock(import('../../../src/releases/github-downloads'), () => ({
       _pattern: unknown,
       outputPath: string,
       _repo: unknown,
-      _options?: unknown,
+      // oxlint-disable-next-line typescript/no-redundant-type-constituents -- fleet optional-explicit-undefined convention: the explicit | undefined on an optional is intentional, not redundant.
+      _options?: unknown | undefined,
     ) => {
       // Write a placeholder so the SUT's cleanup branch has a real
       // file to delete; tests asserting non-cleanup also rely on this.

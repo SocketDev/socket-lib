@@ -15,7 +15,10 @@ import { ErrorCtor } from '../../../primordials/error'
  * @internal When implementing, model after eco/npm/npm/exec.ts
  * (array-based args, Windows shell handling, debug-level filtering).
  */
-export function execBun(_args: string[], _options?: unknown): never {
+export function execBun(
+  _args: string[],
+  _options?: unknown | undefined,
+): never {
   throw new ErrorCtor(
     'execBun is not yet implemented in @socketsecurity/lib/eco/npm/bun. Track at task #57 (socket-lib 6.x: implement execBun).',
   )

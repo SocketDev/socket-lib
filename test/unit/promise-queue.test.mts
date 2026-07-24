@@ -15,7 +15,10 @@ import { PromiseQueue } from '../../src/promises/queue'
 import { describe, expect, it } from 'vitest'
 
 // Helper to create a delayed promise
-export function delay(ms: number, value?: unknown): Promise<unknown> {
+export function delay(
+  ms: number,
+  value?: unknown | undefined,
+): Promise<unknown> {
   return new Promise(resolve => setTimeout(() => resolve(value), ms))
 }
 

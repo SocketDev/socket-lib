@@ -243,7 +243,8 @@ describe('Logger methods', () => {
 
     it('should handle TTY mode', () => {
       // Create TTY mock with cursorTo and clearLine methods
-      const cursorToSpy = vi.fn<(x: number, y?: number) => boolean>()
+      const cursorToSpy =
+        vi.fn<(x: number, y?: number | undefined) => boolean>()
       const clearLineSpy = vi.fn<(dir: -1 | 0 | 1) => boolean>()
 
       const ttyStdout = createCaptureStream(harness.stdoutChunks)

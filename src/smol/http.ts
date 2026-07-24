@@ -43,7 +43,10 @@ export interface SmolHttpBinding {
    * Lean pipelining-aware HTTP client. Signature mirrors `node:http`'s
    * `request` but returns a thinner-allocation response.
    */
-  request(url: string, options?: SmolHttpRequestOptions): Promise<unknown>
+  request(
+    url: string,
+    options?: SmolHttpRequestOptions | undefined,
+  ): Promise<unknown>
   /**
    * Toggle pipelining on the shared client pool. On by default.
    */

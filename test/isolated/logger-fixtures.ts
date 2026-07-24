@@ -33,7 +33,7 @@ export type WriteCallback = (error?: Error | null | undefined) => void
  */
 export type MockStream = Writable & {
   isTTY?: boolean | undefined
-  cursorTo?: ((x: number, y?: number) => boolean) | undefined
+  cursorTo?: ((x: number, y?: number | undefined) => boolean) | undefined
   clearLine?: ((dir: -1 | 0 | 1) => boolean) | undefined
 }
 

@@ -70,9 +70,9 @@ export function dedentMethod<T extends LoggerTrackable>(
  *
  * @param logger - The calling logger instance.
  */
-export function groupEndMethod<T extends { dedent(spaces?: number): T }>(
-  logger: T,
-): T {
+export function groupEndMethod<
+  T extends { dedent(spaces?: number | undefined): T },
+>(logger: T): T {
   logger.dedent(
     (logger as unknown as Record<symbol, number | undefined>)[
       getKGroupIndentationWidthSymbol()
@@ -93,7 +93,7 @@ export function groupEndMethod<T extends { dedent(spaces?: number): T }>(
  */
 export function groupMethod<
   T extends LoggerTrackable & {
-    indent(spaces?: number): T
+    indent(spaces?: number | undefined): T
     log(...args: unknown[]): T
   },
 >(logger: T, label: unknown[]): T {

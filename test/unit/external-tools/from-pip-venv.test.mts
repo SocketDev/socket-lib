@@ -15,7 +15,7 @@ vi.mock(import('../../../src/bin/which'), () => ({
   which: vi.fn<
     (
       name: string,
-      opts?: { nothrow?: boolean | undefined },
+      opts?: { nothrow?: boolean | undefined } | undefined,
     ) => Promise<string | undefined>
   >() as unknown as typeof WhichFn,
 }))

@@ -33,7 +33,7 @@ import type { Options as FastGlobOptions } from 'fast-glob'
  */
 export function globStreamLicenses(
   dirname: string,
-  options?: GlobOptions,
+  options?: GlobOptions | undefined,
 ): NodeJS.ReadableStream {
   const {
     ignore: ignoreOpt,

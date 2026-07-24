@@ -57,11 +57,11 @@ export type InternalAstNode = InternalLicenseNode | InternalBinaryOperationNode
 export interface LicenseVisitor {
   License?: (
     node: InternalLicenseNode,
-    parent?: InternalAstNode,
+    parent?: InternalAstNode | undefined,
   ) => boolean | undefined
   BinaryOperation?: (
     node: InternalBinaryOperationNode,
-    parent?: InternalAstNode,
+    parent?: InternalAstNode | undefined,
   ) => boolean | undefined
 }
 

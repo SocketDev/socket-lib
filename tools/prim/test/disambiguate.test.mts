@@ -28,6 +28,7 @@ import path from 'node:path'
 import { describe, test } from 'node:test'
 
 import { buildSnippet, disambiguateReceiver } from '../src/disambiguate.mts'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 const FIXTURE_SNIPPET = `import { Range } from 'semver'
 const range = new Range('^1.0.0')
@@ -64,7 +65,7 @@ describe('disambiguateReceiver', () => {
         false,
       )
     } finally {
-      rmSync(targetRoot, { recursive: true, force: true })
+      safeDeleteSync(targetRoot)
     }
   })
 
@@ -90,7 +91,7 @@ describe('disambiguateReceiver', () => {
       if (prev !== undefined) {
         process.env.ANTHROPIC_API_KEY = prev
       }
-      rmSync(targetRoot, { recursive: true, force: true })
+      safeDeleteSync(targetRoot)
     }
   })
 
@@ -111,7 +112,7 @@ describe('disambiguateReceiver', () => {
       assert.equal(v.source, 'static')
       assert.match(v.reason, /not-in-ambiguous-table/)
     } finally {
-      rmSync(targetRoot, { recursive: true, force: true })
+      safeDeleteSync(targetRoot)
     }
   })
 
@@ -173,7 +174,7 @@ describe('disambiguateReceiver', () => {
         }
       }
     } finally {
-      rmSync(targetRoot, { recursive: true, force: true })
+      safeDeleteSync(targetRoot)
     }
   })
 })

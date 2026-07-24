@@ -40,7 +40,7 @@ export function getEscapedScopeRegExp(): RegExp {
  */
 export function normalizePackageJson(
   pkgJson: PackageJson,
-  options?: NormalizeOptions,
+  options?: NormalizeOptions | undefined,
 ): PackageJson {
   const { preserve } = { __proto__: null, ...options } as NormalizeOptions
   // Add default version if not present.

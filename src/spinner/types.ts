@@ -194,7 +194,7 @@ export type SpinnerInstance = {
   /**
    * Increment progress by specified amount (default: 1)
    */
-  progressStep(amount?: number): SpinnerInstance
+  progressStep(amount?: number | undefined): SpinnerInstance
 
   /**
    * Set complete shimmer configuration.

@@ -105,7 +105,7 @@ export class ProgressBar {
    * @param total - Total number of units for the progress bar.
    * @param options - Configuration options for the progress bar.
    */
-  constructor(total: number, options?: ProgressBarOptions) {
+  constructor(total: number, options?: ProgressBarOptions | undefined) {
     options = { __proto__: null, ...options } as typeof options
     this.total = total
     this.startTime = DateNow()
@@ -138,7 +138,7 @@ export class ProgressBar {
    * @param current - Current progress value (will be clamped to total)
    * @param tokens - Optional custom tokens to replace in format string.
    */
-  update(current: number, tokens?: Record<string, unknown>): void {
+  update(current: number, tokens?: Record<string, unknown> | undefined): void {
     if (this.terminated) {
       return
     }
@@ -182,14 +182,14 @@ export class ProgressBar {
    * @param amount - Amount to increment by.
    * @param tokens - Optional custom tokens to replace in format string.
    */
-  tick(amount: number = 1, tokens?: Record<string, unknown>): void {
+  tick(amount: number = 1, tokens?: Record<string, unknown> | undefined): void {
     this.update(this.current + amount, tokens)
   }
 
   /**
    * Render the progress bar.
    */
-  private render(tokens?: Record<string, unknown>): void {
+  private render(tokens?: Record<string, unknown> | undefined): void {
     // Default-options arms (color/colorFn fallback, width/complete/
     // incomplete/format defaults) and total===0 / current===0 edge
     // cases fire only when caller doesn't seed those options or hits

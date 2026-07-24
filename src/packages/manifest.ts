@@ -81,7 +81,7 @@ export function createPackageJson(
     },
     ...(type ? { type } : {}),
     ...(isPlainObject(entryExports) ? { exports: { ...entryExports } } : {}),
-    ...(entryExports ? {} : { main: `${main ?? './index.js'}` }),
+    ...(entryExports ? {} : { main: main ?? './index.js' }),
     sideEffects: sideEffects !== undefined && !!sideEffects,
     ...(isPlainObject(dependencies)
       ? { dependencies: { ...dependencies } }
@@ -143,7 +143,7 @@ export function createPackageJson(
  */
 export async function fetchPackageManifest(
   pkgNameOrId: string,
-  options?: PacoteOptions,
+  options?: PacoteOptions | undefined,
 ): Promise<unknown> {
   const pacoteOptions = {
     __proto__: null,
@@ -192,7 +192,7 @@ export async function fetchPackageManifest(
  */
 export async function fetchPackagePackument(
   pkgNameOrId: string,
-  options?: PacoteOptions,
+  options?: PacoteOptions | undefined,
 ): Promise<unknown> {
   // module is imported at the top
   try {

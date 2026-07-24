@@ -77,7 +77,7 @@ export function canUseNodeFsGlob(
  */
 export async function glob(
   patterns: Pattern | Pattern[],
-  options?: FastGlobOptions,
+  options?: FastGlobOptions | undefined,
 ): Promise<string[]> {
   // Strip trailing slashes from ignore patterns before fast-glob sees
   // them; otherwise `dist/` from a .gitignore-derived list silently
@@ -119,7 +119,7 @@ export async function glob(
  */
 export function globSync(
   patterns: Pattern | Pattern[],
-  options?: FastGlobOptions,
+  options?: FastGlobOptions | undefined,
 ): string[] {
   // Strip trailing slashes from ignore patterns; same workaround as
   // the async `glob` above, see file header.

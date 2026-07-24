@@ -26,9 +26,13 @@ const ANSI_REGEX = /\x1b\[[0-9;]*m/g
  *   ansiRegex({ onlyFirst: true }) // matches only the first code
  *   ```
  */
-export function ansiRegex(options?: {
-  onlyFirst?: boolean | undefined
-}): RegExp {
+export function ansiRegex(
+  options?:
+    | {
+        onlyFirst?: boolean | undefined
+      }
+    | undefined,
+): RegExp {
   const { onlyFirst } = options ?? {}
   // Valid string terminator sequences are BEL, ESC\, and 0x9c.
   const ST = '(?:\\u0007|\\u001B\\u005C|\\u009C)'

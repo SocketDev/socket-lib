@@ -195,7 +195,7 @@ export function readWindowsSync(
 
 export async function runPsAsync(
   script: string,
-  input?: string,
+  input?: string | undefined,
 ): Promise<{
   status: number | null
   stdout: string
@@ -237,7 +237,7 @@ export async function runPsAsync(
 
 export function runPsSync(
   script: string,
-  input?: string,
+  input?: string | undefined,
 ): {
   status: number | null
   stdout: string

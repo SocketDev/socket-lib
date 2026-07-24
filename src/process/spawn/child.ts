@@ -106,7 +106,7 @@ import type npmCliPromiseSpawnType from '../../external/@npmcli/promise-spawn'
 // Default (stdioString: true) → strings. `stdioString: false` → Buffers.
 export function spawn(
   cmd: string,
-  args?: string[] | readonly string[],
+  args?: string[] | readonly string[] | undefined,
 ): SpawnResult<string>
 export function spawn(
   cmd: string,
@@ -122,13 +122,13 @@ export function spawn(
 ): SpawnResult<Buffer>
 export function spawn(
   cmd: string,
-  args?: string[] | readonly string[],
+  args?: string[] | readonly string[] | undefined,
   options?: SpawnOptions | undefined,
   extra?: SpawnExtra | undefined,
 ): SpawnResult
 export function spawn(
   cmd: string,
-  args?: string[] | readonly string[],
+  args?: string[] | readonly string[] | undefined,
   options?: SpawnOptions | undefined,
   extra?: SpawnExtra | undefined,
 ): SpawnResult {
@@ -393,7 +393,7 @@ export function spawn(
 // through to the untyped `string | Buffer` form.
 export function spawnSync(
   cmd: string,
-  args?: string[] | readonly string[],
+  args?: string[] | readonly string[] | undefined,
 ): SpawnSyncReturns<string>
 export function spawnSync(
   cmd: string,
@@ -419,12 +419,12 @@ export function spawnSync(
 ): SpawnSyncReturns<Buffer>
 export function spawnSync(
   cmd: string,
-  args?: string[] | readonly string[],
+  args?: string[] | readonly string[] | undefined,
   options?: SpawnSyncOptions | undefined,
 ): SpawnSyncReturns<string | Buffer>
 export function spawnSync(
   cmd: string,
-  args?: string[] | readonly string[],
+  args?: string[] | readonly string[] | undefined,
   options?: SpawnSyncOptions | undefined,
 ): SpawnSyncReturns<string | Buffer> {
   // Resolve binary names to full paths using whichSync.

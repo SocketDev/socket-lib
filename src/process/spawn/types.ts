@@ -264,18 +264,21 @@ export interface ChildProcess extends EventEmitter {
   readonly signalCode: NodeJS.Signals | null
   readonly spawnargs: string[]
   readonly spawnfile: string
-  kill(signal?: NodeJS.Signals | number): boolean
-  send(message: Serializable, callback?: (error: Error | null) => void): boolean
+  kill(signal?: NodeJS.Signals | number | undefined): boolean
+  send(
+    message: Serializable,
+    callback?: ((error: Error | null) => void) | undefined,
+  ): boolean
   send(
     message: Serializable,
     sendHandle?: SendHandle | undefined,
-    callback?: (error: Error | null) => void,
+    callback?: ((error: Error | null) => void) | undefined,
   ): boolean
   send(
     message: Serializable,
     sendHandle?: SendHandle | undefined,
     options?: { keepOpen?: boolean | undefined } | undefined,
-    callback?: (error: Error | null) => void,
+    callback?: ((error: Error | null) => void) | undefined,
   ): boolean
   disconnect(): void
   unref(): void
@@ -295,15 +298,18 @@ export interface WritableStreamType {
   write(
     chunk: unknown,
     encoding?: BufferEncoding | undefined,
-    callback?: (error?: Error | null) => void,
+    callback?: ((error?: Error | null | undefined) => void) | undefined,
   ): boolean
-  write(chunk: unknown, callback?: (error?: Error | null) => void): boolean
-  end(cb?: () => void): this
-  end(chunk: unknown, cb?: () => void): this
+  write(
+    chunk: unknown,
+    callback?: ((error?: Error | null | undefined) => void) | undefined,
+  ): boolean
+  end(cb?: (() => void) | undefined): this
+  end(chunk: unknown, cb?: (() => void) | undefined): this
   end(
     chunk: unknown,
     encoding?: BufferEncoding | undefined,
-    cb?: () => void,
+    cb?: (() => void) | undefined,
   ): this
   cork(): void
   uncork(): void

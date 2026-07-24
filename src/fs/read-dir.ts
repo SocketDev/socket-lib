@@ -113,7 +113,10 @@ export async function readDirNames(
  *
  * @returns Array of directory names, empty array on error
  */
-export function readDirNamesSync(dirname: PathLike, options?: ReadDirOptions) {
+export function readDirNamesSync(
+  dirname: PathLike,
+  options?: ReadDirOptions | undefined,
+) {
   const fs = getNodeFs()
   try {
     return innerReadDirNames(

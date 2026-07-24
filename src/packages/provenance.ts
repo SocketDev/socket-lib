@@ -78,7 +78,7 @@ export function didTrustDecrease(
 export async function fetchPackageProvenance(
   pkgName: string,
   pkgVersion: string,
-  options?: ProvenanceOptions,
+  options?: ProvenanceOptions | undefined,
 ): Promise<unknown> {
   const { signal, timeout = 10_000 } = {
     __proto__: null,
