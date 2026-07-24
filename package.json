@@ -3383,6 +3383,7 @@
     "npm-run-all2": "catalog:",
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
+    "oxlint-tsgolint": "catalog:",
     "p-map": "7.0.4",
     "pacote": "21.5.0",
     "picomatch": "4.0.4",
