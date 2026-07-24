@@ -240,6 +240,10 @@ pnpm-debug.log
 !/src/external/
 !/test/fixtures/
 !/tools/prim/test/fixtures/
+# Committed package-tarball fixtures for the offline pacote registry mock; the
+# `*.tgz` glob above would otherwise ignore them (a file glob a directory
+# negation can't re-include).
+!/test/fixtures/npm/*.tgz
 
 # ─── repo-local: fleet hook bundle build output (generated-outputs-are-untracked).
 # The v1.0.11 bundle still ships _dist/bundle.cjs, so it lands on disk from a
