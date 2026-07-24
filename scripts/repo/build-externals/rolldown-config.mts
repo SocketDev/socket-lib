@@ -16,9 +16,23 @@ import { fileURLToPath } from 'node:url'
 import type { Plugin, RolldownOptions } from 'rolldown'
 
 import { defineGuardedPlugin } from '../../../.config/repo/rolldown/define-guarded.mts'
+import { REPO_ROOT } from '../../fleet/paths.mts'
+import {
+  createCollapseEngineGatesPlugin,
+  readSupportedNodeRange,
+} from './collapse-engine-gates.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const stubsDir = path.join(__dirname, 'stubs')
+
+// Resolved once per build: package.json engines.node, asserted at or above
+// the fleet floor by readSupportedNodeRange (floor as code, no second copy of
+// the version here).
+let supportedNodeRange: string | undefined
+function getSupportedNodeRange(): string {
+  supportedNodeRange ??= readSupportedNodeRange(REPO_ROOT)
+  return supportedNodeRange
+}
 
 const requireResolve = createRequire(import.meta.url)
 
@@ -49,6 +63,10 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
     /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
     'arborist-isolated-reifier.cjs',
   ],
+  // @npmcli/fs's userland fs.cp fallback. Its `useNative` engine gate is
+  // collapsed to `true` at bundle time (see collapse-engine-gates.mts), so the
+  // polyfill branch is unreachable on every supported runtime.
+  '^\\./polyfill\\.js$': [/@npmcli[\\/]fs[\\/]lib[\\/]cp[\\/]/, 'throw.cjs'],
   '^\\./printable\\.js$': [
     /@npmcli[\\/]arborist[\\/]lib[\\/]/,
     'arborist-printable.cjs',
@@ -248,6 +266,12 @@ export function getRolldownConfig(
     plugins: [
       createForceNodeModulesPlugin(),
       createStubPlugin(),
+      // Collapse vendored engine gates that are dead at or below the
+      // engines.node floor (e.g. @npmcli/fs cp's `useNative =
+      // node.satisfies('>=16.7.0')`) so the gate's helper binding never
+      // reaches dist/external, where downstream bundlers have mangled it into
+      // require-time crashes.
+      createCollapseEngineGatesPlugin(getSupportedNodeRange()),
       // Guarded define for dead-code elimination. Read-only substitution —
       // assignment targets and `delete` operands are left alone, so e.g.
       // `delete process.env.DEBUG` (debug's node.js save()) stays verbatim
