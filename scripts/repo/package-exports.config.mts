@@ -1,6 +1,6 @@
 /**
- * @file Socket-lib's opt-in config for the canonical make-package-exports
- *   generator (scripts/fleet/make-package-exports.mts). socket-lib publishes.
+ * @file Socket-lib's opt-in config for the canonical package-exports
+ *   generator (scripts/fleet/gen/package-exports.mts). socket-lib publishes.
  *
  * @socketsecurity/lib(-stable) as a per-leaf subpath surface: every dist file
  *   is its own export, browser-safe leaves carry a `browser` condition, and the
@@ -14,7 +14,7 @@
  *   after auditing the subpath has zero Node deps.
  */
 
-import type { ExportsConfig } from '../fleet/make-package-exports.mts'
+import type { ExportsConfig } from '../fleet/gen/package-exports.mts'
 import { REPO_ROOT } from '../fleet/paths.mts'
 
 export const packageDir: string = REPO_ROOT

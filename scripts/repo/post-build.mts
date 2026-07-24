@@ -35,7 +35,7 @@ async function main(): Promise<void> {
 
   const exitCode = await runSequence([
     {
-      args: ['scripts/fleet/make-package-exports.mts', ...fixArgs],
+      args: ['scripts/fleet/gen/package-exports.mts', ...fixArgs],
       command: 'node',
     },
     {
