@@ -5,8 +5,8 @@
 import { REGISTRY_SCOPE_DELIMITER } from '../constants/socket'
 // @ts-expect-error - external vendored module
 import { PackageURL } from '../external/@socketregistry/packageurl-js'
-import npmPackageArg from '../external/npm-package-arg'
 
+import { requireFrom } from '../node/module'
 import { isPlainObject } from '../objects/predicates'
 import { getSmolPurl } from '../smol/purl'
 import { isNonEmptyString } from '../strings/predicates'
@@ -18,6 +18,30 @@ import {
   StringPrototypeSlice,
   StringPrototypeStartsWith,
 } from '../primordials/string'
+
+import type npmPackageArgFn from '../external/npm-package-arg'
+
+let npmPackageArg: typeof npmPackageArgFn | undefined
+
+/**
+ * The vendored `npm-package-arg`. It resolves through the npm-pack bundle —
+ * arborist, pacote, cacache, make-fetch-happen — so a static import at module
+ * scope drags that whole multi-megabyte subgraph into any consumer bundling a
+ * pure helper like `pkgNameToSlug`. Loaded lazily at first spec parse via
+ * `requireFrom`, whose non-literal specifier keeps bundlers from walking the
+ * edge, and memoized. Same relative shape in both trees: `src/packages` and
+ * `dist/packages` each sit one level above their `external/` sibling.
+ */
+export function getNpmPackageArg(): typeof npmPackageArgFn {
+  if (npmPackageArg === undefined) {
+    npmPackageArg = requireFrom(
+      import.meta.url,
+      '../external/npm-package-arg',
+    ) as typeof npmPackageArgFn
+  }
+  return npmPackageArg!
+}
+
 /**
  * Get the release tag for a version.
  *
@@ -135,8 +159,7 @@ export function isGitHubTgzSpec(
   if (isPlainObject(spec)) {
     parsedSpec = spec
   } else {
-    // module is imported at the top
-    parsedSpec = npmPackageArg(spec as string, where)
+    parsedSpec = getNpmPackageArg()(spec as string, where)
   }
   const typedSpec = parsedSpec as {
     type?: string | undefined
@@ -164,8 +187,7 @@ export function isGitHubUrlSpec(
   if (isPlainObject(spec)) {
     parsedSpec = spec
   } else {
-    // module is imported at the top
-    parsedSpec = npmPackageArg(spec as string, where)
+    parsedSpec = getNpmPackageArg()(spec as string, where)
   }
   const typedSpec = parsedSpec as {
     gitCommittish?: string | undefined
