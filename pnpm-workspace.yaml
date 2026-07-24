@@ -18,7 +18,7 @@ packages:
 catalog:
   '@redwoodjs/agent-ci': 0.17.1
   '@sinclair/typebox': 0.34.52
-  '@socketregistry/packageurl-js': 1.4.4
+  '@socketregistry/packageurl-js': 1.4.5
   '@types/shell-quote': 1.7.5
   '@ultrathink/acorn.wasm': npm:@ultrathink/acorn-wasm@0.0.1
   '@vitiate/core': 0.3.1
@@ -32,7 +32,7 @@ catalog:
   # version regardless of where the importing file lives. src/ + test/
   # code uses the canonical name because vitest aliases that to local
   # src/.
-  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.4'
+  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.4.5'
   '@socketsecurity/lib': 6.2.2
   '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.2.2'
   '@socketsecurity/registry': 'npm:@socketsecurity/registry@2.0.2'
