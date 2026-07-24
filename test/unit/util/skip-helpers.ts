@@ -24,7 +24,15 @@ import process from 'node:process'
 import { WIN32 } from '../../../src/constants/platform'
 import { describe, it } from 'vitest'
 
-const skipNetwork = !!process.env['SOCKET_LIB_SKIP_NETWORK_TESTS']
+// Read the flag at call time (inside the wrappers below), not at module import.
+// The wrappers run during test collection, after vitest's setupFiles have set
+// SOCKET_LIB_SKIP_NETWORK_TESTS; a module-scope const would capture the value
+// before setup ran, so a worker that imported this file first would see the
+// flag unset and run the live-network suites (leaking a sibling file's Nock
+// disableNetConnect into them).
+function shouldSkipNetwork(): boolean {
+  return !!process.env['SOCKET_LIB_SKIP_NETWORK_TESTS']
+}
 
 const TAG_WINDOWS = '[windows]'
 const TAG_UNIX = '[unix]'
@@ -38,7 +46,7 @@ type SuiteFn = () => void
  * `SOCKET_LIB_SKIP_NETWORK_TESTS` env var is set.
  */
 export function describeNetworkOnly(name: string, fn: SuiteFn): void {
-  describe.skipIf(skipNetwork)(tagged(name, TAG_NETWORK), fn)
+  describe.skipIf(shouldSkipNetwork())(tagged(name, TAG_NETWORK), fn)
 }
 
 /**
@@ -88,7 +96,7 @@ export function describeWindowsOnly(name: string, fn: SuiteFn): void {
  * env var is set.
  */
 export function itNetworkOnly(name: string, fn: TestFn): void {
-  it.skipIf(skipNetwork)(tagged(name, TAG_NETWORK), fn)
+  it.skipIf(shouldSkipNetwork())(tagged(name, TAG_NETWORK), fn)
 }
 
 /**
