@@ -45,6 +45,7 @@ import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { FLEET_CATALOG_YAML, PNPM_WORKSPACE_YAML, REPO_ROOT } from './paths.mts'
 import { applyClaudeMdTrim } from './lib/claude-md-trim.mts'
 import { applyStableAliasReconcile } from './lib/stable-alias.mts'
+import { isCascadeMirrorPath } from './_shared/cascade-mirror-scope.mts'
 import { getModifiedFiles, getStagedFiles } from './_shared/format-scope.mts'
 import {
   acquireFixerLock,
@@ -129,7 +130,12 @@ export async function main(
   // interactive `pnpm run fix` calls hit this path constantly.
   const mode = resolveScopeMode(argv)
   if (mode !== 'all') {
-    const scoped = mode === 'staged' ? getStagedFiles() : getModifiedFiles()
+    // Live cascade-mirror payloads never count toward a dirty scope: they are
+    // gated at the template source and the mutating runners skip them anyway
+    // — a mirror-only scope, e.g. mid-cascade-landing, is a clean scope.
+    const scoped = (
+      mode === 'staged' ? getStagedFiles() : getModifiedFiles()
+    ).filter(f => !isCascadeMirrorPath(f))
     if (shouldSkipCleanScope(argv, scoped)) {
       logger.log(
         `fix: no ${mode} files — clean scope, nothing to fix (pass --all for the repo-wide pass).`,

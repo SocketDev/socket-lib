@@ -44,7 +44,9 @@ export interface RunnerSeams {
   ensureRelease?:
     | ((
         pkg: { name: string; version: string },
-        options?: { packAssets?: (() => Promise<string[]>) | undefined },
+        options?:
+          | { packAssets?: (() => Promise<string[]>) | undefined }
+          | undefined,
       ) => Promise<void>)
     | undefined
   listStaged?: (() => Promise<StageListEntry[]>) | undefined
@@ -71,7 +73,9 @@ export interface RunnerSeams {
 export interface ResolvedSeams {
   ensureRelease: (
     pkg: { name: string; version: string },
-    options?: { packAssets?: (() => Promise<string[]>) | undefined },
+    options?:
+      | { packAssets?: (() => Promise<string[]>) | undefined }
+      | undefined,
   ) => Promise<void>
   listStaged: () => Promise<StageListEntry[]>
   packTarball: (name: string, version: string) => Promise<string | undefined>

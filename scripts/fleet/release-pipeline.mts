@@ -12,9 +12,9 @@
  *   RECEIPT-PRODUCING stages, each deferring to its owning script:
  *
  *   1. preflight — pnpm run update → pnpm i → fix --all → check --all
- *   2. cover — pnpm run cover + make-coverage-badge refresh (the badge is a
+ *   2. cover — pnpm run cover + gen/coverage-badge refresh (the badge is a
  *      tracked asset the ci stage commits, so it rides ahead of the bump)
- *   3. exports — make-package-exports (opt-in) + public-files-are-exported
+ *   3. exports — gen/package-exports (opt-in) + public-files-are-exported
  *   4. files — pnpm pack tarball inspected via pack-contents-are-clean
  *   5. ci — surgical commit of staged fixes; green CI on a pushed head, or
  *      "local-only, CI deferred" (the pipeline NEVER pushes)
@@ -295,10 +295,12 @@ export async function runPipeline(
 export async function runApproveMode(
   state: PipelineState,
   cli: CliOptions,
-  options?: {
-    persist?: typeof persistOutcome | undefined
-    seams?: RunnerSeams | undefined
-  },
+  options?:
+    | {
+        persist?: typeof persistOutcome | undefined
+        seams?: RunnerSeams | undefined
+      }
+    | undefined,
 ): Promise<void> {
   const opts = { __proto__: null, ...options } as NonNullable<typeof options>
   const persist = opts.persist ?? persistOutcome

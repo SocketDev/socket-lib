@@ -134,7 +134,7 @@ export const STAGE_DESCRIPTIONS: Readonly<Record<StageId, string>> = {
   bump: 'bump.mts: CHANGELOG + bump commit, from the user-named version',
   'bump-stop': 'HARD STOP — the USER names X.Y.Z; --version resumes',
   ci: 'commit staged fixes surgically; green CI on the pushed head, or defer (local gates green → pending-remote; --ci-wait blocks)',
-  cover: 'pnpm run cover + make-coverage-badge refresh (badge rides the bump)',
+  cover: 'pnpm run cover + gen/coverage-badge refresh (badge rides the bump)',
   exports: 'exports map ↔ public files agree (public-files-are-exported)',
   files: 'pnpm pack tarball inspected (pack-contents-are-clean)',
   preflight:

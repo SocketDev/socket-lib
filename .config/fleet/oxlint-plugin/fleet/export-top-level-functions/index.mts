@@ -21,6 +21,7 @@ import path from 'node:path'
 
 import { detectSourceType } from '../../lib/detect-source-type.mts'
 import type { AstNode, RuleContext, RuleFixer } from '../../lib/rule-types.mts'
+import { isLockstepMirror } from '../../lib/lockstep-mirror.mts'
 
 const SCRIPT_ENTRY_NAMES = new Set(['main'])
 
@@ -79,6 +80,10 @@ const rule = {
   },
 
   create(context: RuleContext) {
+    // Verbatim upstream mirrors keep upstream's shape; see lib/lockstep-mirror.mts.
+    if (isLockstepMirror(context)) {
+      return {}
+    }
     const sourceCode = context.getSourceCode
       ? context.getSourceCode()
       : context.sourceCode
@@ -114,13 +119,13 @@ const rule = {
 
     let exportedNames: Set<string> | undefined
 
-    // Shared handler for every top-level declaration shape. `kind` is the
+    // Shared handler for every top-level declaration shape. `kindLabel` is the
     // human label used in the message + autofix (`function`/`interface`/
     // `type`/`class`); `allowMain` exempts the `main` script-entry convention,
     // which only applies to functions.
     function check(
       node: AstNode,
-      kind: string,
+      kindLabel: string,
       { allowMain }: { allowMain: boolean },
     ): void {
       if (!node.id || node.id.type !== 'Identifier') {
@@ -139,14 +144,14 @@ const rule = {
         context.report({
           node: node.id,
           messageId: 'missingAlreadyReExported',
-          data: { kind, name },
+          data: { kind: kindLabel, name },
         })
         return
       }
       context.report({
         node: node.id,
         messageId: 'missing',
-        data: { kind, name },
+        data: { kind: kindLabel, name },
         fix(fixer: RuleFixer) {
           // Insert `export ` at the declaration's start. Handles `function`,
           // `async function`, `interface`, `type`, and `class` alike.

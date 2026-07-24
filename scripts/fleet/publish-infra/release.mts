@@ -117,7 +117,9 @@ export async function releaseBehindLiveGate(config: {
   ensureRelease?:
     | ((
         pkg: { name: string; version: string },
-        options?: { packAssets?: (() => Promise<string[]>) | undefined },
+        options?:
+          | { packAssets?: (() => Promise<string[]>) | undefined }
+          | undefined,
       ) => Promise<void>)
     | undefined
   isLive: () => Promise<boolean>
@@ -199,9 +201,11 @@ export async function ensureTagAndRelease(
     name: string
     version: string
   },
-  options?: {
-    packAssets?: (() => Promise<string[]>) | undefined
-  },
+  options?:
+    | {
+        packAssets?: (() => Promise<string[]>) | undefined
+      }
+    | undefined,
 ): Promise<void> {
   const opts = { __proto__: null, ...options } as {
     packAssets?: (() => Promise<string[]>) | undefined

@@ -322,15 +322,17 @@ export async function compareExtractedTarballs(
  */
 export async function verifyStagedEntry(
   entry: StageListEntry,
-  options?: {
-    downloadStagedTarball?:
-      | ((stageId: string) => Promise<string | undefined>)
-      | undefined
-    hashLocalTarball?: ((filePath: string) => TarballDigest) | undefined
-    packTarball?:
-      | ((name: string, version: string) => Promise<string | undefined>)
-      | undefined
-  },
+  options?:
+    | {
+        downloadStagedTarball?:
+          | ((stageId: string) => Promise<string | undefined>)
+          | undefined
+        hashLocalTarball?: ((filePath: string) => TarballDigest) | undefined
+        packTarball?:
+          | ((name: string, version: string) => Promise<string | undefined>)
+          | undefined
+      }
+    | undefined,
 ): Promise<boolean> {
   const opts = { __proto__: null, ...options } as {
     downloadStagedTarball?:

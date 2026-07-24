@@ -84,7 +84,7 @@ export async function runPreflight(config: {
 /**
  * Cover gate: run the repo's coverage script (`pnpm run cover` — or whichever
  * of cover/coverage/test:cover the repo declares), then ACTIVELY regenerate
- * the coverage badge via make-coverage-badge.mts. `check --all` (preflight)
+ * the coverage badge via gen/coverage-badge.mts. `check --all` (preflight)
  * only runs coverage-badge-is-current — a CHECK, not an UPDATE — so this stage
  * is where the badge actually refreshes; the refreshed
  * assets/repo/badges/coverage.svg is a modified tracked file the ci stage
@@ -136,14 +136,14 @@ export async function runCoverGate(config: {
   }
   const badge = await seams.runInherit(
     'node',
-    ['scripts/fleet/make-coverage-badge.mts'],
+    ['scripts/fleet/gen/coverage-badge.mts'],
     cfg.cwd,
   )
   if (badge !== 0) {
     return {
       detail:
-        `make-coverage-badge.mts exited ${badge}.\n` +
-        `  Fix: run \`node scripts/fleet/make-coverage-badge.mts\` directly and resolve its error, then re-run.`,
+        `gen/coverage-badge.mts exited ${badge}.\n` +
+        `  Fix: run \`node scripts/fleet/gen/coverage-badge.mts\` directly and resolve its error, then re-run.`,
       status: 'failed',
     }
   }
@@ -157,7 +157,7 @@ export async function runCoverGate(config: {
 
 /**
  * Exports gate: regenerate the exports map when the repo opts in
- * (make-package-exports.mts, write skipped under --dry-run), then run the
+ * (gen/package-exports.mts, write skipped under --dry-run), then run the
  * canonical map ↔ files check (public-files-are-exported).
  */
 export async function runExportsGate(config: {
@@ -174,14 +174,14 @@ export async function runExportsGate(config: {
   if (optedIn && !cfg.dryRun) {
     const gen = await seams.runInherit(
       'node',
-      ['scripts/fleet/make-package-exports.mts'],
+      ['scripts/fleet/gen/package-exports.mts'],
       cfg.cwd,
     )
     if (gen !== 0) {
       return {
         detail:
-          `make-package-exports.mts exited ${gen}.\n` +
-          `  Fix: run \`node scripts/fleet/make-package-exports.mts\` directly and resolve its error.`,
+          `gen/package-exports.mts exited ${gen}.\n` +
+          `  Fix: run \`node scripts/fleet/gen/package-exports.mts\` directly and resolve its error.`,
         status: 'failed',
       }
     }
