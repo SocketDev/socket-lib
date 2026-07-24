@@ -11,12 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`stdio`** — restore typed prompt signatures in published d.ts
 
-## [6.2.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.2.2) - 2026-07-24
-
-### Fixed
-
-- **`stdio`** — restore typed prompt signatures in published d.ts
-
 ## [6.2.1](https://github.com/SocketDev/socket-lib/releases/tag/v6.2.1) - 2026-07-23
 
 ### Fixed
