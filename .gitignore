@@ -241,6 +241,11 @@ pnpm-debug.log
 !/test/fixtures/
 !/tools/prim/test/fixtures/
 
+# ─── repo-local: fleet hook bundle build output (generated-outputs-are-untracked).
+# The v1.0.11 bundle still ships _dist/bundle.cjs, so it lands on disk from a
+# refresh; keep it out of tracking until the fleet gitignore block covers it. ───
+/.claude/hooks/fleet/_dist/
+
 # ─── vitiate coverage-guided fuzz lane (`pnpm run test:fuzz`) caches ───
 # `.swc/` is the SWC instrument plugin's WASM cache; `.vitiate/` holds the
 # regenerable corpus + run results. Both are rebuilt on every fuzz run — never
