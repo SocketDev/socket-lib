@@ -17,6 +17,7 @@ packages:
 # lockstep with the parent without each hook duplicating literal pins.
 catalog:
   '@redwoodjs/agent-ci': 0.17.1
+  '@shadscan/cli': 0.2.0
   '@sinclair/typebox': 0.34.52
   '@socketregistry/packageurl-js': 1.4.7
   '@types/shell-quote': 1.7.5
@@ -37,7 +38,7 @@ catalog:
   '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.2.3'
   '@socketsecurity/registry': 'npm:@socketsecurity/registry@2.0.4'
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.4'
-  '@socketsecurity/sdk': 'npm:@socketsecurity/sdk@4.0.3'
+  '@socketsecurity/sdk': 4.0.4
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.0.3'
   '@types/mdast': 4.0.4
   '@types/node': 26.1.1
@@ -52,14 +53,14 @@ catalog:
   'ecc-agentshield': 1.4.0
   'fast-check': 4.9.0
   'html5parser': 3.0.0
-  'markdownlint-cli2': 0.23.0
+  'markdownlint-cli2': 0.23.1
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
   'neosanitize': 0.3.0
   'nock': 15.0.0
   'npm-run-all2': 9.0.2
   'oxfmt': 0.59.0
-  'oxlint': 1.74.0
+  'oxlint': 1.75.0
   # oxlint-tsgolint — the type-aware lint sidecar the fleet lint runner's
   # whole-tree gate invokes via `oxlint --type-aware`. Exact-pinned to match
   # the wheelhouse catalog; the per-platform binaries are soak-excluded
@@ -134,10 +135,6 @@ minimumReleaseAgeExclude:
   - '@sdxgen/*'
   - 'sdxgen'
   - 'stuie'
-  # published: 2026-07-16 | removable: 2026-07-23
-  - 'magic-string@1.0.0'
-  # published: 2026-07-16 | removable: 2026-07-23
-  - 'portless@0.15.4'
   # oxlint-tsgolint 7.0.2001 — the type-aware lint sidecar the fleet lint
   # runner's whole-tree gate needs. The main package + its per-platform binary
   # family are pinned to the exact version (a scope glob would blanket-bypass a
@@ -165,6 +162,48 @@ minimumReleaseAgeExclude:
   # exact-pinned so future versions re-soak.
   # published: 2026-07-19 | removable: 2026-07-26
   - 'verkit@0.1.2'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-android-arm-eabi@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-android-arm64@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-darwin-arm64@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-darwin-x64@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-freebsd-x64@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-arm-gnueabihf@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-arm-musleabihf@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-arm64-gnu@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-arm64-musl@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-ppc64-gnu@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-riscv64-gnu@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-riscv64-musl@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-s390x-gnu@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-x64-gnu@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-linux-x64-musl@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-openharmony-arm64@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-win32-arm64-msvc@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-win32-ia32-msvc@1.75.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - '@oxlint/binding-win32-x64-msvc@1.75.0'
+  # published: 2026-07-24 | removable: 2026-07-31
+  - '@shadscan/cli@0.2.0'
+  # published: 2026-07-21 | removable: 2026-07-28
+  - 'oxlint@1.75.0'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
