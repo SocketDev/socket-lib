@@ -221,8 +221,8 @@ catalogs:
       specifier: npm:@socketsecurity/lib@6.2.3
       version: 6.2.3
     '@socketsecurity/sdk-stable':
-      specifier: npm:@socketsecurity/sdk@4.0.3
-      version: 4.0.3
+      specifier: npm:@socketsecurity/sdk@4.0.4
+      version: 4.0.4
     '@types/mdast':
       specifier: 4.0.4
       version: 4.0.4
@@ -528,7 +528,7 @@ importers:
         version: 4.0.4
       '@socketsecurity/sdk-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/sdk@4.0.3'
+        version: '@socketsecurity/sdk@4.0.4'
       '@types/mdast':
         specifier: 'catalog:'
         version: 4.0.4
@@ -914,7 +914,7 @@ importers:
         version: '@socketsecurity/lib@6.2.3(typescript@7.0.2)'
       '@socketsecurity/sdk-stable':
         specifier: 'catalog:'
-        version: '@socketsecurity/sdk@4.0.3'
+        version: '@socketsecurity/sdk@4.0.4'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3610,10 +3610,6 @@ packages:
     peerDependenciesMeta:
       typescript:
         optional: true
-
-  '@socketsecurity/sdk@4.0.3':
-    resolution: {integrity: sha512-m/YswFjERxa9nkw4PTGw/8Q6HDRNuvYl5HLWHTtDTj7TLLsk2efbgjpzarqouql2+1VdukDzt5YRejJq7fptXg==}
-    engines: {node: '>=18.20.8', npm: '>=12.0.0', pnpm: '>=11.0.5'}
 
   '@socketsecurity/sdk@4.0.4':
     resolution: {integrity: sha512-Kyyz8GLX7lpGcpCy8XGCSxtL7a24kL53wP/CczzIMQRB5Ijslw5wDxSj0bs+niqVyw2yg7X+QBUei1gd+Kd8Qw==}
@@ -7166,8 +7162,6 @@ snapshots:
   '@socketsecurity/lib@6.2.3(typescript@7.0.2)':
     optionalDependencies:
       typescript: 7.0.2
-
-  '@socketsecurity/sdk@4.0.3': {}
 
   '@socketsecurity/sdk@4.0.4': {}
 
