@@ -11,5 +11,8 @@
   },
   "lint": {
     "profile": "rich"
+  },
+  "vite": {
+    "allowEsbuild": "test-only browser-bundle e2e arm (test/browser) bundles with esbuild to prove the published browser field works under a non-rolldown consumer; the build bundler is rolldown"
   }
 }
