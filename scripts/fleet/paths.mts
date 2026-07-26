@@ -19,10 +19,10 @@
  *      `REPO_ROOT`, `CONFIG_DIR`, `NODE_MODULES_CACHE_DIR`. Importable as-is.
  *   2. RESOLVER FUNCTIONS — paths that need a search (multiple accepted locations)
  *      or runtime input (a target directory, a package name). Example:
- *      `findSocketWheelhouseConfig(repoRoot)` returns the first of
- *      `.config/socket-wheelhouse.json` or `.socket-wheelhouse.json` that
- *      exists. Resolution from script call sites: every script anchors on its
- *      own location via `fileURLToPath(import.meta.url)`, then walks up to the
+ *      `findSocketWheelhouseConfig(repoRoot)` resolves
+ *      `.config/repo/socket-wheelhouse.json` when it exists. Resolution from
+ *      script call sites: every script anchors on its own location via
+ *      `fileURLToPath(import.meta.url)`, then walks up to the
  *      package.json-bearing ancestor. `process.cwd()` is forbidden in scripts/
  *      per fleet rule (the user / Claude Code may invoke from any subdir).
  *
@@ -477,10 +477,9 @@ export interface LoadedSocketWheelhouseConfig {
 }
 
 /**
- * Find the socket-wheelhouse.json under `repoRoot` (defaults to the current
- * repo's root). Returns the first matching location, or `undefined` if neither
- * file exists. When both exist, emits a stderr warning + returns the primary
- * location.
+ * Find the member config at `.config/repo/socket-wheelhouse.json` under
+ * `repoRoot` (defaults to the current repo's root). Returns `undefined` when
+ * the file is absent.
  */
 export function findSocketWheelhouseConfig(
   repoRoot: string = REPO_ROOT,

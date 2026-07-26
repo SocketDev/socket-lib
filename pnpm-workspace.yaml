@@ -38,7 +38,7 @@ catalog:
   '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.2.3'
   '@socketsecurity/registry': 'npm:@socketsecurity/registry@2.0.4'
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.4'
-  '@socketsecurity/sdk': 4.0.4
+  '@socketsecurity/sdk': 4.1.0
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.0.4'
   '@types/mdast': 4.0.4
   '@types/node': 26.1.1
@@ -247,7 +247,7 @@ overrides:
   'semver@>=5.0.0 <7.6.0': '7.8.1'
   'side-channel': 'npm:@socketregistry/side-channel@1.0.10'
   'ssri@>=12': '13.0.1'
-  'string-width@>=5': '8.1.0'
+  'string-width@>=5': '8.2.2'
   'update-notifier@>=4.0.0': '7.3.1'
   'uuid': '11.1.1'
   'which': '7.0.0'
