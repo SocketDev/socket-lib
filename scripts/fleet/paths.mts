@@ -199,11 +199,18 @@ export const COVERAGE_SUMMARY_PATH = path.join(
  * each tier's throwaway `coverage-final.json` never clutter COVERAGE_DIR. Lives
  * in the OS temp dir and is wiped per run. `os` is a node builtin so paths.mts
  * stays import-safe for the rolldown loader.
+ *
+ * A cover run pins a UNIQUE per-run dir via the FLEET_COVERAGE_SCRATCH_DIR env
+ * (set by scripts/fleet/cover/scratch-isolation.mts, imported before this
+ * module loads) so concurrent cover runs never wipe each other's raw child
+ * dumps or the vitest v8 `.tmp` at startup — the source of the cover-gate
+ * measurement wobble. Consumers that don't set it (measure-one-enforcer, ad-hoc
+ * tools) fall back to the fixed shared path. Keep this env-name literal in
+ * lockstep with scratch-isolation.mts's FLEET_COVERAGE_SCRATCH_DIR_ENV.
  */
-export const COVERAGE_SCRATCH_DIR = path.join(
-  os.tmpdir(),
-  'fleet-coverage-scratch',
-)
+export const COVERAGE_SCRATCH_DIR =
+  process.env['FLEET_COVERAGE_SCRATCH_DIR'] ||
+  path.join(os.tmpdir(), 'fleet-coverage-scratch')
 
 /**
  * Throwaway reportsDirectory for the vitest tiers (main / isolated). A
