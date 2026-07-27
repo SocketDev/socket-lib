@@ -113,6 +113,11 @@ steps:
     uses: ./.github/actions/fleet/setup-and-install
     with:
       checkout: 'false'
+      # The agent runs pnpm inside the AWF container, which mounts the
+      # workspace but NOT the runner home — node_modules linked against the
+      # default home store would fail there with a store mismatch, so the
+      # whole job uses a workspace-local store both sides can read.
+      store-dir: ${{ github.workspace }}/.pnpm-store
   - name: Expose pnpm inside the agent sandbox
     shell: bash
     run: |
