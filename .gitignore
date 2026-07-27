@@ -260,7 +260,6 @@ pnpm-debug.log
 /.swc/
 /.vitiate/
 
-# Repo-local: generated run artifacts (release checksums, coverage scratch, fixture build objects)
+# Repo-local: generated run artifacts (release checksums, fixture build objects)
 /checksums.txt
-/coverage-children/
 /test/fixtures/perry/*.o
