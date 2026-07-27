@@ -113,6 +113,27 @@ describe('billingFromKeyed', () => {
       __proto__: null,
     })
   })
+
+  it('omits the keyless local account by default', () => {
+    const ctx = billingFromKeyed({
+      keyed: new Set<CredentialProvider>(['anthropic']),
+    })
+    expect(ctx.local).toBeUndefined()
+  })
+
+  it('injects the keyless local account tagged $0/local when opted in', () => {
+    const ctx = billingFromKeyed({ keyed: new Set(), local: true })
+    expect(ctx.local).toStrictEqual({ kind: '$0/local', provider: 'local' })
+  })
+
+  it('lets config override the local account kind', () => {
+    const ctx = billingFromKeyed({
+      keyed: new Set(),
+      kinds: { local: 'flat-rate' },
+      local: true,
+    })
+    expect(ctx.local?.kind).toBe('flat-rate')
+  })
 })
 
 describe('detectRoutingEnv', () => {

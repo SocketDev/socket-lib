@@ -222,6 +222,11 @@
       "types": "./dist/ai/http.d.mts",
       "default": "./dist/ai/http.js"
     },
+    "./ai/json": {
+      "source": "./src/ai/json.mts",
+      "types": "./dist/ai/json.d.mts",
+      "default": "./dist/ai/json.js"
+    },
     "./ai/profiles": {
       "source": "./src/ai/profiles.mts",
       "types": "./dist/ai/profiles.d.mts",
@@ -246,6 +251,11 @@
       "source": "./src/ai/spawn.mts",
       "types": "./dist/ai/spawn.d.mts",
       "default": "./dist/ai/spawn.js"
+    },
+    "./ai/spawn-local": {
+      "source": "./src/ai/spawn-local.mts",
+      "types": "./dist/ai/spawn-local.d.mts",
+      "default": "./dist/ai/spawn-local.js"
     },
     "./ai/subagent-status": {
       "source": "./src/ai/subagent-status.mts",

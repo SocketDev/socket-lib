@@ -28,16 +28,36 @@ import {
 } from '../secrets/keychain'
 
 /**
- * A provider whose credential this module can resolve: the HTTP providers
- * (fireworks, synthetic) plus the CLI/first-party providers (anthropic, openai,
- * xai) for CI env + keychain.
+ * A KEYED provider whose credential this module resolves from a token source:
+ * the HTTP providers (fireworks, synthetic) plus the CLI/first-party providers
+ * (anthropic, openai, xai) for CI env + keychain. Every keyed provider has a
+ * `{ tokenEnv, keychainService }` entry in `PROVIDER_CREDENTIALS`.
  */
-export type CredentialProvider =
+export type KeyedCredentialProvider =
   | 'anthropic'
   | 'fireworks'
   | 'openai'
   | 'synthetic'
   | 'xai'
+
+/**
+ * The keyless on-device provider: a `local` engine (the `builtin.mts`
+ * LanguageModel seam / an injected local runner) that needs NO credential — it
+ * runs on the machine, so it is "always present with no token". It is a
+ * `CredentialProvider` so routing can name it uniformly, but it is deliberately
+ * NOT in `PROVIDER_CREDENTIALS` (there is nothing to resolve). Use
+ * `isKeylessProvider` to branch before a token lookup.
+ */
+export const KEYLESS_PROVIDER = 'local' as const
+
+/**
+ * A provider routing can name: every keyed provider, plus the keyless `local`
+ * on-device engine. Token resolution only applies to the keyed subset; a
+ * keyless provider resolves as always-present-with-no-token.
+ */
+export type CredentialProvider =
+  | KeyedCredentialProvider
+  | typeof KEYLESS_PROVIDER
 
 export interface ProviderCredentialSpec {
   // The env var the token lives in (CI sets this as a secret).
@@ -53,7 +73,7 @@ export interface ProviderCredentialSpec {
 // keychain service is the Socket-uniform `socketsecurity` scope (the daemon /
 // keychain stores per-account, account == tokenEnv).
 export const PROVIDER_CREDENTIALS: Readonly<
-  Record<CredentialProvider, ProviderCredentialSpec>
+  Record<KeyedCredentialProvider, ProviderCredentialSpec>
 > = {
   __proto__: null,
   anthropic: {
@@ -70,7 +90,9 @@ export const PROVIDER_CREDENTIALS: Readonly<
     tokenEnv: 'SYNTHETIC_API_KEY',
   },
   xai: { keychainService: 'socketsecurity', tokenEnv: 'XAI_API_KEY' },
-} as unknown as Readonly<Record<CredentialProvider, ProviderCredentialSpec>>
+} as unknown as Readonly<
+  Record<KeyedCredentialProvider, ProviderCredentialSpec>
+>
 
 export interface DeleteProviderCredentialOptions {
   // The provider whose stored credential to remove.
@@ -90,6 +112,10 @@ export async function deleteProviderCredential(
   options: DeleteProviderCredentialOptions,
 ): Promise<'absent' | 'removed'> {
   const opts = { __proto__: null, ...options } as typeof options
+  if (isKeylessProvider(opts.provider)) {
+    // A keyless provider stores nothing, so there is never anything to remove.
+    return 'absent'
+  }
   const spec = PROVIDER_CREDENTIALS[opts.provider]
   if (!spec) {
     return 'absent'
@@ -101,12 +127,25 @@ export async function deleteProviderCredential(
 }
 
 /**
- * True when `value` names a provider with a resolvable credential.
+ * True when `value` names a provider routing can use: a keyed provider with a
+ * resolvable credential, or the keyless `local` on-device engine.
  */
 export function isCredentialProvider(
   value: string,
 ): value is CredentialProvider {
-  return value in PROVIDER_CREDENTIALS
+  return value in PROVIDER_CREDENTIALS || value === KEYLESS_PROVIDER
+}
+
+/**
+ * True when `value` is the keyless `local` provider — the on-device engine that
+ * needs no credential. Callers branch on this BEFORE a token lookup: routing
+ * treats a keyless provider as always-present (no `keyed` membership required),
+ * and the credential resolvers short-circuit it with no keychain/env access.
+ */
+export function isKeylessProvider(
+  value: string,
+): value is typeof KEYLESS_PROVIDER {
+  return value === KEYLESS_PROVIDER
 }
 
 export interface ResolveProviderCredentialOptions {
@@ -132,6 +171,12 @@ export async function resolveProviderCredential(
   const opts = { __proto__: null, ...options } as typeof options
   if (opts.explicit) {
     return opts.explicit
+  }
+  if (isKeylessProvider(opts.provider)) {
+    // Keyless: there is no token to resolve. The provider is "present" for
+    // routing (see `isKeylessProvider`) but carries no bearer credential, so a
+    // token lookup honestly returns undefined rather than a placeholder.
+    return undefined
   }
   const spec = PROVIDER_CREDENTIALS[opts.provider]
   if (!spec) {
@@ -177,6 +222,12 @@ export async function writeProviderCredential(
   options: WriteProviderCredentialOptions,
 ): Promise<'unchanged' | 'written'> {
   const opts = { __proto__: null, ...options } as typeof options
+  if (isKeylessProvider(opts.provider)) {
+    throw new Error(
+      `writeProviderCredential: "${opts.provider}" is a keyless provider — ` +
+        'it has no credential to store.',
+    )
+  }
   const spec = PROVIDER_CREDENTIALS[opts.provider]
   if (!spec) {
     throw new Error(

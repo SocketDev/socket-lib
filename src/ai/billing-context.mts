@@ -19,6 +19,7 @@
 import { ObjectKeys } from '../primordials/object'
 import { getEnvValue } from '../env/rewire'
 import {
+  KEYLESS_PROVIDER,
   PROVIDER_CREDENTIALS,
   resolveProviderCredential,
 } from './credentials.mts'
@@ -47,6 +48,8 @@ export const DEFAULT_PROVIDER_KIND: Readonly<
   __proto__: null,
   anthropic: 'metered',
   fireworks: 'metered',
+  // The keyless on-device engine — no window, quota, or dollar cost.
+  local: '$0/local',
   openai: 'subscription',
   synthetic: 'flat-rate',
   xai: 'metered',
@@ -65,6 +68,11 @@ export interface BillingFromKeyedOptions {
   readonly headroom?:
     | Readonly<Partial<Record<CredentialProvider, BillingHeadroom>>>
     | undefined
+  // Include the keyless on-device provider (`local`, kind `$0/local`) in the
+  // context so grunt-tier routing can rank it cheapest. Off by default: a
+  // caller opts in once it has probed the local engine is available (see
+  // `isLocalEngineAvailable`), keeping the context to the KEYED set otherwise.
+  readonly local?: boolean | undefined
 }
 
 /**
@@ -88,6 +96,16 @@ export function billingFromKeyed(
     }
     const headroom = opts.headroom?.[provider]
     out[provider] = headroom ? { headroom, kind, provider } : { kind, provider }
+  }
+  if (opts.local) {
+    // The keyless on-device account is always present (no token) when the
+    // caller opts in; tag it with its config-or-default kind (`$0/local`).
+    const kind =
+      opts.kinds?.[KEYLESS_PROVIDER] ?? DEFAULT_PROVIDER_KIND[KEYLESS_PROVIDER]
+    const headroom = opts.headroom?.[KEYLESS_PROVIDER]
+    out[KEYLESS_PROVIDER] = headroom
+      ? { headroom, kind, provider: KEYLESS_PROVIDER }
+      : { kind, provider: KEYLESS_PROVIDER }
   }
   return out
 }

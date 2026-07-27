@@ -14,6 +14,8 @@ import {
 import {
   deleteProviderCredential,
   isCredentialProvider,
+  isKeylessProvider,
+  KEYLESS_PROVIDER,
   PROVIDER_CREDENTIALS,
   resolveProviderCredential,
   writeProviderCredential,
@@ -71,6 +73,44 @@ describe('isCredentialProvider', () => {
     expect(isCredentialProvider('anthropic')).toBe(true)
     expect(isCredentialProvider('gemini')).toBe(false)
     expect(isCredentialProvider('')).toBe(false)
+  })
+
+  it('accepts the keyless local provider', () => {
+    expect(isCredentialProvider(KEYLESS_PROVIDER)).toBe(true)
+    expect(isCredentialProvider('local')).toBe(true)
+  })
+})
+
+describe('isKeylessProvider', () => {
+  it('is true only for the keyless local provider', () => {
+    expect(isKeylessProvider('local')).toBe(true)
+    expect(isKeylessProvider(KEYLESS_PROVIDER)).toBe(true)
+    expect(isKeylessProvider('anthropic')).toBe(false)
+    expect(isKeylessProvider('')).toBe(false)
+  })
+})
+
+describe('keyless provider credential resolution', () => {
+  it('resolves a keyless provider as present-with-no-token (undefined, no lookup)', async () => {
+    const token = await resolveProviderCredential({
+      provider: KEYLESS_PROVIDER,
+    })
+    expect(token).toBeUndefined()
+    expect(resolveMock).not.toHaveBeenCalled()
+  })
+
+  it('reports a keyless provider as absent on delete (nothing stored)', async () => {
+    expect(await deleteProviderCredential({ provider: KEYLESS_PROVIDER })).toBe(
+      'absent',
+    )
+    expect(deleteMock).not.toHaveBeenCalled()
+  })
+
+  it('refuses to write a credential for a keyless provider', async () => {
+    await expect(
+      writeProviderCredential({ provider: KEYLESS_PROVIDER, value: 'x' }),
+    ).rejects.toThrow(/keyless/)
+    expect(writeMock).not.toHaveBeenCalled()
   })
 })
 
