@@ -12,6 +12,13 @@ import { whichSync } from '../../../src/bin/which'
 import { buildPtyInvocation, ptyRun } from '../../../src/process/spawn/pty'
 
 const HAS_SCRIPT = whichSync('script') !== null
+// The end-to-end case allocates a REAL PTY through the system `script`
+// binary. PTY allocation is unreliable under the parallel coverage
+// harness (and macOS `script` masks the child's own failures), so the
+// spawn case runs only outside coverage — the raw-terminal exemption.
+const UNDER_COVERAGE = Boolean(
+  process.env['NODE_V8_COVERAGE'] || process.env['FLEET_CHILD_V8_COVERAGE_DIR'],
+)
 
 describe('buildPtyInvocation', () => {
   it('returns undefined on win32', () => {
@@ -46,7 +53,7 @@ describe('buildPtyInvocation', () => {
 })
 
 describe('ptyRun', () => {
-  it.skipIf(!HAS_SCRIPT)(
+  it.skipIf(!HAS_SCRIPT || UNDER_COVERAGE)(
     'streams stdout and resolves exit code 0 for `node --version`',
     async () => {
       const chunks: string[] = []
