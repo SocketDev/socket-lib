@@ -63,7 +63,9 @@
     "socket/no-vitest-skipped-tests": "error",
     "socket/no-vitest-standalone-expect": [
       "error",
-      { "additionalTestBlockFunctions": ["cmdit"] }
+      {
+        "additionalTestBlockFunctions": ["cmdit"]
+      }
     ],
     "socket/no-which-for-local-bin": "error",
     "socket/normalize-path-before-match": "error",
@@ -279,6 +281,7 @@
     "**/.config/repo/vitest.config.mts",
     "**/.mcp.json",
     "**/test/fleet/nock-loopback-passthrough.test.mts",
+    "**/test/fleet/publish-infra-placeholder.test.mts",
     "#fleet-canonical-end"
   ]
 }
