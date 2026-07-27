@@ -142,3 +142,76 @@ describe('usableTierCandidates', () => {
     expect(usableTierCandidates('fable', ctx([], []))).toStrictEqual([])
   })
 })
+
+describe('keyless local candidate', () => {
+  it('appends a local TAIL rung to the grunt tiers (haiku/fable) only', () => {
+    for (const tier of ['haiku', 'fable'] as const) {
+      const chain = TIER_CHAINS[tier]
+      const tail = chain[chain.length - 1]!
+      expect(tail.kind).toBe('local')
+      expect(tail.provider).toBe('local')
+      expect(tail.engine).toBe('builtin')
+    }
+    for (const tier of ['opus', 'sonnet'] as const) {
+      expect(TIER_CHAINS[tier].some(c => c.kind === 'local')).toBe(false)
+    }
+  })
+
+  it('never puts the local rung at a chain head', () => {
+    for (const tier of ['haiku', 'fable'] as const) {
+      expect(TIER_CHAINS[tier][0]!.kind).not.toBe('local')
+      expect(TIER_CHAINS[tier][0]!.engine).toBe('claude')
+    }
+  })
+
+  it('is usable only when the local engine is probed available', () => {
+    const local = TIER_CHAINS.haiku.find(c => c.kind === 'local')!
+    // Keyless: no keyed provider needed, but gated on localAvailable.
+    expect(
+      isCandidateUsable(local, {
+        available: new Set(),
+        keyed: new Set(),
+        localAvailable: true,
+      }),
+    ).toBe(true)
+    expect(
+      isCandidateUsable(local, {
+        available: new Set(),
+        keyed: new Set(),
+        localAvailable: false,
+      }),
+    ).toBe(false)
+    // Undefined (caller never probed) → skipped.
+    expect(isCandidateUsable(local, ctx([], []))).toBe(false)
+  })
+
+  it('surfaces the local rung with no CLI or key when the engine is available', () => {
+    const seq = usableTierCandidates('haiku', {
+      available: new Set(),
+      keyed: new Set(),
+      localAvailable: true,
+    })
+    expect(seq).toHaveLength(1)
+    expect(seq[0]!.kind).toBe('local')
+  })
+
+  it('keeps the local rung LAST when higher candidates are also usable', () => {
+    const seq = usableTierCandidates('haiku', {
+      available: new Set(['claude']),
+      keyed: new Set(['anthropic']),
+      localAvailable: true,
+    })
+    expect(seq[0]!.engine).toBe('claude')
+    expect(seq[seq.length - 1]!.kind).toBe('local')
+  })
+
+  it('still prefers the Claude head for resolveTier (local is a tail)', () => {
+    const res = resolveTier('haiku', {
+      available: new Set(['claude']),
+      keyed: new Set(['anthropic']),
+      localAvailable: true,
+    })
+    expect(res?.reason).toBe('preferred')
+    expect(res?.candidate.engine).toBe('claude')
+  })
+})

@@ -186,4 +186,131 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
     },
     tolerantTimeout(40_000),
   )
+
+  describe('ordered candidate lists', () => {
+    // Mirrors the real opentui-20260424-18f0f46 release: .node prebuilt
+    // assets are tag-infixed (<tag>-<platformArch>.node) with the release
+    // platform token `win` on Windows.
+    const tag = 'opentui-20260424-18f0f46'
+    const nodePrebuildRelease = {
+      assets: [
+        'checksums.txt',
+        `${tag}-darwin-arm64.node`,
+        `${tag}-darwin-x64.node`,
+        `${tag}-linux-arm64-musl.node`,
+        `${tag}-linux-arm64.node`,
+        `${tag}-linux-x64-musl.node`,
+        `${tag}-linux-x64.node`,
+        `${tag}-win-arm64.node`,
+        `${tag}-win-x64.node`,
+      ].map(name => ({
+        browser_download_url: `https://github.com/SocketDev/socket-btm/releases/download/${tag}/${name}`,
+        name,
+      })),
+      tag_name: tag,
+    }
+
+    it('should resolve the first candidate when it is present', async () => {
+      const plainRelease = {
+        assets: [
+          {
+            browser_download_url: `https://github.com/SocketDev/socket-btm/releases/download/lief-20250101-abc/lief-linux-x64`,
+            name: 'lief-linux-x64',
+          },
+        ],
+        tag_name: 'lief-20250101-abc',
+      }
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSONStringify(plainRelease)),
+          true,
+          200,
+        ),
+      )
+
+      const url = await getReleaseAssetUrl(
+        'lief-20250101-abc',
+        ['lief-linux-x64', 'lief-20250101-abc-linux-x64.node'],
+        SOCKET_BTM_REPO,
+      )
+      expect(url).toBe(
+        'https://github.com/SocketDev/socket-btm/releases/download/lief-20250101-abc/lief-linux-x64',
+      )
+    })
+
+    it('should fall through to the tag-infixed .node candidate when the plain name is absent', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSONStringify(nodePrebuildRelease)),
+          true,
+          200,
+        ),
+      )
+
+      const url = await getReleaseAssetUrl(
+        tag,
+        ['opentui-linux-x64-musl', `${tag}-linux-x64-musl.node`],
+        SOCKET_BTM_REPO,
+      )
+      expect(url).toBe(
+        `https://github.com/SocketDev/socket-btm/releases/download/${tag}/${tag}-linux-x64-musl.node`,
+      )
+    })
+
+    it('should prefer the earlier candidate when both are present', async () => {
+      const bothRelease = {
+        assets: [
+          {
+            browser_download_url: `https://github.com/SocketDev/socket-btm/releases/download/${tag}/${tag}-linux-x64.node`,
+            name: `${tag}-linux-x64.node`,
+          },
+          {
+            browser_download_url: `https://github.com/SocketDev/socket-btm/releases/download/${tag}/opentui-linux-x64`,
+            name: 'opentui-linux-x64',
+          },
+        ],
+        tag_name: tag,
+      }
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        createMockHttpResponse(
+          Buffer.from(JSONStringify(bothRelease)),
+          true,
+          200,
+        ),
+      )
+
+      const url = await getReleaseAssetUrl(
+        tag,
+        ['opentui-linux-x64', `${tag}-linux-x64.node`],
+        SOCKET_BTM_REPO,
+      )
+      expect(url).toBe(
+        `https://github.com/SocketDev/socket-btm/releases/download/${tag}/opentui-linux-x64`,
+      )
+    })
+
+    it(
+      'should throw listing every tried candidate when none match',
+      async () => {
+        vi.mocked(httpRequest).mockResolvedValue(
+          createMockHttpResponse(
+            Buffer.from(JSONStringify(nodePrebuildRelease)),
+            true,
+            200,
+          ),
+        )
+
+        await expect(
+          getReleaseAssetUrl(
+            tag,
+            ['opentui-win32-arm64.exe', `${tag}-win32-arm64.node`],
+            SOCKET_BTM_REPO,
+          ),
+        ).rejects.toThrow(
+          `Asset opentui-win32-arm64.exe or ${tag}-win32-arm64.node not found in release ${tag}`,
+        )
+      },
+      tolerantTimeout(40_000),
+    )
+  })
 })

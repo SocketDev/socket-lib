@@ -276,3 +276,46 @@ describe('allocateBudget', () => {
     expect(caps.grunt).toBe(0)
   })
 })
+
+describe('keyless $0/local billing kind', () => {
+  it('ranks $0/local cheaper than every metered/subscription/flat-rate kind', () => {
+    const score = (kind: BillingAccount['kind']): number =>
+      candidateScore({
+        account: { kind, provider: 'local' },
+        demoteThreshold: 0.2,
+        promoteCheap: true,
+      })
+    expect(score('$0/local')).toBeLessThan(score('flat-rate'))
+    expect(score('$0/local')).toBeLessThan(score('subscription'))
+    expect(score('$0/local')).toBeLessThan(score('metered'))
+  })
+
+  it('promotes the local rung ahead of paid equivalents on a grunt tier in local dev', () => {
+    // haiku chain: claude(anthropic) → codex(openai) → opencode(synthetic) → local.
+    const order = orderCandidates({
+      billing: bill({
+        anthropic: { kind: 'metered', provider: 'anthropic' },
+        local: { kind: '$0/local', provider: 'local' },
+        openai: { kind: 'subscription', provider: 'openai' },
+        synthetic: { kind: 'flat-rate', provider: 'synthetic' },
+      }),
+      env: 'local',
+      route: { ...FULL, localAvailable: true },
+      tier: 'haiku',
+    })
+    expect(providers(order)[0]).toBe('local')
+  })
+
+  it('keeps the local rung last on a grunt tier in CI (static order held)', () => {
+    const order = orderCandidates({
+      billing: bill({
+        anthropic: { kind: 'metered', provider: 'anthropic' },
+        local: { kind: '$0/local', provider: 'local' },
+      }),
+      env: 'ci',
+      route: { ...FULL, localAvailable: true },
+      tier: 'haiku',
+    })
+    expect(providers(order).at(-1)).toBe('local')
+  })
+})
