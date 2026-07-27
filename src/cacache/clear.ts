@@ -41,6 +41,7 @@ import type { RemoveOptions } from './types'
  *
  * @returns Number of entries removed (only when prefix is specified)
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export async function clear(
   options?: RemoveOptions | undefined,
 ): Promise<number | undefined> {

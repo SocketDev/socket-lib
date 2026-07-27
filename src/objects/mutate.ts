@@ -40,6 +40,7 @@ import { isObject } from './predicates'
  *
  * @returns The modified target object
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function merge<T extends object, U extends object>(
   target: T,
   source: U,

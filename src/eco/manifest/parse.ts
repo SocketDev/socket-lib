@@ -39,6 +39,7 @@ const smolParse = smol
   : undefined
 /* c8 ignore stop */
 
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export const parse: (
   filename: string,
   content: string,

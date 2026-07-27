@@ -23,6 +23,7 @@ import type { IterationOptions } from '../promises/types'
  *   }
  *   ```
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function transform<T, U>(
   iterable: Iterable<T> | AsyncIterable<T>,
   func: (item: T) => Promise<U>,

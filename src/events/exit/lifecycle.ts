@@ -63,6 +63,7 @@ export function getSignalListeners() {
  *   // Signal handlers are now active
  *   ```
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function load(): void {
   /* c8 ignore next - !globalProcess never fires in Node tests. */
   if (isLoaded() || !globalProcess) {

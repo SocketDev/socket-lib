@@ -86,6 +86,7 @@ export function readEnv(name: string): string | undefined {
  * `undefined` when neither source has the value — the caller's signal to prompt
  * the user or surface a setup hint.
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export async function resolve(
   options: ResolveOptions,
 ): Promise<ResolveResult | undefined> {

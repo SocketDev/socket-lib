@@ -47,6 +47,7 @@ export async function put(
  *
  * @throws {TypeError} If key contains wildcards (*)
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export async function remove(key: string): Promise<unknown> {
   if (StringPrototypeIncludes(key, '*')) {
     throw new TypeErrorCtor(

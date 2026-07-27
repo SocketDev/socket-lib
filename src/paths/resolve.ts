@@ -182,6 +182,7 @@ export function relativeResolve(from: string, to: string): string {
  *
  * @returns {string} The resolved absolute path
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function resolve(...segments: string[]): string {
   let resolvedPath = ''
   let resolvedAbsolute = false

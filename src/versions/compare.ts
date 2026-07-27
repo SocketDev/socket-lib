@@ -28,6 +28,7 @@ import { getImpl } from './_internal'
  *
  * @returns -1 if a < b, 0 if a === b, 1 if a > b, or undefined if invalid.
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function compare(a: string, b: string): -1 | 0 | 1 | undefined {
   try {
     return getImpl().compare(a, b) as -1 | 0 | 1
@@ -98,6 +99,7 @@ export function rsort(versions: readonly string[]): string[] {
  * Sort versions in ascending order. The input is spread so callers can pass a
  * `readonly string[]` even when the impl mutates internally.
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function sort(versions: readonly string[]): string[] {
   // oxlint-disable-next-line unicorn/no-array-sort -- the smol/semver binding's own sort method, not Array#sort; the binding exposes no `toSorted`.
   return getImpl().sort([...versions])

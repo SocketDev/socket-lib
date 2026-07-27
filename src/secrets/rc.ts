@@ -81,6 +81,7 @@ export function buildBlock(options: WriteOptions): {
  * / clear flow. Returns `true` when a block was found and removed, `false` when
  * no block was present.
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function clear(
   service: string,
   legacySentinels: readonly string[] = [],
@@ -247,6 +248,7 @@ export function shellSingleQuote(value: string): string {
  * `shell` and `rcPath` override the auto-detected target — useful for chezmoi /
  * dotfile-manager users or installers running under a non-default shell.
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function write(options: WriteOptions): WriteResult {
   options = { __proto__: null, ...options } as typeof options
   if (os.platform() !== 'darwin') {

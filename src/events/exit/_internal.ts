@@ -59,6 +59,7 @@ let signals: string[] | undefined
 /* c8 ignore start - Only called from signal-listener body and
    processEmit/processReallyExit interceptors, all of which are
    c8-ignored. Cannot be reached from the test runner. */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function emit(
   event: string,
   code: number | undefined,

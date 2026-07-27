@@ -24,6 +24,7 @@ import type { CacheEntry, GetOptions } from './types'
  * @throws {Error} When cache entry is not found.
  * @throws {TypeError} If key contains wildcards (*)
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export async function get(
   key: string,
   options?: GetOptions | undefined,

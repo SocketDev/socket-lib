@@ -190,6 +190,7 @@ export function showCursor(): void {
  *
  * @param text - Text to write.
  */
+// oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function write(text: string): void {
   stdout.write(text)
 }
