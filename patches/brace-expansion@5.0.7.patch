@@ -1,0 +1,13 @@
+diff --git a/dist/commonjs/index.js b/dist/commonjs/index.js
+index e4e5bd87666d1b0aa632d15d80f878af730c533b..ffdcdd406cef7a77a27dc43c9fec36ccd2543e49 100644
+--- a/dist/commonjs/index.js
++++ b/dist/commonjs/index.js
+@@ -208,4 +208,8 @@ function expand_(str, max, isTop) {
+         return expansions;
+     }
+ }
++// Interop: 5.0.7 dropped the CJS default export; minimatch@9's compiled
++// __importDefault call reads `.default` (the __esModule flag skips the
++// namespace fallback), so restore it pointing at expand.
++exports.default = expand;
+ //# sourceMappingURL=index.js.map

@@ -9,5 +9,5 @@ index 1c9f02c062f72645b75947204a53457e181384e4..1bcef1c83fc07641edd4d33430d6b7eb
 -    npm_config_node_gyp = require.resolve('node-gyp/bin/node-gyp.js')
 +    npm_config_node_gyp = require.resolve('node-' + 'gyp/bin/node-gyp.js')
    }
-
+ 
    const spawnEnv = setPATH(path, binPaths, {
