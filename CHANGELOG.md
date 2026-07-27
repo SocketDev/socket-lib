@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.3.0) - 2026-07-27
+
+### Added
+
+- **`process`** — add ptyRun and openUrl zero-dep primitives
+
+### Fixed
+
+- **`test`** — skip the real-PTY spawn under the coverage harness
+
 ## [6.2.3](https://github.com/SocketDev/socket-lib/releases/tag/v6.2.3) - 2026-07-24
 
 ### Changed
