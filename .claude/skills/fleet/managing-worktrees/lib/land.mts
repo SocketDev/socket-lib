@@ -33,7 +33,7 @@
  *      (each only when a worktree can't run that tool)
  */
 
-import { existsSync, symlinkSync, unlinkSync } from 'node:fs'
+import { existsSync, symlinkSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
