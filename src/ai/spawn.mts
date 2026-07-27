@@ -15,20 +15,18 @@
 import process from 'node:process'
 
 import { errorMessage } from '../errors/message'
+import { DateNow } from '../primordials/date'
+import { ErrorCtor } from '../primordials/error'
 import { ObjectKeys } from '../primordials/object'
+import { PromiseCtor } from '../primordials/promise'
 import { spawn } from '../process/spawn/child'
 import { isSpawnError } from '../process/spawn/errors'
 
 import { discoverAiAgents } from './discover.mts'
-
-import { DateNow } from '../primordials/date'
-
-import { ErrorCtor } from '../primordials/error'
-
-import { PromiseCtor } from '../primordials/promise'
-
 import { usableTierCandidates } from './route.mts'
+import { runLocalTierSpawn } from './spawn-local.mts'
 
+import type { LocalAgentProvider } from './spawn-local.mts'
 import type { RouteContext, TierCandidate } from './route.mts'
 import type { AiTier } from './tier.mts'
 import type {
@@ -453,6 +451,7 @@ export async function spawnTierWithFallback(
   tier: AiTier,
   ctx: RouteContext,
   options: Omit<SpawnAiAgentOptions, 'agent' | 'effort' | 'model'>,
+  localProvider?: LocalAgentProvider | undefined,
 ): Promise<TierSpawnResult> {
   const candidates = usableTierCandidates(tier, ctx)
   if (candidates.length === 0) {
@@ -464,12 +463,17 @@ export async function spawnTierWithFallback(
   let last: { candidate: TierCandidate; result: AgentSpawnResult } | undefined
   for (let i = 0, { length } = candidates; i < length; i += 1) {
     const candidate = candidates[i]!
-    const result = await spawnAiAgent({
-      ...options,
-      agent: candidate.engine,
-      effort: candidate.effort,
-      model: candidate.model,
-    } as SpawnAiAgentOptions)
+    // A `local` candidate drives the keyless on-device seam (returning the same
+    // AgentSpawnResult) so the fall-over logic below stays uniform across kinds.
+    const result =
+      candidate.kind === 'local'
+        ? await runLocalTierSpawn(options, candidate.model, localProvider)
+        : await spawnAiAgent({
+            ...options,
+            agent: candidate.engine,
+            effort: candidate.effort,
+            model: candidate.model,
+          } as SpawnAiAgentOptions)
     last = { candidate, result }
     if (
       !result.unavailable &&

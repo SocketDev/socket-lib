@@ -18,6 +18,7 @@
  *   `--effort` for it anyway.
  */
 
+import { isKeylessProvider, KEYLESS_PROVIDER } from './credentials.mts'
 import { AI_TIER } from './tier.mts'
 
 import type { CredentialProvider } from './credentials.mts'
@@ -25,16 +26,51 @@ import type { AiAgentName, AiEffort } from './types.mts'
 import type { AiTier } from './tier.mts'
 
 /**
- * A concrete, spawnable target: which CLI engine to run, the model id, the
- * reasoning effort to pass (undefined when the model ignores effort, e.g.
- * Fable), and the credential provider whose key gates it.
+ * A non-CLI, on-device engine. Distinct from `AiAgentName` (the agent CLIs that
+ * drive `spawn.mts`'s per-agent switch and the `which` probe) so a keyless
+ * local target is nameable WITHOUT widening the CLI unions. `builtin` is the
+ * `builtin.mts` LanguageModel seam (`getLanguageModel()`); the heavy provider
+ * impl is injected at the spawn layer (`spawn-local.mts`), never imported
+ * here.
  */
-export interface TierCandidate {
+export type LocalEngineName = 'builtin'
+
+/**
+ * A concrete, spawnable CLI target: which agent CLI to run, the model id, the
+ * reasoning effort to pass (undefined when the model ignores effort, e.g.
+ * Fable), and the credential provider whose key gates it. `kind` is optional
+ * and absent means `cli` — keeping the historical object shape byte-identical
+ * so existing consumers and snapshots are unaffected.
+ */
+export interface CliTierCandidate {
   readonly effort: AiEffort | undefined
   readonly engine: AiAgentName
+  readonly kind?: 'cli' | undefined
   readonly model: string
   readonly provider: CredentialProvider
 }
+
+/**
+ * A keyless on-device target: a `local` engine driven through the `builtin.mts`
+ * LanguageModel seam or an injected local provider (see `spawn-local.mts`). It
+ * carries `kind: 'local'`, `provider: 'local'` (keyless — no credential gates
+ * it), and a non-CLI `engine`. Reserved for grunt-tier TAIL rungs; never a
+ * chain head.
+ */
+export interface LocalTierCandidate {
+  readonly effort: AiEffort | undefined
+  readonly engine: LocalEngineName
+  readonly kind: 'local'
+  readonly model: string
+  readonly provider: typeof KEYLESS_PROVIDER
+}
+
+/**
+ * A routable target: a CLI agent or a keyless local engine. The `kind`
+ * discriminant (absent = `cli`) lets the spawn layer branch a local candidate
+ * onto the non-CLI execution path.
+ */
+export type TierCandidate = CliTierCandidate | LocalTierCandidate
 
 /**
  * Why the resolver returned what it did. - `preferred` — the tier's
@@ -60,6 +96,13 @@ export interface TierResolution {
 export interface RouteContext {
   readonly available: ReadonlySet<AiAgentName>
   readonly keyed: ReadonlySet<CredentialProvider>
+  /**
+   * Whether the keyless local engine is usable, probed once by the caller via
+   * the `builtin.mts` availability seam (`getLanguageModel().availability()` —
+   * see `isLocalEngineAvailable` in `spawn-local.mts`). Undefined/false means a
+   * `local` candidate is skipped, so callers that never probe are unaffected.
+   */
+  readonly localAvailable?: boolean | undefined
 }
 
 /**
@@ -77,6 +120,21 @@ const OPUS = AI_TIER.opus
 const SONNET = AI_TIER.sonnet
 const HAIKU = AI_TIER.haiku
 
+/**
+ * The keyless on-device TAIL rung. Appended ONLY to grunt-tier chains
+ * (haiku/fable) as the last resort — never a chain head — so a machine with no
+ * keyed engine can still grind commodity work locally, and billing can promote
+ * it ahead of a metered equivalent on cost (see `route-heuristic.mts`). Effort
+ * is undefined: an on-device model has no reasoning-effort dial (like Fable).
+ */
+const LOCAL: LocalTierCandidate = {
+  effort: undefined,
+  engine: 'builtin',
+  kind: 'local',
+  model: 'builtin',
+  provider: KEYLESS_PROVIDER,
+}
+
 export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
   __proto__: null,
   fable: [
@@ -93,6 +151,7 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
       model: 'fireworks-ai/accounts/fireworks/models/glm-5p2',
       provider: 'fireworks',
     },
+    LOCAL,
   ],
   opus: [
     {
@@ -138,21 +197,30 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
       model: 'synthetic/hf:moonshotai/Kimi-K2.6',
       provider: 'synthetic',
     },
+    LOCAL,
   ],
 } as unknown as Readonly<Record<AiTier, readonly TierCandidate[]>>
 
 /**
- * A candidate is usable when its engine CLI exists AND a credential for its
- * provider is resolvable. Both gates matter: an installed Claude with an
- * expired key is as unusable as a missing CLI.
+ * A candidate is usable when its credential requirement is met AND its engine
+ * is reachable. The credential gate is relaxed for keyless providers: a keyless
+ * `local` provider is always "keyed" (it needs no token), so it passes without
+ * `ctx.keyed` membership. The reachability gate depends on the kind: a keyless
+ * local candidate is gated on the local-engine availability probe
+ * (`ctx.localAvailable`), a CLI candidate on its engine being installed. Both
+ * gates still matter for CLI: an installed Claude with an expired key is as
+ * unusable as a missing CLI.
  */
 export function isCandidateUsable(
   candidate: TierCandidate,
   ctx: RouteContext,
 ): boolean {
-  return (
-    ctx.available.has(candidate.engine) && ctx.keyed.has(candidate.provider)
-  )
+  const keyOk =
+    isKeylessProvider(candidate.provider) || ctx.keyed.has(candidate.provider)
+  if (candidate.kind === 'local') {
+    return keyOk && ctx.localAvailable === true
+  }
+  return keyOk && ctx.available.has(candidate.engine)
 }
 
 /**

@@ -28,9 +28,10 @@ export type AssetPattern = string | { prefix: string; suffix: string } | RegExp
  */
 export interface DownloadGitHubReleaseConfig {
   /**
-   * Asset name on GitHub.
+   * Asset name on GitHub, or an ordered candidate list — the first candidate
+   * present in the release is downloaded.
    */
-  assetName: string
+  assetName: string | readonly string[]
   /**
    * Binary filename (e.g., 'node', 'binject').
    */

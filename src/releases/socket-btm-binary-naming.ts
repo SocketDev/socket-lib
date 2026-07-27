@@ -106,6 +106,44 @@ export function getBinaryName(
 }
 
 /**
+ * Get the tag-infixed asset name for a socket-btm `.node` prebuilt.
+ *
+ * The `.node` addon families (e.g. opentui) name their release assets
+ * `<tag>-<platformArch>.node` — release `opentui-20260424-18f0f46` carries
+ * `opentui-20260424-18f0f46-linux-x64-musl.node`. On Windows those assets use
+ * the release platform token `win` (`opentui-20260424-18f0f46-win-arm64.node`),
+ * matching the node-smol convention in `WIN_TOKEN_BY_BASENAME`.
+ *
+ * @example
+ *   ;```typescript
+ *   getNodePrebuildAssetName('opentui-20260424-18f0f46', 'linux', 'x64', 'musl')
+ *   // 'opentui-20260424-18f0f46-linux-x64-musl.node'
+ *   getNodePrebuildAssetName('opentui-20260424-18f0f46', 'win32', 'arm64')
+ *   // 'opentui-20260424-18f0f46-win-arm64.node'
+ *   ```
+ *
+ * @param tag - Release tag name (e.g., 'opentui-20260424-18f0f46')
+ * @param platform - Target platform.
+ * @param arch - Target architecture.
+ * @param libc - Linux libc variant (optional)
+ *
+ * @returns Asset name (e.g., 'opentui-20260424-18f0f46-darwin-arm64.node')
+ */
+export function getNodePrebuildAssetName(
+  tag: string,
+  platform: Platform,
+  arch: Arch,
+  libc?: Libc | undefined,
+): string {
+  const platformArch = getPlatformArch(platform, arch, libc)
+  const assetPlatformArch =
+    platform === 'win32'
+      ? `win${platformArch.slice('win32'.length)}`
+      : platformArch
+  return `${tag}-${assetPlatformArch}.node`
+}
+
+/**
  * Get platform-arch identifier for directory structure and asset names.
  *
  * # Format: `<os>-<arch>[-<libc>]`

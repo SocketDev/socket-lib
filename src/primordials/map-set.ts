@@ -5,6 +5,7 @@
  *   the throws-on-non-Object case.
  */
 
+import { TypeErrorCtor } from './error'
 import { uncurryThis } from './uncurry'
 
 // Stage 3+ TC39 proposals that Node 22+ ships but TypeScript's
@@ -50,10 +51,18 @@ export const MapPrototypeDelete = uncurryThis(Map.prototype.delete)
 export const MapPrototypeEntries = uncurryThis(Map.prototype.entries)
 export const MapPrototypeForEach = uncurryThis(Map.prototype.forEach)
 export const MapPrototypeGet = uncurryThis(Map.prototype.get)
-export const MapPrototypeGetOrInsert = uncurryThis(Map.prototype.getOrInsert)
-export const MapPrototypeGetOrInsertComputed = uncurryThis(
-  Map.prototype.getOrInsertComputed,
-)
+// getOrInsert / getOrInsertComputed (tc39 proposal-upsert) ship unflagged
+// only from Node 25 — engines allows >=22, so each export falls back to a
+// spec-equivalent built from the captured primordials when the native is
+// absent.
+export const MapPrototypeGetOrInsert =
+  Map.prototype.getOrInsert === undefined
+    ? mapGetOrInsertFallback
+    : uncurryThis(Map.prototype.getOrInsert)
+export const MapPrototypeGetOrInsertComputed =
+  Map.prototype.getOrInsertComputed === undefined
+    ? mapGetOrInsertComputedFallback
+    : uncurryThis(Map.prototype.getOrInsertComputed)
 export const MapPrototypeHas = uncurryThis(Map.prototype.has)
 export const MapPrototypeKeys = uncurryThis(Map.prototype.keys)
 export const MapPrototypeSet = uncurryThis(Map.prototype.set)
@@ -83,12 +92,14 @@ export const SetPrototypeValues = uncurryThis(Set.prototype.values)
 // ─── WeakMap (prototype) ───────────────────────────────────────────────
 export const WeakMapPrototypeDelete = uncurryThis(WeakMap.prototype.delete)
 export const WeakMapPrototypeGet = uncurryThis(WeakMap.prototype.get)
-export const WeakMapPrototypeGetOrInsert = uncurryThis(
-  WeakMap.prototype.getOrInsert,
-)
-export const WeakMapPrototypeGetOrInsertComputed = uncurryThis(
-  WeakMap.prototype.getOrInsertComputed,
-)
+export const WeakMapPrototypeGetOrInsert =
+  WeakMap.prototype.getOrInsert === undefined
+    ? weakMapGetOrInsertFallback
+    : uncurryThis(WeakMap.prototype.getOrInsert)
+export const WeakMapPrototypeGetOrInsertComputed =
+  WeakMap.prototype.getOrInsertComputed === undefined
+    ? weakMapGetOrInsertComputedFallback
+    : uncurryThis(WeakMap.prototype.getOrInsertComputed)
 export const WeakMapPrototypeHas = uncurryThis(WeakMap.prototype.has)
 export const WeakMapPrototypeSet = uncurryThis(WeakMap.prototype.set)
 
@@ -96,3 +107,69 @@ export const WeakMapPrototypeSet = uncurryThis(WeakMap.prototype.set)
 export const WeakSetPrototypeAdd = uncurryThis(WeakSet.prototype.add)
 export const WeakSetPrototypeDelete = uncurryThis(WeakSet.prototype.delete)
 export const WeakSetPrototypeHas = uncurryThis(WeakSet.prototype.has)
+
+// ─── proposal-upsert fallbacks ─────────────────────────────────────────
+// Hoisted function declarations referenced by the conditional exports
+// above. Each mirrors the proposal's algorithm: existing entry wins,
+// otherwise insert (computing via the callback, which — per spec — is
+// only invoked on a miss, and whose result is stored even if the
+// callback itself touched the map).
+export function mapGetOrInsertComputedFallback<K, V>(
+  map: Map<K, V>,
+  key: K,
+  callbackfn: (key: K) => V,
+): V {
+  if (typeof callbackfn !== 'function') {
+    throw new TypeErrorCtor(
+      `getOrInsertComputed takes a callback. Saw ${typeof callbackfn}, wanted a function computing the value to insert.`,
+    )
+  }
+  if (MapPrototypeHas(map, key)) {
+    return MapPrototypeGet(map, key) as V
+  }
+  const value = callbackfn(key)
+  MapPrototypeSet(map, key, value)
+  return value
+}
+
+export function mapGetOrInsertFallback<K, V>(
+  map: Map<K, V>,
+  key: K,
+  value: V,
+): V {
+  if (MapPrototypeHas(map, key)) {
+    return MapPrototypeGet(map, key) as V
+  }
+  MapPrototypeSet(map, key, value)
+  return value
+}
+
+export function weakMapGetOrInsertComputedFallback<K extends WeakKey, V>(
+  map: WeakMap<K, V>,
+  key: K,
+  callbackfn: (key: K) => V,
+): V {
+  if (typeof callbackfn !== 'function') {
+    throw new TypeErrorCtor(
+      `getOrInsertComputed takes a callback. Saw ${typeof callbackfn}, wanted a function computing the value to insert.`,
+    )
+  }
+  if (WeakMapPrototypeHas(map, key)) {
+    return WeakMapPrototypeGet(map, key) as V
+  }
+  const value = callbackfn(key)
+  WeakMapPrototypeSet(map, key, value)
+  return value
+}
+
+export function weakMapGetOrInsertFallback<K extends WeakKey, V>(
+  map: WeakMap<K, V>,
+  key: K,
+  value: V,
+): V {
+  if (WeakMapPrototypeHas(map, key)) {
+    return WeakMapPrototypeGet(map, key) as V
+  }
+  WeakMapPrototypeSet(map, key, value)
+  return value
+}

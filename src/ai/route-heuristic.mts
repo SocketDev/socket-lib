@@ -35,6 +35,9 @@ import type { AiTier } from './tier.mts'
  * How a provider's credential is billed, which decides what the marginal token
  * actually costs:
  *
+ * - `$0/local` — a keyless on-device engine. Marginal cost is $0 with no window,
+ *   quota, or cap, so it is the cheapest ration of all — ranked first for
+ *   commodity work.
  * - `flat-rate` — a fixed monthly plan with a usage window (e.g. N requests per
  *   5h). Marginal cost is $0 while the window has room.
  * - `metered` — pay per token against a (usually large, readable) monthly spend
@@ -42,7 +45,7 @@ import type { AiTier } from './tier.mts'
  * - `subscription` — a seat (Claude Max, ChatGPT Pro) with an opaque weekly
  *   quota. Marginal cost is $0 until the quota is hit, then it stops.
  */
-export type BillingKind = 'flat-rate' | 'metered' | 'subscription'
+export type BillingKind = '$0/local' | 'flat-rate' | 'metered' | 'subscription'
 
 /**
  * Where routing is running. `local` dev has the full discovered provider set
@@ -119,12 +122,14 @@ export const TASK_CLASS_TIER: Readonly<Record<TaskClass, AiTier>> = {
 /**
  * Marginal-cost rank by billing kind, cheapest ration first (lower =
  * preferred). Used only for commodity tiers in local dev — high-value tiers
- * stay quality-first. Flat-rate and subscription are both $0-until-cap;
- * flat-rate leads because its window resets fast (hours) vs a subscription's
- * weekly cap.
+ * stay quality-first. `$0/local` leads: an on-device engine has no window,
+ * quota, or dollar cost, so grunt-tier work prefers it. Flat-rate and
+ * subscription are both $0-until-cap; flat-rate leads because its window resets
+ * fast (hours) vs a subscription's weekly cap.
  */
 export const COST_RANK: Readonly<Record<BillingKind, number>> = {
   __proto__: null,
+  '$0/local': -1,
   'flat-rate': 0,
   metered: 2,
   subscription: 1,
