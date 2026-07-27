@@ -21,6 +21,7 @@ catalog:
   '@sinclair/typebox': 0.34.52
   '@socketregistry/packageurl-js': 1.4.7
   '@types/shell-quote': 1.7.5
+  '@ultrathink/acorn.rs.wasm': 0.0.1
   '@ultrathink/acorn.wasm': npm:@ultrathink/acorn-wasm@0.0.1
   '@vitiate/core': 0.3.1
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
@@ -163,8 +164,6 @@ minimumReleaseAgeExclude:
   - 'taze@19.16.0'
   # verkit — new dev-only transitive of taze 19.16.0 (same owner directive);
   # exact-pinned so future versions re-soak.
-  # published: 2026-07-19 | removable: 2026-07-26
-  - 'verkit@0.1.2'
   # published: 2026-07-21 | removable: 2026-07-28
   - '@oxlint/binding-android-arm-eabi@1.75.0'
   # published: 2026-07-21 | removable: 2026-07-28
@@ -240,6 +239,7 @@ overrides:
   'hasown': 'npm:@socketregistry/hasown@1.0.7'
   'iconv-lite': '0.7.3'
   'isexe@>=3': '4.0.0'
+  'js-yaml@>=5.0.0 <5.2.2': '5.2.2'
   'lru-cache@>=10': '11.5.2'
   'magic-string': '1.0.0'
   'mime-db': '1.54.0'

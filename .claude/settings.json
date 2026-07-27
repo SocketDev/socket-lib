@@ -53,14 +53,6 @@
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/bundle-stale-reminder/index.mts"
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/oxlint-plugin-load-nudge/index.mts"
-          },
-          {
-            "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/repo-map-refresh/index.mts"
           }
         ]
@@ -85,17 +77,16 @@
           {
             "type": "command",
             "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/stale-process-sweeper/index.mts"
-          },
-          {
-            "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/fleet/sweep-ds-store/index.mts"
           }
         ]
       }
     ]
   },
   "permissions": {
-    "allow": ["Bash(gh release create:*)", "SendMessage"],
+    "allow": [
+      "Bash(gh release create:*)",
+      "SendMessage"
+    ],
     "deny": [
       "Bash(gh release delete:*)",
       "Bash(npm publish:*)",
