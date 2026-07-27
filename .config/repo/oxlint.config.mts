@@ -20,6 +20,23 @@ export default config({
   // factory already ignores `**/.config/oxlint-plugin/**`).
   ignorePatterns: ['**/.config/fleet/oxlint-plugin/**'],
   jsPlugins: ['./oxlint-plugin/index.mts'],
+  overrides: [
+    // no-required-in-options-bag surfaced a 178-finding pre-existing debt
+    // pile across src/ (required params folded into options bags need
+    // per-signature review, not an autofix). Staged OFF for src/ only, per
+    // the fleet "surface the cleanup as a separate task" doctrine; the
+    // lint-modernization campaign owns the burn-down. This lives HERE (the
+    // repo-owned factory config) because .config/fleet/oxlintrc.json is
+    // fleet-managed and any edit there reverts on the next refresh — see
+    // docs/agents.md/fleet/lint-rules.md "Repo-owned overrides". Delete this
+    // block when the count reaches zero.
+    {
+      files: ['**/src/**'],
+      rules: {
+        'socket/no-required-in-options-bag': 'off',
+      },
+    },
+  ],
   rules: {
     'socket-repo/no-inline-lazy-node-getter': 'error',
     // Brand-new socket/* rules from the plugin cascade: each surfaced a
