@@ -142,7 +142,7 @@ interface RefTally {
   testRefs: number
 }
 
-interface TallyFileOptions {
+interface TallyFileConfig {
   readonly defsByName: Map<string, ExportDef[]>
   readonly file: string
   readonly repo: string | undefined
@@ -154,8 +154,8 @@ interface TallyFileOptions {
 // Scan one file's identifier tokens against the candidate-name set, crediting
 // each hit to the owning tally. The defining line itself is not a reference,
 // and internal pure re-export lines (`export … from`) are forwarding, not use.
-export function tallyFileRefs(options: TallyFileOptions): void {
-  const opts = { __proto__: null, ...options }
+export function tallyFileRefs(config: TallyFileConfig): void {
+  const opts = { __proto__: null, ...config }
   const lines = opts.source.split('\n')
   for (let i = 0, { length } = lines; i < length; i += 1) {
     const line = lines[i]!

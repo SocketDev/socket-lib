@@ -123,76 +123,6 @@ function spliceFleetBlock(config) {
   }
   return `${target.replace(/\n+$/, '')}\n\n${fleetBlock}\n`
 }
-const COL0_KEY_RE = /^[A-Za-z][\w-]*:/
-/**
- * Parse a YAML string into an ordered list of top-level key blocks. Each block
- * owns all lines from the key line up to (not including) the next column-0 key
- * line or EOF.
- */
-function parseYamlKeyBlocks(yaml) {
-  const lines = yaml.split('\n')
-  const blocks = []
-  let current
-  for (let i = 0, { length } = lines; i < length; i += 1) {
-    const line = lines[i]
-    if (COL0_KEY_RE.test(line)) {
-      if (current !== void 0) blocks.push(current)
-      const colonIdx = line.indexOf(':')
-      current = {
-        key: line.slice(0, colonIdx),
-        lines: [line],
-      }
-    } else if (current !== void 0) current.lines.push(line)
-  }
-  if (current !== void 0) blocks.push(current)
-  return blocks
-}
-/**
- * Merge the fleet-managed workspace sections from `bundleFleetSections` into
- * `consumerYaml`, replacing only the keys listed in `fleetKeys`. Non-fleet keys
- * (including `packages:`) are preserved byte-exact. Throws on ambiguous input.
- */
-function mergeWorkspaceYaml(config) {
-  const { bundleFleetSections, consumerYaml, fleetKeys } = {
-    __proto__: null,
-    ...config,
-  }
-  const consumerBlocks = parseYamlKeyBlocks(consumerYaml)
-  const bundleBlocks = parseYamlKeyBlocks(bundleFleetSections)
-  const fleetKeySet = new Set(fleetKeys)
-  const consumerKeyCounts = /* @__PURE__ */ new Map()
-  for (const block of consumerBlocks)
-    if (fleetKeySet.has(block.key))
-      consumerKeyCounts.set(
-        block.key,
-        (consumerKeyCounts.get(block.key) ?? 0) + 1,
-      )
-  for (const [key, count] of consumerKeyCounts)
-    if (count > 1)
-      throw new Error(
-        `mergeWorkspaceYaml: fleet key "${key}" appears ${count} times at column 0 in consumerYaml — cannot merge safely`,
-      )
-  const bundleMap = /* @__PURE__ */ new Map()
-  for (const block of bundleBlocks) bundleMap.set(block.key, block)
-  const resultBlocks = []
-  const handledFleetKeys = /* @__PURE__ */ new Set()
-  for (const block of consumerBlocks)
-    if (fleetKeySet.has(block.key)) {
-      const bundleBlock = bundleMap.get(block.key)
-      if (bundleBlock !== void 0) resultBlocks.push(bundleBlock)
-      else resultBlocks.push(block)
-      handledFleetKeys.add(block.key)
-    } else resultBlocks.push(block)
-  for (const key of fleetKeys)
-    if (!handledFleetKeys.has(key)) {
-      const bundleBlock = bundleMap.get(key)
-      if (bundleBlock !== void 0) resultBlocks.push(bundleBlock)
-    }
-  return `${resultBlocks
-    .map(b => b.lines.join('\n'))
-    .join('\n')
-    .replace(/\n+$/, '')}\n`
-}
 function run(cmd, args) {
   execFileSync(cmd, args, { stdio: 'inherit' })
 }
@@ -201,15 +131,6 @@ function segmentFileName(relativePath) {
 }
 function readManifest(manifestPath) {
   return JSON.parse(readFileSync(manifestPath, 'utf8'))
-}
-function walkFiles(dir, base) {
-  const out = []
-  for (const entry of readdirSync(dir, { withFileTypes: true })) {
-    const abs = path.join(dir, entry.name)
-    if (entry.isDirectory()) out.push(...walkFiles(abs, base))
-    else if (entry.isFile()) out.push(path.relative(base, abs))
-  }
-  return out
 }
 /**
  * Verify every file in `manifest.files` against its expected SHA-256 digest.
@@ -268,15 +189,106 @@ function verifySegments(segmentsDir, manifest) {
 }
 
 //#endregion
-//#region template/bootstrap/src/install-thin-prune.mts
-const PRUNE_SKIP_NAMES = /* @__PURE__ */ new Set([
-  '._.DS_Store',
-  '.DS_Store',
-  'Thumbs.db',
-])
+//#region template/bootstrap/src/applied-state.mts
+const SETTINGS_CANDIDATES = [
+  '.config/repo/socket-wheelhouse.json',
+  '.config/socket-wheelhouse.json',
+  '.socket-wheelhouse.json',
+]
+function resolveSettingsPath(dest) {
+  for (let i = 0, { length } = SETTINGS_CANDIDATES; i < length; i += 1) {
+    const p = path.join(dest, SETTINGS_CANDIDATES[i])
+    if (existsSync(p)) return p
+  }
+}
+const APPLIED_MARKER =
+  'node_modules/.cache/fleet/socket-wheelhouse/bundle-applied'
+const APPLIED_FILES_MARKER =
+  'node_modules/.cache/fleet/socket-wheelhouse/applied-files'
+const FLAT_APPLIED_MARKER =
+  'node_modules/.cache/socket-wheelhouse/bundle-applied'
+const LEGACY_APPLIED_MARKER = '.config/fleet/.bundle-applied'
 /**
- * The hybrid (segment + settingsSegment) path set thinIgnoreEntries and
- * fleetDirRoots both exclude from their wholly-fleet walk.
+ * Default bundle ref for a member — `bundle.ref` in its wheelhouse settings
+ * file. Lets install-fleet (and the prepare/CI wires) omit an explicit --ref so
+ * the pin lives in exactly one place. Returns undefined when absent/malformed.
+ */
+function readBundleRef(dest) {
+  const p = resolveSettingsPath(dest)
+  if (!p) return
+  try {
+    return JSON.parse(readFileSync(p, 'utf8')).bundle?.ref
+  } catch {
+    return
+  }
+}
+/**
+ * Read the member's full pinned `bundle` block (ref + cascadeSha) from the
+ * wheelhouse settings file. The lock-step verify + the `fleet:status` verb need
+ * BOTH halves — `readBundleRef` returns only the ref for the fetch default.
+ * Returns both as undefined when the file is absent / malformed.
+ */
+function readBundleConfig(dest) {
+  const p = resolveSettingsPath(dest)
+  if (!p)
+    return {
+      ref: void 0,
+      cascadeSha: void 0,
+    }
+  try {
+    const json = JSON.parse(readFileSync(p, 'utf8'))
+    return {
+      cascadeSha: json.bundle?.cascadeSha,
+      ref: json.bundle?.ref,
+    }
+  } catch {
+    return {
+      ref: void 0,
+      cascadeSha: void 0,
+    }
+  }
+}
+function readAppliedRef(dest) {
+  const p = path.join(dest, APPLIED_MARKER)
+  return existsSync(p) ? readFileSync(p, 'utf8').trim() : void 0
+}
+/**
+ * The file list the LAST applied bundle owned, or undefined when no record
+ * exists. Feeds pruneStaleFleetFiles — see APPLIED_FILES_MARKER.
+ */
+function readAppliedFiles(dest) {
+  const p = path.join(dest, APPLIED_FILES_MARKER)
+  if (!existsSync(p)) return
+  return readFileSync(p, 'utf8')
+    .split('\n')
+    .map(l => l.trim())
+    .filter(Boolean)
+}
+/**
+ * Record the manifest file list the apply just placed, replacing the previous
+ * record. Written after a successful apply only, beside the applied-ref
+ * marker.
+ */
+function writeAppliedFiles(dest, files) {
+  const p = path.join(dest, APPLIED_FILES_MARKER)
+  mkdirSync(path.dirname(p), { recursive: true })
+  writeFileSync(p, `${files.map(normalizeBundlePath).toSorted().join('\n')}\n`)
+}
+function writeAppliedRef(dest, ref) {
+  const p = path.join(dest, APPLIED_MARKER)
+  mkdirSync(path.dirname(p), { recursive: true })
+  writeFileSync(p, `${ref}\n`)
+  const legacy = path.join(dest, LEGACY_APPLIED_MARKER)
+  if (existsSync(legacy)) safeDeleteSync(legacy)
+  const flat = path.join(dest, FLAT_APPLIED_MARKER)
+  if (existsSync(flat)) safeDeleteSync(flat)
+}
+
+//#endregion
+//#region template/bootstrap/src/install-thin-prune.mts
+/**
+ * The hybrid (segment + settingsSegment) path set thinIgnoreEntries excludes
+ * from its wholly-fleet list.
  */
 function computeHybridPaths(manifest) {
   const hybridPaths = new Set(
@@ -286,24 +298,174 @@ function computeHybridPaths(manifest) {
     hybridPaths.add(normalizeBundlePath(manifest.settingsSegment.path))
   return hybridPaths
 }
+
+//#endregion
+//#region template/bootstrap/src/yaml-merge.mts
+const COL0_KEY_RE = /^[A-Za-z][\w-]*:/
 /**
- * Walk one wholly-fleet DIR root and delete any on-disk file not in `kept`.
- * Normal-ignore files (PRUNE_SKIP_NAMES) are left alone — they are local, not
- * bundle payload. Returns the count of files deleted under this root.
+ * Parse a YAML string into an ordered list of top-level key blocks. Each block
+ * owns all lines from the key line up to (not including) the next column-0 key
+ * line or EOF.
  */
-function pruneRootFiles(root, dest, kept) {
-  const dirAbs = path.join(dest, root)
-  if (!existsSync(dirAbs)) return 0
-  let pruned = 0
-  for (const rel of walkFiles(dirAbs, dest)) {
-    if (PRUNE_SKIP_NAMES.has(path.basename(rel))) continue
-    const key = normalizeBundlePath(rel)
-    if (!kept.has(key)) {
-      safeDeleteSync(path.join(dest, rel))
-      pruned += 1
-    }
+function parseYamlKeyBlocks(yaml) {
+  const lines = yaml.split('\n')
+  const blocks = []
+  let current
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]
+    if (COL0_KEY_RE.test(line)) {
+      if (current !== void 0) blocks.push(current)
+      const colonIdx = line.indexOf(':')
+      current = {
+        key: line.slice(0, colonIdx),
+        lines: [line],
+      }
+    } else if (current !== void 0) current.lines.push(line)
   }
-  return pruned
+  if (current !== void 0) blocks.push(current)
+  return blocks
+}
+const MAP_ENTRY_RE = /^(\s+)(['"]?)([^'":\n]+)\2:/
+const LIST_ITEM_RE = /^(\s+)-\s+(.*)$/
+/**
+ * Split a top-level key block's BODY lines into entry chunks. A chunk starts
+ * at a map-entry or list-item line at the block's entry indent; comment and
+ * blank lines BEFORE an entry attach to it (they document what follows);
+ * deeper-indented lines are continuations. Returns `undefined` when the body
+ * has no recognizable entries (scalar block — nothing nested to merge).
+ */
+function parseYamlEntryChunks(bodyLines) {
+  const chunks = []
+  let pending = []
+  let current
+  let entryIndent
+  for (let i = 0, { length } = bodyLines; i < length; i += 1) {
+    const line = bodyLines[i]
+    const trimmed = line.trim()
+    if (trimmed === '' || trimmed.startsWith('#')) {
+      pending.push(line)
+      continue
+    }
+    const map = MAP_ENTRY_RE.exec(line)
+    const item = map ? void 0 : LIST_ITEM_RE.exec(line)
+    const indent = map ? map[1].length : item ? item[1].length : void 0
+    if (
+      indent !== void 0 &&
+      (entryIndent === void 0 || indent === entryIndent)
+    ) {
+      entryIndent ??= indent
+      if (current !== void 0) chunks.push(current)
+      current = {
+        id: map ? `k:${map[3].trim()}` : `i:${item[2].trim()}`,
+        lines: [...pending, line],
+      }
+      pending = []
+      continue
+    }
+    if (current === void 0) return
+    current.lines.push(...pending, line)
+    pending = []
+  }
+  if (current !== void 0) {
+    current.lines.push(...pending)
+    chunks.push(current)
+  } else if (pending.length > 0) return
+  return chunks.length > 0 ? chunks : void 0
+}
+/**
+ * Merge one fleet-managed top-level key block ENTRY-SCOPED — the workspace
+ * analog of the Claude-settings splice that keeps repo hook registrations
+ * inside the fleet-owned `hooks` key. Fleet-shipped entries (present in the
+ * bundle block) take the bundle's text, comments included; member-local
+ * entries (present only in the consumer block) survive in their original
+ * order after the fleet set. Scalar-shaped blocks (`saveExact: true`) have no
+ * nested entries, so the bundle block replaces wholesale. Trailing blank lines
+ * follow the consumer block so inter-block spacing is preserved.
+ */
+function mergeYamlKeyBlock(bundleBlock, consumerBlock) {
+  const stripTrailingBlanks = lines => {
+    const out = [...lines]
+    while (out.length > 0 && out[out.length - 1].trim() === '') out.pop()
+    return out
+  }
+  const trailingBlankCount =
+    consumerBlock.lines.length - stripTrailingBlanks(consumerBlock.lines).length
+  const bundleBody = stripTrailingBlanks(bundleBlock.lines).slice(1)
+  const consumerBody = stripTrailingBlanks(consumerBlock.lines).slice(1)
+  const bundleChunks = parseYamlEntryChunks(bundleBody)
+  const consumerChunks = parseYamlEntryChunks(consumerBody)
+  if (bundleChunks === void 0 || consumerChunks === void 0)
+    return {
+      key: bundleBlock.key,
+      lines: [
+        ...stripTrailingBlanks(bundleBlock.lines),
+        ...Array.from({ length: trailingBlankCount }, () => ''),
+      ],
+    }
+  const bundleIds = new Set(bundleChunks.map(c => c.id))
+  const merged = [bundleBlock.lines[0]]
+  for (let i = 0, { length } = bundleChunks; i < length; i += 1)
+    merged.push(...bundleChunks[i].lines)
+  for (let i = 0, { length } = consumerChunks; i < length; i += 1) {
+    const chunk = consumerChunks[i]
+    if (!bundleIds.has(chunk.id)) merged.push(...chunk.lines)
+  }
+  for (let i = 0; i < trailingBlankCount; i += 1) merged.push('')
+  return {
+    key: bundleBlock.key,
+    lines: merged,
+  }
+}
+/**
+ * Merge the fleet-managed workspace sections from `bundleFleetSections` into
+ * `consumerYaml`, scoped to the keys listed in `fleetKeys` — and, within each
+ * fleet key, scoped to the ENTRIES the bundle ships (mergeYamlKeyBlock):
+ * member-local nested entries (repo-specific `catalog:`/`overrides:` pins,
+ * soak-exclude items, …) survive a refresh instead of being wholesale-dropped.
+ * Non-fleet keys (including `packages:`) are preserved byte-exact. Throws on
+ * ambiguous input.
+ */
+function mergeWorkspaceYaml(config) {
+  const { bundleFleetSections, consumerYaml, fleetKeys } = {
+    __proto__: null,
+    ...config,
+  }
+  const consumerBlocks = parseYamlKeyBlocks(consumerYaml)
+  const bundleBlocks = parseYamlKeyBlocks(bundleFleetSections)
+  const fleetKeySet = new Set(fleetKeys)
+  const consumerKeyCounts = /* @__PURE__ */ new Map()
+  for (const block of consumerBlocks)
+    if (fleetKeySet.has(block.key))
+      consumerKeyCounts.set(
+        block.key,
+        (consumerKeyCounts.get(block.key) ?? 0) + 1,
+      )
+  for (const [key, count] of consumerKeyCounts)
+    if (count > 1)
+      throw new Error(
+        `mergeWorkspaceYaml: fleet key "${key}" appears ${count} times at column 0 in consumerYaml — cannot merge safely`,
+      )
+  const bundleMap = /* @__PURE__ */ new Map()
+  for (const block of bundleBlocks) bundleMap.set(block.key, block)
+  const resultBlocks = []
+  const handledFleetKeys = /* @__PURE__ */ new Set()
+  for (const block of consumerBlocks)
+    if (fleetKeySet.has(block.key)) {
+      const bundleBlock = bundleMap.get(block.key)
+      if (bundleBlock !== void 0)
+        resultBlocks.push(mergeYamlKeyBlock(bundleBlock, block))
+      else resultBlocks.push(block)
+      handledFleetKeys.add(block.key)
+    } else resultBlocks.push(block)
+  for (const key of fleetKeys)
+    if (!handledFleetKeys.has(key)) {
+      const bundleBlock = bundleMap.get(key)
+      if (bundleBlock !== void 0) resultBlocks.push(bundleBlock)
+    }
+  return `${resultBlocks
+    .map(b => b.lines.join('\n'))
+    .join('\n')
+    .replace(/\n+$/, '')}\n`
 }
 
 //#endregion
@@ -515,6 +677,41 @@ function installFiles(filesDir, dest, manifest) {
   }
 }
 /**
+ * Untrack the bundle's GENERATED build outputs (`manifest.generatedPaths`)
+ * from the git index after placement. The bundle SHIPS these files — placement
+ * writes them to disk — while the fleet gitignore block ignores them and
+ * `generated-outputs-are-untracked` forbids TRACKING them. A member that
+ * historically committed one (bundle.cjs et al., before the ignore existed)
+ * heals on the next refresh: the file stays on disk, but leaves the index.
+ * Non-fatal by design — a non-git dest or an already-clean index is a no-op
+ * (`--ignore-unmatch`).
+ */
+function untrackGeneratedOutputs(dest, generatedPaths) {
+  if (!generatedPaths || generatedPaths.length === 0) return
+  if (!existsSync(path.join(dest, '.git'))) return
+  try {
+    execFileSync(
+      'git',
+      [
+        'rm',
+        '--cached',
+        '--quiet',
+        '--ignore-unmatch',
+        '--',
+        ...generatedPaths,
+      ],
+      {
+        cwd: dest,
+        stdio: 'ignore',
+      },
+    )
+  } catch (e) {
+    logger$3.log(
+      `install-fleet: untracking generated outputs failed (non-fatal) — ${errorMessage(e)}`,
+    )
+  }
+}
+/**
  * Apply each fleet-canonical segment: read the `.fleetblock` file, read the
  * consumer's existing file (or start with an empty string), splice the block
  * in, and write back.
@@ -665,8 +862,7 @@ function normalizeManifestEntryPath(entry) {
  * `…/fleet/` dir entry. A dir blanket also swallows any future non-bundle
  * file that lands beside the payload, hiding it from git entirely; the
  * explicit list ignores exactly what the bundle supplies and nothing else.
- * The dir-level collapse still exists for the sync-prune walk — see
- * fleetDirRoots().
+ * The sync-prune is manifest-scoped too — see pruneStaleFleetFiles.
  */
 function thinIgnoreEntries(manifest) {
   const hybridPaths = computeHybridPaths(manifest)
@@ -678,28 +874,6 @@ function thinIgnoreEntries(manifest) {
     entries.add(p)
   }
   return [...entries].toSorted()
-}
-/**
- * The wholly-fleet DIRECTORY roots — each `fleet/` tier a bundle file sits
- * under (`.claude/hooks/fleet/`, `.config/fleet/`, `scripts/fleet/`, …). The
- * sync-prune walks these so an on-disk file the current bundle dropped is
- * deleted. The `fleet/` convention guarantees each root holds only fleet
- * files (the member's own live beside it under `repo/`), so the walk can
- * never touch repo-owned content. The .gitignore block deliberately does NOT
- * use these — its entries are explicit per-file (thinIgnoreEntries).
- */
-function fleetDirRoots(manifest) {
-  const hybridPaths = computeHybridPaths(manifest)
-  const roots = /* @__PURE__ */ new Set()
-  const files = Object.keys(manifest.files)
-  for (let i = 0, { length } = files; i < length; i += 1) {
-    const p = normalizeBundlePath(files[i])
-    if (hybridPaths.has(p)) continue
-    const parts = p.split('/')
-    const fleetIdx = parts.indexOf('fleet')
-    if (fleetIdx >= 0) roots.add(`${parts.slice(0, fleetIdx + 1).join('/')}/`)
-  }
-  return [...roots].toSorted()
 }
 /**
  * Apply thin mode: write a fleet-managed `.gitignore` block listing the
@@ -747,96 +921,65 @@ function applyThinMode(config) {
     }
 }
 /**
- * Prune stale fleet files so a fetch is a true SYNC (place + prune), not just
- * an additive copy. After the bundle is placed, any on-disk file under a
- * wholly-fleet DIR root (the `…/fleet/` tiers thinIgnoreEntries collapses) that
- * the current bundle does NOT contain is deleted — so a fleet file a later
- * bundle no longer ships does not linger as cruft on a member. Only those
- * fleet-owned roots are walked; hybrid segments, carve-outs, and repo-owned
- * files live outside them and are never touched. Normal-ignore files (OS
- * noise — see pruneRootFiles) are left alone — they are local, not bundle
- * payload.
+ * Delete the manifest's TOMBSTONED paths (`removedPaths`) — files or whole
+ * dirs a past bundle shipped that the wheelhouse has since moved/retired. The
+ * applied-files prune below only covers a member whose record OWNED the old
+ * path; a fresh clone or a member whose record began after the move keeps the
+ * orphan forever (the v1.0.12 `.github/actions/fleet/lib` → `_shared` move did
+ * exactly that fleet-wide). Manifest-scoped like the prune — never a directory
+ * walk. Belt: a tombstone the current manifest ships a file at/under is
+ * skipped, so a bad producer entry can never delete freshly placed payload.
  */
-function pruneStaleFleetFiles(dest, manifest) {
+function removeTombstonedPaths(dest, manifest) {
+  const removedPaths = manifest.removedPaths
+  if (!removedPaths || removedPaths.length === 0) return 0
+  const shipped = Object.keys(manifest.files).map(rel =>
+    normalizeBundlePath(rel),
+  )
+  let removed = 0
+  for (let i = 0, { length } = removedPaths; i < length; i += 1) {
+    const rel = normalizeBundlePath(removedPaths[i])
+    if (!rel || shipped.some(f => f === rel || f.startsWith(`${rel}/`)))
+      continue
+    const abs = path.join(dest, rel)
+    if (existsSync(abs)) {
+      safeDeleteSync(abs)
+      removed += 1
+    }
+  }
+  return removed
+}
+/**
+ * Prune stale fleet files so a fetch is a true SYNC (place + prune) — scoped
+ * to what the bundle PREVIOUSLY owned. Only a file the last-applied manifest
+ * shipped (the applied-files record, see readAppliedFiles) that the current
+ * manifest no longer ships is deleted. The prune list comes from MANIFESTS,
+ * never a directory walk, so repo-owned files that merely live beside the
+ * fleet payload — per-repo EXPECTED variants like
+ * `.config/fleet/tsconfig.check.json`, `.gitkeep` seeds, cascade-only
+ * release-excluded scripts under `scripts/fleet/` — can never be collateral.
+ * With no record (fresh clone, or the first refresh that introduces the
+ * record) nothing is pruned; the record starts with this apply and the next
+ * refresh prunes precisely.
+ */
+function pruneStaleFleetFiles(dest, manifest, previousFiles) {
+  if (!previousFiles || previousFiles.length === 0) return 0
   const kept = new Set(Object.keys(manifest.files).map(normalizeBundlePath))
   for (const segment of manifest.segments ?? [])
     kept.add(normalizeBundlePath(segment.path))
   if (manifest.settingsSegment !== void 0)
     kept.add(normalizeBundlePath(manifest.settingsSegment.path))
   let pruned = 0
-  const roots = fleetDirRoots(manifest)
-  for (let r = 0, { length: rootCount } = roots; r < rootCount; r += 1)
-    pruned += pruneRootFiles(roots[r], dest, kept)
+  for (let i = 0, { length } = previousFiles; i < length; i += 1) {
+    const rel = normalizeBundlePath(previousFiles[i])
+    if (kept.has(rel)) continue
+    const abs = path.join(dest, rel)
+    if (existsSync(abs)) {
+      safeDeleteSync(abs)
+      pruned += 1
+    }
+  }
   return pruned
-}
-const SETTINGS_CANDIDATES = [
-  '.config/repo/socket-wheelhouse.json',
-  '.config/socket-wheelhouse.json',
-  '.socket-wheelhouse.json',
-]
-function resolveSettingsPath(dest) {
-  for (let i = 0, { length } = SETTINGS_CANDIDATES; i < length; i += 1) {
-    const p = path.join(dest, SETTINGS_CANDIDATES[i])
-    if (existsSync(p)) return p
-  }
-}
-const APPLIED_MARKER =
-  'node_modules/.cache/fleet/socket-wheelhouse/bundle-applied'
-const FLAT_APPLIED_MARKER =
-  'node_modules/.cache/socket-wheelhouse/bundle-applied'
-const LEGACY_APPLIED_MARKER = '.config/fleet/.bundle-applied'
-/**
- * Default bundle ref for a member — `bundle.ref` in its wheelhouse settings
- * file. Lets install-fleet (and the prepare/CI wires) omit an explicit --ref so
- * the pin lives in exactly one place. Returns undefined when absent/malformed.
- */
-function readBundleRef(dest) {
-  const p = resolveSettingsPath(dest)
-  if (!p) return
-  try {
-    return JSON.parse(readFileSync(p, 'utf8')).bundle?.ref
-  } catch {
-    return
-  }
-}
-/**
- * Read the member's full pinned `bundle` block (ref + cascadeSha) from the
- * wheelhouse settings file. The lock-step verify + the `fleet:status` verb need
- * BOTH halves — `readBundleRef` returns only the ref for the fetch default.
- * Returns both as undefined when the file is absent / malformed.
- */
-function readBundleConfig(dest) {
-  const p = resolveSettingsPath(dest)
-  if (!p)
-    return {
-      ref: void 0,
-      cascadeSha: void 0,
-    }
-  try {
-    const json = JSON.parse(readFileSync(p, 'utf8'))
-    return {
-      cascadeSha: json.bundle?.cascadeSha,
-      ref: json.bundle?.ref,
-    }
-  } catch {
-    return {
-      ref: void 0,
-      cascadeSha: void 0,
-    }
-  }
-}
-function readAppliedRef(dest) {
-  const p = path.join(dest, APPLIED_MARKER)
-  return existsSync(p) ? readFileSync(p, 'utf8').trim() : void 0
-}
-function writeAppliedRef(dest, ref) {
-  const p = path.join(dest, APPLIED_MARKER)
-  mkdirSync(path.dirname(p), { recursive: true })
-  writeFileSync(p, `${ref}\n`)
-  const legacy = path.join(dest, LEGACY_APPLIED_MARKER)
-  if (existsSync(legacy)) safeDeleteSync(legacy)
-  const flat = path.join(dest, FLAT_APPLIED_MARKER)
-  if (existsSync(flat)) safeDeleteSync(flat)
 }
 
 //#endregion
@@ -1496,7 +1639,13 @@ async function installFleet(config) {
       return 0
     }
     installFiles(filesDir, dest, manifest)
-    const prunedCount = pruneStaleFleetFiles(dest, manifest)
+    untrackGeneratedOutputs(dest, manifest.generatedPaths)
+    const prunedCount = pruneStaleFleetFiles(
+      dest,
+      manifest,
+      readAppliedFiles(dest),
+    )
+    const tombstonedCount = removeTombstonedPaths(dest, manifest)
     installSegments(segmentsDir, dest, manifest)
     const settingsResult = installSettingsSegment(segmentsDir, dest, manifest)
     if (settingsResult !== 0) return settingsResult
@@ -1509,7 +1658,9 @@ async function installFleet(config) {
         manifest,
       })
     writeAppliedRef(dest, sourceRef)
-    const prunedNote = prunedCount > 0 ? `, pruned ${prunedCount} stale` : ''
+    writeAppliedFiles(dest, Object.keys(manifest.files))
+    const prunedTotal = prunedCount + tombstonedCount
+    const prunedNote = prunedTotal > 0 ? `, pruned ${prunedTotal} stale` : ''
     logger.log(
       `install-fleet: placed ${fileCount} file(s) + ${segmentCount} segment(s)${prunedNote} from ${sourceRef} (template ${manifest.templateSha}) → ${dest}.`,
     )
@@ -1547,7 +1698,6 @@ export {
   computeSha256,
   endMarker,
   errorMessage,
-  fleetDirRoots,
   formatLockStepError,
   formatUpdateNotice,
   installFiles,
@@ -1561,17 +1711,21 @@ export {
   lockStepExitCode,
   maybeShowUpdateNotice,
   mergeWorkspaceYaml,
+  mergeYamlKeyBlock,
   normalizeBundlePath,
   normalizeManifestEntryPath,
   parseArgs,
+  parseYamlEntryChunks,
   parseYamlKeyBlocks,
   printStatusReport,
   pruneStaleFleetFiles,
+  readAppliedFiles,
   readAppliedRef,
   readBundleConfig,
   readBundleRef,
   readManifest,
   readNoticeStore,
+  removeTombstonedPaths,
   resolveLockStepState,
   resolveNewestRef,
   resolveReleaseTemplateSha,
@@ -1586,13 +1740,14 @@ export {
   tarExecutable,
   tarExtractArgs,
   thinIgnoreEntries,
+  untrackGeneratedOutputs,
   validateBundleBlock,
   validateCascadeSha,
   validateRef,
   verifyBundleFiles,
   verifySegments,
-  walkFiles,
   wirePackageJson,
+  writeAppliedFiles,
   writeAppliedRef,
   writeNoticeStore,
 }
