@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 571 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 574 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -29,11 +29,13 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/ai/enforce](./dist/ai/enforce.d.mts)
 - [@socketsecurity/lib/ai/exec](./dist/ai/exec.d.mts)
 - [@socketsecurity/lib/ai/http](./dist/ai/http.d.mts)
+- [@socketsecurity/lib/ai/json](./dist/ai/json.d.mts)
 - [@socketsecurity/lib/ai/profiles](./dist/ai/profiles.d.mts)
 - [@socketsecurity/lib/ai/role](./dist/ai/role.d.mts)
 - [@socketsecurity/lib/ai/route](./dist/ai/route.d.mts)
 - [@socketsecurity/lib/ai/route-heuristic](./dist/ai/route-heuristic.d.mts)
 - [@socketsecurity/lib/ai/spawn](./dist/ai/spawn.d.mts)
+- [@socketsecurity/lib/ai/spawn-local](./dist/ai/spawn-local.d.mts)
 - [@socketsecurity/lib/ai/subagent-status](./dist/ai/subagent-status.d.mts)
 - [@socketsecurity/lib/ai/tier](./dist/ai/tier.d.mts)
 - [@socketsecurity/lib/ai/types](./dist/ai/types.d.mts)
@@ -717,6 +719,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/stdio/header](./dist/stdio/header.d.ts): Console header/banner formatting utilities.
 - [@socketsecurity/lib/stdio/progress](./dist/stdio/progress.d.ts): Progress bar utilities for CLI applications.
 - [@socketsecurity/lib/stdio/prompts](./dist/stdio/prompts.d.ts): User prompt utilities for interactive scripts.
+- [@socketsecurity/lib/stdio/prompts-types](./dist/stdio/prompts-types.d.ts): Type definitions for the interactive prompt wrappers in `./prompts`.
 - [@socketsecurity/lib/stdio/stderr](./dist/stdio/stderr.d.ts): Standard error stream utilities.
 - [@socketsecurity/lib/stdio/stdout](./dist/stdio/stdout.d.ts): Standard output stream utilities.
 
