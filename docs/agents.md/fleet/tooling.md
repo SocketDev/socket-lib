@@ -39,6 +39,10 @@ exclude-newer = "7 days"
 
 uv is pre-1.0 (`0.x`) — adopted as a noted exception to the stable-1.0+ rule because it is de-facto stable, Astral-backed, Apache-2.0 / MIT, and ships as a single static binary. It replaces the unpinned `pip3 install --break-system-packages` pattern in Dockerfiles, which has no lockfile or soak.
 
+## ripgrep: `-r` never clusters
+
+rg's `-r` (`--replace`) takes a value, so inside a short-flag cluster it consumes the REST of the cluster as the replacement text: `rg -rln <pattern>` parses as `rg --replace 'ln' <pattern>`. Every match is rewritten to the literal text `ln` instead of listing files with line numbers, and the command still exits 0, so the corruption is easy to miss. Spell `-r` separately (`rg -l -n`), use long flags, or pass `--replace '<text>'` only when a replacement is meant. `-r` last in a cluster (`-lnr <text>`) and standalone `-r <text>` read the next argument as the replacement and are fine. Nudged by `.claude/hooks/fleet/rg-replace-flag-nudge/`.
+
 ## Reserved `scripts/` dir names
 
 Script tiers are `scripts/fleet/` + `scripts/repo/`; name any other dir for its job, never a build/output concept (`build`, `dist`, `node_modules`, `coverage`, `cache`). Bypass `Allow reserved-script-dir bypass` (`.claude/hooks/fleet/reserved-script-dir-guard/`).
@@ -105,6 +109,25 @@ Vitest `include` globs must not match `node:test` files. Mismatched runners prod
 
 `rolldown`, NOT `esbuild`. The fleet standardizes on rolldown for direct bundling (see `template/.config/rolldown/`). Transitive esbuild deps (e.g. via vitest) are unavoidable today. The rule is no _new direct_ esbuild use anywhere in the fleet.
 
+## Engine-gate folding (`engine-gate-fold`)
+
+`.config/repo/rolldown/engine-gate-fold.mts` (`createEngineGateFoldPlugin`) precomputes semver-vs-runtime engine gates in bundled (vendored) code from the `engines.node` of the package being built. Vendored deps ship gates like `useNative = node.satisfies('>=16.7.0')` (the @npmcli/fs `lib/common/node.js` shape) whose losing branch — usually a polyfill — is dead weight the bundler can't drop because the gate looks dynamic. Motivating incident: socket-packageurl-js's bundled `dist/exists.js` crashed at require-time on exactly that vendored gate.
+
+- **Statically-safe shapes only, string-literal ranges only**: `satisfies(process.version, 'R')` / `semver.satisfies(process.version, 'R')` and comparator forms `gte|gt|lte|lt(process.version, 'V')` when the callee provably binds to the `semver` package, plus `helper.satisfies('R')` when the callee resolves to a vendored node-version helper module structurally verified to wrap `semver.satisfies(process.version, range)`. Anything dynamic stays untouched.
+- **Verdicts are interval math against `engines.node`** (read once at plugin creation; the factory throws without a valid range): engines ⊆ gate-range → literal `true`; provably disjoint → literal `false`; partial overlap → untouched. Unbounded floors are honest: `>=99` under engines `>=18` is a partial overlap — a future node 99 exists in both sets — not a false fold — provable `false` comes from upper-bounded gates (`lt(process.version, '18.0.0')` under `>=18`) or bounded engines unions (`^18 || ^20` vs `>=99`).
+- **The literal lets rolldown DCE drop the dead branch** (and its polyfill imports). Every folded site is logged (module id + gate source + verdict) — silent transforms are banned.
+- **Wire it into the repo's `rolldown.config.mts` `plugins`**: `createEngineGateFoldPlugin()` (reads `engines.node` from cwd; pass `{ packageDir }` otherwise). Requires `semver` catalog-pinned in devDependencies and `define-guarded.mts` alongside (it imports its AST helpers) — the cascade delivers the file to every repo carrying `.config/repo/rolldown/define-guarded.mts` (CONDITIONAL_FILES marker).
+
+## Factory-collision guards (`factory-collision`)
+
+`.config/repo/rolldown/factory-collision.mts` guards the nested-bundle factory-collision class: re-bundling a file that is ITSELF a bundler output — a pre-bundled dependency like socket-lib's `dist/external/npm-pack.js` — carries pre-suffixed CJS factory bindings such as `require_node$2`, and rolldown's identifier deconflicter can rename another `require_node` onto exactly that pre-existing name in the same emitted scope. The later `var` declaration silently clobbers the earlier, so an unrelated binding resolves to the wrong module at runtime. Motivating incidents: socket-cli's dlx crash — Arborist's `pacote` rebound to libnpmpack via a colliding `require_lib$10` — and socket-packageurl-js's `dist/exists.js` require-time crash, where two `var require_node$2` in one scope turned `node.satisfies` into a class.
+
+Two independent guards; adopt either or both in the repo's `rolldown.config.mts` `plugins`:
+
+- **`createPrebundleRenamePlugin({ prebundlePattern })` is the fix** — the proven socket-cli mechanics, generalized. It rewrites `require_*$N` factory names inside files matching `prebundlePattern` to a `$`-free form (`require_lib$36` → `require_lib_v36`) the deconflicter can never generate, and realpath-normalizes resolved ids so a symlink-aliased prebundle (pnpm's `@socketsecurity/lib` + `lib-stable` aliases point at one real package) can't enter the graph twice and force the deconflict at all. Place it FIRST in `plugins` so its `resolveId` hook sees every resolution; custom `resolveId` hooks that hand-compute paths should return `toRealPath(p)` themselves.
+- **`createCollisionDetectorPlugin()` is the backstop** — a post-render `generateBundle` check that fails the build when any emitted chunk declares the same `var require_*` binding twice in one scope. Cheap: a regex pass filters chunks that can't collide, only suspects pay for the scope-aware AST scan. Wire it even where the rename plugin isn't adopted — a silent wrong-module rebinding is strictly worse than a red build.
+- **Delivery**: same CONDITIONAL_FILES channel as engine-gate-fold — every repo carrying `.config/repo/rolldown/define-guarded.mts` receives the file on sync.
+
 ## Compile-time defines (`INLINED_*`)
 
 Build-inlined constants use the `process.env.INLINED_*` naming convention (mirrors socket-cli: `INLINED_VERSION`, `INLINED_NAME`, …). The `INLINED_` prefix flags at a glance that a value is substituted at build time, not read from the real environment at runtime.
@@ -121,9 +144,15 @@ FORBIDDEN to maintain. Remove when encountered.
 
 ## `packageManager` field
 
-The fleet pins `packageManager` to a **forgiving floor**, `pnpm@>=<floor>` (currently `pnpm@>=11.0.5`), matching the `engines.pnpm` floor. `pnpm-workspace.yaml` sets `managePackageManagerVersions: false` plus `pmOnFail: warn`, so pnpm treats the field as a minimum hint rather than a version lock: it never switches pnpm versions and only warns on a mismatch. The exact pnpm for CI comes from the setup action (`external-tools.json`), not this field. `derivePins` (`sync-package-manager-pins.mts`) emits the floor from root `engines.pnpm`, and the cascade propagates both pins via `sync.mts package-manager --fleet`. A `packageManager` drift is always benign (`isBehindSource`) because the field is only a hint; the enforced gate is `engines.pnpm`.
+Retired — there is NO `packageManager` field, and corepack is disabled fleet-wide. `scripts/fleet/sync-package-manager-pins.mts` is the code-as-law: it derives every pin from `external-tools.json`'s `tools.{pnpm,npm}.version`, deletes any legacy `packageManager` it finds, and writes:
 
-pnpm 11 stores the integrity hash in `pnpm-lock.yaml` — a separate YAML document — rather than inline. The lockfile is the integrity source of truth, and a legacy `pnpm@<version>+sha512.<hex>` migrates on first install.
+- `devEngines.packageManager` — pnpm at the major-bounded SemVer range derived from the floor, `11.0.5` → `>=11.0.0 <12.0.0`, with `onFail: error`. This is the enforced manager pin: a mismatched pnpm is refused, and the fleet provisions pnpm out-of-band — the setup action reads `external-tools.json` in CI, local uses the racked pnpm — so nothing ever downloads a package manager on the fly.
+- `engines.pnpm` — the `>=<floor>` floor.
+- `engines.npm` — the `>=<npm-version>` floor.
+
+`pnpm-workspace.yaml` keeps `managePackageManagerVersions: false` plus `pmOnFail: warn` as a belt: pnpm's legacy `packageManager` self-check stays off and is moot without the field. Integrity needs no field-level hash either — pnpm 11 stores it in `pnpm-lock.yaml`, the integrity source of truth.
+
+Drift is directional. A pin behind a newer `external-tools.json` warns and continues — a cascade reconciles it during a rollout window, and hard-failing would block unrelated member PRs. A pin ahead of the source, or otherwise inconsistent, fails. `packageManager` removal and any `devEngines.packageManager` reshape are advisory, never a hard fail. Run the sync after a bump — `update-external-tools.mts` calls it and `pnpm run update` runs it; the `package-manager-pins-are-synced` check gates drift in CI.
 
 ## Bumping a versioned tool fleet-wide (pnpm, zizmor, sfw)
 
@@ -133,7 +162,7 @@ pnpm 11 stores the integrity hash in `pnpm-lock.yaml` — a separate YAML docume
 node scripts/repo/cascade-fleet.mts --pnpm 11.3.0 [--dry-run] [--self]
 ```
 
-The bump stage (`pipeline-stages.mts#runBump` → `tools/<tool>.mts#applyToRegistry`) downloads every platform binary from upstream, recomputes sha256 ourselves (integrity = binary-download + own-checksum, never trust in upstream-published values), writes `external-tools.json`, and commits. Tools with a `sourceDir` override (node, npm) write the wheelhouse root instead (`.node-version` / `package.json` engines).
+The bump stage (`pipeline-stages.mts#runBump` → `tools/<tool>.mts#applyToRegistry`) downloads every platform binary from upstream, recomputes sha256 ourselves (integrity = binary-download + own-checksum, never trust in upstream-published values), writes `socket-registry/.config/repo/external-tools.json`, and commits. Tools with a `sourceDir` override (node, npm) write the wheelhouse root instead (`.node-version` / `package.json` engines).
 
 **Propagation is the sync-scaffolding cascade, not this script.** external-tools.json is a cascaded file — after a bump, run the cascade to fan it out to every member. The former registry-hosted reconcile / gate / propagate stages (which pinned members to a socket-registry SHA) were retired with the socket-registry shared-source model; fleet actions now live in each repo as `.github/actions/fleet/*`, referenced by local `./` path, so there is no cross-repo pin to rewrite. (`--skip-ci-wait` / `--ci-timeout` are vestigial no-ops from the retired gate stage.)
 
@@ -225,7 +254,7 @@ start, native `docker` CLI compatibility). macOS-only; Linux dev hosts use
 the distro's native Docker/Podman and don't need it. It's a recommended
 dev convenience, not a build requirement — CI builds run on Linux runners
 with native Docker, so OrbStack only affects local Mac iteration. Repos
-that consume it pin it in their own `external-tools.json` (per-repo, not
+that consume it pin it in their own `.config/repo/external-tools.json` (per-repo, not
 template) and may wire a `brew install --cask orbstack` onboarding step.
 
 ## Local CI runs (`agent-ci`)
@@ -241,7 +270,7 @@ download + integrity-verify the pinned package through Socket Firewall):
 
 ```mts
 import { dlxPackage, executePackage } from '@socketsecurity/lib/dlx/package'
-// version resolves from the repo's external-tools.json `agent-ci` pin
+// version resolves from the repo's .config/repo/external-tools.json `agent-ci` pin
 ```
 
 **Limitations** ([compatibility](https://agent-ci.dev/compatibility)) — it
@@ -250,7 +279,7 @@ concurrency groups, and a simplified job-`if` evaluator. The fleet `ci.yml`
 is self-contained: its jobs call local `./.github/actions/fleet/*` composite
 actions (which agent-ci runs), never a cross-repo reusable workflow — so
 agent-ci runs the full lint / type / test matrix. Repos that adopt it pin
-the version in their own `external-tools.json`.
+the version in their own `.config/repo/external-tools.json`.
 
 ## npm 2FA registry ops
 

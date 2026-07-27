@@ -38,11 +38,13 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/ai/enforce`](../src/ai/enforce.ts)                 | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/exec`](../src/ai/exec.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/http`](../src/ai/http.ts)                       | _(no description)_ |
+| [`@socketsecurity/lib-stable/ai/json`](../src/ai/json.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/profiles`](../src/ai/profiles.ts)               | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/role`](../src/ai/role.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/route`](../src/ai/route.ts)                     | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/route-heuristic`](../src/ai/route-heuristic.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/spawn`](../src/ai/spawn.ts)                     | _(no description)_ |
+| [`@socketsecurity/lib-stable/ai/spawn-local`](../src/ai/spawn-local.ts)         | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/subagent-status`](../src/ai/subagent-status.ts) | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/tier`](../src/ai/tier.ts)                       | _(no description)_ |
 | [`@socketsecurity/lib-stable/ai/types`](../src/ai/types.ts)                     | _(no description)_ |
@@ -832,16 +834,17 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## stdio/
 
-| Subpath                                                                 | Description                                    |
-| ----------------------------------------------------------------------- | ---------------------------------------------- |
-| [`@socketsecurity/lib-stable/stdio/clear`](../src/stdio/clear.ts)       | Terminal clearing and cursor utilities.        |
-| [`@socketsecurity/lib-stable/stdio/divider`](../src/stdio/divider.ts)   | Console divider and separator utilities.       |
-| [`@socketsecurity/lib-stable/stdio/footer`](../src/stdio/footer.ts)     | Console footer/summary formatting utilities.   |
-| [`@socketsecurity/lib-stable/stdio/header`](../src/stdio/header.ts)     | Console header/banner formatting utilities.    |
-| [`@socketsecurity/lib-stable/stdio/progress`](../src/stdio/progress.ts) | Progress bar utilities for CLI applications.   |
-| [`@socketsecurity/lib-stable/stdio/prompts`](../src/stdio/prompts.ts)   | User prompt utilities for interactive scripts. |
-| [`@socketsecurity/lib-stable/stdio/stderr`](../src/stdio/stderr.ts)     | Standard error stream utilities.               |
-| [`@socketsecurity/lib-stable/stdio/stdout`](../src/stdio/stdout.ts)     | Standard output stream utilities.              |
+| Subpath                                                                           | Description                                                          |
+| --------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
+| [`@socketsecurity/lib-stable/stdio/clear`](../src/stdio/clear.ts)                 | Terminal clearing and cursor utilities.                              |
+| [`@socketsecurity/lib-stable/stdio/divider`](../src/stdio/divider.ts)             | Console divider and separator utilities.                             |
+| [`@socketsecurity/lib-stable/stdio/footer`](../src/stdio/footer.ts)               | Console footer/summary formatting utilities.                         |
+| [`@socketsecurity/lib-stable/stdio/header`](../src/stdio/header.ts)               | Console header/banner formatting utilities.                          |
+| [`@socketsecurity/lib-stable/stdio/progress`](../src/stdio/progress.ts)           | Progress bar utilities for CLI applications.                         |
+| [`@socketsecurity/lib-stable/stdio/prompts`](../src/stdio/prompts.ts)             | User prompt utilities for interactive scripts.                       |
+| [`@socketsecurity/lib-stable/stdio/prompts-types`](../src/stdio/prompts-types.ts) | Type definitions for the interactive prompt wrappers in `./prompts`. |
+| [`@socketsecurity/lib-stable/stdio/stderr`](../src/stdio/stderr.ts)               | Standard error stream utilities.                                     |
+| [`@socketsecurity/lib-stable/stdio/stdout`](../src/stdio/stdout.ts)               | Standard output stream utilities.                                    |
 
 ## streams/
 
