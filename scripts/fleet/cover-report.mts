@@ -7,15 +7,27 @@
  *   under the fleet's file-size cap.
  */
 
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import {
+  appendFileSync,
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  writeFileSync,
+} from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 
 import { stripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import type { CoverThresholds } from './cover/discovery.mts'
-import { REPO_ROOT } from './paths.mts'
-import type { AggregateCoverage } from './util/coverage-merge.mts'
+import { COVERAGE_FINAL_PATH, REPO_ROOT } from './paths.mts'
+import { coveredCounts } from './util/coverage-merge.mts'
+import type {
+  AggregateCoverage,
+  CoverageFileFinal,
+} from './util/coverage-merge.mts'
 import type { SuiteResult } from './cover.mts'
 
 const rootPath = REPO_ROOT
@@ -221,12 +233,39 @@ function persistSuiteFailureOutput(
   }
 }
 
+// Pull the FAILING test-file paths out of vitest's buffered output. cover runs
+// vitest buffered (runQuietCommand), so a below-threshold / test-failure cut
+// only re-emits the summary — the failing FILE names never reach the CI log
+// (only the runner's inaccessible last-failure log). Two vitest markers name a
+// failing file: the "FAIL <path>" failure header and the file-tree entry
+// "❯ <path> (N tests | M failed)". The count/threshold lines give totals, not
+// paths — so without this the gate says "2 failed" but never WHICH two. Pure +
+// exported for unit testing.
+export function extractFailingTestFiles(lines: readonly string[]): string[] {
+  const fileToken = String.raw`(\S+\.(?:test|spec)\.[cm]?[jt]sx?)`
+  const failHeader = new RegExp(String.raw`(?:^|\s)FAIL\s+${fileToken}`)
+  const failTreeEntry = new RegExp(
+    String.raw`❯\s+${fileToken}\s+\([^)]*\bfailed\)`,
+  )
+  const paths = new Set<string>()
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
+    const match = failHeader.exec(line) ?? failTreeEntry.exec(line)
+    if (match?.[1]) {
+      paths.add(match[1])
+    }
+  }
+  return [...paths].toSorted()
+}
+
 // Explain a failing suite: vitest prints its per-config coverage-threshold
 // misses (e.g. "ERROR: Coverage for branches (46.92%) does not meet global
 // threshold (49%)") to the suite's own output, which the summary display
 // filters out — a bare "Coverage failed" strands the operator without the
-// failing metric. Returns the error-ish lines from the suite output (deduped,
-// capped), falling back to the output tail; empty for a passing suite.
+// failing metric. NAMES the failing test files up front (see
+// extractFailingTestFiles), then returns the error-ish lines from the suite
+// output (deduped, capped), falling back to the output tail; empty for a
+// passing suite.
 export function buildSuiteFailureReport(
   name: string,
   result: SuiteResult,
@@ -243,20 +282,117 @@ export function buildSuiteFailureReport(
     ...new Set(
       lines.filter(line =>
         // `ERROR` keyword; vitest coverage threshold message ("does not meet"
-        // / "threshold"); vitest final summary line ("Tests N failed").
-        /\bERROR\b|does not meet|threshold|Tests\s+\d+\s+failed/i.test(line),
+        // / "threshold"); vitest final summary ("Tests N failed"); the vitest
+        // per-file failure header ("FAIL <path>") and file-tree entry
+        // ("❯ <path> (… | M failed)") that name WHICH files failed.
+        /\bERROR\b|does not meet|threshold|Tests\s+\d+\s+failed|\bFAIL\b|\|\s*\d+\s+failed\)/i.test(
+          line,
+        ),
       ),
     ),
   ]
   const detail = (errorLines.length > 0 ? errorLines : lines.slice(-maxLines))
     .slice(0, maxLines)
     .map(line => `  ${line}`)
+  const failingFiles = extractFailingTestFiles(lines)
   const dumpPath = persistSuiteFailureOutput(name, result)
   return [
     `${name} suite failed (exit ${result.exitCode}):`,
+    ...(failingFiles.length > 0
+      ? [`  failing file(s): ${failingFiles.join(', ')}`]
+      : []),
     ...detail,
     ...(dumpPath ? [`  full suite output: ${dumpPath}`] : []),
   ]
+}
+
+// The N files with the most UNCOVERED branches in the merged coverage-final
+// (skips test files + files with no branches). Pure read; returns [] on any
+// read/parse failure so the caller stays best-effort.
+export function topUncoveredBranchFiles(
+  limit: number,
+  finalPath: string = COVERAGE_FINAL_PATH,
+): Array<{ file: string; covered: number; total: number; missing: number }> {
+  let merged: Record<string, CoverageFileFinal>
+  try {
+    merged = JSON.parse(readFileSync(finalPath, 'utf8')) as Record<
+      string,
+      CoverageFileFinal
+    >
+  } catch {
+    return []
+  }
+  const rows: Array<{
+    file: string
+    covered: number
+    total: number
+    missing: number
+  }> = []
+  for (const [abs, entry] of Object.entries(merged)) {
+    const rel = normalizePath(path.relative(rootPath, abs))
+    if (rel.endsWith('.test.mts') || /(?:^|\/)test\//.test(rel)) {
+      continue
+    }
+    let total = 0
+    const branchArrs = Object.values(entry?.b ?? {})
+    for (let i = 0, { length } = branchArrs; i < length; i += 1) {
+      total += branchArrs[i]!.length
+    }
+    if (total === 0) {
+      continue
+    }
+    const { branches: covered } = coveredCounts(entry)
+    const missing = total - covered
+    if (missing > 0) {
+      rows.push({ covered, file: rel, missing, total })
+    }
+  }
+  rows.sort((a, b) => b.missing - a.missing)
+  return rows.slice(0, limit)
+}
+
+// Visibility: echo the aggregate + the top uncovered-branch files to stdout AND
+// (when running under Actions) GITHUB_STEP_SUMMARY, so a CI cover run surfaces
+// its real number + the biggest gaps. Pure logging — best-effort, never throws.
+export function emitCoverageVisibility(aggregate: AggregateCoverage): void {
+  const top = topUncoveredBranchFiles(5)
+  if (top.length > 0) {
+    logger.log('')
+    logger.log(' Top uncovered-branch files:')
+    for (let i = 0, { length } = top; i < length; i += 1) {
+      const r = top[i]!
+      logger.log(
+        `   ${r.covered}/${r.total} branches — ${r.file} (${r.missing} uncovered)`,
+      )
+    }
+  }
+  const summaryPath = process.env['GITHUB_STEP_SUMMARY']
+  if (!summaryPath) {
+    return
+  }
+  const lines = [
+    '### Aggregate code coverage (Main + Isolated)',
+    '',
+    `- Statements: ${aggregate.statements}%`,
+    `- Branches: ${aggregate.branches}%`,
+    `- Functions: ${aggregate.functions}%`,
+    `- Lines: ${aggregate.lines}%`,
+  ]
+  if (top.length > 0) {
+    lines.push('', '#### Top uncovered-branch files', '')
+    for (let i = 0, { length } = top; i < length; i += 1) {
+      const r = top[i]!
+      lines.push(
+        `- \`${r.file}\` — ${r.covered}/${r.total} branches (${r.missing} uncovered)`,
+      )
+    }
+  }
+  lines.push('')
+  try {
+    appendFileSync(summaryPath, `${lines.join('\n')}\n`)
+  } catch {
+    // Best-effort: a missing/unwritable step-summary file must not fail cover.
+  }
 }
 
 // Print the test summary, optional v8 detail table, and the coverage summary.
@@ -325,6 +461,11 @@ export function renderCodeCoverageDisplay(
     logger.log(
       `   Functions:  ${aggregateCoverage.functions}% | Lines:    ${aggregateCoverage.lines}%`,
     )
+    // Visibility: echo the aggregate + the biggest uncovered-branch files to
+    // stdout AND GITHUB_STEP_SUMMARY, so a CI cover run SHOWS its real number
+    // and the top gaps instead of only failing a threshold. Pure logging — no
+    // gating logic, best-effort (any read/write error is swallowed).
+    emitCoverageVisibility(aggregateCoverage)
   }
 
   if (typeCoveragePercent !== undefined) {

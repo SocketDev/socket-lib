@@ -6,7 +6,7 @@
  *   fleet-managed `[[permission.rules]]` block and preserves all unrelated user
  *   settings. Idempotent: re-running splices the same marked block. Credentials
  *   never belong here. Usage: node
- *   scripts/fleet/setup/setup-kimi-user-config.mts.
+ *   scripts/fleet/setup/kimi-user-config.mts.
  */
 
 import {

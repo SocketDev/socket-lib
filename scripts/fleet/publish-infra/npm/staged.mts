@@ -24,10 +24,38 @@ import {
 import { releaseBehindLiveGate } from '../release.mts'
 import { logger, rootPath, runCapture, runInherit } from '../shared.mts'
 import { withPinnedReadme } from '../pin-readme.mts'
+import { withPrunedPackManifest } from './pack-manifest.mts'
 import { isAlreadyPublished } from './registry.mts'
 import type { StageListEntry } from './shared.mts'
-import { isStagingExpected, readPackageJson } from './shared.mts'
+import { isStagingExpected } from './shared.mts'
+import {
+  packWorkspaceMemberTarball,
+  runWorkspacePublish,
+} from './staged-workspace.mts'
+import { resolveNpmWorkspaceLayout } from './workspace.mts'
+import { resolveReleaseSubject } from '../../_shared/release-subject.mts'
 import { tarExecutable } from '../../_shared/tar-executable.mts'
+
+import type { ReleaseSubject } from '../../_shared/release-subject.mts'
+
+// The README-pin bracket target for a publish subject: the pinned README is
+// the one that PACKS — the subject's, not the repo root's when
+// publishConfig.directory redirects the publish. Shared by runStaged,
+// runDirect, and the approve-time verify pack so every pack of one release
+// pins identical bytes.
+function pinTargetFor(subject: ReleaseSubject): {
+  readmePath: string
+  repository: string | { url?: string | undefined } | undefined
+  rootPath: string
+  version: string
+} {
+  return {
+    readmePath: path.relative(subject.rootPath, subject.readmePath),
+    repository: subject.repository,
+    rootPath: subject.rootPath,
+    version: subject.version,
+  }
+}
 
 /**
  * `--staged` mode: stage this package's tarball.
@@ -43,7 +71,15 @@ export async function runStaged(
   config: { dryRun: boolean },
 ): Promise<void> {
   const { dryRun } = { __proto__: null, ...config } as typeof config
-  const pkg = readPackageJson()
+  // Multi-package workspace (decmpfs, stuie): the workspace runner publishes
+  // every member in dependency order behind the lockstep + hollow gates.
+  // Single-package repos take the identical-to-before subject path below.
+  const layout = resolveNpmWorkspaceLayout(rootPath)
+  if (layout.kind === 'multi') {
+    await runWorkspacePublish('staged', tag, layout, { dryRun })
+    return
+  }
+  const pkg = resolveReleaseSubject(rootPath)
   logger.log(
     `Staging ${pkg.name}@${pkg.version} (tag=${tag})${dryRun ? ' [dry-run]' : ''}`,
   )
@@ -75,14 +111,14 @@ export async function runStaged(
     // touching the registry.
     args.push('--dry-run')
   }
-  // Pin the README's relative asset URLs to the release tag for the packed
-  // tarball only (restored right after) so the npm page's badge is immutable +
-  // matches this version instead of a moving HEAD ref. The same bracket wraps
-  // the --approve verify pack (defaultPackTarball) so the integrity gate sees
-  // identical bytes.
-  const code = await withPinnedReadme(
-    { repository: pkg.repository, rootPath, version: pkg.version },
-    () => runInherit('pnpm', args, rootPath),
+  // Pin the SUBJECT README's relative asset URLs to the release tag for the
+  // packed tarball only (restored right after) so the npm page's badge is
+  // immutable + matches this version instead of a moving HEAD ref, and prune
+  // repo-only lifecycle scripts from the manifest that packs. The same
+  // brackets wrap the --approve verify pack (defaultPackTarball) so the
+  // integrity gate sees identical bytes.
+  const code = await withPinnedReadme(pinTargetFor(pkg), () =>
+    withPrunedPackManifest(pkg.dir, () => runInherit('pnpm', args, rootPath)),
   )
   if (code !== 0) {
     logger.fail(`pnpm stage publish exited ${code}`)
@@ -118,7 +154,13 @@ export async function runDirect(
   config: { dryRun: boolean },
 ): Promise<void> {
   const { dryRun } = { __proto__: null, ...config } as typeof config
-  const pkg = readPackageJson()
+  // Multi-package workspace: same delegation as runStaged.
+  const layout = resolveNpmWorkspaceLayout(rootPath)
+  if (layout.kind === 'multi') {
+    await runWorkspacePublish('direct', tag, layout, { dryRun })
+    return
+  }
+  const pkg = resolveReleaseSubject(rootPath)
   logger.log(
     `Direct-publishing ${pkg.name}@${pkg.version} (tag=${tag})${dryRun ? ' [dry-run]' : ''}`,
   )
@@ -161,11 +203,10 @@ export async function runDirect(
   if (dryRun) {
     args.push('--dry-run')
   }
-  // Pin the README to the release tag for the published tarball only (see
-  // runStaged).
-  const code = await withPinnedReadme(
-    { repository: pkg.repository, rootPath, version: pkg.version },
-    () => runInherit('pnpm', args, rootPath),
+  // Pin the SUBJECT README to the release tag + prune repo-only lifecycle
+  // scripts for the published tarball only (see runStaged).
+  const code = await withPinnedReadme(pinTargetFor(pkg), () =>
+    withPrunedPackManifest(pkg.dir, () => runInherit('pnpm', args, rootPath)),
   )
   if (code !== 0) {
     logger.fail(`pnpm publish exited ${code}`)
@@ -195,21 +236,59 @@ export async function runDirect(
  * Pack `<name>@<version>` from the repo root and return the tarball path, or
  * undefined if the pack failed / produced no file. pnpm pack names the tarball
  * `<scope-stripped-name>-<version>.tgz` (e.g. @socketsecurity/lib@6.0.9 →
- * socketsecurity-lib-6.0.9.tgz).
+ * socketsecurity-lib-6.0.9.tgz) — from the PUBLISH SUBJECT's manifest, and
+ * writes it into the subject directory when publishConfig.directory redirects
+ * the publish. `root` is injectable for tests.
  */
 export async function defaultPackTarball(
   name: string,
   version: string,
+  root: string = rootPath,
 ): Promise<string | undefined> {
-  // Same README-pin bracket as runStaged, so the approve-time verify pack is
-  // byte-identical to the staged tarball (the integrity gate compares them).
+  // Multi-package workspace: pack the member that publishes `name` from its
+  // own directory (pnpm packs the cwd package); a name no member publishes
+  // gets the same cross-repo refusal as the single-subject path below.
+  const layout = resolveNpmWorkspaceLayout(root)
+  if (layout.kind === 'multi') {
+    return await packWorkspaceMemberTarball(layout, name, version)
+  }
+  // Refuse a cross-repo pack outright: the stage list is account-scoped, so a
+  // caller can hand this an entry staged from ANOTHER repo. Packing it here
+  // would pin the README against the wrong manifest — this repo's repository
+  // slug with the foreign entry's version — before failing anyway on the
+  // tarball-name lookup. Fail loud, with zero pack side effects. The name
+  // check runs against the SUBJECT manifest, so a redirected monorepo's
+  // private root name never trips it.
+  const subject = resolveReleaseSubject(root)
+  if (subject.name !== name) {
+    logger.fail(
+      `Refusing to pack ${name}@${version} from ${root}: this repo's ` +
+        `package is ${subject.name}. A cross-repo pack would pin the README ` +
+        `against the wrong repository/version. Run the publish flow from ` +
+        `${name}'s own repo.`,
+    )
+    return undefined
+  }
+  // Same README-pin + manifest-prune brackets as runStaged, so the
+  // approve-time verify pack is byte-identical to the staged tarball (the
+  // integrity gate compares them).
   const packed = await withPinnedReadme(
-    { repository: readPackageJson().repository, rootPath, version },
-    () => runCapture('pnpm', ['pack'], rootPath),
+    { ...pinTargetFor(subject), version },
+    () =>
+      withPrunedPackManifest(subject.dir, () =>
+        runCapture('pnpm', ['pack'], root),
+      ),
   )
   const tarballName = `${name.replace(/^@/, '').replace('/', '-')}-${version}.tgz`
-  const tarballPath = path.join(rootPath, tarballName)
-  return packed.code === 0 && existsSync(tarballPath) ? tarballPath : undefined
+  // pnpm pack writes into the subject directory under a publishConfig
+  // redirect; probe there first, then the root for belt-and-braces.
+  for (const dir of [subject.packDir, root]) {
+    const tarballPath = path.join(dir, tarballName)
+    if (packed.code === 0 && existsSync(tarballPath)) {
+      return tarballPath
+    }
+  }
+  return undefined
 }
 
 /**

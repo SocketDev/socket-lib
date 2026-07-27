@@ -16,10 +16,18 @@ import type { CheckStep } from './check-steps.mts'
 export function buildReleaseAndDocsSteps(): CheckStep[] {
   return [
     // gh-aw agentic workflows: each `<name>.md` source has a compiled
-    // `<name>.lock.yml` (what Actions runs) whose embedded body_hash matches
-    // the .md body — catches a prompt edited without `gh aw compile`. Pure
-    // node, no gh-aw dependency; vacuous pass with no agentic workflows.
+    // `<name>.lock.yml` (what Actions runs) whose embedded body_hash AND
+    // frontmatter_hash match the .md — catches a prompt OR frontmatter edited
+    // without `gh aw compile`. Pure node, no gh-aw dependency; vacuous pass
+    // with no agentic workflows.
     () => run('node', ['scripts/fleet/check/gh-aw-locks-are-current.mts']),
+    // The gh-aw compile surface is CLOSED: every gh-aw-generated file under
+    // .github/workflows — compiled locks AND compiler side-emissions like
+    // v0.83.2's agentics-maintenance.yml, tracked or untracked — maps to a
+    // declared .md source or a SANCTIONED_GHAW_EMISSIONS entry. A bare
+    // `gh aw compile` drive-by goes red with the two legal moves named:
+    // adopt via allowlist, or delete.
+    () => run('node', ['scripts/fleet/check/gh-aw-emissions-are-declared.mts']),
     // gh-aw agentic workflows: any explicit `engine.model` frontmatter pin is a
     // canonical model id (KNOWN_MODELS: pricing registry + AI_TIER). Catches a
     // workflow left on a stale id (claude-sonnet-4-5) after the tier moved — the
@@ -248,6 +256,17 @@ export function buildReleaseAndDocsSteps(): CheckStep[] {
     // no-ops in offline CI lanes + repos with no pin (the wheelhouse producer).
     releaseStep([
       'scripts/fleet/check/release-and-cascade-are-paired.mts',
+      '--quiet',
+    ]),
+    // The RELEASE CASCADE GRAPH's read side: every published fleet package's
+    // downstream declarations — consumer catalog pins, the fleet catalog,
+    // socket-registry's manifest.json purl entry — track its registry latest,
+    // with lag going red and the owed action named. Registry reads → release
+    // tier; sibling-clone/offline gaps skip honestly; wheelhouse-only in
+    // effect (members have no template/base → vacuous pass). Graph:
+    // scripts/fleet/lib/release-cascade.mts.
+    releaseStep([
+      'scripts/fleet/check/cascade-followups-are-settled.mts',
       '--quiet',
     ]),
     // Persisted release pins store ONLY exact canonical values — the belt twin of

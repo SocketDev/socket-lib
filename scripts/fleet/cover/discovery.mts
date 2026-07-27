@@ -21,9 +21,14 @@ export const BUILD_ENTRY_CANDIDATES: readonly string[] = [
   'scripts/build.mts',
   'scripts/bundle.mts',
   // Repo-owned build pipelines that moved under scripts/repo/ (a member that
-  // separated its bespoke build from the cascaded scripts/fleet/ — e.g.
-  // socket-lib's scripts/repo/bundle.mts). Probed last so a top-level entry
-  // still wins.
+  // separated its bespoke build from the cascaded scripts/fleet/ after the
+  // scripts/repo migration — e.g. socket-sdk-js's scripts/repo/build.mts,
+  // socket-lib's scripts/repo/bundle.mts). Without these, a repo whose build
+  // entry lives here resolves NONE, cover falls back to instrumenting sources
+  // directly, and the merge reports 0.00% → a false threshold miss that fails
+  // the release gate. Probed last (build before bundle, mirroring the
+  // top-level order) so a top-level entry still wins.
+  'scripts/repo/build.mts',
   'scripts/repo/bundle.mts',
 ]
 
@@ -67,17 +72,20 @@ export interface ResolvedSuite {
   runExclude: string[]
 }
 
-// Read the repo-owned cover config (`.config/repo/cover.json`, legacy
-// `.config/cover.json` fallback). Returns an empty config when absent so
-// callers get fleet defaults. A malformed file is reported and treated as
-// empty rather than crashing the run. `repoDir` defaults to the live repo
-// root; tests pass a fixture dir.
+// Read the repo's cover config from the `cover` section of socket-wheelhouse.json
+// (`.config/repo/socket-wheelhouse.json`) — folded in from the former standalone
+// cover.json per config-segregation. Returns an empty config when the file or
+// section is absent so callers get fleet defaults. A malformed file is reported
+// and treated as empty rather than crashing the run. `repoDir` defaults to the
+// live repo root; tests pass a fixture dir.
 export function readCoverConfig(repoDir: string): CoverConfig {
-  const configPath = [
-    path.join(repoDir, '.config', 'repo', 'cover.json'),
-    path.join(repoDir, '.config', 'cover.json'),
-  ].find(p => existsSync(p))
-  if (!configPath) {
+  const configPath = path.join(
+    repoDir,
+    '.config',
+    'repo',
+    'socket-wheelhouse.json',
+  )
+  if (!existsSync(configPath)) {
     return {}
   }
   try {
@@ -88,7 +96,11 @@ export function readCoverConfig(repoDir: string): CoverConfig {
       )
       return {}
     }
-    return parsed as CoverConfig
+    const cover = (parsed as { cover?: unknown | undefined }).cover
+    if (!cover || typeof cover !== 'object') {
+      return {}
+    }
+    return cover as CoverConfig
   } catch (e) {
     logger.warn(
       `Failed to parse ${path.relative(repoDir, configPath)}: ${errorMessage(e)} — ignoring`,

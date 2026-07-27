@@ -35,6 +35,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import {
   BADGE_PLACEHOLDER,
   badgeAssetPath,
+  hasUnrecognizedCoverageBadge,
   parseBadgeSvgValue,
   readCoveragePct,
   readmeBadgeForm,
@@ -48,7 +49,7 @@ const FIX_HINT =
   // oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- socket-lint FP: the string already targets node_modules/.cache/ — it's a human-facing message, and the rule's string matcher can't see the node_modules/ prefix on the same path.
   '  Fix: run `node scripts/fleet/gen/coverage-badge.mts` and commit the refreshed badge (it regenerates from node_modules/.cache/fleet/coverage/coverage-summary.json).'
 
-export interface CoverageBadgeCheckOptions {
+export interface CoverageBadgeCheckConfig {
   // Suppress the success line (check --all batch mode).
   quiet?: boolean | undefined
   // The repo to check. main() passes REPO_ROOT; tests pass a tmp repo.
@@ -61,16 +62,28 @@ export interface CoverageBadgeCheckOptions {
  * 1 — stale or broken.
  */
 export function checkCoverageBadgeIsCurrent(
-  config: CoverageBadgeCheckOptions,
+  config: CoverageBadgeCheckConfig,
 ): number {
   const cfg = { __proto__: null, quiet: false, ...config }
   const readmePath = path.join(cfg.repoRoot, 'README.md')
   if (!existsSync(readmePath)) {
     return 0
   }
-  const form = readmeBadgeForm(readFileSync(readmePath, 'utf8'))
+  const readme = readFileSync(readmePath, 'utf8')
+  const form = readmeBadgeForm(readme)
   if (!form) {
-    // No badge in either form — a repo that opted out.
+    if (hasUnrecognizedCoverageBadge(readme)) {
+      // A coverage-badge-looking line the recognizer can't see (e.g. a
+      // hand-written shields.io HTML <img>). Treating it as an opt-out let a
+      // stale hand-written percent ship on a public README while this gate
+      // stayed green — fail loud instead.
+      logger.fail(
+        '[check-coverage-badge-is-current] README carries a coverage badge in an unrecognized form — the freshness gate cannot verify it. Rewrite it as `![Coverage](assets/repo/badges/coverage.svg)` and run gen/coverage-badge (which migrates it to the dimensioned <img> form).',
+      )
+      logger.error(FIX_HINT)
+      return 1
+    }
+    // No badge at all — a repo that opted out.
     return 0
   }
   const pct = readCoveragePct(cfg.repoRoot)

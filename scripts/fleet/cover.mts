@@ -13,12 +13,19 @@
  *   --summary hide the detailed v8 table, show only the summary.
  */
 
+// Imported FIRST: pins a per-run-unique FLEET_COVERAGE_SCRATCH_DIR into the env
+// BEFORE paths.mts derives COVERAGE_SCRATCH_DIR from it, so concurrent cover
+// runs can't wipe each other's scratch (the cover-gate wobble). Side-effect
+// import — keep it above every import that transitively loads paths.mts.
+import './cover/scratch-isolation.mts'
+
 import { performance } from 'node:perf_hooks'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
@@ -36,6 +43,7 @@ import {
   collectChurnNotes,
   collectLiveActorNotes,
   executeTestSuites,
+  IncompleteChildCaptureError,
   reexecWithHeapHeadroom,
   resolveRunPlan,
   runQuietCommand,
@@ -51,7 +59,7 @@ import {
   resolveConfiguredUnitBudgetMs,
 } from './cover-report.mts'
 import { ensurePinnedNode } from './lib/ensure-node.mts'
-import { REPO_ROOT } from './paths.mts'
+import { COVERAGE_SCRATCH_DIR, REPO_ROOT } from './paths.mts'
 import type { AggregateCoverage } from './util/coverage-merge.mts'
 import {
   mergeCoverageFinal,
@@ -290,7 +298,8 @@ export async function main(): Promise<void> {
       // by default — the 'shared' tier always runs, 'isolated' only when its
       // suite is resolved. Flip on with FLEET_COVER_STRICT_TIERS=1 once a
       // supervised `cover` run confirms the wheelhouse emits every resolved
-      // tier; step 2 promotes this gate into `.config/repo/cover.json`.
+      // tier; step 2 promotes this gate into the `cover` section of
+      // `.config/repo/socket-wheelhouse.json`.
       const expectedTiers =
         process.env['FLEET_COVER_STRICT_TIERS'] === '1'
           ? ['shared', ...(isolatedVitestArgs ? ['isolated'] : [])]
@@ -300,7 +309,18 @@ export async function main(): Promise<void> {
       try {
         await convertChildrenCoverage()
       } catch (e) {
-        logger.warn(`Subprocess coverage conversion failed: ${errorMessage(e)}`)
+        if (e instanceof IncompleteChildCaptureError) {
+          // Provably-incomplete capture — fail LOUD rather than merge a partial
+          // (which would silently under-report the aggregate on runner timing).
+          logger.error(
+            `Subprocess coverage capture incomplete: ${errorMessage(e)}`,
+          )
+          exitCode = exitCode === 0 ? 1 : exitCode
+        } else {
+          logger.warn(
+            `Subprocess coverage conversion failed: ${errorMessage(e)}`,
+          )
+        }
       }
       let aggregateCoverage: AggregateCoverage | undefined
       try {
@@ -330,7 +350,7 @@ export async function main(): Promise<void> {
       })
 
       // Gate on configured thresholds: any metric under its minimum fails the
-      // run. Repos with no thresholds in cover.json are report-only.
+      // run. Repos with no thresholds in their cover config are report-only.
       const thresholdFailures = checkThresholds(
         aggregateCoverage,
         coverConfig.thresholds,
@@ -402,5 +422,11 @@ if (isMainModule(import.meta.url)) {
     })
     .finally(() => {
       unregisterActiveRun()
+      // Remove this run's private scratch dir. With a fixed shared path the
+      // next run's startup wipe reclaimed it; a per-run-unique dir has no next
+      // run to clean it, so it must clean up after itself or leak into tmpdir.
+      // COVERAGE_DIR (the persisted summary/final the badge + gate read) lives
+      // elsewhere and is untouched.
+      safeDeleteSync(COVERAGE_SCRATCH_DIR, { force: true, recursive: true })
     })
 }

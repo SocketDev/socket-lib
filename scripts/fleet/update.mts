@@ -1,20 +1,20 @@
 /**
  * Update: two-pass taze to apply the fleet's maturity policy correctly.
  *
- * Pass 1: default config (.config/fleet/taze.config.mts) — non-Socket deps
- * respect maturityPeriod: 7.
+ * Pass 1: third-party deps — soak-gated, Socket scopes and the pinned dev
+ * toolchain excluded.
  *
- * Pass 2: CLI-flag override — Socket-owned scopes only, maturityPeriod: 0.
- * taze's config auto-discovery is path-based and doesn't support a --config
- * override, so the second pass uses `--include <scopes> --maturity- period 0`
- * flags instead of a second config file.
+ * Pass 2: Socket-owned scopes only, no cooldown.
+ *
+ * The full policy rides CLI flags: taze only discovers a root-level
+ * `taze.config.<ext>`, never `.config/fleet/taze.config.mts`, so the config
+ * file documents the policy while the flag lists in
+ * scripts/fleet/constants/taze-passes.mts enforce it — including
+ * `--include-locked`, without which taze silently skips every exact catalog
+ * pin. See that module for the per-flag rationale.
  *
  * Pass 3: pnpm install to refresh the lockfile against the updated
  * package.json.
- *
- * SOCKET_SCOPES is the single shared constant (scripts/fleet/constants/
- * socket-scopes.mts) — the same one .config/fleet/taze.config.mts imports, so
- * the two can't drift (was previously hand-copied in both, "MUST match").
  *
  * This is a reference script. Consuming repos can drop it into their own
  * scripts/ dir and wire it in via a `"update": "node scripts/fleet/update.mts"`
@@ -27,11 +27,42 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { SOAK_DAYS } from './constants/soak.mts'
-import { SOCKET_SCOPES } from './constants/socket-scopes.mts'
+import {
+  TAZE_PASS_SOCKET_ARGS,
+  TAZE_PASS_THIRD_PARTY_ARGS,
+} from './constants/taze-passes.mts'
 import { FLEET_CATALOG_YAML, PNPM_WORKSPACE_YAML, REPO_ROOT } from './paths.mts'
 import { applyStableAliasReconcile } from './lib/stable-alias.mts'
 import { collectPackumentFailures } from './lib/taze-output.mts'
 import { scanRepoForTelemetry } from './lib/telemetry-scan.mts'
+import {
+  applyFleetPinLockstep,
+  applyOverridePinLockstep,
+} from './update/fleet-pins.mts'
+import {
+  findStalePatchKeysInFile,
+  formatStalePatchKeysError,
+} from './update/patched-deps.mts'
+
+// Canonical homes of the fleet-owned pins (wheelhouse-only; absent in member
+// repos, where the lockstep appliers skip them): the fleet catalog template
+// and the sync-scaffolding override-pin manifest.
+const TEMPLATE_FLEET_CATALOG_YAML = path.join(
+  REPO_ROOT,
+  'template',
+  'base',
+  '.config',
+  'fleet',
+  'pnpm-workspace.fleet.yaml',
+)
+const OVERRIDE_PIN_MANIFEST = path.join(
+  REPO_ROOT,
+  'scripts',
+  'repo',
+  'sync-scaffolding',
+  'manifest',
+  'catalog-overrides.mts',
+)
 
 const logger = getDefaultLogger()
 
@@ -87,27 +118,17 @@ interface Step {
 }
 
 const steps: Step[] = [
-  /* Pass 1 — third-party deps, respects the 7-day cooldown.
-   *
-   * `--maturity-period 7` MUST be passed on the CLI even though
-   * the config file (.config/fleet/taze.config.mts) sets the same
-   * value. Taze's CLI default for this flag is 0, and CLI
-   * defaults override config — without this flag, the cooldown
-   * is silently disabled. */
+  // Pass 1 — third-party deps, soak-gated. The arg list lives in
+  // constants/taze-passes.mts so the integration tests exercise the exact
+  // invocation this script spawns; see that module for the per-flag rationale.
   {
-    args: ['--maturity-period', '7', '--write'],
+    args: [...TAZE_PASS_THIRD_PARTY_ARGS],
     cmd: path.join(REPO_ROOT, 'node_modules', '.bin', 'taze'),
     tazePass: true,
   },
-  /* Pass 2 — Socket deps, no cooldown. --include is comma-separated. */
+  // Pass 2 — Socket deps, no cooldown.
   {
-    args: [
-      '--include',
-      SOCKET_SCOPES.join(','),
-      '--maturity-period',
-      '0',
-      '--write',
-    ],
+    args: [...TAZE_PASS_SOCKET_ARGS],
     cmd: path.join(REPO_ROOT, 'node_modules', '.bin', 'taze'),
     tazePass: true,
   },
@@ -149,18 +170,57 @@ async function main(): Promise<void> {
         '(version lookups failed after a retry).',
     )
     logger.error(
-      '  Where: taze version resolution (fast-npm-meta endpoint npm.antfu.dev, 5s hard timeout).',
+      '  Where: taze version resolution (registry packument fetch via the single-registry patch, hard request timeout).',
     )
     logger.error(
       '  Saw: lookup timeouts/failures; wanted: every dependency checked against its latest soaked version.',
     )
     logger.error(
-      '  Fix: check egress to npm.antfu.dev (or the network), then re-run `pnpm run update`.',
+      '  Fix: check registry egress (and that the taze single-registry patch applied — `pnpm install`), then re-run `pnpm run update`.',
     )
     for (let i = 0, { length } = list; i < length; i += 1) {
       logger.error(`  ✗ ${list[i]!}`)
     }
     process.exitCode = 1
+  }
+
+  // Pass 3a.0 — fleet-pin lockstep. The taze passes bump the LIVE
+  // pnpm-workspace.yaml, but a fleet-canonical pin's source of truth is the
+  // wheelhouse template catalog + the sync-scaffolding override-pin manifest —
+  // a live-only bump loses at the next cascade, which splices the old version
+  // straight back (svgo, vite, iconv-lite, lru-cache, string-width all bounced
+  // this way). Mirror every fleet-owned bump into the canonical files in the
+  // same wave so the update engine and the cascade agree. Only newer versions
+  // mirror (the template→live direction belongs to the cascade); differing
+  // drift that can't be mirrored is warned, never silently dropped.
+  if (process.exitCode !== 1) {
+    const pinResults = applyFleetPinLockstep(PNPM_WORKSPACE_YAML, [
+      FLEET_CATALOG_YAML,
+      TEMPLATE_FLEET_CATALOG_YAML,
+    ])
+    const overrideResult = applyOverridePinLockstep(
+      PNPM_WORKSPACE_YAML,
+      OVERRIDE_PIN_MANIFEST,
+    )
+    if (overrideResult) {
+      pinResults.push(overrideResult)
+    }
+    for (let i = 0, { length } = pinResults; i < length; i += 1) {
+      const r = pinResults[i]!
+      const rel = path.relative(REPO_ROOT, r.file)
+      for (let j = 0, jl = r.mirrored.length; j < jl; j += 1) {
+        const m = r.mirrored[j]!
+        logger.info(
+          `update: fleet-pin lockstep ${rel} '${m.name}' ${m.canonicalValue} → ${m.liveValue} (${m.blockKey})`,
+        )
+      }
+      for (let j = 0, jl = r.skipped.length; j < jl; j += 1) {
+        const s = r.skipped[j]!
+        logger.warn(
+          `update: fleet-pin drift NOT mirrored to ${rel} — '${s.name}' live ${s.liveValue} vs canonical ${s.canonicalValue} (${s.reason}); reconcile via the cascade.`,
+        )
+      }
+    }
   }
 
   // Pass 3a — reconcile `-stable` aliases, THEN resync the lockfile. A pass-2
@@ -175,14 +235,7 @@ async function main(): Promise<void> {
       PNPM_WORKSPACE_YAML,
       FLEET_CATALOG_YAML,
       path.join(REPO_ROOT, 'template', 'base', 'pnpm-workspace.yaml'),
-      path.join(
-        REPO_ROOT,
-        'template',
-        'base',
-        '.config',
-        'fleet',
-        'pnpm-workspace.fleet.yaml',
-      ),
+      TEMPLATE_FLEET_CATALOG_YAML,
     ]
     const reconciled = applyStableAliasReconcile(catalogFiles)
     for (let i = 0, { length } = reconciled; i < length; i += 1) {
@@ -195,9 +248,20 @@ async function main(): Promise<void> {
         )
       }
     }
-    const { ok } = await run('pnpm', ['install'])
-    if (!ok) {
-      process.exitCode = process.exitCode || 1
+    // Stale-patch gate: a bump that leaves a `patchedDependencies` key on the
+    // old version strands the very install below (ERR_PNPM_UNUSED_PATCH) — and
+    // a half-state referencing a nonexistent patch file once got committed.
+    // Fail loud BEFORE the lockfile resync with the exact re-key instructions;
+    // never silently bump past a keyed patch.
+    const stalePatchKeys = findStalePatchKeysInFile(PNPM_WORKSPACE_YAML)
+    if (stalePatchKeys.length > 0) {
+      logger.fail(formatStalePatchKeysError(stalePatchKeys))
+      process.exitCode = 1
+    } else {
+      const { ok } = await run('pnpm', ['install'])
+      if (!ok) {
+        process.exitCode = process.exitCode || 1
+      }
     }
   }
 
