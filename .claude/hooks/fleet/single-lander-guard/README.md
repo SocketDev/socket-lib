@@ -14,15 +14,14 @@ entangle a repo's live tree when more than one lander touches it at once.
   while `<repo>/.git` holds an `index.lock`. The lock means another git process
   is mid-operation; piling on races the lock and can entangle the live tree.
 
-**Why — the 2026-07-27 incident:** a background land-watcher was armed to merge
-branches onto wheelhouse main the instant the co-session primary went clean. A
-concurrent MANUAL land ran at the same window. Both fired and raced on
-`.git/index.lock`: the manual `git stash push` failed on the lock, but the
-script still ran a blind `git stash pop`, which popped `stash@{0}` — a STALE
-co-session stash — into the live tree, leaving `UU` conflict markers in
-`pnpm-workspace` files. This guard makes both halves of that impossible at the
-Bash layer, so NO path — script, loop, or manual — can blind-pop or pile a
-destructive land onto a repo with an active git process.
+**Why:** a background land-watcher armed to merge branches onto main the
+instant the co-session primary goes clean can fire in the same window as a
+MANUAL land. Both race on `.git/index.lock`: the manual `git stash push` fails
+on the lock, but the script still runs a blind `git stash pop`, which pops
+`stash@{0}` — a STALE co-session stash — into the live tree, leaving `UU`
+conflict markers in workspace files. This guard makes both halves of that
+impossible at the Bash layer, so NO path — script, loop, or manual — can
+blind-pop or pile a destructive land onto a repo with an active git process.
 
 **Pure decision:** `decideLandGuard(command, { indexLockPresent })` returns
 `{ blocked, rule, op }`. It is exhaustively unit-tested without touching the
