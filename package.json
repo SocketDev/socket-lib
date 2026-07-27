@@ -2642,6 +2642,11 @@
       "types": "./dist/process/lock-types.d.ts",
       "default": "./dist/process/lock-types.js"
     },
+    "./process/open-url": {
+      "source": "./src/process/open-url.ts",
+      "types": "./dist/process/open-url.d.ts",
+      "default": "./dist/process/open-url.js"
+    },
     "./process/spawn/child": {
       "source": "./src/process/spawn/child.ts",
       "types": "./dist/process/spawn/child.d.ts",
@@ -2656,6 +2661,11 @@
       "source": "./src/process/spawn/kill-tree.ts",
       "types": "./dist/process/spawn/kill-tree.d.ts",
       "default": "./dist/process/spawn/kill-tree.js"
+    },
+    "./process/spawn/pty": {
+      "source": "./src/process/spawn/pty.ts",
+      "types": "./dist/process/spawn/pty.d.ts",
+      "default": "./dist/process/spawn/pty.js"
     },
     "./process/spawn/stdio": {
       "source": "./src/process/spawn/stdio.ts",

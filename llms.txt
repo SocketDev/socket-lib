@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 574 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 576 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -610,9 +610,11 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/process/lock-instance](./dist/process/lock-instance.d.ts): Singleton `processLock` instance — the canonical cross-cutting lock manager.
 - [@socketsecurity/lib/process/lock-manager](./dist/process/lock-manager.d.ts): `ProcessLockManager` — the class that owns active locks, touch timers, and the exit-handler registration.
 - [@socketsecurity/lib/process/lock-types](./dist/process/lock-types.d.ts): Public type surface for `process/lock-*` modules — the `ProcessLockOptions` bag accepted by `processLock.acquire` and `processLock.withLock`.
+- [@socketsecurity/lib/process/open-url](./dist/process/open-url.d.ts): Open a URL in the platform's default browser.
 - [@socketsecurity/lib/process/spawn/child](./dist/process/spawn/child.d.ts): Child process spawning utilities with cross-platform support.
 - [@socketsecurity/lib/process/spawn/errors](./dist/process/spawn/errors.d.ts): Spawn error classification and enhancement.
 - [@socketsecurity/lib/process/spawn/kill-tree](./dist/process/spawn/kill-tree.d.ts): Cross-platform process-tree termination.
+- [@socketsecurity/lib/process/spawn/pty](./dist/process/spawn/pty.d.ts): Zero-dependency PTY runner: run a command under a pseudo-terminal using the system `script` binary, no `node-pty` and no native addon.
 - [@socketsecurity/lib/process/spawn/stdio](./dist/process/spawn/stdio.d.ts): Stdio configuration helpers for `spawn` callers.
 - [@socketsecurity/lib/process/spawn/timeout](./dist/process/spawn/timeout.d.ts): Platform-aware spawn-timeout scaling.
 - [@socketsecurity/lib/process/spawn/types](./dist/process/spawn/types.d.ts): Public type surface for `spawn/*` modules.
