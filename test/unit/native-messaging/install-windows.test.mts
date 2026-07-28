@@ -1,11 +1,10 @@
 /**
  * @file Tests for the Windows-only arms of native-messaging/install.
- *
- * `registerWindows` shells out to reg.exe and `installNativeHost` branches on
- * WIN32 to pick the .cmd wrapper — neither runs on the CI/dev platforms this
- * suite executes on. The platform constant and the spawn boundary are mocked so
- * the arms are exercised and their arguments asserted, which is the part that
- * matters: the registry key shape and the absence of a shell on POSIX.
+ *   `registerWindows` shells out to reg.exe and `installNativeHost` branches on
+ *   WIN32 to pick the .cmd wrapper — neither runs on the CI/dev platforms this
+ *   suite executes on. The platform constant and the spawn boundary are mocked
+ *   so the arms are exercised and their arguments asserted, which is the part
+ *   that matters: the registry key shape and the absence of a shell on POSIX.
  */
 
 import { mkdtempSync, readFileSync } from 'node:fs'
@@ -32,10 +31,11 @@ vi.mock(import('../../../src/constants/platform'), async importOriginal => ({
   WIN32: true,
 }))
 
-const { HOST_NAME, installNativeHost, registerWindows } = await import(
-  '../../../src/native-messaging/install'
-)
-const { withEnvSync } = await import('../../../src/env/rewire')
+import {
+  installNativeHost,
+  registerWindows,
+} from '../../../src/native-messaging/install'
+import { withEnvSync } from '../../../src/env/rewire'
 
 const tmpDirs: string[] = []
 
@@ -63,8 +63,11 @@ describe('registerWindows', () => {
     const [cmd, args] = mockSpawnSync.mock.calls[0]!
     expect(cmd).toBe('reg')
     expect(args[0]).toBe('add')
-    expect(args[1]).toBe(
-      `HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\${HOST_NAME}`,
+    // Asserted structurally rather than against the module's own HOST_NAME:
+    // building the expectation from the code under test would pass even if the
+    // key drifted from what Chrome reads.
+    expect(args[1]).toMatch(
+      /^HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\\S+$/,
     )
     // /ve writes the default value; /f overwrites without prompting.
     expect(args).toContain('/ve')

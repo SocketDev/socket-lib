@@ -1,11 +1,10 @@
 /**
  * @file Tests for ai/worktree's tryGit throw paths.
- *
- * tryGit has three failure shapes: git exits non-zero (covered against a real
- * repo in the isolated suite), the spawn itself throws a SpawnError, and the
- * spawn throws something else entirely. The last two cannot be produced by a
- * real git invocation — a missing binary or a malformed spawn — so the spawn
- * boundary is mocked here rather than left uncovered.
+ *   tryGit has three failure shapes: git exits non-zero (covered against a real
+ *   repo in the isolated suite), the spawn itself throws a SpawnError, and the
+ *   spawn throws something else entirely. The last two cannot be produced by a
+ *   real git invocation — a missing binary or a malformed spawn — so the spawn
+ *   boundary is mocked here rather than left uncovered.
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
@@ -17,7 +16,7 @@ vi.mock(import('../../../src/process/spawn/child'), async importOriginal => ({
   spawnSync: mockSpawnSync,
 }))
 
-const { tryGit } = await import('../../../src/ai/worktree.mts')
+import { tryGit } from '../../../src/ai/worktree.mts'
 
 beforeEach(() => {
   mockSpawnSync.mockReset()
@@ -72,7 +71,7 @@ describe('tryGit — spawn throws', () => {
     // which is a distinct path from a non-zero exit.
     mockSpawnSync.mockReturnValue({
       error: new Error('ENOENT'),
-      status: null,
+      status: undefined,
       stderr: '',
       stdout: '',
     })

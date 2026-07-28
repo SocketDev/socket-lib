@@ -1,10 +1,10 @@
 /**
- * @file Tests for native-messaging/install's refusal and Linux arms.
- *
- * Three branches the running platform/runtime cannot produce: the too-old-Node
- * refusal (the suite runs on a supported Node by definition), the missing-home
- * failure, and the Linux XDG layout. The runtime and platform constants are
- * mocked so each is exercised where it would otherwise be dead.
+ * @file Tests for native-messaging/install's refusal and Linux arms. Three
+ *   branches the running platform/runtime cannot produce: the too-old-Node
+ *   refusal — the suite runs on a supported Node by definition — plus the
+ *   missing-home failure and the Linux XDG layout. The runtime and platform
+ *   constants are mocked so each is exercised where it would otherwise be
+ *   dead.
  */
 
 import { mkdtempSync } from 'node:fs'
@@ -27,9 +27,12 @@ vi.mock(import('../../../src/constants/platform'), async importOriginal => ({
   WIN32: false,
 }))
 
-const { assertNodeStripTypesSupported, chromeManifestDirs, installNativeHost } =
-  await import('../../../src/native-messaging/install')
-const { withEnvSync } = await import('../../../src/env/rewire')
+import {
+  assertNodeStripTypesSupported,
+  chromeManifestDirs,
+  installNativeHost,
+} from '../../../src/native-messaging/install'
+import { withEnvSync } from '../../../src/env/rewire'
 
 const tmpDirs: string[] = []
 
@@ -46,7 +49,7 @@ function fakeHome(): string {
 }
 
 /**
- * Run `fn` with XDG_CONFIG_HOME set to `value` (or removed when undefined),
+ * Run `fn` with XDG_CONFIG_HOME set to `value`, or removed when undefined,
  * restoring whatever was there before. XDG is read straight off process.env by
  * the module, so it cannot go through the env rewire.
  */
@@ -127,9 +130,9 @@ describe('chromeManifestDirs on Linux', () => {
     withEnvSync({ HOME: home, USERPROFILE: home }, () => {
       withXdg(undefined, () => {
         const dirs = chromeManifestDirs()
-        expect(
-          dirs.every(d => d.startsWith(path.join(home, '.config'))),
-        ).toBe(true)
+        expect(dirs.every(d => d.startsWith(path.join(home, '.config')))).toBe(
+          true,
+        )
       })
     })
   })
