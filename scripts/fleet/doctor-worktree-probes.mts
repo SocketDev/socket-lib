@@ -1,4 +1,4 @@
-/**
+/*
  * @file Fleet doctor — worktree hygiene probes. Two checks that need FS + a
  *   possible reinstall, kept out of doctor.mts's dispatcher so it stays under
  *   the file-size cap:
