@@ -95,7 +95,7 @@ export function callsUnmockedAi(content: string): boolean {
 // adding any `spawnAiAgent(` call to a properly-mocked suite would false-block.
 // The whole-file read is the authority for the mock, the payload for the call.
 export function fileAlreadyMocks(filePath: string): boolean {
-  const onDisk = safeReadFileSync(filePath, 'utf8')
+  const onDisk = safeReadFileSync(filePath)
   return typeof onDisk === 'string'
     ? /\bvi\s*\.\s*mock\s*\(/.test(stripStringLiterals(onDisk))
     : false

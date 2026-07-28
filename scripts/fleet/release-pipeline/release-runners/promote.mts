@@ -9,6 +9,7 @@
 
 import { existsSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
+import process from 'node:process'
 
 import { hashTarball } from '../../lib/verify-release-hashes.mts'
 import { formatReleaseGapFailure } from '../../_shared/release-gap-recovery.mts'
@@ -18,6 +19,21 @@ import type { RunnerSeams, StageOutcome } from '../seams.mts'
 import type { ReleaseChecksums, StageReceipt } from '../state.mts'
 
 // ── separate explicit step: approve ────────────────────────────────────────
+
+// `pnpm stage approve` prompts with an interactive multi-select. Without a TTY
+// the prompt takes no input, prints "Nothing selected; exiting", and exits 0 —
+// so a non-TTY run promoted NOTHING while this step minted a "public on npm"
+// receipt. The registry-liveness gate on the release stage caught it, but only
+// after the false receipt was already written. Refuse up front instead: a
+// promote that cannot receive a selection is not a promote.
+export const NO_TTY_APPROVE_DETAIL =
+  'approve needs an interactive terminal.\n' +
+  '  What:  the promote is an interactive multi-select plus browser web-OTP 2FA.\n' +
+  '  Where: this channel has no TTY, so the prompt receives no selection,\n' +
+  '         reports "Nothing selected; exiting", and exits 0 having promoted nothing.\n' +
+  '  Saw:   stdin/stdout are not a TTY; wanted a real terminal.\n' +
+  '  Fix:   run `node scripts/fleet/publish-pipeline.mts --approve` in a terminal\n' +
+  '         directly (not through an agent/CI channel). The step is idempotent.'
 
 /**
  * Approve: promote the staged package to public. A SEPARATE explicit
@@ -32,10 +48,16 @@ import type { ReleaseChecksums, StageReceipt } from '../state.mts'
 export async function runApproveStep(config: {
   cwd: string
   dryRun: boolean
+  isTty?: boolean | undefined
   seams?: RunnerSeams | undefined
 }): Promise<StageOutcome> {
   const cfg = { __proto__: null, ...config } as typeof config
   const seams = resolveSeams(cfg.seams)
+  const isTty =
+    cfg.isTty ?? Boolean(process.stdin.isTTY && process.stdout.isTTY)
+  if (!cfg.dryRun && !isTty) {
+    return { detail: NO_TTY_APPROVE_DETAIL, status: 'failed' }
+  }
   const args = ['scripts/fleet/npm-publish.mts', '--approve', '--no-release']
   if (cfg.dryRun) {
     args.push('--dry-run')
