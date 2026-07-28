@@ -3399,7 +3399,8 @@
     "weekly-update": "node scripts/fleet/weekly-update.mts",
     "weekly-update:ci": "node scripts/fleet/weekly-update-workflow.mts run",
     "type": "node node_modules/typescript/bin/tsc --noEmit -p .config/fleet/tsconfig.check.json",
-    "socket-wheelhouse:emit-schema": "node scripts/fleet/socket-wheelhouse-emit-schema.mts"
+    "socket-wheelhouse:emit-schema": "node scripts/fleet/socket-wheelhouse-emit-schema.mts",
+    "mcp:reset": "node scripts/fleet/mcp-reset.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
