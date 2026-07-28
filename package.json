@@ -3412,7 +3412,7 @@
     "oxfmt": "catalog:",
     "oxlint": "catalog:",
     "oxlint-tsgolint": "catalog:",
-    "p-map": "7.0.5",
+    "p-map": "7.0.6",
     "pacote": "21.5.1",
     "picomatch": "4.0.5",
     "playwright-core": "catalog:",
