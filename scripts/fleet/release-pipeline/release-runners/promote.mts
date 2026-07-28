@@ -13,6 +13,10 @@ import process from 'node:process'
 
 import { hashTarball } from '../../lib/verify-release-hashes.mts'
 import { formatReleaseGapFailure } from '../../_shared/release-gap-recovery.mts'
+import {
+  buildPtyInvocation,
+  NON_INTERACTIVE_RENDER_ENV,
+} from '../../publish-infra/shared.mts'
 import { readPkg, resolveSeams } from '../seams.mts'
 
 import type { RunnerSeams, StageOutcome } from '../seams.mts'
@@ -35,30 +39,6 @@ export const NO_TTY_APPROVE_DETAIL =
   '  Fix:   add --yes to approve every eligible staged entry without the prompt\n' +
   '         (the run is wrapped in a PTY so npm still opens the browser for 2FA),\n' +
   '         or run the same command in a terminal directly. Either is idempotent.'
-
-/**
- * Wrap `node <args>` in a pseudo-terminal so npm believes it has a TTY and runs
- * its native open-the-browser-and-poll web-OTP flow instead of erroring EOTP.
- * Same zero-dependency mechanism as `npm-web-auth.mts`: BSD/macOS `script -q
- * /dev/null <cmd>`, util-linux `script -q -c '<cmd>' /dev/null`. Returns
- * undefined on win32, where `script` does not exist — there the caller runs
- * unwrapped and npm's own flow applies.
- */
-export function buildApprovePtyInvocation(
-  platform: NodeJS.Platform,
-  nodeArgs: readonly string[],
-): { args: string[]; command: string } | undefined {
-  if (platform === 'win32') {
-    return undefined
-  }
-  if (platform === 'linux') {
-    const inner = ['node', ...nodeArgs]
-      .map(token => `'${token.replaceAll("'", `'\\''`)}'`)
-      .join(' ')
-    return { args: ['-q', '-c', inner, '/dev/null'], command: 'script' }
-  }
-  return { args: ['-q', '/dev/null', 'node', ...nodeArgs], command: 'script' }
-}
 
 /**
  * Approve: promote the staged package to public. A SEPARATE explicit
@@ -99,10 +79,17 @@ export async function runApproveStep(config: {
   // it has one. On a real TTY npm drives its own flow, so run unwrapped.
   const pty =
     !cfg.dryRun && !isTty
-      ? buildApprovePtyInvocation(cfg.platform ?? process.platform, args)
+      ? buildPtyInvocation(cfg.platform ?? process.platform, 'node', args)
       : undefined
+  // The PTY re-enables the child's spinners; force plain rendering so the
+  // scan gate's progress display cannot flood the captured stream.
   const code = pty
-    ? await seams.runInherit(pty.command, pty.args, cfg.cwd)
+    ? await seams.runInherit(
+        pty.command,
+        pty.args,
+        cfg.cwd,
+        NON_INTERACTIVE_RENDER_ENV,
+      )
     : await seams.runInherit('node', args, cfg.cwd)
   if (code !== 0) {
     return {

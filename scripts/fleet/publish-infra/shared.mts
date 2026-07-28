@@ -63,10 +63,13 @@ export function runInherit(
   cmd: string,
   args: string[],
   cwd: string,
+  env?: NodeJS.ProcessEnv | undefined,
 ): Promise<number> {
   return new Promise((resolve, reject) => {
     const childPromise = spawn(cmd, args, {
       cwd,
+      // Only override when the caller supplies one; absent = inherit.
+      ...(env ? { env: { ...process.env, ...env } } : {}),
       shell: WIN32,
       stdio: 'inherit',
     })
@@ -92,24 +95,51 @@ export function runInherit(
  * `script(1)`'s pseudo-terminal. Passthrough when stdio is already a TTY, and
  * on Windows (no script(1) there — Windows runs stay interactive-only).
  */
-export function runInheritTty(
+export function buildPtyInvocation(
+  platform: NodeJS.Platform,
   cmd: string,
-  args: string[],
-  cwd: string,
-): Promise<number> {
-  if (process.stdin.isTTY || WIN32) {
-    return runInherit(cmd, args, cwd)
+  args: readonly string[],
+): { args: string[]; command: string } | undefined {
+  if (platform === 'win32') {
+    return undefined
   }
-  if (process.platform === 'darwin') {
+  if (platform === 'darwin') {
     // BSD script: `script -q /dev/null <cmd> <args…>` runs cmd directly.
-    return runInherit('script', ['-q', '/dev/null', cmd, ...args], cwd)
+    return { args: ['-q', '/dev/null', cmd, ...args], command: 'script' }
   }
   // util-linux script: the command goes through `-c` as a single shell
   // string — single-quote each arg (POSIX '\'' escape for embedded quotes).
   const quoted = [cmd, ...args]
     .map(a => `'${a.replace(/'/g, `'\\''`)}'`)
     .join(' ')
-  return runInherit('script', ['-qec', quoted, '/dev/null'], cwd)
+  return { args: ['-qec', quoted, '/dev/null'], command: 'script' }
+}
+
+// A PTY makes the child believe a human is watching, which is what keeps npm's
+// browser web-OTP alive — but it also re-enables every spinner and redraw the
+// child suppresses when piped. The Socket scan gate's progress display wrote
+// 2.6 GB of frames into a captured PTY in ten minutes. These are the standard
+// signals for "render once, plainly"; none of them relax a gate, and the
+// publish path keys provenance off GITHUB_ACTIONS, not CI.
+export const NON_INTERACTIVE_RENDER_ENV: NodeJS.ProcessEnv = {
+  CI: '1',
+  NO_COLOR: '1',
+  TERM: 'dumb',
+}
+
+export function runInheritTty(
+  cmd: string,
+  args: string[],
+  cwd: string,
+  env?: NodeJS.ProcessEnv | undefined,
+): Promise<number> {
+  if (process.stdin.isTTY || WIN32) {
+    return runInherit(cmd, args, cwd, env)
+  }
+  const pty = buildPtyInvocation(process.platform, cmd, args)
+  return pty
+    ? runInherit(pty.command, pty.args, cwd, env)
+    : runInherit(cmd, args, cwd, env)
 }
 
 /**

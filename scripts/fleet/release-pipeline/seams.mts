@@ -102,7 +102,12 @@ export interface RunnerSeams {
       ) => Promise<{ stdout: string; code: number }>)
     | undefined
   runInherit?:
-    | ((cmd: string, args: string[], cwd: string) => Promise<number>)
+    | ((
+        cmd: string,
+        args: string[],
+        cwd: string,
+        env?: NodeJS.ProcessEnv | undefined,
+      ) => Promise<number>)
     | undefined
   sleep?: ((ms: number) => Promise<void>) | undefined
   verifyEntry?: ((entry: StageListEntry) => Promise<boolean>) | undefined
@@ -134,7 +139,12 @@ export interface ResolvedSeams {
     args: string[],
     cwd: string,
   ) => Promise<{ stdout: string; code: number }>
-  runInherit: (cmd: string, args: string[], cwd: string) => Promise<number>
+  runInherit: (
+    cmd: string,
+    args: string[],
+    cwd: string,
+    env?: NodeJS.ProcessEnv | undefined,
+  ) => Promise<number>
   sleep: (ms: number) => Promise<void>
   verifyEntry: (entry: StageListEntry) => Promise<boolean>
 }
