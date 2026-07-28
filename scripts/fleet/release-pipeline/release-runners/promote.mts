@@ -80,8 +80,7 @@ export async function runApproveStep(config: {
 }): Promise<StageOutcome> {
   const cfg = { __proto__: null, ...config } as typeof config
   const seams = resolveSeams(cfg.seams)
-  const isTty =
-    cfg.isTty ?? Boolean(process.stdin.isTTY && process.stdout.isTTY)
+  const isTty = cfg.isTty ?? seams.isTty
   // Without a TTY the multi-select takes no input and exits 0 having promoted
   // nothing. `--yes` replaces the selection outright, so it is the one way a
   // terminal-less run can still be a real promote.
@@ -113,12 +112,31 @@ export async function runApproveStep(config: {
       status: 'failed',
     }
   }
-  return {
-    detail: cfg.dryRun
-      ? '[dry-run] approve preview (no promote)'
-      : 'staged package approved — public on npm',
-    status: 'passed',
+  if (cfg.dryRun) {
+    return {
+      detail: '[dry-run] approve preview (no promote)',
+      status: 'passed',
+    }
   }
+  // Exit 0 is NOT proof of a promote. Three ways this step has exited clean
+  // having published nothing: the multi-select taking no input off a terminal,
+  // a browser 2FA that was never approved, and `script`'s status not always
+  // being the child's. The registry is the only authority — read it before
+  // minting a receipt, because a passing receipt is what the release stage
+  // trusts AND what makes a later --approve skip the promote entirely.
+  const pkg = readPkg(cfg.cwd)
+  if (!(await seams.registryLive(pkg.name, pkg.version))) {
+    return {
+      detail:
+        `approve exited 0 but ${pkg.name}@${pkg.version} is NOT on the registry — nothing was promoted.\n` +
+        `  Where: the approve subprocess returned success; the registry read disagrees.\n` +
+        `  Saw:   the version is unresolvable; wanted it live and public.\n` +
+        `  Fix:   likely the browser 2FA was never completed (the promote waits on it).\n` +
+        `         Re-run --approve and finish the 2FA in the browser it opens.`,
+      status: 'failed',
+    }
+  }
+  return { detail: 'staged package approved — public on npm', status: 'passed' }
 }
 
 // ── final stage: tag + immutable GH release (cut LAST) ─────────────────────
