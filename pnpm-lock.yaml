@@ -239,8 +239,8 @@ catalogs:
       specifier: 7.0.0-dev.20260510.1
       version: 7.0.0-dev.20260510.1
     '@ultrathink/acorn.rs.wasm':
-      specifier: 0.0.1
-      version: 0.0.1
+      specifier: 0.1.1
+      version: 0.1.1
     '@ultrathink/acorn.wasm':
       specifier: npm:@ultrathink/acorn-wasm@0.0.1
       version: 0.0.1
@@ -1235,7 +1235,7 @@ importers:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1397,7 +1397,7 @@ importers:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1607,7 +1607,7 @@ importers:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1733,7 +1733,7 @@ importers:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1934,7 +1934,7 @@ importers:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
 
   .claude/hooks/fleet/overeager-staging-guard:
     dependencies:
@@ -2000,13 +2000,13 @@ importers:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
 
   .claude/hooks/fleet/path-regex-normalize-nudge:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2057,7 +2057,7 @@ importers:
         version: '@socketsecurity/lib@6.3.0(typescript@7.0.2)'
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2115,7 +2115,7 @@ importers:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
 
   .claude/hooks/fleet/prefer-pipx-over-pip-guard:
     dependencies:
@@ -2660,7 +2660,7 @@ importers:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
-        version: 0.0.1
+        version: 0.1.1
       regjsparser:
         specifier: 'catalog:'
         version: 0.13.2
@@ -2726,6 +2726,8 @@ importers:
   .config/fleet/oxlint-plugin/fleet/no-options-param-mutation: {}
 
   .config/fleet/oxlint-plugin/fleet/no-package-manager-auto-update-reenable: {}
+
+  .config/fleet/oxlint-plugin/fleet/no-parenthetical-aside: {}
 
   .config/fleet/oxlint-plugin/fleet/no-placeholders: {}
 
@@ -4345,8 +4347,8 @@ packages:
     resolution: {integrity: sha512-XAYEvamnSuvhLxQm5eXl31dxMmh+fhhJrZDOY70siPU46feNF9In5utVjhzskezBoqRaSn7/QlbMcZSTd4KE7A==}
     engines: {node: '>=18'}
 
-  '@ultrathink/acorn.rs.wasm@0.0.1':
-    resolution: {integrity: sha512-XZLeVZKgcswjnBqHD/jfdAxS+/8wUwShxPjJjTmJD9CtHwZ8sb/XNWYt0oGfUErX+YzzJfX9JCd+gWTmkw6/cQ==}
+  '@ultrathink/acorn.rs.wasm@0.1.1':
+    resolution: {integrity: sha512-oL0uqC5cROkhhVqeGQ4h0CeGYPwkc+tu/dPyfUcmdA2tKpa0o9x5L5L+nu/FeWsqMoO/OjAqHQDCUF0bqVNVwQ==}
     engines: {node: '>=18'}
 
   '@vitest/coverage-v8@4.1.10':
@@ -7814,7 +7816,7 @@ snapshots:
 
   '@ultrathink/acorn-wasm@0.0.1': {}
 
-  '@ultrathink/acorn.rs.wasm@0.0.1': {}
+  '@ultrathink/acorn.rs.wasm@0.1.1': {}
 
   '@vitest/coverage-v8@4.1.10(vitest@4.1.10)':
     dependencies:

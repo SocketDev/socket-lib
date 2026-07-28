@@ -426,6 +426,34 @@ describe.sequential('runOne', () => {
     expect(called).toBe(false)
   })
 
+  test('reports an error when the ff-only merge is rejected', async () => {
+    // Base moves ahead while the worktree commits, so the histories diverge and
+    // `merge --ff-only` refuses. The run is not merged and carries the error.
+    const wt = worktreeFor('wt-diverge')
+    const settled = await runOne(
+      'item',
+      0,
+      'agent/diverge',
+      wt,
+      repo,
+      'main',
+      'never',
+      async (_item, ctx) => {
+        writeFileSync(path.join(ctx.cwd, 'branch.txt'), 'from worktree')
+        sh(ctx.cwd, 'git add branch.txt')
+        sh(ctx.cwd, 'git commit -q -m "feat: worktree side"')
+        // Diverge the base AFTER the worktree committed.
+        writeFileSync(path.join(repo, 'base.txt'), 'from base')
+        sh(repo, 'git add base.txt')
+        sh(repo, 'git commit -q -m "feat: base side"')
+        return 'done'
+      },
+    )
+    expect(settled.merged).toBe(false)
+    expect(settled.status).toBe('rejected')
+    expect(String(settled.error)).toMatch(/git merge --ff-only failed/)
+  })
+
   test('cleanup "always" removes the worktree after a clean run', async () => {
     const wt = worktreeFor('wt-always')
     const settled = await runOne(
