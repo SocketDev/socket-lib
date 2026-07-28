@@ -229,6 +229,85 @@ export function changelogHasVersionSection(
 }
 
 /**
+ * Every `## <version>` heading in `changelog`, newest first. `[Unreleased]` and
+ * any non-version heading are skipped — only real version sections are listed.
+ */
+export function changelogVersionSections(changelog: string): string[] {
+  const found: string[] = []
+  const lines = changelog.split('\n')
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
+    if (!line.startsWith('## ')) {
+      continue
+    }
+    const version = /^##\s+\[?v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)/.exec(line)?.[1]
+    if (version) {
+      found.push(version)
+    }
+  }
+  return found
+}
+
+/**
+ * `changelog` with the section for `version` removed (heading through the line
+ * before the next `## ` heading, or EOF). Returns the input unchanged when no
+ * such section exists.
+ */
+export function removeChangelogVersionSection(
+  changelog: string,
+  version: string,
+): string {
+  const lines = changelog.split('\n')
+  const start = lines.findIndex(line => {
+    if (!line.startsWith('## ')) {
+      return false
+    }
+    const rest = line.slice(3).trim().replace(/^\[/, '').replace(/^v/, '')
+    return (
+      rest.startsWith(version) && !/^[0-9.]/.test(rest.slice(version.length))
+    )
+  })
+  if (start === -1) {
+    return changelog
+  }
+  let end = lines.length
+  for (let i = start + 1, { length } = lines; i < length; i += 1) {
+    if (lines[i]!.startsWith('## ')) {
+      end = i
+      break
+    }
+  }
+  return [...lines.slice(0, start), ...lines.slice(end)].join('\n')
+}
+
+/**
+ * Drop every version section the release never actually shipped.
+ *
+ * A section is a DRAFT when its version is newer than the last release: it was
+ * written, then superseded before it ever published (a re-cut at a different
+ * number, a rejected staging entry, a release that stopped at approve).
+ *
+ * `isDraft` is injected so the pruning stays pure. Callers pass a
+ * base-relative predicate (`v => gt(v, base)`) rather than a tag lookup:
+ * plenty of real history predates the tagging convention, so treating every
+ * untagged section as a draft would delete shipped entries.
+ */
+export function dropUnreleasedChangelogSections(
+  changelog: string,
+  isDraft: (version: string) => boolean,
+): { dropped: string[]; text: string } {
+  const dropped: string[] = []
+  let text = changelog
+  for (const version of changelogVersionSections(changelog)) {
+    if (isDraft(version)) {
+      dropped.push(version)
+      text = removeChangelogVersionSection(text, version)
+    }
+  }
+  return { dropped, text }
+}
+
+/**
  * Insert a new CHANGELOG section above the first existing `## ` version heading
  * (after the file's intro). When the file has no version sections yet, append
  * after a trailing blank line. IDEMPOTENT per version: when the changelog
@@ -743,7 +822,37 @@ async function main(): Promise<void> {
   // sandbox), so `new Date()` is available.
   const date = new Date().toISOString().slice(0, 10)
   const changelogPath = path.join(rootPath, 'CHANGELOG.md')
-  const existingChangelog = readFileSync(changelogPath, 'utf8')
+  let existingChangelog = readFileSync(changelogPath, 'utf8')
+
+  // Reclaim stale draft sections before deciding anything. A section for a
+  // version NEWER than the last release never shipped: it is a draft this bump
+  // owns, written then superseded before it published (a re-cut at a different
+  // number, a rejected staging entry, a release that stopped at approve).
+  //
+  // Gauged against the release BASE, not tag presence: plenty of real history
+  // predates the tagging convention, and treating every untagged section as a
+  // draft would delete shipped entries. Nothing at or below the base is ever
+  // touched.
+  //
+  // Why this matters: leaving drafts behind wedges the release.
+  // `changelog-is-commit-derived` wants the entry to carry every commit since
+  // the last tag, while a bump that finds an existing section for its target
+  // reports "already applied" and writes nothing — so the entry can never be
+  // completed and the only way out is hand-editing a script-owned file.
+  const reclaimed = dropUnreleasedChangelogSections(existingChangelog, v =>
+    gt(v, base),
+  )
+  if (reclaimed.dropped.length) {
+    logger.log(
+      `Reclaiming ${reclaimed.dropped.length} unreleased CHANGELOG draft ` +
+        `section(s) above ${base}: ${reclaimed.dropped.join(', ')}.`,
+    )
+    existingChangelog = reclaimed.text
+    // A dry-run previews the reclaimed text without touching the file.
+    if (!dryRun) {
+      writeFileSync(changelogPath, existingChangelog)
+    }
+  }
 
   // The whole release chain bumps EXACTLY ONCE. When the CHANGELOG already
   // carries the section for nextVersion and package.json already reads it,
