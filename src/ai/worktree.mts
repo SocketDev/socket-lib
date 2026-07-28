@@ -294,8 +294,22 @@ export function tryGit(
   ...args: string[]
 ): { ok: boolean; output: string } {
   try {
-    const output = git(cwd, ...args)
-    return { ok: true, output }
+    // spawnSync RESOLVES a non-zero exit rather than throwing, so the status
+    // has to be read here. Routing through `git()` instead would discard it and
+    // report every failure as `{ ok: true, output: '' }` — which made a failed
+    // `worktree add` look like a created worktree, and a failed
+    // `merge --ff-only` get reported as merged.
+    const result = spawnSync('git', args, {
+      cwd,
+      stdio: 'pipe',
+      stdioString: true,
+    })
+    const stdout = String(result.stdout ?? '').trim()
+    if (result.status !== 0 || result.error) {
+      const stderr = String(result.stderr ?? '').trim()
+      return { ok: false, output: stderr || stdout }
+    }
+    return { ok: true, output: stdout }
   } catch (e) {
     if (isSpawnError(e)) {
       return { ok: false, output: String(e.stderr ?? e.stdout ?? '') }

@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
@@ -9,6 +9,7 @@ import {
   git,
   hasCommittedChanges,
   hasStagedOrUnstaged,
+  runOne,
   spawnAiAgentsInWorktrees,
   tryGit,
 } from '../../src/ai/worktree.mts'
@@ -77,14 +78,25 @@ describe.sequential('tryGit', () => {
     expect(r.output).toContain(path.basename(repo))
   })
 
-  // Note: the inner `git()` helper does NOT throw on non-zero exit (it just
-  // returns the trimmed stdout, which may be empty). So tryGit's `ok=false`
-  // branch only fires when spawnSync itself throws — which happens when the
-  // git binary is missing or when invocation arguments are malformed. We
-  // can't reliably trigger those from a unit test without mocking the
-  // spawn boundary. The success-path coverage from the first test plus the
-  // integration use inside spawnAiAgentsInWorktrees (covered below) is
-  // sufficient.
+  test('ok=false when git exits non-zero', () => {
+    // Regression: spawnSync RESOLVES a non-zero exit instead of throwing, so
+    // reading only stdout reported every failure as `{ ok: true, output: '' }`.
+    // That made a failed `worktree add` look like a created worktree and a
+    // failed `merge --ff-only` get reported as merged.
+    const r = tryGit(repo, 'rev-parse', '--verify', 'no-such-ref')
+    expect(r.ok).toBe(false)
+  })
+
+  test('ok=false surfaces stderr as the output', () => {
+    const r = tryGit(repo, 'checkout', 'no-such-branch')
+    expect(r.ok).toBe(false)
+    expect(r.output.length).toBeGreaterThan(0)
+  })
+
+  test('ok=false for an unknown subcommand', () => {
+    const r = tryGit(repo, 'definitely-not-a-git-command')
+    expect(r.ok).toBe(false)
+  })
 })
 
 describe.sequential('hasCommittedChanges', () => {
@@ -312,5 +324,173 @@ describe.sequential('spawnAiAgentsInWorktrees', () => {
     )
     expect(results[0]!.status).toBe('fulfilled')
     expect(results[0]!.value).toBe('ok')
+  })
+})
+
+describe.sequential('runOne', () => {
+  // runOne owns one item's whole worktree lifecycle: add → run → merge →
+  // clean up. Each arm is driven against a real repo, since the decisions it
+  // makes (merged? cleaned up?) are readable only from git's actual state.
+
+  function worktreeFor(name: string): string {
+    return path.join(tmpRoot, name)
+  }
+
+  test('merges a worktree whose callback committed, and reports it', async () => {
+    const wt = worktreeFor('wt-merge')
+    const settled = await runOne(
+      'item',
+      0,
+      'agent/merge',
+      wt,
+      repo,
+      'main',
+      'always',
+      async (_item, ctx) => {
+        writeFileSync(path.join(ctx.cwd, 'added.txt'), 'content')
+        sh(ctx.cwd, 'git add added.txt')
+        sh(ctx.cwd, 'git commit -q -m "feat: add a file"')
+        return 'done'
+      },
+    )
+    expect(settled.status).toBe('fulfilled')
+    expect(settled.value).toBe('done')
+    expect(settled.merged).toBe(true)
+    // The commit is on the base repo's main after the ff-only merge.
+    expect(git(repo, 'log', '--oneline', '-1')).toContain('add a file')
+  })
+
+  test('passes the item, index, branch and cwd to the callback', async () => {
+    const wt = worktreeFor('wt-ctx')
+    let seen: Record<string, unknown> = {}
+    await runOne(
+      { id: 7 },
+      3,
+      'agent/ctx',
+      wt,
+      repo,
+      'main',
+      'always',
+      async (item, ctx) => {
+        seen = { branch: ctx.branch, cwd: ctx.cwd, index: ctx.index, item }
+        return undefined
+      },
+    )
+    expect(seen['item']).toEqual({ id: 7 })
+    expect(seen['index']).toBe(3)
+    expect(seen['branch']).toBe('agent/ctx')
+    expect(seen['cwd']).toBe(wt)
+  })
+
+  test('rejects without merging when the callback throws', async () => {
+    const wt = worktreeFor('wt-throw')
+    const boom = new Error('callback exploded')
+    const settled = await runOne(
+      'item',
+      0,
+      'agent/throw',
+      wt,
+      repo,
+      'main',
+      'always',
+      async () => {
+        throw boom
+      },
+    )
+    expect(settled.status).toBe('rejected')
+    expect(settled.error).toBe(boom)
+    expect(settled.merged).toBe(false)
+    // A failed run is KEPT so the operator can inspect it.
+    expect(settled.cleanup).toBe('kept')
+  })
+
+  test('rejects when the worktree cannot be created', async () => {
+    // The base branch does not exist, so `git worktree add` fails before the
+    // callback ever runs.
+    let called = false
+    const settled = await runOne(
+      'item',
+      0,
+      'agent/no-base',
+      worktreeFor('wt-nobase'),
+      repo,
+      'no-such-branch',
+      'always',
+      async () => {
+        called = true
+        return 'unreachable'
+      },
+    )
+    expect(settled.status).toBe('rejected')
+    expect(String(settled.error)).toMatch(/git worktree add failed/)
+    expect(called).toBe(false)
+  })
+
+  test('cleanup "always" removes the worktree after a clean run', async () => {
+    const wt = worktreeFor('wt-always')
+    const settled = await runOne(
+      'item',
+      0,
+      'agent/always',
+      wt,
+      repo,
+      'main',
+      'always',
+      async () => 'ok',
+    )
+    expect(settled.cleanup).toBe('removed')
+    expect(existsSync(wt)).toBe(false)
+  })
+
+  test('cleanup "on-empty" removes a worktree that produced nothing', async () => {
+    const wt = worktreeFor('wt-empty')
+    const settled = await runOne(
+      'item',
+      0,
+      'agent/empty',
+      wt,
+      repo,
+      'main',
+      'on-empty',
+      async () => 'ok',
+    )
+    expect(settled.cleanup).toBe('removed')
+    expect(existsSync(wt)).toBe(false)
+  })
+
+  test('cleanup "on-empty" keeps a worktree with uncommitted work', async () => {
+    // Uncommitted changes are the operator's, so an on-empty pass leaves them.
+    const wt = worktreeFor('wt-dirty')
+    const settled = await runOne(
+      'item',
+      0,
+      'agent/dirty',
+      wt,
+      repo,
+      'main',
+      'on-empty',
+      async (_item, ctx) => {
+        writeFileSync(path.join(ctx.cwd, 'scratch.txt'), 'wip')
+        return 'ok'
+      },
+    )
+    expect(settled.cleanup).toBe('kept')
+    expect(existsSync(wt)).toBe(true)
+  })
+
+  test('cleanup "never" keeps the worktree even on a clean run', async () => {
+    const wt = worktreeFor('wt-never')
+    const settled = await runOne(
+      'item',
+      0,
+      'agent/never',
+      wt,
+      repo,
+      'main',
+      'never',
+      async () => 'ok',
+    )
+    expect(settled.cleanup).toBe('kept')
+    expect(existsSync(wt)).toBe(true)
   })
 })
