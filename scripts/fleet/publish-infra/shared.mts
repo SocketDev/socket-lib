@@ -120,14 +120,15 @@ export function buildPtyInvocation(
 // child suppresses when piped. The Socket scan gate's progress display wrote
 // 2.6 GB of frames into a captured PTY in ten minutes.
 //
-// Deliberately NOT `CI=1`, the usual way to ask for plain output: pnpm reads it
-// as "no human here" and refuses the web-OTP challenge outright, so the approve
-// exits 1 before printing a line — the exact interactivity the PTY exists to
-// preserve. `TERM=dumb` is the signal that suppresses cursor addressing without
-// claiming the session is unattended.
+// Two obvious knobs are wrong here, both learned the hard way:
+//   - `CI=1` — pnpm reads it as "no human here" and refuses the web-OTP
+//     challenge, killing the interactivity the PTY exists to preserve.
+//   - `TERM=dumb` — under script(1) it drives `process.stdout.columns` to 0,
+//     and width-aware rendering dies on that before printing a line.
+// NO_COLOR is the safe one: it strips the per-character truecolor escapes that
+// made up the bulk of that 2.6 GB while leaving the terminal usable.
 export const NON_INTERACTIVE_RENDER_ENV: NodeJS.ProcessEnv = {
   NO_COLOR: '1',
-  TERM: 'dumb',
 }
 
 export function runInheritTty(
