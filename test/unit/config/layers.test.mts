@@ -65,7 +65,12 @@ describe('mergeConfigArray', () => {
 
   it('returns an empty array when no layer carries it', () => {
     expect(mergeConfigArray([], 'exclude')).toEqual([])
-    expect(mergeConfigArray([{ other: [1] }], 'exclude')).toEqual([])
+    // A layer shaped for a DIFFERENT key contributes nothing.
+    const others: Array<{
+      exclude?: string[] | undefined
+      other?: number[] | undefined
+    }> = [{ other: [1] }]
+    expect(mergeConfigArray(others, 'exclude')).toEqual([])
   })
 
   it('preserves duplicates — merging is concat, not union', () => {
