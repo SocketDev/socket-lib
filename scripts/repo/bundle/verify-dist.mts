@@ -7,7 +7,7 @@
  *   loudly and locally instead of becoming an opaque downstream test failure.
  *   The check is a real parse: `new vm.Script(src)` for CJS / a
  *   `SourceTextModule`-free `--check`-equivalent via the V8 compile cache. We
- *   use `node --check <file>` per file, it parses without executing, which
+ *   use `node --check <file>` per file (it parses without executing), which
  *   catches truncation, encoding corruption, and partial writes. Cheap: parse
  *   only, no eval, no module graph.
  */
@@ -42,7 +42,7 @@ async function collectJsFiles(dir: string): Promise<string[]> {
 }
 
 /**
- * Syntax-check one file with `node --check`, parse-only, no execution. Returns
+ * Syntax-check one file with `node --check` (parse-only, no execution). Returns
  * the stderr on failure, or undefined on success.
  */
 async function checkFile(file: string): Promise<string | undefined> {

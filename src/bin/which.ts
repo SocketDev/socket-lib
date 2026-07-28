@@ -30,8 +30,8 @@ import type { WhichOptions } from './types'
  * Find an executable in the system PATH asynchronously.
  *
  * This function resolves binary names to their full paths by searching the
- * system PATH. It should only be used for binary names, not paths. If the
- * input is already a path, absolute or relative, it will be returned as-is
+ * system PATH. It should only be used for binary names (not paths). If the
+ * input is already a path (absolute or relative), it will be returned as-is
  * without PATH resolution.
  *
  * Binary name vs. path detection:
@@ -63,7 +63,7 @@ export async function which(
   binName: string,
   options?: WhichOptions | undefined,
 ): Promise<string | string[] | null> {
-  // If binName is already a path, absolute or relative, return it as-is
+  // If binName is already a path (absolute or relative), return it as-is
   if (isPath(binName)) {
     return binName
   }
@@ -87,9 +87,9 @@ export async function which(
 /**
  * Resolve a tool installed in the project-local `node_modules/.bin` to its
  * ABSOLUTE path. This is the inverse of findRealBin: that helper SKIPS
- * node_modules/.bin, shadow bins, to find the real package manager behind a
+ * node_modules/.bin (shadow bins) to find the real package manager behind a
  * tool's shim, whereas whichLocalBin WANTS the local bin — it is for spawning a
- * dev dependency's own CLI, oxlint, vitest, tsc, directly instead of through
+ * dev dependency's own CLI (oxlint, vitest, tsc) directly instead of through
  * `pnpm exec`. Returns the platform-correct absolute path (the .cmd / .exe shim
  * on Windows, the symlink on POSIX), falling back to a plain PATH lookup, or
  * undefined when the tool resolves nowhere. `options.cwd` overrides the project
@@ -171,7 +171,7 @@ export async function whichReal(
   /* c8 ignore next - External which call */
   const result = await whichModule(binName, opts as ExternalWhichOptions)
 
-  // opts.all, returns array, and not-found arms.
+  // opts.all (returns array) and not-found arms.
   /* c8 ignore start */
   if (opts?.all) {
     const paths = ArrayIsArray(result)
@@ -274,8 +274,8 @@ export function whichRealSync(
  * Find an executable in the system PATH synchronously.
  *
  * This function resolves binary names to their full paths by searching the
- * system PATH. It should only be used for binary names, not paths. If the
- * input is already a path, absolute or relative, it will be returned as-is
+ * system PATH. It should only be used for binary names (not paths). If the
+ * input is already a path (absolute or relative), it will be returned as-is
  * without PATH resolution.
  *
  * Binary name vs. path detection:
@@ -307,7 +307,7 @@ export function whichSync(
   binName: string,
   options?: WhichOptions | undefined,
 ): string | string[] | null {
-  // If binName is already a path, absolute or relative, return it as-is
+  // If binName is already a path (absolute or relative), return it as-is
   if (isPath(binName)) {
     return binName
   }

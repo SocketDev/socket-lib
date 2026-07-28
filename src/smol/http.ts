@@ -52,7 +52,7 @@ export interface SmolHttpBinding {
    */
   setPipelining(enabled: boolean): void
   /**
-   * `true` if the binary was built with io_uring support, Linux only.
+   * `true` if the binary was built with io_uring support (Linux only).
    */
   readonly isIoUringAvailable: boolean
   /**
@@ -68,7 +68,7 @@ let smolHttpProbed = false
  * Returns `node:smol-http` when running on the smol Node binary, otherwise
  * `undefined`. Result is cached across calls.
  *
- * @unused No internal or Socket consumers, exercised only by its unit tests.
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function getSmolHttp(): SmolHttpBinding | undefined {
   if (!smolHttpProbed) {

@@ -1,6 +1,6 @@
 /**
  * @file Tests for the ai/exec injection seam. The lib ships the `real` runner
- *   host shell via spawn, and the ExecContext policy; the sandboxed runner is
+ *   (host shell via spawn) and the ExecContext policy; the sandboxed runner is
  *   INJECTED by the caller, so these tests inject a trivial fake sandbox rather
  *   than pulling a real one. The `real` runner is exercised with side-effect-
  *   free commands.
@@ -34,7 +34,7 @@ describe('backendForTrust', () => {
 describe('ExecContext.resolve', () => {
   it('resolves trusted → a host-shell runner even with no sandbox injected', async () => {
     const ctx = createExecContext()
-    // Assert behavior, runs on the host shell, not identity against the
+    // Assert behavior (runs on the host shell), not identity against the
     // src-imported runner — the latter trips no-src-import-in-test-expect.
     const result = await ctx.resolve('trusted').run('echo resolved-real')
     expect(result.exitCode).toBe(0)

@@ -270,7 +270,7 @@ describe('buildSnippet', () => {
       }
     }
     // Default 8 lines of context. Center on line 5 ('e'), should
-    // include all the surrounding lines, file is small.
+    // include all the surrounding lines (file is small).
     const snippet = buildSnippet(src, lineStarts, 5)
     assert.match(snippet, /a/)
     assert.match(snippet, /e/)

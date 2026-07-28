@@ -2,13 +2,13 @@
  * @file Cross-tool script runner — picks the right package manager by detecting
  *   the nearest lockfile and dispatches to its exec function. Falls back to
  *   running `node --run` directly when no lockfile is found. Lockfile
- *   precedence, first match wins, walking up from cwd:
+ *   precedence (first match wins, walking up from cwd):
  *
  *   1. pnpm-lock.yaml → execPnpm(['run', scriptName, ...args])
  *   2. package-lock.json → execNpm(['run', scriptName, ...args])
  *   3. yarn.lock → execYarn(['run', scriptName, ...args])
- *   4. no lockfile → node --run scriptName (or `node <npm-cli> run` on older Node
- *      where `node --run` isn't available) Honors `shell: true` by passing
+ *   4. (no lockfile) → node --run scriptName (or `node <npm-cli> run` on older
+ *      Node where `node --run` isn't available) Honors `shell: true` by passing
  *      through to spawn() unchanged.
  */
 

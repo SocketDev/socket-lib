@@ -3,7 +3,7 @@
  *   theme context management for scoped theming:
  *
  *   - getTheme() retrieves the current theme from context
- *   - setTheme() sets the global theme, name string or Theme object
+ *   - setTheme() sets the global theme (name string or Theme object)
  *   - withTheme() runs async functions with a scoped theme, restoring previous on
  *     completion
  *   - withThemeSync() provides synchronous scoped theme execution

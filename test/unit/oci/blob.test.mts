@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for the OCI blob client. Verifies bearer + URL shape, the
  *   raw-bytes return, and that the returned bytes digest back to the requested
- *   digest, the caller-side verification the fetcher delegates.
+ *   digest (the caller-side verification the fetcher delegates).
  */
 
 import { describe, expect, it } from 'vitest'

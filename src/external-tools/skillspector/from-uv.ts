@@ -8,7 +8,7 @@
  *   and `--locked` hard-fails on lock drift (vs. `from-dlx`'s pip-from-git-SHA
  *   venv, which re-resolves the closure freshly). Returns `undefined` when:
  *
- *   - No project dir / uv binary is supplied, the caller didn't opt in.
+ *   - No project dir / uv binary is supplied (the caller didn't opt in).
  *   - The project files are absent, or `uv sync --locked` fails (lock drift, no
  *     network, missing Python). Idempotent: a second call hits the synced venv
  *     (`uv sync` is a no-op when the venv already matches the lock).

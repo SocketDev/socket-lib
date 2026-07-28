@@ -70,7 +70,7 @@ export const dividers = {
    */
   thin: () => divider({ char: '─' }),
   /**
-   * Double-line divider, alias for thick.
+   * Double-line divider (alias for thick)
    */
   double: () => divider({ char: '═' }),
   /**
@@ -148,7 +148,7 @@ export function printSectionBreak(options?: DividerOptions | undefined): void {
 }
 
 /**
- * Print a thick divider line, default style. Convenience function using `═`
+ * Print a thick divider line (default style). Convenience function using `═`
  * character.
  *
  * @example

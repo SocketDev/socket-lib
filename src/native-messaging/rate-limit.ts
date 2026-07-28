@@ -52,7 +52,7 @@ export interface BucketEntry {
 }
 
 /**
- * @unused No internal or Socket consumers, exercised only by its unit tests.
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export class TokenBucketLimiter {
   readonly #capacity: number
@@ -84,7 +84,7 @@ export class TokenBucketLimiter {
    * to refill.
    *
    * `now` is injectable so tests can advance the virtual clock without
-   * sleeping. In production callers pass `Date.now()`, the default.
+   * sleeping. In production callers pass `Date.now()` (the default).
    */
   consume(key: string, now: number = Date.now()): boolean {
     let entry = this.#buckets.get(key)

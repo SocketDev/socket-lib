@@ -103,7 +103,7 @@ export async function bundleAllPackages(options = {}) {
         totalSize += size
       }
     } else {
-      // Copy non-bundled file as-is, thin re-export wrapper
+      // Copy non-bundled file as-is (thin re-export wrapper)
       const srcPath = path.join(rootDir, 'src', 'external', `${name}.js`)
       const destPath = path.join(distExternalDir, `${name}.js`)
       await fs.copyFile(srcPath, destPath)
@@ -126,7 +126,7 @@ export async function bundleAllPackages(options = {}) {
       // Single package in scope.
       const outputPath = path.join(scopeDir, `${name}.js`)
       if (bundle === false) {
-        // Copy non-bundled file as-is, thin re-export wrapper
+        // Copy non-bundled file as-is (thin re-export wrapper)
         const srcPath = path.join(
           rootDir,
           'src',
@@ -165,7 +165,7 @@ export async function bundleAllPackages(options = {}) {
       for (const pkg of packages) {
         const outputPath = path.join(scopeDir, `${pkg}.js`)
         if (bundle === false) {
-          // Copy non-bundled file as-is, thin re-export wrapper
+          // Copy non-bundled file as-is (thin re-export wrapper)
           const srcPath = path.join(
             rootDir,
             'src',

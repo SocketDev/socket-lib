@@ -7,7 +7,7 @@
  *   Injection, exactly like `ai/exec.mts`: the lib OWNS the
  *   `LocalAgentProvider` interface and ships a thin built-in provider over the
  *   `builtin.mts` LanguageModel factory (`getLanguageModel()`), while the HEAVY
- *   provider, a real on-device model such as odai, is INJECTED by the caller
+ *   provider (a real on-device model such as odai) is INJECTED by the caller
  *   and never imported here. That keeps the small-dist lib free of any model
  *   dependency: a consumer that never routes local pays nothing, and the local
  *   engine is discovered lazily through the seam.
@@ -29,7 +29,7 @@ import type { AgentSpawnResult, SpawnAiAgentOptions } from './types.mts'
  * A minimal Prompt-API session: `prompt(input)` resolves to the model's reply
  * text. Matches the shape a `LanguageModelFactory.create()` session exposes
  * across Chrome and the native Node builds. Kept structural so any conforming
- * on-device session, including an injected one, satisfies it.
+ * on-device session (including an injected one) satisfies it.
  */
 export interface LocalModelSession {
   prompt(input: unknown, options?: unknown | undefined): Promise<string>
@@ -52,7 +52,7 @@ export interface LocalSpawnOptions {
 /**
  * The injectable keyless-local primitive: probe availability, then generate a
  * completion as plain text. The lib provides `builtinLocalProvider`; a caller
- * injects a heavier implementation, a real on-device model, that satisfies this
+ * injects a heavier implementation (a real on-device model) that satisfies this
  * same interface. `generate` MUST resolve with the reply text or throw, never
  * return a sentinel, so `spawnLocalAgent` can normalize both paths.
  */
@@ -168,8 +168,8 @@ export async function runLocalTierSpawn(
  *   non-zero exit, the same signal `spawnTierWithFallback` uses to fall over to
  *   the next rung.
  * - A generation throw yields a non-zero exit with the message on `stderr`; this
- *   is a genuine failure on a reachable engine, so `unavailable` stays false do
- *   not silently downgrade a real failure.
+ *   is a genuine failure on a reachable engine, so `unavailable` stays false
+ *   (do not silently downgrade a real failure).
  * - Success returns the reply text on `stdout` with exit 0.
  *
  * A local engine has no retry/overload/quota surface, so `attempts` is always 1

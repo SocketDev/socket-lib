@@ -5,7 +5,7 @@
  *   NOTE: We don't apply hardening flags to npm because:
  *
  *   1. npm is a trusted system tool installed with Node.js.
- *   2. npm requires full system access, filesystem, network, child processes.
+ *   2. npm requires full system access (filesystem, network, child processes).
  *   3. Hardening flags would prevent npm from functioning even with --allow-*
  *      grants.
  *   4. The permission model is intended for untrusted user code, not package

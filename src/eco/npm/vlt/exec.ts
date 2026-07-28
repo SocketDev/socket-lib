@@ -14,7 +14,7 @@ import { ErrorCtor } from '../../../primordials/error'
  * Execute vlt commands. Not yet implemented — throws.
  *
  * @internal When implementing, model after eco/npm/npm/exec.ts
- * array-based args, Windows shell handling, debug-level filtering.
+ * (array-based args, Windows shell handling, debug-level filtering).
  */
 export function execVlt(
   _args: string[],

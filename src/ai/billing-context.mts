@@ -98,7 +98,7 @@ export function billingFromKeyed(
     out[provider] = headroom ? { headroom, kind, provider } : { kind, provider }
   }
   if (opts.local) {
-    // The keyless on-device account is always present, no token, when the
+    // The keyless on-device account is always present (no token) when the
     // caller opts in; tag it with its config-or-default kind (`$0/local`).
     const kind =
       opts.kinds?.[KEYLESS_PROVIDER] ?? DEFAULT_PROVIDER_KIND[KEYLESS_PROVIDER]
@@ -112,7 +112,7 @@ export function billingFromKeyed(
 
 /**
  * Detect whether routing runs in locked-down CI (restricted to the secrets
- * actually present, under the four-flag lockdown) or local dev, full freedom.
+ * actually present, under the four-flag lockdown) or local dev (full freedom).
  * CI when the standard `CI` env var is set; `local` otherwise.
  */
 export function detectRoutingEnv(): RoutingEnv {
@@ -120,12 +120,12 @@ export function detectRoutingEnv(): RoutingEnv {
 }
 
 export interface DiscoverBillingOptions {
-  // Skip the keychain fallback when probing credentials, env var only. Defaults
+  // Skip the keychain fallback when probing credentials (env var only). Defaults
   // to true in CI, false locally. Set true to guarantee no keychain access.
   readonly allowEnvOnly?: boolean | undefined
   // Where routing runs; defaults to `detectRoutingEnv()`.
   readonly env?: RoutingEnv | undefined
-  // Optional best-effort headroom, non-privileged readers only.
+  // Optional best-effort headroom (non-privileged readers only).
   readonly headroom?:
     | Readonly<Partial<Record<CredentialProvider, BillingHeadroom>>>
     | undefined
@@ -139,11 +139,11 @@ export interface DiscoverBillingOptions {
  * Discover a `BillingContext` end-to-end with no privileged lookup: probe which
  * provider credentials resolve (env → keychain, the non-admin check), then tag
  * them via `billingFromKeyed`. Headroom defaults to undefined (reactive). In CI
- * the credential probe is env-only, no keychain prompt; locally it allows the
+ * the credential probe is env-only (no keychain prompt); locally it allows the
  * keychain. Convenience over calling `discoverKeyedProviders` +
  * `billingFromKeyed`.
  *
- * @unused No internal or Socket consumers, exercised only by its unit tests.
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export async function discoverBilling(
   options?: DiscoverBillingOptions | undefined,
@@ -161,7 +161,7 @@ export async function discoverBilling(
 }
 
 export interface DiscoverKeyedProvidersOptions {
-  // Env var only — no keychain fallback, avoids a prompt. Default false.
+  // Env var only — no keychain fallback (avoids a prompt). Default false.
   readonly allowEnvOnly?: boolean | undefined
 }
 
@@ -179,7 +179,7 @@ export async function discoverKeyedProviders(
   const keyed = new Set<CredentialProvider>()
   for (let i = 0, { length } = providers; i < length; i += 1) {
     const provider = providers[i]!
-    // Sequential probes, a handful of providers: avoids a burst of concurrent
+    // Sequential probes (a handful of providers): avoids a burst of concurrent
     // keychain access that could stack auth prompts.
     const token = await resolveProviderCredential({
       allowEnvOnly: opts.allowEnvOnly,

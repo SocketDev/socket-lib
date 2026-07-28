@@ -40,8 +40,8 @@ import crypto from 'node:crypto'
  *   }
  *   ```
  *
- * @param a - First secret, string or Buffer.
- * @param b - Second secret, string or Buffer.
+ * @param a - First secret (string or Buffer).
+ * @param b - Second secret (string or Buffer).
  *
  * @returns `true` when `a` and `b` are byte-equal; `false` otherwise.
  */

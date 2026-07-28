@@ -44,13 +44,13 @@ export interface FirewallResponse {
 
 /**
  * Check all resolved packages in an Arborist ideal tree against the Socket
- * Firewall API, public, no auth required. Throws if any dependency has
+ * Firewall API (public, no auth required). Throws if any dependency has
  * critical or high severity alerts.
  *
  * @private
  *
  * @param arb - Arborist instance with populated idealTree.
- * @param requestedPackage - Top-level package name, for error messages.
+ * @param requestedPackage - Top-level package name (for error messages)
  */
 export async function checkFirewallPurls(
   arb: InstanceType<typeof Arborist>,

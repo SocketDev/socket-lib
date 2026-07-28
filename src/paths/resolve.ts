@@ -139,7 +139,7 @@ export function relative(from: string, to: string): string {
  * Get the normalized relative path from one path to another.
  *
  * Computes the relative path using `relative()` then runs the result through
- * `normalizePath()`. Empty strings, same path, are preserved verbatim rather
+ * `normalizePath()`. Empty strings (same path) are preserved verbatim rather
  * than collapsed to `.`.
  *
  * @example

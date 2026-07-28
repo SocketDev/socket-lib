@@ -105,7 +105,7 @@ export function nativeHash(): typeof NodeHash | undefined {
 
 /**
  * Throw if `bytes` does not content-address to `blobHash`. Both `Q`-prefixed
- * single blob, and `S`-prefixed (file-stream) hashes share the sha256 digest
+ * (single blob) and `S`-prefixed (file-stream) hashes share the sha256 digest
  * body, so both verify against the same digest; the leading discriminator char
  * is dropped before comparison.
  *

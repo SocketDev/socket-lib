@@ -79,7 +79,7 @@ export interface BinaryDetails {
     path?: string | undefined
   }
   /**
-   * Update check metadata, same structure as packages.
+   * Update check metadata (same structure as packages).
    */
   update_check?:
     | {
@@ -91,7 +91,7 @@ export interface BinaryDetails {
 }
 
 /**
- * Unified manifest entry for all cached items, packages and binaries. Shared
+ * Unified manifest entry for all cached items (packages and binaries). Shared
  * fields at root, type-specific fields in details.
  */
 export interface DlxManifestEntry {
@@ -101,7 +101,7 @@ export interface DlxManifestEntry {
   details: PackageDetails | BinaryDetails
 }
 /**
- * Legacy store record format, deprecated, for migration.
+ * Legacy store record format (deprecated, for migration).
  */
 export interface StoreRecord {
   timestampFetch: number
@@ -151,7 +151,7 @@ export function isPackageEntry(
 
 /**
  * DLX manifest storage manager with atomic operations. Supports both legacy
- * format, package name keys, and new unified manifest format, spec keys.
+ * format (package name keys) and new unified manifest format (spec keys).
  */
 export class DlxManifest {
   private readonly manifestPath: string
@@ -292,7 +292,7 @@ export class DlxManifest {
   }
 
   /**
-   * Get cached update information for a package, legacy format.
+   * Get cached update information for a package (legacy format).
    *
    * @deprecated Use getManifestEntry() for new code.
    */
@@ -364,7 +364,7 @@ export class DlxManifest {
   }
 
   /**
-   * Store update information for a package, legacy format.
+   * Store update information for a package (legacy format).
    *
    * @deprecated Use setPackageEntry() for new code.
    */

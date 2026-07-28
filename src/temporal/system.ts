@@ -24,7 +24,7 @@ import { DateNow } from '../primordials/date'
 // monotonic nanoseconds and add them to the captured wallclock.
 //
 // Drift caveat: NTP adjustments after capture will not be reflected.
-// For our usage, soak-window comparisons measured in days, the drift
+// For our usage (soak-window comparisons measured in days) the drift
 // is bounded by ±ppm × process-uptime — sub-second over weeks.
 // Acceptable.
 

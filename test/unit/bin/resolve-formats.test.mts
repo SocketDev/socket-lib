@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for src/bin/resolve — resolveRealBinSync's package-manager
- *   shim format coverage: extensionless Unix shell scripts, pnpm, yarn, and
+ *   shim format coverage: extensionless Unix shell scripts (pnpm, yarn) and
  *   the Windows `.cmd`/`.ps1` shim variants for npm, npx, pnpm, and yarn.
  */
 

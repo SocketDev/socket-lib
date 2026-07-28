@@ -198,7 +198,7 @@ export function createLazyGetter<T>(
  * @param propKey - The property key for the getter.
  * @param getter - Function that computes the property value.
  *
- * @returns The modified object, for chaining
+ * @returns The modified object (for chaining)
  */
 export function defineGetter<T>(
   object: object,
@@ -224,7 +224,7 @@ export function defineGetter<T>(
  * @param getter - Function that computes the value on first access.
  * @param stats - Optional stats object to track initialization.
  *
- * @returns The modified object, for chaining
+ * @returns The modified object (for chaining)
  */
 export function defineLazyGetter<T>(
   object: object,
@@ -246,7 +246,7 @@ export function defineLazyGetter<T>(
  * @param getterDefObj - Object mapping property keys to getter functions.
  * @param stats - Optional stats object to track initialization.
  *
- * @returns The modified object, for chaining
+ * @returns The modified object (for chaining)
  */
 export function defineLazyGetters(
   object: object,

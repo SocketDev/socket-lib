@@ -1,7 +1,7 @@
 /**
  * @file Path utilities for Socket ecosystem directories. Platform-aware
  *   resolution for the shared ~/.socket/ layout. The `_`-prefixed entries are
- *   Socket-managed DIRS, not apps: `_cacache` content-addressable cache;
+ *   Socket-managed DIRS (not apps): `_cacache` content-addressable cache;
  *   `_dlx/<hash>/` name+version binary store (node, jre, python, sfw, …);
  *   `_state/<app>/` version-LESS persistent app state (daemon socket + lock +
  *   OAuth refresh; mirrors pnpm `state-dir` / XDG_STATE_HOME), with
@@ -144,7 +144,7 @@ export function getSocketAppRuntimeDir(appName: string): string {
 
 /**
  * Get an app's persistent state directory (~/.socket/_state/<app>/). The
- * `<app>` is a real app, proteus, acorn, nesting its version-less state inside
+ * `<app>` is a real app (proteus, acorn) nesting its version-less state inside
  * the `_state` infra dir.
  */
 export function getSocketAppStateDir(appName: string): string {
@@ -236,7 +236,7 @@ export function getSocketRackToolDir(options: {
 }
 /**
  * Get the Wheelhouse repo-clones directory (~/.socket/_wheelhouse/repo-clones).
- * Sits beside the per-tool dirs, sfw, codedb, janus, bin, under `_wheelhouse`.
+ * Sits beside the per-tool dirs (sfw, codedb, janus, bin) under `_wheelhouse`.
  * The home for reference clones of EXTERNAL repos an agent reviews, each as
  * `<org>-<repo>` lowercased + dash-cased (e.g. `justrach-codedb`).
  *
@@ -324,7 +324,7 @@ export function getSocketWheelhouseDir(): string {
  * test mocking. Falls back to temporary directory if home is not available.
  *
  * Priority order: 1. HOME (Unix) 2. USERPROFILE (Windows) 3.
- * getNodeOs().homedir() 4. Fallback: getNodeOs().tmpdir() restricted envs.
+ * getNodeOs().homedir() 4. Fallback: getNodeOs().tmpdir() (restricted envs).
  */
 
 /**
@@ -332,7 +332,7 @@ export function getSocketWheelhouseDir(): string {
  * test mocking. Falls back to temporary directory if home is not available.
  *
  * Priority order: 1. HOME (Unix) 2. USERPROFILE (Windows) 3.
- * getNodeOs().homedir() 4. Fallback: getNodeOs().tmpdir() restricted envs.
+ * getNodeOs().homedir() 4. Fallback: getNodeOs().tmpdir() (restricted envs).
  */
 export function getUserHomeDir(): string {
   // Try HOME first (Unix)

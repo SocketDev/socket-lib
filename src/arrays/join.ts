@@ -41,7 +41,7 @@ export interface JoinListOptions {
  *   // Outputs: "You can choose React, Vue, and Angular"
  *   ```
  *
- * @param arr - Array of strings to join, can be readonly.
+ * @param arr - Array of strings to join (can be readonly)
  *
  * @returns Formatted string with proper "and" conjunction
  */
@@ -73,7 +73,7 @@ export function joinAnd(arr: string[] | readonly string[]): string {
  *   joinList([1, 2, 3], { with: 'and' })        // '1, 2, and 3'
  *   ```
  *
- * @param items - Items to join, can be readonly, any type.
+ * @param items - Items to join (can be readonly, any type)
  * @param options - Formatting options (optional)
  *
  * @returns Formatted string
@@ -127,7 +127,7 @@ export function joinList(
  *   // Outputs: "Choose a package manager: npm, yarn, or pnpm"
  *   ```
  *
- * @param arr - Array of strings to join, can be readonly.
+ * @param arr - Array of strings to join (can be readonly)
  *
  * @returns Formatted string with proper "or" disjunction
  */

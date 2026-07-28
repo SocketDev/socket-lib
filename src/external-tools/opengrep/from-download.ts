@@ -1,7 +1,7 @@
 /**
  * @file `opengrepFromDownload()` — fetches upstream OpenGrep and returns a
  *   `ResolvedOpengrep` pointing at the cached binary. macOS/Linux assets are
- *   bare binaries, no extraction; Windows ships a zip. The asset-map's
+ *   bare binaries (no extraction); Windows ships a zip. The asset-map's
  *   `isArchive` flag drives extraction vs. copy.
  */
 

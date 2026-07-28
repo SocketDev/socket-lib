@@ -2,7 +2,7 @@
  * @file `resolveSkillSpector()` — SkillSpector resolution entry point. Tries
  *   each source in order:
  *
- *   1. VFS — smol binary's embedded skillspector, if packed
+ *   1. VFS — smol binary's embedded skillspector (if packed)
  *   2. PATH — `which skillspector` (pipx-installed binaries land here too; the
  *      source field distinguishes `'pipx'` vs `'path'`)
  *   3. UV-project — `uv sync --locked` against a uv project (the most locked-down

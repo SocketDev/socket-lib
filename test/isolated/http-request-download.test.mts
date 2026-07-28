@@ -397,7 +397,7 @@ describe('http-request', () => {
           logger,
         })
 
-        // Should not have logged any progress, no content-length header
+        // Should not have logged any progress (no content-length header)
         expect(logMessages.length).toBe(0)
 
         const content = await fs.readFile(destPath, 'utf8')

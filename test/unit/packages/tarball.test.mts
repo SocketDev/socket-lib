@@ -211,7 +211,7 @@ describe('packages/tarball — extract & pack (mocked registry, offline)', () =>
           tmpPath = destPath
           expect(existsSync(path.join(destPath, 'package.json'))).toBe(true)
         }
-        // Local-file spec keeps the, spec, callback, overload offline.
+        // Local-file spec keeps the (spec, callback) overload offline.
         await extractPackage(
           isNumberTarballPath,
           verifyCallback as unknown as ExtractOptions,

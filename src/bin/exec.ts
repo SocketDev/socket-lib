@@ -2,7 +2,7 @@
  * @file `execBin` — spawn a binary with PATH resolution, wrapper-script
  *   unwrapping, and Windows shell handling. Order of operations:
  *
- *   1. If the input looks like a path, absolute or relative, `resolveRealBinSync`
+ *   1. If the input looks like a path (absolute or relative), `resolveRealBinSync`
  *      it directly so we can spawn the underlying script rather than a
  *      wrapper.
  *   2. Otherwise treat it as a binary name and:
@@ -44,7 +44,7 @@ export async function execBin(
   args?: string[] | undefined,
   options?: SpawnOptions | undefined,
 ) {
-  // Resolve the binary path, using cache for binary names, not paths.
+  // Resolve the binary path, using cache for binary names (not paths).
   let resolvedPath: string | string[] | undefined
   if (isPath(binPath)) {
     resolvedPath = resolveRealBinSync(binPath)

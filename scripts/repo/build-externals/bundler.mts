@@ -62,7 +62,7 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
         )
       }
     } else {
-      // No src/external file, check for local workspace/sibling versions, dev mode.
+      // No src/external file, check for local workspace/sibling versions (dev mode).
       const localPath = await getLocalPackagePath(packageName, rootDir)
       if (localPath) {
         if (!quiet) {
@@ -104,7 +104,7 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
 
     // Add a header comment to the bundled file.
     const bundleContent = await fs.readFile(outputPath, 'utf8')
-    // Strip 'use strict' from bundle content if present, will be re-added at top
+    // Strip 'use strict' from bundle content if present (will be re-added at top)
     const contentWithoutStrict = bundleContent.replace(/^"use strict";\n/, '')
     const finalContent = `"use strict";
 /**

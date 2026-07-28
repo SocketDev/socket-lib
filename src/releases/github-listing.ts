@@ -56,7 +56,7 @@ export interface ReleaseRow {
  *
  * Why we hit a different backend: GraphQL queries don't go through the same
  * Elasticsearch index that REST listings rely on. During incidents that drop
- * the ES index, or its connectivity, GraphQL's `repository.releases`
+ * the ES index (or its connectivity), GraphQL's `repository.releases`
  * connection keeps working because it reads from a different data path inside
  * GitHub. That's the entire reason this fallback exists.
  */
@@ -175,7 +175,7 @@ export async function fetchReleasesViaRest(
   }
   // `body` is declared Buffer, but the installed http layer may resolve it to
   // an already-parsed object/array — widen to unknown so parseResponseBody can
-  // branch at runtime, see its docstring.
+  // branch at runtime (see its docstring).
   const body: unknown = response.body
   // 200 OK + empty body — the documented GitHub-search-degraded signature.
   // Return [] so the caller can decide whether to fall back rather than
@@ -303,7 +303,7 @@ export async function getLatestRelease(
           return false
         }
 
-        // Skip releases with no assets, empty releases.
+        // Skip releases with no assets (empty releases).
         if (!assets || assets.length === 0) {
           return false
         }
@@ -325,7 +325,7 @@ export async function getLatestRelease(
         return undefined
       }
 
-      // Sort by published_at descending, newest first.
+      // Sort by published_at descending (newest first).
       // GitHub API doesn't guarantee order, so we must sort explicitly.
       // DateParse returns the epoch ms for an ISO 8601 string, which
       // is what we'd get from `new Date(s).getTime()` but with one
@@ -343,7 +343,7 @@ export async function getLatestRelease(
 
 /**
  * Normalize an `httpRequest` response body to a parsed value. `body` may be a
- * Buffer / string, older paths, OR — depending on the response's content-type
+ * Buffer / string (older paths) OR — depending on the response's content-type
  * handling — an already-parsed object/array. Calling `body.toString('utf8')` +
  * JSON.parse on an already-parsed object yields `"[object Object]"` and throws
  * (the "Failed to parse … releases response" build failure). Pass through
@@ -351,7 +351,7 @@ export async function getLatestRelease(
  */
 export function parseResponseBody(body: unknown): unknown {
   if (body !== null && typeof body === 'object' && !Buffer.isBuffer(body)) {
-    // Already parsed by the http layer, object or array — use as-is.
+    // Already parsed by the http layer (object or array) — use as-is.
     return body
   }
   const text = Buffer.isBuffer(body)

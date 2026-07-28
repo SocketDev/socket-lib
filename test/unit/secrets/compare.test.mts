@@ -140,7 +140,7 @@ describe('compareSecrets', () => {
     // the implementation with a naive `===` (early-exit would show as
     // an order-of-magnitude difference on a long secret with an early-
     // byte mismatch). It's intentionally LENIENT and skipped under
-    // coverage runs, instrumentation makes timing meaningless.
+    // coverage runs (instrumentation makes timing meaningless).
     it.skipIf(process.env['COVERAGE'] === 'true')(
       'shows no order-of-magnitude difference between early- and late-byte mismatches',
       () => {

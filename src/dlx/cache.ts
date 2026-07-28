@@ -15,7 +15,7 @@ import { hash } from '../crypto/hash'
  * - 16 hex chars = 64 bits = acceptable collision risk for local cache
  * - Collision probability ~1 in 18 quintillion with 1000 entries
  *
- * Input strategy, aligned with npx:
+ * Input strategy (aligned with npx):
  *
  * - Npx uses package spec strings (e.g., '@scope/pkg@1.0.0', 'prettier@3.0.0')
  * - Caller provides complete spec string with version for accurate cache keying

@@ -201,7 +201,7 @@ export interface ResolveBackendOptions {
  * Resolve which backend runs a pass, encoding Socket's detection policy
  * (`_shared/multi-agent-backends.md`): an installed explicit override wins;
  * else the first installed non-hybrid entry in the preference order; else
- * nothing, skip the pass. Pure — returns the decision + why, never logs. An
+ * nothing (skip the pass). Pure — returns the decision + why, never logs. An
  * override that isn't installed is reported via `overrideMissing` so the caller
  * can warn.
  */

@@ -6,7 +6,7 @@
  *
  *   - POSIX: when the child was spawned `detached: true` it leads its own process
  *     group, so `process.kill(-pid, signal)` signals every member at once. Pass
- *     `{ detached: true }`, the default, for that behavior; pass `{ detached:
+ *     `{ detached: true }` (the default) for that behavior; pass `{ detached:
  *     false }` to signal only the single pid.
  *   - Windows: there are no POSIX process groups, so we shell out to `taskkill /T
  *     /F /pid <pid>`, which walks and terminates the descendant tree. The
@@ -28,7 +28,7 @@ export interface KillProcessTreeOptions {
    * POSIX only. When `true` (default), signal the child's entire process group
    * via the negative pid — requires the child to have been spawned `detached:
    * true`. When `false`, signal only the single pid. Ignored on Windows
-   * taskkill always kills the tree.
+   * (taskkill always kills the tree).
    */
   detached?: boolean | undefined
   /**
@@ -98,7 +98,7 @@ export function killProcessTree(
     }
     return true
   } catch {
-    // ESRCH, already gone / EPERM, not ours: nothing actionable.
+    // ESRCH (already gone) / EPERM (not ours): nothing actionable.
     return false
   }
 }
@@ -112,8 +112,8 @@ export function resolvePid(target: number | ChildProcess): number | undefined {
   if (typeof target === 'number') {
     return Number.isInteger(target) && target > 1 ? target : undefined
   }
-  // A ChildProcess: skip if it already settled, exited or was signalled, or
-  // never got a pid, spawn failed. Node types exitCode/signalCode as
+  // A ChildProcess: skip if it already settled (exited or was signalled) or
+  // never got a pid (spawn failed). Node types exitCode/signalCode as
   // `number | null` / `NodeJS.Signals | null`, so the null comparison is the
   // external-API exception to prefer-undefined-over-null.
   // oxlint-disable-next-line socket/prefer-undefined-over-null -- Node ChildProcess.exitCode/signalCode are `… | null`

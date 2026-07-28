@@ -353,7 +353,7 @@ describe.sequential('process/lock', () => {
       // cannot reach when given an empty parent.
       // The cleanest cross-platform reproduction is to mock the fs module,
       // but for an integration test we skip if the system can create the
-      // path, very unusual.
+      // path (very unusual).
       try {
         await processLock.acquire(missingPath, { retries: 1 })
         // If we got here, mkdir succeeded — clean up and skip the assertion.

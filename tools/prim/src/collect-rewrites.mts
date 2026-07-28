@@ -73,7 +73,7 @@ export function collectRewrites(options: {
       if (!exported.has(ctor)) {
         return
       }
-      // Replace `Foo`, the identifier, with `Ctor`, or its aliased form.
+      // Replace `Foo` (the identifier) with `Ctor` (or its aliased form).
       // Add `!` for nullable ctors in TS sources — see static-call site
       // for rationale.
       const ctorNeedsBang = isTsFile && nullable && nullable.has(ctor)
@@ -127,7 +127,7 @@ export function collectRewrites(options: {
         return
       }
       // Replace `Foo.bar` (the whole MemberExpression callee) with the
-      // primordial name, or its aliased form. Args list stays intact.
+      // primordial name (or its aliased form). Args list stays intact.
       // For nullable primordials (e.g. Buffer.* in cross-env builds where
       // BufferCtor may be `undefined`), add a `!` non-null assertion
       // when emitting into a TypeScript source — the call site's

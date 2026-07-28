@@ -4,7 +4,7 @@
  *
  *   - `isSmol()` — memoized boolean detector
  *   - `getSmolUtil()` — lazy-loader for the `node:smol-util` binding On stock
- *     Node, the test runtime, `isSmol()` returns `false` and `getSmolUtil()`
+ *     Node (the test runtime), `isSmol()` returns `false` and `getSmolUtil()`
  *     returns `undefined`. The integration story is verified by socket-btm's
  *     own tests running inside the smol binary.
  */

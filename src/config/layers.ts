@@ -40,7 +40,7 @@ export interface ReadConfigLayersOptions {
  * globs). Layers contribute in precedence order; a non-array value for the key
  * (or a missing key, or an `undefined` layer) contributes nothing.
  *
- * @param layers - The layers from `readConfigLayers`, or any object array.
+ * @param layers - The layers from `readConfigLayers` (or any object array).
  * @param key - The array-valued property to concatenate.
  *
  * @returns Each layer's entries in order; `[]` when no layer has the array.
@@ -78,7 +78,7 @@ export function mergeConfigArray<
  *   // layers === every one of those that existed, in that order
  *   ```
  *
- * @param name - Base name of the config file, no directory, no extension.
+ * @param name - Base name of the config file (no directory, no extension).
  * @param options - Layer dirs + resolution options.
  *
  * @returns Parsed layers in precedence order; empty when none exist.

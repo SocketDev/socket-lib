@@ -2,7 +2,7 @@
  * @file Generic "venv-install tier" for external-tools resolvers. Parallel to
  *   `from-download.ts` — that one handles single-binary tools downloaded as
  *   GitHub release assets; this one handles Python packages installed into a
- *   single-purpose venv. Per-tool resolvers, skillspector, future Python CLIs
+ *   single-purpose venv. Per-tool resolvers (skillspector, future Python CLIs)
  *   compose their fourth tier on top of these helpers. Two helpers:
  *
  *   - `createPipVenv` — `python -m venv <cacheDir>` + `pip install <spec>`.
@@ -36,12 +36,12 @@ export interface CreatePipVenvOptions {
   readonly cacheDir: string
   /**
    * Name of the entry-point executable. Matches the package's
-   * `[project.scripts]` key, or the package name when it's the same.
+   * `[project.scripts]` key (or the package name when it's the same).
    */
   readonly entryPoint: string
   /**
    * Pip-install argument — either `<pkg>==<version>` (PyPI exact pin) or
-   * `git+<https-url>@<sha>`, git-SHA pin. Anything else is rejected.
+   * `git+<https-url>@<sha>` (git-SHA pin). Anything else is rejected.
    */
   readonly installSpec: string
   /**
@@ -58,14 +58,14 @@ export interface CreatePipVenvResult {
    */
   readonly entryPointPath: string
   /**
-   * `true` when this call created the venv, and ran pip install; `false` when
+   * `true` when this call created the venv (and ran pip install); `false` when
    * the existing cache was reused.
    */
   readonly created: boolean
 }
 
 /**
- * Create, or reuse, a venv at `cacheDir` and pip-install `installSpec` into it.
+ * Create (or reuse) a venv at `cacheDir` and pip-install `installSpec` into it.
  * Returns the entry-point path + a `created` flag. Throws when:
  *
  * - No Python interpreter is on PATH (and none was passed via `python`).
@@ -99,7 +99,7 @@ export async function createPipVenv(
   await safeMkdir(path.dirname(cacheDir), { recursive: true })
 
   // Create the venv. `--clear` makes the call idempotent — if the dir
-  // exists but is stale, partial install from a previous crash, it
+  // exists but is stale (partial install from a previous crash), it
   // wipes and recreates.
   await spawn(python, ['-m', 'venv', '--clear', cacheDir], { stdio: 'pipe' })
 
@@ -135,7 +135,7 @@ export async function createPipVenv(
 
 /**
  * Locate a Python interpreter. Prefer `python3` on macOS/Linux, fall back to
- * `python`, the Windows convention. Returns `undefined` when neither is on
+ * `python` (the Windows convention). Returns `undefined` when neither is on
  * PATH.
  */
 export async function findPython(): Promise<string | undefined> {

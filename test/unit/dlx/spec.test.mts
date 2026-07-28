@@ -62,7 +62,7 @@ describe.sequential('dlx/spec — parsePackageSpec', () => {
 
   test('falls back gracefully on an empty string spec', () => {
     // Force the catch path with a value npm-package-arg rejects; the
-    // fallback returns whatever it can extract, no version.
+    // fallback returns whatever it can extract (no version).
     const result = parsePackageSpec('')
     expect(result.name).toBe('')
   })

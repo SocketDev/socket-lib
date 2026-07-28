@@ -3,7 +3,7 @@
  *   valid URL via `parseUrl`. `isLoopbackHost` / `isPrivateHost` classify a
  *   hostname for SSRF guards: a server that fetches an operator- or
  *   issuer-supplied URL uses these to refuse hosts that resolve to the local
- *   machine or an internal network, cloud metadata, redis, link-local.
+ *   machine or an internal network (cloud metadata, redis, link-local).
  */
 
 import { RegExpPrototypeTest } from '../primordials/regexp'
@@ -38,7 +38,7 @@ export function isLoopbackHost(hostname: string): boolean {
   let host = StringPrototypeToLowerCase(hostname)
   // `URL` reports an IPv6 hostname bracketed (e.g. `[::1]`); compare the bare
   // form so `allowLocalhost` can permit IPv6 loopback, matching `isPrivateHost`
-  // whose regex already tolerates the brackets.
+  // (whose regex already tolerates the brackets).
   if (
     StringPrototypeStartsWith(host, '[') &&
     StringPrototypeEndsWith(host, ']')

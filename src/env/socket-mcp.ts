@@ -12,7 +12,7 @@ import { NumberIsFinite } from '../primordials/number'
 /**
  * Whether the MCP server should run in HTTP mode. MCP_HTTP_MODE — when set to
  * the literal string `'true'`, the MCP server serves over HTTP instead of
- * stdio. Returns `false` for any other value, including unset.
+ * stdio. Returns `false` for any other value (including unset).
  *
  * @example
  *   ;```typescript
@@ -31,7 +31,7 @@ export function getMcpHttpMode(): boolean {
 
 /**
  * MCP HTTP server listen port. MCP_PORT — port the MCP HTTP server binds to.
- * Defaults to `3000`, matches socket-mcp's documented default. Invalid /
+ * Defaults to `3000` (matches socket-mcp's documented default). Invalid /
  * non-numeric values also fall back to `3000`.
  *
  * @example
@@ -106,7 +106,7 @@ export function getSocketOauthIssuer(): string {
 /**
  * Required OAuth scopes for the MCP HTTP server. SOCKET_OAUTH_REQUIRED_SCOPES —
  * whitespace-separated list of scopes inbound tokens must carry. Defaults to
- * `'packages:list'`, the minimum scope socket-mcp's depscore tool needs.
+ * `'packages:list'` (the minimum scope socket-mcp's depscore tool needs).
  *
  * @example
  *   ;```typescript

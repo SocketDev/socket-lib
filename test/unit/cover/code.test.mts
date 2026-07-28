@@ -191,7 +191,7 @@ describe.sequential('cover/code', () => {
 
     it('uses default coveragePath when none provided', async () => {
       // Default is cwd/coverage/coverage-final.json. Either it exists (we
-      // get a result) or it doesn't, we get the missing-file error. Both
+      // get a result) or it doesn't (we get the missing-file error). Both
       // are acceptable — the test exists to confirm the option default is
       // wired in.
       try {

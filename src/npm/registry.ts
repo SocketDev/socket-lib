@@ -121,7 +121,7 @@ export interface ProvenancePredicate {
  *
  * When `configured` is true, `repo` and `workflow` are populated only if the
  * attestation bundle was fetched and parsed — `detectTrustedPublisher()` alone
- * from packument data, cannot provide them. Call `getAttestations()` +
+ * (from packument data) cannot provide them. Call `getAttestations()` +
  * `parseProvenancePredicate()` to obtain those fields.
  */
 export interface TrustedPublisherResult {
@@ -182,7 +182,7 @@ export function encodeCdnName(name: string): string {
  * segment encoded separately). This fixes the `@scope%2Fname` → 400 bug on
  * `cdn.jsdelivr.net`.
  *
- * @unused No internal or Socket consumers, exercised only by its unit tests.
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export function encodePackageName(
   name: string,
@@ -263,7 +263,7 @@ export async function getPackument(
  * Uses split-encode for scoped names so `cdn.jsdelivr.net` receives the literal
  * `/` between scope and name (not `%2F` which causes 400s).
  *
- * @unused No internal or Socket consumers, exercised only by its unit tests.
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export async function getVersionManifest(
   name: string,
@@ -279,7 +279,7 @@ export async function getVersionManifest(
 /**
  * Fetch last-week download counts for a package from the npm downloads API.
  *
- * @unused No internal or Socket consumers, exercised only by its unit tests.
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export async function getWeeklyDownloads(
   name: string,
@@ -305,7 +305,7 @@ export function hasProvenance(versionEntry: PackumentVersion): boolean {
  * a wrong "not published" invites a duplicate-version publish attempt). Returns
  * `false` when the package does not exist or the packument fetch fails.
  *
- * @unused No internal or Socket consumers, exercised only by its unit tests.
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export async function isVersionPublished(
   name: string,

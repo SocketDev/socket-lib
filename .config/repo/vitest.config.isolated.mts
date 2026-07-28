@@ -20,7 +20,7 @@ const projectRoot = REPO_ROOT
 const isCI = !!process.env['CI']
 const workerHeapMB = isCI ? 6144 : 12_288
 
-// Normalize paths for cross-platform glob patterns, forward slashes on Windows
+// Normalize paths for cross-platform glob patterns (forward slashes on Windows)
 export function toGlobPath(pathLike: string) {
   return pathLike.replaceAll('\\', '/')
 }
@@ -75,7 +75,7 @@ const vitestConfigIsolated = defineConfig({
         isolate: true,
       },
     },
-    // Heavy I/O tests, archive extraction, large http fixtures, need
+    // Heavy I/O tests (archive extraction, large http fixtures) need
     // headroom under coverage instrumentation. CI is colder and slower than
     // local dev — give it more rope. Locally we keep it tight so a hung
     // test surfaces fast.

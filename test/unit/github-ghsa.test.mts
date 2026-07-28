@@ -70,7 +70,7 @@ describe.sequential('github ghsa', () => {
     })
 
     it('should fall back to GraphQL on REST empty body and normalize fields', async () => {
-      // REST returns 200 + empty body, incident shape. The fallback
+      // REST returns 200 + empty body (incident shape). The fallback
       // hits GraphQL `securityAdvisory(ghsaId)` and normalizes the
       // two field-shape diffs:
       //   - severity: GraphQL uppercases ('MODERATE'), REST lowercases
@@ -162,8 +162,8 @@ describe.sequential('github ghsa', () => {
     })
 
     it('should propagate GraphQL transport error when REST is empty and GraphQL fails', async () => {
-      // REST returned 200 + empty, incident shape, so we tried
-      // GraphQL. GraphQL itself failed, non-OK status. Surface
+      // REST returned 200 + empty (incident shape), so we tried
+      // GraphQL. GraphQL itself failed (non-OK status). Surface
       // the GraphQL error so the user sees both transports failed
       // — there's no useful REST error to fall back on here
       // because REST "succeeded" with an empty body.

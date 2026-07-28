@@ -6,7 +6,7 @@
  *   - readDirNames / readDirNamesSync option combinations (sort, includeEmpty)
  *   - isDirEmptySync ignore-pattern handling
  *   - safeDelete / safeDeleteSync against temp directories
- *   - uniqueSync edge cases, multiple dots, directory paths
+ *   - uniqueSync edge cases (multiple dots, directory paths)
  *   - Path-like (Buffer) inputs to isDir / safeStat Uses runWithTempDir for
  *     isolated test environments to avoid filesystem pollution. Raw fs APIs
  *     (existsSync, fs.unlink) are used intentionally to verify behavior rather

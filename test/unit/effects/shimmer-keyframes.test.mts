@@ -24,13 +24,13 @@ describe('effects/shimmer-keyframes', () => {
       const tracks = toShimmerKeyframes(spec, 5, 20)
       for (const track of tracks) {
         expect(track.times[track.times.length - 1]).toBe(1)
-        // Closing value matches the opening value, clean loop.
+        // Closing value matches the opening value (clean loop).
         expect(track.values[track.values.length - 1]).toBe(track.values[0])
       }
     })
 
     it('deduplicates consecutive identical colors', () => {
-      // A static spec, wave never moves, should produce just two keyframes
+      // A static spec (wave never moves) should produce just two keyframes
       // per char: the initial value and the t=1 closure.
       const spec: ShimmerSpec = {
         positionAt: () => -100,
@@ -79,7 +79,7 @@ describe('effects/shimmer-keyframes', () => {
     })
 
     it('agrees with frameColors at every emitted keyframe time', () => {
-      // Frame-by-frame correctness: for every keyframe, time, value, there
+      // Frame-by-frame correctness: for every keyframe (time, value), there
       // must exist a frame number whose engine output matches that value.
       // This catches any drift between the keyframes adapter and the engine.
       const FRAMES = 30
@@ -90,7 +90,7 @@ describe('effects/shimmer-keyframes', () => {
       // output at the corresponding frame index.
       for (let charIdx = 0; charIdx < 6; charIdx++) {
         const track = tracks[charIdx]!
-        // Skip the t=1 closure entry, it's a synthetic loop wrap.
+        // Skip the t=1 closure entry (it's a synthetic loop wrap).
         for (let k = 0; k < track.times.length - 1; k++) {
           const frameIdx = Math.round(track.times[k]! * FRAMES)
           const engineRgb = frameColors(spec, 6, frameIdx)[charIdx]!

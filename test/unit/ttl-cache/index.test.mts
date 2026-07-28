@@ -179,7 +179,7 @@ describe.sequential('ttl-cache', () => {
     })
 
     it('should fetch again after cache expires', async () => {
-      // Use generous TTL to avoid flaky failures on slow CI runners, especially Windows.
+      // Use generous TTL to avoid flaky failures on slow CI runners (especially Windows).
       const shortCache = createTtlCache({
         ttl: 500,
         prefix: 'short-cache',
@@ -348,7 +348,7 @@ describe.sequential('ttl-cache', () => {
     })
 
     it('should skip expired entries in getAll', async () => {
-      // Use generous TTL to avoid flaky failures on slow CI runners, especially Windows.
+      // Use generous TTL to avoid flaky failures on slow CI runners (especially Windows).
       const shortCache = createTtlCache({
         ttl: 500,
         prefix: 'expiry-getall-test',

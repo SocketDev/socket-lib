@@ -3,7 +3,7 @@
  *   publishes per-platform archives under
  *   https://github.com/aquasecurity/trivy/releases/download/v<X.Y.Z>/. Asset
  *   names follow `trivy_<X.Y.Z>_<OS>-<Arch>.{tar.gz,zip}` where `<OS>` is
- *   `macOS` / `Linux` / `windows`, capitalization matters, and `<Arch>` is
+ *   `macOS` / `Linux` / `windows` (capitalization matters) and `<Arch>` is
  *   `ARM64` / `64bit`.
  */
 

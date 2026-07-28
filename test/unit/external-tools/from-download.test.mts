@@ -117,7 +117,7 @@ describe.sequential('external-tools/from-download', () => {
       const tarBytes = await buildTarFixture(scratch)
       const { downloader } = makeFakeDownloader(tarBytes)
       const extractedDir = path.join(scratch, 'pre-empty')
-      // Pre-create the dir empty, simulates a prior interrupted setup.
+      // Pre-create the dir empty (simulates a prior interrupted setup).
       mkdirSync(extractedDir, { recursive: true })
       expect(existsSync(extractedDir)).toBe(true)
       expect(readdirSync(extractedDir).length).toBe(0)

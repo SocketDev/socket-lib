@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for DLX, Download and Execute, cache management utilities.
+ * @file Unit tests for DLX (Download and Execute) cache management utilities.
  *   Tests DLX cache directory lifecycle and package management:
  *
  *   - ensureDlxDir(), ensureDlxDirSync() cache directory creation
@@ -270,7 +270,7 @@ describe.sequential('dlx', () => {
       await ensureDlxDir()
       const pkgDir = getDlxPackageDir('real-package')
       await fsPromises.mkdir(pkgDir, { recursive: true })
-      // Create a file in the DLX directory, should be ignored
+      // Create a file in the DLX directory (should be ignored)
       const filePath = path.join(getSocketDlxDir(), 'some-file.txt')
       await fsPromises.writeFile(filePath, 'content')
 

@@ -113,7 +113,7 @@ export function checkExternalExport(filePath) {
         }
 
         // If .default exists but so do other exports, it might be okay
-        // some modules export both named and default
+        // (some modules export both named and default)
         // But warn if .default seems to be the "real" export
         if (
           nonDefaultKeys.length === 0 ||

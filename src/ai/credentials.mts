@@ -29,8 +29,8 @@ import {
 
 /**
  * A KEYED provider whose credential this module resolves from a token source:
- * the HTTP providers, fireworks, synthetic, plus the CLI/first-party providers
- * anthropic, openai, xai, for CI env + keychain. Every keyed provider has a
+ * the HTTP providers (fireworks, synthetic) plus the CLI/first-party providers
+ * (anthropic, openai, xai) for CI env + keychain. Every keyed provider has a
  * `{ tokenEnv, keychainService }` entry in `PROVIDER_CREDENTIALS`.
  */
 export type KeyedCredentialProvider =
@@ -45,7 +45,7 @@ export type KeyedCredentialProvider =
  * LanguageModel seam / an injected local runner) that needs NO credential — it
  * runs on the machine, so it is "always present with no token". It is a
  * `CredentialProvider` so routing can name it uniformly, but it is deliberately
- * NOT in `PROVIDER_CREDENTIALS`, there is nothing to resolve. Use
+ * NOT in `PROVIDER_CREDENTIALS` (there is nothing to resolve). Use
  * `isKeylessProvider` to branch before a token lookup.
  */
 export const KEYLESS_PROVIDER = 'local' as const
@@ -106,7 +106,7 @@ export interface DeleteProviderCredentialOptions {
  * platform has no keychain backend — delete degrades to a no-op rather than
  * throwing, since "nothing to remove" is the same outcome either way).
  *
- * @unused No internal or Socket consumers, exercised only by its unit tests.
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 export async function deleteProviderCredential(
   options: DeleteProviderCredentialOptions,
@@ -163,7 +163,7 @@ export interface ResolveProviderCredentialOptions {
  * Resolve a provider's bearer token: explicit override → env var → keychain →
  * undefined. The token never appears inline or in logs — callers pass the
  * result straight to an `Authorization` header. Returns `undefined` when no
- * source has it, the caller decides whether that's fatal.
+ * source has it (the caller decides whether that's fatal).
  */
 export async function resolveProviderCredential(
   options: ResolveProviderCredentialOptions,
@@ -210,7 +210,7 @@ export interface WriteProviderCredentialOptions {
  * Keychain ONLY — this never writes a shell-rc export. That matters most for
  * anthropic: a live `ANTHROPIC_API_KEY` env var overrides a Claude Max-seat
  * OAuth session and silently flips the user to metered billing, so its token
- * must live only in the keychain, read on demand, never exported. A setup
+ * must live only in the keychain (read on demand), never exported. A setup
  * wizard that rc-exports `FIREWORKS_API_KEY`/`SYNTHETIC_API_KEY` for
  * convenience must still route anthropic here, keychain-only.
  *

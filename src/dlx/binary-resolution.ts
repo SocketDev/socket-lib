@@ -28,8 +28,8 @@ import { binaryPathCache, binaryPathCacheSet } from './_internal'
  * strategy with user-friendly fallbacks. Resolves platform-specific wrappers
  * (.cmd, .ps1, etc.) on Windows.
  *
- * Resolution strategy, cherry-picked from libnpmexec: 1. Use npm's
- * getBinFromManifest, handles aliases and standard cases, 2. Fall back to
+ * Resolution strategy (cherry-picked from libnpmexec): 1. Use npm's
+ * getBinFromManifest (handles aliases and standard cases) 2. Fall back to
  * user-provided binaryName if npm's strategy fails 3. Try last segment of
  * package name as final fallback 4. Use first binary as last resort.
  *
@@ -126,8 +126,8 @@ export function findBinaryPath(
  * bin field and makes all binaries executable (chmod 0o755). Handles both
  * single binary (string) and multiple binaries (object) formats.
  *
- * Aligns with npm's approach: - Uses 0o755 permission, matches npm's cmd-shim
- * - Reads bin field from package.json, matches npm's bin-links and libnpmexec
+ * Aligns with npm's approach: - Uses 0o755 permission (matches npm's cmd-shim)
+ * - Reads bin field from package.json (matches npm's bin-links and libnpmexec)
  * - Handles both string and object bin formats.
  *
  * References: - npm cmd-shim:

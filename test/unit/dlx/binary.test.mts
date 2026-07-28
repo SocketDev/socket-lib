@@ -153,7 +153,7 @@ describe.sequential('dlx-binary', () => {
           })
           await result1.spawnPromise.catch(() => {})
 
-          // Second call with yes, should behave like force
+          // Second call with yes (should behave like force)
           const result = await dlxBinary(['--version'], {
             name: 'yes-binary',
             url,

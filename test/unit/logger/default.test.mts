@@ -3,8 +3,8 @@
  *   instance creation and caching:
  *
  *   - getDefaultLogger() returns singleton Logger instance
- *   - All logging methods available, log, success, error, info, warn, debug
- *   - Instance reuse across multiple calls, singleton pattern
+ *   - All logging methods available (log, success, error, info, warn, debug)
+ *   - Instance reuse across multiple calls (singleton pattern)
  *   - Integration with global logging configuration Used by Socket tools for
  *     centralized logging without explicit Logger instantiation.
  */

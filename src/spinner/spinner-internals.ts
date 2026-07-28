@@ -31,8 +31,8 @@ import type { ShimmerInfo, SpinnerOptions } from './types'
  * as it advances. Skips work in CI or when the direction is 'none'.
  *
  * @param displayText - Text to colorize.
- * @param shimmer - Mutable shimmer state, frame counter is advanced.
- * @param currentColor - The spinner's current RGB color, used for inherit.
+ * @param shimmer - Mutable shimmer state (frame counter is advanced).
+ * @param currentColor - The spinner's current RGB color (used for inherit).
  *
  * @returns Colorized text, or the input unchanged when shimmer is skipped.
  */
@@ -68,7 +68,7 @@ export function applyShimmer(
 }
 
 /**
- * Parse the shimmer option, object or direction string, into a `ShimmerInfo`.
+ * Parse the shimmer option (object or direction string) into a `ShimmerInfo`.
  *
  * @param shimmer - The `shimmer` option value.
  *
@@ -146,7 +146,7 @@ export function resolveSpinnerColorRgb(options: SpinnerOptions): ColorRgb {
     }
   }
 
-  // Convert color option to RGB, default from theme.
+  // Convert color option to RGB (default from theme).
   const spinnerColor = options.color ?? defaultColor
 
   // Validate RGB tuple if provided.

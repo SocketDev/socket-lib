@@ -34,7 +34,7 @@ export function localeCompare(x: string, y: string): number {
 }
 
 /**
- * Compare two strings using natural sorting, numeric-aware, case-insensitive.
+ * Compare two strings using natural sorting (numeric-aware, case-insensitive).
  *
  * @example
  *   ;```typescript

@@ -1,7 +1,7 @@
 /**
  * @file `memoizeWeak` — memoizer keyed by an object reference via `WeakMap`.
  *   Cache entries are eligible for GC as soon as the keying object becomes
- *   unreachable, so there's no need for explicit eviction. First, and only
+ *   unreachable, so there's no need for explicit eviction. First (and only)
  *   argument must be an object.
  */
 

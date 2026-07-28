@@ -1,5 +1,5 @@
 /**
- * @file SEA, Single Executable Application, binary detection + path accessor.
+ * @file SEA (Single Executable Application) binary detection + path accessor.
  *   Two responsibilities (mirror of `src/smol/detect.ts` shape):
  *
  *   1. `isSeaBinary()` — memoized boolean detector for whether the current process

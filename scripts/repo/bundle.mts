@@ -1,7 +1,7 @@
 /**
  * @file Bundle runner (the `build` script): rolldown for the per-file source +
  *   externals builds, tsgo for declarations. Step scripts live in
- *   scripts/repo/bundle/ clean, externals, verify-dist.
+ *   scripts/repo/bundle/ (clean, externals, verify-dist).
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -147,7 +147,7 @@ export function isBuildNeeded(): boolean {
     }
   }
   // Either every dist-backed export target exists (built), or there are no
-  // dist-backed exports, nothing to build. Both mean: no build needed.
+  // dist-backed exports (nothing to build). Both mean: no build needed.
   return false
 }
 
@@ -407,7 +407,7 @@ async function main(): Promise<void> {
         const postBuildExitCode = await runPostBuild({ quiet, verbose })
         exitCode = postBuildExitCode
         // Integrity guard: syntax-check the emitted JS so a corrupt /
-        // half-written file, parallel-write race, fails the build here
+        // half-written file (parallel-write race) fails the build here
         // rather than as a cryptic SyntaxError at test time.
         if (exitCode === 0 && existsSync(distDir)) {
           exitCode = await verifyDist(distDir)

@@ -43,11 +43,11 @@ export type ProgressInfo = {
  */
 export type ShimmerInfo = {
   /**
-   * User-facing color reference, inherit, explicit value, or palette.
+   * User-facing color reference (inherit, explicit value, or palette).
    */
   color: ColorInherit | ColorValue | Palette
   /**
-   * Current direction, driven by config, snapshotted here for getters.
+   * Current direction (driven by config, snapshotted here for getters).
    */
   direction: ShimmerDirection
   /**
@@ -110,11 +110,11 @@ export type SpinnerInstance = {
   clear(): SpinnerInstance
 
   /**
-   * Show debug message without stopping, only if debug mode enabled.
+   * Show debug message without stopping (only if debug mode enabled)
    */
   debug(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
   /**
-   * Show debug message and stop the spinner, only if debug mode enabled.
+   * Show debug message and stop the spinner (only if debug mode enabled)
    */
   debugAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
@@ -124,7 +124,7 @@ export type SpinnerInstance = {
   dedent(spaces?: number | undefined): SpinnerInstance
 
   /**
-   * Disable shimmer effect, preserves config for later re-enable.
+   * Disable shimmer effect (preserves config for later re-enable)
    */
   disableShimmer(): SpinnerInstance
 
@@ -138,7 +138,7 @@ export type SpinnerInstance = {
   doneAndStop(text?: string | undefined, ...extras: unknown[]): SpinnerInstance
 
   /**
-   * Enable shimmer effect, restores saved config or uses defaults.
+   * Enable shimmer effect (restores saved config or uses defaults)
    */
   enableShimmer(): SpinnerInstance
 
@@ -323,7 +323,7 @@ export type SpinnerOptions = {
  */
 export type SpinnerStyle = {
   /**
-   * Array of animation frames, strings to display sequentially.
+   * Array of animation frames (strings to display sequentially)
    */
   readonly frames: string[]
   /**

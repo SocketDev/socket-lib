@@ -1,9 +1,9 @@
 /**
  * @file Unit tests for the DlxManifest class new-format entry API. Exercises
- *   the on-disk manifest behavior for dlx, download and execute, cached
+ *   the on-disk manifest behavior for dlx (download and execute) cached
  *   packages and binaries:
  *
- *   - constructor, custom vs default path
+ *   - constructor (custom vs default path)
  *   - getManifestEntry / setPackageEntry / setBinaryEntry
  *   - clearAll
  *   - error handling + concurrent operations The pure type guards (isPackageEntry

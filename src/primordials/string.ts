@@ -1,7 +1,7 @@
 /**
  * @file Safe references to `String` static methods and prototype methods.
  *   `StringPrototypeCharCodeAt` prefers the smol Fast API binding for ASCII
- *   inputs, single byte load, and translates the `-1` Fast API sentinel back to
+ *   inputs (single byte load) and translates the `-1` Fast API sentinel back to
  *   `NaN` to preserve spec parity. Two-byte strings fall back to the uncurried
  *   `String.prototype.charCodeAt`.
  *

@@ -49,27 +49,27 @@ import type { RetryOptions } from './types'
  * @example
  *   // With custom retry logic
  *   const data = await pRetry(
- *   async () => {
- *   return await apiCall()
- *   },
- *   {
- *   retries: 3,
- *   onRetry: attempt, error, delay => {
- *   console.log(`Attempt ${attempt} failed: ${error}`)
- *   console.log(`Waiting ${delay}ms before retry...`)
+ *     async () => {
+ *       return await apiCall()
+ *     },
+ *     {
+ *       retries: 3,
+ *       onRetry: (attempt, error, delay) => {
+ *         console.log(`Attempt ${attempt} failed: ${error}`)
+ *         console.log(`Waiting ${delay}ms before retry...`)
  *
- *   // Cancel retries for client errors (4xx)
- *   if (error.statusCode >= 400 && error.statusCode < 500) {
- *   return false
- *   }
+ *         // Cancel retries for client errors (4xx)
+ *         if (error.statusCode >= 400 && error.statusCode < 500) {
+ *           return false
+ *         }
  *
- *   // Use longer delay for rate limit errors
- *   if (error.statusCode === 429) {
- *   return 60000 // Wait 1 minute
- *   }
- *   },
- *   onRetryCancelOnFalse: true,
- *   },
+ *         // Use longer delay for rate limit errors
+ *         if (error.statusCode === 429) {
+ *           return 60000 // Wait 1 minute
+ *         }
+ *       },
+ *       onRetryCancelOnFalse: true,
+ *     },
  *   )
  *
  * @example
@@ -91,13 +91,13 @@ import type { RetryOptions } from './types'
  * @example
  *   // Pass arguments to callback
  *   const result = await pRetry(
- *   async, url, options => {
- *   return await fetch(url, options)
- *   },
- *   {
- *   retries: 3,
- *   args: ['https://api.example.com', { method: 'POST' }],
- *   },
+ *     async (url, options) => {
+ *       return await fetch(url, options)
+ *     },
+ *     {
+ *       retries: 3,
+ *       args: ['https://api.example.com', { method: 'POST' }],
+ *     },
  *   )
  *
  * @template T - The return type of the callback function.

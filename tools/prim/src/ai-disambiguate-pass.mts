@@ -44,7 +44,7 @@ export interface Rewrite {
  * scan), recording the introduced primordial in `usedPrimordials`.
  *
  * Pushes surviving rewrites into `rewrites` and returns how many sites were
- * skipped, no verdict, so the caller can fold the count into its own total.
+ * skipped (no verdict) so the caller can fold the count into its own total.
  */
 export async function drainPendingAmbiguous(options: {
   src: string

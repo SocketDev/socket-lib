@@ -36,7 +36,7 @@ const RULE_NAME = 'no-inline-lazy-node-getter'
 
 /**
  * Oxlint renders the rule id as either `socket-repo/<name>` (diagnostic ruleId)
- * or `socket-repo(<name>)`, compact code form, depending on reporter. Match
+ * or `socket-repo(<name>)` (compact code form) depending on reporter. Match
  * either.
  */
 function hasRuleFinding(stdout: string): boolean {

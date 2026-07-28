@@ -9,13 +9,13 @@
  *   three independent layers, all required. The official permission evaluation
  *   flow (per https://code.claude.com/docs/en/agent-sdk/permissions) is:
  *
- *   1. Hooks, none here
+ *   1. Hooks (none here)
  *   2. Deny rules from `disallowedTools` — match → blocked, even in
  *      bypass-permissions mode
  *   3. Permission mode — `dontAsk` denies anything not pre-approved without
  *      calling `canUseTool`
  *   4. Allow rules from `allowedTools` — match → approved
- *   5. `canUseTool` — skipped in `dontAsk` mode, deny by default, The doc
+ *   5. `canUseTool` — skipped in `dontAsk` mode (deny by default) The doc
  *      explicitly notes (verbatim): "`allowedTools` and `disallowedTools` ...
  *      control whether a tool call is approved, not whether the tool is
  *      available to Claude." Restricting _availability_ is the SDK's separate
@@ -191,7 +191,7 @@ Examples:
 }
 
 /**
- * Build a source snippet around, line, column. Used by audit/codemod to gather
+ * Build a source snippet around (line, column). Used by audit/codemod to gather
  * the context the model needs.
  *
  * @param {string} src Full source text.
@@ -218,7 +218,7 @@ export function cachePath(targetRoot) {
 
 /**
  * Hash the inputs that determine the verdict. Two snippets with the same hash
- * will get the same verdict, and re-using the cached one is correct. Includes
+ * will get the same verdict (and re-using the cached one is correct). Includes
  * the method name + the surrounding source + the receiver identifier so an
  * unrelated edit elsewhere in the file doesn't invalidate the cache.
  */
@@ -235,7 +235,7 @@ export function computeKey(methodName, receiverName, snippet) {
 
 /**
  * @param {Object} opts
- * @param {string} opts.targetRoot Repo root, cache lives here.
+ * @param {string} opts.targetRoot Repo root (cache lives here).
  * @param {string} opts.methodName E.g. "test".
  * @param {string} opts.receiverName E.g. "range".
  * @param {string} opts.filePath Relative path for prompt.
@@ -408,7 +408,7 @@ export function loadCache(targetRoot) {
 
 /**
  * Lazily load the SDK only when a real call is needed. Keeps the audit
- * lightweight when AI defer is off, no install, no import.
+ * lightweight when AI defer is off (no install, no import).
  */
 export async function loadSdk() {
   // The SDK is an optional peer; require it dynamically so the

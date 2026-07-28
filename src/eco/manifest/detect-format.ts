@@ -1,5 +1,5 @@
 /**
- * @file `detectFormat(filename)` — maps a filename, or path, to its
+ * @file `detectFormat(filename)` — maps a filename (or path) to its
  *   `FormatDescriptor` (ecosystem + manifest/lockfile + lockfile format), or
  *   returns `undefined` if nothing matched. On socket-btm's smol Node binary
  *   this routes to `node:smol-manifest`'s native `detectFormat`; on stock Node

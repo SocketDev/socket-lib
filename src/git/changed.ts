@@ -144,7 +144,7 @@ export async function isChanged(
     absolute: false,
   })
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path, using cache.
+  // Resolve pathname to handle symlinks before computing relative path (using cache).
   const resolvedPathname = getCachedRealpath(pathname)
   // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
   /* c8 ignore start */
@@ -159,7 +159,7 @@ export async function isChanged(
  *
  * Synchronous version of `isChanged()`. Checks if the given pathname has any
  * changes including: - Staged modifications (added with `git add`) - Unstaged
- * modifications, not yet staged - Untracked status (new file/directory not in
+ * modifications (not yet staged) - Untracked status (new file/directory not in
  * git)
  *
  * For directories, returns `true` if ANY file within the directory has changes.
@@ -198,7 +198,7 @@ export function isChangedSync(
     absolute: false,
   })
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path, using cache.
+  // Resolve pathname to handle symlinks before computing relative path (using cache).
   try {
     const resolvedPathname = getCachedRealpath(pathname)
     // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().

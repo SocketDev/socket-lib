@@ -2,7 +2,7 @@
  * @file `resolveSbt()` — SBT resolution entry point. Tries each source in
  *   order:
  *
- *   1. VFS — smol binary's embedded `sbt-launch.jar`, if packed
+ *   1. VFS — smol binary's embedded `sbt-launch.jar` (if packed)
  *   2. PATH — `sbt` script on the system PATH
  *   3. download — upstream GitHub release tgz (only when `downloadIfMissing` is
  *      passed) VFS-sourced SBT is a `.jar` that must be invoked as `java -jar
@@ -74,7 +74,7 @@ export async function doResolveSbt(
 }
 
 /**
- * @unused No internal or Socket consumers, exercised only by its unit tests.
+ * @unused No internal or Socket consumers (exercised only by its unit tests).
  */
 /* c8 ignore start - test-only escape hatch. */
 export function resetSbtResolution(): void {

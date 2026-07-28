@@ -52,7 +52,7 @@ export async function ensureIpcDirectory(filePath: string): Promise<void> {
       `IPC directory ${dir} is owned by another user (uid ${stats.uid}); refusing to use it.`,
     )
   }
-  // Permission bits only, mask out file-type bits. Reject any group or
+  // Permission bits only (mask out file-type bits). Reject any group or
   // other access — only owner bits may be set.
   const mode = stats.mode & 0o777
   /* c8 ignore next 7 - chmod-tightening fires only if umask leaves

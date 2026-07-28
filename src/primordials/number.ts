@@ -37,9 +37,9 @@ export const NumberIsSafeInteger =
 // is sequential one-byte (ASCII). Two-byte strings, BigInt-as-string,
 // etc. fall through to the slow path automatically. parseInt is
 // specialized to radix 10 because every parseInt site in this repo
-// and in socket-cli, uses `parseInt(s, 10)`. The wrapper below
+// (and in socket-cli) uses `parseInt(s, 10)`. The wrapper below
 // preserves the "missing radix" and "radix !== 10" cases by routing
-// to stock Number.parseInt — only radix 10, or omitted, hits the
+// to stock Number.parseInt — only radix 10 (or omitted) hits the
 // Fast API path.
 export const NumberParseFloat =
   smolPrimordial?.numberParseFloat ?? Number.parseFloat

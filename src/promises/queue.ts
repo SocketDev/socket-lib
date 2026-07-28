@@ -133,7 +133,7 @@ export class PromiseQueue {
   }
 
   /**
-   * Clear all pending tasks from the queue, does not affect running tasks.
+   * Clear all pending tasks from the queue (does not affect running tasks)
    */
   clear(): void {
     const pending = this.queue

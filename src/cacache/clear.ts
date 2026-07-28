@@ -39,7 +39,7 @@ import type { RemoveOptions } from './types'
  * @param options - Optional configuration for selective clearing.
  * @param options.prefix - Prefix or pattern to match (supports * wildcards)
  *
- * @returns Number of entries removed, only when prefix is specified
+ * @returns Number of entries removed (only when prefix is specified)
  */
 // oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export async function clear(
@@ -91,7 +91,7 @@ export async function clear(
 
 /**
  * Build a key→boolean matcher for `pattern`. For non-wildcard patterns this
- * returns a prefix-startsWith predicate, no regex allocation; for wildcard
+ * returns a prefix-startsWith predicate (no regex allocation); for wildcard
  * patterns it compiles the regex _once_ and closes over it so the caller can
  * apply the same matcher across N keys in O(1)-per-key.
  *

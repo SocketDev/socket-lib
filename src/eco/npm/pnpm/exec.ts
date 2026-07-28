@@ -65,7 +65,7 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
 
   // CI defaults: pnpm uses --frozen-lockfile by default. Suppress when
   // the caller explicitly opted into lockfile updates. The full chain
-  // short-circuits at getCI() in non-CI runs, returns false, so the
+  // short-circuits at getCI() in non-CI runs (returns false), so the
   // remaining branches are unreachable in test environments.
   /* c8 ignore start */
   const frozenLockfileArgs = []

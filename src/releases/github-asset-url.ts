@@ -225,7 +225,7 @@ export async function getReleaseAssetUrl(
     let resolvedAssets: Array<{ name: string; browser_download_url: string }>
     if (response.body.byteLength === 0) {
       // REST is degraded — silently route to GraphQL. Only error
-      // out, with a clear, informative message, if BOTH transports
+      // out (with a clear, informative message) if BOTH transports
       // fail to return assets for this tag.
       let fallbackAssets:
         | Array<{ name: string; browser_download_url: string }>
@@ -285,7 +285,7 @@ export async function getReleaseAssetUrl(
   }
 
   // Try each candidate in order — the FIRST candidate that matches any
-  // release asset wins, candidate priority, not asset-list order.
+  // release asset wins (candidate priority, not asset-list order).
   let asset: { name: string; browser_download_url: string } | undefined
   for (let i = 0, { length } = candidates; i < length; i += 1) {
     const candidate = candidates[i]!

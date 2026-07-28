@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for the withSpinner()/withSpinnerSync() wrappers that wrap
  *   async and sync operations with an animated spinner and restore spinner
- *   state, color, shimmer, afterwards, including on error. Used by Socket CLI
+ *   state (color, shimmer) afterwards, including on error. Used by Socket CLI
  *   for long-running operations (package scanning, API calls).
  */
 

@@ -209,7 +209,7 @@ describe('orderCandidates', () => {
       route: FULL,
       tier: 'opus',
     })
-    // opus is quality-first, no cost rank, but a near-cap account still sinks.
+    // opus is quality-first (no cost rank), but a near-cap account still sinks.
     expect(providers(order).at(-1)).toBe('anthropic')
   })
 

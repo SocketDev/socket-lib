@@ -109,7 +109,7 @@ describe('socket env', () => {
   describe('getSocketApiToken', () => {
     // getEnvValue falls back to process.env when neither isolated
     // nor shared overrides have a value. Developers commonly have
-    // SOCKET_API_KEY, or another alias, set in their shell for daily
+    // SOCKET_API_KEY (or another alias) set in their shell for daily
     // use, which would leak into the fallback-chain tests below. Pin
     // each alias to undefined so only the one we set per-test wins.
     // socket-api-token-env: bootstrap -- this suite tests the legacy-alias
@@ -418,7 +418,7 @@ describe('socket env', () => {
 
   describe('getSocketRepositoryName', () => {
     // Same env-leak guard as getSocketApiToken above: developers
-    // commonly have SOCKET_REPOSITORY_NAME, or its alias, set in
+    // commonly have SOCKET_REPOSITORY_NAME (or its alias) set in
     // their shell. Pin both to undefined per-test so only the one
     // we set wins.
     const clearRepoAliases = () => {

@@ -120,7 +120,7 @@ describe('binary resolution with cross-platform wrappers', () => {
       const binDir = path.join(nodeModules, 'bin')
       mkdirSync(binDir, { recursive: true })
 
-      // Create .cmd wrapper, Windows shim created by npm
+      // Create .cmd wrapper (Windows shim created by npm)
       writeFileSync(
         path.join(binDir, 'cli.js.cmd'),
         '@echo off\nnode "%~dp0cli.js" %*',
@@ -204,7 +204,7 @@ describe('binary resolution with cross-platform wrappers', () => {
       const binDir = path.join(nodeModules, 'bin')
       mkdirSync(binDir, { recursive: true })
 
-      // Create .exe binary, native executable
+      // Create .exe binary (native executable)
       writeFileSync(path.join(binDir, 'tool.exe'), 'MZ\x90\x00') // Minimal PE header
 
       // Binary resolution should find the .exe
@@ -237,7 +237,7 @@ describe('binary resolution with cross-platform wrappers', () => {
       const binDir = path.join(nodeModules, 'bin')
       mkdirSync(binDir, { recursive: true })
 
-      // Create bare executable, no wrapper needed on Unix
+      // Create bare executable (no wrapper needed on Unix)
       writeFileSync(
         path.join(binDir, 'cli'),
         '#!/usr/bin/env node\nconsole.log("test")',
@@ -443,7 +443,7 @@ describe('binary resolution with cross-platform wrappers', () => {
       expect(existsSync(path.join(binDir, 'tool.ps1'))).toBe(true)
       expect(existsSync(path.join(binDir, 'tool'))).toBe(true)
 
-      // Resolution should prefer .cmd, npm's default wrapper format
+      // Resolution should prefer .cmd (npm's default wrapper format)
       // This tests the priority order: .cmd, .bat, .ps1, .exe, bare
     }, 'dlx-pkg-priority-')
   })

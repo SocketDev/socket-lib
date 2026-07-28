@@ -45,7 +45,7 @@ import type { LinkOptions } from './types'
  *   ```
  *
  * @param text - Link text to display.
- * @param url - URL, included in fallback mode.
+ * @param url - URL (included in fallback mode)
  * @param options - Link configuration options.
  *
  * @returns Colored link text

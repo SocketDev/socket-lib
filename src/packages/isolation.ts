@@ -56,7 +56,7 @@ import { getNodePath } from '../node/path'
 /**
  * Isolates a package in a temporary test environment.
  *
- * Supports multiple input types: 1. File system path, absolute or relative, 2.
+ * Supports multiple input types: 1. File system path (absolute or relative) 2.
  * Package name with optional version spec 3. npm package spec (parsed via
  * npm-package-arg)
  *

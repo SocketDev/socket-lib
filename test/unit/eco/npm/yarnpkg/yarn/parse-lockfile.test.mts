@@ -125,7 +125,7 @@ describe('eco/npm/yarnpkg/yarn/parse-lockfile', () => {
 
     it('does NOT flip the parent isOptional based on dependenciesMeta children', () => {
       // `dependenciesMeta.<child>.optional` flags the CHILD as
-      // optional, parent listed it as an optional peer, not the
+      // optional (parent listed it as an optional peer), not the
       // parent itself. A package like `optional-thing` that happens
       // to list optional children must NOT be marked optional.
       const optional = result.packages.find(p => p.name === 'optional-thing')!

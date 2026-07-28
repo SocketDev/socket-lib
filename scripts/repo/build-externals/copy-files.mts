@@ -11,7 +11,7 @@ const logger = getDefaultLogger()
 
 /**
  * Copy local TypeScript declaration files only. JavaScript files are either
- * bundled by rolldown or manually vendored, handled separately.
+ * bundled by rolldown or manually vendored (handled separately).
  */
 export async function copyLocalFiles(
   srcDir: string,
@@ -22,7 +22,7 @@ export async function copyLocalFiles(
   let count = 0
 
   for (const file of files) {
-    // Only copy .d.ts files, hand-written type definitions
+    // Only copy .d.ts files (hand-written type definitions)
     // .js files are either bundled by rolldown or don't need to be in dist
     if (file.endsWith('.d.ts')) {
       const srcPath = path.join(srcDir, file)
@@ -61,7 +61,7 @@ export async function copyRecursive(
       // Recursively copy directory
       count += await copyRecursive(srcEntry, destEntry, relPath, quiet)
     } else if (!existsSync(destEntry)) {
-      // File doesn't exist, wasn't bundled, copy it.
+      // File doesn't exist (wasn't bundled), copy it.
       await fs.copyFile(srcEntry, destEntry)
       if (!quiet) {
         logger.log(`  Copied ${relPath}`)

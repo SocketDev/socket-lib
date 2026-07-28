@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for the browser-safe npm registry client.
- *   Pure-parser tests use sample JSON fixtures, no network.
+ *   Pure-parser tests use sample JSON fixtures (no network).
  *   Network helper tests inject a nock-backed `{ http: { json } }` adapter.
  */
 

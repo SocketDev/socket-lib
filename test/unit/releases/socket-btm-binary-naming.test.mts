@@ -153,7 +153,7 @@ describe('releases/socket-btm-binary-naming', () => {
 
     it('should use the release platform token win on windows', () => {
       // Published .node prebuilt assets are <tag>-win-<arch>.node
-      // release-platform naming, matching the node-smol family.
+      // (release-platform naming, matching the node-smol family).
       expect(
         getNodePrebuildAssetName('opentui-20260424-18f0f46', 'win32', 'arm64'),
       ).toBe('opentui-20260424-18f0f46-win-arm64.node')

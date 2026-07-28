@@ -1,8 +1,8 @@
 /**
  * @file Tests for primordials/process — the call-through accessors. Verifies
  *   the two design properties: (1) a `vi.spyOn(process, 'cwd')` STILL
- *   intercepts, late call preserves mockability, and (2) reading goes through
- *   the captured process object, the real values surface.
+ *   intercepts (late call preserves mockability), and (2) reading goes through
+ *   the captured process object (the real values surface).
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'

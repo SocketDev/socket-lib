@@ -1,6 +1,6 @@
 /**
  * @file Upstream OpenGrep release asset-name mapping per `platform-arch`.
- *   OpenGrep publishes raw binaries, no archive wrapper, for macOS and Linux,
+ *   OpenGrep publishes raw binaries (no archive wrapper) for macOS and Linux,
  *   and a zipped binary (`opengrep-core_windows_x86.zip` containing
  *   `opengrep-core.exe`) for Windows. The `isArchive` flag tells the download
  *   helper whether to extract or copy as-is.

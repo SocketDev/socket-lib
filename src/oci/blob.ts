@@ -1,5 +1,5 @@
 /**
- * @file Fetch a blob, a layer or the config, by digest. `GET
+ * @file Fetch a blob (a layer or the config) by digest. `GET
  *   /v2/<repository>/blobs/<digest>` with a bearer token. `getBlob` returns the
  *   raw bytes as a `Uint8Array` — the CALLER is responsible for verifying
  *   `sha256(bytes) === digest`. `getBlobJson` is a convenience for the config
@@ -52,7 +52,7 @@ export async function getBlob(
 }
 
 /**
- * Fetch and parse a JSON blob by digest, the image config, typically. Uses the
+ * Fetch and parse a JSON blob by digest (the image config, typically). Uses the
  * adapter's `json` leg so a non-2xx surfaces through its error path.
  */
 export async function getBlobJson<T = unknown>(

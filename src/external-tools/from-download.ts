@@ -1,6 +1,6 @@
 /**
  * @file Generic "download tier" for external-tools resolvers. The per-tool
- *   resolvers, jre, bazel, sbt, each have local-discovery tiers — VFS, env-var
+ *   resolvers (jre, bazel, sbt) each have local-discovery tiers — VFS, env-var
  *   pointer, system PATH. This module adds two helpers covering the fourth
  *   tier:
  *
@@ -17,7 +17,7 @@
  *     / `ResolvedBazel` / `ResolvedSbt`. Trust-on-first-use:
  *   - First call with no `integrity`: downloads, returns the computed
  *     sha512-<base64> in the result. Caller writes it back to
- *     `external-tools.json`, or wherever the pin lives.
+ *     `external-tools.json` (or wherever the pin lives).
  *   - Subsequent calls with `integrity` set: downloads, verifies against the pin,
  *     returns the same value. Customization:
  *   - `downloader?` lets tests inject a fake fetch, and gives Socket consumers an
@@ -69,9 +69,9 @@ export interface DownloadAndExtractOptions extends DownloadOptions {
 }
 
 /**
- * Download an archive, with integrity verification, and extract it into
+ * Download an archive (with integrity verification) and extract it into
  * `extractedDir`. Idempotent: if `extractedDir` already exists and is
- * non-empty, extraction is skipped — the helper still downloads, or cache-hits
+ * non-empty, extraction is skipped — the helper still downloads (or cache-hits)
  * the archive so the integrity is surfaced consistently.
  *
  * @example
@@ -94,7 +94,7 @@ export async function downloadAndExtractTool(
     ...options,
   } as typeof options
   // Skip extraction when the target dir already has content. Empty
-  // dir → treat as not-yet-extracted, handles a half-created mkdir.
+  // dir → treat as not-yet-extracted (handles a half-created mkdir).
   let extracted = false
   if (existsSync(extractedDir)) {
     const entries = await fsPromises.readdir(extractedDir)
@@ -151,9 +151,9 @@ export interface DownloadedArchive {
 
 /**
  * Optional downloader injection. Default: `dlx/binary-download.downloadBinary`.
- * Replace when: - Writing unit tests that need a fake fetch, no network. -
+ * Replace when: - Writing unit tests that need a fake fetch (no network). -
  * Wiring an alternate cache backend or progress reporter. - Adding
- * tool-specific instrumentation, metrics, retry.
+ * tool-specific instrumentation (metrics, retry).
  */
 export type BinaryDownloader = typeof downloadBinary
 

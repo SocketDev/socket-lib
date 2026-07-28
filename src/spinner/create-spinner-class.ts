@@ -3,7 +3,7 @@
  *   `yocto-spinner` constructor. The class graph is constructed inside
  *   `createSpinnerClass()` so the `super()` call binds against the runtime
  *   `YoctoSpinner` constructor passed in by the factory; keeping it here
- *   rather than at module scope, preserves the spinner's lazy-init guarantee
+ *   (rather than at module scope) preserves the spinner's lazy-init guarantee
  *   while splitting the bulk of the class body out of the factory module.
  */
 
@@ -65,7 +65,7 @@ export type YoctoSpinnerConstructor = new (...args: unknown[]) => {
   // exposes it as a property, but SpinnerClass owns the public `text()`
   // getter/setter method, and TypeScript forbids overriding a base property
   // with a subclass method. The base `text` is reached through the index
-  // signature, so internal writes use `super['text']`, bracket access.
+  // signature, so internal writes use `super['text']` (bracket access).
   isSpinning: boolean
   [key: string]: unknown
 }
@@ -432,7 +432,7 @@ export function createSpinnerClass(
      * current base text. When called with text, updates the display and returns
      * the spinner for chaining.
      *
-     * @param value - Text to display, omit to get current text.
+     * @param value - Text to display (omit to get current text)
      *
      * @returns Current text (getter) or this spinner (setter)
      */

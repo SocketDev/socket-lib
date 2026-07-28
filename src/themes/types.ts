@@ -80,7 +80,7 @@ export type ThemeEffects = {
   spinner?:
     | {
         /**
-         * Color, supports theme references.
+         * Color (supports theme references)
          */
         color?: ColorReference | undefined
         /**
@@ -100,7 +100,7 @@ export type ThemeEffects = {
          */
         enabled?: boolean | undefined
         /**
-         * Color, single, gradient, or keyword.
+         * Color (single, gradient, or keyword)
          */
         color?: ColorReference | ColorValue[] | undefined
         /**
@@ -108,7 +108,7 @@ export type ThemeEffects = {
          */
         direction?: ShimmerDirection | undefined
         /**
-         * Speed, steps per frame.
+         * Speed (steps per frame)
          */
         speed?: number | undefined
       }

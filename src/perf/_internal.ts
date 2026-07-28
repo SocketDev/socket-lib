@@ -7,6 +7,6 @@
 import type { PerformanceMetrics } from './types'
 
 /**
- * Global metrics collection, only in debug mode.
+ * Global metrics collection (only in debug mode).
  */
 export const performanceMetrics: PerformanceMetrics[] = []

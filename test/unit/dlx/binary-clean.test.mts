@@ -257,7 +257,7 @@ describe.sequential('dlx-binary cache cleanup', () => {
           const entryPath = path.join(cachePath, 'future-timestamp-entry')
           await fs.mkdir(entryPath, { recursive: true })
 
-          // Write metadata with future timestamp, clock skew scenario
+          // Write metadata with future timestamp (clock skew scenario)
           const futureTimestamp = Date.now() + 365 * 24 * 60 * 60 * 1000 // 1 year in future
           await fs.writeFile(
             path.join(entryPath, '.dlx-metadata.json'),
@@ -289,7 +289,7 @@ describe.sequential('dlx-binary cache cleanup', () => {
           const entryPath = path.join(cachePath, 'slight-future-entry')
           await fs.mkdir(entryPath, { recursive: true })
 
-          // Write metadata with slightly future timestamp, minor clock skew
+          // Write metadata with slightly future timestamp (minor clock skew)
           const slightlyFutureTimestamp = Date.now() + 5000 // 5 seconds in future
           await fs.writeFile(
             path.join(entryPath, '.dlx-metadata.json'),

@@ -5,7 +5,7 @@
  *   for any spec-compliant registry, ghcr.io included), and fall back to the
  *   conventional `GET https://<registry>/token?service=<registry>&scope=
  *   repository:<repository>:pull` form when a registry answers the probe with
- *   200, no challenge advertised. A registry that needs no auth at all yields
+ *   200 (no challenge advertised). A registry that needs no auth at all yields
  *   an empty token, which the manifest/blob callers send as no `Authorization`.
  */
 
@@ -61,7 +61,7 @@ export function firstHeaderValue(
 /**
  * Obtain an anonymous pull token for `repository` on `registry`. Probes
  * `GET /v2/`: a 401 with a parseable Bearer challenge drives the realm-based
- * token request; a 200, no challenge, means the registry serves anonymous
+ * token request; a 200 (no challenge) means the registry serves anonymous
  * pulls directly, so the conventional `/token` endpoint is tried and an empty
  * token is returned when it declines. Fails loud when a registry demands auth
  * but advertises no usable challenge.
@@ -144,7 +144,7 @@ export function parseWwwAuthenticate(
   }
   const params: Record<string, string> = Object.create(null)
   // Each challenge param is `key="value"`: capture 1 = the word-char key,
-  // capture 2 = the quoted value, anything but a double quote.
+  // capture 2 = the quoted value (anything but a double quote).
   for (const match of bearer[1]!.matchAll(/(\w+)="([^"]*)"/g)) {
     params[match[1]!] = match[2]!
   }

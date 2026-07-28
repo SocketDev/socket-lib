@@ -126,7 +126,7 @@ export function memoizeAsync<Args extends unknown[], Result>(
 
     debugLog(`[memoizeAsync:${name}] miss`, { key })
 
-    // Create promise and cache it immediately, for deduplication.
+    // Create promise and cache it immediately (for deduplication).
     // The async IIFE is what gets stored in `refreshing` and `cache`,
     // so concurrent callers can join the same in-flight computation
     // before it resolves — that's the dedup contract.

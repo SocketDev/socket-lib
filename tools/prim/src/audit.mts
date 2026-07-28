@@ -1,6 +1,6 @@
 /**
  * @file Walk a directory of JavaScript/TypeScript and emit findings: every site
- *   where a primordial would, or already does, apply. Each finding records:
+ *   where a primordial would (or already does) apply. Each finding records:
  *
  *   - The primordial that maps to the call site (e.g. `ArrayPrototypeMap`).
  *   - Whether that primordial is currently exported from socket-lib (`covered`)
@@ -60,7 +60,7 @@ import { disambiguateReceiver } from './disambiguate.mts'
  * @param {string} opts.scanDir Directory to walk.
  * @param {Set<string>} opts.exported Currently-exported primordials.
  * @param {string[]} [opts.skipDirs] Directories to skip during walk.
- * @param {string[]} [opts.skipFiles] Files to skip, basename match.
+ * @param {string[]} [opts.skipFiles] Files to skip (basename match).
  * @param {boolean} [opts.aiDisambiguate] When true, defer ambiguous prototype
  *   methods (.test, .then, etc.) to Claude with a locked-down read-only tool
  *   surface. Off by default — opt-in via CLI flag. Requires ANTHROPIC_API_KEY
@@ -171,7 +171,7 @@ export async function auditDirectory({
   })
 
   // Track files that couldn't be audited. Two failure modes:
-  //   - parse: acorn-wasm threw on the, possibly type-stripped, source.
+  //   - parse: acorn-wasm threw on the (possibly type-stripped) source.
   //   - strip: Node's module.stripTypeScriptTypes threw before we got
   //     to the parser. Different mode but same user impact (the file
   //     was silently skipped, audit results incomplete).
@@ -261,7 +261,7 @@ export async function auditDirectory({
   }
 
   // Post-walk: drain pending ambiguous sites. Each call goes to
-  // Claude, or hits the on-disk cache, and produces a verdict.
+  // Claude (or hits the on-disk cache) and produces a verdict.
   // Sequential to keep API throughput predictable; parallelism
   // would need a token budget concept we don't have.
   if (aiDisambiguate && pendingAmbiguous.length > 0) {

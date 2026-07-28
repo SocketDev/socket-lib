@@ -23,7 +23,7 @@
  *     test cases that rely on fresh reads. Not cached:
  *   - Read failures (ENOENT under `throws: false` returns `undefined`). Caching
  *     undefined would silently miss a file that gets created later.
- *   - Reads with a `reviver`, see above.
+ *   - Reads with a `reviver` (see above).
  *   - Reads with explicit `cache: false`.
  *   - Relative paths whose `resolvePath` would change CWD-sensitively. We key on
  *     the literal input path, so callers passing relative paths from different
@@ -55,7 +55,7 @@ export interface CacheEntry {
 }
 
 // Insertion-ordered Map gives LRU-ish behavior when we delete + reinsert on
-// access. Not strictly LRU, we'd need access-order tracking on hit too, but
+// access. Not strictly LRU (we'd need access-order tracking on hit too) but
 // "most-recently-set wins" is the dominant pattern for stat-validated caches.
 const cache = new MapCtor<string, CacheEntry>()
 

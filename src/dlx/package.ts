@@ -249,7 +249,7 @@ export async function ensurePackageInstalled(
     lockPath,
     async () => {
       // fs is imported at the top
-      // Double-check if already installed, unless force.
+      // Double-check if already installed (unless force).
       // Another process may have installed while waiting for lock.
       if (!force && fs.existsSync(installedDir)) {
         // Verify package.json exists.
@@ -262,7 +262,7 @@ export async function ensurePackageInstalled(
       // If a lockfile was provided, materialize it into packageDir and
       // drop a hardened .npmrc alongside. Arborist picks up both.
       // Sniff: explicit { type, value } wins; bare string with leading `{`
-      // after whitespace, is JSON content, else a filesystem path.
+      // (after whitespace) is JSON content, else a filesystem path.
       if (install?.lockfile !== undefined) {
         const spec = install.lockfile
         const lockDest = path.join(packageDir, 'package-lock.json')
@@ -287,7 +287,7 @@ export async function ensurePackageInstalled(
         )
       }
 
-      // Install package and dependencies using Arborist, like npx does.
+      // Install package and dependencies using Arborist (like npx does).
       // Split into buildIdealTree → firewall check → reify so we can
       // scan all resolved packages before downloading any tarballs.
       try {
@@ -299,21 +299,21 @@ export async function ensurePackageInstalled(
           // Use Socket's shared cacache directory (~/.socket/_cacache).
           /* c8 ignore stop */
           cache: getSocketCacacheDir(),
-          // Skip devDependencies, production-only like npx.
+          // Skip devDependencies (production-only like npx).
           omit: ['dev'],
           // Security: Skip install/preinstall/postinstall scripts to prevent arbitrary code execution.
           ignoreScripts: true,
-          // Security: Enable binary links, needed for dlx to execute the package binary.
+          // Security: Enable binary links (needed for dlx to execute the package binary).
           binLinks: true,
-          // Suppress funding messages, unneeded for ephemeral dlx installs.
+          // Suppress funding messages (unneeded for ephemeral dlx installs).
           fund: false,
-          // Skip audit, unneeded for ephemeral dlx installs.
+          // Skip audit (unneeded for ephemeral dlx installs).
           audit: false,
-          // Suppress output, unneeded for ephemeral dlx installs.
+          // Suppress output (unneeded for ephemeral dlx installs).
           silent: true,
         })
 
-        // Step 1: Resolve dependency tree, registry metadata only, no tarballs.
+        // Step 1: Resolve dependency tree (registry metadata only, no tarballs).
         /* c8 ignore next - External Arborist call */
         await arb.buildIdealTree({ add: [packageSpec] })
 
@@ -322,7 +322,7 @@ export async function ensurePackageInstalled(
         await checkFirewallPurls(arb, packageName)
 
         // Step 3: Download tarballs and install. Reuses the cached idealTree.
-        // save: true creates package.json and package-lock.json at the root, like npx.
+        // save: true creates package.json and package-lock.json at the root (like npx).
         /* c8 ignore next - External Arborist call */
         await arb.reify({ save: true })
       } catch (e) {

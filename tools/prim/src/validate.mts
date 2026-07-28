@@ -30,7 +30,7 @@ import { stripTypeScriptTypes } from 'node:module'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 /**
- * Detect import cycles introduced, or made worse, by the planned rewrites.
+ * Detect import cycles introduced (or made worse) by the planned rewrites.
  *
  * Algorithm:
  *
@@ -40,7 +40,7 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
  * 2. For nodes that ARE plans, use `plan.newSource` as the source-of-truth (the
  *    post-rewrite view). For other nodes referenced via edges, read the file on
  *    disk + parse. Files that don't exist or fail to parse contribute no
- *    outgoing edges, the cycle search continues past them.
+ *    outgoing edges (the cycle search continues past them).
  * 3. Run DFS from each plan node. Track a recursion stack of `(node, edge
  *    specifier)` tuples. A revisit of any node currently on the stack means we
  *    found a back-edge → cycle. Walk the stack to recover the path, surface it
@@ -109,10 +109,10 @@ export function detectImportCycles(
 
 /**
  * Iterative DFS for a back-edge into the recursion stack. Returns the cycle
- * path, sequence of node keys ending at the back-edge target, or undefined if
+ * path (sequence of node keys ending at the back-edge target) or undefined if
  * no cycle is found from this start.
  *
- * Iterative, not recursive, because deep graphs would blow the call stack on
+ * Iterative (not recursive) because deep graphs would blow the call stack on
  * pathological inputs. The state per frame is the node, its abs path, and an
  * index into its outgoing-edges list.
  */
@@ -126,7 +126,7 @@ export function dfsForCycle(
   visited: Set<string>,
 ): readonly string[] | undefined {
   // Each frame: { node, abs, edges, edgeIndex }. We push on enter and pop
-  // on exit. `via`, in the stack array passed by caller, records the
+  // on exit. `via` (in the stack array passed by caller) records the
   // specifier that led to this node, used to render the cycle path.
   type Frame = {
     node: string
@@ -325,7 +325,7 @@ export function isRelativeSpecifier(spec: string): boolean {
  * (ext-stripped) but needs the actual on-disk path to read source. We probe the
  * same set of extensions used elsewhere; first one that exists wins.
  *
- * `hint` is the original path, with ext, for the starting plan — used as the
+ * `hint` is the original path (with ext) for the starting plan — used as the
  * preferred answer when the key matches.
  */
 export function nodeAbsForKey(node: string, hint: string): string {
@@ -413,7 +413,7 @@ export interface ValidationFinding {
  * Run cross-batch validation on a set of planned rewrites. Returns an empty
  * array on success; a non-empty array means the apply should abort.
  *
- * `primordialsRoot`, optional, absolute, normalized to forward slashes, is the
+ * `primordialsRoot` (optional, absolute, normalized to forward slashes) is the
  * directory containing per-leaf primordials files. Used to recognize the
  * source-of-truth files that should never be rewritten.
  */

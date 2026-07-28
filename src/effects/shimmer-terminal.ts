@@ -56,7 +56,7 @@ export function ansiTruecolor([r, g, b]: RGB): string {
  * grapheme cluster as multiple "chars."
  *
  * If `colors.length` is shorter than the text's char count, surplus chars are
- * emitted without color, uncolored tail.
+ * emitted without color (uncolored tail).
  *
  * @param text Input string to color.
  * @param colors Per-char colors; index `i` colors char `i`

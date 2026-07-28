@@ -1,6 +1,6 @@
 /**
- * @file Object mutation helpers — `merge`, deep recursive, `objectAssign`
- *   alias for native, `objectFreeze`, alias for native. `merge` includes
+ * @file Object mutation helpers — `merge` (deep recursive), `objectAssign`
+ *   (alias for native), `objectFreeze` (alias for native). `merge` includes
  *   infinite-loop detection via `LOOP_SENTINEL` because `__proto__` and
  *   self-referential graphs would otherwise blow the stack on a recursive
  *   descent.
@@ -17,7 +17,7 @@ import { isObject } from './predicates'
  * Deep merge source object into target object.
  *
  * Recursively merges properties from `source` into `target`. Arrays in source
- * completely replace arrays in target, no element-wise merging. Objects are
+ * completely replace arrays in target (no element-wise merging). Objects are
  * merged recursively. Includes infinite loop detection for safety.
  *
  * @example
@@ -35,7 +35,7 @@ import { isObject } from './predicates'
  *   merge({ arr: [1, 2] }, { arr: [3] }) // { arr: [3] }
  *   ```
  *
- * @param target - The object to merge into, will be modified.
+ * @param target - The object to merge into (will be modified)
  * @param source - The object to merge from.
  *
  * @returns The modified target object

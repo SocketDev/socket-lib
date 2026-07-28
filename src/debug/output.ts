@@ -288,7 +288,7 @@ export function debugtime(label: string) {
 }
 
 /**
- * Resolve the default spinner on Node; off Node, browser bundles, there is no
+ * Resolve the default spinner on Node; off Node (browser bundles) there is no
  * spinner — callers no-op through their optional chains. Construction is
  * deferred to first debug write (every call site sits behind the `isEnabled`
  * / `getSocketDebug` gates), so a browser bundle never constructs the

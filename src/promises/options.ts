@@ -88,11 +88,11 @@ export function normalizeRetryOptions(
     args = [],
     // Multiplier for exponential backoff (e.g., 2 doubles delay each retry).
     backoffFactor = 2,
-    // Initial delay before the first retry, in milliseconds.
+    // Initial delay before the first retry (in milliseconds).
     baseDelayMs = 200,
     // Whether to apply randomness to spread out retries.
     jitter = true,
-    // Upper limit for any backoff delay, in milliseconds.
+    // Upper limit for any backoff delay (in milliseconds).
     maxDelayMs = 10_000,
     // Optional callback invoked on each retry attempt:
     // (attempt: number, error: unknown, delay: number) => void

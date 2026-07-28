@@ -147,7 +147,7 @@ describe.sequential('secrets/_internal — dedupeRead', () => {
   test('drops the inflight slot after the reader settles', async () => {
     const reader = async () => 'val'
     await dedupeRead('svc', 'a', reader)
-    // A fresh call after settle goes through the value cache, no inflight slot.
+    // A fresh call after settle goes through the value cache (no inflight slot).
     let secondCalls = 0
     const secondReader = async () => {
       secondCalls += 1

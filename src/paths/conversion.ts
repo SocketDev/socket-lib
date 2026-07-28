@@ -48,7 +48,7 @@ export function fromUnixPath(pathLike: string | Buffer | URL): string {
  * Split a path into an array of segments.
  *
  * Divides a path into individual components by splitting on path separators
- * both forward slashes and backslashes.
+ * (both forward slashes and backslashes).
  *
  * @example
  *   ;```typescript

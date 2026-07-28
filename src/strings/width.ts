@@ -45,7 +45,7 @@ export function getEastAsianWidth() {
 // be composed of multiple Unicode code points.
 //
 // Why this matters:
-// - '👍', thumbs up, is 1 code point but appears as 1 character → 1 grapheme
+// - '👍' (thumbs up) is 1 code point but appears as 1 character → 1 grapheme
 // - '👍🏽' (thumbs up + skin tone) is 2 code points but appears as 1 character → 1 grapheme
 // - '👨‍👩‍👧‍👦' (family) is 7 code points (4 people + 3 ZWJ) but appears as 1 character → 1 grapheme
 // - 'é' can be 1 code point (U+00E9) OR 2 code points (e + ́) but appears as 1 character → 1 grapheme
@@ -56,7 +56,7 @@ export function getEastAsianWidth() {
 // Intl.Segmenter is available in Node.js 16+ (our floor is 18) and all modern
 // browsers.
 //
-// Construction is DEFERRED to first stringWidth() call, not module-eval: an
+// Construction is DEFERRED to first stringWidth() call (not module-eval): an
 // Intl.Segmenter holds a live ICU [Foreign] handle, and constructing it at
 // import time pins that handle into every module transitively importing this
 // leaf — aborting V8 --build-snapshot serialization. The memoized getter keeps
@@ -75,7 +75,7 @@ export function getSegmenter(): Intl.Segmenter {
 //
 // The 'v' flag (ES2024, Node 20+) provides the most accurate Unicode support
 // including \p{RGI_Emoji}. The 'u' flag (ES2015, Node 18+) falls back to
-// \p{Extended_Pictographic} broader, slightly less precise.
+// \p{Extended_Pictographic} (broader, slightly less precise).
 let zeroWidthClusterRegex: RegExp
 let leadingNonPrintingRegex: RegExp
 let emojiRegex: RegExp
@@ -104,9 +104,9 @@ try {
  * Get the visual width of a string in terminal columns.
  *
  * Calculates how many columns a string will occupy when displayed in a
- * terminal, accounting for: - ANSI escape codes, stripped before calculation -
+ * terminal, accounting for: - ANSI escape codes (stripped before calculation) -
  * Wide characters (CJK ideographs, fullwidth forms) that take 2 columns - Emoji
- * including complex sequences, that take 2 columns - Combining marks and
+ * (including complex sequences) that take 2 columns - Combining marks and
  * zero-width characters (take 0 columns) - East Asian Width properties
  * (Fullwidth, Wide, Halfwidth, Narrow, etc.)
  *
@@ -147,7 +147,7 @@ export function stringWidth(text: string): number {
 
   // Segment the string into grapheme clusters and calculate width for each.
   for (const { segment } of getSegmenter().segment(plainText)) {
-    // Skip zero-width / non-printing clusters, controls, combining marks.
+    // Skip zero-width / non-printing clusters (controls, combining marks).
     if (RegExpPrototypeTest(zeroWidthClusterRegex, segment)) {
       continue
     }
@@ -173,7 +173,7 @@ export function stringWidth(text: string): number {
     width += eastAsianWidth(codePoint, eastAsianWidthOptions)
 
     // Handle trailing Halfwidth and Fullwidth Forms (U+FF00-U+FFEF).
-    // These are spacing characters, not combining marks, so they add
+    // These are spacing characters (not combining marks) so they add
     // their own column(s) when following another character.
     if (segment.length > 1) {
       const trailingChars = segment.slice(1)

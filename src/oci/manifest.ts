@@ -42,7 +42,7 @@ export const MANIFEST_ACCEPT = [
 ].join(', ')
 
 /**
- * Build the manifest URL for a repository reference, a tag or a digest.
+ * Build the manifest URL for a repository reference (a tag or a digest).
  */
 export function buildManifestUrl(
   registry: string,
@@ -53,8 +53,8 @@ export function buildManifestUrl(
 }
 
 /**
- * Fetch one manifest by reference, tag or digest. Returns the parsed manifest,
- * its canonical `Docker-Content-Digest`, the value a caller pins, and the
+ * Fetch one manifest by reference (tag or digest). Returns the parsed manifest,
+ * its canonical `Docker-Content-Digest` (the value a caller pins), and the
  * served media type. Fails loud on a non-2xx response or an unparseable body.
  */
 export async function getManifest(

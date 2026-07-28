@@ -1,7 +1,7 @@
 /**
  * @file Uv project install helpers — the locked-source-of-truth half of the
  *   "uv project + dlx materialize" model.
- *   uv, Astral's Python package manager, drives a uv PROJECT — a directory with
+ *   uv (Astral's Python package manager) drives a uv PROJECT — a directory with
  *   `pyproject.toml` + `uv.lock` (+ optional `[tool.uv] exclude-newer`). The
  *   lock manifests every transitive version, so the project is the most
  *   locked-down, most-version-pinned form a Python tool install can take.
@@ -41,7 +41,7 @@ const WAIT_TICKS = 30
 /**
  * Export a uv project's locked closure to a flat requirements list, then
  * `uv pip install --target` it into a content-addressed dlx dir. The dlx dir
- * holds plain files, no venv, so it is relocatable and embeddable in a smol
+ * holds plain files (no venv), so it is relocatable and embeddable in a smol
  * binary's VFS — the bundle-safe analog of `uvSyncProject`'s `.venv`.
  *
  * Lock-guarded + idempotent (reuses `pip-install`'s `isAlreadyInstalled` /
@@ -105,7 +105,7 @@ export async function uvExportMaterialize(
   try {
     await safeMkdir(targetDir, { recursive: true })
     const requirementsPath = path.join(lockDir, 'requirements.locked.txt')
-    // `uv export --locked` writes the lock's full pinned closure, with hashes
+    // `uv export --locked` writes the lock's full pinned closure (with hashes)
     // as a requirements file; `--no-emit-project` drops the project's own
     // editable root so only the dependency closure is materialized.
     await spawn(
@@ -165,9 +165,9 @@ export function uvProjectTargetDir(projectDir: string): string {
 /**
  * Run `uv sync --locked` against a uv project. Installs the lock's exact
  * dependency closure into the project's `.venv`; the `--locked` flag turns a
- * lock-vs-manifest drift into a hard failure, uv exits non-zero, rather than a
+ * lock-vs-manifest drift into a hard failure (uv exits non-zero) rather than a
  * silent re-resolution — this is what makes it verification-grade. Throws when
- * uv exits non-zero, drift, missing lock, or a resolution failure.
+ * uv exits non-zero (drift, missing lock, or a resolution failure).
  */
 export async function uvSyncProject(
   options: UvSyncProjectOptions,
@@ -194,7 +194,7 @@ export interface UvSyncProjectOptions {
   readonly projectDir: string
   /**
    * Default true — pass `--locked` so a lock-vs-manifest drift fails hard.
-   * Set false ONLY to bootstrap/refresh a lock, never in a verify path.
+   * Set false ONLY to bootstrap/refresh a lock (never in a verify path).
    */
   readonly locked?: boolean | undefined
 }

@@ -3,8 +3,8 @@
  *   `parseChecksumFile` understands the three common text-file shapes:
  *
  *   - BSD style: `SHA256 (filename) = hash`
- *   - GNU style: `hash filename`, two spaces
- *   - Simple: `hash filename`, single space, Comment lines (`#…`) and blank lines
+ *   - GNU style: `hash filename` (two spaces)
+ *   - Simple: `hash filename` (single space) Comment lines (`#…`) and blank lines
  *     are skipped. Each hex digest is converted to an SRI integrity string
  *     (`sha256-<base64>=`) so callers always work in the same format as
  *     `external-tools.json` and other integrity-string consumers.
@@ -23,10 +23,10 @@ import { httpRequest } from './request'
 import type { ChecksumFile, FetchChecksumFileOptions } from './download-types'
 
 // BSD `shasum -a 256` line: `SHA256 (<filename>) = <64-hex digest>`.
-// Group 1 = filename, anything inside the parens, group 2 = the 64-char hex.
+// Group 1 = filename (anything inside the parens), group 2 = the 64-char hex.
 const CHECKSUM_BSD_RE = /^SHA256\s+\((.+)\)\s+=\s+([a-fA-F0-9]{64})$/
 // GNU `sha256sum` line: `<64-hex digest>  <filename>`.
-// Group 1 = the 64-char hex digest, group 2 = the filename, rest of line.
+// Group 1 = the 64-char hex digest, group 2 = the filename (rest of line).
 const CHECKSUM_GNU_RE = /^([a-fA-F0-9]{64})\s+(.+)$/
 
 /**
@@ -77,8 +77,8 @@ export async function fetchChecksumFile(
  * Parse a checksums file text into a filename-to-integrity map.
  *
  * Supports standard checksums file formats: - BSD style: `SHA256 (filename) =
- * hash` - GNU style: `hash filename`, two spaces - Simple style: `hash
- * filename`, single space.
+ * hash` - GNU style: `hash filename` (two spaces) - Simple style: `hash
+ * filename` (single space)
  *
  * Lines starting with `#` are treated as comments and ignored. Empty lines are
  * ignored. Each 64-char hex digest is converted to an SRI integrity string so

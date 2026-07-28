@@ -78,7 +78,7 @@ export function hasOwn(
 }
 
 /**
- * Check if a value is an object, including arrays.
+ * Check if a value is an object (including arrays).
  *
  * Returns `true` for any object type including arrays, dates, etc. Returns
  * `false` for primitives and `null`. Functions are not considered objects here
@@ -95,7 +95,7 @@ export function hasOwn(
  *
  * @param value - The value to check.
  *
- * @returns `true` if value is an object, including arrays, `false` otherwise
+ * @returns `true` if value is an object (including arrays), `false` otherwise
  */
 export function isObject(
   value: unknown,
@@ -104,7 +104,7 @@ export function isObject(
 }
 
 /**
- * Check if a value is a plain object, not an array, not a built-in.
+ * Check if a value is a plain object (not an array, not a built-in).
  *
  * Returns `true` only for plain objects created with `{}` or
  * `Object.create(null)`. Returns `false` for arrays, built-in objects (Date,

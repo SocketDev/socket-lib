@@ -41,7 +41,7 @@ export const TRACKED_GLOBALS = new Set([
   'Math',
   'Number',
   'Object',
-  // Node-platform global, the only non-ECMAScript entry. Only its callable
+  // Node-platform global (the only non-ECMAScript entry). Only its callable
   // members with a matching primordial export are rewritten; property reads
   // like `process.env` are left untouched (the codemod walks CallExpressions).
   'process',
@@ -70,7 +70,7 @@ export const TRACKED_GLOBALS = new Set([
 ])
 
 /**
- * Bare global functions, not on a namespace. Tracked separately because they
+ * Bare global functions (not on a namespace). Tracked separately because they
  * can't be detected as `Foo.bar(...)` member-call patterns.
  */
 export const TRACKED_GLOBAL_FUNCTIONS = new Set([
@@ -275,7 +275,7 @@ export const NODE_MODULE_STATIC_METHODS = new Set([
  *
  * Error.prepareStackTrace V8 setter property; user code assigns a `(err,
  * frames) => string` to override the default stack-formatting on `err.stack`
- * access. Not standardized — V8, Node, Chromium, only.
+ * access. Not standardized — V8 (Node, Chromium) only.
  * https://v8.dev/docs/stack-trace-api#customizing-stack-traces.
  *
  * Error.stackTraceLimit V8 number property — the global cap on stack frames
@@ -360,7 +360,7 @@ export function guessReceiverType(name) {
   // To stay useful on plurals, require either:
   //   1. Exact match against a known-array list, OR
   //   2. A clearly array-ish suffix that's unlikely to be a hash/object
-  //      collection, Array, List, Vec, Tuple.
+  //      collection (Array, List, Vec, Tuple).
   if (
     /^(?:ancestors|args|argv|arr|array|children|chunks|cols|deps|elements|entries|errors|events|files|items|jobs|keys|lines|list|matches|messages|nodes|parts|paths|records|requests|responses|results|rows|rows|siblings|specs|tags|tasks|tokens|values|warnings)$/.test(
       name,

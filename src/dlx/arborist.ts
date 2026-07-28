@@ -40,13 +40,13 @@ export interface SafeArboristOptions {
    * when installing.
    *
    * Must already exist before calling. The caller is responsible for its
-   * lifecycle, including cleanup of tmp directories.
+   * lifecycle (including cleanup of tmp directories).
    */
   path: string
 
   /**
    * Refuse to resolve any version published after this date. Passed to Arborist
-   * and pacote, as the `before` option. Matches npm's `min-release-age`
+   * (and pacote) as the `before` option. Matches npm's `min-release-age`
    * semantics once a caller converts days → Date.
    */
   before?: Date | undefined

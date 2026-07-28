@@ -11,7 +11,7 @@ export type SynpSource = 'download' | 'path' | 'vfs'
  */
 export interface ResolvedSynp {
   /**
-   * Absolute path to the `synp` executable, the npm package's bin shim.
+   * Absolute path to the `synp` executable (the npm package's bin shim).
    */
   readonly path: string
   /**

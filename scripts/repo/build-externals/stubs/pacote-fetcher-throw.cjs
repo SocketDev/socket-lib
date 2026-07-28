@@ -2,7 +2,7 @@
  * Pacote fetcher stub (throw-on-use).
  *
  * Pacote eagerly requires all five fetcher classes at the top of
- * pacote/lib/fetcher.js, Git, Registry, File, Dir, Remote. The runtime only
+ * pacote/lib/fetcher.js (Git, Registry, File, Dir, Remote). The runtime only
  * instantiates one based on `spec.type`. We only use `version` / `range` /
  * `tag` specs (→ RegistryFetcher), so Git/File/Dir/Remote fetchers are never
  * constructed.

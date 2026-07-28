@@ -121,13 +121,13 @@ export class Logger {
     return resolveConsole(this)
   }
 
-  // Read the indentation prefix for a stream, from the root logger.
+  // Read the indentation prefix for a stream (from the root logger).
   #getIndent(stream: 'stderr' | 'stdout'): string {
     const root = this.#getRoot()
     return stream === 'stderr' ? root.#stderrIndention : root.#stdoutIndention
   }
 
-  // Read the last-was-blank flag for a stream, from the root logger.
+  // Read the last-was-blank flag for a stream (from the root logger).
   #getLastWasBlank(stream: 'stderr' | 'stdout'): boolean {
     const root = this.#getRoot()
     return stream === 'stderr'
@@ -167,7 +167,7 @@ export class Logger {
     }
   }
 
-  // Write the indentation prefix for a stream, on the root logger.
+  // Write the indentation prefix for a stream (on the root logger).
   #setIndent(stream: 'stderr' | 'stdout', value: string): void {
     const root = this.#getRoot()
     if (stream === 'stderr') {
@@ -177,7 +177,7 @@ export class Logger {
     }
   }
 
-  // Write the last-was-blank flag for a stream, on the root logger.
+  // Write the last-was-blank flag for a stream (on the root logger).
   // socket-lint: allow boolean-trap -- private setter; `value` is the
   // last-was-blank flag being stored for the given stream.
   #setLastWasBlank(stream: 'stderr' | 'stdout', value: boolean): void {
@@ -251,7 +251,7 @@ export class Logger {
   }
 
   // Sets whether the last logged line was blank. An explicit `stream` targets
-  // that stream; otherwise the bound stream, or both, on the root, is updated.
+  // that stream; otherwise the bound stream (or both, on the root) is updated.
   // Called automatically by logging methods.
   [lastWasBlankSymbol](
     value: unknown,
@@ -278,7 +278,7 @@ export class Logger {
     return clearLineMethod(this, this.#getConsole(), this.#getTargetStream())
   }
 
-  // Clears the visible terminal screen, main logger only. See
+  // Clears the visible terminal screen (main logger only). See
   // clearVisibleMethod. Throws if called on a stream-bound instance.
   clearVisible() {
     return clearVisibleMethod(

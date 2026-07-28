@@ -12,7 +12,7 @@ import { isError } from './predicates'
 export { stackWithCauses }
 
 /**
- * Extract a stack trace, with causes, from any caught value.
+ * Extract a stack trace (with causes) from any caught value.
  *
  * Returns the cause-aware stack via {@link stackWithCauses} for Errors; returns
  * `undefined` for non-Error values, so callers can `logger.error(msg, { stack:

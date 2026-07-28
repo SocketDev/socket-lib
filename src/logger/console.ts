@@ -9,7 +9,7 @@
  *     through all callers.
  *   - `ensurePrototypeInitialized` walks `globalConsole` once at first use and
  *     copies any console method that isn't already on `Logger.prototype`. Doing
- *     this lazily, rather than at module load, is what lets the logger be
+ *     this lazily (rather than at module load) is what lets the logger be
  *     imported during early Node.js bootstrap before stdout is ready, which
  *     would otherwise crash with `ERR_CONSOLE_WRITABLE_STREAM`. Note on the
  *     apparent circular import with `core.ts`: `ensurePrototypeInitialized`

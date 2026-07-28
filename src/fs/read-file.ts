@@ -31,7 +31,7 @@ import type { ReadFileOptions, ReadOptions, SafeReadOptions } from './types'
  *   ```
  *
  * @param filepath - Path to file.
- * @param options - Read options, encoding is forced to null for binary.
+ * @param options - Read options (encoding is forced to null for binary)
  *
  * @returns Promise resolving to Buffer containing file contents
  */
@@ -63,7 +63,7 @@ export async function readFileBinary(
  *   ```
  *
  * @param filepath - Path to file.
- * @param options - Read options, encoding is forced to null for binary.
+ * @param options - Read options (encoding is forced to null for binary)
  *
  * @returns Buffer containing file contents
  */
@@ -167,7 +167,7 @@ export function readFileUtf8Sync(
  * @param filepath - Path to file.
  * @param options - Read options including encoding and default value.
  *
- * @returns Promise resolving to file contents, string by default, or undefined
+ * @returns Promise resolving to file contents (string by default), or undefined
  *   on error.
  */
 export async function safeReadFile(
@@ -240,7 +240,7 @@ export async function safeReadFile(
  * @param filepath - Path to file.
  * @param options - Read options including encoding and default value.
  *
- * @returns File contents, string by default, or undefined on error
+ * @returns File contents (string by default), or undefined on error
  */
 export function safeReadFileSync(
   filepath: PathLike,

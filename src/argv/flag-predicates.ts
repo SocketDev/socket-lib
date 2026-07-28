@@ -208,7 +208,7 @@ export const isQuiet = makeFlagPredicate(
 export const isStaged = makeFlagPredicate(['--staged'])
 
 /**
- * Check if update mode is enabled, for snapshots, dependencies, etc.
+ * Check if update mode is enabled (for snapshots, dependencies, etc).
  *
  * @example
  *   ;```typescript

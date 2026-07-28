@@ -97,7 +97,7 @@ export function getGlobMatcher(
 
   // Narrow `path.matchesGlob` fast-path. picomatch's defaults
   // (`dot: true`, `nocase: true`) silently differ from
-  // `path.matchesGlob`'s behavior, case-sensitive, no dot match, so
+  // `path.matchesGlob`'s behavior (case-sensitive, no dot match), so
   // taking the fast-path under those defaults silently changes
   // observable behavior — that's how the previous draft of this
   // file regressed the case-insensitive default and the dot-match

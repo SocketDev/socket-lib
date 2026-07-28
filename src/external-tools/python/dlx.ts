@@ -1,5 +1,5 @@
 /**
- * @file One-call dlx convenience wrappers for python: resolve, or download, a
+ * @file One-call dlx convenience wrappers for python: resolve (or download) a
  *   CPython into the known dlx location, then run a pip primitive against it —
  *   so callers don't thread `pythonBin` by hand. Mirrors how `dlx/package.ts`'s
  *   `dlxPackage` wraps `downloadNpmPackage`. The dlx Python path is
@@ -72,7 +72,7 @@ export class DlxPythonUnavailableError extends Error {
 }
 
 /**
- * Resolve, or download, the dlx CPython for `python`, then pip-install `spec`
+ * Resolve (or download) the dlx CPython for `python`, then pip-install `spec`
  * into a content-addressed dlx dir. One-call form of `resolvePython` +
  * `downloadPipPackage`. The returned result includes the interpreter path used,
  * so callers can run the tool: `spawn(pythonBin, ['-m', '<module>'], { env: {
@@ -92,7 +92,7 @@ export async function dlxPipInstall(
 }
 
 /**
- * Resolve, or download, the dlx CPython for `python`, then generate a
+ * Resolve (or download) the dlx CPython for `python`, then generate a
  * hash-pinned closure for `spec`. One-call form of `resolvePython` +
  * `resolvePipPackagePin`.
  */

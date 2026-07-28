@@ -5,7 +5,7 @@
  *   (missing/invalid verificationMaterial, non-JSON content, a non-string or
  *   non-decodable payload, a missing predicate field). Split out of
  *   `registry.test.mts` to keep each file under the fleet's 500-line soft cap.
- *   Pure-parser tests use sample JSON fixtures, no network.
+ *   Pure-parser tests use sample JSON fixtures (no network).
  */
 
 import { createRequire } from 'node:module'

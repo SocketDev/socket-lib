@@ -50,7 +50,7 @@ export function isErrnoException(
   // letter — libuv's `UV_E*` (ENOENT, EACCES, EBUSY, EPERM, EEXIST,
   // etc. — see include/uv/errno.h) and Node's `ERR_*` family
   // (https://nodejs.org/api/errors.html#nodejs-error-codes). Reject
-  // Errors whose `.code` is lowercase, usually a package-specific tag
+  // Errors whose `.code` is lowercase (usually a package-specific tag)
   // rather than maintaining an exact allow-list that would drift on
   // every Node release.
   const first = StringPrototypeCharCodeAt(code, 0)

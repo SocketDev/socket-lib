@@ -78,14 +78,14 @@ describe('memoization', () => {
 
       memoized(2) // cache hit
       memoized(3) // cache hit
-      memoized(1) // cache miss, was evicted
+      memoized(1) // cache miss (was evicted)
 
       expect(fn).toHaveBeenCalledTimes(4)
     })
 
     it('should respect TTL expiration', async () => {
       const fn = vi.fn((n: number) => n * 2)
-      // Use a large margin so slow CI, especially Windows, doesn't race the
+      // Use a large margin so slow CI (especially Windows) doesn't race the
       // wall clock: expire 100ms, sleep 500ms.
       const memoized = memoize(fn, { ttl: 100 })
 
@@ -158,7 +158,7 @@ describe('memoization', () => {
       expect(fn).toHaveBeenCalledTimes(3)
 
       memoized(1) // cache hit
-      memoized(2) // cache miss, was evicted
+      memoized(2) // cache miss (was evicted)
 
       expect(fn).toHaveBeenCalledTimes(4)
     })

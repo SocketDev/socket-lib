@@ -107,7 +107,7 @@ describe('stdio/footer createSummaryFooter', () => {
 
     it('should use circle for skipped', () => {
       const result = createSummaryFooter({ skipped: 3 })
-      // socket-lib's skip symbol is ↻ cyan recycle; see
+      // socket-lib's skip symbol is ↻ (cyan recycle); see
       // src/logger/symbols-builder.ts.
       expect(result).toContain('↻')
     })

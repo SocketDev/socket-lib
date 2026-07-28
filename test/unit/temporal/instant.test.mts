@@ -96,7 +96,7 @@ describe.sequential('temporal/instant — epochNanoseconds getter', () => {
 
 describe.sequential('temporal/instant — describe (value formatter)', () => {
   test('returns "null" for null', () => {
-    // Avoid `null` literal in source, no-null rule, by deriving it via JSON.parse.
+    // Avoid `null` literal in source (no-null rule) by deriving it via JSON.parse.
     const nullValue = JSON.parse('null') as unknown
     expect(describeValue(nullValue)).toBe('null')
   })

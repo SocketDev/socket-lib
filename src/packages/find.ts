@@ -1,5 +1,5 @@
 /**
- * @file Find the nearest package.json, or other marker, walking up from an
+ * @file Find the nearest package.json (or other marker) walking up from an
  *   `import.meta` — the package-domain wrapper over the generic `findUpSync`
  *   lookup in `fs/find`. Lives here (not in `paths/`) because it touches the
  *   filesystem; `paths/packages.ts` stays pure path-string shaping.
@@ -28,7 +28,7 @@ export interface FindUpPackageJsonOptions {
 
 /**
  * Find the nearest `package.json` walking up from `import.meta`. Returns the
- * absolute path to the file, normalized to forward slashes, matching the
+ * absolute path to the file (normalized to forward slashes), matching the
  * `findUp` / `findUpSync` return shape. Throws when no marker is found — every
  * script using this helper lives inside a package and should resolve.
  *

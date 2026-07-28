@@ -176,7 +176,7 @@ describe.sequential('cache controls', () => {
   it('rejects invalid setReadJsonCacheTtlMs inputs', () => {
     expect(() => setReadJsonCacheTtlMs(-1)).toThrow()
     expect(() => setReadJsonCacheTtlMs(Number.NaN)).toThrow()
-    // Zero IS allowed, disables time-based ejection.
+    // Zero IS allowed (disables time-based ejection).
     expect(() => setReadJsonCacheTtlMs(0)).not.toThrow()
     setReadJsonCacheTtlMs(5 * 60 * 1000)
   })

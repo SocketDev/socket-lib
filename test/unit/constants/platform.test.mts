@@ -2,7 +2,7 @@
  * @file Unit tests for platform detection and OS-specific constants. Tests
  *   platform/OS constants:
  *
- *   - IS_WINDOWS, IS_MAC, IS_LINUX, boolean flags
+ *   - IS_WINDOWS, IS_MAC, IS_LINUX (boolean flags)
  *   - PLATFORM (win32, darwin, linux from process.platform)
  *   - EOL (line ending: \r\n on Windows, \n on Unix)
  *   - Architecture detection (x64, arm64) Frozen constants for cross-platform
@@ -386,7 +386,7 @@ describe('constants/platform', () => {
 
   describe('permission constant relationships', () => {
     it('should have powers of 2 relationship in octal', () => {
-      // In octal: 100, 010, 001, each digit is independent
+      // In octal: 100, 010, 001 (each digit is independent)
       expect(S_IXUSR).toBe(64) // 2^6
       expect(S_IXGRP).toBe(8) // 2^3
       expect(S_IXOTH).toBe(1) // 2^0

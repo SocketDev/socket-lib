@@ -65,7 +65,7 @@ export function buildUserAgent(
 
 /**
  * Chain User-Agent fragments into a breadcrumb trail, ordered identity → hop
- * the immediate agent first, each forwarded caller after, so it reads
+ * (the immediate agent first, each forwarded caller after) so it reads
  * left-to-right and a server's UA parser buckets by the immediate agent. Each
  * fragment is sanitized; empties are dropped; an immediately-repeated fragment
  * is collapsed so re-proxying doesn't stutter the same hop twice.
@@ -116,7 +116,7 @@ export function getSocketCallerUserAgent(): string {
     })
   }
   // Sanitize + drop blank via the chainer — SOCKET_CALLER_USER_AGENT is
-  // attacker-influenceable, set by a parent process, so it must not be able to
+  // attacker-influenceable (set by a parent process), so it must not be able to
   // inject header bytes.
   const caller = getEnvValue('SOCKET_CALLER_USER_AGENT')
   return chainUserAgents([cachedBaseUserAgent, caller])
@@ -134,8 +134,8 @@ export function sanitizeUserAgent(value: string | undefined): string {
   if (!value) {
     return ''
   }
-  // Built without a control-char regex literal, which trips no-control-regex;
-  // counted code-unit loop, primordials, no iterator. Control chars are all
+  // Built without a control-char regex literal (which trips no-control-regex);
+  // counted code-unit loop (primordials, no iterator). Control chars are all
   // single code units, so code-unit iteration is correct here.
   let cleaned = ''
   for (let i = 0, { length } = value; i < length; i += 1) {

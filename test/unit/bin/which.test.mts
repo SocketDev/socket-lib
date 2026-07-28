@@ -69,7 +69,7 @@ describe('whichRealSync', () => {
   })
 
   it('should resolve node path when all is false', () => {
-    // node is guaranteed to be on PATH, we are running under node.
+    // node is guaranteed to be on PATH (we are running under node).
     const result = whichRealSync('node', { all: false })
     expect(typeof result).toBe('string')
     expect(result).toContain('node')

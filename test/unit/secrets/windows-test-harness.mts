@@ -42,7 +42,7 @@ export async function spawnChildMockFactory(
 }
 
 // `@socketsecurity/lib-stable/process/spawn/child`'s `spawn()` returns
-// `{ process: ChildProcess, ... }`, the lib wraps the raw child, and
+// `{ process: ChildProcess, ... }` (the lib wraps the raw child), and
 // src/secrets/windows.ts destructures `const { process: cp } = spawn(...)`.
 // Return that wrapped shape so `mockSpawn.mockImplementationOnce(() =>
 // makeFakeChild({ ... }))` matches the real contract.
@@ -81,7 +81,7 @@ export function makeFakeChild(opts: {
       if (opts.emitError) {
         // Only emit the EventEmitter `error` if something listens — an
         // `error` event with no listener throws as an uncaught exception
-        // Node semantics. The await-style runners DON'T listen on
+        // (Node semantics). The await-style runners DON'T listen on
         // `.process.on('error')`; the event-style ones (deleteX) do.
         if (emitter.listenerCount('error') > 0) {
           emitter.emit('error', opts.emitError)

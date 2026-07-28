@@ -21,7 +21,7 @@
  *   in-flight reads of the same key share a single Promise so two `await
  *   readSecret(...)` calls don't spawn two `security` processes for the same
  *   entry. Once the Promise resolves, the value is cached. If the read returns
- *   undefined, entry missing, `undefined` is cached too — callers that want a
+ *   undefined (entry missing), `undefined` is cached too — callers that want a
  *   re-check after creating the entry must call `invalidate`.
  */
 
@@ -96,7 +96,7 @@ export function invalidate(service: string, account: string): void {
 
 /**
  * Wipe the entire cache. Tests use this between cases; consumers generally
- * don't need it, process exit drops the cache anyway.
+ * don't need it (process exit drops the cache anyway).
  */
 export function invalidateAll(): void {
   valueCache.clear()

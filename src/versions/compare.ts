@@ -5,7 +5,7 @@
  *   lib — both impls expose this surface, so we pick one at module load (`impl
  *   = smol ?? semver`) and each export just forwards to it.
  *
- *   - `compare(a, b)` — returns `-1 | 0 | 1`, undefined on invalid input
+ *   - `compare(a, b)` — returns `-1 | 0 | 1` (undefined on invalid input)
  *   - `eq(a, b)`, `neq(a, b)` — equality / inequality
  *   - `lt(a, b)`, `lte(a, b)` — less-than / less-or-equal
  *   - `gt(a, b)`, `gte(a, b)` — greater-than / greater-or-equal

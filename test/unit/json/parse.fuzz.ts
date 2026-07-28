@@ -26,6 +26,6 @@ fuzz('parseJsonSafe never corrupts / crashes on arbitrary bytes', data => {
     parseJsonSafe(data.toString('utf8'))
   } catch {
     // Intended validation throws are the contract; only an uncontrolled crash
-    // or a detector hit, fails the fuzz.
+    // (or a detector hit) fails the fuzz.
   }
 })

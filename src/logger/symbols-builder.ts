@@ -56,7 +56,7 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
 }
 
 /**
- * Strip leading log-status symbols, and variation selectors, from a string.
+ * Strip leading log-status symbols (and variation selectors) from a string.
  * Matches both unicode forms (`✖`, `⚠`, `✔`, `ℹ`, `→`, `∴`, `↻`) and the
  * unambiguous ASCII fallback `:.`. Does not strip lone ASCII letters (`i`, `>`,
  * `@`) since those would mangle real words.

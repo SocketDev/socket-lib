@@ -2,7 +2,7 @@
  * @file Unit tests for testing framework constants and CI environment
  *   detection. Tests testing-related constants:
  *
- *   - Test framework detection, Vitest, Jest, Mocha
+ *   - Test framework detection (Vitest, Jest, Mocha)
  *   - CI environment indicators
  *   - Test timeout defaults
  *   - Test environment markers Frozen constants for test configuration.

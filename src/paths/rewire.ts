@@ -38,7 +38,7 @@ const sharedState: PathRewireState = globalState[stateSymbol]!
 // Per-test overrides
 const testOverrides = sharedState.testOverrides
 
-// Cache for computed values, cleared when overrides change
+// Cache for computed values (cleared when overrides change)
 const valueCache = sharedState.valueCache
 
 // Cache invalidation callbacks - registered by modules that need to clear their caches
@@ -57,7 +57,7 @@ export function clearPath(key: string): void {
  * Get a path value, checking overrides first.
  *
  * Resolution order: 1. Test overrides (set via setPath in beforeEach) 2. Cached
- * value, for performance, 3. Original function call (cached for subsequent
+ * value (for performance) 3. Original function call (cached for subsequent
  * calls)
  *
  * @internal Used by path getters to support test rewiring

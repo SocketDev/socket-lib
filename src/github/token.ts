@@ -15,7 +15,7 @@ import type { SpawnOptions } from '../process/spawn/types'
  * Get GitHub authentication token from environment variables. Checks multiple
  * environment variable names in priority order.
  *
- * Environment variables checked, in order:
+ * Environment variables checked (in order):
  *
  * 1. `GITHUB_TOKEN` - Standard GitHub token variable
  * 2. `GH_TOKEN` - Alternative GitHub CLI token variable

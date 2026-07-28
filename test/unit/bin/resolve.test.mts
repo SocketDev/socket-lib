@@ -152,7 +152,7 @@ describe('resolveRealBinSync - additional scenarios', () => {
 
       const result = resolveRealBinSync(binPath)
       expect(result).toBeTruthy()
-      // Result should be normalized, no backslashes mixed with forward slashes
+      // Result should be normalized (no backslashes mixed with forward slashes)
       if (typeof result === 'string') {
         expect(result.includes('\\')).toBe(false)
       }

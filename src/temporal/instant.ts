@@ -11,7 +11,7 @@
  *   get Temporal.Instant.prototype.epochNanoseconds — prototype ✗ 8.4.2
  *   Temporal.Instant.from ( item ) — pass 2 ✗ 8.4.3
  *   Temporal.Instant.fromEpochMilliseconds ( ms ) — pass 2 ✗ 8.4.7
- *   Temporal.Instant.compare, one, two — pass 2 ✗ 8.5.5 get
+ *   Temporal.Instant.compare ( one, two ) — pass 2 ✗ 8.5.5 get
  *   Temporal.Instant.prototype.epochMilliseconds — pass 2 ✗ 8.5.13
  *   Temporal.Instant.prototype.toString ( [ options ] ) — pass 2 ✗ 8.5.x add /
  *   subtract / until / since / round / equals / etc. — later.

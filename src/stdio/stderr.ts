@@ -151,7 +151,7 @@ export function writeErrorFormatted(
  *
  * @default text ''
  *
- * @param text - Text to write, defaults to the empty string.
+ * @param text - Text to write (defaults to the empty string)
  */
 export function writeErrorLine(text: string = ''): void {
   stderr.write(`${text}\n`)

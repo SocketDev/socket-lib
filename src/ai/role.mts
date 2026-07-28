@@ -1,13 +1,13 @@
 /**
- * @file Declarative ROLE → tier, profile, orchestration for AI call-outs. A
+ * @file Declarative ROLE → (tier, profile) orchestration for AI call-outs. A
  *   caller names the ROLE its spawn plays — discovery, execution, planning,
- *   review, verification — and gets the fleet-policy, model, effort, pair via
+ *   review, verification — and gets the fleet-policy (model, effort) pair via
  *   `AI_TIER` plus the matching permission `AI_PROFILE`, instead of hardcoding
  *   a model string and hand-pairing a profile at every site.
  *   The policy encodes fleet doctrine (see docs/agents.md/fleet/{token-spend,
  *   delegating-execution,fable-fallback}.md): Fable is the planning/review
  *   brain; execution + verification run on the sonnet floor to save tokens
- *   mechanical execution drops to haiku; Opus is reserved for
+ *   (mechanical execution drops to haiku); Opus is reserved for
  *   security-sensitive planning/review — never Fable there.
  *   Everything downstream is reuse: `spawnForRole` delegates to
  *   `spawnTierWithFallback`, so the model/effort table (`AI_TIER`), the

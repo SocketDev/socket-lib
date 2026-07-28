@@ -6,7 +6,7 @@
  *
  *   ## Why directories instead of files?
  *
- *   This implementation uses `mkdir()` to create lock directories, not files
+ *   This implementation uses `mkdir()` to create lock directories (not files)
  *   because:
  *
  *   1. **Atomic guarantee**: `mkdir()` is guaranteed atomic across ALL
@@ -26,7 +26,7 @@
  *
  *   ## The mtime trick
  *
- *   We periodically update the lock directory's mtime, modification time, by
+ *   We periodically update the lock directory's mtime (modification time) by
  *   "touching" it to signal "I'm still actively working". This prevents other
  *   processes from treating the lock as stale and removing it. **The lock
  *   directory remains empty** - it's just a sentinel that signals "locked". The
@@ -252,7 +252,7 @@ export class ProcessLockManager {
           }
 
           // Ensure parent directory exists. Use path.dirname() so that both
-          // POSIX and Windows separators, and mixed-separator inputs, are
+          // POSIX and Windows separators (and mixed-separator inputs) are
           // handled correctly — the previous Math.max(lastIndexOf('/'), '\\')
           // approach failed on relative paths and mixed-separator inputs.
           const fs = getFs()
@@ -262,7 +262,7 @@ export class ProcessLockManager {
             fs.mkdirSync(parent, { recursive: true })
           }
 
-          // Atomic lock acquisition via mkdir, without recursive.
+          // Atomic lock acquisition via mkdir (without recursive).
           // Without recursive, mkdirSync throws EEXIST if another process
           // already owns the directory. No pre-check: an existsSync +
           // mkdirSync pair opens a TOCTOU window without adding safety,

@@ -173,7 +173,7 @@ export type SpawnExtra = Record<string, unknown>
 export type IOType = 'pipe' | 'ignore' | 'inherit' | 'overlapped'
 
 /**
- * Configuration for process stdio, stdin, stdout, stderr, streams. Can be a
+ * Configuration for process stdio (stdin, stdout, stderr) streams. Can be a
  * single value applied to all streams, or an array specifying each stream
  * individually. - `'ipc'` - Creates an IPC channel for communication with the
  * parent.
@@ -192,7 +192,7 @@ export type StdioType = IOType | 'ipc' | Array<IOType | 'ipc'>
  * Result object returned by {@link spawnSync} when the child process completes
  * synchronously.
  *
- * @template T - Type of stdout/stderr, string or Buffer.
+ * @template T - Type of stdout/stderr (string or Buffer)
  *
  * @property {number} pid - Process ID of the spawned child.
  * @property {(T | null)[]} output - Array containing stdout/stderr values.
@@ -376,7 +376,7 @@ export type SpawnStdioResult = {
  * Mirrors {@link SpawnOptions} (stdioString, stripAnsi) but builds on Node's
  * sync option shape ({@link NodeSpawnSyncOptions}) — which adds `input`,
  * `maxBuffer`, and `encoding` that the async API doesn't have. The `spinner`
- * field is excluded, not applicable for synchronous execution.
+ * field is excluded (not applicable for synchronous execution).
  */
 export type SpawnSyncOptions = Remap<
   NodeSpawnSyncOptions & {

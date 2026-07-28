@@ -43,10 +43,10 @@ export function invalidatePathCache(): void {
  * Guarded + self-rescheduling: in the require cycle (`allowed-dirs-cache →
  * _internal → paths/socket → … → rewire`) the `registerCacheInvalidation` live
  * binding can still be in its temporal dead zone when the first microtask fires
- * under some import orders, vitest loads many modules concurrently, throwing
+ * under some import orders (vitest loads many modules concurrently), throwing
  * `registerCacheInvalidation is not defined`. So check the binding is callable;
  * if not, re-defer to the next microtask. The registration is a test-seam
- * best-effort, it lets path-rewire flush this cache, so a bounded retry that
+ * best-effort (it lets path-rewire flush this cache), so a bounded retry that
  * lands on a later turn is correct — and a never-resolving binding (production,
  * where rewire is unused) simply stops retrying without throwing.
  *
@@ -56,7 +56,7 @@ export function registerInvalidationCallback(attempt: number = 0): void {
   // The access is wrapped: a still-uninitialized live binding throws ReferenceError
   // (bundled CJS, where it reads `undefined`) or a TDZ error (transformed ESM under
   // vitest). Catch both, re-defer a bounded number of turns, and give up silently
-  // if it never resolves, production, where rewire is unused — never throw.
+  // if it never resolves (production, where rewire is unused) — never throw.
   try {
     if (typeof registerCacheInvalidation === 'function') {
       registerCacheInvalidation(invalidatePathCache)
