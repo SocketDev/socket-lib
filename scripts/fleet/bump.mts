@@ -240,7 +240,12 @@ export function changelogVersionSections(changelog: string): string[] {
     if (!line.startsWith('## ')) {
       continue
     }
-    const version = /^##\s+\[?v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)/.exec(line)?.[1]
+    // `## ` then an optional `[` (link-style heading) and optional `v`, then
+    // the captured version: three dot-separated numbers plus an optional
+    // `-prerelease` tail. Anchored, so only a heading's own version matches.
+    const version = /^##\s+\[?v?(\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?)/.exec(
+      line,
+    )?.[1]
     if (version) {
       found.push(version)
     }
@@ -587,6 +592,56 @@ export async function applyLockstepBump(
   return writes.map(write => write.relManifestPath)
 }
 
+// Every flag `main` accepts. Kept beside the parseArgs options it mirrors so a
+// new flag is added in both places, and `unrecognizedFlags` can refuse the rest.
+export const BUMP_FLAGS: ReadonlySet<string> = new Set([
+  'dry-run',
+  'empty-changelog-entry',
+  'help',
+  'release-as',
+  'write-only',
+])
+
+export const BUMP_USAGE = `Usage: node scripts/fleet/bump.mts [options]
+
+  Derives the next version from the Conventional Commits since the last
+  release, writes package.json + CHANGELOG.md, and commits the bump.
+
+  --dry-run                    preview; writes nothing
+  --release-as <level|X.Y.Z>   major | minor | patch, or an exact version
+  --write-only                 write the files but do NOT git-commit (CI)
+  --empty-changelog-entry <s>  entry to use when no user-visible changes derive
+  --help                       print this and exit
+
+  The VERSION is the user's decision. Prefer naming the target as a
+  \`X.Y.Z-prerelease\` hint in package.json — the release tooling consumes it.`
+
+/**
+ * The `--flag` tokens in `argv` that `known` does not contain, normalized off
+ * their leading dashes and any `=value` tail. A bare `-` or `--` is ignored,
+ * and everything after a `--` separator is treated as positional.
+ */
+export function unrecognizedFlags(
+  argv: readonly string[],
+  known: ReadonlySet<string>,
+): string[] {
+  const unknown: string[] = []
+  for (let i = 0, { length } = argv; i < length; i += 1) {
+    const token = argv[i]!
+    if (token === '--') {
+      break
+    }
+    if (!token.startsWith('--') || token.length <= 2) {
+      continue
+    }
+    const name = token.slice(2).split('=')[0]!
+    if (name && !known.has(name)) {
+      unknown.push(`--${name}`)
+    }
+  }
+  return unknown
+}
+
 async function main(): Promise<void> {
   const { values } = parseArgs({
     options: {
@@ -608,9 +663,34 @@ async function main(): Promise<void> {
       // by the operator (e.g. --empty-changelog-entry "Internal maintenance"),
       // never a silent canned default.
       'empty-changelog-entry': { type: 'string' },
+      help: { default: false, type: 'boolean' },
     },
     strict: false,
   })
+  // `--help` must never mutate. It printed nothing here and, because parsing is
+  // non-strict, fell through to a REAL bump — writing package.json, rewriting
+  // the CHANGELOG, and committing a version nobody named.
+  if (values['help']) {
+    logger.log(BUMP_USAGE)
+    return
+  }
+  // Non-strict parsing keeps unknown flags from throwing, which also means a
+  // typo silently loses its meaning: `--dryrun` parses as an unknown flag and
+  // the run bumps FOR REAL. A mutating script must not guess — refuse instead.
+  const unknownFlags = unrecognizedFlags(process.argv.slice(2), BUMP_FLAGS)
+  if (unknownFlags.length) {
+    logger.fail(
+      `bump: unrecognized flag(s) ${unknownFlags.join(', ')}.\n` +
+        `  What:  this script WRITES (version + CHANGELOG + commit), so an\n` +
+        `         unrecognized flag is refused rather than ignored — a typo'd\n` +
+        `         --dry-run would otherwise perform a real bump.\n` +
+        `  Where: the bump CLI.\n` +
+        `  Saw:   ${unknownFlags.join(', ')}; wanted one of: ${[...BUMP_FLAGS].sort().join(', ')}.\n` +
+        `  Fix:   correct the flag, or run --help for the full list.`,
+    )
+    process.exitCode = 1
+    return
+  }
   const dryRun = !!values['dry-run']
   const releaseAs = values['release-as']
   const writeOnly = !!values['write-only']

@@ -6,7 +6,7 @@
  *   helpers live in the per-registry subfolders (`npm/`).
  */
 
-import { readFileSync } from 'node:fs'
+import { fstatSync, readFileSync } from 'node:fs'
 import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
@@ -131,6 +131,33 @@ export const NON_INTERACTIVE_RENDER_ENV: NodeJS.ProcessEnv = {
   NO_COLOR: '1',
 }
 
+/**
+ * True when fd 1 is a regular FILE (a `> out.log` redirect, or an agent harness
+ * that captures a background task to disk) rather than a tty or a pipe.
+ *
+ * `script(1)` cannot drive a pseudo-terminal into a file-backed stdout: it
+ * prints `tcgetattr/ioctl: Operation not supported on socket` and the child
+ * exits 1 having produced NO output at all. That reads as "the command failed"
+ * when the command never ran, which is worth naming rather than debugging
+ * twice.
+ */
+export function stdoutIsFileBacked(): boolean {
+  try {
+    return fstatSync(1).isFile()
+  } catch {
+    return false
+  }
+}
+
+export const PTY_FILE_STDOUT_MESSAGE =
+  'refusing to wrap this command in a PTY: stdout is a file.\n' +
+  '  What:  script(1) cannot allocate a pseudo-terminal onto a file-backed\n' +
+  '         stdout — the child exits 1 having produced no output.\n' +
+  '  Where: the PTY wrapper used for npm/pnpm browser web-OTP prompts.\n' +
+  '  Saw:   fd 1 is a regular file; wanted a terminal or a pipe.\n' +
+  '  Fix:   drop the `> file` redirect (pipe it instead, e.g. `| tail -40`),\n' +
+  '         or run the command in a real terminal.'
+
 export function runInheritTty(
   cmd: string,
   args: string[],
@@ -141,9 +168,14 @@ export function runInheritTty(
     return runInherit(cmd, args, cwd, env)
   }
   const pty = buildPtyInvocation(process.platform, cmd, args)
-  return pty
-    ? runInherit(pty.command, pty.args, cwd, env)
-    : runInherit(cmd, args, cwd, env)
+  if (!pty) {
+    return runInherit(cmd, args, cwd, env)
+  }
+  if (stdoutIsFileBacked()) {
+    logger.fail(`[pty] ${PTY_FILE_STDOUT_MESSAGE}`)
+    return Promise.resolve(1)
+  }
+  return runInherit(pty.command, pty.args, cwd, env)
 }
 
 /**

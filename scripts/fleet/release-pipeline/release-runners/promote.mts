@@ -16,6 +16,8 @@ import { formatReleaseGapFailure } from '../../_shared/release-gap-recovery.mts'
 import {
   buildPtyInvocation,
   NON_INTERACTIVE_RENDER_ENV,
+  PTY_FILE_STDOUT_MESSAGE,
+  stdoutIsFileBacked,
 } from '../../publish-infra/shared.mts'
 import { readPkg, resolveSeams } from '../seams.mts'
 
@@ -56,6 +58,7 @@ export async function runApproveStep(config: {
   isTty?: boolean | undefined
   platform?: NodeJS.Platform | undefined
   seams?: RunnerSeams | undefined
+  stdoutIsFile?: boolean | undefined
   yes?: boolean | undefined
 }): Promise<StageOutcome> {
   const cfg = { __proto__: null, ...config } as typeof config
@@ -81,6 +84,12 @@ export async function runApproveStep(config: {
     !cfg.dryRun && !isTty
       ? buildPtyInvocation(cfg.platform ?? process.platform, 'node', args)
       : undefined
+  // Refuse before spawning rather than let script(1) die with no output. The
+  // promote is the one step where an opaque exit-1 is most expensive to
+  // diagnose, and a captured/backgrounded run lands here every time.
+  if (pty && (cfg.stdoutIsFile ?? stdoutIsFileBacked())) {
+    return { detail: PTY_FILE_STDOUT_MESSAGE, status: 'failed' }
+  }
   // The PTY re-enables the child's spinners; force plain rendering so the
   // scan gate's progress display cannot flood the captured stream.
   const code = pty
