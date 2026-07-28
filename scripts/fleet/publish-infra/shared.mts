@@ -118,11 +118,14 @@ export function buildPtyInvocation(
 // A PTY makes the child believe a human is watching, which is what keeps npm's
 // browser web-OTP alive — but it also re-enables every spinner and redraw the
 // child suppresses when piped. The Socket scan gate's progress display wrote
-// 2.6 GB of frames into a captured PTY in ten minutes. These are the standard
-// signals for "render once, plainly"; none of them relax a gate, and the
-// publish path keys provenance off GITHUB_ACTIONS, not CI.
+// 2.6 GB of frames into a captured PTY in ten minutes.
+//
+// Deliberately NOT `CI=1`, the usual way to ask for plain output: pnpm reads it
+// as "no human here" and refuses the web-OTP challenge outright, so the approve
+// exits 1 before printing a line — the exact interactivity the PTY exists to
+// preserve. `TERM=dumb` is the signal that suppresses cursor addressing without
+// claiming the session is unattended.
 export const NON_INTERACTIVE_RENDER_ENV: NodeJS.ProcessEnv = {
-  CI: '1',
   NO_COLOR: '1',
   TERM: 'dumb',
 }
