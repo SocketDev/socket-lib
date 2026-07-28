@@ -7,6 +7,8 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  mapGetOrInsertComputedFallback,
+  mapGetOrInsertFallback,
   MapPrototypeClear,
   MapPrototypeDelete,
   MapPrototypeEntries,
@@ -33,6 +35,8 @@ import {
   SetPrototypeSymmetricDifference,
   SetPrototypeUnion,
   SetPrototypeValues,
+  weakMapGetOrInsertComputedFallback,
+  weakMapGetOrInsertFallback,
   WeakMapPrototypeDelete,
   WeakMapPrototypeGet,
   WeakMapPrototypeGetOrInsert,
@@ -233,5 +237,140 @@ describe('WeakSet (prototype)', () => {
     expect(WeakSetPrototypeHas(ws, key)).toBe(true)
     WeakSetPrototypeDelete(ws, key)
     expect(WeakSetPrototypeHas(ws, key)).toBe(false)
+  })
+})
+
+// ─── proposal-upsert fallbacks ──────────────────────────────────
+//
+// The conditional exports above resolve to the NATIVE methods on a Node that
+// ships proposal-upsert, so these fallbacks are unreachable through them on a
+// modern runtime. `engines` allows >=22, where the natives are absent and these
+// are what actually run — so they are exercised directly rather than left to
+// whichever Node happens to run the suite.
+
+describe('mapGetOrInsertFallback', () => {
+  it('returns the existing value without overwriting it', () => {
+    const map = new Map([['k', 'first']])
+    expect(mapGetOrInsertFallback(map, 'k', 'second')).toBe('first')
+    expect(map.get('k')).toBe('first')
+  })
+
+  it('inserts and returns the value on a miss', () => {
+    const map = new Map<string, string>()
+    expect(mapGetOrInsertFallback(map, 'k', 'inserted')).toBe('inserted')
+    expect(map.get('k')).toBe('inserted')
+  })
+
+  it('treats a stored undefined as present, not missing', () => {
+    // `has` decides, not a truthiness check on `get`.
+    const map = new Map<string, undefined>([['k', undefined]])
+    expect(mapGetOrInsertFallback(map, 'k', undefined)).toBe(undefined)
+    expect(map.size).toBe(1)
+  })
+})
+
+describe('mapGetOrInsertComputedFallback', () => {
+  it('does not invoke the callback when the key exists', () => {
+    const map = new Map([['k', 'first']])
+    let calls = 0
+    const out = mapGetOrInsertComputedFallback(map, 'k', () => {
+      calls += 1
+      return 'computed'
+    })
+    expect(out).toBe('first')
+    expect(calls).toBe(0)
+  })
+
+  it('invokes the callback with the key on a miss and stores the result', () => {
+    const map = new Map<string, string>()
+    const seen: string[] = []
+    const out = mapGetOrInsertComputedFallback(map, 'k', key => {
+      seen.push(key)
+      return `computed:${key}`
+    })
+    expect(out).toBe('computed:k')
+    expect(seen).toEqual(['k'])
+    expect(map.get('k')).toBe('computed:k')
+  })
+
+  it("stores the callback's result even when the callback mutated the map", () => {
+    // Per the proposal the computed value wins over a write made during the
+    // callback.
+    const map = new Map<string, string>()
+    const out = mapGetOrInsertComputedFallback(map, 'k', () => {
+      map.set('k', 'set-inside-callback')
+      return 'computed'
+    })
+    expect(out).toBe('computed')
+    expect(map.get('k')).toBe('computed')
+  })
+
+  it('throws a TypeError when the callback is not a function', () => {
+    const map = new Map<string, string>()
+    expect(() =>
+      (
+        mapGetOrInsertComputedFallback as unknown as (
+          m: unknown,
+          k: unknown,
+          c: unknown,
+        ) => unknown
+      )(map, 'k', 'not-a-function'),
+    ).toThrow(TypeError)
+  })
+})
+
+describe('weakMapGetOrInsertFallback', () => {
+  it('returns the existing value without overwriting it', () => {
+    const key = {}
+    const map = new WeakMap([[key, 'first']])
+    expect(weakMapGetOrInsertFallback(map, key, 'second')).toBe('first')
+    expect(map.get(key)).toBe('first')
+  })
+
+  it('inserts and returns the value on a miss', () => {
+    const key = {}
+    const map = new WeakMap<object, string>()
+    expect(weakMapGetOrInsertFallback(map, key, 'inserted')).toBe('inserted')
+    expect(map.get(key)).toBe('inserted')
+  })
+})
+
+describe('weakMapGetOrInsertComputedFallback', () => {
+  it('does not invoke the callback when the key exists', () => {
+    const key = {}
+    const map = new WeakMap([[key, 'first']])
+    let calls = 0
+    const out = weakMapGetOrInsertComputedFallback(map, key, () => {
+      calls += 1
+      return 'computed'
+    })
+    expect(out).toBe('first')
+    expect(calls).toBe(0)
+  })
+
+  it('invokes the callback with the key on a miss and stores the result', () => {
+    const key = { id: 1 }
+    const map = new WeakMap<object, string>()
+    const seen: object[] = []
+    const out = weakMapGetOrInsertComputedFallback(map, key, k => {
+      seen.push(k)
+      return 'computed'
+    })
+    expect(out).toBe('computed')
+    expect(seen).toEqual([key])
+    expect(map.get(key)).toBe('computed')
+  })
+
+  it('throws a TypeError when the callback is not a function', () => {
+    const map = new WeakMap<object, string>()
+    expect(() =>
+      (
+        weakMapGetOrInsertComputedFallback as unknown as (
+          m: unknown,
+          k: unknown,
+          c: unknown,
+        ) => unknown
+      )(map, {}, undefined),
+    ).toThrow(TypeError)
   })
 })
