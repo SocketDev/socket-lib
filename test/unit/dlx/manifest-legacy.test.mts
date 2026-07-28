@@ -1,10 +1,10 @@
 /**
  * @file Unit tests for the DlxManifest legacy-format and utility surface.
- *   Exercises the on-disk manifest behavior for dlx (download and execute)
+ *   Exercises the on-disk manifest behavior for dlx, download and execute
  *   cached packages:
  *
  *   - get / set legacy-format records
- *   - clear (single entry)
+ *   - clear, single entry
  *   - isFresh TTL checks
  *   - getAllPackages (legacy + new format keys) The new-format entry API
  *     (getManifestEntry / setPackageEntry / setBinaryEntry / clearAll) lives in

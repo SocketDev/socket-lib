@@ -165,11 +165,11 @@ describe('releases/github-downloads', () => {
     // Pre-populate the on-disk cache state synchronously before calling
     // downloadGitHubRelease, so the function under test can only
     // observe the state the test prepared. httpDownload is either
-    // asserted-never-called (cache-hit path) or mocked as a trivial
+    // asserted-never-called, cache-hit path, or mocked as a trivial
     // no-op that writes the missing file for the re-download path.
     // No mock side effects interleave with the call under test.
 
-    // All state (temp dir, imports) lives inside each `it` block so
+    // All state, temp dir, imports, lives inside each `it` block so
     // nothing leaks across tests under `isolate: false`. The previous
     // rewrite used `let testDir` at the describe scope and flaked
     // because that single binding got overwritten by the next

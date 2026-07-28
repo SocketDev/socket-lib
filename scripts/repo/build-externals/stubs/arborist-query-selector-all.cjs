@@ -7,7 +7,7 @@
  *
  * Stub throws if invoked so accidental callers get a clear message. Drops.
  *
- * @npmcli/query + postcss-selector-parser (already stubbed) from the bundle's
+ * @npmcli/query + postcss-selector-parser, already stubbed, from the bundle's
  * reach via this entry.
  */
 'use strict'

@@ -5,8 +5,8 @@
  *   on stock Node it runs the line-scanning JS impl below. Both Classic + Berry
  *   share the same outer shape (top-level block with `name@spec:` header +
  *   indented properties). Berry is detected via the presence of `__metadata:`
- *   and additionally honors `linkType: soft` (workspace links are skipped) and
- *   `dependenciesMeta:` blocks (which can mark deps optional). The parser is
+ *   and additionally honors `linkType: soft`, workspace links are skipped, and
+ *   `dependenciesMeta:` blocks, which can mark deps optional. The parser is
  *   forgiving — unknown lines are ignored, missing versions skip the entry. It
  *   never throws. Source material (in lock-step order, newest → oldest):
  *
@@ -17,7 +17,7 @@
  *      socket-sdxgen/src/parsers/yarn-classic/yarn-lock-v1.mts
  *      socket-sdxgen/src/parsers/yarn-berry/yarn-lock-v2.mts sdxgen uses
  *      `@yarnpkg/parsers.parseSyml`; this TS port + the C++ port both use a
- *      line walker (yarn's syml-as-it-uses-it is a strict subset).
+ *      line walker, yarn's syml-as-it-uses-it is a strict subset.
  *   3. **cdxgen** (pinned v11.11.0):
  *      https://github.com/CycloneDX/cdxgen/blob/v11.11.0/lib/parsers/js.js
  *      (parseYarnLock)
@@ -90,7 +90,7 @@ export function consumeDependenciesMeta(
   // subdependency), not the parent itself. Flipping the parent's
   // `isOptional` based on any child's flag was inverted semantics —
   // it made every package with `fsevents`-like optional children
-  // (very common) show up as optional. Consume the block to advance
+  // very common, show up as optional. Consume the block to advance
   // `pos`, but don't synthesize anything from it. The parent's own
   // optionality comes from how upstream references it, which yarn
   // lockfiles don't encode at the entry level.
@@ -340,7 +340,7 @@ export function stripQuotes(s: string): string {
 export function valueAfterKey(line: string, keyLen: number): string {
   // Both `key "value"` (Classic) and `key: value` (Berry) share the
   // same total prefix length when `keyLen` is passed as the byte
-  // length of `'key '` (Classic, space-terminated). Berry's `key:`
+  // length of `'key '`, Classic, space-terminated. Berry's `key:`
   // has the same character count when `keyLen` includes the colon's
   // trailing space — every callsite passes `'key '.length`, which
   // covers `key:` plus the value's leading space. Slicing after that

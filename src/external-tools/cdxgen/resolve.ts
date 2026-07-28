@@ -2,7 +2,7 @@
  * @file `resolveCdxgen()` — cdxgen resolution entry point. Tries each source in
  *   order:
  *
- *   1. VFS — smol binary's embedded cdxgen (if packed)
+ *   1. VFS — smol binary's embedded cdxgen, if packed
  *   2. PATH — `cdxgen` on the system PATH
  *   3. download — upstream SEA binary from the GitHub release (slim by default;
  *      pass `variant: 'full'` for the bun+deno-bundled flavor) Single source of
@@ -80,7 +80,7 @@ export async function doResolveCdxgen(
 
 /* c8 ignore start - test-only escape hatch. */
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function resetCdxgenResolution(): void {
   resolutionCache.clear()

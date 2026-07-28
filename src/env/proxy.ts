@@ -1,5 +1,5 @@
 /**
- * @file `createEnvProxy` — wrap `process.env` (or any env-like record) in a
+ * @file `createEnvProxy` — wrap `process.env`, or any env-like record, in a
  *   Proxy that adds case-insensitive lookups for known-Windows-sensitive keys
  *   (PATH, APPDATA, etc.) and an `overrides` layer. Intended for cross-platform
  *   test harnesses and child-process spawn env normalization.

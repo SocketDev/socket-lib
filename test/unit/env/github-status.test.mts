@@ -5,8 +5,8 @@
  *   - All operational → status: 'operational', degraded: false
  *   - One component degraded → status = that component's status
  *   - Multiple degraded → worst-case status
- *   - Unknown component IDs ignored (only monitored set)
- *   - Network failure → status: 'unknown', degraded: false (fails open)
+ *   - Unknown component IDs ignored, only monitored set
+ *   - Network failure → status: 'unknown', degraded: false, fails open
  *   - 404 / non-JSON response → status: 'unknown'
  *   - Probe timeout → status: 'unknown'
  *   - summary string content

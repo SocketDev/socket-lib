@@ -3,7 +3,7 @@
  *   map + Node-internal-only set that `socket-lib check primordials` defaults
  *   to when a consumer's config doesn't override them. Source of truth: the
  *   `globals` npm package's globals.json. We pull the union of `builtin`
- *   (standard JS) + `node` (Node-runtime globals), filter to the identifiers
+ *   (standard JS) + `node`, Node-runtime globals, filter to the identifiers
  *   socket-lib actually exports with a `Ctor` suffix (cross-referenced against
  *   src/primordials/*.ts), and emit a frozen Record<string, string> at codegen
  *   time so the runtime check doesn't need to bundle the 100KB globals.json

@@ -124,7 +124,7 @@ export async function withSpinner<T>(
     // Clear any remaining spinner artifacts that yocto-spinner's clear() misses.
     // Despite yocto-spinner calling clear(), ANSI-colored spinner frames can sometimes
     // leave visual artifacts on the line. A final explicit clear ensures clean output.
-    // Only clear if spinner was actually running (which means it was already interactive).
+    // Only clear if spinner was actually running, which means it was already interactive.
     // Each restore branch fires only when caller seeded the
     // corresponding option; tests cover paths individually.
     /* c8 ignore start */
@@ -153,7 +153,7 @@ export async function withSpinner<T>(
 /**
  * Execute an async operation with conditional spinner restart. Useful when you
  * need to temporarily stop a spinner for an operation, then restore it to its
- * previous state (if it was spinning).
+ * previous state, if it was spinning.
  *
  * @example
  *   ;```ts

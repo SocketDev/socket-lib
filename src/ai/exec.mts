@@ -52,7 +52,7 @@ export interface ExecRunner {
 }
 
 // Registry of runners + the trust→runner policy. `real` is always present
-// (the lib provides it); `sandboxed` is whatever the caller injected, if any.
+// the lib provides it; `sandboxed` is whatever the caller injected, if any.
 export interface ExecContext {
   readonly runners: {
     readonly real: ExecRunner
@@ -80,7 +80,7 @@ export const realRunner: ExecRunner = {
     // `spawn` exposes stdin only via the interactive `result.stdin` stream
     // (write/end), which doesn't fit a one-shot run; piping without closing
     // hangs a reader like `cat`. A script needing stdin should use a sandboxed
-    // runner (which feeds stdin in-memory) or embed the data via a here-doc.
+    // runner, which feeds stdin in-memory, or embed the data via a here-doc.
     const spawnOptions = {
       ...(cwd ? { cwd } : {}),
       ...(env ? { env } : {}),
@@ -106,7 +106,7 @@ export const realRunner: ExecRunner = {
       return {
         stdout: String(e.stdout ?? ''),
         stderr: String(e.stderr ?? ''),
-        // A signal-kill (code null) becomes non-zero so it isn't read as
+        // A signal-kill, code null, becomes non-zero so it isn't read as
         // success.
         exitCode: typeof e.code === 'number' ? e.code : 1,
       }

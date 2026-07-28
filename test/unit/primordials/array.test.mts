@@ -249,7 +249,7 @@ describe('Array (prototype)', () => {
     const a: Array<number | string> = [1, 2, 3, 4]
     const out = ArrayPrototypeToSpliced(a, 1, 2, 'a', 'b', 'c')
     expect(out).toEqual([1, 'a', 'b', 'c', 4])
-    // Source unchanged (Change Array By Copy invariant).
+    // Source unchanged, Change Array By Copy invariant.
     expect(a).toEqual([1, 2, 3, 4])
   })
 

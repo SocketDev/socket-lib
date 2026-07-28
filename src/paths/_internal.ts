@@ -21,7 +21,7 @@ import {
   StringPrototypeStartsWith,
 } from '../primordials/string'
 
-// Char-code constants are owned by `constants/encoding` (the single source);
+// Char-code constants are owned by `constants/encoding`, the single source;
 // re-exported here so `paths/*` keeps its local import site unchanged.
 export {
   CHAR_BACKWARD_SLASH,
@@ -39,7 +39,7 @@ export {
 // `.toUpperCase()` would throw on Windows MSYS-style paths like `/c/foo`.
 // oxlint-disable-next-line socket/prefer-non-capturing-group -- both groups are read by the replace callback in paths/normalize.ts:msysDriveToNative
 export const msysDriveRegExp = /^\/([a-zA-Z])($|\/)/
-// Matches a `node_modules` path segment: bounded by a slash (either separator)
+// Matches a `node_modules` path segment: bounded by a slash, either separator
 // or string start before, and a slash or string end after — so it hits
 // `node_modules` as a whole segment, not a substring like `my_node_modules`.
 export const nodeModulesPathRegExp = /(?:[/\\]|^)node_modules(?:$|[/\\])/

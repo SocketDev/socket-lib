@@ -6,7 +6,7 @@
  * Thrown by `fetchGitHub` when GitHub returns HTTP 200 OK with a zero-byte body
  * — the "successful empty response" pattern.
  *
- * Why this exists (background for new contributors): GitHub's REST API has a
+ * Why this exists, background for new contributors: GitHub's REST API has a
  * documented failure mode that is _very_ easy to miss in code review. During
  * incidents where the search / Elasticsearch backing index is degraded (see
  * GitHub status pages with titles like "search is degraded" or "Pull Requests

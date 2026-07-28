@@ -58,7 +58,7 @@ export function parseShmRows(
   for (let i = 0, { length } = lines; i < length; i += 1) {
     const line = lines[i]!
     const cols = line.trim().split(/\s+/u)
-    // Data rows start with the type marker `m` (shared memory).
+    // Data rows start with the type marker `m`, shared memory.
     if (cols[0] !== 'm' || cols.length < 11) {
       continue
     }
@@ -91,7 +91,7 @@ function pidIsAlive(pid: number): boolean {
  * 0.3.1 leaks one control segment per fuzz-target run on macOS (never
  * IPC_RMID'd); the default kern.sysv.shmmni=32 caps the table at ~32 runs,
  * after which every run dies with "shmem allocation failed … check OS limits
- * (shmall, shmmax)". A segment is an orphan only when it is OURS, has zero
+ * shmall, shmmax, ". A segment is an orphan only when it is OURS, has zero
  * attachments, and its creator PID is dead — live fuzz runs are untouched.
  */
 export function sweepOrphanedShmSegments(): void {

@@ -1,6 +1,6 @@
 /**
  * @file Rolldown configuration for the `prim` CLI bundle. Unlike the main
- *   socket-lib build (per-file transpile), this is a real bundle: every import
+ *   socket-lib build, per-file transpile, this is a real bundle: every import
  *   — including `@socketsecurity/lib-stable/*` and `diff` — gets inlined into a
  *   single `dist/bin/prim.cjs`. The `@ultrathink/acorn.wasm` parser stays
  *   external: its CJS entry reads `${__dirname}/./acorn.wasm` synchronously at
@@ -35,7 +35,7 @@ export const primBuildConfig: RolldownOptions = {
     format: 'cjs',
     // `codeSplitting: false` inlines all dynamic imports into the single
     // prim.cjs bundle — the rolldown 1.x replacement for the deprecated
-    // `inlineDynamicImports: true` (both produce one bundle).
+    // `inlineDynamicImports: true`, both produce one bundle.
     codeSplitting: false,
     minify: false,
     banner: '"use strict";\n/* Socket Lib prim - bundled with rolldown */',

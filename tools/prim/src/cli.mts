@@ -12,11 +12,11 @@
  *   `src` to scan source instead. --json Emit JSON instead of human-readable
  *   text. --help, -h Print help and exit. `audit`-only flags (filter the
  *   unified findings list): --coverage Show only call sites covered by an
- *   existing primordial (migration candidates). --gaps Show only call sites
- *   whose primordial doesn't exist yet (surface-expansion candidates). Both
+ *   existing primordial, migration candidates. --gaps Show only call sites
+ *   whose primordial doesn't exist yet, surface-expansion candidates. Both
  *   omitted = both shown. `audit`/`mod`-only flag: --surface <path> Explicit
  *   primordials source file. Overrides the default sibling/installed lookup.
- *   `mod`-only flags: --apply Actually write file changes (default is dry-run).
+ *   `mod`-only flags: --apply Actually write file changes, default is dry-run.
  *   --include-guessed Also rewrite prototype-method calls where the receiver
  *   type was guessed from the identifier name (e.g. `arr.map(fn)` →
  *   ArrayPrototypeMap). Off by default — requires manual review. `lint`-only
@@ -326,7 +326,7 @@ export async function runCli(argv) {
     //                   primordials, redeclaration = need to use
     //                   the existing primordial)
     //   --gaps        → only gap (what's missing from primordials.ts)
-    //   --coverage --gaps → all (explicit, redundant but allowed)
+    //   --coverage --gaps → all, explicit, redundant but allowed
     const wantCoverage = values.coverage || !values.gaps
     const wantGaps = values.gaps || !values.coverage
     let filtered = findings
@@ -446,7 +446,7 @@ export function findLocalPrimordials(scanDir): string | undefined {
 
 /**
  * Returns true when `localPrimordialsPath` points at a directory of per-leaf
- * primordials files (the split-surface layout socket-lib uses), false when it's
+ * primordials files, the split-surface layout socket-lib uses, false when it's
  * the legacy single-file shape.
  *
  * Callers use this to choose between top-level `specifier` (single-file) and

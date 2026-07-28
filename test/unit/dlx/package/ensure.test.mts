@@ -83,7 +83,7 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
       false,
     )
     expect(result.installed).toBe(false)
-    // packageDir matches exactly (modulo path normalization).
+    // packageDir matches exactly, modulo path normalization.
     expect(normalizePath(result.packageDir)).toBe(normalizePath(packageDir))
     // The cached package.json is untouched.
     expect(existsSync(path.join(installedDir, 'package.json'))).toBe(true)

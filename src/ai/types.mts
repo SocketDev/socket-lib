@@ -81,7 +81,7 @@ export interface AgentSpawnResult {
  * capability ladder) — callers spread a tier and override per-call (model,
  * timeout, addDirs).
  *
- * Why the lockdown fields are required (not defaulted to a permissive shape):
+ * Why the lockdown fields are required, not defaulted to a permissive shape:
  * the CLAUDE.md rule says "all four lockdown flags MUST be set on every spawn."
  * Making them required at the type level is the type-system version of that
  * rule.
@@ -110,7 +110,7 @@ export interface SpawnAiAgentOptions {
   readonly effort?: AiEffort | undefined
   /**
    * Extra environment variables for the spawned agent process, merged over the
-   * inherited env. Gated off by default (inherit-only when absent). Used by
+   * inherited env. Gated off by default, inherit-only when absent. Used by
    * egress-containment callers to inject `HTTP_PROXY` / `NODE_OPTIONS`; no
    * effect when omitted.
    */
@@ -158,7 +158,7 @@ export type DiscoveredAgents = Readonly<Partial<Record<AiAgentName, string>>>
  * - `always` — remove the worktree after the per-item function returns,
  *   regardless of success/failure or whether changes were committed. Matches
  *   the "leave no trace" expectation.
- * - `never` — never auto-remove. Caller (or human inspector) cleans up. Useful
+ * - `never` — never auto-remove. Caller, or human inspector, cleans up. Useful
  *   for debugging.
  * - `on-empty` — remove only if the worktree had no changes (committed or
  *   staged). Preserves evidence on failure.

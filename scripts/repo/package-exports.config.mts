@@ -10,7 +10,7 @@
  *   (or `./errors/predicates` / `./errors/stack`) directly.
  *
  *   The browser-safe surface is a VERIFIED-compat claim — its source of truth
- *   is docs/browser-compatibility.md (the audit matrix). Add a prefix here only
+ *   is docs/browser-compatibility.md, the audit matrix. Add a prefix here only
  *   after auditing the subpath has zero Node deps.
  */
 

@@ -3,7 +3,7 @@
  *
  *   - getNodeFs() returns the real `node:fs` module (functional check via known
  *     exports like `existsSync`, not just typeof)
- *   - Repeated calls return the same reference (single require, cached)
+ *   - Repeated calls return the same reference, single require, cached
  *   - The getter is non-throwing on Node
  */
 

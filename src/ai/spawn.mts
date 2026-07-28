@@ -4,7 +4,7 @@
  *   headless invocation MUST set the four lockdown flags (tools / disallow /
  *   permissionMode). The helper enforces this at the
  *   type level (`SpawnAiAgentOptions` requires the relevant fields) AND at the
- *   spawn site (per-agent flag translator). Why CLI subprocess instead of an
+ *   spawn site, per-agent flag translator. Why CLI subprocess instead of an
  *   SDK call: Socket's contract matches what the local user sees when
  *   invoking the CLI — same auth config, same model availability, same tool
  *   permissions. SDK calls would diverge on auth handling and force per-agent
@@ -58,8 +58,8 @@ export function backoffFor(attempt: number): number {
  * denied tools, and here is the permission mode." This
  * translator is the single source of truth for how each agent's flags map.
  *
- * Update sites (when an agent changes its flag surface): 1. The relevant case
- * below. 2. The agent's docs link (cited inline).
+ * Update sites, when an agent changes its flag surface: 1. The relevant case
+ * below. 2. The agent's docs link, cited inline.
  */
 export function buildArgs(
   agent: AiAgentName,
@@ -380,7 +380,7 @@ export async function spawnTierWithFallback(
       !result.unavailable &&
       !isQuotaExhausted(result.stdout, result.stderr)
     ) {
-      // Reached a model that could serve (success or a genuine failure) —
+      // Reached a model that could serve, success or a genuine failure —
       // stop; don't downgrade a real failure onto a weaker model.
       return { candidate, fellOver, result }
     }

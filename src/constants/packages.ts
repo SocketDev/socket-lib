@@ -34,7 +34,7 @@ export const PACKAGE_DEFAULT_VERSION = '1.0.0'
  * Clear the packument cache. Useful for long-running processes that want to
  * force a re-fetch of registry metadata.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function clearPackumentCache(): void {
   // First-call branch fires only when cache is uninitialized; tests
@@ -46,7 +46,7 @@ export function clearPackumentCache(): void {
 }
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function getLifecycleScriptNames(): string[] {
   if (cachedLifecycleScriptNames === undefined) {
@@ -85,7 +85,7 @@ const PACKUMENT_CACHE_MAX = 500
 export class BoundedPackumentCache extends Map<string, unknown> {
   override set(key: string, value: unknown): this {
     // LRU touch/eviction: has-existing tested via Wave 4; fill-to-max
-    // requires 500 distinct keys (impractical in test). The
+    // requires 500 distinct keys, impractical in test. The
     // oldest!==undefined defensive guard is unreachable when size>=max.
     /* c8 ignore start */
     if (this.has(key)) {

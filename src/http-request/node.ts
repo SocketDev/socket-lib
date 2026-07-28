@@ -24,7 +24,7 @@ export type { HttpRequestOptions } from './request-types'
 
 /**
  * GET / POST a JSON endpoint. Automatically sets `Accept: application/json` and
- * `Content-Type: application/json` (when a body is present); user-supplied
+ * `Content-Type: application/json`, when a body is present; user-supplied
  * headers always win. Throws `HttpResponseError` on non-2xx.
  */
 export async function httpJson<T = unknown>(

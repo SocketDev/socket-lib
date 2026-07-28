@@ -200,7 +200,7 @@ export function createTtlCache(
         continue
       }
 
-      // Skip if already in results (from memory).
+      // Skip if already in results, from memory.
       const originalKey = opts.prefix
         ? cacheEntry.key.slice(opts.prefix.length + 1)
         : cacheEntry.key
@@ -253,12 +253,12 @@ export function createTtlCache(
       expiresAt: DateNow() + ttl,
     }
 
-    // Update in-memory cache first (synchronous and fast).
+    // Update in-memory cache first, synchronous and fast.
     if (opts.memoize) {
       memoSet(fullKey, entry)
     }
 
-    // Update persistent cache (don't fail if this errors).
+    // Update persistent cache, don't fail if this errors.
     try {
       await cacachePut(fullKey, JSONStringify(entry), {
         metadata: { expiresAt: entry.expiresAt },

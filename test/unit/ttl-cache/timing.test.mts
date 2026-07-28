@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for time-dependent behavior of the TTL cache:
  *
- *   - TTL expiration (entries expire after their time-to-live elapses)
+ *   - TTL expiration, entries expire after their time-to-live elapses
  *   - Memoization (in-memory cache layer toggled by the `memoize` option)
  *   - Concurrent operations (parallel set/get/getOrFetch, inflight dedupe) Split
  *     out of index.test.mts to keep each file under the file-size cap. Shares

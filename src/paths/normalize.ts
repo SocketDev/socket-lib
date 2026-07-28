@@ -127,7 +127,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
         i++
       }
 
-      // Find the end of first segment (server name).
+      // Find the end of first segment, server name.
       while (i < length) {
         const char = StringPrototypeCharCodeAt(filepath, i)
         if (char === 47 /*'/'*/ || char === 92 /*'\\'*/) {

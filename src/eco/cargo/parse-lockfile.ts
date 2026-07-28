@@ -10,7 +10,7 @@
  *   unambiguous):
  *
  *   - `"name 1.2.3"` — name + space-separated version
- *   - `"name"` — name only (when only one version of that crate is in the graph)
+ *   - `"name"` — name only, when only one version of that crate is in the graph
  *   - `"name 1.2.3 (registry+…)"` — name + version + source spec
  *     `parseGitUrl`-style detection here treats `source = "git+…"` as the git
  *     VCS source, with `#<rev>` as the commit pin. The parser is forgiving —
@@ -189,7 +189,7 @@ export function jsParseCargoLock(content: string): ParsedLockfile {
         currentEntry.checksum = stripTomlString(valueAfterEquals(trimmed))
       } else if (StringPrototypeIndexOf(trimmed, 'dependencies') === 0) {
         const value = valueAfterEquals(trimmed)
-        // Inline form: `dependencies = [ "a", "b" ]` (single line).
+        // Inline form: `dependencies = [ "a", "b" ]`, single line.
         if (
           StringPrototypeIndexOf(value, '[') !== -1 &&
           StringPrototypeIndexOf(value, ']') !== -1
@@ -327,7 +327,7 @@ export function stripTomlString(value: string): string {
 
 /**
  * Read the value half of a `key = value` TOML line. Returns the raw value text
- * (no quote stripping); callers run `stripTomlString` if they want the inner
+ * no quote stripping; callers run `stripTomlString` if they want the inner
  * string.
  */
 export function valueAfterEquals(line: string): string {

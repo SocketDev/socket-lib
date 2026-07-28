@@ -4,7 +4,7 @@
  *
  *   - Default export contains array of actively maintained Node.js major versions
  *   - Data is frozen to prevent runtime modifications
- *   - Version format validation (numeric major versions)
+ *   - Version format validation, numeric major versions
  *   - Sorted in ascending order Used by Socket tools to validate Node.js version
  *     compatibility and requirements.
  */
@@ -123,7 +123,7 @@ describe('maintained-node-versions', () => {
   describe('immutability', () => {
     it('should not allow modification of array elements', () => {
       expect(() => {
-        // Testing runtime immutability (readonly array)
+        // Testing runtime immutability, readonly array
         const arr = maintainedNodeVersions as unknown as string[]
         arr[0] = '99.99.99'
       }).toThrow()
@@ -131,7 +131,7 @@ describe('maintained-node-versions', () => {
 
     it('should not allow push', () => {
       expect(() => {
-        // Testing runtime immutability (readonly array)
+        // Testing runtime immutability, readonly array
         const arr = maintainedNodeVersions as unknown as string[]
         arr.push('99.99.99')
       }).toThrow()
@@ -139,7 +139,7 @@ describe('maintained-node-versions', () => {
 
     it('should not allow pop', () => {
       expect(() => {
-        // Testing runtime immutability (readonly array)
+        // Testing runtime immutability, readonly array
         const arr = maintainedNodeVersions as unknown as string[]
         arr.pop()
       }).toThrow()
@@ -147,7 +147,7 @@ describe('maintained-node-versions', () => {
 
     it('should not allow modification of named properties', () => {
       expect(() => {
-        // Testing runtime immutability (readonly properties)
+        // Testing runtime immutability, readonly properties
         const obj = maintainedNodeVersions as unknown as Record<string, string>
         obj['current'] = '99.99.99'
       }).toThrow()

@@ -81,7 +81,7 @@ describe.sequential('releases/github-api: getReleaseAssetUrl (GraphQL fallback)'
       // REST hit the empty-body incident shape, so we tried GraphQL.
       // GraphQL ran fine but returned `repository.release: null` —
       // there is no release with that tag. Surface a clear error
-      // (not a silent skip) so the caller knows the tag is the
+      // not a silent skip, so the caller knows the tag is the
       // problem, not the transport.
       let call = 0
       vi.mocked(httpRequest).mockImplementation(async () => {

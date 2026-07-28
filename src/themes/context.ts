@@ -30,7 +30,7 @@ export function emitThemeChange(theme: Theme): void {
 
 /**
  * Lazily load the async_hooks module. Aliases the canonical `node/async-hooks`
- * accessor (single owner of the bundler-safe require); kept as an export so
+ * accessor, single owner of the bundler-safe require; kept as an export so
  * this module's surface is unchanged.
  *
  * @private

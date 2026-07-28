@@ -1,6 +1,6 @@
 /**
  * @file Rolldown configuration for the socket-lib main build. Per-file
- *   transpile (not a bundle): every `src/**\/*.{ts,mts,cts}` becomes a sibling
+ *   transpile, not a bundle: every `src/**\/*.{ts,mts,cts}` becomes a sibling
  *   `dist/**\/*.js` with inter-file `require()`s preserved, via
  *   `output.preserveModules`. Declarations come from tsgo, externals from the
  *   separate rolldown externals build. Output contract (must not change —
@@ -30,7 +30,7 @@ const srcPath = path.join(rootPath, 'src')
 const distPath = path.join(rootPath, 'dist')
 
 // Entry-point glob: every runtime source file, minus declaration files and
-// the vendored externals (built separately).
+// the vendored externals, built separately.
 const entryFiles = fg.sync('**/*.{ts,mts,cts}', {
   cwd: srcPath,
   absolute: true,
@@ -65,7 +65,7 @@ export const buildConfig: RolldownOptions = {
   // avoids that).
   external: (id: string) =>
     // Treat any path with an `external/` segment as external: bounded by a
-    // separator (either platform) or string start before, and a separator after.
+    // separator, either platform, or string start before, and a separator after.
     /(?:[/\\]|^)external[/\\]/.test(id) ||
     (!id.startsWith('.') && !path.isAbsolute(id)),
   input,

@@ -2,7 +2,7 @@
  * @file Security tests for archive extraction utilities. Covers the hardening
  *   layers shared by extractZip/extractTar/extractTarGz/extractArchive:
  *
- *   - Path traversal protection (adm-zip normalization, base-dir containment)
+ *   - Path traversal protection, adm-zip normalization, base-dir containment
  *   - Zip bomb protection (per-file maxFileSize, aggregate maxTotalSize)
  *   - Symlink/hard-link rejection in tar and tar.gz archives
  *   - Combined end-to-end security validation through auto-detection

@@ -92,7 +92,7 @@ describe('git extended tests - real git operations', () => {
         const isUnstagedResult = await isUnstaged(testFile, { cwd: tmpDir })
         expect(isUnstagedResult).toBe(true)
 
-        // Check isStaged (should be false)
+        // Check isStaged, should be false
         const isStagedResult = await isStaged(testFile, { cwd: tmpDir })
         expect(isStagedResult).toBe(false)
 
@@ -125,7 +125,7 @@ describe('git extended tests - real git operations', () => {
       const changed = await getChangedFiles({ cache: false, cwd: tmpDir })
       expect(changed).toContain('untracked.txt')
 
-      // Untracked files should not appear in unstaged (they're not tracked)
+      // Untracked files should not appear in unstaged, they're not tracked
       const unstaged = await getUnstagedFiles({ cwd: tmpDir })
       expect(unstaged).not.toContain('untracked.txt')
     }, 'git-untracked-')

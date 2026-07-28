@@ -2,7 +2,7 @@
  * Arborist AuditReport stub.
  *
  * Audit-report.js is eagerly required by arborist/index.js and reify.js but
- * AuditReport.load is only called from arb.audit() (never used by us) and from
+ * AuditReport.load is only called from arb.audit() never used by us, and from
  * reify's [_submitQuickAudit] which is gated on `this.options.audit !== false`.
  * We always pass `audit: false`, so load() is unreachable.
  *

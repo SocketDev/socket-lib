@@ -147,7 +147,7 @@ export function spawn(
   const cwd = spawnOptions.cwd ? String(spawnOptions.cwd) : undefined
   const commandWasPath = isPath(cmd)
   // Resolve binary names to full paths using which.
-  // If cmd is not a path (absolute or relative), resolve it via PATH.
+  // If cmd is not a path, absolute or relative, resolve it via PATH.
   // If cmd is already a path, use it as-is.
   let actualCmd = cmd
   if (!commandWasPath) {
@@ -277,7 +277,7 @@ export function spawn(
   // failure paths read top-to-bottom.
   // shouldStripAnsi vs not branches; both arms exercised but the
   // 'code' in result and catch branches fire only on specific child-
-  // process outcomes (exit-with-code vs throw).
+  // process outcomes, exit-with-code vs throw.
   /* c8 ignore start */
   let newSpawnPromise: PromiseSpawnResult
   if (shouldStripAnsi && stdioString) {
@@ -428,7 +428,7 @@ export function spawnSync(
   options?: SpawnSyncOptions | undefined,
 ): SpawnSyncReturns<string | Buffer> {
   // Resolve binary names to full paths using whichSync.
-  // If cmd is not a path (absolute or relative), resolve it via PATH.
+  // If cmd is not a path, absolute or relative, resolve it via PATH.
   // If cmd is already a path, use it as-is.
   let actualCmd = cmd
   const commandWasPath = isPath(cmd)

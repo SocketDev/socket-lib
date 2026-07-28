@@ -183,7 +183,7 @@ export async function fetchPackageManifest(
 }
 
 /**
- * Fetch the packument (package document) for a package.
+ * Fetch the packument, package document, for a package.
  *
  * @example
  *   ;```typescript

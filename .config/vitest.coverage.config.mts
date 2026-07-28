@@ -22,7 +22,7 @@ import {
  */
 const libSpecificExcludes = [
   // Arborist wrapper — every code path delegates to the npm Arborist
-  // library (network calls, registry lookups, lockfile writes).
+  // library, network calls, registry lookups, lockfile writes.
   // Meaningful coverage requires integration tests against a live
   // registry, not unit tests.
   'src/dlx/arborist.ts',

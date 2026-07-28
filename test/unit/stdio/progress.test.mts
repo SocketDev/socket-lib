@@ -94,7 +94,7 @@ describe('stdio/progress', () => {
         clear: true,
       })
       bar.update(10)
-      // No final newline emitted (clear path).
+      // No final newline emitted, clear path.
       expect(stream.writes[stream.writes.length - 1]).not.toBe('\n')
       // cursorTo was called for the TTY clear.
       expect(stream.cursorTo).toHaveBeenCalled()
@@ -219,7 +219,7 @@ describe('stdio/progress', () => {
     })
 
     it('uses process.stderr by default when no stream is provided', () => {
-      // Construct with no options — should still produce a bar (using stderr).
+      // Construct with no options — should still produce a bar, using stderr.
       // We don't actually want stderr writes in tests, so spy on it.
       const writeSpy = vi
         .spyOn(process.stderr, 'write')

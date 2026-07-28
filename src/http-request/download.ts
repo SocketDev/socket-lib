@@ -4,7 +4,7 @@
  *   randomly-named sibling temp file first, then atomic-renames into place on
  *   success so a failed run never leaves a half-written file at `destPath`.
  *   `httpDownloadAttempt` is one streaming pass; the retry / hash-check loop
- *   sits in `httpDownload`. `httpDownloadAttempt` is exported (not private) per
+ *   sits in `httpDownload`. `httpDownloadAttempt` is exported, not private, per
  *   `export-top-level-functions` — it lives here next to the only caller, and
  *   it uses `httpRequestAttempt(... { stream: true })` from `request.ts` to
  *   obtain the unconsumed `rawResponse` it pipes to disk.
@@ -124,7 +124,7 @@ export async function httpDownload(
 
   // Download to a temp file first, then atomically rename to destination.
   // This prevents partial/corrupted files at the destination path if download fails,
-  // and preserves the original file (if any) until download succeeds.
+  // and preserves the original file, if any, until download succeeds.
   const crypto = getCrypto()
   const fs = getFs()
   const tempSuffix = crypto.randomBytes(6).toString('hex')

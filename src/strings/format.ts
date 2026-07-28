@@ -63,7 +63,7 @@ export function applyLinePrefix(
  * text length to ensure accurate centering of colored text.
  *
  * If the text is already wider than or equal to the target width, returns the
- * original text unchanged (no truncation occurs).
+ * original text unchanged, no truncation occurs.
  *
  * @example
  *   ;```ts
@@ -105,7 +105,7 @@ export function centerText(text: string, width: number): string {
  * Indent each line of a string with spaces.
  *
  * Adds the specified number of spaces to the beginning of each non-empty line
- * in the input string. Empty lines (containing only whitespace) are not
+ * in the input string. Empty lines, containing only whitespace, are not
  * indented. Uses a regular expression to efficiently handle multi-line
  * strings.
  *

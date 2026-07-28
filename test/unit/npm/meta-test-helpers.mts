@@ -44,7 +44,7 @@ export interface StubHttpAdapter extends NpmMetaHttpAdapter {
 /**
  * Create a resolvers-pattern deferred promise — lets a test control exactly
  * when an in-flight `json()` call resolves, so it can assert on state while
- * the call is still pending (in-flight dedupe, concurrency bounds).
+ * the call is still pending, in-flight dedupe, concurrency bounds.
  */
 export function createDeferred<T>(): Deferred<T> {
   let reject!: (reason: unknown) => void

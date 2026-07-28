@@ -180,7 +180,7 @@ describe('browser ttl-cache — storage adapter', () => {
       const adapter = createMemoryAdapter({ enumerable: false })
       const cache = createBrowserTtlCache({ prefix: 'ne', storage: adapter })
       await cache.set('seen', 'in-memo')
-      // A storage-only entry (previous session) is invisible to wildcard ops
+      // A storage-only entry, previous session, is invisible to wildcard ops
       // without enumeration, but still expires per-entry on read.
       adapter.store.set(
         'ne:unseen',

@@ -92,7 +92,7 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
   // The Socket convention is `.socket-lib.json` with a section per
   // check (primordials, paths, public-surface, ...). When the file
   // has the section, use it; otherwise treat the whole file as the
-  // primordials config (back-compat with single-check setups).
+  // primordials config, back-compat with single-check setups.
   if (typeof parsed !== 'object' || parsed === null || ArrayIsArray(parsed)) {
     throw new ErrorCtor('config root must be an object')
   }
@@ -258,7 +258,7 @@ export function renderHuman(
  * "config file not found" error message names the canonical default.
  *
  * `baseDir` is the directory the relative candidates resolve against; it
- * defaults to `process.cwd()` (the repo root the user runs from) and is a
+ * defaults to `process.cwd()`, the repo root the user runs from, and is a
  * parameter so callers/tests can probe a fixture tree without `process.chdir`.
  */
 export function resolveConfigPath(

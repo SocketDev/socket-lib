@@ -1,16 +1,16 @@
 #!/usr/bin/env node
 /**
- * @file Audit which individual `src/` exports (functions, classes, consts) have
+ * @file Audit which individual `src/` exports, functions, classes, consts, have
  *   zero references anywhere — same-file use, other socket-lib source, or any
- *   fleet consumer repo. Complements audit-api-usage.mts (subpath granularity)
+ *   fleet consumer repo. Complements audit-api-usage.mts, subpath granularity
  *   with per-name granularity.
- *   Matching is identifier-based (word-boundary token scan), so it sees through
+ *   Matching is identifier-based, word-boundary token scan, so it sees through
  *   namespace imports (`ns.foo()`), re-export chains, and `require` shapes that
  *   a specifier-based audit can't attribute per name. The trade-off is
  *   conservatism: a name shared with ANY other identifier in the scanned tree
  *   counts as used, and a name defined in more than one module is reported as a
  *   collision and never flagged. False "used" is possible; false "unused" is
- *   not (modulo string-built dynamic access, which nothing static can see).
+ *   not, modulo string-built dynamic access, which nothing static can see.
  *   Usage: node scripts/repo/audit-unused-exports.mts [--json]
  */
 

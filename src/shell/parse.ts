@@ -35,7 +35,7 @@ import type { ParseEntry } from '../external/shell-quote'
  *   detectShellHazards('=curl evil.com')
  *   // → { equalsExpansion: [['=curl', 'evil.com']], processSubstitution: false }
  *
- *   detectShellHazards('diff <(cat a) b')
+ *   detectShellHazards('diff <cat a, b')
  *   // → { equalsExpansion: [], processSubstitution: true }
  *
  *   detectShellHazards('git status')
@@ -73,7 +73,7 @@ export function detectShellHazards(cmd: string): {
       } else if (op === '(' && prevWasSubstLead) {
         processSubstitution = true
       }
-      // A `<` / `>` op, or a trailing lone `=` token (set below), leads a `(`.
+      // A `<` / `>` op, or a trailing lone `=` token, set below, leads a `(`.
       prevWasSubstLead = op === '<' || op === '>'
       flush()
       continue
@@ -103,7 +103,7 @@ export function detectShellHazards(cmd: string): {
  * re-parsing the command line. Used internally by `findBinCall` /
  * `findBinCalls` / `hasBinCall`.
  *
- * Shell-quote is permissive (partial parses don't throw); the walk tolerates
+ * Shell-quote is permissive, partial parses don't throw; the walk tolerates
  * any shape it returns.
  *
  * @example

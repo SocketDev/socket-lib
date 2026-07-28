@@ -41,7 +41,7 @@ describe('git extended tests', () => {
     it('should not cache when cache option is false', async () => {
       const result1 = await getChangedFiles({ cache: false, cwd: projectRoot })
       const result2 = await getChangedFiles({ cache: false, cwd: projectRoot })
-      // Results should be arrays (may not be exactly equal if files changed)
+      // Results should be arrays, may not be exactly equal if files changed
       expect(Array.isArray(result1)).toBe(true)
       expect(Array.isArray(result2)).toBe(true)
     })
@@ -85,7 +85,7 @@ describe('git extended tests', () => {
   describe('options handling', () => {
     it('should handle asSet option', async () => {
       const result = await getChangedFiles({ asSet: true, cwd: projectRoot })
-      // Even with asSet, the function returns array (option is for future use)
+      // Even with asSet, the function returns array, option is for future use
       expect(Array.isArray(result)).toBe(true)
     })
 
@@ -160,7 +160,7 @@ describe('git extended tests', () => {
     it('should normalize paths correctly', async () => {
       const result = await getChangedFiles({ cwd: projectRoot })
       for (const file of result) {
-        // Paths should not have backslashes (even on Windows)
+        // Paths should not have backslashes, even on Windows
         expect(file).not.toContain('\\')
       }
     })

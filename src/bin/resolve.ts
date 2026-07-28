@@ -14,7 +14,7 @@
  *   `which.ts` can flush them when its own cache eviction fires. Cycles with
  *   `which.ts`: `resolveRealBinSync` calls `whichRealSync` to handle relative
  *   input paths. ESM tolerates the cycle since both sides expose only functions
- *   (no eager top-level evaluation that needs the other module's bindings).
+ *   no eager top-level evaluation that needs the other module's bindings.
  */
 
 import { WIN32 } from '../constants/platform'
@@ -52,7 +52,7 @@ export function resolveRealBinSync(binPath: string): string {
   // Normalize the path once for consistent pattern matching.
   binPath = normalizePath(binPath)
 
-  // Handle empty string that normalized to '.' (current directory)
+  // Handle empty string that normalized to '.', current directory
   if (binPath === '.') {
     return binPath
   }
@@ -343,7 +343,7 @@ export function resolveRealBinSync(binPath: string): string {
       }
     }
   } else {
-    // Handle Unix shell scripts (non-Windows platforms)
+    // Handle Unix shell scripts, non-Windows platforms
     let hasNoExt = extLowered === ''
     const isPnpmOrYarn = basename === 'pnpm' || basename === 'yarn'
     const isNpmOrNpx = basename === 'npm' || basename === 'npx' // # socket-lint: allow npx
@@ -366,7 +366,7 @@ export function resolveRealBinSync(binPath: string): string {
         try {
           // oxlint-disable-next-line socket/prefer-exists-sync -- statSync needed to discriminate files from directories
           const stats = fs.statSync(baseBinPath)
-          // Only use this path if it's a file (the shell script).
+          // Only use this path if it's a file, the shell script.
           if (stats.isFile()) {
             binPath = normalizePath(baseBinPath)
             // Recompute hasNoExt since we changed the path.
@@ -381,7 +381,7 @@ export function resolveRealBinSync(binPath: string): string {
     if (
       hasNoExt &&
       (isPnpmOrYarn || isNpmOrNpx) &&
-      // For extensionless files (Unix shell scripts), verify existence before reading.
+      // For extensionless files, Unix shell scripts, verify existence before reading.
       // This prevents ENOENT errors when the bin path doesn't exist.
       fs.existsSync(binPath)
     ) {

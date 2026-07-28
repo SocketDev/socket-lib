@@ -103,7 +103,7 @@ export async function extractTar(
         return header
       }
 
-      // Reject entries with null bytes in names (defense in depth).
+      // Reject entries with null bytes in names, defense in depth.
       if (header.name.includes('\0')) {
         destroyScheduled = true
         process.nextTick(() => {
@@ -250,7 +250,7 @@ export async function extractTarGz(
         return header
       }
 
-      // Reject entries with null bytes in names (defense in depth).
+      // Reject entries with null bytes in names, defense in depth.
       if (header.name.includes('\0')) {
         destroyScheduled = true
         process.nextTick(() => {

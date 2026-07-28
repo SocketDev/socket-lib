@@ -34,7 +34,7 @@ export interface RetryOptions {
   backoffFactor?: number | undefined
 
   /**
-   * Initial delay before the first retry (in milliseconds). This is the base
+   * Initial delay before the first retry, in milliseconds. This is the base
    * value for exponential backoff calculations.
    *
    * @default 200
@@ -57,7 +57,7 @@ export interface RetryOptions {
   jitter?: boolean | undefined
 
   /**
-   * Upper limit for any backoff delay (in milliseconds). Prevents exponential
+   * Upper limit for any backoff delay, in milliseconds. Prevents exponential
    * backoff from growing unbounded.
    *
    * @default 10000
@@ -76,15 +76,18 @@ export interface RetryOptions {
    *
    * @example
    *   // Log each retry
-   *   onRetry: (attempt, error, delay) => {
-   *     console.log(`Retry ${attempt} after ${delay}ms: ${error}`)
-   *   }
+   *   onRetry: (attempt,
+   *     error,
+   *     delay => {
+   *       console.log(`Retry ${attempt} after ${delay}ms: ${error}`)
+   *     })
    *
    * @example
    *   // Cancel retries for specific errors
-   *   onRetry: (attempt, error) => {
-   *     if (error instanceof ValidationError) return false
-   *   }
+   *   onRetry: (attempt,
+   *     error => {
+   *       if (error instanceof ValidationError) return false
+   *     })
    *
    * @example
    *   // Use custom delay
@@ -127,7 +130,7 @@ export interface RetryOptions {
    * callback is executed `retries + 1` times total (initial + retries).
    *
    * @example
-   *   // retries: 0 -> 1 total attempt (no retries)
+   *   // retries: 0 -> 1 total attempt, no retries
    *   // retries: 3 -> 4 total attempts (1 initial + 3 retries)
    *
    * @default 0
@@ -167,7 +170,7 @@ export interface IterationOptions {
   concurrency?: number | undefined
 
   /**
-   * Retry configuration as a number (retry count) or full options object.
+   * Retry configuration as a number, retry count, or full options object.
    * Applied to each individual item's callback execution.
    *
    * @example
@@ -184,7 +187,7 @@ export interface IterationOptions {
    *     },
    *   })
    *
-   * @default 0 (no retries)
+   * @default 0, no retries
    */
   retries?: number | RetryOptions | undefined
 
@@ -210,7 +213,7 @@ export interface PromiseWithResolvers<T> {
    */
   promise: Promise<T>
   /**
-   * Resolves {@link promise} with the given value (or thenable).
+   * Resolves {@link promise} with the given value, or thenable.
    */
   resolve: (value: T | PromiseLike<T>) => void
   /**

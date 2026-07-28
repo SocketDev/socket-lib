@@ -59,7 +59,7 @@ export interface YargsArguments extends Record<string, unknown> {
 export interface ParseArgsOptionsConfig {
   // Whether the option accepts multiple values (array).
   multiple?: boolean | undefined
-  // Short alias for the option (single character).
+  // Short alias for the option, single character.
   short?: string | undefined
   // Type of the option value.
   type?: 'boolean' | 'string' | undefined
@@ -96,7 +96,7 @@ export interface ParseArgsConfig {
 export interface ParsedArgs<T = Record<string, unknown>> {
   // Parsed option values.
   values: T
-  // Positional arguments (non-option arguments).
+  // Positional arguments, non-option arguments.
   positionals: string[]
   // Raw parsed arguments object from yargs-parser.
   raw: YargsArguments
@@ -105,7 +105,7 @@ export interface ParsedArgs<T = Record<string, unknown>> {
 /**
  * Common parseArgs configuration for Socket registry scripts.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export const commonParseArgsConfig: ParseArgsConfig = {
   options: {

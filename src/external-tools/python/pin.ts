@@ -10,7 +10,7 @@
  *     for every artifact in the closure) ready to feed back to
  *     `downloadPipPackage` / `pip install --require-hashes`. Engine: `pip
  *     download --dest <scratch> <spec>` downloads the spec + its resolved
- *     closure as wheels/sdists into a scratch dir (no install, no venv), each
+ *     closure as wheels/sdists into a scratch dir, no install, no venv, each
  *     file is hashed, then the scratch dir is torn down. This is pip's own
  *     recipe for producing hashed requirements — `pip-tools` is NOT required.
  *     Contrast `resolveNpmPackagePin` (dlx/lockfile): same contract, npm engine
@@ -21,7 +21,7 @@
  *     `before` date. pip has no native release-age gate, so this generator does
  *     NOT enforce one — callers that need a soak must vet the resolved versions
  *     out of band. The spec itself remains the primary pin: `==<version>` (PyPI
- *     is immutable per version) or `@<full-sha>` (git is content-addressed).
+ *     is immutable per version) or `@<full-sha>`, git is content-addressed.
  */
 
 // oxlint-disable-next-line socket/prefer-async-spawn -- pip download streams progress; the lib promise wrapper rejects on nonzero and hides output.
@@ -50,7 +50,7 @@ export interface ResolvePipPackagePinOptions {
   readonly scratchDir?: string | undefined
   /**
    * Pip spec to pin: `<pkg>==<version>` (PyPI exact pin) or
-   * `git+https://<url>@<sha>` (git-SHA pin).
+   * `git+https://<url>@<sha>`, git-SHA pin.
    */
   readonly spec: string
 }

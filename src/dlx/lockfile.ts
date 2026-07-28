@@ -33,7 +33,7 @@ import { getNodePath } from '../node/path'
 /**
  * Lockfile source for the `lockfile` option on `downloadNpmPackage`.
  *
- * Bare strings are sniffed: a leading `{` (after whitespace) means JSON
+ * Bare strings are sniffed: a leading `{`, after whitespace, means JSON
  * content, anything else is treated as a filesystem path. Pass the explicit `{
  * type, value }` form to override sniffing.
  *
@@ -137,7 +137,7 @@ export class DlxLockfileError extends Error {
  *
  * The result contains everything a caller needs to pin the package for future
  * installs: the exact resolved name/version, both hash formats, and the
- * lockfile content (ready to commit).
+ * lockfile content, ready to commit.
  *
  * @example
  *   ;```ts

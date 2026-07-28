@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for packages/manifest.ts. Covers the pure helper
  *   `createPackageJson` + the network fns `fetchPackageManifest` /
- *   `fetchPackagePackument` via pacote mocks (no real network).
+ *   `fetchPackagePackument` via pacote mocks, no real network.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

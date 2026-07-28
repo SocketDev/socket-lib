@@ -6,7 +6,7 @@
  *   accessors. Split out of `meta-cache.test.mts` to keep each file under the
  *   fleet's 500-line soft cap — see that file for the primary TTL/force/dedupe/
  *   negative-cache coverage. HTTP is mocked via the `StubHttpAdapter` test
- *   double (no live network); cacache persistence is isolated per test via a
+ *   double, no live network; cacache persistence is isolated per test via a
  *   unique `SOCKET_CACACHE_DIR`.
  */
 

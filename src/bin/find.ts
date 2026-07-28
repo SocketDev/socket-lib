@@ -8,7 +8,7 @@
  *   package manager. Per-tool helpers (`findRealNpm`, `findRealPnpm`,
  *   `findRealYarn`) encode the canonical install layouts:
  *
- *   - npm: alongside `process.execPath` first (Node bundles it), then
+ *   - npm: alongside `process.execPath` first, Node bundles it, then
  *     `%APPDATA%\npm` on Windows or `/usr/local/bin` / `/usr/bin` on POSIX.
  *   - pnpm: `~/.local/share/pnpm` (XDG) or `~/.pnpm` on POSIX,
  *     `%APPDATA%\npm\pnpm` or `%LOCALAPPDATA%\pnpm\pnpm` on Windows.
@@ -164,7 +164,7 @@ export function findRealPnpm(): string {
   // Try common pnpm locations. Guard each env-derived path with its
   // existence — getHome()/getAppdata()/etc. can all return undefined.
   // WIN32 commonPaths tested on Windows runners; HOME-based fallback
-  // fires only when XDG_DATA_HOME is unset (env-config dependent).
+  // fires only when XDG_DATA_HOME is unset, env-config dependent.
   /* c8 ignore start */
   const commonPaths = WIN32
     ? [

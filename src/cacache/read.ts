@@ -1,5 +1,5 @@
 /**
- * @file Cache read entrypoints — `get` (throws on miss) and `safeGet` (returns
+ * @file Cache read entrypoints — `get`, throws on miss, and `safeGet` (returns
  *   `undefined` on miss). Both reject keys containing wildcards; bulk reads go
  *   through `clear` / `ls` patterns.
  */

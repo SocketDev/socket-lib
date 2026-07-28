@@ -1,6 +1,6 @@
 /**
  * @file Safe references to Node's `Buffer` global. `Buffer` is a Node-only
- *   global; in browsers and Deno (without compatibility shim) the captured
+ *   global; in browsers and Deno, without compatibility shim, the captured
  *   references are `undefined`. Cross- env consumers must null-check before
  *   calling.
  */

@@ -38,7 +38,7 @@ let cachedFetcher: ReturnType<typeof makeFetchHappen.defaults> | undefined
  * Comparator ordering two trust statuses by ascending trust level. Sorts an
  * array of statuses lowest-trust-first; negate for highest-first.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function compareTrust(a: TrustStatus, b: TrustStatus): -1 | 0 | 1 {
   const levelA = getTrustLevel(a)
@@ -58,7 +58,7 @@ export function compareTrust(a: TrustStatus, b: TrustStatus): -1 | 0 | 1 {
  * reminder: a version that drops from trustedPublisher back to bare provenance
  * is a red flag worth surfacing.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function didTrustDecrease(
   prev: TrustStatus,
@@ -245,7 +245,7 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
   const { externalParameters, predicate } = provenanceData
   const def = predicate?.buildDefinition
 
-  // Handle both SLSA v0.2 (direct properties) and v1 (nested workflow object)
+  // Handle both SLSA v0.2, direct properties, and v1, nested workflow object
   const workflow = externalParameters?.workflow
   const workflowRef = workflow?.ref || externalParameters?.workflow_ref
   const workflowUrl = externalParameters?.context
@@ -293,7 +293,7 @@ export function getTrustLevel(status: TrustStatus): TrustLevel {
 /**
  * Map a trust status to its human-readable level name.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function getTrustLevelName(status: TrustStatus): TrustLevelName {
   return TRUST_LEVELS[getTrustLevel(status)]
@@ -309,7 +309,7 @@ export function getTrustLevelName(status: TrustStatus): TrustLevelName {
  * `provenance` in pnpm's trust-evidence ladder, because it adds a human
  * approval gate on top of the OIDC publisher identity.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function getTrustStatus(meta: unknown): TrustStatus {
   const status: TrustStatus = {

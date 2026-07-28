@@ -18,7 +18,7 @@ export type MemoizeOptions<Args extends unknown[]> = {
    */
   maxSize?: number | undefined
   /**
-   * TTL in milliseconds (cache entries expire after this time)
+   * TTL in milliseconds, cache entries expire after this time.
    */
   ttl?: number | undefined
   /**

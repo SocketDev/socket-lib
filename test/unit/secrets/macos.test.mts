@@ -59,7 +59,7 @@ interface FakeChild extends EventEmitter {
 }
 
 // `@socketsecurity/lib-stable/process/spawn/child`'s `spawn()` returns
-// `{ process: ChildProcess, ... }` (the lib wraps the raw child); src code
+// `{ process: ChildProcess, ... }`, the lib wraps the raw child; src code
 // does `const { process: cp } = spawn(...)`. The helper here returns the
 // wrapped shape so call sites can stay terse — `mockSpawn.mockImplementationOnce(
 // () => makeFakeChild({ ... }))` Just Works without per-call destructuring.
@@ -101,7 +101,7 @@ function makeFakeChild(opts: {
       if (opts.emitError) {
         // Only emit the EventEmitter `error` if something listens — an
         // `error` event with no listener throws as an uncaught exception
-        // (Node semantics). The await-style runners DON'T listen on
+        // Node semantics. The await-style runners DON'T listen on
         // `.process.on('error')`; the event-style ones (deleteX) do.
         if (emitter.listenerCount('error') > 0) {
           emitter.emit('error', opts.emitError)

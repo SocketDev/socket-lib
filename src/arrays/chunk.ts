@@ -30,7 +30,7 @@ import { ErrorCtor } from '../primordials/error'
  *
  * @default 2
  *
- * @param arr - The array to split into chunks (can be readonly)
+ * @param arr - The array to split into chunks, can be readonly.
  * @param size - Size of each chunk. Must be greater than 0.
  *
  * @returns Array of chunks, where each chunk is an array of elements

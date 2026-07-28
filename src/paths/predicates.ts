@@ -105,7 +105,7 @@ export function isNodeModules(pathLike: string | Buffer | URL): boolean {
 }
 
 /**
- * Check if a value is a valid file path (absolute or relative).
+ * Check if a value is a valid file path, absolute or relative.
  *
  * Distinguishes between file paths and other string formats like package names,
  * URLs, or bare module specifiers.

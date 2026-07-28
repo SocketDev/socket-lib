@@ -5,7 +5,7 @@
  *   an in-C++ `findUp`). Returns `undefined` on stock Node, non-Node runtimes,
  *   and on socket-btm binaries that haven't shipped the binding yet; callers
  *   fall back to the JS implementation. Result is cached. The binding does not
- *   exist yet (the plan is unbuilt) — this accessor is the seam so that when it
+ *   exist yet, the plan is unbuilt — this accessor is the seam so that when it
  *   lands, only this file changes and `paths/walk`, `fs/access`, `fs/find`
  *   light up natively. Today `getSmolPath()` is always `undefined` and the JS
  *   paths run.

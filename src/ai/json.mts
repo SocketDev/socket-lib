@@ -66,7 +66,7 @@ export function closeUnbalancedJson(raw: string): string | undefined {
 
 /**
  * Resolve a key to its canonical form via a synonym map, case-insensitively. A
- * canonical name matching the key (or any of its synonyms) wins; otherwise the
+ * canonical name matching the key, or any of its synonyms, wins; otherwise the
  * original key is returned unchanged. Models paraphrase field names ("summary"
  * vs "description"), so a caller supplies the accepted synonyms per canonical
  * key.

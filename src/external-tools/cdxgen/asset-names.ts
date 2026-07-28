@@ -46,7 +46,7 @@ export interface CdxgenDownloadOptions {
    */
   platformArch: string
   /**
-   * Slim (no bundled bun/deno) or full (bundles both). Defaults to slim.
+   * Slim (no bundled bun/deno) or full, bundles both. Defaults to slim.
    */
   variant?: CdxgenVariant | undefined
 }

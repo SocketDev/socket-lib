@@ -87,7 +87,7 @@ export async function pythonFromDownload(
     ...options,
   } as typeof options
   // Resolve the effective platform-arch ONCE so the asset URL and the cache
-  // path agree (a stray undefined here would poison the cache dir name).
+  // path agree, a stray undefined here would poison the cache dir name.
   const arch = options.arch ?? getPythonArch()
   if (!arch) {
     return undefined

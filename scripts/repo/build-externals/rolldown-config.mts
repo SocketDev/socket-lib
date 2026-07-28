@@ -49,7 +49,7 @@ const requireResolve = createRequire(import.meta.url)
  *
  * Each entry may be a bare stub filename (matches against the resolved
  * specifier only) or a tuple `[importerPattern, stubFilename]` to require the
- * importer to also match (used to scope relative-path stubs to a package).
+ * importer to also match, used to scope relative-path stubs to a package.
  */
 const STUB_MAP: Record<string, string | [RegExp, string]> = {
   '^(encoding|iconv-lite)$': 'encoding.cjs',
@@ -250,7 +250,7 @@ export function getRolldownConfig(
   packageOpts: PackageOpts = {},
 ): RolldownOptions {
   const externals = [...BUILTIN_EXTERNALS, ...(packageOpts.external || [])]
-  // `pkg/*` entries externalize the whole subtree (prefix match); bare
+  // `pkg/*` entries externalize the whole subtree, prefix match; bare
   // entries match exactly. `pkg/*` mirrors esbuild's wildcard external.
   const exactExternals = new Set(externals.filter(e => !e.endsWith('/*')))
   const prefixExternals = externals
@@ -309,7 +309,7 @@ export function getRolldownConfig(
       sourcemap: false,
       // Single self-contained file per external. Disable code-splitting so
       // dynamic imports inline into one chunk and `output.file` is valid
-      // (matches esbuild's single-outfile bundle).
+      // matches esbuild's single-outfile bundle.
       codeSplitting: false,
       // Preserve function/class .name for readable runtime errors (esbuild
       // keepNames:true). OutputOptions field, not top-level.

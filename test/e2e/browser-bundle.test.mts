@@ -138,7 +138,7 @@ describe('browser-bundle e2e', () => {
         stats?.toString({ all: false, errors: true }),
       ).toBe(false)
 
-      // Execute the bundle in a bare vm context: console (browsers have it)
+      // Execute the bundle in a bare vm context: console, browsers have it
       // but NO process global — module evaluation must not touch it.
       const source = readFileSync(path.join(outDir, 'debug-bundle.js'), 'utf8')
       const sandbox: Record<string, unknown> = { console }

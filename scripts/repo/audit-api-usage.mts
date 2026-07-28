@@ -16,7 +16,7 @@
  *     through them. Classifies each export 3 ways: ADOPTED (a member repo
  *     imports it directly), CASCADE-ONLY (used only in the wheelhouse
  *     `template/`, shipped fleet-wide by the cascade — live, NOT removable),
- *     UNUSED (no reference). Also flags pass-through re-exports (a consumer
+ *     UNUSED, no reference. Also flags pass-through re-exports (a consumer
  *     forwarding a lib subpath through its own surface — a cleanup candidate).
  *     Renders the picture as terminal bars (see audit-api-usage/render.mts).
  *     Usage: node scripts/repo/audit-api-usage.mts [--json] [--consumers
@@ -73,7 +73,7 @@ const SOURCE_EXTS = new Set([
 const SKIP_DIRS = new Set(['.git', 'build', 'coverage', 'dist', 'node_modules'])
 
 // A single reference to a lib subpath, tagged with the syntactic shape that
-// produced it (so the report can separate clean imports from blind spots) and
+// produced it, so the report can separate clean imports from blind spots, and
 // where it came from: which consumer repo, and whether it is a cascade-source
 // path (the wheelhouse `template/` tree, which SHIPS to every member — so a
 // subpath used only there is live fleet-wide, not "directly adopted").
@@ -139,7 +139,7 @@ export function listSourceFiles(root: string): string[] {
   return out
 }
 
-// Pull the string value out of an import/require source node (a Literal).
+// Pull the string value out of an import/require source node, a Literal.
 function literalValue(node: AcornNode | undefined): string | undefined {
   const n = node as
     | { type?: string | undefined; value?: unknown | undefined }
@@ -157,7 +157,7 @@ export function isCascadeSource(repo: string, file: string): boolean {
   return repo === 'socket-wheelhouse' && /[/\\]template[/\\]/.test(file)
 }
 
-// AST-walk one file, returning every lib reference it makes (any shape).
+// AST-walk one file, returning every lib reference it makes, any shape.
 export function collectRefs(
   source: string,
   file: string,
@@ -182,7 +182,7 @@ export function collectRefs(
       // A namespace import (`import * as x from …`) hides which named exports
       // are used — flag it distinctly from a plain named import. BUT a
       // type-only namespace import (`import type * as x`) is erased at compile
-      // (no runtime surface, no tree-shaking impact), so it's NOT a blind spot
+      // no runtime surface, no tree-shaking impact, so it's NOT a blind spot
       // — treat it as a plain named ref. The acorn-wasm parser doesn't expose
       // `importKind`, so detect `import type` from the statement's source text.
       const specifiers =
@@ -272,7 +272,7 @@ function main(): number {
   const libRoot = path.resolve(import.meta.dirname, '../..')
   const subpaths = exportSubpaths(path.join(libRoot, 'package.json'))
 
-  // Walk every consumer, collecting refs (skip socket-lib's own tree).
+  // Walk every consumer, collecting refs, skip socket-lib's own tree.
   const allRefs: UsageRef[] = []
   for (
     let i = 0, { length } = consumers.length ? consumers : [];
@@ -346,7 +346,7 @@ function main(): number {
   }
 
   // 3-way classification:
-  //   adopted     — a MEMBER repo imports it directly (real downstream demand)
+  //   adopted     — a MEMBER repo imports it directly, real downstream demand
   //   cascadeOnly — used only in the wheelhouse template/ (shipped fleet-wide
   //                 by the cascade, but no member imports it itself)
   //   unused      — no reference anywhere
@@ -364,10 +364,10 @@ function main(): number {
 
   // Pass-through re-exports: a consumer `export { x } from '@socketsecurity/lib/x'`
   // that just forwards a lib subpath through its own surface. The subpath IS
-  // used (counted as adopted), but the forwarding adds nothing — downstream
+  // used, counted as adopted, but the forwarding adds nothing — downstream
   // could import lib directly. A cleanup candidate (minimize). Keyed by
   // "<repo>: <file>:<subpath>" so the report can point at each site. The
-  // wheelhouse template/ is excluded (its re-exports are intentional shims).
+  // wheelhouse template/ is excluded, its re-exports are intentional shims.
   const passThroughReExports = allRefs
     .filter(r => r.kind === 're-export' && !r.cascadeSource)
     .map(r => ({

@@ -36,8 +36,8 @@ export interface DownloadNpmPackageResult {
 export interface EnsurePackageInstallOptions {
   /**
    * Expected hash of the top-level package tarball. Accepts either: - A bare
-   * sha512 SRI string (sniffed as integrity). - A bare sha256 hex string
-   * (sniffed as checksum). - An explicit `{ type: 'integrity' | 'checksum',
+   * sha512 SRI string, sniffed as integrity. - A bare sha256 hex string
+   * sniffed as checksum. - An explicit `{ type: 'integrity' | 'checksum',
    * value }` object.
    */
   hash?: HashSpec | undefined
@@ -98,10 +98,10 @@ export interface DlxPackageOptions extends EnsurePackageInstallOptions {
    * fails.
    *
    * @example
-   *   // Auto-detected (single binary)
+   *   // Auto-detected, single binary
    *   { spec: '@socketsecurity/cli' }  // Finds 'socket' binary automatically
    *
-   *   // Explicit (multiple binaries)
+   *   // Explicit, multiple binaries
    *   { spec: 'some-tool', binaryName: 'specific-tool' }
    */
   binaryName?: string | undefined
@@ -113,7 +113,7 @@ export interface DlxPackageOptions extends EnsurePackageInstallOptions {
   force?: boolean | undefined
 
   /**
-   * Suppress output (quiet mode). Aligns with npx --quiet/-q and pnpm
+   * Suppress output, quiet mode. Aligns with npx --quiet/-q and pnpm
    * --silent/-s flags.
    */
   quiet?: boolean | undefined

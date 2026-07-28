@@ -10,7 +10,7 @@ import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import { walkUp } from '../../../src/paths/walk'
 
-// On Windows, `path.resolve('/a/b/c')` returns `D:\a\b\c` (current drive).
+// On Windows, `path.resolve('/a/b/c')` returns `D:\a\b\c`, current drive.
 // walkUp yields the normalized form `D:/a/b/c`. Strip the drive prefix on
 // Windows so the assertion compares the path tail, not the drive letter.
 const DRIVE_PREFIX =

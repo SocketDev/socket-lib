@@ -98,7 +98,7 @@ describe.sequential('dlx/packages', () => {
     it('filters out non-directory entries', async () => {
       const dlxRoot = tmpDir
       mkdirSync(path.join(dlxRoot, 'pkg-a'), { recursive: true })
-      // Drop a file (not a directory) — should be filtered out.
+      // Drop a file, not a directory — should be filtered out.
       writeFileSync(path.join(dlxRoot, 'not-a-package.txt'), '')
       const result = await listDlxPackagesAsync()
       expect(result).toEqual(['pkg-a'])

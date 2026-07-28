@@ -2,7 +2,7 @@
  * @file Tests for Logger theme handling and LOG_SYMBOLS. Tests theme-related
  *   Logger functionality including:
  *
- *   - Logger initialization with theme options (string and object)
+ *   - Logger initialization with theme options, string and object
  *   - Theme changes and LOG_SYMBOLS updates
  *   - Theme color application to symbols
  *   - LOG_SYMBOLS access triggers initialization

@@ -2,7 +2,7 @@
  * @file Tests for src/external-tools/python/uv-install.ts. `uvProjectTargetDir`
  *   is pure and covered directly; `uvSyncProject` + `uvExportMaterialize` are
  *   covered with mocked spawn + filesystem so the test never spawns uv and
- *   never sleeps for real (the lock-poll loop uses fake timers).
+ *   never sleeps for real, the lock-poll loop uses fake timers.
  */
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
@@ -199,7 +199,7 @@ describe.sequential('external-tools/python/uv-install — uvExportMaterialize', 
       // pre-check empty, then the poll loop sees it populated on the 1st tick.
       readdirMock.mockResolvedValueOnce([]).mockResolvedValueOnce(['pkg'])
       writeFileMock.mockRejectedValueOnce(eexist())
-      // A live PID (this process) → isStaleLock false → enter the poll loop.
+      // A live PID, this process → isStaleLock false → enter the poll loop.
       readFileMock.mockResolvedValueOnce(process.pid.toString())
       const promise = uvExportMaterialize({ projectDir: PROJECT, uvBin: UV })
       await vi.advanceTimersByTimeAsync(1000)

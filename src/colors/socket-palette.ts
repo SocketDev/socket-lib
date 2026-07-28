@@ -56,7 +56,7 @@ export interface SocketPalette {
 const HEX_BY_THEME: Record<SocketPaletteTheme, SocketPaletteHex> = {
   __proto__: null,
   // The dark theme is the default — bright values that pop on terminal
-  // backgrounds (which are overwhelmingly dark).
+  // backgrounds, which are overwhelmingly dark.
   dark: {
     __proto__: null,
     alert: '#fb923c',
@@ -67,7 +67,7 @@ const HEX_BY_THEME: Record<SocketPaletteTheme, SocketPaletteHex> = {
     success: '#4ade80',
     warning: '#facc15',
   } as SocketPaletteHex,
-  // Saturated, deep values for light terminals (rare but supported).
+  // Saturated, deep values for light terminals, rare but supported.
   light: {
     __proto__: null,
     alert: '#9a3412',
@@ -94,7 +94,7 @@ const HEX_BY_THEME: Record<SocketPaletteTheme, SocketPaletteHex> = {
 /**
  * Build an ANSI-wrapping function for a single hex color. Emits the 24-bit
  * sequence rather than rounding to the legacy 8-color palette so the rendered
- * output matches the CSS token byte-for-byte (modulo terminal gamut).
+ * output matches the CSS token byte-for-byte, modulo terminal gamut.
  * `\x1b[39m` resets fg to the terminal default — using `[0m` would also clear
  * bg / styles, which the caller may have set deliberately.
  */

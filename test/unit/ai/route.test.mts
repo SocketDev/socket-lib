@@ -181,7 +181,7 @@ describe('keyless local candidate', () => {
         localAvailable: false,
       }),
     ).toBe(false)
-    // Undefined (caller never probed) → skipped.
+    // Undefined, caller never probed → skipped.
     expect(isCandidateUsable(local, ctx([], []))).toBe(false)
   })
 

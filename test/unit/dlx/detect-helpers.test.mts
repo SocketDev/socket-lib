@@ -104,7 +104,7 @@ describe.sequential('dlx/detect — readPackageJson', () => {
     writeFileSync(pkgPath, JSON.stringify({ name: 'x' }))
     const first = readPackageJson(pkgPath)
     const second = readPackageJson(pkgPath)
-    // Same parsed reference returned (cache hit returns stored object).
+    // Same parsed reference returned, cache hit returns stored object.
     expect(second).toBe(first)
   })
 })

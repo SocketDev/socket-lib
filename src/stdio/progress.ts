@@ -135,7 +135,7 @@ export class ProgressBar {
    *   bar.update(75, { status: 'Processing...' })
    *   ```
    *
-   * @param current - Current progress value (will be clamped to total)
+   * @param current - Current progress value, will be clamped to total.
    * @param tokens - Optional custom tokens to replace in format string.
    */
   update(current: number, tokens?: Record<string, unknown> | undefined): void {

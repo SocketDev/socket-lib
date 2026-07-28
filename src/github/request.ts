@@ -5,7 +5,7 @@
  *
  *   1. Token resolution (env → git config) when the caller doesn't pass an
  *      explicit token.
- *   2. Standard headers (Accept, User-Agent) merged with caller- supplied headers.
+ *   2. Standard headers, Accept, User-Agent, merged with caller- supplied headers.
  *   3. Rate-limit detection — when GitHub returns 403 with `x-ratelimit-remaining:
  *      0`, throw a typed `GitHubRateLimitError` so callers can react (set
  *      GITHUB_TOKEN, retry after reset).
@@ -35,7 +35,7 @@ import type { GitHubFetchOptions, GitHubRateLimitError } from './types'
  *
  * Features: - Automatic token injection from environment if not provided - Rate
  * limit detection with helpful error messages - Standard GitHub API headers
- * (Accept, User-Agent) - JSON response parsing.
+ * Accept, User-Agent - JSON response parsing.
  *
  * @example
  *   ```ts

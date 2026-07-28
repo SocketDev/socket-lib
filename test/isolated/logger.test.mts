@@ -1,6 +1,6 @@
 /**
  * @file Isolated tests for the Logger class's core logging surface: every
- *   logging level (log, info, warn, error, success, fail, done), indentation,
+ *   logging level, log, info, warn, error, success, fail, done, indentation,
  *   grouping, newline/blank-line helpers, assertions, the stream-bound getters,
  *   and the logCallCount tracker. The data/timing/stream-control methods live
  *   in `logger-methods.test.mts`; the LOG_SYMBOLS surface, internal symbol
@@ -353,7 +353,7 @@ describe('Logger', () => {
 
     it('should strip existing symbols from step message', () => {
       testLogger.step('→ Step 1')
-      // Get the last chunk (the actual step line, not the blank line)
+      // Get the last chunk, the actual step line, not the blank line
       const stepLine = stdoutChunks[stdoutChunks.length - 1]
       // Strip ANSI color codes for easier testing
       // biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequence needed for stripping color codes

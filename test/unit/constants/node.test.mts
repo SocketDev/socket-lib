@@ -238,7 +238,7 @@ describe('node constants', () => {
     })
 
     it('should return true on the current runtime (Node 22.6+ floor)', () => {
-      // Tests run on Node 22.6+ (fleet floor), so this is always true here.
+      // Tests run on Node 22.6+ fleet floor, so this is always true here.
       // The function exists to gate older runtimes that the lib still
       // type-checks against.
       expect(supportsNodeStripTypes()).toBe(true)
@@ -299,7 +299,7 @@ describe('node constants', () => {
     })
 
     it('should be false on Node 23', () => {
-      // 23.x also requires the flag (it's a non-LTS bridge release).
+      // 23.x also requires the flag, it's a non-LTS bridge release.
       // Default-on kicks in at 24.
       const major = getNodeMajorVersion()
       if (major === 23) {

@@ -195,7 +195,7 @@ describe.sequential('discoverAiAgents', () => {
       refresh: true,
       repoRoot: tmpRoot,
     })
-    // Same shape (real discovery is deterministic on a given machine).
+    // Same shape, real discovery is deterministic on a given machine.
     expect(Object.keys(second).toSorted()).toEqual(
       Object.keys(first).toSorted(),
     )

@@ -72,7 +72,7 @@ export interface DlxBinaryOptions {
   yes?: boolean | undefined
 
   /**
-   * Suppress output (quiet mode). Aligns with npx --quiet/-q and pnpm
+   * Suppress output, quiet mode. Aligns with npx --quiet/-q and pnpm
    * --silent/-s flags.
    */
   quiet?: boolean | undefined
@@ -105,7 +105,7 @@ export interface DlxBinaryResult {
  * Fields:
  *
  * - Version: Schema version (currently "1.0.0")
- * - Cache_key: First 16 chars of SHA-512 hash (matches directory name)
+ * - Cache_key: First 16 chars of SHA-512 hash, matches directory name
  * - Timestamp: Unix timestamp in milliseconds
  * - Integrity: SRI hash (sha512-<base64>, aligned with npm)
  * - Size: Size of cached binary in bytes

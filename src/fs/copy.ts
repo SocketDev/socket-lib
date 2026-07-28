@@ -20,7 +20,7 @@ import type { PathLike } from 'node:fs'
 
 /**
  * Named values for {@link CopyMode}. A frozen object rather than a TypeScript
- * `enum` so the declaration is erasable (enums emit runtime helper code).
+ * `enum` so the declaration is erasable, enums emit runtime helper code.
  */
 export const CopyMode = ObjectFreeze({
   Fill: 'fill',
@@ -35,7 +35,7 @@ export const CopyMode = ObjectFreeze({
  *   pre-existing destination-only files in place (a recursive `fs.cp`).
  * - `'pave'` — replace the destination so it becomes an exact copy of the source;
  *   destination entries absent from the source do not survive. The swap is
- *   atomic (a sibling temp directory is renamed into place), so a partial tree
+ *   atomic, a sibling temp directory is renamed into place, so a partial tree
  *   is never observable.
  * - `'fill'` — copy only what the destination lacks: existing files stay
  *   untouched (no-clobber), missing ones are added. Never throws on an existing
@@ -59,7 +59,7 @@ export interface CopyOptions {
   dereference?: boolean | undefined
   /**
    * Predicate deciding which entries to copy. Return `false` to skip an entry
-   * (and, for a directory, everything beneath it). Receives resolved source
+   * and, for a directory, everything beneath it. Receives resolved source
    * and destination paths, matching `node:fs` `cp`'s `filter`.
    */
   filter?: ((source: string, destination: string) => boolean) | undefined
@@ -96,7 +96,7 @@ export interface CopyOptions {
  *
  * @param from - Source file or directory to copy.
  * @param to - Destination path.
- * @param options - Copy options (mode, filter, dereference, abort signal).
+ * @param options - Copy options, mode, filter, dereference, abort signal.
  */
 export async function copy(
   from: PathLike,

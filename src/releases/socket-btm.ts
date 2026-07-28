@@ -94,7 +94,7 @@ export interface SocketBtmBinaryConfig {
    */
   asset?: never | undefined
   /**
-   * Binary/executable name (without extension). @default tool.
+   * Binary/executable name, without extension. @default tool.
    */
   bin?: string | undefined
   /**
@@ -122,24 +122,24 @@ export interface SocketBtmBinaryConfig {
    */
   tag?: string | undefined
   /**
-   * Target architecture (defaults to current arch).
+   * Target architecture, defaults to current arch.
    */
   targetArch?: Arch | undefined
   /**
-   * Target platform (defaults to current platform).
+   * Target platform, defaults to current platform.
    */
   targetPlatform?: Platform | undefined
 }
 
 /**
- * Configuration for downloading socket-btm releases (binary or asset).
+ * Configuration for downloading socket-btm releases, binary or asset.
  */
 export type SocketBtmReleaseConfig =
   | SocketBtmBinaryConfig
   | SocketBtmAssetConfig
 
 /**
- * Detect the libc variant (musl or glibc) on Linux systems. Returns undefined
+ * Detect the libc variant, musl or glibc, on Linux systems. Returns undefined
  * for non-Linux platforms.
  *
  * @example
@@ -148,7 +148,7 @@ export type SocketBtmReleaseConfig =
  *   console.log(libc) // 'glibc', 'musl', or undefined
  *   ```
  *
- * @returns 'musl', 'glibc', or undefined (for non-Linux)
+ * @returns 'musl', 'glibc', or undefined, for non-Linux
  */
 export function detectLibc(): Libc | undefined {
   // Non-linux early-return arm fires on macOS/Windows (the test
@@ -181,7 +181,7 @@ export function detectLibc(): Libc | undefined {
     // If no musl files found, assume glibc.
     return 'glibc'
   } catch {
-    // If detection fails, default to glibc (most common).
+    // If detection fails, default to glibc, most common.
     return 'glibc'
   }
   /* c8 ignore stop */
@@ -234,7 +234,7 @@ export async function downloadSocketBtmRelease(
     let resolvedAsset: string
     let resolvedTag = tag
 
-    // Check if asset is a string without wildcard (exact match).
+    // Check if asset is a string without wildcard, exact match.
     const isExactMatch = typeof asset === 'string' && !asset.includes('*')
 
     if (isExactMatch) {

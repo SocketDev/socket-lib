@@ -20,7 +20,7 @@ import path from 'node:path'
 import { walk } from '@ultrathink/acorn.wasm'
 
 // Names that MUST be aliased with `<Name>Ctor` when imported from
-// `primordials` (or any other surface). Matches the convention used
+// `primordials`, or any other surface. Matches the convention used
 // across socket-lib's `src/primordials.ts` and socket-btm's additions.
 const CTOR_NAMES = new Set([
   'AggregateError',
@@ -110,7 +110,7 @@ export function buildLineStarts(src) {
  * - `primordials` — Node bootstrap global (in `lib/internal/...`).
  * - `internal/socketsecurity/safe-references` — socket-btm's curated re-export of
  *   cached primordial references.
- * - `safe-references` — short form (when require resolution allows).
+ * - `safe-references` — short form, when require resolution allows.
  */
 const DEFAULT_PRIMORDIAL_SOURCES = [
   'primordials',

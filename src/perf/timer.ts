@@ -1,7 +1,7 @@
 /**
  * @file Recording-side helpers — `perfTimer` (returns a stop() closure),
  *   `measure` / `measureSync` (timed wrappers around an async / sync function),
- *   `perfCheckpoint` (zero-duration marker), and `trackMemory` (records
+ *   `perfCheckpoint`, zero-duration marker, and `trackMemory` (records
  *   heap-used at a label). All push rows into the shared metrics array when
  *   `isPerfEnabled()` is true.
  */

@@ -1,8 +1,8 @@
 /**
  * @file Individual build steps for the `build` runner (scripts/repo/bundle.mts):
- *   source (rolldown per-file), TypeScript declarations (tsgo), the prim CLI
+ *   source, rolldown per-file, TypeScript declarations (tsgo), the prim CLI
  *   bundle, external dependencies, and the post-build dist-shaping pass. Each
- *   returns an exit code (and source returns its build time) so the runner can
+ *   returns an exit code, and source returns its build time, so the runner can
  *   log + sequence them; the runner owns orchestration, these own one step
  *   each.
  */
@@ -129,7 +129,7 @@ export async function buildTypes(
 }
 
 /**
- * Build the prim CLI: a true bundle (not per-file transpile) that inlines
+ * Build the prim CLI: a true bundle, not per-file transpile, that inlines
  * lib-stable + diff into a single `dist/bin/prim.cjs`. The
  * `@ultrathink/acorn.wasm` parser's `acorn-wasm.cjs` entry + `acorn.wasm` are
  * copied alongside so its `${__dirname}/./acorn.wasm` sibling-load resolves

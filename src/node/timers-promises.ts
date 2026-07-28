@@ -10,7 +10,7 @@ import { IS_NODE } from '../constants/runtime'
 let timersPromises: typeof NodeTimersPromises | undefined
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function getNodeTimersPromises(): typeof NodeTimersPromises {
   if (!IS_NODE) {

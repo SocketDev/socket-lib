@@ -1,6 +1,6 @@
 /**
  * @file Cache write entrypoints — `put` (insert/replace by key) and `remove`
- *   (single-key delete). Both reject wildcards; for pattern deletes use
+ *   single-key delete. Both reject wildcards; for pattern deletes use
  *   `clear({ prefix: 'foo*' })`.
  */
 

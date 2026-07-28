@@ -1,6 +1,6 @@
 /**
  * @file Brotli compression / decompression — in-memory, file-to-file, and
- *   raw-stream variants. Default quality is 11 (max compression, slow) on the
+ *   raw-stream variants. Default quality is 11, max compression, slow, on the
  *   assumption these are one-shot CLI calls. Override via `options.level` for
  *   hot paths. await compressBrotli(JSON.stringify(payload)) await
  *   compressBrotliFile('input.json', 'input.json.br')
@@ -135,7 +135,7 @@ export function createBrotliCompressor(options?: CompressOptions | undefined) {
 /**
  * Create a brotli decompress transform stream.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function createBrotliDecompressor() {
   return createBrotliDecompress()
@@ -211,7 +211,7 @@ export function hasBrotliExt(filePath: string): boolean {
  * this is intentionally permissive — the authoritative test is
  * `decompressBrotli(buf)` succeeding. Use for UI hints, not correctness.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function isBrotliCompressed(input: Buffer): boolean {
   return BufferIsBuffer!(input) && input.byteLength >= BROTLI_MIN_LEN

@@ -2,9 +2,9 @@
  * @file Unit tests for glob pattern constants. Tests glob pattern constants
  *   used throughout Socket tooling:
  *
- *   - LICENSE patterns (recursive and non-recursive)
+ *   - LICENSE patterns, recursive and non-recursive
  *   - LICENSE.original patterns
- *   - README patterns (recursive and non-recursive) Used for file discovery,
+ *   - README patterns, recursive and non-recursive, Used for file discovery,
  *     pattern matching, and codebase traversal.
  */
 

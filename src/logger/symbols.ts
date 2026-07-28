@@ -1,6 +1,6 @@
 /**
  * @file Symbol exports + the `LOG_SYMBOLS` proxy. The two `Symbol.for(...)`
- *   constants are how the spinner (and tests) reach into a `Logger` instance to
+ *   constants are how the spinner, and tests, reach into a `Logger` instance to
  *   bump the call counter and toggle blank-line tracking without exposing
  *   private fields. The `LOG_SYMBOLS` proxy is the public colored-symbol
  *   palette that lazily initializes on first access (so importing the logger

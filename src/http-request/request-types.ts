@@ -49,7 +49,7 @@ export interface HttpHookResponseInfo {
 
 /**
  * Lifecycle hooks for observing HTTP request/response events. Hooks fire
- * per-attempt (retries produce multiple hook calls).
+ * per-attempt, retries produce multiple hook calls.
  */
 export interface HttpHooks {
   onRequest?: ((info: HttpHookRequestInfo) => void) | undefined
@@ -65,7 +65,7 @@ export interface HttpRequestOptions {
    *
    * When a Readable stream is provided, it is piped directly to the request. If
    * the stream has a `getHeaders()` method (duck-typed, e.g., the `form-data`
-   * npm package), its headers (Content-Type with boundary) are automatically
+   * npm package), its headers, Content-Type with boundary, are automatically
    * merged into the request headers.
    *
    * **Note:** Streaming bodies are one-shot — they cannot be replayed. Using a
@@ -148,7 +148,7 @@ export interface HttpRequestOptions {
    * On retried attempts (when `retries` > 0), three telemetry headers are added
    * automatically for server-side logging and are NOT removable here:
    * `Retry-Attempt` (1-based retry number), `Retry-Max` (the `retries`
-   * ceiling), and `Retry-After` (seconds waited before this attempt).
+   * ceiling), and `Retry-After`, seconds waited before this attempt.
    *
    * @example
    *   ;```ts
@@ -174,7 +174,7 @@ export interface HttpRequestOptions {
    * rejected with an error. Prevents memory exhaustion from unexpectedly large
    * responses.
    *
-   * @default undefined (no limit)
+   * @default undefined, no limit
    */
   maxResponseSize?: number | undefined
   /**
@@ -237,7 +237,7 @@ export interface HttpRequestOptions {
    * AbortSignal forwarded to the underlying `http.request` / `https.request`
    * call. Supported in Node 22+ via `node:http` request options. When both
    * `signal` and `timeout` are provided, either can cancel the in-flight
-   * request (whichever fires first). Aborts are NOT retried — an external
+   * request, whichever fires first. Aborts are NOT retried — an external
    * cancel is treated as an explicit caller decision.
    *
    * @example

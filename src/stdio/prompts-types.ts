@@ -29,7 +29,7 @@ export interface Choice<Value = unknown> {
    */
   description?: string | undefined
   /**
-   * Short text shown after selection (defaults to name)
+   * Short text shown after selection, defaults to name.
    */
   short?: string | undefined
   /**
@@ -116,7 +116,7 @@ export interface CheckboxChoice<Value = unknown> extends Choice<Value> {
    */
   checked?: boolean | undefined
   /**
-   * Display name used while the choice is checked (defaults to name)
+   * Display name used while the choice is checked, defaults to name.
    */
   checkedName?: string | undefined
 }

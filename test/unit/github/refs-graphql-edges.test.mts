@@ -17,7 +17,7 @@ const JSONStringify = JSON.stringify
 const GRAPHQL_NULL = null
 
 // socket-lint: allow boolean-trap -- local test fixture builder; the
-// (body, ok, status) shape mirrors the httpRequest return it stands in for.
+// body, ok, status, shape mirrors the httpRequest return it stands in for.
 function mkResponse(body: Buffer, ok: boolean, status: number) {
   return {
     body,

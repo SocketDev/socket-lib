@@ -12,7 +12,7 @@ import type { ShadowInstallationOptions } from './types'
 /**
  * Determines if shadow binaries should be installed. Shadows should NOT be
  * installed when: - Running in a temporary execution context (exec/npx/dlx) -
- * On Windows with an existing binary path (required for Windows to function)
+ * On Windows with an existing binary path, required for Windows to function.
  *
  * @example
  *   ;```typescript

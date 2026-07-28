@@ -90,7 +90,7 @@ describe('TokenBucketLimiter', () => {
       // Advance 100 intervals — but cap is 3.
       // The peek-after-consume below burns one token so peek = 3, not 4.
       expect(limiter.consume('key', 100_000)).toBe(true)
-      // 3 burst requests fit (we just used one of the cap above).
+      // 3 burst requests fit, we just used one of the cap above.
       expect(limiter.consume('key', 100_000)).toBe(true)
       expect(limiter.consume('key', 100_000)).toBe(true)
       // 4th in the same instant denied — bucket capped at capacity.
@@ -113,7 +113,7 @@ describe('TokenBucketLimiter', () => {
     it('preserves partial-interval remainders across calls', () => {
       // Fractional remainders should not be lost — call A burns 600ms,
       // call B at 800ms should NOT think it's 200ms past a new refill
-      // window (which would compound into a free token).
+      // window, which would compound into a free token.
       const limiter = new TokenBucketLimiter({
         capacity: 1,
         refillIntervalMs: 1000,
@@ -191,7 +191,7 @@ describe('TokenBucketLimiter', () => {
       })
       limiter.consume('a', 0)
       expect(limiter.size()).toBe(1)
-      // 'b' evicts 'a' (only slot).
+      // 'b' evicts 'a', only slot.
       limiter.consume('b', 0)
       expect(limiter.size()).toBe(1)
       expect(limiter.peek('a')).toBeUndefined()

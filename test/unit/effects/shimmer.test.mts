@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for the shimmer engine. The engine is a pure function:
- *   (spec, length, frame) → RGB[]. These tests verify the building blocks
- *   (kernels, sweep generators, palette helpers) compose correctly and produce
+ *   spec, length, frame → RGB[]. These tests verify the building blocks
+ *   kernels, sweep generators, palette helpers, compose correctly and produce
  *   deterministic output.
  */
 
@@ -269,7 +269,7 @@ describe('effects/shimmer', () => {
       // Wave at frame 2 should be at position 0 (wave starts at -padding=-2,
       // advances by speed=1 per frame; frame 2 → wave at 0).
       const colors = frameColors(spec, 5, 2)
-      // Char 0 should be GREEN (highlight on the wave center).
+      // Char 0 should be GREEN, highlight on the wave center.
       expect(colors[0]).toEqual(GREEN)
     })
 
@@ -303,8 +303,8 @@ describe('effects/shimmer', () => {
         10,
       )
       // Place wave at center. Use a high frame so wave is well inside the text.
-      // narrow halfWidth=1 means char 2 is OUTSIDE the bright zone (gets base color).
-      // wide halfWidth=4 means char 2 is INSIDE (gets some white blend).
+      // narrow halfWidth=1 means char 2 is OUTSIDE the bright zone, gets base color.
+      // wide halfWidth=4 means char 2 is INSIDE, gets some white blend.
       const narrowColors = frameColors(narrow, 10, 4)
       const wideColors = frameColors(wide, 10, 4)
       // The wide kernel should have more chars affected (non-base).

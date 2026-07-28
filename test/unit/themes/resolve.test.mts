@@ -2,7 +2,7 @@
  * @file Unit tests for theme utility functions. Tests color resolution
  *   utilities for Socket's theme system:
  *
- *   - resolveColor() resolves semantic color keywords (primary, secondary) to
+ *   - resolveColor() resolves semantic color keywords, primary, secondary, to
  *     actual colors
  *   - Handles color values as strings ('blue', 'red') or RGB tuples ([255, 0, 0])
  *   - Fallback behavior: 'secondary' falls back to 'primary' when undefined

@@ -19,7 +19,7 @@ import type { PromiseWithResolvers } from './types'
  * Drain an async iterable into an array, per [TC39
  * Array.fromAsync](https://tc39.es/proposal-array-from-async/).
  *
- * Uses the `ArrayFromAsync` primordial (already bound) when available (Node
+ * Uses the `ArrayFromAsync` primordial, already bound, when available (Node
  * 22+; V8 ≥ 12.0); otherwise falls back to a `for await…of` + push loop.
  *
  * Use this instead of the manual `const out = []; for await (const x of iter)
@@ -56,7 +56,7 @@ export const fromAsync: <T>(
  * first-class values, per [ECMA-262
  * §27.2.4.9](https://tc39.es/ecma262/#sec-promise.withResolvers).
  *
- * Uses the `PromiseWithResolvers` primordial (already bound) when available
+ * Uses the `PromiseWithResolvers` primordial, already bound, when available
  * (Node 20.12+ / 21+ / 22+; V8 ≥ 12.0); otherwise falls back to a
  * spec-equivalent `new Promise(executor)` that captures the handles via
  * closure. The returned object always has own data properties `promise`,

@@ -40,7 +40,7 @@ import type { AiTier } from './tier.mts'
  * - `grunt` → `read` — classify / summarize / single-token rewrites are
  *   read-and-report; the caller applies the rewrite, the agent does not.
  * - `code` → `create` — control-flow / caller-chain edits and feature work author
- *   AND create files (a new test, a split module), but do not need Bash to do
+ *   AND create files, a new test, a split module, but do not need Bash to do
  *   the job.
  * - `agentic` → `full` — long autonomous tool-use loops that land their own work
  *   need the whole ladder: author, self-verify, and commit.

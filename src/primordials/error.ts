@@ -26,7 +26,7 @@ export const ErrorIsError: ((value: unknown) => value is Error) | undefined = (
 ).isError
 
 // V8-specific stack trace API. See https://v8.dev/docs/stack-trace-api.
-// These are present on V8 (Node, Chromium, Deno) but not in
+// These are present on V8, Node, Chromium, Deno, but not in
 // JavaScriptCore / SpiderMonkey, so each is typed `| undefined` to keep
 // non-V8 importers safe.
 
@@ -60,7 +60,7 @@ export const ErrorPrepareStackTrace:
 ).prepareStackTrace
 
 // `Error.stackTraceLimit` — max frames V8 captures per stack. May be a
-// data property (today on Node) or an accessor (some bundler shims).
+// data property, today on Node, or an accessor, some bundler shims.
 // Returning a function avoids capturing a stale snapshot — callers that
 // need the live value invoke `ErrorStackTraceLimit()` and get whatever
 // V8 currently reports.

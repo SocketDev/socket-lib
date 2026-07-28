@@ -158,7 +158,7 @@ describe('makePackageBinsExecutable', () => {
           bin: { a: 'a.js', b: 'b.js' },
         }),
       )
-      // Create the binary files (without exec bits).
+      // Create the binary files, without exec bits.
       writeFileSync(path.join(installedDir, 'a.js'), '#!/usr/bin/env node\n')
       writeFileSync(path.join(installedDir, 'b.js'), '#!/usr/bin/env node\n')
       const fs = require('node:fs')

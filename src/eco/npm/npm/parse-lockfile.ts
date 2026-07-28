@@ -27,7 +27,7 @@
  *      https://docs.npmjs.com/cli/v10/configuring-npm/package-lock-json
  *      arborist (canonical reader/writer):
  *      https://github.com/npm/cli/tree/latest/workspaces/arborist Bug fixes
- *      implemented here (and in the native parser):
+ *      implemented here, and in the native parser:
  *
  *   - Fix 1 v1 alias extraction. `version: "npm:<real>@<ver>"` surfaces the real
  *     registry identity on the PackageRef; `_index` keeps the original alias

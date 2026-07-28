@@ -79,7 +79,7 @@ describe('detectAgent', () => {
   })
 
   it('does NOT treat the codex-plugin companion var as codex-running', () => {
-    // CODEX_COMPANION_SESSION_ID is set even under Claude (the codex plugin),
+    // CODEX_COMPANION_SESSION_ID is set even under Claude, the codex plugin,
     // so it must not be a codex signal.
     process.env['CODEX_COMPANION_SESSION_ID'] = 'abc'
     expect(detectAgent()).toBeUndefined()

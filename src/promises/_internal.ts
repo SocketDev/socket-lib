@@ -11,7 +11,7 @@ import { IS_NODE } from '../constants/runtime'
 export { getAbortSignal } from '../process/abort'
 
 /**
- * Get the timers/promises module. Lazy `require` (not a top-level import) to
+ * Get the timers/promises module. Lazy `require`, not a top-level import, to
  * avoid Webpack bundling issues.
  *
  * Intentionally NOT memoized: Node's module cache already makes the repeat

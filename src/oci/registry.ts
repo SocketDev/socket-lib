@@ -3,7 +3,7 @@
  *   blob, in the order the distribution spec requires. `resolveImageManifest`
  *   turns a tag or digest into a concrete single-image manifest, chasing a
  *   multi-arch index down to one platform. `pullFirstLayer` runs the full
- *   anon-pull flow for the common single-artifact case (one layer) and returns
+ *   anon-pull flow for the common single-artifact case, one layer, and returns
  *   the layer bytes plus its declared digest so the CALLER can verify
  *   `sha256(bytes) === digest`. All network work goes through the same
  *   injectable `{ http }` adapter the leaf modules take.
@@ -29,7 +29,7 @@ export const GHCR_REGISTRY = 'ghcr.io'
 
 /**
  * Result of an end-to-end single-layer pull: the layer's declared descriptor
- * and its raw bytes (for the caller to digest-verify).
+ * and its raw bytes, for the caller to digest-verify.
  */
 export interface OciLayerPull {
   bytes: Uint8Array
@@ -37,8 +37,8 @@ export interface OciLayerPull {
 }
 
 /**
- * Run the full anonymous pull flow for a single-artifact image (one layer):
- * acquire a pull token, resolve the manifest (chasing an index to a platform),
+ * Run the full anonymous pull flow for a single-artifact image, one layer:
+ * acquire a pull token, resolve the manifest, chasing an index to a platform,
  * and fetch the sole layer's bytes. Throws when the resolved manifest does not
  * carry exactly one layer. The caller verifies `sha256(bytes)` against
  * `layer.digest`.
@@ -80,7 +80,7 @@ export async function pullFirstLayer(
 }
 
 /**
- * Resolve `reference` (a tag or a digest) to a concrete single-image manifest.
+ * Resolve `reference`, a tag or a digest, to a concrete single-image manifest.
  * When the reference points at a manifest index, the preferred platform
  * (default `linux/amd64`) is picked and re-fetched so the returned manifest
  * carries a `config` + `layers`. The `digest` is the platform-resolved

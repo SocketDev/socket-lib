@@ -7,7 +7,7 @@
  */
 
 import type { TtlCache } from '../cache/ttl/types'
-// no-platform-http-import: server-only module (cacache-backed cache); node platform is intentional.
+// no-platform-http-import: server-only module, cacache-backed cache; node platform is intentional.
 import type { HttpRequestOptions } from '../http-request/node'
 
 /**
@@ -110,8 +110,8 @@ export interface GetVersionsOptions extends GetPackumentSlimOptions {
    * (via `toEpochMs`) when the value is neither. A version with no recorded
    * publish time is EXCLUDED rather than included by default: it cannot be
    * proven to satisfy the floor, and for a time-based filter a false negative
-   * (unfairly dropped) is the safer failure mode than a false positive
-   * (unfairly kept).
+   * unfairly dropped, is the safer failure mode than a false positive
+   * unfairly kept.
    */
   after?: string | number | undefined
   /**
@@ -132,7 +132,7 @@ export interface GetVersionsOptions extends GetPackumentSlimOptions {
   /**
    * Maturity filter in days — only versions whose publish time is at least
    * this many days old are kept. The publish time is anchored to the END of
-   * its UTC day before `minAgeDays` is added (Socket soak-window semantics), so
+   * its UTC day before `minAgeDays` is added, Socket soak-window semantics, so
    * a version published at any point during a UTC day matures at the same
    * wall-clock instant. Like `after`, a version with no recorded publish time
    * is excluded.
@@ -145,12 +145,12 @@ export interface GetVersionsOptions extends GetPackumentSlimOptions {
    *
    * 1. A dist-tag key (e.g. `"beta"`) resolves to the single version it points to.
    *    Throws `PackumentNotFoundError` if that version is missing from the
-   *    packument (a stale or inconsistent packument).
+   *    packument, a stale or inconsistent packument.
    * 2. An exact, valid semver version resolves to itself. Throws
    *    `PackumentNotFoundError` if it isn't in the packument — `getVersions`
    *    never falls back to the full list on a specific miss.
    * 3. Anything else is treated as a semver range filter. Versions that don't
-   *    satisfy it are dropped; an empty result (not an error) when nothing
+   *    satisfy it are dropped; an empty result, not an error, when nothing
    *    matches, since a narrow-but-valid range matching zero versions is not a
    *    "not found" case.
    */

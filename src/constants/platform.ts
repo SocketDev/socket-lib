@@ -96,7 +96,7 @@ let memoizedTarget: string | undefined
  * non-python / non-JRE tools (matches pnpm's release assets,
  * `pnpm-<os>-<arch>[-<libc>].{tar.gz,zip}`). Tool-specific resolvers that need
  * a different vocabulary own their own helper — see `getPythonArch`
- * (python-build- standalone) / `getJreArch` (Adoptium).
+ * python-build- standalone / `getJreArch` (Adoptium).
  */
 export function getTarget(): string {
   if (memoizedTarget === undefined) {
@@ -107,12 +107,12 @@ export function getTarget(): string {
   return memoizedTarget
 }
 
-// Platform detection (memoized at module load).
+// Platform detection, memoized at module load.
 export const DARWIN = getOs() === 'darwin'
 export const WIN32 = getOs() === 'win32'
 
 /**
- * True when this process was launched as a Chrome (or Chromium) native
+ * True when this process was launched as a Chrome, or Chromium, native
  * messaging host. Chrome passes the extension origin URL
  * (`chrome-extension://<id>/`) as `process.argv[2]`; no other invocation shape
  * produces that prefix.

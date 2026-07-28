@@ -2,7 +2,7 @@
  * @file `resolveTrivy()` — Trivy resolution entry point. Tries each source in
  *   order:
  *
- *   1. VFS — smol binary's embedded Trivy (if packed)
+ *   1. VFS — smol binary's embedded Trivy, if packed
  *   2. PATH — `trivy` on the system PATH
  *   3. download — upstream GitHub release archive (only when `downloadIfMissing`
  *      is passed) Returns `undefined` if all of the enabled sources miss.
@@ -73,7 +73,7 @@ export async function doResolveTrivy(
 }
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 /* c8 ignore start - test-only escape hatch. */
 export function resetTrivyResolution(): void {

@@ -79,7 +79,7 @@ describe.sequential('fs/read-json-cache — set/get round-trip', () => {
   it('drops the stale entry after stat mismatch (single miss, not repeated)', () => {
     setCachedJson('/a', 1, 100, 200, { name: 'a' })
     getCachedJson('/a', 1, 100, 999) // miss → drops
-    // Subsequent lookup with matching key still misses (entry is gone).
+    // Subsequent lookup with matching key still misses, entry is gone.
     getCachedJson('/a', 1, 100, 200)
     expect(getReadJsonCacheStats().size).toBe(0)
   })

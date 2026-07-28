@@ -13,7 +13,7 @@ import { IntlPluralRules } from '../primordials/intl'
 
 import type { PluralForms, PluralizeOptions } from './types'
 
-// CLDR (Common Locale Data Repository) is the Unicode Consortium's
+// CLDR, Common Locale Data Repository, is the Unicode Consortium's
 // database of locale data: https://cldr.unicode.org/. The plural-
 // category strings — zero/one/two/few/many/other — come from LDML
 // (Locale Data Markup Language, UTS-35), the XML schema CLDR uses;

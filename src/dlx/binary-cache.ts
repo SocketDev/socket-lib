@@ -79,7 +79,7 @@ export async function cleanDlxCache(
           ? now - timestamp
           : Number.POSITIVE_INFINITY
 
-      // Treat future timestamps (clock skew) as expired
+      // Treat future timestamps, clock skew, as expired
       if (age < 0 || age > maxAge) {
         // Remove entire cache entry directory.
         await safeDelete(entryPath, { force: true, recursive: true })
@@ -160,7 +160,7 @@ export async function isBinaryCacheValid(
       return false
     }
     const age = now - timestamp
-    // Reject future timestamps (clock skew or corruption)
+    // Reject future timestamps, clock skew or corruption
     if (age < 0) {
       return false
     }

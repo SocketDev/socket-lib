@@ -75,7 +75,7 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
   afterEach(async () => {
     // Clear only THIS file's httpDownload mock — not vi.restoreAllMocks(),
     // which under `isolate: false` restores module mocks shared across the
-    // worker and tears down (or is torn down by) other files' mocks mid-run,
+    // worker and tears down, or is torn down by, other files' mocks mid-run,
     // letting the real httpDownload leak through. mockClear (not mockReset)
     // drops call history + the mockImplementationOnce queue while preserving
     // the vi.mock factory's default implementation for the next test.

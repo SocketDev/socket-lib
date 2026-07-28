@@ -21,7 +21,7 @@ export function getNodePath(): typeof NodePath {
 
 // ── Frozen hot-method snapshots ──────────────────────────────────────
 // Socket's hottest path methods, captured by reference at load off the
-// IS_NODE-gated module (undefined in a browser). path methods are standalone
+// IS_NODE-gated module, undefined in a browser. path methods are standalone
 // (no `this`), so a member read freezes the reference; a later
 // `nodePath.join = evil` can't redirect these. Frozen refs aren't spy-able —
 // use `getNodePath()` for the test-seam path. Direct-const exports (the

@@ -52,7 +52,7 @@ vi.mock(import('../../src/process/abort'), async importOriginal => ({
 }))
 
 // Spy on the Intl.Segmenter constructor (strings/width's only live ICU handle).
-// A plain `function` spy is `new`-able (arrow functions are not) and, by
+// A plain `function` spy is `new`-able, arrow functions are not, and, by
 // returning a real Intl.Segmenter, the `new` expression yields a fully working
 // instance while the spy still records each construction.
 const IntlSegmenter = vi.fn(function (
@@ -111,7 +111,7 @@ describe('snapshot safety — lazy abort-signal acquisition', () => {
   // Each module previously captured `const abortSignal = getAbortSignal()` at
   // module scope. The signal must instead be read inside the function that
   // forwards it to a node:fs / pacote / iteration call. Each case imports the
-  // module (asserting import alone is signal-free) then runs its using
+  // module, asserting import alone is signal-free, then runs its using
   // function (asserting the signal is read by call time). The using calls hit
   // a missing path / fake spec, so they reject — caught and ignored; we only
   // assert WHEN the shared signal was read.
@@ -356,7 +356,7 @@ describe('snapshot safety — lazy vendored-cacache require (cacache/_internal)'
 })
 
 describe('snapshot safety — built dist survives node --build-snapshot', () => {
-  // Ground truth: snapshot the REAL built CJS module (not a src spy). A pinned
+  // Ground truth: snapshot the REAL built CJS module, not a src spy. A pinned
   // [Foreign] handle or unresolvable external reference aborts serialization
   // with a non-zero exit, so exit 0 proves the import path is handle-free.
   //
@@ -364,7 +364,7 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
   // requires, but createRequire() inside the snapshot main script can, so the
   // harness requires the dist module through a createRequire bound to dist/.
   // SharedArrayBuffer is shimmed because the snapshot main context omits it
-  // (an unrelated primordials concern, out of scope here).
+  // an unrelated primordials concern, out of scope here.
   const distDir = path.resolve(
     path.dirname(fileURLToPath(import.meta.url)),
     '../../dist',

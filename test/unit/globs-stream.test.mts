@@ -207,7 +207,7 @@ describe.sequential('trailing-slash ignore patterns', () => {
   })
 
   // Empty ignore array must still produce a normalized empty array
-  // (not undefined, not throw). Catches a regression where an empty
+  // not undefined, not throw. Catches a regression where an empty
   // option object was being passed through with `ignore: undefined`
   // and fast-glob fell back to its defaults.
   it('glob: accepts empty ignore array', async () => {
@@ -244,7 +244,7 @@ describe.sequential('trailing-slash ignore patterns', () => {
 
   // Calling without an `ignore` option at all must not crash on the
   // `options?.ignore` access path. Regression-guard for a typo where
-  // `options.ignore` (missing the optional chain) used to throw.
+  // `options.ignore`, missing the optional chain, used to throw.
   it('glob: works with no ignore option', async () => {
     const files = await glob(['**/*.json'], { cwd: tmpRoot })
     expect(files.toSorted()).toEqual([

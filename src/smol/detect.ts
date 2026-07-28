@@ -111,8 +111,8 @@ export function getSmolUtil(): SmolUtilBinding | undefined {
  * Memoized on first call.
  *
  * Defensive across runtimes: returns `false` on stock Node, browsers (no
- * `node:module`), Deno / Bun (different module resolution), and worker threads
- * (each has its own builtin table).
+ * `node:module`), Deno / Bun, different module resolution, and worker threads
+ * each has its own builtin table.
  *
  * @example
  *   ;```ts

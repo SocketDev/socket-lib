@@ -9,15 +9,15 @@
  *
  *   - `AI_PROFILE.read` — research / scanning. Read + Grep + Glob + WebFetch +
  *     WebSearch. No Edit, no Write, no Bash. Static-analysis skills
- *     (scanning-quality, scanning-security).
+ *     scanning-quality, scanning-security.
  *   - `AI_PROFILE.edit` — in-place edits only. Read + Edit + Grep + Glob. NO
- *     Write (can't create files), NO Bash. Lint autofix / codemods constrained
+ *     Write, can't create files, NO Bash. Lint autofix / codemods constrained
  *     to existing files.
  *   - `AI_PROFILE.create` — edit AND create files. Adds Write on top of `.edit`.
  *     Still no Bash. Codegen, adding a test, refactors that split modules.
  *   - `AI_PROFILE.verify` — `.create` plus a READ-ONLY Bash allowlist (node /
  *     pnpm test+run / git status·diff·log). Lets an agent author files AND run
- *     the verifier (its own tests, a check script) — but it CANNOT mutate the
+ *     the verifier, its own tests, a check script — but it CANNOT mutate the
  *     repo: no `git add`, no `git commit`, no install. For codegen that must
  *     self-verify without being trusted to land.
  *   - `AI_PROFILE.full` — `.verify` plus the mutating git commands (`git add` /
@@ -48,10 +48,10 @@ export interface AiProfile {
  *
  * - `gitRead` — non-mutating inspection (`status` / `diff` / `log`).
  * - `gitWrite` — mutating (`add` / `commit`). The bright line between `verify`
- *   (may NOT land) and `full` (may land).
- * - `node` — run a `.mts` / `.js` directly (tests, check scripts, codegen).
- * - `test` — `pnpm test` / `pnpm run <script>` (the verify surface).
- * - `pkgExec` — `pnpm exec` (run a workspace bin); broader, full-tier only.
+ *   (may NOT land) and `full`, may land.
+ * - `node` — run a `.mts` / `.js` directly, tests, check scripts, codegen.
+ * - `test` — `pnpm test` / `pnpm run <script>`, the verify surface.
+ * - `pkgExec` — `pnpm exec`, run a workspace bin; broader, full-tier only.
  */
 export const BASH_ALLOW = {
   gitRead: ['Bash(git status:*)', 'Bash(git diff:*)', 'Bash(git log:*)'],

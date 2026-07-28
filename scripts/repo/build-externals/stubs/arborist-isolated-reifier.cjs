@@ -2,7 +2,7 @@
  * Arborist IsolatedReifier mixin stub.
  *
  * Arborist/index.js composes the Arborist class via: const Base =
- * mixins.reduce((a, b) => b(a), require('node:events')) where `mixins` includes
+ * mixins.reduce(a, b => b(a), require('node:events')) where `mixins` includes
  * `require('./isolated-reifier.js')`.
  *
  * The isolated reifier only runs when `options.installStrategy === 'linked'`

@@ -78,7 +78,7 @@ export const ADOPTIUM_QUERY_MAP: Readonly<Record<string, AdoptiumAssetQuery>> =
  */
 export interface AdoptiumDownloadOptions {
   /**
-   * Java feature version (the major). `21` for Java 21, `17` for 17, etc.
+   * Java feature version, the major. `21` for Java 21, `17` for 17, etc.
    * Adoptium accepts the bare integer; we pass it through as a string in the
    * URL.
    */
@@ -157,7 +157,7 @@ export function getAdoptiumDownloadUrl(
  * Returns the Adoptium query parameters for a given platform-arch, or
  * `undefined` if no Adoptium build exists for that target.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 export function getAdoptiumQuery(
   platformArch: string,

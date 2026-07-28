@@ -4,7 +4,7 @@
  *   checks where a cryptic "operation was canceled" error would otherwise mask
  *   an upstream GitHub outage. Component IDs are stable GitHub-assigned
  *   identifiers from githubstatus.com/api/v2/components.json. The probe adds at
- *   most 8 seconds to startup (configurable timeout) and fails open on network
+ *   most 8 seconds to startup, configurable timeout, and fails open on network
  *   error so a down status page never blocks a healthy workflow.
  */
 

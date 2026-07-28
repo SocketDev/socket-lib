@@ -1,7 +1,7 @@
 /**
  * @file Tests for releases/github-retry-config — the shared GITHUB_RETRY_CONFIG
  *   and its SOCKET_GITHUB_RETRY_BASE_DELAY_MS env override. The override is
- *   read live via `resolveBaseDelayMs()` (not memoized), so these tests mutate
+ *   read live via `resolveBaseDelayMs()`, not memoized, so these tests mutate
  *   `process.env` per case rather than re-importing the module. The frozen
  *   GITHUB_RETRY_CONFIG snapshots the delay at load time; we assert its fixed
  *   invariants (backoffFactor / retries / frozen / null proto) separately.

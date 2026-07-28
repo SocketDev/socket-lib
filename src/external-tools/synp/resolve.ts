@@ -2,7 +2,7 @@
  * @file `resolveSynp()` — synp resolution entry point. Tries each source in
  *   order:
  *
- *   1. VFS — smol binary's embedded synp (if packed)
+ *   1. VFS — smol binary's embedded synp, if packed
  *   2. PATH — `synp` on the system PATH
  *   3. download — pinned npm package via dlx (only when `downloadIfMissing` is
  *      passed) Returns `undefined` if all of the enabled sources miss. Memoized
@@ -58,7 +58,7 @@ export async function doResolveSynp(
 }
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers, exercised only by its unit tests.
  */
 /* c8 ignore start - test-only escape hatch. */
 export function resetSynpResolution(): void {

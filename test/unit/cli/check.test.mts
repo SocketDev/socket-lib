@@ -31,7 +31,7 @@ describe('socket-lib check dispatcher', () => {
   })
 
   it('routes `prim` to the same handler as `primordials` (alias)', async () => {
-    // Both error out the same way (no config file in cwd) — the point
+    // Both error out the same way, no config file in cwd — the point
     // is the alias resolves and dispatches identically. Using --help
     // would exit before the config check; since we want to assert
     // "same handler", the cleanest signal is exit 1 from both,

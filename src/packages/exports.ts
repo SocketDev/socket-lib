@@ -140,7 +140,7 @@ export function getSubpaths(entryExports: unknown): string[] {
   if (!isObject(entryExports)) {
     return []
   }
-  // Return the keys of the exports object (the subpaths).
+  // Return the keys of the exports object, the subpaths.
   return ObjectGetOwnPropertyNames(entryExports).filter(key =>
     StringPrototypeStartsWith(key, '.'),
   )
