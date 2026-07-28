@@ -27,13 +27,38 @@ import type { ReleaseChecksums, StageReceipt } from '../state.mts'
 // after the false receipt was already written. Refuse up front instead: a
 // promote that cannot receive a selection is not a promote.
 export const NO_TTY_APPROVE_DETAIL =
-  'approve needs an interactive terminal.\n' +
+  'approve needs an interactive terminal, or --yes.\n' +
   '  What:  the promote is an interactive multi-select plus browser web-OTP 2FA.\n' +
   '  Where: this channel has no TTY, so the prompt receives no selection,\n' +
   '         reports "Nothing selected; exiting", and exits 0 having promoted nothing.\n' +
-  '  Saw:   stdin/stdout are not a TTY; wanted a real terminal.\n' +
-  '  Fix:   run `node scripts/fleet/publish-pipeline.mts --approve` in a terminal\n' +
-  '         directly (not through an agent/CI channel). The step is idempotent.'
+  '  Saw:   stdin/stdout are not a TTY; wanted a real terminal or the --yes opt-in.\n' +
+  '  Fix:   add --yes to approve every eligible staged entry without the prompt\n' +
+  '         (the run is wrapped in a PTY so npm still opens the browser for 2FA),\n' +
+  '         or run the same command in a terminal directly. Either is idempotent.'
+
+/**
+ * Wrap `node <args>` in a pseudo-terminal so npm believes it has a TTY and runs
+ * its native open-the-browser-and-poll web-OTP flow instead of erroring EOTP.
+ * Same zero-dependency mechanism as `npm-web-auth.mts`: BSD/macOS `script -q
+ * /dev/null <cmd>`, util-linux `script -q -c '<cmd>' /dev/null`. Returns
+ * undefined on win32, where `script` does not exist — there the caller runs
+ * unwrapped and npm's own flow applies.
+ */
+export function buildApprovePtyInvocation(
+  platform: NodeJS.Platform,
+  nodeArgs: readonly string[],
+): { args: string[]; command: string } | undefined {
+  if (platform === 'win32') {
+    return undefined
+  }
+  if (platform === 'linux') {
+    const inner = ['node', ...nodeArgs]
+      .map(token => `'${token.replaceAll("'", `'\\''`)}'`)
+      .join(' ')
+    return { args: ['-q', '-c', inner, '/dev/null'], command: 'script' }
+  }
+  return { args: ['-q', '/dev/null', 'node', ...nodeArgs], command: 'script' }
+}
 
 /**
  * Approve: promote the staged package to public. A SEPARATE explicit
@@ -49,20 +74,37 @@ export async function runApproveStep(config: {
   cwd: string
   dryRun: boolean
   isTty?: boolean | undefined
+  platform?: NodeJS.Platform | undefined
   seams?: RunnerSeams | undefined
+  yes?: boolean | undefined
 }): Promise<StageOutcome> {
   const cfg = { __proto__: null, ...config } as typeof config
   const seams = resolveSeams(cfg.seams)
   const isTty =
     cfg.isTty ?? Boolean(process.stdin.isTTY && process.stdout.isTTY)
-  if (!cfg.dryRun && !isTty) {
+  // Without a TTY the multi-select takes no input and exits 0 having promoted
+  // nothing. `--yes` replaces the selection outright, so it is the one way a
+  // terminal-less run can still be a real promote.
+  if (!cfg.dryRun && !isTty && !cfg.yes) {
     return { detail: NO_TTY_APPROVE_DETAIL, status: 'failed' }
   }
   const args = ['scripts/fleet/npm-publish.mts', '--approve', '--no-release']
+  if (cfg.yes) {
+    args.push('--yes')
+  }
   if (cfg.dryRun) {
     args.push('--dry-run')
   }
-  const code = await seams.runInherit('node', args, cfg.cwd)
+  // A --yes run off a terminal still needs a PTY: the registry challenges 2FA
+  // and npm only opens the browser (and stays alive to poll) when it believes
+  // it has one. On a real TTY npm drives its own flow, so run unwrapped.
+  const pty =
+    !cfg.dryRun && !isTty
+      ? buildApprovePtyInvocation(cfg.platform ?? process.platform, args)
+      : undefined
+  const code = pty
+    ? await seams.runInherit(pty.command, pty.args, cfg.cwd)
+    : await seams.runInherit('node', args, cfg.cwd)
   if (code !== 0) {
     return {
       detail:
