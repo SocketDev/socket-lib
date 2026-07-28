@@ -1,4 +1,4 @@
-import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
@@ -9,7 +9,6 @@ import {
   git,
   hasCommittedChanges,
   hasStagedOrUnstaged,
-  runOne,
   spawnAiAgentsInWorktrees,
   tryGit,
 } from '../../src/ai/worktree.mts'
