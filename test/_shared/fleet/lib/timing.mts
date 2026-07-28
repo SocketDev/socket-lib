@@ -23,7 +23,7 @@ export const TIMEOUT_MULTIPLIER: number = 5
 
 /**
  * Minimum observable timer quantum on the current platform, in milliseconds.
- * Windows defaults to ~15.6 ms (one tick of the system timer); Unix-likes
+ * Windows defaults to ~15.6 ms — one tick of the system timer; Unix-likes
  * resolve down to ~1 ms. Tests asserting on `Date.now()` deltas or sleeping for
  * less than this value will see the lower bound clip on Windows — compare
  * assertions against `Math.max(expected, MIN_TIMER_QUANTUM_MS)`.
@@ -66,7 +66,8 @@ export function tolerantSleep(ms: number): number {
 /**
  * Lower-bound a sleep budget at the platform timer quantum. A test's "small
  * delay" of 10-20 ms silently stretches to ~16 ms on Windows;
- * `minTimerQuantum(20)` returns 20 ms on both (already above the quantum), but
+ * `minTimerQuantum(20)` returns 20 ms on both since 20 is already above the
+ * quantum, but
  * `minTimerQuantum(5)` returns 15.6 ms on Windows so the sleep matches the
  * assertion budget.
  *
