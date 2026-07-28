@@ -37,6 +37,12 @@
     "_http_incoming": false,
     "_http_outgoing": false,
     "_http_server": false,
+    "_stream_duplex": false,
+    "_stream_passthrough": false,
+    "_stream_readable": false,
+    "_stream_transform": false,
+    "_stream_wrap": false,
+    "_stream_writable": false,
     "_tls_common": false,
     "_tls_wrap": false,
     "assert": false,
@@ -192,6 +198,11 @@
       "types": "./dist/ai/builtin.d.mts",
       "default": "./dist/ai/builtin.js"
     },
+    "./ai/cli-flags": {
+      "source": "./src/ai/cli-flags.mts",
+      "types": "./dist/ai/cli-flags.d.mts",
+      "default": "./dist/ai/cli-flags.js"
+    },
     "./ai/cost": {
       "source": "./src/ai/cost.mts",
       "types": "./dist/ai/cost.d.mts",
@@ -216,6 +227,11 @@
       "source": "./src/ai/exec.mts",
       "types": "./dist/ai/exec.d.mts",
       "default": "./dist/ai/exec.js"
+    },
+    "./ai/failures": {
+      "source": "./src/ai/failures.mts",
+      "types": "./dist/ai/failures.d.mts",
+      "default": "./dist/ai/failures.js"
     },
     "./ai/http": {
       "source": "./src/ai/http.mts",
