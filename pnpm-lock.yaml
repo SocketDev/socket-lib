@@ -673,7 +673,7 @@ importers:
         specifier: 'catalog:'
         version: 0.15.4
       prim:
-        specifier: workspace:*
+        specifier: workspace:0.1.0
         version: link:tools/prim
       regjsparser:
         specifier: 'catalog:'

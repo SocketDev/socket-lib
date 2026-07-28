@@ -3418,7 +3418,7 @@
     "playwright-core": "catalog:",
     "pony-cause": "2.1.11",
     "portless": "catalog:",
-    "prim": "workspace:*",
+    "prim": "workspace:0.1.0",
     "regjsparser": "catalog:",
     "rolldown": "catalog:",
     "semver": "catalog:",
