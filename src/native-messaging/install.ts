@@ -34,6 +34,7 @@ import {
 import { DARWIN, WIN32 } from '../constants/platform'
 import { getAppdata } from '../env/windows'
 import { getHome } from '../env/home'
+import { getEnvValue } from '../env/rewire'
 import {
   detectActiveNodeManager,
   nodeManagerUpgradeHint,
@@ -136,7 +137,9 @@ export function chromeManifestDirs(): string[] {
     ]
   }
   // Linux (XDG)
-  const config = process.env['XDG_CONFIG_HOME'] ?? path.join(home, '.config')
+  // Through the env rewire, like HOME/APPDATA above — a direct process.env
+  // read leaks the runner's real XDG config dir past withEnv in tests.
+  const config = getEnvValue('XDG_CONFIG_HOME') ?? path.join(home, '.config')
   return [
     path.join(config, 'google-chrome', 'NativeMessagingHosts'),
     path.join(config, 'chromium', 'NativeMessagingHosts'),
