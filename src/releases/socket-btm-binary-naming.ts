@@ -172,13 +172,14 @@ export function getNodePrebuildAssetName(
  * pack-app's `--target` arg, `pnpm.app.targets` config, and
  * sibling-package-name construction without a translation map.
  *
- * ## Why `-musl` is the suffix (and glibc is unsuffixed)
+ * ## Why `-musl` is the suffix and glibc is unsuffixed
  *
  * Node.js's own linuxstatic tarballs historically used the unqualified `linux`
  * for glibc and a separate download channel for musl. The pnpm ecosystem
- * codified that as `linux-<arch>` (glibc, default) and `linux-<arch>-musl` (the
- * libc outlier), matching the asymmetric reality of Linux distros — glibc is
- * the majority case, musl is Alpine-and-similar. Adding `-glibc` for the
+ * codified that as a default `linux-<arch>` for glibc and, for the libc
+ * outlier, `linux-<arch>-musl`, matching the asymmetric reality of Linux
+ * distros — glibc
+ * is the majority case, musl is Alpine-and-similar. Adding `-glibc` for the
  * default would be redundant noise in the name.
  *
  * ## Why libc is only appended for Linux

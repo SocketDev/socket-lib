@@ -13,6 +13,7 @@ import { ArrayPrototypePush, ArrayPrototypeSlice } from '../primordials/array'
 
 import type { ParseEntry } from '../external/shell-quote'
 
+// oxlint-disable-next-line socket/no-parenthetical-aside -- JSDoc @example embeds a shell command, `<(cat a)` is process substitution rather than prose
 /**
  * Structural hazard facts a parse surfaces that the binary-call matchers
  * (`hasBinCall` / `findBinCall`) swallow. These are observations about _how_
@@ -73,7 +74,8 @@ export function detectShellHazards(cmd: string): {
       } else if (op === '(' && prevWasSubstLead) {
         processSubstitution = true
       }
-      // A `<` / `>` op, or a trailing lone `=` token (set below), leads a `(`.
+      // A `<` / `>` op leads a `(`, as does a trailing lone `=` token, which
+      // is set below.
       prevWasSubstLead = op === '<' || op === '>'
       flush()
       continue
@@ -103,8 +105,8 @@ export function detectShellHazards(cmd: string): {
  * re-parsing the command line. Used internally by `findBinCall` /
  * `findBinCalls` / `hasBinCall`.
  *
- * Shell-quote is permissive (partial parses don't throw); the walk tolerates
- * any shape it returns.
+ * Shell-quote is permissive and a partial parse never throws, so the walk
+ * tolerates any shape it returns.
  *
  * @example
  *   eachSimpleCommand('sudo apt && rm -rf /', tokens => {

@@ -13,6 +13,7 @@ import { normalizeRetryOptions } from './options'
 
 import type { RetryOptions } from './types'
 
+// oxlint-disable-next-line socket/no-parenthetical-aside -- JSDoc @example carries callback signatures — (attempt, error, delay) and (url, options) are parameter lists, not prose
 /**
  * Retry an async function with exponential backoff.
  *

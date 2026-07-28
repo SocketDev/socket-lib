@@ -1,7 +1,7 @@
 /**
  * @file Safe references to `Date`. `DateNow` prefers the smol Fast API binding
- *   when available — a single-byte wallclock read inlined into JIT'd callers;
- *   stock Node falls back to `Date.now`.
+ *   when available: a single-byte wallclock read inlined into JIT'd callers.
+ *   Stock Node falls back to `Date.now`.
  */
 
 import { getSmolPrimordial } from '../smol/primordial'

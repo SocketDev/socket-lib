@@ -40,8 +40,9 @@ describe('Number', () => {
   })
 
   it('parseInt with omitted radix matches radix-10', () => {
-    // The smol-aware wrapper routes radix=10 (and omitted) through
-    // the Fast API path. Radix 16 / 2 / 8 fall back to stock parseInt.
+    // The smol-aware wrapper routes radix=10, and an omitted radix,
+    // through the Fast API path. Radix 16 / 2 / 8 fall back to stock
+    // parseInt.
     expect(NumberParseInt('42')).toBe(42)
     expect(NumberParseInt('  -7')).toBe(-7)
     expect(NumberParseInt('+99')).toBe(99)

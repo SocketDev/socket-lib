@@ -58,9 +58,9 @@ export interface CopyOptions {
    */
   dereference?: boolean | undefined
   /**
-   * Predicate deciding which entries to copy. Return `false` to skip an entry,
-   * and for a directory everything beneath it. Receives resolved source
-   * and destination paths, matching `node:fs` `cp`'s `filter`.
+   * Predicate deciding which entries to copy. Return `false` to skip an entry;
+   * skipping a directory also skips everything beneath it. Receives resolved
+   * source and destination paths, matching `node:fs` `cp`'s `filter`.
    */
   filter?: ((source: string, destination: string) => boolean) | undefined
   /**

@@ -38,8 +38,8 @@ export function getKeys(obj: unknown): string[] {
  * Get an own property value from an object safely.
  *
  * Returns `undefined` if the value is null/undefined or if the property doesn't
- * exist as an own rather than inherited property. This avoids prototype chain
- * lookups and prevents errors on null/undefined values.
+ * exist as an own property. Inherited properties don't count. This avoids
+ * prototype chain lookups and prevents errors on null/undefined values.
  *
  * @example
  *   ;```ts

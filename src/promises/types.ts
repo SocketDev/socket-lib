@@ -34,7 +34,7 @@ export interface RetryOptions {
   backoffFactor?: number | undefined
 
   /**
-   * Initial delay before the first retry (in milliseconds). This is the base
+   * Initial delay in milliseconds before the first retry. This is the base
    * value for exponential backoff calculations.
    *
    * @default 200
@@ -57,7 +57,7 @@ export interface RetryOptions {
   jitter?: boolean | undefined
 
   /**
-   * Upper limit for any backoff delay (in milliseconds). Prevents exponential
+   * Upper limit in milliseconds for any backoff delay. Prevents exponential
    * backoff from growing unbounded.
    *
    * @default 10000
@@ -70,6 +70,7 @@ export interface RetryOptions {
   // REMOVED: Deprecated `minTimeout` option
   // Migration: Use `baseDelayMs` instead
 
+  // oxlint-disable-next-line socket/no-parenthetical-aside -- JSDoc @example carries the onRetry callback signature, a parameter list rather than prose
   /**
    * Callback invoked on each retry attempt. Can observe errors, customize
    * delays, or cancel retries.
@@ -127,7 +128,7 @@ export interface RetryOptions {
    * callback is executed `retries + 1` times total (initial + retries).
    *
    * @example
-   *   // retries: 0 -> 1 total attempt (no retries)
+   *   // retries: 0 -> 1 total attempt
    *   // retries: 3 -> 4 total attempts (1 initial + 3 retries)
    *
    * @default 0
@@ -167,8 +168,8 @@ export interface IterationOptions {
   concurrency?: number | undefined
 
   /**
-   * Retry configuration as a number (retry count) or full options object.
-   * Applied to each individual item's callback execution.
+   * Retry configuration as a retry count or a full options object. Applied to
+   * each individual item's callback execution.
    *
    * @example
    *   // Simple: retry each item up to 3 times
@@ -184,7 +185,7 @@ export interface IterationOptions {
    *     },
    *   })
    *
-   * @default 0 (no retries)
+   * @default 0 — no retries
    */
   retries?: number | RetryOptions | undefined
 
@@ -210,7 +211,7 @@ export interface PromiseWithResolvers<T> {
    */
   promise: Promise<T>
   /**
-   * Resolves {@link promise} with the given value (or thenable).
+   * Resolves {@link promise} with the given value or thenable.
    */
   resolve: (value: T | PromiseLike<T>) => void
   /**

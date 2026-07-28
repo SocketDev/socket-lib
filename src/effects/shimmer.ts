@@ -13,7 +13,7 @@
  *      {@link randomSweep}, {@link noSweep}.
  *   2. `kernel(signedDistance, ctx)` — given a char's signed distance from the
  *      wave center, produce its color. Built-ins: {@link blockKernel} for hard
- *      on/off, {@link smoothKernel} for a soft glow.
+ *      on/off and {@link smoothKernel} for a soft glow.
  *   3. `baseColor(i)` / `highlightColor(i)` — per-char palette anchors fed to the
  *      kernel as `ctx.baseColor` and `ctx.highlightColor`. Build these with
  *      {@link solidColor} for one color across every char, or {@link gradient}

@@ -1,3 +1,4 @@
+// oxlint-disable-next-line socket/no-parenthetical-aside -- spec clause listing carries method signatures such as compare ( one, two ), not prose
 /**
  * @file Spec clause 8 — Temporal.Instant Objects. Implements the class,
  *   constructor, and the validity predicate. Pass 1 of the rollout; statics
