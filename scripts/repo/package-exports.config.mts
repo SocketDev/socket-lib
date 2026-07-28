@@ -59,6 +59,7 @@ export const config: ExportsConfig = {
     './memo/**',
     './npm/**',
     './objects/**',
+    './oci/**',
     './regexps/**',
     './strings/**',
     './url/**',

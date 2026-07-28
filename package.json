@@ -2346,6 +2346,51 @@
       "types": "./dist/objects/types.d.ts",
       "default": "./dist/objects/types.js"
     },
+    "./oci/blob": {
+      "source": "./src/oci/blob.ts",
+      "browser": {
+        "types": "./dist/oci/blob.d.ts",
+        "default": "./dist/oci/blob.js"
+      },
+      "types": "./dist/oci/blob.d.ts",
+      "default": "./dist/oci/blob.js"
+    },
+    "./oci/manifest": {
+      "source": "./src/oci/manifest.ts",
+      "browser": {
+        "types": "./dist/oci/manifest.d.ts",
+        "default": "./dist/oci/manifest.js"
+      },
+      "types": "./dist/oci/manifest.d.ts",
+      "default": "./dist/oci/manifest.js"
+    },
+    "./oci/registry": {
+      "source": "./src/oci/registry.ts",
+      "browser": {
+        "types": "./dist/oci/registry.d.ts",
+        "default": "./dist/oci/registry.js"
+      },
+      "types": "./dist/oci/registry.d.ts",
+      "default": "./dist/oci/registry.js"
+    },
+    "./oci/registry-token": {
+      "source": "./src/oci/registry-token.ts",
+      "browser": {
+        "types": "./dist/oci/registry-token.d.ts",
+        "default": "./dist/oci/registry-token.js"
+      },
+      "types": "./dist/oci/registry-token.d.ts",
+      "default": "./dist/oci/registry-token.js"
+    },
+    "./oci/types": {
+      "source": "./src/oci/types.ts",
+      "browser": {
+        "types": "./dist/oci/types.d.ts",
+        "default": "./dist/oci/types.js"
+      },
+      "types": "./dist/oci/types.d.ts",
+      "default": "./dist/oci/types.js"
+    },
     "./packages/edit": {
       "source": "./src/packages/edit.ts",
       "types": "./dist/packages/edit.d.ts",
