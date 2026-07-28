@@ -13,14 +13,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`check`** — let changelog-is-commit-derived see draft sections as bump-owned
 - **`package`** — drop the \_stream\_\* browser stubs node 26 no longer reports
-- **`ai`** — retry a spawn without an optional flag the CLI rejects
-- **`deps`** — absorb the fleet catalog heal (packageurl-js 1.4.8, lib 6.3.0)
-
-## [6.3.1](https://github.com/SocketDev/socket-lib/releases/tag/v6.3.1) - 2026-07-28
-
-### Fixed
-
 - **`ai`** — retry a spawn without an optional flag the CLI rejects
 - **`deps`** — absorb the fleet catalog heal (packageurl-js 1.4.8, lib 6.3.0)
 
