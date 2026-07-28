@@ -2933,6 +2933,11 @@
       "types": "./dist/shadow/types.d.ts",
       "default": "./dist/shadow/types.js"
     },
+    "./shell/command-args": {
+      "source": "./src/shell/command-args.ts",
+      "types": "./dist/shell/command-args.d.ts",
+      "default": "./dist/shell/command-args.js"
+    },
     "./shell/parse": {
       "source": "./src/shell/parse.ts",
       "types": "./dist/shell/parse.d.ts",
