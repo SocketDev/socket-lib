@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for packages/isolation.ts. Covers `mergePackageJson` and
  *   `resolveRealPath` pure helpers + the orchestrator `isolatePackage` via the
- *   `install` callback escape hatch (so tests never spawn pnpm). Real
+ *   `install` callback escape hatch, so tests never spawn pnpm. Real
  *   end-to-end pnpm-install behavior is covered by integration tests.
  */
 
@@ -122,7 +122,8 @@ describe.sequential('packages/isolation — isolatePackage', () => {
   })
 
   it('throws when no version spec is provided + no sourcePath', async () => {
-    // 'unscoped-pkg-name' is parsed as registry spec (no version, no path).
+    // 'unscoped-pkg-name' is parsed as a registry spec with no version and
+    // no path.
     // npmPackageArg picks up the bare name → spec is set → registry branch,
     // which under our `install: noop` shortcut still throws because the
     // registry install doesn't actually populate node_modules/<pkg>.
@@ -141,7 +142,7 @@ describe.sequential('packages/isolation — isolatePackage', () => {
     const result = await isolatePackage(srcDir, { install })
     expect(result.tmpdir).toContain('node_modules')
     expect(result.tmpdir).toContain('localpkg')
-    // install callback fired (replaces pnpm install).
+    // install callback fired in place of pnpm install.
     expect(install).toHaveBeenCalledTimes(1)
     // package.json was copied through.
     const installedPkg = JSON.parse(
@@ -190,7 +191,7 @@ describe.sequential('packages/isolation — isolatePackage', () => {
     // spec-branch where registry install would normally run.
     // We feed install:noop to skip the spawn; the failure mode is then
     // readPackageJson on the non-existent installedPath. Confirms the
-    // spec branch was entered (the install callback was called).
+    // spec branch was entered because the install callback was called.
     const install = vi.fn(async () => undefined)
     await expect(isolatePackage('lodash', { install })).rejects.toThrow(
       /JSON file not found|Could not read package.json/,

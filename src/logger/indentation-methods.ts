@@ -1,10 +1,10 @@
 /**
  * @file Free-function bodies for the `Logger` indentation-domain methods
  *   (`indent`, `dedent`, `resetIndent`, `group`, `groupCollapsed`, `groupEnd`).
- *   Indentation is tracked at the prefix layer (a per-stream string of spaces)
- *   rather than via `node:console`'s frozen `Symbol(kGroupIndent)`, so these
- *   helpers read and write that prefix through a small accessor context handed
- *   in by the calling `Logger`. Pulling these out of `./node` keeps the
+ *   Indentation is tracked at the prefix layer as a per-stream string of
+ *   spaces rather than via `node:console`'s frozen `Symbol(kGroupIndent)`, so
+ *   these helpers read and write that prefix through a small accessor context
+ *   handed in by the calling `Logger`. Pulling these out of `./node` keeps the
  *   `Logger` class body under the file-size cap; the class retains one-line
  *   delegators that build the context from its private state.
  */

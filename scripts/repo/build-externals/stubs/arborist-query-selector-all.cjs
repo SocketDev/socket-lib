@@ -5,10 +5,9 @@
  * to this module. The method is part of arb.query()'s public API — a
  * CSS-selector-style query over the dependency tree that we never call.
  *
- * Stub throws if invoked so accidental callers get a clear message. Drops.
- *
- * @npmcli/query + postcss-selector-parser (already stubbed) from the bundle's
- * reach via this entry.
+ * Stub throws if invoked so accidental callers get a clear message. Drops
+ * `@npmcli/query` and the already-stubbed `postcss-selector-parser` from the
+ * bundle's reach via this entry.
  */
 'use strict'
 

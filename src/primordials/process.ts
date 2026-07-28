@@ -16,7 +16,7 @@
 
 // The `process` object captured at module load. A later
 // `globalThis.process = evil` cannot redirect reads that go through this
-// reference; a `vi.spyOn(process, 'cwd')` (mutating this same object) still
+// reference; a `vi.spyOn(process, 'cwd')` mutates this same object and still
 // takes effect because the method is looked up at call time below.
 const SafeProcess: NodeJS.Process = process
 

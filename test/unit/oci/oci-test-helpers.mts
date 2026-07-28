@@ -25,7 +25,7 @@ export interface FakeRoute {
 
 /**
  * Records every request the client makes, so a test can assert on the URLs and
- * headers sent (bearer token, Accept media types).
+ * headers sent, such as the bearer token and the Accept media types.
  */
 export interface FakeCall {
   headers: Record<string, string> | undefined

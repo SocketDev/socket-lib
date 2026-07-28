@@ -112,8 +112,8 @@ export function checkExternalExport(filePath) {
           return { path: normalizedPath, ok: true, keys: nonDefaultKeys.length }
         }
 
-        // If .default exists but so do other exports, it might be okay
-        // (some modules export both named and default)
+        // If .default exists but so do other exports, it might be okay, since
+        // some modules export both named and default.
         // But warn if .default seems to be the "real" export
         if (
           nonDefaultKeys.length === 0 ||

@@ -34,7 +34,7 @@ import { StringPrototypeStartsWith } from '../../primordials/string'
 
 export interface JreFromDownloadOptions {
   /**
-   * Java feature version (the major), e.g. `21`.
+   * Java feature version — the major version number, e.g. `21`.
    */
   version: number
   /**

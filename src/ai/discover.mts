@@ -4,7 +4,7 @@
  *
  *   1. In-process Map — survives until the Node process exits.
  *   2. On-disk JSON at `<repo>/.cache/agent-discovery.json`, TTL 1h — survives
- *      across subprocess invocations (per-file ai-lint-fix batches) without
+ *      across subprocess invocations like per-file ai-lint-fix batches without
  *      re-running which(). Cache invalidation: stale on-disk cache is detected
  *      by mtime comparison; missing or expired → fresh which() pass + rewrite.
  *      Why two tiers: hooks and skills spawn dozens of short-lived Node
@@ -61,8 +61,8 @@ export function cachePathFor(repoRoot: string): string {
  *   Useful after `npm i -g <agent>` mid-session.
  *
  *   Returns a map of agent → absolute binary path. Agents that aren't installed
- *   are absent from the map (not present-with-undefined), so callers can use
- *   `'claude' in agents` for the existence check.
+ *   are absent from the map rather than present-with-undefined, so callers can
+ *   use `'claude' in agents` for the existence check.
  */
 export async function discoverAiAgents(
   options: {
@@ -112,7 +112,7 @@ export function discoverFresh(): DiscoveredAgents {
  * Useful in fast paths where the caller has already populated the cache and
  * just wants to read it back.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function getDiscoveredAiAgents(): DiscoveredAgents | undefined {
   return inProcessCache
@@ -144,7 +144,7 @@ export function readDiskCache(cachePath: string): DiscoveredAgents | undefined {
  * Reset the in-process cache. Tests use this; production callers shouldn't need
  * it (use `refresh: true` on discoverAiAgents()).
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function resetAiAgentDiscoveryCache(): void {
   inProcessCache = undefined

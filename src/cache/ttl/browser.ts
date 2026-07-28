@@ -8,9 +8,9 @@
  *   workers. Shared semantics live in `./_internal` (one owner, so the node
  *   and browser stores cannot drift): TTL default, clock-skew detection, LRU
  *   memo eviction via Map insertion order, prefix namespacing, wildcard
- *   matching. `getOrFetch` deduplicates concurrent fetches for the same key
- *   (thundering-herd protection), and single-key methods throw on `*`.
- *   Differences from `./store` (cacache-specific pieces that don't map):
+ *   matching. `getOrFetch` deduplicates concurrent fetches for the same key to
+ *   protect against a thundering herd, and single-key methods throw on `*`.
+ *   Differences from `./store`, whose cacache-specific pieces don't map here:
  *
  *   - No cacache `ls.stream` — `getAll` / `deleteAll` / `clear` enumerate the
  *     persistent tier only when the adapter provides the optional `keys()`
@@ -18,7 +18,7 @@
  *     it they still cover the memo tier, and delete those memo keys from
  *     storage too; storage-only entries from previous sessions are then
  *     unreachable by wildcard but still expire per-entry on read.
- *   - No storage supplied ⇒ memo-only cache (all operations stay correct).
+ *   - No storage supplied ⇒ memo-only cache; all operations stay correct.
  *   - A corrupt or shape-invalid storage entry is treated as a miss and deleted
  *     best-effort; storage failures never throw — the memo tier is the source
  *     of truth, mirroring store.ts's cacache error handling.
@@ -54,7 +54,7 @@ import type {
 /**
  * Create a browser-safe TTL cache instance. Same contract as
  * `createTtlCache`, with the persistent tier backed by the injected
- * `storage` adapter (or absent, for a memo-only cache).
+ * `storage` adapter. Omit the adapter for a memo-only cache.
  *
  * @example
  *   ;```typescript
@@ -183,7 +183,8 @@ export function createBrowserTtlCache(
       typeof (parsed as { expiresAt?: unknown | undefined }).expiresAt !==
         'number'
     ) {
-      // Shape-invalid entry (tampered or foreign write), same treatment.
+      // A shape-invalid entry from a tampered or foreign write gets the
+      // same treatment.
       await removeQuietly(fullKey)
       return undefined
     }
@@ -262,7 +263,7 @@ export function createBrowserTtlCache(
         continue
       }
       const originalKey = StringPrototypeSlice(fullKey, fullPrefix.length)
-      // Skip if already in results (from memory).
+      // Skip if memory already put this key in the results.
       if (results.has(originalKey)) {
         continue
       }
@@ -293,12 +294,12 @@ export function createBrowserTtlCache(
       expiresAt: DateNow() + ttl,
     }
 
-    // Update in-memory cache first (synchronous and fast).
+    // Update the in-memory cache first because it is synchronous and fast.
     if (opts.memoize) {
       lruSet(memoCache, memoMaxSize, fullKey, entry)
     }
 
-    // Update the persistent tier (don't fail if this errors).
+    // Update the persistent tier, but don't fail if this errors.
     if (storage) {
       try {
         await storage.setItem(fullKey, JSONStringify(entry))

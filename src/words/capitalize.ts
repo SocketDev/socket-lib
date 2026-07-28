@@ -17,8 +17,8 @@ export function capitalize(word: string): string {
   if (word.length === 0) {
     return word
   }
-  // Iterate by code point, not UTF-16 unit, so non-BMP characters
-  // (emoji, astral-plane scripts) aren't split between their surrogate
+  // Iterate by code point, not UTF-16 unit, so non-BMP characters like
+  // emoji and astral-plane scripts aren't split between their surrogate
   // pair halves. `charAt(0).toUpperCase() + slice(1).toLowerCase()` used
   // to produce broken surrogate pairs for inputs like '𐐀foo'.
   const [first, ...rest] = [...word]

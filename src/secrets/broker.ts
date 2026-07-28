@@ -1,6 +1,6 @@
 /**
  * @file Proteus broker client. Asks the running proteus credential daemon for a
- *   secret over its local Unix socket (Windows named pipe later), so a
+ *   secret over its local Unix socket, with a Windows named pipe to come, so a
  *   biometric-gated read happens inside the daemon and the value is vended to
  *   this process in memory rather than sitting in an env var. This is the layer
  *   `ai/credentials.mts` documents as slotting between the env check and the
@@ -46,7 +46,7 @@ export interface BrokerResponse {
  * Ask the proteus daemon for a credential. Returns the value on success, or
  * `undefined` when the daemon isn't running, doesn't hold it, or the biometric
  * prompt was declined. Never throws: a miss falls through to the next resolver
- * layer (the keychain).
+ * layer, the keychain.
  */
 export async function requestFromBroker({
   account,

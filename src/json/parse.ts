@@ -92,7 +92,7 @@ export function isJsonPrimitive(value: unknown): value is JsonPrimitive {
  * safer JSON parsing with helpful error messages and optional error
  * suppression.
  *
- * Features: - Automatic UTF-8 Buffer conversion - BOM (Byte Order Mark)
+ * Features: - Automatic UTF-8 Buffer conversion - Byte Order Mark
  * stripping for cross-platform compatibility - Enhanced error messages with
  * filepath context - Optional error suppression (returns `undefined` instead of
  * throwing) - Optional reviver for transforming parsed values.

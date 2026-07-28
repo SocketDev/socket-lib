@@ -88,7 +88,7 @@ export function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
  * Strip a trailing `/` from a glob pattern so fast-glob's deep filter matches
  * it. See header comment in `glob.ts` for the full rationale — shortest
  * summary: a `dist/` ignore pattern lets fast-glob walk the whole subtree
- * before filtering, while `dist` (no slash) skips the walk entirely.
+ * before filtering, while a slashless `dist` skips the walk entirely.
  *
  * CharCode 47 is `/`. Reading it that way avoids a per-call string allocation
  * for the literal — primordials-friendly, no behavior change vs.

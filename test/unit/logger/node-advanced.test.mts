@@ -145,7 +145,7 @@ describe.sequential('Logger - Advanced Features', () => {
       if (typeof maybeDebug === 'function') {
         ;(maybeDebug as (...args: unknown[]) => void).call(logger, 'debug')
       }
-      // Expect at least 3 calls (log, error, warn)
+      // Expect at least 3 calls: log, error, warn
       expect(logger.logCallCount).toBeGreaterThanOrEqual(3)
     })
 

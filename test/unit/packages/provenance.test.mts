@@ -1,8 +1,8 @@
 /**
  * @file Unit tests for packages/provenance.ts. Covers the pure helpers
  *   (findProvenance / getAttestations / getProvenanceDetails /
- *   isTrustedPublisher) + fetchPackageProvenance via a make-fetch-happen mock
- *   (no network).
+ *   isTrustedPublisher) + fetchPackageProvenance via a make-fetch-happen mock,
+ *   so no network is touched.
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

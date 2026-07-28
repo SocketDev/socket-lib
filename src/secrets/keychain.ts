@@ -125,7 +125,7 @@ export async function deleteSecretFromSlots({
 }
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function deleteSecretFromSlotsSync({
   service,
@@ -191,8 +191,8 @@ export function detectPlatform(): Platform {
 
 /**
  * Diagnostic: tell the operator whether the OS credential backend is reachable.
- * Used by installers to report up-front (before any prompt fires) when
- * libsecret-tools or the CredentialManager module aren't installed.
+ * Used by installers to report, before any prompt fires, when libsecret-tools
+ * or the CredentialManager module aren't installed.
  */
 export function getBackendAvailability(): BackendAvailability {
   const platform_ = detectPlatform()
@@ -290,7 +290,7 @@ export async function readSecretFromSlots({
 }
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function readSecretFromSlotsSync({
   service,
@@ -387,8 +387,8 @@ export async function writeSecret({
       await writeWindows(service, account, value, lbl)
       break
   }
-  // Refresh the cache so subsequent reads return the new value
-  // without a re-fetch (and without surfacing the stale prior value).
+  // Refresh the cache so subsequent reads return the new value without a
+  // re-fetch and never surface the stale prior value.
   setCached(service, account, value)
   return 'written'
 }
@@ -461,7 +461,7 @@ export async function writeSecretToSlots({
 }
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function writeSecretToSlotsSync({
   service,

@@ -45,7 +45,7 @@ export function generateSocketSpinnerFrames(
   const opts = { __proto__: null, ...options } as SocketFramesOptions
   const interval = opts.interval ?? 50
 
-  // ANSI codes for brightness modifiers only (no colors).
+  // ANSI codes for brightness modifiers only — no colors.
   // Yocto-spinner will apply the spinner's current color to each frame.
   const bold = ANSI_BOLD
   const dim = ANSI_DIM

@@ -320,7 +320,7 @@ export interface WriteOptions extends Abortable {
   /**
    * File system flag for write behavior.
    *
-   * @default 'w' (create or truncate)
+   * @default 'w' — create or truncate.
    */
   flag?: string | undefined
 }

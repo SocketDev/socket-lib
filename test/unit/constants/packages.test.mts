@@ -2,9 +2,9 @@
  * @file Unit tests for package constants and utilities. Tests
  *   npm/package-related constants:
  *
- *   - NPM_REGISTRY_URL, NPM_PUBLIC_REGISTRY (registry endpoints)
+ *   - Registry endpoints: NPM_REGISTRY_URL, NPM_PUBLIC_REGISTRY
  *   - Package.json field names (dependencies, devDependencies, scripts)
- *   - Package manager identifiers (npm, yarn, pnpm, bun) Frozen constants for
+ *   - Package manager identifiers: npm, yarn, pnpm, bun Frozen constants for
  *     consistent package operations.
  */
 
@@ -252,7 +252,7 @@ describe('constants/packages', () => {
       const originalAtLatest = AT_LATEST
       const originalVersion = PACKAGE_DEFAULT_VERSION
 
-      // Attempt to modify (should fail silently or throw in strict mode)
+      // Attempt to modify: it should fail silently or throw in strict mode.
       // TypeScript will prevent this, but we can test runtime behavior
       expect(PACKAGE).toBe(originalPackage)
       expect(LATEST).toBe(originalLatest)

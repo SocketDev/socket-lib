@@ -6,7 +6,7 @@
  *   commit — a reproducible content pin for a source whose host serves no
  *   stable archive (a gitiles `+archive` .tar.gz is gzip-timestamped and
  *   regenerated per fetch, i.e. movable under your feet). Requires the ref be
- *   present in `cwd`'s repo (a materialized submodule worktree, say).
+ *   present in `cwd`'s repo, such as a materialized submodule worktree.
  */
 
 import { StringPrototypeTrim } from '../primordials/string'

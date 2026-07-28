@@ -55,7 +55,8 @@ describe('path construction (cross-platform)', () => {
   it('should handle binary paths from package.json', async () => {
     await runWithTempDir(async tempDir => {
       const installedDir = path.join(tempDir, 'node_modules', 'pkg')
-      const binPath = './bin/cli.js' // From package.json (always forward slashes).
+      // From package.json, so always forward slashes.
+      const binPath = './bin/cli.js'
 
       // path.join normalizes forward slashes to platform separator.
       const fullBinPath = path.join(installedDir, binPath)

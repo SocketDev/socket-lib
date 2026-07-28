@@ -24,7 +24,7 @@ import process from 'node:process'
 import { WIN32 } from '../../../src/constants/platform'
 import { describe, it } from 'vitest'
 
-// Read the flag at call time (inside the wrappers below), not at module import.
+// Read the flag at call time inside the wrappers below, not at module import.
 // The wrappers run during test collection, after vitest's setupFiles have set
 // SOCKET_LIB_SKIP_NETWORK_TESTS; a module-scope const would capture the value
 // before setup ran, so a worker that imported this file first would see the

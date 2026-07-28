@@ -3,7 +3,7 @@
  *   run it. Guards the lib's ahead-of-time-compile support — the `node:smol-*`
  *   deferral and the `require` binding in `node/module.ts` — against
  *   regressions (both "compiles" and "runs"). Skipped when the pinned
- *   `@perryts/perry` platform binary is unavailable (unsupported host).
+ *   `@perryts/perry` platform binary is unavailable on an unsupported host.
  */
 import { existsSync, mkdirSync, symlinkSync } from 'node:fs'
 import os from 'node:os'
@@ -23,7 +23,7 @@ const repoRoot = path.resolve(testDir, '..', '..')
 const fixtureDir = path.resolve(repoRoot, 'test', 'fixtures', 'perry')
 // On Windows the runnable shim is perry.cmd; the extensionless `perry` is a
 // POSIX sh script Windows can't exec directly. spawn() runs the .cmd via
-// cmd.exe when shell: true (see below).
+// cmd.exe when shell: true; see the perry spawn below.
 const perryBin = path.resolve(
   repoRoot,
   'node_modules',
@@ -31,7 +31,7 @@ const perryBin = path.resolve(
   WIN32 ? 'perry.cmd' : 'perry',
 )
 
-// Fail-closed: telemetry off, no background update checks (fleet rule).
+// Fail-closed per fleet rule: telemetry off, no background update checks.
 const perryEnv: NodeJS.ProcessEnv = {
   ...process.env,
   CI: 'true',
@@ -39,9 +39,10 @@ const perryEnv: NodeJS.ProcessEnv = {
   PERRY_NO_UPDATE_CHECK: '1',
 }
 
-// Resolve @socketsecurity/lib to THIS repo (not the published version) so the
-// compile exercises local `src`. With the package in perry.compilePackages,
-// Perry resolves and compiles its TypeScript source directly.
+// Resolve @socketsecurity/lib to THIS repo instead of the published version so
+// the compile exercises local `src`. With the package in
+// perry.compilePackages, Perry resolves and compiles its TypeScript source
+// directly.
 function linkLocalLib(): void {
   const scopeDir = path.join(fixtureDir, 'node_modules', '@socketsecurity')
   mkdirSync(scopeDir, { recursive: true })

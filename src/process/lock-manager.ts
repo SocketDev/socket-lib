@@ -6,8 +6,8 @@
  *
  *   ## Why directories instead of files?
  *
- *   This implementation uses `mkdir()` to create lock directories (not files)
- *   because:
+ *   This implementation uses `mkdir()` to create lock directories rather than
+ *   lock files because:
  *
  *   1. **Atomic guarantee**: `mkdir()` is guaranteed atomic across ALL
  *      filesystems, including NFS. Only ONE process can successfully create the
@@ -26,9 +26,9 @@
  *
  *   ## The mtime trick
  *
- *   We periodically update the lock directory's mtime (modification time) by
- *   "touching" it to signal "I'm still actively working". This prevents other
- *   processes from treating the lock as stale and removing it. **The lock
+ *   We periodically update the lock directory's mtime, its modification time,
+ *   by "touching" it to signal "I'm still actively working". This prevents
+ *   other processes from treating the lock as stale and removing it. **The lock
  *   directory remains empty** - it's just a sentinel that signals "locked". The
  *   mtime is the only data needed to track lock freshness.
  *
@@ -251,8 +251,8 @@ export class ProcessLockManager {
             }
           }
 
-          // Ensure parent directory exists. Use path.dirname() so that both
-          // POSIX and Windows separators (and mixed-separator inputs) are
+          // Ensure parent directory exists. Use path.dirname() so POSIX
+          // separators, Windows separators, and mixed-separator inputs are all
           // handled correctly — the previous Math.max(lastIndexOf('/'), '\\')
           // approach failed on relative paths and mixed-separator inputs.
           const fs = getFs()
@@ -262,7 +262,7 @@ export class ProcessLockManager {
             fs.mkdirSync(parent, { recursive: true })
           }
 
-          // Atomic lock acquisition via mkdir (without recursive).
+          // Atomic lock acquisition via a non-recursive mkdir.
           // Without recursive, mkdirSync throws EEXIST if another process
           // already owns the directory. No pre-check: an existsSync +
           // mkdirSync pair opens a TOCTOU window without adding safety,

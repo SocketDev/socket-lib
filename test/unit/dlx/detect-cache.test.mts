@@ -94,7 +94,8 @@ describe.sequential('dlx/detect — cache + stale paths', () => {
         path.join(projDir, 'package.json'),
         JSON.stringify({ name: 'p', bin: './cli.js' }),
       )
-      // Two calls back-to-back hit the content cache (mtime unchanged).
+      // Two calls back-to-back hit the content cache, as the mtime is
+      // unchanged.
       const a = detectLocalExecutableType(path.join(projDir, 'cli.js'))
       const b = detectLocalExecutableType(path.join(projDir, 'cli.js'))
       expect(a.type).toBe('package')

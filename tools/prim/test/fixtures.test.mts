@@ -30,7 +30,7 @@
  *   write per scenario. Each fixture's input MAY include a `primordials/`
  *   directory of leaves so the codemod's split-by-leaf import wiring exercises
  *   against a realistic surface. Otherwise the codemod falls back to the
- *   package-name specifier (consumer-of-lib mode).
+ *   package-name specifier used in consumer-of-lib mode.
  */
 
 import assert from 'node:assert/strict'

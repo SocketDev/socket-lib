@@ -1,7 +1,8 @@
 /**
  * @file Unit tests for src/bin/resolve — resolveRealBinSync's package-manager
- *   shim format coverage: extensionless Unix shell scripts (pnpm, yarn) and
- *   the Windows `.cmd`/`.ps1` shim variants for npm, npx, pnpm, and yarn.
+ *   shim format coverage: the extensionless Unix shell scripts for pnpm and
+ *   yarn, and the Windows `.cmd`/`.ps1` shim variants for npm, npx, pnpm, and
+ *   yarn.
  */
 
 import { promises as fs } from 'node:fs'

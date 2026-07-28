@@ -63,7 +63,7 @@ export async function readLinux(
   // attach `.setEncoding('utf8')` + `.on('data')` — that flips the stream to
   // string chunks while the lib buffers it as Buffers + does Buffer.concat on
   // close, throwing `TypeError: list[0] must be a Buffer`. The lib rejects on a
-  // non-zero exit (a missing entry), which is just "undefined" here.
+  // non-zero exit for a missing entry, which is just "undefined" here.
   try {
     const r = await spawn(
       SECRET_TOOL_BIN,

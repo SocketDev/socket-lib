@@ -1,5 +1,5 @@
 /**
- * @file Tests for ai/role — the declarative ROLE → (tier, profile)
+ * @file Tests for ai/role — the declarative ROLE → tier/profile
  *   orchestration. resolveRoleTier + ROLE_POLICY are pure policy and get
  *   exhaustive coverage; spawnForRole's delegation to spawnTierWithFallback is
  *   verified with a mocked spawn layer (the fleet rule: AI calls are mocked in

@@ -43,7 +43,7 @@ const logger = getDefaultLogger()
  *   true)
  * @param options.strip - Strip leading path components (like tar
  *   --strip-components)
- * @param options.format - Archive format (auto-detected if not specified)
+ * @param options.format - Archive format, auto-detected when not specified.
  *
  * @returns Path to the extraction directory
  */

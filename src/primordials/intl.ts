@@ -3,9 +3,9 @@
  *   consumers reading adversarial input never see a tampered global. `new
  *   Intl.X(...)` is expensive (10-14ms for Collator in Node); callers are
  *   responsible for caching instances — these exports are the constructors
- *   only. On the smol Node binary the captures come from `node:smol-primordial`
- *   (which hoists them from within the sealed module context); on stock Node
- *   they fall back to the global `Intl` object.
+ *   only. On the smol Node binary the captures come from
+ *   `node:smol-primordial`, which hoists them from within the sealed module
+ *   context; on stock Node they fall back to the global `Intl` object.
  */
 
 import { getSmolPrimordial } from '../smol/primordial'

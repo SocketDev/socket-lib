@@ -19,7 +19,7 @@ import { debugLog } from '../debug/output'
  *   })
  *
  *   initialize() // Logs "Initializing…" and returns config
- *   initialize() // Returns cached config (no log)
+ *   initialize() // Returns cached config without logging
  *
  * @param fn - Zero-argument function to run once.
  *

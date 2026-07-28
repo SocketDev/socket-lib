@@ -110,7 +110,7 @@ export async function fetchRefSha(
       return branchData.object.sha
     } catch (e2) {
       note404(e2)
-      // Try without refs/ prefix (for commit SHAs or other refs).
+      // Try without the refs/ prefix, which covers commit SHAs and other refs.
       try {
         const commitUrl = `${GITHUB_API_BASE_URL}/repos/${owner}/${repo}/commits/${ref}`
         const commitData = await fetchGitHub<GitHubCommit>(

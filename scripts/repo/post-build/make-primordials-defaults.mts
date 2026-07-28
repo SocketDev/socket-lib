@@ -2,17 +2,17 @@
  * @file Codegen for src/checks/primordials-defaults.ts — the canonical alias
  *   map + Node-internal-only set that `socket-lib check primordials` defaults
  *   to when a consumer's config doesn't override them. Source of truth: the
- *   `globals` npm package's globals.json. We pull the union of `builtin`
- *   (standard JS) + `node` (Node-runtime globals), filter to the identifiers
- *   socket-lib actually exports with a `Ctor` suffix (cross-referenced against
- *   src/primordials/*.ts), and emit a frozen Record<string, string> at codegen
- *   time so the runtime check doesn't need to bundle the 100KB globals.json
- *   itself. Why codegen instead of runtime import: `globals` is a devDependency
- *   (correct — consumers shouldn't pull it transitively just to run a
- *   primordials check), and the bundler runs at publish time, before consumer
- *   install. Embedding the derived map keeps the published bundle
- *   self-contained. Re-run whenever globals bumps, or src/primordials/ exports
- *   change. Wired into scripts/repo/post-build.mts.
+ *   `globals` npm package's globals.json. We pull the union of the `builtin`
+ *   standard-JS globals and the `node` runtime globals, filter to the
+ *   identifiers socket-lib actually exports with a `Ctor` suffix
+ *   (cross-referenced against src/primordials/*.ts), and emit a frozen
+ *   Record<string, string> at codegen time so the runtime check doesn't need
+ *   to bundle the 100KB globals.json itself. Why codegen instead of a runtime
+ *   import: `globals` is a devDependency (correct — consumers shouldn't pull
+ *   it transitively just to run a primordials check), and the bundler runs at
+ *   publish time, before consumer install. Embedding the derived map keeps the
+ *   published bundle self-contained. Re-run whenever globals bumps, or
+ *   src/primordials/ exports change. Wired into scripts/repo/post-build.mts.
  */
 
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'

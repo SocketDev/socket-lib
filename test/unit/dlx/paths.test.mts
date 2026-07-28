@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for DLX (Download and Execute) path-resolution utilities.
+ * @file Unit tests for DLX download-and-execute path-resolution utilities.
  *   Tests pure path construction for the DLX cache:
  *
  *   - getDlxPackageDir() resolves a package's cache directory

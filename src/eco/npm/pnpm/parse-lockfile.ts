@@ -26,7 +26,7 @@
  *   4. **pnpm lockfile spec** + reference implementation:
  *      https://github.com/pnpm/spec/blob/834f2815cc61917fa133e10869a2d4e9391c36bf/lockfile/9.0.md
  *      https://github.com/pnpm/pnpm/blob/main/packages/lockfile-file/ Bug fixes
- *      implemented here (and in the native parser):
+ *      implemented here and in the native parser:
  *
  *   - Fix 3a Empty-version guard in importer block-shape walk — v9
  *     nested-property entries (`pkg:` parent + indented `version:` child) no
@@ -263,8 +263,8 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
 
     const indent = indentOf(line)
     // A package entry must end with `:`, sit at indent 2-4, and — if
-    // we're already inside one — be at the same depth or shallower
-    // (deeper means it's a property block of the current entry).
+    // we're already inside one — be at the same depth or shallower.
+    // Deeper means it's a property block of the current entry.
     const isPackageEntry =
       indent >= 2 &&
       indent <= 4 &&

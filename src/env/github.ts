@@ -76,7 +76,7 @@ export function getGithubRefName(): string | undefined {
 }
 
 /**
- * GITHUB_REF_TYPE environment variable. GitHub ref type (branch or tag).
+ * GITHUB_REF_TYPE environment variable. GitHub ref type: branch or tag.
  *
  * @example
  *   ;```typescript

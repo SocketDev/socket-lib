@@ -29,7 +29,7 @@ import type { ResolveRefOptions } from './types'
 
 /**
  * Resolve a git ref (tag, branch, or commit SHA) to its full commit SHA.
- * Handles tags (annotated and lightweight), branches, and commit SHAs. Results
+ * Handles annotated and lightweight tags, branches, and commit SHAs. Results
  * are cached in-memory and on disk (with TTL) to minimize API calls.
  *
  * Resolution strategy:
@@ -75,7 +75,7 @@ import type { ResolveRefOptions } from './types'
  *   console.log(sha) // Full 40-char SHA
  *   ```
  *
- * @param owner - Repository owner (user or organization name)
+ * @param owner - Repository owner, a user or organization name.
  * @param repo - Repository name.
  * @param ref - Git reference to resolve (tag name, branch name, or commit SHA)
  * @param options - Resolution options including authentication token.

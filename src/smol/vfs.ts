@@ -18,7 +18,7 @@
  *     and immutable at runtime. Returns `undefined` on stock Node, non-Node
  *     runtimes, and on socket-btm binaries that haven't yet shipped the aligned
  *     binding. Result is cached across calls. Callers fall back to PATH lookup
- *     (or out-of-band downloads in socket-cli's case) when this is missing.
+ *     when this is missing, or to out-of-band downloads in socket-cli's case.
  */
 
 import { isNodeBuiltin, requireBuiltin } from '../node/module'

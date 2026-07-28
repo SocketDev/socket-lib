@@ -90,7 +90,7 @@ describe('safeDelete', () => {
       const testFile = path.join(tmpDir, 'file.txt')
       await fs.writeFile(testFile, '', 'utf8')
 
-      // Delete with explicit retry options (should succeed on first attempt)
+      // Delete with explicit retry options; it should succeed on first attempt
       await safeDelete(testFile, { maxRetries: 2, retryDelay: 50 })
 
       const exists = existsSync(testFile)
@@ -150,7 +150,7 @@ describe('safeDeleteSync', () => {
       const testFile = path.join(tmpDir, 'file.txt')
       await fs.writeFile(testFile, '', 'utf8')
 
-      // Delete with explicit retry options (should succeed on first attempt)
+      // Delete with explicit retry options; it should succeed on first attempt
       safeDeleteSync(testFile, { maxRetries: 2, retryDelay: 50 })
 
       const exists = existsSync(testFile)

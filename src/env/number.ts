@@ -47,7 +47,8 @@ export function envAsNumber(
       : (defaultValueOrOptions ?? {})
   const { allowInfinity = false, defaultValue = 0, mode = 'int' } = opts
 
-  // Fast-paths for the strict `string | undefined` shape (helpers semantics).
+  // Fast-paths for the strict `string | undefined` shape, per helpers
+  // semantics.
   if (value === undefined || value === null) {
     return defaultValue
   }

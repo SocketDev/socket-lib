@@ -8,18 +8,18 @@
  *   `addDirs`). Choose the LEAST-capable tier that gets the job done:
  *
  *   - `AI_PROFILE.read` — research / scanning. Read + Grep + Glob + WebFetch +
- *     WebSearch. No Edit, no Write, no Bash. Static-analysis skills
- *     (scanning-quality, scanning-security).
+ *     WebSearch. No Edit, no Write, no Bash. Static-analysis skills such as
+ *     scanning-quality and scanning-security.
  *   - `AI_PROFILE.edit` — in-place edits only. Read + Edit + Grep + Glob. NO
- *     Write (can't create files), NO Bash. Lint autofix / codemods constrained
- *     to existing files.
+ *     Write, so it cannot create files, and NO Bash. Lint autofix / codemods
+ *     constrained to existing files.
  *   - `AI_PROFILE.create` — edit AND create files. Adds Write on top of `.edit`.
  *     Still no Bash. Codegen, adding a test, refactors that split modules.
  *   - `AI_PROFILE.verify` — `.create` plus a READ-ONLY Bash allowlist (node /
  *     pnpm test+run / git status·diff·log). Lets an agent author files AND run
- *     the verifier (its own tests, a check script) — but it CANNOT mutate the
- *     repo: no `git add`, no `git commit`, no install. For codegen that must
- *     self-verify without being trusted to land.
+ *     the verifier, whether its own tests or a check script, but it CANNOT
+ *     mutate the repo: no `git add`, no `git commit`, no install. For codegen
+ *     that must self-verify without being trusted to land.
  *   - `AI_PROFILE.full` — `.verify` plus the mutating git commands (`git add` /
  *     `git commit`) and `pnpm exec`. Skills that commit, run tests, install
  *     deps. No "wide open" tier exists by design — letting an agent run
@@ -47,11 +47,11 @@ export interface AiProfile {
  * without rewriting a whole tier's literal.
  *
  * - `gitRead` — non-mutating inspection (`status` / `diff` / `log`).
- * - `gitWrite` — mutating (`add` / `commit`). The bright line between `verify`
- *   (may NOT land) and `full` (may land).
- * - `node` — run a `.mts` / `.js` directly (tests, check scripts, codegen).
- * - `test` — `pnpm test` / `pnpm run <script>` (the verify surface).
- * - `pkgExec` — `pnpm exec` (run a workspace bin); broader, full-tier only.
+ * - `gitWrite` — mutating (`add` / `commit`). The bright line between `verify`,
+ *   which may not land, and `full`, which may.
+ * - `node` — run a `.mts` / `.js` directly: tests, check scripts, codegen.
+ * - `test` — `pnpm test` / `pnpm run <script>`, the verify surface.
+ * - `pkgExec` — `pnpm exec` to run a workspace bin; broader, full-tier only.
  */
 export const BASH_ALLOW = {
   gitRead: ['Bash(git status:*)', 'Bash(git diff:*)', 'Bash(git log:*)'],

@@ -2,8 +2,8 @@
  * @file Unit tests for `src/npm/meta.ts`'s `getBatch` (order preservation,
  *   per-item errors, bounded concurrency, `throwOnError`) and
  *   `getVersionTrustInfo` (forced `variant: 'full'`, `_npmUser` mapping). HTTP
- *   is mocked via `StubHttpAdapter` (no live network); cacache persistence is
- *   isolated per test via a unique `SOCKET_CACACHE_DIR`.
+ *   is mocked via `StubHttpAdapter` so no live network is touched; cacache
+ *   persistence is isolated per test via a unique `SOCKET_CACACHE_DIR`.
  */
 
 import { describe, expect, it } from 'vitest'

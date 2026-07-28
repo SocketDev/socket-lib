@@ -3,7 +3,7 @@
  *   per-platform CPython archives under
  *   https://github.com/astral-sh/python-build-standalone/releases/download/<tag>/.
  *   Asset name shape: `cpython-<version>+<tag>-<triple>-install_only.tar.gz`.
- *   The `install_only` flavor is a relocatable runtime (no build artifacts),
+ *   The `install_only` flavor is a relocatable runtime with no build artifacts,
  *   extracted one directory deep (`python/bin/python3`).
  */
 
@@ -13,8 +13,8 @@ import { getLibc } from '../../constants/platform'
 import { ObjectFreeze } from '../../primordials/object'
 
 // platform-arch → python-build-standalone target triple. Upstream ships both
-// gnu (glibc) and musl Linux builds, so musl hosts get the real musl triple
-// (an Alpine interpreter linked against the right libc) rather than a glibc
+// gnu (glibc) and musl Linux builds, so musl hosts get the real musl triple,
+// an Alpine interpreter linked against the right libc, rather than a glibc
 // fallback. Keys mirror the host tokens `getPythonArch` emits.
 const PLATFORM_TRIPLES: Readonly<Record<string, string>> = ObjectFreeze({
   __proto__: null,
@@ -54,7 +54,7 @@ const RELEASE_BASE =
  * lockstep with socket-cli (drift-watch). The `checksums` map is keyed by asset
  * filename so the download tier verifies the exact tarball per platform.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export const DEFAULT_PYTHON_PIN = ObjectFreeze({
   __proto__: null,
@@ -86,8 +86,8 @@ export const DEFAULT_PYTHON_PIN = ObjectFreeze({
  * `PLATFORM_TRIPLES` key, e.g. `darwin-arm64`, `linux-x64-musl`, `win-x64`).
  * Owns the python-build-standalone vocabulary end to end: Node's `win32`
  * becomes `win`, and an Alpine host gets a `-musl` suffix so it resolves to the
- * real musl triple (upstream ships both gnu and musl Linux builds). Returns
- * `undefined` when the host platform/arch has no upstream prebuilt.
+ * real musl triple, since upstream ships both gnu and musl Linux builds.
+ * Returns `undefined` when the host platform/arch has no upstream prebuilt.
  *
  * Separate from `getJreArch` (jre/Adoptium vocabulary) and from the shared
  * `getPlatformArch` — neither matches python-build-standalone's key set.

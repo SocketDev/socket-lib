@@ -438,6 +438,6 @@ export class HashMismatchError extends Error {
  * @deprecated Renamed to {@link HashMismatchError}. Alias kept for callers that
  *   catch the old name.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export const DlxHashMismatchError = HashMismatchError

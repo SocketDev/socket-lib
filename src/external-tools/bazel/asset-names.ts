@@ -25,7 +25,7 @@ export interface BazelAssetEntry {
    */
   readonly native: boolean
   /**
-   * Human-readable note about compatibility quirks (if any).
+   * Human-readable note about any compatibility quirks.
    */
   readonly note: string | undefined
 }

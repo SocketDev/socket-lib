@@ -108,7 +108,7 @@ describe('binary path caching', () => {
     const result1 = await execBin('node', ['-p', '"first"'])
     expect(result1.code).toBe(0)
 
-    // Second call should use cache (same result, faster)
+    // Second call should hit the cache, returning the same result faster
     const result2 = await execBin('node', ['-p', '"second"'])
     expect(result2.code).toBe(0)
 

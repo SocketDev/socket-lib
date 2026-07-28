@@ -1,8 +1,8 @@
 /**
  * @file Classify an agent CLI's failure output into the three conditions that
- *   call for different recovery: the model is unavailable (fall over to another
- *   agent), the service is overloaded (retry the same agent after backoff), or
- *   the quota is spent (fall over to another provider/account).
+ *   call for different recovery: the model is unavailable, so fall over to
+ *   another agent; the service is overloaded, so retry the same agent after
+ *   backoff; or the quota is spent, so fall over to another provider/account.
  *   These read raw stdout/stderr and are pure, so `spawn.mts` owns the recovery
  *   policy while the pattern-matching stays independently testable.
  */
@@ -88,8 +88,8 @@ export function isModelUnavailable(stdout: string, stderr: string): boolean {
       return true
     }
   }
-  // model_not_found (any separator) + the API status codes (403 no-access,
-  // 404 model-not-found) the http/programmatic backends surface.
+  // model_not_found with any separator, plus the API status codes (403
+  // no-access, 404 model-not-found) the http/programmatic backends surface.
   if (
     /\bmodel[_-]?not[_-]?found\b/i.test(text) ||
     /\bapi error:\s*(?:403|404)\b/i.test(text)

@@ -158,7 +158,7 @@ describe('env/node-version-managers', () => {
 
   describe('detectActiveNodeManager (precedence)', () => {
     it('path beats env: volta path wins over NVM_DIR env', () => {
-      // A user can have NVM_DIR set (legacy nvm install) but currently
+      // A user can have NVM_DIR set from a legacy nvm install but currently
       // be running a Volta-managed node. Path-based detection takes
       // precedence so we name the *active* manager, not just any
       // installed one.
@@ -256,7 +256,7 @@ describe('env/node-version-managers', () => {
 
     it('does not mis-detect `.nvm-archive` (path-prefix false positive)', () => {
       // The regex requires `.nvm/versions/node/` — a related but distinct
-      // path shape (someone's archived nvm config) must not match.
+      // path shape such as someone's archived nvm config must not match.
       maskAllManagerEnv()
       withExecPath('/Users/<user>/.nvm-archive/old-node/bin/node')
       expect(detectActiveNodeManager()).toBe('system')

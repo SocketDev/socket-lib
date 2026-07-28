@@ -10,7 +10,7 @@
  *   an expired Claude key, or neither plus an opencode/synthetic seat.
  *   Hard-coding `fable` then fails at spawn time; routing here degrades
  *   gracefully and tells the caller WHY (the `reason`), so a skill can log
- *   "fell back to codex gpt-5.5 (claude unavailable)" instead of crashing. Pure
+ *   "fell back to codex gpt-5.5: claude unavailable" instead of crashing. Pure
  *   given an availability/keyed context — no I/O — so callers fan out their
  *   `which` + credential probes once and pass the result in. Pairs with
  *   `buildArgs` in `spawn.mts`: a Fable candidate carries `effort: undefined`
@@ -107,9 +107,9 @@ export interface RouteContext {
 
 /**
  * Per-tier preference chain, most-preferred-first. The head is the "perfect"
- * Claude choice from `AI_TIER`; the tail is the cross-engine equivalent ladder
- * (Codex, then an open-weight provider reached through opencode). Effort is the
- * shared `AiEffort` vocab; `buildArgs` translates per engine (codex clamps
+ * Claude choice from `AI_TIER`; the tail is the cross-engine equivalent ladder:
+ * Codex, then an open-weight provider reached through opencode. Effort is
+ * the shared `AiEffort` vocab; `buildArgs` translates per engine (codex clamps
  * `max`→`xhigh`, Fable drops effort entirely).
  *
  * The Claude head reuses `AI_TIER` so a model-generation bump stays a single
@@ -125,7 +125,8 @@ const HAIKU = AI_TIER.haiku
  * (haiku/fable) as the last resort — never a chain head — so a machine with no
  * keyed engine can still grind commodity work locally, and billing can promote
  * it ahead of a metered equivalent on cost (see `route-heuristic.mts`). Effort
- * is undefined: an on-device model has no reasoning-effort dial (like Fable).
+ * is undefined: an on-device model has no reasoning-effort dial, just like
+ * Fable.
  */
 const LOCAL: LocalTierCandidate = {
   effort: undefined,
@@ -204,7 +205,7 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
 /**
  * A candidate is usable when its credential requirement is met AND its engine
  * is reachable. The credential gate is relaxed for keyless providers: a keyless
- * `local` provider is always "keyed" (it needs no token), so it passes without
+ * `local` provider needs no token and so counts as "keyed", passing without
  * `ctx.keyed` membership. The reachability gate depends on the kind: a keyless
  * local candidate is gated on the local-engine availability probe
  * (`ctx.localAvailable`), a CLI candidate on its engine being installed. Both

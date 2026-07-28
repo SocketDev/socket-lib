@@ -1,7 +1,7 @@
 /**
  * @file Unit tests for the Spinner class lifecycle and methods:
  *
- *   - Spinner class for manual control (start, stop, update text)
+ *   - Spinner class for manual control: start, stop, update text
  *   - Indentation, text/control, color methods
  *   - Method chaining, edge cases, theme handling, getCliSpinners, streams
  *   - Color preservation after spinner operations The

@@ -245,7 +245,7 @@ export async function pFilter<T>(
  *
  * @template T - The type of array elements.
  *
- * @param chunks - Pre-chunked array (array of arrays)
+ * @param chunks - Pre-chunked array, an array of arrays.
  * @param callbackFn - Async predicate function.
  * @param options - Retry count as number, or full retry options, or undefined.
  *

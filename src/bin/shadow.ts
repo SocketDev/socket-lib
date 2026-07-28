@@ -20,7 +20,7 @@ export function isShadowBinPath(dirPath: string | undefined): boolean {
   if (!dirPath) {
     return false
   }
-  // Check for node_modules/.bin pattern (Unix and Windows)
+  // Check for the node_modules/.bin pattern on Unix and Windows.
   const normalized = normalizePath(dirPath)
   return normalized.includes('node_modules/.bin')
 }

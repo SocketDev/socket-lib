@@ -1,6 +1,6 @@
 /**
- * @file SBT distribution download-URL builder. SBT (Scala Build Tool) ships a
- *   platform-agnostic launcher tarball via GitHub releases
+ * @file SBT distribution download-URL builder. SBT, the Scala Build Tool,
+ *   ships a platform-agnostic launcher tarball via GitHub releases
  *   (`sbt-<version>.tgz`). The archive contains a `bin/sbt` script and a
  *   `bin/sbt-launch.jar` — both run on any platform with a JRE available. No
  *   platform-arch query map needed because there's only one asset per version.

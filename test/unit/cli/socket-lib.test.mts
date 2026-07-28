@@ -46,7 +46,7 @@ describe('socket-lib CLI dispatcher', () => {
 
   it('falls back to process.argv.slice(2) when called with no args', async () => {
     // Default-arg path: no `args` passed, so it reads process.argv.
-    // Stub argv to a clean state where main returns 0 (help path).
+    // Stub argv to a clean state where the help path makes main return 0.
     const original = process.argv
     process.argv = ['node', 'socket-lib', '--help']
     try {

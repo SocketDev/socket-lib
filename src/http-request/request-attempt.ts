@@ -9,8 +9,8 @@
  *   - Stream-mode bodies (Readable / form-data duck-typed)
  *   - `maxResponseSize` enforcement
  *   - Hook lifecycle (`onRequest` pre-issue, `onResponse` settle-or-error)
- *     Exported (not private) so `download.ts` can drive it in stream mode for
- *     its own download-attempt loop.
+ *     Exported rather than private so `download.ts` can drive it in stream mode
+ *     for its own download-attempt loop.
  */
 
 import { BufferAlloc, BufferConcat } from '../primordials/buffer'
@@ -37,7 +37,8 @@ import type { HttpResponse } from './response-types'
 
 /**
  * Single HTTP request attempt (used internally by httpRequest with retry
- * logic). Supports hooks (fire per-attempt), maxResponseSize, and rawResponse.
+ * logic). Supports maxResponseSize, rawResponse, and hooks, which fire once per
+ * attempt.
  */
 export async function httpRequestAttempt(
   url: string,
@@ -59,7 +60,7 @@ export async function httpRequestAttempt(
 
   const startTime = DateNow()
 
-  // Auto-merge FormData headers (Content-Type with boundary).
+  // Auto-merge FormData headers, chiefly the Content-Type with its boundary.
   const streamHeaders =
     body &&
     typeof body === 'object' &&

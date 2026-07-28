@@ -352,8 +352,8 @@ describe.sequential('process/lock', () => {
       // a non-writable absolute root. Use a relative path that mkdir
       // cannot reach when given an empty parent.
       // The cleanest cross-platform reproduction is to mock the fs module,
-      // but for an integration test we skip if the system can create the
-      // path (very unusual).
+      // but for an integration test we skip in the very unusual case where
+      // the system can create the path.
       try {
         await processLock.acquire(missingPath, { retries: 1 })
         // If we got here, mkdir succeeded — clean up and skip the assertion.

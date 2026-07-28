@@ -175,7 +175,7 @@ export function findClosingParen(src: string, from: number): number {
  * Literal, MemberExpression after the fix in this file's earlier session, etc.)
  * have correct ends; this function propagates those upward.
  *
- * Returns the (possibly repaired) end of `node` so parents can fold it into
+ * Returns the possibly repaired end of `node` so parents can fold it into
  * their own computation.
  */
 export function repairEndPositions(node) {

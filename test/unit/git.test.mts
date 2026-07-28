@@ -8,7 +8,8 @@
  *   - isChanged(), isStaged(), isUnstaged() check individual file status
  *   - Sync variants for all operations (*Sync)
  *   - Real git integration (not mocked - tests actual repository) Used by Socket
- *     CLI for git-aware operations (pre-commit hooks, file filtering).
+ *     CLI for git-aware operations such as pre-commit hooks and file
+ *     filtering.
  */
 
 import { existsSync } from 'node:fs'

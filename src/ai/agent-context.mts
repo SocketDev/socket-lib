@@ -86,7 +86,8 @@ export interface AgentPaths {
 }
 
 /**
- * Resolve an agent's config (and, for Claude, memory) directories on this OS.
+ * Resolve an agent's config directories on this OS, plus the memory directory
+ * for Claude.
  *
  * Per-agent / per-platform (verified against each tool's docs; flagged where a
  * platform path is best-effort):
@@ -100,7 +101,7 @@ export interface AgentPaths {
  *   mac/linux; on Windows `%APPDATA%\opencode` (best-effort: OpenCode's docs
  *   don't pin the Windows user-config path; APPDATA is the conventional
  *   fallback and is overridable via `$XDG_CONFIG_HOME`). No memory.
- * - **gemini**: `~/.gemini` (all OSes). No memory.
+ * - **gemini**: `~/.gemini` on every OS. No memory.
  *
  * @returns The resolved paths, or `undefined` if the home dir is unresolvable.
  */
@@ -169,8 +170,8 @@ export function agentPaths(
  *
  * Resolution order:
  *
- * 1. `AI_AGENT` — the cross-agent signal (Claude Code sets it). Its leading token
- *    names the family.
+ * 1. `AI_AGENT` — the cross-agent signal, which Claude Code sets. Its leading
+ *    token names the family.
  * 2. Tool-specific flags as a fallback: `CLAUDECODE=1` / `CLAUDE_CODE_*` → claude;
  *    `CODEX_*` → codex; `OPENCODE` → opencode.
  *

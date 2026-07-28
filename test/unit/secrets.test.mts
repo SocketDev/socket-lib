@@ -400,7 +400,7 @@ describe('secrets/keychain cache', () => {
         const first = await readSecret({ service, account })
         expect(first).toBe(value)
         // Now wipe the entry from the keychain directly via
-        // deleteSecret (which also invalidates the cache).
+        // deleteSecret, which also invalidates the cache.
         await deleteSecret({ service, account })
         // After invalidation, a fresh read hits the keychain again
         // and finds the entry gone.

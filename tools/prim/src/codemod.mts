@@ -5,12 +5,12 @@
  *   rewriting, prepend an import block for every primordial introduced. What
  *   gets rewritten:
  *
- *   - `Object.keys(x)` → `ObjectKeys(x)` (static method)
- *   - `Math.ceil(n)` → `MathCeil(n)` (static method)
- *   - `JSON.parse(s)` → `JSONParse(s)` (static method)
- *   - `new TypeError(msg)` → `new TypeErrorCtor(msg)` (constructor)
- *   - With `--include-guessed` or unambiguous-method match: `arr.map(fn)` →
- *     `ArrayPrototypeMap(arr, fn)` (prototype method) What is NOT rewritten:
+ *   - Static method `Object.keys(x)` → `ObjectKeys(x)`
+ *   - Static method `Math.ceil(n)` → `MathCeil(n)`
+ *   - Static method `JSON.parse(s)` → `JSONParse(s)`
+ *   - Constructor `new TypeError(msg)` → `new TypeErrorCtor(msg)`
+ *   - Prototype method, with `--include-guessed` or unambiguous-method match:
+ *     `arr.map(fn)` → `ArrayPrototypeMap(arr, fn)` What is NOT rewritten:
  *   - Patterns whose primordial isn't exported yet — they show up in `prim gaps`
  *     and need a surface addition first.
  *   - Property-only access (`Symbol.iterator`) — out of scope; it's a constant
@@ -161,8 +161,8 @@ export async function applyCodemod({
   }
 
   // Normalize the primordials root via lib's normalizePath so the
-  // containment check is consistent with the rest of the codebase
-  // (forward slashes everywhere, including Windows). Without this,
+  // containment check is consistent with the rest of the codebase, which
+  // uses forward slashes everywhere, Windows included. Without this,
   // a Windows-style `C:\repo\src\primordials` would never `startsWith`
   // a posix-style `C:/repo/src/primordials/array.ts` from the walker.
   const primordialsRoot = localPrimordialsPath
@@ -178,8 +178,8 @@ export async function applyCodemod({
   //     atomicWrite. Per-file atomicity + batch-level validation = effectively
   //     transactional.
   //
-  // When `validate === false` (caller opts out) OR `apply === false` (caller
-  // is in dry-run), we skip the two-phase split and walk inline. Same code
+  // When the caller opts out via `validate === false`, or is in dry-run via
+  // `apply === false`, we skip the two-phase split and walk inline. Same code
   // path as before; lets the consumer choose speed over safety when they
   // know what they're doing.
   const useTwoPhase = apply && validate !== false
@@ -284,15 +284,15 @@ export async function rewriteFile({
   // Local-name prefix for the inserted destructure. When set, an
   // imported `Foo` is referenced in source as `<prefix>Foo` and the
   // require becomes `const { Foo: <prefix>Foo, … } = require(…)`.
-  // Empty string = no aliasing (matches the ESM-default behavior).
+  // Empty string means no aliasing, matching the ESM-default behavior.
   const aliasPrefix = importStyle?.aliasPrefix ?? ''
   const localName = (name: string): string => aliasPrefix + name
   const src = readFileSync(absPath, 'utf8')
   // For TypeScript files, parse a type-stripped copy. `mode: 'strip'`
   // replaces type annotations with whitespace of the same byte length,
   // so AST start/end offsets from the stripped source map 1:1 back to
-  // the raw source. We apply rewrites to `src` (raw, with types intact)
-  // using positions from the parser's view of `parseSrc` (stripped).
+  // the raw source. We apply rewrites to `src`, which still has its types
+  // intact, using positions from the parser's view of `parseSrc` (stripped).
   const ext = path.extname(absPath)
   const isTsFile = TS_EXTENSIONS.has(ext)
   let parseSrc = src
@@ -339,8 +339,8 @@ export async function rewriteFile({
   // is char-indexed, so on sources with multi-byte UTF-8 chars (CJK,
   // emoji, accented Latin), positions silently mis-align and rewrites
   // corrupt the file. Build a byte→char map once, then translate every
-  // AST start/end before slicing. ASCII-only sources skip the
-  // conversion entirely (the map is identity).
+  // AST start/end before slicing. ASCII-only sources skip the conversion
+  // entirely, since the map is the identity.
   const byteToChar = buildByteToCharMap(src)
   const toChar = (off: number): number =>
     byteToChar === undefined ? off : (byteToChar[off] ?? off)
@@ -409,8 +409,8 @@ export async function rewriteFile({
 
   // Only return newSource when it actually changed AND we have rewrites
   // applied. Callers in batch-validation mode read this to plan writes
-  // after running cross-file checks (cycle detection, self-import veto)
-  // without already having dirtied the working tree.
+  // after running the cross-file checks for cycle detection and the
+  // self-import veto, without already having dirtied the working tree.
   const changed = newSource !== src
   if (apply && changed) {
     atomicWrite(absPath, newSource)

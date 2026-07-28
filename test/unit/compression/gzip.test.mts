@@ -246,8 +246,8 @@ describe.sequential('compression — gzip', () => {
     })
 
     it('only honors the trailing extension, not embedded ones', () => {
-      // foo.br.json is a .json file (last extname wins), so brotli set
-      // shouldn't strip anything.
+      // foo.br.json is a .json file because the last extname wins, so the
+      // brotli set shouldn't strip anything.
       expect(stripExt('foo.br.json', BROTLI_EXTS)).toBe('foo.br.json')
       // archive.tgz.txt similarly.
       expect(stripExt('archive.tgz.txt', GZIP_EXTS)).toBe('archive.tgz.txt')

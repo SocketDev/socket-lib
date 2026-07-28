@@ -92,11 +92,11 @@ describe('getSubmodulePaths edge cases (real temp repo)', () => {
 
 describe('cwd defaulting (runs against this repo)', () => {
   it('isTracked / getSubmodulePaths default cwd to process.cwd()', async () => {
-    // No options → the helpers fall back to process.cwd(), which is socket-lib
-    // itself (a git repo). package.json is tracked here.
+    // No options → the helpers fall back to process.cwd(), which is the
+    // socket-lib git repo itself. package.json is tracked here.
     expect(await isTracked('package.json')).toBe(true)
     expect(await isTracked('definitely-not-a-real-file.xyz')).toBe(false)
-    // getSubmodulePaths reads this repo's .gitmodules (may be empty); it must
+    // getSubmodulePaths reads this repo's possibly empty .gitmodules; it must
     // resolve to an array without throwing.
     expect(Array.isArray(await getSubmodulePaths())).toBe(true)
   })
@@ -136,7 +136,7 @@ describe('isTracked + isUntrackedNonSubmodulePath (real temp repo)', () => {
       expect(
         await isUntrackedNonSubmodulePath('.DS_Store', { cwd: tmpDir }),
       ).toBe(true)
-      // The submodule-internal junk is NOT safe (belongs to the submodule).
+      // The submodule-internal junk is NOT safe; it belongs to the submodule.
       expect(
         await isUntrackedNonSubmodulePath('vendor/sub/x.pyc', { cwd: tmpDir }),
       ).toBe(false)

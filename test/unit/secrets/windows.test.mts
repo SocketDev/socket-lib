@@ -228,7 +228,7 @@ describe.sequential('secrets/windows — readWindows', () => {
   })
 
   test('falls back to DPAPI when CredentialManager misses', async () => {
-    // 1st spawn: CM (returns non-zero); 2nd: DPAPI decode (success).
+    // 1st spawn: CM returns non-zero; 2nd: DPAPI decode succeeds.
     const filePath = path.join(harness.tmpRoot, 'svc', 'acc.enc')
     require('node:fs').mkdirSync(path.dirname(filePath), { recursive: true })
     writeFileSync(filePath, 'b64')

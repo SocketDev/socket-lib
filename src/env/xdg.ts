@@ -61,8 +61,8 @@ export function getXdgDataHome(): string | undefined {
 
 /**
  * XDG_RUNTIME_DIR environment variable. XDG Base Directory specification
- * runtime directory — the home for ephemeral, owner-only runtime objects
- * (daemon sockets, locks). Set by systemd to `/run/user/<uid>`; absent on
+ * runtime directory — the home for ephemeral, owner-only runtime objects such
+ * as daemon sockets and locks. Set by systemd to `/run/user/<uid>`; absent on
  * macOS and many non-systemd setups, so callers must provide a fallback.
  *
  * @example

@@ -35,9 +35,10 @@ export interface ParsedLoggerOptions {
 /**
  * Parse the first `Logger` constructor argument into normalized option slots.
  *
- * A `theme` string is resolved against `THEMES` (unknown names yield no theme);
- * a `theme` object is used directly. When the first argument is not an object,
- * every slot defaults (empty null-prototype options, no stdout, no theme).
+ * A `theme` string is resolved against `THEMES`, where an unknown name yields
+ * no theme; a `theme` object is used directly. When the first argument is not
+ * an object, every slot defaults: empty null-prototype options, no stdout, and
+ * no theme.
  *
  * @param args - The raw `Logger` constructor arguments.
  */

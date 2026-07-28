@@ -43,7 +43,8 @@ describe('paths/normalize', () => {
     })
 
     it('should not add a slash to a drive-relative path', () => {
-      // `D:foo` (no separator after the colon) is drive-relative, not a root.
+      // `D:foo` has no separator after the colon, so it is drive-relative
+      // rather than a root.
       expect(normalizePath('D:foo')).toBe('D:foo')
     })
 

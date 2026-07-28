@@ -2,7 +2,7 @@
  * @file `resolveJre()` — the JRE resolution entry point. Tries each source in
  *   order:
  *
- *   1. VFS — smol binary's embedded JRE (zero network, fast)
+ *   1. VFS — smol binary's embedded JRE: zero network, fast
  *   2. JAVA_HOME — user-pinned via env var
  *   3. PATH — `java` (or `java.exe`) on the system PATH
  *   4. download — Adoptium fetch + extract (only when `downloadIfMissing` is

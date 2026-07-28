@@ -49,7 +49,7 @@ export function getNodeDisableSigusr1Flags(): string[] {
     // --disable-sigusr1: Prevents Signal I/O Thread from listening to SIGUSR1 (v22.14.0+).
     // --no-inspect: Disables inspector on older Node versions that don't support --disable-sigusr1.
     //
-    // Note: --disable-sigusr1 is the correct solution (prevents thread creation entirely).
+    // Note: --disable-sigusr1 is the correct solution: it prevents thread creation entirely.
     // --no-inspect is a fallback that still creates the signal handler thread but blocks later.
     /* c8 ignore start - --no-inspect fallback fires only on Node
        runtimes pre-v22.14 / v23.7 / v24.8; tests run on Node 24+. */
@@ -76,7 +76,7 @@ export function getNodeHardenFlags(): string[] {
     const flags: string[] = ['--disable-proto=delete']
 
     // Permission model: Experimental in Node 20-23, stable in Node 24+.
-    // Node 20-23: --experimental-permission (no explicit grants needed).
+    // Node 20-23: --experimental-permission needs no explicit grants.
     // Node 24+: --permission (requires explicit grants via getNodePermissionFlags()).
     if (major >= 24) {
       flags.push('--permission')
@@ -146,7 +146,7 @@ export function getNodeNoWarningsFlags(): string[] {
  *
  * @returns The patch version number, or `0` if it cannot be parsed.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function getNodePatchVersion(): number {
   // Defensive `?? '0'` against malformed process.version.
@@ -161,7 +161,7 @@ export function getNodePatchVersion(): number {
  * `--allow-fs-read=*`, `--allow-fs-write=*`, and `--allow-child-process`. Older
  * versions return an empty array.
  *
- * @returns The permission flag list (possibly empty) for the current runtime.
+ * @returns The possibly-empty permission flag list for the current runtime.
  */
 export function getNodePermissionFlags(): string[] {
   if (nodePermissionFlags === undefined) {
@@ -203,7 +203,7 @@ export function getNodeVersion(): string {
  *
  * @returns `true` when the current runtime is Node.js 24 or newer.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function supportsNodeCompileCacheApi(): boolean {
   const major = getNodeMajorVersion()
@@ -216,7 +216,7 @@ export function supportsNodeCompileCacheApi(): boolean {
  *
  * @returns `true` when the current runtime is Node.js 22 or newer.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function supportsNodeCompileCacheEnvVar(): boolean {
   const major = getNodeMajorVersion()
@@ -259,7 +259,7 @@ export function supportsNodeDisableSigusr1Flag(): boolean {
  *
  * @returns `true` when the current runtime is Node.js 21 or newer.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function supportsNodeDisableWarningFlag(): boolean {
   const major = getNodeMajorVersion()
@@ -272,7 +272,7 @@ export function supportsNodeDisableWarningFlag(): boolean {
  *
  * @returns `true` when the current runtime is Node.js 20 or newer.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function supportsNodePermissionFlag(): boolean {
   const major = getNodeMajorVersion()
@@ -285,7 +285,7 @@ export function supportsNodePermissionFlag(): boolean {
  *
  * @returns `true` when the runtime supports `require()`-ing ES modules.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function supportsNodeRequireModule(): boolean {
   const major = getNodeMajorVersion()
@@ -348,7 +348,7 @@ export function supportsNodeStripTypesDefault(): boolean {
  *
  * @returns `true` when the current process has an IPC channel to its parent.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function supportsProcessSend(): boolean {
   return typeof process.send === 'function'

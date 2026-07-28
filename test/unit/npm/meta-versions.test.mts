@@ -2,7 +2,7 @@
  * @file Unit tests for `src/npm/meta.ts`'s version-filtering helpers —
  *   `getVersions` (range / loose / after / minAgeDays), `getLatestVersion`
  *   (tag + range paths), `getPublishDate`, and the `isMatured` end-of-UTC-day
- *   anchor. HTTP is mocked via `StubHttpAdapter` (no live network); cacache
+ *   anchor. HTTP is mocked via `StubHttpAdapter` with no live network; cacache
  *   persistence is isolated per test via a unique `SOCKET_CACACHE_DIR`.
  */
 

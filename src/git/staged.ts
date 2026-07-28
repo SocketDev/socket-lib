@@ -15,8 +15,10 @@ import type { GitDiffOptions } from './types'
  * Get staged files ready for commit (changes added with `git add`).
  *
  * Uses `git diff --cached --name-only` which returns only staged changes. Does
- * NOT include: - Unstaged modifications (changes not added with `git add`) -
- * Untracked files (new files not added to git)
+ * NOT include:
+ *
+ * - Unstaged modifications (changes not added with `git add`)
+ * - Untracked files, meaning new files not added to git.
  *
  * This is a focused check for what will be included in the next commit. Useful
  * for validating changes before committing or running pre-commit hooks.
@@ -92,8 +94,10 @@ export function getStagedFilesSync(
  * Check if a file or directory is staged for commit.
  *
  * Checks if the given pathname has changes staged with `git add` that will be
- * included in the next commit. Does NOT include: - Unstaged modifications
- * (changes not added with `git add`) - Untracked files (new files not in git)
+ * included in the next commit. Does NOT include:
+ *
+ * - Unstaged modifications (changes not added with `git add`)
+ * - Untracked files, meaning new files not in git.
  *
  * For directories, returns `true` if ANY file within the directory is staged.
  *
@@ -131,7 +135,8 @@ export async function isStaged(
     absolute: false,
   })
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path (using cache).
+  // Resolve pathname through the cache to handle symlinks before computing
+  // the relative path.
   const resolvedPathname = getCachedRealpath(pathname)
   // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
   /* c8 ignore start */
@@ -146,8 +151,10 @@ export async function isStaged(
  *
  * Synchronous version of `isStaged()`. Checks if the given pathname has changes
  * staged with `git add` that will be included in the next commit. Does NOT
- * include: - Unstaged modifications (changes not added with `git add`) -
- * Untracked files (new files not in git)
+ * include:
+ *
+ * - Unstaged modifications (changes not added with `git add`)
+ * - Untracked files, meaning new files not in git.
  *
  * For directories, returns `true` if ANY file within the directory is staged.
  *
@@ -185,7 +192,8 @@ export function isStagedSync(
     absolute: false,
   })
   const path = getPath()
-  // Resolve pathname to handle symlinks before computing relative path (using cache).
+  // Resolve pathname through the cache to handle symlinks before computing
+  // the relative path.
   const resolvedPathname = getCachedRealpath(pathname)
   // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
   /* c8 ignore start */

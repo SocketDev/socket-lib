@@ -179,7 +179,8 @@ describe('stdio/prompts - wrapping', () => {
       const mockPrompt = vi.fn().mockResolvedValue('test')
       const wrapped = wrapPrompt(mockPrompt)
 
-      // Pass an array (which is technically an object but not the expected config)
+      // Pass an array, which is technically an object but not the expected
+      // config.
       const result = await wrapped([1, 2, 3])
       expect(result).toBe('test')
       expect(mockPrompt).toHaveBeenCalled()

@@ -63,7 +63,8 @@ export const AI_HTTP_PROVIDERS: Readonly<Record<string, AiHttpProvider>> = {
  * Inputs to a single completion call.
  *
  * Required: `provider`, `model`, `prompt`. `effort` maps to the OpenAI
- * `reasoning_effort` field for models that support it (left off otherwise).
+ * `reasoning_effort` field for models that support it and is left off for the
+ * rest.
  */
 export interface AiHttpCallOptions {
   /**
@@ -156,7 +157,8 @@ export function buildChatRequestBody(options: AiHttpCallOptions): string {
  * Call an OpenAI-compatible chat-completions endpoint and return the assistant
  * text. The bearer token is read from the provider's `tokenEnv` env var — never
  * accepted as a parameter, never logged. Throws when the token env var is unset
- * (naming the var to set) or when the response carries no message text.
+ * — the error names the var to set — or when the response carries no message
+ * text.
  *
  * @example
  *   ;```ts
@@ -175,7 +177,8 @@ export async function callAiHttpModel(
   const provider = resolveAiHttpProvider(options.provider)
   // Resolve via the layered resolver (explicit → env → keychain) when the
   // provider is a known CredentialProvider; otherwise fall back to its env var
-  // directly (a caller-supplied custom provider not in the credential map).
+  // directly, which is the case for a caller-supplied custom provider that is
+  // not in the credential map.
   const token = isCredentialProvider(provider.id)
     ? await resolveProviderCredential({
         allowEnvOnly: options.allowEnvOnly,

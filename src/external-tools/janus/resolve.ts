@@ -2,7 +2,7 @@
  * @file `resolveJanus()` — janus resolution entry point. Tries each source in
  *   order:
  *
- *   1. VFS — smol binary's embedded janus (if packed)
+ *   1. VFS — the smol binary's embedded janus, when packed
  *   2. PATH — `janus` on the system PATH
  *   3. download — upstream GitHub release tar.gz (only when `downloadIfMissing` is
  *      passed) Returns `undefined` if all of the enabled sources miss —
@@ -76,7 +76,7 @@ export async function doResolveJanus(
 
 /* c8 ignore start - test-only escape hatch. */
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function resetJanusResolution(): void {
   resolutionCache.clear()

@@ -1,7 +1,7 @@
 /**
- * @file Cache write entrypoints — `put` (insert/replace by key) and `remove`
- *   (single-key delete). Both reject wildcards; for pattern deletes use
- *   `clear({ prefix: 'foo*' })`.
+ * @file Cache write entrypoints — `put` inserts or replaces by key and
+ *   `remove` deletes a single key. Both reject wildcards; for pattern
+ *   deletes use `clear({ prefix: 'foo*' })`.
  */
 
 import { getSocketCacacheDir } from '../paths/socket'

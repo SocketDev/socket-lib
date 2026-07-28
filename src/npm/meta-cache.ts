@@ -4,7 +4,7 @@
  *   `createTtlCache` (memo + cacache persistence + in-flight dedupe via
  *   `getOrFetch`). Every `getPackumentSlim`-backed cache is actually three
  *   `TtlCache` instances sharing one cacache directory (`getCachePeers`): the
- *   primary cache (the object callers hold), a persisted long-TTL last
+ *   primary cache that callers hold, a persisted long-TTL last
  *   known-good store (`-stale` prefix, `STALE_TTL_MS`), and a short-TTL
  *   storm-control marker (`-storm` prefix, `STALE_SERVE_TTL_MS`). Three
  *   failure-handling policies layer on top:
@@ -37,7 +37,7 @@
  */
 
 import { createTtlCache } from '../cache/ttl/store'
-// no-platform-http-import: server-only module (cacache-backed cache); node platform is intentional.
+// no-platform-http-import: server-only module backed by cacache; node platform is intentional.
 import { httpJson, HttpResponseError } from '../http-request/node'
 import { JSONParse, JSONStringify } from '../primordials/json'
 import { URLCtor } from '../primordials/url'
@@ -130,7 +130,7 @@ export class PackumentNotFoundError extends Error {
 }
 
 /**
- * Build the cache key for one (registry, name, variant) tuple. Normalizes
+ * Build the cache key for one registry/name/variant tuple. Normalizes
  * `registry` first (`normalizeRegistryUrl`) so two spellings of the same
  * registry collapse to one key.
  */
@@ -143,19 +143,20 @@ export function buildMetaCacheKey(
 }
 
 /**
- * Deep-clone a `PackumentMetaSlim` via a JSON round-trip — plain
- * JSON-roundtrippable data (strings, numbers, booleans, records), so this is
- * 3-5x faster than `structuredClone` and avoids the HTML structured-clone
- * algorithm entirely. Used at every public read boundary so no two callers
- * ever hold a reference to the same cached object.
+ * Deep-clone a `PackumentMetaSlim` via a JSON round-trip. The payload is plain
+ * JSON-roundtrippable data: strings, numbers, booleans, and records. That
+ * makes this 3-5x faster than `structuredClone` and avoids the HTML
+ * structured-clone algorithm entirely. Used at every public read boundary so
+ * no two callers ever hold a reference to the same cached object.
  */
 export function cloneMeta(meta: PackumentMetaSlim): PackumentMetaSlim {
   return JSONParse(JSONStringify(meta)) as PackumentMetaSlim
 }
 
 /**
- * Companion long-TTL (persisted stale) and short-TTL (storm-control) caches
- * that back one primary `TtlCache` instance — see the file-level doc.
+ * Companion caches that back one primary `TtlCache` instance: a long-TTL
+ * persisted-stale cache and a short-TTL storm-control cache. See the
+ * file-level doc.
  */
 export interface NpmMetaCachePeers {
   stale: TtlCache
@@ -190,8 +191,8 @@ export function createNpmMetaCache(
 /**
  * The uncached fetch attempt for one packument, run through the negative-cache
  * decision: on success, persists the result to `staleCache` and returns a
- * `hit`; on a definitive 404 with no persisted stale data, returns a `miss`
- * (a normal, non-throwing outcome the caller decides how to cache); any other
+ * `hit`; on a definitive 404 with no persisted stale data, returns a `miss` —
+ * a normal, non-throwing outcome the caller decides how to cache. Any other
  * failure (transient error, or a 404 when stale data DOES exist) rethrows so
  * the caller's serve-stale-on-error path can take over.
  */
@@ -219,7 +220,7 @@ export async function fetchAndCacheEntry(
 
 /**
  * `GetPackumentSlimOptions` with every field the fetch path needs resolved to
- * a concrete value (defaults applied) — the shape `fetchPackumentSlim` and
+ * a concrete value with defaults applied — the shape `fetchPackumentSlim` and
  * `getPackumentSlim`'s cache-key logic operate on internally.
  */
 export interface ResolvedPackumentFetchOptions {
@@ -254,7 +255,7 @@ export async function fetchPackumentSlim(
 
 /**
  * Resolve the persisted-stale + storm-control companions for a primary cache
- * instance, creating them lazily (under the default prefix) for a `TtlCache`
+ * instance, creating them lazily under the default prefix for a `TtlCache`
  * that wasn't created via `createNpmMetaCache`.
  */
 export function getCachePeers(cache: TtlCache): NpmMetaCachePeers {
@@ -275,7 +276,7 @@ export function getDefaultMetaCache(): TtlCache {
 
 /**
  * Fetch a package's packument, slice it down to `PackumentMetaSlim`, and
- * cache the result. Concurrent calls for the same (registry, name, variant)
+ * cache the result. Concurrent calls for the same registry, name, and variant
  * dedupe to a single upstream request via the cache's `getOrFetch`. See the
  * file-level doc for the `force` / negative-cache / serve-stale-on-error
  * policies.

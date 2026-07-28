@@ -3,8 +3,8 @@
  *
  *   - detectArchiveFormat() - identifies format from file extension
  *   - extractZip()/extractTar()/extractTarGz() - extract with optional strip
- *   - extractArchive() - auto-detects format and extracts Security hardening
- *     (path traversal, zip bombs, symlinks) lives in the sibling
+ *   - extractArchive() - auto-detects format and extracts Security hardening for
+ *     path traversal, zip bombs, and symlinks lives in the sibling
  *     archives-security.test.mts.
  */
 
@@ -194,7 +194,7 @@ describe('archives', () => {
       await runWithTempDir(async tempDir => {
         await extractZip(testZipWithStripPath, tempDir, { strip: 10 })
 
-        // No files should be extracted (all paths shorter than strip value)
+        // No files extracted: every path is shorter than the strip value.
         const files = await fs.readdir(tempDir)
         expect(files).toHaveLength(0)
       }, 'extractZip-strip-deep-')

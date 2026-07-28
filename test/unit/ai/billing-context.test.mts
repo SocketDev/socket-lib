@@ -2,7 +2,7 @@
  * @file Tests for ai/billing-context — building a BillingContext with no
  *   privileged lookup. billingFromKeyed is pure (kind defaults + overrides +
  *   headroom passthrough); detectRoutingEnv reads the CI env; discover* probe
- *   credentials via a mocked resolver (no real keychain, no network).
+ *   credentials via a mocked resolver, so no real keychain and no network.
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'

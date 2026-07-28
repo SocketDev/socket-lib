@@ -18,8 +18,9 @@ export type PackageManagerType = 'npm' | 'pnpm' | 'yarn' | 'bun' | undefined
  *
  * Detection priority:
  *
- * 1. Npm_config_user_agent (most reliable, set by all package managers)
- * 2. Binary path analysis (fallback for non-standard environments)
+ * 1. Npm_config_user_agent — the most reliable signal, set by every package
+ *    manager
+ * 2. Binary path analysis, the fallback for non-standard environments
  *
  * @example
  *   ;```typescript

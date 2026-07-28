@@ -4,8 +4,9 @@
  *   checks where a cryptic "operation was canceled" error would otherwise mask
  *   an upstream GitHub outage. Component IDs are stable GitHub-assigned
  *   identifiers from githubstatus.com/api/v2/components.json. The probe adds at
- *   most 8 seconds to startup (configurable timeout) and fails open on network
- *   error so a down status page never blocks a healthy workflow.
+ *   most 8 seconds to startup, a timeout the caller can configure, and fails
+ *   open on network error so a down status page never blocks a healthy
+ *   workflow.
  */
 
 // oxlint-disable-next-line socket/no-platform-specific-import -- server-only module; node platform is intentional.

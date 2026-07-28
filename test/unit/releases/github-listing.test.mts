@@ -229,10 +229,10 @@ describe.sequential('releases/github-api: getLatestRelease', () => {
   })
 
   it('should skip releases with no assets', async () => {
-    // Mock releases where the newest has no assets (empty placeholder release).
+    // Mock releases where the newest is an empty placeholder with no assets.
     const releasesWithEmpty = [
       {
-        assets: [], // Empty release (no binaries built yet)
+        assets: [], // Empty release with no binaries built yet
         published_at: '2026-01-13T03:06:00Z', // Newest but empty
         tag_name: 'node-smol-20260113-121d029',
       },

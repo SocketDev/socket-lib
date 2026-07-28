@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for dlx manifest type guards. Tests type guards and
- *   utilities for dlx (download and execute) manifest entries:
+ *   utilities for dlx download-and-execute manifest entries:
  *
  *   - isPackageEntry() validates package-type manifest entries
  *   - isBinaryEntry() validates binary-type manifest entries

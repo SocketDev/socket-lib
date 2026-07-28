@@ -4,7 +4,7 @@
  *   lists the repo's submodule mount points; `isInSubmodule` answers "does this
  *   path live inside one?"; `isUntrackedNonSubmodulePath` composes them into
  *   the safe-to-touch condition for cleanup tooling — never delete a tracked
- *   file or reach into a submodule's own tree (which would dirty it).
+ *   file or reach into a submodule's own tree, which would dirty it.
  */
 
 import { getNodePath } from '../node/path'
@@ -130,7 +130,7 @@ export async function isTracked(
  * Whether `targetPath` is git does NOT track AND does not live inside a
  * submodule — the safe-to-touch condition for cleanup tooling. A tracked path
  * is a deliberate file; a submodule-internal path belongs to that submodule's
- * own git (touching it would dirty the submodule). Composes `isTracked` +
+ * own git, so touching it would dirty the submodule. Composes `isTracked` +
  * `getSubmodulePaths`/`pathIsUnderSubmodule`. Fails closed — any check error
  * resolves to `false`.
  *

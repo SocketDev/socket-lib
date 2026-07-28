@@ -103,7 +103,7 @@ describe('spawnSync', () => {
       {},
     )
     expect(result.status).toBe(0)
-    // ANSI codes should be stripped (default behavior); stdout is string.
+    // ANSI codes should be stripped by default; stdout is string.
     expect(result.stdout).not.toContain('\x1b[31m')
     expect(result.stdout).toContain('red')
   })

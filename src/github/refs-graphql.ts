@@ -43,10 +43,10 @@ import type { GitHubFetchOptions } from './types'
  * - Returns `undefined` when the ref genuinely doesn't exist as a tag, branch, OR
  *   commit. The caller treats `undefined` the same as "REST cascade also
  *   failed" — a real "ref not found".
- * - Returns `undefined` (not throws) on transport-level failures too: non-OK
- *   HTTP, empty GraphQL body, or JSON parse error. The REST cascade's "ref not
- *   found" message is more useful to the end user than a GraphQL transport
- *   error.
+ * - Returns `undefined` rather than throwing on transport-level failures too:
+ *   non-OK HTTP, empty GraphQL body, or JSON parse error. The REST cascade's
+ *   "ref not found" message is more useful to the end user than a GraphQL
+ *   transport error.
  */
 export async function fetchRefShaViaGraphQL(
   owner: string,
@@ -117,7 +117,7 @@ export async function fetchRefShaViaGraphQL(
     method: 'POST',
   })
   if (!response.ok || response.body.byteLength === 0) {
-    // Either GraphQL itself failed (non-OK status) or it ALSO
+    // Either GraphQL itself failed with a non-OK status or it ALSO
     // returned an empty body — both backends are degraded. Return
     // undefined so the caller surfaces the original REST error rather
     // than re-throwing here. We deliberately don't recurse to

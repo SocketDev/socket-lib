@@ -3,8 +3,8 @@
  *   destructures from Node's internal `primordials` global needs to keep its
  *   usage shape-aligned with socket-lib's userland mirror
  *   (`@socketsecurity/lib/primordials`). This module is the parser + diff
- *   engine; per-repo policy (which dirs to scan, naming aliases, allowlist)
- *   lives in a config the caller supplies. Used by the `socket-lib check
+ *   engine. The caller supplies a config with the per-repo policy: which dirs
+ *   to scan, naming aliases, and the allowlist. Used by the `socket-lib check
  *   primordials` CLI subcommand. Kept importable as a library so repos with
  *   bespoke needs can compose it directly without going through the CLI. The
  *   flow:
@@ -12,9 +12,9 @@
  *   1. Walk the configured `scanDirs` for `*.js` files.
  *   2. From each file, extract names from every `const { Foo, Bar } = primordials`
  *      destructure.
- *   3. Read socket-lib's `primordials/` directory (sibling clone) or
- *      `primordials/*.d.ts` (installed `node_modules`) and pull every exported
- *      name across all leaves.
+ *   3. Read socket-lib's `primordials/` directory from a sibling clone, or
+ *      `primordials/*.d.ts` from installed `node_modules`, and pull every
+ *      exported name across all leaves.
  *   4. Diff: every destructured name must be either (a) in socket-lib verbatim,
  *      (b) in socket-lib via the configured alias map, or (c) in the configured
  *      node-internal-only allowlist. Findings come back classified so callers
@@ -83,8 +83,9 @@ const NAME_HEAD_RE = /^([A-Za-z_$][A-Za-z0-9_$]*)/
 
 /**
  * Run the primordials drift check against the configured repo. Returns the full
- * result including raw inputs (used names, lib exports) so renderers can show
- * context, plus a sorted list of findings classified by kind.
+ * result including the raw inputs, both used names and lib exports, so
+ * renderers can show context, plus a sorted list of findings classified by
+ * kind.
  */
 export function checkPrimordials(
   config: PrimordialsCheckConfig,
@@ -129,8 +130,8 @@ export function checkPrimordials(
     }
   }
 
-  // Read socket-lib's exported names. The resolver returns either a
-  // file (legacy single-file layout) or a directory (post-split).
+  // Read socket-lib's exported names. The resolver returns either a file for
+  // the legacy single-file layout or a directory for the post-split layout.
   const socketLibPath = resolveSocketLibPrimordials(config)
   const socketLibNames = readSocketLibPrimordialNames(socketLibPath)
 
@@ -304,8 +305,8 @@ export function extractTsExports(src: string): string[] {
 
 /**
  * Read TS exports from a resolved primordials path. Handles both the legacy
- * single-file layout (returns one file's exports) and the post-split directory
- * layout (concatenates exports across every `*.ts` / `*.d.ts` leaf).
+ * single-file layout, returning that one file's exports, and the post-split
+ * directory layout, concatenating exports across every `*.ts` / `*.d.ts` leaf.
  */
 export function readSocketLibPrimordialNames(resolved: string): Set<string> {
   const stat = statSync(resolved)

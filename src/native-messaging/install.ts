@@ -52,7 +52,7 @@ export interface InstallOptions {
   /**
    * List of Chrome extension origin URLs that are allowed to connect to this
    * host. Each entry is `chrome-extension://<extension-id>/`. Pass `['*']`
-   * during development to allow any extension (not for production).
+   * during development to allow any extension. Never do that in production.
    */
   allowedOrigins: string[]
   /**
@@ -201,7 +201,7 @@ export function installNativeHost(options: InstallOptions): InstallResult {
 
 export function registerWindows(manifestPath: string): void {
   const key = `HKCU\\Software\\Google\\Chrome\\NativeMessagingHosts\\${HOST_NAME}`
-  // Array-arg spawnSync (no shell, no injection surface). reg.exe is on
+  // Array-arg spawnSync means no shell and no injection surface. reg.exe is on
   // every Windows install at %SystemRoot%\System32\reg.exe and on PATH.
   spawnSync(
     'reg',

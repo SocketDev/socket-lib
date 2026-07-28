@@ -53,7 +53,7 @@ describe('env rewiring', () => {
       setEnv('CI', '1')
       expect(getCI()).toBe(true)
 
-      // CI with empty string still returns true (key exists)
+      // CI with an empty string still returns true because the key exists
       setEnv('CI', '')
       expect(getCI()).toBe(true)
 

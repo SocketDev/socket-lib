@@ -33,8 +33,8 @@ export interface ShouldSaveOptions {
 }
 
 /**
- * Detect indentation from a JSON string. Supports space-based indentation
- * (returns count) or mixed indentation (returns string).
+ * Detect indentation from a JSON string. Space-based indentation returns a
+ * count; mixed indentation returns the string.
  *
  * @example
  *   ;```ts
@@ -55,7 +55,7 @@ export function detectIndent(json: string): string | number {
     return 2
   }
   const indent = match[1]!
-  // Check if all spaces (return count) or mixed (return string)
+  // All-spaces indentation returns a count; mixed returns the string.
   if (/^ +$/.test(indent)) {
     return indent.length
   }
@@ -250,7 +250,7 @@ export function sortKeys(
  *   ```
  *
  * @param content - Object to stringify.
- * @param formatting - Formatting preferences (indent and newline)
+ * @param formatting - Formatting preferences: indent and newline.
  *
  * @returns Formatted JSON string with trailing newline
  */

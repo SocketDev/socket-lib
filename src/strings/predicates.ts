@@ -7,7 +7,7 @@
 import type { BlankString, NonEmptyString } from './types'
 
 /**
- * Check if a value is a blank string (empty or only whitespace).
+ * Check if a value is a blank string: empty or only whitespace.
  *
  * A blank string is defined as a string that is either: - Completely empty
  * (length 0) - Contains only whitespace characters (spaces, tabs, newlines,

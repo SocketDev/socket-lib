@@ -3,7 +3,7 @@
  *   and their scopes.
  */
 
-// Define which packages need bundling (ones that are actual npm packages).
+// Define which packages need bundling: the ones that are actual npm packages.
 export const externalPackages = [
   // external-pack: Shared dependencies and @inquirer packages bundled together.
   // Bundled first so npm-pack can mark shared deps as external.
@@ -13,7 +13,8 @@ export const externalPackages = [
   // npm-pack: arborist, cacache, libnpmpack, make-fetch-happen, npm-package-arg,
   // normalize-package-data, pacote, semver, validate-npm-package-name.
   { name: 'npm-pack', bundle: true },
-  // NPM internals - individual packages now just re-export from bundles (no bundling needed)
+  // NPM internals - individual packages just re-export from bundles, so they
+  // need no bundling of their own.
   { name: 'cacache', bundle: false },
   { name: 'pacote', bundle: false },
   { name: 'make-fetch-happen', bundle: false },
@@ -26,9 +27,9 @@ export const externalPackages = [
   { name: 'adm-zip', bundle: true },
   { name: 'debug', bundle: true },
   { name: 'tar-fs', bundle: true },
-  // p-map: Standalone bundle (ESM-only package, bundled before pico-pack).
+  // p-map: Standalone bundle. ESM-only package, bundled before pico-pack.
   { name: 'p-map', bundle: true },
-  // pico-pack: picomatch, del, fast-glob (p-map marked external).
+  // pico-pack: picomatch, del, fast-glob, with p-map marked external.
   { name: 'pico-pack', bundle: true },
   { name: 'del', bundle: false },
   { name: 'fast-glob', bundle: false },
@@ -59,7 +60,8 @@ export const externalPackages = [
 export const scopedPackages = [
   {
     scope: '@npmcli',
-    // arborist re-exports from npm-pack bundle (no separate bundling needed)
+    // arborist re-exports from the npm-pack bundle, so it needs no separate
+    // bundling.
     name: 'arborist',
     bundle: false,
   },

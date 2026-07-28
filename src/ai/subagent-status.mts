@@ -54,7 +54,7 @@ const ESCALATION: Readonly<Record<SubagentStatus, SubagentEscalation>> = {
 
 /**
  * The canonical status set, sorted, for callers that need to enumerate or
- * validate against the full vocabulary (the doc-parity check reads this).
+ * validate against the full vocabulary. The doc-parity check reads this.
  */
 export const SUBAGENT_STATUSES: readonly SubagentStatus[] = [
   'blocked',
@@ -81,7 +81,7 @@ export function escalationFor(status: SubagentStatus): SubagentEscalation {
 /**
  * True when `value` names a status in the contract.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers — exercised only by its unit tests.
  */
 export function isSubagentStatus(value: string): value is SubagentStatus {
   return SUBAGENT_STATUSES.includes(value as SubagentStatus)

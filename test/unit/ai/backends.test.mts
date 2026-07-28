@@ -106,7 +106,8 @@ describe('resolveBackendForRole', () => {
   })
 
   it('selects a hybrid backend ONLY via override, never from the order', () => {
-    // opencode in the order but available → still skipped (auto-pick banned).
+    // opencode in the order but available → still skipped, since auto-pick is
+    // banned.
     const auto = resolveBackendForRole({
       available: new Set<BackendName>(['opencode']),
       preferenceOrder: ['opencode', 'claude'],

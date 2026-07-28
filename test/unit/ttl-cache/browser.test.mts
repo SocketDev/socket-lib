@@ -3,8 +3,8 @@
  *   expiry, TTL boundary, clock-skew detection, LRU eviction + recency bump,
  *   `getOrFetch` thundering-herd dedup + failure retry, memo-only mode, and
  *   wildcard-key rejection. Pure in-memory — no filesystem, no env rewiring.
- *   Storage-adapter behavior (round-trips, corruption, failures) lives in the
- *   sibling browser-storage.test.mts.
+ *   Storage-adapter behavior for round-trips, corruption, and failures lives
+ *   in the sibling browser-storage.test.mts.
  */
 
 import { describe, expect, it } from 'vitest'

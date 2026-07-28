@@ -6,9 +6,10 @@
  *   - getSocketAppDir() - application directory
  *   - getSocketAppCacheDir() - app-level cache storage
  *   - getSocketAppCacheTtlDir() - TTL-based cache directory
- *   - getSocketCacacheDir() - cacache (content-addressable cache) directory
+ *   - getSocketCacacheDir() - cacache content-addressable cache directory
  *   - getSocketDlxDir() - dlx (name+version binary store) directory
- *   - getSocketStateDir() - _state (version-less persistent app state) directory
+ *   - getSocketStateDir() - _state directory for version-less persistent app
+ *     state
  *   - getSocketAppStateDir() / getSocketAppRuntimeDir() - per-app state + run/
  *     dir (daemon socket + lock) Tests validate path existence, normalization,
  *     cross-platform consistency, and aliasing. These paths are critical for

@@ -18,11 +18,11 @@
  *   "which model is suspended" is not encoded here — that is the
  *   route/availability layer's concern. Two design choices keep it a "sweet
  *   spot" rather than a blunt cost-sort: high-value tiers (opus/fable) stay
- *   QUALITY-FIRST (the Claude head leads) and only DEMOTE an account under
- *   budget pressure, while commodity tiers (haiku/sonnet) in local dev PROMOTE
- *   the cheapest equivalent to preserve the metered budget for work that needs
- *   it; and CI keeps the locked static order so a headless run never reorders
- *   away from its single available provider.
+ *   QUALITY-FIRST with the Claude head leading, and only DEMOTE an account
+ *   under budget pressure, while commodity tiers (haiku/sonnet) in local dev
+ *   PROMOTE the cheapest equivalent to preserve the metered budget for work
+ *   that needs it; and CI keeps the locked static order so a headless run
+ *   never reorders away from its single available provider.
  */
 
 import { usableTierCandidates } from './route.mts'
@@ -40,8 +40,8 @@ import type { AiTier } from './tier.mts'
  *   commodity work.
  * - `flat-rate` — a fixed monthly plan with a usage window (e.g. N requests per
  *   5h). Marginal cost is $0 while the window has room.
- * - `metered` — pay per token against a (usually large, readable) monthly spend
- *   limit. Marginal cost is real dollars.
+ * - `metered` — pay per token against a monthly spend limit, usually large and
+ *   readable. Marginal cost is real dollars.
  * - `subscription` — a seat (Claude Max, ChatGPT Pro) with an opaque weekly
  *   quota. Marginal cost is $0 until the quota is hit, then it stops.
  */
@@ -50,7 +50,7 @@ export type BillingKind = '$0/local' | 'flat-rate' | 'metered' | 'subscription'
 /**
  * Where routing is running. `local` dev has the full discovered provider set
  * and may chase the cheapest equivalent; `ci` is locked to the secrets actually
- * present (often a single provider) under the four-flag lockdown, so the policy
+ * present under the four-flag lockdown, often just one provider, so the policy
  * keeps the static order and never reorders away from the one available lane.
  */
 export type RoutingEnv = 'ci' | 'local'
@@ -150,9 +150,9 @@ export const DEFAULT_TASK_CLASS_WEIGHTS: Readonly<Record<TaskClass, number>> = {
 } as unknown as Readonly<Record<TaskClass, number>>
 
 /**
- * Headroom fraction at or below which a metered/flat-rate account is demoted
- * (predictive backoff before the hard cap). A config knob with a sane default;
- * callers override per `orderCandidates` call.
+ * Headroom fraction at or below which a metered/flat-rate account is demoted,
+ * backing off predictively before the hard cap. A config knob with a sane
+ * default; callers override per `orderCandidates` call.
  */
 export const DEFAULT_DEMOTE_THRESHOLD = 0.2
 
@@ -178,7 +178,8 @@ export interface BudgetAllocationOptions {
   // Total monthly budget to divide (an org limit, a team pool, …). Caller
   // supplies it from private config / a live spend reader; never hard-coded.
   readonly totalUsd: number
-  // People sharing `totalUsd`; defaults to 1 (the whole budget is one member's).
+  // People sharing `totalUsd`; defaults to 1, so one member owns the whole
+  // budget.
   readonly members?: number | undefined
   // Per-class weights; merged over DEFAULT_TASK_CLASS_WEIGHTS.
   readonly weights?: Readonly<Partial<Record<TaskClass, number>>> | undefined
@@ -219,16 +220,16 @@ export function allocateBudget(
 export interface CandidateScoreOptions {
   readonly account: BillingAccount | undefined
   readonly demoteThreshold: number
-  // Whether cost rank applies (commodity tier in local dev).
+  // Whether cost rank applies, which it does for a commodity tier in local dev.
   readonly promoteCheap: boolean
 }
 
 /**
- * Score one candidate for ordering (lower sorts earlier). A candidate with no
- * known billing account scores neutral so it keeps its static position. The
- * bands: a hard-exhausted account sinks to the back; a near-cap account is
- * demoted; cost rank nudges commodity tiers toward the cheapest ration; an
- * operator `prefer` nudge pulls a provider earlier. Pure.
+ * Score one candidate for ordering, where a lower score sorts earlier. A
+ * candidate with no known billing account scores neutral so it keeps its static
+ * position. The bands: a hard-exhausted account sinks to the back; a near-cap
+ * account is demoted; cost rank nudges commodity tiers toward the cheapest
+ * ration; an operator `prefer` nudge pulls a provider earlier. Pure.
  */
 export function candidateScore(options: CandidateScoreOptions): number {
   const opts = { __proto__: null, ...options } as CandidateScoreOptions
@@ -268,10 +269,10 @@ export interface OrderCandidatesOptions {
 
 /**
  * Reorder a tier's usable candidates by the billing policy, returning the
- * runtime-fallback sequence (most-preferred first). Wraps
+ * runtime-fallback sequence most-preferred first. Wraps
  * `usableTierCandidates` — it never mutates the static `TIER_CHAINS`. The sort
  * is stable on the original preference index, so candidates that score equal
- * keep their static order (the Claude head stays first among equals).
+ * keep their static order and the Claude head stays first among equals.
  *
  * - In `ci`, or on a high-value tier (opus/fable), cost rank does NOT apply: the
  *   static quality-first order holds and only budget demotion / exhaustion

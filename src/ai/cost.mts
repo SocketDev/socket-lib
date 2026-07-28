@@ -38,8 +38,8 @@ const JSON_USAGE_FORWARD_RE =
 const JSON_USAGE_REVERSED_RE =
   /"(?:completion_tokens|output_tokens)"\s*:\s*(\d+)[^{}]*?"(?:input_tokens|prompt_tokens)"\s*:\s*(\d+)/i
 const JSON_TOTAL_TOKENS_RE = /"total_tokens"\s*:\s*(\d+)/i
-// A `costUsd` / `cost_usd` / `total_cost_usd` key (either naming), capturing
-// the dollar amount that follows.
+// A `costUsd` / `cost_usd` / `total_cost_usd` key in either naming style,
+// capturing the dollar amount that follows.
 const JSON_COST_RE = /"(?:costUsd|cost_usd|total_cost_usd)"\s*:\s*([\d.]+)/i
 
 // Text-footer fallbacks — a line like "Total cost: $0.0123" or "input tokens:

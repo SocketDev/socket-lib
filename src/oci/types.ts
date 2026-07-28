@@ -33,8 +33,9 @@ export interface OciRequestOptions {
 }
 
 /**
- * Injectable HTTP adapter. `json` parses a JSON endpoint (token, config blob);
- * `request` returns the full response so the caller can read headers and bytes.
+ * Injectable HTTP adapter. `json` parses a JSON endpoint such as a token or
+ * config blob; `request` returns the full response so the caller can read
+ * headers and bytes.
  */
 export interface OciHttpAdapter {
   json<T = unknown>(
@@ -84,7 +85,7 @@ export interface OciPlatform {
 }
 
 /**
- * An OCI content descriptor (config, layer, or index entry).
+ * An OCI content descriptor for a config, layer, or index entry.
  */
 export interface OciDescriptor {
   digest?: string | undefined

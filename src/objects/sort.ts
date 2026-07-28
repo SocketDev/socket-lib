@@ -1,9 +1,9 @@
 /**
  * @file Sorted-object helpers: `entryKeyComparator`, `objectEntries`,
  *   `toSortedObject`, `toSortedObjectFromEntries`. Symbol keys sort separately
- *   from string keys (placed first in the resulting object) — this matters for
- *   serialization stability since `Object.keys` and `JSON.stringify` will
- *   iterate insertion order.
+ *   from string keys and are placed first in the resulting object. This
+ *   matters for serialization stability since `Object.keys` and
+ *   `JSON.stringify` will iterate insertion order.
  */
 
 import { ObjectFromEntries } from '../primordials/object'
@@ -46,7 +46,7 @@ export function entryKeyComparator(
 }
 
 /**
- * Get all own property entries (key-value pairs) from an object.
+ * Get all own property entries, as key-value pairs, from an object.
  *
  * Unlike `Object.entries()`, this includes non-enumerable properties and symbol
  * keys. Returns an empty array for null/undefined.

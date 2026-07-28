@@ -34,7 +34,7 @@ export interface GitDiffSpawnArgs {
 // LRU cache for git diff results with TTL. We exploit Map's insertion-order
 // iteration so eviction is O(1): delete the first key. Touching on read
 // (delete + set) keeps the most-recently-used entry at the back. TTL keeps
-// long-running tools (watch mode, devserver) from serving stale results
+// long-running tools like watch mode and devservers from serving stale results
 // after the working tree changes.
 export type GitDiffCacheEntry = {
   readonly expiresAt: number
@@ -68,7 +68,7 @@ export function getCachedGitDiff(key: string): string[] | undefined {
  * Get spawn arguments for different git diff operations.
  *
  * Prepares argument arrays for `spawn()`/`spawnSync()` calls that retrieve: -
- * `all`: All changed files (staged, unstaged, untracked) via `git status
+ * `all`: All staged, unstaged, and untracked changed files via `git status
  * --porcelain` - `unstaged`: Unstaged modifications via `git diff --name-only`
  * - `staged`: Staged changes via `git diff --cached --name-only`
  *
@@ -289,7 +289,7 @@ export function parseGitDiffStdout(
     ...matcherOptions
   } = { __proto__: null, ...options }
   const path = getPath()
-  // Resolve cwd to handle symlinks (using cache for performance).
+  // Resolve cwd to handle symlinks, using the cache for performance.
   const cwd =
     cwdOption === defaultRoot ? defaultRoot : getCachedRealpath(cwdOption)
   const rootPath = defaultRoot

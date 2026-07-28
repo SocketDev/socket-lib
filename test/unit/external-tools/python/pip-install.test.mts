@@ -144,13 +144,15 @@ describe.sequential('external-tools/python/pip-install — downloadPipPackage', 
       spawnMock,
       writeFileMock,
     } = await loadFresh()
-    // readdir: not-installed (pre-check), not-installed (retry pre-check),
-    // installed (post-spawn verify).
+    // The three readdir results in order: not-installed at the pre-check,
+    // not-installed at the retry pre-check, installed at the post-spawn
+    // verify.
     readdirMock
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce([])
       .mockResolvedValueOnce(['skillspector'])
-    // First writeFile loses the lock race (EEXIST); second (after retry) wins.
+    // First writeFile loses the lock race (EEXIST); the second one after the
+    // retry wins.
     writeFileMock
       .mockRejectedValueOnce(eexist())
       .mockResolvedValueOnce(undefined)

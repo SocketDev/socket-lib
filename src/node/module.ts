@@ -10,13 +10,13 @@
  *   there).
  *   `require` is DIRECTORY-SPECIFIC: `createRequire(base)` resolves relative
  *   specifiers (`./x`, `../y`) from `base`'s directory. For builtins and bare
- *   packages that's irrelevant (they resolve the same anywhere), so the cached
- *   `getRequire` / `requireBuiltin` bind to THIS file. A RELATIVE specifier
- *   must resolve from the CALLER's directory, so use `requireFrom` with the
- *   caller's `import.meta.url` — binding such a load to this file would resolve
- *   it against `src/node/` instead. Bundled, every module collapses to one base
- *   and either works; unbundled (e.g. AOT-compiled from source), each module
- *   sits at its own nested path and the base matters.
+ *   packages that's irrelevant since they resolve the same anywhere, so the
+ *   cached `getRequire` / `requireBuiltin` bind to THIS file. A RELATIVE
+ *   specifier must resolve from the CALLER's directory, so use `requireFrom`
+ *   with the caller's `import.meta.url` — binding such a load to this file
+ *   would resolve it against `src/node/` instead. Bundled, every module
+ *   collapses to one base and either works; unbundled (e.g. AOT-compiled from
+ *   source), each module sits at its own nested path and the base matters.
  */
 
 // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare `module` is browser-stubbable (resolve.fallback / browser field); a `node:` prefix breaks browser bundles. Named exports resolve on Node + Perry.
@@ -62,8 +62,8 @@ export function bindRequire(
 }
 
 /**
- * Returns `node:module` (or undefined off Node), loaded through the bound
- * `require`. Cached across calls.
+ * Returns `node:module` loaded through the bound `require`, or undefined off
+ * Node. Cached across calls.
  */
 export function getNodeModule(): typeof NodeModule {
   return (cachedModule ??= requireBuiltin('module') as typeof NodeModule)

@@ -39,7 +39,7 @@ import type { HttpDownloadWriteStreamFactory } from '../http-request/download-ty
 import { BufferFrom } from '../primordials/buffer'
 
 /**
- * Download a binary from a URL with caching (without execution). Similar to
+ * Download a binary from a URL with caching, without executing it. Similar to
  * downloadNpmPackage from dlx/package.
  *
  * Returns `{binaryPath, downloaded, integrity}`. The `integrity` field is the
@@ -186,7 +186,7 @@ export async function downloadBinary(
  *
  * - Sha256: Hex SHA-256 checksum (verified from the download stream via
  *   httpDownload)
- * - Integrity: SRI format sha512-<base64> (verified from the same stream)
+ * - Integrity: SRI format sha512-<base64>, verified from the same stream
  *
  * Both checks happen before the download temp is atomically published.
  *

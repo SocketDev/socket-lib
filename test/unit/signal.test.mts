@@ -243,7 +243,7 @@ describe('abort', () => {
       await new Promise(resolve => setTimeout(resolve, 0))
       expect(signal.aborted).toBe(true)
 
-      // Abort again (should be idempotent)
+      // Abort again; this should be idempotent
       controller2.abort()
       await new Promise(resolve => setTimeout(resolve, 0))
       expect(signal.aborted).toBe(true)

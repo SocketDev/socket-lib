@@ -92,7 +92,7 @@ export function capitalize(s) {
  * the static + prototype methods of the upstream globals. This mirrors what
  * `lib/internal/per_context/primordials.js` does at runtime via
  * `copyPropsRenamed` + `copyPrototype` helpers — names like `ArrayPrototypeMap`
- * aren't directly assigned in the source (they're installed by reflection), so
+ * aren't directly assigned in the source but installed by reflection, so
  * name-only regex parsing misses them.
  */
 export function deriveNodeBootstrapSurface() {
@@ -195,8 +195,8 @@ export function deriveNodeBootstrapSurface() {
  *    layout).
  * 4. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials/` (installed,
  *    post-split).
- * 5. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials.js`
- *    (installed, legacy).
+ * 5. `<targetRoot>/node_modules/@socketsecurity/lib/dist/primordials.js` —
+ *    installed, legacy.
  *
  * @param {string} targetRoot - The repo being audited.
  * @param {string} [surfacePath] - Explicit path to a primordials source file.
@@ -263,8 +263,8 @@ export function parseExports(sourcePath) {
   // Post-split layout: `sourcePath` may be a directory of leaves
   // (`primordials/`). Concatenate every leaf so the regex passes below
   // see the same shape as the legacy single-file path. Track which
-  // leaf each name came from so the codemod can emit per-leaf imports
-  // (transform-primordials uses this).
+  // leaf each name came from so the codemod can emit per-leaf imports;
+  // transform-primordials uses this.
   const stat = statSync(sourcePath)
   let src
   // exportToLeaf is empty for the legacy single-file path.

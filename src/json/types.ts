@@ -74,7 +74,7 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonArray
  * @param key - The object key or array index being parsed.
  * @param value - The parsed value.
  *
- * @returns The transformed value (or original if no transform needed)
+ * @returns The transformed value, or the original when no transform is needed.
  */
 export type JsonReviver = (key: string, value: unknown) => unknown
 
@@ -203,7 +203,7 @@ export interface EditableJsonSaveOptions {
  */
 export interface EditableJsonOptions<T = Record<string, unknown>> {
   /**
-   * File path for the JSON file (optional for in-memory instances).
+   * File path for the JSON file. Optional for in-memory instances.
    */
   path?: string | undefined
   /**
@@ -221,7 +221,7 @@ export interface EditableJsonOptions<T = Record<string, unknown>> {
 /**
  * EditableJson instance interface for JSON file manipulation. Provides core
  * functionality for loading, editing, and saving JSON files while preserving
- * formatting (indentation and line endings).
+ * formatting: indentation and line endings.
  */
 export interface EditableJsonInstance<T = Record<string, unknown>> {
   /**
@@ -239,8 +239,8 @@ export interface EditableJsonInstance<T = Record<string, unknown>> {
   create(path: string): this
 
   /**
-   * Initialize the instance from a content object. Note: Disables saving when
-   * used (no file path associated).
+   * Initialize the instance from a content object. Note: Using this disables
+   * saving, since no file path is associated.
    *
    * @param content - The JSON content object.
    */

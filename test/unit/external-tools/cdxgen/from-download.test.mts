@@ -129,8 +129,8 @@ describe.sequential('external-tools/cdxgen/from-download', () => {
     })
     // Normalize to forward slashes so the regex matches across darwin /
     // linux / win32. `path.join` on win32 produces backslashes for ALL
-    // separators (including ones in the input), so a literal `/fake/dlx`
-    // prefix would become `\fake\dlx` on Windows.
+    // separators, including ones already in the input, so a literal
+    // `/fake/dlx` prefix would become `\fake\dlx` on Windows.
     const normalized =
       result !== undefined ? normalizePath(result.path) : undefined
     expect(normalized).toMatch(/\/fake\/dlx\/cdxgen\/12\.4\.1\/linux-x64-slim/)

@@ -10,7 +10,7 @@ import { IS_NODE } from '../constants/runtime'
 let events: typeof NodeEvents | undefined
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function getNodeEvents(): typeof NodeEvents {
   if (!IS_NODE) {

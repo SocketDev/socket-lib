@@ -167,8 +167,8 @@ export interface DownloadPipPackageOptions {
    * Optional sha256 hash (`sha256:<hex>` or bare `<hex>`) of the top-level
    * artifact, the Python analog of `downloadNpmPackage`'s `hash`. When set, pip
    * runs with `--require-hashes` and `--hash=sha256:<hex>`, which fails closed
-   * unless EVERY resolved artifact (the spec and its full dependency closure)
-   * carries a matching hash — so it only fits specs pip can hash-verify (a
+   * unless EVERY resolved artifact carries a matching hash — the spec plus its
+   * full dependency closure. So it only fits specs pip can hash-verify (a
    * pinned `==<version>` or a direct wheel/sdist URL) with a hash-pinned
    * closure. Omit it and rely on the immutable spec as the pin: `==<version>`
    * (PyPI is immutable per version) or `@<full-sha>` (git is
@@ -182,8 +182,8 @@ export interface DownloadPipPackageOptions {
    */
   readonly pythonBin: string
   /**
-   * Pip install spec: `<pkg>==<version>` (PyPI exact pin) or
-   * `git+https://<url>@<sha>` (git-SHA pin).
+   * Pip install spec: `<pkg>==<version>` for a PyPI exact pin, or
+   * `git+https://<url>@<sha>` for a git-SHA pin.
    */
   readonly spec: string
 }

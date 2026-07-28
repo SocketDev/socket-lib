@@ -76,7 +76,7 @@ export type Separator = SeparatorType
 export function createInquirerTheme(
   theme: Theme | ThemeName | unknown,
 ): Record<string, unknown> {
-  // If it's a string (theme name) or Socket Theme object, convert it
+  // If it's a theme-name string or a Socket Theme object, convert it
   if (typeof theme === 'string' || isSocketTheme(theme)) {
     const socketTheme = resolveTheme(theme as Theme | ThemeName)
     const promptColor = resolveColor(
@@ -95,16 +95,16 @@ export function createInquirerTheme(
       style: {
         // Message text (uses colors.prompt)
         message: (text: string) => applyColor(text, promptColor),
-        // Answer text (uses primary color)
+        // Answer text uses the primary color.
         answer: (text: string) => applyColor(text, primaryColor),
         // Help text / descriptions (uses textDim)
         help: (text: string) => applyColor(text, textDimColor),
         description: (text: string) => applyColor(text, textDimColor),
         // Disabled items (uses textDim)
         disabled: (text: string) => applyColor(text, textDimColor),
-        // Error messages (uses error color)
+        // Error messages use the error color.
         error: (text: string) => applyColor(text, errorColor),
-        // Highlight/active (uses primary color)
+        // Highlight/active uses the primary color.
         highlight: (text: string) => applyColor(text, primaryColor),
       },
       icon: {
@@ -303,8 +303,8 @@ export const input = wrapPrompt((...args: unknown[]) =>
 ) as InputPrompt
 
 /**
- * Prompt for password input (hidden characters). Wrapped with spinner handling
- * and abort signal support.
+ * Prompt for password input with hidden characters. Wrapped with spinner
+ * handling and abort signal support.
  *
  * @example
  *   const token = await password({ message: 'Enter API token:' })
@@ -344,7 +344,7 @@ export const select = wrapPrompt((...args: unknown[]) =>
   require('../external/@inquirer/select').default(...args),
 ) as SelectPrompt
 
-// Lazy value export (snapshot-safety, see the note above): front the real
+// Lazy value export for snapshot-safety; see the note above. Front the real
 // @inquirer Separator class with a Proxy so the vendored-bundle require is
 // deferred until the class is constructed or a static is read — importing this
 // module never evaluates @inquirer.

@@ -54,7 +54,7 @@ describe.sequential('releases/github-api: getLatestRelease (GraphQL fallback)', 
       },
     }
     vi.mocked(httpRequest)
-      // 1st call: REST → 200 + empty body (incident shape)
+      // 1st call: REST → 200 + empty body, the incident shape
       .mockResolvedValueOnce(createMockHttpResponse(Buffer.from(''), true, 200))
       // 2nd call: GraphQL → real result
       .mockResolvedValueOnce(
@@ -148,7 +148,7 @@ describe.sequential('releases/github-api: getLatestRelease (GraphQL fallback)', 
       let call = 0
       vi.mocked(httpRequest).mockImplementation(async () => {
         call += 1
-        // Odd calls = REST (empty body), even = GraphQL errors[].
+        // Odd calls = REST with an empty body, even = GraphQL errors[].
         if (call % 2 === 1) {
           return createMockHttpResponse(Buffer.from(''), true, 200)
         }
@@ -180,8 +180,8 @@ describe.sequential('releases/github-api: getLatestRelease (GraphQL fallback)', 
 
   it('should NOT call GraphQL when REST returns a populated array', async () => {
     // Healthy GitHub: REST returns a populated list. The fallback
-    // should NOT fire (no second http call). Verified by setting
-    // a single `mockResolvedValueOnce` — if the helper made a
+    // should NOT fire, so there is no second http call. Verified by
+    // setting a single `mockResolvedValueOnce` — if the helper made a
     // second call, the second mock would be undefined and the
     // test would throw a TypeError instead of resolving cleanly.
     const healthyRelease = [
@@ -259,10 +259,10 @@ describe.sequential('releases/github-api: getLatestRelease (GraphQL fallback)', 
   it(
     'should throw informative error when both REST and GraphQL transport fail',
     async () => {
-      // REST returns 200 + empty (incident shape) → fall back to GraphQL.
-      // GraphQL itself returns non-OK. The wrapper surfaces a terse
-      // "both REST and GraphQL backends degraded" library-API error
-      // so the operator immediately knows to check GitHub status,
+      // REST returns the incident-shape 200 + empty body → fall back to
+      // GraphQL. GraphQL itself returns non-OK. The wrapper surfaces a
+      // terse "both REST and GraphQL backends degraded" library-API
+      // error so the operator immediately knows to check GitHub status,
       // not their config.
       let call = 0
       vi.mocked(httpRequest).mockImplementation(async () => {

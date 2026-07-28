@@ -17,7 +17,7 @@ describe('node/module', () => {
   describe('getNodeModule', () => {
     it('returns the node:module module in Node.js', () => {
       const mod = getNodeModule()
-      // In Node.js (where this test runs) `require` exists so mod is defined.
+      // In Node.js, where this test runs, `require` exists so mod is defined.
       expect(mod).toBeDefined()
       expect(typeof mod!.isBuiltin).toBe('function')
       expect(typeof mod!.createRequire).toBe('function')

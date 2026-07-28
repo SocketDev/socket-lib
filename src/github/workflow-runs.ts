@@ -152,8 +152,8 @@ export function selectLatestRun(
 /**
  * Poll the workflow run for `sha` until it completes (or the attempt budget is
  * spent), returning the final verdict and the last run seen. A `red` or `green`
- * verdict resolves immediately; `pending` (no run yet, or still running) keeps
- * polling every `pollIntervalMs` up to `maxAttempts`.
+ * verdict resolves immediately; `pending`, which means no run yet or a run
+ * still in progress, keeps polling every `pollIntervalMs` up to `maxAttempts`.
  */
 export async function waitForRun(
   options: WaitForRunOptions,

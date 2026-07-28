@@ -2,7 +2,7 @@
  * @file `resolveTrufflehog()` — TruffleHog resolution entry point. Tries each
  *   source in order:
  *
- *   1. VFS — smol binary's embedded TruffleHog (if packed)
+ *   1. VFS — smol binary's embedded TruffleHog, when packed
  *   2. PATH — `trufflehog` on the system PATH
  *   3. download — upstream GitHub release tar.gz (only when `downloadIfMissing` is
  *      passed) Returns `undefined` if all of the enabled sources miss. Memoized
@@ -79,7 +79,7 @@ export async function doResolveTrufflehog(
 }
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 /* c8 ignore start - test-only escape hatch. */
 export function resetTrufflehogResolution(): void {

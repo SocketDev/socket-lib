@@ -75,7 +75,7 @@ describe('memoizeAsync', () => {
     await expect(memoized(5)).rejects.toThrow('Test error')
     expect(fn).toHaveBeenCalledTimes(1)
 
-    // Retry should call function again (not cached)
+    // Retry should call function again because the rejection is not cached.
     shouldFail = false
     expect(await memoized(5)).toBe(10)
     expect(fn).toHaveBeenCalledTimes(2)
@@ -97,7 +97,7 @@ describe('memoizeAsync', () => {
 
     await memoized(2) // cache hit
     await memoized(3) // cache hit
-    await memoized(1) // cache miss (was evicted)
+    await memoized(1) // cache miss, since 1 was evicted
 
     expect(fn).toHaveBeenCalledTimes(4)
   })
@@ -127,8 +127,8 @@ describe('memoizeAsync', () => {
     // TTL window would re-fetch despite the cache having just landed a
     // fresh value. The fix sets `entry.timestamp = Date.now()` in the
     // resolve handler so the cached hit window starts when the result
-    // is available. Uses a stubbed `Date.now` (not fake timers) so we
-    // don't depend on Vitest's timer/microtask interleaving under
+    // is available. Uses a stubbed `Date.now` rather than fake timers so
+    // we don't depend on Vitest's timer/microtask interleaving under
     // parallel worker load.
     const realNow = Date.now
     let fakeTime = 1_000_000
@@ -188,7 +188,7 @@ describe('memoizeAsync', () => {
     expect(fn).toHaveBeenCalledTimes(3)
 
     await memoized(1) // cache hit
-    await memoized(2) // cache miss (was evicted)
+    await memoized(2) // cache miss, since 2 was evicted
 
     expect(fn).toHaveBeenCalledTimes(4)
   })

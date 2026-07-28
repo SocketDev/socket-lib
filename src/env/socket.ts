@@ -338,8 +338,8 @@ export function getSocketNoApiToken(): boolean {
 }
 
 /**
- * SOCKET_NPM_REGISTRY environment variable getter. Socket NPM registry URL
- * (alternative name).
+ * SOCKET_NPM_REGISTRY environment variable getter. Alternative name for the
+ * Socket NPM registry URL.
  *
  * @example
  *   ;```typescript

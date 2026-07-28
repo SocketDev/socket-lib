@@ -12,12 +12,12 @@
  *      {@link ltrSweep}, {@link rtlSweep}, {@link bidirectionalSweep},
  *      {@link randomSweep}, {@link noSweep}.
  *   2. `kernel(signedDistance, ctx)` — given a char's signed distance from the
- *      wave center, produce its color. Built-ins: {@link blockKernel} (hard
- *      on/off) and {@link smoothKernel} (soft glow).
+ *      wave center, produce its color. Built-ins: {@link blockKernel} for hard
+ *      on/off, {@link smoothKernel} for a soft glow.
  *   3. `baseColor(i)` / `highlightColor(i)` — per-char palette anchors fed to the
  *      kernel as `ctx.baseColor` and `ctx.highlightColor`. Build these with
- *      {@link solidColor} (one color for every char) or {@link gradient} (cycle
- *      through a palette). Most callers don't build a spec by hand.
+ *      {@link solidColor} for one color across every char, or {@link gradient}
+ *      to cycle through a palette. Most callers don't build a spec by hand.
  *      {@link configToSpec} translates the flat {@link ShimmerConfig} (`{
  *      color, dir, speed, … }`) into a spec using sensible defaults. The
  *      spinner uses this internally. Adapters in `shimmer-terminal.ts` and
@@ -69,7 +69,7 @@ export type Palette = readonly RGB[]
  * - `'rtl'` — wave moves right-to-left, restarts at right.
  * - `'bi'` — alternates LTR and RTL each cycle.
  * - `'random'` — re-rolls direction at each cycle boundary.
- * - `'none'` — wave never appears (every char shows base color).
+ * - `'none'` — wave never appears, so every char shows its base color.
  */
 export type ShimmerDirection = 'ltr' | 'rtl' | 'bi' | 'random' | 'none'
 
@@ -97,8 +97,8 @@ export type Kernel = (signedDistance: number, ctx: KernelContext) => RGB
 
 /**
  * Functional shimmer specification — the full engine input. Built up from
- * orthogonal pieces (position generator, kernel, palette functions) so any
- * piece can be replaced independently.
+ * three orthogonal pieces: a position generator, a kernel, and palette
+ * functions. Any piece can be replaced independently.
  */
 export type ShimmerSpec = {
   /**
@@ -110,11 +110,11 @@ export type ShimmerSpec = {
    */
   readonly kernel: Kernel
   /**
-   * Per-char base color (when the wave is far away).
+   * Per-char base color, used when the wave is far away.
    */
   readonly baseColor: (charIndex: number) => RGB
   /**
-   * Per-char highlight color (when the wave is on the char).
+   * Per-char highlight color, used when the wave is on the char.
    */
   readonly highlightColor: (charIndex: number) => RGB
 }
@@ -355,8 +355,8 @@ export function gradient(palette: Palette): (i: number) => RGB {
 
 /**
  * Build a position function for left-to-right motion: the wave starts at
- * `-padding` (off-screen left), advances by 1 per frame, exits at `textLength +
- * padding`, then wraps.
+ * `-padding`, off-screen to the left, advances by 1 per frame, exits at
+ * `textLength + padding`, then wraps.
  *
  * @default padding=2
  *

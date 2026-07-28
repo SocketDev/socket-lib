@@ -1,6 +1,6 @@
 /**
- * @file SEA (Single Executable Application) binary detection + path accessor.
- *   Two responsibilities (mirror of `src/smol/detect.ts` shape):
+ * @file Single Executable Application binary detection + path accessor. Two
+ *   responsibilities (mirror of `src/smol/detect.ts` shape):
  *
  *   1. `isSeaBinary()` — memoized boolean detector for whether the current process
  *      is running as a Node.js Single Executable Application. Probes via Node

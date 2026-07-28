@@ -284,8 +284,8 @@ describe('stdio/header', () => {
   // at construction time and writes to that captured reference. The
   // Logger singleton resolves at module-load time, so neither
   // `vi.spyOn(console, 'log')` (which observes the global console
-  // object) nor `vi.spyOn(process.stdout, 'write')` (after the fact)
-  // can intercept. The internal Console is private to the Logger
+  // object) nor a later `vi.spyOn(process.stdout, 'write')` can
+  // intercept. The internal Console is private to the Logger
   // module with no injection point.
   //
   // The original suite spied on `console.log` and asserted exact

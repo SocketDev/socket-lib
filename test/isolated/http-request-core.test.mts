@@ -5,7 +5,7 @@
  *   covers httpRequest; httpDownload lives in http-request-download.test.mts,
  *   parseChecksums/fetchChecksums in http-request-checksums.test.mts, and the
  *   httpJson/httpText wrappers in http-request-json-text.test.mts. Advanced
- *   topics (edge cases, options, retries, error handling) live in
+ *   topics — edge cases, options, retries, error handling — live in
  *   http-request-advanced.test.mts. All files share the same test server via
  *   http-request-fixtures.mts.
  */

@@ -1,6 +1,6 @@
 /**
  * @file Socket CLI environment variables. Provides typed getters for
- *   SOCKET_CLI_* environment variables (excluding shadow).
+ *   SOCKET_CLI_* environment variables other than the shadow ones.
  */
 
 import { envAsBoolean } from './boolean'
@@ -8,7 +8,8 @@ import { envAsNumber } from './number'
 import { getEnvValue } from './rewire'
 
 /**
- * Whether to accept all Socket CLI risks (alternative name).
+ * Whether to accept all Socket CLI risks. Alternative name for
+ * SOCKET_ACCEPT_RISKS.
  *
  * @example
  *   ;```typescript
@@ -26,8 +27,9 @@ export function getSocketCliAcceptRisks(): boolean {
 }
 
 /**
- * Socket CLI API base URL (alternative name). Checks SOCKET_CLI_API_BASE_URL
- * first, then falls back to legacy SOCKET_SECURITY_API_BASE_URL.
+ * Socket CLI API base URL. Alternative name for SOCKET_API_BASE_URL. Checks
+ * SOCKET_CLI_API_BASE_URL first, then falls back to legacy
+ * SOCKET_SECURITY_API_BASE_URL.
  *
  * @example
  *   ;```typescript
@@ -47,10 +49,10 @@ export function getSocketCliApiBaseUrl(): string | undefined {
 }
 
 /**
- * Proxy URL for Socket CLI API requests (alternative name). Checks
- * SOCKET_CLI_API_PROXY, SOCKET_SECURITY_API_PROXY, then standard proxy env
- * vars. Follows the same precedence as v1.x: HTTPS_PROXY → https_proxy →
- * HTTP_PROXY → http_proxy.
+ * Proxy URL for Socket CLI API requests. Alternative name for
+ * SOCKET_API_PROXY. Checks SOCKET_CLI_API_PROXY, SOCKET_SECURITY_API_PROXY,
+ * then standard proxy env vars. Follows the same precedence as v1.x:
+ * HTTPS_PROXY → https_proxy → HTTP_PROXY → http_proxy.
  *
  * @example
  *   ;```typescript
@@ -74,7 +76,8 @@ export function getSocketCliApiProxy(): string | undefined {
 }
 
 /**
- * Timeout in milliseconds for Socket CLI API requests (alternative name).
+ * Timeout in milliseconds for Socket CLI API requests. Alternative name for
+ * SOCKET_API_TIMEOUT.
  *
  * @example
  *   ;```typescript
@@ -127,7 +130,7 @@ export function getSocketCliBootstrapSpec(): string | undefined {
 }
 
 /**
- * Socket CLI configuration file path (alternative name).
+ * Socket CLI configuration file path. Alternative name for SOCKET_CONFIG.
  *
  * @example
  *   ;```typescript
@@ -186,7 +189,8 @@ export function getSocketCliGithubToken(): string | undefined {
 }
 
 /**
- * Whether to skip Socket CLI API token requirement (alternative name).
+ * Whether to skip Socket CLI API token requirement. Alternative name for
+ * SOCKET_NO_API_TOKEN.
  *
  * @example
  *   ;```typescript
@@ -222,8 +226,9 @@ export function getSocketCliOptimize(): boolean {
 }
 
 /**
- * Socket CLI organization slug identifier (alternative name). Checks
- * SOCKET_CLI_ORG_SLUG first, then falls back to SOCKET_ORG_SLUG.
+ * Socket CLI organization slug identifier. Alternative name for
+ * SOCKET_ORG_SLUG. Checks SOCKET_CLI_ORG_SLUG first, then falls back to
+ * SOCKET_ORG_SLUG.
  *
  * @example
  *   ;```typescript
@@ -240,7 +245,8 @@ export function getSocketCliOrgSlug(): string | undefined {
 }
 
 /**
- * Whether to view all Socket CLI risks (alternative name).
+ * Whether to view all Socket CLI risks. Alternative name for
+ * SOCKET_VIEW_ALL_RISKS.
  *
  * @example
  *   ;```typescript

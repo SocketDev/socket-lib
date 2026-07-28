@@ -212,7 +212,7 @@ describe.sequential('dlx-binary re-validation', () => {
           // Wait for first spawn to complete
           await result1.spawnPromise.catch(() => {})
 
-          // Make metadata unreadable (change permissions)
+          // Make metadata unreadable by changing its permissions
           const name = 'read-error-binary'
           const spec = `${url}:${name}`
           const cacheKey = crypto

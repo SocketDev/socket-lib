@@ -11,7 +11,7 @@ import type { Theme } from '../themes/types'
  */
 export type LinkOptions = {
   /**
-   * Theme to use (overrides global)
+   * Theme to use, overriding the global theme.
    */
   theme?: Theme | ThemeName | undefined
   /**

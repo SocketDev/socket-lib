@@ -1,7 +1,7 @@
 /**
  * @file Network-facing package helpers: the lazily-initialized
- *   make-fetch-happen fetcher (shared cache) and GitHub tarball-URL resolution
- *   for a package spec.
+ *   make-fetch-happen fetcher with its shared cache, and GitHub tarball-URL
+ *   resolution for a package spec.
  */
 
 import { getPacoteCachePath } from '../constants/packages'

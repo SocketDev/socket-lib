@@ -159,8 +159,8 @@ describe('all profiles', () => {
 
 describe('capability ladder (read ⊂ edit ⊂ create ⊂ verify ⊂ full)', () => {
   it('each tier mutation-tool set is a superset of the previous', () => {
-    // Compare the editing/writing/bash tools only — read's Web* tools
-    // are orthogonal (research surface, dropped once we start mutating).
+    // Compare the editing/writing/bash tools only — read's Web* tools are
+    // orthogonal, a research surface dropped once we start mutating.
     const mutating = (p: { tools: readonly string[] }) =>
       new Set(
         p.tools.filter(t => ['Bash', 'Edit', 'MultiEdit', 'Write'].includes(t)),
@@ -174,7 +174,7 @@ describe('capability ladder (read ⊂ edit ⊂ create ⊂ verify ⊂ full)', () 
       expect(create.has(t)).toBe(true)
     }
     expect(create.size).toBeGreaterThan(edit.size)
-    // create ⊂ verify (verify adds Bash)
+    // create ⊂ verify, since verify adds Bash.
     for (const t of create) {
       expect(verify.has(t)).toBe(true)
     }

@@ -2,8 +2,8 @@
 // `@socketsecurity/lib-stable/process/spawn/child` — NOT from
 // `node:child_process`. A mock against `node:child_process` is a no-op:
 // every call would pass through to the real `secret-tool` binary. On
-// macOS that fails benignly (no secret-tool installed); on Linux it
-// would write a real entry to the user's libsecret keyring. The mock
+// macOS that fails benignly because secret-tool isn't installed; on Linux
+// it would write a real entry to the user's libsecret keyring. The mock
 // below targets the actual import surface so the test runs hermetically;
 // the afterAll() further down is a defense-in-depth cleanup that wipes
 // any libsecret item the test placeholders might have created if a
@@ -44,8 +44,8 @@ vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), async () => {
 // is grep-able and tells you exactly which test file would have created a
 // leaked entry. If you ever see one in `secret-tool search` (Linux) or
 // `security dump-keychain` (macOS — should never happen, secret-tool isn't
-// macOS), it came from this file — the afterAll() below was bypassed
-// (probably because the mock regressed).
+// macOS), it came from this file — the afterAll() below was bypassed,
+// probably because the mock regressed.
 const TEST_SERVICE_BASE = 'socket-lib-test:secrets/linux'
 const TEST_SERVICE_WRITE = `${TEST_SERVICE_BASE}:writeLinux-args`
 const TEST_ACCOUNT = 'unit-test-account'
@@ -77,9 +77,9 @@ function makeWritableStdin(captureInto?: string[] | undefined): Writable {
 }
 
 // `@socketsecurity/lib-stable/process/spawn/child`'s `spawn()` returns
-// `{ process: ChildProcess, ... }` (the lib wraps the raw child); src code
-// does `const { process: cp } = spawn(...)`. Returns the wrapped shape so
-// `mockSpawn.mockImplementationOnce(() => makeFakeChild({ ... }))` Just
+// `{ process: ChildProcess, ... }` because the lib wraps the raw child; src
+// code does `const { process: cp } = spawn(...)`. Returns the wrapped shape
+// so `mockSpawn.mockImplementationOnce(() => makeFakeChild({ ... }))` Just
 // Works without per-call destructuring. Pass `stdinCapture: []` to swap
 // the no-op stdin for a sink that records every chunk written to the
 // child.
@@ -87,8 +87,8 @@ function makeWritableStdin(captureInto?: string[] | undefined): Writable {
 // stdout, stderr }>` — awaitable AND carrying the raw child on `.process`. The
 // secrets runners now `await` the spawn result (stdioString → string stdout/
 // stderr) and read stdin via `.process.stdin`, so the fake must be a thenable
-// too. A non-zero exit code REJECTS (the lib's contract), carrying the same
-// `{ code, stdout, stderr }` on the error.
+// too. Per the lib's contract a non-zero exit code REJECTS, carrying the
+// same `{ code, stdout, stderr }` on the error.
 function makeFakeChild(opts: {
   stdout?: string | undefined
   stderr?: string | undefined
@@ -120,7 +120,7 @@ function makeFakeChild(opts: {
       if (opts.emitError) {
         // Only emit the EventEmitter `error` if something listens — an
         // `error` event with no listener throws as an uncaught exception
-        // (Node semantics). The await-style runners DON'T listen on
+        // under Node semantics. The await-style runners DON'T listen on
         // `.process.on('error')`; the event-style ones (deleteX) do.
         if (emitter.listenerCount('error') > 0) {
           emitter.emit('error', opts.emitError)
@@ -142,8 +142,8 @@ function makeFakeChild(opts: {
       resolve({ code, stderr, stdout })
     })
   })
-  // A non-zero rejection nobody awaits (the event-style delete path) must not
-  // surface as an unhandled rejection.
+  // The event-style delete path never awaits a non-zero rejection, which
+  // must not surface as an unhandled rejection.
   settled.catch(() => {})
   // Attach `.process` to the Promise so the awaitable AND `{ process }`
   // destructure both work, matching the lib's `{ process } & Promise` shape.

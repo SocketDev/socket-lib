@@ -52,8 +52,9 @@ export function innerReadDirNames(
 
 /**
  * Read directory names asynchronously with filtering and sorting. Returns only
- * directory names (not files), with optional filtering for empty directories
- * and glob-based ignore patterns. Results are naturally sorted by default.
+ * directory names and never files, with optional filtering for empty
+ * directories and glob-based ignore patterns. Results are naturally sorted by
+ * default.
  *
  * @example
  *   ;```ts
@@ -93,8 +94,9 @@ export async function readDirNames(
 
 /**
  * Read directory names synchronously with filtering and sorting. Returns only
- * directory names (not files), with optional filtering for empty directories
- * and glob-based ignore patterns. Results are naturally sorted by default.
+ * directory names and never files, with optional filtering for empty
+ * directories and glob-based ignore patterns. Results are naturally sorted by
+ * default.
  *
  * @example
  *   ;```ts

@@ -3,7 +3,7 @@
  *   shapes:
  *
  *   1. In-memory (Buffer/string round-trip)
- *   2. File-to-file (stream pipeline)
+ *   2. File-to-file through a stream pipeline
  *   3. Raw transform stream (composition) Plus brotli detection (magic bytes,
  *      filename extensions), the replace-in-place wrappers, and
  *      resolveBrotliOptions. The gzip counterparts and the shared cross-format
@@ -53,8 +53,8 @@ afterEach(async () => {
 })
 
 // Tests share a module-scoped `tmpDir` set up in `beforeEach`. Vitest's
-// `sequence.concurrent` setting (true locally) would otherwise run tests
-// in parallel, racing the tmpDir mutation. `describe.sequential` keeps
+// `sequence.concurrent` setting, which is true locally, would otherwise run
+// tests in parallel, racing the tmpDir mutation. `describe.sequential` keeps
 // the file's tests sequential regardless of the global setting — file
 // IO tests want one-at-a-time semantics anyway.
 describe.sequential('compression — brotli', () => {

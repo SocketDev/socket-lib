@@ -51,7 +51,7 @@ export async function isDir(filepath: PathLike) {
  * @param dirname - Directory path to check.
  * @param options - Options including ignore patterns.
  *
- * @returns `true` if directory is empty (or doesn't exist), `false` otherwise
+ * @returns `true` if the directory is empty or doesn't exist, `false` otherwise
  */
 export function isDirEmptySync(
   dirname: PathLike,

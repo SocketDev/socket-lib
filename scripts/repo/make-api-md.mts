@@ -80,9 +80,9 @@ export function extractSummary(srcPath: string): string {
     return ''
   }
   const block = match[1] ?? ''
-  // Accept both `@file` (the fleet convention) and `@fileoverview`. Check the
-  // longer tag first so a `@fileoverview` block isn't matched as `@file` with a
-  // leftover "overview" prefix bleeding into the description.
+  // Accept both `@file` and `@fileoverview`; `@file` is the fleet convention.
+  // Check the longer tag first so a `@fileoverview` block isn't matched as
+  // `@file` with a leftover "overview" prefix bleeding into the description.
   let overviewIdx = block.indexOf('@fileoverview')
   let tagLength = '@fileoverview'.length
   if (overviewIdx < 0) {

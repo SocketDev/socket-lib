@@ -32,7 +32,7 @@ export interface TtlCache {
    * Get cached data without fetching. Returns undefined if not found or
    * expired.
    *
-   * @param key - Cache key (must not contain wildcards)
+   * @param key - Cache key that must not contain wildcards.
    *
    * @throws {TypeError} If key contains wildcards (*)
    */
@@ -50,13 +50,13 @@ export interface TtlCache {
   /**
    * Get cached data or fetch and cache if missing/expired.
    *
-   * @param key - Cache key (must not contain wildcards)
+   * @param key - Cache key that must not contain wildcards.
    */
   getOrFetch<T>(key: string, fetcher: () => Promise<T>): Promise<T>
   /**
    * Set cached data with TTL.
    *
-   * @param key - Cache key (must not contain wildcards)
+   * @param key - Cache key that must not contain wildcards.
    *
    * @throws {TypeError} If key contains wildcards (*)
    */
@@ -64,7 +64,7 @@ export interface TtlCache {
   /**
    * Delete a specific cache entry.
    *
-   * @param key - Cache key (must not contain wildcards)
+   * @param key - Cache key that must not contain wildcards.
    *
    * @throws {TypeError} If key contains wildcards (*)
    */
@@ -149,7 +149,7 @@ export interface TtlCacheStorage {
    */
   keys?(): Promise<string[]> | string[]
   /**
-   * Remove one key. Failures are swallowed (best-effort removal).
+   * Remove one key on a best-effort basis; failures are swallowed.
    */
   removeItem(key: string): Promise<void> | void
   /**

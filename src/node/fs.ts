@@ -11,9 +11,9 @@
  *   eager-but-guarded form keeps the browser-safe behavior while gaining the
  *   load-time snapshot. Two surfaces: `getNodeFs()` returns the module object
  *   with LATE method lookup (spy-able — the test seam); the `fs<Method>` consts
- *   (`fsExistsSync`, `fsReadFileSync`, …) are method references FROZEN at load
- *   (tamper-proof against a method swap, not spy-able), for Socket's hot fs
- *   calls. Both stay browser-safe behind IS_NODE + `/*@__PURE__*\/`.
+ *   (`fsExistsSync`, `fsReadFileSync`, …) are method references FROZEN at
+ *   load, tamper-proof against a method swap but not spy-able, for Socket's
+ *   hot fs calls. Both stay browser-safe behind IS_NODE + `/*@__PURE__*\/`.
  */
 
 import type * as NodeFs from 'node:fs'
@@ -22,7 +22,7 @@ import { IS_NODE } from '../constants/runtime'
 
 // Captured at module load behind the runtime IS_NODE guard (false in browsers,
 // so the require never runs there). The `/*@__PURE__*/` must sit directly on
-// the call (a wrapping cast would detach it), so cast on use, not inline.
+// the call because a wrapping cast would detach it. Cast on use, not inline.
 // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
 const nodeFs = IS_NODE ? /*@__PURE__*/ require('fs') : undefined
 
@@ -44,7 +44,7 @@ export function getNodeFs(): typeof NodeFs {
 // `fs` to false). Node's fs sync methods are standalone functions (no `this`
 // binding needed — verified), so a plain member read freezes the reference:
 // unlike `getNodeFs().existsSync`, a later `nodeFs.existsSync = evil` cannot
-// redirect these (the method-level twin of the object snapshot). Frozen refs
+// redirect these — the method-level twin of the object snapshot. Frozen refs
 // are NOT spy-able — use `getNodeFs()` for the test-seam path; reach for these
 // only on a hot path that wants tamper-resistance. Exported as direct consts
 // (the `primordials/intl` shape) so there's no helper/getter to sort and no

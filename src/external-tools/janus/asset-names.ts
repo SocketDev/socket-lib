@@ -37,7 +37,7 @@ export const JANUS_SUPPORTED_PLATFORM_ARCHES: readonly string[] = ObjectFreeze(
 ) as readonly string[]
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function getJanusAssetEntry(
   platformArch: string,

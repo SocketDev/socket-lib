@@ -23,7 +23,7 @@ const ANSI = {
 
 // A proportional bar of `width` cells split into segments. Each segment is
 // [count, ansiColor, glyph] — a DISTINCT glyph per segment so the split reads in
-// monochrome too (not only by color): adopted uses a full block, cascade a
+// monochrome too and not only by color: adopted uses a full block, cascade a
 // medium shade, unused a light shade. The last segment absorbs rounding so the
 // bar always fills exactly `width` cells.
 export function stackedBar(
@@ -222,7 +222,7 @@ function renderAreas(d: ReportData): void {
 }
 
 // Consumer fan-out: top adopted subpaths + which member repos import each, as a
-// dot-grid heat strip (short repo labels, fixed column order).
+// dot-grid heat strip with short repo labels in a fixed column order.
 function renderFanOut(d: ReportData): void {
   const c = ANSI
   const repoLabels = d.consumers

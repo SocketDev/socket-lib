@@ -3,10 +3,10 @@
  *   Ensures type definitions are compatible with static ES6 imports and don't
  *   require ESLint disables or @ts-expect-error comments. Key validations:
  *
- *   - No `declare module` patterns (should use direct exports)
+ *   - No `declare module` patterns; use direct exports instead
  *   - No `export = ` (CommonJS style - should use `export` or `export
  *     const/function`)
- *   - Files are proper TypeScript modules (have at least one export)
+ *   - Files are proper TypeScript modules with at least one export
  *   - Type definitions match the actual module structure
  */
 
@@ -62,7 +62,7 @@ export function checkTypeDefinition(filePath) {
       continue
     }
 
-    // Check for `declare module` pattern (ambient declarations)
+    // Check for the `declare module` ambient-declaration pattern
     if (line.startsWith('declare module')) {
       issues.push(
         `Line ${lineNum}: Uses 'declare module' (ambient declaration) - should be a proper module with direct exports`,
@@ -86,7 +86,7 @@ export function checkTypeDefinition(filePath) {
     }
   }
 
-  // Check if file has at least one export (is a proper module)
+  // Check if file has at least one export, making it a proper module
   if (!hasExport && content.trim() !== '') {
     issues.push(
       'File has no exports - should be a proper TypeScript module with at least one export',

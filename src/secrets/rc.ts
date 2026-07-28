@@ -12,14 +12,15 @@
  *   `readSecret()` into a shell rc file directly, the user gets an auth prompt
  *   on every new shell. Claude Code's Bash tool spawns a fresh shell per
  *   command, which means continuous prompt flood. Solution: write the literal
- *   value into ~/.zshenv (or equivalent) **once**, at install time, so every
+ *   value into ~/.zshenv or its equivalent **once**, at install time, so every
  *   subsequent shell session picks up the env var without re-reading the
  *   keychain. The keychain is still the canonical store; this helper is just a
  *   cached materialization that lives in the rc file. API: write({ service,
  *   exports, notes?, legacySentinels? }) → { rcPath, outcome: 'inserted' |
  *   'updated' | 'unchanged' } | undefined clear(service, legacySentinels?) →
- *   boolean (true when a block was found and removed) Block layout (idempotent
- *   — re-running with the same exports returns `outcome: 'unchanged'`):
+ *   boolean that is true when a block was found and removed. Block layout
+ *   (idempotent — re-running with the same exports returns
+ *   `outcome: 'unchanged'`):
  *
  *   # BEGIN <service> env (managed)
  *
@@ -270,7 +271,7 @@ export function write(options: WriteOptions): WriteResult {
   }
   let working = onDisk
 
-  // Sweep legacy sentinels first (migration support). The END line
+  // Sweep legacy sentinels first to support migration. The END line
   // is derived by replacing the first `BEGIN` with `END`; we also
   // accept the same string with a trailing ` (managed)` stripped,
   // since older sentinels were asymmetric (BEGIN had the qualifier,
@@ -307,8 +308,8 @@ export function write(options: WriteOptions): WriteResult {
     return { rcPath, outcome: 'updated' }
   }
 
-  // No existing canonical block. Append the new block to the
-  // (possibly legacy-scrubbed) working copy and write the whole
+  // No existing canonical block. Append the new block to the working
+  // copy, which may already be legacy-scrubbed, and write the whole
   // thing back.
   const needsLeadingNewline =
     working.length > 0 && !StringPrototypeEndsWith(working, '\n\n')
@@ -320,9 +321,9 @@ export function write(options: WriteOptions): WriteResult {
   const next = `${working}${prefix}${desiredBlock}\n`.replace(/\n{3,}/g, '\n\n')
   writeRcFile(rcPath, next)
   // If we scrubbed a legacy block, the outcome is logically an
-  // "updated" (replaced the old shape) — but the API only has
+  // "updated" that replaced the old shape — but the API only has
   // 'inserted' / 'updated' / 'unchanged', and the new BEGIN/END
-  // sentinel didn't exist on disk before, so 'inserted' is honest.
+  // sentinel didn't exist on disk before, so 'inserted' is accurate.
   return { rcPath, outcome: 'inserted' }
 }
 

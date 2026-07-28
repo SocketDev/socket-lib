@@ -381,7 +381,8 @@ describe('paths/normalize predicates', () => {
     })
 
     it('returns base segment when from is exact ancestor of to', () => {
-      // from='/foo/bar'; to='/foo/bar/baz' → 'baz' (separator-following branch)
+      // from='/foo/bar'; to='/foo/bar/baz' → 'baz' via the
+      // separator-following branch.
       const result = relativeResolve('/foo/bar', '/foo/bar/baz')
       expect(result).toBe('baz')
     })

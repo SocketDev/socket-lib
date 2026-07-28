@@ -134,9 +134,9 @@ describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
   test('cache miss: creates venv then pip-installs', async () => {
     const { createPipVenv, existsMock, spawnMock, whichMock } =
       await loadFresh()
-    // 1st existsSync (entry-point check) → false (cache miss)
-    // 2nd existsSync (venv python check) → true (venv created)
-    // 3rd existsSync (post-install entry-point check) → true (install OK)
+    // 1st existsSync is the entry-point check → false, a cache miss.
+    // 2nd existsSync is the venv python check → true, the venv was created.
+    // 3rd existsSync is the post-install entry-point check → true, install OK.
     existsMock
       .mockReturnValueOnce(false)
       .mockReturnValueOnce(true)
@@ -175,7 +175,7 @@ describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
   test('throws when venv create succeeds but the venv python is missing', async () => {
     const { createPipVenv, existsMock, spawnMock, whichMock } =
       await loadFresh()
-    // entry-point check → miss; venv python → missing (venv broken)
+    // entry-point check → miss; venv python → missing, so the venv is broken.
     existsMock.mockReturnValueOnce(false).mockReturnValueOnce(false)
     whichMock.mockResolvedValueOnce('/usr/bin/python3')
     spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })

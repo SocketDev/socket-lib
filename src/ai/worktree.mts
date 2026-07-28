@@ -5,8 +5,8 @@
  *   same checkout. This helper enforces that contract: each item gets a fresh
  *   worktree branched from the base, the per-item function runs inside it, then
  *   the helper either fast-forward-merges the worktree branch back into the
- *   base (when changes were committed) or removes the worktree silently (when
- *   no changes happened). Concurrency: caller-controlled with a default cap of
+ *   base once changes were committed, or removes the worktree silently when no
+ *   changes happened. Concurrency: caller-controlled with a default cap of
  *   4. Per the "Programmatic Claude calls" CLAUDE.md rule, very high
  *   concurrency saturates the API rate limits; 4 is safe headroom for most
  *   accounts. The hard cap of 8 prevents accidental flag-finger disasters.
@@ -38,7 +38,7 @@ const MAX_CONCURRENCY = 8
 
 export interface WorktreeRunOptions {
   /**
-   * Base repo path (the primary checkout).
+   * Base repo path of the primary checkout.
    */
   readonly baseRepo: string
   /**
@@ -204,7 +204,7 @@ export async function runOne<I, T>(
  * Run `fn` for each item in parallel, each invocation isolated in its own git
  * worktree. Results are merged back into the base branch with `git merge
  * --ff-only`; non-FF merges are reported as failures and the worktree is
- * preserved (regardless of cleanup policy).
+ * preserved regardless of cleanup policy.
  *
  * @example
  *   ;```ts

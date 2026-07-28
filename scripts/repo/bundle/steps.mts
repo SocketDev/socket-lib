@@ -1,10 +1,10 @@
 /**
  * @file Individual build steps for the `build` runner (scripts/repo/bundle.mts):
- *   source (rolldown per-file), TypeScript declarations (tsgo), the prim CLI
- *   bundle, external dependencies, and the post-build dist-shaping pass. Each
- *   returns an exit code (and source returns its build time) so the runner can
- *   log + sequence them; the runner owns orchestration, these own one step
- *   each.
+ *   source built per-file by rolldown, TypeScript declarations (tsgo), the
+ *   prim CLI bundle, external dependencies, and the post-build dist-shaping
+ *   pass. Each returns an exit code, and the source step also returns its
+ *   build time, so the runner can log + sequence them; the runner owns
+ *   orchestration, these own one step each.
  */
 
 import { promises as fsPromises } from 'node:fs'
@@ -129,8 +129,8 @@ export async function buildTypes(
 }
 
 /**
- * Build the prim CLI: a true bundle (not per-file transpile) that inlines
- * lib-stable + diff into a single `dist/bin/prim.cjs`. The
+ * Build the prim CLI: a true bundle rather than a per-file transpile, which
+ * inlines lib-stable + diff into a single `dist/bin/prim.cjs`. The
  * `@ultrathink/acorn.wasm` parser's `acorn-wasm.cjs` entry + `acorn.wasm` are
  * copied alongside so its `${__dirname}/./acorn.wasm` sibling-load resolves
  * after publish.

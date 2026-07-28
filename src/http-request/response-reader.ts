@@ -33,7 +33,7 @@ export async function decodeBody(
   }
   // A comma-separated list applies encodings in order; the last applied is the
   // first to undo. In practice servers send a single token — handle the common
-  // case and bail (return as-is) on anything layered or unrecognized.
+  // case and return the body as-is on anything layered or unrecognized.
   const encoding = (
     Array.isArray(contentEncoding) ? contentEncoding[0]! : contentEncoding
   )

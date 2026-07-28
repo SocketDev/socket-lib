@@ -1,6 +1,6 @@
 /**
- * @file Unit tests for src/fs/copy — recursive file/dir copy with overlay,
- *   pave (atomic mirror), and fill (no-clobber) modes.
+ * @file Unit tests for src/fs/copy — recursive file/dir copy in overlay, pave,
+ *   and fill modes. Pave is an atomic mirror; fill never clobbers.
  */
 
 import { existsSync, promises as fs } from 'node:fs'

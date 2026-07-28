@@ -4,10 +4,10 @@
  *   Covers:
  *
  *   - Successful parse of "covered / total percent%" output
- *   - null on unparseable output (no match, partial match)
+ *   - null on unparseable output, both no match and partial match
  *   - null on spawn failure when generateIfMissing=false (default)
  *   - Throws when generateIfMissing=true and spawn fails
- *   - Throws when cwd is empty string (validation guard)
+ *   - Throws from the validation guard when cwd is an empty string
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'

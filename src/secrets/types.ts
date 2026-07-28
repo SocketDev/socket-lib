@@ -66,8 +66,8 @@ export interface BackendAvailability {
   toolName: string
   /**
    * `apt install libsecret-tools` / similar. `undefined` when the backend is
-   * always available (macOS `security(1)` ships with the OS) or when no install
-   * path is sensible (unsupported platform).
+   * always available (macOS `security(1)` ships with the OS) or when the
+   * platform is unsupported, so no install path is sensible.
    */
   installHint: string | undefined
 }

@@ -122,7 +122,7 @@ export interface HttpDownloadOptions {
    *   ```
    *
    * @param downloaded - Number of bytes downloaded so far.
-   * @param total - Total file size in bytes (from Content-Length header)
+   * @param total - Total file size in bytes, from the Content-Length header.
    */
   onProgress?: ((downloaded: number, total: number) => void) | undefined
   /**
@@ -186,7 +186,7 @@ export interface HttpDownloadOptions {
  */
 export interface HttpDownloadResult {
   /**
-   * HTTP response headers from the final response (after redirects).
+   * HTTP response headers from the final response after any redirects.
    */
   headers: IncomingHttpHeaders
   /**
@@ -211,11 +211,11 @@ export interface HttpDownloadResult {
    */
   size: number
   /**
-   * HTTP status code from the final response (after redirects).
+   * HTTP status code from the final response after any redirects.
    */
   status: number
   /**
-   * HTTP status message from the final response (after redirects).
+   * HTTP status message from the final response after any redirects.
    */
   statusText: string
 }

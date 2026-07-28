@@ -27,10 +27,10 @@ import { StringPrototypeToLowerCase } from '../primordials/string'
  *   `node:https` / `node:stream`. Consumers import from
  *   `@socketsecurity/lib/http-request/browser` directly, OR from
  *   `@socketsecurity/lib/http-request` inside a bundler that resolves the
- *   `browser` package.json conditional (rolldown, vite, esbuild) — the bundler
- *   picks this entry automatically. API parity with the Node side is the goal —
- *   same function names, same option shapes (where browsers can support them),
- *   same error shape. Caveats:
+ *   `browser` package.json conditional, as rolldown, vite, and esbuild do —
+ *   the bundler picks this entry automatically. API parity with the Node side
+ *   is the goal: same function names, same option shapes where browsers can
+ *   support them, same error shape. Caveats:
  *
  *   - `HttpResponse.body` is `Uint8Array` here, vs Node's `Buffer`. Most callers
  *     use `arrayBuffer()` / `text()` / `json()` and don't care.
@@ -194,8 +194,8 @@ export interface BrowserHttpHookRequestInfo {
 }
 
 /**
- * Per-attempt response info passed to `hooks.onResponse`. Either `status`
- * (success) or `error` (network failure) is populated.
+ * Per-attempt response info passed to `hooks.onResponse`. Populates `status`
+ * on success and `error` on network failure.
  */
 export interface BrowserHttpHookResponseInfo {
   method: string
@@ -237,7 +237,7 @@ export interface BrowserHttpRequestOptions {
   hooks?: BrowserHttpHooks | undefined
   /**
    * Maximum response body size in bytes. Responses larger than this are
-   * truncated and treated as a network failure (so retries can fire). Defaults
+   * truncated and treated as a network failure so retries can fire. Defaults
    * to no limit. Useful when calling untrusted endpoints.
    */
   maxResponseSize?: number | undefined
@@ -274,7 +274,7 @@ export interface BrowserHttpRequestOptions {
   /**
    * Per-attempt timeout in milliseconds. Implemented via AbortController;
    * exceeds the timeout aborts the fetch and the attempt counts as a network
-   * failure (retryable). Defaults to no timeout (fetch defaults).
+   * failure (retryable). Defaults to no timeout, matching fetch's default.
    */
   timeout?: number | undefined
 }
@@ -332,8 +332,8 @@ export function headersToRecord(headers: Headers): Record<string, string> {
 }
 
 /**
- * GET / POST a JSON endpoint. Automatically sets `Accept: application/json` and
- * `Content-Type: application/json` (when a body is present). Throws
+ * GET / POST a JSON endpoint. Automatically sets `Accept: application/json`,
+ * plus `Content-Type: application/json` when a body is present. Throws
  * `HttpResponseError` on non-2xx.
  */
 export async function httpJson<T = unknown>(
@@ -386,7 +386,7 @@ export async function httpRequest(
     } catch (err) {
       lastError = err
       // Network errors are eligible for retry; HttpResponseError thrown
-      // by throwOnError is not (it's an explicit failure signal).
+      // by throwOnError is not, because it is an explicit failure signal.
       if (err instanceof HttpResponseError) {
         throw err
       }

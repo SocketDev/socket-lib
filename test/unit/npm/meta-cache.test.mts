@@ -3,7 +3,7 @@
  *   accept-header selection, TTL hit/miss + `force`, in-flight dedupe via the
  *   cache's `getOrFetch`, negative (404) caching with status preservation, and
  *   serve-stale-on-error. HTTP is mocked via the `StubHttpAdapter` test double
- *   (no live network); cacache persistence is isolated per test via a unique
+ *   with no live network; cacache persistence is isolated per test via a unique
  *   `SOCKET_CACACHE_DIR`.
  */
 

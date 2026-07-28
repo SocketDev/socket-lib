@@ -29,7 +29,7 @@ export const DEFAULT_TTL_MS = 5 * 60 * 1000
 const MAX_FUTURE_SKEW_MS = 10_000
 
 /**
- * Create a matcher for a key pattern (with wildcard support) against FULL
+ * Create a matcher for a wildcard-capable key pattern against FULL
  * (prefixed) cache keys. Without a wildcard the pattern is a plain prefix
  * match; with wildcards the pattern is anchored both ends so `foo*bar`
  * matches exactly `foo<anything>bar`.
@@ -41,7 +41,7 @@ export function createKeyMatcher(
   const fullPattern = `${prefix}:${pattern}`
 
   if (!pattern.includes('*')) {
-    // Simple prefix matching (fast path).
+    // Simple prefix matching is the fast path.
     return (fullKey: string) => StringPrototypeStartsWith(fullKey, fullPattern)
   }
 
@@ -77,7 +77,7 @@ export function isExpiredEntry(
  * Set an entry in a memo Map capped at `maxSize`, using the Map's
  * insertion-order semantics as the LRU list: an existing key is deleted first
  * so the re-insert moves it to the tail, and when the cap is hit the oldest
- * entry (first key in iteration order) is evicted.
+ * entry, the first key in iteration order, is evicted.
  */
 export function lruSet(
   map: Map<string, TtlCacheEntry<unknown>>,

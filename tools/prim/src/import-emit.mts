@@ -14,12 +14,12 @@
  * Dedupes rewrite spans by `[start, end]` (acorn-wasm's compact_serialize can
  * surface the same node multiple times in the JSON tree), sorts them
  * back-to-front so applied positions stay valid, splices each replacement into
- * the source, and finally inserts (or merges into) the import / require block
- * for every primordial introduced.
+ * the source, and finally inserts the import / require block for every
+ * primordial introduced, merging into an existing block when there is one.
  *
  * When `importStyle.splitByLeaf` is set, one import is emitted per leaf with
  * the leaf-resolved specifier; otherwise a single barrel import is emitted with
- * the resolved (string or per-file function) specifier.
+ * the resolved specifier, which is either a string or a per-file function.
  *
  * Returns the rewritten source plus whether an import was added.
  */
@@ -118,7 +118,7 @@ export function applyPrimordialsImports(
 }
 
 /**
- * Insert (or merge into) the primordials import statement.
+ * Insert the primordials import statement, or merge into an existing one.
  *
  * In ESM mode emits `import { X, Y } from '<specifier>'`. In CJS mode emits
  * `const { X, Y } = require('<specifier>')`. If a matching import (same shape,
@@ -128,7 +128,8 @@ export function applyPrimordialsImports(
  * neither exists.
  *
  * Returns the rewritten source and a boolean indicating whether anything was
- * added/changed (vs already-present-and-complete).
+ * added or changed, as opposed to the import already being present and
+ * complete.
  */
 export function ensureImports(source, identifiers, importStyle) {
   const { kind, specifier } = importStyle

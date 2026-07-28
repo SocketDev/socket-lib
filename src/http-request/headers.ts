@@ -34,7 +34,7 @@ const RETRY_AFTER_INT_RE = /^\d+$/
  *   // { Authorization: 'Basic c2t0X3h4eHg6' }
  *   ```
  *
- * @param token - The Socket API token (used as the Basic-auth username).
+ * @param token - The Socket API token, used as the Basic-auth username.
  *
  * @returns The `Authorization` header value, e.g. `Basic <base64>`.
  */
@@ -73,7 +73,7 @@ export function isSensitiveHeaderName(name: string): boolean {
  * - **HTTP-date**: an absolute date/time (e.g., `"Fri, 31 Dec 2027 23:59:59
  *   GMT"`)
  *
- * When the header is an array (multiple values), the first element is used.
+ * When the header is an array of multiple values, the first element is used.
  *
  * @example
  *   ;```ts
@@ -94,7 +94,7 @@ export function parseRetryAfterHeader(
   if (!value) {
     return undefined
   }
-  // Handle array of values (take first).
+  // Handle an array of values by taking the first.
   const raw = ArrayIsArray(value) ? value[0] : value
   if (!raw) {
     return undefined

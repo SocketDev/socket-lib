@@ -1,7 +1,7 @@
 /**
  * @file `resolveUv()` — uv resolution entry point. Tries each source in order:
  *
- *   1. VFS — smol binary's embedded uv (if packed)
+ *   1. VFS — smol binary's embedded uv, when it was packed in
  *   2. PATH — `uv` on the system PATH
  *   3. download — upstream GitHub release archive (only when `downloadIfMissing`
  *      is passed) Returns `undefined` if all of the enabled sources miss.
@@ -69,7 +69,7 @@ export async function doResolveUv(
 
 /* c8 ignore start - test-only escape hatch. */
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function resetUvResolution(): void {
   resolutionCache.clear()

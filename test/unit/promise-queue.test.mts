@@ -306,7 +306,7 @@ describe('PromiseQueue', () => {
     it('should allow new tasks after clear', async () => {
       const queue = new PromiseQueue(2)
 
-      // With concurrency=2, task starts immediately (not pending).
+      // With concurrency=2, the task starts immediately rather than pending.
       queue.add(async () => await delay(50))
       queue.clear()
 

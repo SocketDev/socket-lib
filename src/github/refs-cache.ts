@@ -19,9 +19,9 @@ import type { TtlCache } from '../cache/ttl/types'
 let githubCache: TtlCache | undefined
 
 /**
- * Clear the ref resolution cache (in-memory only). Clears the in-memory
- * memoization cache without affecting the persistent disk cache. Useful for
- * testing or when you need fresh data from the API.
+ * Clear the in-memory ref resolution cache. Clears the memoization cache
+ * without affecting the persistent disk cache. Useful for testing or when you
+ * need fresh data from the API.
  *
  * Note: This only clears the in-memory cache. The persistent cacache storage
  * remains intact and will be used to rebuild the in-memory cache on next

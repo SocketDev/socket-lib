@@ -69,7 +69,7 @@ export function clearEnv(key: string): void {
 
 /**
  * Lazily load the async_hooks module. Aliases the canonical `node/async-hooks`
- * accessor (single owner of the bundler-safe require); kept as an export so
+ * accessor, the single owner of the bundler-safe require; kept as an export so
  * this module's surface is unchanged.
  *
  * @private
@@ -111,7 +111,7 @@ export function getEnvValue(key: string): string | undefined {
 
 /**
  * Get the current isolated-override map, or undefined when none is active.
- * Off Node (browser bundles) there is no AsyncLocalStorage and no isolated
+ * Off Node, in browser bundles, there is no AsyncLocalStorage and no isolated
  * context — env getters fall straight through to the other tiers.
  *
  * @private
@@ -162,8 +162,7 @@ export function hasOverride(key: string): boolean {
 }
 
 /**
- * Check if an environment variable exists (has a key), checking overrides
- * first.
+ * Check if an environment variable key exists, checking overrides first.
  *
  * Resolution order: 1. Isolated overrides (temporary - set via
  * withEnv/withEnvSync) 2. Shared overrides (persistent - set via setEnv in
@@ -177,7 +176,8 @@ export function hasOverride(key: string): boolean {
  *   isInEnv('MISSING') // false
  *   ```
  *
- * @internal Used by env getters to check for key presence (not value truthiness)
+ * @internal Used by env getters to check for key presence rather than value
+ *   truthiness.
  */
 export function isInEnv(key: string): boolean {
   // Check isolated overrides first (highest priority - temporary via withEnv)

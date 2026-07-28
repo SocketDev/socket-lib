@@ -59,7 +59,7 @@ export function getDel() {
  * deletion with these safety features:
  *
  * - By default, prevents deleting the current working directory (cwd) and above
- * - Allows deleting within cwd (descendant paths) without force option
+ * - Allows deleting descendant paths within cwd without the force option
  * - Automatically uses force: true for temp directory, cacache, and ~/.socket
  *   subdirectories
  * - Protects against accidental deletion of parent directories via `../` paths
@@ -160,7 +160,7 @@ export async function safeDelete(
  * deletion with these safety features:
  *
  * - By default, prevents deleting the current working directory (cwd) and above
- * - Allows deleting within cwd (descendant paths) without force option
+ * - Allows deleting descendant paths within cwd without the force option
  * - Automatically uses force: true for temp directory, cacache, and ~/.socket
  *   subdirectories
  * - Protects against accidental deletion of parent directories via `../` paths
@@ -279,8 +279,8 @@ export function safeDeleteSync(
  * directory might already exist, which is common in concurrent code.
  *
  * Unlike fs.promises.mkdir with recursive:true, this function: - Silently
- * ignores EEXIST errors (directory already exists) - Re-throws all other errors
- * (permissions, invalid path, etc.) - Works reliably in
+ * ignores EEXIST errors when the directory already exists - Re-throws all
+ * other errors (permissions, invalid path, etc.) - Works reliably in
  * multi-process/concurrent scenarios - Defaults to recursive: true for
  * convenient nested directory creation.
  *
@@ -332,8 +332,8 @@ export async function safeMkdir(
  * directory might already exist, which is common in concurrent code.
  *
  * Unlike fs.mkdirSync with recursive:true, this function: - Silently ignores
- * EEXIST errors (directory already exists) - Re-throws all other errors
- * (permissions, invalid path, etc.) - Works reliably in
+ * EEXIST errors when the directory already exists - Re-throws all other
+ * errors (permissions, invalid path, etc.) - Works reliably in
  * multi-process/concurrent scenarios - Defaults to recursive: true for
  * convenient nested directory creation.
  *

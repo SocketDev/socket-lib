@@ -114,12 +114,13 @@ export async function extractZip(
     const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
     const targetPath = path.join(normalizedOutputDir, strippedPath)
 
-    // Validate path is within target directory (prevents path traversal)
+    // Validate the path is within the target directory, which prevents path
+    // traversal.
     validatePathWithinBase(targetPath, normalizedOutputDir, entry.entryName)
   }
 
   // strip===0 vs strip>0 cases tested separately; isDirectory arms
-  // only fire on archives with directory entries (most don't).
+  // only fire on the few archives that have directory entries.
   /* c8 ignore start */
   if (strip === 0) {
     for (const entry of entries) {

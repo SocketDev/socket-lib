@@ -26,8 +26,8 @@ export function makeFakeDownloader(payload: Buffer | string): {
   const calls: Array<{ url: string; name: string }> = []
   const scratchDir = mkdtempSync(path.join(os.tmpdir(), 'from-download-test-'))
   const downloader = (async (opts: Parameters<BinaryDownloader>[0]) => {
-    // `name` is optional on DlxBinaryOptions; default for tests that
-    // omit it (matches dlx's own fallback to a platform-arch synth).
+    // `name` is optional on DlxBinaryOptions; default for tests that omit
+    // it, matching dlx's own fallback to a platform-arch synth.
     const name = opts.name ?? 'fake-binary'
     calls.push({ url: opts.url, name })
     const binaryPath = path.join(scratchDir, name)

@@ -23,9 +23,10 @@ export const DEFAULT_BASE_DELAY_MS = 5000
 
 /**
  * Resolve the retry base delay from `SOCKET_GITHUB_RETRY_BASE_DELAY_MS`,
- * falling back to {@link DEFAULT_BASE_DELAY_MS}. Read live (not memoized) so
- * it's unit-testable by mutating the env — and so a long-lived process that has
- * the env changed under it picks up the new value on next read.
+ * falling back to {@link DEFAULT_BASE_DELAY_MS}. Read live rather than
+ * memoized so it's unit-testable by mutating the env — and so a long-lived
+ * process that has the env changed under it picks up the new value on next
+ * read.
  *
  * @returns The configured base delay in milliseconds.
  */
@@ -42,6 +43,6 @@ export const GITHUB_RETRY_CONFIG = ObjectFreeze({
   backoffFactor: 2,
   // Initial delay before first retry. Overridable for tests / CI.
   baseDelayMs: resolveBaseDelayMs(),
-  // Maximum number of retry attempts (excluding initial request).
+  // Maximum number of retry attempts, excluding the initial request.
   retries: 2,
 })

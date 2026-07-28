@@ -6,7 +6,7 @@
  *
  *   - CJS require() returns usable values without .default wrappers
  *   - ESM default imports work correctly
- *   - Named exports (like Separator) are accessible from both CJS and ESM
+ *   - Named exports such as Separator are accessible from both CJS and ESM
  *   - Function exports are directly callable without .default
  *   - Object exports preserve all named properties
  */
@@ -61,8 +61,8 @@ export function getJsFilesRecursive(dir, files = []) {
  */
 export function getExternalModules(dir) {
   return getJsFilesRecursive(dir).filter(file => {
-    // Ensure the file is actually in the external directory
-    // (not some symlink or weird path)
+    // Ensure the file is actually in the external directory and not some
+    // symlink or weird path.
     return file.startsWith(dir)
   })
 }

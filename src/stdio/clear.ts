@@ -74,7 +74,7 @@ export function clearLines(
  *
  * ANSI Sequence:
  *
- * - `\x1bc`: Full reset (clear screen and move cursor home)
+ * - `\x1bc`: Full reset, which clears the screen and moves the cursor home.
  *
  * @example
  *   ;```ts

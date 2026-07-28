@@ -4,7 +4,7 @@
  *   see `./package` for those) and executing them with cross-platform shell
  *   handling.
  *
- *   - `dlxBinary` — download (if needed) + execute
+ *   - `dlxBinary` — download when needed + execute
  *   - `executeBinary` — execute an already-cached binary Supporting surface lives
  *     in sibling leaves and is re-exported here so existing `dlx/binary`
  *     importers keep working unchanged:

@@ -4,11 +4,12 @@
  *   per-platform asset names, and integrity hashes. The manifest itself is
  *   hand-maintained in each Socket repo's root (`<repo>/external-tools.json`)
  *   and consumed by the setup-and-install GitHub action. This reader gives
- *   in-process consumers (external- tools resolvers, ad-hoc scripts) the same
- *   typed view without each one re-implementing the JSON-parse + shape check +
- *   integrity-string validation. Shape: { "<tool-name>": { "description":
- *   "human-readable summary", "version": "1.7.2", "release": "asset" |
- *   "tarball" | ..., "repository": "github:owner/repo", "notes": [...],
+ *   in-process consumers such as external-tools resolvers and ad-hoc scripts
+ *   the same typed view without each one re-implementing the JSON-parse +
+ *   shape check + integrity-string validation. Shape: { "<tool-name>": {
+ *   "description": "human-readable summary", "version": "1.7.2", "release":
+ *   "asset" | "tarball" | ..., "repository": "github:owner/repo",
+ *   "notes": [...],
  *   "platforms": { "<platform-arch>": { "asset": "<asset-filename>",
  *   "integrity": "sha256-base64=" } } } } Some tools have flavor variants (e.g.
  *   sfw's `free` / `enterprise`) that wrap the `{repository, binaryName,
@@ -225,10 +226,11 @@ export function parseToolEntry(raw: unknown, toolName: string): ManifestEntry {
 /**
  * Read an `external-tools.json` file from disk and return the parsed manifest.
  * Throws on malformed JSON or invalid integrity strings; unknown-shape entries
- * (rust components, future variants) come back as `{kind: 'other', raw}` so
- * callers can handle them out-of-band without blocking the manifest read.
+ * such as rust components and future variants come back as
+ * `{kind: 'other', raw}` so callers can handle them out-of-band without
+ * blocking the manifest read.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; only its unit tests exercise it.
  */
 export async function readExternalToolsManifest(
   filepath: string,

@@ -15,7 +15,7 @@ export interface GitHubFetchOptions {
   token?: string | undefined
   /**
    * Additional HTTP headers to include in the request. Will be merged with
-   * default headers (Accept, User-Agent, Authorization).
+   * default headers: Accept, User-Agent, and Authorization.
    */
   headers?: Record<string, string> | undefined
 }
@@ -249,8 +249,8 @@ export interface GhsaDetails {
     firstPatchedVersion: { identifier: string } | null
   }>
   /**
-   * CVSS (Common Vulnerability Scoring System) information. `null` if CVSS
-   * score is not available.
+   * Common Vulnerability Scoring System information. `null` if the CVSS score
+   * is not available.
    */
   cvss: {
     /**
@@ -263,7 +263,7 @@ export interface GhsaDetails {
     vectorString: string
   } | null
   /**
-   * CWE (Common Weakness Enumeration) categories.
+   * Common Weakness Enumeration categories, known as CWEs.
    */
   cwes: Array<{
     /**

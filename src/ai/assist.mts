@@ -20,7 +20,7 @@ import { pickAgent, spawnAiAgent } from './spawn.mts'
 import type { AiAgentName } from './types.mts'
 
 // Env flag that opts a session into AI assistance. Absent / any other value =
-// disabled (opt-in is off by default).
+// disabled; the opt-in is off by default.
 export const AI_ASSIST_ENV = 'SOCKET_AI_ASSIST'
 
 // Default per-attempt timeout (5 min). A stuck-task assist must be bounded so it
@@ -29,7 +29,7 @@ export const AI_ASSIST_ENV = 'SOCKET_AI_ASSIST'
 export const DEFAULT_TIMEOUT_MS = 5 * 60 * 1000
 
 export interface AiAssistOptions {
-  // The stuck task handed to the agent (what to do).
+  // The stuck task handed to the agent: what to do.
   readonly task: string
   // The repo / working dir the agent runs in.
   readonly cwd: string

@@ -32,7 +32,7 @@ import { SetCtor } from '../primordials/map-set'
  *   // Returns: []
  *   ```
  *
- * @param arr - The array to deduplicate (can be readonly)
+ * @param arr - The array to deduplicate, which may be readonly.
  *
  * @returns New array with duplicate values removed
  */

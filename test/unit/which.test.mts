@@ -4,7 +4,7 @@
  *
  *   - which() async binary resolution in PATH
  *   - whichSync() synchronous binary resolution
- *   - Path detection (absolute, relative, bare names)
+ *   - Path detection for absolute paths, relative paths, and bare names
  *   - Cross-platform binary resolution
  */
 

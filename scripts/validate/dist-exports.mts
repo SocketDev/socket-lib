@@ -33,7 +33,8 @@ export function checkExport(filePath: string) {
   // Skip external packages - they are internal implementation details
   // used by public dist/* modules. We only validate public exports.
   const relativePath = path.relative(distDir, filePath)
-  // Normalize path for cross-platform compatibility (Windows uses backslashes)
+  // Normalize the path for cross-platform compatibility since Windows uses
+  // backslashes.
   const normalizedPath = normalizePath(relativePath)
   if (normalizedPath.startsWith('external/')) {
     return { path: filePath, ok: true, skipped: true }

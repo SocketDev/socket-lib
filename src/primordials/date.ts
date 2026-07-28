@@ -1,6 +1,6 @@
 /**
  * @file Safe references to `Date`. `DateNow` prefers the smol Fast API binding
- *   (single-byte wallclock read inlined into JIT'd callers) when available;
+ *   when available — a single-byte wallclock read inlined into JIT'd callers;
  *   stock Node falls back to `Date.now`.
  */
 

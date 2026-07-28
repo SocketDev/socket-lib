@@ -39,13 +39,14 @@ let defaultSpinnerStyle: SpinnerStyle | undefined
  *
  * - All *AndStop() methods AUTO-CLEAR the spinner line via yocto-spinner.stop()
  *   Examples: `doneAndStop()`, `successAndStop()`, `failAndStop()`, etc.
- * - Methods WITHOUT "AndStop" do NOT clear (spinner keeps spinning) Examples:
- *   `done()`, `success()`, `fail()`, etc.
+ * - Methods WITHOUT "AndStop" do NOT clear, so the spinner keeps spinning.
+ *   Examples: `done()`, `success()`, `fail()`, etc.
  *
  * STREAM USAGE:
  *
- * - Spinner animation: stderr (yocto-spinner default)
- * - Status methods (done, success, fail, info, warn, step, substep): stderr
+ * - Spinner animation: stderr, the yocto-spinner default.
+ * - Status methods `done`, `success`, `fail`, `info`, `warn`, `step`, and
+ *   `substep`: stderr
  * - Data methods (`log()`): stdout
  *
  * COMPARISON WITH LOGGER:

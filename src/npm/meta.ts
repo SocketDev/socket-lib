@@ -5,12 +5,12 @@
  *   slimming (`./meta-slice`), and the derived helpers built on top
  *   (`getVersions`, `getLatestVersion`, `getPublishDate`,
  *   `getVersionTrustInfo`, `getBatch`) plus their `safe*` fail-open variants.
- *   Node-only (the cache layer is cacache-backed) — unlike `./registry`, this
- *   module is not browser-safe.
+ *   Node-only because the cache layer is cacache-backed; unlike
+ *   `./registry`, this module is not browser-safe.
  */
 
 import { errorMessage } from '../errors/message'
-// no-platform-http-import: server-only module (cacache-backed cache); node platform is intentional.
+// no-platform-http-import: server-only module with a cacache-backed cache; node platform is intentional.
 import { HttpResponseError } from '../http-request/node'
 import { RangeErrorCtor } from '../primordials/error'
 import { pEach } from '../promises/iterate'
@@ -258,9 +258,9 @@ export async function getVersions(
     const floorMs = toEpochMs(opts.after)
     versions = versions.filter(v => {
       // A version with no recorded publish time cannot be proven to satisfy
-      // an `after`/`minAgeDays` floor, so it is EXCLUDED — a false negative
-      // (unfairly dropped) is the safer failure mode than a false positive
-      // (unfairly included) for a time-based filter.
+      // an `after`/`minAgeDays` floor, so it is EXCLUDED. For a time-based
+      // filter, an unfairly dropped false negative is the safer failure mode
+      // than an unfairly included false positive.
       const publishedAt = time[v]
       return !!publishedAt && Date.parse(publishedAt) >= floorMs
     })
@@ -279,10 +279,10 @@ export async function getVersions(
 
 /**
  * `true` when `publishedAt` is at least `minAgeDays` days old, anchored to the
- * END of `publishedAt`'s UTC day (Socket soak-window semantics) — a version
- * published at any point during a UTC day matures at the same wall-clock
- * instant, `minAgeDays` later at 23:59:59.999 UTC. Returns `false` for an
- * unparseable `publishedAt`.
+ * END of `publishedAt`'s UTC day, matching Socket soak-window semantics: a
+ * version published at any point during a UTC day matures at the same
+ * wall-clock instant, `minAgeDays` later at 23:59:59.999 UTC. Returns `false`
+ * for an unparseable `publishedAt`.
  */
 export function isMatured(
   publishedAt: string,
@@ -366,7 +366,7 @@ export function resolveRequestedVersions(
 /**
  * Fail-open `getLatestVersion` — `undefined` on any error.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function safeGetLatestVersion(
   name: string,
@@ -382,7 +382,7 @@ export async function safeGetLatestVersion(
 /**
  * Fail-open `getPackumentSlim` — `undefined` on any error.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function safeGetPackumentSlim(
   name: string,
@@ -398,7 +398,7 @@ export async function safeGetPackumentSlim(
 /**
  * Fail-open `getPublishDate` — `undefined` on any error.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function safeGetPublishDate(
   name: string,
@@ -415,7 +415,7 @@ export async function safeGetPublishDate(
 /**
  * Fail-open `getVersionTrustInfo` — an empty record on any error.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function safeGetVersionTrustInfo(
   name: string,
@@ -431,7 +431,7 @@ export async function safeGetVersionTrustInfo(
 /**
  * Fail-open `getVersions` — an empty result on any error.
  *
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function safeGetVersions(
   name: string,

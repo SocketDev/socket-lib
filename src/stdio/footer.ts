@@ -84,7 +84,8 @@ export interface SummaryStats {
    */
   errors?: number | undefined
   /**
-   * Duration in milliseconds (timestamp value, not elapsed time)
+   * Duration in milliseconds, given as a timestamp value rather than
+   * elapsed time.
    */
   duration?: number | undefined
 }
@@ -235,7 +236,7 @@ export function createSummaryFooter(
  *   // Analysis complete (in green)
  *   ```
  *
- * @param message - Optional message to display (shown in green)
+ * @param message - Optional message to display in green.
  */
 export function printFooter(message?: string | undefined): void {
   const border = repeatString('─', 55)

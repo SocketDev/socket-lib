@@ -6,7 +6,7 @@
  * Pattern for matching release assets. Can be either:
  *
  * - A string with glob pattern syntax
- * - A prefix/suffix pair for explicit matching (backward compatible)
+ * - A prefix/suffix pair for explicit, backward-compatible matching
  * - A RegExp for complex patterns
  *
  * String patterns support full glob syntax via picomatch. Examples:

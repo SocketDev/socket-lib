@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for Node.js Single Executable Application (SEA) utilities.
- *   Tests Node.js SEA (Single Executable Application) detection:
+ *   Tests Node.js SEA detection:
  *
  *   - isSeaBinary() detects if running as SEA binary
  *   - getSeaBinaryPath() returns SEA binary path if applicable
@@ -43,7 +43,7 @@ describe('sea/detect', () => {
 
     it('should return consistent cached result across repeated calls', () => {
       // Caching is an observable: the return value must be stable across
-      // repeated calls regardless of wall-clock timing (which is CI-flaky).
+      // repeated calls regardless of wall-clock timing, which is CI-flaky.
       const first = isSeaBinary()
       for (let i = 0; i < 100; i++) {
         expect(isSeaBinary()).toBe(first)

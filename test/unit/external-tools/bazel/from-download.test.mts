@@ -51,9 +51,9 @@ describe('external-tools/bazel/from-download', () => {
   it('forwards integrity through to the downloader', async () => {
     const { downloader } = makeFakeDownloader('fake')
     // Capture the second call to assert the integrity arrived. We
-    // can't intercept the dlx-level hash arg directly from the fake
-    // (the fake ignores it), so this test asserts the call shape
-    // doesn't error rather than the pin being verified.
+    // can't intercept the dlx-level hash arg directly from the fake,
+    // which ignores it, so this test asserts the call shape doesn't
+    // error rather than the pin being verified.
     await expect(
       bazelFromDownload({
         version: '7.4.1',

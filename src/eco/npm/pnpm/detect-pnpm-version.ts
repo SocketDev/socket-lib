@@ -1,7 +1,7 @@
 /**
  * @file `detectPnpmVersion(content)` — scans a pnpm-lock.yaml for its
- *   `lockfileVersion:` line and returns `5`, `6`, or `9`. Falls back to `9`
- *   (the latest) when no recognizable marker is present. Matches socket-btm's
+ *   `lockfileVersion:` line and returns `5`, `6`, or `9`. Falls back to the
+ *   latest, `9`, when no recognizable marker is present. Matches socket-btm's
  *   smol-manifest internal `detectPnpmVersion`.
  */
 

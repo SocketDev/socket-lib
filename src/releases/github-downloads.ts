@@ -67,7 +67,7 @@ export async function downloadGitHubRelease(
     toolPrefix,
   } = config
 
-  // Get release tag (either explicit or latest).
+  // Get the release tag, either the explicit one or the latest.
   let tag: string
   if (explicitTag) {
     tag = explicitTag
@@ -82,12 +82,12 @@ export async function downloadGitHubRelease(
   }
 
   const path = getNodePath()
-  // Resolve download directory (can be absolute or relative to cwd).
+  // Resolve the download directory, which may be absolute or relative to cwd.
   const resolvedDownloadDir = path.isAbsolute(downloadDir)
     ? downloadDir
     : path.join(cwd, downloadDir)
 
-  // Caller controls full directory structure (no automatic nesting).
+  // Caller controls the full directory structure, so nothing nests it here.
   const binaryDir = resolvedDownloadDir
   const binaryPath = path.join(binaryDir, binaryName)
   const versionPath = path.join(binaryDir, '.version')

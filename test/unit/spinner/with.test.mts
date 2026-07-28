@@ -1,8 +1,8 @@
 /**
  * @file Unit tests for the withSpinner()/withSpinnerSync() wrappers that wrap
  *   async and sync operations with an animated spinner and restore spinner
- *   state (color, shimmer) afterwards, including on error. Used by Socket CLI
- *   for long-running operations (package scanning, API calls).
+ *   state such as color and shimmer afterwards, including on error. Used by
+ *   Socket CLI for long-running operations (package scanning, API calls).
  */
 
 import process from 'node:process'

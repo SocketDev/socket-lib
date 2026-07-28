@@ -45,7 +45,7 @@ export const TRUFFLEHOG_ASSET_MAP: Readonly<
 }) as unknown as Readonly<Record<string, TrufflehogAssetEntry>>
 
 /**
- * @unused No internal or Socket consumers (exercised only by its unit tests).
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function getTrufflehogAssetEntry(
   platformArch: string,

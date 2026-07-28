@@ -42,7 +42,7 @@ export function createAssetMatcher(
     return (input: string) => pattern.test(input)
   }
 
-  // Prefix/suffix object pattern (backward compatible).
+  // Prefix/suffix object pattern, kept for backward compatibility.
   const { prefix, suffix } = pattern
   return (input: string) =>
     StringPrototypeStartsWith(input, prefix) &&
