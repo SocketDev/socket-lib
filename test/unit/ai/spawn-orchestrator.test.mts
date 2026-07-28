@@ -262,6 +262,86 @@ describe.sequential('ai/spawn — spawnAiAgent retries on overload', () => {
   })
 })
 
+describe.sequential('ai/spawn — retries without a flag the CLI rejects', () => {
+  test('drops --effort and retries when the CLI reports it unknown', async () => {
+    const { discoverAiAgents, spawnAiAgent } = await loadFresh()
+    discoverAiAgents.mockResolvedValueOnce({ claude: '/p' })
+    mockChildSpawn
+      .mockReturnValueOnce(
+        makeSpawnReturn({
+          code: 1,
+          stdout: '',
+          stderr: "error: unknown option '--effort'",
+        }),
+      )
+      .mockReturnValueOnce(
+        makeSpawnReturn({ code: 0, stdout: 'did-the-work', stderr: '' }),
+      )
+    const result = await spawnAiAgent({ ...baseOpts, effort: 'high' })
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toBe('did-the-work')
+    // The first attempt carried the flag, the retry did not.
+    const [, firstArgs] = mockChildSpawn.mock.calls[0]!
+    const [, retryArgs] = mockChildSpawn.mock.calls[1]!
+    expect(firstArgs as string[]).toContain('--effort')
+    expect(retryArgs as string[]).not.toContain('--effort')
+    // The value goes with the flag; the lockdown args survive.
+    expect(retryArgs as string[]).not.toContain('high')
+    expect(retryArgs as string[]).toContain('--permission-mode')
+  })
+
+  test('retrying costs an attempt rather than looping forever', async () => {
+    const { discoverAiAgents, spawnAiAgent } = await loadFresh()
+    discoverAiAgents.mockResolvedValueOnce({ claude: '/p' })
+    // Every attempt claims the flag is unknown. Once it is stripped the claim
+    // no longer matches a flag in argv, so the loop has to exit.
+    mockChildSpawn.mockReturnValue(
+      makeSpawnReturn({
+        code: 1,
+        stdout: '',
+        stderr: "error: unknown option '--effort'",
+      }),
+    )
+    const result = await spawnAiAgent({ ...baseOpts, effort: 'low' })
+    expect(result.exitCode).toBe(1)
+    expect(result.attempts).toBe(2)
+  })
+
+  test('leaves args alone when a DIFFERENT flag is rejected', async () => {
+    const { discoverAiAgents, spawnAiAgent } = await loadFresh()
+    discoverAiAgents.mockResolvedValueOnce({ claude: '/p' })
+    mockChildSpawn.mockReturnValue(
+      makeSpawnReturn({
+        code: 1,
+        stdout: '',
+        stderr: "error: unknown option '--model'",
+      }),
+    )
+    const result = await spawnAiAgent({ ...baseOpts, effort: 'high' })
+    // Not a flag this layer treats as optional, so it fails on the first pass.
+    expect(result.exitCode).toBe(1)
+    expect(result.attempts).toBe(1)
+  })
+
+  test('does not retry when the run SUCCEEDS while printing the phrase', async () => {
+    const { discoverAiAgents, spawnAiAgent } = await loadFresh()
+    discoverAiAgents.mockResolvedValueOnce({ claude: '/p' })
+    // Work output can quote a CLI error verbatim; a zero exit is a success
+    // whatever the text says.
+    mockChildSpawn.mockReturnValueOnce(
+      makeSpawnReturn({
+        code: 0,
+        stdout: "fixed a bug where we logged: unknown option '--effort'",
+        stderr: '',
+      }),
+    )
+    const result = await spawnAiAgent({ ...baseOpts, effort: 'high' })
+    expect(result.exitCode).toBe(0)
+    expect(result.attempts).toBe(1)
+    expect(mockChildSpawn).toHaveBeenCalledTimes(1)
+  })
+})
+
 describe.sequential('ai/spawn — pickAgent', () => {
   test('rejects when requested agent is not discovered', async () => {
     const { discoverAiAgents, pickAgent } = await loadFresh()
