@@ -206,4 +206,28 @@ describe('pullFirstLayer (full anon-pull flow)', () => {
       pullFirstLayer('ghcr.io', 'owner/pkg', 'v1', { http }),
     ).rejects.toThrow(/Manifest carried no pullable layer/)
   })
+
+  it('fails loud when the sole layer has no digest', async () => {
+    const routes = new Map<string, FakeRoute>([
+      ['https://ghcr.io/v2/', { status: 200 }],
+      [
+        'https://ghcr.io/token?service=ghcr.io&scope=repository%3Aowner%2Fpkg%3Apull',
+        { body: { token: 'tok' } },
+      ],
+      [
+        'https://ghcr.io/v2/owner/pkg/manifests/v1',
+        {
+          body: {
+            config: { digest: 'sha256:c' },
+            layers: [{ mediaType: 'application/gzip' }],
+          },
+          headers: {},
+        },
+      ],
+    ])
+    const { http } = makeFakeAdapter(routes)
+    await expect(
+      pullFirstLayer('ghcr.io', 'owner/pkg', 'v1', { http }),
+    ).rejects.toThrow(/Manifest carried no pullable layer/)
+  })
 })

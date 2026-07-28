@@ -81,4 +81,14 @@ describe('getBlobJson', () => {
     expect(calls[0]?.headers?.['authorization']).toBe('Bearer tok')
     expect(calls[0]?.headers?.['accept']).toBe('application/json')
   })
+
+  it('omits Authorization when the token is empty', async () => {
+    const url = 'https://ghcr.io/v2/owner/pkg/blobs/sha256:cfg'
+    const routes = new Map<string, FakeRoute>([
+      [url, { body: { created: '2026-01-01T00:00:00Z' } }],
+    ])
+    const { calls, http } = makeFakeAdapter(routes)
+    await getBlobJson('ghcr.io', 'owner/pkg', 'sha256:cfg', '', { http })
+    expect(calls[0]?.headers?.['authorization']).toBeUndefined()
+  })
 })

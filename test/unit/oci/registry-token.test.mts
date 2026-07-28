@@ -171,6 +171,41 @@ describe('getRegistryToken', () => {
     expect(token).toBe('')
   })
 
+  it('returns an empty token when the endpoint body has neither field', async () => {
+    const routes = new Map<string, FakeRoute>([
+      ['https://reg.example/v2/', { status: 200 }],
+      [
+        'https://reg.example/token?service=reg.example&scope=repository%3Aowner%2Fpkg%3Apull',
+        { body: {} },
+      ],
+    ])
+    const { http } = makeFakeAdapter(routes)
+    const token = await getRegistryToken('reg.example', 'owner/pkg', { http })
+    expect(token).toBe('')
+  })
+
+  it('fails loud when the challenge-flow token endpoint rejects', async () => {
+    const routes = new Map<string, FakeRoute>([
+      [
+        'https://ghcr.io/v2/',
+        {
+          headers: {
+            'www-authenticate': 'Bearer realm="https://ghcr.io/token"',
+          },
+          status: 401,
+        },
+      ],
+      [
+        'https://ghcr.io/token?scope=repository%3Aowner%2Fpkg%3Apull',
+        { status: 500, statusText: 'Server Error' },
+      ],
+    ])
+    const { http } = makeFakeAdapter(routes)
+    await expect(
+      getRegistryToken('ghcr.io', 'owner/pkg', { http }),
+    ).rejects.toThrow(/Token request failed/)
+  })
+
   it('fails loud on a 401 with no parseable challenge', async () => {
     const routes = new Map<string, FakeRoute>([
       ['https://reg.example/v2/', { status: 401 }],
