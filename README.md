@@ -46,13 +46,13 @@ Start with the [API reference](./docs/api.md) — every subpath export with a on
 <summary>Contributor commands</summary>
 
 ```sh
-pnpm install          # install
 pnpm build            # build
-pnpm test             # run tests
-pnpm run cover        # tests with coverage
 pnpm dev              # watch mode
-pnpm run lint         # check style
+pnpm install          # install before build
+pnpm run cover        # tests with coverage
 pnpm run fix          # auto-fix formatting
+pnpm run lint         # check style
+pnpm test             # run tests
 ```
 
 See [CLAUDE.md](./CLAUDE.md) for contributor guidelines.
