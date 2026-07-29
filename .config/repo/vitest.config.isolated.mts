@@ -9,7 +9,7 @@ import process from 'node:process'
 import { defineConfig } from 'vitest/config'
 
 import { baseCoverageConfig } from '../vitest.coverage.config.mts'
-import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
+import { REPO_CACHE_DIR, REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = REPO_ROOT
@@ -27,7 +27,7 @@ export function toGlobPath(pathLike: string) {
 }
 
 const vitestConfigIsolated = defineConfig({
-  cacheDir: path.resolve(projectRoot, 'node_modules/.cache/vitest-isolated'),
+  cacheDir: path.join(REPO_CACHE_DIR, 'vitest-isolated'),
   resolve: {
     preserveSymlinks: false,
     extensions: ['.mts', '.ts', '.mjs', '.js', '.json'],
