@@ -23,6 +23,34 @@ import {
 } from './collapse-engine-gates.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+/**
+ * The guarded define substitutions every external build applies. Exported so
+ * the regression test can assert no bare identifier here shadows a REAL
+ * runtime global — substituting one turns a dep's correct feature detection
+ * into a `(void 0).x` crash (Node 21 promoted `navigator`, Node 22
+ * `WebSocket`, Node 26 `localStorage`/`sessionStorage`; picomatch's
+ * isWindows hit the navigator one in 6.5.0). Only identifiers Node does not
+ * define belong here.
+ */
+export const GUARDED_DEFINES: Record<string, string> = {
+  __DEV__: 'false',
+  __JEST__: 'false',
+  __MOCHA__: 'false',
+  __TEST__: 'false',
+  document: 'undefined',
+  'global.GENTLY': 'false',
+  HTMLElement: 'undefined',
+  'process.browser': 'false',
+  'process.env.CI': 'false',
+  'process.env.DEBUG': 'undefined',
+  'process.env.JEST_WORKER_ID': 'undefined',
+  'process.env.NODE_ENV': '"production"',
+  'process.env.NODE_TEST': 'undefined',
+  'process.env.VERBOSE': 'false',
+  window: 'undefined',
+  XMLHttpRequest: 'undefined',
+}
 const stubsDir = path.join(__dirname, 'stubs')
 
 // Resolved once per build: package.json engines.node, asserted at or above
@@ -278,26 +306,7 @@ export function getRolldownConfig(
       // instead of becoming the strict-mode-illegal `delete undefined`. Plain
       // `transform.define` / @rollup/plugin-replace can't guard `delete`.
       defineGuardedPlugin({
-        'process.env.NODE_ENV': '"production"',
-        __DEV__: 'false',
-        'global.GENTLY': 'false',
-        'process.env.DEBUG': 'undefined',
-        'process.browser': 'false',
-        'process.env.VERBOSE': 'false',
-        window: 'undefined',
-        document: 'undefined',
-        navigator: 'undefined',
-        HTMLElement: 'undefined',
-        localStorage: 'undefined',
-        sessionStorage: 'undefined',
-        XMLHttpRequest: 'undefined',
-        WebSocket: 'undefined',
-        __TEST__: 'false',
-        'process.env.CI': 'false',
-        __JEST__: 'false',
-        __MOCHA__: 'false',
-        'process.env.JEST_WORKER_ID': 'undefined',
-        'process.env.NODE_TEST': 'undefined',
+        ...GUARDED_DEFINES,
         ...packageOpts.define,
       }),
       ...(packageOpts.plugins || []),
