@@ -171,7 +171,7 @@ async function main(): Promise<void> {
 
     // Build task list
     if (cleanAll || values.cache) {
-      tasks.push({ name: 'cache', pattern: 'node_modules/.cache' })
+      tasks.push({ name: 'cache', pattern: '.cache' })
     }
 
     if (cleanAll || values.coverage) {
