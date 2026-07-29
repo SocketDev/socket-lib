@@ -4,6 +4,11 @@
  *   out of the published build.
  */
 
+import { mkdtempSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
+import os from 'node:os'
+import path from 'node:path'
+
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -11,6 +16,8 @@ import {
   makeUnexposedModuleSource,
   STUB_BANNER,
 } from '../../scripts/repo/build-stubs/unexposed.mts'
+
+const requireHere = createRequire(import.meta.url)
 
 describe('collectRuntimeExportNames', () => {
   it('reads literal exports assignments, deduped and sorted', () => {
@@ -37,14 +44,15 @@ describe('makeUnexposedModuleSource', () => {
       'extractArchive',
     ])
     expect(source.startsWith(STUB_BANNER)).toBe(true)
-    const moduleShim = { exports: {} as Record<string, () => unknown> }
-    // oxlint-disable-next-line no-new-func -- evaluating the generated CJS module body is the test.
-    new Function('exports', 'module', source)(moduleShim.exports, moduleShim)
-    expect(Object.keys(moduleShim.exports)).toEqual(['extractArchive'])
-    expect(() => moduleShim.exports['extractArchive']!()).toThrow(
+    const stubDir = mkdtempSync(path.join(os.tmpdir(), 'unexposed-stub-'))
+    const stubPath = path.join(stubDir, 'extract.js')
+    writeFileSync(stubPath, source)
+    const stub = requireHere(stubPath) as Record<string, () => unknown>
+    expect(Object.keys(stub)).toEqual(['extractArchive'])
+    expect(() => stub['extractArchive']!()).toThrow(
       /extractArchive is compiled out of this @socketsecurity\/lib build/,
     )
-    expect(() => moduleShim.exports['extractArchive']!()).toThrow(
+    expect(() => stub['extractArchive']!()).toThrow(
       /open an issue at https:\/\/github\.com\/SocketDev\/socket-lib\/issues/,
     )
   })
