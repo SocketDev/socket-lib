@@ -75,6 +75,15 @@ export interface ToolInput {
   // it to record which skill fired). Optional + unknown so a shape surprise
   // can't crash the narrow.
   readonly skill?: unknown | undefined
+  // Grep/Glob: the search root a query is scoped to. Read by hooks that gate
+  // WHERE a search may look, not just what it edits.
+  readonly path?: unknown | undefined
+  // Grep/Glob: the search expression itself — a regex for Grep, a path glob
+  // for Glob. A Glob pattern names paths, so a path-scoped guard reads it too.
+  readonly pattern?: unknown | undefined
+  // WebFetch: the URL to fetch. Read by hooks that gate network reads of a
+  // specific origin or repository.
+  readonly url?: unknown | undefined
 }
 
 /**

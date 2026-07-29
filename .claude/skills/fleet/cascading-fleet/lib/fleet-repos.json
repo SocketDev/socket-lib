@@ -80,6 +80,11 @@
       "publishes": "js"
     },
     {
+      "name": "scan-patterns",
+      "description": "Canonical detector pattern tables for Socket's baseline security scanners.",
+      "publishes": "js"
+    },
+    {
       "name": "sdxgen",
       "description": "CycloneDX and SPDX manifest generator (Socket dx gen)",
       "optIns": ["squash-history"]

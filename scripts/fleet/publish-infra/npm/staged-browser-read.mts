@@ -43,6 +43,13 @@ const DEFAULT_PROFILE_DIR = path.join(
 const SIGN_IN_TIMEOUT_MS = 5 * 60_000
 const SIGN_IN_POLL_MS = 2000
 
+// Browser-read tarball size ceiling: the in-page base64 round-trip peaks at
+// several times the tarball size and would OOM the renderer or exceed V8's max
+// string length on a huge artifact. 256 MB is generous for a package tarball
+// and well under that ceiling; a larger staged artifact falls back to the
+// registry/local pack path.
+const MAX_STAGED_TARBALL_BYTES = 256 * 1024 * 1024
+
 // Challenge backoff: 15s → 30s → 60s, matching the fleet cooldown ladder.
 const CHALLENGE_MAX_ATTEMPTS = 4
 const CHALLENGE_BASE_MS = 15_000
@@ -218,36 +225,61 @@ export async function downloadStagedTarballInPage(
   if (!url) {
     return undefined
   }
-  let base64: string
+  const label = `${tarball.packageName}@${tarball.version}`
+  let result:
+    | { base64: string; kind: 'ok' }
+    | { bytes: number; kind: 'too-large' }
+    | { kind: 'error' }
   try {
-    base64 = await page.evaluate(async fetchUrl => {
-      // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- runs in the npm page's MAIN world; only the page session can read the staged tarball.
-      const r = await fetch(fetchUrl, {
-        cache: 'no-store',
-        credentials: 'same-origin',
-      })
-      if (!r.ok) {
-        return ''
-      }
-      const buf = new Uint8Array(await r.arrayBuffer())
-      let binary = ''
-      for (let i = 0, { length } = buf; i < length; i += 1) {
-        binary += String.fromCharCode(buf[i]!)
-      }
-      return btoa(binary)
-    }, url)
+    result = await page.evaluate(
+      async ({ fetchUrl, maxBytes }) => {
+        // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- runs in the npm page's MAIN world; only the page session can read the staged tarball.
+        const r = await fetch(fetchUrl, {
+          cache: 'no-store',
+          credentials: 'same-origin',
+        })
+        if (!r.ok) {
+          return { kind: 'error' as const }
+        }
+        // Reject before buffering when the server declares an oversize body,
+        // and again after reading in case it was chunked with no length. The
+        // base64 round-trip below peaks at several times the tarball size and
+        // would OOM the renderer or blow V8's max string length on a huge
+        // artifact; a too-large result falls back to the registry/local pack.
+        const declared = Number(r.headers.get('content-length') || '0')
+        if (declared > maxBytes) {
+          return { bytes: declared, kind: 'too-large' as const }
+        }
+        const buf = new Uint8Array(await r.arrayBuffer())
+        if (buf.byteLength > maxBytes) {
+          return { bytes: buf.byteLength, kind: 'too-large' as const }
+        }
+        let binary = ''
+        for (let i = 0, { length } = buf; i < length; i += 1) {
+          binary += String.fromCharCode(buf[i]!)
+        }
+        return { base64: btoa(binary), kind: 'ok' as const }
+      },
+      { fetchUrl: url, maxBytes: MAX_STAGED_TARBALL_BYTES },
+    )
   } catch (e) {
     logger.warn(
-      `Could not read staged tarball for ${tarball.packageName}@${tarball.version} in the browser (${errorMessage(e)}).`,
+      `Could not read staged tarball for ${label} in the browser (${errorMessage(e)}).`,
     )
     return undefined
   }
-  if (!base64) {
+  if (result.kind === 'too-large') {
+    logger.warn(
+      `Staged tarball for ${label} is ${result.bytes} bytes, over the ${MAX_STAGED_TARBALL_BYTES}-byte browser-read cap; falling back to the registry/local pack.`,
+    )
+    return undefined
+  }
+  if (result.kind === 'error' || !result.base64) {
     return undefined
   }
   const dir = await fs.mkdtemp(path.join(os.tmpdir(), 'socket-staged-tar-'))
   const file = path.join(dir, 'staged.tgz')
-  await fs.writeFile(file, Buffer.from(base64, 'base64'))
+  await fs.writeFile(file, Buffer.from(result.base64, 'base64'))
   return file
 }
 

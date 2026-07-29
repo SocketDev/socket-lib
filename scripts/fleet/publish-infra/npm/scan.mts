@@ -23,6 +23,10 @@ import process from 'node:process'
 import { SocketSdk } from '@socketsecurity/sdk-stable'
 
 import { logger, rootPath, runCapture } from '../shared.mts'
+import {
+  acquireSocketTokenViaOAuth,
+  socketOAuthConfigured,
+} from '../socket-oauth.mts'
 import { defaultPackTarball } from './staged.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
@@ -106,6 +110,16 @@ export async function preflightSocketScanAuth(
   } = { __proto__: null, ...options } as NonNullable<typeof options>
 
   let token = resolveSocketApiToken(env)
+  if (!token && socketOAuthConfigured(env)) {
+    // Browser OAuth (authorization-code + PKCE + loopback) — no key to copy.
+    // The browser opens on the operator's screen, so this path does not need
+    // a TTY; a thrown failure falls through to the paste/fail paths below.
+    try {
+      token = await acquireSocketTokenViaOAuth({ env, openUrl })
+    } catch (e) {
+      logger.warn(errorMessage(e))
+    }
+  }
   if (!token && interactive) {
     logger.log(
       `Scan gate: no Socket API token in the environment — opening ${SOCKET_TOKEN_MINT_URL} ` +
@@ -232,21 +246,56 @@ export function collectPolicyFailingAlerts(
 // Full-scan payload shapes vary by endpoint version (a bare artifact array vs
 // an `{ artifacts: [...] }` wrapper); normalize to the artifact array the
 // policy evaluation consumes.
-function normalizeFullScanArtifacts(data: unknown): Array<{
+export interface FullScanArtifact {
   alerts?: Array<{ severity?: string | undefined; type: string }> | undefined
   name?: string | undefined
   version?: string | undefined
-}> {
+}
+
+export type SecurityPolicyRules = Record<
+  string,
+  { action?: string | undefined }
+>
+
+// Return the artifact list for a RECOGNIZED full-scan response shape (a bare
+// array or `{ artifacts: [...] }`), or undefined when the shape is
+// unrecognized. The gate fails closed on undefined rather than conflating
+// "unknown response shape" with "clean" — the SDK maps an empty HTTP body to
+// `{}`, and a future enveloped/paginated shape would otherwise silently pass.
+// A recognized-but-empty `[]` is also a fail-closed signal at the call site: a
+// real full scan of a package always yields at least the package's own
+// artifact, so zero artifacts means nothing was evaluated.
+export function normalizeFullScanArtifacts(
+  data: unknown,
+): FullScanArtifact[] | undefined {
   if (Array.isArray(data)) {
-    return data as ReturnType<typeof normalizeFullScanArtifacts>
+    return data as FullScanArtifact[]
   }
   if (data && typeof data === 'object') {
     const maybe = (data as { artifacts?: unknown | undefined }).artifacts
     if (Array.isArray(maybe)) {
-      return maybe as ReturnType<typeof normalizeFullScanArtifacts>
+      return maybe as FullScanArtifact[]
     }
   }
-  return []
+  return undefined
+}
+
+// Return the org security-policy rule map for a RECOGNIZED shape, or undefined
+// when `securityPolicyRules` is absent or not an object. The gate fails closed
+// on undefined rather than defaulting to an empty map — an empty map matches
+// no alert, so a missing/renamed policy would silently approve a package that
+// carries genuine error-action alerts.
+export function extractSecurityPolicyRules(
+  data: unknown,
+): SecurityPolicyRules | undefined {
+  if (data && typeof data === 'object') {
+    const rules = (data as { securityPolicyRules?: unknown | undefined })
+      .securityPolicyRules
+    if (rules && typeof rules === 'object') {
+      return rules as SecurityPolicyRules
+    }
+  }
+  return undefined
 }
 
 /**
@@ -297,95 +346,124 @@ export async function scanStagedEntry(
     )
     return false
   }
-  const tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), 'socket-scan-gate-'))
+  // The downloaded-tarball cleanup wraps the extract-dir mkdtemp too, so a
+  // packTarball provider's temp download (registry stage-download / browser
+  // passback, both under os.tmpdir()) is still removed if mkdtemp itself
+  // throws. A repo-local pnpm pack output lands in the package dir, not under
+  // tmpdir, so it is never touched.
+  const tmpRoot = os.tmpdir()
   try {
-    const untar = await runCapture(
-      'tar',
-      ['-xzf', tarballPath, '-C', tmpDir],
-      rootPath,
-    )
-    if (untar.code !== 0) {
-      logger.fail(
-        `Scan gate: extracting ${tarballPath} failed (tar exited ${untar.code}).`,
-      )
-      return false
-    }
-    // npm tarballs root their contents at `package/`.
-    const packageDir = path.join(tmpDir, 'package')
-    logger.log(
-      `Scan gate: Socket full scan (tmp) on ${name}@${version} via the API…`,
-    )
-    let scanId: string | undefined
+    const tmpDir = await fs.mkdtemp(path.join(tmpRoot, 'socket-scan-gate-'))
     try {
-      const created = await sdk.createFullScan(orgSlug, ['package.json'], {
-        pathsRelativeTo: packageDir,
-        repo: 'staged-publish-gate',
-        tmp: true,
-      })
-      if (created.success) {
-        scanId = (created.data as { id?: string | undefined }).id
-      } else {
+      const untar = await runCapture(
+        'tar',
+        ['-xzf', tarballPath, '-C', tmpDir],
+        rootPath,
+      )
+      if (untar.code !== 0) {
         logger.fail(
-          `Scan gate: full-scan create failed for ${name}@${version} ` +
-            `(status ${created.status}${created.error ? `: ${String(created.error)}` : ''}).`,
+          `Scan gate: extracting ${tarballPath} failed (tar exited ${untar.code}).`,
         )
         return false
       }
-    } catch (e) {
-      logger.fail(
-        `Scan gate: full-scan create threw for ${name}@${version} (${errorMessage(e)}).`,
+      // npm tarballs root their contents at `package/`.
+      const packageDir = path.join(tmpDir, 'package')
+      logger.log(
+        `Scan gate: Socket full scan (tmp) on ${name}@${version} via the API…`,
       )
-      return false
-    }
-    if (!scanId) {
-      logger.fail(
-        `Scan gate: full-scan create returned no scan id for ${name}@${version}; not approving.`,
-      )
-      return false
-    }
-    let artifacts: ReturnType<typeof normalizeFullScanArtifacts>
-    let policyRules: Record<string, { action?: string | undefined }>
-    try {
-      const [scan, policy] = await Promise.all([
-        sdk.getFullScan(orgSlug, scanId),
-        sdk.getOrgSecurityPolicy(orgSlug),
-      ])
-      if (!scan.success || !policy.success) {
+      let scanId: string | undefined
+      try {
+        const created = await sdk.createFullScan(orgSlug, ['package.json'], {
+          pathsRelativeTo: packageDir,
+          repo: 'staged-publish-gate',
+          tmp: true,
+        })
+        if (created.success) {
+          scanId = (created.data as { id?: string | undefined }).id
+        } else {
+          logger.fail(
+            `Scan gate: full-scan create failed for ${name}@${version} ` +
+              `(status ${created.status}${created.error ? `: ${String(created.error)}` : ''}).`,
+          )
+          return false
+        }
+      } catch (e) {
         logger.fail(
-          `Scan gate: could not read the scan or the org security policy for ${name}@${version}; not approving.`,
+          `Scan gate: full-scan create threw for ${name}@${version} (${errorMessage(e)}).`,
         )
         return false
       }
-      artifacts = normalizeFullScanArtifacts(scan.data)
-      policyRules =
-        ((policy.data as { securityPolicyRules?: unknown | undefined })
-          .securityPolicyRules as typeof policyRules | undefined) ?? {}
-    } catch (e) {
-      logger.fail(
-        `Scan gate: reading scan results threw for ${name}@${version} (${errorMessage(e)}).`,
-      )
-      return false
-    }
-    const failing = collectPolicyFailingAlerts(artifacts, policyRules)
-    if (failing.length > 0) {
-      logger.fail(
-        `Scan gate: ${failing.length} policy-failing alert(s) for ${name}@${version}; not approving.`,
-      )
-      for (let i = 0, { length } = failing; i < length; i += 1) {
-        const f = failing[i]!
-        logger.fail(`  - ${f.type} (${f.severity}) in ${f.artifact}`)
+      if (!scanId) {
+        logger.fail(
+          `Scan gate: full-scan create returned no scan id for ${name}@${version}; not approving.`,
+        )
+        return false
       }
-      return false
+      let artifacts: FullScanArtifact[]
+      let policyRules: SecurityPolicyRules
+      try {
+        const [scan, policy] = await Promise.all([
+          sdk.getFullScan(orgSlug, scanId),
+          sdk.getOrgSecurityPolicy(orgSlug),
+        ])
+        if (!scan.success || !policy.success) {
+          logger.fail(
+            `Scan gate: could not read the scan or the org security policy for ${name}@${version}; not approving.`,
+          )
+          return false
+        }
+        // Fail closed on an unrecognized or empty scan/policy: an unknown
+        // response shape (or the SDK's empty-body → `{}`) must never read as
+        // "clean". A real full scan yields at least the package's own artifact,
+        // and a real org carries a policy rule map; the absence of either means
+        // nothing was actually evaluated.
+        const rawArtifacts = normalizeFullScanArtifacts(scan.data)
+        if (!rawArtifacts || rawArtifacts.length === 0) {
+          logger.fail(
+            `Scan gate: full scan for ${name}@${version} returned no recognizable ` +
+              'artifacts; refusing to approve bytes the scan did not evaluate.',
+          )
+          return false
+        }
+        const rules = extractSecurityPolicyRules(policy.data)
+        if (!rules) {
+          logger.fail(
+            `Scan gate: org security policy for ${name}@${version} was empty or ` +
+              'unrecognized; refusing to approve without a policy to evaluate against.',
+          )
+          return false
+        }
+        artifacts = rawArtifacts
+        policyRules = rules
+      } catch (e) {
+        logger.fail(
+          `Scan gate: reading scan results threw for ${name}@${version} (${errorMessage(e)}).`,
+        )
+        return false
+      }
+      const failing = collectPolicyFailingAlerts(artifacts, policyRules)
+      if (failing.length > 0) {
+        logger.fail(
+          `Scan gate: ${failing.length} policy-failing alert(s) for ${name}@${version}; not approving.`,
+        )
+        for (let i = 0, { length } = failing; i < length; i += 1) {
+          const f = failing[i]!
+          logger.fail(`  - ${f.type} (${f.severity}) in ${f.artifact}`)
+        }
+        return false
+      }
+      return true
+    } finally {
+      await safeDelete(tmpDir)
     }
-    return true
   } finally {
-    await safeDelete(tmpDir)
     // Clean the tarball too when a packTarball provider downloaded it into a
     // temp dir (the registry-API `stage download` and the browser-read
-    // passback both mkdtemp under os.tmpdir()). A repo-local `pnpm pack`
-    // output lands in the package dir, NOT under tmpdir, so it is never
-    // touched — pnpm/repo hygiene owns that one.
-    const tmpRoot = os.tmpdir()
+    // passback both mkdtemp under os.tmpdir()). This outer finally also runs
+    // if the extract-dir mkdtemp above throws, so a downloaded tarball is
+    // never orphaned. A repo-local `pnpm pack` output lands in the package
+    // dir, NOT under tmpdir, so it is never touched — pnpm/repo hygiene owns
+    // that one.
     if (tarballPath.startsWith(tmpRoot + path.sep)) {
       await safeDelete(path.dirname(tarballPath))
     }
