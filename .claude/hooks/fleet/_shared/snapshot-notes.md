@@ -140,7 +140,7 @@ What the two completed steps added vs the prior 97-hook state:
   `judgment-nudge`'s lazy `await import('compromise')` (inside its check fn, never
   at module-eval) is code-split by default, and both the snapshot bundle
   (`--build-snapshot` consumes one CJS file) and the production bundle
-  (`index.cjs` `require()`s one `bundle.cjs`) need a single chunk.
+  (`index.cjs` `require()`s one `fleet-pack.cjs`) need a single chunk.
 
 - **Semver "over-exclusion" drop: NOT removed — proven load-bearing.** Step 2
   asked to drop the `new Comparator at module-eval` exclusion (the config's
@@ -199,7 +199,7 @@ Built with each Node major — the blob is Node-major + platform + V8-tag keyed:
   Node majors. Fixtures cover PreToolUse Bash (clean / `cd` nudge / commit-format
   block → exit 2), PreToolUse Edit, PreToolUse Write, PostToolUse Edit.
 
-Blob sizes (Node 24): snapshot-bundle.cjs 1.67 MB → blob ~10.9 MB. The
+Blob sizes (Node 24): snapshot-fleet-pack.cjs 1.67 MB → blob ~10.9 MB. The
 `compromise` inline (`judgment-nudge`) is most of the bundle growth over the
 97-hook state.
 
@@ -246,7 +246,7 @@ blob, or any error falls open to `node index.cjs <Event>`, the always-correct
 compile-cache path (same fail-open target `snapshot-loader.cjs` uses).
 
 **FAIL-OPEN COVERAGE — now FULL, the hybrid caveat is retired:** with all 190
-hooks in the single frozen bundle, `index.cjs` requires `bundle.cjs` = **the same
+hooks in the single frozen bundle, `index.cjs` requires `fleet-pack.cjs` = **the same
 full 190-hook set** the snapshot freezes (both compile from `dispatch-table.mts`
 via `dispatch-entry.mts` → `runDispatcherCli`). So a launcher fail-open to
 `node index.cjs <Event>` now runs the COMPLETE guard set — there is no longer a
@@ -322,7 +322,7 @@ the wiring is TWO layers:
 
 1. **The cascaded, fleet-canonical baseline — `settings.json` → `node
    ".../index.cjs" <Event>`.** The V8 COMPILE-CACHE path. `index.cjs` requires
-   `bundle.cjs` = the COMPLETE 190-hook set (same `dispatch-table.mts` the
+   `fleet-pack.cjs` = the COMPLETE 190-hook set (same `dispatch-table.mts` the
    snapshot freezes), so it is correct on every os/arch — Windows included — with
    zero per-machine state. This is what ships to every fleet repo, and it is the
    launcher's own fail-open target, so the worst case anywhere is this complete,
@@ -330,7 +330,7 @@ the wiring is TWO layers:
 
 2. **The per-machine fast path — build-on-setup wires the native launcher.** The
    setup step `scripts/fleet/setup/hook-snapshot.mts` (run by `pnpm setup-all` /
-   `node scripts/fleet/setup/index.mts`) builds `bundle.cjs`/`index.cjs`, the
+   `node scripts/fleet/setup/index.mts`) builds `fleet-pack.cjs`/`index.cjs`, the
    snapshot blob, and the host launcher, then ON POSIX rewrites the LIVE
    `.claude/settings.json` dispatch commands to the launcher binary
    (`"$CLAUDE_PROJECT_DIR"/.claude/hooks/fleet/_dispatch/dispatch-launcher
@@ -382,8 +382,8 @@ fail-open.
 
 ```sh
 node scripts/fleet/gen/hook-dispatch.mts          # regen the 190-hook table
-node scripts/fleet/build-hook-bundle.mts           # build the compile-cache bundle.cjs (index.cjs requires it)
-node scripts/fleet/build-hook-snapshot.mts         # build snapshot-bundle.cjs + the runtime-keyed blob
+node scripts/fleet/build-hook-bundle.mts           # build the compile-cache fleet-pack.cjs (index.cjs requires it)
+node scripts/fleet/build-hook-snapshot.mts         # build snapshot-fleet-pack.cjs + the runtime-keyed blob
 node scripts/fleet/build-snapshot-launcher.mts     # compile the host launcher + freeze its sidecars
 node scripts/fleet/setup/hook-snapshot.mts         # build all of the above + wire the live settings (POSIX)
 ```

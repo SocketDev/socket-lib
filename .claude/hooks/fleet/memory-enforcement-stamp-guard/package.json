@@ -1,5 +1,5 @@
 {
-  "name": "hook-rg-replace-flag-nudge",
+  "name": "hook-memory-enforcement-stamp-guard",
   "private": true,
   "type": "module",
   "main": "./index.mts",
@@ -10,7 +10,6 @@
     "test": "node --test test/*.test.mts"
   },
   "devDependencies": {
-    "@socketsecurity/lib-stable": "catalog:",
     "@types/node": "catalog:"
   }
 }

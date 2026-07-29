@@ -33,8 +33,8 @@ import '../_shared/es-polyfills.mts'
 import process from 'node:process'
 import v8 from 'node:v8'
 
-import { dispatch } from './dispatch.mts'
-import type { DispatchPayload } from './dispatch.mts'
+import { dispatch } from './dispatch-hook.mts'
+import type { DispatchPayload } from './dispatch-hook.mts'
 
 // FULL COVERAGE (190/190 in ONE bundle): every candidate hook is now frozen into
 // the snapshot, so the prior hybrid's runtime `loadBundleB()` is gone — there is

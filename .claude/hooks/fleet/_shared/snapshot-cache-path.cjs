@@ -39,14 +39,16 @@ function versionTag() {
   return `${process.version}-${process.arch}-${v8Tag()}${uid}`
 }
 
-// Durable per-runtime store under the repo's `node_modules/.cache/` (the fleet
-// runtime-state home for dep-0 code): git-ignored (node_modules is), out of the
-// tracked tree, and — unlike `os.tmpdir()` — NOT reaped by the OS on a timer.
+// Durable per-runtime store under the repo's `.cache/` (the fleet
+// runtime-state home for dep-0 code): git-ignored by the fleet block's
+// `**/.cache/` glob, out of the tracked tree, and — unlike `os.tmpdir()` —
+// NOT reaped by the OS on a timer.
 // tmpdir reaping silently drops the blob, and while the launcher then fail-opens
 // to index.cjs (correct, ~13-16ms slower), the fast path never survived a temp
-// sweep. node_modules/.cache persists until an explicit node_modules rebuild, at
-// which point the next hook-bundle build regenerates the blob; a missing blob is
-// never an error, launcher fail-opens, builder recreates. Build-time only — the
+// sweep. The store survives `rm -rf node_modules` and a package `clean`, so
+// the blob is regenerated only when the next hook-bundle build asks for it;
+// a missing blob is never an error, launcher fail-opens, builder recreates.
+// Build-time only — the
 // launcher reads the frozen snapshot-blob.path sidecar, never this module.
 //
 // Walk to the workspace marker instead of assuming this file has a fixed depth:
@@ -74,7 +76,6 @@ function snapshotCacheDir() {
   }
   return path.join(
     repoRoot,
-    'node_modules',
     '.cache',
     'fleet',
     'node-snapshot-cache',
@@ -86,7 +87,7 @@ function snapshotCacheDir() {
 // a guard yields a different blob and a stale source can NEVER boot old logic: a
 // miss falls open to the non-snapshot path. This is the fail-open-correct half
 // of "Node only validates version, not payload" — content keying is ours to own.
-// A bundle edit orphans the prior blob; node_modules/.cache is NOT OS-reaped, so
+// A bundle edit orphans the prior blob; .cache is NOT OS-reaped, so
 // pruneStaleBlobs() clears those orphans keep-active-only after each build.
 function blobPath(entryId, sourceHash) {
   return path.join(snapshotCacheDir(), `${entryId}-${sourceHash}.blob`)
@@ -96,7 +97,7 @@ function blobPath(entryId, sourceHash) {
 // built. A checkout has exactly ONE active blob at a time — the launcher reads
 // the frozen snapshot-blob.path sidecar, which names a single blob — so every
 // other content-hashed blob of the same entry is an orphan from a prior bundle
-// edit. node_modules/.cache is NOT OS-reaped, so without this the orphans grow
+// edit. .cache is NOT OS-reaped, so without this the orphans grow
 // unbounded (~16 MB each). Scoped strictly to keepBlobPath's own versionTag dir
 // and entry prefix (never another node/arch/V8 dir, never another entry's active
 // blob). Fail-open-safe: every filesystem call is wrapped so a prune failure can

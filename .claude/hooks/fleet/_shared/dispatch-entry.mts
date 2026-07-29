@@ -10,7 +10,7 @@
 // bundle runs on Node ≥18 (feature-detected → no-op on modern Node).
 import '../_shared/es-polyfills.mts'
 
-import { runDispatcherCli } from './dispatch.mts'
+import { runDispatcherCli } from './dispatch-hook.mts'
 
 runDispatcherCli().catch(() => {
   process.exit(0)

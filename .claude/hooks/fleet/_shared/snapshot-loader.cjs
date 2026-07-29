@@ -35,7 +35,7 @@ const event = process.argv[2]
 // edit (new bundle → new hash) misses cleanly instead of booting stale logic.
 // Hashing the bundle is sub-millisecond against the hundreds of ms a hit saves.
 function currentBlobPath() {
-  const src = fs.readFileSync(path.join(DIR, 'snapshot-bundle.cjs'))
+  const src = fs.readFileSync(path.join(DIR, 'snapshot-fleet-pack.cjs'))
   const sha = crypto.createHash('sha256').update(src).digest('hex').slice(0, 16)
   return blobPath('dispatch', sha)
 }
@@ -72,11 +72,9 @@ if (!blob || !hasBlobFile(blob)) {
 } else {
   // The snapshot-booted process reads the event from argv[1] (no script path in
   // a snapshot-booted argv), so pass the event as the sole arg after the flag.
-  const res = spawnSync(
-    process.execPath,
-    ['--snapshot-blob', blob, event],
-    { stdio: 'inherit' },
-  )
+  const res = spawnSync(process.execPath, ['--snapshot-blob', blob, event], {
+    stdio: 'inherit',
+  })
   if (res.error) {
     // The blob failed to load (a version/arch/V8 mismatch slipped past the key,
     // or corruption — Node refuse-to-boots either) — fall back, don't wedge.
