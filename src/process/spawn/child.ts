@@ -20,21 +20,16 @@
 
 import process from 'node:process'
 
-import { whichSync } from '../../bin/which'
+import { findPathEnvKey, replacePathInEnv } from '../../bin/trusted'
 import { getAbortSignal } from '../../process/abort'
 import { getNodeChildProcess } from '../../node/child-process'
-import { getNodeFs } from '../../node/fs'
-import { getNodePath } from '../../node/path'
 import { getOwn } from '../../objects/inspect'
-import { isPath } from '../../paths/normalize'
-import { RegExpPrototypeTest } from '../../primordials/regexp'
 import { getDefaultSpinner } from '../../spinner/default'
 
 import {
   getNpmCliPromiseSpawn,
-  spawnBinPathCache,
+  resolveSpawnBin,
   stripAnsiFromSpawnResult,
-  windowsScriptExtRegExp,
 } from './_internal'
 import { enhanceSpawnError } from './errors'
 import { isStdioType } from './stdio'
@@ -145,80 +140,31 @@ export function spawn(
   const spawnOptions = { __proto__: null, ...rawSpawnOptions }
   const { env, shell, stdio, stdioString = true } = spawnOptions
   const cwd = spawnOptions.cwd ? String(spawnOptions.cwd) : undefined
-  const commandWasPath = isPath(cmd)
-  // Resolve binary names to full paths using which.
-  // If cmd is not an absolute or relative path, resolve it via PATH.
-  // If cmd is already a path, use it as-is.
-  let actualCmd = cmd
-  if (!commandWasPath) {
-    // Binary name - check cache first, validate with existsSync().
-    const fs = getNodeFs()
-    const cached = spawnBinPathCache.get(cmd)
-    // Cache hit fires only on second spawn() of the same binary;
-    // stale-cache eviction fires only if the binary is removed
-    // mid-session. The which-resolved arm fires when binary is in PATH.
-    /* c8 ignore start */
-    if (cached) {
-      if (fs.existsSync(cached)) {
-        actualCmd = cached
-      } else {
-        spawnBinPathCache.delete(cmd)
-      }
-    }
-    if (actualCmd === cmd) {
-      const resolved = whichSync(cmd, { cwd, nothrow: true })
-      if (resolved && typeof resolved === 'string') {
-        actualCmd = resolved
-        spawnBinPathCache.set(cmd, resolved)
-      }
-    }
-    /* c8 ignore stop */
-    // If which returns null, keep original cmd and let spawn fail naturally
-  }
-
-  // Windows cmd.exe command resolution for .cmd/.bat/.ps1 files:
-  //
-  // When shell: true is used on Windows with script files (.cmd, .bat, .ps1),
-  // cmd.exe can have issues executing full paths. The solution is to use just
-  // the command basename without extension and let cmd.exe find it via PATH.
-  //
-  // How cmd.exe resolves commands:
-  // 1. Searches current directory first
-  // 2. Then searches each directory in PATH environment variable
-  // 3. For each directory, tries extensions from PATHEXT (.COM, .EXE, .BAT, .CMD, etc.)
-  // 4. Executes the first match found
-  //
-  // Example: Given 'C:\pnpm\pnpm.cmd' with shell: true
-  // 1. Extract basename without extension: 'pnpm'
-  // 2. cmd.exe searches PATH directories for 'pnpm'
-  // 3. PATHEXT causes it to try 'pnpm.com', 'pnpm.exe', 'pnpm.bat', 'pnpm.cmd', etc.
-  // 4. Finds and executes 'C:\pnpm\pnpm.cmd'
-  //
-  // This approach is consistent with how other tools handle Windows execution:
-  // - npm's promise-spawn: uses which.sync() to find commands in PATH
-  // - cross-spawn: spawns cmd.exe with escaped arguments
-  // - execa: uses cross-spawn under the hood for Windows support
-  //
-  // See: https://github.com/nodejs/node/issues/3675
-  // Inline WIN32 constant for coverage mode compatibility
-  const WIN32 = process.platform === 'win32'
-  /* c8 ignore start - Windows-only cmd.exe extension stripping for
-     .cmd/.bat/.ps1 shell-true execution. Tested on Windows runners. */
-  if (
-    WIN32 &&
-    shell &&
-    RegExpPrototypeTest(windowsScriptExtRegExp, actualCmd)
-  ) {
-    // Bare PATH command: cmd='gh' → whichSync() gives C:\\temp\\gh.cmd →
-    // basename removes .cmd → actualCmd='gh' → cmd.exe/PATHEXT finds gh.cmd.
-    // Keep explicit paths intact because their parent may not be on PATH.
-    if (!commandWasPath) {
-      const path = getNodePath()
-      // Extract just the command name without extension for PATH lookup.
-      actualCmd = path.basename(actualCmd, path.extname(actualCmd))
-    }
-  }
-  /* c8 ignore stop */
+  // Build the child environment before resolving: the PATH search must run
+  // against the PATH the child will actually receive.
+  // Preserve Windows process.env Proxy behavior when no custom env is provided.
+  // On Windows, process.env is a Proxy that provides case-insensitive access
+  // (PATH vs Path vs path). Spreading creates a plain object that loses this.
+  // Only spread when we have custom environment variables to merge.
+  const baseEnv = env
+    ? ({
+        __proto__: null,
+        ...process.env,
+        ...env,
+      } as unknown as NodeJS.ProcessEnv)
+    : process.env
+  // Resolve a bare binary name against a search path the working directory
+  // cannot supply. A path-like cmd passes through untouched. See
+  // ./_internal.resolveSpawnBin.
+  const { command: actualCmd, searchPath } = resolveSpawnBin(cmd, {
+    cwd,
+    env: baseEnv,
+    shell,
+  })
+  const envToUse =
+    searchPath === undefined
+      ? baseEnv
+      : replacePathInEnv(baseEnv, searchPath, findPathEnvKey(baseEnv))
   // The stdio option can be a string or an array.
   // https://nodejs.org/api/child_process.html#optionsstdio
   const wasSpinning = !!spinnerInstance?.isSpinning
@@ -235,18 +181,6 @@ export function spawn(
   // third-party code, Node.js built-ins, or JavaScript built-in methods.
   // https://github.com/npm/promise-spawn
   // https://github.com/nodejs/node/blob/v24.0.1/lib/child_process.js#L674-L678
-  // Preserve Windows process.env Proxy behavior when no custom env is provided.
-  // On Windows, process.env is a Proxy that provides case-insensitive access
-  // (PATH vs Path vs path). Spreading creates a plain object that loses this.
-  // Only spread when we have custom environment variables to merge.
-  const envToUse = env
-    ? ({
-        __proto__: null,
-        ...process.env,
-        ...env,
-      } as unknown as NodeJS.ProcessEnv)
-    : process.env
-
   const promiseSpawnOpts = {
     __proto__: null,
     cwd: typeof spawnOptions.cwd === 'string' ? spawnOptions.cwd : undefined,
@@ -427,45 +361,16 @@ export function spawnSync(
   args?: string[] | readonly string[] | undefined,
   options?: SpawnSyncOptions | undefined,
 ): SpawnSyncReturns<string | Buffer> {
-  // Resolve binary names to full paths using whichSync.
-  // If cmd is not an absolute or relative path, resolve it via PATH.
-  // If cmd is already a path, use it as-is.
-  let actualCmd = cmd
-  const commandWasPath = isPath(cmd)
-  if (!commandWasPath) {
-    // Binary name - resolve via PATH using whichSync
-    const resolved = whichSync(cmd, {
-      cwd: getOwn(options, 'cwd') as string | undefined,
-      nothrow: true,
-    })
-    if (resolved && typeof resolved === 'string') {
-      actualCmd = resolved
-    }
-    // If whichSync returns null, keep original cmd and let spawn fail naturally
-  }
-
-  // Windows cmd.exe command resolution for .cmd/.bat/.ps1 files:
-  // See spawn() function above for detailed explanation of this approach.
-  const shell = getOwn(options, 'shell')
-  // Inline WIN32 constant for coverage mode compatibility
-  const WIN32 = process.platform === 'win32'
-  /* c8 ignore start - Windows-only cmd.exe extension stripping for
-     .cmd/.bat/.ps1 shell-true execution. Tested on Windows runners. */
-  if (
-    WIN32 &&
-    shell &&
-    RegExpPrototypeTest(windowsScriptExtRegExp, actualCmd)
-  ) {
-    // Bare PATH command: cmd='gh' → whichSync() gives C:\\temp\\gh.cmd →
-    // basename removes .cmd → actualCmd='gh' → cmd.exe/PATHEXT finds gh.cmd.
-    // Keep explicit paths intact because their parent may not be on PATH.
-    if (!commandWasPath) {
-      const path = getNodePath()
-      // Extract just the command name without extension for PATH lookup.
-      actualCmd = path.basename(actualCmd, path.extname(actualCmd))
-    }
-  }
-  /* c8 ignore stop */
+  // Resolve a bare binary name against a search path the working directory
+  // cannot supply, and hand back the PATH the child needs. A path-like cmd
+  // passes through untouched. See ./_internal.resolveSpawnBin.
+  const optionsEnv = getOwn(options, 'env') as NodeJS.ProcessEnv | undefined
+  const baseEnv = optionsEnv ?? process.env
+  const { command: actualCmd, searchPath } = resolveSpawnBin(cmd, {
+    cwd: getOwn(options, 'cwd') as string | undefined,
+    env: baseEnv,
+    shell: getOwn(options, 'shell') as boolean | string | undefined,
+  })
   const { stripAnsi: shouldStripAnsi = true, ...rawSpawnOptions } = {
     __proto__: null,
     ...options,
@@ -475,6 +380,11 @@ export function spawnSync(
   const spawnOptions = {
     encoding: rawEncoding,
     ...rawSpawnOptions,
+    ...(searchPath === undefined
+      ? {}
+      : {
+          env: replacePathInEnv(baseEnv, searchPath, findPathEnvKey(baseEnv)),
+        }),
     // localTimeout (scaled) beats timeout (fixed); both throws. Node ignores the
     // stray localTimeout key on the options it receives. See ./timeout.
     timeout: resolveSpawnTimeout(rawSpawnOptions),

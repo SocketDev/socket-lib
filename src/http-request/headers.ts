@@ -136,6 +136,8 @@ export function parseRetryAfterHeader(
  * @param headers - HTTP headers to sanitize.
  *
  * @returns A new object with sensitive values redacted
+ *
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function sanitizeHeaders(
   headers: Record<string, unknown> | undefined,

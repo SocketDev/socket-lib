@@ -24,7 +24,7 @@ import { binPathAllCache, binPathCache, getFs, getPath } from './_internal'
 import { resolveRealBinSync } from './resolve'
 
 import type { WhichOptions as ExternalWhichOptions } from '../external/which'
-import type { WhichOptions } from './types'
+import type { WhichLocalBinOptions, WhichOptions } from './types'
 
 /**
  * Find an executable in the system PATH asynchronously.
@@ -109,9 +109,9 @@ export async function which(
  */
 export function whichLocalBin(
   binName: string,
-  options?: WhichOptions | undefined,
+  options?: WhichLocalBinOptions | undefined,
 ): string | undefined {
-  const opts = { __proto__: null, ...options } as WhichOptions
+  const opts = { __proto__: null, ...options } as WhichLocalBinOptions
   const path = getPath()
   const localBin =
     opts.path ?? path.join(opts.cwd ?? process.cwd(), 'node_modules', '.bin')

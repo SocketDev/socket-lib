@@ -209,6 +209,9 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
  * @throws {Error} When prototype-pollution keys are detected (and
  *   `allowPrototype` is not `true`).
  * @throws {Error} When schema validation fails.
+ *
+ * @unused No internal or Socket consumers; downstream repos call the plain
+ *   `parseJson`. Exercised only by its unit tests.
  */
 export function parseJsonSafe<T = unknown>(
   jsonString: string,

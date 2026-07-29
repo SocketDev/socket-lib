@@ -21,9 +21,15 @@ import type { SearchOptions } from './types'
  * if no match is found. Negative `fromIndex` values count back from the end of
  * the string.
  *
- * This is more efficient than using `str.slice(fromIndex).search()` when you
- * need the absolute position in the original string, as it handles the offset
- * calculation for you.
+ * Equivalent to `str.slice(fromIndex).search(regexp)` with the result mapped
+ * back onto the original string, so `regexp` sees `fromIndex` as the start of
+ * input: `^` anchors there and lookbehind cannot reach the characters before
+ * it. Those are the semantics that make the call side-effect free, and they
+ * differ from seeking a shared regexp's `lastIndex` to `fromIndex`.
+ *
+ * Searching a substring allocates one per call. On a hot path matching a
+ * single character or a character class, scan char codes instead of calling
+ * this.
  *
  * @example
  *   ;```ts
@@ -55,6 +61,9 @@ export function search(
     return StringPrototypeSearch(str, regexp)
   }
   const offset = fromIndex < 0 ? MathMax(length + fromIndex, 0) : fromIndex
-  const result = StringPrototypeSlice(str, offset).search(regexp)
+  const result = StringPrototypeSearch(
+    StringPrototypeSlice(str, offset),
+    regexp,
+  )
   return result === -1 ? -1 : result + offset
 }

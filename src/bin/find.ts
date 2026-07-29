@@ -90,6 +90,8 @@ export function findRealBin(
  *   const npmPath = findRealNpm()
  *   // e.g. '/usr/local/bin/npm'
  *   ```
+ *
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function findRealNpm(): string {
   const fs = getFs()
@@ -153,6 +155,8 @@ export function findRealNpm(): string {
  *   const pnpmPath = findRealPnpm()
  *   // e.g. '/usr/local/bin/pnpm'
  *   ```
+ *
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function findRealPnpm(): string {
   const path = getPath()
@@ -198,6 +202,8 @@ export function findRealPnpm(): string {
  *   const yarnPath = findRealYarn()
  *   // e.g. '/usr/local/bin/yarn'
  *   ```
+ *
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function findRealYarn(): string {
   const path = getPath()

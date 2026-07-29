@@ -33,9 +33,12 @@ export function memoizeWeak<K extends object, Result>(
   const cache = new WeakMapCtor<K, Result>()
 
   return function memoized(key: K): Result {
-    if (cache.has(key)) {
+    // One lookup serves the common hit. `has` only runs when the value is
+    // `undefined`, which is both a cached `undefined` result and a miss.
+    const cached = cache.get(key)
+    if (cached !== undefined || cache.has(key)) {
       debugLog(`[memoizeWeak:${fn.name}] hit`)
-      return cache.get(key) as Result
+      return cached as Result
     }
 
     debugLog(`[memoizeWeak:${fn.name}] miss`)

@@ -11,14 +11,16 @@
 
 import { WIN32 } from '../constants/platform'
 
-import { search } from '../strings/search'
-
 import {
   StringPrototypeCharCodeAt,
   StringPrototypeSlice,
 } from '../primordials/string'
 
-import { msysDriveRegExp, pathLikeToString, slashRegExp } from './_internal'
+import {
+  indexOfPathSeparator,
+  msysDriveRegExp,
+  pathLikeToString,
+} from './_internal'
 
 // A normalized path that is exactly a bare Windows drive letter (`C:`).
 const DRIVE_LETTER_REGEXP = /^[A-Za-z]:$/
@@ -179,7 +181,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
       }
     }
   }
-  let nextIndex = search(filepath, slashRegExp, { fromIndex: start })
+  let nextIndex = indexOfPathSeparator(filepath, start)
   // Single-segment-no-separator early-return path; sub-arms each fire on
   // specific inputs.
   /* c8 ignore start */
@@ -238,7 +240,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
       start += 1
       code = StringPrototypeCharCodeAt(filepath, start)
     }
-    nextIndex = search(filepath, slashRegExp, { fromIndex: start })
+    nextIndex = indexOfPathSeparator(filepath, start)
   }
   const lastSegment = filepath.slice(start)
   if (lastSegment.length > 0 && lastSegment !== '.') {

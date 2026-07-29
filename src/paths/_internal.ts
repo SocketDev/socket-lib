@@ -67,6 +67,41 @@ export function getUrl() {
 }
 
 /**
+ * Find the next path separator at or after an index.
+ *
+ * Scans char codes for `/` (47) and `\` (92) — the same two characters
+ * `slashRegExp` matches — and allocates nothing. Reaching the same answer
+ * through `search` costs a substring, an options bag, and a regex match per
+ * lookup, which a segment walk pays once per segment.
+ *
+ * @example
+ *   ;```typescript
+ *   indexOfPathSeparator('a/b', 0) // 1
+ *   indexOfPathSeparator('a/b', 2) // -1
+ *   indexOfPathSeparator('a\\b', 0) // 1
+ *   ```
+ *
+ * @param {string} filepath - The path to scan.
+ * @param {number} fromIndex - The index to start scanning at.
+ *
+ * @returns {number} The index of the first separator at or after `fromIndex`,
+ *   or -1 when there is none.
+ */
+export function indexOfPathSeparator(
+  filepath: string,
+  fromIndex: number,
+): number {
+  const { length } = filepath
+  for (let i = fromIndex; i < length; i += 1) {
+    const code = StringPrototypeCharCodeAt(filepath, i)
+    if (code === 47 /*'/'*/ || code === 92 /*'\\'*/) {
+      return i
+    }
+  }
+  return -1
+}
+
+/**
  * Convert a path-like value to a string.
  *
  * Converts various path-like types (string, Buffer, URL) into a normalized

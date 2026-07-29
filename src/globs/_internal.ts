@@ -90,9 +90,9 @@ export function normalizeIgnorePatterns(ignore: unknown): string[] | undefined {
  * summary: a `dist/` ignore pattern lets fast-glob walk the whole subtree
  * before filtering, while a slashless `dist` skips the walk entirely.
  *
- * CharCode 47 is `/`. Reading it that way avoids a per-call string allocation
- * for the literal — primordials-friendly, no behavior change vs.
- * `pattern.endsWith('/')`.
+ * CharCode 47 is `/`. Comparing the char code keeps the check on a primordial
+ * so a monkey-patched `String.prototype.endsWith` cannot change the answer.
+ * The result matches `pattern.endsWith('/')`.
  */
 export function stripTrailingSlash(pattern: string): string {
   if (

@@ -7,8 +7,9 @@
 export interface AssertSafeHttpUrlOptions {
   // Human-readable subject for the thrown message, e.g. 'OAuth issuer'.
   label?: string | undefined
-  // When true, localhost / 127.0.0.1 / ::1 pass instead of being refused —
-  // for local-stack development only.
+  // When true, localhost / 127.0.0.1 / ::1 pass instead of being refused, and
+  // may use plaintext http: — for local-stack development only. A public host
+  // always requires https:.
   allowLocalhost?: boolean | undefined
 }
 
