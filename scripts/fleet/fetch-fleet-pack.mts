@@ -8,9 +8,9 @@
  *   written), so a tampered/partial asset can never land. Auth: ambient `gh`
  *   (GH_TOKEN env / keychain). socket-wheelhouse is private, so in CI the
  *   release App token is exported as GH_TOKEN before this runs. USAGE — `node
- *   scripts/fleet/fetch-fleet-bundle.mts --ref <tag> [--repo <owner/repo>]
+ *   scripts/fleet/fetch-fleet-pack.mts --ref <tag> [--repo <owner/repo>]
  *   [--dest <dir>] [--dry-run] [--allow-non-member --reason <why>]`. `--ref` is
- *   the release tag (e.g. `fleet-bundle-<sha>`). Default repo
+ *   the release tag (e.g. `fleet-pack-<sha>`). Default repo
  *   SocketDev/socket-wheelhouse, default dest the repo root. MEMBERSHIP GATE —
  *   the destination (default repo root or `--dest`) must be a fleet-roster
  *   member (origin remote resolved against
@@ -194,7 +194,7 @@ export function placeFiles(
 // bundle SHIPS these files, placement keeps them on disk, while the fleet
 // gitignore block ignores them and `generated-outputs-are-untracked` forbids
 // TRACKING them. A member that historically committed one (the root MCP
-// projections `opencode.json` + `.kimi-code/mcp.json`, `bundle.cjs` et al.)
+// projections `opencode.json` + `.kimi-code/mcp.json`, `fleet-pack.cjs` et al.)
 // heals on the next fetch: the file stays on disk but leaves the index.
 // Non-fatal by design; a non-git dest or an already-clean index is a no-op
 // (`--ignore-unmatch`). Returns the count of declared paths submitted for
@@ -315,7 +315,7 @@ export async function main(): Promise<number> {
   const opts = parseArgs(process.argv.slice(2))
   if (!opts.ref) {
     logger.error(
-      'Missing --ref. Pass the release tag to fetch, e.g. `--ref fleet-bundle-<sha>`.',
+      'Missing --ref. Pass the release tag to fetch, e.g. `--ref fleet-pack-<sha>`.',
     )
     return 1
   }
@@ -326,7 +326,7 @@ export async function main(): Promise<number> {
     const gate = gateWriteDest({
       destDir: opts.dest,
       override: { allowNonMember: opts.allowNonMember, reason: opts.reason },
-      toolName: 'fetch-fleet-bundle',
+      toolName: 'fetch-fleet-pack',
     })
     if (!gate.allowed) {
       logger.error(gate.message)
@@ -337,7 +337,7 @@ export async function main(): Promise<number> {
     }
   }
 
-  const tmp = mkdtempSync(path.join(os.tmpdir(), 'fleet-bundle-'))
+  const tmp = mkdtempSync(path.join(os.tmpdir(), 'fleet-pack-'))
   try {
     // 1. Download the tarball + manifest assets via gh, ambient auth.
     logger.log(`Downloading bundle ${opts.ref} from ${opts.repo}…`)
