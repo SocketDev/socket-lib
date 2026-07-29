@@ -19,9 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- **`check`** — let changelog-is-commit-derived see draft sections as bump-owned
 - **`package`** — drop the \_stream\_\* browser stubs node 26 no longer reports
 - **`ai`** — retry a spawn without an optional flag the CLI rejects
+
+### Internal
+
+- **`check`** — let changelog-is-commit-derived see draft sections as bump-owned
 - **`deps`** — absorb the fleet catalog heal (packageurl-js 1.4.8, lib 6.3.0)
 
 ## [6.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.3.0) - 2026-07-27
@@ -36,14 +39,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [6.2.3](https://github.com/SocketDev/socket-lib/releases/tag/v6.2.3) - 2026-07-24
 
-### Changed
-
-- **`deps`** — update vendored @socketregistry/packageurl-js to 1.4.6
-
 ### Fixed
 
 - **`packages`** — lazy-require npm-package-arg in specs
 - **`externals`** — collapse below-floor vendored engine gates at bundle time
+
+### Internal
+
+- **`deps`** — update vendored @socketregistry/packageurl-js to 1.4.6
 
 ## [6.2.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.2.2) - 2026-07-24
 
@@ -66,10 +69,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - **`prim`** — consume @ultrathink/acorn.wasm dep, drop vendored acorn
-- **`deps`** — bump adm-zip 0.5.16 → 0.6.0 (crafted-ZIP 4GB alloc, dev dep)
 - **`argv`** — parseArgsString never throws on a malformed ${...}
 - **`url`** — isLoopbackHost matches bracketed IPv6 loopback [::1]
 - **`git`** — make git-util error + non-ASCII paths correct
+
+### Internal
+
+- **`deps`** — bump adm-zip 0.5.16 → 0.6.0 (crafted-ZIP 4GB alloc, dev dep)
 
 ## [6.1.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.1.0) - 2026-07-19
 
@@ -77,12 +83,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **`tooling`** — lock fleet hook workspaces
 - **`types`** — exclude built-artifact tests
-- **`ci`** — restore the Socket Lib quality gates
 - **`prim`** — avoid lockdown scanner sentinel
 - **`prim`** — identify Claude SDK integration
 - **`ai`** — drop retired Claude session flag
 - **`cover`** — preserve runner Node runtime
 - **`spawn`** — resolve Windows PATH batch shims
+
+### Internal
+
+- **`ci`** — restore the Socket Lib quality gates
 
 ## [6.0.10](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.10) - 2026-07-13
 
@@ -207,13 +216,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`releases/github-retry-config` — `GITHUB_RETRY_CONFIG`, `resolveBaseDelayMs()`, `DEFAULT_BASE_DELAY_MS`.** Shared backoff config for the GitHub release helpers. The base retry delay is overridable via the `SOCKET_GITHUB_RETRY_BASE_DELAY_MS` env var (default 5000ms; set `0` for near-instant retries) — useful in CI / tests to skip the exponential-backoff wait.
 - **`smol/path` — `getSmolPath()`.** Lazy accessor for socket-btm's `node:smol-path` native binding; `undefined` on stock Node. `walkUp`, `canAccess`, and `findUp` now prefer the native fast path (`dirname` / `access` / batched find-up) when running on a smol binary and fall back to the JS implementation otherwise — transparent to callers.
 
-### Changed (breaking)
-
-- **`ai/profiles` exports a single `AI_PROFILE` capability ladder** instead of the four standalone `*_PROFILE` constants. The tiers are `AI_PROFILE.read` ⊂ `.edit` ⊂ `.create` ⊂ `.full`, ordered least-to-most capable. Migration: `READ_ONLY_PROFILE` → `AI_PROFILE.read`; `EDIT_ONLY_PROFILE` → `AI_PROFILE.create` (the old `EDIT_ONLY` allowed `Write`/`MultiEdit`); `FULL_FIX_PROFILE` → `AI_PROFILE.full`. New `AI_PROFILE.edit` is the narrowest fix tier — `Edit` on existing files only, no `Write`/`MultiEdit` — for lint autofix and in-place codemods.
-
 ### Changed
 
 - **Every `AI_PROFILE` tier now denies `Agent`.** Sub-agent spawning is blocked across all profiles, since a sub-agent can escape the parent's tool restrictions.
+
+### Changed (breaking)
+
+- **`ai/profiles` exports a single `AI_PROFILE` capability ladder** instead of the four standalone `*_PROFILE` constants. The tiers are `AI_PROFILE.read` ⊂ `.edit` ⊂ `.create` ⊂ `.full`, ordered least-to-most capable. Migration: `READ_ONLY_PROFILE` → `AI_PROFILE.read`; `EDIT_ONLY_PROFILE` → `AI_PROFILE.create` (the old `EDIT_ONLY` allowed `Write`/`MultiEdit`); `FULL_FIX_PROFILE` → `AI_PROFILE.full`. New `AI_PROFILE.edit` is the narrowest fix tier — `Edit` on existing files only, no `Write`/`MultiEdit` — for lint autofix and in-place codemods.
 
 ## [6.0.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.2) - 2026-05-26
 
@@ -225,19 +234,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Package trust-status helpers in `./packages/provenance`.** `getTrustStatus(meta)` extracts `{ provenance, trustedPublisher, stagedPublish }` from an npm registry version document; `getTrustLevel(status)` maps to a 0..3 ladder and `getTrustLevelName(status)` to its name; `TRUST_LEVELS` is the single source-of-truth array (index = level); `compareTrust(a, b)` is an ascending-level comparator; `didTrustDecrease(prev, next)` flags a release that regressed its supply-chain posture.
 - **`primordials/map-set` Stage 4 surface.** `getOrInsert` / `getOrInsertComputed` on `Map` / `WeakMap` plus the Set-composition methods (`union`, `intersection`, `difference`, `symmetricDifference`, `isSubsetOf`, `isSupersetOf`, `isDisjointFrom`) are ambient-declared, so consumers get types for methods Node 22+ ships but TypeScript's lib doesn't yet surface.
 
+### Fixed
+
+- **`./logger` auto-resolves to `./logger/browser` on browser platforms.** 6.0.1 announced this but shipped without the `'browser'` condition on the `./logger` entry, so bundlers fell through to the Node default and pulled in `node:*` builtins.
+
 ### Changed (breaking)
 
 - **`getDefaultLogger` moved from `./logger` to `./logger/default`.** The bare `./logger` entry now exposes the `Logger` class only (matching `./logger/logger`). Migration: `import { getDefaultLogger } from '@socketsecurity/lib/logger'` → `from '@socketsecurity/lib/logger/default'`.
 - **`./logger/default` semantics shifted.** Previously `./logger/default` resolved to the Node logger source; that file is now `./logger/node`. The `./logger/default` path is the singleton accessor module.
 - **`./http-request/convenience` removed.** `httpJson` and `httpText` live on `./http-request/node` and `./http-request/browser` alongside `httpRequest` and `HttpResponseError`. Most consumers should import from `./http-request` (auto-routing) rather than the explicit leaf.
 
-### Fixed
-
-- **`./logger` auto-resolves to `./logger/browser` on browser platforms.** 6.0.1 announced this but shipped without the `'browser'` condition on the `./logger` entry, so bundlers fell through to the Node default and pulled in `node:*` builtins.
-
 ## [6.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.1) - 2026-05-25
 
 Five additive features plus public-surface polish on top of 6.0.0. The path renames drop doubled-name leaves (`spawn/spawn`, `ttl-cache/cache`, `globs/glob`, `links/link`, `promise-queue/queue`) and regroup three top-level directories whose contents were the same concept (process events) under a new `events/` umbrella. Renames are path-only; no symbol renames or behavior changes.
+
+```diff
 
 ### Added
 
@@ -267,7 +278,6 @@ Five additive features plus public-surface polish on top of 6.0.0. The path rena
 
 ### Migration
 
-```diff
 - import { spawn, spawnSync } from '@socketsecurity/lib/spawn/spawn'
 - import { isSpawnError, SpawnError } from '@socketsecurity/lib/spawn/errors'
 - import type { SpawnOptions } from '@socketsecurity/lib/spawn/types'
@@ -278,28 +288,20 @@ Five additive features plus public-surface polish on top of 6.0.0. The path rena
 +   SpawnError,
 + } from '@socketsecurity/lib/process/spawn/child'
 + import type { SpawnOptions } from '@socketsecurity/lib/process/spawn/types'
-
 - import { onExit } from '@socketsecurity/lib/signal-exit/register'
 + import { onExit } from '@socketsecurity/lib/events/exit/handler'
-
 - import { suppressDeprecationWarnings } from '@socketsecurity/lib/warnings/suppress'
 + import { suppressDeprecationWarnings } from '@socketsecurity/lib/events/warning/suppress'
-
 - import { createTtlCache, TtlCache } from '@socketsecurity/lib/ttl-cache/cache'
 + import { createTtlCache, TtlCache } from '@socketsecurity/lib/cache/ttl/store'
-
 - import { getDefaultSpinner } from '@socketsecurity/lib/spinner/registry'
 + import { getDefaultSpinner } from '@socketsecurity/lib/spinner/default'
-
 - import { getDefaultLogger } from '@socketsecurity/lib/logger/logger'
 + import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
-
 - import { PromiseQueue } from '@socketsecurity/lib/promise-queue/queue'
 + import { PromiseQueue } from '@socketsecurity/lib/promises/queue'
-
 - import { glob } from '@socketsecurity/lib/globs/glob'
 + import { glob } from '@socketsecurity/lib/globs/match'
-
 - import { createSymlink } from '@socketsecurity/lib/links/link'
 + import { createSymlink } from '@socketsecurity/lib/links/create'
 ```
@@ -310,21 +312,7 @@ No symbol names changed. No behavior changes.
 
 Public-surface reshape. All top-level barrels are gone; import from named leaf subpaths instead. `@socketsecurity/lib/logger` and `@socketsecurity/lib/errors` stay as aliases.
 
-### Removed (breaking)
-
-- **All top-level barrel modules.** Replace with leaf subpaths — e.g. `fs` → `fs/safe`, `http-request` → `http-request/convenience`, `packages` → `packages/operations`, `versions` → `versions/compare`. Affects `fs`, `http-request`, `spinner`, `git`, `github`, `spawn`, `bin`, `primordials`, `objects`, `strings`, `promises`, `arrays`, `url`, `packages`, `cacache`, `signal-exit`, `compression`, `archives`, `globs`, `regexps`, `ssri`, `colors`, `ansi`, `crypto`, `abort`, `streams`, `links`, `shadow`, `ipc`, `ipc-cli`, `errors`, `words`, `tables`, `sorts`, `env`, `debug`, `versions`, `types`.
-- **`agent` removed.** Per-tool helpers under `eco/npm/<tool>/{exec,flags}` (`bun`, `npm`, `pnpm`, `vlt`, `yarnpkg/yarn`).
-- **`types/` removed.** Schema types under `eco/purl` and `eco/types`.
-- **Subdir renames.** `memoization/` → `memo/`, `performance/` → `perf/`, `suppress-warnings/` → `warnings/`, `cache-with-ttl/` → `ttl-cache/`, `process-lock/` → `process/`, `package-extensions/` → `pkg-ext/`, `temporary-executor/` → `process/transient` (`isRunningInTemporaryExecutor` → `isTransientProcess`).
-- **`SOCKET_LIB_USER_AGENT` + `SOCKET_LIB_URL` removed.** Use `getSocketCallerUserAgent()` from `http-request/user-agent` — see Added.
-
-### Changed (breaking)
-
-- **`versions` API renamed.** `compareVersions` → `compare`, `isEqual` → `eq` (+ new `neq`), `isLessThan(OrEqual)` → `lt`/`lte`, `isGreaterThan(OrEqual)` → `gt`/`gte`, `sortVersions` → `sort`, `sortVersionsDesc` → `rsort`. Runs through `node:smol-versions` when present, falls back to `semver`.
-- **`dlx/manifest` `ManifestEntry` → `DlxManifestEntry`** (disambiguates from `eco/types` `ManifestEntry`).
-- **`dlx/arborist getBaseArboristOptions`** second arg is now `{ quiet }` instead of positional `quiet: boolean`.
-- **Predicates renamed for scope clarity** — cwd/process-scoped predicates now carry the scope in the name.
-- **Default `User-Agent` header** now `socketsecurity-lib/<version> node/<node-version> <platform>/<arch>` (was `socketsecurity-lib/<version> (<url>)`).
+```diff
 
 ### Added
 
@@ -344,16 +332,29 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 - **npm v1 alias extraction.** Aliased installs (`"alias": { "version": "npm:<real>@<ver>" }`) now surface the real `{ name, version }`; the alias key is preserved on `_index`.
 - **npm v2/v3 workspace + alias name preference.** Path-keyed workspace entries and aliased installs honor the explicit `pkg.name` over the path-derived fallback.
 
+### Removed (breaking)
+
+- **All top-level barrel modules.** Replace with leaf subpaths — e.g. `fs` → `fs/safe`, `http-request` → `http-request/convenience`, `packages` → `packages/operations`, `versions` → `versions/compare`. Affects `fs`, `http-request`, `spinner`, `git`, `github`, `spawn`, `bin`, `primordials`, `objects`, `strings`, `promises`, `arrays`, `url`, `packages`, `cacache`, `signal-exit`, `compression`, `archives`, `globs`, `regexps`, `ssri`, `colors`, `ansi`, `crypto`, `abort`, `streams`, `links`, `shadow`, `ipc`, `ipc-cli`, `errors`, `words`, `tables`, `sorts`, `env`, `debug`, `versions`, `types`.
+- **`agent` removed.** Per-tool helpers under `eco/npm/<tool>/{exec,flags}` (`bun`, `npm`, `pnpm`, `vlt`, `yarnpkg/yarn`).
+- **`types/` removed.** Schema types under `eco/purl` and `eco/types`.
+- **Subdir renames.** `memoization/` → `memo/`, `performance/` → `perf/`, `suppress-warnings/` → `warnings/`, `cache-with-ttl/` → `ttl-cache/`, `process-lock/` → `process/`, `package-extensions/` → `pkg-ext/`, `temporary-executor/` → `process/transient` (`isRunningInTemporaryExecutor` → `isTransientProcess`).
+- **`SOCKET_LIB_USER_AGENT` + `SOCKET_LIB_URL` removed.** Use `getSocketCallerUserAgent()` from `http-request/user-agent` — see Added.
+
+### Changed (breaking)
+
+- **`versions` API renamed.** `compareVersions` → `compare`, `isEqual` → `eq` (+ new `neq`), `isLessThan(OrEqual)` → `lt`/`lte`, `isGreaterThan(OrEqual)` → `gt`/`gte`, `sortVersions` → `sort`, `sortVersionsDesc` → `rsort`. Runs through `node:smol-versions` when present, falls back to `semver`.
+- **`dlx/manifest` `ManifestEntry` → `DlxManifestEntry`** (disambiguates from `eco/types` `ManifestEntry`).
+- **`dlx/arborist getBaseArboristOptions`** second arg is now `{ quiet }` instead of positional `quiet: boolean`.
+- **Predicates renamed for scope clarity** — cwd/process-scoped predicates now carry the scope in the name.
+- **Default `User-Agent` header** now `socketsecurity-lib/<version> node/<node-version> <platform>/<arch>` (was `socketsecurity-lib/<version> (<url>)`).
+
 ### Migration
 
-```diff
 - import { safeDelete, readJson } from '@socketsecurity/lib/fs'
 + import { safeDelete } from '@socketsecurity/lib/fs/safe'
 + import { readJson } from '@socketsecurity/lib/fs/read-json'
-
 - import { httpJson } from '@socketsecurity/lib/http-request'
 + import { httpJson } from '@socketsecurity/lib/http-request/convenience'
-
 - import { compareVersions, isLessThan, sortVersions } from '@socketsecurity/lib/versions'
 - compareVersions(a, b); isLessThan(a, b); sortVersions(arr)
 + import { compare, lt, sort } from '@socketsecurity/lib/versions/compare'
@@ -399,19 +400,19 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 - **BREAKING**: `spinner` `ShimmerInfo` shape — `{ direction, speed, frame }` (was: `currentDir`, `mode`, `speed`, `step`). User-facing `ShimmerConfig` is unchanged
 - `getLatestRelease` / `getReleaseAssetUrl` return `undefined` (was: `null`) when no result is found, and no longer log on success/retry — errors throw, success returns
 
-### Removed
-
-- **BREAKING**: `effects/text-shimmer`, `effects/ultra`, `effects/types` subpath exports. Migrate to `effects/shimmer` (+ `effects/shimmer-terminal`); `RAINBOW_GRADIENT` now lives in `themes/utils`
-- **BREAKING**: `themes` barrel export. Import from `themes/themes`, `themes/context`, `themes/utils`, or `themes/types`
-- **BREAKING**: `releases/github` subpath export. Migrate to the focused submodules (see Added)
-- `getLatestRelease({ quiet })` / `getReleaseAssetUrl({ quiet })` — the helpers no longer log
-
 ### Fixed
 
 - `globs` `getGlobMatcher` — `path.matchesGlob` fast-path only activates when the caller opts out of both picomatch defaults (`nocase: false` AND `dot: false`); previously took the fast-path under default options and silently broke case-insensitive matching.
 - `globs` `glob` / `globSync` — results normalized to forward slashes on Windows regardless of backend (`node:fs.glob` returns native-OS separators).
 - `globs` `glob` / `globSync` / `globStreamLicenses` — trailing `/` stripped from `ignore` patterns before passing to fast-glob (gitignore-style `dist/` was silently dropped at the deep-filter level). Workaround for [mrmlnc/fast-glob#437](https://github.com/mrmlnc/fast-glob/issues/437).
 - GitHub helpers (`releases/github-api`, `github/resolveRefToSha`, `fetchGhsaDetails`) fall back to GraphQL on the "search-degraded" 200 OK + empty body shape. Real 404s / rate-limits / 5xx still propagate.
+
+### Removed
+
+- **BREAKING**: `effects/text-shimmer`, `effects/ultra`, `effects/types` subpath exports. Migrate to `effects/shimmer` (+ `effects/shimmer-terminal`); `RAINBOW_GRADIENT` now lives in `themes/utils`
+- **BREAKING**: `themes` barrel export. Import from `themes/themes`, `themes/context`, `themes/utils`, or `themes/types`
+- **BREAKING**: `releases/github` subpath export. Migrate to the focused submodules (see Added)
+- `getLatestRelease({ quiet })` / `getReleaseAssetUrl({ quiet })` — the helpers no longer log
 
 ## [5.26.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.26.0) - 2026-04-27
 
@@ -425,15 +426,15 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 - `getLatestRelease` / `getReleaseAssetUrl` return `undefined` (was: `null`) when no result is found, and no longer log on success/retry — errors throw, success returns
 - `fetchGhsaDetails` GraphQL fallback normalizes severity to lowercase to match REST shape
 
-### Removed
-
-- `getLatestRelease({ quiet })` / `getReleaseAssetUrl({ quiet })` — no longer accepted (the helpers don't log anymore)
-
 ### Fixed
 
 - `releases/github` `getLatestRelease` and `getReleaseAssetUrl` fall back to GraphQL on the empty-body incident shape
 - `github` `resolveRefToSha` and `fetchGhsaDetails` get the same GraphQL fallback
 - All fallbacks fire only on `GitHubEmptyBodyError`; real 404s / rate-limits / 5xx still propagate
+
+### Removed
+
+- `getLatestRelease({ quiet })` / `getReleaseAssetUrl({ quiet })` — no longer accepted (the helpers don't log anymore)
 
 ## [5.25.1](https://github.com/SocketDev/socket-lib/releases/tag/v5.25.1) - 2026-04-27
 
@@ -449,15 +450,15 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 
 ## [5.24.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.24.0) - 2026-04-22
 
-### Removed
-
-- `env/socket-cli-shadow` — deleted (unused)
-
 ### Fixed
 
 - `packPackage()` / `extractPackage()` work for non-registry specs (local dir/tarball, remote tarball, git)
 - `EditablePackageJson.prepare()` no longer throws `git.find is not a function`
 - `packPackage(<dir>)` runs `prepack` / `postpack` scripts instead of throwing
+
+### Removed
+
+- `env/socket-cli-shadow` — deleted (unused)
 
 ## [5.23.0](https://github.com/SocketDev/socket-lib/releases/tag/v5.23.0) - 2026-04-22
 
@@ -495,11 +496,6 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 - `packages/specs` `getRepoUrlDetails()` — accepts `git+https://` / `git+ssh://` GitHub URLs; rejects lookalike hosts. scp-style `git@github.com:…` returns `{ user: '', project: '' }`
 - `url` `urlSearchParamAsBoolean()` — accepts the same truthy vocabulary as `envAsBoolean` (`1` / `true` / `yes` / `on`); empty string falls through to `defaultValue`
 
-### Removed
-
-- `validation/*` subpath retired — exports re-homed: `validateSchema` / `parseSchema` → `schema/validate` / `schema/parse`; `safeJsonParse` → `json/parse`; types → `schema/types` and `json/types`
-- `memoization` `memoizeDebounced` — use `memoize` / `memoizeAsync` with a `ttl` instead
-
 ### Fixed
 
 - `versions` `maxVersion()` / `minVersion()` — return latest/earliest prerelease for all-prerelease inputs
@@ -513,6 +509,11 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 - `suppress-warnings` `withSuppressedWarnings()` — no longer wipes concurrent suppressions on exit
 - `dlx` LRU caches capped (binary path, package.json path); negative package.json lookups expire after 10s
 - Glob cache keys for array-valued options are order-insensitive
+
+### Removed
+
+- `validation/*` subpath retired — exports re-homed: `validateSchema` / `parseSchema` → `schema/validate` / `schema/parse`; `safeJsonParse` → `json/parse`; types → `schema/types` and `json/types`
+- `memoization` `memoizeDebounced` — use `memoize` / `memoizeAsync` with a `ttl` instead
 
 ### Performance
 
@@ -560,13 +561,13 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 - `dlx/lockfile` `generatePackagePin()` — returns `{ name, version, hash, packageJson, lockfile }`. Default `minReleaseDays: 7` refuses versions published in the last week
 - `DlxPackageOptions.hash`, `.lockfile`, `DlxBinaryOptions.hash` — integrity + lockfile options on dlx entry points
 
-### Fixed
-
-- `pacote` shim exposes `tarball`, `manifest`, `packument` alongside `extract`
-
 ### Changed
 
 - `dist/external/npm-pack.js` 30% smaller; `dist/external/zod.js` 51% smaller (unused code paths stubbed)
+
+### Fixed
+
+- `pacote` shim exposes `tarball`, `manifest`, `packument` alongside `extract`
 
 ## [5.18.2](https://github.com/SocketDev/socket-lib/releases/tag/v5.18.2) - 2026-04-14
 
@@ -1125,14 +1126,14 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 
 ## [3.0.5](https://github.com/SocketDev/socket-lib/releases/tag/v3.0.5) - 2025-11-01
 
-### Fixed
-
-- **Critical**: prompts API restored — non-functional stub from v3.0.0 replaced with working implementation. `@socketsecurity/lib/stdio/prompts` exports `password`, `search`, `Separator`, `createSeparator()`. `Choice.name` (was erroneously `label`)
-
 ### Added
 
 - Prompts adopt the active theme (`colors.prompt`, `textDim`, `primary`, `error`, `success`); `createInquirerTheme()` exported
 - Theme parameter support — `Logger`, prompts, and text effects accept `theme: 'socket' | 'sunset' | 'terracotta' | 'lush' | 'ultra'` (or a Theme object)
+
+### Fixed
+
+- **Critical**: prompts API restored — non-functional stub from v3.0.0 replaced with working implementation. `@socketsecurity/lib/stdio/prompts` exports `password`, `search`, `Separator`, `createSeparator()`. `Choice.name` (was erroneously `label`)
 
 ### Removed
 
@@ -1331,16 +1332,16 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 
 ## [2.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v2.0.0) - 2025-10-27
 
+### Added
+
+- `env/rewire` and `paths/rewire` — AsyncLocalStorage-based env/path overrides for testing. `withEnv({...}, async () => {})` for isolated context, or `setEnv` / `resetEnv` for `beforeEach`/`afterEach`
+- `getCacache()` exported
+
 ### Changed
 
 - **BREAKING**: Environment variable system refactor — 60+ individual `env/<NAME>.ts` files consolidated into grouped getter modules:
   - `env/github`, `env/socket`, `env/socket-cli`, `env/npm`, `env/locale`, `env/windows`, `env/xdg`, `env/temp-dir`, `env/test`
   - All env constants converted to functions: `import { GITHUB_TOKEN } from '#env/github-token'` → `import { getGithubToken } from '#env/github'`
-
-### Added
-
-- `env/rewire` and `paths/rewire` — AsyncLocalStorage-based env/path overrides for testing. `withEnv({...}, async () => {})` for isolated context, or `setEnv` / `resetEnv` for `beforeEach`/`afterEach`
-- `getCacache()` exported
 
 ## [1.3.6](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.6) - 2025-10-26
 
@@ -1379,16 +1380,16 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 
 ## [1.3.1](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.1) - 2025-10-24
 
-### Fixed
-
-- `@inquirer` modules (`input`, `password`, `search`) properly bundled into `dist/external/` — fixes build failures in downstream socket-cli
-
 ### Added
 
 - Added tests to prevent rogue external stubs in `dist/external/`
   - Detects stub re-export patterns that indicate incomplete bundling
   - Verifies all @inquirer modules are properly bundled (> 1KB)
   - Catches bundling regressions early in CI pipeline
+
+### Fixed
+
+- `@inquirer` modules (`input`, `password`, `search`) properly bundled into `dist/external/` — fixes build failures in downstream socket-cli
 
 ## [1.3.0](https://github.com/SocketDev/socket-lib/releases/tag/v1.3.0) - 2025-10-23
 
@@ -1464,7 +1465,6 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 ---
 
 **Historical Entries**: The entries below are from when this package was named `@socketsecurity/registry`. This package was renamed to `@socketsecurity/lib` starting with version 1.0.0.
-
 ---
 
 These entries cover versions 1.0.0 → 1.5.3 of the previous package name (`@socketsecurity/registry`, Sep 2025 – Oct 2025). The version-number line restarted at 1.0.0 when the package was renamed to `@socketsecurity/lib`, so the current 1.x and 5.x lines do **not** continue from these old versions. Listed here for archival reference only.
@@ -1474,5 +1474,4 @@ These entries cover versions 1.0.0 → 1.5.3 of the previous package name (`@soc
 - **1.5.x** (Oct 2025) — `isolatePackage` for isolated package test environments; v8 coverage utilities; `dependencies/index` barrel removed
 - **1.4.x** (Oct 2025) — Performance monitoring + memoization utilities; table formatting (`formatTable`, `formatSimpleTable`); spinner progress; `isDir`, `safeStats` async fs helpers
 - **1.3.x** (Sep–Oct 2025) — Initial constants restructure, build configuration, package exports
-
-For full details, see git history under the `@socketsecurity/registry` package name.
+  For full details, see git history under the `@socketsecurity/registry` package name.
