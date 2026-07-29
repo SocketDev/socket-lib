@@ -50,6 +50,10 @@ async function main(): Promise<void> {
       command: 'node',
     },
     {
+      args: ['scripts/repo/post-build/apply-unexposed-stubs.mts', ...fixArgs],
+      command: 'node',
+    },
+    {
       args: ['scripts/validate/esm-named-exports.mts', ...fixArgs],
       command: 'node',
     },
