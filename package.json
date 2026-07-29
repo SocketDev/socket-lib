@@ -398,6 +398,11 @@
       "types": "./dist/bin/shadow.d.ts",
       "default": "./dist/bin/shadow.js"
     },
+    "./bin/trusted": {
+      "source": "./src/bin/trusted.ts",
+      "types": "./dist/bin/trusted.d.ts",
+      "default": "./dist/bin/trusted.js"
+    },
     "./bin/types": {
       "source": "./src/bin/types.ts",
       "types": "./dist/bin/types.d.ts",
@@ -3370,7 +3375,7 @@
     "check": "node scripts/fleet/check.mts",
     "check:paths": "node scripts/fleet/check/paths-are-canonical.mts",
     "ci:local": "node scripts/fleet/agent-ci-skip-locks.mts run --all --quiet --pause-on-failure --github-token",
-    "clean": "node -e \"require('node:fs').rmSync('node_modules/.cache', { recursive: true, force: true })\"",
+    "clean": "node scripts/fleet/clean.mts",
     "cover": "node scripts/fleet/cover.mts",
     "dev": "node scripts/repo/bundle.mts --watch",
     "docs": "node scripts/repo/make-api-md.mts",
@@ -3379,7 +3384,7 @@
     "fix": "node scripts/fleet/fix.mts",
     "format": "node scripts/fleet/format.mts",
     "format:check": "node scripts/fleet/format.mts --check",
-    "gen:llms-txt": "node scripts/fleet/gen/llms-txt.mts --no-ai",
+    "gen:llms-txt": "node scripts/fleet/make-llms-txt.mts --no-ai",
     "lint": "node scripts/fleet/lint.mts",
     "lockstep": "node scripts/fleet/lockstep.mts",
     "lockstep:emit-mirror-globs": "node scripts/fleet/lockstep-emit-mirror-globs.mts",
