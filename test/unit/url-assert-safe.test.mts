@@ -1,8 +1,9 @@
 /**
  * @file Unit tests for assertSafeHttpUrl() — the SSRF guard that parses an
- *   operator- or issuer-supplied URL, rejects non-HTTP(S) schemes, and refuses
- *   loopback / private / link-local hosts. Set allowLocalhost to permit
- *   localhost for local-stack development.
+ *   operator- or issuer-supplied URL, rejects non-HTTP(S) schemes, refuses
+ *   loopback / private / link-local hosts, and requires https: for a public
+ *   host. Set allowLocalhost to permit localhost over plaintext http: for
+ *   local-stack development.
  */
 
 import { assertSafeHttpUrl } from '../../src/url/assert-safe'
@@ -15,9 +16,34 @@ describe('assertSafeHttpUrl', () => {
     expect(url.href).toBe('https://api.example.com/path')
   })
 
-  it('should accept http as well as https', () => {
-    expect(assertSafeHttpUrl('http://example.com').protocol).toBe('http:')
+  it('should accept https on a public host', () => {
     expect(assertSafeHttpUrl('https://example.com').protocol).toBe('https:')
+    expect(assertSafeHttpUrl('https://example.com:8443/a?b=c').href).toBe(
+      'https://example.com:8443/a?b=c',
+    )
+  })
+
+  it('should refuse plaintext http on a public host', () => {
+    expect(() => assertSafeHttpUrl('http://example.com')).toThrow(
+      /must use https: for a public host/,
+    )
+    expect(() =>
+      assertSafeHttpUrl('http://api.example.com/introspect'),
+    ).toThrow(/must use https: for a public host/)
+  })
+
+  it('should name cleartext credentials as the reason http is refused', () => {
+    expect(() =>
+      assertSafeHttpUrl('http://api.example.com', { label: 'OAuth issuer' }),
+    ).toThrow(
+      /^OAuth issuer must use https: for a public host: http:\/\/api\.example\.com\. Got http:, which puts bearer tokens and client credentials on the wire in cleartext/,
+    )
+  })
+
+  it('should refuse plaintext http on a public host even with allowLocalhost', () => {
+    expect(() =>
+      assertSafeHttpUrl('http://example.com', { allowLocalhost: true }),
+    ).toThrow(/must use https: for a public host/)
   })
 
   it('should throw for a value that does not parse', () => {
@@ -40,12 +66,30 @@ describe('assertSafeHttpUrl', () => {
     expect(() => assertSafeHttpUrl('http://127.0.0.1')).toThrow(
       /private\/loopback host/,
     )
+    expect(() => assertSafeHttpUrl('http://[::1]:3000')).toThrow(
+      /private\/loopback host/,
+    )
+    expect(() => assertSafeHttpUrl('https://localhost:3000')).toThrow(
+      /private\/loopback host/,
+    )
   })
 
   it('should refuse the cloud-metadata link-local address', () => {
     expect(() =>
       assertSafeHttpUrl('http://169.254.169.254/latest/meta-data'),
     ).toThrow(/private\/loopback host/)
+  })
+
+  it('should refuse private and link-local hosts over https too', () => {
+    expect(() =>
+      assertSafeHttpUrl('https://169.254.169.254/latest/meta-data'),
+    ).toThrow(/private\/loopback host/)
+    expect(() => assertSafeHttpUrl('https://10.0.0.5')).toThrow(
+      /private\/loopback host/,
+    )
+    expect(() => assertSafeHttpUrl('https://192.168.1.1')).toThrow(
+      /private\/loopback host/,
+    )
   })
 
   it('should refuse RFC 1918 ranges', () => {
@@ -57,14 +101,25 @@ describe('assertSafeHttpUrl', () => {
     )
   })
 
-  it('should permit localhost only when allowLocalhost is set', () => {
+  it('should permit plaintext http on loopback when allowLocalhost is set', () => {
     const url = assertSafeHttpUrl('http://localhost:3000', {
       allowLocalhost: true,
     })
     expect(url.hostname).toBe('localhost')
+    expect(url.protocol).toBe('http:')
     expect(
       assertSafeHttpUrl('http://127.0.0.1', { allowLocalhost: true }).hostname,
     ).toBe('127.0.0.1')
+    expect(
+      assertSafeHttpUrl('http://[::1]:3000', { allowLocalhost: true }).hostname,
+    ).toBe('[::1]')
+  })
+
+  it('should permit https on loopback when allowLocalhost is set', () => {
+    expect(
+      assertSafeHttpUrl('https://localhost:3000', { allowLocalhost: true })
+        .protocol,
+    ).toBe('https:')
   })
 
   it('should still refuse non-loopback private hosts even with allowLocalhost', () => {
