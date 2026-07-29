@@ -17,9 +17,6 @@
   "exports": {
     ".": "./src/index.mts"
   },
-  "scripts": {
-    "test": "node scripts/test.mts"
-  },
   "dependencies": {
     "@socketsecurity/lib-stable": "catalog:",
     "@ultrathink/acorn.wasm": "catalog:",

@@ -46,7 +46,8 @@ import {
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { describe, test } from 'node:test'
+
+import { describe, test } from 'vitest'
 
 import { applyCodemod } from '../src/codemod.mts'
 import { findLocalPrimordials, isSplitPrimordials } from '../src/cli.mts'
@@ -171,7 +172,7 @@ async function runFixture(fixturePath: string): Promise<{
 /**
  * Walk fixtures/. Each subdirectory with an `input/` + `expected.json` is a
  * scenario. Returns a list of `{ name, dir, expected }` records ready for
- * `node:test`'s describe/test wiring.
+ * vitest's describe/test wiring.
  */
 function discoverFixtures(): ReadonlyArray<{
   readonly name: string

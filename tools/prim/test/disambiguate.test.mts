@@ -1,8 +1,6 @@
 /**
- * @file Tests for the Claude SDK-deferred disambiguation layer. Run via the
- *   Prim
- *   package's test script. Mocks the SDK via a self-contained queue file so no
- *   network hits.
+ * @file Tests for the Claude SDK-deferred disambiguation layer. Mocks the SDK
+ *   via a self-contained queue file so no network hits.
  *   Coverage:
  *
  *   - "ai-defer-not-enabled" short-circuit (no SDK loaded)
@@ -25,7 +23,8 @@ import {
 } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { describe, test } from 'node:test'
+
+import { describe, test } from 'vitest'
 
 import { buildSnippet, disambiguateReceiver } from '../src/disambiguate.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
