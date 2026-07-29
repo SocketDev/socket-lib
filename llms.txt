@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 576 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 586 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -23,11 +23,13 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/ai/backends](./dist/ai/backends.d.mts)
 - [@socketsecurity/lib/ai/billing-context](./dist/ai/billing-context.d.mts)
 - [@socketsecurity/lib/ai/builtin](./dist/ai/builtin.d.mts)
+- [@socketsecurity/lib/ai/cli-flags](./dist/ai/cli-flags.d.mts)
 - [@socketsecurity/lib/ai/cost](./dist/ai/cost.d.mts)
 - [@socketsecurity/lib/ai/credentials](./dist/ai/credentials.d.mts)
 - [@socketsecurity/lib/ai/discover](./dist/ai/discover.d.mts)
 - [@socketsecurity/lib/ai/enforce](./dist/ai/enforce.d.mts)
 - [@socketsecurity/lib/ai/exec](./dist/ai/exec.d.mts)
+- [@socketsecurity/lib/ai/failures](./dist/ai/failures.d.mts)
 - [@socketsecurity/lib/ai/http](./dist/ai/http.d.mts)
 - [@socketsecurity/lib/ai/json](./dist/ai/json.d.mts)
 - [@socketsecurity/lib/ai/profiles](./dist/ai/profiles.d.mts)
@@ -74,16 +76,17 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/bin/find](./dist/bin/find.d.ts): Find specific package-manager binaries with platform- aware fallbacks.
 - [@socketsecurity/lib/bin/resolve](./dist/bin/resolve.d.ts): Resolve a binary path to the underlying script file.
 - [@socketsecurity/lib/bin/shadow](./dist/bin/shadow.d.ts): Shadow-bin detection.
-- [@socketsecurity/lib/bin/types](./dist/bin/types.d.ts): Public type surface for `bin/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`.
+- [@socketsecurity/lib/bin/trusted](./dist/bin/trusted.d.ts): Path-trust-inverting executable resolution.
+- [@socketsecurity/lib/bin/types](./dist/bin/types.d.ts): Public type surface for `bin/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`, plus the `whichLocalBin` variant.
 - [@socketsecurity/lib/bin/which](./dist/bin/which.d.ts): Look up binaries on PATH.
 
 ## cacache/
 
 - [@socketsecurity/lib/cacache/clear](./dist/cacache/clear.d.ts): Bulk-clear entries from the Socket shared cacache — `clear()` plus its wildcard helper `createPatternMatcher`.
-- [@socketsecurity/lib/cacache/read](./dist/cacache/read.d.ts): Cache read entrypoints — `get` (throws on miss) and `safeGet` (returns `undefined` on miss).
+- [@socketsecurity/lib/cacache/read](./dist/cacache/read.d.ts): Cache read entrypoints: `get` throws on miss and `safeGet` returns `undefined` on miss.
 - [@socketsecurity/lib/cacache/tmp](./dist/cacache/tmp.d.ts): `withTmp` — run a callback with a freshly-created temp directory under the cacache root.
 - [@socketsecurity/lib/cacache/types](./dist/cacache/types.d.ts): Public type surface for `cacache/*` modules — the `CacheEntry` row shape returned by reads and the option bags consumed by `clear` / `get` / `put`.
-- [@socketsecurity/lib/cacache/write](./dist/cacache/write.d.ts): Cache write entrypoints — `put` (insert/replace by key) and `remove` (single-key delete).
+- [@socketsecurity/lib/cacache/write](./dist/cacache/write.d.ts): Cache write entrypoints — `put` inserts or replaces by key and `remove` deletes a single key.
 
 ## cache/
 
@@ -183,7 +186,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/eco/cargo/manifest-format](./dist/eco/cargo/manifest-format.d.ts): Format descriptor for `Cargo.toml` — Rust's package manifest.
 - [@socketsecurity/lib/eco/cargo/parse-lockfile](./dist/eco/cargo/parse-lockfile.d.ts): `parseCargoLock(content)` — parses a Rust `Cargo.lock` (v1/v2/v3/v4) into a `ParsedLockfile`.
 - [@socketsecurity/lib/eco/manifest/analyze-lockfile](./dist/eco/manifest/analyze-lockfile.d.ts): `analyzeLockfile(lockfile)` — returns a `LockfileStats` summary (counts by dep type, total packages, per-ecosystem breakdown).
-- [@socketsecurity/lib/eco/manifest/detect-format](./dist/eco/manifest/detect-format.d.ts): `detectFormat(filename)` — maps a filename (or path) to its `FormatDescriptor` (ecosystem + manifest/lockfile + lockfile format), or returns `undefined` if nothing matched.
+- [@socketsecurity/lib/eco/manifest/detect-format](./dist/eco/manifest/detect-format.d.ts): `detectFormat(filename)` — maps a filename or path to its `FormatDescriptor` (ecosystem + manifest/lockfile + lockfile format), or returns `undefined` if nothing matched.
 - [@socketsecurity/lib/eco/manifest/find-packages](./dist/eco/manifest/find-packages.d.ts): `findPackages(lockfile, pattern)` — returns all `PackageRef`s whose name matches the regex/string pattern.
 - [@socketsecurity/lib/eco/manifest/get-package](./dist/eco/manifest/get-package.d.ts): `getPackage(lockfile, name)` — O(1) lookup of the first matching `PackageRef` by name in a `ParsedLockfile`.
 - [@socketsecurity/lib/eco/manifest/get-package-versions](./dist/eco/manifest/get-package-versions.d.ts): `getPackageVersions(lockfile, name)` — returns all `PackageRef`s that match the given name in a `ParsedLockfile`.
@@ -193,7 +196,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/eco/manifest/parse-manifest](./dist/eco/manifest/parse-manifest.d.ts): `parseManifest(content, ecosystem)` — dispatches to the right per-ecosystem manifest parser.
 - [@socketsecurity/lib/eco/manifest/types](./dist/eco/manifest/types.d.ts): Shared types for manifest + lockfile parsing.
 - [@socketsecurity/lib/eco/npm/bun/exec](./dist/eco/npm/bun/exec.d.ts): Bun tool surface.
-- [@socketsecurity/lib/eco/npm/manifest-format](./dist/eco/npm/manifest-format.d.ts): Format descriptor for `package.json` — the manifest shape shared across the entire npm-family ecosystem (npm, pnpm, yarn, bun, vlt).
+- [@socketsecurity/lib/eco/npm/manifest-format](./dist/eco/npm/manifest-format.d.ts): Format descriptor for `package.json` — the manifest shape shared across the entire npm-family ecosystem: npm, pnpm, yarn, bun, and vlt.
 - [@socketsecurity/lib/eco/npm/npm/exec](./dist/eco/npm/npm/exec.d.ts): Execute npm commands with optimized flags and security defaults.
 - [@socketsecurity/lib/eco/npm/npm/extract-package-name-from-path](./dist/eco/npm/npm/extract-package-name-from-path.d.ts): `extractPackageNameFromPath(pkgPath)` — given an npm v2/v3 lockfile entry key like `node_modules/a/node_modules/b`, returns the final package name (`b`), preserving scoped-package boundaries (`@scope/name` stays joined).
 - [@socketsecurity/lib/eco/npm/npm/flags](./dist/eco/npm/npm/flags.d.ts): Npm CLI flag predicates.
@@ -245,7 +248,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/env/path](./dist/env/path.d.ts): PATH environment variable getter.
 - [@socketsecurity/lib/env/pre-commit](./dist/env/pre-commit.d.ts): PRE_COMMIT environment variable getter.
 - [@socketsecurity/lib/env/providers](./dist/env/providers.d.ts): CI/host provider detection, re-exported from std-env — not reimplemented.
-- [@socketsecurity/lib/env/proxy](./dist/env/proxy.d.ts): `createEnvProxy` — wrap `process.env` (or any env-like record) in a Proxy that adds case-insensitive lookups for known-Windows-sensitive keys (PATH, APPDATA, etc.) and an `overrides` layer.
+- [@socketsecurity/lib/env/proxy](./dist/env/proxy.d.ts): `createEnvProxy` — wrap `process.env`, or any env-like record, in a Proxy that adds case-insensitive lookups for known-Windows-sensitive keys (PATH, APPDATA, etc.) and an `overrides` layer.
 - [@socketsecurity/lib/env/rewire](./dist/env/rewire.d.ts): Environment variable rewiring utilities for testing.
 - [@socketsecurity/lib/env/runtimes](./dist/env/runtimes.d.ts): JS runtime detection, re-exported from std-env — not reimplemented.
 - [@socketsecurity/lib/env/shell](./dist/env/shell.d.ts): SHELL environment variable getter.
@@ -316,7 +319,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/external-tools/opengrep/resolve](./dist/external-tools/opengrep/resolve.d.ts): `resolveOpengrep()` — OpenGrep resolution entry point.
 - [@socketsecurity/lib/external-tools/opengrep/types](./dist/external-tools/opengrep/types.d.ts): Shared types for OpenGrep resolution.
 - [@socketsecurity/lib/external-tools/python/asset-names](./dist/external-tools/python/asset-names.d.ts): Python-build-standalone release asset mapping.
-- [@socketsecurity/lib/external-tools/python/dlx](./dist/external-tools/python/dlx.d.ts): One-call dlx convenience wrappers for python: resolve (or download) a CPython into the known dlx location, then run a pip primitive against it — so callers don't thread `pythonBin` by hand.
+- [@socketsecurity/lib/external-tools/python/dlx](./dist/external-tools/python/dlx.d.ts): One-call dlx convenience wrappers for python: resolve or download a CPython into the known dlx location, then run a pip primitive against it — so callers don't thread `pythonBin` by hand.
 - [@socketsecurity/lib/external-tools/python/from-download](./dist/external-tools/python/from-download.d.ts): `pythonFromDownload()` — fetches a python-build-standalone CPython into the DLX cache and returns a `ResolvedPython` pointing at the interpreter.
 - [@socketsecurity/lib/external-tools/python/from-path](./dist/external-tools/python/from-path.d.ts): `pythonFromPath()` — looks for a CPython interpreter on the system PATH.
 - [@socketsecurity/lib/external-tools/python/pin](./dist/external-tools/python/pin.d.ts): `resolvePipPackagePin()` — the Python mirror of `resolveNpmPackagePin()` (dlx/lockfile).
@@ -528,18 +531,26 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 
 - [@socketsecurity/lib/objects/getters](./dist/objects/getters.d.ts): Lazy-getter primitives + `createConstantsObject`.
 - [@socketsecurity/lib/objects/inspect](./dist/objects/inspect.d.ts): Object inspection helpers — `getKeys`, `getOwn`, `getOwnPropertyValues`.
-- [@socketsecurity/lib/objects/mutate](./dist/objects/mutate.d.ts): Object mutation helpers — `merge` (deep recursive), `objectAssign` (alias for native), `objectFreeze` (alias for native).
+- [@socketsecurity/lib/objects/mutate](./dist/objects/mutate.d.ts): Object mutation helpers: a deep recursive `merge`, plus `objectAssign` and `objectFreeze` aliasing their natives.
 - [@socketsecurity/lib/objects/predicates](./dist/objects/predicates.d.ts): Object type guards: `hasKeys`, `hasOwn`, `isObject`, `isPlainObject`.
 - [@socketsecurity/lib/objects/sort](./dist/objects/sort.d.ts): Sorted-object helpers: `entryKeyComparator`, `objectEntries`, `toSortedObject`, `toSortedObjectFromEntries`.
 - [@socketsecurity/lib/objects/types](./dist/objects/types.d.ts): Public type surface for `objects/*` modules — getter definition shapes and the `Remap` type helper.
+
+## oci/
+
+- [@socketsecurity/lib/oci/blob](./dist/oci/blob.d.ts): Fetch a blob, either a layer or the config, by digest.
+- [@socketsecurity/lib/oci/manifest](./dist/oci/manifest.d.ts): Fetch and parse an OCI/Docker image manifest.
+- [@socketsecurity/lib/oci/registry](./dist/oci/registry.d.ts): The tie-together layer for an anonymous OCI pull: token → manifest → blob, in the order the distribution spec requires.
+- [@socketsecurity/lib/oci/registry-token](./dist/oci/registry-token.d.ts): Anonymous bearer-token acquisition for an OCI distribution-spec pull.
+- [@socketsecurity/lib/oci/types](./dist/oci/types.d.ts): Shared types for the browser-safe OCI distribution-spec pull client.
 
 ## packages/
 
 - [@socketsecurity/lib/packages/edit](./dist/packages/edit.d.ts): Editable package.json manipulation utilities.
 - [@socketsecurity/lib/packages/edit-class](./dist/packages/edit-class.d.ts): The `EditablePackageJson` class factory.
 - [@socketsecurity/lib/packages/exports](./dist/packages/exports.d.ts): Package exports field utilities.
-- [@socketsecurity/lib/packages/fetch](./dist/packages/fetch.d.ts): Network-facing package helpers: the lazily-initialized make-fetch-happen fetcher (shared cache) and GitHub tarball-URL resolution for a package spec.
-- [@socketsecurity/lib/packages/find](./dist/packages/find.d.ts): Find the nearest package.json (or other marker) walking up from an `import.meta` — the package-domain wrapper over the generic `findUpSync` lookup in `fs/find`.
+- [@socketsecurity/lib/packages/fetch](./dist/packages/fetch.d.ts): Network-facing package helpers: the lazily-initialized make-fetch-happen fetcher with its shared cache, and GitHub tarball-URL resolution for a package spec.
+- [@socketsecurity/lib/packages/find](./dist/packages/find.d.ts): Find the nearest package.json, or other marker, walking up from an `import.meta` — the package-domain wrapper over the generic `findUpSync` lookup in `fs/find`.
 - [@socketsecurity/lib/packages/isolation](./dist/packages/isolation.d.ts): Package isolation utilities for testing.
 - [@socketsecurity/lib/packages/licenses](./dist/packages/licenses.d.ts): SPDX license parsing and analysis utilities.
 - [@socketsecurity/lib/packages/manifest](./dist/packages/manifest.d.ts): Package manifest and packument fetching utilities.
@@ -572,7 +583,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/perf/enabled](./dist/perf/enabled.d.ts): Feature-flag check — `isPerfEnabled()` returns true when `DEBUG=perf` is set in the environment.
 - [@socketsecurity/lib/perf/metrics](./dist/perf/metrics.d.ts): Read-side helpers — `getPerformanceMetrics` returns a shallow copy of the recorded rows, `getPerformanceSummary` rolls them up per operation (count / total / avg / min / max), and `clearPerformanceMetrics` empties the...
 - [@socketsecurity/lib/perf/report](./dist/perf/report.d.ts): Report-side helpers — `generatePerformanceReport` returns a multi-line ASCII-bordered report string; `printPerformanceSummary` writes a one-line-per-op summary through `debugLog`.
-- [@socketsecurity/lib/perf/timer](./dist/perf/timer.d.ts): Recording-side helpers — `perfTimer` (returns a stop() closure), `measure` / `measureSync` (timed wrappers around an async / sync function), `perfCheckpoint` (zero-duration marker), and `trackMemory` (records heap-use...
+- [@socketsecurity/lib/perf/timer](./dist/perf/timer.d.ts): Recording-side helpers.
 - [@socketsecurity/lib/perf/types](./dist/perf/types.d.ts): Public type surface for `perf/*` modules — the `PerformanceMetrics` row shape pushed onto the shared metrics array by `perfTimer` / `measure` / `measureSync` / `perfCheckpoint` / `trackMemory`.
 
 ## pkg-ext/
@@ -622,6 +633,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 
 ## promises/
 
+- [@socketsecurity/lib/promises/all-keyed](./dist/promises/all-keyed.d.ts): Keyed promise combinators: `pAllKeyed` and `pAllSettledKeyed` — the tc39 proposal-await-dictionary (`Promise.allKeyed` / `Promise.allSettledKeyed`, stage 3) as plain helpers, no global patching.
 - [@socketsecurity/lib/promises/iterate](./dist/promises/iterate.d.ts): Concurrency-controlled async iteration helpers: `pEach`, `pEachChunk`, `pFilter`, `pFilterChunk`.
 - [@socketsecurity/lib/promises/options](./dist/promises/options.d.ts): Option-shape normalizers for the iteration / retry helpers.
 - [@socketsecurity/lib/promises/queue](./dist/promises/queue.d.ts): Bounded concurrency promise queue.
@@ -657,7 +669,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 
 ## sea/
 
-- [@socketsecurity/lib/sea/detect](./dist/sea/detect.d.ts): SEA (Single Executable Application) binary detection + path accessor.
+- [@socketsecurity/lib/sea/detect](./dist/sea/detect.d.ts): Single Executable Application binary detection + path accessor.
 
 ## secrets/
 
@@ -679,6 +691,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 
 ## shell/
 
+- [@socketsecurity/lib/shell/command-args](./dist/shell/command-args.d.ts): Positional-argument extraction that survives value-taking flags.
 - [@socketsecurity/lib/shell/parse](./dist/shell/parse.d.ts): Tokenize a shell command line into typed entries (bare strings, operators, comments, globs).
 - [@socketsecurity/lib/shell/quote](./dist/shell/quote.d.ts): Escape an argv array into a single shell-safe command string.
 
@@ -763,7 +776,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 
 ## url/
 
-- [@socketsecurity/lib/url/assert-safe](./dist/url/assert-safe.d.ts): SSRF guard for operator- or issuer-supplied URLs — `assertSafeHttpUrl` parses a raw URL, rejects non-HTTP(S) schemes, and refuses hosts that resolve to loopback / private / link-local ranges (cloud metadata, redis, in...
+- [@socketsecurity/lib/url/assert-safe](./dist/url/assert-safe.d.ts): SSRF guard for operator- or issuer-supplied URLs — `assertSafeHttpUrl` parses a raw URL, rejects non-HTTP(S) schemes, refuses hosts that resolve to loopback / private / link-local ranges (cloud metadata, redis, intern...
 - [@socketsecurity/lib/url/parse](./dist/url/parse.d.ts): URL parsing helpers — `parseUrl` (safe `new URL(...)` wrapper that returns `undefined` instead of throwing) and `createRelativeUrl` (compose a relative path against an optional base).
 - [@socketsecurity/lib/url/predicates](./dist/url/predicates.d.ts): URL type-guard predicates — `isUrl` answers whether a value parses as a valid URL via `parseUrl`.
 - [@socketsecurity/lib/url/search-params](./dist/url/search-params.d.ts): URL search-param coercion helpers — `urlSearchParamsAs*` normalise a raw `string | null | undefined` value into a typed shape (array / boolean / number / string) with a default.
