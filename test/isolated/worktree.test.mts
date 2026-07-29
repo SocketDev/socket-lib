@@ -216,27 +216,35 @@ describe.sequential('spawnAiAgentsInWorktrees', () => {
     expect(results[0]!.cleanup).toBe('removed')
   })
 
-  test('respects concurrency cap (does not allow more than concurrency workers in flight)', async () => {
-    const worktreeRoot = path.join(tmpRoot, 'wts-7')
-    let active = 0
-    let maxActive = 0
-    await spawnAiAgentsInWorktrees(
-      [1, 2, 3, 4, 5, 6, 7, 8],
-      async () => {
-        active += 1
-        maxActive = Math.max(maxActive, active)
-        await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
-        active -= 1
-        return 'ok'
-      },
-      {
-        baseRepo: repo,
-        concurrency: 2,
-        worktreeRoot,
-      },
-    )
-    expect(maxActive).toBeLessThanOrEqual(2)
-  })
+  // Real-I/O budget: eight git-worktree creations share the fork pool with
+  // the other isolated files under coverage instrumentation, so the default
+  // 20s times out on a loaded host while the test passes alone in under a
+  // second.
+  test(
+    'respects concurrency cap (does not allow more than concurrency workers in flight)',
+    { timeout: 60_000 },
+    async () => {
+      const worktreeRoot = path.join(tmpRoot, 'wts-7')
+      let active = 0
+      let maxActive = 0
+      await spawnAiAgentsInWorktrees(
+        [1, 2, 3, 4, 5, 6, 7, 8],
+        async () => {
+          active += 1
+          maxActive = Math.max(maxActive, active)
+          await new Promise(resolve => setTimeout(resolve, tolerantSleep(10)))
+          active -= 1
+          return 'ok'
+        },
+        {
+          baseRepo: repo,
+          concurrency: 2,
+          worktreeRoot,
+        },
+      )
+      expect(maxActive).toBeLessThanOrEqual(2)
+    },
+  )
 
   test('clamps concurrency to 1 when 0 is passed', async () => {
     const worktreeRoot = path.join(tmpRoot, 'wts-8')
