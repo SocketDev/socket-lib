@@ -242,8 +242,8 @@ catalogs:
       specifier: 0.1.1
       version: 0.1.1
     '@ultrathink/acorn.wasm':
-      specifier: npm:@ultrathink/acorn.rs.wasm@0.0.1
-      version: 0.0.1
+      specifier: npm:@ultrathink/acorn.rs.wasm@0.1.1
+      version: 0.1.1
     '@vitest/coverage-v8':
       specifier: 4.1.10
       version: 4.1.10
@@ -551,7 +551,7 @@ importers:
         version: 7.0.0-dev.20260510.1
       '@ultrathink/acorn.wasm':
         specifier: 'catalog:'
-        version: '@ultrathink/acorn.rs.wasm@0.0.1'
+        version: '@ultrathink/acorn.rs.wasm@0.1.1'
       '@vitest/coverage-v8':
         specifier: 'catalog:'
         version: 4.1.10(vitest@4.1.10)
@@ -2951,7 +2951,7 @@ importers:
         version: '@socketsecurity/lib@6.5.1(typescript@7.0.2)'
       '@ultrathink/acorn.wasm':
         specifier: 'catalog:'
-        version: '@ultrathink/acorn.rs.wasm@0.0.1'
+        version: '@ultrathink/acorn.rs.wasm@0.1.1'
       diff:
         specifier: 9.0.0
         version: 9.0.0
@@ -4406,10 +4406,6 @@ packages:
     engines: {node: '>=16.20.0'}
     cpu: [x64]
     os: [win32]
-
-  '@ultrathink/acorn.rs.wasm@0.0.1':
-    resolution: {integrity: sha512-XZLeVZKgcswjnBqHD/jfdAxS+/8wUwShxPjJjTmJD9CtHwZ8sb/XNWYt0oGfUErX+YzzJfX9JCd+gWTmkw6/cQ==}
-    engines: {node: '>=18'}
 
   '@ultrathink/acorn.rs.wasm@0.1.1':
     resolution: {integrity: sha512-oL0uqC5cROkhhVqeGQ4h0CeGYPwkc+tu/dPyfUcmdA2tKpa0o9x5L5L+nu/FeWsqMoO/OjAqHQDCUF0bqVNVwQ==}
@@ -7877,8 +7873,6 @@ snapshots:
 
   '@typescript/typescript-win32-x64@7.0.2':
     optional: true
-
-  '@ultrathink/acorn.rs.wasm@0.0.1': {}
 
   '@ultrathink/acorn.rs.wasm@0.1.1': {}
 
