@@ -17,6 +17,44 @@ anyone remembering it.
   algorithms, the source files that produce the behavior. Reading them to write
   fleet code makes the fleet code a derivative work.
 
+## Structure is not content
+
+**A directory tree is fact; only the code is expression.** Paths, file names,
+blob shas, and counts carry no copyright, so enumerating a copyleft upstream is
+always allowed. Only reading the bytes is blocked.
+
+This is not a convenience carve-out — it is load-bearing. The first cut of this
+guard blocked listing too, and the immediate casualty was the guard's own data:
+a roster entry's `testPathPatterns` could not be checked against the upstream's
+real test corpus, because checking meant listing. The entry shipped unverified.
+A rule that blocks its own maintenance rots behind itself.
+
+| Allowed — enumeration | Blocked — content |
+| --- | --- |
+| `ls` at any depth, `tree` | `cat` / `head` / `tail` / `less` / `strings` on a non-test file |
+| `find` with name-style output | `find … -exec` / `-execdir` / `-ok` |
+| `git ls-tree`, `git ls-files` | `git show <rev>:<non-test-path>`, `git cat-file`, `git archive` |
+| `gh api …/git/trees/<sha>` | `gh api …/contents/<path>` |
+| Glob, including `upstream/<repo>/**` | Read of a non-test FILE |
+| Read of a DIRECTORY | `rg` / `grep` printing matching LINES |
+| `rg -l`, `grep -l`, `--files-with-matches`, `--count` | Grep tool with `output_mode: content` |
+
+The Grep tool's default `output_mode` is `files_with_matches`, so an ordinary
+Grep is enumeration and passes; only an explicit `output_mode: content` is
+gated. `git show HEAD:<dir>` prints a tree listing rather than bytes, but a
+rev-spec gives the guard no way to tell a directory from a file, so it stays
+blocked and `git ls-tree` is the sanctioned route.
+
+### Why `-l` is allowed even though it is a content oracle
+
+`rg -l` leaks one bit per query — "does this file match?" — and with enough
+queries you could binary-search a file's contents out of it. We allow it
+anyway, deliberately. It returns the same information class as a listing, the
+attack needs thousands of queries to recover a few lines, and anyone willing to
+run it has far easier routes. Recording the decision here so it reads as a
+judgment call rather than an oversight: **the line is drawn at output shape,
+not at information-theoretic purity.**
+
 ## Why derivation flips the license
 
 Copyleft licenses attach to derived works, not to users. Running an AGPL tool
@@ -112,6 +150,36 @@ git -C upstream/<repo> sparse-checkout set --no-cone \
 guard's Fix line and the belt's remediation print that generated string — the
 command an operator is handed is provably the command the matcher accepts.
 
+### Root-anchor every metadata glob
+
+**A metadata pattern carries a leading `/`. Always.** `--no-cone` patterns use
+gitignore semantics, where a pattern with no slash in it matches at **any
+depth** — and on a case-insensitive filesystem, the macOS and Windows default,
+it also matches any casing. Those two facts compose into a live leak:
+
+| Pattern | Intent | What it actually admitted |
+| --- | --- | --- |
+| `NOTICE*` | the root NOTICE file | `pkg/detectors/noticeable/noticeable.go` |
+| `README*` | the root README | `pkg/detectors/readme/readme.go` |
+
+Two AGPL implementation files materialized inside a slice whose entire purpose
+is that they cannot exist. `/NOTICE*` and `/README*` close it. Verified against
+real git on a case-insensitive filesystem: the unanchored cone checks out both
+detector files, the anchored cone checks out neither.
+
+Read that table before writing a new roster entry. Anything meant to be
+root-only must be anchored; a pattern that looks obviously-safe on Linux can
+still match on a contributor's Mac. `testPathPatterns` are the deliberate
+exception — `**/*_test.go` and `**/testdata/**` are depth-any *by design*,
+because a test corpus is spread through the tree.
+
+`copyleftGlobToRegExp()` mirrors these gitignore rules exactly — leading `/`
+anchors, a slash-less pattern floats — so the in-process predicate and git
+itself agree on what a pattern admits. That agreement is the point: when they
+diverge, the predicate calls a path unobservable while git cheerfully writes it
+to disk. The sparse allowlist likewise compares **verbatim**, so `README*` is
+rejected even though `/README*` is accepted.
+
 Widening that cone is itself blocked: `git sparse-checkout disable` and
 `reapply` are refused outright on a copyleft submodule, and `set` / `add` are
 refused for any pattern not on the allowlist. Once the cone is wide, every later
@@ -119,13 +187,14 @@ read looks like an ordinary local file, so the cone is the real perimeter.
 
 ## Enforcement
 
-- `.claude/hooks/fleet/no-copyleft-source-read/` — PreToolUse, blocks Read of an
-  off-allowlist `upstream/<repo>/…` path; a Grep/Glob scope not confined to the
-  tests slice; `gh api repos/<o>/<r>/contents/…` for a non-test path; a
-  `curl`/`wget` of a raw blob, file view, or whole-tree archive; a `git
-  show`/`cat-file`/`archive` of a non-test blob; a cone-widening `git
-  sparse-checkout`; and a WebFetch of the same URLs. Bypass:
-  `Allow copyleft-source-read bypass`.
+- `.claude/hooks/fleet/no-copyleft-source-read/` — PreToolUse. Blocks CONTENT
+  only, per the table above: a Read of an off-allowlist `upstream/<repo>/…`
+  file, a `cat`-family reader, a line-printing `rg`/`grep` or a Grep with
+  `output_mode: content`, `find … -exec`, `gh api …/contents/…` for a non-test
+  path, a `curl`/`wget` of a raw blob / file view / whole-tree archive, a `git
+  show`/`cat-file`/`archive` of a non-test blob, a cone-widening `git
+  sparse-checkout`, and a WebFetch of the same URLs. Enumeration passes.
+  Bypass: `Allow copyleft-source-read bypass`.
 - `scripts/fleet/check/copyleft-slices-are-tests-only.mts` — commit-time belt.
   Per copyleft submodule present: no non-test sparse pattern, no materialized
   non-test file, no tracked file citing it as a derivation source. Vacuous pass

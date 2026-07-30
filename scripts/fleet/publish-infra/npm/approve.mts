@@ -38,10 +38,12 @@ import {
 } from './staged-browser-read.mts'
 import type { StagedBrowserSession } from './staged-browser-read.mts'
 import {
+  composeTarballProviders,
   defaultDownloadStagedTarball,
   defaultPackTarball,
   verifyStagedEntry,
 } from './staged.mts'
+import type { TarballProvider } from './staged.mts'
 import {
   packWorkspaceReleaseAssets,
   verifyStagedPlatformEntry,
@@ -352,9 +354,7 @@ export async function runApprove(config: {
         // bytes (undefined — a staged entry with no tarballUrl, an in-page
         // fetch that failed) falls through to the next instead of hard-failing
         // the scan, matching downloadStagedTarballInPage's documented contract.
-        const sources: Array<
-          (name: string, version: string) => Promise<string | undefined>
-        > = []
+        const sources: TarballProvider[] = []
         if (browserSession) {
           const stagedTar = browserSession.tarballs.find(
             t => t.packageName === entry.name && t.version === entry.version,
@@ -372,19 +372,7 @@ export async function runApprove(config: {
           sources.push(() => defaultDownloadStagedTarball(stageId))
         }
         sources.push(defaultPackTarball)
-        const packTarball = async (
-          entryName: string,
-          entryVersion: string,
-        ): Promise<string | undefined> => {
-          for (let s = 0, sn = sources.length; s < sn; s += 1) {
-            // eslint-disable-next-line no-await-in-loop -- serial fallback: try each source until one yields bytes.
-            const packed = await sources[s]!(entryName, entryVersion)
-            if (packed) {
-              return packed
-            }
-          }
-          return undefined
-        }
+        const packTarball = composeTarballProviders(sources)
         // eslint-disable-next-line no-await-in-loop
         const scanOk = await scanEntry(scanSubject, {
           context: scanContext,

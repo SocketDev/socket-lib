@@ -9,22 +9,45 @@
 // all live in `_shared/copyleft-upstreams.mts`, which the commit-time belt
 // `copyleft-slices-are-tests-only.mts` shares, so guard and gate cannot drift.
 //
-// Routes blocked:
-//   - Read of an `upstream/<repo>/…` path off the tests allowlist.
-//   - Grep / Glob whose search SCOPE lands inside a copyleft submodule but is
-//     not confined to its tests slice — a grep at the submodule root reads the
-//     whole implementation even though no implementation path is typed.
-//   - Bash `gh api repos/<owner>/<repo>/contents/<path>` for a non-test path.
-//   - Bash `curl` / `wget` against `raw.githubusercontent.com`, a
+// STRUCTURE IS NOT CONTENT. A directory tree — paths, file names, blob shas,
+// counts — is FACT, not expression, and copyright does not reach it. Only the
+// code itself is off limits. So enumeration is ALLOWED everywhere and only
+// content reads are blocked. Conflating the two is not merely over-strict, it
+// is actively harmful: it blocks the very listing needed to verify that a
+// roster entry's tests allowlist matches the upstream's real test corpus, so
+// the guard's own data silently rots behind the guard.
+//
+// ALLOWED — enumeration, yields paths and names, never file bytes:
+//   - `ls` at any depth, `tree`, `find` with name-style output.
+//   - `git ls-tree` / `git ls-files`; a blob sha names a blob, it is not one.
+//   - `gh api repos/<o>/<r>/git/trees/<sha>` — the remote tree listing.
+//   - The Glob tool; its results ARE paths, including a bare submodule-root
+//     pattern such as `upstream/<repo>/**`.
+//   - Read of a DIRECTORY, which yields an entry listing rather than content.
+//   - `rg -l` / `grep -l` / `--files-with-matches` / `--count` — path-only
+//     output. See docs/agents.md/fleet/copyleft-boundaries.md for why the
+//     theoretical content-oracle in `-l` is accepted rather than blocked.
+//
+// BLOCKED — content:
+//   - Read of a non-test FILE under `upstream/<repo>/`.
+//   - `cat` / `head` / `tail` / `less` / `strings` and equivalents on a
+//     non-test file, whether named directly or reached by a leading `cd`.
+//   - `rg` / `grep` in default LINE-PRINTING mode against a non-test scope;
+//     matching lines are content. The Grep tool likewise blocks only when
+//     `output_mode` is `content`.
+//   - `find … -exec`/`-execdir`/`-ok`, which runs an arbitrary reader per hit.
+//   - `git show <rev>:<non-test-path>`, `git cat-file` of a non-test blob, and
+//     `git archive`. `git show HEAD:<dir>` prints a tree listing rather than
+//     content, but the guard cannot tell a dir from a file in a rev-spec, so it
+//     stays blocked and `git ls-tree` is the sanctioned enumeration route.
+//   - `gh api repos/<owner>/<repo>/contents/<path>` for a non-test path.
+//   - `curl` / `wget` against `raw.githubusercontent.com`, a
 //     `github.com/<o>/<r>/{blob,raw}` file view, or a whole-tree archive from
 //     `codeload.github.com` / `/archive` / `/tarball` / `/zipball`.
-//   - Bash `git show` / `git cat-file` / `git archive` reading a non-test blob
-//     out of a copyleft submodule, whether reached by `git -C <dir>`, a leading
-//     `cd`, or an `upstream/<repo>/…` path in the revision argument.
-//   - Bash `git sparse-checkout set|add|disable|reapply` that would WIDEN a
-//     copyleft submodule's cone past its tests allowlist. This is the route
-//     that matters most: widening the cone materializes the implementation on
-//     disk, after which every later read looks like an ordinary local file.
+//   - `git sparse-checkout set|add|disable|reapply` that would WIDEN a copyleft
+//     submodule's cone past its tests allowlist. This is the route that matters
+//     most: widening the cone materializes the implementation on disk, after
+//     which every later read looks like an ordinary local file.
 //   - WebFetch of the same URLs. WebSearch carries a query, not a fetchable
 //     URL, so there is nothing for this guard to match on it; the URL its
 //     results lead to arrives as a WebFetch and is gated there.
@@ -33,6 +56,8 @@
 //
 // Convention: docs/agents.md/fleet/copyleft-boundaries.md.
 // Bypass: `Allow copyleft-source-read bypass`.
+
+import { statSync } from 'node:fs'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
@@ -46,7 +71,11 @@ import {
   isCopyleftSparsePatternAllowed,
 } from '../_shared/copyleft-upstreams.mts'
 import { bashGuard, block, defineHook, runHook } from '../_shared/guard.mts'
-import { commandsFor, commandWorkingDir } from '../_shared/shell-command.mts'
+import {
+  commandsFor,
+  commandWorkingDir,
+  parseCommands,
+} from '../_shared/shell-command.mts'
 
 import type {
   CopyleftReadFinding,
@@ -70,6 +99,39 @@ const GIT_READ_SUBCOMMANDS = new Set(['archive', 'cat-file', 'show'])
 const GIT_SPARSE_WIDENING = new Set(['add', 'disable', 'reapply', 'set'])
 // Fetchers whose arguments are URLs.
 const URL_FETCHERS: readonly string[] = ['curl', 'wget']
+// Binaries that stream a file's BYTES to stdout. Every bare path operand is a
+// content read. `ls` / `tree` / `find` are deliberately absent — they emit
+// names, which is structure.
+const CONTENT_READERS = new Set([
+  'bat',
+  'cat',
+  'head',
+  'less',
+  'more',
+  'nl',
+  'od',
+  'strings',
+  'tail',
+  'xxd',
+])
+// Search binaries that print MATCHING LINES by default. Lines are content, so
+// these block unless a flag reduces the output to paths.
+const SEARCH_BINARIES = new Set(['grep', 'rg', 'ripgrep'])
+// Flags that reduce a search to paths, or to per-path tallies — the same
+// information class as a directory listing. `-L` is absent on purpose: it means
+// files-without-match in grep but follow-symlinks in rg, and a flag that blocks
+// in one tool and not the other is worse than requiring the long spelling.
+const SEARCH_PATH_ONLY_FLAGS = new Set([
+  '--count',
+  '--files',
+  '--files-with-matches',
+  '--files-without-match',
+  '-c',
+  '-l',
+])
+// `find` actions that hand each hit to an arbitrary command, which is how a
+// name-only walk turns into a content read.
+const FIND_EXEC_ACTIONS = new Set(['-exec', '-execdir', '-ok', '-okdir'])
 
 /**
  * A blocked copyleft read: the finding plus the human label for HOW it was
@@ -233,6 +295,106 @@ export function detectCopyleftSparseWiden(
   return undefined
 }
 
+// A path operand judged as a FILE read, tried both as typed and as resolved
+// against the command's working dir, so `cd upstream/<repo> && cat pkg/x.go`
+// is caught even though the operand carries no `upstream/` segment.
+function copyleftFileFinding(
+  cwd: string,
+  arg: string,
+): CopyleftReadFinding | undefined {
+  return (
+    detectCopyleftImplementationRead(arg) ??
+    detectCopyleftImplementationRead(`${cwd}/${arg}`)
+  )
+}
+
+// The same, judged as a SEARCH SCOPE: a directory operand counts because a
+// recursive search under it reads every file it holds.
+function copyleftScopeFinding(
+  cwd: string,
+  arg: string,
+): CopyleftReadFinding | undefined {
+  return (
+    detectCopyleftScopeRead(arg) ?? detectCopyleftScopeRead(`${cwd}/${arg}`)
+  )
+}
+
+/**
+ * True when a search invocation prints only paths or tallies. Covers the long
+ * flags, the bare `-l`/`-c`, and a short-flag cluster such as `-rl` / `-ln`.
+ */
+export function isPathOnlySearch(args: readonly string[]): boolean {
+  for (let i = 0, { length } = args; i < length; i += 1) {
+    const arg = args[i]!
+    if (SEARCH_PATH_ONLY_FLAGS.has(arg)) {
+      return true
+    }
+    // `^-[A-Za-z]+$` is a short-flag cluster, no `--` and no `=value`; an `l`
+    // anywhere inside it is the files-with-matches flag.
+    if (/^-[A-Za-z]+$/.test(arg) && arg.includes('l')) {
+      return true
+    }
+  }
+  return false
+}
+
+/**
+ * Detect a LOCAL content read of a copyleft implementation: a `cat`-family
+ * reader on a non-test file, a line-printing `grep`/`rg` over a non-test scope,
+ * or a `find … -exec` that hands each hit to an arbitrary command.
+ *
+ * Enumeration passes straight through — `ls`, `tree`, a name-only `find`, and
+ * `git ls-tree`/`ls-files` are never in scope here.
+ */
+export function detectCopyleftContentRead(
+  command: string,
+): CopyleftBlock | undefined {
+  const cwd = commandWorkingDir(command)
+  const commands = parseCommands(command)
+  for (let i = 0, { length } = commands; i < length; i += 1) {
+    const cmd = commands[i]!
+    const bare = cmd.args.filter(a => !a.startsWith('-'))
+    if (CONTENT_READERS.has(cmd.binary)) {
+      for (let j = 0, { length: blen } = bare; j < blen; j += 1) {
+        const finding = copyleftFileFinding(cwd, bare[j]!)
+        if (finding) {
+          return { finding, how: `a \`${cmd.binary}\`` }
+        }
+      }
+    } else if (SEARCH_BINARIES.has(cmd.binary)) {
+      if (isPathOnlySearch(cmd.args)) {
+        continue
+      }
+      // The first bare operand is the PATTERN unless `-e`/`--regexp` supplied
+      // it, so skipping it keeps a search FOR the text of an upstream path from
+      // reading as a search INSIDE that path.
+      const patternIsFlagged =
+        cmd.args.includes('-e') || cmd.args.includes('--regexp')
+      for (
+        let j = patternIsFlagged ? 0 : 1, { length: blen } = bare;
+        j < blen;
+        j += 1
+      ) {
+        const finding = copyleftScopeFinding(cwd, bare[j]!)
+        if (finding) {
+          return { finding, how: `a line-printing \`${cmd.binary}\`` }
+        }
+      }
+    } else if (cmd.binary === 'find') {
+      if (!cmd.args.some(a => FIND_EXEC_ACTIONS.has(a))) {
+        continue
+      }
+      for (let j = 0, { length: blen } = bare; j < blen; j += 1) {
+        const finding = copyleftScopeFinding(cwd, bare[j]!)
+        if (finding) {
+          return { finding, how: 'a `find … -exec`' }
+        }
+      }
+    }
+  }
+  return undefined
+}
+
 /**
  * Detect a Bash network read of a copyleft implementation: a `gh api
  * repos/<o>/<r>/contents/<path>` call, or a `curl`/`wget` against a raw blob,
@@ -279,7 +441,8 @@ export function detectCopyleftBashRead(
   return (
     detectCopyleftNetworkRead(command) ??
     detectCopyleftSparseWiden(command) ??
-    detectCopyleftGitRead(command)
+    detectCopyleftGitRead(command) ??
+    detectCopyleftContentRead(command)
   )
 }
 
@@ -307,6 +470,9 @@ export function formatCopyleftBlock(detection: CopyleftBlock): string {
     '  Fix:   derive from a permissively licensed source instead, and keep the',
     '         submodule cone tests-only:',
     `           ${copyleftSparseRecipe(upstream)}`,
+    '         Enumerating the tree is FINE — structure is fact, not expression.',
+    '         Use `ls` / `tree` / `find`, `git ls-tree`, Glob, a directory Read,',
+    '         or `rg -l` when you need to know what is there.',
   ]
   if (upstream.permissiveAlternative) {
     lines.push(
@@ -319,32 +485,53 @@ export function formatCopyleftBlock(detection: CopyleftBlock): string {
 
 // Read narrows to one file; Grep/Glob narrow to a scope, so the scope matcher
 // runs for them.
+/**
+ * True when a Read targets a DIRECTORY, whose result is an entry listing rather
+ * than file bytes. Structure is fact, so a directory Read is enumeration and
+ * passes. A path that cannot be stat'd is treated as a file: that is the
+ * fail-safe side, and a Read of a nonexistent path errors on its own anyway.
+ */
+export function isDirectoryRead(filePath: string): boolean {
+  try {
+    return statSync(filePath).isDirectory()
+  } catch {
+    return false
+  }
+}
+
+// Grep's `output_mode`: 'content' prints matching LINES, which is content.
+// 'files_with_matches' — the tool's DEFAULT — and 'count' emit paths and
+// tallies, the same information class as a listing.
+function grepPrintsContent(input: ToolCallPayload['tool_input']): boolean {
+  return input?.output_mode === 'content'
+}
+
 function checkReadTools(payload: ToolCallPayload): GuardResult {
   const tool = payload?.tool_name
   const input = payload?.tool_input
   if (tool === 'Read') {
     const filePath = typeof input?.file_path === 'string' ? input.file_path : ''
+    // Listing a directory inside the submodule is enumeration, not a read.
+    if (isDirectoryRead(filePath)) {
+      return undefined
+    }
     const finding = detectCopyleftImplementationRead(filePath)
     return finding
       ? block(formatCopyleftBlock({ finding, how: 'a Read' }))
       : undefined
   }
-  if (tool !== 'Glob' && tool !== 'Grep') {
+  // Glob is never gated: its results ARE paths, so even a bare
+  // `upstream/<repo>/**` is a listing.
+  if (tool !== 'Grep' || !grepPrintsContent(input)) {
     return undefined
   }
   const searchPath = typeof input?.path === 'string' ? input.path : undefined
   if (searchPath) {
     const finding = detectCopyleftScopeRead(searchPath)
     if (finding) {
-      return block(formatCopyleftBlock({ finding, how: `a ${tool} scope` }))
-    }
-  }
-  // Only Glob's `pattern` names paths. Grep's `pattern` is a content regex, and
-  // scanning it would block a search for the literal text of an upstream path.
-  if (tool === 'Glob' && typeof input?.pattern === 'string') {
-    const finding = detectCopyleftScopeRead(input.pattern)
-    if (finding) {
-      return block(formatCopyleftBlock({ finding, how: 'a Glob pattern' }))
+      return block(
+        formatCopyleftBlock({ finding, how: 'a line-printing Grep scope' }),
+      )
     }
   }
   return undefined
@@ -381,7 +568,7 @@ export const hook = defineHook({
   bypass: ['copyleft-source-read'],
   check,
   event: 'PreToolUse',
-  matcher: ['Bash', 'Glob', 'Grep', 'Read', 'WebFetch'],
+  matcher: ['Bash', 'Grep', 'Read', 'WebFetch'],
   triggers,
   type: 'guard',
 })

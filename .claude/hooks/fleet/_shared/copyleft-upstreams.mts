@@ -79,6 +79,16 @@ export const COPYLEFT_UPSTREAMS: readonly CopyleftUpstream[] = [
     spdx: 'AGPL-3.0',
     // Go's universal test conventions: `_test.go` siblings and `testdata/`
     // fixture trees. Everything else in the tree is implementation.
+    //
+    // VERIFIED against the real tree at the version below by enumerating it
+    // through the GitHub trees API, which is structure, not content: of 3467
+    // blobs these two globs admit 1991 — 1973 `_test.go` files and 18
+    // `testdata/` fixtures — and the `testdata/` hits are all genuine fixture
+    // data. The only test-shaped paths left outside are deliberate: a compiled
+    // `utf16_test.dll`, a `test_helpers.go` that is compiled into the shipping
+    // package rather than the test binary, and the `scripts/test*` CI harness.
+    // None is needed to observe detection behavior. No other fixture corpus
+    // lives under a different directory name.
     testPathPatterns: ['**/*_test.go', '**/testdata/**'],
     verifiedVersion: 'v3.96.0',
   },
@@ -89,14 +99,26 @@ export const COPYLEFT_UPSTREAMS: readonly CopyleftUpstream[] = [
  * copyleft upstream. `LICENSE` is load-bearing: this module's own rule is that
  * a new entry's SPDX id must be verified from the upstream's LICENSE, so
  * blocking that read would make the rule unfollowable. Sorted alpha.
+ *
+ * 🚨 EVERY ENTRY IS ROOT-ANCHORED WITH A LEADING `/`, and must stay that way.
+ * These patterns are emitted verbatim into a `git sparse-checkout set
+ * --no-cone` cone, where gitignore semantics apply: a pattern with NO slash
+ * matches at ANY depth. An unanchored `NOTICE*` / `README*` therefore reaches
+ * far past the repo root, and on a case-insensitive filesystem — the macOS and
+ * Windows default — it also matches lowercase. Together those two facts
+ * materialized real AGPL implementation files, `pkg/detectors/noticeable/…`
+ * and `pkg/detectors/readme/…`, inside a slice whose entire purpose is that
+ * they cannot exist. The leading `/` is the fix and the invariant.
  */
 export const COPYLEFT_METADATA_PATTERNS: readonly string[] = [
-  'AUTHORS*',
-  'CONTRIBUTORS*',
-  'COPYING*',
-  'LICENSE*',
-  'NOTICE*',
-  'README*',
+  '/AUTHORS*',
+  '/CONTRIBUTORS*',
+  '/COPYING*',
+  '/COPYRIGHT*',
+  '/LICENCE*',
+  '/LICENSE*',
+  '/NOTICE*',
+  '/README*',
 ]
 
 /**
@@ -127,12 +149,20 @@ export interface CopyleftReadFinding {
 // directories so `**/*_test.go` also covers a top-level `main_test.go`; a lone
 // `*` stops at a separator; every other character is literal.
 function copyleftGlobToRegExp(pattern: string): RegExp {
-  let source = '^'
-  for (let i = 0, { length } = pattern; i < length; i += 1) {
-    const ch = pattern[i]!
+  // gitignore semantics, mirrored EXACTLY, because the very same string is
+  // handed to `git sparse-checkout set --no-cone`: a leading `/` anchors the
+  // pattern to the repo root, and a pattern carrying no slash at all floats to
+  // any depth. Diverging here would let the predicate call a path unobservable
+  // while git happily materializes it — the drift that leaked AGPL detector
+  // files onto disk.
+  const anchored = pattern.startsWith('/')
+  const body = anchored ? pattern.slice(1) : pattern
+  let source = anchored || body.includes('/') ? '^' : '^(?:[^\\0]*\\/)?'
+  for (let i = 0, { length } = body; i < length; i += 1) {
+    const ch = body[i]!
     if (ch === '*') {
-      const isDoubleStar = pattern[i + 1] === '*'
-      if (isDoubleStar && pattern[i + 2] === '/') {
+      const isDoubleStar = body[i + 1] === '*'
+      if (isDoubleStar && body[i + 2] === '/') {
         // `**/` — any number of leading path segments, including none.
         source += '(?:[^\\0]*\\/)?'
         i += 2
@@ -405,18 +435,23 @@ export function isCopyleftSparsePatternAllowed(
   upstream: CopyleftUpstream,
   pattern: string,
 ): boolean {
-  const normalized = normalizePath(pattern).replace(/^\.?\//, '')
-  if (normalized === '') {
+  // Compared VERBATIM, with no leading-slash stripping. The anchor is part of
+  // the pattern's meaning here: `/README*` admits one root file, while the
+  // unanchored `README*` floats to every depth and drags implementation in. An
+  // allowlist that treated them as equal would wave through the exact spelling
+  // that caused the leak.
+  const candidate = pattern.trim()
+  if (candidate === '') {
     return false
   }
   const { testPathPatterns } = upstream
   for (let i = 0, { length } = testPathPatterns; i < length; i += 1) {
-    if (normalizePath(testPathPatterns[i]!) === normalized) {
+    if (testPathPatterns[i] === candidate) {
       return true
     }
   }
   for (let i = 0, { length } = COPYLEFT_METADATA_PATTERNS; i < length; i += 1) {
-    if (COPYLEFT_METADATA_PATTERNS[i] === normalized) {
+    if (COPYLEFT_METADATA_PATTERNS[i] === candidate) {
       return true
     }
   }
