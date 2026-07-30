@@ -67,6 +67,18 @@ export function rosterRepoNames(repoRoot: string): string[] {
 }
 
 /**
+ * The roster repos with no checkout on disk beside this one. Each missing
+ * checkout is a blind spot: its imports are invisible, so every leaf only it
+ * uses would be misclassified as fleet-unused.
+ */
+export function missingRosterRepos(repoRoot: string): string[] {
+  const projectsDir = path.dirname(repoRoot)
+  return rosterRepoNames(repoRoot).filter(
+    name => !existsSync(path.join(projectsDir, name, '.git')),
+  )
+}
+
+/**
  * The lib's public leaf specifiers, from the exports map (`./abort/signal`
  * → `abort/signal`). The root `.` entry and pattern entries are skipped —
  * stubbing targets concrete leaves.
@@ -132,11 +144,26 @@ export function parseLibImports(text: string): ParsedImport[] {
   return results
 }
 
-// Tracked source files in a repo that can import the lib.
+// Source files in a repo that can import the lib — tracked plus untracked
+// (unignored) files, so a consumer written but not yet committed still counts
+// as fleet usage. (The 6.5.1 npm/meta stub shipped because the only consumer
+// was untracked work in progress at audit time.)
 function sourceFiles(repoDir: string): string[] {
   const r = spawnSync(
     'git',
-    ['ls-files', '*.ts', '*.mts', '*.cts', '*.tsx', '*.js', '*.mjs', '*.cjs'],
+    [
+      'ls-files',
+      '--cached',
+      '--others',
+      '--exclude-standard',
+      '*.ts',
+      '*.mts',
+      '*.cts',
+      '*.tsx',
+      '*.js',
+      '*.mjs',
+      '*.cjs',
+    ],
     { cwd: repoDir, stdio: 'pipe', stdioString: true },
   )
   if (r.status !== 0) {
@@ -302,8 +329,20 @@ export function graphSafeStubCandidates(
 }
 
 function main(): void {
+  const writeStubList = process.argv.includes('--write-stub-list')
+  if (writeStubList) {
+    const missing = missingRosterRepos(REPO_ROOT)
+    if (missing.length > 0) {
+      throw new Error(
+        'audit-fleet-lib-usage: refusing to write the stub list with roster blind spots.\n' +
+          `  Where: ${path.dirname(REPO_ROOT)}\n` +
+          `  Saw: ${missing.length} roster repo(s) with no checkout on disk (${missing.join(', ')}); wanted every roster member scannable.\n` +
+          '  Fix: clone the missing checkout(s) beside this repo, then re-run --write-stub-list.',
+      )
+    }
+  }
   const report = auditFleetLibUsage(REPO_ROOT)
-  if (process.argv.includes('--write-stub-list')) {
+  if (writeStubList) {
     const candidates = graphSafeStubCandidates(REPO_ROOT, report)
     const listPath = path.join(
       REPO_ROOT,
