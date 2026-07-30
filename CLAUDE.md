@@ -117,8 +117,8 @@
 
 Core infrastructure library for Socket.dev security tools.
 
-🚨 Internal imports use relative paths (no aliases). Vendored externals live in `src/external/` and import by bare name. Build: `pnpm build` (rolldown → CJS) / type-check: `pnpm run check` (tsgo) / test: `pnpm test` / coverage: `pnpm run cover`. NEVER use `process.chdir()` — pass `{ cwd }` and absolute paths. NEVER use `--` before vitest test paths — runs all tests.
-
-🚨 **Vitest OOM with `tests 0ms` = infinite stream, not memory.** `Readable.push(undefined)` doesn't end the stream (only `null` does). Bisect with `node_modules/.bin/vitest -t '<describe>'` **before** raising heap.
-
-Full architecture, commands, code-quality tools, build system, package-exports, testing, CI, env-var conventions in [`docs/agents.md/repo/architecture.md`](docs/agents.md/repo/architecture.md).
+- 🚨 Internal imports use relative paths (no aliases); vendored externals live in `src/external/` and import by bare name.
+- 🚨 Build: `pnpm build` (rolldown → CJS); type-check: `pnpm run check` (tsgo); test: `pnpm test`; coverage: `pnpm run cover`.
+- 🚨 NEVER `process.chdir()` — pass `{ cwd }` and absolute paths; NEVER `--` before vitest test paths — runs ALL tests.
+- 🚨 Vitest OOM with `tests 0ms` = infinite stream, not memory — `Readable.push(undefined)` doesn't end a stream (only `null` does); bisect with `node_modules/.bin/vitest -t '<describe>'` before raising heap.
+- Full architecture, commands, code-quality tools, build system, package-exports, testing, CI, env-var conventions in [`docs/agents.md/repo/architecture.md`](docs/agents.md/repo/architecture.md).
