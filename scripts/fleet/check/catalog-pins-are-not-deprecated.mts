@@ -37,7 +37,11 @@ import { isValidVersion } from '@socketsecurity/lib-stable/versions/parse'
 import { NPM_REGISTRY_URL } from '../constants/npm-registry.mts'
 import { summarizeDeprecation } from '../lib/npm-version-policy.mts'
 import { parseCatalogBlock } from '../lib/workspace-yaml.mts'
-import { FLEET_CATALOG_YAML, PNPM_WORKSPACE_YAML, REPO_ROOT } from '../paths.mts'
+import {
+  FLEET_CATALOG_YAML,
+  PNPM_WORKSPACE_YAML,
+  REPO_ROOT,
+} from '../paths.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
 
 const logger = getDefaultLogger()
@@ -79,7 +83,8 @@ export interface CatalogPinVerdict {
  * The subset of npm's single-version document this gate reads.
  */
 export interface RawNpmVersionDocument {
-  readonly deprecated?: unknown
+  // oxlint-disable-next-line typescript/no-redundant-type-constituents -- fleet optional-explicit-undefined convention: the explicit | undefined on an optional is intentional, not redundant.
+  readonly deprecated?: unknown | undefined
 }
 
 /**

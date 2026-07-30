@@ -4,33 +4,30 @@
  *   fixer, the catalog-drift bump, any future planner — routes its choice
  *   through `chooseNpmUpgradeCandidate` so the policy lives in one tested,
  *   pure function instead of being re-derived per caller.
- *
  *   The policy, in order of authority:
  *
- *   1. The registry's `latest` dist-tag is the publisher's own statement of
- *      what is current. Max-semver sorting is an INFERENCE, and the two
- *      disagree exactly when it matters: nock's version list ends
- *      `…15.0.0-beta.14, 15.0.0` while `latest` is `14.0.17`, because 15.0.0
- *      was published by accident. Prefer `latest`; never adopt a version that
- *      sorts above it.
- *   2. A version npm marks `deprecated` is never a candidate, however it
- *      sorts. The skip is reported with the upstream's own message so an
- *      operator reads "skipped 15.0.0 — deprecated: released accidentally…"
- *      rather than wondering why the pin stood still.
- *   3. A prerelease (`-alpha`/`-beta`/`-rc`/`-next`/`-canary`/anything after
- *      the `-`) is a candidate only when the CURRENT pin is itself a
- *      prerelease on that same major line — moving along a line you already
- *      opted into is legitimate; jumping onto one is not.
- *   4. The fleet soak window applies last: a third-party release must have
- *      been published `soakDays` ago (fail-closed — an undatable version is
- *      treated as still soaking). `soakExempt` covers the Socket-owned scopes
- *      that ride the `minimumReleaseAgeExclude` globs.
- *
- *   `chooseNpmUpgradeCandidate` is pure: version metadata in, a candidate plus
- *   a reason out. `fetchNpmPackageVersionMetadata` is the networked seam that
- *   feeds it, and it is fail-open by contract — no registry answer yields
- *   `undefined`, which the decision reports as "not verified this run" rather
- *   than as "nothing to do".
+ *   1. The registry's `latest` dist-tag is the publisher's own statement of what
+ *      is current. Max-semver sorting is an INFERENCE, and the two disagree
+ *      exactly when it matters: nock's version list ends `…15.0.0-beta.14,
+ *      15.0.0` while `latest` is `14.0.17`, because 15.0.0 was published by
+ *      accident. Prefer `latest`; never adopt a version that sorts above it.
+ *   2. A version npm marks `deprecated` is never a candidate, however it sorts.
+ *      The skip is reported with the upstream's own message so an operator
+ *      reads "skipped 15.0.0 — deprecated: released accidentally…" rather than
+ *      wondering why the pin stood still.
+ *   3. A prerelease (`-alpha`/`-beta`/`-rc`/`-next`/`-canary`/anything after the
+ *      `-`) is a candidate only when the CURRENT pin is itself a prerelease on
+ *      that same major line — moving along a line you already opted into is
+ *      legitimate; jumping onto one is not.
+ *   4. The fleet soak window applies last: a third-party release must have been
+ *      published `soakDays` ago (fail-closed — an undatable version is treated
+ *      as still soaking). `soakExempt` covers the Socket-owned scopes that ride
+ *      the `minimumReleaseAgeExclude` globs. `chooseNpmUpgradeCandidate` is
+ *      pure: version metadata in, a candidate plus a reason out.
+ *      `fetchNpmPackageVersionMetadata` is the networked seam that feeds it,
+ *      and it is fail-open by contract — no registry answer yields `undefined`,
+ *      which the decision reports as "not verified this run" rather than as
+ *      "nothing to do".
  */
 
 import { httpJson } from '@socketsecurity/lib-stable/http-request'
@@ -77,9 +74,9 @@ export interface SkippedUpgradeCandidate {
 }
 
 /**
- * The verdict: the version a pin may move to (absent when none qualifies),
- * whether that version is the registry's own `latest`, and the reason for
- * both the choice and every refusal.
+ * The verdict: the version a pin may move to, which is absent when none
+ * qualifies, whether that version is the registry's own `latest`, and the
+ * reason for both the choice and every refusal.
  */
 export interface NpmUpgradeDecision {
   readonly candidate?: string | undefined
@@ -158,13 +155,13 @@ function byAscendingVersion(a: string, b: string): number {
  * Decide the version a pin at `currentVersion` may move to. Pure — the whole
  * policy in one function, the primary unit-test target.
  *
- * Absent `metadata` (a registry that did not answer) yields `verified: false`
- * with no candidate: the caller must report "not checked", never "up to
- * date". Present metadata always yields `verified: true`, even when nothing
- * qualifies.
+ * When `metadata` is absent because the registry did not answer this run,
+ * the result is `verified: false` with no candidate: the caller must report
+ * "not checked", never "up to date". Present metadata always yields
+ * `verified: true`, even when nothing qualifies.
  */
 export function chooseNpmUpgradeCandidate(
-  options: ChooseNpmUpgradeCandidateOptions,
+  config: ChooseNpmUpgradeCandidateOptions,
 ): NpmUpgradeDecision {
   const {
     currentVersion,
@@ -172,7 +169,7 @@ export function chooseNpmUpgradeCandidate(
     soakDays = SOAK_DAYS,
     soakExempt = false,
     today,
-  } = { __proto__: null, ...options } as ChooseNpmUpgradeCandidateOptions
+  } = { __proto__: null, ...config } as ChooseNpmUpgradeCandidateOptions
   if (!metadata) {
     return {
       candidate: undefined,
@@ -291,7 +288,9 @@ export interface RawNpmPackument {
   readonly 'dist-tags'?: Record<string, unknown> | undefined
   readonly name?: string | undefined
   readonly time?: Record<string, unknown> | undefined
-  readonly versions?: Record<string, { deprecated?: unknown } | undefined>
+  readonly versions?:
+    | Record<string, { deprecated?: unknown | undefined } | undefined>
+    | undefined
 }
 
 /**
