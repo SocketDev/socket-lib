@@ -215,8 +215,8 @@ catalogs:
       specifier: 0.34.52
       version: 0.34.52
     '@socketregistry/packageurl-js-stable':
-      specifier: npm:@socketregistry/packageurl-js@1.4.8
-      version: 1.4.8
+      specifier: npm:@socketregistry/packageurl-js@1.5.0
+      version: 1.5.0
     '@socketsecurity/lib-stable':
       specifier: npm:@socketsecurity/lib@6.5.1
       version: 6.5.1
@@ -518,7 +518,7 @@ importers:
         version: 1.5.0
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.8'
+        version: '@socketregistry/packageurl-js@1.5.0'
       '@socketregistry/yocto-spinner':
         specifier: 1.0.25
         version: 1.0.25
@@ -955,7 +955,7 @@ importers:
     dependencies:
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.8'
+        version: '@socketregistry/packageurl-js@1.5.0'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.5.1(typescript@7.0.2)'
@@ -2438,7 +2438,7 @@ importers:
         version: 0.34.52
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.4.8'
+        version: '@socketregistry/packageurl-js@1.5.0'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.5.1(typescript@7.0.2)'
@@ -4037,10 +4037,6 @@ packages:
   '@socketregistry/is-unicode-supported@1.0.5':
     resolution: {integrity: sha512-l3wz0cknjyGlI2iCyZxp50FJhtUFXkdZR6CfUU7OfNxE7I4CRBdsvORLgV+JPwqQQErRO/CZgKsbDHefd3puYA==}
     engines: {node: '>=18'}
-
-  '@socketregistry/packageurl-js@1.4.8':
-    resolution: {integrity: sha512-u9Mlg3zeiCr8FHdG6Sxd4T8dWS/zVzW270tS67JdDra2hrzPfgsmbWr7itlQc/0P9uWX6gslISs88YQvi3Z5SQ==}
-    engines: {node: '>=24', npm: '>=12.0.0', pnpm: '>=11.0.5'}
 
   '@socketregistry/packageurl-js@1.5.0':
     resolution: {integrity: sha512-Yqnq50McfKVqKCUKRIhW3XcnjxzFoysBDkUktOuLzOdy4cWi0smVqvLNSkS3f4sdDJYpRBjcxTlb2ajHr+cURQ==}
@@ -7635,8 +7631,6 @@ snapshots:
   '@socketregistry/es-define-property@1.0.7': {}
 
   '@socketregistry/is-unicode-supported@1.0.5': {}
-
-  '@socketregistry/packageurl-js@1.4.8': {}
 
   '@socketregistry/packageurl-js@1.5.0': {}
 
