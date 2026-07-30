@@ -22,7 +22,10 @@ catalog:
   '@socketregistry/packageurl-js': 1.5.0
   '@types/shell-quote': 1.7.5
   '@ultrathink/acorn.rs.wasm': 0.1.1
-  '@ultrathink/acorn.wasm': npm:@ultrathink/acorn-wasm@0.0.1
+  # Alias to the post-rename artifact (same 0.0.1 lineage, index.cjs +
+  # acorn.wasm sibling layout the prim bundle step stages); the pre-rename
+  # @ultrathink/acorn-wasm name is npm-deprecated.
+  '@ultrathink/acorn.wasm': npm:@ultrathink/acorn.rs.wasm@0.0.1
   '@vitiate/core': 0.3.1
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used inside that same package — Node ESM treats it as a
