@@ -143,17 +143,10 @@ minimumReleaseAgeExclude:
   # runner's whole-tree gate needs. The main package + its per-platform binary
   # family are pinned to the exact version (a scope glob would blanket-bypass a
   # future publish); exact-pinned so a future version re-soaks.
-  # taze 19.16.0 — the dep updater itself; forced ahead of the soak by owner
-  # directive so the regenerated single-registry patch (patchedDependencies)
-  # tracks the current release. Exact-pinned so a future version re-soaks.
-  # published: 2026-07-22 | removable: 2026-07-29
-  - 'taze@19.16.0'
   # verkit — new dev-only transitive of taze 19.16.0 (same owner directive);
   # exact-pinned so future versions re-soak.
   # published: 2026-07-24 | removable: 2026-07-31
   - '@shadscan/cli@0.2.0'
-  # published: 2026-07-23 | removable: 2026-07-30
-  - 'js-yaml@5.2.2'
 
 # Refuse transitive dependencies declared via git/tarball/local-tarball
 # specs — an npm package shouldn't be allowed to drag in a git URL we
