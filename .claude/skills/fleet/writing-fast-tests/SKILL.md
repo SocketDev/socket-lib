@@ -1,6 +1,6 @@
 ---
 name: writing-fast-tests
-description: Use when writing or reviewing tests, or when a suite or coverage pass runs slow — picks the cheapest seam, shares fixtures, and keeps files parallel-safe.
+description: Use when writing or reviewing tests, or when a suite runs slow: picks the cheapest seam and keeps files parallel-safe.
 metadata:
   internal: true
 ---

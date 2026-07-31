@@ -52,7 +52,7 @@ catalog:
   # logic; runs standalone in vitest. Soaked (4.9.0 published 2026-07-08). See
   # .claude/skills/fleet/property-and-fuzz-testing.
   'fast-check': 4.9.0
-  'magic-string': 1.0.0
+  'magic-string': 1.1.0
   'markdownlint-cli2': 0.23.1
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
