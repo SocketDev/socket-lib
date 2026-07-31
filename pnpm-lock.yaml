@@ -2891,6 +2891,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/prefer-lib-versions-over-semver: {}
 
+  .config/fleet/oxlint-plugin/fleet/prefer-mirror-lock-write: {}
+
   .config/fleet/oxlint-plugin/fleet/prefer-mock-import: {}
 
   .config/fleet/oxlint-plugin/fleet/prefer-node-builtin-imports: {}
