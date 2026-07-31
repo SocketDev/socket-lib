@@ -124,6 +124,13 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // telemetry + update-notifier opt-outs across npm/pnpm/Claude Code. Deployed
     // by setup-security-tools, dev shell-rc + the reusable CI workflow env.
     () => run('node', ['scripts/fleet/check/telemetry-env-is-disabled.mts']),
+    // Any workflow that opts into the no-phone-home env (its top-level `env:`
+    // sets ANY FLEET_ENV knob) MUST carry the COMPLETE list — so a new knob
+    // added to ci.yml can't silently miss a sibling workflow (github-release.yml).
+    () =>
+      run('node', [
+        'scripts/fleet/check/workflow-env-carries-full-fleet-env.mts',
+      ]),
     // Internal GitHub Action / reusable-workflow SHA pins are current w.r.t. their
     // CLOSURE — the pinned unit's own files PLUS its declared `# cascade-data-deps:`
     // (e.g. external-tools.json read via ${GITHUB_ACTION_PATH}/../…). A data-edge
