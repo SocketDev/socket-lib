@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.5.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.5.2) - 2026-07-31
+
+### Fixed
+
+- **`build`** — restore fleet-used npm/meta leaves to the published build
+- **`audit`** — scan untracked consumers and refuse stub-list writes with roster blind spots
+
+### Internal
+
+- **`deps`** — align the sdk-stable alias with the catalog sdk pin
+- **`deps`** — collapse the acorn.wasm alias onto the installed 0.1.1
+- **`deps`** — follow the acorn.wasm rename at the same 0.0.1 lineage
+- **`deps`** — restore the nock 14.0.16 pin-back the loopback guard enforces
+- **`check`** — gate stubbed leaves against fleet usage and the committed stub list
+
 ## [6.5.1](https://github.com/SocketDev/socket-lib/releases/tag/v6.5.1) - 2026-07-29
 
 ### Added
