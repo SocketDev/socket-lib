@@ -3504,7 +3504,7 @@
     "validate-npm-package-name": "6.0.2",
     "vitest": "catalog:",
     "vitiate": "catalog:",
-    "webpack": "5.108.4",
+    "webpack": "5.109.0",
     "which": "5.0.0",
     "yargs-parser": "22.0.0",
     "yoctocolors-cjs": "2.1.3",

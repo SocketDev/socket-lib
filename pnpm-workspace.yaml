@@ -235,7 +235,7 @@ overrides:
   # vendors its own ansi-styles) leaves only ESM importers (wrap-ansi,
   # npm-run-all2), so no compat patch is needed here.
   'ansi-styles': '6.2.3'
-  'brace-expansion': '5.0.7'
+  'brace-expansion': '5.0.8'
   # Dedup: chalk 4 (CJS; @yarnpkg/*, type-coverage) + chalk 5 (ESM-only;
   # ecc-agentshield) → 5.6.2. chalk 5 ships no `require` export condition, so a
   # CJS require() lands on the ESM namespace rather than the callable default;
@@ -342,11 +342,11 @@ patchedDependencies:
   # literals so the browser bundle (which stubs http2 to false) can load the
   # sigstore signer; consumer: packages/provenance via the browser field.
   '@sigstore/sign@4.1.1': patches/@sigstore__sign@4.1.1.patch
-  # 5.0.7 dropped the CJS default export; minimatch@9's compiled
+  # 5.0.7 dropped the CJS default export and 5.0.8 did not restore it; minimatch@9's compiled
   # __importDefault call reads `.default` (the __esModule flag skips the
   # namespace fallback), so the patch restores exports.default = expand.
   # Consumer: npm-packlist → ignore-walk → minimatch@9 during tarball packs.
-  brace-expansion@5.0.7: patches/brace-expansion@5.0.7.patch
+  brace-expansion@5.0.8: patches/brace-expansion@5.0.8.patch
   # Dedup compat: adds a `require` export condition + source/index.cjs so the
   # ESM-only chalk@5 stays require()-able by chalk@4's CJS consumers (@yarnpkg,
   # type-coverage) after the chalk 4/5 collapse.
