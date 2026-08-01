@@ -19,7 +19,7 @@
  */
 
 import process from 'node:process'
-import { readFileSync, writeFileSync } from 'node:fs'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 
@@ -32,6 +32,7 @@ import { buildTriageEnvelope, terminalSummary } from './lib/report.mts'
 import type { TriagedFinding, TriageEnvelope } from './lib/report.mts'
 import { isMainModule } from '../_shared/is-main-module.mts'
 import { resolveRepoRoot } from '../_shared/git-mutex.mts'
+import { writeThroughMirrorLock } from '../_shared/mirror-lock.mts'
 import {
   localAssistEnabled,
   resolveOdaiBin,
@@ -83,7 +84,7 @@ export function cmdIngest(argv: readonly string[]): number {
   const out = `${JSON.stringify({ findings }, undefined, 2)}\n`
   const outPath = optValue(argv, '--out')
   if (outPath) {
-    writeFileSync(outPath, out)
+    writeThroughMirrorLock(outPath, out)
     logger.info(`ingested ${findings.length} finding(s) → ${outPath}`)
   } else {
     process.stdout.write(out)
@@ -168,9 +169,9 @@ export async function cmdReport(argv: readonly string[]): Promise<number> {
   const out = `${JSON.stringify(env, undefined, 2)}\n`
   const outPath = optValue(argv, '--out-json')
   if (outPath) {
-    writeFileSync(outPath, out)
+    writeThroughMirrorLock(outPath, out)
   } else {
-    writeFileSync('./TRIAGE.json', out)
+    writeThroughMirrorLock('./TRIAGE.json', out)
   }
   process.stdout.write(`${terminalSummary(env)}\n`)
   // Anchor on the script's own location, not the caller's cwd: for a cascaded

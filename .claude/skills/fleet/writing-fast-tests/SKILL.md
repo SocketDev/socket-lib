@@ -15,6 +15,12 @@ Order of preference, cheapest first: **in-process call → shared fixture →
 parallel file → isolated run.** Reach for the next one only when the previous
 one genuinely cannot express the behaviour.
 
+This skill covers how to make a suite fast. What an assertion may say is a
+separate contract — assert outcomes and exit codes rather than message prose,
+never re-implement the logic under test, never scan source text. See
+[`test-layout`](../../../../docs/agents.md/fleet/test-layout.md) → "What to
+assert". A fake for I/O is right; a fake for LOGIC defeats the test.
+
 ## 1. Default to the in-process seam
 
 Import the module and call its exported function. Spawning the same code as a

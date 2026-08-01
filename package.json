@@ -3410,7 +3410,8 @@
     "weekly-update:ci": "node scripts/fleet/weekly-update-workflow.mts run",
     "type": "node node_modules/typescript/bin/tsc --noEmit -p .config/fleet/tsconfig.check.json",
     "socket-wheelhouse:emit-schema": "node scripts/fleet/socket-wheelhouse-emit-schema.mts",
-    "mcp:reset": "node scripts/fleet/mcp-reset.mts"
+    "mcp:reset": "node scripts/fleet/mcp-reset.mts",
+    "setup:sfw-ca": "node scripts/fleet/setup/sfw-ca.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -3473,6 +3474,7 @@
     "neosanitize": "catalog:",
     "nock": "catalog:",
     "normalize-package-data": "8.0.0",
+    "npm-high-impact": "catalog:",
     "npm-package-arg": "13.0.2",
     "npm-run-all2": "catalog:",
     "oxfmt": "catalog:",

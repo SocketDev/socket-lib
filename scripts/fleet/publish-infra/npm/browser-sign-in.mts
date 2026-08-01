@@ -85,23 +85,49 @@ export async function seedNpmSignIn(
   const child = spawn(
     chromeBinary,
     [`--user-data-dir=${profileDir}`, `${NPM_ORIGIN}/login`],
-    { stdio: 'ignore' },
+    { stdio: ['ignore', 'ignore', 'pipe'] },
   )
-  // The Chrome process outlives this script's interest in it — the operator
-  // quits it by hand, and the lock watch below is the real signal. Swallow
-  // the exit promise either way so a crash can't become an unhandled
-  // rejection after the run already resolved.
+  // Chrome's stderr is diagnostics-only noise on a good run — but on a
+  // failed launch it is the ONLY evidence, and the first version of this
+  // script swallowed it (`void child.catch(...)` + stdio ignore), which
+  // turned a silent spawn failure into a 15-minute lock wait with nothing to
+  // debug (2026-07-30). A rolling tail is kept for the failure message; the
+  // exit promise is still swallowed because the operator quitting Chrome is
+  // the SUCCESS path, whatever the exit code.
+  let stderrTail = ''
+  child.process.stderr?.on('data', (chunk: Buffer) => {
+    stderrTail = (stderrTail + chunk.toString('utf8')).slice(-2000)
+  })
+  let childAlive = true
+  child.process.on('exit', () => {
+    childAlive = false
+  })
   void child.catch(() => undefined)
   logger.log('Chrome is open on the shared profile at the npm login page.')
   logger.log('Sign in (password + OTP), then QUIT Chrome (Cmd-Q).')
   logger.log(
     'Quitting is load-bearing: it flushes cookies and frees the profile.',
   )
-  // Wait for the lock to appear (Chrome up), then disappear (operator quit).
+  // Launch signal: the PROCESS, not the lock — a fresh profile's first-run
+  // initialization can delay SingletonLock well past any reasonable poll
+  // window, and waiting on the lock alone reported "Chrome never opened"
+  // against a Chrome that was busily initializing (2026-07-31 probe). The
+  // lock remains the QUIT signal below. A child that dies before the lock
+  // ever appears is the real launch failure, reported with its stderr.
   const deadline = Date.now() + SIGN_IN_BUDGET_MS
   while (!existsSync(lockPath)) {
+    if (!childAlive) {
+      throw new Error(
+        'Chrome exited before opening the profile.\n' +
+          `  Saw (stderr tail): ${stderrTail.trim().slice(-500) || '(nothing)'}\n` +
+          '  Fix: run the binary by hand to reproduce: ' +
+          `"${chromeBinary}" --user-data-dir=${profileDir} ${NPM_ORIGIN}/login`,
+      )
+    }
     if (Date.now() > deadline) {
-      throw new Error('Chrome never opened the profile (no lock appeared).')
+      throw new Error(
+        'Chrome is running but never adopted the profile (no lock appeared).',
+      )
     }
     await sleep(POLL_MS)
   }

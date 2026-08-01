@@ -253,7 +253,7 @@ Tooling + package manager:
 - `prefer-pipx-over-pip-guard` — blocks `pip`/`pip3`; use `pypa-tool` or `pipx install <pkg>==<ver>`
 - `reserved-script-dir-guard` — blocks build/output dir names under `scripts/`; bypass `Allow reserved-script-dir bypass`
 - `rg-replace-flag-guard` — PreToolUse(Bash), BLOCKS. Fires when an `rg` short-flag cluster puts `r` at a non-final position (`-rln` parses as `--replace 'ln'`, silently rewriting output while still exiting 0); the fix spells each flag apart. `-r` last in a cluster, standalone `-r <text>`, long `--replace <text>`, an earlier value-taking flag that swallows the `r`, and tokens after a literal `--` all stay silent. Bypass slug: `rg-replace-cluster`.
-- `zsh-word-split-nudge` — PreToolUse(Bash), non-blocking. Fires when a space-joined list built from a command substitution is later expanded unquoted (zsh doesn't word-split it, so it passes as ONE argument); points at safe splitting alternatives.
+- `zsh-word-split-guard` — PreToolUse(Bash): BLOCKS when a space-joined list built from a command substitution is later expanded unquoted (zsh doesn't word-split it, so it passes as ONE argument), and points at safe splitting alternatives (`${=var}`, `$(cat file)`, xargs). Promoted from a nudge because the failure mode is a silent wrong answer, not a style slip: the one-argument case matches nothing while exiting 0, and an EMPTY list makes the argument vanish so the tool silently falls back to its default input — a 2026-07 session produced an all-zeros measurement and then a whole-repo scan this way, with the nudge firing correctly both times and never surfacing. Bypass `Allow zsh-word-split bypass`
 
 Supply-chain hygiene:
 

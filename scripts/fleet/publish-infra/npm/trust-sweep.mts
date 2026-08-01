@@ -28,8 +28,10 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
+import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { isMainModule } from '../../_shared/is-main-module.mts'
+import { extractNpmAuthUrl } from '../../npm-web-auth.mts'
 import { logger, runCapture } from '../shared.mts'
 import { npmScratchCwd } from './shared.mts'
 import { sleep } from './browser-session.mts'
@@ -67,13 +69,13 @@ interface SweepResult {
  * Whether an existing config already IS the law — the conforming no-op that
  * makes the sweep idempotent and re-runnable after partial failures.
  */
-export function conformsToLaw(config: TrustConfig): boolean {
+export function conformsToLaw(config: TrustConfig, repository: string): boolean {
   const perms = [...(config.permissions ?? [])].toSorted()
   const wanted = [...LAW.permissions].toSorted()
   return (
     config.type === LAW.type &&
     config.file === LAW.file &&
-    config.repository === LAW.repository &&
+    config.repository === repository &&
     config.environment === LAW.environment &&
     perms.length === wanted.length &&
     perms.every((p, i) => p === wanted[i])
@@ -100,24 +102,117 @@ async function npmTrust(
   )
 }
 
+/**
+ * Raised when the trust API refuses AUTH — `npm trust` demands a 2FA-fresh
+ * session even for reads, and outside the cooldown window every call 401s.
+ * Fail CLOSED and stop the sweep: classifying a 401 as "(no config)" is the
+ * unauthenticated-reads-as-empty trap (it made a whole audit report
+ * "132 planned / no config" against a registry that was fully configured).
+ */
+export class TrustAuthDiedError extends Error {}
+
 async function trustList(pkg: string): Promise<TrustConfig | undefined> {
   const { code, stdout } = await runCapture(
     'npm',
     ['trust', 'list', pkg, '--json'],
     npmScratchCwd(),
   )
-  if (code !== 0) {
-    return undefined
-  }
+  // FAIL CLOSED on ANY error envelope. The auth failures keep changing
+  // costume — E401 "must be logged in" when the token dies, EOTP "requires a
+  // one-time password" when only the 2FA-fresh window lapses — and each new
+  // phrasing that slips through reads as "(no config)", producing an audit
+  // that says 132 unconfigured against a fully configured registry (happened
+  // TWICE, 2026-07-31). Only a clean exit parses; a genuinely unconfigured
+  // package is the clean-exit-without-config shape, never an error.
   const jsonStart = stdout.indexOf('{')
-  if (jsonStart === -1) {
-    return undefined
+  const parsed =
+    jsonStart === -1
+      ? undefined
+      : (() => {
+          try {
+            return JSON.parse(stdout.slice(jsonStart)) as TrustConfig & {
+              error?: { authUrl?: string | undefined } | undefined
+            }
+          } catch {
+            return undefined
+          }
+        })()
+  if (code !== 0 || parsed?.error) {
+    const authUrl = parsed?.error?.authUrl
+    throw new TrustAuthDiedError(
+      `npm trust list ${pkg} refused (exit ${code}) — auth or 2FA window is stale.\n` +
+        (authUrl
+          ? `  Approve here (expires in minutes): ${authUrl}\n`
+          : '') +
+        '  Fix: re-approve auth, then re-run — the sweep is idempotent.',
+    )
   }
-  try {
-    return JSON.parse(stdout.slice(jsonStart)) as TrustConfig
-  } catch {
-    return undefined
-  }
+  return parsed
+}
+
+/**
+ * Reopen the 2FA-fresh window MID-RUN: hold a live PTY-wrapped write (the
+ * one shape npm's cooldown actually honors — approving a dead URL grants
+ * nothing; a waiting command completing through the approval does), surface
+ * its auth URL loudly for the operator, and block until they approve. The
+ * windows are short and each one used to cost an abort + a full re-walk;
+ * in-flow reopening turns N aborted runs into one run with N approvals.
+ * Returns true when the window reopened (the wrapped write exited — an E409
+ * on an already-configured anchor package is the expected success shape).
+ */
+async function reopenAuthWindow(
+  anchorPkg: string,
+  repository: string,
+): Promise<boolean> {
+  logger.log('')
+  logger.log(
+    `2FA window lapsed — reopening with a live waiting write on ${anchorPkg}.`,
+  )
+  return await new Promise<boolean>(resolve => {
+    const child = spawn(
+      process.execPath,
+      [
+        AUTH_WRAPPER,
+        'trust',
+        'github',
+        anchorPkg,
+        '--file',
+        LAW.file,
+        '--repo',
+        repository,
+        '--env',
+        LAW.environment,
+        '--allow-publish',
+        '--allow-stage-publish',
+        '--yes',
+      ],
+      { cwd: npmScratchCwd(), stdio: ['ignore', 'pipe', 'pipe'] },
+    )
+    void child.catch(() => undefined)
+    let buffer = ''
+    let announced = false
+    const watch = (chunk: Buffer) => {
+      if (announced) {
+        return
+      }
+      buffer += chunk.toString('utf8')
+      const url = extractNpmAuthUrl(buffer)
+      if (url) {
+        announced = true
+        logger.log(`APPROVE HERE (expires in minutes): ${url}`)
+        logger.log('Tick the cooldown box — the sweep resumes on approval.')
+      }
+    }
+    child.process.stdout?.on('data', watch)
+    child.process.stderr?.on('data', watch)
+    child.process.on('error', () => resolve(false))
+    // A reopen only happened if npm actually OFFERED the web-auth flow — a
+    // dead token E401s immediately with no URL, and counting that exit as
+    // success spun the reopen budget 12 times against a wall (2026-07-31).
+    // No URL means no window: the fix is a LOGIN (the wrapper's pnpm lane +
+    // token bridge), not another write.
+    child.process.on('exit', () => resolve(announced))
+  })
 }
 
 /**
@@ -127,12 +222,16 @@ async function trustList(pkg: string): Promise<TrustConfig | undefined> {
  */
 export async function sweepOne(
   pkg: string,
-  config: { drive: boolean },
+  config: { drive: boolean; repository?: string | undefined },
 ): Promise<SweepResult> {
   const cfg = { __proto__: null, ...config } as typeof config
+  // The file/env/permission law is fleet-constant; only the repository varies
+  // by where the package lives (@socketregistry/* → socket-registry; a member
+  // package like @socketsecurity/odai → its own repo via --repo).
+  const repository = cfg.repository ?? LAW.repository
   try {
     const current = await trustList(pkg)
-    if (current && conformsToLaw(current)) {
+    if (current && conformsToLaw(current, repository)) {
       return { pkg, status: 'conforms' }
     }
     if (!cfg.drive) {
@@ -140,7 +239,7 @@ export async function sweepOne(
         ? `${current.file ?? '(none)'} / env ${current.environment ?? '(empty)'}`
         : '(no config)'
       return {
-        detail: `[dry-run] ${from} -> ${LAW.file} / env ${LAW.environment}`,
+        detail: `[dry-run] ${from} -> ${LAW.file} @ ${repository} / env ${LAW.environment}`,
         pkg,
         status: 'planned',
       }
@@ -157,7 +256,7 @@ export async function sweepOne(
       '--file',
       LAW.file,
       '--repo',
-      LAW.repository,
+      repository,
       '--env',
       LAW.environment,
       '--allow-publish',
@@ -168,7 +267,7 @@ export async function sweepOne(
       return { detail: `create exited ${create.code}`, pkg, status: 'failed' }
     }
     const echoed = await trustList(pkg)
-    if (!echoed || !conformsToLaw(echoed)) {
+    if (!echoed || !conformsToLaw(echoed, repository)) {
       return {
         detail: 'registry re-read does not echo the law after create',
         pkg,
@@ -177,6 +276,12 @@ export async function sweepOne(
     }
     return { pkg, status: 'applied' }
   } catch (e) {
+    if (e instanceof TrustAuthDiedError) {
+      // Auth death is a SWEEP-level stop, never a per-package failure — 89
+      // cascading "failed" rows from one lapsed window is noise that buries
+      // the one actionable fact.
+      throw e
+    }
     return { detail: errorMessage(e), pkg, status: 'failed' }
   }
 }
@@ -185,7 +290,12 @@ async function main(): Promise<void> {
   const argv = process.argv.slice(2)
   const drive = argv.includes('--drive')
   const socketRegistry = argv.includes('--socket-registry')
-  const packages = argv.filter(a => !a.startsWith('--'))
+  const repoFlagAt = argv.indexOf('--repo')
+  const repoOverride =
+    repoFlagAt !== -1 ? argv[repoFlagAt + 1] : undefined
+  const packages = argv.filter(
+    (a, i) => !a.startsWith('--') && i !== repoFlagAt + 1,
+  )
   if (socketRegistry) {
     packages.push(...(await expandSocketRegistryWorklist()))
   }
@@ -203,10 +313,45 @@ async function main(): Promise<void> {
     failed: 0,
     planned: 0,
   }
+  // In-flow window reopens are bounded: each costs the operator one browser
+  // approval, and past this many something else is wrong.
+  const MAX_WINDOW_REOPENS = 12
+  let reopens = 0
   for (let i = 0, { length } = packages; i < length; i += 1) {
     const pkg = packages[i]!
-    // eslint-disable-next-line no-await-in-loop -- serial by design: the npm-trust docs' rate-limit guidance.
-    const result = await sweepOne(pkg, { drive })
+    let result: SweepResult
+    try {
+      // eslint-disable-next-line no-await-in-loop -- serial by design: the npm-trust docs' rate-limit guidance.
+      result = await sweepOne(pkg, { drive, repository: repoOverride })
+    } catch (e) {
+      if (e instanceof TrustAuthDiedError) {
+        reopens += 1
+        if (reopens > MAX_WINDOW_REOPENS) {
+          logger.fail(e.message)
+          logger.log(
+            `Stopped at ${pkg} (${i}/${length} done) after ${MAX_WINDOW_REOPENS} ` +
+              'window reopens — something beyond window expiry is wrong.',
+          )
+          process.exitCode = 1
+          return
+        }
+        // eslint-disable-next-line no-await-in-loop -- the reopen must complete before the walk resumes.
+        const reopened = await reopenAuthWindow(pkg, repoOverride ?? LAW.repository)
+        if (!reopened) {
+          logger.fail(e.message)
+          logger.log(
+            'No web-auth flow was offered — the token itself is dead, not ' +
+              'just the 2FA window. Fix: node scripts/fleet/npm-web-auth.mts ' +
+              'login (the pnpm lane bridges the token to npm), then re-run.',
+          )
+          process.exitCode = 1
+          return
+        }
+        i -= 1
+        continue
+      }
+      throw e
+    }
     counts[result.status] += 1
     const line = `${result.pkg}: ${result.status}${result.detail ? ` — ${result.detail}` : ''}`
     if (result.status === 'failed') {

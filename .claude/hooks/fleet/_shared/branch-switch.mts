@@ -1,4 +1,4 @@
-/**
+/*
  * @file Shared branch-switch detection + primary-checkout classification for
  *   the two branch-switch guards:
  *
