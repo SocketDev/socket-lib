@@ -224,4 +224,31 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     ).rejects.toThrow(/SHA-256 mismatch/)
     expect(existsSync(destPath)).toBe(false)
   })
+
+  it('forwards caller headers to httpDownload', async () => {
+    const destPath = path.join(testDir, 'authed-asset')
+    await downloadBinaryFile(
+      'https://example.com/private-asset',
+      destPath,
+      undefined,
+      undefined,
+      undefined,
+      { authorization: 'Bearer test-token' },
+    )
+    expect(httpDownload).toHaveBeenCalledWith(
+      'https://example.com/private-asset',
+      destPath,
+      expect.objectContaining({
+        headers: { authorization: 'Bearer test-token' },
+      }),
+    )
+  })
+
+  it('omits the headers key entirely when the caller passes none', async () => {
+    const destPath = path.join(testDir, 'public-asset')
+    await downloadBinaryFile('https://example.com/public-asset', destPath)
+    const opts = vi.mocked(httpDownload).mock.calls.at(-1)?.[2]
+    expect(opts).toBeDefined()
+    expect(Object.hasOwn(opts!, 'headers')).toBe(false)
+  })
 })

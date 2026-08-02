@@ -26,6 +26,17 @@ export interface DlxBinaryOptions {
   createWriteStream?: HttpDownloadWriteStreamFactory | undefined
 
   /**
+   * Extra request headers for the download, forwarded to `httpDownload`. The
+   * cache key is derived from `url` and `name` only, so a rotated credential
+   * reuses the existing entry instead of orphaning it.
+   *
+   * Needed for an asset behind auth: a private GitHub release answers an
+   * unauthenticated request with a bare 404, which reads as "never published"
+   * rather than "not allowed".
+   */
+  headers?: Record<string, string> | undefined
+
+  /**
    * Optional name for the cached binary (defaults to URL hash).
    */
   name?: string | undefined

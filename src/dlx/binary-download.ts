@@ -75,6 +75,7 @@ export async function downloadBinary(
     createWriteStream,
     force = false,
     hash: hashSpec,
+    headers,
     integrity: rawIntegrity,
     name,
     sha256: rawSha256,
@@ -155,6 +156,7 @@ export async function downloadBinary(
       integrity,
       sha256,
       createWriteStream,
+      headers,
     )
 
     // Get file size for metadata (intentional: need stats.size, not just existence).
@@ -205,6 +207,7 @@ export async function downloadBinaryFile(
   integrity?: string | undefined,
   sha256?: string | undefined,
   createWriteStream?: HttpDownloadWriteStreamFactory | undefined,
+  headers?: Record<string, string> | undefined,
 ): Promise<string> {
   // Use process lock to prevent concurrent downloads.
   // Lock is placed in the cache entry directory as 'concurrency.lock'.
@@ -282,6 +285,7 @@ export async function downloadBinaryFile(
       try {
         result = await httpDownload(url, destPath, {
           createWriteStream,
+          ...(headers ? { headers } : {}),
           integrity,
           sha256,
         })
