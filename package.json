@@ -3384,7 +3384,6 @@
     "fix": "node scripts/fleet/fix.mts",
     "format": "node scripts/fleet/format.mts",
     "format:check": "node scripts/fleet/format.mts --check",
-    "gen:llms-txt": "node scripts/fleet/make-llms-txt.mts --no-ai",
     "lint": "node scripts/fleet/lint.mts",
     "lockstep": "node scripts/fleet/lockstep.mts",
     "lockstep:emit-mirror-globs": "node scripts/fleet/lockstep-emit-mirror-globs.mts",
@@ -3411,7 +3410,8 @@
     "socket-wheelhouse:emit-schema": "node scripts/fleet/socket-wheelhouse-emit-schema.mts",
     "mcp:reset": "node scripts/fleet/mcp-reset.mts",
     "setup:sfw-ca": "node scripts/fleet/setup/sfw-ca.mts",
-    "get-green": "node scripts/fleet/get-green.mts"
+    "get-green": "node scripts/fleet/get-green.mts",
+    "docs:llms": "node scripts/fleet/make-llms-txt.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",

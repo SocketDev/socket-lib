@@ -16,7 +16,7 @@
     "provenanceOrphanBaseline": [
       {
         "id": "@socketsecurity/lib@6.5.1",
-        "reason": "Bump-in-CI: the publish run bumped the version in-tree, so the attested commit 7b853622 pre-dates the v6.5.1 tag at de394ae21. Frozen history — remedying it means tagging an immutable published release."
+        "reason": "Bump-in-CI: the publish run bumped the version in-tree, so the attested commit 7b853622 pre-dates the v6.5.1 tag at de394ae21. Frozen history \u2014 remedying it means tagging an immutable published release."
       },
       {
         "id": "@socketsecurity/lib@6.5.0",
@@ -30,5 +30,8 @@
   },
   "vite": {
     "allowEsbuild": "test-only browser-bundle e2e arm (test/browser) bundles with esbuild to prove the published browser field works under a non-rolldown consumer; the build bundler is rolldown"
+  },
+  "docs": {
+    "llmsTxt": true
   }
 }
