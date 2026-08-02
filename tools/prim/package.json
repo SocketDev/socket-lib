@@ -19,7 +19,7 @@
   },
   "dependencies": {
     "@socketsecurity/lib-stable": "catalog:",
-    "@ultrathink/acorn.wasm": "catalog:",
+    "@ultrathink/acorn.rs.wasm": "catalog:",
     "diff": "9.0.0"
   },
   "peerDependencies": {

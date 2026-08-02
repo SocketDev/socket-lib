@@ -22,7 +22,7 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
-import { parse } from '@ultrathink/acorn.wasm'
+import { parse } from '@ultrathink/acorn.rs.wasm'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 

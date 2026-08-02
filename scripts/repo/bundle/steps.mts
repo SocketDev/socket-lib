@@ -21,7 +21,7 @@ import { primBuildConfig } from '../../../.config/repo/rolldown.prim.config.mts'
 import { REPO_ROOT as rootPath } from '../../fleet/paths.mts'
 import { runSequence } from '../../fleet/util/run-command.mts'
 
-// `@ultrathink/acorn.wasm` is declared by tools/prim, not the repo root, and
+// `@ultrathink/acorn.rs.wasm` is declared by tools/prim, not the repo root, and
 // pnpm does not hoist it into the root node_modules. Resolve it from the
 // package that owns the dependency so the prim bundle step finds it.
 const primRequire = createRequire(
@@ -136,8 +136,8 @@ export async function buildTypes(
 /**
  * Build the prim CLI: a true bundle rather than a per-file transpile, which
  * inlines lib-stable + diff into a single `dist/bin/prim.cjs`. The
- * `@ultrathink/acorn.wasm` parser's `acorn-wasm.cjs` entry + `acorn.wasm` are
- * copied alongside so its `${__dirname}/./acorn.wasm` sibling-load resolves
+ * `@ultrathink/acorn.rs.wasm` parser's `acorn-wasm.cjs` entry + `acorn.wasm`
+ * are copied alongside so its `${__dirname}/./acorn.wasm` sibling-load resolves
  * after publish.
  */
 export async function buildPrim(
@@ -152,12 +152,12 @@ export async function buildPrim(
     } finally {
       await bundle.close()
     }
-    // Stage the `@ultrathink/acorn.wasm` parser next to the bundle. Its CJS
+    // Stage the `@ultrathink/acorn.rs.wasm` parser next to the bundle. Its CJS
     // entry loads `${__dirname}/./acorn.wasm`, so entry + wasm must sit beside
     // `dist/bin/prim.cjs` at runtime (prim.cjs requires `./acorn-wasm.cjs`).
     const binDir = path.join(rootPath, 'dist/bin')
     await fsPromises.mkdir(binDir, { recursive: true })
-    const acornEntry = primRequire.resolve('@ultrathink/acorn.wasm')
+    const acornEntry = primRequire.resolve('@ultrathink/acorn.rs.wasm')
     const acornDir = path.dirname(acornEntry)
     await fsPromises.copyFile(acornEntry, path.join(binDir, 'acorn-wasm.cjs'))
     await fsPromises.copyFile(

@@ -13,7 +13,7 @@ import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 
-import { walk } from '@ultrathink/acorn.wasm'
+import { walk } from '@ultrathink/acorn.rs.wasm'
 
 // Suppress the one-time ExperimentalWarning from stripTypeScriptTypes
 // without affecting other warnings. We replace Node's default emit-to-

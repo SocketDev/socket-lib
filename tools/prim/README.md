@@ -101,7 +101,7 @@ bootstrap via `copyPropsRenamed` + `copyPrototype` reflection.
 
 ## Design
 
-- **Parser**: the `@ultrathink/acorn.wasm` package (a WASM build of the
+- **Parser**: the `@ultrathink/acorn.rs.wasm` package (a WASM build of the
   ultrathink acorn parser), whose `acorn-wasm.cjs` entry + `acorn.wasm` are
   copied next to the bundled CLI so the shipped `prim.cjs` parses with no
   install step and no network access.
