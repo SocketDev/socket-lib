@@ -288,3 +288,57 @@ describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
     ).rejects.toThrow(/Failed to create binary cache directory/)
   })
 })
+
+describe.sequential('dlx/binary-download — downloadBinary headers', () => {
+  test('forwards caller headers through to httpDownload', async () => {
+    const { downloadBinary, httpDownload } = await loadFresh()
+    const url = 'https://example.com/private-tool'
+    const name = 'privtool'
+    httpDownload.mockImplementation(async (_u: string, destPath: string) => {
+      writeFileSync(destPath, 'authed-bytes')
+      return { integrity: 'sha512-authed==', size: 12 }
+    })
+    await downloadBinary({
+      url,
+      name,
+      headers: { authorization: 'Bearer secret-token' },
+    })
+    expect(httpDownload).toHaveBeenCalledWith(
+      url,
+      expect.any(String),
+      expect.objectContaining({
+        headers: { authorization: 'Bearer secret-token' },
+      }),
+    )
+  })
+
+  test('keys the cache on url and name only, so a rotated credential hits the same entry', async () => {
+    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
+    const url = 'https://example.com/rotating-tool'
+    const name = 'rotating'
+    // Seed the entry as if a previous run downloaded it under an older token.
+    const cacheKey = generateCacheKey(`${url}:${name}`)
+    const cacheEntryDir = path.join(tmpRoot, cacheKey)
+    mkdirSync(cacheEntryDir, { recursive: true })
+    writeFileSync(path.join(cacheEntryDir, name), 'cached-bytes')
+    writeFileSync(
+      path.join(cacheEntryDir, '.dlx-metadata.json'),
+      JSON.stringify({
+        version: '1.0.0',
+        cache_key: cacheKey,
+        timestamp: Date.now(),
+        integrity: 'sha512-cachedintegrity==',
+        size: 12,
+        source: { type: 'download', url },
+      }),
+    )
+    // A DIFFERENT credential must not orphan the entry.
+    const result = await downloadBinary({
+      url,
+      name,
+      headers: { authorization: 'Bearer rotated-token' },
+    })
+    expect(result.downloaded).toBe(false)
+    expect(httpDownload).not.toHaveBeenCalled()
+  })
+})
