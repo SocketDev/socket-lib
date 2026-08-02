@@ -21,7 +21,12 @@ import { primBuildConfig } from '../../../.config/repo/rolldown.prim.config.mts'
 import { REPO_ROOT as rootPath } from '../../fleet/paths.mts'
 import { runSequence } from '../../fleet/util/run-command.mts'
 
-const require = createRequire(import.meta.url)
+// `@ultrathink/acorn.wasm` is declared by tools/prim, not the repo root, and
+// pnpm does not hoist it into the root node_modules. Resolve it from the
+// package that owns the dependency so the prim bundle step finds it.
+const primRequire = createRequire(
+  path.join(rootPath, 'tools/prim/package.json'),
+)
 
 const logger = getDefaultLogger()
 
@@ -152,7 +157,7 @@ export async function buildPrim(
     // `dist/bin/prim.cjs` at runtime (prim.cjs requires `./acorn-wasm.cjs`).
     const binDir = path.join(rootPath, 'dist/bin')
     await fsPromises.mkdir(binDir, { recursive: true })
-    const acornEntry = require.resolve('@ultrathink/acorn.wasm')
+    const acornEntry = primRequire.resolve('@ultrathink/acorn.wasm')
     const acornDir = path.dirname(acornEntry)
     await fsPromises.copyFile(acornEntry, path.join(binDir, 'acorn-wasm.cjs'))
     await fsPromises.copyFile(
