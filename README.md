@@ -3,8 +3,8 @@
 <a href="https://socket.dev/npm/package/@socketsecurity/lib"><img src="https://socket.dev/api/badge/npm/package/@socketsecurity/lib" alt="Socket Badge" height="20"></a>
 <img src="assets/repo/badges/coverage.svg" width="97" height="20" alt="Coverage" />
 
-[![Follow @SocketSecurity](assets/fleet/badge-follow-x.svg)](https://twitter.com/SocketSecurity)
-[![Follow @socket.dev on Bluesky](assets/fleet/badge-follow-bluesky.svg)](https://bsky.app/profile/socket.dev)
+[![Follow @SocketSecurity](https://raw.githubusercontent.com/SocketDev/socket-lib/HEAD/assets/fleet/badge-follow-x.svg)](https://twitter.com/SocketSecurity)
+[![Follow @socket.dev on Bluesky](https://raw.githubusercontent.com/SocketDev/socket-lib/HEAD/assets/fleet/badge-follow-bluesky.svg)](https://bsky.app/profile/socket.dev)
 
 Core utilities for [Socket.dev](https://socket.dev/) tools: file system, processes, HTTP, env detection, logging, spinners, and more. Tree-shakeable, TypeScript-first, cross-platform.
 
