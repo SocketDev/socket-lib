@@ -25,6 +25,7 @@ catalog:
   # Alias to the post-rename artifact at the version this repo already
   # installs (dedup: one acorn.rs.wasm major); the pre-rename
   # @ultrathink/acorn-wasm name is npm-deprecated.
+  '@ultrathink/acorn.wasm': 'npm:@ultrathink/acorn.rs.wasm@0.1.1'
   '@vitiate/core': 0.3.1
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used inside that same package — Node ESM treats it as a
