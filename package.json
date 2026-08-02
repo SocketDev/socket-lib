@@ -3411,7 +3411,8 @@
     "mcp:reset": "node scripts/fleet/mcp-reset.mts",
     "setup:sfw-ca": "node scripts/fleet/setup/sfw-ca.mts",
     "get-green": "node scripts/fleet/get-green.mts",
-    "docs:llms": "node scripts/fleet/make-llms-txt.mts"
+    "gen:llms-txt": "node scripts/fleet/gen/llms-txt.mts",
+    "weekly-update:ci": "gh workflow run weekly-update.lock.yml"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
