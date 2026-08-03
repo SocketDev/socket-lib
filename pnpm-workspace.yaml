@@ -56,7 +56,7 @@ catalog:
   'ecc-agentshield': 1.4.0
   'fast-check': 4.9.0
   'html5parser': 3.0.0
-  'markdownlint-cli2': 0.23.1
+  'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
   'neosanitize': 0.3.0
@@ -151,13 +151,13 @@ minimumReleaseAgeExclude:
   # verkit — new dev-only transitive of taze 19.16.0 (same owner directive);
   # exact-pinned so future versions re-soak.
 
-# Refuse transitive dependencies declared via git/tarball/local-tarball
-# specs — an npm package shouldn't be allowed to drag in a git URL we
-# don't control (bypasses npm registry validation, no provenance, no
-# soak window). Direct git deps are still allowed (the test suite at
-# pnpm/pkg-manager/core/test/install/blockExoticSubdeps.ts confirms
-# this). pnpm's current default is `false`; declared explicitly so a
-# future flip can't silently change install behavior.
+  # Refuse transitive dependencies declared via git/tarball/local-tarball
+  # specs — an npm package shouldn't be allowed to drag in a git URL we
+  # don't control (bypasses npm registry validation, no provenance, no
+  # soak window). Direct git deps are still allowed (the test suite at
+  # pnpm/pkg-manager/core/test/install/blockExoticSubdeps.ts confirms
+  # this). pnpm's current default is `false`; declared explicitly so a
+  # future flip can't silently change install behavior.
 blockExoticSubdeps: true
 confirmModulesPurge: false
 
@@ -254,9 +254,9 @@ overrides:
   'has-flag': '5.0.1'
   # 4.12.25+ clears GHSA-88fw-hqm2-52qc (hono CORS wildcard+credentials reflect),
   # pulled transitively via @anthropic-ai/claude-agent-sdk.
-  'hono': '4.12.31'
+  'hono': '4.12.32'
   'hosted-git-info': '8.1.0'
-  'ip-address': '10.2.0'
+  'ip-address': '10.3.1'
   'isexe': '3.1.5'
   # Dedup: js-tokens 4 (@babel/code-frame, CJS require) + 10 (ast-v8-to-istanbul,
   # ESM import) → 10.0.0. The two majors have incompatible APIs (v4 regex vs v10
@@ -286,7 +286,7 @@ overrides:
   'p-map': '7.0.6'
   'pacote': '21.5.1'
   'picomatch': '4.0.5'
-  'postcss': '8.5.22'
+  'postcss': '8.5.23'
   'proc-log': '6.1.0'
   'qs': '6.15.3'
   # Unify every rolldown resolution to the catalog pin (1.1.0). vite 8.0.14
@@ -301,7 +301,7 @@ overrides:
   'strip-ansi': '7.2.0'
   'supports-color': '10.2.2'
   # 7.5.16+ clears GHSA (node-tar PAX size-override parser differential, <=7.5.15).
-  'tar': '7.5.21'
+  'tar': '7.5.22'
   # Dedup: tar-fs 2 (dockerode) + 3 (bundled into src/archives) → the catalog
   # pin, and its tar-stream 2/3 dep along with it → 3.2.0. Both are CJS;
   # dockerode is the only tar-fs@2 consumer (latent devtool).
