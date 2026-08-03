@@ -2825,6 +2825,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/no-npx-dlx: {}
 
+  .config/fleet/oxlint-plugin/fleet/no-optional-positional-trap: {}
+
   .config/fleet/oxlint-plugin/fleet/no-options-param-mutation: {}
 
   .config/fleet/oxlint-plugin/fleet/no-package-manager-auto-update-reenable: {}

@@ -121,6 +121,10 @@ export function spawn(
   options?: SpawnOptions | undefined,
   extra?: SpawnExtra | undefined,
 ): SpawnResult
+// This mirrors node's own child_process.spawn(command, args, options) on
+// purpose: callers write spawn('git', ['push']) exactly as they would against
+// the builtin, so the shape is fixed by that contract, not chosen here.
+// socket-lint: allow optional-positional-trap -- node child_process contract.
 export function spawn(
   cmd: string,
   args?: string[] | readonly string[] | undefined,
