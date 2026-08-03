@@ -17,6 +17,7 @@ import exportTopLevelFunctions from './fleet/export-top-level-functions/index.mt
 import exportedNameHasDomainWord from './fleet/exported-name-has-domain-word/index.mts'
 import guardContract from './fleet/guard-contract/index.mts'
 import inclusiveLanguage from './fleet/inclusive-language/index.mts'
+import maxCommentBlockLines from './fleet/max-comment-block-lines/index.mts'
 import maxFileLines from './fleet/max-file-lines/index.mts'
 import noAgentBrandAssumption from './fleet/no-agent-brand-assumption/index.mts'
 import noBareCryptoNamedUsage from './fleet/no-bare-crypto-named-usage/index.mts'
@@ -133,6 +134,7 @@ const plugin = {
     'exported-name-has-domain-word': exportedNameHasDomainWord,
     'guard-contract': guardContract,
     'inclusive-language': inclusiveLanguage,
+    'max-comment-block-lines': maxCommentBlockLines,
     'max-file-lines': maxFileLines,
     'no-agent-brand-assumption': noAgentBrandAssumption,
     'no-bare-crypto-named-usage': noBareCryptoNamedUsage,
