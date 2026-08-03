@@ -155,7 +155,6 @@
     "github/ghsa",
     "github/workflow-runs",
     "http-request/browser",
-    "http-request/checksum-file",
     "http-request/fetch/browser",
     "http-request/headers",
     "ipc-cli/get",
