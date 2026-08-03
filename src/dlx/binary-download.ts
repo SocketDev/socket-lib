@@ -150,14 +150,12 @@ export async function downloadBinary(
     }
 
     // Download the binary.
-    actualIntegrity = await downloadBinaryFile(
-      url,
-      binaryPath,
-      integrity,
-      sha256,
+    actualIntegrity = await downloadBinaryFile(url, binaryPath, {
       createWriteStream,
       headers,
-    )
+      integrity,
+      sha256,
+    })
 
     // Get file size for metadata (intentional: need stats.size, not just existence).
     // oxlint-disable-next-line socket/prefer-exists-sync -- need stats.size for metadata, not just existence check
@@ -179,6 +177,30 @@ export async function downloadBinary(
   }
 }
 
+export interface DownloadBinaryFileOptions {
+  /**
+   * Factory for the destination write stream. Injected by tests and by callers
+   * that need to tee or throttle the download.
+   */
+  createWriteStream?: HttpDownloadWriteStreamFactory | undefined
+  /**
+   * Extra request headers, forwarded to `httpDownload`. Needed for an asset
+   * behind auth: a private GitHub release answers an unauthenticated request
+   * with a bare 404, which reads as "never published" rather than "not
+   * allowed".
+   */
+  headers?: Record<string, string> | undefined
+  /**
+   * SRI string (`sha512-<base64>`) the download must match, verified from the
+   * response stream before the temp file is atomically published.
+   */
+  integrity?: string | undefined
+  /**
+   * Hex SHA-256 the download must match, verified from the same stream.
+   */
+  sha256?: string | undefined
+}
+
 /**
  * Download a file from a URL with integrity checking and concurrent download
  * protection. Uses processLock to prevent multiple processes from downloading
@@ -197,6 +219,7 @@ export async function downloadBinary(
  *   const integrity = await downloadBinaryFile(
  *   'https://example.com/tool-linux-x64',
  *   '/tmp/dlx-cache/tool',
+ *   { integrity: 'sha512-…' },
  *   )
  *   console.log(`Integrity: ${integrity}`)
  *   ```
@@ -204,11 +227,12 @@ export async function downloadBinary(
 export async function downloadBinaryFile(
   url: string,
   destPath: string,
-  integrity?: string | undefined,
-  sha256?: string | undefined,
-  createWriteStream?: HttpDownloadWriteStreamFactory | undefined,
-  headers?: Record<string, string> | undefined,
+  options?: DownloadBinaryFileOptions | undefined,
 ): Promise<string> {
+  const { createWriteStream, headers, integrity, sha256 } = {
+    __proto__: null,
+    ...options,
+  } as DownloadBinaryFileOptions
   // Use process lock to prevent concurrent downloads.
   // Lock is placed in the cache entry directory as 'concurrency.lock'.
   const crypto = getNodeCrypto()

@@ -129,11 +129,9 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     })
     const expectedIntegrity = sha512OfBuffer(payload)
     const destPath = path.join(testDir, 'verified')
-    const result = await downloadBinaryFile(
-      'https://example.com/x',
-      destPath,
-      expectedIntegrity,
-    )
+    const result = await downloadBinaryFile('https://example.com/x', destPath, {
+      integrity: expectedIntegrity,
+    })
     expect(result).toBe(expectedIntegrity)
   })
 
@@ -146,7 +144,9 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     const wrongIntegrity = sha512OfBuffer(Buffer.from('different-content'))
     const destPath = path.join(testDir, 'mismatch')
     await expect(
-      downloadBinaryFile('https://example.com/x', destPath, wrongIntegrity),
+      downloadBinaryFile('https://example.com/x', destPath, {
+        integrity: wrongIntegrity,
+      }),
     ).rejects.toThrow(/Integrity mismatch/)
     // Bad file removed by safeDelete.
     expect(existsSync(destPath)).toBe(false)
@@ -164,12 +164,9 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
 
   it('passes sha256 option through to httpDownload when provided', async () => {
     const destPath = path.join(testDir, 'with-sha256')
-    await downloadBinaryFile(
-      'https://example.com/x',
-      destPath,
-      undefined,
-      'a'.repeat(64),
-    )
+    await downloadBinaryFile('https://example.com/x', destPath, {
+      sha256: 'a'.repeat(64),
+    })
     const args = vi.mocked(httpDownload).mock.calls[0]!
     expect(args[2]).toEqual({
       createWriteStream: undefined,
@@ -182,13 +179,9 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     const destPath = path.join(testDir, 'with-custom-stream')
     const createWriteStream =
       vi.fn() as unknown as HttpDownloadWriteStreamFactory
-    await downloadBinaryFile(
-      'https://example.com/x',
-      destPath,
-      undefined,
-      undefined,
+    await downloadBinaryFile('https://example.com/x', destPath, {
       createWriteStream,
-    )
+    })
     expect(vi.mocked(httpDownload).mock.calls[0]![2]?.createWriteStream).toBe(
       createWriteStream,
     )
@@ -199,12 +192,9 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     const sha256 = crypto.createHash('sha256').update(payload).digest('hex')
     const destPath = path.join(testDir, 'cached-ok')
     writeFileSync(destPath, payload)
-    const result = await downloadBinaryFile(
-      'https://example.com/x',
-      destPath,
-      undefined,
+    const result = await downloadBinaryFile('https://example.com/x', destPath, {
       sha256,
-    )
+    })
     expect(result.startsWith('sha512-')).toBe(true)
     expect(httpDownload).not.toHaveBeenCalled()
   })
@@ -215,26 +205,18 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     writeFileSync(destPath, payload)
     const wrongSha256 = 'f'.repeat(64)
     await expect(
-      downloadBinaryFile(
-        'https://example.com/x',
-        destPath,
-        undefined,
-        wrongSha256,
-      ),
+      downloadBinaryFile('https://example.com/x', destPath, {
+        sha256: wrongSha256,
+      }),
     ).rejects.toThrow(/SHA-256 mismatch/)
     expect(existsSync(destPath)).toBe(false)
   })
 
   it('forwards caller headers to httpDownload', async () => {
     const destPath = path.join(testDir, 'authed-asset')
-    await downloadBinaryFile(
-      'https://example.com/private-asset',
-      destPath,
-      undefined,
-      undefined,
-      undefined,
-      { authorization: 'Bearer test-token' },
-    )
+    await downloadBinaryFile('https://example.com/private-asset', destPath, {
+      headers: { authorization: 'Bearer test-token' },
+    })
     expect(httpDownload).toHaveBeenCalledWith(
       'https://example.com/private-asset',
       destPath,

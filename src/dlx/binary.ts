@@ -161,13 +161,11 @@ export async function dlxBinary(
     }
 
     // Download the binary.
-    computedIntegrity = await downloadBinaryFile(
-      url,
-      binaryPath,
+    computedIntegrity = await downloadBinaryFile(url, binaryPath, {
+      createWriteStream,
       integrity,
       sha256,
-      createWriteStream,
-    )
+    })
 
     // Get file size for metadata (intentional: need stats.size, not just existence).
     // oxlint-disable-next-line socket/prefer-exists-sync -- need stats.size for metadata, not just existence check
