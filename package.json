@@ -1766,6 +1766,11 @@
       "types": "./dist/github/constants.d.ts",
       "default": "./dist/github/constants.js"
     },
+    "./github/error-classification": {
+      "source": "./src/github/error-classification.ts",
+      "types": "./dist/github/error-classification.d.ts",
+      "default": "./dist/github/error-classification.js"
+    },
     "./github/errors": {
       "source": "./src/github/errors.ts",
       "types": "./dist/github/errors.d.ts",

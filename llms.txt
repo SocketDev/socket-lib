@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 586 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 587 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/signal'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -406,6 +406,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 
 - [@socketsecurity/lib/github/commit](./dist/github/commit.d.ts): Create a SIGNED commit on a branch via the GitHub git-objects API (blob -> tree -> commit -> ref PATCH).
 - [@socketsecurity/lib/github/constants](./dist/github/constants.d.ts): GitHub API URL + cache-TTL constants.
+- [@socketsecurity/lib/github/error-classification](./dist/github/error-classification.d.ts): Classify a GitHub API error response from its status, headers, and body.
 - [@socketsecurity/lib/github/errors](./dist/github/errors.d.ts): Named errors thrown by `github/*` helpers.
 - [@socketsecurity/lib/github/ghsa](./dist/github/ghsa.d.ts): GitHub Security Advisory (GHSA) lookups.
 - [@socketsecurity/lib/github/refs](./dist/github/refs.d.ts): Resolve GitHub git refs (tag / branch / commit) to full commit SHAs.
