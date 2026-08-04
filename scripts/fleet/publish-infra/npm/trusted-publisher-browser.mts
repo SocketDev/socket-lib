@@ -43,14 +43,15 @@ import type {
   NpmBrowserSessionOptions,
 } from './browser-session.mts'
 import {
-  awaitVerifiedSave,
-  driveFormEdits,
+  accessUrl,
+  driveVerifiedSave,
   readTrustedPublisher,
 } from './trusted-publisher-page.mts'
 import {
   desiredTrustedPublisher,
   diffTrustedPublisher,
   formatApplySummary,
+  formatPartialSaveFailure,
   parseSocketRegistryManifest,
   renderPlannedEdits,
   renderReadTable,
@@ -198,11 +199,13 @@ export async function applyOne(
       logger.log(`[dry-run] ${renderPlannedEdits(pkg, edits)}`)
       return { pkg, status: 'planned' }
     }
-    await driveFormEdits(page, pkg, desired)
-    const verify = await awaitVerifiedSave(page, pkg, desired)
-    if (!verify.ok) {
+    const saved = await driveVerifiedSave(page, pkg, desired)
+    if (!saved.ok) {
       return {
-        detail: `saved state did not verify: ${verify.mismatches.join('; ')}`,
+        detail: formatPartialSaveFailure({
+          mismatches: saved.mismatches,
+          url: accessUrl(pkg),
+        }),
         pkg,
         status: 'failed',
       }
