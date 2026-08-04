@@ -41,7 +41,6 @@ import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { httpRequest } from '@socketsecurity/lib-stable/http-request'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { isMainModule } from '../../_shared/is-main-module.mts'
 import { REPO_ROOT } from '../../paths.mts'
@@ -337,13 +336,109 @@ export interface OtpChallenge {
   readonly doneUrl: string
 }
 
+/**
+ * The last whitespace-delimited token on the first line containing `marker`.
+ * npm prints each URL alone at the end of its line, so the token IS the URL.
+ *
+ * Token scanning rather than a URL regex on purpose: these are URLs, not
+ * filesystem paths, and normalizing them for a separator-regex match collapses
+ * `https://` to `https:/` — which silently defeated the parse.
+ */
+export function urlAfterMarker(
+  output: string,
+  marker: string,
+): string | undefined {
+  const lines = output.split('\n')
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i]!
+    if (!line.includes(marker)) {
+      continue
+    }
+    const token = line.trim().split(/\s+/).pop()
+    if (token?.startsWith('https:')) {
+      return token
+    }
+  }
+  return undefined
+}
+
 export function parseOtpChallenge(output: string): OtpChallenge | undefined {
-  // URLs, not filesystem paths: the separators are part of the URL grammar, so
-  // the text is matched as npm printed it.
-  const text = normalizePath(output)
-  const authUrl = /https:\/\/\S*npmjs\.com\/auth\/cli\/\S+/.exec(text)?.[0]
-  const doneUrl = /https:\/\/\S*\/-\/v1\/done\?authId=\S+/.exec(text)?.[0]
+  const authUrl = urlAfterMarker(output, 'auth/cli/')
+  const doneUrl = urlAfterMarker(output, 'v1/done?authId=')
   return authUrl && doneUrl ? { authUrl, doneUrl } : undefined
+}
+
+/**
+ * Whether `url` resolves to something a person can approve. npm's CLI has
+ * printed EOTP approval URLs for routes the website no longer serves — both the
+ * `auth/cli` page and its paired done endpoint answered 404 on 2026-08-04 —
+ * and opening a 404 tells the operator nothing. Checking first is what lets
+ * this flow fall through to the login protocol that does work.
+ */
+export async function isUrlReachable(url: string): Promise<boolean> {
+  try {
+    const response = await httpRequest(url)
+    return response.status < 400
+  } catch {
+    return false
+  }
+}
+
+/**
+ * A fresh approval flow from the registry's web-login protocol — the same
+ * `/-/v1/login` call `login.mts` makes, whose URLs the website does serve.
+ * `npm-auth-type: web` is load-bearing: the endpoint 401s a client that does
+ * not declare web auth.
+ */
+export async function createLoginChallenge(): Promise<
+  OtpChallenge | undefined
+> {
+  try {
+    const created = await httpRequest('https://registry.npmjs.org/-/v1/login', {
+      body: '{}',
+      headers: {
+        'content-type': 'application/json',
+        'npm-auth-type': 'web',
+        'npm-command': 'login',
+      },
+      method: 'POST',
+    })
+    if (!created.ok) {
+      return undefined
+    }
+    const session = created.json<{
+      doneUrl?: string | undefined
+      loginUrl?: string | undefined
+    }>()
+    return session.loginUrl && session.doneUrl
+      ? { authUrl: session.loginUrl, doneUrl: session.doneUrl }
+      : undefined
+  } catch {
+    return undefined
+  }
+}
+
+/**
+ * A challenge whose URLs actually resolve. npm's own EOTP pair is preferred
+ * when it works; when it 404s, the registry's web-login protocol
+ * (`login.mts`, which posts `/-/v1/login` with `npm-auth-type: web`) issues a
+ * session that does — and a completed web login elevates the account for the
+ * same ~5-minute window an OTP would, which is all these writes need.
+ */
+export async function resolveUsableChallenge(
+  probeOutput: string,
+): Promise<OtpChallenge | undefined> {
+  const printed = parseOtpChallenge(probeOutput)
+  if (printed && (await isUrlReachable(printed.authUrl))) {
+    return printed
+  }
+  if (printed) {
+    logger.log(
+      "npm's own approval URL is not reachable, so this run falls back to the " +
+        'registry login protocol.',
+    )
+  }
+  return await createLoginChallenge()
 }
 
 /**
@@ -358,12 +453,30 @@ export const OTP_POLL_MS = 3000
  * Whether npm's done endpoint reports the approval as complete. It answers 202
  * while the operator has not finished and 200 with the token once they have.
  */
-export async function isApprovalComplete(doneUrl: string): Promise<boolean> {
+export async function isApprovalComplete(
+  doneUrl: string,
+  npmPath?: string | undefined,
+  neutralCwd?: string | undefined,
+): Promise<boolean> {
   try {
     const response = await httpRequest(doneUrl, {
-      headers: { 'npm-auth-type': 'web' },
+      headers: { 'npm-auth-type': 'web', 'npm-command': 'login' },
     })
-    return response.status === 200
+    if (response.status !== 200) {
+      return false
+    }
+    // The login protocol answers 200 with the session's token. Persisting it is
+    // what makes the CLI use the newly elevated session; npm's own EOTP flow
+    // returns no token and needs nothing saved.
+    const { token } = response.json<{ token?: string | undefined }>()
+    if (neutralCwd && npmPath && token) {
+      await runCaptureBoth(
+        npmPath,
+        ['config', 'set', `//registry.npmjs.org/:_authToken=${token}`],
+        neutralCwd,
+      )
+    }
+    return true
   } catch {
     return false
   }
@@ -393,14 +506,16 @@ export async function primeOtpSession(
   if (!isOtpRequired(probe.output)) {
     return true
   }
-  const challenge = parseOtpChallenge(probe.output)
+  const challenge = await resolveUsableChallenge(probe.output)
   if (!challenge) {
     logger.fail(
-      'npm asked for a one-time password without naming an approval URL.\n' +
+      'npm would not open an authentication flow this session.\n' +
         `  Where: ${npmPath} trust list ${probePkg}\n` +
-        `  Saw:   ${probe.output.trim().slice(0, 300) || '(no output)'}\n` +
-        '  Wanted: the auth/cli and /-/v1/done URLs npm prints with EOTP.\n' +
-        '  Fix:   run `npm login --auth-type=web` from a neutral directory, then re-run.',
+        `  Saw:   ${probe.output.trim().slice(0, 200) || '(no output)'}\n` +
+        "  Wanted: a reachable approval URL, from npm's EOTP message or the " +
+        'registry login protocol.\n' +
+        '  Fix:   configure the trusted publishers through the npmjs.com web UI ' +
+        '(scripts/fleet/publish-infra/npm/trusted-publisher-browser.mts).',
     )
     return false
   }
@@ -417,7 +532,7 @@ export async function primeOtpSession(
   const deadline = Date.now() + OTP_APPROVAL_BUDGET_MS
   while (Date.now() < deadline) {
     // eslint-disable-next-line no-await-in-loop -- serial: one operator, one approval.
-    if (await isApprovalComplete(challenge.doneUrl)) {
+    if (await isApprovalComplete(challenge.doneUrl, npmPath, neutralCwd)) {
       logger.success('approval received — continuing.')
       return true
     }
