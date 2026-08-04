@@ -52,8 +52,15 @@ describe('makeUnexposedModuleSource', () => {
     expect(() => stub['extractArchive']!()).toThrow(
       /extractArchive is compiled out of this @socketsecurity\/lib build/,
     )
+    // The error is the whole detection mechanism, so it has to name the
+    // remediation for the leaf it fired on — not a generic link someone then
+    // has to translate into an edit.
     expect(() => stub['extractArchive']!()).toThrow(
-      /open an issue at https:\/\/github\.com\/SocketDev\/socket-lib\/issues/,
+      /node scripts\/repo\/expose-leaf\.mts archives\/extract/,
+    )
+    // The issue link survives as the fallback for anyone without a checkout.
+    expect(() => stub['extractArchive']!()).toThrow(
+      /https:\/\/github\.com\/SocketDev\/socket-lib\/issues/,
     )
   })
 })

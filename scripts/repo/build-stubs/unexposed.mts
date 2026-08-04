@@ -66,7 +66,10 @@ function unexposed(name) {
       name + ' is compiled out of this @socketsecurity/lib build.\\n' +
       '  Where: @socketsecurity/lib/${leaf}\\n' +
       '  Saw: a call to a build-stubbed export; wanted the real implementation.\\n' +
-      '  Fix: open an issue at ${EXPOSE_ISSUE_URL} to expose this method.'
+      '  Fix: in a socket-lib checkout, run\\n' +
+      '    node scripts/repo/expose-leaf.mts ${leaf}\\n' +
+      '  which un-stubs the leaf, rebuilds, and commits. Then cut a release to\\n' +
+      '  ship it. No socket-lib checkout? Open an issue at ${EXPOSE_ISSUE_URL}.'
     );
   };
 }
