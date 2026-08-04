@@ -63,12 +63,30 @@ export const buildConfig: RolldownOptions = {
   // rewriting consumers to `.default` (the source uses `module.exports =`, so
   // the injected `.default` would be undefined at runtime — externalizing
   // avoids that).
-  external: (id: string) =>
-    // Treat any path with an `external/` segment as external: preceded by a
-    // separator of either platform or by the string start, and followed by a
-    // separator.
-    /(?:[/\\]|^)external[/\\]/.test(id) ||
-    (!id.startsWith('.') && !path.isAbsolute(id)),
+  external: (id: string, importer?: string | undefined) => {
+    // Bare specifiers (deps) stay external — per-file transpile, consumers
+    // install them.
+    if (!id.startsWith('.') && !path.isAbsolute(id)) {
+      return true
+    }
+    // THIS repo's `src/external/*` shims, matched by resolved path. A blanket
+    // `external/`-segment test also matches a *dependency's* nested
+    // `dist/external/*` (e.g. an inlined package vendoring its own externals),
+    // externalizing modules that were meant to be bundled and emitting
+    // relative requires into files that don't exist next to the output —
+    // exactly the class of break that shipped socket-cli 1.1.151's
+    // "Cannot find module 'form-data'". Scoping by resolved prefix keeps the
+    // predicate to the tree it owns.
+    const resolved = path.isAbsolute(id)
+      ? id
+      : importer
+        ? path.resolve(path.dirname(importer), id)
+        : undefined
+    return (
+      resolved !== undefined &&
+      resolved.startsWith(path.join(srcPath, 'external') + path.sep)
+    )
+  },
   input,
   output: {
     banner: '"use strict";\n/* Socket Lib - Built with rolldown */',
