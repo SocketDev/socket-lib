@@ -67,7 +67,9 @@
     "socket/no-vitest-skipped-tests": "error",
     "socket/no-vitest-standalone-expect": [
       "error",
-      { "additionalTestBlockFunctions": ["cmdit"] }
+      {
+        "additionalTestBlockFunctions": ["cmdit"]
+      }
     ],
     "socket/no-which-for-local-bin": "error",
     "socket/normalize-path-before-match": "error",
@@ -290,8 +292,6 @@
     "**/.config/fleet/**",
     "**/.config/fleet/oxlint-plugin/**",
     "**/.config/repo/rolldown/**",
-    "**/.config/repo/vitest.config.mts",
-    "**/.config/repo/vitest.settings.mts",
     "**/.git-hooks/**",
     "**/.pnpm-store/**",
     "**/bootstrap/**",

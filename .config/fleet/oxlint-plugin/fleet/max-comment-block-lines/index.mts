@@ -6,13 +6,16 @@
  *   are narration that restates the code beneath, or a design discussion that
  *   belongs in `docs/agents.md/**` where it is searchable and can be linked.
  *
- *   Sized against the two windows in `lib/comment-markers.mts`, so the three
- *   agree instead of drifting:
+ *   Sized against the windows in `lib/comment-markers.mts`, so they agree
+ *   instead of drifting:
  *
- *   - The FILE header gets `MAX_FILE_HEADER_COMMENT_LINES` (20). That is the
- *     most generous comment budget the fleet grants anything, and it is the
- *     default cap here: an inline block should never out-run the budget of the
- *     whole file's `@file` docblock.
+ *   - The FILE header gets `MAX_FILE_HEADER_COMMENT_LINES` (20), and that is
+ *     the default cap for an INLINE block: it should never out-run the budget
+ *     of the whole file's `@file` docblock.
+ *   - A DOCUMENTATION block gets `MAX_DOC_COMMENT_LINES` (40). A single
+ *     JSDoc `/** *\/` carries API contracts and parser lock-step notes, so
+ *     it never needs an allow marker under the budget, and past the budget
+ *     the discussion moves to `docs/agents.md/**`.
  *   - A LEADING block sits under `MAX_LEADING_COMMENT_LINES` (12) if it needs
  *     to carry a `socket-lint: allow` marker, since the bypass lookback stops
  *     there. `no-malformed-bypass-marker` reports a marker pushed past it.
@@ -27,6 +30,7 @@
 
 import {
   makeBypassCommentChecker,
+  MAX_DOC_COMMENT_LINES,
   MAX_FILE_HEADER_COMMENT_LINES,
 } from '../../lib/comment-markers.mts'
 import { isLockstepMirror } from '../../lib/lockstep-mirror.mts'
@@ -40,6 +44,21 @@ export interface CommentBlock {
   readonly endLine: number
   readonly lines: number
   readonly first: AstNode
+  readonly isDoc: boolean
+}
+
+/**
+ * A documentation block: a single `/** ... *\/` comment whose body opens
+ * with `*` — the JSDoc shape. Doc blocks carry API contracts and parser
+ * lock-step notes, so they get MAX_DOC_COMMENT_LINES instead of the inline
+ * cap and never need an allow marker under it.
+ */
+export function isDocBlock(comment: AstNode): boolean {
+  return (
+    comment.type === 'Block' &&
+    typeof comment.value === 'string' &&
+    comment.value.startsWith('*')
+  )
 }
 
 /**
@@ -71,6 +90,7 @@ export function groupCommentBlocks(
         endLine,
         lines: endLine - first.loc.start.line + 1,
         first,
+        isDoc: isDocBlock(first) && first.loc.end?.line === endLine,
       })
     }
     first = c
@@ -82,6 +102,7 @@ export function groupCommentBlocks(
       endLine,
       lines: endLine - first.loc.start.line + 1,
       first,
+      isDoc: isDocBlock(first) && first.loc.end?.line === endLine,
     })
   }
   return blocks
@@ -92,13 +113,15 @@ const rule = {
     type: 'suggestion',
     docs: {
       description:
-        'An inline comment block must not out-run the file-header budget. Long prose belongs in docs/agents.md, linked from a short comment.',
+        'An inline comment block must not out-run the file-header budget; a JSDoc documentation block gets the doubled doc budget. Long prose belongs in docs/agents.md, linked from a short comment.',
       category: 'Best Practices',
       recommended: true,
     },
     messages: {
       tooLong:
-        'Comment block runs {{lines}} lines, over the {{limit}}-line cap — past this a reader skips it. Keep the constraint or invariant here and move the discussion into `docs/agents.md/**`, linked from a one-line pointer. Bypass: add a `socket-lint: allow long-comment-block` comment.',
+        'Comment block runs {{lines}} lines, over the {{limit}}-line cap — past this a reader skips it. Keep the constraint or invariant here and move the discussion into `docs/agents.md/**`, linked from a one-line pointer.',
+      docTooLong:
+        'Documentation block runs {{lines}} lines, over the {{limit}}-line doc budget. A doc block never needs an allow marker under the budget; past it, keep the contract here and move the discussion into `docs/agents.md/**`, linked from a one-line pointer.',
     },
     schema: [
       {
@@ -125,6 +148,9 @@ const rule = {
       typeof configured === 'number' && configured >= 5
         ? configured
         : MAX_FILE_HEADER_COMMENT_LINES
+    // The doc budget is never tighter than the inline cap, even when a repo
+    // raises `limit` past it.
+    const docLimit = Math.max(MAX_DOC_COMMENT_LINES, limit)
 
     return {
       Program(_node: AstNode) {
@@ -137,7 +163,8 @@ const rule = {
           if (b.startLine <= MAX_FILE_HEADER_COMMENT_LINES) {
             continue
           }
-          if (b.lines <= limit) {
+          const cap = b.isDoc ? docLimit : limit
+          if (b.lines <= cap) {
             continue
           }
           if (hasBypassComment(b.first)) {
@@ -145,8 +172,8 @@ const rule = {
           }
           context.report({
             node: b.first,
-            messageId: 'tooLong',
-            data: { lines: String(b.lines), limit: String(limit) },
+            messageId: b.isDoc ? 'docTooLong' : 'tooLong',
+            data: { lines: String(b.lines), limit: String(cap) },
           })
         }
       },

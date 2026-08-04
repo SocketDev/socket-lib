@@ -43,6 +43,13 @@ export const MAX_LEADING_COMMENT_LINES = 12
 // file-level statement of intent, which is the point of bounding it at all.
 export const MAX_FILE_HEADER_COMMENT_LINES = 20
 
+// The DOCUMENTATION budget: a JSDoc `/** */` block documenting the symbol
+// beneath it gets twice the header budget. Docs are the sanctioned home for
+// parser lock-step notes and API contracts, so they never need an allow
+// marker — but they stay bounded; discussion past this belongs in
+// docs/agents.md/** behind a link.
+export const MAX_DOC_COMMENT_LINES = 40
+
 // A line that is entirely a comment (`//`, `/*`, or a `*` block continuation).
 // Used to keep walking upward through a contiguous comment block.
 const COMMENT_LINE_RE = /^\s*(?:\*|\/\*|\/\/)/
