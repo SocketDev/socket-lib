@@ -16,6 +16,10 @@
  *     JSDoc `/** *\/` carries API contracts and parser lock-step notes, so
  *     it never needs an allow marker under the budget, and past the budget
  *     the discussion moves to `docs/agents.md/**`.
+ *   - An `@example` section is FREE: its lines are subtracted before the
+ *     budget is applied. A worked example is sized by the code it shows, not
+ *     by how wordy the author was, and capping it only pressures people into
+ *     deleting the most useful part of the block.
  *   - A LEADING block sits under `MAX_LEADING_COMMENT_LINES` (12) if it needs
  *     to carry a `socket-lint: allow` marker, since the bypass lookback stops
  *     there. `no-malformed-bypass-marker` reports a marker pushed past it.
@@ -59,6 +63,47 @@ export function isDocBlock(comment: AstNode): boolean {
     typeof comment.value === 'string' &&
     comment.value.startsWith('*')
   )
+}
+
+// A JSDoc block tag at the start of a line, capturing the tag name so the
+// scan below can tell `@example` from every other tag.
+const DOC_TAG_RE = /^\s*\*?\s*@(\w+)/
+
+/**
+ * Lines the `@example` sections occupy inside a doc block. An example runs
+ * from its `@example` tag to the next block tag or the end of the comment.
+ *
+ * These do not count toward the budget. A worked example is the part of a
+ * docblock a reader actually comes for, and its length is set by the code it
+ * shows rather than by how wordy the author was — capping it would only push
+ * people to delete the example or bury it in a doc nobody opens.
+ */
+export function exampleLineCount(commentValue: string): number {
+  const lines = commentValue.split('\n')
+  let count = 0
+  let inExample = false
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const tag = DOC_TAG_RE.exec(lines[i]!)
+    if (tag) {
+      inExample = tag[1] === 'example'
+    }
+    if (inExample) {
+      count += 1
+    }
+  }
+  return count
+}
+
+/**
+ * The block's length as the budget sees it: total lines, less whatever its
+ * `@example` sections take up. Only a doc block gets the discount, since an
+ * inline `//` run has no tags to exempt.
+ */
+export function budgetedLines(block: CommentBlock): number {
+  if (!block.isDoc || typeof block.first.value !== 'string') {
+    return block.lines
+  }
+  return block.lines - exampleLineCount(block.first.value)
 }
 
 /**
@@ -164,7 +209,8 @@ const rule = {
             continue
           }
           const cap = b.isDoc ? docLimit : limit
-          if (b.lines <= cap) {
+          const counted = budgetedLines(b)
+          if (counted <= cap) {
             continue
           }
           if (hasBypassComment(b.first)) {
@@ -173,7 +219,7 @@ const rule = {
           context.report({
             node: b.first,
             messageId: b.isDoc ? 'docTooLong' : 'tooLong',
-            data: { lines: String(b.lines), limit: String(cap) },
+            data: { lines: String(counted), limit: String(cap) },
           })
         }
       },
