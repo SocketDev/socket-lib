@@ -197,31 +197,12 @@ export async function getReleaseAssetUrl(
       )
     }
 
-    // -------------------------------------------------------
-    // 200 OK + zero-byte body = GitHub Elasticsearch incident.
-    // The status says "success" but the payload is empty.
-    // Cross-check via GraphQL `repository.release(tagName)`,
-    // which uses a different backend — when REST is degraded
-    // GraphQL is usually still serving the same data.
-    //
-    // The two transports expose the SAME asset data with one
-    // field-name diff (`downloadUrl` vs. `browser_download_url`)
-    // that `fetchReleaseAssetsViaGraphQL` normalizes. After
-    // normalization we go back to the SAME asset matcher path
-    // below — the rest of the function doesn't know which
-    // transport produced the asset list.
-    //
-    // Three outcomes from the GraphQL fallback:
-    //   - assets returned: continue with matching as normal
-    //   - `undefined` returned: GraphQL says no release with this
-    //     tag exists. Throw a clear error so the user knows
-    //     the tag is genuinely missing rather than masking a
-    //     transient with a silent skip.
-    //   - GraphQL itself throws: `pRetry` retries the whole
-    //     `getReleaseAssetUrl` call (REST included). This is
-    //     intentional — if both transports fail we want
-    //     backoff, not a blind error.
-    // -------------------------------------------------------
+    // 200 OK with a zero-byte body is a GitHub Elasticsearch incident, not an
+    // absent release: trusting the status here records a false negative. Cross-
+    // check via GraphQL, which runs on a different backend. A `undefined` from
+    // GraphQL means the tag genuinely does not exist and must throw rather than
+    // skip; a GraphQL throw falls through to `pRetry` so both transports get
+    // backoff. Detail: docs/references/repo/github-api-degradation.md
     let resolvedAssets: Array<{ name: string; browser_download_url: string }>
     if (response.body.byteLength === 0) {
       // REST is degraded — silently route to GraphQL. Only error

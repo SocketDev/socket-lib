@@ -153,59 +153,15 @@ export function getNodePrebuildAssetName(
  * libc suffix is `-musl` (Linux only; the glibc default is unsuffixed to match
  * Node.js's own linuxstatic convention).
  *
- * # Why these specific conventions
- *
- * ## Why `win32`, not `win`
- *
- * `win32` is what `process.platform` returns on every Windows host. Every npm
- * package whose install-time platform filter uses the standard `os` / `cpu` /
- * `libc` manifest fields must match `process.platform` strings exactly (npm
- * compares them verbatim — there's no shorthand layer). Using `win` internally
- * here would have forced a translation every time we constructed an install
- * filter or a target triple, and reviewers would have to remember "we
- * abbreviate on disk but not in package filters." Since the two now match,
- * there's no translation step to get wrong.
- *
- * Pnpm's pack-app (v11+) accepts `<os>-<arch>[-<libc>]` target strings and its
- * shards are `@pnpm/exe.<os>-<arch>` (with `win32`, not `win` — see
- * pnpm#11314). Our naming matches so asset names we emit can flow directly into
- * pack-app's `--target` arg, `pnpm.app.targets` config, and
- * sibling-package-name construction without a translation map.
- *
- * ## Why `-musl` is the suffix and glibc is unsuffixed
- *
- * Node.js's own linuxstatic tarballs historically used the unqualified `linux`
- * for glibc and a separate download channel for musl. The pnpm ecosystem
- * codified that as a default `linux-<arch>` for glibc and, for the libc
- * outlier, `linux-<arch>-musl`, matching the asymmetric reality of Linux
- * distros — glibc
- * is the majority case, musl is Alpine-and-similar. Adding `-glibc` for the
- * default would be redundant noise in the name.
- *
- * ## Why libc is only appended for Linux
- *
- * MacOS and Windows have exactly one system libc each (Apple libSystem,
- * Microsoft UCRT). A hypothetical `darwin-arm64-libsystem` conveys no
- * information. Node.js, npm, and pnpm all treat libc as a Linux-only axis; we
- * follow the same convention so callers don't have to special- case
- * `'darwin-arm64'.startsWith('darwin-arm64')` style matches.
- *
- * ## Why this function exists at all (vs. inlining)
- *
- * Two upstream APIs that socket-btm consumers end up calling — the npm manifest
- * filter (`os`/`cpu`/`libc`) and pnpm's pack-app `--target` — both need the
- * exact same triple format. Centralizing the construction here means a future
- * schema change (e.g. Node introducing `riscv64`) gets one edit, and the error
- * message for an unsupported platform is uniform across downloaders, pack-app
- * invocations, and the `@socketbin/*` resolver logic.
+ * Every segment matches what npm and pnpm already expect verbatim, so nothing
+ * downstream needs a translation map. Why each convention was chosen:
+ * docs/references/repo/platform-arch-naming.md.
  *
  * @example
- *   ;```typescript
  *   getPlatformArch('linux', 'x64', 'musl') // 'linux-x64-musl'
  *   getPlatformArch('darwin', 'arm64') // 'darwin-arm64'
  *   getPlatformArch('win32', 'x64') // 'win32-x64'
- *   getPlatformArch('darwin', 'x64', 'musl') // 'darwin-x64' — libc ignored
- *   ```
+ *   getPlatformArch('darwin', 'x64', 'musl') // 'darwin-x64', libc ignored
  *
  * @param platform - Target platform.
  * @param arch - Target architecture.
