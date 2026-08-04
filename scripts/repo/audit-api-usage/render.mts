@@ -12,13 +12,13 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 const logger = getDefaultLogger()
 
 const ANSI = {
-  bold: '[1m',
-  cyan: '[36m',
-  dim: '[2m',
-  green: '[32m',
-  red: '[31m',
-  reset: '[0m',
-  yellow: '[33m',
+  bold: '\u001B[1m',
+  cyan: '\u001B[36m',
+  dim: '\u001B[2m',
+  green: '\u001B[32m',
+  red: '\u001B[31m',
+  reset: '\u001B[0m',
+  yellow: '\u001B[33m',
 }
 
 // A proportional bar of `width` cells split into segments. Each segment is

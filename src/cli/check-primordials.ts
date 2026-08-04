@@ -197,7 +197,8 @@ export function printHelp(): void {
   )
   logger.log(
     `                        (falls back to .config/socket-lib.json, then .config/repo/socket-lib.json)`,
-  ) // socket-lint: allow logger-decoration -- aligned --help usage text, matching the surrounding option lines
+    // socket-lint: allow logger-decoration -- aligned --help usage text, matching the surrounding option lines
+  )
   logger.log('  --explain             Print one detailed line per finding.')
   logger.log('  --json                Machine-readable JSON output.')
   logger.log('  --silent              Silent on success.')

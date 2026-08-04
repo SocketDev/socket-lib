@@ -60,8 +60,10 @@ describe('stdio/stderr', () => {
     })
 
     it('should handle ANSI color codes', () => {
-      writeErrorLine('[31mRed Error[0m')
-      expect(getContext().writeSpy).toHaveBeenCalledWith('[31mRed Error[0m\n')
+      writeErrorLine('\u001B[31mRed Error\u001B[0m')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        '\u001B[31mRed Error\u001B[0m\n',
+      )
     })
 
     it('should not return a value', () => {
@@ -92,8 +94,10 @@ describe('stdio/stderr', () => {
     })
 
     it('should handle ANSI escape sequences', () => {
-      writeError('[33mWarning[0m')
-      expect(getContext().writeSpy).toHaveBeenCalledWith('[33mWarning[0m')
+      writeError('\u001B[33mWarning\u001B[0m')
+      expect(getContext().writeSpy).toHaveBeenCalledWith(
+        '\u001B[33mWarning\u001B[0m',
+      )
     })
 
     it('should not return a value', () => {

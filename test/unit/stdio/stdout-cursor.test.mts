@@ -41,7 +41,7 @@ describe('stdio/stdout cursor lifecycle', () => {
         configurable: true,
       })
       hideCursor()
-      expect(getContext().writeSpy).toHaveBeenCalledWith('[?25l')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25l')
     })
 
     it('should not return a value', () => {
@@ -65,7 +65,7 @@ describe('stdio/stdout cursor lifecycle', () => {
         configurable: true,
       })
       showCursor()
-      expect(getContext().writeSpy).toHaveBeenCalledWith('[?25h')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25h')
     })
 
     it('should not return a value', () => {
@@ -150,8 +150,8 @@ describe('stdio/stdout cursor lifecycle', () => {
       write('Animation frame 1')
       write('Animation frame 2')
       showCursor()
-      expect(getContext().writeSpy).toHaveBeenCalledWith('[?25l')
-      expect(getContext().writeSpy).toHaveBeenCalledWith('[?25h')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25l')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25h')
     })
 
     it('should handle graceful degradation from TTY to non-TTY', () => {
@@ -270,8 +270,8 @@ describe('stdio/stdout cursor lifecycle', () => {
         clearLine()
       }
       showCursor()
-      expect(getContext().writeSpy).toHaveBeenCalledWith('[?25l')
-      expect(getContext().writeSpy).toHaveBeenCalledWith('[?25h')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25l')
+      expect(getContext().writeSpy).toHaveBeenCalledWith('\u001B[?25h')
     })
 
     it('should support table rendering', () => {
