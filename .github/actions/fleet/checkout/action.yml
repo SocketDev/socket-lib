@@ -134,6 +134,20 @@ runs:
         # The checkout action runs while the workspace may still contain only
         # the initial .github/ sparse checkout. Keep its pins beside the action.
         TOOLS_FILE="${GITHUB_WORKSPACE}/scripts/fleet/setup/external-tools.json"
+        # A THIN member untracks the whole scripts/fleet/** payload and
+        # repopulates it from the pinned release bundle during `pnpm install`,
+        # which runs five steps after this one. An absent pin file here is the
+        # CORRECT state for such a member, so skip the audit the way an
+        # unsupported platform skips it: zizmor hardens the workflow surface,
+        # it does not gate correctness, and the payload is audited after it
+        # lands. The dep-0 fetcher being present is what proves this is a thin
+        # member awaiting hydration rather than a genuinely broken package, so
+        # the hard failure below still fires when BOTH are missing.
+        if [ ! -f "$TOOLS_FILE" ] \
+          && [ -f "${GITHUB_WORKSPACE}/scripts/repo/bootstrap/fleet.mjs" ]; then
+          echo "::warning::zizmor skipped — thin fleet payload not yet materialized"
+          exit 0
+        fi
         if [ ! -f "$TOOLS_FILE" ]; then
           echo "× fleet pin file not found at ${TOOLS_FILE} — this member is missing scripts/fleet/setup/external-tools.json; re-run the cascade." >&2
           echo "  This is a packaging bug in the fleet scaffolding, not a consumer issue. File a bug." >&2
