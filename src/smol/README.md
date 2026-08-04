@@ -51,7 +51,7 @@ export const MathAbs = _smolPrimordial?.mathAbs ?? Math.abs
 socket-btm's smol binary exposes 12 user-facing `node:smol-*` modules. The 8 not wrapped here:
 
 - **`node:smol-ffi`** — generic FFI / native calls. No FFI surface in the lib.
-- **`node:smol-http`** / **`node:smol-https`** — pooled, buffered HTTP client. The lib's `http-request/*` requires streaming bodies, redirect chasing, `maxResponseSize` enforcement, hook lifecycle, and `stream: true` mode that resolves to an unconsumed `IncomingMessage` — none of which the smol client surfaces. The smol client is a Promise-returning, buffered, drop-everything-in-memory shape; a clean wrap would require rewriting the lib's surface around it.
+- **`node:smol-http`** / **`node:smol-https`** — pooled, buffered HTTP client. The lib's `http-request/*` requires streaming bodies, redirect chasing, `maxResponseSize` enforcement, hook lifecycle, and `stream: true` mode that resolves to an unconsumed `IncomingMessage`, none of which the smol client surfaces. The smol client is a Promise-returning, buffered, drop-everything-in-memory shape; a clean wrap would require rewriting the lib's surface around it.
 - **`node:smol-ilp`** — QuestDB ILP wire protocol. No ILP surface in the lib.
 - **`node:smol-manifest`** — package.json / lockfile parser. The lib's manifest module reads via the npm `read-package-json` chain, which uses pacote's normalization. Wrapping `parse(filename, content)` would skip the pacote normalization the lib relies on.
 - **`node:smol-power`** — power-state / battery / CPU mode. No fit.

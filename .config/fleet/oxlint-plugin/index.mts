@@ -17,6 +17,7 @@ import exportTopLevelFunctions from './fleet/export-top-level-functions/index.mt
 import exportedNameHasDomainWord from './fleet/exported-name-has-domain-word/index.mts'
 import guardContract from './fleet/guard-contract/index.mts'
 import inclusiveLanguage from './fleet/inclusive-language/index.mts'
+import maxCommentBlockLines from './fleet/max-comment-block-lines/index.mts'
 import maxFileLines from './fleet/max-file-lines/index.mts'
 import noAgentBrandAssumption from './fleet/no-agent-brand-assumption/index.mts'
 import noBareCryptoNamedUsage from './fleet/no-bare-crypto-named-usage/index.mts'
@@ -35,6 +36,7 @@ import noFileoverviewPreferFile from './fleet/no-fileoverview-prefer-file/index.
 import noInlineDeferAsync from './fleet/no-inline-defer-async/index.mts'
 import noInlineLogger from './fleet/no-inline-logger/index.mts'
 import noLibBarrelImport from './fleet/no-lib-barrel-import/index.mts'
+import noLiteralControlChar from './fleet/no-literal-control-char/index.mts'
 import noLoggerNewlineLiteral from './fleet/no-logger-newline-literal/index.mts'
 import noMalformedBypassMarker from './fleet/no-malformed-bypass-marker/index.mts'
 import noMinifiedBundlerOutput from './fleet/no-minified-bundler-output/index.mts'
@@ -133,6 +135,7 @@ const plugin = {
     'exported-name-has-domain-word': exportedNameHasDomainWord,
     'guard-contract': guardContract,
     'inclusive-language': inclusiveLanguage,
+    'max-comment-block-lines': maxCommentBlockLines,
     'max-file-lines': maxFileLines,
     'no-agent-brand-assumption': noAgentBrandAssumption,
     'no-bare-crypto-named-usage': noBareCryptoNamedUsage,
@@ -151,6 +154,7 @@ const plugin = {
     'no-inline-defer-async': noInlineDeferAsync,
     'no-inline-logger': noInlineLogger,
     'no-lib-barrel-import': noLibBarrelImport,
+    'no-literal-control-char': noLiteralControlChar,
     'no-logger-newline-literal': noLoggerNewlineLiteral,
     'no-malformed-bypass-marker': noMalformedBypassMarker,
     'no-minified-bundler-output': noMinifiedBundlerOutput,

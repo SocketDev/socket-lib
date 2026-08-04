@@ -110,48 +110,31 @@ export interface DlxBinaryResult {
 }
 
 /**
- * Metadata structure for cached binaries (.dlx-metadata.json). Unified schema
- * shared across TypeScript (dlxBinary) and C++ stub extractor.
+ * Metadata structure for cached binaries (.dlx-metadata.json). ONE schema
+ * shared by the TypeScript `dlxBinary` path and the C++ stub extractor, so a
+ * field added on one side has to land on the other or the two disagree about
+ * the same file.
  *
- * Fields:
+ * Two fields are not self-describing: `cache_key` is the first 16 characters
+ * of the SHA-512 hash and matches the cache directory's own name, and
+ * `integrity` is an npm-style SRI hash (`sha512-<base64>`). Timestamps are Unix
+ * milliseconds.
  *
- * - Version: Schema version (currently "1.0.0")
- * - Cache_key: First 16 chars of SHA-512 hash, matching the directory name
- * - Timestamp: Unix timestamp in milliseconds
- * - Integrity: SRI hash (sha512-<base64>, aligned with npm)
- * - Size: Size of cached binary in bytes
- * - Source: Origin information
- *
- *   - Type: "download" | "extract" | "package"
- *   - Url: Download URL (if type is "download")
- *   - Path: Source binary path (if type is "extract")
- *   - Spec: Package spec (if type is "package")
- * - Update_check: Update checking metadata (optional)
- *
- *   - Last_check: Timestamp of last update check
- *   - Last_notification: Timestamp of last user notification
- *   - Latest_known: Latest known version string
- *
- * Example:
- *
- * ```json
- * {
+ * @example
+ *   // .dlx-metadata.json
+ *   {
  *   "version": "1.0.0",
  *   "cache_key": "a1b2c3d4e5f67890",
  *   "timestamp": 1730332800000,
  *   "integrity": "sha512-abc123base64...",
  *   "size": 15000000,
- *   "source": {
- *     "type": "download",
- *     "url": "https://example.com/binary"
- *   },
+ *   "source": { "type": "download", "url": "https://example.com/binary" },
  *   "update_check": {
- *     "last_check": 1730332800000,
- *     "last_notification": 1730246400000,
- *     "latest_known": "2.1.0"
+ *   "last_check": 1730332800000,
+ *   "last_notification": 1730246400000,
+ *   "latest_known": "2.1.0"
  *   }
- * }
- * ```
+ *   }
  *
  * @internal This interface documents the metadata file format.
  */

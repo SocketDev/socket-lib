@@ -161,5 +161,6 @@ export function writeMessage(
   // Native messaging protocol requires raw binary writes to stdout.
   // Chrome treats any non-protocol byte as a framing error, so the logger
   // must not be used here. socket-lint: allow process-stdio
-  ;(stream ?? process.stdout).write(Buffer.concat([header, payload])) // socket-lint: allow process-stdio
+  // socket-lint: allow process-stdio
+  ;(stream ?? process.stdout).write(Buffer.concat([header, payload]))
 }

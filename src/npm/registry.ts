@@ -371,10 +371,11 @@ export function parseProvenancePredicate(
     return undefined
   }
   const { attestations } = bundle as AttestationBundle
-  /* c8 ignore start - the prior Array.isArray guard above already narrows
-   * `attestations` to a real array; even an empty array is truthy, so this
-   * falsy-check can never take its true branch at runtime. Kept only to
-   * satisfy the optional `attestations?: ... | undefined` field type. */
+  // The Array.isArray guard above already narrows `attestations` to a real
+  // array, and even an empty array is truthy, so this falsy-check can never
+  // take its true branch at run time. It stays only to satisfy the optional
+  // `attestations?: ... | undefined` field type.
+  /* c8 ignore start - unreachable behind the Array.isArray guard above. */
   if (!attestations) {
     return undefined
   }

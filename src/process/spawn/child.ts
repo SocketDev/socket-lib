@@ -50,52 +50,32 @@ import type {
 import type npmCliPromiseSpawnType from '../../external/@npmcli/promise-spawn'
 
 /**
- * Spawn a child process and return a promise that resolves when it completes.
- * Provides enhanced error handling, output capture, and cross-platform
- * support.
+ * Spawn a child process and return a promise that resolves when it completes,
+ * with error handling, output capture, and cross-platform support.
  *
- * SECURITY: This function uses array-based arguments which prevent command
- * injection. Arguments in the `args` array are passed directly to the OS
- * without shell interpretation. Shell metacharacters (;|&$()`) are treated as
- * literal strings, not as commands or operators. This is the PRIMARY SECURITY
- * DEFENSE.
+ * SECURITY: array-based arguments are the PRIMARY DEFENSE against command
+ * injection. Everything in `args` reaches the OS without shell interpretation,
+ * so shell metacharacters stay literal rather than becoming operators. That
+ * holds even when `shell: true` is set for Windows .cmd/.bat execution,
+ * because Node escapes each argument before handing it to the shell.
  *
- * Even when shell: true is used (on Windows for .cmd/.bat execution), the
- * array-based approach remains secure because Node.js properly escapes each
- * argument before passing to the shell.
+ * @example
+ *   // DO: array arguments stay safe however hostile userMessage is.
+ *   spawn('git', ['commit', '-m', userMessage])
  *
- * @param {string} cmd - Command to execute (not user-controlled) @param
- * {string[] | readonly string[] | undefined} args - Array of arguments (safe
- * even with user input) @param {SpawnOptions | undefined} options - Spawn
- * options for process configuration @param {SpawnExtra | undefined} extra -
- * Extra options for promise-spawn @returns {SpawnResult} Promise that resolves
- * with process exit information.
+ * @example
+ *   // NEVER: concatenating into one string lets a crafted userMessage close
+ *   // the quote and append a command of its own.
+ *   spawn(`git commit -m "${userMessage}"`, { shell: true })
  *
- * @throws {SpawnError} When the process exits with non-zero code or is
- * terminated by signal.
+ * @example
+ *   // stdin is exposed for interactive processes.
+ *   const result = spawn('cat', [])
+ *   result.stdin?.write('Hello\n')
+ *   result.stdin?.end()
+ *   const { stdout } = await result
  *
- * @example // Basic usage - spawn and wait for completion const result = await
- * spawn('git', ['status']) console.log(result.stdout)
- *
- * @example // With options - set working directory and environment const result
- * = await spawn('npm', ['install'], { cwd: '/path/to/project', env: { NODE_ENV:
- * 'production' } })
- *
- * @example // ✔ DO THIS - Array-based arguments (safe) spawn('git', ['commit',
- * '-m', userMessage]) // Each argument is properly escaped, even if userMessage
- * = "foo; rm -rf /"
- *
- * @example // ✖ NEVER DO THIS - String concatenation (vulnerable) spawn(`git
- * commit -m "${userMessage}"`, { shell: true }) // Vulnerable to injection if
- * userMessage = '"; rm -rf / #'
- *
- * @example // Access stdin for interactive processes const result =
- * spawn('cat', []) result.stdin?.write('Hello\n') result.stdin?.end() const {
- * stdout } = await result console.log(stdout) // 'Hello'
- *
- * @example // Handle errors with exit codes try { await spawn('exit', ['1']) }
- * catch (e) { if (isSpawnError(e)) { console.error(`Failed with code
- * ${e.code}`) console.error(e.stderr) } }
+ * @throws {SpawnError} When the process exits non-zero or a signal kills it.
  */
 // Typed overloads — narrow the resolved stdout/stderr based on `stdioString`.
 // Default (stdioString: true) → strings. `stdioString: false` → Buffers.
@@ -279,12 +259,10 @@ export function spawn(
 }
 
 /**
- * Synchronously spawn a child process and wait for it to complete. Blocks
- * execution until the process exits, returning all output and exit
- * information.
+ * Synchronously spawn a child process and wait for it to complete, returning
+ * all output and exit information.
  *
- * WARNING: This function blocks the event loop. Use {@link spawn} for async
- * operations.
+ * WARNING: this blocks the event loop. Use {@link spawn} for async work.
  *
  * @example
  *   // Basic synchronous spawn

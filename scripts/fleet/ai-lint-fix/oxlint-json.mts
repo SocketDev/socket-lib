@@ -11,6 +11,8 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { isSpawnError } from '@socketsecurity/lib-stable/process/spawn/errors'
 
+import { cascadeMirrorOxlintIgnoreArgs } from '../_shared/cascade-mirror-scope.mts'
+
 const logger = getDefaultLogger()
 
 export interface OxlintMessage {
@@ -112,11 +114,19 @@ export async function runLintJson(
 ): Promise<OxlintFile[]> {
   // Run oxlint directly with --format=json. Bypass `pnpm run lint`
   // because that wrapper formats for humans.
+  //
+  // The cascade-mirror ignores are NOT optional here. This step MUTATES what
+  // it reports on, so it takes the same exclusion a `--fix` invocation does:
+  // a live mirror is gated at its template source, and a member repo cannot
+  // legally edit one (no-fleet-fork-guard blocks the write). Without this the
+  // pass spawns a paid agent per mirror file, in every member of the roster,
+  // to produce a diff that can never land.
   const args = [
     'exec',
     'oxlint',
     '--format=json',
     '--config=.config/fleet/oxlintrc.json',
+    ...cascadeMirrorOxlintIgnoreArgs(),
     ...passthrough.filter(a => a !== '--all'),
   ]
   if (shouldScanWholeTree(passthrough)) {

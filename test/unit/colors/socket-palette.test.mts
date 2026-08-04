@@ -60,14 +60,14 @@ describe('socket-palette', () => {
       const { socketPurple } = getPalette('dark')
       const out = socketPurple('Socket')
       // #8c50ff => 140, 80, 255
-      expect(out).toBe('[38;2;140;80;255mSocket[39m')
+      expect(out).toBe('\u001B[38;2;140;80;255mSocket\u001B[39m')
     })
 
     it('should be the same wrapper across themes for socket brand colors', () => {
       const themes: SocketPaletteTheme[] = ['dark', 'light', 'synthwave']
       const wraps = themes.map(t => getPalette(t).socketPink('x'))
       // #ff00aa is theme-stable.
-      const expected = '[38;2;255;0;170mx[39m'
+      const expected = '\u001B[38;2;255;0;170mx\u001B[39m'
       for (let i = 0, { length } = wraps; i < length; i += 1) {
         const w = wraps[i]!
         expect(w).toBe(expected)
@@ -88,8 +88,8 @@ describe('socket-palette', () => {
       const payload = 'multi\nline	content'
       const out = success(payload)
       expect(out).toContain(payload)
-      expect(out.startsWith('[38;2;')).toBe(true)
-      expect(out.endsWith('[39m')).toBe(true)
+      expect(out.startsWith('\u001B[38;2;')).toBe(true)
+      expect(out.endsWith('\u001B[39m')).toBe(true)
     })
 
     it('should emit different escapes for different themes (status colors)', () => {

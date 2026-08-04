@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "6.5.1",
+  "version": "6.5.3",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
     "Socket.dev",
@@ -3420,6 +3420,7 @@
     "weekly-update:ci": "gh workflow run weekly-update.lock.yml"
   },
   "devDependencies": {
+    "@actions/cache": "catalog:",
     "@babel/core": "7.29.7",
     "@babel/parser": "7.29.7",
     "@babel/traverse": "7.29.7",
@@ -3466,7 +3467,7 @@
     "fast-glob": "3.3.3",
     "fast-sort": "3.4.1",
     "get-east-asian-width": "1.6.0",
-    "globals": "17.7.0",
+    "globals": "17.8.0",
     "has-flag": "5.0.1",
     "html5parser": "catalog:",
     "libnpmexec": "10.3.1",
@@ -3506,12 +3507,12 @@
     "tar-fs": "catalog:",
     "tar-stream": "3.2.0",
     "taze": "catalog:",
-    "type-coverage": "2.29.7",
+    "type-coverage": "2.30.1",
     "typescript": "catalog:",
     "validate-npm-package-name": "6.0.2",
     "vitest": "catalog:",
     "vitiate": "catalog:",
-    "webpack": "5.109.0",
+    "webpack": "5.109.1",
     "which": "5.0.0",
     "yargs-parser": "22.0.0",
     "yoctocolors-cjs": "2.1.3",

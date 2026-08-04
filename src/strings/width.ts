@@ -38,23 +38,10 @@ export function getEastAsianWidth() {
   return cachedEastAsianWidth!
 }
 
-// Intl.Segmenter for proper grapheme cluster segmentation, created once and
-// reused across calls.
-//
-// A grapheme cluster is what a user perceives as a single character, but may
-// be composed of multiple Unicode code points.
-//
-// Why this matters:
-// - A thumbs up '👍' is 1 code point but appears as 1 character → 1 grapheme
-// - '👍🏽' (thumbs up + skin tone) is 2 code points but appears as 1 character → 1 grapheme
-// - '👨‍👩‍👧‍👦' (family) is 7 code points (4 people + 3 ZWJ) but appears as 1 character → 1 grapheme
-// - 'é' can be 1 code point (U+00E9) OR 2 code points (e + ́) but appears as 1 character → 1 grapheme
-//
-// Without Intl.Segmenter, simple iteration treats each code point separately,
-// leading to incorrect width calculations for complex sequences.
-//
-// Intl.Segmenter is available in Node.js 16+ (our floor is 18) and all modern
-// browsers.
+// Intl.Segmenter for grapheme cluster segmentation, created once and reused.
+// A grapheme is what a reader sees as one character even when it spans several
+// code points: a skin-toned emoji is 2, a family emoji is 7 (4 people + 3 ZWJ),
+// and 'é' may be 1 or 2. Iterating code points instead miscounts all of them.
 //
 // Construction is DEFERRED to the first stringWidth() call rather than
 // module-eval: an Intl.Segmenter holds a live ICU [Foreign] handle, and

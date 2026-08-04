@@ -43,46 +43,22 @@ export function toShimmerColor(
 }
 
 /**
- * Execute an async operation with spinner lifecycle management. Ensures
- * `spinner.stop()` is always called via try/finally, even if the operation
- * throws. Provides safe cleanup and consistent spinner behavior.
+ * Execute an async operation with spinner lifecycle management.
+ * `spinner.stop()` always runs via try/finally, even when the operation
+ * throws, and the error is re-thrown once the spinner has stopped.
  *
- * @example
- *   ;```ts
- *   import { Spinner } from '@socketsecurity/lib/spinner/spinner'
- *   import { withSpinner } from '@socketsecurity/lib/spinner/with'
- *
- *   const spinner = Spinner()
- *
- *   // With spinner instance
- *   const result = await withSpinner({
- *     message: 'Processing…',
- *     operation: async () => {
- *       return await processData()
- *     },
- *     spinner,
- *   })
- *
- *   // Without spinner instance (no-op, just runs operation)
- *   const result = await withSpinner({
- *     message: 'Processing…',
- *     operation: async () => {
- *       return await processData()
- *     },
- *   })
- *   ```
+ * Omitting `spinner` is valid rather than an error: the operation still runs,
+ * just with no spinner output.
  *
  * @template T - Return type of the operation.
  *
- * @param options - Configuration object.
- * @param options.message - Message to display while spinner is running.
+ * @param options.message - Message to display while the spinner runs.
  * @param options.operation - Async function to execute.
- * @param options.spinner - Optional spinner instance (if not provided, no
- *   spinner is used)
+ * @param options.spinner - Optional; omit it for no spinner.
  *
- * @returns Result of the operation
+ * @returns Result of the operation.
  *
- * @throws Re-throws any error from operation after stopping spinner
+ * @throws Re-throws any error from operation after stopping the spinner.
  */
 export async function withSpinner<T>(
   options: WithSpinnerOptions<T>,
@@ -129,7 +105,8 @@ export async function withSpinner<T>(
     // corresponding option; tests cover paths individually.
     /* c8 ignore start */
     if (wasSpinning) {
-      process.stderr.write('\r\x1B[2K') // socket-lint: allow process-stdio
+      // socket-lint: allow process-stdio
+      process.stderr.write('\r\x1B[2K')
     }
 
     if (savedColor !== undefined) {

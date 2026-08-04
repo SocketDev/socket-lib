@@ -48,36 +48,15 @@ export async function fetchRefSha(
     token: options.token,
   }
 
-  // ---------------------------------------------------------------
-  // Why this function has a "tier cascade" instead of a single call:
+  // `ref` may name a tag, a branch, or a raw commit SHA, and REST has a
+  // separate endpoint for each with no "resolve any ref" endpoint, so the tiers
+  // below are tried in order and the first 200 wins.
   //
-  //   The user gives us a string `ref` and we don't know whether it
-  //   names a tag (e.g. "v1.2.3"), a branch (e.g. "main"), or a raw
-  //   commit SHA (e.g. "abc1234..."). REST has three different
-  //   endpoints for these — there's no single "resolve any ref"
-  //   endpoint — so we just try each in order: tag first (most
-  //   common), then branch, then raw commit SHA. The first 200
-  //   wins, the rest are skipped.
-  //
-  // Why we track `sawEmptyBody` separately from "this tier 404'd":
-  //
-  //   A real 404 means "this tier didn't match — keep walking" (e.g.
-  //   "v1.2.3" isn't a branch, so the heads/v1.2.3 lookup 404s and
-  //   we move on). But a `GitHubEmptyBodyError` means "GitHub itself
-  //   is degraded right now and even a real match would return as
-  //   if it didn't exist." Walking the tier cascade further when
-  //   GitHub is down just multiplies the wasted calls — we'd 'fail'
-  //   all three tiers, then either give up or fall back. By noting
-  //   the empty-body signal in `sawEmptyBody`, we can fall through
-  //   to a single GraphQL call after the cascade finishes that
-  //   resolves all three forms in one shot via a different backend.
-  //
-  //   The `note404` name is a little unfortunate — it really tracks
-  //   "the kind of error we just caught". But the semantic intent
-  //   from the caller's perspective IS "this tier didn't match",
-  //   which is what 404 means in the original cascade. Renaming
-  //   would touch every catch site for limited gain.
-  // ---------------------------------------------------------------
+  // `sawEmptyBody` is tracked apart from a 404 because the two mean opposite
+  // things: a 404 is "this tier did not match, keep walking", while an empty
+  // body is "GitHub is degraded and a real match would look absent too". The
+  // flag lets the cascade finish and hand off to one GraphQL call on a
+  // different backend. Detail: docs/references/repo/github-api-degradation.md
   let sawEmptyBody = false
   const note404 = (e: unknown): unknown => {
     if (e instanceof GitHubEmptyBodyError) {

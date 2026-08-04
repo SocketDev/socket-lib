@@ -19,9 +19,36 @@
 
 import type { AstNode, RuleContext } from './rule-types.mts'
 
-// How far up a leading-comment block to look for the marker. A leading marker
-// comment may wrap onto a couple of continuation lines, so allow a few.
-const MAX_LEADING_COMMENT_LINES = 3
+// How far up a contiguous leading-comment block to look for a bypass marker,
+// counted from the line the flagged node starts on.
+//
+// This is the ONE place either window is defined, so a rule can never drift
+// its own lookback out of step with the rest (`max-file-lines` used to
+// hard-code its own `<= 5`).
+//
+// Sized against `max-file-lines`, which counts EVERY line — comments
+// included — toward its 500-line soft cap. So a lookback window is not free:
+// it is budgeted out of the same line count that cap measures. Twelve lines
+// fits a real justification (what the marker exempts, and why the rule is
+// wrong here) at ~2% of the soft cap, while still keeping the marker close
+// enough to what it exempts to mean something. Three was too tight to explain
+// anything — a normal-length reason silently pushed the marker out of reach
+// and the bypass just did not apply, with no warning.
+export const MAX_LEADING_COMMENT_LINES = 12
+
+// The same idea at FILE scope: how far into a file to accept a header-level
+// bypass marker. Larger than the node window because an `@file` docblock runs
+// longer than a function's leading comment, and the marker belongs inside that
+// block rather than jammed above it. A marker buried past the header is not a
+// file-level statement of intent, which is the point of bounding it at all.
+export const MAX_FILE_HEADER_COMMENT_LINES = 20
+
+// The DOCUMENTATION budget: a JSDoc `/** */` block documenting the symbol
+// beneath it gets twice the header budget. Docs are the sanctioned home for
+// parser lock-step notes and API contracts, so they never need an allow
+// marker — but they stay bounded; discussion past this belongs in
+// docs/agents.md/** behind a link.
+export const MAX_DOC_COMMENT_LINES = 40
 
 // A line that is entirely a comment (`//`, `/*`, or a `*` block continuation).
 // Used to keep walking upward through a contiguous comment block.
@@ -37,6 +64,30 @@ const COMMENT_LINE_RE = /^\s*(?:\*|\/\*|\/\/)/
 export const SOCKET_LINT_ALLOW_PREFIX_RE = /socket-lint\s*:\s*allow\b/
 export const SOCKET_LINT_ALLOW_WELL_FORMED_RE =
   /socket-lint\s*:\s*allow\s+[a-z0-9][a-z0-9-]*/
+
+// A line that is ONLY an opt-out marker comment — the marker right after the
+// comment opener, optionally a `-- reason` tail, optionally a block-comment
+// close. The PREFERRED placement: such a line covers the line below it on
+// every enforcement surface (this plugin's leading-comment walk, the Claude
+// guards, the git-hook scanners), so a long pragma reads as a heading instead
+// of trailing off the right edge. Mirrors the same regex in
+// .claude/hooks/fleet/_shared/markers.mts and .git-hooks/_shared/scan-core.mts.
+export const SOCKET_LINT_MARKER_ONLY_LINE_RE: RegExp =
+  /^\s*(?:#|\/\*|\/\/)\s*socket-lint:\s*allow(?:\s+([\w-]+))?(?:\s*\*\/|\s+--.*)?\s*$/
+
+/**
+ * True when `line` is a marker-only comment line whose opt-out covers `id`
+ * (bare `allow` covers every rule). Line-scanning rules pair this with their
+ * own same-line check so BOTH marker placements work:
+ * `isLineMarkered(ownLine) || markerOnlyLineAllows(lineAbove, '<id>')`.
+ */
+export function markerOnlyLineAllows(line: string, id: string): boolean {
+  const m = line.match(SOCKET_LINT_MARKER_ONLY_LINE_RE)
+  if (!m) {
+    return false
+  }
+  return !m[1] || m[1] === id
+}
 
 /**
  * Build a rule's `socket-lint: allow <id>` bypass regex from the canonical
@@ -138,7 +189,10 @@ export function makeBypassChecker(
       idx >= 0 && idx >= ownIdx - MAX_LEADING_COMMENT_LINES;
       idx -= 1
     ) {
-      const text = sourceLines[idx]!
+      // A node can report a line past the end of the text this context hands
+      // back, so treat a missing line as blank rather than throwing — a guard
+      // that crashes takes the whole lint run down with it.
+      const text = sourceLines[idx] ?? ''
       if (bypassRe.test(text)) {
         return true
       }
