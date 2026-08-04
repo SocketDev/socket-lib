@@ -300,6 +300,8 @@
     "**/test/fleet/scripts/**",
     "**/wasm_exec.js",
     "**/.mcp.json",
+    "**/.config/repo/vitest.config.mts",
+    "**/.config/repo/vitest.settings.mts",
     "**/test/fleet/nock-loopback-passthrough.test.mts",
     "**/test/fleet/publish-infra-placeholder.test.mts",
     "</fleet>",
