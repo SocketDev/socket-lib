@@ -159,6 +159,7 @@ docs/design/fleet/README.md linguist-generated=true
 docs/design/fleet/components.css linguist-generated=true
 docs/design/fleet/tokens.css linguist-generated=true
 docs/references/fleet/sfw-local-install.md linguist-generated=true
+patches/brace-expansion@5.0.8.patch linguist-generated=true
 patches/taze@19.16.0.patch linguist-generated=true
 scripts/fleet linguist-generated=true
 scripts/repo/bootstrap linguist-generated=true

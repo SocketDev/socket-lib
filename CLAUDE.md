@@ -80,6 +80,7 @@
 - An exported name carries a domain word — a bare single generic token (`create`/`parse`/`get`) is a grep-noise magnet. [`code-style`](docs/agents.md/fleet/code-style.md)
 - 🚨 Soft cap 500 lines, hard cap 1000 — soft band (501–1000) MUST split; the hard-cap-only `max-file-lines` marker names a real `<category>: <reason>`. [`file-size`](docs/agents.md/fleet/file-size.md) [`max-file-lines-hard-cap-only`](docs/agents.md/fleet/max-file-lines-hard-cap-only.md)
 - 🚨 New lint rules default `"error"` with `fixable: 'code'`; oxlint + oxfmt only — no ESLint/Prettier/Biome. [`lint-rules`](docs/agents.md/fleet/lint-rules.md)
+- 🚨 The formatter runs BEFORE the linter — oxfmt owns final wrapping, so a line-counting rule measured on unformatted text never converges; leave headroom under a cap. [`format-before-lint`](docs/agents.md/fleet/format-before-lint.md)
 - 🚨 `lint`/`fix` default to the MODIFIED scope, so a clean tree checks NOTHING — a zero-file scope warns "0 files checked, NOT a pass" and withholds "Lint passed"; only `--all` is a whole-tree verdict. [`lint-rules`](docs/agents.md/fleet/lint-rules.md)
 - 🚨 Generated/vendored/dep-0 artifacts are never lint- or format-gated in ANY scope — `isNeverGated()` pre-filters them. [`generated-files-are-never-gated`](docs/agents.md/fleet/generated-files-are-never-gated.md)
 - 🚨 Fleet `socket/*` doctrine (no-status-emoji, personal-path-placeholders, max-file-lines) is enforced across Rust/Go/C++ source by one scanner. [`lint-parity-across-languages`](docs/agents.md/fleet/lint-parity-across-languages.md)

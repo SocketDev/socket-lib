@@ -60,6 +60,7 @@ catalog:
   'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
   'micromark': 4.0.2
+  'minimatch': 10.2.6
   'neosanitize': 0.3.0
   'nock': 14.0.16
   'npm-high-impact': 1.13.0
@@ -189,6 +190,7 @@ overrides:
   'magic-string': '1.1.0'
   'mime-db': '1.54.0'
   'mime-types@>=3': '3.0.2'
+  'minimatch@>=3': '10.2.5'
   'minipass@>=4': '7.1.3'
   'safe-buffer': 'npm:@socketregistry/safe-buffer@1.0.9'
   'safer-buffer': 'npm:@socketregistry/safer-buffer@1.0.10'
@@ -364,13 +366,6 @@ patchedDependencies:
   # condition (for @babel/code-frame) while keeping js-tokens@10's generator on
   # `import`, after the js-tokens 4/10 collapse.
   js-tokens@10.0.0: patches/js-tokens@10.0.0.patch
-  # Interop: neither build ships a default export, so `import mm from
-  # 'minimatch'` — the shape the fleet CI cache action resolves through —
-  # throws "does not provide an export named 'default'" and kills the job in
-  # setup-and-install before a single check runs. Lifting 9 → 10 does not fix
-  # it on its own; 10 dropped the default too. The patch restores it on BOTH
-  # builds, since patching one leaves the other broken.
-  minimatch@10.2.5: patches/minimatch@10.2.5.patch
   # minipass 7 ships a named export ({ Minipass }) where 3.x was a default;
   # these three re-pin the import shape + peer range so the deduped minipass 7
   # tree works; consumer: cacache/make-fetch-happen in src/external.
@@ -391,6 +386,17 @@ patchedDependencies:
   # Single-registry: drops taze's default-registry fast path in
   # getVersionsForContext so version lookups stay on the configured registry.
   taze@19.16.0: patches/taze@19.16.0.patch
+  # default-export interop (managed by socket-wheelhouse sync; do not edit):
+  # v10's ESM build ships named exports only, so `import minimatch from
+  # 'minimatch'` throws "does not provide an export named default". That is
+  # the shape `@actions/cache` resolves through, so an unpatched member dies
+  # in the CI cache step at setup, before a single check runs. The patch adds
+  # the default to BOTH builds; patching one leaves the other broken.
+  # It also makes the `minimatch@>=3` hoist safe: a v3 consumer
+  # (`@actions/glob@0.6.1` pulls 3.1.5) default-imports a callable, and the
+  # patched v10 answers that same shape.
+  # On a bump, regenerate via `pnpm patch minimatch` + `pnpm patch-commit`.
+  minimatch@10.2.6: patches/minimatch@10.2.6.patch
 
 # Opt out of pnpm's packageManager-version self-check. CI installs pnpm from
 # its native bin via the shared setup workflow, not corepack, so the runner's
