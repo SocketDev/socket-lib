@@ -237,8 +237,11 @@ const laneFilterActive =
   (activeLane === 'fast' || activeLane === 'mid' || activeLane === 'slow')
 // A lane's dir globs → test-file include patterns (`--lane mid|slow` runs ONLY
 // that lane; a trailing `/**` becomes `/**/*.test.{…}`).
-const laneToTestGlobs = (globs: string[]): string[] =>
-  globs.map(g => `${g.replace(/\/\*+$/, '')}/**/*.test.{js,ts,mjs,mts,cjs}`)
+function laneToTestGlobs(globs: string[]): string[] {
+  return globs.map(
+    g => `${g.replace(/\/\*+$/, '')}/**/*.test.{js,ts,mjs,mts,cjs}`,
+  )
+}
 // The conformance tier's dir globs, and whether THIS run is the explicit
 // conformance run. Set by scripts/repo/test-conformance.mts, never by hand.
 const conformanceGlobs = readConformanceExcludeGlobs()
