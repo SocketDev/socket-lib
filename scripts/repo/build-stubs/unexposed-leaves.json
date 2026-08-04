@@ -206,6 +206,7 @@
   ],
   "scannedRoster": [
     "abitious",
+    "action",
     "bun-security-scanner",
     "code-sign",
     "decmpfs",
@@ -218,7 +219,6 @@
     "sauce",
     "scan-patterns",
     "sdxgen",
-    "socket-btm",
     "socket-cli",
     "socket-lib",
     "socket-mcp",
