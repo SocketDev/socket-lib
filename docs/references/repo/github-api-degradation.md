@@ -28,11 +28,11 @@ produced the list.
 
 The fallback has three outcomes, and they are deliberately different:
 
-| GraphQL result | What it means | What the code does |
-| --- | --- | --- |
-| Assets returned | REST was degraded, GraphQL is healthy | Continue matching as normal |
-| `undefined` | No release with that tag exists | Throw a clear error, so a genuinely missing tag is not masked as a transient |
-| GraphQL throws | Both transports are unhappy | Let `pRetry` retry the whole call, REST included, so we get backoff rather than a blind error |
+| GraphQL result  | What it means                         | What the code does                                                                            |
+| --------------- | ------------------------------------- | --------------------------------------------------------------------------------------------- |
+| Assets returned | REST was degraded, GraphQL is healthy | Continue matching as normal                                                                   |
+| `undefined`     | No release with that tag exists       | Throw a clear error, so a genuinely missing tag is not masked as a transient                  |
+| GraphQL throws  | Both transports are unhappy           | Let `pRetry` retry the whole call, REST included, so we get backoff rather than a blind error |
 
 ## `resolveRef`: the tier cascade
 
