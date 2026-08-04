@@ -44,7 +44,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { isMainModule } from '../../_shared/is-main-module.mts'
 import { REPO_ROOT } from '../../paths.mts'
-import { runCapture, runInheritTty } from '../shared.mts'
+import { buildPtyInvocation, runCapture } from '../shared.mts'
 import { resolvePinnedNpm } from './pinned-npm.mts'
 import { desiredTrustedPublisher } from './trusted-publisher-plan.mts'
 import type { TrustedPublisherDesired } from './trusted-publisher-plan.mts'
@@ -262,6 +262,29 @@ export function formatVerifyFailure(
 }
 
 /**
+ * The report for a package whose verify read was REFUSED rather than answered.
+ * `writeExitCode` is the only evidence about the write itself, and it is stated
+ * as evidence rather than a verdict: the row may be set, and the next run's
+ * read — once a session can read — settles it either way.
+ */
+export function formatUnverifiable(
+  pkg: string,
+  desired: TrustedPublisherDesired,
+  writeExitCode: number,
+): string {
+  return [
+    `${pkg}: the write ${writeExitCode === 0 ? 'reported success' : `exited ${writeExitCode}`}, ` +
+      'but the verify read was refused for a one-time password, so this run ' +
+      'cannot say whether the row is set.',
+    `  Wanted: repo ${desired.repositoryOwner}/${desired.repositoryName}, ` +
+      `workflow ${desired.workflowFilename}, environment ${desired.environmentName}.`,
+    `  Check:  https://www.npmjs.com/package/${pkg}/access`,
+    '  Next:   re-run once a session can read; an already-correct row reports ' +
+      'as conforming and is never rewritten.',
+  ].join('\n')
+}
+
+/**
  * The human gate for the first write. npm challenges the first
  * account-changing call with 2FA web-auth and then grants a short window, so
  * one approval covers the batch.
@@ -331,6 +354,58 @@ export async function runCaptureBoth(
  * way `npm login` does — it refuses, names both URLs, and expects the next
  * call to find an elevated session. This flow closes that loop itself.
  */
+/**
+ * Run a `npm trust` write through a PTY and answer its prompts.
+ *
+ * With a TTY npm takes its INTERACTIVE OTP path instead of refusing: it prints
+ * an approval URL, waits at `Press ENTER to open in the browser...`, then polls
+ * for the approval itself. The fleet's PTY helper inherits stdin, which is
+ * empty in a non-interactive session, so that wait never ends. This answers the
+ * prompt and opens the URL directly — the difference between a hang and a
+ * completed write.
+ */
+export async function runTrustWriteInteractive(
+  npmPath: string,
+  args: readonly string[],
+  neutralCwd: string,
+): Promise<number> {
+  const pty = buildPtyInvocation(process.platform, npmPath, [...args])
+  const command = pty?.command ?? npmPath
+  const commandArgs = pty ? [...pty.args] : [...args]
+  const child = spawn(command, commandArgs, {
+    cwd: neutralCwd,
+    shell: WIN32,
+    stdio: ['pipe', 'pipe', 'pipe'],
+  })
+  let seen = ''
+  let answered = false
+  let opened = false
+  const onChunk = (chunk: Buffer): void => {
+    seen += chunk.toString('utf8')
+    process.stdout.write(chunk)
+    if (!answered && /press enter/i.test(seen)) {
+      answered = true
+      child.process.stdin?.write('\n')
+    }
+    if (!opened) {
+      const url = urlAfterMarker(seen, 'auth/cli/')
+      if (url) {
+        opened = true
+        void runCaptureBoth('open', [url], neutralCwd).catch(() => undefined)
+      }
+    }
+  }
+  child.process.stdout?.on('data', onChunk)
+  child.process.stderr?.on('data', onChunk)
+  const code = await new Promise<number>(resolve => {
+    child.process.on('close', (exitCode: number | null) => {
+      resolve(exitCode ?? 1)
+    })
+  })
+  void child.catch(() => undefined)
+  return code
+}
+
 export interface OtpChallenge {
   readonly authUrl: string
   readonly doneUrl: string
@@ -668,15 +743,20 @@ async function main(): Promise<void> {
   logger.log(formatAuthGate(pending.length))
   let configured = 0
   const failures: string[] = []
+  // Packages whose write ran but whose result could not be read back. Held
+  // apart from failures so the summary never claims a write failed when the
+  // only thing that failed was reading it.
+  const unverified: string[] = []
   for (let i = 0, { length } = pending; i < length; i += 1) {
     const plan = pending[i]!
     if (i > 0) {
       // eslint-disable-next-line no-await-in-loop -- sequential: one 2FA window, npm's own rate-limit guidance.
       await sleep(WRITE_SPACING_MS)
     }
-    // The PTY seam carries npm's 2FA prompt through a non-TTY session.
+    // A PTY makes npm take its interactive OTP path, which waits rather than
+    // refusing; this answers that wait and opens the approval page.
     // eslint-disable-next-line no-await-in-loop -- sequential writes share one 2FA window.
-    const code = await runInheritTty(
+    const code = await runTrustWriteInteractive(
       npmPath,
       buildTrustWriteArgs(plan.pkg, plan.desired),
       neutralCwd,
@@ -692,15 +772,26 @@ async function main(): Promise<void> {
       logger.success(`${plan.pkg}: configured and verified.`)
       continue
     }
+    // A REFUSED verify read is not a failed write. `npm trust list` needs the
+    // same 2FA the write does, so a refusal says the row could not be READ —
+    // reporting that as "did not verify" would claim knowledge this run does
+    // not have, in the direction that hides a write that actually landed.
+    if (isOtpRequired(verify.output)) {
+      unverified.push(plan.pkg)
+      logger.warn(formatUnverifiable(plan.pkg, plan.desired, code))
+      continue
+    }
     failures.push(plan.pkg)
     logger.fail(formatVerifyFailure(plan.pkg, plan.desired, verify.output))
   }
   const skipped = plans.length - pending.length
   logger.log(
     `Trusted-publisher summary: ${configured} configured, ${skipped} already ` +
-      `conforming, ${failures.length} failed.`,
+      `conforming, ${unverified.length} unverifiable, ${failures.length} failed.`,
   )
-  if (failures.length) {
+  // An unverifiable package is an unfinished job, not a green one: the exit is
+  // non-zero so a pipeline never treats "could not read" as "configured".
+  if (failures.length || unverified.length) {
     process.exitCode = 1
   }
 }

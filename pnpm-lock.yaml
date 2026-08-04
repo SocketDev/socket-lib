@@ -334,7 +334,7 @@ catalogs:
 
 overrides:
   '@socketregistry/packageurl-js': 1.5.0
-  '@socketsecurity/lib': 6.5.2
+  '@socketsecurity/lib': 6.5.3
   '@socketsecurity/registry': npm:@socketsecurity/registry@2.0.5
   '@socketsecurity/sdk': 4.1.3
   chalk@>=5: 5.6.2
@@ -531,8 +531,8 @@ importers:
         specifier: 1.0.25
         version: 1.0.25
       '@socketsecurity/lib':
-        specifier: 6.5.2
-        version: 6.5.2(typescript@7.0.2)
+        specifier: 6.5.3
+        version: 6.5.3(typescript@7.0.2)
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.5.2(typescript@7.0.2)'
@@ -4251,6 +4251,16 @@ packages:
 
   '@socketsecurity/lib@6.5.2':
     resolution: {integrity: sha512-RVoWyP9zVoc5160zGRkM76Zc5LOEmeX9HZzjLeu+bgacCyJ+nDIFU7viNqYzDNQGY0Ij7OEHPlAgmM4z8Dnxog==}
+    engines: {node: '>=22', npm: '>=12.0.1', pnpm: '>=11.0.5'}
+    hasBin: true
+    peerDependencies:
+      typescript: '>=5.0.0'
+    peerDependenciesMeta:
+      typescript:
+        optional: true
+
+  '@socketsecurity/lib@6.5.3':
+    resolution: {integrity: sha512-LS0SGTg1DXnlaqvqm4XDkdD7vCl5Q3E1FyHbbIgdk8tgVhiWLDGyxuJfdlzagggoQ51UjvkcPjq1GXfERxjrVw==}
     engines: {node: '>=22', npm: '>=12.0.1', pnpm: '>=11.0.5'}
     hasBin: true
     peerDependencies:
@@ -8016,6 +8026,10 @@ snapshots:
       yoctocolors-cjs: 2.1.3
 
   '@socketsecurity/lib@6.5.2(typescript@7.0.2)':
+    optionalDependencies:
+      typescript: 7.0.2
+
+  '@socketsecurity/lib@6.5.3(typescript@7.0.2)':
     optionalDependencies:
       typescript: 7.0.2
 
