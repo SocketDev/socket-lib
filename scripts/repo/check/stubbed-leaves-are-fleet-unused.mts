@@ -171,7 +171,9 @@ export function main(): void {
       `${CHECK} the stub list was judged against a different fleet.\n` +
         '  Where: scripts/repo/build-stubs/unexposed-leaves.json\n' +
         `  Saw: ${scanned.length ? `recorded roster of ${scanned.length}` : 'NO recorded roster (list predates the record)'}` +
-        `${coverage.missing.length ? `, never judged against ${coverage.missing.join(', ')}` : ''}` +
+        (coverage.missing.length
+          ? `, never judged against ${coverage.missing.join(', ')}`
+          : '') +
         `${coverage.stale.length ? `, records departed member(s) ${coverage.stale.join(', ')}` : ''};` +
         ' wanted the recorded roster to match the current one.\n' +
         '  Why: a leaf only an unjudged member imports reads as fleet-unused, gets compiled out, and throws for that member at runtime.\n' +
