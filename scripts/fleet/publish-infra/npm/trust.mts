@@ -36,8 +36,10 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { httpRequest } from '@socketsecurity/lib-stable/http-request'
+import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
@@ -294,6 +296,37 @@ export function isOtpRequired(output: string): boolean {
 }
 
 /**
+ * Run npm and collect BOTH streams. npm reports an EOTP refusal — and the
+ * approval URLs with it — on stderr, so a stdout-only capture reads as silence
+ * and the caller concludes the session is authenticated when it is not.
+ */
+export async function runCaptureBoth(
+  cmd: string,
+  args: readonly string[],
+  cwd: string,
+): Promise<{ code: number; output: string }> {
+  const child = spawn(cmd, [...args], {
+    cwd,
+    shell: WIN32,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  })
+  let output = ''
+  child.process.stdout?.on('data', (chunk: Buffer) => {
+    output += chunk.toString('utf8')
+  })
+  child.process.stderr?.on('data', (chunk: Buffer) => {
+    output += chunk.toString('utf8')
+  })
+  const code = await new Promise<number>(resolve => {
+    child.process.on('close', (exitCode: number | null) => {
+      resolve(exitCode ?? 1)
+    })
+  })
+  void child.catch(() => undefined)
+  return { code, output }
+}
+
+/**
  * Npm's browser-approval URL and the endpoint that reports the approval, as
  * printed in an EOTP refusal. `npm trust` does NOT poll for the approval the
  * way `npm login` does — it refuses, names both URLs, and expects the next
@@ -351,25 +384,24 @@ export async function primeOtpSession(
   probePkg: string,
   neutralCwd: string,
 ): Promise<boolean> {
-  const probe = await runCapture(
+  // Both streams: npm puts the refusal AND the approval URLs on stderr.
+  const probe = await runCaptureBoth(
     npmPath,
     ['trust', 'list', probePkg],
     neutralCwd,
   )
-  const combined = probe.stdout
-  if (!isOtpRequired(combined)) {
+  if (!isOtpRequired(probe.output)) {
     return true
   }
-  // The refusal names the URLs on stderr, which runCapture leaves on the
-  // parent's stderr — re-run captured so this flow can read them.
-  const refusal = await runCapture(
-    npmPath,
-    ['trust', 'list', probePkg, '--json'],
-    neutralCwd,
-  )
-  const challenge =
-    parseOtpChallenge(combined) ?? parseOtpChallenge(refusal.stdout)
+  const challenge = parseOtpChallenge(probe.output)
   if (!challenge) {
+    logger.fail(
+      'npm asked for a one-time password without naming an approval URL.\n' +
+        `  Where: ${npmPath} trust list ${probePkg}\n` +
+        `  Saw:   ${probe.output.trim().slice(0, 300) || '(no output)'}\n` +
+        '  Wanted: the auth/cli and /-/v1/done URLs npm prints with EOTP.\n' +
+        '  Fix:   run `npm login --auth-type=web` from a neutral directory, then re-run.',
+    )
     return false
   }
   logger.log(
@@ -485,14 +517,14 @@ async function main(): Promise<void> {
       continue
     }
     // eslint-disable-next-line no-await-in-loop -- sequential by design: npm rate-limits account reads.
-    const listRun = await runCapture(
+    const listRun = await runCaptureBoth(
       npmPath,
       ['trust', 'list', pkg],
       neutralCwd,
     )
     plans.push({
       desired,
-      matches: listOutputMatches(listRun.stdout, desired),
+      matches: listOutputMatches(listRun.output, desired),
       pkg,
     })
   }
@@ -535,18 +567,18 @@ async function main(): Promise<void> {
       neutralCwd,
     )
     // eslint-disable-next-line no-await-in-loop -- the verify belongs to this package's turn.
-    const verify = await runCapture(
+    const verify = await runCaptureBoth(
       npmPath,
       ['trust', 'list', plan.pkg],
       neutralCwd,
     )
-    if (code === 0 && listOutputMatches(verify.stdout, plan.desired)) {
+    if (code === 0 && listOutputMatches(verify.output, plan.desired)) {
       configured += 1
       logger.success(`${plan.pkg}: configured and verified.`)
       continue
     }
     failures.push(plan.pkg)
-    logger.fail(formatVerifyFailure(plan.pkg, plan.desired, verify.stdout))
+    logger.fail(formatVerifyFailure(plan.pkg, plan.desired, verify.output))
   }
   const skipped = plans.length - pending.length
   logger.log(

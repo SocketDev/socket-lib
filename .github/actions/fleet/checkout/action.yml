@@ -146,6 +146,7 @@ runs:
         if [ ! -f "$TOOLS_FILE" ] \
           && [ -f "${GITHUB_WORKSPACE}/scripts/repo/bootstrap/fleet.mjs" ]; then
           echo "::warning::zizmor skipped — thin fleet payload not yet materialized"
+          echo "SOCKET_TOOL_ZIZMOR_AVAILABLE=false" >> "${GITHUB_ENV:-/dev/null}"
           exit 0
         fi
         if [ ! -f "$TOOLS_FILE" ]; then
