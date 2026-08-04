@@ -21,6 +21,8 @@ import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
+import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+
 const logger = getDefaultLogger()
 
 // Consumer repos live as siblings of socket-lib — every fleet repo that
@@ -347,4 +349,6 @@ function main(): number {
   return 0
 }
 
-process.exitCode = main()
+if (isMainModule(import.meta.url)) {
+  process.exitCode = main()
+}

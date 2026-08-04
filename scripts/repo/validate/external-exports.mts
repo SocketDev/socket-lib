@@ -12,6 +12,8 @@ import process from 'node:process'
 
 import { REPO_ROOT } from '../../fleet/paths.mts'
 
+import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+
 const externalDir = path.join(REPO_ROOT, 'dist', 'external')
 const require = createRequire(import.meta.url)
 
@@ -198,7 +200,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(error => {
-  logger.fail(`Validation failed: ${error.message}`)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch(error => {
+    logger.fail(`Validation failed: ${error.message}`)
+    process.exitCode = 1
+  })
+}

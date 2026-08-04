@@ -16,6 +16,8 @@ import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { parseArgs } from '../../fleet/util/parse-args.mts'
 
+import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+
 const logger = getDefaultLogger()
 
 const rootPath = path.resolve(
@@ -224,7 +226,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(error => {
-  logger.error(error.message || error)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch(error => {
+    logger.error(error.message || error)
+    process.exitCode = 1
+  })
+}

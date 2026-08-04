@@ -366,6 +366,16 @@ patchedDependencies:
   # condition (for @babel/code-frame) while keeping js-tokens@10's generator on
   # `import`, after the js-tokens 4/10 collapse.
   js-tokens@10.0.0: patches/js-tokens@10.0.0.patch
+  # default-export interop (managed by socket-wheelhouse sync; do not edit):
+  # v10's ESM build ships named exports only, so `import minimatch from
+  # 'minimatch'` throws "does not provide an export named default". That is
+  # the shape `@actions/cache` resolves through, so an unpatched member dies
+  # in the CI cache step at setup, before a single check runs. The patch adds
+  # the default to BOTH builds; patching one leaves the other broken.
+  # It also makes the `minimatch@>=3` hoist safe: a v3 consumer
+  # (`@actions/glob@0.6.1` pulls 3.1.5) default-imports a callable, and the
+  # patched v10 answers that same shape.
+  # On a bump, regenerate via `pnpm patch minimatch` + `pnpm patch-commit`.
   minimatch@10.2.6: patches/minimatch@10.2.6.patch
   # minipass 7 ships a named export ({ Minipass }) where 3.x was a default;
   # these three re-pin the import shape + peer range so the deduped minipass 7

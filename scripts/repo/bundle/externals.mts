@@ -12,6 +12,8 @@ import { pluralize } from '@socketsecurity/lib-stable/words/pluralize'
 
 import { buildExternals } from '../build-externals/orchestrator.mts'
 
+import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+
 const logger = getDefaultLogger()
 
 async function main(): Promise<void> {
@@ -35,7 +37,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(error => {
-  logger.error(`Build failed: ${error.message || error}`)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch(error => {
+    logger.error(`Build failed: ${error.message || error}`)
+    process.exitCode = 1
+  })
+}

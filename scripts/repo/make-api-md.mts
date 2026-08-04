@@ -18,6 +18,8 @@ import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 // hand-walked `__dirname/../..`, which silently breaks when the file moves.
 import { REPO_ROOT as rootPath } from '../fleet/paths.mts'
 
+import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+
 const logger = getDefaultLogger()
 const WIN32 = process.platform === 'win32'
 
@@ -268,7 +270,9 @@ async function main(): Promise<void> {
   logger.log(`Wrote ${rows.length} exports to docs/api.md and llms.txt`)
 }
 
-main().catch(err => {
-  logger.fail(err)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch(err => {
+    logger.fail(err)
+    process.exitCode = 1
+  })
+}

@@ -174,6 +174,8 @@ function main(): void {
   const output = `${banner}
 import { ObjectFreeze } from '../primordials/object'
 
+import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+
 /**
  * Fleet-canonical alias map: socket-lib mirrors standard JS + Node
  * globals with a \`Ctor\` suffix. Downstream repos that destructure
@@ -203,4 +205,6 @@ ${internalArrLines.join('\n')}
   )
 }
 
-main()
+if (isMainModule(import.meta.url)) {
+  main()
+}

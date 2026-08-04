@@ -38,6 +38,8 @@ import type { AcornNode } from '../../.claude/hooks/fleet/_shared/acorn/index.mt
 
 import { renderReport } from './audit-api-usage/render.mts'
 
+import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+
 const logger = getDefaultLogger()
 
 // The package whose exports we audit, and the bare specifiers consumers use to
@@ -422,4 +424,6 @@ function main(): number {
   return 0
 }
 
-process.exitCode = main()
+if (isMainModule(import.meta.url)) {
+  process.exitCode = main()
+}
