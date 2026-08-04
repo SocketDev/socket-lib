@@ -49,6 +49,11 @@ export interface CommentBlock {
   readonly lines: number
   readonly first: AstNode
   readonly isDoc: boolean
+  // Lines the group's `@example` sections occupy, summed over every block
+  // comment in it. Tracked during grouping because a directive line such as
+  // `oxlint-disable-next-line` merges into the group ahead of the docblock,
+  // which would otherwise hide the examples behind a non-doc `first`.
+  readonly exampleLines: number
 }
 
 /**
@@ -96,14 +101,11 @@ export function exampleLineCount(commentValue: string): number {
 
 /**
  * The block's length as the budget sees it: total lines, less whatever its
- * `@example` sections take up. Only a doc block gets the discount, since an
- * inline `//` run has no tags to exempt.
+ * `@example` sections take up. An inline `//` run has no tags, so it simply
+ * has nothing to discount.
  */
 export function budgetedLines(block: CommentBlock): number {
-  if (!block.isDoc || typeof block.first.value !== 'string') {
-    return block.lines
-  }
-  return block.lines - exampleLineCount(block.first.value)
+  return block.lines - block.exampleLines
 }
 
 /**
@@ -121,12 +123,18 @@ export function groupCommentBlocks(
   const blocks: CommentBlock[] = []
   let first: AstNode | undefined
   let endLine = 0
+  let exampleLines = 0
   for (let i = 0, { length } = sorted; i < length; i += 1) {
     const c = sorted[i]!
     const start = c.loc.start.line
     const end = c.loc.end?.line ?? start
+    const examples =
+      c.type === 'Block' && typeof c.value === 'string'
+        ? exampleLineCount(c.value)
+        : 0
     if (first && start === endLine + 1) {
       endLine = end
+      exampleLines += examples
       continue
     }
     if (first) {
@@ -136,10 +144,12 @@ export function groupCommentBlocks(
         lines: endLine - first.loc.start.line + 1,
         first,
         isDoc: isDocBlock(first) && first.loc.end?.line === endLine,
+        exampleLines,
       })
     }
     first = c
     endLine = end
+    exampleLines = examples
   }
   if (first) {
     blocks.push({
@@ -148,6 +158,7 @@ export function groupCommentBlocks(
       lines: endLine - first.loc.start.line + 1,
       first,
       isDoc: isDocBlock(first) && first.loc.end?.line === endLine,
+      exampleLines,
     })
   }
   return blocks
