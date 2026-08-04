@@ -351,9 +351,20 @@ function main(): void {
       'build-stubs',
       'unexposed-leaves.json',
     )
+    // Record the roster this verdict was judged against, not just the verdict.
+    // "Unused" is a claim about the whole fleet, so the list is only as good
+    // as the consumer set behind it — and with no record, one computed against
+    // a smaller fleet reads exactly like a correct one.
     writeFileSync(
       listPath,
-      `${JSON.stringify({ leaves: candidates }, null, 2)}\n`,
+      `${JSON.stringify(
+        {
+          leaves: candidates,
+          scannedRoster: rosterRepoNames(REPO_ROOT).toSorted(),
+        },
+        null,
+        2,
+      )}\n`,
     )
     logger.success(
       `audit-fleet-lib-usage: ${candidates.length} graph-safe stub leaf(s) → ${listPath}`,

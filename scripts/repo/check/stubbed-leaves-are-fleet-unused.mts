@@ -33,8 +33,14 @@ import {
   exportLeaves,
   graphSafeStubCandidates,
   missingRosterRepos,
+  rosterRepoNames,
 } from '../audit-fleet-lib-usage.mts'
-import { readUnexposedLeaves, STUB_BANNER } from '../build-stubs/unexposed.mts'
+import {
+  readScannedRoster,
+  readUnexposedLeaves,
+  rosterCoverageGap,
+  STUB_BANNER,
+} from '../build-stubs/unexposed.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
 
@@ -148,6 +154,30 @@ export function main(): void {
     logger.warn(
       `${CHECK} dist/ absent — stub-banner leg skipped (build first for full coverage).`,
     )
+  }
+
+  // Coverage leg. Runs even when a checkout is missing, because it compares
+  // the roster the list RECORDS against the roster that exists — a question
+  // answered from committed data, needing no checkout at all. It is the only
+  // leg that can catch a list written before a member joined, which is a state
+  // the usage leg below reads as clean.
+  const coverage = rosterCoverageGap(
+    rosterRepoNames(REPO_ROOT),
+    readScannedRoster(REPO_ROOT),
+  )
+  if (coverage.missing.length > 0 || coverage.stale.length > 0) {
+    const scanned = readScannedRoster(REPO_ROOT)
+    logger.error(
+      `${CHECK} the stub list was judged against a different fleet.\n` +
+        '  Where: scripts/repo/build-stubs/unexposed-leaves.json\n' +
+        `  Saw: ${scanned.length ? `recorded roster of ${scanned.length}` : 'NO recorded roster (list predates the record)'}` +
+        `${coverage.missing.length ? `, never judged against ${coverage.missing.join(', ')}` : ''}` +
+        `${coverage.stale.length ? `, records departed member(s) ${coverage.stale.join(', ')}` : ''};` +
+        ' wanted the recorded roster to match the current one.\n' +
+        '  Why: a leaf only an unjudged member imports reads as fleet-unused, gets compiled out, and throws for that member at runtime.\n' +
+        '  Fix: run `node scripts/repo/audit-fleet-lib-usage.mts --write-stub-list`, commit the regenerated list, and rebuild.',
+    )
+    failed = true
   }
 
   const missing = missingRosterRepos(REPO_ROOT)

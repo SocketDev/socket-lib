@@ -75,16 +75,23 @@ ${assignments}
 }
 
 /**
- * The committed stub-leaf list.
+ * The path of the committed stub-leaf list.
  */
-export function readUnexposedLeaves(repoRoot: string): string[] {
-  const listPath = path.join(
+export function unexposedLeavesPath(repoRoot: string): string {
+  return path.join(
     repoRoot,
     'scripts',
     'repo',
     'build-stubs',
     'unexposed-leaves.json',
   )
+}
+
+/**
+ * The committed stub-leaf list.
+ */
+export function readUnexposedLeaves(repoRoot: string): string[] {
+  const listPath = unexposedLeavesPath(repoRoot)
   if (!existsSync(listPath)) {
     return []
   }
@@ -92,6 +99,53 @@ export function readUnexposedLeaves(repoRoot: string): string[] {
     leaves?: string[] | undefined
   }
   return Array.isArray(parsed.leaves) ? parsed.leaves : []
+}
+
+/**
+ * The roster the committed list was judged against, as recorded when it was
+ * written. Empty when the list predates the record.
+ *
+ * "Unused" is a claim about the whole fleet, so the list is only as good as
+ * the set of consumers actually scanned. Storing the conclusion without the
+ * evidence makes a list computed against a smaller fleet indistinguishable
+ * from a correct one, which is how a leaf only one member imports can stay
+ * stubbed after that member joins. The writer refuses to run with a missing
+ * checkout, but that guard cannot reach backwards into a list written before
+ * it existed.
+ */
+export function readScannedRoster(repoRoot: string): string[] {
+  const listPath = unexposedLeavesPath(repoRoot)
+  if (!existsSync(listPath)) {
+    return []
+  }
+  const parsed = JSON.parse(readFileSync(listPath, 'utf8')) as {
+    scannedRoster?: string[] | undefined
+  }
+  return Array.isArray(parsed.scannedRoster) ? parsed.scannedRoster : []
+}
+
+/**
+ * How the committed list's recorded roster differs from the current one:
+ * `missing` are members it was never judged against, `stale` are names it
+ * records that have since left. Either means the evidence no longer covers
+ * the fleet and the list must be regenerated, whatever any individual leaf
+ * looks like today.
+ *
+ * Compares MEMBERSHIP, not each consumer's commit. Pinning commits would
+ * invalidate the list on every unrelated push and train everyone to
+ * regenerate on reflex; membership changes are rare and are exactly the event
+ * that silently widens the set of importers.
+ */
+export function rosterCoverageGap(
+  currentRoster: readonly string[],
+  scannedRoster: readonly string[],
+): { missing: string[]; stale: string[] } {
+  const scanned = new Set(scannedRoster)
+  const current = new Set(currentRoster)
+  return {
+    missing: currentRoster.filter(name => !scanned.has(name)).toSorted(),
+    stale: scannedRoster.filter(name => !current.has(name)).toSorted(),
+  }
 }
 
 // The dist .js target a leaf's exports-map entry points at, or undefined for
