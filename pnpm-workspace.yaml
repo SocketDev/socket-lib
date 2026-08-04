@@ -190,7 +190,7 @@ overrides:
   'magic-string': '1.1.0'
   'mime-db': '1.54.0'
   'mime-types@>=3': '3.0.2'
-  'minimatch@>=3': '10.2.5'
+  'minimatch@>=3': '10.2.6'
   'minipass@>=4': '7.1.3'
   'safe-buffer': 'npm:@socketregistry/safe-buffer@1.0.9'
   'safer-buffer': 'npm:@socketregistry/safer-buffer@1.0.10'
@@ -281,7 +281,7 @@ overrides:
   # setup before a check runs. 10 does not fix that on its own — it drops the
   # default too — so the paired patch restores it on BOTH builds, the same
   # treatment brace-expansion needs above.
-  'minimatch': '10.2.5'
+  'minimatch': '10.2.6'
   'minipass': '7.1.3'
   'minipass-fetch': '4.0.1'
   'minipass-flush': '1.0.7'
@@ -366,6 +366,7 @@ patchedDependencies:
   # condition (for @babel/code-frame) while keeping js-tokens@10's generator on
   # `import`, after the js-tokens 4/10 collapse.
   js-tokens@10.0.0: patches/js-tokens@10.0.0.patch
+  minimatch@10.2.6: patches/minimatch@10.2.6.patch
   # minipass 7 ships a named export ({ Minipass }) where 3.x was a default;
   # these three re-pin the import shape + peer range so the deduped minipass 7
   # tree works; consumer: cacache/make-fetch-happen in src/external.
@@ -396,12 +397,11 @@ patchedDependencies:
   # (`@actions/glob@0.6.1` pulls 3.1.5) default-imports a callable, and the
   # patched v10 answers that same shape.
   # On a bump, regenerate via `pnpm patch minimatch` + `pnpm patch-commit`.
-  minimatch@10.2.6: patches/minimatch@10.2.6.patch
 
-# Opt out of pnpm's packageManager-version self-check. CI installs pnpm from
-# its native bin via the shared setup workflow, not corepack, so the runner's
-# pnpm legitimately differs from the `packageManager` pin (which is a forgiving
-# floor `pnpm@>=<x>`, informational — not a version to enforce).
+  # Opt out of pnpm's packageManager-version self-check. CI installs pnpm from
+  # its native bin via the shared setup workflow, not corepack, so the runner's
+  # pnpm legitimately differs from the `packageManager` pin (which is a forgiving
+  # floor `pnpm@>=<x>`, informational — not a version to enforce).
 managePackageManagerVersions: false
 
 # pnpm 11's packageManager-version-check failure policy. `warn` lets the install
