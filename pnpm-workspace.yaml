@@ -273,7 +273,13 @@ overrides:
   # Dedup: mimic-response 1 (clone-response) + 3 (decompress-response) → 3.1.0.
   # Both CJS with the same mimicResponse(from, to) surface.
   'mimic-response': '3.1.0'
-  'minimatch': '9.0.9'
+  # Dedup: lifted from 9.0.9 to the newest line the fleet carries. 9's ESM
+  # build ships named exports only, so the CI cache action's default import
+  # throws "does not provide an export named 'default'" and kills the job at
+  # setup before a check runs. 10 does not fix that on its own — it drops the
+  # default too — so the paired patch restores it on BOTH builds, the same
+  # treatment brace-expansion needs above.
+  'minimatch': '10.2.5'
   'minipass': '7.1.3'
   'minipass-fetch': '4.0.1'
   'minipass-flush': '1.0.7'
@@ -338,10 +344,14 @@ patchedDependencies:
   # literals so the browser bundle (which stubs http2 to false) can load the
   # sigstore signer; consumer: packages/provenance via the browser field.
   '@sigstore/sign@4.1.1': patches/@sigstore__sign@4.1.1.patch
-  # 5.0.7 dropped the CJS default export and 5.0.8 did not restore it; minimatch@9's compiled
-  # __importDefault call reads `.default` (the __esModule flag skips the
-  # namespace fallback), so the patch restores exports.default = expand.
-  # Consumer: npm-packlist → ignore-walk → minimatch@9 during tarball packs.
+  # 5.0.7 dropped the default export from both builds and 5.0.8 did not restore
+  # it, so the patch re-adds `expand` as the default on each build separately.
+  # The original consumer was minimatch@9's compiled __importDefault call, which
+  # reads `.default` because the __esModule flag skips the namespace fallback.
+  # That consumer is GONE: minimatch is pinned to 10 below, which imports
+  # `{ expand }` by name on both builds and carries no __importDefault at all.
+  # The patch stays for the remaining shape — any `import x from
+  # 'brace-expansion'`, which is how the fleet CI cache action resolves it.
   brace-expansion@5.0.8: patches/brace-expansion@5.0.8.patch
   # Dedup compat: adds a `require` export condition + source/index.cjs so the
   # ESM-only chalk@5 stays require()-able by chalk@4's CJS consumers (@yarnpkg,
@@ -354,6 +364,13 @@ patchedDependencies:
   # condition (for @babel/code-frame) while keeping js-tokens@10's generator on
   # `import`, after the js-tokens 4/10 collapse.
   js-tokens@10.0.0: patches/js-tokens@10.0.0.patch
+  # Interop: neither build ships a default export, so `import mm from
+  # 'minimatch'` — the shape the fleet CI cache action resolves through —
+  # throws "does not provide an export named 'default'" and kills the job in
+  # setup-and-install before a single check runs. Lifting 9 → 10 does not fix
+  # it on its own; 10 dropped the default too. The patch restores it on BOTH
+  # builds, since patching one leaves the other broken.
+  minimatch@10.2.5: patches/minimatch@10.2.5.patch
   # minipass 7 ships a named export ({ Minipass }) where 3.x was a default;
   # these three re-pin the import shape + peer range so the deduped minipass 7
   # tree works; consumer: cacache/make-fetch-happen in src/external.
