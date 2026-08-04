@@ -18,7 +18,7 @@ Thumbs.db
 .npmrc.local
 .nvm
 .pnpmfile.cjs
-node_modules/
+node_modules
 # Defensive cache ignore — Node compile-cache, corepack, and other
 # tools occasionally drop scratch dirs into a project-local .cache/.
 # node_modules/.cache/ is the canonical home for tools we control.
@@ -210,7 +210,7 @@ Thumbs.db
 **/upstream/
 
 # Node
-node_modules/
+node_modules
 # Workspace-local pnpm store — CI jobs whose pnpm runs inside a
 # workspace-mounted sandbox pin the store here (setup-and-install
 # store-dir input); never committed.
