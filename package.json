@@ -2002,6 +2002,11 @@
       "types": "./dist/links/create.d.ts",
       "default": "./dist/links/create.js"
     },
+    "./links/github": {
+      "source": "./src/links/github.ts",
+      "types": "./dist/links/github.d.ts",
+      "default": "./dist/links/github.js"
+    },
     "./links/types": {
       "source": "./src/links/types.ts",
       "types": "./dist/links/types.d.ts",
