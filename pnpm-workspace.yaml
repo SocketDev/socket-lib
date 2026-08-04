@@ -16,8 +16,9 @@ packages:
 # repo itself ships. Pinning them here keeps the entire hook tree in
 # lockstep with the parent without each hook duplicating literal pins.
 catalog:
+  '@actions/cache': 6.2.0
   '@redwoodjs/agent-ci': 0.17.1
-  '@shadscan/cli': 0.5.0
+  '@shadscan/cli': 0.7.0
   '@sinclair/typebox': 0.34.52
   '@socketregistry/packageurl-js': 1.5.0
   '@types/shell-quote': 1.7.5
@@ -63,8 +64,8 @@ catalog:
   'nock': 14.0.16
   'npm-high-impact': 1.13.0
   'npm-run-all2': 9.0.2
-  'oxfmt': 0.60.0
-  'oxlint': 1.75.0
+  'oxfmt': 0.61.0
+  'oxlint': 1.76.0
   # oxlint-tsgolint — the type-aware lint sidecar the fleet lint runner's
   # whole-tree gate invokes via `oxlint --type-aware`. Exact-pinned to match
   # the wheelhouse catalog; the per-platform binaries are soak-excluded

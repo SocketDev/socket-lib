@@ -3420,6 +3420,7 @@
     "weekly-update:ci": "gh workflow run weekly-update.lock.yml"
   },
   "devDependencies": {
+    "@actions/cache": "catalog:",
     "@babel/core": "7.29.7",
     "@babel/parser": "7.29.7",
     "@babel/traverse": "7.29.7",

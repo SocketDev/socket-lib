@@ -325,6 +325,7 @@ export const hook = defineHook({
   bypassOptional: true,
   check,
   event: 'Stop',
+  global: true,
   scope: 'convention',
   type: 'guard',
 })
