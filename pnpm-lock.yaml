@@ -447,7 +447,7 @@ patchedDependencies:
   '@npmcli/run-script@10.0.4': b1f74f31293142449c0be473fae0f0b977e1e1174e6a88e2021fcb93dc902ed6
   '@polka/url@1.0.0-next.29': 60d82e95c5e67e66c41fe2987ddd4fc3f4992f12158e5c56838e7682e6ef72ea
   '@sigstore/sign@4.1.1': 4d806e50e530edf6761bba8ad98cd1f2867a86201f6faee419444d86f5325def
-  brace-expansion@5.0.8: bd295f922aea271bbf224174ed8d9a48299f6a714a7393659a1bdf9ac2abd4c8
+  brace-expansion@5.0.8: bdf9963feca3f55f619773889c6a471b5b91d491d090cb7f9fa361a04bb02771
   chalk@5.6.2: 3e5adfdfa27f0c9e066fe820ac91f77773798f205f5e43ff220b250007196661
   content-type@2.0.0: 985a8758e5e2783b13cabb8db054c0ff2a18591eb76a8eaacd7bc3eaae1a6ba5
   js-tokens@10.0.0: 9ca5535547c973063c8c2d0a7d33505cef80152329f2572507a54abbb4099826
@@ -8637,7 +8637,7 @@ snapshots:
 
   boolbase@1.0.0: {}
 
-  brace-expansion@5.0.8(patch_hash=bd295f922aea271bbf224174ed8d9a48299f6a714a7393659a1bdf9ac2abd4c8):
+  brace-expansion@5.0.8(patch_hash=bdf9963feca3f55f619773889c6a471b5b91d491d090cb7f9fa361a04bb02771):
     dependencies:
       balanced-match: 4.0.4
 
@@ -9771,7 +9771,7 @@ snapshots:
 
   minimatch@9.0.9:
     dependencies:
-      brace-expansion: 5.0.8(patch_hash=bd295f922aea271bbf224174ed8d9a48299f6a714a7393659a1bdf9ac2abd4c8)
+      brace-expansion: 5.0.8(patch_hash=bdf9963feca3f55f619773889c6a471b5b91d491d090cb7f9fa361a04bb02771)
 
   minimist@1.2.8: {}
 
