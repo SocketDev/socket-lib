@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.5.3](https://github.com/SocketDev/socket-lib/releases/tag/v6.5.3) - 2026-08-04
+
+### Added
+
+- **`build-stubs`** — make the stub error name its own remediation
+- **`github`** — classify GitHub rate-limit, abuse-detection, and auth responses
+
+### Fixed
+
+- **`prose`** — clear the release-gate prose and block-comment findings
+- **`build-stubs`** — record the roster the stub list was judged against
+
 ## [6.5.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.5.2) - 2026-07-31
 
 ### Fixed
