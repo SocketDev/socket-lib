@@ -23,6 +23,7 @@
 //
 // Bypass: `Allow bot-collapse bypass`.
 
+import { directiveFor } from '../../../../scripts/fleet/_shared/bot-directives.mts'
 import { block, defineHook, runHook } from '../_shared/guard.mts'
 import type { GuardResult } from '../_shared/guard.mts'
 import type { ToolCallPayload } from '../_shared/payload.mts'
@@ -295,6 +296,12 @@ export const check = (payload: ToolCallPayload): GuardResult | undefined => {
         `    - ${violation.kind} by ${violation.author} (${violation.id})`,
       )
       lines.push(`      ${buildMinimizeCommand(violation.id)}`)
+      const directive = directiveFor(violation.author, 'resolve-own-comments')
+      if (directive) {
+        lines.push(
+          `      If that returns FORBIDDEN (no write on this repo), post \`${directive.command}\` on the PR instead — ${directive.why}`,
+        )
+      }
     }
   }
   if (lines.length === 0) {

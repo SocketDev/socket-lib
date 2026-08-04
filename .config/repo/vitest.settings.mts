@@ -6,6 +6,9 @@
  *   RESOLVES runtime config from them. One file, one parse; each key's
  *   contract is on its field below, and docs/agents.md/fleet/test-layout.md
  *   carries the tier rationale.
+ *   Exported readers are ordered alphabetically, which `socket/sort-source-
+ *   methods` enforces in every consuming member. Neither copy of this file is
+ *   linted in the wheelhouse itself, so the order is a downstream contract.
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -34,12 +37,58 @@ export interface VitestRepoConfig {
   pool?: 'forks' | 'threads' | undefined
 }
 
+/**
+ * Test LANES — a SPEED category, orthogonal to test TYPE (unit/integration/e2e)
+ * — from the `vitest.lanes` section of the canonical per-repo settings file
+ * (.config/repo/socket-wheelhouse.json; see paths.mts's resolver order for the
+ * fallbacks). `slow` = heavy suites (subprocess-per-case, e.g. hook integration
+ * specs); `mid` = isolated in-process suites (env-mutating / vi.mock /
+ * fs-heavy); `fast` = the implicit complement, pure in-process. The runner's
+ * `--lane <fast|mid|slow>` flag (scripts/fleet/test.mts) selects one, and bare
+ * `pnpm test` defaults to `fast` for a quick local loop. The lane filter is
+ * INERT under coverage and for an unset FLEET_LANE (an --all / scoped / cover
+ * run), so coverage + CI run EVERY lane — the split shapes only the fast local
+ * feedback loop and never removes a suite from the gate.
+ */
+export interface VitestLanes {
+  mid?: string[] | undefined
+  slow?: string[] | undefined
+}
+
 // The settings file, canonical location first and the repo-root dotfile as the
 // one fallback a member may ship.
 export const SETTINGS_FILES = [
   '.config/repo/socket-wheelhouse.json',
   '.socket-wheelhouse.json',
 ] as const
+
+/**
+ * The CONFORMANCE tier — heavy external-suite wrappers (a full Test262 corpus
+ * per implementation, upstream conformance harnesses) named by
+ * `vitest.conformanceExclude` in the settings file.
+ *
+ * `scripts/repo/test-conformance.mts` runs this tier explicitly with
+ * FLEET_TEST_CONFORMANCE=1; every other run must EXCLUDE it. Both halves live
+ * here because both were previously unwired: the runner set the env var and
+ * nothing read it, and the setting named the tier while no lane excluded it —
+ * so `pnpm run cover` spawned a ~92k-scenario corpus per BUILT implementation,
+ * three at once. Against the 60s unit budget that reads as a hung run rather
+ * than the multi-hour sweep it actually is.
+ */
+export function readConformanceExcludeGlobs(): string[] {
+  return stringArray(readVitestSettings().conformanceExclude)
+}
+
+export function readNonIsolatedGlobs(): string[] {
+  return stringArray(readVitestSettings().nonIsolated)
+}
+
+export function readVitestLanes(): VitestLanes {
+  const lanes = readVitestSettings().lanes
+  return lanes && typeof lanes === 'object' && !Array.isArray(lanes)
+    ? { mid: stringArray(lanes.mid), slow: stringArray(lanes.slow) }
+    : {}
+}
 
 /**
  * The `vitest` section of the settings file. The ONE settings-file parse in
@@ -68,6 +117,10 @@ export function readVitestSettings(): VitestRepoConfig {
   return {}
 }
 
+export function repoNodeTestExcludeGlobs(): string[] {
+  return stringArray(readVitestSettings().nodeTestExclude)
+}
+
 /**
  * A settings value read as a string array; anything else reads as empty.
  */
@@ -75,54 +128,4 @@ export function stringArray(value: unknown): string[] {
   return Array.isArray(value)
     ? value.filter((g): g is string => typeof g === 'string')
     : []
-}
-
-/**
- * Test LANES — a SPEED category, orthogonal to test TYPE (unit/integration/e2e)
- * — from the `vitest.lanes` section of the canonical per-repo settings file
- * (.config/repo/socket-wheelhouse.json; see paths.mts's resolver order for the
- * fallbacks). `slow` = heavy suites (subprocess-per-case, e.g. hook integration
- * specs); `mid` = isolated in-process suites (env-mutating / vi.mock /
- * fs-heavy); `fast` = the implicit complement, pure in-process. The runner's
- * `--lane <fast|mid|slow>` flag (scripts/fleet/test.mts) selects one, and bare
- * `pnpm test` defaults to `fast` for a quick local loop. The lane filter is
- * INERT under coverage and for an unset FLEET_LANE (an --all / scoped / cover
- * run), so coverage + CI run EVERY lane — the split shapes only the fast local
- * feedback loop and never removes a suite from the gate.
- */
-export interface VitestLanes {
-  mid?: string[] | undefined
-  slow?: string[] | undefined
-}
-
-export function readVitestLanes(): VitestLanes {
-  const lanes = readVitestSettings().lanes
-  return lanes && typeof lanes === 'object' && !Array.isArray(lanes)
-    ? { mid: stringArray(lanes.mid), slow: stringArray(lanes.slow) }
-    : {}
-}
-
-export function readNonIsolatedGlobs(): string[] {
-  return stringArray(readVitestSettings().nonIsolated)
-}
-
-/**
- * The CONFORMANCE tier — heavy external-suite wrappers (a full Test262 corpus
- * per implementation, upstream conformance harnesses) named by
- * `vitest.conformanceExclude` in the settings file.
- *
- * `scripts/repo/test-conformance.mts` runs this tier explicitly with
- * FLEET_TEST_CONFORMANCE=1; every other run must EXCLUDE it. Both halves live
- * here because both were previously unwired: the runner set the env var and
- * nothing read it, and the setting named the tier while no lane excluded it —
- * so `pnpm run cover` spawned a ~92k-scenario corpus per BUILT implementation,
- * three at once. Against the 60s unit budget that reads as a hung run rather
- * than the multi-hour sweep it actually is.
- */
-export function readConformanceExcludeGlobs(): string[] {
-  return stringArray(readVitestSettings().conformanceExclude)
-}
-
-export function repoNodeTestExcludeGlobs(): string[] {
-  return stringArray(readVitestSettings().nodeTestExclude)
 }

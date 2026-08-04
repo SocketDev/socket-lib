@@ -237,7 +237,7 @@ const laneFilterActive =
   (activeLane === 'fast' || activeLane === 'mid' || activeLane === 'slow')
 // A lane's dir globs → test-file include patterns (`--lane mid|slow` runs ONLY
 // that lane; a trailing `/**` becomes `/**/*.test.{…}`).
-function laneToTestGlobs(globs: string[]): string[] {
+export function laneToTestGlobs(globs: string[]): string[] {
   return globs.map(
     g => `${g.replace(/\/\*+$/, '')}/**/*.test.{js,ts,mjs,mts,cjs}`,
   )

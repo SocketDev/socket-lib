@@ -224,10 +224,17 @@ export function createLintRunners(context: LintRunnerContext): LintRunners {
   // MUTATING spawn instead of trusting config plumbing. The globs are
   // root-anchored, so the wheelhouse's template/base/** sources — which the
   // any-depth canonical globs also match — stay fixable via the dogfood +
-  // template-payload passes. Read-only lint keeps its current scope and may
-  // still REPORT mirror findings; only mutation is barred.
-  const mirrorOxlintGuardArgs = fix ? cascadeMirrorOxlintIgnoreArgs() : []
-  const mirrorOxfmtGuardArgs = fix ? cascadeMirrorOxfmtExcludeArgs() : []
+  // template-payload passes.
+  //
+  // Reporting is barred too, not just mutation. A member cannot legally edit a
+  // mirror (no-fleet-fork-guard blocks the write), so a mirror finding in a
+  // member is an instruction nobody can carry out: socket-lib red-lit 12
+  // findings in `.config/repo/vitest.*.mts`, byte-identical to the template.
+  // Mirror correctness is still enforced, by the cascade's own drift check and
+  // by the wheelhouse's dogfood + template-payload legs, which gate the SOURCE
+  // where a fix can actually land.
+  const mirrorOxlintGuardArgs = cascadeMirrorOxlintIgnoreArgs()
+  const mirrorOxfmtGuardArgs = cascadeMirrorOxfmtExcludeArgs()
 
   // Assert the socket/ oxlint plugin actually loaded. A dead plugin (a rule with
   // a missing dep / bad import) makes oxlint silently disable EVERY socket/ rule
