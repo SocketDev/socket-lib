@@ -9,13 +9,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **`links`** — add githubRefLink for markdown PR/issue links
 - **`build-stubs`** — make the stub error name its own remediation
 - **`github`** — classify GitHub rate-limit, abuse-detection, and auth responses
 
 ### Fixed
 
+- **`checks`** — clear the entrypoint, mirror-name, and stub-roster findings
 - **`prose`** — clear the release-gate prose and block-comment findings
 - **`build-stubs`** — record the roster the stub list was judged against
+
+### Internal
+
+- **`deps`** — re-key the minimatch interop patch to 10.2.6
+- **`deps`** — lift minimatch to 10.2.5 and restore its default export
+- **`deps`** — give the brace-expansion ESM build a default export too
+- **`lint`** — clear the control-char and bypass-marker findings via autofix
 
 ## [6.5.2](https://github.com/SocketDev/socket-lib/releases/tag/v6.5.2) - 2026-07-31
 
