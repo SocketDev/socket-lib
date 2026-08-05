@@ -3,6 +3,12 @@
  *   type-guard for shaping unknown errors that crossed an `await spawn(...)`.
  *   It checks for the `code` / `errno` / `syscall` properties that Node's
  *   child_process tags onto `ENOENT` / `EACCES` / process-exit failures.
+ *   `isSpawnExitError` narrows further, to the failures whose process actually
+ *   ran and exited — the ones whose `.code` is the NUMERIC exit status. That
+ *   distinction is load-bearing: a spawn fails in two shapes, and a launch
+ *   failure carries a string `.code` (`'ENOENT'`) while a non-zero exit carries
+ *   a number. Both satisfy `isSpawnError`, so code reading `.code` as a number
+ *   after that guard alone is wrong for half its inputs.
  *   `enhanceSpawnError` rewrites the upstream `@npmcli/promise-spawn` "command
  *   failed" placeholder message into something the operator can actually act
  *   on: command + args (truncated at 100 chars), exit code or signal, and the
@@ -11,6 +17,7 @@
  *   `stackWithCauses` cost.
  */
 
+import { isError } from '../../errors/predicates'
 import { stackWithCauses } from '../../errors/stack'
 import { hasOwn } from '../../objects/predicates'
 import { ErrorCtor } from '../../primordials/error'
@@ -156,14 +163,53 @@ export function enhanceSpawnError(error: unknown): unknown {
  * @returns {boolean} `true` if the value has spawn error properties
  */
 export function isSpawnError(value: unknown): value is SpawnError {
-  if (value === null || typeof value !== 'object') {
+  // Must be an Error. `isError` is cross-realm safe (it reads the
+  // [[ErrorData]] slot rather than using `instanceof`), so a rejection that
+  // crossed a realm boundary still narrows. A bare `typeof value === 'object'`
+  // let any plain object carrying a `code` through, and this guard narrows to
+  // a type declaring `message` / `stack` / `cmd`, none of which a plain object
+  // has.
+  if (!isError(value)) {
     return false
   }
   // Check for spawn-specific error properties.
-  const err = value as Record<string, unknown>
+  const err = value as unknown as Record<string, unknown>
   return (
     (hasOwn(err, 'code') && typeof err['code'] !== 'undefined') ||
     (hasOwn(err, 'errno') && typeof err['errno'] !== 'undefined') ||
     (hasOwn(err, 'syscall') && typeof err['syscall'] === 'string')
   )
+}
+
+/**
+ * Narrow a caught value to a spawn failure whose process actually RAN and then
+ * exited non-zero — the case where `.code` is the numeric exit status.
+ *
+ * `isSpawnError` alone is not enough for that. A spawn fails in two shapes and
+ * they carry different `code` types:
+ *
+ * | failure                | `.code`    | type     |
+ * | ---------------------- | ---------- | -------- |
+ * | process exits non-zero | `3`        | `number` |
+ * | command not found      | `'ENOENT'` | `string` |
+ *
+ * Both satisfy `isSpawnError`, so reading `.code` as a number after that guard
+ * is wrong for the launch-failure case. Use this predicate when the exit status
+ * is what you want, and {@link isErrnoException} when the launch failure is.
+ *
+ * @example
+ *   try {
+ *     await spawn('git', ['grep', '-q', needle])
+ *   } catch (e) {
+ *     // `git grep` exits 1 for "no match", which is an answer, not a failure.
+ *     if (isSpawnExitError(e) && e.code === 1) {
+ *       return false
+ *     }
+ *     throw e
+ *   }
+ */
+export function isSpawnExitError(
+  value: unknown,
+): value is SpawnError & { code: number } {
+  return isSpawnError(value) && typeof value.code === 'number'
 }

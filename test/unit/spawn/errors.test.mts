@@ -4,26 +4,33 @@ import { spawn } from '../../../src/process/spawn/child'
 import {
   enhanceSpawnError,
   isSpawnError,
+  isSpawnExitError,
 } from '../../../src/process/spawn/errors'
+
+// A spawn rejection is an Error carrying extra fields. Building fixtures this
+// way rather than as bare object literals matters: the guard narrows to a type
+// declaring `message` / `stack` / `cmd`, so a plain object that satisfied it
+// would hand the caller a value typed as something it is not.
+function spawnErr(extra: Record<string, unknown>): Error {
+  return Object.assign(new Error('command failed'), extra)
+}
 
 describe('spawn/errors — isSpawnError', () => {
   it('returns true for error with code property', () => {
-    const error = { code: 1 }
-    expect(isSpawnError(error)).toBe(true)
+    expect(isSpawnError(spawnErr({ code: 1 }))).toBe(true)
   })
 
   it('returns true for error with errno property', () => {
-    const error = { errno: -2 }
-    expect(isSpawnError(error)).toBe(true)
+    expect(isSpawnError(spawnErr({ errno: -2 }))).toBe(true)
   })
 
   it('returns true for error with syscall property', () => {
-    const error = { syscall: 'spawn' }
-    expect(isSpawnError(error)).toBe(true)
+    expect(isSpawnError(spawnErr({ syscall: 'spawn' }))).toBe(true)
   })
 
   it('returns false for null', () => {
-    expect(isSpawnError(undefined)).toBe(false)
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- `throw null` is legal JS, so a catch-site guard must handle it; that is the case under test.
+    expect(isSpawnError(null)).toBe(false)
   })
 
   it('returns false for undefined', () => {
@@ -41,9 +48,18 @@ describe('spawn/errors — isSpawnError', () => {
     expect(isSpawnError({ message: 'error' })).toBe(false)
   })
 
+  // The guard narrows to `SpawnError`, which declares `message`, `stack`,
+  // `cmd` and `args`. A plain bag carrying only `code` has none of them, so
+  // accepting it handed callers a value typed as something it was not.
+  it('rejects a plain object even when it carries spawn-shaped fields', () => {
+    expect(isSpawnError({ code: 1 })).toBe(false)
+    expect(isSpawnError({ errno: -2 })).toBe(false)
+    expect(isSpawnError({ syscall: 'spawn' })).toBe(false)
+    expect(isSpawnError({ cmd: 'git', args: [], code: 1 })).toBe(false)
+  })
+
   it('handles error with undefined code', () => {
-    const error = { code: undefined, errno: 1 }
-    expect(isSpawnError(error)).toBe(true)
+    expect(isSpawnError(spawnErr({ code: undefined, errno: 1 }))).toBe(true)
   })
 
   it('returns true for spawn-shaped errors with cmd + args + code', () => {
@@ -63,6 +79,55 @@ describe('spawn/errors — isSpawnError', () => {
     expect(isSpawnError(undefined)).toBe(false)
     expect(isSpawnError('string')).toBe(false)
     expect(isSpawnError(42)).toBe(false)
+  })
+})
+
+describe('spawn/errors — isSpawnExitError', () => {
+  // The distinction this predicate exists for. `spawn` fails in two shapes and
+  // they carry DIFFERENT `code` types: a process that ran and exited non-zero
+  // gives a number, a command that could not be launched gives the string
+  // 'ENOENT'. Both satisfy isSpawnError, so reading `.code` as a number after
+  // that guard alone is wrong for the launch-failure half.
+  it('accepts a non-zero exit, whose code is the numeric status', () => {
+    expect(isSpawnExitError(spawnErr({ code: 3 }))).toBe(true)
+    expect(isSpawnExitError(spawnErr({ code: 0 }))).toBe(true)
+  })
+
+  it('REJECTS a launch failure, whose code is a string', () => {
+    const enoent = spawnErr({ code: 'ENOENT', syscall: 'spawn' })
+    // Still a spawn error…
+    expect(isSpawnError(enoent)).toBe(true)
+    // …but not one with an exit status, which is the whole point.
+    expect(isSpawnExitError(enoent)).toBe(false)
+  })
+
+  it('rejects a spawn error carrying no code at all', () => {
+    expect(isSpawnExitError(spawnErr({ errno: -2 }))).toBe(false)
+    expect(isSpawnExitError(spawnErr({ code: undefined, errno: 1 }))).toBe(
+      false,
+    )
+  })
+
+  it('rejects the things isSpawnError rejects', () => {
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- same as above: `throw null` is reachable at a catch site.
+    expect(isSpawnExitError(null)).toBe(false)
+    expect(isSpawnExitError(undefined)).toBe(false)
+    expect(isSpawnExitError(42)).toBe(false)
+    expect(isSpawnExitError(new Error('plain'))).toBe(false)
+    expect(isSpawnExitError({ code: 1 })).toBe(false)
+  })
+
+  // The motivating caller: `git grep` exits 1 for "no match", which is an
+  // answer rather than a failure. Distinguishing that from "git could not be
+  // launched" is the difference between a correct search and one that silently
+  // reports every repo as a match.
+  it('separates a real exit 1 from a failure to launch', () => {
+    const noMatch = spawnErr({ code: 1 })
+    const notFound = spawnErr({ code: 'ENOENT', syscall: 'spawn' })
+    const exitCodeOf = (e: unknown) =>
+      isSpawnExitError(e) ? e.code : undefined
+    expect(exitCodeOf(noMatch)).toBe(1)
+    expect(exitCodeOf(notFound)).toBeUndefined()
   })
 })
 

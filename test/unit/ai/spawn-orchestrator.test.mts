@@ -156,15 +156,17 @@ describe.sequential('ai/spawn — spawnAiAgent non-overload errors do not retry'
   test('spawnError thrown by child surface populates exit/stdout/stderr', async () => {
     const { discoverAiAgents, spawnAiAgent } = await loadFresh()
     discoverAiAgents.mockResolvedValueOnce({ claude: '/p' })
-    // Simulate the spawn rejection with isSpawnError-shaped object.
-    const spawnErr = {
+    // A real spawn rejection is an ERROR carrying extra fields, which is what
+    // `spawn` actually throws: `Object.assign(new Error(…), { code, stderr })`.
+    // This fixture used to be a bare object literal, which passed only because
+    // `isSpawnError` accepted any object with a `code` — while narrowing to a
+    // type that declares `message` and `stack`. Building it faithfully keeps
+    // the test honest about the shape production code sees.
+    const spawnErr = Object.assign(new Error('command failed'), {
       stdout: 'partial-out',
       stderr: 'fatal',
       code: 137,
-      // Use the marker isSpawnError() recognizes: name property matches
-      // — actually socket-lib uses an instanceof check. Use a real error
-      // class from the source.
-    }
+    })
     mockChildSpawn.mockImplementationOnce(() => {
       const t: PromiseLike<unknown> & { stdin: { end: () => void } } = {
         stdin: { end: () => {} },
