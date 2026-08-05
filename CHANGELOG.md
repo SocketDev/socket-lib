@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.7.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.7.0) - 2026-08-05
+
+### Added
+
+- **`links`** — add hyperlink(), and dedupe terminal-link into external-pack
+
+### Fixed
+
+- **`external`** — load terminal-link lazily — an eager require broke 215 src-context tests
+- **`test`** — use the string form of vi.mock so the release preflight typechecks
+- **`scripts`** — unshadow groupRows and cache the summary loop length
+
+### Internal
+
+- **`deps`** — soak-exclude tinyexec 1.3.0 and align the brace-expansion override
+
 ## [6.6.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.6.0) - 2026-08-05
 
 ### Added
