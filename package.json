@@ -3459,7 +3459,7 @@
     "@vitest/coverage-v8": "catalog:",
     "@vitest/ui": "catalog:",
     "@vitiate/core": "catalog:",
-    "@yarnpkg/extensions": "2.0.6",
+    "@yarnpkg/extensions": "2.0.7",
     "adm-zip": "0.6.0",
     "c8": "catalog:",
     "cacache": "20.0.4",
@@ -3536,7 +3536,7 @@
   "devEngines": {
     "packageManager": {
       "name": "pnpm",
-      "version": ">=11.0.0 <12.0.0",
+      "version": ">=11.18.0",
       "onFail": "error"
     }
   },
