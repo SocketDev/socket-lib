@@ -24,16 +24,19 @@ const terminalLinkMock = vi.fn(
 // external-pack is the choke point: create.ts imports BOTH terminal-link and
 // yoctocolors-cjs, and each re-exports from it, so mocking only terminal-link
 // still pulled the raw ESM packages and threw. Mocking the pack covers both.
-vi.mock(import('../../../src/external/external-pack'), () => ({
+// oxlint-disable-next-line socket/prefer-mock-import -- the import() form requires a FULL module shape; these factories are deliberate partials and TS2769s.
+vi.mock('../../../src/external/external-pack', () => ({
   terminalLink: terminalLinkMock,
   yoctocolorsCjs: new Proxy({}, { get: () => (text: string) => text }),
 }))
 
-vi.mock(import('../../../src/external/terminal-link'), () => ({
+// oxlint-disable-next-line socket/prefer-mock-import -- the import() form requires a FULL module shape; these factories are deliberate partials and TS2769s.
+vi.mock('../../../src/external/terminal-link', () => ({
   default: terminalLinkMock,
 }))
 
-vi.mock(import('../../../src/external/yoctocolors-cjs'), () => ({
+// oxlint-disable-next-line socket/prefer-mock-import -- the import() form requires a FULL module shape; these factories are deliberate partials and TS2769s.
+vi.mock('../../../src/external/yoctocolors-cjs', () => ({
   default: new Proxy({}, { get: () => (text: string) => text }),
 }))
 
