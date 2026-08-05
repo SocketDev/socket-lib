@@ -39,7 +39,7 @@ catalog:
   # src/.
   '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.0'
   '@socketsecurity/lib': 6.5.3
-  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.5.2'
+  '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.5.3'
   '@socketsecurity/registry': 'npm:@socketsecurity/registry@2.0.5'
   '@socketsecurity/registry-stable': 'npm:@socketsecurity/registry@2.0.5'
   '@socketsecurity/sdk': 4.1.3
