@@ -182,7 +182,6 @@
     "primordials/symbol",
     "process/open-url",
     "process/spawn/kill-tree",
-    "process/spawn/pty",
     "process/transient",
     "promises/all-keyed",
     "releases/github-archives",
