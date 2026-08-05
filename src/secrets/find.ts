@@ -21,6 +21,7 @@
  *   covers the read.
  */
 
+import { readSecretBiometric } from './addon'
 import { requestFromBroker } from './broker'
 import { readSecret, readSecretSync } from './keychain'
 
@@ -57,10 +58,11 @@ export interface ResolveResult {
   /**
    * Where the value came from: 'env' — `process.env[<account>]` had a non-empty
    * value. 'broker' — the proteus daemon vended it after a biometric unlock.
-   * 'keychain' — env-var was empty and no broker was running; the value was
-   * read from the OS credential store under the matching account.
+   * 'keychain-biometric' — the in-process sockeye keychain.node addon vended it
+   * from behind a Secure-Enclave Touch ID ACL. 'keychain' — none of the above;
+   * the value was read from the OS credential store via the CLI backend.
    */
-  source: 'broker' | 'env' | 'keychain'
+  source: 'broker' | 'env' | 'keychain' | 'keychain-biometric'
   /**
    * Which account in `accounts` was the actual hit.
    */
@@ -114,6 +116,17 @@ export async function resolve(
     const fromBroker = await requestFromBroker({ account, service })
     if (fromBroker) {
       return { value: fromBroker, source: 'broker', account }
+    }
+  }
+  // sockeye keychain.node layer: in-process biometric read for machines
+  // without a running proteus daemon. Same self-gating contract — absent
+  // addon or a cancelled Touch ID prompt returns undefined and the chain
+  // continues to the CLI keychain floor.
+  for (let i = 0, { length } = accounts; i < length; i += 1) {
+    const account = accounts[i]!
+    const fromAddon = readSecretBiometric({ account, service })
+    if (fromAddon) {
+      return { value: fromAddon, source: 'keychain-biometric', account }
     }
   }
   for (let i = 0, { length } = accounts; i < length; i += 1) {
