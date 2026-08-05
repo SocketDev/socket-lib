@@ -11,7 +11,7 @@ import {
   getColumnsOf,
   getRowsOf,
   isTTYOf,
-} from './_internal'
+} from './shared'
 
 // Get the actual stderr stream.
 // oxlint-disable-next-line socket/no-module-eval-side-effects -- the raw stream IS this module's public API (`export { stderr }` below); lazifying is a breaking contract change.

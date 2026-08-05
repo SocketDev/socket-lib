@@ -5,7 +5,7 @@
  *   because the increment / diff APIs aren't on the smol-versions surface.
  */
 
-import { getSemver } from './_internal'
+import { getSemver } from './shared'
 
 /**
  * Increment a version by the specified release type.

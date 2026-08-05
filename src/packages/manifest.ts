@@ -25,7 +25,7 @@ import { isRegistryFetcherType } from './validation'
 import type { PackageJson, PacoteOptions } from './types'
 
 import { ObjectFromEntries, ObjectKeys } from '../primordials/object'
-import { getSemver } from '../versions/_internal'
+import { getSemver } from '../versions/shared'
 const packageDefaultNodeRange = getPackageDefaultNodeRange()
 const PACKAGE_DEFAULT_SOCKET_CATEGORIES = getPackageDefaultSocketCategories()
 const packumentCache = getPackumentCache()

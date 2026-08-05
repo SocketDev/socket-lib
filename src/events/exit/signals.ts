@@ -5,7 +5,7 @@
  *   successfully.
  */
 
-import { getSignals } from './_internal'
+import { getSignals } from './shared'
 
 /**
  * Get the list of signals that are currently being monitored.

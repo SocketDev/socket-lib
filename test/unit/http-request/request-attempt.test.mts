@@ -1,6 +1,6 @@
 /**
  * @file Branch-coverage tests for src/http-request/request-attempt.ts. Mocks
- *   the underlying `node:http` module via the `_internal` getter so we can
+ *   the underlying `node:http` module via the `shared` getter so we can
  *   trigger rejectOnce body-destroy + signal pass-through arms without real
  *   network. Sits alongside `request.test.mts` which mocks at a higher level.
  */
@@ -9,7 +9,7 @@ import { EventEmitter } from 'node:events'
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import type * as HttpRequestInternal from '../../../src/http-request/_internal'
+import type * as HttpRequestInternal from '../../../src/http-request/shared'
 
 const { httpStub, httpsStub } = vi.hoisted(() => ({
   httpStub: { request: vi.fn() },
@@ -17,7 +17,7 @@ const { httpStub, httpsStub } = vi.hoisted(() => ({
 }))
 
 vi.mock(
-  import('../../../src/http-request/_internal'),
+  import('../../../src/http-request/shared'),
   () =>
     ({
       getHttp: () => httpStub,

@@ -34,7 +34,7 @@ import {
   getFsPromises,
   normalizeGlobResults,
   normalizeIgnorePatterns,
-} from './_internal'
+} from './shared'
 
 import type { FastGlobOptions, Pattern } from './types'
 import type { Options as FastGlobLibOptions } from 'fast-glob'

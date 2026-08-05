@@ -2,7 +2,7 @@
 
 > Core utilities and infrastructure for Socket.dev security tools. 588 subpath exports, grouped by namespace.
 
-Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
+Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/signal'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
 ## Top-level
 

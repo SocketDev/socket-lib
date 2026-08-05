@@ -12,7 +12,7 @@
 import { MathMin } from '../primordials/math'
 import { ReflectApply } from '../primordials/reflect'
 
-import { maxIndentation } from './_internal'
+import { maxIndentation } from './shared'
 import {
   getKGroupIndentationWidthSymbol,
   incLogCallCountSymbol,

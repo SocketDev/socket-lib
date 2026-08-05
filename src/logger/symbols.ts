@@ -25,7 +25,7 @@ import { ReflectOwnKeys } from '../primordials/reflect'
 import { getTheme, onThemeChange } from '../themes/context'
 
 import { applyColor, getYoctocolors } from './colors'
-import { globalConsole } from './_internal'
+import { globalConsole } from './shared'
 
 let consoleSymbols: symbol[] | undefined
 let kGroupIndentationWidthSymbol: symbol | undefined

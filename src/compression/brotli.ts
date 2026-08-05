@@ -26,7 +26,7 @@ import { safeDelete } from '../fs/safe'
 import { ErrorCtor } from '../primordials/error'
 import { StringPrototypeToLowerCase } from '../primordials/string'
 
-import { resolveFileArgs, stripExt } from './_internal'
+import { resolveFileArgs, stripExt } from './shared'
 
 import type { CompressFileOptions, CompressOptions } from './types'
 

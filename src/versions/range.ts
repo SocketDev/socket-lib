@@ -6,7 +6,7 @@
  *   the smol-versions surface.
  */
 
-import { getImpl, getSemver } from './_internal'
+import { getImpl, getSemver } from './shared'
 
 /**
  * Get all versions from an array that satisfy a semver range.

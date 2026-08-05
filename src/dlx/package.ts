@@ -30,7 +30,7 @@
  *   - PURL + firewall — `./firewall`
  *   - spec parsing — `./spec`
  *   - binary resolution — `./binary-resolution`
- *   - lazy `node:fs` / `node:path` + LRU cache — `./_internal`
+ *   - lazy `node:fs` / `node:path` + LRU cache — `./shared`
  */
 
 import { WIN32 } from '../constants/platform'
@@ -415,7 +415,7 @@ export function executePackage(
 // `node:fs` / `node:path` loaders were removed: use the canonical
 // `getNodeFs` / `getNodePath` from `@socketsecurity/lib/node/{fs,path}`
 // instead.
-export { binaryPathCacheSet } from './_internal'
+export { binaryPathCacheSet } from './shared'
 export {
   findBinaryPath,
   makePackageBinsExecutable,

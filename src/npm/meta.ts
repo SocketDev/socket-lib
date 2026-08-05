@@ -14,7 +14,7 @@ import { errorMessage } from '../errors/message'
 import { HttpResponseError } from '../http-request/node'
 import { RangeErrorCtor } from '../primordials/error'
 import { pEach } from '../promises/iterate'
-import { getSemver } from '../versions/_internal'
+import { getSemver } from '../versions/shared'
 import { getPackumentSlim, PackumentNotFoundError } from './meta-cache'
 
 import type {

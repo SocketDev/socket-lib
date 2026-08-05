@@ -5,7 +5,7 @@
  *   `chrome.storage.local`, `sessionStorage` / `localStorage`, IndexedDB, …)
  *   instead of cacache, so the module's import graph stays primordials-only —
  *   safe for Chrome MV3 service workers, content scripts, popups, and web
- *   workers. Shared semantics live in `./_internal` (one owner, so the node
+ *   workers. Shared semantics live in `./shared` (one owner, so the node
  *   and browser stores cannot drift): TTL default, clock-skew detection, LRU
  *   memo eviction via Map insertion order, prefix namespacing, wildcard
  *   matching. `getOrFetch` deduplicates concurrent fetches for the same key to
@@ -42,7 +42,7 @@ import {
   DEFAULT_TTL_MS,
   isExpiredEntry,
   lruSet,
-} from './_internal'
+} from './shared'
 
 import type {
   BrowserTtlCacheOptions,

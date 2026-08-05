@@ -8,7 +8,7 @@
 
 import { normalizePath } from '../paths/normalize'
 import { ArrayPrototypeIncludes } from '../primordials/array'
-import { getGitDiffSpawnArgs, innerDiff, innerDiffSync } from './_internal'
+import { getGitDiffSpawnArgs, innerDiff, innerDiffSync } from './shared'
 import { getCachedRealpath, getCwd, getPath } from './repo'
 
 import type { GitDiffOptions } from './types'

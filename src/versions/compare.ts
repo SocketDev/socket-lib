@@ -21,7 +21,7 @@
  *     bundle into the heap and aborted `node --build-snapshot`.
  */
 
-import { getImpl } from './_internal'
+import { getImpl } from './shared'
 
 /**
  * Compare two semantic version strings.

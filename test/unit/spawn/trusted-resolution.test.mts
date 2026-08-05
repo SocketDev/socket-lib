@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for the trusted-resolution glue in
- *   src/process/spawn/_internal — resolveSpawnBin, its cache key, and the
+ *   src/process/spawn/shared — resolveSpawnBin, its cache key, and the
  *   end-to-end effect on spawn/spawnSync. Fixtures are real mode-0o755 scripts
  *   under os.tmpdir().
  */
@@ -19,7 +19,7 @@ import {
   hasCmdExeShadowInDir,
   resolveSpawnBin,
   spawnBinPathCache,
-} from '../../../src/process/spawn/_internal'
+} from '../../../src/process/spawn/shared'
 import { spawn, spawnSync } from '../../../src/process/spawn/child'
 
 import { describeUnixOnly } from '../util/skip-helpers'

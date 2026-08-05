@@ -2,7 +2,7 @@
  * @file Git repository discovery + foundational lazy fs/path/cwd helpers shared
  *   across `git/*` leaves. Owns `findGitRoot`, the realpath cache, the cwd
  *   resolver, and the lazy `node:fs` / `node:path` loaders — pulling these
- *   together keeps the dependency direction one-way: `_internal.ts` and the
+ *   together keeps the dependency direction one-way: `shared.ts` and the
  *   public-surface leaves all import from here.
  */
 

@@ -36,7 +36,7 @@ import {
   DEFAULT_TTL_MS,
   isExpiredEntry,
   lruSet,
-} from './_internal'
+} from './shared'
 
 import type {
   ClearOptions,
@@ -186,7 +186,7 @@ export function createTtlCache(
 
     // Check persistent cache for entries not in memory.
     const cacheDir = (await import('../../paths/socket')).getSocketCacacheDir()
-    const cacacheModule = await import('../../cacache/_internal')
+    const cacacheModule = await import('../../cacache/shared')
     const stream = cacacheModule.getCacache().ls.stream(cacheDir)
 
     for await (const cacheEntry of stream) {

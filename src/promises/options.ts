@@ -7,7 +7,7 @@
  */
 
 import { MathMax } from '../primordials/math'
-import { getAbortSignal } from './_internal'
+import { getAbortSignal } from './shared'
 
 import type { IterationOptions, RetryOptions } from './types'
 

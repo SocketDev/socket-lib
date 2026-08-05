@@ -11,7 +11,7 @@ import { WIN32 } from '../constants/platform'
 
 import { StringPrototypeStartsWith } from '../primordials/string'
 
-import { pathLikeToString, slashRegExp } from './_internal'
+import { pathLikeToString, slashRegExp } from './shared'
 import { normalizePath } from './normalize'
 
 /**

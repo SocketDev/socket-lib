@@ -10,7 +10,7 @@ import { DateNow } from '../primordials/date'
 import { TypeErrorCtor } from '../primordials/error'
 import { MapCtor } from '../primordials/map-set'
 
-import { cacheRegistry, defaultKeyGen } from './_internal'
+import { cacheRegistry, defaultKeyGen } from './shared'
 
 import type { CacheEntry, MemoizeOptions } from './types'
 

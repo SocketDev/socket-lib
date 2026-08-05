@@ -2,20 +2,20 @@
  * @file Node-side `Logger` class — owns per-instance state (parent, bound
  *   stream, indent buffers, theme) and exposes the public surface as thin
  *   delegators over sibling free-function leaves. Console construction is lazy:
- *   the constructor stashes its args in `_internal.privateConstructorArgs` and
+ *   the constructor stashes its args in `shared.privateConstructorArgs` and
  *   the `node:console` instance is built on first `#getConsole()`, so the
  *   logger can be imported during early Node.js bootstrap before stdout is
  *   ready (avoiding `ERR_CONSOLE_WRITABLE_STREAM`). Method bodies live in the
  *   leaves: `./console-methods`, `./semantic-methods`, `./indentation-methods`,
  *   `./stream-methods`, `./console`, `./options`, `./symbols`,
- *   `./symbols-builder`, `./_internal`.
+ *   `./symbols-builder`, `./shared`.
  */
 
 import { ReflectApply } from '../primordials/reflect'
 
 import { getTheme } from '../themes/context'
 
-import { privateConstructorArgs } from './_internal'
+import { privateConstructorArgs } from './shared'
 import { buildLoggerSymbols } from './symbols-builder'
 import {
   incLogCallCountSymbol,

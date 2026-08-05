@@ -30,7 +30,7 @@ describe('main build external() predicate', () => {
   })
 
   it('externalizes own src/external shims by relative import', () => {
-    const importer = path.join(srcPath, 'globs/_internal.ts')
+    const importer = path.join(srcPath, 'globs/shared.ts')
     expect(external('../external/fast-glob.js', importer)).toBe(true)
     expect(external('../external/picomatch.js', importer)).toBe(true)
   })
@@ -40,7 +40,7 @@ describe('main build external() predicate', () => {
   })
 
   it('bundles ordinary relative imports', () => {
-    const importer = path.join(srcPath, 'globs/_internal.ts')
+    const importer = path.join(srcPath, 'globs/shared.ts')
     expect(external('./defaults', importer)).toBe(false)
     expect(external('../paths/normalize', importer)).toBe(false)
   })
@@ -55,7 +55,7 @@ describe('main build external() predicate', () => {
     expect(external(nested)).toBe(false)
     const importerInDep = path.join(
       rootPath,
-      'node_modules/@socketsecurity/lib/dist/cacache/_internal.js',
+      'node_modules/@socketsecurity/lib/dist/cacache/shared.js',
     )
     expect(external('../external/cacache', importerInDep)).toBe(false)
   })

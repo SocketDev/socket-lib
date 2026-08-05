@@ -1,7 +1,7 @@
 /**
  * @file Process-method interceptors — `processEmit` replaces `process.emit` and
  *   `processReallyExit` replaces `process.reallyExit` while `load()` is active.
- *   Both forward to the originals captured in `_internal` and broadcast `exit`
+ *   Both forward to the originals captured in `shared` and broadcast `exit`
  *   / `afterexit` through the signal-exit emitter.
  */
 
@@ -13,7 +13,7 @@ import {
   globalProcess,
   originalProcessEmit,
   originalProcessReallyExit,
-} from './_internal'
+} from './shared'
 
 /* c8 ignore start - processEmit + processReallyExit interceptors
    only fire on real process exit/emit; can't be triggered in-test. */

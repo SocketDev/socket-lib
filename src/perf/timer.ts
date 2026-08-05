@@ -13,7 +13,7 @@ import { errorMessage } from '../errors/message'
 import { DateNow } from '../primordials/date'
 import { MathRound } from '../primordials/math'
 
-import { performanceMetrics } from './_internal'
+import { performanceMetrics } from './shared'
 import { isPerfEnabled } from './enabled'
 
 import type { PerformanceMetrics } from './types'

@@ -4,7 +4,7 @@ import {
   BINARY_PATH_CACHE_MAX_SIZE,
   binaryPathCache,
   binaryPathCacheSet,
-} from '../../../src/dlx/_internal'
+} from '../../../src/dlx/shared'
 
 // Independent copy of the documented cap. The src value is the
 // system-under-test, so the expected value must not be derived from it.
@@ -14,7 +14,7 @@ beforeEach(() => {
   binaryPathCache.clear()
 })
 
-describe.sequential('dlx/_internal — binaryPathCacheSet (bounded LRU)', () => {
+describe.sequential('dlx/shared — binaryPathCacheSet (bounded LRU)', () => {
   test('sets a value the first time', () => {
     binaryPathCacheSet('key', '/path/value')
     expect(binaryPathCache.get('key')).toBe('/path/value')

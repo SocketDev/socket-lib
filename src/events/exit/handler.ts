@@ -7,7 +7,7 @@
 
 import { TypeErrorCtor } from '../../primordials/error'
 
-import { getEmitter, globalProcess, isLoaded } from './_internal'
+import { getEmitter, globalProcess, isLoaded } from './shared'
 import { load, unload } from './lifecycle'
 
 import type { OnExitOptions } from './types'

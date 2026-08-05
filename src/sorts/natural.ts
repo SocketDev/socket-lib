@@ -6,7 +6,7 @@
  *   per-comparison.
  */
 
-import { getFastSort } from './_internal'
+import { getFastSort } from './shared'
 import { IntlCollator } from '../primordials/intl'
 
 import type { FastSortFunction } from './types'

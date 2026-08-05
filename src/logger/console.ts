@@ -17,7 +17,7 @@
  *     `ensurePrototypeInitialized()` from inside a method body, so the import
  *     cycle never resolves at module-load time — by the time
  *     `ensurePrototypeInitialized` actually runs, both modules are fully
- *     evaluated. Same pattern as `fs/path-cache` ↔ `fs/_internal`.
+ *     evaluated. Same pattern as `fs/path-cache` ↔ `fs/shared`.
  */
 
 // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare `process` is browser-stubbable (resolve.fallback / browser field); a `node:` prefix throws UnhandledSchemeError in webpack browser bundles.
@@ -38,7 +38,7 @@ import {
   globalConsole,
   privateConsole,
   privateConstructorArgs,
-} from './_internal'
+} from './shared'
 import { Logger } from './node'
 import { getKGroupIndentationWidthSymbol } from './symbols'
 

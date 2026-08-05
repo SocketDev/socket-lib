@@ -8,7 +8,7 @@
 
 import { UNDEFINED_TOKEN } from '../constants/sentinels'
 import { MathFloor, MathMin, MathRandom } from '../primordials/math'
-import { getTimers } from './_internal'
+import { getTimers } from './shared'
 import { normalizeRetryOptions } from './options'
 
 import type { RetryOptions } from './types'

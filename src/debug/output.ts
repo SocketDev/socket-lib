@@ -15,7 +15,7 @@ import { ReflectApply } from '../primordials/reflect'
 import { getDefaultSpinner } from '../spinner/default'
 import { applyLinePrefix } from '../strings/format'
 
-import { getDebugJs, getPointingTriangle, getUtil } from './_internal'
+import { getDebugJs, getPointingTriangle, getUtil } from './shared'
 import { getCallerInfo } from './caller-info'
 import { extractOptions, isEnabled } from './namespace'
 

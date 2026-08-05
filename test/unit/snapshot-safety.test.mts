@@ -10,8 +10,8 @@
  *   - The shared process `AbortSignal` (`getAbortSignal()`).
  *   - The `Intl.Segmenter` in `strings/width` (live ICU handle).
  *   - `AsyncLocalStorage` singletons in `env/rewire` and `themes/context`.
- *   - The pre-bound `console.*` methods in `logger/_internal`. Each is now
- *     acquired LAZILY at first use. Two layers of tests assert the contract:
+ *   - The pre-bound `console.*` methods in `logger/shared`. Each is now acquired
+ *     LAZILY at first use. Two layers of tests assert the contract:
  *
  *   1. Unit: importing the module must NOT trigger the deferred construction;
  *      calling the using function MUST.
@@ -230,8 +230,8 @@ describe('snapshot safety — lazy AsyncLocalStorage singletons', () => {
   })
 })
 
-describe('snapshot safety — lazy bound console methods (logger/_internal)', () => {
-  // logger/_internal used to build `console.method.bind(globalConsole)` at
+describe('snapshot safety — lazy bound console methods (logger/shared)', () => {
+  // logger/shared used to build `console.method.bind(globalConsole)` at
   // module-eval; a bound native function serializes as an unresolvable external
   // reference and aborts --build-snapshot. The binds are now built lazily by
   // getBoundConsoleEntries(). Counting Function.prototype.bind invocations that
@@ -263,13 +263,12 @@ describe('snapshot safety — lazy bound console methods (logger/_internal)', ()
   })
 
   it('does not bind console methods at module-eval', async () => {
-    await import('../../src/logger/_internal')
+    await import('../../src/logger/shared')
     expect(bindCount).toBe(0)
   })
 
   it('binds console methods on the first getBoundConsoleEntries() call and memoizes', async () => {
-    const { getBoundConsoleEntries } =
-      await import('../../src/logger/_internal')
+    const { getBoundConsoleEntries } = await import('../../src/logger/shared')
     expect(bindCount).toBe(0)
 
     const entries = getBoundConsoleEntries()
@@ -284,7 +283,7 @@ describe('snapshot safety — lazy bound console methods (logger/_internal)', ()
 })
 
 describe('snapshot safety — lazy vendored-semver require (versions/*)', () => {
-  // versions/_internal used to `require('../external/semver')` at module-eval
+  // versions/shared used to `require('../external/semver')` at module-eval
   // and versions/compare used to `impl.eq.bind(impl)` at module scope. The
   // vendored semver resolves through the npm-pack bundle, whose eval builds a
   // live native [Foreign] handle — pinning it aborts --build-snapshot. The
@@ -332,8 +331,8 @@ describe('snapshot safety — lazy vendored-semver require (versions/*)', () => 
   })
 })
 
-describe('snapshot safety — lazy vendored-cacache require (cacache/_internal)', () => {
-  // cacache/_internal used to `import cacache from '../external/cacache'` at
+describe('snapshot safety — lazy vendored-cacache require (cacache/shared)', () => {
+  // cacache/shared used to `import cacache from '../external/cacache'` at
   // module-eval, constructing the npm-pack bundle's native [Foreign] handle at
   // import. The require is now deferred + memoized in getCacache().
   //
@@ -346,7 +345,7 @@ describe('snapshot safety — lazy vendored-cacache require (cacache/_internal)'
   // accessor's observable contract: it yields the real cacache surface and
   // memoizes a single instance across calls.
   it('getCacache yields the cacache surface and memoizes one instance', async () => {
-    const { getCacache } = await import('../../src/cacache/_internal')
+    const { getCacache } = await import('../../src/cacache/shared')
     const first = getCacache()
     expect(typeof first.get).toBe('function')
     expect(typeof first.put).toBe('function')
@@ -386,12 +385,12 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
     'logger/symbols',
     'logger/logger',
     'stdio/footer',
-    'versions/_internal',
+    'versions/shared',
     'versions/compare',
     'versions/parse',
     'versions/range',
     'versions/modify',
-    'cacache/_internal',
+    'cacache/shared',
     'cacache/read',
     'cacache/write',
   ]

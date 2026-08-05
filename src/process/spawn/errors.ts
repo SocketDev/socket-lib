@@ -27,7 +27,7 @@ import {
   ObjectGetOwnPropertyDescriptors,
 } from '../../primordials/object'
 import { ReflectDeleteProperty } from '../../primordials/reflect'
-import { stackCache } from './_internal'
+import { stackCache } from './shared'
 
 import type { SpawnError } from './types'
 

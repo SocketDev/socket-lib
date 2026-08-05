@@ -10,7 +10,7 @@ import process from 'node:process'
 
 import { ErrorCtor } from '../primordials/error'
 
-import { getFs, getPath } from './_internal'
+import { getFs, getPath } from './shared'
 
 /**
  * Ensure IPC directory exists for stub file creation. Uses restrictive (0o700)

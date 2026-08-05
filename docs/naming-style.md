@@ -75,7 +75,7 @@ This is **internal** only — public API still uses `get` where it disambiguates
 
 Within a module:
 
-- `_internal.ts` — underscore-prefix, NOT part of public API. The dist export
+- `shared.ts` — underscore-prefix, NOT part of public API. The dist export
   generator skips `dist/**/_*` so consumers can't import these even if they
   guess the path.
 - Flat siblings (`macos.ts`, `linux.ts`, `windows.ts`, `keychain.ts`, `rc.ts`)

@@ -11,7 +11,7 @@ import { WIN32 } from '../constants/platform'
 
 import { StringPrototypeCharCodeAt } from '../primordials/string'
 
-import { CHAR_UPPERCASE_A, CHAR_UPPERCASE_Z } from './_internal'
+import { CHAR_UPPERCASE_A, CHAR_UPPERCASE_Z } from './shared'
 import { normalizePath } from './normalize'
 import { isAbsolute, isPathSeparator } from './predicates'
 

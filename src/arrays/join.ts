@@ -4,7 +4,7 @@
  *   `joinOr` ("a, b, or c").
  */
 
-import { getConjunctionFormatter, getDisjunctionFormatter } from './_internal'
+import { getConjunctionFormatter, getDisjunctionFormatter } from './shared'
 
 export interface JoinListOptions {
   with?: string | undefined

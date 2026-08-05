@@ -13,7 +13,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 // We can't intercept `httpDownloadAttempt` directly (it's called as a
 // local symbol from `httpDownload`), so we mock the lower-level
-// `httpRequestAttempt` AND the file-stream getter from `_internal` so we
+// `httpRequestAttempt` AND the file-stream getter from `shared` so we
 // can:
 //   1. Return a fake streaming response with a controllable rawResponse.
 //   2. Write the expected bytes to the temp file via that fake stream.

@@ -5,7 +5,7 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { getCacache } from '../../../src/cacache/_internal'
+import { getCacache } from '../../../src/cacache/shared'
 import { clear } from '../../../src/cacache/clear'
 import { get, safeGet } from '../../../src/cacache/read'
 import { put, remove } from '../../../src/cacache/write'

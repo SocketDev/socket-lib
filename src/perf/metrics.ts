@@ -9,7 +9,7 @@ import { debugLog } from '../debug/output'
 import { MathMax, MathMin, MathRound } from '../primordials/math'
 import { ObjectEntries } from '../primordials/object'
 
-import { performanceMetrics } from './_internal'
+import { performanceMetrics } from './shared'
 
 import type { PerformanceMetrics } from './types'
 

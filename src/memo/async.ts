@@ -11,7 +11,7 @@ import { DateNow } from '../primordials/date'
 import { MapCtor } from '../primordials/map-set'
 import { PromiseResolve } from '../primordials/promise'
 
-import { cacheRegistry, defaultKeyGen } from './_internal'
+import { cacheRegistry, defaultKeyGen } from './shared'
 
 import type { CacheEntry, MemoizeOptions } from './types'
 

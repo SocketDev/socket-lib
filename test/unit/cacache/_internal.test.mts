@@ -1,10 +1,10 @@
 /**
- * @file Unit tests for src/cacache/_internal — getCacache.
+ * @file Unit tests for src/cacache/shared — getCacache.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { getCacache } from '../../../src/cacache/_internal'
+import { getCacache } from '../../../src/cacache/shared'
 
 describe('getCacache', () => {
   it('should export getCacache function', () => {

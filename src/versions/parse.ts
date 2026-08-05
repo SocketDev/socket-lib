@@ -7,7 +7,7 @@
  *   `semver` directly — smol-versions doesn't expose the parsed shape.
  */
 
-import { getImpl, getSemver } from './_internal'
+import { getImpl, getSemver } from './shared'
 
 import type { ParsedVersion } from './types'
 

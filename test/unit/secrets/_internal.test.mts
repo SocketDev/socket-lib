@@ -8,13 +8,13 @@ import {
   invalidate,
   invalidateAll,
   setCached,
-} from '../../../src/secrets/_internal'
+} from '../../../src/secrets/shared'
 
 beforeEach(() => {
   invalidateAll()
 })
 
-describe.sequential('secrets/_internal — cacheKey', () => {
+describe.sequential('secrets/shared — cacheKey', () => {
   test('combines service + account with a space separator', () => {
     const key = cacheKey('svc', 'acct')
     expect(key).toBe('svc acct')
@@ -33,7 +33,7 @@ describe.sequential('secrets/_internal — cacheKey', () => {
   })
 })
 
-describe.sequential('secrets/_internal — setCached / getCached / has', () => {
+describe.sequential('secrets/shared — setCached / getCached / has', () => {
   test('getCached returns undefined before anything is cached', () => {
     expect(getCached('svc', 'acct')).toBeUndefined()
     expect(has('svc', 'acct')).toBe(false)
@@ -59,7 +59,7 @@ describe.sequential('secrets/_internal — setCached / getCached / has', () => {
   })
 })
 
-describe.sequential('secrets/_internal — invalidate', () => {
+describe.sequential('secrets/shared — invalidate', () => {
   test('invalidate drops a single cache entry', () => {
     setCached('svc', 'a', 'tok')
     invalidate('svc', 'a')
@@ -79,7 +79,7 @@ describe.sequential('secrets/_internal — invalidate', () => {
   })
 })
 
-describe.sequential('secrets/_internal — invalidateAll', () => {
+describe.sequential('secrets/shared — invalidateAll', () => {
   test('clears every entry', () => {
     setCached('s1', 'a', '1')
     setCached('s2', 'b', '2')
@@ -91,7 +91,7 @@ describe.sequential('secrets/_internal — invalidateAll', () => {
   })
 })
 
-describe.sequential('secrets/_internal — dedupeRead', () => {
+describe.sequential('secrets/shared — dedupeRead', () => {
   test('calls reader once on first read and caches the result', async () => {
     let calls = 0
     const reader = async () => {

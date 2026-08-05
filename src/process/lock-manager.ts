@@ -52,7 +52,7 @@ import { MathMax } from '../primordials/math'
 import { pRetry } from '../promises/retry'
 import { onExit } from '../events/exit/handler'
 
-import { getFs, getPath } from './_internal'
+import { getFs, getPath } from './shared'
 
 import type { ProcessLockOptions } from './lock-types'
 

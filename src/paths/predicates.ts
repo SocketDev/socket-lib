@@ -29,7 +29,7 @@ import {
   msysDriveRegExp,
   nodeModulesPathRegExp,
   pathLikeToString,
-} from './_internal'
+} from './shared'
 
 /**
  * Check if a path is absolute.

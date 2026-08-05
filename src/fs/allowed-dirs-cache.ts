@@ -7,7 +7,7 @@
  *   `invalidatePathCache()` directly without that side effect repeating. The
  *   registration is deferred to a microtask (`registerInvalidationCallback`)
  *   rather than run at top-level module load. This module sits in a require
- *   cycle (`allowed-dirs-cache → _internal → paths/socket → …`); in the bundled
+ *   cycle (`allowed-dirs-cache → shared → paths/socket → …`); in the bundled
  *   CJS the `registerCacheInvalidation` import binding from `paths/rewire` is
  *   not yet initialized when this module first evaluates, so a synchronous
  *   top-level call threw `registerCacheInvalidation is not defined` at require
@@ -19,7 +19,7 @@
 
 import { registerCacheInvalidation } from '../paths/rewire'
 
-import { clearAllowedDirectories } from './_internal'
+import { clearAllowedDirectories } from './shared'
 
 /**
  * Invalidate the cached allowed directories. Called automatically by the
@@ -41,7 +41,7 @@ export function invalidatePathCache(): void {
  * Register `invalidatePathCache` with the rewire module after the current
  * module-init turn, so the circular import is fully wired before the call.
  * Guarded + self-rescheduling: in the require cycle (`allowed-dirs-cache →
- * _internal → paths/socket → … → rewire`) the `registerCacheInvalidation` live
+ * shared → paths/socket → … → rewire`) the `registerCacheInvalidation` live
  * binding can still be in its temporal dead zone when the first microtask
  * fires under some import orders, throwing `registerCacheInvalidation is not
  * defined`. Vitest loads many modules concurrently, so those orders do come

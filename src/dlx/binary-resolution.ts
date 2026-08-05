@@ -5,8 +5,8 @@
  *   - `makePackageBinsExecutable` — chmod all bin entries to 0o755 on Unix
  *   - `resolveBinaryPath` — Windows wrapper (.cmd/.bat/.ps1/.exe) lookup Split
  *     out of `dlx/package.ts` for size hygiene. The cache used by
- *     `resolveBinaryPath` lives in `_internal.ts` so both this leaf and any
- *     direct consumers (`binaryPathCacheSet`) share one source.
+ *     `resolveBinaryPath` lives in `shared.ts` so both this leaf and any direct
+ *     consumers (`binaryPathCacheSet`) share one source.
  */
 
 import { WIN32 } from '../constants/platform'
@@ -21,7 +21,7 @@ import { ObjectKeys, ObjectValues } from '../primordials/object'
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 
-import { binaryPathCache, binaryPathCacheSet } from './_internal'
+import { binaryPathCache, binaryPathCacheSet } from './shared'
 
 /**
  * Find the binary path for an installed package. Uses npm's bin resolution

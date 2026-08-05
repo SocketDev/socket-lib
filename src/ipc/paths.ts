@@ -8,7 +8,7 @@ import process from 'node:process'
 
 import { getOsTmpDir } from '../paths/socket'
 
-import { getPath } from './_internal'
+import { getPath } from './shared'
 
 /**
  * Get the IPC stub path for a given application.

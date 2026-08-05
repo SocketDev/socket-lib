@@ -9,7 +9,7 @@ import { debugLog } from '../debug/output'
 import { MathRound } from '../primordials/math'
 import { ObjectKeys, ObjectValues } from '../primordials/object'
 
-import { performanceMetrics } from './_internal'
+import { performanceMetrics } from './shared'
 import { isPerfEnabled } from './enabled'
 import { getPerformanceSummary } from './metrics'
 

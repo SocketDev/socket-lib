@@ -34,7 +34,7 @@ const CLDR_TO_FIELD: Record<Intl.LDMLPluralRule, keyof PluralForms> = {
 // measurably slow on first call in Node (10ms+); a Map keyed on
 // `<locale>:<type>` keeps every distinct config to a single
 // construction across the lifetime of the process. Same pattern
-// the lib uses for Intl.ListFormat (arrays/_internal.ts) and
+// the lib uses for Intl.ListFormat (arrays/shared.ts) and
 // Intl.Collator (sorts/natural.ts), extended to a multi-key cache
 // because pluralize accepts per-call locale + cardinal/ordinal.
 // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Intl/PluralRules/PluralRules

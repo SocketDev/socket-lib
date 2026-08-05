@@ -6,7 +6,7 @@
  *   `vi.useFakeTimers()` / `clock.install()`, vitest/sinon replace
  *   `globalThis.setTimeout` before this module loads, so fake timers advance
  *   `sleep()` correctly — no special wiring needed. For Node-only
- *   abort-signal-aware delays see `promises/_internal.ts`.
+ *   abort-signal-aware delays see `promises/shared.ts`.
  */
 
 import { PromiseCtor } from '../primordials/promise'

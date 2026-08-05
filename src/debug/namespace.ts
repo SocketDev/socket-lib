@@ -11,7 +11,7 @@ import { getDebug } from '../env/debug'
 import { getSocketDebug } from '../env/socket'
 import { StringPrototypeStartsWith } from '../primordials/string'
 
-import { customLog, debugByNamespace, getDebugJs } from './_internal'
+import { customLog, debugByNamespace, getDebugJs } from './shared'
 
 import type { DebugOptions, NamespacesOrOptions } from './types'
 

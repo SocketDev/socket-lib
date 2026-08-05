@@ -1,7 +1,7 @@
 /**
  * @file The npm-packlist-derived `defaultIgnore` list. Public starting point
  *   for caller-customized ignore arrays — also consumed internally by
- *   `_internal` (matcher / stream callers fall back to this list when no
+ *   `shared` (matcher / stream callers fall back to this list when no
  *   `ignore` option is supplied).
  */
 

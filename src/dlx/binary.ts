@@ -8,7 +8,7 @@
  *   - `executeBinary` — execute an already-cached binary Supporting surface lives
  *     in sibling leaves and is re-exported here so existing `dlx/binary`
  *     importers keep working unchanged:
- *   - lazy `node:fs` / `node:path` / `node:crypto` + LRU cache — `./_internal`
+ *   - lazy `node:fs` / `node:path` / `node:crypto` + LRU cache — `./shared`
  *   - types — `./binary-types`
  *   - on-disk cache metadata — `./binary-cache`
  *   - download + integrity verification — `./binary-download`

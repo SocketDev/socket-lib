@@ -20,7 +20,7 @@ import {
   indexOfPathSeparator,
   msysDriveRegExp,
   pathLikeToString,
-} from './_internal'
+} from './shared'
 
 // A normalized path that is exactly a bare Windows drive letter (`C:`).
 const DRIVE_LETTER_REGEXP = /^[A-Za-z]:$/
@@ -297,7 +297,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
 
 // Re-exports — preserve the historical `paths/normalize` surface so
 // downstream importers don't have to chase the split.
-export { getUrl, pathLikeToString } from './_internal'
+export { getUrl, pathLikeToString } from './shared'
 export {
   fromUnixPath,
   splitPath,

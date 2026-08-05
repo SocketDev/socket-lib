@@ -16,7 +16,7 @@ import {
   setLoaded,
   setSignals,
   WIN32,
-} from './_internal'
+} from './shared'
 import { processEmit, processReallyExit } from './intercept'
 
 import type { SignalListener, SignalListenerMap } from './types'

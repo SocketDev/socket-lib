@@ -26,7 +26,7 @@ import {
   resolveGzipOptions,
 } from '../../../src/compression/gzip'
 import { BROTLI_EXTS, compressBrotli } from '../../../src/compression/brotli'
-import { stripExt } from '../../../src/compression/_internal'
+import { stripExt } from '../../../src/compression/shared'
 import { safeDelete } from '../../../src/fs/safe'
 import {
   LARGE_TEXT,

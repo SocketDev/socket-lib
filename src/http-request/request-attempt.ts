@@ -21,7 +21,7 @@ import { ObjectKeys } from '../primordials/object'
 import { PromiseCtor } from '../primordials/promise'
 import { URLCtor } from '../primordials/url'
 
-import { getHttp, getHttps } from './_internal'
+import { getHttp, getHttps } from './shared'
 import { enrichErrorMessage } from './errors'
 import { decodeBody } from './response-reader'
 import { getSocketCallerUserAgent } from './user-agent'

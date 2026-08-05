@@ -5,7 +5,7 @@
  *   cumulative total, `strip`, and path-traversal rejection. Fixtures are real
  *   zips built with the same library the extractor uses, so the entry headers
  *   the size checks read are genuine. Path traversal is covered against
- *   `validatePathWithinBase` directly, in _internal.test.mts: adm-zip strips
+ *   `validatePathWithinBase` directly, in shared.test.mts: adm-zip strips
  *   `../` when an entry is added, so a fixture built with it cannot express a
  *   malicious entry name — a test written that way passes for the wrong
  *   reason.

@@ -14,7 +14,7 @@ import { parseSchema } from '../schema/parse'
 import { DateNow } from '../primordials/date'
 import { JSONStringify } from '../primordials/json'
 
-import { getFs, IpcStubSchema } from './_internal'
+import { getFs, IpcStubSchema } from './shared'
 import { ensureIpcDirectory } from './directory'
 import { getIpcStubPath } from './paths'
 

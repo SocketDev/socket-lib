@@ -1,5 +1,5 @@
 /**
- * @file Tests for archives/_internal — the shared archive guard rails.
+ * @file Tests for archives/shared — the shared archive guard rails.
  *   `validatePathWithinBase` is the unit that actually enforces the traversal
  *   guarantee for both the zip and tar extractors, so it is tested here
  *   directly. Driving it through a zip fixture is not possible: adm-zip strips
@@ -18,7 +18,7 @@ import {
   getAdmZip,
   getTarFs,
   validatePathWithinBase,
-} from '../../../src/archives/_internal.ts'
+} from '../../../src/archives/shared.ts'
 
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 

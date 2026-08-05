@@ -11,7 +11,7 @@ import {
   StringPrototypeStartsWith,
 } from '../primordials/string'
 
-import { getCacache } from './_internal'
+import { getCacache } from './shared'
 
 import type { RemoveOptions } from './types'
 

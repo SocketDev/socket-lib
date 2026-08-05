@@ -27,7 +27,7 @@ import {
   DEFAULT_MAX_FILE_SIZE,
   DEFAULT_MAX_TOTAL_SIZE,
   getTarFs,
-} from './_internal'
+} from './shared'
 
 import type { ExtractOptions } from './types'
 

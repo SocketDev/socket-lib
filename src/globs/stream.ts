@@ -11,11 +11,7 @@ import {
 } from '../paths/globs'
 import { ArrayIsArray } from '../primordials/array'
 
-import {
-  defaultIgnore,
-  getFastGlob,
-  normalizeIgnorePatterns,
-} from './_internal'
+import { defaultIgnore, getFastGlob, normalizeIgnorePatterns } from './shared'
 
 import type { GlobOptions } from './types'
 import type { Options as FastGlobOptions } from 'fast-glob'

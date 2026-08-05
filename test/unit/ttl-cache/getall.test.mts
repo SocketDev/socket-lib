@@ -16,7 +16,7 @@ import { resetEnv, setEnv } from '../../../src/env/rewire'
 import { safeDelete } from '../../../src/fs/safe'
 import { invalidateCaches } from '../../../src/paths/rewire'
 
-import * as cacacheInternal from '../../../src/cacache/_internal'
+import * as cacacheInternal from '../../../src/cacache/shared'
 import * as cacacheRead from '../../../src/cacache/read'
 import * as cacacheWrite from '../../../src/cacache/write'
 
@@ -50,7 +50,7 @@ export function makeFakeStream(
   }
 }
 
-vi.mock(import('../../../src/cacache/_internal'), async importOriginal => {
+vi.mock(import('../../../src/cacache/shared'), async importOriginal => {
   const original = await importOriginal<typeof cacacheInternal>()
   return {
     ...original,

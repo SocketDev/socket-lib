@@ -30,7 +30,7 @@ import {
   getNpmCliPromiseSpawn,
   resolveSpawnBin,
   stripAnsiFromSpawnResult,
-} from './_internal'
+} from './shared'
 import { enhanceSpawnError } from './errors'
 import { isStdioType } from './stdio'
 import { resolveSpawnTimeout } from './timeout'
@@ -139,7 +139,7 @@ export function spawn(
     : process.env
   // Resolve a bare binary name against a search path the working directory
   // cannot supply. A path-like cmd passes through untouched. See
-  // ./_internal.resolveSpawnBin.
+  // ./shared.resolveSpawnBin.
   const { command: actualCmd, searchPath } = resolveSpawnBin(cmd, {
     cwd,
     env: baseEnv,
@@ -345,7 +345,7 @@ export function spawnSync(
 ): SpawnSyncReturns<string | Buffer> {
   // Resolve a bare binary name against a search path the working directory
   // cannot supply, and hand back the PATH the child needs. A path-like cmd
-  // passes through untouched. See ./_internal.resolveSpawnBin.
+  // passes through untouched. See ./shared.resolveSpawnBin.
   const optionsEnv = getOwn(options, 'env') as NodeJS.ProcessEnv | undefined
   const baseEnv = optionsEnv ?? process.env
   const { command: actualCmd, searchPath } = resolveSpawnBin(cmd, {

@@ -1,12 +1,12 @@
 /**
  * @file `clearAllMemoizationCaches` — fan out to every per-cache clear function
- *   registered in `_internal.cacheRegistry`. Useful for tests and for callers
+ *   registered in `shared.cacheRegistry`. Useful for tests and for callers
  *   that need to force recomputation across every memoize instance.
  */
 
 import { debugLog } from '../debug/output'
 
-import { cacheRegistry } from './_internal'
+import { cacheRegistry } from './shared'
 
 /**
  * Clear all memoization caches. Useful for testing or when you need to force

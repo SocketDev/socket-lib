@@ -6,7 +6,7 @@
 
 import { getPackageExtensions } from '../constants/packages'
 import { merge } from '../objects/mutate'
-import { getSemver } from '../versions/_internal'
+import { getSemver } from '../versions/shared'
 
 const packageExtensions = getPackageExtensions()
 

@@ -18,7 +18,7 @@ import { ErrorCtor } from '../primordials/error'
 import { MathFloor } from '../primordials/math'
 import { NumberIsSafeInteger, NumberParseInt } from '../primordials/number'
 import { PromiseCtor } from '../primordials/promise'
-import { getCrypto, getFs } from './_internal'
+import { getCrypto, getFs } from './shared'
 import { httpRequestAttempt } from './request'
 import { HttpResponseError } from './response-types'
 

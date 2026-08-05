@@ -20,7 +20,7 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { indexOfPathSeparator } from '../../../src/paths/_internal'
+import { indexOfPathSeparator } from '../../../src/paths/shared'
 import { normalizePath } from '../../../src/paths/normalize'
 import { search } from '../../../src/strings/search'
 

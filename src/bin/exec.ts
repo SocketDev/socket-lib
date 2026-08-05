@@ -24,7 +24,7 @@ import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
 import { spawn } from '../process/spawn/child'
 
-import { binPathCache, getFs } from './_internal'
+import { binPathCache, getFs } from './shared'
 import { resolveRealBinSync } from './resolve'
 import { whichReal } from './which'
 
