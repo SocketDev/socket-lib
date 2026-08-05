@@ -145,6 +145,14 @@ export function buildHookAndDocSteps(forwardedArgs: string[]): CheckStep[] {
     // the anti-prose-guard em-dash-chain pattern.
     () =>
       run('node', ['scripts/fleet/check/prose-em-dash-chains-are-absent.mts']),
+    // A human-gate lane A must be pasteable as-is: a `! <cmd>` that runs in
+    // the session so its output is readable, with no working-directory
+    // assumption. A lane the operator edits, or runs in their own terminal, is
+    // a gate that strands the agent.
+    () =>
+      run('node', [
+        'scripts/fleet/check/human-gate-lanes-are-runnable.mts',
+      ]),
     // Prose in tracked markdown must reference a PR/issue as a clickable
     // `[#N](url)` link, not a bare `#N` — dead text in a rendered .md or a
     // terminal report. Complements the anti-backref rule (bare `#N` is correct

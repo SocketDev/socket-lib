@@ -20,7 +20,7 @@ catalog:
   '@redwoodjs/agent-ci': 0.17.1
   '@shadscan/cli': 0.7.0
   '@sinclair/typebox': 0.34.52
-  '@socketregistry/packageurl-js': 1.5.0
+  '@socketregistry/packageurl-js': 1.5.1
   '@types/shell-quote': 1.7.5
   '@ultrathink/acorn.rs.wasm': 0.1.1
   # Alias to the post-rename artifact at the version this repo already
@@ -37,7 +37,7 @@ catalog:
   # version regardless of where the importing file lives. src/ + test/
   # code uses the canonical name because vitest aliases that to local
   # src/.
-  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.0'
+  '@socketregistry/packageurl-js-stable': 'npm:@socketregistry/packageurl-js@1.5.1'
   '@socketsecurity/lib': 6.5.3
   '@socketsecurity/lib-stable': 'npm:@socketsecurity/lib@6.5.3'
   '@socketsecurity/registry': 'npm:@socketsecurity/registry@2.0.5'
@@ -50,6 +50,7 @@ catalog:
   '@typescript/native-preview': 7.0.0-dev.20260510.1
   '@vitest/coverage-v8': 4.1.10
   '@vitest/ui': 4.1.10
+  'brace-expansion': 5.0.9
   'c8': 12.0.0
   'chrome-devtools-mcp': 1.6.0
   'compromise': 14.16.0
@@ -89,7 +90,7 @@ catalog:
   # Test-only tar extraction seam for archives coverage; single-sourced here so
   # the devDep and the dedup override below stay on one pin.
   'tar-fs': 3.1.3
-  'taze': 19.16.0
+  'taze': 19.17.1
   # Vite 8.x is rolldown-native (keeps the fleet bundler rolldown end-to-end,
   # so esbuild never enters the tree). vitest 4.1.x pulls vite transitively;
   # the override below forces that transitive vite to this pin. Pinned to
@@ -154,6 +155,10 @@ minimumReleaseAgeExclude:
   # exact-pinned so future versions re-soak.
   # published: 2026-08-04 | removable: 2026-08-11
   - '@socketsecurity/lib@6.5.3'
+  # published: 2026-07-30 | removable: 2026-08-06
+  - 'brace-expansion@5.0.9'
+  # published: 2026-08-03 | removable: 2026-08-10
+  - 'taze@19.17.1'
 
   # Refuse transitive dependencies declared via git/tarball/local-tarball
   # specs — an npm package shouldn't be allowed to drag in a git URL we
@@ -176,6 +181,7 @@ overrides:
   '@socketsecurity/lib': 'catalog:'
   '@socketsecurity/registry': 'catalog:'
   '@socketsecurity/sdk': 'catalog:'
+  'brace-expansion@>=4': '5.0.9'
   'chalk@>=5': '5.6.2'
   'es-define-property': 'npm:@socketregistry/es-define-property@1.0.7'
   'es-set-tostringtag': 'npm:@socketregistry/es-set-tostringtag@1.0.10'
@@ -194,12 +200,14 @@ overrides:
   'mime-types@>=3': '3.0.2'
   'minimatch@>=3': '10.2.6'
   'minipass@>=4': '7.1.3'
+  'postcss@>=8': '8.5.24'
   'safe-buffer': 'npm:@socketregistry/safe-buffer@1.0.9'
   'safer-buffer': 'npm:@socketregistry/safer-buffer@1.0.10'
   'semver@>=5.0.0 <7.6.0': '7.8.5'
   'side-channel': 'npm:@socketregistry/side-channel@1.0.10'
   'ssri@>=12': '13.0.1'
   'string-width@>=5': '8.2.2'
+  'tinyexec': '1.3.0'
   'update-notifier@>=4.0.0': '7.3.1'
   'uuid': '11.1.1'
   'which': '7.0.0'
@@ -348,15 +356,6 @@ patchedDependencies:
   # literals so the browser bundle (which stubs http2 to false) can load the
   # sigstore signer; consumer: packages/provenance via the browser field.
   '@sigstore/sign@4.1.1': patches/@sigstore__sign@4.1.1.patch
-  # 5.0.7 dropped the default export from both builds and 5.0.8 did not restore
-  # it, so the patch re-adds `expand` as the default on each build separately.
-  # The original consumer was minimatch@9's compiled __importDefault call, which
-  # reads `.default` because the __esModule flag skips the namespace fallback.
-  # That consumer is GONE: minimatch is pinned to 10 below, which imports
-  # `{ expand }` by name on both builds and carries no __importDefault at all.
-  # The patch stays for the remaining shape — any `import x from
-  # 'brace-expansion'`, which is how the fleet CI cache action resolves it.
-  brace-expansion@5.0.8: patches/brace-expansion@5.0.8.patch
   # Dedup compat: adds a `require` export condition + source/index.cjs so the
   # ESM-only chalk@5 stays require()-able by chalk@4's CJS consumers (@yarnpkg,
   # type-coverage) after the chalk 4/5 collapse.
@@ -396,9 +395,27 @@ patchedDependencies:
   # cause chains survive vm/worker realms; consumer: errors/predicates parity
   # with src's own isError semantics.
   pony-cause@2.1.11: patches/pony-cause@2.1.11.patch
-  # Single-registry: drops taze's default-registry fast path in
-  # getVersionsForContext so version lookups stay on the configured registry.
-  taze@19.16.0: patches/taze@19.16.0.patch
+  # default-export interop (managed by socket-wheelhouse sync; do not edit):
+  # 5.0.7 dropped the default export from BOTH builds. The CJS half breaks
+  # minimatch@9's compiled `__importDefault`, which reads `.default` and
+  # skips the namespace fallback once `__esModule` is set. The ESM half
+  # breaks any `import x from 'brace-expansion'`, the shape the fleet CI
+  # cache action resolves through, so an unpatched member throws "does not
+  # provide an export named default" and dies at setup before a test runs.
+  # The patch restores `expand` as the default on each build separately;
+  # patching one build leaves the other broken.
+  # On a bump, regenerate via `pnpm patch brace-expansion` + `pnpm patch-commit`.
+  brace-expansion@5.0.9: patches/brace-expansion@5.0.9.patch
+  # single-registry (managed by socket-wheelhouse sync; do not edit):
+  # routes taze version resolution through its own bundled direct-registry
+  # client (getVersionsFromRegistry — full packument, .npmrc/auth-aware) for
+  # EVERY registry, instead of the fast-npm-meta hosted endpoint it uses
+  # when the registry is the npm default. That third-party hop leaks
+  # dependency names, violates the fleet single-registry posture, and is
+  # blocked by egress policy — every lookup then hits the request timeout
+  # while taze still exits 0 (false green; update.mts fails loud on it).
+  # On a taze bump, regenerate via `pnpm patch taze` + `pnpm patch-commit`.
+  taze@19.17.1: patches/taze@19.17.1.patch
 
   # Opt out of pnpm's packageManager-version self-check. CI installs pnpm from
   # its native bin via the shared setup workflow, not corepack, so the runner's
