@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [6.6.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.6.0) - 2026-08-05
+
+### Added
+
+- **`spawn`** — add isSpawnExitError, and require an Error in isSpawnError
+
+### Fixed
+
+- **`catalog`** — sync the lib-stable alias to its 6.5.3 base
+
 ## [6.5.3](https://github.com/SocketDev/socket-lib/releases/tag/v6.5.3) - 2026-08-04
 
 ### Added
