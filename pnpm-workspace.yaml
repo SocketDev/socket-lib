@@ -159,6 +159,13 @@ minimumReleaseAgeExclude:
   - 'brace-expansion@5.0.9'
   # published: 2026-08-03 | removable: 2026-08-10
   - 'taze@19.17.1'
+  # tinyexec — the fleet cascade advanced the `tinyexec` OVERRIDE to 1.3.0, but
+  # the cascade propagates catalog/catalogOptional/overrides only, never this
+  # exclude list, so the pair split: the override demanded a version the soak
+  # window forbade installing and every install refused. Exact-pinned so a
+  # future version re-soaks.
+  # published: 2026-08-01 | removable: 2026-08-08
+  - 'tinyexec@1.3.0'
 
   # Refuse transitive dependencies declared via git/tarball/local-tarball
   # specs — an npm package shouldn't be allowed to drag in a git URL we
@@ -243,7 +250,12 @@ overrides:
   # vendors its own ansi-styles) leaves only ESM importers (wrap-ansi,
   # npm-run-all2), so no compat patch is needed here.
   'ansi-styles': '6.2.3'
-  'brace-expansion': '5.0.8'
+  # Must match the `brace-expansion@>=4` override, the catalog pin, the soak
+  # exclude and the patch key above — all four say 5.0.9. This bare key is more
+  # specific, so at 5.0.8 it won and pinned resolution there, which orphaned
+  # `patches/brace-expansion@5.0.9.patch` and made every install fail with
+  # ERR_PNPM_UNUSED_PATCH.
+  'brace-expansion': '5.0.9'
   # Dedup: chalk 4 (CJS; @yarnpkg/*, type-coverage) + chalk 5 (ESM-only;
   # ecc-agentshield) → 5.6.2. chalk 5 ships no `require` export condition, so a
   # CJS require() lands on the ESM namespace rather than the callable default;

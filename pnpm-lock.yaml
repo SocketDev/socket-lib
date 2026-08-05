@@ -218,8 +218,8 @@ catalogs:
       specifier: 0.34.52
       version: 0.34.52
     '@socketregistry/packageurl-js-stable':
-      specifier: npm:@socketregistry/packageurl-js@1.5.0
-      version: 1.5.0
+      specifier: npm:@socketregistry/packageurl-js@1.5.1
+      version: 1.5.1
     '@socketsecurity/lib-stable':
       specifier: npm:@socketsecurity/lib@6.5.3
       version: 6.5.3
@@ -320,8 +320,8 @@ catalogs:
       specifier: 4.0.2
       version: 4.0.2
     taze:
-      specifier: 19.16.0
-      version: 19.16.0
+      specifier: 19.17.1
+      version: 19.17.1
     typescript:
       specifier: 7.0.2
       version: 7.0.2
@@ -333,10 +333,11 @@ catalogs:
       version: 0.3.1
 
 overrides:
-  '@socketregistry/packageurl-js': 1.5.0
+  '@socketregistry/packageurl-js': 1.5.1
   '@socketsecurity/lib': 6.5.3
   '@socketsecurity/registry': npm:@socketsecurity/registry@2.0.5
   '@socketsecurity/sdk': 4.1.3
+  brace-expansion@>=4: 5.0.9
   chalk@>=5: 5.6.2
   es-define-property: npm:@socketregistry/es-define-property@1.0.7
   es-set-tostringtag: npm:@socketregistry/es-set-tostringtag@1.0.10
@@ -355,12 +356,14 @@ overrides:
   mime-types@>=3: 3.0.2
   minimatch@>=3: 10.2.6
   minipass@>=4: 7.1.3
+  postcss@>=8: 8.5.24
   safe-buffer: npm:@socketregistry/safe-buffer@1.0.9
   safer-buffer: npm:@socketregistry/safer-buffer@1.0.10
   semver@>=5.0.0 <7.6.0: 7.8.5
   side-channel: npm:@socketregistry/side-channel@1.0.10
   ssri@>=12: 13.0.1
   string-width@>=5: 8.2.2
+  tinyexec: 1.3.0
   update-notifier@>=4.0.0: 7.3.1
   uuid: 11.1.1
   which: 7.0.0
@@ -385,7 +388,7 @@ overrides:
   ajv-formats: 3.0.1
   ansi-regex: 6.2.2
   ansi-styles: 6.2.3
-  brace-expansion: 5.0.8
+  brace-expansion: 5.0.9
   chalk: 5.6.2
   chownr: 3.0.0
   commander: 13.1.0
@@ -448,7 +451,7 @@ patchedDependencies:
   '@npmcli/run-script@10.0.4': b1f74f31293142449c0be473fae0f0b977e1e1174e6a88e2021fcb93dc902ed6
   '@polka/url@1.0.0-next.29': 60d82e95c5e67e66c41fe2987ddd4fc3f4992f12158e5c56838e7682e6ef72ea
   '@sigstore/sign@4.1.1': 4d806e50e530edf6761bba8ad98cd1f2867a86201f6faee419444d86f5325def
-  brace-expansion@5.0.8: bdf9963feca3f55f619773889c6a471b5b91d491d090cb7f9fa361a04bb02771
+  brace-expansion@5.0.9: a89e05a7c781115d8e78a92c9f9b843aa7c534a587baa5ac808074d4fafa6857
   chalk@5.6.2: 3e5adfdfa27f0c9e066fe820ac91f77773798f205f5e43ff220b250007196661
   content-type@2.0.0: 985a8758e5e2783b13cabb8db054c0ff2a18591eb76a8eaacd7bc3eaae1a6ba5
   js-tokens@10.0.0: 9ca5535547c973063c8c2d0a7d33505cef80152329f2572507a54abbb4099826
@@ -458,7 +461,7 @@ patchedDependencies:
   minipass-sized@1.0.3: 2048620f836b8d07ca6b41a3500944fe7a43fb7542aa6d45bceb405afa513738
   node-gyp@12.4.0: 140ba43d43d74f7d3577feb3f8a6efad544dbb0059784102b144a0e2daa437f9
   pony-cause@2.1.11: 39b2eb2567818b7c60126d03e252dbbabd8738082fca850582300d45b0a8cfb8
-  taze@19.16.0: 77208c02cff936d0f1dbf2ffcc95f6f0def9697d6ba7ca4671c399c8c933c6fd
+  taze@19.17.1: c13f815d1890421e07eb593b719f34b45a7c00d04beea59b45024e0293f61ee9
 
 importers:
 
@@ -522,11 +525,11 @@ importers:
         specifier: 1.0.5
         version: 1.0.5
       '@socketregistry/packageurl-js':
-        specifier: 1.5.0
-        version: 1.5.0
+        specifier: 1.5.1
+        version: 1.5.1
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.5.0'
+        version: '@socketregistry/packageurl-js@1.5.1'
       '@socketregistry/yocto-spinner':
         specifier: 1.0.25
         version: 1.0.25
@@ -724,7 +727,7 @@ importers:
         version: 3.2.0
       taze:
         specifier: 'catalog:'
-        version: 19.16.0(patch_hash=77208c02cff936d0f1dbf2ffcc95f6f0def9697d6ba7ca4671c399c8c933c6fd)
+        version: 19.17.1(patch_hash=c13f815d1890421e07eb593b719f34b45a7c00d04beea59b45024e0293f61ee9)
       type-coverage:
         specifier: 2.30.1
         version: 2.30.1(typescript@7.0.2)
@@ -963,7 +966,7 @@ importers:
     dependencies:
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.5.0'
+        version: '@socketregistry/packageurl-js@1.5.1'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.5.3(typescript@7.0.2)'
@@ -2517,7 +2520,7 @@ importers:
         version: 0.34.52
       '@socketregistry/packageurl-js-stable':
         specifier: 'catalog:'
-        version: '@socketregistry/packageurl-js@1.5.0'
+        version: '@socketregistry/packageurl-js@1.5.1'
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.5.3(typescript@7.0.2)'
@@ -3093,8 +3096,8 @@ packages:
     resolution: {integrity: sha512-hghYVU7h//IGf+NaQgZrO7SI2Pre88ZKZQ8sM/1CBx1bEIJM9t9MMAeTCnKOknNaxBScbDPmmpwil26DxKgMwA==}
     engines: {node: '>= 18'}
 
-  '@antfu/ni@30.2.0':
-    resolution: {integrity: sha512-/FOdAP1w8COnANVD3TtNj/tnpt/36RkU/ysKZTqx86x9acdhCqTFjDXNYVDyBg6UzcrTwWPUeY75ng7CWLNr+g==}
+  '@antfu/ni@30.3.0':
+    resolution: {integrity: sha512-KkYFVPA1IvC3m+WBKUuY5oxYc4OdXr83jvnlOn8a+bJM10yQMu+slFN/1pDzAw2JZVi+FYP9IYjo4KaPIccMmA==}
     engines: {node: '>=20.19.0'}
     hasBin: true
 
@@ -4229,8 +4232,8 @@ packages:
     resolution: {integrity: sha512-l3wz0cknjyGlI2iCyZxp50FJhtUFXkdZR6CfUU7OfNxE7I4CRBdsvORLgV+JPwqQQErRO/CZgKsbDHefd3puYA==}
     engines: {node: '>=18'}
 
-  '@socketregistry/packageurl-js@1.5.0':
-    resolution: {integrity: sha512-Yqnq50McfKVqKCUKRIhW3XcnjxzFoysBDkUktOuLzOdy4cWi0smVqvLNSkS3f4sdDJYpRBjcxTlb2ajHr+cURQ==}
+  '@socketregistry/packageurl-js@1.5.1':
+    resolution: {integrity: sha512-5gOd4TqzA+IUsy4TVZNrYhmN6glL5K0+QgkExPiMQNM84Ouopf4u19/+slNDuWHa+o5O/NlZv5yIPxLqKndzGA==}
     engines: {node: '>=24', npm: '>=12.0.1', pnpm: '>=11.0.5'}
 
   '@socketregistry/safe-buffer@1.0.9':
@@ -4928,8 +4931,8 @@ packages:
   boolbase@1.0.0:
     resolution: {integrity: sha512-JZOSA7Mo9sNGB8+UjSgzdLtokWAky1zbztM3WRLCbZ70/3cTANmQmOdR7y2g+J0e2WXywy1yS468tY+IruqEww==}
 
-  brace-expansion@5.0.8:
-    resolution: {integrity: sha512-JZyDyq3D4AUifKTPOB7DELf6XsB3WdPuNxCtob1vFXPsSXhdAiHBWJ/tJ8HAc9aH84BK+5JFZLNkJKx3G9kzQg==}
+  brace-expansion@5.0.9:
+    resolution: {integrity: sha512-ScQ4IuvIEF1TMlP7Zt+vjJ//9zlPb2SDcxWxM3bk8s6t6GGdJ7KO1dCcTidOPJKePW30LE/2cT7wCyPho9/Wxg==}
     engines: {node: 20 || >=22}
 
   braces@3.0.3:
@@ -6199,11 +6202,11 @@ packages:
     resolution: {integrity: sha512-R4nPAVTAU0B9D35/Gk3uJf/7XYbQcyohSKdvAxIRSNghFl4e71hVoGnBNQz9cWaXxO2I10KTC+3jMdvvoKw6dQ==}
     engines: {node: '>=6'}
 
-  package-manager-detector@1.6.0:
-    resolution: {integrity: sha512-61A5ThoTiDG/C8s8UMZwSorAGwMJ0ERVGj2OjoW5pAalsNOg15+iQiPzrLJ4jhZ1HJzmC2PIHT2oEiH3R5fzNA==}
-
   package-manager-detector@1.7.0:
     resolution: {integrity: sha512-xg1eHpwYL/D/HEdWw2goFZP6vV0FH7W+PZ5rFkGjdIDLtxq7EkzBUeT3m+lndYCt8wKbmofUu1MUdMCXkCk9ZQ==}
+
+  package-manager-detector@1.8.0:
+    resolution: {integrity: sha512-yQA4H19AmPEoMUeavPMDIe1higySl/gH/yaQrkT/s07Qp+7pp2hYz30N3z2l5BkjVkF9Ow6o0wjJamm2y7Sn0A==}
 
   pacote@21.5.1:
     resolution: {integrity: sha512-KvcJ9iy3crysCsgqc4+PknH/w6jkrp8JN36mpZBPwNaDRwTfMZD37YzRazNstiZUOhuF5pno9f78n9mEJBavwg==}
@@ -6264,8 +6267,8 @@ packages:
     engines: {node: '>=20'}
     hasBin: true
 
-  pnpm-workspace-yaml@1.6.1:
-    resolution: {integrity: sha512-yTeZntGWi8m9WNuhoVsP0DpFc4sC1U0+rr/qR6Zi9n2g3sxXY+JfccjXjjruNz96tM8I09yaJUA86doRnNLkbg==}
+  pnpm-workspace-yaml@1.7.0:
+    resolution: {integrity: sha512-cgjaozHkjWL4H8oKZydEWE4mg31XydK3/1cLKjHvwnFAXutp45yAlMKljpOdZEq4TtLuzYAMvy9j05wRm3aoPw==}
 
   polka@0.5.2:
     resolution: {integrity: sha512-FVg3vDmCqP80tOrs+OeNlgXYmFppTXdjD5E7I4ET1NjvtNmQrb1/mJibybKkb/d4NA7YWAr1ojxuhpL3FHqdlw==}
@@ -6577,8 +6580,8 @@ packages:
     resolution: {integrity: sha512-MFO/QzvtAOmJbkhOaCTvbGcFN9L9b+JunIsDwaKljSOdcLMea3NJ1k9Usz/rjdfSXTq4dfzfeS7W4p4YOAAHeA==}
     engines: {node: '>=18'}
 
-  taze@19.16.0:
-    resolution: {integrity: sha512-E33PiGSHYB40yKOgi/KvaBDvRJEn5ajRa6xeGS7V/02aLBSWkpQ68ayUMDRQOYbyaBMPZ+xqbkH41woACluQTg==}
+  taze@19.17.1:
+    resolution: {integrity: sha512-ZUrU86BRNGJRZzCWOaMWC1ohYogHpRlQcGYuTClW8CpSE3iWjHE/jPuqpsOA/lKijL7O3algqq7l2bbdLCfrxg==}
     hasBin: true
 
   teex@1.0.1:
@@ -6599,8 +6602,8 @@ packages:
   tinybench@2.9.0:
     resolution: {integrity: sha512-0+DUvqWMValLmha6lr4kD8iAMK1HzV0/aKnCtWb9v9641TnP/MFb7Pc2bxoxQjTXAErryXVgUOfv2YqNllqGeg==}
 
-  tinyexec@1.2.4:
-    resolution: {integrity: sha512-SHf/r48b7vOrjve9PxJo3MN5v5yuyjHvdUcrQffT3WXMUfnGmHDVbC4k3sHJaJTgZCwpUplIaAo5ANtMyp3YHg==}
+  tinyexec@1.3.0:
+    resolution: {integrity: sha512-QKAl9m8gWWGHV8jZcPeym6j+XULi6tOf1mT83WYJ4Lk2ytW/uwAWkrP0uFsdoYMdueVJ0qs26wZ+23xeB4ibNQ==}
     engines: {node: '>=18'}
 
   tinyglobby@0.2.15:
@@ -6765,8 +6768,8 @@ packages:
     resolution: {integrity: sha512-BNGbWLfd0eUPabhkXUVm0j8uuvREyTh5ovRa/dyow/BqAbZJyC+5fU+IzQOzmAKzYqYRAISoRhdQr3eIZ/PXqg==}
     engines: {node: '>= 0.8'}
 
-  verkit@0.1.2:
-    resolution: {integrity: sha512-WqkT8n3hqizuCu71W3bUzf5fjBmkbXcudsehe/NbxA8PgqoKnSOY5K0Ba2ckg1qaRaSpSz7as/n9K1R9JXjQKg==}
+  verkit@0.3.1:
+    resolution: {integrity: sha512-w2Eo8LSIIoW7qxNBzT7/17k+bh8plXo7G3dHjEIDqPlnluhzaxr9JX8F28VSYEtDvc1/a3WBDih6xNUZseebXg==}
     engines: {node: '>=18.12.0'}
 
   vite@8.1.5:
@@ -6994,11 +6997,11 @@ snapshots:
       cronstrue: 2.59.0
       yaml: 2.9.0
 
-  '@antfu/ni@30.2.0':
+  '@antfu/ni@30.3.0':
     dependencies:
       fzf: 0.5.2
-      package-manager-detector: 1.6.0
-      tinyexec: 1.2.4
+      package-manager-detector: 1.7.0
+      tinyexec: 1.3.0
       tinyglobby: 0.2.17
 
   '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.141':
@@ -8003,7 +8006,7 @@ snapshots:
 
   '@socketregistry/is-unicode-supported@1.0.5': {}
 
-  '@socketregistry/packageurl-js@1.5.0': {}
+  '@socketregistry/packageurl-js@1.5.1': {}
 
   '@socketregistry/safe-buffer@1.0.9': {}
 
@@ -8645,7 +8648,7 @@ snapshots:
 
   boolbase@1.0.0: {}
 
-  brace-expansion@5.0.8(patch_hash=bdf9963feca3f55f619773889c6a471b5b91d491d090cb7f9fa361a04bb02771):
+  brace-expansion@5.0.9(patch_hash=a89e05a7c781115d8e78a92c9f9b843aa7c534a587baa5ac808074d4fafa6857):
     dependencies:
       balanced-match: 4.0.4
 
@@ -9779,7 +9782,7 @@ snapshots:
 
   minimatch@10.2.6(patch_hash=83f1ea5b333d1b6fe1b36f93ccb222aa02e5dd468b2c646e285d7d53d234e174):
     dependencies:
-      brace-expansion: 5.0.8(patch_hash=bdf9963feca3f55f619773889c6a471b5b91d491d090cb7f9fa361a04bb02771)
+      brace-expansion: 5.0.9(patch_hash=a89e05a7c781115d8e78a92c9f9b843aa7c534a587baa5ac808074d4fafa6857)
 
   minimist@1.2.8: {}
 
@@ -10042,9 +10045,9 @@ snapshots:
 
   p-try@2.2.0: {}
 
-  package-manager-detector@1.6.0: {}
-
   package-manager-detector@1.7.0: {}
+
+  package-manager-detector@1.8.0: {}
 
   pacote@21.5.1(supports-color@10.2.2):
     dependencies:
@@ -10111,7 +10114,7 @@ snapshots:
 
   playwright-core@1.62.0: {}
 
-  pnpm-workspace-yaml@1.6.1:
+  pnpm-workspace-yaml@1.7.0:
     dependencies:
       yaml: 2.9.0
 
@@ -10482,21 +10485,21 @@ snapshots:
       minizlib: 3.1.0
       yallist: 5.0.0
 
-  taze@19.16.0(patch_hash=77208c02cff936d0f1dbf2ffcc95f6f0def9697d6ba7ca4671c399c8c933c6fd):
+  taze@19.17.1(patch_hash=c13f815d1890421e07eb593b719f34b45a7c00d04beea59b45024e0293f61ee9):
     dependencies:
-      '@antfu/ni': 30.2.0
+      '@antfu/ni': 30.3.0
       '@henrygd/queue': 1.2.0
       cac: 7.0.0
       obug: 2.1.4
       ofetch: 1.5.1
-      package-manager-detector: 1.7.0
+      package-manager-detector: 1.8.0
       pathe: 2.0.3
-      pnpm-workspace-yaml: 1.6.1
+      pnpm-workspace-yaml: 1.7.0
       restore-cursor: 5.1.0
-      tinyexec: 1.2.4
+      tinyexec: 1.3.0
       tinyglobby: 0.2.17
       unconfig: 7.5.0
-      verkit: 0.1.2
+      verkit: 0.3.1
       yaml: 2.9.0
 
   teex@1.0.1:
@@ -10527,7 +10530,7 @@ snapshots:
 
   tinybench@2.9.0: {}
 
-  tinyexec@1.2.4: {}
+  tinyexec@1.3.0: {}
 
   tinyglobby@0.2.15:
     dependencies:
@@ -10696,7 +10699,7 @@ snapshots:
 
   vary@1.1.2: {}
 
-  verkit@0.1.2: {}
+  verkit@0.3.1: {}
 
   vite@8.1.5(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0):
     dependencies:
@@ -10730,7 +10733,7 @@ snapshots:
       picomatch: 4.0.5
       std-env: 4.2.0
       tinybench: 2.9.0
-      tinyexec: 1.2.4
+      tinyexec: 1.3.0
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
       vite: 8.1.5(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
