@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 588 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 613 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/signal'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -52,6 +52,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 
 - [@socketsecurity/lib/archives/detect](./dist/archives/detect.d.ts): Format detection by file extension.
 - [@socketsecurity/lib/archives/extract](./dist/archives/extract.d.ts): `extractArchive` — format-detecting dispatcher that routes to `extractTar` / `extractTarGz` / `extractZip`.
+- [@socketsecurity/lib/archives/shared](./dist/archives/shared.d.ts): Private internals for `archives/*` modules — defaults, lazy module accessors (adm-zip, tar-fs, node:path), shared pre-extraction validators (`assertArchiveExists`, `validatePathWithinBase`).
 - [@socketsecurity/lib/archives/tar](./dist/archives/tar.d.ts): Tar / tar.gz extraction with security limits and symlink rejection.
 - [@socketsecurity/lib/archives/types](./dist/archives/types.d.ts): Public type surface for `archives/*` modules — the `ArchiveFormat` union and the `ExtractOptions` security-limit record.
 - [@socketsecurity/lib/archives/zip](./dist/archives/zip.d.ts): Zip extraction with security limits and path traversal validation.
@@ -68,6 +69,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/arrays/chunk](./dist/arrays/chunk.d.ts): Split an array into fixed-size chunks.
 - [@socketsecurity/lib/arrays/join](./dist/arrays/join.d.ts): Grammatical list joiners via `Intl.ListFormat` — Oxford-comma aware and locale-correct.
 - [@socketsecurity/lib/arrays/predicates](./dist/arrays/predicates.d.ts): Array type-guard predicates.
+- [@socketsecurity/lib/arrays/shared](./dist/arrays/shared.d.ts): Private internals for `arrays/*` modules — cached `Intl.ListFormat` instances for conjunction (and) and disjunction (or) joins.
 - [@socketsecurity/lib/arrays/unique](./dist/arrays/unique.d.ts): Deduplicate an array via `Set`.
 
 ## bin/
@@ -76,6 +78,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/bin/find](./dist/bin/find.d.ts): Find specific package-manager binaries with platform- aware fallbacks.
 - [@socketsecurity/lib/bin/resolve](./dist/bin/resolve.d.ts): Resolve a binary path to the underlying script file.
 - [@socketsecurity/lib/bin/shadow](./dist/bin/shadow.d.ts): Shadow-bin detection.
+- [@socketsecurity/lib/bin/shared](./dist/bin/shared.d.ts): Private internals for `bin/*` modules — lazy `fs` / `path` accessors and the binary-resolution caches.
 - [@socketsecurity/lib/bin/trusted](./dist/bin/trusted.d.ts): Path-trust-inverting executable resolution.
 - [@socketsecurity/lib/bin/types](./dist/bin/types.d.ts): Public type surface for `bin/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`, plus the `whichLocalBin` variant.
 - [@socketsecurity/lib/bin/which](./dist/bin/which.d.ts): Look up binaries on PATH.
@@ -84,6 +87,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 
 - [@socketsecurity/lib/cacache/clear](./dist/cacache/clear.d.ts): Bulk-clear entries from the Socket shared cacache — `clear()` plus its wildcard helper `createPatternMatcher`.
 - [@socketsecurity/lib/cacache/read](./dist/cacache/read.d.ts): Cache read entrypoints: `get` throws on miss and `safeGet` returns `undefined` on miss.
+- [@socketsecurity/lib/cacache/shared](./dist/cacache/shared.d.ts): Accessor for the vendored `cacache` module.
 - [@socketsecurity/lib/cacache/tmp](./dist/cacache/tmp.d.ts): `withTmp` — run a callback with a freshly-created temp directory under the cacache root.
 - [@socketsecurity/lib/cacache/types](./dist/cacache/types.d.ts): Public type surface for `cacache/*` modules — the `CacheEntry` row shape returned by reads and the option bags consumed by `clear` / `get` / `put`.
 - [@socketsecurity/lib/cacache/write](./dist/cacache/write.d.ts): Cache write entrypoints — `put` inserts or replaces by key and `remove` deletes a single key.
@@ -91,6 +95,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 ## cache/
 
 - [@socketsecurity/lib/cache/ttl/browser](./dist/cache/ttl/browser.d.ts): `createBrowserTtlCache` — browser-safe sibling of `createTtlCache` (`./store`).
+- [@socketsecurity/lib/cache/ttl/shared](./dist/cache/ttl/shared.d.ts): Private internals shared by the `cache/ttl/*` stores — the TTL / prefix / memo-cap defaults, the clock-skew-aware expiry predicate, the wildcard key matcher, and the LRU insertion-order setter.
 - [@socketsecurity/lib/cache/ttl/store](./dist/cache/ttl/store.d.ts): `createTtlCache` — generic TTL-based cache built on top of cacache (persistent) plus an in-memory LRU memo layer.
 - [@socketsecurity/lib/cache/ttl/types](./dist/cache/ttl/types.d.ts): Public type surface for `cache/ttl/*` modules — the seven-method `TtlCache` interface returned by `createTtlCache` and `createBrowserTtlCache`, plus the `TtlCacheEntry` storage shape, the `TtlCacheStorage` adapter con...
 
@@ -116,6 +121,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 
 - [@socketsecurity/lib/compression/brotli](./dist/compression/brotli.d.ts): Brotli compression / decompression — in-memory, file-to-file, and raw-stream variants.
 - [@socketsecurity/lib/compression/gzip](./dist/compression/gzip.d.ts): Gzip compression / decompression — same calling shapes as brotli: in-memory, file-to-file, and raw-stream variants.
+- [@socketsecurity/lib/compression/shared](./dist/compression/shared.d.ts): Private internals for `compression/*` modules — `resolveFileArgs` disambiguates the `(src, dest, options?)` vs `(src, options)` calling shape, and `stripExt` removes a trailing extension when it matches one of a calle...
 - [@socketsecurity/lib/compression/types](./dist/compression/types.d.ts): Public type surface for `compression/*` modules — the `CompressOptions` accepted by every compression entrypoint and `CompressFileOptions` which extends it with `inPlace`.
 
 ## config/
@@ -158,6 +164,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/debug/caller-info](./dist/debug/caller-info.d.ts): `getCallerInfo` — extract the caller's function name from the V8 stack trace at a given offset.
 - [@socketsecurity/lib/debug/namespace](./dist/debug/namespace.d.ts): Namespace-handling helpers — `extractOptions` normalises the polymorphic first argument that every `*Ns` function takes, `getDebugJsInstance` per-namespace caches the underlying `debug-js` instance with `customLog` pa...
 - [@socketsecurity/lib/debug/output](./dist/debug/output.d.ts): Output entrypoints — `debug` / `debugCache` / `debugDir` / `debugLog` and their `*Ns` namespace variants, plus `debuglog` (node-util-compatible) and `debugtime` (start/end timers).
+- [@socketsecurity/lib/debug/shared](./dist/debug/shared.d.ts): Private internals for `debug/*` modules — the lazy debug-js accessor, the `debugByNamespace` cache that `namespace.getDebugJsInstance` fills, the lazy `pointingTriangle` glyph used by every output function, and `custo...
 - [@socketsecurity/lib/debug/types](./dist/debug/types.d.ts): Public type surface for `debug/*` modules — the options bag accepted by every `debug*Ns` entrypoint and the `InspectOptions` mirror of `node:util`'s shape (the public subset we accept; not the full thing).
 
 ## dlx/
@@ -177,6 +184,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/dlx/package](./dist/dlx/package.d.ts): DLX package execution — install and execute npm packages.
 - [@socketsecurity/lib/dlx/packages](./dist/dlx/packages.d.ts): Package management utilities for DLX installations.
 - [@socketsecurity/lib/dlx/paths](./dist/dlx/paths.d.ts): Path utilities for DLX package installations.
+- [@socketsecurity/lib/dlx/shared](./dist/dlx/shared.d.ts): Shared internals for the `dlx/*` module — the bounded LRU cache used by `resolveBinaryPath` on Windows.
 - [@socketsecurity/lib/dlx/spec](./dist/dlx/spec.d.ts): Parse `package@version` specs into `{name, version}`.
 - [@socketsecurity/lib/dlx/types](./dist/dlx/types.d.ts): Public option / result interfaces for dlx package operations.
 
@@ -274,6 +282,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/events/exit/handler](./dist/events/exit/handler.d.ts): `onExit` — register a callback for process exit / signal.
 - [@socketsecurity/lib/events/exit/intercept](./dist/events/exit/intercept.d.ts): Process-method interceptors — `processEmit` replaces `process.emit` and `processReallyExit` replaces `process.reallyExit` while `load()` is active.
 - [@socketsecurity/lib/events/exit/lifecycle](./dist/events/exit/lifecycle.d.ts): `load` and `unload` — install and remove the `signal-exit` listeners.
+- [@socketsecurity/lib/events/exit/shared](./dist/events/exit/shared.d.ts): Private internals for `events/exit/*` modules — the shared module-singleton state plus the lazy accessors that read and mutate it.
 - [@socketsecurity/lib/events/exit/signals](./dist/events/exit/signals.d.ts): `signals()` — list the signals this process is watching.
 - [@socketsecurity/lib/events/exit/types](./dist/events/exit/types.d.ts): Public type surface for `events/exit/*` modules — the `OnExitOptions` consumed by `onExit`, plus the shared internal types for the signal emitter, emitted-signal map, and listener map.
 - [@socketsecurity/lib/events/warning/handler](./dist/events/warning/handler.d.ts): Bump the max-listener cap on an EventTarget (or AbortSignal).
@@ -386,6 +395,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/fs/read-json-cache](./dist/fs/read-json-cache.d.ts): Process-scoped LRU cache for `readJson` / `readJsonSync` results, keyed by absolute path + stat (`ino + size + mtimeMs`).
 - [@socketsecurity/lib/fs/resolve-module](./dist/fs/resolve-module.d.ts): `require.resolve`-from-an-arbitrary-base.
 - [@socketsecurity/lib/fs/safe](./dist/fs/safe.d.ts): Safe deletion + idempotent directory creation.
+- [@socketsecurity/lib/fs/shared](./dist/fs/shared.d.ts): Private state shared between `fs/safe` and `fs/path-cache`.
 - [@socketsecurity/lib/fs/types](./dist/fs/types.d.ts): Public type surface for `fs/*` modules — option shapes, encoding union, and result records.
 - [@socketsecurity/lib/fs/unique](./dist/fs/unique.d.ts): Generate a unique filepath by appending `-1`, `-2`, … before the extension until the path is free.
 - [@socketsecurity/lib/fs/validate](./dist/fs/validate.d.ts): Pre-flight readability check for file lists.
@@ -396,6 +406,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/git/changed](./dist/git/changed.d.ts): "Anything different from HEAD" helpers — the broad-strokes `git status --porcelain` view that lumps staged, unstaged, and untracked paths together.
 - [@socketsecurity/lib/git/ignored](./dist/git/ignored.d.ts): `getTrackedIgnoredFiles` — the paths git TRACKS that the repo's own `.gitignore` also IGNORES.
 - [@socketsecurity/lib/git/repo](./dist/git/repo.d.ts): Git repository discovery + foundational lazy fs/path/cwd helpers shared across `git/*` leaves.
+- [@socketsecurity/lib/git/shared](./dist/git/shared.d.ts): Cross-leaf diff machinery for `git/*`.
 - [@socketsecurity/lib/git/staged](./dist/git/staged.d.ts): "Ready for the next commit" helpers — `git diff --cached` over only the index.
 - [@socketsecurity/lib/git/tracked](./dist/git/tracked.d.ts): Tracked-status + submodule-membership probes for a working-tree path.
 - [@socketsecurity/lib/git/tree](./dist/git/tree.d.ts): `getTreeManifest` — the `git ls-tree -r <ref>` manifest of a commit.
@@ -423,6 +434,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/globs/defaults](./dist/globs/defaults.d.ts): The npm-packlist-derived `defaultIgnore` list.
 - [@socketsecurity/lib/globs/match](./dist/globs/match.d.ts): `glob` (async) and `globSync` — fast-glob wrappers with a `node:fs.glob` fast-path when the option surface lines up.
 - [@socketsecurity/lib/globs/matcher](./dist/globs/matcher.d.ts): `getGlobMatcher` — picomatch-backed sync predicate with an LRU-memoized matcher cache.
+- [@socketsecurity/lib/globs/shared](./dist/globs/shared.d.ts): Private internals for `globs/*` modules — lazy module accessors, normalization helpers, and the matcher LRU cache.
 - [@socketsecurity/lib/globs/stream](./dist/globs/stream.d.ts): `globStreamLicenses` — license-file discovery as an async stream.
 - [@socketsecurity/lib/globs/types](./dist/globs/types.d.ts): Public type surface for `globs/*` modules — the `Pattern` alias, the `FastGlobOptions` mirror of fast-glob's option surface, and the `GlobOptions` extension that adds Socket-specific `recursive` / `ignoreOriginals` fl...
 
@@ -442,6 +454,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/http-request/request-types](./dist/http-request/request-types.d.ts): Types for HTTP request configuration — options, hooks, and Node `IncomingMessage` aliases.
 - [@socketsecurity/lib/http-request/response-reader](./dist/http-request/response-reader.d.ts): Read a raw Node `IncomingMessage` into our `HttpResponse` shape.
 - [@socketsecurity/lib/http-request/response-types](./dist/http-request/response-types.d.ts): Types for HTTP response surface — `HttpResponse` with its fetch-like body accessors, and `HttpResponseError` for `throwOnError`.
+- [@socketsecurity/lib/http-request/shared](./dist/http-request/shared.d.ts): Private lazy loaders for the Node.js modules used by the `http-request/*` leaves.
 - [@socketsecurity/lib/http-request/user-agent](./dist/http-request/user-agent.d.ts): User-Agent header generation for socket-lib's outbound HTTP requests.
 
 ## ipc-cli/
@@ -453,6 +466,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 
 - [@socketsecurity/lib/ipc/directory](./dist/ipc/directory.d.ts): Stub-directory creation + permission audit.
 - [@socketsecurity/lib/ipc/paths](./dist/ipc/paths.d.ts): IPC stub path resolution.
+- [@socketsecurity/lib/ipc/shared](./dist/ipc/shared.d.ts): Private internals for `ipc/*` modules — lazy node:fs / node:path accessors, the IpcStub schema, and the shared platform check.
 - [@socketsecurity/lib/ipc/types](./dist/ipc/types.d.ts): Public type surface for `ipc/*` modules — the `IpcStub` shape that backs the file-based handoff.
 - [@socketsecurity/lib/ipc/write](./dist/ipc/write.d.ts): Atomic stub write — `O_CREAT|O_WRONLY|O_EXCL| O_NOFOLLOW` so we refuse to overwrite a pre-existing stub (collision with attacker-planted file or PID reuse) and refuse to follow symlinks at the final path component.
 
@@ -481,6 +495,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/logger/node](./dist/logger/node.d.ts): Node-side `Logger` class — owns per-instance state (parent, bound stream, indent buffers, theme) and exposes the public surface as thin delegators over sibling free-function leaves.
 - [@socketsecurity/lib/logger/options](./dist/logger/options.d.ts): Constructor-options parsing for the `Logger` class.
 - [@socketsecurity/lib/logger/semantic-methods](./dist/logger/semantic-methods.d.ts): Free-function bodies for the symbol-prefixed semantic `Logger` methods (`done`, `fail`, `info`, `skip`, `step`, `success`, `warn`).
+- [@socketsecurity/lib/logger/shared](./dist/logger/shared.d.ts): Private state shared between the `logger/node` class (which owns the public `Logger` surface) and `logger/console-init` (which mutates `Logger.prototype` to mirror `globalConsole`).
 - [@socketsecurity/lib/logger/stream](./dist/logger/stream.d.ts): Terminal stream resolution + line-clearing helpers shared by the Node-side `Logger` methods that write directly to a stream (`clearLine`, `clearVisible`, `progress`).
 - [@socketsecurity/lib/logger/stream-methods](./dist/logger/stream-methods.d.ts): Free-function bodies for the `Logger` methods that write to or clear a raw stream rather than going through the indented `#apply` path (`clearLine`, `clearVisible`, `progress`, `write`).
 - [@socketsecurity/lib/logger/symbols](./dist/logger/symbols.d.ts): Symbol exports + the `LOG_SYMBOLS` proxy.
@@ -490,10 +505,11 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 ## memo/
 
 - [@socketsecurity/lib/memo/async](./dist/memo/async.d.ts): `memoizeAsync` — async-aware memoizer with the same LRU+TTL contract as `memoize`, plus thundering-herd dedup.
-- [@socketsecurity/lib/memo/clear](./dist/memo/clear.d.ts): `clearAllMemoizationCaches` — fan out to every per-cache clear function registered in `_internal.cacheRegistry`.
+- [@socketsecurity/lib/memo/clear](./dist/memo/clear.d.ts): `clearAllMemoizationCaches` — fan out to every per-cache clear function registered in `shared.cacheRegistry`.
 - [@socketsecurity/lib/memo/decorator](./dist/memo/decorator.d.ts): `Memoize` — class-method decorator that wraps the decorated method via `memoize`.
 - [@socketsecurity/lib/memo/memoize](./dist/memo/memoize.d.ts): `memoize` — synchronous function memoizer with LRU eviction (Map insertion-order based), optional TTL, and optional custom key generator.
 - [@socketsecurity/lib/memo/once](./dist/memo/once.d.ts): `once` — zero-argument memoizer.
+- [@socketsecurity/lib/memo/shared](./dist/memo/shared.d.ts): Private internals for `memo/*` modules — the shared `cacheRegistry` (each memoize variant registers its per-instance clear function here so `clearAllMemoizationCaches` can fan out).
 - [@socketsecurity/lib/memo/types](./dist/memo/types.d.ts): Public type surface for `memo/*` modules — `MemoizeOptions` is the user-facing options bag accepted by every memoize entrypoint, `CacheEntry<T>` is the internal row stored in each per-function cache.
 - [@socketsecurity/lib/memo/weak](./dist/memo/weak.d.ts): `memoizeWeak` — memoizer keyed by an object reference via `WeakMap`.
 
@@ -577,6 +593,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/paths/predicates](./dist/paths/predicates.d.ts): Path predicates — `is*` checks for path shape and kind.
 - [@socketsecurity/lib/paths/resolve](./dist/paths/resolve.d.ts): Path resolution utilities — `resolve`, `relative`, `relativeResolve`.
 - [@socketsecurity/lib/paths/rewire](./dist/paths/rewire.d.ts): Path rewiring utilities for testing.
+- [@socketsecurity/lib/paths/shared](./dist/paths/shared.d.ts): Shared internals for the `paths/` module — the leaf-level primitives every other path leaf depends on.
 - [@socketsecurity/lib/paths/socket](./dist/paths/socket.d.ts): Path utilities for Socket ecosystem directories.
 - [@socketsecurity/lib/paths/walk](./dist/paths/walk.d.ts): Walk parent directories.
 
@@ -585,6 +602,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/perf/enabled](./dist/perf/enabled.d.ts): Feature-flag check — `isPerfEnabled()` returns true when `DEBUG=perf` is set in the environment.
 - [@socketsecurity/lib/perf/metrics](./dist/perf/metrics.d.ts): Read-side helpers — `getPerformanceMetrics` returns a shallow copy of the recorded rows, `getPerformanceSummary` rolls them up per operation (count / total / avg / min / max), and `clearPerformanceMetrics` empties the...
 - [@socketsecurity/lib/perf/report](./dist/perf/report.d.ts): Report-side helpers — `generatePerformanceReport` returns a multi-line ASCII-bordered report string; `printPerformanceSummary` writes a one-line-per-op summary through `debugLog`.
+- [@socketsecurity/lib/perf/shared](./dist/perf/shared.d.ts): Private internals for `perf/*` modules — the shared in-process metrics array.
 - [@socketsecurity/lib/perf/timer](./dist/perf/timer.d.ts): Recording-side helpers.
 - [@socketsecurity/lib/perf/types](./dist/perf/types.d.ts): Public type surface for `perf/*` modules — the `PerformanceMetrics` row shape pushed onto the shared metrics array by `perfTimer` / `measure` / `measureSync` / `perfCheckpoint` / `trackMemory`.
 
@@ -624,10 +642,12 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/process/lock-manager](./dist/process/lock-manager.d.ts): `ProcessLockManager` — the class that owns active locks, touch timers, and the exit-handler registration.
 - [@socketsecurity/lib/process/lock-types](./dist/process/lock-types.d.ts): Public type surface for `process/lock-*` modules — the `ProcessLockOptions` bag accepted by `processLock.acquire` and `processLock.withLock`.
 - [@socketsecurity/lib/process/open-url](./dist/process/open-url.d.ts): Open a URL in the platform's default browser.
+- [@socketsecurity/lib/process/shared](./dist/process/shared.d.ts): Private internals for `process/lock-*` modules — re-exports of the canonical node:fs / node:path lazy loaders under the process/ legacy names.
 - [@socketsecurity/lib/process/spawn/child](./dist/process/spawn/child.d.ts): Child process spawning utilities with cross-platform support.
 - [@socketsecurity/lib/process/spawn/errors](./dist/process/spawn/errors.d.ts): Spawn error classification and enhancement.
 - [@socketsecurity/lib/process/spawn/kill-tree](./dist/process/spawn/kill-tree.d.ts): Cross-platform process-tree termination.
 - [@socketsecurity/lib/process/spawn/pty](./dist/process/spawn/pty.d.ts): Zero-dependency PTY runner: run a command under a pseudo-terminal using the system `script` binary, no `node-pty` and no native addon.
+- [@socketsecurity/lib/process/spawn/shared](./dist/process/spawn/shared.d.ts): Private internals for `spawn/*` modules — the `@npmcli/promise-spawn` lazy loader, the per-spawn ANSI-stripping helper, the WeakMap stack cache, the binary-path cache shared between `spawn` and `spawnSync`, and the tr...
 - [@socketsecurity/lib/process/spawn/stdio](./dist/process/spawn/stdio.d.ts): Stdio configuration helpers for `spawn` callers.
 - [@socketsecurity/lib/process/spawn/timeout](./dist/process/spawn/timeout.d.ts): Platform-aware spawn-timeout scaling.
 - [@socketsecurity/lib/process/spawn/types](./dist/process/spawn/types.d.ts): Public type surface for `spawn/*` modules.
@@ -641,6 +661,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/promises/queue](./dist/promises/queue.d.ts): Bounded concurrency promise queue.
 - [@socketsecurity/lib/promises/resolvers](./dist/promises/resolvers.d.ts): ECMA-262 standalone async helpers — `withResolvers` (Promise.withResolvers) and `fromAsync` (Array.fromAsync).
 - [@socketsecurity/lib/promises/retry](./dist/promises/retry.d.ts): `pRetry` — exponential-backoff retry with optional jitter, abort-signal support, and an `onRetry` hook for customizing delays or canceling retries entirely.
+- [@socketsecurity/lib/promises/shared](./dist/promises/shared.d.ts): Private internals for `promises/*` modules — the lazy `node:timers/promises` accessor + the shared abort signal.
 - [@socketsecurity/lib/promises/timers](./dist/promises/timers.d.ts): Browser-compatible promise-based timer helpers.
 - [@socketsecurity/lib/promises/types](./dist/promises/types.d.ts): Public type surface for `promises/*` modules: `RetryOptions`, `IterationOptions`, `PromiseWithResolvers`, and the `QueuedTask` storage shape used by the bounded-concurrency `PromiseQueue`.
 
@@ -682,6 +703,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/secrets/linux](./dist/secrets/linux.d.ts): Linux Secret Service backend via `secret-tool`.
 - [@socketsecurity/lib/secrets/macos](./dist/secrets/macos.d.ts): MacOS Keychain backend via `security(1)`.
 - [@socketsecurity/lib/secrets/rc](./dist/secrets/rc.d.ts): Write a managed `export VAR='<value>'` block to the user's shell rc ("run commands") file.
+- [@socketsecurity/lib/secrets/shared](./dist/secrets/shared.d.ts): Private internals for `secrets/` — process-scoped read cache for the keychain backend.
 - [@socketsecurity/lib/secrets/socket-api-token](./dist/secrets/socket-api-token.d.ts): Convenience helper for reading the Socket API token from the canonical env → keychain precedence order.
 - [@socketsecurity/lib/secrets/types](./dist/secrets/types.d.ts): Public type surface for `secrets/*`.
 - [@socketsecurity/lib/secrets/windows](./dist/secrets/windows.d.ts): Windows backend via PowerShell CredentialManager module, with a DPAPI-encrypted file fallback.
@@ -713,6 +735,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 
 - [@socketsecurity/lib/sorts/natural](./dist/sorts/natural.d.ts): Locale-aware + numeric-aware comparison via `Intl.Collator`, plus the `naturalSorter` helper that wires the fast-sort engine to the natural comparator.
 - [@socketsecurity/lib/sorts/semver](./dist/sorts/semver.d.ts): Semver-aware string comparison.
+- [@socketsecurity/lib/sorts/shared](./dist/sorts/shared.d.ts): Private internals for `sorts/*` modules — lazy module accessors for fast-sort + semver, and the cached Intl.Collator instances.
 - [@socketsecurity/lib/sorts/strings](./dist/sorts/strings.d.ts): Plain string comparison.
 - [@socketsecurity/lib/sorts/types](./dist/sorts/types.d.ts): Public type surface for `sorts/*` modules — the `FastSortFunction` shape returned by `naturalSorter`.
 
@@ -737,6 +760,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/stdio/progress](./dist/stdio/progress.d.ts): Progress bar utilities for CLI applications.
 - [@socketsecurity/lib/stdio/prompts](./dist/stdio/prompts.d.ts): User prompt utilities for interactive scripts.
 - [@socketsecurity/lib/stdio/prompts-types](./dist/stdio/prompts-types.d.ts): Type definitions for the interactive prompt wrappers in `./prompts`.
+- [@socketsecurity/lib/stdio/shared](./dist/stdio/shared.d.ts): Shared TTY primitives for stdio/stdout.ts + stdio/stderr.ts.
 - [@socketsecurity/lib/stdio/stderr](./dist/stdio/stderr.d.ts): Standard error stream utilities.
 - [@socketsecurity/lib/stdio/stdout](./dist/stdio/stdout.d.ts): Standard output stream utilities.
 
@@ -790,6 +814,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/versions/modify](./dist/versions/modify.d.ts): Mutation helpers — `incrementVersion` bumps a version by release type ('major' | 'minor' | 'patch' | 'pre*'), and `versionDiff` returns the kind of step between two versions.
 - [@socketsecurity/lib/versions/parse](./dist/versions/parse.d.ts): Parsing helpers — `coerceVersion` rounds a sloppy input ("1.2") up to a valid semver triple, `parseVersion` returns `{major, minor, patch, prerelease, build}`, and the `getMajor*` / `getMinor*` / `getPatchVersion` acc...
 - [@socketsecurity/lib/versions/range](./dist/versions/range.d.ts): Range / set helpers — `satisfiesVersion` / `filterVersions` check membership against a semver range, `maxVersion` / `minVersion` pick the bounds of an arbitrary version array.
+- [@socketsecurity/lib/versions/shared](./dist/versions/shared.d.ts): Private internals for `versions/*` modules — lazily picks the right implementation at FIRST USE.
 - [@socketsecurity/lib/versions/types](./dist/versions/types.d.ts): Public type surface for `versions/*` modules — the parsed-version shape returned by `parseVersion`, a stable subset of semver's SemVer instance exposed as a structural type rather than leaking the upstream class.
 
 ## words/
