@@ -1,15 +1,15 @@
 /**
  * @file Socket.dev branding and identifier constants. Centralizes API base
- *   URLs, the public API key, website/docs URLs, npm scopes, GitHub org/repo
+ *   URLs, website/docs URLs, npm scopes, GitHub org/repo
  *   names, and app name strings used across the Socket toolchain.
  */
 
 // Socket.dev API.
 export const SOCKET_API_BASE_URL = 'https://api.socket.dev/v0'
-export const SOCKET_PUBLIC_API_KEY =
-  'sktsec_t_--RAN5U4ivauy4w37-6aoKyYPDt5ZbaT5JBVMqiwKo_api'
-// Alias for backward compatibility.
-export const SOCKET_PUBLIC_API_TOKEN = SOCKET_PUBLIC_API_KEY
+// The shared public API key (SOCKET_PUBLIC_API_KEY / SOCKET_PUBLIC_API_TOKEN)
+// is RETIRED: public consumption goes through the token-free purl-api proxy
+// (firewall-api.socket.dev) instead of a baked-in credential. Removing the
+// exported constant is a breaking change and rides the next major.
 
 // Socket.dev URLs.
 export const SOCKET_WEBSITE_URL = 'https://socket.dev'

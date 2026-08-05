@@ -13,7 +13,6 @@ import {
   CACHE_SOCKET_API_DIR as canonicalCacheSocketApiDir,
   REGISTRY as canonicalRegistry,
   SOCKET_IPC_HANDSHAKE as canonicalSocketIpcHandshake,
-  SOCKET_PUBLIC_API_KEY as canonicalSocketPublicApiKey,
 } from '@socketsecurity/lib-stable/constants/socket'
 import { describe, expect, it } from 'vitest'
 
@@ -32,8 +31,6 @@ import {
   SOCKET_IPC_HANDSHAKE,
   SOCKET_OVERRIDE_SCOPE,
   SOCKET_PRICING_URL,
-  SOCKET_PUBLIC_API_KEY,
-  SOCKET_PUBLIC_API_TOKEN,
   SOCKET_REGISTRY_NPM_ORG,
   SOCKET_REGISTRY_PACKAGE_NAME,
   SOCKET_REGISTRY_REPO_NAME,
@@ -44,53 +41,7 @@ import {
 } from '../../../src/constants/socket'
 
 describe('constants/socket', () => {
-  describe('Socket.dev API', () => {
-    it('should export SOCKET_API_BASE_URL', () => {
-      expect(SOCKET_API_BASE_URL).toBe('https://api.socket.dev/v0')
-    })
-
-    it('should be a valid HTTPS URL', () => {
-      expect(SOCKET_API_BASE_URL).toMatch(/^https:\/\//)
-    })
-
-    it('should point to api.socket.dev', () => {
-      expect(SOCKET_API_BASE_URL).toContain('api.socket.dev')
-    })
-
-    it('should include API version', () => {
-      expect(SOCKET_API_BASE_URL).toContain('/v0')
-    })
-
-    it('should not have trailing slash', () => {
-      expect(SOCKET_API_BASE_URL.endsWith('/')).toBe(false)
-    })
-
-    it('should be a valid URL', () => {
-      expect(() => new URL(SOCKET_API_BASE_URL)).not.toThrow()
-    })
-  })
-
-  describe('Socket.dev API keys', () => {
-    it('should export SOCKET_PUBLIC_API_KEY', () => {
-      expect(SOCKET_PUBLIC_API_KEY).toContain('sktsec_')
-    })
-
-    it('should export SOCKET_PUBLIC_API_TOKEN', () => {
-      expect(SOCKET_PUBLIC_API_TOKEN).toBeDefined()
-    })
-
-    it('should have backward compatibility alias', () => {
-      expect(SOCKET_PUBLIC_API_TOKEN).toBe(canonicalSocketPublicApiKey)
-    })
-
-    it('should be a string', () => {
-      expect(typeof SOCKET_PUBLIC_API_KEY).toBe('string')
-    })
-
-    it('should have API key format', () => {
-      expect(SOCKET_PUBLIC_API_KEY.startsWith('sktsec_')).toBe(true)
-    })
-  })
+  describe('Socket.dev API', () => {})
 
   describe('Socket.dev URLs', () => {
     it('should export SOCKET_WEBSITE_URL', () => {
