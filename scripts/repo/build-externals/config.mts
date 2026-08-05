@@ -7,7 +7,8 @@
 export const externalPackages = [
   // external-pack: Shared dependencies and @inquirer packages bundled together.
   // Bundled first so npm-pack can mark shared deps as external.
-  // Contains: has-flag, signal-exit, supports-color, yoctocolors-cjs, @inquirer/*.
+  // Contains: has-flag, signal-exit, supports-color, terminal-link,
+  // yoctocolors-cjs, @inquirer/*.
   { name: 'external-pack', bundle: true },
   // NPM bundles - grouped for better deduplication.
   // npm-pack: arborist, cacache, libnpmpack, make-fetch-happen, npm-package-arg,
@@ -50,6 +51,9 @@ export const externalPackages = [
   { name: 'std-env', bundle: true },
   { name: 'streaming-iterables', bundle: true },
   { name: 'supports-color', bundle: false },
+  // In the external-pack bundle, not its own: it shares supports-color and
+  // has-flag with the pack via supports-hyperlinks.
+  { name: 'terminal-link', bundle: false },
   { name: 'validate-npm-package-name', bundle: false },
   { name: 'which', bundle: true },
   { name: 'yargs-parser', bundle: true },

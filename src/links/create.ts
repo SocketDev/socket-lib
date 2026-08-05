@@ -3,6 +3,7 @@
  *   hyperlinks using theme configuration.
  */
 
+import terminalLink from '../external/terminal-link'
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 import { ArrayIsArray } from '../primordials/array'
 import { getTheme } from '../themes/context'
@@ -14,34 +15,58 @@ import type { ColorName } from '../colors/types'
 import type { LinkOptions } from './types'
 
 /**
+ * Wrap `text` in an OSC 8 terminal hyperlink so it is CLICKABLE, falling back
+ * to plain text where the terminal cannot render one.
+ *
+ * `link` colors, this one makes it clickable, and they compose in that order:
+ * `hyperlink(link('Docs', url), url)`. Keeping them separate is deliberate —
+ * color is a theme concern and clickability is a terminal-capability one, and a
+ * caller often wants exactly one of them.
+ *
+ * Capability detection is delegated to `terminal-link`, which reads VTE and
+ * iTerm versions, `TERM_PROGRAM_VERSION`, CI providers, and Windows build
+ * numbers. A hand-rolled `TERM_PROGRAM` allowlist looks equivalent and is not:
+ * it silently drops every capable terminal it forgot, and the failure is
+ * invisible, because an undetected terminal renders a non-clickable string
+ * that looks fine.
+ *
+ * @param text - Text to display.
+ * @param url - URL the text points at.
+ * @param options - `fallback: false` renders bare text on an unsupported
+ *   terminal; the default appends the URL so it stays reachable.
+ *
+ * @returns `text` as a clickable hyperlink, or a plain-text fallback
+ */
+export function hyperlink(
+  text: string,
+  url: string,
+  options?: { fallback?: boolean | undefined } | undefined,
+): string {
+  const opts = { __proto__: null, fallback: true, ...options } as {
+    fallback: boolean
+  }
+  return terminalLink(text, url, {
+    fallback: opts.fallback ? undefined : (linkText: string) => linkText,
+  })
+}
+
+/**
  * Create a themed hyperlink for terminal output. The link text is colored using
  * the theme's link color.
  *
- * Note: Most terminals support ANSI color codes but not clickable links. This
- * function colors the text but does not create clickable hyperlinks. For
- * clickable links, use a library like 'terminal-link' separately.
+ * Note: this colors the text only. For a CLICKABLE link use `hyperlink` above,
+ * which composes with this one: `hyperlink(link('Docs', url), url)`.
  *
  * @example
  *   ;```ts
  *   import { link } from '@socketsecurity/lib/links/create'
  *
- *   // Use current theme
  *   console.log(link('Documentation', 'https://socket.dev'))
  *
- *   // Override theme
- *   console.log(
- *     link('API Docs', 'https://api.socket.dev', {
- *       theme: 'coana',
- *     }),
- *   )
+ *   console.log(link('API Docs', 'https://api.socket.dev', { theme: 'coana' }))
  *
- *   // Show URL as fallback
- *   console.log(
- *     link('GitHub', 'https://github.com', {
- *       fallback: true,
- *     }),
- *   )
- *   // Output: "GitHub (https://github.com)"
+ *   // "GitHub (https://github.com)"
+ *   console.log(link('GitHub', 'https://github.com', { fallback: true }))
  *   ```
  *
  * @param text - Link text to display.
@@ -102,7 +127,7 @@ export function link(
  *   formatted.forEach(link => console.log(link))
  *   ```
  *
- * @param links - Array of [text, url] pairs.
+ * @param linkSpecs - Array of [text, url] pairs.
  * @param options - Link configuration options.
  *
  * @returns Array of colored link texts

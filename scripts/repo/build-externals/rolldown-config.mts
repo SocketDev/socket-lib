@@ -112,9 +112,15 @@ const STUB_MAP: Record<string, string | [RegExp, string]> = {
     /@npmcli[\\/]arborist[\\/]lib[\\/]arborist[\\/]/,
     'arborist-audit-report.cjs',
   ],
+  // has-flag is ESM-only; bundled it resolves to a namespace, and supports-color
+  // calls it as a function. Swap in real CJS. See stubs/has-flag.cjs.
+  '^has-flag$': 'has-flag.cjs',
   '^postcss-selector-parser$': 'empty.cjs',
   '^proggy$': 'proggy.cjs',
   '^sigstore$': 'empty.cjs',
+  // supports-hyperlinks is ESM-only and is terminal-link's only route to
+  // supports-color. Stub the consumer, not the far larger supports-color.
+  '^supports-hyperlinks$': 'supports-hyperlinks.cjs',
   '^tuf-js$': 'empty.cjs',
 }
 
