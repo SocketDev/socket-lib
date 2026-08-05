@@ -225,7 +225,7 @@ const config: RolldownOptions = {
     // -backed object (an `[[api object]]` + its `[Foreign]` backing — an LRU /
     // npmcli-fs cache handle) V8 refuses to serialize. `check-new-deps`'s
     // `audit.mts` is the only puller (`cache/ttl/store` → `cacache/{read,write,
-    // clear}` → this `shared`), and it only ever calls `getCacache()` lazily
+    // clear}` → this `_internal`), and it only ever calls `getCacache()` lazily
     // inside `getNotFoundCache()` — never on the snapshot boot path. This stub
     // re-implements the leaf with a `getCacache()` that requires the cacache
     // bundle on FIRST CALL (and `__toESM`-normalizes it the same way), so the

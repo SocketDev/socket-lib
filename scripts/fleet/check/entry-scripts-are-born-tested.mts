@@ -135,7 +135,7 @@ const SCRIPT_META: ScriptMeta = {
   --update-baseline  rewrite bornTested.grandfathered in .config/repo/socket-wheelhouse.json to the current untested set`,
 }
 
-function main(): number {
+export function main(): number {
   if (process.argv.includes('--update-baseline')) {
     const written = updateBaseline()
     const location = findSocketWheelhouseConfig()

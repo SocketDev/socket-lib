@@ -1,4 +1,4 @@
-/**
+/*
  * @file The external-tools.json half of `soak-excludes-have-dates`. The parent
  *   check reads pnpm-workspace.yaml's `minimumReleaseAgeExclude:` /
  *   `trustPolicyExclude:` bullets; this module reads the OTHER soak-bypass

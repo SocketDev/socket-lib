@@ -3,7 +3,7 @@
 ## What
 
 Never prefix a function, variable, type, or export name with `_` to signal
-privacy or "internal use." An `shared/` directory name is the one allowed
+privacy or "internal use." An `_internal/` directory name is the one allowed
 exception — it marks a module-private directory, not an identifier.
 
 ## Why
@@ -14,7 +14,7 @@ claims to give. Privacy in the fleet comes from one of two real mechanisms:
 
 - **Module boundaries.** Don't export the symbol at all; consumers that need it
   reach through the public API instead.
-- **An `shared/` directory.** Files under it are understood to be
+- **An `_internal/` directory.** Files under it are understood to be
   module-private by location, not by a per-name marker on every symbol inside.
 
 A leading underscore also collides with the fleet's export-everything
@@ -25,7 +25,7 @@ it isn't exported and needs no naming trick to hide it.
 
 ## How to apply
 
-- Reach for `shared/` when a group of files is genuinely module-private.
+- Reach for `_internal/` when a group of files is genuinely module-private.
 - Reach for "don't export it" when a single symbol is private.
 - Never reach for a leading underscore on a function, variable, type, class, or
   export name to mean either of the above.
@@ -34,11 +34,11 @@ it isn't exported and needs no naming trick to hide it.
 
 - `.claude/hooks/fleet/no-underscore-ident-guard/` — PreToolUse Edit/Write:
   blocks introducing a new underscore-prefixed identifier (function, variable,
-  type, or export). The `shared/` directory name itself is allowed.
+  type, or export). The `_internal/` directory name itself is allowed.
 
 ## Why this is codified
 
 Privacy-by-underscore is a convention that erodes the moment someone imports
 across the boundary it claims to protect. Codifying "no underscore, use
-`shared/` or don't export" removes the false sense of safety a leading
+`_internal/` or don't export" removes the false sense of safety a leading
 underscore gives without actually stopping anyone from reaching in.

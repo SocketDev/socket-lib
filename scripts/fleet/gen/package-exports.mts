@@ -6,7 +6,7 @@
  *   `dist/`) and packages whose published files sit at the package root.
  *   Privacy taxonomy (applied regardless of `dist/`): a file is PRIVATE — never
  *   exported — when its path contains an `external/` segment, an underscore-
- *   prefixed leaf (`_foo.js`) or directory (`shared/`), or matches a config
+ *   prefixed leaf (`_foo.js`) or directory (`_internal/`), or matches a config
  *   `ignore` glob (src/scripts/test/tools/vendor by default). Everything else
  *   is the public surface and earns an `exports` entry. The deterministic core
  *   (`buildExportsMap`) is a pure function over a file list so it is
@@ -102,7 +102,7 @@ export interface ExportsConfig {
   readonly aliases?: readonly ExportAlias[] | undefined
   // EXTRA private path-segment names on top of the built-in defaults
   // (`external`, `_`-prefixed). A repo that marks privacy with, say,
-  // `internal/` instead of `shared/` lists `['internal']` here. The
+  // `internal/` instead of `_internal/` lists `['internal']` here. The
   // underscore-prefix rule always applies; this only ADDS exact segment names.
   readonly privateSegments?: readonly string[] | undefined
 }

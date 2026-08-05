@@ -366,6 +366,14 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // lines, read off coverage/lane-summary.json) is release/CI tier only,
     // because a fresh clone has no artifact to read.
     () => run('node', ['scripts/fleet/check/coverage-lanes-are-wired.mts']),
+    // The coverage ratchet is law: a Cover threshold trailing the measured
+    // coverage by more than the band means gains went unlocked — the check
+    // fails and its own --fix writes the ratchet. Fail-open on trees with no
+    // cover run or no thresholds, so fresh clones and report-only repos skip.
+    () =>
+      run('node', [
+        'scripts/fleet/check/coverage-thresholds-are-ratcheted.mts',
+      ]),
     // A repo's vitest tuning lives in the ONE settings file
     // (socket-wheelhouse.json `vitest` section), never a standalone
     // .config/repo/vitest.json. The canonical vitest config reads only that
