@@ -63,6 +63,12 @@ export const COMMON_FLAGS = {
     default: false,
     description: 'Enable debug output',
   },
+  describe: {
+    type: 'boolean' as const,
+    default: false,
+    description:
+      'Print what this tool does and exit; with --json, a machine-readable command manifest',
+  },
   'dry-run': {
     type: 'boolean' as const,
     default: false,

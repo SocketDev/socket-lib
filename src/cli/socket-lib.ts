@@ -10,13 +10,69 @@
  *   `@socketsecurity/lib` as a (dev)dependency.
  */
 
+import { createRequire } from 'node:module'
 import process from 'node:process'
 
+import { buildCliManifest, describeRequest, renderDescribe } from '../argv/meta'
 import { getDefaultLogger } from '../logger/default'
 
 import { runCheck } from './check'
 
 const logger = getDefaultLogger()
+
+// Resolves to the repo root from src/cli/ and to the published package root
+// from dist/cli/ — the same two hops in both layouts.
+const { version: LIB_VERSION } = createRequire(import.meta.url)(
+  '../../package.json',
+) as { version: string }
+
+const MANIFEST = buildCliManifest({
+  name: 'socket-lib',
+  version: LIB_VERSION,
+  description: 'Socket-wide static-analysis CLI',
+  commands: [
+    {
+      name: 'check',
+      description: 'Run a Socket-wide check (primordials, ...)',
+      flags: [
+        {
+          name: 'json',
+          type: 'boolean',
+          default: false,
+          description: 'Output as JSON',
+        },
+        {
+          name: 'explain',
+          type: 'boolean',
+          default: false,
+          description: 'Explain each finding',
+        },
+        {
+          name: 'silent',
+          type: 'boolean',
+          default: false,
+          description: 'Suppress output',
+        },
+      ],
+    },
+  ],
+  flags: [
+    {
+      name: 'describe',
+      type: 'boolean',
+      default: false,
+      description:
+        'Print what this tool does and exit; with --json, a machine-readable command manifest',
+    },
+    {
+      name: 'help',
+      type: 'boolean',
+      short: 'h',
+      default: false,
+      description: 'Show help',
+    },
+  ],
+})
 
 export function printHelp(): void {
   logger.log('socket-lib — Socket-wide static-analysis CLI')
@@ -33,6 +89,13 @@ export function printHelp(): void {
 export async function main(
   args: readonly string[] = process.argv.slice(2),
 ): Promise<number> {
+  const describeKind = describeRequest(args)
+  if (describeKind) {
+    // socket-lint: allow process-stdio
+    process.stdout.write(renderDescribe(describeKind, MANIFEST))
+    return 0
+  }
+
   const command = args[0]
 
   if (!command || command === '--help' || command === '-h') {

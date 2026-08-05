@@ -337,6 +337,11 @@
       "types": "./dist/argv/flag-types.d.ts",
       "default": "./dist/argv/flag-types.js"
     },
+    "./argv/meta": {
+      "source": "./src/argv/meta.ts",
+      "types": "./dist/argv/meta.d.ts",
+      "default": "./dist/argv/meta.js"
+    },
     "./argv/parse": {
       "source": "./src/argv/parse.ts",
       "types": "./dist/argv/parse.d.ts",

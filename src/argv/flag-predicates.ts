@@ -127,6 +127,17 @@ export const isCoverage = makeFlagPredicate(
 export const isDebug = makeFlagPredicate(['--debug'])
 
 /**
+ * Check if a self-description is requested.
+ *
+ * @example
+ *   ;```typescript
+ *   isDescribe({ describe: true }) // true
+ *   isDescribe(['--describe']) // true
+ *   ```
+ */
+export const isDescribe = makeFlagPredicate(['--describe'])
+
+/**
  * Check if dry-run mode is enabled.
  *
  * @example
