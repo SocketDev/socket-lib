@@ -127,6 +127,33 @@ export function groupRows(rows: Row[]): Map<string, Row[]> {
   return groups
 }
 
+// A namespace table longer than this many rows renders past one GitHub
+// viewport, so it gets a <details> fold. Section body is the table plus three
+// framing lines, and the fold rule trips past 30 body lines.
+const TABLE_FOLD_THRESHOLD = 27
+
+// Names what a folded namespace table contains so a reader can decide whether
+// to open it without opening it: the row count, then the sub-namespaces and
+// leaf modules inside.
+export function renderGroupSummary(key: string, rows: Row[]): string {
+  const nested = new Set<string>()
+  const leaves: string[] = []
+  for (let i = 0, { length } = rows; i < length; i += 1) {
+    const parts = rows[i]!.subpath.split('/')
+    if (parts.length > 2) {
+      nested.add(parts[1]!)
+    } else if (parts.length === 2) {
+      leaves.push(parts[1]!)
+    }
+  }
+  const names = [...nested, ...leaves]
+  const shown = names.slice(0, 12)
+  const rest = names.length - shown.length
+  const list =
+    rest > 0 ? `${shown.join(', ')}, and ${rest} more` : shown.join(', ')
+  return `All ${rows.length} ${key} subpaths, alphabetical and linked to source: ${list}`
+}
+
 export function renderMarkdown(groups: Map<string, Row[]>): string {
   const keys = [...groups.keys()].toSorted((a, b) => {
     if (a === 'Top-level') {
@@ -165,15 +192,30 @@ export function renderMarkdown(groups: Map<string, Row[]>): string {
 
   for (let i = 0, { length } = keys; i < length; i += 1) {
     const key = keys[i]!
+    const rowsForGroup = groups.get(key) ?? []
+    // A GitHub markdown viewport is about 45 rendered lines, so a table longer
+    // than TABLE_FOLD_THRESHOLD rows pushes the next namespace heading off
+    // screen. Fold those behind a <details> whose <summary> names the
+    // sub-namespaces inside, so the index stays skimmable closed.
+    const folded = rowsForGroup.length > TABLE_FOLD_THRESHOLD
     lines.push(`## ${key}`)
     lines.push('')
+    if (folded) {
+      lines.push('<details>')
+      lines.push(`<summary>${renderGroupSummary(key, rowsForGroup)}</summary>`)
+      lines.push('')
+    }
     lines.push('| Subpath | Description |')
     lines.push('| --- | --- |')
-    for (const row of groups.get(key) ?? []) {
+    for (const row of rowsForGroup) {
       const summary = row.summary || '_(no description)_'
       lines.push(
         `| [\`@socketsecurity/lib-stable/${row.subpath}\`](../${row.file}) | ${summary} |`,
       )
+    }
+    if (folded) {
+      lines.push('')
+      lines.push('</details>')
     }
     lines.push('')
   }

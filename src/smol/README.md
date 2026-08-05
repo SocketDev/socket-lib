@@ -8,6 +8,9 @@ This directory is the lib's **bridge** to the `node:smol-*` builtins that ship w
 
 The shape of each loader is uniform:
 
+<details>
+<summary>The uniform loader shape: a module-level `_smolX` cache, the `/*@__NO_SIDE_EFFECTS__*/` marker, the `isSmol()` gate, and a try/catch around `require('node:smol-x')`</summary>
+
 ```ts
 let _smolX: SmolXBinding | null | undefined
 
@@ -27,6 +30,8 @@ export function getSmolX(): SmolXBinding | undefined {
   return _smolX ?? undefined
 }
 ```
+
+</details>
 
 Each loader exports a typed `SmolXBinding` interface that mirrors the canonical shape in socket-btm's `additions/source-patched/lib/smol-x.js`. Consumers route the hot path through the loader and fall back transparently:
 
