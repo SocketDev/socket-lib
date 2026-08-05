@@ -38,7 +38,7 @@
  *   guard `IfStatement`s cross into JS. This is the standard-things/esm
  *   `parseTopLevel` optimization, expressed as walker pruning.
  *
- *   Run standalone: `node scripts/fleet/check/entry-scripts-self-describe.mts`.
+ *   Run standalone: `node scripts/fleet/check/entry-scripts-are-self-describing.mts`.
  */
 
 import { readFileSync } from 'node:fs'
@@ -460,7 +460,7 @@ export function scan(repoRoot: string = REPO_ROOT): Finding[] {
 const SCRIPT_META: ScriptMeta = {
   describe:
     'checks every fleet/repo CLI entry script answers --describe and --help via runMain(main, meta)',
-  help: 'Usage: node scripts/fleet/check/entry-scripts-self-describe.mts',
+  help: 'Usage: node scripts/fleet/check/entry-scripts-are-self-describing.mts',
 }
 
 export function main(): number {
@@ -474,7 +474,7 @@ export function main(): number {
   const onImport = findings.filter(f => f.kind === 'runs-on-import')
   if (noRunMain.length > 0) {
     logger.error(
-      `entry-scripts-self-describe: ${noRunMain.length} entry script(s) never call the shared runner, so --describe/--help run the side effect instead of printing usage.`,
+      `entry-scripts-are-self-describing: ${noRunMain.length} entry script(s) never call the shared runner, so --describe/--help run the side effect instead of printing usage.`,
     )
     logger.error(
       '  Wrap the entry: `runMain(main, SCRIPT_META)` from scripts/fleet/_shared/run-main.mts.',
@@ -485,7 +485,7 @@ export function main(): number {
   }
   if (noMeta.length > 0) {
     logger.error(
-      `entry-scripts-self-describe: ${noMeta.length} runMain call(s) pass no ScriptMeta, so the runner has nothing to print for --describe/--help.`,
+      `entry-scripts-are-self-describing: ${noMeta.length} runMain call(s) pass no ScriptMeta, so the runner has nothing to print for --describe/--help.`,
     )
     logger.error(
       '  Pass the second argument: `runMain(main, { describe, help })`.',
@@ -496,7 +496,7 @@ export function main(): number {
   }
   if (onImport.length > 0) {
     logger.error(
-      `entry-scripts-self-describe: ${onImport.length} entry script(s) start their work at module scope, so --describe/--help never get a turn.`,
+      `entry-scripts-are-self-describing: ${onImport.length} entry script(s) start their work at module scope, so --describe/--help never get a turn.`,
     )
     logger.error(
       '  Where: a top-level statement invoking main() — `main()`, `void main()`, `await main()`, or `export const run = main().catch(…)`.',

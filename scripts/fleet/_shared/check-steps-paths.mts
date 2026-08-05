@@ -366,10 +366,14 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // lines, read off coverage/lane-summary.json) is release/CI tier only,
     // because a fresh clone has no artifact to read.
     () => run('node', ['scripts/fleet/check/coverage-lanes-are-wired.mts']),
-    // The coverage ratchet is law: a Cover threshold trailing the measured
-    // coverage by more than the band means gains went unlocked — the check
-    // fails and its own --fix writes the ratchet. Fail-open on trees with no
-    // cover run or no thresholds, so fresh clones and report-only repos skip.
+    // The coverage ratchet is law. When the last cover run measures a metric
+    // more than 1.5 points above its committed threshold, somebody shipped
+    // covered work and never locked the gain, so this check fails and names
+    // the stale metric. Running it again with --fix rewrites each stale
+    // threshold to one point under the measured floor, and it refuses to ever
+    // lower a value. A tree with no coverage summary or no configured
+    // thresholds skips cleanly, so fresh clones and report-only repos are
+    // never blocked.
     () =>
       run('node', [
         'scripts/fleet/check/coverage-thresholds-are-ratcheted.mts',
@@ -521,7 +525,10 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // Every fleet/repo CLI entrypoint must SELF-DESCRIBE: runMain(main, meta)
     // so --describe and -h/--help print purpose/usage instead of running the
     // script's side effect.
-    () => run('node', ['scripts/fleet/check/entry-scripts-self-describe.mts']),
+    () =>
+      run('node', [
+        'scripts/fleet/check/entry-scripts-are-self-describing.mts',
+      ]),
     // A NEW repo-owned entry script is born with a mirror-named unit test;
     // pre-contract scripts ride the script-owned bornTested ratchet.
     () =>
