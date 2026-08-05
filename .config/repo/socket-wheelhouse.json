@@ -15,10 +15,6 @@
   "release": {
     "provenanceOrphanBaseline": [
       {
-        "id": "@socketsecurity/lib@6.6.0",
-        "reason": "Bump-in-CI: npm derives provenance from GITHUB_SHA, the commit the publish workflow was triggered at (32435898, manifest 6.6.0-prerelease), while the version was bumped in-CI afterwards and pushed as 55f971b7 (manifest 6.6.0). The attested tree therefore never shipped, and a re-pack at it diverges on dist/. Same defect as 6.5.0/6.5.1; the durable fix is to push the bump commit BEFORE publishing so the attested SHA is the shipped tree."
-      },
-      {
         "id": "@socketsecurity/lib@6.5.1",
         "reason": "Bump-in-CI: the publish run bumped the version in-tree, so the attested commit 7b853622 pre-dates the v6.5.1 tag at de394ae21. Frozen history \u2014 remedying it means tagging an immutable published release."
       },
