@@ -3515,7 +3515,8 @@
       "default": "./dist/words/types.js"
     },
     "./data/extensions.json": "./data/extensions.json",
-    "./package.json": "./package.json"
+    "./package.json": "./package.json",
+    "./llms.txt": "./llms.txt"
   },
   "publishConfig": {
     "access": "public",
