@@ -65,7 +65,7 @@ later:
 
 ## Enforcement
 
-`scripts/fleet/check/entry-scripts-self-describe.mts` scans every `.mts`
+`scripts/fleet/check/entry-scripts-are-self-describing.mts` scans every `.mts`
 under `scripts/fleet/` + `scripts/repo/` and flags:
 
 1. **no-run-main** — an entry-guarded script that never calls the shared

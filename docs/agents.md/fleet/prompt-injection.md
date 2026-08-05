@@ -92,6 +92,9 @@ denial-of-service on the reader. The guard blocks introducing these shapes:
 
 ### A shape only counts where it can mean what the rule assumes
 
+<details>
+<summary><b>Position-scoped detectors</b> — ReDoS only in regex positions, homoglyphs only in prose; markdown emphasis is stripped first because <code>*</code> and backticks are formatting and metacharacters at once</summary>
+
 Two of those detectors read a POSITION, not a whole line, because the same
 characters carry the shape in one place and ordinary content in another
 (`.claude/hooks/fleet/prompt-injection-guard/scan-context.mts`):
@@ -129,6 +132,8 @@ as pre-existing, so this fires on newly hand-introduced bombs. To keep the
 guard's own tests from seeding these payloads into the tree, every test payload
 (injection and DoS alike) is assembled at runtime from fragments in
 `.claude/hooks/fleet/prompt-injection-guard/test/payloads.mts` — nothing scannable is stored on disk.
+
+</details>
 
 ## Untrusted contributors (new-account drive-by)
 
