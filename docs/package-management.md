@@ -51,6 +51,9 @@ const lockFile = findUpSync([
 
 **Example:**
 
+<details>
+<summary>Example: detectPackageManager inside a script, logging the running manager or warning when there is none</summary>
+
 ```typescript
 import { detectPackageManager } from '@socketsecurity/lib/env/package-manager'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
@@ -66,11 +69,16 @@ if (pm) {
 }
 ```
 
+</details>
+
 **Common Pitfalls:**
 
 - This detects the RUNNING package manager from environment, not the project's preferred package manager
 - Returns `null` when called outside package manager context (e.g., standalone Node.js script)
 - To detect a project's package manager, check lock files instead:
+
+<details>
+<summary>Lock-file fallback: a getProjectPackageManager helper mapping pnpm-lock.yaml, yarn.lock, bun.lockb and package-lock.json through findUpSync</summary>
 
 ```typescript
 import { findUpSync } from '@socketsecurity/lib/fs/find'
@@ -95,9 +103,14 @@ function getProjectPackageManager(
 }
 ```
 
+</details>
+
 ## Package Manager Operations
 
 ### Running Commands with Different Package Managers
+
+<details>
+<summary>runScript source: lock-file detection, then `npm run test` versus the bare `pnpm test` script form</summary>
 
 ```typescript
 import { findUpSync } from '@socketsecurity/lib/fs/find'
@@ -127,7 +140,12 @@ await runScript('./project', 'test')
 // pnpm/yarn: runs "pnpm test" or "yarn test"
 ```
 
+</details>
+
 ### Installing Specific Packages
+
+<details>
+<summary>addPackage source: lock-file detection, then `add` with `--save-dev`/`-D` and `--save-exact`/`-E` chosen per manager</summary>
 
 ```typescript
 import { findUpSync } from '@socketsecurity/lib/fs/find'
@@ -167,9 +185,14 @@ await addPackage('./project', 'lodash')
 await addPackage('./project', 'typescript', { dev: true, exact: true })
 ```
 
+</details>
+
 ## Package Manifest Operations
 
 ### Reading package.json
+
+<details>
+<summary>Typed read: a PackageJson interface, the readJson call, a dependency lookup, and a scripts listing loop</summary>
 
 ```typescript
 import { readJson } from '@socketsecurity/lib/fs/read-json'
@@ -197,6 +220,8 @@ if (pkg.scripts) {
   })
 }
 ```
+
+</details>
 
 ### Updating package.json
 
@@ -264,6 +289,9 @@ if (lockFile) {
 
 ### Regenerating Lock Files
 
+<details>
+<summary>regenerateLockFile source: detect the manager, safeDelete its lock file from a name map, then re-run install</summary>
+
 ```typescript
 import { findUpSync } from '@socketsecurity/lib/fs/find'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
@@ -296,9 +324,14 @@ async function regenerateLockFile(projectPath: string) {
 }
 ```
 
+</details>
+
 ## Real-World Examples
 
 ### Smart Package Installer
+
+<details>
+<summary>smartInstall source: manager detection, spinner start, `install` versus `add` argument shaping, `--save-dev`/`-D` for dev packages, and success or failure spinner endings</summary>
 
 ```typescript
 import { findUpSync } from '@socketsecurity/lib/fs/find'
@@ -355,7 +388,12 @@ await smartInstall('./project', ['lodash', 'axios'])
 await smartInstall('./project', ['typescript', '@types/node'], { dev: true })
 ```
 
+</details>
+
 ### Dependency Version Checker
+
+<details>
+<summary>checkOutdated source: read package.json, merge dependencies and devDependencies, fetch each `dist-tags.latest` from the npm registry with httpJson, then log outdated versus current</summary>
 
 ```typescript
 import { readJson } from '@socketsecurity/lib/fs/read-json'
@@ -401,7 +439,12 @@ async function checkOutdated(projectPath: string) {
 await checkOutdated('./my-project')
 ```
 
+</details>
+
 ### Workspace Management
+
+<details>
+<summary>listWorkspaces source: read the root package.json workspaces field, walk `packages/`, and collect name, path, version and dependency names per workspace</summary>
 
 ```typescript
 import { readJson } from '@socketsecurity/lib/fs/read-json'
@@ -448,7 +491,12 @@ workspaces.forEach(ws => {
 })
 ```
 
+</details>
+
 ### Package Manager Command Runner
+
+<details>
+<summary>PackageManager class source: a static detect factory plus install, add, remove and runScript methods with per-manager argument mapping</summary>
 
 ```typescript
 import { findUpSync } from '@socketsecurity/lib/fs/find'
@@ -500,6 +548,8 @@ await pm.add(['lodash'], false)
 await pm.add(['typescript'], true)
 await pm.runScript('test')
 ```
+
+</details>
 
 ## Troubleshooting
 

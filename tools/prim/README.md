@@ -50,6 +50,9 @@ development — it always picks up the live source under `tools/prim/`.
 | `prim mod`   | Codemod **JavaScript** source files to use primordials. Dry-run by default; `--apply` to write. TypeScript is out of scope (rewriting `.ts` requires source-mapping between stripped-types and original byte offsets) — `prim audit` still walks TS, so candidates are visible.               |
 | `prim lint`  | Structural lint rules for primordials destructure blocks. Currently: `ctor-rename` — constructor primordials (`Array`, `Set`, `TypeError`, …) must be aliased `<Name>: <Name>Ctor` when destructured from `primordials` (or any configured primordials-shaped source). Exits 1 on violations. |
 
+<details>
+<summary>Worked command lines: `--help`, an audit with `--gaps` and one with `--coverage`, a dry-run `prim mod`, the same with `--apply`, `--include-guessed`, and `prim lint` over an additions tree</summary>
+
 ```sh
 # Show help
 pnpm prim --help
@@ -76,6 +79,8 @@ pnpm prim mod --target . --dir src --include-guessed --apply
 # Lint additions code for ctor-rename violations:
 pnpm prim lint --target additions/source-patched --dir lib
 ```
+
+</details>
 
 ## How it knows what's covered
 
@@ -132,6 +137,9 @@ can only classify these via the receiver-name heuristic
 Pass `--ai-disambiguate` (audit and mod both accept it) to defer the
 remaining ambiguous sites to Claude Sonnet:
 
+<details>
+<summary>How the deferral works: the ANTHROPIC_API_KEY invocation line, the read-only Read, Grep and Glob tool surface, the `.prim-cache/disambiguate.json` verdict cache, where the hard-case list lives, and what happens without the flag</summary>
+
 ```sh
 ANTHROPIC_API_KEY=sk-... pnpm prim audit --target . --ai-disambiguate
 ```
@@ -151,3 +159,5 @@ risk the cacache→semver `RegExp.prototype.test called on incompatible
 receiver` shape). The static guess path still applies — `re.test()`
 gets classified as RegExp via the receiver-name heuristic with no API
 call.
+
+</details>

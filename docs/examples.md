@@ -6,6 +6,9 @@ Complete examples showing how to combine multiple utilities from @socketsecurity
 
 A complete CLI tool that downloads a file, processes it, and provides visual feedback:
 
+<details>
+<summary>Full `downloadAndProcess` source: safeMkdir, httpDownload with an onProgress spinner, tar extract via spawn, then safeDelete cleanup</summary>
+
 ```typescript
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
@@ -59,9 +62,14 @@ async function downloadAndProcess(url: string, destPath: string) {
 await downloadAndProcess('https://example.com/archive.tar.gz', './output')
 ```
 
+</details>
+
 ## Package Manager Wrapper
 
 A wrapper that detects and runs the appropriate package manager:
+
+<details>
+<summary>Full `installDependencies` source: findUpSync lockfile detection for pnpm, yarn and npm, then a spawned install with the spinner attached</summary>
 
 ```typescript
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
@@ -105,9 +113,14 @@ async function installDependencies(projectPath: string) {
 await installDependencies('./my-project')
 ```
 
+</details>
+
 ## Build Pipeline with Error Recovery
 
 A build system that tries multiple strategies on failure:
+
+<details>
+<summary>Full `buildProject` source: safeDelete of dist, a tsc --noEmit check, an esbuild bundle with a `cp -r` fallback, then vitest run</summary>
 
 ```typescript
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
@@ -183,9 +196,14 @@ async function buildProject(projectPath: string) {
 await buildProject('./my-project')
 ```
 
+</details>
+
 ## Configuration Manager
 
 Load configuration from multiple sources with fallbacks:
+
+<details>
+<summary>Full `loadConfig` source: defaults, home `.myapp/config.json`, project `.myapprc`, env-specific `.myapprc.$env`, and API_URL/TIMEOUT/DEBUG variables merged in precedence order</summary>
 
 ```typescript
 import { readJson } from '@socketsecurity/lib/fs/read-json'
@@ -258,9 +276,14 @@ const config = await loadConfig(process.cwd())
 console.log('Using config:', config)
 ```
 
+</details>
+
 ## Parallel File Processor
 
 Process multiple files in parallel with progress tracking:
+
+<details>
+<summary>Full `processFiles` source: readDirNames scan, Promise.all across directories, readFileUtf8 plus safeMkdir per file, spinner.progress ticking as each directory lands</summary>
 
 ```typescript
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
@@ -321,9 +344,14 @@ async function processFiles(inputDir: string, outputDir: string) {
 await processFiles('./input', './output')
 ```
 
+</details>
+
 ## Git Operations Helper
 
 Common git operations with error handling:
+
+<details>
+<summary>Full source: gitStatus, hasUncommittedChanges, getCurrentBranch, and safeCheckout with auto-stash and isSpawnError handling</summary>
 
 ```typescript
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
@@ -391,9 +419,14 @@ if (await hasUncommittedChanges('./my-repo')) {
 await safeCheckout('./my-repo', 'main')
 ```
 
+</details>
+
 ## Health Check System
 
 Monitor multiple services with retries:
+
+<details>
+<summary>Full `checkHealth` source: httpJson with retries, retryDelay and timeout per service, a per-check spinner, and a healthy-count tally</summary>
 
 ```typescript
 import { httpJson } from '@socketsecurity/lib/http-request'
@@ -454,9 +487,14 @@ const results = await checkHealth([
 ])
 ```
 
+</details>
+
 ## Task Queue with Concurrency Control
 
 Execute tasks with limited concurrency:
+
+<details>
+<summary>Full `processBatch` source: PromiseQueue bounded to a concurrency limit, spinner.progress per completion, and a glob-driven usage sample</summary>
 
 ```typescript
 import fs from 'node:fs/promises'
@@ -511,5 +549,7 @@ await processBatch(
   10, // Process 10 files at a time
 )
 ```
+
+</details>
 
 These examples demonstrate how to combine multiple utilities from @socketsecurity/lib to build robust CLI tools with proper error handling, progress feedback, and cross-platform support.

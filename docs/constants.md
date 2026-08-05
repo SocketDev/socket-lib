@@ -97,6 +97,9 @@ if (isLinux) {
 
 ### Platform-Specific Logic Example
 
+<details>
+<summary>getConfigDir source: branches on WIN32 and DARWIN to build the AppData, Application Support, or `.config` path under the home directory</summary>
+
 ```typescript
 import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
 import { getHome } from '@socketsecurity/lib/env/home'
@@ -120,6 +123,8 @@ function getConfigDir(): string {
   return path.join(home, '.myapp')
 }
 ```
+
+</details>
 
 ## Process Constants
 
@@ -150,6 +155,9 @@ await spawn('command', [], { signal })
 
 ### Version Requirement Checker
 
+<details>
+<summary>checkNodeVersion source: compares getNodeMajorVersion against a required major, logs a fail plus the download URL, then exits 1</summary>
+
 ```typescript
 import { getNodeMajorVersion } from '@socketsecurity/lib/constants/node'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
@@ -172,7 +180,12 @@ function checkNodeVersion() {
 checkNodeVersion()
 ```
 
+</details>
+
 ### npm Package Downloader
+
+<details>
+<summary>downloadPackage source: fetch registry metadata, resolve `latest` through dist-tags, look up that version's tarball, then httpDownload with spinner progress</summary>
 
 ```typescript
 import { httpJson, httpDownload } from '@socketsecurity/lib/http-request'
@@ -225,7 +238,12 @@ async function downloadPackage(name: string, version: string, destDir: string) {
 await downloadPackage('lodash', 'latest', '/tmp')
 ```
 
+</details>
+
 ### Cross-Platform Path Builder
+
+<details>
+<summary>PathBuilder class source: a static home factory, an appData method branching on WIN32 and DARWIN, a variadic add, and build joining the segments</summary>
 
 ```typescript
 import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
@@ -280,7 +298,12 @@ console.log(configPath)
 // - Linux: Uses .config
 ```
 
+</details>
+
 ### Registry URL Builder
+
+<details>
+<summary>RegistryClient class source: packageUrl, versionUrl, a tarballUrl that handles scoped names, and a searchUrl using encodeURIComponent</summary>
 
 ```typescript
 class RegistryClient {
@@ -317,7 +340,12 @@ console.log(registry.tarballUrl('@types/node', '20.0.0'))
 console.log(registry.searchUrl('testing framework'))
 ```
 
+</details>
+
 ### Abort Signal Usage
+
+<details>
+<summary>Example: one shared abort signal passed to two httpDownload calls and a spawn, alongside a SIGINT handler</summary>
 
 ```typescript
 import { getAbortSignal } from '@socketsecurity/lib/process/abort'
@@ -343,6 +371,8 @@ await Promise.all([
   spawn('long-running-command', [], { signal }),
 ])
 ```
+
+</details>
 
 ## Available Constants
 

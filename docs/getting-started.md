@@ -35,6 +35,9 @@ yarn add @socketsecurity/lib
 
 Let's create a simple script that uses a few core features:
 
+<details>
+<summary>The example script: a logger and a spinner wrapped around a `readJson('./package.json')` read, then successAndStop and a success log</summary>
+
 ```typescript
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 import { getDefaultLogger } from '@socketsecurity/lib/logger'
@@ -57,10 +60,13 @@ spinner.successAndStop('Loaded successfully')
 logger.success(`Package name: ${pkg.name}`)
 ```
 
-Save this as `example.ts` and run it:
+</details>
+
+Save this as `example.ts` and run it. Node 24, the version this library
+requires, strips TypeScript types on its own, so no separate runner is needed:
 
 ```bash
-npx tsx example.ts
+node example.ts
 ```
 
 You should see an animated spinner followed by success messages.

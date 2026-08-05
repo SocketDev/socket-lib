@@ -17,6 +17,9 @@ a binary that cannot be found.
 Generated at
 https://github.com/npm/cmd-shim/blob/v7.0.0/lib/index.js#L192:
 
+<details>
+<summary>Verbatim npm cmd-shim v7.0.0 PowerShell output: the `$basedir` and `$exe` setup, the `Test-Path "$basedir/node$exe"` branch, and both pipeline-input paths the parser regex must match</summary>
+
 ```powershell
 #!/usr/bin/env pwsh
 $basedir=Split-Path $MyInvocation.MyCommand.Definition -Parent
@@ -46,3 +49,5 @@ if (Test-Path "$basedir/node$exe") {
   $ret=$LASTEXITCODE
 }
 ```
+
+</details>

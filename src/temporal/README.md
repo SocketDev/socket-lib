@@ -51,6 +51,9 @@ don't fall back to the equivalent `Date` form.
 
 ## Adding a new operation
 
+<details>
+<summary>The ten-step recipe: find the spec section, pick the file, write the JSDoc header, walk the steps with `// Step N.` comments, throw with primordials, follow the four-ingredient message rule, route slots through slots.ts, keep statics and prototype methods inline, update the surface inventory, and add a test262-backed test</summary>
+
 1. **Find the spec section** in the pinned rev (see _Spec revision
    pinning_ below). Each operation has a section number like `8.4.2`.
 2. **Decide which file it lives in** — same clause as an existing
@@ -81,10 +84,15 @@ don't fall back to the equivalent `Date` form.
 10. **Add a test** that round-trips through the polyfill reference
     impl's relevant `test262` cases — those are the ground truth.
 
+</details>
+
 ## The spec-step annotation style
 
 This is what an operation looks like end-to-end (excerpt from
 `instant.ts`):
+
+<details>
+<summary>Excerpt from `instant.ts`: the `8.4.2 Temporal.Instant.from` JSDoc header listing its spec steps, and a body matching them with `// Step N.` markers</summary>
 
 ```ts
 /**
@@ -107,6 +115,8 @@ export function from(item: unknown): Instant {
 }
 ```
 
+</details>
+
 The header cites the section and lists the spec steps as written. The
 body matches step-for-step with inline `// Step N.` markers. A
 reviewer reads the spec PDF on one side and the file on the other and
@@ -118,6 +128,9 @@ The Temporal spec says many places: _"throw a RangeError exception"_
 or _"throw a TypeError exception"_. The spec is silent on the message
 text. Our throws use the **primordial** constructor and follow the
 Socket's **four-ingredient** message rule.
+
+<details>
+<summary>The good and the bad throw side by side: a RangeErrorCtor message carrying rule, where, saw and fix, versus a bare `new RangeError('invalid input')`</summary>
 
 **✓**:
 
@@ -140,6 +153,8 @@ throw new RangeError('invalid input')
 
 No rule, no where, no saw, no fix. Also: bare global `RangeError`
 instead of the primordial — fails the primordials lint.
+
+</details>
 
 Full rule and worked examples:
 [`../../docs/agents.md/fleet/error-messages.md`](../../docs/agents.md/fleet/error-messages.md).

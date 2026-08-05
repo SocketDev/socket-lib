@@ -47,6 +47,9 @@ await processLock.withLock('/tmp/my-operation.lock', async () => {
 
 **Example:**
 
+<details>
+<summary>Worked spawn calls: a basic `git status`, options with cwd, env and stdio, writing to stdin for an interactive process, catching a non-zero exit through isSpawnError, and a timeout kill</summary>
+
 ```typescript
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
@@ -88,6 +91,8 @@ try {
 }
 ```
 
+</details>
+
 **Common Pitfalls:**
 
 - Don't use string concatenation for arguments - use array form for security
@@ -104,6 +109,9 @@ try {
 **Returns:** SpawnSyncReturns with exit code and captured output
 
 **Example:**
+
+<details>
+<summary>Worked spawnSync calls: a basic run reading stdout and status, options with cwd and stdioString, and `stdioString: false` for raw Buffer output</summary>
 
 ```typescript
 import { spawnSync } from '@socketsecurity/lib/process/spawn/child'
@@ -130,6 +138,8 @@ const result = spawnSync('cat', ['binary-file'], {
 console.log(result.stdout) // Buffer
 ```
 
+</details>
+
 **Common Pitfalls:**
 
 - Blocks the event loop - don't use for long-running commands
@@ -137,6 +147,9 @@ console.log(result.stdout) // Buffer
 - Timeout not supported (use `spawn()` with timeout instead)
 
 ### Spawn Options
+
+<details>
+<summary>All eight spawn options with an example each: cwd, env, stdio, shell, timeout, stdioString, stripAnsi, and spinner, plus their defaults and Windows notes</summary>
 
 #### cwd
 
@@ -265,6 +278,8 @@ await spawn('command', [], {
 spinner.success('Complete')
 ```
 
+</details>
+
 ### Security: Array-Based Arguments
 
 The spawn functions use array-based arguments, which is the PRIMARY DEFENSE against command injection:
@@ -294,6 +309,9 @@ await spawn(`git commit -m "${userMessage}"`, { shell: true })
 
 **Example:**
 
+<details>
+<summary>Example: catching a failed spawn and reading error.cmd, error.code and error.stderr</summary>
+
 ```typescript
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
 import { isSpawnError } from '@socketsecurity/lib/process/spawn/errors'
@@ -309,11 +327,16 @@ try {
 }
 ```
 
+</details>
+
 #### enhanceSpawnError()
 
 **What it does:** Enhances spawn errors with better context and messages.
 
 **Example:**
+
+<details>
+<summary>Example: wrapping a caught error so the message names the command, its flags and the exit code</summary>
 
 ```typescript
 import { enhanceSpawnError } from '@socketsecurity/lib/process/spawn/errors'
@@ -327,6 +350,8 @@ try {
   // "Error details..."
 }
 ```
+
+</details>
 
 ## Process Locks
 
@@ -370,6 +395,9 @@ await processLock.withLock('/tmp/build.lock', async () => {
 
 ### processLock Methods
 
+<details>
+<summary>The three methods in full: acquire with retries, baseDelayMs and staleMs, release paired in a finally block, and the scoped withLock helper</summary>
+
 #### acquire(lockPath, options?)
 
 Acquires the lock at `lockPath`. Returns a release function. Throws if the lock cannot be acquired after all retries.
@@ -401,6 +429,8 @@ const result = await processLock.withLock('/tmp/my.lock', async () => {
   return await doWork()
 })
 ```
+
+</details>
 
 ## Inter-Process Communication (IPC)
 
@@ -505,6 +535,9 @@ async function atomicBuild() {
 
 ### Git Operations
 
+<details>
+<summary>Reading the current branch, testing for uncommitted changes with `git diff-index --quiet HEAD`, and formatting the last commit</summary>
+
 ```typescript
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
@@ -531,6 +564,8 @@ const result = await spawn('git', ['log', '-1', '--format=%H %s'], {
 })
 console.log(`Last commit: ${result.stdout}`)
 ```
+
+</details>
 
 ### Parallel Execution with Error Handling
 

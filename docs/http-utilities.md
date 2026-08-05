@@ -46,6 +46,9 @@ await httpDownload('https://example.com/file.zip', '/tmp/file.zip')
 
 **Example:**
 
+<details>
+<summary>Worked httpJson calls: a plain GET, a typed `httpJson<User>` call, a POST with a JSON body, and a call carrying an Authorization header plus retries, retryDelay and timeout</summary>
+
 ```typescript
 import { httpJson } from '@socketsecurity/lib/http-request'
 
@@ -83,6 +86,8 @@ const data = await httpJson('https://api.example.com/data', {
 })
 ```
 
+</details>
+
 **Common Pitfalls:**
 
 - Non-2xx responses throw an error (check `response.ok` if using `httpRequest` directly)
@@ -104,6 +109,9 @@ const data = await httpJson('https://api.example.com/data', {
 **Returns:** `Promise<string>`
 
 **Example:**
+
+<details>
+<summary>Worked httpText calls: fetching HTML, fetching a raw README, POSTing a plain text payload, and setting Accept and User-Agent headers</summary>
 
 ```typescript
 import { httpText } from '@socketsecurity/lib/http-request'
@@ -132,6 +140,8 @@ const content = await httpText('https://example.com/data.txt', {
 })
 ```
 
+</details>
+
 **Common Pitfalls:**
 
 - Non-2xx responses throw an error
@@ -151,6 +161,9 @@ const content = await httpText('https://example.com/data.txt', {
 **Returns:** `Promise<HttpResponse>` with methods for accessing the response
 
 **Example:**
+
+<details>
+<summary>Worked httpRequest calls: reading status, statusText, ok and headers, choosing json, text or arrayBuffer, branching on a non-2xx result, POSTing with custom headers, and disabling redirect following</summary>
 
 ```typescript
 import { httpRequest } from '@socketsecurity/lib/http-request'
@@ -196,6 +209,8 @@ console.log(response.status) // 301, 302, etc.
 console.log(response.headers['location']) // Redirect target
 ```
 
+</details>
+
 **Response Methods:**
 
 - `.json<T>()` - Parse as JSON (generic type T)
@@ -224,6 +239,9 @@ console.log(response.headers['location']) // Redirect target
 **Returns:** `Promise<HttpDownloadResult>` with `headers`, `ok`, `path`, `size`, `status`, and `statusText`
 
 **Example:**
+
+<details>
+<summary>Worked httpDownload calls: a simple download, a GitHub release URL that redirects, an onProgress percentage callback, logger-driven progress at a progressInterval, and retries with a long timeout</summary>
 
 ```typescript
 import { httpDownload } from '@socketsecurity/lib/http-request'
@@ -271,6 +289,8 @@ await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
   },
 })
 ```
+
+</details>
 
 **Common Pitfalls:**
 
@@ -459,6 +479,9 @@ await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
 
 ### Fetching GitHub API Data
 
+<details>
+<summary>Fetching the latest GitHub release as a typed GitHubRelease, with the vnd.github.v3+json Accept header and a token read from GITHUB_TOKEN</summary>
+
 ```typescript
 import { httpJson } from '@socketsecurity/lib/http-request'
 
@@ -482,7 +505,12 @@ const release = await httpJson<GitHubRelease>(
 console.log(`Latest release: ${release.tag_name}`)
 ```
 
+</details>
+
 ### Downloading with Retry Logic
+
+<details>
+<summary>Downloading an installer with retries 3, retryDelay 2000, a 300000 ms timeout and logger progress, wrapped in a try/catch that logs a fail</summary>
 
 ```typescript
 import { httpDownload } from '@socketsecurity/lib/http-request'
@@ -512,7 +540,12 @@ try {
 }
 ```
 
+</details>
+
 ### Handling API Errors
+
+<details>
+<summary>Branching on response.ok by status: 401, 404, 5xx, and a fallback that reads the error body before throwing</summary>
 
 ```typescript
 import { httpRequest } from '@socketsecurity/lib/http-request'
@@ -537,7 +570,12 @@ if (!response.ok) {
 const data = response.json()
 ```
 
+</details>
+
 ### Streaming Large File Downloads
+
+<details>
+<summary>Driving a Spinner from onProgress, updating only when the whole percent changes, then successAndStop</summary>
 
 ```typescript
 import { httpDownload } from '@socketsecurity/lib/http-request'
@@ -563,6 +601,8 @@ await httpDownload(
 
 spinner.successAndStop('Download complete')
 ```
+
+</details>
 
 ## Troubleshooting
 

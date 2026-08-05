@@ -10,6 +10,9 @@ Common issues and solutions when using @socketsecurity/lib.
 
 **Solution:**
 
+<details>
+<summary>Three steps: verify with `npm list @socketsecurity/lib`, correct the import to a subpath such as `@socketsecurity/lib/spinner/spinner`, then clear the cache and reinstall under npm, pnpm or yarn</summary>
+
 1. Verify the package is installed:
 
    ```bash
@@ -41,6 +44,8 @@ Common issues and solutions when using @socketsecurity/lib.
    rm -rf node_modules yarn.lock
    yarn install
    ```
+
+</details>
 
 ### TypeScript cannot find types
 

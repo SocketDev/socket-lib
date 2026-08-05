@@ -225,6 +225,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## eco/
 
+<details>
+<summary>All 37 eco/ subpaths, alphabetical and linked to source: cargo, manifest, npm, purl, types</summary>
+
 | Subpath                                                                                                                         | Description                                                                                                                                                                                                                  |
 | ------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib-stable/eco/cargo/lockfile-format`](../src/eco/cargo/lockfile-format.ts)                                   | Format descriptor for `Cargo.lock` — Rust's Cargo-managed lockfile.                                                                                                                                                          |
@@ -265,6 +268,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/eco/purl`](../src/eco/purl.ts)                                                                     | PURL (Package URL) ecosystem identifiers shared across every package manager Socket understands.                                                                                                                             |
 | [`@socketsecurity/lib-stable/eco/types`](../src/eco/types.ts)                                                                   | Socket Registry ecosystem schema types — tags for packages and the manifest entries the registry build pipeline emits.                                                                                                       |
 
+</details>
+
 ## effects/
 
 | Subpath                                                                                       | Description                                           |
@@ -275,6 +280,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/effects/shimmer-terminal`](../src/effects/shimmer-terminal.ts)   | Terminal renderer for the shimmer engine.             |
 
 ## env/
+
+<details>
+<summary>All 33 env/ subpaths, alphabetical and linked to source: agents, boolean, case-insensitive, ci, debug, flags, github, github-status, home, locale, node-auth-token, node-env, and 21 more</summary>
 
 | Subpath                                                                                       | Description                                                                                                                                                                                   |
 | --------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -312,6 +320,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/env/windows`](../src/env/windows.ts)                             | Windows environment variable getters.                                                                                                                                                         |
 | [`@socketsecurity/lib-stable/env/xdg`](../src/env/xdg.ts)                                     | XDG Base Directory Specification environment variable getters.                                                                                                                                |
 
+</details>
+
 ## errors/
 
 | Subpath                                                                       | Description                                                                                                                                               |
@@ -333,6 +343,9 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/events/warning/suppress`](../src/events/warning/suppress.ts) | `process.emitWarning` suppression.                                                                                                                                                       |
 
 ## external-tools/
+
+<details>
+<summary>All 86 external-tools/ subpaths, alphabetical and linked to source: bazel, cdxgen, janus, jre, opengrep, python, sbt, skillspector, socket-keychain, synp, trivy, trufflehog, and 4 more</summary>
 
 | Subpath                                                                                                                             | Description                                                                                                                                                                                 |
 | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -422,6 +435,8 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/external-tools/uv/from-vfs`](../src/external-tools/uv/from-vfs.ts)                                     | `uvFromVfs()` — extracts the uv binary from the smol binary's VFS.                                                                                                                          |
 | [`@socketsecurity/lib-stable/external-tools/uv/resolve`](../src/external-tools/uv/resolve.ts)                                       | `resolveUv()` — uv resolution entry point.                                                                                                                                                  |
 | [`@socketsecurity/lib-stable/external-tools/uv/types`](../src/external-tools/uv/types.ts)                                           | Shared types for uv resolution.                                                                                                                                                             |
+
+</details>
 
 ## fleet/
 
@@ -541,6 +556,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath                                                             | Description                                                           |
 | ------------------------------------------------------------------- | --------------------------------------------------------------------- |
 | [`@socketsecurity/lib-stable/links/create`](../src/links/create.ts) | Themed hyperlink utilities for terminal output.                       |
+| [`@socketsecurity/lib-stable/links/github`](../src/links/github.ts) | Markdown GitHub reference links.                                      |
 | [`@socketsecurity/lib-stable/links/types`](../src/links/types.ts)   | Public type surface for `links/*` modules — the `LinkOptions` record. |
 
 ## logger/

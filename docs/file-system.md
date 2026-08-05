@@ -48,6 +48,9 @@ const pkgPath = findUpSync('package.json')
 
 **Example:**
 
+<details>
+<summary>Example: a plain readFileUtf8 call, plus one passing an AbortController signal</summary>
+
 ```typescript
 import { readFileUtf8 } from '@socketsecurity/lib/fs/read-file'
 
@@ -61,6 +64,8 @@ const content = await readFileUtf8('./large-file.txt', {
   signal: controller.signal,
 })
 ```
+
+</details>
 
 **Common Pitfalls:**
 
@@ -113,6 +118,9 @@ const archive = await readFileBinary('./backup.tar.gz')
 
 **Example:**
 
+<details>
+<summary>Example: reading package.json, a reviver that turns createdAt into a Date, and `throws: false` for an optional config</summary>
+
 ```typescript
 import { readJson } from '@socketsecurity/lib/fs/read-json'
 
@@ -134,6 +142,8 @@ if (config === undefined) {
   console.log('Config file not found, using defaults')
 }
 ```
+
+</details>
 
 **Common Pitfalls:**
 
@@ -194,6 +204,9 @@ const buffer = await safeReadFile('./image.png', { encoding: null })
 
 **Example:**
 
+<details>
+<summary>Example: default 2-space output, `spaces: 4`, tab indentation, CRLF via EOL, and `finalEOL: false`</summary>
+
 ```typescript
 import { writeJson } from '@socketsecurity/lib/fs/write-json'
 
@@ -215,6 +228,8 @@ await writeJson('./win-data.json', data, { EOL: '\r\n' })
 // No final newline
 await writeJson('./compact.json', data, { finalEOL: false })
 ```
+
+</details>
 
 **Common Pitfalls:**
 
@@ -248,6 +263,9 @@ writeJsonSync('./config.json', { version: '2.0.0' })
 
 **Example:**
 
+<details>
+<summary>Example: listing subdirectories, `includeEmpty: false`, an ignore list for node_modules and .git, and `sort: false`</summary>
+
 ```typescript
 import { readDirNames } from '@socketsecurity/lib/fs/read-dir'
 
@@ -268,6 +286,8 @@ const dirs = await readDirNames('./src', {
 // Disable sorting
 const unsorted = await readDirNames('./src', { sort: false })
 ```
+
+</details>
 
 ### readDirNamesSync()
 
@@ -354,6 +374,9 @@ if (isDirSync('./dist')) {
 
 **Example:**
 
+<details>
+<summary>Example: a recursive default create, `mode: 0o700` for a private directory, and `recursive: false`</summary>
+
 ```typescript
 import { safeMkdir } from '@socketsecurity/lib/fs/safe'
 
@@ -366,6 +389,8 @@ await safeMkdir('./secure', { mode: 0o700 })
 // Non-recursive
 await safeMkdir('./single-level', { recursive: false })
 ```
+
+</details>
 
 **Common Pitfalls:**
 
@@ -406,6 +431,9 @@ safeMkdirSync('./output')
 
 **Example:**
 
+<details>
+<summary>Example: deleting one directory, an array of paths, glob patterns with a negation, `force: true` outside cwd, and maxRetries with retryDelay</summary>
+
 ```typescript
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 
@@ -427,6 +455,8 @@ await safeDelete('./flaky-dir', {
   retryDelay: 500,
 })
 ```
+
+</details>
 
 **Common Pitfalls:**
 
@@ -461,6 +491,9 @@ safeDeleteSync('./temp')
 
 **Example:**
 
+<details>
+<summary>Example: finding package.json, trying several config filenames, `onlyDirectories: true` for node_modules, and a custom cwd</summary>
+
 ```typescript
 import { findUp } from '@socketsecurity/lib/fs/find'
 
@@ -481,6 +514,8 @@ const path = await findUp('tsconfig.json', {
   cwd: '/path/to/project',
 })
 ```
+
+</details>
 
 ### findUpSync()
 

@@ -14,6 +14,9 @@ If you're an agent wiring up a browser/extension consumer, the short version:
 
 ## Subpath matrix
 
+<details>
+<summary>Every subpath and its verdict: zero-Node-dep leaves such as arrays, strings, objects, errors, url, colors and primordials; condition-flagged entries logger/browser, http-request/browser, cache/ttl/browser, debug, memo, npm/registry, oci and ai/builtin; case-by-case areas paths, themes, env, eco, perf and events; and Node-only areas fs, bin, spawn, process, ipc, archives, git, secrets, sea and dlx</summary>
+
 | Subpath                                  | Browser                   | Notes                                                                                                                                                                                                                          |
 | ---------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `./logger`                               | ✅ via `./logger/browser` | Bundler `browser` condition resolves automatically. Singleton + `success`/`fail`/`warn`/`error`/`info`/`log` surface backed by `console.*`. No Node deps.                                                                      |
@@ -83,11 +86,16 @@ If you're an agent wiring up a browser/extension consumer, the short version:
 | `./dlx/*`                                | ❌                        | `npx`-equivalent. N/A.                                                                                                                                                                                                         |
 | `./constants/*`                          | ⚠️                        | Mostly browser-safe constants, but the umbrella entry pulls in Node-dependent modules. Import individual leaf files.                                                                                                           |
 
+</details>
+
 ## Opting in as a consumer
 
 ### Bundlers (rolldown, vite, esbuild)
 
 These honor `package.json#exports[".browser"]` automatically when their target is `browser` / `web`. No code changes needed:
+
+<details>
+<summary>The four snippets: an unchanged logger import that resolves to the browser shim, a rolldown `platform: 'browser'` config, a vite `resolve.conditions` list, and the esbuild `--platform=browser` flag</summary>
 
 ```ts
 // In your extension's src/background.mts
@@ -126,6 +134,8 @@ For esbuild:
 ```sh
 esbuild --platform=browser src/index.ts
 ```
+
+</details>
 
 ### Direct imports (when the bundler ignores conditions)
 

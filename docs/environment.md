@@ -140,6 +140,9 @@ if (term === 'dumb') {
 
 Environment getters support test rewiring without modifying `process.env`:
 
+<details>
+<summary>The rewiring pattern: `setEnv('CI', '1')` in beforeEach, `resetEnv()` in afterEach, and `clearEnv` for a single override inside one test</summary>
+
 ```typescript
 import { setEnv, clearEnv, resetEnv } from '@socketsecurity/lib/env/rewire'
 import { getCI } from '@socketsecurity/lib/env/ci'
@@ -161,6 +164,8 @@ test('specific test', () => {
   clearEnv('CI')
 })
 ```
+
+</details>
 
 **Benefits:**
 

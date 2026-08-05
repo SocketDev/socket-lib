@@ -55,6 +55,9 @@ const spinner = Spinner({
 
 **Example:**
 
+<details>
+<summary>Example: start, update the text mid-run, mark a success without stopping, then successAndStop</summary>
+
 ```typescript
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
@@ -72,6 +75,8 @@ spinner.text('Saving to database...')
 spinner.successAndStop('All operations complete')
 ```
 
+</details>
+
 **Common Pitfalls:**
 
 - Don't forget to call `.start()` - the spinner won't animate until started
@@ -79,6 +84,9 @@ spinner.successAndStop('All operations complete')
 - Call `.stop()` or `.successAndStop()` when done to clean up properly
 
 ### Spinner Methods
+
+<details>
+<summary>Every spinner method with a snippet: start, stop, success, successAndStop, fail, failAndStop, warn, warnAndStop, text, progress, progressStep, indent, and dedent</summary>
 
 #### start(text?: string)
 
@@ -191,6 +199,8 @@ Decreases indentation.
 spinner.dedent()
 ```
 
+</details>
+
 ### Spinner Shimmer Effects
 
 Add animated shimmer effects to spinner text:
@@ -228,6 +238,9 @@ const logger = getDefaultLogger()
 **When to use:** Use the logger for all status messages, errors, warnings, and informational output in CLI tools.
 
 ### Logger Methods
+
+<details>
+<summary>Every logger method with a snippet: success, fail, warn, info, skip, step, substep, log, and error, plus the symbol each one prints</summary>
 
 #### success(message: string, ...extras: unknown[])
 
@@ -308,6 +321,8 @@ Logs to stderr without symbols.
 logger.error('An error occurred:', error.message)
 ```
 
+</details>
+
 ### Logger Indentation
 
 Control output indentation for nested operations:
@@ -374,6 +389,9 @@ console.log(`${LOG_SYMBOLS.step} Processing step`)
 
 Customize colors across the entire library:
 
+<details>
+<summary>Applying the built-in `THEMES.sunset`, then a custom theme setting the primary, success, error, warning, info and step colors</summary>
+
 ```typescript
 import { setTheme } from '@socketsecurity/lib/themes/context'
 import { THEMES } from '@socketsecurity/lib/themes/themes'
@@ -393,6 +411,8 @@ setTheme({
   },
 })
 ```
+
+</details>
 
 **Built-in Themes:**
 
