@@ -13,13 +13,13 @@
  */
 
 import { NPM_BIN_PATH } from '../../../constants/agents'
-import { WIN32 } from '../../../constants/platform'
 import { isDebug } from '../../../debug/namespace'
 import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
 } from '../../../primordials/array'
 import { spawn } from '../../../process/spawn/child'
+import { windowsShellOption } from '../../../process/spawn/windows-shell'
 
 import {
   isNpmAuditFlag,
@@ -68,8 +68,9 @@ export function execNpm(args: string[], options?: SpawnOptions | undefined) {
     ],
     {
       __proto__: null,
-      // npm on Windows is a .cmd file that requires a shell.
-      shell: WIN32,
+      // npm on Windows is a .cmd shim that cmd.exe has to interpret. Asked per
+      // command so the answer follows NPM_BIN_PATH rather than the platform.
+      ...windowsShellOption(NPM_BIN_PATH),
       ...options,
     } as SpawnOptions,
   )

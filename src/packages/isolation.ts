@@ -10,6 +10,7 @@ import { errorMessage } from '../errors/message'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize'
 import { getOsTmpDir } from '../paths/socket'
 import { spawn } from '../process/spawn/child'
+import { windowsShellOption } from '../process/spawn/windows-shell'
 import { readPackageJson } from './read'
 
 import type { PackageJson } from './types'
@@ -162,7 +163,7 @@ export async function isolatePackage(
 
       await spawn('pnpm', ['add', packageInstallSpec], {
         cwd: packageTempDir,
-        shell: WIN32,
+        ...windowsShellOption('pnpm'),
         stdio: 'pipe',
       })
     }
@@ -231,7 +232,7 @@ export async function isolatePackage(
     // spawn is imported at the top
     await spawn('pnpm', ['install'], {
       cwd: installedPath,
-      shell: WIN32,
+      ...windowsShellOption('pnpm'),
       stdio: 'pipe',
     })
   }

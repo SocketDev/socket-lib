@@ -12,17 +12,18 @@
  *   - Fall through to `whichReal` for a fresh PATH search; cache the result on
  *     success.
  *
- *   3. Spawn with `shell: WIN32` so `.cmd` wrappers work on Windows; POSIX bypass
- *      since direct `execve` is faster.
+ *   3. Spawn under `windowsShellOption` so `.cmd` wrappers work on Windows while a
+ *      real `.exe` is exec'd directly; POSIX bypasses the shell entirely since
+ *      direct `execve` is faster.
  *   4. On not-found, throw a typed `ENOENT` error with operator guidance — far
  *      more useful than a bare "command not found".
  */
 
-import { WIN32 } from '../constants/platform'
 import { isPath } from '../paths/normalize'
 import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
 import { spawn } from '../process/spawn/child'
+import { windowsShellOption } from '../process/spawn/windows-shell'
 
 import { binPathCache, getFs } from './shared'
 import { resolveRealBinSync } from './resolve'
@@ -100,9 +101,11 @@ export async function execBin(
     ? resolvedPath[0]!
     : resolvedPath
   /* c8 ignore stop */
-  // On Windows, binaries are often .cmd files that require shell to execute.
+  // On Windows, binaries are often .cmd shims that cmd.exe has to interpret.
+  // Asked per command rather than per platform, so a real .exe is exec'd
+  // directly instead of being routed through cmd.exe's quoting rules.
   return await spawn(binCommand, args ?? [], {
-    shell: WIN32,
+    ...windowsShellOption(binCommand),
     ...options,
   })
 }
