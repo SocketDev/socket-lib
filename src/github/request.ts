@@ -27,7 +27,15 @@ import { JSONParse } from '../primordials/json'
 import { getGitHubToken } from './token'
 import { GitHubEmptyBodyError } from './errors'
 
+import type { GitHubStatusResult } from '../env/github-status'
 import type { GitHubFetchOptions, GitHubRateLimitError } from './types'
+
+/**
+ * How long the status probe may take. Short on purpose: the request it explains
+ * has already failed, so this is added latency on an error path, and the probe
+ * fails open when it runs out.
+ */
+export const GITHUB_STATUS_PROBE_TIMEOUT_MS = 4000
 
 /**
  * Fetch data from GitHub API with automatic authentication and rate limit
@@ -90,6 +98,10 @@ export async function fetchGitHub<T = unknown>(
 ): Promise<T> {
   const opts = { __proto__: null, ...options } as GitHubFetchOptions
   const token = opts.token ?? getGitHubToken()
+  // Injectable so a test exercises the enriched error without reaching
+  // githubstatus.com, and so a caller that already knows the platform state
+  // can supply it rather than paying for a second lookup.
+  const probe = opts.probeStatus ?? probeGitHubStatus
 
   const headers: Record<string, string> = {
     Accept: 'application/vnd.github.v3+json',
@@ -101,9 +113,30 @@ export async function fetchGitHub<T = unknown>(
     headers['Authorization'] = `Bearer ${token}`
   }
 
-  /* c8 ignore start - External GitHub API call */
-  const response = await httpRequest(url, { headers })
-  /* c8 ignore stop */
+  // A timeout, a reset connection, or a DNS failure never reaches the status
+  // branches below, because it throws before there is a response to inspect.
+  // That is precisely the shape a platform outage takes: the 2026-08-06 Actions
+  // incident produced timeouts and dropped runners, not 5xx bodies. So the same
+  // probe runs here, and the operator learns whether GitHub was down instead of
+  // reading a bare ECONNRESET.
+  let response
+  try {
+    /* c8 ignore start - External GitHub API call */
+    response = await httpRequest(url, { headers })
+    /* c8 ignore stop */
+  } catch (e) {
+    /* c8 ignore start - External status probe, non-deterministic */
+    const ghStatus = await probe(GITHUB_STATUS_PROBE_TIMEOUT_MS).catch(
+      () => undefined,
+    )
+    /* c8 ignore stop */
+    throw new ErrorCtor(
+      `GitHub API request failed: ${errorMessage(e)}.${formatGitHubStatusNote(ghStatus)}`,
+      // The original is preserved as the cause, so a caller inspecting `code`
+      // for ECONNRESET or ETIMEDOUT still can.
+      { cause: e },
+    )
+  }
 
   if (!response.ok) {
     if (response.status === 403) {
@@ -129,25 +162,12 @@ export async function fetchGitHub<T = unknown>(
     // the caller whether it's a GitHub-side outage or something local.
     if (response.status >= 500) {
       /* c8 ignore start - External status probe, non-deterministic */
-      const ghStatus = await probeGitHubStatus(4000).catch(() => undefined)
+      const ghStatus = await probe(GITHUB_STATUS_PROBE_TIMEOUT_MS).catch(
+        () => undefined,
+      )
       /* c8 ignore stop */
-      let statusNote = ''
-      if (ghStatus) {
-        if (ghStatus.status === 'unknown') {
-          statusNote =
-            ' (githubstatus.com unreachable — could not confirm platform health)'
-        } else if (ghStatus.degraded) {
-          const componentLines = ghStatus.components
-            .map(c => `  ${c.name}: ${c.status}`)
-            .join('\n')
-          statusNote = `\nGitHub platform status at time of failure:\n${componentLines}`
-        } else {
-          statusNote =
-            '\nGitHub platform status: all monitored components operational — this may be a transient issue or a request-specific error.'
-        }
-      }
       throw new ErrorCtor(
-        `GitHub API error ${response.status}: ${response.statusText}.${statusNote}`,
+        `GitHub API error ${response.status}: ${response.statusText}.${formatGitHubStatusNote(ghStatus)}`,
       )
     }
     throw new ErrorCtor(
@@ -176,6 +196,35 @@ export async function fetchGitHub<T = unknown>(
       { cause: e },
     )
   }
+}
+
+/**
+ * The sentence appended to a GitHub failure describing the platform's state.
+ *
+ * Three outcomes, because they call for three different next moves. A degraded
+ * component means waiting is the answer. All-operational means the fault is
+ * probably this request rather than GitHub, which is what stops someone
+ * waiting out an outage that is not happening. An unreachable status page says
+ * so plainly instead of implying health it never confirmed.
+ *
+ * Pure over the probe's result, so every branch is testable without network.
+ */
+export function formatGitHubStatusNote(
+  health: GitHubStatusResult | undefined,
+): string {
+  if (!health) {
+    return ''
+  }
+  if (health.status === 'unknown') {
+    return ' (githubstatus.com unreachable — could not confirm platform health)'
+  }
+  if (health.degraded) {
+    const componentLines = health.components
+      .map(c => `  ${c.name}: ${c.status}`)
+      .join('\n')
+    return `\nGitHub platform status at time of failure:\n${componentLines}`
+  }
+  return '\nGitHub platform status: all monitored components operational — this may be a transient issue or a request-specific error.'
 }
 
 /**

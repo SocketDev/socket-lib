@@ -4,6 +4,8 @@
  *   Constants live in `./constants`, named errors in `./errors`.
  */
 
+import type { GitHubStatusResult } from '../env/github-status'
+
 /**
  * Options for GitHub API fetch requests.
  */
@@ -18,6 +20,12 @@ export interface GitHubFetchOptions {
    * default headers: Accept, User-Agent, and Authorization.
    */
   headers?: Record<string, string> | undefined
+  /**
+   * The platform-status probe used to explain a failure, injectable so a test
+   * exercises the enriched error without reaching githubstatus.com. Defaults to
+   * the real probe. Only ever called on an error path.
+   */
+  probeStatus?: ((timeoutMs: number) => Promise<GitHubStatusResult>) | undefined
 }
 
 /**

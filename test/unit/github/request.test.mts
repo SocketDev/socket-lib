@@ -2,7 +2,11 @@ import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { GitHubEmptyBodyError } from '../../../src/github/errors'
-import { fetchGitHub, getGhsaUrl } from '../../../src/github/request'
+import {
+  fetchGitHub,
+  formatGitHubStatusNote,
+  getGhsaUrl,
+} from '../../../src/github/request'
 
 const GITHUB_API = 'https://api.github.com'
 
@@ -191,4 +195,114 @@ describe('getGhsaUrl', () => {
     const url = getGhsaUrl('GHSA-@@@-###-$$$')
     expect(url).toContain('GHSA-@@@-###-$$$')
   })
+})
+
+describe('formatGitHubStatusNote', () => {
+  it('says nothing when the probe produced no result', () => {
+    expect(formatGitHubStatusNote(undefined)).toBe('')
+  })
+
+  it('names each degraded component so waiting is the obvious move', () => {
+    const note = formatGitHubStatusNote({
+      components: [
+        { id: 'br0l2tvcx85d', name: 'Actions', status: 'major_outage' },
+        { id: 'brv1bkgrwx7q', name: 'API Requests', status: 'operational' },
+      ],
+      degraded: true,
+      status: 'major_outage',
+      summary: 'Actions: major_outage',
+    })
+    expect(note).toContain('GitHub platform status at time of failure')
+    expect(note).toContain('Actions: major_outage')
+    expect(note).toContain('API Requests: operational')
+  })
+
+  it('says all-operational, so nobody waits out an outage that is not happening', () => {
+    const note = formatGitHubStatusNote({
+      components: [
+        { id: 'br0l2tvcx85d', name: 'Actions', status: 'operational' },
+      ],
+      degraded: false,
+      status: 'operational',
+      summary: 'All monitored GitHub components operational',
+    })
+    expect(note).toContain('all monitored components operational')
+    expect(note).toContain('request-specific error')
+  })
+
+  it('admits an unreachable status page rather than implying health', () => {
+    const note = formatGitHubStatusNote({
+      components: [],
+      degraded: false,
+      status: 'unknown',
+      summary: 'githubstatus.com unreachable — cannot confirm GitHub health',
+    })
+    expect(note).toContain('githubstatus.com unreachable')
+    expect(note).not.toContain('operational')
+  })
+})
+
+// A probe reporting the 2026-08-06 shape, injected so no test reaches
+// githubstatus.com or pays its timeout.
+async function outageProbe() {
+  return {
+    components: [
+      { id: 'br0l2tvcx85d', name: 'Actions', status: 'major_outage' as const },
+    ],
+    degraded: true,
+    status: 'major_outage' as const,
+    summary: 'Actions: major_outage',
+  }
+}
+
+describe('fetchGitHub network failures', () => {
+  beforeEach(() => {
+    nock.disableNetConnect()
+    nock.cleanAll()
+    vi.resetModules()
+  })
+
+  afterEach(() => {
+    nock.cleanAll()
+    nock.enableNetConnect()
+  })
+
+  it(
+    'enriches a connection error, which is the shape an outage takes',
+    { timeout: 60_000 },
+    async () => {
+      // The 2026-08-06 Actions incident produced timeouts and dropped runners,
+      // never a 5xx body, so this path is the one that needed the platform note.
+      nock(GITHUB_API)
+        .get('/repos/foo/bar')
+        .replyWithError({ code: 'ECONNRESET', message: 'socket hang up' })
+      await expect(
+        fetchGitHub(`${GITHUB_API}/repos/foo/bar`, {
+          probeStatus: outageProbe,
+        }),
+      ).rejects.toThrow(
+        /GitHub API request failed: [\s\S]*Actions: major_outage/,
+      )
+    },
+  )
+
+  it(
+    'keeps the original error as the cause so a caller can still read its code',
+    { timeout: 60_000 },
+    async () => {
+      nock(GITHUB_API)
+        .get('/repos/foo/bar')
+        .replyWithError({ code: 'ETIMEDOUT', message: 'timed out' })
+      let caught: unknown
+      try {
+        await fetchGitHub(`${GITHUB_API}/repos/foo/bar`, {
+          probeStatus: outageProbe,
+        })
+      } catch (e) {
+        caught = e
+      }
+      expect(caught).toBeInstanceOf(Error)
+      expect((caught as Error).cause).toBeDefined()
+    },
+  )
 })
