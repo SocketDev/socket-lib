@@ -238,7 +238,7 @@ export function safeProcessEnv():
  * @example
  *   ;```typescript
  *   import { setEnv, resetEnv } from './rewire'
- *   import { getCI } from './ci'
+ *   import { isCI } from './ci'
  *
  *   beforeEach(() => {
  *     setEnv('CI', '1')
@@ -249,7 +249,7 @@ export function safeProcessEnv():
  *   })
  *
  *   it('should detect CI environment', () => {
- *     expect(getCI()).toBe(true)
+ *     expect(isCI()).toBe(true)
  *   })
  *   ```
  */
@@ -267,13 +267,13 @@ export function setEnv(key: string, value: string | undefined): void {
  * @example
  *   ;```typescript
  *   import { withEnv } from './rewire'
- *   import { getCI } from './ci'
+ *   import { isCI } from './ci'
  *
  *   // Temporary override in isolated context
  *   await withEnv({ CI: '1' }, async () => {
- *     expect(getCI()).toBe(true)
+ *     expect(isCI()).toBe(true)
  *   })
- *   expect(getCI()).toBe(false) // Override is gone
+ *   expect(isCI()).toBe(false) // Override is gone
  *   ```
  *
  * @example
@@ -282,10 +282,10 @@ export function setEnv(key: string, value: string | undefined): void {
  *   setEnv('CI', '1') // Shared override (persistent)
  *
  *   await withEnv({ CI: '0' }, async () => {
- *     expect(getCI()).toBe(false) // Isolated override takes precedence
+ *     expect(isCI()).toBe(false) // Isolated override takes precedence
  *   })
  *
- *   expect(getCI()).toBe(true) // Back to shared override
+ *   expect(isCI()).toBe(true) // Back to shared override
  *   ```
  */
 export async function withEnv<T>(
@@ -302,10 +302,10 @@ export async function withEnv<T>(
  * @example
  *   ;```typescript
  *   import { withEnvSync } from './rewire'
- *   import { getCI } from './ci'
+ *   import { isCI } from './ci'
  *
  *   const result = withEnvSync({ CI: '1' }, () => {
- *     return getCI()
+ *     return isCI()
  *   })
  *   expect(result).toBe(true)
  *   ```

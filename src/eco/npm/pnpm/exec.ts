@@ -6,7 +6,7 @@
 
 import { execBin } from '../../../bin/exec'
 import { isDebug } from '../../../debug/namespace'
-import { getCI } from '../../../env/ci'
+import { isCI } from '../../../env/ci'
 import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
@@ -65,12 +65,12 @@ export function execPnpm(args: string[], options?: PnpmOptions | undefined) {
 
   // CI defaults: pnpm uses --frozen-lockfile by default. Suppress when
   // the caller explicitly opted into lockfile updates. The full chain
-  // short-circuits at getCI(), which returns false in non-CI runs, so the
+  // short-circuits at isCI(), which returns false in non-CI runs, so the
   // remaining branches are unreachable in test environments.
   /* c8 ignore start */
   const frozenLockfileArgs = []
   if (
-    getCI() &&
+    isCI() &&
     allowLockfileUpdate &&
     firstArg &&
     isPnpmInstallCommand(firstArg) &&

@@ -27,6 +27,8 @@ import {
   getLibc,
   getOs,
   getTarget,
+  isPosix,
+  isWin32,
   S_IXGRP,
   S_IXOTH,
   S_IXUSR,
@@ -41,6 +43,14 @@ describe('constants/platform', () => {
 
     it('should export WIN32 boolean', () => {
       expect(typeof WIN32).toBe('boolean')
+    })
+
+    it('should answer isWin32() for the live platform', () => {
+      expect(isWin32()).toBe(process.platform === 'win32')
+    })
+
+    it('should answer isPosix() as the platform complement', () => {
+      expect(isPosix()).toBe(process.platform !== 'win32')
     })
 
     it('should have mutually exclusive platform flags', () => {

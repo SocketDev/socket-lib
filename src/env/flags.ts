@@ -4,7 +4,7 @@
  *   carries the logic with no runtime std-env import.
  *   Only the flags socket-lib does NOT already own live here. CI, DEBUG,
  *   NODE_ENV, test, platform, and Node-version detection are handled by
- *   socket-lib's own rewire-aware getters and constants (`env/ci` `getCI`,
+ *   socket-lib's own rewire-aware getters and constants (`env/ci` `isCI`,
  *   `env/debug` `getDebug`, `env/node-env` `getNodeEnv`, `env/test` `isTest`,
  *   `constants/platform`, `constants/node`, `constants/runtime`), so std-env's
  *   overlapping flags are intentionally not re-exported.

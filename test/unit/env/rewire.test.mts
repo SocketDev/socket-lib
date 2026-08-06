@@ -10,7 +10,7 @@
  */
 
 import process from 'node:process'
-import { getCI } from '../../../src/env/ci'
+import { isCI } from '../../../src/env/ci'
 import { getHome } from '../../../src/env/home'
 import { getSocketDebug } from '../../../src/env/socket'
 import {
@@ -51,17 +51,17 @@ describe('env rewiring', () => {
     it('should override boolean env vars', () => {
       // Override CI to true
       setEnv('CI', '1')
-      expect(getCI()).toBe(true)
+      expect(isCI()).toBe(true)
 
       // CI with an empty string still returns true because the key exists
       setEnv('CI', '')
-      expect(getCI()).toBe(true)
+      expect(isCI()).toBe(true)
 
       // CI returns false only when cleared AND not in process.env
       // On CI systems, process.env.CI exists, so stub it out first
       vi.stubEnv('CI', undefined)
       clearEnv('CI')
-      expect(getCI()).toBe(false)
+      expect(isCI()).toBe(false)
       vi.unstubAllEnvs()
     })
 
@@ -97,17 +97,17 @@ describe('env rewiring', () => {
 
     it('test 1: should run with CI=true', () => {
       setEnv('CI', 'true')
-      expect(getCI()).toBe(true)
+      expect(isCI()).toBe(true)
     })
 
     it('test 2: should run with CI cleared', () => {
       setEnv('CI', 'false')
-      expect(getCI()).toBe(true) // Key exists, so true
+      expect(isCI()).toBe(true) // Key exists, so true
 
       // Clear both override and process.env (for CI systems where CI is set)
       vi.stubEnv('CI', undefined)
       clearEnv('CI')
-      expect(getCI()).toBe(false) // Key doesn't exist
+      expect(isCI()).toBe(false) // Key doesn't exist
       vi.unstubAllEnvs()
     })
 
@@ -123,7 +123,7 @@ describe('env rewiring', () => {
       setEnv('CI', '1')
       setEnv('GITHUB_REPOSITORY', 'owner/repo')
 
-      expect(getCI()).toBe(true)
+      expect(isCI()).toBe(true)
       // Test code that behaves differently in CI...
     })
 
@@ -149,7 +149,7 @@ describe('env rewiring', () => {
       setEnv('SOCKET_DEBUG', 'test')
 
       expect(getHome()).toBe('/custom/home')
-      expect(getCI()).toBe(true)
+      expect(isCI()).toBe(true)
       expect(getSocketDebug()).toBe('test')
 
       // Clear one override

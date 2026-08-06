@@ -112,6 +112,27 @@ export const DARWIN = getOs() === 'darwin'
 export const WIN32 = getOs() === 'win32'
 
 /**
+ * Returns whether the current platform is POSIX (anything but Windows).
+ * Callable predicate backed by the module-load memo, so tests can mock the
+ * module.
+ *
+ * @returns `true` on darwin/linux, `false` on win32
+ */
+export function isPosix(): boolean {
+  return !WIN32
+}
+
+/**
+ * Returns whether the current platform is Windows. Callable predicate backed
+ * by the module-load memo, so tests can mock the module.
+ *
+ * @returns `true` on win32, `false` otherwise
+ */
+export function isWin32(): boolean {
+  return WIN32
+}
+
+/**
  * True when this process was launched as a Chrome or Chromium native
  * messaging host. Chrome passes the extension origin URL
  * (`chrome-extension://<id>/`) as `process.argv[2]`; no other invocation shape
