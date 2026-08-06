@@ -15,6 +15,7 @@ import type {
 } from '../effects/shimmer'
 import { configToSpec, frameColors } from '../effects/shimmer'
 import { colorsToAnsi } from '../effects/shimmer-terminal'
+import { isAgent } from '../env/agents'
 import { getCI } from '../env/ci'
 import { ArrayIsArray } from '../primordials/array'
 import { TypeErrorCtor } from '../primordials/error'
@@ -50,7 +51,9 @@ export function applyShimmer(
     shimmerColor = toRgb(shimmer.color as ColorValue)
   }
 
-  if (!getCI() && shimmer.direction !== 'none') {
+  // Shimmer is a per-frame animation: skip it for CI logs and AI-agent-driven
+  // runs, where the frames land in a transcript instead of a terminal.
+  if (!getCI() && !isAgent && shimmer.direction !== 'none') {
     const chars = [...displayText]
     const spec: ShimmerSpec = configToSpec(
       {

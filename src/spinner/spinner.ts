@@ -8,6 +8,7 @@
  *   the module free of side effects at import time.
  */
 
+import { isAgent } from '../env/agents'
 import { getCI } from '../env/ci'
 import yoctoSpinner from '../external/@socketregistry/yocto-spinner'
 import { getDefaultLogger } from '../logger/default'
@@ -71,11 +72,14 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerInstance {
 
     SpinnerCtor = createSpinnerClass(YoctoSpinnerClass, logger)
 
-    // CI vs interactive spinner; getCI() returns false in test runs.
+    // CI and AI-agent-driven runs get the minimal no-animation spinner: an
+    // agent reads a transcript, so throbber frames are pure noise there.
+    // getCI() returns false in test runs.
     /* c8 ignore start - getCI() returns false in test runs so the CI arm is unexercised */
-    defaultSpinnerStyle = getCI()
-      ? ciSpinner
-      : (getCliSpinners('socket') as SpinnerStyle)
+    defaultSpinnerStyle =
+      getCI() || isAgent
+        ? ciSpinner
+        : (getCliSpinners('socket') as SpinnerStyle)
     /* c8 ignore stop */
   }
   return new SpinnerCtor({
