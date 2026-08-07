@@ -7,6 +7,7 @@
  *   - `normalizePath` — backslash → forward-slash, segment collapse, UNC +
  *     namespace preservation
  *   - `msysDriveToNative` — `/c/path` → `C:/path` on Windows
+ *   - `foldPathForCompare` — case/trailing-separator folding for path equality
  */
 
 import { isWin32 } from '../constants/platform'
@@ -24,6 +25,23 @@ import {
 
 // A normalized path that is exactly a bare Windows drive letter (`C:`).
 const DRIVE_LETTER_REGEXP = /^[A-Za-z]:$/
+
+/**
+ * Normalize a path for equality comparison — forward slashes, no trailing
+ * separator, lowercased on Windows.
+ *
+ * @example
+ *   ;```typescript
+ *   foldPathForCompare('C:\\Program Files\\') // 'c:/program files'
+ *   ```
+ */
+export function foldPathForCompare(pathLike: string): string {
+  let normalized = normalizePath(pathLike)
+  if (normalized.length > 1 && normalized.endsWith('/')) {
+    normalized = normalized.slice(0, -1)
+  }
+  return isWin32() ? normalized.toLowerCase() : normalized
+}
 
 // On Windows, convert MSYS drive notation to native: /c/path → C:/path
 export function msysDriveToNative(normalized: string): string {

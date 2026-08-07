@@ -1110,10 +1110,10 @@
       "types": "./dist/exe/path/resolve.d.ts",
       "default": "./dist/exe/path/resolve.js"
     },
-    "./exe/path/trusted": {
-      "source": "./src/exe/path/trusted.ts",
-      "types": "./dist/exe/path/trusted.d.ts",
-      "default": "./dist/exe/path/trusted.js"
+    "./exe/path/sanitize": {
+      "source": "./src/exe/path/sanitize.ts",
+      "types": "./dist/exe/path/sanitize.d.ts",
+      "default": "./dist/exe/path/sanitize.js"
     },
     "./exe/path/which": {
       "source": "./src/exe/path/which.ts",

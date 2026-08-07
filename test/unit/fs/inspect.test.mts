@@ -14,6 +14,7 @@ import {
   isDirEmptySync,
   isDirSync,
   isSymlinkSync,
+  readRealPath,
   safeStat,
   safeStatSync,
 } from '../../../src/fs/inspect'
@@ -153,6 +154,19 @@ describe('isSymlinkSync', () => {
   it('should return false for non-existent paths', () => {
     const result = isSymlinkSync('/nonexistent/path')
     expect(result).toBe(false)
+  })
+})
+
+describe('readRealPath', () => {
+  it('should return the realpath for an existing path', async () => {
+    await runWithTempDir(async tmpDir => {
+      const result = readRealPath(tmpDir)
+      expect(result).toBeDefined()
+    }, 'readRealPath-exists-')
+  })
+
+  it('returns undefined for a path that does not resolve', () => {
+    expect(readRealPath('/definitely/not/here/socket-lib')).toBeUndefined()
   })
 })
 

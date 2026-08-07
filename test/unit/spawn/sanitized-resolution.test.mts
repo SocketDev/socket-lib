@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for the trusted-resolution glue in
+ * @file Unit tests for the sanitized-resolution glue in
  *   src/process/spawn/shared — resolveSpawnBin, its cache key, and the
  *   end-to-end effect on spawn/spawnSync. Fixtures are real mode-0o755 scripts
  *   under os.tmpdir().
@@ -12,7 +12,7 @@ import process from 'node:process'
 
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { readRealPath } from '../../../src/exe/path/trusted'
+import { readRealPath } from '../../../src/fs/inspect'
 import { safeDelete } from '../../../src/fs/safe'
 import {
   applyCmdExeStem,

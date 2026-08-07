@@ -201,7 +201,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/env/npm](./dist/env/npm.d.ts): NPM environment variable getters.
 - [@socketsecurity/lib/env/number](./dist/env/number.d.ts): `envAsNumber` — coerce an env-var-shaped value into a number.
 - [@socketsecurity/lib/env/package-manager](./dist/env/package-manager.d.ts): Package manager environment detection.
-- [@socketsecurity/lib/env/path](./dist/env/path.d.ts): PATH environment variable getter.
+- [@socketsecurity/lib/env/path](./dist/env/path.d.ts): PATH environment variable helpers.
 - [@socketsecurity/lib/env/pre-commit](./dist/env/pre-commit.d.ts): PRE_COMMIT environment variable getter.
 - [@socketsecurity/lib/env/providers](./dist/env/providers.d.ts): CI/host provider detection, re-exported from std-env — not reimplemented.
 - [@socketsecurity/lib/env/proxy](./dist/env/proxy.d.ts): `createEnvProxy` — wrap `process.env`, or any env-like record, in a Proxy that adds case-insensitive lookups for known-Windows-sensitive keys (PATH, APPDATA, etc.) and an `overrides` layer.
@@ -245,7 +245,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/exe/exec](./dist/exe/exec.d.ts): `execBin` — spawn a binary with PATH resolution, wrapper-script unwrapping, and Windows shell handling.
 - [@socketsecurity/lib/exe/path/find](./dist/exe/path/find.d.ts): Find specific package-manager binaries with platform- aware fallbacks.
 - [@socketsecurity/lib/exe/path/resolve](./dist/exe/path/resolve.d.ts): Resolve a binary path to the underlying script file.
-- [@socketsecurity/lib/exe/path/trusted](./dist/exe/path/trusted.d.ts): Path-trust-inverting executable resolution.
+- [@socketsecurity/lib/exe/path/sanitize](./dist/exe/path/sanitize.d.ts): Sanitize the executable search path, then resolve against it.
 - [@socketsecurity/lib/exe/path/which](./dist/exe/path/which.d.ts): Look up binaries on PATH.
 - [@socketsecurity/lib/exe/sea/detect](./dist/exe/sea/detect.d.ts): Single Executable Application binary detection + path accessor.
 - [@socketsecurity/lib/exe/shadow/detect](./dist/exe/shadow/detect.d.ts): Shadow-bin detection.
@@ -711,7 +711,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/strings/format](./dist/strings/format.d.ts): Line formatting helpers: `applyLinePrefix`, `centerText`, `indentString`, `repeatString`.
 - [@socketsecurity/lib/strings/predicates](./dist/strings/predicates.d.ts): String predicates: `isBlankString` and `isNonEmptyString`.
 - [@socketsecurity/lib/strings/search](./dist/strings/search.d.ts): `search` — like `String.prototype.search` but with a configurable starting index.
-- [@socketsecurity/lib/strings/transform](./dist/strings/transform.d.ts): String transformations: `stripBom`, `toKebabCase`, `trimNewlines`.
+- [@socketsecurity/lib/strings/transform](./dist/strings/transform.d.ts): String transformations: `stripBom`, `stripSurroundingQuotes`, `toKebabCase`, `trimNewlines`.
 - [@socketsecurity/lib/strings/types](./dist/strings/types.d.ts): Public type surface for `strings/*` modules — branded string types and option interfaces.
 - [@socketsecurity/lib/strings/width](./dist/strings/width.d.ts): `stringWidth` — calculate visual terminal width.
 

@@ -1,8 +1,8 @@
 /**
- * @file Unit tests for src/exe/trusted — resolveTrustedExecutable and its
- *   helpers. Fixtures are real directories under os.tmpdir() holding real
- *   mode-0o755 files, because the whole point of the resolver is what the
- *   filesystem says, not what a mock says.
+ * @file Unit tests for src/exe/path/sanitize — resolveSanitizedExecutable
+ *   and its helpers. Fixtures are real directories under os.tmpdir() holding
+ *   real mode-0o755 files, because the whole point of the resolver is what
+ *   the filesystem says, not what a mock says.
  */
 
 import {
@@ -19,17 +19,11 @@ import process from 'node:process'
 import { afterAll, describe, expect, it } from 'vitest'
 
 import {
-  findOutermostGitRoot,
-  findPathEnvKey,
-  foldPathForCompare,
-  isPathWithinRoot,
   isTrustedTarget,
-  readRealPath,
-  replacePathInEnv,
-  resolveTrustedExecutable,
+  resolveSanitizedExecutable,
   resolveUntrustedRoot,
-  stripSurroundingQuotes,
-} from '../../../../src/exe/path/trusted'
+} from '../../../../src/exe/path/sanitize'
+import { readRealPath } from '../../../../src/fs/inspect'
 import { safeDelete } from '../../../../src/fs/safe'
 
 import { describeUnixOnly } from '../../util/skip-helpers'
@@ -59,62 +53,6 @@ afterAll(async () => {
   await Promise.all(tempRoots.map(root => safeDelete(root)))
 })
 
-describe('findPathEnvKey', () => {
-  it('prefers an exact PATH key', () => {
-    expect(findPathEnvKey({ PATH: '/usr/bin', Path: 'C:\\Windows' })).toBe(
-      'PATH',
-    )
-  })
-
-  it('finds a Windows-cased Path key', () => {
-    expect(findPathEnvKey({ Path: 'C:\\Windows' })).toBe('Path')
-  })
-
-  it('returns undefined when no key is present', () => {
-    expect(findPathEnvKey({ HOME: '/home/user' })).toBeUndefined()
-  })
-})
-
-describe('foldPathForCompare', () => {
-  it('drops a trailing separator', () => {
-    expect(foldPathForCompare('/usr/bin/')).toBe('/usr/bin')
-  })
-
-  it('keeps a lone root separator', () => {
-    expect(foldPathForCompare('/')).toBe('/')
-  })
-})
-
-describe('isPathWithinRoot', () => {
-  it('treats the root itself as within', () => {
-    expect(isPathWithinRoot('/repo', '/repo')).toBe(true)
-  })
-
-  it('matches a descendant', () => {
-    expect(isPathWithinRoot('/repo/bin/git', '/repo')).toBe(true)
-  })
-
-  it('does not match a sibling with a shared prefix', () => {
-    expect(isPathWithinRoot('/repo-other/bin/git', '/repo')).toBe(false)
-  })
-})
-
-describe('stripSurroundingQuotes', () => {
-  it('removes surrounding double quotes', () => {
-    expect(stripSurroundingQuotes('"/usr/local/bin"')).toBe('/usr/local/bin')
-  })
-
-  it('leaves an unquoted entry alone', () => {
-    expect(stripSurroundingQuotes('/usr/local/bin')).toBe('/usr/local/bin')
-  })
-})
-
-describe('readRealPath', () => {
-  it('returns undefined for a path that does not resolve', () => {
-    expect(readRealPath('/definitely/not/here/socket-lib')).toBeUndefined()
-  })
-})
-
 describe('resolveUntrustedRoot', () => {
   it('returns undefined for a filesystem root', () => {
     expect(resolveUntrustedRoot(path.parse(process.cwd()).root)).toBeUndefined()
@@ -137,44 +75,20 @@ describe('resolveUntrustedRoot', () => {
   })
 })
 
-describe('findOutermostGitRoot', () => {
-  it('returns the input when no ancestor has a git marker', () => {
-    const root = makeTempRoot()
-    expect(findOutermostGitRoot(root)).toBe(root)
-  })
-})
-
 describe('isTrustedTarget', () => {
   it('trusts everything when there is no untrusted root', () => {
     expect(isTrustedTarget('/anything', undefined)).toBe(true)
   })
 })
 
-describe('replacePathInEnv', () => {
-  it('replaces every case variant of the key', () => {
-    const next = replacePathInEnv(
-      { HOME: '/home/user', Path: 'C:\\a', path: 'C:\\b' },
-      'C:\\trusted',
-      'Path',
-    )
-    expect(next['Path']).toBe('C:\\trusted')
-    expect(next['path']).toBeUndefined()
-    expect(next['HOME']).toBe('/home/user')
-  })
-
-  it('defaults to PATH when the env had no key', () => {
-    expect(replacePathInEnv({}, '/usr/bin', undefined)['PATH']).toBe('/usr/bin')
-  })
-})
-
-describeUnixOnly('resolveTrustedExecutable', () => {
+describeUnixOnly('resolveSanitizedExecutable', () => {
   it('never resolves a shim inside the untrusted root', () => {
     const root = makeTempRoot()
     const repo = path.join(root, 'repo')
     const systemBin = path.join(root, 'system-bin')
     writeExecutable(repo, 'socket-fixture-tool')
     writeExecutable(systemBin, 'socket-fixture-tool')
-    const resolved = resolveTrustedExecutable('socket-fixture-tool', {
+    const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       // The repo entry is FIRST, so only the trust filter can keep it from
       // winning.
       env: envWithPath([repo, systemBin]),
@@ -192,7 +106,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     const systemBin = path.join(root, 'system-bin')
     writeExecutable(shadowBin, 'socket-fixture-tool')
     writeExecutable(systemBin, 'socket-fixture-tool')
-    const resolved = resolveTrustedExecutable('socket-fixture-tool', {
+    const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: envWithPath([shadowBin, systemBin]),
       // The shadow bin sits OUTSIDE the untrusted root, so only the shadow-bin
       // filter can exclude it.
@@ -206,7 +120,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     const root = makeTempRoot()
     const systemBin = path.join(root, 'system-bin')
     const expected = writeExecutable(systemBin, 'socket-fixture-tool')
-    const resolved = resolveTrustedExecutable('socket-fixture-tool', {
+    const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: envWithPath([systemBin]),
       untrustedRoot: path.join(root, 'repo'),
     })
@@ -215,7 +129,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
   })
 
   it('still finds a real system binary with the ambient environment', () => {
-    const resolved = resolveTrustedExecutable('node')
+    const resolved = resolveSanitizedExecutable('node')
     expect(resolved.binPath).toBeDefined()
     expect(resolved.trusted).toBe(true)
   })
@@ -229,7 +143,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     mkdirSync(trustedBin, { recursive: true })
     symlinkSync(evil, path.join(trustedBin, 'socket-fixture-tool'))
     const expected = writeExecutable(fallbackBin, 'socket-fixture-tool')
-    const resolved = resolveTrustedExecutable('socket-fixture-tool', {
+    const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: envWithPath([trustedBin, fallbackBin]),
       untrustedRoot: repo,
     })
@@ -242,7 +156,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     const root = makeTempRoot()
     const systemBin = path.join(root, 'system-bin')
     writeExecutable(systemBin, 'socket-fixture-tool')
-    const resolved = resolveTrustedExecutable('socket-fixture-tool', {
+    const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: envWithPath(['', '.', 'relative/bin', systemBin]),
       untrustedRoot: path.join(root, 'repo'),
     })
@@ -254,7 +168,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     const root = makeTempRoot()
     const repo = path.join(root, 'repo')
     writeExecutable(repo, 'socket-fixture-tool')
-    const resolved = resolveTrustedExecutable('socket-fixture-tool', {
+    const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: envWithPath([repo]),
       untrustedRoot: repo,
     })
@@ -267,7 +181,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     const root = makeTempRoot()
     const repo = path.join(root, 'repo')
     const expected = writeExecutable(repo, 'socket-fixture-tool')
-    const resolved = resolveTrustedExecutable('socket-fixture-tool', {
+    const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: envWithPath([repo]),
       untrustedFallback: 'all',
       untrustedRoot: repo,
@@ -287,14 +201,14 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     const localTool = writeExecutable(shadowBin, 'workspace-only-tool')
     const shared = { env: envWithPath([repoBin, shadowBin]) } as const
     expect(
-      resolveTrustedExecutable('workspace-only-tool', {
+      resolveSanitizedExecutable('workspace-only-tool', {
         ...shared,
         untrustedFallback: 'shadowBins',
         untrustedRoot: repo,
       }).binPath,
     ).toBe(localTool)
     expect(
-      resolveTrustedExecutable('repo-only-tool', {
+      resolveSanitizedExecutable('repo-only-tool', {
         ...shared,
         untrustedFallback: 'shadowBins',
         untrustedRoot: repo,
@@ -309,7 +223,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     const evil = writeExecutable(repo, 'evil-payload')
     mkdirSync(trustedBin, { recursive: true })
     symlinkSync(evil, path.join(trustedBin, 'socket-fixture-tool'))
-    const resolved = resolveTrustedExecutable('socket-fixture-tool', {
+    const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: envWithPath([trustedBin]),
       untrustedFallback: 'all',
       untrustedRoot: repo,
@@ -320,7 +234,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
   it('passes an explicit absolute path through', () => {
     const root = makeTempRoot()
     const target = writeExecutable(path.join(root, 'anywhere'), 'tool')
-    const resolved = resolveTrustedExecutable(target, {
+    const resolved = resolveSanitizedExecutable(target, {
       env: envWithPath([]),
       untrustedRoot: path.join(root, 'repo'),
     })
@@ -332,7 +246,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     const root = makeTempRoot()
     const repo = path.join(root, 'repo')
     const target = writeExecutable(repo, 'tool')
-    const resolved = resolveTrustedExecutable(target, {
+    const resolved = resolveSanitizedExecutable(target, {
       env: envWithPath([]),
       untrustedRoot: repo,
     })
@@ -341,7 +255,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
   })
 
   it('resolves an explicit relative path against the process cwd', () => {
-    const resolved = resolveTrustedExecutable('./package.json', {
+    const resolved = resolveSanitizedExecutable('./package.json', {
       env: envWithPath([]),
     })
     expect(resolved.binPath).toBe(path.join(process.cwd(), 'package.json'))
@@ -353,7 +267,7 @@ describeUnixOnly('resolveTrustedExecutable', () => {
     const systemBin = path.join(root, 'system-bin')
     writeExecutable(repo, 'socket-fixture-tool')
     writeExecutable(systemBin, 'socket-fixture-tool')
-    const resolved = resolveTrustedExecutable('socket-fixture-tool', {
+    const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: { HOME: '/home/user', PATH: [repo, systemBin].join(path.delimiter) },
       untrustedRoot: repo,
     })

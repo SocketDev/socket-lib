@@ -7,6 +7,7 @@
  *   - `isPath` — file-path vs package-spec vs URL discriminator
  *   - `isNodeModules`, `isUnixPath` — content-pattern checks
  *   - `isPathSeparator`, `isWindowsDeviceRoot` — char-code primitives
+ *   - `isPathWithinRoot` — realpath containment check
  */
 
 import { isWin32 } from '../constants/platform'
@@ -18,6 +19,7 @@ import {
   StringPrototypeStartsWith,
 } from '../primordials/string'
 
+import { foldPathForCompare } from './normalize'
 import {
   CHAR_BACKWARD_SLASH,
   CHAR_COLON,
@@ -182,6 +184,22 @@ export function isPath(pathLike: string | Buffer | URL): boolean {
  */
 export function isPathSeparator(code: number): boolean {
   return code === CHAR_FORWARD_SLASH || code === CHAR_BACKWARD_SLASH
+}
+
+/**
+ * Report whether a path sits at or under a root. Both sides must already be
+ * realpath'd.
+ *
+ * @example
+ *   ;```typescript
+ *   isPathWithinRoot('/repo/bin/git', '/repo') // true
+ *   isPathWithinRoot('/usr/bin/git', '/repo') // false
+ *   ```
+ */
+export function isPathWithinRoot(candidate: string, root: string): boolean {
+  const left = foldPathForCompare(candidate)
+  const right = foldPathForCompare(root)
+  return left === right || left.startsWith(`${right}/`)
 }
 
 /**

@@ -1,6 +1,7 @@
 /**
- * @file String transformations: `stripBom`, `toKebabCase`, `trimNewlines`. All
- *   three are pure functions with no side effects.
+ * @file String transformations: `stripBom`, `stripSurroundingQuotes`,
+ *   `toKebabCase`, `trimNewlines`. All four are pure functions with no side
+ *   effects.
  */
 
 import {
@@ -8,6 +9,9 @@ import {
   StringPrototypeReplace,
   StringPrototypeSlice,
 } from '../primordials/string'
+
+// A PATH entry may carry surrounding double quotes; `which` strips them too.
+const quotedEntryRegExp = /^".*"$/
 
 /**
  * Strip the Byte Order Mark (BOM) from the beginning of a string.
@@ -38,6 +42,18 @@ export function stripBom(str: string): string {
   return str.length > 0 && StringPrototypeCharCodeAt(str, 0) === 0xfe_ff
     ? StringPrototypeSlice(str, 1)
     : str
+}
+
+/**
+ * Strip the surrounding double quotes a PATH entry may carry.
+ *
+ * @example
+ *   ;```typescript
+ *   stripSurroundingQuotes('"C:\\Program Files"') // 'C:\\Program Files'
+ *   ```
+ */
+export function stripSurroundingQuotes(entry: string): string {
+  return quotedEntryRegExp.test(entry) ? entry.slice(1, -1) : entry
 }
 
 /**

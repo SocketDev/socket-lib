@@ -1,10 +1,13 @@
 /**
- * @file Path-trust-inverting executable resolution. `resolveTrustedExecutable`
- *   finds a bare command on PATH while treating one directory tree — the
- *   "untrusted root", by default the current working directory — as hostile.
- *   The threat it closes: a tool that runs inside a checkout it did not author
- *   (a scanner, a fixer, a CI bot) must never execute a `git` / `npm` / `node`
- *   that the checkout itself supplies.
+ * @file Sanitize the executable search path, then resolve against it. A tool
+ *   running inside a checkout it did not author must never execute a `git` /
+ *   `npm` / `node` that checkout supplied, so `resolveSanitizedExecutable`
+ *   drops every PATH entry inside one directory tree — the "untrusted root",
+ *   by default the current working directory — before searching, and hands
+ *   back the cleaned `searchPath` + `env` alongside the resolved `binPath`
+ *   and the `unsafeEntries` it removed. Implements the fleet's
+ *   `untrusted-cwd` doctrine; the sibling leaves (`which`, `find`, `resolve`)
+ *   are the unhardened lookups.
  *   Three separate ways a bare name reaches a checkout-supplied binary, all
  *   handled here:
  *
@@ -30,22 +33,22 @@
 
 import process from 'node:process'
 
-import { isWin32 } from '../../constants/platform'
-import { getNodeFs } from '../../node/fs'
+import { findPathEnvKey, replacePathInEnv } from '../../env/path'
+import { readRealPath } from '../../fs/inspect'
+import { findOutermostGitRoot } from '../../git/repo'
 import { getNodePath } from '../../node/path'
-import { isPath, normalizePath } from '../../paths/normalize'
+import { foldPathForCompare, isPath } from '../../paths/normalize'
+import { isPathWithinRoot } from '../../paths/predicates'
 import { ArrayIsArray } from '../../primordials/array'
+import { stripSurroundingQuotes } from '../../strings/transform'
 
 import { isShadowBinPath } from '../shadow/detect'
 import { whichSync } from './which'
 
-// A PATH entry may carry surrounding double quotes; `which` strips them too.
-const quotedEntryRegExp = /^".*"$/
-
 /**
- * Options for {@link resolveTrustedExecutable}.
+ * Options for {@link resolveSanitizedExecutable}.
  */
-export interface TrustedExecutableOptions {
+export interface SanitizedExecutableOptions {
   /**
    * Environment to read PATH from and to sanitize. Default `process.env`.
    */
@@ -89,9 +92,9 @@ export interface TrustedExecutableOptions {
 }
 
 /**
- * Result of {@link resolveTrustedExecutable}.
+ * Result of {@link resolveSanitizedExecutable}.
  */
-export interface TrustedExecutableResult {
+export interface SanitizedExecutableResult {
   /**
    * Absolute path to the executable, as the PATH search produced it, or
    * `undefined` when the command exists nowhere the resolver is willing to
@@ -117,89 +120,6 @@ export interface TrustedExecutableResult {
    * PATH entries excluded from {@link searchPath}, in their original order.
    */
   unsafeEntries: string[]
-}
-
-/**
- * Walk up from a directory to the OUTERMOST ancestor that holds a `.git`
- * marker. Returns the input when no ancestor has one.
- *
- * @example
- *   ;```typescript
- *   findOutermostGitRoot('/repo/vendor/nested/src') // '/repo'
- *   ```
- */
-export function findOutermostGitRoot(dirPath: string): string {
-  const fs = getNodeFs()
-  const path = getNodePath()
-  let outermost = dirPath
-  let current = dirPath
-  while (true) {
-    if (fs.existsSync(path.join(current, '.git'))) {
-      outermost = current
-    }
-    const parent = path.dirname(current)
-    if (parent === current) {
-      return outermost
-    }
-    current = parent
-  }
-}
-
-/**
- * Find the PATH key in an environment. Windows exposes it as `Path`, and a
- * merged environment object can carry any casing at all.
- *
- * @example
- *   ;```typescript
- *   findPathEnvKey({ Path: 'C:\\Windows' }) // 'Path'
- *   findPathEnvKey({}) // undefined
- *   ```
- */
-export function findPathEnvKey(env: NodeJS.ProcessEnv): string | undefined {
-  if (env['PATH'] !== undefined) {
-    return 'PATH'
-  }
-  const keys = Object.keys(env)
-  for (let i = 0, { length } = keys; i < length; i += 1) {
-    const key = keys[i]!
-    if (key.toLowerCase() === 'path') {
-      return key
-    }
-  }
-  return undefined
-}
-
-/**
- * Normalize a path for equality comparison — forward slashes, no trailing
- * separator, lowercased on Windows.
- *
- * @example
- *   ;```typescript
- *   foldPathForCompare('C:\\Program Files\\') // 'c:/program files'
- *   ```
- */
-export function foldPathForCompare(pathLike: string): string {
-  let normalized = normalizePath(pathLike)
-  if (normalized.length > 1 && normalized.endsWith('/')) {
-    normalized = normalized.slice(0, -1)
-  }
-  return isWin32() ? normalized.toLowerCase() : normalized
-}
-
-/**
- * Report whether a path sits at or under a root. Both sides must already be
- * realpath'd.
- *
- * @example
- *   ;```typescript
- *   isPathWithinRoot('/repo/bin/git', '/repo') // true
- *   isPathWithinRoot('/usr/bin/git', '/repo') // false
- *   ```
- */
-export function isPathWithinRoot(candidate: string, root: string): boolean {
-  const left = foldPathForCompare(candidate)
-  const right = foldPathForCompare(root)
-  return left === right || left.startsWith(`${right}/`)
 }
 
 /**
@@ -278,54 +198,6 @@ export function probePathEntries(
 }
 
 /**
- * Realpath a location, returning `undefined` when it does not resolve.
- *
- * @example
- *   ;```typescript
- *   readRealPath('/tmp') // '/private/tmp' on macOS
- *   readRealPath('/nope') // undefined
- *   ```
- */
-export function readRealPath(pathname: string): string | undefined {
-  const fs = getNodeFs()
-  try {
-    return fs.realpathSync(pathname)
-  } catch {
-    return undefined
-  }
-}
-
-/**
- * Copy an environment with its PATH replaced. Every case variant of the key is
- * rewritten so Windows cannot fall back to a stale `Path`.
- *
- * @example
- *   ;```typescript
- *   replacePathInEnv({ Path: 'C:\\a;C:\\b' }, 'C:\\a', 'Path')
- *   // { Path: 'C:\\a' }
- *   ```
- */
-export function replacePathInEnv(
-  env: NodeJS.ProcessEnv,
-  searchPath: string,
-  pathKey: string | undefined,
-): NodeJS.ProcessEnv {
-  const next = {
-    __proto__: null,
-    ...env,
-  } as unknown as NodeJS.ProcessEnv
-  const keys = Object.keys(next)
-  for (let i = 0, { length } = keys; i < length; i += 1) {
-    const key = keys[i]!
-    if (key.toLowerCase() === 'path') {
-      delete next[key]
-    }
-  }
-  next[pathKey ?? 'PATH'] = searchPath
-  return next
-}
-
-/**
  * Resolve a bare command name to an executable the untrusted root could not
  * have supplied.
  *
@@ -336,18 +208,18 @@ export function replacePathInEnv(
  *
  * @example
  *   ;```typescript
- *   const resolved = resolveTrustedExecutable('git', {
+ *   const resolved = resolveSanitizedExecutable('git', {
  *     untrustedRoot: '/scan/target',
  *   })
  *   // resolved.binPath  → '/usr/bin/git'
  *   // resolved.env.PATH → PATH minus every entry under /scan/target
  *   ```
  */
-export function resolveTrustedExecutable(
+export function resolveSanitizedExecutable(
   command: string,
-  options?: TrustedExecutableOptions | undefined,
-): TrustedExecutableResult {
-  const opts = { __proto__: null, ...options } as TrustedExecutableOptions
+  options?: SanitizedExecutableOptions | undefined,
+): SanitizedExecutableResult {
+  const opts = { __proto__: null, ...options } as SanitizedExecutableOptions
   const {
     excludeShadowBins = true,
     pathExt,
@@ -466,16 +338,4 @@ export function resolveUntrustedRoot(
     ? (readRealPath(findOutermostGitRoot(real)) ?? real)
     : real
   return path.dirname(widened) === widened ? undefined : widened
-}
-
-/**
- * Strip the surrounding double quotes a PATH entry may carry.
- *
- * @example
- *   ;```typescript
- *   stripSurroundingQuotes('"C:\\Program Files"') // 'C:\\Program Files'
- *   ```
- */
-export function stripSurroundingQuotes(entry: string): string {
-  return quotedEntryRegExp.test(entry) ? entry.slice(1, -1) : entry
 }

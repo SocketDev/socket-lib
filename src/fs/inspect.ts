@@ -138,6 +138,24 @@ export function isSymlinkSync(filepath: PathLike) {
 }
 
 /**
+ * Realpath a location, returning `undefined` when it does not resolve.
+ *
+ * @example
+ *   ;```typescript
+ *   readRealPath('/tmp') // '/private/tmp' on macOS
+ *   readRealPath('/nope') // undefined
+ *   ```
+ */
+export function readRealPath(pathname: string): string | undefined {
+  const fs = getNodeFs()
+  try {
+    return fs.realpathSync(pathname)
+  } catch {
+    return undefined
+  }
+}
+
+/**
  * Safely get file stats asynchronously, returning undefined on error. Useful
  * for checking file existence and properties without error handling. Returns
  * undefined for any error (file not found, permission denied, etc.).

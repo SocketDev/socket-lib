@@ -16,6 +16,7 @@ import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 import { describe, expect, it } from 'vitest'
 
 import {
+  foldPathForCompare,
   fromUnixPath,
   normalizePath,
   toUnixPath,
@@ -24,6 +25,16 @@ import {
 import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers'
 
 describe('paths/normalize', () => {
+  describe('foldPathForCompare', () => {
+    it('drops a trailing separator', () => {
+      expect(foldPathForCompare('/usr/bin/')).toBe('/usr/bin')
+    })
+
+    it('keeps a lone root separator', () => {
+      expect(foldPathForCompare('/')).toBe('/')
+    })
+  })
+
   describe('normalizePath', () => {
     it('should normalize Unix paths', () => {
       expect(normalizePath('/usr/local/bin')).toBe('/usr/local/bin')

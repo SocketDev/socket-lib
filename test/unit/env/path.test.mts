@@ -1,20 +1,42 @@
 /**
- * @file Unit tests for PATH environment variable getter. Tests getPath() for
- *   system executable search paths (PATH env var). Returns
- *   colon/semicolon-separated path string or undefined. Uses rewire for test
- *   isolation. Critical for executable resolution.
+ * @file Unit tests for PATH environment variable helpers. Tests getPath() for
+ *   system executable search paths (PATH env var); findPathEnvKey() for
+ *   locating the PATH key under any casing; and replacePathInEnv() for
+ *   rewriting it. getPath() returns a colon/semicolon-separated path string
+ *   or undefined, and uses rewire for test isolation. Critical for
+ *   executable resolution.
  */
 
 import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { getPath } from '../../../src/env/path'
+import {
+  findPathEnvKey,
+  getPath,
+  replacePathInEnv,
+} from '../../../src/env/path'
 import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 
 describe('env/path', () => {
   afterEach(() => {
     resetEnv()
+  })
+
+  describe('findPathEnvKey', () => {
+    it('prefers an exact PATH key', () => {
+      expect(findPathEnvKey({ PATH: '/usr/bin', Path: 'C:\\Windows' })).toBe(
+        'PATH',
+      )
+    })
+
+    it('finds a Windows-cased Path key', () => {
+      expect(findPathEnvKey({ Path: 'C:\\Windows' })).toBe('Path')
+    })
+
+    it('returns undefined when no key is present', () => {
+      expect(findPathEnvKey({ HOME: '/home/user' })).toBeUndefined()
+    })
   })
 
   describe('getPath', () => {
@@ -170,6 +192,25 @@ describe('env/path', () => {
     it('should handle WSL PATH', () => {
       setEnv('PATH', '/usr/bin:/bin:/mnt/c/Windows/System32')
       expect(getPath()).toBe('/usr/bin:/bin:/mnt/c/Windows/System32')
+    })
+  })
+
+  describe('replacePathInEnv', () => {
+    it('replaces every case variant of the key', () => {
+      const next = replacePathInEnv(
+        { HOME: '/home/user', Path: 'C:\\a', path: 'C:\\b' },
+        'C:\\trusted',
+        'Path',
+      )
+      expect(next['Path']).toBe('C:\\trusted')
+      expect(next['path']).toBeUndefined()
+      expect(next['HOME']).toBe('/home/user')
+    })
+
+    it('defaults to PATH when the env had no key', () => {
+      expect(replacePathInEnv({}, '/usr/bin', undefined)['PATH']).toBe(
+        '/usr/bin',
+      )
     })
   })
 })

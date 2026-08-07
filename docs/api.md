@@ -244,7 +244,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/env/npm`](../src/env/npm.ts)                                     | NPM environment variable getters.                                                                                                                                                             |
 | [`@socketsecurity/lib-stable/env/number`](../src/env/number.ts)                               | `envAsNumber` — coerce an env-var-shaped value into a number.                                                                                                                                 |
 | [`@socketsecurity/lib-stable/env/package-manager`](../src/env/package-manager.ts)             | Package manager environment detection.                                                                                                                                                        |
-| [`@socketsecurity/lib-stable/env/path`](../src/env/path.ts)                                   | PATH environment variable getter.                                                                                                                                                             |
+| [`@socketsecurity/lib-stable/env/path`](../src/env/path.ts)                                   | PATH environment variable helpers.                                                                                                                                                            |
 | [`@socketsecurity/lib-stable/env/pre-commit`](../src/env/pre-commit.ts)                       | PRE_COMMIT environment variable getter.                                                                                                                                                       |
 | [`@socketsecurity/lib-stable/env/providers`](../src/env/providers.ts)                         | CI/host provider detection, re-exported from std-env — not reimplemented.                                                                                                                     |
 | [`@socketsecurity/lib-stable/env/proxy`](../src/env/proxy.ts)                                 | `createEnvProxy` — wrap `process.env`, or any env-like record, in a Proxy that adds case-insensitive lookups for known-Windows-sensitive keys (PATH, APPDATA, etc.) and an `overrides` layer. |
@@ -296,7 +296,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/exe/exec`](../src/exe/exec.ts)                                     | `execBin` — spawn a binary with PATH resolution, wrapper-script unwrapping, and Windows shell handling.                                                                                                                      |
 | [`@socketsecurity/lib-stable/exe/path/find`](../src/exe/path/find.ts)                           | Find specific package-manager binaries with platform- aware fallbacks.                                                                                                                                                       |
 | [`@socketsecurity/lib-stable/exe/path/resolve`](../src/exe/path/resolve.ts)                     | Resolve a binary path to the underlying script file.                                                                                                                                                                         |
-| [`@socketsecurity/lib-stable/exe/path/trusted`](../src/exe/path/trusted.ts)                     | Path-trust-inverting executable resolution.                                                                                                                                                                                  |
+| [`@socketsecurity/lib-stable/exe/path/sanitize`](../src/exe/path/sanitize.ts)                   | Sanitize the executable search path, then resolve against it.                                                                                                                                                                |
 | [`@socketsecurity/lib-stable/exe/path/which`](../src/exe/path/which.ts)                         | Look up binaries on PATH.                                                                                                                                                                                                    |
 | [`@socketsecurity/lib-stable/exe/sea/detect`](../src/exe/sea/detect.ts)                         | Single Executable Application binary detection + path accessor.                                                                                                                                                              |
 | [`@socketsecurity/lib-stable/exe/shadow/detect`](../src/exe/shadow/detect.ts)                   | Shadow-bin detection.                                                                                                                                                                                                        |
@@ -828,14 +828,14 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## strings/
 
-| Subpath                                                                         | Description                                                                               |
-| ------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib-stable/strings/format`](../src/strings/format.ts)         | Line formatting helpers: `applyLinePrefix`, `centerText`, `indentString`, `repeatString`. |
-| [`@socketsecurity/lib-stable/strings/predicates`](../src/strings/predicates.ts) | String predicates: `isBlankString` and `isNonEmptyString`.                                |
-| [`@socketsecurity/lib-stable/strings/search`](../src/strings/search.ts)         | `search` — like `String.prototype.search` but with a configurable starting index.         |
-| [`@socketsecurity/lib-stable/strings/transform`](../src/strings/transform.ts)   | String transformations: `stripBom`, `toKebabCase`, `trimNewlines`.                        |
-| [`@socketsecurity/lib-stable/strings/types`](../src/strings/types.ts)           | Public type surface for `strings/*` modules — branded string types and option interfaces. |
-| [`@socketsecurity/lib-stable/strings/width`](../src/strings/width.ts)           | `stringWidth` — calculate visual terminal width.                                          |
+| Subpath                                                                         | Description                                                                                  |
+| ------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib-stable/strings/format`](../src/strings/format.ts)         | Line formatting helpers: `applyLinePrefix`, `centerText`, `indentString`, `repeatString`.    |
+| [`@socketsecurity/lib-stable/strings/predicates`](../src/strings/predicates.ts) | String predicates: `isBlankString` and `isNonEmptyString`.                                   |
+| [`@socketsecurity/lib-stable/strings/search`](../src/strings/search.ts)         | `search` — like `String.prototype.search` but with a configurable starting index.            |
+| [`@socketsecurity/lib-stable/strings/transform`](../src/strings/transform.ts)   | String transformations: `stripBom`, `stripSurroundingQuotes`, `toKebabCase`, `trimNewlines`. |
+| [`@socketsecurity/lib-stable/strings/types`](../src/strings/types.ts)           | Public type surface for `strings/*` modules — branded string types and option interfaces.    |
+| [`@socketsecurity/lib-stable/strings/width`](../src/strings/width.ts)           | `stringWidth` — calculate visual terminal width.                                             |
 
 ## temporal/
 

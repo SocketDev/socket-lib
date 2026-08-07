@@ -1,9 +1,9 @@
 /**
  * @file Git repository discovery + foundational lazy fs/path/cwd helpers shared
- *   across `git/*` leaves. Owns `findGitRoot`, the realpath cache, the cwd
- *   resolver, and the lazy `node:fs` / `node:path` loaders — pulling these
- *   together keeps the dependency direction one-way: `shared.ts` and the
- *   public-surface leaves all import from here.
+ *   across `git/*` leaves. Owns `findGitRoot`, `findOutermostGitRoot`, the
+ *   realpath cache, the cwd resolver, and the lazy `node:fs` / `node:path`
+ *   loaders — pulling these together keeps the dependency direction one-way:
+ *   `shared.ts` and the public-surface leaves all import from here.
  */
 
 import { MapCtor } from '../primordials/map-set'
@@ -78,6 +78,32 @@ export function findGitRoot(startPath: string): string {
       return startPath
     }
     currentPath = parentPath
+  }
+}
+
+/**
+ * Walk up from a directory to the OUTERMOST ancestor that holds a `.git`
+ * marker. Returns the input when no ancestor has one.
+ *
+ * @example
+ *   ;```typescript
+ *   findOutermostGitRoot('/repo/vendor/nested/src') // '/repo'
+ *   ```
+ */
+export function findOutermostGitRoot(dirPath: string): string {
+  const fs = getNodeFs()
+  const path = getNodePath()
+  let outermost = dirPath
+  let current = dirPath
+  while (true) {
+    if (fs.existsSync(path.join(current, '.git'))) {
+      outermost = current
+    }
+    const parent = path.dirname(current)
+    if (parent === current) {
+      return outermost
+    }
+    current = parent
   }
 }
 

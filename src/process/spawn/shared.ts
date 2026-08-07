@@ -2,17 +2,15 @@
  * @file Private internals for `spawn/*` modules — the `@npmcli/promise-spawn`
  *   lazy loader, the per-spawn ANSI-stripping helper, the WeakMap stack cache,
  *   the binary-path cache shared between `spawn` and `spawnSync`, and the
- *   trusted-resolution glue both entry points run a bare command name through.
- *   Underscore prefix excludes this file from the public exports map.
+ *   sanitized-resolution glue both entry points run a bare command name
+ *   through. Underscore prefix excludes this file from the public exports map.
  */
 
 import process from 'node:process'
 
 import { stripAnsi } from '../../term/ansi/strip'
-import {
-  findPathEnvKey,
-  resolveTrustedExecutable,
-} from '../../exe/path/trusted'
+import { findPathEnvKey } from '../../env/path'
+import { resolveSanitizedExecutable } from '../../exe/path/sanitize'
 import { isWin32 } from '../../constants/platform'
 import { getNodeFs } from '../../node/fs'
 import { getNodePath } from '../../node/path'
@@ -191,7 +189,7 @@ export function hasCmdExeShadowInDir(
  * Resolve the command a spawn entry point should actually launch.
  *
  * A path-like input passes through untouched. A bare name goes through
- * {@link resolveTrustedExecutable} against the child's own environment, with
+ * {@link resolveSanitizedExecutable} against the child's own environment, with
  * the child's working directory as the untrusted root, and falls back to a
  * dropped PATH entry only when no trusted directory supplies the command.
  *
@@ -224,7 +222,7 @@ export function resolveSpawnBin(
     }
     spawnBinPathCache.delete(cacheKey)
   }
-  const resolved = resolveTrustedExecutable(cmd, {
+  const resolved = resolveSanitizedExecutable(cmd, {
     env,
     // A package-manager run script prepends the workspace `node_modules/.bin`
     // and a dev-dependency CLI lives nowhere else, so that one dropped

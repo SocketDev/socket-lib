@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import {
   stripBom,
+  stripSurroundingQuotes,
   toKebabCase,
   trimNewlines,
 } from '../../../src/strings/transform'
@@ -33,6 +34,16 @@ describe('strings/transform — stripBom', () => {
 
   it('handles string with only BOM', () => {
     expect(stripBom('﻿')).toBe('')
+  })
+})
+
+describe('strings/transform — stripSurroundingQuotes', () => {
+  it('removes surrounding double quotes', () => {
+    expect(stripSurroundingQuotes('"/usr/local/bin"')).toBe('/usr/local/bin')
+  })
+
+  it('leaves an unquoted entry alone', () => {
+    expect(stripSurroundingQuotes('/usr/local/bin')).toBe('/usr/local/bin')
   })
 })
 

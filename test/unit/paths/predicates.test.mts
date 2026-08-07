@@ -16,6 +16,7 @@ import {
   isAbsolute,
   isNodeModules,
   isPath,
+  isPathWithinRoot,
   isRelative,
 } from '../../../src/paths/predicates'
 import { describe, expect, it } from 'vitest'
@@ -269,6 +270,20 @@ describe('path predicates', () => {
         // @scope\name\file is only 1 part when split by '/', not detected as path
         expect(isPath('@scope\\name\\file')).toBe(false)
       })
+    })
+  })
+
+  describe('isPathWithinRoot', () => {
+    it('treats the root itself as within', () => {
+      expect(isPathWithinRoot('/repo', '/repo')).toBe(true)
+    })
+
+    it('matches a descendant', () => {
+      expect(isPathWithinRoot('/repo/bin/git', '/repo')).toBe(true)
+    })
+
+    it('does not match a sibling with a shared prefix', () => {
+      expect(isPathWithinRoot('/repo-other/bin/git', '/repo')).toBe(false)
     })
   })
 
