@@ -87,13 +87,13 @@ export type JsonReviver = (key: string, value: unknown) => unknown
  *
  * @example
  *   ;```ts
- *   const options: ParseJsonSafeOptions = {
+ *   const options: ParseJsonStrictOptions = {
  *     maxSize: 1024 * 1024, // 1MB limit
  *     allowPrototype: false, // Block prototype pollution
  *   }
  *   ```
  */
-export interface ParseJsonSafeOptions {
+export interface ParseJsonStrictOptions {
   /**
    * Allow dangerous prototype pollution keys (`__proto__`, `constructor`,
    * `prototype`). Set to `true` only if you trust the JSON source completely.

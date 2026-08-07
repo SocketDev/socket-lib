@@ -16,7 +16,7 @@ import type {
   JsonPrimitive,
   JsonValue,
   ParseJsonOptions,
-  ParseJsonSafeOptions,
+  ParseJsonStrictOptions,
 } from './types'
 
 /**
@@ -216,7 +216,7 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
 export function parseJsonStrict<T = unknown>(
   jsonString: string,
   schema?: Schema<T> | undefined,
-  options: ParseJsonSafeOptions = {},
+  options: ParseJsonStrictOptions = {},
 ): T {
   const { allowPrototype = false, maxSize = DEFAULT_MAX_SIZE } = options
 
