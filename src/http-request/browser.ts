@@ -340,7 +340,7 @@ export async function httpJson<T = unknown>(
   url: string,
   options?: BrowserHttpRequestOptions | undefined,
 ): Promise<T> {
-  const opts = options ?? {}
+  const opts = { __proto__: null, ...options } as BrowserHttpRequestOptions
   const headers: Record<string, string> = {
     Accept: 'application/json',
     ...(opts.headers ?? {}),
@@ -365,7 +365,7 @@ export async function httpRequest(
   url: string,
   options?: BrowserHttpRequestOptions | undefined,
 ): Promise<BrowserHttpResponse> {
-  const opts = options ?? {}
+  const opts = { __proto__: null, ...options } as BrowserHttpRequestOptions
   const maxAttempts = (opts.retries ?? 0) + 1
   const baseDelay = opts.retryDelay ?? 250
   // Cap each backoff wait so a high `retries` count can't stall for minutes.
@@ -409,7 +409,7 @@ export async function httpText(
   options?: BrowserHttpRequestOptions | undefined,
 ): Promise<string> {
   const response = await httpRequest(url, {
-    ...(options ?? {}),
+    ...options,
     throwOnError: true,
   })
   return response.text()

@@ -39,7 +39,7 @@ import type { ExtractOptions } from './types'
 export async function extractZip(
   archivePath: string,
   outputDir: string,
-  options: ExtractOptions = {},
+  options?: ExtractOptions | undefined,
 ): Promise<void> {
   // Normalize the "missing archive" surface — throws ENOENT before
   // AdmZip can surface its generic "Invalid filename" message.
@@ -50,7 +50,7 @@ export async function extractZip(
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
     maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
     strip = 0,
-  } = options
+  } = { __proto__: null, ...options } as ExtractOptions
 
   // Normalize output directory path for cross-platform compatibility
   const normalizedOutputDir = normalizePath(outputDir)

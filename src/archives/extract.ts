@@ -31,7 +31,7 @@ import type { ExtractOptions } from './types'
 export async function extractArchive(
   archivePath: string,
   outputDir: string,
-  options: ExtractOptions = {},
+  options?: ExtractOptions | undefined,
 ): Promise<void> {
   const format = detectArchiveFormat(archivePath)
 

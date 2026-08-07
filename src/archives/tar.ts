@@ -47,7 +47,7 @@ import type { ExtractOptions } from './types'
 export async function extractTar(
   archivePath: string,
   outputDir: string,
-  options: ExtractOptions = {},
+  options?: ExtractOptions | undefined,
 ): Promise<void> {
   // Normalize the "missing archive" surface (see extractZip) — throw
   // ENOENT up front with a clear message rather than letting the
@@ -59,7 +59,7 @@ export async function extractTar(
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
     maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
     strip = 0,
-  } = options
+  } = { __proto__: null, ...options } as ExtractOptions
 
   // Normalize output directory path for cross-platform compatibility
   const normalizedOutputDir = normalizePath(outputDir)
@@ -196,7 +196,7 @@ export async function extractTar(
 export async function extractTarGz(
   archivePath: string,
   outputDir: string,
-  options: ExtractOptions = {},
+  options?: ExtractOptions | undefined,
 ): Promise<void> {
   // Normalize the "missing archive" surface (see extractZip).
   assertArchiveExists(archivePath)
@@ -206,7 +206,7 @@ export async function extractTarGz(
     maxFileSize = DEFAULT_MAX_FILE_SIZE,
     maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
     strip = 0,
-  } = options
+  } = { __proto__: null, ...options } as ExtractOptions
 
   // Normalize output directory path for cross-platform compatibility
   const normalizedOutputDir = normalizePath(outputDir)

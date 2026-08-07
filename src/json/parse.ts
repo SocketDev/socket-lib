@@ -216,9 +216,12 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
 export function parseJsonStrict<T = unknown>(
   jsonString: string,
   schema?: Schema<T> | undefined,
-  options: ParseJsonStrictOptions = {},
+  options?: ParseJsonStrictOptions | undefined,
 ): T {
-  const { allowPrototype = false, maxSize = DEFAULT_MAX_SIZE } = options
+  const { allowPrototype = false, maxSize = DEFAULT_MAX_SIZE } = {
+    __proto__: null,
+    ...options,
+  } as ParseJsonStrictOptions
 
   // Size check up front.
   const byteLength = BufferByteLength!(jsonString, 'utf8')
