@@ -1,12 +1,12 @@
 /**
- * @file Unit tests for src/smol/http.ts. On stock Node, `getSmolHttp()` returns
+ * @file Unit tests for src/exe/smol/http.ts. On stock Node, `getSmolHttp()` returns
  *   `undefined`. The smol-binary path is exercised by socket-btm's own tests
  *   running inside the smol binary.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolHttp } from '../../../src/smol/http'
+import { getSmolHttp } from '../../../../src/exe/smol/http'
 
 describe('smol/http', () => {
   describe('getSmolHttp', () => {

@@ -28,7 +28,7 @@
  *   canonical design statement.
  */
 
-import { getSmolPrimordial } from '../smol/primordial'
+import { getSmolPrimordial } from '../exe/smol/primordial'
 
 import { uncurryThis } from './uncurry'
 

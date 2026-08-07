@@ -51,7 +51,7 @@ import {
   StringPrototypeSlice,
   StringPrototypeTrim,
 } from '../../../../primordials/string'
-import { getSmolManifest } from '../../../../smol/manifest'
+import { getSmolManifest } from '../../../../exe/smol/manifest'
 import { detectPnpmVersion } from './detect-version'
 import { parsePnpmPackageIdV5 } from './package-id-v5'
 import { parsePnpmPackageIdV6V9 } from './package-id-v6-v9'

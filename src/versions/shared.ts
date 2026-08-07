@@ -15,7 +15,7 @@
  *   smol-vs-semver pick are deferred to first call and memoized.
  */
 
-import { getSmolVersions } from '../smol/versions'
+import { getSmolVersions } from '../exe/smol/versions'
 
 import type {
   coerce,
@@ -35,7 +35,7 @@ import type {
   sort,
   valid,
 } from '../external/semver'
-import type { SmolVersionsBinding } from '../smol/versions'
+import type { SmolVersionsBinding } from '../exe/smol/versions'
 
 /**
  * The surface of the vendored `semver` module the `versions/*` leaves call.

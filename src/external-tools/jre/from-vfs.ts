@@ -12,7 +12,7 @@
 import path from 'node:path'
 import process from 'node:process'
 
-import { getSmolVfs } from '../../smol/vfs'
+import { getSmolVfs } from '../../exe/smol/vfs'
 
 import type { ResolvedJre } from './types'
 

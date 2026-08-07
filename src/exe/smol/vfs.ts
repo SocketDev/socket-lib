@@ -21,7 +21,7 @@
  *     when this is missing, or to out-of-band downloads in socket-cli's case.
  */
 
-import { isNodeBuiltin, requireBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../../node/module'
 
 /**
  * A `SmolVirtualFileSystem` instance mirroring upstream `node:vfs`'s

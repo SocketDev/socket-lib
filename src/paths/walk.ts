@@ -9,7 +9,7 @@
 import process from 'node:process'
 
 import { getNodePath } from '../node/path'
-import { getSmolPath } from '../smol/path'
+import { getSmolPath } from '../exe/smol/path'
 
 import { normalizePath } from './normalize'
 

@@ -13,9 +13,9 @@
  *   through this when smol is present.
  */
 
-import { isNodeBuiltin, requireBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../../node/module'
 
-import type { EcosystemString } from '../eco/purl'
+import type { EcosystemString } from '../../eco/purl'
 
 /**
  * Dependency-relationship tag on a parsed package reference.

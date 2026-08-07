@@ -3,7 +3,7 @@
  *   `undefined` when the binary doesn't carry a bundled cdxgen.
  */
 
-import { getSmolVfs } from '../../smol/vfs'
+import { getSmolVfs } from '../../exe/smol/vfs'
 
 import type { ResolvedCdxgen } from './types'
 

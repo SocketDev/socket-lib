@@ -14,7 +14,7 @@ import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 import { normalizePath } from '../paths/normalize'
 import { walkUp } from '../paths/walk'
-import { getSmolPath } from '../smol/path'
+import { getSmolPath } from '../exe/smol/path'
 
 import type { FindUpOptions, FindUpSyncOptions } from './types'
 

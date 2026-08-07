@@ -9,7 +9,7 @@ import { ManifestError } from './manifest-error'
 import { detectFormat } from './detect-format'
 import { parseLockfile } from './parse-lockfile'
 import { parseManifest } from './parse-manifest'
-import { getSmolManifest } from '../../smol/manifest'
+import { getSmolManifest } from '../../exe/smol/manifest'
 
 import type { ParsedLockfile, ParsedManifest } from './types'
 

@@ -9,7 +9,7 @@
 
 import { ManifestError } from './manifest-error'
 import { parsePackageJson } from '../npm/parse-package-json'
-import { getSmolManifest } from '../../smol/manifest'
+import { getSmolManifest } from '../../exe/smol/manifest'
 
 import type { ParsedManifest } from './types'
 import type { EcosystemString } from '../purl'

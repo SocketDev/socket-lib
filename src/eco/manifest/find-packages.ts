@@ -11,7 +11,7 @@
 
 import { RangeErrorCtor, TypeErrorCtor } from '../../primordials/error'
 import { RegExpCtor, RegExpPrototypeTest } from '../../primordials/regexp'
-import { getSmolManifest } from '../../smol/manifest'
+import { getSmolManifest } from '../../exe/smol/manifest'
 
 import type { PackageRef, ParsedLockfile } from './types'
 

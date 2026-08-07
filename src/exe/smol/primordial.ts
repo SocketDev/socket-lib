@@ -15,7 +15,7 @@
  * @see https://v8.dev/blog/v8-release-99 — V8 Fast API Calls overview
  */
 
-import { isNodeBuiltin, requireBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../../node/module'
 
 /**
  * Surface of `node:smol-primordial`. See socket-btm's

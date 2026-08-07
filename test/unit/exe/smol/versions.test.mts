@@ -1,12 +1,12 @@
 /**
- * @file Unit tests for src/smol/versions.ts. On stock Node, `getSmolVersions()`
+ * @file Unit tests for src/exe/smol/versions.ts. On stock Node, `getSmolVersions()`
  *   returns `undefined`. The smol- binary path is exercised by socket-btm's own
  *   tests running inside the smol binary.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolVersions } from '../../../src/smol/versions'
+import { getSmolVersions } from '../../../../src/exe/smol/versions'
 
 describe('smol/versions', () => {
   describe('getSmolVersions', () => {

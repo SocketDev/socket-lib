@@ -8,7 +8,7 @@
  *   context; on stock Node they fall back to the global `Intl` object.
  */
 
-import { getSmolPrimordial } from '../smol/primordial'
+import { getSmolPrimordial } from '../exe/smol/primordial'
 
 const smolPrimordial = getSmolPrimordial()
 

@@ -3,7 +3,7 @@
  *   VFS. Returns `undefined` when the binary doesn't have janus bundled.
  */
 
-import { getSmolVfs } from '../../smol/vfs'
+import { getSmolVfs } from '../../exe/smol/vfs'
 
 import type { ResolvedJanus } from './types'
 

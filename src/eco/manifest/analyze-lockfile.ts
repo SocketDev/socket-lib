@@ -7,7 +7,7 @@
  */
 
 import { ObjectFreeze } from '../../primordials/object'
-import { getSmolManifest } from '../../smol/manifest'
+import { getSmolManifest } from '../../exe/smol/manifest'
 
 import type { LockfileStats, ParsedLockfile } from './types'
 

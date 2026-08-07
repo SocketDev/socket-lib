@@ -3,7 +3,7 @@
  *   VFS. Returns `undefined` when the binary doesn't have Trivy bundled.
  */
 
-import { getSmolVfs } from '../../smol/vfs'
+import { getSmolVfs } from '../../exe/smol/vfs'
 
 import type { ResolvedTrivy } from './types'
 

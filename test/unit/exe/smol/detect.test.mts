@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/smol/detect.ts. Tests both responsibilities of the
+ * @file Unit tests for src/exe/smol/detect.ts. Tests both responsibilities of the
  *   file:
  *
  *   - `isSmol()` — memoized boolean detector
@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolUtil, isSmol } from '../../../src/smol/detect'
+import { getSmolUtil, isSmol } from '../../../../src/exe/smol/detect'
 
 describe('smol/detect', () => {
   describe('isSmol', () => {

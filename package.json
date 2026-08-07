@@ -1110,10 +1110,10 @@
       "types": "./dist/exe/resolve.d.ts",
       "default": "./dist/exe/resolve.js"
     },
-    "./exe/sea": {
-      "source": "./src/exe/sea.ts",
-      "types": "./dist/exe/sea.d.ts",
-      "default": "./dist/exe/sea.js"
+    "./exe/sea/detect": {
+      "source": "./src/exe/sea/detect.ts",
+      "types": "./dist/exe/sea/detect.d.ts",
+      "default": "./dist/exe/sea/detect.js"
     },
     "./exe/shadow/detect": {
       "source": "./src/exe/shadow/detect.ts",
@@ -1129,6 +1129,51 @@
       "source": "./src/exe/shadow/types.ts",
       "types": "./dist/exe/shadow/types.d.ts",
       "default": "./dist/exe/shadow/types.js"
+    },
+    "./exe/smol/detect": {
+      "source": "./src/exe/smol/detect.ts",
+      "types": "./dist/exe/smol/detect.d.ts",
+      "default": "./dist/exe/smol/detect.js"
+    },
+    "./exe/smol/http": {
+      "source": "./src/exe/smol/http.ts",
+      "types": "./dist/exe/smol/http.d.ts",
+      "default": "./dist/exe/smol/http.js"
+    },
+    "./exe/smol/https": {
+      "source": "./src/exe/smol/https.ts",
+      "types": "./dist/exe/smol/https.d.ts",
+      "default": "./dist/exe/smol/https.js"
+    },
+    "./exe/smol/manifest": {
+      "source": "./src/exe/smol/manifest.ts",
+      "types": "./dist/exe/smol/manifest.d.ts",
+      "default": "./dist/exe/smol/manifest.js"
+    },
+    "./exe/smol/path": {
+      "source": "./src/exe/smol/path.ts",
+      "types": "./dist/exe/smol/path.d.ts",
+      "default": "./dist/exe/smol/path.js"
+    },
+    "./exe/smol/primordial": {
+      "source": "./src/exe/smol/primordial.ts",
+      "types": "./dist/exe/smol/primordial.d.ts",
+      "default": "./dist/exe/smol/primordial.js"
+    },
+    "./exe/smol/purl": {
+      "source": "./src/exe/smol/purl.ts",
+      "types": "./dist/exe/smol/purl.d.ts",
+      "default": "./dist/exe/smol/purl.js"
+    },
+    "./exe/smol/versions": {
+      "source": "./src/exe/smol/versions.ts",
+      "types": "./dist/exe/smol/versions.d.ts",
+      "default": "./dist/exe/smol/versions.js"
+    },
+    "./exe/smol/vfs": {
+      "source": "./src/exe/smol/vfs.ts",
+      "types": "./dist/exe/smol/vfs.d.ts",
+      "default": "./dist/exe/smol/vfs.js"
     },
     "./exe/trusted": {
       "source": "./src/exe/trusted.ts",
@@ -2921,51 +2966,6 @@
       "source": "./src/shell/quote.ts",
       "types": "./dist/shell/quote.d.ts",
       "default": "./dist/shell/quote.js"
-    },
-    "./smol/detect": {
-      "source": "./src/smol/detect.ts",
-      "types": "./dist/smol/detect.d.ts",
-      "default": "./dist/smol/detect.js"
-    },
-    "./smol/http": {
-      "source": "./src/smol/http.ts",
-      "types": "./dist/smol/http.d.ts",
-      "default": "./dist/smol/http.js"
-    },
-    "./smol/https": {
-      "source": "./src/smol/https.ts",
-      "types": "./dist/smol/https.d.ts",
-      "default": "./dist/smol/https.js"
-    },
-    "./smol/manifest": {
-      "source": "./src/smol/manifest.ts",
-      "types": "./dist/smol/manifest.d.ts",
-      "default": "./dist/smol/manifest.js"
-    },
-    "./smol/path": {
-      "source": "./src/smol/path.ts",
-      "types": "./dist/smol/path.d.ts",
-      "default": "./dist/smol/path.js"
-    },
-    "./smol/primordial": {
-      "source": "./src/smol/primordial.ts",
-      "types": "./dist/smol/primordial.d.ts",
-      "default": "./dist/smol/primordial.js"
-    },
-    "./smol/purl": {
-      "source": "./src/smol/purl.ts",
-      "types": "./dist/smol/purl.d.ts",
-      "default": "./dist/smol/purl.js"
-    },
-    "./smol/versions": {
-      "source": "./src/smol/versions.ts",
-      "types": "./dist/smol/versions.d.ts",
-      "default": "./dist/smol/versions.js"
-    },
-    "./smol/vfs": {
-      "source": "./src/smol/vfs.ts",
-      "types": "./dist/smol/vfs.d.ts",
-      "default": "./dist/smol/vfs.js"
     },
     "./sorts/natural": {
       "source": "./src/sorts/natural.ts",

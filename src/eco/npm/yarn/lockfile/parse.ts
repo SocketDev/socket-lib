@@ -47,7 +47,7 @@ import {
   StringPrototypeSlice,
   StringPrototypeTrim,
 } from '../../../../primordials/string'
-import { getSmolManifest } from '../../../../smol/manifest'
+import { getSmolManifest } from '../../../../exe/smol/manifest'
 import { parseYarnDescriptor } from './descriptor'
 
 import type { PackageRef, ParsedLockfile } from '../../../manifest/types'

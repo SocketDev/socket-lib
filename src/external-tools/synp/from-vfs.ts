@@ -3,7 +3,7 @@
  *   `undefined` when the binary doesn't carry a bundled synp.
  */
 
-import { getSmolVfs } from '../../smol/vfs'
+import { getSmolVfs } from '../../exe/smol/vfs'
 
 import type { ResolvedSynp } from './types'
 

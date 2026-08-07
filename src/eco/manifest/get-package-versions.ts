@@ -4,7 +4,7 @@
  *   match exists.
  */
 
-import { getSmolManifest } from '../../smol/manifest'
+import { getSmolManifest } from '../../exe/smol/manifest'
 
 import type { PackageRef, ParsedLockfile } from './types'
 

@@ -11,7 +11,7 @@
  *   and the JS paths run.
  */
 
-import { isNodeBuiltin, requireBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../../node/module'
 
 import type { PathLike } from 'node:fs'
 

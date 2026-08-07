@@ -8,7 +8,7 @@ import { PackageURL } from '../external/@socketregistry/packageurl-js'
 
 import { requireFrom } from '../node/module'
 import { isPlainObject } from '../objects/predicates'
-import { getSmolPurl } from '../smol/purl'
+import { getSmolPurl } from '../exe/smol/purl'
 import { isNonEmptyString } from '../strings/predicates'
 
 import {

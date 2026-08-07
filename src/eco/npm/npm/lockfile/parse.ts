@@ -48,7 +48,7 @@ import { RangeErrorCtor } from '../../../../primordials/error'
 import { JSONParse } from '../../../../primordials/json'
 import { SetCtor } from '../../../../primordials/map-set'
 import { ObjectFreeze, ObjectKeys } from '../../../../primordials/object'
-import { getSmolManifest } from '../../../../smol/manifest'
+import { getSmolManifest } from '../../../../exe/smol/manifest'
 import { extractPackageNameFromPath } from '../extract-package-name-from-path'
 import { parseGitUrl } from '../parse-git-url'
 

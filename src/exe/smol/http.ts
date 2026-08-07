@@ -13,7 +13,7 @@
  *   is present.
  */
 
-import { isNodeBuiltin, requireBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../../node/module'
 
 /**
  * Options accepted by `smol-http`'s `request()`. The full surface is larger;

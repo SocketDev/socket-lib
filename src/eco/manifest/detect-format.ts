@@ -35,7 +35,7 @@ import {
   YARN_LOCK_FORMAT,
 } from '../npm/yarn/lockfile/format'
 import { ObjectFreeze } from '../../primordials/object'
-import { getSmolManifest } from '../../smol/manifest'
+import { getSmolManifest } from '../../exe/smol/manifest'
 
 import {
   StringPrototypeLastIndexOf,

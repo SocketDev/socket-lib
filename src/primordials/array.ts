@@ -5,7 +5,7 @@
  *   live reference at module load so consumers never see a tampered global.
  */
 
-import { getSmolPrimordial } from '../smol/primordial'
+import { getSmolPrimordial } from '../exe/smol/primordial'
 
 import { uncurryThis } from './uncurry'
 

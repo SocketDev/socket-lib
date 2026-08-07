@@ -10,7 +10,7 @@
  *   See: https://github.com/SocketDev/socket-packageurl-js/issues/3.
  */
 
-import { getSmolUtil } from '../smol/detect'
+import { getSmolUtil } from '../exe/smol/detect'
 
 const smolUtil = getSmolUtil()
 

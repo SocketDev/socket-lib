@@ -19,7 +19,7 @@
  *   the smol binary that exposes the `node:smol-util` binding.
  */
 
-import { isNodeBuiltin, requireBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../../node/module'
 
 // ─── types ─────────────────────────────────────────────────────────────
 

@@ -14,7 +14,7 @@
  *   only matters where the hot path warrants the native acceleration.
  */
 
-import { isNodeBuiltin, requireBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../../node/module'
 
 /**
  * Surface of a parsed PURL — the shape both smol-purl's `parse()` and

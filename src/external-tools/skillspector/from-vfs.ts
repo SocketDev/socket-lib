@@ -4,7 +4,7 @@
  *   skillspector.
  */
 
-import { getSmolVfs } from '../../smol/vfs'
+import { getSmolVfs } from '../../exe/smol/vfs'
 
 import type { ResolvedSkillSpector } from './types'
 

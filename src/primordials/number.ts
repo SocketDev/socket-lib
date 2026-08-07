@@ -5,7 +5,7 @@
  *   for ASCII inputs and fall back to stock `Number.parse*` otherwise.
  */
 
-import { getSmolPrimordial } from '../smol/primordial'
+import { getSmolPrimordial } from '../exe/smol/primordial'
 
 import { uncurryThis } from './uncurry'
 

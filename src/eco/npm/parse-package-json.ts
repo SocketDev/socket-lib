@@ -14,7 +14,7 @@ import { errorMessage } from '../../errors/message'
 import { ArrayPrototypePush } from '../../primordials/array'
 import { JSONParse } from '../../primordials/json'
 import { ObjectFreeze, ObjectKeys } from '../../primordials/object'
-import { getSmolManifest } from '../../smol/manifest'
+import { getSmolManifest } from '../../exe/smol/manifest'
 
 import type { DepType, ManifestDep, ParsedManifest } from '../manifest/types'
 

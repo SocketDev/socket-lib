@@ -1,7 +1,8 @@
 /**
  * @file Single Executable Application binary detection + path accessor. Two
- *   responsibilities (mirror of `src/smol/detect.ts` shape). Executable-domain:
- *   detects whether THIS process is a packaged SEA executable.
+ *   responsibilities (mirror of `src/exe/smol/detect.ts` shape).
+ *   Executable-domain: detects whether THIS process is a packaged SEA
+ *   executable.
  *
  *   1. `isSeaBinary()` — memoized boolean detector for whether the current process
  *      is running as a Node.js Single Executable Application. Probes via Node
@@ -15,7 +16,7 @@
 
 import process from 'node:process'
 
-import { normalizePath } from '../paths/normalize'
+import { normalizePath } from '../../paths/normalize'
 
 /**
  * Cached SEA detection result.

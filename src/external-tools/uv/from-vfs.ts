@@ -3,7 +3,7 @@
  *   Returns `undefined` when the binary doesn't have uv bundled.
  */
 
-import { getSmolVfs } from '../../smol/vfs'
+import { getSmolVfs } from '../../exe/smol/vfs'
 
 import type { ResolvedUv } from './types'
 

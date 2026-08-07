@@ -6,7 +6,7 @@
  *   benefit.
  */
 
-import { getSmolPrimordial } from '../smol/primordial'
+import { getSmolPrimordial } from '../exe/smol/primordial'
 
 const smolPrimordial = getSmolPrimordial()
 

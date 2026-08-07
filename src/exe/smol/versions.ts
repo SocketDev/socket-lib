@@ -11,7 +11,7 @@
  *   which already route through this when smol is present.
  */
 
-import { isNodeBuiltin, requireBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../../node/module'
 
 /**
  * Surface of `node:smol-versions`. See socket-btm's

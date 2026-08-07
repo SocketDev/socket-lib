@@ -15,7 +15,7 @@ import { parsePackageLock } from '../npm/npm/lockfile/parse'
 import { parsePnpmLock } from '../npm/pnpm/lockfile/parse'
 import { parseYarnLock } from '../npm/yarn/lockfile/parse'
 import { StringPrototypeIndexOf } from '../../primordials/string'
-import { getSmolManifest } from '../../smol/manifest'
+import { getSmolManifest } from '../../exe/smol/manifest'
 
 import type { ParsedLockfile } from './types'
 import type { EcosystemString } from '../purl'

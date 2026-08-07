@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/smol/primordial.ts. On stock Node,
+ * @file Unit tests for src/exe/smol/primordial.ts. On stock Node,
  *   `getSmolPrimordial()` returns `undefined`. The integration story is
  *   verified by socket-btm's own tests running inside the smol binary.
  */
@@ -7,7 +7,7 @@
 import { getSmolPrimordial as getSmolPrimordialStable } from '@socketsecurity/lib-stable/smol/primordial'
 import { describe, expect, it } from 'vitest'
 
-import { getSmolPrimordial } from '../../../src/smol/primordial'
+import { getSmolPrimordial } from '../../../../src/exe/smol/primordial'
 
 describe('smol/primordial', () => {
   describe('getSmolPrimordial', () => {

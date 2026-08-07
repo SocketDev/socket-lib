@@ -296,12 +296,14 @@ describe('snapshot safety — lazy vendored-semver require (versions/*)', () => 
   const getSmolVersions = vi.fn(() => undefined)
 
   beforeEach(async () => {
-    vi.doMock(import('../../src/smol/versions'), () => ({ getSmolVersions }))
+    vi.doMock(import('../../src/exe/smol/versions'), () => ({
+      getSmolVersions,
+    }))
     getSmolVersions.mockClear()
   })
 
   afterEach(async () => {
-    vi.doUnmock(import('../../src/smol/versions'))
+    vi.doUnmock(import('../../src/exe/smol/versions'))
   })
 
   it('versions/compare does not resolve the version impl at module-eval', async () => {

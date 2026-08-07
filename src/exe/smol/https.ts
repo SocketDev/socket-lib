@@ -11,7 +11,7 @@
  *   route through this when smol is present.
  */
 
-import { isNodeBuiltin, requireBuiltin } from '../node/module'
+import { isNodeBuiltin, requireBuiltin } from '../../node/module'
 
 /**
  * TLS options accepted by `smol-https`'s `serve()`. Mirrors Node's

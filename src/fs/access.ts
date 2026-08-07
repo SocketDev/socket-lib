@@ -9,7 +9,7 @@
  */
 
 import { getNodeFs } from '../node/fs'
-import { getSmolPath } from '../smol/path'
+import { getSmolPath } from '../exe/smol/path'
 
 import type { PathLike } from 'node:fs'
 

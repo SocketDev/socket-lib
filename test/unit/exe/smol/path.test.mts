@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/smol/path.ts. On stock Node, `getSmolPath()` returns
+ * @file Unit tests for src/exe/smol/path.ts. On stock Node, `getSmolPath()` returns
  *   `undefined` (the node:smol-path binding ships only in socket-btm smol
  *   binaries). The native path is exercised by socket-btm's own tests.
  */
@@ -7,7 +7,7 @@
 import { getSmolPath as getSmolPathStable } from '@socketsecurity/lib-stable/smol/path'
 import { describe, expect, it } from 'vitest'
 
-import { getSmolPath } from '../../../src/smol/path'
+import { getSmolPath } from '../../../../src/exe/smol/path'
 
 describe('smol/path', () => {
   describe('getSmolPath', () => {

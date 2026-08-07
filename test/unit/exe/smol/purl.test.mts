@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/smol/purl.ts. On stock Node, `getSmolPurl()` returns
+ * @file Unit tests for src/exe/smol/purl.ts. On stock Node, `getSmolPurl()` returns
  *   `undefined`. The integration story is verified by socket-btm's own tests
  *   running inside the smol binary.
  */
@@ -7,7 +7,7 @@
 import { describe, expect, it } from 'vitest'
 
 // oxlint-disable-next-line socket/no-src-import-in-test-expect -- getSmolPurl is the system-under-test; the assertions exercise its return value and idempotent identity, not a builder of expected values.
-import { getSmolPurl } from '../../../src/smol/purl'
+import { getSmolPurl } from '../../../../src/exe/smol/purl'
 
 describe('smol/purl', () => {
   describe('getSmolPurl', () => {
