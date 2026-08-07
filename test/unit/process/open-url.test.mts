@@ -139,6 +139,8 @@ describe('resolveNewWindowBrowser', () => {
 })
 
 describe('buildOpenUrlInvocation', () => {
+  const URL = 'https://example.com/auth/cli/abc123'
+
   it('stays on the platform opener when no new window is asked for', () => {
     // The default is unchanged, so every existing caller keeps its behavior.
     const invocation = buildOpenUrlInvocation(URL, {
