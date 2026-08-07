@@ -709,9 +709,6 @@ importers:
       portless:
         specifier: 'catalog:'
         version: 0.15.5
-      prim:
-        specifier: workspace:0.1.0
-        version: link:tools/prim
       regjsparser:
         specifier: 'catalog:'
         version: 0.13.2
@@ -727,6 +724,9 @@ importers:
       signal-exit:
         specifier: 4.1.0
         version: 4.1.0
+      socket-lib-tools-prim:
+        specifier: workspace:0.0.0
+        version: link:tools/prim
       spdx-correct:
         specifier: 3.2.0
         version: 3.2.0

@@ -1,10 +1,14 @@
 {
-  "name": "@socketsecurity/lib-perry-fixture",
+  "name": "socket-lib-test-fixtures-perry",
   "private": true,
   "perry": {
-    "compilePackages": ["@socketsecurity/lib"],
+    "compilePackages": [
+      "@socketsecurity/lib"
+    ],
     "allow": {
-      "compilePackages": ["@socketsecurity/lib"]
+      "compilePackages": [
+        "@socketsecurity/lib"
+      ]
     },
     "lockdown": true,
     "strict": true,
