@@ -39,6 +39,9 @@ import type { AcornNode } from '../../.claude/hooks/fleet/_shared/acorn/index.mt
 import { renderReport } from './audit-api-usage/render.mts'
 
 import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { runMain } from '../fleet/_shared/run-main.mts'
+
+import type { ScriptMeta } from '../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -427,6 +430,15 @@ function main(): number {
   return 0
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'audits which @socketsecurity/lib export subpaths the fleet + wheelhouse actually import',
+  help: `Usage: node scripts/repo/audit-api-usage.mts [flags]
+
+  --json                    emit the report as JSON instead of terminal bars
+  --consumers <dir,dir,…>   comma-separated consumer repo names (default: every fleet repo)`,
+}
+
 if (isMainModule(import.meta.url)) {
-  process.exitCode = main()
+  runMain(main, SCRIPT_META)
 }

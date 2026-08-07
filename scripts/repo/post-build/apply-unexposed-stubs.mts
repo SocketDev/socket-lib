@@ -12,6 +12,9 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { applyUnexposedStubs } from '../build-stubs/unexposed.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+import { runMain } from '../../fleet/_shared/run-main.mts'
+
+import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -22,6 +25,14 @@ function main(): void {
   }
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'swaps each dist module listed in unexposed-leaves.json for a throwing stub',
+  help: `Usage: node scripts/repo/post-build/apply-unexposed-stubs.mts [flags]
+
+  --quiet, --silent   suppress the success summary`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(main, SCRIPT_META)
 }

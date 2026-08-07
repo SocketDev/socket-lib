@@ -23,6 +23,10 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import globals from 'globals'
 
 import { REPO_ROOT } from '../../fleet/paths.mts'
+import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+import { runMain } from '../../fleet/_shared/run-main.mts'
+
+import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -174,8 +178,6 @@ function main(): void {
   const output = `${banner}
 import { ObjectFreeze } from '../primordials/object'
 
-import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
-
 /**
  * Fleet-canonical alias map: socket-lib mirrors standard JS + Node
  * globals with a \`Ctor\` suffix. Downstream repos that destructure
@@ -205,6 +207,14 @@ ${internalArrLines.join('\n')}
   )
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'codegens src/checks/primordials-defaults.ts from the globals package crossed against src/primordials/*.ts',
+  help: `Usage: node scripts/repo/post-build/make-primordials-defaults.mts
+
+  No flags. Re-run whenever globals bumps or src/primordials/ exports change.`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(main, SCRIPT_META)
 }

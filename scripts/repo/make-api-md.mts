@@ -19,6 +19,9 @@ import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { REPO_ROOT as rootPath } from '../fleet/paths.mts'
 
 import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { runMain } from '../fleet/_shared/run-main.mts'
+
+import type { ScriptMeta } from '../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 const WIN32 = process.platform === 'win32'
@@ -269,52 +272,62 @@ export function renderLlmsTxt(
 }
 
 async function main(): Promise<void> {
-  const pkg = JSON.parse(
-    readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
-  ) as { exports: PackageExports }
-
-  const rows = buildRows(pkg.exports)
-  const groups = groupRows(rows)
-
-  const apiPath = path.join(rootPath, 'docs', 'api.md')
-  writeFileSync(apiPath, renderMarkdown(groups))
-
-  const llmsPath = path.join(rootPath, 'llms.txt')
-  writeFileSync(llmsPath, renderLlmsTxt(groups, rows.length))
-
-  // Run oxfmt so the checked-in files match the formatter's expectations
-  // (table column alignment, etc.) — otherwise lint fails on every build.
-  // Must pass -c so the fleet's oxfmtrc.json (single-quote, no-semi, table
-  // alignment behaviour) wins over oxfmt's built-in default config.
   try {
-    await spawn(
-      // Windows needs the .cmd shim — the extension-less .bin file is a POSIX
-      // sh script cmd.exe (shell: WIN32) can't run.
-      WIN32 ? 'node_modules\\.bin\\oxfmt.cmd' : 'node_modules/.bin/oxfmt',
-      [
-        '-c',
-        '.config/fleet/oxfmtrc.json',
-        '--ignore-path',
-        '.config/fleet/.prettierignore',
-        '--write',
-        apiPath,
-        llmsPath,
-      ],
-      {
-        cwd: rootPath,
-        shell: WIN32,
-        stdio: 'ignore',
-      },
-    )
-  } catch {
-    // Formatting is best-effort — don't fail the build if oxfmt is missing.
+    const pkg = JSON.parse(
+      readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
+    ) as { exports: PackageExports }
+
+    const rows = buildRows(pkg.exports)
+    const groups = groupRows(rows)
+
+    const apiPath = path.join(rootPath, 'docs', 'api.md')
+    writeFileSync(apiPath, renderMarkdown(groups))
+
+    const llmsPath = path.join(rootPath, 'llms.txt')
+    writeFileSync(llmsPath, renderLlmsTxt(groups, rows.length))
+
+    // Run oxfmt so the checked-in files match the formatter's expectations
+    // (table column alignment, etc.) — otherwise lint fails on every build.
+    // Must pass -c so the fleet's oxfmtrc.json (single-quote, no-semi, table
+    // alignment behaviour) wins over oxfmt's built-in default config.
+    try {
+      await spawn(
+        // Windows needs the .cmd shim — the extension-less .bin file is a POSIX
+        // sh script cmd.exe (shell: WIN32) can't run.
+        WIN32 ? 'node_modules\\.bin\\oxfmt.cmd' : 'node_modules/.bin/oxfmt',
+        [
+          '-c',
+          '.config/fleet/oxfmtrc.json',
+          '--ignore-path',
+          '.config/fleet/.prettierignore',
+          '--write',
+          apiPath,
+          llmsPath,
+        ],
+        {
+          cwd: rootPath,
+          shell: WIN32,
+          stdio: 'ignore',
+        },
+      )
+    } catch {
+      // Formatting is best-effort — don't fail the build if oxfmt is missing.
+    }
+    logger.log(`Wrote ${rows.length} exports to docs/api.md and llms.txt`)
+  } catch (e) {
+    logger.fail(e)
+    process.exitCode = 1
   }
-  logger.log(`Wrote ${rows.length} exports to docs/api.md and llms.txt`)
+}
+
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'generates docs/api.md and llms.txt from the package.json exports map',
+  help: `Usage: node scripts/repo/make-api-md.mts
+
+  No flags. Regenerate whenever the exports map changes.`,
 }
 
 if (isMainModule(import.meta.url)) {
-  main().catch(err => {
-    logger.fail(err)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

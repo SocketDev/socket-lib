@@ -17,6 +17,9 @@ import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 import { parseArgs } from '../../fleet/util/parse-args.mts'
 
 import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+import { runMain } from '../../fleet/_shared/run-main.mts'
+
+import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -88,10 +91,6 @@ async function main(): Promise<void> {
     // Parse arguments
     const { values } = parseArgs({
       options: {
-        help: {
-          type: 'boolean',
-          default: false,
-        },
         all: {
           type: 'boolean',
           default: false,
@@ -128,35 +127,6 @@ async function main(): Promise<void> {
       allowPositionals: false,
       strict: false,
     })
-
-    // Show help if requested
-    if (values.help) {
-      logger.log('Clean Runner')
-      logger.log('')
-      logger.log('Usage: pnpm clean [options]')
-      logger.log('')
-      logger.log('Options:')
-      logger.log('  --help              Show this help message')
-      logger.log('  --all               Clean everything (default if no flags)')
-      logger.log('  --cache             Clean cache directories')
-      logger.log('  --coverage          Clean coverage reports')
-      logger.log('  --dist              Clean build output')
-      logger.log('  --types             Clean TypeScript declarations only')
-      logger.log('  --modules           Clean node_modules')
-      logger.log('  --quiet, --silent   Suppress progress messages')
-      logger.log('')
-      logger.log('Examples:')
-      logger.log(
-        '  pnpm clean                  # Clean everything except node_modules',
-      )
-      logger.log('  pnpm clean --dist           # Clean build output only')
-      logger.log('  pnpm clean --cache --coverage  # Clean cache and coverage')
-      logger.log(
-        '  pnpm clean --all --modules  # Clean everything including node_modules',
-      )
-      process.exitCode = 0
-      return
-    }
 
     const quiet = isQuiet(values)
 
@@ -226,9 +196,20 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'unified clean runner — removes build artifacts, caches, and other generated files',
+  help: `Usage: node scripts/repo/bundle/clean.mts [flags]
+
+  --all               clean everything (default if no flags)
+  --cache             clean cache directories
+  --coverage          clean coverage reports
+  --dist              clean build output
+  --types             clean TypeScript declarations only
+  --modules           clean node_modules
+  --quiet, --silent   suppress progress messages`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch(error => {
-    logger.error(error.message || error)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

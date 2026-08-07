@@ -13,6 +13,9 @@ import { pluralize } from '@socketsecurity/lib-stable/words/pluralize'
 import { buildExternals } from '../build-externals/orchestrator.mts'
 
 import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+import { runMain } from '../../fleet/_shared/run-main.mts'
+
+import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -37,9 +40,15 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'bundles external dependencies (cacache, pacote, make-fetch-happen, …) into standalone modules',
+  help: `Usage: node scripts/repo/bundle/externals.mts [flags]
+
+  --verbose             show detailed build output
+  --quiet, --silent     suppress progress messages`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch(error => {
-    logger.error(`Build failed: ${error.message || error}`)
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

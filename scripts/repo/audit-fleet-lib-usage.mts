@@ -30,7 +30,10 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { REPO_ROOT } from '../fleet/paths.mts'
 import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { runMain } from '../fleet/_shared/run-main.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+
+import type { ScriptMeta } from '../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -400,6 +403,16 @@ function main(): void {
   logger.log(json)
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'audits fleet-wide @socketsecurity/lib usage to find leaf modules no roster repo imports',
+  help: `Usage: node scripts/repo/audit-fleet-lib-usage.mts [flags]
+
+  --out <file>          write the JSON report to <file> instead of stdout
+  --write-stub-list      write the graph-safe stub candidates to
+                         scripts/repo/build-stubs/unexposed-leaves.json`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(main, SCRIPT_META)
 }

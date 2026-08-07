@@ -18,12 +18,17 @@ import process from 'node:process'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 
 import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+import { runMain } from '../../fleet/_shared/run-main.mts'
+
+import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
 
 const externalDir = path.join(REPO_ROOT, 'src', 'external')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
 const { isQuiet } = require('@socketsecurity/lib-stable/argv/flag-predicates')
+const { errorMessage } = require('@socketsecurity/lib-stable/errors/message')
+const { errorStack } = require('@socketsecurity/lib-stable/errors/stack')
 const {
   getDefaultLogger,
 } = require('@socketsecurity/lib-stable/logger/default')
@@ -159,6 +164,19 @@ export function getDtsFilesRecursive(
 }
 
 async function main(): Promise<void> {
+  try {
+    await runValidation()
+  } catch (e) {
+    logger.fail(`Validation failed: ${errorMessage(e)}`)
+    const stack = errorStack(e)
+    if (!isQuiet() && stack) {
+      logger.log(stack)
+    }
+    process.exitCode = 1
+  }
+}
+
+async function runValidation(): Promise<void> {
   const quiet = isQuiet()
   const verbose = process.argv.includes('--verbose')
 
@@ -220,12 +238,15 @@ async function main(): Promise<void> {
   }
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'validates that external .d.ts files use proper ES6 module export patterns',
+  help: `Usage: node scripts/repo/validate/external-types.mts [flags]
+
+  --verbose             show detail on success
+  --quiet, --silent     suppress non-error output`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main().catch(error => {
-    logger.fail(`Validation failed: ${error.message}`)
-    if (!isQuiet() && error.stack) {
-      logger.log(error.stack)
-    }
-    process.exitCode = 1
-  })
+  runMain(main, SCRIPT_META)
 }

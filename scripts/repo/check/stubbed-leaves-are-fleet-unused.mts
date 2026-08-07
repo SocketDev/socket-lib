@@ -43,6 +43,9 @@ import {
 } from '../build-stubs/unexposed.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
+import { runMain } from '../../fleet/_shared/run-main.mts'
+
+import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -215,6 +218,14 @@ export function main(): void {
   }
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'checks every leaf compiled out of the published build is allowlisted and still fleet-unused',
+  help: `Usage: node scripts/repo/check/stubbed-leaves-are-fleet-unused.mts [flags]
+
+  --quiet, --silent   suppress non-error output`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(main, SCRIPT_META)
 }

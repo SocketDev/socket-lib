@@ -39,7 +39,10 @@ import {
   unexposedLeavesPath,
 } from './build-stubs/unexposed.mts'
 import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { runMain } from '../fleet/_shared/run-main.mts'
 import { REPO_ROOT } from '../fleet/paths.mts'
+
+import type { ScriptMeta } from '../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -189,6 +192,17 @@ function main(): void {
   )
 }
 
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'un-stubs a leaf the fleet needs, rebuilds, and commits — stops before the release',
+  help: `Usage: node scripts/repo/expose-leaf.mts <leaf>… [flags]
+
+  leaf          the exports-map specifier without the leading ./,
+                e.g. http-request/checksum-file
+  --no-commit   skip committing the stub-list change
+  --dry-run     report what would be exposed without writing or rebuilding`,
+}
+
 if (isMainModule(import.meta.url)) {
-  main()
+  runMain(main, SCRIPT_META)
 }
