@@ -174,7 +174,7 @@ export function ensureImports(source, identifiers, importStyle) {
         ? `import { ${merged} } from '${specifier}'`
         : `const { ${merged} } = require('${specifier}')`
     return {
-      newSource: source.replace(existingRe, replacement),
+      newSource: source.replace(existingRe, () => replacement),
       importAdded: true,
     }
   }

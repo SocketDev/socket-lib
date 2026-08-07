@@ -100,7 +100,10 @@ export function detectBarrels(
       typeof entryRecord['source'] === 'string' ? entryRecord['source'] : ''
 
     // (a) Classic barrel: source file named index.* .
-    // oxlint-disable-next-line socket/no-source-sniffing -- path-name check only: matching the filename (package.json `exports.source` field) to detect index.* entry points, not inspecting file text content
+    // Path-name check only: matching the filename (package.json
+    // `exports.source` field) to detect index.* entry points, not
+    // inspecting file text content.
+    // oxlint-disable-next-line socket/no-source-sniffing -- path-name check
     if (/\/index\.[mc]?[jt]s$/.test(source)) {
       findings.push({ key, source, reason: 'index_source' })
       continue

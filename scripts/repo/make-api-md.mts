@@ -51,7 +51,7 @@ export function buildRows(exports: PackageExports): Row[] {
       continue
     }
     const srcPath = def
-      .replace(/^\.\/dist\//, path.join(rootPath, 'src') + path.sep)
+      .replace(/^\.\/dist\//, () => path.join(rootPath, 'src') + path.sep)
       .replace(/\.js$/, '.ts')
     const display = subpath.slice(2)
     // Link llms.txt at the shipped declaration file (./dist/**/*.d.mts) — the

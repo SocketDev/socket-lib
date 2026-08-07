@@ -17,5 +17,6 @@ const plugin = {
   },
 }
 
-// oxlint-disable-next-line socket/no-default-export -- oxlint jsPlugins contract requires a default-exported plugin object.
+// oxlint's jsPlugins contract requires a default-exported plugin object.
+// oxlint-disable-next-line socket/no-default-export -- plugin contract
 export default plugin

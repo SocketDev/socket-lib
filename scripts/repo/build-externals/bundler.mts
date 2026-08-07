@@ -124,7 +124,8 @@ ${contentWithoutStrict}`
     await fs.writeFile(tmpPath, finalContent)
     await fs.rename(tmpPath, outputPath)
 
-    // oxlint-disable-next-line socket/prefer-exists-sync -- need size for logging.
+    // Need the file size for the success log line below.
+    // oxlint-disable-next-line socket/prefer-exists-sync -- need size
     const stats = await fs.stat(outputPath)
     const sizeKB = Math.round(stats.size / 1024)
     if (!quiet) {

@@ -85,7 +85,7 @@ export async function fixFileImports(filePath, verbose = false) {
     if (testPattern.test(content)) {
       // Replace with require('./external/pkg') or require('../external/pkg').
       const replacement = `require('${externalPrefix}/${pkg}')`
-      content = content.replace(requirePattern, replacement)
+      content = content.replace(requirePattern, () => replacement)
       modified = true
     }
   }

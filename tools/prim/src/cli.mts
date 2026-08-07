@@ -338,7 +338,10 @@ const PRIMORDIALS_FILE_EXTS = ['.cjs', '.cts', '.js', '.mjs', '.mts', '.ts']
  * any primordials.* found is unrelated (avoid drifting up to a monorepo-root
  * primordials owned by a sibling package).
  */
-// oxlint-disable-next-line socket/sort-source-methods -- helper sits after `runCli` so the module reads entry-point-first; the `PRIMORDIALS_FILE_EXTS` config between them blocks safe autofix reordering.
+// Helper sits after `runCli` so the module reads entry-point-first; the
+// `PRIMORDIALS_FILE_EXTS` config between them blocks safe autofix
+// reordering.
+// oxlint-disable-next-line socket/sort-source-methods -- reads entry-first
 export function findLocalPrimordials(scanDir): string | undefined {
   const candidates = [scanDir, path.dirname(scanDir)]
   for (let i = 0, { length: dl } = candidates; i < dl; i++) {
@@ -379,7 +382,10 @@ export function findLocalPrimordials(scanDir): string | undefined {
  * Callers use this to choose between top-level `specifier` (single-file) and
  * `splitByLeaf` (directory) import wiring.
  */
-// oxlint-disable-next-line socket/sort-source-methods -- helper sits after `runCli` so the module reads entry-point-first; the `PRIMORDIALS_FILE_EXTS` config between them blocks safe autofix reordering.
+// Helper sits after `runCli` so the module reads entry-point-first; the
+// `PRIMORDIALS_FILE_EXTS` config between them blocks safe autofix
+// reordering.
+// oxlint-disable-next-line socket/sort-source-methods -- reads entry-first
 export function isSplitPrimordials(localPrimordialsPath: string): boolean {
   try {
     return statSync(localPrimordialsPath).isDirectory()
