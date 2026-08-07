@@ -1,11 +1,11 @@
 # trivy
 
-Resolver for **Trivy** — Aqua Security's vulnerability + IaC + SBOM scanner.
+Resolver for **Trivy** - Aqua Security's vulnerability + IaC + SBOM scanner.
 socket-basics uses it for container and filesystem scanning.
 
 ## Why it's here
 
-Trivy is a single Go binary that does a lot — container scanning, IaC misconfig
+Trivy is a single Go binary that does a lot - container scanning, IaC misconfig
 detection, SBOM generation, secret scanning. We pin one version per Socket
 release; this resolver lets every Socket product use the same pinned copy
 without each one re-implementing the download dance.
@@ -26,9 +26,9 @@ const trivy = await resolveTrivy({
 
 ## Tiers (in order)
 
-1. **VFS** — bundled inside smol Node.
-2. **PATH** — `which trivy`.
-3. **Download** — GitHub release tarball (opt-in).
+1. **VFS** - bundled inside smol Node.
+2. **PATH** - `which trivy`.
+3. **Download** - GitHub release tarball (opt-in).
 
 ## When you'd reach for this
 

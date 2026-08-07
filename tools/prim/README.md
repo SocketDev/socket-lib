@@ -24,7 +24,7 @@ naming-convention rules for primordials destructure blocks.
 
 ## Install
 
-`prim` is a workspace-only tool — it isn't published to npm and never
+`prim` is a workspace-only tool - it isn't published to npm and never
 will be (`"private": true`). Two ways to run it:
 
 ```sh
@@ -38,7 +38,7 @@ node /path/to/socket-lib/tools/prim/bin/prim.mts --help
 ```
 
 The `pnpm prim` form is the canonical way to run it during fleet
-development — it always picks up the live source under `tools/prim/`.
+development - it always picks up the live source under `tools/prim/`.
 
 ## Usage
 
@@ -47,8 +47,8 @@ development — it always picks up the live source under `tools/prim/`.
 | Subcommand   | Purpose                                                                                                                                                                                                                                                                                       |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `prim audit` | Find call sites where a primordial applies. Default shows both migration candidates (covered) and surface gaps (gap). Filter with `--coverage` or `--gaps`.                                                                                                                                   |
-| `prim mod`   | Codemod **JavaScript** source files to use primordials. Dry-run by default; `--apply` to write. TypeScript is out of scope (rewriting `.ts` requires source-mapping between stripped-types and original byte offsets) — `prim audit` still walks TS, so candidates are visible.               |
-| `prim lint`  | Structural lint rules for primordials destructure blocks. Currently: `ctor-rename` — constructor primordials (`Array`, `Set`, `TypeError`, …) must be aliased `<Name>: <Name>Ctor` when destructured from `primordials` (or any configured primordials-shaped source). Exits 1 on violations. |
+| `prim mod`   | Codemod **JavaScript** source files to use primordials. Dry-run by default; `--apply` to write. TypeScript is out of scope (rewriting `.ts` requires source-mapping between stripped-types and original byte offsets) - `prim audit` still walks TS, so candidates are visible.               |
+| `prim lint`  | Structural lint rules for primordials destructure blocks. Currently: `ctor-rename` - constructor primordials (`Array`, `Set`, `TypeError`, …) must be aliased `<Name>: <Name>Ctor` when destructured from `primordials` (or any configured primordials-shaped source). Exits 1 on violations. |
 
 <details>
 <summary>Worked command lines: `--help`, an audit with `--gaps` and one with `--coverage`, a dry-run `prim mod`, the same with `--apply`, `--include-guessed`, and `prim lint` over an additions tree</summary>
@@ -86,12 +86,12 @@ pnpm prim lint --target additions/source-patched --dir lib
 
 `prim` resolves the primordials surface from one of three locations:
 
-1. Explicit `--surface <path>` flag (audit/mod) — overrides everything.
+1. Explicit `--surface <path>` flag (audit/mod) - overrides everything.
    Use this to audit against Node's
    `lib/internal/per_context/primordials.js` or any other
    primordials-shaped source.
 2. A sibling socket-lib checkout: `../socket-lib/src/primordials.ts`
-   (used during fleet development — picks up unreleased exports).
+   (used during fleet development - picks up unreleased exports).
 3. The installed `@socketsecurity/lib/dist/primordials.js` in the
    target's `node_modules`.
 
@@ -101,7 +101,7 @@ When `--surface` points at a Node `per_context/primordials.js`, the
 loader recognizes the path and dynamically computes the full surface
 (~541 names) by enumerating the static + prototype methods of the
 upstream globals (Array, Object, String, Number, Map, Set, Error,
-RegExp, JSON, Math, Reflect, etc.) — the same names Node installs at
+RegExp, JSON, Math, Reflect, etc.) - the same names Node installs at
 bootstrap via `copyPropsRenamed` + `copyPrototype` reflection.
 
 ## Design
@@ -125,11 +125,11 @@ bootstrap via `copyPropsRenamed` + `copyPrototype` reflection.
   `var __defProp = Object.defineProperty;`) so audits of `dist/`
   trees don't drown in machine-generated noise.
 
-## Hard cases — `--ai-disambiguate`
+## Hard cases - `--ai-disambiguate`
 
 A small number of method names (`.test`, `.then`, `.exec`, `.catch`,
 `.finally`) are spec-defined on a single built-in (RegExp / Promise) but
-widely _duck-typed_ by user libraries — semver `Range.prototype.test`,
+widely _duck-typed_ by user libraries - semver `Range.prototype.test`,
 PromiseLike thenables, validator predicates, etc. The static analyzer
 can only classify these via the receiver-name heuristic
 (`re`/`regex`/`promise`/…), which misses anything else.
@@ -144,14 +144,14 @@ remaining ambiguous sites to Claude Sonnet:
 ANTHROPIC_API_KEY=sk-... pnpm prim audit --target . --ai-disambiguate
 ```
 
-The disambiguator runs Claude with a **read-only** tool surface —
+The disambiguator runs Claude with a **read-only** tool surface -
 `Read`, `Grep`, `Glob` only; `Bash`, `Edit`, `Write`, `WebFetch` are
 explicitly denied (defense-in-depth). Verdicts are cached in
 `<target>/.prim-cache/disambiguate.json`, so re-runs after the first
 hit don't pay the API cost.
 
 The list of "hard cases" lives in
-[`src/ambiguous-methods.mts`](./src/ambiguous-methods.mts) — add an
+[`src/ambiguous-methods.mts`](./src/ambiguous-methods.mts) - add an
 entry there if you encounter a new duck-typed method name in the wild.
 
 Without the flag, ambiguous sites are silently skipped (rather than

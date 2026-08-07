@@ -329,7 +329,7 @@ await httpJson('https://api.example.com/data', {
 })
 ```
 
-**Default:** Includes `User-Agent: socketsecurity-lib/<version> node/<node-version> <platform>/<arch>` (see `getSocketCallerUserAgent` in `http-request/user-agent`). Downstream callers can append their own identifier by setting the `SOCKET_CALLER_USER_AGENT` env var — e.g. `SOCKET_CALLER_USER_AGENT='sdxgen/0.5.0'` yields `socketsecurity-lib/<version> node/<node-version> <platform>/<arch> sdxgen/0.5.0`.
+**Default:** Includes `User-Agent: socketsecurity-lib/<version> node/<node-version> <platform>/<arch>` (see `getSocketCallerUserAgent` in `http-request/user-agent`). Downstream callers can append their own identifier by setting the `SOCKET_CALLER_USER_AGENT` env var - e.g. `SOCKET_CALLER_USER_AGENT='sdxgen/0.5.0'` yields `socketsecurity-lib/<version> node/<node-version> <platform>/<arch> sdxgen/0.5.0`.
 
 ### body
 

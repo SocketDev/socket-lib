@@ -1,6 +1,6 @@
 # bazel
 
-Resolver for **Bazel** — Google's build system used by socket-btm and a
+Resolver for **Bazel** - Google's build system used by socket-btm and a
 handful of upstream projects we scan.
 
 ## Why it's here
@@ -28,12 +28,12 @@ const dl = await resolveBazel({
 
 ## Tiers (in order)
 
-1. **PATH** — `bazelisk` is preferred (handles per-project version
+1. **PATH** - `bazelisk` is preferred (handles per-project version
    switching), then plain `bazel`.
-2. **Download** — upstream GitHub release binary (opt-in).
+2. **Download** - upstream GitHub release binary (opt-in).
 
 **No VFS tier.** Bundling a global Bazel into the smol binary would lock
-every project to one version — the opposite of what `.bazelversion` exists
+every project to one version - the opposite of what `.bazelversion` exists
 for.
 
 ## When you'd reach for this
@@ -44,10 +44,10 @@ for.
 
 ## Subdir extras
 
-- `read-bazel-version-file.ts` — parses a project's `.bazelversion` file.
-- `resolve-bazel-version.ts` — picks the version using `.bazelversion`
+- `read-bazel-version-file.ts` - parses a project's `.bazelversion` file.
+- `resolve-bazel-version.ts` - picks the version using `.bazelversion`
   with fallbacks.
-- `resolve-asset-url.ts` — turns version + platform-arch into the GitHub
+- `resolve-asset-url.ts` - turns version + platform-arch into the GitHub
   release asset URL.
 
 ## See also

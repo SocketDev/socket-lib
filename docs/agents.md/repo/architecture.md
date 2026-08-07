@@ -38,8 +38,8 @@ All modules exported via `package.json` exports field. When adding modules, upda
 **Framework:** Vitest (shared config from socket-registry, main config: `.config/vitest.config.mts`).
 
 - Test files in `test/`, naming matches source.
-- 🚨 **NEVER use `--` before test paths** — runs all tests.
-- NEVER write source-code-scanning tests — verify behavior with real function calls.
+- 🚨 **NEVER use `--` before test paths** - runs all tests.
+- NEVER write source-code-scanning tests - verify behavior with real function calls.
 
 🚨 **Vitest OOM with no per-test failure → infinite stream, not cumulative memory.** `FATAL ERROR: Ineffective mark-compacts near heap limit` + `tests 0ms`: one test is spinning. Top culprit: `Readable` with `this.push(undefined)` (only `null` ends the stream). Bisect with `pnpm exec vitest -t '<describe>'` **before** splitting files or raising heap. See `test/isolated/http-request-advanced-2.test.mts` for the canonical example.
 
@@ -53,4 +53,4 @@ Access via typed getter functions in `src/env/`. Each module exports a pure gett
 
 ## Working directory
 
-🚨 **NEVER** use `process.chdir()` — pass `{ cwd }` options and absolute paths.
+🚨 **NEVER** use `process.chdir()` - pass `{ cwd }` options and absolute paths.

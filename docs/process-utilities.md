@@ -361,7 +361,7 @@ try {
 
 **When to use:** Preventing duplicate builds, ensuring atomic operations, coordinating between processes.
 
-The module exports a singleton `processLock` (type `ProcessLockManager`). There is NO `ProcessLock` constructor — use the singleton.
+The module exports a singleton `processLock` (type `ProcessLockManager`). There is NO `ProcessLock` constructor - use the singleton.
 
 **Example:**
 
@@ -422,7 +422,7 @@ processLock.release('/tmp/my.lock')
 
 #### withLock(lockPath, fn, options?)
 
-Scoped helper — acquires the lock, runs `fn`, releases the lock even on error. Returns the value of `fn`.
+Scoped helper - acquires the lock, runs `fn`, releases the lock even on error. Returns the value of `fn`.
 
 ```typescript
 const result = await processLock.withLock('/tmp/my.lock', async () => {

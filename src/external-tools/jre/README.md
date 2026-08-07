@@ -1,12 +1,12 @@
 # jre
 
-Resolver for the **Java Runtime Environment** — the JVM Socket needs to drive
+Resolver for the **Java Runtime Environment** - the JVM Socket needs to drive
 Bazel, SBT, and a handful of upstream Java tools (`ws.exe`, etc.).
 
 ## Why it's here
 
 Java is the heaviest external dependency we ship. We can't assume the host has
-a JRE installed, and the version matters — Bazel and SBT both pin minimum JVM
+a JRE installed, and the version matters - Bazel and SBT both pin minimum JVM
 versions. This resolver covers four discovery paths so we don't have to
 hard-code a search routine into every consumer.
 
@@ -32,10 +32,10 @@ can log which tier hit.
 
 ## Tiers (in order)
 
-1. **VFS** — embedded JRE inside the smol Node binary.
-2. **`JAVA_HOME`** — if the env var points at a directory with `bin/java`.
-3. **PATH** — `which java`.
-4. **Download** — Adoptium release (opt-in via `downloadIfMissing`).
+1. **VFS** - embedded JRE inside the smol Node binary.
+2. **`JAVA_HOME`** - if the env var points at a directory with `bin/java`.
+3. **PATH** - `which java`.
+4. **Download** - Adoptium release (opt-in via `downloadIfMissing`).
 
 ## When you'd reach for this
 
@@ -45,9 +45,9 @@ can log which tier hit.
 
 ## Subdir extras
 
-- `detect-platform-arch.ts` — turns `process.platform` + `process.arch` into
+- `detect-platform-arch.ts` - turns `process.platform` + `process.arch` into
   the Adoptium token (`mac-aarch64`, `linux-x64`, etc.).
-- `from-java-home.ts` — the tier-2 helper unique to JRE.
+- `from-java-home.ts` - the tier-2 helper unique to JRE.
 
 ## See also
 

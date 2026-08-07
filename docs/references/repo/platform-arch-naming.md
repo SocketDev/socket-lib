@@ -24,7 +24,7 @@ abbreviate on disk but not in package filters. Matching means there is no
 translation step available to get wrong.
 
 pnpm's pack-app (v11+) accepts `<os>-<arch>[-<libc>]` target strings, and its
-shards are `@pnpm/exe.<os>-<arch>` — also with `win32`, see pnpm#11314. Our
+shards are `@pnpm/exe.<os>-<arch>` - also with `win32`, see pnpm#11314. Our
 names therefore flow straight into pack-app's `--target` argument,
 `pnpm.app.targets` config, and sibling-package-name construction.
 

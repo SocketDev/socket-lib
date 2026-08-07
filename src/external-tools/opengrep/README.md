@@ -1,6 +1,6 @@
 # opengrep
 
-Resolver for **OpenGrep** — a community fork of semgrep used by
+Resolver for **OpenGrep** - a community fork of semgrep used by
 socket-basics for SAST.
 
 ## Why it's here
@@ -25,9 +25,9 @@ const og = await resolveOpengrep({
 
 ## Tiers (in order)
 
-1. **VFS** — bundled inside smol Node.
-2. **PATH** — `which opengrep`.
-3. **Download** — GitHub release (opt-in). Mac/Linux: bare binary. Windows:
+1. **VFS** - bundled inside smol Node.
+2. **PATH** - `which opengrep`.
+3. **Download** - GitHub release (opt-in). Mac/Linux: bare binary. Windows:
    zip wrapper.
 
 ## When you'd reach for this

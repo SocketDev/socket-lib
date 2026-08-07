@@ -1,6 +1,6 @@
 # uv
 
-Resolver for **uv** — Astral's Rust-built Python package manager. Used by
+Resolver for **uv** - Astral's Rust-built Python package manager. Used by
 socket-basics to bootstrap Python projects for scanning.
 
 ## Why it's here
@@ -26,10 +26,10 @@ const uv = await resolveUv({
 
 ## Tiers (in order)
 
-1. **VFS** — bundled inside smol Node.
-2. **PATH** — `which uv`.
-3. **Download** — GitHub release tarball (opt-in). The release archive wraps
-   the binary one level deep — the per-tool `from-download.ts` handles the
+1. **VFS** - bundled inside smol Node.
+2. **PATH** - `which uv`.
+3. **Download** - GitHub release tarball (opt-in). The release archive wraps
+   the binary one level deep - the per-tool `from-download.ts` handles the
    strip.
 
 ## When you'd reach for this

@@ -113,7 +113,7 @@ if (home) {
 }
 ```
 
-**Environment Variables:** `HOME` (Unix/Linux/macOS), falling back to `USERPROFILE` (Windows). Callers do NOT need to handle the Windows fallback themselves — `getHome()` returns the correct value on all platforms.
+**Environment Variables:** `HOME` (Unix/Linux/macOS), falling back to `USERPROFILE` (Windows). Callers do NOT need to handle the Windows fallback themselves - `getHome()` returns the correct value on all platforms.
 
 ### getTerm()
 
@@ -291,7 +291,7 @@ All getters follow the pattern `get<VarName>()` and return `string | boolean | u
 **Problem:** Path doesn't work on Windows/Unix.
 
 **Solution:**
-`getHome()` already handles the Windows `USERPROFILE` fallback internally — just use it directly:
+`getHome()` already handles the Windows `USERPROFILE` fallback internally - just use it directly:
 
 ```typescript
 import { getHome } from '@socketsecurity/lib/env/home'

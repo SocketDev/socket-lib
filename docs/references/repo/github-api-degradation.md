@@ -39,7 +39,7 @@ The fallback has three outcomes, and they are deliberately different:
 A caller hands us a string `ref` without saying what kind it is. It might be a
 tag (`v1.2.3`), a branch (`main`), or a raw commit SHA. REST has three separate
 endpoints for those and no single "resolve any ref" endpoint, so the code tries
-each in order — tag first as the most common, then branch, then commit. The
+each in order - tag first as the most common, then branch, then commit. The
 first 200 wins.
 
 ### Why empty-body is tracked separately from 404

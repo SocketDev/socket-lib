@@ -1,6 +1,6 @@
 # sbt
 
-Resolver for the **SBT launcher** — Scala Build Tool's `sbt-launch.jar`. SBT
+Resolver for the **SBT launcher** - Scala Build Tool's `sbt-launch.jar`. SBT
 itself is a `.jar`; running it requires a JVM.
 
 ## Why it's here
@@ -25,9 +25,9 @@ script that knows how to find its own JVM.
 
 ## Tiers (in order)
 
-1. **VFS** — bundled `sbt-launch.jar` inside the smol Node binary.
-2. **PATH** — system `sbt` shell script.
-3. **Download** — Maven Central artifact (opt-in).
+1. **VFS** - bundled `sbt-launch.jar` inside the smol Node binary.
+2. **PATH** - system `sbt` shell script.
+3. **Download** - Maven Central artifact (opt-in).
 
 ## When you'd reach for this
 
@@ -36,5 +36,5 @@ script that knows how to find its own JVM.
 
 ## See also
 
-- [`../jre/README.md`](../jre/README.md) — required for the `isJar` case.
+- [`../jre/README.md`](../jre/README.md) - required for the `isJar` case.
 - [`../README.md`](../README.md) for the four-tier pattern.

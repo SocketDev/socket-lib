@@ -43,7 +43,7 @@ or the `@js-temporal/polyfill` package directly:
 
 You're writing code that needs a timestamp, duration, or wallclock
 read. **Use these helpers, not `new Date(…)` / `Date.now()` /
-`Date.parse(…)`** — those forms are guarded by an oxlint rule.
+`Date.parse(…)`** - those forms are guarded by an oxlint rule.
 
 When you reach for `Temporal.<Namespace>.<op>` and the operation
 doesn't exist yet here, add it deliberately (see the recipe below);
@@ -56,21 +56,21 @@ don't fall back to the equivalent `Date` form.
 
 1. **Find the spec section** in the pinned rev (see _Spec revision
    pinning_ below). Each operation has a section number like `8.4.2`.
-2. **Decide which file it lives in** — same clause as an existing
+2. **Decide which file it lives in** - same clause as an existing
    file, or a new top-level file if it's a new namespace. We group
    one file per spec clause.
 3. **Write the JSDoc header** citing the section number, the spec URL,
    and the algorithm steps verbatim. The header is the contract; the
    body implements it.
 4. **Walk the steps with `// Step N.` comments** at each
-   implementation point. Match v8's `runtime-temporal.cc` density —
+   implementation point. Match v8's `runtime-temporal.cc` density -
    every spec step gets a corresponding line.
 5. **Throws use primordials.** `RangeErrorCtor` / `TypeErrorCtor` /
    `ErrorCtor` from `../primordials/error`, never the bare globals.
 6. **Throw messages follow Socket's four-ingredient rule** (What /
    Where / Saw / Fix). The spec only says "throw a `RangeError`"; we
    pick the message. See `../../docs/agents.md/fleet/error-messages.md`.
-7. **Internal slot reads/writes** go through `slots.ts` — never store
+7. **Internal slot reads/writes** go through `slots.ts` - never store
    state on `this.<field>` directly. The spec models slots as private,
    non-introspectable storage; the `WeakMap`-based helpers preserve
    that contract.
@@ -82,7 +82,7 @@ don't fall back to the equivalent `Date` form.
 9. **Update the surface inventory at the top of the clause file** to
    list the operation as ✓ (with section number) rather than ✗.
 10. **Add a test** that round-trips through the polyfill reference
-    impl's relevant `test262` cases — those are the ground truth.
+    impl's relevant `test262` cases - those are the ground truth.
 
 </details>
 
@@ -152,7 +152,7 @@ throw new RangeError('invalid input')
 ```
 
 No rule, no where, no saw, no fix. Also: bare global `RangeError`
-instead of the primordial — fails the primordials lint.
+instead of the primordial - fails the primordials lint.
 
 </details>
 
@@ -184,17 +184,17 @@ load-bearing. When updating the pin:
 The spec treats Temporal objects as having non-introspectable internal
 slots (`[[InitializedTemporalInstant]]`, `[[Nanoseconds]]`, etc.).
 ECMAScript private fields (`#nanoseconds`) are close but not quite the
-same — they don't survive `Object.create(Instant.prototype)` and they
+same - they don't survive `Object.create(Instant.prototype)` and they
 leak through `Reflect.ownKeys` patterns.
 
 We use a per-slot `WeakMap` (or `WeakSet` for boolean presence) keyed
 on the receiver. `instanceof Instant` is **not** the slot-presence
-check — the spec separates "is a Temporal.Instant" from "has the
+check - the spec separates "is a Temporal.Instant" from "has the
 initialized slot." `slots.ts` exposes:
 
-- `hasInstantSlot(o)` — slot-presence predicate
-- `setInstantSlots(o, ns)` — install slots
-- `getNanoseconds(o)` — read `[[Nanoseconds]]`
+- `hasInstantSlot(o)` - slot-presence predicate
+- `setInstantSlots(o, ns)` - install slots
+- `getNanoseconds(o)` - read `[[Nanoseconds]]`
 
 This matches the polyfill's approach and survives subclassing as the
 spec requires.
@@ -207,7 +207,7 @@ ultrathink acorn) is:
 - Runner library lives at `test/scripts/test262-<scope>-runner.mts`.
 - Runner is import-safe: any `main()` is guarded with `if (import.meta.main)`.
 - All pure helpers (classifiers, frontmatter parsers, allowlist loaders)
-  live in the **same file** as the runner — no `*-helpers.mts` /
+  live in the **same file** as the runner - no `*-helpers.mts` /
   `*-classify.mts` siblings. Section-header comments inside the runner
   separate concerns.
 - The unit test lives at `test/unit/test262-<scope>.test.mts`, imports

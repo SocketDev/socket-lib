@@ -8,7 +8,7 @@
 
 Core utilities for [Socket.dev](https://socket.dev/) tools: file system, processes, HTTP, env detection, logging, spinners, and more. Tree-shakeable, TypeScript-first, cross-platform.
 
-`@socketsecurity/lib` is the shared utility layer for every Socket.dev tool: the CLI, SDK, registry, MCP server, and build infrastructure. It exists so we ship one battle-tested implementation of "spawn a child", "fetch JSON with retries", "delete a path safely on Windows + POSIX", etc. — rather than ten subtly different ones across the fleet. Every export is reachable via a subpath import, so tree-shaking keeps your bundle lean.
+`@socketsecurity/lib` is the shared utility layer for every Socket.dev tool: the CLI, SDK, registry, MCP server, and build infrastructure. It exists so we ship one battle-tested implementation of "spawn a child", "fetch JSON with retries", "delete a path safely on Windows + POSIX", etc. - rather than ten subtly different ones across the fleet. Every export is reachable via a subpath import, so tree-shaking keeps your bundle lean.
 
 ## Install
 
@@ -28,7 +28,7 @@ const pkg = await readJson('./package.json')
 spinner.successAndStop(`Loaded ${pkg.name}@${pkg.version}`)
 ```
 
-Every export lives under a subpath — pick what you need:
+Every export lives under a subpath - pick what you need:
 
 ```typescript
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
@@ -36,7 +36,7 @@ import { httpJson } from '@socketsecurity/lib/http-request'
 import { safeDelete } from '@socketsecurity/lib/fs/safe'
 ```
 
-Start with the [API reference](./docs/api.md) — every subpath export with a one-line description.
+Start with the [API reference](./docs/api.md) - every subpath export with a one-line description.
 
 ## Development
 

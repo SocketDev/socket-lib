@@ -1,12 +1,12 @@
 # synp
 
-Resolver for **synp** — converts `package-lock.json` ↔ `yarn.lock`. Used by
+Resolver for **synp** - converts `package-lock.json` ↔ `yarn.lock`. Used by
 Socket workflows that need to normalize between lockfile flavors before
 SCA processing.
 
 ## Why it's here
 
-synp is small and npm-only — there's no upstream binary release. We resolve
+synp is small and npm-only - there's no upstream binary release. We resolve
 it via the `dlx/package` pipeline (`pkg:npm/synp@1.9.14`) so it lives in the
 shared dlx cache instead of being installed per-project.
 
@@ -26,9 +26,9 @@ const synp = await resolveSynp({
 
 ## Tiers (in order)
 
-1. **VFS** — bundled inside smol Node.
-2. **PATH** — `which synp`.
-3. **Download** — npm via `dlx/package` (opt-in).
+1. **VFS** - bundled inside smol Node.
+2. **PATH** - `which synp`.
+3. **Download** - npm via `dlx/package` (opt-in).
 
 ## When you'd reach for this
 

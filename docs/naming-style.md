@@ -33,11 +33,11 @@ The `file` survives even though `fs` is the namespace.
 
 Only when the resulting name is still self-describing:
 
-- **Constructors / factories** — `Spinner()`, not `createSpinner()`. The noun
+- **Constructors / factories** - `Spinner()`, not `createSpinner()`. The noun
   IS the thing being made.
-- **Domain-specific verbs** — `stringify` in `json/`, not `toString`. The
+- **Domain-specific verbs** - `stringify` in `json/`, not `toString`. The
   verb is uniquely meaningful in JSON-land.
-- **Direct mirror of a stdlib API** — `paths/resolve.ts` exports `resolve`
+- **Direct mirror of a stdlib API** - `paths/resolve.ts` exports `resolve`
   and `relative` to match `node:path.resolve()` / `path.relative()`. The
   mental model is "this is `path`, but ours."
 
@@ -72,18 +72,18 @@ Internal `getNativeHash()` → `nativeHash()`. The `get` prefix is noise on a
 private memoizing-probe; the bare noun reads as "give me the native hash
 function."
 
-This is **internal** only — public API still uses `get` where it disambiguates
+This is **internal** only - public API still uses `get` where it disambiguates
 (e.g. `getDefaultLogger()` returns a singleton).
 
 ## Private vs public files
 
 Within a module:
 
-- `shared.ts` — underscore-prefix, NOT part of public API. The dist export
+- `shared.ts` - underscore-prefix, NOT part of public API. The dist export
   generator skips `dist/**/_*` so consumers can't import these even if they
   guess the path.
 - Flat siblings (`macos.ts`, `linux.ts`, `windows.ts`, `keychain.ts`, `rc.ts`)
-  — these ARE the public surface. Each filename declares its primary export.
+  - these ARE the public surface. Each filename declares its primary export.
 
 ## Pairs: async + sync
 
@@ -96,7 +96,7 @@ writeSecret     / writeSecretSync
 parseJson       / (no sync variant — it's already sync)
 ```
 
-Don't invert this (`readSecretAsync` is wrong — async is the default).
+Don't invert this (`readSecretAsync` is wrong - async is the default).
 
 ## Types co-located with primary function
 

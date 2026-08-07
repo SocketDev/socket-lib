@@ -1,6 +1,6 @@
 # janus
 
-Resolver for **janus** — a tool from `divmain/janus` used by Socket
+Resolver for **janus** - a tool from `divmain/janus` used by Socket
 workflows. Currently macOS-aarch64 only; the platform map will grow as
 upstream adds builds.
 
@@ -26,9 +26,9 @@ const janus = await resolveJanus({
 
 ## Tiers (in order)
 
-1. **VFS** — bundled inside smol Node.
-2. **PATH** — `which janus`.
-3. **Download** — GitHub release (opt-in). macOS aarch64 only today.
+1. **VFS** - bundled inside smol Node.
+2. **PATH** - `which janus`.
+3. **Download** - GitHub release (opt-in). macOS aarch64 only today.
 
 ## When you'd reach for this
 
@@ -38,7 +38,7 @@ const janus = await resolveJanus({
 
 - **Platform support is narrow.** Calling `resolveJanus()` with
   `downloadIfMissing` on Linux or Windows will throw at the asset-resolution
-  step — there is no build for those platforms upstream yet.
+  step - there is no build for those platforms upstream yet.
 
 ## See also
 
