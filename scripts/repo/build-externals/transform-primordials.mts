@@ -39,7 +39,7 @@
 
 import path from 'node:path'
 
-import { applyCodemod, loadPrimordialsSurface } from 'prim'
+import { applyCodemod, loadPrimordialsSurface } from 'socket-lib-tools-prim'
 
 /**
  * Apply the primordials codemod to every JS file under `distExternalDir`.
