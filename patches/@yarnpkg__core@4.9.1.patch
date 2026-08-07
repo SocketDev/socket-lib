@@ -1,0 +1,20 @@
+diff --git a/lib/TelemetryManager.js b/lib/TelemetryManager.js
+index 035565e6457e65eb43801caf0965401db9cb3e75..c9192e6b768379dc08b07dccfeef85ee425daa56 100644
+--- a/lib/TelemetryManager.js
++++ b/lib/TelemetryManager.js
+@@ -174,12 +174,9 @@ class TelemetryManager {
+         if (triggerUpdate) {
+             const blocks = state.blocks ?? {};
+             if (Object.keys(blocks).length === 0) {
+-                const rawUrl = `https://browser-http-intake.logs.datadoghq.eu/v1/input/${accountId}?ddsource=yarn`;
+-                const sendPayload = (payload) => httpUtils.post(rawUrl, payload, {
+-                    configuration: this.configuration,
+-                }).catch(() => {
+-                    // Nothing we can do
+-                });
++                // socket-lib patch: analytics ingest disabled. The upload endpoint is
++                // removed so no telemetry payload ever leaves the machine.
++                const sendPayload = () => Promise.resolve();
+                 for (const [userId, block] of Object.entries(state.blocks ?? {})) {
+                     if (Object.keys(block).length === 0)
+                         continue;

@@ -600,6 +600,12 @@ patchedDependencies:
   # literals so the browser bundle (which stubs http2 to false) can load the
   # sigstore signer; consumer: packages/provenance via the browser field.
   '@sigstore/sign@4.1.1': patches/@sigstore__sign@4.1.1.patch
+  # Telemetry lockdown: removes TelemetryManager's Datadog ingest endpoint so
+  # the dev-only @yarnpkg/core (reached via @yarnpkg/extensions, the
+  # packageExtensions data pkg-ext/data.ts bundles) can never upload metrics;
+  # the telemetry-deps-are-reviewed payload scan gates the shape.
+  # On a bump, regenerate via `pnpm patch @yarnpkg/core` + `pnpm patch-commit`.
+  '@yarnpkg/core@4.9.1': patches/@yarnpkg__core@4.9.1.patch
   # Dedup compat: adds a `require` export condition + source/index.cjs so the
   # ESM-only chalk@5 stays require()-able by chalk@4's CJS consumers (@yarnpkg,
   # type-coverage) after the chalk 4/5 collapse.
