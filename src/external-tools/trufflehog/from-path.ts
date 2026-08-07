@@ -4,7 +4,7 @@
  *   `undefined`.
  */
 
-import { which } from '../../exe/which'
+import { which } from '../../exe/path/which'
 
 import type { ResolvedTrufflehog } from './types'
 

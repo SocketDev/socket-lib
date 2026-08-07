@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/exe/which'), () => ({
+vi.mock(import('../../../../src/exe/path/which'), () => ({
   which:
     vi.fn<
       (
@@ -12,7 +12,7 @@ vi.mock(import('../../../../src/exe/which'), () => ({
 }))
 
 async function loadFresh() {
-  const whichMod = await import('../../../../src/exe/which')
+  const whichMod = await import('../../../../src/exe/path/which')
   const whichMock = whichMod.which as ReturnType<typeof vi.fn>
   const mod = await import('../../../../src/external-tools/cdxgen/from-path')
   return { whichMock, cdxgenFromPath: mod.cdxgenFromPath }

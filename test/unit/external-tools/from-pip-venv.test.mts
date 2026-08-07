@@ -8,10 +8,10 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { pipVenvEntryPointPath } from '../../../src/external-tools/from-pip-venv'
 
-import type { which as WhichFn } from '../../../src/exe/which'
+import type { which as WhichFn } from '../../../src/exe/path/which'
 import type * as NodeFs from 'node:fs'
 
-vi.mock(import('../../../src/exe/which'), () => ({
+vi.mock(import('../../../src/exe/path/which'), () => ({
   which: vi.fn<
     (
       name: string,
@@ -37,7 +37,7 @@ vi.mock(import('../../../src/fs/safe'), () => ({
 }))
 
 async function loadFresh() {
-  const whichMod = await import('../../../src/exe/which')
+  const whichMod = await import('../../../src/exe/path/which')
   const spawnMod = await import('../../../src/process/spawn/child')
   const fsMod = await import('node:fs')
   const mod = await import('../../../src/external-tools/from-pip-venv')

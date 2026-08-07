@@ -4,7 +4,7 @@
  *   Windows convention / some minimal images). Returns the first hit.
  */
 
-import { which } from '../../exe/which'
+import { which } from '../../exe/path/which'
 
 import type { ResolvedPython } from './types'
 

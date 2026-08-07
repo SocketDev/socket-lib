@@ -24,7 +24,7 @@ import { existsSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { which } from '../exe/which'
+import { which } from '../exe/path/which'
 import { safeMkdir } from '../fs/safe'
 import { spawn } from '../process/spawn/child'
 

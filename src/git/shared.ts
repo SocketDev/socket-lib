@@ -5,7 +5,7 @@
  *   `unstaged.ts`) call into these helpers; nothing else should.
  */
 
-import { whichSync } from '../exe/which'
+import { whichSync } from '../exe/path/which'
 import { debugNs } from '../debug/output'
 import { getGlobMatcher } from '../globs/matcher'
 import { getNodePath } from '../node/path'

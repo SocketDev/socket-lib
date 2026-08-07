@@ -17,14 +17,14 @@
 
 import process from 'node:process'
 
-import whichModule from '../external/which'
-import { isPath } from '../paths/normalize'
-import { ArrayIsArray, ArrayPrototypeMap } from '../primordials/array'
-import { binPathAllCache, binPathCache, getFs, getPath } from './shared'
+import whichModule from '../../external/which'
+import { isPath } from '../../paths/normalize'
+import { ArrayIsArray, ArrayPrototypeMap } from '../../primordials/array'
+import { binPathAllCache, binPathCache, getFs, getPath } from '../shared'
 import { resolveRealBinSync } from './resolve'
 
-import type { WhichOptions as ExternalWhichOptions } from '../external/which'
-import type { WhichLocalBinOptions, WhichOptions } from './types'
+import type { WhichOptions as ExternalWhichOptions } from '../../external/which'
+import type { WhichLocalBinOptions, WhichOptions } from '../types'
 
 /**
  * Find an executable in the system PATH asynchronously.

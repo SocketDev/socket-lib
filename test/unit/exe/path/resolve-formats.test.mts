@@ -10,8 +10,8 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { resolveRealBinSync } from '../../../src/exe/resolve'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { resolveRealBinSync } from '../../../../src/exe/path/resolve'
+import { runWithTempDir } from '../../util/temp-file-helper'
 
 describe('resolveRealBinSync - Unix scenarios', () => {
   it('should handle extensionless pnpm shell script', async () => {

@@ -2,7 +2,7 @@
  * @file `trivyFromPath()` — looks for `trivy` on the system PATH.
  */
 
-import { which } from '../../exe/which'
+import { which } from '../../exe/path/which'
 
 import type { ResolvedTrivy } from './types'
 

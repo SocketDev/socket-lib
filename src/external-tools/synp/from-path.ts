@@ -2,7 +2,7 @@
  * @file `synpFromPath()` — looks for `synp` on the system PATH.
  */
 
-import { which } from '../../exe/which'
+import { which } from '../../exe/path/which'
 
 import type { ResolvedSynp } from './types'
 

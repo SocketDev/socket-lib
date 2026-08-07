@@ -18,7 +18,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
 import path from 'node:path'
 
-import { whichSync } from '../exe/which'
+import { whichSync } from '../exe/path/which'
 import { errorMessage } from '../errors/message'
 import { getDefaultLogger } from '../logger/default'
 import { JSONParse, JSONStringify } from '../primordials/json'

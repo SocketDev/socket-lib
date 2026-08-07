@@ -20,7 +20,7 @@
 
 import process from 'node:process'
 
-import { findPathEnvKey, replacePathInEnv } from '../../exe/trusted'
+import { findPathEnvKey, replacePathInEnv } from '../../exe/path/trusted'
 import { getAbortSignal } from '../../process/abort'
 import { getNodeChildProcess } from '../../node/child-process'
 import { getOwn } from '../../objects/inspect'

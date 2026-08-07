@@ -8,7 +8,11 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { whichLocalBin, whichReal, whichRealSync } from '../../../src/exe/which'
+import {
+  whichLocalBin,
+  whichReal,
+  whichRealSync,
+} from '../../../../src/exe/path/which'
 
 describe('whichReal (async)', () => {
   it('resolves node to a real path and caches it', async () => {

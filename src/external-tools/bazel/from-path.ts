@@ -5,7 +5,7 @@
  *   Bazel users want. Returns `undefined` if neither is found on PATH.
  */
 
-import { which } from '../../exe/which'
+import { which } from '../../exe/path/which'
 
 import type { ResolvedBazel } from './types'
 

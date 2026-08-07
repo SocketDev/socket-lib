@@ -243,8 +243,10 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/exe/argv/parse](./dist/exe/argv/parse.d.ts): Argument parsing utilities for CLI applications.
 - [@socketsecurity/lib/exe/argv/parse-args-string](./dist/exe/argv/parse-args-string.d.ts): Tokenize a shell-style command string into an argv array.
 - [@socketsecurity/lib/exe/exec](./dist/exe/exec.d.ts): `execBin` — spawn a binary with PATH resolution, wrapper-script unwrapping, and Windows shell handling.
-- [@socketsecurity/lib/exe/find](./dist/exe/find.d.ts): Find specific package-manager binaries with platform- aware fallbacks.
-- [@socketsecurity/lib/exe/resolve](./dist/exe/resolve.d.ts): Resolve a binary path to the underlying script file.
+- [@socketsecurity/lib/exe/path/find](./dist/exe/path/find.d.ts): Find specific package-manager binaries with platform- aware fallbacks.
+- [@socketsecurity/lib/exe/path/resolve](./dist/exe/path/resolve.d.ts): Resolve a binary path to the underlying script file.
+- [@socketsecurity/lib/exe/path/trusted](./dist/exe/path/trusted.d.ts): Path-trust-inverting executable resolution.
+- [@socketsecurity/lib/exe/path/which](./dist/exe/path/which.d.ts): Look up binaries on PATH.
 - [@socketsecurity/lib/exe/sea/detect](./dist/exe/sea/detect.d.ts): Single Executable Application binary detection + path accessor.
 - [@socketsecurity/lib/exe/shadow/detect](./dist/exe/shadow/detect.d.ts): Shadow-bin detection.
 - [@socketsecurity/lib/exe/shadow/skip](./dist/exe/shadow/skip.d.ts): Shadow binary installation utilities for Socket ecosystem.
@@ -258,9 +260,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/exe/smol/purl](./dist/exe/smol/purl.d.ts): Lazy-loader for socket-btm's `node:smol-purl` binding.
 - [@socketsecurity/lib/exe/smol/versions](./dist/exe/smol/versions.d.ts): Lazy-loader for socket-btm's `node:smol-versions`.
 - [@socketsecurity/lib/exe/smol/vfs](./dist/exe/smol/vfs.d.ts): Lazy-loader for socket-btm's `node:smol-vfs`.
-- [@socketsecurity/lib/exe/trusted](./dist/exe/trusted.d.ts): Path-trust-inverting executable resolution.
 - [@socketsecurity/lib/exe/types](./dist/exe/types.d.ts): Public type surface for `exe/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`, plus the `whichLocalBin` variant.
-- [@socketsecurity/lib/exe/which](./dist/exe/which.d.ts): Look up binaries on PATH.
 
 ## external-tools/
 

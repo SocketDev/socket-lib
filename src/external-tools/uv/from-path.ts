@@ -2,7 +2,7 @@
  * @file `uvFromPath()` — looks for `uv` on the system PATH.
  */
 
-import { which } from '../../exe/which'
+import { which } from '../../exe/path/which'
 
 import type { ResolvedUv } from './types'
 

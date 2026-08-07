@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
 
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 
-import { which, whichSync } from '../../src/exe/which'
+import { which, whichSync } from '../../src/exe/path/which'
 
 describe('which', () => {
   describe('whichSync', () => {

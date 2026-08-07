@@ -10,10 +10,10 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { resolveRealBinSync } from '../../../src/exe/resolve'
-import { isError } from '../../../src/errors/predicates'
-import { getDefaultLogger } from '../../../src/logger/default'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { resolveRealBinSync } from '../../../../src/exe/path/resolve'
+import { isError } from '../../../../src/errors/predicates'
+import { getDefaultLogger } from '../../../../src/logger/default'
+import { runWithTempDir } from '../../util/temp-file-helper'
 
 const logger = getDefaultLogger()
 

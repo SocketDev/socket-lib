@@ -8,7 +8,7 @@
 
 import path from 'node:path'
 
-import { which } from '../../exe/which'
+import { which } from '../../exe/path/which'
 
 import type { ResolvedJre } from './types'
 

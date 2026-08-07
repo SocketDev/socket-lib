@@ -1100,15 +1100,25 @@
       "types": "./dist/exe/exec.d.ts",
       "default": "./dist/exe/exec.js"
     },
-    "./exe/find": {
-      "source": "./src/exe/find.ts",
-      "types": "./dist/exe/find.d.ts",
-      "default": "./dist/exe/find.js"
+    "./exe/path/find": {
+      "source": "./src/exe/path/find.ts",
+      "types": "./dist/exe/path/find.d.ts",
+      "default": "./dist/exe/path/find.js"
     },
-    "./exe/resolve": {
-      "source": "./src/exe/resolve.ts",
-      "types": "./dist/exe/resolve.d.ts",
-      "default": "./dist/exe/resolve.js"
+    "./exe/path/resolve": {
+      "source": "./src/exe/path/resolve.ts",
+      "types": "./dist/exe/path/resolve.d.ts",
+      "default": "./dist/exe/path/resolve.js"
+    },
+    "./exe/path/trusted": {
+      "source": "./src/exe/path/trusted.ts",
+      "types": "./dist/exe/path/trusted.d.ts",
+      "default": "./dist/exe/path/trusted.js"
+    },
+    "./exe/path/which": {
+      "source": "./src/exe/path/which.ts",
+      "types": "./dist/exe/path/which.d.ts",
+      "default": "./dist/exe/path/which.js"
     },
     "./exe/sea/detect": {
       "source": "./src/exe/sea/detect.ts",
@@ -1175,20 +1185,10 @@
       "types": "./dist/exe/smol/vfs.d.ts",
       "default": "./dist/exe/smol/vfs.js"
     },
-    "./exe/trusted": {
-      "source": "./src/exe/trusted.ts",
-      "types": "./dist/exe/trusted.d.ts",
-      "default": "./dist/exe/trusted.js"
-    },
     "./exe/types": {
       "source": "./src/exe/types.ts",
       "types": "./dist/exe/types.d.ts",
       "default": "./dist/exe/types.js"
-    },
-    "./exe/which": {
-      "source": "./src/exe/which.ts",
-      "types": "./dist/exe/which.d.ts",
-      "default": "./dist/exe/which.js"
     },
     "./external-tools/bazel/asset-names": {
       "source": "./src/external-tools/bazel/asset-names.ts",

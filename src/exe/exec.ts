@@ -26,8 +26,8 @@ import { spawn } from '../process/spawn/child'
 import { windowsShellOption } from '../process/spawn/windows-shell'
 
 import { binPathCache, getFs } from './shared'
-import { resolveRealBinSync } from './resolve'
-import { whichReal } from './which'
+import { resolveRealBinSync } from './path/resolve'
+import { whichReal } from './path/which'
 
 import type { SpawnOptions } from '../process/spawn/types'
 

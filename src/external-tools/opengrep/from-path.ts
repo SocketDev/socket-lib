@@ -2,7 +2,7 @@
  * @file `opengrepFromPath()` — looks for `opengrep` on the system PATH.
  */
 
-import { which } from '../../exe/which'
+import { which } from '../../exe/path/which'
 
 import type { ResolvedOpengrep } from './types'
 

@@ -29,10 +29,10 @@ import {
   resolveTrustedExecutable,
   resolveUntrustedRoot,
   stripSurroundingQuotes,
-} from '../../../src/exe/trusted'
-import { safeDelete } from '../../../src/fs/safe'
+} from '../../../../src/exe/path/trusted'
+import { safeDelete } from '../../../../src/fs/safe'
 
-import { describeUnixOnly } from '../util/skip-helpers'
+import { describeUnixOnly } from '../../util/skip-helpers'
 
 const tempRoots: string[] = []
 

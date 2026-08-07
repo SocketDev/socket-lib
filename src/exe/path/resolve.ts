@@ -18,11 +18,11 @@
  *   bindings.
  */
 
-import { isWin32 } from '../constants/platform'
-import { readJsonSync } from '../fs/read-json'
-import { normalizePath } from '../paths/normalize'
-import { StringPrototypeStartsWith } from '../primordials/string'
-import { getFs, getPath, voltaBinCache } from './shared'
+import { isWin32 } from '../../constants/platform'
+import { readJsonSync } from '../../fs/read-json'
+import { normalizePath } from '../../paths/normalize'
+import { StringPrototypeStartsWith } from '../../primordials/string'
+import { getFs, getPath, voltaBinCache } from '../shared'
 import { whichRealSync } from './which'
 
 /**

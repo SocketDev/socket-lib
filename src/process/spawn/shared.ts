@@ -9,7 +9,10 @@
 import process from 'node:process'
 
 import { stripAnsi } from '../../term/ansi/strip'
-import { findPathEnvKey, resolveTrustedExecutable } from '../../exe/trusted'
+import {
+  findPathEnvKey,
+  resolveTrustedExecutable,
+} from '../../exe/path/trusted'
 import { isWin32 } from '../../constants/platform'
 import { getNodeFs } from '../../node/fs'
 import { getNodePath } from '../../node/path'
