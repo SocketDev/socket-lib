@@ -20,7 +20,7 @@
     "cli/check",
     "cli/check-primordials",
     "cli/socket-lib",
-    "config/fleet-repo",
+    "config/repo",
     "config/layers",
     "constants/typescript",
     "cover/code",

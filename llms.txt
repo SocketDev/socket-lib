@@ -82,8 +82,8 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 
 ## config/
 
-- [@socketsecurity/lib/config/fleet-repo](./dist/config/fleet-repo.d.ts): Fleet-convention config reader: a per-repo override (`.config/repo`) layered over the cascaded fleet default (`.config/fleet`).
 - [@socketsecurity/lib/config/layers](./dist/config/layers.d.ts): Read a layered config — a base config that higher layers may override or extend.
+- [@socketsecurity/lib/config/repo](./dist/config/repo.d.ts): Fleet-convention config reader: a per-repo override (`.config/repo`) layered over the cascaded fleet default (`.config/fleet`).
 
 ## constants/
 

@@ -101,10 +101,10 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## config/
 
-| Subpath                                                                       | Description                                                                                                                     |
-| ----------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| [`@socketsecurity/lib-stable/config/fleet-repo`](../src/config/fleet-repo.ts) | Fleet-convention config reader: a per-repo override (`.config/repo`) layered over the cascaded fleet default (`.config/fleet`). |
-| [`@socketsecurity/lib-stable/config/layers`](../src/config/layers.ts)         | Read a layered config — a base config that higher layers may override or extend.                                                |
+| Subpath                                                               | Description                                                                                                                     |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib-stable/config/layers`](../src/config/layers.ts) | Read a layered config — a base config that higher layers may override or extend.                                                |
+| [`@socketsecurity/lib-stable/config/repo`](../src/config/repo.ts)     | Fleet-convention config reader: a per-repo override (`.config/repo`) layered over the cascaded fleet default (`.config/fleet`). |
 
 ## constants/
 

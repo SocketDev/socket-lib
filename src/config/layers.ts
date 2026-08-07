@@ -8,7 +8,7 @@
  *   layer that declares one; an array key concatenates). `mergeConfigArray`
  *   covers the concat case across any number of layers. No Socket-specific
  *   knowledge lives here — the Socket-convention `.config/fleet` +
- *   `.config/repo` wrapper is `config/fleet-repo`'s `resolveRepoConfig`, a thin
+ *   `.config/repo` wrapper is `config/repo`'s `resolveRepoConfig`, a thin
  *   layer over this reader.
  */
 
