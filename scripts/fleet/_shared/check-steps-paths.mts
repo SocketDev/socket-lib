@@ -39,9 +39,6 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
     // died before a single test ran.
     () =>
       run('node', ['scripts/fleet/check/managed-file-imports-are-managed.mts']),
-    // Root `scripts/` is a namespace only: fleet and repo automation must
-    // declare ownership by living below scripts/fleet/ or scripts/repo/.
-    () => run('node', ['scripts/fleet/check/root-scripts-are-segregated.mts']),
     // The repo ROOT is a namespace too: every tracked root entry is a
     // sanctioned tool-anchored name / tier dir, or carries a documented
     // per-repo allowlist reason (.config/repo/root-files.json). The legacy
@@ -258,6 +255,14 @@ export function buildPathsAndSupplyChainSteps(): CheckStep[] {
         'scripts/fleet/check/generated-outputs-are-untracked.mts',
         '--quiet',
       ]),
+    // Companion: `scripts/` splits into exactly the two ownership tiers, and a
+    // MEMBER tracks nothing under scripts/fleet/. An entry outside fleet/ and
+    // repo/ belongs to neither tier, so nobody can say whether the cascade owns
+    // it; a tracked fleet payload duplicates state the cascade owns and drifts
+    // silently. The wheelhouse is exempt because it AUTHORS the payload. See
+    // docs/agents.md/fleet/thin-distribution.md.
+    () =>
+      run('node', ['scripts/fleet/check/scripts-are-segmented.mts', '--quiet']),
     // Companion: no handoff / planning doc is tracked. These are TRANSIENT agent
     // work-state, a session's in-flight reasoning, whose one home is the
     // gitignored .claude/plans/ — never source control. Matched by filename

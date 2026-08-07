@@ -278,7 +278,7 @@ export function replaceManifestVersion(
   raw: string,
   nextVersion: string,
 ): string {
-  return raw.replace(/("version":\s*")[^"]+(")/, `$1${nextVersion}$2`)
+  return raw.replace(/("version":\s*")[^"]+(")/, () => `$1${nextVersion}$2`)
 }
 
 /**
@@ -305,7 +305,7 @@ export function planLockstepManifestWrites(
       const escaped = sibling.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
       updated = updated.replace(
         new RegExp(`("${escaped}":\\s*")\\d[^"]*(")`, 'g'),
-        `$1${nextVersion}$2`,
+        () => `$1${nextVersion}$2`,
       )
     }
     if (updated !== input.raw) {

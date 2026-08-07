@@ -59,13 +59,16 @@ export function missingRepos(statuses: readonly RepoExistence[]): string[] {
 
 // True when `gh` is installed and authenticated — the precondition for the reads.
 export function ghAuthed(): boolean {
-  // oxlint-disable-next-line socket/prefer-async-spawn -- main() is a sync CLI check; the auth probe must resolve inline before the sweep.
+  // Main() is a sync CLI check; the auth probe must resolve inline before the
+  // sweep.
+  // oxlint-disable-next-line socket/prefer-async-spawn -- main() is a sync CLI
   return spawnSync('gh', ['auth', 'status'], { encoding: 'utf8' }).status === 0
 }
 
 // True when the repo exists, false on a 404, undefined on any other error.
 export function ghRepoExists(repo: FleetRepo): boolean | undefined {
-  // oxlint-disable-next-line socket/prefer-async-spawn -- main() is a sync CLI check; the sweep reads sequentially inline.
+  // Main() is a sync CLI check; the sweep reads sequentially inline.
+  // oxlint-disable-next-line socket/prefer-async-spawn -- main() is a sync CLI
   const result = spawnSync(
     'gh',
     ['api', `repos/${repo.owner}/${repo.name}`, '--jq', '.id'],

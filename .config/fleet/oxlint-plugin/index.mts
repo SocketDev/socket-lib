@@ -61,6 +61,7 @@ import noSourceSniffing from './fleet/no-source-sniffing/index.mts'
 import noSpawnStreamDoubleConsume from './fleet/no-spawn-stream-double-consume/index.mts'
 import noSpawnsyncCodeField from './fleet/no-spawnsync-code-field/index.mts'
 import noSrcImportInTestExpect from './fleet/no-src-import-in-test-expect/index.mts'
+import noStackedLintDisables from './fleet/no-stacked-lint-disables/index.mts'
 import noStatusEmoji from './fleet/no-status-emoji/index.mts'
 import noStructuredClonePreferJson from './fleet/no-structured-clone-prefer-json/index.mts'
 import noSyncRmInTestLifecycle from './fleet/no-sync-rm-in-test-lifecycle/index.mts'
@@ -97,6 +98,7 @@ import preferNonCapturingGroup from './fleet/prefer-non-capturing-group/index.mt
 import preferNormalizePath from './fleet/prefer-normalize-path/index.mts'
 import preferOptionalChain from './fleet/prefer-optional-chain/index.mts'
 import preferPureCallForm from './fleet/prefer-pure-call-form/index.mts'
+import preferReplaceFunction from './fleet/prefer-replace-function/index.mts'
 import preferRepoRootDotCache from './fleet/prefer-repo-root-dot-cache/index.mts'
 import preferSafeDelete from './fleet/prefer-safe-delete/index.mts'
 import preferSeparateTypeImport from './fleet/prefer-separate-type-import/index.mts'
@@ -119,6 +121,7 @@ import sortObjectLiteralProperties from './fleet/sort-object-literal-properties/
 import sortRegexAlternations from './fleet/sort-regex-alternations/index.mts'
 import sortSetArgs from './fleet/sort-set-args/index.mts'
 import sortSourceMethods from './fleet/sort-source-methods/index.mts'
+import terseLintDisableReason from './fleet/terse-lint-disable-reason/index.mts'
 import useFleetCanonicalApiTokenGetter from './fleet/use-fleet-canonical-api-token-getter/index.mts'
 
 /**
@@ -180,6 +183,7 @@ const plugin = {
     'no-spawn-stream-double-consume': noSpawnStreamDoubleConsume,
     'no-spawnsync-code-field': noSpawnsyncCodeField,
     'no-src-import-in-test-expect': noSrcImportInTestExpect,
+    'no-stacked-lint-disables': noStackedLintDisables,
     'no-status-emoji': noStatusEmoji,
     'no-structured-clone-prefer-json': noStructuredClonePreferJson,
     'no-sync-rm-in-test-lifecycle': noSyncRmInTestLifecycle,
@@ -216,6 +220,7 @@ const plugin = {
     'prefer-normalize-path': preferNormalizePath,
     'prefer-optional-chain': preferOptionalChain,
     'prefer-pure-call-form': preferPureCallForm,
+    'prefer-replace-function': preferReplaceFunction,
     'prefer-repo-root-dot-cache': preferRepoRootDotCache,
     'prefer-safe-delete': preferSafeDelete,
     'prefer-separate-type-import': preferSeparateTypeImport,
@@ -238,6 +243,7 @@ const plugin = {
     'sort-regex-alternations': sortRegexAlternations,
     'sort-set-args': sortSetArgs,
     'sort-source-methods': sortSourceMethods,
+    'terse-lint-disable-reason': terseLintDisableReason,
     'use-fleet-canonical-api-token-getter': useFleetCanonicalApiTokenGetter,
   },
 }

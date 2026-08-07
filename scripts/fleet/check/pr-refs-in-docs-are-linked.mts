@@ -135,16 +135,16 @@ export function maskNonProse(line: string): string {
   const blank = (m: string): string => ' '.repeat(m.length)
   let out = line
   // Inline code spans — a `#N` in code is not rendered prose.
-  out = out.replace(/`[^`]*`/g, blank)
+  out = out.replace(/`[^`]*`/g, match => blank(match))
   // Inline markdown links `[text](url)` — a `[#N](url)` is COMPLIANT, the ref is
   // already the link text, so masking the whole construct means it never flags.
-  out = out.replace(/\[[^\]]*\]\([^)]*\)/g, blank)
+  out = out.replace(/\[[^\]]*\]\([^)]*\)/g, match => blank(match))
   // Reference-style links `[text][ref]` and `[text][]` — also compliant links.
-  out = out.replace(/\[[^\]]*\]\[[^\]]*\]/g, blank)
+  out = out.replace(/\[[^\]]*\]\[[^\]]*\]/g, match => blank(match))
   // Bare URLs / autolinks — a `#N` fragment inside a URL is not a dead ref.
-  out = out.replace(/<?https?:\/\/[^\s>]+>?/g, blank)
+  out = out.replace(/<?https?:\/\/[^\s>]+>?/g, match => blank(match))
   // HTML comments carry machine markers, not rendered prose.
-  out = out.replace(/<!--[\s\S]*?-->/g, blank)
+  out = out.replace(/<!--[\s\S]*?-->/g, match => blank(match))
   return out
 }
 

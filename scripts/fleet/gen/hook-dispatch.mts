@@ -90,7 +90,8 @@ export function renderExcludedHints(excluded: readonly EligibleHook[]): string {
         // null is a tri-state sentinel distinct from Map#get's own
         // undefined-for-absent-key, and mirrors the emitted
         // `readonly string[] | null` EXCLUDED_HOOK_HINTS contract.
-        // oxlint-disable-next-line socket/prefer-undefined-over-null -- see above
+        // See above.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- see
         byEvent.set(event, null)
         continue
       }

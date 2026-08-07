@@ -61,7 +61,11 @@ export function parseRustChannel(toml: string): string | undefined {
  * Returns the input unchanged when there is no channel line to rewrite.
  */
 export function withRustChannel(toml: string, channel: string): string {
-  return toml.replace(CHANNEL_RE, `$1${channel}$3`)
+  return toml.replace(
+    CHANNEL_RE,
+    (_match: string, open: string, _old: string, close: string) =>
+      `${open}${channel}${close}`,
+  )
 }
 
 /**
@@ -81,7 +85,11 @@ export function withUpdaterToolchain(
   cargoMts: string,
   channel: string,
 ): string {
-  return cargoMts.replace(UPDATER_RE, `$1${channel}$3`)
+  return cargoMts.replace(
+    UPDATER_RE,
+    (_match: string, open: string, _old: string, close: string) =>
+      `${open}${channel}${close}`,
+  )
 }
 
 export interface RunCheckOptions {
@@ -278,7 +286,7 @@ export function runCheck(
   return 1
 }
 
-function main(): void {
+export function main(): void {
   const { values } = parseArgs({
     options: { fix: { default: false, type: 'boolean' } },
     strict: false,

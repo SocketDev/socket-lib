@@ -199,7 +199,8 @@ export async function main(): Promise<void> {
     // Registry truth, not the exit status above.
     let served: string | undefined
     for (let i = 0; i < REGISTRY_POLL_ATTEMPTS; i += 1) {
-      // eslint-disable-next-line no-await-in-loop -- a poll is sequential by definition.
+      // A poll is sequential by definition.
+      // eslint-disable-next-line no-await-in-loop -- a poll is sequential
       served = await publishedVersion(pkg)
       if (served === version) {
         break

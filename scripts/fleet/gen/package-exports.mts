@@ -122,7 +122,10 @@ export function privatePathMatcher(
   // Sort the configured segments (ASCII) so the alternation is stable +
   // satisfies sort-regex-alternations, then OR them with the defaults.
   const extra = [...privateSegments]
-    // oxlint-disable-next-line unicorn/no-array-sort -- the spread already copies `privateSegments`, no shared mutation; .toSorted() would trip socket/no-runtime-features-below-engine-floor in cascaded Node-18 repos.
+    // The spread already copies `privateSegments`, no shared mutation;
+    // .toSorted() would trip socket/no-runtime-features-below-engine-floor in
+    // cascaded Node-18 repos.
+    // oxlint-disable-next-line unicorn/no-array-sort -- the spread already
     .sort()
     .map(s => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'))
     .join('|')
@@ -210,7 +213,6 @@ export function buildExportsMap(
 ): Record<string, ExportConditions | string> {
   const { outDir } = config
   const map: Record<string, ExportConditions | string> = {}
-
 
   for (let i = 0, { length } = publicFiles; i < length; i += 1) {
     const rel = normalizePath(publicFiles[i]!)

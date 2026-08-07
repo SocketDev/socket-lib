@@ -139,7 +139,9 @@ export async function archiveAndClassify(
   const out: ArchivedStash[] = []
   for (let i = 0, { length } = entries; i < length; i += 1) {
     const entry = entries[i]!
-    // oxlint-disable-next-line no-await-in-loop -- serial by design: one git process at a time, and each stash must be archived before its verdict is recorded
+    // One git process at a time, and each stash must be archived before its
+    // verdict is recorded.
+    // oxlint-disable-next-line no-await-in-loop -- serial by design
     const { archiveRef, archiveState } = await archiveStash(
       entry,
       known,
@@ -187,7 +189,9 @@ export async function dropSupersededStashes(
       continue
     }
     const ref = `stash@{${String(record.entry.index)}}`
-    // oxlint-disable-next-line no-await-in-loop -- serial by design: every drop renumbers the list, so the next iteration must see the result of this one
+    // Every drop renumbers the list, so the next iteration must see the result
+    // of this one.
+    // oxlint-disable-next-line no-await-in-loop -- serial by design
     const resolved = await exec(['rev-parse', ref])
     if (resolved.stdout.trim() !== record.entry.sha) {
       logger.warn(
@@ -363,7 +367,8 @@ export async function runStashes(argv: readonly string[]): Promise<void> {
       continue
     }
     try {
-      // oxlint-disable-next-line no-await-in-loop -- serial across repos: each sweep mutates a stash list and reports before the next starts
+      // Each sweep mutates a stash list and reports before the next starts.
+      // oxlint-disable-next-line no-await-in-loop -- serial across repos
       const outcome = await sweepStashes(dir, { fix })
       reportStashOutcome(outcome)
       for (let i = 0, { length } = outcome.rows; i < length; i += 1) {

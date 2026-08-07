@@ -251,7 +251,8 @@ export async function collectTouchedFiles(
 ): Promise<Map<string, string[]>> {
   const out = new Map<string, string[]>()
   for (const hash of hashes) {
-    // eslint-disable-next-line no-await-in-loop -- serial per-commit git probe; the candidate list is short
+    // The candidate list is short.
+    // eslint-disable-next-line no-await-in-loop -- serial per-commit git probe
     const r = await runCapture(
       'git',
       ['diff-tree', '--no-commit-id', '--name-only', '-r', hash],

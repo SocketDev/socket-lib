@@ -86,7 +86,9 @@ export interface CatalogPinVerdict {
  * The subset of npm's single-version document this gate reads.
  */
 export interface RawNpmVersionDocument {
-  // oxlint-disable-next-line typescript/no-redundant-type-constituents -- fleet optional-explicit-undefined convention: the explicit | undefined on an optional is intentional, not redundant.
+  // Fleet optional-explicit-undefined convention: the explicit | undefined on
+  // an optional is intentional, not redundant.
+  // oxlint-disable-next-line typescript/no-redundant-type-constituents -- fleet
   readonly deprecated?: unknown | undefined
 }
 

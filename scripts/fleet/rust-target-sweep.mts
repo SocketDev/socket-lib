@@ -95,7 +95,8 @@ export function targetOf(checkout: string): string | undefined {
 
 export function duHuman(dir: string): string {
   try {
-    // oxlint-disable-next-line socket/prefer-async-spawn -- one-shot sync size probe for the report line.
+    // One-shot sync size probe for the report line.
+    // oxlint-disable-next-line socket/prefer-async-spawn -- one-shot sync size
     const result = spawnSync('du', ['-sh', dir])
     const out = String(result.stdout ?? '').trim()
     return out.split('\t')[0] || '?'
@@ -179,7 +180,8 @@ export async function main(): Promise<void> {
       continue
     }
     const size = duHuman(target)
-    // eslint-disable-next-line no-await-in-loop -- serial deletes; each is a large recursive unlink.
+    // Each is a large recursive unlink.
+    // eslint-disable-next-line no-await-in-loop -- serial deletes
     await safeDelete(target)
     swept += 1
     logger.success(`${target}: swept ${size}.`)

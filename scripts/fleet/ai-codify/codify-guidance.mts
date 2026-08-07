@@ -128,7 +128,8 @@ export function tierFor(surface: CodifySurface): {
  * fleet and passes the relevant guards on the first try.
  */
 export const SURFACE_GUIDANCE: Readonly<Record<CodifySurface, string>> = {
-  // oxlint-disable-next-line socket/prefer-undefined-over-null -- null-prototype object literal.
+  // null-prototype object literal.
+  // oxlint-disable-next-line socket/prefer-undefined-over-null -- proto null
   __proto__: null,
   'agents-doc': `Do NOT author this surface directly. The documentation surface (a terse one-line CLAUDE.md bullet pointing at a detail doc under docs/agents.md/{fleet,repo}/) is owned by scripts/fleet/codify-rule.mts, which keeps the CLAUDE.md edit under the 40KB whole-file cap and the per-section ≤8-line cap by pushing all prose into the doc. The orchestrator shells out to that script; you should not see this guidance unless a routing bug sent you here — stop and report it.`,
   check: `Author a single self-contained fleet check at scripts/fleet/check/<assertion-name>.mts, then register it in scripts/fleet/check.mts.

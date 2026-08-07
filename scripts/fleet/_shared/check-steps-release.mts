@@ -237,6 +237,14 @@ export function buildReleaseAndDocsSteps(): CheckStep[] {
     // (fleet-main-protection) and never touches any other. Strict; skips
     // cleanly off the release tier / member checkouts / no gh.
     releaseStep(['scripts/fleet/check/main-branch-rules-are-enforced.mts']),
+    // The ruleset is the ONE branch-law surface. A classic branch protection
+    // rule beside it is unmanaged: it can contradict the ruleset, carries no
+    // Repository-admin bypass, and no fleet tooling converges it — so the
+    // sweep deletes classic rules everywhere (--fix) and fails while any
+    // remain. Skips cleanly off the release tier / member checkouts / no gh.
+    releaseStep([
+      'scripts/fleet/check/classic-branch-protections-are-absent.mts',
+    ]),
     // Every member's GitHub security posture matches the posture law
     // (_shared/security-posture-law.mts): CodeQL default setup configured with
     // a SANITISED language set on public repos — at most one of the
@@ -304,6 +312,39 @@ export function buildReleaseAndDocsSteps(): CheckStep[] {
     // Runs per-tree (imports the member's own scripts/repo/bootstrap/fleet.mjs);
     // vacuous pass where that fetcher is absent.
     () => run('node', ['scripts/fleet/check/thin-untrack-set-is-ci-safe.mts']),
+    // The other half of a thin member's CI contract: untracking the payload is
+    // only safe if every workflow can FETCH it back. The wheelhouse release is
+    // private and a workflow's own GITHUB_TOKEN cannot read it, so each fleet
+    // install/checkout step must pass the payload-token inputs that mint an App
+    // token. Omitting them fails at install, before any test runs — and it is
+    // invisible until the member goes thin, which is how ultrathink shipped
+    // nine unwired workflows and went red on every run for three days.
+    () =>
+      run('node', [
+        'scripts/fleet/check/thin-workflow-payloads-are-fetchable.mts',
+        '--quiet',
+      ]),
+    // A repo that provisions the on-device model has opted into it. Every
+    // layer of the odai path is fail-open and quiet — ready=false, exit 69, a
+    // default-false opt-in — so a workflow can download a ~4 GB model, invoke
+    // it, and produce nothing on a green run. The capability sat dead
+    // fleet-wide for exactly that reason: `ai.localAssist` was undefined in
+    // every repo while the workflows, the version pin, and the model cache
+    // were all in place.
+    () =>
+      run('node', [
+        'scripts/fleet/check/odai-legs-are-switched-on.mts',
+        '--quiet',
+      ]),
+    // Every workflow running a fleet setup composite supplies the Socket API
+    // token, by step input or job env. Omitting BOTH installs the firewall
+    // unauthenticated while the job still reports green — prune-workflow-runs
+    // shipped that way, the one workflow where neither form was present.
+    () =>
+      run('node', [
+        'scripts/fleet/check/workflow-installs-have-the-socket-token.mts',
+        '--quiet',
+      ]),
     // Every slashed pattern in .config/fleet/.prettierignore must be `**/`-anchored
     // or it silently matches nothing (oxfmt roots the matcher at the ignore file's
     // dir via Gitignore::new). Catches the footgun where a bare `vendor/**` looks

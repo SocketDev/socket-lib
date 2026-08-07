@@ -1,4 +1,6 @@
-/* oxlint-disable socket/sort-source-methods -- ordered as path resolution flow (resolver → primary roots → derived constants → helpers); alphabetizing would scatter the flow. */
+/* oxlint-disable socket/sort-source-methods -- ordered as path resolution */
+// Ordered as path resolution flow (resolver → primary roots → derived constants
+// → helpers); alphabetizing would scatter the flow.
 /**
  * @file Canonical path constants + resolvers for this package. Mantra: 1 path,
  *   1 reference. Every path the scripts in this directory need — config files,
@@ -445,6 +447,22 @@ export function resolvePnpmVirtualStoreDir(repoRoot: string): string {
  * Absolute path to the repo's `pnpm-lock.yaml`.
  */
 export const PNPM_LOCK = resolvePnpmLockPath(REPO_ROOT)
+
+/**
+ * Absolute path to a given repo root's `FLEET_CANONICAL_OVERRIDES` pin manifest
+ * — the wheelhouse-owned source of the `overrides:` block every member carries.
+ * Only the wheelhouse has one, so a caller checks existence before reading.
+ */
+export function resolveOverridePinManifestPath(repoRoot: string): string {
+  return path.join(
+    repoRoot,
+    'scripts',
+    'repo',
+    'sync-scaffolding',
+    'manifest',
+    'catalog-overrides.mts',
+  )
+}
 
 /**
  * Absolute path to the release pipeline runner. Callers that re-enter the

@@ -15,7 +15,8 @@ import process from 'node:process'
 
 // prefer-async-spawn: sync-required — a startup re-exec must block before the
 // entrypoint's own work runs; there is nothing to stream.
-// oxlint-disable-next-line socket/prefer-async-spawn -- startup re-exec, sync by nature.
+// Sync by nature.
+// oxlint-disable-next-line socket/prefer-async-spawn -- startup re-exec
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 // The hard Node major the fleet hooks assert (`Hook requires Node >= 24.0.0`).

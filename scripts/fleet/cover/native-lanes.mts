@@ -403,7 +403,9 @@ export async function runLanesSequentially(
 export async function runNativeLanes(config: {
   detailDir: string
   logger: LaneLogger
-  // oxlint-disable-next-line typescript/no-redundant-type-constituents -- fleet optional-explicit-undefined convention: the explicit | undefined on an optional is intentional, not redundant.
+  // Fleet optional-explicit-undefined convention: the explicit | undefined on
+  // an optional is intentional, not redundant.
+  // oxlint-disable-next-line typescript/no-redundant-type-constituents -- fleet
   repoConfig?: unknown | undefined
   repoRoot: string
   runner: LaneCommandRunner

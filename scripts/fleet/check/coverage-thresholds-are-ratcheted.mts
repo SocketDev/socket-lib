@@ -167,7 +167,10 @@ export function ratchetConfigText(
     if (!re.test(next)) {
       return undefined
     }
-    next = next.replace(re, `$1${entry.ratcheted}`)
+    next = next.replace(
+      re,
+      (_match: string, key: string) => `${key}${entry.ratcheted}`,
+    )
   }
   return next
 }

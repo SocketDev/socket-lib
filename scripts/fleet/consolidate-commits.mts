@@ -35,7 +35,8 @@ import process from 'node:process'
 
 import { parseArgs } from '@socketsecurity/lib-stable/argv/parse'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
-// oxlint-disable-next-line socket/prefer-async-spawn -- sequential git plumbing; each step gates the next on exit status.
+// Each step gates the next on exit status.
+// oxlint-disable-next-line socket/prefer-async-spawn -- sequential git plumbing
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import {

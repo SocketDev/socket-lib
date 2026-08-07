@@ -26,7 +26,8 @@
 //
 // Usage: node scripts/fleet/check/private-paths-are-absent.mts [--quiet]
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- sync check; needs typed string stdout from `git ls-files`, sequential gate.
+// Needs typed string stdout from `git ls-files`, sequential gate.
+// oxlint-disable-next-line socket/prefer-async-spawn -- sync check
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'

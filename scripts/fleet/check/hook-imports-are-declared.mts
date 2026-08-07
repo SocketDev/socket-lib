@@ -131,7 +131,8 @@ export function listMtsFiles(dir: string): string[] {
 export function extractImportSpecifiers(content: string): string[] {
   const specifiers: string[] = []
   const fromRe =
-    // oxlint-disable-next-line socket/require-regex-comment -- captures the module specifier from an import/export … from clause
+    // Captures the module specifier from an import/export … from clause.
+    // oxlint-disable-next-line socket/require-regex-comment -- captures
     /(?:^|\n)[ \t]*(?:export|import)\b[\s\w,{}*]*?\bfrom[ \t]*['"]([^'"]+)['"]/g
   let m: RegExpExecArray | null
   while ((m = fromRe.exec(content)) !== null) {
@@ -340,7 +341,7 @@ export function readHookFiles(
   return files
 }
 
-function main(): void {
+export function main(): void {
   const quiet = process.argv.includes('--quiet')
   const declaredNames = readDeclaredPackageNames(PACKAGE_JSON)
   const files = readHookFiles(REPO_ROOT, HOOK_TREES)

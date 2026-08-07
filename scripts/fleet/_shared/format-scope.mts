@@ -257,12 +257,14 @@ export function isGeneratedHookArtifact(filePath: string): boolean {
 export function isNeverGated(filePath: string): boolean {
   const p = normalizePath(filePath)
   // The rolldown-inlined dep-0 fetcher bundle (bootstrap/src/* IS gated).
-  // oxlint-disable-next-line socket/require-regex-comment -- generated-artifact path, described above.
+  // Generated-artifact path, described above.
+  // oxlint-disable-next-line socket/require-regex-comment -- generated-artifact
   if (/(?:^|\/)bootstrap\/fleet\.mjs$/.test(p)) {
     return true
   }
   // A `.d.ts` / `.d.mts` / `.d.cts` type-declaration file, compiler output.
-  // oxlint-disable-next-line socket/require-regex-comment -- generated-artifact path, described above.
+  // Generated-artifact path, described above.
+  // oxlint-disable-next-line socket/require-regex-comment -- generated-artifact
   if (/\.d\.[cm]?ts$/.test(p)) {
     return true
   }
@@ -274,7 +276,8 @@ export function isNeverGated(filePath: string): boolean {
     return true
   }
   // The rolldown-bundled fleet oxlint plugin (build-oxlint-bundle.mts output).
-  // oxlint-disable-next-line socket/require-regex-comment -- generated-artifact path, described above.
+  // Generated-artifact path, described above.
+  // oxlint-disable-next-line socket/require-regex-comment -- generated-artifact
   if (/(?:^|\/)\.config\/fleet\/oxlint-plugin\.mjs$/.test(p)) {
     return true
   }

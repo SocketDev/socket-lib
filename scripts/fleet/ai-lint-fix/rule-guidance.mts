@@ -184,9 +184,11 @@ export function escalateTier(
  * file, so noise stays low.
  */
 export const RULE_GUIDANCE: Readonly<Record<string, string>> = {
-  // oxlint-disable-next-line socket/prefer-undefined-over-null -- null-prototype object literal.
+  // null-prototype object literal.
+  // oxlint-disable-next-line socket/prefer-undefined-over-null -- proto null
   __proto__: null,
-  // oxlint-disable-next-line socket/inclusive-language -- rule guidance string documents the legacy terms it scans for.
+  // Rule guidance string documents the legacy terms it scans for.
+  // oxlint-disable-next-line socket/inclusive-language -- rule guidance string
   'socket/inclusive-language':
     'Replace `master`/`slave` with the contextually correct term: `main` (branch), `primary`/`controller` (process), `replica`/`worker`/`secondary`/`follower` (subordinate). Read the surrounding code to pick the right one. Do not autofix when an external API field name forces the legacy term — leave a `// inclusive-language: external-api` comment instead.',
   'socket/personal-path-placeholders':

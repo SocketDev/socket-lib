@@ -91,7 +91,8 @@ export async function findBackupBranchesWithUnreleasedCommits(
   const out: BackupBranchUnreleased[] = []
   for (let i = 0, { length } = branches; i < length; i += 1) {
     const branch = branches[i]!
-    // eslint-disable-next-line no-await-in-loop -- serial per-branch git probe; backup branches are few
+    // Backup branches are few.
+    // eslint-disable-next-line no-await-in-loop -- serial per-branch git probe
     const revs = await exec(['log', '--format=%h %s', `${baseRef}..${branch}`])
     if (revs.code !== 0) {
       continue

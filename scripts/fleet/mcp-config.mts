@@ -87,7 +87,7 @@ function compactKimiArgsArrays(
       ),
       '      ]',
     ].join('\n')
-    result = result.replace(expanded, compact)
+    result = result.replace(expanded, () => compact)
   }
   return result
 }
@@ -116,7 +116,7 @@ function compactOpenCodeCommandArrays(
       ),
       '      ]',
     ].join('\n')
-    result = result.replace(expanded, compact)
+    result = result.replace(expanded, () => compact)
   }
   return result
 }
