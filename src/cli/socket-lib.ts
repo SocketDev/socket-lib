@@ -13,7 +13,11 @@
 import { createRequire } from 'node:module'
 import process from 'node:process'
 
-import { buildCliManifest, describeRequest, renderDescribe } from '../argv/meta'
+import {
+  buildCliManifest,
+  describeRequest,
+  renderDescribe,
+} from '../exe/argv/meta'
 import { getDefaultLogger } from '../logger/default'
 
 import { runCheck } from './check'

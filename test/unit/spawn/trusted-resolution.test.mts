@@ -12,7 +12,7 @@ import process from 'node:process'
 
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { readRealPath } from '../../../src/bin/trusted'
+import { readRealPath } from '../../../src/exe/trusted'
 import { safeDelete } from '../../../src/fs/safe'
 import {
   applyCmdExeStem,

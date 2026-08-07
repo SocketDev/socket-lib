@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/bin/find — findRealBin, findRealNpm, findRealPnpm,
+ * @file Unit tests for src/exe/find — findRealBin, findRealNpm, findRealPnpm,
  *   findRealYarn. Split out of the historical monolithic
  *   test/unit/bin.test.mts.
  */
@@ -14,8 +14,8 @@ import {
   findRealNpm,
   findRealPnpm,
   findRealYarn,
-} from '../../../src/bin/find'
-import { isShadowBinPath } from '../../../src/bin/shadow'
+} from '../../../src/exe/find'
+import { isShadowBinPath } from '../../../src/exe/shadow'
 import { runWithTempDir } from '../util/temp-file-helper'
 
 describe('findRealBin', () => {

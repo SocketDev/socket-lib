@@ -7,7 +7,7 @@
  */
 
 import process from 'node:process'
-import { getPositionalArgs, hasFlag } from '../../../src/argv/parse'
+import { getPositionalArgs, hasFlag } from '../../../../src/exe/argv/parse'
 import { describe, expect, it } from 'vitest'
 
 describe('argv/parse helpers', () => {

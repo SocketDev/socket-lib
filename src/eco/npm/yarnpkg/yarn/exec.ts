@@ -9,7 +9,7 @@
  *   and yarn-classic stays here.
  */
 
-import { execBin } from '../../../../bin/exec'
+import { execBin } from '../../../../exe/exec'
 import { isDebug } from '../../../../debug/namespace'
 import {
   ArrayPrototypeIndexOf,

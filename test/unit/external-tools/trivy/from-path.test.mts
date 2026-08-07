@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/bin/which'), () => ({
+vi.mock(import('../../../../src/exe/which'), () => ({
   which:
     vi.fn<
       (
@@ -12,7 +12,7 @@ vi.mock(import('../../../../src/bin/which'), () => ({
 }))
 
 async function loadFresh() {
-  const whichMod = await import('../../../../src/bin/which')
+  const whichMod = await import('../../../../src/exe/which')
   const whichMock = whichMod.which as ReturnType<typeof vi.fn>
   const mod = await import('../../../../src/external-tools/trivy/from-path')
   return { whichMock, trivyFromPath: mod.trivyFromPath }

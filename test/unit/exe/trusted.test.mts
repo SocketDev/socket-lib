@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/bin/trusted — resolveTrustedExecutable and its
+ * @file Unit tests for src/exe/trusted — resolveTrustedExecutable and its
  *   helpers. Fixtures are real directories under os.tmpdir() holding real
  *   mode-0o755 files, because the whole point of the resolver is what the
  *   filesystem says, not what a mock says.
@@ -29,7 +29,7 @@ import {
   resolveTrustedExecutable,
   resolveUntrustedRoot,
   stripSurroundingQuotes,
-} from '../../../src/bin/trusted'
+} from '../../../src/exe/trusted'
 import { safeDelete } from '../../../src/fs/safe'
 
 import { describeUnixOnly } from '../util/skip-helpers'

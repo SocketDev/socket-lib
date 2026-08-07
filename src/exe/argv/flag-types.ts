@@ -1,6 +1,6 @@
 /**
  * @file Types + `COMMON_FLAGS` table for argv flag parsing. Split out of
- *   `argv/flags.ts` for size hygiene. Pure values + types only; no I/O or
+ *   `exe/argv/flags.ts` for size hygiene. Pure values + types only; no I/O or
  *   runtime side effects so this module stays cheap to import everywhere.
  */
 

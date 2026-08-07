@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/bin/exec — execBin + binary path caching across
+ * @file Unit tests for src/exe/exec — execBin + binary path caching across
  *   resolvers. Split out of the historical monolithic test/unit/bin.test.mts.
  */
 
@@ -9,8 +9,8 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { execBin } from '../../../src/bin/exec'
-import { whichReal, whichRealSync } from '../../../src/bin/which'
+import { execBin } from '../../../src/exe/exec'
+import { whichReal, whichRealSync } from '../../../src/exe/which'
 import { isError } from '../../../src/errors/predicates'
 import { runWithTempDir } from '../util/temp-file-helper'
 import { safeDelete } from '../../../src/fs/safe'

@@ -1,12 +1,12 @@
 /**
- * @file Unit tests for src/bin/shadow — isShadowBinPath. Split out of the
+ * @file Unit tests for src/exe/shadow — isShadowBinPath. Split out of the
  *   historical monolithic test/unit/bin.test.mts to keep each test file under
  *   the fleet's 500-line soft cap.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { isShadowBinPath } from '../../../src/bin/shadow'
+import { isShadowBinPath } from '../../../src/exe/shadow'
 
 describe('isShadowBinPath', () => {
   it('should return false for undefined', () => {

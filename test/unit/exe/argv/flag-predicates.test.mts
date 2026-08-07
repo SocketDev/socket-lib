@@ -1,10 +1,11 @@
 /**
- * @file Unit tests for src/argv/flag-predicates — CLI flag detection functions.
+ * @file Unit tests for src/exe/argv/flag-predicates — CLI flag detection
+ *   functions.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import type { FlagValues } from '../../../src/argv/flag-types'
+import type { FlagValues } from '../../../../src/exe/argv/flag-types'
 import {
   getLogLevel,
   isAll,
@@ -21,7 +22,7 @@ import {
   isUpdate,
   isVerbose,
   isWatch,
-} from '../../../src/argv/flag-predicates'
+} from '../../../../src/exe/argv/flag-predicates'
 
 describe('argv/flag-predicates', () => {
   describe('getLogLevel', () => {

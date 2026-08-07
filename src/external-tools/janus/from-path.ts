@@ -2,7 +2,7 @@
  * @file `janusFromPath()` — looks for `janus` on the system PATH.
  */
 
-import { which } from '../../bin/which'
+import { which } from '../../exe/which'
 
 import type { ResolvedJanus } from './types'
 

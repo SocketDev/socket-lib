@@ -1,6 +1,7 @@
 /**
  * @file Flag predicates — `is*` checks across parsed `FlagValues`, raw
- *   `process.argv`, or no input. Split out of `argv/flags.ts` for size hygiene.
+ *   `process.argv`, or no input. Split out of `exe/argv/flags.ts` for size
+ *   hygiene.
  *   Every predicate follows the same 3-branch shape, so they're built via a
  *   single `makeFlagPredicate` factory:
  *
@@ -13,7 +14,7 @@
 
 import process from 'node:process'
 
-import { ArrayIsArray, ArrayPrototypeIncludes } from '../primordials/array'
+import { ArrayIsArray, ArrayPrototypeIncludes } from '../../primordials/array'
 
 import type { FlagInput, FlagValues } from './flag-types'
 

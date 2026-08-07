@@ -30,7 +30,7 @@ import type {
   PrimordialsCheckResult,
   PrimordialsFinding,
 } from '../checks/primordials'
-import { parseArgs as parseLibArgs } from '../argv/parse'
+import { parseArgs as parseLibArgs } from '../exe/argv/parse'
 
 import { MapCtor, SetCtor } from '../primordials/map-set'
 

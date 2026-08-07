@@ -25,7 +25,7 @@ import {
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // No vi.mock — these tests exercise the real module against the real fs.
-// `discoverFresh` uses `whichSync` from src/bin/which against PATH; on a
+// `discoverFresh` uses `whichSync` from src/exe/which against PATH; on a
 // dev / CI machine the four known agent names (claude, codex, gemini,
 // opencode) may or may not be present, so we exercise the SHAPE of the
 // returned object instead of pinning specific keys. The cache + on-disk

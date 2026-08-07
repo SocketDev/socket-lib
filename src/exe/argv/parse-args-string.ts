@@ -15,9 +15,9 @@
  *   `bash`).
  */
 
-import { ArrayPrototypeFilter } from '../primordials/array'
-import { StringPrototypeSplit } from '../primordials/string'
-import { parse as shellParse } from '../external/shell-quote'
+import { ArrayPrototypeFilter } from '../../primordials/array'
+import { StringPrototypeSplit } from '../../primordials/string'
+import { parse as shellParse } from '../../external/shell-quote'
 
 /**
  * Tokenize a shell-style command string into argv. Single + double quote pairs

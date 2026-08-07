@@ -1,5 +1,5 @@
 /**
- * @file Public type surface for `bin/*` modules — the `WhichOptions` interface
+ * @file Public type surface for `exe/*` modules — the `WhichOptions` interface
  *   that callers pass to `which`, `whichSync`, `whichReal`, and
  *   `whichRealSync`, plus the `whichLocalBin` variant. Pure types, no runtime
  *   side effects.

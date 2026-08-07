@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/bin/resolve — resolveRealBinSync core behavior:
+ * @file Unit tests for src/exe/resolve — resolveRealBinSync core behavior:
  *   path normalization, symlink resolution, relative/absolute/Windows-style
  *   inputs, and general edge cases (special characters, UNC paths, current
  *   and parent directory references, repeated separators).
@@ -10,7 +10,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { resolveRealBinSync } from '../../../src/bin/resolve'
+import { resolveRealBinSync } from '../../../src/exe/resolve'
 import { isError } from '../../../src/errors/predicates'
 import { getDefaultLogger } from '../../../src/logger/default'
 import { runWithTempDir } from '../util/temp-file-helper'

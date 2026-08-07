@@ -2,7 +2,7 @@
  * @file `cdxgenFromPath()` — looks for `cdxgen` on the system PATH.
  */
 
-import { which } from '../../bin/which'
+import { which } from '../../exe/which'
 
 import type { ResolvedCdxgen } from './types'
 

@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/argv/meta — the CLI self-description contract:
+ * @file Unit tests for src/exe/argv/meta — the CLI self-description contract:
  *   the argv sniff, the manifest builder's canonical $schema stamp, and the
  *   text/json renderers.
  */
@@ -10,7 +10,7 @@ import {
   buildCliManifest,
   describeRequest,
   renderDescribe,
-} from '../../../src/argv/meta'
+} from '../../../../src/exe/argv/meta'
 
 // The canonical $schema url, spelled out rather than imported so the
 // assertion pins the published contract, not whatever the constant drifts to.

@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { whichSync } from '../../../src/bin/which'
+import { whichSync } from '../../../src/exe/which'
 import { buildPtyInvocation, ptyRun } from '../../../src/process/spawn/pty'
 
 const HAS_SCRIPT = whichSync('script') !== null

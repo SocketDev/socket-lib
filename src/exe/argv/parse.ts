@@ -6,13 +6,13 @@
 
 import process from 'node:process'
 
-import yargsParser from '../external/yargs-parser'
+import yargsParser from '../../external/yargs-parser'
 
-import { ArrayPrototypeIncludes } from '../primordials/array'
+import { ArrayPrototypeIncludes } from '../../primordials/array'
 
-import { ObjectEntries } from '../primordials/object'
+import { ObjectEntries } from '../../primordials/object'
 
-import { StringPrototypeStartsWith } from '../primordials/string'
+import { StringPrototypeStartsWith } from '../../primordials/string'
 /**
  * Yargs parser options interface.
  */

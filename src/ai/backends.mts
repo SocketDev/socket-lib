@@ -22,7 +22,7 @@
  *   attribution accurate.
  */
 
-import { which } from '../bin/which'
+import { which } from '../exe/which'
 
 import { isAdaptiveOnlyModel } from './spawn.mts'
 

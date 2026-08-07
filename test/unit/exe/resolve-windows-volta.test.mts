@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/bin/resolve — resolveRealBinSync Windows and Volta
+ * @file Unit tests for src/exe/resolve — resolveRealBinSync Windows and Volta
  *   scenarios (cmd/ps1 shims, Volta-managed binaries, fallback paths,
  *   non-existent files, format coverage). Split out of resolve.test.mts to stay
  *   under the file-size cap.
@@ -10,7 +10,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { resolveRealBinSync } from '../../../src/bin/resolve'
+import { resolveRealBinSync } from '../../../src/exe/resolve'
 import { runWithTempDir } from '../util/temp-file-helper'
 
 describe('resolveRealBinSync - Windows scenarios', () => {

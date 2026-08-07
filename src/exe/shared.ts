@@ -1,8 +1,8 @@
 /**
- * @file Private internals for `bin/*` modules — lazy `fs` / `path` accessors
+ * @file Private internals for `exe/*` modules — lazy `fs` / `path` accessors
  *   and the binary-resolution caches. Underscore prefix keeps this file out of
  *   the public exports map (see the `dist/<dir>/_<file>` ignore in
- *   scripts/fleet/make-package-exports.mts). Two caches:
+ *   scripts/fleet/gen/package-exports.mts). Two caches:
  *
  *   1. `binPathCache` — maps a binary name to its first resolved path. Validated
  *      with `existsSync` before reuse so a stale cache doesn't survive a tool

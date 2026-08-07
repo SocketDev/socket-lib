@@ -1,5 +1,6 @@
 /**
- * @file Vitiate coverage-guided fuzz target (Tier 2) for src/argv/parse-args-string
+ * @file Vitiate coverage-guided fuzz target (Tier 2) for
+ *   src/exe/argv/parse-args-string
  *   — the untrusted-input shell-string tokenizer (config files, a package's
  *   `bin` string, CI env). Complements the fast-check property test in
  *   parse-args-string.fuzz.test.mts: fast-check checks the tokenizer's contract
@@ -13,7 +14,7 @@
 
 import { fuzz } from '@vitiate/core'
 
-import { parseArgsString } from '../../../src/argv/parse-args-string'
+import { parseArgsString } from '../../../../src/exe/argv/parse-args-string'
 
 fuzz('parseArgsString never throws on arbitrary bytes', data => {
   parseArgsString(data.toString('utf8'))

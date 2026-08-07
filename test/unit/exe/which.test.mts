@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/bin/which — whichReal, whichRealSync. Split out of
+ * @file Unit tests for src/exe/which — whichReal, whichRealSync. Split out of
  *   the historical monolithic test/unit/bin.test.mts.
  */
 
@@ -8,7 +8,7 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { whichLocalBin, whichReal, whichRealSync } from '../../../src/bin/which'
+import { whichLocalBin, whichReal, whichRealSync } from '../../../src/exe/which'
 
 describe('whichReal (async)', () => {
   it('resolves node to a real path and caches it', async () => {

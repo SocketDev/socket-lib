@@ -31,7 +31,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { parseArgs } from 'node:util'
 
-import { describeRequest, renderDescribe } from '../../../src/argv/meta.ts'
+import { describeRequest, renderDescribe } from '../../../src/exe/argv/meta.ts'
 
 import { auditDirectory } from './audit.mts'
 import { applyCodemod } from './codemod.mts'

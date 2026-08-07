@@ -322,31 +322,6 @@
       "types": "./dist/archives/zip.d.ts",
       "default": "./dist/archives/zip.js"
     },
-    "./argv/flag-predicates": {
-      "source": "./src/argv/flag-predicates.ts",
-      "types": "./dist/argv/flag-predicates.d.ts",
-      "default": "./dist/argv/flag-predicates.js"
-    },
-    "./argv/flag-types": {
-      "source": "./src/argv/flag-types.ts",
-      "types": "./dist/argv/flag-types.d.ts",
-      "default": "./dist/argv/flag-types.js"
-    },
-    "./argv/meta": {
-      "source": "./src/argv/meta.ts",
-      "types": "./dist/argv/meta.d.ts",
-      "default": "./dist/argv/meta.js"
-    },
-    "./argv/parse": {
-      "source": "./src/argv/parse.ts",
-      "types": "./dist/argv/parse.d.ts",
-      "default": "./dist/argv/parse.js"
-    },
-    "./argv/parse-args-string": {
-      "source": "./src/argv/parse-args-string.ts",
-      "types": "./dist/argv/parse-args-string.d.ts",
-      "default": "./dist/argv/parse-args-string.js"
-    },
     "./arrays/chunk": {
       "source": "./src/arrays/chunk.ts",
       "browser": {
@@ -382,41 +357,6 @@
       },
       "types": "./dist/arrays/unique.d.ts",
       "default": "./dist/arrays/unique.js"
-    },
-    "./bin/exec": {
-      "source": "./src/bin/exec.ts",
-      "types": "./dist/bin/exec.d.ts",
-      "default": "./dist/bin/exec.js"
-    },
-    "./bin/find": {
-      "source": "./src/bin/find.ts",
-      "types": "./dist/bin/find.d.ts",
-      "default": "./dist/bin/find.js"
-    },
-    "./bin/resolve": {
-      "source": "./src/bin/resolve.ts",
-      "types": "./dist/bin/resolve.d.ts",
-      "default": "./dist/bin/resolve.js"
-    },
-    "./bin/shadow": {
-      "source": "./src/bin/shadow.ts",
-      "types": "./dist/bin/shadow.d.ts",
-      "default": "./dist/bin/shadow.js"
-    },
-    "./bin/trusted": {
-      "source": "./src/bin/trusted.ts",
-      "types": "./dist/bin/trusted.d.ts",
-      "default": "./dist/bin/trusted.js"
-    },
-    "./bin/types": {
-      "source": "./src/bin/types.ts",
-      "types": "./dist/bin/types.d.ts",
-      "default": "./dist/bin/types.js"
-    },
-    "./bin/which": {
-      "source": "./src/bin/which.ts",
-      "types": "./dist/bin/which.d.ts",
-      "default": "./dist/bin/which.js"
     },
     "./cacache/clear": {
       "source": "./src/cacache/clear.ts",
@@ -1205,6 +1145,66 @@
       "source": "./src/events/warning/suppress.ts",
       "types": "./dist/events/warning/suppress.d.ts",
       "default": "./dist/events/warning/suppress.js"
+    },
+    "./exe/argv/flag-predicates": {
+      "source": "./src/exe/argv/flag-predicates.ts",
+      "types": "./dist/exe/argv/flag-predicates.d.ts",
+      "default": "./dist/exe/argv/flag-predicates.js"
+    },
+    "./exe/argv/flag-types": {
+      "source": "./src/exe/argv/flag-types.ts",
+      "types": "./dist/exe/argv/flag-types.d.ts",
+      "default": "./dist/exe/argv/flag-types.js"
+    },
+    "./exe/argv/meta": {
+      "source": "./src/exe/argv/meta.ts",
+      "types": "./dist/exe/argv/meta.d.ts",
+      "default": "./dist/exe/argv/meta.js"
+    },
+    "./exe/argv/parse": {
+      "source": "./src/exe/argv/parse.ts",
+      "types": "./dist/exe/argv/parse.d.ts",
+      "default": "./dist/exe/argv/parse.js"
+    },
+    "./exe/argv/parse-args-string": {
+      "source": "./src/exe/argv/parse-args-string.ts",
+      "types": "./dist/exe/argv/parse-args-string.d.ts",
+      "default": "./dist/exe/argv/parse-args-string.js"
+    },
+    "./exe/exec": {
+      "source": "./src/exe/exec.ts",
+      "types": "./dist/exe/exec.d.ts",
+      "default": "./dist/exe/exec.js"
+    },
+    "./exe/find": {
+      "source": "./src/exe/find.ts",
+      "types": "./dist/exe/find.d.ts",
+      "default": "./dist/exe/find.js"
+    },
+    "./exe/resolve": {
+      "source": "./src/exe/resolve.ts",
+      "types": "./dist/exe/resolve.d.ts",
+      "default": "./dist/exe/resolve.js"
+    },
+    "./exe/shadow": {
+      "source": "./src/exe/shadow.ts",
+      "types": "./dist/exe/shadow.d.ts",
+      "default": "./dist/exe/shadow.js"
+    },
+    "./exe/trusted": {
+      "source": "./src/exe/trusted.ts",
+      "types": "./dist/exe/trusted.d.ts",
+      "default": "./dist/exe/trusted.js"
+    },
+    "./exe/types": {
+      "source": "./src/exe/types.ts",
+      "types": "./dist/exe/types.d.ts",
+      "default": "./dist/exe/types.js"
+    },
+    "./exe/which": {
+      "source": "./src/exe/which.ts",
+      "types": "./dist/exe/which.d.ts",
+      "default": "./dist/exe/which.js"
     },
     "./external-tools/bazel/asset-names": {
       "source": "./src/external-tools/bazel/asset-names.ts",

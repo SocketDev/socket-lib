@@ -1,10 +1,11 @@
 /**
- * @file Unit tests for src/argv/flag-types — COMMON_FLAGS and FlagValues types.
+ * @file Unit tests for src/exe/argv/flag-types — COMMON_FLAGS and FlagValues
+ *   types.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { COMMON_FLAGS } from '../../../src/argv/flag-types'
+import { COMMON_FLAGS } from '../../../../src/exe/argv/flag-types'
 
 describe('argv/flag-types', () => {
   describe('COMMON_FLAGS', () => {

@@ -5,7 +5,7 @@
  *   if `sbt` isn't on PATH.
  */
 
-import { which } from '../../bin/which'
+import { which } from '../../exe/which'
 
 import type { ResolvedSbt } from './types'
 

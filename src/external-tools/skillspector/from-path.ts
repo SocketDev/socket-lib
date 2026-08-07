@@ -5,7 +5,7 @@
  *   'path'` otherwise (a one-off binary on PATH).
  */
 
-import { which } from '../../bin/which'
+import { which } from '../../exe/which'
 import { normalizePath } from '../../paths/normalize'
 
 import type { ResolvedSkillSpector } from './types'

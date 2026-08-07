@@ -467,7 +467,7 @@ overrides:
   'wrap-ansi': '9.0.2'
   'yaml': '2.9.0'
   # Dedup: yargs-parser 21 (yargs@17, CJS require) + 22 (bundled into
-  # src/argv/parse) → 21.1.1. 22 is ESM-only (no `require` export) and would
+  # src/exe/argv/parse) → 21.1.1. 22 is ESM-only (no `require` export) and would
   # break yargs@17; 21.1.1 is dual CJS/ESM with the same parse surface and is
   # the version rolldown bundles for src.
   'yargs-parser': '21.1.1'

@@ -56,30 +56,12 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/archives/types](./dist/archives/types.d.ts): Public type surface for `archives/*` modules — the `ArchiveFormat` union and the `ExtractOptions` security-limit record.
 - [@socketsecurity/lib/archives/zip](./dist/archives/zip.d.ts): Zip extraction with security limits and path traversal validation.
 
-## argv/
-
-- [@socketsecurity/lib/argv/flag-predicates](./dist/argv/flag-predicates.d.ts): Flag predicates — `is*` checks across parsed `FlagValues`, raw `process.argv`, or no input.
-- [@socketsecurity/lib/argv/flag-types](./dist/argv/flag-types.d.ts): Types + `COMMON_FLAGS` table for argv flag parsing.
-- [@socketsecurity/lib/argv/meta](./dist/argv/meta.d.ts): The CLI self-description contract: every Socket product CLI answers `--describe` with a one-line purpose and `--describe --json` with a machine-readable manifest of its commands and flags, before any side effect.
-- [@socketsecurity/lib/argv/parse](./dist/argv/parse.d.ts): Argument parsing utilities for CLI applications.
-- [@socketsecurity/lib/argv/parse-args-string](./dist/argv/parse-args-string.d.ts): Tokenize a shell-style command string into an argv array.
-
 ## arrays/
 
 - [@socketsecurity/lib/arrays/chunk](./dist/arrays/chunk.d.ts): Split an array into fixed-size chunks.
 - [@socketsecurity/lib/arrays/join](./dist/arrays/join.d.ts): Grammatical list joiners via `Intl.ListFormat` — Oxford-comma aware and locale-correct.
 - [@socketsecurity/lib/arrays/predicates](./dist/arrays/predicates.d.ts): Array type-guard predicates.
 - [@socketsecurity/lib/arrays/unique](./dist/arrays/unique.d.ts): Deduplicate an array via `Set`.
-
-## bin/
-
-- [@socketsecurity/lib/bin/exec](./dist/bin/exec.d.ts): `execBin` — spawn a binary with PATH resolution, wrapper-script unwrapping, and Windows shell handling.
-- [@socketsecurity/lib/bin/find](./dist/bin/find.d.ts): Find specific package-manager binaries with platform- aware fallbacks.
-- [@socketsecurity/lib/bin/resolve](./dist/bin/resolve.d.ts): Resolve a binary path to the underlying script file.
-- [@socketsecurity/lib/bin/shadow](./dist/bin/shadow.d.ts): Shadow-bin detection.
-- [@socketsecurity/lib/bin/trusted](./dist/bin/trusted.d.ts): Path-trust-inverting executable resolution.
-- [@socketsecurity/lib/bin/types](./dist/bin/types.d.ts): Public type surface for `bin/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`, plus the `whichLocalBin` variant.
-- [@socketsecurity/lib/bin/which](./dist/bin/which.d.ts): Look up binaries on PATH.
 
 ## cacache/
 
@@ -279,6 +261,21 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/events/exit/types](./dist/events/exit/types.d.ts): Public type surface for `events/exit/*` modules — the `OnExitOptions` consumed by `onExit`, plus the shared internal types for the signal emitter, emitted-signal map, and listener map.
 - [@socketsecurity/lib/events/warning/handler](./dist/events/warning/handler.d.ts): Bump the max-listener cap on an EventTarget (or AbortSignal).
 - [@socketsecurity/lib/events/warning/suppress](./dist/events/warning/suppress.d.ts): `process.emitWarning` suppression.
+
+## exe/
+
+- [@socketsecurity/lib/exe/argv/flag-predicates](./dist/exe/argv/flag-predicates.d.ts): Flag predicates — `is*` checks across parsed `FlagValues`, raw `process.argv`, or no input.
+- [@socketsecurity/lib/exe/argv/flag-types](./dist/exe/argv/flag-types.d.ts): Types + `COMMON_FLAGS` table for argv flag parsing.
+- [@socketsecurity/lib/exe/argv/meta](./dist/exe/argv/meta.d.ts): The CLI self-description contract: every Socket product CLI answers `--describe` with a one-line purpose and `--describe --json` with a machine-readable manifest of its commands and flags, before any side effect.
+- [@socketsecurity/lib/exe/argv/parse](./dist/exe/argv/parse.d.ts): Argument parsing utilities for CLI applications.
+- [@socketsecurity/lib/exe/argv/parse-args-string](./dist/exe/argv/parse-args-string.d.ts): Tokenize a shell-style command string into an argv array.
+- [@socketsecurity/lib/exe/exec](./dist/exe/exec.d.ts): `execBin` — spawn a binary with PATH resolution, wrapper-script unwrapping, and Windows shell handling.
+- [@socketsecurity/lib/exe/find](./dist/exe/find.d.ts): Find specific package-manager binaries with platform- aware fallbacks.
+- [@socketsecurity/lib/exe/resolve](./dist/exe/resolve.d.ts): Resolve a binary path to the underlying script file.
+- [@socketsecurity/lib/exe/shadow](./dist/exe/shadow.d.ts): Shadow-bin detection.
+- [@socketsecurity/lib/exe/trusted](./dist/exe/trusted.d.ts): Path-trust-inverting executable resolution.
+- [@socketsecurity/lib/exe/types](./dist/exe/types.d.ts): Public type surface for `exe/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`, plus the `whichLocalBin` variant.
+- [@socketsecurity/lib/exe/which](./dist/exe/which.d.ts): Look up binaries on PATH.
 
 ## external-tools/
 
