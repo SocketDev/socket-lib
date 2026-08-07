@@ -274,7 +274,7 @@ describe.sequential('fs - Sync Functions', () => {
     })
 
     it('isDir returns true for directories and false otherwise', async () => {
-      // oxlint-disable-next-line socket/prefer-exists-sync -- isDir is the unit under test.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- unit under test
       const callIsDir = (p: string) => isDir(p)
       const dir = path.join(testDir, 'is-dir-target')
       mkdirSync(dir)

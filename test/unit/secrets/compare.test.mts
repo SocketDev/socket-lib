@@ -9,7 +9,10 @@ import { Buffer } from 'node:buffer'
 
 import { describe, expect, it } from 'vitest'
 
-// oxlint-disable-next-line socket/no-src-import-in-test-expect -- compareSecrets is the ACTUAL under test (expect(compareSecrets(...)).toBe(...)), not an expected-value builder; it has no -stable export to import from.
+// compareSecrets is the ACTUAL under test
+// (expect(compareSecrets(...)).toBe(...)), not an expected-value builder;
+// it has no -stable export to import from.
+// oxlint-disable-next-line socket/no-src-import-in-test-expect -- under test
 import { compareSecrets } from '../../../src/secrets/compare'
 
 describe('compareSecrets', () => {

@@ -82,7 +82,8 @@ describe.sequential('compression — gzip', () => {
       await fs.writeFile(srcPath, LARGE_TEXT, 'utf8')
 
       await compressGzipFile(srcPath, compressedPath)
-      // oxlint-disable-next-line socket/prefer-exists-sync -- needs the byte size, not just existence.
+      // Needs the byte size, not just existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- needs byte size
       const compressedSize = (await fs.stat(compressedPath)).size
       expect(compressedSize).toBeLessThan(LARGE_TEXT.length)
 
@@ -170,7 +171,9 @@ describe.sequential('compression — gzip', () => {
       const newPath = await compressGzipFile(srcPath, { inPlace: true })
       expect(newPath).toBe(`${srcPath}.gz`)
 
-      // oxlint-disable-next-line socket/prefer-exists-sync -- asserts the original was unlinked via the raw fs.access rejection, not a lib wrapper.
+      // Asserts the original was unlinked via the raw fs.access rejection,
+      // not a lib wrapper.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- raw fs.access
       await expect(fs.access(srcPath)).rejects.toThrow()
       const restored = await decompressGzip(await fs.readFile(newPath))
       expect(restored.toString('utf8')).toBe(LARGE_TEXT)
@@ -199,7 +202,9 @@ describe.sequential('compression — gzip', () => {
       const tgzPath = path.join(tmpDir, 'archive.tgz')
       await fs.writeFile(tarPath, LARGE_TEXT, 'utf8')
       await compressGzipFile(tarPath, tgzPath)
-      // oxlint-disable-next-line socket/prefer-safe-delete -- removes the source tar so the .tgz is the only candidate for the inPlace rename target; tests raw fs semantics, not the lib wrapper.
+      // Removes the source tar so the .tgz is the only candidate for the
+      // inPlace rename target; tests raw fs semantics, not the lib wrapper.
+      // oxlint-disable-next-line socket/prefer-safe-delete -- raw fs semantics
       await fs.rm(tarPath)
 
       const restoredPath = await decompressGzipFile(tgzPath, { inPlace: true })

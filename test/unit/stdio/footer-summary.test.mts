@@ -95,13 +95,13 @@ describe('stdio/footer createSummaryFooter', () => {
     // predated the migration to LOG_SYMBOLS in symbols-builder.ts.
     it('should use checkmark for success', () => {
       const result = createSummaryFooter({ success: 100 })
-      // oxlint-disable-next-line socket/no-status-emoji -- expect string literal
+      // oxlint-disable-next-line socket/no-status-emoji -- expected literal
       expect(result).toContain('✔')
     })
 
     it('should use cross for failed', () => {
       const result = createSummaryFooter({ failed: 5 })
-      // oxlint-disable-next-line socket/no-status-emoji -- expect string literal
+      // oxlint-disable-next-line socket/no-status-emoji -- expected literal
       expect(result).toContain('✖')
     })
 
@@ -114,13 +114,13 @@ describe('stdio/footer createSummaryFooter', () => {
 
     it('should use warning symbol for warnings', () => {
       const result = createSummaryFooter({ warnings: 10 })
-      // oxlint-disable-next-line socket/no-status-emoji -- expect string literal
+      // oxlint-disable-next-line socket/no-status-emoji -- expected literal
       expect(result).toContain('⚠')
     })
 
     it('should use cross for errors', () => {
       const result = createSummaryFooter({ errors: 2 })
-      // oxlint-disable-next-line socket/no-status-emoji -- expect string literal
+      // oxlint-disable-next-line socket/no-status-emoji -- expected literal
       expect(result).toContain('✖')
     })
 

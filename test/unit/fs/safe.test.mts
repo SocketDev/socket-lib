@@ -23,7 +23,8 @@ import { runWithTempDir } from '../util/temp-file-helper'
 // repeating it at every fs.stat() call — these tests verify the stat
 // output (isDirectory), not just existence.
 async function inspectDirStats(p: string) {
-  // oxlint-disable-next-line socket/prefer-exists-sync -- verifying stats.isDirectory(), not existence.
+  // Verifies stats.isDirectory(), not existence.
+  // oxlint-disable-next-line socket/prefer-exists-sync -- verifies stat output
   return fs.stat(p)
 }
 

@@ -27,7 +27,9 @@ function makeSpawnReturn(opts: FakeSpawnResult) {
     stdin: { end: ReturnType<typeof vi.fn> }
   } = {
     stdin: { end: stdinEnd },
-    // oxlint-disable-next-line unicorn/no-thenable -- intentional, matches source await target
+    // The thenable is intentional: it matches the source's `await child`
+    // target.
+    // oxlint-disable-next-line unicorn/no-thenable -- intentional
     then(onFulfilled) {
       return Promise.resolve(opts).then(onFulfilled)
     },
@@ -101,7 +103,9 @@ describe.sequential('ai/spawn — spawnAiAgent happy path', () => {
     mockChildSpawn.mockImplementationOnce(() => {
       const t: PromiseLike<unknown> & { stdin: { end: () => void } } = {
         stdin: { end: () => {} },
-        // oxlint-disable-next-line unicorn/no-thenable -- intentional, matches source await target
+        // The thenable is intentional: it matches the source's `await child`
+        // target.
+        // oxlint-disable-next-line unicorn/no-thenable -- intentional
         then(_o, r) {
           return Promise.resolve().then(() => {
             if (r) {
@@ -170,7 +174,9 @@ describe.sequential('ai/spawn — spawnAiAgent non-overload errors do not retry'
     mockChildSpawn.mockImplementationOnce(() => {
       const t: PromiseLike<unknown> & { stdin: { end: () => void } } = {
         stdin: { end: () => {} },
-        // oxlint-disable-next-line unicorn/no-thenable -- intentional, matches source await target
+        // The thenable is intentional: it matches the source's `await child`
+        // target.
+        // oxlint-disable-next-line unicorn/no-thenable -- intentional
         then(_o, r) {
           return Promise.resolve().then(() => {
             if (r) {
@@ -196,7 +202,9 @@ describe.sequential('ai/spawn — spawnAiAgent non-overload errors do not retry'
     mockChildSpawn.mockImplementationOnce(() => {
       const t: PromiseLike<unknown> & { stdin: { end: () => void } } = {
         stdin: { end: () => {} },
-        // oxlint-disable-next-line unicorn/no-thenable -- intentional, matches source await target
+        // The thenable is intentional: it matches the source's `await child`
+        // target.
+        // oxlint-disable-next-line unicorn/no-thenable -- intentional
         then(_o, r) {
           return Promise.resolve().then(() => {
             const err = new Error('generic-failure')

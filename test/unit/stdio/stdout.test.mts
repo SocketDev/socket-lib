@@ -75,9 +75,9 @@ describe('stdio/stdout', () => {
     })
 
     it('should handle emojis', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- test asserts on emoji passthrough in output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji passthrough
       writeLine('Success! ✅')
-      // oxlint-disable-next-line socket/no-status-emoji -- test asserts on emoji passthrough in output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji passthrough
       expect(getContext().writeSpy).toHaveBeenCalledWith('Success! ✅\n')
     })
 

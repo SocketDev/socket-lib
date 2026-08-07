@@ -381,9 +381,10 @@ describe('url search params', () => {
 
   describe('urlSearchParamsAsBoolean — non-string non-null edge cases', () => {
     it('returns coerced boolean for non-string non-null values (number)', () => {
-      // oxlint-disable-next-line typescript/no-explicit-any -- testing non-string non-null path
+      // Testing the non-string non-null coercion path.
+      // oxlint-disable-next-line typescript/no-explicit-any -- non-string path
       expect(urlSearchParamsAsBoolean(0 as any)).toBe(false)
-      // oxlint-disable-next-line typescript/no-explicit-any -- testing non-string non-null path
+      // oxlint-disable-next-line typescript/no-explicit-any -- non-string path
       expect(urlSearchParamsAsBoolean(1 as any)).toBe(true)
     })
   })

@@ -11,7 +11,10 @@
  *     asserts the whole group dies — the orphan-prevention contract.
  */
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- this test verifies OS process-group semantics: it needs a synchronously-spawned detached child with an immediate pid + group-signalling, which the async lib wrapper doesn't surface.
+// This test verifies OS process-group semantics: it needs a synchronously-
+// spawned detached child with an immediate pid + group-signalling, which the
+// async lib wrapper doesn't surface.
+// oxlint-disable-next-line socket/prefer-async-spawn -- process-group test
 import { spawn } from 'node:child_process'
 import process from 'node:process'
 

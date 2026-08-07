@@ -24,18 +24,24 @@ const terminalLinkMock = vi.fn(
 // external-pack is the choke point: create.ts imports BOTH terminal-link and
 // yoctocolors-cjs, and each re-exports from it, so mocking only terminal-link
 // still pulled the raw ESM packages and threw. Mocking the pack covers both.
-// oxlint-disable-next-line socket/prefer-mock-import -- the import() form requires a FULL module shape; these factories are deliberate partials and TS2769s.
+// The import() form requires a FULL module shape; these factories are
+// deliberate partials and TS2769s.
+// oxlint-disable-next-line socket/prefer-mock-import -- partial factory
 vi.mock('../../../src/external/external-pack', () => ({
   terminalLink: terminalLinkMock,
   yoctocolorsCjs: new Proxy({}, { get: () => (text: string) => text }),
 }))
 
-// oxlint-disable-next-line socket/prefer-mock-import -- the import() form requires a FULL module shape; these factories are deliberate partials and TS2769s.
+// The import() form requires a FULL module shape; these factories are
+// deliberate partials and TS2769s.
+// oxlint-disable-next-line socket/prefer-mock-import -- partial factory
 vi.mock('../../../src/external/terminal-link', () => ({
   default: terminalLinkMock,
 }))
 
-// oxlint-disable-next-line socket/prefer-mock-import -- the import() form requires a FULL module shape; these factories are deliberate partials and TS2769s.
+// The import() form requires a FULL module shape; these factories are
+// deliberate partials and TS2769s.
+// oxlint-disable-next-line socket/prefer-mock-import -- partial factory
 vi.mock('../../../src/external/yoctocolors-cjs', () => ({
   default: new Proxy({}, { get: () => (text: string) => text }),
 }))

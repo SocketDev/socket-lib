@@ -127,7 +127,8 @@ describe.sequential('compression — brotli', () => {
       await fs.writeFile(srcPath, LARGE_TEXT, 'utf8')
 
       await compressBrotliFile(srcPath, compressedPath)
-      // oxlint-disable-next-line socket/prefer-exists-sync -- needs the byte size, not just existence.
+      // Needs the byte size, not just existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- needs byte size
       const compressedSize = (await fs.stat(compressedPath)).size
       expect(compressedSize).toBeLessThan(LARGE_TEXT.length)
 
@@ -252,8 +253,9 @@ describe.sequential('compression — brotli', () => {
       const newPath = await compressBrotliFile(srcPath, { inPlace: true })
       expect(newPath).toBe(`${srcPath}.br`)
 
-      // Original should be gone, .br should exist
-      // oxlint-disable-next-line socket/prefer-exists-sync -- asserts the original was unlinked via the raw fs.access rejection, not a lib wrapper.
+      // Original should be gone, .br should exist. Asserts the original was
+      // unlinked via the raw fs.access rejection, not a lib wrapper.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- raw fs.access
       await expect(fs.access(srcPath)).rejects.toThrow()
       const compressed = await fs.readFile(newPath)
       const restored = await decompressBrotli(compressed)
@@ -269,7 +271,9 @@ describe.sequential('compression — brotli', () => {
       const restoredPath = await decompressBrotliFile(brPath, { inPlace: true })
       expect(restoredPath).toBe(originalPath)
 
-      // oxlint-disable-next-line socket/prefer-exists-sync -- asserts the .br file was unlinked via the raw fs.access rejection, not a lib wrapper.
+      // Asserts the .br file was unlinked via the raw fs.access rejection,
+      // not a lib wrapper.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- raw fs.access
       await expect(fs.access(brPath)).rejects.toThrow()
       const restored = await fs.readFile(restoredPath, 'utf8')
       expect(restored).toBe(LARGE_TEXT)
@@ -325,8 +329,9 @@ describe.sequential('compression — brotli', () => {
       await fs.writeFile(srcPath, SMALL_TEXT, 'utf8')
       const result = await compressBrotliFile(srcPath, destPath)
       expect(result).toBe(destPath)
-      // Source should still be there (not inPlace)
-      // oxlint-disable-next-line socket/prefer-exists-sync -- needs the byte size, not just existence.
+      // Source should still be there (not inPlace). Needs the byte size,
+      // not just existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- needs byte size
       expect((await fs.stat(srcPath)).size).toBeGreaterThan(0)
     })
   })

@@ -16,19 +16,27 @@ const { httpRequestMock, openUrlMock, passwordMock, writeSecretMock } =
     writeSecretMock: vi.fn(async () => 'written' as const),
   }))
 
-// oxlint-disable-next-line socket/prefer-mock-import -- factory is a deliberate PARTIAL module shape; the import() form demands the full module and TS2769s (same precedent as create-src.test.mts).
+// Factory is a deliberate PARTIAL module shape; the import() form demands
+// the full module and TS2769s (same precedent as create-src.test.mts).
+// oxlint-disable-next-line socket/prefer-mock-import -- partial factory
 vi.mock('../../../src/process/open-url', () => ({
   openUrl: openUrlMock,
 }))
-// oxlint-disable-next-line socket/prefer-mock-import -- factory is a deliberate PARTIAL module shape; the import() form demands the full module and TS2769s (same precedent as create-src.test.mts).
+// Factory is a deliberate PARTIAL module shape; the import() form demands
+// the full module and TS2769s (same precedent as create-src.test.mts).
+// oxlint-disable-next-line socket/prefer-mock-import -- partial factory
 vi.mock('../../../src/external/@inquirer/password', () => ({
   default: passwordMock,
 }))
-// oxlint-disable-next-line socket/prefer-mock-import -- factory is a deliberate PARTIAL module shape; the import() form demands the full module and TS2769s (same precedent as create-src.test.mts).
+// Factory is a deliberate PARTIAL module shape; the import() form demands
+// the full module and TS2769s (same precedent as create-src.test.mts).
+// oxlint-disable-next-line socket/prefer-mock-import -- partial factory
 vi.mock('../../../src/secrets/keychain', () => ({
   writeSecret: writeSecretMock,
 }))
-// oxlint-disable-next-line socket/prefer-mock-import -- factory is a deliberate PARTIAL module shape; the import() form demands the full module and TS2769s (same precedent as create-src.test.mts).
+// Factory is a deliberate PARTIAL module shape; the import() form demands
+// the full module and TS2769s (same precedent as create-src.test.mts).
+// oxlint-disable-next-line socket/prefer-mock-import -- partial factory
 vi.mock('../../../src/http-request/request', () => ({
   httpRequest: httpRequestMock,
 }))

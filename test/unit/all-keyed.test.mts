@@ -177,9 +177,11 @@ describe('pAllKeyed — spec conformance', () => {
   })
 
   it('unwraps non-Promise thenables through Promise.resolve', async () => {
-    // oxlint-disable-next-line unicorn/no-thenable -- a hand-rolled thenable IS the subject: the spec resolves values through Promise.resolve, which must unwrap it
+    // A hand-rolled thenable IS the subject: the spec resolves values
+    // through Promise.resolve, which must unwrap it.
+    // oxlint-disable-next-line unicorn/no-thenable -- thenable is the subject
     const thenable = {
-      // oxlint-disable-next-line unicorn/no-thenable -- a hand-rolled thenable IS the subject: Promise.resolve must unwrap it per spec
+      // oxlint-disable-next-line unicorn/no-thenable -- thenable is the subject
       then(resolve: (v: string) => void) {
         resolve('from thenable')
       },

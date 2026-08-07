@@ -215,12 +215,14 @@ describe('tables/bordered — edge cases', () => {
   })
 
   it('handles emoji', () => {
-    // oxlint-disable-next-line socket/no-status-emoji -- fixture data exercises emoji rendering in table cells.
+    // Fixture data exercises emoji rendering in table cells.
+    // oxlint-disable-next-line socket/no-status-emoji -- emoji fixture
     const data = [{ status: '✓ Done' }]
     const columns = [{ key: 'status', header: 'Status' }]
 
     const result = formatTable(data, columns)
-    // oxlint-disable-next-line socket/no-status-emoji -- asserts emoji round-trips through table output.
+    // Asserts emoji round-trips through table output.
+    // oxlint-disable-next-line socket/no-status-emoji -- emoji round-trip
     expect(result).toContain('✓ Done')
   })
 

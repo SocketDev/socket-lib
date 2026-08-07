@@ -252,7 +252,8 @@ describe.sequential('Logger - Advanced Features', () => {
     })
 
     it('should strip existing symbols', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- test asserts the leading symbol is stripped and re-added.
+      // Test asserts the leading symbol is stripped and re-added.
+      // oxlint-disable-next-line socket/no-status-emoji -- symbol under test
       logger.success('✔ Already has symbol')
       const output = stderrData.join('')
       // Symbol should be stripped and re-added

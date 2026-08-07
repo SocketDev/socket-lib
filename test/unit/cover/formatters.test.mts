@@ -18,57 +18,71 @@ const sampleCode = {
 describe('cover/formatters', () => {
   describe('getCoverageEmoji', () => {
     it('returns rocket for >= 99%', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(99)).toBe(' 🚀')
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(100)).toBe(' 🚀')
     })
 
     it('returns target for >= 95%', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(95)).toBe(' 🎯')
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(98.99)).toBe(' 🎯')
     })
 
     it('returns sparkles for >= 90%', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(90)).toBe(' ✨')
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(94.99)).toBe(' ✨')
     })
 
     it('returns heart for >= 85%', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(85)).toBe(' 💚')
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(89.99)).toBe(' 💚')
     })
 
     it('returns check for >= 80%', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(80)).toBe(' ✅')
     })
 
     it('returns green-circle for >= 70%', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(70)).toBe(' 🟢')
     })
 
     it('returns yellow-circle for >= 60%', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(60)).toBe(' 🟡')
     })
 
     it('returns hammer for >= 50%', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(50)).toBe(' 🔨')
     })
 
     it('returns warning for < 50%', () => {
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(49)).toBe(' ⚠️')
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(getCoverageEmoji(0)).toBe(' ⚠️')
     })
 
@@ -148,7 +162,8 @@ describe('cover/formatters', () => {
     it('appends an emoji to the overall line in default format', () => {
       const out = formatCoverage({ code: sampleCode })
       // 85.75% overall lands in the heart band.
-      // oxlint-disable-next-line socket/no-status-emoji -- asserts the formatter's emoji output.
+      // Asserts the formatter's emoji output.
+      // oxlint-disable-next-line socket/no-status-emoji -- emoji under test
       expect(out).toContain('💚')
     })
   })

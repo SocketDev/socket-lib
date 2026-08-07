@@ -244,7 +244,9 @@ describe('snapshot safety — lazy bound console methods (logger/shared)', () =>
   beforeEach(async () => {
     bindCount = 0
     originalBind = Function.prototype.bind
-    // oxlint-disable-next-line no-extend-native -- deliberate test instrumentation: counts console binds at module-eval; restored in afterEach.
+    // Deliberate test instrumentation: counts console binds at module-eval;
+    // restored in afterEach.
+    // oxlint-disable-next-line no-extend-native -- test instrumentation
     Function.prototype.bind = function (
       this: (...args: unknown[]) => unknown,
       thisArg,
@@ -258,7 +260,8 @@ describe('snapshot safety — lazy bound console methods (logger/shared)', () =>
   })
 
   afterEach(async () => {
-    // oxlint-disable-next-line no-extend-native -- restores the original bind captured in beforeEach.
+    // Restores the original bind captured in beforeEach.
+    // oxlint-disable-next-line no-extend-native -- restores bind
     Function.prototype.bind = originalBind
   })
 

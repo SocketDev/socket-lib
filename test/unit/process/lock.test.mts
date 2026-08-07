@@ -391,11 +391,11 @@ describe.sequential('process/lock', () => {
         staleMs: 200,
         touchIntervalMs: 50,
       })
-      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime, not existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime
       const initialMtime = fs.statSync(testLockPath).mtime.getTime()
       // Wait longer than staleMs.
       await sleep(300)
-      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime, not existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime
       const refreshedMtime = fs.statSync(testLockPath).mtime.getTime()
       expect(refreshedMtime).toBeGreaterThan(initialMtime)
       release()
@@ -407,10 +407,10 @@ describe.sequential('process/lock', () => {
         touchIntervalMs: 0,
         staleMs: 5000,
       })
-      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime, not existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime
       const initial = fs.statSync(testLockPath).mtime.getTime()
       await sleep(100)
-      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime, not existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- reads mtime
       const after = fs.statSync(testLockPath).mtime.getTime()
       // No automatic touch — mtime stable.
       expect(after).toBe(initial)

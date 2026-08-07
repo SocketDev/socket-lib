@@ -347,9 +347,10 @@ describe('objects - mutate & sort', () => {
     })
 
     it('skips falsy currentSource/currentTarget at queue level (undefined source)', () => {
-      // oxlint-disable-next-line typescript/no-explicit-any -- testing undefined source path
+      // Testing the undefined-source path needs loosely-typed inputs.
+      // oxlint-disable-next-line typescript/no-explicit-any -- test input
       const target: any = { a: { b: 1 } }
-      // oxlint-disable-next-line typescript/no-explicit-any -- testing undefined source path
+      // oxlint-disable-next-line typescript/no-explicit-any -- test input
       const source: any = { a: undefined }
       const result = merge(target, source) as { a: unknown }
       expect(result.a).toBeUndefined()

@@ -224,7 +224,8 @@ describe('promises', () => {
     })
 
     it('returns an empty array for an empty async iterable', async () => {
-      // oxlint-disable-next-line require-yield -- deliberately yields nothing: the test needs an EMPTY async iterable.
+      // Deliberately yields nothing: the test needs an EMPTY async iterable.
+      // oxlint-disable-next-line require-yield -- empty iterable
       async function* empty() {
         return
       }
@@ -315,7 +316,8 @@ describe('promises', () => {
 
     it('fallback returns empty array for empty iterable', async () => {
       const fallback = await loadFallback()
-      // oxlint-disable-next-line require-yield -- deliberately yields nothing: the test needs an EMPTY async iterable.
+      // Deliberately yields nothing: the test needs an EMPTY async iterable.
+      // oxlint-disable-next-line require-yield -- empty iterable
       async function* empty() {
         return
       }
