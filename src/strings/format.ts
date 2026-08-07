@@ -5,7 +5,7 @@
  *   use case.
  */
 
-import { stripAnsi } from '../ansi/strip'
+import { stripAnsi } from '../term/ansi/strip'
 import { MathFloor } from '../primordials/math'
 import {
   StringPrototypeIncludes,

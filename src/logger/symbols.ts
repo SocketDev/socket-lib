@@ -22,7 +22,7 @@ import { ProxyCtor } from '../primordials/globals'
 import { ObjectGetOwnPropertySymbols } from '../primordials/object'
 
 import { ReflectOwnKeys } from '../primordials/reflect'
-import { getTheme, onThemeChange } from '../themes/context'
+import { getTheme, onThemeChange } from '../term/themes/context'
 
 import { applyColor, getYoctocolors } from './colors'
 import { globalConsole } from './shared'

@@ -5,23 +5,23 @@
  *   module focused on method wiring and under the file-size cap.
  */
 
-import type { ColorInherit, ColorRgb, ColorValue } from '../colors/types'
-import { isRgbTuple, toRgb } from '../colors/convert'
+import type { ColorInherit, ColorRgb, ColorValue } from '../term/colors/types'
+import { isRgbTuple, toRgb } from '../term/colors/convert'
 import type {
   Palette,
   ShimmerConfig,
   ShimmerDirection,
   ShimmerSpec,
-} from '../effects/shimmer'
-import { configToSpec, frameColors } from '../effects/shimmer'
-import { colorsToAnsi } from '../effects/shimmer-terminal'
+} from '../term/effects/shimmer'
+import { configToSpec, frameColors } from '../term/effects/shimmer'
+import { colorsToAnsi } from '../term/effects/shimmer-terminal'
 import { isAgent } from '../env/agents'
 import { isCI } from '../env/ci'
 import { ArrayIsArray } from '../primordials/array'
 import { TypeErrorCtor } from '../primordials/error'
-import { getTheme } from '../themes/context'
-import { THEMES } from '../themes/themes'
-import { resolveColor } from '../themes/resolve'
+import { getTheme } from '../term/themes/context'
+import { THEMES } from '../term/themes/themes'
+import { resolveColor } from '../term/themes/resolve'
 
 import { COLOR_INHERIT } from './format'
 

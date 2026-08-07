@@ -2,7 +2,7 @@
 
 > Core utilities and infrastructure for Socket.dev security tools. 592 subpath exports, grouped by namespace.
 
-Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/signal'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
+Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
 ## Top-level
 
@@ -10,10 +10,6 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/integrity](./dist/integrity.d.ts): Integrity + checksum helpers.
 - [@socketsecurity/lib/logger](./dist/logger/node.d.ts): Node-side `Logger` class — owns per-instance state (parent, bound stream, indent buffers, theme) and exposes the public surface as thin delegators over sibling free-function leaves.
 - [@socketsecurity/lib/native-messaging](./dist/native-messaging/index.d.ts)
-
-## abort/
-
-- [@socketsecurity/lib/abort/signal](./dist/abort/signal.d.ts): Abort signal utilities — composite signal construction from multiple sources and timeout-driven signal creation.
 
 ## ai/
 
@@ -42,11 +38,6 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/ai/tier](./dist/ai/tier.d.mts)
 - [@socketsecurity/lib/ai/types](./dist/ai/types.d.mts)
 - [@socketsecurity/lib/ai/worktree](./dist/ai/worktree.d.mts)
-
-## ansi/
-
-- [@socketsecurity/lib/ansi/constants](./dist/ansi/constants.d.ts): ANSI escape code constants.
-- [@socketsecurity/lib/ansi/strip](./dist/ansi/strip.d.ts): ANSI escape-code regex factory and stripping helper.
 
 ## archives/
 
@@ -77,23 +68,11 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/cache/ttl/store](./dist/cache/ttl/store.d.ts): `createTtlCache` — generic TTL-based cache built on top of cacache (persistent) plus an in-memory LRU memo layer.
 - [@socketsecurity/lib/cache/ttl/types](./dist/cache/ttl/types.d.ts): Public type surface for `cache/ttl/*` modules — the seven-method `TtlCache` interface returned by `createTtlCache` and `createBrowserTtlCache`, plus the `TtlCacheEntry` storage shape, the `TtlCacheStorage` adapter con...
 
-## checks/
-
-- [@socketsecurity/lib/checks/primordials](./dist/checks/primordials.d.ts): Primordials drift check — generic core.
-- [@socketsecurity/lib/checks/primordials-defaults](./dist/checks/primordials-defaults.d.ts): GENERATED — do not edit by hand.
-
 ## cli/
 
 - [@socketsecurity/lib/cli/check](./dist/cli/check.d.ts): `socket-lib check <name>` subcommand group.
 - [@socketsecurity/lib/cli/check-primordials](./dist/cli/check-primordials.d.ts): `socket-lib check primordials` handler.
 - [@socketsecurity/lib/cli/socket-lib](./dist/cli/socket-lib.d.ts): `socket-lib` CLI entry point — top-level dispatcher.
-
-## colors/
-
-- [@socketsecurity/lib/colors/convert](./dist/colors/convert.d.ts): Color conversion helpers — `isRgbTuple()` narrows a `ColorValue` to the RGB-tuple branch, and `toRgb()` resolves a named color or passes through an existing tuple.
-- [@socketsecurity/lib/colors/palette](./dist/colors/palette.d.ts): Named-color palette — maps each `ColorName` to its canonical RGB tuple.
-- [@socketsecurity/lib/colors/socket-palette](./dist/colors/socket-palette.d.ts): Socket terminal-color palette — mirrors the CSS design tokens defined in Socket's `template/styles/tokens.css` (light / dark / synthwave themes).
-- [@socketsecurity/lib/colors/types](./dist/colors/types.d.ts): Public type surface for `colors/*` modules — the `ColorInherit` literal, the `ColorName` named-color union, the `ColorRgb` tuple, and the `ColorValue` super-union.
 
 ## compression/
 
@@ -103,6 +82,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 
 ## config/
 
+- [@socketsecurity/lib/config/fleet-repo](./dist/config/fleet-repo.d.ts): Fleet-convention config reader: a per-repo override (`.config/repo`) layered over the cascaded fleet default (`.config/fleet`).
 - [@socketsecurity/lib/config/layers](./dist/config/layers.d.ts): Read a layered config — a base config that higher layers may override or extend.
 
 ## constants/
@@ -203,13 +183,6 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/eco/purl](./dist/eco/purl.d.ts): PURL (Package URL) ecosystem identifiers shared across every package manager Socket understands.
 - [@socketsecurity/lib/eco/types](./dist/eco/types.d.ts): Socket Registry ecosystem schema types — tags for packages and the manifest entries the registry build pipeline emits.
 
-## effects/
-
-- [@socketsecurity/lib/effects/pulse-frames](./dist/effects/pulse-frames.d.ts): Socket pulse animation frames generator.
-- [@socketsecurity/lib/effects/shimmer](./dist/effects/shimmer.d.ts): Shimmer animation engine — pure functions, zero deps.
-- [@socketsecurity/lib/effects/shimmer-keyframes](./dist/effects/shimmer-keyframes.d.ts): SVG keyframe batcher for the shimmer engine.
-- [@socketsecurity/lib/effects/shimmer-terminal](./dist/effects/shimmer-terminal.d.ts): Terminal renderer for the shimmer engine.
-
 ## env/
 
 - [@socketsecurity/lib/env/agents](./dist/env/agents.d.ts): AI coding-agent detection.
@@ -272,7 +245,10 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/exe/exec](./dist/exe/exec.d.ts): `execBin` — spawn a binary with PATH resolution, wrapper-script unwrapping, and Windows shell handling.
 - [@socketsecurity/lib/exe/find](./dist/exe/find.d.ts): Find specific package-manager binaries with platform- aware fallbacks.
 - [@socketsecurity/lib/exe/resolve](./dist/exe/resolve.d.ts): Resolve a binary path to the underlying script file.
-- [@socketsecurity/lib/exe/shadow](./dist/exe/shadow.d.ts): Shadow-bin detection.
+- [@socketsecurity/lib/exe/sea](./dist/exe/sea.d.ts): Single Executable Application binary detection + path accessor.
+- [@socketsecurity/lib/exe/shadow/detect](./dist/exe/shadow/detect.d.ts): Shadow-bin detection.
+- [@socketsecurity/lib/exe/shadow/skip](./dist/exe/shadow/skip.d.ts): Shadow binary installation utilities for Socket ecosystem.
+- [@socketsecurity/lib/exe/shadow/types](./dist/exe/shadow/types.d.ts): Public type surface for `exe/shadow/*` modules — the `ShadowInstallationOptions` record.
 - [@socketsecurity/lib/exe/trusted](./dist/exe/trusted.d.ts): Path-trust-inverting executable resolution.
 - [@socketsecurity/lib/exe/types](./dist/exe/types.d.ts): Public type surface for `exe/*` modules — the `WhichOptions` interface that callers pass to `which`, `whichSync`, `whichReal`, and `whichRealSync`, plus the `whichLocalBin` variant.
 - [@socketsecurity/lib/exe/which](./dist/exe/which.d.ts): Look up binaries on PATH.
@@ -366,10 +342,6 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/external-tools/uv/resolve](./dist/external-tools/uv/resolve.d.ts): `resolveUv()` — uv resolution entry point.
 - [@socketsecurity/lib/external-tools/uv/types](./dist/external-tools/uv/types.d.ts): Shared types for uv resolution.
 
-## fleet/
-
-- [@socketsecurity/lib/fleet/repo-config](./dist/fleet/repo-config.d.ts): Fleet-convention config reader: a per-repo override (`.config/repo`) layered over the cascaded fleet default (`.config/fleet`).
-
 ## fs/
 
 - [@socketsecurity/lib/fs/access](./dist/fs/access.d.ts): Synchronous file-access predicates — boolean "can this process do X to this path?" checks over `fs.accessSync`.
@@ -443,13 +415,10 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/http-request/response-types](./dist/http-request/response-types.d.ts): Types for HTTP response surface — `HttpResponse` with its fetch-like body accessors, and `HttpResponseError` for `throwOnError`.
 - [@socketsecurity/lib/http-request/user-agent](./dist/http-request/user-agent.d.ts): User-Agent header generation for socket-lib's outbound HTTP requests.
 
-## ipc-cli/
-
-- [@socketsecurity/lib/ipc-cli/get](./dist/ipc-cli/get.d.ts): Socket CLI child-process IPC object getter.
-- [@socketsecurity/lib/ipc-cli/types](./dist/ipc-cli/types.d.ts): Public type surface for `ipc-cli/*` modules — the `IpcObject` record describing the `SOCKET_CLI_*` env-var shape forwarded from a parent Socket CLI to a child process.
-
 ## ipc/
 
+- [@socketsecurity/lib/ipc/cli/get](./dist/ipc/cli/get.d.ts): Socket CLI child-process IPC object getter.
+- [@socketsecurity/lib/ipc/cli/types](./dist/ipc/cli/types.d.ts): Public type surface for `ipc/cli/*` modules — the `IpcObject` record describing the `SOCKET_CLI_*` env-var shape forwarded from a parent Socket CLI to a child process.
 - [@socketsecurity/lib/ipc/directory](./dist/ipc/directory.d.ts): Stub-directory creation + permission audit.
 - [@socketsecurity/lib/ipc/paths](./dist/ipc/paths.d.ts): IPC stub path resolution.
 - [@socketsecurity/lib/ipc/types](./dist/ipc/types.d.ts): Public type surface for `ipc/*` modules — the `IpcStub` shape that backs the file-based handoff.
@@ -596,6 +565,8 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 
 - [@socketsecurity/lib/primordials/array](./dist/primordials/array.d.ts): Safe references to `Array`, typed-array, `ArrayBuffer`, `DataView`, `Atomics`, and shared iterator-prototype primordials.
 - [@socketsecurity/lib/primordials/buffer](./dist/primordials/buffer.d.ts): Safe references to Node's `Buffer` global.
+- [@socketsecurity/lib/primordials/checks/primordials](./dist/primordials/checks/primordials.d.ts): Primordials drift check — generic core.
+- [@socketsecurity/lib/primordials/checks/primordials-defaults](./dist/primordials/checks/primordials-defaults.d.ts): GENERATED — do not edit by hand.
 - [@socketsecurity/lib/primordials/date](./dist/primordials/date.d.ts): Safe references to `Date`.
 - [@socketsecurity/lib/primordials/error](./dist/primordials/error.d.ts): Safe references to `Error` and its subclass constructors, plus V8's stack-trace API.
 - [@socketsecurity/lib/primordials/function](./dist/primordials/function.d.ts): Safe references to `Function.prototype` methods.
@@ -635,6 +606,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 
 ## promises/
 
+- [@socketsecurity/lib/promises/abort](./dist/promises/abort.d.ts): Abort signal utilities — composite signal construction from multiple sources and timeout-driven signal creation.
 - [@socketsecurity/lib/promises/all-keyed](./dist/promises/all-keyed.d.ts): Keyed promise combinators: `pAllKeyed` and `pAllSettledKeyed` — the tc39 proposal-await-dictionary (`Promise.allKeyed` / `Promise.allSettledKeyed`, stage 3) as plain helpers, no global patching.
 - [@socketsecurity/lib/promises/iterate](./dist/promises/iterate.d.ts): Concurrency-controlled async iteration helpers: `pEach`, `pEachChunk`, `pFilter`, `pFilterChunk`.
 - [@socketsecurity/lib/promises/options](./dist/promises/options.d.ts): Option-shape normalizers for the iteration / retry helpers.
@@ -669,10 +641,6 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/schema/types](./dist/schema/types.d.ts): Shared types for schema validation.
 - [@socketsecurity/lib/schema/validate](./dist/schema/validate.d.ts): Universal schema validator — non-throwing.
 
-## sea/
-
-- [@socketsecurity/lib/sea/detect](./dist/sea/detect.d.ts): Single Executable Application binary detection + path accessor.
-
 ## secrets/
 
 - [@socketsecurity/lib/secrets/addon](./dist/secrets/addon.d.ts): In-process biometric keychain backend — the sockeye `keychain.node` N-API addon, loaded lazily and OPTIONALLY.
@@ -687,11 +655,6 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/secrets/socket-api-token](./dist/secrets/socket-api-token.d.ts): Convenience helper for reading the Socket API token from the canonical env → keychain precedence order.
 - [@socketsecurity/lib/secrets/types](./dist/secrets/types.d.ts): Public type surface for `secrets/*`.
 - [@socketsecurity/lib/secrets/windows](./dist/secrets/windows.d.ts): Windows backend via PowerShell CredentialManager module, with a DPAPI-encrypted file fallback.
-
-## shadow/
-
-- [@socketsecurity/lib/shadow/skip](./dist/shadow/skip.d.ts): Shadow binary installation utilities for Socket ecosystem.
-- [@socketsecurity/lib/shadow/types](./dist/shadow/types.d.ts): Public type surface for `shadow/*` modules — the `ShadowInstallationOptions` record.
 
 ## shell/
 
@@ -755,13 +718,6 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/strings/types](./dist/strings/types.d.ts): Public type surface for `strings/*` modules — branded string types and option interfaces.
 - [@socketsecurity/lib/strings/width](./dist/strings/width.d.ts): `stringWidth` — calculate visual terminal width.
 
-## tables/
-
-- [@socketsecurity/lib/tables/bordered](./dist/tables/bordered.d.ts): Bordered table renderer using Unicode box-drawing characters (`┌`, `─`, `│`, `┴`, …).
-- [@socketsecurity/lib/tables/padding](./dist/tables/padding.d.ts): Cell padding + display-width measurement — shared helpers used by both the simple and bordered table renderers.
-- [@socketsecurity/lib/tables/simple](./dist/tables/simple.d.ts): Borderless table renderer — columns separated by two spaces, header underlined with `─`.
-- [@socketsecurity/lib/tables/types](./dist/tables/types.d.ts): Public type surface for `tables/*` modules — the `ColumnAlignment` union + `TableColumn` config record.
-
 ## temporal/
 
 - [@socketsecurity/lib/temporal/instant](./dist/temporal/instant.d.ts): Spec clause 8 — Temporal.Instant Objects.
@@ -770,12 +726,26 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/temporal/system](./dist/temporal/system.d.ts): Spec clause 21.x host hook — wallclock reader.
 - [@socketsecurity/lib/temporal/temporal](./dist/temporal/temporal.d.ts): Public aggregator for the `Temporal` surface.
 
-## themes/
+## term/
 
-- [@socketsecurity/lib/themes/context](./dist/themes/context.d.ts): Elegant theme context management.
-- [@socketsecurity/lib/themes/resolve](./dist/themes/resolve.d.ts): Theme utilities — color resolution and composition.
-- [@socketsecurity/lib/themes/themes](./dist/themes/themes.d.ts): Elegant theme definitions for Socket libraries.
-- [@socketsecurity/lib/themes/types](./dist/themes/types.d.ts): Elegant theme type system.
+- [@socketsecurity/lib/term/ansi/constants](./dist/term/ansi/constants.d.ts): ANSI escape code constants.
+- [@socketsecurity/lib/term/ansi/strip](./dist/term/ansi/strip.d.ts): ANSI escape-code regex factory and stripping helper.
+- [@socketsecurity/lib/term/colors/convert](./dist/term/colors/convert.d.ts): Color conversion helpers — `isRgbTuple()` narrows a `ColorValue` to the RGB-tuple branch, and `toRgb()` resolves a named color or passes through an existing tuple.
+- [@socketsecurity/lib/term/colors/palette](./dist/term/colors/palette.d.ts): Named-color palette — maps each `ColorName` to its canonical RGB tuple.
+- [@socketsecurity/lib/term/colors/socket-palette](./dist/term/colors/socket-palette.d.ts): Socket terminal-color palette — mirrors the CSS design tokens defined in Socket's `template/styles/tokens.css` (light / dark / synthwave themes).
+- [@socketsecurity/lib/term/colors/types](./dist/term/colors/types.d.ts): Public type surface for `term/colors/*` modules — the `ColorInherit` literal, the `ColorName` named-color union, the `ColorRgb` tuple, and the `ColorValue` super-union.
+- [@socketsecurity/lib/term/effects/pulse-frames](./dist/term/effects/pulse-frames.d.ts): Socket pulse animation frames generator.
+- [@socketsecurity/lib/term/effects/shimmer](./dist/term/effects/shimmer.d.ts): Shimmer animation engine — pure functions, zero deps.
+- [@socketsecurity/lib/term/effects/shimmer-keyframes](./dist/term/effects/shimmer-keyframes.d.ts): SVG keyframe batcher for the shimmer engine.
+- [@socketsecurity/lib/term/effects/shimmer-terminal](./dist/term/effects/shimmer-terminal.d.ts): Terminal renderer for the shimmer engine.
+- [@socketsecurity/lib/term/tables/bordered](./dist/term/tables/bordered.d.ts): Bordered table renderer using Unicode box-drawing characters (`┌`, `─`, `│`, `┴`, …).
+- [@socketsecurity/lib/term/tables/padding](./dist/term/tables/padding.d.ts): Cell padding + display-width measurement — shared helpers used by both the simple and bordered table renderers.
+- [@socketsecurity/lib/term/tables/simple](./dist/term/tables/simple.d.ts): Borderless table renderer — columns separated by two spaces, header underlined with `─`.
+- [@socketsecurity/lib/term/tables/types](./dist/term/tables/types.d.ts): Public type surface for `term/tables/*` modules — the `ColumnAlignment` union + `TableColumn` config record.
+- [@socketsecurity/lib/term/themes/context](./dist/term/themes/context.d.ts): Elegant theme context management.
+- [@socketsecurity/lib/term/themes/resolve](./dist/term/themes/resolve.d.ts): Theme utilities — color resolution and composition.
+- [@socketsecurity/lib/term/themes/themes](./dist/term/themes/themes.d.ts): Elegant theme definitions for Socket libraries.
+- [@socketsecurity/lib/term/themes/types](./dist/term/themes/types.d.ts): Elegant theme type system.
 
 ## url/
 

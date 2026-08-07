@@ -13,7 +13,7 @@
 
 import { ReflectApply } from '../primordials/reflect'
 
-import { getTheme } from '../themes/context'
+import { getTheme } from '../term/themes/context'
 
 import { privateConstructorArgs } from './shared'
 import { buildLoggerSymbols } from './symbols-builder'
@@ -54,7 +54,7 @@ import {
 import type { IndentContext } from './indentation-methods'
 
 import type { LogSymbols, Task } from './types'
-import type { Theme } from '../themes/types'
+import type { Theme } from '../term/themes/types'
 
 /**
  * Enhanced console logger with indentation, colored symbols, and stream

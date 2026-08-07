@@ -9,10 +9,10 @@
 
 import process from 'node:process'
 
-import { toRgb } from '../colors/convert'
+import { toRgb } from '../term/colors/convert'
 
-import type { ColorInherit, ColorValue } from '../colors/types'
-import type { Palette, RGB } from '../effects/shimmer'
+import type { ColorInherit, ColorValue } from '../term/colors/types'
+import type { Palette, RGB } from '../term/effects/shimmer'
 import type {
   WithSpinnerOptions,
   WithSpinnerRestoreOptions,

@@ -8,7 +8,7 @@
 
 import process from 'node:process'
 
-import { stripAnsi } from '../../ansi/strip'
+import { stripAnsi } from '../../term/ansi/strip'
 import { findPathEnvKey, resolveTrustedExecutable } from '../../exe/trusted'
 import { isWin32 } from '../../constants/platform'
 import { getNodeFs } from '../../node/fs'

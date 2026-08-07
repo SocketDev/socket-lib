@@ -15,7 +15,7 @@ import {
   findRealPnpm,
   findRealYarn,
 } from '../../../src/exe/find'
-import { isShadowBinPath } from '../../../src/exe/shadow'
+import { isShadowBinPath } from '../../../src/exe/shadow/detect'
 import { runWithTempDir } from '../util/temp-file-helper'
 
 describe('findRealBin', () => {

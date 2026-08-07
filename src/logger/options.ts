@@ -7,9 +7,9 @@
  *   slots.
  */
 
-import { THEMES } from '../themes/themes'
+import { THEMES } from '../term/themes/themes'
 
-import type { Theme } from '../themes/types'
+import type { Theme } from '../term/themes/types'
 
 /**
  * The normalized result of inspecting the first `Logger` constructor argument.

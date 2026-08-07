@@ -10,7 +10,7 @@ import makeFetchHappen from '../external/make-fetch-happen'
 import {
   createCompositeAbortSignal,
   createTimeoutSignal,
-} from '../abort/signal'
+} from '../promises/abort'
 import { parseUrl } from '../url/parse'
 
 import { isObject } from '../objects/predicates'

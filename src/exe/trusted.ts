@@ -36,7 +36,7 @@ import { getNodePath } from '../node/path'
 import { isPath, normalizePath } from '../paths/normalize'
 import { ArrayIsArray } from '../primordials/array'
 
-import { isShadowBinPath } from './shadow'
+import { isShadowBinPath } from './shadow/detect'
 import { whichSync } from './which'
 
 // A PATH entry may carry surrounding double quotes; `which` strips them too.

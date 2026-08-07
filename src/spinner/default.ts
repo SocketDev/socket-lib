@@ -6,7 +6,7 @@
  *   first call so module initialization stays cheap.
  */
 
-import { generateSocketSpinnerFrames } from '../effects/pulse-frames'
+import { generateSocketSpinnerFrames } from '../term/effects/pulse-frames'
 import yoctoSpinner from '../external/@socketregistry/yocto-spinner'
 import { hasOwn } from '../objects/predicates'
 

@@ -6,11 +6,11 @@
 import terminalLink from '../external/terminal-link'
 import yoctocolorsCjs from '../external/yoctocolors-cjs'
 import { ArrayIsArray } from '../primordials/array'
-import { getTheme } from '../themes/context'
-import { THEMES } from '../themes/themes'
-import { resolveColor } from '../themes/resolve'
+import { getTheme } from '../term/themes/context'
+import { THEMES } from '../term/themes/themes'
+import { resolveColor } from '../term/themes/resolve'
 
-import type { ColorName } from '../colors/types'
+import type { ColorName } from '../term/colors/types'
 
 import type { LinkOptions } from './types'
 

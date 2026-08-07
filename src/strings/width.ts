@@ -13,7 +13,7 @@
  *     details and Unicode Standard Annex #11 references.
  */
 
-import { stripAnsi } from '../ansi/strip'
+import { stripAnsi } from '../term/ansi/strip'
 import { IntlSegmenter } from '../primordials/intl'
 import { RegExpPrototypeTest } from '../primordials/regexp'
 import {

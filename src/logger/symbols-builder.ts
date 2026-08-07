@@ -21,7 +21,7 @@ import { StringPrototypeReplace } from '../primordials/string'
 import { applyColor } from './colors'
 
 import type { LogSymbols } from './types'
-import type { Theme } from '../themes/types'
+import type { Theme } from '../term/themes/types'
 
 /**
  * Build a `LogSymbols` map for the given theme.

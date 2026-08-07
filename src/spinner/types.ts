@@ -7,14 +7,14 @@
 
 import type { Writable } from 'node:stream'
 
-import type { ColorInherit, ColorRgb, ColorValue } from '../colors/types'
+import type { ColorInherit, ColorRgb, ColorValue } from '../term/colors/types'
 import type {
   Palette,
   ShimmerConfig,
   ShimmerDirection,
-} from '../effects/shimmer'
-import type { ThemeName } from '../themes/themes'
-import type { Theme } from '../themes/types'
+} from '../term/effects/shimmer'
+import type { ThemeName } from '../term/themes/themes'
+import type { Theme } from '../term/themes/types'
 
 /**
  * Progress tracking information for display in spinner. Used by `progress()`

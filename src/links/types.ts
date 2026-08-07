@@ -3,8 +3,8 @@
  *   Pure types, no runtime side effects.
  */
 
-import type { ThemeName } from '../themes/themes'
-import type { Theme } from '../themes/types'
+import type { ThemeName } from '../term/themes/themes'
+import type { Theme } from '../term/themes/types'
 
 /**
  * Options for creating themed links.

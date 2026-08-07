@@ -33,7 +33,7 @@ vi.mock(import('../../../src/external/yoctocolors-cjs'), () => ({
   default: forcedColors as unknown as YoctoColors,
 }))
 
-import { stripAnsi } from '../../../src/ansi/strip'
+import { stripAnsi } from '../../../src/term/ansi/strip'
 import { printFooter } from '../../../src/stdio/footer'
 import {
   createHeader,

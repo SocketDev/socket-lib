@@ -153,11 +153,6 @@
     "zlib": false
   },
   "exports": {
-    "./abort/signal": {
-      "source": "./src/abort/signal.ts",
-      "types": "./dist/abort/signal.d.ts",
-      "default": "./dist/abort/signal.js"
-    },
     "./ai/advisor": {
       "source": "./src/ai/advisor.mts",
       "types": "./dist/ai/advisor.d.mts",
@@ -287,16 +282,6 @@
       "types": "./dist/ai/worktree.d.mts",
       "default": "./dist/ai/worktree.js"
     },
-    "./ansi/constants": {
-      "source": "./src/ansi/constants.ts",
-      "types": "./dist/ansi/constants.d.ts",
-      "default": "./dist/ansi/constants.js"
-    },
-    "./ansi/strip": {
-      "source": "./src/ansi/strip.ts",
-      "types": "./dist/ansi/strip.d.ts",
-      "default": "./dist/ansi/strip.js"
-    },
     "./archives/detect": {
       "source": "./src/archives/detect.ts",
       "types": "./dist/archives/detect.d.ts",
@@ -402,16 +387,6 @@
       "types": "./dist/cache/ttl/types.d.ts",
       "default": "./dist/cache/ttl/types.js"
     },
-    "./checks/primordials": {
-      "source": "./src/checks/primordials.ts",
-      "types": "./dist/checks/primordials.d.ts",
-      "default": "./dist/checks/primordials.js"
-    },
-    "./checks/primordials-defaults": {
-      "source": "./src/checks/primordials-defaults.ts",
-      "types": "./dist/checks/primordials-defaults.d.ts",
-      "default": "./dist/checks/primordials-defaults.js"
-    },
     "./cli/check": {
       "source": "./src/cli/check.ts",
       "types": "./dist/cli/check.d.ts",
@@ -427,42 +402,6 @@
       "types": "./dist/cli/socket-lib.d.ts",
       "default": "./dist/cli/socket-lib.js"
     },
-    "./colors/convert": {
-      "source": "./src/colors/convert.ts",
-      "browser": {
-        "types": "./dist/colors/convert.d.ts",
-        "default": "./dist/colors/convert.js"
-      },
-      "types": "./dist/colors/convert.d.ts",
-      "default": "./dist/colors/convert.js"
-    },
-    "./colors/palette": {
-      "source": "./src/colors/palette.ts",
-      "browser": {
-        "types": "./dist/colors/palette.d.ts",
-        "default": "./dist/colors/palette.js"
-      },
-      "types": "./dist/colors/palette.d.ts",
-      "default": "./dist/colors/palette.js"
-    },
-    "./colors/socket-palette": {
-      "source": "./src/colors/socket-palette.ts",
-      "browser": {
-        "types": "./dist/colors/socket-palette.d.ts",
-        "default": "./dist/colors/socket-palette.js"
-      },
-      "types": "./dist/colors/socket-palette.d.ts",
-      "default": "./dist/colors/socket-palette.js"
-    },
-    "./colors/types": {
-      "source": "./src/colors/types.ts",
-      "browser": {
-        "types": "./dist/colors/types.d.ts",
-        "default": "./dist/colors/types.js"
-      },
-      "types": "./dist/colors/types.d.ts",
-      "default": "./dist/colors/types.js"
-    },
     "./compression/brotli": {
       "source": "./src/compression/brotli.ts",
       "types": "./dist/compression/brotli.d.ts",
@@ -477,6 +416,11 @@
       "source": "./src/compression/types.ts",
       "types": "./dist/compression/types.d.ts",
       "default": "./dist/compression/types.js"
+    },
+    "./config/fleet-repo": {
+      "source": "./src/config/fleet-repo.ts",
+      "types": "./dist/config/fleet-repo.d.ts",
+      "default": "./dist/config/fleet-repo.js"
     },
     "./config/layers": {
       "source": "./src/config/layers.ts",
@@ -899,26 +843,6 @@
       "types": "./dist/eco/types.d.ts",
       "default": "./dist/eco/types.js"
     },
-    "./effects/pulse-frames": {
-      "source": "./src/effects/pulse-frames.ts",
-      "types": "./dist/effects/pulse-frames.d.ts",
-      "default": "./dist/effects/pulse-frames.js"
-    },
-    "./effects/shimmer": {
-      "source": "./src/effects/shimmer.ts",
-      "types": "./dist/effects/shimmer.d.ts",
-      "default": "./dist/effects/shimmer.js"
-    },
-    "./effects/shimmer-keyframes": {
-      "source": "./src/effects/shimmer-keyframes.ts",
-      "types": "./dist/effects/shimmer-keyframes.d.ts",
-      "default": "./dist/effects/shimmer-keyframes.js"
-    },
-    "./effects/shimmer-terminal": {
-      "source": "./src/effects/shimmer-terminal.ts",
-      "types": "./dist/effects/shimmer-terminal.d.ts",
-      "default": "./dist/effects/shimmer-terminal.js"
-    },
     "./env/agents": {
       "source": "./src/env/agents.ts",
       "types": "./dist/env/agents.d.ts",
@@ -1186,10 +1110,25 @@
       "types": "./dist/exe/resolve.d.ts",
       "default": "./dist/exe/resolve.js"
     },
-    "./exe/shadow": {
-      "source": "./src/exe/shadow.ts",
-      "types": "./dist/exe/shadow.d.ts",
-      "default": "./dist/exe/shadow.js"
+    "./exe/sea": {
+      "source": "./src/exe/sea.ts",
+      "types": "./dist/exe/sea.d.ts",
+      "default": "./dist/exe/sea.js"
+    },
+    "./exe/shadow/detect": {
+      "source": "./src/exe/shadow/detect.ts",
+      "types": "./dist/exe/shadow/detect.d.ts",
+      "default": "./dist/exe/shadow/detect.js"
+    },
+    "./exe/shadow/skip": {
+      "source": "./src/exe/shadow/skip.ts",
+      "types": "./dist/exe/shadow/skip.d.ts",
+      "default": "./dist/exe/shadow/skip.js"
+    },
+    "./exe/shadow/types": {
+      "source": "./src/exe/shadow/types.ts",
+      "types": "./dist/exe/shadow/types.d.ts",
+      "default": "./dist/exe/shadow/types.js"
     },
     "./exe/trusted": {
       "source": "./src/exe/trusted.ts",
@@ -1636,11 +1575,6 @@
       "types": "./dist/external-tools/uv/types.d.ts",
       "default": "./dist/external-tools/uv/types.js"
     },
-    "./fleet/repo-config": {
-      "source": "./src/fleet/repo-config.ts",
-      "types": "./dist/fleet/repo-config.d.ts",
-      "default": "./dist/fleet/repo-config.js"
-    },
     "./fs/access": {
       "source": "./src/fs/access.ts",
       "types": "./dist/fs/access.d.ts",
@@ -1957,15 +1891,15 @@
       "types": "./dist/integrity.d.ts",
       "default": "./dist/integrity.js"
     },
-    "./ipc-cli/get": {
-      "source": "./src/ipc-cli/get.ts",
-      "types": "./dist/ipc-cli/get.d.ts",
-      "default": "./dist/ipc-cli/get.js"
+    "./ipc/cli/get": {
+      "source": "./src/ipc/cli/get.ts",
+      "types": "./dist/ipc/cli/get.d.ts",
+      "default": "./dist/ipc/cli/get.js"
     },
-    "./ipc-cli/types": {
-      "source": "./src/ipc-cli/types.ts",
-      "types": "./dist/ipc-cli/types.d.ts",
-      "default": "./dist/ipc-cli/types.js"
+    "./ipc/cli/types": {
+      "source": "./src/ipc/cli/types.ts",
+      "types": "./dist/ipc/cli/types.d.ts",
+      "default": "./dist/ipc/cli/types.js"
     },
     "./ipc/directory": {
       "source": "./src/ipc/directory.ts",
@@ -2601,6 +2535,16 @@
       "types": "./dist/primordials/buffer.d.ts",
       "default": "./dist/primordials/buffer.js"
     },
+    "./primordials/checks/primordials": {
+      "source": "./src/primordials/checks/primordials.ts",
+      "types": "./dist/primordials/checks/primordials.d.ts",
+      "default": "./dist/primordials/checks/primordials.js"
+    },
+    "./primordials/checks/primordials-defaults": {
+      "source": "./src/primordials/checks/primordials-defaults.ts",
+      "types": "./dist/primordials/checks/primordials-defaults.d.ts",
+      "default": "./dist/primordials/checks/primordials-defaults.js"
+    },
     "./primordials/date": {
       "source": "./src/primordials/date.ts",
       "types": "./dist/primordials/date.d.ts",
@@ -2766,6 +2710,11 @@
       "types": "./dist/process/transient.d.ts",
       "default": "./dist/process/transient.js"
     },
+    "./promises/abort": {
+      "source": "./src/promises/abort.ts",
+      "types": "./dist/promises/abort.d.ts",
+      "default": "./dist/promises/abort.js"
+    },
     "./promises/all-keyed": {
       "source": "./src/promises/all-keyed.ts",
       "types": "./dist/promises/all-keyed.d.ts",
@@ -2898,11 +2847,6 @@
       "types": "./dist/schema/validate.d.ts",
       "default": "./dist/schema/validate.js"
     },
-    "./sea/detect": {
-      "source": "./src/sea/detect.ts",
-      "types": "./dist/sea/detect.d.ts",
-      "default": "./dist/sea/detect.js"
-    },
     "./secrets/addon": {
       "source": "./src/secrets/addon.ts",
       "types": "./dist/secrets/addon.d.ts",
@@ -2962,16 +2906,6 @@
       "source": "./src/secrets/windows.ts",
       "types": "./dist/secrets/windows.d.ts",
       "default": "./dist/secrets/windows.js"
-    },
-    "./shadow/skip": {
-      "source": "./src/shadow/skip.ts",
-      "types": "./dist/shadow/skip.d.ts",
-      "default": "./dist/shadow/skip.js"
-    },
-    "./shadow/types": {
-      "source": "./src/shadow/types.ts",
-      "types": "./dist/shadow/types.d.ts",
-      "default": "./dist/shadow/types.js"
     },
     "./shell/command-args": {
       "source": "./src/shell/command-args.ts",
@@ -3202,26 +3136,6 @@
       "types": "./dist/strings/width.d.ts",
       "default": "./dist/strings/width.js"
     },
-    "./tables/bordered": {
-      "source": "./src/tables/bordered.ts",
-      "types": "./dist/tables/bordered.d.ts",
-      "default": "./dist/tables/bordered.js"
-    },
-    "./tables/padding": {
-      "source": "./src/tables/padding.ts",
-      "types": "./dist/tables/padding.d.ts",
-      "default": "./dist/tables/padding.js"
-    },
-    "./tables/simple": {
-      "source": "./src/tables/simple.ts",
-      "types": "./dist/tables/simple.d.ts",
-      "default": "./dist/tables/simple.js"
-    },
-    "./tables/types": {
-      "source": "./src/tables/types.ts",
-      "types": "./dist/tables/types.d.ts",
-      "default": "./dist/tables/types.js"
-    },
     "./temporal/instant": {
       "source": "./src/temporal/instant.ts",
       "types": "./dist/temporal/instant.d.ts",
@@ -3247,25 +3161,95 @@
       "types": "./dist/temporal/temporal.d.ts",
       "default": "./dist/temporal/temporal.js"
     },
-    "./themes/context": {
-      "source": "./src/themes/context.ts",
-      "types": "./dist/themes/context.d.ts",
-      "default": "./dist/themes/context.js"
+    "./term/ansi/constants": {
+      "source": "./src/term/ansi/constants.ts",
+      "types": "./dist/term/ansi/constants.d.ts",
+      "default": "./dist/term/ansi/constants.js"
     },
-    "./themes/resolve": {
-      "source": "./src/themes/resolve.ts",
-      "types": "./dist/themes/resolve.d.ts",
-      "default": "./dist/themes/resolve.js"
+    "./term/ansi/strip": {
+      "source": "./src/term/ansi/strip.ts",
+      "types": "./dist/term/ansi/strip.d.ts",
+      "default": "./dist/term/ansi/strip.js"
     },
-    "./themes/themes": {
-      "source": "./src/themes/themes.ts",
-      "types": "./dist/themes/themes.d.ts",
-      "default": "./dist/themes/themes.js"
+    "./term/colors/convert": {
+      "source": "./src/term/colors/convert.ts",
+      "types": "./dist/term/colors/convert.d.ts",
+      "default": "./dist/term/colors/convert.js"
     },
-    "./themes/types": {
-      "source": "./src/themes/types.ts",
-      "types": "./dist/themes/types.d.ts",
-      "default": "./dist/themes/types.js"
+    "./term/colors/palette": {
+      "source": "./src/term/colors/palette.ts",
+      "types": "./dist/term/colors/palette.d.ts",
+      "default": "./dist/term/colors/palette.js"
+    },
+    "./term/colors/socket-palette": {
+      "source": "./src/term/colors/socket-palette.ts",
+      "types": "./dist/term/colors/socket-palette.d.ts",
+      "default": "./dist/term/colors/socket-palette.js"
+    },
+    "./term/colors/types": {
+      "source": "./src/term/colors/types.ts",
+      "types": "./dist/term/colors/types.d.ts",
+      "default": "./dist/term/colors/types.js"
+    },
+    "./term/effects/pulse-frames": {
+      "source": "./src/term/effects/pulse-frames.ts",
+      "types": "./dist/term/effects/pulse-frames.d.ts",
+      "default": "./dist/term/effects/pulse-frames.js"
+    },
+    "./term/effects/shimmer": {
+      "source": "./src/term/effects/shimmer.ts",
+      "types": "./dist/term/effects/shimmer.d.ts",
+      "default": "./dist/term/effects/shimmer.js"
+    },
+    "./term/effects/shimmer-keyframes": {
+      "source": "./src/term/effects/shimmer-keyframes.ts",
+      "types": "./dist/term/effects/shimmer-keyframes.d.ts",
+      "default": "./dist/term/effects/shimmer-keyframes.js"
+    },
+    "./term/effects/shimmer-terminal": {
+      "source": "./src/term/effects/shimmer-terminal.ts",
+      "types": "./dist/term/effects/shimmer-terminal.d.ts",
+      "default": "./dist/term/effects/shimmer-terminal.js"
+    },
+    "./term/tables/bordered": {
+      "source": "./src/term/tables/bordered.ts",
+      "types": "./dist/term/tables/bordered.d.ts",
+      "default": "./dist/term/tables/bordered.js"
+    },
+    "./term/tables/padding": {
+      "source": "./src/term/tables/padding.ts",
+      "types": "./dist/term/tables/padding.d.ts",
+      "default": "./dist/term/tables/padding.js"
+    },
+    "./term/tables/simple": {
+      "source": "./src/term/tables/simple.ts",
+      "types": "./dist/term/tables/simple.d.ts",
+      "default": "./dist/term/tables/simple.js"
+    },
+    "./term/tables/types": {
+      "source": "./src/term/tables/types.ts",
+      "types": "./dist/term/tables/types.d.ts",
+      "default": "./dist/term/tables/types.js"
+    },
+    "./term/themes/context": {
+      "source": "./src/term/themes/context.ts",
+      "types": "./dist/term/themes/context.d.ts",
+      "default": "./dist/term/themes/context.js"
+    },
+    "./term/themes/resolve": {
+      "source": "./src/term/themes/resolve.ts",
+      "types": "./dist/term/themes/resolve.d.ts",
+      "default": "./dist/term/themes/resolve.js"
+    },
+    "./term/themes/themes": {
+      "source": "./src/term/themes/themes.ts",
+      "types": "./dist/term/themes/themes.d.ts",
+      "default": "./dist/term/themes/themes.js"
+    },
+    "./term/themes/types": {
+      "source": "./src/term/themes/types.ts",
+      "types": "./dist/term/themes/types.d.ts",
+      "default": "./dist/term/themes/types.js"
     },
     "./url/assert-safe": {
       "source": "./src/url/assert-safe.ts",

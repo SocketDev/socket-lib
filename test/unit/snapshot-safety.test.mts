@@ -218,12 +218,12 @@ describe('snapshot safety — lazy AsyncLocalStorage singletons', () => {
   })
 
   it('themes/context does not construct its store at module-eval', async () => {
-    await import('../../src/themes/context')
+    await import('../../src/term/themes/context')
     expect(getNodeAsyncHooks).not.toHaveBeenCalled()
   })
 
   it('themes/context constructs its store on first getTheme()', async () => {
-    const { getTheme } = await import('../../src/themes/context')
+    const { getTheme } = await import('../../src/term/themes/context')
     expect(getNodeAsyncHooks).not.toHaveBeenCalled()
     getTheme()
     expect(getNodeAsyncHooks).toHaveBeenCalled()
@@ -384,7 +384,7 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
     'stdio/prompts',
     'process/spawn/child',
     'env/rewire',
-    'themes/context',
+    'term/themes/context',
     'logger/symbols',
     'logger/logger',
     'stdio/footer',

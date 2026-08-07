@@ -7,8 +7,8 @@
 
 import type { Remap } from '../objects/types'
 import type { SpinnerInstance } from '../spinner/types'
-import type { ThemeName } from '../themes/themes'
-import type { Theme } from '../themes/types'
+import type { ThemeName } from '../term/themes/themes'
+import type { Theme } from '../term/themes/types'
 
 /**
  * Choice option for select and search prompts.

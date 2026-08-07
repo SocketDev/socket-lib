@@ -26,7 +26,7 @@ import { getXdgDataHome } from '../env/xdg'
 import whichModule from '../external/which'
 import { ArrayIsArray } from '../primordials/array'
 import { getFs, getPath } from './shared'
-import { isShadowBinPath } from './shadow'
+import { isShadowBinPath } from './shadow/detect'
 import { whichRealSync } from './which'
 
 /**

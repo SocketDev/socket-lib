@@ -7,8 +7,8 @@
  *   while splitting the bulk of the class body out of the factory module.
  */
 
-import type { ColorRgb, ColorValue } from '../colors/types'
-import { isRgbTuple, toRgb } from '../colors/convert'
+import type { ColorRgb, ColorValue } from '../term/colors/types'
+import { isRgbTuple, toRgb } from '../term/colors/convert'
 import { getAbortSignal } from '../process/abort'
 import {
   incLogCallCountSymbol,

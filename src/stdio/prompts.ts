@@ -6,13 +6,13 @@
 import { getAbortSignal } from '../process/abort'
 import { applyColor } from '../logger/colors'
 
-import type { ColorValue } from '../colors/types'
+import type { ColorValue } from '../term/colors/types'
 import { getDefaultSpinner } from '../spinner/default'
-import { getTheme } from '../themes/context'
-import { THEMES } from '../themes/themes'
-import type { ThemeName } from '../themes/themes'
-import type { Theme } from '../themes/types'
-import { resolveColor } from '../themes/resolve'
+import { getTheme } from '../term/themes/context'
+import { THEMES } from '../term/themes/themes'
+import type { ThemeName } from '../term/themes/themes'
+import type { Theme } from '../term/themes/types'
+import { resolveColor } from '../term/themes/resolve'
 
 import type {
   CheckboxPrompt,

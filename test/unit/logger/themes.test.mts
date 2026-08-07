@@ -16,7 +16,7 @@ import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/l
 
 import { Logger } from '../../../src/logger/node'
 import { LOG_SYMBOLS } from '../../../src/logger/symbols'
-import { THEMES } from '../../../src/themes/themes'
+import { THEMES } from '../../../src/term/themes/themes'
 
 describe('Logger - Theme Handling', () => {
   let stdout: Writable

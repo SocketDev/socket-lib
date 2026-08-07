@@ -23,13 +23,13 @@ import { ObjectEntries } from '../primordials/object'
 import {
   DEFAULT_ALIAS_MAP,
   DEFAULT_NODE_INTERNAL_ONLY,
-} from '../checks/primordials-defaults'
-import { checkPrimordials } from '../checks/primordials'
+} from '../primordials/checks/primordials-defaults'
+import { checkPrimordials } from '../primordials/checks/primordials'
 import type {
   PrimordialsCheckConfig,
   PrimordialsCheckResult,
   PrimordialsFinding,
-} from '../checks/primordials'
+} from '../primordials/checks/primordials'
 import { parseArgs as parseLibArgs } from '../exe/argv/parse'
 
 import { MapCtor, SetCtor } from '../primordials/map-set'

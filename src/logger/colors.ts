@@ -12,7 +12,7 @@
 
 import type yoctocolorsCjs from '../external/yoctocolors-cjs'
 
-import type { ColorValue } from '../colors/types'
+import type { ColorValue } from '../term/colors/types'
 
 let cachedYoctocolors: typeof yoctocolorsCjs | undefined
 

@@ -17,7 +17,7 @@ import { MapCtor } from '../primordials/map-set'
 import { ObjectKeys } from '../primordials/object'
 import { StringPrototypeSubstring } from '../primordials/string'
 import { spawn, spawnSync } from '../process/spawn/child'
-import { stripAnsi } from '../ansi/strip'
+import { stripAnsi } from '../term/ansi/strip'
 import { findGitRoot, getCachedRealpath, getCwd } from './repo'
 
 import type { GitDiffOptions } from './types'

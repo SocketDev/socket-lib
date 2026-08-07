@@ -9,8 +9,8 @@
  *   built.
  */
 
-import type { ColorInherit, ColorValue } from '../colors/types'
-import type { Palette, ShimmerConfig } from '../effects/shimmer'
+import type { ColorInherit, ColorValue } from '../term/colors/types'
+import type { Palette, ShimmerConfig } from '../term/effects/shimmer'
 
 import { COLOR_INHERIT } from './format'
 
