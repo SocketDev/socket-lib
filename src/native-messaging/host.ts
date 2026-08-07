@@ -161,6 +161,5 @@ export function writeMessage(
   // Native messaging protocol requires raw binary writes to stdout.
   // Chrome treats any non-protocol byte as a framing error, so the logger
   // must not be used here.
-  // oxlint-disable-next-line socket/no-direct-stream-write -- protocol
   ;(stream ?? process.stdout).write(Buffer.concat([header, payload]))
 }

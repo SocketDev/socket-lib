@@ -17,7 +17,6 @@ import { formatLintFindings } from './lint.mts'
 import { formatValidationReport } from './validate.mts'
 
 export function fail(msg) {
-  // oxlint-disable-next-line socket/no-direct-stream-write -- error output
   process.stderr.write(`prim: ${msg}\n`)
   process.exit(1)
 }
@@ -45,10 +44,8 @@ export function report(
       stripFailures: stripFailureFiles.length,
       stripFailureFiles,
     })
-    // oxlint-disable-next-line socket/no-direct-stream-write -- JSON output
     process.stdout.write(`${payload}\n`)
   } else {
-    // oxlint-disable-next-line socket/no-direct-stream-write -- text output
     process.stdout.write(formatHuman(findings, { mode, targetName }) + '\n')
   }
 }
@@ -61,11 +58,9 @@ export function reportLint(findings, json, targetName) {
       count: findings.length,
       findings,
     })
-    // oxlint-disable-next-line socket/no-direct-stream-write -- JSON output
     process.stdout.write(`${payload}\n`)
     return
   }
-  // oxlint-disable-next-line socket/no-direct-stream-write -- lint output
   process.stdout.write(formatLintFindings(findings, { targetName }))
 }
 
@@ -84,10 +79,8 @@ export function reportMod(result, json, applied, showDiff = false) {
         validationFailed: true,
         validationFindings: result.validationFindings,
       })
-      // oxlint-disable-next-line socket/no-direct-stream-write -- validation result
       process.stdout.write(`${payload}\n`)
     } else {
-      // oxlint-disable-next-line socket/no-direct-stream-write -- validation output
       process.stderr.write(`${validationReport}\n`)
     }
     process.exitCode = 1
@@ -101,31 +94,25 @@ export function reportMod(result, json, applied, showDiff = false) {
       skipped: result.skipped,
       files: result.files,
     })
-    // oxlint-disable-next-line socket/no-direct-stream-write -- JSON output
     process.stdout.write(`${payload}\n`)
     return
   }
   const verb = applied ? 'Wrote' : 'Would write'
   if (result.rewriteCount === 0) {
-    // oxlint-disable-next-line socket/no-direct-stream-write -- mod output
     process.stdout.write('mod: no rewrites needed.\n')
     return
   }
   const summary = `mod: ${verb} ${result.rewriteCount} rewrite(s) across ${result.filesChanged} file(s).\n`
-  // oxlint-disable-next-line socket/no-direct-stream-write -- summary
   process.stdout.write(summary)
   if (result.skipped > 0) {
     const skippedMsg = `mod: skipped ${result.skipped} candidate(s) — pass --include-guessed to rewrite receiver-guessed sites too.\n`
-    // oxlint-disable-next-line socket/no-direct-stream-write -- skipped count
     process.stdout.write(skippedMsg)
   }
   if (!applied) {
-    // oxlint-disable-next-line socket/no-direct-stream-write -- dry run
     process.stdout.write('mod: dry run — pass --apply to write changes.\n')
   }
   for (const f of result.files) {
     const fileLine = `  ${f.file}: ${f.rewrites} rewrite(s), import added: ${f.importAdded ? 'yes' : 'no'}\n`
-    // oxlint-disable-next-line socket/no-direct-stream-write -- file stats
     process.stdout.write(fileLine)
   }
   if (showDiff && !applied) {

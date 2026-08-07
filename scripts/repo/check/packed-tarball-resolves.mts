@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-/**
+/*
  * @file Repo check — the PACKED tarball's dist resolves under both CJS
  *   `require` and ESM `import` for a sample of the subpaths the fleet
  *   actually imports.
@@ -80,7 +80,10 @@ export const PACKAGE_NAME = '@socketsecurity/lib'
  * combined hit count across the three repos at that snapshot). A static
  * sample rather than a live re-grep at check time: the check must run the
  * same way in CI, where those sibling repos are not checked out, and a fixed
- * sample keeps the result reproducible run to run.
+ * sample keeps the result reproducible run to run. Two leaves are spelled at
+ * their post-consolidation homes: the `exe` namespace (15f89c63) moved
+ * `argv/parse` to `exe/argv/parse` and `bin/which` to `exe/path/which`, and
+ * consumers migrate with their next lib bump.
  */
 export const HOT_LIB_SUBPATHS: readonly string[] = [
   'logger/default', // 2779
@@ -89,9 +92,9 @@ export const HOT_LIB_SUBPATHS: readonly string[] = [
   'paths/normalize', // 980
   'errors/message', // 680
   'http-request', // 174
-  'argv/parse', // 136
+  'exe/argv/parse', // 136
   'constants/platform', // 122
-  'bin/which', // 109
+  'exe/path/which', // 109
   'fs/read-file', // 103
   'debug/output', // 99
   'globs/match', // 91
