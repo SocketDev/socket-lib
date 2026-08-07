@@ -16,8 +16,9 @@ const JSONStringify = JSON.stringify
 // oxlint-disable-next-line socket/prefer-undefined-over-null -- GraphQL spec returns null for unresolved nodes; carry the exemption here once instead of stacking identical disables at each call site.
 const GRAPHQL_NULL = null
 
-// socket-lint: allow boolean-trap -- local test fixture builder; the
-// `body, ok, status` shape mirrors the httpRequest return it stands in for.
+// Local test fixture builder; body/ok/status shape mirrors the httpRequest
+// return value so the mock stands in for it across tests.
+// oxlint-disable-next-line socket/no-boolean-trap-param -- test fixture match
 function mkResponse(body: Buffer, ok: boolean, status: number) {
   return {
     body,

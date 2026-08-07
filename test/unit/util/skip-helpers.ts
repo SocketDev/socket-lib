@@ -67,7 +67,9 @@ export function describeNetworkOnly(name: string, fn: SuiteFn): void {
  *   )
  *   ```
  */
-// socket-lint: allow boolean-trap -- callers pass a positional boolean; changing to options object would break existing call sites in other files
+// Callers pass a positional boolean; changing to options object would break
+// existing call sites in other test files. Kept for cohesion with itRequires.
+// oxlint-disable-next-line socket/no-boolean-trap-param -- test fixture shape
 export function describeRequires(
   capability: string,
   available: boolean,
@@ -102,7 +104,9 @@ export function itNetworkOnly(name: string, fn: TestFn): void {
 /**
  * Test gated on a runtime capability. Same shape as `describeRequires`.
  */
-// socket-lint: allow boolean-trap -- callers pass a positional boolean; changing to options object would break existing call sites in other files
+// Callers pass a positional boolean; changing to options object would break
+// existing call sites in other test files. Kept for cohesion with describeRequires.
+// oxlint-disable-next-line socket/no-boolean-trap-param -- test fixture shape
 export function itRequires(
   capability: string,
   available: boolean,

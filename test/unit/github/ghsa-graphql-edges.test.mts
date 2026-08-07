@@ -14,8 +14,9 @@ import { httpRequest } from '../../../src/http-request/request'
 
 const JSONStringify = JSON.stringify
 
-// socket-lint: allow boolean-trap -- local test fixture builder; the
-// body/ok/status shape mirrors the httpRequest return it stands in for.
+// Local test fixture builder; body/ok/status shape mirrors the httpRequest
+// return value so the mock stands in for it across tests.
+// oxlint-disable-next-line socket/no-boolean-trap-param -- test fixture match
 function mkResponse(body: Buffer, ok: boolean, status: number) {
   return {
     body,

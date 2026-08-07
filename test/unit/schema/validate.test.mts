@@ -10,9 +10,9 @@
  *     conversion) and the unsupported-schema TypeError branch.
  */
 
-// socket-lint: allow schema-lib
+// oxlint-disable-next-line socket/prefer-typebox-schema -- zod needed
 import * as zodV3 from 'zod/v3'
-// socket-lint: allow schema-lib
+// oxlint-disable-next-line socket/prefer-typebox-schema -- zod needed
 import * as zodV4 from 'zod/v4'
 import { describe, expect, it } from 'vitest'
 

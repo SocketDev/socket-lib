@@ -9,7 +9,9 @@
  */
 
 import { describe, expect, it } from 'vitest'
-// socket-lint: allow schema-lib -- parseJsonStrict validates Zod-shaped schemas; this test must build a real zod schema to exercise that path.
+// parseJsonStrict validates Zod-shaped schemas; test must build a real
+// zod schema to exercise that code path.
+// oxlint-disable-next-line socket/prefer-typebox-schema -- zod needed
 import { z } from 'zod'
 
 import { parseJsonStrict } from '../../../src/json/parse'
