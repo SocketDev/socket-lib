@@ -176,6 +176,31 @@ describe('objects - mutate & sort', () => {
     })
   })
 
+  describe('merge - prototype pollution', () => {
+    it('never walks a JSON __proto__ key onto Object.prototype', () => {
+      const source = JSON.parse('{"__proto__":{"polluted":"yes"}}')
+      merge({}, source)
+      expect(({} as { polluted?: string | undefined }).polluted).toBeUndefined()
+      expect(
+        (Object.prototype as { polluted?: string | undefined }).polluted,
+      ).toBeUndefined()
+    })
+
+    it('skips constructor and prototype source keys', () => {
+      const source = JSON.parse(
+        '{"constructor":{"hacked":1},"prototype":{"hacked":1},"ok":2}',
+      )
+      const target: Record<string, unknown> = {}
+      const result = merge(target, source) as Record<string, unknown>
+      expect(result['ok']).toBe(2)
+      expect(Object.hasOwn(target, 'constructor')).toBe(false)
+      expect(Object.hasOwn(target, 'prototype')).toBe(false)
+      expect(
+        (Object.prototype as { hacked?: number | undefined }).hacked,
+      ).toBeUndefined()
+    })
+  })
+
   describe('merge - additional edge cases', () => {
     it('should handle symbol keys', () => {
       const sym = Symbol('test')

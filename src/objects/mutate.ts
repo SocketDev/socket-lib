@@ -10,8 +10,15 @@ import { LOOP_SENTINEL } from '../constants/sentinels'
 import { isArray } from '../arrays/predicates'
 import { ErrorCtor } from '../primordials/error'
 import { ReflectOwnKeys } from '../primordials/reflect'
+import { SetCtor } from '../primordials/map-set'
 
 import { isObject } from './predicates'
+
+// Keys a deep merge must never walk or assign: reading `target['__proto__']`
+// answers `Object.prototype` itself, so recursing into it writes attacker
+// keys onto every object in the process. Same guard set as json/parse.ts's
+// prototypePollutionReviver.
+const DANGEROUS_KEYS = new SetCtor(['__proto__', 'constructor', 'prototype'])
 
 /**
  * Deep merge source object into target object.
@@ -75,6 +82,9 @@ export function merge<T extends object, U extends object>(
     const keys = ReflectOwnKeys(currentSource as object)
     for (let i = 0, { length } = keys; i < length; i += 1) {
       const key = keys[i] as PropertyKey
+      if (typeof key === 'string' && DANGEROUS_KEYS.has(key)) {
+        continue
+      }
       const srcVal = currentSource[key]
       const targetVal = currentTarget[key]
       if (isArray(srcVal)) {
