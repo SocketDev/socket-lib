@@ -94,6 +94,11 @@ export const config: ExportsConfig = {
     // of scope for the generator migration.)
     'dist/logger/logger.d.ts',
     'dist/logger/logger.js',
+    // Module-internal helper leaves. Every `*/shared.ts` header describes
+    // itself as private to its directory; none had a real import across the
+    // fleet, so v7 stops publishing them as subpaths.
+    'dist/**/shared.d.ts',
+    'dist/**/shared.js',
     'src/**',
   ],
   nodeRange: '>=22',

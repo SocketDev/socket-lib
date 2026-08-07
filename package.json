@@ -307,11 +307,6 @@
       "types": "./dist/archives/extract.d.ts",
       "default": "./dist/archives/extract.js"
     },
-    "./archives/shared": {
-      "source": "./src/archives/shared.ts",
-      "types": "./dist/archives/shared.d.ts",
-      "default": "./dist/archives/shared.js"
-    },
     "./archives/tar": {
       "source": "./src/archives/tar.ts",
       "types": "./dist/archives/tar.d.ts",
@@ -336,11 +331,6 @@
       "source": "./src/argv/flag-types.ts",
       "types": "./dist/argv/flag-types.d.ts",
       "default": "./dist/argv/flag-types.js"
-    },
-    "./argv/meta": {
-      "source": "./src/argv/meta.ts",
-      "types": "./dist/argv/meta.d.ts",
-      "default": "./dist/argv/meta.js"
     },
     "./argv/parse": {
       "source": "./src/argv/parse.ts",
@@ -379,15 +369,6 @@
       "types": "./dist/arrays/predicates.d.ts",
       "default": "./dist/arrays/predicates.js"
     },
-    "./arrays/shared": {
-      "source": "./src/arrays/shared.ts",
-      "browser": {
-        "types": "./dist/arrays/shared.d.ts",
-        "default": "./dist/arrays/shared.js"
-      },
-      "types": "./dist/arrays/shared.d.ts",
-      "default": "./dist/arrays/shared.js"
-    },
     "./arrays/unique": {
       "source": "./src/arrays/unique.ts",
       "browser": {
@@ -417,11 +398,6 @@
       "types": "./dist/bin/shadow.d.ts",
       "default": "./dist/bin/shadow.js"
     },
-    "./bin/shared": {
-      "source": "./src/bin/shared.ts",
-      "types": "./dist/bin/shared.d.ts",
-      "default": "./dist/bin/shared.js"
-    },
     "./bin/trusted": {
       "source": "./src/bin/trusted.ts",
       "types": "./dist/bin/trusted.d.ts",
@@ -447,11 +423,6 @@
       "types": "./dist/cacache/read.d.ts",
       "default": "./dist/cacache/read.js"
     },
-    "./cacache/shared": {
-      "source": "./src/cacache/shared.ts",
-      "types": "./dist/cacache/shared.d.ts",
-      "default": "./dist/cacache/shared.js"
-    },
     "./cacache/tmp": {
       "source": "./src/cacache/tmp.ts",
       "types": "./dist/cacache/tmp.d.ts",
@@ -475,11 +446,6 @@
       },
       "types": "./dist/cache/ttl/browser.d.ts",
       "default": "./dist/cache/ttl/browser.js"
-    },
-    "./cache/ttl/shared": {
-      "source": "./src/cache/ttl/shared.ts",
-      "types": "./dist/cache/ttl/shared.d.ts",
-      "default": "./dist/cache/ttl/shared.js"
     },
     "./cache/ttl/store": {
       "source": "./src/cache/ttl/store.ts",
@@ -561,11 +527,6 @@
       "source": "./src/compression/gzip.ts",
       "types": "./dist/compression/gzip.d.ts",
       "default": "./dist/compression/gzip.js"
-    },
-    "./compression/shared": {
-      "source": "./src/compression/shared.ts",
-      "types": "./dist/compression/shared.d.ts",
-      "default": "./dist/compression/shared.js"
     },
     "./compression/types": {
       "source": "./src/compression/types.ts",
@@ -714,15 +675,6 @@
       "types": "./dist/debug/output.d.ts",
       "default": "./dist/debug/output.js"
     },
-    "./debug/shared": {
-      "source": "./src/debug/shared.ts",
-      "browser": {
-        "types": "./dist/debug/shared.d.ts",
-        "default": "./dist/debug/shared.js"
-      },
-      "types": "./dist/debug/shared.d.ts",
-      "default": "./dist/debug/shared.js"
-    },
     "./debug/types": {
       "source": "./src/debug/types.ts",
       "browser": {
@@ -806,11 +758,6 @@
       "source": "./src/dlx/paths.ts",
       "types": "./dist/dlx/paths.d.ts",
       "default": "./dist/dlx/paths.js"
-    },
-    "./dlx/shared": {
-      "source": "./src/dlx/shared.ts",
-      "types": "./dist/dlx/shared.d.ts",
-      "default": "./dist/dlx/shared.js"
     },
     "./dlx/spec": {
       "source": "./src/dlx/spec.ts",
@@ -1233,11 +1180,6 @@
       "source": "./src/events/exit/lifecycle.ts",
       "types": "./dist/events/exit/lifecycle.d.ts",
       "default": "./dist/events/exit/lifecycle.js"
-    },
-    "./events/exit/shared": {
-      "source": "./src/events/exit/shared.ts",
-      "types": "./dist/events/exit/shared.d.ts",
-      "default": "./dist/events/exit/shared.js"
     },
     "./events/exit/signals": {
       "source": "./src/events/exit/signals.ts",
@@ -1754,11 +1696,6 @@
       "types": "./dist/fs/safe.d.ts",
       "default": "./dist/fs/safe.js"
     },
-    "./fs/shared": {
-      "source": "./src/fs/shared.ts",
-      "types": "./dist/fs/shared.d.ts",
-      "default": "./dist/fs/shared.js"
-    },
     "./fs/types": {
       "source": "./src/fs/types.ts",
       "types": "./dist/fs/types.d.ts",
@@ -1794,11 +1731,6 @@
       "types": "./dist/git/repo.d.ts",
       "default": "./dist/git/repo.js"
     },
-    "./git/shared": {
-      "source": "./src/git/shared.ts",
-      "types": "./dist/git/shared.d.ts",
-      "default": "./dist/git/shared.js"
-    },
     "./git/staged": {
       "source": "./src/git/staged.ts",
       "types": "./dist/git/staged.d.ts",
@@ -1823,11 +1755,6 @@
       "source": "./src/git/unstaged.ts",
       "types": "./dist/git/unstaged.d.ts",
       "default": "./dist/git/unstaged.js"
-    },
-    "./github/cli": {
-      "source": "./src/github/cli.ts",
-      "types": "./dist/github/cli.d.ts",
-      "default": "./dist/github/cli.js"
     },
     "./github/commit": {
       "source": "./src/github/commit.ts",
@@ -1908,11 +1835,6 @@
       "source": "./src/globs/matcher.ts",
       "types": "./dist/globs/matcher.d.ts",
       "default": "./dist/globs/matcher.js"
-    },
-    "./globs/shared": {
-      "source": "./src/globs/shared.ts",
-      "types": "./dist/globs/shared.d.ts",
-      "default": "./dist/globs/shared.js"
     },
     "./globs/stream": {
       "source": "./src/globs/stream.ts",
@@ -2015,11 +1937,6 @@
       "types": "./dist/http-request/response-types.d.ts",
       "default": "./dist/http-request/response-types.js"
     },
-    "./http-request/shared": {
-      "source": "./src/http-request/shared.ts",
-      "types": "./dist/http-request/shared.d.ts",
-      "default": "./dist/http-request/shared.js"
-    },
     "./http-request/user-agent": {
       "source": "./src/http-request/user-agent.ts",
       "types": "./dist/http-request/user-agent.d.ts",
@@ -2049,11 +1966,6 @@
       "source": "./src/ipc/paths.ts",
       "types": "./dist/ipc/paths.d.ts",
       "default": "./dist/ipc/paths.js"
-    },
-    "./ipc/shared": {
-      "source": "./src/ipc/shared.ts",
-      "types": "./dist/ipc/shared.d.ts",
-      "default": "./dist/ipc/shared.js"
     },
     "./ipc/types": {
       "source": "./src/ipc/types.ts",
@@ -2167,11 +2079,6 @@
       "types": "./dist/logger/semantic-methods.d.ts",
       "default": "./dist/logger/semantic-methods.js"
     },
-    "./logger/shared": {
-      "source": "./src/logger/shared.ts",
-      "types": "./dist/logger/shared.d.ts",
-      "default": "./dist/logger/shared.js"
-    },
     "./logger/stream": {
       "source": "./src/logger/stream.ts",
       "types": "./dist/logger/stream.d.ts",
@@ -2241,15 +2148,6 @@
       },
       "types": "./dist/memo/once.d.ts",
       "default": "./dist/memo/once.js"
-    },
-    "./memo/shared": {
-      "source": "./src/memo/shared.ts",
-      "browser": {
-        "types": "./dist/memo/shared.d.ts",
-        "default": "./dist/memo/shared.js"
-      },
-      "types": "./dist/memo/shared.d.ts",
-      "default": "./dist/memo/shared.js"
     },
     "./memo/types": {
       "source": "./src/memo/types.ts",
@@ -2638,11 +2536,6 @@
       "types": "./dist/paths/rewire.d.ts",
       "default": "./dist/paths/rewire.js"
     },
-    "./paths/shared": {
-      "source": "./src/paths/shared.ts",
-      "types": "./dist/paths/shared.d.ts",
-      "default": "./dist/paths/shared.js"
-    },
     "./paths/socket": {
       "source": "./src/paths/socket.ts",
       "types": "./dist/paths/socket.d.ts",
@@ -2667,11 +2560,6 @@
       "source": "./src/perf/report.ts",
       "types": "./dist/perf/report.d.ts",
       "default": "./dist/perf/report.js"
-    },
-    "./perf/shared": {
-      "source": "./src/perf/shared.ts",
-      "types": "./dist/perf/shared.d.ts",
-      "default": "./dist/perf/shared.js"
     },
     "./perf/timer": {
       "source": "./src/perf/timer.ts",
@@ -2823,11 +2711,6 @@
       "types": "./dist/process/open-url.d.ts",
       "default": "./dist/process/open-url.js"
     },
-    "./process/shared": {
-      "source": "./src/process/shared.ts",
-      "types": "./dist/process/shared.d.ts",
-      "default": "./dist/process/shared.js"
-    },
     "./process/spawn/child": {
       "source": "./src/process/spawn/child.ts",
       "types": "./dist/process/spawn/child.d.ts",
@@ -2847,11 +2730,6 @@
       "source": "./src/process/spawn/pty.ts",
       "types": "./dist/process/spawn/pty.d.ts",
       "default": "./dist/process/spawn/pty.js"
-    },
-    "./process/spawn/shared": {
-      "source": "./src/process/spawn/shared.ts",
-      "types": "./dist/process/spawn/shared.d.ts",
-      "default": "./dist/process/spawn/shared.js"
     },
     "./process/spawn/stdio": {
       "source": "./src/process/spawn/stdio.ts",
@@ -2902,11 +2780,6 @@
       "source": "./src/promises/retry.ts",
       "types": "./dist/promises/retry.d.ts",
       "default": "./dist/promises/retry.js"
-    },
-    "./promises/shared": {
-      "source": "./src/promises/shared.ts",
-      "types": "./dist/promises/shared.d.ts",
-      "default": "./dist/promises/shared.js"
     },
     "./promises/timers": {
       "source": "./src/promises/timers.ts",
@@ -3050,11 +2923,6 @@
       "types": "./dist/secrets/rc.d.ts",
       "default": "./dist/secrets/rc.js"
     },
-    "./secrets/shared": {
-      "source": "./src/secrets/shared.ts",
-      "types": "./dist/secrets/shared.d.ts",
-      "default": "./dist/secrets/shared.js"
-    },
     "./secrets/socket-api-token": {
       "source": "./src/secrets/socket-api-token.ts",
       "types": "./dist/secrets/socket-api-token.d.ts",
@@ -3150,11 +3018,6 @@
       "types": "./dist/sorts/semver.d.ts",
       "default": "./dist/sorts/semver.js"
     },
-    "./sorts/shared": {
-      "source": "./src/sorts/shared.ts",
-      "types": "./dist/sorts/shared.d.ts",
-      "default": "./dist/sorts/shared.js"
-    },
     "./sorts/strings": {
       "source": "./src/sorts/strings.ts",
       "types": "./dist/sorts/strings.d.ts",
@@ -3244,11 +3107,6 @@
       "source": "./src/stdio/prompts-types.ts",
       "types": "./dist/stdio/prompts-types.d.ts",
       "default": "./dist/stdio/prompts-types.js"
-    },
-    "./stdio/shared": {
-      "source": "./src/stdio/shared.ts",
-      "types": "./dist/stdio/shared.d.ts",
-      "default": "./dist/stdio/shared.js"
     },
     "./stdio/stderr": {
       "source": "./src/stdio/stderr.ts",
@@ -3469,15 +3327,6 @@
       },
       "types": "./dist/versions/range.d.ts",
       "default": "./dist/versions/range.js"
-    },
-    "./versions/shared": {
-      "source": "./src/versions/shared.ts",
-      "browser": {
-        "types": "./dist/versions/shared.d.ts",
-        "default": "./dist/versions/shared.js"
-      },
-      "types": "./dist/versions/shared.d.ts",
-      "default": "./dist/versions/shared.js"
     },
     "./versions/types": {
       "source": "./src/versions/types.ts",
