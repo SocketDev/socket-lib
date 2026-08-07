@@ -2871,6 +2871,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/inclusive-language: {}
 
+  .config/fleet/oxlint-plugin/fleet/lint-disable-precedes-code: {}
+
   .config/fleet/oxlint-plugin/fleet/max-comment-block-lines: {}
 
   .config/fleet/oxlint-plugin/fleet/max-file-lines: {}
@@ -2945,6 +2947,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/no-promise-race-in-loop: {}
 
+  .config/fleet/oxlint-plugin/fleet/no-redundant-spread-fallback: {}
+
   .config/fleet/oxlint-plugin/fleet/no-required-in-options-bag: {}
 
   .config/fleet/oxlint-plugin/fleet/no-runtime-features-below-engine-floor: {}
@@ -2966,6 +2970,8 @@ importers:
   .config/fleet/oxlint-plugin/fleet/no-sync-rm-in-test-lifecycle: {}
 
   .config/fleet/oxlint-plugin/fleet/no-top-level-await: {}
+
+  .config/fleet/oxlint-plugin/fleet/no-truncated-lint-disable-reason: {}
 
   .config/fleet/oxlint-plugin/fleet/no-underscore-identifier: {}
 
@@ -3031,6 +3037,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/prefer-pure-call-form: {}
 
+  .config/fleet/oxlint-plugin/fleet/prefer-replace-function: {}
+
   .config/fleet/oxlint-plugin/fleet/prefer-repo-root-dot-cache: {}
 
   .config/fleet/oxlint-plugin/fleet/prefer-safe-delete: {}
@@ -3078,6 +3086,8 @@ importers:
   .config/fleet/oxlint-plugin/fleet/sort-set-args: {}
 
   .config/fleet/oxlint-plugin/fleet/sort-source-methods: {}
+
+  .config/fleet/oxlint-plugin/fleet/terse-lint-disable-reason: {}
 
   .config/fleet/oxlint-plugin/fleet/use-fleet-canonical-api-token-getter: {}
 

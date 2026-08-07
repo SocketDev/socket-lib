@@ -332,6 +332,11 @@
       "types": "./dist/argv/flag-types.d.ts",
       "default": "./dist/argv/flag-types.js"
     },
+    "./argv/meta": {
+      "source": "./src/argv/meta.ts",
+      "types": "./dist/argv/meta.d.ts",
+      "default": "./dist/argv/meta.js"
+    },
     "./argv/parse": {
       "source": "./src/argv/parse.ts",
       "types": "./dist/argv/parse.d.ts",
@@ -577,6 +582,11 @@
       "source": "./src/constants/package-default-socket-categories.ts",
       "types": "./dist/constants/package-default-socket-categories.d.ts",
       "default": "./dist/constants/package-default-socket-categories.js"
+    },
+    "./constants/package-managers": {
+      "source": "./src/constants/package-managers.ts",
+      "types": "./dist/constants/package-managers.d.ts",
+      "default": "./dist/constants/package-managers.js"
     },
     "./constants/packages": {
       "source": "./src/constants/packages.ts",
@@ -1751,6 +1761,11 @@
       "types": "./dist/git/unstaged.d.ts",
       "default": "./dist/git/unstaged.js"
     },
+    "./github/cli": {
+      "source": "./src/github/cli.ts",
+      "types": "./dist/github/cli.d.ts",
+      "default": "./dist/github/cli.js"
+    },
     "./github/commit": {
       "source": "./src/github/commit.ts",
       "types": "./dist/github/commit.d.ts",
@@ -2741,6 +2756,11 @@
       "types": "./dist/process/spawn/types.d.ts",
       "default": "./dist/process/spawn/types.js"
     },
+    "./process/spawn/windows-shell": {
+      "source": "./src/process/spawn/windows-shell.ts",
+      "types": "./dist/process/spawn/windows-shell.d.ts",
+      "default": "./dist/process/spawn/windows-shell.js"
+    },
     "./process/transient": {
       "source": "./src/process/transient.ts",
       "types": "./dist/process/transient.d.ts",
@@ -2883,6 +2903,11 @@
       "types": "./dist/sea/detect.d.ts",
       "default": "./dist/sea/detect.js"
     },
+    "./secrets/addon": {
+      "source": "./src/secrets/addon.ts",
+      "types": "./dist/secrets/addon.d.ts",
+      "default": "./dist/secrets/addon.js"
+    },
     "./secrets/broker": {
       "source": "./src/secrets/broker.ts",
       "types": "./dist/secrets/broker.d.ts",
@@ -2907,6 +2932,11 @@
       "source": "./src/secrets/linux.ts",
       "types": "./dist/secrets/linux.d.ts",
       "default": "./dist/secrets/linux.js"
+    },
+    "./secrets/login": {
+      "source": "./src/secrets/login.ts",
+      "types": "./dist/secrets/login.d.ts",
+      "default": "./dist/secrets/login.js"
     },
     "./secrets/macos": {
       "source": "./src/secrets/macos.ts",

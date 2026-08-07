@@ -10,6 +10,7 @@ packages:
   - .config/repo/oxlint-plugin/*
   - tools/*
   - '.claude/hooks/fleet/*'
+  - '.claude/hooks/repo/*'
 
 # Catalog entries shared across hook workspaces. The hooks live in
 # `.claude/hooks/*` and depend on the same Socket fleet packages the
