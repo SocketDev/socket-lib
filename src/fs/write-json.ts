@@ -22,24 +22,36 @@ const NEWLINE_REGEX = /\n/g
  * line endings and indentation.
  *
  * @param json - Value to stringify.
- * @param EOL - End-of-line sequence.
- * @param finalEOL - Whether to add final newline.
- * @param replacer - JSON replacer function.
- * @param spaces - Indentation spaces or string.
+ * @param options - Formatting options.
+ * @param options.EOL - End-of-line sequence.
+ * @param options.finalEOL - Whether to add final newline.
+ * @param options.replacer - JSON replacer function.
+ * @param options.spaces - Indentation spaces or string.
  *
  * @returns Formatted JSON string
  */
-// socket-lint: allow boolean-trap -- public API; callers across other files
-// pass `finalEOL` positionally, so an options object would be a breaking change.
 export function stringify(
   json: unknown,
-  EOL: string,
-  finalEOL: boolean,
-  replacer: JsonReviver | undefined,
-  spaces: number | string = 2,
+  options?:
+    | {
+        EOL?: string | undefined
+        finalEOL?: boolean | undefined
+        replacer?: JsonReviver | undefined
+        spaces?: number | string | undefined
+      }
+    | undefined,
 ): string {
+  const opts = { __proto__: null, ...options } as {
+    EOL: string | undefined
+    finalEOL: boolean | undefined
+    replacer: JsonReviver | undefined
+    spaces: number | string | undefined
+  }
+  const EOL = opts.EOL || '\n'
+  const finalEOL = opts.finalEOL !== undefined ? opts.finalEOL : true
+  const spaces = opts.spaces !== undefined ? opts.spaces : 2
   const EOF = finalEOL ? EOL : ''
-  const str = JSONStringify(json, replacer, spaces)
+  const str = JSONStringify(json, opts.replacer, spaces)
   return `${StringPrototypeReplace(str, NEWLINE_REGEX, EOL)}${EOF}`
 }
 
@@ -83,13 +95,7 @@ export async function writeJson(
     ...opts,
   } as WriteJsonOptions
   const fs = getNodeFs()
-  const jsonString = stringify(
-    jsonContent,
-    EOL || '\n',
-    finalEOL !== undefined ? finalEOL : true,
-    replacer,
-    spaces,
-  )
+  const jsonString = stringify(jsonContent, { EOL, finalEOL, replacer, spaces })
   await fs.promises.writeFile(filepath, jsonString, {
     encoding: 'utf8',
     ...fsOptions,
@@ -132,13 +138,7 @@ export function writeJsonSync(
     ...opts,
   }
   const fs = getNodeFs()
-  const jsonString = stringify(
-    jsonContent,
-    EOL || '\n',
-    finalEOL !== undefined ? finalEOL : true,
-    replacer,
-    spaces,
-  )
+  const jsonString = stringify(jsonContent, { EOL, finalEOL, replacer, spaces })
   fs.writeFileSync(filepath, jsonString, {
     encoding: 'utf8',
     ...fsOptions,

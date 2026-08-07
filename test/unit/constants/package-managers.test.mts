@@ -32,7 +32,7 @@ import {
   YARN_BERRY,
   YARN_CLASSIC,
   YARN_LOCK,
-} from '../../../src/constants/agents'
+} from '../../../src/constants/package-managers'
 import {
   BUN as stableBUN,
   NPM as stableNPM,
@@ -49,7 +49,7 @@ import {
 } from '@socketsecurity/lib-stable/constants/agents'
 import { describe, expect, it } from 'vitest'
 
-describe('constants/agents', () => {
+describe('constants/package-managers', () => {
   describe('agent names', () => {
     it('should export NPM constant', () => {
       expect(NPM).toBe('npm')

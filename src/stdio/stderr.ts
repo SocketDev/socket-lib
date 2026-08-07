@@ -23,11 +23,11 @@ const stderr: NodeJS.WriteStream = process.stderr
  * @example
  *   ;```ts
  *   writeError('Processing...')
- *   clearLine()
+ *   clearStderrLine()
  *   writeError('Done!')
  *   ```
  */
-export function clearLine(): void {
+export function clearStderrLine(): void {
   clearLineOn(stderr)
 }
 
@@ -36,14 +36,14 @@ export function clearLine(): void {
  *
  * @example
  *   ;```ts
- *   cursorTo(0) // Move to start of line
- *   cursorTo(10, 5) // Move to column 10, row 5
+ *   cursorToStderr(0) // Move to start of line
+ *   cursorToStderr(10, 5) // Move to column 10, row 5
  *   ```
  *
  * @param x - Column position (0-based)
  * @param y - Row position (0-based, optional)
  */
-export function cursorTo(x: number, y?: number | undefined): void {
+export function cursorToStderr(x: number, y?: number | undefined): void {
   cursorToOn(stderr, x, y)
 }
 
@@ -52,7 +52,7 @@ export function cursorTo(x: number, y?: number | undefined): void {
  *
  * @example
  *   ```ts
- *   const width = getColumns()
+ *   const width = getStderrColumns()
  *   console.error(`Terminal is ${width} characters wide`)
  *   ```
  *
@@ -60,7 +60,7 @@ export function cursorTo(x: number, y?: number | undefined): void {
  *
  * @returns Terminal width in characters
  */
-export function getColumns(): number {
+export function getStderrColumns(): number {
   return getColumnsOf(stderr)
 }
 
@@ -69,7 +69,7 @@ export function getColumns(): number {
  *
  * @example
  *   ```ts
- *   const height = getRows()
+ *   const height = getStderrRows()
  *   console.error(`Terminal is ${height} lines tall`)
  *   ```
  *
@@ -77,7 +77,7 @@ export function getColumns(): number {
  *
  * @returns Terminal height in lines
  */
-export function getRows(): number {
+export function getStderrRows(): number {
   return getRowsOf(stderr)
 }
 
@@ -86,7 +86,7 @@ export function getRows(): number {
  *
  * @example
  *   ;```ts
- *   if (isTTY()) {
+ *   if (isStderrTTY()) {
  *     // Show colored error messages
  *   } else {
  *     // Use plain text
@@ -95,7 +95,7 @@ export function getRows(): number {
  *
  * @returns `true` if stderr is a TTY, `false` if piped/redirected
  */
-export function isTTY(): boolean {
+export function isStderrTTY(): boolean {
   return isTTYOf(stderr)
 }
 

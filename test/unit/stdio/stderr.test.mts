@@ -11,7 +11,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  clearLine,
+  clearStderrLine,
   stderr,
   writeError,
   writeErrorFormatted,
@@ -285,7 +285,7 @@ describe('stdio/stderr', () => {
         value: true,
         configurable: true,
       })
-      clearLine()
+      clearStderrLine()
       expect(getContext().clearLineSpy).toHaveBeenCalled()
 
       getContext().clearLineSpy!.mockClear()
@@ -295,7 +295,7 @@ describe('stdio/stderr', () => {
         value: false,
         configurable: true,
       })
-      clearLine()
+      clearStderrLine()
       expect(getContext().clearLineSpy).not.toHaveBeenCalled()
     })
 

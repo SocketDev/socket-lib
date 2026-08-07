@@ -162,8 +162,7 @@ export async function downloadNpmPackage(
   const { installed, packageDir } = await ensurePackageInstalled(
     packageName,
     fullPackageSpec,
-    force,
-    { hash, installRoot, lockfile },
+    { force, install: { hash, installRoot, lockfile } },
   )
 
   // Find binary path.
@@ -189,19 +188,25 @@ export async function downloadNpmPackage(
  *   const { installed, packageDir } = await ensurePackageInstalled(
  *   'prettier',
  *   'prettier@3.0.0',
- *   false,
+ *   { force: false },
  *   )
  *   console.log(`Installed: ${installed}, dir: ${packageDir}`)
  *   ```
  */
-// socket-lint: allow boolean-trap -- public API; callers across other files
-// pass `force` positionally, so an options object would be a breaking change.
 export async function ensurePackageInstalled(
   packageName: string,
   packageSpec: string,
-  force: boolean,
-  install?: EnsurePackageInstallOptions | undefined,
+  options?:
+    | {
+        force?: boolean | undefined
+        install?: EnsurePackageInstallOptions | undefined
+      }
+    | undefined,
 ): Promise<{ installed: boolean; packageDir: string }> {
+  const { force, install } = { __proto__: null, ...options } as {
+    force: boolean | undefined
+    install: EnsurePackageInstallOptions | undefined
+  }
   const fs = getNodeFs()
   const path = getNodePath()
   // installRoot bypasses the cache layout entirely: the caller picks the

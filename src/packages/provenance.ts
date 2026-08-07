@@ -2,7 +2,7 @@
  * @file Package provenance and attestation verification utilities.
  */
 
-import { NPM_REGISTRY_URL } from '../constants/agents'
+import { NPM_REGISTRY_URL } from '../constants/package-managers'
 import { getPacoteCachePath } from '../constants/packages'
 
 import makeFetchHappen from '../external/make-fetch-happen'

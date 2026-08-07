@@ -77,11 +77,9 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
       'lodash@4.17.21',
       'lodash',
     )
-    const result = await ensurePackageInstalled(
-      'lodash',
-      'lodash@4.17.21',
-      false,
-    )
+    const result = await ensurePackageInstalled('lodash', 'lodash@4.17.21', {
+      force: false,
+    })
     expect(result.installed).toBe(false)
     // packageDir matches exactly, modulo path normalization.
     expect(normalizePath(result.packageDir)).toBe(normalizePath(packageDir))
@@ -94,7 +92,7 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
     const result = await ensurePackageInstalled(
       '@scope/pkg',
       '@scope/pkg@2.0.0',
-      false,
+      { force: false },
     )
     expect(result.installed).toBe(false)
   })
@@ -122,8 +120,9 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
     // only on .npmrc avoids the Arborist-overwrites-lockfile race that
     // makes the package-lock.json assertion flaky in concurrent runs.
     await expect(
-      ensurePackageInstalled('lf-test', 'lf-test@1.0.0', false, {
-        lockfile: lockfileContent,
+      ensurePackageInstalled('lf-test', 'lf-test@1.0.0', {
+        force: false,
+        install: { lockfile: lockfileContent },
       }),
     ).rejects.toBeDefined()
 
@@ -158,12 +157,10 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
       JSON.stringify({ name: 'lodash', version: '4.17.21' }),
     )
 
-    const result = await ensurePackageInstalled(
-      'lodash',
-      'lodash@4.17.21',
-      false,
-      { installRoot },
-    )
+    const result = await ensurePackageInstalled('lodash', 'lodash@4.17.21', {
+      force: false,
+      install: { installRoot },
+    })
 
     expect(result.installed).toBe(false)
     expect(normalizePath(result.packageDir)).toBe(normalizePath(installRoot))
@@ -206,8 +203,7 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
     const customResult = await ensurePackageInstalled(
       'lodash',
       'lodash@4.17.21',
-      false,
-      { installRoot: customPath },
+      { force: false, install: { installRoot: customPath } },
     )
     expect(normalizePath(customResult.packageDir)).toBe(
       normalizePath(customPath),
@@ -221,7 +217,7 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
       const defaultResult = await ensurePackageInstalled(
         'lodash',
         'lodash@4.17.21',
-        false,
+        { force: false },
       )
       expect(normalizePath(defaultResult.packageDir)).toBe(
         normalizePath(path.join(defaultDlxDir, cacheKey)),
@@ -251,8 +247,7 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
     const result = await ensurePackageInstalled(
       '@scope/pkg',
       '@scope/pkg@2.0.0',
-      false,
-      { installRoot },
+      { force: false, install: { installRoot } },
     )
 
     expect(result.installed).toBe(false)

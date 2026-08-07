@@ -3,20 +3,20 @@
  *
  *   - stderr stream export
  *   - Stream detection (TTY vs pipe)
- *   - Cursor control (clearLine, cursorTo)
- *   - Terminal dimensions (getColumns, getRows) Used by Socket tools for
- *     terminal-aware diagnostic output.
+ *   - Cursor control (clearStderrLine, cursorToStderr)
+ *   - Terminal dimensions (getStderrColumns, getStderrRows) Used by Socket tools
+ *     for terminal-aware diagnostic output.
  */
 
 import process from 'node:process'
 import { describe, expect, it } from 'vitest'
 
 import {
-  clearLine,
-  cursorTo,
-  getColumns,
-  getRows,
-  isTTY,
+  clearStderrLine,
+  cursorToStderr,
+  getStderrColumns,
+  getStderrRows,
+  isStderrTTY,
   stderr,
 } from '../../../src/stdio/stderr'
 import { setupStdioTestSuite } from '../util/stdio-test-helper'
@@ -35,9 +35,9 @@ describe('stdio/stderr terminal', () => {
     })
   })
 
-  describe('clearLine', () => {
-    it('should export clearLine function', () => {
-      expect(typeof clearLine).toBe('function')
+  describe('clearStderrLine', () => {
+    it('should export clearStderrLine function', () => {
+      expect(typeof clearStderrLine).toBe('function')
     })
 
     it('should clear line in TTY', () => {
@@ -45,7 +45,7 @@ describe('stdio/stderr terminal', () => {
         value: true,
         configurable: true,
       })
-      clearLine()
+      clearStderrLine()
       expect(getContext().cursorToSpy).toHaveBeenCalledWith(0)
       expect(getContext().clearLineSpy).toHaveBeenCalledWith(0)
     })
@@ -55,14 +55,14 @@ describe('stdio/stderr terminal', () => {
         value: true,
         configurable: true,
       })
-      const result = clearLine()
+      const result = clearStderrLine()
       expect(result).toBeUndefined()
     })
   })
 
-  describe('cursorTo', () => {
-    it('should export cursorTo function', () => {
-      expect(typeof cursorTo).toBe('function')
+  describe('cursorToStderr', () => {
+    it('should export cursorToStderr function', () => {
+      expect(typeof cursorToStderr).toBe('function')
     })
 
     it('should move cursor to x position in TTY', () => {
@@ -70,7 +70,7 @@ describe('stdio/stderr terminal', () => {
         value: true,
         configurable: true,
       })
-      cursorTo(10)
+      cursorToStderr(10)
       expect(getContext().cursorToSpy).toHaveBeenCalledWith(10, undefined)
     })
 
@@ -79,7 +79,7 @@ describe('stdio/stderr terminal', () => {
         value: true,
         configurable: true,
       })
-      cursorTo(10, 5)
+      cursorToStderr(10, 5)
       expect(getContext().cursorToSpy).toHaveBeenCalledWith(10, 5)
     })
 
@@ -88,7 +88,7 @@ describe('stdio/stderr terminal', () => {
         value: true,
         configurable: true,
       })
-      cursorTo(0, 0)
+      cursorToStderr(0, 0)
       expect(getContext().cursorToSpy).toHaveBeenCalledWith(0, 0)
     })
 
@@ -97,7 +97,7 @@ describe('stdio/stderr terminal', () => {
         value: true,
         configurable: true,
       })
-      const result = cursorTo(0)
+      const result = cursorToStderr(0)
       expect(result).toBeUndefined()
     })
 
@@ -106,7 +106,7 @@ describe('stdio/stderr terminal', () => {
         value: true,
         configurable: true,
       })
-      cursorTo(1000, 500)
+      cursorToStderr(1000, 500)
       expect(getContext().cursorToSpy).toHaveBeenCalledWith(1000, 500)
     })
 
@@ -115,14 +115,14 @@ describe('stdio/stderr terminal', () => {
         value: true,
         configurable: true,
       })
-      cursorTo(-1, -1)
+      cursorToStderr(-1, -1)
       expect(getContext().cursorToSpy).toHaveBeenCalledWith(-1, -1)
     })
   })
 
-  describe('isTTY', () => {
-    it('should export isTTY function', () => {
-      expect(typeof isTTY).toBe('function')
+  describe('isStderrTTY', () => {
+    it('should export isStderrTTY function', () => {
+      expect(typeof isStderrTTY).toBe('function')
     })
 
     it('should return true when stderr is TTY', () => {
@@ -130,7 +130,7 @@ describe('stdio/stderr terminal', () => {
         value: true,
         configurable: true,
       })
-      expect(isTTY()).toBe(true)
+      expect(isStderrTTY()).toBe(true)
     })
 
     it('should return false when stderr is not TTY', () => {
@@ -138,7 +138,7 @@ describe('stdio/stderr terminal', () => {
         value: false,
         configurable: true,
       })
-      expect(isTTY()).toBe(false)
+      expect(isStderrTTY()).toBe(false)
     })
 
     it('should return false when isTTY is undefined', () => {
@@ -146,17 +146,17 @@ describe('stdio/stderr terminal', () => {
         value: undefined,
         configurable: true,
       })
-      expect(isTTY()).toBe(false)
+      expect(isStderrTTY()).toBe(false)
     })
 
     it('should be a boolean', () => {
-      expect(typeof isTTY()).toBe('boolean')
+      expect(typeof isStderrTTY()).toBe('boolean')
     })
   })
 
-  describe('getColumns', () => {
-    it('should export getColumns function', () => {
-      expect(typeof getColumns).toBe('function')
+  describe('getStderrColumns', () => {
+    it('should export getStderrColumns function', () => {
+      expect(typeof getStderrColumns).toBe('function')
     })
 
     it('should return actual columns when set', () => {
@@ -164,7 +164,7 @@ describe('stdio/stderr terminal', () => {
         value: 120,
         configurable: true,
       })
-      expect(getColumns()).toBe(120)
+      expect(getStderrColumns()).toBe(120)
     })
 
     it('should return default 80 when columns is undefined', () => {
@@ -172,12 +172,12 @@ describe('stdio/stderr terminal', () => {
         value: undefined,
         configurable: true,
       })
-      expect(getColumns()).toBe(80)
+      expect(getStderrColumns()).toBe(80)
     })
 
     it('should return default 80 when columns is 0', () => {
       Object.defineProperty(stderr, 'columns', { value: 0, configurable: true })
-      expect(getColumns()).toBe(80)
+      expect(getStderrColumns()).toBe(80)
     })
 
     it('should handle small terminal width', () => {
@@ -185,7 +185,7 @@ describe('stdio/stderr terminal', () => {
         value: 40,
         configurable: true,
       })
-      expect(getColumns()).toBe(40)
+      expect(getStderrColumns()).toBe(40)
     })
 
     it('should handle large terminal width', () => {
@@ -193,22 +193,22 @@ describe('stdio/stderr terminal', () => {
         value: 300,
         configurable: true,
       })
-      expect(getColumns()).toBe(300)
+      expect(getStderrColumns()).toBe(300)
     })
 
     it('should be a number', () => {
-      expect(typeof getColumns()).toBe('number')
+      expect(typeof getStderrColumns()).toBe('number')
     })
   })
 
-  describe('getRows', () => {
-    it('should export getRows function', () => {
-      expect(typeof getRows).toBe('function')
+  describe('getStderrRows', () => {
+    it('should export getStderrRows function', () => {
+      expect(typeof getStderrRows).toBe('function')
     })
 
     it('should return actual rows when set', () => {
       Object.defineProperty(stderr, 'rows', { value: 50, configurable: true })
-      expect(getRows()).toBe(50)
+      expect(getStderrRows()).toBe(50)
     })
 
     it('should return default 24 when rows is undefined', () => {
@@ -216,26 +216,26 @@ describe('stdio/stderr terminal', () => {
         value: undefined,
         configurable: true,
       })
-      expect(getRows()).toBe(24)
+      expect(getStderrRows()).toBe(24)
     })
 
     it('should return default 24 when rows is 0', () => {
       Object.defineProperty(stderr, 'rows', { value: 0, configurable: true })
-      expect(getRows()).toBe(24)
+      expect(getStderrRows()).toBe(24)
     })
 
     it('should handle small terminal height', () => {
       Object.defineProperty(stderr, 'rows', { value: 10, configurable: true })
-      expect(getRows()).toBe(10)
+      expect(getStderrRows()).toBe(10)
     })
 
     it('should handle large terminal height', () => {
       Object.defineProperty(stderr, 'rows', { value: 100, configurable: true })
-      expect(getRows()).toBe(100)
+      expect(getStderrRows()).toBe(100)
     })
 
     it('should be a number', () => {
-      expect(typeof getRows()).toBe('number')
+      expect(typeof getStderrRows()).toBe('number')
     })
   })
 
@@ -245,9 +245,9 @@ describe('stdio/stderr terminal', () => {
         value: undefined,
         configurable: true,
       })
-      expect(isTTY()).toBe(false)
-      clearLine() // Should not throw
-      cursorTo(0) // Should not throw
+      expect(isStderrTTY()).toBe(false)
+      clearStderrLine() // Should not throw
+      cursorToStderr(0) // Should not throw
     })
 
     it('should handle terminal dimension changes', () => {
@@ -255,13 +255,13 @@ describe('stdio/stderr terminal', () => {
         value: 80,
         configurable: true,
       })
-      expect(getColumns()).toBe(80)
+      expect(getStderrColumns()).toBe(80)
 
       Object.defineProperty(stderr, 'columns', {
         value: 120,
         configurable: true,
       })
-      expect(getColumns()).toBe(120)
+      expect(getStderrColumns()).toBe(120)
     })
 
     it('should handle null-like terminal dimensions', () => {
@@ -269,13 +269,13 @@ describe('stdio/stderr terminal', () => {
         value: undefined,
         configurable: true,
       })
-      expect(getColumns()).toBe(80)
+      expect(getStderrColumns()).toBe(80)
 
       Object.defineProperty(stderr, 'rows', {
         value: undefined,
         configurable: true,
       })
-      expect(getRows()).toBe(24)
+      expect(getStderrRows()).toBe(24)
     })
   })
 
@@ -285,7 +285,7 @@ describe('stdio/stderr terminal', () => {
         value: false,
         configurable: true,
       })
-      expect(isTTY()).toBe(false)
+      expect(isStderrTTY()).toBe(false)
     })
 
     it('should handle terminal size queries', () => {
@@ -294,8 +294,8 @@ describe('stdio/stderr terminal', () => {
         configurable: true,
       })
       Object.defineProperty(stderr, 'rows', { value: 40, configurable: true })
-      const width = getColumns()
-      const height = getRows()
+      const width = getStderrColumns()
+      const height = getStderrRows()
       expect(width).toBe(120)
       expect(height).toBe(40)
     })

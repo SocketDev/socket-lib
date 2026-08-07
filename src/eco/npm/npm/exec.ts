@@ -12,7 +12,7 @@
  *      managers.
  */
 
-import { NPM_BIN_PATH } from '../../../constants/agents'
+import { NPM_BIN_PATH } from '../../../constants/package-managers'
 import { isDebug } from '../../../debug/namespace'
 import {
   ArrayPrototypeIndexOf,
