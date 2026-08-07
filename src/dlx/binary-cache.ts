@@ -217,11 +217,10 @@ export async function listDlxCache(): Promise<
 
       const metaObj = metadata as Record<string, unknown>
 
-      // Get URL from unified schema (source.url) or legacy schema (url).
-      // Allow empty URL for backward compatibility with partial metadata.
+      // Read the URL from the unified source.url field. Empty when
+      // metadata is partial (e.g. missing fields).
       const source = metaObj['source'] as Record<string, unknown> | undefined
-      const url =
-        (source?.['url'] as string) || (metaObj['url'] as string) || ''
+      const url = (source?.['url'] as string) || ''
 
       // Find the binary file in the directory.
       const files = await fs.promises.readdir(entryPath)

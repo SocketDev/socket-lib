@@ -15,11 +15,12 @@ import { ReflectApply } from '../primordials/reflect'
 import { getDefaultSpinner } from '../spinner/default'
 import { applyLinePrefix } from '../strings/format'
 
-import { getDebugJs, getPointingTriangle, getUtil } from './shared'
+import { getDebugJs, getPointingTriangle } from './shared'
 import { getCallerInfo } from './caller-info'
 import { extractOptions, isEnabled } from './namespace'
 
 import { getSocketDebug } from '../env/socket'
+import { getNodeUtil } from '../node/util'
 
 import type { SpinnerInstance } from '../spinner/types'
 import type { InspectOptions, NamespacesOrOptions } from './types'
@@ -253,7 +254,7 @@ export function debugNs(
  * conditionally writes debug messages to stderr.
  */
 export function debuglog(section: string) {
-  const util = getUtil()
+  const util = getNodeUtil()
   return util.debuglog(section)
 }
 
@@ -262,7 +263,7 @@ export function debuglog(section: string) {
  * with start() and end() methods, plus a callable function.
  */
 export function debugtime(label: string) {
-  const util = getUtil()
+  const util = getNodeUtil()
   // Node.js util doesn't have debugtime - create a custom implementation
   let startTime: number | undefined
   const impl = () => {

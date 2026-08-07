@@ -5,6 +5,7 @@
  */
 
 import { safeMkdir } from '../fs/safe'
+import { getNodePath } from '../node/path'
 import { normalizePath } from '../paths/normalize'
 import { ArrayFrom, ArrayPrototypeSlice } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'
@@ -17,7 +18,6 @@ import {
   DEFAULT_MAX_FILE_SIZE,
   DEFAULT_MAX_TOTAL_SIZE,
   getAdmZip,
-  getPath,
   validatePathWithinBase,
 } from './shared'
 
@@ -58,7 +58,7 @@ export async function extractZip(
 
   const AdmZip = getAdmZip()
   const zip = new AdmZip(archivePath)
-  const path = getPath()
+  const path = getNodePath()
 
   // Pre-validate all entries for security
   const entries = zip.getEntries()

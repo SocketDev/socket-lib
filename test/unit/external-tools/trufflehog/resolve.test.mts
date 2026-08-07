@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import { cacheKey } from '../../../../src/external-tools/trufflehog/resolve'
+import { makeHash } from '../../../../src/integrity'
 
 describe('external-tools/trufflehog/resolve — cacheKey', () => {
   test('returns "local-only" when no opts are given', () => {
@@ -34,16 +35,17 @@ describe('external-tools/trufflehog/resolve — cacheKey', () => {
     ).toBe('dl:3.93.8:linux-x64:sha256-truf:')
   })
 
-  test('encodes a structured integrity', () => {
+  test('encodes a Hash object integrity', () => {
+    const hash = makeHash('sha256', 'a'.repeat(64))
     expect(
       cacheKey({
         downloadIfMissing: {
           platformArch: 'linux-x64',
           version: '3.93.8',
-          integrity: { type: 'checksum', value: 'truf' },
+          integrity: hash,
         },
       }),
-    ).toBe('dl:3.93.8:linux-x64:checksum:truf:')
+    ).toBe(`dl:3.93.8:linux-x64:${hash.sri}:`)
   })
 
   test('encodes cacheDir', () => {

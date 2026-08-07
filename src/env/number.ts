@@ -17,9 +17,6 @@ import type { EnvAsNumberOptions } from './types'
 /**
  * Convert an environment variable value to a number.
  *
- * Back-compat overload: passing a bare number as the second argument is
- * equivalent to `{ defaultValue: N }`.
- *
  * @example
  *   ;```typescript
  *   import { envAsNumber } from '@socketsecurity/lib/env/number'
@@ -27,25 +24,26 @@ import type { EnvAsNumberOptions } from './types'
  *   envAsNumber('3000') // 3000 (int mode)
  *   envAsNumber('3.14', { mode: 'float' }) // 3.14
  *   envAsNumber('abc') // 0
- *   envAsNumber(undefined, 42) // 42 (legacy positional default)
+ *   envAsNumber(undefined, { defaultValue: 42 }) // 42
  *   ```
  *
  * @param value - The value to convert.
- * @param defaultValueOrOptions - Default (number) or options object.
+ * @param options - Options bag: `defaultValue`, `mode`, `allowInfinity`.
  *
  * @returns The parsed number, or the default value if parsing fails
  */
 export function envAsNumber(
   value: unknown,
-  defaultValueOrOptions: number | EnvAsNumberOptions | undefined = 0,
+  options?: EnvAsNumberOptions | undefined,
 ): number {
-  // `?? {}` arm fires only when caller passes undefined explicitly.
-  /* c8 ignore next 4 */
-  const opts: EnvAsNumberOptions =
-    typeof defaultValueOrOptions === 'number'
-      ? { defaultValue: defaultValueOrOptions }
-      : (defaultValueOrOptions ?? {})
-  const { allowInfinity = false, defaultValue = 0, mode = 'int' } = opts
+  const {
+    allowInfinity = false,
+    defaultValue = 0,
+    mode = 'int',
+  } = {
+    __proto__: null,
+    ...options,
+  } as EnvAsNumberOptions
 
   // Fast-paths for the strict `string | undefined` shape, per helpers
   // semantics.

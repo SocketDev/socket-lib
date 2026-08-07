@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import { cacheKey } from '../../../../src/external-tools/opengrep/resolve'
+import { makeHash } from '../../../../src/integrity'
 
 describe('external-tools/opengrep/resolve — cacheKey', () => {
   test('returns "local-only" when no opts are given', () => {
@@ -34,16 +35,17 @@ describe('external-tools/opengrep/resolve — cacheKey', () => {
     ).toBe('dl:1.16.5:linux-x64:sha256-xyz:')
   })
 
-  test('encodes a structured integrity into the key', () => {
+  test('encodes a Hash object integrity into the key', () => {
+    const hash = makeHash('sha512', 'a'.repeat(128))
     expect(
       cacheKey({
         downloadIfMissing: {
           platformArch: 'linux-x64',
           version: '1.16.5',
-          integrity: { type: 'integrity', value: 'sha512-abc' },
+          integrity: hash,
         },
       }),
-    ).toBe('dl:1.16.5:linux-x64:integrity:sha512-abc:')
+    ).toBe(`dl:1.16.5:linux-x64:${hash.sri}:`)
   })
 
   test('encodes cacheDir into the key', () => {

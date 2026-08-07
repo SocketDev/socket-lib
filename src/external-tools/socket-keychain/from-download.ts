@@ -16,14 +16,14 @@ import {
   SOCKET_KEYCHAIN_SUPPORTED_PLATFORM_ARCHES,
 } from './asset-names'
 
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { BinaryDownloader } from '../from-download'
 import type { ResolvedSocketKeychain } from './types'
 
 export interface SocketKeychainFromDownloadOptions {
   cacheDir?: string | undefined
   downloader?: BinaryDownloader | undefined
-  integrity: HashSpec
+  integrity: HashInput
   platformArch: string
   version: string
 }

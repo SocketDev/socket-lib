@@ -254,7 +254,7 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
         JSON.stringify({
           timestamp: Date.now() - 5000,
           integrity: 'sha512-abc',
-          url: 'https://example.com/bin',
+          source: { type: 'download', url: 'https://example.com/bin' },
         }),
       )
       const entries = await listDlxCache()

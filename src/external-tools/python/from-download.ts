@@ -15,7 +15,7 @@ import { downloadAndExtractTool } from '../from-download'
 import { getPythonArch, pythonAsset } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedPython } from './types'
 
 export interface PythonFromDownloadOptions {
@@ -35,7 +35,7 @@ export interface PythonFromDownloadOptions {
   /**
    * Optional pinned integrity (hex SHA-256 or SRI) for the tarball.
    */
-  integrity?: HashSpec | undefined
+  integrity?: HashInput | undefined
   /**
    * Override the extraction directory. Defaults to
    * `~/.socket/_dlx/python/<version>-<tag>-<arch>`.

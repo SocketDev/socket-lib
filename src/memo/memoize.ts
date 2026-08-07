@@ -41,14 +41,14 @@ import type { CacheEntry, MemoizeOptions } from './types'
  */
 export function memoize<Args extends unknown[], Result>(
   fn: (...args: Args) => Result,
-  options: MemoizeOptions<Args> = {},
+  options?: MemoizeOptions<Args> | undefined,
 ): (...args: Args) => Result {
   const {
     keyGen = (...args) => defaultKeyGen(args),
     maxSize = Number.POSITIVE_INFINITY,
     name = fn.name || 'anonymous',
     ttl = Number.POSITIVE_INFINITY,
-  } = options
+  } = { __proto__: null, ...options } as MemoizeOptions<Args>
 
   if (ttl < 0) {
     throw new TypeErrorCtor('TTL must be non-negative')

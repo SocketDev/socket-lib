@@ -18,7 +18,7 @@ import { cdxgenFromPath } from './from-path'
 import { cdxgenFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { CdxgenVariant } from './asset-names'
 import type { ResolvedCdxgen } from './types'
 
@@ -30,7 +30,7 @@ export interface ResolveCdxgenOptions {
         version: string
         platformArch: string
         variant?: CdxgenVariant | undefined
-        integrity?: HashSpec | undefined
+        integrity?: HashInput | undefined
         cacheDir?: string | undefined
         downloader?: BinaryDownloader | undefined
       }
@@ -50,11 +50,7 @@ export function cacheKey(options: ResolveCdxgenOptions | undefined): string {
   const { cacheDir, integrity, platformArch, variant, version } =
     options.downloadIfMissing
   const integrityKey =
-    typeof integrity === 'string'
-      ? integrity
-      : integrity
-        ? `${integrity.type}:${integrity.value}`
-        : ''
+    typeof integrity === 'string' ? integrity : integrity ? integrity.sri : ''
   return `dl:${version}:${platformArch}:${variant ?? 'slim'}:${integrityKey}:${cacheDir ?? ''}`
 }
 

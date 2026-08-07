@@ -24,11 +24,6 @@ let tarFs: typeof tarFsType | undefined
 
 import { getNodePath } from '../node/path'
 
-// Re-export canonical node:path loader under the archives/ legacy name
-// for siblings (extract.ts, …). New code should import getNodePath
-// from '@socketsecurity/lib/node/path' directly.
-export { getNodePath as getPath } from '../node/path'
-
 /**
  * Assert that an archive file exists on disk before handing it to the
  * underlying extractor. Normalizes the "missing archive" surface across all

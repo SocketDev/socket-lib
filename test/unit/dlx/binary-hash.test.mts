@@ -25,7 +25,7 @@ afterAll(async () => {
 })
 
 describe.sequential('dlx/binary hash normalization', () => {
-  it('accepts an integrity hash object', async () => {
+  it('accepts a sha512 SRI hash string', async () => {
     await runWithTempDir(async tmpDir => {
       const restoreHome = mockHomeDir(tmpDir)
       const isWindows = process.platform === 'win32'
@@ -39,7 +39,7 @@ describe.sequential('dlx/binary hash normalization', () => {
 
       try {
         const result = await dlxBinary([], {
-          hash: { type: 'integrity', value: integrity },
+          hash: integrity,
           name: `integrity-hash-binary${isWindows ? '.cmd' : ''}`,
           url: `${testServer.baseUrl}/${isWindows ? 'binary-windows.cmd' : 'binary-with-integrity'}`,
         })
@@ -52,7 +52,7 @@ describe.sequential('dlx/binary hash normalization', () => {
     }, 'dlx-binary-integrity-hash-')
   })
 
-  it('accepts a checksum hash object', async () => {
+  it('accepts a sha256 hex hash string', async () => {
     await runWithTempDir(async tmpDir => {
       const restoreHome = mockHomeDir(tmpDir)
       const isWindows = process.platform === 'win32'
@@ -63,7 +63,7 @@ describe.sequential('dlx/binary hash normalization', () => {
 
       try {
         const result = await dlxBinary([], {
-          hash: { type: 'checksum', value: checksum },
+          hash: checksum,
           name: `checksum-hash-binary${isWindows ? '.cmd' : ''}`,
           url: `${testServer.baseUrl}/${isWindows ? 'binary-windows.cmd' : 'binary'}`,
         })

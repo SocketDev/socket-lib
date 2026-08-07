@@ -17,7 +17,7 @@ import { downloadAndExtractTool } from '../from-download'
 import { getSbtDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedSbt } from './types'
 
 export interface SbtFromDownloadOptions {
@@ -28,7 +28,7 @@ export interface SbtFromDownloadOptions {
   /**
    * Optional pinned integrity from `external-tools.json`.
    */
-  integrity?: HashSpec | undefined
+  integrity?: HashInput | undefined
   /**
    * Override the cache directory. Default:
    * `<getSocketDlxDir()>/sbt/<version>/`.

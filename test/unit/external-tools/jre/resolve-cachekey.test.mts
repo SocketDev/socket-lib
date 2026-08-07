@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import { cacheKey } from '../../../../src/external-tools/jre/resolve'
+import { makeHash } from '../../../../src/integrity'
 
 describe.sequential('external-tools/jre/resolve — cacheKey', () => {
   test('returns "local-only" when no opts are given', () => {
@@ -31,16 +32,17 @@ describe.sequential('external-tools/jre/resolve — cacheKey', () => {
     ).toBe('dl:17:linux-x64:sha256-jdk:')
   })
 
-  test('encodes a structured integrity into the key', () => {
+  test('encodes a Hash object integrity into the key', () => {
+    const hash = makeHash('sha256', 'a'.repeat(64))
     expect(
       cacheKey({
         downloadIfMissing: {
           version: 17,
           platformArch: 'linux-x64',
-          integrity: { type: 'checksum', value: 'jdk-val' },
+          integrity: hash,
         },
       }),
-    ).toBe('dl:17:linux-x64:checksum:jdk-val:')
+    ).toBe(`dl:17:linux-x64:${hash.sri}:`)
   })
 
   test('encodes cacheDir into the key', () => {

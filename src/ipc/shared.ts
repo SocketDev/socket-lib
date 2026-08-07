@@ -24,9 +24,3 @@ export const IpcStubSchema = Type.Object({
    */
   data: Type.Unknown(),
 })
-
-// Re-export canonical node:fs / node:path loaders under the ipc/
-// legacy names for siblings. New code should import getNodeFs /
-// getNodePath from '@socketsecurity/lib/node/{fs,path}'.
-export { getNodeFs as getFs } from '../node/fs'
-export { getNodePath as getPath } from '../node/path'

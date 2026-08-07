@@ -40,14 +40,14 @@ import type { CacheEntry, MemoizeOptions } from './types'
  */
 export function memoizeAsync<Args extends unknown[], Result>(
   fn: (...args: Args) => Promise<Result>,
-  options: MemoizeOptions<Args> = {},
+  options?: MemoizeOptions<Args> | undefined,
 ): (...args: Args) => Promise<Result> {
   const {
     keyGen = (...args) => defaultKeyGen(args),
     maxSize = Number.POSITIVE_INFINITY,
     name = fn.name || 'anonymous',
     ttl = Number.POSITIVE_INFINITY,
-  } = options
+  } = { __proto__: null, ...options } as MemoizeOptions<Args>
 
   // LRU via Map insertion-order: see `memoize()` above for the full
   // rationale. Key lifecycle on bump: `cache.delete(key)` +

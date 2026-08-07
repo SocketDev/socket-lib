@@ -30,7 +30,8 @@ import type { MemoizeOptions } from './types'
  *
  * @returns Modified descriptor with memoized method
  */
-export function Memoize(options: MemoizeOptions<unknown[]> = {}) {
+export function Memoize(options?: MemoizeOptions<unknown[]> | undefined) {
+  const opts = { __proto__: null, ...options } as MemoizeOptions<unknown[]>
   return (
     _target: unknown,
     propertyKey: string,
@@ -39,8 +40,8 @@ export function Memoize(options: MemoizeOptions<unknown[]> = {}) {
     const originalMethod = descriptor.value as (...args: unknown[]) => unknown
 
     descriptor.value = memoize(originalMethod, {
-      ...options,
-      name: options.name || propertyKey,
+      ...opts,
+      name: opts.name || propertyKey,
     })
 
     return descriptor

@@ -120,17 +120,10 @@ describe.sequential('releases/github-archives', () => {
 
     it('falls back to .archive when format and pattern give no signal', async () => {
       const out = path.join(testDir, 'fmt-fallback')
-      // AssetPattern object — detectArchiveFormat only inspects strings.
-      await downloadAndExtractArchive(
-        'v1',
-        { __proto__: null, prefix: 'asset-', suffix: '' } as {
-          prefix: string
-          suffix: string
-        },
-        out,
-        REPO,
-        { quiet: true },
-      )
+      // RegExp AssetPattern — detectArchiveFormat only inspects strings.
+      await downloadAndExtractArchive('v1', /^asset-/, out, REPO, {
+        quiet: true,
+      })
       const args = vi.mocked(downloadReleaseAsset).mock.calls[0]!
       expect((args[2] as string).endsWith('.archive')).toBe(true)
     })

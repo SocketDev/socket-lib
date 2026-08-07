@@ -62,25 +62,6 @@ export interface Hash {
 export type HashInput = string | Hash
 
 /**
- * Tagged union representing an expected hash.
- *
- * @deprecated Prefer {@link HashInput} + {@link parseHash}. Kept for the
- *   `integrity?: HashSpec` option fields across dlx / external-tools.
- */
-export type HashSpec =
-  | string
-  | { type: 'integrity'; value: string }
-  | { type: 'checksum'; value: string }
-
-/**
- * Normalized internal form of a {@link HashSpec}. Always an object.
- */
-export interface NormalizedHash {
-  type: 'integrity' | 'checksum'
-  value: string
-}
-
-/**
  * Both pinned hash formats for the same bytes: the sha512 SRI we pin against
  * and the sha256 hex upstream tools emit. Returned from downloads so callers
  * record whichever their config uses.
@@ -132,32 +113,6 @@ const HEX_LENGTH_TO_ALGORITHM: { [length: number]: HashAlgorithm | undefined } =
     96: 'sha384',
     128: 'sha512',
   }
-
-/**
- * Convert a hex checksum to its SRI integrity form.
- *
- * @deprecated Prefer `parseHash(x).sri`, which is total across all algorithms
- *   and infers the algorithm from a bare hex digest. This shim defaults to
- *   `'sha256'` because it only relabels the hex bytes — it does NOT re-hash, so
- *   a sha512 label on a 256-bit digest would be a lie. Idempotent on SRI input.
- *
- * @throws TypeError when the input is neither a recognized SRI nor a hex
- *   digest.
- */
-export function checksumToIntegrity(
-  input: string,
-  algorithm: HashAlgorithm = 'sha256',
-): string {
-  if (isIntegrity(input)) {
-    return input
-  }
-  if (!HEX_RE.test(input)) {
-    throw new TypeErrorCtor(
-      `checksumToIntegrity: expected a hex digest or SRI string, got: ${input}`,
-    )
-  }
-  return makeHash(algorithm, input).sri
-}
 
 /**
  * Compute a single {@link Hash} of `bytes`. Defaults to sha512 — the canonical
@@ -222,29 +177,6 @@ export function equalHashes(a: HashInput, b: HashInput): boolean {
 }
 
 /**
- * Convert an SRI integrity string to its hex checksum form.
- *
- * @deprecated Prefer `parseHash(x).hex`, which is total across all algorithms.
- *   This shim is sha256-only (throws on sha384 / sha512) to preserve its
- *   historical "checksums are sha256" contract. Idempotent on hex input.
- *
- * @throws TypeError when the input is neither a recognized SRI nor a hex
- *   checksum, or when the input is a non-sha256 SRI.
- */
-export function integrityToChecksum(input: string): string {
-  if (isChecksum(input)) {
-    return input
-  }
-  const parsed = parseIntegrity(input)
-  if (parsed.algorithm !== 'sha256') {
-    throw new TypeErrorCtor(
-      `integrityToChecksum: ${parsed.algorithm} integrity has no 64-hex-char checksum form — checksums are sha256-only by Socket convention. Use parseHash(x).hex for any algorithm.`,
-    )
-  }
-  return BufferPrototypeToString!(BufferFrom!(parsed.body, 'base64'), 'hex')
-}
-
-/**
  * True when `s` is a sha256 hex checksum (exactly 64 hex chars).
  */
 export function isChecksum(s: string): boolean {
@@ -282,53 +214,6 @@ export function makeHash(algorithm: HashAlgorithm, hex: string): Hash {
     hex: lowerHex,
     sri: `${algorithm}-${base64}`,
   })
-}
-
-/**
- * Normalize a {@link HashSpec} to its canonical `{ type, value }` form.
- *
- * @deprecated Prefer {@link parseHash}, which returns an algorithm-tagged
- *   {@link Hash}. Kept for callers that branch on integrity-vs-checksum type.
- *
- * @throws TypeError if the string is not a recognized format, or if an explicit
- *   object's value doesn't match its declared type.
- */
-export function normalizeHash(spec: HashSpec): NormalizedHash {
-  if (typeof spec === 'object' && spec !== null) {
-    if (spec.type === 'integrity') {
-      if (!isIntegrity(spec.value)) {
-        throw new TypeErrorCtor(
-          `normalizeHash: expected SRI integrity "sha(256|384|512)-<base64>", got: ${spec.value}`,
-        )
-      }
-      return { type: 'integrity', value: spec.value }
-    }
-    if (spec.type === 'checksum') {
-      if (!isChecksum(spec.value)) {
-        throw new TypeErrorCtor(
-          `normalizeHash: expected sha256 hex checksum (64 hex chars), got: ${spec.value}`,
-        )
-      }
-      return { type: 'checksum', value: spec.value }
-    }
-    throw new TypeErrorCtor(
-      `normalizeHash: unknown hash type: ${(spec as { type: unknown }).type}`,
-    )
-  }
-  if (typeof spec !== 'string') {
-    throw new TypeErrorCtor(
-      `normalizeHash: expected string or { type, value }, got: ${typeof spec}`,
-    )
-  }
-  if (isIntegrity(spec)) {
-    return { type: 'integrity', value: spec }
-  }
-  if (isChecksum(spec)) {
-    return { type: 'checksum', value: spec }
-  }
-  throw new TypeErrorCtor(
-    `normalizeHash: unrecognized hash format. Expected SRI integrity ("sha(256|384|512)-<base64>") or sha256 hex checksum (64 hex chars), got: ${spec}`,
-  )
 }
 
 /**
@@ -433,11 +318,3 @@ export class HashMismatchError extends Error {
     this.actual = actual
   }
 }
-
-/**
- * @deprecated Renamed to {@link HashMismatchError}. Alias kept for callers that
- *   catch the old name.
- *
- * @unused No internal or Socket consumers; exercised only by its unit tests.
- */
-export const DlxHashMismatchError = HashMismatchError

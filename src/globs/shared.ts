@@ -29,12 +29,6 @@ export const matcherCache = new MapCtor<string, (path: string) => boolean>()
 let cachedFastGlob: typeof fastGlobType | undefined
 let cachedPicomatch: typeof picomatchType | undefined
 
-// Re-export canonical node:fs / node:fs/promises loaders under the
-// globs/ legacy names. New code should import getNodeFs /
-// getNodeFsPromises from '@socketsecurity/lib/node/{fs,fs-promises}'.
-export { getNodeFs as getFs } from '../node/fs'
-export { getNodeFsPromises as getFsPromises } from '../node/fs-promises'
-
 export function getFastGlob() {
   if (cachedFastGlob === undefined) {
     cachedFastGlob = /*@__PURE__*/ require('../external/fast-glob.js')

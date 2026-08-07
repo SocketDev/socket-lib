@@ -19,7 +19,7 @@ import { bazelFromDownload } from './from-download'
 import { bazelFromPath } from './from-path'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedBazel } from './types'
 
 import { MapCtor } from '../../primordials/map-set'
@@ -33,7 +33,7 @@ export interface ResolveBazelOptions {
     | {
         version: string
         platformArch: string
-        integrity?: HashSpec | undefined
+        integrity?: HashInput | undefined
         downloader?: BinaryDownloader | undefined
       }
     | undefined
@@ -51,11 +51,7 @@ export function cacheKey(options: ResolveBazelOptions | undefined): string {
   }
   const { integrity, platformArch, version } = options.downloadIfMissing
   const integrityKey =
-    typeof integrity === 'string'
-      ? integrity
-      : integrity
-        ? `${integrity.type}:${integrity.value}`
-        : ''
+    typeof integrity === 'string' ? integrity : integrity ? integrity.sri : ''
   return `dl:${version}:${platformArch}:${integrityKey}`
 }
 

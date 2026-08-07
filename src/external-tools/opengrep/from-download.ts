@@ -15,13 +15,13 @@ import { downloadAndExtractTool, downloadToolArchive } from '../from-download'
 import { getOpengrepAssetEntry, getOpengrepDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedOpengrep } from './types'
 
 export interface OpengrepFromDownloadOptions {
   version: string
   platformArch: string
-  integrity?: HashSpec | undefined
+  integrity?: HashInput | undefined
   cacheDir?: string | undefined
   downloader?: BinaryDownloader | undefined
 }

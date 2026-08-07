@@ -19,14 +19,6 @@ describe.sequential('env/number — envAsNumber (default int mode)', () => {
     expect(envAsNumber(undefined)).toBe(0)
   })
 
-  test('returns positional defaultValue for undefined (legacy)', () => {
-    expect(envAsNumber(undefined, 42)).toBe(42)
-  })
-
-  test('returns positional defaultValue for null (legacy)', () => {
-    expect(envAsNumber(undefined, 42)).toBe(42)
-  })
-
   test('returns defaultValue via options', () => {
     expect(envAsNumber(undefined, { defaultValue: 99 })).toBe(99)
   })
@@ -66,7 +58,9 @@ describe.sequential('env/number — float mode', () => {
   test('treats null value as undefined (returns defaultValue)', () => {
     const nullValue = JSON.parse('null') as unknown
     expect(
-      envAsNumber(nullValue as Parameters<typeof envAsNumber>[0], 99),
+      envAsNumber(nullValue as Parameters<typeof envAsNumber>[0], {
+        defaultValue: 99,
+      }),
     ).toBe(99)
   })
 })

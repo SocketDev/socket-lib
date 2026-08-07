@@ -18,7 +18,7 @@ import { normalizePath } from '../paths/normalize'
 import { processLock } from '../process/lock-instance'
 import { generateCacheKey } from './cache'
 
-import { normalizeHash } from '../integrity'
+import { parseHash } from '../integrity'
 
 import { ErrorCtor } from '../primordials/error'
 import { StringPrototypeStartsWith } from '../primordials/string'
@@ -84,11 +84,11 @@ export async function downloadBinary(
   let integrity = rawIntegrity
   let sha256 = rawSha256
   if (hashSpec !== undefined) {
-    const normalized = normalizeHash(hashSpec)
-    if (normalized.type === 'integrity') {
-      integrity = normalized.value
+    const parsed = parseHash(hashSpec)
+    if (parsed.algorithm === 'sha256') {
+      sha256 = parsed.hex
     } else {
-      sha256 = normalized.value
+      integrity = parsed.sri
     }
   }
   const fs = getNodeFs()

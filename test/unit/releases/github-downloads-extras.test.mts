@@ -201,12 +201,12 @@ describe.sequential('releases/github-downloads — extras', () => {
       ).rejects.toThrow(/Asset .+ not found in release v1\.0\.0/)
     })
 
-    it('uses object pattern description when assetPattern is not a string', async () => {
+    it('uses RegExp pattern description when assetPattern is not a string', async () => {
       vi.mocked(getReleaseAssetUrl).mockResolvedValueOnce(undefined)
       await expect(
         downloadReleaseAsset(
           'v1.0.0',
-          { prefix: 'asset-', suffix: '.zip' },
+          /^asset-.*\.zip$/,
           path.join(testDir, 'output'),
           REPO,
           { quiet: true },

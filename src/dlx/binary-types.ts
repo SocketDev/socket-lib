@@ -8,7 +8,7 @@
  *   - `DlxMetadata` — on-disk metadata schema for a cached binary
  */
 
-import type { HashSpec } from '../integrity'
+import type { HashInput } from '../integrity'
 import type { HttpDownloadWriteStreamFactory } from '../http-request/download-types'
 import type { spawn } from '../process/spawn/child'
 import type { SpawnOptions } from '../process/spawn/types'
@@ -44,15 +44,15 @@ export interface DlxBinaryOptions {
   /**
    * Expected hash for verification. Accepts either:
    *
-   * - A bare sha512 SRI string (`sha512-<base64>`), sniffed as integrity.
-   * - A bare sha256 hex string (64 hex chars), sniffed as checksum.
-   * - An explicit `{ type: 'integrity' | 'checksum', value }` object.
+   * - A bare SRI string (`sha(256|384|512)-<base64>`).
+   * - A bare hex digest (64/96/128 chars), algorithm inferred by length.
+   * - A parsed {@link Hash} (from `parseHash` / `computeHash`).
    *
    * This is the preferred field. `integrity` and `sha256` remain as lower-level
    * escapes; if both `hash` and one of those is set, `hash` wins for the
    * matching flavor.
    */
-  hash?: HashSpec | undefined
+  hash?: HashInput | undefined
 
   /**
    * Expected SRI integrity hash (sha512-<base64>) for verification. Lower-level

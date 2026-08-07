@@ -32,8 +32,10 @@ const npmBinPath = /*@__PURE__*/ resolveNpmBinPath()
 export const NPM_BIN_PATH = npmBinPath || 'npm'
 
 // NPM CLI entry point - resolved at runtime from npm bin location.
-// NOTE: This is kept for backward compatibility but NPM_BIN_PATH should be used instead
-// because cli.js exports a function that must be invoked, not executed directly.
+// Distinct from NPM_BIN_PATH: this is npm's cli.js FILE path, needed to
+// invoke npm as `node <cli.js> run <script>` on a Node without `--run`
+// support. NPM_BIN_PATH is the npm launcher itself and can't be passed to
+// `node` as a script argument.
 export function resolveNpmRealExecPath(): string | undefined {
   try {
     // Reuse cached npm bin path to avoid duplicate which.sync call.

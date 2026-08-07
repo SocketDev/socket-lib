@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import { cacheKey } from '../../../../src/external-tools/trivy/resolve'
+import { makeHash } from '../../../../src/integrity'
 
 describe('external-tools/trivy/resolve — cacheKey', () => {
   test('returns "local-only" when no opts are given', () => {
@@ -31,16 +32,17 @@ describe('external-tools/trivy/resolve — cacheKey', () => {
     ).toBe('dl:0.69.3:linux-x64:sha256-abc:')
   })
 
-  test('encodes a structured integrity', () => {
+  test('encodes a Hash object integrity', () => {
+    const hash = makeHash('sha256', 'a'.repeat(64))
     expect(
       cacheKey({
         downloadIfMissing: {
           platformArch: 'linux-x64',
           version: '0.69.3',
-          integrity: { type: 'checksum', value: 'abc' },
+          integrity: hash,
         },
       }),
-    ).toBe('dl:0.69.3:linux-x64:checksum:abc:')
+    ).toBe(`dl:0.69.3:linux-x64:${hash.sri}:`)
   })
 
   test('encodes cacheDir', () => {

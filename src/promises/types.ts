@@ -41,9 +41,6 @@ export interface RetryOptions {
    */
   baseDelayMs?: number | undefined
 
-  // REMOVED: Deprecated `factor` option
-  // Migration: Use `backoffFactor` instead
-
   /**
    * Whether to apply randomness to spread out retries and avoid thundering
    * herd. When `true`, adds random delay between 0 and current delay value.
@@ -63,12 +60,6 @@ export interface RetryOptions {
    * @default 10000
    */
   maxDelayMs?: number | undefined
-
-  // REMOVED: Deprecated `maxTimeout` option
-  // Migration: Use `maxDelayMs` instead
-
-  // REMOVED: Deprecated `minTimeout` option
-  // Migration: Use `baseDelayMs` instead
 
   // The JSDoc example below carries the onRetry callback signature, a
   // parameter list rather than prose.

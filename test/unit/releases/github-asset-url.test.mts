@@ -125,25 +125,6 @@ describe.sequential('releases/github-api: getReleaseAssetUrl', () => {
     )
   })
 
-  it('should get asset URL with prefix/suffix object pattern', async () => {
-    vi.mocked(httpRequest).mockResolvedValueOnce(
-      createMockHttpResponse(
-        Buffer.from(JSONStringify(mockRelease)),
-        true,
-        200,
-      ),
-    )
-
-    const url = await getReleaseAssetUrl(
-      'v1.0.0',
-      { prefix: 'models-', suffix: '.tar.gz' },
-      SOCKET_BTM_REPO,
-    )
-    expect(url).toBe(
-      'https://github.com/test/repo/releases/download/v1.0.0/models-data.tar.gz',
-    )
-  })
-
   it(
     'should throw when REST per-tag returns non-ok status',
     async () => {

@@ -7,11 +7,7 @@
  *   - `setPackageEntry(spec, key, details)` — store npm package metadata
  *   - `setBinaryEntry(spec, key, details)` — store binary download metadata
  *   - `getAllPackages()` — enumerate cached package names
- *   - `clear(name)` / `clearAll()` — eviction
- *   - `isFresh(record, ttlMs)` — TTL check The bare `get(name)` / `set(name,
- *     record)` methods are deprecated legacy shims kept for backward
- *     compatibility with pre-5.x callers. Features:
- *   - TTL-based cache expiration
+ *   - `clear(name)` / `clearAll()` — eviction Features:
  *   - Atomic file operations with locking
  *   - JSON-based persistent storage
  *   - Error-resistant implementation Storage Format:
@@ -29,8 +25,6 @@ import { safeDeleteSync, safeMkdirSync } from '../fs/safe'
 import { getDefaultLogger } from '../logger/default'
 import { getSocketDlxDir } from '../paths/socket'
 import { processLock } from '../process/lock-instance'
-
-import { DateNow } from '../primordials/date'
 
 import { JSONParse, JSONStringify } from '../primordials/json'
 
@@ -100,14 +94,6 @@ export interface DlxManifestEntry {
   timestamp: number
   details: PackageDetails | BinaryDetails
 }
-/**
- * Deprecated legacy store record format retained for migration.
- */
-export interface StoreRecord {
-  timestampFetch: number
-  timestampNotification: number
-  version: string
-}
 export interface DlxManifestOptions {
   /**
    * Custom manifest file path (defaults to ~/.socket/_dlx/.dlx-manifest.json).
@@ -150,16 +136,22 @@ export function isPackageEntry(
 }
 
 /**
- * DLX manifest storage manager with atomic operations. Supports both the legacy
- * format keyed by package name and the unified manifest format keyed by spec.
+ * DLX manifest storage manager with atomic operations, keyed by spec. Skips
+ * any on-disk entry that doesn't match the {@link DlxManifestEntry} shape
+ * (no `type` field) instead of throwing, so a manifest file is never
+ * corrupted beyond repair by one malformed entry.
  */
 export class DlxManifest {
   private readonly manifestPath: string
   private readonly lockPath: string
 
-  constructor(options: DlxManifestOptions = {}) {
+  constructor(options?: DlxManifestOptions | undefined) {
+    const { manifestPath } = {
+      __proto__: null,
+      ...options,
+    } as DlxManifestOptions
     this.manifestPath =
-      options.manifestPath ?? path.join(getSocketDlxDir(), MANIFEST_FILE_NAME)
+      manifestPath ?? path.join(getSocketDlxDir(), MANIFEST_FILE_NAME)
     this.lockPath = `${this.manifestPath}.lock`
   }
 
@@ -168,12 +160,15 @@ export class DlxManifest {
    *
    * @private
    */
-  private readManifest(): Record<string, DlxManifestEntry | StoreRecord> {
+  private readManifest(): Record<
+    string,
+    DlxManifestEntry | Record<string, unknown>
+  > {
     try {
       if (!fs.existsSync(this.manifestPath)) {
         return { __proto__: null } as unknown as Record<
           string,
-          DlxManifestEntry | StoreRecord
+          DlxManifestEntry | Record<string, unknown>
         >
       }
 
@@ -188,19 +183,19 @@ export class DlxManifest {
       if (!content) {
         return { __proto__: null } as unknown as Record<
           string,
-          DlxManifestEntry | StoreRecord
+          DlxManifestEntry | Record<string, unknown>
         >
       }
 
       return JSONParse(content) as Record<
         string,
-        DlxManifestEntry | StoreRecord
+        DlxManifestEntry | Record<string, unknown>
       >
     } catch (e) {
       logger.warn(`Failed to read manifest: ${errorMessage(e)}`)
       return { __proto__: null } as unknown as Record<
         string,
-        DlxManifestEntry | StoreRecord
+        DlxManifestEntry | Record<string, unknown>
       >
     }
   }
@@ -211,7 +206,7 @@ export class DlxManifest {
    * @private
    */
   private async writeManifest(
-    data: Record<string, DlxManifestEntry | StoreRecord>,
+    data: Record<string, DlxManifestEntry | Record<string, unknown>>,
   ): Promise<void> {
     // Ensure directory exists.
     const manifestDir = path.dirname(this.manifestPath)
@@ -262,7 +257,7 @@ export class DlxManifest {
 
         const data = JSONParse(content) as Record<
           string,
-          DlxManifestEntry | StoreRecord
+          DlxManifestEntry | Record<string, unknown>
         >
         delete data[name]
 
@@ -311,7 +306,7 @@ export class DlxManifest {
         return []
       }
 
-      const data = JSONParse(content) as Record<string, StoreRecord>
+      const data = JSONParse(content) as Record<string, unknown>
       return ObjectKeys(data)
     } catch (e) {
       logger.warn(`Failed to get package list: ${errorMessage(e)}`)
@@ -326,24 +321,13 @@ export class DlxManifest {
     const data = this.readManifest()
     const entry = data[spec]
 
-    // Check if it's a new-format entry (has 'type' field).
+    // Skip anything that doesn't match the DlxManifestEntry shape (no
+    // 'type' field) rather than returning malformed data to the caller.
     if (entry && 'type' in entry) {
       return entry as DlxManifestEntry
     }
 
     return undefined
-  }
-
-  /**
-   * Check if cached data is fresh based on TTL.
-   */
-  isFresh(record: StoreRecord | undefined, ttlMs: number): boolean {
-    if (!record) {
-      return false
-    }
-
-    const age = DateNow() - record.timestampFetch
-    return age < ttlMs
   }
 
   /**

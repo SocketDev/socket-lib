@@ -6,9 +6,8 @@
 
 import process from 'node:process'
 
+import { getNodePath } from '../node/path'
 import { getOsTmpDir } from '../paths/socket'
-
-import { getPath } from './shared'
 
 /**
  * Get the IPC stub path for a given application.
@@ -43,7 +42,7 @@ import { getPath } from './shared'
  */
 export function getIpcStubPath(appName: string): string {
   const tempDir = getOsTmpDir()
-  const path = getPath()
+  const path = getNodePath()
   const stubDir = path.join(tempDir, '.socket-ipc', appName)
   return path.join(stubDir, `stub-${process.pid}.json`)
 }

@@ -1,17 +1,13 @@
 /**
- * @file `envAsBoolean` — coerce an env-var-shaped value into a boolean. Accepts
- *   a back-compat positional `defaultValue` or an options bag (with `trim`).
- *   Truthy vocabulary is `'1'` / `'true'` / `'yes'` case-insensitively after
- *   optional trim.
+ * @file `envAsBoolean` — coerce an env-var-shaped value into a boolean via an
+ *   options bag (`defaultValue`, `trim`). Truthy vocabulary is `'1'` /
+ *   `'true'` / `'yes'` case-insensitively after optional trim.
  */
 
 import type { EnvAsBooleanOptions } from './types'
 
 /**
  * Convert an environment variable value to a boolean.
- *
- * Back-compat overload: passing a bare boolean as the second argument is
- * equivalent to `{ defaultValue: B }`.
  *
  * @example
  *   ;```typescript
@@ -23,26 +19,23 @@ import type { EnvAsBooleanOptions } from './types'
  *   envAsBoolean('  true  ') // true (trimmed)
  *   envAsBoolean('  true  ', { trim: false }) // false (strict)
  *   envAsBoolean(undefined) // false
- *   envAsBoolean(undefined, true) // true (legacy positional default)
+ *   envAsBoolean(undefined, { defaultValue: true }) // true
  *   ```
  *
  * @param value - The value to convert.
- * @param defaultValueOrOptions - Default (boolean) or options object.
+ * @param options - Options bag: `defaultValue`, `trim`.
  *
  * @returns `true` if value is '1', 'true', or 'yes' (case-insensitive), `false`
  *   otherwise.
  */
 export function envAsBoolean(
   value: unknown,
-  defaultValueOrOptions: boolean | EnvAsBooleanOptions | undefined = false,
+  options?: EnvAsBooleanOptions | undefined,
 ): boolean {
-  // `?? {}` arm fires only when caller passes undefined explicitly.
-  /* c8 ignore next 4 */
-  const opts: EnvAsBooleanOptions =
-    typeof defaultValueOrOptions === 'boolean'
-      ? { defaultValue: defaultValueOrOptions }
-      : (defaultValueOrOptions ?? {})
-  const { defaultValue = false, trim = true } = opts
+  const { defaultValue = false, trim = true } = {
+    __proto__: null,
+    ...options,
+  } as EnvAsBooleanOptions
   if (typeof value === 'string') {
     const candidate = trim ? value.trim() : value
     if (!candidate) {

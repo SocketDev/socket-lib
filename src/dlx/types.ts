@@ -9,7 +9,7 @@
  *   - `DlxPackageResult` — what `dlxPackage` returns
  */
 
-import type { HashSpec } from '../integrity'
+import type { HashInput } from '../integrity'
 import type { LockfileSpec } from './lockfile'
 import type { spawn } from '../process/spawn/child'
 import type { SpawnOptions } from '../process/spawn/types'
@@ -36,11 +36,11 @@ export interface DownloadNpmPackageResult {
 export interface EnsurePackageInstallOptions {
   /**
    * Expected hash of the top-level package tarball. Accepts either: - A bare
-   * sha512 SRI string, sniffed as integrity. - A bare sha256 hex string,
-   * sniffed as checksum. - An explicit `{ type: 'integrity' | 'checksum',
-   * value }` object.
+   * SRI string (`sha(256|384|512)-<base64>`). - A bare hex digest (64/96/128
+   * chars, algorithm inferred by length). - A parsed {@link Hash} (from
+   * `parseHash` / `computeHash`).
    */
-  hash?: HashSpec | undefined
+  hash?: HashInput | undefined
 
   /**
    * Override the install root passed to Arborist. By default, the install root

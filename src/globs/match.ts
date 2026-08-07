@@ -26,12 +26,12 @@
  *      slash makes it `**\/dist`, which both filters interpret correctly.
  */
 
+import { getNodeFs } from '../node/fs'
+import { getNodeFsPromises } from '../node/fs-promises'
 import { fromAsync } from '../promises/resolvers'
 
 import {
   getFastGlob,
-  getFs,
-  getFsPromises,
   normalizeGlobResults,
   normalizeIgnorePatterns,
 } from './shared'
@@ -88,7 +88,7 @@ export async function glob(
   // option surface lines up. Avoids loading fast-glob entirely.
   /* c8 ignore start */
   if (canUseNodeFsGlob(options)) {
-    const fsPromises = getFsPromises()
+    const fsPromises = getNodeFsPromises()
     const out = await fromAsync(
       fsPromises.glob(patterns as string | readonly string[], {
         ...(options?.cwd ? { cwd: options.cwd } : {}),
@@ -129,7 +129,7 @@ export function globSync(
   // surface lines up. Avoids loading fast-glob entirely.
   /* c8 ignore start */
   if (canUseNodeFsGlob(options)) {
-    const fs = getFs()
+    const fs = getNodeFs()
     return normalizeGlobResults([
       ...fs.globSync(patterns as string | readonly string[], {
         ...(options?.cwd ? { cwd: options.cwd } : {}),

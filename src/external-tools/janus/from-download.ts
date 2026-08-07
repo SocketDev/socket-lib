@@ -19,7 +19,7 @@ import {
 } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedJanus } from './types'
 
 import { ErrorCtor } from '../../primordials/error'
@@ -27,7 +27,7 @@ import { ErrorCtor } from '../../primordials/error'
 export interface JanusFromDownloadOptions {
   version: string
   platformArch: string
-  integrity?: HashSpec | undefined
+  integrity?: HashInput | undefined
   /**
    * Override the install directory. By default the binary lands in
    * `<getSocketWheelhouseDir()>/janus/<version>/<platformArch>/` — a shared

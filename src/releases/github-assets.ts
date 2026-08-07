@@ -6,16 +6,12 @@ import { joinOr } from '../arrays/join'
 import picomatch from '../external/picomatch'
 
 import { ArrayIsArray } from '../primordials/array'
-import {
-  StringPrototypeEndsWith,
-  StringPrototypeStartsWith,
-} from '../primordials/string'
 
 import type { AssetPattern } from './github-types'
 
 /**
  * Create a matcher function for a pattern using picomatch for glob patterns or
- * simple prefix/suffix matching for object patterns.
+ * a RegExp test for complex patterns.
  *
  * @example
  *   ;```typescript
@@ -24,13 +20,12 @@ import type { AssetPattern } from './github-types'
  *   isMatch('tool-v1.0-darwin-arm64') // false
  *   ```
  *
- * @param pattern - Pattern to match (string glob, prefix/suffix object, or
- *   RegExp)
+ * @param pattern - Pattern to match (string glob or RegExp)
  *
  * @returns Function that tests if a string matches the pattern
  */
 export function createAssetMatcher(
-  pattern: string | { prefix: string; suffix: string } | RegExp,
+  pattern: AssetPattern,
 ): (input: string) => boolean {
   if (typeof pattern === 'string') {
     // Use picomatch for glob pattern matching.
@@ -38,22 +33,14 @@ export function createAssetMatcher(
     return (input: string) => isMatch(input)
   }
 
-  if (pattern instanceof RegExp) {
-    return (input: string) => pattern.test(input)
-  }
-
-  // Prefix/suffix object pattern, kept for backward compatibility.
-  const { prefix, suffix } = pattern
-  return (input: string) =>
-    StringPrototypeStartsWith(input, prefix) &&
-    StringPrototypeEndsWith(input, suffix)
+  return (input: string) => pattern.test(input)
 }
 
 /**
  * Describe one or more asset patterns for error messages. String patterns are
- * quoted verbatim; object/RegExp patterns collapse to 'matching pattern'.
- * Multiple candidates join with "or" so a not-found error lists everything the
- * lookup tried.
+ * quoted verbatim; RegExp patterns collapse to 'matching pattern'. Multiple
+ * candidates join with "or" so a not-found error lists everything the lookup
+ * tried.
  *
  * @example
  *   ;```typescript

@@ -8,9 +8,9 @@
 
 import process from 'node:process'
 
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 import { ErrorCtor } from '../primordials/error'
-
-import { getFs, getPath } from './shared'
 
 /**
  * Ensure IPC directory exists for stub file creation. Uses restrictive (0o700)
@@ -23,8 +23,8 @@ import { getFs, getPath } from './shared'
  * @internal
  */
 export async function ensureIpcDirectory(filePath: string): Promise<void> {
-  const fs = getFs()
-  const path = getPath()
+  const fs = getNodeFs()
+  const path = getNodePath()
   const dir = path.dirname(filePath)
   await fs.promises.mkdir(dir, { recursive: true, mode: 0o700 })
   // Windows skip-path; tested on Windows runners.

@@ -34,7 +34,7 @@ import { safeMkdir } from '../fs/safe'
 import { downloadBinary } from '../dlx/binary-download'
 
 import type { ExtractOptions } from '../archives/types'
-import type { HashSpec } from '../integrity'
+import type { HashInput } from '../integrity'
 
 /**
  * Result of `downloadAndExtractTool`. Extends `DownloadedArchive` with the
@@ -173,7 +173,7 @@ export interface DownloadOptions {
    * hash. Omit on first use to let the helper compute and return the integrity,
    * then pin it for future calls.
    */
-  integrity?: HashSpec | undefined
+  integrity?: HashInput | undefined
   /**
    * Inject a custom downloader. Defaults to dlx.
    */

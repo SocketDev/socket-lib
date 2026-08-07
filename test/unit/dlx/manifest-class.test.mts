@@ -1,15 +1,15 @@
 /**
- * @file Unit tests for the DlxManifest class new-format entry API. Exercises
- *   the on-disk manifest behavior for dlx download-and-execute cached
- *   packages and binaries:
+ * @file Unit tests for the DlxManifest class entry API. Exercises the on-disk
+ *   manifest behavior for dlx download-and-execute cached packages and
+ *   binaries:
  *
  *   - constructor with a custom vs default path
  *   - getManifestEntry / setPackageEntry / setBinaryEntry
  *   - clearAll
  *   - error handling + concurrent operations The pure type guards (isPackageEntry
- *     / isBinaryEntry) live in manifest.test.mts. The legacy-format API (get /
- *     set / clear / isFresh / getAllPackages) lives in
- *     manifest-legacy.test.mts.
+ *     / isBinaryEntry) live in manifest.test.mts. `clear` / `getAllPackages`
+ *     and the filesystem-failure catch branches live in
+ *     manifest-errors.test.mts.
  */
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'

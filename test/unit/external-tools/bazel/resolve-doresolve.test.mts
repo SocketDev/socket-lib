@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { makeHash } from '../../../../src/integrity'
+
 vi.mock(import('../../../../src/external-tools/bazel/from-path'), () => ({
   bazelFromPath: vi.fn(),
 }))
@@ -50,17 +52,18 @@ describe.sequential('external-tools/bazel/resolve — cacheKey', () => {
     ).toBe('dl:7.0.0:darwin-arm64:sha256-abc')
   })
 
-  test('encodes a structured integrity', async () => {
+  test('encodes a Hash object integrity', async () => {
     const { cacheKey } = await loadFresh()
+    const hash = makeHash('sha256', 'a'.repeat(64))
     expect(
       cacheKey({
         downloadIfMissing: {
           version: '7.0.0',
           platformArch: 'darwin-arm64',
-          integrity: { type: 'checksum', value: 'bazel-csum' },
+          integrity: hash,
         },
       }),
-    ).toBe('dl:7.0.0:darwin-arm64:checksum:bazel-csum')
+    ).toBe(`dl:7.0.0:darwin-arm64:${hash.sri}`)
   })
 })
 

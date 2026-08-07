@@ -24,7 +24,7 @@ import { normalizePath } from '../paths/normalize'
 import { spawn } from '../process/spawn/child'
 import { generateCacheKey } from './cache'
 
-import { normalizeHash } from '../integrity'
+import { parseHash } from '../integrity'
 
 import { ArrayIsArray } from '../primordials/array'
 
@@ -75,11 +75,11 @@ export async function dlxBinary(
   let integrity = rawIntegrity
   let sha256 = rawSha256
   if (hash !== undefined) {
-    const normalized = normalizeHash(hash)
-    if (normalized.type === 'integrity') {
-      integrity = normalized.value
+    const parsed = parseHash(hash)
+    if (parsed.algorithm === 'sha256') {
+      sha256 = parsed.hex
     } else {
-      sha256 = normalized.value
+      integrity = parsed.sri
     }
   }
   const fs = getNodeFs()

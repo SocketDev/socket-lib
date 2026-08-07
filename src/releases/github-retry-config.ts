@@ -31,10 +31,9 @@ export const DEFAULT_BASE_DELAY_MS = 5000
  * @returns The configured base delay in milliseconds.
  */
 export function resolveBaseDelayMs(): number {
-  return envAsNumber(
-    getEnvValue('SOCKET_GITHUB_RETRY_BASE_DELAY_MS'),
-    DEFAULT_BASE_DELAY_MS,
-  )
+  return envAsNumber(getEnvValue('SOCKET_GITHUB_RETRY_BASE_DELAY_MS'), {
+    defaultValue: DEFAULT_BASE_DELAY_MS,
+  })
 }
 
 export const GITHUB_RETRY_CONFIG = ObjectFreeze({

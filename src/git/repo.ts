@@ -142,10 +142,3 @@ export function getCachedRealpath(pathname: string): string {
 export function getCwd(): string {
   return getCachedRealpath(processCwd())
 }
-
-// Re-export canonical node lazy loaders under the `git/repo` legacy
-// names so existing siblings keep working. New code should import
-// `getNodeFs` / `getNodePath` from `@socketsecurity/lib/node/{fs,path}`
-// directly.
-export { getNodeFs as getFs } from '../node/fs'
-export { getNodePath as getPath } from '../node/path'

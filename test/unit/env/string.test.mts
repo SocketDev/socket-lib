@@ -19,14 +19,6 @@ describe.sequential('env/string — envAsString', () => {
     expect(envAsString(undefined)).toBe('')
   })
 
-  test('returns positional defaultValue when value is undefined (legacy)', () => {
-    expect(envAsString(undefined, 'fallback')).toBe('fallback')
-  })
-
-  test('returns positional defaultValue when value is null (legacy)', () => {
-    expect(envAsString(undefined, 'fallback')).toBe('fallback')
-  })
-
   test('trims the defaultValue by default', () => {
     expect(envAsString(undefined, { defaultValue: '  fb  ' })).toBe('fb')
   })

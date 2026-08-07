@@ -24,7 +24,7 @@ import { jreFromPath } from './from-path'
 import { jreFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedJre } from './types'
 
 import { MapCtor } from '../../primordials/map-set'
@@ -39,7 +39,7 @@ export interface ResolveJreOptions {
     | {
         version: number
         platformArch: string
-        integrity?: HashSpec | undefined
+        integrity?: HashInput | undefined
         cacheDir?: string | undefined
         downloader?: BinaryDownloader | undefined
       }
@@ -56,11 +56,7 @@ export function cacheKey(options: ResolveJreOptions | undefined): string {
   const { cacheDir, integrity, platformArch, version } =
     options.downloadIfMissing
   const integrityKey =
-    typeof integrity === 'string'
-      ? integrity
-      : integrity
-        ? `${integrity.type}:${integrity.value}`
-        : ''
+    typeof integrity === 'string' ? integrity : integrity ? integrity.sri : ''
   return `dl:${version}:${platformArch}:${integrityKey}:${cacheDir ?? ''}`
 }
 

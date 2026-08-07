@@ -6,7 +6,7 @@
 import { ErrorCtor } from '../primordials/error'
 
 import { detectArchiveFormat } from './detect'
-import { getPath } from './shared'
+import { getNodePath } from '../node/path'
 import { extractTar, extractTarGz } from './tar'
 import { extractZip } from './zip'
 
@@ -36,7 +36,7 @@ export async function extractArchive(
   const format = detectArchiveFormat(archivePath)
 
   if (!format) {
-    const path = getPath()
+    const path = getNodePath()
     const ext = path.extname(archivePath).toLowerCase()
     throw new ErrorCtor(
       `Unsupported archive format${ext ? ` (extension: ${ext})` : ''}: ${archivePath}. ` +

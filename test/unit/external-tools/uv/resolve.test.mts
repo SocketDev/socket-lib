@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import { cacheKey } from '../../../../src/external-tools/uv/resolve'
+import { makeHash } from '../../../../src/integrity'
 
 describe('external-tools/uv/resolve — cacheKey', () => {
   test('returns "local-only" when no opts are given', () => {
@@ -34,16 +35,17 @@ describe('external-tools/uv/resolve — cacheKey', () => {
     ).toBe('dl:0.10.11:linux-x64:sha256-uv:')
   })
 
-  test('encodes a structured integrity', () => {
+  test('encodes a Hash object integrity', () => {
+    const hash = makeHash('sha512', 'a'.repeat(128))
     expect(
       cacheKey({
         downloadIfMissing: {
           platformArch: 'linux-x64',
           version: '0.10.11',
-          integrity: { type: 'integrity', value: 'uv-val' },
+          integrity: hash,
         },
       }),
-    ).toBe('dl:0.10.11:linux-x64:integrity:uv-val:')
+    ).toBe(`dl:0.10.11:linux-x64:${hash.sri}:`)
   })
 
   test('encodes cacheDir', () => {

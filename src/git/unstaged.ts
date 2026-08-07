@@ -4,10 +4,11 @@
  *   for the broader view or `staged.ts` for the index.
  */
 
+import { getNodePath } from '../node/path'
 import { normalizePath } from '../paths/normalize'
 import { ArrayPrototypeIncludes } from '../primordials/array'
 import { getGitDiffSpawnArgs, innerDiff, innerDiffSync } from './shared'
-import { getCachedRealpath, getCwd, getPath } from './repo'
+import { getCachedRealpath, getCwd } from './repo'
 
 import type { GitDiffOptions } from './types'
 
@@ -137,7 +138,7 @@ export async function isUnstaged(
     ...options,
     absolute: false,
   })
-  const path = getPath()
+  const path = getNodePath()
   // Resolve pathname through the cache to handle symlinks before computing
   // the relative path.
   const resolvedPathname = getCachedRealpath(pathname)
@@ -195,7 +196,7 @@ export function isUnstagedSync(
     ...options,
     absolute: false,
   })
-  const path = getPath()
+  const path = getNodePath()
   // Resolve pathname through the cache to handle symlinks before computing
   // the relative path.
   const resolvedPathname = getCachedRealpath(pathname)

@@ -1,9 +1,8 @@
 /**
- * @file Public type surface for the cross-cutting `env/*` leaves split out of
- *   the legacy single-file `env.ts` — option bags consumed by `envAsBoolean` /
- *   `envAsNumber` / `envAsString`. The pre-existing concern-specific leaves in
- *   this directory (ci, debug, github, …) keep their own ad-hoc types. Pure
- *   types, no runtime side effects.
+ * @file Public type surface for the cross-cutting `env/*` leaves — option
+ *   bags consumed by `envAsBoolean` / `envAsNumber` / `envAsString`. The
+ *   concern-specific leaves in this directory (ci, debug, github, …) keep
+ *   their own ad-hoc types. Pure types, no runtime side effects.
  */
 
 /**

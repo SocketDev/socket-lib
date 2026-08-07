@@ -27,7 +27,7 @@ import { downloadAndExtractTool } from '../from-download'
 import { getAdoptiumDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedJre } from './types'
 
 import { StringPrototypeStartsWith } from '../../primordials/string'
@@ -46,7 +46,7 @@ export interface JreFromDownloadOptions {
    * download is verified against this hash; verification failure throws (from
    * the dlx layer).
    */
-  integrity?: HashSpec | undefined
+  integrity?: HashInput | undefined
   /**
    * Override the cache directory. By default the JRE extracts into
    * `<getSocketDlxDir()>/jre/<version>/<platformArch>/`.

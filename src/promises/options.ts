@@ -61,9 +61,9 @@ export function normalizeIterationOptions(
 /**
  * Normalize options for retry functionality.
  *
- * Converts various retry option formats into a complete configuration with all
- * defaults. Handles legacy property names (`factor`, `minTimeout`,
- * `maxTimeout`) and merges them with modern equivalents.
+ * Converts various retry option formats — a bare retry count, a partial
+ * options object, or undefined — into a complete configuration with every
+ * default filled in.
  *
  * @example
  *   // Number shorthand
@@ -128,11 +128,11 @@ export function normalizeRetryOptions(
  *
  * @example
  *   resolveRetryOptions(3)
- *   // => { retries: 3, minTimeout: 200, maxTimeout: 10000, factor: 2 }
+ *   // => { retries: 3, baseDelayMs: 200, maxDelayMs: 10000, backoffFactor: 2 }
  *
  * @example
- *   resolveRetryOptions({ retries: 5, maxTimeout: 5000 })
- *   // => { retries: 5, minTimeout: 200, maxTimeout: 5000, factor: 2 }
+ *   resolveRetryOptions({ retries: 5, maxDelayMs: 5000 })
+ *   // => { retries: 5, baseDelayMs: 200, maxDelayMs: 5000, backoffFactor: 2 }
  *
  * @param options - Retry count as number, or partial options object, or
  *   undefined.

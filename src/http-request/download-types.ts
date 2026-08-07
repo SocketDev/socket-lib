@@ -167,8 +167,8 @@ export interface HttpDownloadOptions {
    * fail if the computed hash doesn't match. The hash should be a lowercase hex
    * string (64 characters).
    *
-   * Pair with `fetchChecksumFile()` + `integrityToChecksum()` when working from
-   * a checksums URL, since `fetchChecksumFile()` returns SRI strings.
+   * Pair with `fetchChecksumFile()` + `parseHash(x).hex` when working from a
+   * checksums URL, since `fetchChecksumFile()` returns SRI strings.
    *
    * @example
    *   ;```ts
@@ -222,9 +222,9 @@ export interface HttpDownloadResult {
 
 /**
  * Map of filenames to SRI integrity strings (`sha256-<base64>=`). Returned by
- * `parseChecksumFile` / `fetchChecksumFile`. Pass through
- * `integrityToChecksum()` to feed `httpDownload({ sha256 })`, or pass the SRI
- * string directly to consumers that accept SRI.
+ * `parseChecksumFile` / `fetchChecksumFile`. Pass through `parseHash(x).hex`
+ * to feed `httpDownload({ sha256 })`, or pass the SRI string directly to
+ * consumers that accept SRI.
  *
  * @example
  *   ;```ts

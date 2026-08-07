@@ -184,7 +184,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     expect(httpDownload).toHaveBeenCalled()
   })
 
-  test('hash: { type: "integrity", value } normalizes to integrity pin', async () => {
+  test('hash: sha512 SRI string normalizes to integrity pin', async () => {
     const { downloadBinary, httpDownload } = await loadFresh()
     httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
       writeFileSync(p, 'bytes')
@@ -195,12 +195,12 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
       downloadBinary({
         url: 'https://example.com/tool-hash',
         name: 'mytool',
-        hash: { type: 'integrity', value: fake },
+        hash: fake,
       }),
     ).rejects.toThrow(/Integrity mismatch/)
   })
 
-  test('hash: { type: "checksum", value } normalizes to sha256 pin', async () => {
+  test('hash: sha256 hex string normalizes to sha256 pin', async () => {
     const { downloadBinary, httpDownload } = await loadFresh()
     httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
       writeFileSync(p, 'bytes')
@@ -210,7 +210,7 @@ describe.sequential('dlx/binary-download — downloadBinary fresh download', () 
     await downloadBinary({
       url: 'https://example.com/tool-csum',
       name: 'mytool',
-      hash: { type: 'checksum', value: sha256 },
+      hash: sha256,
     })
     // Inline sha256 verification is delegated to httpDownload — assert
     // sha256 was forwarded in its opts.

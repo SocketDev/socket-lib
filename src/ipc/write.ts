@@ -9,12 +9,13 @@
 import process from 'node:process'
 
 import { safeDelete } from '../fs/safe'
+import { getNodeFs } from '../node/fs'
 import { parseSchema } from '../schema/parse'
 
 import { DateNow } from '../primordials/date'
 import { JSONStringify } from '../primordials/json'
 
-import { getFs, IpcStubSchema } from './shared'
+import { IpcStubSchema } from './shared'
 import { ensureIpcDirectory } from './directory'
 import { getIpcStubPath } from './paths'
 
@@ -67,7 +68,7 @@ export async function writeIpcStub(
 
   const validated = parseSchema(IpcStubSchema, ipcData)
 
-  const fs = getFs()
+  const fs = getNodeFs()
   // Open O_CREAT|O_WRONLY|O_EXCL|O_NOFOLLOW so we (a) refuse to overwrite
   // a pre-existing stub — protects against collision with an attacker-
   // planted file or an old stub from a reused PID — and (b) refuse to

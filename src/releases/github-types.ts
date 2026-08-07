@@ -6,7 +6,6 @@
  * Pattern for matching release assets. Can be either:
  *
  * - A string with glob pattern syntax
- * - A prefix/suffix pair for explicit, backward-compatible matching
  * - A RegExp for complex patterns
  *
  * String patterns support full glob syntax via picomatch. Examples:
@@ -17,11 +16,8 @@
  * - Suffix wildcard: yoga-* matches yoga-layout
  * - Brace expansion: {yoga,models}-*.{mjs,js} matches yoga-abc.mjs or
  *   models-xyz.js
- *
- * For backward compatibility, prefix/suffix objects are still supported but
- * glob patterns are recommended.
  */
-export type AssetPattern = string | { prefix: string; suffix: string } | RegExp
+export type AssetPattern = string | RegExp
 
 /**
  * Configuration for downloading a GitHub release.

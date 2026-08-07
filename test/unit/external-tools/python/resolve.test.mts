@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { cacheKey } from '../../../../src/external-tools/python/resolve'
+import { makeHash } from '../../../../src/integrity'
 
 vi.mock(import('../../../../src/external-tools/python/from-path'), () => ({
   pythonFromPath: vi.fn(),
@@ -80,17 +81,18 @@ describe('external-tools/python/resolve — cacheKey', () => {
     ).toBe('dl:3.11.14:20260203:linux-x64:sha256-py:')
   })
 
-  test('encodes a structured integrity', () => {
+  test('encodes a Hash object integrity', () => {
+    const hash = makeHash('sha256', 'a'.repeat(64))
     expect(
       cacheKey({
         downloadIfMissing: {
           arch: 'linux-x64',
           tag: '20260203',
           version: '3.11.14',
-          integrity: { type: 'checksum', value: 'hex-val' },
+          integrity: hash,
         },
       }),
-    ).toBe('dl:3.11.14:20260203:linux-x64:checksum:hex-val:')
+    ).toBe(`dl:3.11.14:20260203:linux-x64:${hash.sri}:`)
   })
 
   test('preferDownload + download key combine', () => {

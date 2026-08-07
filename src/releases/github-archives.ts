@@ -33,8 +33,7 @@ const logger = getDefaultLogger()
  *   ```
  *
  * @param tag - Release tag name.
- * @param assetPattern - Asset name or pattern (glob string, prefix/suffix
- *   object, or RegExp)
+ * @param assetPattern - Asset name or pattern (glob string or RegExp)
  * @param outputDir - Directory to extract the archive contents to.
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options.
@@ -142,8 +141,7 @@ export async function downloadAndExtractArchive(
  *   ```
  *
  * @param tag - Release tag name.
- * @param assetPattern - Asset name or pattern (glob string, prefix/suffix
- *   object, or RegExp)
+ * @param assetPattern - Asset name or pattern (glob string or RegExp)
  * @param outputDir - Directory to extract the zip contents to.
  * @param repoConfig - Repository configuration (owner/repo)
  * @param options - Additional options.

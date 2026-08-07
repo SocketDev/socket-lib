@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { makeHash } from '../../../../src/integrity'
+
 vi.mock(import('../../../../src/external-tools/sbt/from-vfs'), () => ({
   sbtFromVfs: vi.fn(),
 }))
@@ -50,16 +52,17 @@ describe.sequential('external-tools/sbt/resolve — cacheKey', () => {
     ).toBe('dl:1.9.0:sha256-abc:')
   })
 
-  test('encodes a structured integrity', async () => {
+  test('encodes a Hash object integrity', async () => {
     const { cacheKey } = await loadFresh()
+    const hash = makeHash('sha256', 'a'.repeat(64))
     expect(
       cacheKey({
         downloadIfMissing: {
           version: '1.9.0',
-          integrity: { type: 'checksum', value: 'sbt-val' },
+          integrity: hash,
         },
       }),
-    ).toBe('dl:1.9.0:checksum:sbt-val:')
+    ).toBe(`dl:1.9.0:${hash.sri}:`)
   })
 
   test('encodes cacheDir', async () => {

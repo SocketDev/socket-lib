@@ -163,8 +163,8 @@ export async function downloadGitHubRelease(
  *   ```
  *
  * @param tag - Release tag name.
- * @param assetPattern - Asset name or pattern (glob string, prefix/suffix
- *   object, or RegExp), or an ordered candidate list — the first candidate that
+ * @param assetPattern - Asset name or pattern (glob string or RegExp), or
+ *   an ordered candidate list — the first candidate that
  *   matches any release asset wins.
  * @param outputPath - Path to write the downloaded file.
  * @param repoConfig - Repository configuration (owner/repo)

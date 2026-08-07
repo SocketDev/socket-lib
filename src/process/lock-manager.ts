@@ -227,7 +227,7 @@ export class ProcessLockManager {
    */
   async acquire(
     lockPath: string,
-    options: ProcessLockOptions = {},
+    options?: ProcessLockOptions | undefined,
   ): Promise<() => void> {
     const {
       baseDelayMs = 100,
@@ -235,7 +235,7 @@ export class ProcessLockManager {
       retries = 3,
       staleMs = 5000,
       touchIntervalMs = 2000,
-    } = options
+    } = { __proto__: null, ...options } as ProcessLockOptions
 
     // Ensure exit handler is registered before any lock acquisition.
     this.ensureExitHandler()

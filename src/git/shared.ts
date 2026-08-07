@@ -8,6 +8,7 @@
 import { whichSync } from '../bin/which'
 import { debugNs } from '../debug/output'
 import { getGlobMatcher } from '../globs/matcher'
+import { getNodePath } from '../node/path'
 import { normalizePath } from '../paths/normalize'
 import { ArrayIsArray } from '../primordials/array'
 import { BufferIsBuffer } from '../primordials/buffer'
@@ -17,7 +18,7 @@ import { ObjectKeys } from '../primordials/object'
 import { StringPrototypeSubstring } from '../primordials/string'
 import { spawn, spawnSync } from '../process/spawn/child'
 import { stripAnsi } from '../ansi/strip'
-import { findGitRoot, getCachedRealpath, getCwd, getPath } from './repo'
+import { findGitRoot, getCachedRealpath, getCwd } from './repo'
 
 import type { GitDiffOptions } from './types'
 
@@ -288,7 +289,7 @@ export function parseGitDiffStdout(
     porcelain = false,
     ...matcherOptions
   } = { __proto__: null, ...options }
-  const path = getPath()
+  const path = getNodePath()
   // Resolve cwd to handle symlinks, using the cache for performance.
   const cwd =
     cwdOption === defaultRoot ? defaultRoot : getCachedRealpath(cwdOption)

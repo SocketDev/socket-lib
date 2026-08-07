@@ -12,7 +12,7 @@
  *     `httpRequest` and runs the body through `parseChecksumFile`.
  */
 
-import { checksumToIntegrity } from '../integrity'
+import { parseHash } from '../integrity'
 import { ErrorCtor } from '../primordials/error'
 import {
   StringPrototypeSplit,
@@ -35,18 +35,18 @@ const CHECKSUM_GNU_RE = /^([a-fA-F0-9]{64})\s+(.+)$/
  *
  * Returns a map of filenames to SRI integrity strings (`sha256-<base64>=`).
  * Feed `httpDownload({ sha256 })` by converting back to hex via
- * `integrityToChecksum()`; pass the SRI string through verbatim to consumers
+ * `parseHash(x).hex`; pass the SRI string through verbatim to consumers
  * that accept SRI directly.
  *
  * @example
  *   ;```ts
- *   import { integrityToChecksum } from '@socketsecurity/lib/integrity'
+ *   import { parseHash } from '@socketsecurity/lib/integrity'
  *
  *   const sums = await fetchChecksumFile(
  *     'https://github.com/org/repo/releases/download/v1.0.0/checksums.txt',
  *   )
  *   await httpDownload(url, '/tmp/tool.tar.gz', {
- *     sha256: integrityToChecksum(sums['tool_linux.tar.gz']!),
+ *     sha256: parseHash(sums['tool_linux.tar.gz']!).hex,
  *   })
  *   ```
  */
@@ -104,13 +104,13 @@ export function parseChecksumFile(text: string): ChecksumFile {
 
     const bsdMatch = CHECKSUM_BSD_RE.exec(trimmed)
     if (bsdMatch) {
-      result[bsdMatch[1]!] = checksumToIntegrity(bsdMatch[2]!.toLowerCase())
+      result[bsdMatch[1]!] = parseHash(bsdMatch[2]!.toLowerCase()).sri
       continue
     }
 
     const gnuMatch = CHECKSUM_GNU_RE.exec(trimmed)
     if (gnuMatch) {
-      result[gnuMatch[2]!] = checksumToIntegrity(gnuMatch[1]!.toLowerCase())
+      result[gnuMatch[2]!] = parseHash(gnuMatch[1]!.toLowerCase()).sri
     }
   }
 

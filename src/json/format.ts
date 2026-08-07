@@ -178,9 +178,16 @@ export function shouldSave(
   currentContent: Record<string | symbol, unknown>,
   originalContent: Record<string | symbol, unknown> | undefined,
   originalFileContent: string,
-  options: ShouldSaveOptions = {},
+  options?: ShouldSaveOptions | undefined,
 ): boolean {
-  const { ignoreWhitespace = false, sort = false, sortFn } = options
+  const {
+    ignoreWhitespace = false,
+    sort = false,
+    sortFn,
+  } = {
+    __proto__: null,
+    ...options,
+  } as ShouldSaveOptions
 
   // Extract content without formatting symbols
   const content = stripFormattingSymbols(currentContent)

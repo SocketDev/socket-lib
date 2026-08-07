@@ -18,7 +18,7 @@ import { pythonFromPath } from './from-path'
 import { MapCtor } from '../../primordials/map-set'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedPython } from './types'
 
 export interface ResolvePythonOptions {
@@ -40,7 +40,7 @@ export interface ResolvePythonOptions {
          * Omit to auto-detect the current host via {@link getPythonArch}.
          */
         arch?: string | undefined
-        integrity?: HashSpec | undefined
+        integrity?: HashInput | undefined
         cacheDir?: string | undefined
         downloader?: BinaryDownloader | undefined
       }
@@ -63,11 +63,7 @@ export function cacheKey(options: ResolvePythonOptions | undefined): string {
   // explicit-matching call share one cache slot (and don't key on `undefined`).
   const arch = options.downloadIfMissing.arch ?? getPythonArch() ?? 'unknown'
   const integrityKey =
-    typeof integrity === 'string'
-      ? integrity
-      : integrity
-        ? `${integrity.type}:${integrity.value}`
-        : ''
+    typeof integrity === 'string' ? integrity : integrity ? integrity.sri : ''
   return `${prefer}dl:${version}:${tag}:${arch}:${integrityKey}:${cacheDir ?? ''}`
 }
 

@@ -17,7 +17,7 @@ import { downloadAndExtractTool } from '../from-download'
 import { getTrufflehogDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedTrufflehog } from './types'
 
 export interface TrufflehogFromDownloadOptions {
@@ -32,7 +32,7 @@ export interface TrufflehogFromDownloadOptions {
   /**
    * Optional pinned integrity from `external-tools.json`.
    */
-  integrity?: HashSpec | undefined
+  integrity?: HashInput | undefined
   /**
    * Override the cache directory. By default the binary extracts into
    * `<getSocketDlxDir()>/trufflehog/<version>/<platformArch>/`.

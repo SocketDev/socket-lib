@@ -14,7 +14,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { integrityToChecksum } from '../../src/integrity'
+import { parseHash } from '../../src/integrity'
 import { fetchChecksumFile } from '../../src/http-request/checksum-file'
 import { httpDownload } from '../../src/http-request/download'
 
@@ -77,7 +77,7 @@ describe('http-request', () => {
         const result = await httpDownload(
           `${fixture.baseUrl}/checksum-file`,
           destPath,
-          { sha256: integrityToChecksum(checksums['checksum-file']!) },
+          { sha256: parseHash(checksums['checksum-file']!).hex },
         )
 
         expect(result.path).toBe(destPath)

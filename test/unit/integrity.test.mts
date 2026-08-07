@@ -4,22 +4,19 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  checksumToIntegrity,
   computeHash,
   computeHashes,
-  DlxHashMismatchError,
   equalHashes,
-  HashMismatchError,
-  integrityToChecksum,
   isChecksum,
   isHex,
   isIntegrity,
   makeHash,
-  normalizeHash,
   parseHash,
   parseIntegrity,
   verifyHash,
 } from '../../src/integrity'
+
+import type { HashMismatchError } from '../../src/integrity'
 
 // Known-correct pair for pnpm v10 darwin-arm64 release asset:
 // the actual sha256 hex digest of the tarball next to its sha256 SRI form.
@@ -133,156 +130,6 @@ describe('integrity', () => {
     })
   })
 
-  describe('checksumToIntegrity', () => {
-    it('converts hex to sha256 SRI by default', () => {
-      expect(checksumToIntegrity(KNOWN_HEX)).toBe(KNOWN_SRI)
-    })
-
-    it('is idempotent on SRI input', () => {
-      expect(checksumToIntegrity(KNOWN_SRI)).toBe(KNOWN_SRI)
-    })
-
-    it('is idempotent on sha512 SRI input (passes through, ignoring algorithm arg)', () => {
-      const sri = 'sha512-' + 'A'.repeat(86) + '=='
-      expect(checksumToIntegrity(sri)).toBe(sri)
-    })
-
-    it('honors algorithm override for hex input', () => {
-      const got = checksumToIntegrity(KNOWN_HEX, 'sha384')
-      expect(got.startsWith('sha384-')).toBe(true)
-      // Body is the base64 of the input hex regardless of algorithm — the
-      // helper does not re-hash; that's a caller responsibility when the
-      // hex doesn't actually match the declared algorithm.
-      expect(parseIntegrity(got).body).toBe(
-        Buffer.from(KNOWN_HEX, 'hex').toString('base64'),
-      )
-    })
-
-    it('throws on a string that is neither hex nor SRI', () => {
-      expect(() => checksumToIntegrity('not-a-hash')).toThrow(TypeError)
-    })
-
-    it('throws on empty string', () => {
-      expect(() => checksumToIntegrity('')).toThrow(TypeError)
-    })
-  })
-
-  describe('integrityToChecksum', () => {
-    it('converts sha256 SRI to hex', () => {
-      expect(integrityToChecksum(KNOWN_SRI)).toBe(KNOWN_HEX)
-    })
-
-    it('is idempotent on hex input', () => {
-      expect(integrityToChecksum(KNOWN_HEX)).toBe(KNOWN_HEX)
-    })
-
-    it('throws on sha384 SRI (checksums are sha256-only)', () => {
-      const sri = 'sha384-' + 'A'.repeat(64) + '='
-      expect(() => integrityToChecksum(sri)).toThrow(
-        /sha384 integrity has no 64-hex-char checksum form/,
-      )
-    })
-
-    it('throws on sha512 SRI (checksums are sha256-only)', () => {
-      const sri = 'sha512-' + 'A'.repeat(86) + '=='
-      expect(() => integrityToChecksum(sri)).toThrow(
-        /sha512 integrity has no 64-hex-char checksum form/,
-      )
-    })
-
-    it('throws on garbage string (neither hex nor SRI)', () => {
-      expect(() => integrityToChecksum('not-a-hash')).toThrow(
-        /invalid SRI format/,
-      )
-    })
-
-    it('round-trips: checksumToIntegrity(integrityToChecksum(sri)) === sri', () => {
-      expect(checksumToIntegrity(integrityToChecksum(KNOWN_SRI))).toBe(
-        KNOWN_SRI,
-      )
-    })
-
-    it('round-trips: integrityToChecksum(checksumToIntegrity(hex)) === hex', () => {
-      expect(integrityToChecksum(checksumToIntegrity(KNOWN_HEX))).toBe(
-        KNOWN_HEX,
-      )
-    })
-  })
-
-  describe('normalizeHash', () => {
-    it('sniffs sha512 SRI string as integrity', () => {
-      const sri = 'sha512-' + 'A'.repeat(86) + '=='
-      expect(normalizeHash(sri)).toEqual({ type: 'integrity', value: sri })
-    })
-
-    it('sniffs sha256 SRI as integrity', () => {
-      expect(normalizeHash(KNOWN_SRI)).toEqual({
-        type: 'integrity',
-        value: KNOWN_SRI,
-      })
-    })
-
-    it('sniffs sha384 SRI as integrity', () => {
-      const sri = 'sha384-' + 'A'.repeat(64) + '='
-      expect(normalizeHash(sri)).toEqual({ type: 'integrity', value: sri })
-    })
-
-    it('sniffs 64-char hex as checksum', () => {
-      expect(normalizeHash(KNOWN_HEX)).toEqual({
-        type: 'checksum',
-        value: KNOWN_HEX,
-      })
-    })
-
-    it('accepts explicit integrity object', () => {
-      expect(normalizeHash({ type: 'integrity', value: KNOWN_SRI })).toEqual({
-        type: 'integrity',
-        value: KNOWN_SRI,
-      })
-    })
-
-    it('accepts explicit checksum object', () => {
-      expect(normalizeHash({ type: 'checksum', value: KNOWN_HEX })).toEqual({
-        type: 'checksum',
-        value: KNOWN_HEX,
-      })
-    })
-
-    it('rejects sha1 SRI (insecure, outside W3C set)', () => {
-      expect(() => normalizeHash('sha1-abc==')).toThrow(TypeError)
-    })
-
-    it('rejects sha1 hex (40 chars, wrong length)', () => {
-      expect(() => normalizeHash('a'.repeat(40))).toThrow(TypeError)
-    })
-
-    it('rejects random strings', () => {
-      expect(() => normalizeHash('not-a-hash')).toThrow(TypeError)
-    })
-
-    it('rejects unknown hash object type', () => {
-      expect(() =>
-        normalizeHash({ type: 'sha1', value: 'abc' } as never),
-      ).toThrow(TypeError)
-    })
-
-    it('rejects integrity object with malformed value', () => {
-      expect(() =>
-        normalizeHash({ type: 'integrity', value: 'notsha-anything' }),
-      ).toThrow(TypeError)
-    })
-
-    it('rejects checksum object with malformed value', () => {
-      expect(() =>
-        normalizeHash({ type: 'checksum', value: 'nothex!' }),
-      ).toThrow(TypeError)
-    })
-
-    it('rejects non-string, non-object', () => {
-      expect(() => normalizeHash(42 as unknown as string)).toThrow(TypeError)
-    })
-  })
-
   describe('computeHashes', () => {
     it('computes both sha512 SRI and sha256 hex for known bytes', () => {
       const bytes = Buffer.from('hello world', 'utf8')
@@ -302,11 +149,11 @@ describe('integrity', () => {
       expect(a).toEqual(b)
     })
 
-    it('checksum from computeHashes round-trips through the converters', () => {
+    it('checksum from computeHashes round-trips through parseHash', () => {
       const bytes = Buffer.from('round trip me', 'utf8')
       const { checksum } = computeHashes(bytes)
-      const sri = checksumToIntegrity(checksum)
-      expect(integrityToChecksum(sri)).toBe(checksum)
+      const sri = parseHash(checksum).sri
+      expect(parseHash(sri).hex).toBe(checksum)
     })
 
     it('emits integrity as sha512 (the canonical OUR-side algorithm)', () => {
@@ -462,11 +309,6 @@ describe('integrity', () => {
     it('throws HashMismatchError when the digest differs', () => {
       const wrong = makeHash('sha512', 'a'.repeat(128))
       expect(() => verifyHash(bytes, wrong)).toThrow(/Hash mismatch/)
-    })
-
-    it('DlxHashMismatchError is an alias for HashMismatchError', () => {
-      const isAlias = DlxHashMismatchError === HashMismatchError
-      expect(isAlias).toBe(true)
     })
 
     it('error carries expected + actual as Hash; message names the algorithm', () => {

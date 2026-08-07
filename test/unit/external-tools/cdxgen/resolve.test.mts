@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
 import { cacheKey } from '../../../../src/external-tools/cdxgen/resolve'
+import { makeHash } from '../../../../src/integrity'
 
 describe('external-tools/cdxgen/resolve — cacheKey', () => {
   test('returns "local-only" when no opts are given', () => {
@@ -57,16 +58,17 @@ describe('external-tools/cdxgen/resolve — cacheKey', () => {
     ).toBe('dl:12.4.1:linux-x64:slim:sha256-cdx:')
   })
 
-  test('encodes a structured integrity', () => {
+  test('encodes a Hash object integrity', () => {
+    const hash = makeHash('sha256', 'a'.repeat(64))
     expect(
       cacheKey({
         downloadIfMissing: {
           platformArch: 'linux-x64',
           version: '12.4.1',
-          integrity: { type: 'checksum', value: 'cdx' },
+          integrity: hash,
         },
       }),
-    ).toBe('dl:12.4.1:linux-x64:slim:checksum:cdx:')
+    ).toBe(`dl:12.4.1:linux-x64:slim:${hash.sri}:`)
   })
 
   test('encodes cacheDir', () => {

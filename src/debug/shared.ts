@@ -24,10 +24,6 @@ import type debugJs from '../external/debug'
 
 export const debugByNamespace = new MapCtor()
 
-// Re-export canonical node:util loader under the debug/ legacy name.
-// New code should import getNodeUtil from '@socketsecurity/lib/node/util'.
-export { getNodeUtil as getUtil } from '../node/util'
-
 let cachedDebugJs: typeof debugJs | undefined
 
 let pointingTriangle: string | undefined

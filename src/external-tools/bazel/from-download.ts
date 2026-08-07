@@ -17,7 +17,7 @@ import { downloadToolArchive } from '../from-download'
 import { getBazelDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedBazel } from './types'
 
 export interface BazelFromDownloadOptions {
@@ -32,7 +32,7 @@ export interface BazelFromDownloadOptions {
   /**
    * Optional pinned integrity from `external-tools.json`.
    */
-  integrity?: HashSpec | undefined
+  integrity?: HashInput | undefined
   /**
    * Inject a custom downloader. Forwarded to the underlying
    * `downloadToolArchive`. Defaults to dlx.

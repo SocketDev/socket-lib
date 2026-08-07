@@ -13,7 +13,7 @@ import { uvFromPath } from './from-path'
 import { uvFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashSpec } from '../../integrity'
+import type { HashInput } from '../../integrity'
 import type { ResolvedUv } from './types'
 
 import { MapCtor } from '../../primordials/map-set'
@@ -23,7 +23,7 @@ export interface ResolveUvOptions {
     | {
         version: string
         platformArch: string
-        integrity?: HashSpec | undefined
+        integrity?: HashInput | undefined
         cacheDir?: string | undefined
         downloader?: BinaryDownloader | undefined
       }
@@ -39,11 +39,7 @@ export function cacheKey(options: ResolveUvOptions | undefined): string {
   }
   const { cacheDir, integrity, platformArch, version } = opts.downloadIfMissing
   const integrityKey =
-    typeof integrity === 'string'
-      ? integrity
-      : integrity
-        ? `${integrity.type}:${integrity.value}`
-        : ''
+    typeof integrity === 'string' ? integrity : integrity ? integrity.sri : ''
   return `dl:${version}:${platformArch}:${integrityKey}:${cacheDir ?? ''}`
 }
 
