@@ -185,6 +185,8 @@ describe('buildOpenUrlInvocation', () => {
 })
 
 describe('openUrl with newWindow', () => {
+  const URL = 'https://example.com/auth/cli/abc123'
+
   it('spawns the browser binary with --new-window and no shell', () => {
     const chrome = NEW_WINDOW_BROWSERS['win32']![0]!
     const launches: Launch[] = []
