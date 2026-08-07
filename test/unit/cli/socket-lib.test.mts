@@ -7,7 +7,7 @@
  *   when imported.
  */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { main, printHelp } from '../../../src/cli/socket-lib'
 
@@ -25,6 +25,42 @@ describe('socket-lib CLI dispatcher', () => {
   it('prints help and exits 0 with -h', async () => {
     const code = await main(['-h'])
     expect(code).toBe(0)
+  })
+
+  it('prints a one-line description and exits 0 with --describe, running nothing else', async () => {
+    const spy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    try {
+      const code = await main(['--describe'])
+      expect(code).toBe(0)
+      expect(spy).toHaveBeenCalledTimes(1)
+      expect(spy.mock.calls[0]?.[0]).toBe('Socket-wide static-analysis CLI\n')
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
+  it('prints the machine-readable manifest and exits 0 with --describe --json', async () => {
+    const spy = vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
+    try {
+      const code = await main(['--describe', '--json'])
+      expect(code).toBe(0)
+      expect(spy).toHaveBeenCalledTimes(1)
+      const printed = spy.mock.calls[0]?.[0] as string
+      const manifest = JSON.parse(printed)
+      expect(manifest.name).toBe('socket-lib')
+      expect(manifest.description).toBe('Socket-wide static-analysis CLI')
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
+  it('reports an unknown command and exits 1 for bare --json (no top-level JSON mode)', async () => {
+    // `--json` is a per-check flag (`socket-lib check <name> --json`), not a
+    // top-level mode — the dispatcher only recognizes a command name as
+    // args[0], so a bare `--json` here is exactly the same as any other
+    // unrecognized command name.
+    const code = await main(['--json'])
+    expect(code).toBe(1)
   })
 
   it('exits 1 on an unknown command', async () => {

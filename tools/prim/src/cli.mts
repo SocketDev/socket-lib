@@ -35,7 +35,7 @@ import { describeRequest, renderDescribe } from '../../../src/argv/meta.ts'
 
 import { auditDirectory } from './audit.mts'
 import { applyCodemod } from './codemod.mts'
-import { HELP, MANIFEST } from './describe.mts'
+import { HELP, MANIFEST, renderDescribeHelpJson } from './describe.mts'
 import { lintSource } from './lint.mts'
 import { fail, report, reportLint, reportMod } from './report.mts'
 import { loadPrimordialsSurface } from './surface.mts'
@@ -67,14 +67,25 @@ const ARG_OPTIONS = {
 export async function runCli(argv) {
   const describeKind = describeRequest(argv)
   if (describeKind) {
+    // `--describe --json` (either order) answers the fleet-runner-shaped
+    // `{describe, help}` envelope instead of the full command manifest —
+    // plain `--describe` stays the one-liner, unchanged.
     // socket-lint: allow process-stdio
-    process.stdout.write(renderDescribe(describeKind, MANIFEST))
+    process.stdout.write(
+      describeKind === 'json'
+        ? renderDescribeHelpJson()
+        : renderDescribe(describeKind, MANIFEST),
+    )
     return
   }
-  // Bare `prim` / `prim help` / `prim --help` → print help.
+  // Bare `prim` / `prim help` / `prim --help` → print help. With --json
+  // riding along and no command to report a result for, answer the same
+  // `{describe, help}` envelope rather than silently ignoring the flag.
   if (argv.length === 0 || argv[0] === 'help') {
     // socket-lint: allow process-stdio
-    process.stdout.write(HELP)
+    process.stdout.write(
+      argv.includes('--json') ? renderDescribeHelpJson() : HELP,
+    )
     return
   }
 
@@ -93,8 +104,11 @@ export async function runCli(argv) {
   const { values, positionals } = parsed
 
   if (values.help || positionals.length === 0) {
+    // No command to report a JSON result for — `--json` alone answers the
+    // same `{describe, help}` envelope as `--describe --json` rather than
+    // falling through to the human help banner.
     // socket-lint: allow process-stdio
-    process.stdout.write(HELP)
+    process.stdout.write(values.json ? renderDescribeHelpJson() : HELP)
     return
   }
 

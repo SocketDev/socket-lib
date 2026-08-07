@@ -207,3 +207,20 @@ export const MANIFEST = buildCliManifest({
     },
   ],
 })
+
+/**
+ * The `{describe, help}` JSON envelope for a `--json` request with no
+ * command-specific result to report: `prim --describe --json` (either
+ * order), or bare `prim --json` with no command. Deliberately minimal — the
+ * full command/flag manifest is what plain `--describe --json` used to dump;
+ * this is the fleet-runner-shaped self-description instead, so a caller
+ * scripting against `prim --json` gets the same two fields every fleet
+ * script answers with.
+ */
+export function renderDescribeHelpJson(): string {
+  return `${JSON.stringify(
+    { describe: MANIFEST.description, help: HELP },
+    undefined,
+    2,
+  )}\n`
+}
