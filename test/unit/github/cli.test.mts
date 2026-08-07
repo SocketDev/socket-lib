@@ -71,7 +71,8 @@ describe('encodeGhFieldArgs', () => {
 
   it('sends a number, null, array, and object through -F as JSON', () => {
     expect(encodeGhFieldArgs({ count: 3 })).toStrictEqual(['-F', 'count=3'])
-    // oxlint-disable-next-line socket/prefer-undefined-over-null -- null IS the value under test: a settings field is cleared by sending the JSON literal null, and undefined would drop the field instead.
+    // A cleared settings field is sent as JSON null; undefined drops the key.
+    // oxlint-disable-next-line socket/prefer-undefined-over-null -- null is the value under test
     expect(encodeGhFieldArgs({ owner: null })).toStrictEqual([
       '-F',
       'owner=null',
