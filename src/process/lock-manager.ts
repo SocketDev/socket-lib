@@ -52,7 +52,8 @@ import { MathMax } from '../primordials/math'
 import { pRetry } from '../promises/retry'
 import { onExit } from '../events/exit/handler'
 
-import { getFs, getPath } from './shared'
+import { getNodeFs } from '../node/fs'
+import { getNodePath } from '../node/path'
 
 import type { ProcessLockOptions } from './lock-types'
 
@@ -86,7 +87,7 @@ export class ProcessLockManager {
       this.touchTimers.clear()
 
       // Clean up all active locks.
-      const fs = getFs()
+      const fs = getNodeFs()
       for (const lockPath of this.activeLocks) {
         try {
           if (fs.existsSync(lockPath)) {
@@ -110,7 +111,7 @@ export class ProcessLockManager {
    */
   private touchLock(lockPath: string): void {
     try {
-      const fs = getFs()
+      const fs = getNodeFs()
       if (fs.existsSync(lockPath)) {
         // utimesSync accepts numeric timestamps (seconds). Pass Date.now() / 1000
         // to avoid the Date allocation on every touch tick.
@@ -174,7 +175,7 @@ export class ProcessLockManager {
     try {
       // Use single statSync call instead of existsSync + statSync.
       // throwIfNoEntry: false returns undefined if path doesn't exist.
-      const fs = getFs()
+      const fs = getNodeFs()
       // oxlint-disable-next-line socket/prefer-exists-sync -- need mtimeMs for staleness check; existsSync would discard the metadata.
       const stats = fs.statSync(lockPath, { throwIfNoEntry: false })
       if (!stats) {
@@ -255,8 +256,8 @@ export class ProcessLockManager {
           // separators, Windows separators, and mixed-separator inputs are all
           // handled correctly — the previous Math.max(lastIndexOf('/'), '\\')
           // approach failed on relative paths and mixed-separator inputs.
-          const fs = getFs()
-          const path = getPath()
+          const fs = getNodeFs()
+          const path = getNodePath()
           const parent = path.dirname(lockPath)
           if (parent && parent !== '.' && parent !== lockPath) {
             fs.mkdirSync(parent, { recursive: true })
@@ -374,7 +375,7 @@ export class ProcessLockManager {
     this.stopTouchTimer(lockPath)
 
     try {
-      const fs = getFs()
+      const fs = getNodeFs()
       if (fs.existsSync(lockPath)) {
         safeDeleteSync(lockPath, { recursive: true })
       }

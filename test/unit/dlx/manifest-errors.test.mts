@@ -127,20 +127,19 @@ describe.sequential('dlx/manifest — error branches', () => {
     })
   })
 
-  describe('set() catch paths', () => {
+  describe('setPackageEntry() catch paths', () => {
     it('continues when readFileSync of existing manifest is malformed JSON', async () => {
       // Write malformed JSON: the read succeeds but JSON.parse throws,
-      // exercising the catch branch that warns and treats as empty.
+      // exercising readManifest's catch branch that treats it as empty.
       writeFileSync(manifestPath, 'not-valid-json', 'utf8')
-      const record = {
-        timestampFetch: Date.now(),
-        latestVersion: '1.0.0',
-      }
-      // Even with the malformed file on disk, set() should succeed
-      // (catches the parse error, treats as empty, writes its single
-      // entry). No throw is the assertion.
+      // Even with the malformed file on disk, setPackageEntry should
+      // succeed (treats as empty, writes its single entry). No throw is
+      // the assertion.
       await expect(
-        manifest.set('pkg', record as never),
+        manifest.setPackageEntry('pkg@1.0.0', 'cache-key', {
+          name: 'pkg',
+          version: '1.0.0',
+        } as never),
       ).resolves.toBeUndefined()
     })
 
@@ -148,13 +147,13 @@ describe.sequential('dlx/manifest — error branches', () => {
       vi.mocked(safeMkdirSync).mockImplementationOnce(() => {
         throw makeFsError('EACCES')
       })
-      // Even with the mkdir warn, set() proceeds to writeFileSync.
+      // Even with the mkdir warn, writeManifest proceeds to writeFileSync.
       // If that succeeds (because the dir already exists from beforeEach),
       // the operation completes normally.
       await expect(
-        manifest.set('p', {
-          timestampFetch: Date.now(),
-          latestVersion: '1.0.0',
+        manifest.setPackageEntry('p@1.0.0', 'cache-key', {
+          name: 'p',
+          version: '1.0.0',
         } as never),
       ).resolves.toBeUndefined()
     })
@@ -174,7 +173,8 @@ describe.sequential('dlx/manifest — error branches', () => {
     })
 
     it('runs cleanup branch when renameSync throws + temp file exists', async () => {
-      // Seed a manifest so set() goes through writeManifest with a real temp.
+      // Seed a manifest so the write goes through writeManifest with a
+      // real temp file.
       writeFileSync(manifestPath, '{}', 'utf8')
       // Patch fs.renameSync at runtime to throw, causing the outer catch.
       const fsMod = require('node:fs') as typeof nodeFs
@@ -185,14 +185,13 @@ describe.sequential('dlx/manifest — error branches', () => {
         throw makeFsError('EPERM')
       }) as typeof fsMod.renameSync
       try {
-        // set() calls writeManifest; the writeFileSync to tempPath
-        // succeeds, the renameSync throws, the inner cleanup runs.
+        // setPackageEntry calls writeManifest; the writeFileSync to
+        // tempPath succeeds, the renameSync throws, the inner cleanup runs.
         await expect(
-          manifest.set('test-pkg', {
-            timestampFetch: 1,
-            timestampNotification: 1,
+          manifest.setPackageEntry('test-pkg@1.0.0', 'cache-key', {
+            name: 'test-pkg',
             version: '1.0.0',
-          }),
+          } as never),
         ).rejects.toThrow(/EPERM/)
       } finally {
         fsMod.renameSync = originalRename

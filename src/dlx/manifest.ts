@@ -292,23 +292,6 @@ export class DlxManifest {
   }
 
   /**
-   * Get cached update information for a package in the legacy format.
-   *
-   * @deprecated Use getManifestEntry() for new code.
-   */
-  get(name: string): StoreRecord | undefined {
-    const data = this.readManifest()
-    const entry = data[name]
-
-    // Return legacy format entries only.
-    if (entry && !('type' in entry)) {
-      return entry as StoreRecord
-    }
-
-    return undefined
-  }
-
-  /**
    * Get all cached package names.
    */
   getAllPackages(): string[] {
@@ -361,61 +344,6 @@ export class DlxManifest {
 
     const age = DateNow() - record.timestampFetch
     return age < ttlMs
-  }
-
-  /**
-   * Store update information for a package in the legacy format.
-   *
-   * @deprecated Use setPackageEntry() for new code.
-   */
-  async set(name: string, record: StoreRecord): Promise<void> {
-    await processLock.withLock(this.lockPath, async () => {
-      let data: Record<string, StoreRecord> = {
-        __proto__: null,
-      } as unknown as Record<string, StoreRecord>
-
-      // Read existing data.
-      try {
-        if (fs.existsSync(this.manifestPath)) {
-          const content = fs.readFileSync(this.manifestPath, 'utf8')
-          if (content.trim()) {
-            data = JSONParse(content) as Record<string, StoreRecord>
-          }
-        }
-      } catch (e) {
-        logger.warn(`Failed to read existing manifest: ${errorMessage(e)}`)
-      }
-
-      // Update record.
-      data[name] = record
-
-      // Ensure directory exists.
-      const manifestDir = path.dirname(this.manifestPath)
-      try {
-        safeMkdirSync(manifestDir, { recursive: true })
-      } catch (e) {
-        logger.warn(`Failed to create manifest directory: ${errorMessage(e)}`)
-      }
-
-      // Write atomically.
-      const content = JSONStringify(data, null, 2)
-      const tempPath = `${this.manifestPath}.tmp`
-
-      try {
-        fs.writeFileSync(tempPath, content, 'utf8')
-        fs.renameSync(tempPath, this.manifestPath)
-      } catch (e) {
-        // Clean up temp file on error.
-        try {
-          if (fs.existsSync(tempPath)) {
-            safeDeleteSync(tempPath)
-          }
-        } catch {
-          // Best effort cleanup.
-        }
-        throw e
-      }
-    })
   }
 
   /**

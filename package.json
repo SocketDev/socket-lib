@@ -3013,11 +3013,6 @@
       "types": "./dist/sorts/natural.d.ts",
       "default": "./dist/sorts/natural.js"
     },
-    "./sorts/semver": {
-      "source": "./src/sorts/semver.ts",
-      "types": "./dist/sorts/semver.d.ts",
-      "default": "./dist/sorts/semver.js"
-    },
     "./sorts/strings": {
       "source": "./src/sorts/strings.ts",
       "types": "./dist/sorts/strings.d.ts",
