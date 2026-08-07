@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
 import { execNpm } from '../../../../src/eco/npm/npm/exec'
 import { execPnpm } from '../../../../src/eco/npm/pnpm/exec'
 import { execScript } from '../../../../src/eco/npm/script'
-import { execYarn } from '../../../../src/eco/npm/yarnpkg/yarn/exec'
+import { execYarn } from '../../../../src/eco/npm/yarn/exec'
 
 describe('agent execution', () => {
   describe('Integration tests (using real spawn)', () => {

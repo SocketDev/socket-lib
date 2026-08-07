@@ -12,9 +12,9 @@ import {
   StringPrototypeIndexOf,
   StringPrototypeLastIndexOf,
   StringPrototypeSlice,
-} from '../../../primordials/string'
+} from '../../../../primordials/string'
 
-import type { PnpmPackageId } from './parse-pnpm-package-id-v5'
+import type { PnpmPackageId } from './package-id-v5'
 
 export function parsePnpmPackageIdV6V9(pkgId: string): PnpmPackageId {
   const parenIdx = StringPrototypeIndexOf(pkgId, '(')

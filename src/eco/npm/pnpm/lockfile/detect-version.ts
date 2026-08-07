@@ -5,7 +5,7 @@
  *   smol-manifest internal `detectPnpmVersion`.
  */
 
-import { RegExpPrototypeExec } from '../../../primordials/regexp'
+import { RegExpPrototypeExec } from '../../../../primordials/regexp'
 
 const RE_LOCKFILE_VERSION = /lockfileVersion:\s*['"]?([0-9.]+)['"]?/
 

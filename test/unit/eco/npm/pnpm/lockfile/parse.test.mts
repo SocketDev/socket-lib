@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/eco/npm/pnpm/parse-lockfile.ts.
+ * @file Unit tests for src/eco/npm/pnpm/lockfile/parse.ts.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -11,7 +11,7 @@ import {
   newPnpmEntry,
   parsePnpmLock,
   stripPeerSuffix,
-} from '../../../../../src/eco/npm/pnpm/parse-lockfile'
+} from '../../../../../../src/eco/npm/pnpm/lockfile/parse'
 
 const PNPM_V5 = `lockfileVersion: 5.4
 
@@ -53,7 +53,7 @@ snapshots:
     dev: true
 `
 
-describe('eco/npm/pnpm/parse-lockfile', () => {
+describe('eco/npm/pnpm/lockfile/parse', () => {
   describe('parsePnpmLock (v5)', () => {
     const result = parsePnpmLock(PNPM_V5)
 

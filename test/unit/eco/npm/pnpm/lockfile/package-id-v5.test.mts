@@ -1,12 +1,12 @@
 /**
- * @file Unit tests for parse-pnpm-package-id-v5.ts.
+ * @file Unit tests for src/eco/npm/pnpm/lockfile/package-id-v5.ts.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { parsePnpmPackageIdV5 } from '../../../../../src/eco/npm/pnpm/parse-pnpm-package-id-v5'
+import { parsePnpmPackageIdV5 } from '../../../../../../src/eco/npm/pnpm/lockfile/package-id-v5'
 
-describe('eco/npm/pnpm/parse-pnpm-package-id-v5', () => {
+describe('eco/npm/pnpm/lockfile/package-id-v5', () => {
   it('parses an unscoped /name/version', () => {
     expect(parsePnpmPackageIdV5('/lodash/4.17.21')).toEqual({
       name: 'lodash',

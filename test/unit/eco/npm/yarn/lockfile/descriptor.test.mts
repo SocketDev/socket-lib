@@ -1,12 +1,12 @@
 /**
- * @file Unit tests for parse-yarn-descriptor.ts.
+ * @file Unit tests for src/eco/npm/yarn/lockfile/descriptor.ts.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { parseYarnDescriptor } from '../../../../../../src/eco/npm/yarnpkg/yarn/parse-yarn-descriptor'
+import { parseYarnDescriptor } from '../../../../../../src/eco/npm/yarn/lockfile/descriptor'
 
-describe('eco/npm/yarnpkg/yarn/parse-yarn-descriptor', () => {
+describe('eco/npm/yarn/lockfile/descriptor', () => {
   it('handles a classic spec', () => {
     expect(parseYarnDescriptor('lodash@^4.17.0')).toEqual({ name: 'lodash' })
   })

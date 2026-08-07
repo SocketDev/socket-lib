@@ -183,23 +183,23 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/abort/sig
 - [@socketsecurity/lib/eco/npm/npm/exec](./dist/eco/npm/npm/exec.d.ts): Execute npm commands with optimized flags and security defaults.
 - [@socketsecurity/lib/eco/npm/npm/extract-package-name-from-path](./dist/eco/npm/npm/extract-package-name-from-path.d.ts): `extractPackageNameFromPath(pkgPath)` — given an npm v2/v3 lockfile entry key like `node_modules/a/node_modules/b`, returns the final package name (`b`), preserving scoped-package boundaries (`@scope/name` stays joined).
 - [@socketsecurity/lib/eco/npm/npm/flags](./dist/eco/npm/npm/flags.d.ts): Npm CLI flag predicates.
-- [@socketsecurity/lib/eco/npm/npm/lockfile-format](./dist/eco/npm/npm/lockfile-format.d.ts): Format descriptor for npm lockfiles — covers both `package-lock.json` and `npm-shrinkwrap.json` (npm v1/v2/v3 lock formats share the parser).
+- [@socketsecurity/lib/eco/npm/npm/lockfile/format](./dist/eco/npm/npm/lockfile/format.d.ts): Format descriptor for npm lockfiles — covers both `package-lock.json` and `npm-shrinkwrap.json` (npm v1/v2/v3 lock formats share the parser).
+- [@socketsecurity/lib/eco/npm/npm/lockfile/parse](./dist/eco/npm/npm/lockfile/parse.d.ts): `parsePackageLock(content)` — parses an npm `package-lock.json` / `npm-shrinkwrap.json` (v1/v2/v3) into a `ParsedLockfile`.
 - [@socketsecurity/lib/eco/npm/npm/parse-git-url](./dist/eco/npm/npm/parse-git-url.d.ts): `parseGitUrl(resolved)` — extracts `{ url, commit }` from a `resolved` field on an npm lockfile entry when it points to a git source (`git+…` or `git://…`).
-- [@socketsecurity/lib/eco/npm/npm/parse-lockfile](./dist/eco/npm/npm/parse-lockfile.d.ts): `parsePackageLock(content)` — parses an npm `package-lock.json` / `npm-shrinkwrap.json` (v1/v2/v3) into a `ParsedLockfile`.
 - [@socketsecurity/lib/eco/npm/parse-package-json](./dist/eco/npm/parse-package-json.d.ts): `parsePackageJson(content)` — parses a `package.json` string into a `ParsedManifest`.
-- [@socketsecurity/lib/eco/npm/pnpm/detect-pnpm-version](./dist/eco/npm/pnpm/detect-pnpm-version.d.ts): `detectPnpmVersion(content)` — scans a pnpm-lock.yaml for its `lockfileVersion:` line and returns `5`, `6`, or `9`.
 - [@socketsecurity/lib/eco/npm/pnpm/exec](./dist/eco/npm/pnpm/exec.d.ts): Execute pnpm commands with optimized flags and security defaults.
 - [@socketsecurity/lib/eco/npm/pnpm/flags](./dist/eco/npm/pnpm/flags.d.ts): Pnpm CLI flag predicates.
-- [@socketsecurity/lib/eco/npm/pnpm/lockfile-format](./dist/eco/npm/pnpm/lockfile-format.d.ts): Format descriptor for `pnpm-lock.yaml` — pnpm's YAML-formatted lockfile (v5/v6/v9).
-- [@socketsecurity/lib/eco/npm/pnpm/parse-lockfile](./dist/eco/npm/pnpm/parse-lockfile.d.ts): `parsePnpmLock(content)` — parses a `pnpm-lock.yaml` (v5, v6, or v9) into a `ParsedLockfile`.
-- [@socketsecurity/lib/eco/npm/pnpm/parse-pnpm-package-id-v5](./dist/eco/npm/pnpm/parse-pnpm-package-id-v5.d.ts): `parsePnpmPackageIdV5(pkgId)` — extracts `{ name, version }` from a pnpm v5 package key.
-- [@socketsecurity/lib/eco/npm/pnpm/parse-pnpm-package-id-v6-v9](./dist/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.d.ts): `parsePnpmPackageIdV6V9(pkgId)` — extracts `{ name, version }` from a pnpm v6/v9 package key.
+- [@socketsecurity/lib/eco/npm/pnpm/lockfile/detect-version](./dist/eco/npm/pnpm/lockfile/detect-version.d.ts): `detectPnpmVersion(content)` — scans a pnpm-lock.yaml for its `lockfileVersion:` line and returns `5`, `6`, or `9`.
+- [@socketsecurity/lib/eco/npm/pnpm/lockfile/format](./dist/eco/npm/pnpm/lockfile/format.d.ts): Format descriptor for `pnpm-lock.yaml` — pnpm's YAML-formatted lockfile (v5/v6/v9).
+- [@socketsecurity/lib/eco/npm/pnpm/lockfile/package-id-v5](./dist/eco/npm/pnpm/lockfile/package-id-v5.d.ts): `parsePnpmPackageIdV5(pkgId)` — extracts `{ name, version }` from a pnpm v5 package key.
+- [@socketsecurity/lib/eco/npm/pnpm/lockfile/package-id-v6-v9](./dist/eco/npm/pnpm/lockfile/package-id-v6-v9.d.ts): `parsePnpmPackageIdV6V9(pkgId)` — extracts `{ name, version }` from a pnpm v6/v9 package key.
+- [@socketsecurity/lib/eco/npm/pnpm/lockfile/parse](./dist/eco/npm/pnpm/lockfile/parse.d.ts): `parsePnpmLock(content)` — parses a `pnpm-lock.yaml` (v5, v6, or v9) into a `ParsedLockfile`.
 - [@socketsecurity/lib/eco/npm/script](./dist/eco/npm/script.d.ts): Cross-tool script runner — picks the right package manager by detecting the nearest lockfile and dispatches to its exec function.
 - [@socketsecurity/lib/eco/npm/vlt/exec](./dist/eco/npm/vlt/exec.d.ts): Vlt tool surface.
-- [@socketsecurity/lib/eco/npm/yarnpkg/yarn/exec](./dist/eco/npm/yarnpkg/yarn/exec.d.ts): Execute Yarn Classic (v1.x) commands with optimized flags and security defaults.
-- [@socketsecurity/lib/eco/npm/yarnpkg/yarn/lockfile-format](./dist/eco/npm/yarnpkg/yarn/lockfile-format.d.ts): Format descriptor for `yarn.lock` — yarn's lockfile (Classic v1 + Berry v6 share the filename; the parser auto-discriminates on `__metadata:` presence).
-- [@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-lockfile](./dist/eco/npm/yarnpkg/yarn/parse-lockfile.d.ts): `parseYarnLock(content)` — parses a `yarn.lock` (Classic v1 or Berry v6) into a `ParsedLockfile`.
-- [@socketsecurity/lib/eco/npm/yarnpkg/yarn/parse-yarn-descriptor](./dist/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.d.ts): `parseYarnDescriptor(descriptor)` — extracts the package name from a yarn lockfile spec key.
+- [@socketsecurity/lib/eco/npm/yarn/exec](./dist/eco/npm/yarn/exec.d.ts): Execute Yarn Classic (v1.x) commands with optimized flags and security defaults.
+- [@socketsecurity/lib/eco/npm/yarn/lockfile/descriptor](./dist/eco/npm/yarn/lockfile/descriptor.d.ts): `parseYarnDescriptor(descriptor)` — extracts the package name from a yarn lockfile spec key.
+- [@socketsecurity/lib/eco/npm/yarn/lockfile/format](./dist/eco/npm/yarn/lockfile/format.d.ts): Format descriptor for `yarn.lock` — yarn's lockfile (Classic v1 + Berry v6 share the filename; the parser auto-discriminates on `__metadata:` presence).
+- [@socketsecurity/lib/eco/npm/yarn/lockfile/parse](./dist/eco/npm/yarn/lockfile/parse.d.ts): `parseYarnLock(content)` — parses a `yarn.lock` (Classic v1 or Berry v6) into a `ParsedLockfile`.
 - [@socketsecurity/lib/eco/purl](./dist/eco/purl.d.ts): PURL (Package URL) ecosystem identifiers shared across every package manager Socket understands.
 - [@socketsecurity/lib/eco/types](./dist/eco/types.d.ts): Socket Registry ecosystem schema types — tags for packages and the manifest entries the registry build pipeline emits.
 

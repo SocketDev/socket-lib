@@ -9,18 +9,18 @@
  *   and yarn-classic stays here.
  */
 
-import { execBin } from '../../../../exe/exec'
-import { isDebug } from '../../../../debug/namespace'
+import { execBin } from '../../../exe/exec'
+import { isDebug } from '../../../debug/namespace'
 import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
-} from '../../../../primordials/array'
-import { isNpmLoglevelFlag, isNpmProgressFlag } from '../../npm/flags'
-import { isPnpmIgnoreScriptsFlag } from '../../pnpm/flags'
+} from '../../../primordials/array'
+import { isNpmLoglevelFlag, isNpmProgressFlag } from '../npm/flags'
+import { isPnpmIgnoreScriptsFlag } from '../pnpm/flags'
 
-import { SetCtor } from '../../../../primordials/map-set'
+import { SetCtor } from '../../../primordials/map-set'
 
-import type { SpawnOptions } from '../../../../process/spawn/types'
+import type { SpawnOptions } from '../../../process/spawn/types'
 
 // Commands that support --ignore-scripts in yarn (similar to npm/pnpm).
 const yarnInstallLikeCommands = new SetCtor([

@@ -804,30 +804,25 @@
       "types": "./dist/eco/npm/npm/flags.d.ts",
       "default": "./dist/eco/npm/npm/flags.js"
     },
-    "./eco/npm/npm/lockfile-format": {
-      "source": "./src/eco/npm/npm/lockfile-format.ts",
-      "types": "./dist/eco/npm/npm/lockfile-format.d.ts",
-      "default": "./dist/eco/npm/npm/lockfile-format.js"
+    "./eco/npm/npm/lockfile/format": {
+      "source": "./src/eco/npm/npm/lockfile/format.ts",
+      "types": "./dist/eco/npm/npm/lockfile/format.d.ts",
+      "default": "./dist/eco/npm/npm/lockfile/format.js"
+    },
+    "./eco/npm/npm/lockfile/parse": {
+      "source": "./src/eco/npm/npm/lockfile/parse.ts",
+      "types": "./dist/eco/npm/npm/lockfile/parse.d.ts",
+      "default": "./dist/eco/npm/npm/lockfile/parse.js"
     },
     "./eco/npm/npm/parse-git-url": {
       "source": "./src/eco/npm/npm/parse-git-url.ts",
       "types": "./dist/eco/npm/npm/parse-git-url.d.ts",
       "default": "./dist/eco/npm/npm/parse-git-url.js"
     },
-    "./eco/npm/npm/parse-lockfile": {
-      "source": "./src/eco/npm/npm/parse-lockfile.ts",
-      "types": "./dist/eco/npm/npm/parse-lockfile.d.ts",
-      "default": "./dist/eco/npm/npm/parse-lockfile.js"
-    },
     "./eco/npm/parse-package-json": {
       "source": "./src/eco/npm/parse-package-json.ts",
       "types": "./dist/eco/npm/parse-package-json.d.ts",
       "default": "./dist/eco/npm/parse-package-json.js"
-    },
-    "./eco/npm/pnpm/detect-pnpm-version": {
-      "source": "./src/eco/npm/pnpm/detect-pnpm-version.ts",
-      "types": "./dist/eco/npm/pnpm/detect-pnpm-version.d.ts",
-      "default": "./dist/eco/npm/pnpm/detect-pnpm-version.js"
     },
     "./eco/npm/pnpm/exec": {
       "source": "./src/eco/npm/pnpm/exec.ts",
@@ -839,25 +834,30 @@
       "types": "./dist/eco/npm/pnpm/flags.d.ts",
       "default": "./dist/eco/npm/pnpm/flags.js"
     },
-    "./eco/npm/pnpm/lockfile-format": {
-      "source": "./src/eco/npm/pnpm/lockfile-format.ts",
-      "types": "./dist/eco/npm/pnpm/lockfile-format.d.ts",
-      "default": "./dist/eco/npm/pnpm/lockfile-format.js"
+    "./eco/npm/pnpm/lockfile/detect-version": {
+      "source": "./src/eco/npm/pnpm/lockfile/detect-version.ts",
+      "types": "./dist/eco/npm/pnpm/lockfile/detect-version.d.ts",
+      "default": "./dist/eco/npm/pnpm/lockfile/detect-version.js"
     },
-    "./eco/npm/pnpm/parse-lockfile": {
-      "source": "./src/eco/npm/pnpm/parse-lockfile.ts",
-      "types": "./dist/eco/npm/pnpm/parse-lockfile.d.ts",
-      "default": "./dist/eco/npm/pnpm/parse-lockfile.js"
+    "./eco/npm/pnpm/lockfile/format": {
+      "source": "./src/eco/npm/pnpm/lockfile/format.ts",
+      "types": "./dist/eco/npm/pnpm/lockfile/format.d.ts",
+      "default": "./dist/eco/npm/pnpm/lockfile/format.js"
     },
-    "./eco/npm/pnpm/parse-pnpm-package-id-v5": {
-      "source": "./src/eco/npm/pnpm/parse-pnpm-package-id-v5.ts",
-      "types": "./dist/eco/npm/pnpm/parse-pnpm-package-id-v5.d.ts",
-      "default": "./dist/eco/npm/pnpm/parse-pnpm-package-id-v5.js"
+    "./eco/npm/pnpm/lockfile/package-id-v5": {
+      "source": "./src/eco/npm/pnpm/lockfile/package-id-v5.ts",
+      "types": "./dist/eco/npm/pnpm/lockfile/package-id-v5.d.ts",
+      "default": "./dist/eco/npm/pnpm/lockfile/package-id-v5.js"
     },
-    "./eco/npm/pnpm/parse-pnpm-package-id-v6-v9": {
-      "source": "./src/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.ts",
-      "types": "./dist/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.d.ts",
-      "default": "./dist/eco/npm/pnpm/parse-pnpm-package-id-v6-v9.js"
+    "./eco/npm/pnpm/lockfile/package-id-v6-v9": {
+      "source": "./src/eco/npm/pnpm/lockfile/package-id-v6-v9.ts",
+      "types": "./dist/eco/npm/pnpm/lockfile/package-id-v6-v9.d.ts",
+      "default": "./dist/eco/npm/pnpm/lockfile/package-id-v6-v9.js"
+    },
+    "./eco/npm/pnpm/lockfile/parse": {
+      "source": "./src/eco/npm/pnpm/lockfile/parse.ts",
+      "types": "./dist/eco/npm/pnpm/lockfile/parse.d.ts",
+      "default": "./dist/eco/npm/pnpm/lockfile/parse.js"
     },
     "./eco/npm/script": {
       "source": "./src/eco/npm/script.ts",
@@ -869,25 +869,25 @@
       "types": "./dist/eco/npm/vlt/exec.d.ts",
       "default": "./dist/eco/npm/vlt/exec.js"
     },
-    "./eco/npm/yarnpkg/yarn/exec": {
-      "source": "./src/eco/npm/yarnpkg/yarn/exec.ts",
-      "types": "./dist/eco/npm/yarnpkg/yarn/exec.d.ts",
-      "default": "./dist/eco/npm/yarnpkg/yarn/exec.js"
+    "./eco/npm/yarn/exec": {
+      "source": "./src/eco/npm/yarn/exec.ts",
+      "types": "./dist/eco/npm/yarn/exec.d.ts",
+      "default": "./dist/eco/npm/yarn/exec.js"
     },
-    "./eco/npm/yarnpkg/yarn/lockfile-format": {
-      "source": "./src/eco/npm/yarnpkg/yarn/lockfile-format.ts",
-      "types": "./dist/eco/npm/yarnpkg/yarn/lockfile-format.d.ts",
-      "default": "./dist/eco/npm/yarnpkg/yarn/lockfile-format.js"
+    "./eco/npm/yarn/lockfile/descriptor": {
+      "source": "./src/eco/npm/yarn/lockfile/descriptor.ts",
+      "types": "./dist/eco/npm/yarn/lockfile/descriptor.d.ts",
+      "default": "./dist/eco/npm/yarn/lockfile/descriptor.js"
     },
-    "./eco/npm/yarnpkg/yarn/parse-lockfile": {
-      "source": "./src/eco/npm/yarnpkg/yarn/parse-lockfile.ts",
-      "types": "./dist/eco/npm/yarnpkg/yarn/parse-lockfile.d.ts",
-      "default": "./dist/eco/npm/yarnpkg/yarn/parse-lockfile.js"
+    "./eco/npm/yarn/lockfile/format": {
+      "source": "./src/eco/npm/yarn/lockfile/format.ts",
+      "types": "./dist/eco/npm/yarn/lockfile/format.d.ts",
+      "default": "./dist/eco/npm/yarn/lockfile/format.js"
     },
-    "./eco/npm/yarnpkg/yarn/parse-yarn-descriptor": {
-      "source": "./src/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.ts",
-      "types": "./dist/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.d.ts",
-      "default": "./dist/eco/npm/yarnpkg/yarn/parse-yarn-descriptor.js"
+    "./eco/npm/yarn/lockfile/parse": {
+      "source": "./src/eco/npm/yarn/lockfile/parse.ts",
+      "types": "./dist/eco/npm/yarn/lockfile/parse.d.ts",
+      "default": "./dist/eco/npm/yarn/lockfile/parse.js"
     },
     "./eco/purl": {
       "source": "./src/eco/purl.ts",

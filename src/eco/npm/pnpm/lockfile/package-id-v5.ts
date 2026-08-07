@@ -13,7 +13,7 @@ import {
   StringPrototypeIndexOf,
   StringPrototypeSlice,
   StringPrototypeSplit,
-} from '../../../primordials/string'
+} from '../../../../primordials/string'
 
 export interface PnpmPackageId {
   readonly name: string

@@ -48,7 +48,7 @@ import {
   StringPrototypeTrim,
 } from '../../../../primordials/string'
 import { getSmolManifest } from '../../../../smol/manifest'
-import { parseYarnDescriptor } from './parse-yarn-descriptor'
+import { parseYarnDescriptor } from './descriptor'
 
 import type { PackageRef, ParsedLockfile } from '../../../manifest/types'
 

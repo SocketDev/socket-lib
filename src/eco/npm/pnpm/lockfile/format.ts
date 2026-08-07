@@ -4,9 +4,9 @@
  *   matches `pnpm-lock.yaml`.
  */
 
-import { ObjectFreeze } from '../../../primordials/object'
+import { ObjectFreeze } from '../../../../primordials/object'
 
-import type { FormatDescriptor } from '../../manifest/types'
+import type { FormatDescriptor } from '../../../manifest/types'
 
 export const PNPM_LOCK_FORMAT = ObjectFreeze({
   __proto__: null,

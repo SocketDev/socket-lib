@@ -33,7 +33,7 @@ import { spawn } from '../../process/spawn/child'
 
 import { execNpm } from './npm/exec'
 import { execPnpm } from './pnpm/exec'
-import { execYarn } from './yarnpkg/yarn/exec'
+import { execYarn } from './yarn/exec'
 
 import type { SpawnOptions } from '../../process/spawn/types'
 

@@ -42,21 +42,25 @@
  *     fixture directory there.
  */
 
-import { ArrayPrototypePush } from '../../../primordials/array'
-import { ObjectFreeze } from '../../../primordials/object'
-import { RegExpPrototypeExec } from '../../../primordials/regexp'
+import { ArrayPrototypePush } from '../../../../primordials/array'
+import { ObjectFreeze } from '../../../../primordials/object'
+import { RegExpPrototypeExec } from '../../../../primordials/regexp'
 import {
   StringPrototypeEndsWith,
   StringPrototypeIndexOf,
   StringPrototypeSlice,
   StringPrototypeTrim,
-} from '../../../primordials/string'
-import { getSmolManifest } from '../../../smol/manifest'
-import { detectPnpmVersion } from './detect-pnpm-version'
-import { parsePnpmPackageIdV5 } from './parse-pnpm-package-id-v5'
-import { parsePnpmPackageIdV6V9 } from './parse-pnpm-package-id-v6-v9'
+} from '../../../../primordials/string'
+import { getSmolManifest } from '../../../../smol/manifest'
+import { detectPnpmVersion } from './detect-version'
+import { parsePnpmPackageIdV5 } from './package-id-v5'
+import { parsePnpmPackageIdV6V9 } from './package-id-v6-v9'
 
-import type { DepType, PackageRef, ParsedLockfile } from '../../manifest/types'
+import type {
+  DepType,
+  PackageRef,
+  ParsedLockfile,
+} from '../../../manifest/types'
 
 const RE_INTEGRITY = /integrity:\s*([a-zA-Z0-9+/=-]+)/
 const RE_TARBALL = /tarball:\s*['"]?([^'"}\s]+)['"]?/

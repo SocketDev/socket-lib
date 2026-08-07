@@ -4,16 +4,16 @@
  *   (npm `lockfileVersion`, yarn `__metadata:` or `yarn lockfile`, pnpm
  *   `lockfileVersion:`). On socket-btm's smol Node binary this routes to
  *   `node:smol-manifest`'s native `parseLockfile`; on stock Node it dispatches
- *   to one of the `src/eco/npm/<pm>/parse-lockfile.ts` leaves. Throws
+ *   to one of the `src/eco/npm/<pm>/lockfile/parse.ts` leaves. Throws
  *   `ManifestError(ERR_UNSUPPORTED)` for unrecognized ecosystems, and
  *   `ManifestError(ERR_UNKNOWN_FORMAT)` when content can't be sniffed.
  */
 
 import { ManifestError } from './manifest-error'
 import { parseCargoLock } from '../cargo/parse-lockfile'
-import { parsePackageLock } from '../npm/npm/parse-lockfile'
-import { parsePnpmLock } from '../npm/pnpm/parse-lockfile'
-import { parseYarnLock } from '../npm/yarnpkg/yarn/parse-lockfile'
+import { parsePackageLock } from '../npm/npm/lockfile/parse'
+import { parsePnpmLock } from '../npm/pnpm/lockfile/parse'
+import { parseYarnLock } from '../npm/yarn/lockfile/parse'
 import { StringPrototypeIndexOf } from '../../primordials/string'
 import { getSmolManifest } from '../../smol/manifest'
 

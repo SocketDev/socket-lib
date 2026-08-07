@@ -5,9 +5,9 @@
  *   either of the two npm lockfile basenames.
  */
 
-import { ObjectFreeze } from '../../../primordials/object'
+import { ObjectFreeze } from '../../../../primordials/object'
 
-import type { FormatDescriptor } from '../../manifest/types'
+import type { FormatDescriptor } from '../../../manifest/types'
 
 export const PACKAGE_LOCK_FORMAT = ObjectFreeze({
   __proto__: null,

@@ -1,12 +1,12 @@
 /**
- * @file Unit tests for detect-pnpm-version.ts.
+ * @file Unit tests for src/eco/npm/pnpm/lockfile/detect-version.ts.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { detectPnpmVersion } from '../../../../../src/eco/npm/pnpm/detect-pnpm-version'
+import { detectPnpmVersion } from '../../../../../../src/eco/npm/pnpm/lockfile/detect-version'
 
-describe('eco/npm/pnpm/detect-pnpm-version', () => {
+describe('eco/npm/pnpm/lockfile/detect-version', () => {
   it('detects v5', () => {
     expect(detectPnpmVersion('lockfileVersion: 5.4\n')).toBe(5)
   })

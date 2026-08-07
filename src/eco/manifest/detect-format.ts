@@ -25,15 +25,15 @@ import {
 import {
   PACKAGE_LOCK_FILENAMES,
   PACKAGE_LOCK_FORMAT,
-} from '../npm/npm/lockfile-format'
+} from '../npm/npm/lockfile/format'
 import {
   PNPM_LOCK_FILENAME,
   PNPM_LOCK_FORMAT,
-} from '../npm/pnpm/lockfile-format'
+} from '../npm/pnpm/lockfile/format'
 import {
   YARN_LOCK_FILENAME,
   YARN_LOCK_FORMAT,
-} from '../npm/yarnpkg/yarn/lockfile-format'
+} from '../npm/yarn/lockfile/format'
 import { ObjectFreeze } from '../../primordials/object'
 import { getSmolManifest } from '../../smol/manifest'
 

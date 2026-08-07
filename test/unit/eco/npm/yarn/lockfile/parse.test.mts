@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/eco/npm/yarnpkg/yarn/parse-lockfile.ts. Exercises
+ * @file Unit tests for src/eco/npm/yarn/lockfile/parse.ts. Exercises
  *   Yarn Classic (v1) + Berry (v6) lockfile parsing, plus helper exports
  *   (stripQuotes, valueAfterKey, etc.).
  */
@@ -13,7 +13,7 @@ import {
   skipIndentedBlock,
   stripQuotes,
   valueAfterKey,
-} from '../../../../../../src/eco/npm/yarnpkg/yarn/parse-lockfile'
+} from '../../../../../../src/eco/npm/yarn/lockfile/parse'
 
 const CLASSIC = `
 # yarn lockfile v1
@@ -64,7 +64,7 @@ const BERRY = `__metadata:
   linkType: hard
 `
 
-describe('eco/npm/yarnpkg/yarn/parse-lockfile', () => {
+describe('eco/npm/yarn/lockfile/parse', () => {
   describe('parseYarnLock (Classic)', () => {
     const result = parseYarnLock(CLASSIC)
 

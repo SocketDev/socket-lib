@@ -41,24 +41,28 @@
  *     shipped fix has a matching fixture directory there.
  */
 
-import { ManifestError } from '../../manifest/manifest-error'
-import { errorMessage } from '../../../errors/message'
-import { ArrayFrom, ArrayPrototypePush } from '../../../primordials/array'
-import { RangeErrorCtor } from '../../../primordials/error'
-import { JSONParse } from '../../../primordials/json'
-import { SetCtor } from '../../../primordials/map-set'
-import { ObjectFreeze, ObjectKeys } from '../../../primordials/object'
-import { getSmolManifest } from '../../../smol/manifest'
-import { extractPackageNameFromPath } from './extract-package-name-from-path'
-import { parseGitUrl } from './parse-git-url'
+import { ManifestError } from '../../../manifest/manifest-error'
+import { errorMessage } from '../../../../errors/message'
+import { ArrayFrom, ArrayPrototypePush } from '../../../../primordials/array'
+import { RangeErrorCtor } from '../../../../primordials/error'
+import { JSONParse } from '../../../../primordials/json'
+import { SetCtor } from '../../../../primordials/map-set'
+import { ObjectFreeze, ObjectKeys } from '../../../../primordials/object'
+import { getSmolManifest } from '../../../../smol/manifest'
+import { extractPackageNameFromPath } from '../extract-package-name-from-path'
+import { parseGitUrl } from '../parse-git-url'
 
 import {
   StringPrototypeLastIndexOf,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
-} from '../../../primordials/string'
+} from '../../../../primordials/string'
 
-import type { DepType, PackageRef, ParsedLockfile } from '../../manifest/types'
+import type {
+  DepType,
+  PackageRef,
+  ParsedLockfile,
+} from '../../../manifest/types'
 
 // Cap recursion depth on v1 nested `dependencies`. The `visited` set
 // prevents cycles but not pathological linear nesting — an
