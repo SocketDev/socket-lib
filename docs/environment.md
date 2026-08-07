@@ -13,11 +13,11 @@ Detect CI environments, check Node.js environment settings, and access platform-
 ## Quick Start
 
 ```typescript
-import { getCI } from '@socketsecurity/lib/env/ci'
+import { isCI } from '@socketsecurity/lib/env/ci'
 import { getNodeEnv } from '@socketsecurity/lib/env/node-env'
 import { isTest } from '@socketsecurity/lib/env/test'
 
-if (getCI()) {
+if (isCI()) {
   console.log('Running in CI environment')
 }
 
@@ -34,7 +34,7 @@ if (isTest()) {
 
 All environment getters are pure functions that access only their specific environment variable. For fallback logic, compose multiple getters.
 
-### getCI()
+### isCI()
 
 **What it does:** Checks if code is running in a Continuous Integration environment.
 
@@ -43,9 +43,9 @@ All environment getters are pure functions that access only their specific envir
 **Example:**
 
 ```typescript
-import { getCI } from '@socketsecurity/lib/env/ci'
+import { isCI } from '@socketsecurity/lib/env/ci'
 
-if (getCI()) {
+if (isCI()) {
   // Disable interactive prompts
   // Use non-colored output
   // Skip browser-based tests
@@ -145,12 +145,12 @@ Environment getters support test rewiring without modifying `process.env`:
 
 ```typescript
 import { setEnv, clearEnv, resetEnv } from '@socketsecurity/lib/env/rewire'
-import { getCI } from '@socketsecurity/lib/env/ci'
+import { isCI } from '@socketsecurity/lib/env/ci'
 
 // In test setup
 beforeEach(() => {
   setEnv('CI', '1')
-  expect(getCI()).toBe(true)
+  expect(isCI()).toBe(true)
 })
 
 afterEach(() => {
@@ -178,10 +178,10 @@ test('specific test', () => {
 ### CI-Specific Behavior
 
 ```typescript
-import { getCI } from '@socketsecurity/lib/env/ci'
+import { isCI } from '@socketsecurity/lib/env/ci'
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
-const spinner = getCI()
+const spinner = isCI()
   ? { start: () => {}, successAndStop: () => {} } // Noop in CI
   : Spinner({ text: 'Working...' })
 
@@ -249,7 +249,7 @@ function getLogger() {
 All getters follow the pattern `get<VarName>()` and return `string | boolean | undefined`:
 
 - **CI/CD:**
-  - `getCI()` - Checks `CI` variable
+  - `isCI()` - Checks `CI` variable
 
 - **Node.js:**
   - `getNodeEnv()` - Checks `NODE_ENV`
@@ -278,7 +278,7 @@ All getters follow the pattern `get<VarName>()` and return `string | boolean | u
 
 ### CI not detected
 
-**Problem:** `getCI()` returns `false` in CI environment.
+**Problem:** `isCI()` returns `false` in CI environment.
 
 **Solution:**
 

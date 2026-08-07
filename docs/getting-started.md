@@ -124,10 +124,10 @@ const result = await spawn('npm', ['install'], {
 ### Environment Detection
 
 ```typescript
-import { getCI } from '@socketsecurity/lib/env/ci'
+import { isCI } from '@socketsecurity/lib/env/ci'
 import { getNodeEnv } from '@socketsecurity/lib/env/node-env'
 
-if (getCI()) {
+if (isCI()) {
   console.log('Running in CI environment')
 }
 

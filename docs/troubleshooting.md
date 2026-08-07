@@ -385,7 +385,7 @@ await spawn('command', [], {
 
 ### CI not detected
 
-**Problem:** `getCI()` returns false in CI.
+**Problem:** `isCI()` returns false in CI.
 
 **Solutions:**
 
