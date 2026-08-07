@@ -30,7 +30,7 @@
 
 import process from 'node:process'
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 import { getNodeFs } from '../node/fs'
 import { getNodePath } from '../node/path'
 import { isPath, normalizePath } from '../paths/normalize'
@@ -183,7 +183,7 @@ export function foldPathForCompare(pathLike: string): string {
   if (normalized.length > 1 && normalized.endsWith('/')) {
     normalized = normalized.slice(0, -1)
   }
-  return WIN32 ? normalized.toLowerCase() : normalized
+  return isWin32() ? normalized.toLowerCase() : normalized
 }
 
 /**

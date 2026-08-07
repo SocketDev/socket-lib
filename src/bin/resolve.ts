@@ -18,7 +18,7 @@
  *   bindings.
  */
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 import { readJsonSync } from '../fs/read-json'
 import { normalizePath } from '../paths/normalize'
 import { StringPrototypeStartsWith } from '../primordials/string'
@@ -148,10 +148,10 @@ export function resolveRealBinSync(binPath: string): string {
     }
   }
   /* c8 ignore start - Windows-only wrapper-script resolution; tested
-     on Windows runners. The whole `if (WIN32)` block parses npm/npx/ // socket-lint: allow npx
+     on Windows runners. The whole `if (isWin32())` block parses npm/npx/ // socket-lint: allow npx
      pnpm/yarn .cmd/.bat/.ps1 shims to extract the underlying CLI JS
      path. Unreachable on macOS/Linux. */
-  if (WIN32) {
+  if (isWin32()) {
     const hasKnownExt =
       extLowered === '' ||
       extLowered === '.cmd' ||

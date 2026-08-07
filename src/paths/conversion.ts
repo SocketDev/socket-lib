@@ -7,7 +7,7 @@
  *   - `trimLeadingDotSlash` — strip a single `./` / `.\` prefix
  */
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 
 import { StringPrototypeStartsWith } from '../primordials/string'
 
@@ -37,7 +37,7 @@ export function fromUnixPath(pathLike: string | Buffer | URL): string {
   const normalized = normalizePath(pathLike)
   // Windows-only backslash conversion.
   /* c8 ignore start */
-  if (WIN32) {
+  if (isWin32()) {
     return normalized.replace(/\//g, '\\')
   }
   /* c8 ignore stop */
@@ -94,7 +94,7 @@ export function toUnixPath(pathLike: string | Buffer | URL): string {
 
   // Windows drive-letter conversion; tested on Windows runners.
   /* c8 ignore start */
-  if (WIN32) {
+  if (isWin32()) {
     // Capture the drive letter so the replace callback can lowercase it —
     // non-capturing groups would leave `letter` undefined and the call
     // would throw on Windows.

@@ -23,8 +23,8 @@ vi.mock(import('../../../src/constants/node'), async importOriginal => ({
 
 vi.mock(import('../../../src/constants/platform'), async importOriginal => ({
   ...(await importOriginal()),
-  DARWIN: false,
-  WIN32: false,
+  isDarwin: () => false,
+  isWin32: () => false,
 }))
 
 import {

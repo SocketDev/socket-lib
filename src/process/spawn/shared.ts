@@ -10,7 +10,7 @@ import process from 'node:process'
 
 import { stripAnsi } from '../../ansi/strip'
 import { findPathEnvKey, resolveTrustedExecutable } from '../../bin/trusted'
-import { WIN32 } from '../../constants/platform'
+import { isWin32 } from '../../constants/platform'
 import { getNodeFs } from '../../node/fs'
 import { getNodePath } from '../../node/path'
 import { isPath } from '../../paths/normalize'
@@ -111,7 +111,7 @@ export function applyCmdExeStem(
   /* c8 ignore start - Windows-only cmd.exe extension stripping for
      .cmd/.bat/.ps1 shell-true execution. Tested on Windows runners. */
   if (
-    !WIN32 ||
+    !isWin32() ||
     !config.shell ||
     !RegExpPrototypeTest(windowsScriptExtRegExp, command)
   ) {

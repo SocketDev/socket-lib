@@ -1,7 +1,7 @@
 /**
  * @file Windows-only branches in src/dlx/binary-download.ts. Mocks
- *   constants/platform to set WIN32=true so the chmod-skip path runs without
- *   actually changing platform.
+ *   constants/platform's isWin32() to return true so the chmod-skip path runs
+ *   without actually changing platform.
  */
 
 import crypto from 'node:crypto'
@@ -16,7 +16,7 @@ import type * as DownloadModule from '../../../src/http-request/download'
 
 vi.mock(import('../../../src/constants/platform'), async importOriginal => {
   const actual = await importOriginal<typeof PlatformModule>()
-  return { ...actual, WIN32: true }
+  return { ...actual, isWin32: () => true }
 })
 
 vi.mock(import('../../../src/http-request/download'), async importOriginal => {
@@ -56,7 +56,7 @@ afterEach(async () => {
   await safeDelete(tmp)
 })
 
-describe.sequential('dlx/binary-download — Windows branch (WIN32=true stub)', () => {
+describe.sequential('dlx/binary-download — Windows branch (isWin32() stubbed true)', () => {
   it('skips chmod on Windows (downloadBinaryFile returns integrity)', async () => {
     const destPath = path.join(tmp, 'win-binary.exe')
     const result = await downloadBinaryFile('https://example.com/x', destPath)

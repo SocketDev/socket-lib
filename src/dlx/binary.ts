@@ -16,7 +16,7 @@
 
 import process from 'node:process'
 
-import { getArch, WIN32 } from '../constants/platform'
+import { getArch, isWin32 } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 import { readJson } from '../fs/read-json'
 import { safeMkdir } from '../fs/safe'
@@ -183,7 +183,7 @@ export async function dlxBinary(
   // On Windows, script files (.bat, .cmd, .ps1) require shell: true because
   // they are not executable on their own and must be run through cmd.exe.
   // Note: .exe files are actual binaries and don't need shell mode.
-  const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
+  const needsShell = isWin32() && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
   // Windows cmd.exe PATH resolution behavior:
   // When shell: true on Windows with .cmd/.bat/.ps1 files, spawn will automatically
   // strip the full path down to just the basename without extension. Windows cmd.exe
@@ -200,7 +200,7 @@ export async function dlxBinary(
           ...spawnOptions?.env,
           PATH: `${cacheEntryDir}${path.delimiter}${process.env['PATH'] || ''}`,
         },
-        // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (WIN32 && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
+        // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (isWin32() && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
         shell: true,
       }
     : spawnOptions
@@ -243,7 +243,7 @@ export function executeBinary(
   // On Windows, script files (.bat, .cmd, .ps1) require shell: true because
   // they are not executable on their own and must be run through cmd.exe.
   // Note: .exe files are actual binaries and don't need shell mode.
-  const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
+  const needsShell = isWin32() && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
 
   // Windows: prepend cache dir to PATH so cmd.exe can locate the binary.
   const path = getNodePath()
@@ -255,7 +255,7 @@ export function executeBinary(
           ...spawnOptions?.env,
           PATH: `${cacheEntryDir}${path.delimiter}${process.env['PATH'] || ''}`,
         },
-        // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (WIN32 && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
+        // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (isWin32() && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
         shell: true,
       }
     : spawnOptions

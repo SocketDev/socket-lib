@@ -25,7 +25,7 @@
  *     committed AGENTS.md (which Socket symlinks to CLAUDE.md).
  */
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 import { getHome } from '../env/home'
 import { getEnvValue } from '../env/rewire'
 import { getXdgConfigHome } from '../env/xdg'
@@ -144,7 +144,7 @@ export function agentPaths(
       let base: string
       if (xdg) {
         base = xdg
-      } else if (WIN32) {
+      } else if (isWin32()) {
         base = getEnvValue('APPDATA') || path.join(home, '.config')
       } else {
         base = path.join(home, '.config')

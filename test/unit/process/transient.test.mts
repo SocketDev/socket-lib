@@ -179,7 +179,7 @@ describe('process/transient', () => {
       it('should detect Yarn Windows temp xfs pattern on Windows', () => {
         const cwd = 'C:\\Users\\user\\AppData\\Local\\Temp\\xfs-abc123'
         const result = isTransientProcess(cwd)
-        // Only matches on Windows platform (WIN32 constant check)
+        // Only matches on Windows platform (isWin32() check)
         expect(typeof result).toBe('boolean')
       })
 
@@ -187,14 +187,14 @@ describe('process/transient', () => {
         const cwd =
           'C:\\Users\\user\\AppData\\Local\\Temp\\xfs-123\\package\\bin'
         const result = isTransientProcess(cwd)
-        // Only matches on Windows platform (WIN32 constant check)
+        // Only matches on Windows platform (isWin32() check)
         expect(typeof result).toBe('boolean')
       })
 
       it('should handle Windows paths with forward slashes on Windows', () => {
         const cwd = 'C:/Users/user/AppData/Local/Temp/xfs-abc123'
         const result = isTransientProcess(cwd)
-        // Only matches on Windows platform (WIN32 constant check)
+        // Only matches on Windows platform (isWin32() check)
         expect(typeof result).toBe('boolean')
       })
 

@@ -32,7 +32,7 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { WIN32 } from '../../constants/platform'
+import { isWin32 } from '../../constants/platform'
 import { safeDelete, safeMkdir } from '../../fs/safe'
 import { computeHashes } from '../../integrity'
 
@@ -188,7 +188,7 @@ export async function resolvePipPackagePin(
         scratch,
         spec,
       ],
-      { shell: WIN32, stdio: 'inherit' },
+      { shell: isWin32(), stdio: 'inherit' },
     )
     const files = (await fs.readdir(scratch)).filter(
       f =>

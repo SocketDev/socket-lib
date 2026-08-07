@@ -18,7 +18,7 @@
  *     kill was attempted, `false` if the pid was invalid or already gone.
  */
 
-import { WIN32 } from '../../constants/platform'
+import { isWin32 } from '../../constants/platform'
 import { getNodeChildProcess } from '../../node/child-process'
 
 import type { ChildProcess } from 'node:child_process'
@@ -76,7 +76,7 @@ export function killProcessTree(
   const detached = opts.detached !== false
   const signal = opts.signal ?? 'SIGTERM'
   try {
-    if (WIN32) {
+    if (isWin32()) {
       // No POSIX process groups on Windows; taskkill /T walks the tree.
       // taskkill never throws — it sets status. 0 = killed (or at least
       // dispatched a kill); 128 = "process not found" (ERROR_PROC_NOT_FOUND).

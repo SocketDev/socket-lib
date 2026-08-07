@@ -9,7 +9,7 @@
 
 import process from 'node:process'
 
-import { getArch, WIN32 } from '../constants/platform'
+import { getArch, isWin32 } from '../constants/platform'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time'
 import { isError } from '../errors/predicates'
 import { safeDelete, safeMkdir } from '../fs/safe'
@@ -333,7 +333,7 @@ export async function downloadBinaryFile(
       await verifyIntegrity(result.integrity)
 
       // Make executable on POSIX systems.
-      if (!WIN32) {
+      if (!isWin32()) {
         await fs.promises.chmod(destPath, 0o755)
       }
 

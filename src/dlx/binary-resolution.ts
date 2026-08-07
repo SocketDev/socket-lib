@@ -9,7 +9,7 @@
  *     consumers (`binaryPathCacheSet`) share one source.
  */
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 import { readJsonSync } from '../fs/read-json'
 import libnpmexec from '../external/libnpmexec'
 import { normalizePath } from '../paths/normalize'
@@ -144,7 +144,7 @@ export function makePackageBinsExecutable(
   packageDir: string,
   packageName: string,
 ): void {
-  if (WIN32) {
+  if (isWin32()) {
     // Windows doesn't need chmod
     return
   }
@@ -207,7 +207,7 @@ export function makePackageBinsExecutable(
  *   ```
  */
 export function resolveBinaryPath(basePath: string): string {
-  if (!WIN32) {
+  if (!isWin32()) {
     // Unix: use path directly
     return basePath
   }

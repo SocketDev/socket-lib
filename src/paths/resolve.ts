@@ -7,7 +7,7 @@
  *   - `relativeResolve` — `relative` + `normalizePath` convenience wrapper
  */
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 
 import { StringPrototypeCharCodeAt } from '../primordials/string'
 
@@ -54,7 +54,7 @@ export function relative(from: string, to: string): string {
 
   /* c8 ignore start - Windows-only case-insensitive comparison. */
   // Windows: NTFS / FAT32 preserve case but are case-insensitive for lookups.
-  if (WIN32) {
+  if (isWin32()) {
     const fromLower = actualFrom.toLowerCase()
     const toLower = actualTo.toLowerCase()
     if (fromLower === toLower) {
@@ -81,7 +81,7 @@ export function relative(from: string, to: string): string {
     let toCode = StringPrototypeCharCodeAt(actualTo, toStart + i)
 
     /* c8 ignore start - Windows-only case folding. */
-    if (WIN32) {
+    if (isWin32()) {
       if (fromCode >= CHAR_UPPERCASE_A && fromCode <= CHAR_UPPERCASE_Z) {
         fromCode += 32
       }

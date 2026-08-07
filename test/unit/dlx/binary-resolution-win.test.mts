@@ -1,8 +1,8 @@
 /**
  * @file Unit tests for src/dlx/binary-resolution.ts Windows-specific branches.
- *   The module-level `WIN32` constant is mocked via the constants/platform
- *   import path; this exercises the `.cmd/.bat/.ps1/.exe` wrapper-resolution
- *   tier + the cache-recency-bump path.
+ *   `isWin32()` is mocked via the constants/platform import path; this
+ *   exercises the `.cmd/.bat/.ps1/.exe` wrapper-resolution tier + the
+ *   cache-recency-bump path.
  */
 
 import { mkdtempSync, writeFileSync } from 'node:fs'
@@ -13,10 +13,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type * as PlatformConstants from '../../../src/constants/platform'
 
-// Mock the platform constant BEFORE importing the SUT so it sees WIN32=true.
+// Mock the platform predicate BEFORE importing the SUT so it sees isWin32() === true.
 vi.mock(import('../../../src/constants/platform'), async importOriginal => {
   const actual = await importOriginal<typeof PlatformConstants>()
-  return { ...actual, WIN32: true }
+  return { ...actual, isWin32: () => true }
 })
 
 import {
@@ -35,7 +35,7 @@ afterEach(async () => {
   await safeDelete(tmp)
 })
 
-describe.sequential('dlx/binary-resolution — resolveBinaryPath (WIN32 stub)', () => {
+describe.sequential('dlx/binary-resolution — resolveBinaryPath (isWin32() stub)', () => {
   it('returns the .cmd wrapper when present', () => {
     const base = path.join(tmp, 'tool')
     writeFileSync(`${base}.cmd`, 'rem cmd wrapper')
@@ -91,7 +91,7 @@ describe.sequential('dlx/binary-resolution — resolveBinaryPath (WIN32 stub)', 
   })
 })
 
-describe.sequential('dlx/binary-resolution — makePackageBinsExecutable (WIN32 stub)', () => {
+describe.sequential('dlx/binary-resolution — makePackageBinsExecutable (isWin32() stub)', () => {
   it('early-returns without touching the filesystem on Windows', () => {
     // No package.json need exist; the Win32 path returns before any I/O.
     expect(() =>

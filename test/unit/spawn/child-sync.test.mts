@@ -13,7 +13,7 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { WIN32 } from '../../../src/constants/platform'
+import { isWin32 } from '../../../src/constants/platform'
 import { spawnSync } from '../../../src/process/spawn/child'
 
 import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers'
@@ -142,8 +142,8 @@ describe('spawnSync', () => {
     expect(Array.isArray(result.output)).toBe(true)
   })
 
-  // Fleet pattern: pass `shell: WIN32` (not `shell: true`). On Windows
-  // they're equivalent; on Unix `shell: WIN32 === false` is the right
+  // Fleet pattern: pass `shell: isWin32()` (not `shell: true`). On Windows
+  // they're equivalent; on Unix `shell: isWin32() === false` is the right
   // value (no shell wrapping for the unreachable POSIX branch of a
   // Windows-only test).
   //
@@ -163,7 +163,7 @@ describe('spawnSync', () => {
       const cmdPath = path.join(tmp, 'hello.cmd')
       writeFileSync(cmdPath, '@echo hello\r\n')
       const result = spawnSync(cmdPath, [], {
-        shell: WIN32,
+        shell: isWin32(),
       })
       expect(result.status).toBe(0)
       expect(String(result.stdout)).toContain('hello')

@@ -19,7 +19,7 @@
 
 import process from 'node:process'
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 import { getHome } from '../env/home'
 import { getAppdata, getLocalappdata } from '../env/windows'
 import { getXdgDataHome } from '../env/xdg'
@@ -102,7 +102,7 @@ export function findRealNpm(): string {
   // tested on Windows runners.
   const nodeDir = path.dirname(process.execPath)
   /* c8 ignore start */
-  const nodeDirCandidates = WIN32
+  const nodeDirCandidates = isWin32()
     ? [path.join(nodeDir, 'npm.cmd'), path.join(nodeDir, 'npm')]
     : [path.join(nodeDir, 'npm')]
   /* c8 ignore stop */
@@ -117,7 +117,7 @@ export function findRealNpm(): string {
   // Try common npm locations per platform. getAppdata() returns
   // undefined off-Windows; WIN32 commonPaths tested on Windows runners.
   const appdata = getAppdata()
-  const commonPaths = WIN32
+  const commonPaths = isWin32()
     ? [
         appdata ? path.join(appdata, 'npm', 'npm.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'npm') : '',
@@ -170,7 +170,7 @@ export function findRealPnpm(): string {
   // WIN32 commonPaths tested on Windows runners; HOME-based fallback
   // fires only when XDG_DATA_HOME is unset, which depends on env config.
   /* c8 ignore start */
-  const commonPaths = WIN32
+  const commonPaths = isWin32()
     ? [
         appdata ? path.join(appdata, 'npm', 'pnpm.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'pnpm') : '',
@@ -214,7 +214,7 @@ export function findRealYarn(): string {
   // existence checks — getHome()/getAppdata() can return undefined.
   // WIN32 commonPaths tested on Windows runners.
   /* c8 ignore start */
-  const commonPaths = WIN32
+  const commonPaths = isWin32()
     ? [
         appdata ? path.join(appdata, 'npm', 'yarn.cmd') : '',
         appdata ? path.join(appdata, 'npm', 'yarn') : '',

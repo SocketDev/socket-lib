@@ -9,7 +9,7 @@
  *   - `isPathSeparator`, `isWindowsDeviceRoot` — char-code primitives
  */
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 
 import { RegExpPrototypeTest } from '../primordials/regexp'
 
@@ -70,7 +70,7 @@ export function isAbsolute(pathLike: string | Buffer | URL): boolean {
 
   /* c8 ignore start - Windows drive-letter detection. */
   // Windows drive-letter absolute paths: [A-Za-z]:[\\/]
-  if (WIN32 && length > 2) {
+  if (isWin32() && length > 2) {
     if (
       isWindowsDeviceRoot(code) &&
       StringPrototypeCharCodeAt(filepath, 1) === CHAR_COLON &&

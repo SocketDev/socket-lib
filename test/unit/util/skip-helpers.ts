@@ -21,7 +21,7 @@
 
 import process from 'node:process'
 
-import { WIN32 } from '../../../src/constants/platform'
+import { isWin32 } from '../../../src/constants/platform'
 import { describe, it } from 'vitest'
 
 // Read the flag at call time inside the wrappers below, not at module import.
@@ -81,14 +81,14 @@ export function describeRequires(
  * Describe block that only runs on Unix-likes. Skipped on Windows.
  */
 export function describeUnixOnly(name: string, fn: SuiteFn): void {
-  describe.skipIf(WIN32)(tagged(name, TAG_UNIX), fn)
+  describe.skipIf(isWin32())(tagged(name, TAG_UNIX), fn)
 }
 
 /**
  * Describe block that only runs on Windows. Skipped on Unix-likes.
  */
 export function describeWindowsOnly(name: string, fn: SuiteFn): void {
-  describe.skipIf(!WIN32)(tagged(name, TAG_WINDOWS), fn)
+  describe.skipIf(!isWin32())(tagged(name, TAG_WINDOWS), fn)
 }
 
 /**
@@ -121,14 +121,14 @@ export function itUnixOnly(
   fn: TestFn,
   timeout?: number | undefined,
 ): void {
-  it.skipIf(WIN32)(tagged(name, TAG_UNIX), fn, timeout)
+  it.skipIf(isWin32())(tagged(name, TAG_UNIX), fn, timeout)
 }
 
 /**
  * Test that only runs on Windows. Skipped on Unix-likes.
  */
 export function itWindowsOnly(name: string, fn: TestFn): void {
-  it.skipIf(!WIN32)(tagged(name, TAG_WINDOWS), fn)
+  it.skipIf(!isWin32())(tagged(name, TAG_WINDOWS), fn)
 }
 
 export function tagged(name: string, tag: string): string {

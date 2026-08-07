@@ -31,7 +31,7 @@ import {
   supportsNodeStripTypes,
   supportsNodeStripTypesDefault,
 } from '../constants/node'
-import { DARWIN, WIN32 } from '../constants/platform'
+import { isDarwin, isWin32 } from '../constants/platform'
 import { getAppdata } from '../env/windows'
 import { getHome } from '../env/home'
 import { getEnvValue } from '../env/rewire'
@@ -115,14 +115,14 @@ export function chromeManifestDirs(): string[] {
   if (!home) {
     throw new ErrorCtor('Cannot determine home directory.')
   }
-  if (DARWIN) {
+  if (isDarwin()) {
     const lib = path.join(home, 'Library', 'Application Support')
     return [
       path.join(lib, 'Google', 'Chrome', 'NativeMessagingHosts'),
       path.join(lib, 'Chromium', 'NativeMessagingHosts'),
     ]
   }
-  if (WIN32) {
+  if (isWin32()) {
     // On Windows we write the manifest file and then add the registry key.
     // getAppdata() goes through the env rewire so tests can override.
     const appData = getAppdata() ?? path.join(home, 'AppData', 'Roaming')
@@ -171,10 +171,10 @@ export function installNativeHost(options: InstallOptions): InstallResult {
     )
   }
 
-  const wrapperName = WIN32 ? `${HOST_NAME}.cmd` : `${HOST_NAME}.sh`
+  const wrapperName = isWin32() ? `${HOST_NAME}.cmd` : `${HOST_NAME}.sh`
   const wrapperPath = path.join(wrapperDir, wrapperName)
 
-  if (WIN32) {
+  if (isWin32()) {
     writeWrapperWindows(wrapperPath)
   } else {
     writeWrapperPosix(wrapperPath)
@@ -195,7 +195,7 @@ export function installNativeHost(options: InstallOptions): InstallResult {
     written.push(manifestPath)
   }
 
-  if (WIN32 && written[0]) {
+  if (isWin32() && written[0]) {
     registerWindows(written[0])
   }
 
@@ -211,7 +211,7 @@ export function registerWindows(manifestPath: string): void {
     ['add', key, '/ve', '/t', 'REG_SZ', '/d', manifestPath, '/f'],
     {
       stdio: 'ignore',
-      shell: WIN32,
+      shell: isWin32(),
     },
   )
 }

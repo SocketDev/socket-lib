@@ -33,7 +33,7 @@
  *   - lazy `node:fs` / `node:path` + LRU cache — `./shared`
  */
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 import { isError } from '../errors/predicates'
 import Arborist from '../external/@npmcli/arborist'
 import { safeMkdir } from '../fs/safe'
@@ -397,12 +397,12 @@ export function executePackage(
   // On Windows, script files (.bat, .cmd, .ps1) require shell: true
   // because they are not executable on their own and must be run through cmd.exe.
   // .exe files are actual binaries and don't need shell mode.
-  const needsShell = WIN32 && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
+  const needsShell = isWin32() && /\.(?:bat|cmd|ps1)$/i.test(binaryPath)
 
   const finalOptions = needsShell
     ? {
         ...spawnOptions,
-        // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (WIN32 && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
+        // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (isWin32() && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
         shell: true,
       }
     : spawnOptions

@@ -108,8 +108,18 @@ export function getTarget(): string {
 }
 
 // Platform detection, memoized at module load.
-export const DARWIN = getOs() === 'darwin'
-export const WIN32 = getOs() === 'win32'
+const DARWIN = getOs() === 'darwin'
+const WIN32 = getOs() === 'win32'
+
+/**
+ * Returns whether the current platform is macOS. Callable predicate backed
+ * by the module-load memo, so tests can mock the module.
+ *
+ * @returns `true` on darwin, `false` otherwise
+ */
+export function isDarwin(): boolean {
+  return DARWIN
+}
 
 /**
  * Returns whether the current platform is POSIX (anything but Windows).

@@ -27,7 +27,7 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { WIN32 } from '../../constants/platform'
+import { isWin32 } from '../../constants/platform'
 import { safeDelete, safeMkdir } from '../../fs/safe'
 import { getSocketDlxDir } from '../../paths/socket'
 
@@ -120,7 +120,7 @@ export async function uvExportMaterialize(
         '--output-file',
         requirementsPath,
       ],
-      { shell: WIN32, stdio: 'inherit' },
+      { shell: isWin32(), stdio: 'inherit' },
     )
     // `uv pip install --target` lays the closure down as plain files — no venv,
     // no symlinks, no absolute `home=` — so the result is relocatable and
@@ -135,7 +135,7 @@ export async function uvExportMaterialize(
         '--requirement',
         requirementsPath,
       ],
-      { shell: WIN32, stdio: 'inherit' },
+      { shell: isWin32(), stdio: 'inherit' },
     )
     await safeDelete(requirementsPath, { force: true })
     if (!(await isAlreadyInstalled(targetDir))) {
@@ -178,7 +178,7 @@ export async function uvSyncProject(
   // would silently rewrite uv.lock when it drifts from pyproject.toml.
   const lockedArgs = opts.locked === false ? [] : ['--locked']
   await spawn(uvBin, ['sync', ...lockedArgs, '--project', projectDir], {
-    shell: WIN32,
+    shell: isWin32(),
     stdio: 'inherit',
   })
 }

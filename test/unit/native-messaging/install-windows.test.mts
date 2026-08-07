@@ -1,10 +1,11 @@
 /**
  * @file Tests for the Windows-only arms of native-messaging/install.
  *   `registerWindows` shells out to reg.exe and `installNativeHost` branches on
- *   WIN32 to pick the .cmd wrapper — neither runs on the CI/dev platforms this
- *   suite executes on. The platform constant and the spawn boundary are mocked
- *   so the arms are exercised and their arguments asserted, which is the part
- *   that matters: the registry key shape and the absence of a shell on POSIX.
+ *   `isWin32()` to pick the .cmd wrapper — neither runs on the CI/dev platforms
+ *   this suite executes on. The platform predicate and the spawn boundary are
+ *   mocked so the arms are exercised and their arguments asserted, which is
+ *   the part that matters: the registry key shape and the absence of a shell
+ *   on POSIX.
  */
 
 import { mkdtempSync, readFileSync } from 'node:fs'
@@ -27,8 +28,8 @@ vi.mock(
 
 vi.mock(import('../../../src/constants/platform'), async importOriginal => ({
   ...(await importOriginal()),
-  DARWIN: false,
-  WIN32: true,
+  isDarwin: () => false,
+  isWin32: () => true,
 }))
 
 import {

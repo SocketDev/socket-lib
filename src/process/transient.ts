@@ -6,7 +6,7 @@
 
 import process from 'node:process'
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 import { normalizePath } from '../paths/normalize'
 
 /**
@@ -59,7 +59,7 @@ export function isTransientProcess(cwd = process.cwd()): boolean {
 
   // Windows-only Yarn temp pattern.
   /* c8 ignore start */
-  if (WIN32) {
+  if (isWin32()) {
     tempPatterns.push('AppData/Local/Temp/xfs-')
   }
   /* c8 ignore stop */

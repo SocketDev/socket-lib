@@ -10,7 +10,7 @@
  *   nest under the same `_`-prefix.
  */
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 import { SOCKET_DIR, SOCKET_DIR_PREFIX } from '../constants/socket'
 import { getHome } from '../env/home'
 import {
@@ -72,7 +72,7 @@ export function getOsTmpDir(): string {
  *   TMPDIR is shared across users on a multi-tenant box).
  */
 export function getRuntimeSocketPath(name: string): string {
-  if (WIN32) {
+  if (isWin32()) {
     return `\\\\.\\pipe\\${name}-sock`
   }
   const path = getNodePath()

@@ -5,7 +5,7 @@
 
 import npmPackageArg from '../external/npm-package-arg'
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 import { errorMessage } from '../errors/message'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize'
 import { getOsTmpDir } from '../paths/socket'
@@ -48,7 +48,7 @@ const FS_CP_OPTIONS = {
     !src.includes('node_modules') && !StringPrototypeEndsWith(src, '.DS_Store'),
   force: true,
   recursive: true,
-  ...(WIN32 ? { maxRetries: 3, retryDelay: 100 } : {}),
+  ...(isWin32() ? { maxRetries: 3, retryDelay: 100 } : {}),
 }
 
 import { getNodeFs } from '../node/fs'

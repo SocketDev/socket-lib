@@ -22,31 +22,34 @@ import {
 } from '@socketsecurity/lib-stable/constants/platform'
 
 import {
-  DARWIN,
   getArch,
   getLibc,
   getOs,
   getTarget,
+  isDarwin,
   isPosix,
   isWin32,
   S_IXGRP,
   S_IXOTH,
   S_IXUSR,
-  WIN32,
 } from '../../../src/constants/platform'
 
 describe('constants/platform', () => {
   describe('platform detection', () => {
-    it('should export DARWIN boolean', () => {
-      expect(typeof DARWIN).toBe('boolean')
+    it('should answer isDarwin() as a boolean', () => {
+      expect(typeof isDarwin()).toBe('boolean')
     })
 
-    it('should export WIN32 boolean', () => {
-      expect(typeof WIN32).toBe('boolean')
+    it('should answer isWin32() as a boolean', () => {
+      expect(typeof isWin32()).toBe('boolean')
     })
 
     it('should answer isWin32() for the live platform', () => {
       expect(isWin32()).toBe(process.platform === 'win32')
+    })
+
+    it('should answer isDarwin() for the live platform', () => {
+      expect(isDarwin()).toBe(process.platform === 'darwin')
     })
 
     it('should answer isPosix() as the platform complement', () => {
@@ -55,35 +58,35 @@ describe('constants/platform', () => {
 
     it('should have mutually exclusive platform flags', () => {
       // A system cannot be both Darwin and Win32
-      if (DARWIN) {
-        expect(WIN32).toBe(false)
+      if (isDarwin()) {
+        expect(isWin32()).toBe(false)
       }
-      if (WIN32) {
-        expect(DARWIN).toBe(false)
+      if (isWin32()) {
+        expect(isDarwin()).toBe(false)
       }
     })
 
     it('should reflect actual platform', () => {
       const platform = process.platform
       if (platform === 'darwin') {
-        expect(DARWIN).toBe(true)
-        expect(WIN32).toBe(false)
+        expect(isDarwin()).toBe(true)
+        expect(isWin32()).toBe(false)
       } else if (platform === 'win32') {
-        expect(DARWIN).toBe(false)
-        expect(WIN32).toBe(true)
+        expect(isDarwin()).toBe(false)
+        expect(isWin32()).toBe(true)
       } else {
-        expect(DARWIN).toBe(false)
-        expect(WIN32).toBe(false)
+        expect(isDarwin()).toBe(false)
+        expect(isWin32()).toBe(false)
       }
     })
 
     it('should be consistent across multiple reads', () => {
-      const darwin1 = DARWIN
-      const darwin2 = DARWIN
+      const darwin1 = isDarwin()
+      const darwin2 = isDarwin()
       expect(darwin1).toBe(darwin2)
 
-      const win321 = WIN32
-      const win322 = WIN32
+      const win321 = isWin32()
+      const win322 = isWin32()
       expect(win321).toBe(win322)
     })
   })
@@ -150,16 +153,16 @@ describe('constants/platform', () => {
       expect(known.includes(getOs())).toBe(true)
     })
 
-    it('should be consistent with DARWIN constant', () => {
-      if (DARWIN) {
+    it('should be consistent with isDarwin()', () => {
+      if (isDarwin()) {
         expect(getOs()).toBe('darwin')
       } else {
         expect(getOs()).not.toBe('darwin')
       }
     })
 
-    it('should be consistent with WIN32 constant', () => {
-      if (WIN32) {
+    it('should be consistent with isWin32()', () => {
+      if (isWin32()) {
         expect(getOs()).toBe('win32')
       } else {
         expect(getOs()).not.toBe('win32')
@@ -312,21 +315,21 @@ describe('constants/platform', () => {
 
   describe('platform-specific behavior', () => {
     it('should enable platform-specific logic for Darwin', () => {
-      if (DARWIN) {
+      if (isDarwin()) {
         // macOS-specific code would go here
         expect(process.platform).toBe('darwin')
       }
     })
 
     it('should enable platform-specific logic for Windows', () => {
-      if (WIN32) {
+      if (isWin32()) {
         // Windows-specific code would go here
         expect(process.platform).toBe('win32')
       }
     })
 
     it('should handle non-Darwin, non-Windows platforms', () => {
-      if (!DARWIN && !WIN32) {
+      if (!isDarwin() && !isWin32()) {
         // Likely Linux or other Unix
         expect(['linux', 'freebsd', 'openbsd', 'sunos', 'aix']).toContain(
           process.platform,
@@ -355,9 +358,9 @@ describe('constants/platform', () => {
     })
 
     it('should support platform-conditional file paths', () => {
-      const separator = WIN32 ? '\\' : '/'
+      const separator = isWin32() ? '\\' : '/'
       const path = `home${separator}user${separator}file.txt`
-      if (WIN32) {
+      if (isWin32()) {
         expect(path).toContain('\\')
       } else {
         expect(path).toContain('/')
@@ -365,8 +368,8 @@ describe('constants/platform', () => {
     })
 
     it('should support platform-conditional binary extensions', () => {
-      const binaryName = WIN32 ? 'app.exe' : 'app'
-      if (WIN32) {
+      const binaryName = isWin32() ? 'app.exe' : 'app'
+      if (isWin32()) {
         expect(binaryName.endsWith('.exe')).toBe(true)
       } else {
         expect(binaryName).not.toContain('.')
@@ -375,17 +378,20 @@ describe('constants/platform', () => {
   })
 
   describe('constant identity', () => {
-    // ESM-imported `const` bindings are read-only by spec; we don't
-    // re-verify that here. Earlier revs attempted an assignment-to-
-    // readonly trap which is correct in theory but triggers a vite-
-    // SSR transform that balloons the worker heap. Test the value
+    // S_IXUSR/S_IXGRP/S_IXOTH are ESM-imported `const` bindings, read-only by
+    // spec; we don't re-verify that here. Earlier revs attempted an
+    // assignment-to-readonly trap which is correct in theory but triggers a
+    // vite SSR transform that balloons the worker heap. Test the value
     // identity / type instead — that's what callers actually rely on.
-    it('DARWIN is a boolean singleton', () => {
-      expect(typeof DARWIN).toBe('boolean')
+    // isDarwin()/isWin32() are callable predicates rather than bindings, but
+    // they answer from the same module-load memo, so a repeat call within one
+    // test run always returns the same boolean.
+    it('isDarwin() returns a boolean', () => {
+      expect(typeof isDarwin()).toBe('boolean')
     })
 
-    it('WIN32 is a boolean singleton', () => {
-      expect(typeof WIN32).toBe('boolean')
+    it('isWin32() returns a boolean', () => {
+      expect(typeof isWin32()).toBe('boolean')
     })
 
     it('S_IXUSR is the canonical exec-by-owner bit', () => {

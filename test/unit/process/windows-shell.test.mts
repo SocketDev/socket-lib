@@ -1,9 +1,9 @@
 /**
  * @file Specs for the Windows spawn-shell decision. The property that matters
  *   is that the answer depends on the COMMAND and not only on the platform:
- *   `shell: WIN32` cannot tell a `.cmd` shim from a real `.exe`, and handing an
- *   executable to cmd.exe adds a quoting layer for nothing. `platform` is
- *   injected so every Windows branch runs from any host.
+ *   `shell: isWin32()` cannot tell a `.cmd` shim from a real `.exe`, and
+ *   handing an executable to cmd.exe adds a quoting layer for nothing.
+ *   `platform` is injected so every Windows branch runs from any host.
  */
 
 import assert from 'node:assert/strict'
@@ -38,7 +38,7 @@ describe('needsWindowsShell', () => {
   })
 
   test('an executable does NOT need the shell', () => {
-    // This is the case blanket `shell: WIN32` gets wrong: cmd.exe buys nothing
+    // This is the case blanket `shell: isWin32()` gets wrong: cmd.exe buys nothing
     // here and every argument then has to survive its quoting rules.
     for (const ext of WINDOWS_DIRECT_EXEC_EXTENSIONS) {
       assert.equal(needsWindowsShell(`C:\\tools\\node${ext}`, WIN), false, ext)

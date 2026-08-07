@@ -63,9 +63,9 @@ export function resolveSpawnTimeout(options: {
  * patience for a present-but-slow process — never the missing-binary case.
  */
 export function spawnTimeoutMs(baseMs: number): number {
-  // Inline the platform check (not the module-cached WIN32 constant) so tests
-  // can flip `process.platform` per case and cover both branches — this mirrors
-  // the same inline in child.ts.
+  // Inline the platform check (not the isWin32() predicate) so tests can flip
+  // `process.platform` per case and cover both branches — this mirrors the
+  // same inline in child.ts.
   return process.platform === 'win32'
     ? baseMs * getWin32SpawnTimeoutMultiplier()
     : baseMs
