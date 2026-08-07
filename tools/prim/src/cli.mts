@@ -70,7 +70,7 @@ export async function runCli(argv) {
     // `--describe --json` (either order) answers the fleet-runner-shaped
     // `{describe, help}` envelope instead of the full command manifest —
     // plain `--describe` stays the one-liner, unchanged.
-    // socket-lint: allow process-stdio
+    // oxlint-disable-next-line socket/no-direct-stream-write -- CLI output
     process.stdout.write(
       describeKind === 'json'
         ? renderDescribeHelpJson()
@@ -82,7 +82,7 @@ export async function runCli(argv) {
   // riding along and no command to report a result for, answer the same
   // `{describe, help}` envelope rather than silently ignoring the flag.
   if (argv.length === 0 || argv[0] === 'help') {
-    // socket-lint: allow process-stdio
+    // oxlint-disable-next-line socket/no-direct-stream-write -- CLI output
     process.stdout.write(
       argv.includes('--json') ? renderDescribeHelpJson() : HELP,
     )
@@ -107,7 +107,7 @@ export async function runCli(argv) {
     // No command to report a JSON result for — `--json` alone answers the
     // same `{describe, help}` envelope as `--describe --json` rather than
     // falling through to the human help banner.
-    // socket-lint: allow process-stdio
+    // oxlint-disable-next-line socket/no-direct-stream-write -- CLI output
     process.stdout.write(values.json ? renderDescribeHelpJson() : HELP)
     return
   }
@@ -302,25 +302,25 @@ export async function runCli(argv) {
         // CLI tool: stderr for human warnings keeps stdout pure
         // machine-pipeable JSON / findings text.
         const warnMsg = `prim: warning — ${totalSkipped} file(s) skipped and excluded from findings. Audit is incomplete.\n`
-        // socket-lint: allow process-stdio
+        // oxlint-disable-next-line socket/no-direct-stream-write -- warning
         process.stderr.write(warnMsg)
         if (parseFailureFiles.length > 0) {
           const header = `  parse-failed (${parseFailureFiles.length}):\n`
-          // socket-lint: allow process-stdio
+          // oxlint-disable-next-line socket/no-direct-stream-write -- error output
           process.stderr.write(header)
           for (let i = 0, { length } = parseFailureFiles; i < length; i += 1) {
             const f = parseFailureFiles[i]!
-            // socket-lint: allow process-stdio
+            // oxlint-disable-next-line socket/no-direct-stream-write -- error list
             process.stderr.write(`    ${f}\n`)
           }
         }
         if (stripFailureFiles.length > 0) {
           const header = `  ts-strip-failed (${stripFailureFiles.length}):\n`
-          // socket-lint: allow process-stdio
+          // oxlint-disable-next-line socket/no-direct-stream-write -- error output
           process.stderr.write(header)
           for (let i = 0, { length } = stripFailureFiles; i < length; i += 1) {
             const f = stripFailureFiles[i]!
-            // socket-lint: allow process-stdio
+            // oxlint-disable-next-line socket/no-direct-stream-write -- error list
             process.stderr.write(`    ${f}\n`)
           }
         }

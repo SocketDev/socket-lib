@@ -95,7 +95,7 @@ export async function main(
 ): Promise<number> {
   const describeKind = describeRequest(args)
   if (describeKind) {
-    // socket-lint: allow process-stdio
+    // oxlint-disable-next-line socket/no-direct-stream-write -- describe output
     process.stdout.write(renderDescribe(describeKind, MANIFEST))
     return 0
   }

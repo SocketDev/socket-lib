@@ -178,8 +178,8 @@ export class Logger {
   }
 
   // Write a stream's last-was-blank flag on the root logger.
-  // socket-lint: allow boolean-trap -- private setter; `value` is the
-  // last-was-blank flag being stored for the given stream.
+  // The setter param carries the flag; renaming to an options object is not viable.
+  // oxlint-disable-next-line socket/no-boolean-trap-param -- setter param
   #setLastWasBlank(stream: 'stderr' | 'stdout', value: boolean): void {
     const root = this.#getRoot()
     if (stream === 'stderr') {

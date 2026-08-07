@@ -105,7 +105,7 @@ export async function withSpinner<T>(
     // corresponding option; tests cover paths individually.
     /* c8 ignore start */
     if (wasSpinning) {
-      // socket-lint: allow process-stdio
+      // oxlint-disable-next-line socket/no-direct-stream-write -- clear spinner
       process.stderr.write('\r\x1B[2K')
     }
 

@@ -196,8 +196,8 @@ export function printHelp(): void {
     `  --config, -c <path>   Config file. Default: ${DEFAULT_CONFIG_PATH}`,
   )
   logger.log(
-    `                        (falls back to .config/socket-lib.json, then .config/repo/socket-lib.json)`,
-    // socket-lint: allow logger-decoration -- aligned --help usage text, matching the surrounding option lines
+    `                        (falls back to .config/repo/socket-lib.json)`,
+    // oxlint-disable-next-line socket/no-logger-newline-literal -- aligned --help usage text, matching the surrounding option lines
   )
   logger.log('  --explain             Print one detailed line per finding.')
   logger.log('  --json                Machine-readable JSON output.')

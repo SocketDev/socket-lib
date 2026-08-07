@@ -192,7 +192,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
           return this
         }
 
-        // socket-lint: allow boolean-trap -- matches EditablePackageJsonInstance interface which declares create?: boolean
+        // oxlint-disable-next-line socket/no-boolean-trap-param -- matches EditablePackageJsonInstance interface which declares create?: boolean
         override async load(
           path: string,
           create?: boolean | undefined,

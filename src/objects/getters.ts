@@ -93,7 +93,8 @@ export function createConstantsObject(
         )
       : undefined,
     props: props
-      ? // oxlint-disable-next-line socket/prefer-undefined-over-null -- Object.setPrototypeOf requires `null` for null-prototype objects.
+      ? // Object.setPrototypeOf requires `null` for null-prototype objects.
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- required
         ObjectFreeze(ObjectSetPrototypeOf(toSortedObject(props), null))
       : undefined,
   })

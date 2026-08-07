@@ -265,7 +265,7 @@ export async function spawnAiAgent(
       // `.stdin` is a typed convenience accessor on the Socket
       // PromiseSpawnResult (`Promise<…> & { process; stdin }`); `await child`
       // resolves the result, so the wrapper is kept rather than destructured.
-      // socket-lint: allow bare-spawn-access
+      // oxlint-disable-next-line socket/no-bare-spawn-childproc-access -- stdin accessor
       child.stdin?.end(options.prompt)
       const result = await child
       stdout = String(result.stdout ?? '')
