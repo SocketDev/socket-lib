@@ -9,7 +9,7 @@
  *   - `msysDriveToNative` — `/c/path` → `C:/path` on Windows
  */
 
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
 
 import {
   StringPrototypeCharCodeAt,
@@ -28,7 +28,7 @@ const DRIVE_LETTER_REGEXP = /^[A-Za-z]:$/
 // On Windows, convert MSYS drive notation to native: /c/path → C:/path
 export function msysDriveToNative(normalized: string): string {
   /* c8 ignore start - Windows-only branch. */
-  if (WIN32) {
+  if (isWin32()) {
     return normalized.replace(
       msysDriveRegExp,
       (_, letter, sep) => `${letter.toUpperCase()}:${sep || '/'}`,
@@ -297,7 +297,7 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
 
 // Re-exports — preserve the historical `paths/normalize` surface so
 // downstream importers don't have to chase the split.
-export { getUrl, pathLikeToString } from './shared'
+export { pathLikeToString } from './shared'
 export {
   fromUnixPath,
   splitPath,

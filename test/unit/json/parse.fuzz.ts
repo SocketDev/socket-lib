@@ -9,7 +9,7 @@
 
 import { fuzz } from '@vitiate/core'
 
-import { parseJson, parseJsonSafe } from '../../../src/json/parse'
+import { parseJson, parseJsonStrict } from '../../../src/json/parse'
 
 // `parseJson(content, { throws: false })` promises to NEVER throw — any thrown
 // error on arbitrary bytes is a crash.
@@ -17,13 +17,13 @@ fuzz('parseJson({ throws: false }) never throws on arbitrary bytes', data => {
   parseJson(data.toString('utf8'), { throws: false })
 })
 
-// `parseJsonSafe` throws its intended validation errors (SyntaxError, maxSize,
+// `parseJsonStrict` throws its intended validation errors (SyntaxError, maxSize,
 // prototype-pollution); it must never crash uncontrollably, and the
 // prototypePollution detector flags any `__proto__` that actually reaches the
 // returned object.
-fuzz('parseJsonSafe never corrupts / crashes on arbitrary bytes', data => {
+fuzz('parseJsonStrict never corrupts / crashes on arbitrary bytes', data => {
   try {
-    parseJsonSafe(data.toString('utf8'))
+    parseJsonStrict(data.toString('utf8'))
   } catch {
     // Intended validation throws are the contract; only an uncontrolled crash
     // or a detector hit fails the fuzz.

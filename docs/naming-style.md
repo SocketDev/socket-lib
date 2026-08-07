@@ -46,10 +46,14 @@ Only when the resulting name is still self-describing:
 For functions that DO things:
 
 ```text
-parseJson      not  jsonParse
-parseJsonSafe  not  safeJsonParse
+parseJson        not  jsonParse
+parseJsonStrict  not  strictJsonParse
 toEditablePackageJson  not  pkgJsonToEditable
 ```
+
+The `safe` PREFIX is reserved for never-throws helpers (`safeReadFile`,
+`safeDelete`); a validating parse that throws is `parseJsonStrict`, never
+`parseJsonSafe`.
 
 The verb tells the reader the _kind_ of operation; the noun says _what_ it
 operates on.

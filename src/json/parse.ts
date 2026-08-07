@@ -1,8 +1,8 @@
 /**
  * @file JSON parsing utilities with Buffer detection and BOM stripping.
  *   Provides safe JSON parsing with automatic encoding handling, plus
- *   `parseJsonSafe` for untrusted input (prototype-pollution protection + size
- *   limits + optional schema validation).
+ *   `parseJsonStrict` for untrusted input (prototype-pollution protection +
+ *   size limits + optional schema validation).
  */
 
 import { validateSchema } from '../schema/validate'
@@ -188,18 +188,18 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
  * @example
  *   ;```ts
  *   // Basic parsing with type inference.
- *   const data = parseJsonSafe<User>('{"name":"Alice","age":30}')
+ *   const data = parseJsonStrict<User>('{"name":"Alice","age":30}')
  *
  *   // With schema validation.
  *   import { z } from 'zod'
  *   const userSchema = z.object({ name: z.string(), age: z.number() })
- *   const user = parseJsonSafe('{"name":"Alice","age":30}', userSchema)
+ *   const user = parseJsonStrict('{"name":"Alice","age":30}', userSchema)
  *
  *   // With size limit.
- *   const data = parseJsonSafe(jsonString, undefined, { maxSize: 1024 })
+ *   const data = parseJsonStrict(jsonString, undefined, { maxSize: 1024 })
  *
  *   // Allow prototype keys (DANGEROUS — only for trusted sources).
- *   const data = parseJsonSafe('{"__proto__":{}}', undefined, {
+ *   const data = parseJsonStrict('{"__proto__":{}}', undefined, {
  *     allowPrototype: true,
  *   })
  *   ```
@@ -213,7 +213,7 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
  * @unused No internal or Socket consumers; downstream repos call the plain
  *   `parseJson`. Exercised only by its unit tests.
  */
-export function parseJsonSafe<T = unknown>(
+export function parseJsonStrict<T = unknown>(
   jsonString: string,
   schema?: Schema<T> | undefined,
   options: ParseJsonSafeOptions = {},

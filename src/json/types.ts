@@ -79,7 +79,7 @@ export type JsonValue = JsonPrimitive | JsonObject | JsonArray
 export type JsonReviver = (key: string, value: unknown) => unknown
 
 /**
- * Options for `parseJsonSafe`: security controls for untrusted JSON.
+ * Options for `parseJsonStrict`: security controls for untrusted JSON.
  *
  * Distinct from `ParseJsonOptions` (which is scoped to reviver / error-handling
  * for trusted-source fs reads). Use this type when parsing user input, network
@@ -101,10 +101,10 @@ export interface ParseJsonSafeOptions {
    * @example
    *   ;```ts
    *   // Will throw error by default
-   *   parseJsonSafe('{"__proto__": {"polluted": true}}')
+   *   parseJsonStrict('{"__proto__": {"polluted": true}}')
    *
    *   // Allows the parse (dangerous!)
-   *   parseJsonSafe('{"__proto__": {"polluted": true}}', undefined, {
+   *   parseJsonStrict('{"__proto__": {"polluted": true}}', undefined, {
    *     allowPrototype: true,
    *   })
    *   ```
@@ -120,7 +120,7 @@ export interface ParseJsonSafeOptions {
    * @example
    *   ;```ts
    *   // Limit to 1KB
-   *   parseJsonSafe(jsonString, undefined, { maxSize: 1024 })
+   *   parseJsonStrict(jsonString, undefined, { maxSize: 1024 })
    *   ```
    *
    * @default 10_485_760 (10 MB)

@@ -5,13 +5,11 @@
  *   circular imports.
  *
  *   - char-code constants + shared regexps
- *   - `getUrl` — lazy `node:url` loader
  *   - `pathLikeToString` — `string | Buffer | URL` → `string`
  */
 
-import type nodeUrl from 'node:url'
-
-import { WIN32 } from '../constants/platform'
+import { isWin32 } from '../constants/platform'
+import { getNodeUrl } from '../node/url'
 
 import { BufferIsBuffer } from '../primordials/buffer'
 
@@ -46,25 +44,6 @@ export const msysDriveRegExp = /^\/([a-zA-Z])($|\/)/
 // `my_node_modules`.
 export const nodeModulesPathRegExp = /(?:[/\\]|^)node_modules(?:$|[/\\])/
 export const slashRegExp = /[/\\]/
-
-let cachedUrl: typeof nodeUrl | undefined
-
-/**
- * Lazily load the url module.
- *
- * Performs on-demand loading of Node.js url module to avoid initialization
- * overhead and potential Webpack bundling errors.
- *
- * @private
- */
-export function getUrl() {
-  if (cachedUrl === undefined) {
-    // Use non-'node:' prefixed require to avoid Webpack errors.
-
-    cachedUrl = /*@__PURE__*/ require('node:url')
-  }
-  return cachedUrl as typeof nodeUrl
-}
 
 /**
  * Find the next path separator at or after an index.
@@ -134,7 +113,7 @@ export function pathLikeToString(
   if (BufferIsBuffer!(pathLike)) {
     return pathLike.toString('utf8')
   }
-  const url = getUrl()
+  const url = getNodeUrl()
   if (pathLike instanceof URL) {
     try {
       return url.fileURLToPath(pathLike)
@@ -147,7 +126,7 @@ export function pathLikeToString(
       const decodedPathname = decodeURIComponent(pathname)
 
       /* c8 ignore start - Windows-only URL drive-letter handling. */
-      if (WIN32 && StringPrototypeStartsWith(decodedPathname, '/')) {
+      if (isWin32() && StringPrototypeStartsWith(decodedPathname, '/')) {
         // Drive-letter pattern: /[a-zA-Z]:/
         const letter = StringPrototypeCharCodeAt(decodedPathname, 1) | 0x20
         const hasValidDriveLetter =
