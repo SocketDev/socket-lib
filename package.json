@@ -1824,6 +1824,11 @@
       "types": "./dist/git/unstaged.d.ts",
       "default": "./dist/git/unstaged.js"
     },
+    "./github/cli": {
+      "source": "./src/github/cli.ts",
+      "types": "./dist/github/cli.d.ts",
+      "default": "./dist/github/cli.js"
+    },
     "./github/commit": {
       "source": "./src/github/commit.ts",
       "types": "./dist/github/commit.d.ts",
