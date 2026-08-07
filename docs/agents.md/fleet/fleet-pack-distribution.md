@@ -24,7 +24,7 @@ so has to hold the payload it ships.
   set, so a bootstrap change reaches members via a fleet-wave cascade, not the
   belt fetch.
 
-The untrack set is computed by `scripts/repo/bootstrap/fleet.mjs --thin` (`thinIgnoreEntries`):
+The untrack set is computed by `scripts/repo/bootstrap/fleet.mjs --thin` (`fleetPackOwnedPaths`):
 it collapses only to the `fleet/` tier (convention-guaranteed all-fleet) and
 lists every other wholly-fleet file EXACTLY, so it can NEVER catch a repo-owned
 sibling (`.claude/hooks/repo/**`, `.config/repo/`, the member's own
@@ -64,13 +64,13 @@ both are required (and enforced):
 
 Thin is not an opt-in: EVERY roster member is a thin consumer. The canonical
 roster (`.claude/skills/fleet/cascading-fleet/lib/fleet-repos.json`) is the
-single source of truth for membership, and `isThinMember` (in the shared
+single source of truth for membership, and `isFleetPackConsumer` (in the shared
 `fleet-roster.mts`) derives thin-ness from it: a repo is thin exactly when it
 is on the roster. Two shapes fall outside by identity, never by configuration:
 a checkout absent from the roster, and the wheelhouse itself, which produces
 the bundle and is never its consumer.
 
-`scripts/repo/sync-scaffolding/checks/thin-consumer-wiring.mts` (`thin_wiring_missing`) fails when a member
+`scripts/repo/sync-scaffolding/checks/fleet-pack-consumer-wiring.mts` (`fleet_pack_wiring_missing`) fails when a member
 is missing the prepare belt: its fresh clones / CI
 would otherwise run against a missing payload. Run
 `node scripts/repo/bootstrap/fleet.mjs --wire` to add the belt + `sync-fleet`
