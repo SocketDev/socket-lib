@@ -50,7 +50,11 @@ export function applyLinePrefix(
     ...options,
   } as ApplyLinePrefixOptions
   return prefix.length
-    ? `${prefix}${StringPrototypeIncludes(str, '\n') ? str.replace(/\n/g, `\n${prefix}`) : str}`
+    ? `${prefix}${
+        StringPrototypeIncludes(str, '\n')
+          ? str.replace(/\n/g, () => `\n${prefix}`)
+          : str
+      }`
     : str
 }
 
@@ -131,7 +135,7 @@ export function indentString(
   options?: IndentStringOptions | undefined,
 ): string {
   const { count = 1 } = { __proto__: null, ...options } as IndentStringOptions
-  return str.replace(/^(?!\s*$)/gm, ' '.repeat(count))
+  return str.replace(/^(?!\s*$)/gm, () => ' '.repeat(count))
 }
 
 /**

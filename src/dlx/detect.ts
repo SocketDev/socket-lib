@@ -328,7 +328,8 @@ export function readPackageJson(packageJsonPath: string): object | undefined {
 
   let mtimeMs = 0
   try {
-    // oxlint-disable-next-line socket/prefer-exists-sync -- need mtimeMs for cache invalidation, not just existence.
+    // Need mtimeMs for cache invalidation, not just existence.
+    // oxlint-disable-next-line socket/prefer-exists-sync -- need mtimeMs
     mtimeMs = fs.statSync(packageJsonPath).mtimeMs
   } catch {
     packageJsonContentCache.delete(packageJsonPath)

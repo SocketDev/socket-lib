@@ -82,7 +82,9 @@ export function killProcessTree(
       // dispatched a kill); 128 = "process not found" (ERROR_PROC_NOT_FOUND).
       const childProcess = getNodeChildProcess()
       // Treat non-zero as "nothing to do" to match the POSIX ESRCH branch.
-      // oxlint-disable-next-line socket/prefer-async-spawn -- synchronous taskkill in a best-effort cleanup path; async spawn would race teardown.
+      // Synchronous taskkill in a best-effort cleanup path; async spawn
+      // would race teardown.
+      // oxlint-disable-next-line socket/prefer-async-spawn -- sync cleanup
       const res = childProcess.spawnSync(
         'taskkill',
         ['/T', '/F', '/pid', String(pid)],

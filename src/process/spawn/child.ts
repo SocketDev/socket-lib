@@ -373,7 +373,9 @@ export function spawnSync(
   } as NodeSpawnOptions & { encoding: BufferEncoding | 'buffer' }
   const stdioString = spawnOptions.encoding !== 'buffer'
   const childProcess = getNodeChildProcess()
-  // oxlint-disable-next-line socket/prefer-async-spawn -- this IS the lib's sync spawn primitive; it must call the underlying spawnSync.
+  // This IS the lib's sync spawn primitive; it must call the underlying
+  // spawnSync.
+  // oxlint-disable-next-line socket/prefer-async-spawn -- sync primitive
   const result = childProcess.spawnSync(actualCmd, args, spawnOptions)
   if (stdioString) {
     const { stderr, stdout } = result

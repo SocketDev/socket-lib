@@ -108,7 +108,9 @@ export function createInquirerTheme(
         highlight: (text: string) => applyColor(text, primaryColor),
       },
       icon: {
-        // oxlint-disable-next-line socket/no-status-emoji -- Inquirer theme icon; consumed by the prompt library, not log output.
+        // Inquirer theme icon; consumed by the prompt library, not log
+        // output.
+        // oxlint-disable-next-line socket/no-status-emoji -- theme icon
         checked: applyColor('✓', successColor),
         unchecked: ' ',
         cursor: applyColor('❯', primaryColor),

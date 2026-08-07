@@ -92,7 +92,9 @@ export function combineSignals(
   }
 }
 
-// oxlint-disable-next-line socket/sort-source-methods -- attempt() is called by combineSignals-using paths below; declared near its callers
+// `attempt` is called by the `combineSignals`-using paths below; declared
+// near its callers.
+// oxlint-disable-next-line socket/sort-source-methods -- near its callers
 export async function attempt(
   url: string,
   options: BrowserHttpRequestOptions,
@@ -343,7 +345,7 @@ export async function httpJson<T = unknown>(
   const opts = { __proto__: null, ...options } as BrowserHttpRequestOptions
   const headers: Record<string, string> = {
     Accept: 'application/json',
-    ...(opts.headers ?? {}),
+    ...opts.headers,
   }
   if (opts.body !== undefined && !('Content-Type' in headers)) {
     headers['Content-Type'] = 'application/json'

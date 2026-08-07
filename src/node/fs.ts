@@ -23,7 +23,10 @@ import { IS_NODE } from '../constants/runtime'
 // Captured at module load behind the runtime IS_NODE guard (false in browsers,
 // so the require never runs there). The `/*@__PURE__*/` must sit directly on
 // the call because a wrapping cast would detach it. Cast on use, not inline.
-// oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
+// Bare specifier, not node:, so webpack resolve.fallback / the browser field
+// can stub this builtin in browser bundles; a node: prefix throws
+// UnhandledSchemeError there.
+// oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
 const nodeFs = IS_NODE ? /*@__PURE__*/ require('fs') : undefined
 
 // `getNodeFs()` returns the captured MODULE object; methods are looked up LATE

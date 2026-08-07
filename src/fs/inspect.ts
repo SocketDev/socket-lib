@@ -130,7 +130,8 @@ export function isDirSync(filepath: PathLike) {
 export function isSymlinkSync(filepath: PathLike) {
   const fs = getNodeFs()
   try {
-    // oxlint-disable-next-line socket/prefer-exists-sync -- needs lstat metadata to test isSymbolicLink, not mere existence.
+    // Needs lstat metadata to test isSymbolicLink, not mere existence.
+    // oxlint-disable-next-line socket/prefer-exists-sync -- lstat metadata
     return fs.lstatSync(filepath).isSymbolicLink()
   } catch {}
   return false
@@ -158,7 +159,9 @@ export function isSymlinkSync(filepath: PathLike) {
 export async function safeStat(filepath: PathLike) {
   const fs = getNodeFs()
   try {
-    // oxlint-disable-next-line socket/prefer-exists-sync -- returns the Stats object for callers reading metadata (size, mtime, isDirectory), not existence.
+    // Returns the Stats object for callers reading metadata such as size,
+    // mtime, and isDirectory, not existence.
+    // oxlint-disable-next-line socket/prefer-exists-sync -- Stats metadata
     return await fs.promises.stat(filepath)
   } catch {}
   return undefined
@@ -186,7 +189,9 @@ export async function safeStat(filepath: PathLike) {
 export function safeStatSync(filepath: PathLike) {
   const fs = getNodeFs()
   try {
-    // oxlint-disable-next-line socket/prefer-exists-sync -- returns the Stats object for callers reading metadata (size, mtime, isDirectory), not existence.
+    // Returns the Stats object for callers reading metadata such as size,
+    // mtime, and isDirectory, not existence.
+    // oxlint-disable-next-line socket/prefer-exists-sync -- Stats metadata
     return fs.statSync(filepath, {
       __proto__: null,
       throwIfNoEntry: false,

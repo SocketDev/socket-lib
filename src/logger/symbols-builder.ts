@@ -35,21 +35,22 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
 
   /* c8 ignore start - ASCII-fallback symbol arms only fire on
      terminals without unicode support; tests run on unicode TTYs. */
+  // This module is the source of the canonical status symbols.
   return {
     __proto__: null,
-    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
+    // oxlint-disable-next-line socket/no-status-emoji -- canonical source
     fail: applyColor(supported ? '✖' : '×', theme.colors.error),
-    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
+    // oxlint-disable-next-line socket/no-status-emoji -- canonical source
     info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info),
-    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
+    // oxlint-disable-next-line socket/no-status-emoji -- canonical source
     progress: applyColor(supported ? '∴' : ':.', theme.colors.step),
-    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
+    // oxlint-disable-next-line socket/no-status-emoji -- canonical source
     skip: applyColor(supported ? '↻' : '@', theme.colors.step),
-    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
+    // oxlint-disable-next-line socket/no-status-emoji -- canonical source
     step: applyColor(supported ? '→' : '>', theme.colors.step),
-    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
+    // oxlint-disable-next-line socket/no-status-emoji -- canonical source
     success: applyColor(supported ? '✔' : '√', theme.colors.success),
-    // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
+    // oxlint-disable-next-line socket/no-status-emoji -- canonical source
     warn: applyColor(supported ? '⚠' : '‼', theme.colors.warning),
   } as LogSymbols
   /* c8 ignore stop */
@@ -65,6 +66,7 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
  * input becomes `'Done'`.
  */
 export function stripLoggerSymbols(text: string): string {
-  // oxlint-disable-next-line socket/no-status-emoji -- this module is the source of the canonical status symbols.
+  // This module is the source of the canonical status symbols.
+  // oxlint-disable-next-line socket/no-status-emoji -- canonical source
   return StringPrototypeReplace(text, /^(?::.|[✖✗×⚠‼✔✓√ℹ→∴↻])[️\s]*/u, '')
 }

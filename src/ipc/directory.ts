@@ -33,7 +33,8 @@ export async function ensureIpcDirectory(filePath: string): Promise<void> {
     return
   }
   /* c8 ignore stop */
-  // oxlint-disable-next-line socket/prefer-exists-sync -- need lstat to discriminate symlink/dir via isDirectory().
+  // Need lstat to discriminate symlink vs dir via isDirectory().
+  // oxlint-disable-next-line socket/prefer-exists-sync -- need lstat
   const stats = await fs.promises.lstat(dir)
   // Defensive: mkdir just succeeded so dir is a directory.
   /* c8 ignore start */

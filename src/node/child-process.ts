@@ -17,7 +17,10 @@ export function getNodeChildProcess(): typeof NodeChildProcess {
   if (!IS_NODE) {
     return undefined as unknown as typeof NodeChildProcess
   }
-  return (childProcess ??=
-    // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
-    /*@__PURE__*/ require('child_process') as typeof NodeChildProcess)
+  // A bare specifier (not `node:`) so webpack resolve.fallback / the browser
+  // field can stub this builtin for browser bundles; the `node:` prefix throws
+  // UnhandledSchemeError there.
+  // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier
+  childProcess ??= /*@__PURE__*/ require('child_process')
+  return childProcess as typeof NodeChildProcess
 }

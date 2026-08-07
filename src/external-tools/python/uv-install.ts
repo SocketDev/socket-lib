@@ -21,7 +21,9 @@
  *      self-contained.
  */
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- uv needs streaming stdio; the lib promise wrapper rejects on nonzero and hides output.
+// uv needs streaming stdio; the lib promise wrapper rejects on nonzero and
+// hides output.
+// oxlint-disable-next-line socket/prefer-async-spawn -- streaming stdio
 import { spawn } from '../../process/spawn/child'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'

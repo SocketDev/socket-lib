@@ -13,7 +13,9 @@ import { normalizeRetryOptions } from './options'
 
 import type { RetryOptions } from './types'
 
-// oxlint-disable-next-line socket/no-parenthetical-aside -- JSDoc @example carries callback signatures — (attempt, error, delay) and (url, options) are parameter lists, not prose
+// The JSDoc example below carries callback signatures; the parenthesized
+// attempt/error/delay and url/options groups are parameter lists, not prose.
+/* oxlint-disable-next-line socket/no-parenthetical-aside -- param lists */
 /**
  * Retry an async function with exponential backoff.
  *

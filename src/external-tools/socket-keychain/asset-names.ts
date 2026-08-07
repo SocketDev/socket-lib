@@ -57,7 +57,7 @@ export function getSocketKeychainAssetEntry(
     return undefined
   }
   return {
-    asset: template.asset.replace('{version}', version),
+    asset: template.asset.replace('{version}', () => version),
     binary: template.binary,
   }
 }

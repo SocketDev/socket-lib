@@ -176,7 +176,9 @@ export class ProcessLockManager {
       // Use single statSync call instead of existsSync + statSync.
       // throwIfNoEntry: false returns undefined if path doesn't exist.
       const fs = getNodeFs()
-      // oxlint-disable-next-line socket/prefer-exists-sync -- need mtimeMs for staleness check; existsSync would discard the metadata.
+      // Need mtimeMs for the staleness check; existsSync would discard the
+      // metadata.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- need mtimeMs
       const stats = fs.statSync(lockPath, { throwIfNoEntry: false })
       if (!stats) {
         return false

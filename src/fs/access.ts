@@ -34,7 +34,9 @@ export function canAccess(path: PathLike, mode?: number | undefined): boolean {
   /* c8 ignore stop */
   const fs = getNodeFs()
   try {
-    // oxlint-disable-next-line socket/prefer-exists-sync -- checks the mode bit (R_OK/W_OK/X_OK), not mere existence; existsSync can't express permissions.
+    // Checks the mode bit R_OK/W_OK/X_OK, not mere existence; existsSync
+    // can't express permissions.
+    // oxlint-disable-next-line socket/prefer-exists-sync -- checks mode bit
     fs.accessSync(path, mode)
     return true
   } catch {

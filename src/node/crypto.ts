@@ -13,6 +13,9 @@ export function getNodeCrypto(): typeof NodeCrypto {
   if (!IS_NODE) {
     return undefined as unknown as typeof NodeCrypto
   }
-  // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
+  // Bare specifier, not node:, so webpack resolve.fallback / the browser
+  // field can stub this builtin in browser bundles; a node: prefix throws
+  // UnhandledSchemeError there.
+  // oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
   return (crypto ??= /*@__PURE__*/ require('crypto') as typeof NodeCrypto)
 }

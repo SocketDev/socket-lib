@@ -25,7 +25,9 @@
  *     is immutable per version) or a content-addressed git `@<full-sha>`.
  */
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- pip download streams progress; the lib promise wrapper rejects on nonzero and hides output.
+// pip download streams progress; the lib promise wrapper rejects on nonzero
+// and hides output.
+// oxlint-disable-next-line socket/prefer-async-spawn -- streaming stdio
 import { spawn } from '../../process/spawn/child'
 import os from 'node:os'
 import { promises as fs } from 'node:fs'

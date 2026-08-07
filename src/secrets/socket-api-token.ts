@@ -15,7 +15,7 @@ const SOCKET_SERVICE_LEGACY = 'socket-cli'
 // The canonical fallback list the resolver reads (SOCKET_API_TOKEN first, then
 // the SOCKET_API_KEY legacy alias) — the one place the alias legitimately
 // appears as a literal.
-// oxlint-disable-next-line socket/socket-api-token-env -- canonical resolver names the legacy alias by design
+// oxlint-disable-next-line socket/socket-api-token-env -- names legacy alias
 const TOKEN_ACCOUNTS = ['SOCKET_API_TOKEN', 'SOCKET_API_KEY'] as const
 
 export interface ReadSocketApiTokenOptions {

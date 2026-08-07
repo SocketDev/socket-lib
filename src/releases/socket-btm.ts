@@ -208,7 +208,7 @@ export async function downloadSocketBtmRelease(
 ): Promise<string> {
   // options-undefined fallback fires when caller omits options.
   /* c8 ignore next */
-  const config = { __proto__: null, ...(options ?? {}) } as unknown as {
+  const config = { __proto__: null, ...options } as unknown as {
     cwd?: string | undefined
     downloadDir?: string | undefined
     quiet?: boolean | undefined

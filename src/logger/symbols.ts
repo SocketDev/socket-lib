@@ -64,9 +64,12 @@ export function createLogSymbols(): Record<string, string> {
     )
     target['skip'] = applyColor(supported ? '↻' : '@', stepColor)
     target['step'] = applyColor(supported ? '→' : '>', stepColor)
-    // oxlint-disable-next-line socket/no-status-emoji -- This module is the canonical owner of LOG_SYMBOLS.success; it constructs the symbol the rule points callers at.
+    // This module is the canonical owner of LOG_SYMBOLS.success and
+    // LOG_SYMBOLS.warn; it constructs the symbols that the rule points
+    // callers at.
+    // oxlint-disable-next-line socket/no-status-emoji -- canonical owner
     target['success'] = applyColor(supported ? '✔' : '√', successColor)
-    // oxlint-disable-next-line socket/no-status-emoji -- This module is the canonical owner of LOG_SYMBOLS.warn; it constructs the symbol the rule points callers at.
+    // oxlint-disable-next-line socket/no-status-emoji -- canonical owner
     target['warn'] = applyColor(supported ? '⚠' : '‼', warningColor)
     /* c8 ignore stop */
   }

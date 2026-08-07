@@ -321,7 +321,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
             content,
             undefined,
             format,
-          )}\n`.replace(/\n/g, eol)
+          )}\n`.replace(/\n/g, () => eol)
 
           if (
             !ignoreWhitespace &&
@@ -377,7 +377,7 @@ export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
             content,
             undefined,
             format,
-          )}\n`.replace(/\n/g, eol)
+          )}\n`.replace(/\n/g, () => eol)
 
           if (
             !ignoreWhitespace &&

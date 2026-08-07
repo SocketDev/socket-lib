@@ -13,7 +13,10 @@ export function getNodeFsPromises(): typeof NodeFsPromises {
   if (!IS_NODE) {
     return undefined as unknown as typeof NodeFsPromises
   }
-  return (fsPromises ??=
-    // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
-    /*@__PURE__*/ require('fs/promises') as typeof NodeFsPromises)
+  // Bare specifier, not node:, so webpack resolve.fallback / the browser
+  // field can stub this builtin in browser bundles; a node: prefix throws
+  // UnhandledSchemeError there.
+  // oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
+  fsPromises ??= /*@__PURE__*/ require('fs/promises')
+  return fsPromises as typeof NodeFsPromises
 }

@@ -11,7 +11,10 @@ import type * as NodeOs from 'node:os'
 
 import { IS_NODE } from '../constants/runtime'
 
-// oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
+// Bare specifier, not node:, so webpack resolve.fallback / the browser field
+// can stub this builtin in browser bundles; a node: prefix throws
+// UnhandledSchemeError there.
+// oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
 const nodeOs = IS_NODE ? /*@__PURE__*/ require('os') : undefined
 
 export function getNodeOs(): typeof NodeOs {

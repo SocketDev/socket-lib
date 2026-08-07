@@ -262,7 +262,10 @@ export function stringifyWithFormatting(
   const format = indent === undefined || indent === null ? '  ' : indent
   const eol = newline === undefined || newline === null ? '\n' : newline
 
-  return `${JSONStringify(content, undefined, format)}\n`.replace(/\n/g, eol)
+  return `${JSONStringify(content, undefined, format)}\n`.replace(
+    /\n/g,
+    () => eol,
+  )
 }
 
 /**

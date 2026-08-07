@@ -70,7 +70,9 @@ export interface RetryOptions {
   // REMOVED: Deprecated `minTimeout` option
   // Migration: Use `baseDelayMs` instead
 
-  // oxlint-disable-next-line socket/no-parenthetical-aside -- JSDoc @example carries the onRetry callback signature, a parameter list rather than prose
+  // The JSDoc example below carries the onRetry callback signature, a
+  // parameter list rather than prose.
+  /* oxlint-disable-next-line socket/no-parenthetical-aside -- param list */
   /**
    * Callback invoked on each retry attempt. Can observe errors, customize
    * delays, or cancel retries.

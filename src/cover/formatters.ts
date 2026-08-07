@@ -14,26 +14,27 @@ import {
   NumberPrototypeToFixed,
 } from '../primordials/number'
 /**
- * Coverage emoji thresholds for visual feedback.
+ * Coverage emoji thresholds for visual feedback. The status emoji are the
+ * coverage gamification UI and are part of the public output contract.
  */
 const COVERAGE_EMOJI_THRESHOLDS = [
-  // oxlint-disable-next-line socket/no-status-emoji -- coverage gamification UI; part of the public output contract.
+  // oxlint-disable-next-line socket/no-status-emoji -- output contract
   { emoji: ' 🚀', threshold: 99 },
-  // oxlint-disable-next-line socket/no-status-emoji -- coverage gamification UI; part of the public output contract.
+  // oxlint-disable-next-line socket/no-status-emoji -- output contract
   { emoji: ' 🎯', threshold: 95 },
-  // oxlint-disable-next-line socket/no-status-emoji -- coverage gamification UI; part of the public output contract.
+  // oxlint-disable-next-line socket/no-status-emoji -- output contract
   { emoji: ' ✨', threshold: 90 },
-  // oxlint-disable-next-line socket/no-status-emoji -- coverage gamification UI; part of the public output contract.
+  // oxlint-disable-next-line socket/no-status-emoji -- output contract
   { emoji: ' 💚', threshold: 85 },
-  // oxlint-disable-next-line socket/no-status-emoji -- coverage gamification UI; part of the public output contract.
+  // oxlint-disable-next-line socket/no-status-emoji -- output contract
   { emoji: ' ✅', threshold: 80 },
-  // oxlint-disable-next-line socket/no-status-emoji -- coverage gamification UI; part of the public output contract.
+  // oxlint-disable-next-line socket/no-status-emoji -- output contract
   { emoji: ' 🟢', threshold: 70 },
-  // oxlint-disable-next-line socket/no-status-emoji -- coverage gamification UI; part of the public output contract.
+  // oxlint-disable-next-line socket/no-status-emoji -- output contract
   { emoji: ' 🟡', threshold: 60 },
-  // oxlint-disable-next-line socket/no-status-emoji -- coverage gamification UI; part of the public output contract.
+  // oxlint-disable-next-line socket/no-status-emoji -- output contract
   { emoji: ' 🔨', threshold: 50 },
-  // oxlint-disable-next-line socket/no-status-emoji -- coverage gamification UI; part of the public output contract.
+  // oxlint-disable-next-line socket/no-status-emoji -- output contract
   { emoji: ' ⚠️', threshold: 0 },
 ]
 

@@ -223,16 +223,16 @@ export class ProgressBar {
     let output = this.options.format ?? ':bar :percent :current/:total'
     /* c8 ignore stop */
     output = StringPrototypeReplace(output, ':bar', bar)
-    output = output.replace(':percent', `${percent}%`)
-    output = output.replace(':current', String(this.current))
-    output = output.replace(':total', String(this.total))
-    output = output.replace(':elapsed', this.formatTime(elapsed))
-    output = output.replace(':eta', this.formatTime(eta))
+    output = output.replace(':percent', () => `${percent}%`)
+    output = output.replace(':current', () => String(this.current))
+    output = output.replace(':total', () => String(this.total))
+    output = output.replace(':elapsed', () => this.formatTime(elapsed))
+    output = output.replace(':eta', () => this.formatTime(eta))
 
     // Replace custom tokens
     if (tokens) {
       for (const [key, value] of ObjectEntries(tokens)) {
-        output = output.replace(`:${key}`, String(value))
+        output = output.replace(`:${key}`, () => String(value))
       }
     }
 

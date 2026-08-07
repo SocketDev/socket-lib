@@ -13,7 +13,9 @@ import { ArrayPrototypePush, ArrayPrototypeSlice } from '../primordials/array'
 
 import type { ParseEntry } from '../external/shell-quote'
 
-// oxlint-disable-next-line socket/no-parenthetical-aside -- JSDoc @example embeds a shell command, `<(cat a)` is process substitution rather than prose
+// The JSDoc example below embeds a shell command; `<(cat a)` is process
+// substitution rather than prose.
+/* oxlint-disable-next-line socket/no-parenthetical-aside -- shell example */
 /**
  * Structural hazard facts a parse surfaces that the binary-call matchers
  * (`hasBinCall` / `findBinCall`) swallow. These are observations about _how_

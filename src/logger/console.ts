@@ -20,7 +20,10 @@
  *     evaluated. Same pattern as `fs/path-cache` ↔ `fs/shared`.
  */
 
-// oxlint-disable-next-line unicorn/prefer-node-protocol -- bare `process` is browser-stubbable (resolve.fallback / browser field); a `node:` prefix throws UnhandledSchemeError in webpack browser bundles.
+// Bare `process` is browser-stubbable via resolve.fallback / the browser
+// field; a `node:` prefix throws UnhandledSchemeError in webpack browser
+// bundles.
+// oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
 import process from 'process'
 
 import type { Console } from 'node:console'
@@ -51,7 +54,10 @@ let prototypeInitialized = false
 export function constructConsole(...args: unknown[]) {
   /* c8 ignore next - Lazy-init second-call branch; module-singleton. */
   if (cachedConsole === undefined) {
-    // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare `console` is browser-stubbable (resolve.fallback / browser field); a `node:` prefix throws UnhandledSchemeError in webpack browser bundles.
+    // Bare `console` is browser-stubbable via resolve.fallback / the
+    // browser field; a `node:` prefix throws UnhandledSchemeError in
+    // webpack browser bundles.
+    // oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
     const nodeConsole = /*@__PURE__*/ require('console')
     cachedConsole = nodeConsole.Console
   }

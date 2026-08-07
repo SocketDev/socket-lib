@@ -19,7 +19,10 @@
  *   source), each module sits at its own nested path and the base matters.
  */
 
-// oxlint-disable-next-line unicorn/prefer-node-protocol -- bare `module` is browser-stubbable (resolve.fallback / browser field); a `node:` prefix breaks browser bundles. Named exports resolve on Node + Perry.
+// Bare `module` is browser-stubbable via resolve.fallback / the browser
+// field; a `node:` prefix breaks browser bundles. Named exports resolve on
+// Node and Perry.
+// oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
 import { createRequire, isBuiltin as nodeIsBuiltin } from 'module'
 import type * as NodeModule from 'node:module'
 

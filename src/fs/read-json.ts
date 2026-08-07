@@ -81,7 +81,8 @@ export async function readJson(
   // default-on caching safe under caller mutation.
   if (cacheEnabled) {
     try {
-      // oxlint-disable-next-line socket/prefer-exists-sync -- need ino+size+mtime as the cache invalidation key, not just existence.
+      // Need ino+size+mtime as the cache invalidation key, not existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
       const stat = await fs.promises.stat(filepath)
       const cached = getCachedJson(
         pathStr,
@@ -143,7 +144,8 @@ export async function readJson(
   // entry's mtime → miss → re-read).
   if (cacheEnabled && parsed !== undefined) {
     try {
-      // oxlint-disable-next-line socket/prefer-exists-sync -- need ino+size+mtime as the cache invalidation key, not just existence.
+      // Need ino+size+mtime as the cache invalidation key, not existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
       const stat = await fs.promises.stat(filepath)
       setCachedJson(
         pathStr,
@@ -205,7 +207,8 @@ export function readJsonSync(
   const pathStr = String(filepath)
   if (cacheEnabled) {
     try {
-      // oxlint-disable-next-line socket/prefer-exists-sync -- need ino+size+mtime as the cache invalidation key, not just existence.
+      // Need ino+size+mtime as the cache invalidation key, not existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
       const stat = fs.statSync(filepath)
       const cached = getCachedJson(
         pathStr,
@@ -261,7 +264,8 @@ export function readJsonSync(
   })
   if (cacheEnabled && parsed !== undefined) {
     try {
-      // oxlint-disable-next-line socket/prefer-exists-sync -- need ino+size+mtime as the cache invalidation key, not just existence.
+      // Need ino+size+mtime as the cache invalidation key, not existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
       const stat = fs.statSync(filepath)
       setCachedJson(
         pathStr,

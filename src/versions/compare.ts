@@ -101,6 +101,8 @@ export function rsort(versions: readonly string[]): string[] {
  */
 // oxlint-disable-next-line socket/exported-name-has-domain-word -- published leaf API; the module path carries the domain
 export function sort(versions: readonly string[]): string[] {
-  // oxlint-disable-next-line unicorn/no-array-sort -- the smol/semver binding's own sort method, not Array#sort; the binding exposes no `toSorted`.
+  // The smol/semver binding's own sort method, not Array#sort; the binding
+  // exposes no `toSorted`.
+  // oxlint-disable-next-line unicorn/no-array-sort -- binding's own sort
   return getImpl().sort([...versions])
 }

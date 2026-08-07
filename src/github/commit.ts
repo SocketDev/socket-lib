@@ -123,7 +123,9 @@ export async function createSignedCommit(
   }> = []
   for (let i = 0, { length } = opts.files; i < length; i += 1) {
     const file = opts.files[i]!
-    // oxlint-disable-next-line no-await-in-loop -- blobs must exist before the tree references them; file count is tiny (a bump touches 1-2 files).
+    // Blobs must exist before the tree references them; file count is tiny,
+    // a bump touches one or two files.
+    // oxlint-disable-next-line no-await-in-loop -- sequential blob creation
     const blob = await post<{ sha: string }>(`${git}/blobs`, headers, {
       content: Buffer.from(file.content, 'utf8').toString('base64'),
       encoding: 'base64',

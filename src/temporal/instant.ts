@@ -1,4 +1,6 @@
-// oxlint-disable-next-line socket/no-parenthetical-aside -- spec clause listing carries method signatures such as compare ( one, two ), not prose
+// The @file spec listing below quotes method signatures such as
+// `compare ( one, two )`; those parens are spec clause syntax, not prose.
+/* oxlint-disable-next-line socket/no-parenthetical-aside -- spec syntax */
 /**
  * @file Spec clause 8 — Temporal.Instant Objects. Implements the class,
  *   constructor, and the validity predicate. Pass 1 of the rollout; statics
@@ -137,7 +139,9 @@ export class Instant {
 // 4. Return ns.
 // ─────────────────────────────────────────────────────────────────
 
-// oxlint-disable-next-line socket/sort-source-methods -- ordered by TC39 Temporal clause number (8.5.6), not alphabetically, so the file reads alongside the spec. See README.md "Adding a new operation".
+// Ordered by TC39 Temporal clause number 8.5.6, not alphabetically, so the
+// file reads alongside the spec. See README.md "Adding a new operation".
+// oxlint-disable-next-line socket/sort-source-methods -- spec clause order
 export function epochNanosecondsImpl(this: Instant): bigint {
   // Step 1. Spec: "Let instant be the this value." Keeping `instant`
   // as a named local preserves the step-for-step mapping the rest of
@@ -171,7 +175,10 @@ ObjectDefineProperty(Instant.prototype, 'epochNanoseconds', {
 /**
  * One-line description of an arbitrary value for error messages.
  */
-// oxlint-disable-next-line socket/sort-source-methods -- local error-message helper kept in the trailing "Local helpers" section after the spec operations that consume it, not in alphabetical order. See README.md "Adding a new operation".
+// Local error-message helper kept in the trailing "Local helpers" section
+// after the spec operations that consume it, not in alphabetical order. See
+// README.md "Adding a new operation".
+// oxlint-disable-next-line socket/sort-source-methods -- helpers section
 export function describe(value: unknown): string {
   if (value === null) {
     return 'null'

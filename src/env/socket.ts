@@ -106,13 +106,13 @@ export function getSocketApiToken(): string | undefined {
   // cascaded oxlint-plugin version.
   return (
     getEnvValue('SOCKET_API_TOKEN') ||
-    // oxlint-disable-next-line socket/socket-api-token-env -- canonical resolver fallback chain
+    // oxlint-disable-next-line socket/socket-api-token-env -- fallback chain
     getEnvValue('SOCKET_API_KEY') ||
     getEnvValue('SOCKET_CLI_API_TOKEN') ||
     getEnvValue('SOCKET_CLI_API_KEY') ||
-    // oxlint-disable-next-line socket/socket-api-token-env -- canonical resolver fallback chain
+    // oxlint-disable-next-line socket/socket-api-token-env -- fallback chain
     getEnvValue('SOCKET_SECURITY_API_TOKEN') ||
-    // oxlint-disable-next-line socket/socket-api-token-env -- canonical resolver fallback chain
+    // oxlint-disable-next-line socket/socket-api-token-env -- fallback chain
     getEnvValue('SOCKET_SECURITY_API_KEY')
   )
 }

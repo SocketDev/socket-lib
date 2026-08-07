@@ -13,7 +13,10 @@ export function getNodeHttps(): typeof NodeHttps {
   if (!IS_NODE) {
     return undefined as unknown as typeof NodeHttps
   }
-  return (cachedHttps ??=
-    // oxlint-disable-next-line unicorn/prefer-node-protocol -- bare specifier (not node:) so webpack resolve.fallback / browser-field can stub this builtin for browser bundles; node: prefix throws UnhandledSchemeError there
-    /*@__PURE__*/ require('https') as typeof NodeHttps)
+  // Bare specifier, not node:, so webpack resolve.fallback / the browser
+  // field can stub this builtin in browser bundles; a node: prefix throws
+  // UnhandledSchemeError there.
+  // oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
+  cachedHttps ??= /*@__PURE__*/ require('https')
+  return cachedHttps as typeof NodeHttps
 }

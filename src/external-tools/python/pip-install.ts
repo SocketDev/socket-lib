@@ -23,7 +23,9 @@
  *     so DLX-only and NOT bundleable.
  */
 
-// oxlint-disable-next-line socket/prefer-async-spawn -- pip needs streaming stdio; the lib promise wrapper rejects on nonzero and hides output.
+// pip needs streaming stdio; the lib promise wrapper rejects on nonzero and
+// hides output.
+// oxlint-disable-next-line socket/prefer-async-spawn -- streaming stdio
 import { spawn } from '../../process/spawn/child'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
