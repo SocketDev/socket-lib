@@ -2765,6 +2765,11 @@
       "types": "./dist/promises/all-keyed.d.ts",
       "default": "./dist/promises/all-keyed.js"
     },
+    "./promises/backoff": {
+      "source": "./src/promises/backoff.ts",
+      "types": "./dist/promises/backoff.d.ts",
+      "default": "./dist/promises/backoff.js"
+    },
     "./promises/iterate": {
       "source": "./src/promises/iterate.ts",
       "types": "./dist/promises/iterate.d.ts",
@@ -2932,10 +2937,20 @@
       "types": "./dist/secrets/macos.d.ts",
       "default": "./dist/secrets/macos.js"
     },
+    "./secrets/patterns": {
+      "source": "./src/secrets/patterns.ts",
+      "types": "./dist/secrets/patterns.d.ts",
+      "default": "./dist/secrets/patterns.js"
+    },
     "./secrets/rc": {
       "source": "./src/secrets/rc.ts",
       "types": "./dist/secrets/rc.d.ts",
       "default": "./dist/secrets/rc.js"
+    },
+    "./secrets/redact": {
+      "source": "./src/secrets/redact.ts",
+      "types": "./dist/secrets/redact.d.ts",
+      "default": "./dist/secrets/redact.js"
     },
     "./secrets/socket-api-token": {
       "source": "./src/secrets/socket-api-token.ts",
@@ -3090,6 +3105,15 @@
       },
       "types": "./dist/strings/format.d.ts",
       "default": "./dist/strings/format.js"
+    },
+    "./strings/lines": {
+      "source": "./src/strings/lines.ts",
+      "browser": {
+        "types": "./dist/strings/lines.d.ts",
+        "default": "./dist/strings/lines.js"
+      },
+      "types": "./dist/strings/lines.d.ts",
+      "default": "./dist/strings/lines.js"
     },
     "./strings/predicates": {
       "source": "./src/strings/predicates.ts",
