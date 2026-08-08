@@ -6,18 +6,35 @@
  *   receives and asserts nothing is actually spawned.
  */
 
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
+  ALLOW_SPAWN_ENV_VAR,
   BROWSER_BINARY_ENV_VAR,
   buildOpenUrlInvocation,
   NEW_WINDOW_BROWSERS,
   openUrl,
   pickOpenCommand,
   resolveNewWindowBrowser,
+  shouldSkipSpawn,
 } from '../../../src/process/open-url'
 
 import type { OpenUrlSpawnOptions } from '../../../src/process/open-url'
+
+// Observe the DEFAULT spawner's launch path without ever spawning: the
+// default lane reaches node:child_process through the lazy getNodeChildProcess
+// seam, so mocking that module records what would have launched.
+const nodeSpawnCalls = vi.hoisted(
+  () => [] as Array<{ args: readonly string[]; command: string }>,
+)
+vi.mock(import('../../../src/node/child-process'), () => ({
+  getNodeChildProcess: () => ({
+    spawn: (command: string, args: readonly string[]) => {
+      nodeSpawnCalls.push({ args, command })
+      return { on() {}, unref() {} }
+    },
+  }),
+}))
 
 interface Launch {
   command: string
@@ -181,6 +198,74 @@ describe('buildOpenUrlInvocation', () => {
         platform: 'linux',
       }),
     ).toStrictEqual({ args: [URL], command: 'xdg-open', newWindow: false })
+  })
+})
+
+describe('shouldSkipSpawn', () => {
+  it('answers false outside any test runner', () => {
+    expect(shouldSkipSpawn({})).toBe(false)
+  })
+
+  it('detects vitest via the VITEST worker variable', () => {
+    expect(shouldSkipSpawn({ VITEST: 'true' })).toBe(true)
+  })
+
+  it('detects the other runners via NODE_ENV=test', () => {
+    expect(shouldSkipSpawn({ NODE_ENV: 'test' })).toBe(true)
+  })
+
+  it('lets the explicit opt-in through even under a runner', () => {
+    expect(
+      shouldSkipSpawn({ [ALLOW_SPAWN_ENV_VAR]: '1', VITEST: 'true' }),
+    ).toBe(false)
+  })
+
+  it('reads the real environment by default — this very suite is a runner', () => {
+    expect(shouldSkipSpawn()).toBe(true)
+  })
+})
+
+describe('openUrl skip-under-test-runner', () => {
+  const URL = 'https://example.com/auth/cli/abc123'
+
+  beforeEach(() => {
+    nodeSpawnCalls.length = 0
+  })
+
+  it('never launches the default spawner under a test runner', () => {
+    // No injected spawn, real env (vitest sets VITEST): the default-deny
+    // lane must return before the default spawner touches child_process.
+    openUrl(URL, { platform: 'darwin' })
+    expect(nodeSpawnCalls).toHaveLength(0)
+  })
+
+  it('launches when skipUnderTestRunner: false opts out', () => {
+    openUrl(URL, { platform: 'darwin', skipUnderTestRunner: false })
+    expect(nodeSpawnCalls).toHaveLength(1)
+    expect(nodeSpawnCalls[0]!.command).toBe('open')
+    expect(nodeSpawnCalls[0]!.args).toStrictEqual([URL])
+  })
+
+  it('launches when the env opt-in is set', () => {
+    openUrl(URL, {
+      env: { [ALLOW_SPAWN_ENV_VAR]: '1', VITEST: 'true' },
+      platform: 'darwin',
+    })
+    expect(nodeSpawnCalls).toHaveLength(1)
+    expect(nodeSpawnCalls[0]!.command).toBe('open')
+  })
+
+  it('launches when the injected env shows no runner at all', () => {
+    openUrl(URL, { env: {}, platform: 'linux' })
+    expect(nodeSpawnCalls).toHaveLength(1)
+    expect(nodeSpawnCalls[0]!.command).toBe('xdg-open')
+  })
+
+  it('proceeds into an injected spawn seam — the spy is asking to observe', () => {
+    const launches: Launch[] = []
+    openUrl(URL, { platform: 'darwin', spawn: recordingSpawner(launches) })
+    expect(launches).toHaveLength(1)
+    expect(nodeSpawnCalls).toHaveLength(0)
   })
 })
 

@@ -80,6 +80,13 @@ export const NEW_WINDOW_BROWSERS: Readonly<Record<string, readonly string[]>> =
 export const BROWSER_BINARY_ENV_VAR = 'SOCKET_BROWSER_BINARY'
 
 /**
+ * Set by a suite that MOCKS the spawn seam and wants to assert on the opener's
+ * invocation. Without it a test run never spawns at all, which is the safe
+ * default; with it the call proceeds into whatever the suite mocked.
+ */
+export const ALLOW_SPAWN_ENV_VAR = 'SOCKET_OPEN_URL_ALLOW_SPAWN'
+
+/**
  * The command and args that open `url`. Pure, so the choice between a browser
  * binary and the platform opener is testable without spawning anything.
  */
@@ -135,11 +142,30 @@ export function openUrl(
   url: string,
   options?: OpenUrlOptions | undefined,
 ): void {
-  const { platform = process.platform, spawn = defaultOpenUrlSpawner } = {
+  const {
+    env = process.env,
+    platform = process.platform,
+    skipUnderTestRunner = true,
+    spawn = defaultOpenUrlSpawner,
+  } = {
     __proto__: null,
     ...options,
   } as OpenUrlOptions
   const invocation = buildOpenUrlInvocation(url, options)
+  // A unit test must never launch a real browser, and mocking the spawn seam
+  // is not enough on its own to guarantee it: this module can be reached
+  // through a dynamic import several layers down, so a suite can mock
+  // `node:child_process`, miss the seam this actually uses, and open a window
+  // on the developer's machine on every run.
+  //
+  // Default-deny under a runner, with two ways through: an injected `spawn`,
+  // since a caller passing its own spy is asking to observe the call, or the
+  // ALLOW_SPAWN_ENV_VAR opt-in for a suite that mocked the seam and asserts
+  // on the invocation. Forgetting both costs an assertion, never a stray
+  // window.
+  if (skipUnderTestRunner && !options?.spawn && shouldSkipSpawn(env)) {
+    return
+  }
   spawn(invocation.command, invocation.args, {
     detached: true,
     // `start` is a cmd.exe builtin, not an executable, so win32 needs a shell.
@@ -173,13 +199,20 @@ export function pickOpenCommand(platform: NodeJS.Platform): string {
  * `newWindow` opts into a NEW WINDOW rather than a tab, which needs a browser
  * binary rather than the platform opener. It is opt-in so every existing caller
  * keeps the behavior it already has. `env` and `exists` back the browser
- * lookup and are injectable for the same reason `platform` is.
+ * lookup (and the test-runner detection) and are injectable for the same
+ * reason `platform` is.
+ *
+ * `skipUnderTestRunner` (default: `true`) makes {@link openUrl} a no-op when
+ * {@link shouldSkipSpawn} detects a test runner and no `spawn` seam was
+ * injected, so a suite that reaches this module through layers of imports can
+ * never pop a real browser window. Pass `false` to launch anyway.
  */
 export interface OpenUrlOptions {
   readonly env?: Record<string, string | undefined> | undefined
   readonly exists?: ((filePath: string) => boolean) | undefined
   readonly newWindow?: boolean | undefined
   readonly platform?: NodeJS.Platform | undefined
+  readonly skipUnderTestRunner?: boolean | undefined
   readonly spawn?: OpenUrlSpawner | undefined
 }
 
@@ -210,4 +243,17 @@ export function resolveNewWindowBrowser(
     }
   }
   return undefined
+}
+
+/**
+ * True when the opener must NOT spawn: a test runner with no explicit opt-in.
+ * Vitest sets `VITEST` in the worker and `NODE_ENV=test` covers the other
+ * runners. Pure apart from the env read; exported for tests and for callers
+ * that want the same detection around their own launch paths.
+ */
+export function shouldSkipSpawn(
+  env: Record<string, string | undefined> = process.env,
+): boolean {
+  const underRunner = Boolean(env['VITEST']) || env['NODE_ENV'] === 'test'
+  return underRunner && !env[ALLOW_SPAWN_ENV_VAR]
 }
