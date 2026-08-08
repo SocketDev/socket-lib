@@ -19,8 +19,30 @@
 import process from 'node:process'
 
 import { getNodeChildProcess } from '../../node/child-process'
+import { getNodeFs } from '../../node/fs'
 
 import type { ChildProcess } from 'node:child_process'
+
+/**
+ * Environment entries that quiet a PTY child's rendering without breaking its
+ * interactivity. A PTY makes the child believe a human is watching, which is
+ * what keeps browser-based auth prompts alive — but it also re-enables every
+ * spinner and redraw the child suppresses when piped; a progress display can
+ * write gigabytes of frames into a captured PTY in minutes.
+ *
+ * Two obvious knobs are wrong here, both learned the hard way:
+ *
+ * - `CI=1` — tools read it as "no human here" and refuse the interactive flows
+ *   the PTY exists to preserve.
+ * - `TERM=dumb` — under script(1) it drives `process.stdout.columns` to 0, and
+ *   width-aware rendering dies on that before printing a line.
+ *
+ * NO_COLOR is the safe one: it strips the per-character truecolor escapes
+ * that make up the bulk of the frame spam while leaving the terminal usable.
+ */
+export const NON_INTERACTIVE_RENDER_ENV: NodeJS.ProcessEnv = {
+  NO_COLOR: '1',
+}
 
 /**
  * A concrete `script`-based invocation: the binary to spawn plus its argv. The
@@ -142,10 +164,62 @@ export async function ptyRun(
 }
 
 /**
+ * Run a PTY child in pipe-pump form: {@link ptyRun} already gives the child a
+ * PIPE (never the parent's stdout directly), so pumping is just default
+ * stream callbacks that write each chunk on to the parent's own
+ * stdout/stderr. This is the lane for a file-backed stdout — a `> file`
+ * redirect or an agent harness capturing to disk — where script(1) cannot
+ * allocate a pseudo-terminal onto the fd: it prints `tcgetattr/ioctl:
+ * Operation not supported` and the child exits 1 having produced NO output,
+ * which reads as "the command failed" when the command never ran. Check
+ * {@link stdoutIsFileBacked} to pick this lane. Caller-supplied
+ * `onStdout`/`onStderr` still observe every chunk after it is forwarded.
+ */
+export async function ptyRunPumped(
+  command: string,
+  args: readonly string[],
+  options?: PtyRunOptions | undefined,
+): Promise<PtyRunResult> {
+  const opts = { __proto__: null, ...options } as PtyRunOptions
+  return await ptyRun(command, args, {
+    ...opts,
+    onStderr: (chunk: string) => {
+      process.stderr.write(chunk)
+      opts.onStderr?.(chunk)
+    },
+    onStdout: (chunk: string) => {
+      process.stdout.write(chunk)
+      opts.onStdout?.(chunk)
+    },
+  })
+}
+
+/**
  * Single-quote a token for the util-linux `script -c` command string. Array
  * spawn args stay unquoted; only the Linux `-c` path joins tokens into one
  * shell string, so this is the one place a token needs escaping.
  */
 export function quoteForShell(token: string): string {
   return `'${token.replaceAll("'", `'\\''`)}'`
+}
+
+/**
+ * True when the given fd (default: this process's stdout, fd 1) is a regular
+ * FILE — a `> out.log` redirect, or an agent harness that captures a
+ * background task to disk — rather than a tty or a pipe.
+ *
+ * Script(1) cannot drive a pseudo-terminal into a file-backed stdout: it
+ * prints `tcgetattr/ioctl: Operation not supported on socket` and the child
+ * exits 1 having produced NO output at all. That reads as "the command
+ * failed" when the command never ran, so callers check this first and route
+ * a file-backed stdout through {@link ptyRunPumped}. Returns false when the
+ * fd cannot be stat'ed.
+ */
+export function stdoutIsFileBacked(fd: number = 1): boolean {
+  try {
+    const fs = getNodeFs()
+    return fs.fstatSync(fd).isFile()
+  } catch {
+    return false
+  }
 }
