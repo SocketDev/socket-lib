@@ -2730,6 +2730,11 @@
       "types": "./dist/process/spawn/pty.d.ts",
       "default": "./dist/process/spawn/pty.js"
     },
+    "./process/spawn/run": {
+      "source": "./src/process/spawn/run.ts",
+      "types": "./dist/process/spawn/run.d.ts",
+      "default": "./dist/process/spawn/run.js"
+    },
     "./process/spawn/stdio": {
       "source": "./src/process/spawn/stdio.ts",
       "types": "./dist/process/spawn/stdio.d.ts",
