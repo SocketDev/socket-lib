@@ -409,7 +409,11 @@ export function spawnSync(
     env: baseEnv,
     shell: getOwn(options, 'shell') as boolean | string | undefined,
   })
-  const { stripAnsi: shouldStripAnsi = true, ...rawSpawnOptions } = {
+  const {
+    stripAnsi: shouldStripAnsi = true,
+    trim = true,
+    ...rawSpawnOptions
+  } = {
     __proto__: null,
     ...options,
   } as SpawnSyncOptions
@@ -435,11 +439,16 @@ export function spawnSync(
   const result = childProcess.spawnSync(actualCmd, args, spawnOptions)
   if (stdioString) {
     const { stderr, stdout } = result
+    // `trim: false` keeps the decode byte-faithful — the default trim eats
+    // the leading status column of `git status --porcelain` output. v7 may
+    // flip the default to false; see SpawnSyncOptions.trim.
     if (stdout) {
-      result.stdout = stdout.toString().trim()
+      const text = stdout.toString()
+      result.stdout = trim ? text.trim() : text
     }
     if (stderr) {
-      result.stderr = stderr.toString().trim()
+      const text = stderr.toString()
+      result.stderr = trim ? text.trim() : text
     }
   }
   return (

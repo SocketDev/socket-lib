@@ -385,11 +385,18 @@ export type SpawnStdioResult = {
  * sync option shape ({@link NodeSpawnSyncOptions}) — which adds `input`,
  * `maxBuffer`, and `encoding` that the async API doesn't have. The `spinner`
  * field is excluded because it doesn't apply to synchronous execution.
+ *
+ * `trim` controls the string decode's `.trim()` (default: `true` — today's
+ * behavior). Pass `false` to keep stdout/stderr byte-faithful: the
+ * unconditional trim eats meaningful leading whitespace such as the status
+ * column of `git status --porcelain` (` M file` becomes `M file`). NOTE: v7
+ * may flip the default to `false`.
  */
 export type SpawnSyncOptions = Remap<
   NodeSpawnSyncOptions & {
     localTimeout?: number | undefined
     stdioString?: boolean | undefined
     stripAnsi?: boolean | undefined
+    trim?: boolean | undefined
   }
 >

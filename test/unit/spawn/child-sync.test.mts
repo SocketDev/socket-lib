@@ -210,6 +210,59 @@ describe('spawnSync', () => {
     expect(result.error).toBeTruthy()
   })
 
+  describe('trim option', () => {
+    // A porcelain-style fixture: the leading column IS the data. `git
+    // status --porcelain` writes ` M lib/a.ts` where the first two bytes
+    // are the staged/unstaged status columns.
+    const PORCELAIN = ' M lib/a.ts\n?? untracked.txt\n'
+    const EMIT_PORCELAIN = `process.stdout.write(${JSON.stringify(PORCELAIN)})`
+
+    it('trims decoded stdout by default (eating the leading status column)', () => {
+      const result = spawnSync('node', ['-e', EMIT_PORCELAIN])
+      expect(result.status).toBe(0)
+      expect(result.stdout).toBe('M lib/a.ts\n?? untracked.txt')
+    })
+
+    it('trims with explicit trim: true', () => {
+      const result = spawnSync('node', ['-e', EMIT_PORCELAIN], { trim: true })
+      expect(result.stdout).toBe('M lib/a.ts\n?? untracked.txt')
+    })
+
+    it('preserves leading and trailing whitespace with trim: false', () => {
+      const result = spawnSync('node', ['-e', EMIT_PORCELAIN], { trim: false })
+      expect(result.status).toBe(0)
+      expect(result.stdout).toBe(PORCELAIN)
+    })
+
+    it('preserves stderr whitespace with trim: false', () => {
+      const result = spawnSync(
+        'node',
+        ['-e', 'process.stderr.write("  padded err  ")'],
+        { trim: false },
+      )
+      expect(result.stderr).toBe('  padded err  ')
+    })
+
+    it('leaves Buffer output untouched either way (no decode, no trim)', () => {
+      const result = spawnSync('node', ['-e', EMIT_PORCELAIN], {
+        stdioString: false,
+        trim: false,
+      })
+      expect(Buffer.isBuffer(result.stdout)).toBe(true)
+      expect(result.stdout.toString()).toBe(PORCELAIN)
+    })
+
+    it('still strips ANSI when trim: false (the options are independent)', () => {
+      const result = spawnSync(
+        'node',
+        ['-e', 'process.stdout.write(" \\x1b[31mred\\x1b[0m \\n")'],
+        { trim: false },
+      )
+      expect(result.stdout).not.toContain('\x1b[31m')
+      expect(result.stdout).toBe(' red \n')
+    })
+  })
+
   describe('cross-platform behavior', () => {
     it('should work on current platform', () => {
       const result = spawnSync('echo', ['hello'])
