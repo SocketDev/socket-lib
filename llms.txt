@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 592 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 597 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -607,6 +607,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/process/spawn/errors](./dist/process/spawn/errors.d.ts): Spawn error classification and enhancement.
 - [@socketsecurity/lib/process/spawn/kill-tree](./dist/process/spawn/kill-tree.d.ts): Cross-platform process-tree termination.
 - [@socketsecurity/lib/process/spawn/pty](./dist/process/spawn/pty.d.ts): Zero-dependency PTY runner: run a command under a pseudo-terminal using the system `script` binary, no `node-pty` and no native addon.
+- [@socketsecurity/lib/process/spawn/run](./dist/process/spawn/run.d.ts): Script-style run lanes over spawn/child: `runInherit` forwards stdio and resolves the exit code, `runCapture` collects stdout while stderr stays visible, and `runInheritTee` forwards the live stream AND keeps a copy —...
 - [@socketsecurity/lib/process/spawn/stdio](./dist/process/spawn/stdio.d.ts): Stdio configuration helpers for `spawn` callers.
 - [@socketsecurity/lib/process/spawn/timeout](./dist/process/spawn/timeout.d.ts): Platform-aware spawn-timeout scaling.
 - [@socketsecurity/lib/process/spawn/types](./dist/process/spawn/types.d.ts): Public type surface for `spawn/*` modules.
@@ -617,6 +618,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 
 - [@socketsecurity/lib/promises/abort](./dist/promises/abort.d.ts): Abort signal utilities — composite signal construction from multiple sources and timeout-driven signal creation.
 - [@socketsecurity/lib/promises/all-keyed](./dist/promises/all-keyed.d.ts): Keyed promise combinators: `pAllKeyed` and `pAllSettledKeyed` — the tc39 proposal-await-dictionary (`Promise.allKeyed` / `Promise.allSettledKeyed`, stage 3) as plain helpers, no global patching.
+- [@socketsecurity/lib/promises/backoff](./dist/promises/backoff.d.ts): Escalating-wait pacing for code that polls or retries against rate-limited services: a `createBackoff` state machine — initial delay, multiply per wait, optional cap, reset on forward progress.
 - [@socketsecurity/lib/promises/iterate](./dist/promises/iterate.d.ts): Concurrency-controlled async iteration helpers: `pEach`, `pEachChunk`, `pFilter`, `pFilterChunk`.
 - [@socketsecurity/lib/promises/options](./dist/promises/options.d.ts): Option-shape normalizers for the iteration / retry helpers.
 - [@socketsecurity/lib/promises/queue](./dist/promises/queue.d.ts): Bounded concurrency promise queue.
@@ -660,7 +662,9 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/secrets/linux](./dist/secrets/linux.d.ts): Linux Secret Service backend via `secret-tool`.
 - [@socketsecurity/lib/secrets/login](./dist/secrets/login.d.ts): Interactive socket.dev login — acquire an API token and store it in the canonical `socketsecurity` keychain slot, biometric-first.
 - [@socketsecurity/lib/secrets/macos](./dist/secrets/macos.d.ts): MacOS Keychain backend via `security(1)`.
+- [@socketsecurity/lib/secrets/patterns](./dist/secrets/patterns.d.ts): Shared catalog of secret-bearing env-var key names and literal secret-value shapes.
 - [@socketsecurity/lib/secrets/rc](./dist/secrets/rc.d.ts): Write a managed `export VAR='<value>'` block to the user's shell rc ("run commands") file.
+- [@socketsecurity/lib/secrets/redact](./dist/secrets/redact.d.ts): Deep redaction for payloads that carry live credentials beside state worth keeping (audit inventories, captured API responses, transcripts).
 - [@socketsecurity/lib/secrets/socket-api-token](./dist/secrets/socket-api-token.d.ts): Convenience helper for reading the Socket API token from the canonical env → keychain precedence order.
 - [@socketsecurity/lib/secrets/types](./dist/secrets/types.d.ts): Public type surface for `secrets/*`.
 - [@socketsecurity/lib/secrets/windows](./dist/secrets/windows.d.ts): Windows backend via PowerShell CredentialManager module, with a DPAPI-encrypted file fallback.
@@ -709,6 +713,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 ## strings/
 
 - [@socketsecurity/lib/strings/format](./dist/strings/format.d.ts): Line formatting helpers: `applyLinePrefix`, `centerText`, `indentString`, `repeatString`.
+- [@socketsecurity/lib/strings/lines](./dist/strings/lines.d.ts): Newline-aware line splitting.
 - [@socketsecurity/lib/strings/predicates](./dist/strings/predicates.d.ts): String predicates: `isBlankString` and `isNonEmptyString`.
 - [@socketsecurity/lib/strings/search](./dist/strings/search.d.ts): `search` — like `String.prototype.search` but with a configurable starting index.
 - [@socketsecurity/lib/strings/transform](./dist/strings/transform.d.ts): String transformations: `stripBom`, `stripSurroundingQuotes`, `toKebabCase`, `trimNewlines`.

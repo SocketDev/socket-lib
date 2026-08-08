@@ -261,10 +261,10 @@ describe('spawn/child — throws option', () => {
   })
 
   it('sets the exitCode alias on the resolved failure result', async () => {
-    const settled = (await spawn('node', ['-e', 'process.exit(7)'], {
+    const settled = await spawn('node', ['-e', 'process.exit(7)'], {
       throws: false,
-    })) as { code: number; exitCode: number }
-    expect(settled.exitCode).toBe(7)
+    })
+    expect((settled as typeof settled & { exitCode: number }).exitCode).toBe(7)
   })
 
   it('carries stdout and stderr on the resolved failure result', async () => {

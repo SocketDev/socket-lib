@@ -19,21 +19,25 @@ import {
   shouldSkipSpawn,
 } from '../../../src/process/open-url'
 
+import type { getNodeChildProcess } from '../../../src/node/child-process'
 import type { OpenUrlSpawnOptions } from '../../../src/process/open-url'
 
 // Observe the DEFAULT spawner's launch path without ever spawning: the
 // default lane reaches node:child_process through the lazy getNodeChildProcess
-// seam, so mocking that module records what would have launched.
+// seam, so mocking that module records what would have launched. The stub
+// carries only the surface the default spawner touches (spawn → on/unref),
+// hence the cast to the seam's full module type.
 const nodeSpawnCalls = vi.hoisted(
   () => [] as Array<{ args: readonly string[]; command: string }>,
 )
 vi.mock(import('../../../src/node/child-process'), () => ({
-  getNodeChildProcess: () => ({
-    spawn: (command: string, args: readonly string[]) => {
-      nodeSpawnCalls.push({ args, command })
-      return { on() {}, unref() {} }
-    },
-  }),
+  getNodeChildProcess: () =>
+    ({
+      spawn: (command: string, args: readonly string[]) => {
+        nodeSpawnCalls.push({ args, command })
+        return { on() {}, unref() {} }
+      },
+    }) as unknown as ReturnType<typeof getNodeChildProcess>,
 }))
 
 interface Launch {
