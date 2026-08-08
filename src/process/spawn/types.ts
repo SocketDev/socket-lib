@@ -332,6 +332,13 @@ export interface WritableStreamType {
  *   (default: `true`)
  * @property {boolean | undefined} stripAnsi - Remove ANSI codes from output
  *   (default: `true`)
+ * @property {boolean | undefined} throws - Reject the returned promise when
+ *   the child exits non-zero or dies to a signal (default: `true`). When
+ *   `false`, the promise RESOLVES with the result carrying the non-zero `code`
+ *   (plus the `exitCode` alias), so callers branch on the code instead of
+ *   wrapping in try/catch or swallowing the rejection. A LAUNCH failure
+ *   (`'ENOENT'` — the child never ran) still rejects either way: there is no
+ *   exit code to resolve with.
  * @property {number | undefined} timeout - Timeout in milliseconds.
  * @property {number | undefined} uid - User identity (POSIX)
  * @property {boolean | undefined} windowsVerbatimArguments - Don't quote or
@@ -344,6 +351,7 @@ export type SpawnOptions = Remap<
     spinner?: SpinnerInstance | undefined
     stdioString?: boolean | undefined
     stripAnsi?: boolean | undefined
+    throws?: boolean | undefined
   }
 >
 export type SpawnResult<T = string | Buffer> = PromiseSpawnResult<T>

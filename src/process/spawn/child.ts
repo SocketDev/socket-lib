@@ -31,7 +31,7 @@ import {
   resolveSpawnBin,
   stripAnsiFromSpawnResult,
 } from './shared'
-import { enhanceSpawnError } from './errors'
+import { enhanceSpawnError, isSpawnError } from './errors'
 import { isStdioType } from './stdio'
 import { resolveSpawnTimeout } from './timeout'
 
@@ -43,6 +43,7 @@ import type {
   SpawnExtra,
   SpawnOptions,
   SpawnResult,
+  SpawnStdioResult,
   SpawnSyncOptions,
   SpawnSyncReturns,
 } from './types'
@@ -75,7 +76,16 @@ import type npmCliPromiseSpawnType from '../../external/@npmcli/promise-spawn'
  *   result.stdin?.end()
  *   const { stdout } = await result
  *
- * @throws {SpawnError} When the process exits non-zero or a signal kills it.
+ * @example
+ *   // throws: false resolves with the non-zero code instead of rejecting,
+ *   // so callers branch on `code` rather than try/catch.
+ *   const { code } = await spawn('git', ['grep', '-q', needle], {
+ *     throws: false,
+ *   })
+ *
+ * @throws {SpawnError} When the process exits non-zero or a signal kills it —
+ *   unless `throws: false`, which resolves with that result instead. A launch
+ *   failure (`'ENOENT'`) always rejects.
  */
 // Typed overloads — narrow the resolved stdout/stderr based on `stdioString`.
 // Default (stdioString: true) → strings. `stdioString: false` → Buffers.
@@ -114,6 +124,7 @@ export function spawn(
   const {
     spinner: optionsSpinner,
     stripAnsi: shouldStripAnsi = true,
+    throws = true,
     ...rawSpawnOptions
   } = { __proto__: null, ...options } as SpawnOptions
   // Lazily acquire the default spinner at call time rather than capturing it at
@@ -211,6 +222,12 @@ export function spawn(
         return strippedResult
       } catch (error) {
         const strippedError = stripAnsiFromSpawnResult(error)
+        if (!throws) {
+          const exitResult = spawnExitResult(strippedError)
+          if (exitResult) {
+            return exitResult
+          }
+        }
         throw enhanceSpawnError(strippedError)
       }
     })() as PromiseSpawnResult
@@ -228,6 +245,12 @@ export function spawn(
         }
         return result
       } catch (error) {
+        if (!throws) {
+          const exitResult = spawnExitResult(error)
+          if (exitResult) {
+            return exitResult
+          }
+        }
         throw enhanceSpawnError(error)
       }
     })() as PromiseSpawnResult
@@ -256,6 +279,39 @@ export function spawn(
     oldSpawnPromise as unknown as PromiseSpawnResult
   ).stdin
   return newSpawnPromise as SpawnResult
+}
+
+/**
+ * The resolved-result shape for a spawn rejection whose child actually RAN and
+ * exited — a numeric exit code, or a terminating signal. This is what
+ * `throws: false` resolves with instead of rejecting: the same
+ * `cmd`/`args`/`code`/`signal`/`stdout`/`stderr` fields the success path
+ * carries, plus the `exitCode` alias the success path also sets. A LAUNCH
+ * failure — the command was never found or never started, so `.code` is a
+ * string like `'ENOENT'` and no signal terminated it — returns undefined,
+ * because there is no exit code to report and the rejection must stand.
+ */
+export function spawnExitResult(
+  error: unknown,
+): (SpawnStdioResult & { exitCode: number }) | undefined {
+  if (!isSpawnError(error)) {
+    return undefined
+  }
+  const { args, cmd, code, signal, stderr, stdout } = error
+  if (typeof code !== 'number' && typeof signal !== 'string') {
+    return undefined
+  }
+  // On a signal kill `code` is null at runtime; it passes through unchanged,
+  // mirroring how the success path aliases `exitCode = code` verbatim.
+  return {
+    args,
+    cmd,
+    code,
+    exitCode: code,
+    signal,
+    stderr,
+    stdout,
+  } as SpawnStdioResult & { exitCode: number }
 }
 
 /**

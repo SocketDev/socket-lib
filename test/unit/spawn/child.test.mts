@@ -2,7 +2,7 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { spawn } from '../../../src/process/spawn/child'
+import { spawn, spawnExitResult } from '../../../src/process/spawn/child'
 import { isSpawnError } from '../../../src/process/spawn/errors'
 
 import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers'
@@ -231,6 +231,154 @@ describe('spawn/child — security', () => {
   it('safely handles special characters', async () => {
     const result = await spawn('echo', ['$PATH', '&&', 'echo', 'test'])
     expect(result.code).toBe(0)
+  })
+})
+
+describe('spawn/child — throws option', () => {
+  it('rejects on non-zero exit by default', async () => {
+    try {
+      await spawn('node', ['-e', 'process.exit(2)'])
+      expect.fail('Should have thrown')
+    } catch (e) {
+      expect(isSpawnError(e)).toBe(true)
+    }
+  })
+
+  it('rejects on non-zero exit with explicit throws: true', async () => {
+    try {
+      await spawn('node', ['-e', 'process.exit(2)'], { throws: true })
+      expect.fail('Should have thrown')
+    } catch (e) {
+      expect(isSpawnError(e)).toBe(true)
+    }
+  })
+
+  it('resolves with the non-zero exit code when throws: false', async () => {
+    const { code } = await spawn('node', ['-e', 'process.exit(3)'], {
+      throws: false,
+    })
+    expect(code).toBe(3)
+  })
+
+  it('sets the exitCode alias on the resolved failure result', async () => {
+    const settled = (await spawn('node', ['-e', 'process.exit(7)'], {
+      throws: false,
+    })) as { code: number; exitCode: number }
+    expect(settled.exitCode).toBe(7)
+  })
+
+  it('carries stdout and stderr on the resolved failure result', async () => {
+    const { code, stderr, stdout } = await spawn(
+      'node',
+      [
+        '-e',
+        'process.stdout.write("partial out"); process.stderr.write("the error"); process.exit(4)',
+      ],
+      { throws: false },
+    )
+    expect(code).toBe(4)
+    expect(stdout).toContain('partial out')
+    expect(stderr).toContain('the error')
+  })
+
+  it('resolves the zero-exit success path unchanged', async () => {
+    const { code, stdout } = await spawn('echo', ['fine'], { throws: false })
+    expect(code).toBe(0)
+    expect(stdout).toContain('fine')
+  })
+
+  it('still rejects a launch failure — there is no exit code to resolve', async () => {
+    try {
+      await spawn('nonexistent-command-12345', [], { throws: false })
+      expect.fail('Should have thrown')
+    } catch (e) {
+      expect(isSpawnError(e)).toBe(true)
+    }
+  })
+
+  it('strips ANSI from the resolved failure result by default', async () => {
+    const { code, stderr } = await spawn(
+      'node',
+      ['-e', 'process.stderr.write("\\x1b[31mred\\x1b[0m"); process.exit(5)'],
+      { throws: false },
+    )
+    expect(code).toBe(5)
+    expect(stderr).not.toContain('\x1b[31m')
+    expect(stderr).toContain('red')
+  })
+
+  it('returns Buffers on the resolved failure result with stdioString: false', async () => {
+    const { code, stdout } = await spawn(
+      'node',
+      ['-e', 'process.stdout.write("bytes"); process.exit(6)'],
+      { stdioString: false, throws: false },
+    )
+    expect(code).toBe(6)
+    expect(Buffer.isBuffer(stdout)).toBe(true)
+  })
+
+  it('resolves a signal-killed child instead of rejecting', async () => {
+    const childPromise = spawn('node', ['-e', 'setInterval(() => {}, 1000)'], {
+      throws: false,
+    })
+    childPromise.process.kill('SIGTERM')
+    const { signal } = await childPromise
+    expect(signal).toBe('SIGTERM')
+  })
+})
+
+describe('spawn/child — spawnExitResult', () => {
+  it('returns undefined for a non-error value', () => {
+    expect(spawnExitResult({ code: 1 })).toBe(undefined)
+  })
+
+  it('returns undefined for a launch failure carrying a string code', () => {
+    const launchError = Object.assign(new Error('spawn failed'), {
+      args: [],
+      cmd: 'nope',
+      code: 'ENOENT',
+      signal: undefined,
+      stderr: '',
+      stdout: '',
+    })
+    expect(spawnExitResult(launchError)).toBe(undefined)
+  })
+
+  it('extracts the result shape from a numeric-exit rejection', () => {
+    const exitError = Object.assign(new Error('command failed'), {
+      args: ['status'],
+      cmd: 'git',
+      code: 128,
+      signal: undefined,
+      stderr: 'fatal: not a repository',
+      stdout: '',
+    })
+    expect(spawnExitResult(exitError)).toStrictEqual({
+      args: ['status'],
+      cmd: 'git',
+      code: 128,
+      exitCode: 128,
+      signal: undefined,
+      stderr: 'fatal: not a repository',
+      stdout: '',
+    })
+  })
+
+  it('accepts a signal-terminated rejection whose code is null', () => {
+    // promise-spawn rejects a signal-killed child with `code: null` (its
+    // close handler passes Node's exit code through verbatim), so the
+    // fixture must carry the literal null to stay faithful to the wire.
+    const signalError = Object.assign(new Error('command failed'), {
+      args: [],
+      cmd: 'sleep',
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- faithful promise-spawn rejection shape
+      code: null,
+      signal: 'SIGKILL',
+      stderr: '',
+      stdout: '',
+    })
+    const result = spawnExitResult(signalError)
+    expect(result?.signal).toBe('SIGKILL')
   })
 })
 
