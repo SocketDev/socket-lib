@@ -18,6 +18,7 @@
     "../../.cache",
     "../../dist/**/*",
     "../../node_modules",
+    "../../test/fixtures/perry/entry.ts",
     "../../test/unit/ansi.test.mts",
     "../../test/unit/links/create.test.mts",
     "../../test/unit/packages/normalize.test.mts"
