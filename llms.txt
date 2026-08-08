@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 597 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 603 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -72,6 +72,8 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 
 - [@socketsecurity/lib/cli/check](./dist/cli/check.d.ts): `socket-lib check <name>` subcommand group.
 - [@socketsecurity/lib/cli/check-primordials](./dist/cli/check-primordials.d.ts): `socket-lib check primordials` handler.
+- [@socketsecurity/lib/cli/is-main-module](./dist/cli/is-main-module.d.ts): Entrypoint detection for CLI scripts.
+- [@socketsecurity/lib/cli/main](./dist/cli/main.d.ts): Fail-soft entrypoint runner for CLI scripts.
 - [@socketsecurity/lib/cli/socket-lib](./dist/cli/socket-lib.d.ts): `socket-lib` CLI entry point — top-level dispatcher.
 
 ## compression/
@@ -376,6 +378,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/git/ignored](./dist/git/ignored.d.ts): `getTrackedIgnoredFiles` — the paths git TRACKS that the repo's own `.gitignore` also IGNORES.
 - [@socketsecurity/lib/git/repo](./dist/git/repo.d.ts): Git repository discovery + foundational lazy fs/path/cwd helpers shared across `git/*` leaves.
 - [@socketsecurity/lib/git/staged](./dist/git/staged.d.ts): "Ready for the next commit" helpers — `git diff --cached` over only the index.
+- [@socketsecurity/lib/git/status](./dist/git/status.d.ts): Pure parser for `git status --porcelain` output.
 - [@socketsecurity/lib/git/tracked](./dist/git/tracked.d.ts): Tracked-status + submodule-membership probes for a working-tree path.
 - [@socketsecurity/lib/git/tree](./dist/git/tree.d.ts): `getTreeManifest` — the `git ls-tree -r <ref>` manifest of a commit.
 - [@socketsecurity/lib/git/types](./dist/git/types.d.ts): Public type surface for `git/*` modules — the `FilterPackagesByChangesOptions` and `GitDiffOptions` configuration records.
@@ -393,6 +396,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/github/refs-cache](./dist/github/refs-cache.d.ts): TtlCache singleton for github/refs.
 - [@socketsecurity/lib/github/refs-graphql](./dist/github/refs-graphql.d.ts): Resolve a GitHub git ref via GraphQL.
 - [@socketsecurity/lib/github/refs-rest](./dist/github/refs-rest.d.ts): Resolve a GitHub git ref via REST tier-cascade.
+- [@socketsecurity/lib/github/refs-write](./dist/github/refs-write.d.ts): GitHub git-refs REST write helpers — create, fast-forward, and delete a branch ref, plus tag creation.
 - [@socketsecurity/lib/github/request](./dist/github/request.d.ts): Authenticated GitHub REST fetch.
 - [@socketsecurity/lib/github/token](./dist/github/token.d.ts): GitHub token resolution.
 - [@socketsecurity/lib/github/types](./dist/github/types.d.ts): Public type surface for `github/*` modules — pure interfaces.
@@ -505,6 +509,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/npm/meta-slice](./dist/npm/meta-slice.d.ts): Pure slicing of a raw npm packument into the client's slim shapes — no network, no cache.
 - [@socketsecurity/lib/npm/meta-types](./dist/npm/meta-types.d.ts): Type surface for the npm metadata client (`./meta`, `./meta-cache`, `./meta-slice`) — the raw packument shapes accepted from the registry, the slimmed shapes the client returns, and the options/result records for the ...
 - [@socketsecurity/lib/npm/registry](./dist/npm/registry.d.ts): Browser-safe npm registry client — pure parsers + injectable-fetch shell.
+- [@socketsecurity/lib/npm/registry-live](./dist/npm/registry-live.d.ts): Live (CDN-cache-defeating) npm registry reads — the cache-busted packument fetch, the checked latest-version read, and the maintainer-list read.
 
 ## objects/
 
@@ -662,6 +667,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/secrets/linux](./dist/secrets/linux.d.ts): Linux Secret Service backend via `secret-tool`.
 - [@socketsecurity/lib/secrets/login](./dist/secrets/login.d.ts): Interactive socket.dev login — acquire an API token and store it in the canonical `socketsecurity` keychain slot, biometric-first.
 - [@socketsecurity/lib/secrets/macos](./dist/secrets/macos.d.ts): MacOS Keychain backend via `security(1)`.
+- [@socketsecurity/lib/secrets/oauth-pkce](./dist/secrets/oauth-pkce.d.ts): Pure seams for a client-side OAuth authorization-code flow: PKCE S256 pair generation (RFC 7636 §4), the RFC 8414 issuer-discovery URL, the authorization URL the browser opens, and the loopback callback parser (RFC 82...
 - [@socketsecurity/lib/secrets/patterns](./dist/secrets/patterns.d.ts): Shared catalog of secret-bearing env-var key names and literal secret-value shapes.
 - [@socketsecurity/lib/secrets/rc](./dist/secrets/rc.d.ts): Write a managed `export VAR='<value>'` block to the user's shell rc ("run commands") file.
 - [@socketsecurity/lib/secrets/redact](./dist/secrets/redact.d.ts): Deep redaction for payloads that carry live credentials beside state worth keeping (audit inventories, captured API responses, transcripts).
