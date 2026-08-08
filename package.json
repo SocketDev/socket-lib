@@ -397,6 +397,16 @@
       "types": "./dist/cli/check-primordials.d.ts",
       "default": "./dist/cli/check-primordials.js"
     },
+    "./cli/is-main-module": {
+      "source": "./src/cli/is-main-module.ts",
+      "types": "./dist/cli/is-main-module.d.ts",
+      "default": "./dist/cli/is-main-module.js"
+    },
+    "./cli/main": {
+      "source": "./src/cli/main.ts",
+      "types": "./dist/cli/main.d.ts",
+      "default": "./dist/cli/main.js"
+    },
     "./cli/socket-lib": {
       "source": "./src/cli/socket-lib.ts",
       "types": "./dist/cli/socket-lib.d.ts",
@@ -1720,6 +1730,11 @@
       "types": "./dist/git/staged.d.ts",
       "default": "./dist/git/staged.js"
     },
+    "./git/status": {
+      "source": "./src/git/status.ts",
+      "types": "./dist/git/status.d.ts",
+      "default": "./dist/git/status.js"
+    },
     "./git/tracked": {
       "source": "./src/git/tracked.ts",
       "types": "./dist/git/tracked.d.ts",
@@ -1789,6 +1804,11 @@
       "source": "./src/github/refs-rest.ts",
       "types": "./dist/github/refs-rest.d.ts",
       "default": "./dist/github/refs-rest.js"
+    },
+    "./github/refs-write": {
+      "source": "./src/github/refs-write.ts",
+      "types": "./dist/github/refs-write.d.ts",
+      "default": "./dist/github/refs-write.js"
     },
     "./github/request": {
       "source": "./src/github/request.ts",
@@ -2295,6 +2315,15 @@
       },
       "types": "./dist/npm/registry.d.ts",
       "default": "./dist/npm/registry.js"
+    },
+    "./npm/registry-live": {
+      "source": "./src/npm/registry-live.ts",
+      "browser": {
+        "types": "./dist/npm/registry-live.d.ts",
+        "default": "./dist/npm/registry-live.js"
+      },
+      "types": "./dist/npm/registry-live.d.ts",
+      "default": "./dist/npm/registry-live.js"
     },
     "./objects/getters": {
       "source": "./src/objects/getters.ts",
@@ -2941,6 +2970,11 @@
       "source": "./src/secrets/macos.ts",
       "types": "./dist/secrets/macos.d.ts",
       "default": "./dist/secrets/macos.js"
+    },
+    "./secrets/oauth-pkce": {
+      "source": "./src/secrets/oauth-pkce.ts",
+      "types": "./dist/secrets/oauth-pkce.d.ts",
+      "default": "./dist/secrets/oauth-pkce.js"
     },
     "./secrets/patterns": {
       "source": "./src/secrets/patterns.ts",
