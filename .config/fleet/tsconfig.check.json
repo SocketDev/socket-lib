@@ -19,6 +19,7 @@
     "../../dist/**/*",
     "../../node_modules",
     "../../test/unit/ansi.test.mts",
+    "../../test/unit/links/create.test.mts",
     "../../test/unit/packages/normalize.test.mts"
   ]
 }
