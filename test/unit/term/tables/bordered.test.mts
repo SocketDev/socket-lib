@@ -94,7 +94,7 @@ describe('tables/bordered — formatTable', () => {
     const columns = [{ key: 'name', header: 'Name', width: 20 }]
 
     const result = formatTable(data, columns)
-    const lines = stripAnsi(result).split('\n')
+    const lines = stripAnsi(result).split(/\r?\n/)
     expect(lines.some(line => line.length > 20)).toBe(true)
   })
 
@@ -136,7 +136,7 @@ describe('tables/bordered — formatTable', () => {
     ]
 
     const result = formatTable(data, columns)
-    const lines = result.split('\n')
+    const lines = result.split(/\r?\n/)
     expect(lines.length).toBeGreaterThan(5)
   })
 
@@ -294,7 +294,7 @@ describe('tables/bordered — integration', () => {
     const columns = [{ key: 'a', header: 'A' }]
 
     const result = formatTable(data, columns)
-    const lines = result.split('\n')
+    const lines = result.split(/\r?\n/)
 
     expect(lines.length).toBe(5)
   })

@@ -82,7 +82,7 @@ export function enhanceSpawnError(error: unknown): unknown {
 
   const trimmedStderr = stderrText.trim()
   if (trimmedStderr) {
-    const firstLine = trimmedStderr.split('\n')[0] ?? ''
+    const firstLine = trimmedStderr.split(/\r?\n/)[0] ?? ''
     if (firstLine.length < 200) {
       enhancedMessage += `\n${firstLine}`
     } else {

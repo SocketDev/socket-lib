@@ -45,7 +45,7 @@ describe('stdio/header', () => {
   describe('createHeader', () => {
     it('should create default header with cyan bold title', () => {
       const result = createHeader('Test Title')
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
 
       expect(lines).toHaveLength(5)
       expect(lines[0]).toBe('='.repeat(80))
@@ -57,7 +57,7 @@ describe('stdio/header', () => {
 
     it('should center title within specified width', () => {
       const result = createHeader('Test', { width: 20 })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
 
       expect(lines[0]).toBe('='.repeat(20))
       expect(lines[4]).toBe('='.repeat(20))
@@ -69,7 +69,7 @@ describe('stdio/header', () => {
 
     it('should use custom border character', () => {
       const result = createHeader('Test', { borderChar: '-' })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
 
       expect(lines[0]).toBe('-'.repeat(80))
       expect(lines[4]).toBe('-'.repeat(80))
@@ -77,7 +77,7 @@ describe('stdio/header', () => {
 
     it('should use custom width', () => {
       const result = createHeader('Test', { width: 50 })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
 
       expect(lines[0]).toBe('='.repeat(50))
       expect(lines[0]).toHaveLength(50)
@@ -85,7 +85,7 @@ describe('stdio/header', () => {
 
     it('should apply custom padding', () => {
       const result = createHeader('Test', { padding: 0 })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
 
       expect(lines).toHaveLength(3)
       expect(lines[0]).toBe('='.repeat(80))
@@ -94,7 +94,7 @@ describe('stdio/header', () => {
 
     it('should apply multiple padding lines', () => {
       const result = createHeader('Test', { padding: 3 })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
 
       expect(lines).toHaveLength(9)
       expect(lines[0]).toBe('='.repeat(80))
@@ -150,7 +150,7 @@ describe('stdio/header', () => {
     it('should not apply bold when bold is false', () => {
       const result = createHeader('Test', { bold: false })
       expect(result).toContain('\x1b[36m')
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       const titleLine = lines[2] ?? ''
       const boldEscape = '\x1b[1m'
       const boldCount = titleLine.split(boldEscape).length - 1
@@ -159,7 +159,7 @@ describe('stdio/header', () => {
 
     it('should handle empty title', () => {
       const result = createHeader('')
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines).toHaveLength(5)
       expect(lines[0]).toBe('='.repeat(80))
     })
@@ -167,20 +167,20 @@ describe('stdio/header', () => {
     it('should handle long title', () => {
       const longTitle = 'A'.repeat(100)
       const result = createHeader(longTitle, { width: 80 })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines).toHaveLength(5)
       expect(lines[0]).toBe('='.repeat(80))
     })
 
     it('should handle width of 1', () => {
       const result = createHeader('X', { width: 1 })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines[0]).toBe('=')
     })
 
     it('should handle multi-character border', () => {
       const result = createHeader('Test', { borderChar: '=-', width: 10 })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines[0]).toBe('=-'.repeat(10))
     })
 
@@ -193,7 +193,7 @@ describe('stdio/header', () => {
         bold: false,
       })
 
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines).toHaveLength(7)
       expect(lines[0]).toBe('*'.repeat(60))
       expect(lines[6]).toBe('*'.repeat(60))
@@ -207,7 +207,7 @@ describe('stdio/header', () => {
   describe('createSectionHeader', () => {
     it('should create section header with default options', () => {
       const result = createSectionHeader('Section')
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
 
       expect(lines).toHaveLength(3)
       expect(lines[0]).toBe('-'.repeat(60))
@@ -224,7 +224,7 @@ describe('stdio/header', () => {
 
     it('should not be bold', () => {
       const result = createSectionHeader('Section')
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       const titleLine = lines[1] ?? ''
       const boldEscape = '\x1b[1m'
       const boldCount = titleLine.split(boldEscape).length - 1
@@ -233,20 +233,20 @@ describe('stdio/header', () => {
 
     it('should have padding of 0', () => {
       const result = createSectionHeader('Section')
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines).toHaveLength(3)
     })
 
     it('should use custom width', () => {
       const result = createSectionHeader('Section', { width: 40 })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines[0]).toBe('-'.repeat(40))
       expect(lines[0]).toHaveLength(40)
     })
 
     it('should use custom border character', () => {
       const result = createSectionHeader('Section', { borderChar: '~' })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines[0]).toBe('~'.repeat(60))
     })
 
@@ -257,7 +257,7 @@ describe('stdio/header', () => {
 
     it('should handle empty title', () => {
       const result = createSectionHeader('')
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines).toHaveLength(3)
       expect(lines[0]).toBe('-'.repeat(60))
     })
@@ -269,7 +269,7 @@ describe('stdio/header', () => {
         color: 'magenta',
       })
 
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines).toHaveLength(3)
       expect(lines[0]).toBe('·'.repeat(50))
       expect(result).toContain('\x1b[35m')

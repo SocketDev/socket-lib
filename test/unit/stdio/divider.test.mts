@@ -203,7 +203,7 @@ describe('stdio/divider', () => {
 
     it('should have exactly one newline at start and end', () => {
       const result = sectionBreak()
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines).toHaveLength(3)
       expect(lines[0]).toBe('')
       expect(lines[1]).toBe('═'.repeat(55))

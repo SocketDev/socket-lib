@@ -57,7 +57,7 @@ export function checkTypeDefinition(filePath) {
   }
 
   // Check for problematic patterns
-  const lines = content.split('\n')
+  const lines = content.split(/\r?\n/)
   let hasExport = false
 
   for (let i = 0; i < lines.length; i++) {

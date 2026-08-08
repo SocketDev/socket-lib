@@ -129,7 +129,7 @@ describe('tables/simple — formatSimpleTable', () => {
     ]
 
     const result = formatSimpleTable(data, columns)
-    const lines = result.split('\n')
+    const lines = result.split(/\r?\n/)
     expect(lines.length).toBeGreaterThan(3)
   })
 

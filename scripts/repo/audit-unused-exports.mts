@@ -86,7 +86,7 @@ export interface ExportUsage {
 // source file. Interfaces and type aliases are compile-time-only and skipped.
 export function collectExportDefs(source: string, file: string): ExportDef[] {
   const defs: ExportDef[] = []
-  const lines = source.split('\n')
+  const lines = source.split(/\r?\n/)
   for (let i = 0, { length } = lines; i < length; i += 1) {
     const line = lines[i]!
     // `export` + one of `async function` / `function` / `class` / `const`,
@@ -162,7 +162,7 @@ interface TallyFileConfig {
 // and internal pure re-export lines (`export … from`) are forwarding, not use.
 export function tallyFileRefs(config: TallyFileConfig): void {
   const opts = { __proto__: null, ...config }
-  const lines = opts.source.split('\n')
+  const lines = opts.source.split(/\r?\n/)
   for (let i = 0, { length } = lines; i < length; i += 1) {
     const line = lines[i]!
     if (opts.zone !== 'consumer' && REEXPORT_LINE_RE.test(line)) {

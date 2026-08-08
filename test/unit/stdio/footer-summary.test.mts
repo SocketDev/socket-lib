@@ -207,7 +207,7 @@ describe('stdio/footer createSummaryFooter', () => {
 
     it('should end with border', () => {
       const result = createSummaryFooter({ total: 100 })
-      const lines = result.split('\n')
+      const lines = result.split(/\r?\n/)
       expect(lines[lines.length - 1]).toBe('='.repeat(80))
     })
   })

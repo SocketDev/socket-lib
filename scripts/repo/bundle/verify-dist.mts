@@ -85,7 +85,7 @@ export async function verifyDist(distDir: string): Promise<number> {
     )
     for (const { error, file } of failures) {
       const rel = path.relative(distDir, file)
-      logger.error(`  ${rel}: ${error.split('\n')[0]}`)
+      logger.error(`  ${rel}: ${error.split(/\r?\n/)[0]}`)
     }
     logger.error(
       'A corrupt/partial dist usually means a parallel-write race. ' +

@@ -173,7 +173,7 @@ function sourceFiles(repoDir: string): string[] {
     return []
   }
   return String(r.stdout ?? '')
-    .split('\n')
+    .split(/\r?\n/)
     .map(line => line.trim())
     .filter(
       line =>

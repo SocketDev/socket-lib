@@ -100,7 +100,7 @@ export function extractSummary(srcPath: string): string {
   const afterTag = block.slice(overviewIdx + tagLength)
   // Strip leading-asterisk continuation and collapse whitespace.
   const flat = afterTag
-    .split('\n')
+    .split(/\r?\n/)
     .map(line => line.replace(/^\s*\*\s?/, ''))
     .join(' ')
     .replace(/\s+/g, ' ')

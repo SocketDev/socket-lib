@@ -144,7 +144,7 @@ describe('logger — uncovered methods', () => {
       const { logger, stdout } = makeLogger()
       logger.log('first')
       logger.logNewline()
-      expect(stdout.text.split('\n').length).toBeGreaterThan(2)
+      expect(stdout.text.split(/\r?\n/).length).toBeGreaterThan(2)
     })
 
     it('skips when the previous output was already blank', () => {
@@ -190,7 +190,7 @@ describe('logger — uncovered methods', () => {
       logger.error('first')
       logger.errorNewline()
       // Two newlines minimum: one for 'first', one for the blank.
-      expect(stderr.text.split('\n').length).toBeGreaterThan(2)
+      expect(stderr.text.split(/\r?\n/).length).toBeGreaterThan(2)
     })
 
     it('skips when previous output was already blank', () => {

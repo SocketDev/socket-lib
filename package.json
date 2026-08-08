@@ -3561,7 +3561,7 @@
     "html5parser": "catalog:",
     "libnpmexec": "10.3.1",
     "libnpmpack": "9.1.11",
-    "magic-string": "0.30.21",
+    "magic-string": "catalog:",
     "make-fetch-happen": "15.0.6",
     "markdownlint-cli2": "catalog:",
     "mdast-util-from-markdown": "catalog:",
