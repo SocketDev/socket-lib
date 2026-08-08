@@ -4,7 +4,7 @@
 // perry.compilePackages, Perry compiles it from src/*.ts natively (no V8
 // runtime), under lockdown + strict. On a non-smol host isSmol() is false and
 // the JS fallback path is taken; the point is that it compiles + runs at all.
-import { isSmol } from '@socketsecurity/lib/smol/detect'
+import { isSmol } from '@socketsecurity/lib/exe/smol/detect'
 
 const result = isSmol()
 if (typeof result !== 'boolean') {
