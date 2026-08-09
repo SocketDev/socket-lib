@@ -1,5 +1,5 @@
 {
-  "name": "socket-lib-tools-prim",
+  "name": "local-prim",
   "version": "0.0.0",
   "private": true,
   "description": "Audit a project's bundled output for primordials coverage and gaps against @socketsecurity/lib/primordials, and codemod source to use them",
