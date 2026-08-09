@@ -165,7 +165,6 @@
     "github/error-classification",
     "github/ghsa",
     "github/workflow-runs",
-    "http-request/browser",
     "http-request/fetch/browser",
     "http-request/headers",
     "ipc/cli/get",
