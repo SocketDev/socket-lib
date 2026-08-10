@@ -1800,6 +1800,11 @@
       "types": "./dist/github/ghsa.d.ts",
       "default": "./dist/github/ghsa.js"
     },
+    "./github/packages": {
+      "source": "./src/github/packages.ts",
+      "types": "./dist/github/packages.d.ts",
+      "default": "./dist/github/packages.js"
+    },
     "./github/refs": {
       "source": "./src/github/refs.ts",
       "types": "./dist/github/refs.d.ts",
