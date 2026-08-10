@@ -11,7 +11,7 @@ import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
 } from '../../../primordials/array'
-import { isNpmProgressFlag } from '../npm/flags'
+import { isNpmProgressFlag } from '../npm-cli/flags'
 
 import {
   isPnpmFrozenLockfileFlag,

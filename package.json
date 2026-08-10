@@ -743,35 +743,35 @@
       "types": "./dist/eco/npm/manifest-format.d.ts",
       "default": "./dist/eco/npm/manifest-format.js"
     },
-    "./eco/npm/npm/exec": {
-      "source": "./src/eco/npm/npm/exec.ts",
-      "types": "./dist/eco/npm/npm/exec.d.ts",
-      "default": "./dist/eco/npm/npm/exec.js"
+    "./eco/npm/npm-cli/exec": {
+      "source": "./src/eco/npm/npm-cli/exec.ts",
+      "types": "./dist/eco/npm/npm-cli/exec.d.ts",
+      "default": "./dist/eco/npm/npm-cli/exec.js"
     },
-    "./eco/npm/npm/extract-package-name-from-path": {
-      "source": "./src/eco/npm/npm/extract-package-name-from-path.ts",
-      "types": "./dist/eco/npm/npm/extract-package-name-from-path.d.ts",
-      "default": "./dist/eco/npm/npm/extract-package-name-from-path.js"
+    "./eco/npm/npm-cli/extract-package-name-from-path": {
+      "source": "./src/eco/npm/npm-cli/extract-package-name-from-path.ts",
+      "types": "./dist/eco/npm/npm-cli/extract-package-name-from-path.d.ts",
+      "default": "./dist/eco/npm/npm-cli/extract-package-name-from-path.js"
     },
-    "./eco/npm/npm/flags": {
-      "source": "./src/eco/npm/npm/flags.ts",
-      "types": "./dist/eco/npm/npm/flags.d.ts",
-      "default": "./dist/eco/npm/npm/flags.js"
+    "./eco/npm/npm-cli/flags": {
+      "source": "./src/eco/npm/npm-cli/flags.ts",
+      "types": "./dist/eco/npm/npm-cli/flags.d.ts",
+      "default": "./dist/eco/npm/npm-cli/flags.js"
     },
-    "./eco/npm/npm/lockfile/format": {
-      "source": "./src/eco/npm/npm/lockfile/format.ts",
-      "types": "./dist/eco/npm/npm/lockfile/format.d.ts",
-      "default": "./dist/eco/npm/npm/lockfile/format.js"
+    "./eco/npm/npm-cli/lockfile/format": {
+      "source": "./src/eco/npm/npm-cli/lockfile/format.ts",
+      "types": "./dist/eco/npm/npm-cli/lockfile/format.d.ts",
+      "default": "./dist/eco/npm/npm-cli/lockfile/format.js"
     },
-    "./eco/npm/npm/lockfile/parse": {
-      "source": "./src/eco/npm/npm/lockfile/parse.ts",
-      "types": "./dist/eco/npm/npm/lockfile/parse.d.ts",
-      "default": "./dist/eco/npm/npm/lockfile/parse.js"
+    "./eco/npm/npm-cli/lockfile/parse": {
+      "source": "./src/eco/npm/npm-cli/lockfile/parse.ts",
+      "types": "./dist/eco/npm/npm-cli/lockfile/parse.d.ts",
+      "default": "./dist/eco/npm/npm-cli/lockfile/parse.js"
     },
-    "./eco/npm/npm/parse-git-url": {
-      "source": "./src/eco/npm/npm/parse-git-url.ts",
-      "types": "./dist/eco/npm/npm/parse-git-url.d.ts",
-      "default": "./dist/eco/npm/npm/parse-git-url.js"
+    "./eco/npm/npm-cli/parse-git-url": {
+      "source": "./src/eco/npm/npm-cli/parse-git-url.ts",
+      "types": "./dist/eco/npm/npm-cli/parse-git-url.d.ts",
+      "default": "./dist/eco/npm/npm-cli/parse-git-url.js"
     },
     "./eco/npm/package-extensions/data": {
       "source": "./src/eco/npm/package-extensions/data.ts",

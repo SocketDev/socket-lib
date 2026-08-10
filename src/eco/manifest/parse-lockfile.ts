@@ -11,7 +11,7 @@
 
 import { ManifestError } from './manifest-error'
 import { parseCargoLock } from '../cargo/parse-lockfile'
-import { parsePackageLock } from '../npm/npm/lockfile/parse'
+import { parsePackageLock } from '../npm/npm-cli/lockfile/parse'
 import { parsePnpmLock } from '../npm/pnpm/lockfile/parse'
 import { parseYarnLock } from '../npm/yarn/lockfile/parse'
 import { StringPrototypeIndexOf } from '../../primordials/string'

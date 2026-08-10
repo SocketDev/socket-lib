@@ -12,7 +12,7 @@ import { ErrorCtor } from '../../../primordials/error'
 /**
  * Execute Bun commands. Not yet implemented — throws.
  *
- * @internal When implementing, model after eco/npm/npm/exec.ts for array-based
+ * @internal When implementing, model after eco/npm/npm-cli/exec.ts for array-based
  *   args, Windows shell handling, and debug-level filtering.
  */
 export function execBun(

@@ -4,7 +4,9 @@
  *   isPnpmInstallCommand(), and isPnpmLoglevelFlag(). The loglevel helper is
  *   expected to behave identically to npm's; the npm oracle in that comparison
  *   comes from the published `-stable` snapshot so the test can't validate
- *   `src/` against itself.
+ *   `src/` against itself. That import keeps the PUBLISHED subpath spelling
+ *   (`eco/npm/npm/flags`); local `src/` moved to `npm-cli/`, and the oracle
+ *   follows the published package, not the working tree.
  */
 
 import { describe, expect, it } from 'vitest'

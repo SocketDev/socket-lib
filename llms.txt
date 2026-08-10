@@ -162,12 +162,12 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/eco/manifest/types](./dist/eco/manifest/types.d.ts): Shared types for manifest + lockfile parsing.
 - [@socketsecurity/lib/eco/npm/bun/exec](./dist/eco/npm/bun/exec.d.ts): Bun tool surface.
 - [@socketsecurity/lib/eco/npm/manifest-format](./dist/eco/npm/manifest-format.d.ts): Format descriptor for `package.json` — the manifest shape shared across the entire npm-family ecosystem: npm, pnpm, yarn, bun, and vlt.
-- [@socketsecurity/lib/eco/npm/npm/exec](./dist/eco/npm/npm/exec.d.ts): Execute npm commands with optimized flags and security defaults.
-- [@socketsecurity/lib/eco/npm/npm/extract-package-name-from-path](./dist/eco/npm/npm/extract-package-name-from-path.d.ts): `extractPackageNameFromPath(pkgPath)` — given an npm v2/v3 lockfile entry key like `node_modules/a/node_modules/b`, returns the final package name (`b`), preserving scoped-package boundaries (`@scope/name` stays joined).
-- [@socketsecurity/lib/eco/npm/npm/flags](./dist/eco/npm/npm/flags.d.ts): Npm CLI flag predicates.
-- [@socketsecurity/lib/eco/npm/npm/lockfile/format](./dist/eco/npm/npm/lockfile/format.d.ts): Format descriptor for npm lockfiles — covers both `package-lock.json` and `npm-shrinkwrap.json` (npm v1/v2/v3 lock formats share the parser).
-- [@socketsecurity/lib/eco/npm/npm/lockfile/parse](./dist/eco/npm/npm/lockfile/parse.d.ts): `parsePackageLock(content)` — parses an npm `package-lock.json` / `npm-shrinkwrap.json` (v1/v2/v3) into a `ParsedLockfile`.
-- [@socketsecurity/lib/eco/npm/npm/parse-git-url](./dist/eco/npm/npm/parse-git-url.d.ts): `parseGitUrl(resolved)` — extracts `{ url, commit }` from a `resolved` field on an npm lockfile entry when it points to a git source (`git+…` or `git://…`).
+- [@socketsecurity/lib/eco/npm/npm-cli/exec](./dist/eco/npm/npm-cli/exec.d.ts): Execute npm commands with optimized flags and security defaults.
+- [@socketsecurity/lib/eco/npm/npm-cli/extract-package-name-from-path](./dist/eco/npm/npm-cli/extract-package-name-from-path.d.ts): `extractPackageNameFromPath(pkgPath)` — given an npm v2/v3 lockfile entry key like `node_modules/a/node_modules/b`, returns the final package name (`b`), preserving scoped-package boundaries (`@scope/name` stays joined).
+- [@socketsecurity/lib/eco/npm/npm-cli/flags](./dist/eco/npm/npm-cli/flags.d.ts): Npm CLI flag predicates.
+- [@socketsecurity/lib/eco/npm/npm-cli/lockfile/format](./dist/eco/npm/npm-cli/lockfile/format.d.ts): Format descriptor for npm lockfiles — covers both `package-lock.json` and `npm-shrinkwrap.json` (npm v1/v2/v3 lock formats share the parser).
+- [@socketsecurity/lib/eco/npm/npm-cli/lockfile/parse](./dist/eco/npm/npm-cli/lockfile/parse.d.ts): `parsePackageLock(content)` — parses an npm `package-lock.json` / `npm-shrinkwrap.json` (v1/v2/v3) into a `ParsedLockfile`.
+- [@socketsecurity/lib/eco/npm/npm-cli/parse-git-url](./dist/eco/npm/npm-cli/parse-git-url.d.ts): `parseGitUrl(resolved)` — extracts `{ url, commit }` from a `resolved` field on an npm lockfile entry when it points to a git source (`git+…` or `git://…`).
 - [@socketsecurity/lib/eco/npm/package-extensions/data](./dist/eco/npm/package-extensions/data.d.ts): Per-package `package.json` overrides, keyed by package name and version range.
 - [@socketsecurity/lib/eco/npm/package-extensions/types](./dist/eco/npm/package-extensions/types.d.ts): Public type surface for `eco/npm/package-extensions/*` modules — the `PackageExtension` tuple shape used by the merged Yarn / Socket-curated extensions list.
 - [@socketsecurity/lib/eco/npm/parse-package-json](./dist/eco/npm/parse-package-json.d.ts): `parsePackageJson(content)` — parses a `package.json` string into a `ParsedManifest`.

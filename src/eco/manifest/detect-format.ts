@@ -25,7 +25,7 @@ import {
 import {
   PACKAGE_LOCK_FILENAMES,
   PACKAGE_LOCK_FORMAT,
-} from '../npm/npm/lockfile/format'
+} from '../npm/npm-cli/lockfile/format'
 import {
   PNPM_LOCK_FILENAME,
   PNPM_LOCK_FORMAT,

@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getPackage } from '../../../../src/eco/manifest/get-package'
 import { getPackageVersions } from '../../../../src/eco/manifest/get-package-versions'
-import { parsePackageLock } from '../../../../src/eco/npm/npm/lockfile/parse'
+import { parsePackageLock } from '../../../../src/eco/npm/npm-cli/lockfile/parse'
 
 const LOCK = parsePackageLock(
   JSON.stringify({

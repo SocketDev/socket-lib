@@ -5,7 +5,7 @@
  */
 
 import { SetCtor } from '../../../primordials/map-set'
-import { isNpmLoglevelFlag } from '../npm/flags'
+import { isNpmLoglevelFlag } from '../npm-cli/flags'
 
 const pnpmIgnoreScriptsFlags = new SetCtor([
   '--ignore-scripts',

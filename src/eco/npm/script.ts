@@ -31,7 +31,7 @@ import { ArrayIsArray } from '../../primordials/array'
 import { ErrorCtor } from '../../primordials/error'
 import { spawn } from '../../process/spawn/child'
 
-import { execNpm } from './npm/exec'
+import { execNpm } from './npm-cli/exec'
 import { execPnpm } from './pnpm/exec'
 import { execYarn } from './yarn/exec'
 

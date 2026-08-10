@@ -15,7 +15,7 @@ import {
   ArrayPrototypeIndexOf,
   ArrayPrototypeSlice,
 } from '../../../primordials/array'
-import { isNpmLoglevelFlag, isNpmProgressFlag } from '../npm/flags'
+import { isNpmLoglevelFlag, isNpmProgressFlag } from '../npm-cli/flags'
 import { isPnpmIgnoreScriptsFlag } from '../pnpm/flags'
 
 import { SetCtor } from '../../../primordials/map-set'

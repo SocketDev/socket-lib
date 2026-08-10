@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for src/eco/npm/npm/lockfile/parse.ts. Exercises v1
+ * @file Unit tests for src/eco/npm/npm-cli/lockfile/parse.ts. Exercises v1
  *   (recursive `dependencies`) and v2/v3 (flat `packages`) parser branches,
  *   plus error + edge-case behavior.
  */
@@ -7,9 +7,9 @@
 import { describe, expect, it } from 'vitest'
 
 import type { ManifestError } from '../../../../../../src/eco/manifest/manifest-error'
-import { parsePackageLock } from '../../../../../../src/eco/npm/npm/lockfile/parse'
+import { parsePackageLock } from '../../../../../../src/eco/npm/npm-cli/lockfile/parse'
 
-describe('eco/npm/npm/lockfile/parse', () => {
+describe('eco/npm/npm-cli/lockfile/parse', () => {
   describe('v2/v3', () => {
     it('parses a minimal v3 lockfile', () => {
       const result = parsePackageLock(

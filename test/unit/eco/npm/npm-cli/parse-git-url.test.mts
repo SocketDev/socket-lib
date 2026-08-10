@@ -1,12 +1,12 @@
 /**
- * @file Unit tests for src/eco/npm/npm/parse-git-url.ts.
+ * @file Unit tests for src/eco/npm/npm-cli/parse-git-url.ts.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { parseGitUrl } from '../../../../../src/eco/npm/npm/parse-git-url'
+import { parseGitUrl } from '../../../../../src/eco/npm/npm-cli/parse-git-url'
 
-describe('eco/npm/npm/parse-git-url', () => {
+describe('eco/npm/npm-cli/parse-git-url', () => {
   it('extracts url + commit from git+https with hash', () => {
     expect(
       parseGitUrl('git+https://github.com/lodash/lodash.git#abc123'),

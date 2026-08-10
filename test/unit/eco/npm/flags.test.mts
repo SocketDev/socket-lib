@@ -17,7 +17,7 @@ import {
   isNpmLoglevelFlag,
   isNpmNodeOptionsFlag,
   isNpmProgressFlag,
-} from '../../../../src/eco/npm/npm/flags'
+} from '../../../../src/eco/npm/npm-cli/flags'
 
 describe('npm flag detection', () => {
   describe('isNpmAuditFlag', () => {
