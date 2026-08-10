@@ -1,7 +1,10 @@
 /**
- * @file Package manager agent constants. Exports agent names
+ * @file Package manager constants. Exports manager names
  *   (npm/pnpm/yarn/bun/vlt/npx), lockfile names, registry URLs, and resolved
  *   npm binary paths used across Socket tooling.
+ *   Says manager, never agent: `agent` names an AI coding agent in this
+ *   codebase (`ai/agent-context`, `env/agents`), which is why v7 renamed this
+ *   module from `constants/agents`.
  */
 
 import which from '../external/which'
@@ -12,7 +15,8 @@ export const PNPM = 'pnpm'
 export const YARN = 'yarn'
 export const BUN = 'bun'
 export const VLT = 'vlt'
-export const NPX = 'npx' // # socket-lint: allow npx
+// oxlint-disable-next-line socket/no-npx-dlx -- the binary NAME is the value
+export const NPX = 'npx'
 
 // NPM binary path - resolved once at runtime using which.
 // Shared between NPM_BIN_PATH and NPM_REAL_EXEC_PATH to avoid duplicate which.sync calls.
@@ -84,7 +88,7 @@ export const YARN_CLASSIC = 'yarn/classic'
 // __metadata.version >= 9, "entries" key. Versioning skipped from
 // Berry v4 to ZPM v6 (no v5). Distinct enough from Berry/Classic
 // that downstream tooling such as sdxgen parsers and lockfile readers
-// treats it as a separate agent. The canonical name across Socket repos
+// treats it as a separate manager. The canonical name across Socket repos
 // is "zpm", matching socket-sdxgen's parser dir name.
 export const ZPM = 'zpm'
 
