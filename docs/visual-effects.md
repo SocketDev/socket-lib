@@ -393,8 +393,8 @@ Customize colors across the entire library:
 <summary>Applying the built-in `THEMES.sunset`, then a custom theme setting the primary, success, error, warning, info and step colors</summary>
 
 ```typescript
-import { setTheme } from '@socketsecurity/lib/themes/context'
-import { THEMES } from '@socketsecurity/lib/themes/themes'
+import { setTheme } from '@socketsecurity/lib/term/themes/context'
+import { THEMES } from '@socketsecurity/lib/term/themes/themes'
 
 // Use a built-in theme
 setTheme(THEMES.sunset)

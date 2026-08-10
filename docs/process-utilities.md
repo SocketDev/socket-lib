@@ -456,12 +456,12 @@ import { readFile } from 'node:fs/promises'
 const data = JSON.parse(await readFile(process.argv[2], 'utf8'))
 ```
 
-### CLI env-var IPC (`@socketsecurity/lib/ipc-cli/get`)
+### CLI env-var IPC (`@socketsecurity/lib/ipc/cli/get`)
 
 For reading `SOCKET_CLI_*` environment variables forwarded by a parent Socket CLI.
 
 ```typescript
-import { getIpc } from '@socketsecurity/lib/ipc-cli/get'
+import { getIpc } from '@socketsecurity/lib/ipc/cli/get'
 
 const { SOCKET_CLI_FIX, SOCKET_CLI_OPTIMIZE } = await getIpc()
 ```

@@ -116,7 +116,7 @@ export function getSmolUtil(): SmolUtilBinding | undefined {
  *
  * @example
  *   ;```ts
- *   import { isSmol } from '@socketsecurity/lib/smol/detect'
+ *   import { isSmol } from '@socketsecurity/lib/exe/smol/detect'
  *
  *   if (isSmol()) {
  *     // running on the smol binary; native fast paths available
