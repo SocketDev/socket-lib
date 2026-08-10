@@ -1,7 +1,11 @@
 /**
- * @file Package extensions for compatibility adjustments. Package extensions
- *   allow modifying package.json fields of dependencies to fix compatibility
- *   issues, missing peer dependencies, etc.
+ * @file Per-package `package.json` overrides, keyed by package name and
+ *   version range. An extension patches a dependency's own manifest to repair
+ *   a missing peer dependency or a wrong field, without a fork or a patch file.
+ *   Manager-agnostic, which is why this sits at the ecosystem tier beside
+ *   `manifest-format.ts` rather than under `npm/`: yarn and pnpm both read a
+ *   `packageExtensions` config, and the seed list here is Yarn's curated set
+ *   (`external/@yarnpkg/extensions`) merged with Socket's additions.
  */
 
 import { packageExtensions as yarnPackageExtensions } from '../../../external/@yarnpkg/extensions'

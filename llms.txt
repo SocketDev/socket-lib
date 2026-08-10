@@ -168,7 +168,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/eco/npm/npm/lockfile/format](./dist/eco/npm/npm/lockfile/format.d.ts): Format descriptor for npm lockfiles — covers both `package-lock.json` and `npm-shrinkwrap.json` (npm v1/v2/v3 lock formats share the parser).
 - [@socketsecurity/lib/eco/npm/npm/lockfile/parse](./dist/eco/npm/npm/lockfile/parse.d.ts): `parsePackageLock(content)` — parses an npm `package-lock.json` / `npm-shrinkwrap.json` (v1/v2/v3) into a `ParsedLockfile`.
 - [@socketsecurity/lib/eco/npm/npm/parse-git-url](./dist/eco/npm/npm/parse-git-url.d.ts): `parseGitUrl(resolved)` — extracts `{ url, commit }` from a `resolved` field on an npm lockfile entry when it points to a git source (`git+…` or `git://…`).
-- [@socketsecurity/lib/eco/npm/package-extensions/data](./dist/eco/npm/package-extensions/data.d.ts): Package extensions for compatibility adjustments.
+- [@socketsecurity/lib/eco/npm/package-extensions/data](./dist/eco/npm/package-extensions/data.d.ts): Per-package `package.json` overrides, keyed by package name and version range.
 - [@socketsecurity/lib/eco/npm/package-extensions/types](./dist/eco/npm/package-extensions/types.d.ts): Public type surface for `eco/npm/package-extensions/*` modules — the `PackageExtension` tuple shape used by the merged Yarn / Socket-curated extensions list.
 - [@socketsecurity/lib/eco/npm/parse-package-json](./dist/eco/npm/parse-package-json.d.ts): `parsePackageJson(content)` — parses a `package.json` string into a `ParsedManifest`.
 - [@socketsecurity/lib/eco/npm/pnpm/exec](./dist/eco/npm/pnpm/exec.d.ts): Execute pnpm commands with optimized flags and security defaults.
