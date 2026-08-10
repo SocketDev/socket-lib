@@ -2,7 +2,7 @@
 
 > Core utilities and infrastructure for Socket.dev security tools. 603 subpath exports, grouped by namespace.
 
-Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
+Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
 ## Top-level
 
@@ -739,8 +739,8 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/term/ansi/constants](./dist/term/ansi/constants.d.ts): ANSI escape code constants.
 - [@socketsecurity/lib/term/ansi/strip](./dist/term/ansi/strip.d.ts): ANSI escape-code regex factory and stripping helper.
 - [@socketsecurity/lib/term/colors/convert](./dist/term/colors/convert.d.ts): Color conversion helpers — `isRgbTuple()` narrows a `ColorValue` to the RGB-tuple branch, and `toRgb()` resolves a named color or passes through an existing tuple.
-- [@socketsecurity/lib/term/colors/palette](./dist/term/colors/palette.d.ts): Named-color palette — maps each `ColorName` to its canonical RGB tuple.
-- [@socketsecurity/lib/term/colors/socket-palette](./dist/term/colors/socket-palette.d.ts): Socket terminal-color palette — mirrors the CSS design tokens defined in Socket's `template/styles/tokens.css` (light / dark / synthwave themes).
+- [@socketsecurity/lib/term/colors/palette/named](./dist/term/colors/palette/named.d.ts): Named-color palette — maps each `ColorName` to its canonical RGB tuple.
+- [@socketsecurity/lib/term/colors/palette/socket](./dist/term/colors/palette/socket.d.ts): Socket terminal-color palette — mirrors the CSS design tokens defined in Socket's `template/styles/tokens.css` (light / dark / synthwave themes).
 - [@socketsecurity/lib/term/colors/types](./dist/term/colors/types.d.ts): Public type surface for `term/colors/*` modules — the `ColorInherit` literal, the `ColorName` named-color union, the `ColorRgb` tuple, and the `ColorValue` super-union.
 - [@socketsecurity/lib/term/effects/pulse-frames](./dist/term/effects/pulse-frames.d.ts): Socket pulse animation frames generator.
 - [@socketsecurity/lib/term/effects/shimmer](./dist/term/effects/shimmer.d.ts): Shimmer animation engine — pure functions, zero deps.

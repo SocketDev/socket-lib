@@ -5,7 +5,7 @@
  *   blending.
  */
 
-import type { ColorName, ColorRgb } from './types'
+import type { ColorName, ColorRgb } from '../types'
 
 export const colorToRgb: Record<ColorName, ColorRgb> = {
   __proto__: null,

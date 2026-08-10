@@ -6,7 +6,7 @@
 
 import { ArrayIsArray } from '../../primordials/array'
 
-import { colorToRgb } from './palette'
+import { colorToRgb } from './palette/named'
 
 import type { ColorRgb, ColorValue } from './types'
 

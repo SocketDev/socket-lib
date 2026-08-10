@@ -3239,15 +3239,15 @@
       "types": "./dist/term/colors/convert.d.ts",
       "default": "./dist/term/colors/convert.js"
     },
-    "./term/colors/palette": {
-      "source": "./src/term/colors/palette.ts",
-      "types": "./dist/term/colors/palette.d.ts",
-      "default": "./dist/term/colors/palette.js"
+    "./term/colors/palette/named": {
+      "source": "./src/term/colors/palette/named.ts",
+      "types": "./dist/term/colors/palette/named.d.ts",
+      "default": "./dist/term/colors/palette/named.js"
     },
-    "./term/colors/socket-palette": {
-      "source": "./src/term/colors/socket-palette.ts",
-      "types": "./dist/term/colors/socket-palette.d.ts",
-      "default": "./dist/term/colors/socket-palette.js"
+    "./term/colors/palette/socket": {
+      "source": "./src/term/colors/palette/socket.ts",
+      "types": "./dist/term/colors/palette/socket.d.ts",
+      "default": "./dist/term/colors/palette/socket.js"
     },
     "./term/colors/types": {
       "source": "./src/term/colors/types.ts",
