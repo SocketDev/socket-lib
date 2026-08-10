@@ -4,7 +4,7 @@
  *   issues, missing peer dependencies, etc.
  */
 
-import { packageExtensions as yarnPackageExtensions } from '../external/@yarnpkg/extensions'
+import { packageExtensions as yarnPackageExtensions } from '../../../external/@yarnpkg/extensions'
 
 import type { PackageExtension } from './types'
 

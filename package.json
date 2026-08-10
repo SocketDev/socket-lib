@@ -773,6 +773,16 @@
       "types": "./dist/eco/npm/npm/parse-git-url.d.ts",
       "default": "./dist/eco/npm/npm/parse-git-url.js"
     },
+    "./eco/npm/package-extensions/data": {
+      "source": "./src/eco/npm/package-extensions/data.ts",
+      "types": "./dist/eco/npm/package-extensions/data.d.ts",
+      "default": "./dist/eco/npm/package-extensions/data.js"
+    },
+    "./eco/npm/package-extensions/types": {
+      "source": "./src/eco/npm/package-extensions/types.ts",
+      "types": "./dist/eco/npm/package-extensions/types.d.ts",
+      "default": "./dist/eco/npm/package-extensions/types.js"
+    },
     "./eco/npm/parse-package-json": {
       "source": "./src/eco/npm/parse-package-json.ts",
       "types": "./dist/eco/npm/parse-package-json.d.ts",
@@ -2588,16 +2598,6 @@
       "source": "./src/perf/types.ts",
       "types": "./dist/perf/types.d.ts",
       "default": "./dist/perf/types.js"
-    },
-    "./pkg-ext/data": {
-      "source": "./src/pkg-ext/data.ts",
-      "types": "./dist/pkg-ext/data.d.ts",
-      "default": "./dist/pkg-ext/data.js"
-    },
-    "./pkg-ext/types": {
-      "source": "./src/pkg-ext/types.ts",
-      "types": "./dist/pkg-ext/types.d.ts",
-      "default": "./dist/pkg-ext/types.js"
     },
     "./primordials/array": {
       "source": "./src/primordials/array.ts",

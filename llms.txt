@@ -168,6 +168,8 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/eco/npm/npm/lockfile/format](./dist/eco/npm/npm/lockfile/format.d.ts): Format descriptor for npm lockfiles — covers both `package-lock.json` and `npm-shrinkwrap.json` (npm v1/v2/v3 lock formats share the parser).
 - [@socketsecurity/lib/eco/npm/npm/lockfile/parse](./dist/eco/npm/npm/lockfile/parse.d.ts): `parsePackageLock(content)` — parses an npm `package-lock.json` / `npm-shrinkwrap.json` (v1/v2/v3) into a `ParsedLockfile`.
 - [@socketsecurity/lib/eco/npm/npm/parse-git-url](./dist/eco/npm/npm/parse-git-url.d.ts): `parseGitUrl(resolved)` — extracts `{ url, commit }` from a `resolved` field on an npm lockfile entry when it points to a git source (`git+…` or `git://…`).
+- [@socketsecurity/lib/eco/npm/package-extensions/data](./dist/eco/npm/package-extensions/data.d.ts): Package extensions for compatibility adjustments.
+- [@socketsecurity/lib/eco/npm/package-extensions/types](./dist/eco/npm/package-extensions/types.d.ts): Public type surface for `eco/npm/package-extensions/*` modules — the `PackageExtension` tuple shape used by the merged Yarn / Socket-curated extensions list.
 - [@socketsecurity/lib/eco/npm/parse-package-json](./dist/eco/npm/parse-package-json.d.ts): `parsePackageJson(content)` — parses a `package.json` string into a `ParsedManifest`.
 - [@socketsecurity/lib/eco/npm/pnpm/exec](./dist/eco/npm/pnpm/exec.d.ts): Execute pnpm commands with optimized flags and security defaults.
 - [@socketsecurity/lib/eco/npm/pnpm/flags](./dist/eco/npm/pnpm/flags.d.ts): Pnpm CLI flag predicates.
@@ -569,11 +571,6 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/perf/report](./dist/perf/report.d.ts): Report-side helpers — `generatePerformanceReport` returns a multi-line ASCII-bordered report string; `printPerformanceSummary` writes a one-line-per-op summary through `debugLog`.
 - [@socketsecurity/lib/perf/timer](./dist/perf/timer.d.ts): Recording-side helpers.
 - [@socketsecurity/lib/perf/types](./dist/perf/types.d.ts): Public type surface for `perf/*` modules — the `PerformanceMetrics` row shape pushed onto the shared metrics array by `perfTimer` / `measure` / `measureSync` / `perfCheckpoint` / `trackMemory`.
-
-## pkg-ext/
-
-- [@socketsecurity/lib/pkg-ext/data](./dist/pkg-ext/data.d.ts): Package extensions for compatibility adjustments.
-- [@socketsecurity/lib/pkg-ext/types](./dist/pkg-ext/types.d.ts): Public type surface for `pkg-ext/*` modules — the `PackageExtension` tuple shape used by the merged Yarn / Socket-curated extensions list.
 
 ## primordials/
 

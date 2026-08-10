@@ -8,7 +8,7 @@
  *     manager for applying compatibility patches to dependencies.
  */
 
-import { packageExtensions } from '../../src/pkg-ext/data'
+import { packageExtensions } from '../../../../../src/eco/npm/package-extensions/data'
 import { describe, expect, it } from 'vitest'
 
 describe('pkg-ext', () => {
