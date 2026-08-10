@@ -1,20 +1,30 @@
 /*
  * @file Repo check — every leaf compiled out of the published build is
- *   provably fleet-unused. Two legs, both against what actually ships:
+ *   provably unreachable and fleet-unused. Three legs, all against what
+ *   actually ships:
  *
- *   (a) dist bytes: a built dist module carrying the build-stub banner must
+ *   (a) reachability: no stub may sit in the require graph of a dist module
+ *       that ships real code, seeded from EVERY condition of every exports
+ *       entry. This is the only leg that needs no sibling checkout, so it is
+ *       the one that still runs in CI. It exists because 6.7.0 shipped
+ *       http-request/browser as a throwing stub: the fleet imports
+ *       `http-request`, whose `browser` condition resolves to that separate
+ *       leaf, so no specifier ever named it and legs (b)/(c) read clean while
+ *       every SDK browser bundle threw before touching `fetch`.
+ *
+ *   (b) dist bytes: a built dist module carrying the build-stub banner must
  *       be named in scripts/repo/build-stubs/unexposed-leaves.json — a stub
  *       outside the committed allowlist means the build compiled out a leaf
  *       nobody signed off on. Skipped when dist/ is absent (unbuilt tree).
  *
- *   (b) fleet usage: the committed stub list must still be graph-safe against
+ *   (c) fleet usage: the committed stub list must still be graph-safe against
  *       the CURRENT roster checkouts — a listed leaf a fleet repo now imports
  *       (directly, or transitively via a used module's relative imports)
  *       would ship as a throwing stub to a real consumer. Skipped loudly when
  *       any roster checkout is missing on disk (CI has no siblings; the
  *       pre-push gate on a full checkout set is the enforcer).
  *
- *   Leg (b) exists because 6.5.1 shipped npm/meta as a throwing stub while
+ *   Leg (c) exists because 6.5.1 shipped npm/meta as a throwing stub while
  *   socket-registry imported it — the audit snapshot predated the consumer,
  *   the list went stale, and nothing between build and publish re-checked it.
  *
@@ -36,6 +46,10 @@ import {
   rosterRepoNames,
 } from '../audit-fleet-lib-usage.mts'
 import {
+  findStubsReachableFromShippedCode,
+  reachableStubErrorMessage,
+} from '../build-stubs/dist-graph.mts'
+import {
   readScannedRoster,
   readUnexposedLeaves,
   rosterCoverageGap,
@@ -45,6 +59,7 @@ import { REPO_ROOT } from '../../fleet/paths.mts'
 import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
 import { runMain } from '../../fleet/_shared/run-main.mts'
 
+import type { ReachableStubFinding } from '../build-stubs/dist-graph.mts'
 import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
@@ -139,6 +154,21 @@ export function main(): void {
 
   const distDir = path.join(REPO_ROOT, 'dist')
   if (existsSync(distDir)) {
+    // Reachability leg. Asks whether shipped code can REACH a stub, which the
+    // usage leg below cannot answer: it asks who imports a specifier, and a
+    // leaf resolved through an exports CONDITION is named by nobody.
+    const reachable = findStubsReachableFromShippedCode(REPO_ROOT)
+    if (reachable.length > 0) {
+      for (let i = 0, { length } = reachable; i < length; i += 1) {
+        const f = reachable[i] as ReachableStubFinding
+        logger.error(
+          `${CHECK} reachable stub: ${f.file} via ${f.chain.join(' -> ')}`,
+        )
+      }
+      logger.error(`${CHECK} ${reachableStubErrorMessage(reachable)}`)
+      failed = true
+    }
+
     const unlisted = findUnlistedStubs(REPO_ROOT)
     if (unlisted.length > 0) {
       for (let i = 0, { length } = unlisted; i < length; i += 1) {
