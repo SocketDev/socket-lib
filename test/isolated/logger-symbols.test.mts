@@ -18,8 +18,8 @@ import {
 // from the published surface rather than local `src/` (the isolated vitest
 // config aliases `@socketsecurity/lib-stable` back to `src`).
 import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/logger/symbols'
-import { setTheme } from '@socketsecurity/lib/themes/context'
-import { THEMES } from '@socketsecurity/lib/themes/themes'
+import { setTheme } from '../../src/term/themes/context'
+import { THEMES } from '../../src/term/themes/themes'
 import { setupLoggerHarness } from './logger-fixtures'
 
 /**

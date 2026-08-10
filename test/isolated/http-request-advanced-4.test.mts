@@ -12,7 +12,7 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, it } from 'vitest'
 
-import type { HttpHookResponseInfo } from '@socketsecurity/lib/http-request/request-types'
+import type { HttpHookResponseInfo } from '../../src/http-request/request-types'
 
 import { httpRequest } from '../../src/http-request/request'
 
