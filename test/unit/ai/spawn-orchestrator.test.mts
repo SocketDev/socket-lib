@@ -8,7 +8,7 @@ vi.mock(import('../../../src/process/spawn/child'), () => ({
   spawn: mockChildSpawn,
 }))
 
-vi.mock(import('../../../src/ai/discover.mts'), () => ({
+vi.mock(import('../../../src/ai/discover'), () => ({
   discoverAiAgents: vi.fn(),
 }))
 
@@ -38,8 +38,8 @@ function makeSpawnReturn(opts: FakeSpawnResult) {
 }
 
 async function loadFresh() {
-  const discoverMod = await import('../../../src/ai/discover.mts')
-  const mod = await import('../../../src/ai/spawn.mts')
+  const discoverMod = await import('../../../src/ai/discover')
+  const mod = await import('../../../src/ai/spawn')
   return {
     discoverAiAgents: discoverMod.discoverAiAgents as ReturnType<typeof vi.fn>,
     spawnAiAgent: mod.spawnAiAgent,

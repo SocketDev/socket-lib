@@ -33,7 +33,7 @@ import { normalizePath } from '../paths/normalize'
 
 import path from 'node:path'
 
-import type { AiAgentName } from './types.mts'
+import type { AiAgentName } from './types'
 
 /**
  * The detected running agent + the raw version token from `AI_AGENT`, when

@@ -25,11 +25,11 @@
  *   never reorders away from its single available provider.
  */
 
-import { usableTierCandidates } from './route.mts'
+import { usableTierCandidates } from './route'
 
-import type { CredentialProvider } from './credentials.mts'
-import type { RouteContext, TierCandidate } from './route.mts'
-import type { AiTier } from './tier.mts'
+import type { CredentialProvider } from './credentials'
+import type { RouteContext, TierCandidate } from './route'
+import type { AiTier } from './tier'
 
 /**
  * How a provider's credential is billed, which decides what the marginal token

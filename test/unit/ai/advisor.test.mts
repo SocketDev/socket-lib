@@ -8,12 +8,12 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { adviseSpawn, PROFILE_FLOOR } from '../../../src/ai/advisor.mts'
+import { adviseSpawn, PROFILE_FLOOR } from '../../../src/ai/advisor'
 
-import type { CredentialProvider } from '../../../src/ai/credentials.mts'
-import type { BillingContext } from '../../../src/ai/route-heuristic.mts'
-import type { RouteContext } from '../../../src/ai/route.mts'
-import type { AiAgentName } from '../../../src/ai/types.mts'
+import type { CredentialProvider } from '../../../src/ai/credentials'
+import type { BillingContext } from '../../../src/ai/route-heuristic'
+import type { RouteContext } from '../../../src/ai/route'
+import type { AiAgentName } from '../../../src/ai/types'
 
 function ctx(
   available: readonly AiAgentName[],

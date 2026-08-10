@@ -154,132 +154,132 @@
   },
   "exports": {
     "./ai/advisor": {
-      "source": "./src/ai/advisor.mts",
-      "types": "./dist/ai/advisor.d.mts",
+      "source": "./src/ai/advisor.ts",
+      "types": "./dist/ai/advisor.d.ts",
       "default": "./dist/ai/advisor.js"
     },
     "./ai/agent-context": {
-      "source": "./src/ai/agent-context.mts",
-      "types": "./dist/ai/agent-context.d.mts",
+      "source": "./src/ai/agent-context.ts",
+      "types": "./dist/ai/agent-context.d.ts",
       "default": "./dist/ai/agent-context.js"
     },
     "./ai/assist": {
-      "source": "./src/ai/assist.mts",
-      "types": "./dist/ai/assist.d.mts",
+      "source": "./src/ai/assist.ts",
+      "types": "./dist/ai/assist.d.ts",
       "default": "./dist/ai/assist.js"
     },
     "./ai/backends": {
-      "source": "./src/ai/backends.mts",
-      "types": "./dist/ai/backends.d.mts",
+      "source": "./src/ai/backends.ts",
+      "types": "./dist/ai/backends.d.ts",
       "default": "./dist/ai/backends.js"
     },
     "./ai/billing-context": {
-      "source": "./src/ai/billing-context.mts",
-      "types": "./dist/ai/billing-context.d.mts",
+      "source": "./src/ai/billing-context.ts",
+      "types": "./dist/ai/billing-context.d.ts",
       "default": "./dist/ai/billing-context.js"
     },
     "./ai/builtin": {
-      "source": "./src/ai/builtin.mts",
+      "source": "./src/ai/builtin.ts",
       "browser": {
-        "types": "./dist/ai/builtin.d.mts",
+        "types": "./dist/ai/builtin.d.ts",
         "default": "./dist/ai/builtin.js"
       },
-      "types": "./dist/ai/builtin.d.mts",
+      "types": "./dist/ai/builtin.d.ts",
       "default": "./dist/ai/builtin.js"
     },
     "./ai/cli-flags": {
-      "source": "./src/ai/cli-flags.mts",
-      "types": "./dist/ai/cli-flags.d.mts",
+      "source": "./src/ai/cli-flags.ts",
+      "types": "./dist/ai/cli-flags.d.ts",
       "default": "./dist/ai/cli-flags.js"
     },
     "./ai/cost": {
-      "source": "./src/ai/cost.mts",
-      "types": "./dist/ai/cost.d.mts",
+      "source": "./src/ai/cost.ts",
+      "types": "./dist/ai/cost.d.ts",
       "default": "./dist/ai/cost.js"
     },
     "./ai/credentials": {
-      "source": "./src/ai/credentials.mts",
-      "types": "./dist/ai/credentials.d.mts",
+      "source": "./src/ai/credentials.ts",
+      "types": "./dist/ai/credentials.d.ts",
       "default": "./dist/ai/credentials.js"
     },
     "./ai/discover": {
-      "source": "./src/ai/discover.mts",
-      "types": "./dist/ai/discover.d.mts",
+      "source": "./src/ai/discover.ts",
+      "types": "./dist/ai/discover.d.ts",
       "default": "./dist/ai/discover.js"
     },
     "./ai/enforce": {
-      "source": "./src/ai/enforce.mts",
-      "types": "./dist/ai/enforce.d.mts",
+      "source": "./src/ai/enforce.ts",
+      "types": "./dist/ai/enforce.d.ts",
       "default": "./dist/ai/enforce.js"
     },
     "./ai/exec": {
-      "source": "./src/ai/exec.mts",
-      "types": "./dist/ai/exec.d.mts",
+      "source": "./src/ai/exec.ts",
+      "types": "./dist/ai/exec.d.ts",
       "default": "./dist/ai/exec.js"
     },
     "./ai/failures": {
-      "source": "./src/ai/failures.mts",
-      "types": "./dist/ai/failures.d.mts",
+      "source": "./src/ai/failures.ts",
+      "types": "./dist/ai/failures.d.ts",
       "default": "./dist/ai/failures.js"
     },
     "./ai/http": {
-      "source": "./src/ai/http.mts",
-      "types": "./dist/ai/http.d.mts",
+      "source": "./src/ai/http.ts",
+      "types": "./dist/ai/http.d.ts",
       "default": "./dist/ai/http.js"
     },
     "./ai/json": {
-      "source": "./src/ai/json.mts",
-      "types": "./dist/ai/json.d.mts",
+      "source": "./src/ai/json.ts",
+      "types": "./dist/ai/json.d.ts",
       "default": "./dist/ai/json.js"
     },
     "./ai/profiles": {
-      "source": "./src/ai/profiles.mts",
-      "types": "./dist/ai/profiles.d.mts",
+      "source": "./src/ai/profiles.ts",
+      "types": "./dist/ai/profiles.d.ts",
       "default": "./dist/ai/profiles.js"
     },
     "./ai/role": {
-      "source": "./src/ai/role.mts",
-      "types": "./dist/ai/role.d.mts",
+      "source": "./src/ai/role.ts",
+      "types": "./dist/ai/role.d.ts",
       "default": "./dist/ai/role.js"
     },
     "./ai/route": {
-      "source": "./src/ai/route.mts",
-      "types": "./dist/ai/route.d.mts",
+      "source": "./src/ai/route.ts",
+      "types": "./dist/ai/route.d.ts",
       "default": "./dist/ai/route.js"
     },
     "./ai/route-heuristic": {
-      "source": "./src/ai/route-heuristic.mts",
-      "types": "./dist/ai/route-heuristic.d.mts",
+      "source": "./src/ai/route-heuristic.ts",
+      "types": "./dist/ai/route-heuristic.d.ts",
       "default": "./dist/ai/route-heuristic.js"
     },
     "./ai/spawn": {
-      "source": "./src/ai/spawn.mts",
-      "types": "./dist/ai/spawn.d.mts",
+      "source": "./src/ai/spawn.ts",
+      "types": "./dist/ai/spawn.d.ts",
       "default": "./dist/ai/spawn.js"
     },
     "./ai/spawn-local": {
-      "source": "./src/ai/spawn-local.mts",
-      "types": "./dist/ai/spawn-local.d.mts",
+      "source": "./src/ai/spawn-local.ts",
+      "types": "./dist/ai/spawn-local.d.ts",
       "default": "./dist/ai/spawn-local.js"
     },
     "./ai/subagent-status": {
-      "source": "./src/ai/subagent-status.mts",
-      "types": "./dist/ai/subagent-status.d.mts",
+      "source": "./src/ai/subagent-status.ts",
+      "types": "./dist/ai/subagent-status.d.ts",
       "default": "./dist/ai/subagent-status.js"
     },
     "./ai/tier": {
-      "source": "./src/ai/tier.mts",
-      "types": "./dist/ai/tier.d.mts",
+      "source": "./src/ai/tier.ts",
+      "types": "./dist/ai/tier.d.ts",
       "default": "./dist/ai/tier.js"
     },
     "./ai/types": {
-      "source": "./src/ai/types.mts",
-      "types": "./dist/ai/types.d.mts",
+      "source": "./src/ai/types.ts",
+      "types": "./dist/ai/types.d.ts",
       "default": "./dist/ai/types.js"
     },
     "./ai/worktree": {
-      "source": "./src/ai/worktree.mts",
-      "types": "./dist/ai/worktree.d.mts",
+      "source": "./src/ai/worktree.ts",
+      "types": "./dist/ai/worktree.d.ts",
       "default": "./dist/ai/worktree.js"
     },
     "./archives/detect": {

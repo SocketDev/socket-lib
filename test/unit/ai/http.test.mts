@@ -5,7 +5,7 @@ import {
   buildChatRequestBody,
   callAiHttpModel,
   resolveAiHttpProvider,
-} from '../../../src/ai/http.mts'
+} from '../../../src/ai/http'
 
 describe('resolveAiHttpProvider', () => {
   test('resolves the built-in fireworks + synthetic ids', () => {

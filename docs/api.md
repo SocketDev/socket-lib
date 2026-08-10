@@ -18,33 +18,33 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## ai/
 
-| Subpath                                                                         | Description        |
-| ------------------------------------------------------------------------------- | ------------------ |
-| [`@socketsecurity/lib-stable/ai/advisor`](../src/ai/advisor.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/agent-context`](../src/ai/agent-context.ts)     | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/assist`](../src/ai/assist.ts)                   | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/backends`](../src/ai/backends.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/billing-context`](../src/ai/billing-context.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/builtin`](../src/ai/builtin.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/cli-flags`](../src/ai/cli-flags.ts)             | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/cost`](../src/ai/cost.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/credentials`](../src/ai/credentials.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/discover`](../src/ai/discover.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/enforce`](../src/ai/enforce.ts)                 | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/exec`](../src/ai/exec.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/failures`](../src/ai/failures.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/http`](../src/ai/http.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/json`](../src/ai/json.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/profiles`](../src/ai/profiles.ts)               | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/role`](../src/ai/role.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/route`](../src/ai/route.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/route-heuristic`](../src/ai/route-heuristic.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/spawn`](../src/ai/spawn.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/spawn-local`](../src/ai/spawn-local.ts)         | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/subagent-status`](../src/ai/subagent-status.ts) | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/tier`](../src/ai/tier.ts)                       | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/types`](../src/ai/types.ts)                     | _(no description)_ |
-| [`@socketsecurity/lib-stable/ai/worktree`](../src/ai/worktree.ts)               | _(no description)_ |
+| Subpath                                                                         | Description                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| [`@socketsecurity/lib-stable/ai/advisor`](../src/ai/advisor.ts)                 | Spawn advisor — composes tier + route + billing + profile into ONE call so callers stop hand-wiring the AI stack layer by layer.                                                                                             |
+| [`@socketsecurity/lib-stable/ai/agent-context`](../src/ai/agent-context.ts)     | Agent-awareness for hooks + scripts: WHICH agent is running right now, and WHERE that agent keeps its config / memory on the current platform.                                                                               |
+| [`@socketsecurity/lib-stable/ai/assist`](../src/ai/assist.ts)                   | Opt-in "AI assist when stuck" helper — a thin, dependency-light layer over the ai-agent runner (pickAgent + spawnAiAgent).                                                                                                   |
+| [`@socketsecurity/lib-stable/ai/backends`](../src/ai/backends.ts)               | Multi-agent CLI backend registry + role routing.                                                                                                                                                                             |
+| [`@socketsecurity/lib-stable/ai/billing-context`](../src/ai/billing-context.ts) | Build a `BillingContext` for the route-heuristic WITHOUT privileged lookups.                                                                                                                                                 |
+| [`@socketsecurity/lib-stable/ai/builtin`](../src/ai/builtin.ts)                 | Lazy cross-runtime resolver for the built-in LanguageModel factory.                                                                                                                                                          |
+| [`@socketsecurity/lib-stable/ai/cli-flags`](../src/ai/cli-flags.ts)             | Agent-CLI flag compatibility: recognize a flag the installed CLI does not know, and strip it so the spawn can be retried without it.                                                                                         |
+| [`@socketsecurity/lib-stable/ai/cost`](../src/ai/cost.ts)                       | Pure parsers for per-agent token/cost usage embedded in a spawn's output.                                                                                                                                                    |
+| [`@socketsecurity/lib-stable/ai/credentials`](../src/ai/credentials.ts)         | Layered provider-credential resolver for AI backends.                                                                                                                                                                        |
+| [`@socketsecurity/lib-stable/ai/discover`](../src/ai/discover.ts)               | Detect which AI agent CLIs are installed on PATH.                                                                                                                                                                            |
+| [`@socketsecurity/lib-stable/ai/enforce`](../src/ai/enforce.ts)                 | Runtime enforcers that keep a spawn honest against the advice `advisor.mts` produced.                                                                                                                                        |
+| [`@socketsecurity/lib-stable/ai/exec`](../src/ai/exec.ts)                       | Exec-backend seam: WHERE a shell command runs, a separate axis from WHICH model produced it (`ai/backends`).                                                                                                                 |
+| [`@socketsecurity/lib-stable/ai/failures`](../src/ai/failures.ts)               | Classify an agent CLI's failure output into the three conditions that call for different recovery: the model is unavailable, so fall over to another agent; the service is overloaded, so retry the same agent after back... |
+| [`@socketsecurity/lib-stable/ai/http`](../src/ai/http.ts)                       | OpenAI-compatible HTTP backends for AI providers that expose a chat-completions endpoint rather than a CLI — Fireworks (`api.fireworks.ai`) and Synthetic (`api.synthetic.new`).                                             |
+| [`@socketsecurity/lib-stable/ai/json`](../src/ai/json.ts)                       | Zero-dependency JSON hardening for noisy model text.                                                                                                                                                                         |
+| [`@socketsecurity/lib-stable/ai/profiles`](../src/ai/profiles.ts)               | Pre-built lockdown profiles for spawnAiAgent.                                                                                                                                                                                |
+| [`@socketsecurity/lib-stable/ai/role`](../src/ai/role.ts)                       | Declarative ROLE → tier + profile orchestration for AI call-outs.                                                                                                                                                            |
+| [`@socketsecurity/lib-stable/ai/route`](../src/ai/route.ts)                     | Availability-gated tier routing.                                                                                                                                                                                             |
+| [`@socketsecurity/lib-stable/ai/route-heuristic`](../src/ai/route-heuristic.ts) | Billing-aware routing heuristic — a PURE policy layer over `route.mts`.                                                                                                                                                      |
+| [`@socketsecurity/lib-stable/ai/spawn`](../src/ai/spawn.ts)                     | Locked-down spawn for AI agent CLIs (Claude / Codex / Gemini / OpenCode).                                                                                                                                                    |
+| [`@socketsecurity/lib-stable/ai/spawn-local`](../src/ai/spawn-local.ts)         | Keyless on-device execution seam for a `local` TierCandidate, the non-CLI complement to `spawn.mts`.                                                                                                                         |
+| [`@socketsecurity/lib-stable/ai/subagent-status`](../src/ai/subagent-status.ts) | The terminal-status contract a delegated subagent returns to its orchestrator.                                                                                                                                               |
+| [`@socketsecurity/lib-stable/ai/tier`](../src/ai/tier.ts)                       | Canonical model + reasoning-effort ladder for AI orchestrators.                                                                                                                                                              |
+| [`@socketsecurity/lib-stable/ai/types`](../src/ai/types.ts)                     | Shared types for the locked-down AI agent surface.                                                                                                                                                                           |
+| [`@socketsecurity/lib-stable/ai/worktree`](../src/ai/worktree.ts)               | Run AI agents in parallel, each in its own git worktree, and merge results back to the base branch.                                                                                                                          |
 
 ## archives/
 

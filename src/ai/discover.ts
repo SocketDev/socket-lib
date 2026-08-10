@@ -25,7 +25,7 @@ import { JSONParse, JSONStringify } from '../primordials/json'
 
 const logger = getDefaultLogger()
 
-import type { AiAgentName, DiscoveredAgents } from './types.mts'
+import type { AiAgentName, DiscoveredAgents } from './types'
 
 import { DateNow } from '../primordials/date'
 

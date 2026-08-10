@@ -12,7 +12,7 @@
  *   only a real one or an honest gap.
  */
 
-import type { AiAgentName } from './types.mts'
+import type { AiAgentName } from './types'
 
 /**
  * Parsed usage for one spawn. Every field is independently `undefined` when

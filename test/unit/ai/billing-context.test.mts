@@ -8,15 +8,15 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { getEnvValue } from '../../../src/env/rewire'
-import { resolveProviderCredential } from '../../../src/ai/credentials.mts'
+import { resolveProviderCredential } from '../../../src/ai/credentials'
 import {
   billingFromKeyed,
   detectRoutingEnv,
   discoverBilling,
   discoverKeyedProviders,
-} from '../../../src/ai/billing-context.mts'
+} from '../../../src/ai/billing-context'
 
-import type { CredentialProvider } from '../../../src/ai/credentials.mts'
+import type { CredentialProvider } from '../../../src/ai/credentials'
 
 // Mock the env reader (for detectRoutingEnv) and the credential resolver (for
 // the discover* probes) so tests never touch a real keychain, env, or network.
@@ -24,7 +24,7 @@ vi.mock(import('../../../src/env/rewire'), async importActual => ({
   ...(await importActual()),
   getEnvValue: vi.fn(),
 }))
-vi.mock(import('../../../src/ai/credentials.mts'), async importActual => ({
+vi.mock(import('../../../src/ai/credentials'), async importActual => ({
   ...(await importActual()),
   resolveProviderCredential: vi.fn(),
 }))

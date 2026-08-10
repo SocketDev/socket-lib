@@ -17,13 +17,10 @@ import { errorMessage } from '../errors/message'
 import { DateNow } from '../primordials/date'
 import { ErrorCtor } from '../primordials/error'
 
-import { getLanguageModel } from './builtin.mts'
+import { getLanguageModel } from './builtin'
 
-import type {
-  LanguageModelAvailability,
-  LanguageModelFactory,
-} from './builtin.mts'
-import type { AgentSpawnResult, SpawnAiAgentOptions } from './types.mts'
+import type { LanguageModelAvailability, LanguageModelFactory } from './builtin'
+import type { AgentSpawnResult, SpawnAiAgentOptions } from './types'
 
 /**
  * A minimal Prompt-API session: `prompt(input)` resolves to the model's reply

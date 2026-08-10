@@ -26,24 +26,20 @@ import {
   isUnknownCliOption,
   OPTIONAL_CLI_FLAGS,
   withoutCliFlag,
-} from './cli-flags.mts'
-import { discoverAiAgents } from './discover.mts'
-import {
-  isModelUnavailable,
-  isOverloaded,
-  isQuotaExhausted,
-} from './failures.mts'
-import { usableTierCandidates } from './route.mts'
-import { runLocalTierSpawn } from './spawn-local.mts'
+} from './cli-flags'
+import { discoverAiAgents } from './discover'
+import { isModelUnavailable, isOverloaded, isQuotaExhausted } from './failures'
+import { usableTierCandidates } from './route'
+import { runLocalTierSpawn } from './spawn-local'
 
-import type { LocalAgentProvider } from './spawn-local.mts'
-import type { RouteContext, TierCandidate } from './route.mts'
-import type { AiTier } from './tier.mts'
+import type { LocalAgentProvider } from './spawn-local'
+import type { RouteContext, TierCandidate } from './route'
+import type { AiTier } from './tier'
 import type {
   AgentSpawnResult,
   AiAgentName,
   SpawnAiAgentOptions,
-} from './types.mts'
+} from './types'
 
 const MAX_ATTEMPTS = 3
 const BACKOFF_BASE_MS = 5000

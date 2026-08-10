@@ -21,7 +21,7 @@ import { errorMessage } from '../errors/message'
 import { spawnSync } from '../process/spawn/child'
 import { isSpawnError } from '../process/spawn/errors'
 
-import type { WorktreeCleanup } from './types.mts'
+import type { WorktreeCleanup } from './types'
 
 import { ArrayFrom } from '../primordials/array'
 

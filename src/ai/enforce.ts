@@ -18,14 +18,14 @@
  *      must run with `effort: undefined`.
  */
 
-import { isAdaptiveOnlyModel } from './spawn.mts'
-import { AI_TIER } from './tier.mts'
+import { isAdaptiveOnlyModel } from './spawn'
+import { AI_TIER } from './tier'
 
 import { ErrorCtor } from '../primordials/error'
 
-import type { AI_PROFILE } from './profiles.mts'
-import type { AiTier } from './tier.mts'
-import type { AiEffort } from './types.mts'
+import type { AI_PROFILE } from './profiles'
+import type { AiTier } from './tier'
+import type { AiEffort } from './types'
 
 // Ladder position of each lockdown profile, least → most capable. Mirrors the
 // `AI_PROFILE` key order documented in `profiles.mts`.

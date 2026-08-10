@@ -12,16 +12,16 @@ import {
   isLocalEngineAvailable,
   isLocalModelSession,
   spawnLocalAgent,
-} from '../../../src/ai/spawn-local.mts'
+} from '../../../src/ai/spawn-local'
 
 import type {
   LanguageModelAvailability,
   LanguageModelFactory,
-} from '../../../src/ai/builtin.mts'
+} from '../../../src/ai/builtin'
 import type {
   LocalAgentProvider,
   LocalSpawnOptions,
-} from '../../../src/ai/spawn-local.mts'
+} from '../../../src/ai/spawn-local'
 
 // A LanguageModelFactory whose create() yields a session with a prompt() that
 // echoes a fixed reply. `availability` is configurable.

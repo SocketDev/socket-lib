@@ -14,12 +14,12 @@ import {
   assistWhenStuck,
   buildAssistPrompt,
   isAiAssistEnabled,
-} from '../../../src/ai/assist.mts'
+} from '../../../src/ai/assist'
 
 const pickAgent = vi.fn()
 const spawnAiAgent = vi.fn()
 
-vi.mock(import('../../../src/ai/spawn.mts'), () => ({
+vi.mock(import('../../../src/ai/spawn'), () => ({
   pickAgent: (...args: unknown[]) => pickAgent(...args),
   spawnAiAgent: (...args: unknown[]) => spawnAiAgent(...args),
 }))

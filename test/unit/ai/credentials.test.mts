@@ -19,7 +19,7 @@ import {
   PROVIDER_CREDENTIALS,
   resolveProviderCredential,
   writeProviderCredential,
-} from '../../../src/ai/credentials.mts'
+} from '../../../src/ai/credentials'
 
 // Mock the env resolver plus the keychain write + erase helpers, so the suite
 // never touches a real keychain. The vi.mock calls are hoisted above the

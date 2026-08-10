@@ -13,7 +13,7 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
-import { git, runOne } from '../../src/ai/worktree.mts'
+import { git, runOne } from '../../src/ai/worktree'
 import { sh } from '../unit/util/cross-platform-sh.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 

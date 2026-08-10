@@ -15,18 +15,14 @@
  *   reimplementing the same composition at every call site.
  */
 
-import { AI_PROFILE } from './profiles.mts'
-import { orderCandidates, taskClassToTier } from './route-heuristic.mts'
-import { usableTierCandidates } from './route.mts'
+import { AI_PROFILE } from './profiles'
+import { orderCandidates, taskClassToTier } from './route-heuristic'
+import { usableTierCandidates } from './route'
 
-import type { AiProfile } from './profiles.mts'
-import type {
-  BillingContext,
-  RoutingEnv,
-  TaskClass,
-} from './route-heuristic.mts'
-import type { RouteContext, TierCandidate } from './route.mts'
-import type { AiTier } from './tier.mts'
+import type { AiProfile } from './profiles'
+import type { BillingContext, RoutingEnv, TaskClass } from './route-heuristic'
+import type { RouteContext, TierCandidate } from './route'
+import type { AiTier } from './tier'
 
 /**
  * The LEAST-capable `AI_PROFILE` lockdown tier each task class needs — a

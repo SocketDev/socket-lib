@@ -18,12 +18,12 @@
  *   them apart.
  */
 
-import { AI_PROFILE } from './profiles.mts'
-import { spawnTierWithFallback } from './spawn.mts'
-import type { RouteContext } from './route.mts'
-import type { TierSpawnResult } from './spawn.mts'
-import type { AiTier } from './tier.mts'
-import type { SpawnAiAgentOptions } from './types.mts'
+import { AI_PROFILE } from './profiles'
+import { spawnTierWithFallback } from './spawn'
+import type { RouteContext } from './route'
+import type { TierSpawnResult } from './spawn'
+import type { AiTier } from './tier'
+import type { SpawnAiAgentOptions } from './types'
 
 export type AiRole =
   | 'discovery'

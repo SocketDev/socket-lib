@@ -22,16 +22,16 @@ import {
   KEYLESS_PROVIDER,
   PROVIDER_CREDENTIALS,
   resolveProviderCredential,
-} from './credentials.mts'
+} from './credentials'
 
-import type { CredentialProvider } from './credentials.mts'
+import type { CredentialProvider } from './credentials'
 import type {
   BillingAccount,
   BillingContext,
   BillingHeadroom,
   BillingKind,
   RoutingEnv,
-} from './route-heuristic.mts'
+} from './route-heuristic'
 
 /**
  * Inherent billing model per provider — the provider's NATURE, not anyone's

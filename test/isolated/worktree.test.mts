@@ -11,7 +11,7 @@ import {
   hasStagedOrUnstaged,
   spawnAiAgentsInWorktrees,
   tryGit,
-} from '../../src/ai/worktree.mts'
+} from '../../src/ai/worktree'
 import { sh } from '../unit/util/cross-platform-sh.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 

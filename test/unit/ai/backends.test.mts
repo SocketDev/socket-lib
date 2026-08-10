@@ -9,9 +9,9 @@ import {
   BACKENDS,
   isBackendName,
   resolveBackendForRole,
-} from '../../../src/ai/backends.mts'
+} from '../../../src/ai/backends'
 
-import type { BackendName } from '../../../src/ai/backends.mts'
+import type { BackendName } from '../../../src/ai/backends'
 
 describe('BACKENDS registry', () => {
   it('registers the four known backends', () => {

@@ -31,7 +31,7 @@
  *     literal.
  */
 
-import type { PermissionMode } from './types.mts'
+import type { PermissionMode } from './types'
 
 export interface AiProfile {
   readonly allow: readonly string[]

@@ -14,10 +14,10 @@
 
 import { errorMessage } from '../errors/message'
 
-import { AI_PROFILE } from './profiles.mts'
-import { pickAgent, spawnAiAgent } from './spawn.mts'
+import { AI_PROFILE } from './profiles'
+import { pickAgent, spawnAiAgent } from './spawn'
 
-import type { AiAgentName } from './types.mts'
+import type { AiAgentName } from './types'
 
 // Env flag that opts a session into AI assistance. Absent / any other value =
 // disabled; the opt-in is off by default.

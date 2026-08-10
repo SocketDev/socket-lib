@@ -13,7 +13,7 @@
  *   tier.
  */
 
-import type { AiEffort } from './types.mts'
+import type { AiEffort } from './types'
 
 /**
  * The capability tiers, least → most capable. Orchestrators classify each unit

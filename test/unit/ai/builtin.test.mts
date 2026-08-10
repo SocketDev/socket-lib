@@ -49,7 +49,7 @@ function setBrowserFactory(value?: unknown | undefined): void {
 }
 
 async function loadResolver() {
-  return await import('../../../src/ai/builtin.mts')
+  return await import('../../../src/ai/builtin')
 }
 
 beforeEach(() => {

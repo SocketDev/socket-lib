@@ -24,7 +24,7 @@
 
 import { which } from '../exe/path/which'
 
-import { isAdaptiveOnlyModel } from './spawn.mts'
+import { isAdaptiveOnlyModel } from './spawn'
 
 /**
  * A CLI backend Socket can delegate a pass to.

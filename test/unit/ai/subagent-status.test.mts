@@ -9,7 +9,7 @@ import {
   escalationFor,
   isSubagentStatus,
   SUBAGENT_STATUSES,
-} from '../../../src/ai/subagent-status.mts'
+} from '../../../src/ai/subagent-status'
 
 describe('SUBAGENT_STATUSES', () => {
   it('is the four-state vocabulary, sorted', () => {

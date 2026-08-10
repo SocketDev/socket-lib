@@ -16,7 +16,7 @@ vi.mock(import('../../../src/process/spawn/child'), async importOriginal => ({
   spawnSync: mockSpawnSync,
 }))
 
-import { tryGit } from '../../../src/ai/worktree.mts'
+import { tryGit } from '../../../src/ai/worktree'
 
 beforeEach(() => {
   mockSpawnSync.mockReset()

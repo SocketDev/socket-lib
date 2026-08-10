@@ -18,12 +18,12 @@
  *   `--effort` for it anyway.
  */
 
-import { isKeylessProvider, KEYLESS_PROVIDER } from './credentials.mts'
-import { AI_TIER } from './tier.mts'
+import { isKeylessProvider, KEYLESS_PROVIDER } from './credentials'
+import { AI_TIER } from './tier'
 
-import type { CredentialProvider } from './credentials.mts'
-import type { AiAgentName, AiEffort } from './types.mts'
-import type { AiTier } from './tier.mts'
+import type { CredentialProvider } from './credentials'
+import type { AiAgentName, AiEffort } from './types'
+import type { AiTier } from './tier'
 
 /**
  * A non-CLI, on-device engine. Distinct from `AiAgentName` (the agent CLIs that

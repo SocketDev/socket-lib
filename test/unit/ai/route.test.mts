@@ -11,11 +11,11 @@ import {
   resolveTier,
   TIER_CHAINS,
   usableTierCandidates,
-} from '../../../src/ai/route.mts'
+} from '../../../src/ai/route'
 
-import type { CredentialProvider } from '../../../src/ai/credentials.mts'
-import type { RouteContext } from '../../../src/ai/route.mts'
-import type { AiAgentName } from '../../../src/ai/types.mts'
+import type { CredentialProvider } from '../../../src/ai/credentials'
+import type { RouteContext } from '../../../src/ai/route'
+import type { AiAgentName } from '../../../src/ai/types'
 
 function ctx(
   available: readonly AiAgentName[],
