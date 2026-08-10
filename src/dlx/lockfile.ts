@@ -14,9 +14,9 @@ import pacote from '../external/pacote'
 import { safeDelete, safeMkdir } from '../fs/safe'
 import { safeIdealTree, writeSafeNpmrc } from './arborist'
 
-import { computeHashes } from '../integrity'
+import { computeHashes } from '../crypto/integrity'
 
-import type { ComputedHashes } from '../integrity'
+import type { ComputedHashes } from '../crypto/integrity'
 
 import { DateCtor, DateNow } from '../primordials/date'
 

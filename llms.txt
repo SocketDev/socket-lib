@@ -7,7 +7,6 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 ## Top-level
 
 - [@socketsecurity/lib/http-request](./dist/http-request/node.d.ts): Node-side HTTP request layer — the public surface (`httpJson`, `httpText`, `httpRequest`, `HttpResponseError`) for consumers on Node.
-- [@socketsecurity/lib/integrity](./dist/integrity.d.ts): Integrity + checksum helpers.
 - [@socketsecurity/lib/logger](./dist/logger/node.d.ts): Node-side `Logger` class — owns per-instance state (parent, bound stream, indent buffers, theme) and exposes the public surface as thin delegators over sibling free-function leaves.
 - [@socketsecurity/lib/native-messaging](./dist/native-messaging/index.d.ts)
 
@@ -97,7 +96,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/constants/node](./dist/constants/node.d.ts): Node.js runtime version and capability helpers.
 - [@socketsecurity/lib/constants/package-default-node-range](./dist/constants/package-default-node-range.d.ts): Default Node.js version range for packages.
 - [@socketsecurity/lib/constants/package-default-socket-categories](./dist/constants/package-default-socket-categories.d.ts): Default Socket security categories for packages.
-- [@socketsecurity/lib/constants/package-managers](./dist/constants/package-managers.d.ts): Package manager agent constants.
+- [@socketsecurity/lib/constants/package-managers](./dist/constants/package-managers.d.ts): Package manager constants.
 - [@socketsecurity/lib/constants/packages](./dist/constants/packages.d.ts): Package metadata, defaults, extensions, and lifecycle helpers.
 - [@socketsecurity/lib/constants/platform](./dist/constants/platform.d.ts): Platform detection and OS-specific constants.
 - [@socketsecurity/lib/constants/runtime](./dist/constants/runtime.d.ts): Runtime environment detection constants.
@@ -117,6 +116,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 ## crypto/
 
 - [@socketsecurity/lib/crypto/hash](./dist/crypto/hash.d.ts): Crypto hash helpers that prefer Node builtins where available.
+- [@socketsecurity/lib/crypto/integrity](./dist/crypto/integrity.d.ts): Integrity + checksum helpers.
 
 ## debug/
 

@@ -13,7 +13,7 @@ import {
   fetchChecksumFile,
   parseChecksumFile,
 } from '../../src/http-request/checksum-file'
-import { isIntegrity } from '../../src/integrity'
+import { isIntegrity } from '../../src/crypto/integrity'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures'
 

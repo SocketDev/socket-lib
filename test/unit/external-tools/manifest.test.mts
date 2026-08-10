@@ -16,7 +16,7 @@ import {
 import type { Manifest } from '../../../src/external-tools/manifest'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
-// SRI integrity per src/integrity.ts: prefix `sha512-` followed by base64.
+// SRI integrity per src/crypto/integrity.ts: prefix `sha512-` followed by base64.
 const VALID_INTEGRITY = 'sha512-' + 'A'.repeat(86) + '=='
 
 let tmpRoot: string

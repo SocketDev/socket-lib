@@ -16,7 +16,7 @@ import {
   SOCKET_KEYCHAIN_SUPPORTED_PLATFORM_ARCHES,
 } from './asset-names'
 
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { BinaryDownloader } from '../from-download'
 import type { ResolvedSocketKeychain } from './types'
 

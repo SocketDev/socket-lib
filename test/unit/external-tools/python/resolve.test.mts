@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { cacheKey } from '../../../../src/external-tools/python/resolve'
-import { makeHash } from '../../../../src/integrity'
+import { makeHash } from '../../../../src/crypto/integrity'
 
 vi.mock(import('../../../../src/external-tools/python/from-path'), () => ({
   pythonFromPath: vi.fn(),

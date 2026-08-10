@@ -15,7 +15,7 @@ import { downloadAndExtractTool, downloadToolArchive } from '../from-download'
 import { getOpengrepAssetEntry, getOpengrepDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedOpengrep } from './types'
 
 export interface OpengrepFromDownloadOptions {

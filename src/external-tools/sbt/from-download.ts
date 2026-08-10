@@ -17,7 +17,7 @@ import { downloadAndExtractTool } from '../from-download'
 import { getSbtDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedSbt } from './types'
 
 export interface SbtFromDownloadOptions {

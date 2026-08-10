@@ -12,7 +12,6 @@ Each entry links to the source module and shows the first sentence of its `@file
 | Subpath                                                                           | Description                                                                                                                                                                           |
 | --------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [`@socketsecurity/lib-stable/http-request`](../src/http-request/node.ts)          | Node-side HTTP request layer — the public surface (`httpJson`, `httpText`, `httpRequest`, `HttpResponseError`) for consumers on Node.                                                 |
-| [`@socketsecurity/lib-stable/integrity`](../src/integrity.ts)                     | Integrity + checksum helpers.                                                                                                                                                         |
 | [`@socketsecurity/lib-stable/logger`](../src/logger/node.ts)                      | Node-side `Logger` class — owns per-instance state (parent, bound stream, indent buffers, theme) and exposes the public surface as thin delegators over sibling free-function leaves. |
 | [`@socketsecurity/lib-stable/native-messaging`](../src/native-messaging/index.ts) | _(no description)_                                                                                                                                                                    |
 
@@ -120,7 +119,7 @@ Each entry links to the source module and shows the first sentence of its `@file
 | [`@socketsecurity/lib-stable/constants/node`](../src/constants/node.ts)                                                           | Node.js runtime version and capability helpers.                |
 | [`@socketsecurity/lib-stable/constants/package-default-node-range`](../src/constants/package-default-node-range.ts)               | Default Node.js version range for packages.                    |
 | [`@socketsecurity/lib-stable/constants/package-default-socket-categories`](../src/constants/package-default-socket-categories.ts) | Default Socket security categories for packages.               |
-| [`@socketsecurity/lib-stable/constants/package-managers`](../src/constants/package-managers.ts)                                   | Package manager agent constants.                               |
+| [`@socketsecurity/lib-stable/constants/package-managers`](../src/constants/package-managers.ts)                                   | Package manager constants.                                     |
 | [`@socketsecurity/lib-stable/constants/packages`](../src/constants/packages.ts)                                                   | Package metadata, defaults, extensions, and lifecycle helpers. |
 | [`@socketsecurity/lib-stable/constants/platform`](../src/constants/platform.ts)                                                   | Platform detection and OS-specific constants.                  |
 | [`@socketsecurity/lib-stable/constants/runtime`](../src/constants/runtime.ts)                                                     | Runtime environment detection constants.                       |
@@ -141,9 +140,10 @@ Each entry links to the source module and shows the first sentence of its `@file
 
 ## crypto/
 
-| Subpath                                                           | Description                                                    |
-| ----------------------------------------------------------------- | -------------------------------------------------------------- |
-| [`@socketsecurity/lib-stable/crypto/hash`](../src/crypto/hash.ts) | Crypto hash helpers that prefer Node builtins where available. |
+| Subpath                                                                     | Description                                                    |
+| --------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| [`@socketsecurity/lib-stable/crypto/hash`](../src/crypto/hash.ts)           | Crypto hash helpers that prefer Node builtins where available. |
+| [`@socketsecurity/lib-stable/crypto/integrity`](../src/crypto/integrity.ts) | Integrity + checksum helpers.                                  |
 
 ## debug/
 

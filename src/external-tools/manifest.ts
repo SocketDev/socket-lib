@@ -20,7 +20,7 @@
  */
 
 import { readJson } from '../fs/read-json'
-import { isIntegrity } from '../integrity'
+import { isIntegrity } from '../crypto/integrity'
 
 import { ArrayIsArray } from '../primordials/array'
 import { ErrorCtor } from '../primordials/error'

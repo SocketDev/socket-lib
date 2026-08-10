@@ -19,7 +19,7 @@ import { bazelFromDownload } from './from-download'
 import { bazelFromPath } from './from-path'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedBazel } from './types'
 
 import { MapCtor } from '../../primordials/map-set'

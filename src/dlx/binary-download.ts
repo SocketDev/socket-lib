@@ -18,7 +18,7 @@ import { normalizePath } from '../paths/normalize'
 import { processLock } from '../process/lock-instance'
 import { generateCacheKey } from './cache'
 
-import { parseHash } from '../integrity'
+import { parseHash } from '../crypto/integrity'
 
 import { ErrorCtor } from '../primordials/error'
 import { StringPrototypeStartsWith } from '../primordials/string'

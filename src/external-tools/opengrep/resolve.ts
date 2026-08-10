@@ -14,7 +14,7 @@ import { opengrepFromPath } from './from-path'
 import { opengrepFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedOpengrep } from './types'
 
 import { MapCtor } from '../../primordials/map-set'

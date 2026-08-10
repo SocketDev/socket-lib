@@ -547,6 +547,11 @@
       "types": "./dist/crypto/hash.d.ts",
       "default": "./dist/crypto/hash.js"
     },
+    "./crypto/integrity": {
+      "source": "./src/crypto/integrity.ts",
+      "types": "./dist/crypto/integrity.d.ts",
+      "default": "./dist/crypto/integrity.js"
+    },
     "./debug/caller-info": {
       "source": "./src/debug/caller-info.ts",
       "browser": {
@@ -1960,11 +1965,6 @@
       "source": "./src/http-request/user-agent.ts",
       "types": "./dist/http-request/user-agent.d.ts",
       "default": "./dist/http-request/user-agent.js"
-    },
-    "./integrity": {
-      "source": "./src/integrity.ts",
-      "types": "./dist/integrity.d.ts",
-      "default": "./dist/integrity.js"
     },
     "./ipc/cli/get": {
       "source": "./src/ipc/cli/get.ts",

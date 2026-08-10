@@ -8,7 +8,7 @@
  *   - `DlxMetadata` — on-disk metadata schema for a cached binary
  */
 
-import type { HashInput } from '../integrity'
+import type { HashInput } from '../crypto/integrity'
 import type { HttpDownloadWriteStreamFactory } from '../http-request/download-types'
 import type { spawn } from '../process/spawn/child'
 import type { SpawnOptions } from '../process/spawn/types'

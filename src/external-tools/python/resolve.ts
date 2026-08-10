@@ -18,7 +18,7 @@ import { pythonFromPath } from './from-path'
 import { MapCtor } from '../../primordials/map-set'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedPython } from './types'
 
 export interface ResolvePythonOptions {

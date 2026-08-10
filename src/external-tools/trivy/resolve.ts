@@ -14,7 +14,7 @@ import { trivyFromPath } from './from-path'
 import { trivyFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedTrivy } from './types'
 
 import { MapCtor } from '../../primordials/map-set'

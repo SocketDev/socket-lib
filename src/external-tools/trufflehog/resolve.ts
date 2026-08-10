@@ -14,7 +14,7 @@ import { trufflehogFromPath } from './from-path'
 import { trufflehogFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedTrufflehog } from './types'
 
 import { MapCtor } from '../../primordials/map-set'

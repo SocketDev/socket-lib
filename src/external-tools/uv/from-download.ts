@@ -14,7 +14,7 @@ import { downloadAndExtractTool } from '../from-download'
 import { getUvAssetEntry, getUvDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedUv } from './types'
 
 export interface UvFromDownloadOptions {

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { makeHash } from '../../../../src/integrity'
+import { makeHash } from '../../../../src/crypto/integrity'
 
 vi.mock(import('../../../../src/external-tools/sbt/from-vfs'), () => ({
   sbtFromVfs: vi.fn(),

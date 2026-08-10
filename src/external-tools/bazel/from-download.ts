@@ -17,7 +17,7 @@ import { downloadToolArchive } from '../from-download'
 import { getBazelDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedBazel } from './types'
 
 export interface BazelFromDownloadOptions {

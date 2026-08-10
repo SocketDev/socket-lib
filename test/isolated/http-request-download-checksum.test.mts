@@ -14,7 +14,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { parseHash } from '../../src/integrity'
+import { parseHash } from '../../src/crypto/integrity'
 import { fetchChecksumFile } from '../../src/http-request/checksum-file'
 import { httpDownload } from '../../src/http-request/download'
 

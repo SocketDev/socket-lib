@@ -19,7 +19,7 @@ import {
 } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedJanus } from './types'
 
 import { ErrorCtor } from '../../primordials/error'

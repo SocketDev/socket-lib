@@ -20,15 +20,15 @@
  */
 import crypto from 'node:crypto'
 
-import { hash as computeDigest } from './crypto/hash'
+import { hash as computeDigest } from './hash'
 
-import { BufferFrom, BufferPrototypeToString } from './primordials/buffer'
+import { BufferFrom, BufferPrototypeToString } from '../primordials/buffer'
 
-import { ErrorCtor, TypeErrorCtor } from './primordials/error'
+import { ErrorCtor, TypeErrorCtor } from '../primordials/error'
 
-import { ObjectFreeze } from './primordials/object'
+import { ObjectFreeze } from '../primordials/object'
 
-import { StringPrototypeToLowerCase } from './primordials/string'
+import { StringPrototypeToLowerCase } from '../primordials/string'
 
 /**
  * SRI-blessed hash algorithms. The W3C set; the prefix is part of the wire

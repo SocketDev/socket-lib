@@ -34,7 +34,7 @@ import { safeMkdir } from '../fs/safe'
 import { downloadBinary } from '../dlx/binary-download'
 
 import type { ExtractOptions } from '../archives/types'
-import type { HashInput } from '../integrity'
+import type { HashInput } from '../crypto/integrity'
 
 /**
  * Result of `downloadAndExtractTool`. Extends `DownloadedArchive` with the

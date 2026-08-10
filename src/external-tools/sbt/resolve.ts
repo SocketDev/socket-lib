@@ -16,7 +16,7 @@ import { sbtFromPath } from './from-path'
 import { sbtFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedSbt } from './types'
 
 import { MapCtor } from '../../primordials/map-set'

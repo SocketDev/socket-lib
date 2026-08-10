@@ -13,7 +13,7 @@ import { uvFromPath } from './from-path'
 import { uvFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedUv } from './types'
 
 import { MapCtor } from '../../primordials/map-set'

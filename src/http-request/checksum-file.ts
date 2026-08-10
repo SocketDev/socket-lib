@@ -12,7 +12,7 @@
  *     `httpRequest` and runs the body through `parseChecksumFile`.
  */
 
-import { parseHash } from '../integrity'
+import { parseHash } from '../crypto/integrity'
 import { ErrorCtor } from '../primordials/error'
 import {
   StringPrototypeSplit,
@@ -40,7 +40,7 @@ const CHECKSUM_GNU_RE = /^([a-fA-F0-9]{64})\s+(.+)$/
  *
  * @example
  *   ;```ts
- *   import { parseHash } from '@socketsecurity/lib/integrity'
+ *   import { parseHash } from '@socketsecurity/lib/crypto/integrity'
  *
  *   const sums = await fetchChecksumFile(
  *     'https://github.com/org/repo/releases/download/v1.0.0/checksums.txt',

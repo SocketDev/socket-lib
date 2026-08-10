@@ -20,7 +20,7 @@ import { downloadToolArchive } from '../from-download'
 import { getCdxgenAssetEntry, getCdxgenDownloadUrl } from './asset-names'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { CdxgenVariant } from './asset-names'
 import type { ResolvedCdxgen } from './types'
 

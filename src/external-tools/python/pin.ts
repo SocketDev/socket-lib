@@ -36,9 +36,9 @@ import process from 'node:process'
 
 import { isWin32 } from '../../constants/platform'
 import { safeDelete, safeMkdir } from '../../fs/safe'
-import { computeHashes } from '../../integrity'
+import { computeHashes } from '../../crypto/integrity'
 
-import type { ComputedHashes } from '../../integrity'
+import type { ComputedHashes } from '../../crypto/integrity'
 
 export interface ResolvePipPackagePinOptions {
   /**

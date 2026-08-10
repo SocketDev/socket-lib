@@ -18,7 +18,7 @@ import { cdxgenFromPath } from './from-path'
 import { cdxgenFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { CdxgenVariant } from './asset-names'
 import type { ResolvedCdxgen } from './types'
 

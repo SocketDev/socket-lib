@@ -16,7 +16,7 @@ import { janusFromPath } from './from-path'
 import { janusFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedJanus } from './types'
 
 import { MapCtor } from '../../primordials/map-set'

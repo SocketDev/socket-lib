@@ -24,7 +24,7 @@ import { jreFromPath } from './from-path'
 import { jreFromVfs } from './from-vfs'
 
 import type { BinaryDownloader } from '../from-download'
-import type { HashInput } from '../../integrity'
+import type { HashInput } from '../../crypto/integrity'
 import type { ResolvedJre } from './types'
 
 import { MapCtor } from '../../primordials/map-set'

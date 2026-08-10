@@ -24,7 +24,7 @@ import { normalizePath } from '../paths/normalize'
 import { spawn } from '../process/spawn/child'
 import { generateCacheKey } from './cache'
 
-import { parseHash } from '../integrity'
+import { parseHash } from '../crypto/integrity'
 
 import { ArrayIsArray } from '../primordials/array'
 
