@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
 import { getRuntimeSocketPath } from '../../../src/paths/socket'
 import { requestFromBroker } from '../../../src/secrets/broker'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 
 let tmpDir = ''
 let server: net.Server | undefined

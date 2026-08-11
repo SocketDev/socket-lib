@@ -1,5 +1,5 @@
 // IMPORTANT: src/secrets/linux.ts imports `spawn` + `spawnSync` from
-// `@socketsecurity/lib-stable/process/spawn/child` — NOT from
+// `../../../src/process/spawn/child` — NOT from
 // `node:child_process`. A mock against `node:child_process` is a no-op:
 // every call would pass through to the real `secret-tool` binary. On
 // macOS that fails benignly because secret-tool isn't installed; on Linux
@@ -21,16 +21,16 @@ import {
   vi,
 } from 'vitest'
 
-import type * as SpawnChild from '@socketsecurity/lib-stable/process/spawn/child'
+import type * as SpawnChild from '../../../src/process/spawn/child'
 
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawn: vi.fn(),
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), async () => {
+vi.mock(import('../../../src/process/spawn/child'), async () => {
   const actual = await vi.importActual<typeof SpawnChild>(
-    '@socketsecurity/lib-stable/process/spawn/child',
+    '../../../src/process/spawn/child',
   )
   return {
     ...actual,
@@ -76,7 +76,7 @@ function makeWritableStdin(captureInto?: string[] | undefined): Writable {
   })
 }
 
-// `@socketsecurity/lib-stable/process/spawn/child`'s `spawn()` returns
+// `../../../src/process/spawn/child`'s `spawn()` returns
 // `{ process: ChildProcess, ... }` because the lib wraps the raw child; src
 // code does `const { process: cp } = spawn(...)`. Returns the wrapped shape
 // so `mockSpawn.mockImplementationOnce(() => makeFakeChild({ ... }))` Just

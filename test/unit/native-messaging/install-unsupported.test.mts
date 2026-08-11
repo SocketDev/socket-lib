@@ -13,7 +13,7 @@ import path from 'node:path'
 
 import { afterAll, describe, expect, it, vi } from 'vitest'
 
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 
 vi.mock(import('../../../src/constants/node'), async importOriginal => ({
   ...(await importOriginal()),

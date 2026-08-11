@@ -19,10 +19,7 @@
  *   v6's first cut.
  */
 
-import {
-  spawn,
-  spawnSync,
-} from '@socketsecurity/lib-stable/process/spawn/child'
+import { spawn, spawnSync } from '../process/spawn/child'
 
 import { ErrorCtor } from '../primordials/error'
 

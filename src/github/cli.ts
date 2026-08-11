@@ -26,7 +26,7 @@ import { getNodeFs } from '../node/fs'
 import { getNodeOs } from '../node/os'
 import { getNodePath } from '../node/path'
 import { spawn } from '../process/spawn/child'
-import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+import { safeDeleteSync } from '../fs/safe'
 
 /**
  * How long a `gh` invocation may run before it is killed. A CLI call that has

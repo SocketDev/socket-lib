@@ -20,7 +20,7 @@ import path from 'node:path'
 
 import { afterAll, describe, expect, it } from 'vitest'
 
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 import { withEnvSync } from '../../../src/env/rewire'
 
 const tmpDirs: string[] = []

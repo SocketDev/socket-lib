@@ -15,7 +15,7 @@ const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), () =>
+vi.mock(import('../../../src/process/spawn/child'), () =>
   spawnChildMockFactory(mockSpawn, mockSpawnSync),
 )
 

@@ -14,17 +14,14 @@ import path from 'node:path'
 
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 
 const { mockSpawnSync } = vi.hoisted(() => ({ mockSpawnSync: vi.fn() }))
 
-vi.mock(
-  import('@socketsecurity/lib-stable/process/spawn/child'),
-  async importOriginal => ({
-    ...(await importOriginal()),
-    spawnSync: mockSpawnSync,
-  }),
-)
+vi.mock(import('../../../src/process/spawn/child'), async importOriginal => ({
+  ...(await importOriginal()),
+  spawnSync: mockSpawnSync,
+}))
 
 vi.mock(import('../../../src/constants/platform'), async importOriginal => ({
   ...(await importOriginal()),

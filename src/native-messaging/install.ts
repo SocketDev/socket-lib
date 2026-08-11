@@ -24,7 +24,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 
-import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
+import { spawnSync } from '../process/spawn/child'
 
 import {
   getNodeVersion,
