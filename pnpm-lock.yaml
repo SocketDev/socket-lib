@@ -1140,19 +1140,6 @@ importers:
         specifier: 'catalog:'
         version: 26.1.2
 
-  .claude/hooks/fleet/concurrent-cargo-build-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@6.7.0(typescript@7.0.2)'
-      shell-quote:
-        specifier: 'catalog:'
-        version: 1.10.0
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.1.2
-
   .claude/hooks/fleet/consumer-grep-nudge:
     devDependencies:
       '@types/node':
@@ -4442,9 +4429,6 @@ packages:
 
   '@types/responselike@1.0.3':
     resolution: {integrity: sha512-H/+L+UkTV33uf49PH5pCAUBVPNj2nDBXTN+qS1dOwyyg24l3CcicicCA7ca+HMvJBZcFgl5r8e+RR6elsb4Lyw==}
-
-  '@types/semver@7.7.1':
-    resolution: {integrity: sha512-FmgJfu+MOcQ370SD0ev7EI8TlCAfKYU+B4m5T3yXc1CiRN94g/SZPtsCkk506aUDtlMnFZvasDwHHUcZUEaYuA==}
 
   '@types/semver@7.8.0':
     resolution: {integrity: sha512-1mAINjtQCXXeLkJ9ehXkwOcBpqtLxiVtKhpUf83DdRNdQKV0iXZpaHYqRr7nj+wvxuJzoAmAwXI+sCNMv1CzLQ==}
@@ -8057,8 +8041,6 @@ snapshots:
     dependencies:
       '@types/node': 26.1.2
 
-  '@types/semver@7.7.1': {}
-
   '@types/semver@7.8.0': {}
 
   '@types/shell-quote@1.7.5': {}
@@ -8360,7 +8342,7 @@ snapshots:
   '@yarnpkg/core@4.9.1(patch_hash=90d84a2833b418e806d5458847773c4c9104fc8e8aa2fa3971f1fd0a68bad1c9)(typanion@3.14.0)':
     dependencies:
       '@arcanis/slice-ansi': 1.1.1
-      '@types/semver': 7.7.1
+      '@types/semver': 7.8.0
       '@types/treeify': 1.0.3
       '@yarnpkg/fslib': 3.1.5
       '@yarnpkg/libzip': 3.2.2(@yarnpkg/fslib@3.1.5)
