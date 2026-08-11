@@ -1,8 +1,8 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 603 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 604 subpath exports, grouped by namespace.
 
-Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
+Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
 ## Top-level
 
@@ -394,6 +394,7 @@ Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@soc
 - [@socketsecurity/lib/github/error-classification](./dist/github/error-classification.d.ts): Classify a GitHub API error response from its status, headers, and body.
 - [@socketsecurity/lib/github/errors](./dist/github/errors.d.ts): Named errors thrown by `github/*` helpers.
 - [@socketsecurity/lib/github/ghsa](./dist/github/ghsa.d.ts): GitHub Security Advisory (GHSA) lookups.
+- [@socketsecurity/lib/github/packages](./dist/github/packages.d.ts): Build GitHub Packages REST paths for container packages.
 - [@socketsecurity/lib/github/refs](./dist/github/refs.d.ts): Resolve GitHub git refs (tag / branch / commit) to full commit SHAs.
 - [@socketsecurity/lib/github/refs-cache](./dist/github/refs-cache.d.ts): TtlCache singleton for github/refs.
 - [@socketsecurity/lib/github/refs-graphql](./dist/github/refs-graphql.d.ts): Resolve a GitHub git ref via GraphQL.
