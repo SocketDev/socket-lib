@@ -73,6 +73,22 @@ export function buildRows(exports: PackageExports): Row[] {
   return rows
 }
 
+/**
+ * Bring a source doc comment in line with the fleet prose rules before it is
+ * written to a markdown surface.
+ *
+ * Em-dashes are the whole reason this exists: `prose-em-dashes-are-absent`
+ * gates markdown, and every description here is lifted verbatim out of a
+ * `@file` block, so 1,624 em-dashes across 480 source files landed in
+ * docs/api.md and failed the gate. Fixing the OUTPUT by hand is not durable,
+ * because the next `pnpm run docs` regenerates it. The transform is the
+ * sanctioned one: swap the em-dash for a plain hyphen and leave the surrounding
+ * spacing alone, so ` — ` becomes ` - `.
+ */
+export function normalizeProse(text: string): string {
+  return text.replaceAll('—', '-')
+}
+
 export function extractSummary(srcPath: string): string {
   let content: string
   try {
@@ -107,7 +123,9 @@ export function extractSummary(srcPath: string): string {
     .trim()
   // Stop at the first JSDoc tag (lines starting with `@` after normalization).
   const tagBoundary = flat.search(/\s@\w+/)
-  const trimmed = (tagBoundary > 0 ? flat.slice(0, tagBoundary) : flat).trim()
+  const trimmed = normalizeProse(
+    (tagBoundary > 0 ? flat.slice(0, tagBoundary) : flat).trim(),
+  )
   // First sentence, up to a period or 220 chars.
   const dotIdx = trimmed.indexOf('. ')
   if (dotIdx > 0 && dotIdx < 220) {
