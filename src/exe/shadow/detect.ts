@@ -5,7 +5,7 @@
  *   the real interpreter.
  */
 
-import { normalizePath } from '@socketsecurity/lib/paths/normalize'
+import { normalizePath } from '../../paths/normalize'
 
 /**
  * Check if a directory path contains any shadow bin patterns.
