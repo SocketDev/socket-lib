@@ -339,14 +339,18 @@ export function getRolldownConfig(
  * Get package-specific rolldown options.
  */
 export function getPackageSpecificOptions(packageName: string): PackageOpts {
+  // `npm-pack` used to mark `semver` external so it would not inline a second
+  // copy alongside `dist/external/semver.js`. That saved size and broke the
+  // package: a bare `require('semver')` in a shipped bundle resolves only if
+  // the consumer happens to have semver installed, and this package declares
+  // zero runtime dependencies. It worked for years on pnpm's hoisting, then
+  // stopped the moment socket-wheelhouse enabled a global virtual store, which
+  // takes the hoist directory off the resolution path. Inlining costs published
+  // bytes and keeps dep-0 true, which is the trade this package exists to make.
   const opts: PackageOpts = {}
 
   if (packageName === 'browserslist') {
     opts.define = { 'process.versions.node': '"18.0.0"' }
-  } else if (packageName === 'npm-pack') {
-    // semver has its own self-contained bundle (dist/external/semver.js).
-    // Mark it external here so npm-pack doesn't inline a second copy.
-    opts.external = [...(opts.external || []), 'semver']
   } else if (packageName === '@socketregistry/packageurl-js-stable') {
     // packageurl-js imports from socket-lib, creating a circular dependency.
     // Mark socket-lib imports as external to avoid bundling issues.

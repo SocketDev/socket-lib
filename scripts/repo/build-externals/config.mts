@@ -37,7 +37,7 @@ export const externalPackages = [
   { name: 'fast-sort', bundle: true },
   { name: 'get-east-asian-width', bundle: true },
   { name: 'has-flag', bundle: false },
-  { name: 'picomatch', bundle: false },
+  { name: 'picomatch', bundle: true },
   // pony-cause
   { name: 'pony-cause', bundle: true },
   // shell-quote: zero-dep shell tokenizer + quoter. Powers shell/parse +
@@ -57,7 +57,7 @@ export const externalPackages = [
   { name: 'validate-npm-package-name', bundle: false },
   { name: 'which', bundle: true },
   { name: 'yargs-parser', bundle: true },
-  { name: 'yoctocolors-cjs', bundle: false },
+  { name: 'yoctocolors-cjs', bundle: true },
 ]
 
 // Scoped packages need special handling.
