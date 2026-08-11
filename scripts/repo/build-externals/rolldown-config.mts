@@ -337,16 +337,19 @@ export function getRolldownConfig(
 
 /**
  * Get package-specific rolldown options.
+ *
+ * `external` is load-bearing here. This package declares zero runtime
+ * dependencies, so a third-party bare specifier left external in a shipped
+ * bundle resolves only by luck: it needs the consumer to already have that
+ * package installed, and the luck runs out as soon as an install layout stops
+ * hoisting. Only specifiers the consuming dist resolves on its own belong in
+ * `external`: a node builtin, or one of this package's own subpaths. A
+ * third-party package must inline, even when a sibling `dist/external/*`
+ * bundle already carries a copy, because the sibling is reachable only through
+ * a relative require. `verifyDist` fails the build on a third-party bare
+ * require that survives into `dist/`.
  */
 export function getPackageSpecificOptions(packageName: string): PackageOpts {
-  // `npm-pack` used to mark `semver` external so it would not inline a second
-  // copy alongside `dist/external/semver.js`. That saved size and broke the
-  // package: a bare `require('semver')` in a shipped bundle resolves only if
-  // the consumer happens to have semver installed, and this package declares
-  // zero runtime dependencies. It worked for years on pnpm's hoisting, then
-  // stopped the moment socket-wheelhouse enabled a global virtual store, which
-  // takes the hoist directory off the resolution path. Inlining costs published
-  // bytes and keeps dep-0 true, which is the trade this package exists to make.
   const opts: PackageOpts = {}
 
   if (packageName === 'browserslist') {

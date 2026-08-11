@@ -589,9 +589,6 @@ importers:
       adm-zip:
         specifier: 0.6.0
         version: 0.6.0
-      braces:
-        specifier: 3.0.3
-        version: 3.0.3
       c8:
         specifier: 'catalog:'
         version: 12.0.0
@@ -634,9 +631,6 @@ importers:
       html5parser:
         specifier: 'catalog:'
         version: 3.0.0
-      iterable-pokedex:
-        specifier: 2.1.0
-        version: 2.1.0
       libnpmexec:
         specifier: 10.3.1
         version: 10.3.1(supports-color@10.2.2)
@@ -670,9 +664,6 @@ importers:
       micromark-extension-gfm:
         specifier: 'catalog:'
         version: 3.0.0
-      micromatch:
-        specifier: 4.0.8
-        version: 4.0.8
       neosanitize:
         specifier: 'catalog:'
         version: 0.3.0(parse5@8.0.1)
@@ -5613,9 +5604,6 @@ packages:
     resolution: {integrity: sha512-HGYWWS/ehqTV3xN10i23tkPkpH46MLCIMFNCaaKNavAXTF1RkqxawEPtnjnGZ6XKSInBKkiOA5BKS+aZiY3AvA==}
     engines: {node: '>=8'}
 
-  iterable-pokedex@2.1.0:
-    resolution: {integrity: sha512-KsaUIOY/sa+ralVqumXSMPBDf/uMUXvP8RFlTcUNYynlScpTecoZTFaN0zDJhQUOeuFfIco8FByjkqT6510ogg==}
-
   jest-worker@27.5.1:
     resolution: {integrity: sha512-7vuh85V5cdDofPyxn58nrPjBktZo0u9x1g8WtjQol+jZDaE+fhN+cIvTj11GndBnMnyfrUOG1sZQxCdjKh+DKg==}
     engines: {node: '>= 10.13.0'}
@@ -9228,8 +9216,6 @@ snapshots:
     dependencies:
       html-escaper: 2.0.2
       istanbul-lib-report: 3.0.1
-
-  iterable-pokedex@2.1.0: {}
 
   jest-worker@27.5.1:
     dependencies:

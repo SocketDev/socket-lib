@@ -13,11 +13,16 @@
  */
 
 import { promises as fs } from 'node:fs'
+import { builtinModules } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 
+import { parse } from '@babel/parser'
+
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+
+import { REPO_ROOT } from '../../fleet/paths.mts'
 
 const logger = getDefaultLogger()
 
@@ -60,6 +65,128 @@ async function checkFile(file: string): Promise<string | undefined> {
 }
 
 /**
+ * The bare specifiers a shipped file may keep. Derived from package.json so
+ * there is no second copy of the dependency set to drift: this package's own
+ * name (self-referencing subpath imports) plus anything an installing consumer
+ * is actually contracted to provide. `dependencies` is empty by design, so in
+ * practice the set is the package name and the TypeScript peer.
+ */
+async function readAllowedBareSpecifiers(): Promise<string[]> {
+  const pkgJson = JSON.parse(
+    await fs.readFile(path.join(REPO_ROOT, 'package.json'), 'utf8'),
+  ) as {
+    name: string
+    dependencies?: Record<string, string> | undefined
+    optionalDependencies?: Record<string, string> | undefined
+    peerDependencies?: Record<string, string> | undefined
+  }
+  return [
+    pkgJson.name,
+    ...Object.keys(pkgJson.dependencies ?? {}),
+    ...Object.keys(pkgJson.optionalDependencies ?? {}),
+    ...Object.keys(pkgJson.peerDependencies ?? {}),
+  ]
+}
+
+/**
+ * Collect the specifier of every `require('<literal>')` CALL in `src`.
+ *
+ * This parses rather than pattern-matches on purpose. The vendored bundles are
+ * full of JSDoc examples like `* const mm = require('micromatch');`, and a
+ * regex counts each one as a real dependency. `dist/external/pico-pack.js`
+ * alone yields four such false positives. Only an AST tells a call apart from
+ * a comment.
+ */
+function collectRequiredSpecifiers(src: string): Set<string> {
+  const found = new Set<string>()
+  const ast = parse(src, {
+    allowReturnOutsideFunction: true,
+    sourceType: 'unambiguous',
+  })
+  const seen = new Set<object>()
+  const stack: unknown[] = [ast]
+  while (stack.length) {
+    const node = stack.pop()
+    if (!node || typeof node !== 'object' || seen.has(node)) {
+      continue
+    }
+    seen.add(node)
+    const candidate = node as {
+      type?: string | undefined
+      callee?:
+        | { type?: string | undefined; name?: string | undefined }
+        | undefined
+      arguments?:
+        | Array<{ type?: string | undefined; value?: unknown | undefined }>
+        | undefined
+    }
+    if (
+      candidate.type === 'CallExpression' &&
+      candidate.callee?.type === 'Identifier' &&
+      candidate.callee.name === 'require' &&
+      candidate.arguments?.length === 1 &&
+      candidate.arguments[0]!.type === 'StringLiteral'
+    ) {
+      found.add(String(candidate.arguments[0]!.value))
+    }
+    const childValues = Object.values(node)
+    for (let i = 0, { length } = childValues; i < length; i += 1) {
+      const value = childValues[i]
+      if (Array.isArray(value)) {
+        stack.push(...value)
+      } else if (value && typeof value === 'object') {
+        stack.push(value)
+      }
+    }
+  }
+  return found
+}
+
+/**
+ * Whether `spec` resolves for a consumer without an undeclared install.
+ */
+function isResolvableSpecifier(spec: string, allowed: string[]): boolean {
+  if (spec.startsWith('.') || path.isAbsolute(spec)) {
+    return true
+  }
+  if (spec.startsWith('node:') || builtinModules.includes(spec)) {
+    return true
+  }
+  return allowed.some(name => spec === name || spec.startsWith(`${name}/`))
+}
+
+/**
+ * Find every shipped file that keeps a bare require this package does not
+ * declare, which is a phantom dependency. It loads for whoever happens to have
+ * the package hoisted nearby and throws MODULE_NOT_FOUND for everyone else, so
+ * it has to fail the build that produced it rather than a consumer's test run.
+ */
+async function findPhantomRequires(
+  files: string[],
+): Promise<Array<{ file: string; specifiers: string[] }>> {
+  const allowed = await readAllowedBareSpecifiers()
+  const phantoms: Array<{ file: string; specifiers: string[] }> = []
+  for (let i = 0, { length } = files; i < length; i += 1) {
+    const file = files[i]!
+    const src = await fs.readFile(file, 'utf8')
+    // A parse failure is already reported by the syntax stage above.
+    let specifiers: Set<string>
+    try {
+      specifiers = collectRequiredSpecifiers(src)
+    } catch {
+      continue
+    }
+    const bad = [...specifiers]
+      .filter(spec => !isResolvableSpecifier(spec, allowed))
+      .toSorted()
+    if (bad.length) {
+      phantoms.push({ file, specifiers: bad })
+    }
+  }
+  return phantoms
+}
+
+/**
  * Verify dist integrity. Returns exit code (0 = all files parse).
  */
 export async function verifyDist(distDir: string): Promise<number> {
@@ -91,6 +218,24 @@ export async function verifyDist(distDir: string): Promise<number> {
       'A corrupt/partial dist usually means a parallel-write race. ' +
         'Re-run the build; if it persists, the externals codemod or ' +
         'bundler is racing on this file.',
+    )
+    return 1
+  }
+  const phantoms = await findPhantomRequires(files)
+  if (phantoms.length > 0) {
+    logger.error(
+      `dist phantom-dependency check FAILED - ${phantoms.length} file(s) keep an undeclared bare require:`,
+    )
+    for (const { file, specifiers } of phantoms) {
+      const rel = path.relative(distDir, file)
+      logger.error(`  ${rel}: ${specifiers.join(', ')}`)
+    }
+    logger.error(
+      'This package declares no runtime dependencies, so a bare require ' +
+        'that survives into dist resolves only when the consumer happens to ' +
+        'have that package installed. Wanted: the specifier inlined into the ' +
+        "bundle. Fix: drop it from the package's `external` list in " +
+        'scripts/repo/build-externals/rolldown-config.mts so rolldown bundles it.',
     )
     return 1
   }
