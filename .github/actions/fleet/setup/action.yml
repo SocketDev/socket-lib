@@ -52,7 +52,8 @@ runs:
     # github-release.yml.
     - name: Export the fleet no-phone-home env
       shell: bash
-      run: node "${GITHUB_ACTION_PATH}/export-fleet-env.mjs" >> "$GITHUB_ENV"
+      run: | # zizmor: ignore[github-env] - emits fixed NAME=value lines read from the tracked fleet-env.json, no runtime-attacker data.
+        node "${GITHUB_ACTION_PATH}/export-fleet-env.mjs" >> "$GITHUB_ENV"
 
     - name: Check GitHub platform health
       uses: ./.github/actions/fleet/github-status-check
