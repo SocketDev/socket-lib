@@ -7,8 +7,8 @@ import { Readable, Writable } from 'node:stream'
 import { afterEach, beforeEach, vi } from 'vitest'
 
 import type { Mock } from 'vitest'
-import type * as SpawnChild from '@socketsecurity/lib-stable/process/spawn/child'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import type * as SpawnChild from '../../../src/process/spawn/child'
+import { safeDelete } from '../../../src/fs/safe'
 
 export interface FakeChild extends EventEmitter {
   stdin: Writable
@@ -17,13 +17,13 @@ export interface FakeChild extends EventEmitter {
 }
 
 /**
- * Build the mocked `@socketsecurity/lib-stable/process/spawn/child` module for
+ * Build the mocked `../../../src/process/spawn/child` module for
  * a `vi.mock` factory. src/secrets/windows.ts imports `spawn`/`spawnSync` from
  * that module (NOT node:child_process), so this is the correct mock target —
  * mocking node:child_process is a no-op and lets the real powershell binary
  * run. The mocks sit on both the named and default exports. Usage:
  *
- * Vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'), () =>
+ * Vi.mock(import('../../../src/process/spawn/child'), () =>
  * spawnChildMockFactory(mockSpawn, mockSpawnSync))
  */
 export async function spawnChildMockFactory(
@@ -31,7 +31,7 @@ export async function spawnChildMockFactory(
   mockSpawnSync: Mock,
 ): Promise<typeof SpawnChild> {
   const actual = await vi.importActual<typeof SpawnChild>(
-    '@socketsecurity/lib-stable/process/spawn/child',
+    '../../../src/process/spawn/child',
   )
   const mocked = {
     ...actual,
@@ -41,7 +41,7 @@ export async function spawnChildMockFactory(
   return { ...mocked, default: mocked } as unknown as typeof SpawnChild
 }
 
-// `@socketsecurity/lib-stable/process/spawn/child`'s `spawn()` returns
+// `../../../src/process/spawn/child`'s `spawn()` returns
 // `{ process: ChildProcess, ... }` because the lib wraps the raw child, and
 // src/secrets/windows.ts destructures `const { process: cp } = spawn(...)`.
 // Return that wrapped shape so `mockSpawn.mockImplementationOnce(() =>

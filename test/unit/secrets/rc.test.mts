@@ -12,7 +12,7 @@ import {
   write,
   writeRcFile,
 } from '../../../src/secrets/rc'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+import { safeDelete } from '../../../src/fs/safe'
 
 const IS_DARWIN = os.platform() === 'darwin'
 const IS_WIN32 = os.platform() === 'win32'
