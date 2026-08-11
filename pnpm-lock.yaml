@@ -1140,18 +1140,6 @@ importers:
         specifier: 'catalog:'
         version: 26.1.2
 
-  .claude/hooks/fleet/concurrent-cargo-build-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@6.7.0(typescript@7.0.2)'
-      shell-quote:
-        specifier: 'catalog:'
-        version: 1.10.0
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.1.2
   .claude/hooks/fleet/consumer-grep-nudge:
     devDependencies:
       '@types/node':
@@ -1518,6 +1506,16 @@ importers:
         version: 26.1.2
 
   .claude/hooks/fleet/minimum-release-age-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(typescript@7.0.2)'
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.2
+
+  .claude/hooks/fleet/mixed-clock-recency-guard:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
@@ -3004,6 +3002,8 @@ importers:
   .config/fleet/oxlint-plugin/fleet/no-namespace-import: {}
 
   .config/fleet/oxlint-plugin/fleet/no-npx-dlx: {}
+
+  .config/fleet/oxlint-plugin/fleet/no-optional-param-before-options-bag: {}
 
   .config/fleet/oxlint-plugin/fleet/no-optional-positional-trap: {}
 
