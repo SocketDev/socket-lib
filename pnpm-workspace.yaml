@@ -495,6 +495,14 @@ overrides:
   'zod': '4.4.3'
 
 patchedDependencies:
+  # Published 6.7.0 requires two things it never declares: its own alias
+  # `@socketsecurity/lib-stable/...` from five dist files, and bare `semver`
+  # from dist/external/npm-pack.js in 13 places. Both resolved only on pnpm
+  # hoisting and broke the moment a global virtual store took the hoist
+  # directory off the resolution path. The patch points each at what the
+  # package already ships. Remove it when the catalog pin moves to a release
+  # carrying the source fixes.
+  '@socketsecurity/lib@6.7.0': patches/@socketsecurity__lib@6.7.0.patch
   # Indirects the `node-gyp/bin/node-gyp.js` require.resolve so the rolldown
   # bundle doesn't statically inline node-gyp; consumer: pacote → run-script
   # in the bundled dist tree.
