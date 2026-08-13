@@ -31,7 +31,7 @@ catalog:
   # shadscan — shadcn UI audit CLI for the design skills (missing UI
   # fundamentals report). Exact-pinned; the whole package is younger than
   # the soak window, so it carries a minimumReleaseAgeExclude entry below.
-  '@shadscan/cli': 0.8.0
+  '@shadscan/cli': 0.10.0
   '@sinclair/typebox': 0.34.52
   # typebox 1.x — the unscoped rewrite of @sinclair/typebox. Both names are
   # pinned while the fleet migrates; the 0.x entry is deleted once no member
@@ -117,7 +117,7 @@ catalog:
   'regjsparser': 0.13.2
   'semver': 7.8.5
   'shell-quote': 1.10.0
-  'taze': 19.17.1
+  'taze': 19.17.2
   # vite 8.0.16 swaps esbuild → rolldown natively (bundles rolldown
   # 1.0.2) and patches the <=8.0.15 advisories (GHSA-fx2h-pf6j-xcff
   # high, GHSA-v6wh-96g9-6wx3 medium). Tracked here so the pnpm
@@ -249,38 +249,6 @@ minimumReleaseAgeExclude:
   # markdownlint-cli2 0.23.1's vulnerable 5.2.1 exact-pin. Soak bypassed per
   # the high-severity security exception; exact-pinned so a future version
   # re-soaks.
-  # published: 2026-08-04 | removable: 2026-08-11
-  - '@socketsecurity/lib@6.5.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-android-arm64@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-darwin-arm64@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-darwin-x64@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-freebsd-x64@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-linux-arm-gnueabihf@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-linux-arm64-gnu@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-linux-arm64-musl@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-linux-ppc64-gnu@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-linux-s390x-gnu@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-linux-x64-gnu@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-linux-x64-musl@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-openharmony-arm64@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-win32-arm64-msvc@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - '@rolldown/binding-win32-x64-msvc@1.2.3'
-  # published: 2026-08-05 | removable: 2026-08-12
-  - 'rolldown@1.2.3'
 
 # Refuse transitive (sub-) deps declared via git/tarball/local-tarball
 # specs. Direct git deps in this repo are still allowed; this only
@@ -579,7 +547,7 @@ patchedDependencies:
   # blocked by egress policy — every lookup then hits the request timeout
   # while taze still exits 0 (false green; update.mts fails loud on it).
   # On a taze bump, regenerate via `pnpm patch taze` + `pnpm patch-commit`.
-  taze@19.17.1: patches/taze@19.17.1.patch
+  taze@19.17.2: patches/taze@19.17.2.patch
 
 # Opt out of pnpm's packageManager-version self-check. CI installs pnpm from
 # its native bin via the shared setup workflow, not corepack, so the runner's

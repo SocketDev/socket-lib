@@ -3483,7 +3483,6 @@
     "setup-security-tools": "node .claude/hooks/fleet/setup-security-tools/install.mts",
     "setup:brew": "node scripts/fleet/setup/brew.mts",
     "setup:go": "node scripts/fleet/setup/go.mts",
-    "setup:mcp": "node scripts/fleet/setup/mcp.mts",
     "setup:python": "node scripts/fleet/setup/python.mts",
     "setup:refero": "node scripts/fleet/setup/refero.mts",
     "setup:rust": "node scripts/fleet/setup/rust.mts",
@@ -3520,7 +3519,9 @@
     "fix:repo": "node scripts/fleet/fix.mts --repo",
     "fmt:js": "node scripts/fleet/format.mts",
     "lint:js": "node scripts/fleet/lint.mts",
-    "gh:auth": "node scripts/fleet/gh-auth.mts"
+    "gh:auth": "node scripts/fleet/gh-auth.mts",
+    "offload:model": "node scripts/fleet/offload-model.mts",
+    "setup:fireconnect": "node scripts/fleet/setup/fireconnect.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
