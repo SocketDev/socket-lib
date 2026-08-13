@@ -106,7 +106,7 @@ describe.sequential('hasCommittedChanges', () => {
   test('returns true after a commit is added past the base ref', () => {
     sh(repo, 'git checkout -b feature -q')
     writeFileSync(path.join(repo, 'alpha.txt'), 'a')
-    sh(repo, 'git add a.txt && git commit -q -m "add a"')
+    sh(repo, 'git add alpha.txt && git commit -q -m "add alpha"')
     expect(hasCommittedChanges(repo, 'main')).toBe(true)
   })
 

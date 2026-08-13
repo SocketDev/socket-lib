@@ -284,7 +284,7 @@ describe.sequential('packages/provenance — fetchPackageProvenance', () => {
               externalParameters: {
                 workflow: {
                   ref: 'https://github.com/owner/repo/.github/workflows/ci.yml@refs/heads/main',
-                  repository: 'o/r',
+                  repository: 'owner/repo',
                 },
                 ref: 'refs/heads/main',
                 sha: 'abc',
