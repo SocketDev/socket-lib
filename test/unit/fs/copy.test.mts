@@ -30,11 +30,11 @@ describe('copy', () => {
       const src = path.join(tmpDir, 'src')
       const dest = path.join(tmpDir, 'dest')
       await fs.mkdir(path.join(src, 'sub'), { recursive: true })
-      await fs.writeFile(path.join(src, 'sub', 'f.txt'), 'x', 'utf8')
+      await fs.writeFile(path.join(src, 'sub', 'file.txt'), 'x', 'utf8')
 
       await copy(src, dest)
 
-      expect(await fs.readFile(path.join(dest, 'sub', 'f.txt'), 'utf8')).toBe(
+      expect(await fs.readFile(path.join(dest, 'sub', 'file.txt'), 'utf8')).toBe(
         'x',
       )
     }, 'copy-dir-')
@@ -62,12 +62,12 @@ describe('copy', () => {
       const dest = path.join(tmpDir, 'dest')
       await fs.mkdir(src, { recursive: true })
       await fs.mkdir(dest, { recursive: true })
-      await fs.writeFile(path.join(src, 'f.txt'), 'from-src', 'utf8')
-      await fs.writeFile(path.join(dest, 'f.txt'), 'old', 'utf8')
+      await fs.writeFile(path.join(src, 'file.txt'), 'from-src', 'utf8')
+      await fs.writeFile(path.join(dest, 'file.txt'), 'old', 'utf8')
 
       await copy(src, dest, { mode: CopyMode.Overlay })
 
-      expect(await fs.readFile(path.join(dest, 'f.txt'), 'utf8')).toBe(
+      expect(await fs.readFile(path.join(dest, 'file.txt'), 'utf8')).toBe(
         'from-src',
       )
     }, 'copy-overlay-clobber-')
@@ -94,11 +94,11 @@ describe('copy', () => {
       const src = path.join(tmpDir, 'src')
       const dest = path.join(tmpDir, 'nested', 'dest')
       await fs.mkdir(src, { recursive: true })
-      await fs.writeFile(path.join(src, 'f.txt'), 'x', 'utf8')
+      await fs.writeFile(path.join(src, 'file.txt'), 'x', 'utf8')
 
       await copy(src, dest, { mode: CopyMode.Pave })
 
-      expect(await fs.readFile(path.join(dest, 'f.txt'), 'utf8')).toBe('x')
+      expect(await fs.readFile(path.join(dest, 'file.txt'), 'utf8')).toBe('x')
     }, 'copy-pave-new-')
   })
 

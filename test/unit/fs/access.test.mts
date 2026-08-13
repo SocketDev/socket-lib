@@ -21,7 +21,7 @@ let file: string
 
 beforeAll(async () => {
   tmp = mkdtempSync(path.join(os.tmpdir(), 'access-test-'))
-  file = path.join(tmp, 'f.txt')
+  file = path.join(tmp, 'file.txt')
   writeFileSync(file, 'hi')
 })
 

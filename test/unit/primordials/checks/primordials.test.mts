@@ -340,7 +340,7 @@ describe('checks/primordials', () => {
     })
 
     it('ignores .ts files (only walks .js)', () => {
-      writeFile('src/a.ts', 'const { ShouldBeIgnored } = primordials')
+      writeFile('src/alpha.ts', 'const { ShouldBeIgnored } = primordials')
       setupLib([])
 
       const result = checkPrimordials(makeConfig({}))

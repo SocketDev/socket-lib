@@ -135,7 +135,7 @@ describe.sequential('cache controls', () => {
     try {
       const a = path.join(tmpDir, 'alpha.json')
       const b = path.join(tmpDir, 'beta.json')
-      const c = path.join(tmpDir, 'c.json')
+      const c = path.join(tmpDir, 'gamma.json')
       await fs.writeFile(a, JSON.stringify({ k: 'a' }))
       await fs.writeFile(b, JSON.stringify({ k: 'b' }))
       await fs.writeFile(c, JSON.stringify({ k: 'c' }))

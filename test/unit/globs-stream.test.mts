@@ -198,7 +198,7 @@ describe.sequential('trailing-slash ignore patterns', () => {
   // normalized array dropped non-string entries silently.
   it('glob: handles mixed trailing/non-trailing slashes in same array', async () => {
     mkdirSync(path.join(tmpRoot, 'build'), { recursive: true })
-    writeFileSync(path.join(tmpRoot, 'build', 'c.json'), '{}')
+    writeFileSync(path.join(tmpRoot, 'build', 'gamma.json'), '{}')
     const files = await glob(['**/*.json'], {
       cwd: tmpRoot,
       ignore: ['**/dist/', '**/build'],

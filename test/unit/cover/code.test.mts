@@ -83,12 +83,12 @@ describe.sequential('cover/code', () => {
 
     it('aggregates across multiple files', async () => {
       const coveragePath = writeCoverageFile({
-        '/a.ts': {
+        '/alpha.ts': {
           s: { '0': 1 },
           b: {},
           f: { '0': 1 },
         },
-        '/b.ts': {
+        '/beta.ts': {
           s: { '0': 0, '1': 2 },
           b: {},
           f: { '0': 0 },
@@ -102,9 +102,9 @@ describe.sequential('cover/code', () => {
 
     it('skips entries that are not objects', async () => {
       const coveragePath = writeCoverageFile({
-        '/a.ts': undefined,
-        '/b.ts': 'not an object',
-        '/c.ts': { s: { '0': 1 }, b: {}, f: {} },
+        '/alpha.ts': undefined,
+        '/beta.ts': 'not an object',
+        '/gamma.ts': { s: { '0': 1 }, b: {}, f: {} },
       })
       const result = await getCodeCoverage({ coveragePath })
       expect(result.statements.covered).toBe(1)
@@ -113,7 +113,7 @@ describe.sequential('cover/code', () => {
 
     it('skips non-object s/b/f buckets', async () => {
       const coveragePath = writeCoverageFile({
-        '/a.ts': { s: 'not an object', b: undefined, f: undefined },
+        '/alpha.ts': { s: 'not an object', b: undefined, f: undefined },
       })
       const result = await getCodeCoverage({ coveragePath })
       expect(result.statements.total).toBe(0)
@@ -121,7 +121,7 @@ describe.sequential('cover/code', () => {
 
     it('skips non-array branch buckets', async () => {
       const coveragePath = writeCoverageFile({
-        '/a.ts': { b: { '0': 'not array', '1': [1, 2] } },
+        '/alpha.ts': { b: { '0': 'not array', '1': [1, 2] } },
       })
       const result = await getCodeCoverage({ coveragePath })
       expect(result.branches.total).toBe(2)
@@ -129,7 +129,7 @@ describe.sequential('cover/code', () => {
 
     it('skips non-number counts', async () => {
       const coveragePath = writeCoverageFile({
-        '/a.ts': {
+        '/alpha.ts': {
           s: { '0': 'not a number', '1': 1 },
           f: { '0': undefined, '1': 2 },
           b: { '0': [1, 'bad', 3] },

@@ -132,7 +132,7 @@ describe.sequential('dlx/detect — cache + stale paths', () => {
     it('returns true for .js, .mjs, .cjs', () => {
       expect(isJsFilePath('alpha.js')).toBe(true)
       expect(isJsFilePath('alpha.mjs')).toBe(true)
-      expect(isJsFilePath('a.cjs')).toBe(true)
+      expect(isJsFilePath('alpha.cjs')).toBe(true)
     })
 
     it('returns false for binary extensions', () => {

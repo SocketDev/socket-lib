@@ -117,9 +117,9 @@ describe.sequential('packages/exports — getExportFilePaths', () => {
   it('collects nested conditional string values', () => {
     expect(
       getExportFilePaths({
-        '.': { import: './alpha.mjs', require: './a.cjs' },
+        '.': { import: './alpha.mjs', require: './alpha.cjs' },
       }),
-    ).toEqual(['./alpha.mjs', './a.cjs'])
+    ).toEqual(['./alpha.mjs', './alpha.cjs'])
   })
 
   it('collects strings from array-of-conditions values', () => {
@@ -134,7 +134,7 @@ describe.sequential('packages/exports — getExportFilePaths', () => {
 
   it('returns [] for purely conditional top-level shape', () => {
     expect(
-      getExportFilePaths({ import: './alpha.mjs', require: './a.cjs' }),
+      getExportFilePaths({ import: './alpha.mjs', require: './alpha.cjs' }),
     ).toEqual([])
   })
 })
@@ -153,7 +153,7 @@ describe.sequential('packages/exports — resolvePackageJsonEntryExports', () =>
   })
 
   it('passes through conditional-shape objects', () => {
-    const exports = { import: './alpha.mjs', require: './a.cjs' }
+    const exports = { import: './alpha.mjs', require: './alpha.cjs' }
     expect(resolvePackageJsonEntryExports(exports)).toBe(exports)
   })
 
