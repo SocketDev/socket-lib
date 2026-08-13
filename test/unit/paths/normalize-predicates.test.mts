@@ -92,10 +92,10 @@ describe('paths/normalize predicates', () => {
 
   describe('isUnixPath', () => {
     it('should detect MSYS drive letter paths', () => {
-      expect(isUnixPath('/c/tools/bin')).toBe(true) // fixture-name: allow -- MSYS drive letter, not a placeholder
-      expect(isUnixPath('/d/projects/app')).toBe(true) // fixture-name: allow -- MSYS drive letter, not a placeholder
-      expect(isUnixPath('/z/path')).toBe(true) // fixture-name: allow -- MSYS drive letter, not a placeholder
-      expect(isUnixPath('/C/Windows')).toBe(true) // fixture-name: allow -- MSYS drive letter, not a placeholder
+      expect(isUnixPath('/c/tools/bin')).toBe(true)
+      expect(isUnixPath('/d/projects/app')).toBe(true)
+      expect(isUnixPath('/z/path')).toBe(true)
+      expect(isUnixPath('/C/Windows')).toBe(true)
     })
 
     it('should detect bare drive letter paths', () => {
