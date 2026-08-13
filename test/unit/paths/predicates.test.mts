@@ -26,7 +26,7 @@ describe('path predicates', () => {
     it('should detect node_modules in path', () => {
       expect(isNodeModules('/project/node_modules/package')).toBe(true)
       expect(isNodeModules('node_modules/package/index.js')).toBe(true)
-      expect(isNodeModules('/a/b/node_modules/gamma/delta')).toBe(true)
+      expect(isNodeModules('/project/src/node_modules/gamma/delta')).toBe(true)
       expect(isNodeModules('node_modules')).toBe(true)
     })
 

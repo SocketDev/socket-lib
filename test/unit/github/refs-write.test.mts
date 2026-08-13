@@ -96,7 +96,7 @@ describe('github/refs-write', () => {
         .reply(201, {})
       await createBranchRef({
         apiUrl: 'https://ghe.example.test',
-        branch: 'b',
+        branch: 'feature',
         repo: 'octo/lib',
         sha: SHA,
         token: 'tok',
@@ -215,19 +215,19 @@ describe('github/refs-write', () => {
 
     it('propagates auth failures (401)', async () => {
       nock(GITHUB_API)
-        .delete('/repos/octo/lib/git/refs/heads/b')
+        .delete('/repos/octo/lib/git/refs/heads/feature')
         .reply(401, { message: 'Bad credentials' })
       await expect(
-        deleteBranchRef({ branch: 'b', repo: 'octo/lib', token: 'bad' }),
+        deleteBranchRef({ branch: 'feature', repo: 'octo/lib', token: 'bad' }),
       ).rejects.toThrow('HTTP 401')
     })
 
     it('propagates network-level failures', async () => {
       nock(GITHUB_API)
-        .delete('/repos/octo/lib/git/refs/heads/b')
+        .delete('/repos/octo/lib/git/refs/heads/feature')
         .replyWithError('ECONNRESET')
       await expect(
-        deleteBranchRef({ branch: 'b', repo: 'octo/lib', token: 'tok' }),
+        deleteBranchRef({ branch: 'feature', repo: 'octo/lib', token: 'tok' }),
       ).rejects.toThrow()
     })
   })

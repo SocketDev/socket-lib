@@ -15,9 +15,9 @@ describe('eco/npm/npm-cli/extract-package-name-from-path', () => {
   it('returns the deepest package for nested node_modules', () => {
     expect(
       extractPackageNameFromPath(
-        'node_modules/a/node_modules/b/node_modules/c',
+        'node_modules/alpha/node_modules/beta/node_modules/gamma',
       ),
-    ).toBe('c')
+    ).toBe('gamma')
   })
 
   it('preserves scoped package names', () => {
@@ -28,8 +28,8 @@ describe('eco/npm/npm-cli/extract-package-name-from-path', () => {
 
   it('preserves scoped packages inside nested paths', () => {
     expect(
-      extractPackageNameFromPath('node_modules/a/node_modules/@scope/b'),
-    ).toBe('@scope/b')
+      extractPackageNameFromPath('node_modules/alpha/node_modules/@scope/beta'),
+    ).toBe('@scope/beta')
   })
 
   it('handles Windows-style separators', () => {

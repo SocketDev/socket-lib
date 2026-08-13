@@ -300,8 +300,10 @@ describe('normalizeTypeBoxErrors', () => {
   it('preserves non-canonical numeric strings as strings', async () => {
     const { normalizeTypeBoxErrors } =
       await import('../../../src/schema/validate')
-    const issues = normalizeTypeBoxErrors([{ path: '/a/01/b', message: 'x' }])
-    expect(issues[0]!.path).toEqual(['a', '01', 'b'])
+    const issues = normalizeTypeBoxErrors([
+      { path: '/alpha/01/beta', message: 'x' },
+    ])
+    expect(issues[0]!.path).toEqual(['alpha', '01', 'beta'])
   })
 
   it('handles empty path', async () => {

@@ -43,9 +43,9 @@ describe('pathIsUnderSubmodule (pure)', () => {
   })
 
   it('does not match a sibling path', () => {
-    expect(pathIsUnderSubmodule('vendor/other/x', ['vendor/mbedtls'])).toBe(
-      false,
-    )
+    expect(
+      pathIsUnderSubmodule('vendor/other/example', ['vendor/mbedtls']),
+    ).toBe(false)
   })
 
   it('does not match when there are no submodules', () => {
@@ -60,7 +60,9 @@ describe('getSubmodulePaths edge cases (real temp repo)', () => {
       // No .gitmodules → git config exits non-zero → the catch yields ''.
       expect(await getSubmodulePaths({ cwd: tmpDir })).toEqual([])
       // Empty submodule list → isInSubmodule returns false without parsing.
-      expect(await isInSubmodule('anything/x', { cwd: tmpDir })).toBe(false)
+      expect(await isInSubmodule('anything/example', { cwd: tmpDir })).toBe(
+        false,
+      )
       // A junk file in a no-submodule repo is still safe to delete.
       await fs.writeFile(path.join(tmpDir, 'foo.orig'), 'x')
       expect(
@@ -76,16 +78,16 @@ describe('getSubmodulePaths edge cases (real temp repo)', () => {
         path.join(tmpDir, '.gitmodules'),
         [
           '[submodule "a"]',
-          '\tpath = vendor/a',
+          '\tpath = vendor/alpha',
           '\turl = https://example.com/a.git',
           '[submodule "b"]',
-          '\tpath = vendor/b',
+          '\tpath = vendor/beta',
           '\turl = https://example.com/b.git',
         ].join('\n'),
       )
       const subs = await getSubmodulePaths({ cwd: tmpDir })
-      expect(subs).toContain('vendor/a')
-      expect(subs).toContain('vendor/b')
+      expect(subs).toContain('vendor/alpha')
+      expect(subs).toContain('vendor/beta')
     }, 'git-tracked-multi-sub')
   })
 })

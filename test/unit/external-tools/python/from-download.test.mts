@@ -38,7 +38,7 @@ describe('external-tools/python/from-download — path helpers', () => {
   const WIN32 = process.platform === 'win32'
 
   test('pythonBinPath nests under python/ with the per-OS interpreter', () => {
-    const dir = path.join('a', 'b')
+    const dir = path.join('tools', 'python-dist')
     const expected = WIN32
       ? path.join(dir, 'python', 'python.exe')
       : path.join(dir, 'python', 'bin', 'python3')
@@ -46,17 +46,17 @@ describe('external-tools/python/from-download — path helpers', () => {
   })
 
   test('pythonBinPath follows the TARGET arch, not the host', () => {
-    const dir = path.join('a', 'b')
+    const dir = path.join('tools', 'python-dist')
     // A win-* target always yields python.exe; any other target bin/python3 —
     // independent of the host the resolution runs on (cross-compile-safe).
     expect(normalizePath(pythonBinPath(dir, 'win-x64'))).toBe(
-      'a/b/python/python.exe',
+      'tools/python-dist/python/python.exe',
     )
     expect(normalizePath(pythonBinPath(dir, 'linux-x64'))).toBe(
-      'a/b/python/bin/python3',
+      'tools/python-dist/python/bin/python3',
     )
     expect(normalizePath(pythonBinPath(dir, 'darwin-arm64'))).toBe(
-      'a/b/python/bin/python3',
+      'tools/python-dist/python/bin/python3',
     )
   })
 

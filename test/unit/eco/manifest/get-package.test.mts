@@ -12,23 +12,23 @@ const LOCK = parsePackageLock(
   JSON.stringify({
     lockfileVersion: 3,
     packages: {
-      'node_modules/a': { version: '1.0.0' },
-      'node_modules/b': { version: '1.0.0' },
-      'node_modules/a/node_modules/a': { version: '2.0.0' },
+      'node_modules/alpha': { version: '1.0.0' },
+      'node_modules/beta': { version: '1.0.0' },
+      'node_modules/alpha/node_modules/alpha': { version: '2.0.0' },
     },
   }),
 )
 
 describe('eco/manifest/get-package', () => {
   it('returns the first matching entry (multi-version)', () => {
-    const a = getPackage(LOCK, 'a')!
-    expect(a.name).toBe('a')
+    const alpha = getPackage(LOCK, 'alpha')!
+    expect(alpha.name).toBe('alpha')
   })
 
   it('returns the entry for a single-version name', () => {
-    const b = getPackage(LOCK, 'b')!
-    expect(b.name).toBe('b')
-    expect(b.version).toBe('1.0.0')
+    const beta = getPackage(LOCK, 'beta')!
+    expect(beta.name).toBe('beta')
+    expect(beta.version).toBe('1.0.0')
   })
 
   it('returns undefined for an unknown name', () => {
@@ -38,12 +38,12 @@ describe('eco/manifest/get-package', () => {
 
 describe('eco/manifest/get-package-versions', () => {
   it('returns all entries that share a name', () => {
-    const versions = getPackageVersions(LOCK, 'a')
+    const versions = getPackageVersions(LOCK, 'alpha')
     expect(versions.map(v => v.version).toSorted()).toEqual(['1.0.0', '2.0.0'])
   })
 
   it('returns a singleton array for single-version names', () => {
-    expect(getPackageVersions(LOCK, 'b')).toHaveLength(1)
+    expect(getPackageVersions(LOCK, 'beta')).toHaveLength(1)
   })
 
   it('returns an empty array for unknown names', () => {

@@ -78,7 +78,7 @@ describe('env/node-version-managers', () => {
 
     it('detects n from execPath', () => {
       maskAllManagerEnv()
-      withExecPath('/usr/local/n/versions/node/22.11.0/bin/node')
+      withExecPath('/usr/local/n/versions/node/22.11.0/bin/node') // fixture-name: allow -- 'n' is the version manager's real name
       expect(detectActiveNodeManager()).toBe('n')
     })
 
@@ -195,7 +195,7 @@ describe('env/node-version-managers', () => {
       maskAllManagerEnv()
       // oxlint-disable-next-line socket/prefer-node-modules-dot-cache -- fixture path mirrors corepack's real user-home install location, not a repo-root cache.
       setEnv('COREPACK_HOME', '/Users/<user>/.cache/node/corepack')
-      withExecPath('/usr/local/n/versions/node/22.11.0/bin/node')
+      withExecPath('/usr/local/n/versions/node/22.11.0/bin/node') // fixture-name: allow -- 'n' is the version manager's real name
       expect(detectActiveNodeManager()).toBe('n')
     })
 

@@ -74,7 +74,7 @@ describe('detectAgent', () => {
     process.env['OPENCODE'] = '1'
     expect(detectAgent()?.agent).toBe('opencode')
     delete process.env['OPENCODE']
-    process.env['CODEX_HOME'] = '/x/.codex'
+    process.env['CODEX_HOME'] = '/example/.codex'
     expect(detectAgent()?.agent).toBe('codex')
   })
 
@@ -96,14 +96,16 @@ describe('agentPaths', () => {
   })
 
   it('claude: ~/.claude config; memory keyed by cwd slug', () => {
-    const p = agentPaths('claude', { cwd: '/Users/x/projects/socket-btm' })
+    const p = agentPaths('claude', {
+      cwd: '/Users/<user>/projects/socket-btm',
+    })
     expect(p?.configDir).toBe(path.join('/home/alice', '.claude'))
     expect(p?.memoryDir).toBe(
       path.join(
         '/home/alice',
         '.claude',
         'projects',
-        '-Users-x-projects-socket-btm',
+        '-Users-<user>-projects-socket-btm',
         'memory',
       ),
     )

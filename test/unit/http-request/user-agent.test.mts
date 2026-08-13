@@ -88,7 +88,9 @@ describe('http-request/user-agent', () => {
     })
 
     it('should strip control chars and collapse whitespace', () => {
-      expect(sanitizeUserAgent('a/1\t\u0000\u0007 b/2')).toBe('a/1 b/2')
+      expect(sanitizeUserAgent('alpha/1\t\u0000\u0007 beta/2')).toBe(
+        'alpha/1 beta/2',
+      )
     })
 
     it('should return empty string for nullish / blank / all-control', () => {

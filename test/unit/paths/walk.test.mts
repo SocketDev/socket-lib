@@ -10,8 +10,8 @@ import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import { walkUp } from '../../../src/paths/walk'
 
-// On Windows, `path.resolve('/a/b/c')` returns `D:\a\b\c` on the current drive.
-// walkUp yields the normalized form `D:/a/b/c`. Strip the drive prefix on
+// On Windows, `path.resolve('/project/src/lib')` returns `D:\project\src\lib` on the current drive.
+// walkUp yields the normalized form `D:/project/src/lib`. Strip the drive prefix on
 // Windows so the assertion compares the path tail, not the drive letter.
 const DRIVE_PREFIX =
   process.platform === 'win32'
@@ -21,29 +21,29 @@ const withDrive = (p: string): string => `${DRIVE_PREFIX}${p}`
 
 describe('walkUp', () => {
   it('yields the start dir then each ancestor up to root', () => {
-    const start = path.resolve('/a/b/c')
+    const start = path.resolve('/project/src/lib')
     const got = [...walkUp(start)]
     // First entry is the start dir; last is the filesystem root.
-    expect(got[0]).toBe(withDrive('/a/b/c'))
-    expect(got).toContain(withDrive('/a/b'))
-    expect(got).toContain(withDrive('/a'))
+    expect(got[0]).toBe(withDrive('/project/src/lib'))
+    expect(got).toContain(withDrive('/project/src'))
+    expect(got).toContain(withDrive('/project'))
     expect(got.at(-1)).toBe(normalizePath(path.parse(start).root))
   })
 
   it('stops (inclusive) at stopAt', () => {
-    const got = [...walkUp('/a/b/c', { stopAt: '/a' })]
+    const got = [...walkUp('/project/src/lib', { stopAt: '/project' })]
     expect(got).toStrictEqual([
-      withDrive('/a/b/c'),
-      withDrive('/a/b'),
-      withDrive('/a'),
+      withDrive('/project/src/lib'),
+      withDrive('/project/src'),
+      withDrive('/project'),
     ])
   })
 
   it('resolves a relative from against cwd', () => {
-    const got = [...walkUp('b/c', { cwd: '/a' })]
-    expect(got[0]).toBe(withDrive('/a/b/c'))
-    expect(got).toContain(withDrive('/a/b'))
-    expect(got).toContain(withDrive('/a'))
+    const got = [...walkUp('src/lib', { cwd: '/project' })]
+    expect(got[0]).toBe(withDrive('/project/src/lib'))
+    expect(got).toContain(withDrive('/project/src'))
+    expect(got).toContain(withDrive('/project'))
   })
 
   it('terminates at root even with no stopAt', () => {
@@ -54,12 +54,14 @@ describe('walkUp', () => {
   })
 
   it('a start AT the stopAt yields just that one dir', () => {
-    expect([...walkUp('/a', { stopAt: '/a' })]).toStrictEqual([withDrive('/a')])
+    expect([...walkUp('/project', { stopAt: '/project' })]).toStrictEqual([
+      withDrive('/project'),
+    ])
   })
 
   it('is lazy — can break early without computing the whole chain', () => {
     let count = 0
-    for (const dir of walkUp('/a/b/c/d/e')) {
+    for (const dir of walkUp('/project/src/lib/nested/deep')) {
       void dir
       count += 1
       if (count === 2) {

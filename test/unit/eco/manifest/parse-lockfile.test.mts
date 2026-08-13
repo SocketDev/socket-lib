@@ -38,13 +38,13 @@ describe('eco/manifest/parse-lockfile', () => {
       const result = parseLockfile(
         JSON.stringify({
           lockfileVersion: 3,
-          packages: { 'node_modules/x': { version: '1.0.0' } },
+          packages: { 'node_modules/example': { version: '1.0.0' } },
         }),
         'npm',
         'npm',
       )
       expect(result.type).toBe('lockfile')
-      expect(result.packages[0]!.name).toBe('x')
+      expect(result.packages[0]!.name).toBe('example')
     })
 
     it('routes yarn format to parseYarnLock', () => {
@@ -91,11 +91,11 @@ describe('eco/manifest/parse-lockfile', () => {
       const result = parseLockfile(
         JSON.stringify({
           lockfileVersion: 3,
-          packages: { 'node_modules/x': { version: '1.0.0' } },
+          packages: { 'node_modules/example': { version: '1.0.0' } },
         }),
         'npm',
       )
-      expect(result.packages[0]!.name).toBe('x')
+      expect(result.packages[0]!.name).toBe('example')
     })
   })
 

@@ -97,7 +97,7 @@ const EXPLICIT_CASES = [
   '\\\\.\\pipe\\name',
   '//?/C:/foo',
   '//./pipe/name',
-  '/c/users/foo',
+  '/c/users/foo', // fixture-name: allow -- MSYS drive letter, not a placeholder
   '/c',
   '/c/',
   'foo bar/baz qux',
