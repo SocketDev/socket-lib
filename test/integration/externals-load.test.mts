@@ -47,14 +47,14 @@ describe('dist externals', () => {
       const src = path.join(tmpDir, 'src')
       const dest = path.join(tmpDir, 'dest')
       await fs.mkdir(path.join(src, 'nested'), { recursive: true })
-      await fs.writeFile(path.join(src, 'a.txt'), 'alpha')
-      await fs.writeFile(path.join(src, 'nested', 'b.txt'), 'beta')
+      await fs.writeFile(path.join(src, 'alpha.txt'), 'alpha')
+      await fs.writeFile(path.join(src, 'nested', 'beta.txt'), 'beta')
 
       await copy(src, dest)
 
-      expect(await fs.readFile(path.join(dest, 'a.txt'), 'utf8')).toBe('alpha')
+      expect(await fs.readFile(path.join(dest, 'alpha.txt'), 'utf8')).toBe('alpha')
       expect(
-        await fs.readFile(path.join(dest, 'nested', 'b.txt'), 'utf8'),
+        await fs.readFile(path.join(dest, 'nested', 'beta.txt'), 'utf8'),
       ).toBe('beta')
     } finally {
       safeDeleteSync(tmpDir)
