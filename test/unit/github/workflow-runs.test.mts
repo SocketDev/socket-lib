@@ -18,10 +18,10 @@ import {
 } from '../../../src/github/workflow-runs'
 
 const API = 'https://api.github.com'
-const RUNS_PATH = '/repos/o/r/actions/workflows/ci.yml/runs'
+const RUNS_PATH = '/repos/owner/repo/actions/workflows/ci.yml/runs'
 const QUERY = {
-  owner: 'o',
-  repo: 'r',
+  owner: 'owner',
+  repo: 'repo',
   sha: 's',
   token: 'tok',
   workflow: 'ci.yml',
@@ -62,13 +62,13 @@ describe('buildWorkflowRunsUrl', () => {
   it('builds the workflow-scoped, single-result runs URL', () => {
     expect(
       buildWorkflowRunsUrl({
-        owner: 'o',
-        repo: 'r',
+        owner: 'owner',
+        repo: 'repo',
         sha: 'abc123',
         workflow: 'ci.yml',
       }),
     ).toBe(
-      'https://api.github.com/repos/o/r/actions/workflows/ci.yml/runs?head_sha=abc123&per_page=1',
+      'https://api.github.com/repos/owner/repo/actions/workflows/ci.yml/runs?head_sha=abc123&per_page=1',
     )
   })
 })
@@ -137,8 +137,8 @@ describe('getRunForCommit', () => {
         workflow_runs: [{ conclusion: 'success', id: 9, status: 'completed' }],
       })
     const run = await getRunForCommit({
-      owner: 'o',
-      repo: 'r',
+      owner: 'owner',
+      repo: 'repo',
       sha: 's',
       workflow: 'ci.yml',
     })

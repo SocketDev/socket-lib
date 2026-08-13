@@ -26,15 +26,15 @@ afterEach(() => {
 describe('createSignedCommit', () => {
   it('chains blob -> tree -> commit -> ref and returns the new commit SHA', async () => {
     const scope = nock(API)
-      .post('/repos/o/r/git/blobs')
+      .post('/repos/owner/repo/git/blobs')
       .reply(201, { sha: 'blobA' })
-      .post('/repos/o/r/git/blobs')
+      .post('/repos/owner/repo/git/blobs')
       .reply(201, { sha: 'blobB' })
-      .post('/repos/o/r/git/trees')
+      .post('/repos/owner/repo/git/trees')
       .reply(201, { sha: 'treeX' })
-      .post('/repos/o/r/git/commits')
+      .post('/repos/owner/repo/git/commits')
       .reply(201, { sha: 'commitZ' })
-      .patch('/repos/o/r/git/refs/heads/main')
+      .patch('/repos/owner/repo/git/refs/heads/main')
       .reply(200, {})
 
     const sha = await createSignedCommit({
@@ -46,7 +46,7 @@ describe('createSignedCommit', () => {
       ],
       message: 'chore: bump version to 1.1.0',
       parentSha: 'parent1',
-      repo: 'o/r',
+      repo: 'owner/repo',
       token: 'tok',
     })
 
@@ -56,7 +56,7 @@ describe('createSignedCommit', () => {
 
   it('sends base64 blob content, a base_tree, parent, and message', async () => {
     const scope = nock(API)
-      .post('/repos/o/r/git/blobs', body => {
+      .post('/repos/owner/repo/git/blobs', body => {
         expect(body.encoding).toBe('base64')
         expect(Buffer.from(body.content, 'base64').toString('utf8')).toBe(
           '{"v":1}',
@@ -64,7 +64,7 @@ describe('createSignedCommit', () => {
         return true
       })
       .reply(201, { sha: 'b1' })
-      .post('/repos/o/r/git/trees', body => {
+      .post('/repos/owner/repo/git/trees', body => {
         expect(body.base_tree).toBe('basetree1')
         expect(body.tree[0].path).toBe('package.json')
         expect(body.tree[0].mode).toBe('100644')
@@ -72,14 +72,14 @@ describe('createSignedCommit', () => {
         return true
       })
       .reply(201, { sha: 't1' })
-      .post('/repos/o/r/git/commits', body => {
+      .post('/repos/owner/repo/git/commits', body => {
         expect(body.message).toBe('chore: bump version to 1.1.0')
         expect(body.parents).toEqual(['parent1'])
         expect(body.tree).toBe('t1')
         return true
       })
       .reply(201, { sha: 'c1' })
-      .patch('/repos/o/r/git/refs/heads/main', body => {
+      .patch('/repos/owner/repo/git/refs/heads/main', body => {
         expect(body.sha).toBe('c1')
         return true
       })
@@ -91,7 +91,7 @@ describe('createSignedCommit', () => {
       files: [{ content: '{"v":1}', path: 'package.json' }],
       message: 'chore: bump version to 1.1.0',
       parentSha: 'parent1',
-      repo: 'o/r',
+      repo: 'owner/repo',
       token: 'tok',
     })
 
@@ -127,7 +127,7 @@ describe('createSignedCommit', () => {
   })
 
   it('throws when a blob POST fails', async () => {
-    nock(API).post('/repos/o/r/git/blobs').reply(500, 'Internal Server Error')
+    nock(API).post('/repos/owner/repo/git/blobs').reply(500, 'Internal Server Error')
 
     await expect(
       createSignedCommit({
@@ -136,7 +136,7 @@ describe('createSignedCommit', () => {
         files: [{ content: 'x', path: 'x.txt' }],
         message: 'test',
         parentSha: 'parent1',
-        repo: 'o/r',
+        repo: 'owner/repo',
         token: 'tok',
       }),
     ).rejects.toThrow(/GitHub API POST.*failed/)
@@ -144,13 +144,13 @@ describe('createSignedCommit', () => {
 
   it('throws when the ref PATCH fails', async () => {
     nock(API)
-      .post('/repos/o/r/git/blobs')
+      .post('/repos/owner/repo/git/blobs')
       .reply(201, { sha: 'b1' })
-      .post('/repos/o/r/git/trees')
+      .post('/repos/owner/repo/git/trees')
       .reply(201, { sha: 't1' })
-      .post('/repos/o/r/git/commits')
+      .post('/repos/owner/repo/git/commits')
       .reply(201, { sha: 'c1' })
-      .patch('/repos/o/r/git/refs/heads/main')
+      .patch('/repos/owner/repo/git/refs/heads/main')
       .reply(422, 'Unprocessable Entity')
 
     await expect(
@@ -160,7 +160,7 @@ describe('createSignedCommit', () => {
         files: [{ content: 'x', path: 'x.txt' }],
         message: 'test',
         parentSha: 'parent1',
-        repo: 'o/r',
+        repo: 'owner/repo',
         token: 'tok',
       }),
     ).rejects.toThrow(/GitHub API PATCH.*failed/)
