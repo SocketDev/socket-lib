@@ -6,6 +6,7 @@
  */
 
 import { existsSync, promises as fs } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 
 import {
@@ -17,6 +18,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
+import { normalizePath } from '../../../src/paths/normalize'
 import { safeDelete } from '../../../src/fs/safe'
 import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'
 
@@ -286,6 +288,16 @@ describe.sequential('dlx-binary cache enumeration', () => {
         const restoreHome = mockHomeDir(tmpDir)
 
         try {
+          // Assert the sandbox is in effect BEFORE counting anything. This test
+          // asserts an exact entry count, so if the cache ever resolved to the
+          // real ~/.socket/_dlx it would not fail cleanly -- it would count
+          // whatever binaries that machine had already cached and report a
+          // baffling "expected 2, got 5". Checking the path first turns that
+          // into a failure that names its own cause.
+          expect(getDlxCachePath().startsWith(normalizePath(os.tmpdir()))).toBe(
+            true,
+          )
+
           // Download multiple binaries
           const result1 = await dlxBinary(['--version'], {
             name: 'binary-1',

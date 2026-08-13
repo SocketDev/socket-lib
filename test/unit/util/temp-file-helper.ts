@@ -10,7 +10,7 @@ import process from 'node:process'
 
 import { clearEnv, setEnv } from '../../../src/env/rewire'
 import { safeDelete } from '../../../src/fs/safe'
-import { resetPaths } from '../../../src/paths/rewire'
+import { resetPaths, setPath } from '../../../src/paths/rewire'
 
 /**
  * Creates a unique temporary directory for testing. The directory is created in
@@ -43,7 +43,24 @@ export function mockHomeDir(homeDir: string): () => void {
   setEnv('HOME', homeDir)
   process.env['HOME'] = homeDir
 
-  // Set DLX directory override for test isolation.
+  // Pin the DLX cache to this test's own dir under os.tmpdir(). `homeDir` comes
+  // from createTempDir, so the path is unique per test and never the real
+  // ~/.socket/_dlx.
+  //
+  // Pinned THREE ways on purpose, because getSocketDlxDir() resolves
+  // setPath('socket-dlx-dir') → SOCKET_DLX_DIR → $SOCKET_HOME/_dlx →
+  // $HOME/.socket/_dlx, and each mechanism covers a different way the others
+  // slip:
+  //   - setPath is the FIRST override consulted, so it holds even when a
+  //     sibling has left a stale SOCKET_DLX_DIR in the environment. That
+  //     matters because process.env outlives a file: vitest resets the module
+  //     registry between files (isolate: true) but reuses the worker thread,
+  //     so an env var set by an earlier file is still there for a later one.
+  //   - setEnv is what the in-process env rewiring reads.
+  //   - process.env is what SPAWNED binaries inherit, and dlx tests spawn.
+  // Falling through to the last rung is the failure this prevents: the cache
+  // resolves to the developer's real ~/.socket/_dlx, and an enumeration test
+  // counts whatever happens to live there.
   const dlxDir = path.join(homeDir, '.socket', '_dlx')
   setEnv('SOCKET_DLX_DIR', dlxDir)
   process.env['SOCKET_DLX_DIR'] = dlxDir
@@ -56,6 +73,11 @@ export function mockHomeDir(homeDir: string): () => void {
 
   // Reset path cache after env changes.
   resetPaths()
+
+  // AFTER resetPaths, never before: resetPaths() clears every override, so a
+  // setPath made earlier in this function would be wiped here and the pin
+  // would quietly do nothing while the env var carried the isolation alone.
+  setPath('socket-dlx-dir', dlxDir)
 
   // Return restore function.
   return () => {
