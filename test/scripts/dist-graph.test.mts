@@ -56,7 +56,10 @@ describe('collectConditionTargets', () => {
     expect(
       collectConditionTargets(
         {
-          browser: { default: './dist/example/browser.js', types: './dist/example/beta.d.ts' },
+          browser: {
+            default: './dist/example/browser.js',
+            types: './dist/example/beta.d.ts',
+          },
           default: './dist/example/node.js',
           source: './src/example/node.ts',
         },
@@ -66,7 +69,9 @@ describe('collectConditionTargets', () => {
   })
 
   it('reads a bare string entry and skips non-js targets', () => {
-    expect(collectConditionTargets('./dist/example.js', [])).toEqual(['dist/example.js'])
+    expect(collectConditionTargets('./dist/example.js', [])).toEqual([
+      'dist/example.js',
+    ])
     expect(collectConditionTargets('./data/example.json', [])).toEqual([])
   })
 })

@@ -16,6 +16,14 @@
     "from": "npm-registry",
     "type": "js"
   },
+  "cover": {
+    "thresholds": {
+      "statements": 91,
+      "branches": 85,
+      "functions": 94,
+      "lines": 91
+    }
+  },
   "lint": {
     "profile": "rich"
   },

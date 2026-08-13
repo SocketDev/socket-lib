@@ -240,7 +240,9 @@ describe('eco/npm/npm-cli/lockfile/parse', () => {
           },
         }),
       )
-      const idxEntry = (result._index as { a?: unknown | undefined })['alpha']
+      const idxEntry = (result._index as { alpha?: unknown | undefined })[
+        'alpha'
+      ]
       expect(idxEntry).toEqual([0, 1, 2])
     })
 

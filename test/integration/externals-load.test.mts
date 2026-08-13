@@ -52,7 +52,9 @@ describe('dist externals', () => {
 
       await copy(src, dest)
 
-      expect(await fs.readFile(path.join(dest, 'alpha.txt'), 'utf8')).toBe('alpha')
+      expect(await fs.readFile(path.join(dest, 'alpha.txt'), 'utf8')).toBe(
+        'alpha',
+      )
       expect(
         await fs.readFile(path.join(dest, 'nested', 'beta.txt'), 'utf8'),
       ).toBe('beta')

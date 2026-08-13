@@ -75,7 +75,11 @@ describe('fs - Additional Coverage (dir/delete/inspect)', () => {
       await runWithTempDir(async tmpDir => {
         await fs.mkdir(path.join(tmpDir, 'empty'))
         await fs.mkdir(path.join(tmpDir, 'non-empty'))
-        await fs.writeFile(path.join(tmpDir, 'non-empty', 'file.txt'), '', 'utf8')
+        await fs.writeFile(
+          path.join(tmpDir, 'non-empty', 'file.txt'),
+          '',
+          'utf8',
+        )
 
         const result = readDirNamesSync(tmpDir, { includeEmpty: false })
         expect(result).toEqual(['non-empty'])

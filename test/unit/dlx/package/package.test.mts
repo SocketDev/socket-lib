@@ -159,7 +159,10 @@ describe('makePackageBinsExecutable', () => {
         }),
       )
       // Create the binary files without exec bits.
-      writeFileSync(path.join(installedDir, 'alpha.js'), '#!/usr/bin/env node\n')
+      writeFileSync(
+        path.join(installedDir, 'alpha.js'),
+        '#!/usr/bin/env node\n',
+      )
       writeFileSync(path.join(installedDir, 'beta.js'), '#!/usr/bin/env node\n')
       const fs = require('node:fs')
       fs.chmodSync(path.join(installedDir, 'alpha.js'), 0o644)

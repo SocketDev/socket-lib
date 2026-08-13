@@ -320,7 +320,11 @@ describe.sequential('pickAgent', () => {
   })
 
   test('falls back to codex over opencode/gemini', async () => {
-    primeCache({ codex: '/bin/codex', opencode: '/bin/oc', gemini: '/bin/grouprouproup' })
+    primeCache({
+      codex: '/bin/codex',
+      opencode: '/bin/oc',
+      gemini: '/bin/grouprouproup',
+    })
     expect(await pickAgent(undefined, tmpRoot)).toBe('codex')
   })
 

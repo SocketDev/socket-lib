@@ -76,10 +76,26 @@ jobs:
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
+      # Depth: 1 is enough to run the full suite, but `pnpm test --ci` needs a
+      # merge base to diff against, and a one-commit clone has none. Deepen on
+      # a pull request only; every other event runs `--all`, which needs no
+      # history at all and keeps the cheap depth-1 fetch.
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
         with:
-          fetch-depth: 1
+          fetch-depth: ${{ github.event_name == 'pull_request' && 50 || 1 }}
           persist-credentials: false
+      # The base branch as a remote-tracking ref, so resolveCiBaseRef can find
+      # it. A failure here is NOT fatal: with no base ref the scope decision
+      # escalates to the full suite, which is the safe answer.
+      - name: Fetch the base branch for the diff
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          set -euo pipefail
+          git fetch --no-tags --depth 50 origin \
+            "+refs/heads/${BASE_REF}:refs/remotes/origin/${BASE_REF}" || true
       - uses: ./.github/actions/fleet/setup-and-install
         with:
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
@@ -99,4 +115,43 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         with:
           setup-script: pnpm run build
-          main-script: pnpm run test --all
+          # A pull request tests only what its diff touches; main and tags run
+          # the whole suite, because main is the commit a release cut verifies
+          # green and that guarantee should not depend on a diff being computed
+          # correctly. `--ci` escalates to the full suite by itself whenever it
+          # cannot work out the diff, so a shallow clone or a missing base ref
+          # costs CI minutes rather than coverage.
+          main-script: ${{ github.event_name == 'pull_request' && 'pnpm run test --ci' || 'pnpm run test --all' }}
+
+  # Coverage gate. Runs on main pushes, tags and dispatch -- NOT on pull
+  # requests: the sweep is ~15 min, and main is what a release cuts from.
+  #
+  # This job is the reason .config/repo/socket-wheelhouse.json now carries a
+  # `cover.thresholds` block. Without thresholds, computeThresholdFailures
+  # returns no failures by construction, so `pnpm run cover` printed its
+  # percentages and exited 0 no matter how far coverage had fallen -- a gate
+  # that reports rather than gates. The floors are set at the measured
+  # aggregate, so they hold the line and are meant to be raised as it climbs.
+  cover:
+    name: 📊 Cover
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
+        with:
+          fetch-depth: 1
+          persist-credentials: false
+      - uses: ./.github/actions/fleet/setup-and-install
+        with:
+          socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
+          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
+      - uses: ./.github/actions/fleet/run-script
+        env:
+          # cover builds with source maps first; authenticate its build-time
+          # GitHub API reads, same as the test job.
+          GH_TOKEN: ${{ github.token }}
+        with:
+          setup-script: pnpm run build
+          main-script: pnpm run cover

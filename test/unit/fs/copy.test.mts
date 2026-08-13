@@ -34,9 +34,9 @@ describe('copy', () => {
 
       await copy(src, dest)
 
-      expect(await fs.readFile(path.join(dest, 'sub', 'file.txt'), 'utf8')).toBe(
-        'x',
-      )
+      expect(
+        await fs.readFile(path.join(dest, 'sub', 'file.txt'), 'utf8'),
+      ).toBe('x')
     }, 'copy-dir-')
   })
 

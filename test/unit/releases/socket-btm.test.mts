@@ -188,7 +188,9 @@ describe('releases/socket-btm', () => {
 
     it('should default bin to tool name when bin is unset', async () => {
       vi.mocked(getLatestRelease).mockResolvedValueOnce('lief-20250101-abc')
-      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/example/lief')
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        '/tmp/dl/example/lief',
+      )
 
       await downloadSocketBtmRelease('lief', {
         quiet: true,
@@ -206,7 +208,9 @@ describe('releases/socket-btm', () => {
 
     it('should use explicit bin name when different from tool', async () => {
       vi.mocked(getLatestRelease).mockResolvedValueOnce('tool-20250101-abc')
-      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/example/other')
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        '/tmp/dl/example/other',
+      )
 
       await downloadSocketBtmRelease('tool', {
         bin: 'other',
@@ -310,7 +314,9 @@ describe('releases/socket-btm', () => {
 
     it('forwards an explicit downloadDir through to downloadGitHubRelease config', async () => {
       vi.mocked(getLatestRelease).mockResolvedValueOnce('bin-20250101-abc')
-      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/example/dl/sample')
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce(
+        '/example/dl/sample',
+      )
       await downloadSocketBtmRelease('bin', {
         downloadDir: '/example/dl',
         quiet: true,

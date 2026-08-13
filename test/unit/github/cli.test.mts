@@ -104,23 +104,22 @@ describe('encodeGhFieldArgs', () => {
 describe('buildGhApiArgs', () => {
   it('is a bare GET by default', () => {
     // GET is gh's default, so naming it would add an argument saying nothing.
-    expect(buildGhApiArgs('repos/owner/repo')).toStrictEqual(['api', 'repos/owner/repo'])
+    expect(buildGhApiArgs('repos/owner/repo')).toStrictEqual([
+      'api',
+      'repos/owner/repo',
+    ])
   })
 
   it('omits -X for an explicit GET', () => {
-    expect(buildGhApiArgs('repos/owner/repo', { method: 'GET' })).toStrictEqual([
-      'api',
-      'repos/owner/repo',
-    ])
+    expect(buildGhApiArgs('repos/owner/repo', { method: 'GET' })).toStrictEqual(
+      ['api', 'repos/owner/repo'],
+    )
   })
 
   it('names any other method', () => {
-    expect(buildGhApiArgs('repos/owner/repo', { method: 'PATCH' })).toStrictEqual([
-      'api',
-      'repos/owner/repo',
-      '-X',
-      'PATCH',
-    ])
+    expect(
+      buildGhApiArgs('repos/owner/repo', { method: 'PATCH' }),
+    ).toStrictEqual(['api', 'repos/owner/repo', '-X', 'PATCH'])
   })
 
   it('appends the encoded fields after the method', () => {
@@ -225,7 +224,9 @@ describe('runGh', () => {
 
   it('leaves args alone when no body is given', async () => {
     const calls: SpawnCall[] = []
-    await runGh(['api', 'repos/owner/repo'], { spawnGh: scriptedSpawn(calls, {}) })
+    await runGh(['api', 'repos/owner/repo'], {
+      spawnGh: scriptedSpawn(calls, {}),
+    })
     expect(calls[0]!.args).toStrictEqual(['api', 'repos/owner/repo'])
   })
 })
