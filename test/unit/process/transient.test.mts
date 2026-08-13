@@ -333,7 +333,7 @@ describe('process/transient', () => {
       })
 
       it('should handle WSL paths', () => {
-        expect(isTransientProcess('/mnt/c/Users/user/_npx/123')).toBe(true)
+        expect(isTransientProcess('/mnt/gamma/Users/user/_npx/123')).toBe(true)
       })
     })
 

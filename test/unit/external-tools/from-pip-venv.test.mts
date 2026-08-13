@@ -78,8 +78,8 @@ describe.sequential('external-tools/from-pip-venv / pipVenvEntryPointPath', () =
   })
 
   test('different cache dirs produce different paths', () => {
-    const a = pipVenvEntryPointPath('/cache/a', 'tool')
-    const b = pipVenvEntryPointPath('/cache/b', 'tool')
+    const a = pipVenvEntryPointPath('/cache/alpha', 'tool')
+    const b = pipVenvEntryPointPath('/cache/beta', 'tool')
     expect(a).not.toBe(b)
   })
 })

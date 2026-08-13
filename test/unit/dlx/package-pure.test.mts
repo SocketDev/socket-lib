@@ -192,7 +192,7 @@ describe.sequential('dlx/package — pure functions', () => {
       // Spawn a binary that does not exist — the spawn lib throws
       // SpawnError. We just confirm executePackage routes through spawn
       // and returns a thenable handle.
-      const result = executePackage('/definitely/not/a/binary/xyz', [], {
+      const result = executePackage('/definitely/not/alpha/binary/xyz', [], {
         stdio: 'ignore',
       })
       await expect(result).rejects.toThrow()

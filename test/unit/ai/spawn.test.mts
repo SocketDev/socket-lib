@@ -320,17 +320,17 @@ describe.sequential('pickAgent', () => {
   })
 
   test('falls back to codex over opencode/gemini', async () => {
-    primeCache({ codex: '/bin/codex', opencode: '/bin/oc', gemini: '/bin/g' })
+    primeCache({ codex: '/bin/codex', opencode: '/bin/oc', gemini: '/bin/grouprouproup' })
     expect(await pickAgent(undefined, tmpRoot)).toBe('codex')
   })
 
   test('falls back to opencode when codex/claude missing', async () => {
-    primeCache({ opencode: '/bin/oc', gemini: '/bin/g' })
+    primeCache({ opencode: '/bin/oc', gemini: '/bin/grouprouproup' })
     expect(await pickAgent(undefined, tmpRoot)).toBe('opencode')
   })
 
   test('falls back to gemini when only gemini available', async () => {
-    primeCache({ gemini: '/bin/g' })
+    primeCache({ gemini: '/bin/grouprouproup' })
     expect(await pickAgent(undefined, tmpRoot)).toBe('gemini')
   })
 

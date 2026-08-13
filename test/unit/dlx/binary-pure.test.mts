@@ -34,7 +34,7 @@ describe('dlx/binary — pure functions', () => {
     it('routes a non-existent binary through spawn (rejects)', async () => {
       // Confirms executeBinary doesn't short-circuit before reaching
       // the spawn call. The spawned binary doesn't exist so spawn rejects.
-      const result = executeBinary('/definitely/not/a/binary/xyz', [], {
+      const result = executeBinary('/definitely/not/alpha/binary/xyz', [], {
         stdio: 'ignore',
       })
       await expect(result).rejects.toThrow()
@@ -42,7 +42,7 @@ describe('dlx/binary — pure functions', () => {
 
     it('handles empty args array', async () => {
       // Just confirms the args are forwarded, not consumed.
-      const result = executeBinary('/definitely/not/a/binary/xyz', [], {
+      const result = executeBinary('/definitely/not/alpha/binary/xyz', [], {
         stdio: 'ignore',
       })
       await expect(result).rejects.toThrow()

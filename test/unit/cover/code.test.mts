@@ -111,7 +111,7 @@ describe.sequential('cover/code', () => {
       expect(result.statements.total).toBe(1)
     })
 
-    it('skips non-object s/b/f buckets', async () => {
+    it('skips non-object s/beta/f buckets', async () => {
       const coveragePath = writeCoverageFile({
         '/alpha.ts': { s: 'not an object', b: undefined, f: undefined },
       })

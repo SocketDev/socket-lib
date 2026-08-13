@@ -202,7 +202,7 @@ describe('git extended tests', () => {
     })
 
     it('should return same path when no .git found', () => {
-      const nonGitPath = '/tmp/definitely/not/a/git/repo'
+      const nonGitPath = '/tmp/definitely/not/alpha/git/repo'
       const result = findGitRoot(nonGitPath)
       // Function returns either the path itself OR the nearest .git parent
       // If /tmp has .git, it returns /tmp; otherwise returns the input path

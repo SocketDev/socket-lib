@@ -86,7 +86,7 @@ describe.sequential('packages/exports — getSubpaths', () => {
       getSubpaths({
         '.': './index.js',
         './utils': './utils.js',
-        types: './x.d.ts',
+        types: './example.d.ts',
       }),
     ).toEqual(['.', './utils'])
   })
@@ -108,7 +108,7 @@ describe.sequential('packages/exports — getExportFilePaths', () => {
     expect(
       getExportFilePaths({
         '.': './alpha.js',
-        types: './x.d.ts',
+        types: './example.d.ts',
         './b': './beta.js',
       }),
     ).toEqual(['./alpha.js', './beta.js'])

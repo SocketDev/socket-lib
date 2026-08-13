@@ -188,7 +188,7 @@ describe('releases/socket-btm', () => {
 
     it('should default bin to tool name when bin is unset', async () => {
       vi.mocked(getLatestRelease).mockResolvedValueOnce('lief-20250101-abc')
-      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/x/lief')
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/example/lief')
 
       await downloadSocketBtmRelease('lief', {
         quiet: true,
@@ -206,7 +206,7 @@ describe('releases/socket-btm', () => {
 
     it('should use explicit bin name when different from tool', async () => {
       vi.mocked(getLatestRelease).mockResolvedValueOnce('tool-20250101-abc')
-      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/x/other')
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/example/other')
 
       await downloadSocketBtmRelease('tool', {
         bin: 'other',
@@ -297,7 +297,7 @@ describe('releases/socket-btm', () => {
 
     it('forwards an explicit cwd through to downloadGitHubRelease config', async () => {
       vi.mocked(getLatestRelease).mockResolvedValueOnce('bin-20250101-abc')
-      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/x')
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/tmp/dl/example')
       await downloadSocketBtmRelease('bin', {
         cwd: '/my/repo/root',
         quiet: true,
@@ -310,15 +310,15 @@ describe('releases/socket-btm', () => {
 
     it('forwards an explicit downloadDir through to downloadGitHubRelease config', async () => {
       vi.mocked(getLatestRelease).mockResolvedValueOnce('bin-20250101-abc')
-      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/x/dl/y')
+      vi.mocked(downloadGitHubRelease).mockResolvedValueOnce('/example/dl/sample')
       await downloadSocketBtmRelease('bin', {
-        downloadDir: '/x/dl',
+        downloadDir: '/example/dl',
         quiet: true,
         targetPlatform: 'darwin',
         targetArch: 'arm64',
       })
       const cfg = vi.mocked(downloadGitHubRelease).mock.lastCall![0]
-      expect(cfg.downloadDir).toBe('/x/dl')
+      expect(cfg.downloadDir).toBe('/example/dl')
     })
   })
 })

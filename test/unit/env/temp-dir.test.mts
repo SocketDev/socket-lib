@@ -29,8 +29,8 @@ describe('env/temp-dir', () => {
     })
 
     it('should handle macOS default tmpdir', () => {
-      setEnv('TMPDIR', '/var/folders/abc/xyz/T/')
-      expect(getTmpdir()).toBe('/var/folders/abc/xyz/T/')
+      setEnv('TMPDIR', '/var/folders/abc/xyz/target/')
+      expect(getTmpdir()).toBe('/var/folders/abc/xyz/target/')
     })
 
     it('should handle Unix tmpdir', () => {
@@ -204,8 +204,8 @@ describe('env/temp-dir', () => {
     })
 
     it('should handle WSL tmp path', () => {
-      setEnv('TMP', '/mnt/c/Windows/Temp')
-      expect(getTmp()).toBe('/mnt/c/Windows/Temp')
+      setEnv('TMP', '/mnt/gamma/Windows/Temp')
+      expect(getTmp()).toBe('/mnt/gamma/Windows/Temp')
     })
   })
 

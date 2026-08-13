@@ -30,8 +30,8 @@ describe('parsePorcelain', () => {
   })
 
   it('parses an untracked line', () => {
-    expect(parsePorcelain('?? scripts/x.mts\n')).toEqual([
-      { status: '??', path: 'scripts/x.mts' },
+    expect(parsePorcelain('?? scripts/example.mts\n')).toEqual([
+      { status: '??', path: 'scripts/example.mts' },
     ])
   })
 
@@ -49,31 +49,31 @@ describe('parsePorcelain', () => {
 
   it('parses a mixed multi-line status in order', () => {
     const out =
-      ' M src/a.ts\n' +
-      'M  src/b.ts\n' +
-      'MM src/c.ts\n' +
+      ' M src/alphalphalpha.ts\n' +
+      'M  src/betalphalpha.ts\n' +
+      'MM src/gammalphalpha.ts\n' +
       '?? notes.md\n' +
       'R  src/old.ts -> src/new.ts\n'
     expect(parsePorcelain(out)).toEqual([
-      { status: ' M', path: 'src/a.ts' },
-      { status: 'M ', path: 'src/b.ts' },
-      { status: 'MM', path: 'src/c.ts' },
+      { status: ' M', path: 'src/alphalphalpha.ts' },
+      { status: 'M ', path: 'src/betalphalpha.ts' },
+      { status: 'MM', path: 'src/gammalphalpha.ts' },
       { status: '??', path: 'notes.md' },
       { status: 'R ', path: 'src/new.ts' },
     ])
   })
 
   it('skips blank lines, including the trailing newline entry', () => {
-    expect(parsePorcelain(' M a.ts\n\n M b.ts\n')).toEqual([
-      { status: ' M', path: 'a.ts' },
-      { status: ' M', path: 'b.ts' },
+    expect(parsePorcelain(' M alphalpha.ts\n\n M betalpha.ts\n')).toEqual([
+      { status: ' M', path: 'alphalpha.ts' },
+      { status: ' M', path: 'betalpha.ts' },
     ])
   })
 
   it('handles CRLF line endings', () => {
-    expect(parsePorcelain(' M a.ts\r\n?? b.ts\r\n')).toEqual([
-      { status: ' M', path: 'a.ts' },
-      { status: '??', path: 'b.ts' },
+    expect(parsePorcelain(' M alphalpha.ts\r\n?? betalpha.ts\r\n')).toEqual([
+      { status: ' M', path: 'alphalpha.ts' },
+      { status: '??', path: 'betalpha.ts' },
     ])
   })
 

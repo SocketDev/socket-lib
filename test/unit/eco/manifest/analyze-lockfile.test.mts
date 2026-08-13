@@ -11,10 +11,10 @@ const LOCK = parsePackageLock(
   JSON.stringify({
     lockfileVersion: 3,
     packages: {
-      'node_modules/a': { version: '1.0.0' },
-      'node_modules/b': { version: '1.0.0', dev: true },
-      'node_modules/c': { version: '1.0.0', optional: true },
-      'node_modules/d': { version: '1.0.0', peer: true },
+      'node_modules/alpha': { version: '1.0.0' },
+      'node_modules/beta': { version: '1.0.0', dev: true },
+      'node_modules/gamma': { version: '1.0.0', optional: true },
+      'node_modules/delta': { version: '1.0.0', peer: true },
     },
   }),
 )

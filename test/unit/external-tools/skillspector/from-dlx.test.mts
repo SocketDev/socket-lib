@@ -49,7 +49,7 @@ describe.sequential('external-tools/skillspector/from-dlx', () => {
   test('passes the canonical NVIDIA repo + sha as the install spec', async () => {
     const { skillspectorFromDlx, createMock } = await loadFresh()
     createMock.mockResolvedValueOnce({
-      entryPointPath: '/x/skillspector',
+      entryPointPath: '/example/skillspector',
       created: true,
     })
     await skillspectorFromDlx({ sha: 'abc1234' })
@@ -64,7 +64,7 @@ describe.sequential('external-tools/skillspector/from-dlx', () => {
   test('defaults cache dir to getSocketDlxDir()/skillspector/<sha>', async () => {
     const { skillspectorFromDlx, createMock } = await loadFresh()
     createMock.mockResolvedValueOnce({
-      entryPointPath: '/x/skillspector',
+      entryPointPath: '/example/skillspector',
       created: true,
     })
     await skillspectorFromDlx({ sha: 'abc1234' })
@@ -77,7 +77,7 @@ describe.sequential('external-tools/skillspector/from-dlx', () => {
   test('honors caller-supplied cacheDir override', async () => {
     const { skillspectorFromDlx, createMock } = await loadFresh()
     createMock.mockResolvedValueOnce({
-      entryPointPath: '/x/skillspector',
+      entryPointPath: '/example/skillspector',
       created: true,
     })
     await skillspectorFromDlx({

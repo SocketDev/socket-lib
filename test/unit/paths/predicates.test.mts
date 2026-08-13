@@ -26,7 +26,7 @@ describe('path predicates', () => {
     it('should detect node_modules in path', () => {
       expect(isNodeModules('/project/node_modules/package')).toBe(true)
       expect(isNodeModules('node_modules/package/index.js')).toBe(true)
-      expect(isNodeModules('/a/b/node_modules/c/d')).toBe(true)
+      expect(isNodeModules('/a/b/node_modules/c/delta')).toBe(true)
       expect(isNodeModules('node_modules')).toBe(true)
     })
 
@@ -188,7 +188,7 @@ describe('path predicates', () => {
       it('should detect paths starting with @ that have subpaths', () => {
         expect(isPath('@scope/name/subpath')).toBe(true)
         expect(isPath('@scope/name/file.js')).toBe(true)
-        expect(isPath('@scope/name/a/b/c')).toBe(true)
+        expect(isPath('@scope/name/a/beta/gamma')).toBe(true)
         expect(isPath('@/path')).toBe(true)
       })
 
@@ -261,7 +261,7 @@ describe('path predicates', () => {
         expect(isPath('@scope')).toBe(false)
         expect(isPath('@scope/name')).toBe(false)
         expect(isPath('@scope/name/file')).toBe(true)
-        expect(isPath('@scope/name/a/b')).toBe(true)
+        expect(isPath('@scope/name/a/beta')).toBe(true)
       })
 
       it('should handle mixed separators in scoped packages', () => {

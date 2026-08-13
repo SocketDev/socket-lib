@@ -32,7 +32,7 @@ describe.sequential('external-tools/skillspector/resolve / cacheKey', () => {
 
   test('cacheDir override is part of the key', () => {
     expect(cacheKey({ sha: 'abc1234' })).not.toBe(
-      canonicalCacheKey({ sha: 'abc1234', cacheDir: '/tmp/x' }),
+      canonicalCacheKey({ sha: 'abc1234', cacheDir: '/tmp/example' }),
     )
   })
 
@@ -45,12 +45,12 @@ describe.sequential('external-tools/skillspector/resolve / cacheKey', () => {
   test('opts with sha + cacheDir + localOnly produces a deterministic key', () => {
     const opts = {
       sha: 'abc1234',
-      cacheDir: '/tmp/x',
+      cacheDir: '/tmp/example',
       localOnly: true,
     } as const
     const k = cacheKey(opts)
     expect(k).toContain('abc1234')
-    expect(k).toContain('/tmp/x')
+    expect(k).toContain('/tmp/example')
     expect(k).toContain('local')
   })
 })

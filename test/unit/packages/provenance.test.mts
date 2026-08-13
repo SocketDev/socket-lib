@@ -211,19 +211,19 @@ describe.sequential('packages/provenance — isTrustedPublisher', () => {
   })
 
   it('returns true for github.com URLs', () => {
-    expect(isTrustedPublisher('https://github.com/o/r')).toBe(true)
+    expect(isTrustedPublisher('https://github.com/o/repo')).toBe(true)
     expect(isTrustedPublisher('https://api.github.com/repos/owner/repo')).toBe(true)
   })
 
   it('returns true for gitlab.com URLs', () => {
-    expect(isTrustedPublisher('https://gitlab.com/g/p')).toBe(true)
+    expect(isTrustedPublisher('https://gitlab.com/g/pkg')).toBe(true)
     expect(isTrustedPublisher('https://nested.gitlab.com/path')).toBe(true)
   })
 
   it('handles workflow @-suffix by splitting on @', () => {
     expect(
       isTrustedPublisher(
-        'https://github.com/o/r/.github/workflows/ci.yml@refs/heads/main',
+        'https://github.com/o/repo/.github/workflows/ci.yml@refs/heads/main',
       ),
     ).toBe(true)
   })
@@ -231,17 +231,17 @@ describe.sequential('packages/provenance — isTrustedPublisher', () => {
   it('handles @-suffix where first part is also not a URL', () => {
     // "@" is present, but the value before "@" isn't a valid URL either.
     // The fall-through then tries `https://` prefix and matches.
-    expect(isTrustedPublisher('github.com/o/r@refs/heads/main')).toBe(true)
+    expect(isTrustedPublisher('github.com/owner/r@refs/heads/main')).toBe(true)
   })
 
   it('handles @-suffix where first part is empty after split', () => {
     // Edge: split returns ['', ...] — the inner if(firstPart) guard fires.
-    expect(isTrustedPublisher('@github.com/o')).toBe(true)
+    expect(isTrustedPublisher('@github.com/owner')).toBe(true)
   })
 
   it('returns true for bare hostnames (synthetic https:// prefix)', () => {
-    expect(isTrustedPublisher('github.com/o/r')).toBe(true)
-    expect(isTrustedPublisher('gitlab.com/g/p')).toBe(true)
+    expect(isTrustedPublisher('github.com/o/repo')).toBe(true)
+    expect(isTrustedPublisher('gitlab.com/g/pkg')).toBe(true)
   })
 
   it('falls back to substring match for strings without a hostname', () => {
@@ -281,7 +281,7 @@ describe.sequential('packages/provenance — fetchPackageProvenance', () => {
             buildDefinition: {
               externalParameters: {
                 workflow: {
-                  ref: 'https://github.com/o/r/.github/workflows/ci.yml@refs/heads/main',
+                  ref: 'https://github.com/o/repo/.github/workflows/ci.yml@refs/heads/main',
                   repository: 'o/r',
                 },
                 ref: 'refs/heads/main',

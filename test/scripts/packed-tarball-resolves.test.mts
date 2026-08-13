@@ -68,23 +68,23 @@ describe('buildPackedProbeSource', () => {
   it('emits a synchronous try/catch require per subpath', () => {
     const source = buildPackedProbeSource(
       '@fixture/pkg',
-      ['a/one', 'b/two'],
+      ['alphalphalphalphalphalphalphalpha/one', 'beta/two'],
       'require',
     )
-    expect(source).toContain('require("@fixture/pkg/a/one")')
-    expect(source).toContain('require("@fixture/pkg/b/two")')
+    expect(source).toContain('require("@fixture/pkg/alphalphalphalphalphalphalphalpha/one")')
+    expect(source).toContain('require("@fixture/pkg/beta/two")')
     expect(source).not.toContain('await')
     expect(source).toContain('process.stdout.write(JSON.stringify(failures))')
   })
 
   it('emits an awaited dynamic import per subpath', () => {
-    const source = buildPackedProbeSource('@fixture/pkg', ['a/one'], 'import')
-    expect(source).toContain('await import("@fixture/pkg/a/one")')
+    const source = buildPackedProbeSource('@fixture/pkg', ['alphalphalphalphalphalphalphalpha/one'], 'import')
+    expect(source).toContain('await import("@fixture/pkg/alphalphalphalphalphalphalphalpha/one")')
   })
 
   it('records the subpath and mode on failure, not the whole specifier', () => {
-    const source = buildPackedProbeSource('@fixture/pkg', ['a/one'], 'require')
-    expect(source).toContain('subpath: "a/one"')
+    const source = buildPackedProbeSource('@fixture/pkg', ['alphalphalphalphalphalphalphalpha/one'], 'require')
+    expect(source).toContain('subpath: "alphalphalphalphalphalphalphalpha/one"')
     expect(source).toContain('mode: "require"')
   })
 })
@@ -92,10 +92,10 @@ describe('buildPackedProbeSource', () => {
 describe('parsePackedProbeOutput', () => {
   it('parses a JSON array of failures', () => {
     const failures = parsePackedProbeOutput(
-      '[{"subpath":"a/one","mode":"require","message":"boom"}]',
+      '[{"subpath":"alphalphalphalphalphalphalphalpha/one","mode":"require","message":"boom"}]',
     )
     expect(failures).toEqual([
-      { subpath: 'a/one', mode: 'require', message: 'boom' },
+      { subpath: 'alphalphalphalphalphalphalphalpha/one', mode: 'require', message: 'boom' },
     ])
   })
 

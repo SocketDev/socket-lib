@@ -406,8 +406,8 @@ describe('socket env', () => {
 
   describe('getSocketBranchName', () => {
     it('should return branch name when set', () => {
-      setEnv('SOCKET_BRANCH_NAME', 'feature/x')
-      expect(getSocketBranchName()).toBe('feature/x')
+      setEnv('SOCKET_BRANCH_NAME', 'feature/example')
+      expect(getSocketBranchName()).toBe('feature/example')
     })
 
     it('should return undefined when not set', () => {

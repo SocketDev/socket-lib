@@ -252,7 +252,7 @@ describe('spawn/errors — enhanceSpawnError', () => {
 
 describe('spawn/errors — basic invocation (child integration)', () => {
   it('rejects with an enhanced error when binary does not exist', async () => {
-    const result = spawn('/definitely/not/a/binary/xyz', [], {
+    const result = spawn('/definitely/not/alpha/binary/xyz', [], {
       stdio: 'ignore',
     })
     await expect(result).rejects.toThrow()

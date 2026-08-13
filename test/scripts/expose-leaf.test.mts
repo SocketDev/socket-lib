@@ -66,22 +66,22 @@ describe('planExposure', () => {
 describe('listWithoutLeaves', () => {
   test('drops the exposed leaf and keeps the rest', () => {
     const out = JSON.parse(
-      listWithoutLeaves(['a/one', 'b/two', 'c/three'], ['alpha'], ['b/two']),
+      listWithoutLeaves(['alphalphalphalphalphalphalphalphalphalpha/one', 'beta/two', 'gamma/three'], ['alpha'], ['beta/two']),
     )
-    expect(out.leaves).toEqual(['a/one', 'c/three'])
+    expect(out.leaves).toEqual(['alphalphalphalphalphalphalphalphalphalpha/one', 'gamma/three'])
   })
 
   test('preserves the roster record so coverage stays verifiable', () => {
     // Dropping scannedRoster here would silently reopen the hole the coverage
     // check exists to close.
     const out = JSON.parse(
-      listWithoutLeaves(['a/one'], ['alpha', 'beta'], ['a/one']),
+      listWithoutLeaves(['alphalphalphalphalphalphalphalphalphalpha/one'], ['alpha', 'beta'], ['alphalphalphalphalphalphalphalphalphalpha/one']),
     )
     expect(out.scannedRoster).toEqual(['alpha', 'beta'])
     expect(out.leaves).toEqual([])
   })
 
   test('emits a trailing newline so the file stays diff-clean', () => {
-    expect(listWithoutLeaves(['a/one'], [], [])).toMatch(/\}\n$/)
+    expect(listWithoutLeaves(['alphalphalphalphalphalphalphalphalphalpha/one'], [], [])).toMatch(/\}\n$/)
   })
 })

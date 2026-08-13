@@ -21,7 +21,7 @@ describe('eco/manifest/parse', () => {
       'package-lock.json',
       JSON.stringify({
         lockfileVersion: 3,
-        packages: { 'node_modules/x': { version: '1.0.0' } },
+        packages: { 'node_modules/example': { version: '1.0.0' } },
       }),
     )
     expect(result.type).toBe('lockfile')

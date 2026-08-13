@@ -190,8 +190,8 @@ describe('env/path', () => {
     })
 
     it('should handle WSL PATH', () => {
-      setEnv('PATH', '/usr/bin:/bin:/mnt/c/Windows/System32')
-      expect(getPath()).toBe('/usr/bin:/bin:/mnt/c/Windows/System32')
+      setEnv('PATH', '/usr/bin:/bin:/mnt/gamma/Windows/System32')
+      expect(getPath()).toBe('/usr/bin:/bin:/mnt/gamma/Windows/System32')
     })
   })
 

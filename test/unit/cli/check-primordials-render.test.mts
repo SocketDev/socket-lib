@@ -95,7 +95,7 @@ describe('resolveConfigPath', () => {
     const { resolveConfigPath } =
       await import('../../../src/cli/check-primordials')
     const dir = await seedBaseDir(['.config/repo/socket-lib.json'])
-    expect(resolveConfigPath('/explicit/x.json', dir)).toBe('/explicit/x.json')
+    expect(resolveConfigPath('/explicit/example.json', dir)).toBe('/explicit/example.json')
   })
 })
 
@@ -156,7 +156,7 @@ describe('renderHuman', () => {
             {
               kind: 'unmapped',
               name: 'BadName',
-              hint: 'no mapping; pick one of A/B/C',
+              hint: 'no mapping; pick one of A/B/gamma',
               files: ['src/alpha.js', 'src/beta.js'],
             },
           ],

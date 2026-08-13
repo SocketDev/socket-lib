@@ -136,8 +136,8 @@ describe('env/home', () => {
     })
 
     it('should handle WSL paths', () => {
-      setEnv('HOME', '/mnt/c/Users/testuser')
-      expect(getHome()).toBe('/mnt/c/Users/testuser')
+      setEnv('HOME', '/mnt/gamma/Users/testuser')
+      expect(getHome()).toBe('/mnt/gamma/Users/testuser')
     })
 
     it('should handle Docker container paths', () => {

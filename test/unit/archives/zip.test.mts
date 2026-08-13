@@ -86,7 +86,7 @@ describe('extractZip', () => {
   it('skips entries with fewer path parts than strip', async () => {
     // `top.txt` has one part, so a strip of 2 leaves nothing to write and the
     // entry is passed over instead of erroring.
-    const archive = makeZip({ 'a/b/deep.txt': 'deep', 'top.txt': 'top' })
+    const archive = makeZip({ 'a/beta/deep.txt': 'deep', 'top.txt': 'top' })
     const out = tmpDir()
     await extractZip(archive, out, { strip: 2 })
     expect(existsSync(path.join(out, 'top.txt'))).toBe(false)
