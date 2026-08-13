@@ -25,8 +25,8 @@ describe('getTrackedIgnoredFiles', () => {
   it('returns [] for a clean repo (nothing tracked-ignored)', async () => {
     await runWithTempDir(async dir => {
       initRepo(dir)
-      await fs.writeFile(path.join(dir, 'a.txt'), 'hi\n')
-      spawnSync('git', ['add', 'a.txt'], { cwd: dir })
+      await fs.writeFile(path.join(dir, 'alpha.txt'), 'hi\n')
+      spawnSync('git', ['add', 'alpha.txt'], { cwd: dir })
       spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
       expect(await getTrackedIgnoredFiles({ cwd: dir })).toEqual([])
     })

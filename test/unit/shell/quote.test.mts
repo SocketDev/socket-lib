@@ -26,7 +26,7 @@ describe('shell/quote', () => {
   })
 
   it('round-trips a path with spaces', () => {
-    expect(quote(['cat', '/a b/c.txt'])).toBe("cat '/a b/c.txt'")
+    expect(quote(['cat', '/a b/gamma.txt'])).toBe("cat '/a b/gamma.txt'")
   })
 
   it('returns an empty string for no args', () => {

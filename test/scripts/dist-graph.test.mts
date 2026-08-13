@@ -56,7 +56,7 @@ describe('collectConditionTargets', () => {
     expect(
       collectConditionTargets(
         {
-          browser: { default: './dist/x/browser.js', types: './dist/x/b.d.ts' },
+          browser: { default: './dist/x/browser.js', types: './dist/x/beta.d.ts' },
           default: './dist/x/node.js',
           source: './src/x/node.ts',
         },

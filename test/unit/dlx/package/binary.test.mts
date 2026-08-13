@@ -322,8 +322,8 @@ describe('binary resolution with cross-platform wrappers', () => {
         name: '@scope/multi-bin',
         version: '1.0.0',
         bin: {
-          'tool-a': './bin/a.js',
-          'tool-b': './bin/b.js',
+          'tool-a': './bin/alpha.js',
+          'tool-b': './bin/beta.js',
           'multi-bin': './bin/main.js',
         },
       }
@@ -338,11 +338,11 @@ describe('binary resolution with cross-platform wrappers', () => {
 
       // Create all binaries
       writeFileSync(
-        path.join(binDir, 'a.js'),
+        path.join(binDir, 'alpha.js'),
         '#!/usr/bin/env node\nconsole.log("a")',
       )
       writeFileSync(
-        path.join(binDir, 'b.js'),
+        path.join(binDir, 'beta.js'),
         '#!/usr/bin/env node\nconsole.log("b")',
       )
       writeFileSync(
@@ -372,8 +372,8 @@ describe('binary resolution with cross-platform wrappers', () => {
         name: 'fallback-pkg',
         version: '1.0.0',
         bin: {
-          'other-a': './bin/a.js',
-          'other-b': './bin/b.js',
+          'other-a': './bin/alpha.js',
+          'other-b': './bin/beta.js',
         },
       }
       writeFileSync(
@@ -387,11 +387,11 @@ describe('binary resolution with cross-platform wrappers', () => {
 
       // Create binaries
       writeFileSync(
-        path.join(binDir, 'a.js'),
+        path.join(binDir, 'alpha.js'),
         '#!/usr/bin/env node\nconsole.log("a")',
       )
       writeFileSync(
-        path.join(binDir, 'b.js'),
+        path.join(binDir, 'beta.js'),
         '#!/usr/bin/env node\nconsole.log("b")',
       )
 
@@ -401,7 +401,7 @@ describe('binary resolution with cross-platform wrappers', () => {
       )
       const firstBinary = Object.keys(pkg.bin)[0]!
       expect(firstBinary).toBe('other-a')
-      expect(pkg.bin[firstBinary]).toBe('./bin/a.js')
+      expect(pkg.bin[firstBinary]).toBe('./bin/alpha.js')
     }, 'dlx-pkg-fallback-')
   })
 

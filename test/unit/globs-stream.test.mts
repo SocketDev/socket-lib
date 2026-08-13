@@ -157,8 +157,8 @@ describe.sequential('trailing-slash ignore patterns', () => {
     mkdirSync(path.join(tmpRoot, 'dist'), { recursive: true })
     mkdirSync(path.join(tmpRoot, 'src'), { recursive: true })
     writeFileSync(path.join(tmpRoot, 'package.json'), '{}')
-    writeFileSync(path.join(tmpRoot, 'src', 'a.json'), '{}')
-    writeFileSync(path.join(tmpRoot, 'dist', 'b.json'), '{}')
+    writeFileSync(path.join(tmpRoot, 'src', 'alpha.json'), '{}')
+    writeFileSync(path.join(tmpRoot, 'dist', 'beta.json'), '{}')
   })
 
   afterEach(async () => {
@@ -174,7 +174,7 @@ describe.sequential('trailing-slash ignore patterns', () => {
       cwd: tmpRoot,
       ignore: ['**/dist/'],
     })
-    expect(files.toSorted()).toEqual(['package.json', 'src/a.json'])
+    expect(files.toSorted()).toEqual(['package.json', 'src/alpha.json'])
   })
 
   it('globSync: directory ignored via trailing-slash pattern is excluded', () => {
@@ -182,7 +182,7 @@ describe.sequential('trailing-slash ignore patterns', () => {
       cwd: tmpRoot,
       ignore: ['**/dist/'],
     })
-    expect(files.toSorted()).toEqual(['package.json', 'src/a.json'])
+    expect(files.toSorted()).toEqual(['package.json', 'src/alpha.json'])
   })
 
   it('glob: still honors patterns without trailing slash', async () => {
@@ -190,7 +190,7 @@ describe.sequential('trailing-slash ignore patterns', () => {
       cwd: tmpRoot,
       ignore: ['**/dist/**'],
     })
-    expect(files.toSorted()).toEqual(['package.json', 'src/a.json'])
+    expect(files.toSorted()).toEqual(['package.json', 'src/alpha.json'])
   })
 
   // Mixed: one entry has the trailing slash, one does not. Both
@@ -203,7 +203,7 @@ describe.sequential('trailing-slash ignore patterns', () => {
       cwd: tmpRoot,
       ignore: ['**/dist/', '**/build'],
     })
-    expect(files.toSorted()).toEqual(['package.json', 'src/a.json'])
+    expect(files.toSorted()).toEqual(['package.json', 'src/alpha.json'])
   })
 
   // Empty ignore array must still produce a normalized empty array rather
@@ -216,9 +216,9 @@ describe.sequential('trailing-slash ignore patterns', () => {
       ignore: [],
     })
     expect(files.toSorted()).toEqual([
-      'dist/b.json',
+      'dist/beta.json',
       'package.json',
-      'src/a.json',
+      'src/alpha.json',
     ])
   })
 
@@ -236,9 +236,9 @@ describe.sequential('trailing-slash ignore patterns', () => {
     // Same result as no ignore at all — `/` was preserved (not
     // stripped to '') and didn't accidentally match the cwd.
     expect(files.toSorted()).toEqual([
-      'dist/b.json',
+      'dist/beta.json',
       'package.json',
-      'src/a.json',
+      'src/alpha.json',
     ])
   })
 
@@ -248,9 +248,9 @@ describe.sequential('trailing-slash ignore patterns', () => {
   it('glob: works with no ignore option', async () => {
     const files = await glob(['**/*.json'], { cwd: tmpRoot })
     expect(files.toSorted()).toEqual([
-      'dist/b.json',
+      'dist/beta.json',
       'package.json',
-      'src/a.json',
+      'src/alpha.json',
     ])
   })
 })

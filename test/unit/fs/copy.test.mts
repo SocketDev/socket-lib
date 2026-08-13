@@ -15,8 +15,8 @@ import { runWithTempDir } from '../util/temp-file-helper'
 describe('copy', () => {
   it('copies a single file', async () => {
     await runWithTempDir(async tmpDir => {
-      const from = path.join(tmpDir, 'a.txt')
-      const to = path.join(tmpDir, 'b.txt')
+      const from = path.join(tmpDir, 'alpha.txt')
+      const to = path.join(tmpDir, 'beta.txt')
       await fs.writeFile(from, 'hello', 'utf8')
 
       await copy(from, to)

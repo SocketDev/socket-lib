@@ -111,8 +111,8 @@ describe('validateFiles', () => {
 
   it('should preserve file order in results', async () => {
     await runWithTempDir(async tmpDir => {
-      const file1 = path.join(tmpDir, 'a.json')
-      const file2 = path.join(tmpDir, 'b.json')
+      const file1 = path.join(tmpDir, 'alpha.json')
+      const file2 = path.join(tmpDir, 'beta.json')
       const file3 = path.join(tmpDir, 'c.json')
       await fs.writeFile(file1, '{}', 'utf8')
       await fs.writeFile(file2, '{}', 'utf8')

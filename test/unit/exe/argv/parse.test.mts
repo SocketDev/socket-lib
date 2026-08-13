@@ -73,12 +73,12 @@ describe('argv/parse', () => {
 
     it('should handle multiple values with array option', () => {
       const result = parseArgs({
-        args: ['--file', 'a.js', '--file', 'b.js'],
+        args: ['--file', 'alpha.js', '--file', 'beta.js'],
         options: {
           file: { type: 'string', multiple: true },
         },
       })
-      expect(result.values['file']).toEqual(['a.js', 'b.js'])
+      expect(result.values['file']).toEqual(['alpha.js', 'beta.js'])
     })
 
     it('should handle coerce function', () => {

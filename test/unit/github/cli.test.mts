@@ -104,20 +104,20 @@ describe('encodeGhFieldArgs', () => {
 describe('buildGhApiArgs', () => {
   it('is a bare GET by default', () => {
     // GET is gh's default, so naming it would add an argument saying nothing.
-    expect(buildGhApiArgs('repos/o/r')).toStrictEqual(['api', 'repos/o/r'])
+    expect(buildGhApiArgs('repos/owner/repo')).toStrictEqual(['api', 'repos/owner/repo'])
   })
 
   it('omits -X for an explicit GET', () => {
-    expect(buildGhApiArgs('repos/o/r', { method: 'GET' })).toStrictEqual([
+    expect(buildGhApiArgs('repos/owner/repo', { method: 'GET' })).toStrictEqual([
       'api',
-      'repos/o/r',
+      'repos/owner/repo',
     ])
   })
 
   it('names any other method', () => {
-    expect(buildGhApiArgs('repos/o/r', { method: 'PATCH' })).toStrictEqual([
+    expect(buildGhApiArgs('repos/owner/repo', { method: 'PATCH' })).toStrictEqual([
       'api',
-      'repos/o/r',
+      'repos/owner/repo',
       '-X',
       'PATCH',
     ])
@@ -125,13 +125,13 @@ describe('buildGhApiArgs', () => {
 
   it('appends the encoded fields after the method', () => {
     expect(
-      buildGhApiArgs('repos/o/r', {
+      buildGhApiArgs('repos/owner/repo', {
         fields: { has_issues: true },
         method: 'PATCH',
       }),
     ).toStrictEqual([
       'api',
-      'repos/o/r',
+      'repos/owner/repo',
       '-X',
       'PATCH',
       '-F',
@@ -159,7 +159,7 @@ describe('runGh', () => {
   it('resolves a non-zero exit rather than throwing', async () => {
     // A missing check run or an absent ruleset is a STATE to report, which is
     // why every caller branches on the code instead of wrapping a try.
-    const result = await runGh(['api', 'repos/o/r/rulesets'], {
+    const result = await runGh(['api', 'repos/owner/repo/rulesets'], {
       spawnGh: scriptedSpawn([], {
         code: 1,
         stderr: 'gh: Not Found (HTTP 404)',
@@ -213,7 +213,7 @@ describe('runGh', () => {
     // The lib spawn leaves the child's stdin unwired, so `--input -` reads
     // nothing and the request goes out empty. The file is the whole point.
     const calls: SpawnCall[] = []
-    await runGh(['api', 'repos/o/r', '--input', GH_BODY_PLACEHOLDER], {
+    await runGh(['api', 'repos/owner/repo', '--input', GH_BODY_PLACEHOLDER], {
       body: '{"enabled":true}',
       spawnGh: scriptedSpawn(calls, {}),
     })
@@ -225,21 +225,21 @@ describe('runGh', () => {
 
   it('leaves args alone when no body is given', async () => {
     const calls: SpawnCall[] = []
-    await runGh(['api', 'repos/o/r'], { spawnGh: scriptedSpawn(calls, {}) })
-    expect(calls[0]!.args).toStrictEqual(['api', 'repos/o/r'])
+    await runGh(['api', 'repos/owner/repo'], { spawnGh: scriptedSpawn(calls, {}) })
+    expect(calls[0]!.args).toStrictEqual(['api', 'repos/owner/repo'])
   })
 })
 
 describe('ghApi', () => {
   it('parses the JSON a successful call returns', async () => {
-    const result = await ghApi<{ name: string }>('repos/o/r', {
+    const result = await ghApi<{ name: string }>('repos/owner/repo', {
       spawnGh: scriptedSpawn([], { stdout: '{"name":"r"}' }),
     })
     expect(result).toStrictEqual({ name: 'r' })
   })
 
   it('answers undefined on a failed call', async () => {
-    const result = await ghApi('repos/o/r', {
+    const result = await ghApi('repos/owner/repo', {
       spawnGh: scriptedSpawn([], { code: 1, stderr: 'Not Found' }),
     })
     expect(result).toBeUndefined()
@@ -247,14 +247,14 @@ describe('ghApi', () => {
 
   it('answers undefined on an empty body', async () => {
     // A 204 and an absent resource are the same non-answer to these readers.
-    const result = await ghApi('repos/o/r', {
+    const result = await ghApi('repos/owner/repo', {
       spawnGh: scriptedSpawn([], { stdout: '   ' }),
     })
     expect(result).toBeUndefined()
   })
 
   it('answers undefined rather than throwing on malformed JSON', async () => {
-    const result = await ghApi('repos/o/r', {
+    const result = await ghApi('repos/owner/repo', {
       spawnGh: scriptedSpawn([], { stdout: 'not json {{{' }),
     })
     expect(result).toBeUndefined()
@@ -262,14 +262,14 @@ describe('ghApi', () => {
 
   it('sends the method and fields it was given', async () => {
     const calls: SpawnCall[] = []
-    await ghApi('repos/o/r', {
+    await ghApi('repos/owner/repo', {
       fields: { has_wiki: false },
       method: 'PATCH',
       spawnGh: scriptedSpawn(calls, { stdout: '{}' }),
     })
     expect(calls[0]!.args).toStrictEqual([
       'api',
-      'repos/o/r',
+      'repos/owner/repo',
       '-X',
       'PATCH',
       '-F',
@@ -281,20 +281,20 @@ describe('ghApi', () => {
 describe('ghApiText', () => {
   it('appends the jq filter and returns trimmed text', async () => {
     const calls: SpawnCall[] = []
-    const text = await ghApiText('repos/o/r/releases', '.[0].tag_name', {
+    const text = await ghApiText('repos/owner/repo/releases', '.[0].tag_name', {
       spawnGh: scriptedSpawn(calls, { stdout: ' v1.2.3 \n' }),
     })
     expect(text).toBe('v1.2.3')
     expect(calls[0]!.args).toStrictEqual([
       'api',
-      'repos/o/r/releases',
+      'repos/owner/repo/releases',
       '--jq',
       '.[0].tag_name',
     ])
   })
 
   it('answers undefined on a failed call, leaving the choice to the caller', async () => {
-    const text = await ghApiText('repos/o/r', '.x', {
+    const text = await ghApiText('repos/owner/repo', '.x', {
       spawnGh: scriptedSpawn([], { code: 1, stderr: 'nope' }),
     })
     expect(text).toBeUndefined()

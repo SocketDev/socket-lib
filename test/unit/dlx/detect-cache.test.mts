@@ -130,8 +130,8 @@ describe.sequential('dlx/detect — cache + stale paths', () => {
 
   describe('isJsFilePath', () => {
     it('returns true for .js, .mjs, .cjs', () => {
-      expect(isJsFilePath('a.js')).toBe(true)
-      expect(isJsFilePath('a.mjs')).toBe(true)
+      expect(isJsFilePath('alpha.js')).toBe(true)
+      expect(isJsFilePath('alpha.mjs')).toBe(true)
       expect(isJsFilePath('a.cjs')).toBe(true)
     })
 

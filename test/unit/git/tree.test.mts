@@ -25,14 +25,14 @@ describe('getTreeManifest', () => {
   it('lists committed paths and is deterministic per ref', async () => {
     await runWithTempDir(async dir => {
       initRepo(dir)
-      await fs.writeFile(path.join(dir, 'a.txt'), 'hello\n')
+      await fs.writeFile(path.join(dir, 'alpha.txt'), 'hello\n')
       await fs.mkdir(path.join(dir, 'sub'))
-      await fs.writeFile(path.join(dir, 'sub', 'b.txt'), 'world\n')
+      await fs.writeFile(path.join(dir, 'sub', 'beta.txt'), 'world\n')
       spawnSync('git', ['add', '-A'], { cwd: dir })
       spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
       const m1 = await getTreeManifest('HEAD', { cwd: dir })
-      expect(m1).toContain('a.txt')
-      expect(m1).toContain('sub/b.txt')
+      expect(m1).toContain('alpha.txt')
+      expect(m1).toContain('sub/beta.txt')
       // Same ref → byte-identical manifest (unmovable).
       expect(await getTreeManifest('HEAD', { cwd: dir })).toBe(m1)
     })
@@ -41,11 +41,11 @@ describe('getTreeManifest', () => {
   it('changes when the tree content changes (content-addressed)', async () => {
     await runWithTempDir(async dir => {
       initRepo(dir)
-      await fs.writeFile(path.join(dir, 'a.txt'), 'one\n')
+      await fs.writeFile(path.join(dir, 'alpha.txt'), 'one\n')
       spawnSync('git', ['add', '-A'], { cwd: dir })
       spawnSync('git', ['commit', '-m', 'first'], { cwd: dir })
       const first = await getTreeManifest('HEAD', { cwd: dir })
-      await fs.writeFile(path.join(dir, 'a.txt'), 'two\n')
+      await fs.writeFile(path.join(dir, 'alpha.txt'), 'two\n')
       spawnSync('git', ['commit', '-am', 'second'], { cwd: dir })
       expect(await getTreeManifest('HEAD', { cwd: dir })).not.toBe(first)
     })
@@ -54,7 +54,7 @@ describe('getTreeManifest', () => {
   it('rejects for an unknown ref (git exits non-zero → spawn rejects)', async () => {
     await runWithTempDir(async dir => {
       initRepo(dir)
-      await fs.writeFile(path.join(dir, 'a.txt'), 'x\n')
+      await fs.writeFile(path.join(dir, 'alpha.txt'), 'x\n')
       spawnSync('git', ['add', '-A'], { cwd: dir })
       spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
       await expect(
@@ -68,7 +68,7 @@ describe('getTreeManifest', () => {
   it('throws the empty-tree message for a present ref resolving to an empty tree', async () => {
     await runWithTempDir(async dir => {
       initRepo(dir)
-      await fs.writeFile(path.join(dir, 'a.txt'), 'x\n')
+      await fs.writeFile(path.join(dir, 'alpha.txt'), 'x\n')
       spawnSync('git', ['add', '-A'], { cwd: dir })
       spawnSync('git', ['commit', '-m', 'seed'], { cwd: dir })
       // The well-known empty-tree object is present in every repo and exits 0

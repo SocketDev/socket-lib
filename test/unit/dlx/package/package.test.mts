@@ -89,11 +89,11 @@ describe('findBinaryPath', () => {
         JSON.stringify({
           name: 'multi',
           version: '1.0.0',
-          bin: { 'tool-a': 'a.js', 'tool-b': 'b.js' },
+          bin: { 'tool-a': 'alpha.js', 'tool-b': 'beta.js' },
         }),
       )
       const result = findBinaryPath(pkgDir, 'multi', 'tool-b')
-      expect(result).toContain('b.js')
+      expect(result).toContain('beta.js')
     })
   })
 
@@ -155,20 +155,20 @@ describe('makePackageBinsExecutable', () => {
         JSON.stringify({
           name: 'multi-bin',
           version: '1.0.0',
-          bin: { a: 'a.js', b: 'b.js' },
+          bin: { a: 'alpha.js', b: 'beta.js' },
         }),
       )
       // Create the binary files without exec bits.
-      writeFileSync(path.join(installedDir, 'a.js'), '#!/usr/bin/env node\n')
-      writeFileSync(path.join(installedDir, 'b.js'), '#!/usr/bin/env node\n')
+      writeFileSync(path.join(installedDir, 'alpha.js'), '#!/usr/bin/env node\n')
+      writeFileSync(path.join(installedDir, 'beta.js'), '#!/usr/bin/env node\n')
       const fs = require('node:fs')
-      fs.chmodSync(path.join(installedDir, 'a.js'), 0o644)
-      fs.chmodSync(path.join(installedDir, 'b.js'), 0o644)
+      fs.chmodSync(path.join(installedDir, 'alpha.js'), 0o644)
+      fs.chmodSync(path.join(installedDir, 'beta.js'), 0o644)
 
       makePackageBinsExecutable(pkgDir, 'multi-bin')
 
-      const aMode = readModeBits(fs, path.join(installedDir, 'a.js'))
-      const bMode = readModeBits(fs, path.join(installedDir, 'b.js'))
+      const aMode = readModeBits(fs, path.join(installedDir, 'alpha.js'))
+      const bMode = readModeBits(fs, path.join(installedDir, 'beta.js'))
       expect(aMode).toBe(0o755)
       expect(bMode).toBe(0o755)
     })

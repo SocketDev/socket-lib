@@ -145,15 +145,15 @@ describe.sequential('dlx/binary-resolution — makePackageBinsExecutable', () =>
     makePackage({
       packageDir: tmpRoot,
       packageName: 'tool',
-      bin: { primary: './bin/a.js', secondary: './bin/b.js' },
+      bin: { primary: './bin/alpha.js', secondary: './bin/beta.js' },
     })
     const dir = path.join(tmpRoot, 'node_modules', 'tool', 'bin')
     mkdirSync(dir, { recursive: true })
-    writeFileSync(path.join(dir, 'a.js'), '')
-    writeFileSync(path.join(dir, 'b.js'), '')
+    writeFileSync(path.join(dir, 'alpha.js'), '')
+    writeFileSync(path.join(dir, 'beta.js'), '')
     makePackageBinsExecutable(tmpRoot, 'tool')
-    expect(statSync(path.join(dir, 'a.js')).mode & 0o777).toBe(0o755)
-    expect(statSync(path.join(dir, 'b.js')).mode & 0o777).toBe(0o755)
+    expect(statSync(path.join(dir, 'alpha.js')).mode & 0o777).toBe(0o755)
+    expect(statSync(path.join(dir, 'beta.js')).mode & 0o777).toBe(0o755)
   })
 
   test.skipIf(IS_WIN)(

@@ -269,12 +269,12 @@ describe('git extended tests', () => {
           cwd: tmpDir,
         })
 
-        const testFile = path.join(tmpDir, 'a.txt')
+        const testFile = path.join(tmpDir, 'alpha.txt')
         await fs.writeFile(testFile, 'content', 'utf8')
 
         const changed = await getChangedFiles({ cwd: tmpDir })
         // Even very short filenames should work
-        expect(changed).toContain('a.txt')
+        expect(changed).toContain('alpha.txt')
       }, 'git-porcelain-')
     })
   })
@@ -291,8 +291,8 @@ describe('git extended tests', () => {
         spawnSync('git', ['config', 'user.email', 'test@example.com'], {
           cwd: tmpDir,
         })
-        await fs.writeFile(path.join(tmpDir, 'a.txt'), 'a', 'utf8')
-        await fs.writeFile(path.join(tmpDir, 'b.txt'), 'b', 'utf8')
+        await fs.writeFile(path.join(tmpDir, 'alpha.txt'), 'a', 'utf8')
+        await fs.writeFile(path.join(tmpDir, 'beta.txt'), 'b', 'utf8')
 
         const operations = Array.from({ length: 20 }, (_, i) => {
           // Always disable the result cache so each call hits git for

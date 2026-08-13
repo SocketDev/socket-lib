@@ -257,7 +257,7 @@ describe('checks/primordials', () => {
     }
 
     it('returns no findings when every name is in lib', () => {
-      writeFile('src/a.js', 'const { Foo, Bar } = primordials')
+      writeFile('src/alpha.js', 'const { Foo, Bar } = primordials')
       setupLib(['Foo', 'Bar'])
 
       const result = checkPrimordials(makeConfig({}))
@@ -266,7 +266,7 @@ describe('checks/primordials', () => {
     })
 
     it('resolves a name through the alias map when alias target exists', () => {
-      writeFile('src/a.js', 'const { Array } = primordials')
+      writeFile('src/alpha.js', 'const { Array } = primordials')
       setupLib(['ArrayCtor'])
 
       const result = checkPrimordials(
@@ -278,7 +278,7 @@ describe('checks/primordials', () => {
     })
 
     it('reports `missing-from-socket-lib` when alias target is absent', () => {
-      writeFile('src/a.js', 'const { Array } = primordials')
+      writeFile('src/alpha.js', 'const { Array } = primordials')
       setupLib([]) // ArrayCtor not exported
 
       const result = checkPrimordials(
@@ -295,7 +295,7 @@ describe('checks/primordials', () => {
     })
 
     it('reports `unmapped` when no alias and no lib export', () => {
-      writeFile('src/a.js', 'const { Mystery } = primordials')
+      writeFile('src/alpha.js', 'const { Mystery } = primordials')
       setupLib(['Foo']) // Mystery is not anywhere
 
       const result = checkPrimordials(makeConfig({}))
@@ -307,7 +307,7 @@ describe('checks/primordials', () => {
     })
 
     it('skips names in nodeInternalOnly', () => {
-      writeFile('src/a.js', 'const { SafeMap } = primordials')
+      writeFile('src/alpha.js', 'const { SafeMap } = primordials')
       setupLib([])
 
       const result = checkPrimordials(
@@ -319,16 +319,16 @@ describe('checks/primordials', () => {
     })
 
     it('attributes a name to every file that uses it', () => {
-      writeFile('src/a.js', 'const { Foo } = primordials')
-      writeFile('src/sub/b.js', 'const { Foo, Bar } = primordials')
+      writeFile('src/alpha.js', 'const { Foo } = primordials')
+      writeFile('src/sub/beta.js', 'const { Foo, Bar } = primordials')
       setupLib(['Foo', 'Bar'])
 
       const result = checkPrimordials(makeConfig({}))
       const fooFiles = result.usedToFiles.get('Foo')
       expect(fooFiles).toBeDefined()
       expect(fooFiles!.length).toBe(2)
-      expect(fooFiles!.some(f => f.endsWith('a.js'))).toBe(true)
-      expect(fooFiles!.some(f => f.endsWith('b.js'))).toBe(true)
+      expect(fooFiles!.some(f => f.endsWith('alpha.js'))).toBe(true)
+      expect(fooFiles!.some(f => f.endsWith('beta.js'))).toBe(true)
     })
 
     it('walks scanDirs recursively', () => {
@@ -364,7 +364,7 @@ describe('checks/primordials', () => {
     })
 
     it('returns findings sorted by name for stable output', () => {
-      writeFile('src/a.js', 'const { Zebra, Alpha, Mango } = primordials')
+      writeFile('src/alpha.js', 'const { Zebra, Alpha, Mango } = primordials')
       setupLib([])
 
       const result = checkPrimordials(makeConfig({}))

@@ -212,7 +212,7 @@ describe.sequential('packages/provenance — isTrustedPublisher', () => {
 
   it('returns true for github.com URLs', () => {
     expect(isTrustedPublisher('https://github.com/o/r')).toBe(true)
-    expect(isTrustedPublisher('https://api.github.com/repos/o/r')).toBe(true)
+    expect(isTrustedPublisher('https://api.github.com/repos/owner/repo')).toBe(true)
   })
 
   it('returns true for gitlab.com URLs', () => {

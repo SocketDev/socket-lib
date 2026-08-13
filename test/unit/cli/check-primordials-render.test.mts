@@ -157,7 +157,7 @@ describe('renderHuman', () => {
               kind: 'unmapped',
               name: 'BadName',
               hint: 'no mapping; pick one of A/B/C',
-              files: ['src/a.js', 'src/b.js'],
+              files: ['src/alpha.js', 'src/beta.js'],
             },
           ],
           used: new Set(['BadName']),

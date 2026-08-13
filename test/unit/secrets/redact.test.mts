@@ -51,7 +51,7 @@ describe('redactContext', () => {
 
   it('omits bulky no-audit-value keys', () => {
     expect(
-      redactContext({ avatars: { large: 'url' }, chunks: ['a.js'] }),
+      redactContext({ avatars: { large: 'url' }, chunks: ['alpha.js'] }),
     ).toEqual({ avatars: OMITTED, chunks: OMITTED })
   })
 

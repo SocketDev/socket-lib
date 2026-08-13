@@ -92,7 +92,7 @@ describe.sequential('packages/exports — getSubpaths', () => {
   })
 
   it('returns [] for purely conditional shape', () => {
-    expect(getSubpaths({ import: './a.mjs' })).toEqual([])
+    expect(getSubpaths({ import: './alpha.mjs' })).toEqual([])
   })
 })
 
@@ -107,19 +107,19 @@ describe.sequential('packages/exports — getExportFilePaths', () => {
   it('skips keys not starting with "."', () => {
     expect(
       getExportFilePaths({
-        '.': './a.js',
+        '.': './alpha.js',
         types: './x.d.ts',
-        './b': './b.js',
+        './b': './beta.js',
       }),
-    ).toEqual(['./a.js', './b.js'])
+    ).toEqual(['./alpha.js', './beta.js'])
   })
 
   it('collects nested conditional string values', () => {
     expect(
       getExportFilePaths({
-        '.': { import: './a.mjs', require: './a.cjs' },
+        '.': { import: './alpha.mjs', require: './a.cjs' },
       }),
-    ).toEqual(['./a.mjs', './a.cjs'])
+    ).toEqual(['./alpha.mjs', './a.cjs'])
   })
 
   it('collects strings from array-of-conditions values', () => {
@@ -134,7 +134,7 @@ describe.sequential('packages/exports — getExportFilePaths', () => {
 
   it('returns [] for purely conditional top-level shape', () => {
     expect(
-      getExportFilePaths({ import: './a.mjs', require: './a.cjs' }),
+      getExportFilePaths({ import: './alpha.mjs', require: './a.cjs' }),
     ).toEqual([])
   })
 })
@@ -153,7 +153,7 @@ describe.sequential('packages/exports — resolvePackageJsonEntryExports', () =>
   })
 
   it('passes through conditional-shape objects', () => {
-    const exports = { import: './a.mjs', require: './a.cjs' }
+    const exports = { import: './alpha.mjs', require: './a.cjs' }
     expect(resolvePackageJsonEntryExports(exports)).toBe(exports)
   })
 
@@ -174,7 +174,7 @@ describe.sequential('packages/exports — findTypesForSubpath', () => {
   it('returns undefined when subpath is not present', () => {
     expect(
       findTypesForSubpath(
-        { '.': { import: './a.mjs', types: './a.d.ts' } },
+        { '.': { import: './alpha.mjs', types: './alpha.d.ts' } },
         './does-not-exist.js',
       ),
     ).toBeUndefined()

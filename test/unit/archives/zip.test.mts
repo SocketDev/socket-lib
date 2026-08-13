@@ -51,18 +51,18 @@ function makeZip(entries: Record<string, string>): string {
 
 describe('extractZip', () => {
   it('extracts entries to the output directory', async () => {
-    const archive = makeZip({ 'a.txt': 'alpha', 'nested/b.txt': 'beta' })
+    const archive = makeZip({ 'alpha.txt': 'alpha', 'nested/beta.txt': 'beta' })
     const out = tmpDir()
     await extractZip(archive, out)
-    expect(readFileSync(path.join(out, 'a.txt'), 'utf8')).toBe('alpha')
-    expect(readFileSync(path.join(out, 'nested', 'b.txt'), 'utf8')).toBe('beta')
+    expect(readFileSync(path.join(out, 'alpha.txt'), 'utf8')).toBe('alpha')
+    expect(readFileSync(path.join(out, 'nested', 'beta.txt'), 'utf8')).toBe('beta')
   })
 
   it('creates the output directory when it does not exist', async () => {
-    const archive = makeZip({ 'a.txt': 'alpha' })
+    const archive = makeZip({ 'alpha.txt': 'alpha' })
     const out = path.join(tmpDir(), 'not', 'yet', 'there')
     await extractZip(archive, out)
-    expect(existsSync(path.join(out, 'a.txt'))).toBe(true)
+    expect(existsSync(path.join(out, 'alpha.txt'))).toBe(true)
   })
 
   it('throws for a missing archive rather than a generic zip error', async () => {
@@ -74,13 +74,13 @@ describe('extractZip', () => {
 
   it('strips leading path components when strip is set', async () => {
     const archive = makeZip({
-      'pkg/inner/c.txt': 'gamma',
-      'pkg/a.txt': 'alpha',
+      'pkg/inner/gamma.txt': 'gamma',
+      'pkg/alpha.txt': 'alpha',
     })
     const out = tmpDir()
     await extractZip(archive, out, { strip: 1 })
-    expect(readFileSync(path.join(out, 'a.txt'), 'utf8')).toBe('alpha')
-    expect(readFileSync(path.join(out, 'inner', 'c.txt'), 'utf8')).toBe('gamma')
+    expect(readFileSync(path.join(out, 'alpha.txt'), 'utf8')).toBe('alpha')
+    expect(readFileSync(path.join(out, 'inner', 'gamma.txt'), 'utf8')).toBe('gamma')
   })
 
   it('skips entries with fewer path parts than strip', async () => {

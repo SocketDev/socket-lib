@@ -69,7 +69,7 @@ describe('validatePathWithinBase', () => {
   it('accepts a path nested inside the base', () => {
     const base = tmpDir()
     expect(() =>
-      validatePathWithinBase(path.join(base, 'a', 'b.txt'), base, 'a/b.txt'),
+      validatePathWithinBase(path.join(base, 'a', 'beta.txt'), base, 'a/beta.txt'),
     ).not.toThrow()
   })
 

@@ -43,7 +43,7 @@ afterEach(async () => {
 
 describe.sequential('readJson cache (async)', () => {
   it('caches successive reads of the same file', async () => {
-    const file = path.join(tmpDir, 'a.json')
+    const file = path.join(tmpDir, 'alpha.json')
     await fs.writeFile(file, JSON.stringify({ count: 1 }))
     await readJson(file)
     const before = getReadJsonCacheStats()
@@ -53,7 +53,7 @@ describe.sequential('readJson cache (async)', () => {
   })
 
   it('returns a deep clone on hit so caller mutation is isolated', async () => {
-    const file = path.join(tmpDir, 'a.json')
+    const file = path.join(tmpDir, 'alpha.json')
     await fs.writeFile(file, JSON.stringify({ items: [1, 2, 3] }))
     const first = (await readJson(file)) as { items: number[] }
     first.items.push(999)
@@ -62,7 +62,7 @@ describe.sequential('readJson cache (async)', () => {
   })
 
   it('invalidates when the file changes on disk', async () => {
-    const file = path.join(tmpDir, 'a.json')
+    const file = path.join(tmpDir, 'alpha.json')
     await fs.writeFile(file, JSON.stringify({ v: 1 }))
     const v1 = (await readJson(file)) as { v: number }
     expect(v1.v).toBe(1)
@@ -74,7 +74,7 @@ describe.sequential('readJson cache (async)', () => {
   })
 
   it('bypasses the cache when cache: false', async () => {
-    const file = path.join(tmpDir, 'a.json')
+    const file = path.join(tmpDir, 'alpha.json')
     await fs.writeFile(file, JSON.stringify({ v: 1 }))
     await readJson(file)
     const before = getReadJsonCacheStats()
@@ -84,7 +84,7 @@ describe.sequential('readJson cache (async)', () => {
   })
 
   it('bypasses the cache when a reviver is passed', async () => {
-    const file = path.join(tmpDir, 'a.json')
+    const file = path.join(tmpDir, 'alpha.json')
     await fs.writeFile(file, JSON.stringify({ v: 1 }))
     await readJson(file)
     const before = getReadJsonCacheStats()
@@ -96,7 +96,7 @@ describe.sequential('readJson cache (async)', () => {
 
 describe.sequential('readJsonSync cache', () => {
   it('caches successive reads', () => {
-    const file = path.join(tmpDir, 'a.json')
+    const file = path.join(tmpDir, 'alpha.json')
     writeFileSync(file, JSON.stringify({ count: 1 }))
     readJsonSync(file)
     const before = getReadJsonCacheStats()
@@ -106,7 +106,7 @@ describe.sequential('readJsonSync cache', () => {
   })
 
   it('isolates caller mutation', () => {
-    const file = path.join(tmpDir, 'a.json')
+    const file = path.join(tmpDir, 'alpha.json')
     writeFileSync(file, JSON.stringify({ items: [1, 2, 3] }))
     const first = readJsonSync(file) as { items: number[] }
     first.items.push(999)
@@ -117,7 +117,7 @@ describe.sequential('readJsonSync cache', () => {
 
 describe.sequential('cache controls', () => {
   it('clearReadJsonCache drops all entries and resets stats', async () => {
-    const file = path.join(tmpDir, 'a.json')
+    const file = path.join(tmpDir, 'alpha.json')
     await fs.writeFile(file, JSON.stringify({ v: 1 }))
     await readJson(file)
     await readJson(file)
@@ -133,8 +133,8 @@ describe.sequential('cache controls', () => {
   it('setReadJsonCacheMax enforces the LRU cap', async () => {
     setReadJsonCacheMax(2)
     try {
-      const a = path.join(tmpDir, 'a.json')
-      const b = path.join(tmpDir, 'b.json')
+      const a = path.join(tmpDir, 'alpha.json')
+      const b = path.join(tmpDir, 'beta.json')
       const c = path.join(tmpDir, 'c.json')
       await fs.writeFile(a, JSON.stringify({ k: 'a' }))
       await fs.writeFile(b, JSON.stringify({ k: 'b' }))
@@ -152,7 +152,7 @@ describe.sequential('cache controls', () => {
   it('setReadJsonCacheTtlMs invalidates entries past the TTL', async () => {
     setReadJsonCacheTtlMs(50)
     try {
-      const file = path.join(tmpDir, 'a.json')
+      const file = path.join(tmpDir, 'alpha.json')
       await fs.writeFile(file, JSON.stringify({ v: 1 }))
       await readJson(file)
       const beforeStats = getReadJsonCacheStats()
