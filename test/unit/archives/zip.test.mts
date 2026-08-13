@@ -55,7 +55,9 @@ describe('extractZip', () => {
     const out = tmpDir()
     await extractZip(archive, out)
     expect(readFileSync(path.join(out, 'alpha.txt'), 'utf8')).toBe('alpha')
-    expect(readFileSync(path.join(out, 'nested', 'beta.txt'), 'utf8')).toBe('beta')
+    expect(readFileSync(path.join(out, 'nested', 'beta.txt'), 'utf8')).toBe(
+      'beta',
+    )
   })
 
   it('creates the output directory when it does not exist', async () => {
@@ -80,13 +82,15 @@ describe('extractZip', () => {
     const out = tmpDir()
     await extractZip(archive, out, { strip: 1 })
     expect(readFileSync(path.join(out, 'alpha.txt'), 'utf8')).toBe('alpha')
-    expect(readFileSync(path.join(out, 'inner', 'gamma.txt'), 'utf8')).toBe('gamma')
+    expect(readFileSync(path.join(out, 'inner', 'gamma.txt'), 'utf8')).toBe(
+      'gamma',
+    )
   })
 
   it('skips entries with fewer path parts than strip', async () => {
     // `top.txt` has one part, so a strip of 2 leaves nothing to write and the
     // entry is passed over instead of erroring.
-    const archive = makeZip({ 'a/beta/deep.txt': 'deep', 'top.txt': 'top' })
+    const archive = makeZip({ 'alpha/beta/deep.txt': 'deep', 'top.txt': 'top' })
     const out = tmpDir()
     await extractZip(archive, out, { strip: 2 })
     expect(existsSync(path.join(out, 'top.txt'))).toBe(false)

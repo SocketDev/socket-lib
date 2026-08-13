@@ -211,19 +211,21 @@ describe.sequential('packages/provenance — isTrustedPublisher', () => {
   })
 
   it('returns true for github.com URLs', () => {
-    expect(isTrustedPublisher('https://github.com/o/repo')).toBe(true)
-    expect(isTrustedPublisher('https://api.github.com/repos/owner/repo')).toBe(true)
+    expect(isTrustedPublisher('https://github.com/owner/repo')).toBe(true)
+    expect(isTrustedPublisher('https://api.github.com/repos/owner/repo')).toBe(
+      true,
+    )
   })
 
   it('returns true for gitlab.com URLs', () => {
-    expect(isTrustedPublisher('https://gitlab.com/g/pkg')).toBe(true)
+    expect(isTrustedPublisher('https://gitlab.com/golf/pkg')).toBe(true)
     expect(isTrustedPublisher('https://nested.gitlab.com/path')).toBe(true)
   })
 
   it('handles workflow @-suffix by splitting on @', () => {
     expect(
       isTrustedPublisher(
-        'https://github.com/o/repo/.github/workflows/ci.yml@refs/heads/main',
+        'https://github.com/owner/repo/.github/workflows/ci.yml@refs/heads/main',
       ),
     ).toBe(true)
   })
@@ -240,8 +242,8 @@ describe.sequential('packages/provenance — isTrustedPublisher', () => {
   })
 
   it('returns true for bare hostnames (synthetic https:// prefix)', () => {
-    expect(isTrustedPublisher('github.com/o/repo')).toBe(true)
-    expect(isTrustedPublisher('gitlab.com/g/pkg')).toBe(true)
+    expect(isTrustedPublisher('github.com/owner/repo')).toBe(true)
+    expect(isTrustedPublisher('gitlab.com/golf/pkg')).toBe(true)
   })
 
   it('falls back to substring match for strings without a hostname', () => {
@@ -281,7 +283,7 @@ describe.sequential('packages/provenance — fetchPackageProvenance', () => {
             buildDefinition: {
               externalParameters: {
                 workflow: {
-                  ref: 'https://github.com/o/repo/.github/workflows/ci.yml@refs/heads/main',
+                  ref: 'https://github.com/owner/repo/.github/workflows/ci.yml@refs/heads/main',
                   repository: 'o/r',
                 },
                 ref: 'refs/heads/main',

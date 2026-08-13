@@ -47,16 +47,16 @@ describe('eco/npm/npm-cli/lockfile/parse', () => {
         JSON.stringify({
           lockfileVersion: 3,
           packages: {
-            'node_modules/a': { version: '1.0.0', dev: true },
-            'node_modules/b': { version: '1.0.0', optional: true },
-            'node_modules/c': { version: '1.0.0', peer: true },
+            'node_modules/alpha': { version: '1.0.0', dev: true },
+            'node_modules/beta': { version: '1.0.0', optional: true },
+            'node_modules/gamma': { version: '1.0.0', peer: true },
           },
         }),
       )
       const byName = new Map(result.packages.map(p => [p.name, p]))
-      expect(byName.get('a')!.depType).toBe('dev')
-      expect(byName.get('b')!.depType).toBe('optional')
-      expect(byName.get('c')!.depType).toBe('peer')
+      expect(byName.get('alpha')!.depType).toBe('dev')
+      expect(byName.get('beta')!.depType).toBe('optional')
+      expect(byName.get('gamma')!.depType).toBe('peer')
     })
 
     it('extracts git VCS metadata from resolved', () => {
@@ -82,11 +82,11 @@ describe('eco/npm/npm-cli/lockfile/parse', () => {
         JSON.stringify({
           lockfileVersion: 3,
           packages: {
-            'node_modules/a/node_modules/@scope/b': { version: '1.0.0' },
+            'node_modules/alpha/node_modules/@scope/beta': { version: '1.0.0' },
           },
         }),
       )
-      expect(result.packages[0]!.name).toBe('@scope/b')
+      expect(result.packages[0]!.name).toBe('@scope/beta')
     })
   })
 
@@ -96,17 +96,17 @@ describe('eco/npm/npm-cli/lockfile/parse', () => {
         JSON.stringify({
           lockfileVersion: 1,
           dependencies: {
-            a: {
+            alpha: {
               version: '1.0.0',
               dependencies: {
-                b: { version: '2.0.0' },
+                beta: { version: '2.0.0' },
               },
             },
           },
         }),
       )
       const names = result.packages.map(p => p.name).toSorted()
-      expect(names).toEqual(['a', 'b'])
+      expect(names).toEqual(['alpha', 'beta'])
     })
 
     it('terminates on circular dependencies', () => {
@@ -114,13 +114,13 @@ describe('eco/npm/npm-cli/lockfile/parse', () => {
         JSON.stringify({
           lockfileVersion: 1,
           dependencies: {
-            a: {
+            alpha: {
               version: '1.0.0',
               dependencies: {
-                b: {
+                beta: {
                   version: '2.0.0',
                   dependencies: {
-                    a: { version: '1.0.0' },
+                    alpha: { version: '1.0.0' },
                   },
                 },
               },
@@ -128,7 +128,10 @@ describe('eco/npm/npm-cli/lockfile/parse', () => {
           },
         }),
       )
-      expect(result.packages.map(p => p.name).toSorted()).toEqual(['a', 'b'])
+      expect(result.packages.map(p => p.name).toSorted()).toEqual([
+        'alpha',
+        'beta',
+      ])
     })
 
     it('extracts real name + version from npm: aliased installs', () => {
@@ -231,13 +234,13 @@ describe('eco/npm/npm-cli/lockfile/parse', () => {
         JSON.stringify({
           lockfileVersion: 3,
           packages: {
-            'node_modules/a': { version: '1.0.0' },
-            'node_modules/x/node_modules/a': { version: '2.0.0' },
-            'node_modules/y/node_modules/a': { version: '3.0.0' },
+            'node_modules/alpha': { version: '1.0.0' },
+            'node_modules/example/node_modules/alpha': { version: '2.0.0' },
+            'node_modules/sample/node_modules/alpha': { version: '3.0.0' },
           },
         }),
       )
-      const idxEntry = (result._index as { a?: unknown | undefined })['a']
+      const idxEntry = (result._index as { a?: unknown | undefined })['alpha']
       expect(idxEntry).toEqual([0, 1, 2])
     })
 
@@ -245,7 +248,7 @@ describe('eco/npm/npm-cli/lockfile/parse', () => {
       const result = parsePackageLock(
         JSON.stringify({
           lockfileVersion: 3,
-          packages: { 'node_modules/x': { version: '1.0.0' } },
+          packages: { 'node_modules/example': { version: '1.0.0' } },
         }),
       )
       expect(Object.isFrozen(result)).toBe(true)
@@ -276,7 +279,7 @@ describe('eco/npm/npm-cli/lockfile/parse', () => {
     it('defaults lockVersion to "1" when lockfileVersion is missing', () => {
       const result = parsePackageLock(
         JSON.stringify({
-          packages: { 'node_modules/x': { version: '1.0.0' } },
+          packages: { 'node_modules/example': { version: '1.0.0' } },
         }),
       )
       expect(result.lockVersion).toBe('1')

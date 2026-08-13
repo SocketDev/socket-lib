@@ -127,13 +127,15 @@ describe('createSignedCommit', () => {
   })
 
   it('throws when a blob POST fails', async () => {
-    nock(API).post('/repos/owner/repo/git/blobs').reply(500, 'Internal Server Error')
+    nock(API)
+      .post('/repos/owner/repo/git/blobs')
+      .reply(500, 'Internal Server Error')
 
     await expect(
       createSignedCommit({
         baseTreeSha: 'base1',
         branch: 'main',
-        files: [{ content: 'x', path: 'x.txt' }],
+        files: [{ content: 'x', path: 'example.txt' }],
         message: 'test',
         parentSha: 'parent1',
         repo: 'owner/repo',
@@ -157,7 +159,7 @@ describe('createSignedCommit', () => {
       createSignedCommit({
         baseTreeSha: 'base1',
         branch: 'main',
-        files: [{ content: 'x', path: 'x.txt' }],
+        files: [{ content: 'x', path: 'example.txt' }],
         message: 'test',
         parentSha: 'parent1',
         repo: 'owner/repo',

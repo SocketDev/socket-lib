@@ -125,7 +125,9 @@ describe('paths/normalize', () => {
       expect(fromUnixPath('/gamma/projects/app/file.txt')).toBe(
         'C:\\projects\\app\\file.txt',
       )
-      expect(fromUnixPath('/delta/projects/foo/bar')).toBe('D:\\projects\\foo\\bar')
+      expect(fromUnixPath('/delta/projects/foo/bar')).toBe(
+        'D:\\projects\\foo\\bar',
+      )
     })
 
     itWindowsOnly('should convert lowercase drive letters to uppercase', () => {
@@ -226,14 +228,18 @@ describe('paths/normalize', () => {
         expect(toUnixPath('C:\\projects\\app\\file.txt')).toBe(
           '/gamma/projects/app/file.txt',
         )
-        expect(toUnixPath('D:\\projects\\foo\\bar')).toBe('/delta/projects/foo/bar')
+        expect(toUnixPath('D:\\projects\\foo\\bar')).toBe(
+          '/delta/projects/foo/bar',
+        )
       },
     )
 
     itWindowsOnly(
       'should convert Windows drive letter paths with forward slashes',
       () => {
-        expect(toUnixPath('C:/Windows/System32')).toBe('/gamma/Windows/System32')
+        expect(toUnixPath('C:/Windows/System32')).toBe(
+          '/gamma/Windows/System32',
+        )
         expect(toUnixPath('D:/data/logs')).toBe('/delta/data/logs')
       },
     )
@@ -250,7 +256,9 @@ describe('paths/normalize', () => {
     })
 
     itWindowsOnly('should handle mixed case drive letters', () => {
-      expect(toUnixPath('c:\\Windows\\System32')).toBe('/gamma/Windows/System32')
+      expect(toUnixPath('c:\\Windows\\System32')).toBe(
+        '/gamma/Windows/System32',
+      )
       expect(toUnixPath('D:\\projects\\app')).toBe('/delta/projects/app')
     })
 
@@ -318,7 +326,9 @@ describe('paths/normalize', () => {
     })
 
     itWindowsOnly('should handle paths with spaces', () => {
-      expect(toUnixPath('C:\\Program Files\\App')).toBe('/gamma/Program Files/App')
+      expect(toUnixPath('C:\\Program Files\\App')).toBe(
+        '/gamma/Program Files/App',
+      )
       expect(toUnixPath('D:\\My Documents\\file.txt')).toBe(
         '/delta/My Documents/file.txt',
       )
@@ -354,7 +364,7 @@ describe('paths/normalize', () => {
 
     itWindowsOnly('should handle MSYS/Git Bash tar paths correctly', () => {
       expect(toUnixPath('D:\\a\\socket-btm\\build\\dev')).toBe(
-        '/d/alpha/socket-btm/build/dev',
+        '/delta/alpha/socket-btm/build/dev',
       )
       const result = toUnixPath('C:\\Windows\\Temp\\archive.tar.gz')
       expect(result.startsWith('/c/')).toBe(true)
