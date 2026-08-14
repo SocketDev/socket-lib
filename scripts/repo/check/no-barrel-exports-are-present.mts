@@ -15,8 +15,6 @@
 //
 // COMPAT ALLOWLIST — entries that pre-date this rule and are kept for backward
 // compatibility while consumers migrate. New barrels are never allowed.
-//   - ./native-messaging: index.ts barrel; consumers must migrate to the
-//       per-module paths (./native-messaging/host, /install, /rate-limit, /run)
 // NOTE: ./errors was removed from the allowlist — it is no longer exported.
 //   Consumers must use @socketsecurity/lib/errors/message instead.
 //
@@ -52,12 +50,7 @@ function isEnvSwap(entry: Record<string, unknown>): boolean {
 // Exports that are known legacy compat entries — they pre-date this rule and
 // are preserved for backward compat while consumers migrate.
 // No new entries may be added here; the check fails on any barrel not in this set.
-export const COMPAT_ALLOWLIST = new Set<string>([
-  // Classic index.ts barrel. Migrate: import from the per-module subpaths
-  // (./native-messaging/host, ./native-messaging/install,
-  //  ./native-messaging/rate-limit, ./native-messaging/run).
-  './native-messaging',
-])
+export const COMPAT_ALLOWLIST = new Set<string>()
 
 export interface BarrelFinding {
   readonly key: string

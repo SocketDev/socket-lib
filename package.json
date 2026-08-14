@@ -2195,11 +2195,6 @@
       "types": "./dist/memo/weak.d.ts",
       "default": "./dist/memo/weak.js"
     },
-    "./native-messaging": {
-      "source": "./src/native-messaging/index.ts",
-      "types": "./dist/native-messaging/index.d.ts",
-      "default": "./dist/native-messaging/index.js"
-    },
     "./native-messaging/host": {
       "source": "./src/native-messaging/host.ts",
       "types": "./dist/native-messaging/host.d.ts",
