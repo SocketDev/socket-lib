@@ -2071,6 +2071,10 @@
     },
     "./logger/default": {
       "source": "./src/logger/default.ts",
+      "browser": {
+        "types": "./dist/logger/browser.d.ts",
+        "default": "./dist/logger/browser.js"
+      },
       "types": "./dist/logger/default.d.ts",
       "default": "./dist/logger/default.js"
     },
