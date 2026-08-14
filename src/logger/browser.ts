@@ -44,3 +44,26 @@ export class Logger {
     return this.error(message, ...args)
   }
 }
+
+let sharedLogger: Logger | undefined
+
+/**
+ * The shared browser `Logger` singleton, mirroring `./default` on the Node
+ * side.
+ *
+ * It lives here so the two leaves expose the SAME surface. Without it,
+ * `./logger/default` cannot be given a `browser` condition pointing at this
+ * file: `./default` exports `getDefaultLogger()` and this module would export
+ * only the class, so a consumer's `import { getDefaultLogger }` would resolve
+ * to a module without it - and only in a browser bundle, where it is hardest
+ * to notice.
+ *
+ * Built lazily for the same reason as the Node twin: importing during a
+ * service-worker cold start should not touch `globalThis.console` yet.
+ */
+export function getDefaultLogger(): Logger {
+  if (sharedLogger === undefined) {
+    sharedLogger = new Logger()
+  }
+  return sharedLogger
+}

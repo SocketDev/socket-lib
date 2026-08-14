@@ -37,6 +37,20 @@ export const config: ExportsConfig = {
       to: './http-request/node',
     },
     { browserTo: './logger/browser', from: './logger', to: './logger/node' },
+    // The singleton needs a condition of its own. The swap on `./logger` above
+    // cannot cover it: that happens at RESOLVE time, and dist/logger/default.js
+    // is built with the Node resolution already inlined, so a browser bundler
+    // handed that file gets the Node logger whatever `./logger` says.
+    //
+    // Safe to point at the class leaf only because `./logger/browser` now
+    // exports `getDefaultLogger()` too. If that ever stops being true this
+    // alias resolves a consumer's `import { getDefaultLogger }` to a module
+    // without it, in browser bundles only.
+    {
+      browserTo: './logger/browser',
+      from: './logger/default',
+      to: './logger/default',
+    },
     {
       browserTo: './logger/browser',
       from: './logger/logger',
