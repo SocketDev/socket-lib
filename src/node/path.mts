@@ -27,7 +27,7 @@ export function getNodePath(): typeof NodePath {
 // IS_NODE-gated module, which is undefined in a browser. path methods are
 // standalone (no `this`), so a member read freezes the reference; a later
 // `nodePath.join = evil` can't redirect these. Frozen refs aren't spy-able —
-// use `getNodePath()` for the test-seam path. Direct-const exports (the
+// use `getNodePath()` for the test injection path. Direct-const exports (the
 // primordials/intl shape) keep it sort-clean + tree-shakable.
 export const pathBasename = nodePath?.basename
 export const pathDirname = nodePath?.dirname

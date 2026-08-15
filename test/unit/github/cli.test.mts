@@ -4,7 +4,8 @@
  *   `-f` / `-F` split that only one of four copies got right, the temp-file
  *   body that exists because the lib spawn leaves the child's stdin unwired,
  *   and the resolve-don't-throw contract that lets a caller treat a 404 as a
- *   state. The spawn seam is injected, so no test needs a `gh` binary.
+ *   state. The spawn injection point is injected, so no test needs a `gh`
+ *   binary.
  */
 
 import { describe, expect, it } from 'vitest'
@@ -191,7 +192,7 @@ describe('runGh', () => {
     expect(result.stderr).toBe('gh not found')
   })
 
-  it('carries the default timeout, since a wedged gh should not hang a run', async () => {
+  it('carries the default timeout, since an unresponsive gh should not hang a run', async () => {
     const calls: SpawnCall[] = []
     await runGh(['auth'], { spawnGh: scriptedSpawn(calls, {}) })
     // The literal, not the constant: importing it from the module under test

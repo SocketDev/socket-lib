@@ -1,8 +1,8 @@
 /**
  * @file CLI plumbing shards for `socket-lib check primordials`: config-path
  *   resolution, help rendering, and human-readable output. Split from
- *   check-primordials.test.mts along describe seams (500-line soft cap); the
- *   handler-boundary smoke tests stay in the base file.
+ *   check-primordials.test.mts along describe boundaries (500-line soft cap);
+ *   the handler-boundary smoke tests stay in the base file.
  */
 
 import { mkdtempSync, promises as fs } from 'node:fs'

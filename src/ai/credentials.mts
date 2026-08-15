@@ -17,7 +17,7 @@
  *   hook-point: the forthcoming biometric credential daemon slots in as a
  *   layer between the env check and the keychain read inside `resolve()`'s
  *   implementation — call sites here do not change when it lands. This module
- *   is the stable seam.
+ *   is the stable injection point.
  */
 
 import { resolve } from '../secrets/find.mjs'
@@ -43,11 +43,11 @@ export type KeyedCredentialProvider =
 
 /**
  * The keyless on-device provider: a `local` engine (the `builtin.mts`
- * LanguageModel seam / an injected local runner) that needs NO credential — it
- * runs on the machine, so it is "always present with no token". It is a
- * `CredentialProvider` so routing can name it uniformly, but it is deliberately
- * NOT in `PROVIDER_CREDENTIALS` because there is nothing to resolve. Use
- * `isKeylessProvider` to branch before a token lookup.
+ * LanguageModel injection point / an injected local runner) that needs NO
+ * credential — it runs on the machine, so it is "always present with no token".
+ * It is a `CredentialProvider` so routing can name it uniformly, but it is
+ * deliberately NOT in `PROVIDER_CREDENTIALS` because there is nothing to
+ * resolve. Use `isKeylessProvider` to branch before a token lookup.
  */
 export const KEYLESS_PROVIDER = 'local' as const
 

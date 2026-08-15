@@ -5,9 +5,9 @@
  *   is CALLED at access time off that captured object — so `vi.spyOn(process,
  *   'cwd')`, which mutates the same captured object, still intercepts. Binding
  *   the method reference instead (`process.cwd.bind(process)`) would freeze it
- *   and break that test seam, so we deliberately keep the late call. Consumers
- *   read cwd / platform / env / argv through these instead of touching
- *   `process` directly; enforced Socket-wide by
+ *   and break that test injection point, so we deliberately keep the late call.
+ *   Consumers read cwd / platform / env / argv through these instead of
+ *   touching `process` directly; enforced Socket-wide by
  *   `socket/prefer-process-primordial`. This is the `process` leaf of the
  *   node-module primordials: where `node/fs` / `node/path` lazy-load a `node:`
  *   module behind a function, this captures the always-present `process` global

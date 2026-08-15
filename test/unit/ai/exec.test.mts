@@ -1,5 +1,5 @@
 /**
- * @file Tests for the ai/exec injection seam. The lib ships the `real` runner,
+ * @file Tests for the ai/exec injection point. The lib ships the `real` runner,
  *   which drives the host shell via spawn, and the ExecContext policy; the
  *   sandboxed runner is INJECTED by the caller, so these tests inject a
  *   trivial fake sandbox rather than pulling a real one. The `real` runner is

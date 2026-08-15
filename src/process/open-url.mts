@@ -80,9 +80,9 @@ export const NEW_WINDOW_BROWSERS: Readonly<Record<string, readonly string[]>> =
 export const BROWSER_BINARY_ENV_VAR = 'SOCKET_BROWSER_BINARY'
 
 /**
- * Set by a suite that MOCKS the spawn seam and wants to assert on the opener's
- * invocation. Without it a test run never spawns at all, which is the safe
- * default; with it the call proceeds into whatever the suite mocked.
+ * Set by a suite that MOCKS the spawn injection point and wants to assert on
+ * the opener's invocation. Without it a test run never spawns at all, which is
+ * the safe default; with it the call proceeds into whatever the suite mocked.
  */
 export const ALLOW_SPAWN_ENV_VAR = 'SOCKET_OPEN_URL_ALLOW_SPAWN'
 
@@ -152,15 +152,15 @@ export function openUrl(
     ...options,
   } as OpenUrlOptions
   const invocation = buildOpenUrlInvocation(url, options)
-  // A unit test must never launch a real browser, and mocking the spawn seam
+  // A unit test must never launch a real browser, and mocking the spawn injection point
   // is not enough on its own to guarantee it: this module can be reached
   // through a dynamic import several layers down, so a suite can mock
-  // `node:child_process`, miss the seam this actually uses, and open a window
+  // `node:child_process`, miss the injection point this actually uses, and open a window
   // on the developer's machine on every run.
   //
   // Default-deny under a runner, with two ways through: an injected `spawn`,
   // since a caller passing its own spy is asking to observe the call, or the
-  // ALLOW_SPAWN_ENV_VAR opt-in for a suite that mocked the seam and asserts
+  // ALLOW_SPAWN_ENV_VAR opt-in for a suite that mocked the injection point and asserts
   // on the invocation. Forgetting both costs an assertion, never a stray
   // window.
   if (skipUnderTestRunner && !options?.spawn && shouldSkipSpawn(env)) {
@@ -194,7 +194,7 @@ export function pickOpenCommand(platform: NodeJS.Platform): string {
 /**
  * Options for {@link openUrl}. `platform` is injectable so a test can exercise
  * every opener branch on one host; it defaults to `process.platform`. `spawn`
- * is the injectable launch seam; it defaults to {@link defaultOpenUrlSpawner}.
+ * is the injectable launch point; it defaults to {@link defaultOpenUrlSpawner}.
  *
  * `newWindow` opts into a NEW WINDOW rather than a tab, which needs a browser
  * binary rather than the platform opener. It is opt-in so every existing caller
@@ -203,9 +203,9 @@ export function pickOpenCommand(platform: NodeJS.Platform): string {
  * reason `platform` is.
  *
  * `skipUnderTestRunner` (default: `true`) makes {@link openUrl} a no-op when
- * {@link shouldSkipSpawn} detects a test runner and no `spawn` seam was
- * injected, so a suite that reaches this module through layers of imports can
- * never pop a real browser window. Pass `false` to launch anyway.
+ * {@link shouldSkipSpawn} detects a test runner and no `spawn` injection point
+ * was injected, so a suite that reaches this module through layers of imports
+ * can never pop a real browser window. Pass `false` to launch anyway.
  */
 export interface OpenUrlOptions {
   readonly env?: Record<string, string | undefined> | undefined

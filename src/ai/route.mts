@@ -29,9 +29,9 @@ import type { AiTier } from './tier.mjs'
  * A non-CLI, on-device engine. Distinct from `AiAgentName` (the agent CLIs that
  * drive `spawn.mts`'s per-agent switch and the `which` probe) so a keyless
  * local target is nameable WITHOUT widening the CLI unions. `builtin` is the
- * `builtin.mts` LanguageModel seam (`getLanguageModel()`); the heavy provider
- * impl is injected at the spawn layer (`spawn-local.mts`), never imported
- * here.
+ * `builtin.mts` LanguageModel injection point (`getLanguageModel()`); the heavy
+ * provider impl is injected at the spawn layer (`spawn-local.mts`), never
+ * imported here.
  */
 export type LocalEngineName = 'builtin'
 
@@ -52,10 +52,10 @@ export interface CliTierCandidate {
 
 /**
  * A keyless on-device target: a `local` engine driven through the `builtin.mts`
- * LanguageModel seam or an injected local provider (see `spawn-local.mts`). It
- * carries `kind: 'local'`, `provider: 'local'` (keyless — no credential gates
- * it), and a non-CLI `engine`. Reserved for grunt-tier TAIL rungs; never a
- * chain head.
+ * LanguageModel injection point or an injected local provider (see
+ * `spawn-local.mts`). It carries `kind: 'local'`, `provider: 'local'` (keyless
+ * — no credential gates it), and a non-CLI `engine`. Reserved for grunt-tier
+ * TAIL rungs; never a chain head.
  */
 export interface LocalTierCandidate {
   readonly effort: AiEffort | undefined
@@ -98,9 +98,10 @@ export interface RouteContext {
   readonly keyed: ReadonlySet<CredentialProvider>
   /**
    * Whether the keyless local engine is usable, probed once by the caller via
-   * the `builtin.mts` availability seam (`getLanguageModel().availability()` —
-   * see `isLocalEngineAvailable` in `spawn-local.mts`). Undefined/false means a
-   * `local` candidate is skipped, so callers that never probe are unaffected.
+   * the `builtin.mts` availability injection point
+   * (`getLanguageModel().availability()` — see `isLocalEngineAvailable` in
+   * `spawn-local.mts`). Undefined/false means a `local` candidate is skipped,
+   * so callers that never probe are unaffected.
    */
   readonly localAvailable?: boolean | undefined
 }

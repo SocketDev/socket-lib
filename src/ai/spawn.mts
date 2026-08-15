@@ -360,7 +360,7 @@ export async function spawnTierWithFallback(
   let last: { candidate: TierCandidate; result: AgentSpawnResult } | undefined
   for (let i = 0, { length } = candidates; i < length; i += 1) {
     const candidate = candidates[i]!
-    // A `local` candidate drives the keyless on-device seam (returning the same
+    // A `local` candidate drives the keyless on-device path (returning the same
     // AgentSpawnResult) so the fall-over logic below stays uniform across kinds.
     const result =
       candidate.kind === 'local'

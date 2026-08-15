@@ -1,11 +1,11 @@
 /**
- * @file Pure seams for a client-side OAuth authorization-code flow: PKCE
+ * @file Pure helpers for a client-side OAuth authorization-code flow: PKCE
  *   S256 pair generation (RFC 7636 §4), the RFC 8414 issuer-discovery URL,
  *   the authorization URL the browser opens, and the loopback callback
  *   parser (RFC 8252). Every function here is network-free so the whole
  *   protocol surface is unit-testable; the flow driver — listener, browser
  *   open, token exchange — lives with the caller.
- *   `./login`'s `loginWithSocketOauth()` adopts these seams in v7; until
+ *   `./login`'s `loginWithSocketOauth()` adopts these helpers in v7; until
  *   then it carries its own inline copies and both stand.
  */
 

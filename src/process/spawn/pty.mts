@@ -56,8 +56,8 @@ export interface PtyInvocation {
 /**
  * Options for {@link ptyRun}. `platform` is injectable so a test can exercise a
  * non-host branch; it defaults to `process.platform`. `onStdout`/`onStderr`
- * receive each decoded chunk as it arrives, the streaming seam that keeps the
- * runner from hard-wiring writes to the parent's stdout.
+ * receive each decoded chunk as it arrives, the streaming boundary that keeps
+ * the runner from hard-wiring writes to the parent's stdout.
  */
 export interface PtyRunOptions {
   readonly cwd?: string | undefined

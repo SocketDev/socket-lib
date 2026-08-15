@@ -30,7 +30,7 @@ import { safeDeleteSync } from '../fs/safe.mjs'
 
 /**
  * How long a `gh` invocation may run before it is killed. A CLI call that has
- * not answered in this long is wedged rather than slow: `gh` does its own
+ * not answered in this long is unresponsive rather than slow: `gh` does its own
  * network retries well inside it.
  */
 export const GH_DEFAULT_TIMEOUT_MS = 30_000
@@ -83,7 +83,7 @@ export interface GhResult {
 /**
  * Options for {@link runGh}. `body` is JSON text written to a temp file whose
  * path replaces {@link GH_BODY_PLACEHOLDER}. `spawnGh` is the injectable launch
- * seam, so a test drives the runner without a `gh` binary present.
+ * injection point, so a test drives the runner without a `gh` binary present.
  */
 export interface RunGhOptions {
   readonly body?: string | undefined

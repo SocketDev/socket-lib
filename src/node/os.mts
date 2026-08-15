@@ -24,7 +24,7 @@ export function getNodeOs(): typeof NodeOs {
 // ── Frozen hot-method snapshots ──────────────────────────────────────
 // Socket's hottest os methods, captured by reference at load off the
 // IS_NODE-gated module, which is undefined in a browser. Frozen refs aren't
-// spy-able — use `getNodeOs()` for the test-seam path. See node/fs.ts for the
+// spy-able — use `getNodeOs()` for the test injection path. See node/fs.ts for the
 // full two-surface rationale.
 export const osArch = nodeOs?.arch
 export const osHomedir = nodeOs?.homedir

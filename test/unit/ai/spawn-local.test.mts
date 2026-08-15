@@ -1,5 +1,5 @@
 /**
- * @file Tests for ai/spawn-local — the keyless on-device execution seam. The
+ * @file Tests for ai/spawn-local — the keyless on-device execution path. The
  *   built-in provider drives an injected LanguageModel factory; spawnLocalAgent
  *   normalizes availability, generation, and failure into the AgentSpawnResult
  *   shape a CLI spawn returns.

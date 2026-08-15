@@ -1,6 +1,6 @@
 /**
- * @file Spawn advisor — composes tier + route + billing + profile into ONE
- *   call so callers stop hand-wiring the AI stack layer by layer. Given a
+ * @file Spawn advisor — composes tier + route + billing + profile into ONE call
+ *   so callers stop hand-wiring the AI stack layer by layer. Given a
  *   `TaskClass` and a probed `RouteContext` (plus an optional
  *   `BillingContext`), `adviseSpawn` resolves the capability tier
  *   (`taskClassToTier`), orders the usable cross-engine candidates
@@ -10,8 +10,8 @@
  *   I/O, no spawn: the caller still probes availability/billing once
  *   (`billing-context.mts`) and hands the resulting `RouteContext` /
  *   `BillingContext` in, then calls `spawnAiAgent` / `spawnTierWithFallback`
- *   with the advice. Modeled on the "advisor" pattern from Copilot-style
- *   CLIs: one seam a skill consults instead of importing four modules and
+ *   with the advice. Modeled on the "advisor" pattern from Copilot-style CLIs:
+ *   one entry point a skill consults instead of importing four modules and
  *   reimplementing the same composition at every call site.
  */
 

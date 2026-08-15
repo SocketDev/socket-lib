@@ -1,5 +1,5 @@
 /**
- * @file Keyless on-device execution seam for a `local` TierCandidate, the
+ * @file Keyless on-device execution path for a `local` TierCandidate, the
  *   non-CLI complement to `spawn.mts`. Where `spawnAiAgent` shells out to an
  *   installed agent CLI, this drives an on-device LanguageModel and normalizes
  *   the reply into the SAME `AgentSpawnResult` shape, so a caller (or
@@ -10,7 +10,7 @@
  *   provider — a real on-device model such as odai — is INJECTED by the caller
  *   and never imported here. That keeps the small-dist lib free of any model
  *   dependency: a consumer that never routes local pays nothing, and the local
- *   engine is discovered lazily through the seam.
+ *   engine is discovered lazily through the injection point.
  */
 
 import { errorMessage } from '../errors/message.mjs'
@@ -140,9 +140,9 @@ export function isLocalModelSession(
  * Tier-orchestration entry: run a `local` candidate for
  * `spawnTierWithFallback`. Maps the shared spawn options plus the candidate's
  * model onto a `LocalSpawnOptions`, defaults the provider to the built-in
- * LanguageModel seam, and normalizes prototype-polluted input. Kept here (not
- * inline in spawn.mts) so the null-proto normalization and provider default
- * live beside the local seam they belong to.
+ * LanguageModel injection point, and normalizes prototype-polluted input. Kept
+ * here (not inline in spawn.mts) so the null-proto normalization and provider
+ * default live beside the local path they belong to.
  */
 export async function runLocalTierSpawn(
   options: Pick<SpawnAiAgentOptions, 'cwd' | 'prompt' | 'timeoutMs'>,
