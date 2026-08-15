@@ -27,6 +27,17 @@ describe('links/github — githubRefLink', () => {
     )
   })
 
+  it('builds a stack link to the stacks REST URL when kind is "stack"', () => {
+    // Stacks have no HTML page — the api.github.com URL is the canonical
+    // resolvable surface, and the label carries the `stack` prefix so the
+    // target isn't mistaken for a PR.
+    expect(
+      githubRefLink('https://github.com/PerryTS/perry', 178, 'stack'),
+    ).toBe(
+      '[stack #178](https://api.github.com/repos/PerryTS/perry/stacks/178)',
+    )
+  })
+
   it('degrades to bare #N when the URL is unparseable', () => {
     expect(githubRefLink('not-a-repo-url', 42)).toBe('#42')
     // scp-style git@ URLs are not parsed by getRepoUrlDetails, so they also
