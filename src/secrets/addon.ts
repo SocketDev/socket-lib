@@ -104,8 +104,8 @@ export function readSecretBiometric(slot: SecretSlot): string | undefined {
 }
 
 /**
- * Test seam and embedder override. Passing an addon forces it; passing
- * `undefined` forces ABSENCE (reads fall through). To return to lazy
+ * Test injection point and embedder override. Passing an addon forces it;
+ * passing `undefined` forces ABSENCE (reads fall through). To return to lazy
  * detection on the next read, pass `undefined` with `{ probe: true }`.
  */
 export function setKeychainAddon(

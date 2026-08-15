@@ -10,10 +10,11 @@
  *   capture when `getNodeFs` is unused. Was a lazy first-call loader; the
  *   eager-but-guarded form keeps the browser-safe behavior while gaining the
  *   load-time snapshot. Two surfaces: `getNodeFs()` returns the module object
- *   with LATE method lookup (spy-able — the test seam); the `fs<Method>` consts
- *   (`fsExistsSync`, `fsReadFileSync`, …) are method references FROZEN at
- *   load, tamper-proof against a method swap but not spy-able, for Socket's
- *   hot fs calls. Both stay browser-safe behind IS_NODE + `/*@__PURE__*\/`.
+ *   with LATE method lookup (spy-able — the test injection point); the
+ *   `fs<Method>` consts (`fsExistsSync`, `fsReadFileSync`, …) are method
+ *   references FROZEN at load, tamper-proof against a method swap but not
+ *   spy-able, for Socket's hot fs calls. Both stay browser-safe behind IS_NODE
+ *   \+ `/*@__PURE__*\/`.
  */
 
 import type * as NodeFs from 'node:fs'
@@ -32,7 +33,7 @@ const nodeFs = IS_NODE ? /*@__PURE__*/ require('fs') : undefined
 // `getNodeFs()` returns the captured MODULE object; methods are looked up LATE
 // off it (`getNodeFs().existsSync(...)`). That is deliberate: the object
 // snapshot defends against `require.cache['fs']` redirection, while late method
-// lookup keeps the test seam intact — a `vi.spyOn(getNodeFs(), 'existsSync')`
+// lookup keeps the test injection point intact — a `vi.spyOn(getNodeFs(), 'existsSync')`
 // (or a direct property swap, as binary-cache.test does) is still observed.
 // For a HOT path that wants tamper-proof methods too (a method swap on the
 // captured object can't redirect a frozen ref), use the `fs<Method>` consts
@@ -48,7 +49,7 @@ export function getNodeFs(): typeof NodeFs {
 // binding needed — verified), so a plain member read freezes the reference:
 // unlike `getNodeFs().existsSync`, a later `nodeFs.existsSync = evil` cannot
 // redirect these — the method-level twin of the object snapshot. Frozen refs
-// are NOT spy-able — use `getNodeFs()` for the test-seam path; reach for these
+// are NOT spy-able — use `getNodeFs()` for the test injection path; reach for these
 // only on a hot path that wants tamper-resistance. Exported as direct consts
 // (the `primordials/intl` shape) so there's no helper/getter to sort and no
 // `/*@__PURE__*/`-on-a-call concern; an unused const tree-shakes on its own.

@@ -5,7 +5,7 @@
  *   code fences, synonymous keys, an object that ends one `}` short, or prose
  *   wrapped around the payload. The router already parses JSON out of model
  *   output (`cost.mts` reads usage objects), so these tolerant, pure repair
- *   primitives live here as the shared seam: strip a fence, normalize
+ *   primitives live here as the shared boundary: strip a fence, normalize
  *   typographic punctuation, canonicalize keys, extract the first balanced
  *   object, or close an under-terminated one. Every function is pure and
  *   allocation-light, and each runs only on a REPAIR path after a strict parse

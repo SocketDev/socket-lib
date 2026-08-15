@@ -1,15 +1,15 @@
 /**
- * @file Exec-backend seam: WHERE a shell command runs, a separate axis from
- *   WHICH model produced it (`ai/backends`). The lib owns the INTERFACE plus
- *   the cheap built-in `real` runner (the host shell via lib `spawn`); a
- *   SANDBOXED runner is INJECTED by the caller, never imported here. That keeps
- *   the small-dist lib free of a heavy sandbox dependency — Socket's sandbox
- *   of choice (`just-bash`, ~40MB incl. WASM) is owned by the wheelhouse hook /
- *   CI tooling and passed in, so a lib consumer that never sandboxes pays
- *   nothing. Layering: ExecRunner.run() — the injectable primitive (real |
- *   sandboxed) composed into ExecContext — { runners: { real, sandboxed? },
- *   resolve(trust) } used by runShell(script, { context, trust }) — the
- *   ergonomic entry point Pick a runner by TRUST LEVEL, never by model.
+ * @file Exec-backend injection point: WHERE a shell command runs, a separate
+ *   axis from WHICH model produced it (`ai/backends`). The lib owns the
+ *   INTERFACE plus the cheap built-in `real` runner (the host shell via lib
+ *   `spawn`); a SANDBOXED runner is INJECTED by the caller, never imported
+ *   here. That keeps the small-dist lib free of a heavy sandbox dependency —
+ *   Socket's sandbox of choice (`just-bash`, ~40MB incl. WASM) is owned by the
+ *   wheelhouse hook / CI tooling and passed in, so a lib consumer that never
+ *   sandboxes pays nothing. Layering: ExecRunner.run() — the injectable
+ *   primitive (real | sandboxed) composed into ExecContext — { runners: { real,
+ *   sandboxed? }, resolve(trust) } used by runShell(script, { context, trust })
+ *   — the ergonomic entry point Pick a runner by TRUST LEVEL, never by model.
  *   `untrusted` resolves to the sandboxed runner — which a caller that hasn't
  *   injected one cannot run, so `resolve` throws a clear "provide a sandboxed
  *   runner" error rather than silently falling back to the host shell. Both

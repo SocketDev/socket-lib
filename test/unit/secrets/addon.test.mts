@@ -1,11 +1,11 @@
 /**
  * @file Unit tests for `secrets/addon` — the sockeye `keychain.node` biometric
  *   backend. The native addon is absent in CI by design, so these drive the
- *   `setKeychainAddon` seam: the contract under test is the SELF-GATING —
- *   absence, a missing item, and a cancelled Touch ID prompt (a throw from the
- *   Secure-Enclave ACL) must all read as `undefined`/`false` fall-throughs,
- *   never as errors, because `resolve()` treats this layer exactly like the
- *   broker: dormant unless it can answer.
+ *   `setKeychainAddon` injection point: the contract under test is the
+ *   SELF-GATING — absence, a missing item, and a cancelled Touch ID prompt (a
+ *   throw from the Secure-Enclave ACL) must all read as `undefined`/`false`
+ *   fall-throughs, never as errors, because `resolve()` treats this layer
+ *   exactly like the broker: dormant unless it can answer.
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'

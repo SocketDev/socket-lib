@@ -94,7 +94,7 @@ export function toShimmerKeyframes(
   }
 
   // Anchor t=1 to the same value as frame 0 so the loop wraps without a
-  // visible glitch at the seam.
+  // visible glitch at the boundary.
   for (let i = 0; i < textLength; i++) {
     const track = tracks[i]!
     track.times.push(1)

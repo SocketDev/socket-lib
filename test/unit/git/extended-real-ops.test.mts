@@ -1,7 +1,7 @@
 /**
  * @file Extended integration tests for git utility functions against real
  *   temporary git repositories. Split from extended.test.mts along the "real
- *   git operations" seam to stay under the file-line cap. Each test seeds a
+ *   git operations" boundary to stay under the file-line cap. Each test seeds a
  *   fresh temp repo and exercises actual repository state changes (init, add,
  *   commit, rename, delete) through the git helpers.
  */

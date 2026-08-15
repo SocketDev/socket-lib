@@ -22,7 +22,7 @@ import { getRuntimeSocketPath } from '../paths/socket'
 // and this client both compute (1 path, 1 reference).
 const PROTEUS_SOCKET_NAME = 'proteus'
 
-// A live daemon answers within milliseconds; cap the wait so a wedged socket
+// A live daemon answers within milliseconds; cap the wait so an unresponsive socket
 // can't stall credential resolution for the whole process.
 const BROKER_TIMEOUT_MS = 1000
 

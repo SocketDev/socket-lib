@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for the GitHub git-refs write helpers. The transport is
- *   mocked with nock at the node:http seam, the same way the refs read /
+ *   mocked with nock at the node:http boundary, the same way the refs read /
  *   request tests mock GitHub — request bodies, methods, and auth headers are
  *   asserted on the intercepted calls; nothing reaches the network.
  */

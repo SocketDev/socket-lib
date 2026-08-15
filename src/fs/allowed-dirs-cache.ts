@@ -42,12 +42,12 @@ export function invalidatePathCache(): void {
  * module-init turn, so the circular import is fully wired before the call.
  * Guarded + self-rescheduling: in the require cycle (`allowed-dirs-cache →
  * shared → paths/socket → … → rewire`) the `registerCacheInvalidation` live
- * binding can still be in its temporal dead zone when the first microtask
- * fires under some import orders, throwing `registerCacheInvalidation is not
- * defined`. Vitest loads many modules concurrently, so those orders do come
- * up. Check that the binding is callable; if not, re-defer to the next
- * microtask. The registration is a test-seam best-effort that lets path-rewire
- * flush this cache, so a bounded retry that lands on a later turn is correct. A
+ * binding can still be in its temporal dead zone when the first microtask fires
+ * under some import orders, throwing `registerCacheInvalidation is not
+ * defined`. Vitest loads many modules concurrently, so those orders do come up.
+ * Check that the binding is callable; if not, re-defer to the next microtask.
+ * The registration is a test-injection best-effort that lets path-rewire flush
+ * this cache, so a bounded retry that lands on a later turn is correct. A
  * never-resolving binding, as in production where rewire is unused, simply
  * stops retrying without throwing.
  *

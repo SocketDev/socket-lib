@@ -49,9 +49,10 @@ export interface TeedRun {
 
 /**
  * Options for {@link runInheritTee}. `onStdout`/`onStderr` are the forwarding
- * seam: each raw chunk goes to the matching sink as it arrives, defaulting to
- * the parent's own stdout/stderr so the operator sees the stream live. A test
- * injects sinks to observe the forwarding without touching the real streams.
+ * boundary: each raw chunk goes to the matching sink as it arrives, defaulting
+ * to the parent's own stdout/stderr so the operator sees the stream live. A
+ * test injects sinks to observe the forwarding without touching the real
+ * streams.
  */
 export interface TeeRunOptions extends RunOptions {
   readonly onStderr?: ((chunk: Buffer) => void) | undefined

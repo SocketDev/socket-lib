@@ -1,5 +1,5 @@
 /**
- * @file Tests for ai/advisor — the composition seam over tier + route +
+ * @file Tests for ai/advisor — the composition boundary over tier + route +
  *   billing + profile. Covers every TaskClass's default advice, the
  *   billing-reorder path vs the no-billing fallback path, the caller
  *   profileFloor override, and the empty-candidates (nothing installed +

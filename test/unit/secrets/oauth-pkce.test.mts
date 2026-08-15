@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for the pure OAuth PKCE seams. The S256 relationship is
+ * @file Unit tests for the pure OAuth PKCE helpers. The S256 relationship is
  *   re-derived with node:crypto rather than trusted; the discovery URL cases
  *   cover the RFC 8414 path-inserted form; the callback parser cases walk the
  *   RFC 8252 loopback shapes — success, provider error, state mismatch, and a

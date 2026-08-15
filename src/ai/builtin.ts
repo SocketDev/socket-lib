@@ -16,7 +16,7 @@ export type LanguageModelAvailability =
   | 'unavailable'
 
 /**
- * Stable factory seam shared by Chrome and the native Node implementations.
+ * Stable factory boundary shared by Chrome and the native Node implementations.
  * The session is intentionally opaque while the Prompt API surface is still
  * changing across browser versions.
  */

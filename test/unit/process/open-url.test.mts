@@ -24,9 +24,9 @@ import type { OpenUrlSpawnOptions } from '../../../src/process/open-url'
 
 // Observe the DEFAULT spawner's launch path without ever spawning: the
 // default lane reaches node:child_process through the lazy getNodeChildProcess
-// seam, so mocking that module records what would have launched. The stub
+// injection point, so mocking that module records what would have launched. The stub
 // carries only the surface the default spawner touches (spawn → on/unref),
-// hence the cast to the seam's full module type.
+// hence the cast to the injection point's full module type.
 const nodeSpawnCalls = vi.hoisted(
   () => [] as Array<{ args: readonly string[]; command: string }>,
 )
@@ -265,7 +265,7 @@ describe('openUrl skip-under-test-runner', () => {
     expect(nodeSpawnCalls[0]!.command).toBe('xdg-open')
   })
 
-  it('proceeds into an injected spawn seam — the spy is asking to observe', () => {
+  it('proceeds into an injected spawn boundary — the spy is asking to observe', () => {
     const launches: Launch[] = []
     openUrl(URL, { platform: 'darwin', spawn: recordingSpawner(launches) })
     expect(launches).toHaveLength(1)
