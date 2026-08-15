@@ -16,6 +16,7 @@ import { RegExpPrototypeTest } from '../primordials/regexp.mjs'
 
 import {
   StringPrototypeCharCodeAt,
+  StringPrototypeSlice,
   StringPrototypeStartsWith,
 } from '../primordials/string.mjs'
 
@@ -232,6 +233,38 @@ export function isRelative(pathLike: string | Buffer | URL): boolean {
 }
 
 /**
+ * Check if a value is wrapped in path separators on BOTH ends — the
+ * `/wrapped/` sigil some list formats use to mark a substring (not exact)
+ * entry. Either separator direction counts on either end, so a stray
+ * backslash-wrapped entry is still read as the sigil rather than silently
+ * treated as an exact path.
+ *
+ * @example
+ *   ;```typescript
+ *   isSeparatorWrapped('/rendering-chromium-to-png/') // true
+ *   isSeparatorWrapped('\\rendering-chromium-to-png\\') // true
+ *   isSeparatorWrapped('scripts/fleet/acquire.mts') // false
+ *   isSeparatorWrapped('//') // false
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The value to check.
+ *
+ * @returns {boolean} `true` if both ends are path separators with content
+ *   between.
+ */
+export function isSeparatorWrapped(pathLike: string | Buffer | URL): boolean {
+  const filepath = pathLikeToString(pathLike)
+  const { length } = filepath
+  if (length < 3) {
+    return false
+  }
+  return (
+    isPathSeparator(StringPrototypeCharCodeAt(filepath, 0)) &&
+    isPathSeparator(StringPrototypeCharCodeAt(filepath, length - 1))
+  )
+}
+
+/**
  * Check if a path uses MSYS/Git Bash Unix-style drive letter notation.
  *
  * Detects paths in the format `/c/...` where a single letter after the leading
@@ -278,3 +311,30 @@ export function isWindowsDeviceRoot(code: number): boolean {
   )
 }
 /* c8 ignore stop */
+
+/**
+ * The forward-slash substring form of a separator-wrapped entry, or
+ * undefined when the value is not wrapped. The inner segment's backslashes
+ * become forward slashes so the needle matches against normalized paths.
+ *
+ * @example
+ *   ;```typescript
+ *   separatorWrappedSubstring('/rendering-chromium-to-png/') // '/rendering-chromium-to-png/'
+ *   separatorWrappedSubstring('\\rendering-chromium-to-png\\') // '/rendering-chromium-to-png/'
+ *   separatorWrappedSubstring('scripts/fleet/acquire.mts') // undefined
+ *   ```
+ *
+ * @param {string | Buffer | URL} pathLike - The value to convert.
+ *
+ * @returns {string | undefined} The `/inner/` substring form, or undefined
+ */
+export function separatorWrappedSubstring(
+  pathLike: string | Buffer | URL,
+): string | undefined {
+  if (!isSeparatorWrapped(pathLike)) {
+    return undefined
+  }
+  const filepath = pathLikeToString(pathLike)
+  const inner = StringPrototypeSlice(filepath, 1, -1).replaceAll('\\', '/')
+  return `/${inner}/`
+}

@@ -22,10 +22,12 @@ import {
   isNodeModules,
   isPath,
   isRelative,
+  isSeparatorWrapped,
   isUnixPath,
   normalizePath,
   pathLikeToString,
   relativeResolve,
+  separatorWrappedSubstring,
   splitPath,
   trimLeadingDotSlash,
 } from '../../../src/paths/normalize'
@@ -87,6 +89,56 @@ describe('paths/normalize predicates', () => {
     it('should handle paths without leading ./', () => {
       expect(isRelative('src/file.ts')).toBe(true)
       expect(isRelative('lib/utils.js')).toBe(true)
+    })
+  })
+
+  describe('isSeparatorWrapped', () => {
+    it('should detect forward-slash wrapped entries', () => {
+      expect(isSeparatorWrapped('/rendering-chromium-to-png/')).toBe(true)
+      expect(isSeparatorWrapped('/a/')).toBe(true)
+    })
+
+    it('should detect backslash and mixed wrapped entries', () => {
+      expect(isSeparatorWrapped('\\rendering-chromium-to-png\\')).toBe(true)
+      expect(isSeparatorWrapped('/rendering-chromium-to-png\\')).toBe(true)
+      expect(isSeparatorWrapped('\\rendering-chromium-to-png/')).toBe(true)
+    })
+
+    it('should reject unwrapped and too-short values', () => {
+      expect(isSeparatorWrapped('scripts/fleet/acquire.mts')).toBe(false)
+      expect(isSeparatorWrapped('/leading')).toBe(false)
+      expect(isSeparatorWrapped('trailing/')).toBe(false)
+      expect(isSeparatorWrapped('//')).toBe(false)
+      expect(isSeparatorWrapped('/')).toBe(false)
+      expect(isSeparatorWrapped('')).toBe(false)
+    })
+
+    it('should handle Buffer input', () => {
+      expect(isSeparatorWrapped(Buffer.from('/wrapped/'))).toBe(true)
+      expect(isSeparatorWrapped(Buffer.from('plain'))).toBe(false)
+    })
+  })
+
+  describe('separatorWrappedSubstring', () => {
+    it('should return the forward-slash needle for wrapped entries', () => {
+      expect(separatorWrappedSubstring('/rendering-chromium-to-png/')).toBe(
+        '/rendering-chromium-to-png/',
+      )
+      expect(separatorWrappedSubstring('\\rendering-chromium-to-png\\')).toBe(
+        '/rendering-chromium-to-png/',
+      )
+    })
+
+    it('should normalize inner backslashes', () => {
+      expect(separatorWrappedSubstring('\\foo\\bar\\')).toBe('/foo/bar/')
+    })
+
+    it('should be undefined for unwrapped values', () => {
+      expect(
+        separatorWrappedSubstring('scripts/fleet/acquire.mts'),
+      ).toBeUndefined()
+      expect(separatorWrappedSubstring('')).toBeUndefined()
+      expect(separatorWrappedSubstring('//')).toBeUndefined()
     })
   })
 

@@ -328,7 +328,9 @@ export {
   isPath,
   isPathSeparator,
   isRelative,
+  isSeparatorWrapped,
   isUnixPath,
   isWindowsDeviceRoot,
+  separatorWrappedSubstring,
 } from './predicates.mjs'
 export { relative, relativeResolve, resolve } from './resolve.mjs'
