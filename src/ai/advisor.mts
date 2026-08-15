@@ -20,7 +20,11 @@ import { orderCandidates, taskClassToTier } from './route-heuristic.mjs'
 import { usableTierCandidates } from './route.mjs'
 
 import type { AiProfile } from './profiles.mjs'
-import type { BillingContext, RoutingEnv, TaskClass } from './route-heuristic.mjs'
+import type {
+  BillingContext,
+  RoutingEnv,
+  TaskClass,
+} from './route-heuristic.mjs'
 import type { RouteContext, TierCandidate } from './route.mjs'
 import type { AiTier } from './tier.mjs'
 

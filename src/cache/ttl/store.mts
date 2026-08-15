@@ -18,7 +18,10 @@
 
 import { clear as cacacheClear } from '../../cacache/clear.mjs'
 import { safeGet as cacacheSafeGet } from '../../cacache/read.mjs'
-import { put as cacachePut, remove as cacacheRemove } from '../../cacache/write.mjs'
+import {
+  put as cacachePut,
+  remove as cacacheRemove,
+} from '../../cacache/write.mjs'
 import { DateNow } from '../../primordials/date.mjs'
 import { TypeErrorCtor } from '../../primordials/error.mjs'
 import { JSONParse, JSONStringify } from '../../primordials/json.mjs'
@@ -185,7 +188,9 @@ export function createTtlCache(
     /* c8 ignore stop */
 
     // Check persistent cache for entries not in memory.
-    const cacheDir = (await import('../../paths/socket.mjs')).getSocketCacacheDir()
+    const cacheDir = (
+      await import('../../paths/socket.mjs')
+    ).getSocketCacacheDir()
     const cacacheModule = await import('../../cacache/shared.mjs')
     const stream = cacacheModule.getCacache().ls.stream(cacheDir)
 

@@ -19,7 +19,10 @@ import { ErrorCtor } from '../primordials/error.mjs'
 
 import { getLanguageModel } from './builtin.mjs'
 
-import type { LanguageModelAvailability, LanguageModelFactory } from './builtin.mjs'
+import type {
+  LanguageModelAvailability,
+  LanguageModelFactory,
+} from './builtin.mjs'
 import type { AgentSpawnResult, SpawnAiAgentOptions } from './types.mjs'
 
 /**

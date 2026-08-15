@@ -22,7 +22,10 @@
 // oxlint-disable-next-line socket/no-platform-specific-import -- the relative barrel '../http-request' has no index.ts and exports-map resolution only applies to the bare package name, so only the explicit /node path resolves here (the rule's autofix produces an unresolvable import — verified TS2307). Matches src/dlx/firewall.ts.
 import { httpJson } from '../http-request/node.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
-import { isCredentialProvider, resolveProviderCredential } from './credentials.mjs'
+import {
+  isCredentialProvider,
+  resolveProviderCredential,
+} from './credentials.mjs'
 
 import type { AiEffort } from './types.mjs'
 
