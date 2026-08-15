@@ -106,11 +106,18 @@ export const config: ExportsConfig = {
     // validator doesn't flag the shadowed leaf. (Latent: the alias could be
     // dropped to let `logger.js` self-route, but that changes resolution — out
     // of scope for the generator migration.)
+    'dist/logger/logger.d.mts',
     'dist/logger/logger.d.ts',
     'dist/logger/logger.js',
-    // Module-internal helper leaves. Every `*/shared.ts` header describes
+    // Module-internal helper leaves. Every `*/shared.mts` header describes
     // itself as private to its directory; none had a real import across the
     // fleet, so v7 stops publishing them as subpaths.
+    //
+    // BOTH declaration extensions are listed. `.mts` sources emit `.d.mts`,
+    // and naming only `.d.ts` silently re-published all 24 of these as public
+    // subpaths when src moved to .mts - a 24-entry widening of the API that
+    // looked like a generator quirk rather than a missing glob.
+    'dist/**/shared.d.mts',
     'dist/**/shared.d.ts',
     'dist/**/shared.js',
     'src/**',

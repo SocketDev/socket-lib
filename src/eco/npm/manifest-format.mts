@@ -1,0 +1,20 @@
+/**
+ * @file Format descriptor for `package.json` — the manifest shape shared across
+ *   the entire npm-family ecosystem: npm, pnpm, yarn, bun, and vlt. Per-PM
+ *   lockfile descriptors live next to their parsers under
+ *   `src/eco/npm/<pm>/lockfile-format.ts`. Returned by
+ *   `src/eco/manifest/detect-format.ts` when a filename matches
+ *   `package.json`.
+ */
+
+import { ObjectFreeze } from '../../primordials/object.mjs'
+
+import type { FormatDescriptor } from '../manifest/types.mjs'
+
+export const PACKAGE_JSON_FORMAT = ObjectFreeze({
+  __proto__: null,
+  ecosystem: 'npm',
+  type: 'manifest',
+}) as unknown as FormatDescriptor
+
+export const PACKAGE_JSON_FILENAME = 'package.json'

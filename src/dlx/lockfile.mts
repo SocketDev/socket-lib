@@ -1,0 +1,247 @@
+/**
+ * @file Package pin generation for dlx installs. `resolveNpmPackagePin`
+ *   resolves an npm package against the registry using Arborist's lockfile-only
+ *   mode and fetches its top-level tarball to return both hash formats plus the
+ *   lockfile content — everything needed to vendor a reproducible install. The
+ *   `LockfileSpec` type is also exported here for use as the `lockfile` option
+ *   on `downloadNpmPackage`. Sniff/write handling lives inline in
+ *   `./package.ts` — no helper.
+ */
+
+import os from 'node:os'
+
+import pacote from '../external/pacote.js'
+import { safeDelete, safeMkdir } from '../fs/safe.mjs'
+import { safeIdealTree, writeSafeNpmrc } from './arborist.mjs'
+
+import { computeHashes } from '../crypto/integrity.mjs'
+
+import type { ComputedHashes } from '../crypto/integrity.mjs'
+
+import { DateCtor, DateNow } from '../primordials/date.mjs'
+
+import { JSONStringify } from '../primordials/json.mjs'
+
+import {
+  StringPrototypeLastIndexOf,
+  StringPrototypeSlice,
+} from '../primordials/string.mjs'
+
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+
+/**
+ * Lockfile source for the `lockfile` option on `downloadNpmPackage`.
+ *
+ * Bare strings are sniffed: a leading `{` after any whitespace means JSON
+ * content; anything else is treated as a filesystem path. Pass the explicit `{
+ * type, value }` form to override sniffing.
+ *
+ * @example
+ *   // Sniffed as path:
+ *   './scripts/dlx/claude/package-lock.json'
+ *   // Sniffed as content:
+ *   '{ "lockfileVersion": 3, ... }'
+ *   // Explicit:
+ *   { type: 'path', value: '/abs/package-lock.json' }
+ *   { type: 'content', value: '{ ... }' }
+ */
+export type LockfileSpec =
+  | string
+  | { type: 'path'; value: string }
+  | { type: 'content'; value: string }
+
+/**
+ * Default minimum release age in days applied when a caller passes neither
+ * `minReleaseDays` nor `minReleaseMins`. Pass `minReleaseDays: 0` to disable
+ * the cutoff explicitly.
+ */
+export const DEFAULT_MIN_RELEASE_DAYS = 7
+
+/**
+ * Options for generating a vendorable pin for an npm package.
+ */
+export interface ResolveNpmPackagePinOptions {
+  /**
+   * Minimum release age in days. Refuses to resolve any version (direct or
+   * transitive) published more recently than `Date.now() - N days`.
+   *
+   * Matches npm's `min-release-age` config (unit: days). Mutually exclusive
+   * with {@link minReleaseMins}. Defaults to {@link DEFAULT_MIN_RELEASE_DAYS}
+   * (7) when neither field is set. Pass `0` to disable.
+   */
+  minReleaseDays?: number | undefined
+  /**
+   * Minimum release age in minutes. Refuses to resolve any version published
+   * more recently than `Date.now() - N minutes`.
+   *
+   * Matches pnpm's `minimumReleaseAge` config (unit: minutes). Mutually
+   * exclusive with {@link minReleaseDays}.
+   */
+  minReleaseMins?: number | undefined
+  /**
+   * Package spec, e.g. `'@anthropic-ai/claude-code@2.1.92'`. Named `spec` to
+   * match `downloadNpmPackage`/`downloadPipPackage`.
+   */
+  spec: string
+}
+
+/**
+ * Result of {@link resolveNpmPackagePin}. All file data is returned as content —
+ * the caller decides whether/where to write it.
+ */
+export interface NpmPackagePin {
+  /**
+   * Resolved package name.
+   */
+  name: string
+  /**
+   * Resolved package version.
+   */
+  version: string
+  /**
+   * Both hash formats of the top-level tarball.
+   */
+  hash: ComputedHashes
+  /**
+   * `package.json` JSON content, ready to write to disk.
+   */
+  packageJson: string
+  /**
+   * `package-lock.json` JSON content, ready to write to disk.
+   */
+  lockfile: string
+}
+
+/**
+ * Thrown when a lockfile spec is malformed (unrecognized string, missing file,
+ * invalid JSON) or drifts from its package.json.
+ */
+export class DlxLockfileError extends Error {
+  constructor(
+    message: string,
+    options?: { cause?: unknown | undefined } | undefined,
+  ) {
+    super(message, options)
+    this.name = 'DlxLockfileError'
+  }
+}
+
+/**
+ * Generate a vendorable pin for an npm package without installing it.
+ *
+ * Runs Arborist in lockfile-only mode (`packageLockOnly: true`) against a
+ * temporary directory, fetches the top-level tarball once to compute sha256 hex
+ * (since Arborist only exposes SRI from the registry), then tears the tmp
+ * directory down before returning.
+ *
+ * The result contains everything a caller needs to pin the package for future
+ * installs: the exact resolved name/version, both hash formats, and the
+ * lockfile content, ready to commit.
+ *
+ * @example
+ *   ;```ts
+ *   const pin = await resolveNpmPackagePin({
+ *     spec: '@anthropic-ai/claude-code@2.1.92',
+ *   })
+ *   await fs.writeFile('./claude.lock.json', pin.lockfile, 'utf8')
+ *   // pin.hash.integrity → 'sha512-…'
+ *   // pin.hash.checksum  → hex
+ *   ```
+ */
+export async function resolveNpmPackagePin(
+  options: ResolveNpmPackagePinOptions,
+): Promise<NpmPackagePin> {
+  const fs = getNodeFs()
+  const path = getNodePath()
+  const { minReleaseDays, minReleaseMins, spec } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
+  if (typeof spec !== 'string' || spec.length === 0) {
+    throw new DlxLockfileError('resolveNpmPackagePin requires a package spec')
+  }
+  if (minReleaseDays !== undefined && minReleaseMins !== undefined) {
+    throw new DlxLockfileError(
+      'resolveNpmPackagePin: minReleaseDays and minReleaseMins are mutually exclusive',
+    )
+  }
+  const effectiveDays =
+    minReleaseDays !== undefined
+      ? minReleaseDays
+      : minReleaseMins !== undefined
+        ? undefined
+        : DEFAULT_MIN_RELEASE_DAYS
+  const ageMs =
+    effectiveDays !== undefined
+      ? effectiveDays * 86_400_000
+      : minReleaseMins !== undefined
+        ? minReleaseMins * 60_000
+        : 0
+  const before = ageMs > 0 ? new DateCtor(DateNow() - ageMs) : undefined
+  const scratch = path.join(
+    os.tmpdir(),
+    `socket-lib-pin-${process.pid}-${Date.now()}`,
+  )
+  await safeMkdir(scratch, { recursive: true })
+  try {
+    const packageJson = JSONStringify(
+      {
+        name: 'socket-lib-pin',
+        version: '0.0.0',
+        private: true,
+        dependencies: { [specName(spec)]: specRange(spec) },
+      },
+      undefined,
+      2,
+    )
+    await fs.promises.writeFile(
+      path.join(scratch, 'package.json'),
+      packageJson + '\n',
+      'utf8',
+    )
+    await writeSafeNpmrc(scratch, {
+      minReleaseDays: effectiveDays,
+      minReleaseMins,
+    })
+    const ideal = await safeIdealTree({ path: scratch, before })
+    const tarball = await pacote.tarball(`${ideal.name}@${ideal.version}`)
+    const hash = computeHashes(tarball)
+    return {
+      name: ideal.name,
+      version: ideal.version,
+      hash,
+      packageJson,
+      lockfile: ideal.lockfile,
+    }
+  } finally {
+    // Swallow cleanup failures so a scratch-dir-delete error doesn't
+    // mask the real exception from the try-block.
+    try {
+      await safeDelete(scratch, { force: true })
+    } catch {}
+  }
+}
+
+/**
+ * Extract the package name from a spec like `'name@range'` or
+ * `'@scope/name@range'` or a bare `'name'`.
+ */
+export function specName(spec: string): string {
+  const atIdx = StringPrototypeLastIndexOf(spec, '@')
+  if (atIdx <= 0) {
+    return spec
+  }
+  return StringPrototypeSlice(spec, 0, atIdx)
+}
+
+/**
+ * Extract the version range (or `'latest'`) from a spec.
+ */
+export function specRange(spec: string): string {
+  const atIdx = StringPrototypeLastIndexOf(spec, '@')
+  if (atIdx <= 0) {
+    return 'latest'
+  }
+  return StringPrototypeSlice(spec, atIdx + 1) || 'latest'
+}

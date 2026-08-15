@@ -17,7 +17,7 @@ import {
   getGitHubRateLimitWaitSeconds,
   getGitHubResponseHeader,
   GITHUB_BLOCKING_ERROR_KINDS,
-} from '../../../src/github/error-classification.ts'
+} from '../../../src/github/error-classification.mjs'
 
 const RATE_LIMIT_BODY = '{"message":"API rate limit exceeded for user 123."}'
 const SECONDARY_LIMIT_BODY =

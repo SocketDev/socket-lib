@@ -1,0 +1,393 @@
+/**
+ * @file Locked-down spawn for AI agent CLIs (Claude / Codex / Gemini /
+ *   OpenCode). Per the CLAUDE.md "Programmatic Claude calls" rule: every
+ *   headless invocation MUST set the four lockdown flags (tools / disallow /
+ *   permissionMode). The helper enforces this at the
+ *   type level (`SpawnAiAgentOptions` requires the relevant fields) AND at the
+ *   spawn site, via the per-agent flag translator. Why a CLI subprocess instead
+ *   of an SDK call: Socket's contract matches what the local user sees when
+ *   invoking the CLI — same auth config, same model availability, same tool
+ *   permissions. SDK calls would diverge on auth handling and force per-agent
+ *   SDK installs. Retry: 3 attempts on overload (HTTP 529 / "Overloaded"), exp.
+ *   backoff (5s / 15s / 45s). Each retry is a fresh subprocess.
+ */
+
+import process from 'node:process'
+
+import { errorMessage } from '../errors/message.mjs'
+import { DateNow } from '../primordials/date.mjs'
+import { ErrorCtor } from '../primordials/error.mjs'
+import { ObjectKeys } from '../primordials/object.mjs'
+import { PromiseCtor } from '../primordials/promise.mjs'
+import { spawn } from '../process/spawn/child.mjs'
+import { isSpawnError } from '../process/spawn/errors.mjs'
+
+import {
+  isUnknownCliOption,
+  OPTIONAL_CLI_FLAGS,
+  withoutCliFlag,
+} from './cli-flags.mjs'
+import { discoverAiAgents } from './discover.mjs'
+import { isModelUnavailable, isOverloaded, isQuotaExhausted } from './failures.mjs'
+import { usableTierCandidates } from './route.mjs'
+import { runLocalTierSpawn } from './spawn-local.mjs'
+
+import type { LocalAgentProvider } from './spawn-local.mjs'
+import type { RouteContext, TierCandidate } from './route.mjs'
+import type { AiTier } from './tier.mjs'
+import type {
+  AgentSpawnResult,
+  AiAgentName,
+  SpawnAiAgentOptions,
+} from './types.mjs'
+
+const MAX_ATTEMPTS = 3
+const BACKOFF_BASE_MS = 5000
+
+export function backoffFor(attempt: number): number {
+  return BACKOFF_BASE_MS * 3 ** (attempt - 1)
+}
+
+/**
+ * Build CLI arg list for a given agent. The flag names differ across agents but
+ * the conceptual surface is the same: "here are the allowed tools, here are the
+ * denied tools, and here is the permission mode." This
+ * translator is the single source of truth for how each agent's flags map.
+ *
+ * When an agent changes its flag surface, update two sites: 1. The relevant
+ * case below. 2. The agent's docs link, cited inline.
+ */
+export function buildArgs(
+  agent: AiAgentName,
+  options: SpawnAiAgentOptions,
+): string[] {
+  options = { __proto__: null, ...options } as typeof options
+  const allAllowed = [...options.tools, ...(options.allow ?? [])]
+
+  switch (agent) {
+    case 'claude': {
+      // https://code.claude.com/docs/en/cli-reference
+      const args: string[] = [
+        '--print',
+        '--permission-mode',
+        options.permissionMode,
+        '--add-dir',
+        options.cwd,
+      ]
+      for (const dir of options.addDirs ?? []) {
+        args.push('--add-dir', dir)
+      }
+      if (options.model) {
+        args.push('--model', options.model)
+      }
+      // Fable / Mythos are adaptive-thinking-only; the effort dial does not
+      // apply, so omit `--effort` for them rather than pass a level they ignore.
+      if (options.effort && !isAdaptiveOnlyModel(options.model ?? '')) {
+        args.push('--effort', options.effort)
+      }
+      if (allAllowed.length > 0) {
+        args.push('--allowedTools', ...allAllowed)
+      }
+      if (options.disallow.length > 0) {
+        args.push('--disallowedTools', ...options.disallow)
+      }
+      if (options.extraArgs) {
+        args.push(...options.extraArgs)
+      }
+      return args
+    }
+    case 'codex': {
+      // Codex CLI uses --tools / --disallow-tools, no --permission-mode
+      // (it has a separate --read-only flag instead). Plan-mode maps
+      // to --read-only; acceptEdits and dontAsk both run normally.
+      const args: string[] = ['--print']
+      if (options.permissionMode === 'plan') {
+        args.push('--read-only')
+      }
+      if (options.model) {
+        args.push('--model', options.model)
+      }
+      if (options.effort) {
+        // Codex takes reasoning effort as a `-c` config override, not a
+        // flag. Its vocab tops out at xhigh (no `max`), so clamp the shared
+        // AiEffort `max` down to xhigh — codex's ceiling.
+        const codexEffort = options.effort === 'max' ? 'xhigh' : options.effort
+        args.push('-c', `model_reasoning_effort=${codexEffort}`)
+      }
+      if (allAllowed.length > 0) {
+        args.push('--tools', allAllowed.join(','))
+      }
+      if (options.disallow.length > 0) {
+        args.push('--disallow-tools', options.disallow.join(','))
+      }
+      args.push('--cwd', options.cwd)
+      if (options.extraArgs) {
+        args.push(...options.extraArgs)
+      }
+      return args
+    }
+    case 'gemini': {
+      // Gemini CLI: --no-interactive for headless, --workspace for cwd.
+      const args: string[] = ['--no-interactive', '--workspace', options.cwd]
+      if (options.model) {
+        args.push('--model', options.model)
+      }
+      if (allAllowed.length > 0) {
+        args.push('--allowed-tools', allAllowed.join(','))
+      }
+      if (options.disallow.length > 0) {
+        args.push('--denied-tools', options.disallow.join(','))
+      }
+      if (options.permissionMode === 'plan') {
+        args.push('--read-only')
+      }
+      if (options.extraArgs) {
+        args.push(...options.extraArgs)
+      }
+      return args
+    }
+    case 'opencode': {
+      // OpenCode CLI: --print, --tools, --no-tools.
+      const args: string[] = ['--print', '--cwd', options.cwd]
+      if (options.model) {
+        args.push('--model', options.model)
+      }
+      if (allAllowed.length > 0) {
+        args.push('--tools', allAllowed.join(','))
+      }
+      if (options.disallow.length > 0) {
+        args.push('--no-tools', options.disallow.join(','))
+      }
+      if (options.extraArgs) {
+        args.push(...options.extraArgs)
+      }
+      return args
+    }
+  }
+}
+
+/**
+ * Fable and Mythos run adaptive thinking only — thinking is always on and there
+ * is no manual thinking-budget knob. The effort dial does not apply the way it
+ * does on Opus, so the spawn layer drops `--effort` for these models rather
+ * than passing a level they should ignore. Matches both alias and full-id
+ * shapes (`fable`, `claude-fable-5`, `mythos`, `claude-mythos-5`).
+ */
+export function isAdaptiveOnlyModel(model: string): boolean {
+  return (
+    /\b(?:fable|mythos)\b/i.test(model) ||
+    /claude-(?:fable|mythos)/i.test(model)
+  )
+}
+
+export async function pickAgent(
+  requested: AiAgentName | undefined,
+  cwd: string,
+): Promise<AiAgentName> {
+  const discovered = await discoverAiAgents({ repoRoot: cwd })
+  if (requested) {
+    if (!(requested in discovered)) {
+      throw new ErrorCtor(
+        `spawnAiAgent: requested agent "${requested}" is not on PATH. Install the CLI or pass a different agent. Discovered: ${ObjectKeys(discovered).join(', ') || '(none)'}`,
+      )
+    }
+    return requested
+  }
+  // Default to claude when present.
+  if ('claude' in discovered) {
+    return 'claude'
+  }
+  // Otherwise, fall back to whichever agent is available, in
+  // preference order: codex → opencode → gemini.
+  for (const candidate of ['codex', 'opencode', 'gemini'] as const) {
+    if (candidate in discovered) {
+      return candidate
+    }
+  }
+  throw new ErrorCtor(
+    'spawnAiAgent: no AI agent CLI on PATH. Install one of: claude, codex, opencode, gemini.',
+  )
+}
+
+/**
+ * Spawn an AI agent CLI subprocess with the locked-down flag set.
+ *
+ * @example
+ *   ```ts
+ *   import { AI_PROFILE } from '@socketsecurity/lib/ai/profiles'
+ *   import { spawnAiAgent } from '@socketsecurity/lib/ai/spawn'
+ *
+ *   const result = await spawnAiAgent({
+ *   ...AI_PROFILE.edit,
+ *   prompt: 'Fix the lint findings in src/foo.ts',
+ *   cwd: process.cwd(),
+ *   model: 'claude-sonnet-4-6',
+ *   timeoutMs: 5 * 60 * 1000,
+ *   })
+ *   if (result.exitCode !== 0) { ... }
+ *   ```
+ *
+ *   Throws when the requested agent isn't on PATH (or, when no agent
+ *   is requested, when none of the known agents are on PATH).
+ */
+export async function spawnAiAgent(
+  options: SpawnAiAgentOptions,
+): Promise<AgentSpawnResult> {
+  options = { __proto__: null, ...options } as typeof options
+  const agent = await pickAgent(options.agent, options.cwd)
+  let args = buildArgs(agent, options)
+
+  let stdout = ''
+  let stderr = ''
+  let exitCode = 0
+  let attempts = 0
+  const start = DateNow()
+
+  while (attempts < MAX_ATTEMPTS) {
+    attempts += 1
+    stdout = ''
+    stderr = ''
+    exitCode = 0
+
+    try {
+      const child = spawn(agent, args, {
+        cwd: options.cwd,
+        // Only override env when the caller supplies one; absent = inherit.
+        ...(options.env ? { env: { ...process.env, ...options.env } } : {}),
+        stdio: 'pipe',
+        stdioString: true,
+        timeout: options.timeoutMs,
+      })
+      // `.stdin` is a typed convenience accessor on the Socket
+      // PromiseSpawnResult (`Promise<…> & { process; stdin }`); `await child`
+      // resolves the result, so the wrapper is kept rather than destructured.
+      // oxlint-disable-next-line socket/no-bare-spawn-childproc-access -- stdin accessor
+      child.stdin?.end(options.prompt)
+      const result = await child
+      stdout = String(result.stdout ?? '')
+      stderr = String(result.stderr ?? '')
+      exitCode = result.code ?? 0
+    } catch (e) {
+      if (isSpawnError(e)) {
+        stdout = String(e.stdout ?? '')
+        stderr = String(e.stderr ?? '')
+        exitCode = e.code ?? 1
+      } else {
+        stderr = errorMessage(e)
+        exitCode = 1
+      }
+    }
+
+    // An optimization flag the installed CLI does not know fails the spawn
+    // before any work happens. Drop it and retry: the run proceeds at the
+    // CLI's default reasoning depth instead of dying on an arg mismatch.
+    const rejected =
+      exitCode === 0
+        ? undefined
+        : OPTIONAL_CLI_FLAGS.find(
+            flag =>
+              args.includes(flag) && isUnknownCliOption(stdout, stderr, flag),
+          )
+    if (rejected) {
+      args = withoutCliFlag(args, rejected)
+      continue
+    }
+
+    if (!isOverloaded(stdout, stderr) || attempts >= MAX_ATTEMPTS) {
+      break
+    }
+    await new PromiseCtor(resolve => setTimeout(resolve, backoffFor(attempts)))
+  }
+
+  // `overloaded` is true only when the LAST attempt was still an overload —
+  // i.e. retries were exhausted on 529, not a real failure. A run that
+  // recovered on a retry exits with the recovered result and overloaded=false.
+  // `unavailable` means the selected MODEL can't serve the request (down /
+  // no-access) — the caller should fall over to the next agent, not retry here.
+  return {
+    attempts,
+    durationMs: DateNow() - start,
+    exitCode,
+    overloaded: isOverloaded(stdout, stderr),
+    stderr,
+    stdout,
+    unavailable: isModelUnavailable(stdout, stderr),
+  }
+}
+
+/**
+ * Result of a tier spawn that may have fallen over one or more offline models.
+ * `result` is the spawn that actually ran (the first whose model was not
+ * `unavailable`, or the last attempt if every candidate was down). `candidate`
+ * is the engine/model that produced it. `fellOver` lists the candidates that
+ * reported their model offline before this one — empty on a first-try success.
+ */
+export interface TierSpawnResult {
+  readonly candidate: TierCandidate
+  readonly fellOver: readonly TierCandidate[]
+  readonly result: AgentSpawnResult
+}
+
+/**
+ * Spawn a tier's work, automatically FALLING OVER to the next agent when a
+ * model is offline. Walks the tier's usable candidates (Claude → Codex →
+ * open-weight) in order; if a spawn comes back with `unavailable` (the model is
+ * down or gated — e.g. "Claude Fable 5 is currently unavailable"), it advances
+ * to the next candidate instead of failing. This is the runtime complement to
+ * `route.mts`'s static availability check: that check can't predict an outage,
+ * so the live spawn result drives the fallback.
+ *
+ * Returns the first non-`unavailable` spawn (success OR a genuine work failure
+ * on a model that WAS reachable — a real failure shouldn't silently retry on a
+ * weaker model). If every candidate is offline, returns the last attempt with
+ * its `unavailable` flag set, so the caller can report "all models down".
+ * Throws only when the tier has no usable candidate at all (nothing installed +
+ * keyed) — same contract as `resolveTier` returning undefined.
+ */
+export async function spawnTierWithFallback(
+  tier: AiTier,
+  ctx: RouteContext,
+  options: Omit<SpawnAiAgentOptions, 'agent' | 'effort' | 'model'>,
+  localProvider?: LocalAgentProvider | undefined,
+): Promise<TierSpawnResult> {
+  const candidates = usableTierCandidates(tier, ctx)
+  if (candidates.length === 0) {
+    throw new ErrorCtor(
+      `spawnTierWithFallback: no usable agent for tier "${tier}". No candidate engine is both installed and keyed (checked: ${candidates.length}). Install/authenticate one of the tier's engines, or pick a different tier.`,
+    )
+  }
+  const fellOver: TierCandidate[] = []
+  let last: { candidate: TierCandidate; result: AgentSpawnResult } | undefined
+  for (let i = 0, { length } = candidates; i < length; i += 1) {
+    const candidate = candidates[i]!
+    // A `local` candidate drives the keyless on-device seam (returning the same
+    // AgentSpawnResult) so the fall-over logic below stays uniform across kinds.
+    const result =
+      candidate.kind === 'local'
+        ? await runLocalTierSpawn(options, candidate.model, localProvider)
+        : await spawnAiAgent({
+            ...options,
+            agent: candidate.engine,
+            effort: candidate.effort,
+            model: candidate.model,
+          } as SpawnAiAgentOptions)
+    last = { candidate, result }
+    if (
+      !result.unavailable &&
+      !isQuotaExhausted(result.stdout, result.stderr)
+    ) {
+      // Reached a model that could serve, either with a success or a genuine
+      // failure. Stop; don't downgrade a real failure onto a weaker model.
+      return { candidate, fellOver, result }
+    }
+    // This model is offline/gated, or its seat/budget is exhausted (429 / quota)
+    // — record it and try the next candidate (a different provider/account).
+    fellOver.push(candidate)
+  }
+  // Every candidate was down or quota-exhausted — return the last attempt.
+  return {
+    candidate: last!.candidate,
+    fellOver: fellOver.slice(0, -1),
+    result: last!.result,
+  }
+}

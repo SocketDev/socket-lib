@@ -20,7 +20,7 @@ import {
   DEFAULT_BASE_DELAY_MS,
   GITHUB_RETRY_CONFIG,
   resolveBaseDelayMs,
-} from '../../../src/releases/github-retry-config.ts'
+} from '../../../src/releases/github-retry-config.mjs'
 
 const ENV_KEY = 'SOCKET_GITHUB_RETRY_BASE_DELAY_MS'
 let savedEnv: string | undefined

@@ -1,0 +1,293 @@
+/**
+ * @file Package isolation utilities for testing. Provides tools to set up
+ *   isolated test environments for packages.
+ */
+
+import npmPackageArg from '../external/npm-package-arg.js'
+
+import { isWin32 } from '../constants/platform.mjs'
+import { errorMessage } from '../errors/message.mjs'
+import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize.mjs'
+import { getOsTmpDir } from '../paths/socket.mjs'
+import { spawn } from '../process/spawn/child.mjs'
+import { windowsShellOption } from '../process/spawn/windows-shell.mjs'
+import { readPackageJson } from './read.mjs'
+
+import type { PackageJson } from './types.mjs'
+
+import { ErrorCtor } from '../primordials/error.mjs'
+
+import { JSONParse, JSONStringify } from '../primordials/json.mjs'
+
+import { ObjectEntries } from '../primordials/object.mjs'
+
+import {
+  StringPrototypeEndsWith,
+  StringPrototypeStartsWith,
+} from '../primordials/string.mjs'
+export type IsolatePackageOptions = {
+  imports?: Record<string, string> | undefined
+  install?: ((cwd: string) => Promise<void>) | undefined
+  onPackageJson?:
+    | ((pkgJson: PackageJson) => PackageJson | Promise<PackageJson>)
+    | undefined
+  sourcePath?: string | undefined
+}
+export type IsolatePackageResult = {
+  exports?: Record<string, unknown> | undefined
+  tmpdir: string
+}
+
+/**
+ * Copy options for fs.cp with cross-platform retry support.
+ */
+const FS_CP_OPTIONS = {
+  dereference: true,
+  errorOnExist: false,
+  filter: (src: string) =>
+    !src.includes('node_modules') && !StringPrototypeEndsWith(src, '.DS_Store'),
+  force: true,
+  recursive: true,
+  ...(isWin32() ? { maxRetries: 3, retryDelay: 100 } : {}),
+}
+
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+
+/**
+ * Isolates a package in a temporary test environment.
+ *
+ * Supports multiple input types: 1. Absolute or relative file system path 2.
+ * Package name with optional version spec 3. npm package spec (parsed via
+ * npm-package-arg)
+ *
+ * @throws {Error} When package installation or setup fails.
+ */
+export async function isolatePackage(
+  packageSpec: string,
+  options?: IsolatePackageOptions | undefined,
+): Promise<IsolatePackageResult> {
+  const fs = getNodeFs()
+  const path = getNodePath()
+  const opts = { __proto__: null, ...options } as IsolatePackageOptions
+  const { imports, install, onPackageJson, sourcePath: optSourcePath } = opts
+
+  let sourcePath = optSourcePath
+  let packageName: string | undefined
+  let spec: string | undefined
+
+  // Determine if this is a path or package spec.
+  if (isPath(packageSpec)) {
+    // File system path.
+    // Handle edge case on Windows where path.relative() returns an absolute path
+    // when paths are on different drives, and the test prepends './' to it.
+    // Example: './C:\path\to\file' should be treated as 'C:\path\to\file'.
+    const trimmedPath = trimLeadingDotSlash(packageSpec)
+    const pathToResolve = isAbsolute(trimmedPath) ? trimmedPath : packageSpec
+    sourcePath = path.resolve(pathToResolve)
+
+    if (!fs.existsSync(sourcePath)) {
+      throw new ErrorCtor(`Source path does not exist: ${sourcePath}`)
+    }
+
+    // Read package.json to get the name.
+    const pkgJson = await readPackageJson(sourcePath, { normalize: true })
+    if (!pkgJson) {
+      throw new ErrorCtor(`Could not read package.json from: ${sourcePath}`)
+    }
+    packageName = pkgJson.name as string
+  } else {
+    // Parse as npm package spec.
+    // npmPackageArg is imported at the top
+    const parsed = npmPackageArg(packageSpec)
+
+    packageName = parsed.name
+
+    if (parsed.type === 'directory' || parsed.type === 'file') {
+      sourcePath = parsed.fetchSpec
+      if (!sourcePath || !fs.existsSync(sourcePath)) {
+        throw new ErrorCtor(`Source path does not exist: ${sourcePath}`)
+      }
+      // If package name not provided by parser, read from package.json.
+      if (!packageName) {
+        const pkgJson = await readPackageJson(sourcePath, { normalize: true })
+        if (!pkgJson) {
+          throw new ErrorCtor(`Could not read package.json from: ${sourcePath}`)
+        }
+        packageName = pkgJson.name as string
+      }
+    } else {
+      // Registry package.
+      spec = parsed.fetchSpec || parsed.rawSpec
+    }
+  }
+
+  if (!packageName) {
+    throw new ErrorCtor(`Could not determine package name from: ${packageSpec}`)
+  }
+
+  // Create temp directory for this package.
+  const sanitizedName = packageName.replace(/[@/]/g, '-')
+  const tempDir = await fs.promises.mkdtemp(
+    path.join(getOsTmpDir(), `socket-test-${sanitizedName}-`),
+  )
+  const packageTempDir = path.join(tempDir, sanitizedName)
+  await fs.promises.mkdir(packageTempDir, { recursive: true })
+
+  let installedPath: string
+  let originalPackageJson: PackageJson | undefined
+
+  if (spec) {
+    // Installing from registry first, then copying source on top if provided.
+    await fs.promises.writeFile(
+      path.join(packageTempDir, 'package.json'),
+      JSONStringify(
+        {
+          name: 'test-temp',
+          private: true,
+          version: '1.0.0',
+        },
+        null,
+        2,
+      ),
+    )
+
+    // Use custom install function or default pnpm install.
+    if (install) {
+      await install(packageTempDir)
+    } else {
+      // spawn is imported at the top
+      const packageInstallSpec = StringPrototypeStartsWith(spec, 'https://')
+        ? spec
+        : `${packageName}@${spec}`
+
+      await spawn('pnpm', ['add', packageInstallSpec], {
+        cwd: packageTempDir,
+        ...windowsShellOption('pnpm'),
+        stdio: 'pipe',
+      })
+    }
+
+    installedPath = path.join(packageTempDir, 'node_modules', packageName)
+
+    // Save original package.json before copying source.
+    originalPackageJson = await readPackageJson(installedPath, {
+      normalize: true,
+    })
+
+    // Copy source files on top if provided.
+    if (sourcePath) {
+      // Check if source and destination are the same (symlinked).
+      const realInstalledPath = await resolveRealPath(installedPath)
+      const realSourcePath = await resolveRealPath(sourcePath)
+
+      if (realSourcePath !== realInstalledPath) {
+        await fs.promises.cp(sourcePath, installedPath, FS_CP_OPTIONS)
+      }
+    }
+  } else {
+    // Just copying local package, no registry install.
+    if (!sourcePath) {
+      throw new ErrorCtor(
+        'sourcePath is required when no version spec provided',
+      )
+    }
+
+    const scopedPath = StringPrototypeStartsWith(packageName, '@')
+      ? path.join(
+          packageTempDir,
+          'node_modules',
+          packageName.split('/')[0] ?? '',
+        )
+      : path.join(packageTempDir, 'node_modules')
+
+    await fs.promises.mkdir(scopedPath, { recursive: true })
+    installedPath = path.join(packageTempDir, 'node_modules', packageName)
+
+    await fs.promises.cp(sourcePath, installedPath, FS_CP_OPTIONS)
+  }
+
+  // Prepare package.json if callback provided or if we need to merge with original.
+  if (onPackageJson || originalPackageJson) {
+    const pkgJsonPath = path.join(installedPath, 'package.json')
+    const mergedPkgJson = await mergePackageJson(
+      pkgJsonPath,
+      originalPackageJson,
+    )
+
+    const finalPkgJson = onPackageJson
+      ? await onPackageJson(mergedPkgJson)
+      : mergedPkgJson
+
+    await fs.promises.writeFile(
+      pkgJsonPath,
+      JSONStringify(finalPkgJson, null, 2),
+    )
+  }
+
+  // Install dependencies.
+  if (install) {
+    await install(installedPath)
+  } else {
+    // spawn is imported at the top
+    await spawn('pnpm', ['install'], {
+      cwd: installedPath,
+      ...windowsShellOption('pnpm'),
+      stdio: 'pipe',
+    })
+  }
+
+  // Load module exports if imports provided.
+  const exports: Record<string, unknown> = imports
+    ? { __proto__: null }
+    : (undefined as unknown as Record<string, unknown>)
+
+  if (imports) {
+    for (const { 0: key, 1: specifier } of ObjectEntries(imports)) {
+      const fullPath = path.join(installedPath, specifier)
+      exports[key] = require(fullPath)
+    }
+  }
+
+  return {
+    exports,
+    tmpdir: installedPath,
+  }
+}
+
+/**
+ * Merge and write package.json with original and new values.
+ */
+export async function mergePackageJson(
+  pkgJsonPath: string,
+  originalPkgJson: PackageJson | undefined,
+): Promise<PackageJson> {
+  const fs = getNodeFs()
+  let pkgJson: PackageJson
+  try {
+    pkgJson = JSONParse(await fs.promises.readFile(pkgJsonPath, 'utf8'))
+  } catch (e) {
+    throw new ErrorCtor(`Failed to parse ${pkgJsonPath}: ${errorMessage(e)}`, {
+      cause: e,
+    })
+  }
+  const mergedPkgJson = originalPkgJson
+    ? { ...originalPkgJson, ...pkgJson }
+    : pkgJson
+  return mergedPkgJson
+}
+
+/**
+ * Resolve a path to its real location, handling symlinks. Falls back to a
+ * non-realpath resolution if the OS rejects the lookup (ENOENT, EACCES, etc.) —
+ * caller still gets a usable absolute path either way.
+ */
+export async function resolveRealPath(pathStr: string): Promise<string> {
+  const fs = getNodeFs()
+  const path = getNodePath()
+  try {
+    return await fs.promises.realpath(pathStr)
+  } catch {
+    return path.resolve(pathStr)
+  }
+}

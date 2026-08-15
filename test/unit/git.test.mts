@@ -355,7 +355,7 @@ describe('git', () => {
       // src/logger.ts was reshaped into src/logger/node.ts (v6.1
       // renamed the leaf from `logger` to `default` so it lines up
       // with `getDefaultLogger`).
-      const result = await isChanged('src/logger/node.ts', {
+      const result = await isChanged('src/logger/node.mts', {
         cwd: projectRoot,
       })
       expect(typeof result).toBe('boolean')

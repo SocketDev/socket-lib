@@ -1,0 +1,393 @@
+/**
+ * @file The `EditablePackageJson` class factory. Split out of
+ *   `packages/edit.ts` for size hygiene. Wraps `@npmcli/package-json` with
+ *   Socket-specific knobs: path tracking, a `canSave` guard for content-only
+ *   instances, async + sync save paths that honor `EditablePackageJsonOptions`
+ *   formatting.
+ *
+ *   - `getEditablePackageJsonClass` — lazy class accessor (Webpack-safe)
+ */
+
+// @ts-expect-error - external vendored module
+import EditablePackageJsonBase from '../external/@npmcli/package-json.js'
+// @ts-expect-error - external vendored module
+import { parse, read } from '../external/@npmcli/package-json/lib/read-package.js'
+// @ts-expect-error - external vendored module
+import { packageSort } from '../external/@npmcli/package-json/lib/sort.js'
+import {
+  getFormattingFromContent,
+  shouldSave as shouldSaveUtil,
+  stringifyWithFormatting,
+  stripFormattingSymbols,
+} from '../json/format.mjs'
+
+import { ErrorCtor } from '../primordials/error.mjs'
+
+import { JSONStringify } from '../primordials/json.mjs'
+
+import { StringPrototypeEndsWith } from '../primordials/string.mjs'
+
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+import { getNodeUtil } from '../node/util.mjs'
+
+import type {
+  EditablePackageJsonOptions,
+  NormalizeOptions,
+  PackageJson,
+  SaveOptions,
+} from './types.mjs'
+
+import type { EditablePackageJsonInstance } from './edit.mjs'
+
+/**
+ * Private constructor interface for the lazily-built `EditablePackageJson`
+ * class. Not exported because consumers go through
+ * `getEditablePackageJsonClass()`.
+ */
+export interface EditablePackageJsonConstructor {
+  new (): EditablePackageJsonInstance
+  fixSteps: unknown[]
+  normalizeSteps: unknown[]
+  prepareSteps: unknown[]
+  create(
+    path: string,
+    opts?: EditablePackageJsonOptions | undefined,
+  ): Promise<EditablePackageJsonInstance>
+  fix(
+    path: string,
+    opts?: unknown | undefined,
+  ): Promise<EditablePackageJsonInstance>
+  load(
+    path: string,
+    opts?: EditablePackageJsonOptions | undefined,
+  ): Promise<EditablePackageJsonInstance>
+  normalize(
+    path: string,
+    opts?: NormalizeOptions | undefined,
+  ): Promise<EditablePackageJsonInstance>
+  prepare(
+    path: string,
+    opts?: unknown | undefined,
+  ): Promise<EditablePackageJsonInstance>
+}
+
+let cachedEditablePackageJsonClass: EditablePackageJsonConstructor | undefined
+
+/**
+ * Get the EditablePackageJson class for package.json manipulation.
+ *
+ * @example
+ *   ;```typescript
+ *   const EditablePackageJson = getEditablePackageJsonClass()
+ *   const pkg = await EditablePackageJson.load('/tmp/my-project')
+ *   console.log(pkg.content.name)
+ *   ```
+ */
+export function getEditablePackageJsonClass(): EditablePackageJsonConstructor {
+  if (cachedEditablePackageJsonClass === undefined) {
+    // module is imported at the top
+    cachedEditablePackageJsonClass =
+      class EditablePackageJson extends (EditablePackageJsonBase as EditablePackageJsonConstructor) {
+        static override fixSteps = EditablePackageJsonBase.fixSteps
+        static override normalizeSteps = EditablePackageJsonBase.normalizeSteps
+        static override prepareSteps = EditablePackageJsonBase.prepareSteps
+
+        canSave = true
+        pkgPath: string | undefined = undefined
+        readFileContent = ''
+        readFileJson: unknown = undefined
+
+        override get content(): Readonly<PackageJson> {
+          return super.content
+        }
+
+        get filename(): string {
+          const pkgPath = this.pkgPath
+          if (!pkgPath) {
+            return ''
+          }
+          if (StringPrototypeEndsWith(pkgPath, 'package.json')) {
+            return pkgPath
+          }
+          const nodePath = getNodePath()
+          return nodePath.join(pkgPath, 'package.json')
+        }
+
+        static override async create(
+          path: string,
+          opts: EditablePackageJsonOptions = {},
+        ) {
+          const p =
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
+          await p.create(path)
+          return opts.data ? p.update(opts.data) : p
+        }
+
+        static override async fix(path: string, options: unknown) {
+          const p =
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
+          await p.load(path, true)
+          return await p.fix(options)
+        }
+
+        static override async load(
+          path: string,
+          opts: EditablePackageJsonOptions = {},
+        ) {
+          const p =
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
+          // Avoid try/catch if we aren't going to create
+          if (!opts.create) {
+            return await p.load(path)
+          }
+          try {
+            return await p.load(path)
+          } catch (err: unknown) {
+            if (
+              !(err as Error).message.startsWith('Could not read package.json')
+            ) {
+              throw err
+            }
+            return p.create(path)
+          }
+        }
+
+        static override async normalize(
+          path: string,
+          options: NormalizeOptions,
+        ) {
+          const p =
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
+          await p.load(path)
+          return await p.normalize(options)
+        }
+
+        static override async prepare(path: string, options: unknown) {
+          const p =
+            new (cachedEditablePackageJsonClass as EditablePackageJsonConstructor)()
+          await p.load(path, true)
+          return await p.prepare(options)
+        }
+
+        override create(path: string) {
+          super.create(path)
+          ;(this as unknown as { pkgPath: string }).pkgPath = path
+          return this
+        }
+
+        override async fix(opts: unknown = {}) {
+          await super.fix(opts)
+          return this
+        }
+
+        override fromContent(data: unknown) {
+          super.fromContent(data)
+          ;(this as unknown as { canSave: boolean }).canSave = false
+          return this
+        }
+
+        override fromJSON(data: string): this {
+          super.fromJSON(data)
+          return this
+        }
+
+        // oxlint-disable-next-line socket/no-boolean-trap-param -- matches EditablePackageJsonInstance interface which declares create?: boolean
+        override async load(
+          path: string,
+          create?: boolean | undefined,
+        ): Promise<this> {
+          this.pkgPath = path
+          const { promises: fsPromises } = getNodeFs()
+          let parseErr: unknown
+          try {
+            this.readFileContent = await read(this.filename)
+          } catch (e) {
+            if (!create) {
+              throw e
+            }
+            parseErr = e
+          }
+          if (parseErr) {
+            const nodePath = getNodePath()
+            const indexFile = nodePath.resolve(this.path || '', 'index.js')
+            let indexFileContent: string
+            try {
+              indexFileContent = await fsPromises.readFile(indexFile, 'utf8')
+            } catch {
+              throw parseErr
+            }
+            try {
+              this.fromContent(indexFileContent)
+            } catch {
+              throw parseErr
+            }
+            // This wasn't a package.json so prevent saving
+            this.canSave = false
+            return this
+          }
+          this.fromJSON(this.readFileContent)
+          // Add AFTER fromJSON is called in case it errors.
+          this.readFileJson = parse(this.readFileContent)
+          return this
+        }
+
+        override async normalize(opts: NormalizeOptions = {}): Promise<this> {
+          await super.normalize(opts)
+          return this
+        }
+
+        get path() {
+          return this.pkgPath
+        }
+
+        override async prepare(opts: unknown = {}): Promise<this> {
+          await super.prepare(opts)
+          return this
+        }
+
+        override async save(
+          options?: SaveOptions | undefined,
+        ): Promise<boolean> {
+          options = { __proto__: null, ...options } as typeof options
+          if (!this.canSave || this.content === undefined) {
+            throw new ErrorCtor('No package.json to save to')
+          }
+
+          // Check if save is needed, using packageSort for package.json
+          if (
+            !shouldSaveUtil(
+              this.content as Record<string | symbol, unknown>,
+              this.readFileJson as Record<string | symbol, unknown>,
+              this.readFileContent,
+              { ...options, sortFn: options?.sort ? packageSort : undefined },
+            )
+          ) {
+            return false
+          }
+
+          // Get content and formatting
+          const content = stripFormattingSymbols(
+            this.content as Record<string | symbol, unknown>,
+          )
+          const sortedContent = options?.sort ? packageSort(content) : content
+          const formatting = getFormattingFromContent(
+            this.content as Record<string | symbol, unknown>,
+          )
+
+          // Generate file content
+          const fileContent = stringifyWithFormatting(sortedContent, formatting)
+
+          // Save to disk
+          const { promises: fsPromises } = getNodeFs()
+          await fsPromises.writeFile(this.filename, fileContent)
+          this.readFileContent = fileContent
+          this.readFileJson = parse(fileContent)
+          return true
+        }
+
+        override saveSync(options?: SaveOptions | undefined): boolean {
+          if (!this.canSave || this.content === undefined) {
+            throw new ErrorCtor('No package.json to save to')
+          }
+          const { ignoreWhitespace = false, sort = false } = {
+            __proto__: null,
+            ...options,
+          } as SaveOptions
+          const {
+            [Symbol.for('indent')]: indent,
+            [Symbol.for('newline')]: newline,
+            ...rest
+          } = this.content as Record<string | symbol, unknown>
+          const content = sort ? packageSort(rest) : rest
+
+          const util = getNodeUtil()
+          if (
+            ignoreWhitespace &&
+            util.isDeepStrictEqual(content, this.readFileJson)
+          ) {
+            return false
+          }
+
+          const format =
+            indent === undefined || indent === null
+              ? '  '
+              : (indent as string | number)
+          const eol =
+            newline === undefined || newline === null
+              ? '\n'
+              : (newline as string)
+          const fileContent = `${JSONStringify(
+            content,
+            undefined,
+            format,
+          )}\n`.replace(/\n/g, () => eol)
+
+          if (
+            !ignoreWhitespace &&
+            fileContent.trim() === this.readFileContent.trim()
+          ) {
+            return false
+          }
+
+          const fs = getNodeFs()
+          fs.writeFileSync(this.filename, fileContent)
+          this.readFileContent = fileContent
+          this.readFileJson = parse(fileContent)
+          return true
+        }
+
+        override update(content: PackageJson): this {
+          super.update(content)
+          return this
+        }
+
+        override willSave(options?: SaveOptions | undefined): boolean {
+          const { ignoreWhitespace = false, sort = false } = {
+            __proto__: null,
+            ...options,
+          } as SaveOptions as SaveOptions
+          if (!this.canSave || this.content === undefined) {
+            return false
+          }
+          const {
+            [Symbol.for('indent')]: indent,
+            [Symbol.for('newline')]: newline,
+            ...rest
+          } = this.content as Record<string | symbol, unknown>
+          const content = sort ? packageSort(rest) : rest
+
+          const util = getNodeUtil()
+          if (
+            ignoreWhitespace &&
+            util.isDeepStrictEqual(content, this.readFileJson)
+          ) {
+            return false
+          }
+
+          const format =
+            indent === undefined || indent === null
+              ? '  '
+              : (indent as string | number)
+          const eol =
+            newline === undefined || newline === null
+              ? '\n'
+              : (newline as string)
+          const fileContent = `${JSONStringify(
+            content,
+            undefined,
+            format,
+          )}\n`.replace(/\n/g, () => eol)
+
+          if (
+            !ignoreWhitespace &&
+            fileContent.trim() === this.readFileContent.trim()
+          ) {
+            return false
+          }
+          return true
+        }
+      } as EditablePackageJsonConstructor
+  }
+  return cachedEditablePackageJsonClass as EditablePackageJsonConstructor
+}

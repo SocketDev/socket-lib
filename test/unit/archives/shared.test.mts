@@ -18,7 +18,7 @@ import {
   getAdmZip,
   getTarFs,
   validatePathWithinBase,
-} from '../../../src/archives/shared.ts'
+} from '../../../src/archives/shared.mjs'
 
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 

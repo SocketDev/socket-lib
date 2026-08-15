@@ -1,0 +1,249 @@
+/**
+ * @file Console footer/summary formatting utilities. Provides consistent footer
+ *   and summary formatting for CLI applications.
+ */
+
+import { repeatString } from '../strings/format.mjs'
+
+import { ArrayPrototypePush } from '../primordials/array.mjs'
+
+import { getDefaultLogger } from '../logger/default.mjs'
+import { LOG_SYMBOLS } from '../logger/symbols.mjs'
+import { DateCtor, DateNow } from '../primordials/date.mjs'
+
+const logger = getDefaultLogger()
+export interface FooterOptions {
+  /**
+   * Width of the footer border in characters.
+   *
+   * @default 80
+   */
+  width?: number | undefined
+  /**
+   * Character to use for the border line.
+   *
+   * @default '='
+   */
+  borderChar?: string | undefined
+  /**
+   * Include ISO timestamp in footer.
+   *
+   * @default false
+   */
+  showTimestamp?: boolean | undefined
+  /**
+   * Show duration since start time.
+   *
+   * @default false
+   */
+  showDuration?: boolean | undefined
+  /**
+   * Start time in milliseconds (from Date.now()). Required when `showDuration`
+   * is true.
+   */
+  startTime?: number | undefined
+  /**
+   * Color to apply to the footer message.
+   *
+   * @default 'gray'
+   */
+  color?:
+    | 'cyan'
+    | 'green'
+    | 'yellow'
+    | 'blue'
+    | 'magenta'
+    | 'red'
+    | 'gray'
+    | undefined
+}
+
+export interface SummaryStats {
+  /**
+   * Total number of items processed.
+   */
+  total?: number | undefined
+  /**
+   * Number of successful items.
+   */
+  success?: number | undefined
+  /**
+   * Number of failed items.
+   */
+  failed?: number | undefined
+  /**
+   * Number of skipped items.
+   */
+  skipped?: number | undefined
+  /**
+   * Number of warnings.
+   */
+  warnings?: number | undefined
+  /**
+   * Number of errors.
+   */
+  errors?: number | undefined
+  /**
+   * Duration in milliseconds, given as a timestamp value rather than
+   * elapsed time.
+   */
+  duration?: number | undefined
+}
+
+/**
+ * Create a formatted footer with optional message, timestamp, and duration.
+ * Useful for marking the end of CLI output or showing completion status.
+ *
+ * @example
+ *   ;```ts
+ *   const startTime = Date.now()
+ *   // ... do work
+ *   console.log(
+ *     createFooter('Build complete', {
+ *       width: 60,
+ *       color: 'green',
+ *       showDuration: true,
+ *       startTime,
+ *     }),
+ *   )
+ *   ```
+ *
+ * @param message - Optional message to display in footer.
+ * @param options - Footer formatting options.
+ *
+ * @returns Formatted footer string with border and optional info
+ */
+export function createFooter(
+  message?: string | undefined,
+  options?: FooterOptions | undefined,
+): string {
+  const {
+    borderChar = '=',
+    color = 'gray',
+    showDuration = false,
+    showTimestamp = false,
+    startTime,
+    width = 80,
+  } = { __proto__: null, ...options } as FooterOptions
+
+  // Require the vendored colors bundle lazily, at call time. Importing it at
+  // module scope aborts V8 `node --build-snapshot` of any module that
+  // transitively imports this one on x64 (std::length_error), so it stays out
+  // of the import graph (guarded by test/unit/snapshot-safety.test.mts).
+  const colors = require('../external/yoctocolors-cjs')
+
+  const border = repeatString(borderChar, width)
+  const lines: string[] = []
+
+  if (message) {
+    const colorFn = color && colors[color] ? colors[color] : (s: string) => s
+    ArrayPrototypePush(lines, colorFn(message))
+  }
+
+  if (showTimestamp) {
+    const timestamp = new DateCtor().toISOString()
+    ArrayPrototypePush(lines, colors.gray(`Completed at: ${timestamp}`))
+  }
+
+  if (showDuration && startTime) {
+    const duration = DateNow() - startTime
+    const seconds = (duration / 1000).toFixed(2)
+    ArrayPrototypePush(lines, colors.gray(`Duration: ${seconds}s`))
+  }
+
+  ArrayPrototypePush(lines, border)
+  return lines.join('\n')
+}
+
+/**
+ * Create a summary footer with statistics and colored status indicators.
+ * Automatically formats success/failure/warning counts with appropriate colors.
+ * Useful for test results, build summaries, or batch operation reports.
+ *
+ * @example
+ *   ;```ts
+ *   console.log(
+ *     createSummaryFooter({
+ *       total: 150,
+ *       success: 145,
+ *       failed: 3,
+ *       skipped: 2,
+ *       warnings: 5,
+ *     }),
+ *   )
+ *   // Output: Total: 150 | ✓ 145 passed | ✗ 3 failed | ○ 2 skipped | ⚠ 5 warnings
+ *   // ========================================
+ *   ```
+ *
+ * @param stats - Statistics to display in the summary.
+ * @param options - Footer formatting options.
+ *
+ * @returns Formatted summary footer string with colored indicators
+ */
+export function createSummaryFooter(
+  stats: SummaryStats,
+  options?: FooterOptions | undefined,
+): string {
+  const parts: string[] = []
+
+  if (stats.total !== undefined) {
+    ArrayPrototypePush(parts, `Total: ${stats.total}`)
+  }
+
+  if (stats.success !== undefined) {
+    ArrayPrototypePush(
+      parts,
+      `${LOG_SYMBOLS['success']} ${stats.success} passed`,
+    )
+  }
+
+  if (stats.failed !== undefined && stats.failed > 0) {
+    ArrayPrototypePush(parts, `${LOG_SYMBOLS['fail']} ${stats.failed} failed`)
+  }
+
+  if (stats.skipped !== undefined && stats.skipped > 0) {
+    ArrayPrototypePush(parts, `${LOG_SYMBOLS['skip']} ${stats.skipped} skipped`)
+  }
+
+  if (stats.warnings !== undefined && stats.warnings > 0) {
+    ArrayPrototypePush(
+      parts,
+      `${LOG_SYMBOLS['warn']} ${stats.warnings} warnings`,
+    )
+  }
+
+  if (stats.errors !== undefined && stats.errors > 0) {
+    ArrayPrototypePush(parts, `${LOG_SYMBOLS['fail']} ${stats.errors} errors`)
+  }
+
+  const message = parts.join(' | ')
+  return createFooter(message, {
+    ...options,
+    showDuration: stats.duration !== undefined,
+    ...(stats.duration !== undefined && { startTime: stats.duration }),
+  })
+}
+
+/**
+ * Print a footer with optional success message. Uses `─` border character for a
+ * lighter appearance. Fixed width of 55 characters to match `printHeader()`.
+ *
+ * @example
+ *   ;```ts
+ *   printFooter('Analysis complete')
+ *   // Output:
+ *   // ───────────────────────────────────────────────────
+ *   // Analysis complete (in green)
+ *   ```
+ *
+ * @param message - Optional message to display in green.
+ */
+export function printFooter(message?: string | undefined): void {
+  const border = repeatString('─', 55)
+  logger.log(border)
+  if (message) {
+    // Lazy require — see the note in createFooter (snapshot-safety).
+    const colors = require('../external/yoctocolors-cjs')
+    logger.log(colors.green(message))
+  }
+}

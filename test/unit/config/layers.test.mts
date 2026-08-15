@@ -12,7 +12,7 @@ import { afterAll, describe, expect, it } from 'vitest'
 import {
   mergeConfigArray,
   readConfigLayers,
-} from '../../../src/config/layers.ts'
+} from '../../../src/config/layers.mjs'
 
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 

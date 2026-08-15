@@ -1,0 +1,149 @@
+/**
+ * @file Shared internals for the `paths/` module — the leaf-level primitives
+ *   every other path leaf depends on. Kept as a single file so `normalize`,
+ *   `predicates`, `conversion`, and `resolve` can layer above it without
+ *   circular imports.
+ *
+ *   - char-code constants + shared regexps
+ *   - `pathLikeToString` — `string | Buffer | URL` → `string`
+ */
+
+import { isWin32 } from '../constants/platform.mjs'
+import { getNodeUrl } from '../node/url.mjs'
+
+import { BufferIsBuffer } from '../primordials/buffer.mjs'
+
+import {
+  StringPrototypeCharAt,
+  StringPrototypeCharCodeAt,
+  StringPrototypeStartsWith,
+} from '../primordials/string.mjs'
+
+// Char-code constants are owned by `constants/encoding`, the single source.
+// They are re-exported here so `paths/*` keeps its local import site
+// unchanged.
+export {
+  CHAR_BACKWARD_SLASH,
+  CHAR_COLON,
+  CHAR_FORWARD_SLASH,
+  CHAR_LOWERCASE_A,
+  CHAR_LOWERCASE_Z,
+  CHAR_UPPERCASE_A,
+  CHAR_UPPERCASE_Z,
+} from '../constants/encoding.mjs'
+
+// Captures the drive letter (group 1) and the trailing separator if any
+// (group 2). The replace callback in paths/normalize.ts:msysDriveToNative
+// reads both — non-capturing groups would leave `letter` undefined and
+// `.toUpperCase()` would throw on Windows MSYS-style paths like `/c/foo`.
+// oxlint-disable-next-line socket/prefer-non-capturing-group -- both groups are read by the replace callback in paths/normalize.ts:msysDriveToNative
+export const msysDriveRegExp = /^\/([a-zA-Z])($|\/)/
+// Matches a `node_modules` path segment: bounded by a slash of either
+// separator or string start before, and a slash or string end after — so it
+// hits `node_modules` as a whole segment, not a substring like
+// `my_node_modules`.
+export const nodeModulesPathRegExp = /(?:[/\\]|^)node_modules(?:$|[/\\])/
+export const slashRegExp = /[/\\]/
+
+/**
+ * Find the next path separator at or after an index.
+ *
+ * Scans char codes for `/` (47) and `\` (92) — the same two characters
+ * `slashRegExp` matches — and allocates nothing. Reaching the same answer
+ * through `search` costs a substring, an options bag, and a regex match per
+ * lookup, which a segment walk pays once per segment.
+ *
+ * @example
+ *   ;```typescript
+ *   indexOfPathSeparator('a/b', 0) // 1
+ *   indexOfPathSeparator('a/b', 2) // -1
+ *   indexOfPathSeparator('a\\b', 0) // 1
+ *   ```
+ *
+ * @param {string} filepath - The path to scan.
+ * @param {number} fromIndex - The index to start scanning at.
+ *
+ * @returns {number} The index of the first separator at or after `fromIndex`,
+ *   or -1 when there is none.
+ */
+export function indexOfPathSeparator(
+  filepath: string,
+  fromIndex: number,
+): number {
+  const { length } = filepath
+  for (let i = fromIndex; i < length; i += 1) {
+    const code = StringPrototypeCharCodeAt(filepath, i)
+    if (code === 47 /*'/'*/ || code === 92 /*'\\'*/) {
+      return i
+    }
+  }
+  return -1
+}
+
+/**
+ * Convert a path-like value to a string.
+ *
+ * Converts various path-like types (string, Buffer, URL) into a normalized
+ * string representation. Handles different input formats and provides
+ * consistent string output for path operations.
+ *
+ * @example
+ *   ;```typescript
+ *   pathLikeToString('/home/user') // '/home/user'
+ *   pathLikeToString(Buffer.from('/tmp/file')) // '/tmp/file'
+ *   pathLikeToString(new URL('file:///home/user')) // '/home/user'
+ *   pathLikeToString(null) // ''
+ *   ```
+ *
+ * @param {string | Buffer | URL | null | undefined} pathLike - The value to
+ *   convert.
+ *
+ * @returns {string} The string representation, or empty string for
+ *   null/undefined.
+ */
+export function pathLikeToString(
+  pathLike: string | Buffer | URL | null | undefined,
+): string {
+  if (pathLike === null || pathLike === undefined) {
+    return ''
+  }
+  if (typeof pathLike === 'string') {
+    return pathLike
+  }
+  if (BufferIsBuffer!(pathLike)) {
+    return pathLike.toString('utf8')
+  }
+  const url = getNodeUrl()
+  if (pathLike instanceof URL) {
+    try {
+      return url.fileURLToPath(pathLike)
+    } catch {
+      // On Windows, file URLs like `file:///C:/path` include drive letters.
+      // Missing-drive-letter URLs throw; this fallback extracts the
+      // pathname directly and decodes percent-encoding.
+      const pathname = pathLike.pathname
+
+      const decodedPathname = decodeURIComponent(pathname)
+
+      /* c8 ignore start - Windows-only URL drive-letter handling. */
+      if (isWin32() && StringPrototypeStartsWith(decodedPathname, '/')) {
+        // Drive-letter pattern: /[a-zA-Z]:/
+        const letter = StringPrototypeCharCodeAt(decodedPathname, 1) | 0x20
+        const hasValidDriveLetter =
+          decodedPathname.length >= 3 &&
+          letter >= 97 &&
+          letter <= 122 &&
+          StringPrototypeCharAt(decodedPathname, 2) === ':'
+
+        if (!hasValidDriveLetter) {
+          // Preserve Unix-style absolute paths on Windows when the URL
+          // didn't carry a drive letter.
+          return decodedPathname
+        }
+      }
+      /* c8 ignore stop */
+      return decodedPathname
+    }
+  }
+  return String(pathLike)
+}

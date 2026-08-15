@@ -11,7 +11,7 @@ import {
   containerPackagePath,
   containerSettingsUrl,
   containerVersionsPath,
-} from '../../../src/github/packages.ts'
+} from '../../../src/github/packages.mjs'
 
 describe('containerPackagePath', () => {
   test('leaves a name with no slash alone', () => {

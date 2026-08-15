@@ -1,0 +1,24 @@
+/**
+ * @file `sbtFromPath()` — looks for the `sbt` shell script on the system PATH.
+ *   Returns it as a direct-executable launcher (the script knows how to find a
+ *   JRE itself, so the caller doesn't need to resolve one). Returns `undefined`
+ *   if `sbt` isn't on PATH.
+ */
+
+import { which } from '../../exe/path/which.mjs'
+
+import type { ResolvedSbt } from './types.mjs'
+
+export async function sbtFromPath(): Promise<ResolvedSbt | undefined> {
+  const sbt = await which('sbt', { nothrow: true })
+  if (typeof sbt !== 'string') {
+    return undefined
+  }
+  /* c8 ignore start - reached only when sbt is on PATH. */
+  return {
+    path: sbt,
+    isJar: false,
+    source: 'path',
+  }
+  /* c8 ignore stop */
+}

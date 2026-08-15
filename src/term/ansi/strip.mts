@@ -1,0 +1,59 @@
+/**
+ * @file ANSI escape-code regex factory and stripping helper. Provides
+ *   `ansiRegex()` for matching CSI/OSC sequences and `stripAnsi()` for removing
+ *   ANSI formatting from terminal output.
+ */
+
+import { RegExpCtor } from '../../primordials/regexp.mjs'
+import { StringPrototypeReplace } from '../../primordials/string.mjs'
+
+// ANSI escape code regex to strip colors/formatting.
+// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequences use control characters.
+const ANSI_REGEX = /\x1b\[[0-9;]*m/g
+
+/**
+ * Create a regular expression for matching ANSI escape codes.
+ *
+ * Inlined ansi-regex: https://socket.dev/npm/package/ansi-regexp/overview/6.2.2
+ * MIT License Copyright (c) Sindre Sorhus
+ * [sindresorhus@gmail.com](mailto:sindresorhus@gmail.com)
+ * (https://sindresorhus.com)
+ *
+ * @example
+ *   ;```typescript
+ *   const regex = ansiRegex()
+ *   '\u001b[31mHello\u001b[0m'.match(regex) // ['\u001b[31m', '\u001b[0m']
+ *   ansiRegex({ onlyFirst: true }) // matches only the first code
+ *   ```
+ */
+export function ansiRegex(
+  options?:
+    | {
+        onlyFirst?: boolean | undefined
+      }
+    | undefined,
+): RegExp {
+  const { onlyFirst } = options ?? {}
+  // Valid string terminator sequences are BEL, ESC\, and 0x9c.
+  const ST = '(?:\\u0007|\\u001B\\u005C|\\u009C)'
+  // OSC sequences only: ESC ] ... ST (non-greedy until the first ST).
+  const osc = `(?:\\u001B\\][\\s\\S]*?${ST})`
+  // CSI and related: ESC/C1, optional intermediates, optional params (supports ; and :) then final byte.
+  const csi =
+    '[\\u001B\\u009B][[\\]()#;?]*(?:\\d{1,4}(?:[;:]\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]'
+  const pattern = `${osc}|${csi}`
+  return new RegExpCtor(pattern, onlyFirst ? undefined : 'g')
+}
+
+/**
+ * Strip ANSI escape codes from text. Uses the inlined ansi-regex for matching.
+ *
+ * @example
+ *   ;```typescript
+ *   stripAnsi('\u001b[31mError\u001b[0m') // 'Error'
+ *   stripAnsi('\u001b[1mBold\u001b[0m') // 'Bold'
+ *   ```
+ */
+export function stripAnsi(text: string): string {
+  return StringPrototypeReplace(text, ANSI_REGEX, '')
+}

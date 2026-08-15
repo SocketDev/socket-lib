@@ -25,22 +25,22 @@ const libSpecificExcludes = [
   // library, which does network calls, registry lookups, and lockfile
   // writes. Meaningful coverage requires integration tests against a
   // live registry, not unit tests.
-  'src/dlx/arborist.ts',
+  'src/dlx/arborist.mts',
   // generatePackagePin orchestration — requires real Arborist resolution +
   // httpDownload of the top-level tarball. Same integration-test boundary
   // as arborist.ts.
-  'src/dlx/lockfile.ts',
+  'src/dlx/lockfile.mts',
   // dlxPackage / downloadPackage / ensurePackageInstalled — Arborist
   // install + Firewall API orchestration. The pure helpers
   // (parsePackageSpec, npmPurl, findBinaryPath, executePackage,
   // makePackageBinsExecutable) are already unit-tested. The remaining
   // orchestration is integration-test territory.
-  'src/dlx/package.ts',
+  'src/dlx/package.mts',
   // dlxBinary / downloadBinary orchestration — full http download +
   // extract + cache flow. Pure parts (downloadBinaryFile, executeBinary,
   // getBinaryCacheMetadataPath, getDlxCachePath) are unit-tested. The
   // orchestration needs integration tests.
-  'src/dlx/binary.ts',
+  'src/dlx/binary.mts',
 ]
 
 /**

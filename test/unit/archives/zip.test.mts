@@ -18,7 +18,7 @@ import path from 'node:path'
 import AdmZip from 'adm-zip'
 import { afterAll, describe, expect, it } from 'vitest'
 
-import { extractZip } from '../../../src/archives/zip.ts'
+import { extractZip } from '../../../src/archives/zip.mjs'
 
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 

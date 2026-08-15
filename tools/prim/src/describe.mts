@@ -4,7 +4,7 @@
  *   views of the interface cannot drift apart unnoticed.
  */
 
-import { buildCliManifest } from '../../../src/exe/argv/meta.ts'
+import { buildCliManifest } from '../../../src/exe/argv/meta.mjs'
 import primPackageJson from '../package.json' with { type: 'json' }
 
 const PRIM_VERSION = primPackageJson.version

@@ -1,0 +1,19 @@
+/**
+ * @file `pythonFromPath()` — looks for a CPython interpreter on the system
+ *   PATH. Tries `python3` first (the POSIX convention), then `python` (the
+ *   Windows convention / some minimal images). Returns the first hit.
+ */
+
+import { which } from '../../exe/path/which.mjs'
+
+import type { ResolvedPython } from './types.mjs'
+
+export async function pythonFromPath(): Promise<ResolvedPython | undefined> {
+  for (const bin of ['python3', 'python']) {
+    const onPath = await which(bin, { nothrow: true })
+    if (typeof onPath === 'string') {
+      return { path: onPath, source: 'path' }
+    }
+  }
+  return undefined
+}

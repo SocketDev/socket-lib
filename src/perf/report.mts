@@ -1,0 +1,111 @@
+/**
+ * @file Report-side helpers — `generatePerformanceReport` returns a multi-line
+ *   ASCII-bordered report string; `printPerformanceSummary` writes a
+ *   one-line-per-op summary through `debugLog`. Both gate on `isPerfEnabled()`
+ *   and use the same `getPerformanceSummary` rollup.
+ */
+
+import { debugLog } from '../debug/output.mjs'
+import { MathRound } from '../primordials/math.mjs'
+import { ObjectKeys, ObjectValues } from '../primordials/object.mjs'
+
+import { performanceMetrics } from './shared.mjs'
+import { isPerfEnabled } from './enabled.mjs'
+import { getPerformanceSummary } from './metrics.mjs'
+
+/**
+ * Create a performance report for the current execution. Only available when
+ * DEBUG=perf is enabled.
+ *
+ * @example
+ *   import { generatePerformanceReport } from '@socketsecurity/lib/perf/report'
+ *
+ *   console.log(generatePerformanceReport())
+ *   // ╔═══════════════════════════════════════════════╗
+ *   // ║         Performance Report                    ║
+ *   // ╚═══════════════════════════════════════════════╝
+ *   //
+ *   // api-call:
+ *   //   Calls: 5
+ *   //   Avg:   246.8ms
+ *   //   Min:   100ms
+ *   //   Max:   500ms
+ *   //   Total: 1234ms
+ *
+ * @returns Formatted performance report
+ */
+export function generatePerformanceReport(): string {
+  if (!isPerfEnabled() || performanceMetrics.length === 0) {
+    return '(no performance data collected - enable with DEBUG=perf)'
+  }
+
+  const summary = getPerformanceSummary()
+  const operations = ObjectKeys(summary).toSorted()
+
+  let report = '\n╔═══════════════════════════════════════════════╗\n'
+  report += '║         Performance Report                    ║\n'
+  report += '╚═══════════════════════════════════════════════╝\n\n'
+
+  for (let i = 0, { length } = operations; i < length; i += 1) {
+    const operation = operations[i]!
+    const stats = summary[operation] as {
+      count: number
+      total: number
+      avg: number
+      min: number
+      max: number
+    }
+    report += `${operation}:\n`
+    report += `  Calls: ${stats.count}\n`
+    report += `  Avg:   ${stats.avg}ms\n`
+    report += `  Min:   ${stats.min}ms\n`
+    report += `  Max:   ${stats.max}ms\n`
+    report += `  Total: ${stats.total}ms\n\n`
+  }
+
+  const totalDuration = ObjectValues(summary).reduce(
+    (sum, s) => sum + s.total,
+    0,
+  )
+  report += `Total measured time: ${MathRound(totalDuration * 100) / 100}ms\n`
+
+  return report
+}
+
+/**
+ * Print performance summary to console. Only prints when DEBUG=perf is enabled.
+ *
+ * @example
+ *   import { printPerformanceSummary } from '@socketsecurity/lib/perf/report'
+ *
+ *   printPerformanceSummary()
+ *   // Performance Summary:
+ *   // api-call: 5 calls, avg 246.8ms (min 100ms, max 500ms, total 1234ms)
+ *   // file-read: 10 calls, avg 5ms (min 2ms, max 15ms, total 50ms)
+ */
+export function printPerformanceSummary(): void {
+  if (!isPerfEnabled() || performanceMetrics.length === 0) {
+    return
+  }
+
+  const summary = getPerformanceSummary()
+  const operations = ObjectKeys(summary).toSorted()
+
+  debugLog('[perf]\n=== Performance Summary ===')
+
+  for (let i = 0, { length } = operations; i < length; i += 1) {
+    const operation = operations[i]!
+    const stats = summary[operation] as {
+      count: number
+      total: number
+      avg: number
+      min: number
+      max: number
+    }
+    debugLog(
+      `[perf] ${operation}: ${stats.count} calls, avg ${stats.avg}ms (min ${stats.min}ms, max ${stats.max}ms, total ${stats.total}ms)`,
+    )
+  }
+
+  debugLog('[perf] =========================\n')
+}

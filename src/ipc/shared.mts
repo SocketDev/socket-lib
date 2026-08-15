@@ -1,0 +1,26 @@
+/**
+ * @file Private internals for `ipc/*` modules — lazy node:fs / node:path
+ *   accessors, the IpcStub schema, and the shared platform check. Used by every
+ *   public IPC entrypoint.
+ */
+
+import { Type } from '../external/@sinclair/typebox.js'
+
+/**
+ * IPC stub file schema - validates the structure of stub files. Stub files are
+ * used for passing data between processes via filesystem.
+ */
+export const IpcStubSchema = Type.Object({
+  /**
+   * Process ID that created the stub.
+   */
+  pid: Type.Integer({ minimum: 1 }),
+  /**
+   * Creation timestamp for age validation.
+   */
+  timestamp: Type.Number({ exclusiveMinimum: 0 }),
+  /**
+   * The actual data payload.
+   */
+  data: Type.Unknown(),
+})

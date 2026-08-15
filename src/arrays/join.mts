@@ -1,0 +1,136 @@
+/**
+ * @file Grammatical list joiners via `Intl.ListFormat` — Oxford-comma aware and
+ *   locale-correct. `joinList` (generalized), `joinAnd` ("a, b, and c"),
+ *   `joinOr` ("a, b, or c").
+ */
+
+import { getConjunctionFormatter, getDisjunctionFormatter } from './shared.mjs'
+
+export interface JoinListOptions {
+  with?: string | undefined
+}
+
+/**
+ * Join array elements with proper "and" conjunction formatting.
+ *
+ * Formats an array of strings into a grammatically correct list using "and" as
+ * the conjunction. Uses `Intl.ListFormat` for proper English formatting with
+ * Oxford comma support. Delegates to `joinList`.
+ *
+ * @example
+ *   ```ts
+ *   // Two items
+ *   joinAnd(['apples', 'oranges'])
+ *   // Returns: "apples and oranges"
+ *
+ *   // Three or more items (Oxford comma)
+ *   joinAnd(['apples', 'oranges', 'bananas'])
+ *   // Returns: "apples, oranges, and bananas"
+ *
+ *   // Single item
+ *   joinAnd(['apples'])
+ *   // Returns: "apples"
+ *
+ *   // Empty array
+ *   joinAnd([])
+ *   // Returns: ""
+ *
+ *   // Usage in messages
+ *   const items = ['React', 'Vue', 'Angular']
+ *   console.log(`You can choose ${joinAnd(items)}`)
+ *   // Outputs: "You can choose React, Vue, and Angular"
+ *   ```
+ *
+ * @param arr - Array of strings to join; readonly arrays are accepted.
+ *
+ * @returns Formatted string with proper "and" conjunction
+ */
+export function joinAnd(arr: string[] | readonly string[]): string {
+  return joinList(arr, { with: 'and' })
+}
+
+/**
+ * Generalized list joiner covering bare join, comma-list, and
+ * conjunction/disjunction via `Intl.ListFormat`.
+ *
+ * - No options: bare concatenation (`'abc'`)
+ * - `{ with: 'and' }`: Oxford-comma "and" list via `Intl.ListFormat` (`'a, b, and
+ *   c'`)
+ * - `{ with: 'or' }`: Oxford-comma "or" list via `Intl.ListFormat` (`'a, b, or
+ *   c'`)
+ * - `{ with: <any other string> }`: `items.join(sep)` — e.g. `','` → `'a,b,c'`,
+ *   `', '` → `'a, b, c'`, `' '` → `'a b c'`
+ *
+ * Each item is coerced via `String()` before formatting.
+ *
+ * @example
+ *   ;```ts
+ *   joinList(['a', 'b', 'c'])                  // 'abc'
+ *   joinList(['a', 'b', 'c'], { with: ', ' })  // 'a, b, c'
+ *   joinList(['a', 'b', 'c'], { with: ' ' })   // 'a b c'
+ *   joinList(['a', 'b', 'c'], { with: 'and' }) // 'a, b, and c'
+ *   joinList(['a', 'b', 'c'], { with: 'or' })  // 'a, b, or c'
+ *   joinList([1, 2, 3], { with: 'and' })        // '1, 2, and 3'
+ *   ```
+ *
+ * @param items - Items of any type to join; readonly arrays are accepted.
+ * @param options - Formatting options (optional)
+ *
+ * @returns Formatted string
+ */
+export function joinList(
+  items: readonly unknown[],
+  options?: JoinListOptions | undefined,
+): string {
+  options = { __proto__: null, ...options } as typeof options
+  const w = options?.with
+  if (w === 'and') {
+    return getConjunctionFormatter().format(items.map(String))
+  }
+  if (w === 'or') {
+    return getDisjunctionFormatter().format(items.map(String))
+  }
+  if (w !== undefined) {
+    return items.map(String).join(w)
+  }
+  return items.map(String).join('')
+}
+
+/**
+ * Join array elements with proper "or" disjunction formatting.
+ *
+ * Formats an array of strings into a grammatically correct list using "or" as
+ * the disjunction. Uses `Intl.ListFormat` for proper English formatting with
+ * Oxford comma support. Delegates to `joinList`.
+ *
+ * @example
+ *   ```ts
+ *   // Two items
+ *   joinOr(['yes', 'no'])
+ *   // Returns: "yes or no"
+ *
+ *   // Three or more items (Oxford comma)
+ *   joinOr(['red', 'green', 'blue'])
+ *   // Returns: "red, green, or blue"
+ *
+ *   // Single item
+ *   joinOr(['maybe'])
+ *   // Returns: "maybe"
+ *
+ *   // Empty array
+ *   joinOr([])
+ *   // Returns: ""
+ *
+ *   // Usage in prompts
+ *   const options = ['npm', 'yarn', 'pnpm']
+ *   console.log(`Choose a package manager: ${joinOr(options)}`)
+ *   // Outputs: "Choose a package manager: npm, yarn, or pnpm"
+ *   ```
+ *
+ * @param arr - Array of strings to join; readonly arrays are accepted.
+ *
+ * @returns Formatted string with proper "or" disjunction
+ */
+export function joinOr(arr: string[] | readonly string[]): string {
+  return joinList(arr, { with: 'or' })
+}

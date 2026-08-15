@@ -154,3294 +154,3294 @@
   },
   "exports": {
     "./ai/advisor": {
-      "source": "./src/ai/advisor.ts",
-      "types": "./dist/ai/advisor.d.ts",
+      "source": "./src/ai/advisor.mts",
+      "types": "./dist/ai/advisor.d.mts",
       "default": "./dist/ai/advisor.js"
     },
     "./ai/agent-context": {
-      "source": "./src/ai/agent-context.ts",
-      "types": "./dist/ai/agent-context.d.ts",
+      "source": "./src/ai/agent-context.mts",
+      "types": "./dist/ai/agent-context.d.mts",
       "default": "./dist/ai/agent-context.js"
     },
     "./ai/assist": {
-      "source": "./src/ai/assist.ts",
-      "types": "./dist/ai/assist.d.ts",
+      "source": "./src/ai/assist.mts",
+      "types": "./dist/ai/assist.d.mts",
       "default": "./dist/ai/assist.js"
     },
     "./ai/backends": {
-      "source": "./src/ai/backends.ts",
-      "types": "./dist/ai/backends.d.ts",
+      "source": "./src/ai/backends.mts",
+      "types": "./dist/ai/backends.d.mts",
       "default": "./dist/ai/backends.js"
     },
     "./ai/billing-context": {
-      "source": "./src/ai/billing-context.ts",
-      "types": "./dist/ai/billing-context.d.ts",
+      "source": "./src/ai/billing-context.mts",
+      "types": "./dist/ai/billing-context.d.mts",
       "default": "./dist/ai/billing-context.js"
     },
     "./ai/builtin": {
-      "source": "./src/ai/builtin.ts",
+      "source": "./src/ai/builtin.mts",
       "browser": {
-        "types": "./dist/ai/builtin.d.ts",
+        "types": "./dist/ai/builtin.d.mts",
         "default": "./dist/ai/builtin.js"
       },
-      "types": "./dist/ai/builtin.d.ts",
+      "types": "./dist/ai/builtin.d.mts",
       "default": "./dist/ai/builtin.js"
     },
     "./ai/cli-flags": {
-      "source": "./src/ai/cli-flags.ts",
-      "types": "./dist/ai/cli-flags.d.ts",
+      "source": "./src/ai/cli-flags.mts",
+      "types": "./dist/ai/cli-flags.d.mts",
       "default": "./dist/ai/cli-flags.js"
     },
     "./ai/cost": {
-      "source": "./src/ai/cost.ts",
-      "types": "./dist/ai/cost.d.ts",
+      "source": "./src/ai/cost.mts",
+      "types": "./dist/ai/cost.d.mts",
       "default": "./dist/ai/cost.js"
     },
     "./ai/credentials": {
-      "source": "./src/ai/credentials.ts",
-      "types": "./dist/ai/credentials.d.ts",
+      "source": "./src/ai/credentials.mts",
+      "types": "./dist/ai/credentials.d.mts",
       "default": "./dist/ai/credentials.js"
     },
     "./ai/discover": {
-      "source": "./src/ai/discover.ts",
-      "types": "./dist/ai/discover.d.ts",
+      "source": "./src/ai/discover.mts",
+      "types": "./dist/ai/discover.d.mts",
       "default": "./dist/ai/discover.js"
     },
     "./ai/enforce": {
-      "source": "./src/ai/enforce.ts",
-      "types": "./dist/ai/enforce.d.ts",
+      "source": "./src/ai/enforce.mts",
+      "types": "./dist/ai/enforce.d.mts",
       "default": "./dist/ai/enforce.js"
     },
     "./ai/exec": {
-      "source": "./src/ai/exec.ts",
-      "types": "./dist/ai/exec.d.ts",
+      "source": "./src/ai/exec.mts",
+      "types": "./dist/ai/exec.d.mts",
       "default": "./dist/ai/exec.js"
     },
     "./ai/failures": {
-      "source": "./src/ai/failures.ts",
-      "types": "./dist/ai/failures.d.ts",
+      "source": "./src/ai/failures.mts",
+      "types": "./dist/ai/failures.d.mts",
       "default": "./dist/ai/failures.js"
     },
     "./ai/http": {
-      "source": "./src/ai/http.ts",
-      "types": "./dist/ai/http.d.ts",
+      "source": "./src/ai/http.mts",
+      "types": "./dist/ai/http.d.mts",
       "default": "./dist/ai/http.js"
     },
     "./ai/json": {
-      "source": "./src/ai/json.ts",
-      "types": "./dist/ai/json.d.ts",
+      "source": "./src/ai/json.mts",
+      "types": "./dist/ai/json.d.mts",
       "default": "./dist/ai/json.js"
     },
     "./ai/profiles": {
-      "source": "./src/ai/profiles.ts",
-      "types": "./dist/ai/profiles.d.ts",
+      "source": "./src/ai/profiles.mts",
+      "types": "./dist/ai/profiles.d.mts",
       "default": "./dist/ai/profiles.js"
     },
     "./ai/role": {
-      "source": "./src/ai/role.ts",
-      "types": "./dist/ai/role.d.ts",
+      "source": "./src/ai/role.mts",
+      "types": "./dist/ai/role.d.mts",
       "default": "./dist/ai/role.js"
     },
     "./ai/route": {
-      "source": "./src/ai/route.ts",
-      "types": "./dist/ai/route.d.ts",
+      "source": "./src/ai/route.mts",
+      "types": "./dist/ai/route.d.mts",
       "default": "./dist/ai/route.js"
     },
     "./ai/route-heuristic": {
-      "source": "./src/ai/route-heuristic.ts",
-      "types": "./dist/ai/route-heuristic.d.ts",
+      "source": "./src/ai/route-heuristic.mts",
+      "types": "./dist/ai/route-heuristic.d.mts",
       "default": "./dist/ai/route-heuristic.js"
     },
     "./ai/spawn": {
-      "source": "./src/ai/spawn.ts",
-      "types": "./dist/ai/spawn.d.ts",
+      "source": "./src/ai/spawn.mts",
+      "types": "./dist/ai/spawn.d.mts",
       "default": "./dist/ai/spawn.js"
     },
     "./ai/spawn-local": {
-      "source": "./src/ai/spawn-local.ts",
-      "types": "./dist/ai/spawn-local.d.ts",
+      "source": "./src/ai/spawn-local.mts",
+      "types": "./dist/ai/spawn-local.d.mts",
       "default": "./dist/ai/spawn-local.js"
     },
     "./ai/subagent-status": {
-      "source": "./src/ai/subagent-status.ts",
-      "types": "./dist/ai/subagent-status.d.ts",
+      "source": "./src/ai/subagent-status.mts",
+      "types": "./dist/ai/subagent-status.d.mts",
       "default": "./dist/ai/subagent-status.js"
     },
     "./ai/tier": {
-      "source": "./src/ai/tier.ts",
-      "types": "./dist/ai/tier.d.ts",
+      "source": "./src/ai/tier.mts",
+      "types": "./dist/ai/tier.d.mts",
       "default": "./dist/ai/tier.js"
     },
     "./ai/types": {
-      "source": "./src/ai/types.ts",
-      "types": "./dist/ai/types.d.ts",
+      "source": "./src/ai/types.mts",
+      "types": "./dist/ai/types.d.mts",
       "default": "./dist/ai/types.js"
     },
     "./ai/worktree": {
-      "source": "./src/ai/worktree.ts",
-      "types": "./dist/ai/worktree.d.ts",
+      "source": "./src/ai/worktree.mts",
+      "types": "./dist/ai/worktree.d.mts",
       "default": "./dist/ai/worktree.js"
     },
     "./archives/detect": {
-      "source": "./src/archives/detect.ts",
-      "types": "./dist/archives/detect.d.ts",
+      "source": "./src/archives/detect.mts",
+      "types": "./dist/archives/detect.d.mts",
       "default": "./dist/archives/detect.js"
     },
     "./archives/extract": {
-      "source": "./src/archives/extract.ts",
-      "types": "./dist/archives/extract.d.ts",
+      "source": "./src/archives/extract.mts",
+      "types": "./dist/archives/extract.d.mts",
       "default": "./dist/archives/extract.js"
     },
     "./archives/tar": {
-      "source": "./src/archives/tar.ts",
-      "types": "./dist/archives/tar.d.ts",
+      "source": "./src/archives/tar.mts",
+      "types": "./dist/archives/tar.d.mts",
       "default": "./dist/archives/tar.js"
     },
     "./archives/types": {
-      "source": "./src/archives/types.ts",
-      "types": "./dist/archives/types.d.ts",
+      "source": "./src/archives/types.mts",
+      "types": "./dist/archives/types.d.mts",
       "default": "./dist/archives/types.js"
     },
     "./archives/zip": {
-      "source": "./src/archives/zip.ts",
-      "types": "./dist/archives/zip.d.ts",
+      "source": "./src/archives/zip.mts",
+      "types": "./dist/archives/zip.d.mts",
       "default": "./dist/archives/zip.js"
     },
     "./arrays/chunk": {
-      "source": "./src/arrays/chunk.ts",
+      "source": "./src/arrays/chunk.mts",
       "browser": {
-        "types": "./dist/arrays/chunk.d.ts",
+        "types": "./dist/arrays/chunk.d.mts",
         "default": "./dist/arrays/chunk.js"
       },
-      "types": "./dist/arrays/chunk.d.ts",
+      "types": "./dist/arrays/chunk.d.mts",
       "default": "./dist/arrays/chunk.js"
     },
     "./arrays/join": {
-      "source": "./src/arrays/join.ts",
+      "source": "./src/arrays/join.mts",
       "browser": {
-        "types": "./dist/arrays/join.d.ts",
+        "types": "./dist/arrays/join.d.mts",
         "default": "./dist/arrays/join.js"
       },
-      "types": "./dist/arrays/join.d.ts",
+      "types": "./dist/arrays/join.d.mts",
       "default": "./dist/arrays/join.js"
     },
     "./arrays/predicates": {
-      "source": "./src/arrays/predicates.ts",
+      "source": "./src/arrays/predicates.mts",
       "browser": {
-        "types": "./dist/arrays/predicates.d.ts",
+        "types": "./dist/arrays/predicates.d.mts",
         "default": "./dist/arrays/predicates.js"
       },
-      "types": "./dist/arrays/predicates.d.ts",
+      "types": "./dist/arrays/predicates.d.mts",
       "default": "./dist/arrays/predicates.js"
     },
     "./arrays/unique": {
-      "source": "./src/arrays/unique.ts",
+      "source": "./src/arrays/unique.mts",
       "browser": {
-        "types": "./dist/arrays/unique.d.ts",
+        "types": "./dist/arrays/unique.d.mts",
         "default": "./dist/arrays/unique.js"
       },
-      "types": "./dist/arrays/unique.d.ts",
+      "types": "./dist/arrays/unique.d.mts",
       "default": "./dist/arrays/unique.js"
     },
     "./cacache/clear": {
-      "source": "./src/cacache/clear.ts",
-      "types": "./dist/cacache/clear.d.ts",
+      "source": "./src/cacache/clear.mts",
+      "types": "./dist/cacache/clear.d.mts",
       "default": "./dist/cacache/clear.js"
     },
     "./cacache/read": {
-      "source": "./src/cacache/read.ts",
-      "types": "./dist/cacache/read.d.ts",
+      "source": "./src/cacache/read.mts",
+      "types": "./dist/cacache/read.d.mts",
       "default": "./dist/cacache/read.js"
     },
     "./cacache/tmp": {
-      "source": "./src/cacache/tmp.ts",
-      "types": "./dist/cacache/tmp.d.ts",
+      "source": "./src/cacache/tmp.mts",
+      "types": "./dist/cacache/tmp.d.mts",
       "default": "./dist/cacache/tmp.js"
     },
     "./cacache/types": {
-      "source": "./src/cacache/types.ts",
-      "types": "./dist/cacache/types.d.ts",
+      "source": "./src/cacache/types.mts",
+      "types": "./dist/cacache/types.d.mts",
       "default": "./dist/cacache/types.js"
     },
     "./cacache/write": {
-      "source": "./src/cacache/write.ts",
-      "types": "./dist/cacache/write.d.ts",
+      "source": "./src/cacache/write.mts",
+      "types": "./dist/cacache/write.d.mts",
       "default": "./dist/cacache/write.js"
     },
     "./cache/ttl/browser": {
-      "source": "./src/cache/ttl/browser.ts",
+      "source": "./src/cache/ttl/browser.mts",
       "browser": {
-        "types": "./dist/cache/ttl/browser.d.ts",
+        "types": "./dist/cache/ttl/browser.d.mts",
         "default": "./dist/cache/ttl/browser.js"
       },
-      "types": "./dist/cache/ttl/browser.d.ts",
+      "types": "./dist/cache/ttl/browser.d.mts",
       "default": "./dist/cache/ttl/browser.js"
     },
     "./cache/ttl/store": {
-      "source": "./src/cache/ttl/store.ts",
-      "types": "./dist/cache/ttl/store.d.ts",
+      "source": "./src/cache/ttl/store.mts",
+      "types": "./dist/cache/ttl/store.d.mts",
       "default": "./dist/cache/ttl/store.js"
     },
     "./cache/ttl/types": {
-      "source": "./src/cache/ttl/types.ts",
-      "types": "./dist/cache/ttl/types.d.ts",
+      "source": "./src/cache/ttl/types.mts",
+      "types": "./dist/cache/ttl/types.d.mts",
       "default": "./dist/cache/ttl/types.js"
     },
     "./cli/check": {
-      "source": "./src/cli/check.ts",
-      "types": "./dist/cli/check.d.ts",
+      "source": "./src/cli/check.mts",
+      "types": "./dist/cli/check.d.mts",
       "default": "./dist/cli/check.js"
     },
     "./cli/check-primordials": {
-      "source": "./src/cli/check-primordials.ts",
-      "types": "./dist/cli/check-primordials.d.ts",
+      "source": "./src/cli/check-primordials.mts",
+      "types": "./dist/cli/check-primordials.d.mts",
       "default": "./dist/cli/check-primordials.js"
     },
     "./cli/is-main-module": {
-      "source": "./src/cli/is-main-module.ts",
-      "types": "./dist/cli/is-main-module.d.ts",
+      "source": "./src/cli/is-main-module.mts",
+      "types": "./dist/cli/is-main-module.d.mts",
       "default": "./dist/cli/is-main-module.js"
     },
     "./cli/main": {
-      "source": "./src/cli/main.ts",
-      "types": "./dist/cli/main.d.ts",
+      "source": "./src/cli/main.mts",
+      "types": "./dist/cli/main.d.mts",
       "default": "./dist/cli/main.js"
     },
     "./cli/socket-lib": {
-      "source": "./src/cli/socket-lib.ts",
-      "types": "./dist/cli/socket-lib.d.ts",
+      "source": "./src/cli/socket-lib.mts",
+      "types": "./dist/cli/socket-lib.d.mts",
       "default": "./dist/cli/socket-lib.js"
     },
     "./compression/brotli": {
-      "source": "./src/compression/brotli.ts",
-      "types": "./dist/compression/brotli.d.ts",
+      "source": "./src/compression/brotli.mts",
+      "types": "./dist/compression/brotli.d.mts",
       "default": "./dist/compression/brotli.js"
     },
     "./compression/gzip": {
-      "source": "./src/compression/gzip.ts",
-      "types": "./dist/compression/gzip.d.ts",
+      "source": "./src/compression/gzip.mts",
+      "types": "./dist/compression/gzip.d.mts",
       "default": "./dist/compression/gzip.js"
     },
     "./compression/types": {
-      "source": "./src/compression/types.ts",
-      "types": "./dist/compression/types.d.ts",
+      "source": "./src/compression/types.mts",
+      "types": "./dist/compression/types.d.mts",
       "default": "./dist/compression/types.js"
     },
     "./config/layers": {
-      "source": "./src/config/layers.ts",
-      "types": "./dist/config/layers.d.ts",
+      "source": "./src/config/layers.mts",
+      "types": "./dist/config/layers.d.mts",
       "default": "./dist/config/layers.js"
     },
     "./config/repo": {
-      "source": "./src/config/repo.ts",
-      "types": "./dist/config/repo.d.ts",
+      "source": "./src/config/repo.mts",
+      "types": "./dist/config/repo.d.mts",
       "default": "./dist/config/repo.js"
     },
     "./constants/encoding": {
-      "source": "./src/constants/encoding.ts",
-      "types": "./dist/constants/encoding.d.ts",
+      "source": "./src/constants/encoding.mts",
+      "types": "./dist/constants/encoding.d.mts",
       "default": "./dist/constants/encoding.js"
     },
     "./constants/github": {
-      "source": "./src/constants/github.ts",
-      "types": "./dist/constants/github.d.ts",
+      "source": "./src/constants/github.mts",
+      "types": "./dist/constants/github.d.mts",
       "default": "./dist/constants/github.js"
     },
     "./constants/licenses": {
-      "source": "./src/constants/licenses.ts",
-      "types": "./dist/constants/licenses.d.ts",
+      "source": "./src/constants/licenses.mts",
+      "types": "./dist/constants/licenses.d.mts",
       "default": "./dist/constants/licenses.js"
     },
     "./constants/lifecycle-script-names": {
-      "source": "./src/constants/lifecycle-script-names.ts",
-      "types": "./dist/constants/lifecycle-script-names.d.ts",
+      "source": "./src/constants/lifecycle-script-names.mts",
+      "types": "./dist/constants/lifecycle-script-names.d.mts",
       "default": "./dist/constants/lifecycle-script-names.js"
     },
     "./constants/maintained-node-versions": {
-      "source": "./src/constants/maintained-node-versions.ts",
-      "types": "./dist/constants/maintained-node-versions.d.ts",
+      "source": "./src/constants/maintained-node-versions.mts",
+      "types": "./dist/constants/maintained-node-versions.d.mts",
       "default": "./dist/constants/maintained-node-versions.js"
     },
     "./constants/node": {
-      "source": "./src/constants/node.ts",
-      "types": "./dist/constants/node.d.ts",
+      "source": "./src/constants/node.mts",
+      "types": "./dist/constants/node.d.mts",
       "default": "./dist/constants/node.js"
     },
     "./constants/package-default-node-range": {
-      "source": "./src/constants/package-default-node-range.ts",
-      "types": "./dist/constants/package-default-node-range.d.ts",
+      "source": "./src/constants/package-default-node-range.mts",
+      "types": "./dist/constants/package-default-node-range.d.mts",
       "default": "./dist/constants/package-default-node-range.js"
     },
     "./constants/package-default-socket-categories": {
-      "source": "./src/constants/package-default-socket-categories.ts",
-      "types": "./dist/constants/package-default-socket-categories.d.ts",
+      "source": "./src/constants/package-default-socket-categories.mts",
+      "types": "./dist/constants/package-default-socket-categories.d.mts",
       "default": "./dist/constants/package-default-socket-categories.js"
     },
     "./constants/package-managers": {
-      "source": "./src/constants/package-managers.ts",
-      "types": "./dist/constants/package-managers.d.ts",
+      "source": "./src/constants/package-managers.mts",
+      "types": "./dist/constants/package-managers.d.mts",
       "default": "./dist/constants/package-managers.js"
     },
     "./constants/packages": {
-      "source": "./src/constants/packages.ts",
-      "types": "./dist/constants/packages.d.ts",
+      "source": "./src/constants/packages.mts",
+      "types": "./dist/constants/packages.d.mts",
       "default": "./dist/constants/packages.js"
     },
     "./constants/platform": {
-      "source": "./src/constants/platform.ts",
-      "types": "./dist/constants/platform.d.ts",
+      "source": "./src/constants/platform.mts",
+      "types": "./dist/constants/platform.d.mts",
       "default": "./dist/constants/platform.js"
     },
     "./constants/runtime": {
-      "source": "./src/constants/runtime.ts",
-      "types": "./dist/constants/runtime.d.ts",
+      "source": "./src/constants/runtime.mts",
+      "types": "./dist/constants/runtime.d.mts",
       "default": "./dist/constants/runtime.js"
     },
     "./constants/sentinels": {
-      "source": "./src/constants/sentinels.ts",
-      "types": "./dist/constants/sentinels.d.ts",
+      "source": "./src/constants/sentinels.mts",
+      "types": "./dist/constants/sentinels.d.mts",
       "default": "./dist/constants/sentinels.js"
     },
     "./constants/socket": {
-      "source": "./src/constants/socket.ts",
-      "types": "./dist/constants/socket.d.ts",
+      "source": "./src/constants/socket.mts",
+      "types": "./dist/constants/socket.d.mts",
       "default": "./dist/constants/socket.js"
     },
     "./constants/testing": {
-      "source": "./src/constants/testing.ts",
-      "types": "./dist/constants/testing.d.ts",
+      "source": "./src/constants/testing.mts",
+      "types": "./dist/constants/testing.d.mts",
       "default": "./dist/constants/testing.js"
     },
     "./constants/time": {
-      "source": "./src/constants/time.ts",
-      "types": "./dist/constants/time.d.ts",
+      "source": "./src/constants/time.mts",
+      "types": "./dist/constants/time.d.mts",
       "default": "./dist/constants/time.js"
     },
     "./constants/typescript": {
-      "source": "./src/constants/typescript.ts",
-      "types": "./dist/constants/typescript.d.ts",
+      "source": "./src/constants/typescript.mts",
+      "types": "./dist/constants/typescript.d.mts",
       "default": "./dist/constants/typescript.js"
     },
     "./cover/code": {
-      "source": "./src/cover/code.ts",
-      "types": "./dist/cover/code.d.ts",
+      "source": "./src/cover/code.mts",
+      "types": "./dist/cover/code.d.mts",
       "default": "./dist/cover/code.js"
     },
     "./cover/formatters": {
-      "source": "./src/cover/formatters.ts",
-      "types": "./dist/cover/formatters.d.ts",
+      "source": "./src/cover/formatters.mts",
+      "types": "./dist/cover/formatters.d.mts",
       "default": "./dist/cover/formatters.js"
     },
     "./cover/type": {
-      "source": "./src/cover/type.ts",
-      "types": "./dist/cover/type.d.ts",
+      "source": "./src/cover/type.mts",
+      "types": "./dist/cover/type.d.mts",
       "default": "./dist/cover/type.js"
     },
     "./cover/types": {
-      "source": "./src/cover/types.ts",
-      "types": "./dist/cover/types.d.ts",
+      "source": "./src/cover/types.mts",
+      "types": "./dist/cover/types.d.mts",
       "default": "./dist/cover/types.js"
     },
     "./crypto/hash": {
-      "source": "./src/crypto/hash.ts",
-      "types": "./dist/crypto/hash.d.ts",
+      "source": "./src/crypto/hash.mts",
+      "types": "./dist/crypto/hash.d.mts",
       "default": "./dist/crypto/hash.js"
     },
     "./crypto/integrity": {
-      "source": "./src/crypto/integrity.ts",
-      "types": "./dist/crypto/integrity.d.ts",
+      "source": "./src/crypto/integrity.mts",
+      "types": "./dist/crypto/integrity.d.mts",
       "default": "./dist/crypto/integrity.js"
     },
     "./debug/caller-info": {
-      "source": "./src/debug/caller-info.ts",
+      "source": "./src/debug/caller-info.mts",
       "browser": {
-        "types": "./dist/debug/caller-info.d.ts",
+        "types": "./dist/debug/caller-info.d.mts",
         "default": "./dist/debug/caller-info.js"
       },
-      "types": "./dist/debug/caller-info.d.ts",
+      "types": "./dist/debug/caller-info.d.mts",
       "default": "./dist/debug/caller-info.js"
     },
     "./debug/namespace": {
-      "source": "./src/debug/namespace.ts",
+      "source": "./src/debug/namespace.mts",
       "browser": {
-        "types": "./dist/debug/namespace.d.ts",
+        "types": "./dist/debug/namespace.d.mts",
         "default": "./dist/debug/namespace.js"
       },
-      "types": "./dist/debug/namespace.d.ts",
+      "types": "./dist/debug/namespace.d.mts",
       "default": "./dist/debug/namespace.js"
     },
     "./debug/output": {
-      "source": "./src/debug/output.ts",
+      "source": "./src/debug/output.mts",
       "browser": {
-        "types": "./dist/debug/output.d.ts",
+        "types": "./dist/debug/output.d.mts",
         "default": "./dist/debug/output.js"
       },
-      "types": "./dist/debug/output.d.ts",
+      "types": "./dist/debug/output.d.mts",
       "default": "./dist/debug/output.js"
     },
     "./debug/types": {
-      "source": "./src/debug/types.ts",
+      "source": "./src/debug/types.mts",
       "browser": {
-        "types": "./dist/debug/types.d.ts",
+        "types": "./dist/debug/types.d.mts",
         "default": "./dist/debug/types.js"
       },
-      "types": "./dist/debug/types.d.ts",
+      "types": "./dist/debug/types.d.mts",
       "default": "./dist/debug/types.js"
     },
     "./dlx/arborist": {
-      "source": "./src/dlx/arborist.ts",
-      "types": "./dist/dlx/arborist.d.ts",
+      "source": "./src/dlx/arborist.mts",
+      "types": "./dist/dlx/arborist.d.mts",
       "default": "./dist/dlx/arborist.js"
     },
     "./dlx/binary": {
-      "source": "./src/dlx/binary.ts",
-      "types": "./dist/dlx/binary.d.ts",
+      "source": "./src/dlx/binary.mts",
+      "types": "./dist/dlx/binary.d.mts",
       "default": "./dist/dlx/binary.js"
     },
     "./dlx/binary-cache": {
-      "source": "./src/dlx/binary-cache.ts",
-      "types": "./dist/dlx/binary-cache.d.ts",
+      "source": "./src/dlx/binary-cache.mts",
+      "types": "./dist/dlx/binary-cache.d.mts",
       "default": "./dist/dlx/binary-cache.js"
     },
     "./dlx/binary-download": {
-      "source": "./src/dlx/binary-download.ts",
-      "types": "./dist/dlx/binary-download.d.ts",
+      "source": "./src/dlx/binary-download.mts",
+      "types": "./dist/dlx/binary-download.d.mts",
       "default": "./dist/dlx/binary-download.js"
     },
     "./dlx/binary-resolution": {
-      "source": "./src/dlx/binary-resolution.ts",
-      "types": "./dist/dlx/binary-resolution.d.ts",
+      "source": "./src/dlx/binary-resolution.mts",
+      "types": "./dist/dlx/binary-resolution.d.mts",
       "default": "./dist/dlx/binary-resolution.js"
     },
     "./dlx/binary-types": {
-      "source": "./src/dlx/binary-types.ts",
-      "types": "./dist/dlx/binary-types.d.ts",
+      "source": "./src/dlx/binary-types.mts",
+      "types": "./dist/dlx/binary-types.d.mts",
       "default": "./dist/dlx/binary-types.js"
     },
     "./dlx/cache": {
-      "source": "./src/dlx/cache.ts",
-      "types": "./dist/dlx/cache.d.ts",
+      "source": "./src/dlx/cache.mts",
+      "types": "./dist/dlx/cache.d.mts",
       "default": "./dist/dlx/cache.js"
     },
     "./dlx/detect": {
-      "source": "./src/dlx/detect.ts",
-      "types": "./dist/dlx/detect.d.ts",
+      "source": "./src/dlx/detect.mts",
+      "types": "./dist/dlx/detect.d.mts",
       "default": "./dist/dlx/detect.js"
     },
     "./dlx/dir": {
-      "source": "./src/dlx/dir.ts",
-      "types": "./dist/dlx/dir.d.ts",
+      "source": "./src/dlx/dir.mts",
+      "types": "./dist/dlx/dir.d.mts",
       "default": "./dist/dlx/dir.js"
     },
     "./dlx/firewall": {
-      "source": "./src/dlx/firewall.ts",
-      "types": "./dist/dlx/firewall.d.ts",
+      "source": "./src/dlx/firewall.mts",
+      "types": "./dist/dlx/firewall.d.mts",
       "default": "./dist/dlx/firewall.js"
     },
     "./dlx/lockfile": {
-      "source": "./src/dlx/lockfile.ts",
-      "types": "./dist/dlx/lockfile.d.ts",
+      "source": "./src/dlx/lockfile.mts",
+      "types": "./dist/dlx/lockfile.d.mts",
       "default": "./dist/dlx/lockfile.js"
     },
     "./dlx/manifest": {
-      "source": "./src/dlx/manifest.ts",
-      "types": "./dist/dlx/manifest.d.ts",
+      "source": "./src/dlx/manifest.mts",
+      "types": "./dist/dlx/manifest.d.mts",
       "default": "./dist/dlx/manifest.js"
     },
     "./dlx/package": {
-      "source": "./src/dlx/package.ts",
-      "types": "./dist/dlx/package.d.ts",
+      "source": "./src/dlx/package.mts",
+      "types": "./dist/dlx/package.d.mts",
       "default": "./dist/dlx/package.js"
     },
     "./dlx/packages": {
-      "source": "./src/dlx/packages.ts",
-      "types": "./dist/dlx/packages.d.ts",
+      "source": "./src/dlx/packages.mts",
+      "types": "./dist/dlx/packages.d.mts",
       "default": "./dist/dlx/packages.js"
     },
     "./dlx/paths": {
-      "source": "./src/dlx/paths.ts",
-      "types": "./dist/dlx/paths.d.ts",
+      "source": "./src/dlx/paths.mts",
+      "types": "./dist/dlx/paths.d.mts",
       "default": "./dist/dlx/paths.js"
     },
     "./dlx/spec": {
-      "source": "./src/dlx/spec.ts",
-      "types": "./dist/dlx/spec.d.ts",
+      "source": "./src/dlx/spec.mts",
+      "types": "./dist/dlx/spec.d.mts",
       "default": "./dist/dlx/spec.js"
     },
     "./dlx/types": {
-      "source": "./src/dlx/types.ts",
-      "types": "./dist/dlx/types.d.ts",
+      "source": "./src/dlx/types.mts",
+      "types": "./dist/dlx/types.d.mts",
       "default": "./dist/dlx/types.js"
     },
     "./eco/cargo/lockfile-format": {
-      "source": "./src/eco/cargo/lockfile-format.ts",
-      "types": "./dist/eco/cargo/lockfile-format.d.ts",
+      "source": "./src/eco/cargo/lockfile-format.mts",
+      "types": "./dist/eco/cargo/lockfile-format.d.mts",
       "default": "./dist/eco/cargo/lockfile-format.js"
     },
     "./eco/cargo/manifest-format": {
-      "source": "./src/eco/cargo/manifest-format.ts",
-      "types": "./dist/eco/cargo/manifest-format.d.ts",
+      "source": "./src/eco/cargo/manifest-format.mts",
+      "types": "./dist/eco/cargo/manifest-format.d.mts",
       "default": "./dist/eco/cargo/manifest-format.js"
     },
     "./eco/cargo/parse-lockfile": {
-      "source": "./src/eco/cargo/parse-lockfile.ts",
-      "types": "./dist/eco/cargo/parse-lockfile.d.ts",
+      "source": "./src/eco/cargo/parse-lockfile.mts",
+      "types": "./dist/eco/cargo/parse-lockfile.d.mts",
       "default": "./dist/eco/cargo/parse-lockfile.js"
     },
     "./eco/manifest/analyze-lockfile": {
-      "source": "./src/eco/manifest/analyze-lockfile.ts",
-      "types": "./dist/eco/manifest/analyze-lockfile.d.ts",
+      "source": "./src/eco/manifest/analyze-lockfile.mts",
+      "types": "./dist/eco/manifest/analyze-lockfile.d.mts",
       "default": "./dist/eco/manifest/analyze-lockfile.js"
     },
     "./eco/manifest/detect-format": {
-      "source": "./src/eco/manifest/detect-format.ts",
-      "types": "./dist/eco/manifest/detect-format.d.ts",
+      "source": "./src/eco/manifest/detect-format.mts",
+      "types": "./dist/eco/manifest/detect-format.d.mts",
       "default": "./dist/eco/manifest/detect-format.js"
     },
     "./eco/manifest/find-packages": {
-      "source": "./src/eco/manifest/find-packages.ts",
-      "types": "./dist/eco/manifest/find-packages.d.ts",
+      "source": "./src/eco/manifest/find-packages.mts",
+      "types": "./dist/eco/manifest/find-packages.d.mts",
       "default": "./dist/eco/manifest/find-packages.js"
     },
     "./eco/manifest/get-package": {
-      "source": "./src/eco/manifest/get-package.ts",
-      "types": "./dist/eco/manifest/get-package.d.ts",
+      "source": "./src/eco/manifest/get-package.mts",
+      "types": "./dist/eco/manifest/get-package.d.mts",
       "default": "./dist/eco/manifest/get-package.js"
     },
     "./eco/manifest/get-package-versions": {
-      "source": "./src/eco/manifest/get-package-versions.ts",
-      "types": "./dist/eco/manifest/get-package-versions.d.ts",
+      "source": "./src/eco/manifest/get-package-versions.mts",
+      "types": "./dist/eco/manifest/get-package-versions.d.mts",
       "default": "./dist/eco/manifest/get-package-versions.js"
     },
     "./eco/manifest/manifest-error": {
-      "source": "./src/eco/manifest/manifest-error.ts",
-      "types": "./dist/eco/manifest/manifest-error.d.ts",
+      "source": "./src/eco/manifest/manifest-error.mts",
+      "types": "./dist/eco/manifest/manifest-error.d.mts",
       "default": "./dist/eco/manifest/manifest-error.js"
     },
     "./eco/manifest/parse": {
-      "source": "./src/eco/manifest/parse.ts",
-      "types": "./dist/eco/manifest/parse.d.ts",
+      "source": "./src/eco/manifest/parse.mts",
+      "types": "./dist/eco/manifest/parse.d.mts",
       "default": "./dist/eco/manifest/parse.js"
     },
     "./eco/manifest/parse-lockfile": {
-      "source": "./src/eco/manifest/parse-lockfile.ts",
-      "types": "./dist/eco/manifest/parse-lockfile.d.ts",
+      "source": "./src/eco/manifest/parse-lockfile.mts",
+      "types": "./dist/eco/manifest/parse-lockfile.d.mts",
       "default": "./dist/eco/manifest/parse-lockfile.js"
     },
     "./eco/manifest/parse-manifest": {
-      "source": "./src/eco/manifest/parse-manifest.ts",
-      "types": "./dist/eco/manifest/parse-manifest.d.ts",
+      "source": "./src/eco/manifest/parse-manifest.mts",
+      "types": "./dist/eco/manifest/parse-manifest.d.mts",
       "default": "./dist/eco/manifest/parse-manifest.js"
     },
     "./eco/manifest/types": {
-      "source": "./src/eco/manifest/types.ts",
-      "types": "./dist/eco/manifest/types.d.ts",
+      "source": "./src/eco/manifest/types.mts",
+      "types": "./dist/eco/manifest/types.d.mts",
       "default": "./dist/eco/manifest/types.js"
     },
     "./eco/npm/bun/exec": {
-      "source": "./src/eco/npm/bun/exec.ts",
-      "types": "./dist/eco/npm/bun/exec.d.ts",
+      "source": "./src/eco/npm/bun/exec.mts",
+      "types": "./dist/eco/npm/bun/exec.d.mts",
       "default": "./dist/eco/npm/bun/exec.js"
     },
     "./eco/npm/manifest-format": {
-      "source": "./src/eco/npm/manifest-format.ts",
-      "types": "./dist/eco/npm/manifest-format.d.ts",
+      "source": "./src/eco/npm/manifest-format.mts",
+      "types": "./dist/eco/npm/manifest-format.d.mts",
       "default": "./dist/eco/npm/manifest-format.js"
     },
     "./eco/npm/npm-cli/exec": {
-      "source": "./src/eco/npm/npm-cli/exec.ts",
-      "types": "./dist/eco/npm/npm-cli/exec.d.ts",
+      "source": "./src/eco/npm/npm-cli/exec.mts",
+      "types": "./dist/eco/npm/npm-cli/exec.d.mts",
       "default": "./dist/eco/npm/npm-cli/exec.js"
     },
     "./eco/npm/npm-cli/extract-package-name-from-path": {
-      "source": "./src/eco/npm/npm-cli/extract-package-name-from-path.ts",
-      "types": "./dist/eco/npm/npm-cli/extract-package-name-from-path.d.ts",
+      "source": "./src/eco/npm/npm-cli/extract-package-name-from-path.mts",
+      "types": "./dist/eco/npm/npm-cli/extract-package-name-from-path.d.mts",
       "default": "./dist/eco/npm/npm-cli/extract-package-name-from-path.js"
     },
     "./eco/npm/npm-cli/flags": {
-      "source": "./src/eco/npm/npm-cli/flags.ts",
-      "types": "./dist/eco/npm/npm-cli/flags.d.ts",
+      "source": "./src/eco/npm/npm-cli/flags.mts",
+      "types": "./dist/eco/npm/npm-cli/flags.d.mts",
       "default": "./dist/eco/npm/npm-cli/flags.js"
     },
     "./eco/npm/npm-cli/lockfile/format": {
-      "source": "./src/eco/npm/npm-cli/lockfile/format.ts",
-      "types": "./dist/eco/npm/npm-cli/lockfile/format.d.ts",
+      "source": "./src/eco/npm/npm-cli/lockfile/format.mts",
+      "types": "./dist/eco/npm/npm-cli/lockfile/format.d.mts",
       "default": "./dist/eco/npm/npm-cli/lockfile/format.js"
     },
     "./eco/npm/npm-cli/lockfile/parse": {
-      "source": "./src/eco/npm/npm-cli/lockfile/parse.ts",
-      "types": "./dist/eco/npm/npm-cli/lockfile/parse.d.ts",
+      "source": "./src/eco/npm/npm-cli/lockfile/parse.mts",
+      "types": "./dist/eco/npm/npm-cli/lockfile/parse.d.mts",
       "default": "./dist/eco/npm/npm-cli/lockfile/parse.js"
     },
     "./eco/npm/npm-cli/parse-git-url": {
-      "source": "./src/eco/npm/npm-cli/parse-git-url.ts",
-      "types": "./dist/eco/npm/npm-cli/parse-git-url.d.ts",
+      "source": "./src/eco/npm/npm-cli/parse-git-url.mts",
+      "types": "./dist/eco/npm/npm-cli/parse-git-url.d.mts",
       "default": "./dist/eco/npm/npm-cli/parse-git-url.js"
     },
     "./eco/npm/package-extensions/data": {
-      "source": "./src/eco/npm/package-extensions/data.ts",
-      "types": "./dist/eco/npm/package-extensions/data.d.ts",
+      "source": "./src/eco/npm/package-extensions/data.mts",
+      "types": "./dist/eco/npm/package-extensions/data.d.mts",
       "default": "./dist/eco/npm/package-extensions/data.js"
     },
     "./eco/npm/package-extensions/types": {
-      "source": "./src/eco/npm/package-extensions/types.ts",
-      "types": "./dist/eco/npm/package-extensions/types.d.ts",
+      "source": "./src/eco/npm/package-extensions/types.mts",
+      "types": "./dist/eco/npm/package-extensions/types.d.mts",
       "default": "./dist/eco/npm/package-extensions/types.js"
     },
     "./eco/npm/parse-package-json": {
-      "source": "./src/eco/npm/parse-package-json.ts",
-      "types": "./dist/eco/npm/parse-package-json.d.ts",
+      "source": "./src/eco/npm/parse-package-json.mts",
+      "types": "./dist/eco/npm/parse-package-json.d.mts",
       "default": "./dist/eco/npm/parse-package-json.js"
     },
     "./eco/npm/pnpm/exec": {
-      "source": "./src/eco/npm/pnpm/exec.ts",
-      "types": "./dist/eco/npm/pnpm/exec.d.ts",
+      "source": "./src/eco/npm/pnpm/exec.mts",
+      "types": "./dist/eco/npm/pnpm/exec.d.mts",
       "default": "./dist/eco/npm/pnpm/exec.js"
     },
     "./eco/npm/pnpm/flags": {
-      "source": "./src/eco/npm/pnpm/flags.ts",
-      "types": "./dist/eco/npm/pnpm/flags.d.ts",
+      "source": "./src/eco/npm/pnpm/flags.mts",
+      "types": "./dist/eco/npm/pnpm/flags.d.mts",
       "default": "./dist/eco/npm/pnpm/flags.js"
     },
     "./eco/npm/pnpm/lockfile/detect-version": {
-      "source": "./src/eco/npm/pnpm/lockfile/detect-version.ts",
-      "types": "./dist/eco/npm/pnpm/lockfile/detect-version.d.ts",
+      "source": "./src/eco/npm/pnpm/lockfile/detect-version.mts",
+      "types": "./dist/eco/npm/pnpm/lockfile/detect-version.d.mts",
       "default": "./dist/eco/npm/pnpm/lockfile/detect-version.js"
     },
     "./eco/npm/pnpm/lockfile/format": {
-      "source": "./src/eco/npm/pnpm/lockfile/format.ts",
-      "types": "./dist/eco/npm/pnpm/lockfile/format.d.ts",
+      "source": "./src/eco/npm/pnpm/lockfile/format.mts",
+      "types": "./dist/eco/npm/pnpm/lockfile/format.d.mts",
       "default": "./dist/eco/npm/pnpm/lockfile/format.js"
     },
     "./eco/npm/pnpm/lockfile/package-id-v5": {
-      "source": "./src/eco/npm/pnpm/lockfile/package-id-v5.ts",
-      "types": "./dist/eco/npm/pnpm/lockfile/package-id-v5.d.ts",
+      "source": "./src/eco/npm/pnpm/lockfile/package-id-v5.mts",
+      "types": "./dist/eco/npm/pnpm/lockfile/package-id-v5.d.mts",
       "default": "./dist/eco/npm/pnpm/lockfile/package-id-v5.js"
     },
     "./eco/npm/pnpm/lockfile/package-id-v6-v9": {
-      "source": "./src/eco/npm/pnpm/lockfile/package-id-v6-v9.ts",
-      "types": "./dist/eco/npm/pnpm/lockfile/package-id-v6-v9.d.ts",
+      "source": "./src/eco/npm/pnpm/lockfile/package-id-v6-v9.mts",
+      "types": "./dist/eco/npm/pnpm/lockfile/package-id-v6-v9.d.mts",
       "default": "./dist/eco/npm/pnpm/lockfile/package-id-v6-v9.js"
     },
     "./eco/npm/pnpm/lockfile/parse": {
-      "source": "./src/eco/npm/pnpm/lockfile/parse.ts",
-      "types": "./dist/eco/npm/pnpm/lockfile/parse.d.ts",
+      "source": "./src/eco/npm/pnpm/lockfile/parse.mts",
+      "types": "./dist/eco/npm/pnpm/lockfile/parse.d.mts",
       "default": "./dist/eco/npm/pnpm/lockfile/parse.js"
     },
     "./eco/npm/script": {
-      "source": "./src/eco/npm/script.ts",
-      "types": "./dist/eco/npm/script.d.ts",
+      "source": "./src/eco/npm/script.mts",
+      "types": "./dist/eco/npm/script.d.mts",
       "default": "./dist/eco/npm/script.js"
     },
     "./eco/npm/vlt/exec": {
-      "source": "./src/eco/npm/vlt/exec.ts",
-      "types": "./dist/eco/npm/vlt/exec.d.ts",
+      "source": "./src/eco/npm/vlt/exec.mts",
+      "types": "./dist/eco/npm/vlt/exec.d.mts",
       "default": "./dist/eco/npm/vlt/exec.js"
     },
     "./eco/npm/yarn/exec": {
-      "source": "./src/eco/npm/yarn/exec.ts",
-      "types": "./dist/eco/npm/yarn/exec.d.ts",
+      "source": "./src/eco/npm/yarn/exec.mts",
+      "types": "./dist/eco/npm/yarn/exec.d.mts",
       "default": "./dist/eco/npm/yarn/exec.js"
     },
     "./eco/npm/yarn/lockfile/descriptor": {
-      "source": "./src/eco/npm/yarn/lockfile/descriptor.ts",
-      "types": "./dist/eco/npm/yarn/lockfile/descriptor.d.ts",
+      "source": "./src/eco/npm/yarn/lockfile/descriptor.mts",
+      "types": "./dist/eco/npm/yarn/lockfile/descriptor.d.mts",
       "default": "./dist/eco/npm/yarn/lockfile/descriptor.js"
     },
     "./eco/npm/yarn/lockfile/format": {
-      "source": "./src/eco/npm/yarn/lockfile/format.ts",
-      "types": "./dist/eco/npm/yarn/lockfile/format.d.ts",
+      "source": "./src/eco/npm/yarn/lockfile/format.mts",
+      "types": "./dist/eco/npm/yarn/lockfile/format.d.mts",
       "default": "./dist/eco/npm/yarn/lockfile/format.js"
     },
     "./eco/npm/yarn/lockfile/parse": {
-      "source": "./src/eco/npm/yarn/lockfile/parse.ts",
-      "types": "./dist/eco/npm/yarn/lockfile/parse.d.ts",
+      "source": "./src/eco/npm/yarn/lockfile/parse.mts",
+      "types": "./dist/eco/npm/yarn/lockfile/parse.d.mts",
       "default": "./dist/eco/npm/yarn/lockfile/parse.js"
     },
     "./eco/purl": {
-      "source": "./src/eco/purl.ts",
-      "types": "./dist/eco/purl.d.ts",
+      "source": "./src/eco/purl.mts",
+      "types": "./dist/eco/purl.d.mts",
       "default": "./dist/eco/purl.js"
     },
     "./eco/types": {
-      "source": "./src/eco/types.ts",
-      "types": "./dist/eco/types.d.ts",
+      "source": "./src/eco/types.mts",
+      "types": "./dist/eco/types.d.mts",
       "default": "./dist/eco/types.js"
     },
     "./env/agents": {
-      "source": "./src/env/agents.ts",
-      "types": "./dist/env/agents.d.ts",
+      "source": "./src/env/agents.mts",
+      "types": "./dist/env/agents.d.mts",
       "default": "./dist/env/agents.js"
     },
     "./env/boolean": {
-      "source": "./src/env/boolean.ts",
-      "types": "./dist/env/boolean.d.ts",
+      "source": "./src/env/boolean.mts",
+      "types": "./dist/env/boolean.d.mts",
       "default": "./dist/env/boolean.js"
     },
     "./env/case-insensitive": {
-      "source": "./src/env/case-insensitive.ts",
-      "types": "./dist/env/case-insensitive.d.ts",
+      "source": "./src/env/case-insensitive.mts",
+      "types": "./dist/env/case-insensitive.d.mts",
       "default": "./dist/env/case-insensitive.js"
     },
     "./env/ci": {
-      "source": "./src/env/ci.ts",
-      "types": "./dist/env/ci.d.ts",
+      "source": "./src/env/ci.mts",
+      "types": "./dist/env/ci.d.mts",
       "default": "./dist/env/ci.js"
     },
     "./env/debug": {
-      "source": "./src/env/debug.ts",
-      "types": "./dist/env/debug.d.ts",
+      "source": "./src/env/debug.mts",
+      "types": "./dist/env/debug.d.mts",
       "default": "./dist/env/debug.js"
     },
     "./env/flags": {
-      "source": "./src/env/flags.ts",
-      "types": "./dist/env/flags.d.ts",
+      "source": "./src/env/flags.mts",
+      "types": "./dist/env/flags.d.mts",
       "default": "./dist/env/flags.js"
     },
     "./env/github": {
-      "source": "./src/env/github.ts",
-      "types": "./dist/env/github.d.ts",
+      "source": "./src/env/github.mts",
+      "types": "./dist/env/github.d.mts",
       "default": "./dist/env/github.js"
     },
     "./env/github-status": {
-      "source": "./src/env/github-status.ts",
-      "types": "./dist/env/github-status.d.ts",
+      "source": "./src/env/github-status.mts",
+      "types": "./dist/env/github-status.d.mts",
       "default": "./dist/env/github-status.js"
     },
     "./env/home": {
-      "source": "./src/env/home.ts",
-      "types": "./dist/env/home.d.ts",
+      "source": "./src/env/home.mts",
+      "types": "./dist/env/home.d.mts",
       "default": "./dist/env/home.js"
     },
     "./env/locale": {
-      "source": "./src/env/locale.ts",
-      "types": "./dist/env/locale.d.ts",
+      "source": "./src/env/locale.mts",
+      "types": "./dist/env/locale.d.mts",
       "default": "./dist/env/locale.js"
     },
     "./env/node-auth-token": {
-      "source": "./src/env/node-auth-token.ts",
-      "types": "./dist/env/node-auth-token.d.ts",
+      "source": "./src/env/node-auth-token.mts",
+      "types": "./dist/env/node-auth-token.d.mts",
       "default": "./dist/env/node-auth-token.js"
     },
     "./env/node-env": {
-      "source": "./src/env/node-env.ts",
-      "types": "./dist/env/node-env.d.ts",
+      "source": "./src/env/node-env.mts",
+      "types": "./dist/env/node-env.d.mts",
       "default": "./dist/env/node-env.js"
     },
     "./env/node-version-managers": {
-      "source": "./src/env/node-version-managers.ts",
-      "types": "./dist/env/node-version-managers.d.ts",
+      "source": "./src/env/node-version-managers.mts",
+      "types": "./dist/env/node-version-managers.d.mts",
       "default": "./dist/env/node-version-managers.js"
     },
     "./env/npm": {
-      "source": "./src/env/npm.ts",
-      "types": "./dist/env/npm.d.ts",
+      "source": "./src/env/npm.mts",
+      "types": "./dist/env/npm.d.mts",
       "default": "./dist/env/npm.js"
     },
     "./env/number": {
-      "source": "./src/env/number.ts",
-      "types": "./dist/env/number.d.ts",
+      "source": "./src/env/number.mts",
+      "types": "./dist/env/number.d.mts",
       "default": "./dist/env/number.js"
     },
     "./env/package-manager": {
-      "source": "./src/env/package-manager.ts",
-      "types": "./dist/env/package-manager.d.ts",
+      "source": "./src/env/package-manager.mts",
+      "types": "./dist/env/package-manager.d.mts",
       "default": "./dist/env/package-manager.js"
     },
     "./env/path": {
-      "source": "./src/env/path.ts",
-      "types": "./dist/env/path.d.ts",
+      "source": "./src/env/path.mts",
+      "types": "./dist/env/path.d.mts",
       "default": "./dist/env/path.js"
     },
     "./env/pre-commit": {
-      "source": "./src/env/pre-commit.ts",
-      "types": "./dist/env/pre-commit.d.ts",
+      "source": "./src/env/pre-commit.mts",
+      "types": "./dist/env/pre-commit.d.mts",
       "default": "./dist/env/pre-commit.js"
     },
     "./env/providers": {
-      "source": "./src/env/providers.ts",
-      "types": "./dist/env/providers.d.ts",
+      "source": "./src/env/providers.mts",
+      "types": "./dist/env/providers.d.mts",
       "default": "./dist/env/providers.js"
     },
     "./env/proxy": {
-      "source": "./src/env/proxy.ts",
-      "types": "./dist/env/proxy.d.ts",
+      "source": "./src/env/proxy.mts",
+      "types": "./dist/env/proxy.d.mts",
       "default": "./dist/env/proxy.js"
     },
     "./env/rewire": {
-      "source": "./src/env/rewire.ts",
-      "types": "./dist/env/rewire.d.ts",
+      "source": "./src/env/rewire.mts",
+      "types": "./dist/env/rewire.d.mts",
       "default": "./dist/env/rewire.js"
     },
     "./env/runtimes": {
-      "source": "./src/env/runtimes.ts",
-      "types": "./dist/env/runtimes.d.ts",
+      "source": "./src/env/runtimes.mts",
+      "types": "./dist/env/runtimes.d.mts",
       "default": "./dist/env/runtimes.js"
     },
     "./env/shell": {
-      "source": "./src/env/shell.ts",
-      "types": "./dist/env/shell.d.ts",
+      "source": "./src/env/shell.mts",
+      "types": "./dist/env/shell.d.mts",
       "default": "./dist/env/shell.js"
     },
     "./env/socket": {
-      "source": "./src/env/socket.ts",
-      "types": "./dist/env/socket.d.ts",
+      "source": "./src/env/socket.mts",
+      "types": "./dist/env/socket.d.mts",
       "default": "./dist/env/socket.js"
     },
     "./env/socket-cli": {
-      "source": "./src/env/socket-cli.ts",
-      "types": "./dist/env/socket-cli.d.ts",
+      "source": "./src/env/socket-cli.mts",
+      "types": "./dist/env/socket-cli.d.mts",
       "default": "./dist/env/socket-cli.js"
     },
     "./env/socket-mcp": {
-      "source": "./src/env/socket-mcp.ts",
-      "types": "./dist/env/socket-mcp.d.ts",
+      "source": "./src/env/socket-mcp.mts",
+      "types": "./dist/env/socket-mcp.d.mts",
       "default": "./dist/env/socket-mcp.js"
     },
     "./env/string": {
-      "source": "./src/env/string.ts",
-      "types": "./dist/env/string.d.ts",
+      "source": "./src/env/string.mts",
+      "types": "./dist/env/string.d.mts",
       "default": "./dist/env/string.js"
     },
     "./env/temp-dir": {
-      "source": "./src/env/temp-dir.ts",
-      "types": "./dist/env/temp-dir.d.ts",
+      "source": "./src/env/temp-dir.mts",
+      "types": "./dist/env/temp-dir.d.mts",
       "default": "./dist/env/temp-dir.js"
     },
     "./env/term": {
-      "source": "./src/env/term.ts",
-      "types": "./dist/env/term.d.ts",
+      "source": "./src/env/term.mts",
+      "types": "./dist/env/term.d.mts",
       "default": "./dist/env/term.js"
     },
     "./env/test": {
-      "source": "./src/env/test.ts",
-      "types": "./dist/env/test.d.ts",
+      "source": "./src/env/test.mts",
+      "types": "./dist/env/test.d.mts",
       "default": "./dist/env/test.js"
     },
     "./env/types": {
-      "source": "./src/env/types.ts",
-      "types": "./dist/env/types.d.ts",
+      "source": "./src/env/types.mts",
+      "types": "./dist/env/types.d.mts",
       "default": "./dist/env/types.js"
     },
     "./env/windows": {
-      "source": "./src/env/windows.ts",
-      "types": "./dist/env/windows.d.ts",
+      "source": "./src/env/windows.mts",
+      "types": "./dist/env/windows.d.mts",
       "default": "./dist/env/windows.js"
     },
     "./env/xdg": {
-      "source": "./src/env/xdg.ts",
-      "types": "./dist/env/xdg.d.ts",
+      "source": "./src/env/xdg.mts",
+      "types": "./dist/env/xdg.d.mts",
       "default": "./dist/env/xdg.js"
     },
     "./errors/message": {
-      "source": "./src/errors/message.ts",
+      "source": "./src/errors/message.mts",
       "browser": {
-        "types": "./dist/errors/message.d.ts",
+        "types": "./dist/errors/message.d.mts",
         "default": "./dist/errors/message.js"
       },
-      "types": "./dist/errors/message.d.ts",
+      "types": "./dist/errors/message.d.mts",
       "default": "./dist/errors/message.js"
     },
     "./errors/predicates": {
-      "source": "./src/errors/predicates.ts",
+      "source": "./src/errors/predicates.mts",
       "browser": {
-        "types": "./dist/errors/predicates.d.ts",
+        "types": "./dist/errors/predicates.d.mts",
         "default": "./dist/errors/predicates.js"
       },
-      "types": "./dist/errors/predicates.d.ts",
+      "types": "./dist/errors/predicates.d.mts",
       "default": "./dist/errors/predicates.js"
     },
     "./errors/stack": {
-      "source": "./src/errors/stack.ts",
+      "source": "./src/errors/stack.mts",
       "browser": {
-        "types": "./dist/errors/stack.d.ts",
+        "types": "./dist/errors/stack.d.mts",
         "default": "./dist/errors/stack.js"
       },
-      "types": "./dist/errors/stack.d.ts",
+      "types": "./dist/errors/stack.d.mts",
       "default": "./dist/errors/stack.js"
     },
     "./events/exit/handler": {
-      "source": "./src/events/exit/handler.ts",
-      "types": "./dist/events/exit/handler.d.ts",
+      "source": "./src/events/exit/handler.mts",
+      "types": "./dist/events/exit/handler.d.mts",
       "default": "./dist/events/exit/handler.js"
     },
     "./events/exit/intercept": {
-      "source": "./src/events/exit/intercept.ts",
-      "types": "./dist/events/exit/intercept.d.ts",
+      "source": "./src/events/exit/intercept.mts",
+      "types": "./dist/events/exit/intercept.d.mts",
       "default": "./dist/events/exit/intercept.js"
     },
     "./events/exit/lifecycle": {
-      "source": "./src/events/exit/lifecycle.ts",
-      "types": "./dist/events/exit/lifecycle.d.ts",
+      "source": "./src/events/exit/lifecycle.mts",
+      "types": "./dist/events/exit/lifecycle.d.mts",
       "default": "./dist/events/exit/lifecycle.js"
     },
     "./events/exit/signals": {
-      "source": "./src/events/exit/signals.ts",
-      "types": "./dist/events/exit/signals.d.ts",
+      "source": "./src/events/exit/signals.mts",
+      "types": "./dist/events/exit/signals.d.mts",
       "default": "./dist/events/exit/signals.js"
     },
     "./events/exit/types": {
-      "source": "./src/events/exit/types.ts",
-      "types": "./dist/events/exit/types.d.ts",
+      "source": "./src/events/exit/types.mts",
+      "types": "./dist/events/exit/types.d.mts",
       "default": "./dist/events/exit/types.js"
     },
     "./events/warning/handler": {
-      "source": "./src/events/warning/handler.ts",
-      "types": "./dist/events/warning/handler.d.ts",
+      "source": "./src/events/warning/handler.mts",
+      "types": "./dist/events/warning/handler.d.mts",
       "default": "./dist/events/warning/handler.js"
     },
     "./events/warning/suppress": {
-      "source": "./src/events/warning/suppress.ts",
-      "types": "./dist/events/warning/suppress.d.ts",
+      "source": "./src/events/warning/suppress.mts",
+      "types": "./dist/events/warning/suppress.d.mts",
       "default": "./dist/events/warning/suppress.js"
     },
     "./exe/argv/flag-predicates": {
-      "source": "./src/exe/argv/flag-predicates.ts",
-      "types": "./dist/exe/argv/flag-predicates.d.ts",
+      "source": "./src/exe/argv/flag-predicates.mts",
+      "types": "./dist/exe/argv/flag-predicates.d.mts",
       "default": "./dist/exe/argv/flag-predicates.js"
     },
     "./exe/argv/flag-types": {
-      "source": "./src/exe/argv/flag-types.ts",
-      "types": "./dist/exe/argv/flag-types.d.ts",
+      "source": "./src/exe/argv/flag-types.mts",
+      "types": "./dist/exe/argv/flag-types.d.mts",
       "default": "./dist/exe/argv/flag-types.js"
     },
     "./exe/argv/meta": {
-      "source": "./src/exe/argv/meta.ts",
-      "types": "./dist/exe/argv/meta.d.ts",
+      "source": "./src/exe/argv/meta.mts",
+      "types": "./dist/exe/argv/meta.d.mts",
       "default": "./dist/exe/argv/meta.js"
     },
     "./exe/argv/parse": {
-      "source": "./src/exe/argv/parse.ts",
-      "types": "./dist/exe/argv/parse.d.ts",
+      "source": "./src/exe/argv/parse.mts",
+      "types": "./dist/exe/argv/parse.d.mts",
       "default": "./dist/exe/argv/parse.js"
     },
     "./exe/argv/parse-args-string": {
-      "source": "./src/exe/argv/parse-args-string.ts",
-      "types": "./dist/exe/argv/parse-args-string.d.ts",
+      "source": "./src/exe/argv/parse-args-string.mts",
+      "types": "./dist/exe/argv/parse-args-string.d.mts",
       "default": "./dist/exe/argv/parse-args-string.js"
     },
     "./exe/exec": {
-      "source": "./src/exe/exec.ts",
-      "types": "./dist/exe/exec.d.ts",
+      "source": "./src/exe/exec.mts",
+      "types": "./dist/exe/exec.d.mts",
       "default": "./dist/exe/exec.js"
     },
     "./exe/path/find": {
-      "source": "./src/exe/path/find.ts",
-      "types": "./dist/exe/path/find.d.ts",
+      "source": "./src/exe/path/find.mts",
+      "types": "./dist/exe/path/find.d.mts",
       "default": "./dist/exe/path/find.js"
     },
     "./exe/path/resolve": {
-      "source": "./src/exe/path/resolve.ts",
-      "types": "./dist/exe/path/resolve.d.ts",
+      "source": "./src/exe/path/resolve.mts",
+      "types": "./dist/exe/path/resolve.d.mts",
       "default": "./dist/exe/path/resolve.js"
     },
     "./exe/path/sanitize": {
-      "source": "./src/exe/path/sanitize.ts",
-      "types": "./dist/exe/path/sanitize.d.ts",
+      "source": "./src/exe/path/sanitize.mts",
+      "types": "./dist/exe/path/sanitize.d.mts",
       "default": "./dist/exe/path/sanitize.js"
     },
     "./exe/path/which": {
-      "source": "./src/exe/path/which.ts",
-      "types": "./dist/exe/path/which.d.ts",
+      "source": "./src/exe/path/which.mts",
+      "types": "./dist/exe/path/which.d.mts",
       "default": "./dist/exe/path/which.js"
     },
     "./exe/sea/detect": {
-      "source": "./src/exe/sea/detect.ts",
-      "types": "./dist/exe/sea/detect.d.ts",
+      "source": "./src/exe/sea/detect.mts",
+      "types": "./dist/exe/sea/detect.d.mts",
       "default": "./dist/exe/sea/detect.js"
     },
     "./exe/shadow/detect": {
-      "source": "./src/exe/shadow/detect.ts",
-      "types": "./dist/exe/shadow/detect.d.ts",
+      "source": "./src/exe/shadow/detect.mts",
+      "types": "./dist/exe/shadow/detect.d.mts",
       "default": "./dist/exe/shadow/detect.js"
     },
     "./exe/shadow/skip": {
-      "source": "./src/exe/shadow/skip.ts",
-      "types": "./dist/exe/shadow/skip.d.ts",
+      "source": "./src/exe/shadow/skip.mts",
+      "types": "./dist/exe/shadow/skip.d.mts",
       "default": "./dist/exe/shadow/skip.js"
     },
     "./exe/shadow/types": {
-      "source": "./src/exe/shadow/types.ts",
-      "types": "./dist/exe/shadow/types.d.ts",
+      "source": "./src/exe/shadow/types.mts",
+      "types": "./dist/exe/shadow/types.d.mts",
       "default": "./dist/exe/shadow/types.js"
     },
     "./exe/smol/detect": {
-      "source": "./src/exe/smol/detect.ts",
-      "types": "./dist/exe/smol/detect.d.ts",
+      "source": "./src/exe/smol/detect.mts",
+      "types": "./dist/exe/smol/detect.d.mts",
       "default": "./dist/exe/smol/detect.js"
     },
     "./exe/smol/http": {
-      "source": "./src/exe/smol/http.ts",
-      "types": "./dist/exe/smol/http.d.ts",
+      "source": "./src/exe/smol/http.mts",
+      "types": "./dist/exe/smol/http.d.mts",
       "default": "./dist/exe/smol/http.js"
     },
     "./exe/smol/https": {
-      "source": "./src/exe/smol/https.ts",
-      "types": "./dist/exe/smol/https.d.ts",
+      "source": "./src/exe/smol/https.mts",
+      "types": "./dist/exe/smol/https.d.mts",
       "default": "./dist/exe/smol/https.js"
     },
     "./exe/smol/manifest": {
-      "source": "./src/exe/smol/manifest.ts",
-      "types": "./dist/exe/smol/manifest.d.ts",
+      "source": "./src/exe/smol/manifest.mts",
+      "types": "./dist/exe/smol/manifest.d.mts",
       "default": "./dist/exe/smol/manifest.js"
     },
     "./exe/smol/path": {
-      "source": "./src/exe/smol/path.ts",
-      "types": "./dist/exe/smol/path.d.ts",
+      "source": "./src/exe/smol/path.mts",
+      "types": "./dist/exe/smol/path.d.mts",
       "default": "./dist/exe/smol/path.js"
     },
     "./exe/smol/primordial": {
-      "source": "./src/exe/smol/primordial.ts",
-      "types": "./dist/exe/smol/primordial.d.ts",
+      "source": "./src/exe/smol/primordial.mts",
+      "types": "./dist/exe/smol/primordial.d.mts",
       "default": "./dist/exe/smol/primordial.js"
     },
     "./exe/smol/purl": {
-      "source": "./src/exe/smol/purl.ts",
-      "types": "./dist/exe/smol/purl.d.ts",
+      "source": "./src/exe/smol/purl.mts",
+      "types": "./dist/exe/smol/purl.d.mts",
       "default": "./dist/exe/smol/purl.js"
     },
     "./exe/smol/versions": {
-      "source": "./src/exe/smol/versions.ts",
-      "types": "./dist/exe/smol/versions.d.ts",
+      "source": "./src/exe/smol/versions.mts",
+      "types": "./dist/exe/smol/versions.d.mts",
       "default": "./dist/exe/smol/versions.js"
     },
     "./exe/smol/vfs": {
-      "source": "./src/exe/smol/vfs.ts",
-      "types": "./dist/exe/smol/vfs.d.ts",
+      "source": "./src/exe/smol/vfs.mts",
+      "types": "./dist/exe/smol/vfs.d.mts",
       "default": "./dist/exe/smol/vfs.js"
     },
     "./exe/types": {
-      "source": "./src/exe/types.ts",
-      "types": "./dist/exe/types.d.ts",
+      "source": "./src/exe/types.mts",
+      "types": "./dist/exe/types.d.mts",
       "default": "./dist/exe/types.js"
     },
     "./external-tools/bazel/asset-names": {
-      "source": "./src/external-tools/bazel/asset-names.ts",
-      "types": "./dist/external-tools/bazel/asset-names.d.ts",
+      "source": "./src/external-tools/bazel/asset-names.mts",
+      "types": "./dist/external-tools/bazel/asset-names.d.mts",
       "default": "./dist/external-tools/bazel/asset-names.js"
     },
     "./external-tools/bazel/from-download": {
-      "source": "./src/external-tools/bazel/from-download.ts",
-      "types": "./dist/external-tools/bazel/from-download.d.ts",
+      "source": "./src/external-tools/bazel/from-download.mts",
+      "types": "./dist/external-tools/bazel/from-download.d.mts",
       "default": "./dist/external-tools/bazel/from-download.js"
     },
     "./external-tools/bazel/from-path": {
-      "source": "./src/external-tools/bazel/from-path.ts",
-      "types": "./dist/external-tools/bazel/from-path.d.ts",
+      "source": "./src/external-tools/bazel/from-path.mts",
+      "types": "./dist/external-tools/bazel/from-path.d.mts",
       "default": "./dist/external-tools/bazel/from-path.js"
     },
     "./external-tools/bazel/read-bazel-version-file": {
-      "source": "./src/external-tools/bazel/read-bazel-version-file.ts",
-      "types": "./dist/external-tools/bazel/read-bazel-version-file.d.ts",
+      "source": "./src/external-tools/bazel/read-bazel-version-file.mts",
+      "types": "./dist/external-tools/bazel/read-bazel-version-file.d.mts",
       "default": "./dist/external-tools/bazel/read-bazel-version-file.js"
     },
     "./external-tools/bazel/resolve": {
-      "source": "./src/external-tools/bazel/resolve.ts",
-      "types": "./dist/external-tools/bazel/resolve.d.ts",
+      "source": "./src/external-tools/bazel/resolve.mts",
+      "types": "./dist/external-tools/bazel/resolve.d.mts",
       "default": "./dist/external-tools/bazel/resolve.js"
     },
     "./external-tools/bazel/resolve-asset-url": {
-      "source": "./src/external-tools/bazel/resolve-asset-url.ts",
-      "types": "./dist/external-tools/bazel/resolve-asset-url.d.ts",
+      "source": "./src/external-tools/bazel/resolve-asset-url.mts",
+      "types": "./dist/external-tools/bazel/resolve-asset-url.d.mts",
       "default": "./dist/external-tools/bazel/resolve-asset-url.js"
     },
     "./external-tools/bazel/resolve-bazel-version": {
-      "source": "./src/external-tools/bazel/resolve-bazel-version.ts",
-      "types": "./dist/external-tools/bazel/resolve-bazel-version.d.ts",
+      "source": "./src/external-tools/bazel/resolve-bazel-version.mts",
+      "types": "./dist/external-tools/bazel/resolve-bazel-version.d.mts",
       "default": "./dist/external-tools/bazel/resolve-bazel-version.js"
     },
     "./external-tools/bazel/types": {
-      "source": "./src/external-tools/bazel/types.ts",
-      "types": "./dist/external-tools/bazel/types.d.ts",
+      "source": "./src/external-tools/bazel/types.mts",
+      "types": "./dist/external-tools/bazel/types.d.mts",
       "default": "./dist/external-tools/bazel/types.js"
     },
     "./external-tools/cdxgen/asset-names": {
-      "source": "./src/external-tools/cdxgen/asset-names.ts",
-      "types": "./dist/external-tools/cdxgen/asset-names.d.ts",
+      "source": "./src/external-tools/cdxgen/asset-names.mts",
+      "types": "./dist/external-tools/cdxgen/asset-names.d.mts",
       "default": "./dist/external-tools/cdxgen/asset-names.js"
     },
     "./external-tools/cdxgen/from-download": {
-      "source": "./src/external-tools/cdxgen/from-download.ts",
-      "types": "./dist/external-tools/cdxgen/from-download.d.ts",
+      "source": "./src/external-tools/cdxgen/from-download.mts",
+      "types": "./dist/external-tools/cdxgen/from-download.d.mts",
       "default": "./dist/external-tools/cdxgen/from-download.js"
     },
     "./external-tools/cdxgen/from-path": {
-      "source": "./src/external-tools/cdxgen/from-path.ts",
-      "types": "./dist/external-tools/cdxgen/from-path.d.ts",
+      "source": "./src/external-tools/cdxgen/from-path.mts",
+      "types": "./dist/external-tools/cdxgen/from-path.d.mts",
       "default": "./dist/external-tools/cdxgen/from-path.js"
     },
     "./external-tools/cdxgen/from-vfs": {
-      "source": "./src/external-tools/cdxgen/from-vfs.ts",
-      "types": "./dist/external-tools/cdxgen/from-vfs.d.ts",
+      "source": "./src/external-tools/cdxgen/from-vfs.mts",
+      "types": "./dist/external-tools/cdxgen/from-vfs.d.mts",
       "default": "./dist/external-tools/cdxgen/from-vfs.js"
     },
     "./external-tools/cdxgen/resolve": {
-      "source": "./src/external-tools/cdxgen/resolve.ts",
-      "types": "./dist/external-tools/cdxgen/resolve.d.ts",
+      "source": "./src/external-tools/cdxgen/resolve.mts",
+      "types": "./dist/external-tools/cdxgen/resolve.d.mts",
       "default": "./dist/external-tools/cdxgen/resolve.js"
     },
     "./external-tools/cdxgen/types": {
-      "source": "./src/external-tools/cdxgen/types.ts",
-      "types": "./dist/external-tools/cdxgen/types.d.ts",
+      "source": "./src/external-tools/cdxgen/types.mts",
+      "types": "./dist/external-tools/cdxgen/types.d.mts",
       "default": "./dist/external-tools/cdxgen/types.js"
     },
     "./external-tools/from-download": {
-      "source": "./src/external-tools/from-download.ts",
-      "types": "./dist/external-tools/from-download.d.ts",
+      "source": "./src/external-tools/from-download.mts",
+      "types": "./dist/external-tools/from-download.d.mts",
       "default": "./dist/external-tools/from-download.js"
     },
     "./external-tools/from-pip-venv": {
-      "source": "./src/external-tools/from-pip-venv.ts",
-      "types": "./dist/external-tools/from-pip-venv.d.ts",
+      "source": "./src/external-tools/from-pip-venv.mts",
+      "types": "./dist/external-tools/from-pip-venv.d.mts",
       "default": "./dist/external-tools/from-pip-venv.js"
     },
     "./external-tools/janus/asset-names": {
-      "source": "./src/external-tools/janus/asset-names.ts",
-      "types": "./dist/external-tools/janus/asset-names.d.ts",
+      "source": "./src/external-tools/janus/asset-names.mts",
+      "types": "./dist/external-tools/janus/asset-names.d.mts",
       "default": "./dist/external-tools/janus/asset-names.js"
     },
     "./external-tools/janus/from-download": {
-      "source": "./src/external-tools/janus/from-download.ts",
-      "types": "./dist/external-tools/janus/from-download.d.ts",
+      "source": "./src/external-tools/janus/from-download.mts",
+      "types": "./dist/external-tools/janus/from-download.d.mts",
       "default": "./dist/external-tools/janus/from-download.js"
     },
     "./external-tools/janus/from-path": {
-      "source": "./src/external-tools/janus/from-path.ts",
-      "types": "./dist/external-tools/janus/from-path.d.ts",
+      "source": "./src/external-tools/janus/from-path.mts",
+      "types": "./dist/external-tools/janus/from-path.d.mts",
       "default": "./dist/external-tools/janus/from-path.js"
     },
     "./external-tools/janus/from-vfs": {
-      "source": "./src/external-tools/janus/from-vfs.ts",
-      "types": "./dist/external-tools/janus/from-vfs.d.ts",
+      "source": "./src/external-tools/janus/from-vfs.mts",
+      "types": "./dist/external-tools/janus/from-vfs.d.mts",
       "default": "./dist/external-tools/janus/from-vfs.js"
     },
     "./external-tools/janus/resolve": {
-      "source": "./src/external-tools/janus/resolve.ts",
-      "types": "./dist/external-tools/janus/resolve.d.ts",
+      "source": "./src/external-tools/janus/resolve.mts",
+      "types": "./dist/external-tools/janus/resolve.d.mts",
       "default": "./dist/external-tools/janus/resolve.js"
     },
     "./external-tools/janus/types": {
-      "source": "./src/external-tools/janus/types.ts",
-      "types": "./dist/external-tools/janus/types.d.ts",
+      "source": "./src/external-tools/janus/types.mts",
+      "types": "./dist/external-tools/janus/types.d.mts",
       "default": "./dist/external-tools/janus/types.js"
     },
     "./external-tools/jre/asset-names": {
-      "source": "./src/external-tools/jre/asset-names.ts",
-      "types": "./dist/external-tools/jre/asset-names.d.ts",
+      "source": "./src/external-tools/jre/asset-names.mts",
+      "types": "./dist/external-tools/jre/asset-names.d.mts",
       "default": "./dist/external-tools/jre/asset-names.js"
     },
     "./external-tools/jre/detect-platform-arch": {
-      "source": "./src/external-tools/jre/detect-platform-arch.ts",
-      "types": "./dist/external-tools/jre/detect-platform-arch.d.ts",
+      "source": "./src/external-tools/jre/detect-platform-arch.mts",
+      "types": "./dist/external-tools/jre/detect-platform-arch.d.mts",
       "default": "./dist/external-tools/jre/detect-platform-arch.js"
     },
     "./external-tools/jre/from-download": {
-      "source": "./src/external-tools/jre/from-download.ts",
-      "types": "./dist/external-tools/jre/from-download.d.ts",
+      "source": "./src/external-tools/jre/from-download.mts",
+      "types": "./dist/external-tools/jre/from-download.d.mts",
       "default": "./dist/external-tools/jre/from-download.js"
     },
     "./external-tools/jre/from-java-home": {
-      "source": "./src/external-tools/jre/from-java-home.ts",
-      "types": "./dist/external-tools/jre/from-java-home.d.ts",
+      "source": "./src/external-tools/jre/from-java-home.mts",
+      "types": "./dist/external-tools/jre/from-java-home.d.mts",
       "default": "./dist/external-tools/jre/from-java-home.js"
     },
     "./external-tools/jre/from-path": {
-      "source": "./src/external-tools/jre/from-path.ts",
-      "types": "./dist/external-tools/jre/from-path.d.ts",
+      "source": "./src/external-tools/jre/from-path.mts",
+      "types": "./dist/external-tools/jre/from-path.d.mts",
       "default": "./dist/external-tools/jre/from-path.js"
     },
     "./external-tools/jre/from-vfs": {
-      "source": "./src/external-tools/jre/from-vfs.ts",
-      "types": "./dist/external-tools/jre/from-vfs.d.ts",
+      "source": "./src/external-tools/jre/from-vfs.mts",
+      "types": "./dist/external-tools/jre/from-vfs.d.mts",
       "default": "./dist/external-tools/jre/from-vfs.js"
     },
     "./external-tools/jre/resolve": {
-      "source": "./src/external-tools/jre/resolve.ts",
-      "types": "./dist/external-tools/jre/resolve.d.ts",
+      "source": "./src/external-tools/jre/resolve.mts",
+      "types": "./dist/external-tools/jre/resolve.d.mts",
       "default": "./dist/external-tools/jre/resolve.js"
     },
     "./external-tools/jre/types": {
-      "source": "./src/external-tools/jre/types.ts",
-      "types": "./dist/external-tools/jre/types.d.ts",
+      "source": "./src/external-tools/jre/types.mts",
+      "types": "./dist/external-tools/jre/types.d.mts",
       "default": "./dist/external-tools/jre/types.js"
     },
     "./external-tools/manifest": {
-      "source": "./src/external-tools/manifest.ts",
-      "types": "./dist/external-tools/manifest.d.ts",
+      "source": "./src/external-tools/manifest.mts",
+      "types": "./dist/external-tools/manifest.d.mts",
       "default": "./dist/external-tools/manifest.js"
     },
     "./external-tools/opengrep/asset-names": {
-      "source": "./src/external-tools/opengrep/asset-names.ts",
-      "types": "./dist/external-tools/opengrep/asset-names.d.ts",
+      "source": "./src/external-tools/opengrep/asset-names.mts",
+      "types": "./dist/external-tools/opengrep/asset-names.d.mts",
       "default": "./dist/external-tools/opengrep/asset-names.js"
     },
     "./external-tools/opengrep/from-download": {
-      "source": "./src/external-tools/opengrep/from-download.ts",
-      "types": "./dist/external-tools/opengrep/from-download.d.ts",
+      "source": "./src/external-tools/opengrep/from-download.mts",
+      "types": "./dist/external-tools/opengrep/from-download.d.mts",
       "default": "./dist/external-tools/opengrep/from-download.js"
     },
     "./external-tools/opengrep/from-path": {
-      "source": "./src/external-tools/opengrep/from-path.ts",
-      "types": "./dist/external-tools/opengrep/from-path.d.ts",
+      "source": "./src/external-tools/opengrep/from-path.mts",
+      "types": "./dist/external-tools/opengrep/from-path.d.mts",
       "default": "./dist/external-tools/opengrep/from-path.js"
     },
     "./external-tools/opengrep/from-vfs": {
-      "source": "./src/external-tools/opengrep/from-vfs.ts",
-      "types": "./dist/external-tools/opengrep/from-vfs.d.ts",
+      "source": "./src/external-tools/opengrep/from-vfs.mts",
+      "types": "./dist/external-tools/opengrep/from-vfs.d.mts",
       "default": "./dist/external-tools/opengrep/from-vfs.js"
     },
     "./external-tools/opengrep/resolve": {
-      "source": "./src/external-tools/opengrep/resolve.ts",
-      "types": "./dist/external-tools/opengrep/resolve.d.ts",
+      "source": "./src/external-tools/opengrep/resolve.mts",
+      "types": "./dist/external-tools/opengrep/resolve.d.mts",
       "default": "./dist/external-tools/opengrep/resolve.js"
     },
     "./external-tools/opengrep/types": {
-      "source": "./src/external-tools/opengrep/types.ts",
-      "types": "./dist/external-tools/opengrep/types.d.ts",
+      "source": "./src/external-tools/opengrep/types.mts",
+      "types": "./dist/external-tools/opengrep/types.d.mts",
       "default": "./dist/external-tools/opengrep/types.js"
     },
     "./external-tools/python/asset-names": {
-      "source": "./src/external-tools/python/asset-names.ts",
-      "types": "./dist/external-tools/python/asset-names.d.ts",
+      "source": "./src/external-tools/python/asset-names.mts",
+      "types": "./dist/external-tools/python/asset-names.d.mts",
       "default": "./dist/external-tools/python/asset-names.js"
     },
     "./external-tools/python/dlx": {
-      "source": "./src/external-tools/python/dlx.ts",
-      "types": "./dist/external-tools/python/dlx.d.ts",
+      "source": "./src/external-tools/python/dlx.mts",
+      "types": "./dist/external-tools/python/dlx.d.mts",
       "default": "./dist/external-tools/python/dlx.js"
     },
     "./external-tools/python/from-download": {
-      "source": "./src/external-tools/python/from-download.ts",
-      "types": "./dist/external-tools/python/from-download.d.ts",
+      "source": "./src/external-tools/python/from-download.mts",
+      "types": "./dist/external-tools/python/from-download.d.mts",
       "default": "./dist/external-tools/python/from-download.js"
     },
     "./external-tools/python/from-path": {
-      "source": "./src/external-tools/python/from-path.ts",
-      "types": "./dist/external-tools/python/from-path.d.ts",
+      "source": "./src/external-tools/python/from-path.mts",
+      "types": "./dist/external-tools/python/from-path.d.mts",
       "default": "./dist/external-tools/python/from-path.js"
     },
     "./external-tools/python/pin": {
-      "source": "./src/external-tools/python/pin.ts",
-      "types": "./dist/external-tools/python/pin.d.ts",
+      "source": "./src/external-tools/python/pin.mts",
+      "types": "./dist/external-tools/python/pin.d.mts",
       "default": "./dist/external-tools/python/pin.js"
     },
     "./external-tools/python/pip-install": {
-      "source": "./src/external-tools/python/pip-install.ts",
-      "types": "./dist/external-tools/python/pip-install.d.ts",
+      "source": "./src/external-tools/python/pip-install.mts",
+      "types": "./dist/external-tools/python/pip-install.d.mts",
       "default": "./dist/external-tools/python/pip-install.js"
     },
     "./external-tools/python/resolve": {
-      "source": "./src/external-tools/python/resolve.ts",
-      "types": "./dist/external-tools/python/resolve.d.ts",
+      "source": "./src/external-tools/python/resolve.mts",
+      "types": "./dist/external-tools/python/resolve.d.mts",
       "default": "./dist/external-tools/python/resolve.js"
     },
     "./external-tools/python/types": {
-      "source": "./src/external-tools/python/types.ts",
-      "types": "./dist/external-tools/python/types.d.ts",
+      "source": "./src/external-tools/python/types.mts",
+      "types": "./dist/external-tools/python/types.d.mts",
       "default": "./dist/external-tools/python/types.js"
     },
     "./external-tools/python/uv-install": {
-      "source": "./src/external-tools/python/uv-install.ts",
-      "types": "./dist/external-tools/python/uv-install.d.ts",
+      "source": "./src/external-tools/python/uv-install.mts",
+      "types": "./dist/external-tools/python/uv-install.d.mts",
       "default": "./dist/external-tools/python/uv-install.js"
     },
     "./external-tools/sbt/asset-names": {
-      "source": "./src/external-tools/sbt/asset-names.ts",
-      "types": "./dist/external-tools/sbt/asset-names.d.ts",
+      "source": "./src/external-tools/sbt/asset-names.mts",
+      "types": "./dist/external-tools/sbt/asset-names.d.mts",
       "default": "./dist/external-tools/sbt/asset-names.js"
     },
     "./external-tools/sbt/from-download": {
-      "source": "./src/external-tools/sbt/from-download.ts",
-      "types": "./dist/external-tools/sbt/from-download.d.ts",
+      "source": "./src/external-tools/sbt/from-download.mts",
+      "types": "./dist/external-tools/sbt/from-download.d.mts",
       "default": "./dist/external-tools/sbt/from-download.js"
     },
     "./external-tools/sbt/from-path": {
-      "source": "./src/external-tools/sbt/from-path.ts",
-      "types": "./dist/external-tools/sbt/from-path.d.ts",
+      "source": "./src/external-tools/sbt/from-path.mts",
+      "types": "./dist/external-tools/sbt/from-path.d.mts",
       "default": "./dist/external-tools/sbt/from-path.js"
     },
     "./external-tools/sbt/from-vfs": {
-      "source": "./src/external-tools/sbt/from-vfs.ts",
-      "types": "./dist/external-tools/sbt/from-vfs.d.ts",
+      "source": "./src/external-tools/sbt/from-vfs.mts",
+      "types": "./dist/external-tools/sbt/from-vfs.d.mts",
       "default": "./dist/external-tools/sbt/from-vfs.js"
     },
     "./external-tools/sbt/resolve": {
-      "source": "./src/external-tools/sbt/resolve.ts",
-      "types": "./dist/external-tools/sbt/resolve.d.ts",
+      "source": "./src/external-tools/sbt/resolve.mts",
+      "types": "./dist/external-tools/sbt/resolve.d.mts",
       "default": "./dist/external-tools/sbt/resolve.js"
     },
     "./external-tools/sbt/types": {
-      "source": "./src/external-tools/sbt/types.ts",
-      "types": "./dist/external-tools/sbt/types.d.ts",
+      "source": "./src/external-tools/sbt/types.mts",
+      "types": "./dist/external-tools/sbt/types.d.mts",
       "default": "./dist/external-tools/sbt/types.js"
     },
     "./external-tools/skillspector/from-dlx": {
-      "source": "./src/external-tools/skillspector/from-dlx.ts",
-      "types": "./dist/external-tools/skillspector/from-dlx.d.ts",
+      "source": "./src/external-tools/skillspector/from-dlx.mts",
+      "types": "./dist/external-tools/skillspector/from-dlx.d.mts",
       "default": "./dist/external-tools/skillspector/from-dlx.js"
     },
     "./external-tools/skillspector/from-path": {
-      "source": "./src/external-tools/skillspector/from-path.ts",
-      "types": "./dist/external-tools/skillspector/from-path.d.ts",
+      "source": "./src/external-tools/skillspector/from-path.mts",
+      "types": "./dist/external-tools/skillspector/from-path.d.mts",
       "default": "./dist/external-tools/skillspector/from-path.js"
     },
     "./external-tools/skillspector/from-uv": {
-      "source": "./src/external-tools/skillspector/from-uv.ts",
-      "types": "./dist/external-tools/skillspector/from-uv.d.ts",
+      "source": "./src/external-tools/skillspector/from-uv.mts",
+      "types": "./dist/external-tools/skillspector/from-uv.d.mts",
       "default": "./dist/external-tools/skillspector/from-uv.js"
     },
     "./external-tools/skillspector/from-vfs": {
-      "source": "./src/external-tools/skillspector/from-vfs.ts",
-      "types": "./dist/external-tools/skillspector/from-vfs.d.ts",
+      "source": "./src/external-tools/skillspector/from-vfs.mts",
+      "types": "./dist/external-tools/skillspector/from-vfs.d.mts",
       "default": "./dist/external-tools/skillspector/from-vfs.js"
     },
     "./external-tools/skillspector/resolve": {
-      "source": "./src/external-tools/skillspector/resolve.ts",
-      "types": "./dist/external-tools/skillspector/resolve.d.ts",
+      "source": "./src/external-tools/skillspector/resolve.mts",
+      "types": "./dist/external-tools/skillspector/resolve.d.mts",
       "default": "./dist/external-tools/skillspector/resolve.js"
     },
     "./external-tools/skillspector/types": {
-      "source": "./src/external-tools/skillspector/types.ts",
-      "types": "./dist/external-tools/skillspector/types.d.ts",
+      "source": "./src/external-tools/skillspector/types.mts",
+      "types": "./dist/external-tools/skillspector/types.d.mts",
       "default": "./dist/external-tools/skillspector/types.js"
     },
     "./external-tools/socket-keychain/asset-names": {
-      "source": "./src/external-tools/socket-keychain/asset-names.ts",
-      "types": "./dist/external-tools/socket-keychain/asset-names.d.ts",
+      "source": "./src/external-tools/socket-keychain/asset-names.mts",
+      "types": "./dist/external-tools/socket-keychain/asset-names.d.mts",
       "default": "./dist/external-tools/socket-keychain/asset-names.js"
     },
     "./external-tools/socket-keychain/from-download": {
-      "source": "./src/external-tools/socket-keychain/from-download.ts",
-      "types": "./dist/external-tools/socket-keychain/from-download.d.ts",
+      "source": "./src/external-tools/socket-keychain/from-download.mts",
+      "types": "./dist/external-tools/socket-keychain/from-download.d.mts",
       "default": "./dist/external-tools/socket-keychain/from-download.js"
     },
     "./external-tools/socket-keychain/resolve": {
-      "source": "./src/external-tools/socket-keychain/resolve.ts",
-      "types": "./dist/external-tools/socket-keychain/resolve.d.ts",
+      "source": "./src/external-tools/socket-keychain/resolve.mts",
+      "types": "./dist/external-tools/socket-keychain/resolve.d.mts",
       "default": "./dist/external-tools/socket-keychain/resolve.js"
     },
     "./external-tools/socket-keychain/types": {
-      "source": "./src/external-tools/socket-keychain/types.ts",
-      "types": "./dist/external-tools/socket-keychain/types.d.ts",
+      "source": "./src/external-tools/socket-keychain/types.mts",
+      "types": "./dist/external-tools/socket-keychain/types.d.mts",
       "default": "./dist/external-tools/socket-keychain/types.js"
     },
     "./external-tools/synp/asset-names": {
-      "source": "./src/external-tools/synp/asset-names.ts",
-      "types": "./dist/external-tools/synp/asset-names.d.ts",
+      "source": "./src/external-tools/synp/asset-names.mts",
+      "types": "./dist/external-tools/synp/asset-names.d.mts",
       "default": "./dist/external-tools/synp/asset-names.js"
     },
     "./external-tools/synp/from-download": {
-      "source": "./src/external-tools/synp/from-download.ts",
-      "types": "./dist/external-tools/synp/from-download.d.ts",
+      "source": "./src/external-tools/synp/from-download.mts",
+      "types": "./dist/external-tools/synp/from-download.d.mts",
       "default": "./dist/external-tools/synp/from-download.js"
     },
     "./external-tools/synp/from-path": {
-      "source": "./src/external-tools/synp/from-path.ts",
-      "types": "./dist/external-tools/synp/from-path.d.ts",
+      "source": "./src/external-tools/synp/from-path.mts",
+      "types": "./dist/external-tools/synp/from-path.d.mts",
       "default": "./dist/external-tools/synp/from-path.js"
     },
     "./external-tools/synp/from-vfs": {
-      "source": "./src/external-tools/synp/from-vfs.ts",
-      "types": "./dist/external-tools/synp/from-vfs.d.ts",
+      "source": "./src/external-tools/synp/from-vfs.mts",
+      "types": "./dist/external-tools/synp/from-vfs.d.mts",
       "default": "./dist/external-tools/synp/from-vfs.js"
     },
     "./external-tools/synp/resolve": {
-      "source": "./src/external-tools/synp/resolve.ts",
-      "types": "./dist/external-tools/synp/resolve.d.ts",
+      "source": "./src/external-tools/synp/resolve.mts",
+      "types": "./dist/external-tools/synp/resolve.d.mts",
       "default": "./dist/external-tools/synp/resolve.js"
     },
     "./external-tools/synp/types": {
-      "source": "./src/external-tools/synp/types.ts",
-      "types": "./dist/external-tools/synp/types.d.ts",
+      "source": "./src/external-tools/synp/types.mts",
+      "types": "./dist/external-tools/synp/types.d.mts",
       "default": "./dist/external-tools/synp/types.js"
     },
     "./external-tools/trivy/asset-names": {
-      "source": "./src/external-tools/trivy/asset-names.ts",
-      "types": "./dist/external-tools/trivy/asset-names.d.ts",
+      "source": "./src/external-tools/trivy/asset-names.mts",
+      "types": "./dist/external-tools/trivy/asset-names.d.mts",
       "default": "./dist/external-tools/trivy/asset-names.js"
     },
     "./external-tools/trivy/from-download": {
-      "source": "./src/external-tools/trivy/from-download.ts",
-      "types": "./dist/external-tools/trivy/from-download.d.ts",
+      "source": "./src/external-tools/trivy/from-download.mts",
+      "types": "./dist/external-tools/trivy/from-download.d.mts",
       "default": "./dist/external-tools/trivy/from-download.js"
     },
     "./external-tools/trivy/from-path": {
-      "source": "./src/external-tools/trivy/from-path.ts",
-      "types": "./dist/external-tools/trivy/from-path.d.ts",
+      "source": "./src/external-tools/trivy/from-path.mts",
+      "types": "./dist/external-tools/trivy/from-path.d.mts",
       "default": "./dist/external-tools/trivy/from-path.js"
     },
     "./external-tools/trivy/from-vfs": {
-      "source": "./src/external-tools/trivy/from-vfs.ts",
-      "types": "./dist/external-tools/trivy/from-vfs.d.ts",
+      "source": "./src/external-tools/trivy/from-vfs.mts",
+      "types": "./dist/external-tools/trivy/from-vfs.d.mts",
       "default": "./dist/external-tools/trivy/from-vfs.js"
     },
     "./external-tools/trivy/resolve": {
-      "source": "./src/external-tools/trivy/resolve.ts",
-      "types": "./dist/external-tools/trivy/resolve.d.ts",
+      "source": "./src/external-tools/trivy/resolve.mts",
+      "types": "./dist/external-tools/trivy/resolve.d.mts",
       "default": "./dist/external-tools/trivy/resolve.js"
     },
     "./external-tools/trivy/types": {
-      "source": "./src/external-tools/trivy/types.ts",
-      "types": "./dist/external-tools/trivy/types.d.ts",
+      "source": "./src/external-tools/trivy/types.mts",
+      "types": "./dist/external-tools/trivy/types.d.mts",
       "default": "./dist/external-tools/trivy/types.js"
     },
     "./external-tools/trufflehog/asset-names": {
-      "source": "./src/external-tools/trufflehog/asset-names.ts",
-      "types": "./dist/external-tools/trufflehog/asset-names.d.ts",
+      "source": "./src/external-tools/trufflehog/asset-names.mts",
+      "types": "./dist/external-tools/trufflehog/asset-names.d.mts",
       "default": "./dist/external-tools/trufflehog/asset-names.js"
     },
     "./external-tools/trufflehog/from-download": {
-      "source": "./src/external-tools/trufflehog/from-download.ts",
-      "types": "./dist/external-tools/trufflehog/from-download.d.ts",
+      "source": "./src/external-tools/trufflehog/from-download.mts",
+      "types": "./dist/external-tools/trufflehog/from-download.d.mts",
       "default": "./dist/external-tools/trufflehog/from-download.js"
     },
     "./external-tools/trufflehog/from-path": {
-      "source": "./src/external-tools/trufflehog/from-path.ts",
-      "types": "./dist/external-tools/trufflehog/from-path.d.ts",
+      "source": "./src/external-tools/trufflehog/from-path.mts",
+      "types": "./dist/external-tools/trufflehog/from-path.d.mts",
       "default": "./dist/external-tools/trufflehog/from-path.js"
     },
     "./external-tools/trufflehog/from-vfs": {
-      "source": "./src/external-tools/trufflehog/from-vfs.ts",
-      "types": "./dist/external-tools/trufflehog/from-vfs.d.ts",
+      "source": "./src/external-tools/trufflehog/from-vfs.mts",
+      "types": "./dist/external-tools/trufflehog/from-vfs.d.mts",
       "default": "./dist/external-tools/trufflehog/from-vfs.js"
     },
     "./external-tools/trufflehog/resolve": {
-      "source": "./src/external-tools/trufflehog/resolve.ts",
-      "types": "./dist/external-tools/trufflehog/resolve.d.ts",
+      "source": "./src/external-tools/trufflehog/resolve.mts",
+      "types": "./dist/external-tools/trufflehog/resolve.d.mts",
       "default": "./dist/external-tools/trufflehog/resolve.js"
     },
     "./external-tools/trufflehog/types": {
-      "source": "./src/external-tools/trufflehog/types.ts",
-      "types": "./dist/external-tools/trufflehog/types.d.ts",
+      "source": "./src/external-tools/trufflehog/types.mts",
+      "types": "./dist/external-tools/trufflehog/types.d.mts",
       "default": "./dist/external-tools/trufflehog/types.js"
     },
     "./external-tools/uv/asset-names": {
-      "source": "./src/external-tools/uv/asset-names.ts",
-      "types": "./dist/external-tools/uv/asset-names.d.ts",
+      "source": "./src/external-tools/uv/asset-names.mts",
+      "types": "./dist/external-tools/uv/asset-names.d.mts",
       "default": "./dist/external-tools/uv/asset-names.js"
     },
     "./external-tools/uv/from-download": {
-      "source": "./src/external-tools/uv/from-download.ts",
-      "types": "./dist/external-tools/uv/from-download.d.ts",
+      "source": "./src/external-tools/uv/from-download.mts",
+      "types": "./dist/external-tools/uv/from-download.d.mts",
       "default": "./dist/external-tools/uv/from-download.js"
     },
     "./external-tools/uv/from-path": {
-      "source": "./src/external-tools/uv/from-path.ts",
-      "types": "./dist/external-tools/uv/from-path.d.ts",
+      "source": "./src/external-tools/uv/from-path.mts",
+      "types": "./dist/external-tools/uv/from-path.d.mts",
       "default": "./dist/external-tools/uv/from-path.js"
     },
     "./external-tools/uv/from-vfs": {
-      "source": "./src/external-tools/uv/from-vfs.ts",
-      "types": "./dist/external-tools/uv/from-vfs.d.ts",
+      "source": "./src/external-tools/uv/from-vfs.mts",
+      "types": "./dist/external-tools/uv/from-vfs.d.mts",
       "default": "./dist/external-tools/uv/from-vfs.js"
     },
     "./external-tools/uv/resolve": {
-      "source": "./src/external-tools/uv/resolve.ts",
-      "types": "./dist/external-tools/uv/resolve.d.ts",
+      "source": "./src/external-tools/uv/resolve.mts",
+      "types": "./dist/external-tools/uv/resolve.d.mts",
       "default": "./dist/external-tools/uv/resolve.js"
     },
     "./external-tools/uv/types": {
-      "source": "./src/external-tools/uv/types.ts",
-      "types": "./dist/external-tools/uv/types.d.ts",
+      "source": "./src/external-tools/uv/types.mts",
+      "types": "./dist/external-tools/uv/types.d.mts",
       "default": "./dist/external-tools/uv/types.js"
     },
     "./fs/access": {
-      "source": "./src/fs/access.ts",
-      "types": "./dist/fs/access.d.ts",
+      "source": "./src/fs/access.mts",
+      "types": "./dist/fs/access.d.mts",
       "default": "./dist/fs/access.js"
     },
     "./fs/allowed-dirs-cache": {
-      "source": "./src/fs/allowed-dirs-cache.ts",
-      "types": "./dist/fs/allowed-dirs-cache.d.ts",
+      "source": "./src/fs/allowed-dirs-cache.mts",
+      "types": "./dist/fs/allowed-dirs-cache.d.mts",
       "default": "./dist/fs/allowed-dirs-cache.js"
     },
     "./fs/copy": {
-      "source": "./src/fs/copy.ts",
-      "types": "./dist/fs/copy.d.ts",
+      "source": "./src/fs/copy.mts",
+      "types": "./dist/fs/copy.d.mts",
       "default": "./dist/fs/copy.js"
     },
     "./fs/encoding": {
-      "source": "./src/fs/encoding.ts",
-      "types": "./dist/fs/encoding.d.ts",
+      "source": "./src/fs/encoding.mts",
+      "types": "./dist/fs/encoding.d.mts",
       "default": "./dist/fs/encoding.js"
     },
     "./fs/find": {
-      "source": "./src/fs/find.ts",
-      "types": "./dist/fs/find.d.ts",
+      "source": "./src/fs/find.mts",
+      "types": "./dist/fs/find.d.mts",
       "default": "./dist/fs/find.js"
     },
     "./fs/inspect": {
-      "source": "./src/fs/inspect.ts",
-      "types": "./dist/fs/inspect.d.ts",
+      "source": "./src/fs/inspect.mts",
+      "types": "./dist/fs/inspect.d.mts",
       "default": "./dist/fs/inspect.js"
     },
     "./fs/read-dir": {
-      "source": "./src/fs/read-dir.ts",
-      "types": "./dist/fs/read-dir.d.ts",
+      "source": "./src/fs/read-dir.mts",
+      "types": "./dist/fs/read-dir.d.mts",
       "default": "./dist/fs/read-dir.js"
     },
     "./fs/read-file": {
-      "source": "./src/fs/read-file.ts",
-      "types": "./dist/fs/read-file.d.ts",
+      "source": "./src/fs/read-file.mts",
+      "types": "./dist/fs/read-file.d.mts",
       "default": "./dist/fs/read-file.js"
     },
     "./fs/read-json": {
-      "source": "./src/fs/read-json.ts",
-      "types": "./dist/fs/read-json.d.ts",
+      "source": "./src/fs/read-json.mts",
+      "types": "./dist/fs/read-json.d.mts",
       "default": "./dist/fs/read-json.js"
     },
     "./fs/read-json-cache": {
-      "source": "./src/fs/read-json-cache.ts",
-      "types": "./dist/fs/read-json-cache.d.ts",
+      "source": "./src/fs/read-json-cache.mts",
+      "types": "./dist/fs/read-json-cache.d.mts",
       "default": "./dist/fs/read-json-cache.js"
     },
     "./fs/resolve-module": {
-      "source": "./src/fs/resolve-module.ts",
-      "types": "./dist/fs/resolve-module.d.ts",
+      "source": "./src/fs/resolve-module.mts",
+      "types": "./dist/fs/resolve-module.d.mts",
       "default": "./dist/fs/resolve-module.js"
     },
     "./fs/safe": {
-      "source": "./src/fs/safe.ts",
-      "types": "./dist/fs/safe.d.ts",
+      "source": "./src/fs/safe.mts",
+      "types": "./dist/fs/safe.d.mts",
       "default": "./dist/fs/safe.js"
     },
     "./fs/types": {
-      "source": "./src/fs/types.ts",
-      "types": "./dist/fs/types.d.ts",
+      "source": "./src/fs/types.mts",
+      "types": "./dist/fs/types.d.mts",
       "default": "./dist/fs/types.js"
     },
     "./fs/unique": {
-      "source": "./src/fs/unique.ts",
-      "types": "./dist/fs/unique.d.ts",
+      "source": "./src/fs/unique.mts",
+      "types": "./dist/fs/unique.d.mts",
       "default": "./dist/fs/unique.js"
     },
     "./fs/validate": {
-      "source": "./src/fs/validate.ts",
-      "types": "./dist/fs/validate.d.ts",
+      "source": "./src/fs/validate.mts",
+      "types": "./dist/fs/validate.d.mts",
       "default": "./dist/fs/validate.js"
     },
     "./fs/write-json": {
-      "source": "./src/fs/write-json.ts",
-      "types": "./dist/fs/write-json.d.ts",
+      "source": "./src/fs/write-json.mts",
+      "types": "./dist/fs/write-json.d.mts",
       "default": "./dist/fs/write-json.js"
     },
     "./git/changed": {
-      "source": "./src/git/changed.ts",
-      "types": "./dist/git/changed.d.ts",
+      "source": "./src/git/changed.mts",
+      "types": "./dist/git/changed.d.mts",
       "default": "./dist/git/changed.js"
     },
     "./git/ignored": {
-      "source": "./src/git/ignored.ts",
-      "types": "./dist/git/ignored.d.ts",
+      "source": "./src/git/ignored.mts",
+      "types": "./dist/git/ignored.d.mts",
       "default": "./dist/git/ignored.js"
     },
     "./git/repo": {
-      "source": "./src/git/repo.ts",
-      "types": "./dist/git/repo.d.ts",
+      "source": "./src/git/repo.mts",
+      "types": "./dist/git/repo.d.mts",
       "default": "./dist/git/repo.js"
     },
     "./git/staged": {
-      "source": "./src/git/staged.ts",
-      "types": "./dist/git/staged.d.ts",
+      "source": "./src/git/staged.mts",
+      "types": "./dist/git/staged.d.mts",
       "default": "./dist/git/staged.js"
     },
     "./git/status": {
-      "source": "./src/git/status.ts",
-      "types": "./dist/git/status.d.ts",
+      "source": "./src/git/status.mts",
+      "types": "./dist/git/status.d.mts",
       "default": "./dist/git/status.js"
     },
     "./git/tracked": {
-      "source": "./src/git/tracked.ts",
-      "types": "./dist/git/tracked.d.ts",
+      "source": "./src/git/tracked.mts",
+      "types": "./dist/git/tracked.d.mts",
       "default": "./dist/git/tracked.js"
     },
     "./git/tree": {
-      "source": "./src/git/tree.ts",
-      "types": "./dist/git/tree.d.ts",
+      "source": "./src/git/tree.mts",
+      "types": "./dist/git/tree.d.mts",
       "default": "./dist/git/tree.js"
     },
     "./git/types": {
-      "source": "./src/git/types.ts",
-      "types": "./dist/git/types.d.ts",
+      "source": "./src/git/types.mts",
+      "types": "./dist/git/types.d.mts",
       "default": "./dist/git/types.js"
     },
     "./git/unstaged": {
-      "source": "./src/git/unstaged.ts",
-      "types": "./dist/git/unstaged.d.ts",
+      "source": "./src/git/unstaged.mts",
+      "types": "./dist/git/unstaged.d.mts",
       "default": "./dist/git/unstaged.js"
     },
     "./github/cli": {
-      "source": "./src/github/cli.ts",
-      "types": "./dist/github/cli.d.ts",
+      "source": "./src/github/cli.mts",
+      "types": "./dist/github/cli.d.mts",
       "default": "./dist/github/cli.js"
     },
     "./github/commit": {
-      "source": "./src/github/commit.ts",
-      "types": "./dist/github/commit.d.ts",
+      "source": "./src/github/commit.mts",
+      "types": "./dist/github/commit.d.mts",
       "default": "./dist/github/commit.js"
     },
     "./github/constants": {
-      "source": "./src/github/constants.ts",
-      "types": "./dist/github/constants.d.ts",
+      "source": "./src/github/constants.mts",
+      "types": "./dist/github/constants.d.mts",
       "default": "./dist/github/constants.js"
     },
     "./github/error-classification": {
-      "source": "./src/github/error-classification.ts",
-      "types": "./dist/github/error-classification.d.ts",
+      "source": "./src/github/error-classification.mts",
+      "types": "./dist/github/error-classification.d.mts",
       "default": "./dist/github/error-classification.js"
     },
     "./github/errors": {
-      "source": "./src/github/errors.ts",
-      "types": "./dist/github/errors.d.ts",
+      "source": "./src/github/errors.mts",
+      "types": "./dist/github/errors.d.mts",
       "default": "./dist/github/errors.js"
     },
     "./github/ghsa": {
-      "source": "./src/github/ghsa.ts",
-      "types": "./dist/github/ghsa.d.ts",
+      "source": "./src/github/ghsa.mts",
+      "types": "./dist/github/ghsa.d.mts",
       "default": "./dist/github/ghsa.js"
     },
     "./github/packages": {
-      "source": "./src/github/packages.ts",
-      "types": "./dist/github/packages.d.ts",
+      "source": "./src/github/packages.mts",
+      "types": "./dist/github/packages.d.mts",
       "default": "./dist/github/packages.js"
     },
     "./github/refs": {
-      "source": "./src/github/refs.ts",
-      "types": "./dist/github/refs.d.ts",
+      "source": "./src/github/refs.mts",
+      "types": "./dist/github/refs.d.mts",
       "default": "./dist/github/refs.js"
     },
     "./github/refs-cache": {
-      "source": "./src/github/refs-cache.ts",
-      "types": "./dist/github/refs-cache.d.ts",
+      "source": "./src/github/refs-cache.mts",
+      "types": "./dist/github/refs-cache.d.mts",
       "default": "./dist/github/refs-cache.js"
     },
     "./github/refs-graphql": {
-      "source": "./src/github/refs-graphql.ts",
-      "types": "./dist/github/refs-graphql.d.ts",
+      "source": "./src/github/refs-graphql.mts",
+      "types": "./dist/github/refs-graphql.d.mts",
       "default": "./dist/github/refs-graphql.js"
     },
     "./github/refs-rest": {
-      "source": "./src/github/refs-rest.ts",
-      "types": "./dist/github/refs-rest.d.ts",
+      "source": "./src/github/refs-rest.mts",
+      "types": "./dist/github/refs-rest.d.mts",
       "default": "./dist/github/refs-rest.js"
     },
     "./github/refs-write": {
-      "source": "./src/github/refs-write.ts",
-      "types": "./dist/github/refs-write.d.ts",
+      "source": "./src/github/refs-write.mts",
+      "types": "./dist/github/refs-write.d.mts",
       "default": "./dist/github/refs-write.js"
     },
     "./github/request": {
-      "source": "./src/github/request.ts",
-      "types": "./dist/github/request.d.ts",
+      "source": "./src/github/request.mts",
+      "types": "./dist/github/request.d.mts",
       "default": "./dist/github/request.js"
     },
     "./github/token": {
-      "source": "./src/github/token.ts",
-      "types": "./dist/github/token.d.ts",
+      "source": "./src/github/token.mts",
+      "types": "./dist/github/token.d.mts",
       "default": "./dist/github/token.js"
     },
     "./github/types": {
-      "source": "./src/github/types.ts",
-      "types": "./dist/github/types.d.ts",
+      "source": "./src/github/types.mts",
+      "types": "./dist/github/types.d.mts",
       "default": "./dist/github/types.js"
     },
     "./github/workflow-runs": {
-      "source": "./src/github/workflow-runs.ts",
-      "types": "./dist/github/workflow-runs.d.ts",
+      "source": "./src/github/workflow-runs.mts",
+      "types": "./dist/github/workflow-runs.d.mts",
       "default": "./dist/github/workflow-runs.js"
     },
     "./globs/defaults": {
-      "source": "./src/globs/defaults.ts",
-      "types": "./dist/globs/defaults.d.ts",
+      "source": "./src/globs/defaults.mts",
+      "types": "./dist/globs/defaults.d.mts",
       "default": "./dist/globs/defaults.js"
     },
     "./globs/match": {
-      "source": "./src/globs/match.ts",
-      "types": "./dist/globs/match.d.ts",
+      "source": "./src/globs/match.mts",
+      "types": "./dist/globs/match.d.mts",
       "default": "./dist/globs/match.js"
     },
     "./globs/matcher": {
-      "source": "./src/globs/matcher.ts",
-      "types": "./dist/globs/matcher.d.ts",
+      "source": "./src/globs/matcher.mts",
+      "types": "./dist/globs/matcher.d.mts",
       "default": "./dist/globs/matcher.js"
     },
     "./globs/stream": {
-      "source": "./src/globs/stream.ts",
-      "types": "./dist/globs/stream.d.ts",
+      "source": "./src/globs/stream.mts",
+      "types": "./dist/globs/stream.d.mts",
       "default": "./dist/globs/stream.js"
     },
     "./globs/types": {
-      "source": "./src/globs/types.ts",
-      "types": "./dist/globs/types.d.ts",
+      "source": "./src/globs/types.mts",
+      "types": "./dist/globs/types.d.mts",
       "default": "./dist/globs/types.js"
     },
     "./http-request": {
-      "source": "./src/http-request/node.ts",
+      "source": "./src/http-request/node.mts",
       "browser": {
-        "types": "./dist/http-request/browser.d.ts",
+        "types": "./dist/http-request/browser.d.mts",
         "default": "./dist/http-request/browser.js"
       },
-      "types": "./dist/http-request/node.d.ts",
+      "types": "./dist/http-request/node.d.mts",
       "default": "./dist/http-request/node.js"
     },
     "./http-request/browser": {
-      "source": "./src/http-request/browser.ts",
+      "source": "./src/http-request/browser.mts",
       "browser": {
-        "types": "./dist/http-request/browser.d.ts",
+        "types": "./dist/http-request/browser.d.mts",
         "default": "./dist/http-request/browser.js"
       },
-      "types": "./dist/http-request/browser.d.ts",
+      "types": "./dist/http-request/browser.d.mts",
       "default": "./dist/http-request/browser.js"
     },
     "./http-request/checksum-file": {
-      "source": "./src/http-request/checksum-file.ts",
-      "types": "./dist/http-request/checksum-file.d.ts",
+      "source": "./src/http-request/checksum-file.mts",
+      "types": "./dist/http-request/checksum-file.d.mts",
       "default": "./dist/http-request/checksum-file.js"
     },
     "./http-request/download": {
-      "source": "./src/http-request/download.ts",
-      "types": "./dist/http-request/download.d.ts",
+      "source": "./src/http-request/download.mts",
+      "types": "./dist/http-request/download.d.mts",
       "default": "./dist/http-request/download.js"
     },
     "./http-request/download-types": {
-      "source": "./src/http-request/download-types.ts",
-      "types": "./dist/http-request/download-types.d.ts",
+      "source": "./src/http-request/download-types.mts",
+      "types": "./dist/http-request/download-types.d.mts",
       "default": "./dist/http-request/download-types.js"
     },
     "./http-request/errors": {
-      "source": "./src/http-request/errors.ts",
-      "types": "./dist/http-request/errors.d.ts",
+      "source": "./src/http-request/errors.mts",
+      "types": "./dist/http-request/errors.d.mts",
       "default": "./dist/http-request/errors.js"
     },
     "./http-request/fetch/browser": {
-      "source": "./src/http-request/fetch/browser.ts",
+      "source": "./src/http-request/fetch/browser.mts",
       "browser": {
-        "types": "./dist/http-request/fetch/browser.d.ts",
+        "types": "./dist/http-request/fetch/browser.d.mts",
         "default": "./dist/http-request/fetch/browser.js"
       },
-      "types": "./dist/http-request/fetch/browser.d.ts",
+      "types": "./dist/http-request/fetch/browser.d.mts",
       "default": "./dist/http-request/fetch/browser.js"
     },
     "./http-request/headers": {
-      "source": "./src/http-request/headers.ts",
-      "types": "./dist/http-request/headers.d.ts",
+      "source": "./src/http-request/headers.mts",
+      "types": "./dist/http-request/headers.d.mts",
       "default": "./dist/http-request/headers.js"
     },
     "./http-request/http-request": {
-      "source": "./src/http-request/node.ts",
+      "source": "./src/http-request/node.mts",
       "browser": {
-        "types": "./dist/http-request/browser.d.ts",
+        "types": "./dist/http-request/browser.d.mts",
         "default": "./dist/http-request/browser.js"
       },
-      "types": "./dist/http-request/node.d.ts",
+      "types": "./dist/http-request/node.d.mts",
       "default": "./dist/http-request/node.js"
     },
     "./http-request/node": {
-      "source": "./src/http-request/node.ts",
-      "types": "./dist/http-request/node.d.ts",
+      "source": "./src/http-request/node.mts",
+      "types": "./dist/http-request/node.d.mts",
       "default": "./dist/http-request/node.js"
     },
     "./http-request/request": {
-      "source": "./src/http-request/request.ts",
-      "types": "./dist/http-request/request.d.ts",
+      "source": "./src/http-request/request.mts",
+      "types": "./dist/http-request/request.d.mts",
       "default": "./dist/http-request/request.js"
     },
     "./http-request/request-attempt": {
-      "source": "./src/http-request/request-attempt.ts",
-      "types": "./dist/http-request/request-attempt.d.ts",
+      "source": "./src/http-request/request-attempt.mts",
+      "types": "./dist/http-request/request-attempt.d.mts",
       "default": "./dist/http-request/request-attempt.js"
     },
     "./http-request/request-types": {
-      "source": "./src/http-request/request-types.ts",
-      "types": "./dist/http-request/request-types.d.ts",
+      "source": "./src/http-request/request-types.mts",
+      "types": "./dist/http-request/request-types.d.mts",
       "default": "./dist/http-request/request-types.js"
     },
     "./http-request/response-reader": {
-      "source": "./src/http-request/response-reader.ts",
-      "types": "./dist/http-request/response-reader.d.ts",
+      "source": "./src/http-request/response-reader.mts",
+      "types": "./dist/http-request/response-reader.d.mts",
       "default": "./dist/http-request/response-reader.js"
     },
     "./http-request/response-types": {
-      "source": "./src/http-request/response-types.ts",
-      "types": "./dist/http-request/response-types.d.ts",
+      "source": "./src/http-request/response-types.mts",
+      "types": "./dist/http-request/response-types.d.mts",
       "default": "./dist/http-request/response-types.js"
     },
     "./http-request/user-agent": {
-      "source": "./src/http-request/user-agent.ts",
-      "types": "./dist/http-request/user-agent.d.ts",
+      "source": "./src/http-request/user-agent.mts",
+      "types": "./dist/http-request/user-agent.d.mts",
       "default": "./dist/http-request/user-agent.js"
     },
     "./ipc/cli/get": {
-      "source": "./src/ipc/cli/get.ts",
-      "types": "./dist/ipc/cli/get.d.ts",
+      "source": "./src/ipc/cli/get.mts",
+      "types": "./dist/ipc/cli/get.d.mts",
       "default": "./dist/ipc/cli/get.js"
     },
     "./ipc/cli/types": {
-      "source": "./src/ipc/cli/types.ts",
-      "types": "./dist/ipc/cli/types.d.ts",
+      "source": "./src/ipc/cli/types.mts",
+      "types": "./dist/ipc/cli/types.d.mts",
       "default": "./dist/ipc/cli/types.js"
     },
     "./ipc/directory": {
-      "source": "./src/ipc/directory.ts",
-      "types": "./dist/ipc/directory.d.ts",
+      "source": "./src/ipc/directory.mts",
+      "types": "./dist/ipc/directory.d.mts",
       "default": "./dist/ipc/directory.js"
     },
     "./ipc/paths": {
-      "source": "./src/ipc/paths.ts",
-      "types": "./dist/ipc/paths.d.ts",
+      "source": "./src/ipc/paths.mts",
+      "types": "./dist/ipc/paths.d.mts",
       "default": "./dist/ipc/paths.js"
     },
     "./ipc/types": {
-      "source": "./src/ipc/types.ts",
-      "types": "./dist/ipc/types.d.ts",
+      "source": "./src/ipc/types.mts",
+      "types": "./dist/ipc/types.d.mts",
       "default": "./dist/ipc/types.js"
     },
     "./ipc/write": {
-      "source": "./src/ipc/write.ts",
-      "types": "./dist/ipc/write.d.ts",
+      "source": "./src/ipc/write.mts",
+      "types": "./dist/ipc/write.d.mts",
       "default": "./dist/ipc/write.js"
     },
     "./json/edit": {
-      "source": "./src/json/edit.ts",
-      "types": "./dist/json/edit.d.ts",
+      "source": "./src/json/edit.mts",
+      "types": "./dist/json/edit.d.mts",
       "default": "./dist/json/edit.js"
     },
     "./json/format": {
-      "source": "./src/json/format.ts",
-      "types": "./dist/json/format.d.ts",
+      "source": "./src/json/format.mts",
+      "types": "./dist/json/format.d.mts",
       "default": "./dist/json/format.js"
     },
     "./json/parse": {
-      "source": "./src/json/parse.ts",
-      "types": "./dist/json/parse.d.ts",
+      "source": "./src/json/parse.mts",
+      "types": "./dist/json/parse.d.mts",
       "default": "./dist/json/parse.js"
     },
     "./json/types": {
-      "source": "./src/json/types.ts",
-      "types": "./dist/json/types.d.ts",
+      "source": "./src/json/types.mts",
+      "types": "./dist/json/types.d.mts",
       "default": "./dist/json/types.js"
     },
     "./links/create": {
-      "source": "./src/links/create.ts",
-      "types": "./dist/links/create.d.ts",
+      "source": "./src/links/create.mts",
+      "types": "./dist/links/create.d.mts",
       "default": "./dist/links/create.js"
     },
     "./links/github": {
-      "source": "./src/links/github.ts",
-      "types": "./dist/links/github.d.ts",
+      "source": "./src/links/github.mts",
+      "types": "./dist/links/github.d.mts",
       "default": "./dist/links/github.js"
     },
     "./links/types": {
-      "source": "./src/links/types.ts",
-      "types": "./dist/links/types.d.ts",
+      "source": "./src/links/types.mts",
+      "types": "./dist/links/types.d.mts",
       "default": "./dist/links/types.js"
     },
     "./logger": {
-      "source": "./src/logger/node.ts",
+      "source": "./src/logger/node.mts",
       "browser": {
-        "types": "./dist/logger/browser.d.ts",
+        "types": "./dist/logger/browser.d.mts",
         "default": "./dist/logger/browser.js"
       },
-      "types": "./dist/logger/node.d.ts",
+      "types": "./dist/logger/node.d.mts",
       "default": "./dist/logger/node.js"
     },
     "./logger/browser": {
-      "source": "./src/logger/browser.ts",
+      "source": "./src/logger/browser.mts",
       "browser": {
-        "types": "./dist/logger/browser.d.ts",
+        "types": "./dist/logger/browser.d.mts",
         "default": "./dist/logger/browser.js"
       },
-      "types": "./dist/logger/browser.d.ts",
+      "types": "./dist/logger/browser.d.mts",
       "default": "./dist/logger/browser.js"
     },
     "./logger/colors": {
-      "source": "./src/logger/colors.ts",
-      "types": "./dist/logger/colors.d.ts",
+      "source": "./src/logger/colors.mts",
+      "types": "./dist/logger/colors.d.mts",
       "default": "./dist/logger/colors.js"
     },
     "./logger/console": {
-      "source": "./src/logger/console.ts",
-      "types": "./dist/logger/console.d.ts",
+      "source": "./src/logger/console.mts",
+      "types": "./dist/logger/console.d.mts",
       "default": "./dist/logger/console.js"
     },
     "./logger/console-methods": {
-      "source": "./src/logger/console-methods.ts",
-      "types": "./dist/logger/console-methods.d.ts",
+      "source": "./src/logger/console-methods.mts",
+      "types": "./dist/logger/console-methods.d.mts",
       "default": "./dist/logger/console-methods.js"
     },
     "./logger/default": {
-      "source": "./src/logger/default.ts",
+      "source": "./src/logger/default.mts",
       "browser": {
-        "types": "./dist/logger/browser.d.ts",
+        "types": "./dist/logger/browser.d.mts",
         "default": "./dist/logger/browser.js"
       },
-      "types": "./dist/logger/default.d.ts",
+      "types": "./dist/logger/default.d.mts",
       "default": "./dist/logger/default.js"
     },
     "./logger/indentation-methods": {
-      "source": "./src/logger/indentation-methods.ts",
-      "types": "./dist/logger/indentation-methods.d.ts",
+      "source": "./src/logger/indentation-methods.mts",
+      "types": "./dist/logger/indentation-methods.d.mts",
       "default": "./dist/logger/indentation-methods.js"
     },
     "./logger/logger": {
-      "source": "./src/logger/node.ts",
+      "source": "./src/logger/node.mts",
       "browser": {
-        "types": "./dist/logger/browser.d.ts",
+        "types": "./dist/logger/browser.d.mts",
         "default": "./dist/logger/browser.js"
       },
-      "types": "./dist/logger/node.d.ts",
+      "types": "./dist/logger/node.d.mts",
       "default": "./dist/logger/node.js"
     },
     "./logger/node": {
-      "source": "./src/logger/node.ts",
-      "types": "./dist/logger/node.d.ts",
+      "source": "./src/logger/node.mts",
+      "types": "./dist/logger/node.d.mts",
       "default": "./dist/logger/node.js"
     },
     "./logger/options": {
-      "source": "./src/logger/options.ts",
-      "types": "./dist/logger/options.d.ts",
+      "source": "./src/logger/options.mts",
+      "types": "./dist/logger/options.d.mts",
       "default": "./dist/logger/options.js"
     },
     "./logger/semantic-methods": {
-      "source": "./src/logger/semantic-methods.ts",
-      "types": "./dist/logger/semantic-methods.d.ts",
+      "source": "./src/logger/semantic-methods.mts",
+      "types": "./dist/logger/semantic-methods.d.mts",
       "default": "./dist/logger/semantic-methods.js"
     },
     "./logger/stream": {
-      "source": "./src/logger/stream.ts",
-      "types": "./dist/logger/stream.d.ts",
+      "source": "./src/logger/stream.mts",
+      "types": "./dist/logger/stream.d.mts",
       "default": "./dist/logger/stream.js"
     },
     "./logger/stream-methods": {
-      "source": "./src/logger/stream-methods.ts",
-      "types": "./dist/logger/stream-methods.d.ts",
+      "source": "./src/logger/stream-methods.mts",
+      "types": "./dist/logger/stream-methods.d.mts",
       "default": "./dist/logger/stream-methods.js"
     },
     "./logger/symbols": {
-      "source": "./src/logger/symbols.ts",
-      "types": "./dist/logger/symbols.d.ts",
+      "source": "./src/logger/symbols.mts",
+      "types": "./dist/logger/symbols.d.mts",
       "default": "./dist/logger/symbols.js"
     },
     "./logger/symbols-builder": {
-      "source": "./src/logger/symbols-builder.ts",
-      "types": "./dist/logger/symbols-builder.d.ts",
+      "source": "./src/logger/symbols-builder.mts",
+      "types": "./dist/logger/symbols-builder.d.mts",
       "default": "./dist/logger/symbols-builder.js"
     },
     "./logger/types": {
-      "source": "./src/logger/types.ts",
-      "types": "./dist/logger/types.d.ts",
+      "source": "./src/logger/types.mts",
+      "types": "./dist/logger/types.d.mts",
       "default": "./dist/logger/types.js"
     },
     "./memo/async": {
-      "source": "./src/memo/async.ts",
+      "source": "./src/memo/async.mts",
       "browser": {
-        "types": "./dist/memo/async.d.ts",
+        "types": "./dist/memo/async.d.mts",
         "default": "./dist/memo/async.js"
       },
-      "types": "./dist/memo/async.d.ts",
+      "types": "./dist/memo/async.d.mts",
       "default": "./dist/memo/async.js"
     },
     "./memo/clear": {
-      "source": "./src/memo/clear.ts",
+      "source": "./src/memo/clear.mts",
       "browser": {
-        "types": "./dist/memo/clear.d.ts",
+        "types": "./dist/memo/clear.d.mts",
         "default": "./dist/memo/clear.js"
       },
-      "types": "./dist/memo/clear.d.ts",
+      "types": "./dist/memo/clear.d.mts",
       "default": "./dist/memo/clear.js"
     },
     "./memo/decorator": {
-      "source": "./src/memo/decorator.ts",
+      "source": "./src/memo/decorator.mts",
       "browser": {
-        "types": "./dist/memo/decorator.d.ts",
+        "types": "./dist/memo/decorator.d.mts",
         "default": "./dist/memo/decorator.js"
       },
-      "types": "./dist/memo/decorator.d.ts",
+      "types": "./dist/memo/decorator.d.mts",
       "default": "./dist/memo/decorator.js"
     },
     "./memo/memoize": {
-      "source": "./src/memo/memoize.ts",
+      "source": "./src/memo/memoize.mts",
       "browser": {
-        "types": "./dist/memo/memoize.d.ts",
+        "types": "./dist/memo/memoize.d.mts",
         "default": "./dist/memo/memoize.js"
       },
-      "types": "./dist/memo/memoize.d.ts",
+      "types": "./dist/memo/memoize.d.mts",
       "default": "./dist/memo/memoize.js"
     },
     "./memo/once": {
-      "source": "./src/memo/once.ts",
+      "source": "./src/memo/once.mts",
       "browser": {
-        "types": "./dist/memo/once.d.ts",
+        "types": "./dist/memo/once.d.mts",
         "default": "./dist/memo/once.js"
       },
-      "types": "./dist/memo/once.d.ts",
+      "types": "./dist/memo/once.d.mts",
       "default": "./dist/memo/once.js"
     },
     "./memo/types": {
-      "source": "./src/memo/types.ts",
+      "source": "./src/memo/types.mts",
       "browser": {
-        "types": "./dist/memo/types.d.ts",
+        "types": "./dist/memo/types.d.mts",
         "default": "./dist/memo/types.js"
       },
-      "types": "./dist/memo/types.d.ts",
+      "types": "./dist/memo/types.d.mts",
       "default": "./dist/memo/types.js"
     },
     "./memo/weak": {
-      "source": "./src/memo/weak.ts",
+      "source": "./src/memo/weak.mts",
       "browser": {
-        "types": "./dist/memo/weak.d.ts",
+        "types": "./dist/memo/weak.d.mts",
         "default": "./dist/memo/weak.js"
       },
-      "types": "./dist/memo/weak.d.ts",
+      "types": "./dist/memo/weak.d.mts",
       "default": "./dist/memo/weak.js"
     },
     "./native-messaging/host": {
-      "source": "./src/native-messaging/host.ts",
-      "types": "./dist/native-messaging/host.d.ts",
+      "source": "./src/native-messaging/host.mts",
+      "types": "./dist/native-messaging/host.d.mts",
       "default": "./dist/native-messaging/host.js"
     },
     "./native-messaging/install": {
-      "source": "./src/native-messaging/install.ts",
-      "types": "./dist/native-messaging/install.d.ts",
+      "source": "./src/native-messaging/install.mts",
+      "types": "./dist/native-messaging/install.d.mts",
       "default": "./dist/native-messaging/install.js"
     },
     "./native-messaging/rate-limit": {
-      "source": "./src/native-messaging/rate-limit.ts",
-      "types": "./dist/native-messaging/rate-limit.d.ts",
+      "source": "./src/native-messaging/rate-limit.mts",
+      "types": "./dist/native-messaging/rate-limit.d.mts",
       "default": "./dist/native-messaging/rate-limit.js"
     },
     "./native-messaging/run": {
-      "source": "./src/native-messaging/run.ts",
-      "types": "./dist/native-messaging/run.d.ts",
+      "source": "./src/native-messaging/run.mts",
+      "types": "./dist/native-messaging/run.d.mts",
       "default": "./dist/native-messaging/run.js"
     },
     "./node/async-hooks": {
-      "source": "./src/node/async-hooks.ts",
-      "types": "./dist/node/async-hooks.d.ts",
+      "source": "./src/node/async-hooks.mts",
+      "types": "./dist/node/async-hooks.d.mts",
       "default": "./dist/node/async-hooks.js"
     },
     "./node/child-process": {
-      "source": "./src/node/child-process.ts",
-      "types": "./dist/node/child-process.d.ts",
+      "source": "./src/node/child-process.mts",
+      "types": "./dist/node/child-process.d.mts",
       "default": "./dist/node/child-process.js"
     },
     "./node/crypto": {
-      "source": "./src/node/crypto.ts",
-      "types": "./dist/node/crypto.d.ts",
+      "source": "./src/node/crypto.mts",
+      "types": "./dist/node/crypto.d.mts",
       "default": "./dist/node/crypto.js"
     },
     "./node/events": {
-      "source": "./src/node/events.ts",
-      "types": "./dist/node/events.d.ts",
+      "source": "./src/node/events.mts",
+      "types": "./dist/node/events.d.mts",
       "default": "./dist/node/events.js"
     },
     "./node/fs": {
-      "source": "./src/node/fs.ts",
-      "types": "./dist/node/fs.d.ts",
+      "source": "./src/node/fs.mts",
+      "types": "./dist/node/fs.d.mts",
       "default": "./dist/node/fs.js"
     },
     "./node/fs-promises": {
-      "source": "./src/node/fs-promises.ts",
-      "types": "./dist/node/fs-promises.d.ts",
+      "source": "./src/node/fs-promises.mts",
+      "types": "./dist/node/fs-promises.d.mts",
       "default": "./dist/node/fs-promises.js"
     },
     "./node/http": {
-      "source": "./src/node/http.ts",
-      "types": "./dist/node/http.d.ts",
+      "source": "./src/node/http.mts",
+      "types": "./dist/node/http.d.mts",
       "default": "./dist/node/http.js"
     },
     "./node/https": {
-      "source": "./src/node/https.ts",
-      "types": "./dist/node/https.d.ts",
+      "source": "./src/node/https.mts",
+      "types": "./dist/node/https.d.mts",
       "default": "./dist/node/https.js"
     },
     "./node/module": {
-      "source": "./src/node/module.ts",
-      "types": "./dist/node/module.d.ts",
+      "source": "./src/node/module.mts",
+      "types": "./dist/node/module.d.mts",
       "default": "./dist/node/module.js"
     },
     "./node/os": {
-      "source": "./src/node/os.ts",
-      "types": "./dist/node/os.d.ts",
+      "source": "./src/node/os.mts",
+      "types": "./dist/node/os.d.mts",
       "default": "./dist/node/os.js"
     },
     "./node/path": {
-      "source": "./src/node/path.ts",
-      "types": "./dist/node/path.d.ts",
+      "source": "./src/node/path.mts",
+      "types": "./dist/node/path.d.mts",
       "default": "./dist/node/path.js"
     },
     "./node/timers-promises": {
-      "source": "./src/node/timers-promises.ts",
-      "types": "./dist/node/timers-promises.d.ts",
+      "source": "./src/node/timers-promises.mts",
+      "types": "./dist/node/timers-promises.d.mts",
       "default": "./dist/node/timers-promises.js"
     },
     "./node/url": {
-      "source": "./src/node/url.ts",
-      "types": "./dist/node/url.d.ts",
+      "source": "./src/node/url.mts",
+      "types": "./dist/node/url.d.mts",
       "default": "./dist/node/url.js"
     },
     "./node/util": {
-      "source": "./src/node/util.ts",
-      "types": "./dist/node/util.d.ts",
+      "source": "./src/node/util.mts",
+      "types": "./dist/node/util.d.mts",
       "default": "./dist/node/util.js"
     },
     "./npm/meta": {
-      "source": "./src/npm/meta.ts",
+      "source": "./src/npm/meta.mts",
       "browser": {
-        "types": "./dist/npm/meta.d.ts",
+        "types": "./dist/npm/meta.d.mts",
         "default": "./dist/npm/meta.js"
       },
-      "types": "./dist/npm/meta.d.ts",
+      "types": "./dist/npm/meta.d.mts",
       "default": "./dist/npm/meta.js"
     },
     "./npm/meta-cache": {
-      "source": "./src/npm/meta-cache.ts",
+      "source": "./src/npm/meta-cache.mts",
       "browser": {
-        "types": "./dist/npm/meta-cache.d.ts",
+        "types": "./dist/npm/meta-cache.d.mts",
         "default": "./dist/npm/meta-cache.js"
       },
-      "types": "./dist/npm/meta-cache.d.ts",
+      "types": "./dist/npm/meta-cache.d.mts",
       "default": "./dist/npm/meta-cache.js"
     },
     "./npm/meta-slice": {
-      "source": "./src/npm/meta-slice.ts",
+      "source": "./src/npm/meta-slice.mts",
       "browser": {
-        "types": "./dist/npm/meta-slice.d.ts",
+        "types": "./dist/npm/meta-slice.d.mts",
         "default": "./dist/npm/meta-slice.js"
       },
-      "types": "./dist/npm/meta-slice.d.ts",
+      "types": "./dist/npm/meta-slice.d.mts",
       "default": "./dist/npm/meta-slice.js"
     },
     "./npm/meta-types": {
-      "source": "./src/npm/meta-types.ts",
+      "source": "./src/npm/meta-types.mts",
       "browser": {
-        "types": "./dist/npm/meta-types.d.ts",
+        "types": "./dist/npm/meta-types.d.mts",
         "default": "./dist/npm/meta-types.js"
       },
-      "types": "./dist/npm/meta-types.d.ts",
+      "types": "./dist/npm/meta-types.d.mts",
       "default": "./dist/npm/meta-types.js"
     },
     "./npm/registry": {
-      "source": "./src/npm/registry.ts",
+      "source": "./src/npm/registry.mts",
       "browser": {
-        "types": "./dist/npm/registry.d.ts",
+        "types": "./dist/npm/registry.d.mts",
         "default": "./dist/npm/registry.js"
       },
-      "types": "./dist/npm/registry.d.ts",
+      "types": "./dist/npm/registry.d.mts",
       "default": "./dist/npm/registry.js"
     },
     "./npm/registry-live": {
-      "source": "./src/npm/registry-live.ts",
+      "source": "./src/npm/registry-live.mts",
       "browser": {
-        "types": "./dist/npm/registry-live.d.ts",
+        "types": "./dist/npm/registry-live.d.mts",
         "default": "./dist/npm/registry-live.js"
       },
-      "types": "./dist/npm/registry-live.d.ts",
+      "types": "./dist/npm/registry-live.d.mts",
       "default": "./dist/npm/registry-live.js"
     },
     "./objects/getters": {
-      "source": "./src/objects/getters.ts",
+      "source": "./src/objects/getters.mts",
       "browser": {
-        "types": "./dist/objects/getters.d.ts",
+        "types": "./dist/objects/getters.d.mts",
         "default": "./dist/objects/getters.js"
       },
-      "types": "./dist/objects/getters.d.ts",
+      "types": "./dist/objects/getters.d.mts",
       "default": "./dist/objects/getters.js"
     },
     "./objects/inspect": {
-      "source": "./src/objects/inspect.ts",
+      "source": "./src/objects/inspect.mts",
       "browser": {
-        "types": "./dist/objects/inspect.d.ts",
+        "types": "./dist/objects/inspect.d.mts",
         "default": "./dist/objects/inspect.js"
       },
-      "types": "./dist/objects/inspect.d.ts",
+      "types": "./dist/objects/inspect.d.mts",
       "default": "./dist/objects/inspect.js"
     },
     "./objects/mutate": {
-      "source": "./src/objects/mutate.ts",
+      "source": "./src/objects/mutate.mts",
       "browser": {
-        "types": "./dist/objects/mutate.d.ts",
+        "types": "./dist/objects/mutate.d.mts",
         "default": "./dist/objects/mutate.js"
       },
-      "types": "./dist/objects/mutate.d.ts",
+      "types": "./dist/objects/mutate.d.mts",
       "default": "./dist/objects/mutate.js"
     },
     "./objects/predicates": {
-      "source": "./src/objects/predicates.ts",
+      "source": "./src/objects/predicates.mts",
       "browser": {
-        "types": "./dist/objects/predicates.d.ts",
+        "types": "./dist/objects/predicates.d.mts",
         "default": "./dist/objects/predicates.js"
       },
-      "types": "./dist/objects/predicates.d.ts",
+      "types": "./dist/objects/predicates.d.mts",
       "default": "./dist/objects/predicates.js"
     },
     "./objects/sort": {
-      "source": "./src/objects/sort.ts",
+      "source": "./src/objects/sort.mts",
       "browser": {
-        "types": "./dist/objects/sort.d.ts",
+        "types": "./dist/objects/sort.d.mts",
         "default": "./dist/objects/sort.js"
       },
-      "types": "./dist/objects/sort.d.ts",
+      "types": "./dist/objects/sort.d.mts",
       "default": "./dist/objects/sort.js"
     },
     "./objects/types": {
-      "source": "./src/objects/types.ts",
+      "source": "./src/objects/types.mts",
       "browser": {
-        "types": "./dist/objects/types.d.ts",
+        "types": "./dist/objects/types.d.mts",
         "default": "./dist/objects/types.js"
       },
-      "types": "./dist/objects/types.d.ts",
+      "types": "./dist/objects/types.d.mts",
       "default": "./dist/objects/types.js"
     },
     "./oci/blob": {
-      "source": "./src/oci/blob.ts",
+      "source": "./src/oci/blob.mts",
       "browser": {
-        "types": "./dist/oci/blob.d.ts",
+        "types": "./dist/oci/blob.d.mts",
         "default": "./dist/oci/blob.js"
       },
-      "types": "./dist/oci/blob.d.ts",
+      "types": "./dist/oci/blob.d.mts",
       "default": "./dist/oci/blob.js"
     },
     "./oci/manifest": {
-      "source": "./src/oci/manifest.ts",
+      "source": "./src/oci/manifest.mts",
       "browser": {
-        "types": "./dist/oci/manifest.d.ts",
+        "types": "./dist/oci/manifest.d.mts",
         "default": "./dist/oci/manifest.js"
       },
-      "types": "./dist/oci/manifest.d.ts",
+      "types": "./dist/oci/manifest.d.mts",
       "default": "./dist/oci/manifest.js"
     },
     "./oci/registry": {
-      "source": "./src/oci/registry.ts",
+      "source": "./src/oci/registry.mts",
       "browser": {
-        "types": "./dist/oci/registry.d.ts",
+        "types": "./dist/oci/registry.d.mts",
         "default": "./dist/oci/registry.js"
       },
-      "types": "./dist/oci/registry.d.ts",
+      "types": "./dist/oci/registry.d.mts",
       "default": "./dist/oci/registry.js"
     },
     "./oci/registry-token": {
-      "source": "./src/oci/registry-token.ts",
+      "source": "./src/oci/registry-token.mts",
       "browser": {
-        "types": "./dist/oci/registry-token.d.ts",
+        "types": "./dist/oci/registry-token.d.mts",
         "default": "./dist/oci/registry-token.js"
       },
-      "types": "./dist/oci/registry-token.d.ts",
+      "types": "./dist/oci/registry-token.d.mts",
       "default": "./dist/oci/registry-token.js"
     },
     "./oci/types": {
-      "source": "./src/oci/types.ts",
+      "source": "./src/oci/types.mts",
       "browser": {
-        "types": "./dist/oci/types.d.ts",
+        "types": "./dist/oci/types.d.mts",
         "default": "./dist/oci/types.js"
       },
-      "types": "./dist/oci/types.d.ts",
+      "types": "./dist/oci/types.d.mts",
       "default": "./dist/oci/types.js"
     },
     "./packages/edit": {
-      "source": "./src/packages/edit.ts",
-      "types": "./dist/packages/edit.d.ts",
+      "source": "./src/packages/edit.mts",
+      "types": "./dist/packages/edit.d.mts",
       "default": "./dist/packages/edit.js"
     },
     "./packages/edit-class": {
-      "source": "./src/packages/edit-class.ts",
-      "types": "./dist/packages/edit-class.d.ts",
+      "source": "./src/packages/edit-class.mts",
+      "types": "./dist/packages/edit-class.d.mts",
       "default": "./dist/packages/edit-class.js"
     },
     "./packages/exports": {
-      "source": "./src/packages/exports.ts",
-      "types": "./dist/packages/exports.d.ts",
+      "source": "./src/packages/exports.mts",
+      "types": "./dist/packages/exports.d.mts",
       "default": "./dist/packages/exports.js"
     },
     "./packages/fetch": {
-      "source": "./src/packages/fetch.ts",
-      "types": "./dist/packages/fetch.d.ts",
+      "source": "./src/packages/fetch.mts",
+      "types": "./dist/packages/fetch.d.mts",
       "default": "./dist/packages/fetch.js"
     },
     "./packages/find": {
-      "source": "./src/packages/find.ts",
-      "types": "./dist/packages/find.d.ts",
+      "source": "./src/packages/find.mts",
+      "types": "./dist/packages/find.d.mts",
       "default": "./dist/packages/find.js"
     },
     "./packages/isolation": {
-      "source": "./src/packages/isolation.ts",
-      "types": "./dist/packages/isolation.d.ts",
+      "source": "./src/packages/isolation.mts",
+      "types": "./dist/packages/isolation.d.mts",
       "default": "./dist/packages/isolation.js"
     },
     "./packages/licenses": {
-      "source": "./src/packages/licenses.ts",
-      "types": "./dist/packages/licenses.d.ts",
+      "source": "./src/packages/licenses.mts",
+      "types": "./dist/packages/licenses.d.mts",
       "default": "./dist/packages/licenses.js"
     },
     "./packages/manifest": {
-      "source": "./src/packages/manifest.ts",
-      "types": "./dist/packages/manifest.d.ts",
+      "source": "./src/packages/manifest.mts",
+      "types": "./dist/packages/manifest.d.mts",
       "default": "./dist/packages/manifest.js"
     },
     "./packages/metadata-extensions": {
-      "source": "./src/packages/metadata-extensions.ts",
-      "types": "./dist/packages/metadata-extensions.d.ts",
+      "source": "./src/packages/metadata-extensions.mts",
+      "types": "./dist/packages/metadata-extensions.d.mts",
       "default": "./dist/packages/metadata-extensions.js"
     },
     "./packages/normalize": {
-      "source": "./src/packages/normalize.ts",
-      "types": "./dist/packages/normalize.d.ts",
+      "source": "./src/packages/normalize.mts",
+      "types": "./dist/packages/normalize.d.mts",
       "default": "./dist/packages/normalize.js"
     },
     "./packages/provenance": {
-      "source": "./src/packages/provenance.ts",
-      "types": "./dist/packages/provenance.d.ts",
+      "source": "./src/packages/provenance.mts",
+      "types": "./dist/packages/provenance.d.mts",
       "default": "./dist/packages/provenance.js"
     },
     "./packages/read": {
-      "source": "./src/packages/read.ts",
-      "types": "./dist/packages/read.d.ts",
+      "source": "./src/packages/read.mts",
+      "types": "./dist/packages/read.d.mts",
       "default": "./dist/packages/read.js"
     },
     "./packages/specs": {
-      "source": "./src/packages/specs.ts",
-      "types": "./dist/packages/specs.d.ts",
+      "source": "./src/packages/specs.mts",
+      "types": "./dist/packages/specs.d.mts",
       "default": "./dist/packages/specs.js"
     },
     "./packages/tarball": {
-      "source": "./src/packages/tarball.ts",
-      "types": "./dist/packages/tarball.d.ts",
+      "source": "./src/packages/tarball.mts",
+      "types": "./dist/packages/tarball.d.mts",
       "default": "./dist/packages/tarball.js"
     },
     "./packages/types": {
-      "source": "./src/packages/types.ts",
-      "types": "./dist/packages/types.d.ts",
+      "source": "./src/packages/types.mts",
+      "types": "./dist/packages/types.d.mts",
       "default": "./dist/packages/types.js"
     },
     "./packages/validation": {
-      "source": "./src/packages/validation.ts",
-      "types": "./dist/packages/validation.d.ts",
+      "source": "./src/packages/validation.mts",
+      "types": "./dist/packages/validation.d.mts",
       "default": "./dist/packages/validation.js"
     },
     "./paths/conversion": {
-      "source": "./src/paths/conversion.ts",
-      "types": "./dist/paths/conversion.d.ts",
+      "source": "./src/paths/conversion.mts",
+      "types": "./dist/paths/conversion.d.mts",
       "default": "./dist/paths/conversion.js"
     },
     "./paths/dirnames": {
-      "source": "./src/paths/dirnames.ts",
-      "types": "./dist/paths/dirnames.d.ts",
+      "source": "./src/paths/dirnames.mts",
+      "types": "./dist/paths/dirnames.d.mts",
       "default": "./dist/paths/dirnames.js"
     },
     "./paths/exts": {
-      "source": "./src/paths/exts.ts",
-      "types": "./dist/paths/exts.d.ts",
+      "source": "./src/paths/exts.mts",
+      "types": "./dist/paths/exts.d.mts",
       "default": "./dist/paths/exts.js"
     },
     "./paths/filenames": {
-      "source": "./src/paths/filenames.ts",
-      "types": "./dist/paths/filenames.d.ts",
+      "source": "./src/paths/filenames.mts",
+      "types": "./dist/paths/filenames.d.mts",
       "default": "./dist/paths/filenames.js"
     },
     "./paths/globs": {
-      "source": "./src/paths/globs.ts",
-      "types": "./dist/paths/globs.d.ts",
+      "source": "./src/paths/globs.mts",
+      "types": "./dist/paths/globs.d.mts",
       "default": "./dist/paths/globs.js"
     },
     "./paths/normalize": {
-      "source": "./src/paths/normalize.ts",
-      "types": "./dist/paths/normalize.d.ts",
+      "source": "./src/paths/normalize.mts",
+      "types": "./dist/paths/normalize.d.mts",
       "default": "./dist/paths/normalize.js"
     },
     "./paths/packages": {
-      "source": "./src/paths/packages.ts",
-      "types": "./dist/paths/packages.d.ts",
+      "source": "./src/paths/packages.mts",
+      "types": "./dist/paths/packages.d.mts",
       "default": "./dist/paths/packages.js"
     },
     "./paths/predicates": {
-      "source": "./src/paths/predicates.ts",
-      "types": "./dist/paths/predicates.d.ts",
+      "source": "./src/paths/predicates.mts",
+      "types": "./dist/paths/predicates.d.mts",
       "default": "./dist/paths/predicates.js"
     },
     "./paths/resolve": {
-      "source": "./src/paths/resolve.ts",
-      "types": "./dist/paths/resolve.d.ts",
+      "source": "./src/paths/resolve.mts",
+      "types": "./dist/paths/resolve.d.mts",
       "default": "./dist/paths/resolve.js"
     },
     "./paths/rewire": {
-      "source": "./src/paths/rewire.ts",
-      "types": "./dist/paths/rewire.d.ts",
+      "source": "./src/paths/rewire.mts",
+      "types": "./dist/paths/rewire.d.mts",
       "default": "./dist/paths/rewire.js"
     },
     "./paths/socket": {
-      "source": "./src/paths/socket.ts",
-      "types": "./dist/paths/socket.d.ts",
+      "source": "./src/paths/socket.mts",
+      "types": "./dist/paths/socket.d.mts",
       "default": "./dist/paths/socket.js"
     },
     "./paths/walk": {
-      "source": "./src/paths/walk.ts",
-      "types": "./dist/paths/walk.d.ts",
+      "source": "./src/paths/walk.mts",
+      "types": "./dist/paths/walk.d.mts",
       "default": "./dist/paths/walk.js"
     },
     "./perf/enabled": {
-      "source": "./src/perf/enabled.ts",
-      "types": "./dist/perf/enabled.d.ts",
+      "source": "./src/perf/enabled.mts",
+      "types": "./dist/perf/enabled.d.mts",
       "default": "./dist/perf/enabled.js"
     },
     "./perf/metrics": {
-      "source": "./src/perf/metrics.ts",
-      "types": "./dist/perf/metrics.d.ts",
+      "source": "./src/perf/metrics.mts",
+      "types": "./dist/perf/metrics.d.mts",
       "default": "./dist/perf/metrics.js"
     },
     "./perf/report": {
-      "source": "./src/perf/report.ts",
-      "types": "./dist/perf/report.d.ts",
+      "source": "./src/perf/report.mts",
+      "types": "./dist/perf/report.d.mts",
       "default": "./dist/perf/report.js"
     },
     "./perf/timer": {
-      "source": "./src/perf/timer.ts",
-      "types": "./dist/perf/timer.d.ts",
+      "source": "./src/perf/timer.mts",
+      "types": "./dist/perf/timer.d.mts",
       "default": "./dist/perf/timer.js"
     },
     "./perf/types": {
-      "source": "./src/perf/types.ts",
-      "types": "./dist/perf/types.d.ts",
+      "source": "./src/perf/types.mts",
+      "types": "./dist/perf/types.d.mts",
       "default": "./dist/perf/types.js"
     },
     "./primordials/array": {
-      "source": "./src/primordials/array.ts",
-      "types": "./dist/primordials/array.d.ts",
+      "source": "./src/primordials/array.mts",
+      "types": "./dist/primordials/array.d.mts",
       "default": "./dist/primordials/array.js"
     },
     "./primordials/buffer": {
-      "source": "./src/primordials/buffer.ts",
-      "types": "./dist/primordials/buffer.d.ts",
+      "source": "./src/primordials/buffer.mts",
+      "types": "./dist/primordials/buffer.d.mts",
       "default": "./dist/primordials/buffer.js"
     },
     "./primordials/checks/primordials": {
-      "source": "./src/primordials/checks/primordials.ts",
-      "types": "./dist/primordials/checks/primordials.d.ts",
+      "source": "./src/primordials/checks/primordials.mts",
+      "types": "./dist/primordials/checks/primordials.d.mts",
       "default": "./dist/primordials/checks/primordials.js"
     },
     "./primordials/checks/primordials-defaults": {
-      "source": "./src/primordials/checks/primordials-defaults.ts",
-      "types": "./dist/primordials/checks/primordials-defaults.d.ts",
+      "source": "./src/primordials/checks/primordials-defaults.mts",
+      "types": "./dist/primordials/checks/primordials-defaults.d.mts",
       "default": "./dist/primordials/checks/primordials-defaults.js"
     },
     "./primordials/date": {
-      "source": "./src/primordials/date.ts",
-      "types": "./dist/primordials/date.d.ts",
+      "source": "./src/primordials/date.mts",
+      "types": "./dist/primordials/date.d.mts",
       "default": "./dist/primordials/date.js"
     },
     "./primordials/error": {
-      "source": "./src/primordials/error.ts",
-      "types": "./dist/primordials/error.d.ts",
+      "source": "./src/primordials/error.mts",
+      "types": "./dist/primordials/error.d.mts",
       "default": "./dist/primordials/error.js"
     },
     "./primordials/function": {
-      "source": "./src/primordials/function.ts",
-      "types": "./dist/primordials/function.d.ts",
+      "source": "./src/primordials/function.mts",
+      "types": "./dist/primordials/function.d.mts",
       "default": "./dist/primordials/function.js"
     },
     "./primordials/globals": {
-      "source": "./src/primordials/globals.ts",
-      "types": "./dist/primordials/globals.d.ts",
+      "source": "./src/primordials/globals.mts",
+      "types": "./dist/primordials/globals.d.mts",
       "default": "./dist/primordials/globals.js"
     },
     "./primordials/headers": {
-      "source": "./src/primordials/headers.ts",
-      "types": "./dist/primordials/headers.d.ts",
+      "source": "./src/primordials/headers.mts",
+      "types": "./dist/primordials/headers.d.mts",
       "default": "./dist/primordials/headers.js"
     },
     "./primordials/intl": {
-      "source": "./src/primordials/intl.ts",
-      "types": "./dist/primordials/intl.d.ts",
+      "source": "./src/primordials/intl.mts",
+      "types": "./dist/primordials/intl.d.mts",
       "default": "./dist/primordials/intl.js"
     },
     "./primordials/json": {
-      "source": "./src/primordials/json.ts",
-      "types": "./dist/primordials/json.d.ts",
+      "source": "./src/primordials/json.mts",
+      "types": "./dist/primordials/json.d.mts",
       "default": "./dist/primordials/json.js"
     },
     "./primordials/map-set": {
-      "source": "./src/primordials/map-set.ts",
-      "types": "./dist/primordials/map-set.d.ts",
+      "source": "./src/primordials/map-set.mts",
+      "types": "./dist/primordials/map-set.d.mts",
       "default": "./dist/primordials/map-set.js"
     },
     "./primordials/math": {
-      "source": "./src/primordials/math.ts",
-      "types": "./dist/primordials/math.d.ts",
+      "source": "./src/primordials/math.mts",
+      "types": "./dist/primordials/math.d.mts",
       "default": "./dist/primordials/math.js"
     },
     "./primordials/number": {
-      "source": "./src/primordials/number.ts",
-      "types": "./dist/primordials/number.d.ts",
+      "source": "./src/primordials/number.mts",
+      "types": "./dist/primordials/number.d.mts",
       "default": "./dist/primordials/number.js"
     },
     "./primordials/object": {
-      "source": "./src/primordials/object.ts",
-      "types": "./dist/primordials/object.d.ts",
+      "source": "./src/primordials/object.mts",
+      "types": "./dist/primordials/object.d.mts",
       "default": "./dist/primordials/object.js"
     },
     "./primordials/process": {
-      "source": "./src/primordials/process.ts",
-      "types": "./dist/primordials/process.d.ts",
+      "source": "./src/primordials/process.mts",
+      "types": "./dist/primordials/process.d.mts",
       "default": "./dist/primordials/process.js"
     },
     "./primordials/promise": {
-      "source": "./src/primordials/promise.ts",
-      "types": "./dist/primordials/promise.d.ts",
+      "source": "./src/primordials/promise.mts",
+      "types": "./dist/primordials/promise.d.mts",
       "default": "./dist/primordials/promise.js"
     },
     "./primordials/reflect": {
-      "source": "./src/primordials/reflect.ts",
-      "types": "./dist/primordials/reflect.d.ts",
+      "source": "./src/primordials/reflect.mts",
+      "types": "./dist/primordials/reflect.d.mts",
       "default": "./dist/primordials/reflect.js"
     },
     "./primordials/regexp": {
-      "source": "./src/primordials/regexp.ts",
-      "types": "./dist/primordials/regexp.d.ts",
+      "source": "./src/primordials/regexp.mts",
+      "types": "./dist/primordials/regexp.d.mts",
       "default": "./dist/primordials/regexp.js"
     },
     "./primordials/string": {
-      "source": "./src/primordials/string.ts",
-      "types": "./dist/primordials/string.d.ts",
+      "source": "./src/primordials/string.mts",
+      "types": "./dist/primordials/string.d.mts",
       "default": "./dist/primordials/string.js"
     },
     "./primordials/symbol": {
-      "source": "./src/primordials/symbol.ts",
-      "types": "./dist/primordials/symbol.d.ts",
+      "source": "./src/primordials/symbol.mts",
+      "types": "./dist/primordials/symbol.d.mts",
       "default": "./dist/primordials/symbol.js"
     },
     "./primordials/uncurry": {
-      "source": "./src/primordials/uncurry.ts",
-      "types": "./dist/primordials/uncurry.d.ts",
+      "source": "./src/primordials/uncurry.mts",
+      "types": "./dist/primordials/uncurry.d.mts",
       "default": "./dist/primordials/uncurry.js"
     },
     "./primordials/url": {
-      "source": "./src/primordials/url.ts",
-      "types": "./dist/primordials/url.d.ts",
+      "source": "./src/primordials/url.mts",
+      "types": "./dist/primordials/url.d.mts",
       "default": "./dist/primordials/url.js"
     },
     "./process/abort": {
-      "source": "./src/process/abort.ts",
-      "types": "./dist/process/abort.d.ts",
+      "source": "./src/process/abort.mts",
+      "types": "./dist/process/abort.d.mts",
       "default": "./dist/process/abort.js"
     },
     "./process/lock-instance": {
-      "source": "./src/process/lock-instance.ts",
-      "types": "./dist/process/lock-instance.d.ts",
+      "source": "./src/process/lock-instance.mts",
+      "types": "./dist/process/lock-instance.d.mts",
       "default": "./dist/process/lock-instance.js"
     },
     "./process/lock-manager": {
-      "source": "./src/process/lock-manager.ts",
-      "types": "./dist/process/lock-manager.d.ts",
+      "source": "./src/process/lock-manager.mts",
+      "types": "./dist/process/lock-manager.d.mts",
       "default": "./dist/process/lock-manager.js"
     },
     "./process/lock-types": {
-      "source": "./src/process/lock-types.ts",
-      "types": "./dist/process/lock-types.d.ts",
+      "source": "./src/process/lock-types.mts",
+      "types": "./dist/process/lock-types.d.mts",
       "default": "./dist/process/lock-types.js"
     },
     "./process/open-url": {
-      "source": "./src/process/open-url.ts",
-      "types": "./dist/process/open-url.d.ts",
+      "source": "./src/process/open-url.mts",
+      "types": "./dist/process/open-url.d.mts",
       "default": "./dist/process/open-url.js"
     },
     "./process/spawn/child": {
-      "source": "./src/process/spawn/child.ts",
-      "types": "./dist/process/spawn/child.d.ts",
+      "source": "./src/process/spawn/child.mts",
+      "types": "./dist/process/spawn/child.d.mts",
       "default": "./dist/process/spawn/child.js"
     },
     "./process/spawn/errors": {
-      "source": "./src/process/spawn/errors.ts",
-      "types": "./dist/process/spawn/errors.d.ts",
+      "source": "./src/process/spawn/errors.mts",
+      "types": "./dist/process/spawn/errors.d.mts",
       "default": "./dist/process/spawn/errors.js"
     },
     "./process/spawn/kill-tree": {
-      "source": "./src/process/spawn/kill-tree.ts",
-      "types": "./dist/process/spawn/kill-tree.d.ts",
+      "source": "./src/process/spawn/kill-tree.mts",
+      "types": "./dist/process/spawn/kill-tree.d.mts",
       "default": "./dist/process/spawn/kill-tree.js"
     },
     "./process/spawn/pty": {
-      "source": "./src/process/spawn/pty.ts",
-      "types": "./dist/process/spawn/pty.d.ts",
+      "source": "./src/process/spawn/pty.mts",
+      "types": "./dist/process/spawn/pty.d.mts",
       "default": "./dist/process/spawn/pty.js"
     },
     "./process/spawn/run": {
-      "source": "./src/process/spawn/run.ts",
-      "types": "./dist/process/spawn/run.d.ts",
+      "source": "./src/process/spawn/run.mts",
+      "types": "./dist/process/spawn/run.d.mts",
       "default": "./dist/process/spawn/run.js"
     },
     "./process/spawn/stdio": {
-      "source": "./src/process/spawn/stdio.ts",
-      "types": "./dist/process/spawn/stdio.d.ts",
+      "source": "./src/process/spawn/stdio.mts",
+      "types": "./dist/process/spawn/stdio.d.mts",
       "default": "./dist/process/spawn/stdio.js"
     },
     "./process/spawn/timeout": {
-      "source": "./src/process/spawn/timeout.ts",
-      "types": "./dist/process/spawn/timeout.d.ts",
+      "source": "./src/process/spawn/timeout.mts",
+      "types": "./dist/process/spawn/timeout.d.mts",
       "default": "./dist/process/spawn/timeout.js"
     },
     "./process/spawn/types": {
-      "source": "./src/process/spawn/types.ts",
-      "types": "./dist/process/spawn/types.d.ts",
+      "source": "./src/process/spawn/types.mts",
+      "types": "./dist/process/spawn/types.d.mts",
       "default": "./dist/process/spawn/types.js"
     },
     "./process/spawn/windows-shell": {
-      "source": "./src/process/spawn/windows-shell.ts",
-      "types": "./dist/process/spawn/windows-shell.d.ts",
+      "source": "./src/process/spawn/windows-shell.mts",
+      "types": "./dist/process/spawn/windows-shell.d.mts",
       "default": "./dist/process/spawn/windows-shell.js"
     },
     "./process/transient": {
-      "source": "./src/process/transient.ts",
-      "types": "./dist/process/transient.d.ts",
+      "source": "./src/process/transient.mts",
+      "types": "./dist/process/transient.d.mts",
       "default": "./dist/process/transient.js"
     },
     "./promises/abort": {
-      "source": "./src/promises/abort.ts",
-      "types": "./dist/promises/abort.d.ts",
+      "source": "./src/promises/abort.mts",
+      "types": "./dist/promises/abort.d.mts",
       "default": "./dist/promises/abort.js"
     },
     "./promises/all-keyed": {
-      "source": "./src/promises/all-keyed.ts",
-      "types": "./dist/promises/all-keyed.d.ts",
+      "source": "./src/promises/all-keyed.mts",
+      "types": "./dist/promises/all-keyed.d.mts",
       "default": "./dist/promises/all-keyed.js"
     },
     "./promises/backoff": {
-      "source": "./src/promises/backoff.ts",
-      "types": "./dist/promises/backoff.d.ts",
+      "source": "./src/promises/backoff.mts",
+      "types": "./dist/promises/backoff.d.mts",
       "default": "./dist/promises/backoff.js"
     },
     "./promises/iterate": {
-      "source": "./src/promises/iterate.ts",
-      "types": "./dist/promises/iterate.d.ts",
+      "source": "./src/promises/iterate.mts",
+      "types": "./dist/promises/iterate.d.mts",
       "default": "./dist/promises/iterate.js"
     },
     "./promises/options": {
-      "source": "./src/promises/options.ts",
-      "types": "./dist/promises/options.d.ts",
+      "source": "./src/promises/options.mts",
+      "types": "./dist/promises/options.d.mts",
       "default": "./dist/promises/options.js"
     },
     "./promises/queue": {
-      "source": "./src/promises/queue.ts",
-      "types": "./dist/promises/queue.d.ts",
+      "source": "./src/promises/queue.mts",
+      "types": "./dist/promises/queue.d.mts",
       "default": "./dist/promises/queue.js"
     },
     "./promises/resolvers": {
-      "source": "./src/promises/resolvers.ts",
-      "types": "./dist/promises/resolvers.d.ts",
+      "source": "./src/promises/resolvers.mts",
+      "types": "./dist/promises/resolvers.d.mts",
       "default": "./dist/promises/resolvers.js"
     },
     "./promises/retry": {
-      "source": "./src/promises/retry.ts",
-      "types": "./dist/promises/retry.d.ts",
+      "source": "./src/promises/retry.mts",
+      "types": "./dist/promises/retry.d.mts",
       "default": "./dist/promises/retry.js"
     },
     "./promises/timers": {
-      "source": "./src/promises/timers.ts",
-      "types": "./dist/promises/timers.d.ts",
+      "source": "./src/promises/timers.mts",
+      "types": "./dist/promises/timers.d.mts",
       "default": "./dist/promises/timers.js"
     },
     "./promises/types": {
-      "source": "./src/promises/types.ts",
-      "types": "./dist/promises/types.d.ts",
+      "source": "./src/promises/types.mts",
+      "types": "./dist/promises/types.d.mts",
       "default": "./dist/promises/types.js"
     },
     "./regexps/escape": {
-      "source": "./src/regexps/escape.ts",
+      "source": "./src/regexps/escape.mts",
       "browser": {
-        "types": "./dist/regexps/escape.d.ts",
+        "types": "./dist/regexps/escape.d.mts",
         "default": "./dist/regexps/escape.js"
       },
-      "types": "./dist/regexps/escape.d.ts",
+      "types": "./dist/regexps/escape.d.mts",
       "default": "./dist/regexps/escape.js"
     },
     "./regexps/hex": {
-      "source": "./src/regexps/hex.ts",
+      "source": "./src/regexps/hex.mts",
       "browser": {
-        "types": "./dist/regexps/hex.d.ts",
+        "types": "./dist/regexps/hex.d.mts",
         "default": "./dist/regexps/hex.js"
       },
-      "types": "./dist/regexps/hex.d.ts",
+      "types": "./dist/regexps/hex.d.mts",
       "default": "./dist/regexps/hex.js"
     },
     "./regexps/spec": {
-      "source": "./src/regexps/spec.ts",
+      "source": "./src/regexps/spec.mts",
       "browser": {
-        "types": "./dist/regexps/spec.d.ts",
+        "types": "./dist/regexps/spec.d.mts",
         "default": "./dist/regexps/spec.js"
       },
-      "types": "./dist/regexps/spec.d.ts",
+      "types": "./dist/regexps/spec.d.mts",
       "default": "./dist/regexps/spec.js"
     },
     "./releases/github-archives": {
-      "source": "./src/releases/github-archives.ts",
-      "types": "./dist/releases/github-archives.d.ts",
+      "source": "./src/releases/github-archives.mts",
+      "types": "./dist/releases/github-archives.d.mts",
       "default": "./dist/releases/github-archives.js"
     },
     "./releases/github-asset-url": {
-      "source": "./src/releases/github-asset-url.ts",
-      "types": "./dist/releases/github-asset-url.d.ts",
+      "source": "./src/releases/github-asset-url.mts",
+      "types": "./dist/releases/github-asset-url.d.mts",
       "default": "./dist/releases/github-asset-url.js"
     },
     "./releases/github-assets": {
-      "source": "./src/releases/github-assets.ts",
-      "types": "./dist/releases/github-assets.d.ts",
+      "source": "./src/releases/github-assets.mts",
+      "types": "./dist/releases/github-assets.d.mts",
       "default": "./dist/releases/github-assets.js"
     },
     "./releases/github-auth": {
-      "source": "./src/releases/github-auth.ts",
-      "types": "./dist/releases/github-auth.d.ts",
+      "source": "./src/releases/github-auth.mts",
+      "types": "./dist/releases/github-auth.d.mts",
       "default": "./dist/releases/github-auth.js"
     },
     "./releases/github-downloads": {
-      "source": "./src/releases/github-downloads.ts",
-      "types": "./dist/releases/github-downloads.d.ts",
+      "source": "./src/releases/github-downloads.mts",
+      "types": "./dist/releases/github-downloads.d.mts",
       "default": "./dist/releases/github-downloads.js"
     },
     "./releases/github-listing": {
-      "source": "./src/releases/github-listing.ts",
-      "types": "./dist/releases/github-listing.d.ts",
+      "source": "./src/releases/github-listing.mts",
+      "types": "./dist/releases/github-listing.d.mts",
       "default": "./dist/releases/github-listing.js"
     },
     "./releases/github-retry-config": {
-      "source": "./src/releases/github-retry-config.ts",
-      "types": "./dist/releases/github-retry-config.d.ts",
+      "source": "./src/releases/github-retry-config.mts",
+      "types": "./dist/releases/github-retry-config.d.mts",
       "default": "./dist/releases/github-retry-config.js"
     },
     "./releases/github-types": {
-      "source": "./src/releases/github-types.ts",
-      "types": "./dist/releases/github-types.d.ts",
+      "source": "./src/releases/github-types.mts",
+      "types": "./dist/releases/github-types.d.mts",
       "default": "./dist/releases/github-types.js"
     },
     "./releases/socket-btm": {
-      "source": "./src/releases/socket-btm.ts",
-      "types": "./dist/releases/socket-btm.d.ts",
+      "source": "./src/releases/socket-btm.mts",
+      "types": "./dist/releases/socket-btm.d.mts",
       "default": "./dist/releases/socket-btm.js"
     },
     "./releases/socket-btm-binary-naming": {
-      "source": "./src/releases/socket-btm-binary-naming.ts",
-      "types": "./dist/releases/socket-btm-binary-naming.d.ts",
+      "source": "./src/releases/socket-btm-binary-naming.mts",
+      "types": "./dist/releases/socket-btm-binary-naming.d.mts",
       "default": "./dist/releases/socket-btm-binary-naming.js"
     },
     "./schema/parse": {
-      "source": "./src/schema/parse.ts",
-      "types": "./dist/schema/parse.d.ts",
+      "source": "./src/schema/parse.mts",
+      "types": "./dist/schema/parse.d.mts",
       "default": "./dist/schema/parse.js"
     },
     "./schema/types": {
-      "source": "./src/schema/types.ts",
-      "types": "./dist/schema/types.d.ts",
+      "source": "./src/schema/types.mts",
+      "types": "./dist/schema/types.d.mts",
       "default": "./dist/schema/types.js"
     },
     "./schema/validate": {
-      "source": "./src/schema/validate.ts",
-      "types": "./dist/schema/validate.d.ts",
+      "source": "./src/schema/validate.mts",
+      "types": "./dist/schema/validate.d.mts",
       "default": "./dist/schema/validate.js"
     },
     "./secrets/addon": {
-      "source": "./src/secrets/addon.ts",
-      "types": "./dist/secrets/addon.d.ts",
+      "source": "./src/secrets/addon.mts",
+      "types": "./dist/secrets/addon.d.mts",
       "default": "./dist/secrets/addon.js"
     },
     "./secrets/broker": {
-      "source": "./src/secrets/broker.ts",
-      "types": "./dist/secrets/broker.d.ts",
+      "source": "./src/secrets/broker.mts",
+      "types": "./dist/secrets/broker.d.mts",
       "default": "./dist/secrets/broker.js"
     },
     "./secrets/compare": {
-      "source": "./src/secrets/compare.ts",
-      "types": "./dist/secrets/compare.d.ts",
+      "source": "./src/secrets/compare.mts",
+      "types": "./dist/secrets/compare.d.mts",
       "default": "./dist/secrets/compare.js"
     },
     "./secrets/find": {
-      "source": "./src/secrets/find.ts",
-      "types": "./dist/secrets/find.d.ts",
+      "source": "./src/secrets/find.mts",
+      "types": "./dist/secrets/find.d.mts",
       "default": "./dist/secrets/find.js"
     },
     "./secrets/keychain": {
-      "source": "./src/secrets/keychain.ts",
-      "types": "./dist/secrets/keychain.d.ts",
+      "source": "./src/secrets/keychain.mts",
+      "types": "./dist/secrets/keychain.d.mts",
       "default": "./dist/secrets/keychain.js"
     },
     "./secrets/linux": {
-      "source": "./src/secrets/linux.ts",
-      "types": "./dist/secrets/linux.d.ts",
+      "source": "./src/secrets/linux.mts",
+      "types": "./dist/secrets/linux.d.mts",
       "default": "./dist/secrets/linux.js"
     },
     "./secrets/login": {
-      "source": "./src/secrets/login.ts",
-      "types": "./dist/secrets/login.d.ts",
+      "source": "./src/secrets/login.mts",
+      "types": "./dist/secrets/login.d.mts",
       "default": "./dist/secrets/login.js"
     },
     "./secrets/macos": {
-      "source": "./src/secrets/macos.ts",
-      "types": "./dist/secrets/macos.d.ts",
+      "source": "./src/secrets/macos.mts",
+      "types": "./dist/secrets/macos.d.mts",
       "default": "./dist/secrets/macos.js"
     },
     "./secrets/oauth-pkce": {
-      "source": "./src/secrets/oauth-pkce.ts",
-      "types": "./dist/secrets/oauth-pkce.d.ts",
+      "source": "./src/secrets/oauth-pkce.mts",
+      "types": "./dist/secrets/oauth-pkce.d.mts",
       "default": "./dist/secrets/oauth-pkce.js"
     },
     "./secrets/patterns": {
-      "source": "./src/secrets/patterns.ts",
-      "types": "./dist/secrets/patterns.d.ts",
+      "source": "./src/secrets/patterns.mts",
+      "types": "./dist/secrets/patterns.d.mts",
       "default": "./dist/secrets/patterns.js"
     },
     "./secrets/rc": {
-      "source": "./src/secrets/rc.ts",
-      "types": "./dist/secrets/rc.d.ts",
+      "source": "./src/secrets/rc.mts",
+      "types": "./dist/secrets/rc.d.mts",
       "default": "./dist/secrets/rc.js"
     },
     "./secrets/redact": {
-      "source": "./src/secrets/redact.ts",
-      "types": "./dist/secrets/redact.d.ts",
+      "source": "./src/secrets/redact.mts",
+      "types": "./dist/secrets/redact.d.mts",
       "default": "./dist/secrets/redact.js"
     },
     "./secrets/socket-api-token": {
-      "source": "./src/secrets/socket-api-token.ts",
-      "types": "./dist/secrets/socket-api-token.d.ts",
+      "source": "./src/secrets/socket-api-token.mts",
+      "types": "./dist/secrets/socket-api-token.d.mts",
       "default": "./dist/secrets/socket-api-token.js"
     },
     "./secrets/types": {
-      "source": "./src/secrets/types.ts",
-      "types": "./dist/secrets/types.d.ts",
+      "source": "./src/secrets/types.mts",
+      "types": "./dist/secrets/types.d.mts",
       "default": "./dist/secrets/types.js"
     },
     "./secrets/windows": {
-      "source": "./src/secrets/windows.ts",
-      "types": "./dist/secrets/windows.d.ts",
+      "source": "./src/secrets/windows.mts",
+      "types": "./dist/secrets/windows.d.mts",
       "default": "./dist/secrets/windows.js"
     },
     "./shell/command-args": {
-      "source": "./src/shell/command-args.ts",
-      "types": "./dist/shell/command-args.d.ts",
+      "source": "./src/shell/command-args.mts",
+      "types": "./dist/shell/command-args.d.mts",
       "default": "./dist/shell/command-args.js"
     },
     "./shell/parse": {
-      "source": "./src/shell/parse.ts",
-      "types": "./dist/shell/parse.d.ts",
+      "source": "./src/shell/parse.mts",
+      "types": "./dist/shell/parse.d.mts",
       "default": "./dist/shell/parse.js"
     },
     "./shell/quote": {
-      "source": "./src/shell/quote.ts",
-      "types": "./dist/shell/quote.d.ts",
+      "source": "./src/shell/quote.mts",
+      "types": "./dist/shell/quote.d.mts",
       "default": "./dist/shell/quote.js"
     },
     "./sorts/natural": {
-      "source": "./src/sorts/natural.ts",
-      "types": "./dist/sorts/natural.d.ts",
+      "source": "./src/sorts/natural.mts",
+      "types": "./dist/sorts/natural.d.mts",
       "default": "./dist/sorts/natural.js"
     },
     "./sorts/strings": {
-      "source": "./src/sorts/strings.ts",
-      "types": "./dist/sorts/strings.d.ts",
+      "source": "./src/sorts/strings.mts",
+      "types": "./dist/sorts/strings.d.mts",
       "default": "./dist/sorts/strings.js"
     },
     "./sorts/types": {
-      "source": "./src/sorts/types.ts",
-      "types": "./dist/sorts/types.d.ts",
+      "source": "./src/sorts/types.mts",
+      "types": "./dist/sorts/types.d.mts",
       "default": "./dist/sorts/types.js"
     },
     "./spinner/create-spinner-class": {
-      "source": "./src/spinner/create-spinner-class.ts",
-      "types": "./dist/spinner/create-spinner-class.d.ts",
+      "source": "./src/spinner/create-spinner-class.mts",
+      "types": "./dist/spinner/create-spinner-class.d.mts",
       "default": "./dist/spinner/create-spinner-class.js"
     },
     "./spinner/default": {
-      "source": "./src/spinner/default.ts",
-      "types": "./dist/spinner/default.d.ts",
+      "source": "./src/spinner/default.mts",
+      "types": "./dist/spinner/default.d.mts",
       "default": "./dist/spinner/default.js"
     },
     "./spinner/format": {
-      "source": "./src/spinner/format.ts",
-      "types": "./dist/spinner/format.d.ts",
+      "source": "./src/spinner/format.mts",
+      "types": "./dist/spinner/format.d.mts",
       "default": "./dist/spinner/format.js"
     },
     "./spinner/spinner": {
-      "source": "./src/spinner/spinner.ts",
-      "types": "./dist/spinner/spinner.d.ts",
+      "source": "./src/spinner/spinner.mts",
+      "types": "./dist/spinner/spinner.d.mts",
       "default": "./dist/spinner/spinner.js"
     },
     "./spinner/spinner-internals": {
-      "source": "./src/spinner/spinner-internals.ts",
-      "types": "./dist/spinner/spinner-internals.d.ts",
+      "source": "./src/spinner/spinner-internals.mts",
+      "types": "./dist/spinner/spinner-internals.d.mts",
       "default": "./dist/spinner/spinner-internals.js"
     },
     "./spinner/spinner-shimmer-methods": {
-      "source": "./src/spinner/spinner-shimmer-methods.ts",
-      "types": "./dist/spinner/spinner-shimmer-methods.d.ts",
+      "source": "./src/spinner/spinner-shimmer-methods.mts",
+      "types": "./dist/spinner/spinner-shimmer-methods.d.mts",
       "default": "./dist/spinner/spinner-shimmer-methods.js"
     },
     "./spinner/spinner-status-methods": {
-      "source": "./src/spinner/spinner-status-methods.ts",
-      "types": "./dist/spinner/spinner-status-methods.d.ts",
+      "source": "./src/spinner/spinner-status-methods.mts",
+      "types": "./dist/spinner/spinner-status-methods.d.mts",
       "default": "./dist/spinner/spinner-status-methods.js"
     },
     "./spinner/types": {
-      "source": "./src/spinner/types.ts",
-      "types": "./dist/spinner/types.d.ts",
+      "source": "./src/spinner/types.mts",
+      "types": "./dist/spinner/types.d.mts",
       "default": "./dist/spinner/types.js"
     },
     "./spinner/with": {
-      "source": "./src/spinner/with.ts",
-      "types": "./dist/spinner/with.d.ts",
+      "source": "./src/spinner/with.mts",
+      "types": "./dist/spinner/with.d.mts",
       "default": "./dist/spinner/with.js"
     },
     "./stdio/clear": {
-      "source": "./src/stdio/clear.ts",
-      "types": "./dist/stdio/clear.d.ts",
+      "source": "./src/stdio/clear.mts",
+      "types": "./dist/stdio/clear.d.mts",
       "default": "./dist/stdio/clear.js"
     },
     "./stdio/divider": {
-      "source": "./src/stdio/divider.ts",
-      "types": "./dist/stdio/divider.d.ts",
+      "source": "./src/stdio/divider.mts",
+      "types": "./dist/stdio/divider.d.mts",
       "default": "./dist/stdio/divider.js"
     },
     "./stdio/footer": {
-      "source": "./src/stdio/footer.ts",
-      "types": "./dist/stdio/footer.d.ts",
+      "source": "./src/stdio/footer.mts",
+      "types": "./dist/stdio/footer.d.mts",
       "default": "./dist/stdio/footer.js"
     },
     "./stdio/header": {
-      "source": "./src/stdio/header.ts",
-      "types": "./dist/stdio/header.d.ts",
+      "source": "./src/stdio/header.mts",
+      "types": "./dist/stdio/header.d.mts",
       "default": "./dist/stdio/header.js"
     },
     "./stdio/progress": {
-      "source": "./src/stdio/progress.ts",
-      "types": "./dist/stdio/progress.d.ts",
+      "source": "./src/stdio/progress.mts",
+      "types": "./dist/stdio/progress.d.mts",
       "default": "./dist/stdio/progress.js"
     },
     "./stdio/prompts": {
-      "source": "./src/stdio/prompts.ts",
-      "types": "./dist/stdio/prompts.d.ts",
+      "source": "./src/stdio/prompts.mts",
+      "types": "./dist/stdio/prompts.d.mts",
       "default": "./dist/stdio/prompts.js"
     },
     "./stdio/prompts-types": {
-      "source": "./src/stdio/prompts-types.ts",
-      "types": "./dist/stdio/prompts-types.d.ts",
+      "source": "./src/stdio/prompts-types.mts",
+      "types": "./dist/stdio/prompts-types.d.mts",
       "default": "./dist/stdio/prompts-types.js"
     },
     "./stdio/stderr": {
-      "source": "./src/stdio/stderr.ts",
-      "types": "./dist/stdio/stderr.d.ts",
+      "source": "./src/stdio/stderr.mts",
+      "types": "./dist/stdio/stderr.d.mts",
       "default": "./dist/stdio/stderr.js"
     },
     "./stdio/stdout": {
-      "source": "./src/stdio/stdout.ts",
-      "types": "./dist/stdio/stdout.d.ts",
+      "source": "./src/stdio/stdout.mts",
+      "types": "./dist/stdio/stdout.d.mts",
       "default": "./dist/stdio/stdout.js"
     },
     "./streams/parallel": {
-      "source": "./src/streams/parallel.ts",
-      "types": "./dist/streams/parallel.d.ts",
+      "source": "./src/streams/parallel.mts",
+      "types": "./dist/streams/parallel.d.mts",
       "default": "./dist/streams/parallel.js"
     },
     "./streams/transform": {
-      "source": "./src/streams/transform.ts",
-      "types": "./dist/streams/transform.d.ts",
+      "source": "./src/streams/transform.mts",
+      "types": "./dist/streams/transform.d.mts",
       "default": "./dist/streams/transform.js"
     },
     "./strings/format": {
-      "source": "./src/strings/format.ts",
+      "source": "./src/strings/format.mts",
       "browser": {
-        "types": "./dist/strings/format.d.ts",
+        "types": "./dist/strings/format.d.mts",
         "default": "./dist/strings/format.js"
       },
-      "types": "./dist/strings/format.d.ts",
+      "types": "./dist/strings/format.d.mts",
       "default": "./dist/strings/format.js"
     },
     "./strings/lines": {
-      "source": "./src/strings/lines.ts",
+      "source": "./src/strings/lines.mts",
       "browser": {
-        "types": "./dist/strings/lines.d.ts",
+        "types": "./dist/strings/lines.d.mts",
         "default": "./dist/strings/lines.js"
       },
-      "types": "./dist/strings/lines.d.ts",
+      "types": "./dist/strings/lines.d.mts",
       "default": "./dist/strings/lines.js"
     },
     "./strings/predicates": {
-      "source": "./src/strings/predicates.ts",
+      "source": "./src/strings/predicates.mts",
       "browser": {
-        "types": "./dist/strings/predicates.d.ts",
+        "types": "./dist/strings/predicates.d.mts",
         "default": "./dist/strings/predicates.js"
       },
-      "types": "./dist/strings/predicates.d.ts",
+      "types": "./dist/strings/predicates.d.mts",
       "default": "./dist/strings/predicates.js"
     },
     "./strings/search": {
-      "source": "./src/strings/search.ts",
+      "source": "./src/strings/search.mts",
       "browser": {
-        "types": "./dist/strings/search.d.ts",
+        "types": "./dist/strings/search.d.mts",
         "default": "./dist/strings/search.js"
       },
-      "types": "./dist/strings/search.d.ts",
+      "types": "./dist/strings/search.d.mts",
       "default": "./dist/strings/search.js"
     },
     "./strings/transform": {
-      "source": "./src/strings/transform.ts",
+      "source": "./src/strings/transform.mts",
       "browser": {
-        "types": "./dist/strings/transform.d.ts",
+        "types": "./dist/strings/transform.d.mts",
         "default": "./dist/strings/transform.js"
       },
-      "types": "./dist/strings/transform.d.ts",
+      "types": "./dist/strings/transform.d.mts",
       "default": "./dist/strings/transform.js"
     },
     "./strings/types": {
-      "source": "./src/strings/types.ts",
+      "source": "./src/strings/types.mts",
       "browser": {
-        "types": "./dist/strings/types.d.ts",
+        "types": "./dist/strings/types.d.mts",
         "default": "./dist/strings/types.js"
       },
-      "types": "./dist/strings/types.d.ts",
+      "types": "./dist/strings/types.d.mts",
       "default": "./dist/strings/types.js"
     },
     "./strings/width": {
-      "source": "./src/strings/width.ts",
+      "source": "./src/strings/width.mts",
       "browser": {
-        "types": "./dist/strings/width.d.ts",
+        "types": "./dist/strings/width.d.mts",
         "default": "./dist/strings/width.js"
       },
-      "types": "./dist/strings/width.d.ts",
+      "types": "./dist/strings/width.d.mts",
       "default": "./dist/strings/width.js"
     },
     "./temporal/instant": {
-      "source": "./src/temporal/instant.ts",
-      "types": "./dist/temporal/instant.d.ts",
+      "source": "./src/temporal/instant.mts",
+      "types": "./dist/temporal/instant.d.mts",
       "default": "./dist/temporal/instant.js"
     },
     "./temporal/now": {
-      "source": "./src/temporal/now.ts",
-      "types": "./dist/temporal/now.d.ts",
+      "source": "./src/temporal/now.mts",
+      "types": "./dist/temporal/now.d.mts",
       "default": "./dist/temporal/now.js"
     },
     "./temporal/slots": {
-      "source": "./src/temporal/slots.ts",
-      "types": "./dist/temporal/slots.d.ts",
+      "source": "./src/temporal/slots.mts",
+      "types": "./dist/temporal/slots.d.mts",
       "default": "./dist/temporal/slots.js"
     },
     "./temporal/system": {
-      "source": "./src/temporal/system.ts",
-      "types": "./dist/temporal/system.d.ts",
+      "source": "./src/temporal/system.mts",
+      "types": "./dist/temporal/system.d.mts",
       "default": "./dist/temporal/system.js"
     },
     "./temporal/temporal": {
-      "source": "./src/temporal/temporal.ts",
-      "types": "./dist/temporal/temporal.d.ts",
+      "source": "./src/temporal/temporal.mts",
+      "types": "./dist/temporal/temporal.d.mts",
       "default": "./dist/temporal/temporal.js"
     },
     "./term/ansi/constants": {
-      "source": "./src/term/ansi/constants.ts",
-      "types": "./dist/term/ansi/constants.d.ts",
+      "source": "./src/term/ansi/constants.mts",
+      "types": "./dist/term/ansi/constants.d.mts",
       "default": "./dist/term/ansi/constants.js"
     },
     "./term/ansi/strip": {
-      "source": "./src/term/ansi/strip.ts",
-      "types": "./dist/term/ansi/strip.d.ts",
+      "source": "./src/term/ansi/strip.mts",
+      "types": "./dist/term/ansi/strip.d.mts",
       "default": "./dist/term/ansi/strip.js"
     },
     "./term/colors/convert": {
-      "source": "./src/term/colors/convert.ts",
-      "types": "./dist/term/colors/convert.d.ts",
+      "source": "./src/term/colors/convert.mts",
+      "types": "./dist/term/colors/convert.d.mts",
       "default": "./dist/term/colors/convert.js"
     },
     "./term/colors/palette/named": {
-      "source": "./src/term/colors/palette/named.ts",
-      "types": "./dist/term/colors/palette/named.d.ts",
+      "source": "./src/term/colors/palette/named.mts",
+      "types": "./dist/term/colors/palette/named.d.mts",
       "default": "./dist/term/colors/palette/named.js"
     },
     "./term/colors/palette/socket": {
-      "source": "./src/term/colors/palette/socket.ts",
-      "types": "./dist/term/colors/palette/socket.d.ts",
+      "source": "./src/term/colors/palette/socket.mts",
+      "types": "./dist/term/colors/palette/socket.d.mts",
       "default": "./dist/term/colors/palette/socket.js"
     },
     "./term/colors/types": {
-      "source": "./src/term/colors/types.ts",
-      "types": "./dist/term/colors/types.d.ts",
+      "source": "./src/term/colors/types.mts",
+      "types": "./dist/term/colors/types.d.mts",
       "default": "./dist/term/colors/types.js"
     },
     "./term/effects/pulse-frames": {
-      "source": "./src/term/effects/pulse-frames.ts",
-      "types": "./dist/term/effects/pulse-frames.d.ts",
+      "source": "./src/term/effects/pulse-frames.mts",
+      "types": "./dist/term/effects/pulse-frames.d.mts",
       "default": "./dist/term/effects/pulse-frames.js"
     },
     "./term/effects/shimmer": {
-      "source": "./src/term/effects/shimmer.ts",
-      "types": "./dist/term/effects/shimmer.d.ts",
+      "source": "./src/term/effects/shimmer.mts",
+      "types": "./dist/term/effects/shimmer.d.mts",
       "default": "./dist/term/effects/shimmer.js"
     },
     "./term/effects/shimmer-keyframes": {
-      "source": "./src/term/effects/shimmer-keyframes.ts",
-      "types": "./dist/term/effects/shimmer-keyframes.d.ts",
+      "source": "./src/term/effects/shimmer-keyframes.mts",
+      "types": "./dist/term/effects/shimmer-keyframes.d.mts",
       "default": "./dist/term/effects/shimmer-keyframes.js"
     },
     "./term/effects/shimmer-terminal": {
-      "source": "./src/term/effects/shimmer-terminal.ts",
-      "types": "./dist/term/effects/shimmer-terminal.d.ts",
+      "source": "./src/term/effects/shimmer-terminal.mts",
+      "types": "./dist/term/effects/shimmer-terminal.d.mts",
       "default": "./dist/term/effects/shimmer-terminal.js"
     },
     "./term/tables/bordered": {
-      "source": "./src/term/tables/bordered.ts",
-      "types": "./dist/term/tables/bordered.d.ts",
+      "source": "./src/term/tables/bordered.mts",
+      "types": "./dist/term/tables/bordered.d.mts",
       "default": "./dist/term/tables/bordered.js"
     },
     "./term/tables/padding": {
-      "source": "./src/term/tables/padding.ts",
-      "types": "./dist/term/tables/padding.d.ts",
+      "source": "./src/term/tables/padding.mts",
+      "types": "./dist/term/tables/padding.d.mts",
       "default": "./dist/term/tables/padding.js"
     },
     "./term/tables/simple": {
-      "source": "./src/term/tables/simple.ts",
-      "types": "./dist/term/tables/simple.d.ts",
+      "source": "./src/term/tables/simple.mts",
+      "types": "./dist/term/tables/simple.d.mts",
       "default": "./dist/term/tables/simple.js"
     },
     "./term/tables/types": {
-      "source": "./src/term/tables/types.ts",
-      "types": "./dist/term/tables/types.d.ts",
+      "source": "./src/term/tables/types.mts",
+      "types": "./dist/term/tables/types.d.mts",
       "default": "./dist/term/tables/types.js"
     },
     "./term/themes/context": {
-      "source": "./src/term/themes/context.ts",
-      "types": "./dist/term/themes/context.d.ts",
+      "source": "./src/term/themes/context.mts",
+      "types": "./dist/term/themes/context.d.mts",
       "default": "./dist/term/themes/context.js"
     },
     "./term/themes/resolve": {
-      "source": "./src/term/themes/resolve.ts",
-      "types": "./dist/term/themes/resolve.d.ts",
+      "source": "./src/term/themes/resolve.mts",
+      "types": "./dist/term/themes/resolve.d.mts",
       "default": "./dist/term/themes/resolve.js"
     },
     "./term/themes/themes": {
-      "source": "./src/term/themes/themes.ts",
-      "types": "./dist/term/themes/themes.d.ts",
+      "source": "./src/term/themes/themes.mts",
+      "types": "./dist/term/themes/themes.d.mts",
       "default": "./dist/term/themes/themes.js"
     },
     "./term/themes/types": {
-      "source": "./src/term/themes/types.ts",
-      "types": "./dist/term/themes/types.d.ts",
+      "source": "./src/term/themes/types.mts",
+      "types": "./dist/term/themes/types.d.mts",
       "default": "./dist/term/themes/types.js"
     },
     "./url/assert-safe": {
-      "source": "./src/url/assert-safe.ts",
+      "source": "./src/url/assert-safe.mts",
       "browser": {
-        "types": "./dist/url/assert-safe.d.ts",
+        "types": "./dist/url/assert-safe.d.mts",
         "default": "./dist/url/assert-safe.js"
       },
-      "types": "./dist/url/assert-safe.d.ts",
+      "types": "./dist/url/assert-safe.d.mts",
       "default": "./dist/url/assert-safe.js"
     },
     "./url/parse": {
-      "source": "./src/url/parse.ts",
+      "source": "./src/url/parse.mts",
       "browser": {
-        "types": "./dist/url/parse.d.ts",
+        "types": "./dist/url/parse.d.mts",
         "default": "./dist/url/parse.js"
       },
-      "types": "./dist/url/parse.d.ts",
+      "types": "./dist/url/parse.d.mts",
       "default": "./dist/url/parse.js"
     },
     "./url/predicates": {
-      "source": "./src/url/predicates.ts",
+      "source": "./src/url/predicates.mts",
       "browser": {
-        "types": "./dist/url/predicates.d.ts",
+        "types": "./dist/url/predicates.d.mts",
         "default": "./dist/url/predicates.js"
       },
-      "types": "./dist/url/predicates.d.ts",
+      "types": "./dist/url/predicates.d.mts",
       "default": "./dist/url/predicates.js"
     },
     "./url/search-params": {
-      "source": "./src/url/search-params.ts",
+      "source": "./src/url/search-params.mts",
       "browser": {
-        "types": "./dist/url/search-params.d.ts",
+        "types": "./dist/url/search-params.d.mts",
         "default": "./dist/url/search-params.js"
       },
-      "types": "./dist/url/search-params.d.ts",
+      "types": "./dist/url/search-params.d.mts",
       "default": "./dist/url/search-params.js"
     },
     "./url/types": {
-      "source": "./src/url/types.ts",
+      "source": "./src/url/types.mts",
       "browser": {
-        "types": "./dist/url/types.d.ts",
+        "types": "./dist/url/types.d.mts",
         "default": "./dist/url/types.js"
       },
-      "types": "./dist/url/types.d.ts",
+      "types": "./dist/url/types.d.mts",
       "default": "./dist/url/types.js"
     },
     "./versions/compare": {
-      "source": "./src/versions/compare.ts",
+      "source": "./src/versions/compare.mts",
       "browser": {
-        "types": "./dist/versions/compare.d.ts",
+        "types": "./dist/versions/compare.d.mts",
         "default": "./dist/versions/compare.js"
       },
-      "types": "./dist/versions/compare.d.ts",
+      "types": "./dist/versions/compare.d.mts",
       "default": "./dist/versions/compare.js"
     },
     "./versions/modify": {
-      "source": "./src/versions/modify.ts",
+      "source": "./src/versions/modify.mts",
       "browser": {
-        "types": "./dist/versions/modify.d.ts",
+        "types": "./dist/versions/modify.d.mts",
         "default": "./dist/versions/modify.js"
       },
-      "types": "./dist/versions/modify.d.ts",
+      "types": "./dist/versions/modify.d.mts",
       "default": "./dist/versions/modify.js"
     },
     "./versions/parse": {
-      "source": "./src/versions/parse.ts",
+      "source": "./src/versions/parse.mts",
       "browser": {
-        "types": "./dist/versions/parse.d.ts",
+        "types": "./dist/versions/parse.d.mts",
         "default": "./dist/versions/parse.js"
       },
-      "types": "./dist/versions/parse.d.ts",
+      "types": "./dist/versions/parse.d.mts",
       "default": "./dist/versions/parse.js"
     },
     "./versions/range": {
-      "source": "./src/versions/range.ts",
+      "source": "./src/versions/range.mts",
       "browser": {
-        "types": "./dist/versions/range.d.ts",
+        "types": "./dist/versions/range.d.mts",
         "default": "./dist/versions/range.js"
       },
-      "types": "./dist/versions/range.d.ts",
+      "types": "./dist/versions/range.d.mts",
       "default": "./dist/versions/range.js"
     },
     "./versions/types": {
-      "source": "./src/versions/types.ts",
+      "source": "./src/versions/types.mts",
       "browser": {
-        "types": "./dist/versions/types.d.ts",
+        "types": "./dist/versions/types.d.mts",
         "default": "./dist/versions/types.js"
       },
-      "types": "./dist/versions/types.d.ts",
+      "types": "./dist/versions/types.d.mts",
       "default": "./dist/versions/types.js"
     },
     "./words/article": {
-      "source": "./src/words/article.ts",
+      "source": "./src/words/article.mts",
       "browser": {
-        "types": "./dist/words/article.d.ts",
+        "types": "./dist/words/article.d.mts",
         "default": "./dist/words/article.js"
       },
-      "types": "./dist/words/article.d.ts",
+      "types": "./dist/words/article.d.mts",
       "default": "./dist/words/article.js"
     },
     "./words/capitalize": {
-      "source": "./src/words/capitalize.ts",
+      "source": "./src/words/capitalize.mts",
       "browser": {
-        "types": "./dist/words/capitalize.d.ts",
+        "types": "./dist/words/capitalize.d.mts",
         "default": "./dist/words/capitalize.js"
       },
-      "types": "./dist/words/capitalize.d.ts",
+      "types": "./dist/words/capitalize.d.mts",
       "default": "./dist/words/capitalize.js"
     },
     "./words/pluralize": {
-      "source": "./src/words/pluralize.ts",
+      "source": "./src/words/pluralize.mts",
       "browser": {
-        "types": "./dist/words/pluralize.d.ts",
+        "types": "./dist/words/pluralize.d.mts",
         "default": "./dist/words/pluralize.js"
       },
-      "types": "./dist/words/pluralize.d.ts",
+      "types": "./dist/words/pluralize.d.mts",
       "default": "./dist/words/pluralize.js"
     },
     "./words/types": {
-      "source": "./src/words/types.ts",
+      "source": "./src/words/types.mts",
       "browser": {
-        "types": "./dist/words/types.d.ts",
+        "types": "./dist/words/types.d.mts",
         "default": "./dist/words/types.js"
       },
-      "types": "./dist/words/types.d.ts",
+      "types": "./dist/words/types.d.mts",
       "default": "./dist/words/types.js"
     },
     "./data/extensions.json": "./data/extensions.json",

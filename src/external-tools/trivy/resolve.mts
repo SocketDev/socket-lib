@@ -1,0 +1,90 @@
+/**
+ * @file `resolveTrivy()` — Trivy resolution entry point. Tries each source in
+ *   order:
+ *
+ *   1. VFS — smol binary's embedded Trivy, when packed
+ *   2. PATH — `trivy` on the system PATH
+ *   3. download — upstream GitHub release archive (only when `downloadIfMissing`
+ *      is passed) Returns `undefined` if all of the enabled sources miss.
+ *      Memoized per option-shape.
+ */
+
+import { trivyFromDownload } from './from-download.mjs'
+import { trivyFromPath } from './from-path.mjs'
+import { trivyFromVfs } from './from-vfs.mjs'
+
+import type { BinaryDownloader } from '../from-download.mjs'
+import type { HashInput } from '../../crypto/integrity.mjs'
+import type { ResolvedTrivy } from './types.mjs'
+
+import { MapCtor } from '../../primordials/map-set.mjs'
+
+export interface ResolveTrivyOptions {
+  downloadIfMissing?:
+    | {
+        version: string
+        platformArch: string
+        integrity?: HashInput | undefined
+        cacheDir?: string | undefined
+        downloader?: BinaryDownloader | undefined
+      }
+    | undefined
+}
+
+const resolutionCache = new MapCtor<
+  string,
+  Promise<ResolvedTrivy | undefined>
+>()
+
+export function cacheKey(options: ResolveTrivyOptions | undefined): string {
+  options = { __proto__: null, ...options } as typeof options
+  if (!options?.downloadIfMissing) {
+    return 'local-only'
+  }
+  const { cacheDir, integrity, platformArch, version } =
+    options.downloadIfMissing
+  const integrityKey =
+    typeof integrity === 'string' ? integrity : integrity ? integrity.sri : ''
+  return `dl:${version}:${platformArch}:${integrityKey}:${cacheDir ?? ''}`
+}
+
+export async function doResolveTrivy(
+  options?: ResolveTrivyOptions | undefined,
+): Promise<ResolvedTrivy | undefined> {
+  options = { __proto__: null, ...options } as typeof options
+  const fromVfs = await trivyFromVfs()
+  /* c8 ignore start - smol Node binary only. */
+  if (fromVfs) {
+    return fromVfs
+  }
+  /* c8 ignore stop */
+  const fromPath = await trivyFromPath()
+  if (fromPath) {
+    return fromPath
+  }
+  if (options?.downloadIfMissing) {
+    return trivyFromDownload(options.downloadIfMissing)
+  }
+  return undefined
+}
+
+/**
+ * @unused No internal or Socket consumers; only its unit tests exercise it.
+ */
+/* c8 ignore start - test-only escape hatch. */
+export function resetTrivyResolution(): void {
+  resolutionCache.clear()
+}
+/* c8 ignore stop */
+
+export function resolveTrivy(
+  options?: ResolveTrivyOptions | undefined,
+): Promise<ResolvedTrivy | undefined> {
+  const key = cacheKey(options)
+  let cached = resolutionCache.get(key)
+  if (!cached) {
+    cached = doResolveTrivy(options)
+    resolutionCache.set(key, cached)
+  }
+  return cached
+}
