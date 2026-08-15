@@ -10,9 +10,15 @@ import { promises as fsPromises } from 'node:fs'
 
 import { getSocketDlxDir } from '../../paths/socket.mjs'
 import { safeMkdir } from '../../fs/safe.mjs'
-import { downloadAndExtractTool, downloadToolArchive } from '../from-download.mjs'
+import {
+  downloadAndExtractTool,
+  downloadToolArchive,
+} from '../from-download.mjs'
 
-import { getOpengrepAssetEntry, getOpengrepDownloadUrl } from './asset-names.mjs'
+import {
+  getOpengrepAssetEntry,
+  getOpengrepDownloadUrl,
+} from './asset-names.mjs'
 
 import type { BinaryDownloader } from '../from-download.mjs'
 import type { HashInput } from '../../crypto/integrity.mjs'

@@ -4,7 +4,10 @@
  *   cache.
  */
 
-import { getPackumentCache, getPacoteCachePath } from '../constants/packages.mjs'
+import {
+  getPackumentCache,
+  getPacoteCachePath,
+} from '../constants/packages.mjs'
 import cacache from '../external/cacache.js'
 import libnpmpack from '../external/libnpmpack.js'
 import pacote from '../external/pacote.js'

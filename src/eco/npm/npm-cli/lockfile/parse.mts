@@ -43,7 +43,10 @@
 
 import { ManifestError } from '../../../manifest/manifest-error.mjs'
 import { errorMessage } from '../../../../errors/message.mjs'
-import { ArrayFrom, ArrayPrototypePush } from '../../../../primordials/array.mjs'
+import {
+  ArrayFrom,
+  ArrayPrototypePush,
+} from '../../../../primordials/array.mjs'
 import { RangeErrorCtor } from '../../../../primordials/error.mjs'
 import { JSONParse } from '../../../../primordials/json.mjs'
 import { SetCtor } from '../../../../primordials/map-set.mjs'

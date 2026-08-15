@@ -16,7 +16,10 @@ import process from 'node:process'
 import { SOCKET_LIB_NAME, SOCKET_LIB_VERSION } from '../constants/socket.mjs'
 import { getEnvValue } from '../env/rewire.mjs'
 import { pkgNameToSlug } from '../packages/specs.mjs'
-import { ArrayPrototypeJoin, ArrayPrototypePush } from '../primordials/array.mjs'
+import {
+  ArrayPrototypeJoin,
+  ArrayPrototypePush,
+} from '../primordials/array.mjs'
 import {
   StringPrototypeCharAt,
   StringPrototypeCharCodeAt,

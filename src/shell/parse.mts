@@ -9,7 +9,10 @@
  */
 
 import { parse as shellParse } from '../external/shell-quote.js'
-import { ArrayPrototypePush, ArrayPrototypeSlice } from '../primordials/array.mjs'
+import {
+  ArrayPrototypePush,
+  ArrayPrototypeSlice,
+} from '../primordials/array.mjs'
 
 import type { ParseEntry } from '../external/shell-quote.js'
 

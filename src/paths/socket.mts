@@ -22,7 +22,12 @@ import {
 import { getUserprofile } from '../env/windows.mjs'
 import { getXdgRuntimeDir } from '../env/xdg.mjs'
 
-import { CACHE_DIR, CACHE_TTL_DIR, DOT_SOCKET_DIR, RUN_DIR } from './dirnames.mjs'
+import {
+  CACHE_DIR,
+  CACHE_TTL_DIR,
+  DOT_SOCKET_DIR,
+  RUN_DIR,
+} from './dirnames.mjs'
 import { normalizePath } from './normalize.mjs'
 import { getPathValue } from './rewire.mjs'
 

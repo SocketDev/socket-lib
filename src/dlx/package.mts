@@ -45,7 +45,10 @@ import { generateCacheKey } from './cache.mjs'
 
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
-import { findBinaryPath, makePackageBinsExecutable } from './binary-resolution.mjs'
+import {
+  findBinaryPath,
+  makePackageBinsExecutable,
+} from './binary-resolution.mjs'
 import { checkFirewallPurls } from './firewall.mjs'
 import { parsePackageSpec } from './spec.mjs'
 

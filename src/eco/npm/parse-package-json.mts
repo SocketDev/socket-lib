@@ -16,7 +16,11 @@ import { JSONParse } from '../../primordials/json.mjs'
 import { ObjectFreeze, ObjectKeys } from '../../primordials/object.mjs'
 import { getSmolManifest } from '../../exe/smol/manifest.mjs'
 
-import type { DepType, ManifestDep, ParsedManifest } from '../manifest/types.mjs'
+import type {
+  DepType,
+  ManifestDep,
+  ParsedManifest,
+} from '../manifest/types.mjs'
 
 const PROD: DepType = 'prod'
 const DEV: DepType = 'dev'

@@ -16,7 +16,10 @@ import {
 
 import { getNodeFs } from '../node/fs.mjs'
 
-import type { AssetPattern, DownloadGitHubReleaseConfig } from './github-types.mjs'
+import type {
+  AssetPattern,
+  DownloadGitHubReleaseConfig,
+} from './github-types.mjs'
 
 import { ErrorCtor } from '../primordials/error.mjs'
 export type { Arch, Libc, Platform }

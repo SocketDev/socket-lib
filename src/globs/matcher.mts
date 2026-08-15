@@ -10,7 +10,11 @@ import { JSONStringify } from '../primordials/json.mjs'
 import { ObjectKeys } from '../primordials/object.mjs'
 import { StringPrototypeStartsWith } from '../primordials/string.mjs'
 
-import { getPicomatch, MATCHER_CACHE_MAX_SIZE, matcherCache } from './shared.mjs'
+import {
+  getPicomatch,
+  MATCHER_CACHE_MAX_SIZE,
+  matcherCache,
+} from './shared.mjs'
 
 import type { PicomatchOptions } from '../external/picomatch.js'
 import type NodePath from 'node:path'

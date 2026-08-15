@@ -38,7 +38,11 @@ export {
   PackumentNotFoundError,
   rememberStaleMeta,
 } from './meta-cache.mjs'
-export { sliceOneVersion, slicePackument, sliceVersionMeta } from './meta-slice.mjs'
+export {
+  sliceOneVersion,
+  slicePackument,
+  sliceVersionMeta,
+} from './meta-slice.mjs'
 export type {
   CachedPackumentEntry,
   CachedPackumentHit,

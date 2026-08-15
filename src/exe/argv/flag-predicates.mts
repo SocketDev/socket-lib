@@ -14,7 +14,10 @@
 
 import process from 'node:process'
 
-import { ArrayIsArray, ArrayPrototypeIncludes } from '../../primordials/array.mjs'
+import {
+  ArrayIsArray,
+  ArrayPrototypeIncludes,
+} from '../../primordials/array.mjs'
 
 import type { FlagInput, FlagValues } from './flag-types.mjs'
 

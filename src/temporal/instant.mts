@@ -23,7 +23,11 @@
 import { BigIntCtor } from '../primordials/globals.mjs'
 import { RangeErrorCtor, TypeErrorCtor } from '../primordials/error.mjs'
 
-import { getInstantNanoseconds, hasInstantSlot, setInstantSlots } from './slots.mjs'
+import {
+  getInstantNanoseconds,
+  hasInstantSlot,
+  setInstantSlots,
+} from './slots.mjs'
 
 import { JSONStringify } from '../primordials/json.mjs'
 

@@ -22,7 +22,10 @@ import { getCrypto, getFs } from './shared.mjs'
 import { httpRequestAttempt } from './request.mjs'
 import { HttpResponseError } from './response-types.mjs'
 
-import type { HttpDownloadOptions, HttpDownloadResult } from './download-types.mjs'
+import type {
+  HttpDownloadOptions,
+  HttpDownloadResult,
+} from './download-types.mjs'
 
 /**
  * Download a file from a URL to a local path with redirect support, retry

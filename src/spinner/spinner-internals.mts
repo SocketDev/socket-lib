@@ -5,7 +5,11 @@
  *   module focused on method wiring and under the file-size cap.
  */
 
-import type { ColorInherit, ColorRgb, ColorValue } from '../term/colors/types.mjs'
+import type {
+  ColorInherit,
+  ColorRgb,
+  ColorValue,
+} from '../term/colors/types.mjs'
 import { isRgbTuple, toRgb } from '../term/colors/convert.mjs'
 import type {
   Palette,

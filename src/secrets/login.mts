@@ -19,7 +19,10 @@
  *   action, and a background token lookup must never pop a browser.
  */
 
-import { SOCKET_API_TOKENS_URL, SOCKET_WEBSITE_URL } from '../constants/socket.mjs'
+import {
+  SOCKET_API_TOKENS_URL,
+  SOCKET_WEBSITE_URL,
+} from '../constants/socket.mjs'
 import passwordPrompt from '../external/@inquirer/password.js'
 import { httpRequest } from '../http-request/request.mjs'
 import { openUrl } from '../process/open-url.mjs'

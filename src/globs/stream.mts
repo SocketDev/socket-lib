@@ -11,7 +11,11 @@ import {
 } from '../paths/globs.mjs'
 import { ArrayIsArray } from '../primordials/array.mjs'
 
-import { defaultIgnore, getFastGlob, normalizeIgnorePatterns } from './shared.mjs'
+import {
+  defaultIgnore,
+  getFastGlob,
+  normalizeIgnorePatterns,
+} from './shared.mjs'
 
 import type { GlobOptions } from './types.mjs'
 import type { Options as FastGlobOptions } from 'fast-glob'

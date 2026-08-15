@@ -20,7 +20,10 @@ import {
 } from '../primordials/string.mjs'
 import { httpRequest } from './request.mjs'
 
-import type { ChecksumFile, FetchChecksumFileOptions } from './download-types.mjs'
+import type {
+  ChecksumFile,
+  FetchChecksumFileOptions,
+} from './download-types.mjs'
 
 // BSD `shasum -a 256` line: `SHA256 (<filename>) = <64-hex digest>`.
 // Group 1 = the filename, whatever sits inside the parens. Group 2 = the

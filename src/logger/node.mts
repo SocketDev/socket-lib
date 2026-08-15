@@ -43,7 +43,11 @@ import {
   resetIndentMethod,
 } from './indentation-methods.mjs'
 import { parseLoggerOptions } from './options.mjs'
-import { applyMethod, stepMethod, symbolApplyMethod } from './semantic-methods.mjs'
+import {
+  applyMethod,
+  stepMethod,
+  symbolApplyMethod,
+} from './semantic-methods.mjs'
 import {
   clearLineMethod,
   clearVisibleMethod,
