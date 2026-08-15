@@ -19,6 +19,12 @@ import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'
 
 import type { DlxTestServer } from './binary-test-server.mts'
 
+// Headroom for the two tests that download AND spawn a real child process.
+// The load-scaled per-test budget caps at 4x, which is sized for CPU
+// contention; process creation contends differently and stretched these 66x
+// under a full parallel run.
+const SPAWN_HEAVY_TIMEOUT_MS = 60_000
+
 let testServer: DlxTestServer
 let httpBaseUrl: string
 
@@ -300,28 +306,39 @@ describe.sequential('dlx-binary re-validation', () => {
       }, 'dlxBinary-create-dir-')
     })
 
-    it('should handle download with empty args array', async () => {
-      await runWithTempDir(async tmpDir => {
-        const restoreHome = mockHomeDir(tmpDir)
+    // Spawn-heavy: a real download over loopback plus a real child process.
+    // 345ms on a quiet box, but process CREATION is a different contended
+    // resource than CPU, and the load-scaled budget's 4x cap is sized for
+    // CPU contention - a full parallel run stretched this 66x and tripped
+    // the timeout while asserting nothing. Explicit headroom here rather
+    // than a looser global cap, which would let a real hang sit longer in
+    // every other test.
+    it(
+      'should handle download with empty args array',
+      async () => {
+        await runWithTempDir(async tmpDir => {
+          const restoreHome = mockHomeDir(tmpDir)
 
-        try {
-          const url = `${httpBaseUrl}/binary`
+          try {
+            const url = `${httpBaseUrl}/binary`
 
-          const result = await dlxBinary([], {
-            name: 'no-args-binary',
-            url,
-          })
+            const result = await dlxBinary([], {
+              name: 'no-args-binary',
+              url,
+            })
 
-          expect(result.spawnPromise).toBeDefined()
-          // Wait for spawn to complete to avoid SIGKILL errors
-          await result.spawnPromise.catch(() => {
-            // Ignore spawn errors in tests
-          })
-        } finally {
-          restoreHome()
-        }
-      }, 'dlxBinary-no-args-')
-    })
+            expect(result.spawnPromise).toBeDefined()
+            // Wait for spawn to complete to avoid SIGKILL errors
+            await result.spawnPromise.catch(() => {
+              // Ignore spawn errors in tests
+            })
+          } finally {
+            restoreHome()
+          }
+        }, 'dlxBinary-no-args-')
+      },
+      SPAWN_HEAVY_TIMEOUT_MS,
+    )
 
     it('should normalize binary path', async () => {
       await runWithTempDir(async tmpDir => {
