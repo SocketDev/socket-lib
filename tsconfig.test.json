@@ -8,5 +8,16 @@
     "types": ["node", "vitest"]
   },
   "include": ["./test/**/*.ts", "./test/**/*.mts", "./src/**/*.ts"],
-  "exclude": ["./.cache", "./dist/**/*", "./node_modules"]
+  // The perry fixture is compiled by Perry in an e2e test, not by this
+  // project. It imports this package BY NAME, so here it resolves through the
+  // self-link to the last PUBLISHED release, which has no `exe/smol/detect`
+  // yet - that subpath arrived after 6.7.0. Typechecking it against a stale
+  // published copy asserts nothing and reports one error until the next
+  // release. The e2e test is what proves the fixture compiles.
+  "exclude": [
+    "./.cache",
+    "./dist/**/*",
+    "./node_modules",
+    "./test/fixtures/perry/**/*"
+  ]
 }

@@ -76,7 +76,7 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
       // `lockdown` + `strict` + `emitAttest` come from the fixture package.json.
       const compiled = await spawn(
         perryBin,
-        ['compile', 'entry.ts', '-o', out],
+        ['compile', 'entry.mts', '-o', out],
         { cwd: fixtureDir, env: perryEnv, shell: WIN32, stdioString: true },
       ).catch(error => error)
       expect(
