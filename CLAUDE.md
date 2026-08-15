@@ -96,7 +96,7 @@
 - 🚨 Generated/vendored/dep-0 artifacts are never lint- or format-gated in ANY scope; `isNeverGated()` pre-filters them. [`generated-files-are-never-gated`](docs/agents.md/fleet/generated-files-are-never-gated.md)
 - 🚨 Fleet `socket/*` doctrine (no-status-emoji, personal-path-placeholders, max-file-lines) is enforced across Rust/Go/C++ source by one scanner. [`lint-parity-across-languages`](docs/agents.md/fleet/lint-parity-across-languages.md)
 - 🚨 Match the microarch pin to who controls the target: portable-by-default via runtime CPU dispatch. (`scripts/fleet/check/build-microarch-is-portable.mts`) [`portable-microarch`](docs/agents.md/fleet/portable-microarch.md)
-- 🚨 Docs alone don't enforce: every rule spans document + hook + lint rule + script; shared logic DRY'd into `_shared/` libs. [`code-is-law`](docs/agents.md/fleet/code-is-law.md) [`disabled-seam-pattern`](docs/agents.md/fleet/disabled-seam-pattern.md)
+- 🚨 Docs alone don't enforce: every rule spans document + hook + lint rule + script; shared logic DRY'd into `_shared/` libs. [`code-is-law`](docs/agents.md/fleet/code-is-law.md) [`gated-extension-point`](docs/agents.md/fleet/gated-extension-point.md)
 - Fleet-wide data (rosters, pins, pricing) lives in ONE canonical file; consumers derive, never hand-maintain a copy. [`single-source-of-truth`](docs/agents.md/fleet/single-source-of-truth.md)
 - 🚨 Per-repo config lives in ONE member surface: a new `.config/*.{json,yaml,toml}` is blocked; add a section to `.config/repo/socket-wheelhouse.json` instead. [`config-segregation`](docs/agents.md/fleet/config-segregation.md)
 - 🚨 One `.gitignore` per repo: every ignore entry lives in the ROOT `.gitignore` (fleet block + repo-owned block). [`single-gitignore`](docs/agents.md/fleet/single-gitignore.md)

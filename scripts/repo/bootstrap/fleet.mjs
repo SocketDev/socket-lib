@@ -1115,8 +1115,8 @@ function spliceRepoHookEntry(settings, event, matcher, hook) {
  *   manifest-scoped (they read the manifest / applied-files record, never a
  *   directory walk) and carry the same producer-agnostic "shipped belt" so a
  *   bad manifest entry can never touch freshly placed payload. Split out of
- *   install.mts along the sync-prune seam to hold that file under the line cap;
- *   install.mts re-exports these so its public surface (and fleet.mts's
+ *   install.mts along the sync-prune boundary to hold that file under the line
+ *   cap; install.mts re-exports these so its public surface (and fleet.mts's
  *   re-export of it) is unchanged. Dep-0, same invariant as install.mts (node:
  *   builtins only, never socket-lib).
  */
@@ -2261,8 +2261,8 @@ async function ghcrFetchBundle(config) {
  * described in its own comment as transitional until the public GHCR package
  * existed. That package exists, and the pack no longer publishes a Release at
  * all, so the fallback could only ever fail now: it turned a clear GHCR error
- * into a confusing `gh` one and hid the real cause. The injectable `ghcrFetch`
- * seam lets tests drive it without network.
+ * into a confusing `gh` one and hid the real cause. The injected `ghcrFetch`
+ * lets tests drive it without network.
  */
 async function fetchBundleSource(config) {
   const cfg = {

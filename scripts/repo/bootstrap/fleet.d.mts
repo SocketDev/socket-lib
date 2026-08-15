@@ -239,8 +239,8 @@ declare function ghcrFetchBundle(config: {
  * described in its own comment as transitional until the public GHCR package
  * existed. That package exists, and the pack no longer publishes a Release at
  * all, so the fallback could only ever fail now: it turned a clear GHCR error
- * into a confusing `gh` one and hid the real cause. The injectable `ghcrFetch`
- * seam lets tests drive it without network.
+ * into a confusing `gh` one and hid the real cause. The injected `ghcrFetch`
+ * lets tests drive it without network.
  */
 declare function fetchBundleSource(config: {
   readonly ghcrFetch?: BundleFetchFn | undefined;
