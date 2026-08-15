@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { prototypePollutionReviver } from '../../../src/json/parse'
+import { prototypePollutionReviver } from '../../../src/json/parse.mjs'
 
 describe('prototypePollutionReviver', () => {
   it('throws on __proto__ key', () => {

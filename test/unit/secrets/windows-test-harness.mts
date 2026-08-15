@@ -7,8 +7,8 @@ import { Readable, Writable } from 'node:stream'
 import { afterEach, beforeEach, vi } from 'vitest'
 
 import type { Mock } from 'vitest'
-import type * as SpawnChild from '../../../src/process/spawn/child'
-import { safeDelete } from '../../../src/fs/safe'
+import type * as SpawnChild from '../../../src/process/spawn/child.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 export interface FakeChild extends EventEmitter {
   stdin: Writable
@@ -23,7 +23,7 @@ export interface FakeChild extends EventEmitter {
  * mocking node:child_process is a no-op and lets the real powershell binary
  * run. The mocks sit on both the named and default exports. Usage:
  *
- * Vi.mock(import('../../../src/process/spawn/child'), () =>
+ * Vi.mock(import('../../../src/process/spawn/child.mjs'), () =>
  * spawnChildMockFactory(mockSpawn, mockSpawnSync))
  */
 export async function spawnChildMockFactory(
@@ -113,7 +113,7 @@ export const harness = {
 }
 
 export async function loadFresh() {
-  const mod = await import('../../../src/secrets/windows')
+  const mod = await import('../../../src/secrets/windows.mjs')
   return mod
 }
 

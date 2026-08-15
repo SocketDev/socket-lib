@@ -1,20 +1,22 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/uv/from-vfs'), () => ({
+vi.mock(import('../../../../src/external-tools/uv/from-vfs.mjs'), () => ({
   uvFromVfs: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/uv/from-path'), () => ({
+vi.mock(import('../../../../src/external-tools/uv/from-path.mjs'), () => ({
   uvFromPath: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/uv/from-download'), () => ({
+vi.mock(import('../../../../src/external-tools/uv/from-download.mjs'), () => ({
   uvFromDownload: vi.fn(),
 }))
 
 async function loadFresh() {
-  const vfsMod = await import('../../../../src/external-tools/uv/from-vfs')
-  const pathMod = await import('../../../../src/external-tools/uv/from-path')
-  const dlMod = await import('../../../../src/external-tools/uv/from-download')
-  const mod = await import('../../../../src/external-tools/uv/resolve')
+  const vfsMod = await import('../../../../src/external-tools/uv/from-vfs.mjs')
+  const pathMod =
+    await import('../../../../src/external-tools/uv/from-path.mjs')
+  const dlMod =
+    await import('../../../../src/external-tools/uv/from-download.mjs')
+  const mod = await import('../../../../src/external-tools/uv/resolve.mjs')
   return {
     fromVfs: vfsMod.uvFromVfs as ReturnType<typeof vi.fn>,
     fromPath: pathMod.uvFromPath as ReturnType<typeof vi.fn>,

@@ -11,7 +11,7 @@ import {
   newPnpmEntry,
   parsePnpmLock,
   stripPeerSuffix,
-} from '../../../../../../src/eco/npm/pnpm/lockfile/parse'
+} from '../../../../../../src/eco/npm/pnpm/lockfile/parse.mjs'
 
 const PNPM_V5 = `lockfileVersion: 5.4
 

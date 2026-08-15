@@ -21,7 +21,7 @@ import {
   MIT,
   UNLICENCED,
   UNLICENSED,
-} from '../../../src/constants/licenses'
+} from '../../../src/constants/licenses.mjs'
 
 describe('constants/licenses', () => {
   describe('license identifier constants', () => {

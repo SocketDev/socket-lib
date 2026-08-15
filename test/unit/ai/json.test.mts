@@ -14,7 +14,7 @@ import {
   normalizeKeys,
   repairJson,
   stripJsonFence,
-} from '../../../src/ai/json'
+} from '../../../src/ai/json.mjs'
 
 describe('stripJsonFence', () => {
   it('extracts the body of a ```json fence', () => {

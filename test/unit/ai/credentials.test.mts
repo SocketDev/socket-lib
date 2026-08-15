@@ -5,12 +5,12 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { resolve } from '../../../src/secrets/find'
+import { resolve } from '../../../src/secrets/find.mjs'
 import {
   deleteSecret,
   getBackendAvailability,
   writeSecret,
-} from '../../../src/secrets/keychain'
+} from '../../../src/secrets/keychain.mjs'
 import {
   deleteProviderCredential,
   isCredentialProvider,
@@ -19,15 +19,15 @@ import {
   PROVIDER_CREDENTIALS,
   resolveProviderCredential,
   writeProviderCredential,
-} from '../../../src/ai/credentials'
+} from '../../../src/ai/credentials.mjs'
 
 // Mock the env resolver plus the keychain write + erase helpers, so the suite
 // never touches a real keychain. The vi.mock calls are hoisted above the
 // imports, so the static imports resolve to the mocks.
-vi.mock(import('../../../src/secrets/find'), () => ({
+vi.mock(import('../../../src/secrets/find.mjs'), () => ({
   resolve: vi.fn(),
 }))
-vi.mock(import('../../../src/secrets/keychain'), () => ({
+vi.mock(import('../../../src/secrets/keychain.mjs'), () => ({
   deleteSecret: vi.fn(),
   getBackendAvailability: vi.fn(),
   writeSecret: vi.fn(),

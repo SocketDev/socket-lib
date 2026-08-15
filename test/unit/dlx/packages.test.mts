@@ -16,8 +16,8 @@ import {
   listDlxPackagesAsync,
   removeDlxPackage,
   removeDlxPackageSync,
-} from '../../../src/dlx/packages'
-import { setPath } from '../../../src/paths/rewire'
+} from '../../../src/dlx/packages.mjs'
+import { setPath } from '../../../src/paths/rewire.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpDir: string

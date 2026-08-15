@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import {
   escapeRegExpFallback,
   isSpecHexEscapeCp,
-} from '../../../src/regexps/spec'
+} from '../../../src/regexps/spec.mjs'
 
 describe('regexps/spec', () => {
   describe('escapeRegExpFallback — empty + plain', () => {

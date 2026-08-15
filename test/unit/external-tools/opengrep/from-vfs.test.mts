@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   OPENGREP_VFS_KEY,
   opengrepFromVfs,
-} from '../../../../src/external-tools/opengrep/from-vfs'
+} from '../../../../src/external-tools/opengrep/from-vfs.mjs'
 
 describe.sequential('external-tools/opengrep/from-vfs', () => {
   test('exports OPENGREP_VFS_KEY constant', () => {

@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ansiRegex, stripAnsi } from '../../../../src/term/ansi/strip'
+import { ansiRegex, stripAnsi } from '../../../../src/term/ansi/strip.mjs'
 
 describe.sequential('ansi/strip (src) — ansiRegex', () => {
   it('returns a fresh RegExp each call (global flag avoids shared lastIndex)', () => {

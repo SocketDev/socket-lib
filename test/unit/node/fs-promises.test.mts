@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeFsPromises } from '../../../src/node/fs-promises'
+import { getNodeFsPromises } from '../../../src/node/fs-promises.mjs'
 
 describe('node/fs-promises', () => {
   it('returns the node:fs/promises module', () => {

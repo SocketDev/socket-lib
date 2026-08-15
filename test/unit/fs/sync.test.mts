@@ -14,12 +14,12 @@ import { existsSync, mkdirSync, symlinkSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import type { SafeReadOptions } from '../../../src/fs/types'
+import type { SafeReadOptions } from '../../../src/fs/types.mjs'
 
-import { isDir, isSymlinkSync, safeStatSync } from '../../../src/fs/inspect'
-import { readFileBinary, safeReadFileSync } from '../../../src/fs/read-file'
-import { readJsonSync } from '../../../src/fs/read-json'
-import { writeJsonSync } from '../../../src/fs/write-json'
+import { isDir, isSymlinkSync, safeStatSync } from '../../../src/fs/inspect.mjs'
+import { readFileBinary, safeReadFileSync } from '../../../src/fs/read-file.mjs'
+import { readJsonSync } from '../../../src/fs/read-json.mjs'
+import { writeJsonSync } from '../../../src/fs/write-json.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 

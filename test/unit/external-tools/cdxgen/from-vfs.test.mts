@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   CDXGEN_VFS_KEY,
   cdxgenFromVfs,
-} from '../../../../src/external-tools/cdxgen/from-vfs'
+} from '../../../../src/external-tools/cdxgen/from-vfs.mjs'
 
 describe.sequential('external-tools/cdxgen/from-vfs', () => {
   test('exports CDXGEN_VFS_KEY constant', () => {

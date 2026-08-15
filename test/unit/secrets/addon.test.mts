@@ -15,8 +15,8 @@ import {
   readSecretBiometric,
   setKeychainAddon,
   writeSecretBiometric,
-} from '../../../src/secrets/addon'
-import type { KeychainAddon } from '../../../src/secrets/addon'
+} from '../../../src/secrets/addon.mjs'
+import type { KeychainAddon } from '../../../src/secrets/addon.mjs'
 
 const SLOT = { account: 'SOCKET_API_TOKEN', service: 'socketsecurity' }
 

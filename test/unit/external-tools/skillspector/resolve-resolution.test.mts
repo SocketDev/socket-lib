@@ -1,36 +1,45 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/skillspector/from-vfs'), () => ({
-  skillspectorFromVfs: vi.fn(),
-  SKILLSPECTOR_VFS_KEY: 'skillspector' as const,
-}))
+vi.mock(
+  import('../../../../src/external-tools/skillspector/from-vfs.mjs'),
+  () => ({
+    skillspectorFromVfs: vi.fn(),
+    SKILLSPECTOR_VFS_KEY: 'skillspector' as const,
+  }),
+)
 
 vi.mock(
-  import('../../../../src/external-tools/skillspector/from-path'),
+  import('../../../../src/external-tools/skillspector/from-path.mjs'),
   () => ({
     skillspectorFromPath: vi.fn(),
   }),
 )
 
-vi.mock(import('../../../../src/external-tools/skillspector/from-dlx'), () => ({
-  skillspectorFromDlx: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/skillspector/from-dlx.mjs'),
+  () => ({
+    skillspectorFromDlx: vi.fn(),
+  }),
+)
 
-vi.mock(import('../../../../src/external-tools/skillspector/from-uv'), () => ({
-  skillspectorFromUv: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/skillspector/from-uv.mjs'),
+  () => ({
+    skillspectorFromUv: vi.fn(),
+  }),
+)
 
 async function loadFresh() {
   const vfsMod =
-    await import('../../../../src/external-tools/skillspector/from-vfs')
+    await import('../../../../src/external-tools/skillspector/from-vfs.mjs')
   const pathMod =
-    await import('../../../../src/external-tools/skillspector/from-path')
+    await import('../../../../src/external-tools/skillspector/from-path.mjs')
   const dlxMod =
-    await import('../../../../src/external-tools/skillspector/from-dlx')
+    await import('../../../../src/external-tools/skillspector/from-dlx.mjs')
   const uvMod =
-    await import('../../../../src/external-tools/skillspector/from-uv')
+    await import('../../../../src/external-tools/skillspector/from-uv.mjs')
   const mod =
-    await import('../../../../src/external-tools/skillspector/resolve')
+    await import('../../../../src/external-tools/skillspector/resolve.mjs')
   return {
     vfsMock: vfsMod.skillspectorFromVfs as ReturnType<typeof vi.fn>,
     pathMock: pathMod.skillspectorFromPath as ReturnType<typeof vi.fn>,

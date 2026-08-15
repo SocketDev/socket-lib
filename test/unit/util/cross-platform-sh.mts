@@ -8,8 +8,8 @@
  *   naive string split, so a literal `&&` inside a quoted arg stays intact.
  */
 
-import { spawnSync } from '../../../src/process/spawn/child'
-import { parseShell } from '../../../src/shell/parse'
+import { spawnSync } from '../../../src/process/spawn/child.mjs'
+import { parseShell } from '../../../src/shell/parse.mjs'
 
 /**
  * Run a command line. Splits on `&&` operators and execs each segment via the

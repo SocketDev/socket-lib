@@ -14,7 +14,7 @@ import {
   deleteBranchRef,
   refWriteHeaders,
   updateBranchRef,
-} from '../../../src/github/refs-write'
+} from '../../../src/github/refs-write.mjs'
 
 const GITHUB_API = 'https://api.github.com'
 const SHA = 'a94a8fe5ccb19ba61c4c0873d391e987982fbbd3'

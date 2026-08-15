@@ -10,13 +10,13 @@ import {
   it,
 } from 'vitest'
 
-import { resetEnv, setEnv } from '../../../src/env/rewire'
-import { clearRefCache } from '../../../src/github/refs'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
+import { clearRefCache } from '../../../src/github/refs.mjs'
 import {
   getGitHubToken,
   getGitHubTokenFromGitConfig,
   getGitHubTokenWithFallback,
-} from '../../../src/github/token'
+} from '../../../src/github/token.mjs'
 
 describe.sequential('github/token', () => {
   // Neutralize the ambient token vars at the process.env level so a real CI

@@ -26,7 +26,7 @@ import {
   EXT_PS1,
   EXT_YAML,
   EXT_YML,
-} from '../../../src/paths/exts'
+} from '../../../src/paths/exts.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('paths/exts', () => {

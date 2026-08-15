@@ -12,19 +12,22 @@ import path from 'node:path'
 
 import { afterEach, beforeEach } from 'vitest'
 
-import { resetEnv, setEnv } from '../../../src/env/rewire'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 // no-platform-http-import: test-only double for the Node-only npm-meta client; node platform is intentional.
-import { HttpResponseError } from '../../../src/http-request/node'
+import { HttpResponseError } from '../../../src/http-request/node.mjs'
 // no-platform-http-import: test-only double for the Node-only npm-meta client; node platform is intentional.
 import type {
   HttpRequestOptions,
   HttpResponse,
-} from '../../../src/http-request/node'
-import { createNpmMetaCache } from '../../../src/npm/meta-cache'
-import type { NpmMetaHttpAdapter } from '../../../src/npm/meta-types'
-import { invalidateCaches } from '../../../src/paths/rewire'
+} from '../../../src/http-request/node.mjs'
+import { createNpmMetaCache } from '../../../src/npm/meta-cache.mjs'
+import type { NpmMetaHttpAdapter } from '../../../src/npm/meta-types.mjs'
+import { invalidateCaches } from '../../../src/paths/rewire.mjs'
 
-import type { TtlCache, TtlCacheOptions } from '../../../src/cache/ttl/types'
+import type {
+  TtlCache,
+  TtlCacheOptions,
+} from '../../../src/cache/ttl/types.mjs'
 
 export interface Deferred<T> {
   promise: Promise<T>

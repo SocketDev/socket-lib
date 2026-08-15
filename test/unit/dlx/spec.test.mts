@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { parsePackageSpec } from '../../../src/dlx/spec'
+import { parsePackageSpec } from '../../../src/dlx/spec.mjs'
 
 describe.sequential('dlx/spec — parsePackageSpec', () => {
   test('parses name@version into {name, version}', () => {

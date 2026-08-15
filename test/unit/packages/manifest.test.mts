@@ -6,12 +6,12 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as PacoteModule from '../../../src/external/pacote'
+import type * as PacoteModule from '../../../src/external/pacote.js'
 
 // Mock pacote BEFORE importing src/packages/manifest so the mocked
 // pacote.manifest / pacote.packument are seen by the SUT.
 vi.mock(
-  import('../../../src/external/pacote'),
+  import('../../../src/external/pacote.js'),
   () =>
     ({
       default: {
@@ -23,15 +23,15 @@ vi.mock(
     }) as unknown as typeof PacoteModule,
 )
 
-import type { PackageJson } from '../../../src/packages/types'
+import type { PackageJson } from '../../../src/packages/types.mjs'
 import {
   createPackageJson,
   DEFAULT_TRIM_FIELDS,
   fetchPackageManifest,
   fetchPackagePackument,
   trimPublishManifest,
-} from '../../../src/packages/manifest'
-import pacote from '../../../src/external/pacote'
+} from '../../../src/packages/manifest.mjs'
+import pacote from '../../../src/external/pacote.js'
 
 describe.sequential('packages/manifest — createPackageJson', () => {
   it('builds the canonical shape from minimal input', () => {

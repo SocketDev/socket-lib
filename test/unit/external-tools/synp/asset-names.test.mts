@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { getSynpPackageSpec } from '../../../../src/external-tools/synp/asset-names'
+import { getSynpPackageSpec } from '../../../../src/external-tools/synp/asset-names.mjs'
 
 describe('external-tools/synp/asset-names', () => {
   test('getSynpPackageSpec builds an npm package spec', () => {

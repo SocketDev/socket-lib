@@ -24,12 +24,12 @@ import {
   smoothKernel,
   solidColor,
   WHITE,
-} from '../../../../src/term/effects/shimmer'
+} from '../../../../src/term/effects/shimmer.mjs'
 import type {
   Palette,
   RGB,
   ShimmerSpec,
-} from '../../../../src/term/effects/shimmer'
+} from '../../../../src/term/effects/shimmer.mjs'
 
 const RED: RGB = [255, 0, 0]
 const GREEN: RGB = [0, 255, 0]

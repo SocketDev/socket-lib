@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { parallelEach, parallelMap } from '../../../src/streams/parallel'
+import { parallelEach, parallelMap } from '../../../src/streams/parallel.mjs'
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 
 export async function* asyncIterable<T>(items: T[]): AsyncIterable<T> {

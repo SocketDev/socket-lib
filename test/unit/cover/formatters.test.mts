@@ -6,7 +6,10 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { formatCoverage, getCoverageEmoji } from '../../../src/cover/formatters'
+import {
+  formatCoverage,
+  getCoverageEmoji,
+} from '../../../src/cover/formatters.mjs'
 
 const sampleCode = {
   branches: { covered: 80, total: 100, percent: '80.00' },

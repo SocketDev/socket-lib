@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { joinAnd, joinList, joinOr } from '../../src/arrays/join'
+import { joinAnd, joinList, joinOr } from '../../src/arrays/join.mjs'
 
 describe('joinList', () => {
   it('bare join (no options): concatenates items', () => {

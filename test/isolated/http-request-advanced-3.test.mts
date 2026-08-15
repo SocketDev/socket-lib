@@ -15,18 +15,18 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, it } from 'vitest'
 
-import type { HttpHookResponseInfo } from '../../src/http-request/request-types'
+import type { HttpHookResponseInfo } from '../../src/http-request/request-types.mjs'
 
 // oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
-import { httpJson, httpText } from '../../src/http-request/node'
+import { httpJson, httpText } from '../../src/http-request/node.mjs'
 import {
   parseRetryAfterHeader,
   sanitizeHeaders,
-} from '../../src/http-request/headers'
-import { httpRequest } from '../../src/http-request/request'
-import { HttpResponseError } from '../../src/http-request/response-types'
+} from '../../src/http-request/headers.mjs'
+import { httpRequest } from '../../src/http-request/request.mjs'
+import { HttpResponseError } from '../../src/http-request/response-types.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures'
+import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
 
 setupHttpFixture()
 

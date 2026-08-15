@@ -14,12 +14,12 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { parseHash } from '../../src/crypto/integrity'
-import { fetchChecksumFile } from '../../src/http-request/checksum-file'
-import { httpDownload } from '../../src/http-request/download'
+import { parseHash } from '../../src/crypto/integrity.mjs'
+import { fetchChecksumFile } from '../../src/http-request/checksum-file.mjs'
+import { httpDownload } from '../../src/http-request/download.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures'
-import { runWithTempDir } from '../unit/util/temp-file-helper'
+import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
 
 setupHttpFixture()
 

@@ -6,13 +6,16 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ArrayIsArray, ArrayPrototypeMap } from '../../../src/primordials/array'
+import {
+  ArrayIsArray,
+  ArrayPrototypeMap,
+} from '../../../src/primordials/array.mjs'
 
-import { JSONParse } from '../../../src/primordials/json'
+import { JSONParse } from '../../../src/primordials/json.mjs'
 
-import { ObjectKeys } from '../../../src/primordials/object'
+import { ObjectKeys } from '../../../src/primordials/object.mjs'
 
-import { StringPrototypeSlice } from '../../../src/primordials/string'
+import { StringPrototypeSlice } from '../../../src/primordials/string.mjs'
 
 import {
   applyBind,
@@ -20,7 +23,7 @@ import {
   bindCall,
   uncurryThis,
   weakRefSafe,
-} from '../../../src/primordials/uncurry'
+} from '../../../src/primordials/uncurry.mjs'
 
 describe('prototype-pollution resilience', () => {
   it('captures persist even if Array.prototype.map is clobbered', () => {

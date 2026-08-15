@@ -5,7 +5,7 @@ import {
   DatePrototypeToISOString,
   DatePrototypeToLocaleString,
   DatePrototypeValueOf,
-} from '../../../src/primordials/date'
+} from '../../../src/primordials/date.mjs'
 
 describe('primordials/date', () => {
   it('GetTime / ToISOString / ValueOf', () => {

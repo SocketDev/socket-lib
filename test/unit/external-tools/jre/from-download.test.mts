@@ -14,12 +14,12 @@ import tarFs from 'tar-fs'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { jreFromDownload } from '../../../../src/external-tools/jre/from-download'
-import { safeDelete } from '../../../../src/fs/safe'
+import { jreFromDownload } from '../../../../src/external-tools/jre/from-download.mjs'
+import { safeDelete } from '../../../../src/fs/safe.mjs'
 
 import { windowsExe } from '../../../_shared/fleet/lib/platform.mts'
 
-import { makeFakeDownloader } from '../../../lib/fake-downloader'
+import { makeFakeDownloader } from '../../../lib/fake-downloader.mjs'
 
 /**
  * Build a JRE-shape tarball: top-level `jdk-21/bin/java`. After strip:1 the

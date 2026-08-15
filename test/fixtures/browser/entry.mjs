@@ -7,7 +7,10 @@ import { isNodeBuiltin } from '@socketsecurity/lib/node/module'
 
 // Verify the browser-safe npm registry module bundles cleanly — no node:* in
 // the import graph.
-import { encodePackageName, parsePackument } from '@socketsecurity/lib/npm/registry'
+import {
+  encodePackageName,
+  parsePackument,
+} from '@socketsecurity/lib/npm/registry'
 
 export const result = isNodeBuiltin('fs')
 export const npmResult = { encodePackageName, parsePackument }

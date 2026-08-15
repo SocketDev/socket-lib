@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 
-import { spawn } from '../../../src/process/spawn/child'
+import { spawn } from '../../../src/process/spawn/child.mjs'
 import {
   enhanceSpawnError,
   isSpawnError,
   isSpawnExitError,
-} from '../../../src/process/spawn/errors'
+} from '../../../src/process/spawn/errors.mjs'
 
 // A spawn rejection is an Error carrying extra fields. Building fixtures this
 // way rather than as bare object literals matters: the guard narrows to a type

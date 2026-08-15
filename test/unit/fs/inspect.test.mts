@@ -17,9 +17,9 @@ import {
   readRealPath,
   safeStat,
   safeStatSync,
-} from '../../../src/fs/inspect'
+} from '../../../src/fs/inspect.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('isDir', () => {
   it('should return true for directories', async () => {

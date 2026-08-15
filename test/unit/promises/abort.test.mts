@@ -12,7 +12,7 @@
 import {
   createCompositeAbortSignal,
   createTimeoutSignal,
-} from '../../../src/promises/abort'
+} from '../../../src/promises/abort.mjs'
 import {
   tolerantSleep,
   tolerantTimeout,

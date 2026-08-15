@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { cacheKey } from '../../../../src/external-tools/skillspector/resolve'
+import { cacheKey } from '../../../../src/external-tools/skillspector/resolve.mjs'
 
 // Published-snapshot binding used to BUILD expected values inside
 // `expect(...)`. This stable alias satisfies

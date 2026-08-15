@@ -12,10 +12,10 @@ import path from 'node:path'
 import {
   readPackageJson,
   readPackageJsonSync,
-} from '../../../src/packages/read'
-import type { NormalizeOptions } from '../../../src/packages/types'
+} from '../../../src/packages/read.mjs'
+import type { NormalizeOptions } from '../../../src/packages/types.mjs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 type ReadPackageJsonSyncOptions = NormalizeOptions & {
   editable?: boolean | undefined

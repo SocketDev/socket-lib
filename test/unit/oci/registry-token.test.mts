@@ -12,7 +12,7 @@ import {
   firstHeaderValue,
   getRegistryToken,
   parseWwwAuthenticate,
-} from '../../../src/oci/registry-token'
+} from '../../../src/oci/registry-token.mjs'
 import { makeFakeAdapter } from './oci-test-helpers.mts'
 
 import type { FakeRoute } from './oci-test-helpers.mts'

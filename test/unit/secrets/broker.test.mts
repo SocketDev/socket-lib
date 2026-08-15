@@ -5,10 +5,10 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
-import { getRuntimeSocketPath } from '../../../src/paths/socket'
-import { requestFromBroker } from '../../../src/secrets/broker'
-import { safeDelete } from '../../../src/fs/safe'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
+import { getRuntimeSocketPath } from '../../../src/paths/socket.mjs'
+import { requestFromBroker } from '../../../src/secrets/broker.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 let tmpDir = ''
 let server: net.Server | undefined

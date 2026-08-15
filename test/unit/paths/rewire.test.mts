@@ -15,7 +15,7 @@ import {
   registerCacheInvalidation,
   resetPaths,
   setPath,
-} from '../../../src/paths/rewire'
+} from '../../../src/paths/rewire.mjs'
 
 beforeEach(() => {
   resetPaths()

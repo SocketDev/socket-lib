@@ -9,8 +9,8 @@ import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { getNodeEnv } from '../../../src/env/node-env'
-import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
+import { getNodeEnv } from '../../../src/env/node-env.mjs'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 
 describe('env/node-env', () => {
   afterEach(() => {

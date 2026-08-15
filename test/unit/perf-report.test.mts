@@ -12,23 +12,23 @@
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { resetEnv, setEnv } from '../../src/env/rewire'
+import { resetEnv, setEnv } from '../../src/env/rewire.mjs'
 import {
   clearPerformanceMetrics,
   getPerformanceMetrics,
   getPerformanceSummary,
-} from '../../src/perf/metrics'
+} from '../../src/perf/metrics.mjs'
 import {
   generatePerformanceReport,
   printPerformanceSummary,
-} from '../../src/perf/report'
+} from '../../src/perf/report.mjs'
 import {
   measure,
   measureSync,
   perfCheckpoint,
   perfTimer,
   trackMemory,
-} from '../../src/perf/timer'
+} from '../../src/perf/timer.mjs'
 
 // The perf module shares a module-scoped `performanceMetrics` array,
 // so concurrent tests would race each other when pushing / clearing.

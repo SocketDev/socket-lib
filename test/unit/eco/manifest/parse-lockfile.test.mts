@@ -4,11 +4,11 @@
 
 import { describe, expect, it } from 'vitest'
 
-import type { ManifestError } from '../../../../src/eco/manifest/manifest-error'
+import type { ManifestError } from '../../../../src/eco/manifest/manifest-error.mjs'
 import {
   parseLockfile,
   sniffLockfileFormat,
-} from '../../../../src/eco/manifest/parse-lockfile'
+} from '../../../../src/eco/manifest/parse-lockfile.mjs'
 
 describe('eco/manifest/parse-lockfile', () => {
   describe('sniffLockfileFormat', () => {

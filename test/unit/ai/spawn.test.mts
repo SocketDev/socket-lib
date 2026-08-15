@@ -6,10 +6,10 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 import {
   cachePathFor,
   resetAiAgentDiscoveryCache,
-} from '../../../src/ai/discover'
-import { backoffFor, buildArgs, pickAgent } from '../../../src/ai/spawn'
+} from '../../../src/ai/discover.mjs'
+import { backoffFor, buildArgs, pickAgent } from '../../../src/ai/spawn.mjs'
 
-import type { SpawnAiAgentOptions } from '../../../src/ai/types'
+import type { SpawnAiAgentOptions } from '../../../src/ai/types.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpRoot: string

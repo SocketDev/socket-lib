@@ -4,7 +4,7 @@ import {
   getTrufflehogAssetEntry,
   getTrufflehogDownloadUrl,
   TRUFFLEHOG_ASSET_MAP,
-} from '../../../../src/external-tools/trufflehog/asset-names'
+} from '../../../../src/external-tools/trufflehog/asset-names.mjs'
 
 describe('external-tools/trufflehog/asset-names', () => {
   test('covers darwin/linux/windows on both arm64 and x64', () => {

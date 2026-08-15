@@ -14,8 +14,8 @@ import path from 'node:path'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { safeDelete } from '../../../../src/fs/safe'
-import { resolveBazelVersion } from '../../../../src/external-tools/bazel/resolve-bazel-version'
+import { safeDelete } from '../../../../src/fs/safe.mjs'
+import { resolveBazelVersion } from '../../../../src/external-tools/bazel/resolve-bazel-version.mjs'
 
 export async function withTmpDir(
   fn: (dir: string) => Promise<void>,

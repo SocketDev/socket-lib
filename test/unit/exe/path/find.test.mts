@@ -14,9 +14,9 @@ import {
   findRealNpm,
   findRealPnpm,
   findRealYarn,
-} from '../../../../src/exe/path/find'
-import { isShadowBinPath } from '../../../../src/exe/shadow/detect'
-import { runWithTempDir } from '../../util/temp-file-helper'
+} from '../../../../src/exe/path/find.mjs'
+import { isShadowBinPath } from '../../../../src/exe/shadow/detect.mjs'
+import { runWithTempDir } from '../../util/temp-file-helper.mjs'
 
 describe('findRealBin', () => {
   it('should find node binary', () => {

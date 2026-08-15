@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import type { TtlCache } from '../../../src/cache/ttl/types'
+import type { TtlCache } from '../../../src/cache/ttl/types.mjs'
 
-vi.mock(import('../../../src/github/refs-rest'), () => ({
+vi.mock(import('../../../src/github/refs-rest.mjs'), () => ({
   fetchRefSha: vi.fn(),
 }))
-vi.mock(import('../../../src/github/refs-cache'), () => ({
+vi.mock(import('../../../src/github/refs-cache.mjs'), () => ({
   clearRefCache: vi.fn(),
   getGithubCache: vi.fn(
     () =>
@@ -16,14 +16,14 @@ vi.mock(import('../../../src/github/refs-cache'), () => ({
       }) as unknown as TtlCache,
   ),
 }))
-vi.mock(import('../../../src/github/refs-graphql'), () => ({
+vi.mock(import('../../../src/github/refs-graphql.mjs'), () => ({
   fetchRefShaViaGraphQL: vi.fn(),
 }))
 
 async function loadFresh() {
-  const restMod = await import('../../../src/github/refs-rest')
-  const cacheMod = await import('../../../src/github/refs-cache')
-  const mod = await import('../../../src/github/refs')
+  const restMod = await import('../../../src/github/refs-rest.mjs')
+  const cacheMod = await import('../../../src/github/refs-cache.mjs')
+  const mod = await import('../../../src/github/refs.mjs')
   return {
     fetchRefSha: restMod.fetchRefSha as ReturnType<typeof vi.fn>,
     getGithubCache: cacheMod.getGithubCache as ReturnType<typeof vi.fn>,
@@ -78,7 +78,7 @@ describe.sequential('github/refs — resolveRefToSha cache enabled', () => {
 
   test('uses the canonical "owner/repo@ref" cacheKey shape', async () => {
     let capturedKey: string | undefined
-    const cacheMod = await import('../../../src/github/refs-cache')
+    const cacheMod = await import('../../../src/github/refs-cache.mjs')
     ;(cacheMod.getGithubCache as ReturnType<typeof vi.fn>).mockReturnValueOnce({
       getOrFetch: vi.fn(async (key: string, fn: () => Promise<string>) => {
         capturedKey = key
@@ -94,7 +94,7 @@ describe.sequential('github/refs — resolveRefToSha cache enabled', () => {
 
 describe.sequential('github/refs — re-exports', () => {
   test('re-exports clearRefCache + getGithubCache + fetchRefShaViaGraphQL + fetchRefSha', async () => {
-    const mod = await import('../../../src/github/refs')
+    const mod = await import('../../../src/github/refs.mjs')
     expect(typeof mod.clearRefCache).toBe('function')
     expect(typeof mod.getGithubCache).toBe('function')
     expect(typeof mod.fetchRefShaViaGraphQL).toBe('function')
@@ -104,12 +104,12 @@ describe.sequential('github/refs — re-exports', () => {
 
 describe.sequential('github/refs — clearRefCache smoke tests', () => {
   test('clearRefCache is callable without throwing', async () => {
-    const mod = await import('../../../src/github/refs')
+    const mod = await import('../../../src/github/refs.mjs')
     expect(() => mod.clearRefCache()).not.toThrow()
   })
 
   test('multiple sequential clears do not throw', async () => {
-    const mod = await import('../../../src/github/refs')
+    const mod = await import('../../../src/github/refs.mjs')
     await expect(
       (async () => {
         await mod.clearRefCache()
@@ -120,7 +120,7 @@ describe.sequential('github/refs — clearRefCache smoke tests', () => {
   })
 
   test('concurrent clears resolve without throwing', async () => {
-    const mod = await import('../../../src/github/refs')
+    const mod = await import('../../../src/github/refs.mjs')
     await expect(
       Promise.all([
         mod.clearRefCache(),

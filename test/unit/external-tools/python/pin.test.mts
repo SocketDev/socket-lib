@@ -10,15 +10,15 @@ import {
   normalizeDistName,
   parseArtifactFilename,
   specDistName,
-} from '../../../../src/external-tools/python/pin'
+} from '../../../../src/external-tools/python/pin.mjs'
 
 import type * as NodeFs from 'node:fs'
 
-vi.mock(import('../../../../src/process/spawn/child'), () => ({
+vi.mock(import('../../../../src/process/spawn/child.mjs'), () => ({
   spawn: vi.fn(),
 }))
 
-vi.mock(import('../../../../src/fs/safe'), () => ({
+vi.mock(import('../../../../src/fs/safe.mjs'), () => ({
   safeDelete: vi.fn(),
   safeMkdir: vi.fn(),
 }))
@@ -36,9 +36,9 @@ vi.mock(import('node:fs'), async () => {
 })
 
 async function loadFresh() {
-  const spawnMod = await import('../../../../src/process/spawn/child')
+  const spawnMod = await import('../../../../src/process/spawn/child.mjs')
   const fsMod = await import('node:fs')
-  const mod = await import('../../../../src/external-tools/python/pin')
+  const mod = await import('../../../../src/external-tools/python/pin.mjs')
   return {
     resolvePipPackagePin: mod.resolvePipPackagePin,
     PipPackagePinError: mod.PipPackagePinError,

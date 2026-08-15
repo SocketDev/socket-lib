@@ -12,7 +12,7 @@ import {
   commonParseArgsConfig,
   parseArgs,
   parseArgsWithDefaults,
-} from '../../../../src/exe/argv/parse'
+} from '../../../../src/exe/argv/parse.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('argv/parse', () => {

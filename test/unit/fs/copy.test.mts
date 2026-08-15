@@ -8,9 +8,9 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { copy, CopyMode } from '../../../src/fs/copy'
+import { copy, CopyMode } from '../../../src/fs/copy.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('copy', () => {
   it('copies a single file', async () => {

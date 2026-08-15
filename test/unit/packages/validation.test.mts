@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
 import {
   isRegistryFetcherType,
   isValidPackageName,
-} from '../../../src/packages/validation'
+} from '../../../src/packages/validation.mjs'
 
 describe('packages/validation', () => {
   describe('isRegistryFetcherType', () => {

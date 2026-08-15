@@ -6,16 +6,16 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { normalizePath } from '../../../../src/paths/normalize'
-import { pipPackageDir } from '../../../../src/external-tools/python/pip-install'
+import { normalizePath } from '../../../../src/paths/normalize.mjs'
+import { pipPackageDir } from '../../../../src/external-tools/python/pip-install.mjs'
 
 import type * as NodeFs from 'node:fs'
 
-vi.mock(import('../../../../src/process/spawn/child'), () => ({
+vi.mock(import('../../../../src/process/spawn/child.mjs'), () => ({
   spawn: vi.fn(),
 }))
 
-vi.mock(import('../../../../src/fs/safe'), () => ({
+vi.mock(import('../../../../src/fs/safe.mjs'), () => ({
   safeDelete: vi.fn(),
   safeMkdir: vi.fn(),
 }))
@@ -34,9 +34,10 @@ vi.mock(import('node:fs'), async () => {
 })
 
 async function loadFresh() {
-  const spawnMod = await import('../../../../src/process/spawn/child')
+  const spawnMod = await import('../../../../src/process/spawn/child.mjs')
   const fsMod = await import('node:fs')
-  const mod = await import('../../../../src/external-tools/python/pip-install')
+  const mod =
+    await import('../../../../src/external-tools/python/pip-install.mjs')
   return {
     downloadPipPackage: mod.downloadPipPackage,
     readdirMock: fsMod.promises.readdir as ReturnType<typeof vi.fn>,

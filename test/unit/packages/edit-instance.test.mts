@@ -8,11 +8,11 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
-import type { PackageJson } from '../../../src/packages/types'
-import { getEditablePackageJsonClass } from '../../../src/packages/edit'
+import type { PackageJson } from '../../../src/packages/types.mjs'
+import { getEditablePackageJsonClass } from '../../../src/packages/edit.mjs'
 import { describe, expect, it } from 'vitest'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 interface EditableInternals {
   filename: string

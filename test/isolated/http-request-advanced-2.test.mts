@@ -39,16 +39,16 @@ import { describe, expect, it } from 'vitest'
 import {
   httpRequest,
   readIncomingResponse,
-} from '../../src/http-request/request'
-import { HttpResponseError } from '../../src/http-request/response-types'
+} from '../../src/http-request/request.mjs'
+import { HttpResponseError } from '../../src/http-request/response-types.mjs'
 
 import {
   fixture,
   makeRawRequest,
   setupHttpFixture,
-} from './http-request-fixtures'
+} from './http-request-fixtures.mjs'
 
-import type { IncomingResponse } from '../../src/http-request/request-types'
+import type { IncomingResponse } from '../../src/http-request/request-types.mjs'
 
 setupHttpFixture()
 

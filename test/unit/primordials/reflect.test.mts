@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ObjectCreate } from '../../../src/primordials/object'
+import { ObjectCreate } from '../../../src/primordials/object.mjs'
 
 import {
   ReflectApply,
@@ -21,7 +21,7 @@ import {
   ReflectPreventExtensions,
   ReflectSet,
   ReflectSetPrototypeOf,
-} from '../../../src/primordials/reflect'
+} from '../../../src/primordials/reflect.mjs'
 
 describe('Reflect', () => {
   it('Apply / Construct / Has / Get / Set', () => {

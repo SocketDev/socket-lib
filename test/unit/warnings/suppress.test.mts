@@ -16,8 +16,8 @@ import {
   suppressMaxListenersWarning,
   suppressWarningType,
   withSuppressedWarnings,
-} from '../../../src/events/warning/suppress'
-import { setMaxEventTargetListeners } from '../../../src/events/warning/handler'
+} from '../../../src/events/warning/suppress.mjs'
+import { setMaxEventTargetListeners } from '../../../src/events/warning/handler.mjs'
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 

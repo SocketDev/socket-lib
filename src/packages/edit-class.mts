@@ -10,7 +10,6 @@
 
 // @ts-expect-error - external vendored module
 import EditablePackageJsonBase from '../external/@npmcli/package-json.js'
-// @ts-expect-error - external vendored module
 import {
   parse,
   read,

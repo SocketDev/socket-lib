@@ -13,24 +13,24 @@ import {
   getChangedFilesSync,
   isChanged,
   isChangedSync,
-} from '../../../src/git/changed'
+} from '../../../src/git/changed.mjs'
 import {
   getStagedFiles,
   getStagedFilesSync,
   isStaged,
   isStagedSync,
-} from '../../../src/git/staged'
+} from '../../../src/git/staged.mjs'
 import {
   getUnstagedFiles,
   getUnstagedFilesSync,
   isUnstaged,
   isUnstagedSync,
-} from '../../../src/git/unstaged'
-import { spawnSync } from '../../../src/process/spawn/child'
+} from '../../../src/git/unstaged.mjs'
+import { spawnSync } from '../../../src/process/spawn/child.mjs'
 import { describe, expect, it, vi } from 'vitest'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
-import { runWithTempDir } from '../util/temp-file-helper'
-import { safeDelete } from '../../../src/fs/safe'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 describe('git extended tests - real git operations', () => {
   // Note: No need to save/restore cwd - we always use explicit cwd options.

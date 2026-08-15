@@ -23,11 +23,11 @@ import {
   getDlxPackageJsonPath,
   getDlxPackageNodeModulesDir,
   isInSocketDlx,
-} from '../../../src/dlx/paths'
-import { safeDelete } from '../../../src/fs/safe'
-import { normalizePath } from '../../../src/paths/normalize'
-import { setPath } from '../../../src/paths/rewire'
-import { getSocketDlxDir } from '../../../src/paths/socket'
+} from '../../../src/dlx/paths.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
+import { normalizePath } from '../../../src/paths/normalize.mjs'
+import { setPath } from '../../../src/paths/rewire.mjs'
+import { getSocketDlxDir } from '../../../src/paths/socket.mjs'
 
 describe.sequential('dlx paths', () => {
   const testPackageName = 'test-package'

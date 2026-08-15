@@ -11,7 +11,7 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { runWithTempDir } from '../../util/temp-file-helper'
+import { runWithTempDir } from '../../util/temp-file-helper.mjs'
 
 describe('cross-platform binary execution', () => {
   it('should identify Windows platform correctly', () => {

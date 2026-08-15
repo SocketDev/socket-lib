@@ -1,23 +1,28 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { cacheKey } from '../../../../src/external-tools/synp/resolve'
+import { cacheKey } from '../../../../src/external-tools/synp/resolve.mjs'
 
-vi.mock(import('../../../../src/external-tools/synp/from-vfs'), () => ({
+vi.mock(import('../../../../src/external-tools/synp/from-vfs.mjs'), () => ({
   synpFromVfs: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/synp/from-path'), () => ({
+vi.mock(import('../../../../src/external-tools/synp/from-path.mjs'), () => ({
   synpFromPath: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/synp/from-download'), () => ({
-  synpFromDownload: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/synp/from-download.mjs'),
+  () => ({
+    synpFromDownload: vi.fn(),
+  }),
+)
 
 async function loadFresh() {
-  const vfsMod = await import('../../../../src/external-tools/synp/from-vfs')
-  const pathMod = await import('../../../../src/external-tools/synp/from-path')
+  const vfsMod =
+    await import('../../../../src/external-tools/synp/from-vfs.mjs')
+  const pathMod =
+    await import('../../../../src/external-tools/synp/from-path.mjs')
   const dlMod =
-    await import('../../../../src/external-tools/synp/from-download')
-  const mod = await import('../../../../src/external-tools/synp/resolve')
+    await import('../../../../src/external-tools/synp/from-download.mjs')
+  const mod = await import('../../../../src/external-tools/synp/resolve.mjs')
   return {
     fromVfs: vfsMod.synpFromVfs as ReturnType<typeof vi.fn>,
     fromPath: pathMod.synpFromPath as ReturnType<typeof vi.fn>,

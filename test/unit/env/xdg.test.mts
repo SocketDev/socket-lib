@@ -13,12 +13,12 @@ import process from 'node:process'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import {
   getXdgCacheHome,
   getXdgConfigHome,
   getXdgDataHome,
-} from '../../../src/env/xdg'
+} from '../../../src/env/xdg.mjs'
 
 // These constants are XDG fixture paths, not this repo's tool caches: `~/.cache`
 // is the freedesktop.org XDG_CACHE_HOME default the getters under test must

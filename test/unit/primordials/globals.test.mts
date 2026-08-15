@@ -6,11 +6,11 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ArrayCtor } from '../../../src/primordials/array'
+import { ArrayCtor } from '../../../src/primordials/array.mjs'
 
-import { DateCtor } from '../../../src/primordials/date'
+import { DateCtor } from '../../../src/primordials/date.mjs'
 
-import { ErrorCtor } from '../../../src/primordials/error'
+import { ErrorCtor } from '../../../src/primordials/error.mjs'
 
 import {
   atob as GlobalAtob,
@@ -24,9 +24,9 @@ import {
   NaNValue,
   ProxyCtor,
   SharedArrayBufferCtor,
-} from '../../../src/primordials/globals'
+} from '../../../src/primordials/globals.mjs'
 
-import { JSONParse, JSONStringify } from '../../../src/primordials/json'
+import { JSONParse, JSONStringify } from '../../../src/primordials/json.mjs'
 
 import {
   MapCtor,
@@ -34,21 +34,21 @@ import {
   WeakMapCtor,
   WeakRefCtor,
   WeakSetCtor,
-} from '../../../src/primordials/map-set'
+} from '../../../src/primordials/map-set.mjs'
 
-import { NumberCtor } from '../../../src/primordials/number'
+import { NumberCtor } from '../../../src/primordials/number.mjs'
 
-import { ObjectCtor } from '../../../src/primordials/object'
+import { ObjectCtor } from '../../../src/primordials/object.mjs'
 
-import { PromiseCtor } from '../../../src/primordials/promise'
+import { PromiseCtor } from '../../../src/primordials/promise.mjs'
 
-import { RegExpCtor } from '../../../src/primordials/regexp'
+import { RegExpCtor } from '../../../src/primordials/regexp.mjs'
 
-import { StringCtor } from '../../../src/primordials/string'
+import { StringCtor } from '../../../src/primordials/string.mjs'
 
-import { SymbolCtor } from '../../../src/primordials/symbol'
+import { SymbolCtor } from '../../../src/primordials/symbol.mjs'
 
-import { URLCtor, URLSearchParamsCtor } from '../../../src/primordials/url'
+import { URLCtor, URLSearchParamsCtor } from '../../../src/primordials/url.mjs'
 
 describe('constructors', () => {
   it('points at the JavaScript global constructors', () => {

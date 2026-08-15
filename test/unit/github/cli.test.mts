@@ -18,7 +18,7 @@ import {
   ghApi,
   ghApiText,
   runGh,
-} from '../../../src/github/cli'
+} from '../../../src/github/cli.mjs'
 
 interface SpawnCall {
   args: readonly string[]

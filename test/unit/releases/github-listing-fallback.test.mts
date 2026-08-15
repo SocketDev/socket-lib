@@ -9,15 +9,15 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
-import { getLatestRelease } from '../../../src/releases/github-listing'
-import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm'
+import { getLatestRelease } from '../../../src/releases/github-listing.mjs'
+import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm.mjs'
 
-import { httpRequest } from '../../../src/http-request/request'
+import { httpRequest } from '../../../src/http-request/request.mjs'
 
-import { createMockHttpResponse } from '../util/http-mock'
+import { createMockHttpResponse } from '../util/http-mock.mjs'
 
 // Mock httpRequest so tests don't issue real network calls.
-vi.mock(import('../../../src/http-request/request'))
+vi.mock(import('../../../src/http-request/request.mjs'))
 
 // Match the production source's primordials convention.
 const JSONStringify = JSON.stringify

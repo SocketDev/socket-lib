@@ -11,8 +11,8 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { resolveRealBinSync } from '../../../../src/exe/path/resolve'
-import { safeDelete } from '../../../../src/fs/safe'
+import { resolveRealBinSync } from '../../../../src/exe/path/resolve.mjs'
+import { safeDelete } from '../../../../src/fs/safe.mjs'
 
 describe.sequential('bin.ts — Volta resolution', () => {
   let voltaRoot: string

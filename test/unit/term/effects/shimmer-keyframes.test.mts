@@ -4,9 +4,12 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { configToSpec, frameColors } from '../../../../src/term/effects/shimmer'
-import type { RGB, ShimmerSpec } from '../../../../src/term/effects/shimmer'
-import { toShimmerKeyframes } from '../../../../src/term/effects/shimmer-keyframes'
+import {
+  configToSpec,
+  frameColors,
+} from '../../../../src/term/effects/shimmer.mjs'
+import type { RGB, ShimmerSpec } from '../../../../src/term/effects/shimmer.mjs'
+import { toShimmerKeyframes } from '../../../../src/term/effects/shimmer-keyframes.mjs'
 
 describe('effects/shimmer-keyframes', () => {
   describe('toShimmerKeyframes', () => {

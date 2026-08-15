@@ -21,7 +21,7 @@ import {
   printThickDivider,
   printThinDivider,
   sectionBreak,
-} from '../../../src/stdio/divider'
+} from '../../../src/stdio/divider.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('stdio/divider', () => {

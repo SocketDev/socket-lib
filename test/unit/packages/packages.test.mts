@@ -18,7 +18,7 @@ import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 import {
   resolvePackageJsonDirname,
   resolvePackageJsonPath,
-} from '../../../src/paths/packages'
+} from '../../../src/paths/packages.mjs'
 
 describe('packages/paths', () => {
   describe('resolvePackageJsonDirname', () => {

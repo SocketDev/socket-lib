@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { defaultIgnore } from '../../../src/globs/defaults'
+import { defaultIgnore } from '../../../src/globs/defaults.mjs'
 
 describe('globs/defaults — defaultIgnore', () => {
   it('should be an array', () => {

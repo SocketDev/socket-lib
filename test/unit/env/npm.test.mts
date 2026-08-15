@@ -16,8 +16,8 @@ import {
   getNpmLifecycleEvent,
   getNpmRegistry,
   getNpmToken,
-} from '../../../src/env/npm'
-import { resetEnv, setEnv } from '../../../src/env/rewire'
+} from '../../../src/env/npm.mjs'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('npm env', () => {

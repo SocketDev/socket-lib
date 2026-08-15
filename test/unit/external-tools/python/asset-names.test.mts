@@ -6,7 +6,7 @@ import {
   DEFAULT_PYTHON_PIN,
   getPythonArch,
   pythonAsset,
-} from '../../../../src/external-tools/python/asset-names'
+} from '../../../../src/external-tools/python/asset-names.mjs'
 
 const SUPPORTED_ARCHES = [
   'darwin-arm64',

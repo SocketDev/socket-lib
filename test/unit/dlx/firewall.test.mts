@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { checkFirewallPurls, npmPurl } from '../../../src/dlx/firewall'
+import { checkFirewallPurls, npmPurl } from '../../../src/dlx/firewall.mjs'
 
-vi.mock(import('../../../src/http-request/node'), () => ({
+vi.mock(import('../../../src/http-request/node.mjs'), () => ({
   httpJson: vi.fn(),
 }))
 
 async function loadFresh() {
-  const httpMod = await import('../../../src/http-request/node')
-  const mod = await import('../../../src/dlx/firewall')
+  const httpMod = await import('../../../src/http-request/node.mjs')
+  const mod = await import('../../../src/dlx/firewall.mjs')
   return {
     httpJson: httpMod.httpJson as ReturnType<typeof vi.fn>,
     checkFirewallPurls: mod.checkFirewallPurls,

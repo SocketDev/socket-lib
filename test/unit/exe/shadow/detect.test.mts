@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { isShadowBinPath } from '../../../../src/exe/shadow/detect'
+import { isShadowBinPath } from '../../../../src/exe/shadow/detect.mjs'
 
 describe('exe/shadow/detect', () => {
   it('should return false for undefined', () => {

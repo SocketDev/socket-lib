@@ -11,16 +11,16 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { createTtlCache } from '../../../src/cache/ttl/store'
-import { resetEnv, setEnv } from '../../../src/env/rewire'
-import { safeDelete } from '../../../src/fs/safe'
-import { invalidateCaches } from '../../../src/paths/rewire'
+import { createTtlCache } from '../../../src/cache/ttl/store.mjs'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
+import { invalidateCaches } from '../../../src/paths/rewire.mjs'
 
-import * as cacacheInternal from '../../../src/cacache/shared'
-import * as cacacheRead from '../../../src/cacache/read'
-import * as cacacheWrite from '../../../src/cacache/write'
+import * as cacacheInternal from '../../../src/cacache/shared.mjs'
+import * as cacacheRead from '../../../src/cacache/read.mjs'
+import * as cacacheWrite from '../../../src/cacache/write.mjs'
 
-import type { CacheEntry } from '../../../src/cacache/types'
+import type { CacheEntry } from '../../../src/cacache/types.mjs'
 
 interface FakeStreamEntry {
   key: string
@@ -50,21 +50,21 @@ export function makeFakeStream(
   }
 }
 
-vi.mock(import('../../../src/cacache/shared'), async importOriginal => {
+vi.mock(import('../../../src/cacache/shared.mjs'), async importOriginal => {
   const original = await importOriginal<typeof cacacheInternal>()
   return {
     ...original,
     getCacache: vi.fn(original.getCacache),
   }
 })
-vi.mock(import('../../../src/cacache/read'), async importOriginal => {
+vi.mock(import('../../../src/cacache/read.mjs'), async importOriginal => {
   const original = await importOriginal<typeof cacacheRead>()
   return {
     ...original,
     safeGet: vi.fn(original.safeGet),
   }
 })
-vi.mock(import('../../../src/cacache/write'), async importOriginal => {
+vi.mock(import('../../../src/cacache/write.mjs'), async importOriginal => {
   const original = await importOriginal<typeof cacacheWrite>()
   return {
     ...original,

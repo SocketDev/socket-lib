@@ -12,16 +12,16 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { downloadBinaryFile } from '../../../src/dlx/binary'
-import { safeDelete } from '../../../src/fs/safe'
-import { httpDownload } from '../../../src/http-request/download'
+import { downloadBinaryFile } from '../../../src/dlx/binary.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
+import { httpDownload } from '../../../src/http-request/download.mjs'
 
-import type * as DownloadModule from '../../../src/http-request/download'
+import type * as DownloadModule from '../../../src/http-request/download.mjs'
 import type {
   HttpDownloadOptions,
   HttpDownloadResult,
   HttpDownloadWriteStreamFactory,
-} from '../../../src/http-request/download-types'
+} from '../../../src/http-request/download-types.mjs'
 
 function mockDownloadResult(
   destPath: string,
@@ -41,23 +41,26 @@ function mockDownloadResult(
 
 type DownloadModuleExports = typeof DownloadModule
 
-vi.mock(import('../../../src/http-request/download'), async importOriginal => {
-  const original = await importOriginal<DownloadModuleExports>()
-  return {
-    ...original,
-    httpDownload: vi.fn(
-      async (
-        _url: string,
-        destPath: string,
-        _opts?: HttpDownloadOptions | undefined,
-      ): Promise<HttpDownloadResult> => {
-        // Default behavior: write a known payload.
-        writeFileSync(destPath, Buffer.from('default-payload'))
-        return mockDownloadResult(destPath)
-      },
-    ) as unknown as DownloadModuleExports['httpDownload'],
-  }
-})
+vi.mock(
+  import('../../../src/http-request/download.mjs'),
+  async importOriginal => {
+    const original = await importOriginal<DownloadModuleExports>()
+    return {
+      ...original,
+      httpDownload: vi.fn(
+        async (
+          _url: string,
+          destPath: string,
+          _opts?: HttpDownloadOptions | undefined,
+        ): Promise<HttpDownloadResult> => {
+          // Default behavior: write a known payload.
+          writeFileSync(destPath, Buffer.from('default-payload'))
+          return mockDownloadResult(destPath)
+        },
+      ) as unknown as DownloadModuleExports['httpDownload'],
+    }
+  },
+)
 
 export function sha512OfBuffer(buf: Buffer): string {
   const h = crypto.createHash('sha512').update(buf).digest('base64')

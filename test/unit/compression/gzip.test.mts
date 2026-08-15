@@ -24,10 +24,13 @@ import {
   hasGzipExt,
   isGzipCompressed,
   resolveGzipOptions,
-} from '../../../src/compression/gzip'
-import { BROTLI_EXTS, compressBrotli } from '../../../src/compression/brotli'
-import { stripExt } from '../../../src/compression/shared'
-import { safeDelete } from '../../../src/fs/safe'
+} from '../../../src/compression/gzip.mjs'
+import {
+  BROTLI_EXTS,
+  compressBrotli,
+} from '../../../src/compression/brotli.mjs'
+import { stripExt } from '../../../src/compression/shared.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 import {
   LARGE_TEXT,
   SMALL_TEXT,

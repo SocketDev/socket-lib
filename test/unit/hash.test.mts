@@ -17,10 +17,10 @@ import {
   hash as hashOneShot,
   nativeHash,
   verifyBlobHash,
-} from '../../src/crypto/hash'
+} from '../../src/crypto/hash.mjs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type * as HashModule from '../../src/crypto/hash'
+import type * as HashModule from '../../src/crypto/hash.mjs'
 
 describe('crypto', () => {
   describe('hash', () => {
@@ -111,7 +111,7 @@ describe('crypto', () => {
       delete cryptoMod.hash
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- re-import after vi.resetModules to exercise the native-hash fallback.
-      const mod = await import('../../src/crypto/hash')
+      const mod = await import('../../src/crypto/hash.mjs')
       return { hash: mod.hash, nativeHash: mod.nativeHash }
     }
 

@@ -5,8 +5,8 @@
  *   isolation. Used for conditional test-only behavior.
  */
 
-import { getJestWorkerId, getVitest, isTest } from '../../../src/env/test'
-import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
+import { getJestWorkerId, getVitest, isTest } from '../../../src/env/test.mjs'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/test', () => {

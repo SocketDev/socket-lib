@@ -14,8 +14,8 @@ import {
   getVersions,
   isMatured,
   toEpochMs,
-} from '../../../src/npm/meta'
-import { PackumentNotFoundError } from '../../../src/npm/meta-cache'
+} from '../../../src/npm/meta.mjs'
+import { PackumentNotFoundError } from '../../../src/npm/meta-cache.mjs'
 import {
   createStubHttpAdapter,
   freshCache,
@@ -23,7 +23,7 @@ import {
   setupNpmMetaCacheIsolation,
 } from './meta-test-helpers.mts'
 
-import type { RawPackument } from '../../../src/npm/meta-types'
+import type { RawPackument } from '../../../src/npm/meta-types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '2.0.0', next: '3.0.0-beta.0' },

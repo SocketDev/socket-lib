@@ -9,10 +9,10 @@
  *     github-ghsa-url.test.mts.
  */
 
-import { fetchGitHub } from '../../src/github/request'
-import { cacheFetchGhsa, fetchGhsaDetails } from '../../src/github/ghsa'
-import { clearRefCache } from '../../src/github/refs'
-import { resetEnv } from '../../src/env/rewire'
+import { fetchGitHub } from '../../src/github/request.mjs'
+import { cacheFetchGhsa, fetchGhsaDetails } from '../../src/github/ghsa.mjs'
+import { clearRefCache } from '../../src/github/refs.mjs'
+import { resetEnv } from '../../src/env/rewire.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import nock from 'nock'
 

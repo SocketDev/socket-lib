@@ -12,7 +12,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 
-import { Spinner } from '../../../src/spinner/spinner'
+import { Spinner } from '../../../src/spinner/spinner.mjs'
 
 describe('spinner — animation', () => {
   // Mock stdout/stderr to prevent actual spinner output during tests

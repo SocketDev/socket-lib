@@ -11,9 +11,9 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { findUp, findUpSync } from '../../../src/fs/find'
+import { findUp, findUpSync } from '../../../src/fs/find.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('findUp', () => {
   it('should find file in current directory', async () => {

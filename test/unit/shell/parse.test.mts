@@ -12,7 +12,7 @@ import {
   hasBinCall,
   parseShell,
   simpleCommandStartsWith,
-} from '../../../src/shell/parse'
+} from '../../../src/shell/parse.mjs'
 
 describe('shell/parse', () => {
   it('tokenizes a bare command', () => {

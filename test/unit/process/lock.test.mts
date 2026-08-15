@@ -18,9 +18,9 @@ import os from 'node:os'
 import * as path from 'node:path'
 import { setTimeout as sleep } from 'node:timers/promises'
 
-import { processLock } from '../../../src/process/lock-instance'
-import type { ProcessLockOptions } from '../../../src/process/lock-types'
-import { safeDelete } from '../../../src/fs/safe'
+import { processLock } from '../../../src/process/lock-instance.mjs'
+import type { ProcessLockOptions } from '../../../src/process/lock-types.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'

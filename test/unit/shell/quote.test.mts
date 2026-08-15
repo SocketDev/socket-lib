@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { quote } from '../../../src/shell/quote'
+import { quote } from '../../../src/shell/quote.mjs'
 
 describe('shell/quote', () => {
   it('joins bare tokens with spaces', () => {

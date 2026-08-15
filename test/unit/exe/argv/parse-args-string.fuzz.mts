@@ -14,7 +14,7 @@
 
 import { fuzz } from '@vitiate/core'
 
-import { parseArgsString } from '../../../../src/exe/argv/parse-args-string'
+import { parseArgsString } from '../../../../src/exe/argv/parse-args-string.mjs'
 
 fuzz('parseArgsString never throws on arbitrary bytes', data => {
   parseArgsString(data.toString('utf8'))

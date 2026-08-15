@@ -4,7 +4,7 @@ import {
   getUvAssetEntry,
   getUvDownloadUrl,
   UV_ASSET_MAP,
-} from '../../../../src/external-tools/uv/asset-names'
+} from '../../../../src/external-tools/uv/asset-names.mjs'
 
 describe('external-tools/uv/asset-names', () => {
   test('covers darwin/linux (gnu+musl) and win on both arm64 and x64', () => {

@@ -6,12 +6,12 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { pipVenvEntryPointPath } from '../../../src/external-tools/from-pip-venv'
+import { pipVenvEntryPointPath } from '../../../src/external-tools/from-pip-venv.mjs'
 
-import type { which as WhichFn } from '../../../src/exe/path/which'
+import type { which as WhichFn } from '../../../src/exe/path/which.mjs'
 import type * as NodeFs from 'node:fs'
 
-vi.mock(import('../../../src/exe/path/which'), () => ({
+vi.mock(import('../../../src/exe/path/which.mjs'), () => ({
   which: vi.fn<
     (
       name: string,
@@ -20,7 +20,7 @@ vi.mock(import('../../../src/exe/path/which'), () => ({
   >() as unknown as typeof WhichFn,
 }))
 
-vi.mock(import('../../../src/process/spawn/child'), () => ({
+vi.mock(import('../../../src/process/spawn/child.mjs'), () => ({
   spawn: vi.fn(),
 }))
 
@@ -32,15 +32,15 @@ vi.mock(import('node:fs'), async () => {
   }
 })
 
-vi.mock(import('../../../src/fs/safe'), () => ({
+vi.mock(import('../../../src/fs/safe.mjs'), () => ({
   safeMkdir: vi.fn(async () => undefined),
 }))
 
 async function loadFresh() {
-  const whichMod = await import('../../../src/exe/path/which')
-  const spawnMod = await import('../../../src/process/spawn/child')
+  const whichMod = await import('../../../src/exe/path/which.mjs')
+  const spawnMod = await import('../../../src/process/spawn/child.mjs')
   const fsMod = await import('node:fs')
-  const mod = await import('../../../src/external-tools/from-pip-venv')
+  const mod = await import('../../../src/external-tools/from-pip-venv.mjs')
   return {
     whichMock: whichMod.which as ReturnType<typeof vi.fn>,
     spawnMock: spawnMod.spawn as ReturnType<typeof vi.fn>,

@@ -4,7 +4,7 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { withTmp } from '../../../src/cacache/tmp'
+import { withTmp } from '../../../src/cacache/tmp.mjs'
 
 describe('withTmp', () => {
   it('should export withTmp function', () => {

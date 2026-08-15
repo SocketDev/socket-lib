@@ -7,7 +7,7 @@
 import * as zodV3 from 'zod/v3'
 import { describe, expect, it } from 'vitest'
 
-import { parseSchema } from '../../../src/schema/parse'
+import { parseSchema } from '../../../src/schema/parse.mjs'
 
 describe('schema/parse', () => {
   it('returns the typed value for valid input', () => {

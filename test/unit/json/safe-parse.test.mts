@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
 // oxlint-disable-next-line socket/prefer-typebox-schema -- zod needed
 import { z } from 'zod'
 
-import { parseJsonStrict } from '../../../src/json/parse'
+import { parseJsonStrict } from '../../../src/json/parse.mjs'
 
 describe('json/safe-parse', () => {
   describe('parseJsonStrict', () => {

@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getGlobMatcher, getMatchesGlob } from '../../../src/globs/matcher'
+import { getGlobMatcher, getMatchesGlob } from '../../../src/globs/matcher.mjs'
 
 describe('globs/matcher — getGlobMatcher', () => {
   it('should create matcher for single pattern', () => {

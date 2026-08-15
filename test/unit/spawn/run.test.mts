@@ -16,7 +16,7 @@ import {
   runInherit,
   runInheritTee,
   waitForStdioFlush,
-} from '../../../src/process/spawn/run'
+} from '../../../src/process/spawn/run.mjs'
 
 describe('runInherit', () => {
   it('resolves 0 for a clean exit', async () => {

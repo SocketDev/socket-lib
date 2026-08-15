@@ -20,8 +20,8 @@ import path from 'node:path'
 
 import { afterAll, describe, expect, it } from 'vitest'
 
-import { safeDelete } from '../../../src/fs/safe'
-import { withEnvSync } from '../../../src/env/rewire'
+import { safeDelete } from '../../../src/fs/safe.mjs'
+import { withEnvSync } from '../../../src/env/rewire.mjs'
 
 const tmpDirs: string[] = []
 
@@ -41,7 +41,7 @@ import {
   stripTypesFlag,
   writeWrapperPosix,
   writeWrapperWindows,
-} from '../../../src/native-messaging/install'
+} from '../../../src/native-messaging/install.mjs'
 
 describe('buildManifest', () => {
   it('returns the canonical Chrome native-host manifest shape', () => {

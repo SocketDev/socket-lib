@@ -9,9 +9,9 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { uniqueSync } from '../../../src/fs/unique'
+import { uniqueSync } from '../../../src/fs/unique.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('uniqueSync', () => {
   it('should return same path if file does not exist', async () => {

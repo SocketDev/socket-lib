@@ -54,7 +54,7 @@ beforeEach(() => {
 
 describe('links/create — hyperlink (source)', () => {
   it('delegates to terminal-link with the text and url unchanged', async () => {
-    const { hyperlink } = await import('../../../src/links/create')
+    const { hyperlink } = await import('../../../src/links/create.mjs')
     hyperlink('Docs', URL)
     expect(terminalLinkMock).toHaveBeenCalledTimes(1)
     const [text, url] = terminalLinkMock.mock.calls[0]!
@@ -65,7 +65,7 @@ describe('links/create — hyperlink (source)', () => {
   it('leaves fallback undefined by default so terminal-link appends the url', async () => {
     // terminal-link's own default renders `text (url)`. Passing undefined keeps
     // it, which is what keeps a destination reachable on a plain terminal.
-    const { hyperlink } = await import('../../../src/links/create')
+    const { hyperlink } = await import('../../../src/links/create.mjs')
     hyperlink('Docs', URL)
     const options = terminalLinkMock.mock.calls[0]![2] as {
       fallback?: unknown | undefined
@@ -78,7 +78,7 @@ describe('links/create — hyperlink (source)', () => {
     // boolean — terminal-link treats a falsy boolean as "use my default", so
     // passing `false` straight through would still append the url and silently
     // break a gate's copy-pasteable lane A.
-    const { hyperlink } = await import('../../../src/links/create')
+    const { hyperlink } = await import('../../../src/links/create.mjs')
     hyperlink('Allow push to main', URL, { fallback: false })
     const options = terminalLinkMock.mock.calls[0]![2] as {
       fallback?: ((text: string, url: string) => string) | undefined
@@ -90,7 +90,7 @@ describe('links/create — hyperlink (source)', () => {
   })
 
   it('treats an explicit fallback: true the same as the default', async () => {
-    const { hyperlink } = await import('../../../src/links/create')
+    const { hyperlink } = await import('../../../src/links/create.mjs')
     hyperlink('Docs', URL, { fallback: true })
     const options = terminalLinkMock.mock.calls[0]![2] as {
       fallback?: unknown | undefined
@@ -100,7 +100,7 @@ describe('links/create — hyperlink (source)', () => {
 
   it('returns whatever terminal-link produced, untouched', async () => {
     terminalLinkMock.mockReturnValueOnce('WRAPPED')
-    const { hyperlink } = await import('../../../src/links/create')
+    const { hyperlink } = await import('../../../src/links/create.mjs')
     expect(hyperlink('Docs', URL)).toBe('WRAPPED')
   })
 })
@@ -111,12 +111,12 @@ describe('links/create — link and links (source)', () => {
   // half-instrumented.
 
   it('colors the text and returns it', async () => {
-    const { link } = await import('../../../src/links/create')
+    const { link } = await import('../../../src/links/create.mjs')
     expect(link('Docs', URL)).toBe('Docs')
   })
 
   it('appends the url when fallback is requested', async () => {
-    const { link } = await import('../../../src/links/create')
+    const { link } = await import('../../../src/links/create.mjs')
     expect(link('Docs', URL, { fallback: true })).toBe(`Docs (${URL})`)
   })
 
@@ -124,7 +124,7 @@ describe('links/create — link and links (source)', () => {
     // The string branch indexes THEMES directly, so an unknown name yields
     // undefined and throws on theme!.colors. This pins the lookup against a
     // real theme rather than assuming a "default" key exists — there is none.
-    const { link } = await import('../../../src/links/create')
+    const { link } = await import('../../../src/links/create.mjs')
     expect(link('Docs', URL, { theme: 'socket' })).toBe('Docs')
   })
 
@@ -132,7 +132,7 @@ describe('links/create — link and links (source)', () => {
     // The ArrayIsArray branch: RGB is not implemented yet and routes to cyan.
     // Mocked colors are identity, so the assertion is that it returns rather
     // than throwing on a non-string color.
-    const { link } = await import('../../../src/links/create')
+    const { link } = await import('../../../src/links/create.mjs')
     expect(
       link('Docs', URL, {
         theme: { colors: { link: [255, 0, 0] } },
@@ -141,7 +141,7 @@ describe('links/create — link and links (source)', () => {
   })
 
   it('maps an array of specs through link', async () => {
-    const { links } = await import('../../../src/links/create')
+    const { links } = await import('../../../src/links/create.mjs')
     expect(
       links([
         ['Docs', URL],
@@ -151,7 +151,7 @@ describe('links/create — link and links (source)', () => {
   })
 
   it('threads options through to every spec', async () => {
-    const { links } = await import('../../../src/links/create')
+    const { links } = await import('../../../src/links/create.mjs')
     expect(links([['Docs', URL]], { fallback: true })).toEqual([
       `Docs (${URL})`,
     ])

@@ -13,9 +13,9 @@ import {
   createExecContext,
   realRunner,
   runShell,
-} from '../../../src/ai/exec'
+} from '../../../src/ai/exec.mjs'
 
-import type { ExecResult, ExecRunner } from '../../../src/ai/exec'
+import type { ExecResult, ExecRunner } from '../../../src/ai/exec.mjs'
 
 // A fake sandboxed runner: echoes which script it got, never touches anything.
 const fakeSandbox: ExecRunner = {

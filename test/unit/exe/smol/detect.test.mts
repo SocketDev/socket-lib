@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolUtil, isSmol } from '../../../../src/exe/smol/detect'
+import { getSmolUtil, isSmol } from '../../../../src/exe/smol/detect.mjs'
 
 describe('smol/detect', () => {
   describe('isSmol', () => {

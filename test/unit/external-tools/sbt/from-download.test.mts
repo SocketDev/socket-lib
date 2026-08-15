@@ -20,10 +20,10 @@ import tarFs from 'tar-fs'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { sbtFromDownload } from '../../../../src/external-tools/sbt/from-download'
-import { safeDelete } from '../../../../src/fs/safe'
+import { sbtFromDownload } from '../../../../src/external-tools/sbt/from-download.mjs'
+import { safeDelete } from '../../../../src/fs/safe.mjs'
 
-import { makeFakeDownloader } from '../../../lib/fake-downloader'
+import { makeFakeDownloader } from '../../../lib/fake-downloader.mjs'
 
 /**
  * Build an SBT-shape tarball: top-level `sbt/bin/sbt` script. After extraction

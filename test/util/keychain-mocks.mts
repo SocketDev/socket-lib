@@ -14,7 +14,7 @@
 
 import { vi } from 'vitest'
 
-import type * as KeychainModule from '../../src/secrets/keychain'
+import type * as KeychainModule from '../../src/secrets/keychain.mjs'
 
 export type KeychainPlatform = 'darwin' | 'linux' | 'win32' | 'other'
 
@@ -77,10 +77,10 @@ export async function loadFreshKeychain(
 ): Promise<LoadedKeychain> {
   vi.resetModules()
   mockPlatform.mockReturnValue(plat)
-  const macos = await import('../../src/secrets/macos')
-  const linux = await import('../../src/secrets/linux')
-  const windows = await import('../../src/secrets/windows')
-  const mod = await import('../../src/secrets/keychain')
+  const macos = await import('../../src/secrets/macos.mjs')
+  const linux = await import('../../src/secrets/linux.mjs')
+  const windows = await import('../../src/secrets/windows.mjs')
+  const mod = await import('../../src/secrets/keychain.mjs')
   return {
     linux: linux as unknown as MockedModule,
     macos: macos as unknown as MockedModule,

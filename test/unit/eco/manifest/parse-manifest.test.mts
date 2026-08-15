@@ -4,8 +4,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import type { ManifestError } from '../../../../src/eco/manifest/manifest-error'
-import { parseManifest } from '../../../../src/eco/manifest/parse-manifest'
+import type { ManifestError } from '../../../../src/eco/manifest/manifest-error.mjs'
+import { parseManifest } from '../../../../src/eco/manifest/parse-manifest.mjs'
 
 describe('eco/manifest/parse-manifest', () => {
   it('routes npm to parsePackageJson', () => {

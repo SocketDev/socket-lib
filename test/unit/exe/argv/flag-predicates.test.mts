@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import type { FlagValues } from '../../../../src/exe/argv/flag-types'
+import type { FlagValues } from '../../../../src/exe/argv/flag-types.mjs'
 import {
   getLogLevel,
   isAll,
@@ -22,7 +22,7 @@ import {
   isUpdate,
   isVerbose,
   isWatch,
-} from '../../../../src/exe/argv/flag-predicates'
+} from '../../../../src/exe/argv/flag-predicates.mjs'
 
 describe('argv/flag-predicates', () => {
   describe('getLogLevel', () => {

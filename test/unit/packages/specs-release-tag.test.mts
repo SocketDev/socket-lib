@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getReleaseTag } from '../../../src/packages/specs'
+import { getReleaseTag } from '../../../src/packages/specs.mjs'
 
 describe('packages/specs — getReleaseTag', () => {
   it('should return empty string for empty spec', () => {

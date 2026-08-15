@@ -11,9 +11,9 @@ import {
   parsePlatforms,
   parseToolEntry,
   readExternalToolsManifest,
-} from '../../../src/external-tools/manifest'
+} from '../../../src/external-tools/manifest.mjs'
 
-import type { Manifest } from '../../../src/external-tools/manifest'
+import type { Manifest } from '../../../src/external-tools/manifest.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // SRI integrity per src/crypto/integrity.ts: prefix `sha512-` followed by base64.

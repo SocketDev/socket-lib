@@ -6,7 +6,7 @@
 import { getSmolVfs as getSmolVfsStable } from '@socketsecurity/lib-stable/smol/vfs'
 import { describe, expect, it } from 'vitest'
 
-import { getSmolVfs } from '../../../../src/exe/smol/vfs'
+import { getSmolVfs } from '../../../../src/exe/smol/vfs.mjs'
 
 describe('smol/vfs', () => {
   describe('getSmolVfs', () => {

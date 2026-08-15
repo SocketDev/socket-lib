@@ -14,7 +14,7 @@ import {
   isOverProfileFloor,
   meetsProfileFloor,
   profileRank,
-} from '../../../src/ai/enforce'
+} from '../../../src/ai/enforce.mjs'
 
 describe('profileRank', () => {
   // Expected values are LITERALS (no-src-import-in-test-expect) — the ladder

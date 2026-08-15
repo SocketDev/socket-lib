@@ -1,22 +1,24 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { makeHash } from '../../../../src/crypto/integrity'
+import { makeHash } from '../../../../src/crypto/integrity.mjs'
 
-vi.mock(import('../../../../src/external-tools/sbt/from-vfs'), () => ({
+vi.mock(import('../../../../src/external-tools/sbt/from-vfs.mjs'), () => ({
   sbtFromVfs: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/sbt/from-path'), () => ({
+vi.mock(import('../../../../src/external-tools/sbt/from-path.mjs'), () => ({
   sbtFromPath: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/sbt/from-download'), () => ({
+vi.mock(import('../../../../src/external-tools/sbt/from-download.mjs'), () => ({
   sbtFromDownload: vi.fn(),
 }))
 
 async function loadFresh() {
-  const vfsMod = await import('../../../../src/external-tools/sbt/from-vfs')
-  const pathMod = await import('../../../../src/external-tools/sbt/from-path')
-  const dlMod = await import('../../../../src/external-tools/sbt/from-download')
-  const mod = await import('../../../../src/external-tools/sbt/resolve')
+  const vfsMod = await import('../../../../src/external-tools/sbt/from-vfs.mjs')
+  const pathMod =
+    await import('../../../../src/external-tools/sbt/from-path.mjs')
+  const dlMod =
+    await import('../../../../src/external-tools/sbt/from-download.mjs')
+  const mod = await import('../../../../src/external-tools/sbt/resolve.mjs')
   return {
     fromVfs: vfsMod.sbtFromVfs as ReturnType<typeof vi.fn>,
     fromPath: pathMod.sbtFromPath as ReturnType<typeof vi.fn>,

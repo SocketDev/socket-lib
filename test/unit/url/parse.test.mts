@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { createRelativeUrl, parseUrl } from '../../../src/url/parse'
+import { createRelativeUrl, parseUrl } from '../../../src/url/parse.mjs'
 
 describe('url/parse — parseUrl', () => {
   it('parses valid HTTP URLs', () => {

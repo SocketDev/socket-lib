@@ -32,7 +32,7 @@ import {
   S_IXGRP,
   S_IXOTH,
   S_IXUSR,
-} from '../../../src/constants/platform'
+} from '../../../src/constants/platform.mjs'
 
 describe('constants/platform', () => {
   describe('platform detection', () => {

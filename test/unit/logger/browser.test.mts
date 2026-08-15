@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { MockInstance } from 'vitest'
 
-import { Logger } from '../../../src/logger/browser'
+import { Logger } from '../../../src/logger/browser.mjs'
 
 describe('logger/browser → Logger', () => {
   let logSpy: MockInstance

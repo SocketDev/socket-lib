@@ -38,8 +38,8 @@ import {
   getSocketRegistryUrl,
   getSocketRepositoryName,
   getSocketViewAllRisks,
-} from '../../../src/env/socket'
-import { resetEnv, setEnv } from '../../../src/env/rewire'
+} from '../../../src/env/socket.mjs'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('socket env', () => {

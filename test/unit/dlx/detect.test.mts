@@ -23,9 +23,9 @@ import {
   isJsFilePath,
   isNativeBinary,
   isNodePackage,
-} from '../../../src/dlx/detect'
+} from '../../../src/dlx/detect.mjs'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
-import { resetPaths, setPath } from '../../../src/paths/rewire'
+import { resetPaths, setPath } from '../../../src/paths/rewire.mjs'
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'

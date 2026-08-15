@@ -30,7 +30,7 @@ import {
   CHAR_UPPERCASE_A,
   CHAR_UPPERCASE_Z,
   UTF8,
-} from '../../../src/constants/encoding'
+} from '../../../src/constants/encoding.mjs'
 
 describe('constants/encoding', () => {
   describe('encoding', () => {

@@ -7,21 +7,21 @@
 
 import { existsSync } from 'node:fs'
 
-import { safeDelete } from '../../../src/fs/safe'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { downloadReleaseAsset } from '../../../src/releases/github-downloads'
-import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm'
+import { downloadReleaseAsset } from '../../../src/releases/github-downloads.mjs'
+import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm.mjs'
 
-import { httpDownload } from '../../../src/http-request/download'
-import { httpRequest } from '../../../src/http-request/request'
+import { httpDownload } from '../../../src/http-request/download.mjs'
+import { httpRequest } from '../../../src/http-request/request.mjs'
 
-import { createMockHttpResponse } from '../util/http-mock'
+import { createMockHttpResponse } from '../util/http-mock.mjs'
 
-import type { HttpDownloadResult } from '../../../src/http-request/download-types'
+import type { HttpDownloadResult } from '../../../src/http-request/download-types.mjs'
 
-vi.mock(import('../../../src/http-request/download'))
-vi.mock(import('../../../src/http-request/request'))
+vi.mock(import('../../../src/http-request/download.mjs'))
+vi.mock(import('../../../src/http-request/request.mjs'))
 
 const JSONStringify = JSON.stringify
 
@@ -181,7 +181,7 @@ describe('releases/github-downloads', () => {
 
     it('uses cache and does not call httpDownload when binary + version file exist and tag matches', async () => {
       const { downloadGitHubRelease } =
-        await import('../../../src/releases/github-downloads')
+        await import('../../../src/releases/github-downloads.mjs')
       const { promises: fs } = await import('node:fs')
       const { tmpdir } = await import('node:os')
       const nodePath = await import('node:path')
@@ -222,7 +222,7 @@ describe('releases/github-downloads', () => {
 
     it('re-downloads when version file exists but binary is missing (TOCTOU recovery)', async () => {
       const { downloadGitHubRelease } =
-        await import('../../../src/releases/github-downloads')
+        await import('../../../src/releases/github-downloads.mjs')
       const { promises: fs } = await import('node:fs')
       const { tmpdir } = await import('node:os')
       const nodePath = await import('node:path')
@@ -296,7 +296,7 @@ describe('releases/github-downloads', () => {
 
     it('re-downloads when version file tag does not match requested tag', async () => {
       const { downloadGitHubRelease } =
-        await import('../../../src/releases/github-downloads')
+        await import('../../../src/releases/github-downloads.mjs')
       const { promises: fs } = await import('node:fs')
       const { tmpdir } = await import('node:os')
       const nodePath = await import('node:path')

@@ -21,12 +21,12 @@ import {
   isDirSync,
   safeStat,
   safeStatSync,
-} from '../../../src/fs/inspect'
-import { readDirNames, readDirNamesSync } from '../../../src/fs/read-dir'
-import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
-import { uniqueSync } from '../../../src/fs/unique'
+} from '../../../src/fs/inspect.mjs'
+import { readDirNames, readDirNamesSync } from '../../../src/fs/read-dir.mjs'
+import { safeDelete, safeDeleteSync } from '../../../src/fs/safe.mjs'
+import { uniqueSync } from '../../../src/fs/unique.mjs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('fs - Additional Coverage (dir/delete/inspect)', () => {
   describe('readDirNames with more options', () => {

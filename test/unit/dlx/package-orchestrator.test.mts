@@ -12,8 +12,8 @@ import { describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-import { dlxPackage, downloadNpmPackage } from '../../../src/dlx/package'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { dlxPackage, downloadNpmPackage } from '../../../src/dlx/package.mjs'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 function stagePackage(installRoot: string, packageName: string): string {
   const installedDir = path.join(installRoot, 'node_modules', packageName)

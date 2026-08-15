@@ -5,7 +5,7 @@ import {
   hasOwn,
   isObject,
   isPlainObject,
-} from '../../../src/objects/predicates'
+} from '../../../src/objects/predicates.mjs'
 
 describe('objects/predicates — hasKeys', () => {
   it('should return true for objects with keys', () => {

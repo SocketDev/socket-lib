@@ -39,7 +39,7 @@ import {
   ObjectSeal,
   ObjectSetPrototypeOf,
   ObjectValues,
-} from '../../../src/primordials/object'
+} from '../../../src/primordials/object.mjs'
 
 describe('Object (static)', () => {
   it('Assign / Create / DefineProperty / DefineProperties', () => {

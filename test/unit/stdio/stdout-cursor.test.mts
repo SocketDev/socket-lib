@@ -24,8 +24,8 @@ import {
   stdout,
   write,
   writeLine,
-} from '../../../src/stdio/stdout'
-import { setupStdioTestSuite } from '../util/stdio-test-helper'
+} from '../../../src/stdio/stdout.mjs'
+import { setupStdioTestSuite } from '../util/stdio-test-helper.mjs'
 
 describe('stdio/stdout cursor lifecycle', () => {
   const getContext = setupStdioTestSuite(stdout)

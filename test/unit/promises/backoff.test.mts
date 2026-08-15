@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { createBackoff } from '../../../src/promises/backoff'
+import { createBackoff } from '../../../src/promises/backoff.mjs'
 
 function recordingSleeper(): {
   sleeper: (ms: number) => Promise<void>

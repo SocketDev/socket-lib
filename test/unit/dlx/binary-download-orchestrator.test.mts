@@ -5,22 +5,22 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import type * as BinaryCacheModule from '../../../src/dlx/binary-cache'
-import type * as FsSafeModule from '../../../src/fs/safe'
-import type { processLock as ProcessLockType } from '../../../src/process/lock-instance'
+import type * as BinaryCacheModule from '../../../src/dlx/binary-cache.mjs'
+import type * as FsSafeModule from '../../../src/fs/safe.mjs'
+import type { processLock as ProcessLockType } from '../../../src/process/lock-instance.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
-vi.mock(import('../../../src/http-request/download'), () => ({
+vi.mock(import('../../../src/http-request/download.mjs'), () => ({
   httpDownload: vi.fn(),
 }))
-vi.mock(import('../../../src/process/lock-instance'), () => ({
+vi.mock(import('../../../src/process/lock-instance.mjs'), () => ({
   processLock: {
     withLock: vi.fn(async (_lockPath: string, fn: () => Promise<unknown>) =>
       fn(),
     ),
   } as unknown as typeof ProcessLockType,
 }))
-vi.mock(import('../../../src/dlx/binary-cache'), async () => {
+vi.mock(import('../../../src/dlx/binary-cache.mjs'), async () => {
   const actual = await vi.importActual<typeof BinaryCacheModule>(
     '../../../src/dlx/binary-cache',
   )
@@ -46,11 +46,11 @@ function mockDownloadResult(outputPath: string, content: string) {
 }
 
 async function loadFresh() {
-  const httpMod = await import('../../../src/http-request/download')
-  const bcMod = await import('../../../src/dlx/binary-cache')
+  const httpMod = await import('../../../src/http-request/download.mjs')
+  const bcMod = await import('../../../src/dlx/binary-cache.mjs')
   ;(bcMod.getDlxCachePath as ReturnType<typeof vi.fn>).mockReturnValue(tmpRoot)
-  const mod = await import('../../../src/dlx/binary-download')
-  const cacheMod = await import('../../../src/dlx/cache')
+  const mod = await import('../../../src/dlx/binary-download.mjs')
+  const cacheMod = await import('../../../src/dlx/cache.mjs')
   return {
     httpDownload: httpMod.httpDownload as ReturnType<typeof vi.fn>,
     downloadBinary: mod.downloadBinary,
@@ -238,7 +238,7 @@ describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
   // resetModules + doMock + unmock to avoid leaking into siblings.
   async function loadWithMkdirError(code: string | undefined) {
     vi.resetModules()
-    vi.doMock(import('../../../src/fs/safe'), async () => {
+    vi.doMock(import('../../../src/fs/safe.mjs'), async () => {
       const actual = await vi.importActual<typeof FsSafeModule>(
         '../../../src/fs/safe',
       )
@@ -248,16 +248,16 @@ describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
       }
       return { ...actual, safeMkdir: vi.fn().mockRejectedValue(err) }
     })
-    const bcMod = await import('../../../src/dlx/binary-cache')
+    const bcMod = await import('../../../src/dlx/binary-cache.mjs')
     ;(bcMod.getDlxCachePath as ReturnType<typeof vi.fn>).mockReturnValue(
       tmpRoot,
     )
-    const mod = await import('../../../src/dlx/binary-download')
+    const mod = await import('../../../src/dlx/binary-download.mjs')
     return { downloadBinary: mod.downloadBinary }
   }
 
   afterEach(async () => {
-    vi.doUnmock(import('../../../src/fs/safe'))
+    vi.doUnmock(import('../../../src/fs/safe.mjs'))
   })
 
   test('wraps EACCES with a permission-denied message', async () => {

@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeHttp } from '../../../src/node/http'
+import { getNodeHttp } from '../../../src/node/http.mjs'
 
 describe('node/http', () => {
   it('returns the node:http module', () => {

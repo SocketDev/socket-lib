@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vitest'
 import {
   isBlankString,
   isNonEmptyString,
-} from '../../../src/strings/predicates'
+} from '../../../src/strings/predicates.mjs'
 
 describe('strings/predicates — isBlankString', () => {
   it('returns true for empty string', () => {

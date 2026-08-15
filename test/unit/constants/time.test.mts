@@ -22,7 +22,7 @@ import {
   MILLISECONDS_PER_HOUR,
   MILLISECONDS_PER_MINUTE,
   MILLISECONDS_PER_SECOND,
-} from '../../../src/constants/time'
+} from '../../../src/constants/time.mjs'
 
 describe('constants/time', () => {
   describe('time multipliers', () => {

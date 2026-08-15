@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { pluralize } from '../../../src/words/pluralize'
+import { pluralize } from '../../../src/words/pluralize.mjs'
 
 describe('words/pluralize — default mode', () => {
   it('returns singular for count of 1', () => {

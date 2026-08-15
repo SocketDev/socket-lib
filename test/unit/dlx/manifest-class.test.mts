@@ -19,8 +19,11 @@ import {
   DlxManifest,
   isBinaryEntry,
   isPackageEntry,
-} from '../../../src/dlx/manifest'
-import type { BinaryDetails, PackageDetails } from '../../../src/dlx/manifest'
+} from '../../../src/dlx/manifest.mjs'
+import type {
+  BinaryDetails,
+  PackageDetails,
+} from '../../../src/dlx/manifest.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 

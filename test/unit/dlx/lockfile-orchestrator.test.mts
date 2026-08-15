@@ -6,17 +6,17 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { safeIdealTree, writeSafeNpmrc } from '../../../src/dlx/arborist'
-import { resolveNpmPackagePin } from '../../../src/dlx/lockfile'
-import pacote from '../../../src/external/pacote'
-import { safeDelete } from '../../../src/fs/safe'
+import { safeIdealTree, writeSafeNpmrc } from '../../../src/dlx/arborist.mjs'
+import { resolveNpmPackagePin } from '../../../src/dlx/lockfile.mjs'
+import pacote from '../../../src/external/pacote.js'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
-import type * as ArboristModule from '../../../src/dlx/arborist'
-import type * as PacoteModule from '../../../src/external/pacote'
-import type * as FsSafeModule from '../../../src/fs/safe'
+import type * as ArboristModule from '../../../src/dlx/arborist.mjs'
+import type * as PacoteModule from '../../../src/external/pacote.js'
+import type * as FsSafeModule from '../../../src/fs/safe.mjs'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
-vi.mock(import('../../../src/dlx/arborist'), async importOriginal => {
+vi.mock(import('../../../src/dlx/arborist.mjs'), async importOriginal => {
   const original = await importOriginal<typeof ArboristModule>()
   return {
     ...original,
@@ -25,7 +25,7 @@ vi.mock(import('../../../src/dlx/arborist'), async importOriginal => {
   }
 })
 
-vi.mock(import('../../../src/external/pacote'), async importOriginal => {
+vi.mock(import('../../../src/external/pacote.js'), async importOriginal => {
   const original = await importOriginal<typeof PacoteModule>()
   return {
     ...original,
@@ -36,7 +36,7 @@ vi.mock(import('../../../src/external/pacote'), async importOriginal => {
   }
 })
 
-vi.mock(import('../../../src/fs/safe'), async importOriginal => {
+vi.mock(import('../../../src/fs/safe.mjs'), async importOriginal => {
   const original = await importOriginal<typeof FsSafeModule>()
   return {
     ...original,

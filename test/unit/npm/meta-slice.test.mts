@@ -9,9 +9,9 @@ import {
   sliceOneVersion,
   slicePackument,
   sliceVersionMeta,
-} from '../../../src/npm/meta-slice'
+} from '../../../src/npm/meta-slice.mjs'
 
-import type { RawPackument } from '../../../src/npm/meta-types'
+import type { RawPackument } from '../../../src/npm/meta-types.mjs'
 
 describe('sliceOneVersion', () => {
   it('keeps only time when the entry has no dist/engines/deprecated', () => {

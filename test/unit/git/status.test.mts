@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parsePorcelain } from '../../../src/git/status'
+import { parsePorcelain } from '../../../src/git/status.mjs'
 
 describe('parsePorcelain', () => {
   it('parses an ordinary worktree-modified line, preserving the leading space', () => {

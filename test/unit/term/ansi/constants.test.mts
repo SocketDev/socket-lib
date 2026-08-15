@@ -12,7 +12,7 @@ import {
   ANSI_RESET,
   ANSI_STRIKETHROUGH,
   ANSI_UNDERLINE,
-} from '../../../../src/term/ansi/constants'
+} from '../../../../src/term/ansi/constants.mjs'
 
 describe.sequential('ansi/constants (src)', () => {
   it('exports the canonical ANSI escape sequences', () => {

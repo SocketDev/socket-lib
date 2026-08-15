@@ -15,7 +15,7 @@ import { CACHE_GITHUB_DIR as canonicalCacheGithubDir } from '@socketsecurity/lib
 import {
   CACHE_GITHUB_DIR,
   GITHUB_API_BASE_URL,
-} from '../../../src/constants/github'
+} from '../../../src/constants/github.mjs'
 
 describe('constants/github', () => {
   describe('GITHUB_API_BASE_URL', () => {

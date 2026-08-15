@@ -9,7 +9,7 @@
  *   promises-resolvers.test.mts.
  */
 
-import { pRetry } from '../../src/promises/retry'
+import { pRetry } from '../../src/promises/retry.mjs'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('promises', () => {

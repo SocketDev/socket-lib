@@ -8,7 +8,7 @@ import {
   getCdxgenDownloadUrl,
   makeCdxgenEntry,
   makeCdxgenPlatformMap,
-} from '../../../../src/external-tools/cdxgen/asset-names'
+} from '../../../../src/external-tools/cdxgen/asset-names.mjs'
 
 const PLATFORMS = [
   'darwin-arm64',

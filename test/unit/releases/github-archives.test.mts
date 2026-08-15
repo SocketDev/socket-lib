@@ -16,16 +16,16 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   downloadAndExtractArchive,
   downloadAndExtractZip,
-} from '../../../src/releases/github-archives'
+} from '../../../src/releases/github-archives.mjs'
 
-import { extractArchive } from '../../../src/archives/extract'
-import { safeDelete } from '../../../src/fs/safe'
-import { downloadReleaseAsset } from '../../../src/releases/github-downloads'
+import { extractArchive } from '../../../src/archives/extract.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
+import { downloadReleaseAsset } from '../../../src/releases/github-downloads.mjs'
 
-import type * as ExtractModule from '../../../src/archives/extract'
+import type * as ExtractModule from '../../../src/archives/extract.mjs'
 
 // Mock at the resolved path the SUT imports (relative within src/).
-vi.mock(import('../../../src/releases/github-downloads'), () => ({
+vi.mock(import('../../../src/releases/github-downloads.mjs'), () => ({
   downloadReleaseAsset: vi.fn(
     async (
       _tag: string,
@@ -42,7 +42,7 @@ vi.mock(import('../../../src/releases/github-downloads'), () => ({
   ),
 }))
 
-vi.mock(import('../../../src/archives/extract'), async importOriginal => {
+vi.mock(import('../../../src/archives/extract.mjs'), async importOriginal => {
   const original = await importOriginal<typeof ExtractModule>()
   return {
     ...original,

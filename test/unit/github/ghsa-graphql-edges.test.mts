@@ -6,11 +6,11 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock(import('../../../src/http-request/request'))
+vi.mock(import('../../../src/http-request/request.mjs'))
 
-import { fetchGhsaDetailsViaGraphQL } from '../../../src/github/ghsa'
-import { GitHubEmptyBodyError } from '../../../src/github/errors'
-import { httpRequest } from '../../../src/http-request/request'
+import { fetchGhsaDetailsViaGraphQL } from '../../../src/github/ghsa.mjs'
+import { GitHubEmptyBodyError } from '../../../src/github/errors.mjs'
+import { httpRequest } from '../../../src/http-request/request.mjs'
 
 const JSONStringify = JSON.stringify
 

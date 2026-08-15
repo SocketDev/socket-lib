@@ -10,7 +10,7 @@ import {
   RegExpPrototypeSymbolMatch,
   RegExpPrototypeSymbolReplace,
   RegExpPrototypeTest,
-} from '../../../src/primordials/regexp'
+} from '../../../src/primordials/regexp.mjs'
 
 describe('RegExp', () => {
   it('PrototypeExec / PrototypeTest', () => {

@@ -18,7 +18,7 @@ import {
   clearScreen,
   clearVisible,
   cursorToStart,
-} from '../../../src/stdio/clear'
+} from '../../../src/stdio/clear.mjs'
 
 describe('stdio/clear', () => {
   describe('clearLine', () => {

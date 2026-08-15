@@ -17,7 +17,7 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
-import { findUp, findUpSync } from '../../../src/fs/find'
+import { findUp, findUpSync } from '../../../src/fs/find.mjs'
 import {
   readFileBinary,
   readFileBinarySync,
@@ -25,12 +25,12 @@ import {
   readFileUtf8Sync,
   safeReadFile,
   safeReadFileSync,
-} from '../../../src/fs/read-file'
-import { readJson, readJsonSync } from '../../../src/fs/read-json'
-import { writeJson, writeJsonSync } from '../../../src/fs/write-json'
+} from '../../../src/fs/read-file.mjs'
+import { readJson, readJsonSync } from '../../../src/fs/read-json.mjs'
+import { writeJson, writeJsonSync } from '../../../src/fs/write-json.mjs'
 import { describe, expect, it } from 'vitest'
 import { minTimerQuantum } from '../../_shared/fleet/lib/timing.mts'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('fs - Additional Coverage', () => {
   describe('findUp edge cases', () => {

@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../src/secrets/keychain'), () => ({
+vi.mock(import('../../../src/secrets/keychain.mjs'), () => ({
   readSecret:
     vi.fn<
       (opts: {
@@ -13,10 +13,10 @@ vi.mock(import('../../../src/secrets/keychain'), () => ({
 }))
 
 async function loadFresh() {
-  const kc = await import('../../../src/secrets/keychain')
+  const kc = await import('../../../src/secrets/keychain.mjs')
   const readAsync = kc.readSecret as ReturnType<typeof vi.fn>
   const readSync = kc.readSecretSync as ReturnType<typeof vi.fn>
-  const mod = await import('../../../src/secrets/find')
+  const mod = await import('../../../src/secrets/find.mjs')
   return {
     readAsync,
     readSync,

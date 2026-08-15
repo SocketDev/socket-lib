@@ -7,7 +7,7 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock(import('../../../src/http-request/fetch/browser'), () => ({
+vi.mock(import('../../../src/http-request/fetch/browser.mjs'), () => ({
   fetchResponse: vi.fn(),
 }))
 
@@ -21,8 +21,8 @@ function mockFetchResponse(
 }
 
 async function loadFresh() {
-  const fetchMod = await import('../../../src/http-request/fetch/browser')
-  const mod = await import('../../../src/http-request/browser')
+  const fetchMod = await import('../../../src/http-request/fetch/browser.mjs')
+  const mod = await import('../../../src/http-request/browser.mjs')
   return {
     fetchSpy: fetchMod.fetchResponse as ReturnType<typeof vi.fn>,
     httpRequest: mod.httpRequest,

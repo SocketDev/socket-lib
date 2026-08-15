@@ -21,9 +21,9 @@ import {
   setTheme,
   withTheme,
   withThemeSync,
-} from '../../../../src/term/themes/context'
+} from '../../../../src/term/themes/context.mjs'
 
-import type { Theme } from '../../../../src/term/themes/types'
+import type { Theme } from '../../../../src/term/themes/types.mjs'
 
 describe('themes/context', () => {
   describe('getTheme', () => {

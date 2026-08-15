@@ -22,7 +22,7 @@ import {
   scanSecretValues,
   SOCKET_FLEET_TOKEN_PATTERNS,
   VCS_TOKEN_PATTERNS,
-} from '../../../src/secrets/patterns'
+} from '../../../src/secrets/patterns.mjs'
 
 describe('ALL_TOKEN_KEY_PATTERNS', () => {
   it('is the flat union of the eleven category arrays', () => {

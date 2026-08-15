@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   SYNP_VFS_KEY,
   synpFromVfs,
-} from '../../../../src/external-tools/synp/from-vfs'
+} from '../../../../src/external-tools/synp/from-vfs.mjs'
 
 describe.sequential('external-tools/synp/from-vfs', () => {
   test('exports SYNP_VFS_KEY constant', () => {

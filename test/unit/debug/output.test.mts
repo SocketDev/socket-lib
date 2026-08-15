@@ -16,9 +16,9 @@ import {
   debugLogNs,
   debugNs,
   debugtime,
-} from '../../../src/debug/output'
-import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
-import { getDefaultLogger } from '../../../src/logger/default'
+} from '../../../src/debug/output.mjs'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
+import { getDefaultLogger } from '../../../src/logger/default.mjs'
 
 const logger = getDefaultLogger()
 

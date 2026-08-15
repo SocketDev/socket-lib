@@ -33,9 +33,9 @@ import {
   extractPrimordialsNames,
   extractTsExports,
   resolveSocketLibPrimordials,
-} from '../../../../src/primordials/checks/primordials'
-import type { PrimordialsCheckConfig } from '../../../../src/primordials/checks/primordials'
-import { safeDelete } from '../../../../src/fs/safe'
+} from '../../../../src/primordials/checks/primordials.mjs'
+import type { PrimordialsCheckConfig } from '../../../../src/primordials/checks/primordials.mjs'
+import { safeDelete } from '../../../../src/fs/safe.mjs'
 
 let tmpDir: string
 

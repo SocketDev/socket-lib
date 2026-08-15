@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
-import { Logger } from '../../../src/logger/node'
-import { LOG_SYMBOLS } from '../../../src/logger/symbols'
+import { Logger } from '../../../src/logger/node.mjs'
+import { LOG_SYMBOLS } from '../../../src/logger/symbols.mjs'
 
 import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/logger/symbols'
 

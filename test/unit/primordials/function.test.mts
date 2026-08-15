@@ -11,7 +11,7 @@ import {
   FunctionPrototypeBind,
   FunctionPrototypeCall,
   FunctionPrototypeToString,
-} from '../../../src/primordials/function'
+} from '../../../src/primordials/function.mjs'
 
 describe('Function (prototype)', () => {
   it('FunctionPrototypeApply invokes with thisArg + args array', () => {

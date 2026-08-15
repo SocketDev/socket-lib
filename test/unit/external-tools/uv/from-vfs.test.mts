@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   UV_VFS_KEY,
   uvFromVfs,
-} from '../../../../src/external-tools/uv/from-vfs'
+} from '../../../../src/external-tools/uv/from-vfs.mjs'
 
 describe.sequential('external-tools/uv/from-vfs', () => {
   test('exports UV_VFS_KEY constant', () => {

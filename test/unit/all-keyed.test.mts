@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 
 import { minTimerQuantum } from '../_shared/fleet/lib/timing.mts'
 
-import { pAllKeyed, pAllSettledKeyed } from '../../src/promises/all-keyed'
+import { pAllKeyed, pAllSettledKeyed } from '../../src/promises/all-keyed.mjs'
 
 describe('pAllKeyed', () => {
   it('awaits a dictionary by key', async () => {

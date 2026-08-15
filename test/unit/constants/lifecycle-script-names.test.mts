@@ -2,7 +2,7 @@
  * @file Unit tests for NPM lifecycle script names.
  */
 
-import { lifecycleScriptNames } from '../../../src/constants/lifecycle-script-names'
+import { lifecycleScriptNames } from '../../../src/constants/lifecycle-script-names.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('lifecycle-script-names', () => {

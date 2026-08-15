@@ -9,7 +9,7 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { agentPaths, detectAgent } from '../../../src/ai/agent-context'
+import { agentPaths, detectAgent } from '../../../src/ai/agent-context.mjs'
 
 // Snapshot + restore the env keys the module reads.
 const KEYS = [

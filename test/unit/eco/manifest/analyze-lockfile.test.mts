@@ -4,8 +4,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { analyzeLockfile } from '../../../../src/eco/manifest/analyze-lockfile'
-import { parsePackageLock } from '../../../../src/eco/npm/npm-cli/lockfile/parse'
+import { analyzeLockfile } from '../../../../src/eco/manifest/analyze-lockfile.mjs'
+import { parsePackageLock } from '../../../../src/eco/npm/npm-cli/lockfile/parse.mjs'
 
 const LOCK = parsePackageLock(
   JSON.stringify({

@@ -7,13 +7,13 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as MakeFetchHappen from '../../../src/external/make-fetch-happen'
+import type * as MakeFetchHappen from '../../../src/external/make-fetch-happen.js'
 
 // Mock make-fetch-happen BEFORE importing provenance so the SUT picks up
 // the mocked fetcher factory.
 const mockFetcher = vi.fn()
 vi.mock(
-  import('../../../src/external/make-fetch-happen'),
+  import('../../../src/external/make-fetch-happen.js'),
   () =>
     ({
       default: {
@@ -28,7 +28,7 @@ import {
   getAttestations,
   getProvenanceDetails,
   isTrustedPublisher,
-} from '../../../src/packages/provenance'
+} from '../../../src/packages/provenance.mjs'
 
 describe.sequential('packages/provenance — getAttestations', () => {
   it('returns [] when input has no attestations field', () => {

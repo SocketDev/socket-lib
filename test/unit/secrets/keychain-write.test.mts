@@ -31,9 +31,9 @@ vi.mock(import('node:os'), async () => {
   return { ...mocked, default: mocked }
 })
 
-vi.mock(import('../../../src/secrets/macos'), () => macosMockFactory())
-vi.mock(import('../../../src/secrets/linux'), () => linuxMockFactory())
-vi.mock(import('../../../src/secrets/windows'), () => windowsMockFactory())
+vi.mock(import('../../../src/secrets/macos.mjs'), () => macosMockFactory())
+vi.mock(import('../../../src/secrets/linux.mjs'), () => linuxMockFactory())
+vi.mock(import('../../../src/secrets/windows.mjs'), () => windowsMockFactory())
 
 const loadFresh = (plat?: KeychainPlatform | undefined) =>
   loadFreshKeychain(mockPlatform, plat)

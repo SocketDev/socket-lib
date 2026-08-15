@@ -5,11 +5,11 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { getCacache } from '../../../src/cacache/shared'
-import { clear } from '../../../src/cacache/clear'
-import { get, safeGet } from '../../../src/cacache/read'
-import { put, remove } from '../../../src/cacache/write'
-import type { RemoveOptions } from '../../../src/cacache/types'
+import { getCacache } from '../../../src/cacache/shared.mjs'
+import { clear } from '../../../src/cacache/clear.mjs'
+import { get, safeGet } from '../../../src/cacache/read.mjs'
+import { put, remove } from '../../../src/cacache/write.mjs'
+import type { RemoveOptions } from '../../../src/cacache/types.mjs'
 
 describe('clear', () => {
   it('should export clear function', () => {

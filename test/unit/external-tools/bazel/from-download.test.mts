@@ -5,9 +5,9 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { bazelFromDownload } from '../../../../src/external-tools/bazel/from-download'
+import { bazelFromDownload } from '../../../../src/external-tools/bazel/from-download.mjs'
 
-import { makeFakeDownloader } from '../../../lib/fake-downloader'
+import { makeFakeDownloader } from '../../../lib/fake-downloader.mjs'
 
 describe('external-tools/bazel/from-download', () => {
   it('constructs the GitHub release URL and returns ResolvedBazel', async () => {

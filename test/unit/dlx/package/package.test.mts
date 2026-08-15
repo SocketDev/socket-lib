@@ -14,15 +14,15 @@ import { describe, expect, it } from 'vitest'
 import type {
   DlxPackageOptions,
   DlxPackageResult,
-} from '../../../../src/dlx/package'
+} from '../../../../src/dlx/package.mjs'
 import {
   executePackage,
   findBinaryPath,
   makePackageBinsExecutable,
   npmPurl,
   resolveBinaryPath,
-} from '../../../../src/dlx/package'
-import { runWithTempDir } from '../../util/temp-file-helper'
+} from '../../../../src/dlx/package.mjs'
+import { runWithTempDir } from '../../util/temp-file-helper.mjs'
 
 // Helper that owns the `prefer-exists-sync` exemption once instead of
 // repeating it at every fs.statSync() call — these tests read the mode

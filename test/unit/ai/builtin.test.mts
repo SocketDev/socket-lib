@@ -11,7 +11,7 @@ const { isNodeBuiltin, requireBuiltin } = vi.hoisted(() => ({
   requireBuiltin: vi.fn(),
 }))
 
-vi.mock(import('../../../src/node/module'), () => ({
+vi.mock(import('../../../src/node/module.mjs'), () => ({
   isNodeBuiltin,
   requireBuiltin,
 }))
@@ -49,7 +49,7 @@ function setBrowserFactory(value?: unknown | undefined): void {
 }
 
 async function loadResolver() {
-  return await import('../../../src/ai/builtin')
+  return await import('../../../src/ai/builtin.mjs')
 }
 
 beforeEach(() => {

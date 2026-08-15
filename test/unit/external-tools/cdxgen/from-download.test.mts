@@ -4,15 +4,15 @@ import type nodeFs from 'node:fs'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-vi.mock(import('../../../../src/external-tools/from-download'), () => ({
+vi.mock(import('../../../../src/external-tools/from-download.mjs'), () => ({
   downloadToolArchive: vi.fn(),
 }))
 
-vi.mock(import('../../../../src/paths/socket'), () => ({
+vi.mock(import('../../../../src/paths/socket.mjs'), () => ({
   getSocketDlxDir: vi.fn(() => '/fake/dlx'),
 }))
 
-vi.mock(import('../../../../src/fs/safe'), () => ({
+vi.mock(import('../../../../src/fs/safe.mjs'), () => ({
   safeMkdir: vi.fn(async () => undefined),
 }))
 
@@ -29,10 +29,10 @@ vi.mock(import('node:fs'), async () => {
 })
 
 async function loadFresh() {
-  const fdMod = await import('../../../../src/external-tools/from-download')
+  const fdMod = await import('../../../../src/external-tools/from-download.mjs')
   const archiveMock = fdMod.downloadToolArchive as ReturnType<typeof vi.fn>
   const mod =
-    await import('../../../../src/external-tools/cdxgen/from-download')
+    await import('../../../../src/external-tools/cdxgen/from-download.mjs')
   return { archiveMock, cdxgenFromDownload: mod.cdxgenFromDownload }
 }
 

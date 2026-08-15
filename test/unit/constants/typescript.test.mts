@@ -12,7 +12,7 @@ import { describe, expect, it } from 'vitest'
 import {
   getTsLibsAvailable,
   getTsTypesAvailable,
-} from '../../../src/constants/typescript'
+} from '../../../src/constants/typescript.mjs'
 
 describe('constants/typescript', () => {
   describe('getTsTypesAvailable', () => {

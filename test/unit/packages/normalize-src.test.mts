@@ -14,9 +14,9 @@ import {
   resolveEscapedScope,
   resolveOriginalPackageName,
   unescapeScope,
-} from '../../../src/packages/normalize'
+} from '../../../src/packages/normalize.mjs'
 
-import type { PackageJson } from '../../../src/packages/types'
+import type { PackageJson } from '../../../src/packages/types.mjs'
 
 describe.sequential('packages/normalize (src) — getEscapedScopeRegExp', () => {
   it('returns a fresh RegExp', () => {

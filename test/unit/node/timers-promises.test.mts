@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeTimersPromises } from '../../../src/node/timers-promises'
+import { getNodeTimersPromises } from '../../../src/node/timers-promises.mjs'
 
 describe('node/timers-promises', () => {
   it('returns the node:timers/promises module', () => {

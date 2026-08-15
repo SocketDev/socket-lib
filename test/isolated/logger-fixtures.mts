@@ -18,7 +18,7 @@ import { Writable } from 'node:stream'
 import { afterEach, beforeEach } from 'vitest'
 
 // oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
-import { Logger } from '../../src/logger/node'
+import { Logger } from '../../src/logger/node.mjs'
 
 /**
  * Callback shape Node passes to a Writable's `write` implementation. Invoke it

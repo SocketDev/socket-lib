@@ -7,7 +7,7 @@
 import { getSmolHttps as getSmolHttpsStable } from '@socketsecurity/lib-stable/smol/https'
 import { describe, expect, it } from 'vitest'
 
-import { getSmolHttps } from '../../../../src/exe/smol/https'
+import { getSmolHttps } from '../../../../src/exe/smol/https.mjs'
 
 describe('smol/https', () => {
   describe('getSmolHttps', () => {

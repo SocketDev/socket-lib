@@ -7,7 +7,7 @@
 import { getSmolPath as getSmolPathStable } from '@socketsecurity/lib-stable/smol/path'
 import { describe, expect, it } from 'vitest'
 
-import { getSmolPath } from '../../../../src/exe/smol/path'
+import { getSmolPath } from '../../../../src/exe/smol/path.mjs'
 
 describe('smol/path', () => {
   describe('getSmolPath', () => {

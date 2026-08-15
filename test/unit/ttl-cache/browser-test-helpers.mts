@@ -4,7 +4,7 @@
  *   failure modes, plus a deferred-promise helper for concurrency tests.
  */
 
-import type { TtlCacheStorage } from '../../../src/cache/ttl/types'
+import type { TtlCacheStorage } from '../../../src/cache/ttl/types.mjs'
 
 export interface AdapterCalls {
   getItem: number

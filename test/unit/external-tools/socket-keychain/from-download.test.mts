@@ -7,12 +7,12 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-import { safeDelete } from '../../../../src/fs/safe'
-import { socketKeychainFromDownload } from '../../../../src/external-tools/socket-keychain/from-download'
+import { safeDelete } from '../../../../src/fs/safe.mjs'
+import { socketKeychainFromDownload } from '../../../../src/external-tools/socket-keychain/from-download.mjs'
 import {
   FAKE_INTEGRITY_VALUE,
   makeFakeDownloader,
-} from '../../../lib/fake-downloader'
+} from '../../../lib/fake-downloader.mjs'
 
 const scratchDirs: string[] = []
 

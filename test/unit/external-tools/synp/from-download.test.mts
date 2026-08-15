@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/dlx/package'), () => ({
+vi.mock(import('../../../../src/dlx/package.mjs'), () => ({
   downloadNpmPackage: vi.fn(),
 }))
 
 async function loadFresh() {
-  const dlxMod = await import('../../../../src/dlx/package')
+  const dlxMod = await import('../../../../src/dlx/package.mjs')
   const downloadMock = dlxMod.downloadNpmPackage as ReturnType<typeof vi.fn>
-  const mod = await import('../../../../src/external-tools/synp/from-download')
+  const mod =
+    await import('../../../../src/external-tools/synp/from-download.mjs')
   return { downloadMock, synpFromDownload: mod.synpFromDownload }
 }
 

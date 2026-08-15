@@ -10,14 +10,14 @@ import path from 'node:path'
 import type {
   EditablePackageJson,
   PackageJson,
-} from '../../../src/packages/types'
+} from '../../../src/packages/types.mjs'
 import {
   toEditablePackageJson,
   toEditablePackageJsonSync,
-} from '../../../src/packages/edit'
+} from '../../../src/packages/edit.mjs'
 import { describe, expect, it } from 'vitest'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 interface EditableInternals {
   filename: string

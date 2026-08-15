@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parseGitUrl } from '../../../../../src/eco/npm/npm-cli/parse-git-url'
+import { parseGitUrl } from '../../../../../src/eco/npm/npm-cli/parse-git-url.mjs'
 
 describe('eco/npm/npm-cli/parse-git-url', () => {
   it('extracts url + commit from git+https with hash', () => {

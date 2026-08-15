@@ -5,7 +5,10 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getCliSpinners, getDefaultSpinner } from '../../../src/spinner/default'
+import {
+  getCliSpinners,
+  getDefaultSpinner,
+} from '../../../src/spinner/default.mjs'
 
 describe.sequential('spinner/default — getCliSpinners', () => {
   it('returns the full spinner registry when no name is passed', () => {

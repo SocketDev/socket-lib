@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest'
 import {
   detectFormat,
   supportedFiles,
-} from '../../../../src/eco/manifest/detect-format'
+} from '../../../../src/eco/manifest/detect-format.mjs'
 
 describe('eco/manifest/detect-format', () => {
   describe('detectFormat', () => {

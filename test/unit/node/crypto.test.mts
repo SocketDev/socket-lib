@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeCrypto } from '../../../src/node/crypto'
+import { getNodeCrypto } from '../../../src/node/crypto.mjs'
 
 describe('node/crypto', () => {
   it('returns the node:crypto module', () => {

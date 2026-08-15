@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { createSummaryFooter } from '../../../src/stdio/footer'
+import { createSummaryFooter } from '../../../src/stdio/footer.mjs'
 
 describe('stdio/footer createSummaryFooter', () => {
   describe('createSummaryFooter', () => {

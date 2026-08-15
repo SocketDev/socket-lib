@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import type * as whichModule from '../../../../src/exe/path/which'
+import type * as whichModule from '../../../../src/exe/path/which.mjs'
 
 vi.mock(
-  import('../../../../src/exe/path/which'),
+  import('../../../../src/exe/path/which.mjs'),
   () =>
     ({
       which:
@@ -18,10 +18,10 @@ vi.mock(
 )
 
 async function loadFresh() {
-  const whichMod = await import('../../../../src/exe/path/which')
+  const whichMod = await import('../../../../src/exe/path/which.mjs')
   const whichMock = whichMod.which as ReturnType<typeof vi.fn>
   const mod =
-    await import('../../../../src/external-tools/skillspector/from-path')
+    await import('../../../../src/external-tools/skillspector/from-path.mjs')
   return { whichMock, skillspectorFromPath: mod.skillspectorFromPath }
 }
 

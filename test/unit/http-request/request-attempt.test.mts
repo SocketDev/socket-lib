@@ -9,7 +9,7 @@ import { EventEmitter } from 'node:events'
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import type * as HttpRequestInternal from '../../../src/http-request/shared'
+import type * as HttpRequestInternal from '../../../src/http-request/shared.mjs'
 
 const { httpStub, httpsStub } = vi.hoisted(() => ({
   httpStub: { request: vi.fn() },
@@ -17,7 +17,7 @@ const { httpStub, httpsStub } = vi.hoisted(() => ({
 }))
 
 vi.mock(
-  import('../../../src/http-request/shared'),
+  import('../../../src/http-request/shared.mjs'),
   () =>
     ({
       getHttp: () => httpStub,
@@ -52,7 +52,7 @@ afterEach(() => {
 })
 
 async function loadAttempt() {
-  return await import('../../../src/http-request/request-attempt')
+  return await import('../../../src/http-request/request-attempt.mjs')
 }
 
 describe.sequential('request-attempt — body cleanup on error', () => {

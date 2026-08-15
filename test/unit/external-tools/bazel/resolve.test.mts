@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   resetBazelResolution,
   resolveBazel,
-} from '../../../../src/external-tools/bazel/resolve'
+} from '../../../../src/external-tools/bazel/resolve.mjs'
 
 // resolveBazel() does real PATH/binary resolution; Windows CI agents can take
 // >10s to return on a cold cache, blowing vitest's 10s default. Bump the

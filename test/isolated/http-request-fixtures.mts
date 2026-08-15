@@ -8,7 +8,7 @@
  *   in its own worker with heap budget intact. This module exports the shared
  *   HTTP test server setup so each split file can stand up + tear down its own
  *   instance without duplicating the 186-line request handler. The pattern is:
- *   import { setupHttpFixture, fixture } from './http-request-fixtures'
+ *   import { setupHttpFixture, fixture } from './http-request-fixtures.mjs'
  *   setupHttpFixture() describe('…', () => { it('…', async () => { const
  *   response = await httpRequest(`${fixture.baseUrl}/text`) … }) })
  *   `setupHttpFixture()` installs vitest `beforeAll` / `afterAll` hooks in the

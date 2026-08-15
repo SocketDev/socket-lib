@@ -17,10 +17,10 @@ import {
   pickOpenCommand,
   resolveNewWindowBrowser,
   shouldSkipSpawn,
-} from '../../../src/process/open-url'
+} from '../../../src/process/open-url.mjs'
 
-import type { getNodeChildProcess } from '../../../src/node/child-process'
-import type { OpenUrlSpawnOptions } from '../../../src/process/open-url'
+import type { getNodeChildProcess } from '../../../src/node/child-process.mjs'
+import type { OpenUrlSpawnOptions } from '../../../src/process/open-url.mjs'
 
 // Observe the DEFAULT spawner's launch path without ever spawning: the
 // default lane reaches node:child_process through the lazy getNodeChildProcess
@@ -30,7 +30,7 @@ import type { OpenUrlSpawnOptions } from '../../../src/process/open-url'
 const nodeSpawnCalls = vi.hoisted(
   () => [] as Array<{ args: readonly string[]; command: string }>,
 )
-vi.mock(import('../../../src/node/child-process'), () => ({
+vi.mock(import('../../../src/node/child-process.mjs'), () => ({
   getNodeChildProcess: () =>
     ({
       spawn: (command: string, args: readonly string[]) => {

@@ -1,19 +1,19 @@
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/from-download'), () => ({
+vi.mock(import('../../../../src/external-tools/from-download.mjs'), () => ({
   downloadAndExtractTool: vi.fn(),
 }))
 
-vi.mock(import('../../../../src/paths/socket'), () => ({
+vi.mock(import('../../../../src/paths/socket.mjs'), () => ({
   getSocketDlxDir: vi.fn(() => '/fake/dlx'),
 }))
 
 async function loadFresh() {
-  const fdMod = await import('../../../../src/external-tools/from-download')
+  const fdMod = await import('../../../../src/external-tools/from-download.mjs')
   const downloadMock = fdMod.downloadAndExtractTool as ReturnType<typeof vi.fn>
   const mod =
-    await import('../../../../src/external-tools/trufflehog/from-download')
+    await import('../../../../src/external-tools/trufflehog/from-download.mjs')
   return { downloadMock, trufflehogFromDownload: mod.trufflehogFromDownload }
 }
 

@@ -13,7 +13,10 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { createFooter, createSummaryFooter } from '../../../src/stdio/footer'
+import {
+  createFooter,
+  createSummaryFooter,
+} from '../../../src/stdio/footer.mjs'
 
 // footer.ts captures `DateNow` from primordials at module init. ESM live
 // bindings make that capture immune to `Date.now = vi.fn()` and to

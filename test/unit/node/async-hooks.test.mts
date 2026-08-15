@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeAsyncHooks } from '../../../src/node/async-hooks'
+import { getNodeAsyncHooks } from '../../../src/node/async-hooks.mjs'
 
 describe('node/async-hooks', () => {
   it('returns the node:async_hooks module', () => {

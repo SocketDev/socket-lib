@@ -5,9 +5,9 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { AI_TIER, tierToSpawn } from '../../../src/ai/tier'
+import { AI_TIER, tierToSpawn } from '../../../src/ai/tier.mjs'
 
-import type { AiTier } from '../../../src/ai/tier'
+import type { AiTier } from '../../../src/ai/tier.mjs'
 
 const TIERS: readonly AiTier[] = ['haiku', 'sonnet', 'opus', 'fable']
 

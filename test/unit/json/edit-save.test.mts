@@ -12,8 +12,8 @@ import { setTimeout as sleep } from 'node:timers/promises'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { safeDelete } from '../../../src/fs/safe'
-import { getEditableJsonClass } from '../../../src/json/edit'
+import { safeDelete } from '../../../src/fs/safe.mjs'
+import { getEditableJsonClass } from '../../../src/json/edit.mjs'
 
 // EditableJson keeps the last-read/written file contents on an internal
 // `readFileContent` field. The tests reach for it to assert on-disk shape

@@ -18,7 +18,7 @@ import {
   gitHubTgzUrl,
   isGitHubTgzSpec,
   isGitHubUrlSpec,
-} from '../../../src/packages/specs'
+} from '../../../src/packages/specs.mjs'
 
 describe('packages/specs', () => {
   describe('getRepoUrlDetails', () => {

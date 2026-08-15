@@ -18,8 +18,8 @@ import {
   getStderrRows,
   isStderrTTY,
   stderr,
-} from '../../../src/stdio/stderr'
-import { setupStdioTestSuite } from '../util/stdio-test-helper'
+} from '../../../src/stdio/stderr.mjs'
+import { setupStdioTestSuite } from '../util/stdio-test-helper.mjs'
 
 describe('stdio/stderr terminal', () => {
   const getContext = setupStdioTestSuite(stderr)

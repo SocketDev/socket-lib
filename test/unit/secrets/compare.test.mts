@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest'
 // (expect(compareSecrets(...)).toBe(...)), not an expected-value builder;
 // it has no -stable export to import from.
 // oxlint-disable-next-line socket/no-src-import-in-test-expect -- under test
-import { compareSecrets } from '../../../src/secrets/compare'
+import { compareSecrets } from '../../../src/secrets/compare.mjs'
 
 describe('compareSecrets', () => {
   describe('equality', () => {

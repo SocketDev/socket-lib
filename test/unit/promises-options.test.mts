@@ -11,7 +11,7 @@
 import {
   normalizeRetryOptions,
   resolveRetryOptions,
-} from '../../src/promises/options'
+} from '../../src/promises/options.mjs'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('promises', () => {

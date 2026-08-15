@@ -23,13 +23,13 @@ import {
   hasProvenance,
   isVersionPublished,
   parsePackument,
-} from '../../../src/npm/registry'
+} from '../../../src/npm/registry.mjs'
 
 import type {
   AttestationBundle,
   NpmHttpOptions,
   PackumentVersion,
-} from '../../../src/npm/registry'
+} from '../../../src/npm/registry.mjs'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
 const fixturesDir = path.resolve(testDir, '../../fixtures/npm')

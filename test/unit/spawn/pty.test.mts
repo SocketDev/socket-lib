@@ -13,17 +13,17 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { whichSync } from '../../../src/exe/path/which'
-import { safeDeleteSync } from '../../../src/fs/safe'
+import { whichSync } from '../../../src/exe/path/which.mjs'
+import { safeDeleteSync } from '../../../src/fs/safe.mjs'
 import {
   buildPtyInvocation,
   NON_INTERACTIVE_RENDER_ENV,
   ptyRun,
   ptyRunPumped,
   stdoutIsFileBacked,
-} from '../../../src/process/spawn/pty'
+} from '../../../src/process/spawn/pty.mjs'
 
-import { itUnixOnly } from '../util/skip-helpers'
+import { itUnixOnly } from '../util/skip-helpers.mjs'
 
 const HAS_SCRIPT = whichSync('script') !== null
 // The end-to-end case allocates a REAL PTY through the system `script`

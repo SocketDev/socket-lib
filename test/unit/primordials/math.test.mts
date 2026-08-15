@@ -50,7 +50,7 @@ import {
   MathTan,
   MathTanh,
   MathTrunc,
-} from '../../../src/primordials/math'
+} from '../../../src/primordials/math.mjs'
 
 // MathFround and MathF16round are used to BUILD expected values inside
 // `expect(...)`, so the assertion-side bindings come from the published snapshot

@@ -10,7 +10,7 @@ import {
   GHCR_REGISTRY,
   pullFirstLayer,
   resolveImageManifest,
-} from '../../../src/oci/registry'
+} from '../../../src/oci/registry.mjs'
 import { makeFakeAdapter, sha256Digest } from './oci-test-helpers.mts'
 
 import type { FakeRoute } from './oci-test-helpers.mts'

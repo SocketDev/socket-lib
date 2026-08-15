@@ -1,12 +1,12 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { GitHubEmptyBodyError } from '../../../src/github/errors'
+import { GitHubEmptyBodyError } from '../../../src/github/errors.mjs'
 import {
   fetchGitHub,
   formatGitHubStatusNote,
   getGhsaUrl,
-} from '../../../src/github/request'
+} from '../../../src/github/request.mjs'
 
 const GITHUB_API = 'https://api.github.com'
 

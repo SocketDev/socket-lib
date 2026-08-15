@@ -13,9 +13,9 @@ import http from 'node:http'
 import { describe, expect, it } from 'vitest'
 
 // oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
-import { httpJson, httpText } from '../../src/http-request/node'
+import { httpJson, httpText } from '../../src/http-request/node.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures'
+import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
 
 setupHttpFixture()
 

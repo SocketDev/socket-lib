@@ -9,7 +9,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { jreFromPath } from '../../../../src/external-tools/jre/from-path'
+import { jreFromPath } from '../../../../src/external-tools/jre/from-path.mjs'
 
 describe('external-tools/jre/from-path', () => {
   it('returns either a resolved shape or undefined', async () => {

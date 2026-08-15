@@ -15,11 +15,11 @@ import crypto from 'node:crypto'
 import os from 'node:os'
 import process from 'node:process'
 
-import { dlxBinary, getDlxCachePath } from '../../../src/dlx/binary'
+import { dlxBinary, getDlxCachePath } from '../../../src/dlx/binary.mjs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { itWindowsOnly } from '../util/skip-helpers'
-import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
+import { itWindowsOnly } from '../util/skip-helpers.mjs'
+import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper.mjs'
 import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'
 
 import type { DlxTestServer } from './binary-test-server.mts'

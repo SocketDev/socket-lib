@@ -14,15 +14,15 @@ import {
   candidateScore,
   orderCandidates,
   taskClassToTier,
-} from '../../../src/ai/route-heuristic'
+} from '../../../src/ai/route-heuristic.mjs'
 
-import type { CredentialProvider } from '../../../src/ai/credentials'
+import type { CredentialProvider } from '../../../src/ai/credentials.mjs'
 import type {
   BillingAccount,
   BillingContext,
-} from '../../../src/ai/route-heuristic'
-import type { RouteContext } from '../../../src/ai/route'
-import type { AiAgentName } from '../../../src/ai/types'
+} from '../../../src/ai/route-heuristic.mjs'
+import type { RouteContext } from '../../../src/ai/route.mjs'
+import type { AiAgentName } from '../../../src/ai/types.mjs'
 
 function ctx(
   available: readonly AiAgentName[],

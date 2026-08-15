@@ -16,16 +16,16 @@ import type http from 'node:http'
 
 import { describe, expect, it } from 'vitest'
 
-import { enrichErrorMessage } from '../../src/http-request/errors'
-import { httpRequest } from '../../src/http-request/request'
+import { enrichErrorMessage } from '../../src/http-request/errors.mjs'
+import { httpRequest } from '../../src/http-request/request.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures'
-import { runWithTempDir } from '../unit/util/temp-file-helper'
+import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
 
 import type {
   IncomingRequest,
   IncomingResponse,
-} from '../../src/http-request/request-types'
+} from '../../src/http-request/request-types.mjs'
 
 setupHttpFixture()
 

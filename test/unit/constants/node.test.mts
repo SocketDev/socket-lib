@@ -29,7 +29,7 @@ import {
   supportsNodeStripTypes,
   supportsNodeStripTypesDefault,
   supportsProcessSend,
-} from '../../../src/constants/node'
+} from '../../../src/constants/node.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('node constants', () => {

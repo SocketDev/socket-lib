@@ -18,14 +18,14 @@ import AdmZip from 'adm-zip'
 import tarStream from 'tar-stream'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { detectArchiveFormat } from '../../src/archives/detect'
-import { extractArchive } from '../../src/archives/extract'
-import { extractTar, extractTarGz } from '../../src/archives/tar'
-import { extractZip } from '../../src/archives/zip'
-import { safeDelete } from '../../src/fs/safe'
+import { detectArchiveFormat } from '../../src/archives/detect.mjs'
+import { extractArchive } from '../../src/archives/extract.mjs'
+import { extractTar, extractTarGz } from '../../src/archives/tar.mjs'
+import { extractZip } from '../../src/archives/zip.mjs'
+import { safeDelete } from '../../src/fs/safe.mjs'
 
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
-import { runWithTempDir } from '../unit/util/temp-file-helper'
+import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
 
 let testZipPath: string
 let testTarPath: string

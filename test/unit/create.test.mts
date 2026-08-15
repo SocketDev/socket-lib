@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { link, links } from '../../src/links/create'
+import { link, links } from '../../src/links/create.mjs'
 
 describe('links', () => {
   describe('link()', () => {

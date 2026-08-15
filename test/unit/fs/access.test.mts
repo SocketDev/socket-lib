@@ -13,7 +13,7 @@ import {
   canExecute,
   canRead,
   canWrite,
-} from '../../../src/fs/access'
+} from '../../../src/fs/access.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string

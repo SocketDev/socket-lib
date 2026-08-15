@@ -14,7 +14,7 @@
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { escapeRegExp } from '../../src/regexps/escape'
+import { escapeRegExp } from '../../src/regexps/escape.mjs'
 
 /**
  * Returns whether `new RegExp(escapeRegExp(input))` matches exactly `input`.
@@ -183,7 +183,7 @@ describe('regexps', () => {
       delete (RegExp as unknown as { escape?: unknown | undefined }).escape
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises fallback after deleting RegExp.escape.
-      const mod = await import('../../src/regexps/escape')
+      const mod = await import('../../src/regexps/escape.mjs')
       return mod.escapeRegExp
     }
 

@@ -3,7 +3,7 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { glob } from '../../../src/globs/match'
+import { glob } from '../../../src/globs/match.mjs'
 
 describe('globs/match — glob', () => {
   it('should be a function', () => {

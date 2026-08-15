@@ -14,9 +14,9 @@ import { beforeEach, describe, expect, it } from 'vitest'
 
 import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/logger/symbols'
 
-import { Logger } from '../../../src/logger/node'
-import { LOG_SYMBOLS } from '../../../src/logger/symbols'
-import { THEMES } from '../../../src/term/themes/themes'
+import { Logger } from '../../../src/logger/node.mjs'
+import { LOG_SYMBOLS } from '../../../src/logger/symbols.mjs'
+import { THEMES } from '../../../src/term/themes/themes.mjs'
 
 describe('Logger - Theme Handling', () => {
   let stdout: Writable

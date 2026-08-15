@@ -1,8 +1,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { onExit } from '../../../../src/events/exit/handler'
-import { unload } from '../../../../src/events/exit/lifecycle'
-import { signals } from '../../../../src/events/exit/signals'
+import { onExit } from '../../../../src/events/exit/handler.mjs'
+import { unload } from '../../../../src/events/exit/lifecycle.mjs'
+import { signals } from '../../../../src/events/exit/signals.mjs'
 
 beforeEach(() => {
   unload()

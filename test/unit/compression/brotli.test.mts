@@ -33,9 +33,9 @@ import {
   hasBrotliExt,
   isBrotliCompressed,
   resolveBrotliOptions,
-} from '../../../src/compression/brotli'
-import { compressGzip } from '../../../src/compression/gzip'
-import { safeDelete } from '../../../src/fs/safe'
+} from '../../../src/compression/brotli.mjs'
+import { compressGzip } from '../../../src/compression/gzip.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 import {
   LARGE_TEXT,
   SMALL_TEXT,

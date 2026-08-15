@@ -28,11 +28,11 @@ import {
   readSecretFromSlots,
   writeSecret,
   writeSecretToSlots,
-} from '../../src/secrets/keychain'
+} from '../../src/secrets/keychain.mjs'
 
-import { resolve, resolveSync } from '../../src/secrets/find'
+import { resolve, resolveSync } from '../../src/secrets/find.mjs'
 
-import * as rc from '../../src/secrets/rc'
+import * as rc from '../../src/secrets/rc.mjs'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 const IS_MACOS = os.platform() === 'darwin'

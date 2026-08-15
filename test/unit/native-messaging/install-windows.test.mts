@@ -14,26 +14,32 @@ import path from 'node:path'
 
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { safeDelete } from '../../../src/fs/safe'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 const { mockSpawnSync } = vi.hoisted(() => ({ mockSpawnSync: vi.fn() }))
 
-vi.mock(import('../../../src/process/spawn/child'), async importOriginal => ({
-  ...(await importOriginal()),
-  spawnSync: mockSpawnSync,
-}))
+vi.mock(
+  import('../../../src/process/spawn/child.mjs'),
+  async importOriginal => ({
+    ...(await importOriginal()),
+    spawnSync: mockSpawnSync,
+  }),
+)
 
-vi.mock(import('../../../src/constants/platform'), async importOriginal => ({
-  ...(await importOriginal()),
-  isDarwin: () => false,
-  isWin32: () => true,
-}))
+vi.mock(
+  import('../../../src/constants/platform.mjs'),
+  async importOriginal => ({
+    ...(await importOriginal()),
+    isDarwin: () => false,
+    isWin32: () => true,
+  }),
+)
 
 import {
   installNativeHost,
   registerWindows,
-} from '../../../src/native-messaging/install'
-import { withEnvSync } from '../../../src/env/rewire'
+} from '../../../src/native-messaging/install.mjs'
+import { withEnvSync } from '../../../src/env/rewire.mjs'
 
 const tmpDirs: string[] = []
 

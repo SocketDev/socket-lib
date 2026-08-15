@@ -27,7 +27,7 @@ import {
   readJsonSync,
   setReadJsonCacheMax,
   setReadJsonCacheTtlMs,
-} from '../../src/fs/read-json'
+} from '../../src/fs/read-json.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpDir: string

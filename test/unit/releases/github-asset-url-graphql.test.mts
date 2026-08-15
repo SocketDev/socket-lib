@@ -7,14 +7,14 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
-import { getReleaseAssetUrl } from '../../../src/releases/github-asset-url'
-import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm'
+import { getReleaseAssetUrl } from '../../../src/releases/github-asset-url.mjs'
+import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm.mjs'
 
-import { httpRequest } from '../../../src/http-request/request'
+import { httpRequest } from '../../../src/http-request/request.mjs'
 
-import { createMockHttpResponse } from '../util/http-mock'
+import { createMockHttpResponse } from '../util/http-mock.mjs'
 
-vi.mock(import('../../../src/http-request/request'))
+vi.mock(import('../../../src/http-request/request.mjs'))
 
 const JSONStringify = JSON.stringify
 

@@ -10,7 +10,7 @@
 import {
   resolvePackageJsonDirname,
   resolvePackageJsonPath,
-} from '../../../src/paths/packages'
+} from '../../../src/paths/packages.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('paths/packages', () => {

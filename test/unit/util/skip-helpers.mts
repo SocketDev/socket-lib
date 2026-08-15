@@ -11,7 +11,7 @@
  *
  * @example
  *   ;```ts
- *   import { itWindowsOnly, itUnixOnly, itNetworkOnly } from '../util/skip-helpers'
+ *   import { itWindowsOnly, itUnixOnly, itNetworkOnly } from '../util/skip-helpers.mjs'
  *
  *   itWindowsOnly('should convert MSYS drive letter paths', () => { ... })
  *   itUnixOnly('should not convert MSYS-like paths on Unix', () => { ... })
@@ -21,7 +21,7 @@
 
 import process from 'node:process'
 
-import { isWin32 } from '../../../src/constants/platform'
+import { isWin32 } from '../../../src/constants/platform.mjs'
 import { describe, it } from 'vitest'
 
 // Read the flag at call time inside the wrappers below, not at module import.

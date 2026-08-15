@@ -11,39 +11,42 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as PlatformModule from '../../../src/constants/platform'
-import type * as DownloadModule from '../../../src/http-request/download'
+import type * as PlatformModule from '../../../src/constants/platform.mjs'
+import type * as DownloadModule from '../../../src/http-request/download.mjs'
 
-vi.mock(import('../../../src/constants/platform'), async importOriginal => {
+vi.mock(import('../../../src/constants/platform.mjs'), async importOriginal => {
   const actual = await importOriginal<typeof PlatformModule>()
   return { ...actual, isWin32: () => true }
 })
 
-vi.mock(import('../../../src/http-request/download'), async importOriginal => {
-  const original = await importOriginal<typeof DownloadModule>()
-  return {
-    ...original,
-    httpDownload: vi.fn(
-      async (_url: string, destPath: string, _opts?: unknown | undefined) => {
-        // Write a known payload so SRI integrity computes deterministically.
-        const payload = Buffer.from('win-payload')
-        writeFileSync(destPath, payload)
-        return {
-          headers: {},
-          integrity: `sha512-${crypto.createHash('sha512').update(payload).digest('base64')}`,
-          ok: true,
-          path: destPath,
-          sha256: crypto.createHash('sha256').update(payload).digest('hex'),
-          size: payload.length,
-          status: 200,
-          statusText: 'OK',
-        } as Awaited<ReturnType<typeof DownloadModule.httpDownload>>
-      },
-    ),
-  }
-})
+vi.mock(
+  import('../../../src/http-request/download.mjs'),
+  async importOriginal => {
+    const original = await importOriginal<typeof DownloadModule>()
+    return {
+      ...original,
+      httpDownload: vi.fn(
+        async (_url: string, destPath: string, _opts?: unknown | undefined) => {
+          // Write a known payload so SRI integrity computes deterministically.
+          const payload = Buffer.from('win-payload')
+          writeFileSync(destPath, payload)
+          return {
+            headers: {},
+            integrity: `sha512-${crypto.createHash('sha512').update(payload).digest('base64')}`,
+            ok: true,
+            path: destPath,
+            sha256: crypto.createHash('sha256').update(payload).digest('hex'),
+            size: payload.length,
+            status: 200,
+            statusText: 'OK',
+          } as Awaited<ReturnType<typeof DownloadModule.httpDownload>>
+        },
+      ),
+    }
+  },
+)
 
-import { downloadBinaryFile } from '../../../src/dlx/binary-download'
+import { downloadBinaryFile } from '../../../src/dlx/binary-download.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string

@@ -4,8 +4,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { get, safeGet } from '../../../src/cacache/read'
-import type { GetOptions } from '../../../src/cacache/types'
+import { get, safeGet } from '../../../src/cacache/read.mjs'
+import type { GetOptions } from '../../../src/cacache/types.mjs'
 
 describe('get', () => {
   it('should export get function', () => {

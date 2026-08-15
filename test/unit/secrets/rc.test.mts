@@ -11,8 +11,8 @@ import {
   shellSingleQuote,
   write,
   writeRcFile,
-} from '../../../src/secrets/rc'
-import { safeDelete } from '../../../src/fs/safe'
+} from '../../../src/secrets/rc.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 const IS_DARWIN = os.platform() === 'darwin'
 const IS_WIN32 = os.platform() === 'win32'

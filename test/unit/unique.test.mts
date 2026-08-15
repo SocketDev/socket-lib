@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { arrayUnique } from '../../src/arrays/unique'
+import { arrayUnique } from '../../src/arrays/unique.mjs'
 
 describe('arrayUnique', () => {
   it('should remove duplicate primitive values', () => {

@@ -15,7 +15,7 @@ import {
   getRunForCommit,
   selectLatestRun,
   waitForRun,
-} from '../../../src/github/workflow-runs'
+} from '../../../src/github/workflow-runs.mjs'
 
 const API = 'https://api.github.com'
 const RUNS_PATH = '/repos/owner/repo/actions/workflows/ci.yml/runs'

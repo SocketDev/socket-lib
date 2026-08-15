@@ -8,7 +8,7 @@
  *     live in promises-iterate.test.mts.
  */
 
-import { pFilter, pFilterChunk } from '../../src/promises/iterate'
+import { pFilter, pFilterChunk } from '../../src/promises/iterate.mjs'
 import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
 import { describe, expect, it } from 'vitest'
 

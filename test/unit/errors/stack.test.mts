@@ -6,7 +6,7 @@ import vm from 'node:vm'
 
 import { describe, expect, it } from 'vitest'
 
-import { errorStack } from '../../../src/errors/stack'
+import { errorStack } from '../../../src/errors/stack.mjs'
 
 describe('errorStack', () => {
   it('returns a stack for an Error', () => {

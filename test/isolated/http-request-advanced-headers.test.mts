@@ -12,9 +12,9 @@ import { describe, expect, it } from 'vitest'
 import {
   parseRetryAfterHeader,
   sanitizeHeaders,
-} from '../../src/http-request/headers'
+} from '../../src/http-request/headers.mjs'
 
-import { setupHttpFixture } from './http-request-fixtures'
+import { setupHttpFixture } from './http-request-fixtures.mjs'
 
 setupHttpFixture()
 

@@ -3,7 +3,7 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { getIpcStubPath } from '../../../src/ipc/paths'
+import { getIpcStubPath } from '../../../src/ipc/paths.mjs'
 
 describe('ipc/paths — getIpcStubPath', () => {
   it('should return path in temp directory', () => {

@@ -4,7 +4,7 @@ import {
   PromisePrototypeCatch,
   PromisePrototypeFinally,
   PromisePrototypeThen,
-} from '../../../src/primordials/promise'
+} from '../../../src/primordials/promise.mjs'
 
 describe('primordials/promise', () => {
   it('PromisePrototypeThen / Catch / Finally preserve semantics', async () => {

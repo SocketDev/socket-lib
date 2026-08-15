@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 
-import { cacheKey } from '../../../../src/external-tools/trivy/resolve'
-import { makeHash } from '../../../../src/crypto/integrity'
+import { cacheKey } from '../../../../src/external-tools/trivy/resolve.mjs'
+import { makeHash } from '../../../../src/crypto/integrity.mjs'
 
 describe('external-tools/trivy/resolve — cacheKey', () => {
   test('returns "local-only" when no opts are given', () => {

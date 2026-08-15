@@ -13,16 +13,20 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { DlxManifest } from '../../../src/dlx/manifest'
+import { DlxManifest } from '../../../src/dlx/manifest.mjs'
 
-import { readFileUtf8Sync } from '../../../src/fs/read-file'
-import { safeDelete, safeDeleteSync, safeMkdirSync } from '../../../src/fs/safe'
+import { readFileUtf8Sync } from '../../../src/fs/read-file.mjs'
+import {
+  safeDelete,
+  safeDeleteSync,
+  safeMkdirSync,
+} from '../../../src/fs/safe.mjs'
 
 import type * as nodeFs from 'node:fs'
-import type * as readFileModule from '../../../src/fs/read-file'
-import type * as safeModule from '../../../src/fs/safe'
+import type * as readFileModule from '../../../src/fs/read-file.mjs'
+import type * as safeModule from '../../../src/fs/safe.mjs'
 
-vi.mock(import('../../../src/fs/read-file'), async importOriginal => {
+vi.mock(import('../../../src/fs/read-file.mjs'), async importOriginal => {
   const original = await importOriginal<typeof readFileModule>()
   return {
     ...original,
@@ -30,7 +34,7 @@ vi.mock(import('../../../src/fs/read-file'), async importOriginal => {
   }
 })
 
-vi.mock(import('../../../src/fs/safe'), async importOriginal => {
+vi.mock(import('../../../src/fs/safe.mjs'), async importOriginal => {
   const original = await importOriginal<typeof safeModule>()
   return {
     ...original,

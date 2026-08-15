@@ -21,18 +21,18 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   resetBazelResolution,
   resolveBazel,
-} from '../../../src/external-tools/bazel/resolve'
+} from '../../../src/external-tools/bazel/resolve.mjs'
 import {
   resetJreResolution,
   resolveJre,
-} from '../../../src/external-tools/jre/resolve'
+} from '../../../src/external-tools/jre/resolve.mjs'
 import {
   resetSbtResolution,
   resolveSbt,
-} from '../../../src/external-tools/sbt/resolve'
-import { safeDelete } from '../../../src/fs/safe'
+} from '../../../src/external-tools/sbt/resolve.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
-import { makeFakeDownloader } from '../../lib/fake-downloader'
+import { makeFakeDownloader } from '../../lib/fake-downloader.mjs'
 
 // Collect the gzip output into a Buffer directly. Round-tripping through
 // the filesystem (createWriteStream + readFileSync) raced under vitest's

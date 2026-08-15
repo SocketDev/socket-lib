@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { execVlt } from '../../../../../src/eco/npm/vlt/exec'
+import { execVlt } from '../../../../../src/eco/npm/vlt/exec.mjs'
 
 describe('eco/npm/vlt/exec', () => {
   it('throws with a not-implemented message', () => {

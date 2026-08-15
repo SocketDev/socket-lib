@@ -4,7 +4,7 @@ import {
   getJanusAssetEntry,
   getJanusDownloadUrl,
   JANUS_ASSET_MAP,
-} from '../../../../src/external-tools/janus/asset-names'
+} from '../../../../src/external-tools/janus/asset-names.mjs'
 
 describe('external-tools/janus/asset-names', () => {
   test('JANUS_ASSET_MAP currently maps darwin-arm64 only', () => {

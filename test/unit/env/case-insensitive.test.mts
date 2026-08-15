@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { findCaseInsensitiveEnvKey } from '../../../src/env/case-insensitive'
+import { findCaseInsensitiveEnvKey } from '../../../src/env/case-insensitive.mjs'
 
 describe('findCaseInsensitiveEnvKey', () => {
   it('should find exact match', () => {

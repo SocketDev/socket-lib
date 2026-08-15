@@ -17,14 +17,14 @@ import {
   getChangedFiles,
   getChangedFilesSync,
   isChanged,
-} from '../../../src/git/changed'
-import { findGitRoot } from '../../../src/git/repo'
-import { getStagedFiles } from '../../../src/git/staged'
-import { getUnstagedFiles } from '../../../src/git/unstaged'
-import { normalizePath } from '../../../src/paths/normalize'
-import { spawnSync } from '../../../src/process/spawn/child'
+} from '../../../src/git/changed.mjs'
+import { findGitRoot } from '../../../src/git/repo.mjs'
+import { getStagedFiles } from '../../../src/git/staged.mjs'
+import { getUnstagedFiles } from '../../../src/git/unstaged.mjs'
+import { normalizePath } from '../../../src/paths/normalize.mjs'
+import { spawnSync } from '../../../src/process/spawn/child.mjs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('git extended tests', () => {
   const projectRoot = normalizePath(process.cwd())

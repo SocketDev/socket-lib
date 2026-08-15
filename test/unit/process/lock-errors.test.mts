@@ -10,12 +10,12 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { processLock } from '../../../src/process/lock-instance'
-import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
+import { processLock } from '../../../src/process/lock-instance.mjs'
+import { safeDelete, safeDeleteSync } from '../../../src/fs/safe.mjs'
 
-import type * as SafeModule from '../../../src/fs/safe'
+import type * as SafeModule from '../../../src/fs/safe.mjs'
 
-vi.mock(import('../../../src/fs/safe'), async importOriginal => {
+vi.mock(import('../../../src/fs/safe.mjs'), async importOriginal => {
   const original = await importOriginal<typeof SafeModule>()
   return {
     ...original,

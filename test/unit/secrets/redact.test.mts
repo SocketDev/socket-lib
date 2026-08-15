@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { redactContext } from '../../../src/secrets/redact'
+import { redactContext } from '../../../src/secrets/redact.mjs'
 
 // Literal copies of the markers src/secrets/redact.ts exports. Written out
 // here (instead of imported) so the expected values are independent of the

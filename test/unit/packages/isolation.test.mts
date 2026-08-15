@@ -15,8 +15,8 @@ import {
   isolatePackage,
   mergePackageJson,
   resolveRealPath,
-} from '../../../src/packages/isolation'
-import { safeDelete } from '../../../src/fs/safe'
+} from '../../../src/packages/isolation.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 let tmp: string
 

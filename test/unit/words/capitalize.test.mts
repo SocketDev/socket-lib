@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { capitalize } from '../../../src/words/capitalize'
+import { capitalize } from '../../../src/words/capitalize.mjs'
 
 describe('words/capitalize', () => {
   it('capitalizes first letter of lowercase word', () => {

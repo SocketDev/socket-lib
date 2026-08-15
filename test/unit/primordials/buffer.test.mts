@@ -4,7 +4,7 @@ import {
   BufferCtor,
   BufferPrototypeSlice,
   BufferPrototypeToString,
-} from '../../../src/primordials/buffer'
+} from '../../../src/primordials/buffer.mjs'
 
 describe('primordials/buffer', () => {
   it('BufferCtor matches globalThis.Buffer when available', () => {

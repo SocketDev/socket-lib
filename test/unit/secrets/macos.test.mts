@@ -19,14 +19,14 @@ import {
   vi,
 } from 'vitest'
 
-import type * as SpawnChild from '../../../src/process/spawn/child'
+import type * as SpawnChild from '../../../src/process/spawn/child.mjs'
 
 const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawn: vi.fn(),
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock(import('../../../src/process/spawn/child'), async () => {
+vi.mock(import('../../../src/process/spawn/child.mjs'), async () => {
   const actual = await vi.importActual<typeof SpawnChild>(
     '../../../src/process/spawn/child',
   )
@@ -129,7 +129,7 @@ function makeFakeChild(opts: {
 }
 
 async function loadFresh() {
-  const mod = await import('../../../src/secrets/macos')
+  const mod = await import('../../../src/secrets/macos.mjs')
   return mod
 }
 

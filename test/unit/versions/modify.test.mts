@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { incrementVersion, versionDiff } from '../../../src/versions/modify'
+import { incrementVersion, versionDiff } from '../../../src/versions/modify.mjs'
 
 describe('versions/modify — incrementVersion', () => {
   it('increments major version', () => {

@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   resetSbtResolution,
   resolveSbt,
-} from '../../../../src/external-tools/sbt/resolve'
+} from '../../../../src/external-tools/sbt/resolve.mjs'
 
 // resolveSbt() does real PATH/binary resolution; Windows CI agents can take
 // >10s to return on a cold cache, blowing vitest's 10s default. Bump the

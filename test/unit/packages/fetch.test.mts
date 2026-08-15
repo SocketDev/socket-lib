@@ -3,10 +3,10 @@ import path from 'node:path'
 
 import { expect, it } from 'vitest'
 
-import { resolveGitHubTgzUrl } from '../../../src/packages/fetch'
-import type { PackageJson } from '../../../src/packages/types'
-import { describeNetworkOnly } from '../util/skip-helpers'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { resolveGitHubTgzUrl } from '../../../src/packages/fetch.mjs'
+import type { PackageJson } from '../../../src/packages/types.mjs'
+import { describeNetworkOnly } from '../util/skip-helpers.mjs'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
 describeNetworkOnly('packages/fetch — resolveGitHubTgzUrl', () => {

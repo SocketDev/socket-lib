@@ -1,25 +1,30 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/jre/from-vfs'), () => ({
+vi.mock(import('../../../../src/external-tools/jre/from-vfs.mjs'), () => ({
   jreFromVfs: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/jre/from-java-home'), () => ({
-  jreFromJavaHome: vi.fn(),
-}))
-vi.mock(import('../../../../src/external-tools/jre/from-path'), () => ({
+vi.mock(
+  import('../../../../src/external-tools/jre/from-java-home.mjs'),
+  () => ({
+    jreFromJavaHome: vi.fn(),
+  }),
+)
+vi.mock(import('../../../../src/external-tools/jre/from-path.mjs'), () => ({
   jreFromPath: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/jre/from-download'), () => ({
+vi.mock(import('../../../../src/external-tools/jre/from-download.mjs'), () => ({
   jreFromDownload: vi.fn(),
 }))
 
 async function loadFresh() {
-  const vfsMod = await import('../../../../src/external-tools/jre/from-vfs')
+  const vfsMod = await import('../../../../src/external-tools/jre/from-vfs.mjs')
   const jhMod =
-    await import('../../../../src/external-tools/jre/from-java-home')
-  const pathMod = await import('../../../../src/external-tools/jre/from-path')
-  const dlMod = await import('../../../../src/external-tools/jre/from-download')
-  const mod = await import('../../../../src/external-tools/jre/resolve')
+    await import('../../../../src/external-tools/jre/from-java-home.mjs')
+  const pathMod =
+    await import('../../../../src/external-tools/jre/from-path.mjs')
+  const dlMod =
+    await import('../../../../src/external-tools/jre/from-download.mjs')
+  const mod = await import('../../../../src/external-tools/jre/resolve.mjs')
   return {
     fromVfs: vfsMod.jreFromVfs as ReturnType<typeof vi.fn>,
     fromJavaHome: jhMod.jreFromJavaHome as ReturnType<typeof vi.fn>,

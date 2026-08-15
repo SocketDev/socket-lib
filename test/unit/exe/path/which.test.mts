@@ -12,7 +12,7 @@ import {
   whichLocalBin,
   whichReal,
   whichRealSync,
-} from '../../../../src/exe/path/which'
+} from '../../../../src/exe/path/which.mjs'
 
 describe('whichReal (async)', () => {
   it('resolves node to a real path and caches it', async () => {

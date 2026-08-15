@@ -1,15 +1,15 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../src/secrets/find'), () => ({
+vi.mock(import('../../../src/secrets/find.mjs'), () => ({
   resolve: vi.fn(),
   resolveSync: vi.fn(),
 }))
 
 async function loadFresh() {
-  const findMod = await import('../../../src/secrets/find')
+  const findMod = await import('../../../src/secrets/find.mjs')
   const resolveMock = findMod.resolve as ReturnType<typeof vi.fn>
   const resolveSyncMock = findMod.resolveSync as ReturnType<typeof vi.fn>
-  const mod = await import('../../../src/secrets/socket-api-token')
+  const mod = await import('../../../src/secrets/socket-api-token.mjs')
   return {
     resolveMock,
     resolveSyncMock,

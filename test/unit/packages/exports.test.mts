@@ -14,7 +14,7 @@ import {
   isConditionalExports,
   isSubpathExports,
   resolvePackageJsonEntryExports,
-} from '../../../src/packages/exports'
+} from '../../../src/packages/exports.mjs'
 
 describe.sequential('packages/exports — isConditionalExports', () => {
   it('returns false for non-objects', () => {

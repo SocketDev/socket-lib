@@ -3,7 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
-import { runOne } from '../../../src/ai/worktree'
+import { runOne } from '../../../src/ai/worktree.mjs'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 import { sh } from '../util/cross-platform-sh.mts'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'

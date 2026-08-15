@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { applyColor, getYoctocolors } from '../../../src/logger/colors'
+import { applyColor, getYoctocolors } from '../../../src/logger/colors.mjs'
 
 const colors = getYoctocolors()
 

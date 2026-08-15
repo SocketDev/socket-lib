@@ -23,13 +23,13 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   downloadAndExtractTool,
   downloadToolArchive,
-} from '../../../src/external-tools/from-download'
-import { safeDelete } from '../../../src/fs/safe'
+} from '../../../src/external-tools/from-download.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 import {
   FAKE_INTEGRITY_VALUE as FAKE_INTEGRITY,
   makeFakeDownloader,
-} from '../../lib/fake-downloader'
+} from '../../lib/fake-downloader.mjs'
 
 // Sequential, not concurrent — the `scratch` mkdtemp is shared by
 // closure into the describe-scoped `let`. Local vitest config has

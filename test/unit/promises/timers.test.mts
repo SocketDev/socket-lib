@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { sleep, yieldToEventLoop } from '../../../src/promises/timers'
+import { sleep, yieldToEventLoop } from '../../../src/promises/timers.mjs'
 
 describe('sleep', () => {
   it('resolves after the given delay', async () => {

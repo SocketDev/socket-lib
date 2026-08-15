@@ -20,7 +20,7 @@ import {
   processStderr,
   processStdout,
   processVersion,
-} from '../../../src/primordials/process'
+} from '../../../src/primordials/process.mjs'
 
 describe('primordials/process', () => {
   afterEach(() => {

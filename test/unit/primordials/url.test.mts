@@ -8,7 +8,7 @@ import {
   URLSearchParamsPrototypeGetAll,
   URLSearchParamsPrototypeHas,
   URLSearchParamsPrototypeSet,
-} from '../../../src/primordials/url'
+} from '../../../src/primordials/url.mjs'
 
 describe('primordials/url — URLSearchParams', () => {
   it('Append / Delete / Get / GetAll / Has / Set / ForEach', () => {

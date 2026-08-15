@@ -14,7 +14,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
-import { findPackageJson, readPackageJson } from '../../../src/dlx/detect'
+import { findPackageJson, readPackageJson } from '../../../src/dlx/detect.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string

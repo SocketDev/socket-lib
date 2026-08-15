@@ -30,7 +30,7 @@ import {
   separatorWrappedSubstring,
   splitPath,
   trimLeadingDotSlash,
-} from '../../../src/paths/normalize'
+} from '../../../src/paths/normalize.mjs'
 
 describe('paths/normalize predicates', () => {
   describe('isAbsolute', () => {

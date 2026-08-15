@@ -7,7 +7,7 @@
 import { getSmolPrimordial as getSmolPrimordialStable } from '@socketsecurity/lib-stable/smol/primordial'
 import { describe, expect, it } from 'vitest'
 
-import { getSmolPrimordial } from '../../../../src/exe/smol/primordial'
+import { getSmolPrimordial } from '../../../../src/exe/smol/primordial.mjs'
 
 describe('smol/primordial', () => {
   describe('getSmolPrimordial', () => {

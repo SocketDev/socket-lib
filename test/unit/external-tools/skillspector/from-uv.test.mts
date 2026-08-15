@@ -9,12 +9,12 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { venvEntryPoint } from '../../../../src/external-tools/skillspector/from-uv'
-import { describeUnixOnly } from '../../util/skip-helpers'
+import { venvEntryPoint } from '../../../../src/external-tools/skillspector/from-uv.mjs'
+import { describeUnixOnly } from '../../util/skip-helpers.mjs'
 
 import type * as NodeFs from 'node:fs'
 
-vi.mock(import('../../../../src/external-tools/python/uv-install'), () => ({
+vi.mock(import('../../../../src/external-tools/python/uv-install.mjs'), () => ({
   uvSyncProject: vi.fn(),
 }))
 
@@ -24,10 +24,11 @@ vi.mock(import('node:fs'), async () => {
 })
 
 async function loadFresh() {
-  const uvMod = await import('../../../../src/external-tools/python/uv-install')
+  const uvMod =
+    await import('../../../../src/external-tools/python/uv-install.mjs')
   const fsMod = await import('node:fs')
   const mod =
-    await import('../../../../src/external-tools/skillspector/from-uv')
+    await import('../../../../src/external-tools/skillspector/from-uv.mjs')
   return {
     skillspectorFromUv: mod.skillspectorFromUv,
     syncMock: uvMod.uvSyncProject as ReturnType<typeof vi.fn>,

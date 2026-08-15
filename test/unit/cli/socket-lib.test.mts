@@ -9,7 +9,7 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { main, printHelp } from '../../../src/cli/socket-lib'
+import { main, printHelp } from '../../../src/cli/socket-lib.mjs'
 
 describe('socket-lib CLI dispatcher', () => {
   it('prints help and exits 0 with no args', async () => {

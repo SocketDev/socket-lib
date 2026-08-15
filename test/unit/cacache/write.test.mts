@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { put, remove } from '../../../src/cacache/write'
+import { put, remove } from '../../../src/cacache/write.mjs'
 
 describe('put', () => {
   it('should export put function', () => {

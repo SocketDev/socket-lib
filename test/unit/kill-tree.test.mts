@@ -25,9 +25,9 @@ import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
 import {
   isProcessAlive,
   killProcessTree,
-} from '../../src/process/spawn/kill-tree'
+} from '../../src/process/spawn/kill-tree.mjs'
 
-import { itUnixOnly } from './util/skip-helpers'
+import { itUnixOnly } from './util/skip-helpers.mjs'
 
 // Build a ChildProcess-shaped stub. Callers pass `undefined` for "not set";
 // we convert to the `null` Node actually uses for exitCode/signalCode here,

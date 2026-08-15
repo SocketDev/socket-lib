@@ -5,7 +5,7 @@ import {
   isSensitiveHeaderName,
   parseRetryAfterHeader,
   sanitizeHeaders,
-} from '../../../src/http-request/headers'
+} from '../../../src/http-request/headers.mjs'
 
 describe.sequential('http-request/headers — isSensitiveHeaderName', () => {
   test('matches credential header families (case-insensitive)', () => {

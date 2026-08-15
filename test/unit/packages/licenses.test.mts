@@ -22,14 +22,14 @@ import {
   parseSpdxExp,
   resolvePackageLicenses,
   visitLicenses,
-} from '../../../src/packages/licenses'
+} from '../../../src/packages/licenses.mjs'
 import type {
   InternalBinaryOperationNode,
   InternalLicenseNode,
   SpdxBinaryOperationNode,
   SpdxLicenseNode,
-} from '../../../src/packages/licenses'
-import type { LicenseNode } from '../../../src/packages/types'
+} from '../../../src/packages/licenses.mjs'
+import type { LicenseNode } from '../../../src/packages/types.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('packages/licenses', () => {

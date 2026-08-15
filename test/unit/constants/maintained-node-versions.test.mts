@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest'
 
 import { maintainedNodeVersions as canonicalMaintainedNodeVersions } from '@socketsecurity/lib-stable/constants/maintained-node-versions'
 
-import { maintainedNodeVersions } from '../../../src/constants/maintained-node-versions'
+import { maintainedNodeVersions } from '../../../src/constants/maintained-node-versions.mjs'
 
 describe('maintained-node-versions', () => {
   describe('default export', () => {

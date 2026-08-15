@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parseJson } from '../../../src/json/parse'
+import { parseJson } from '../../../src/json/parse.mjs'
 
 describe('parseJson error handling and edge cases', () => {
   describe('error handling with throws option', () => {

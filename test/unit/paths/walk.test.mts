@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { walkUp } from '../../../src/paths/walk'
+import { walkUp } from '../../../src/paths/walk.mjs'
 
 // On Windows, `path.resolve('/project/src/lib')` returns `D:\project\src\lib` on the current drive.
 // walkUp yields the normalized form `D:/project/src/lib`. Strip the drive prefix on

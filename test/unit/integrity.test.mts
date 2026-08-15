@@ -14,9 +14,9 @@ import {
   parseHash,
   parseIntegrity,
   verifyHash,
-} from '../../src/crypto/integrity'
+} from '../../src/crypto/integrity.mjs'
 
-import type { HashMismatchError } from '../../src/crypto/integrity'
+import type { HashMismatchError } from '../../src/crypto/integrity.mjs'
 
 // Known-correct pair for pnpm v10 darwin-arm64 release asset:
 // the actual sha256 hex digest of the tarball next to its sha256 SRI form.

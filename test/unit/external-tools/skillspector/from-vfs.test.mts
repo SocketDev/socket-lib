@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   SKILLSPECTOR_VFS_KEY,
   skillspectorFromVfs,
-} from '../../../../src/external-tools/skillspector/from-vfs'
+} from '../../../../src/external-tools/skillspector/from-vfs.mjs'
 
 describe.sequential('external-tools/skillspector/from-vfs', () => {
   test('exports SKILLSPECTOR_VFS_KEY constant', () => {

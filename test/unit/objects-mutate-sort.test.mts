@@ -8,13 +8,13 @@
  *     objects.test.mts; lazy-getter tests live in objects-getters.test.mts.
  */
 
-import { merge, objectAssign, objectFreeze } from '../../src/objects/mutate'
+import { merge, objectAssign, objectFreeze } from '../../src/objects/mutate.mjs'
 import {
   entryKeyComparator,
   objectEntries,
   toSortedObject,
   toSortedObjectFromEntries,
-} from '../../src/objects/sort'
+} from '../../src/objects/sort.mjs'
 
 import { describe, expect, it } from 'vitest'
 

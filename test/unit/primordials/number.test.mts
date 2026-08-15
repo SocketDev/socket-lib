@@ -21,7 +21,7 @@ import {
   NumberPOSITIVE_INFINITY,
   NumberPrototypeToFixed,
   NumberPrototypeToString,
-} from '../../../src/primordials/number'
+} from '../../../src/primordials/number.mjs'
 
 describe('Number', () => {
   it('static predicates', () => {

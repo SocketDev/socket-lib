@@ -20,7 +20,7 @@ import {
   pathLikeToString,
   splitPath,
   trimLeadingDotSlash,
-} from '../../src/paths/normalize'
+} from '../../src/paths/normalize.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('path utilities', () => {

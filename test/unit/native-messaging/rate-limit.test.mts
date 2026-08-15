@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { TokenBucketLimiter } from '../../../src/native-messaging/rate-limit'
+import { TokenBucketLimiter } from '../../../src/native-messaging/rate-limit.mjs'
 
 describe('TokenBucketLimiter', () => {
   describe('basic admission', () => {

@@ -4,7 +4,7 @@ import {
   isLoopbackHost,
   isPrivateHost,
   isUrl,
-} from '../../../src/url/predicates'
+} from '../../../src/url/predicates.mjs'
 
 describe('url/predicates — isUrl', () => {
   it('returns true for valid HTTP URLs', () => {

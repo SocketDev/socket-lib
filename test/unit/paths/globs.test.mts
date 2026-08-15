@@ -15,7 +15,7 @@ import {
   LICENSE_ORIGINAL_GLOB_RECURSIVE,
   README_GLOB,
   README_GLOB_RECURSIVE,
-} from '../../../src/paths/globs'
+} from '../../../src/paths/globs.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('paths/globs', () => {

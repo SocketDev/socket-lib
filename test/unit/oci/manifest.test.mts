@@ -12,10 +12,10 @@ import {
   isManifestIndex,
   parseManifest,
   pickPlatformManifestDigest,
-} from '../../../src/oci/manifest'
+} from '../../../src/oci/manifest.mjs'
 import { makeFakeAdapter } from './oci-test-helpers.mts'
 
-import type { OciManifest } from '../../../src/oci/types'
+import type { OciManifest } from '../../../src/oci/types.mjs'
 import type { FakeRoute } from './oci-test-helpers.mts'
 
 // OCI / Docker distribution-spec media types — the external spec oracle, held

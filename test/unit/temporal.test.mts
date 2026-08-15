@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import * as Temporal from '../../src/temporal/temporal'
+import * as Temporal from '../../src/temporal/temporal.mjs'
 
 describe('Temporal smoke', () => {
   it('exposes the surface and round-trips Now.instant → epochNanoseconds', () => {

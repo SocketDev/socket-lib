@@ -9,7 +9,7 @@
 
 import { fuzz } from '@vitiate/core'
 
-import { parseJson, parseJsonStrict } from '../../../src/json/parse'
+import { parseJson, parseJsonStrict } from '../../../src/json/parse.mjs'
 
 // `parseJson(content, { throws: false })` promises to NEVER throw — any thrown
 // error on arbitrary bytes is a crash.

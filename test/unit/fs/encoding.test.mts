@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest'
 import {
   normalizeEncoding,
   normalizeEncodingSlow,
-} from '../../../src/fs/encoding'
+} from '../../../src/fs/encoding.mjs'
 
 describe('normalizeEncoding', () => {
   it('should handle null and undefined as utf8', () => {

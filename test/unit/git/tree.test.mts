@@ -10,9 +10,9 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { getTreeManifest } from '../../../src/git/tree'
-import { spawnSync } from '../../../src/process/spawn/child'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { getTreeManifest } from '../../../src/git/tree.mjs'
+import { spawnSync } from '../../../src/process/spawn/child.mjs'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 function initRepo(dir: string): void {
   spawnSync('git', ['init'], { cwd: dir })

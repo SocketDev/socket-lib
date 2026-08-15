@@ -12,17 +12,17 @@ import process from 'node:process'
 
 import { afterAll, beforeEach, describe, expect, it } from 'vitest'
 
-import { readRealPath } from '../../../src/fs/inspect'
-import { safeDelete } from '../../../src/fs/safe'
+import { readRealPath } from '../../../src/fs/inspect.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 import {
   applyCmdExeStem,
   hasCmdExeShadowInDir,
   resolveSpawnBin,
   spawnBinPathCache,
-} from '../../../src/process/spawn/shared'
-import { spawn, spawnSync } from '../../../src/process/spawn/child'
+} from '../../../src/process/spawn/shared.mjs'
+import { spawn, spawnSync } from '../../../src/process/spawn/child.mjs'
 
-import { describeUnixOnly } from '../util/skip-helpers'
+import { describeUnixOnly } from '../util/skip-helpers.mjs'
 
 const tempRoots: string[] = []
 

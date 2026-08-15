@@ -1,14 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { parseChecksumFile } from '../../../src/http-request/checksum-file'
+import { parseChecksumFile } from '../../../src/http-request/checksum-file.mjs'
 
-vi.mock(import('../../../src/http-request/request'), () => ({
+vi.mock(import('../../../src/http-request/request.mjs'), () => ({
   httpRequest: vi.fn(),
 }))
 
 async function loadFresh() {
-  const reqMod = await import('../../../src/http-request/request')
-  const mod = await import('../../../src/http-request/checksum-file')
+  const reqMod = await import('../../../src/http-request/request.mjs')
+  const mod = await import('../../../src/http-request/checksum-file.mjs')
   return {
     httpRequest: reqMod.httpRequest as ReturnType<typeof vi.fn>,
     fetchChecksumFile: mod.fetchChecksumFile,

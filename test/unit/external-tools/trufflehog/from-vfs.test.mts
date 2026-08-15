@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   TRUFFLEHOG_VFS_KEY,
   trufflehogFromVfs,
-} from '../../../../src/external-tools/trufflehog/from-vfs'
+} from '../../../../src/external-tools/trufflehog/from-vfs.mjs'
 
 describe.sequential('external-tools/trufflehog/from-vfs', () => {
   test('exports TRUFFLEHOG_VFS_KEY constant', () => {

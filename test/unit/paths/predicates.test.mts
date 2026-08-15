@@ -18,7 +18,7 @@ import {
   isPath,
   isPathWithinRoot,
   isRelative,
-} from '../../../src/paths/predicates'
+} from '../../../src/paths/predicates.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('path predicates', () => {

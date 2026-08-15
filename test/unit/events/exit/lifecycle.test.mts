@@ -2,9 +2,9 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { onExit } from '../../../../src/events/exit/handler'
-import { load, unload } from '../../../../src/events/exit/lifecycle'
-import { signals } from '../../../../src/events/exit/signals'
+import { onExit } from '../../../../src/events/exit/handler.mjs'
+import { load, unload } from '../../../../src/events/exit/lifecycle.mjs'
+import { signals } from '../../../../src/events/exit/signals.mjs'
 
 beforeEach(() => {
   unload()

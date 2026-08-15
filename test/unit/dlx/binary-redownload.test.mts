@@ -10,11 +10,11 @@ import crypto from 'node:crypto'
 import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 
-import { dlxBinary, getDlxCachePath } from '../../../src/dlx/binary'
+import { dlxBinary, getDlxCachePath } from '../../../src/dlx/binary.mjs'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
-import { safeDelete } from '../../../src/fs/safe'
+import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'
 
 import type { DlxTestServer } from './binary-test-server.mts'

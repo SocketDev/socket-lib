@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { determineArticle } from '../../../src/words/article'
+import { determineArticle } from '../../../src/words/article.mjs'
 
 describe('words/article — determineArticle', () => {
   it('returns "an" for words starting with vowels', () => {

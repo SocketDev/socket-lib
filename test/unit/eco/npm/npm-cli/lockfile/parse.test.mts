@@ -6,8 +6,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import type { ManifestError } from '../../../../../../src/eco/manifest/manifest-error'
-import { parsePackageLock } from '../../../../../../src/eco/npm/npm-cli/lockfile/parse'
+import type { ManifestError } from '../../../../../../src/eco/manifest/manifest-error.mjs'
+import { parsePackageLock } from '../../../../../../src/eco/npm/npm-cli/lockfile/parse.mjs'
 
 describe('eco/npm/npm-cli/lockfile/parse', () => {
   describe('v2/v3', () => {

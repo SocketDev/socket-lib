@@ -4,7 +4,7 @@ import {
   isUnknownCliOption,
   OPTIONAL_CLI_FLAGS,
   withoutCliFlag,
-} from '../../../src/ai/cli-flags'
+} from '../../../src/ai/cli-flags.mjs'
 
 describe('OPTIONAL_CLI_FLAGS', () => {
   test('carries --effort, the flag newest-CLI-only builds reject', () => {

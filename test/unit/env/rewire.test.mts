@@ -10,16 +10,16 @@
  */
 
 import process from 'node:process'
-import { isCI } from '../../../src/env/ci'
-import { getHome } from '../../../src/env/home'
-import { getSocketDebug } from '../../../src/env/socket'
+import { isCI } from '../../../src/env/ci.mjs'
+import { getHome } from '../../../src/env/home.mjs'
+import { getSocketDebug } from '../../../src/env/socket.mjs'
 import {
   clearEnv,
   hasOverride,
   isInEnv,
   resetEnv,
   setEnv,
-} from '../../../src/env/rewire'
+} from '../../../src/env/rewire.mjs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('env rewiring', () => {

@@ -11,8 +11,8 @@
  */
 
 import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
-import { pEach, pEachChunk } from '../../src/promises/iterate'
-import { normalizeIterationOptions } from '../../src/promises/options'
+import { pEach, pEachChunk } from '../../src/promises/iterate.mjs'
+import { normalizeIterationOptions } from '../../src/promises/options.mjs'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('promises', () => {

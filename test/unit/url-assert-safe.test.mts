@@ -6,7 +6,7 @@
  *   local-stack development.
  */
 
-import { assertSafeHttpUrl } from '../../src/url/assert-safe'
+import { assertSafeHttpUrl } from '../../src/url/assert-safe.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('assertSafeHttpUrl', () => {

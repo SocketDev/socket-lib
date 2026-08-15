@@ -11,7 +11,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import {
   requireResolveFrom,
   requireResolveFromCwd,
-} from '../../../src/fs/resolve-module'
+} from '../../../src/fs/resolve-module.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string

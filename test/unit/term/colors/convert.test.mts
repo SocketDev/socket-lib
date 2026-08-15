@@ -9,12 +9,12 @@
  *     color handling in spinners, loggers, and UI.
  */
 
-import { isRgbTuple, toRgb } from '../../../../src/term/colors/convert'
+import { isRgbTuple, toRgb } from '../../../../src/term/colors/convert.mjs'
 import type {
   ColorName,
   ColorRgb,
   ColorValue,
-} from '../../../../src/term/colors/types'
+} from '../../../../src/term/colors/types.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('colors', () => {

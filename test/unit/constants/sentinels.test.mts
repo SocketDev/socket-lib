@@ -24,7 +24,7 @@ import {
   UNKNOWN_ERROR,
   UNKNOWN_VALUE,
   V,
-} from '../../../src/constants/sentinels'
+} from '../../../src/constants/sentinels.mjs'
 
 describe('constants/sentinels', () => {
   describe('symbols', () => {

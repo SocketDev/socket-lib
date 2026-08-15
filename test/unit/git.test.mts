@@ -23,20 +23,20 @@ import {
   getChangedFilesSync,
   isChanged,
   isChangedSync,
-} from '../../src/git/changed'
-import { findGitRoot } from '../../src/git/repo'
+} from '../../src/git/changed.mjs'
+import { findGitRoot } from '../../src/git/repo.mjs'
 import {
   getStagedFiles,
   getStagedFilesSync,
   isStaged,
   isStagedSync,
-} from '../../src/git/staged'
+} from '../../src/git/staged.mjs'
 import {
   getUnstagedFiles,
   getUnstagedFilesSync,
   isUnstaged,
   isUnstagedSync,
-} from '../../src/git/unstaged'
+} from '../../src/git/unstaged.mjs'
 
 describe('git', () => {
   const projectRoot = process.cwd()

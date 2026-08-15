@@ -14,13 +14,13 @@ import { describe, expect, it } from 'vitest'
 describe('resolveConfigPath', () => {
   it('returns the explicit path verbatim when provided', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
+      await import('../../../src/cli/check-primordials.mjs')
     expect(resolveConfigPath('/explicit/path.json')).toBe('/explicit/path.json')
   })
 
   it('the fallback list is root, .config/, then the fleet-segmented .config/repo/, in order', async () => {
     const { FALLBACK_CONFIG_PATHS } =
-      await import('../../../src/cli/check-primordials')
+      await import('../../../src/cli/check-primordials.mjs')
     expect([...FALLBACK_CONFIG_PATHS]).toStrictEqual([
       '.socket-lib.json',
       '.config/socket-lib.json',
@@ -42,21 +42,21 @@ describe('resolveConfigPath', () => {
 
   it('resolves the root .socket-lib.json when present', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
+      await import('../../../src/cli/check-primordials.mjs')
     const dir = await seedBaseDir(['.socket-lib.json'])
     expect(resolveConfigPath(undefined, dir)).toBe('.socket-lib.json')
   })
 
   it('falls through to .config/socket-lib.json when the root dotfile is absent', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
+      await import('../../../src/cli/check-primordials.mjs')
     const dir = await seedBaseDir(['.config/socket-lib.json'])
     expect(resolveConfigPath(undefined, dir)).toBe('.config/socket-lib.json')
   })
 
   it('falls through to the fleet-segmented .config/repo/socket-lib.json when the earlier two are absent', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
+      await import('../../../src/cli/check-primordials.mjs')
     const dir = await seedBaseDir(['.config/repo/socket-lib.json'])
     expect(resolveConfigPath(undefined, dir)).toBe(
       '.config/repo/socket-lib.json',
@@ -65,7 +65,7 @@ describe('resolveConfigPath', () => {
 
   it('prefers the root dotfile over both .config/ locations when several exist', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
+      await import('../../../src/cli/check-primordials.mjs')
     const dir = await seedBaseDir([
       '.socket-lib.json',
       '.config/socket-lib.json',
@@ -76,7 +76,7 @@ describe('resolveConfigPath', () => {
 
   it('prefers .config/socket-lib.json over .config/repo/ when the root is absent', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
+      await import('../../../src/cli/check-primordials.mjs')
     const dir = await seedBaseDir([
       '.config/socket-lib.json',
       '.config/repo/socket-lib.json',
@@ -86,14 +86,14 @@ describe('resolveConfigPath', () => {
 
   it('returns the canonical head when none of the fallbacks exist', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
+      await import('../../../src/cli/check-primordials.mjs')
     const dir = await seedBaseDir([])
     expect(resolveConfigPath(undefined, dir)).toBe('.socket-lib.json')
   })
 
   it('returns the explicit path verbatim regardless of baseDir', async () => {
     const { resolveConfigPath } =
-      await import('../../../src/cli/check-primordials')
+      await import('../../../src/cli/check-primordials.mjs')
     const dir = await seedBaseDir(['.config/repo/socket-lib.json'])
     expect(resolveConfigPath('/explicit/example.json', dir)).toBe(
       '/explicit/example.json',
@@ -103,14 +103,15 @@ describe('resolveConfigPath', () => {
 
 describe('printHelp', () => {
   it('writes usage text to stdout without throwing', async () => {
-    const { printHelp } = await import('../../../src/cli/check-primordials')
+    const { printHelp } = await import('../../../src/cli/check-primordials.mjs')
     expect(() => printHelp()).not.toThrow()
   })
 })
 
 describe('renderHuman', () => {
   it('emits success when no findings + silent=false', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
+    const { renderHuman } =
+      await import('../../../src/cli/check-primordials.mjs')
     expect(() =>
       renderHuman(
         {
@@ -130,7 +131,8 @@ describe('renderHuman', () => {
   })
 
   it('emits nothing when silent + no findings', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
+    const { renderHuman } =
+      await import('../../../src/cli/check-primordials.mjs')
     expect(() =>
       renderHuman(
         {
@@ -150,7 +152,8 @@ describe('renderHuman', () => {
   })
 
   it('renders findings with hint when --explain is set', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
+    const { renderHuman } =
+      await import('../../../src/cli/check-primordials.mjs')
     expect(() =>
       renderHuman(
         {
@@ -177,7 +180,8 @@ describe('renderHuman', () => {
   })
 
   it('renders findings without files when files list is empty', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
+    const { renderHuman } =
+      await import('../../../src/cli/check-primordials.mjs')
     expect(() =>
       renderHuman(
         {
@@ -204,7 +208,8 @@ describe('renderHuman', () => {
   })
 
   it('emits trailing "run with --explain" hint when not explaining', async () => {
-    const { renderHuman } = await import('../../../src/cli/check-primordials')
+    const { renderHuman } =
+      await import('../../../src/cli/check-primordials.mjs')
     expect(() =>
       renderHuman(
         {

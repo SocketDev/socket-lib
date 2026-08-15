@@ -17,7 +17,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   readSocketApiToken,
   readSocketApiTokenSync,
-} from '../../src/secrets/socket-api-token'
+} from '../../src/secrets/socket-api-token.mjs'
 
 const TOKEN_VAR = 'SOCKET_API_TOKEN'
 

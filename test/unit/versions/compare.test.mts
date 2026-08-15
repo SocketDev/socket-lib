@@ -9,7 +9,7 @@ import {
   lte,
   rsort,
   sort,
-} from '../../../src/versions/compare'
+} from '../../../src/versions/compare.mjs'
 
 describe('versions/compare — compare', () => {
   it('compares equal versions', () => {

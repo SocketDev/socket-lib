@@ -10,11 +10,11 @@
  *     edge cases live in memo.test.mts.
  */
 
-import { memoizeAsync } from '../../src/memo/async'
-import { clearAllMemoizationCaches } from '../../src/memo/clear'
-import { Memoize } from '../../src/memo/decorator'
-import { once } from '../../src/memo/once'
-import { memoizeWeak } from '../../src/memo/weak'
+import { memoizeAsync } from '../../src/memo/async.mjs'
+import { clearAllMemoizationCaches } from '../../src/memo/clear.mjs'
+import { Memoize } from '../../src/memo/decorator.mjs'
+import { once } from '../../src/memo/once.mjs'
+import { memoizeWeak } from '../../src/memo/weak.mjs'
 import { describe, expect, it, vi } from 'vitest'
 
 import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'

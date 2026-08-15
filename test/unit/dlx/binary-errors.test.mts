@@ -8,11 +8,11 @@ import crypto from 'node:crypto'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type * as FsSafeModule from '../../../src/fs/safe'
+import type * as FsSafeModule from '../../../src/fs/safe.mjs'
 
 async function loadWithMkdirError(code: string | undefined) {
   vi.resetModules()
-  vi.doMock(import('../../../src/fs/safe'), async () => {
+  vi.doMock(import('../../../src/fs/safe.mjs'), async () => {
     const actual = await vi.importActual<typeof FsSafeModule>(
       '../../../src/fs/safe',
     )
@@ -25,12 +25,12 @@ async function loadWithMkdirError(code: string | undefined) {
       safeMkdir: vi.fn().mockRejectedValue(error),
     }
   })
-  return await import('../../../src/dlx/binary')
+  return await import('../../../src/dlx/binary.mjs')
 }
 
 describe.sequential('dlx/binary cache directory errors', () => {
   afterEach(() => {
-    vi.doUnmock(import('../../../src/fs/safe'))
+    vi.doUnmock(import('../../../src/fs/safe.mjs'))
   })
 
   it.each([

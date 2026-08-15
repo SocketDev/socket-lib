@@ -8,8 +8,8 @@ import crypto from 'node:crypto'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { dlxBinary } from '../../../src/dlx/binary'
-import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper'
+import { dlxBinary } from '../../../src/dlx/binary.mjs'
+import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper.mjs'
 import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'
 
 import type { DlxTestServer } from './binary-test-server.mts'

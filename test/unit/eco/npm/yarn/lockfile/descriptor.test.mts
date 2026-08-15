@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parseYarnDescriptor } from '../../../../../../src/eco/npm/yarn/lockfile/descriptor'
+import { parseYarnDescriptor } from '../../../../../../src/eco/npm/yarn/lockfile/descriptor.mjs'
 
 describe('eco/npm/yarn/lockfile/descriptor', () => {
   it('handles a classic spec', () => {

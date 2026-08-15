@@ -26,7 +26,7 @@ import {
   SymbolToPrimitive,
   SymbolToStringTag,
   SymbolUnscopables,
-} from '../../../src/primordials/symbol'
+} from '../../../src/primordials/symbol.mjs'
 
 describe('Symbol', () => {
   it('well-known symbols match globals', () => {

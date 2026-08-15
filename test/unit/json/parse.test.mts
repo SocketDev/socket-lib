@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parseJson } from '../../../src/json/parse'
+import { parseJson } from '../../../src/json/parse.mjs'
 
 describe('parseJson', () => {
   describe('valid JSON parsing', () => {

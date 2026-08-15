@@ -12,9 +12,11 @@ import {
   isNodeBuiltin,
   requireBuiltin,
   requireFrom,
-} from '../../../src/node/module'
+} from '../../../src/node/module.mjs'
 
-vi.mock(import('../../../src/constants/runtime'), () => ({ IS_NODE: false }))
+vi.mock(import('../../../src/constants/runtime.mjs'), () => ({
+  IS_NODE: false,
+}))
 
 describe('node/module (non-Node runtime)', () => {
   it('getNodeModule returns undefined when node:module is unavailable', () => {

@@ -1,7 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 // Mock the exe/which module to control whether the tool resolves.
-vi.mock(import('../../../../src/exe/path/which'), () => ({
+vi.mock(import('../../../../src/exe/path/which.mjs'), () => ({
   which:
     vi.fn<
       (
@@ -13,9 +13,9 @@ vi.mock(import('../../../../src/exe/path/which'), () => ({
 }))
 
 async function loadFresh() {
-  const whichMod = await import('../../../../src/exe/path/which')
+  const whichMod = await import('../../../../src/exe/path/which.mjs')
   const whichMock = whichMod.which as ReturnType<typeof vi.fn>
-  const mod = await import('../../../../src/external-tools/janus/from-path')
+  const mod = await import('../../../../src/external-tools/janus/from-path.mjs')
   return { whichMock, janusFromPath: mod.janusFromPath }
 }
 

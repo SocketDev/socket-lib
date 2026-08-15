@@ -20,9 +20,9 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { indexOfPathSeparator } from '../../../src/paths/shared'
-import { normalizePath } from '../../../src/paths/normalize'
-import { search } from '../../../src/strings/search'
+import { indexOfPathSeparator } from '../../../src/paths/shared.mjs'
+import { normalizePath } from '../../../src/paths/normalize.mjs'
+import { search } from '../../../src/strings/search.mjs'
 
 import { normalizePathCorpus } from './normalize-corpus.mts'
 

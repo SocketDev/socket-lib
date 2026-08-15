@@ -14,7 +14,7 @@ import {
   restoreCursor,
   saveCursor,
   showCursor,
-} from '../../../src/stdio/clear'
+} from '../../../src/stdio/clear.mjs'
 
 describe('stdio/clear cursor', () => {
   describe('hideCursor', () => {

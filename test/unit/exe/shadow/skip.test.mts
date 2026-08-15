@@ -14,7 +14,7 @@
 import process from 'node:process'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { shouldSkipShadow } from '../../../../src/exe/shadow/skip'
+import { shouldSkipShadow } from '../../../../src/exe/shadow/skip.mjs'
 
 describe('exe/shadow/skip', () => {
   describe('shouldSkipShadow', () => {

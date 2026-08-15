@@ -22,8 +22,8 @@ import {
   readSingleDependency,
   readTopLevelFromIdealTree,
   writeSafeNpmrc,
-} from '../../../src/dlx/arborist'
-import { safeDelete } from '../../../src/fs/safe'
+} from '../../../src/dlx/arborist.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 let tmp: string
 

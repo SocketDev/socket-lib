@@ -8,18 +8,18 @@
 
 import { describe, expect, it, vi } from 'vitest'
 
-import { AI_PROFILE } from '../../../src/ai/profiles'
+import { AI_PROFILE } from '../../../src/ai/profiles.mjs'
 import {
   resolveRoleTier,
   ROLE_POLICY,
   spawnForRole,
-} from '../../../src/ai/role'
+} from '../../../src/ai/role.mjs'
 
 const { mockSpawnTier } = vi.hoisted(() => ({
   mockSpawnTier: vi.fn(),
 }))
 
-vi.mock(import('../../../src/ai/spawn'), () => ({
+vi.mock(import('../../../src/ai/spawn.mjs'), () => ({
   spawnTierWithFallback: mockSpawnTier,
 }))
 

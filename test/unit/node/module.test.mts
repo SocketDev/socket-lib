@@ -11,7 +11,7 @@ import {
   isNodeBuiltin,
   requireBuiltin,
   requireFrom,
-} from '../../../src/node/module'
+} from '../../../src/node/module.mjs'
 
 describe('node/module', () => {
   describe('getNodeModule', () => {

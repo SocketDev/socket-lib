@@ -8,7 +8,7 @@
  *     operations and API calls.
  */
 
-import { memoize } from '../../src/memo/memoize'
+import { memoize } from '../../src/memo/memoize.mjs'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('memoization', () => {

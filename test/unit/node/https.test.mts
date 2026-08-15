@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getNodeHttps as getNodeHttpsStable } from '@socketsecurity/lib-stable/node/https'
 
-import { getNodeHttps } from '../../../src/node/https'
+import { getNodeHttps } from '../../../src/node/https.mjs'
 
 describe('node/https', () => {
   it('returns the node:https module', () => {

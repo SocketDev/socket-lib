@@ -20,8 +20,8 @@ import {
   npmPurl,
   parsePackageSpec,
   resolveBinaryPath,
-} from '../../../src/dlx/package'
-import { safeDelete } from '../../../src/fs/safe'
+} from '../../../src/dlx/package.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 describe.sequential('dlx/package — pure functions', () => {
   let testDir: string

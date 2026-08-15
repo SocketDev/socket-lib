@@ -4,7 +4,7 @@ import {
   describe as describeValue,
   Instant,
   isValidEpochNanoseconds,
-} from '../../../src/temporal/instant'
+} from '../../../src/temporal/instant.mjs'
 
 const NS_MAX_INSTANT = 8_640_000_000_000_000_000_000n
 const NS_MIN_INSTANT = -NS_MAX_INSTANT

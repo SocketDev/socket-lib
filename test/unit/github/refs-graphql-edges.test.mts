@@ -6,10 +6,10 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock(import('../../../src/http-request/request'))
+vi.mock(import('../../../src/http-request/request.mjs'))
 
-import { fetchRefShaViaGraphQL } from '../../../src/github/refs-graphql'
-import { httpRequest } from '../../../src/http-request/request'
+import { fetchRefShaViaGraphQL } from '../../../src/github/refs-graphql.mjs'
+import { httpRequest } from '../../../src/http-request/request.mjs'
 
 const JSONStringify = JSON.stringify
 

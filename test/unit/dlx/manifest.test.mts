@@ -11,12 +11,12 @@
  *     The DlxManifest class behavior lives in manifest-class.test.mts.
  */
 
-import { isBinaryEntry, isPackageEntry } from '../../../src/dlx/manifest'
+import { isBinaryEntry, isPackageEntry } from '../../../src/dlx/manifest.mjs'
 import type {
   BinaryDetails,
   DlxManifestEntry,
   PackageDetails,
-} from '../../../src/dlx/manifest'
+} from '../../../src/dlx/manifest.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('dlx-manifest', () => {

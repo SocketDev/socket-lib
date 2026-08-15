@@ -5,8 +5,8 @@
  *   test isolation. Used for conditional behavior in Git hooks.
  */
 
-import { getPreCommit } from '../../../src/env/pre-commit'
-import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
+import { getPreCommit } from '../../../src/env/pre-commit.mjs'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('env/pre-commit', () => {

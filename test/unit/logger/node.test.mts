@@ -10,7 +10,7 @@ import { Writable } from 'node:stream'
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { Logger } from '../../../src/logger/node'
+import { Logger } from '../../../src/logger/node.mjs'
 
 describe('Logger — core', () => {
   let stdout: Writable

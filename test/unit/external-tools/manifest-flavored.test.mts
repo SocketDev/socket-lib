@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { tryParseFlavored } from '../../../src/external-tools/manifest'
+import { tryParseFlavored } from '../../../src/external-tools/manifest.mjs'
 
 // SRI integrity per src/integrity.ts: prefix `sha512-` followed by base64.
 const VALID_INTEGRITY = 'sha512-' + 'A'.repeat(86) + '=='

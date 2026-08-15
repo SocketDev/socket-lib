@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { arrayChunk } from '../../src/arrays/chunk'
+import { arrayChunk } from '../../src/arrays/chunk.mjs'
 
 describe('arrayChunk', () => {
   it('should split array into chunks of specified size', () => {

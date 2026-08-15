@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest'
 import {
   executeBinary,
   getBinaryCacheMetadataPath,
-} from '../../../src/dlx/binary'
+} from '../../../src/dlx/binary.mjs'
 
 describe('dlx/binary — pure functions', () => {
   describe('getBinaryCacheMetadataPath', () => {

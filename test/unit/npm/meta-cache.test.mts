@@ -16,7 +16,7 @@ import {
   getPackumentSlim,
   normalizeRegistryUrl,
   PackumentNotFoundError,
-} from '../../../src/npm/meta-cache'
+} from '../../../src/npm/meta-cache.mjs'
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 import {
   createDeferred,
@@ -28,7 +28,7 @@ import {
 import type {
   PackumentMetaSlim,
   RawPackument,
-} from '../../../src/npm/meta-types'
+} from '../../../src/npm/meta-types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '1.0.0' },

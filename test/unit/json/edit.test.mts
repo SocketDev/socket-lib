@@ -11,8 +11,8 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { safeDelete } from '../../../src/fs/safe'
-import { getEditableJsonClass } from '../../../src/json/edit'
+import { safeDelete } from '../../../src/fs/safe.mjs'
+import { getEditableJsonClass } from '../../../src/json/edit.mjs'
 
 describe('EditableJson', () => {
   let testDir: string

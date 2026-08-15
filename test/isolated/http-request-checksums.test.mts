@@ -12,10 +12,10 @@ import { describe, expect, it } from 'vitest'
 import {
   fetchChecksumFile,
   parseChecksumFile,
-} from '../../src/http-request/checksum-file'
-import { isIntegrity } from '../../src/crypto/integrity'
+} from '../../src/http-request/checksum-file.mjs'
+import { isIntegrity } from '../../src/crypto/integrity.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures'
+import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
 
 setupHttpFixture()
 

@@ -1,12 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
-import { resetEnv, setEnv } from '../../../src/env/rewire'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import {
   clearPerformanceMetrics,
   getPerformanceMetrics,
-} from '../../../src/perf/metrics'
-import { measure, measureSync, perfTimer } from '../../../src/perf/timer'
+} from '../../../src/perf/metrics.mjs'
+import { measure, measureSync, perfTimer } from '../../../src/perf/timer.mjs'
 
 describe.sequential('perf/timer', () => {
   describe('module import', () => {

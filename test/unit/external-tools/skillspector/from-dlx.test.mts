@@ -1,19 +1,20 @@
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/from-pip-venv'), () => ({
+vi.mock(import('../../../../src/external-tools/from-pip-venv.mjs'), () => ({
   createPipVenv: vi.fn(),
 }))
 
-vi.mock(import('../../../../src/paths/socket'), () => ({
+vi.mock(import('../../../../src/paths/socket.mjs'), () => ({
   getSocketDlxDir: vi.fn(() => '/fake/dlx'),
 }))
 
 async function loadFresh() {
-  const venvMod = await import('../../../../src/external-tools/from-pip-venv')
+  const venvMod =
+    await import('../../../../src/external-tools/from-pip-venv.mjs')
   const createMock = venvMod.createPipVenv as ReturnType<typeof vi.fn>
   const mod =
-    await import('../../../../src/external-tools/skillspector/from-dlx')
+    await import('../../../../src/external-tools/skillspector/from-dlx.mjs')
   return { createMock, skillspectorFromDlx: mod.skillspectorFromDlx }
 }
 

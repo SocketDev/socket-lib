@@ -14,7 +14,7 @@ import {
   urlSearchParamsAsString,
   urlSearchParamsGetArray,
   urlSearchParamsGetBoolean,
-} from '../../src/url/search-params'
+} from '../../src/url/search-params.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('url search params', () => {

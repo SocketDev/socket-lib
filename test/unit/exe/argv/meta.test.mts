@@ -10,7 +10,7 @@ import {
   buildCliManifest,
   describeRequest,
   renderDescribe,
-} from '../../../../src/exe/argv/meta'
+} from '../../../../src/exe/argv/meta.mjs'
 
 // The canonical $schema url, spelled out rather than imported so the
 // assertion pins the published contract, not whatever the constant drifts to.

@@ -4,8 +4,8 @@ import path from 'node:path'
 import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { getIpcStubPath } from '../../../src/ipc/paths'
-import { writeIpcStub } from '../../../src/ipc/write'
+import { getIpcStubPath } from '../../../src/ipc/paths.mjs'
+import { writeIpcStub } from '../../../src/ipc/write.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const IS_WIN = os.platform() === 'win32'

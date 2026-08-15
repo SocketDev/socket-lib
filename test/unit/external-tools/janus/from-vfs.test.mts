@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import {
   JANUS_VFS_KEY,
   janusFromVfs,
-} from '../../../../src/external-tools/janus/from-vfs'
+} from '../../../../src/external-tools/janus/from-vfs.mjs'
 
 describe.sequential('external-tools/janus/from-vfs', () => {
   test('exports JANUS_VFS_KEY constant', () => {

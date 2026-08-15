@@ -5,7 +5,7 @@
  *   and async-iterable draining.
  */
 
-import { fromAsync, withResolvers } from '../../src/promises/resolvers'
+import { fromAsync, withResolvers } from '../../src/promises/resolvers.mjs'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 describe('promises', () => {
@@ -136,7 +136,7 @@ describe('promises', () => {
         .withResolvers
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises the fallback path after deleting Promise.withResolvers, which requires re-evaluating the module post-vi.resetModules.
-      const mod = await import('../../src/promises/resolvers')
+      const mod = await import('../../src/promises/resolvers.mjs')
       return mod.withResolvers as () => {
         promise: Promise<unknown>
         resolve: Function
@@ -296,7 +296,7 @@ describe('promises', () => {
       delete (Array as unknown as { fromAsync?: unknown | undefined }).fromAsync
       vi.resetModules()
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- exercises the fallback path after deleting Array.fromAsync.
-      const mod = await import('../../src/promises/resolvers')
+      const mod = await import('../../src/promises/resolvers.mjs')
       return mod.fromAsync
     }
 

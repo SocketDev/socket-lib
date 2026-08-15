@@ -15,7 +15,7 @@ const { mockSpawn, mockSpawnSync } = vi.hoisted(() => ({
   mockSpawnSync: vi.fn(),
 }))
 
-vi.mock(import('../../../src/process/spawn/child'), () =>
+vi.mock(import('../../../src/process/spawn/child.mjs'), () =>
   spawnChildMockFactory(mockSpawn, mockSpawnSync),
 )
 

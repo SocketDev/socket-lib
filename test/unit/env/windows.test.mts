@@ -16,8 +16,8 @@ import {
   getComspec,
   getLocalappdata,
   getUserprofile,
-} from '../../../src/env/windows'
-import { resetEnv, setEnv } from '../../../src/env/rewire'
+} from '../../../src/env/windows.mjs'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('windows env', () => {

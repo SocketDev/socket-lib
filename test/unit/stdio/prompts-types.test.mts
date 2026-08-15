@@ -19,7 +19,7 @@ import {
   password,
   search,
   select,
-} from '../../../src/stdio/prompts'
+} from '../../../src/stdio/prompts.mjs'
 
 describe('prompt export typings', () => {
   it('select resolves the choice value type, not unknown', () => {

@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getBatch, getVersionTrustInfo } from '../../../src/npm/meta'
+import { getBatch, getVersionTrustInfo } from '../../../src/npm/meta.mjs'
 import {
   tolerantSleep,
   tolerantTimeout,
@@ -19,8 +19,8 @@ import {
   setupNpmMetaCacheIsolation,
 } from './meta-test-helpers.mts'
 
-import type { PackumentMetaSlim } from '../../../src/npm/meta-types'
-import type { RawPackument } from '../../../src/npm/meta-types'
+import type { PackumentMetaSlim } from '../../../src/npm/meta-types.mjs'
+import type { RawPackument } from '../../../src/npm/meta-types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '1.0.0' },

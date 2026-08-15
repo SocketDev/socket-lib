@@ -16,7 +16,7 @@ import process from 'node:process'
 import { findGitRoot } from '@socketsecurity/lib/git/repo'
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../unit/util/temp-file-helper'
+import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
 
 describe('git integration', () => {
   describe('repository detection', () => {

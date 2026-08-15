@@ -1,21 +1,26 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/trivy/from-vfs'), () => ({
+vi.mock(import('../../../../src/external-tools/trivy/from-vfs.mjs'), () => ({
   trivyFromVfs: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/trivy/from-path'), () => ({
+vi.mock(import('../../../../src/external-tools/trivy/from-path.mjs'), () => ({
   trivyFromPath: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/trivy/from-download'), () => ({
-  trivyFromDownload: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/trivy/from-download.mjs'),
+  () => ({
+    trivyFromDownload: vi.fn(),
+  }),
+)
 
 async function loadFresh() {
-  const vfsMod = await import('../../../../src/external-tools/trivy/from-vfs')
-  const pathMod = await import('../../../../src/external-tools/trivy/from-path')
+  const vfsMod =
+    await import('../../../../src/external-tools/trivy/from-vfs.mjs')
+  const pathMod =
+    await import('../../../../src/external-tools/trivy/from-path.mjs')
   const dlMod =
-    await import('../../../../src/external-tools/trivy/from-download')
-  const mod = await import('../../../../src/external-tools/trivy/resolve')
+    await import('../../../../src/external-tools/trivy/from-download.mjs')
+  const mod = await import('../../../../src/external-tools/trivy/resolve.mjs')
   return {
     fromVfs: vfsMod.trivyFromVfs as ReturnType<typeof vi.fn>,
     fromPath: pathMod.trivyFromPath as ReturnType<typeof vi.fn>,

@@ -18,14 +18,14 @@ import {
   blockKernel,
   configToSpec,
   solidColor,
-} from '../../../../src/term/effects/shimmer'
-import type { RGB, ShimmerSpec } from '../../../../src/term/effects/shimmer'
+} from '../../../../src/term/effects/shimmer.mjs'
+import type { RGB, ShimmerSpec } from '../../../../src/term/effects/shimmer.mjs'
 import {
   ANSI_RESET,
   ansiTruecolor,
   colorsToAnsi,
   renderFrame,
-} from '../../../../src/term/effects/shimmer-terminal'
+} from '../../../../src/term/effects/shimmer-terminal.mjs'
 
 const RED: RGB = [255, 0, 0]
 const GREEN: RGB = [0, 255, 0]

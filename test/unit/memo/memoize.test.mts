@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { memoize } from '../../../src/memo/memoize'
+import { memoize } from '../../../src/memo/memoize.mjs'
 
 describe('memoization — defaultKeyGen edge args', () => {
   it('disambiguates undefined arguments', () => {

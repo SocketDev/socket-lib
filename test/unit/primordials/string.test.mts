@@ -40,7 +40,7 @@ import {
   StringPrototypeTrimEnd,
   StringPrototypeTrimStart,
   StringRaw,
-} from '../../../src/primordials/string'
+} from '../../../src/primordials/string.mjs'
 
 describe('String (static)', () => {
   it('FromCharCode / FromCodePoint / Raw', () => {

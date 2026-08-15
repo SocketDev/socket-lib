@@ -14,7 +14,7 @@ import {
   pkgNameToSlug,
   resolvePackageName,
   resolveRegistryPackageName,
-} from '../../../src/packages/specs'
+} from '../../../src/packages/specs.mjs'
 
 describe('packages/specs — resolvePackageName', () => {
   it('should return name for unscoped package', () => {

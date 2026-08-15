@@ -8,12 +8,12 @@ import { describe, expect, it } from 'vitest'
 import {
   CARGO_LOCK_FILENAME,
   CARGO_LOCK_FORMAT,
-} from '../../../../src/eco/cargo/lockfile-format'
+} from '../../../../src/eco/cargo/lockfile-format.mjs'
 import {
   CARGO_TOML_FILENAME,
   CARGO_TOML_FORMAT,
-} from '../../../../src/eco/cargo/manifest-format'
-import { detectFormat } from '../../../../src/eco/manifest/detect-format'
+} from '../../../../src/eco/cargo/manifest-format.mjs'
+import { detectFormat } from '../../../../src/eco/manifest/detect-format.mjs'
 
 describe('eco/cargo/lockfile-format', () => {
   it('exports the Cargo.lock filename + descriptor', () => {

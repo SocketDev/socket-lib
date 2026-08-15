@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getCacache } from '../../../src/cacache/shared'
+import { getCacache } from '../../../src/cacache/shared.mjs'
 
 describe('getCacache', () => {
   it('should export getCacache function', () => {

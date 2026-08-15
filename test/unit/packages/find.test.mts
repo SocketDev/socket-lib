@@ -12,7 +12,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { findUpPackageJson } from '../../../src/packages/find'
+import { findUpPackageJson } from '../../../src/packages/find.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('findUpPackageJson', () => {

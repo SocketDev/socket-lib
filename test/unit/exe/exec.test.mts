@@ -9,11 +9,11 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { execBin } from '../../../src/exe/exec'
-import { whichReal, whichRealSync } from '../../../src/exe/path/which'
-import { isError } from '../../../src/errors/predicates'
-import { runWithTempDir } from '../util/temp-file-helper'
-import { safeDelete } from '../../../src/fs/safe'
+import { execBin } from '../../../src/exe/exec.mjs'
+import { whichReal, whichRealSync } from '../../../src/exe/path/which.mjs'
+import { isError } from '../../../src/errors/predicates.mjs'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
 describe('execBin', () => {
   it('should execute a binary by path', async () => {

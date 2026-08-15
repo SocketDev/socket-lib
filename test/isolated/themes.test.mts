@@ -16,13 +16,13 @@ import {
   setTheme,
   withTheme,
   withThemeSync,
-} from '../../src/term/themes/context'
-import { SOCKET_THEME, THEMES } from '../../src/term/themes/themes'
+} from '../../src/term/themes/context.mjs'
+import { SOCKET_THEME, THEMES } from '../../src/term/themes/themes.mjs'
 import {
   createTheme,
   extendTheme,
   resolveColor,
-} from '../../src/term/themes/resolve'
+} from '../../src/term/themes/resolve.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('themes', () => {

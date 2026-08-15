@@ -8,7 +8,7 @@ import {
   invalidate,
   invalidateAll,
   setCached,
-} from '../../../src/secrets/shared'
+} from '../../../src/secrets/shared.mjs'
 
 beforeEach(() => {
   invalidateAll()

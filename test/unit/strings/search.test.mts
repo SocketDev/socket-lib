@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { search } from '../../../src/strings/search'
+import { search } from '../../../src/strings/search.mjs'
 
 describe('strings/search — search', () => {
   it('finds pattern from beginning', () => {

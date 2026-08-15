@@ -13,7 +13,7 @@ import { pathToFileURL } from 'node:url'
 
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-import { isMainModule } from '../../../src/cli/is-main-module'
+import { isMainModule } from '../../../src/cli/is-main-module.mjs'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 let scratchDir: string

@@ -13,9 +13,9 @@ import {
   defineGetter,
   defineLazyGetter,
   defineLazyGetters,
-} from '../../src/objects/getters'
+} from '../../src/objects/getters.mjs'
 
-import type { GetterDefObj } from '../../src/objects/types'
+import type { GetterDefObj } from '../../src/objects/types.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('objects - getters', () => {

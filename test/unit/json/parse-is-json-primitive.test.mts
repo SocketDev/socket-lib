@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { isJsonPrimitive } from '../../../src/json/parse'
+import { isJsonPrimitive } from '../../../src/json/parse.mjs'
 
 describe('isJsonPrimitive', () => {
   it('should return true for null', () => {

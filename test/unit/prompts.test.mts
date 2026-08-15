@@ -19,8 +19,8 @@ import {
   search,
   select,
   Separator,
-} from '../../src/stdio/prompts'
-import type { Choice } from '../../src/stdio/prompts'
+} from '../../src/stdio/prompts.mjs'
+import type { Choice } from '../../src/stdio/prompts.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('prompts', () => {

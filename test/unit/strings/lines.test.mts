@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { splitLines } from '../../../src/strings/lines'
+import { splitLines } from '../../../src/strings/lines.mjs'
 
 describe('splitLines', () => {
   it('splits on LF', () => {

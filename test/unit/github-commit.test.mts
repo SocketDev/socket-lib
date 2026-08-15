@@ -7,7 +7,7 @@
 import nock from 'nock'
 import { afterAll, afterEach, beforeAll, describe, expect, it } from 'vitest'
 
-import { createSignedCommit } from '../../src/github/commit'
+import { createSignedCommit } from '../../src/github/commit.mjs'
 
 const API = 'https://api.github.com'
 

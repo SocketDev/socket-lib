@@ -17,12 +17,12 @@ import {
   RAINBOW_GRADIENT,
   resolveColor,
   resolveShimmerColor,
-} from '../../../../src/term/themes/resolve'
+} from '../../../../src/term/themes/resolve.mjs'
 import { RAINBOW_GRADIENT as canonicalRainbowGradient } from '@socketsecurity/lib-stable/themes/resolve'
 import { describe, expect, it } from 'vitest'
 
-import type { ColorValue } from '../../../../src/term/colors/types'
-import type { ColorReference } from '../../../../src/term/themes/types'
+import type { ColorValue } from '../../../../src/term/colors/types.mjs'
+import type { ColorReference } from '../../../../src/term/themes/types.mjs'
 
 const BASE_COLORS = {
   error: 'red' as const,

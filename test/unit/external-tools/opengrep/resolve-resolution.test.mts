@@ -1,13 +1,16 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/opengrep/from-vfs'), () => ({
+vi.mock(import('../../../../src/external-tools/opengrep/from-vfs.mjs'), () => ({
   opengrepFromVfs: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/opengrep/from-path'), () => ({
-  opengrepFromPath: vi.fn(),
-}))
 vi.mock(
-  import('../../../../src/external-tools/opengrep/from-download'),
+  import('../../../../src/external-tools/opengrep/from-path.mjs'),
+  () => ({
+    opengrepFromPath: vi.fn(),
+  }),
+)
+vi.mock(
+  import('../../../../src/external-tools/opengrep/from-download.mjs'),
   () => ({
     opengrepFromDownload: vi.fn(),
   }),
@@ -15,12 +18,13 @@ vi.mock(
 
 async function loadFresh() {
   const vfsMod =
-    await import('../../../../src/external-tools/opengrep/from-vfs')
+    await import('../../../../src/external-tools/opengrep/from-vfs.mjs')
   const pathMod =
-    await import('../../../../src/external-tools/opengrep/from-path')
+    await import('../../../../src/external-tools/opengrep/from-path.mjs')
   const dlMod =
-    await import('../../../../src/external-tools/opengrep/from-download')
-  const mod = await import('../../../../src/external-tools/opengrep/resolve')
+    await import('../../../../src/external-tools/opengrep/from-download.mjs')
+  const mod =
+    await import('../../../../src/external-tools/opengrep/resolve.mjs')
   return {
     fromVfs: vfsMod.opengrepFromVfs as ReturnType<typeof vi.fn>,
     fromPath: pathMod.opengrepFromPath as ReturnType<typeof vi.fn>,

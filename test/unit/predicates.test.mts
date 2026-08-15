@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { isArray } from '../../src/arrays/predicates'
+import { isArray } from '../../src/arrays/predicates.mjs'
 
 describe('isArray', () => {
   it('should return true for arrays', () => {

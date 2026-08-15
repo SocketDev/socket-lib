@@ -19,7 +19,7 @@ import { spawn, spawnSync } from '@socketsecurity/lib/process/spawn/child'
 import { describe, expect, it } from 'vitest'
 
 import { WIN32 } from '../_shared/fleet/lib/platform.mts'
-import { itWindowsOnly } from '../unit/util/skip-helpers'
+import { itWindowsOnly } from '../unit/util/skip-helpers.mjs'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('spawn integration', () => {

@@ -7,7 +7,7 @@ import {
   getPatchVersion,
   isValidVersion,
   parseVersion,
-} from '../../../src/versions/parse'
+} from '../../../src/versions/parse.mjs'
 
 describe('versions/parse — coerceVersion', () => {
   it('coerces version strings', () => {

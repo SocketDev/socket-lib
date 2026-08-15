@@ -4,7 +4,7 @@ import {
   getKeys,
   getOwn,
   getOwnPropertyValues,
-} from '../../../src/objects/inspect'
+} from '../../../src/objects/inspect.mjs'
 
 describe('objects/inspect — getKeys', () => {
   it('should return enumerable own keys', () => {

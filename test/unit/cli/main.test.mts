@@ -17,15 +17,15 @@ import {
   helpText,
   runMain,
   runMainAsync,
-} from '../../../src/cli/main'
+} from '../../../src/cli/main.mjs'
 
-import type { ScriptMeta } from '../../../src/cli/main'
-import type { Logger } from '../../../src/logger/logger'
+import type { ScriptMeta } from '../../../src/cli/main.mjs'
+import type { Logger } from '../../../src/logger/logger.mjs'
 
 const logSpy = vi.fn()
 const errorSpy = vi.fn()
 
-vi.mock(import('../../../src/logger/default'), () => ({
+vi.mock(import('../../../src/logger/default.mjs'), () => ({
   getDefaultLogger: () =>
     ({ error: errorSpy, log: logSpy }) as unknown as Logger,
 }))

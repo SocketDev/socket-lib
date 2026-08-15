@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { AI_PROFILE, BASH_ALLOW } from '../../../src/ai/profiles'
+import { AI_PROFILE, BASH_ALLOW } from '../../../src/ai/profiles.mjs'
 
 describe('AI_PROFILE.read', () => {
   it('denies all mutation tools', () => {

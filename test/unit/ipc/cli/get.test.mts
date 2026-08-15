@@ -11,11 +11,11 @@
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { getIpc } from '../../../../src/ipc/cli/get'
+import { getIpc } from '../../../../src/ipc/cli/get.mjs'
 
-import { FAKE_SOCKET_TOKEN } from '../../util/fake-tokens'
+import { FAKE_SOCKET_TOKEN } from '../../util/fake-tokens.mjs'
 
-import type { IpcObject } from '../../../../src/ipc/cli/types'
+import type { IpcObject } from '../../../../src/ipc/cli/types.mjs'
 
 describe('ipc/cli/get', () => {
   describe('getIpc()', () => {
@@ -362,7 +362,7 @@ describe('ipc/cli/get', () => {
 
     async function freshGetIpc(): Promise<IpcObject> {
       // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- pick up a fresh module instance after vi.resetModules.
-      const mod = (await import('../../../../src/ipc/cli/get')) as {
+      const mod = (await import('../../../../src/ipc/cli/get.mjs')) as {
         getIpc: () => Promise<IpcObject>
       }
       return await mod.getIpc()

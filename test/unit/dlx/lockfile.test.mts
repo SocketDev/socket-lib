@@ -11,11 +11,11 @@ import {
   resolveNpmPackagePin,
   specName,
   specRange,
-} from '../../../src/dlx/lockfile'
+} from '../../../src/dlx/lockfile.mjs'
 
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
-import { describeNetworkOnly } from '../util/skip-helpers'
+import { describeNetworkOnly } from '../util/skip-helpers.mjs'
 
 describe.sequential('dlx/lockfile — specName', () => {
   it('returns the name from a versioned spec', () => {

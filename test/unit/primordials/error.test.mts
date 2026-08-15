@@ -9,7 +9,7 @@ import {
   ErrorCaptureStackTrace,
   ErrorPrepareStackTrace,
   ErrorStackTraceLimit,
-} from '../../../src/primordials/error'
+} from '../../../src/primordials/error.mjs'
 
 describe('Error (static)', () => {
   it('ErrorCaptureStackTrace attaches a `.stack` to a target object', () => {

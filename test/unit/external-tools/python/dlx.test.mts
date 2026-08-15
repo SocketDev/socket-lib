@@ -6,25 +6,28 @@
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/python/resolve'), () => ({
+vi.mock(import('../../../../src/external-tools/python/resolve.mjs'), () => ({
   resolvePython: vi.fn(),
 }))
 
-vi.mock(import('../../../../src/external-tools/python/pip-install'), () => ({
-  downloadPipPackage: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/python/pip-install.mjs'),
+  () => ({
+    downloadPipPackage: vi.fn(),
+  }),
+)
 
-vi.mock(import('../../../../src/external-tools/python/pin'), () => ({
+vi.mock(import('../../../../src/external-tools/python/pin.mjs'), () => ({
   resolvePipPackagePin: vi.fn(),
 }))
 
 async function loadFresh() {
   const resolveMod =
-    await import('../../../../src/external-tools/python/resolve')
+    await import('../../../../src/external-tools/python/resolve.mjs')
   const pipMod =
-    await import('../../../../src/external-tools/python/pip-install')
-  const pinMod = await import('../../../../src/external-tools/python/pin')
-  const mod = await import('../../../../src/external-tools/python/dlx')
+    await import('../../../../src/external-tools/python/pip-install.mjs')
+  const pinMod = await import('../../../../src/external-tools/python/pin.mjs')
+  const mod = await import('../../../../src/external-tools/python/dlx.mjs')
   return {
     dlxPipInstall: mod.dlxPipInstall,
     dlxPipPin: mod.dlxPipPin,

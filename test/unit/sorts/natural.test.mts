@@ -4,7 +4,7 @@ import {
   localeCompare,
   naturalCompare,
   naturalSorter,
-} from '../../../src/sorts/natural'
+} from '../../../src/sorts/natural.mjs'
 
 describe('sorts/natural — localeCompare', () => {
   it('compares strings in locale-aware manner', () => {

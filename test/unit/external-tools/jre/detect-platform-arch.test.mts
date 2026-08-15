@@ -2,7 +2,7 @@ import process from 'node:process'
 
 import { describe, expect, test } from 'vitest'
 
-import { getJreArch } from '../../../../src/external-tools/jre/detect-platform-arch'
+import { getJreArch } from '../../../../src/external-tools/jre/detect-platform-arch.mjs'
 
 const SUPPORTED = [
   'darwin-arm64',

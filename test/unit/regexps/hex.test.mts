@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { hex2, hex4 } from '../../../src/regexps/hex'
+import { hex2, hex4 } from '../../../src/regexps/hex.mjs'
 
 describe('regexps/hex', () => {
   describe('hex2', () => {

@@ -1,13 +1,14 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../src/http-request/request-attempt'), () => ({
+vi.mock(import('../../../src/http-request/request-attempt.mjs'), () => ({
   httpRequestAttempt: vi.fn(),
 }))
 
 async function loadFresh() {
-  const attemptMod = await import('../../../src/http-request/request-attempt')
-  const mod = await import('../../../src/http-request/request')
-  const errMod = await import('../../../src/http-request/response-types')
+  const attemptMod =
+    await import('../../../src/http-request/request-attempt.mjs')
+  const mod = await import('../../../src/http-request/request.mjs')
+  const errMod = await import('../../../src/http-request/response-types.mjs')
   return {
     httpRequestAttempt: attemptMod.httpRequestAttempt as ReturnType<
       typeof vi.fn
@@ -335,7 +336,7 @@ describe.sequential('http-request/request — retry telemetry headers', () => {
 
 describe.sequential('http-request/request — re-exports', () => {
   test('re-exports httpRequestAttempt and readIncomingResponse from the leaves', async () => {
-    const mod = await import('../../../src/http-request/request')
+    const mod = await import('../../../src/http-request/request.mjs')
     expect(typeof mod.httpRequestAttempt).toBe('function')
     expect(typeof mod.readIncomingResponse).toBe('function')
   })

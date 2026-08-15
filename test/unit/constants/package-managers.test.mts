@@ -32,7 +32,7 @@ import {
   YARN_BERRY,
   YARN_CLASSIC,
   YARN_LOCK,
-} from '../../../src/constants/package-managers'
+} from '../../../src/constants/package-managers.mjs'
 import {
   BUN as stableBUN,
   NPM as stableNPM,

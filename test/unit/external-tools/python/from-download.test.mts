@@ -8,16 +8,17 @@ import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 import {
   pythonBinPath,
   pythonCacheDir,
-} from '../../../../src/external-tools/python/from-download'
+} from '../../../../src/external-tools/python/from-download.mjs'
 
-vi.mock(import('../../../../src/external-tools/from-download'), () => ({
+vi.mock(import('../../../../src/external-tools/from-download.mjs'), () => ({
   downloadAndExtractTool: vi.fn(),
 }))
 
 async function loadFresh() {
-  const fromDlMod = await import('../../../../src/external-tools/from-download')
+  const fromDlMod =
+    await import('../../../../src/external-tools/from-download.mjs')
   const mod =
-    await import('../../../../src/external-tools/python/from-download')
+    await import('../../../../src/external-tools/python/from-download.mjs')
   return {
     downloadAndExtractToolMock: fromDlMod.downloadAndExtractTool as ReturnType<
       typeof vi.fn

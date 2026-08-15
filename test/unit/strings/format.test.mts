@@ -6,7 +6,7 @@ import {
   fromCharCode,
   indentString,
   repeatString,
-} from '../../../src/strings/format'
+} from '../../../src/strings/format.mjs'
 
 describe('strings/format — applyLinePrefix', () => {
   it('applies prefix to single line', () => {

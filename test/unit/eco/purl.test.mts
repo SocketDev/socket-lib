@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { PURL_Type } from '../../../src/eco/purl'
+import { PURL_Type } from '../../../src/eco/purl.mjs'
 
 describe('types', () => {
   describe('PURL_Type enum', () => {

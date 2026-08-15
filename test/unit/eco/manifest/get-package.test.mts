@@ -4,9 +4,9 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getPackage } from '../../../../src/eco/manifest/get-package'
-import { getPackageVersions } from '../../../../src/eco/manifest/get-package-versions'
-import { parsePackageLock } from '../../../../src/eco/npm/npm-cli/lockfile/parse'
+import { getPackage } from '../../../../src/eco/manifest/get-package.mjs'
+import { getPackageVersions } from '../../../../src/eco/manifest/get-package-versions.mjs'
+import { parsePackageLock } from '../../../../src/eco/npm/npm-cli/lockfile/parse.mjs'
 
 const LOCK = parsePackageLock(
   JSON.stringify({

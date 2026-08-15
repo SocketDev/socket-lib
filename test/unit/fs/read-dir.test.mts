@@ -9,9 +9,9 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { readDirNames, readDirNamesSync } from '../../../src/fs/read-dir'
+import { readDirNames, readDirNamesSync } from '../../../src/fs/read-dir.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('readDirNames', () => {
   it('should read directory names', async () => {

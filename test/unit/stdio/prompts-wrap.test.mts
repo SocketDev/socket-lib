@@ -23,8 +23,8 @@ import {
   select,
   Separator,
   wrapPrompt,
-} from '../../../src/stdio/prompts'
-import type { Context } from '../../../src/stdio/prompts'
+} from '../../../src/stdio/prompts.mjs'
+import type { Context } from '../../../src/stdio/prompts.mjs'
 import { describe, expect, it, vi } from 'vitest'
 
 describe('stdio/prompts - wrapping', () => {

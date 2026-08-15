@@ -28,7 +28,7 @@ import {
   getSocketHomePath,
   getSocketStateDir,
   getSocketUserDir,
-} from '../../src/paths/socket'
+} from '../../src/paths/socket.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('paths', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { detectArchiveFormat } from '../../../src/archives/detect'
+import { detectArchiveFormat } from '../../../src/archives/detect.mjs'
 
 describe('archives/detect — detectArchiveFormat', () => {
   it('detects zip format from asset name', () => {

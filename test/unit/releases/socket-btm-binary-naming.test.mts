@@ -9,7 +9,7 @@ import {
   getBinaryName,
   getNodePrebuildAssetName,
   getPlatformArch,
-} from '../../../src/releases/socket-btm-binary-naming'
+} from '../../../src/releases/socket-btm-binary-naming.mjs'
 
 describe('releases/socket-btm-binary-naming', () => {
   describe('getBinaryAssetName', () => {

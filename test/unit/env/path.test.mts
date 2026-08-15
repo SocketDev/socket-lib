@@ -15,8 +15,8 @@ import {
   findPathEnvKey,
   getPath,
   replacePathInEnv,
-} from '../../../src/env/path'
-import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire'
+} from '../../../src/env/path.mjs'
+import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 
 describe('env/path', () => {
   afterEach(() => {

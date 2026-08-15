@@ -41,6 +41,15 @@ async function main(): Promise<void> {
     }
 
     const exitCode = await runSequence([
+      // FIRST: the exports map is built from whatever declaration names exist,
+      // so the pairing rename has to happen before it, not after.
+      {
+        args: [
+          'scripts/repo/post-build/pair-declarations-with-js.mts',
+          ...fixArgs,
+        ],
+        command: 'node',
+      },
       {
         args: ['scripts/fleet/gen/package-exports.mts', ...fixArgs],
         command: 'node',

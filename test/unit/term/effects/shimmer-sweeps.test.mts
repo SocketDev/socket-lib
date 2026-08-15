@@ -13,8 +13,8 @@ import {
   noSweep,
   randomSweep,
   rtlSweep,
-} from '../../../../src/term/effects/shimmer'
-import type { ShimmerDirection } from '../../../../src/term/effects/shimmer'
+} from '../../../../src/term/effects/shimmer.mjs'
+import type { ShimmerDirection } from '../../../../src/term/effects/shimmer.mjs'
 
 describe('effects/shimmer sweeps', () => {
   describe('ltrSweep', () => {

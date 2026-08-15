@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../src/http-request/request'), () => ({
+vi.mock(import('../../../src/http-request/request.mjs'), () => ({
   httpRequest: vi.fn(),
 }))
 
@@ -24,9 +24,9 @@ function makeResponse(opts: {
 }
 
 async function loadFresh() {
-  const reqMod = await import('../../../src/http-request/request')
+  const reqMod = await import('../../../src/http-request/request.mjs')
   const httpReqMock = reqMod.httpRequest as ReturnType<typeof vi.fn>
-  const mod = await import('../../../src/http-request/node')
+  const mod = await import('../../../src/http-request/node.mjs')
   return { httpReqMock, httpJson: mod.httpJson, httpText: mod.httpText }
 }
 

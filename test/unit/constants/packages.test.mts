@@ -22,7 +22,7 @@ import {
   LATEST,
   PACKAGE,
   PACKAGE_DEFAULT_VERSION,
-} from '../../../src/constants/packages'
+} from '../../../src/constants/packages.mjs'
 
 describe('constants/packages', () => {
   describe('package constants', () => {

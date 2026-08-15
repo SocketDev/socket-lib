@@ -4,7 +4,7 @@ import {
   BINARY_PATH_CACHE_MAX_SIZE,
   binaryPathCache,
   binaryPathCacheSet,
-} from '../../../src/dlx/shared'
+} from '../../../src/dlx/shared.mjs'
 
 // Independent copy of the documented cap. The src value is the
 // system-under-test, so the expected value must not be derived from it.

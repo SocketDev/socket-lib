@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { COMMON_FLAGS } from '../../../../src/exe/argv/flag-types'
+import { COMMON_FLAGS } from '../../../../src/exe/argv/flag-types.mjs'
 
 describe('argv/flag-types', () => {
   describe('COMMON_FLAGS', () => {

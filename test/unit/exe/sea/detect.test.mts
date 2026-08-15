@@ -11,7 +11,10 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSeaBinaryPath, isSeaBinary } from '../../../../src/exe/sea/detect'
+import {
+  getSeaBinaryPath,
+  isSeaBinary,
+} from '../../../../src/exe/sea/detect.mjs'
 
 describe('exe/sea', () => {
   describe('isSeaBinary', () => {

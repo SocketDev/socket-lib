@@ -1,22 +1,25 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { cacheKey } from '../../../../src/external-tools/python/resolve'
-import { makeHash } from '../../../../src/crypto/integrity'
+import { cacheKey } from '../../../../src/external-tools/python/resolve.mjs'
+import { makeHash } from '../../../../src/crypto/integrity.mjs'
 
-vi.mock(import('../../../../src/external-tools/python/from-path'), () => ({
+vi.mock(import('../../../../src/external-tools/python/from-path.mjs'), () => ({
   pythonFromPath: vi.fn(),
 }))
 
-vi.mock(import('../../../../src/external-tools/python/from-download'), () => ({
-  pythonFromDownload: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/python/from-download.mjs'),
+  () => ({
+    pythonFromDownload: vi.fn(),
+  }),
+)
 
 async function loadFresh() {
   const pathMod =
-    await import('../../../../src/external-tools/python/from-path')
+    await import('../../../../src/external-tools/python/from-path.mjs')
   const dlMod =
-    await import('../../../../src/external-tools/python/from-download')
-  const mod = await import('../../../../src/external-tools/python/resolve')
+    await import('../../../../src/external-tools/python/from-download.mjs')
+  const mod = await import('../../../../src/external-tools/python/resolve.mjs')
   return {
     doResolvePython: mod.doResolvePython,
     resolvePython: mod.resolvePython,

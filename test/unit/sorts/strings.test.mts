@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { compareStr } from '../../../src/sorts/strings'
+import { compareStr } from '../../../src/sorts/strings.mjs'
 
 describe('sorts/strings — compareStr', () => {
   it('compares strings lexicographically', () => {

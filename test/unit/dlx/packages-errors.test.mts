@@ -11,21 +11,21 @@ import os from 'node:os'
 import path from 'node:path'
 import crypto from 'node:crypto'
 
-import { resetEnv, setEnv } from '../../../src/env/rewire'
-import { invalidateCaches } from '../../../src/paths/rewire'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
+import { invalidateCaches } from '../../../src/paths/rewire.mjs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   removeDlxPackage,
   removeDlxPackageSync,
-} from '../../../src/dlx/packages'
+} from '../../../src/dlx/packages.mjs'
 
-import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
+import { safeDelete, safeDeleteSync } from '../../../src/fs/safe.mjs'
 
-import type * as FsSafeModule from '../../../src/fs/safe'
+import type * as FsSafeModule from '../../../src/fs/safe.mjs'
 
 // Mock the fs helpers at the resolved path the SUT imports.
-vi.mock(import('../../../src/fs/safe'), async importOriginal => {
+vi.mock(import('../../../src/fs/safe.mjs'), async importOriginal => {
   const original = await importOriginal<typeof FsSafeModule>()
   return {
     ...original,

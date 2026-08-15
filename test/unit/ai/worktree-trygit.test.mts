@@ -11,12 +11,15 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 const { mockSpawnSync } = vi.hoisted(() => ({ mockSpawnSync: vi.fn() }))
 
-vi.mock(import('../../../src/process/spawn/child'), async importOriginal => ({
-  ...(await importOriginal()),
-  spawnSync: mockSpawnSync,
-}))
+vi.mock(
+  import('../../../src/process/spawn/child.mjs'),
+  async importOriginal => ({
+    ...(await importOriginal()),
+    spawnSync: mockSpawnSync,
+  }),
+)
 
-import { tryGit } from '../../../src/ai/worktree'
+import { tryGit } from '../../../src/ai/worktree.mjs'
 
 beforeEach(() => {
   mockSpawnSync.mockReset()

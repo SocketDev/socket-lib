@@ -5,7 +5,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { extractPackageNameFromPath } from '../../../../../src/eco/npm/npm-cli/extract-package-name-from-path'
+import { extractPackageNameFromPath } from '../../../../../src/eco/npm/npm-cli/extract-package-name-from-path.mjs'
 
 describe('eco/npm/npm-cli/extract-package-name-from-path', () => {
   it('returns the final segment for a flat node_modules path', () => {

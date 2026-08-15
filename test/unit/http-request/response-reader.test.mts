@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest'
 
-import { compressBrotli } from '../../../src/compression/brotli'
-import { compressGzip } from '../../../src/compression/gzip'
-import { readIncomingResponse } from '../../../src/http-request/response-reader'
+import { compressBrotli } from '../../../src/compression/brotli.mjs'
+import { compressGzip } from '../../../src/compression/gzip.mjs'
+import { readIncomingResponse } from '../../../src/http-request/response-reader.mjs'
 
-import type { IncomingResponse } from '../../../src/http-request/request-types'
+import type { IncomingResponse } from '../../../src/http-request/request-types.mjs'
 
 // Build a fake IncomingMessage that's just async-iterable over byte chunks +
 // the minimum shape our function reads (statusCode, statusMessage, headers).

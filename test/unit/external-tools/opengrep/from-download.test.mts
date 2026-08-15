@@ -1,20 +1,20 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/from-download'), () => ({
+vi.mock(import('../../../../src/external-tools/from-download.mjs'), () => ({
   downloadAndExtractTool: vi.fn(),
   downloadToolArchive: vi.fn(),
 }))
 
-vi.mock(import('../../../../src/paths/socket'), () => ({
+vi.mock(import('../../../../src/paths/socket.mjs'), () => ({
   getSocketDlxDir: vi.fn(() => '/fake/dlx'),
 }))
 
 async function loadFresh() {
-  const fdMod = await import('../../../../src/external-tools/from-download')
+  const fdMod = await import('../../../../src/external-tools/from-download.mjs')
   const downloadMock = fdMod.downloadAndExtractTool as ReturnType<typeof vi.fn>
   const archiveMock = fdMod.downloadToolArchive as ReturnType<typeof vi.fn>
   const mod =
-    await import('../../../../src/external-tools/opengrep/from-download')
+    await import('../../../../src/external-tools/opengrep/from-download.mjs')
   return {
     downloadMock,
     archiveMock,
@@ -149,23 +149,27 @@ describe.sequential('external-tools/opengrep/from-download', () => {
       // Re-mock getSocketDlxDir to point at our tmpdir so the default
       // cacheDir branch is exercised against a writable path.
       vi.resetModules()
-      vi.doMock(import('../../../../src/paths/socket'), () => ({
+      vi.doMock(import('../../../../src/paths/socket.mjs'), () => ({
         getSocketDlxDir: vi.fn(() => tmp),
       }))
-      vi.doMock(import('../../../../src/external-tools/from-download'), () => ({
-        downloadAndExtractTool: vi.fn(),
-        downloadToolArchive: vi.fn(),
-      }))
+      vi.doMock(
+        import('../../../../src/external-tools/from-download.mjs'),
+        () => ({
+          downloadAndExtractTool: vi.fn(),
+          downloadToolArchive: vi.fn(),
+        }),
+      )
       const archivePath = path.join(tmp, 'bare-bin')
       writeFileSync(archivePath, 'x')
-      const fdMod = await import('../../../../src/external-tools/from-download')
+      const fdMod =
+        await import('../../../../src/external-tools/from-download.mjs')
       const archiveMock = fdMod.downloadToolArchive as ReturnType<typeof vi.fn>
       archiveMock.mockResolvedValueOnce({
         archivePath,
         integrity: 'sha512-def==',
       })
       const mod =
-        await import('../../../../src/external-tools/opengrep/from-download')
+        await import('../../../../src/external-tools/opengrep/from-download.mjs')
       const result = await mod.opengrepFromDownload({
         platformArch: 'linux-x64',
         version: '1.16.5',

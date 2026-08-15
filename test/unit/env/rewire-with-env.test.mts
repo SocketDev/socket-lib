@@ -11,7 +11,7 @@ import {
   isInEnv,
   withEnv,
   withEnvSync,
-} from '../../../src/env/rewire'
+} from '../../../src/env/rewire.mjs'
 
 describe('env/rewire — withEnv / withEnvSync', () => {
   describe('withEnvSync', () => {

@@ -20,11 +20,11 @@ import { describe, expect, it } from 'vitest'
 
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 
-import { extractArchive } from '../../src/archives/extract'
-import { extractTar, extractTarGz } from '../../src/archives/tar'
-import { extractZip } from '../../src/archives/zip'
+import { extractArchive } from '../../src/archives/extract.mjs'
+import { extractTar, extractTarGz } from '../../src/archives/tar.mjs'
+import { extractZip } from '../../src/archives/zip.mjs'
 
-import { runWithTempDir } from '../unit/util/temp-file-helper'
+import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
 
 // Suppress unhandled error warnings from tar-fs stream destruction.
 // The errors are properly caught by the pipeline, but Vitest tracks Error

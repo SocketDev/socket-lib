@@ -13,26 +13,29 @@ import path from 'node:path'
 
 import { afterAll, describe, expect, it, vi } from 'vitest'
 
-import { safeDelete } from '../../../src/fs/safe'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 
-vi.mock(import('../../../src/constants/node'), async importOriginal => ({
+vi.mock(import('../../../src/constants/node.mjs'), async importOriginal => ({
   ...(await importOriginal()),
   getNodeVersion: () => 'v20.0.0',
   supportsNodeStripTypes: () => false,
 }))
 
-vi.mock(import('../../../src/constants/platform'), async importOriginal => ({
-  ...(await importOriginal()),
-  isDarwin: () => false,
-  isWin32: () => false,
-}))
+vi.mock(
+  import('../../../src/constants/platform.mjs'),
+  async importOriginal => ({
+    ...(await importOriginal()),
+    isDarwin: () => false,
+    isWin32: () => false,
+  }),
+)
 
 import {
   assertNodeStripTypesSupported,
   chromeManifestDirs,
   installNativeHost,
-} from '../../../src/native-messaging/install'
-import { withEnvSync } from '../../../src/env/rewire'
+} from '../../../src/native-messaging/install.mjs'
+import { withEnvSync } from '../../../src/env/rewire.mjs'
 
 const tmpDirs: string[] = []
 

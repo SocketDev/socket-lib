@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { stringWidth } from '../../../src/strings/width'
+import { stringWidth } from '../../../src/strings/width.mjs'
 
 describe('strings/width — stringWidth', () => {
   it('calculates width of ASCII characters', () => {

@@ -13,10 +13,10 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { isWin32 } from '../../../src/constants/platform'
-import { spawnSync } from '../../../src/process/spawn/child'
+import { isWin32 } from '../../../src/constants/platform.mjs'
+import { spawnSync } from '../../../src/process/spawn/child.mjs'
 
-import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers'
+import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers.mjs'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('spawnSync', () => {

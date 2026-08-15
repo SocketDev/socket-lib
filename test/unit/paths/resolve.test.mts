@@ -11,7 +11,7 @@
  */
 
 import process from 'node:process'
-import { relativeResolve } from '../../../src/paths/resolve'
+import { relativeResolve } from '../../../src/paths/resolve.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('relativeResolve', () => {

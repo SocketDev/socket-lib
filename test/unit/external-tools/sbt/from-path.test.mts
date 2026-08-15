@@ -6,7 +6,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { sbtFromPath } from '../../../../src/external-tools/sbt/from-path'
+import { sbtFromPath } from '../../../../src/external-tools/sbt/from-path.mjs'
 
 describe('external-tools/sbt/from-path', () => {
   it('returns either a resolved shape or undefined', async () => {

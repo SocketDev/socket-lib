@@ -9,10 +9,10 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { createBrowserTtlCache } from '../../../src/cache/ttl/browser'
+import { createBrowserTtlCache } from '../../../src/cache/ttl/browser.mjs'
 import { createMemoryAdapter } from './browser-test-helpers.mts'
 
-import type { TtlCacheStorage } from '../../../src/cache/ttl/types'
+import type { TtlCacheStorage } from '../../../src/cache/ttl/types.mjs'
 
 describe('browser ttl-cache — storage adapter', () => {
   describe('round-trips', () => {

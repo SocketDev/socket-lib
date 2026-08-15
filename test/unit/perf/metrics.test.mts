@@ -1,11 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { resetEnv, setEnv } from '../../../src/env/rewire'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import {
   clearPerformanceMetrics,
   getPerformanceMetrics,
-} from '../../../src/perf/metrics'
-import { perfTimer } from '../../../src/perf/timer'
+} from '../../../src/perf/metrics.mjs'
+import { perfTimer } from '../../../src/perf/timer.mjs'
 
 describe.sequential('perf/metrics', () => {
   describe('getPerformanceMetrics()', () => {

@@ -14,7 +14,7 @@ import { describe, expect, it } from 'vitest'
 
 import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
 
-import { spawn } from '../../src/process/spawn/child'
+import { spawn } from '../../src/process/spawn/child.mjs'
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 

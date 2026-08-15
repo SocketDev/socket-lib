@@ -4,7 +4,7 @@ import {
   getSocketKeychainAssetEntry,
   getSocketKeychainDownloadUrl,
   SOCKET_KEYCHAIN_SUPPORTED_PLATFORM_ARCHES,
-} from '../../../../src/external-tools/socket-keychain/asset-names'
+} from '../../../../src/external-tools/socket-keychain/asset-names.mjs'
 
 describe('external-tools/socket-keychain/asset-names', () => {
   it('covers the release matrix', () => {

@@ -9,7 +9,7 @@ import {
   GIT_VALUE_FLAGS,
   NPM_VALUE_FLAGS,
   positionalArgs,
-} from '../../../src/shell/command-args'
+} from '../../../src/shell/command-args.mjs'
 
 describe('shell/command-args positionalArgs', () => {
   it('skips a value-taking flag and the token it consumes', () => {

@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolVersions } from '../../../../src/exe/smol/versions'
+import { getSmolVersions } from '../../../../src/exe/smol/versions.mjs'
 
 describe('smol/versions', () => {
   describe('getSmolVersions', () => {

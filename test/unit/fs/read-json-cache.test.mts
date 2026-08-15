@@ -16,7 +16,7 @@ import {
   setCachedJson,
   setReadJsonCacheMax,
   setReadJsonCacheTtlMs,
-} from '../../../src/fs/read-json-cache'
+} from '../../../src/fs/read-json-cache.mjs'
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 
 beforeEach(() => {

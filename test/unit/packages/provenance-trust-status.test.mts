@@ -19,7 +19,7 @@ import {
   getTrustLevelName,
   getTrustStatus,
   TRUST_LEVELS,
-} from '../../../src/packages/provenance'
+} from '../../../src/packages/provenance.mjs'
 
 const fullyTrustedDoc = {
   _npmUser: { name: 'someone', trustedPublisher: { id: 'github' } },

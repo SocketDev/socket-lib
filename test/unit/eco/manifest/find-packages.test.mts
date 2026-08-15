@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest'
 import {
   FIND_PACKAGES_PATTERN_MAX_LEN,
   findPackages,
-} from '../../../../src/eco/manifest/find-packages'
-import { parsePackageLock } from '../../../../src/eco/npm/npm-cli/lockfile/parse'
+} from '../../../../src/eco/manifest/find-packages.mjs'
+import { parsePackageLock } from '../../../../src/eco/npm/npm-cli/lockfile/parse.mjs'
 
 const LOCK = parsePackageLock(
   JSON.stringify({

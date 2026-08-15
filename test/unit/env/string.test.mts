@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { envAsString } from '../../../src/env/string'
+import { envAsString } from '../../../src/env/string.mjs'
 
 describe.sequential('env/string — envAsString', () => {
   test('returns the trimmed string for a plain string input', () => {

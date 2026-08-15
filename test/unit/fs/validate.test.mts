@@ -9,9 +9,9 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { validateFiles } from '../../../src/fs/validate'
+import { validateFiles } from '../../../src/fs/validate.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('validateFiles', () => {
   it('should return all files as valid when all exist and are readable', async () => {

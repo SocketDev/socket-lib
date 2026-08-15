@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { detectPnpmVersion } from '../../../../../../src/eco/npm/pnpm/lockfile/detect-version'
+import { detectPnpmVersion } from '../../../../../../src/eco/npm/pnpm/lockfile/detect-version.mjs'
 
 describe('eco/npm/pnpm/lockfile/detect-version', () => {
   it('detects v5', () => {

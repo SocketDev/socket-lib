@@ -29,7 +29,7 @@ import { fileURLToPath } from 'node:url'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type { SpinnerInstance } from '../../src/spinner/types'
+import type { SpinnerInstance } from '../../src/spinner/types.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // Minimal fake covering the spinner surface the wrapped consumers touch
@@ -41,12 +41,12 @@ const fakeSpinner = {
   stop: vi.fn(),
 } as unknown as SpinnerInstance
 const getDefaultSpinner = vi.fn(() => fakeSpinner)
-vi.mock(import('../../src/spinner/default'), () => ({ getDefaultSpinner }))
+vi.mock(import('../../src/spinner/default.mjs'), () => ({ getDefaultSpinner }))
 
 // Spy on the shared process AbortSignal accessor so we can observe whether a
 // consuming module grabs it at import time vs. at call time.
 const getAbortSignal = vi.fn(() => new AbortController().signal)
-vi.mock(import('../../src/process/abort'), async importOriginal => ({
+vi.mock(import('../../src/process/abort.mjs'), async importOriginal => ({
   ...(await importOriginal()),
   getAbortSignal,
 }))
@@ -60,7 +60,7 @@ const IntlSegmenter = vi.fn(function (
 ) {
   return new Intl.Segmenter(...args)
 }) as unknown as typeof Intl.Segmenter
-vi.mock(import('../../src/primordials/intl'), async importOriginal => ({
+vi.mock(import('../../src/primordials/intl.mjs'), async importOriginal => ({
   ...(await importOriginal()),
   IntlSegmenter,
 }))
@@ -75,12 +75,12 @@ beforeEach(async () => {
 describe('snapshot safety — lazy default-spinner acquisition', () => {
   describe('process/spawn/child', () => {
     it('does not construct the default spinner at module-eval', async () => {
-      await import('../../src/process/spawn/child')
+      await import('../../src/process/spawn/child.mjs')
       expect(getDefaultSpinner).not.toHaveBeenCalled()
     })
 
     it('acquires the default spinner when spawn() runs without an override', async () => {
-      const { spawn } = await import('../../src/process/spawn/child')
+      const { spawn } = await import('../../src/process/spawn/child.mjs')
       expect(getDefaultSpinner).not.toHaveBeenCalled()
 
       // Resolve a trivial child so the promise settles; spawn() acquires the
@@ -92,12 +92,12 @@ describe('snapshot safety — lazy default-spinner acquisition', () => {
 
   describe('stdio/prompts', () => {
     it('does not construct the default spinner at module-eval', async () => {
-      await import('../../src/stdio/prompts')
+      await import('../../src/stdio/prompts.mjs')
       expect(getDefaultSpinner).not.toHaveBeenCalled()
     })
 
     it('acquires the default spinner when a wrapped prompt runs without a context spinner', async () => {
-      const { wrapPrompt } = await import('../../src/stdio/prompts')
+      const { wrapPrompt } = await import('../../src/stdio/prompts.mjs')
       expect(getDefaultSpinner).not.toHaveBeenCalled()
 
       const wrapped = wrapPrompt(vi.fn().mockResolvedValue('ok'))
@@ -138,40 +138,46 @@ describe('snapshot safety — lazy abort-signal acquisition', () => {
   // options at the top of the call.
   assertLazy(
     'fs/find',
-    () => import('../../src/fs/find'),
+    () => import('../../src/fs/find.mjs'),
     async () =>
-      (await import('../../src/fs/find')).findUp('definitely-not-a-real-file'),
+      (await import('../../src/fs/find.mjs')).findUp(
+        'definitely-not-a-real-file',
+      ),
   )
   assertLazy(
     'fs/read-file',
-    () => import('../../src/fs/read-file'),
+    () => import('../../src/fs/read-file.mjs'),
     async () =>
-      (await import('../../src/fs/read-file')).readFileUtf8('/no/such/path'),
+      (await import('../../src/fs/read-file.mjs')).readFileUtf8(
+        '/no/such/path',
+      ),
   )
   assertLazy(
     'packages/tarball',
-    () => import('../../src/packages/tarball'),
+    () => import('../../src/packages/tarball.mjs'),
     async () =>
-      (await import('../../src/packages/tarball')).packPackage(
+      (await import('../../src/packages/tarball.mjs')).packPackage(
         'definitely-not-a-real-pkg',
       ),
   )
   assertLazy(
     'promises/options',
-    () => import('../../src/promises/options'),
+    () => import('../../src/promises/options.mjs'),
     async () =>
-      (await import('../../src/promises/options')).normalizeIterationOptions(1),
+      (
+        await import('../../src/promises/options.mjs')
+      ).normalizeIterationOptions(1),
   )
 })
 
 describe('snapshot safety — lazy Intl.Segmenter in strings/width', () => {
   it('does not construct the segmenter at module-eval', async () => {
-    await import('../../src/strings/width')
+    await import('../../src/strings/width.mjs')
     expect(IntlSegmenter).not.toHaveBeenCalled()
   })
 
   it('constructs the segmenter on the first stringWidth() call and reuses it', async () => {
-    const { stringWidth } = await import('../../src/strings/width')
+    const { stringWidth } = await import('../../src/strings/width.mjs')
     expect(IntlSegmenter).not.toHaveBeenCalled()
 
     // 'héllo'(5) + ' '(1) + '漢字'(4, CJK ×2 cols) + ' '(1) + '👍🏽'(2, one
@@ -195,35 +201,35 @@ describe('snapshot safety — lazy AsyncLocalStorage singletons', () => {
   const getNodeAsyncHooks = vi.fn(() => realAsyncHooks)
 
   beforeEach(async () => {
-    vi.doMock(import('../../src/node/async-hooks'), () => ({
+    vi.doMock(import('../../src/node/async-hooks.mjs'), () => ({
       getNodeAsyncHooks,
     }))
     getNodeAsyncHooks.mockClear()
   })
 
   afterEach(async () => {
-    vi.doUnmock(import('../../src/node/async-hooks'))
+    vi.doUnmock(import('../../src/node/async-hooks.mjs'))
   })
 
   it('env/rewire does not construct its store at module-eval', async () => {
-    await import('../../src/env/rewire')
+    await import('../../src/env/rewire.mjs')
     expect(getNodeAsyncHooks).not.toHaveBeenCalled()
   })
 
   it('env/rewire constructs its store on first withEnv()', async () => {
-    const { withEnv } = await import('../../src/env/rewire')
+    const { withEnv } = await import('../../src/env/rewire.mjs')
     expect(getNodeAsyncHooks).not.toHaveBeenCalled()
     await withEnv({ EXAMPLE: '1' }, () => {})
     expect(getNodeAsyncHooks).toHaveBeenCalled()
   })
 
   it('themes/context does not construct its store at module-eval', async () => {
-    await import('../../src/term/themes/context')
+    await import('../../src/term/themes/context.mjs')
     expect(getNodeAsyncHooks).not.toHaveBeenCalled()
   })
 
   it('themes/context constructs its store on first getTheme()', async () => {
-    const { getTheme } = await import('../../src/term/themes/context')
+    const { getTheme } = await import('../../src/term/themes/context.mjs')
     expect(getNodeAsyncHooks).not.toHaveBeenCalled()
     getTheme()
     expect(getNodeAsyncHooks).toHaveBeenCalled()
@@ -266,12 +272,13 @@ describe('snapshot safety — lazy bound console methods (logger/shared)', () =>
   })
 
   it('does not bind console methods at module-eval', async () => {
-    await import('../../src/logger/shared')
+    await import('../../src/logger/shared.mjs')
     expect(bindCount).toBe(0)
   })
 
   it('binds console methods on the first getBoundConsoleEntries() call and memoizes', async () => {
-    const { getBoundConsoleEntries } = await import('../../src/logger/shared')
+    const { getBoundConsoleEntries } =
+      await import('../../src/logger/shared.mjs')
     expect(bindCount).toBe(0)
 
     const entries = getBoundConsoleEntries()
@@ -296,23 +303,23 @@ describe('snapshot safety — lazy vendored-semver require (versions/*)', () => 
   const getSmolVersions = vi.fn(() => undefined)
 
   beforeEach(async () => {
-    vi.doMock(import('../../src/exe/smol/versions'), () => ({
+    vi.doMock(import('../../src/exe/smol/versions.mjs'), () => ({
       getSmolVersions,
     }))
     getSmolVersions.mockClear()
   })
 
   afterEach(async () => {
-    vi.doUnmock(import('../../src/exe/smol/versions'))
+    vi.doUnmock(import('../../src/exe/smol/versions.mjs'))
   })
 
   it('versions/compare does not resolve the version impl at module-eval', async () => {
-    await import('../../src/versions/compare')
+    await import('../../src/versions/compare.mjs')
     expect(getSmolVersions).not.toHaveBeenCalled()
   })
 
   it('versions/compare resolves the impl on the first eq() call and reuses it', async () => {
-    const { eq } = await import('../../src/versions/compare')
+    const { eq } = await import('../../src/versions/compare.mjs')
     expect(getSmolVersions).not.toHaveBeenCalled()
 
     expect(eq('1.2.3', '1.2.3')).toBe(true)
@@ -324,12 +331,12 @@ describe('snapshot safety — lazy vendored-semver require (versions/*)', () => 
   })
 
   it('versions/range does not resolve the version impl at module-eval', async () => {
-    await import('../../src/versions/range')
+    await import('../../src/versions/range.mjs')
     expect(getSmolVersions).not.toHaveBeenCalled()
   })
 
   it('versions/range resolves the impl on the first satisfiesVersion() call', async () => {
-    const { satisfiesVersion } = await import('../../src/versions/range')
+    const { satisfiesVersion } = await import('../../src/versions/range.mjs')
     expect(getSmolVersions).not.toHaveBeenCalled()
     expect(satisfiesVersion('1.5.0', '>=1.0.0 <2.0.0')).toBe(true)
     expect(getSmolVersions).toHaveBeenCalled()
@@ -350,7 +357,7 @@ describe('snapshot safety — lazy vendored-cacache require (cacache/shared)', (
   // accessor's observable contract: it yields the real cacache surface and
   // memoizes a single instance across calls.
   it('getCacache yields the cacache surface and memoizes one instance', async () => {
-    const { getCacache } = await import('../../src/cacache/shared')
+    const { getCacache } = await import('../../src/cacache/shared.mjs')
     const first = getCacache()
     expect(typeof first.get).toBe('function')
     expect(typeof first.put).toBe('function')

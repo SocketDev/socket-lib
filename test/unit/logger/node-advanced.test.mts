@@ -16,7 +16,7 @@ import { Writable } from 'node:stream'
 
 import { beforeEach, describe, expect, it } from 'vitest'
 
-import { Logger } from '../../../src/logger/node'
+import { Logger } from '../../../src/logger/node.mjs'
 
 // Runs sequentially: the logger and stream state must be isolated per test,
 // and concurrent execution risks state sharing across tests in this suite.

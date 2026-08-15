@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolHttp } from '../../../../src/exe/smol/http'
+import { getSmolHttp } from '../../../../src/exe/smol/http.mjs'
 
 describe('smol/http', () => {
   describe('getSmolHttp', () => {

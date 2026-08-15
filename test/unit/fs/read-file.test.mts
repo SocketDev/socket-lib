@@ -17,11 +17,11 @@ import {
   readFileUtf8Sync,
   safeReadFile,
   safeReadFileSync,
-} from '../../../src/fs/read-file'
+} from '../../../src/fs/read-file.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
-import type { SafeReadOptions } from '../../../src/fs/types'
+import type { SafeReadOptions } from '../../../src/fs/types.mjs'
 
 describe('readFileBinary', () => {
   it('should read file as binary buffer', async () => {

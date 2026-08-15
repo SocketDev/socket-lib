@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { findPackageExtensions } from '../../../src/packages/metadata-extensions'
+import { findPackageExtensions } from '../../../src/packages/metadata-extensions.mjs'
 
 describe('packages/metadata-extensions — findPackageExtensions', () => {
   it('should return undefined for package with no extensions', () => {

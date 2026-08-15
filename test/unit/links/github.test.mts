@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { githubRefLink } from '../../../src/links/github'
+import { githubRefLink } from '../../../src/links/github.mjs'
 
 describe('links/github — githubRefLink', () => {
   it('builds a pull link from a .git https URL', () => {

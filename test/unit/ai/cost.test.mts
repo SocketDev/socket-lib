@@ -7,7 +7,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parseAgentCost, parseNumber } from '../../../src/ai/cost'
+import { parseAgentCost, parseNumber } from '../../../src/ai/cost.mjs'
 
 describe('parseNumber', () => {
   it('parses a plain integer string', () => {

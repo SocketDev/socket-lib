@@ -41,13 +41,13 @@ vi.mock('../../../src/http-request/request', () => ({
   httpRequest: httpRequestMock,
 }))
 
-import { setKeychainAddon } from '../../../src/secrets/addon'
+import { setKeychainAddon } from '../../../src/secrets/addon.mjs'
 import {
   discoverSocketOauth,
   loginWithBrowser,
   loginWithSocketOauth,
   storeSocketApiToken,
-} from '../../../src/secrets/login'
+} from '../../../src/secrets/login.mjs'
 
 afterEach(() => {
   vi.clearAllMocks()

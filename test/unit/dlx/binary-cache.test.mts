@@ -11,7 +11,7 @@ import {
   listDlxCache,
   readBinaryCacheMetadata,
   writeBinaryCacheMetadata,
-} from '../../../src/dlx/binary-cache'
+} from '../../../src/dlx/binary-cache.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpRoot: string
@@ -270,7 +270,7 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
   test('readBinaryCacheMetadata returns undefined when getNodeFs().existsSync throws', async () => {
     // Spy on getNodeFs() so the next existsSync call throws — exercises the
     // outer try/catch in readBinaryCacheMetadata (L289-291).
-    const { getNodeFs } = await import('../../../src/node/fs')
+    const { getNodeFs } = await import('../../../src/node/fs.mjs')
     const realFs = getNodeFs()
     const origExists = realFs.existsSync
     ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync = (() => {
@@ -287,7 +287,7 @@ describe.sequential('dlx/binary-cache — cleanDlxCache + listDlxCache', () => {
   })
 
   test('isBinaryCacheValid returns false when getNodeFs().existsSync throws', async () => {
-    const { getNodeFs } = await import('../../../src/node/fs')
+    const { getNodeFs } = await import('../../../src/node/fs.mjs')
     const realFs = getNodeFs()
     const origExists = realFs.existsSync
     ;(realFs as { existsSync: typeof realFs.existsSync }).existsSync = (() => {

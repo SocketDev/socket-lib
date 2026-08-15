@@ -11,10 +11,10 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { execNpm } from '../../../../src/eco/npm/npm-cli/exec'
-import { execPnpm } from '../../../../src/eco/npm/pnpm/exec'
-import { execScript } from '../../../../src/eco/npm/script'
-import { execYarn } from '../../../../src/eco/npm/yarn/exec'
+import { execNpm } from '../../../../src/eco/npm/npm-cli/exec.mjs'
+import { execPnpm } from '../../../../src/eco/npm/pnpm/exec.mjs'
+import { execScript } from '../../../../src/eco/npm/script.mjs'
+import { execYarn } from '../../../../src/eco/npm/yarn/exec.mjs'
 
 describe('agent execution', () => {
   describe('Integration tests (using real spawn)', () => {

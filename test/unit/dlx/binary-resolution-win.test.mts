@@ -11,10 +11,10 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import type * as PlatformConstants from '../../../src/constants/platform'
+import type * as PlatformConstants from '../../../src/constants/platform.mjs'
 
 // Mock the platform predicate BEFORE importing the SUT so it sees isWin32() === true.
-vi.mock(import('../../../src/constants/platform'), async importOriginal => {
+vi.mock(import('../../../src/constants/platform.mjs'), async importOriginal => {
   const actual = await importOriginal<typeof PlatformConstants>()
   return { ...actual, isWin32: () => true }
 })
@@ -22,7 +22,7 @@ vi.mock(import('../../../src/constants/platform'), async importOriginal => {
 import {
   makePackageBinsExecutable,
   resolveBinaryPath,
-} from '../../../src/dlx/binary-resolution'
+} from '../../../src/dlx/binary-resolution.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string

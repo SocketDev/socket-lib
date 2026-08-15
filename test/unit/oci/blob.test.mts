@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { buildBlobUrl, getBlob, getBlobJson } from '../../../src/oci/blob'
+import { buildBlobUrl, getBlob, getBlobJson } from '../../../src/oci/blob.mjs'
 import { makeFakeAdapter, sha256Digest } from './oci-test-helpers.mts'
 
 import type { FakeRoute } from './oci-test-helpers.mts'

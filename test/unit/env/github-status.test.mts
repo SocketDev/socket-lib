@@ -16,7 +16,7 @@
 import nock from 'nock'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { probeGitHubStatus } from '../../../src/env/github-status'
+import { probeGitHubStatus } from '../../../src/env/github-status.mjs'
 
 const STATUS_HOST = 'https://www.githubstatus.com'
 const STATUS_PATH = '/api/v2/components.json'

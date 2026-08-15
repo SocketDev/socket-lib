@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { packageDefaultNodeRange as canonicalPackageDefaultNodeRange } from '@socketsecurity/lib-stable/constants/package-default-node-range'
 
-import { packageDefaultNodeRange } from '../../../src/constants/package-default-node-range'
+import { packageDefaultNodeRange } from '../../../src/constants/package-default-node-range.mjs'
 
 describe('package-default-node-range', () => {
   it('should export a string', () => {

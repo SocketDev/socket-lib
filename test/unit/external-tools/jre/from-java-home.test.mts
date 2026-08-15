@@ -8,7 +8,7 @@ import path from 'node:path'
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { jreFromJavaHome } from '../../../../src/external-tools/jre/from-java-home'
+import { jreFromJavaHome } from '../../../../src/external-tools/jre/from-java-home.mjs'
 
 import { windowsExe } from '../../../_shared/fleet/lib/platform.mts'
 

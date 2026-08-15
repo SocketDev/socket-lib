@@ -21,7 +21,7 @@ import {
   readDiskCache,
   resetAiAgentDiscoveryCache,
   writeDiskCache,
-} from '../../../src/ai/discover'
+} from '../../../src/ai/discover.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // No vi.mock — these tests exercise the real module against the real fs.

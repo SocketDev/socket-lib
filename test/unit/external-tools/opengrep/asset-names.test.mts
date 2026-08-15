@@ -4,7 +4,7 @@ import {
   getOpengrepAssetEntry,
   getOpengrepDownloadUrl,
   OPENGREP_ASSET_MAP,
-} from '../../../../src/external-tools/opengrep/asset-names'
+} from '../../../../src/external-tools/opengrep/asset-names.mjs'
 
 describe('external-tools/opengrep/asset-names', () => {
   test('covers darwin/linux/win', () => {

@@ -20,9 +20,9 @@ import {
   fromUnixPath,
   normalizePath,
   toUnixPath,
-} from '../../../src/paths/normalize'
+} from '../../../src/paths/normalize.mjs'
 
-import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers'
+import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers.mjs'
 
 describe('paths/normalize', () => {
   describe('foldPathForCompare', () => {

@@ -51,7 +51,7 @@ import {
   AtomicsWait,
   IteratorPrototypeNext,
   IteratorPrototypeReturn,
-} from '../../../src/primordials/array'
+} from '../../../src/primordials/array.mjs'
 
 describe('Array (static)', () => {
   it('ArrayFrom converts array-likes and iterables', () => {

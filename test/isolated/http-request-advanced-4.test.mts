@@ -12,11 +12,11 @@ import { Readable } from 'node:stream'
 
 import { describe, expect, it } from 'vitest'
 
-import type { HttpHookResponseInfo } from '../../src/http-request/request-types'
+import type { HttpHookResponseInfo } from '../../src/http-request/request-types.mjs'
 
-import { httpRequest } from '../../src/http-request/request'
+import { httpRequest } from '../../src/http-request/request.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures'
+import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
 
 setupHttpFixture()
 

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { envAsBoolean } from '../../../src/env/boolean'
+import { envAsBoolean } from '../../../src/env/boolean.mjs'
 
 describe.sequential('env/boolean — envAsBoolean', () => {
   test('returns true for "true" / "1" / "yes" (case-insensitive)', () => {

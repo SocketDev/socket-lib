@@ -5,7 +5,7 @@ import {
   maxVersion,
   minVersion,
   satisfiesVersion,
-} from '../../../src/versions/range'
+} from '../../../src/versions/range.mjs'
 
 describe('versions/range — filterVersions', () => {
   it('filters versions by range', () => {

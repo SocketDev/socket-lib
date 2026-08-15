@@ -8,7 +8,7 @@ import type {
   OciHttpAdapter,
   OciHttpResponse,
   OciRequestOptions,
-} from '../../../src/oci/types'
+} from '../../../src/oci/types.mjs'
 
 /**
  * A canned response for one URL: the status, headers, and either a JSON body,

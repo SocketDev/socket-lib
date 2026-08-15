@@ -8,9 +8,9 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
-import { clearEnv, setEnv } from '../../../src/env/rewire'
-import { safeDelete } from '../../../src/fs/safe'
-import { resetPaths, setPath } from '../../../src/paths/rewire'
+import { clearEnv, setEnv } from '../../../src/env/rewire.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
+import { resetPaths, setPath } from '../../../src/paths/rewire.mjs'
 
 /**
  * Creates a unique temporary directory for testing. The directory is created in

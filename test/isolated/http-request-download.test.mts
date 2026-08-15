@@ -15,14 +15,14 @@ import { Writable } from 'node:stream'
 
 import { describe, expect, it } from 'vitest'
 
-import { httpDownload } from '../../src/http-request/download'
+import { httpDownload } from '../../src/http-request/download.mjs'
 // oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
-import { Logger } from '../../src/logger/node'
+import { Logger } from '../../src/logger/node.mjs'
 
 import { minTimerQuantum } from '../_shared/fleet/lib/timing.mts'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures'
-import { runWithTempDir } from '../unit/util/temp-file-helper'
+import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
 
 setupHttpFixture()
 

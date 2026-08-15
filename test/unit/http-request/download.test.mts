@@ -21,14 +21,14 @@ import { PassThrough } from 'node:stream'
 
 import { minTimerQuantum } from '../../_shared/fleet/lib/timing.mts'
 
-import type * as HttpRequestModule from '../../../src/http-request/request'
+import type * as HttpRequestModule from '../../../src/http-request/request.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const { mockHttpRequestAttempt } = vi.hoisted(() => ({
   mockHttpRequestAttempt: vi.fn(),
 }))
 
-vi.mock(import('../../../src/http-request/request'), async () => {
+vi.mock(import('../../../src/http-request/request.mjs'), async () => {
   const actual = await vi.importActual<typeof HttpRequestModule>(
     '../../../src/http-request/request',
   )
@@ -68,7 +68,7 @@ function makeFakeResponse(opts: {
 let tmpRoot: string
 
 async function loadFresh() {
-  const mod = await import('../../../src/http-request/download')
+  const mod = await import('../../../src/http-request/download.mjs')
   return { httpDownload: mod.httpDownload }
 }
 

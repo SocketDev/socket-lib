@@ -5,7 +5,7 @@ import {
   stripSurroundingQuotes,
   toKebabCase,
   trimNewlines,
-} from '../../../src/strings/transform'
+} from '../../../src/strings/transform.mjs'
 
 describe('strings/transform — stripBom', () => {
   it('strips BOM from beginning', () => {

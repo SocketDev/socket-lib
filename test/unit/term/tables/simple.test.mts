@@ -1,7 +1,7 @@
 import { stripAnsi as canonicalStripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
 import { describe, expect, it, vi } from 'vitest'
 
-import type { YoctoColors } from '../../../../src/external/yoctocolors-cjs'
+import type { YoctoColors } from '../../../../src/external/yoctocolors-cjs.js'
 
 const colors = vi.hoisted(() => {
   const format = (open: number, close: number) => (value: string) =>
@@ -14,13 +14,13 @@ const colors = vi.hoisted(() => {
   }
 })
 
-vi.mock(import('../../../../src/external/yoctocolors-cjs'), () => ({
+vi.mock(import('../../../../src/external/yoctocolors-cjs.js'), () => ({
   default: colors as unknown as YoctoColors,
 }))
 
-import { stripAnsi } from '../../../../src/term/ansi/strip'
-import { formatTable } from '../../../../src/term/tables/bordered'
-import { formatSimpleTable } from '../../../../src/term/tables/simple'
+import { stripAnsi } from '../../../../src/term/ansi/strip.mjs'
+import { formatTable } from '../../../../src/term/tables/bordered.mjs'
+import { formatSimpleTable } from '../../../../src/term/tables/simple.mjs'
 
 describe('tables/simple — formatSimpleTable', () => {
   it('formats empty data', () => {

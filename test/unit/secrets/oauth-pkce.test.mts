@@ -15,7 +15,7 @@ import {
   buildDiscoveryUrl,
   generatePkcePair,
   parseCallbackRequest,
-} from '../../../src/secrets/oauth-pkce'
+} from '../../../src/secrets/oauth-pkce.mjs'
 
 const BASE64URL_RE = /^[\w-]+$/
 

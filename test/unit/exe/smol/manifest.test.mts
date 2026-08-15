@@ -6,7 +6,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getSmolManifest } from '../../../../src/exe/smol/manifest'
+import { getSmolManifest } from '../../../../src/exe/smol/manifest.mjs'
 
 describe('smol/manifest', () => {
   describe('getSmolManifest', () => {

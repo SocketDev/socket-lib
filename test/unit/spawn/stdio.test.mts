@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { isStdioType } from '../../../src/process/spawn/stdio'
+import { isStdioType } from '../../../src/process/spawn/stdio.mjs'
 
 describe('spawn/stdio — isStdioType', () => {
   describe('single argument mode (validation)', () => {

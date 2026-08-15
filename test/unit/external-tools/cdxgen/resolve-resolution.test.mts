@@ -1,22 +1,26 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/cdxgen/from-vfs'), () => ({
+vi.mock(import('../../../../src/external-tools/cdxgen/from-vfs.mjs'), () => ({
   cdxgenFromVfs: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/cdxgen/from-path'), () => ({
+vi.mock(import('../../../../src/external-tools/cdxgen/from-path.mjs'), () => ({
   cdxgenFromPath: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/cdxgen/from-download'), () => ({
-  cdxgenFromDownload: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/cdxgen/from-download.mjs'),
+  () => ({
+    cdxgenFromDownload: vi.fn(),
+  }),
+)
 
 async function loadFresh() {
-  const vfsMod = await import('../../../../src/external-tools/cdxgen/from-vfs')
+  const vfsMod =
+    await import('../../../../src/external-tools/cdxgen/from-vfs.mjs')
   const pathMod =
-    await import('../../../../src/external-tools/cdxgen/from-path')
+    await import('../../../../src/external-tools/cdxgen/from-path.mjs')
   const dlMod =
-    await import('../../../../src/external-tools/cdxgen/from-download')
-  const mod = await import('../../../../src/external-tools/cdxgen/resolve')
+    await import('../../../../src/external-tools/cdxgen/from-download.mjs')
+  const mod = await import('../../../../src/external-tools/cdxgen/resolve.mjs')
   return {
     fromVfs: vfsMod.cdxgenFromVfs as ReturnType<typeof vi.fn>,
     fromPath: pathMod.cdxgenFromPath as ReturnType<typeof vi.fn>,

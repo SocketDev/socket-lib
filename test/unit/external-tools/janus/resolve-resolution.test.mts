@@ -1,21 +1,26 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/janus/from-vfs'), () => ({
+vi.mock(import('../../../../src/external-tools/janus/from-vfs.mjs'), () => ({
   janusFromVfs: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/janus/from-path'), () => ({
+vi.mock(import('../../../../src/external-tools/janus/from-path.mjs'), () => ({
   janusFromPath: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/janus/from-download'), () => ({
-  janusFromDownload: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/janus/from-download.mjs'),
+  () => ({
+    janusFromDownload: vi.fn(),
+  }),
+)
 
 async function loadFresh() {
-  const vfsMod = await import('../../../../src/external-tools/janus/from-vfs')
-  const pathMod = await import('../../../../src/external-tools/janus/from-path')
+  const vfsMod =
+    await import('../../../../src/external-tools/janus/from-vfs.mjs')
+  const pathMod =
+    await import('../../../../src/external-tools/janus/from-path.mjs')
   const dlMod =
-    await import('../../../../src/external-tools/janus/from-download')
-  const mod = await import('../../../../src/external-tools/janus/resolve')
+    await import('../../../../src/external-tools/janus/from-download.mjs')
+  const mod = await import('../../../../src/external-tools/janus/resolve.mjs')
   return {
     fromVfs: vfsMod.janusFromVfs as ReturnType<typeof vi.fn>,
     fromPath: pathMod.janusFromPath as ReturnType<typeof vi.fn>,

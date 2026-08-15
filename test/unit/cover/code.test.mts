@@ -16,10 +16,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // module instance that src/cover/code.ts imports (which uses
 // relative paths internally). Package-specifier mocks don't survive
 // vitest's threaded-pool dedup gaps.
-vi.mock(import('../../../src/process/spawn/child'))
+vi.mock(import('../../../src/process/spawn/child.mjs'))
 
-import { spawn } from '../../../src/process/spawn/child'
-import { getCodeCoverage } from '../../../src/cover/code'
+import { spawn } from '../../../src/process/spawn/child.mjs'
+import { getCodeCoverage } from '../../../src/cover/code.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpDir: string

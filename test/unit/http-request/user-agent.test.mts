@@ -14,8 +14,8 @@ import {
   chainUserAgents,
   getSocketCallerUserAgent,
   sanitizeUserAgent,
-} from '../../../src/http-request/user-agent'
-import { resetEnv, setEnv } from '../../../src/env/rewire'
+} from '../../../src/http-request/user-agent.mjs'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('http-request/user-agent', () => {

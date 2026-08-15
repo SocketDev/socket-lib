@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import {
   BAZEL_ASSET_MAP,
   getBazelAssetEntry,
-} from '../../../../src/external-tools/bazel/asset-names'
+} from '../../../../src/external-tools/bazel/asset-names.mjs'
 
 describe('external-tools/bazel/asset-names', () => {
   it('covers all 8 socket targets', () => {

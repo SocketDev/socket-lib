@@ -9,8 +9,8 @@
  *     defined in the fleet's `template/styles/tokens.css`.
  */
 
-import { getPalette } from '../../../../src/term/colors/palette/socket'
-import type { SocketPaletteTheme } from '../../../../src/term/colors/palette/socket'
+import { getPalette } from '../../../../src/term/colors/palette/socket.mjs'
+import type { SocketPaletteTheme } from '../../../../src/term/colors/palette/socket.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('colors/palette/socket', () => {

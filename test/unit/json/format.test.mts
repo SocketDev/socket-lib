@@ -12,7 +12,7 @@ import {
   sortKeys,
   stringifyWithFormatting,
   stripFormattingSymbols,
-} from '../../../src/json/format'
+} from '../../../src/json/format.mjs'
 
 describe('formatting', () => {
   describe('detectIndent', () => {

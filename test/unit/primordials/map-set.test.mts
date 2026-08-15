@@ -46,7 +46,7 @@ import {
   WeakSetPrototypeAdd,
   WeakSetPrototypeDelete,
   WeakSetPrototypeHas,
-} from '../../../src/primordials/map-set'
+} from '../../../src/primordials/map-set.mjs'
 
 describe('Map.prototype.getOrInsert primordials', () => {
   it('MapPrototypeGetOrInsert inserts when key is missing', () => {

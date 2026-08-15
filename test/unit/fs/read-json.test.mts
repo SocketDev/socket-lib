@@ -11,9 +11,9 @@ import process from 'node:process'
 
 import { describe, expect, it } from 'vitest'
 
-import { readJson, readJsonSync } from '../../../src/fs/read-json'
+import { readJson, readJsonSync } from '../../../src/fs/read-json.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('readJson', () => {
   it('should read and parse JSON file', async () => {

@@ -7,20 +7,20 @@
 
 import { describe, expect, it } from 'vitest'
 // oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
-import { Logger } from '../../src/logger/node'
+import { Logger } from '../../src/logger/node.mjs'
 import {
   incLogCallCountSymbol,
   lastWasBlankSymbol,
   LOG_SYMBOLS,
-} from '../../src/logger/symbols'
+} from '../../src/logger/symbols.mjs'
 // The aliased LOG_SYMBOLS is used to BUILD the expected value inside the
 // matcher (`expect(actual).toEqual(canonicalLogSymbols)`), so it must come
 // from the published surface rather than local `src/` (the isolated vitest
 // config aliases `@socketsecurity/lib-stable` back to `src`).
 import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/logger/symbols'
-import { setTheme } from '../../src/term/themes/context'
-import { THEMES } from '../../src/term/themes/themes'
-import { setupLoggerHarness } from './logger-fixtures'
+import { setTheme } from '../../src/term/themes/context.mjs'
+import { THEMES } from '../../src/term/themes/themes.mjs'
+import { setupLoggerHarness } from './logger-fixtures.mjs'
 
 /**
  * Logger exposes two internal hooks as symbol-keyed methods. The tests reach

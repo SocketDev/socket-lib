@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { envAsNumber } from '../../../src/env/number'
+import { envAsNumber } from '../../../src/env/number.mjs'
 
 describe.sequential('env/number — envAsNumber (default int mode)', () => {
   test('parses an integer string', () => {

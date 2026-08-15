@@ -4,7 +4,7 @@ import {
   isModelUnavailable,
   isOverloaded,
   isQuotaExhausted,
-} from '../../../src/ai/failures'
+} from '../../../src/ai/failures.mjs'
 
 describe.sequential('isOverloaded', () => {
   test('detects "API Error: 529" in stdout', () => {

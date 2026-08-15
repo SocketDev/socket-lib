@@ -1,19 +1,23 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import { makeHash } from '../../../../src/crypto/integrity'
+import { makeHash } from '../../../../src/crypto/integrity.mjs'
 
-vi.mock(import('../../../../src/external-tools/bazel/from-path'), () => ({
+vi.mock(import('../../../../src/external-tools/bazel/from-path.mjs'), () => ({
   bazelFromPath: vi.fn(),
 }))
-vi.mock(import('../../../../src/external-tools/bazel/from-download'), () => ({
-  bazelFromDownload: vi.fn(),
-}))
+vi.mock(
+  import('../../../../src/external-tools/bazel/from-download.mjs'),
+  () => ({
+    bazelFromDownload: vi.fn(),
+  }),
+)
 
 async function loadFresh() {
-  const pathMod = await import('../../../../src/external-tools/bazel/from-path')
+  const pathMod =
+    await import('../../../../src/external-tools/bazel/from-path.mjs')
   const dlMod =
-    await import('../../../../src/external-tools/bazel/from-download')
-  const mod = await import('../../../../src/external-tools/bazel/resolve')
+    await import('../../../../src/external-tools/bazel/from-download.mjs')
+  const mod = await import('../../../../src/external-tools/bazel/resolve.mjs')
   return {
     fromPath: pathMod.bazelFromPath as ReturnType<typeof vi.fn>,
     fromDownload: dlMod.bazelFromDownload as ReturnType<typeof vi.fn>,

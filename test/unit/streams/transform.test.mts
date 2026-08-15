@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { transform } from '../../../src/streams/transform'
+import { transform } from '../../../src/streams/transform.mjs'
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 
 async function* asyncIterable<T>(items: T[]): AsyncIterable<T> {

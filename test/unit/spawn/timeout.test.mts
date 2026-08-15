@@ -13,7 +13,7 @@ import {
   getWin32SpawnTimeoutMultiplier,
   resolveSpawnTimeout,
   spawnTimeoutMs,
-} from '../../../src/process/spawn/timeout'
+} from '../../../src/process/spawn/timeout.mjs'
 
 const ORIGINAL_PLATFORM = process.platform
 

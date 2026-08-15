@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 
-import { enrichErrorMessage } from '../../../src/http-request/errors'
+import { enrichErrorMessage } from '../../../src/http-request/errors.mjs'
 
 function makeErr(code: string): NodeJS.ErrnoException {
   const e = new Error(`fake ${code}`) as NodeJS.ErrnoException

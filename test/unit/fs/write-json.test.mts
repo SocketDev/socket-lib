@@ -9,9 +9,9 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { writeJson, writeJsonSync } from '../../../src/fs/write-json'
+import { writeJson, writeJsonSync } from '../../../src/fs/write-json.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 describe('writeJson', () => {
   it('should write JSON to file', async () => {

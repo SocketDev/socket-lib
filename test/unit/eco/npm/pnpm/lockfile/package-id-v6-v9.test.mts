@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parsePnpmPackageIdV6V9 } from '../../../../../../src/eco/npm/pnpm/lockfile/package-id-v6-v9'
+import { parsePnpmPackageIdV6V9 } from '../../../../../../src/eco/npm/pnpm/lockfile/package-id-v6-v9.mjs'
 
 describe('eco/npm/pnpm/lockfile/package-id-v6-v9', () => {
   it('parses an unscoped name@version', () => {

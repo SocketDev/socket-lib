@@ -8,7 +8,7 @@ import { UNKNOWN_ERROR as canonicalUnknownError } from '@socketsecurity/lib-stab
 
 import { describe, expect, it } from 'vitest'
 
-import { errorMessage, UNKNOWN_ERROR } from '../../../src/errors/message'
+import { errorMessage, UNKNOWN_ERROR } from '../../../src/errors/message.mjs'
 
 describe('errorMessage', () => {
   it('returns the message of an Error', () => {

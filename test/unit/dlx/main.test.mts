@@ -19,27 +19,27 @@ import path from 'node:path'
 import process from 'node:process'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { generateCacheKey } from '../../../src/dlx/cache'
+import { generateCacheKey } from '../../../src/dlx/cache.mjs'
 import {
   clearDlx,
   clearDlxSync,
   dlxDirExists,
   ensureDlxDir,
   ensureDlxDirSync,
-} from '../../../src/dlx/dir'
+} from '../../../src/dlx/dir.mjs'
 import {
   isDlxPackageInstalled,
   listDlxPackages,
   listDlxPackagesAsync,
   removeDlxPackage,
   removeDlxPackageSync,
-} from '../../../src/dlx/packages'
+} from '../../../src/dlx/packages.mjs'
 import {
   getDlxInstalledPackageDir,
   getDlxPackageDir,
-} from '../../../src/dlx/paths'
-import { safeDelete, safeDeleteSync } from '../../../src/fs/safe'
-import { getSocketDlxDir } from '../../../src/paths/socket'
+} from '../../../src/dlx/paths.mjs'
+import { safeDelete, safeDeleteSync } from '../../../src/fs/safe.mjs'
+import { getSocketDlxDir } from '../../../src/paths/socket.mjs'
 
 describe.sequential('dlx', () => {
   const testPackageName = 'test-package'

@@ -5,7 +5,7 @@
  *   under the per-file line cap; conversion and lookup helpers live there.
  */
 
-import { createEnvProxy } from '../../src/env/proxy'
+import { createEnvProxy } from '../../src/env/proxy.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('createEnvProxy', () => {

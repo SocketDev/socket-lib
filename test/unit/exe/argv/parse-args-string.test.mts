@@ -4,7 +4,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parseArgsString } from '../../../../src/exe/argv/parse-args-string'
+import { parseArgsString } from '../../../../src/exe/argv/parse-args-string.mjs'
 
 describe.sequential('argv/parse-args-string', () => {
   it('tokenizes a bare command', () => {

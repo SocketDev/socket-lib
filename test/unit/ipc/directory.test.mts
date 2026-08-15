@@ -3,7 +3,7 @@ import os from 'node:os'
 import path from 'node:path'
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
-import { ensureIpcDirectory } from '../../../src/ipc/directory'
+import { ensureIpcDirectory } from '../../../src/ipc/directory.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 const IS_WIN = os.platform() === 'win32'

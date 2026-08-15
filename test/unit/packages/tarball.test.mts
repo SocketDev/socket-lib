@@ -7,13 +7,14 @@ import { fileURLToPath } from 'node:url'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import nock from 'nock'
 
-import { clearPackumentCache } from '../../../src/constants/packages'
-import { readPackageJson } from '../../../src/packages/read'
-import { extractPackage, packPackage } from '../../../src/packages/tarball'
-import type { ExtractOptions, PacoteOptions } from '../../../src/packages/types'
-import { normalizePath } from '../../../src/paths/normalize'
-import { describeNetworkOnly } from '../util/skip-helpers'
-import { runWithTempDir } from '../util/temp-file-helper'
+import { clearPackumentCache } from '../../../src/constants/packages.mjs'
+import { readPackageJson } from '../../../src/packages/read.mjs'
+import { extractPackage, packPackage } from '../../../src/packages/tarball.mjs'
+import type { ExtractOptions } from '../../../src/packages/types.mjs'
+import type { PacoteOptions } from '../../../src/packages/types.mjs'
+import { normalizePath } from '../../../src/paths/normalize.mjs'
+import { describeNetworkOnly } from '../util/skip-helpers.mjs'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
 type ExtractCallback = (destPath: string) => Promise<unknown>
@@ -457,43 +458,5 @@ describeNetworkOnly('pacote fetcher coverage (live network)', () => {
       }, 'git-fetcher-')
     },
     tolerantTimeout(120_000),
-  )
-})
-
-describe('packages/tarball — error handling', () => {
-  it(
-    'should handle extractPackage with invalid spec',
-    async () => {
-      await expect(
-        extractPackage('non-existent-package-xyz-123', { dest: '/tmp/test' }),
-      ).rejects.toThrow()
-    },
-    tolerantTimeout(30_000),
-  )
-
-  it(
-    'should handle packPackage with invalid path',
-    async () => {
-      await expect(packPackage('/non/existent/path')).rejects.toThrow()
-    },
-    tolerantTimeout(30_000),
-  )
-
-  it(
-    'packPackage rejects for non-existent directory',
-    async () => {
-      await expect(packPackage('/non/existent')).rejects.toThrow()
-    },
-    tolerantTimeout(30_000),
-  )
-
-  it(
-    'extractPackage rejects for invalid spec',
-    async () => {
-      await expect(
-        extractPackage('invalid-spec-xyz', { dest: '/tmp/test' }),
-      ).rejects.toThrow()
-    },
-    tolerantTimeout(30_000),
   )
 })

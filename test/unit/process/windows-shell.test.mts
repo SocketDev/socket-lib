@@ -15,7 +15,7 @@ import {
   WINDOWS_DIRECT_EXEC_EXTENSIONS,
   WINDOWS_SHELL_SCRIPT_EXTENSIONS,
   windowsShellOption,
-} from '../../../src/process/spawn/windows-shell'
+} from '../../../src/process/spawn/windows-shell.mjs'
 
 const WIN = { platform: 'win32' as NodeJS.Platform }
 

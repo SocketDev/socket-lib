@@ -4,7 +4,7 @@ import {
   getTrivyAssetEntry,
   getTrivyDownloadUrl,
   TRIVY_ASSET_MAP,
-} from '../../../../src/external-tools/trivy/asset-names'
+} from '../../../../src/external-tools/trivy/asset-names.mjs'
 
 describe('external-tools/trivy/asset-names', () => {
   test('covers darwin/linux/win-x64', () => {

@@ -1,13 +1,19 @@
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-vi.mock(import('../../../../src/external-tools/trufflehog/from-vfs'), () => ({
-  trufflehogFromVfs: vi.fn(),
-}))
-vi.mock(import('../../../../src/external-tools/trufflehog/from-path'), () => ({
-  trufflehogFromPath: vi.fn(),
-}))
 vi.mock(
-  import('../../../../src/external-tools/trufflehog/from-download'),
+  import('../../../../src/external-tools/trufflehog/from-vfs.mjs'),
+  () => ({
+    trufflehogFromVfs: vi.fn(),
+  }),
+)
+vi.mock(
+  import('../../../../src/external-tools/trufflehog/from-path.mjs'),
+  () => ({
+    trufflehogFromPath: vi.fn(),
+  }),
+)
+vi.mock(
+  import('../../../../src/external-tools/trufflehog/from-download.mjs'),
   () => ({
     trufflehogFromDownload: vi.fn(),
   }),
@@ -15,12 +21,13 @@ vi.mock(
 
 async function loadFresh() {
   const vfsMod =
-    await import('../../../../src/external-tools/trufflehog/from-vfs')
+    await import('../../../../src/external-tools/trufflehog/from-vfs.mjs')
   const pathMod =
-    await import('../../../../src/external-tools/trufflehog/from-path')
+    await import('../../../../src/external-tools/trufflehog/from-path.mjs')
   const dlMod =
-    await import('../../../../src/external-tools/trufflehog/from-download')
-  const mod = await import('../../../../src/external-tools/trufflehog/resolve')
+    await import('../../../../src/external-tools/trufflehog/from-download.mjs')
+  const mod =
+    await import('../../../../src/external-tools/trufflehog/resolve.mjs')
   return {
     fromVfs: vfsMod.trufflehogFromVfs as ReturnType<typeof vi.fn>,
     fromPath: pathMod.trufflehogFromPath as ReturnType<typeof vi.fn>,

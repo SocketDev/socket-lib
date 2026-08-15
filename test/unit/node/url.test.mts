@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getNodeUrl as getNodeUrlStable } from '@socketsecurity/lib-stable/node/url'
 
-import { getNodeUrl } from '../../../src/node/url'
+import { getNodeUrl } from '../../../src/node/url.mjs'
 
 describe('node/url', () => {
   it('returns the node:url module', () => {

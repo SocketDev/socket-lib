@@ -17,9 +17,9 @@ import {
   isTracked,
   isUntrackedNonSubmodulePath,
   pathIsUnderSubmodule,
-} from '../../../src/git/tracked'
-import { spawnSync } from '../../../src/process/spawn/child'
-import { runWithTempDir } from '../util/temp-file-helper'
+} from '../../../src/git/tracked.mjs'
+import { spawnSync } from '../../../src/process/spawn/child.mjs'
+import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 function initRepo(dir: string): void {
   spawnSync('git', ['init'], { cwd: dir })

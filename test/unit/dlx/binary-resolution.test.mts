@@ -7,7 +7,7 @@ import {
   findBinaryPath,
   makePackageBinsExecutable,
   resolveBinaryPath,
-} from '../../../src/dlx/binary-resolution'
+} from '../../../src/dlx/binary-resolution.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpRoot: string

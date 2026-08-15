@@ -11,7 +11,7 @@
  *     rate-limited parallel operations (API calls, file I/O).
  */
 
-import { PromiseQueue } from '../../src/promises/queue'
+import { PromiseQueue } from '../../src/promises/queue.mjs'
 import { describe, expect, it } from 'vitest'
 
 // Helper to create a delayed promise

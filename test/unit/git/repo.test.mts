@@ -11,9 +11,9 @@ import path from 'node:path'
 
 import { afterAll, describe, expect, it } from 'vitest'
 
-import { readRealPath } from '../../../src/fs/inspect'
-import { safeDelete } from '../../../src/fs/safe'
-import { findOutermostGitRoot } from '../../../src/git/repo'
+import { readRealPath } from '../../../src/fs/inspect.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
+import { findOutermostGitRoot } from '../../../src/git/repo.mjs'
 
 const tempRoots: string[] = []
 

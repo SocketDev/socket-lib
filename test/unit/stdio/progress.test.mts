@@ -10,9 +10,9 @@ import { describe, expect, it, vi } from 'vitest'
 import {
   createProgressIndicator,
   ProgressBar,
-} from '../../../src/stdio/progress'
+} from '../../../src/stdio/progress.mjs'
 
-import type { ProgressBarOptions } from '../../../src/stdio/progress'
+import type { ProgressBarOptions } from '../../../src/stdio/progress.mjs'
 
 export type MockStream = NodeJS.WriteStream & {
   // Exposed for assertions.

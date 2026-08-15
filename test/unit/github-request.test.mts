@@ -9,9 +9,9 @@
  *     helpers live in github.test.mts and github-ghsa-url.test.mts.
  */
 
-import { fetchGitHub } from '../../src/github/request'
-import { clearRefCache, resolveRefToSha } from '../../src/github/refs'
-import { resetEnv, setEnv } from '../../src/env/rewire'
+import { fetchGitHub } from '../../src/github/request.mjs'
+import { clearRefCache, resolveRefToSha } from '../../src/github/refs.mjs'
+import { resetEnv, setEnv } from '../../src/env/rewire.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import nock from 'nock'
 

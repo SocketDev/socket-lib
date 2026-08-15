@@ -14,25 +14,25 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { fetchChecksumFile } from '../../src/http-request/checksum-file'
+import { fetchChecksumFile } from '../../src/http-request/checksum-file.mjs'
 // oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
-import { httpJson, httpText } from '../../src/http-request/node'
-import { httpDownload } from '../../src/http-request/download'
-import { httpRequest } from '../../src/http-request/request'
+import { httpJson, httpText } from '../../src/http-request/node.mjs'
+import { httpDownload } from '../../src/http-request/download.mjs'
+import { httpRequest } from '../../src/http-request/request.mjs'
 
 // Import from the local src under test, NOT @socketsecurity/lib-stable —
 // see test/isolated/http-request-core.test.mts for the version-mismatch
 // rationale.
 // oxlint-disable-next-line socket/no-src-import-in-test-expect -- self-consistency check against the local httpRequest's own UA; -stable would mismatch the local SOCKET_LIB_VERSION.
-import { getSocketCallerUserAgent } from '../../src/http-request/user-agent'
+import { getSocketCallerUserAgent } from '../../src/http-request/user-agent.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures'
-import { runWithTempDir } from '../unit/util/temp-file-helper'
+import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
 
 import type {
   HttpHookRequestInfo,
   HttpHookResponseInfo,
-} from '../../src/http-request/request-types'
+} from '../../src/http-request/request-types.mjs'
 
 setupHttpFixture()
 

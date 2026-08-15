@@ -5,10 +5,10 @@ import {
   handleOne,
   readExact,
   writeMessage,
-} from '../../../src/native-messaging/host'
-import { readSocketApiToken } from '../../../src/secrets/socket-api-token'
+} from '../../../src/native-messaging/host.mjs'
+import { readSocketApiToken } from '../../../src/secrets/socket-api-token.mjs'
 
-vi.mock(import('../../../src/secrets/socket-api-token'), () => ({
+vi.mock(import('../../../src/secrets/socket-api-token.mjs'), () => ({
   readSocketApiToken: vi.fn(),
 }))
 

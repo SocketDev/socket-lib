@@ -15,8 +15,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 import {
   detectActiveNodeManager,
   nodeManagerUpgradeHint,
-} from '../../../src/env/node-version-managers'
-import { resetEnv, setEnv } from '../../../src/env/rewire'
+} from '../../../src/env/node-version-managers.mjs'
+import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 
 // Mask the host machine's manager env vars to undefined. clearEnv only
 // drops the override layer, which means tests inherit whatever NVM_DIR /

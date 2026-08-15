@@ -22,11 +22,11 @@ import { describe, expect, it } from 'vitest'
 // self-consistency check — the header is built by the local httpRequest, so the
 // expected value must come from the SAME local module, not the -stable snapshot.
 // oxlint-disable-next-line socket/no-src-import-in-test-expect -- self-consistency check against the local httpRequest's own UA; -stable would mismatch the local SOCKET_LIB_VERSION.
-import { getSocketCallerUserAgent } from '../../src/http-request/user-agent'
+import { getSocketCallerUserAgent } from '../../src/http-request/user-agent.mjs'
 
-import { httpRequest } from '../../src/http-request/request'
+import { httpRequest } from '../../src/http-request/request.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures'
+import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
 
 setupHttpFixture()
 

@@ -8,7 +8,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { parseResponseBody } from '../../../src/releases/github-listing'
+import { parseResponseBody } from '../../../src/releases/github-listing.mjs'
 
 describe('parseResponseBody', () => {
   it('parses a JSON string', () => {

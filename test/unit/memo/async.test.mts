@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vitest'
 
-import { memoizeAsync } from '../../../src/memo/async'
+import { memoizeAsync } from '../../../src/memo/async.mjs'
 
 describe('memo/async — memoizeAsync', () => {
   it('dedupes concurrent first-time callers (cold dedup)', async () => {

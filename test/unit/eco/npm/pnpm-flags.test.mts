@@ -18,7 +18,7 @@ import {
   isPnpmIgnoreScriptsFlag,
   isPnpmInstallCommand,
   isPnpmLoglevelFlag,
-} from '../../../../src/eco/npm/pnpm/flags'
+} from '../../../../src/eco/npm/pnpm/flags.mjs'
 
 describe('pnpm flag detection', () => {
   describe('isPnpmIgnoreScriptsFlag', () => {

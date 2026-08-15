@@ -14,9 +14,9 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { parseProvenancePredicate } from '../../../src/npm/registry'
+import { parseProvenancePredicate } from '../../../src/npm/registry.mjs'
 
-import type { AttestationBundle } from '../../../src/npm/registry'
+import type { AttestationBundle } from '../../../src/npm/registry.mjs'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
 const fixturesDir = path.resolve(testDir, '../../fixtures/npm')

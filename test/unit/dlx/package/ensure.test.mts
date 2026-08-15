@@ -20,8 +20,8 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { ensurePackageInstalled } from '../../../../src/dlx/package'
-import { setPath } from '../../../../src/paths/rewire'
+import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
+import { setPath } from '../../../../src/paths/rewire.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // `tmpDir` and `process.env['SOCKET_DLX_DIR']` are mutated at describe
