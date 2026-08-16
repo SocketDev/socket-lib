@@ -232,10 +232,20 @@
       "types": "./dist/ai/json.d.ts",
       "default": "./dist/ai/json.js"
     },
+    "./ai/majority": {
+      "source": "./src/ai/majority.mts",
+      "types": "./dist/ai/majority.d.ts",
+      "default": "./dist/ai/majority.js"
+    },
     "./ai/profiles": {
       "source": "./src/ai/profiles.mts",
       "types": "./dist/ai/profiles.d.ts",
       "default": "./dist/ai/profiles.js"
+    },
+    "./ai/reliability": {
+      "source": "./src/ai/reliability.mts",
+      "types": "./dist/ai/reliability.d.ts",
+      "default": "./dist/ai/reliability.js"
     },
     "./ai/role": {
       "source": "./src/ai/role.mts",
@@ -251,6 +261,16 @@
       "source": "./src/ai/route-heuristic.mts",
       "types": "./dist/ai/route-heuristic.d.ts",
       "default": "./dist/ai/route-heuristic.js"
+    },
+    "./ai/routing": {
+      "source": "./src/ai/routing.mts",
+      "types": "./dist/ai/routing.d.ts",
+      "default": "./dist/ai/routing.js"
+    },
+    "./ai/simulator": {
+      "source": "./src/ai/simulator.mts",
+      "types": "./dist/ai/simulator.d.ts",
+      "default": "./dist/ai/simulator.js"
     },
     "./ai/spawn": {
       "source": "./src/ai/spawn.mts",
@@ -2438,6 +2458,11 @@
       "types": "./dist/oci/types.d.ts",
       "default": "./dist/oci/types.js"
     },
+    "./packages/advisory": {
+      "source": "./src/packages/advisory.mts",
+      "types": "./dist/packages/advisory.d.ts",
+      "default": "./dist/packages/advisory.js"
+    },
     "./packages/edit": {
       "source": "./src/packages/edit.mts",
       "types": "./dist/packages/edit.d.ts",
@@ -2473,6 +2498,11 @@
       "types": "./dist/packages/licenses.d.ts",
       "default": "./dist/packages/licenses.js"
     },
+    "./packages/lockfile-redundancy": {
+      "source": "./src/packages/lockfile-redundancy.mts",
+      "types": "./dist/packages/lockfile-redundancy.d.ts",
+      "default": "./dist/packages/lockfile-redundancy.js"
+    },
     "./packages/manifest": {
       "source": "./src/packages/manifest.mts",
       "types": "./dist/packages/manifest.d.ts",
@@ -2497,6 +2527,11 @@
       "source": "./src/packages/read.mts",
       "types": "./dist/packages/read.d.ts",
       "default": "./dist/packages/read.js"
+    },
+    "./packages/sbom-anomalies": {
+      "source": "./src/packages/sbom-anomalies.mts",
+      "types": "./dist/packages/sbom-anomalies.d.ts",
+      "default": "./dist/packages/sbom-anomalies.js"
     },
     "./packages/specs": {
       "source": "./src/packages/specs.mts",
@@ -2807,6 +2842,11 @@
       "source": "./src/promises/backoff.mts",
       "types": "./dist/promises/backoff.d.ts",
       "default": "./dist/promises/backoff.js"
+    },
+    "./promises/debounce": {
+      "source": "./src/promises/debounce.mts",
+      "types": "./dist/promises/debounce.d.ts",
+      "default": "./dist/promises/debounce.js"
     },
     "./promises/iterate": {
       "source": "./src/promises/iterate.mts",
@@ -3446,47 +3486,7 @@
     },
     "./data/extensions.json": "./data/extensions.json",
     "./package.json": "./package.json",
-    "./llms.txt": "./llms.txt",
-    "./ai/majority": {
-      "source": "./src/ai/majority.mts",
-      "types": "./dist/ai/majority.d.ts",
-      "default": "./dist/ai/majority.js"
-    },
-    "./ai/reliability": {
-      "source": "./src/ai/reliability.mts",
-      "types": "./dist/ai/reliability.d.ts",
-      "default": "./dist/ai/reliability.js"
-    },
-    "./ai/routing": {
-      "source": "./src/ai/routing.mts",
-      "types": "./dist/ai/routing.d.ts",
-      "default": "./dist/ai/routing.js"
-    },
-    "./ai/simulator": {
-      "source": "./src/ai/simulator.mts",
-      "types": "./dist/ai/simulator.d.ts",
-      "default": "./dist/ai/simulator.js"
-    },
-    "./packages/advisory": {
-      "source": "./src/packages/advisory.mts",
-      "types": "./dist/packages/advisory.d.ts",
-      "default": "./dist/packages/advisory.js"
-    },
-    "./packages/lockfile-redundancy": {
-      "source": "./src/packages/lockfile-redundancy.mts",
-      "types": "./dist/packages/lockfile-redundancy.d.ts",
-      "default": "./dist/packages/lockfile-redundancy.js"
-    },
-    "./packages/sbom-anomalies": {
-      "source": "./src/packages/sbom-anomalies.mts",
-      "types": "./dist/packages/sbom-anomalies.d.ts",
-      "default": "./dist/packages/sbom-anomalies.js"
-    },
-    "./promises/debounce": {
-      "source": "./src/promises/debounce.mts",
-      "types": "./dist/promises/debounce.d.ts",
-      "default": "./dist/promises/debounce.js"
-    }
+    "./llms.txt": "./llms.txt"
   },
   "publishConfig": {
     "access": "public",
