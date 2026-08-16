@@ -3446,7 +3446,47 @@
     },
     "./data/extensions.json": "./data/extensions.json",
     "./package.json": "./package.json",
-    "./llms.txt": "./llms.txt"
+    "./llms.txt": "./llms.txt",
+    "./ai/majority": {
+      "source": "./src/ai/majority.mts",
+      "types": "./dist/ai/majority.d.ts",
+      "default": "./dist/ai/majority.js"
+    },
+    "./ai/reliability": {
+      "source": "./src/ai/reliability.mts",
+      "types": "./dist/ai/reliability.d.ts",
+      "default": "./dist/ai/reliability.js"
+    },
+    "./ai/routing": {
+      "source": "./src/ai/routing.mts",
+      "types": "./dist/ai/routing.d.ts",
+      "default": "./dist/ai/routing.js"
+    },
+    "./ai/simulator": {
+      "source": "./src/ai/simulator.mts",
+      "types": "./dist/ai/simulator.d.ts",
+      "default": "./dist/ai/simulator.js"
+    },
+    "./packages/advisory": {
+      "source": "./src/packages/advisory.mts",
+      "types": "./dist/packages/advisory.d.ts",
+      "default": "./dist/packages/advisory.js"
+    },
+    "./packages/lockfile-redundancy": {
+      "source": "./src/packages/lockfile-redundancy.mts",
+      "types": "./dist/packages/lockfile-redundancy.d.ts",
+      "default": "./dist/packages/lockfile-redundancy.js"
+    },
+    "./packages/sbom-anomalies": {
+      "source": "./src/packages/sbom-anomalies.mts",
+      "types": "./dist/packages/sbom-anomalies.d.ts",
+      "default": "./dist/packages/sbom-anomalies.js"
+    },
+    "./promises/debounce": {
+      "source": "./src/promises/debounce.mts",
+      "types": "./dist/promises/debounce.d.ts",
+      "default": "./dist/promises/debounce.js"
+    }
   },
   "publishConfig": {
     "access": "public",
