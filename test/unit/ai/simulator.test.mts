@@ -5,8 +5,6 @@ import {
   LanguageModelSimulator,
 } from '../../../src/ai/simulator.mts'
 
-import type { Message } from '../../../src/ai/simulator.mts'
-
 describe('LanguageModelSimulator', () => {
   it('reports available', async () => {
     const sim = new LanguageModelSimulator()
@@ -73,7 +71,7 @@ describe('installLanguageModelSimulator', () => {
   })
 
   it('returns the simulator instance', () => {
-    const sim = installLanguageModelSimulator({})
+    const sim = installLanguageModelSimulator({} as typeof globalThis)
     expect(sim).toBeInstanceOf(LanguageModelSimulator)
   })
 })

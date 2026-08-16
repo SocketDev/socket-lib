@@ -35,7 +35,7 @@ describe('majorityResult', () => {
   })
 
   it('returns the last result when results is empty', () => {
-    const winner = majorityResult([], d => d)
+    const winner = majorityResult<string>([], d => d)
     expect(winner.ok).toBe(false)
     expect(winner.error).toBe('no samples')
   })

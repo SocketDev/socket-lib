@@ -2,8 +2,6 @@ import { describe, expect, it } from 'vitest'
 
 import { generateVerified } from '../../../src/ai/reliability.mts'
 
-import type { TaskResult } from '../../../src/ai/majority.mts'
-
 describe('generateVerified', () => {
   it('returns the first result that passes verify', async () => {
     let calls = 0
