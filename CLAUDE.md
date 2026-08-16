@@ -47,6 +47,7 @@
 - 🚨 Finish a change, then commit it; never end a turn with a dirty worktree. [`worktree-hygiene`](docs/agents.md/fleet/worktree-hygiene.md)
 - 🚨 Smallest chunks, land ASAP; never checkout/switch mid-queue; a local fast-forward isn't landed until pushed. [`worktree-hygiene`](docs/agents.md/fleet/worktree-hygiene.md) <!--advisory-->
 - 🚨 Land often; `auto-land-on-stop` groups this session's own-work into signed commits on local main at turn-end. [`parallel-claude-sessions`](docs/agents.md/fleet/parallel-claude-sessions.md)
+- 🚨 Before deleting a branch as redundant, verify its content is contained in the kept branch - a squash can silently drop work; stale worktrees and merged branches pile up, so the sweep nudge makes cleanup a decision. (`.claude/hooks/fleet/branch-worktree-sweep-nudge/`) [`worktree-hygiene`](docs/agents.md/fleet/worktree-hygiene.md)
 - 🚨 Never use a push or CI as the error-discovery loop: `pnpm run preflight` runs every gate stage locally in ONE pass, and a `template/` edit is unverifiable until it cascades. (`scripts/fleet/preflight.mts`) [`preflight-before-the-gate`](docs/agents.md/fleet/preflight-before-the-gate.md)
 - 🚨 Never name leftover work and drop it: fix it, or leave an explicit `Follow-up:` / `- [ ]` handle - the next session is almost always this one. (`.claude/hooks/fleet/deferred-residue-guard/`) [`no-deferred-residue`](docs/agents.md/fleet/no-deferred-residue.md)
 - 🚨 Push to origin main only behind the full pre-push gate, then monitor CI to green. [`push-policy`](docs/agents.md/fleet/push-policy.md)

@@ -42,7 +42,7 @@ catalog:
   # shadscan — shadcn UI audit CLI for the design skills (missing UI
   # fundamentals report). Exact-pinned; the whole package is younger than
   # the soak window, so it carries a minimumReleaseAgeExclude entry below.
-  '@shadscan/cli': 0.10.0
+  '@shadscan/cli': 0.11.0
   '@sinclair/typebox': 0.34.52
   'ecc-agentshield': 1.4.0
   # typebox 1.x — the unscoped rewrite of @sinclair/typebox. Both names are
@@ -69,7 +69,7 @@ catalog:
   '@socketsecurity/sdk': 4.1.4
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.1.4'
   '@types/mdast': 4.0.4
-  '@types/node': 26.1.2
+  '@types/node': 26.2.0
   '@types/semver': 7.8.0
   '@types/shell-quote': 1.7.5
   'compromise': 14.16.0
