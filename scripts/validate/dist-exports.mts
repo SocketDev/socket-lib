@@ -89,14 +89,17 @@ export function checkExport(filePath: string) {
 /**
  * Get all .js files in a directory recursively.
  */
-export function getJsFiles(dir: string, files: string[] = []): string[] {
+export function getJsFiles(
+  dir: string,
+  { files = [] }: { files?: string[] | undefined } = {},
+): string[] {
   const entries = readdirSync(dir, { withFileTypes: true })
 
   for (const entry of entries) {
     const fullPath = path.join(dir, entry.name)
 
     if (entry.isDirectory()) {
-      getJsFiles(fullPath, files)
+      getJsFiles(fullPath, { files })
     } else if (entry.isFile() && entry.name.endsWith('.js')) {
       files.push(fullPath)
     }

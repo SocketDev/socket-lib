@@ -142,7 +142,7 @@ export function checkTypeDefinition(filePath) {
  */
 export function getDtsFilesRecursive(
   dir: string,
-  files: string[] = [],
+  { files = [] }: { files?: string[] | undefined } = {},
 ): string[] {
   try {
     const entries = readdirSync(dir, { withFileTypes: true })
@@ -153,7 +153,7 @@ export function getDtsFilesRecursive(
       if (entry.isFile() && entry.name.endsWith('.d.ts')) {
         files.push(fullPath)
       } else if (entry.isDirectory()) {
-        getDtsFilesRecursive(fullPath, files)
+        getDtsFilesRecursive(fullPath, { files })
       }
     }
   } catch {

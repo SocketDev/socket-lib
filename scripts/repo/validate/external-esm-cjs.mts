@@ -42,7 +42,7 @@ const logger = getDefaultLogger()
 /**
  * Get all .js files recursively in a directory.
  */
-export function getJsFilesRecursive(dir, files = []) {
+export function getJsFilesRecursive(dir, { files = [] } = {}) {
   try {
     const entries = readdirSync(dir, { withFileTypes: true })
 
@@ -53,7 +53,7 @@ export function getJsFilesRecursive(dir, files = []) {
         files.push(fullPath)
       } else if (entry.isDirectory()) {
         // Recursively scan all subdirectories
-        getJsFilesRecursive(fullPath, files)
+        getJsFilesRecursive(fullPath, { files })
       }
     }
   } catch {

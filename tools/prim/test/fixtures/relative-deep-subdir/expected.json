@@ -1,7 +1,7 @@
 {
   "ok": true,
   "files": {
-    "src/sub/dir/consumer.ts": {
+    "src/sub/dir/consumer.mts": {
       "rewrites": 1,
       "importAdded": true,
       "contentIncludes": [

@@ -16,7 +16,7 @@ const logger = getDefaultLogger()
 export async function copyLocalFiles(
   srcDir: string,
   destDir: string,
-  quiet: boolean = false,
+  { quiet = false }: { quiet?: boolean | undefined } = {},
 ): Promise<number> {
   const files = await fs.readdir(srcDir)
   let count = 0
@@ -45,8 +45,10 @@ export async function copyLocalFiles(
 export async function copyRecursive(
   srcPath: string,
   destPath: string,
-  relativePath: string = '',
-  quiet: boolean = false,
+  {
+    relativePath = '',
+    quiet = false,
+  }: { relativePath?: string | undefined; quiet?: boolean | undefined } = {},
 ): Promise<number> {
   await ensureDir(destPath)
   const entries = await fs.readdir(srcPath, { withFileTypes: true })
@@ -59,7 +61,10 @@ export async function copyRecursive(
 
     if (entry.isDirectory()) {
       // Recursively copy directory
-      count += await copyRecursive(srcEntry, destEntry, relPath, quiet)
+      count += await copyRecursive(srcEntry, destEntry, {
+        relativePath: relPath,
+        quiet,
+      })
     } else if (!existsSync(destEntry)) {
       // File doesn't exist because it wasn't bundled, so copy it.
       await fs.copyFile(srcEntry, destEntry)
@@ -80,7 +85,7 @@ export async function copyScopedFiles(
   srcDir: string,
   destDir: string,
   scopedPackages: Array<{ scope: string }>,
-  quiet: boolean = false,
+  { quiet = false }: { quiet?: boolean | undefined } = {},
 ): Promise<number> {
   let count = 0
 
@@ -89,7 +94,10 @@ export async function copyScopedFiles(
     const scopeDistDir = path.join(destDir, scope)
 
     try {
-      count += await copyRecursive(scopeSrcDir, scopeDistDir, scope, quiet)
+      count += await copyRecursive(scopeSrcDir, scopeDistDir, {
+        relativePath: scope,
+        quiet,
+      })
     } catch {
       // Scope directory doesn't exist.
     }

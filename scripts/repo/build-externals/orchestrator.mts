@@ -68,11 +68,9 @@ export async function buildExternals(options = {}) {
   // bundled .js so public re-exports of an external's type surface resolve for
   // consumers — an inlined devDependency has no downstream types otherwise. Runs
   // last so the .js-only transform passes above never parse a .d.ts.
-  await copyLocalFiles(
-    path.join(rootDir, 'src', 'external'),
-    distExternalDir,
-    quiet || !showDetails,
-  )
+  await copyLocalFiles(path.join(rootDir, 'src', 'external'), distExternalDir, {
+    quiet: quiet || !showDetails,
+  })
 
   return { bundledCount, totalSize }
 }

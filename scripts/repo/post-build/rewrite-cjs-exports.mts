@@ -24,7 +24,7 @@ export async function fixConstantExports() {
   const quiet = isQuiet()
 
   try {
-    const fixedCount = await processDirectory(distDir, verbose)
+    const fixedCount = await processDirectory(distDir, { verbose })
 
     if (!quiet) {
       const title =
@@ -45,7 +45,7 @@ export async function fixConstantExports() {
  */
 export async function processDirectory(
   dir: string,
-  verbose: boolean = false,
+  { verbose = false }: { verbose?: boolean | undefined } = {},
 ): Promise<number> {
   let fixedCount = 0
 
@@ -56,7 +56,7 @@ export async function processDirectory(
       const fullPath = path.join(dir, entry.name)
 
       if (entry.isDirectory()) {
-        fixedCount += await processDirectory(fullPath, verbose)
+        fixedCount += await processDirectory(fullPath, { verbose })
       } else if (entry.isFile() && entry.name.endsWith('.js')) {
         const content = await fs.readFile(fullPath, 'utf8')
         const s = new MagicString(content)

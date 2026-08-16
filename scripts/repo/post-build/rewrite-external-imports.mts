@@ -38,7 +38,7 @@ export async function fixExternalImports() {
   const quiet = isQuiet()
 
   try {
-    const fixedCount = await processDirectory(distDir, verbose)
+    const fixedCount = await processDirectory(distDir, { verbose })
 
     if (!quiet) {
       const title =
@@ -61,7 +61,7 @@ export async function fixExternalImports() {
  *
  * @returns {Promise<boolean>} True if file was modified
  */
-export async function fixFileImports(filePath, verbose = false) {
+export async function fixFileImports(filePath, { verbose = false } = {}) {
   let content = await fs.readFile(filePath, 'utf8')
   let modified = false
 
@@ -124,7 +124,7 @@ export function getExternalPathPrefix(filePath) {
  *
  * @returns {Promise<number>} Number of files fixed
  */
-export async function processDirectory(dir, verbose = false) {
+export async function processDirectory(dir, { verbose = false } = {}) {
   let fixedCount = 0
 
   try {
@@ -139,9 +139,9 @@ export async function processDirectory(dir, verbose = false) {
       }
 
       if (entry.isDirectory()) {
-        fixedCount += await processDirectory(fullPath, verbose)
+        fixedCount += await processDirectory(fullPath, { verbose })
       } else if (entry.isFile() && entry.name.endsWith('.js')) {
-        const wasFixed = await fixFileImports(fullPath, verbose)
+        const wasFixed = await fixFileImports(fullPath, { verbose })
         if (wasFixed) {
           fixedCount += 1
         }

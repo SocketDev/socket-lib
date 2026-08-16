@@ -1,7 +1,7 @@
 {
   "ok": true,
   "files": {
-    "src/consumer.ts": {
+    "src/consumer.mts": {
       "rewrites": 1,
       "importAdded": true,
       "contentIncludes": ["from './primordials/process'", "processCwd()"],

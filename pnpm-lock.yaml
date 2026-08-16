@@ -886,6 +886,16 @@ importers:
         specifier: 'catalog:'
         version: 26.1.2
 
+  .claude/hooks/fleet/branch-worktree-sweep-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.2
+
   .claude/hooks/fleet/brew-supply-chain-guard:
     devDependencies:
       '@types/node':
@@ -1092,6 +1102,10 @@ importers:
         version: 26.1.2
 
   .claude/hooks/fleet/codex-session-budget-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2523,6 +2537,12 @@ importers:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.1.2
+
+  .claude/hooks/fleet/sabotage-target-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

@@ -95,6 +95,7 @@
     "socket/prefer-find-repo-root": "error",
     "socket/prefer-find-up-package-json": "error",
     "socket/prefer-function-declaration": "error",
+    "socket/prefer-lib-predicates": "error",
     "socket/prefer-lib-versions-over-semver": "error",
     "socket/prefer-mock-import": "error",
     "socket/prefer-node-builtin-imports": "error",
