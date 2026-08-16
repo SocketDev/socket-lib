@@ -212,8 +212,8 @@ catalogs:
       specifier: 0.17.1
       version: 0.17.1
     '@shadscan/cli':
-      specifier: 0.10.0
-      version: 0.10.0
+      specifier: 0.11.0
+      version: 0.11.0
     '@socketregistry/packageurl-js-stable':
       specifier: npm:@socketregistry/packageurl-js@1.5.2
       version: 1.5.2
@@ -227,8 +227,8 @@ catalogs:
       specifier: 4.0.4
       version: 4.0.4
     '@types/node':
-      specifier: 26.1.2
-      version: 26.1.2
+      specifier: 26.2.0
+      version: 26.2.0
     '@types/semver':
       specifier: 7.8.0
       version: 7.8.0
@@ -496,22 +496,22 @@ importers:
         version: 7.29.7
       '@inquirer/checkbox':
         specifier: 5.2.1
-        version: 5.2.1(@types/node@26.1.2)
+        version: 5.2.1(@types/node@26.2.0)
       '@inquirer/confirm':
         specifier: 6.1.1
-        version: 6.1.1(@types/node@26.1.2)
+        version: 6.1.1(@types/node@26.2.0)
       '@inquirer/input':
         specifier: 5.1.2
-        version: 5.1.2(@types/node@26.1.2)
+        version: 5.1.2(@types/node@26.2.0)
       '@inquirer/password':
         specifier: 5.1.1
-        version: 5.1.1(@types/node@26.1.2)
+        version: 5.1.1(@types/node@26.2.0)
       '@inquirer/search':
         specifier: 4.2.1
-        version: 4.2.1(@types/node@26.1.2)
+        version: 4.2.1(@types/node@26.2.0)
       '@inquirer/select':
         specifier: 5.2.1
-        version: 5.2.1(@types/node@26.1.2)
+        version: 5.2.1(@types/node@26.2.0)
       '@npmcli/arborist':
         specifier: 9.9.0
         version: 9.9.0(supports-color@10.2.2)
@@ -532,7 +532,7 @@ importers:
         version: 0.17.1(supports-color@10.2.2)
       '@shadscan/cli':
         specifier: 'catalog:'
-        version: 0.10.0
+        version: 0.11.0
       '@sinclair/typebox':
         specifier: 0.34.52
         version: 0.34.52
@@ -565,7 +565,7 @@ importers:
         version: 4.0.4
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
       '@types/semver':
         specifier: 'catalog:'
         version: 7.8.0
@@ -583,7 +583,7 @@ importers:
         version: 4.1.10(vitest@4.1.10)
       '@vitiate/core':
         specifier: 'catalog:'
-        version: 0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10)
+        version: 0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10)
       '@yarnpkg/extensions':
         specifier: 2.0.7
         version: 2.0.7(@yarnpkg/core@4.9.1(patch_hash=90d84a2833b418e806d5458847773c4c9104fc8e8aa2fa3971f1fd0a68bad1c9)(typanion@3.14.0))
@@ -772,10 +772,10 @@ importers:
         version: 6.0.2
       vitest:
         specifier: 'catalog:'
-        version: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+        version: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
       vitiate:
         specifier: 'catalog:'
-        version: 0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10)
+        version: 0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10)
       webpack:
         specifier: 5.109.2
         version: 5.109.2(@swc/core@1.15.43)(csso@5.0.5)(esbuild@0.28.1)(lightningcss@1.33.0)(postcss@8.5.25)
@@ -800,13 +800,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/adversarial-review-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/agents-skills-mirror-nudge:
     dependencies:
@@ -816,7 +816,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/ai-config-drift-nudge:
     dependencies:
@@ -826,7 +826,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/ai-config-poisoning-guard:
     dependencies:
@@ -836,7 +836,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/alpha-sort-nudge:
     dependencies:
@@ -846,19 +846,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/answer-questions-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/answer-status-requests-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/anti-prose-guard:
     dependencies:
@@ -868,13 +868,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/ask-suppression-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/auth-rotation-nudge:
     dependencies:
@@ -884,7 +884,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/branch-worktree-sweep-nudge:
     dependencies:
@@ -894,13 +894,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/brew-supply-chain-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/broken-hook-detector:
     dependencies:
@@ -913,7 +913,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/bump-defers-to-release-guard:
     dependencies:
@@ -926,7 +926,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/bundle-flags-guard:
     dependencies:
@@ -936,7 +936,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/bundle-stale-reminder:
     dependencies:
@@ -946,19 +946,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/c8-ignore-reason-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/cascade-first-triage-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/cascade-graph-defers-to-script-guard:
     dependencies:
@@ -968,7 +968,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/catch-message-guard:
     dependencies:
@@ -978,7 +978,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/cdn-allowlist-guard:
     devDependencies:
@@ -987,7 +987,7 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/changelog-entry-shape-nudge:
     dependencies:
@@ -997,13 +997,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/changelog-no-empty-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/check-new-deps:
     dependencies:
@@ -1019,7 +1019,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/claude-code-action-lockdown-guard:
     dependencies:
@@ -1029,7 +1029,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/claude-lockdown-guard:
     dependencies:
@@ -1039,19 +1039,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/claude-md-defer-detail-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/claude-md-rule-add-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/claude-md-section-size-guard:
     dependencies:
@@ -1061,7 +1061,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/claude-md-size-guard:
     dependencies:
@@ -1071,7 +1071,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/claude-segmentation-guard:
     devDependencies:
@@ -1080,7 +1080,7 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/clone-reviewed-repo-nudge:
     devDependencies:
@@ -1089,7 +1089,7 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/codex-no-write-guard:
     dependencies:
@@ -1099,7 +1099,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/codex-session-budget-guard:
     dependencies:
@@ -1109,7 +1109,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/commit-author-guard:
     dependencies:
@@ -1119,25 +1119,25 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/commit-cadence-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/commit-message-format-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/commit-pr-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/commit-size-nudge:
     dependencies:
@@ -1147,19 +1147,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/compound-lessons-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/consumer-grep-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/convo-prose-nudge:
     devDependencies:
@@ -1168,7 +1168,7 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/corrupt-rebase-guard:
     dependencies:
@@ -1178,7 +1178,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/cross-repo-guard:
     dependencies:
@@ -1188,7 +1188,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/dated-citation-guard:
     dependencies:
@@ -1198,13 +1198,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/default-branch-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/denied-domain-reference-guard:
     dependencies:
@@ -1214,7 +1214,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/dep-derived-source-nudge:
     dependencies:
@@ -1224,7 +1224,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/dirty-lockfile-nudge:
     dependencies:
@@ -1234,7 +1234,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/dirty-worktree-stop-guard:
     dependencies:
@@ -1244,13 +1244,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/disowned-dirt-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/dogfood-cascade-nudge:
     dependencies:
@@ -1260,31 +1260,31 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/dont-blame-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/dont-stop-mid-queue-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/drift-check-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/enqueue-dont-pivot-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/enterprise-push-nudge:
     dependencies:
@@ -1297,7 +1297,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/error-message-quality-nudge:
     dependencies:
@@ -1307,13 +1307,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/excuse-detector:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/file-size-nudge:
     dependencies:
@@ -1323,7 +1323,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/fixes-need-tests-nudge:
     dependencies:
@@ -1333,13 +1333,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/follow-direct-imperative-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/generic-export-name-nudge:
     dependencies:
@@ -1349,7 +1349,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/gh-token-hygiene-guard:
     dependencies:
@@ -1362,7 +1362,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/git-config-write-guard:
     dependencies:
@@ -1372,13 +1372,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/git-identity-drift-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/gitmodules-comment-guard:
     dependencies:
@@ -1390,13 +1390,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/handoff-command-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/headroom-proxy-start:
     dependencies:
@@ -1412,7 +1412,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/immutable-release-guard:
     dependencies:
@@ -1422,13 +1422,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/inline-script-defer-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/judgment-nudge:
     dependencies:
@@ -1438,13 +1438,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/keep-working-while-waiting-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/land-as-you-go-nudge:
     dependencies:
@@ -1454,7 +1454,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/land-fast-nudge:
     devDependencies:
@@ -1463,7 +1463,7 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/lock-step-ref-nudge:
     dependencies:
@@ -1473,7 +1473,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/logger-guard:
     dependencies:
@@ -1483,7 +1483,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/markdown-filename-guard:
     dependencies:
@@ -1493,7 +1493,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/mass-delete-guard:
     dependencies:
@@ -1506,19 +1506,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/memory-codify-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/memory-enforcement-stamp-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/minimum-release-age-guard:
     dependencies:
@@ -1528,7 +1528,17 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
+
+  .claude/hooks/fleet/mixed-clock-recency-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
 
   .claude/hooks/fleet/module-noun-name-guard:
     dependencies:
@@ -1538,7 +1548,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/new-hook-claude-md-guard:
     dependencies:
@@ -1548,19 +1558,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-blanket-file-exclusion-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-blind-keychain-read-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-boolean-trap-guard:
     dependencies:
@@ -1570,7 +1580,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-branch-reuse-nudge:
     dependencies:
@@ -1580,13 +1590,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-chained-pausing-git-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-copyleft-source-read:
     dependencies:
@@ -1596,13 +1606,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-corepack-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-description-aside-guard:
     dependencies:
@@ -1612,7 +1622,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-designated-ignore-guard:
     dependencies:
@@ -1622,7 +1632,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-direct-linter-guard:
     devDependencies:
@@ -1631,13 +1641,13 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-disable-lint-rule-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-duplicate-pr-guard:
     dependencies:
@@ -1647,7 +1657,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-empty-commit-guard:
     dependencies:
@@ -1657,7 +1667,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-env-kill-switch-guard:
     dependencies:
@@ -1667,7 +1677,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-ext-issue-ref-guard:
     dependencies:
@@ -1677,13 +1687,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-file-oxlint-disable-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-fleet-fork-guard:
     dependencies:
@@ -1693,7 +1703,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-fleet-pr-to-main-guard:
     dependencies:
@@ -1703,19 +1713,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-fleet-scope-in-non-member-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-force-push-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-github-ai-attribution-guard:
     dependencies:
@@ -1725,7 +1735,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-hook-cmd-regex-guard:
     dependencies:
@@ -1735,7 +1745,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-meta-comments-guard:
     dependencies:
@@ -1745,7 +1755,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-new-config-guard:
     dependencies:
@@ -1755,7 +1765,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-non-fleet-push-guard:
     dependencies:
@@ -1765,7 +1775,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-npm-otp-flag-guard:
     dependencies:
@@ -1775,7 +1785,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-orphaned-staging:
     dependencies:
@@ -1785,13 +1795,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-other-linters-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-pkgjson-pnpm-overrides-guard:
     dependencies:
@@ -1801,7 +1811,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-placeholder-commit-subject-guard:
     dependencies:
@@ -1811,7 +1821,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-platform-import-guard:
     dependencies:
@@ -1821,7 +1831,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-pm-exec-guard:
     devDependencies:
@@ -1830,25 +1840,25 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-pr-from-default-branch-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-pr-from-default-checkout-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-pr-in-squash-repo-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-pr-review-verdict-guard:
     dependencies:
@@ -1858,7 +1868,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-premature-commit-kill-guard:
     devDependencies:
@@ -1867,13 +1877,13 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-primary-branch-switch:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-private-path-in-source-guard:
     dependencies:
@@ -1883,7 +1893,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-private-ref-in-tests-docs-guard:
     dependencies:
@@ -1893,7 +1903,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-private-repo-leak-guard:
     dependencies:
@@ -1903,7 +1913,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-raw-gh-auth-login-guard:
     dependencies:
@@ -1916,7 +1926,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-registry-mutation-in-repo-script-nudge:
     dependencies:
@@ -1926,13 +1936,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-removal-comment-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-repo-scope-in-fleet-config-guard:
     dependencies:
@@ -1942,7 +1952,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-revert-guard:
     dependencies:
@@ -1955,7 +1965,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-self-referential-symlink-guard:
     dependencies:
@@ -1965,7 +1975,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-strip-types-guard:
     dependencies:
@@ -1975,13 +1985,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-subagent-commit-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-tail-install-out-guard:
     dependencies:
@@ -1991,7 +2001,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-test-in-scripts-guard:
     dependencies:
@@ -2001,25 +2011,25 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-token-in-dotenv-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-total-squash-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-tsx-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-underscore-ident-guard:
     dependencies:
@@ -2029,7 +2039,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-unisolated-git-fixture-guard:
     dependencies:
@@ -2039,7 +2049,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-unmocked-net-guard:
     dependencies:
@@ -2049,7 +2059,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-upstream-gitlink-guard:
     dependencies:
@@ -2059,7 +2069,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-verify-format-nudge:
     dependencies:
@@ -2069,7 +2079,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-version-bump-pr-guard:
     dependencies:
@@ -2079,19 +2089,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/no-wheelhouse-pr-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/node-modules-staging-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/non-fleet-pr-issue-ask-guard:
     dependencies:
@@ -2103,7 +2113,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/npm-otp-flow-nudge:
     dependencies:
@@ -2113,7 +2123,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/npmrc-trust-optout-guard:
     dependencies:
@@ -2123,7 +2133,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/options-param-naming-guard:
     dependencies:
@@ -2138,7 +2148,7 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/overeager-staging-guard:
     dependencies:
@@ -2151,7 +2161,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/oxlint-plugin-load-nudge:
     dependencies:
@@ -2161,7 +2171,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/package-manager-auto-update-guard:
     devDependencies:
@@ -2170,25 +2180,25 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/parallel-agent-edit-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/parallel-agent-on-stop-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/parallel-agent-removal-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/parallel-agent-staging-guard:
     dependencies:
@@ -2198,13 +2208,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/parallel-spawn-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/path-guard:
     dependencies:
@@ -2220,7 +2230,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/paths-mts-inherit-guard:
     dependencies:
@@ -2230,13 +2240,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/personal-path-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/plan-location-guard:
     dependencies:
@@ -2246,19 +2256,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/plan-review-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/pnpm-filter-zero-match-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/pointer-comment-nudge:
     dependencies:
@@ -2271,13 +2281,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/post-push-ci-monitor-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/pr-vs-push-default-nudge:
     dependencies:
@@ -2287,13 +2297,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/pre-commit-race-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/prefer-async-spawn-guard:
     dependencies:
@@ -2303,13 +2313,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/prefer-evergreen-target-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/prefer-fn-decl-guard:
     dependencies:
@@ -2319,7 +2329,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/prefer-json-clone-guard:
     dependencies:
@@ -2335,7 +2345,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/prefer-rebase-over-revert-nudge:
     dependencies:
@@ -2348,13 +2358,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/prefer-type-import-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/prefer-vitest-guard:
     dependencies:
@@ -2364,7 +2374,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/primary-checkout-branch-guard:
     dependencies:
@@ -2374,7 +2384,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/primary-checkout-on-default-stop-guard:
     dependencies:
@@ -2384,13 +2394,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/private-name-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/proc-environ-exfil-guard:
     dependencies:
@@ -2400,7 +2410,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/prompt-injection-guard:
     dependencies:
@@ -2410,7 +2420,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/provenance-publish-nudge:
     dependencies:
@@ -2420,13 +2430,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/public-surface-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/pull-request-target-guard:
     dependencies:
@@ -2436,13 +2446,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/push-protected-branch-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/readme-fleet-shape-guard:
     dependencies:
@@ -2452,7 +2462,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/release-defers-to-script-guard:
     dependencies:
@@ -2462,7 +2472,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/release-tag-tied-guard:
     dependencies:
@@ -2472,7 +2482,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/release-workflow-guard:
     dependencies:
@@ -2485,13 +2495,13 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/reply-prose-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/report-location-guard:
     dependencies:
@@ -2501,7 +2511,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/reserved-script-dir-guard:
     dependencies:
@@ -2511,7 +2521,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/rg-replace-flag-guard:
     devDependencies:
@@ -2520,7 +2530,7 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/rust-target-sweep-nudge:
     dependencies:
@@ -2530,13 +2540,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/sabotage-target-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/scan-label-in-commit-guard:
     dependencies:
@@ -2546,7 +2556,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/secret-content-guard:
     devDependencies:
@@ -2555,19 +2565,19 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/sed-in-place-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/session-handoff-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/setup-basics-tools:
     dependencies:
@@ -2577,7 +2587,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/setup-claude-scanners:
     dependencies:
@@ -2587,7 +2597,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/setup-firewall:
     dependencies:
@@ -2597,7 +2607,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/setup-misc-tools:
     dependencies:
@@ -2607,7 +2617,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/setup-security-tools:
     dependencies:
@@ -2626,25 +2636,25 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/shallow-clone-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/single-lander-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/skill-usage-logger:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/small-pr-nudge:
     dependencies:
@@ -2654,7 +2664,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/soak-exclude-date-guard:
     dependencies:
@@ -2670,7 +2680,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/soak-pin-needs-annotation-guard:
     dependencies:
@@ -2680,13 +2690,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/squash-freeze-boundary-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/squash-history-nudge:
     dependencies:
@@ -2696,7 +2706,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/stale-process-sweeper:
     dependencies:
@@ -2708,7 +2718,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/stop-means-commit-guard:
     dependencies:
@@ -2718,7 +2728,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/sweep-ds-store:
     dependencies:
@@ -2728,7 +2738,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/target-arch-env-guard:
     dependencies:
@@ -2738,7 +2748,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/test-script-defers-guard:
     dependencies:
@@ -2748,7 +2758,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/token-guard: {}
 
@@ -2756,13 +2766,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/trust-downgrade-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/tsc-canonical-tsconfig-guard:
     dependencies:
@@ -2772,7 +2782,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/unaddressed-review-feedback-guard:
     dependencies:
@@ -2785,7 +2795,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/unbacked-claim-commit-guard:
     dependencies:
@@ -2795,13 +2805,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/uncodified-lesson-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/uncommitted-sweep-nudge:
     dependencies:
@@ -2811,7 +2821,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/unpushed-main-nudge:
     devDependencies:
@@ -2820,13 +2830,13 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/untrusted-coauthor-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/untrusted-content-directive-nudge:
     dependencies:
@@ -2836,19 +2846,19 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/upstream-is-read-only-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/use-repo-test-script-guard:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/uses-sha-verify-guard:
     dependencies:
@@ -2860,13 +2870,13 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/verify-absence-claims-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/verify-render-pre-commit-nudge:
     dependencies:
@@ -2876,7 +2886,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/version-bump-order-guard:
     dependencies:
@@ -2889,7 +2899,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/vitest-vs-node-test-guard:
     dependencies:
@@ -2899,7 +2909,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/wheelhouse-drift-guard:
     dependencies:
@@ -2909,7 +2919,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/workflow-multiline-body-guard:
     dependencies:
@@ -2919,7 +2929,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .claude/hooks/fleet/workflow-uses-comment-guard:
     dependencies:
@@ -2935,7 +2945,7 @@ importers:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
-        version: 26.1.2
+        version: 26.2.0
 
   .config/fleet/oxlint-plugin:
     dependencies:
@@ -3014,6 +3024,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/no-npx-dlx: {}
 
+  .config/fleet/oxlint-plugin/fleet/no-optional-param-before-options-bag: {}
+
   .config/fleet/oxlint-plugin/fleet/no-optional-positional-trap: {}
 
   .config/fleet/oxlint-plugin/fleet/no-options-param-mutation: {}
@@ -3041,6 +3053,8 @@ importers:
   .config/fleet/oxlint-plugin/fleet/no-required-in-options-bag: {}
 
   .config/fleet/oxlint-plugin/fleet/no-runtime-features-below-engine-floor: {}
+
+  .config/fleet/oxlint-plugin/fleet/no-shop-metaphor-jargon: {}
 
   .config/fleet/oxlint-plugin/fleet/no-source-content-tests: {}
 
@@ -4216,8 +4230,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@shadscan/cli@0.10.0':
-    resolution: {integrity: sha512-xQyw85o9ENmlpeHkwXbSV1MjbSix5qN9JyTyjI8Yk+hABW64cIlB0iGbCeh+3a6xaTCtpoxvLstBggxHvJocxg==}
+  '@shadscan/cli@0.11.0':
+    resolution: {integrity: sha512-lA6CK7jxopwoSxapT03RzDc51amXux509NGA5Um3OF1kY0oRRuvdW/mOHSjdyATkZU7zLsC5oZx6Y7y2taE5cg==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -4444,9 +4458,6 @@ packages:
 
   '@types/ms@2.1.0':
     resolution: {integrity: sha512-GsCCIZDE/p3i96vtEqx+7dBUGXrc7zeSK3wwPHIaRThS+9OhWIXRqzs4d6k1SVU8g91DrNRWxWUGhp5KXQb2VA==}
-
-  '@types/node@26.1.2':
-    resolution: {integrity: sha512-Vu4a5UFA9rIIFJ7rB/Vaafh9lrCQszopTCx6KjFboXTGQbPNasehVR5TEiithSDGyd1DEiUByggTZsg8jukeIg==}
 
   '@types/node@26.2.0':
     resolution: {integrity: sha512-5IviulTZeRNp2vAJ514cc/HUlY5nZ9fCbq9DMyC52BrhFZACo3nI0R7qBxhQmo/d27NFe96ur/b7Wwxklda+kg==}
@@ -7327,71 +7338,71 @@ snapshots:
 
   '@inquirer/ansi@2.0.7': {}
 
-  '@inquirer/checkbox@5.2.1(@types/node@26.1.2)':
+  '@inquirer/checkbox@5.2.1(@types/node@26.2.0)':
     dependencies:
       '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@26.1.2)
+      '@inquirer/core': 11.2.1(@types/node@26.2.0)
       '@inquirer/figures': 2.0.7
-      '@inquirer/type': 4.0.7(@types/node@26.1.2)
+      '@inquirer/type': 4.0.7(@types/node@26.2.0)
     optionalDependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
-  '@inquirer/confirm@6.1.1(@types/node@26.1.2)':
+  '@inquirer/confirm@6.1.1(@types/node@26.2.0)':
     dependencies:
-      '@inquirer/core': 11.2.1(@types/node@26.1.2)
-      '@inquirer/type': 4.0.7(@types/node@26.1.2)
+      '@inquirer/core': 11.2.1(@types/node@26.2.0)
+      '@inquirer/type': 4.0.7(@types/node@26.2.0)
     optionalDependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
-  '@inquirer/core@11.2.1(@types/node@26.1.2)':
+  '@inquirer/core@11.2.1(@types/node@26.2.0)':
     dependencies:
       '@inquirer/ansi': 2.0.7
       '@inquirer/figures': 2.0.7
-      '@inquirer/type': 4.0.7(@types/node@26.1.2)
+      '@inquirer/type': 4.0.7(@types/node@26.2.0)
       cli-width: 4.1.0
       fast-wrap-ansi: 0.2.2
       mute-stream: 3.0.0
       signal-exit: 4.1.0
     optionalDependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
   '@inquirer/figures@2.0.7': {}
 
-  '@inquirer/input@5.1.2(@types/node@26.1.2)':
+  '@inquirer/input@5.1.2(@types/node@26.2.0)':
     dependencies:
-      '@inquirer/core': 11.2.1(@types/node@26.1.2)
-      '@inquirer/type': 4.0.7(@types/node@26.1.2)
+      '@inquirer/core': 11.2.1(@types/node@26.2.0)
+      '@inquirer/type': 4.0.7(@types/node@26.2.0)
     optionalDependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
-  '@inquirer/password@5.1.1(@types/node@26.1.2)':
-    dependencies:
-      '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@26.1.2)
-      '@inquirer/type': 4.0.7(@types/node@26.1.2)
-    optionalDependencies:
-      '@types/node': 26.1.2
-
-  '@inquirer/search@4.2.1(@types/node@26.1.2)':
-    dependencies:
-      '@inquirer/core': 11.2.1(@types/node@26.1.2)
-      '@inquirer/figures': 2.0.7
-      '@inquirer/type': 4.0.7(@types/node@26.1.2)
-    optionalDependencies:
-      '@types/node': 26.1.2
-
-  '@inquirer/select@5.2.1(@types/node@26.1.2)':
+  '@inquirer/password@5.1.1(@types/node@26.2.0)':
     dependencies:
       '@inquirer/ansi': 2.0.7
-      '@inquirer/core': 11.2.1(@types/node@26.1.2)
-      '@inquirer/figures': 2.0.7
-      '@inquirer/type': 4.0.7(@types/node@26.1.2)
+      '@inquirer/core': 11.2.1(@types/node@26.2.0)
+      '@inquirer/type': 4.0.7(@types/node@26.2.0)
     optionalDependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
 
-  '@inquirer/type@4.0.7(@types/node@26.1.2)':
+  '@inquirer/search@4.2.1(@types/node@26.2.0)':
+    dependencies:
+      '@inquirer/core': 11.2.1(@types/node@26.2.0)
+      '@inquirer/figures': 2.0.7
+      '@inquirer/type': 4.0.7(@types/node@26.2.0)
     optionalDependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
+
+  '@inquirer/select@5.2.1(@types/node@26.2.0)':
+    dependencies:
+      '@inquirer/ansi': 2.0.7
+      '@inquirer/core': 11.2.1(@types/node@26.2.0)
+      '@inquirer/figures': 2.0.7
+      '@inquirer/type': 4.0.7(@types/node@26.2.0)
+    optionalDependencies:
+      '@types/node': 26.2.0
+
+  '@inquirer/type@4.0.7(@types/node@26.2.0)':
+    optionalDependencies:
+      '@types/node': 26.2.0
 
   '@isaacs/fs-minipass@4.0.1':
     dependencies:
@@ -7872,7 +7883,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@shadscan/cli@0.10.0':
+  '@shadscan/cli@0.11.0':
     dependencies:
       cross-spawn: 7.0.6
       jsonc-parser: 3.3.1
@@ -8054,10 +8065,6 @@ snapshots:
 
   '@types/ms@2.1.0': {}
 
-  '@types/node@26.1.2':
-    dependencies:
-      undici-types: 8.3.0
-
   '@types/node@26.2.0':
     dependencies:
       undici-types: 8.3.0
@@ -8179,7 +8186,7 @@ snapshots:
       obug: 2.1.2
       std-env: 4.2.0
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+      vitest: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
 
   '@vitest/expect@4.1.10':
     dependencies:
@@ -8190,13 +8197,13 @@ snapshots:
       chai: 6.2.2
       tinyrainbow: 3.1.0
 
-  '@vitest/mocker@4.1.10(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
+  '@vitest/mocker@4.1.10(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))':
     dependencies:
       '@vitest/spy': 4.1.10
       estree-walker: 3.0.3
       magic-string: 1.1.0
     optionalDependencies:
-      vite: 8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
 
   '@vitest/pretty-format@4.1.10':
     dependencies:
@@ -8225,7 +8232,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
-      vitest: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+      vitest: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
 
   '@vitest/utils@4.1.10':
     dependencies:
@@ -8233,7 +8240,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@vitiate/core@0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10)':
+  '@vitiate/core@0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10)':
     dependencies:
       '@optique/core': 1.1.0
       '@optique/run': 1.1.0
@@ -8245,8 +8252,8 @@ snapshots:
       ipaddr.js: 2.4.0
       magic-string: 1.1.0
       valibot: 1.4.2(typescript@7.0.2)
-      vite: 8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
-      vitest: 4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+      vite: 8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vitest: 4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
     transitivePeerDependencies:
       - '@swc/helpers'
       - typescript
@@ -10753,7 +10760,7 @@ snapshots:
 
   verkit@0.3.2: {}
 
-  vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0):
+  vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0):
     dependencies:
       lightningcss: 1.33.0
       picomatch: 4.0.5
@@ -10761,17 +10768,17 @@ snapshots:
       rolldown: 1.2.3
       tinyglobby: 0.2.17
     optionalDependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
       esbuild: 0.28.1
       fsevents: 2.3.3
       jiti: 2.7.0
       terser: 5.48.0
       yaml: 2.9.0
 
-  vitest@4.1.10(@types/node@26.1.2)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)):
+  vitest@4.1.10(@types/node@26.2.0)(@vitest/coverage-v8@4.1.10)(@vitest/ui@4.1.10)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)):
     dependencies:
       '@vitest/expect': 4.1.10
-      '@vitest/mocker': 4.1.10(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
+      '@vitest/mocker': 4.1.10(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))
       '@vitest/pretty-format': 4.1.10
       '@vitest/runner': 4.1.10
       '@vitest/snapshot': 4.1.10
@@ -10788,18 +10795,18 @@ snapshots:
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
       tinyrainbow: 3.1.0
-      vite: 8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
+      vite: 8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0)
       why-is-node-running: 2.3.0
     optionalDependencies:
-      '@types/node': 26.1.2
+      '@types/node': 26.2.0
       '@vitest/coverage-v8': 4.1.10(vitest@4.1.10)
       '@vitest/ui': 4.1.10(vitest@4.1.10)
     transitivePeerDependencies:
       - msw
 
-  vitiate@0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10):
+  vitiate@0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10):
     dependencies:
-      '@vitiate/core': 0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.1.2)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10)
+      '@vitiate/core': 0.3.1(typescript@7.0.2)(vite@8.2.0(@types/node@26.2.0)(esbuild@0.28.1)(jiti@2.7.0)(terser@5.48.0)(yaml@2.9.0))(vitest@4.1.10)
     transitivePeerDependencies:
       - '@swc/helpers'
       - typescript

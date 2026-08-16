@@ -3556,7 +3556,8 @@
     "lint:js": "node scripts/fleet/lint.mts",
     "gh:auth": "node scripts/fleet/gh-auth.mts",
     "offload:model": "node scripts/fleet/offload-model.mts",
-    "setup:fireconnect": "node scripts/fleet/setup/fireconnect.mts"
+    "setup:fireconnect": "node scripts/fleet/setup/fireconnect.mts",
+    "setup:offload-providers": "node scripts/fleet/setup/offload-providers.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
