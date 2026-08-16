@@ -8,13 +8,11 @@
  *   - `getEditablePackageJsonClass` — lazy class accessor (Webpack-safe)
  */
 
-// @ts-expect-error - external vendored module
 import EditablePackageJsonBase from '../external/@npmcli/package-json.js'
 import {
   parse,
   read,
 } from '../external/@npmcli/package-json/lib/read-package.js'
-// @ts-expect-error - external vendored module
 import { packageSort } from '../external/@npmcli/package-json/lib/sort.js'
 import {
   getFormattingFromContent,

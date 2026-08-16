@@ -20,13 +20,20 @@ export const IS_NODE =
  * workers — check `IS_SERVICE_WORKER` for that case.
  */
 export const IS_BROWSER =
-  typeof window !== 'undefined' && typeof document !== 'undefined'
+  typeof globalThis !== 'undefined' &&
+  'window' in globalThis &&
+  typeof (globalThis as { window?: unknown | undefined }).window !==
+    'undefined' &&
+  'document' in globalThis &&
+  typeof (globalThis as { document?: unknown | undefined }).document !==
+    'undefined'
 
 /**
  * True when running inside a Web Worker / Chrome MV3 service worker. `self` is
  * defined without `window` in worker contexts.
  */
 export const IS_WORKER =
-  typeof self !== 'undefined' &&
-  typeof window === 'undefined' &&
-  typeof document === 'undefined'
+  'self' in globalThis &&
+  typeof (globalThis as { self?: unknown | undefined }).self !== 'undefined' &&
+  !('window' in globalThis) &&
+  !('document' in globalThis)
