@@ -351,25 +351,25 @@ describe('paths/socket', () => {
 
   describe('getSocketAppStateDir', () => {
     it('should nest the app inside _state', () => {
-      const result = getSocketAppStateDir('proteus')
-      expect(result).toContain('.socket/_state/proteus')
+      const result = getSocketAppStateDir('sockeye')
+      expect(result).toContain('.socket/_state/sockeye')
     })
 
     it('should nest under the _state dir', () => {
-      const result = getSocketAppStateDir('proteus')
-      expect(result).toMatch(/\/_state\/proteus$/)
+      const result = getSocketAppStateDir('sockeye')
+      expect(result).toMatch(/\/_state\/sockeye$/)
     })
   })
 
   describe('getSocketAppRuntimeDir', () => {
     it('should return the app run/ dir under _state', () => {
-      const result = getSocketAppRuntimeDir('proteus')
-      expect(result).toContain('.socket/_state/proteus/run')
+      const result = getSocketAppRuntimeDir('sockeye')
+      expect(result).toContain('.socket/_state/sockeye/run')
     })
 
     it('should end with the app state dir + /run', () => {
-      const runDir = getSocketAppRuntimeDir('proteus')
-      expect(runDir).toMatch(/\/_state\/proteus\/run$/)
+      const runDir = getSocketAppRuntimeDir('sockeye')
+      expect(runDir).toMatch(/\/_state\/sockeye\/run$/)
     })
   })
 
@@ -379,8 +379,8 @@ describe('paths/socket', () => {
   describeUnixOnly('getRuntimeSocketPath', () => {
     it('should use $XDG_RUNTIME_DIR when set', () => {
       setEnv('XDG_RUNTIME_DIR', '/run/user/1000')
-      const result = getRuntimeSocketPath('proteus')
-      expect(result).toBe('/run/user/1000/proteus.sock')
+      const result = getRuntimeSocketPath('sockeye')
+      expect(result).toBe('/run/user/1000/sockeye.sock')
     })
 
     it('should fall back to $TMPDIR/<name>-<uid>.sock without XDG_RUNTIME_DIR', () => {
@@ -390,8 +390,8 @@ describe('paths/socket', () => {
       // returns undefined for a set-but-undefined override).
       setEnv('XDG_RUNTIME_DIR', undefined)
       setPath('tmpdir', '/tmp/run')
-      const result = getRuntimeSocketPath('proteus')
-      expect(result).toMatch(/^\/tmp\/run\/proteus-\d+\.sock$/)
+      const result = getRuntimeSocketPath('sockeye')
+      expect(result).toMatch(/^\/tmp\/run\/sockeye-\d+\.sock$/)
     })
   })
 

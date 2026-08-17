@@ -5,7 +5,7 @@
  *   `@socketaddon/keychain-*` as the legacy republish) exposes the shared
  *   keystore-infra core: macOS Keychain items behind a Secure-Enclave biometric
  *   ACL, so a read is gated on Touch ID instead of a password prompt. This
- *   slots between the proteus broker and the CLI keychain in `secrets/find.ts`
+ *   slots between the sockeye broker and the CLI keychain in `secrets/find.ts`
  *   `resolve()`: the broker is preferred when its daemon runs (one unlock
  *   serves many processes), this addon covers the no-daemon case in-process,
  *   and the `security`-CLI read remains the biometric-less floor. Same

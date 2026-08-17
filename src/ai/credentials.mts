@@ -13,7 +13,7 @@
  *   resolver's existing escape) in headless contexts so a missing token returns
  *   `undefined` immediately instead of triggering a keychain auth prompt. CI
  *   sets the token as a GH-secret env var (e.g. `ANTHROPIC_API_KEY`); the same
- *   `resolveProviderCredential` call reads it there with no keychain. proteus
+ *   `resolveProviderCredential` call reads it there with no keychain. sockeye
  *   hook-point: the forthcoming biometric credential daemon slots in as a
  *   layer between the env check and the keychain read inside `resolve()`'s
  *   implementation — call sites here do not change when it lands. This module
@@ -185,7 +185,7 @@ export async function resolveProviderCredential(
   }
   // `resolve` checks each account as an env var first, then the keychain
   // (service + account), honoring allowEnvOnly. The account IS the env-var
-  // name, matching the readSocketApiToken convention. The proteus daemon will
+  // name, matching the readSocketApiToken convention. The sockeye daemon will
   // insert its biometric layer inside `resolve()` without changing this call.
   const result = await resolve({
     accounts: [spec.tokenEnv],

@@ -13,10 +13,10 @@ import { safeDelete } from '../../../src/fs/safe.mjs'
 let tmpDir = ''
 let server: net.Server | undefined
 
-// Stand up a mock proteus daemon at the path the client resolves, replying with
+// Stand up a mock sockeye daemon at the path the client resolves, replying with
 // `response` to the first request line.
 function startMockDaemon(response: string): Promise<void> {
-  const sockPath = getRuntimeSocketPath('proteus')
+  const sockPath = getRuntimeSocketPath('sockeye')
   return new Promise((resolve, reject) => {
     const srv = net.createServer(conn => {
       let buffer = ''
@@ -43,7 +43,7 @@ beforeEach(async () => {
 afterEach(async () => {
   // Await the close so the socket / Windows named pipe is fully released before
   // the next test re-listens. On Windows getRuntimeSocketPath ignores the
-  // per-test tmpDir and returns a FIXED \\.\pipe\proteus-sock, so a non-awaited
+  // per-test tmpDir and returns a FIXED \\.\pipe\sockeye-sock, so a non-awaited
   // close let the next listen() race the still-closing pipe (intermittent EADDRINUSE).
   await new Promise<void>(resolve => {
     if (server) {

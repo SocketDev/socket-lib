@@ -57,7 +57,7 @@ export interface ResolveResult {
   value: string
   /**
    * Where the value came from: 'env' — `process.env[<account>]` had a non-empty
-   * value. 'broker' — the proteus daemon vended it after a biometric unlock.
+   * value. 'broker' — the sockeye daemon vended it after a biometric unlock.
    * 'keychain-biometric' — the in-process sockeye keychain.node addon vended it
    * from behind a Secure-Enclave Touch ID ACL. 'keychain' — none of the above;
    * the value was read from the OS credential store via the CLI backend.
@@ -106,7 +106,7 @@ export async function resolve(
   if (allowEnvOnly) {
     return undefined
   }
-  // proteus broker layer: a running daemon vends the value after a single
+  // sockeye broker layer: a running daemon vends the value after a single
   // biometric unlock, ahead of the direct keychain read. Dormant (returns
   // undefined without prompting) when no daemon is running, so this is a
   // transparent fall-through to the keychain below. Skipped under allowEnvOnly
@@ -119,7 +119,7 @@ export async function resolve(
     }
   }
   // sockeye keychain.node layer: in-process biometric read for machines
-  // without a running proteus daemon. Same self-gating contract — absent
+  // without a running sockeye daemon. Same self-gating contract — absent
   // addon or a cancelled Touch ID prompt returns undefined and the chain
   // continues to the CLI keychain floor.
   for (let i = 0, { length } = accounts; i < length; i += 1) {
@@ -141,7 +141,7 @@ export async function resolve(
 
 /**
  * Sync variant for non-async callers (hook initializers, schema validators that
- * run before any `await` machinery exists). Has no proteus broker tier — the
+ * run before any `await` machinery exists). Has no sockeye broker tier — the
  * broker socket round-trip is async — so this path is env → keychain only.
  */
 export function resolveSync(

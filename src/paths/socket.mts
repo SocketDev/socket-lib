@@ -149,7 +149,7 @@ export function getSocketAppRuntimeDir(appName: string): string {
 
 /**
  * Get an app's persistent state directory (~/.socket/_state/<app>/). The
- * `<app>` is a real app such as proteus or acorn, nesting its version-less
+ * `<app>` is a real app such as sockeye or acorn, nesting its version-less
  * state inside the `_state` infra dir.
  */
 export function getSocketAppStateDir(appName: string): string {

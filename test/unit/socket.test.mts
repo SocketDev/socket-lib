@@ -242,29 +242,29 @@ describe('paths', () => {
 
   describe('getSocketAppStateDir', () => {
     it('should nest the app inside _state', () => {
-      const result = getSocketAppStateDir('proteus')
-      expect(result).toContain('.socket/_state/proteus')
+      const result = getSocketAppStateDir('sockeye')
+      expect(result).toContain('.socket/_state/sockeye')
     })
 
     it('should nest under the _state dir', () => {
-      const result = getSocketAppStateDir('proteus')
-      expect(result).toMatch(/\/_state\/proteus$/)
+      const result = getSocketAppStateDir('sockeye')
+      expect(result).toMatch(/\/_state\/sockeye$/)
     })
   })
 
   describe('getSocketAppRuntimeDir', () => {
     it('should return the app run/ dir under _state', () => {
-      const result = getSocketAppRuntimeDir('proteus')
-      expect(result).toContain('.socket/_state/proteus/run')
+      const result = getSocketAppRuntimeDir('sockeye')
+      expect(result).toContain('.socket/_state/sockeye/run')
     })
 
     it('should end with the app state dir + /run', () => {
-      const runDir = getSocketAppRuntimeDir('proteus')
-      expect(runDir).toMatch(/\/_state\/proteus\/run$/)
+      const runDir = getSocketAppRuntimeDir('sockeye')
+      expect(runDir).toMatch(/\/_state\/sockeye\/run$/)
     })
 
     it('should return normalized path', () => {
-      const result = getSocketAppRuntimeDir('proteus')
+      const result = getSocketAppRuntimeDir('sockeye')
       expect(result).not.toContain('\\')
     })
   })
