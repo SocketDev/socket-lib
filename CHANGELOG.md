@@ -5,6 +5,50 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.0) - 2026-08-17
+
+v7 is an API-cleanup release: it shrinks the published surface to the
+supported set, renames the pieces that had grown confusing names, and adds
+the AI, spawn, and git utilities the fleet had been duplicating per repo.
+
+### Changed (breaking)
+
+- **`exports`** - the published surface shrinks to the supported set: 25 module-internal shared subpaths are no longer exported. Code importing them must use the public entry points
+- **`constants`** - the shared public API token is retired; each repo carries its own
+- **`api`** - the v6 back-compat residue is deleted and option bags are normalized: a required argument is positional, and a bag holds only real options
+- **`exe`** - `bin` and `argv` consolidate into one `exe` namespace; path resolution groups under `exe/path`; `sea` and `smol` are `exe` submodules with a `detect` leaf; the trusted helpers melt into their domains as `path`/`sanitize`
+- **`config`** - the layered repo-config reader is `config/repo` (was `fleet-repo`)
+- **`json`** - `parseJsonSafe` is now `parseJsonStrict` (and `ParseJsonSafeOptions` is `ParseJsonStrictOptions`); the `getUrl` loader is dropped
+- **`platform`** - the predicate migration finishes; the static helpers it replaces are unexported
+- **`eco`** - the `yarnpkg` parent is dropped; each package manager's manifest handling now lives under that manager's own module
+- **`taxonomy`** - split concepts merge, terms get a namespace, and one-file directories are flattened
+- **`cleanup`** - `sorts/semver`, the `process/shared` shim, and the dlx legacy get/set are deleted
+- **`cli`** - `--json` is a real mode on `prim` with the describe envelope, and every repo entry script self-describes via `runMain`
+
+### Added
+
+- **`ai`** - 8 utilities from the odai project, registered in the exports map
+- **`spawn`** - run lanes (`runInherit`, `runCapture`, `runInheritTee`, `waitForStdioFlush`), a `trim` option for byte-faithful `spawnSync` output, and a `throws` option so non-zero exits can resolve instead of rejecting
+- **`git`** - a pure porcelain status parser, and git-refs write helpers (branch create/advance/delete, tag create)
+- **`github`** - container package paths with every slash escaped; `githubRefLink` learns the stack kind
+- **`secrets`** - pure OAuth PKCE helpers (S256 pair, discovery and auth URLs, loopback callback parse)
+- **`npm`** - live cache-busted registry reads (checked latest, maintainers)
+- **`paths`** - `separatorWrappedSubstring` and `isSeparatorWrapped`
+- **`pty`** - `NON_INTERACTIVE_RENDER_ENV`, `stdoutIsFileBacked`, and the pumped run lane
+- **`cli`** - entrypoint detection and a fail-soft main runner
+- **`open-url`** - skips the browser launch under a detected test runner
+- **`build-stubs`** - the build now fails when shipped code can reach a dev stub
+
+### Fixed
+
+- **`dist`** - declaration files pair with the `.js` they describe again. After the source move to `.mts`, dist shipped `x.js` beside `x.d.mts`, so a deep import got no types at all
+- **`secrets`/`github`/`native-messaging`** - shipped code no longer imports the dev-only `lib-stable` alias, which consumers in pnpm's global virtual store layout could not resolve. Any import chain through `ai` or `secrets` crashed with `Cannot find module` for those consumers in 6.7.0
+- **`test`** - the perry native-compile fixture tracks the `.mts` rename, and the spawn-heavy dlx pair gets real headroom under load
+
+### Internal
+
+- **`src`** - every source file is `.mts` and every relative import names its target explicitly (2,118 of them), so the declarations build and the bundler resolve identically
+
 ## [6.7.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.7.0) - 2026-08-05
 
 ### Added
