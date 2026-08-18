@@ -1750,10 +1750,20 @@
       "types": "./dist/git/changed.d.ts",
       "default": "./dist/git/changed.js"
     },
+    "./git/exec": {
+      "source": "./src/git/exec.mts",
+      "types": "./dist/git/exec.d.ts",
+      "default": "./dist/git/exec.js"
+    },
     "./git/ignored": {
       "source": "./src/git/ignored.mts",
       "types": "./dist/git/ignored.d.ts",
       "default": "./dist/git/ignored.js"
+    },
+    "./git/isolated-index": {
+      "source": "./src/git/isolated-index.mts",
+      "types": "./dist/git/isolated-index.d.ts",
+      "default": "./dist/git/isolated-index.js"
     },
     "./git/repo": {
       "source": "./src/git/repo.mts",
