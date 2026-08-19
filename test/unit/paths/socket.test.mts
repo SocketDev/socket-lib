@@ -28,6 +28,7 @@ import {
   getSocketRackDir,
   getSocketRackToolDir,
   getSocketRepoClonesDir,
+  getSocketStateDbPath,
   getSocketStateDir,
   getSocketUserDir,
   getSocketWheelhouseBinDir,
@@ -346,6 +347,20 @@ describe('paths/socket', () => {
       setPath('socket-state-dir', '/tmp/rewired-state')
       const result = getSocketStateDir()
       expect(result).toBe('/tmp/rewired-state')
+    })
+  })
+
+  describe('getSocketStateDbPath', () => {
+    it('should nest the app DB inside _state', () => {
+      const result = getSocketStateDbPath('wheelhouse')
+      expect(result).toContain('.socket/_state')
+      expect(result).toMatch(/\/_state\/wheelhouse\.sqlite$/)
+    })
+
+    it('should honor the _state dir override', () => {
+      setPath('socket-state-dir', '/tmp/rewired-state')
+      const result = getSocketStateDbPath('wheelhouse')
+      expect(result).toBe('/tmp/rewired-state/wheelhouse.sqlite')
     })
   })
 

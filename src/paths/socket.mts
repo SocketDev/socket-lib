@@ -271,6 +271,11 @@ export function getSocketRepoClonesDir(): string {
  * Override precedence: setPath('socket-state-dir', …) → SOCKET_STATE_DIR env →
  * $SOCKET_HOME/_state → $HOME/.socket/_state.
  */
+export function getSocketStateDbPath(appName: string): string {
+  const path = getNodePath()
+  return normalizePath(path.join(getSocketStateDir(), `${appName}.sqlite`))
+}
+
 export function getSocketStateDir(): string {
   return getPathValue('socket-state-dir', () => {
     if (getSocketStateDirEnv()) {

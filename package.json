@@ -3494,6 +3494,11 @@
       "types": "./dist/words/types.d.ts",
       "default": "./dist/words/types.js"
     },
+    "./state/db": {
+      "source": "./src/state/db.mts",
+      "types": "./dist/state/db.d.ts",
+      "default": "./dist/state/db.js"
+    },
     "./data/extensions.json": "./data/extensions.json",
     "./package.json": "./package.json",
     "./llms.txt": "./llms.txt"
