@@ -3140,6 +3140,8 @@ importers:
 
   .config/fleet/oxlint-plugin/fleet/no-use-strict-in-esm: {}
 
+  .config/fleet/oxlint-plugin/fleet/no-vendored-alias-in-test: {}
+
   .config/fleet/oxlint-plugin/fleet/no-vitest-empty-test: {}
 
   .config/fleet/oxlint-plugin/fleet/no-vitest-focused-tests: {}
