@@ -94,7 +94,7 @@ export interface GitSpawnResult {
 export function detectLockError(
   cmd: string,
   args: readonly string[],
-  stderr: string | Buffer,
+  stderr: string | Buffer | undefined,
 ): void {
   if (stderrText(stderr).includes(INDEX_LOCK_PATTERN)) {
     throw new GitLockError(
@@ -124,11 +124,16 @@ export async function gitSpawn(
     options,
   )
   const git = getGitPath()
+  // throws: false — a non-zero git exit RESOLVES here, per this module's own
+  // contract (see @file header). Without it, spawn() rejects on a non-zero
+  // exit and detectLockError below never runs, making GitLockError
+  // unreachable on the async path even for a real index.lock contention.
   const result = await spawn(git, [...args], {
     cwd: cwd ?? getCwd(),
     env,
     timeout: timeout ?? GIT_DEFAULT_TIMEOUT_MS,
     stdioString: stdioString ?? true,
+    throws: false,
   })
   detectLockError(git, args, result.stderr)
   return result
@@ -167,7 +172,15 @@ export function gitSync(
 
 /**
  * Convert a stderr value (string or Buffer) to text for substring matching.
+ *
+ * A spawn-level launch failure (e.g. an ENOENT from a missing git binary)
+ * carries no stderr at all — `undefined`, not an empty string or Buffer — so
+ * this returns `''` for that case rather than throwing on a nullish
+ * `.toString()` call.
  */
-export function stderrText(stderr: string | Buffer): string {
-  return typeof stderr === 'string' ? stderr : stderr.toString('utf8')
+export function stderrText(stderr: string | Buffer | undefined): string {
+  if (typeof stderr === 'string') {
+    return stderr
+  }
+  return stderr ? stderr.toString('utf8') : ''
 }

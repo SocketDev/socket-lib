@@ -163,191 +163,221 @@ export async function httpRequestAttempt(
     const request = httpModule.request(
       requestOptions,
       (res: IncomingResponse) => {
-        if (
-          followRedirects &&
-          res.statusCode &&
-          res.statusCode >= 300 &&
-          res.statusCode < 400 &&
-          res.headers.location
-        ) {
-          // Drain the redirect response body to free the socket.
-          res.resume()
+        // The response callback runs outside the Promise executor's
+        // synchronous frame (Node invokes it on a later tick), so a throw in
+        // here is NOT caught by the `new PromiseCtor(...)` above — it would
+        // escape as an uncaughtException instead of rejecting the promise.
+        // Wrap the whole body so every throw in it (a malformed redirect
+        // Location header included) routes through rejectOnce.
+        try {
+          if (
+            followRedirects &&
+            res.statusCode &&
+            res.statusCode >= 300 &&
+            res.statusCode < 400 &&
+            res.headers.location
+          ) {
+            // Drain the redirect response body to free the socket.
+            res.resume()
 
-          emitResponse({
-            headers: res.headers,
-            status: res.statusCode,
-            statusText: res.statusMessage,
-          })
+            emitResponse({
+              headers: res.headers,
+              status: res.statusCode,
+              statusText: res.statusMessage,
+            })
 
-          if (maxRedirects <= 0) {
-            // Hook already emitted above — reject directly to avoid double-fire.
-            settled = true
-            reject(
-              new ErrorCtor(
-                `Too many redirects (exceeded maximum: ${maxRedirects})`,
-              ),
-            )
-            return
-          }
+            if (maxRedirects <= 0) {
+              // Hook already emitted above — reject directly to avoid double-fire.
+              settled = true
+              reject(
+                new ErrorCtor(
+                  `Too many redirects (exceeded maximum: ${maxRedirects})`,
+                ),
+              )
+              return
+            }
 
-          const redirectUrl = res.headers.location.startsWith('http')
-            ? res.headers.location
-            : new URLCtor(res.headers.location, url).toString()
+            // Resolve the Location header against the current url whether it
+            // is absolute or relative — the URL constructor ignores the base
+            // when the first argument already parses as an absolute URL. A
+            // scheme check on `.protocol` (not `startsWith('http')`, which
+            // also accepts `httpfoo:`) validates the result.
+            const redirectParsed = new URLCtor(res.headers.location, url)
+            if (
+              redirectParsed.protocol !== 'http:' &&
+              redirectParsed.protocol !== 'https:'
+            ) {
+              // Hook already emitted above — reject directly to avoid double-fire.
+              settled = true
+              reject(
+                new ErrorCtor(
+                  `Redirect Location has an unsupported scheme: ${res.headers.location}`,
+                ),
+              )
+              return
+            }
+            const redirectUrl = redirectParsed.toString()
 
-          const redirectParsed = new URLCtor(redirectUrl)
-          if (isHttps && redirectParsed.protocol !== 'https:') {
-            // Hook already emitted above — reject directly to avoid double-fire.
-            settled = true
-            reject(
-              new ErrorCtor(
-                `Redirect from HTTPS to HTTP is not allowed: ${redirectUrl}`,
-              ),
-            )
-            return
-          }
+            if (isHttps && redirectParsed.protocol !== 'https:') {
+              // Hook already emitted above — reject directly to avoid double-fire.
+              settled = true
+              reject(
+                new ErrorCtor(
+                  `Redirect from HTTPS to HTTP is not allowed: ${redirectUrl}`,
+                ),
+              )
+              return
+            }
 
-          // Strip auth/session headers on cross-origin redirects to prevent
-          // leaking credentials to third-party hosts (e.g., GitHub -> S3).
-          let redirectHeaders = headers
-          if (new URLCtor(url).origin !== redirectParsed.origin) {
-            redirectHeaders = { __proto__: null } as unknown as typeof headers
-            const stripped = new Set([
-              'authorization',
-              'cookie',
-              'proxy-authenticate',
-              'proxy-authorization',
-            ])
-            for (const key of ObjectKeys(headers)) {
-              if (!stripped.has(key.toLowerCase())) {
-                ;(redirectHeaders as Record<string, unknown>)[key] = (
-                  headers as Record<string, unknown>
-                )[key]
+            // Strip auth/session headers on cross-origin redirects to prevent
+            // leaking credentials to third-party hosts (e.g., GitHub -> S3).
+            let redirectHeaders = headers
+            if (new URLCtor(url).origin !== redirectParsed.origin) {
+              redirectHeaders = {
+                __proto__: null,
+              } as unknown as typeof headers
+              const stripped = new Set([
+                'authorization',
+                'cookie',
+                'proxy-authenticate',
+                'proxy-authorization',
+              ])
+              for (const key of ObjectKeys(headers)) {
+                if (!stripped.has(key.toLowerCase())) {
+                  ;(redirectHeaders as Record<string, unknown>)[key] = (
+                    headers as Record<string, unknown>
+                  )[key]
+                }
               }
             }
-          }
 
-          // Redirect chaining — Promise adoption handles the inner result.
-          settled = true
-          resolve(
-            httpRequestAttempt(redirectUrl, {
-              body,
-              ca,
-              followRedirects,
-              headers: redirectHeaders,
-              hooks,
-              maxRedirects: maxRedirects - 1,
-              maxResponseSize,
-              method,
-              stream,
-              timeout,
-            }),
-          )
-          return
-        }
-
-        // Stream mode: resolve immediately with unconsumed response.
-        if (stream) {
-          const status = res.statusCode || 0
-          const statusText = res.statusMessage || ''
-          const ok = status >= 200 && status < 300
-
-          emitResponse({
-            headers: res.headers,
-            status,
-            statusText,
-          })
-
-          const emptyBody = BufferAlloc!(0)
-          resolveOnce({
-            arrayBuffer: () => emptyBody.buffer as ArrayBuffer,
-            body: emptyBody,
-            headers: res.headers,
-            json: () => {
-              throw new ErrorCtor('Cannot parse JSON from a streaming response')
-            },
-            ok,
-            rawResponse: res,
-            status,
-            statusText,
-            text: () => '',
-          })
-          return
-        }
-
-        const chunks: Buffer[] = []
-        let totalBytes = 0
-
-        res.on('data', (chunk: Buffer) => {
-          totalBytes += chunk.length
-          if (maxResponseSize && totalBytes > maxResponseSize) {
-            res.destroy()
-            request.destroy()
-            const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2)
-            const maxMB = (maxResponseSize / (1024 * 1024)).toFixed(2)
-            rejectOnce(
-              new ErrorCtor(
-                `Response exceeds maximum size limit (${sizeMB}MB > ${maxMB}MB)`,
-              ),
+            // Redirect chaining — Promise adoption handles the inner result.
+            settled = true
+            resolve(
+              httpRequestAttempt(redirectUrl, {
+                body,
+                ca,
+                followRedirects,
+                headers: redirectHeaders,
+                hooks,
+                maxRedirects: maxRedirects - 1,
+                maxResponseSize,
+                method,
+                stream,
+                timeout,
+              }),
             )
             return
           }
-          chunks.push(chunk)
-        })
 
-        res.on('end', () => {
-          if (settled) {
+          // Stream mode: resolve immediately with unconsumed response.
+          if (stream) {
+            const status = res.statusCode || 0
+            const statusText = res.statusMessage || ''
+            const ok = status >= 200 && status < 300
+
+            emitResponse({
+              headers: res.headers,
+              status,
+              statusText,
+            })
+
+            const emptyBody = BufferAlloc!(0)
+            resolveOnce({
+              arrayBuffer: () => emptyBody.buffer as ArrayBuffer,
+              body: emptyBody,
+              headers: res.headers,
+              json: () => {
+                throw new ErrorCtor(
+                  'Cannot parse JSON from a streaming response',
+                )
+              },
+              ok,
+              rawResponse: res,
+              status,
+              statusText,
+              text: () => '',
+            })
             return
           }
 
-          // Decompress per Content-Encoding before exposing the body. We
-          // advertise `Accept-Encoding: gzip, br`, so servers (GitHub API,
-          // nodejs.org, …) may return a compressed body — without this,
-          // `.json()` / `.text()` see raw gzip bytes and fail to parse.
-          // decodeBody is async (zlib); resolve through a promise then build
-          // the response. Falls back to the raw bytes on decode failure.
-          const rawBody = BufferConcat!(chunks)
-          void decodeBody(rawBody, res.headers['content-encoding'])
-            .catch(() => rawBody)
-            .then(responseBody => {
-              const ok =
-                res.statusCode !== undefined &&
-                res.statusCode >= 200 &&
-                res.statusCode < 300
+          const chunks: Buffer[] = []
+          let totalBytes = 0
 
-              const response: HttpResponse = {
-                arrayBuffer(): ArrayBuffer {
-                  return responseBody.buffer.slice(
-                    responseBody.byteOffset,
-                    responseBody.byteOffset + responseBody.byteLength,
-                  ) as ArrayBuffer
-                },
-                body: responseBody,
-                headers: res.headers,
-                json<T = unknown>(): T {
-                  return JSONParse(responseBody.toString('utf8')) as T
-                },
-                ok,
-                rawResponse: res,
-                status: res.statusCode || 0,
-                statusText: res.statusMessage || '',
-                text(): string {
-                  return responseBody.toString('utf8')
-                },
-              }
+          res.on('data', (chunk: Buffer) => {
+            totalBytes += chunk.length
+            if (maxResponseSize && totalBytes > maxResponseSize) {
+              res.destroy()
+              request.destroy()
+              const sizeMB = (totalBytes / (1024 * 1024)).toFixed(2)
+              const maxMB = (maxResponseSize / (1024 * 1024)).toFixed(2)
+              rejectOnce(
+                new ErrorCtor(
+                  `Response exceeds maximum size limit (${sizeMB}MB > ${maxMB}MB)`,
+                ),
+              )
+              return
+            }
+            chunks.push(chunk)
+          })
 
-              emitResponse({
-                headers: res.headers,
-                status: res.statusCode,
-                statusText: res.statusMessage,
+          res.on('end', () => {
+            if (settled) {
+              return
+            }
+
+            // Decompress per Content-Encoding before exposing the body. We
+            // advertise `Accept-Encoding: gzip, br`, so servers (GitHub API,
+            // nodejs.org, …) may return a compressed body — without this,
+            // `.json()` / `.text()` see raw gzip bytes and fail to parse.
+            // decodeBody is async (zlib); resolve through a promise then build
+            // the response. Falls back to the raw bytes on decode failure.
+            const rawBody = BufferConcat!(chunks)
+            void decodeBody(rawBody, res.headers['content-encoding'])
+              .catch(() => rawBody)
+              .then(responseBody => {
+                const ok =
+                  res.statusCode !== undefined &&
+                  res.statusCode >= 200 &&
+                  res.statusCode < 300
+
+                const response: HttpResponse = {
+                  arrayBuffer(): ArrayBuffer {
+                    return responseBody.buffer.slice(
+                      responseBody.byteOffset,
+                      responseBody.byteOffset + responseBody.byteLength,
+                    ) as ArrayBuffer
+                  },
+                  body: responseBody,
+                  headers: res.headers,
+                  json<T = unknown>(): T {
+                    return JSONParse(responseBody.toString('utf8')) as T
+                  },
+                  ok,
+                  rawResponse: res,
+                  status: res.statusCode || 0,
+                  statusText: res.statusMessage || '',
+                  text(): string {
+                    return responseBody.toString('utf8')
+                  },
+                }
+
+                emitResponse({
+                  headers: res.headers,
+                  status: res.statusCode,
+                  statusText: res.statusMessage,
+                })
+
+                resolveOnce(response)
               })
+          })
 
-              resolveOnce(response)
-            })
-        })
-
-        res.on('error', (error: Error) => {
-          rejectOnce(error)
-        })
+          res.on('error', (error: Error) => {
+            rejectOnce(error)
+          })
+        } catch (e) {
+          rejectOnce(e instanceof Error ? e : new ErrorCtor(String(e)))
+        }
       },
     )
 

@@ -7,10 +7,6 @@
 import { RegExpCtor } from '../../primordials/regexp.mjs'
 import { StringPrototypeReplace } from '../../primordials/string.mjs'
 
-// ANSI escape code regex to strip colors/formatting.
-// biome-ignore lint/suspicious/noControlCharactersInRegex: ANSI escape sequences use control characters.
-const ANSI_REGEX = /\x1b\[[0-9;]*m/g
-
 /**
  * Create a regular expression for matching ANSI escape codes.
  *
@@ -45,6 +41,14 @@ export function ansiRegex(
   return new RegExpCtor(pattern, onlyFirst ? undefined : 'g')
 }
 
+// Module-level global-flag instance of the full CSI/OSC pattern, hoisted so
+// stripAnsi doesn't recompile it on every call. `.replace` resets its own
+// scan position on every call, so sharing this instance there is safe.
+// Never share this same instance with a `.test`/`.exec` caller - those
+// persist `lastIndex` across calls and would desync against the shared
+// instance.
+const ANSI_FULL = ansiRegex()
+
 /**
  * Strip ANSI escape codes from text. Uses the inlined ansi-regex for matching.
  *
@@ -55,5 +59,5 @@ export function ansiRegex(
  *   ```
  */
 export function stripAnsi(text: string): string {
-  return StringPrototypeReplace(text, ANSI_REGEX, '')
+  return StringPrototypeReplace(text, ANSI_FULL, '')
 }

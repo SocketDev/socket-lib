@@ -171,9 +171,10 @@ export async function scanDocs(
   const pkg = JSON.parse(
     readFileSync(path.join(root, 'package.json'), 'utf8'),
   ) as { exports: Record<string, unknown> }
-  const files = globSync('docs/**/*.md', { absolute: true, cwd: root }).filter(
-    file => statSync(file).isFile(),
-  )
+  // node:fs globSync has no `absolute` option, so the root is joined here.
+  const files = globSync('docs/**/*.md', { cwd: root })
+    .map(entry => path.join(root, entry))
+    .filter(file => statSync(file).isFile())
   const findings: DocImportFinding[] = []
   for (let i = 0, { length } = files; i < length; i += 1) {
     // oxlint-disable-next-line no-await-in-loop -- serial keeps output ordered

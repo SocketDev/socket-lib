@@ -28,6 +28,8 @@
 
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodeFsPromises } from '../node/fs-promises.mjs'
+import { resolve } from '../paths/normalize.mjs'
+import { pFilter } from '../promises/iterate.mjs'
 import { fromAsync } from '../promises/resolvers.mjs'
 
 import {
@@ -67,6 +69,60 @@ export function canUseNodeFsGlob(
 }
 
 /**
+ * `node:fs.glob` / `node:fs.globSync` have no `onlyFiles` notion — they
+ * return directories alongside files. fast-glob (the path this fast path
+ * mirrors) defaults to `onlyFiles: true`, so the two engines must agree on
+ * the default or the same pattern over the same tree returns a different
+ * result set depending on which engine ran. Resolves each entry to an
+ * absolute path relative to the effective cwd and drops directories via a
+ * `stat` call — the same filtering fast-glob itself has to do internally.
+ */
+export async function filterToFilesAsync(
+  entries: string[],
+  cwd: string | undefined,
+  fsPromises: ReturnType<typeof getNodeFsPromises>,
+): Promise<string[]> {
+  const effectiveCwd = cwd ? resolve(cwd) : resolve()
+  return await pFilter(entries, async entry => {
+    try {
+      // Needs the Stats object's isDirectory(), not just existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- dir check
+      const stats = await fsPromises.stat(resolve(effectiveCwd, entry))
+      return !stats.isDirectory()
+    } catch {
+      // Entry vanished between the walk and the stat (race) — drop it,
+      // same as fast-glob would with a broken/missing entry.
+      return false
+    }
+  })
+}
+
+/**
+ * Sync twin of {@link filterToFilesAsync}.
+ */
+export function filterToFilesSync(
+  entries: string[],
+  cwd: string | undefined,
+  fs: ReturnType<typeof getNodeFs>,
+): string[] {
+  const effectiveCwd = cwd ? resolve(cwd) : resolve()
+  const files: string[] = []
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const entry = entries[i]!
+    try {
+      // Needs the Stats object's isDirectory(), not just existence.
+      // oxlint-disable-next-line socket/prefer-exists-sync -- dir check
+      if (!fs.statSync(resolve(effectiveCwd, entry)).isDirectory()) {
+        files.push(entry)
+      }
+    } catch {
+      // Entry vanished between the walk and the stat (race) — drop it.
+    }
+  }
+  return files
+}
+
+/**
  * Asynchronously find files matching glob patterns.
  *
  * @example
@@ -95,7 +151,8 @@ export async function glob(
         ...(normalizedIgnore ? { exclude: normalizedIgnore } : {}),
       }),
     )
-    return normalizeGlobResults(out)
+    const files = await filterToFilesAsync(out, options?.cwd, fsPromises)
+    return normalizeGlobResults(files)
   }
   /* c8 ignore stop */
   /* c8 ignore next - External fast-glob call */
@@ -130,12 +187,13 @@ export function globSync(
   /* c8 ignore start */
   if (canUseNodeFsGlob(options)) {
     const fs = getNodeFs()
-    return normalizeGlobResults([
+    const out = [
       ...fs.globSync(patterns as string | readonly string[], {
         ...(options?.cwd ? { cwd: options.cwd } : {}),
         ...(normalizedIgnore ? { exclude: normalizedIgnore } : {}),
       }),
-    ] as string[])
+    ] as string[]
+    return normalizeGlobResults(filterToFilesSync(out, options?.cwd, fs))
   }
   /* c8 ignore stop */
   /* c8 ignore next - External fast-glob call */

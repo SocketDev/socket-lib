@@ -5,6 +5,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { ansiRegex, stripAnsi } from '../../../../src/term/ansi/strip.mjs'
+import { stringWidth } from '../../../../src/strings/width.mjs'
 
 describe.sequential('ansi/strip (src) — ansiRegex', () => {
   it('returns a fresh RegExp each call (global flag avoids shared lastIndex)', () => {
@@ -60,6 +61,26 @@ describe.sequential('ansi/strip (src) — stripAnsi', () => {
 
   it('handles empty strings', () => {
     expect(stripAnsi('')).toBe('')
+  })
+
+  it('strips an OSC-8 hyperlink, leaving only the visible label', () => {
+    const label = 'click here'
+    const hyperlink = `\x1b]8;;https://example.com\x07${label}\x1b]8;;\x07`
+    expect(stripAnsi(hyperlink)).toBe(label)
+  })
+
+  it('strips a CSI cursor-move sequence', () => {
+    // Cursor up 3 rows, then forward 2 columns.
+    expect(stripAnsi('\x1b[3A\x1b[2Cvisible')).toBe('visible')
+  })
+
+  it('gives a hyperlinked label the same stringWidth as its visible text', () => {
+    // "click here" is plain ASCII, so its visual width equals its plain
+    // .length — a fixture-independent expected value, rather than routing
+    // the expected side back through stringWidth itself.
+    const label = 'click here'
+    const hyperlink = `\x1b]8;;https://example.com\x07${label}\x1b]8;;\x07`
+    expect(stringWidth(hyperlink)).toBe(label.length)
   })
 })
 

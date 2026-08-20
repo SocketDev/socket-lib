@@ -16,13 +16,70 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
-import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
+import {
+  computeHash,
+  HashMismatchError,
+} from '../../../../src/crypto/integrity.mjs'
 import { setPath } from '../../../../src/paths/rewire.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+
+import type NpmArborist from '../../../../src/external/@npmcli/arborist.js'
+
+// FakeArborist backs `new Arborist(...)` inside src/dlx/package.mts so the
+// hash-pin tests below never resolve/reify against the real npm registry —
+// same policy as dlx/arborist.test.mts (registry-hitting paths are exercised
+// by socket-cli's integration tests, not here). `buildIdealTree` rejects by
+// default so the pre-existing "writes hardened .npmrc" test below (which
+// never configures these mocks) keeps rejecting exactly like it did against
+// a real, non-existent 'lf-test' package.
+const {
+  arboristBuildIdealTreeMock,
+  arboristCtorMock,
+  arboristReifyMock,
+  checkFirewallPurlsMock,
+} = vi.hoisted(() => ({
+  arboristBuildIdealTreeMock: vi.fn(),
+  arboristCtorMock: vi.fn(),
+  arboristReifyMock: vi.fn(),
+  checkFirewallPurlsMock: vi.fn(),
+}))
+
+vi.mock(import('../../../../src/external/@npmcli/arborist.js'), () => ({
+  default: class FakeArborist {
+    constructor(options: unknown) {
+      arboristCtorMock(options)
+    }
+
+    async buildIdealTree(options: unknown) {
+      return await arboristBuildIdealTreeMock(options)
+    }
+
+    async reify(options: unknown) {
+      return await arboristReifyMock(options)
+    }
+  } as unknown as typeof NpmArborist,
+}))
+
+vi.mock(import('../../../../src/dlx/firewall.mjs'), () => ({
+  checkFirewallPurls: checkFirewallPurlsMock,
+}))
+
+import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
+
+beforeEach(() => {
+  arboristCtorMock.mockReset()
+  arboristBuildIdealTreeMock
+    .mockReset()
+    .mockRejectedValue(
+      new Error('FakeArborist: buildIdealTree not configured for this test'),
+    )
+  arboristReifyMock.mockReset().mockResolvedValue(undefined)
+  checkFirewallPurlsMock.mockReset().mockResolvedValue(undefined)
+})
 
 // `tmpDir` and `process.env['SOCKET_DLX_DIR']` are mutated at describe
 // scope and beforeEach. Under vitest's default
@@ -252,5 +309,83 @@ describe.sequential('ensurePackageInstalled (installRoot option)', () => {
 
     expect(result.installed).toBe(false)
     expect(normalizePath(result.packageDir)).toBe(normalizePath(installRoot))
+  })
+})
+
+describe.sequential('ensurePackageInstalled (hash pin)', () => {
+  let tmpDir: string
+
+  beforeEach(() => {
+    tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dlx-pkg-hash-'))
+  })
+
+  afterEach(async () => {
+    try {
+      await safeDelete(tmpDir)
+    } catch {}
+  })
+
+  it('throws HashMismatchError before the firewall check or reify when the pin is wrong', async () => {
+    const registryIntegrity = computeHash(
+      Buffer.from('registry-tarball-bytes'),
+    ).sri
+    const wrongHash = computeHash(Buffer.from('a-different-payload')).sri
+
+    arboristBuildIdealTreeMock.mockResolvedValueOnce({
+      inventory: new Map([
+        [
+          'hash-pin-mismatch@1.0.0',
+          {
+            name: 'hash-pin-mismatch',
+            version: '1.0.0',
+            integrity: registryIntegrity,
+            depth: 1,
+          },
+        ],
+      ]),
+    })
+
+    await expect(
+      ensurePackageInstalled('hash-pin-mismatch', 'hash-pin-mismatch@1.0.0', {
+        force: true,
+        install: { hash: wrongHash, installRoot: tmpDir },
+      }),
+    ).rejects.toThrow(HashMismatchError)
+
+    expect(checkFirewallPurlsMock).not.toHaveBeenCalled()
+    expect(arboristReifyMock).not.toHaveBeenCalled()
+  })
+
+  it('proceeds past the hash check to the firewall check and reify when the pin matches', async () => {
+    const registryIntegrity = computeHash(
+      Buffer.from('registry-tarball-bytes-matching'),
+    ).sri
+
+    arboristBuildIdealTreeMock.mockResolvedValueOnce({
+      inventory: new Map([
+        [
+          'hash-pin-match@1.0.0',
+          {
+            name: 'hash-pin-match',
+            version: '1.0.0',
+            integrity: registryIntegrity,
+            depth: 1,
+          },
+        ],
+      ]),
+    })
+
+    const result = await ensurePackageInstalled(
+      'hash-pin-match',
+      'hash-pin-match@1.0.0',
+      {
+        force: true,
+        install: { hash: registryIntegrity, installRoot: tmpDir },
+      },
+    )
+
+    expect(result.installed).toBe(true)
+    expect(checkFirewallPurlsMock).toHaveBeenCalledTimes(1)
+    expect(arboristReifyMock).toHaveBeenCalledTimes(1)
   })
 })

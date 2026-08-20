@@ -133,3 +133,53 @@ describe.sequential('request-attempt — body cleanup on error', () => {
     ).rejects.toThrow(/request failed/i)
   })
 })
+
+describe.sequential('request-attempt — redirect Location handling', () => {
+  // The response callback runs on a later tick outside the Promise
+  // executor's synchronous frame, so a throw while parsing a bad Location
+  // header must be caught internally and turned into a rejection — never an
+  // uncaughtException that takes the process down.
+  test('rejects instead of throwing when the redirect Location header is unparseable', async () => {
+    const fakeReq = makeFakeRequest()
+    const fakeRes = {
+      headers: { location: 'http://' },
+      on: vi.fn(),
+      resume: vi.fn(),
+      statusCode: 302,
+      statusMessage: 'Found',
+    }
+    httpStub.request.mockImplementation(
+      (_opts: Record<string, unknown>, cb: (res: unknown) => void) => {
+        cb(fakeRes)
+        return fakeReq
+      },
+    )
+
+    const { httpRequestAttempt } = await loadAttempt()
+    await expect(
+      httpRequestAttempt('http://example.com/start', {}),
+    ).rejects.toThrow()
+  })
+
+  test('rejects when the redirect Location header has a non-http(s) scheme', async () => {
+    const fakeReq = makeFakeRequest()
+    const fakeRes = {
+      headers: { location: 'javascript:alert(1)' },
+      on: vi.fn(),
+      resume: vi.fn(),
+      statusCode: 302,
+      statusMessage: 'Found',
+    }
+    httpStub.request.mockImplementation(
+      (_opts: Record<string, unknown>, cb: (res: unknown) => void) => {
+        cb(fakeRes)
+        return fakeReq
+      },
+    )
+
+    const { httpRequestAttempt } = await loadAttempt()
+    await expect(
+      httpRequestAttempt('http://example.com/start', {}),
+    ).rejects.toThrow(/unsupported scheme/i)
+  })
+})

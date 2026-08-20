@@ -34,6 +34,11 @@
  */
 
 import { isWin32 } from '../constants/platform.mjs'
+import {
+  equalHashes,
+  HashMismatchError,
+  parseHash,
+} from '../crypto/integrity.mjs'
 import { isError } from '../errors/predicates.mjs'
 import Arborist from '../external/@npmcli/arborist.js'
 import { safeMkdir } from '../fs/safe.mjs'
@@ -41,6 +46,7 @@ import { normalizePath } from '../paths/normalize.mjs'
 import { getSocketCacacheDir, getSocketDlxDir } from '../paths/socket.mjs'
 import { processLock } from '../process/lock-instance.mjs'
 import { spawn } from '../process/spawn/child.mjs'
+import { readTopLevelFromIdealTree } from './arborist.mjs'
 import { generateCacheKey } from './cache.mjs'
 
 import { getNodeFs } from '../node/fs.mjs'
@@ -324,18 +330,39 @@ export async function ensurePackageInstalled(
 
         // Resolve dependency tree from registry metadata, no tarballs.
         /* c8 ignore next - External Arborist call */
-        await arb.buildIdealTree({ add: [packageSpec] })
+        const idealTree = await arb.buildIdealTree({ add: [packageSpec] })
 
-        // Step 2: Check resolved packages against Socket Firewall API (public).
+        // If the caller pinned a hash, verify it against the top-level
+        // package's registry-declared integrity (sourced from the
+        // idealTree, independently of anything this code path computes)
+        // before spending a firewall check or a tarball download on the
+        // wrong package/version.
+        if (install?.hash !== undefined) {
+          const top = readTopLevelFromIdealTree(idealTree, packageName)
+          if (!equalHashes(install.hash, top.integrity)) {
+            throw new HashMismatchError(
+              parseHash(install.hash),
+              parseHash(top.integrity),
+            )
+          }
+        }
+
+        // Check resolved packages against Socket Firewall API (public).
         /* c8 ignore next - External API call */
         await checkFirewallPurls(arb, packageName)
 
-        // Step 3: Download tarballs and install. Reuses the cached idealTree.
+        // Download tarballs and install. Reuses the cached idealTree.
         // save: true creates package.json and package-lock.json at the root,
         // like npx.
         /* c8 ignore next - External Arborist call */
         await arb.reify({ save: true })
       } catch (e) {
+        // Rethrow a hash-pin mismatch without wrapping — the caller asked
+        // to pin an exact package and needs to see that specifically, not
+        // a generic install failure.
+        if (e instanceof HashMismatchError) {
+          throw e
+        }
         // Rethrow firewall block errors without wrapping.
         if (isError(e) && e.message.startsWith('Socket Firewall blocked')) {
           throw e
