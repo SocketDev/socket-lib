@@ -15,7 +15,7 @@ import { describe, expect, it } from 'vitest'
 
 import { getGlobMatcher } from '@socketsecurity/lib/globs/matcher'
 
-import { GUARDED_DEFINES } from '../../scripts/repo/build-externals/rolldown-config.mts'
+import { GUARDED_DEFINES } from '../../scripts/repo/build-externals/guarded-defines.mts'
 
 describe('externals guarded defines', () => {
   it('never substitutes a bare identifier that is a real global in this runtime', () => {
