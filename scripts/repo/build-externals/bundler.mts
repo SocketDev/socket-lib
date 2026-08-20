@@ -9,6 +9,7 @@ import process from 'node:process'
 
 import { rolldown } from 'rolldown'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 
 import {
   getPackageSpecificOptions,
@@ -33,8 +34,18 @@ const logger = getDefaultLogger()
  *
  * @returns {Promise<number | undefined>} Size in KB or undefined on error
  */
-export async function bundlePackage(packageName, outputPath, options = {}) {
-  const { quiet = false, rootDir } = options
+export async function bundlePackage(
+  packageName: string,
+  outputPath: string,
+  options: { quiet?: boolean | undefined; rootDir: string },
+) {
+  // Read through a null-prototype copy so a polluted Object.prototype cannot
+  // supply either option. Bound to a variable first: a destructuring pattern
+  // would give the literal a contextual type and reject `__proto__` as an
+  // excess property.
+  const opts = { __proto__: null, ...options }
+  const quiet = opts.quiet ?? false
+  const { rootDir } = opts
 
   if (!quiet) {
     logger.log(`  Bundling ${packageName}...`)
@@ -94,11 +105,15 @@ export async function bundlePackage(packageName, outputPath, options = {}) {
       outputPath,
       packageOpts,
     )
+    // buildConfig's `output` is typed one-or-many; write() takes one. No
+    // config here sets an array, so take the first entry rather than widen
+    // write()'s input.
+    const writeTarget = Array.isArray(output) ? output[0] : output
 
     // Bundle the package with rolldown.
     const bundle = await rolldown(inputOptions)
     try {
-      await bundle.write(output)
+      await bundle.write(writeTarget)
     } finally {
       await bundle.close()
     }
@@ -134,7 +149,7 @@ ${contentWithoutStrict}`
     return sizeKB
   } catch (e) {
     if (!quiet) {
-      logger.fail(`Failed to bundle ${packageName}: ${e.message}`)
+      logger.fail(`Failed to bundle ${packageName}: ${errorMessage(e)}`)
     }
     // Propagate the failure. The orchestrator wraps optional packages in
     // try/catch and logs a "Skipping optional package" message; required

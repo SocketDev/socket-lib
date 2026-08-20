@@ -11,6 +11,7 @@ import process from 'node:process'
 import { watch } from 'rolldown'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
@@ -34,6 +35,7 @@ import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 import { runMain } from '../fleet/_shared/run-main.mts'
 
 import type { ScriptMeta } from '../fleet/_shared/run-main.mts'
+import type { BuildSourceResult } from './bundle/steps.mts'
 
 const logger = getDefaultLogger()
 
@@ -56,6 +58,14 @@ export async function watchBuild(
 
   try {
     const { output, ...inputOptions } = buildConfig
+    // `output` is optional on RolldownOptions but required by watch(), and
+    // exactOptionalPropertyTypes means an absent one cannot be passed through.
+    // A config with no output has nothing to watch, so say that rather than
+    // handing rolldown a hole.
+    if (!output) {
+      logger.error('rolldown config declares no output; nothing to watch')
+      return 1
+    }
     const watcher = watch({ ...inputOptions, output })
 
     // rolldown requires closing each build's result on BUNDLE_END to avoid
@@ -198,14 +208,28 @@ async function main(): Promise<void> {
       strict: false,
     })
 
+    // `strict: false` keeps parseArgs from throwing on an unrecognized flag,
+    // and the cost is that `values` carries an index signature of `unknown`:
+    // every read needs bracket access and every pass-through is `unknown`
+    // where a `boolean` is wanted. Coercing once here keeps the loose parse
+    // and gives the rest of the function real booleans.
+    const flags = {
+      analyze: Boolean(values['analyze']),
+      needed: Boolean(values['needed']),
+      src: Boolean(values['src']),
+      types: Boolean(values['types']),
+      verbose: Boolean(values['verbose']),
+      watch: Boolean(values['watch']),
+    }
+
     const quiet = isQuiet(values)
-    const verbose = values.verbose
+    const { verbose } = flags
 
     // `--needed` is the `prepare`/install path. In CI, skip it entirely: CI
     // runs explicit build/test/check steps, so the install-time `prepare`
     // build is redundant work that only adds latency to every `pnpm install`
     // in the pipeline. (Locally, `--needed` still builds when dist is absent.)
-    if (values.needed && process.env['CI'] === 'true') {
+    if (flags.needed && process.env['CI'] === 'true') {
       if (!quiet) {
         logger.info(
           'CI detected — skipping prepare-time build (CI builds explicitly)',
@@ -218,7 +242,7 @@ async function main(): Promise<void> {
     // Check if build is needed. isBuildNeeded() short-circuits when dist
     // artifacts already exist, so a local `pnpm install` with a built dist/
     // is near-instant instead of rebuilding every time.
-    if (values.needed && !isBuildNeeded()) {
+    if (flags.needed && !isBuildNeeded()) {
       if (!quiet) {
         logger.info('Build artifacts exist, skipping build')
       }
@@ -229,14 +253,14 @@ async function main(): Promise<void> {
     let exitCode = 0
 
     // Handle watch mode
-    if (values.watch) {
+    if (flags.watch) {
       if (!quiet) {
         printHeader('Build Runner (Watch Mode)')
       }
       exitCode = await watchBuild({ quiet, verbose })
     }
     // Build types only
-    else if (values.types && !values.src) {
+    else if (flags.types && !flags.src) {
       if (!quiet) {
         printHeader('Building TypeScript Declarations')
       }
@@ -246,14 +270,14 @@ async function main(): Promise<void> {
       }
     }
     // Build source only
-    else if (values.src && !values.types) {
+    else if (flags.src && !flags.types) {
       if (!quiet) {
         printHeader('Building Source')
       }
       const { buildTime, exitCode: srcExitCode } = await buildSource({
         quiet,
         verbose,
-        analyze: values.analyze,
+        analyze: flags.analyze,
       })
       exitCode = srcExitCode
       if (exitCode === 0 && !quiet) {
@@ -325,7 +349,7 @@ async function main(): Promise<void> {
           quiet,
           verbose,
           skipClean: true,
-          analyze: values.analyze,
+          analyze: flags.analyze,
         }),
         buildExternals({ quiet, verbose }),
         buildTypes({ quiet, verbose, skipClean: true }),
@@ -397,8 +421,8 @@ async function main(): Promise<void> {
     if (exitCode !== 0) {
       process.exitCode = exitCode
     }
-  } catch (error) {
-    logger.error(`Build runner failed: ${error.message}`)
+  } catch (e) {
+    logger.error(`Build runner failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }

@@ -10,6 +10,8 @@ import process from 'node:process'
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
+import { isErrnoException } from '@socketsecurity/lib-stable/errors/predicates'
 
 import { externalPackages, scopedPackages } from '../build-externals/config.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
@@ -48,7 +50,7 @@ export async function fixExternalImports() {
       logger.success(title)
     }
   } catch (e) {
-    logger.error(`Failed to fix external imports: ${e.message}`)
+    logger.error(`Failed to fix external imports: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }
@@ -61,7 +63,10 @@ export async function fixExternalImports() {
  *
  * @returns {Promise<boolean>} True if file was modified
  */
-export async function fixFileImports(filePath, { verbose = false } = {}) {
+export async function fixFileImports(
+  filePath: string,
+  { verbose = false }: { verbose?: boolean | undefined } = {},
+) {
   let content = await fs.readFile(filePath, 'utf8')
   let modified = false
 
@@ -108,7 +113,7 @@ export async function fixFileImports(filePath, { verbose = false } = {}) {
  *
  * @returns {string} The relative path prefix (e.g., './' or '../')
  */
-export function getExternalPathPrefix(filePath) {
+export function getExternalPathPrefix(filePath: string) {
   const dir = path.dirname(filePath)
   const relativePath = path.relative(dir, distExternalDir)
   // Normalize to forward slashes and ensure it starts with ./ or ../
@@ -124,7 +129,10 @@ export function getExternalPathPrefix(filePath) {
  *
  * @returns {Promise<number>} Number of files fixed
  */
-export async function processDirectory(dir, { verbose = false } = {}) {
+export async function processDirectory(
+  dir: string,
+  { verbose = false }: { verbose?: boolean | undefined } = {},
+) {
   let fixedCount = 0
 
   try {
@@ -149,7 +157,7 @@ export async function processDirectory(dir, { verbose = false } = {}) {
     }
   } catch (e) {
     // Skip directories that don't exist.
-    if (e.code !== 'ENOENT') {
+    if (!isErrnoException(e) || e.code !== 'ENOENT') {
       throw e
     }
   }
@@ -158,6 +166,6 @@ export async function processDirectory(dir, { verbose = false } = {}) {
 }
 
 fixExternalImports().catch(error => {
-  logger.error(`Build failed: ${error.message || error}`)
+  logger.error(`Build failed: ${errorMessage(error)}`)
   process.exitCode = 1
 })

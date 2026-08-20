@@ -29,7 +29,9 @@ const distExternalDir = path.join(rootDir, 'dist', 'external')
  *
  * @returns {Promise<void>}
  */
-export async function buildExternals(options = {}) {
+export async function buildExternals(
+  options: { quiet?: boolean | undefined; verbose?: boolean | undefined } = {},
+) {
   const { quiet = false, verbose = false } = options
 
   // Default behavior: show header but not individual packages (concise)
@@ -83,7 +85,9 @@ export async function buildExternals(options = {}) {
  *
  * @returns {Promise<{ bundledCount: number; totalSize: number }>}
  */
-export async function bundleAllPackages(options = {}) {
+export async function bundleAllPackages(
+  options: { quiet?: boolean | undefined } = {},
+) {
   const { quiet = false } = options
   let bundledCount = 0
   let totalSize = 0
@@ -237,7 +241,10 @@ export async function bundleAllPackages(options = {}) {
  * @param {object} options - Options.
  * @param {boolean} options.quiet - Suppress output.
  */
-export async function fixNodeGypStrings(dir, options = {}) {
+export async function fixNodeGypStrings(
+  dir: string,
+  options: { quiet?: boolean | undefined } = {},
+) {
   const { quiet = false } = options
 
   // Find all .js files in dist/external
@@ -289,7 +296,10 @@ const dualFormBuiltins = new Set(builtinModules)
  * @param {object} options - Options.
  * @param {boolean} options.quiet - Suppress output.
  */
-export async function rewriteBareBuiltinRequires(dir, options = {}) {
+export async function rewriteBareBuiltinRequires(
+  dir: string,
+  options: { quiet?: boolean | undefined } = {},
+) {
   const { quiet = false } = options
 
   const files = await fs.readdir(dir, { withFileTypes: true })

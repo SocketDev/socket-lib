@@ -11,6 +11,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { REPO_ROOT } from '../fleet/paths.mts'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 
 const distDir = path.join(REPO_ROOT, 'dist')
 const require = createRequire(import.meta.url)
@@ -30,7 +31,7 @@ const logger = getDefaultLogger()
  * module.exports = { foo, bar, baz } Bad: module.exports = value or
  * module.exports.default = value.
  */
-export function checkEsmNamedExports(filePath) {
+export function checkEsmNamedExports(filePath: string) {
   // Skip external packages - they are bundled dependencies
   const relativePath = path.relative(distDir, filePath)
   const normalizedPath = normalizePath(relativePath)
@@ -84,7 +85,7 @@ export function checkEsmNamedExports(filePath) {
       return {
         path: filePath,
         ok: false,
-        reason: `Failed to require: ${requireError.message}`,
+        reason: `Failed to require: ${errorMessage(requireError)}`,
       }
     }
 
@@ -148,7 +149,7 @@ export function checkEsmNamedExports(filePath) {
     return {
       path: filePath,
       ok: false,
-      reason: `Failed to analyze: ${e.message}`,
+      reason: `Failed to analyze: ${errorMessage(e)}`,
     }
   }
 }
@@ -156,7 +157,10 @@ export function checkEsmNamedExports(filePath) {
 /**
  * Get all .js files in a directory recursively.
  */
-export function getJsFiles(dir, { files = [] } = {}) {
+export function getJsFiles(
+  dir: string,
+  { files = [] }: { files?: string[] | undefined } = {},
+) {
   const entries = readdirSync(dir, { withFileTypes: true })
 
   for (const entry of entries) {

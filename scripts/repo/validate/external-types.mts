@@ -40,7 +40,7 @@ const logger = getDefaultLogger()
 /**
  * Check if a .d.ts file uses proper module export patterns.
  */
-export function checkTypeDefinition(filePath) {
+export function checkTypeDefinition(filePath: string) {
   const relativePath = path.relative(externalDir, filePath)
   const normalizedPath = normalizePath(relativePath)
   const issues = []
@@ -52,7 +52,7 @@ export function checkTypeDefinition(filePath) {
     return {
       path: normalizedPath,
       ok: false,
-      issues: [`Failed to read file: ${e.message}`],
+      issues: [`Failed to read file: ${errorMessage(e)}`],
     }
   }
 
@@ -61,7 +61,7 @@ export function checkTypeDefinition(filePath) {
   let hasExport = false
 
   for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trim()
+    const line = lines[i]!.trim()
     const lineNum = i + 1
 
     // Skip comments and empty lines

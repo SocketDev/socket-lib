@@ -7,6 +7,7 @@
 import process from 'node:process'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { pluralize } from '@socketsecurity/lib-stable/words/pluralize'
 
@@ -35,7 +36,7 @@ async function main(): Promise<void> {
       logger.success(title)
     }
   } catch (error) {
-    logger.error(`Build failed: ${error.message || error}`)
+    logger.error(`Build failed: ${errorMessage(error)}`)
     process.exitCode = 1
   }
 }

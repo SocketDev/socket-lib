@@ -66,9 +66,13 @@ export async function buildSource(
   try {
     const startTime = Date.now()
     const { output, ...inputOptions } = buildConfig
+    // buildConfig's `output` is typed one-or-many; write() takes one. No
+    // config here sets an array, so take the first entry rather than widen
+    // write()'s input.
+    const writeTarget = Array.isArray(output) ? output[0] : output
     const bundle = await rolldown(inputOptions)
     try {
-      await bundle.write(output)
+      await bundle.write(writeTarget)
     } finally {
       await bundle.close()
     }
@@ -146,9 +150,13 @@ export async function buildPrim(
   const { quiet = false } = options
   try {
     const { output, ...inputOptions } = primBuildConfig
+    // buildConfig's `output` is typed one-or-many; write() takes one. No
+    // config here sets an array, so take the first entry rather than widen
+    // write()'s input.
+    const writeTarget = Array.isArray(output) ? output[0] : output
     const bundle = await rolldown(inputOptions)
     try {
-      await bundle.write(output)
+      await bundle.write(writeTarget)
     } finally {
       await bundle.close()
     }

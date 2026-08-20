@@ -42,7 +42,10 @@ const logger = getDefaultLogger()
 /**
  * Get all .js files recursively in a directory.
  */
-export function getJsFilesRecursive(dir, { files = [] } = {}) {
+export function getJsFilesRecursive(
+  dir: string,
+  { files = [] }: { files?: string[] | undefined } = {},
+) {
   try {
     const entries = readdirSync(dir, { withFileTypes: true })
 
@@ -66,7 +69,7 @@ export function getJsFilesRecursive(dir, { files = [] } = {}) {
 /**
  * Get all .js files and directories in the external directory.
  */
-export function getExternalModules(dir) {
+export function getExternalModules(dir: string) {
   return getJsFilesRecursive(dir).filter(file => {
     // Ensure the file is actually in the external directory and not some
     // symlink or weird path.
@@ -85,7 +88,7 @@ const DEFAULT_ONLY_ALLOWED = new Set([
 /**
  * Check if module exports work correctly for both CJS and ESM.
  */
-export async function checkModuleExports(filePath) {
+export async function checkModuleExports(filePath: string) {
   const relativePath = path.relative(externalDir, filePath)
   const normalizedPath = normalizePath(relativePath)
   const issues = []
@@ -103,7 +106,7 @@ export async function checkModuleExports(filePath) {
     return {
       path: normalizedPath,
       ok: false,
-      issues: [`CJS require() failed: ${e.message}`],
+      issues: [`CJS require() failed: ${errorMessage(e)}`],
     }
   }
 
@@ -151,7 +154,7 @@ export async function checkModuleExports(filePath) {
     // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- module path is computed from filePath at runtime.
     esmModule = await import(moduleUrl)
   } catch (e) {
-    issues.push(`ESM import failed: ${e.message}`)
+    issues.push(`ESM import failed: ${errorMessage(e)}`)
     return {
       path: normalizedPath,
       ok: false,
@@ -321,7 +324,10 @@ async function runValidation(): Promise<void> {
   } else {
     if (!quiet) {
       // Summary statistics
-      const totalCjsKeys = successes.reduce((sum, r) => sum + r.cjsKeys, 0)
+      const totalCjsKeys = successes.reduce(
+        (sum, r) => sum + (r.cjsKeys ?? 0),
+        0,
+      )
       const modulesWithDefault = successes.filter(r => r.hasEsmDefault).length
       const functionExports = successes.filter(
         r => r.cjsType === 'function',
@@ -352,7 +358,7 @@ async function runValidation(): Promise<void> {
             const hasDefault = result.hasEsmDefault ? '✓ default' : ''
             const hasSeparator =
               // oxlint-disable-next-line socket/no-status-emoji -- inline diagnostic label, not a status line.
-              result.cjsKeys > 0 ? `✓ ${result.cjsKeys} exports` : ''
+              (result.cjsKeys ?? 0) > 0 ? `✓ ${result.cjsKeys} exports` : ''
             logger.substep(
               `${result.path}: ${[hasDefault, hasSeparator].filter(Boolean).join(', ')}`,
             )

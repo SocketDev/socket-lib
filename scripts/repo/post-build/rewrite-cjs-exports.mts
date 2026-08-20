@@ -11,11 +11,43 @@ import { parse } from '@babel/parser'
 import MagicString from 'magic-string'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
+import { isErrnoException } from '@socketsecurity/lib-stable/errors/predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { REPO_ROOT } from '../../fleet/paths.mts'
 
 const logger = getDefaultLogger()
+
+/**
+ * The bundler-output AST as this file reads it: structurally, by the handful of
+ * fields the two patterns below test. A Babel discriminated union does not fit,
+ * because the walker recurses over EVERY child key rather than switching on
+ * node type, so each child is typed as another node of the same loose shape.
+ */
+interface AstNode {
+  arguments?: ReadonlyArray<AstNode | undefined> | undefined
+  body?: AstNode | undefined
+  callee?: AstNode | undefined
+  end?: number | undefined
+  key?: AstNode | undefined
+  left?: AstNode | undefined
+  name?: string | undefined
+  object?: AstNode | undefined
+  properties?: ReadonlyArray<AstNode | undefined> | undefined
+  property?: AstNode | undefined
+  right?: AstNode | undefined
+  start?: number | undefined
+  type?: string | undefined
+  value?: AstNode | undefined
+}
+
+/**
+ * Whether `value` is walkable. Anything non-object is a leaf.
+ */
+function isAstNode(value: unknown): value is AstNode {
+  return typeof value === 'object' && value !== null
+}
 
 const distDir = path.join(REPO_ROOT, 'dist')
 
@@ -34,7 +66,7 @@ export async function fixConstantExports() {
       logger.success(title)
     }
   } catch (e) {
-    logger.error(`Failed to fix CommonJS exports: ${e.message}`)
+    logger.error(`Failed to fix CommonJS exports: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }
@@ -81,10 +113,11 @@ export async function processDirectory(
             let toCommonJSEnd = undefined
 
             // Find __export call with default export
-            const walk = node => {
-              if (!node || typeof node !== 'object') {
+            const walk = (value: unknown): void => {
+              if (!isAstNode(value)) {
                 return
               }
+              const node = value
 
               // Look for: __export(name, { default: () => value_identifier })
               if (
@@ -92,15 +125,15 @@ export async function processDirectory(
                 node.callee?.type === 'Identifier' &&
                 node.callee.name === '__export' &&
                 node.arguments?.length === 2 &&
-                node.arguments[1].type === 'ObjectExpression'
+                node.arguments[1]?.type === 'ObjectExpression'
               ) {
-                const defaultProp = node.arguments[1].properties?.find(
+                const defaultProp = node.arguments[1]?.properties?.find(
                   p =>
-                    p.type === 'ObjectProperty' &&
+                    p?.type === 'ObjectProperty' &&
                     p.key?.name === 'default' &&
                     p.value?.type === 'ArrowFunctionExpression',
                 )
-                if (defaultProp?.value.body?.name) {
+                if (defaultProp?.value?.body?.name) {
                   valueIdentifier = defaultProp.value.body.name
                   exportCallStart = node.start
                   exportCallEnd = node.end
@@ -120,30 +153,36 @@ export async function processDirectory(
                 toCommonJSEnd = node.end
               }
 
-              // Recursively walk
-              const nodeKeys = Object.keys(node)
-              for (let i = 0, { length } = nodeKeys; i < length; i += 1) {
-                const key = nodeKeys[i]!
+              // Recursively walk. Entries rather than keys so the child is
+              // read without indexing back into a node that declares no index
+              // signature; `walk` narrows each one itself.
+              const childEntries = Object.entries(node)
+              for (let i = 0, { length } = childEntries; i < length; i += 1) {
+                const [key, child] = childEntries[i]!
                 if (key === 'end' || key === 'loc' || key === 'start') {
                   continue
                 }
-                const value = node[key]
-                if (Array.isArray(value)) {
-                  for (const item of value) {
+                if (Array.isArray(child)) {
+                  for (const item of child) {
                     walk(item)
                   }
                 } else {
-                  walk(value)
+                  walk(child)
                 }
               }
             }
 
             walk(ast.program)
 
+            // Each end offset is assigned in the same branch as its start, so
+            // testing the starts alone left the ends typed as possibly
+            // undefined even though they cannot be. Name all four.
             if (
               valueIdentifier &&
               exportCallStart !== undefined &&
-              toCommonJSStart !== undefined
+              exportCallEnd !== undefined &&
+              toCommonJSStart !== undefined &&
+              toCommonJSEnd !== undefined
             ) {
               // Remove the __export call and surrounding statement
               // Find the semicolon and newline after the call
@@ -233,7 +272,7 @@ export async function processDirectory(
     }
   } catch (e) {
     // Skip directories that don't exist
-    if (e.code !== 'ENOENT') {
+    if (!isErrnoException(e) || e.code !== 'ENOENT') {
       throw e
     }
   }

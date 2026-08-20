@@ -15,7 +15,10 @@ import path from 'node:path'
  *
  * @returns {Promise<string | null>} Path to local package or null
  */
-export async function getLocalPackagePath(packageName, rootDir) {
+export async function getLocalPackagePath(
+  packageName: string,
+  rootDir: string,
+) {
   const checks = []
 
   // Check workspace packages (e.g. @socketregistry/yocto-spinner).
@@ -60,7 +63,7 @@ export async function getLocalPackagePath(packageName, rootDir) {
  *
  * @returns {Promise<string>} Entry point path
  */
-export async function resolveLocalEntryPoint(localPath) {
+export async function resolveLocalEntryPoint(localPath: string) {
   const localPkgJson = JSON.parse(
     await fs.readFile(path.join(localPath, 'package.json'), 'utf8'),
   )

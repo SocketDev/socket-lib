@@ -11,6 +11,7 @@ import { deleteAsync } from 'del'
 import fastGlob from 'fast-glob'
 
 import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
@@ -33,7 +34,7 @@ const rootPath = path.resolve(
 /**
  * Clean specific directories.
  */
-interface CleanTask {
+export interface CleanTask {
   name: string
   pattern?: string | undefined
   patterns?: string[] | undefined
@@ -48,7 +49,13 @@ export async function cleanDirectories(
   for (let i = 0, { length } = tasks; i < length; i += 1) {
     const task = tasks[i]!
     const { name, pattern, patterns } = task
-    const patternsToDelete = patterns || [pattern]
+    // A task carries either `patterns` or a single `pattern`, both optional on
+    // CleanTask, so `[pattern]` alone is a (string | undefined)[] that fast-glob
+    // will not take. Drop the hole rather than widen fast-glob's input.
+    const patternsToDelete = patterns ?? (pattern ? [pattern] : [])
+    if (!patternsToDelete.length) {
+      continue
+    }
 
     if (!quiet) {
       logger.progress(`Cleaning ${name}`)
@@ -74,10 +81,10 @@ export async function cleanDirectories(
           logger.done(`Cleaned ${name} (already clean)`)
         }
       }
-    } catch (error) {
+    } catch (e) {
       if (!quiet) {
         logger.error(`Failed to clean ${name}`)
-        logger.error(error.message)
+        logger.error(errorMessage(e))
       }
       return 1
     }
@@ -130,36 +137,48 @@ async function main(): Promise<void> {
 
     const quiet = isQuiet(values)
 
+    // `strict: false` leaves `values` with an index signature of `unknown`, so
+    // coerce once instead of bracket-reading a possibly-unknown flag at each
+    // of the eleven use sites below.
+    const flags = {
+      all: Boolean(values['all']),
+      cache: Boolean(values['cache']),
+      coverage: Boolean(values['coverage']),
+      dist: Boolean(values['dist']),
+      modules: Boolean(values['modules']),
+      types: Boolean(values['types']),
+    }
+
     // Determine what to clean
     const cleanAll =
-      values.all ||
-      (!values.cache &&
-        !values.coverage &&
-        !values.dist &&
-        !values.types &&
-        !values.modules)
+      flags.all ||
+      (!flags.cache &&
+        !flags.coverage &&
+        !flags.dist &&
+        !flags.types &&
+        !flags.modules)
 
     const tasks = []
 
     // Build task list
-    if (cleanAll || values.cache) {
+    if (cleanAll || flags.cache) {
       tasks.push({ name: 'cache', pattern: '.cache' })
     }
 
-    if (cleanAll || values.coverage) {
+    if (cleanAll || flags.coverage) {
       tasks.push({ name: 'coverage', pattern: 'coverage' })
     }
 
-    if (cleanAll || values.dist) {
+    if (cleanAll || flags.dist) {
       tasks.push({
         name: 'dist',
         patterns: ['dist', '*.tsbuildinfo', '.tsbuildinfo'],
       })
-    } else if (values.types) {
+    } else if (flags.types) {
       tasks.push({ name: 'dist/types', patterns: ['dist/types'] })
     }
 
-    if (values.modules) {
+    if (flags.modules) {
       tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
     }
 
@@ -190,8 +209,8 @@ async function main(): Promise<void> {
         logger.success('Clean completed successfully!')
       }
     }
-  } catch (error) {
-    logger.error(`Clean runner failed: ${error.message}`)
+  } catch (e) {
+    logger.error(`Clean runner failed: ${errorMessage(e)}`)
     process.exitCode = 1
   }
 }
