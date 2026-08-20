@@ -39,6 +39,14 @@ export default config({
   ],
   rules: {
     'socket-repo/no-inline-lazy-node-getter': 'error',
+    // socket-lib dist lands inside a consumer V8 startup snapshot, so a
+    // module-scope load of a native-backed builtin in src/ aborts every
+    // downstream `node --build-snapshot`. The fleet default scope covers what
+    // the FLEET snapshots (its hook tree + scripts/fleet/_shared), which would
+    // never look here - so this repo declares its own sources in scope. Only a
+    // library needs this, which is why it is a per-repo option rather than a
+    // fleet-wide widen.
+    'socket/no-snapshot-hostile-builtin': ['error', { extraScopes: ['src/'] }],
     // Brand-new socket/* rules from the plugin cascade: each surfaced a
     // pre-existing debt pile the whole-tree autofix could not clear
     // (param renames + Promise.allSettled refactors need review). Staged
