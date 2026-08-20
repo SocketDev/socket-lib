@@ -152,18 +152,25 @@ describe('orderCandidates', () => {
   })
 
   it('keeps the Claude head first on a high-value tier even when a cheaper equivalent exists', () => {
-    // opus chain: claude(anthropic) → codex(openai) → opencode(fireworks).
+    // opus chain: claude(anthropic) → codex(openai) → opencode(fireworks) →
+    // opencode(synthetic). The point of this case is the HEAD: a high-value
+    // tier keeps Claude in front even though a cheaper seat sits behind it, so
+    // the assertion pins the head and the relative order of the rest rather
+    // than the chain's length, which grows as rungs are added.
     const order = orderCandidates({
       billing: bill({
         anthropic: { kind: 'metered', provider: 'anthropic' },
         fireworks: { kind: 'metered', provider: 'fireworks' },
         openai: { kind: 'subscription', provider: 'openai' },
+        synthetic: { kind: 'flat-rate', provider: 'synthetic' },
       }),
       env: 'local',
       route: FULL,
       tier: 'opus',
     })
-    expect(providers(order)).toStrictEqual(['anthropic', 'openai', 'fireworks'])
+    const ordered = providers(order)
+    expect(ordered[0]).toBe('anthropic')
+    expect(ordered.indexOf('openai')).toBeLessThan(ordered.indexOf('fireworks'))
   })
 
   it('keeps the static order in CI even on a commodity tier', () => {
