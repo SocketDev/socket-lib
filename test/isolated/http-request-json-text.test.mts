@@ -15,7 +15,11 @@ import { describe, expect, it } from 'vitest'
 // oxlint-disable-next-line socket/no-platform-specific-import -- the isolated vitest config resolves only the explicit /node file; the barrel has no index.ts and exports-map resolution isn't wired for relative/aliased imports here.
 import { httpJson, httpText } from '../../src/http-request/node.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import {
+  fixture,
+  listeningPort,
+  setupHttpFixture,
+} from './http-request-fixtures.mjs'
 
 setupHttpFixture()
 
@@ -26,6 +30,7 @@ describe('http-request', () => {
         `${fixture.baseUrl}/json`,
       )
 
+      // oxlint-disable-next-line socket/no-error-message-assertions -- payload
       expect(data.message).toBe('Hello, World!')
       expect(data.status).toBe('success')
     })
@@ -67,8 +72,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const data = await httpJson<{ retries: string }>(
@@ -104,8 +108,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const data = await httpJson<{ accept: string }>(
@@ -129,8 +132,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const data = await httpJson<{ contentType: string }>(
@@ -163,8 +165,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const data = await httpJson<{ contentType: string | null }>(
@@ -193,8 +194,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const data = await httpJson<{ contentType: string | null }>(
@@ -227,8 +227,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const data = await httpJson<{
@@ -290,8 +289,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const text = await httpText(`http://localhost:${testPort}/`, {
@@ -331,8 +329,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const text = await httpText(`http://localhost:${testPort}/`)
@@ -354,8 +351,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const text = await httpText(`http://localhost:${testPort}/`, {
@@ -380,8 +376,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const text = await httpText(`http://localhost:${testPort}/`)
@@ -403,8 +398,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const text = await httpText(`http://localhost:${testPort}/`, {
@@ -431,8 +425,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const text = await httpText(`http://localhost:${testPort}/`, {

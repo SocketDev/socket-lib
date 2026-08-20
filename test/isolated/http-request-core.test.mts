@@ -26,7 +26,11 @@ import { getSocketCallerUserAgent } from '../../src/http-request/user-agent.mjs'
 
 import { httpRequest } from '../../src/http-request/request.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import {
+  fixture,
+  listeningPort,
+  setupHttpFixture,
+} from './http-request-fixtures.mjs'
 
 setupHttpFixture()
 
@@ -47,6 +51,7 @@ describe('http-request', () => {
       expect(response.status).toBe(200)
       expect(response.ok).toBe(true)
       const data = response.json<{ message: string; status: string }>()
+      // oxlint-disable-next-line socket/no-error-message-assertions -- payload
       expect(data.message).toBe('Hello, World!')
       expect(data.status).toBe('success')
     })
@@ -246,8 +251,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const response = await httpRequest(`http://localhost:${testPort}/`, {
@@ -274,8 +278,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         await expect(
@@ -316,8 +319,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         await httpRequest(`http://localhost:${testPort}/`, {
@@ -346,8 +348,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         await expect(

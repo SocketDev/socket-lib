@@ -26,7 +26,11 @@ import { httpRequest } from '../../src/http-request/request.mjs'
 // oxlint-disable-next-line socket/no-src-import-in-test-expect -- self-consistency check against the local httpRequest's own UA; -stable would mismatch the local SOCKET_LIB_VERSION.
 import { getSocketCallerUserAgent } from '../../src/http-request/user-agent.mjs'
 
-import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
+import {
+  fixture,
+  listeningPort,
+  setupHttpFixture,
+} from './http-request-fixtures.mjs'
 import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
 
 import type {
@@ -48,8 +52,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const response = await httpRequest(`http://localhost:${testPort}/`)
@@ -74,8 +77,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const response = await httpRequest(`http://localhost:${testPort}/`)
@@ -110,8 +112,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const response = await httpRequest(`http://localhost:${testPort}/`)
@@ -141,8 +142,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const response = await httpRequest(`http://localhost:${testPort}/`)
@@ -175,6 +175,7 @@ describe('http-request', () => {
         },
       )
 
+      // oxlint-disable-next-line socket/no-error-message-assertions -- payload
       expect(data.message).toBe('Hello, World!')
     })
 
@@ -316,8 +317,7 @@ describe('http-request', () => {
       await new Promise<void>(resolve => {
         testServer.listen(0, () => resolve())
       })
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         await httpRequest(`http://localhost:${testPort}/`, {

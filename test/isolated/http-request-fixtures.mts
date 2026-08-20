@@ -46,6 +46,17 @@ export function makeRawRequest(url: string): Promise<http.IncomingMessage> {
 }
 
 /**
+ * The port an ad-hoc test server ended up listening on. `address()` answers a
+ * string for a unix socket and null before the server is listening, neither of
+ * which a test that just called `listen(0)` can hit, so the fallback is only
+ * there to keep the return a number.
+ */
+export function listeningPort(server: http.Server): number {
+  const address = server.address()
+  return address !== null && typeof address === 'object' ? address.port : 0
+}
+
+/**
  * Install vitest beforeAll / afterAll hooks for the HTTP test server. Call this
  * once at the top of a test file (outside any `describe`). The server listens
  * on a random port (`listen(0)`) and `fixture.baseUrl` is populated before any

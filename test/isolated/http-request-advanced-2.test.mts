@@ -44,6 +44,7 @@ import { HttpResponseError } from '../../src/http-request/response-types.mjs'
 
 import {
   fixture,
+  listeningPort,
   makeRawRequest,
   setupHttpFixture,
 } from './http-request-fixtures.mjs'
@@ -201,6 +202,7 @@ describe('http-request', () => {
       const response = await httpRequest(`${fixture.baseUrl}/server-error`)
       const error = new HttpResponseError(response, 'Custom error message')
 
+      // oxlint-disable-next-line socket/no-error-message-assertions -- echo
       expect(error.message).toBe('Custom error message')
       expect(error.response.status).toBe(500)
     })
@@ -281,8 +283,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const response = await httpRequest(`http://localhost:${testPort}/`, {
@@ -311,8 +312,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         await httpRequest(`http://localhost:${testPort}/`, {
@@ -345,8 +345,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         await expect(
@@ -382,8 +381,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         await httpRequest(`http://localhost:${testPort}/`, {
@@ -424,8 +422,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         const response = await httpRequest(`http://localhost:${testPort}/`, {
@@ -460,8 +457,7 @@ describe('http-request', () => {
         testServer.listen(0, () => resolve())
       })
 
-      const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort = listeningPort(testServer)
 
       try {
         await expect(
