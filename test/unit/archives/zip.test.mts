@@ -15,7 +15,7 @@ import { existsSync, mkdtempSync, readFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import AdmZip from 'adm-zip'
+import AdmZip from '../../../src/external/adm-zip.js'
 import { afterAll, describe, expect, it } from 'vitest'
 
 import { extractZip } from '../../../src/archives/zip.mjs'

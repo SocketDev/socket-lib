@@ -13,7 +13,7 @@ import path from 'node:path'
 import process from 'node:process'
 import { createGzip } from 'node:zlib'
 
-import AdmZip from 'adm-zip'
+import AdmZip from '../../src/external/adm-zip.js'
 // @ts-expect-error - no type declarations
 import tarStream from 'tar-stream'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
