@@ -145,7 +145,7 @@ export function fetchBundle(): void {
  */
 const SETTINGS_CANDIDATES_LOCAL = [
   '.config/repo/socket-wheelhouse.json',
-  '.config/socket-wheelhouse.json',
+  '.config/repo/socket-wheelhouse.json',
   '.socket-wheelhouse.json',
 ] as const
 

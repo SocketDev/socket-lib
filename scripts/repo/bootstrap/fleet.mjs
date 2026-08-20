@@ -326,7 +326,7 @@ function verifySegments(segmentsDir, manifest) {
 //#region scripts/repo/gen/bootstrap/src/applied-state.mts
 const SETTINGS_CANDIDATES = [
   '.config/repo/socket-wheelhouse.json',
-  '.config/socket-wheelhouse.json',
+  '.config/repo/socket-wheelhouse.json',
   '.socket-wheelhouse.json',
 ]
 function resolveSettingsPath(dest) {
