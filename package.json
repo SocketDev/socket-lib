@@ -1865,6 +1865,11 @@
       "types": "./dist/github/request.d.ts",
       "default": "./dist/github/request.js"
     },
+    "./github/reviews": {
+      "source": "./src/github/reviews.mts",
+      "types": "./dist/github/reviews.d.ts",
+      "default": "./dist/github/reviews.js"
+    },
     "./github/token": {
       "source": "./src/github/token.mts",
       "types": "./dist/github/token.d.ts",
