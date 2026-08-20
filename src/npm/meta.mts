@@ -204,36 +204,6 @@ export async function getPublishDate(
 }
 
 /**
- * Per-version trust signals (forces `variant: 'full'` — `_npmUser` is absent
- * from the abbreviated packument).
- */
-export async function getVersionTrustInfo(
-  name: string,
-  options?: GetPackumentSlimOptions | undefined,
-): Promise<Record<string, VersionTrustInfo>> {
-  const fullOptions = {
-    __proto__: null,
-    ...options,
-    variant: 'full',
-  } as GetPackumentSlimOptions
-  const meta = await getPackumentSlim(name, fullOptions)
-  const result: Record<string, VersionTrustInfo> = {}
-  const versions = Object.keys(meta.versions)
-  for (let i = 0, { length } = versions; i < length; i += 1) {
-    const version = versions[i]!
-    const entry = meta.versions[version]!
-    result[version] = {
-      approver: entry.staged,
-      attestations: entry.attestations,
-      integrity: entry.integrity,
-      shasum: entry.shasum,
-      trustedPublisher: entry.trustedPublisher,
-    }
-  }
-  return result
-}
-
-/**
  * List versions, optionally filtered by `range` (a semver range, an exact
  * version, or a dist-tag name — see `GetVersionsOptions.range`), an `after`
  * time floor, and/or a `minAgeDays` maturity window. See `GetVersionsOptions`
@@ -279,6 +249,38 @@ export async function getVersions(
   }
 
   return { distTags: meta.distTags, time, versions }
+}
+
+/**
+ * Per-version trust signals (forces `variant: 'full'` — `_npmUser` is absent
+ * from the abbreviated packument).
+ */
+export async function getVersionTrustInfo(
+  name: string,
+  options?: GetPackumentSlimOptions | undefined,
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
+): Promise<Record<string, VersionTrustInfo>> {
+  const fullOptions = {
+    __proto__: null,
+    ...options,
+    variant: 'full',
+  } as GetPackumentSlimOptions
+  const meta = await getPackumentSlim(name, fullOptions)
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
+  const result: Record<string, VersionTrustInfo> = {}
+  const versions = Object.keys(meta.versions)
+  for (let i = 0, { length } = versions; i < length; i += 1) {
+    const version = versions[i]!
+    const entry = meta.versions[version]!
+    result[version] = {
+      approver: entry.staged,
+      attestations: entry.attestations,
+      integrity: entry.integrity,
+      shasum: entry.shasum,
+      trustedPublisher: entry.trustedPublisher,
+    }
+  }
+  return result
 }
 
 /**
@@ -417,22 +419,6 @@ export async function safeGetPublishDate(
 }
 
 /**
- * Fail-open `getVersionTrustInfo` — an empty record on any error.
- *
- * @unused No internal or Socket consumers; exercised only by its unit tests.
- */
-export async function safeGetVersionTrustInfo(
-  name: string,
-  options?: GetPackumentSlimOptions | undefined,
-): Promise<Record<string, VersionTrustInfo>> {
-  try {
-    return await getVersionTrustInfo(name, options)
-  } catch {
-    return {}
-  }
-}
-
-/**
  * Fail-open `getVersions` — an empty result on any error.
  *
  * @unused No internal or Socket consumers; exercised only by its unit tests.
@@ -445,6 +431,23 @@ export async function safeGetVersions(
     return await getVersions(name, options)
   } catch {
     return { distTags: {}, time: {}, versions: [] }
+  }
+}
+
+/**
+ * Fail-open `getVersionTrustInfo` — an empty record on any error.
+ *
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
+ */
+export async function safeGetVersionTrustInfo(
+  name: string,
+  options?: GetPackumentSlimOptions | undefined,
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
+): Promise<Record<string, VersionTrustInfo>> {
+  try {
+    return await getVersionTrustInfo(name, options)
+  } catch {
+    return {}
   }
 }
 
