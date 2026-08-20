@@ -7,21 +7,21 @@
  *
  *   ```jsonc
  *   {
- *   // What the codemod did. `ok: false` means the batch was rejected.
- *   "ok": true,
- *   // Optional: expected validation findings (when `ok: false`).
- *   "findings": [
- *   { "kind": "self-import", "fileMatches": "^src/primordials/" }
- *   ],
- *   // Optional: per-file rewrite count + new content invariants.
- *   "files": {
- *   "src/consumer.ts": {
- *   "rewrites": 1,
- *   "importAdded": true,
- *   "contentIncludes": ["from '../primordials/array'"],
- *   "contentExcludes": ["from '@socketsecurity/lib/primordials'"]
- *   }
- *   }
+ *     // What the codemod did. `ok: false` means the batch was rejected.
+ *     "ok": true,
+ *     // Optional: expected validation findings (when `ok: false`).
+ *     "findings": [
+ *       { "kind": "self-import", "fileMatches": "^src/primordials/" },
+ *     ],
+ *     // Optional: per-file rewrite count + new content invariants.
+ *     "files": {
+ *       "src/consumer.ts": {
+ *         "rewrites": 1,
+ *         "importAdded": true,
+ *         "contentIncludes": ["from '../primordials/array'"],
+ *         "contentExcludes": ["from '@socketsecurity/lib/primordials'"],
+ *       },
+ *     },
  *   }
  *   ```
  *

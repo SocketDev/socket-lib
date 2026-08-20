@@ -1581,7 +1581,8 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 
 ---
 
-**Historical Entries**: The entries below are from when this package was named `@socketsecurity/registry`. This package was renamed to `@socketsecurity/lib` starting with version 1.0.0.
+**Historical Entries**: The entries below are from when this package was named `@socketsecurity/registry`. This package was renamed to `@socketsecurity/lib` starting with version 1.0.0
+
 ---
 
 These entries cover versions 1.0.0 → 1.5.3 of the previous package name (`@socketsecurity/registry`, Sep 2025 – Oct 2025). The version-number line restarted at 1.0.0 when the package was renamed to `@socketsecurity/lib`, so the current 1.x and 5.x lines do **not** continue from these old versions. Listed here for archival reference only.

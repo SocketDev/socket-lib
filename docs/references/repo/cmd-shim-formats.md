@@ -5,7 +5,7 @@ extracts the real script path out of them with a regex. That only works if the
 regex matches the exact text npm generates, so this note keeps a verbatim copy
 of the shim shapes the parser targets.
 
-Source: https://github.com/npm/cmd-shim/blob/v7.0.0/lib/index.js
+Source: <https://github.com/npm/cmd-shim/blob/v7.0.0/lib/index.js>
 
 When bumping the pinned cmd-shim version, regenerate a shim and diff it against
 the blocks below. A wording change upstream does not break the build; it makes
@@ -15,7 +15,7 @@ a binary that cannot be found.
 ## PowerShell (`bin.ps1`)
 
 Generated at
-https://github.com/npm/cmd-shim/blob/v7.0.0/lib/index.js#L192:
+<https://github.com/npm/cmd-shim/blob/v7.0.0/lib/index.js#L192>:
 
 <details>
 <summary>Verbatim npm cmd-shim v7.0.0 PowerShell output: the `$basedir` and `$exe` setup, the `Test-Path "$basedir/node$exe"` branch, and both pipeline-input paths the parser regex must match</summary>
