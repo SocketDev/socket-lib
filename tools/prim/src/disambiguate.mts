@@ -101,11 +101,6 @@ const DENIED_TOOLS = [
 // still works; Haiku is similarly capable for this task and cheaper.
 const MODEL = 'claude-sonnet-4-6'
 
-// Reasonable default. Verdict is one word; the model occasionally
-// emits a sentence of rationale before the verdict, which we tolerate
-// and parse out — 256 tokens is plenty.
-const MAX_TOKENS = 256
-
 // ─── Cache ───────────────────────────────────────────────────────────
 
 // A verdict as it is persisted. `reason` is the model's one-line rationale,
@@ -362,9 +357,13 @@ export async function disambiguateReceiver({
 
   let answer = ''
   try {
-    // `maxTokens` is absent from the SDK's `Options`, so the intersection
-    // declares it and the named binding sidesteps the excess-property check.
-    const options: Options & { maxTokens: number } = {
+    // No output-token cap is passed. The SDK's `Options` has no `maxTokens`
+    // (the only one in its types is on a context-usage RESPONSE), so a value
+    // here was accepted by an intersection type and then dropped on the floor —
+    // a cap that read as enforced and never was. What bounds the answer is the
+    // prompt's one-word constraint plus parseResponse, which selects a
+    // candidate out of whatever comes back.
+    const options: Options = {
       // Locked-down tool surface. THREE independent layers — see
       // file header for the canonical permission evaluation flow.
       //
@@ -381,7 +380,6 @@ export async function disambiguateReceiver({
       allowedTools: AUTO_APPROVE_TOOLS,
       cwd: targetRoot,
       disallowedTools: DENIED_TOOLS,
-      maxTokens: MAX_TOKENS,
       model: MODEL,
       permissionMode: 'dontAsk',
       tools: BASE_TOOLS,
