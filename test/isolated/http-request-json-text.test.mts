@@ -29,8 +29,6 @@ describe('http-request', () => {
       const data = await httpJson<{ message: string; status: string }>(
         `${fixture.baseUrl}/json`,
       )
-
-      // oxlint-disable-next-line socket/no-error-message-assertions -- payload
       expect(data.message).toBe('Hello, World!')
       expect(data.status).toBe('success')
     })

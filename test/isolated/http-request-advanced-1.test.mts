@@ -174,8 +174,6 @@ describe('http-request', () => {
           ca: ['-----BEGIN CERTIFICATE-----\ntest\n-----END CERTIFICATE-----'],
         },
       )
-
-      // oxlint-disable-next-line socket/no-error-message-assertions -- payload
       expect(data.message).toBe('Hello, World!')
     })
 

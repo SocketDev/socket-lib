@@ -51,7 +51,6 @@ describe('http-request', () => {
       expect(response.status).toBe(200)
       expect(response.ok).toBe(true)
       const data = response.json<{ message: string; status: string }>()
-      // oxlint-disable-next-line socket/no-error-message-assertions -- payload
       expect(data.message).toBe('Hello, World!')
       expect(data.status).toBe('success')
     })

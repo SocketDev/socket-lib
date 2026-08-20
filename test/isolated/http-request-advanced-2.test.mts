@@ -201,7 +201,6 @@ describe('http-request', () => {
     it('should accept a custom message', async () => {
       const response = await httpRequest(`${fixture.baseUrl}/server-error`)
       const error = new HttpResponseError(response, 'Custom error message')
-
       // oxlint-disable-next-line socket/no-error-message-assertions -- echo
       expect(error.message).toBe('Custom error message')
       expect(error.response.status).toBe(500)
