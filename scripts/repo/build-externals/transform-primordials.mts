@@ -42,6 +42,68 @@ import path from 'node:path'
 import { applyCodemod, loadPrimordialsSurface } from 'local-prim'
 
 /**
+ * The parsed primordials surface `loadPrimordialsSurface` hands back: every
+ * exported primordial name, plus the name → leaf-module map the split-by-leaf
+ * import emitter needs.
+ */
+export interface PrimordialsSurface {
+  exports: Set<string>
+  exportToLeaf: Map<string, string>
+}
+
+/**
+ * The primordials surface, narrowed at this boundary.
+ *
+ * `parseExports` in tools/prim builds its `exports` set and `exportToLeaf` map
+ * without element types, so the value arrives as `Set<unknown>` /
+ * `Map<any, any>` and does not satisfy applyCodemod's `Set<string>`. Narrowing
+ * by test rather than asserting the shape: an assertion would claim a guarantee
+ * the producer does not make, and a non-string name could not drive a rewrite
+ * anyway, so dropping one is the correct behavior rather than a silent lie.
+ *
+ * Once `parseExports` declares its own element types this collapses to a plain
+ * call.
+ */
+export function readSurface(
+  distRoot: string,
+  srcPrimordialsDir: string,
+): PrimordialsSurface {
+  const raw = loadPrimordialsSurface(distRoot, srcPrimordialsDir)
+  return {
+    exports: stringSet(raw.exports),
+    exportToLeaf: stringMap(raw.exportToLeaf),
+  }
+}
+
+/**
+ * The string members of `values`, in iteration order.
+ */
+export function stringSet(values: Iterable<unknown>): Set<string> {
+  const out = new Set<string>()
+  for (const value of values) {
+    if (typeof value === 'string') {
+      out.add(value)
+    }
+  }
+  return out
+}
+
+/**
+ * The string-to-string entries of `entries`, in iteration order.
+ */
+export function stringMap(
+  entries: Iterable<readonly [unknown, unknown]>,
+): Map<string, string> {
+  const out = new Map<string, string>()
+  for (const [key, value] of entries) {
+    if (typeof key === 'string' && typeof value === 'string') {
+      out.set(key, value)
+    }
+  }
+  return out
+}
+
+/**
  * Apply the primordials codemod to every JS file under `distExternalDir`.
  *
  * @param {string} distRoot Absolute path to dist/.
@@ -66,7 +128,7 @@ export async function transformPrimordials(
   // `loadPrimordialsSurface` concatenates every leaf in the directory
   // and parses the unified output as a single primordials surface.
   const srcPrimordialsDir = path.join(distRoot, '..', 'src', 'primordials')
-  const surface = loadPrimordialsSurface(distRoot, srcPrimordialsDir)
+  const surface = readSurface(distRoot, srcPrimordialsDir)
 
   // Per-leaf specifier: walk up from the bundle to dist/, then down to
   // primordials/<leaf>.js. We strip a leading './' replacement because
