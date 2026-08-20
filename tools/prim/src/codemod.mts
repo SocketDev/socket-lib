@@ -22,8 +22,6 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
-import { parse } from '@ultrathink/acorn.rs.wasm'
-
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import type { PlannedRewrite, ValidationFinding } from './validate.mts'
@@ -32,6 +30,7 @@ import { validateRewrites } from './validate.mts'
 import type { PendingAmbiguous, Rewrite } from './ai-disambiguate-pass.mts'
 import { drainPendingAmbiguous } from './ai-disambiguate-pass.mts'
 import { collectRewrites } from './collect-rewrites.mts'
+import type { PrimordialsImportStyle } from './import-emit.mts'
 import { applyPrimordialsImports } from './import-emit.mts'
 import {
   atomicWrite,
@@ -59,73 +58,60 @@ const REWRITABLE_EXTENSIONS = new Set([
 ])
 const TS_EXTENSIONS = new Set(['.cts', '.mts', '.ts', '.tsx'])
 
-/**
- * Output format for the inserted primordials import: { kind: 'esm' }: emits
- * `import { X, Y } from '<specifier>'`. Default; used when the target is ESM
- * source code. { kind: 'cjs' }: emits `const { X, Y } =
- * require('<specifier>')`. Used when the target is CJS bundled output
- * (dist/external/*.js).
- *
- * `specifier` is either a static string or a `(absFilePath) => string`
- * function. The function form lets callers compute a per-file relative path to
- * the primordials module — e.g. absFile === '.../dist/external/tar-fs.js' →
- * '../primordials.js' absFile === '.../dist/external/@npmcli/x/y.js' →
- * '../../../primordials.js'
- *
- * `aliasPrefix` (optional) renames the imported identifiers in the destructure
- * list. Useful for the bundle-transform path: bundled externals frequently
- * declare local `var ObjectDefineProperty = …` shadows from esbuild's CJS
- * interop runtime, which would collide with a top-level `const {
- * ObjectDefineProperty } = require(…)`. Setting `aliasPrefix: '_p_'` rewrites
- * all primordial references in the file to `_p_ObjectDefineProperty(…)` and
- * emits the require as `const { ObjectDefineProperty: _p_ObjectDefineProperty }
- * = …`, avoiding any clash with the bundle's own identifiers.
- *
- * `splitByLeaf` (optional) groups identifiers by leaf name and emits one import
- * / require per leaf. Used after the primordials split, where consumers no
- * longer share a single barrel — instead each primordial lives in
- * `@socketsecurity/lib/primordials/<leaf>`. `exportToLeaf` maps every export
- * name to its leaf; `leafSpecifier` receives the consumer's absolute path plus
- * the leaf name and returns the import target. When `splitByLeaf` is set, the
- * top-level `specifier` is ignored.
- *
- * @typedef {{
- *   kind: 'esm' | 'cjs'
- *   specifier: string | ((absFile: string) => string)
- *   aliasPrefix?: string
- *   splitByLeaf?: {
- *     exportToLeaf: Map<string, string>
- *     leafSpecifier: (absFile: string, leaf: string) => string
- *   }
- * }} ImportStyle
- */
+export interface CodemodReportEntry {
+  file: string
+  rewrites: number
+  importAdded: boolean
+}
 
-/**
- * @typedef {Object} CodemodResult
- *
- * @property {number} filesChanged
- * @property {number} rewriteCount
- * @property {number} skipped Rewrites declined (e.g. guessed-receiver without
- *   --include-guessed).
- * @property {{ file: string; rewrites: number; importAdded: boolean }[]} files
- */
+export interface CodemodResult {
+  filesChanged: number
+  rewriteCount: number
+  /**
+   * Rewrites declined (e.g. guessed-receiver without --include-guessed).
+   */
+  skipped: number
+  files: CodemodReportEntry[]
+  /**
+   * Per-file planned rewrites, kept across the run regardless of validate /
+   * apply mode. The CLI's `--diff` flag reads this to render unified diffs in
+   * dry-run mode without re-walking the tree.
+   */
+  plans: PlannedRewrite[]
+  validationFailed?: boolean | undefined
+  validationFindings?: readonly ValidationFinding[] | undefined
+}
 
-/**
- * @param {Object} opts
- * @param {string} opts.targetRoot
- * @param {string} opts.scanDir
- * @param {Set<string>} opts.exported
- * @param {boolean} opts.apply
- * @param {boolean} opts.includeGuessed
- * @param {boolean} [opts.aiDisambiguate] When true, defer ambiguous prototype
- *   methods (.test, .then, etc.) to Claude with a locked-down read-only tool
- *   surface. Off by default — opt-in via CLI flag. Requires ANTHROPIC_API_KEY
- *   in env.
- * @param {ImportStyle} [opts.importStyle] Defaults to ESM with the
- *   '@socketsecurity/lib/primordials' specifier.
- *
- * @returns {Promise<CodemodResult>}
- */
+export interface ApplyCodemodOptions {
+  /**
+   * When true, defer ambiguous prototype methods (.test, .then, etc.) to Claude
+   * with a locked-down read-only tool surface. Off by default — opt-in via CLI
+   * flag. Requires ANTHROPIC_API_KEY in env.
+   */
+  aiDisambiguate?: boolean | undefined
+  apply: boolean
+  exported: Set<string>
+  /**
+   * Defaults to ESM with the '@socketsecurity/lib/primordials' specifier.
+   */
+  importStyle?: PrimordialsImportStyle | undefined
+  includeGuessed: boolean
+  /**
+   * Root of the target's own primordials surface, which is never rewritten.
+   */
+  localPrimordialsPath?: string | undefined
+  /**
+   * Primordials whose runtime value may be `undefined` in cross-env builds.
+   */
+  nullable?: Set<string> | undefined
+  scanDir: string
+  targetRoot: string
+  /**
+   * Run the cross-batch validation phase before writing. On by default.
+   */
+  validate?: boolean | undefined
+}
+
 export async function applyCodemod({
   aiDisambiguate = false,
   apply,
@@ -140,19 +126,8 @@ export async function applyCodemod({
   scanDir,
   targetRoot,
   validate = true,
-}) {
-  const result: {
-    filesChanged: number
-    rewriteCount: number
-    skipped: number
-    files: Array<{ file: string; rewrites: number; importAdded: boolean }>
-    // Per-file planned rewrites, kept across the run regardless of
-    // validate / apply mode. The CLI's `--diff` flag reads this to render
-    // unified diffs in dry-run mode without re-walking the tree.
-    plans: PlannedRewrite[]
-    validationFailed?: boolean | undefined
-    validationFindings?: readonly ValidationFinding[] | undefined
-  } = {
+}: ApplyCodemodOptions) {
+  const result: CodemodResult = {
     filesChanged: 0,
     rewriteCount: 0,
     skipped: 0,
@@ -260,6 +235,28 @@ export async function applyCodemod({
   return result
 }
 
+export interface RewriteFileOptions {
+  absPath: string
+  aiDisambiguate: boolean
+  apply: boolean
+  exported: Set<string>
+  importStyle: PrimordialsImportStyle
+  includeGuessed: boolean
+  nullable: Set<string>
+  relPath: string
+  targetRoot: string
+}
+
+export interface RewriteFileResult {
+  rewrites: number
+  importAdded: boolean
+  skipped: number
+  /**
+   * Set only when the rewritten content differs from what is on disk.
+   */
+  newSource?: string | undefined
+}
+
 /**
  * Rewrite one file. Returns `{ rewrites, importAdded, skipped }`.
  *
@@ -280,7 +277,7 @@ export async function rewriteFile({
   nullable,
   relPath,
   targetRoot,
-}) {
+}: RewriteFileOptions): Promise<RewriteFileResult> {
   // Local-name prefix for the inserted destructure. When set, an
   // imported `Foo` is referenced in source as `<prefix>Foo` and the
   // require becomes `const { Foo: <prefix>Foo, … } = require(…)`.
@@ -425,9 +422,9 @@ export async function rewriteFile({
 }
 
 export function* walkDir(
-  dir,
-  skipDirs = ['external', 'node_modules', '.cache'],
-  skipFiles = [
+  dir: string,
+  skipDirs: string[] = ['external', 'node_modules', '.cache'],
+  skipFiles: string[] = [
     'primordials.cjs',
     'primordials.cts',
     'primordials.js',
@@ -435,7 +432,7 @@ export function* walkDir(
     'primordials.mts',
     'primordials.ts',
   ],
-) {
+): Generator<string> {
   for (const entry of readdirSync(dir)) {
     if (skipDirs.includes(entry) || skipFiles.includes(entry)) {
       continue

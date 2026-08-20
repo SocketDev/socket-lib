@@ -20,6 +20,16 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 
+import { GLOBAL_RECORD } from './globals.mts'
+
+/**
+ * A global read off `globalThis` by name. Only its prototype is inspected, so
+ * that is all this names.
+ */
+export interface GlobalWithPrototype {
+  prototype?: unknown | undefined
+}
+
 /**
  * @param {string} sourcePath - Path to a primordials source file (.ts or .js).
  *
@@ -80,11 +90,11 @@ const NODE_PRIMORDIAL_NAMESPACES = [
   'Reflect',
 ]
 
-export function capitalize(s) {
+export function capitalize(s: string): string {
   if (!s) {
     return s
   }
-  return s[0].toUpperCase() + s.slice(1)
+  return s[0]!.toUpperCase() + s.slice(1)
 }
 
 /**
@@ -100,7 +110,7 @@ export function deriveNodeBootstrapSurface() {
 
   for (let i = 0, { length } = NODE_PRIMORDIAL_NAMESPACES; i < length; i += 1) {
     const ns = NODE_PRIMORDIAL_NAMESPACES[i]!
-    const original = globalThis[ns]
+    const original = GLOBAL_RECORD[ns]
     if (!original) {
       continue
     }
@@ -117,7 +127,7 @@ export function deriveNodeBootstrapSurface() {
 
   for (let i = 0, { length } = NODE_PRIMORDIAL_GLOBALS; i < length; i += 1) {
     const name = NODE_PRIMORDIAL_GLOBALS[i]!
-    const original = globalThis[name]
+    const original = GLOBAL_RECORD[name] as GlobalWithPrototype | undefined
     if (!original) {
       continue
     }
@@ -203,7 +213,10 @@ export function deriveNodeBootstrapSurface() {
  *
  * @returns {{ source: string; exports: Set<string> }}
  */
-export function loadPrimordialsSurface(targetRoot, surfacePath) {
+export function loadPrimordialsSurface(
+  targetRoot: string,
+  surfacePath?: string | undefined,
+) {
   if (surfacePath) {
     const resolved = path.resolve(surfacePath)
     if (!existsSync(resolved)) {
@@ -259,7 +272,7 @@ export function loadPrimordialsSurface(targetRoot, surfacePath) {
   )
 }
 
-export function parseExports(sourcePath) {
+export function parseExports(sourcePath: string) {
   // Post-split layout: `sourcePath` may be a directory of leaves
   // (`primordials/`). Concatenate every leaf so the regex passes below
   // see the same shape as the legacy single-file path. Track which
@@ -344,7 +357,7 @@ export function parseExports(sourcePath) {
   // ESM grouped form: `export { Foo, Bar, Baz }` (with or without trailing
   // `from '...'`).
   for (const m of src.matchAll(/^export\s*\{\s*([\s\S]+?)\s*\}/gm)) {
-    const idents = m[1].split(',')
+    const idents = m[1]!.split(',')
     for (let i = 0, { length } = idents; i < length; i += 1) {
       const ident = idents[i]!
       const cleaned = ident.trim().replace(/^([A-Z][a-zA-Z0-9]+).*$/, '$1')
@@ -363,7 +376,7 @@ export function parseExports(sourcePath) {
   for (const m of src.matchAll(
     /^export const ([A-Z][a-zA-Z0-9]+)\s*:\s*([\s\S]+?)\s*=\s/gm,
   )) {
-    if (/\|\s*undefined\b/.test(m[2])) {
+    if (/\|\s*undefined\b/.test(m[2]!)) {
       nullable.add(m[1])
     }
   }

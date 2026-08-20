@@ -9,21 +9,33 @@
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { stripTypeScriptTypes } from 'node:module'
+import { createRequire, stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 
-import { walk } from '@ultrathink/acorn.rs.wasm'
+/**
+ * Argument list the interceptor below forwards. `process.emitWarning` has four
+ * overloads and only the first argument is common to all of them, so the rest
+ * passes through unread.
+ */
+export type EmitWarningArgs = [warning: string | Error, ...rest: unknown[]]
 
 // Suppress the one-time ExperimentalWarning from stripTypeScriptTypes
 // without affecting other warnings. We replace Node's default emit-to-
 // stderr behavior with a filter that silences just this one warning;
 // everything else gets re-emitted to stderr in the same format.
-const defaultEmitWarning = process.emitWarning.bind(process)
+const defaultEmitWarning = process.emitWarning.bind(process) as (
+  ...args: EmitWarningArgs
+) => void
 process.emitWarning = function emitWarning(...args) {
   const [warning, name] = args
   const warningStr = typeof warning === 'string' ? warning : warning?.message
-  const warningName = typeof name === 'string' ? name : warning?.name
+  const warningName =
+    typeof name === 'string'
+      ? name
+      : typeof warning === 'string'
+        ? undefined
+        : warning?.name
   if (
     warningName === 'ExperimentalWarning' &&
     warningStr?.includes('stripTypeScriptTypes')
@@ -42,32 +54,106 @@ import {
 } from './audit-helpers.mts'
 import { buildVisitors } from './audit-visitors.mts'
 import { disambiguateReceiver } from './disambiguate.mts'
+import { prototypePrimordialName } from './globals.mts'
 
 /**
- * @typedef {Object} Finding
- *
- * @property {string} primordial Name of the matching primordial.
- * @property {string} pattern Source-level pattern, e.g. `Object.keys(...)`.
- * @property {string} file Path relative to the target root.
- * @property {number} line
- * @property {number} column
- * @property {'covered' | 'gap'} kind Whether the primordial exists today.
+ * The visitor table `buildVisitors` hands the walk. Derived from the builder so
+ * the per-node parameter types stay in one place.
  */
+export type AuditVisitors = ReturnType<typeof buildVisitors>
 
 /**
- * @param {Object} opts
- * @param {string} opts.targetRoot
- * @param {string} opts.scanDir Directory to walk.
- * @param {Set<string>} opts.exported Currently-exported primordials.
- * @param {string[]} [opts.skipDirs] Directories to skip during walk.
- * @param {string[]} [opts.skipFiles] Files to skip, matched by basename.
- * @param {boolean} [opts.aiDisambiguate] When true, defer ambiguous prototype
- *   methods (.test, .then, etc.) to Claude with a locked-down read-only tool
- *   surface. Off by default — opt-in via CLI flag. Requires ANTHROPIC_API_KEY
- *   in env.
- *
- * @returns {Promise<Finding[]>}
+ * `@ultrathink/acorn.rs.wasm` ships no declarations, so this names the one
+ * member this module uses.
  */
+export interface AcornWasmWalk {
+  walk: (
+    source: string,
+    visitors: AuditVisitors,
+    options: typeof PARSE_OPTIONS,
+  ) => void
+}
+
+const { walk } = createRequire(import.meta.url)(
+  '@ultrathink/acorn.rs.wasm',
+) as AcornWasmWalk
+
+/**
+ * `covered` — the primordial exists today. `gap` — it still has to be added to
+ * the surface. `redeclaration` — the file hand-rolls a local alias for a
+ * primordial it could import.
+ */
+export type FindingKind = 'covered' | 'gap' | 'redeclaration'
+
+export interface Finding {
+  /**
+   * Name of the matching primordial.
+   */
+  primordial: string
+  /**
+   * Source-level pattern, e.g. `Object.keys(...)`.
+   */
+  pattern: string
+  /**
+   * Path relative to the target root.
+   */
+  file: string
+  line: number
+  column: number
+  kind: FindingKind
+}
+
+/**
+ * The findings list plus the walk's skipped-file bookkeeping, attached as
+ * non-enumerable handles so array consumers see a plain `Finding[]`.
+ */
+export interface AuditFindings extends Array<Finding> {
+  parseFailures?: number | undefined
+  parseFailureFiles?: string[] | undefined
+  stripFailures?: number | undefined
+  stripFailureFiles?: string[] | undefined
+}
+
+/**
+ * One ambiguous-method call site queued for the post-walk AI pass. Snapshotted
+ * by value because the AST is freed when the walk ends.
+ */
+export interface PendingAmbiguousSite {
+  file: string
+  offset: number
+  line: number
+  column: number
+  methodName: string
+  receiverName: string
+  snippet: string
+}
+
+export interface AuditDirectoryOptions {
+  /**
+   * When true, defer ambiguous prototype methods (.test, .then, etc.) to
+   * Claude with a locked-down read-only tool surface. Off by default — opt-in
+   * via CLI flag. Requires ANTHROPIC_API_KEY in env.
+   */
+  aiDisambiguate?: boolean | undefined
+  /**
+   * Currently-exported primordials.
+   */
+  exported: Set<string>
+  /**
+   * Directory to walk.
+   */
+  scanDir: string
+  /**
+   * Directories to skip during walk.
+   */
+  skipDirs?: string[] | undefined
+  /**
+   * Files to skip, matched by basename.
+   */
+  skipFiles?: string[] | undefined
+  targetRoot: string
+}
+
 export async function auditDirectory({
   aiDisambiguate = false,
   exported,
@@ -82,11 +168,16 @@ export async function auditDirectory({
     'primordials.cts',
   ],
   targetRoot,
-}) {
-  const findings = []
-  const seen = new Set()
+}: AuditDirectoryOptions): Promise<AuditFindings> {
+  const findings: Finding[] = []
+  const seen = new Set<string>()
 
-  function record(file, offset, pattern, primordial) {
+  function record(
+    file: string,
+    offset: number,
+    pattern: string,
+    primordial: string | undefined,
+  ) {
     // `prototypePrimordialName` returns `undefined` when the method
     // doesn't actually exist on the global's prototype — i.e. the
     // receiver-name guess was wrong (e.g. `p` named like a Promise
@@ -120,7 +211,12 @@ export async function auditDirectory({
    * (eventually) rewrites these to a single `import { NAME } from
    * './primordials'` line.
    */
-  function recordRedeclaration(file, offset, name, pattern) {
+  function recordRedeclaration(
+    file: string,
+    offset: number,
+    name: string,
+    pattern: string,
+  ) {
     const lineStarts = currentFile.lineStarts
     const { line, column } = lineColumnAt(lineStarts, offset)
     const dedupKey = `${file}:${line}:${column}:redecl:${name}`
@@ -148,18 +244,7 @@ export async function auditDirectory({
   // after the walk by an async pass that defers to Claude (read-only
   // tool surface) when `aiDisambiguate` is on. Snapshots the snippet
   // up-front because the AST is freed after walk completes.
-  /**
-   * @type {{
-   *   file: string
-   *   offset: number
-   *   line: number
-   *   column: number
-   *   methodName: string
-   *   receiverName: string
-   *   snippet: string
-   * }[]}
-   */
-  const pendingAmbiguous = []
+  const pendingAmbiguous: PendingAmbiguousSite[] = []
 
   const visitors = buildVisitors({
     aiDisambiguate,
@@ -178,7 +263,7 @@ export async function auditDirectory({
   const parseFailureFiles: string[] = []
   const stripFailureFiles: string[] = []
 
-  function auditFile(absPath, relPath) {
+  function auditFile(absPath: string, relPath: string) {
     const ext = path.extname(absPath)
     const rawSrc = readFileSync(absPath, 'utf8')
     // For TypeScript files, strip types before parsing. acorn-wasm's
@@ -212,7 +297,7 @@ export async function auditDirectory({
   // non-enumerable properties so they don't interfere with code that
   // does findings.length / map / filter etc., but enumerable copies
   // also live on a wrapper the JSON formatter pulls from.
-  function attachParseFailureCount(arr) {
+  function attachParseFailureCount(arr: Finding[]): AuditFindings {
     Object.defineProperty(arr, 'parseFailures', {
       value: parseFailureFiles.length,
       enumerable: false,
@@ -240,7 +325,7 @@ export async function auditDirectory({
     return arr
   }
 
-  function* walkDir(dir) {
+  function* walkDir(dir: string): Generator<string, void, undefined> {
     for (const entry of readdirSync(dir)) {
       if (skipDirs.includes(entry) || skipFiles.includes(entry)) {
         continue

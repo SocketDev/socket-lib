@@ -25,7 +25,7 @@ const logger = getDefaultLogger()
  * because the walker recurses over EVERY child key rather than switching on
  * node type, so each child is typed as another node of the same loose shape.
  */
-interface AstNode {
+export interface AstNode {
   arguments?: ReadonlyArray<AstNode | undefined> | undefined
   body?: AstNode | undefined
   callee?: AstNode | undefined
@@ -45,7 +45,7 @@ interface AstNode {
 /**
  * Whether `value` is walkable. Anything non-object is a leaf.
  */
-function isAstNode(value: unknown): value is AstNode {
+export function isAstNode(value: unknown): value is AstNode {
   return typeof value === 'object' && value !== null
 }
 
@@ -175,8 +175,7 @@ export async function processDirectory(
             walk(ast.program)
 
             // Each end offset is assigned in the same branch as its start, so
-            // testing the starts alone left the ends typed as possibly
-            // undefined even though they cannot be. Name all four.
+            // naming all four here is what types the offsets as numbers below.
             if (
               valueIdentifier &&
               exportCallStart !== undefined &&

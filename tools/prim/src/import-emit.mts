@@ -9,6 +9,34 @@
  */
 
 /**
+ * Output format for the inserted primordials import block. `specifier` is
+ * either a static string or a `(absFile) => string` function that computes a
+ * per-file relative path. When `splitByLeaf` is set, one block is emitted per
+ * leaf and the top-level `specifier` is ignored.
+ */
+export interface PrimordialsImportStyle {
+  kind: 'cjs' | 'esm'
+  specifier?: string | ((absFile: string) => string) | undefined
+  aliasPrefix?: string | undefined
+  splitByLeaf?:
+    | {
+        exportToLeaf: Map<string, string>
+        leafSpecifier: (absFile: string, leaf: string) => string
+      }
+    | undefined
+}
+
+/**
+ * The single-block form of {@link PrimordialsImportStyle}: the specifier is
+ * already resolved to a string for the file being rewritten.
+ */
+export interface ResolvedImportStyle {
+  kind: 'cjs' | 'esm'
+  specifier: string
+  aliasPrefix?: string | undefined
+}
+
+/**
  * Apply collected rewrites to `source`, then emit the primordials import block.
  *
  * Dedupes rewrite spans by `[start, end]` (acorn-wasm's compact_serialize can
@@ -27,7 +55,7 @@ export function applyPrimordialsImports(
   source: string,
   rewrites: Array<{ start: number; end: number; replacement: string }>,
   usedPrimordials: Set<string>,
-  importStyle,
+  importStyle: PrimordialsImportStyle,
   absPath: string,
 ): { newSource: string; importAdded: boolean } {
   const aliasPrefix = importStyle?.aliasPrefix ?? ''
@@ -66,7 +94,7 @@ export function applyPrimordialsImports(
     // Group identifiers by leaf, emit one import per leaf with the
     // leaf-resolved specifier.
     const { exportToLeaf, leafSpecifier } = importStyle.splitByLeaf
-    const byLeaf = new Map()
+    const byLeaf = new Map<string, string[]>()
     const idents = [...usedPrimordials].toSorted()
     for (let i = 0, { length } = idents; i < length; i += 1) {
       const id = idents[i]!
@@ -89,7 +117,7 @@ export function applyPrimordialsImports(
     const leaves = [...byLeaf.keys()].toSorted()
     for (let i = 0, { length } = leaves; i < length; i += 1) {
       const leaf = leaves[i]!
-      const leafIdents = byLeaf.get(leaf).toSorted()
+      const leafIdents = byLeaf.get(leaf)!.toSorted()
       const leafSpec = leafSpecifier(absPath, leaf)
       const out2 = ensureImports(newSource, leafIdents, {
         kind: importStyle.kind,
@@ -105,7 +133,7 @@ export function applyPrimordialsImports(
     const resolvedSpecifier =
       typeof importStyle.specifier === 'function'
         ? importStyle.specifier(absPath)
-        : importStyle.specifier
+        : importStyle.specifier!
     const result2 = ensureImports(newSource, [...usedPrimordials].toSorted(), {
       kind: importStyle.kind,
       specifier: resolvedSpecifier,
@@ -131,7 +159,11 @@ export function applyPrimordialsImports(
  * added or changed, as opposed to the import already being present and
  * complete.
  */
-export function ensureImports(source, identifiers, importStyle) {
+export function ensureImports(
+  source: string,
+  identifiers: readonly string[],
+  importStyle: ResolvedImportStyle,
+): { newSource: string; importAdded: boolean } {
   const { kind, specifier } = importStyle
   const aliasPrefix: string = importStyle.aliasPrefix ?? ''
   // Render one identifier as a destructure entry: `Foo` if no alias,
@@ -157,7 +189,9 @@ export function ensureImports(source, identifiers, importStyle) {
         )
   const existing = source.match(existingRe)
   if (existing) {
-    const have = new Set(existing[1].split(',').map(parseEntry).filter(Boolean))
+    const have = new Set(
+      existing[1]!.split(',').map(parseEntry).filter(Boolean),
+    )
     let addedAny = false
     for (const id of identifiers) {
       if (!have.has(id)) {
@@ -201,7 +235,7 @@ export function ensureImports(source, identifiers, importStyle) {
 /**
  * Escape a string for use inside a regex character class / pattern.
  */
-export function escapeRegex(s) {
+export function escapeRegex(s: string): string {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
@@ -211,7 +245,7 @@ export function escapeRegex(s) {
  * JSDoc / shebang block when no import/require is found, so callers prepend
  * BELOW the `@fileoverview` block instead of clobbering it.
  */
-export function findInsertionPoint(source) {
+export function findInsertionPoint(source: string): number {
   // ESM: `import ... from '...'`.
   const importRe = /^import\s.+?from\s+['"][^'"]+['"]\s*;?\s*$/gm
   // CJS: `const|let|var ... = require('...')`. We don't try to handle

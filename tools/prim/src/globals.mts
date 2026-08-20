@@ -302,25 +302,31 @@ export const INTENTIONAL_NON_PRIMORDIAL_STATICS = new Set([
  */
 export const TYPE_NARROWING_STATIC_CALLS = new Set(['Symbol.for'])
 
-export function ctorPrimordialName(global) {
+export function ctorPrimordialName(global: string): string {
   return global + 'Ctor'
 }
 
+/**
+ * `globalThis` has no index signature, so a name-keyed lookup needs a
+ * record-shaped view of it.
+ */
+export const GLOBAL_RECORD = globalThis as unknown as Record<string, unknown>
+
 // Cache the runtime prototype-method set per global so we don't
 // recompute it for every call site.
-const prototypeMethodCache = new Map()
+const prototypeMethodCache = new Map<string, Set<string>>()
 
-export function getPrototypeMethods(globalName) {
+export function getPrototypeMethods(globalName: string): Set<string> {
   let cached = prototypeMethodCache.get(globalName)
   if (cached) {
     return cached
   }
-  const ctor = globalThis[globalName]
+  const ctor = GLOBAL_RECORD[globalName]
   cached = new Set()
   if (ctor && typeof ctor === 'function' && ctor.prototype) {
     const names = Object.getOwnPropertyNames(ctor.prototype)
     for (let i = 0, { length } = names; i < length; i++) {
-      cached.add(names[i])
+      cached.add(names[i]!)
     }
     // Buffer extends Uint8Array; include its prototype too.
     if (
@@ -331,7 +337,7 @@ export function getPrototypeMethods(globalName) {
         globalThis.Uint8Array.prototype,
       )
       for (let i = 0, { length } = u8names; i < length; i++) {
-        cached.add(u8names[i])
+        cached.add(u8names[i]!)
       }
     }
   }
@@ -348,7 +354,7 @@ export function getPrototypeMethods(globalName) {
  * acceptable for an audit; they show up as `[guessed: …]` so the reader can
  * dismiss them.
  */
-export function guessReceiverType(name) {
+export function guessReceiverType(name: string): string | undefined {
   // ─── Array hints ────────────────────────────────────────────────────
   // Explicit known-array names only. We previously matched any camelCase
   // identifier ending in 's' as Array, but that misclassifies object
@@ -425,17 +431,20 @@ export function guessReceiverType(name) {
  * doesn't — prevents fabricating names like `PromisePrototypeLoad` when `p` is
  * just a variable named `p` that isn't actually a Promise.
  */
-export function prototypePrimordialName(global, method) {
+export function prototypePrimordialName(
+  global: string,
+  method: string,
+): string | undefined {
   if (!getPrototypeMethods(global).has(method)) {
     return undefined
   }
-  return global + 'Prototype' + method[0].toUpperCase() + method.slice(1)
+  return global + 'Prototype' + method[0]!.toUpperCase() + method.slice(1)
 }
 
 /**
  * Map a tracked global + property name to the corresponding primordial export
  * name in `@socketsecurity/lib/primordials`.
  */
-export function staticPrimordialName(global, member) {
-  return global + member[0].toUpperCase() + member.slice(1)
+export function staticPrimordialName(global: string, member: string): string {
+  return global + member[0]!.toUpperCase() + member.slice(1)
 }

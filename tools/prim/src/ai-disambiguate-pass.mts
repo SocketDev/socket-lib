@@ -110,7 +110,7 @@ export async function drainPendingAmbiguous(options: {
       continue
     }
     const expectedAi = prototypePrimordialName(verdict.type, item.methodName)
-    if (!exported.has(expectedAi)) {
+    if (!expectedAi || !exported.has(expectedAi)) {
       continue
     }
     // Apply the same rewrite shape as the sync path.

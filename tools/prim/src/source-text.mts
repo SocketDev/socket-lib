@@ -7,15 +7,38 @@
  *   Import/require block emission lives in `import-emit.mts`.
  */
 
-import {
-  closeSync,
-  fsyncSync,
-  openSync,
-  renameSync,
-  unlinkSync,
-  writeSync,
-} from 'node:fs'
+import { closeSync, fsyncSync, openSync, renameSync, writeSync } from 'node:fs'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+
+/**
+ * An acorn-wasm AST node as the codemod reads it. The parser is untyped, so
+ * this names only the fields the walk and the rewrite classification touch.
+ * Positions are byte offsets into the parsed source.
+ */
+export interface AstNode {
+  type: string
+  start: number
+  end: number
+  name: string
+  computed: boolean
+  arguments: AstNode[]
+  callee?: AstNode | undefined
+  id?: AstNode | undefined
+  object?: AstNode | undefined
+  property?: AstNode | undefined
+}
+
+/**
+ * Any object reached by the AST walk, keyed by property name. The walk descends
+ * through nodes, arrays, and plain objects alike, so it can only assume the
+ * shape of `type`, `start`, and `end`.
+ */
+export interface AstNodeRecord {
+  type?: unknown | undefined
+  start?: unknown | undefined
+  end?: unknown | undefined
+  [key: string]: unknown
+}
 
 /**
  * Atomic write: write to `<path>.tmp-<pid>-<rand>`, fsync, rename. Guarantees
@@ -79,13 +102,13 @@ export function buildByteToCharMap(src: string): number[] | undefined {
     return undefined
   }
   const buf = Buffer.from(src, 'utf8')
-  const map = Array.from({ length: buf.length + 1 })
+  const map = Array.from<number>({ length: buf.length + 1 })
   let charIdx = 0
   let byteIdx = 0
   // Walk char-by-char; for each char compute its UTF-8 byte length
   // and stamp the char index into every byte slot it spans.
   for (let i = 0; i < src.length; i++) {
-    const code = src.codePointAt(i)
+    const code = src.codePointAt(i)!
     let byteLen
     if (code < 0x80) {
       byteLen = 1
@@ -178,13 +201,14 @@ export function findClosingParen(src: string, from: number): number {
  * Returns the possibly repaired end of `node` so parents can fold it into
  * their own computation.
  */
-export function repairEndPositions(node) {
+export function repairEndPositions(node: unknown): number {
   if (!node || typeof node !== 'object') {
     return 0
   }
   if (Array.isArray(node)) {
+    const children: readonly unknown[] = node
     let m = 0
-    for (const child of node) {
+    for (const child of children) {
       const e = repairEndPositions(child)
       if (e > m) {
         m = e
@@ -192,17 +216,18 @@ export function repairEndPositions(node) {
     }
     return m
   }
-  if (typeof node.type !== 'string') {
+  const record = node as AstNodeRecord
+  if (typeof record.type !== 'string') {
     // Not an AST node (e.g. a literal value, a token list). Recurse
     // through nested objects/arrays so we still reach AST descendants.
     let m = 0
-    const objectKeys = Object.keys(node)
+    const objectKeys = Object.keys(record)
     for (let i = 0, { length } = objectKeys; i < length; i += 1) {
       const key = objectKeys[i]!
       if (key === 'loc' || key === 'range' || key.startsWith('_')) {
         continue
       }
-      const e = repairEndPositions(node[key])
+      const e = repairEndPositions(record[key])
       if (e > m) {
         m = e
       }
@@ -211,7 +236,7 @@ export function repairEndPositions(node) {
   }
 
   let maxChildEnd = 0
-  const nodeKeys = Object.keys(node)
+  const nodeKeys = Object.keys(record)
   for (let i = 0, { length } = nodeKeys; i < length; i += 1) {
     const key = nodeKeys[i]!
     if (
@@ -223,7 +248,7 @@ export function repairEndPositions(node) {
     ) {
       continue
     }
-    const e = repairEndPositions(node[key])
+    const e = repairEndPositions(record[key])
     if (e > maxChildEnd) {
       maxChildEnd = e
     }
@@ -231,11 +256,11 @@ export function repairEndPositions(node) {
 
   // If the reported end is sane (>= start AND >= max-child-end), keep it.
   // Otherwise replace with the larger of (start, maxChildEnd).
-  const reportedEnd = typeof node.end === 'number' ? node.end : 0
-  const start = typeof node.start === 'number' ? node.start : 0
+  const reportedEnd = typeof record.end === 'number' ? record.end : 0
+  const start = typeof record.start === 'number' ? record.start : 0
   const correctedEnd = Math.max(start, maxChildEnd)
   if (reportedEnd < correctedEnd) {
-    node.end = correctedEnd
+    record.end = correctedEnd
     return correctedEnd
   }
   return reportedEnd
@@ -246,25 +271,27 @@ export function repairEndPositions(node) {
  * visitors that we want to share with codemod. This walker visits every node
  * depth-first.
  */
-export function walkAst(node, visit) {
+export function walkAst(node: unknown, visit: (node: AstNode) => void): void {
   if (!node || typeof node !== 'object') {
     return
   }
   if (Array.isArray(node)) {
-    for (const child of node) {
+    const children: readonly unknown[] = node
+    for (const child of children) {
       walkAst(child, visit)
     }
     return
   }
-  if (typeof node.type === 'string') {
-    visit(node)
+  const record = node as AstNodeRecord
+  if (typeof record.type === 'string') {
+    visit(record as unknown as AstNode)
   }
-  const keys = Object.keys(node)
+  const keys = Object.keys(record)
   for (let i = 0, { length } = keys; i < length; i += 1) {
     const key = keys[i]!
     if (key === 'loc' || key === 'range' || key.startsWith('_')) {
       continue
     }
-    walkAst(node[key], visit)
+    walkAst(record[key], visit)
   }
 }

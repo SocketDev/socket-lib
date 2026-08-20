@@ -264,7 +264,7 @@ async function main(): Promise<void> {
       if (!quiet) {
         printHeader('Building TypeScript Declarations')
       }
-      exitCode = await buildTypes({ quiet, verbose })
+      exitCode = await buildTypes({ quiet })
       if (exitCode === 0 && !quiet) {
         logger.substep('Type declarations built')
       }
@@ -352,7 +352,7 @@ async function main(): Promise<void> {
           analyze: flags.analyze,
         }),
         buildExternals({ quiet, verbose }),
-        buildTypes({ quiet, verbose, skipClean: true }),
+        buildTypes({ quiet, skipClean: true }),
         buildPrim({ quiet }),
       ])
       const [srcSettled, externalsSettled, typesSettled, primSettled] = settled

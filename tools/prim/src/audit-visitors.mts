@@ -25,27 +25,69 @@ import {
   TYPE_NARROWING_STATIC_CALLS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
 } from './globals.mts'
+import type { AstNode } from './source-text.mts'
+
+/**
+ * A `VariableDeclarator` node. `init` is the only field the shared `AstNode`
+ * shape doesn't name, because this is the only walk that reads it.
+ */
+export interface VariableDeclaratorNode extends AstNode {
+  init?: AstNode | undefined
+}
+
+/**
+ * Per-file state the visitors read. `auditFile` overwrites it before each walk.
+ */
+export interface AuditCurrentFile {
+  lineStarts: number[]
+  relPath: string
+  src: string
+}
+
+/**
+ * A duck-typed call site (`.test`, `.then`, …) whose receiver couldn't be
+ * resolved statically, snapshotted for the post-walk AI pass.
+ */
+export interface AuditPendingAmbiguous {
+  column: number
+  file: string
+  line: number
+  methodName: string
+  offset: number
+  receiverName: string
+  snippet: string
+}
+
+/**
+ * The shared per-audit state the visitor table closes over.
+ */
+export interface BuildVisitorsContext {
+  aiDisambiguate: boolean
+  currentFile: AuditCurrentFile
+  /**
+   * Currently-exported primordials.
+   */
+  exported: Set<string>
+  /**
+   * Queue drained after the walk.
+   */
+  pendingAmbiguous: AuditPendingAmbiguous[]
+  record: (
+    file: string,
+    offset: number,
+    pattern: string,
+    primordial: string | undefined,
+  ) => void
+  recordRedeclaration: (
+    file: string,
+    offset: number,
+    name: string,
+    pattern: string,
+  ) => void
+}
 
 /**
  * Build the acorn-walk visitor table.
- *
- * @param {Object} ctx
- * @param {boolean} ctx.aiDisambiguate
- * @param {{ relPath: string; lineStarts: number[]; src: string }} ctx.currentFile
- * @param {Set<string>} ctx.exported Currently-exported primordials.
- * @param {Object[]} ctx.pendingAmbiguous Queue drained after the walk.
- * @param {(
- *   file: string,
- *   offset: number,
- *   pattern: string,
- *   primordial: string,
- * ) => void} ctx.record
- * @param {(
- *   file: string,
- *   offset: number,
- *   name: string,
- *   pattern: string,
- * ) => void} ctx.recordRedeclaration
  */
 export function buildVisitors({
   aiDisambiguate,
@@ -54,14 +96,14 @@ export function buildVisitors({
   pendingAmbiguous,
   record,
   recordRedeclaration,
-}) {
+}: BuildVisitorsContext) {
   // Constructor naming differs between surfaces:
   //   socket-lib uses `<Name>Ctor` (e.g. `ArrayCtor`, `SetCtor`)
   //   Node bootstrap uses bare `<Name>` (e.g. `Array`, `Set`)
   // Pick whichever variant the surface actually exports; if neither
   // is present we report the socket-lib convention as the gap so the
   // expansion target is clear.
-  function resolveCtorName(globalName) {
+  function resolveCtorName(globalName: string): string {
     const sktName = ctorPrimordialName(globalName)
     if (exported.has(sktName)) {
       return sktName
@@ -73,7 +115,7 @@ export function buildVisitors({
   }
 
   return {
-    VariableDeclarator(node, ancestors) {
+    VariableDeclarator(node: VariableDeclaratorNode, ancestors: AstNode[]) {
       // Detect local-alias redeclaration of primordials:
       //   const ErrorCtor = Error
       //   const JSONParse = JSON.parse
@@ -116,7 +158,7 @@ export function buildVisitors({
       // Local-scope shadowing is a different kind of bug and out of scope.
       let topLevel = false
       for (let i = ancestors.length - 1; i >= 0; i -= 1) {
-        const a = ancestors[i]
+        const a = ancestors[i]!
         if (a.type === 'Program') {
           topLevel = true
           break
@@ -151,7 +193,7 @@ export function buildVisitors({
         `const ${node.id.name} = ${rhs}`,
       )
     },
-    NewExpression(node, _ancestors) {
+    NewExpression(node: AstNode, _ancestors: AstNode[]) {
       if (
         node.callee?.type !== 'Identifier' ||
         !TRACKED_GLOBALS.has(node.callee.name)
@@ -165,7 +207,7 @@ export function buildVisitors({
         resolveCtorName(node.callee.name),
       )
     },
-    CallExpression(node, _ancestors) {
+    CallExpression(node: AstNode, _ancestors: AstNode[]) {
       if (node.callee?.type !== 'MemberExpression') {
         return
       }
@@ -278,7 +320,7 @@ export function buildVisitors({
         )
       }
     },
-    MemberExpression(node, ancestors) {
+    MemberExpression(node: AstNode, ancestors: AstNode[]) {
       if (
         node.computed ||
         node.object?.type !== 'Identifier' ||
@@ -297,7 +339,7 @@ export function buildVisitors({
         return
       }
       const propName = node.property.name
-      if (propName[0] !== propName[0].toLowerCase()) {
+      if (propName[0] !== propName[0]!.toLowerCase()) {
         return
       }
       // Skip data-property / accessor statics that aren't callable

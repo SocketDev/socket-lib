@@ -52,6 +52,10 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import type { Options } from '@anthropic-ai/claude-agent-sdk'
+
+import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
+
 import { getAmbiguousCase } from './ambiguous-methods.mts'
 
 // ─── Locked-down tool surface ────────────────────────────────────────
@@ -104,16 +108,31 @@ const MAX_TOKENS = 256
 
 // ─── Cache ───────────────────────────────────────────────────────────
 
-/**
- * @typedef {Object} CachedVerdict
- *
- * @property {string | undefined} type Receiver type, or undefined if "no
- *   primordial candidate" / "unsure".
- * @property {string} reason One-line rationale from the model.
- * @property {number} timestamp Unix-millis. Not used for invalidation (entries
- *   are keyed on snippetHash; a code change re-keys), just surfaced to
- *   operators for "when did we last call Claude on this".
- */
+// A verdict as it is persisted. `reason` is the model's one-line rationale,
+// `type` is the receiver type (undefined for "no candidate" / "unsure"), and
+// `timestamp` is informational only: entries are keyed on the snippet hash,
+// so a source change re-keys rather than expires.
+export interface CachedVerdict {
+  reason: string
+  timestamp: number
+  type: string | undefined
+}
+
+// On-disk shape of `<targetRoot>/.prim-cache/disambiguate.json`.
+export interface DisambiguateCache {
+  entries: Record<string, CachedVerdict>
+  schema: number
+}
+
+// What `parseResponse` recovers from the model's reply.
+export interface ParsedVerdict {
+  reason: string
+  type: string | undefined
+}
+
+// What `disambiguateReceiver` answers: a parsed verdict plus where it came
+// from ('static' | 'ai' | 'cache').
+export type ReceiverVerdict = ParsedVerdict & { source: string }
 
 const CACHE_FILENAME = 'disambiguate.json'
 // Cache schema version. Bump when the verdict shape, prompt
@@ -121,6 +140,19 @@ const CACHE_FILENAME = 'disambiguate.json'
 // previous answers (a re-prompt with different framing may produce
 // a different verdict on the same snippet).
 const CACHE_SCHEMA_VERSION = 1
+
+export interface BuildPromptOptions {
+  // Built-in types the spec method could legitimately resolve to.
+  candidates: string[]
+  column: number
+  filePath: string
+  // One-line description of the duck-typed shapes seen in the wild.
+  hint: string
+  line: number
+  methodName: string
+  receiverName: string
+  snippet: string
+}
 
 /**
  * Build the disambiguation prompt. The model is allowed to read files in the
@@ -142,7 +174,7 @@ export function buildPrompt({
   snippet,
   hint,
   candidates,
-}) {
+}: BuildPromptOptions): string {
   const candidateList = candidates.join(' / ')
   return `You are auditing a JavaScript codebase for primordials migration.
 
@@ -194,14 +226,15 @@ Examples:
  * Build a source snippet around a given line and column. Used by audit/codemod
  * to gather the context the model needs.
  *
- * @param {string} src Full source text.
- * @param {number[]} lineStarts Start-of-line offsets (1-indexed view).
- * @param {number} line 1-based.
- * @param {number} contextLines Lines before+after to include.
- *
- * @returns {string}
+ * `lineStarts` holds start-of-line offsets (1-indexed view), `line` is
+ * 1-based, and `contextLines` is how many lines to include on each side.
  */
-export function buildSnippet(src, lineStarts, line, contextLines = 8) {
+export function buildSnippet(
+  src: string,
+  lineStarts: number[],
+  line: number,
+  contextLines = 8,
+): string {
   const startLine = Math.max(1, line - contextLines)
   const endLine = Math.min(lineStarts.length, line + contextLines)
   const startOffset = lineStarts[startLine - 1] ?? 0
@@ -212,7 +245,7 @@ export function buildSnippet(src, lineStarts, line, contextLines = 8) {
   return src.slice(startOffset, endOffset)
 }
 
-export function cachePath(targetRoot) {
+export function cachePath(targetRoot: string): string {
   return path.join(targetRoot, '.prim-cache', CACHE_FILENAME)
 }
 
@@ -222,7 +255,11 @@ export function cachePath(targetRoot) {
  * the method name + the surrounding source + the receiver identifier so an
  * unrelated edit elsewhere in the file doesn't invalidate the cache.
  */
-export function computeKey(methodName, receiverName, snippet) {
+export function computeKey(
+  methodName: string,
+  receiverName: string,
+  snippet: string,
+): string {
   const hash = crypto.createHash('sha256')
   hash.update('v1\n')
   hash.update(methodName)
@@ -233,23 +270,25 @@ export function computeKey(methodName, receiverName, snippet) {
   return hash.digest('hex')
 }
 
-/**
- * @param {Object} opts
- * @param {string} opts.targetRoot Repo root where the cache lives.
- * @param {string} opts.methodName E.g. "test".
- * @param {string} opts.receiverName E.g. "range".
- * @param {string} opts.filePath Relative path for prompt.
- * @param {number} opts.line 1-based.
- * @param {number} opts.column 1-based.
- * @param {string} opts.snippet ~10 lines of surrounding source.
- * @param {boolean} [opts.aiEnabled=false] Primary switch. False = static-only.
- *
- * @returns {Promise<{
- *   type: string | undefined
- *   source: string
- *   reason: string
- * }>}
- */
+export interface DisambiguateReceiverOptions {
+  // Primary switch. False = static-only.
+  aiEnabled?: boolean | undefined
+  // 1-based column of the call site.
+  column: number
+  // Relative path, used in the prompt.
+  filePath: string
+  // 1-based line of the call site.
+  line: number
+  // E.g. "test".
+  methodName: string
+  // E.g. "range".
+  receiverName: string
+  // ~10 lines of source surrounding the call site.
+  snippet: string
+  // Repo root where the cache lives.
+  targetRoot: string
+}
+
 export async function disambiguateReceiver({
   aiEnabled = false,
   column,
@@ -259,7 +298,7 @@ export async function disambiguateReceiver({
   receiverName,
   snippet,
   targetRoot,
-}) {
+}: DisambiguateReceiverOptions): Promise<ReceiverVerdict> {
   const ambiguousCase = getAmbiguousCase(methodName)
   if (!ambiguousCase) {
     // Caller shouldn't have reached here; method isn't ambiguous.
@@ -278,7 +317,7 @@ export async function disambiguateReceiver({
     }
   }
 
-  if (!process.env.ANTHROPIC_API_KEY) {
+  if (!process.env['ANTHROPIC_API_KEY']) {
     return {
       type: undefined,
       source: 'static',
@@ -306,7 +345,7 @@ export async function disambiguateReceiver({
     return {
       type: undefined,
       source: 'static',
-      reason: `sdk-load-failed: ${err.message}`,
+      reason: `sdk-load-failed: ${errorMessage(err)}`,
     }
   }
 
@@ -323,31 +362,31 @@ export async function disambiguateReceiver({
 
   let answer = ''
   try {
-    const result = query({
-      prompt,
-      options: {
-        // Locked-down tool surface. THREE independent layers — see
-        // file header for the canonical permission evaluation flow.
-        //
-        //   - `tools` restricts the BASE SET the model is told about
-        //     (the model never sees Bash/Edit/Write definitions).
-        //   - `allowedTools` is the AUTO-APPROVE list (step 4 of the
-        //     eval flow); listed tools run without canUseTool.
-        //   - `disallowedTools` is DENY-FIRST (step 2); blocks even
-        //     in bypass-permissions mode.
-        //   - `permissionMode: 'dontAsk'` is the official lockdown
-        //     recipe for headless agents. Anything not pre-approved
-        //     is DENIED (not prompted, not falling through to a
-        //     missing canUseTool callback that would otherwise hang).
-        allowedTools: AUTO_APPROVE_TOOLS,
-        cwd: targetRoot,
-        disallowedTools: DENIED_TOOLS,
-        maxTokens: MAX_TOKENS,
-        model: MODEL,
-        permissionMode: 'dontAsk',
-        tools: BASE_TOOLS,
-      },
-    })
+    // `maxTokens` is absent from the SDK's `Options`, so the intersection
+    // declares it and the named binding sidesteps the excess-property check.
+    const options: Options & { maxTokens: number } = {
+      // Locked-down tool surface. THREE independent layers — see
+      // file header for the canonical permission evaluation flow.
+      //
+      //   - `tools` restricts the BASE SET the model is told about
+      //     (the model never sees Bash/Edit/Write definitions).
+      //   - `allowedTools` is the AUTO-APPROVE list (step 4 of the
+      //     eval flow); listed tools run without canUseTool.
+      //   - `disallowedTools` is DENY-FIRST (step 2); blocks even
+      //     in bypass-permissions mode.
+      //   - `permissionMode: 'dontAsk'` is the official lockdown
+      //     recipe for headless agents. Anything not pre-approved
+      //     is DENIED (not prompted, not falling through to a
+      //     missing canUseTool callback that would otherwise hang).
+      allowedTools: AUTO_APPROVE_TOOLS,
+      cwd: targetRoot,
+      disallowedTools: DENIED_TOOLS,
+      maxTokens: MAX_TOKENS,
+      model: MODEL,
+      permissionMode: 'dontAsk',
+      tools: BASE_TOOLS,
+    }
+    const result = query({ prompt, options })
     for await (const message of result) {
       if (message.type === 'assistant') {
         const blocks = message.message?.content ?? []
@@ -365,7 +404,7 @@ export async function disambiguateReceiver({
     return {
       type: undefined,
       source: 'static',
-      reason: `sdk-call-failed: ${err.message}`,
+      reason: `sdk-call-failed: ${errorMessage(err)}`,
     }
   }
 
@@ -388,13 +427,15 @@ export async function disambiguateReceiver({
   }
 }
 
-export function loadCache(targetRoot) {
+export function loadCache(targetRoot: string): DisambiguateCache {
   const filePath = cachePath(targetRoot)
   if (!existsSync(filePath)) {
     return { schema: CACHE_SCHEMA_VERSION, entries: {} }
   }
   try {
-    const data = JSON.parse(readFileSync(filePath, 'utf8'))
+    const data = JSON.parse(
+      readFileSync(filePath, 'utf8'),
+    ) as DisambiguateCache | null
     if (data?.schema !== CACHE_SCHEMA_VERSION) {
       // Schema mismatch: treat as empty. Don't delete — the operator
       // may want to inspect the previous shape before we overwrite.
@@ -427,14 +468,17 @@ export async function loadSdk() {
  * Parse the model's response to extract the verdict and reason. Tolerates
  * surrounding chatter — looks for the literal `VERDICT:` and `REASON:` keys.
  */
-export function parseResponse(text, candidates) {
+export function parseResponse(
+  text: string,
+  candidates: string[],
+): ParsedVerdict {
   const verdictMatch = /^\s*VERDICT:\s*([A-Za-z]+)/m.exec(text)
   const reasonMatch = /^\s*REASON:\s*(.+?)$/m.exec(text)
   if (!verdictMatch) {
     return { type: undefined, reason: 'no-verdict-line' }
   }
-  const raw = verdictMatch[1]
-  const reason = reasonMatch ? reasonMatch[1].trim() : '(no reason supplied)'
+  const raw = verdictMatch[1]!
+  const reason = reasonMatch ? reasonMatch[1]!.trim() : '(no reason supplied)'
   if (raw === 'Other' || raw === 'Unsure') {
     return { type: undefined, reason }
   }
@@ -447,7 +491,7 @@ export function parseResponse(text, candidates) {
   }
 }
 
-export function saveCache(targetRoot, cache) {
+export function saveCache(targetRoot: string, cache: DisambiguateCache): void {
   const filePath = cachePath(targetRoot)
   mkdirSync(path.dirname(filePath), { recursive: true })
   writeFileSync(filePath, JSON.stringify(cache, null, 2) + '\n')

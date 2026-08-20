@@ -22,12 +22,12 @@
  */
 
 import { existsSync, readFileSync } from 'node:fs'
+import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
-import { parse } from '@ultrathink/acorn.rs.wasm'
-import { stripTypeScriptTypes } from 'node:module'
-
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+
+import { parse } from './acorn-wasm.mts'
 
 /**
  * Detect import cycles the planned rewrites introduce or make worse.

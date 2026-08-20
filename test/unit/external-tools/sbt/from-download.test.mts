@@ -16,9 +16,9 @@ import os from 'node:os'
 import path from 'node:path'
 import { createGzip } from 'node:zlib'
 
-import tarFs from 'tar-fs'
-
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+
+import * as tarFs from '../../../../src/external/tar-fs.js'
 
 import { sbtFromDownload } from '../../../../src/external-tools/sbt/from-download.mjs'
 import { safeDelete } from '../../../../src/fs/safe.mjs'

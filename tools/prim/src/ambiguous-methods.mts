@@ -108,7 +108,7 @@ export const AMBIGUOUS_PROTOTYPE_METHODS = new Map([
  *
  * @returns {{ candidates: string[]; hint: string } | undefined}
  */
-export function getAmbiguousCase(methodName) {
+export function getAmbiguousCase(methodName: string) {
   return AMBIGUOUS_PROTOTYPE_METHODS.get(methodName)
 }
 
@@ -120,6 +120,6 @@ export function getAmbiguousCase(methodName) {
  *
  * @returns {boolean}
  */
-export function isAmbiguousMethod(methodName) {
+export function isAmbiguousMethod(methodName: string) {
   return AMBIGUOUS_PROTOTYPE_METHODS.has(methodName)
 }

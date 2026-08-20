@@ -14,10 +14,44 @@
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { stripTypeScriptTypes } from 'node:module'
+import { createRequire, stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
-import { walk } from '@ultrathink/acorn.rs.wasm'
+/**
+ * `@ultrathink/acorn.rs.wasm` ships no declarations, so this names the one
+ * member this module uses.
+ */
+export interface AcornWasm {
+  walk: (
+    source: string,
+    visitors: AcornWasmVisitors,
+    options: AcornWasmParseOptions,
+  ) => void
+}
+
+/**
+ * Visitor table the walk dispatches on, keyed by AST node type.
+ */
+export type AcornWasmVisitors = Readonly<
+  Record<string, (node: AstNode) => void>
+>
+
+/**
+ * The acorn parse options this module passes. The parser accepts more; these
+ * are the ones the lint walk sets.
+ */
+export interface AcornWasmParseOptions {
+  allowAwaitOutsideFunction?: boolean | undefined
+  allowHashBang?: boolean | undefined
+  allowImportExportEverywhere?: boolean | undefined
+  ecmaVersion?: string | undefined
+  locations?: boolean | undefined
+  sourceType?: string | undefined
+}
+
+const { walk } = createRequire(import.meta.url)(
+  '@ultrathink/acorn.rs.wasm',
+) as AcornWasm
 
 // Names that MUST be aliased with `<Name>Ctor` when imported from
 // `primordials` or any other surface. Matches the convention used
@@ -77,19 +111,65 @@ const PARSE_OPTIONS = {
 }
 
 /**
- * @typedef {Object} LintFinding
- *
- * @property {string} rule The lint rule that fired (e.g. `ctor-rename`).
- * @property {string} file
- * @property {number} line
- * @property {number} column
- * @property {string} name The identifier that violated the rule.
- * @property {string} expected The expected name/alias.
- * @property {string} source Where it was destructured from (`primordials`,
- *   `require('foo')`, etc.).
+ * Payload of an acorn `Literal` node.
  */
+export type LiteralValue = bigint | boolean | number | string | null
 
-export function buildLineStarts(src) {
+/**
+ * The slice of acorn's AST shape this lint reads. The parser ships no type
+ * declarations, so the fields are modeled structurally: `type` and `start` are
+ * on every node, the rest only on the node kinds that carry them.
+ */
+export interface AstNode {
+  type: string
+  start: number
+  name: string
+  arguments?: AstNode[] | undefined
+  callee?: AstNode | undefined
+  id?: AstNode | undefined
+  init?: AstNode | undefined
+  properties: PropertyNode[]
+  value?: LiteralValue | undefined
+}
+
+/**
+ * An `ObjectPattern` property. Its `value` is the local binding node rather
+ * than a literal payload, so it overrides `AstNode['value']`.
+ */
+export interface PropertyNode extends Omit<AstNode, 'value'> {
+  key?: AstNode | undefined
+  shorthand: boolean
+  value?: AstNode | undefined
+}
+
+export interface LintFinding {
+  /**
+   * The lint rule that fired (e.g. `ctor-rename`).
+   */
+  rule: string
+  file: string
+  line: number
+  column: number
+  /**
+   * The identifier that violated the rule.
+   */
+  name: string
+  /**
+   * The expected name/alias.
+   */
+  expected: string
+  /**
+   * Where it was destructured from (`primordials`, `require('foo')`, etc.).
+   */
+  source: string
+}
+
+export interface LineColumn {
+  line: number
+  column: number
+}
+
+export function buildLineStarts(src: string): number[] {
   const starts = [0]
   for (let i = 0; i < src.length; i += 1) {
     if (src.charCodeAt(i) === 10) {
@@ -123,7 +203,10 @@ const DEFAULT_PRIMORDIAL_SOURCES = [
  * canonical source name (e.g. `primordials`, `internal/foo`) for sources we
  * recognize, or `null` for everything else.
  */
-export function classifySource(node, primordialSources) {
+export function classifySource(
+  node: AstNode | undefined,
+  primordialSources: Set<string>,
+): string | undefined {
   if (!node) {
     return undefined
   }
@@ -158,7 +241,7 @@ export function classifySource(node, primordialSources) {
 /**
  * Pretty-print the source for finding output.
  */
-export function describeSource(node) {
+export function describeSource(node: AstNode | undefined): string {
   if (!node) {
     return '<unknown>'
   }
@@ -176,12 +259,20 @@ export function describeSource(node) {
   return node.type
 }
 
-export function formatLintFindings(findings, ctx) {
+export interface FormatLintFindingsContext {
+  targetName: string
+}
+
+export function formatLintFindings(
+  findings: LintFinding[],
+  ctx: FormatLintFindingsContext,
+): string {
   if (findings.length === 0) {
     return `${ctx.targetName}: no lint violations.\n`
   }
   const lines = [`${ctx.targetName} (lint): ${findings.length} violation(s)\n`]
-  for (const f of findings) {
+  for (let i = 0, { length } = findings; i < length; i += 1) {
+    const f = findings[i]!
     lines.push(
       `  [${f.rule}] ${f.file}:${f.line}:${f.column}  destructured \`${f.name}\` from ${f.source}; expected \`${f.name}: ${f.expected}\``,
     )
@@ -189,40 +280,41 @@ export function formatLintFindings(findings, ctx) {
   return lines.join('\n') + '\n'
 }
 
-export function lineColumnAt(lineStarts, offset) {
+export function lineColumnAt(lineStarts: number[], offset: number): LineColumn {
   let lo = 0
   let hi = lineStarts.length - 1
   while (lo < hi) {
     const mid = (lo + hi + 1) >>> 1
-    if (lineStarts[mid] <= offset) {
+    if (lineStarts[mid]! <= offset) {
       lo = mid
     } else {
       hi = mid - 1
     }
   }
-  return { line: lo + 1, column: offset - lineStarts[lo] + 1 }
+  return { line: lo + 1, column: offset - lineStarts[lo]! + 1 }
 }
 
-/**
- * @param {Object} opts
- * @param {string} opts.targetRoot
- * @param {string} opts.scanDir
- * @param {string[]} [opts.skipDirs]
- * @param {string[]} [opts.skipFiles]
- * @param {string[]} [opts.primordialSources] Override default ['primordials',
- *   'safe-references', ...]. Use to add custom primordials-shaped modules.
- *
- * @returns {LintFinding[]}
- */
+export interface LintSourceOptions {
+  targetRoot: string
+  scanDir: string
+  skipDirs?: string[] | undefined
+  skipFiles?: string[] | undefined
+  /**
+   * Override default ['primordials', 'safe-references', ...]. Use to add
+   * custom primordials-shaped modules.
+   */
+  primordialSources?: string[] | undefined
+}
+
 export function lintSource({
   targetRoot,
   scanDir,
   skipDirs,
   skipFiles,
   primordialSources,
-}) {
-  const findings = []
-  const seen = new Set()
+}: LintSourceOptions): LintFinding[] {
+  const findings: LintFinding[] = []
+  const seen = new Set<string>()
 
   const dirsToSkip = new Set(skipDirs ?? ['external', 'node_modules', '.cache'])
   const filesToSkip = new Set(skipFiles ?? [])
@@ -230,7 +322,7 @@ export function lintSource({
 
   const currentFile = { relPath: '', lineStarts: [0] }
 
-  function recordCtorRename(name, source, offset) {
+  function recordCtorRename(name: string, source: string, offset: number) {
     const { line, column } = lineColumnAt(currentFile.lineStarts, offset)
     const dedupKey = `ctor-rename:${currentFile.relPath}:${line}:${column}:${name}`
     if (seen.has(dedupKey)) {
@@ -249,7 +341,7 @@ export function lintSource({
   }
 
   const visitors = {
-    VariableDeclarator(node) {
+    VariableDeclarator(node: AstNode) {
       // Only `const { ... } = X` patterns.
       if (node.id?.type !== 'ObjectPattern' || !node.init) {
         return
@@ -286,7 +378,7 @@ export function lintSource({
     },
   }
 
-  function lintFile(absPath, relPath) {
+  function lintFile(absPath: string, relPath: string) {
     const ext = path.extname(absPath)
     const rawSrc = readFileSync(absPath, 'utf8')
     let src = rawSrc
@@ -306,7 +398,7 @@ export function lintSource({
     }
   }
 
-  function* walkDir(dir) {
+  function* walkDir(dir: string): Generator<string, void, undefined> {
     for (const entry of readdirSync(dir)) {
       if (dirsToSkip.has(entry) || filesToSkip.has(entry)) {
         continue

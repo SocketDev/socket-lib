@@ -89,22 +89,69 @@ export async function buildSource(
 }
 
 /**
+ * The verbosity a build step passes down to the node script it runs.
+ */
+export interface BuildStepOptions {
+  quiet?: boolean | undefined
+  verbose?: boolean | undefined
+}
+
+/**
+ * The verbosity flags to forward to a child build script. Only the flags the
+ * child actually accepts, so a step whose child takes neither passes none.
+ */
+export function verbosityFlags(options: BuildStepOptions): string[] {
+  const { quiet = false, verbose = false } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
+  const flags: string[] = []
+  if (quiet) {
+    flags.push('--quiet')
+  }
+  if (verbose) {
+    flags.push('--verbose')
+  }
+  return flags
+}
+
+/**
+ * Run one node build script, forwarding the verbosity flags, and report a
+ * labeled failure unless quiet. `label` reads as the subject of "<label>
+ * failed".
+ */
+export async function runNodeBuildScript(
+  scriptPath: string,
+  label: string,
+  options: BuildStepOptions = {},
+): Promise<number> {
+  const exitCode = await runSequence([
+    {
+      args: [scriptPath, ...verbosityFlags(options)],
+      command: 'node',
+    },
+  ])
+  if (exitCode !== 0 && options.quiet !== true) {
+    logger.error(`${label} failed`)
+  }
+  return exitCode
+}
+
+/**
  * Build TypeScript declarations. Returns exitCode for external logging.
+ *
+ * No `verbose`: this step runs clean.mts and tsgo, and neither accepts a
+ * verbosity flag, so there is nothing to forward one to.
  */
 export interface BuildTypesOptions {
   quiet?: boolean | undefined
   skipClean?: boolean | undefined
-  verbose?: boolean | undefined
 }
 
 export async function buildTypes(
   options: BuildTypesOptions = {},
 ): Promise<number> {
-  const {
-    quiet = false,
-    skipClean = false,
-    verbose: _verbose = false,
-  } = options
+  const { quiet = false, skipClean = false } = options
 
   const commands = []
 
@@ -189,32 +236,13 @@ export async function buildPrim(
  * Build external dependencies. Returns exitCode for external logging.
  */
 export async function buildExternals(
-  options: { quiet?: boolean | undefined; verbose?: boolean | undefined } = {},
+  options: BuildStepOptions = {},
 ): Promise<number> {
-  const { quiet = false, verbose = false } = options
-
-  const args = ['scripts/repo/bundle/externals.mts']
-  if (quiet) {
-    args.push('--quiet')
-  }
-  if (verbose) {
-    args.push('--verbose')
-  }
-
-  const exitCode = await runSequence([
-    {
-      args,
-      command: 'node',
-    },
-  ])
-
-  if (exitCode !== 0) {
-    if (!quiet) {
-      logger.error('External dependencies build failed')
-    }
-  }
-
-  return exitCode
+  return await runNodeBuildScript(
+    'scripts/repo/bundle/externals.mts',
+    'External dependencies build',
+    options,
+  )
 }
 
 /**
@@ -222,30 +250,11 @@ export async function buildExternals(
  * exitCode for external logging.
  */
 export async function runPostBuild(
-  options: { quiet?: boolean | undefined; verbose?: boolean | undefined } = {},
+  options: BuildStepOptions = {},
 ): Promise<number> {
-  const { quiet = false, verbose = false } = options
-
-  const postBuildArgs = ['scripts/repo/post-build.mts']
-  if (quiet) {
-    postBuildArgs.push('--quiet')
-  }
-  if (verbose) {
-    postBuildArgs.push('--verbose')
-  }
-
-  const exitCode = await runSequence([
-    {
-      args: postBuildArgs,
-      command: 'node',
-    },
-  ])
-
-  if (exitCode !== 0) {
-    if (!quiet) {
-      logger.error('Post-build failed')
-    }
-  }
-
-  return exitCode
+  return await runNodeBuildScript(
+    'scripts/repo/post-build.mts',
+    'Post-build',
+    options,
+  )
 }

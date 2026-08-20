@@ -174,10 +174,10 @@ export function collectRewrites(options: {
             calleeStart: toChar(node.callee.start),
             calleeEnd: toChar(node.callee.end),
             firstArgStart:
-              node.arguments.length > 0 ? toChar(node.arguments[0].start) : -1,
+              node.arguments.length > 0 ? toChar(node.arguments[0]!.start) : -1,
             lastArgEnd:
               node.arguments.length > 0
-                ? toChar(node.arguments.at(-1).end)
+                ? toChar(node.arguments.at(-1)!.end)
                 : toChar(node.callee.end),
             methodName: property.name,
             objectEnd: toChar(object.end),
@@ -203,7 +203,7 @@ export function collectRewrites(options: {
       }
     }
     const expected = prototypePrimordialName(receiverType, property.name)
-    if (!exported.has(expected)) {
+    if (!expected || !exported.has(expected)) {
       return
     }
     // Rewrite `obj.method(args)` → `Primordial(obj, args)`.
@@ -218,14 +218,14 @@ export function collectRewrites(options: {
     const argsSrc =
       node.arguments.length > 0
         ? src.slice(
-            toChar(node.arguments[0].start),
-            toChar(node.arguments.at(-1).end),
+            toChar(node.arguments[0]!.start),
+            toChar(node.arguments.at(-1)!.end),
           )
         : ''
     const callStart = toChar(node.callee.start)
     const lastArgEnd =
       node.arguments.length > 0
-        ? toChar(node.arguments.at(-1).end)
+        ? toChar(node.arguments.at(-1)!.end)
         : toChar(node.callee.end)
     const callEnd = findClosingParen(src, lastArgEnd)
     if (callEnd < 0) {
