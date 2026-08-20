@@ -95,6 +95,33 @@ export const PROVIDER_CREDENTIALS: Readonly<
   Record<KeyedCredentialProvider, ProviderCredentialSpec>
 >
 
+/**
+ * Alternate keychain slots written by external auth tools. `fireconnect login`
+ * stores the Fireworks API key under service `FireworksAI`, account
+ * `fireworks-api-key` — not the Socket `socketsecurity` scope. When the
+ * canonical `PROVIDER_CREDENTIALS` lookup misses, `resolveProviderCredential`
+ * probes these slots so a user who authenticated via the external tool is
+ * recognized as keyed without manually copying the key.
+ */
+const FIRECONNECT_KEYCHAIN_SLOTS: Readonly<
+  Partial<
+    Record<
+      KeyedCredentialProvider,
+      { readonly service: string; readonly account: string }
+    >
+  >
+> = {
+  __proto__: null,
+  fireworks: { account: 'fireworks-api-key', service: 'FireworksAI' },
+} as unknown as Readonly<
+  Partial<
+    Record<
+      KeyedCredentialProvider,
+      { readonly service: string; readonly account: string }
+    >
+  >
+>
+
 export interface DeleteProviderCredentialOptions {
   // The provider whose stored credential to remove.
   readonly provider: CredentialProvider
@@ -192,7 +219,26 @@ export async function resolveProviderCredential(
     allowEnvOnly: opts.allowEnvOnly,
     service: spec.keychainService,
   })
-  return result?.value
+  if (result?.value) {
+    return result.value
+  }
+  // FireConnect (the `fireconnect login` browser-auth tool) stores the
+  // Fireworks API key under its own keychain service/account — not the Socket
+  // scope. When the canonical lookup misses, probe the FireConnect slot so a
+  // user who logged in via `fireconnect login` is recognized as keyed without
+  // manually copying the key into the Socket scope.
+  const fireconnectSlot = FIRECONNECT_KEYCHAIN_SLOTS[opts.provider]
+  if (fireconnectSlot && !opts.allowEnvOnly) {
+    const fcResult = await resolve({
+      accounts: [fireconnectSlot.account],
+      allowEnvOnly: false,
+      service: fireconnectSlot.service,
+    })
+    if (fcResult?.value) {
+      return fcResult.value
+    }
+  }
+  return undefined
 }
 
 export interface WriteProviderCredentialOptions {
