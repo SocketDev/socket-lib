@@ -25,7 +25,10 @@
     }
   },
   "lint": {
-    "profile": "rich"
+    "profile": "rich",
+    "snapshotGraphGlobs": [
+      "src/"
+    ]
   },
   "release": {
     "provenanceOrphanBaseline": [
