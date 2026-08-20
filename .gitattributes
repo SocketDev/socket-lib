@@ -33,7 +33,6 @@
 .config/fleet/playwright linguist-generated=true
 .config/fleet/pnpm-workspace.fleet.yaml linguist-generated=true
 .config/fleet/rolldown/bundle-stub.mts linguist-generated=true
-.config/fleet/rolldown/define-guarded.mts linguist-generated=true
 .config/fleet/rolldown/hook-bundle-excluded.config.mts linguist-generated=true
 .config/fleet/rolldown/hook-bundle-snapshot.config.mts linguist-generated=true
 .config/fleet/rolldown/hook-bundle.config.mts linguist-generated=true
