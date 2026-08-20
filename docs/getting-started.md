@@ -40,7 +40,7 @@ Let's create a simple script that uses a few core features:
 
 ```typescript
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 import { readJson } from '@socketsecurity/lib/fs/read-json'
 
 // Create a logger instance
@@ -139,7 +139,8 @@ if (getNodeEnv() === 'production') {
 ### HTTP Requests
 
 ```typescript
-import { httpJson, httpDownload } from '@socketsecurity/lib/http-request'
+import { httpJson } from '@socketsecurity/lib/http-request'
+import { httpDownload } from '@socketsecurity/lib/http-request/download'
 
 // Fetch JSON from an API
 const data = await httpJson('https://api.example.com/data')
@@ -155,7 +156,7 @@ await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
 ### Logging with Symbols
 
 ```typescript
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 const logger = getDefaultLogger()
 

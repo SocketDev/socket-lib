@@ -56,7 +56,7 @@ const lockFile = findUpSync([
 
 ```typescript
 import { detectPackageManager } from '@socketsecurity/lib/env/package-manager'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 const logger = getDefaultLogger()
 
@@ -337,7 +337,7 @@ async function regenerateLockFile(projectPath: string) {
 import { findUpSync } from '@socketsecurity/lib/fs/find'
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 function getProjectPackageManager(
   cwd: string,
@@ -398,7 +398,7 @@ await smartInstall('./project', ['typescript', '@types/node'], { dev: true })
 ```typescript
 import { readJson } from '@socketsecurity/lib/fs/read-json'
 import { httpJson } from '@socketsecurity/lib/http-request'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 interface NpmPackage {
   'dist-tags': {

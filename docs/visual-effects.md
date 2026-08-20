@@ -13,7 +13,7 @@ Visual feedback is essential for CLI tools. This library provides spinners, logg
 
 ```typescript
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 const spinner = Spinner({ text: 'Processing...' })
 spinner.start()
@@ -228,7 +228,7 @@ const spinner = Spinner({
 ### Getting a Logger
 
 ```typescript
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 const logger = getDefaultLogger()
 ```
@@ -366,7 +366,7 @@ logger
 Access colored symbols directly:
 
 ```typescript
-import { LOG_SYMBOLS } from '@socketsecurity/lib/logger'
+import { LOG_SYMBOLS } from '@socketsecurity/lib/logger/symbols'
 
 console.log(`${LOG_SYMBOLS.success} Operation complete`)
 console.log(`${LOG_SYMBOLS.fail} Operation failed`)
@@ -469,7 +469,7 @@ spinner.successAndStop('Build complete!')
 ### Hierarchical Logging
 
 ```typescript
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 const logger = getDefaultLogger()
 

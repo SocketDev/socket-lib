@@ -12,11 +12,11 @@ Pre-defined constant values for Node.js versions, npm registry URLs, platform de
 ## Quick Start
 
 ```typescript
-import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
+import { isDarwin, isWin32 } from '@socketsecurity/lib/constants/platform'
 
-if (WIN32) {
+if (isWin32()) {
   console.log('Running on Windows')
-} else if (DARWIN) {
+} else if (isDarwin()) {
   console.log('Running on macOS')
 } else {
   console.log('Running on Linux or other Unix-like OS')
@@ -55,42 +55,53 @@ const url = getTarballUrl('lodash', '4.17.21')
 
 ## Platform Constants
 
-### WIN32
+### isWin32()
 
-Checks if platform is Windows.
+Returns true when the platform is Windows.
 
 ```typescript
-import { WIN32 } from '@socketsecurity/lib/constants/platform'
+import { isWin32 } from '@socketsecurity/lib/constants/platform'
 
-if (WIN32) {
+if (isWin32()) {
   console.log('Running on Windows')
   // Use Windows-specific logic
 }
 ```
 
-### DARWIN
+### isDarwin()
 
-Checks if platform is macOS.
+Returns true when the platform is macOS.
 
 ```typescript
-import { DARWIN } from '@socketsecurity/lib/constants/platform'
+import { isDarwin } from '@socketsecurity/lib/constants/platform'
 
-if (DARWIN) {
+if (isDarwin()) {
   console.log('Running on macOS')
   // Use macOS-specific logic
 }
 ```
 
-### Detecting Linux
+### isPosix()
 
-There is no `LINUX` constant. To detect Linux or other Unix-like systems, check if the platform is neither Windows nor macOS:
+Returns true on every platform other than Windows, which covers macOS, Linux, and the BSDs.
 
 ```typescript
-import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
+import { isPosix } from '@socketsecurity/lib/constants/platform'
 
-const isLinux = !WIN32 && !DARWIN
-if (isLinux) {
-  console.log('Running on Linux or other Unix-like OS')
+if (isPosix()) {
+  console.log('Running on a POSIX platform')
+}
+```
+
+### Detecting Linux
+
+`getOs()` returns the raw `process.platform` value, so compare against it when Linux specifically is what matters:
+
+```typescript
+import { getOs } from '@socketsecurity/lib/constants/platform'
+
+if (getOs() === 'linux') {
+  console.log('Running on Linux')
   // Use Linux-specific logic
 }
 ```
@@ -98,10 +109,10 @@ if (isLinux) {
 ### Platform-Specific Logic Example
 
 <details>
-<summary>getConfigDir source: branches on WIN32 and DARWIN to build the AppData, Application Support, or `.config` path under the home directory</summary>
+<summary>getConfigDir source: branches on isWin32() and isDarwin() to build the AppData, Application Support, or `.config` path under the home directory</summary>
 
 ```typescript
-import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
+import { isDarwin, isWin32 } from '@socketsecurity/lib/constants/platform'
 import { getHome } from '@socketsecurity/lib/env/home'
 import path from 'node:path'
 
@@ -111,9 +122,9 @@ function getConfigDir(): string {
     throw new Error('Cannot determine home directory')
   }
 
-  if (WIN32) {
+  if (isWin32()) {
     return path.join(home, 'AppData', 'Local', 'MyApp')
-  } else if (DARWIN) {
+  } else if (isDarwin()) {
     return path.join(home, 'Library', 'Application Support', 'MyApp')
   } else {
     // Linux or other Unix-like OS
@@ -160,7 +171,7 @@ await spawn('command', [], { signal })
 
 ```typescript
 import { getNodeMajorVersion } from '@socketsecurity/lib/constants/node'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 function checkNodeVersion() {
   const logger = getDefaultLogger()
@@ -188,7 +199,8 @@ checkNodeVersion()
 <summary>downloadPackage source: fetch registry metadata, resolve `latest` through dist-tags, look up that version's tarball, then httpDownload with spinner progress</summary>
 
 ```typescript
-import { httpJson, httpDownload } from '@socketsecurity/lib/http-request'
+import { httpJson } from '@socketsecurity/lib/http-request'
+import { httpDownload } from '@socketsecurity/lib/http-request/download'
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const NPM_REGISTRY = 'https://registry.npmjs.org'
@@ -243,10 +255,10 @@ await downloadPackage('lodash', 'latest', '/tmp')
 ### Cross-Platform Path Builder
 
 <details>
-<summary>PathBuilder class source: a static home factory, an appData method branching on WIN32 and DARWIN, a variadic add, and build joining the segments</summary>
+<summary>PathBuilder class source: a static home factory, an appData method branching on isWin32() and isDarwin(), a variadic add, and build joining the segments</summary>
 
 ```typescript
-import { WIN32, DARWIN } from '@socketsecurity/lib/constants/platform'
+import { isDarwin, isWin32 } from '@socketsecurity/lib/constants/platform'
 import path from 'node:path'
 
 class PathBuilder {
@@ -265,9 +277,9 @@ class PathBuilder {
   }
 
   appData(appName: string): this {
-    if (WIN32) {
+    if (isWin32()) {
       this.segments.push('AppData', 'Local', appName)
-    } else if (DARWIN) {
+    } else if (isDarwin()) {
       this.segments.push('Library', 'Application Support', appName)
     } else {
       this.segments.push('.config', appName)
@@ -349,7 +361,7 @@ console.log(registry.searchUrl('testing framework'))
 
 ```typescript
 import { getAbortSignal } from '@socketsecurity/lib/process/abort'
-import { httpDownload } from '@socketsecurity/lib/http-request'
+import { httpDownload } from '@socketsecurity/lib/http-request/download'
 import { spawn } from '@socketsecurity/lib/process/spawn/child'
 
 const signal = getAbortSignal()
@@ -378,9 +390,9 @@ await Promise.all([
 
 ### Platform
 
-- `WIN32` - Boolean, true on Windows
-- `DARWIN` - Boolean, true on macOS
-- For Linux detection, use `!WIN32 && !DARWIN`
+- `isWin32()` - Boolean, true on Windows
+- `isDarwin()` - Boolean, true on macOS
+- For Linux detection, compare `getOs()` against `'linux'`
 
 ### Process
 

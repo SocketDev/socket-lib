@@ -175,7 +175,10 @@ export function renderGroupSummary(key: string, rows: Row[]): string {
   return `All ${rows.length} ${key} subpaths, alphabetical and linked to source: ${list}`
 }
 
-export function renderMarkdown(groups: Map<string, Row[]>): string {
+export function renderMarkdown(
+  groups: Map<string, Row[]>,
+  packageName: string,
+): string {
   const keys = [...groups.keys()].toSorted((a, b) => {
     if (a === 'Top-level') {
       return -1
@@ -190,7 +193,7 @@ export function renderMarkdown(groups: Map<string, Row[]>): string {
   lines.push('# API')
   lines.push('')
   lines.push(
-    'Every subpath exported by **@socketsecurity/lib-stable**, grouped by namespace.',
+    `Every subpath exported by **${packageName}**, grouped by namespace.`,
   )
   lines.push(
     'Each entry links to the source module and shows the first sentence of its `@fileoverview`.',
@@ -231,7 +234,7 @@ export function renderMarkdown(groups: Map<string, Row[]>): string {
     for (const row of rowsForGroup) {
       const summary = row.summary || '_(no description)_'
       lines.push(
-        `| [\`@socketsecurity/lib-stable/${row.subpath}\`](../${row.file}) | ${summary} |`,
+        `| [\`${packageName}/${row.subpath}\`](../${row.file}) | ${summary} |`,
       )
     }
     if (folded) {
@@ -293,13 +296,13 @@ async function main(): Promise<void> {
   try {
     const pkg = JSON.parse(
       readFileSync(path.join(rootPath, 'package.json'), 'utf8'),
-    ) as { exports: PackageExports }
+    ) as { exports: PackageExports; name: string }
 
     const rows = buildRows(pkg.exports)
     const groups = groupRows(rows)
 
     const apiPath = path.join(rootPath, 'docs', 'api.md')
-    writeFileSync(apiPath, renderMarkdown(groups))
+    writeFileSync(apiPath, renderMarkdown(groups, pkg.name))
 
     const llmsPath = path.join(rootPath, 'llms.txt')
     writeFileSync(llmsPath, renderLlmsTxt(groups, rows.length))

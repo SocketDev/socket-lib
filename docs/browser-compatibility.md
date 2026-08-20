@@ -99,7 +99,7 @@ These honor `package.json#exports[".browser"]` automatically when their target i
 
 ```ts
 // In your extension's src/background.mts
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 const logger = getDefaultLogger()
 logger.success('hello from the SW')

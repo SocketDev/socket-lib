@@ -13,11 +13,8 @@ Make HTTP/HTTPS requests, download files, and interact with APIs using Node.js n
 ## Quick Start
 
 ```typescript
-import {
-  httpJson,
-  httpText,
-  httpDownload,
-} from '@socketsecurity/lib/http-request'
+import { httpJson, httpText } from '@socketsecurity/lib/http-request'
+import { httpDownload } from '@socketsecurity/lib/http-request/download'
 
 // Fetch JSON from an API
 const data = await httpJson('https://api.example.com/users')
@@ -244,8 +241,8 @@ console.log(response.headers['location']) // Redirect target
 <summary>Worked httpDownload calls: a simple download, a GitHub release URL that redirects, an onProgress percentage callback, logger-driven progress at a progressInterval, and retries with a long timeout</summary>
 
 ```typescript
-import { httpDownload } from '@socketsecurity/lib/http-request'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { httpDownload } from '@socketsecurity/lib/http-request/download'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 // Simple download
 const result = await httpDownload(
@@ -452,7 +449,7 @@ await httpDownload('https://example.com/large-file.zip', '/tmp/file.zip', {
 Logger instance for automatic progress logging.
 
 ```typescript
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 await httpDownload('https://example.com/file.zip', '/tmp/file.zip', {
   logger: getDefaultLogger(),
@@ -513,8 +510,8 @@ console.log(`Latest release: ${release.tag_name}`)
 <summary>Downloading an installer with retries 3, retryDelay 2000, a 300000 ms timeout and logger progress, wrapped in a try/catch that logs a fail</summary>
 
 ```typescript
-import { httpDownload } from '@socketsecurity/lib/http-request'
-import { getDefaultLogger } from '@socketsecurity/lib/logger'
+import { httpDownload } from '@socketsecurity/lib/http-request/download'
+import { getDefaultLogger } from '@socketsecurity/lib/logger/default'
 
 const logger = getDefaultLogger()
 
@@ -578,7 +575,7 @@ const data = response.json()
 <summary>Driving a Spinner from onProgress, updating only when the whole percent changes, then successAndStop</summary>
 
 ```typescript
-import { httpDownload } from '@socketsecurity/lib/http-request'
+import { httpDownload } from '@socketsecurity/lib/http-request/download'
 import { Spinner } from '@socketsecurity/lib/spinner/spinner'
 
 const spinner = Spinner({ text: 'Downloading large file...' })
