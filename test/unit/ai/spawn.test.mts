@@ -24,7 +24,7 @@ afterEach(async () => {
   resetAiAgentDiscoveryCache()
 })
 
-function primeCache(agents: Record<string, string>): void {
+function setupCache(agents: Record<string, string>): void {
   const cachePath = cachePathFor(tmpRoot)
   mkdirSync(path.dirname(cachePath), { recursive: true })
   writeFileSync(cachePath, JSON.stringify({ agents, writtenAt: Date.now() }))
@@ -289,38 +289,38 @@ describe.sequential('buildArgs — opencode', () => {
 
 describe.sequential('pickAgent', () => {
   test('returns the requested agent when it is discovered', async () => {
-    primeCache({ claude: '/bin/claude', codex: '/bin/codex' })
+    setupCache({ claude: '/bin/claude', codex: '/bin/codex' })
     expect(await pickAgent('codex', tmpRoot)).toBe('codex')
   })
 
   test('throws when the requested agent is not discovered', async () => {
-    primeCache({ claude: '/bin/claude' })
+    setupCache({ claude: '/bin/claude' })
     await expect(pickAgent('gemini', tmpRoot)).rejects.toThrow(
       /requested agent "gemini" is not on PATH/,
     )
   })
 
   test('throws with discovered-list in the message when requested agent missing', async () => {
-    primeCache({ claude: '/bin/claude', codex: '/bin/codex' })
+    setupCache({ claude: '/bin/claude', codex: '/bin/codex' })
     await expect(pickAgent('gemini', tmpRoot)).rejects.toThrow(
       /Discovered: claude, codex/,
     )
   })
 
   test('throws with "(none)" when requested agent missing and no agents discovered', async () => {
-    primeCache({})
+    setupCache({})
     await expect(pickAgent('claude', tmpRoot)).rejects.toThrow(
       /Discovered: \(none\)/,
     )
   })
 
   test('defaults to claude when present and no agent requested', async () => {
-    primeCache({ claude: '/bin/claude', codex: '/bin/codex' })
+    setupCache({ claude: '/bin/claude', codex: '/bin/codex' })
     expect(await pickAgent(undefined, tmpRoot)).toBe('claude')
   })
 
   test('falls back to codex over opencode/gemini', async () => {
-    primeCache({
+    setupCache({
       codex: '/bin/codex',
       opencode: '/bin/oc',
       gemini: '/bin/grouprouproup',
@@ -329,17 +329,17 @@ describe.sequential('pickAgent', () => {
   })
 
   test('falls back to opencode when codex/claude missing', async () => {
-    primeCache({ opencode: '/bin/oc', gemini: '/bin/grouprouproup' })
+    setupCache({ opencode: '/bin/oc', gemini: '/bin/grouprouproup' })
     expect(await pickAgent(undefined, tmpRoot)).toBe('opencode')
   })
 
   test('falls back to gemini when only gemini available', async () => {
-    primeCache({ gemini: '/bin/grouprouproup' })
+    setupCache({ gemini: '/bin/grouprouproup' })
     expect(await pickAgent(undefined, tmpRoot)).toBe('gemini')
   })
 
   test('throws when no agents discovered and none requested', async () => {
-    primeCache({})
+    setupCache({})
     await expect(pickAgent(undefined, tmpRoot)).rejects.toThrow(
       /no AI agent CLI on PATH/,
     )
