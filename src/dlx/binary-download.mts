@@ -115,14 +115,12 @@ export async function downloadBinary(
     // metadata so callers doing trust-on-first-use can pin it
     // without re-fetching.
     downloaded = false
+    // Measure the on-disk bytes against the caller's pin before reusing them.
+    // The metadata records what some earlier call deposited, so trusting it
+    // would let the cache vouch for itself.
+    const digests = await verifyCachedBinary(binaryPath, { integrity, sha256 })
     const cachedMeta = await readBinaryCacheMetadata(cacheEntryDir)
-    if (cachedMeta?.integrity) {
-      actualIntegrity = cachedMeta.integrity
-    } else {
-      // Metadata missing or malformed — recompute from the on-disk
-      // binary so the caller still gets a usable integrity string.
-      actualIntegrity = (await hashBinaryFile(binaryPath)).integrity
-    }
+    actualIntegrity = cachedMeta?.integrity ?? digests.integrity
   } else {
     // Ensure cache directory exists before downloading.
     try {
@@ -371,4 +369,45 @@ export async function hashBinaryFile(
     integrity: `sha512-${sha512Hash.digest('base64')}`,
     sha256: sha256Hash.digest('hex'),
   }
+}
+
+/**
+ * Check a cached binary against the caller's pin.
+ *
+ * A cache HIT skips the download, and with it every check the download
+ * performs, so a caller that pinned a hash needs the on-disk bytes measured
+ * here or the pin governs only the first fetch on each machine. Anything able
+ * to write the dlx cache would otherwise reach execution. Fails closed: the
+ * mismatching file is deleted so the next call fetches again, and the caller
+ * sees the throw.
+ *
+ * Returns the digests it computed so a caller doing trust-on-first-use can
+ * reuse them instead of hashing the file twice. With no pin supplied there is
+ * nothing to compare, and the digests are still returned.
+ */
+export async function verifyCachedBinary(
+  binaryPath: string,
+  options?:
+    | { integrity?: string | undefined; sha256?: string | undefined }
+    | undefined,
+): Promise<BinaryFileDigests> {
+  const opts = { __proto__: null, ...options } as {
+    integrity?: string | undefined
+    sha256?: string | undefined
+  }
+  const digests = await hashBinaryFile(binaryPath)
+  const mismatch = (label: string, want: string, got: string): Error => {
+    return new ErrorCtor(
+      `${label} mismatch for cached binary: expected ${want}, got ${got}. Where: ${binaryPath}. Fix: the cache entry was deleted, so retry to fetch a fresh copy.`,
+    )
+  }
+  if (opts.integrity && digests.integrity !== opts.integrity) {
+    await safeDelete(binaryPath)
+    throw mismatch('Integrity', opts.integrity, digests.integrity)
+  }
+  if (opts.sha256 && digests.sha256 !== opts.sha256.toLowerCase()) {
+    await safeDelete(binaryPath)
+    throw mismatch('SHA-256', opts.sha256, digests.sha256)
+  }
+  return digests
 }

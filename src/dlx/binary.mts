@@ -38,7 +38,7 @@ import {
   isBinaryCacheValid,
   writeBinaryCacheMetadata,
 } from './binary-cache.mjs'
-import { downloadBinaryFile } from './binary-download.mjs'
+import { downloadBinaryFile, verifyCachedBinary } from './binary-download.mjs'
 
 import type { DlxBinaryOptions, DlxBinaryResult } from './binary-types.mjs'
 import type { SpawnExtra, SpawnOptions } from '../process/spawn/types.mjs'
@@ -119,7 +119,12 @@ export async function dlxBinary(
         ] as string
         // Re-check binary exists after reading metadata (TOCTOU protection).
         // Prevents race where binary is deleted between validity check and use.
-        if (!fs.existsSync(binaryPath)) {
+        if (fs.existsSync(binaryPath)) {
+          // A cache hit skips downloadBinaryFile, and with it the pin check that
+          // function performs, so measure the on-disk bytes here. Otherwise a
+          // pinned caller is protected only on the first fetch per machine.
+          await verifyCachedBinary(binaryPath, { integrity, sha256 })
+        } else {
           downloaded = true
         }
       } else {
