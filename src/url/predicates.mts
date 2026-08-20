@@ -17,12 +17,14 @@ import {
 
 import { parseUrl } from './parse.mjs'
 
-// Loopback / link-local / private IPv4 ranges plus IPv6 loopback and ULA
-// (fc00::/7) and link-local (fe80::/10) that an SSRF probe would target.
-// Bracketed forms cover the way `URL` reports IPv6 hostnames. Matched against
-// a lowercased hostname.
+// Loopback / link-local / private IPv4 ranges plus IPv6 loopback (::1), the
+// unspecified address (::), ULA (fc00::/7), link-local (fe80::/10), and an
+// IPv4-mapped (or the legacy IPv4-compatible) IPv6 host — `::ffff:127.0.0.1`
+// or `::127.0.0.1` — whose embedded IPv4 falls in one of the same private
+// ranges. Bracketed forms cover the way `URL` reports IPv6 hostnames.
+// Matched against a lowercased hostname.
 const PRIVATE_HOST_REGEXP =
-  /^(?:0\.0\.0\.0$|10\.|127\.|169\.254\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168\.|\[?::1\]?$|\[?fc00:|\[?fd|\[?fe80:)/u
+  /^(?:0\.0\.0\.0$|10\.|127\.|169\.254\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168\.|\[?::1\]?$|\[?::\]?$|\[?::(?:ffff:)?(?:0\.0\.0\.0$|10\.|127\.|169\.254\.|172\.(?:1[6-9]|2\d|3[01])\.|192\.168\.)|\[?fc00:|\[?fd|\[?fe80:)/u
 
 /**
  * Check whether a hostname is a loopback address — `localhost`, `127.0.0.1`, or

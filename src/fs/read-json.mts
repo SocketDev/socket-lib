@@ -78,12 +78,18 @@ export async function readJson(
   const pathStr = String(filepath)
   // Cache-hit fast path: stat, then if the stat matches a cached entry,
   // return a structuredClone of the parsed value. The clone is what makes
-  // default-on caching safe under caller mutation.
+  // default-on caching safe under caller mutation. Also keep this PRE-READ
+  // stat around: it is the only trustworthy validity key for whatever we
+  // read below, since a stat taken only AFTER the read could reflect a
+  // writer's commit that landed mid-read, stamping stale content with a
+  // fresh mtime that would then wrongly validate on every later call.
+  let preReadStat: Awaited<ReturnType<typeof fs.promises.stat>> | undefined
   if (cacheEnabled) {
     try {
       // Need ino+size+mtime as the cache invalidation key, not existence.
       // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
       const stat = await fs.promises.stat(filepath)
+      preReadStat = stat
       const cached = getCachedJson(
         pathStr,
         NumberCtor(stat.ino),
@@ -94,7 +100,7 @@ export async function readJson(
         return cached
       }
     } catch {
-      // Stat failed (ENOENT etc.) — fall through to the read path so the
+      // Stat failed (ENOENT etc.) - fall through to the read path so the
       // existing error-message logic surfaces the original errno.
     }
   }
@@ -119,7 +125,7 @@ export async function readJson(
       }
       // EPERM operand fires on Windows; the if-truthy + EACCES-vs-
       // EPERM operand sub-arms vary per platform.
-      /* c8 ignore start */
+      /* c8 ignore start - EACCES/EPERM branch is platform-dependent */
       if (code === 'EACCES' || code === 'EPERM') {
         throw new ErrorCtor(
           `Permission denied reading JSON file: ${filepath}\n` +
@@ -137,25 +143,34 @@ export async function readJson(
     reviver,
     throws: shouldThrow,
   })
-  // Cache the successful parse. Run a fresh stat AFTER the read so the
-  // cached key reflects the actual on-disk state at parse time. A concurrent
-  // writer between read and stat would write a slightly-stale entry, which
-  // self-heals on the very next call (the next stat differs from the
-  // entry's mtime → miss → re-read).
-  if (cacheEnabled && parsed !== undefined) {
+  // Cache the successful parse only when a second stat, taken right after
+  // the read, matches the PRE-read stat exactly. A match means the file was
+  // untouched for the whole read window, so `content` genuinely corresponds
+  // to that stat and it is safe to use as the cache's validity key. A
+  // mismatch means a writer committed during the read: `content` might be
+  // the old bytes, the new bytes, or a torn mix, so there is no stat that
+  // safely represents it - skip the cache store and let the next call
+  // re-read rather than risk pinning stale content under a fresh mtime.
+  if (cacheEnabled && parsed !== undefined && preReadStat !== undefined) {
     try {
       // Need ino+size+mtime as the cache invalidation key, not existence.
       // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
-      const stat = await fs.promises.stat(filepath)
-      setCachedJson(
-        pathStr,
-        NumberCtor(stat.ino),
-        NumberCtor(stat.size),
-        NumberCtor(stat.mtimeMs),
-        parsed,
-      )
+      const statAfter = await fs.promises.stat(filepath)
+      if (
+        NumberCtor(statAfter.ino) === NumberCtor(preReadStat.ino) &&
+        NumberCtor(statAfter.size) === NumberCtor(preReadStat.size) &&
+        NumberCtor(statAfter.mtimeMs) === NumberCtor(preReadStat.mtimeMs)
+      ) {
+        setCachedJson(
+          pathStr,
+          NumberCtor(preReadStat.ino),
+          NumberCtor(preReadStat.size),
+          NumberCtor(preReadStat.mtimeMs),
+          parsed,
+        )
+      }
     } catch {
-      // Stat-after-read failed — skip the cache store rather than poison
+      // Stat-after-read failed - skip the cache store rather than poison
       // it with no validity key. The read result is still returned.
     }
   }
@@ -205,11 +220,16 @@ export function readJsonSync(
   const cacheEnabled = cache !== false && reviver === undefined
   const fs = getNodeFs()
   const pathStr = String(filepath)
+  // Keep the PRE-read stat around: it is the only trustworthy validity key
+  // for whatever gets read below. See readJson for the race a post-read-only
+  // stat would miss.
+  let preReadStat: ReturnType<typeof fs.statSync> | undefined
   if (cacheEnabled) {
     try {
       // Need ino+size+mtime as the cache invalidation key, not existence.
       // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
       const stat = fs.statSync(filepath)
+      preReadStat = stat
       const cached = getCachedJson(
         pathStr,
         NumberCtor(stat.ino),
@@ -244,7 +264,7 @@ export function readJsonSync(
       }
       // EPERM operand fires on Windows; the if-truthy + EACCES-vs-
       // EPERM operand sub-arms vary per platform.
-      /* c8 ignore start */
+      /* c8 ignore start - EACCES/EPERM branch is platform-dependent */
       if (code === 'EACCES' || code === 'EPERM') {
         throw new ErrorCtor(
           `Permission denied reading JSON file: ${filepath}\n` +
@@ -262,20 +282,29 @@ export function readJsonSync(
     reviver,
     throws: shouldThrow,
   })
-  if (cacheEnabled && parsed !== undefined) {
+  // Cache only when a second stat, taken right after the read, matches the
+  // PRE-read stat exactly - see readJson for why a mismatch must skip the
+  // cache store rather than pin possibly-stale content under a fresh mtime.
+  if (cacheEnabled && parsed !== undefined && preReadStat !== undefined) {
     try {
       // Need ino+size+mtime as the cache invalidation key, not existence.
       // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
-      const stat = fs.statSync(filepath)
-      setCachedJson(
-        pathStr,
-        NumberCtor(stat.ino),
-        NumberCtor(stat.size),
-        NumberCtor(stat.mtimeMs),
-        parsed,
-      )
+      const statAfter = fs.statSync(filepath)
+      if (
+        NumberCtor(statAfter.ino) === NumberCtor(preReadStat.ino) &&
+        NumberCtor(statAfter.size) === NumberCtor(preReadStat.size) &&
+        NumberCtor(statAfter.mtimeMs) === NumberCtor(preReadStat.mtimeMs)
+      ) {
+        setCachedJson(
+          pathStr,
+          NumberCtor(preReadStat.ino),
+          NumberCtor(preReadStat.size),
+          NumberCtor(preReadStat.mtimeMs),
+          parsed,
+        )
+      }
     } catch {
-      // Skip caching when stat-after-read fails — the read result still
+      // Skip caching when stat-after-read fails - the read result still
       // returns to the caller.
     }
   }

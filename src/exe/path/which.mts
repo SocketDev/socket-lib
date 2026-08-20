@@ -20,11 +20,25 @@ import process from 'node:process'
 import whichModule from '../../external/which.js'
 import { isPath } from '../../paths/normalize.mjs'
 import { ArrayIsArray, ArrayPrototypeMap } from '../../primordials/array.mjs'
+import { JSONStringify } from '../../primordials/json.mjs'
 import { binPathAllCache, binPathCache, getFs, getPath } from '../shared.mjs'
 import { resolveRealBinSync } from './resolve.mjs'
 
 import type { WhichOptions as ExternalWhichOptions } from '../../external/which.js'
 import type { WhichLocalBinOptions, WhichOptions } from '../types.mjs'
+
+/**
+ * Build the binPathCache / binPathAllCache key for a whichReal /
+ * whichRealSync lookup. Resolution depends on binName plus every option
+ * that changes what upstream which actually searches - path and pathExt -
+ * so two callers resolving the same binName under different search roots
+ * (e.g. different options.path) must not collide on the same cache entry
+ * and hand each other a stale or mismatched answer.
+ */
+export function binCacheKey(binName: string, options: WhichOptions): string {
+  const opts = { __proto__: null, ...options } as WhichOptions
+  return JSONStringify([binName, opts.path ?? '', opts.pathExt ?? ''])
+}
 
 /**
  * Find an executable in the system PATH asynchronously.
@@ -144,26 +158,31 @@ export async function whichReal(
   // Default to nothrow: true if not specified to return undefined instead of throwing
   const opts = { __proto__: null, nothrow: true, ...options } as WhichOptions
 
+  // Cache key includes every option that changes what `which` searches
+  // (path, pathExt), not just binName - two callers resolving the same
+  // binName under different search roots must not share a cache entry.
+  const cacheKey = binCacheKey(binName, opts)
+
   // Use cache - validate with existsSync() which is cheaper than full
   // PATH search. opts.all path tested via separate which-all callers;
   // stale-cache eviction fires only when a cached binary is removed
   // mid-session; result-undefined arm fires only when binary is missing.
-  /* c8 ignore start */
+  /* c8 ignore start - cache branches need a primed cache + a removed binary to hit */
   if (opts.all) {
-    const cachedAll = binPathAllCache.get(binName)
+    const cachedAll = binPathAllCache.get(cacheKey)
     if (cachedAll && cachedAll.length > 0) {
       if (fs.existsSync(cachedAll[0]!)) {
         return cachedAll
       }
-      binPathAllCache.delete(binName)
+      binPathAllCache.delete(cacheKey)
     }
   } else {
-    const cached = binPathCache.get(binName)
+    const cached = binPathCache.get(cacheKey)
     if (cached) {
       if (fs.existsSync(cached)) {
         return cached
       }
-      binPathCache.delete(binName)
+      binPathCache.delete(cacheKey)
     }
   }
   /* c8 ignore stop */
@@ -173,7 +192,7 @@ export async function whichReal(
   const result = await whichModule(binName, opts as ExternalWhichOptions)
 
   // The array-returning opts.all arm and the not-found arm.
-  /* c8 ignore start */
+  /* c8 ignore start - opts.all arm needs a dedicated which-all test path */
   if (opts?.all) {
     const paths = ArrayIsArray(result)
       ? result
@@ -182,7 +201,7 @@ export async function whichReal(
         : undefined
     if (paths?.length) {
       const resolved = ArrayPrototypeMap(paths, p => resolveRealBinSync(p))
-      binPathAllCache.set(binName, resolved)
+      binPathAllCache.set(cacheKey, resolved)
       return resolved
     }
     return paths
@@ -195,7 +214,7 @@ export async function whichReal(
 
   const resolved = resolveRealBinSync(result)
   // Cache the resolved path.
-  binPathCache.set(binName, resolved)
+  binPathCache.set(cacheKey, resolved)
   return resolved
 }
 
@@ -220,23 +239,27 @@ export function whichRealSync(
   // Default to nothrow: true if not specified to return undefined instead of throwing
   const opts = { __proto__: null, nothrow: true, ...options } as WhichOptions
 
+  // Cache key includes every option that changes what `which` searches
+  // (path, pathExt), not just binName - see whichReal.
+  const cacheKey = binCacheKey(binName, opts)
+
   // Use cache. See whichReal for branch reachability rationale.
-  /* c8 ignore start */
+  /* c8 ignore start - cache branches need a primed cache + a removed binary to hit */
   if (opts.all) {
-    const cachedAll = binPathAllCache.get(binName)
+    const cachedAll = binPathAllCache.get(cacheKey)
     if (cachedAll && cachedAll.length > 0) {
       if (fs.existsSync(cachedAll[0]!)) {
         return cachedAll
       }
-      binPathAllCache.delete(binName)
+      binPathAllCache.delete(cacheKey)
     }
   } else {
-    const cached = binPathCache.get(binName)
+    const cached = binPathCache.get(cacheKey)
     if (cached) {
       if (fs.existsSync(cached)) {
         return cached
       }
-      binPathCache.delete(binName)
+      binPathCache.delete(cacheKey)
     }
   }
   /* c8 ignore stop */
@@ -246,7 +269,7 @@ export function whichRealSync(
   const result = whichSync(binName, opts)
 
   // opts.all and not-found arms; see whichReal.
-  /* c8 ignore start */
+  /* c8 ignore start - opts.all arm needs a dedicated which-all test path */
   if (opts.all) {
     const paths = ArrayIsArray(result)
       ? result
@@ -255,7 +278,7 @@ export function whichRealSync(
         : undefined
     if (paths?.length) {
       const resolved = ArrayPrototypeMap(paths, p => resolveRealBinSync(p))
-      binPathAllCache.set(binName, resolved)
+      binPathAllCache.set(cacheKey, resolved)
       return resolved
     }
     return paths
@@ -267,7 +290,7 @@ export function whichRealSync(
   /* c8 ignore stop */
 
   const resolved = resolveRealBinSync(result as string)
-  binPathCache.set(binName, resolved)
+  binPathCache.set(cacheKey, resolved)
   return resolved
 }
 

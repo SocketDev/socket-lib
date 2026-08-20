@@ -18,13 +18,15 @@ import path from 'node:path'
 
 import tarFs from 'tar-fs'
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import {
   downloadAndExtractTool,
   downloadToolArchive,
 } from '../../../src/external-tools/from-download.mjs'
 import { safeDelete } from '../../../src/fs/safe.mjs'
+
+import type * as ExtractModule from '../../../src/archives/extract.mjs'
 
 import {
   FAKE_INTEGRITY_VALUE as FAKE_INTEGRITY,
@@ -184,6 +186,68 @@ describe.sequential('external-tools/from-download', () => {
 
       expect(existsSync(path.join(extractedDir, 'inner.txt'))).toBe(true)
       expect(existsSync(path.join(extractedDir, 'top'))).toBe(false)
+    })
+
+    it('does not treat an interrupted (partial) extraction as complete on retry', async () => {
+      const tarBytes = await buildTarFixture(scratch)
+      const { downloader } = makeFakeDownloader(tarBytes)
+      const extractedDir = path.join(scratch, 'interrupted')
+
+      let callCount = 0
+      vi.resetModules()
+      vi.doMock(import('../../../src/archives/extract.mjs'), async () => {
+        const actual = await vi.importActual<typeof ExtractModule>(
+          '../../../src/archives/extract.mjs',
+        )
+        return {
+          extractArchive: vi.fn(
+            async (
+              ...args: Parameters<typeof actual.extractArchive>
+            ): Promise<void> => {
+              callCount += 1
+              if (callCount === 1) {
+                // Simulate a process killed partway through extraction:
+                // some bytes land in the extraction target, then the call
+                // never completes.
+                const outputDir = args[1]
+                mkdirSync(outputDir, { recursive: true })
+                writeFileSync(path.join(outputDir, 'partial-marker'), 'partial')
+                throw new Error('synthetic interruption')
+              }
+              return actual.extractArchive(...args)
+            },
+          ),
+        }
+      })
+
+      try {
+        const { downloadAndExtractTool: downloadAndExtractToolMocked } =
+          await import('../../../src/external-tools/from-download.mjs')
+
+        await expect(
+          downloadAndExtractToolMocked({
+            url: 'https://example.com/fixture.tar',
+            name: 'fixture-interrupted.tar',
+            extractedDir,
+            downloader,
+          }),
+        ).rejects.toThrow('synthetic interruption')
+
+        // Retry after the "crash": the helper must still complete the
+        // extraction instead of reading the partial leftovers as done.
+        const second = await downloadAndExtractToolMocked({
+          url: 'https://example.com/fixture.tar',
+          name: 'fixture-interrupted.tar',
+          extractedDir,
+          downloader,
+        })
+        expect(second.extracted).toBe(true)
+        expect(existsSync(path.join(extractedDir, 'source', 'hello.txt'))).toBe(
+          true,
+        )
+      } finally {
+        vi.resetModules()
+      }
     })
   })
 })

@@ -90,6 +90,53 @@ describe('readJson', () => {
       expect(result.date).toBeInstanceOf(Date)
     }, 'readJson-reviver-')
   })
+
+  it('does not cache stale content when a writer commits between the read and the validating stat', async () => {
+    await runWithTempDir(async tmpDir => {
+      const testFile = path.join(tmpDir, 'race.json')
+      const before = { v: 1 }
+      const after = { v: 222_222 }
+      await fs.writeFile(testFile, JSON.stringify(before), 'utf8')
+
+      const { getNodeFs } = await import('../../../src/node/fs.mjs')
+      const realFs = getNodeFs()
+      const origReadFile = realFs.promises.readFile
+      // Simulate a writer committing new content in the window between
+      // readJson's internal read and its post-read validating stat: read
+      // the current (old) bytes first, then overwrite the file with `after`
+      // before returning the captured old bytes to the caller.
+      const wrappedReadFile = (async (
+        filepathArg: unknown,
+        optionsArg?: unknown | undefined,
+      ) => {
+        const result = await (
+          origReadFile as unknown as (
+            p: unknown,
+            o?: unknown | undefined,
+          ) => Promise<string>
+        )(filepathArg, optionsArg)
+        await fs.writeFile(testFile, JSON.stringify(after), 'utf8')
+        return result
+      }) as typeof origReadFile
+      ;(realFs.promises as { readFile: typeof origReadFile }).readFile =
+        wrappedReadFile
+
+      let first: unknown
+      try {
+        first = await readJson(testFile)
+      } finally {
+        ;(realFs.promises as { readFile: typeof origReadFile }).readFile =
+          origReadFile
+      }
+      expect(first).toEqual(before)
+
+      // The writer's commit landed mid-read. The stale `before` value must
+      // not have been pinned in the cache under the now-current `after`
+      // stat, so this call must see the real, current content.
+      const second = await readJson(testFile)
+      expect(second).toEqual(after)
+    }, 'readJson-race-')
+  })
 })
 
 describe('readJsonSync', () => {
@@ -164,6 +211,51 @@ describe('readJsonSync', () => {
       }, 'readJsonSync-eacces-')
     })
   }
+
+  it('does not cache stale content when a writer commits between the read and the validating stat', async () => {
+    await runWithTempDir(async tmpDir => {
+      const testFile = path.join(tmpDir, 'race-sync.json')
+      const before = { v: 1 }
+      const after = { v: 222_222 }
+      await fs.writeFile(testFile, JSON.stringify(before), 'utf8')
+
+      const { getNodeFs } = await import('../../../src/node/fs.mjs')
+      const realFs = getNodeFs()
+      const origReadFileSync = realFs.readFileSync
+      // Simulate a writer committing new content in the window between
+      // readJsonSync's internal read and its post-read validating stat.
+      const wrappedReadFileSync = ((
+        filepathArg: unknown,
+        optionsArg?: unknown | undefined,
+      ) => {
+        const result = (
+          origReadFileSync as unknown as (
+            p: unknown,
+            o?: unknown | undefined,
+          ) => string
+        )(filepathArg, optionsArg)
+        realFs.writeFileSync(testFile, JSON.stringify(after))
+        return result
+      }) as typeof origReadFileSync
+      ;(realFs as { readFileSync: typeof origReadFileSync }).readFileSync =
+        wrappedReadFileSync
+
+      let first: unknown
+      try {
+        first = readJsonSync(testFile)
+      } finally {
+        ;(realFs as { readFileSync: typeof origReadFileSync }).readFileSync =
+          origReadFileSync
+      }
+      expect(first).toEqual(before)
+
+      // The writer's commit landed mid-read. The stale `before` value must
+      // not have been pinned in the cache under the now-current `after`
+      // stat, so this call must see the real, current content.
+      const second = readJsonSync(testFile)
+      expect(second).toEqual(after)
+    }, 'readJsonSync-race-')
+  })
 })
 
 if (process.platform !== 'win32') {

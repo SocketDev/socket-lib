@@ -3,6 +3,8 @@
  *   the historical monolithic test/unit/bin.test.mts.
  */
 
+import { mkdtempSync, realpathSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -13,6 +15,67 @@ import {
   whichReal,
   whichRealSync,
 } from '../../../../src/exe/path/which.mjs'
+import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+
+describe('whichReal / whichRealSync cache key includes options.path', () => {
+  // Two search roots, each with an executable of the SAME binName resolving
+  // to a DIFFERENT real file. A cache keyed on binName alone would let the
+  // second call's lookup return the first call's answer.
+  function makeBinDirs(binName: string): {
+    dirA: string
+    dirB: string
+    expectedA: string
+    expectedB: string
+  } {
+    const dirA = mkdtempSync(path.join(os.tmpdir(), 'which-cache-a-'))
+    const dirB = mkdtempSync(path.join(os.tmpdir(), 'which-cache-b-'))
+    writeFileSync(path.join(dirA, binName), '#!/bin/sh\necho a\n', {
+      mode: 0o755,
+    })
+    writeFileSync(path.join(dirB, binName), '#!/bin/sh\necho b\n', {
+      mode: 0o755,
+    })
+    // realpathSync: macOS resolves a tmpdir path through a symlink (e.g.
+    // /tmp -> /private/tmp), and resolveRealBinSync compares against the
+    // resolved form.
+    return {
+      dirA,
+      dirB,
+      expectedA: realpathSync(path.join(dirA, binName)),
+      expectedB: realpathSync(path.join(dirB, binName)),
+    }
+  }
+
+  if (process.platform !== 'win32') {
+    it('whichReal resolves distinct paths for the same binName under different options.path', async () => {
+      const binName = 'example-which-cache-key-async'
+      const { dirA, dirB, expectedA, expectedB } = makeBinDirs(binName)
+      try {
+        const resultA = await whichReal(binName, { path: dirA })
+        const resultB = await whichReal(binName, { path: dirB })
+        expect(resultA).toBe(expectedA)
+        expect(resultB).toBe(expectedB)
+      } finally {
+        safeDeleteSync(dirA)
+        safeDeleteSync(dirB)
+      }
+    })
+
+    it('whichRealSync resolves distinct paths for the same binName under different options.path', () => {
+      const binName = 'example-which-cache-key-sync'
+      const { dirA, dirB, expectedA, expectedB } = makeBinDirs(binName)
+      try {
+        const resultA = whichRealSync(binName, { path: dirA })
+        const resultB = whichRealSync(binName, { path: dirB })
+        expect(resultA).toBe(expectedA)
+        expect(resultB).toBe(expectedB)
+      } finally {
+        safeDeleteSync(dirA)
+        safeDeleteSync(dirB)
+      }
+    })
+  }
+})
 
 describe('whichReal (async)', () => {
   it('resolves node to a real path and caches it', async () => {

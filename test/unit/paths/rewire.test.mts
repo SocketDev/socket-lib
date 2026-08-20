@@ -31,14 +31,25 @@ describe.sequential('paths/rewire — getPathValue', () => {
     expect(getPathValue('test-key-x', () => '/computed')).toBe('/override/path')
   })
 
-  it('computes + caches the value when no override is set', () => {
+  it('computes the value fresh from originalFn when no override is set', () => {
     const fn = vi.fn(() => '/computed-value')
     const a = getPathValue('cache-test-key', fn)
     const b = getPathValue('cache-test-key', fn)
     expect(a).toBe('/computed-value')
     expect(b).toBe(a)
-    // Function called once: second call hit the cache.
-    expect(fn).toHaveBeenCalledTimes(1)
+    expect(fn).toHaveBeenCalledTimes(2)
+  })
+
+  it('recomputes on every call, so a changed input is reflected without an override', () => {
+    // originalFn's typical inputs (env vars, os.homedir()/os.tmpdir()) can
+    // change without going through setPath — a long-lived memo keyed only
+    // on `key` would keep serving the value computed against the OLD input.
+    let current = '/v1'
+    const fn = vi.fn(() => current)
+    expect(getPathValue('recompute-key', fn)).toBe('/v1')
+    current = '/v2'
+    expect(getPathValue('recompute-key', fn)).toBe('/v2')
+    expect(fn).toHaveBeenCalledTimes(2)
   })
 
   it('returns the override even after computing+caching first', () => {
@@ -66,9 +77,9 @@ describe.sequential('paths/rewire — hasOverride', () => {
 })
 
 describe.sequential('paths/rewire — invalidateCaches', () => {
-  it('drops cached values (next get recomputes via originalFn)', () => {
+  it('does not affect a subsequent getPathValue call (nothing memoized to drop)', () => {
     const fn = vi.fn(() => '/v1')
-    getPathValue('inv-key', fn) // primes cache
+    getPathValue('inv-key', fn)
     expect(fn).toHaveBeenCalledTimes(1)
     invalidateCaches()
     const fn2 = vi.fn(() => '/v2')

@@ -18,7 +18,6 @@ import { MapCtor } from '../primordials/map-set.mjs'
 // Vitest automatically sets VITEST=true when running tests.
 export interface PathRewireState {
   testOverrides: Map<string, string | undefined>
-  valueCache: Map<string, string>
   cacheInvalidationCallbacks: Array<() => void>
 }
 
@@ -28,7 +27,6 @@ const globalState = globalThis as typeof globalThis &
 if (!globalState[stateSymbol]) {
   globalState[stateSymbol] = {
     testOverrides: new MapCtor<string, string | undefined>(),
-    valueCache: new MapCtor<string, string>(),
     cacheInvalidationCallbacks: [] as Array<() => void>,
   }
 }
@@ -37,9 +35,6 @@ const sharedState: PathRewireState = globalState[stateSymbol]!
 
 // Per-test overrides
 const testOverrides = sharedState.testOverrides
-
-// Cache for computed values, cleared when overrides change
-const valueCache = sharedState.valueCache
 
 // Cache invalidation callbacks - registered by modules that need to clear their caches
 const cacheInvalidationCallbacks = sharedState.cacheInvalidationCallbacks
@@ -59,8 +54,18 @@ export function clearPath(key: string): void {
  * Resolution order:
  *
  * 1. Test overrides, set via setPath in beforeEach.
- * 2. Cached value, kept for performance.
- * 3. Original function call, cached for subsequent calls.
+ * 2. Original function call, recomputed on every call.
+ *
+ * `originalFn` is not memoized here: its typical inputs (env vars such as
+ * HOME / SOCKET_HOME, os.homedir(), os.tmpdir()) can change without going
+ * through setPath/clearPath/resetPaths - `env/rewire`'s setEnv/clearEnv, or a
+ * direct process.env write, update those inputs without calling this
+ * module's invalidateCaches(). A memo keyed only on `key` would then serve a
+ * value computed against the OLD input forever, since nothing here observes
+ * the env change to know the memo is stale. `originalFn` is a cheap pure
+ * read (a string join, an env lookup) in every current caller, so recomputing
+ * it every call costs nothing measurable and removes the staleness class
+ * entirely.
  *
  * @internal Used by path getters to support test rewiring
  */
@@ -70,15 +75,7 @@ export function getPathValue(key: string, originalFn: () => string): string {
     return testOverrides.get(key) as string
   }
 
-  // Check cache
-  if (valueCache.has(key)) {
-    return valueCache.get(key) as string
-  }
-
-  // Compute and cache
-  const value = originalFn()
-  valueCache.set(key, value)
-  return value
+  return originalFn()
 }
 
 /**
@@ -89,16 +86,16 @@ export function hasOverride(key: string): boolean {
 }
 
 /**
- * Invalidate all cached paths. Called automatically when
- * setPath/clearPath/resetPaths are used. Can also be called manually for
- * advanced testing scenarios.
+ * Run every registered cache-invalidation callback. Called automatically
+ * when setPath/clearPath/resetPaths are used, so a module that maintains its
+ * OWN cache derived from a path (via registerCacheInvalidation) still gets
+ * to clear it on override changes. getPathValue itself has nothing to
+ * invalidate - it no longer memoizes - so this only reaches other modules'
+ * registered caches.
  *
  * @internal Primarily for internal use, but exported for advanced testing
  */
 export function invalidateCaches(): void {
-  // Clear the value cache
-  valueCache.clear()
-
   // Call registered callbacks
   for (const callback of cacheInvalidationCallbacks) {
     try {

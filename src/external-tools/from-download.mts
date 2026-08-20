@@ -29,7 +29,9 @@ import { existsSync } from 'node:fs'
 import { promises as fsPromises } from 'node:fs'
 
 import { extractArchive } from '../archives/extract.mjs'
-import { safeMkdir } from '../fs/safe.mjs'
+import { safeDelete, safeMkdir } from '../fs/safe.mjs'
+import { uniqueSync } from '../fs/unique.mjs'
+import { getNodePath } from '../node/path.mjs'
 
 import { downloadBinary } from '../dlx/binary-download.mjs'
 
@@ -93,19 +95,35 @@ export async function downloadAndExtractTool(
     __proto__: null,
     ...options,
   } as typeof options
-  // Skip extraction when the target dir already has content. An empty
-  // dir → treat as not-yet-extracted, which handles a half-created mkdir.
-  let extracted = false
+  // Skip extraction when the target dir already has content. An empty dir
+  // (e.g. a stale pre-created placeholder) counts as not-yet-extracted.
+  let alreadyExtracted = false
   if (existsSync(extractedDir)) {
     const entries = await fsPromises.readdir(extractedDir)
-    if (entries.length === 0) {
-      await extractArchive(archive.archivePath, extractedDir, extractOptions)
+    alreadyExtracted = entries.length > 0
+  }
+  let extracted = false
+  if (!alreadyExtracted) {
+    // Extract into a sibling temp directory, then atomically rename it into
+    // place. Extracting straight into extractedDir would let a killed
+    // process leave a PARTIAL tree there — existsSync + non-empty readdir
+    // on the next call would misread that partial tree as "already
+    // extracted" and never retry. Renaming a completed temp dir onto
+    // extractedDir (absent, or present-but-empty per the check above) is
+    // atomic, so extractedDir only ever exists fully populated or not at
+    // all; an interruption leaves the temp dir behind, not extractedDir.
+    const path = getNodePath()
+    await safeMkdir(path.dirname(extractedDir))
+    const tempDir = uniqueSync(`${extractedDir}.tmp`)
+    await safeMkdir(tempDir)
+    try {
+      await extractArchive(archive.archivePath, tempDir, extractOptions)
+      await fsPromises.rename(tempDir, extractedDir)
       extracted = true
+    } catch (e) {
+      await safeDelete(tempDir, { force: true })
+      throw e
     }
-  } else {
-    await safeMkdir(extractedDir)
-    await extractArchive(archive.archivePath, extractedDir, extractOptions)
-    extracted = true
   }
   return {
     ...archive,

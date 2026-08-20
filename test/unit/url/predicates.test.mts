@@ -132,4 +132,30 @@ describe('url/predicates — isPrivateHost', () => {
     expect(isPrivateHost('172.15.0.1')).toBe(false)
     expect(isPrivateHost('172.32.0.1')).toBe(false)
   })
+
+  it('returns true for the IPv6 unspecified address', () => {
+    expect(isPrivateHost('::')).toBe(true)
+    expect(isPrivateHost('[::]')).toBe(true)
+  })
+
+  it('returns true for an IPv4-mapped IPv6 host embedding a private IPv4', () => {
+    expect(isPrivateHost('::ffff:127.0.0.1')).toBe(true)
+    expect(isPrivateHost('[::ffff:127.0.0.1]')).toBe(true)
+    expect(isPrivateHost('::ffff:10.0.0.5')).toBe(true)
+    expect(isPrivateHost('::ffff:169.254.169.254')).toBe(true)
+    expect(isPrivateHost('::ffff:192.168.1.1')).toBe(true)
+  })
+
+  it('returns true for the legacy IPv4-compatible IPv6 form embedding a private IPv4', () => {
+    expect(isPrivateHost('::127.0.0.1')).toBe(true)
+    expect(isPrivateHost('::0.0.0.0')).toBe(true)
+  })
+
+  it('is case-insensitive for an IPv4-mapped IPv6 host', () => {
+    expect(isPrivateHost('::FFFF:127.0.0.1')).toBe(true)
+  })
+
+  it('returns false for an IPv4-mapped IPv6 host embedding a public IPv4', () => {
+    expect(isPrivateHost('::ffff:8.8.8.8')).toBe(false)
+  })
 })
