@@ -74,6 +74,7 @@ describe.sequential('http-request/errors — enrichErrorMessage', () => {
     const e = new Error('no-code') as NodeJS.ErrnoException
     // No e.code set.
     const msg = enrichErrorMessage('https://a', 'GET', e)
+    // oxlint-disable-next-line socket/no-error-message-assertions -- builder
     expect(msg).toBe('GET request failed: https://a')
     expect(msg).not.toContain('Error code:')
   })

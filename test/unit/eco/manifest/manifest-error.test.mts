@@ -14,6 +14,7 @@ describe('eco/manifest/manifest-error', () => {
 
   it('preserves message and code', () => {
     const err = new ManifestError('bad input', 'ERR_UNKNOWN_FORMAT')
+    // oxlint-disable-next-line socket/no-error-message-assertions -- echo
     expect(err.message).toBe('bad input')
     expect(err.code).toBe('ERR_UNKNOWN_FORMAT')
   })

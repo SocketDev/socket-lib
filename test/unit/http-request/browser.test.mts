@@ -417,6 +417,7 @@ describe.sequential('http-request/browser', () => {
         expect.fail('expected throw')
       } catch (e) {
         const err = e as InstanceType<typeof HttpResponseError>
+        // oxlint-disable-next-line socket/no-error-message-assertions -- format
         expect(err.message).toBe('HTTP 503: Service Unavailable')
       }
     })
@@ -434,6 +435,7 @@ describe.sequential('http-request/browser', () => {
         text: () => '',
       }
       const err = new HttpResponseError(fakeResp, 'custom message')
+      // oxlint-disable-next-line socket/no-error-message-assertions -- echo
       expect(err.message).toBe('custom message')
       expect(err.response).toBe(fakeResp)
     })
@@ -451,6 +453,7 @@ describe.sequential('http-request/browser', () => {
         text: () => '',
       }
       const err = new HttpResponseError(fakeResp)
+      // oxlint-disable-next-line socket/no-error-message-assertions -- builder
       expect(err.message).toBe('HTTP 500: No status message')
     })
 
@@ -468,6 +471,7 @@ describe.sequential('http-request/browser', () => {
         text: () => '',
       }
       const err = new HttpResponseError(fakeResp)
+      // oxlint-disable-next-line socket/no-error-message-assertions -- builder
       expect(err.message).toBe('HTTP unknown: Mystery')
     })
   })
