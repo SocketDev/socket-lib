@@ -33,8 +33,8 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import {
   tryParse,
   walkSimple,
-} from '../../.claude/hooks/fleet/_shared/acorn/index.mts'
-import type { AcornNode } from '../../.claude/hooks/fleet/_shared/acorn/index.mts'
+} from '../../.claude/hooks/fleet/_shared/ast/core.mts'
+import type { AcornNode } from '../../.claude/hooks/fleet/_shared/ast/core.mts'
 
 import { renderReport } from './audit-api-usage/render.mts'
 
