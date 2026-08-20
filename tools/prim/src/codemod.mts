@@ -24,6 +24,8 @@ import path from 'node:path'
 
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
+import { parse } from './acorn-wasm.mts'
+
 import type { PlannedRewrite, ValidationFinding } from './validate.mts'
 import { validateRewrites } from './validate.mts'
 

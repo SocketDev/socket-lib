@@ -14,44 +14,10 @@
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { createRequire, stripTypeScriptTypes } from 'node:module'
+import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 
-/**
- * `@ultrathink/acorn.rs.wasm` ships no declarations, so this names the one
- * member this module uses.
- */
-export interface AcornWasm {
-  walk: (
-    source: string,
-    visitors: AcornWasmVisitors,
-    options: AcornWasmParseOptions,
-  ) => void
-}
-
-/**
- * Visitor table the walk dispatches on, keyed by AST node type.
- */
-export type AcornWasmVisitors = Readonly<
-  Record<string, (node: AstNode) => void>
->
-
-/**
- * The acorn parse options this module passes. The parser accepts more; these
- * are the ones the lint walk sets.
- */
-export interface AcornWasmParseOptions {
-  allowAwaitOutsideFunction?: boolean | undefined
-  allowHashBang?: boolean | undefined
-  allowImportExportEverywhere?: boolean | undefined
-  ecmaVersion?: string | undefined
-  locations?: boolean | undefined
-  sourceType?: string | undefined
-}
-
-const { walk } = createRequire(import.meta.url)(
-  '@ultrathink/acorn.rs.wasm',
-) as AcornWasm
+import { walk } from './acorn-wasm.mts'
 
 // Names that MUST be aliased with `<Name>Ctor` when imported from
 // `primordials` or any other surface. Matches the convention used

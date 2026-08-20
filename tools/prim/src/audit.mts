@@ -9,7 +9,7 @@
  */
 
 import { readdirSync, readFileSync, statSync } from 'node:fs'
-import { createRequire, stripTypeScriptTypes } from 'node:module'
+import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -62,21 +62,9 @@ import { prototypePrimordialName } from './globals.mts'
  */
 export type AuditVisitors = ReturnType<typeof buildVisitors>
 
-/**
- * `@ultrathink/acorn.rs.wasm` ships no declarations, so this names the one
- * member this module uses.
- */
-export interface AcornWasmWalk {
-  walk: (
-    source: string,
-    visitors: AuditVisitors,
-    options: typeof PARSE_OPTIONS,
-  ) => void
-}
-
-const { walk } = createRequire(import.meta.url)(
-  '@ultrathink/acorn.rs.wasm',
-) as AcornWasmWalk
+// `@ultrathink/acorn.rs.wasm` ships no declarations; ./acorn-wasm.mts is the
+// one typed accessor for it, so this module does not name a second.
+import { walk } from './acorn-wasm.mts'
 
 /**
  * `covered` — the primordial exists today. `gap` — it still has to be added to
