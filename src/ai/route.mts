@@ -153,6 +153,12 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
       model: 'fireworks-ai/accounts/fireworks/models/glm-5p2',
       provider: 'fireworks',
     },
+    {
+      effort: 'high',
+      engine: 'opencode',
+      model: 'synthetic/hf:moonshotai/Kimi-K2.6',
+      provider: 'synthetic',
+    },
     LOCAL,
   ],
   opus: [
@@ -168,6 +174,12 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
       engine: 'opencode',
       model: 'fireworks-ai/accounts/fireworks/models/glm-5p2',
       provider: 'fireworks',
+    },
+    {
+      effort: 'medium',
+      engine: 'opencode',
+      model: 'synthetic/hf:moonshotai/Kimi-K2.6',
+      provider: 'synthetic',
     },
   ],
   sonnet: [
