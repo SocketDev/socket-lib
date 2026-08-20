@@ -77,6 +77,7 @@ export interface ParseArgsConfig {
   // Command-line arguments to parse (defaults to process.argv.slice(2)).
   args?: readonly string[] | undefined
   // Options configuration object.
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
   options?: Record<string, ParseArgsOptionsConfig> | undefined
   // Whether to throw on unknown options (default: true).
   strict?: boolean | undefined

@@ -214,7 +214,7 @@ export function wrapPrompt<T = unknown>(
 
     // Inject theme into config (args[0])
     const config = args[0] as Record<string, unknown>
-    if (config && typeof config === 'object') {
+    if (config !== null && typeof config === 'object') {
       if (!config['theme']) {
         // No theme provided, use current theme
         config['theme'] = createInquirerTheme(getTheme())

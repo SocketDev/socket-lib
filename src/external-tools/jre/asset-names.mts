@@ -28,6 +28,7 @@ export interface AdoptiumAssetQuery {
  * Platform-arch string (matches `getPlatformArch` output) → `{ os, architecture
  * }` query for Adoptium.
  */
+// oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 export const ADOPTIUM_QUERY_MAP: Readonly<Record<string, AdoptiumAssetQuery>> =
   ObjectFreeze({
     __proto__: null,
@@ -71,6 +72,7 @@ export const ADOPTIUM_QUERY_MAP: Readonly<Record<string, AdoptiumAssetQuery>> =
       os: 'windows',
       architecture: 'x64',
     }) as unknown as AdoptiumAssetQuery,
+    // oxlint-disable-next-line socket/prefer-refined-record -- frozen
   }) as unknown as Readonly<Record<string, AdoptiumAssetQuery>>
 
 /**

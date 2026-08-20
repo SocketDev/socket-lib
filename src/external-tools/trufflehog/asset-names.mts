@@ -15,6 +15,7 @@ export interface TrufflehogAssetEntry {
 }
 
 export const TRUFFLEHOG_ASSET_MAP: Readonly<
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
   Record<string, TrufflehogAssetEntry>
 > = ObjectFreeze({
   __proto__: null,
@@ -42,6 +43,7 @@ export const TRUFFLEHOG_ASSET_MAP: Readonly<
     __proto__: null,
     suffix: 'windows_amd64.tar.gz',
   }) as unknown as TrufflehogAssetEntry,
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 }) as unknown as Readonly<Record<string, TrufflehogAssetEntry>>
 
 /**

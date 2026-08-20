@@ -17,6 +17,7 @@ export interface JanusAssetEntry {
   readonly asset: string
 }
 
+// oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 export const JANUS_ASSET_MAP: Readonly<Record<string, JanusAssetEntry>> =
   ObjectFreeze({
     __proto__: null,
@@ -24,6 +25,7 @@ export const JANUS_ASSET_MAP: Readonly<Record<string, JanusAssetEntry>> =
       __proto__: null,
       asset: 'janus-aarch64-apple-darwin.tar.gz',
     }) as unknown as JanusAssetEntry,
+    // oxlint-disable-next-line socket/prefer-refined-record -- frozen
   }) as unknown as Readonly<Record<string, JanusAssetEntry>>
 
 /**

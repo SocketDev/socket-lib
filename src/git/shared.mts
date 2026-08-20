@@ -364,7 +364,7 @@ export function setCachedGitDiff(key: string, result: string[]): void {
  */
 export function stableKey(value: unknown): string {
   return JSONStringify(value, (_key, val) => {
-    if (val && typeof val === 'object' && !ArrayIsArray(val)) {
+    if (val !== null && typeof val === 'object' && !ArrayIsArray(val)) {
       const sorted: Record<string, unknown> = {}
       const sortedKeys = ObjectKeys(val as object).toSorted()
       for (let i = 0, { length } = sortedKeys; i < length; i += 1) {

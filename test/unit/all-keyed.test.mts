@@ -44,6 +44,7 @@ describe('pAllKeyed', () => {
   })
 
   it('skips non-enumerable properties', async () => {
+    // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
     const dict: Record<string, Promise<number>> = {
       visible: Promise.resolve(1),
     }
@@ -199,6 +200,7 @@ describe('pAllKeyed — spec conformance', () => {
 
   it('ignores inherited enumerable properties (own-only, like Object.keys)', async () => {
     const proto = { inherited: Promise.resolve('nope') }
+    // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
     const dict = Object.create(proto) as Record<string, Promise<string>>
     dict['own'] = Promise.resolve('yes')
     const result = await pAllKeyed(dict)

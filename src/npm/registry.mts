@@ -90,6 +90,7 @@ export interface PackumentRecord {
   distTags: Record<string, string>
   name: string
   time?: Record<string, string> | undefined
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
   versions: Record<string, PackumentVersion>
 }
 
@@ -339,6 +340,7 @@ export function parsePackument(raw: unknown): PackumentRecord | undefined {
     'dist-tags': Record<string, string>
     name?: string | undefined
     time?: Record<string, string> | undefined
+    // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
     versions: Record<string, PackumentVersion>
   }
   return {

@@ -64,6 +64,7 @@ export type FormatCoverageOptions = {
  * V8 coverage data structure for a single file.
  */
 export type V8FileCoverage = {
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
   b?: Record<string, number[]> | undefined
   branchMap?: Record<string, unknown> | undefined
   f?: Record<string, number> | undefined
@@ -76,4 +77,5 @@ export type V8FileCoverage = {
 /**
  * V8 coverage-final.json structure.
  */
+// oxlint-disable-next-line socket/prefer-refined-record -- open string keys
 export type V8CoverageData = Record<string, V8FileCoverage>

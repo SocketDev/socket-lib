@@ -116,4 +116,5 @@ export const AI_PROFILE = {
     permissionMode: 'acceptEdits',
     tools: ['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Write'],
   },
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
 } as const satisfies Readonly<Record<string, AiProfile>>

@@ -195,7 +195,7 @@ export async function checkModuleExports(filePath) {
       }
     } else {
       // Regular object exports - all CJS keys should be in ESM default
-      if (esmDefault && typeof esmDefault === 'object') {
+      if (esmDefault !== null && typeof esmDefault === 'object') {
         const esmDefaultKeys = Object.keys(esmDefault)
         for (const key of cjsKeys) {
           if (!esmDefaultKeys.includes(key)) {

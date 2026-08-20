@@ -16,6 +16,7 @@ export interface TrivyAssetEntry {
   readonly suffix: string
 }
 
+// oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 export const TRIVY_ASSET_MAP: Readonly<Record<string, TrivyAssetEntry>> =
   ObjectFreeze({
     __proto__: null,
@@ -39,6 +40,7 @@ export const TRIVY_ASSET_MAP: Readonly<Record<string, TrivyAssetEntry>> =
       __proto__: null,
       suffix: 'windows-64bit.zip',
     }) as unknown as TrivyAssetEntry,
+    // oxlint-disable-next-line socket/prefer-refined-record -- frozen
   }) as unknown as Readonly<Record<string, TrivyAssetEntry>>
 
 export function getTrivyAssetEntry(

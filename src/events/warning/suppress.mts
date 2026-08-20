@@ -52,7 +52,7 @@ export function setupSuppression(): void {
             return
           }
         }
-      } else if (warning && typeof warning === 'object') {
+      } else if (warning !== null && typeof warning === 'object') {
         /* c8 ignore start - Object-shaped warning suppression
            (Error / Warning instances). process.emitWarning rarely
            passes object form in test runs; covered when consumers

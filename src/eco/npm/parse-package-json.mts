@@ -103,7 +103,7 @@ export function resolveRepository(value: unknown): string | undefined {
   if (typeof value === 'string') {
     return value.length > 0 ? value : undefined
   }
-  if (value && typeof value === 'object') {
+  if (value !== null && typeof value === 'object') {
     const url = (value as { url?: unknown | undefined }).url
     if (typeof url === 'string' && url.length > 0) {
       return url

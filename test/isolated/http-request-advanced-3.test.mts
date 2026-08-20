@@ -164,7 +164,8 @@ describe('http-request', () => {
       })
 
       const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort =
+        address !== null && typeof address === 'object' ? address.port : 0
 
       try {
         await expect(
@@ -198,7 +199,8 @@ describe('http-request', () => {
       })
 
       const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort =
+        address !== null && typeof address === 'object' ? address.port : 0
 
       try {
         await httpRequest(`http://localhost:${testPort}/`, {
@@ -232,7 +234,8 @@ describe('http-request', () => {
       })
 
       const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort =
+        address !== null && typeof address === 'object' ? address.port : 0
 
       try {
         await httpRequest(`http://localhost:${testPort}/`, {
@@ -266,7 +269,8 @@ describe('http-request', () => {
       })
 
       const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort =
+        address !== null && typeof address === 'object' ? address.port : 0
 
       try {
         await httpRequest(`http://localhost:${testPort}/`, {
@@ -305,7 +309,8 @@ describe('http-request', () => {
       })
 
       const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort =
+        address !== null && typeof address === 'object' ? address.port : 0
 
       try {
         const response = await httpRequest(`http://localhost:${testPort}/`, {

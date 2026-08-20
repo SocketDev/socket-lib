@@ -109,7 +109,7 @@ export async function dlxBinary(
       const metaPath = getBinaryCacheMetadataPath(cacheEntryDir)
       const metadata = await readJson(metaPath, { throws: false })
       if (
-        metadata &&
+        metadata !== null &&
         typeof metadata === 'object' &&
         !ArrayIsArray(metadata) &&
         typeof (metadata as Record<string, unknown>)['integrity'] === 'string'

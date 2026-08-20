@@ -84,6 +84,7 @@ export interface ToolEntry {
   repository: string
   binaryName?: string | undefined
   notes?: readonly string[] | undefined
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
   platforms: Readonly<Record<string, ToolChecksum>>
 }
 
@@ -97,12 +98,14 @@ export interface FlavoredToolEntry {
   version: string
   release: string
   notes?: readonly string[] | undefined
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
   flavors: Readonly<Record<string, ToolFlavor>>
 }
 
 export interface ToolFlavor {
   repository: string
   binaryName?: string | undefined
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
   platforms: Readonly<Record<string, ToolChecksum>>
 }
 
@@ -113,6 +116,7 @@ export interface ToolFlavor {
  * kind: 'other'; raw: unknown }` so callers can opt in to handle them.
  */
 export interface Manifest {
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
   tools: Readonly<Record<string, ManifestEntry>>
 }
 
@@ -173,12 +177,14 @@ export function parseChecksum(
 export function parsePlatforms(
   raw: unknown,
   toolName: string,
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 ): Record<string, ToolChecksum> {
   if (!isObject(raw)) {
     throw new ErrorCtor(
       `external-tools.json: tool '${toolName}' is missing a 'platforms' object`,
     )
   }
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
   const out: Record<string, ToolChecksum> = {}
   for (const platformKey of ObjectKeys(raw)) {
     out[platformKey] = parseChecksum(raw[platformKey], toolName, platformKey)
@@ -241,6 +247,7 @@ export async function readExternalToolsManifest(
       `external-tools.json: expected top-level object, got: ${typeof raw}`,
     )
   }
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
   const tools: Record<string, ManifestEntry> = {}
   for (const toolName of ObjectKeys(raw)) {
     if (StringPrototypeStartsWith(toolName, '$')) {
@@ -258,6 +265,7 @@ export function tryParseFlavored(
 ): FlavoredToolEntry | undefined {
   // Flavored entries have at least one nested object that itself has
   // a 'platforms' field — those are the flavor variants.
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
   const flavors: Record<string, ToolFlavor> = {}
   for (const key of ObjectKeys(raw)) {
     const value = raw[key]

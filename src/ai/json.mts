@@ -73,6 +73,7 @@ export function closeUnbalancedJson(raw: string): string | undefined {
  */
 export function findCanonicalKey(
   key: string,
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
   synonymMap: Record<string, string[]>,
 ): string {
   const lower = key.toLowerCase()
@@ -116,6 +117,7 @@ export function normalizeJsonPunctuation(raw: string): string {
 // oxlint-disable-next-line typescript/no-unnecessary-type-parameters -- the generic return is the API contract, not incidental.
 export function normalizeKeys<T>(
   value: unknown,
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
   synonymMap: Record<string, string[]>,
 ): T {
   if (value === undefined || value === null || typeof value !== 'object') {

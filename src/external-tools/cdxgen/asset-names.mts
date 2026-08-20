@@ -103,6 +103,7 @@ export function makeCdxgenEntry(
 
 export function makeCdxgenPlatformMap(
   variant: CdxgenVariant,
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 ): Readonly<Record<string, CdxgenAssetEntry>> {
   return ObjectFreeze({
     __proto__: null,
@@ -114,6 +115,7 @@ export function makeCdxgenPlatformMap(
     'linux-x64-musl': makeCdxgenEntry('linux-amd64-musl', variant),
     'win-arm64': makeCdxgenEntry('windows-arm64', variant, '.exe'),
     'win-x64': makeCdxgenEntry('windows-amd64', variant, '.exe'),
+    // oxlint-disable-next-line socket/prefer-refined-record -- frozen
   }) as unknown as Readonly<Record<string, CdxgenAssetEntry>>
 }
 

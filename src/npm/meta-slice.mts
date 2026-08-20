@@ -75,9 +75,11 @@ export function slicePackument(packument: RawPackument): PackumentMetaSlim {
  */
 export function sliceVersionMeta(
   packument: RawPackument,
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
 ): Record<string, PackumentVersionMetaSlim> {
   const rawVersions = packument.versions ?? {}
   const time = packument.time ?? {}
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
   const result: Record<string, PackumentVersionMetaSlim> = {}
   const versions = Object.keys(rawVersions)
   for (let i = 0, { length } = versions; i < length; i += 1) {

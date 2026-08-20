@@ -18,6 +18,7 @@ import type * as KeychainModule from '../../src/secrets/keychain.mjs'
 
 export type KeychainPlatform = 'darwin' | 'linux' | 'win32' | 'other'
 
+// oxlint-disable-next-line socket/prefer-refined-record -- open string keys
 export type MockedModule = Record<string, ReturnType<typeof vi.fn>>
 
 export interface LoadedKeychain {

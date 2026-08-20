@@ -62,7 +62,7 @@ export async function httpRequestAttempt(
 
   // Auto-merge FormData headers, chiefly the Content-Type with its boundary.
   const streamHeaders =
-    body &&
+    body !== null &&
     typeof body === 'object' &&
     'getHeaders' in body &&
     typeof (body as { getHeaders?: unknown | undefined }).getHeaders ===
@@ -109,7 +109,7 @@ export async function httpRequestAttempt(
       settled = true
       // Clean up streaming body if still active to avoid leaked descriptors.
       if (
-        body &&
+        body !== null &&
         typeof body === 'object' &&
         typeof (body as { destroy?: unknown | undefined }).destroy ===
           'function'

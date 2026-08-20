@@ -26,6 +26,7 @@ export interface OpengrepAssetEntry {
   readonly binaryInArchive: string | undefined
 }
 
+// oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 export const OPENGREP_ASSET_MAP: Readonly<Record<string, OpengrepAssetEntry>> =
   ObjectFreeze({
     __proto__: null,
@@ -59,6 +60,7 @@ export const OPENGREP_ASSET_MAP: Readonly<Record<string, OpengrepAssetEntry>> =
       isArchive: true,
       binaryInArchive: 'opengrep-core.exe',
     }) as unknown as OpengrepAssetEntry,
+    // oxlint-disable-next-line socket/prefer-refined-record -- frozen
   }) as unknown as Readonly<Record<string, OpengrepAssetEntry>>
 
 export function getOpengrepAssetEntry(

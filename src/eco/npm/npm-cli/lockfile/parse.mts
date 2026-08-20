@@ -90,7 +90,9 @@ export interface RawPackage {
 
 export interface RawLockfile {
   readonly lockfileVersion?: unknown | undefined
+  // oxlint-disable-next-line socket/prefer-refined-record -- npm lockfile shape
   readonly packages?: Record<string, RawPackage> | undefined
+  // oxlint-disable-next-line socket/prefer-refined-record -- npm lockfile shape
   readonly dependencies?: Record<string, RawPackage> | undefined
 }
 
@@ -123,7 +125,7 @@ export function buildPackageRef(name: string, pkg: RawPackage): PackageRef {
   }
   const depsKey = pkg.dependencies ?? pkg.requires
   const dependencies =
-    depsKey && typeof depsKey === 'object'
+    depsKey !== null && typeof depsKey === 'object'
       ? ObjectKeys(depsKey as Record<string, unknown>)
       : []
   // Aliased installs in npm v1 lockfiles encode the real identity in
@@ -191,6 +193,7 @@ export function jsParsePackageLock(content: string): ParsedLockfile {
 
 export function parseV1(
   data: RawLockfile,
+  // oxlint-disable-next-line socket/prefer-refined-record -- npm lockfile shape
   rootDeps: Record<string, RawPackage>,
 ): ParsedLockfile {
   const packageIndex: PackageIndex = {
@@ -200,6 +203,7 @@ export function parseV1(
   const visited = new SetCtor<string>()
 
   const flatten = (
+    // oxlint-disable-next-line socket/prefer-refined-record -- lockfile shape
     deps: Record<string, RawPackage>,
     parentPath: string,
     depth: number,
@@ -226,6 +230,7 @@ export function parseV1(
       if (pkg.dependencies && typeof pkg.dependencies === 'object') {
         visited.add(key)
         flatten(
+          // oxlint-disable-next-line socket/prefer-refined-record -- lockfile
           pkg.dependencies as Record<string, RawPackage>,
           `${parentPath}/${name}`,
           depth + 1,
@@ -248,6 +253,7 @@ export function parseV1(
 
 export function parseV2V3(
   data: RawLockfile,
+  // oxlint-disable-next-line socket/prefer-refined-record -- npm lockfile shape
   rawPackages: Record<string, RawPackage>,
 ): ParsedLockfile {
   const packageIndex: PackageIndex = {

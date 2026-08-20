@@ -67,7 +67,7 @@ export async function startDlxTestServer(): Promise<DlxTestServer> {
       const address = server.address()
       let baseUrl = ''
       let port = 0
-      if (address && typeof address === 'object') {
+      if (address !== null && typeof address === 'object') {
         port = address.port
         baseUrl = `http://localhost:${port}`
       }

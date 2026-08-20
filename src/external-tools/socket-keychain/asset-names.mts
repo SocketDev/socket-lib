@@ -10,6 +10,7 @@ export interface SocketKeychainAssetEntry {
 }
 
 export const SOCKET_KEYCHAIN_ASSET_MAP: Readonly<
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
   Record<string, SocketKeychainAssetEntry>
 > = ObjectFreeze({
   __proto__: null,
@@ -38,6 +39,7 @@ export const SOCKET_KEYCHAIN_ASSET_MAP: Readonly<
     asset: 'socket-keychain-{version}-win32-x64.exe',
     binary: 'socket-keychain.exe',
   }) as unknown as SocketKeychainAssetEntry,
+  // oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 }) as unknown as Readonly<Record<string, SocketKeychainAssetEntry>>
 
 export const SOCKET_KEYCHAIN_SUPPORTED_PLATFORM_ARCHES: readonly string[] =

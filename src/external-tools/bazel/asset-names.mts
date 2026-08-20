@@ -30,6 +30,7 @@ export interface BazelAssetEntry {
   readonly note: string | undefined
 }
 
+// oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 export const BAZEL_ASSET_MAP: Readonly<Record<string, BazelAssetEntry>> =
   ObjectFreeze({
     __proto__: null,
@@ -81,6 +82,7 @@ export const BAZEL_ASSET_MAP: Readonly<Record<string, BazelAssetEntry>> =
       native: true,
       note: undefined,
     }) as unknown as BazelAssetEntry,
+    // oxlint-disable-next-line socket/prefer-refined-record -- frozen
   }) as unknown as Readonly<Record<string, BazelAssetEntry>>
 
 export function getBazelAssetEntry(

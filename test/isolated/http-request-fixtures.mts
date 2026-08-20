@@ -237,7 +237,7 @@ export function setupHttpFixture(): void {
 
       httpServer.listen(0, () => {
         const address = httpServer.address()
-        if (address && typeof address === 'object') {
+        if (address !== null && typeof address === 'object') {
           fixture.port = address.port
           fixture.baseUrl = `http://localhost:${address.port}`
         }

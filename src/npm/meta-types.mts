@@ -197,6 +197,7 @@ export interface PackumentMetaSlim {
   name: string
   timeCreated?: string | undefined
   timeModified?: string | undefined
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
   versions: Record<string, PackumentVersionMetaSlim>
 }
 
@@ -259,6 +260,7 @@ export interface RawPackument {
   'dist-tags'?: Record<string, string> | undefined
   name?: string | undefined
   time?: Record<string, string> | undefined
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
   versions?: Record<string, RawPackumentVersion> | undefined
 }
 

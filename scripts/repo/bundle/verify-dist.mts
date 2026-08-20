@@ -134,7 +134,7 @@ function collectRequiredSpecifiers(src: string): Set<string> {
       const value = childValues[i]
       if (Array.isArray(value)) {
         stack.push(...value)
-      } else if (value && typeof value === 'object') {
+      } else if (value !== null && typeof value === 'object') {
         stack.push(value)
       }
     }

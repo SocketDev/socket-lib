@@ -18,6 +18,7 @@ export interface UvAssetEntry {
   readonly asset: string
 }
 
+// oxlint-disable-next-line socket/prefer-refined-record -- frozen asset table
 export const UV_ASSET_MAP: Readonly<Record<string, UvAssetEntry>> =
   ObjectFreeze({
     __proto__: null,
@@ -53,6 +54,7 @@ export const UV_ASSET_MAP: Readonly<Record<string, UvAssetEntry>> =
       __proto__: null,
       asset: 'uv-x86_64-pc-windows-msvc.zip',
     }) as unknown as UvAssetEntry,
+    // oxlint-disable-next-line socket/prefer-refined-record -- frozen
   }) as unknown as Readonly<Record<string, UvAssetEntry>>
 
 export function getUvAssetEntry(

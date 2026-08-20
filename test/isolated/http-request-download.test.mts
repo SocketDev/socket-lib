@@ -136,7 +136,8 @@ describe('http-request', () => {
       })
 
       const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort =
+        address !== null && typeof address === 'object' ? address.port : 0
 
       try {
         await runWithTempDir(async tmpDir => {
@@ -175,7 +176,8 @@ describe('http-request', () => {
       })
 
       const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort =
+        address !== null && typeof address === 'object' ? address.port : 0
 
       try {
         await runWithTempDir(async tmpDir => {
@@ -237,7 +239,8 @@ describe('http-request', () => {
       })
 
       const address = testServer.address()
-      const testPort = address && typeof address === 'object' ? address.port : 0
+      const testPort =
+        address !== null && typeof address === 'object' ? address.port : 0
 
       try {
         await runWithTempDir(async tmpDir => {

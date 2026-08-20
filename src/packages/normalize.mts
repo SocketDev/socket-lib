@@ -64,7 +64,7 @@ export function normalizePackageJson(
   // Apply package extensions if name and version are present.
   if (pkgJson.name && pkgJson.version) {
     const extensions = findPackageExtensions(pkgJson.name, pkgJson.version)
-    if (extensions && typeof extensions === 'object') {
+    if (extensions !== null && typeof extensions === 'object') {
       merge(pkgJson, extensions)
     }
   }

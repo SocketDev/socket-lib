@@ -14,6 +14,7 @@ import { Spinner } from './spinner.mjs'
 
 import type { SpinnerInstance, SpinnerStyle } from './types.mjs'
 
+// oxlint-disable-next-line socket/prefer-refined-record -- open string keys
 let cliSpinners: Record<string, SpinnerStyle> | undefined
 let spinner: SpinnerInstance | undefined
 
@@ -43,6 +44,7 @@ let spinner: SpinnerInstance | undefined
  */
 export function getCliSpinners(
   styleName?: string | undefined,
+  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
 ): SpinnerStyle | Record<string, SpinnerStyle> | undefined {
   if (cliSpinners === undefined) {
     /* c8 ignore start - External yoctoSpinner initialization */
@@ -52,6 +54,7 @@ export function getCliSpinners(
     const yoctoFactory = yoctoSpinner as unknown as (
       options: Record<string, unknown>,
     ) => {
+      // oxlint-disable-next-line socket/prefer-refined-record -- open keys
       constructor: { spinners?: Record<string, SpinnerStyle> | undefined }
     }
     const tempInstance = yoctoFactory({})
@@ -62,6 +65,7 @@ export function getCliSpinners(
       __proto__: null,
       ...yoctoSpinnerClass.spinners,
       socket: generateSocketSpinnerFrames(),
+      // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
     } as unknown as Record<string, SpinnerStyle>
   }
   if (typeof styleName === 'string' && cliSpinners) {
