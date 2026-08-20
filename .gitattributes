@@ -18,6 +18,7 @@
 .config/fleet/.markdownlint-cli2.jsonc linguist-generated=true
 .config/fleet/.prettierignore linguist-generated=true
 .config/fleet/egress-allowlist.json linguist-generated=true
+.config/fleet/external-tools.json linguist-generated=true
 .config/fleet/git-authors.json linguist-generated=true
 .config/fleet/lockstep.schema.json linguist-generated=true
 .config/fleet/markdownlint-rules linguist-generated=true
