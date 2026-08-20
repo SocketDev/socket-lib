@@ -3,10 +3,13 @@
  *   socket-lib build, which transpiles per file, this is a real bundle: every
  *   import, including `@socketsecurity/lib-stable/*` and `diff`, is inlined
  *   into a single `dist/bin/prim.cjs`. The `@ultrathink/acorn.rs.wasm` parser
- *   stays external: its CJS entry reads `${__dirname}/./acorn.wasm`
- *   synchronously at module load, so it is required as a `./acorn-wasm.cjs`
- *   sibling the build runner copies next to the bundle — `__dirname` at
- *   runtime resolves to `dist/bin/`, where both files sit. Output contract:
+ *   is the exception, and it is not handled here: its CJS entry reads
+ *   `${__dirname}/./acorn.wasm` synchronously at module load, so the build
+ *   runner copies both files next to the bundle and
+ *   `tools/prim/src/acorn-wasm.mts` requires the sibling at runtime. A bundler
+ *   rewrite cannot do that job: `output.paths` only rewrites a static import's
+ *   specifier, and the accessor's `createRequire` call is opaque to it. Output
+ *   contract:
  *
  *   - `dist/bin/prim.cjs` — the bundled CLI
  *   - `dist/bin/acorn-wasm.cjs` — copied from the `@ultrathink/acorn.rs.wasm`
@@ -24,11 +27,6 @@ import type { RolldownOptions } from 'rolldown'
 import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
 export const primBuildConfig: RolldownOptions = {
-  // The wasm parser stays external so prim.cjs keeps a runtime
-  // `require('@ultrathink/acorn.rs.wasm')`; `output.paths` rewrites that to the
-  // `./acorn-wasm.cjs` sibling the build runner copies into dist/bin, so its
-  // `${__dirname}/./acorn.wasm` load resolves next to the bundle.
-  external: ['@ultrathink/acorn.rs.wasm'],
   input: path.join(REPO_ROOT, 'tools/prim/bin/prim.mts'),
   output: {
     file: path.join(REPO_ROOT, 'dist/bin/prim.cjs'),
@@ -39,7 +37,6 @@ export const primBuildConfig: RolldownOptions = {
     codeSplitting: false,
     minify: false,
     banner: '"use strict";\n/* Socket Lib prim - bundled with rolldown */',
-    paths: { '@ultrathink/acorn.rs.wasm': './acorn-wasm.cjs' },
   },
   platform: 'node',
 }
