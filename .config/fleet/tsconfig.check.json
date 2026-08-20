@@ -1,27 +1,26 @@
 {
-  "extends": "../../tsconfig.json",
+  "extends": "./tsconfig.check.base.json",
   "compilerOptions": {
-    "declarationMap": false,
-    "module": "esnext",
-    "noEmit": true,
-    "rootDir": "../..",
-    "skipLibCheck": true,
-    "sourceMap": false,
-    "types": ["node", "vitest"]
+    "rootDir": "../.."
   },
   "include": [
-    "../../src/**/*.ts",
-    "../../src/**/*.mts",
-    "../../test/**/*.ts",
+    "../../scripts/**/*.mts",
+    "../../.claude/hooks/repo/**/*.mts",
+    "../../.claude/hooks/fleet/**/*.mts",
+    "../../.config/fleet/markdownlint-rules/**/*.mts",
+    "../../.config/fleet/oxlint-plugin/**/*.mts",
+    "../../.config/fleet/rolldown/**/*.mts",
     "../../test/**/*.mts"
   ],
   "exclude": [
     "../../.cache",
-    "../../dist/**/*",
+    "../../build",
+    "../../coverage",
+    "../../dist",
     "../../node_modules",
-    "../../test/fixtures/perry/entry.mts",
-    "../../test/unit/ansi.test.mts",
-    "../../test/unit/links/create.test.mts",
-    "../../test/unit/packages/normalize.test.mts"
+    "../../scripts/fleet",
+    "../../template",
+    "**/_shared/**",
+    "**/node_modules"
   ]
 }
