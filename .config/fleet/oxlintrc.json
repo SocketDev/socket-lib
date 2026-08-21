@@ -68,6 +68,7 @@
     "socket/no-fetch-prefer-http-request": "error",
     "socket/no-file-scope-oxlint-disable": "error",
     "socket/no-fileoverview-prefer-file": "error",
+    "socket/no-floating-async-map": "error",
     "socket/no-force-delete": "error",
     "socket/no-handbuilt-file-url": "error",
     "socket/no-inline-defer-async": "error",
@@ -117,7 +118,9 @@
     "socket/no-vitest-skipped-tests": "error",
     "socket/no-vitest-standalone-expect": [
       "error",
-      { "additionalTestBlockFunctions": ["cmdit"] }
+      {
+        "additionalTestBlockFunctions": ["cmdit"]
+      }
     ],
     "socket/no-which-for-local-bin": "error",
     "socket/optional-explicit-undefined": "error",
@@ -161,6 +164,7 @@
     "socket/require-async-iife-entry": "error",
     "socket/require-regex-comment": "error",
     "socket/require-vitest-globals-import": "error",
+    "socket/require-void-run-hook": "error",
     "socket/socket-api-token-env": "error",
     "socket/sort-array-literals": "error",
     "socket/sort-boolean-chains": "error",
@@ -306,11 +310,13 @@
     "**/.claude/agents/fleet/**",
     "**/.claude/commands/fleet/**",
     "**/.claude/hooks/fleet/**",
+    "**/.claude/rules/fleet/**",
     "**/.claude/skills/fleet/**",
     "**/.config/fleet/**",
     "**/.config/fleet/oxlint-plugin/**",
     "**/.config/repo/rolldown/**",
     "**/.git-hooks/**",
+    "**/.github/actions/fleet/**",
     "**/.pnpm-store/**",
     "**/bootstrap/**",
     "**/docs/agents.md/fleet/**",
