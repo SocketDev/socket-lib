@@ -81,7 +81,7 @@ function node(shape: unknown): AstNode {
 
 describe('the ctor-rename rule', () => {
   it('flags a shorthand destructure, which shadows the global', () => {
-    const findings = lint({ 'a.mjs': 'const { Array } = primordials\n' })
+    const findings = lint({ 'module.mjs': 'const { Array } = primordials\n' })
     expect(findings.length).toBe(1)
     expect(findings[0]!.rule).toBe('ctor-rename')
     expect(findings[0]!.name).toBe('Array')
@@ -91,14 +91,16 @@ describe('the ctor-rename rule', () => {
 
   it('accepts the <Name>Ctor alias', () => {
     expect(
-      lint({ 'a.mjs': 'const { Array: ArrayCtor } = primordials\n' }),
+      lint({ 'module.mjs': 'const { Array: ArrayCtor } = primordials\n' }),
     ).toEqual([])
   })
 
   it('flags an alias that is not <Name>Ctor', () => {
     // `Array: A` avoids the shadow but loses the convention that makes the
     // alias recognizable at every call site.
-    const findings = lint({ 'a.mjs': 'const { Array: A } = primordials\n' })
+    const findings = lint({
+      'module.mjs': 'const { Array: A } = primordials\n',
+    })
     expect(findings.length).toBe(1)
     expect(findings[0]!.name).toBe('Array')
   })
@@ -106,35 +108,35 @@ describe('the ctor-rename rule', () => {
   it('ignores a destructured name that is not constructor-shaped', () => {
     // A non-constructor cannot shadow a global constructor, so the alias
     // convention does not apply.
-    expect(lint({ 'a.mjs': 'const { keys } = primordials\n' })).toEqual([])
+    expect(lint({ 'module.mjs': 'const { keys } = primordials\n' })).toEqual([])
   })
 
   it('ignores a destructure from an unrelated module', () => {
-    expect(lint({ 'a.mjs': 'const { Array } = myHelpers\n' })).toEqual([])
+    expect(lint({ 'module.mjs': 'const { Array } = myHelpers\n' })).toEqual([])
   })
 
   it('flags the require form', () => {
     const findings = lint({
-      'a.cjs': "const { Array } = require('primordials')\n",
+      'module.cjs': "const { Array } = require('primordials')\n",
     })
     expect(findings.length).toBe(1)
     expect(findings[0]!.source).toBe("require('primordials')")
   })
 
   it('ignores a non-destructuring declarator', () => {
-    expect(lint({ 'a.mjs': 'const p = primordials\n' })).toEqual([])
+    expect(lint({ 'module.mjs': 'const p = primordials\n' })).toEqual([])
   })
 
   it('reports one finding per offending name', () => {
     const findings = lint({
-      'a.mjs': 'const { Array, Set: SetCtor, Map } = primordials\n',
+      'module.mjs': 'const { Array, Set: SetCtor, Map } = primordials\n',
     })
     expect(findings.map(f => f.name)).toEqual(['Array', 'Map'])
   })
 
   it('reports the line and column of the offending key', () => {
     const findings = lint({
-      'a.mjs': '// leading comment\nconst { Array } = primordials\n',
+      'module.mjs': '// leading comment\nconst { Array } = primordials\n',
     })
     expect(findings[0]!.line).toBe(2)
     expect(findings[0]!.column).toBe('const { '.length + 1)
@@ -142,7 +144,7 @@ describe('the ctor-rename rule', () => {
 
   it('honours a custom primordial source list', () => {
     const findings = lint(
-      { 'a.mjs': 'const { Array } = mySafeRefs\n' },
+      { 'module.mjs': 'const { Array } = mySafeRefs\n' },
       { primordialSources: ['mySafeRefs'] },
     )
     expect(findings.length).toBe(1)
@@ -152,14 +154,16 @@ describe('the ctor-rename rule', () => {
 describe('the directory walk', () => {
   it('finds files in nested directories', () => {
     const findings = lint({
-      'deep/nested/a.mjs': 'const { Array } = primordials\n',
+      'deep/nested/module.mjs': 'const { Array } = primordials\n',
     })
     expect(findings.length).toBe(1)
-    expect(findings[0]!.file).toBe(path.join('deep', 'nested', 'a.mjs'))
+    expect(findings[0]!.file).toBe(path.join('deep', 'nested', 'module.mjs'))
   })
 
   it('reports paths relative to the target root', () => {
-    const findings = lint({ 'pkg/a.mjs': 'const { Array } = primordials\n' })
+    const findings = lint({
+      'pkg/module.mjs': 'const { Array } = primordials\n',
+    })
     expect(path.isAbsolute(findings[0]!.file)).toBe(false)
   })
 
@@ -168,9 +172,9 @@ describe('the directory walk', () => {
     // actionable.
     expect(
       lint({
-        'node_modules/p/a.mjs': 'const { Array } = primordials\n',
-        'external/a.mjs': 'const { Array } = primordials\n',
-        '.cache/a.mjs': 'const { Array } = primordials\n',
+        'node_modules/dep/module.mjs': 'const { Array } = primordials\n',
+        'external/module.mjs': 'const { Array } = primordials\n',
+        '.cache/module.mjs': 'const { Array } = primordials\n',
       }),
     ).toEqual([])
   })
@@ -178,7 +182,7 @@ describe('the directory walk', () => {
   it('honours a custom skipDirs list', () => {
     expect(
       lint(
-        { 'vendor/a.mjs': 'const { Array } = primordials\n' },
+        { 'vendor/module.mjs': 'const { Array } = primordials\n' },
         { skipDirs: ['vendor'] },
       ),
     ).toEqual([])
@@ -201,7 +205,7 @@ describe('the directory walk', () => {
     // Without the strip the annotation is a parse error and the whole file is
     // skipped, so the rule would silently not apply to any .mts source.
     const findings = lint({
-      'a.mts': 'const { Array } = primordials\nconst n: number = 1\n',
+      'module.mts': 'const { Array } = primordials\nconst n: number = 1\n',
     })
     expect(findings.length).toBe(1)
   })
@@ -342,7 +346,7 @@ describe('formatLintFindings', () => {
   const finding: LintFinding = {
     column: 9,
     expected: 'ArrayCtor',
-    file: 'src/a.mjs',
+    file: 'src/module.mjs',
     line: 2,
     name: 'Array',
     rule: 'ctor-rename',
@@ -362,7 +366,7 @@ describe('formatLintFindings', () => {
 
   it('gives each finding a file:line:column and the expected alias', () => {
     const out = formatLintFindings([finding], { targetName: 'pkg' })
-    expect(out).toContain('[ctor-rename] src/a.mjs:2:9')
+    expect(out).toContain('[ctor-rename] src/module.mjs:2:9')
     expect(out).toContain('expected `Array: ArrayCtor`')
   })
 

@@ -131,25 +131,27 @@ describe('isDeclarationFile', () => {
   it('recognizes the three declaration suffixes', () => {
     // path.extname yields just `.ts` for `foo.d.ts`, so this has to read the
     // basename's secondary suffix rather than the extension.
-    expect(isDeclarationFile('/p/foo.d.ts')).toBe(true)
-    expect(isDeclarationFile('/p/foo.d.mts')).toBe(true)
-    expect(isDeclarationFile('/p/foo.d.cts')).toBe(true)
+    expect(isDeclarationFile('/project/foo.d.ts')).toBe(true)
+    expect(isDeclarationFile('/project/foo.d.mts')).toBe(true)
+    expect(isDeclarationFile('/project/foo.d.cts')).toBe(true)
   })
 
   it('does not treat ordinary sources as declarations', () => {
-    expect(isDeclarationFile('/p/foo.ts')).toBe(false)
-    expect(isDeclarationFile('/p/foo.mts')).toBe(false)
-    expect(isDeclarationFile('/p/foo.d.tsx')).toBe(false)
+    expect(isDeclarationFile('/project/foo.ts')).toBe(false)
+    expect(isDeclarationFile('/project/foo.mts')).toBe(false)
+    expect(isDeclarationFile('/project/foo.d.tsx')).toBe(false)
   })
 
   it('reads the basename, not the directory', () => {
     // A directory called `x.d.ts` must not make every file inside it look like
     // a declaration.
-    expect(isDeclarationFile(path.join('/p/x.d.ts', 'real.mts'))).toBe(false)
+    expect(
+      isDeclarationFile(path.join('/project/declarations.d.ts', 'real.mts')),
+    ).toBe(false)
   })
 
   it('is false for a name that merely contains .d.', () => {
-    expect(isDeclarationFile('/p/foo.d.ts.map')).toBe(false)
+    expect(isDeclarationFile('/project/foo.d.ts.map')).toBe(false)
   })
 })
 
@@ -169,13 +171,13 @@ describe('isSourceFile', () => {
   it('skips a declaration file even though its extension is walked', () => {
     // A `.d.ts` has no runtime code, so it can never hold a call site. The
     // declaration check has to win over the extension check.
-    expect(isSourceFile('/p/types.d.ts')).toBe(false)
+    expect(isSourceFile('/project/types.d.ts')).toBe(false)
   })
 
   it('skips everything else', () => {
-    expect(isSourceFile('/p/data.json')).toBe(false)
-    expect(isSourceFile('/p/README.md')).toBe(false)
-    expect(isSourceFile('/p/Makefile')).toBe(false)
+    expect(isSourceFile('/project/data.json')).toBe(false)
+    expect(isSourceFile('/project/README.md')).toBe(false)
+    expect(isSourceFile('/project/Makefile')).toBe(false)
   })
 })
 
