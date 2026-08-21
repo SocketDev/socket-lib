@@ -1835,6 +1835,16 @@
       "types": "./dist/github/packages.d.ts",
       "default": "./dist/github/packages.js"
     },
+    "./github/rate-limit": {
+      "source": "./src/github/rate-limit.mts",
+      "types": "./dist/github/rate-limit.d.ts",
+      "default": "./dist/github/rate-limit.js"
+    },
+    "./github/rate-limit-wait": {
+      "source": "./src/github/rate-limit-wait.mts",
+      "types": "./dist/github/rate-limit-wait.d.ts",
+      "default": "./dist/github/rate-limit-wait.js"
+    },
     "./github/refs": {
       "source": "./src/github/refs.mts",
       "types": "./dist/github/refs.d.ts",
