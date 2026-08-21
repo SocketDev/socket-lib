@@ -14,7 +14,11 @@ import { describe, expect, it } from 'vitest'
 // @ts-expect-error - no type declarations
 import picomatch from 'picomatch'
 
-import { getAuthHeaders } from '../../../src/releases/github-auth.mjs'
+import { clearGitHubTokenCache } from '../../../src/github/token.mjs'
+import {
+  getAuthHeaders,
+  getAuthHeadersWithFallback,
+} from '../../../src/releases/github-auth.mjs'
 import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm.mjs'
 
 describe('releases/github-auth', () => {
@@ -183,5 +187,68 @@ describe('releases/github-auth', () => {
       expect(isMatch('Yoga-Sync-abc.mjs')).toBe(false)
       expect(isMatch('YOGA-SYNC-abc.MJS')).toBe(false)
     })
+  })
+})
+
+describe('releases/github-auth getAuthHeadersWithFallback', () => {
+  // The release path is the one that motivated this: its sweep is the request
+  // pattern that hits the anonymous 60/hour ceiling, and on a developer machine
+  // the only credential is usually in the `gh` keychain, which no environment
+  // variable exposes.
+  it('carries the base GitHub headers', async () => {
+    const headers = await getAuthHeadersWithFallback()
+    expect(headers['Accept']).toBe('application/vnd.github+json')
+    expect(headers['X-GitHub-Api-Version']).toBe('2022-11-28')
+  })
+
+  it('prefers an explicit environment token', async () => {
+    const saved = process.env['GITHUB_TOKEN']
+    process.env['GITHUB_TOKEN'] = 'env-wins'
+    try {
+      clearGitHubTokenCache()
+      const headers = await getAuthHeadersWithFallback()
+      expect(headers['Authorization']).toBe('Bearer env-wins')
+    } finally {
+      if (saved === undefined) {
+        delete process.env['GITHUB_TOKEN']
+      } else {
+        process.env['GITHUB_TOKEN'] = saved
+      }
+      clearGitHubTokenCache()
+    }
+  })
+
+  it('never emits an empty Authorization header', async () => {
+    // A `Bearer ` with no token is rejected as a bad credential rather than
+    // treated as anonymous, so an absent token must omit the header entirely.
+    const headers = await getAuthHeadersWithFallback()
+    expect(headers['Authorization']).not.toBe('Bearer ')
+    expect(headers['Authorization']).not.toBe('Bearer undefined')
+  })
+
+  it('reaches sources the env-only resolver cannot', async () => {
+    // Contract difference, asserted structurally: whenever the env is empty and
+    // the fallback still finds a credential, only the async resolver reports it.
+    const saved = {
+      gh: process.env['GH_TOKEN'],
+      gt: process.env['GITHUB_TOKEN'],
+    }
+    delete process.env['GH_TOKEN']
+    delete process.env['GITHUB_TOKEN']
+    try {
+      clearGitHubTokenCache()
+      expect(getAuthHeaders()['Authorization']).toBe(undefined)
+      const withFallback = await getAuthHeadersWithFallback()
+      const auth = withFallback['Authorization']
+      expect(auth === undefined || auth.startsWith('Bearer ')).toBe(true)
+    } finally {
+      if (saved.gh !== undefined) {
+        process.env['GH_TOKEN'] = saved.gh
+      }
+      if (saved.gt !== undefined) {
+        process.env['GITHUB_TOKEN'] = saved.gt
+      }
+      clearGitHubTokenCache()
+    }
   })
 })

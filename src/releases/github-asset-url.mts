@@ -18,7 +18,8 @@ import { ErrorCtor } from '../primordials/error.mjs'
 import { JSONParse, JSONStringify } from '../primordials/json.mjs'
 
 import { createAssetMatcher, describeAssetPatterns } from './github-assets.mjs'
-import { getAuthHeaders } from './github-auth.mjs'
+import { recordGitHubRateLimit } from '../github/rate-limit.mjs'
+import { getAuthHeadersWithFallback } from './github-auth.mjs'
 import { GITHUB_RETRY_CONFIG as RETRY_CONFIG } from './github-retry-config.mjs'
 
 import type { AssetPattern, RepoConfig } from './github-types.mjs'
@@ -68,9 +69,15 @@ export async function fetchReleaseAssetsViaGraphQL(
       }`,
       variables: { owner, repo, tag },
     }),
-    headers: { ...getAuthHeaders(), 'Content-Type': 'application/json' },
+    headers: {
+      ...(await getAuthHeadersWithFallback()),
+      'Content-Type': 'application/json',
+    },
     method: 'POST',
   })
+  // GraphQL is metered as its own resource, so this fills a different ledger
+  // slot than the REST calls below.
+  recordGitHubRateLimit(response.headers)
   if (!response.ok) {
     throw new ErrorCtor(
       `Failed to fetch ${owner}/${repo} release ${tag} (GraphQL): ${response.status} ${response.statusText}`,
@@ -187,9 +194,10 @@ export async function getReleaseAssetUrl(
     const response = await httpRequest(
       `https://api.github.com/repos/${owner}/${repo}/releases/tags/${tag}`,
       {
-        headers: getAuthHeaders(),
+        headers: await getAuthHeadersWithFallback(),
       },
     )
+    recordGitHubRateLimit(response.headers)
 
     if (!response.ok) {
       throw new ErrorCtor(
