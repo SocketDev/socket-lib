@@ -198,10 +198,19 @@ export interface ReadOptions extends Abortable {
  */
 export interface RemoveOptions {
   /**
-   * Force deletion even outside normally safe directories. When `false`,
-   * prevents deletion outside temp, cacache, and ~/.socket.
+   * Permit deleting the current working directory or anything above it.
    *
-   * @default true for safe directories, false otherwise
+   * NOT node's `force`. `fs.rm(p, { force: true })` means "do not throw when
+   * the path is missing"; this one lifts a SAFETY boundary, and the two are
+   * easy to confuse because they share a name. Missing paths are already
+   * tolerated here regardless, since the pattern simply matches nothing.
+   *
+   * Off by default. Descendants of the cwd delete without it, and the OS temp
+   * dir, the cacache, and the Socket user dir raise it automatically, so a
+   * scratch cleanup never needs it either. That leaves one case: deleting
+   * outside the cwd on purpose - which is worth stating at the call site.
+   *
+   * @default false, raised automatically inside temp, cacache, and ~/.socket
    */
   force?: boolean | undefined
   /**
