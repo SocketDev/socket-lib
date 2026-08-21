@@ -273,6 +273,10 @@ jobs:
           git checkout -q --detach FETCH_HEAD
       - uses: ./.github/actions/fleet/setup-and-install
         with:
+          # Authorizes a thin member's bundle hydration right after checkout.
+          # Both stay empty on a member with no payload App, skipping the mint.
+          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
           # The org secret feeds both SOCKET_API_TOKEN and SOCKET_API_KEY.
           socket-api-token: ${{ secrets.SOCKET_API_TOKEN_FOR_CLI_AND_SFW }}
       - name: Smoke the JS fuzz lane
@@ -551,6 +555,11 @@ jobs:
           fi
           git checkout -q --detach FETCH_HEAD
       - uses: ./.github/actions/fleet/setup-and-install
+        with:
+          # Authorizes a thin member's bundle hydration right after checkout.
+          # Both stay empty on a member with no payload App, skipping the mint.
+          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
       - name: Run the JS fuzz campaign
         run: |
           set -euo pipefail

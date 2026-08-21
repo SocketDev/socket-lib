@@ -60,6 +60,10 @@ jobs:
       # re-checks-out at its own depth.
       - uses: ./.github/actions/fleet/checkout
         with:
+          # Authorizes a thin member's bundle hydration right after checkout.
+          # Both stay empty on a member with no payload App, skipping the mint.
+          payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
+          payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
           fetch-depth: 1
       - name: Checkout
         uses: ./.github/actions/fleet/checkout

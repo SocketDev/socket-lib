@@ -2385,10 +2385,30 @@ function tokenFromBody(body) {
   }
 }
 /**
- * Obtain an anonymous pull token. Hits the documented token endpoint first; on
- * anything but a usable token, falls back to the 401 WWW-Authenticate challenge
- * form (probe /v2/, follow the advertised realm). Fails loud when no token can
- * be obtained.
+ * `Authorization: Basic` for GHCR's token endpoint, built from the workflow
+ * token when one is in the environment.
+ *
+ * A PUBLIC package needs none of this - anonymous pull is the common path and
+ * stays first. A package that is private, or newly published and not yet made
+ * public, answers the anonymous request with 403 and no token, which reads as
+ * "confirm the package is public" and is unactionable inside a job that already
+ * holds a credential for the same repo. GHCR accepts the workflow token as the
+ * password with any username.
+ *
+ * Returns undefined when no token is in the environment, so a local run keeps
+ * its anonymous behavior. Never logged: the value only ever becomes a header.
+ */
+function ghcrBasicAuthHeader(env) {
+  const token = env['GH_TOKEN'] || env['GITHUB_TOKEN']
+  if (!token) return
+  return `Basic ${Buffer.from(`x-access-token:${token}`).toString('base64')}`
+}
+/**
+ * Obtain a pull token. Hits the documented token endpoint first; on anything
+ * but a usable token, falls back to the 401 WWW-Authenticate challenge form
+ * (probe /v2/, follow the advertised realm), and finally retries the challenge
+ * WITH the workflow token when the environment carries one. Fails loud when no
+ * token can be obtained.
  */
 async function getGhcrToken(repo, registry, httpFn = httpGet) {
   const primary = await httpFn(ghcrTokenUrl(repo, registry), {
@@ -2413,10 +2433,24 @@ async function getGhcrToken(repo, registry, httpFn = httpGet) {
   const res = await httpFn(`${challenge.realm}?${params.toString()}`, {
     headers: { accept: 'application/json' },
   })
-  const token = tokenFromBody(res.body)
+  let token = tokenFromBody(res.body)
+  if (!token) {
+    const authorization = ghcrBasicAuthHeader(process.env)
+    if (authorization)
+      token = tokenFromBody(
+        (
+          await httpFn(`${challenge.realm}?${params.toString()}`, {
+            headers: {
+              accept: 'application/json',
+              authorization,
+            },
+          })
+        ).body,
+      )
+  }
   if (!token)
-    throw new Error(`Cannot obtain a GHCR anonymous pull token.
-  Where: ${challenge.realm} for repo ${repo}\n  Saw:   HTTP ${res.status} with no token in the body\n  Fix:   confirm the package is public and speaks the OCI token flow.`)
+    throw new Error(`Cannot obtain a GHCR pull token.
+  Where: ${challenge.realm} for repo ${repo}\n  Saw:   HTTP ${res.status} with no token in the body, anonymously or with the workflow token\n  Fix:   make the package public, or give the job a token with read:packages on it.`)
   return token
 }
 /**
@@ -3277,6 +3311,7 @@ export {
   formatLockStepError,
   formatUpdateNotice,
   getGhcrToken,
+  ghcrBasicAuthHeader,
   ghcrBundleRepo,
   ghcrFetchBundle,
   ghcrTokenUrl,
