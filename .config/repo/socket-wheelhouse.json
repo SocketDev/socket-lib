@@ -19,10 +19,10 @@
   },
   "cover": {
     "thresholds": {
-      "statements": 91,
-      "branches": 85,
+      "statements": 92,
+      "branches": 87,
       "functions": 94,
-      "lines": 91
+      "lines": 92
     }
   },
   "lint": {
