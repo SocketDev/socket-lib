@@ -143,7 +143,7 @@ describe.sequential('dlx', () => {
     it('should return false when DLX directory does not exist', () => {
       // Ensure it doesn't exist
       if (existsSync(getSocketDlxDir())) {
-        safeDeleteSync(getSocketDlxDir(), { force: true })
+        safeDeleteSync(getSocketDlxDir())
       }
       expect(dlxDirExists()).toBe(false)
     })
@@ -158,7 +158,7 @@ describe.sequential('dlx', () => {
     it('should create DLX directory if it does not exist', async () => {
       // Ensure it doesn't exist
       if (existsSync(getSocketDlxDir())) {
-        safeDeleteSync(getSocketDlxDir(), { force: true })
+        safeDeleteSync(getSocketDlxDir())
       }
       await ensureDlxDir()
       expect(existsSync(getSocketDlxDir())).toBe(true)
@@ -172,7 +172,7 @@ describe.sequential('dlx', () => {
     it('sync version should create DLX directory if it does not exist', () => {
       // Ensure it doesn't exist
       if (existsSync(getSocketDlxDir())) {
-        safeDeleteSync(getSocketDlxDir(), { force: true })
+        safeDeleteSync(getSocketDlxDir())
       }
       ensureDlxDirSync()
       expect(existsSync(getSocketDlxDir())).toBe(true)
@@ -368,7 +368,7 @@ describe.sequential('dlx', () => {
     it('should not throw when DLX directory does not exist', async () => {
       // Ensure directory doesn't exist
       if (existsSync(getSocketDlxDir())) {
-        safeDeleteSync(getSocketDlxDir(), { force: true })
+        safeDeleteSync(getSocketDlxDir())
       }
       await expect(clearDlx()).resolves.not.toThrow()
     })
@@ -394,7 +394,7 @@ describe.sequential('dlx', () => {
     it('sync version should not throw when DLX directory does not exist', () => {
       // Ensure directory doesn't exist
       if (existsSync(getSocketDlxDir())) {
-        safeDeleteSync(getSocketDlxDir(), { force: true })
+        safeDeleteSync(getSocketDlxDir())
       }
       expect(() => clearDlxSync()).not.toThrow()
     })

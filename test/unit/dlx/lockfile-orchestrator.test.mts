@@ -91,9 +91,9 @@ describe.sequential('dlx/lockfile orchestrator', () => {
     expect(vi.mocked(pacote.tarball)).toHaveBeenCalledWith(
       'fixture-package@1.2.3',
     )
-    expect(vi.mocked(safeDelete)).toHaveBeenCalledWith(idealOptions.path, {
-      force: true,
-    })
+    // The scratch dir is a mkdtemp under the OS temp dir, which safeDelete
+    // exempts, so the cleanup needs no force flag.
+    expect(vi.mocked(safeDelete)).toHaveBeenCalledWith(idealOptions.path)
   })
 
   it('returns the pin when scratch cleanup fails', async () => {

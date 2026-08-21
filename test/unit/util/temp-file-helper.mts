@@ -136,7 +136,7 @@ export async function withTempDir(prefix: string): Promise<{
   const cleanup = async () => {
     try {
       // Force delete temp directory outside CWD.
-      await safeDelete(tempDir, { force: true })
+      await safeDelete(tempDir)
     } catch {
       // Ignore cleanup errors.
     }

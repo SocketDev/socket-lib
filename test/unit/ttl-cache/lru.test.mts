@@ -30,7 +30,7 @@ describe.sequential('ttl-cache — LRU + clock skew', () => {
   afterEach(async () => {
     resetEnv()
     try {
-      await safeDelete(testCacheDir, { force: true })
+      await safeDelete(testCacheDir)
     } catch {}
   })
 

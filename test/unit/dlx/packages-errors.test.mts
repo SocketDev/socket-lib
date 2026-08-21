@@ -62,7 +62,7 @@ describe.sequential('dlx/packages — error branches', () => {
     // Clean the parent of testDlxDir so the random root goes too.
     // Mock wraps original.safeDelete; default-impl calls through.
     try {
-      await safeDelete(path.dirname(testDlxDir), { force: true })
+      await safeDelete(path.dirname(testDlxDir))
     } catch {}
   })
 

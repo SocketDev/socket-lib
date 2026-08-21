@@ -35,7 +35,7 @@ describe.sequential('dlx/package — pure functions', () => {
   })
 
   afterEach(async () => {
-    await safeDelete(testDir, { force: true })
+    await safeDelete(testDir)
   })
 
   describe('parsePackageSpec', () => {

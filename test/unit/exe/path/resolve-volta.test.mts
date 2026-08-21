@@ -28,7 +28,7 @@ describe.sequential('bin.ts — Volta resolution', () => {
 
   afterEach(async () => {
     try {
-      await safeDelete(voltaRoot, { force: true })
+      await safeDelete(voltaRoot)
     } catch {}
   })
 

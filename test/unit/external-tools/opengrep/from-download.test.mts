@@ -111,7 +111,7 @@ describe.sequential('external-tools/opengrep/from-download', () => {
         expect(statSync(finalPath).mode & 0o777).toBe(0o755)
       }
     } finally {
-      rmSync(tmp, { force: true, recursive: true })
+      rmSync(tmp, { recursive: true })
     }
   })
 
@@ -136,7 +136,7 @@ describe.sequential('external-tools/opengrep/from-download', () => {
       expect(result?.source).toBe('download')
       expect(result?.path).toBe(path.join(tmp, 'opengrep'))
     } finally {
-      rmSync(tmp, { force: true, recursive: true })
+      rmSync(tmp, { recursive: true })
     }
   })
 
@@ -178,7 +178,7 @@ describe.sequential('external-tools/opengrep/from-download', () => {
         path.join(tmp, 'opengrep', '1.16.5', 'linux-x64', 'opengrep'),
       )
     } finally {
-      rmSync(tmp, { force: true, recursive: true })
+      rmSync(tmp, { recursive: true })
       vi.resetModules()
     }
   })

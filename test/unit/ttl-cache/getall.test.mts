@@ -92,7 +92,7 @@ describe.sequential('ttl-cache — getAll wildcard', () => {
     resetEnv()
     invalidateCaches()
     try {
-      await safeDelete(testCacheDir, { force: true })
+      await safeDelete(testCacheDir)
     } catch {}
   })
 

@@ -39,7 +39,7 @@ describe.sequential('process-lock — error branches', () => {
 
   afterEach(async () => {
     try {
-      await safeDelete(testDir, { force: true })
+      await safeDelete(testDir)
     } catch {}
     vi.restoreAllMocks()
   })

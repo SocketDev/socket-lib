@@ -32,9 +32,9 @@ describe('state/db', () => {
   })
 
   afterEach(() => {
-    safeDeleteSync(dbPath, { force: true })
-    safeDeleteSync(`${dbPath}-wal`, { force: true })
-    safeDeleteSync(`${dbPath}-shm`, { force: true })
+    safeDeleteSync(dbPath)
+    safeDeleteSync(`${dbPath}-wal`)
+    safeDeleteSync(`${dbPath}-shm`)
   })
 
   it('opens a DB at the app path and enables WAL', () => {

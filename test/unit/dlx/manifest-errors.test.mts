@@ -72,7 +72,7 @@ describe.sequential('dlx/manifest — error branches', () => {
     // (async) is passed through unchanged. Use the async form per
     // CLAUDE.md preference for async surrounding code.
     try {
-      await safeDelete(testDir, { force: true })
+      await safeDelete(testDir)
     } catch {}
     vi.restoreAllMocks()
   })

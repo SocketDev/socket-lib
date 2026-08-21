@@ -56,7 +56,7 @@ describe.sequential('ttl-cache — error branches', () => {
     resetEnv()
     invalidateCaches()
     try {
-      await safeDelete(testCacheDir, { force: true })
+      await safeDelete(testCacheDir)
     } catch {}
   })
 

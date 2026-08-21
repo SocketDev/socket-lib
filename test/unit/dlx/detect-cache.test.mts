@@ -29,7 +29,7 @@ describe.sequential('dlx/detect — cache + stale paths', () => {
   })
 
   afterEach(async () => {
-    await safeDelete(testDir, { force: true })
+    await safeDelete(testDir)
   })
 
   describe('detectLocalExecutableType', () => {

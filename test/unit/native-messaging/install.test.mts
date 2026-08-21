@@ -27,7 +27,7 @@ const tmpDirs: string[] = []
 
 afterAll(async () => {
   for (const dir of tmpDirs.splice(0)) {
-    await safeDelete(dir, { force: true })
+    await safeDelete(dir)
   }
 })
 

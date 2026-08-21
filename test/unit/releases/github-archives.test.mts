@@ -70,7 +70,7 @@ describe.sequential('releases/github-archives', () => {
 
   afterEach(async () => {
     if (existsSync(testDir)) {
-      await safeDelete(testDir, { force: true })
+      await safeDelete(testDir)
     }
   })
 

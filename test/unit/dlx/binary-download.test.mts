@@ -85,7 +85,7 @@ describe.sequential('dlx/binary — downloadBinaryFile', () => {
     // test.
     vi.mocked(httpDownload).mockClear()
     try {
-      await safeDelete(testDir, { force: true })
+      await safeDelete(testDir)
     } catch {}
   })
 

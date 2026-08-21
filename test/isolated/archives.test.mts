@@ -97,7 +97,7 @@ beforeAll(async () => {
 
   cleanupTestFiles = async () => {
     try {
-      await safeDelete(tempDir, { force: true })
+      await safeDelete(tempDir)
     } catch {
       // Ignore cleanup errors
     }

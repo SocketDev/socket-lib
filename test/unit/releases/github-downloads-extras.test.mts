@@ -83,7 +83,7 @@ describe.sequential('releases/github-downloads — extras', () => {
   afterEach(async () => {
     vi.restoreAllMocks()
     try {
-      await safeDelete(testDir, { force: true })
+      await safeDelete(testDir)
     } catch {}
   })
 

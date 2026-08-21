@@ -216,7 +216,7 @@ describe('releases/github-downloads', () => {
         expect(existsSync(binaryFile)).toBe(true)
         expect(existsSync(versionFile)).toBe(true)
       } finally {
-        await safeDelete(testDir, { force: true }).catch(() => {})
+        await safeDelete(testDir).catch(() => {})
       }
     })
 
@@ -290,7 +290,7 @@ describe('releases/github-downloads', () => {
         expect(httpDownload).toHaveBeenCalledTimes(1)
         expect(existsSync(binaryFile)).toBe(true)
       } finally {
-        await safeDelete(testDir, { force: true }).catch(() => {})
+        await safeDelete(testDir).catch(() => {})
       }
     })
 
@@ -362,7 +362,7 @@ describe('releases/github-downloads', () => {
         // Cache updated to the new tag.
         expect(await fs.readFile(versionFile, 'utf8')).toBe('v1.0.0')
       } finally {
-        await safeDelete(testDir, { force: true }).catch(() => {})
+        await safeDelete(testDir).catch(() => {})
       }
     })
   })
