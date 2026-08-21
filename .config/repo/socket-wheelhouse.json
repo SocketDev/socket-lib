@@ -49,5 +49,8 @@
   },
   "docs": {
     "llmsTxt": true
+  },
+  "vitest": {
+    "unitBudgetMs": 180000
   }
 }
