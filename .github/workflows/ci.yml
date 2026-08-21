@@ -121,7 +121,8 @@ jobs:
           # correctly. `--ci` escalates to the full suite by itself whenever it
           # cannot work out the diff, so a shallow clone or a missing base ref
           # costs CI minutes rather than coverage.
-          main-script: ${{ github.event_name == 'pull_request' && 'pnpm run test --ci' ||
+          main-script:
+            ${{ github.event_name == 'pull_request' && 'pnpm run test --ci' ||
             'pnpm run test --all' }}
 
   # Coverage gate. Runs on main pushes, tags and dispatch -- NOT on pull
