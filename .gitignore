@@ -289,6 +289,27 @@ pnpm-debug.log
 # fetches it from the pinned fleet-pack release (bundle.ref in
 # .config/repo/socket-wheelhouse.json) before install-git-hooks runs.
 /scripts/fleet/
+# Composite actions GitHub resolves at workflow-start: a job's FIRST `uses:`
+# runs before any hydrate step exists, so these stay TRACKED even though the
+# rest of the fleet payload is fetched. The fleet block above ignores the
+# directories, so the re-include has to sit here, after it and inside the
+# member-owned region where a cascade cannot discard it.
+!/.github/actions/fleet/cleanup-git-signing/
+!/.github/actions/fleet/github-pr-app-token/
+!/.github/actions/fleet/github-release-app-token/
+!/.github/actions/fleet/github-release/
+!/.github/actions/fleet/run-offline/
+!/.github/actions/fleet/run-script/
+!/.github/actions/fleet/setup-git-signing/
+!/.github/actions/fleet/setup-odai/
+!/.github/actions/fleet/setup-rust-cache/
+!/.github/actions/fleet/setup-rust-toolchain/
+# pnpm applies these at install, so an untracked patch silently stops being
+# applied for everyone else. The fleet block lists them individually because
+# they were once local-only; tracked is correct now.
+!/patches/@socketsecurity__lib@6.7.0.patch
+!/patches/brace-expansion@5.0.9.patch
+!/patches/minimatch@10.2.6.patch
 # </repo>
 
 # ─── repo-local (socket-wheelhouse): keep hand-authored files that the
