@@ -52,7 +52,6 @@ const logger = getDefaultLogger()
 const DEFAULT_CONFIG_PATH = '.socket-lib.json'
 export const FALLBACK_CONFIG_PATHS: readonly string[] = [
   '.socket-lib.json',
-  '.config/socket-lib.json',
   '.config/repo/socket-lib.json',
 ]
 const CONFIG_SECTION = 'primordials'

@@ -18,12 +18,14 @@ describe('resolveConfigPath', () => {
     expect(resolveConfigPath('/explicit/path.json')).toBe('/explicit/path.json')
   })
 
-  it('the fallback list is root, .config/, then the fleet-segmented .config/repo/, in order', async () => {
+  it('the fallback list is the root dotfile, then the fleet-segmented .config/repo/, in order', async () => {
+    // The loose `.config/socket-lib.json` probe is gone: per-repo config lives
+    // in ONE member surface, and a path no repo carries is a silent read of
+    // nothing.
     const { FALLBACK_CONFIG_PATHS } =
       await import('../../../src/cli/check-primordials.mjs')
     expect([...FALLBACK_CONFIG_PATHS]).toStrictEqual([
       '.socket-lib.json',
-      '.config/socket-lib.json',
       '.config/repo/socket-lib.json',
     ])
   })
@@ -47,11 +49,13 @@ describe('resolveConfigPath', () => {
     expect(resolveConfigPath(undefined, dir)).toBe('.socket-lib.json')
   })
 
-  it('falls through to .config/socket-lib.json when the root dotfile is absent', async () => {
+  it('falls through to .config/repo/socket-lib.json when the root dotfile is absent', async () => {
     const { resolveConfigPath } =
       await import('../../../src/cli/check-primordials.mjs')
-    const dir = await setupBaseDir(['.config/socket-lib.json'])
-    expect(resolveConfigPath(undefined, dir)).toBe('.config/socket-lib.json')
+    const dir = await setupBaseDir(['.config/repo/socket-lib.json'])
+    expect(resolveConfigPath(undefined, dir)).toBe(
+      '.config/repo/socket-lib.json',
+    )
   })
 
   it('falls through to the fleet-segmented .config/repo/socket-lib.json when the earlier two are absent', async () => {
@@ -68,20 +72,22 @@ describe('resolveConfigPath', () => {
       await import('../../../src/cli/check-primordials.mjs')
     const dir = await setupBaseDir([
       '.socket-lib.json',
-      '.config/socket-lib.json',
+      '.config/repo/socket-lib.json',
       '.config/repo/socket-lib.json',
     ])
     expect(resolveConfigPath(undefined, dir)).toBe('.socket-lib.json')
   })
 
-  it('prefers .config/socket-lib.json over .config/repo/ when the root is absent', async () => {
+  it('prefers .config/repo/socket-lib.json over .config/repo/ when the root is absent', async () => {
     const { resolveConfigPath } =
       await import('../../../src/cli/check-primordials.mjs')
     const dir = await setupBaseDir([
-      '.config/socket-lib.json',
+      '.config/repo/socket-lib.json',
       '.config/repo/socket-lib.json',
     ])
-    expect(resolveConfigPath(undefined, dir)).toBe('.config/socket-lib.json')
+    expect(resolveConfigPath(undefined, dir)).toBe(
+      '.config/repo/socket-lib.json',
+    )
   })
 
   it('returns the canonical head when none of the fallbacks exist', async () => {
