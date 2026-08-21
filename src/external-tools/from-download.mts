@@ -121,7 +121,7 @@ export async function downloadAndExtractTool(
       await fsPromises.rename(tempDir, extractedDir)
       extracted = true
     } catch (e) {
-      await safeDelete(tempDir, { force: true })
+      await safeDelete(tempDir)
       throw e
     }
   }

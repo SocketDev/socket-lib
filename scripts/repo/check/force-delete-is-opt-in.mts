@@ -119,6 +119,8 @@ export async function probeDeleteGuard(config: {
       property: 'refuses outside cwd',
     })
   }
+  // The probe sits outside cwd by design, so clearing it needs the flag.
+  // oxlint-disable-next-line socket/no-force-delete -- probe is outside cwd
   await safe.safeDelete(outside, { force: true })
 
   // 2. A descendant of the cwd must still delete with no flag, or every caller
@@ -137,6 +139,7 @@ export async function probeDeleteGuard(config: {
       detail: `safeDelete refused ${inside}, a descendant of the cwd, which must not need force`,
       property: 'allows inside cwd',
     })
+    // oxlint-disable-next-line socket/no-force-delete -- refused above
     await safe.safeDelete(inside, { force: true })
   }
 
