@@ -700,9 +700,11 @@ function computeHybridPaths(manifest) {
 
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/local-template-manifest.mts
+const PACKAGE_MANAGER_DIRS = /* @__PURE__ */ new Set(['.venv', 'node_modules'])
 /**
- * Every regular file beneath `dir`, as paths relative to `dir`. Bare-node walk:
- * this module is dep-0 and must not reach for a glob library.
+ * Every regular file beneath `dir`, as paths relative to `dir`, skipping any
+ * package-manager directory. Bare-node walk: this module is dep-0 and must not
+ * reach for a glob library.
  */
 function walkFilesRelative(dir, prefix, out) {
   let entries
@@ -714,9 +716,10 @@ function walkFilesRelative(dir, prefix, out) {
   for (let i = 0, { length } = entries; i < length; i += 1) {
     const entry = entries[i]
     const rel = prefix ? `${prefix}/${entry.name}` : entry.name
-    if (entry.isDirectory())
+    if (entry.isDirectory()) {
+      if (PACKAGE_MANAGER_DIRS.has(entry.name)) continue
       walkFilesRelative(path.join(dir, entry.name), rel, out)
-    else if (entry.isFile()) out.push(rel)
+    } else if (entry.isFile()) out.push(rel)
   }
 }
 /**
