@@ -77,7 +77,7 @@ catalog:
   # derivation, version compare, config validation). Runs standalone in vitest.
   # published: 2026-07-08 (past 7-day soak). See .claude/skills/fleet/property-testing.
   'fast-check': 4.9.0
-  'magic-string': 1.1.1
+  'magic-string': 1.2.0
   'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
   # GFM pair for render-faithful markdown parsing (tables, footnotes,

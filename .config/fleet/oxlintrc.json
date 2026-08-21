@@ -68,6 +68,7 @@
     "socket/no-fetch-prefer-http-request": "error",
     "socket/no-file-scope-oxlint-disable": "error",
     "socket/no-fileoverview-prefer-file": "error",
+    "socket/no-force-delete": "error",
     "socket/no-handbuilt-file-url": "error",
     "socket/no-inline-defer-async": "error",
     "socket/no-inline-logger": "error",
@@ -119,7 +120,7 @@
       { "additionalTestBlockFunctions": ["cmdit"] }
     ],
     "socket/no-which-for-local-bin": "error",
-    "socket/normalize-path-before-match": "error",
+    "socket/paths-are-normalized-before-match-at-edit": "error",
     "socket/optional-explicit-undefined": "error",
     "socket/options-null-proto": "error",
     "socket/options-param-naming": "error",

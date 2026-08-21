@@ -125,6 +125,21 @@ export function fetchBundle(): void {
     log('no scripts/repo/bootstrap/fleet.mjs beside me — skipping bundle fetch')
     return
   }
+  // The PRODUCER branch. A checkout carrying `template/base` holds the canon
+  // locally: there is no bundle to fetch and no pin to compare, so it
+  // materializes from its own template instead. Everything after this step —
+  // the pnpm-workspace repair and the reconcile install — is identical, and is
+  // exactly what a producer needs too: the mirrors it just placed include ~380
+  // workspace package.json files that the first install could not see.
+  // Branching here rather than writing a second doctor keeps one code path.
+  if (existsSync(path.join(REPO_ROOT, 'template', 'base'))) {
+    if (!tryRun('node', [fleet, '--from-template'])) {
+      log(
+        'materialize (fleet.mjs --from-template) reported a problem — continuing',
+      )
+    }
+    return
+  }
   const pinnedRef = readPinnedRef(REPO_ROOT)
   const appliedRef = readAppliedRefLocal(REPO_ROOT)
   if (isAppliedRefCurrentOrNewer(pinnedRef, appliedRef)) {

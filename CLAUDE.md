@@ -116,7 +116,7 @@
 - 🚨 Repo-root `upstream/<name>` is the ONLY submodule home, build source or test corpus alike, never `packages/*/upstream/*` or `test/fixtures/*`. (`scripts/fleet/check/submodules-are-rooted-in-upstream.mts`) [`upstream-references`](docs/agents.md/fleet/upstream-references.md)
 - 🚨 Never git-track an `upstream/` gitlink; upstream references are `.gitmodules`-only, and the `ref`+`sha256:` there ARE the pin. [`upstream-references`](docs/agents.md/fleet/upstream-references.md)
 - 🚨 A copyleft upstream (AGPL/GPL) is RUN and OBSERVED via its own tests only; never read or derive from its implementation. [`copyleft-boundaries`](docs/agents.md/fleet/copyleft-boundaries.md)
-- 🚨 Normalize a path-like variable with `normalizePath`/`toUnixPath` before any separator-sensitive op (regex match, `.split('/')`, `.startsWith('/')`, `.includes('/')`). [`normalize-path-before-match`](docs/agents.md/fleet/normalize-path-before-match.md)
+- 🚨 Normalize a path-like variable with `normalizePath`/`toUnixPath` before any separator-sensitive op (regex match, `.split('/')`, `.startsWith('/')`, `.includes('/')`). [`paths-are-normalized-before-match-at-edit`](docs/agents.md/fleet/paths-are-normalized-before-match-at-edit.md)
 - Never `Bash(run_in_background: true)` for a test/build run or a `git commit`/`rebase`/`merge`/`cherry-pick`. [`no-live-network-in-tests`](docs/agents.md/fleet/no-live-network-in-tests.md)
 - 🚨 Tests are vitest via `pnpm test` / `pnpm test <file>`; never `node --test`, never `--` before the path. [`test-layout`](docs/agents.md/fleet/test-layout.md)
 - 🚨 A committed test reference-output fixture is `*.golden.json`, never `*.expected.json`. [`golden-fixtures`](docs/agents.md/fleet/golden-fixtures.md)
