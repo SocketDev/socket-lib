@@ -119,11 +119,19 @@ export async function exportNamesOf(
   }
 }
 
+export interface ScanDocsOptions {
+  /**
+   * Repo root the reported paths are relative to. Defaults to this checkout.
+   */
+  root?: string | undefined
+}
+
 export async function scanDocFile(
   file: string,
   exportsMap: Record<string, unknown>,
-  root: string = ROOT,
+  options?: ScanDocsOptions | undefined,
 ): Promise<DocImportFinding[]> {
+  const { root = ROOT } = { __proto__: null, ...options } as ScanDocsOptions
   const findings: DocImportFinding[] = []
   const rel = path.relative(root, file)
   const sites = collectImportSites(readFileSync(file, 'utf8'))
@@ -166,8 +174,9 @@ export async function scanDocFile(
 }
 
 export async function scanDocs(
-  root: string = ROOT,
+  options?: ScanDocsOptions | undefined,
 ): Promise<DocImportFinding[]> {
+  const { root = ROOT } = { __proto__: null, ...options } as ScanDocsOptions
   const pkg = JSON.parse(
     readFileSync(path.join(root, 'package.json'), 'utf8'),
   ) as { exports: Record<string, unknown> }
@@ -178,7 +187,7 @@ export async function scanDocs(
   const findings: DocImportFinding[] = []
   for (let i = 0, { length } = files; i < length; i += 1) {
     // oxlint-disable-next-line no-await-in-loop -- serial keeps output ordered
-    findings.push(...(await scanDocFile(files[i]!, pkg.exports, root)))
+    findings.push(...(await scanDocFile(files[i]!, pkg.exports, { root })))
   }
   return findings
 }

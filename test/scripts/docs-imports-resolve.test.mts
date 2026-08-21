@@ -87,7 +87,7 @@ describe('scanDocFile', () => {
       path.join(root, 'dist', 'logger', 'default.js'),
       'export const somethingElse = 1\n',
     )
-    const findings = await scanDocFile(file, exportsMap, root)
+    const findings = await scanDocFile(file, exportsMap, { root })
     expect(findings).toHaveLength(1)
     expect(findings[0]!.detail).toMatch(/does not export getDefaultLogger/)
   })
@@ -102,7 +102,7 @@ describe('scanDocFile', () => {
       path.join(root, 'dist', 'logger', 'default.js'),
       'export function getDefaultLogger() {}\n',
     )
-    expect(await scanDocFile(file, exportsMap, root)).toEqual([])
+    expect(await scanDocFile(file, exportsMap, { root })).toEqual([])
   })
 
   it('passes a counterexample', async () => {
