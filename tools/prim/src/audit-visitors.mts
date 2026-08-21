@@ -28,65 +28,6 @@ import {
 import type { AstNode } from './source-text.mts'
 
 /**
- * A `VariableDeclarator` node. `init` is the only field the shared `AstNode`
- * shape doesn't name, because this is the only walk that reads it.
- */
-export interface VariableDeclaratorNode extends AstNode {
-  init?: AstNode | undefined
-}
-
-/**
- * Per-file state the visitors read. `auditFile` overwrites it before each walk.
- */
-export interface AuditCurrentFile {
-  lineStarts: number[]
-  relPath: string
-  src: string
-}
-
-/**
- * A duck-typed call site (`.test`, `.then`, …) whose receiver couldn't be
- * resolved statically, snapshotted for the post-walk AI pass.
- */
-export interface AuditPendingAmbiguous {
-  column: number
-  file: string
-  line: number
-  methodName: string
-  offset: number
-  receiverName: string
-  snippet: string
-}
-
-/**
- * The shared per-audit state the visitor table closes over.
- */
-export interface BuildVisitorsContext {
-  aiDisambiguate: boolean
-  currentFile: AuditCurrentFile
-  /**
-   * Currently-exported primordials.
-   */
-  exported: Set<string>
-  /**
-   * Queue drained after the walk.
-   */
-  pendingAmbiguous: AuditPendingAmbiguous[]
-  record: (
-    file: string,
-    offset: number,
-    pattern: string,
-    primordial: string | undefined,
-  ) => void
-  recordRedeclaration: (
-    file: string,
-    offset: number,
-    name: string,
-    pattern: string,
-  ) => void
-}
-
-/**
  * Build the acorn-walk visitor table.
  */
 export function buildVisitors({
@@ -338,6 +279,24 @@ export function buildVisitors({
       if (isBundlerHelperAssignment(ancestors)) {
         return
       }
+      // The CallExpression visitor exempts CJS interop glue and the hardened
+      // `Object.prototype.X.call(...)` idiom, but this visitor sees the CALLEE
+      // and its inner `Object.prototype` separately - so without the same two
+      // exemptions here, both shapes are still reported and the exemptions
+      // above buy nothing.
+      const parent = nearestAncestor(ancestors, node)
+      if (parent) {
+        if (
+          parent.type === 'CallExpression' &&
+          parent.callee === node &&
+          isExportsInteropGlue(parent)
+        ) {
+          return
+        }
+        if (isObjectPrototypeIdiom(parent)) {
+          return
+        }
+      }
       const propName = node.property.name
       if (propName[0] !== propName[0]!.toLowerCase()) {
         return
@@ -364,4 +323,83 @@ export function buildVisitors({
       )
     },
   }
+}
+
+/**
+ * A `VariableDeclarator` node. `init` is the only field the shared `AstNode`
+ * shape doesn't name, because this is the only walk that reads it.
+ */
+export interface VariableDeclaratorNode extends AstNode {
+  init?: AstNode | undefined
+}
+
+/**
+ * Per-file state the visitors read. `auditFile` overwrites it before each walk.
+ */
+export interface AuditCurrentFile {
+  lineStarts: number[]
+  relPath: string
+  src: string
+}
+
+/**
+ * A duck-typed call site (`.test`, `.then`, …) whose receiver couldn't be
+ * resolved statically, snapshotted for the post-walk AI pass.
+ */
+export interface AuditPendingAmbiguous {
+  column: number
+  file: string
+  line: number
+  methodName: string
+  offset: number
+  receiverName: string
+  snippet: string
+}
+
+/**
+ * The shared per-audit state the visitor table closes over.
+ */
+export interface BuildVisitorsContext {
+  aiDisambiguate: boolean
+  currentFile: AuditCurrentFile
+  /**
+   * Currently-exported primordials.
+   */
+  exported: Set<string>
+  /**
+   * Queue drained after the walk.
+   */
+  pendingAmbiguous: AuditPendingAmbiguous[]
+  record: (
+    file: string,
+    offset: number,
+    pattern: string,
+    primordial: string | undefined,
+  ) => void
+  recordRedeclaration: (
+    file: string,
+    offset: number,
+    name: string,
+    pattern: string,
+  ) => void
+}
+
+/**
+ * The nearest ancestor that is not `node` itself.
+ *
+ * The walk hands ancestors root-first, and whether the array's last entry is
+ * the node or its parent varies by walker, so identity is checked rather than
+ * assumed.
+ */
+export function nearestAncestor(
+  ancestors: readonly AstNode[],
+  node: AstNode,
+): AstNode | undefined {
+  for (let i = ancestors.length - 1; i >= 0; i -= 1) {
+    const candidate = ancestors[i]!
+    if (candidate !== node) {
+      return candidate
+    }
+  }
+  return undefined
 }
