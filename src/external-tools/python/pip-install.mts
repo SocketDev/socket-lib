@@ -86,7 +86,7 @@ export async function downloadPipPackage(
       stale = true
     }
     if (stale) {
-      await safeDelete(lockFile, { force: true })
+      await safeDelete(lockFile)
       return downloadPipPackage(options, retryCount + 1)
     }
     for (let i = 0; i < WAIT_TICKS; i += 1) {
@@ -135,7 +135,7 @@ export async function downloadPipPackage(
     }
     return { installed: true, packageDir }
   } finally {
-    await safeDelete(lockFile, { force: true })
+    await safeDelete(lockFile)
   }
 }
 

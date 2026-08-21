@@ -53,7 +53,7 @@ export async function deleteWindows(
   if (existsSync(filePath)) {
     try {
       const { rmSync } = await import('node:fs')
-      rmSync(filePath, { force: true })
+      rmSync(filePath)
       removedAny = true
     } catch {
       // best-effort
@@ -80,7 +80,7 @@ export function deleteWindowsSync(
   if (existsSync(filePath)) {
     try {
       const fsMod = require('node:fs') as typeof fs
-      fsMod.rmSync(filePath, { force: true })
+      fsMod.rmSync(filePath)
       removedAny = true
     } catch {
       // best-effort

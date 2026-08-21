@@ -82,7 +82,7 @@ export async function cleanDlxCache(
       // Treat future timestamps from clock skew as expired
       if (age < 0 || age > maxAge) {
         // Remove entire cache entry directory.
-        await safeDelete(entryPath, { force: true, recursive: true })
+        await safeDelete(entryPath, { recursive: true })
         cleaned += 1
       }
     } catch {

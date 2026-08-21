@@ -79,7 +79,7 @@ export async function listDlxPackagesAsync(): Promise<string[]> {
 export async function removeDlxPackage(packageName: string): Promise<void> {
   const packageDir = getDlxPackageDir(packageName)
   try {
-    await safeDelete(packageDir, { recursive: true, force: true })
+    await safeDelete(packageDir, { recursive: true })
   } catch (e) {
     throw new ErrorCtor(`Failed to remove DLX package "${packageName}"`, {
       cause: e,
@@ -98,7 +98,7 @@ export async function removeDlxPackage(packageName: string): Promise<void> {
 export function removeDlxPackageSync(packageName: string): void {
   const packageDir = getDlxPackageDir(packageName)
   try {
-    safeDeleteSync(packageDir, { recursive: true, force: true })
+    safeDeleteSync(packageDir, { recursive: true })
   } catch (e) {
     const code = (e as NodeJS.ErrnoException).code
     if (code === 'EACCES' || code === 'EPERM') {

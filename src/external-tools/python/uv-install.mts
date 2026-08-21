@@ -90,7 +90,7 @@ export async function uvExportMaterialize(
       stale = true
     }
     if (stale) {
-      await safeDelete(lockFile, { force: true })
+      await safeDelete(lockFile)
       return uvExportMaterialize(options, retryCount + 1)
     }
     for (let i = 0; i < WAIT_TICKS; i += 1) {
@@ -139,7 +139,7 @@ export async function uvExportMaterialize(
       ],
       { shell: isWin32(), stdio: 'inherit' },
     )
-    await safeDelete(requirementsPath, { force: true })
+    await safeDelete(requirementsPath)
     if (!(await isAlreadyInstalled(targetDir))) {
       throw new Error(
         `uvExportMaterialize: uv pip install --target ${targetDir} reported success but the target is still empty`,
@@ -147,7 +147,7 @@ export async function uvExportMaterialize(
     }
     return { installed: true, targetDir }
   } finally {
-    await safeDelete(lockFile, { force: true })
+    await safeDelete(lockFile)
   }
 }
 

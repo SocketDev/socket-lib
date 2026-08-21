@@ -255,7 +255,7 @@ export async function resolvePipPackagePin(
     // Swallow cleanup failures so a scratch-dir-delete error doesn't mask the
     // real exception from the try-block.
     try {
-      await safeDelete(scratch, { force: true })
+      await safeDelete(scratch)
     } catch {}
   }
 }

@@ -200,7 +200,7 @@ export interface RemoveOptions {
   /**
    * Permit deleting the current working directory or anything above it.
    *
-   * NOT node's `force`. `fs.rm(p, { force: true })` means "do not throw when
+   * NOT node's `force`. `fs.rm(p)` means "do not throw when
    * the path is missing"; this one lifts a SAFETY boundary, and the two are
    * easy to confuse because they share a name. Missing paths are already
    * tolerated here regardless, since the pattern simply matches nothing.

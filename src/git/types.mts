@@ -15,7 +15,7 @@
  *   const changed = filterPackagesByChanges(packages)
  *
  *   // Force include all packages
- *   const all = filterPackagesByChanges(packages, { force: true })
+ *   const all = filterPackagesByChanges(packages)
  *
  *   // Use custom package key
  *   const changed = filterPackagesByChanges(packages, {
