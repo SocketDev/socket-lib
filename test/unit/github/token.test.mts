@@ -14,6 +14,7 @@ import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { clearRefCache } from '../../../src/github/refs.mjs'
 import {
   getGitHubToken,
+  getGitHubTokenFromGhCli,
   getGitHubTokenFromGitConfig,
   getGitHubTokenWithFallback,
 } from '../../../src/github/token.mjs'
@@ -120,6 +121,42 @@ describe.sequential('github/token', () => {
     it('should fallback to git config (integration test)', async () => {
       const token = await getGitHubTokenWithFallback()
       expect(typeof token === 'string' || token === undefined).toBe(true)
+    })
+  })
+
+  describe('getGitHubTokenFromGhCli', () => {
+    // This lane exists because `gh auth login` stores its credential in the OS
+    // keychain, so on a developer machine it is the only source that answers
+    // while env and git config are both empty. A resolver that stopped before
+    // it reports "no token" on a fully authenticated machine and silently
+    // downgrades to 60 requests/hour.
+    it('answers undefined when gh is not on PATH, without throwing', async () => {
+      // The degradation contract: an absent gh is not an error, because the
+      // caller still makes the request unauthenticated.
+      const token = await getGitHubTokenFromGhCli({
+        env: { PATH: '/nonexistent-for-test' },
+      })
+      expect(token).toBe(undefined)
+    })
+
+    it('answers a string or undefined against the real gh', async () => {
+      const token = await getGitHubTokenFromGhCli()
+      expect(typeof token === 'string' || token === undefined).toBe(true)
+    })
+
+    it('never answers an empty string', async () => {
+      // A '' token would pass a truthiness check upstream and be sent as an
+      // empty Authorization header, which GitHub rejects as a bad credential
+      // rather than treating as anonymous.
+      const token = await getGitHubTokenFromGhCli()
+      expect(token).not.toBe('')
+    })
+
+    it('is not consulted when the environment already has a token', async () => {
+      // Ordering claim: env wins, so an authenticated gh cannot override an
+      // explicit GITHUB_TOKEN that a caller or CI set on purpose.
+      setEnv('GITHUB_TOKEN', 'env-token')
+      expect(await getGitHubTokenWithFallback()).toBe('env-token')
     })
   })
 
