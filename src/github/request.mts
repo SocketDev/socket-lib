@@ -140,7 +140,10 @@ export async function fetchGitHub<T = unknown>(
   let response
   try {
     /* c8 ignore start - External GitHub API call */
-    response = await httpRequest(url, { headers })
+    response = await httpRequest(url, {
+      headers,
+      ...(opts.timeout === undefined ? {} : { timeout: opts.timeout }),
+    })
     /* c8 ignore stop */
     // Recorded on EVERY response, including successful ones. The budget on a
     // success is what lets a later preflight refuse a sweep before it starts;

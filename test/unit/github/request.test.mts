@@ -1,5 +1,16 @@
 import nock from 'nock'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import process from 'node:process'
+
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vitest'
 
 import { GitHubEmptyBodyError } from '../../../src/github/errors.mjs'
 import {
@@ -15,6 +26,23 @@ import {
 const GITHUB_API = 'https://api.github.com'
 
 describe('fetchGitHub', () => {
+  // An explicit env token short-circuits the resolver. Without one the first
+  // call shells out to `git config` and `gh auth token` - half a second of
+  // subprocess for a credential no nock-mocked request needs.
+  const savedToken = process.env['GITHUB_TOKEN']
+
+  beforeAll(() => {
+    process.env['GITHUB_TOKEN'] = 'test-token-not-a-credential'
+  })
+
+  afterAll(() => {
+    if (savedToken === undefined) {
+      delete process.env['GITHUB_TOKEN']
+    } else {
+      process.env['GITHUB_TOKEN'] = savedToken
+    }
+  })
+
   beforeEach(() => {
     nock.disableNetConnect()
     nock.cleanAll()
@@ -381,42 +409,39 @@ describe('fetchGitHub network failures', () => {
     nock.enableNetConnect()
   })
 
-  it(
-    'enriches a connection error, which is the shape an outage takes',
-    { timeout: 60_000 },
-    async () => {
-      // The 2026-08-06 Actions incident produced timeouts and dropped runners,
-      // never a 5xx body, so this path is the one that needed the platform note.
-      nock(GITHUB_API)
-        .get('/repos/foo/bar')
-        .replyWithError({ code: 'ECONNRESET', message: 'socket hang up' })
-      await expect(
-        fetchGitHub(`${GITHUB_API}/repos/foo/bar`, {
-          probeStatus: outageProbe,
-        }),
-      ).rejects.toThrow(
-        /GitHub API request failed: [\s\S]*Actions: major_outage/,
-      )
-    },
-  )
+  it('enriches a connection error, which is the shape an outage takes', async () => {
+    // The 2026-08-06 Actions incident produced timeouts and dropped runners,
+    // never a 5xx body, so this path is the one that needed the platform note.
+    nock(GITHUB_API)
+      .get('/repos/foo/bar')
+      .replyWithError({ code: 'ECONNRESET', message: 'socket hang up' })
+    await expect(
+      fetchGitHub(`${GITHUB_API}/repos/foo/bar`, {
+        probeStatus: outageProbe,
+        // A nock connection error is not surfaced by the transport, so
+        // without a bound this waits out the 30s default and the file alone
+        // exceeds the whole suite's budget.
+        timeout: 50,
+      }),
+    ).rejects.toThrow(/GitHub API request failed: [\s\S]*Actions: major_outage/)
+  })
 
-  it(
-    'keeps the original error as the cause so a caller can still read its code',
-    { timeout: 60_000 },
-    async () => {
-      nock(GITHUB_API)
-        .get('/repos/foo/bar')
-        .replyWithError({ code: 'ETIMEDOUT', message: 'timed out' })
-      let caught: unknown
-      try {
-        await fetchGitHub(`${GITHUB_API}/repos/foo/bar`, {
-          probeStatus: outageProbe,
-        })
-      } catch (e) {
-        caught = e
-      }
-      expect(caught).toBeInstanceOf(Error)
-      expect((caught as Error).cause).toBeDefined()
-    },
-  )
+  it('keeps the original error as the cause so a caller can still read its code', async () => {
+    nock(GITHUB_API)
+      .get('/repos/foo/bar')
+      .replyWithError({ code: 'ETIMEDOUT', message: 'timed out' })
+    let caught: unknown
+    try {
+      await fetchGitHub(`${GITHUB_API}/repos/foo/bar`, {
+        probeStatus: outageProbe,
+        // Bounded for the same reason as above: an unsurfaced connection
+        // error otherwise sits until the 30s default.
+        timeout: 50,
+      })
+    } catch (e) {
+      caught = e
+    }
+    expect(caught).toBeInstanceOf(Error)
+    expect((caught as Error).cause).toBeDefined()
+  })
 })

@@ -21,6 +21,16 @@ export interface GitHubFetchOptions {
    */
   headers?: Record<string, string> | undefined
   /**
+   * Milliseconds before the request is abandoned. Defaults to the http-request
+   * default of 30s.
+   *
+   * Worth setting on any path that must fail fast. A connection error is not
+   * always reported by the transport, and when it is not, the request sits
+   * until this timeout - so the default turns an unreachable host into a
+   * 30-second stall rather than an error.
+   */
+  timeout?: number | undefined
+  /**
    * The platform-status probe used to explain a failure, injectable so a test
    * exercises the enriched error without reaching githubstatus.com. Defaults to
    * the real probe. Only ever called on an error path.
