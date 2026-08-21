@@ -44,8 +44,19 @@ interface SafeFs {
   ) => Promise<void>
 }
 
+// The methods this check uses, named rather than an index signature: an index
+// signature types every read as possibly-undefined and forces bracket access.
+interface CheckLogger {
+  error: (message: string) => void
+  fail: (message: string) => void
+  group: () => void
+  groupEnd: () => void
+  log: (message: string) => void
+  warn: (message: string) => void
+}
+
 interface LoggerFs {
-  getDefaultLogger: () => Record<string, (...args: unknown[]) => void>
+  getDefaultLogger: () => CheckLogger
 }
 
 /**
