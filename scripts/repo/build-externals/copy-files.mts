@@ -79,34 +79,6 @@ export async function copyRecursive(
 }
 
 /**
- * Copy scoped package directories.
- */
-export async function copyScopedFiles(
-  srcDir: string,
-  destDir: string,
-  scopedPackages: Array<{ scope: string }>,
-  { quiet = false }: { quiet?: boolean | undefined } = {},
-): Promise<number> {
-  let count = 0
-
-  for (const { scope } of scopedPackages) {
-    const scopeSrcDir = path.join(srcDir, scope)
-    const scopeDistDir = path.join(destDir, scope)
-
-    try {
-      count += await copyRecursive(scopeSrcDir, scopeDistDir, {
-        relativePath: scope,
-        quiet,
-      })
-    } catch {
-      // Scope directory doesn't exist.
-    }
-  }
-
-  return count
-}
-
-/**
  * Ensure directory exists.
  */
 export async function ensureDir(dir: string): Promise<void> {
