@@ -813,16 +813,6 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/agents-skills-mirror-nudge:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.2.0
-
   .claude/hooks/fleet/ai-config-drift-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
@@ -901,7 +891,7 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/brew-supply-chain-guard:
+  .claude/hooks/fleet/brew-supply-chain-at-edit:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1186,16 +1176,6 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/dated-citation-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.2.0
-
   .claude/hooks/fleet/default-branch-guard:
     devDependencies:
       '@types/node':
@@ -1280,15 +1260,6 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/egress-allowlist-guard:
-    devDependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.2.0
-
   .claude/hooks/fleet/enqueue-dont-pivot-nudge:
     devDependencies:
       '@types/node':
@@ -1308,7 +1279,17 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/error-message-quality-nudge:
+  .claude/hooks/fleet/env-kill-switches-are-absent-at-edit:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
+
+  .claude/hooks/fleet/error-messages-are-thorough-at-edit:
     dependencies:
       '@ultrathink/acorn.rs.wasm':
         specifier: 'catalog:'
@@ -1320,6 +1301,15 @@ importers:
 
   .claude/hooks/fleet/excuse-detector:
     devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
+
+  .claude/hooks/fleet/fetch-allowlist-at-edit:
+    devDependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
@@ -1395,7 +1385,7 @@ importers:
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
 
-  .claude/hooks/fleet/golden-fixture-naming-guard:
+  .claude/hooks/fleet/golden-fixtures-are-named-golden-at-edit:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1498,7 +1488,7 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/markdown-filename-guard:
+  .claude/hooks/fleet/markdown-filenames-are-canonical-at-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
@@ -1521,13 +1511,13 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/memory-codify-nudge:
+  .claude/hooks/fleet/memories-are-codified-at-edit:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/memory-enforcement-stamp-guard:
+  .claude/hooks/fleet/memory-codify-nudge:
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1677,16 +1667,6 @@ importers:
       shell-quote:
         specifier: 'catalog:'
         version: 1.10.0
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.2.0
-
-  .claude/hooks/fleet/no-env-kill-switch-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1898,16 +1878,6 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/no-private-path-in-source-guard:
-    dependencies:
-      '@ultrathink/acorn.rs.wasm':
-        specifier: 'catalog:'
-        version: 0.1.1
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.2.0
-
   .claude/hooks/fleet/no-private-ref-in-tests-docs-guard:
     dependencies:
       '@socketsecurity/lib-stable':
@@ -2078,16 +2048,6 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/no-upstream-gitlink-guard:
-    dependencies:
-      '@socketsecurity/lib-stable':
-        specifier: 'catalog:'
-        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 26.2.0
-
   .claude/hooks/fleet/no-verify-format-nudge:
     dependencies:
       '@socketsecurity/lib-stable':
@@ -2210,7 +2170,7 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/package-manager-auto-update-guard:
+  .claude/hooks/fleet/package-manager-auto-update-at-edit:
     devDependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
@@ -2467,6 +2427,16 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
+  .claude/hooks/fleet/private-paths-are-absent-at-edit:
+    dependencies:
+      '@ultrathink/acorn.rs.wasm':
+        specifier: 'catalog:'
+        version: 0.1.1
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
+
   .claude/hooks/fleet/proc-environ-exfil-guard:
     dependencies:
       '@socketsecurity/lib-stable':
@@ -2593,6 +2563,16 @@ importers:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
+
+  .claude/hooks/fleet/rule-citations-are-generic-at-edit:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
+    devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
@@ -2919,6 +2899,16 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
+  .claude/hooks/fleet/upstream-gitlinks-are-absent-at-edit:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 26.2.0
+
   .claude/hooks/fleet/upstream-is-read-only-guard:
     devDependencies:
       '@types/node':
@@ -3002,7 +2992,7 @@ importers:
         specifier: 'catalog:'
         version: 26.2.0
 
-  .claude/hooks/fleet/workflow-uses-comment-guard:
+  .claude/hooks/fleet/workflow-sha-pins-are-stamped-at-edit:
     dependencies:
       '@socketsecurity/lib-stable':
         specifier: 'catalog:'
@@ -3074,6 +3064,8 @@ importers:
   .config/fleet/oxlint-plugin/fleet/no-file-scope-oxlint-disable: {}
 
   .config/fleet/oxlint-plugin/fleet/no-fileoverview-prefer-file: {}
+
+  .config/fleet/oxlint-plugin/fleet/no-floating-async-map: {}
 
   .config/fleet/oxlint-plugin/fleet/no-force-delete: {}
 
@@ -3256,6 +3248,8 @@ importers:
         version: 0.13.2
 
   .config/fleet/oxlint-plugin/fleet/require-vitest-globals-import: {}
+
+  .config/fleet/oxlint-plugin/fleet/require-void-run-hook: {}
 
   .config/fleet/oxlint-plugin/fleet/socket-api-token-env: {}
 
