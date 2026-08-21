@@ -55,11 +55,13 @@ function tree(files: Record<string, string>): string {
 
 function lint(
   files: Record<string, string>,
-  options?: {
-    primordialSources?: string[]
-    skipDirs?: string[]
-    skipFiles?: string[]
-  },
+  options?:
+    | {
+        primordialSources?: string[] | undefined
+        skipDirs?: string[] | undefined
+        skipFiles?: string[] | undefined
+      }
+    | undefined,
 ): LintFinding[] {
   const root = tree(files)
   return lintSource({
