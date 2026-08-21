@@ -7,10 +7,10 @@ name: ⚡ CI
 
 on:
   push:
-    branches: [ main ]
-    tags: [ '*' ]
+    branches: [main]
+    tags: ['*']
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -72,7 +72,7 @@ jobs:
       matrix:
         # JS/TS tests only need a fast Linux run; cross-platform behavior is
         # covered by unit tests, not the CI matrix.
-        os: [ ubuntu-latest ]
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
