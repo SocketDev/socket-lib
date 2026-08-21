@@ -33,9 +33,11 @@ import type {
 } from '../external/del.js'
 import type { RemoveOptions } from './types.mjs'
 
+// Only the retry fields are read from here. `force` is resolved per call and
+// deliberately absent: a `force: true` sitting in a frozen defaults object reads
+// like the default even after the call sites stopped consulting it.
 const defaultRemoveOptions = objectFreeze({
   __proto__: null,
-  force: true,
   maxRetries: 3,
   recursive: true,
   retryDelay: 200,
@@ -98,10 +100,17 @@ export async function safeDelete(
     ? filepath.map(pathLikeToString)
     : [pathLikeToString(filepath)]
 
-  // shouldForce default is true; the allowedDirs branch fires only
-  // when caller passes `force: false` to bypass auto-force.
+  // `force` is OPT-IN. It defaults to false so del's own guard stands: a
+  // descendant of cwd deletes freely, cwd itself and anything above it throws.
+  // The allowedDirs branch below then re-enables force for the three trees a
+  // caller can never harm by clearing - the OS temp dir, the cacache, and the
+  // Socket user dir - so a scratch-dir cleanup needs no flag either.
+  //
+  // This defaulted to TRUE, which disabled the guard for every caller that
+  // passed no options, so `safeDelete(dirAboveCwd)` deleted it without a word.
+  // Measured against a real checkout.
   /* c8 ignore start */
-  let shouldForce = opts.force !== false
+  let shouldForce = opts.force === true
   if (!shouldForce && patterns.length > 0) {
     const path = getNodePath()
     const allowedDirs = getAllowedDirectories()
@@ -199,10 +208,17 @@ export function safeDeleteSync(
     ? filepath.map(pathLikeToString)
     : [pathLikeToString(filepath)]
 
-  // shouldForce default is true; the allowedDirs branch fires only
-  // when caller passes `force: false` to bypass auto-force.
+  // `force` is OPT-IN. It defaults to false so del's own guard stands: a
+  // descendant of cwd deletes freely, cwd itself and anything above it throws.
+  // The allowedDirs branch below then re-enables force for the three trees a
+  // caller can never harm by clearing - the OS temp dir, the cacache, and the
+  // Socket user dir - so a scratch-dir cleanup needs no flag either.
+  //
+  // This defaulted to TRUE, which disabled the guard for every caller that
+  // passed no options, so `safeDelete(dirAboveCwd)` deleted it without a word.
+  // Measured against a real checkout.
   /* c8 ignore start */
-  let shouldForce = opts.force !== false
+  let shouldForce = opts.force === true
   if (!shouldForce && patterns.length > 0) {
     const path = getNodePath()
     const allowedDirs = getAllowedDirectories()

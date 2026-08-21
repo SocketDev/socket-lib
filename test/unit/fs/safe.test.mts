@@ -8,7 +8,7 @@ import { existsSync, promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
   safeDelete,
@@ -291,5 +291,68 @@ describe('safeMkdirSync', () => {
       const newDir = path.join(readonlyDir, 'should-fail')
       expect(() => safeMkdirSync(newDir)).toThrow()
     }, 'safeMkdirSync-permission-')
+  })
+})
+
+describe('safeDelete force is opt-in', () => {
+  // Regression: `force` defaulted to true, which disabled del's cwd guard for
+  // every caller that passed no options, so `safeDelete(pathOutsideCwd)` deleted
+  // it without a word. Measured against a real checkout, which it removed.
+  //
+  // The target is a NON-EXISTENT sibling of cwd on purpose. The guard decides on
+  // path shape before touching the filesystem, so the assertion needs no real
+  // tree - and a regression here cannot destroy one. `process.chdir` is
+  // unavailable in a vitest worker, so cwd stays put and the path moves instead.
+  // A REAL directory outside cwd, created here and cleaned up here. del does
+  // not throw for a path that does not exist, so the guard can only be observed
+  // against a tree that is actually there. `process.chdir` is unavailable in a
+  // vitest worker, so cwd stays put and the target sits beside it. If the guard
+  // ever regresses, the only casualty is this directory.
+  const outsideCwd = path.join(
+    process.cwd(),
+    '..',
+    `safe-delete-guard-probe-${process.pid}`,
+  )
+
+  beforeEach(async () => {
+    await fs.mkdir(path.join(outsideCwd, 'child'), { recursive: true })
+    await fs.writeFile(path.join(outsideCwd, 'precious.txt'), 'keep')
+  })
+
+  afterEach(async () => {
+    await safeDelete(outsideCwd, { force: true })
+  })
+
+  it('rejects a path outside cwd when no options are passed', async () => {
+    await expect(safeDelete(outsideCwd)).rejects.toThrow()
+    expect(existsSync(path.join(outsideCwd, 'precious.txt'))).toBe(true)
+  })
+
+  it('rejects the same path synchronously', () => {
+    expect(() => safeDeleteSync(outsideCwd)).toThrow()
+    expect(existsSync(path.join(outsideCwd, 'precious.txt'))).toBe(true)
+  })
+
+  it('deletes it when force is explicitly requested', async () => {
+    await safeDelete(outsideCwd, { force: true })
+    expect(existsSync(outsideCwd)).toBe(false)
+  })
+
+  it('still deletes a descendant of cwd without a flag', async () => {
+    await runWithTempDir(async tmpDir => {
+      const child = path.join(tmpDir, 'build')
+      await fs.mkdir(child, { recursive: true })
+      await safeDelete(child)
+      expect(existsSync(child)).toBe(false)
+    }, 'safeDelete-descendant-')
+  })
+
+  it('still auto-forces inside the OS temp dir, so scratch cleanup needs no flag', async () => {
+    await runWithTempDir(async tmpDir => {
+      const scratch = path.join(tmpDir, 'scratch')
+      await fs.mkdir(scratch, { recursive: true })
+      await safeDelete(scratch)
+      expect(existsSync(scratch)).toBe(false)
+    }, 'safeDelete-autoforce-')
   })
 })
