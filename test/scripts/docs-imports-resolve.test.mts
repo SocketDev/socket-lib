@@ -41,7 +41,7 @@ describe('distTargetOf', () => {
 
   it('answers undefined for a shape it cannot read', () => {
     expect(distTargetOf(undefined)).toBe(undefined)
-    expect(distTargetOf({ types: './x.d.ts' })).toBe(undefined)
+    expect(distTargetOf({ types: './dist/example.d.ts' })).toBe(undefined)
   })
 })
 

@@ -73,31 +73,43 @@ describe('verbosityFlags', () => {
 describe('runNodeBuildScript', () => {
   it('runs the script under node with its verbosity flags', async () => {
     reset(0)
-    const exitCode = await runNodeBuildScript('a/script.mts', 'Thing build', {
-      verbose: true,
-    })
+    const exitCode = await runNodeBuildScript(
+      'scripts/repo/bundle/example.mts',
+      'Thing build',
+      {
+        verbose: true,
+      },
+    )
     expect(exitCode).toBe(0)
     expect(runCommand.calls).toEqual([
-      { args: ['a/script.mts', '--verbose'], command: 'node' },
+      {
+        args: ['scripts/repo/bundle/example.mts', '--verbose'],
+        command: 'node',
+      },
     ])
   })
 
   it('says nothing when the script succeeds', async () => {
     reset(0)
-    await runNodeBuildScript('a/script.mts', 'Thing build')
+    await runNodeBuildScript('scripts/repo/bundle/example.mts', 'Thing build')
     expect(logged).toEqual([])
   })
 
   it('names the step once when the script fails', async () => {
     reset(2)
-    const exitCode = await runNodeBuildScript('a/script.mts', 'Thing build')
+    const exitCode = await runNodeBuildScript(
+      'scripts/repo/bundle/example.mts',
+      'Thing build',
+    )
     expect(exitCode).toBe(2)
     expect(logged).toEqual(['Thing build failed'])
   })
 
   it('stays silent on failure when quiet', async () => {
     reset(2)
-    await runNodeBuildScript('a/script.mts', 'Thing build', { quiet: true })
+    await runNodeBuildScript('scripts/repo/bundle/example.mts', 'Thing build', {
+      quiet: true,
+    })
     expect(logged).toEqual([])
   })
 })
