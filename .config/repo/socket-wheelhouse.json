@@ -52,5 +52,25 @@
   },
   "vitest": {
     "unitBudgetMs": 180000
+  },
+  "bornTested": {
+    "grandfathered": [
+      "scripts/repo/audit-api-usage.mts",
+      "scripts/repo/audit-fleet-lib-usage.mts",
+      "scripts/repo/audit-unused-exports.mts",
+      "scripts/repo/bootstrap/prepare.mts",
+      "scripts/repo/bundle.mts",
+      "scripts/repo/bundle/clean.mts",
+      "scripts/repo/bundle/externals.mts",
+      "scripts/repo/fuzz.mts",
+      "scripts/repo/make-api-md.mts",
+      "scripts/repo/post-build.mts",
+      "scripts/repo/post-build/apply-unexposed-stubs.mts",
+      "scripts/repo/post-build/make-primordials-defaults.mts",
+      "scripts/repo/post-build/pair-declarations-with-js.mts",
+      "scripts/repo/validate/external-esm-cjs.mts",
+      "scripts/repo/validate/external-exports.mts",
+      "scripts/repo/validate/external-types.mts"
+    ]
   }
 }
