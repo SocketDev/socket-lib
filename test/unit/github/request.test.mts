@@ -3,6 +3,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { GitHubEmptyBodyError } from '../../../src/github/errors.mjs'
 import {
+  clearGitHubRateLimitLedger,
+  getGitHubRateLimitSnapshot,
+} from '../../../src/github/rate-limit.mjs'
+import {
   fetchGitHub,
   formatGitHubStatusNote,
   getGhsaUrl,
@@ -154,6 +158,116 @@ describe('fetchGitHub', () => {
     await expect(fetchGitHub(`${GITHUB_API}/repos/foo/bar`)).rejects.toThrow(
       /GitHub API error 404/,
     )
+  })
+
+  describe('the rate-limit shapes a header-only check misses', () => {
+    // Each shape below carries no `x-ratelimit-remaining: 0`, so a check that
+    // reads that header alone reports a generic "GitHub API error" and a caller
+    // reads a spent quota as a broken resource.
+    it('catches a 429', async () => {
+      nock(GITHUB_API)
+        .get('/repos/foo/bar')
+        .reply(429, { message: 'Too Many Requests' })
+      const err = (await fetchGitHub(`${GITHUB_API}/repos/foo/bar`).catch(
+        e => e,
+      )) as { message: string; status: number }
+      expect(err.message).toMatch(/rate limit exceeded/)
+      expect(err.status).toBe(429)
+    })
+
+    it('catches a 403 whose body names the limit but whose headers do not', async () => {
+      nock(GITHUB_API)
+        .get('/repos/foo/bar')
+        .reply(403, { message: 'API rate limit exceeded for 1.2.3.4.' })
+      const err = (await fetchGitHub(`${GITHUB_API}/repos/foo/bar`).catch(
+        e => e,
+      )) as { message: string }
+      expect(err.message).toMatch(/rate limit exceeded/)
+    })
+
+    it('catches the secondary limit, which sends Retry-After', async () => {
+      // The secondary limit carries no x-ratelimit-remaining at all, so a
+      // header-only check cannot see it.
+      nock(GITHUB_API)
+        .get('/repos/foo/bar')
+        .reply(
+          403,
+          { message: 'You have exceeded a secondary rate limit.' },
+          { 'Retry-After': '30' },
+        )
+      const err = (await fetchGitHub(`${GITHUB_API}/repos/foo/bar`).catch(
+        e => e,
+      )) as { message: string; resetTime: Date | undefined }
+      expect(err.message).toMatch(/rate limit exceeded/)
+      // Retry-After is a delay, not a timestamp, so the reset has to be
+      // derived from the clock rather than read as epoch seconds.
+      expect(err.resetTime).toBeInstanceOf(Date)
+    })
+
+    it('still throws a plain error for a permission denial', async () => {
+      // A 403 that is ABOUT THE RESOURCE must not be reported as a rate limit:
+      // it is not retryable and skipping it and continuing is correct.
+      nock(GITHUB_API)
+        .get('/repos/foo/bar')
+        .reply(403, { message: 'Must have admin rights to Repository.' })
+      await expect(fetchGitHub(`${GITHUB_API}/repos/foo/bar`)).rejects.toThrow(
+        /GitHub API error 403/,
+      )
+    })
+  })
+
+  describe('budget recording', () => {
+    it('records the budget from a SUCCESSFUL response', async () => {
+      // The point of recording on success: a preflight can then refuse a sweep
+      // before it starts. Recording only failures leaves the ledger empty
+      // until something has already gone wrong.
+      clearGitHubRateLimitLedger()
+      nock(GITHUB_API).get('/repos/foo/bar').reply(
+        200,
+        { id: 1 },
+        {
+          'X-RateLimit-Limit': '5000',
+          'X-RateLimit-Remaining': '4321',
+          'X-RateLimit-Reset': '9999999999',
+        },
+      )
+      await fetchGitHub(`${GITHUB_API}/repos/foo/bar`)
+      expect(getGitHubRateLimitSnapshot()?.remaining).toBe(4321)
+    })
+
+    it('names an unauthenticated request as the cause when throttled', async () => {
+      // The silent downgrade made loud. A bare "rate limit exceeded" sends
+      // someone looking for a network fault; the anonymous limit of 60 is the
+      // fact that explains it.
+      clearGitHubRateLimitLedger()
+      nock(GITHUB_API)
+        .get('/repos/foo/bar')
+        .reply(
+          403,
+          { message: 'API rate limit exceeded' },
+          { 'X-RateLimit-Limit': '60', 'X-RateLimit-Remaining': '0' },
+        )
+      const err = (await fetchGitHub(`${GITHUB_API}/repos/foo/bar`, {
+        token: 'ignored',
+      }).catch(e => e)) as { message: string }
+      expect(err.message).toMatch(/UNAUTHENTICATED/)
+      expect(err.message).toMatch(/gh auth login/)
+    })
+
+    it('says nothing about authentication when the token was accepted', async () => {
+      clearGitHubRateLimitLedger()
+      nock(GITHUB_API)
+        .get('/repos/foo/bar')
+        .reply(
+          403,
+          { message: 'API rate limit exceeded' },
+          { 'X-RateLimit-Limit': '5000', 'X-RateLimit-Remaining': '0' },
+        )
+      const err = (await fetchGitHub(`${GITHUB_API}/repos/foo/bar`, {
+        token: 'accepted',
+      }).catch(e => e)) as { message: string }
+      expect(err.message).not.toMatch(/UNAUTHENTICATED/)
+    })
   })
 })
 

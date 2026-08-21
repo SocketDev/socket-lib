@@ -19,6 +19,23 @@ import { spawn } from '../process/spawn/child.mjs'
 
 import type { SpawnOptions } from '../process/spawn/types.mjs'
 
+// Memoized as the PROMISE, not the resolved value, so concurrent callers share
+// one resolution instead of each spawning its own subprocess.
+let cachedToken: Promise<string | undefined> | undefined
+
+/**
+ * Drop the memo held by {@link resolveGitHubToken}. For tests, which vary the
+ * environment between cases, and for a process that changes credentials.
+ *
+ * @example
+ *   ;```ts
+ *   clearGitHubTokenCache()
+ *   ```
+ */
+export function clearGitHubTokenCache(): void {
+  cachedToken = undefined
+}
+
 /**
  * Get GitHub authentication token from environment variables. Checks multiple
  * environment variable names in priority order.
@@ -167,4 +184,30 @@ export async function getGitHubTokenWithFallback(): Promise<
     (await getGitHubTokenFromGitConfig()) ||
     (await getGitHubTokenFromGhCli())
   )
+}
+
+/**
+ * The GitHub token, resolved once per process.
+ *
+ * Same sources and same order as {@link getGitHubTokenWithFallback}, memoized.
+ * This is what a per-request code path should call: the fallback chain spawns
+ * up to two subprocesses when the environment carries no token, and paying
+ * that on every request in a loop over repos costs more than the request it
+ * authenticates.
+ *
+ * The tradeoff is that a token appearing in the environment LATER is not seen.
+ * That suits a process resolving its own credential once and not a long-lived
+ * service switching identities, which should call
+ * {@link getGitHubTokenWithFallback} directly or clear the cache.
+ *
+ * @example
+ *   ;```ts
+ *   const token = await resolveGitHubToken()
+ *   ```
+ *
+ * @returns GitHub token from the first available source, or `undefined`.
+ */
+export async function resolveGitHubToken(): Promise<string | undefined> {
+  cachedToken ??= getGitHubTokenWithFallback()
+  return await cachedToken
 }
