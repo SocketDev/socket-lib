@@ -79,6 +79,8 @@ describe('safeDelete', () => {
       const testFile = path.join(tmpDir, 'file.txt')
       await fs.writeFile(testFile, '', 'utf8')
 
+      // The flag is this test's subject.
+      // oxlint-disable-next-line socket/no-force-delete -- the subject
       await safeDelete(testFile, { force: true })
 
       const exists = existsSync(testFile)
@@ -320,6 +322,8 @@ describe('safeDelete force is opt-in', () => {
   })
 
   afterEach(async () => {
+    // The probe sits outside cwd on purpose, so removing it needs the flag.
+    // oxlint-disable-next-line socket/no-force-delete -- probe is outside cwd
     await safeDelete(outsideCwd, { force: true })
   })
 
@@ -334,6 +338,8 @@ describe('safeDelete force is opt-in', () => {
   })
 
   it('deletes it when force is explicitly requested', async () => {
+    // The opt-in path is the assertion.
+    // oxlint-disable-next-line socket/no-force-delete -- the subject
     await safeDelete(outsideCwd, { force: true })
     expect(existsSync(outsideCwd)).toBe(false)
   })
