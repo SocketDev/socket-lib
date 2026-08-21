@@ -7,10 +7,10 @@ name: ⚡ CI
 
 on:
   push:
-    branches: [main]
-    tags: ['*']
+    branches: [ main ]
+    tags: [ '*' ]
   pull_request:
-    branches: [main]
+    branches: [ main ]
   workflow_dispatch:
 
 permissions:
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 1
           persist-credentials: false
@@ -72,7 +72,7 @@ jobs:
       matrix:
         # JS/TS tests only need a fast Linux run; cross-platform behavior is
         # covered by unit tests, not the CI matrix.
-        os: [ubuntu-latest]
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 15
     steps:
@@ -80,7 +80,7 @@ jobs:
       # merge base to diff against, and a one-commit clone has none. Deepen on
       # a pull request only; every other event runs `--all`, which needs no
       # history at all and keeps the cheap depth-1 fetch.
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: ${{ github.event_name == 'pull_request' && 50 || 1 }}
           persist-credentials: false
@@ -121,7 +121,8 @@ jobs:
           # correctly. `--ci` escalates to the full suite by itself whenever it
           # cannot work out the diff, so a shallow clone or a missing base ref
           # costs CI minutes rather than coverage.
-          main-script: ${{ github.event_name == 'pull_request' && 'pnpm run test --ci' || 'pnpm run test --all' }}
+          main-script: ${{ github.event_name == 'pull_request' && 'pnpm run test --ci' ||
+            'pnpm run test --all' }}
 
   # Coverage gate. Runs on main pushes, tags and dispatch -- NOT on pull
   # requests: the sweep is ~15 min, and main is what a release cuts from.
@@ -138,7 +139,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     steps:
-      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2 (2026-05-15)
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
         with:
           fetch-depth: 1
           persist-credentials: false
