@@ -18,12 +18,24 @@ const load = createRequire(import.meta.url)
 
 /**
  * The Node major each shimmed built-in first shipped in.
+ *
+ * Keyed by the UPSTREAM path, which flattens a prototype method: what the spec
+ * calls `Array.prototype.toSorted` is `Array.toSorted` here.
  */
 const RECORDED_FLOORS: ReadonlyArray<readonly [string, number]> = [
+  ['Array.toReversed', 20],
+  ['Array.toSorted', 20],
   ['Map.groupBy', 21],
   ['Object.groupBy', 21],
   ['Promise.try', 23],
   ['Promise.withResolvers', 22],
+  ['Set.difference', 22],
+  ['Set.intersection', 22],
+  ['Set.isDisjointFrom', 22],
+  ['Set.isSubsetOf', 22],
+  ['Set.isSupersetOf', 22],
+  ['Set.symmetricDifference', 22],
+  ['Set.union', 22],
 ]
 
 /**

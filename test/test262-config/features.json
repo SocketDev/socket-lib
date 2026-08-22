@@ -41,6 +41,90 @@
       }
     },
     {
+      "name": "Set.prototype.difference",
+      "module": "polyfills/set.js",
+      "dirs": ["test/built-ins/Set/prototype/difference"],
+      "install": {
+        "target": "Set.prototype",
+        "property": "difference",
+        "export": "setDifferenceShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Set.prototype.intersection",
+      "module": "polyfills/set.js",
+      "dirs": ["test/built-ins/Set/prototype/intersection"],
+      "install": {
+        "target": "Set.prototype",
+        "property": "intersection",
+        "export": "setIntersectionShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Set.prototype.isDisjointFrom",
+      "module": "polyfills/set.js",
+      "dirs": ["test/built-ins/Set/prototype/isDisjointFrom"],
+      "install": {
+        "target": "Set.prototype",
+        "property": "isDisjointFrom",
+        "export": "setIsDisjointFromShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Set.prototype.isSubsetOf",
+      "module": "polyfills/set.js",
+      "dirs": ["test/built-ins/Set/prototype/isSubsetOf"],
+      "install": {
+        "target": "Set.prototype",
+        "property": "isSubsetOf",
+        "export": "setIsSubsetOfShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Set.prototype.isSupersetOf",
+      "module": "polyfills/set.js",
+      "dirs": ["test/built-ins/Set/prototype/isSupersetOf"],
+      "install": {
+        "target": "Set.prototype",
+        "property": "isSupersetOf",
+        "export": "setIsSupersetOfShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Set.prototype.symmetricDifference",
+      "module": "polyfills/set.js",
+      "dirs": ["test/built-ins/Set/prototype/symmetricDifference"],
+      "install": {
+        "target": "Set.prototype",
+        "property": "symmetricDifference",
+        "export": "setSymmetricDifferenceShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Set.prototype.union",
+      "module": "polyfills/set.js",
+      "dirs": ["test/built-ins/Set/prototype/union"],
+      "install": {
+        "target": "Set.prototype",
+        "property": "union",
+        "export": "setUnionShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
       "name": "Map.groupBy",
       "module": "polyfills/group-by.js",
       "dirs": ["test/built-ins/Map/groupBy"],

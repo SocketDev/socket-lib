@@ -53,6 +53,16 @@ which argument shapes throw a `TypeError`, and that a `Set`-like with its own
 `has` is honored. A shim that gets all of that right is correct even if it never
 builds a record.
 
+Getting that boundary wrong in either direction costs something. `set.mts`
+looked finished with a plain, readable implementation, and test262 rejected 38
+of its 186 tests: the result was built with `Set.prototype.add` (observable to
+anyone who patches it), the receiver was read with `for…of` rather than a
+primordial (so a subclass's overrides ran), `next` was fetched once per loop
+turn rather than once (observable as extra property gets), and `isSubsetOf`
+iterated a snapshot where the spec iterates live (so a set-like whose `has`
+deletes from the receiver got the wrong answer). None of those are internal
+bookkeeping, and none were visible from reading the code.
+
 So the rule is: match the observable surface exactly, and take any liberty
 behind it.
 
