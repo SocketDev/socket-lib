@@ -10,12 +10,15 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  newPromiseCapability,
   promiseTry,
   promiseTryNative,
   promiseTryShim,
+  promiseTrySpecShim,
   promiseWithResolvers,
   promiseWithResolversNative,
   promiseWithResolversShim,
+  promiseWithResolversSpecShim,
 } from '../../../src/polyfills/promise.mjs'
 
 describe('promiseWithResolvers', () => {
@@ -111,5 +114,82 @@ describe('promiseTry', () => {
     const picked = promiseTryNative ?? promiseTryShim
     const selectedIsPicked = promiseTry === picked
     expect(selectedIsPicked).toBe(true)
+  })
+})
+
+describe('newPromiseCapability', () => {
+  it('builds a promise from the given constructor', async () => {
+    const { promise, resolve } = newPromiseCapability<number>(Promise)
+    resolve(4)
+    await expect(promise).resolves.toBe(4)
+  })
+
+  it('honors a subclass, so the result is an instance of it', () => {
+    class SubPromise<T> extends Promise<T> {}
+    const { promise } = newPromiseCapability<number>(SubPromise)
+    const isSubclass = promise instanceof SubPromise
+    expect(isSubclass).toBe(true)
+  })
+
+  it('throws a TypeError when the receiver is not a constructor', () => {
+    expect(() => newPromiseCapability(undefined)).toThrow(TypeError)
+    expect(() => newPromiseCapability(42)).toThrow(TypeError)
+    expect(() => newPromiseCapability({})).toThrow(TypeError)
+  })
+
+  it('propagates a throw from the constructor', () => {
+    class Boom {
+      constructor() {
+        throw new Error('ctor boom')
+      }
+    }
+    expect(() => newPromiseCapability(Boom)).toThrow('ctor boom')
+  })
+
+  it('throws when the constructor never calls its executor', () => {
+    // Without both resolvers there is no capability, so resolving would
+    // silently do nothing rather than fail.
+    class Silent {
+      executor: unknown
+      constructor(executor: unknown) {
+        // Stored, never called, so neither resolver is handed back.
+        this.executor = executor
+      }
+    }
+    expect(() => newPromiseCapability(Silent)).toThrow(TypeError)
+  })
+})
+
+describe('the this-generic spec shims', () => {
+  it('promiseTrySpecShim builds an instance of its receiver', async () => {
+    class SubPromise<T> extends Promise<T> {}
+    const out = promiseTrySpecShim.call(SubPromise, () => 1)
+    const isSubclass = out instanceof SubPromise
+    expect(isSubclass).toBe(true)
+    await expect(out).resolves.toBe(1)
+  })
+
+  it('promiseTrySpecShim rejects a non-constructor receiver', () => {
+    expect(() => promiseTrySpecShim.call(undefined, () => 1)).toThrow(TypeError)
+  })
+
+  it('promiseWithResolversSpecShim builds an instance of its receiver', () => {
+    class SubPromise<T> extends Promise<T> {}
+    const { promise, resolve } = promiseWithResolversSpecShim.call(SubPromise)
+    resolve(undefined)
+    const isSubclass = promise instanceof SubPromise
+    expect(isSubclass).toBe(true)
+  })
+
+  it('promiseWithResolversSpecShim rejects a non-constructor receiver', () => {
+    expect(() => promiseWithResolversSpecShim.call(1)).toThrow(TypeError)
+  })
+
+  it('the ergonomic shims need no receiver and build a real Promise', async () => {
+    // This is why both shapes exist: internal callers use them as plain
+    // functions, where there is no `this` to read a constructor from.
+    const isPromise = promiseWithResolversShim().promise instanceof Promise
+    expect(isPromise).toBe(true)
+    await expect(promiseTryShim(() => 2)).resolves.toBe(2)
   })
 })
