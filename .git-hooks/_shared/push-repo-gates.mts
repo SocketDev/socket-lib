@@ -222,7 +222,82 @@ const ensureDispatchTables = (): void => {
 // verify the push, so it is blocked, not skipped. A repo without the fleet
 // tsconfig, a non-fleet member, has nothing to check here → skip. Returns 1 on a
 // type error, or an unverifiable checkout, 0 on pass/skip.
-export const scanTypeCheck = (): number => {
+// A tsc diagnostic line: `path/to/file.mts(12,7): error TS1234: message`.
+const TS_ERROR_LINE_RE = /^(.+?)\((\d+),(\d+)\): error TS\d+:/mu
+
+/**
+ * The distinct files tsc reported errors in, repo-relative and `/`-normalized.
+ * Pure — exported for tests.
+ */
+export function parseTypeErrorFiles(output: string): string[] {
+  const seen = new Set<string>()
+  const lines = output.split(/\r?\n/)
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const match = TS_ERROR_LINE_RE.exec(lines[i]!)
+    if (match?.[1]) {
+      seen.add(normalizePath(match[1].trim()))
+    }
+  }
+  return [...seen].toSorted()
+}
+
+/**
+ * Split reported error files into the ones this push is answerable for and the
+ * ones it is not.
+ *
+ * A DIRTY file's bytes are not in the push. An error located only in such a
+ * file cannot exist at origin once the push lands, so blocking on it is wrong —
+ * and in a shared checkout it is worse than wrong: a co-session's half-finished
+ * edit blocks every unrelated push in the repo until they happen to finish.
+ * Measured here, twice in one session: an untracked module's importer, then an
+ * unused type in a file another session was mid-edit on.
+ *
+ * Everything else blocks. An error in a CLEAN file is committed state that CI
+ * will see, and an error in a dirty file this push also touches is the author's
+ * own. The conservative direction is deliberate: a diagnostic located in a
+ * clean file but caused by a dirty one still blocks, because the location is
+ * all tsc reports and a false block costs a re-push while a false pass reaches
+ * origin.
+ *
+ * Pure over the three sets, so the rule is testable without a git tree.
+ */
+export function splitTypeErrorBlame(
+  errorFiles: readonly string[],
+  dirtyFiles: ReadonlySet<string>,
+  pushedFiles: ReadonlySet<string>,
+): { blocking: string[]; foreign: string[] } {
+  const blocking: string[] = []
+  const foreign: string[] = []
+  for (let i = 0, { length } = errorFiles; i < length; i += 1) {
+    const file = errorFiles[i]!
+    if (dirtyFiles.has(file) && !pushedFiles.has(file)) {
+      foreign.push(file)
+    } else {
+      blocking.push(file)
+    }
+  }
+  return { blocking, foreign }
+}
+
+/**
+ * Working-tree paths with uncommitted changes, staged or not, including
+ * untracked. `/`-normalized to match {@link parseTypeErrorFiles}.
+ */
+export function readDirtyFiles(): Set<string> {
+  const out = new Set<string>()
+  for (const line of gitLines('status', '--porcelain')) {
+    // Porcelain is `XY <path>`, and a rename is `R  old -> new`.
+    const body = line.slice(3).trim()
+    if (!body) {
+      continue
+    }
+    const arrow = body.lastIndexOf(' -> ')
+    out.add(normalizePath(arrow === -1 ? body : body.slice(arrow + 4)))
+  }
+  return out
+}
+
+export const scanTypeCheck = (ranges: readonly string[] = []): number => {
   if (!existsSync('package.json') || !existsSync(TYPE_CHECK_TSCONFIG)) {
     return 0
   }
@@ -239,25 +314,79 @@ export const scanTypeCheck = (): number => {
   }
   ensureDispatchTables()
   logger.info('Running type check…')
+  // Captured rather than inherited so the diagnostics can be ATTRIBUTED. tsc
+  // reads the working tree, which in a shared checkout holds a co-session's
+  // half-finished edits — errors this push neither caused nor can fix.
   const r = spawnSync(
     process.execPath,
     [TSC_BIN, '--noEmit', '-p', TYPE_CHECK_TSCONFIG],
-    { stdio: 'inherit' },
+    { stdioString: true },
   )
-  if (r.status !== 0) {
-    logger.fail(
-      'Type check failed — fix the type error(s) above before pushing.',
+  if (r.status === 0) {
+    return 0
+  }
+  const output = `${String(r.stdout ?? '')}${String(r.stderr ?? '')}`
+  process.stderr.write(output.endsWith('\n') ? output : `${output}\n`)
+  const errorFiles = parseTypeErrorFiles(output)
+  // No parseable diagnostic means tsc failed some other way (a bad tsconfig, a
+  // crash). Attribution cannot apply, so it blocks as before.
+  const { blocking, foreign } =
+    errorFiles.length === 0
+      ? { blocking: errorFiles, foreign: [] }
+      : splitTypeErrorBlame(
+          errorFiles,
+          readDirtyFiles(),
+          new Set(pushedRangeFiles(ranges)),
+        )
+  if (blocking.length === 0 && foreign.length > 0) {
+    logger.warn(
+      `Type check reported ${foreign.length} file(s) with errors, all in uncommitted work this push does not carry — not blocking.`,
     )
     logger.info(
-      '  What: the pushed tree does not type-check.\n' +
-        '  Where: the file(line,col) reported above.\n' +
-        '  Saw: a type error; wanted: `pnpm run type` clean (what CI verifies).\n' +
-        '  Fix: resolve the error(s), commit, then re-push. Bypass once with ' +
-        '`git push --no-verify` (records the skip).',
+      `  Where: ${foreign.join(', ')}\n` +
+        '  Why not blocking: those bytes are not in the push, so they cannot ' +
+        'reach origin. In a shared checkout this is usually a parallel ' +
+        'session mid-edit, and blocking would hold every unrelated push \n' +
+        '  hostage until they finish.\n' +
+        '  Note: CI still type-checks the merged result, and a push that ' +
+        'lands them will be gated then.',
     )
-    return 1
+    return 0
   }
-  return 0
+  logger.fail('Type check failed — fix the type error(s) above before pushing.')
+  logger.info(
+    '  What: the tree does not type-check.\n' +
+      '  Where: the file(line,col) reported above.\n' +
+      '  Saw: a type error; wanted: `pnpm run type` clean (what CI verifies).\n' +
+      '  Fix: resolve the error(s), commit, then re-push. Bypass once with ' +
+      '`git push --no-verify` (records the skip).',
+  )
+  if (foreign.length > 0) {
+    logger.info(
+      `  Note: ${foreign.length} further file(s) with errors are uncommitted ` +
+        'and not carried by this push, so they are not what is blocking you: ' +
+        `${foreign.join(', ')}.`,
+    )
+  }
+  return 1
+}
+
+/**
+ * The files the pushed commits touch, `/`-normalized. Empty when there is no
+ * range to read, which makes every error blocking — the conservative direction
+ * when the gate cannot tell what is being pushed.
+ */
+export function pushedRangeFiles(ranges: readonly string[]): string[] {
+  const out = new Set<string>()
+  for (let i = 0, { length } = ranges; i < length; i += 1) {
+    for (const line of gitLines('diff', '--name-only', ranges[i]!)) {
+      const file = line.trim()
+      if (file) {
+        out.add(normalizePath(file))
+      }
+    }
+  }
+  return [...out]
 }
 
 // Dispatch-table drift — WHEELHOUSE-ONLY (gated on the canonical `template/base`

@@ -345,7 +345,7 @@ runs:
       run: |
         if [ -d .github ]; then
           # Pass --gh-token only when a token is actually present. In a local
-          # agent-ci run github.token is empty, and zizmor 1.25+ treats an empty
+          # local-ci run github.token is empty, and zizmor 1.25+ treats an empty
           # `--gh-token ""` as a real token, then fatally errors ("no audit was
           # performed") when its online impostor-commit check can't reach the
           # GitHub API. Omitting the flag makes zizmor skip its online audits

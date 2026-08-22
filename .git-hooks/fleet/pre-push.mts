@@ -161,7 +161,7 @@ const main = async (): Promise<number> => {
   // origin/main behind CI alone. Runs AFTER the dispatch-drift check so its
   // dispatch-table regen cannot mask a stale on-disk table, and (unlike
   // scanFastChecks) it does not skip under a `.claude/` worktree path.
-  totalErrors += scanTypeCheck()
+  totalErrors += scanTypeCheck(pushedRanges)
 
   if (totalErrors > 0) {
     logger.error('')

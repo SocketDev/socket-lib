@@ -399,7 +399,12 @@ const main = (): number => {
       // artifact is exempt (flagging it blocks every cascade that ships
       // a rebuilt bundle).
       normalizePath(file).endsWith('/hooks/fleet/_dist/fleet-pack.cjs') ||
-      normalizePath(file).endsWith('/_shared/snapshot-fleet-pack.cjs')
+      normalizePath(file).endsWith('/_shared/snapshot-fleet-pack.cjs') ||
+      // A hook README documents what that hook BLOCKS, so a guard banning a
+      // command has to be able to name it. Same reasoning as the built bundle
+      // above: the prose IS the ban, never an instruction to run it. The hook
+      // source is still scanned.
+      /\/hooks\/(?:fleet|repo)\/[^/]+\/README\.md$/.test(normalizePath(file))
     ) {
       continue
     }
