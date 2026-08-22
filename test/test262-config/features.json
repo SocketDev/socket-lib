@@ -41,6 +41,206 @@
       }
     },
     {
+      "name": "Iterator.concat",
+      "module": "polyfills/iterator/statics.js",
+      "dirs": ["test/built-ins/Iterator/concat"],
+      "install": {
+        "target": "Iterator",
+        "property": "concat",
+        "export": "iteratorConcatShim",
+        "length": 0
+      }
+    },
+    {
+      "name": "Iterator.from",
+      "module": "polyfills/iterator/statics.js",
+      "dirs": ["test/built-ins/Iterator/from"],
+      "install": {
+        "target": "Iterator",
+        "property": "from",
+        "export": "iteratorFromShim",
+        "length": 1
+      }
+    },
+    {
+      "name": "Iterator.prototype.drop",
+      "module": "polyfills/iterator/lazy.js",
+      "dirs": ["test/built-ins/Iterator/prototype/drop"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "drop",
+        "export": "iteratorDropShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.every",
+      "module": "polyfills/iterator/eager.js",
+      "dirs": ["test/built-ins/Iterator/prototype/every"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "every",
+        "export": "iteratorEveryShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.filter",
+      "module": "polyfills/iterator/lazy.js",
+      "dirs": ["test/built-ins/Iterator/prototype/filter"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "filter",
+        "export": "iteratorFilterShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.find",
+      "module": "polyfills/iterator/eager.js",
+      "dirs": ["test/built-ins/Iterator/prototype/find"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "find",
+        "export": "iteratorFindShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.flatMap",
+      "module": "polyfills/iterator/lazy.js",
+      "dirs": ["test/built-ins/Iterator/prototype/flatMap"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "flatMap",
+        "export": "iteratorFlatMapShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.forEach",
+      "module": "polyfills/iterator/eager.js",
+      "dirs": ["test/built-ins/Iterator/prototype/forEach"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "forEach",
+        "export": "iteratorForEachShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.map",
+      "module": "polyfills/iterator/lazy.js",
+      "dirs": ["test/built-ins/Iterator/prototype/map"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "map",
+        "export": "iteratorMapShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.reduce",
+      "module": "polyfills/iterator/eager.js",
+      "dirs": ["test/built-ins/Iterator/prototype/reduce"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "reduce",
+        "export": "iteratorReduceShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.some",
+      "module": "polyfills/iterator/eager.js",
+      "dirs": ["test/built-ins/Iterator/prototype/some"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "some",
+        "export": "iteratorSomeShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.take",
+      "module": "polyfills/iterator/lazy.js",
+      "dirs": ["test/built-ins/Iterator/prototype/take"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "take",
+        "export": "iteratorTakeShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Iterator.prototype.toArray",
+      "module": "polyfills/iterator/eager.js",
+      "dirs": ["test/built-ins/Iterator/prototype/toArray"],
+      "install": {
+        "target": "Iterator.prototype",
+        "property": "toArray",
+        "export": "iteratorToArrayShim",
+        "length": 0,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Map.groupBy",
+      "module": "polyfills/group-by.js",
+      "dirs": ["test/built-ins/Map/groupBy"],
+      "install": {
+        "target": "Map",
+        "property": "groupBy",
+        "export": "mapGroupByShim",
+        "length": 2
+      }
+    },
+    {
+      "name": "Object.groupBy",
+      "module": "polyfills/group-by.js",
+      "dirs": ["test/built-ins/Object/groupBy"],
+      "install": {
+        "target": "Object",
+        "property": "groupBy",
+        "export": "objectGroupByShim",
+        "length": 2
+      }
+    },
+    {
+      "name": "Promise.try",
+      "module": "polyfills/promise.js",
+      "dirs": ["test/built-ins/Promise/try"],
+      "install": {
+        "target": "Promise",
+        "property": "try",
+        "export": "promiseTrySpecShim",
+        "length": 1,
+        "receiverAs": "this"
+      }
+    },
+    {
+      "name": "Promise.withResolvers",
+      "module": "polyfills/promise.js",
+      "dirs": ["test/built-ins/Promise/withResolvers"],
+      "install": {
+        "target": "Promise",
+        "property": "withResolvers",
+        "export": "promiseWithResolversSpecShim",
+        "length": 0,
+        "receiverAs": "this"
+      }
+    },
+    {
       "name": "Set.prototype.difference",
       "module": "polyfills/set.js",
       "dirs": ["test/built-ins/Set/prototype/difference"],
@@ -122,52 +322,6 @@
         "export": "setUnionShim",
         "length": 1,
         "receiverAs": "argument"
-      }
-    },
-    {
-      "name": "Map.groupBy",
-      "module": "polyfills/group-by.js",
-      "dirs": ["test/built-ins/Map/groupBy"],
-      "install": {
-        "target": "Map",
-        "property": "groupBy",
-        "export": "mapGroupByShim",
-        "length": 2
-      }
-    },
-    {
-      "name": "Object.groupBy",
-      "module": "polyfills/group-by.js",
-      "dirs": ["test/built-ins/Object/groupBy"],
-      "install": {
-        "target": "Object",
-        "property": "groupBy",
-        "export": "objectGroupByShim",
-        "length": 2
-      }
-    },
-    {
-      "name": "Promise.try",
-      "module": "polyfills/promise.js",
-      "dirs": ["test/built-ins/Promise/try"],
-      "install": {
-        "target": "Promise",
-        "property": "try",
-        "export": "promiseTrySpecShim",
-        "length": 1,
-        "receiverAs": "this"
-      }
-    },
-    {
-      "name": "Promise.withResolvers",
-      "module": "polyfills/promise.js",
-      "dirs": ["test/built-ins/Promise/withResolvers"],
-      "install": {
-        "target": "Promise",
-        "property": "withResolvers",
-        "export": "promiseWithResolversSpecShim",
-        "length": 0,
-        "receiverAs": "this"
       }
     }
   ]

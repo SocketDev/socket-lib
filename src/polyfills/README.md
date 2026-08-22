@@ -27,6 +27,21 @@ The native and the shim stay separately reachable on purpose:
 `errors/predicates.mts` already followed this shape for `Error.isError`, with
 `ErrorIsError` captured in `primordials/error.mts`; these modules match it.
 
+## Iterator helpers take the iterator first
+
+The eleven `Iterator.prototype` helpers, `Iterator.from`, and `Iterator.concat`
+are shimmed as free functions whose first argument is the iterator:
+`iteratorMap(iter, fn)`, not `iter.map(fn)`. On Node 18 there is no method on
+the prototype to call, so a method-shaped shim would have nowhere to live
+without patching a global, which this package does not do.
+
+Three of them are not here, and the reason is the same in each case - a shim
+would be inventing behavior rather than filling a gap:
+
+- `chunks`, `windows`, `join`, and `includes` are proposals no Node ships.
+- `Iterator.prototype[Symbol.dispose]` is `version_added: false` for Node in
+  upstream compat data.
+
 ## What belongs here
 
 A built-in a **pure-JS shim can actually implement**. Anything needing engine
