@@ -205,6 +205,9 @@ settings:
 
 catalogs:
   default:
+    '@mdn/browser-compat-data':
+      specifier: 8.0.11
+      version: 8.0.11
     '@playwright/mcp':
       specifier: 0.0.79
       version: 0.0.79
@@ -511,6 +514,9 @@ importers:
       '@inquirer/select':
         specifier: 5.2.1
         version: 5.2.1(@types/node@26.2.0)
+      '@mdn/browser-compat-data':
+        specifier: 'catalog:'
+        version: 8.0.11
       '@npmcli/arborist':
         specifier: 9.9.0
         version: 9.9.0(supports-color@10.2.2)
@@ -4227,6 +4233,9 @@ packages:
 
   '@js-sdsl/ordered-map@4.4.2':
     resolution: {integrity: sha512-iUKgm52T8HOE/makSxjqoWhe95ZJA1/G1sYsGev2JDKUSS14KAgg1LHb+Ba+IPow0xflbnSkOsZcO08C7w1gYw==}
+
+  '@mdn/browser-compat-data@8.0.11':
+    resolution: {integrity: sha512-KZMEJ9A2Q9lLCSplxRtTe4hDiydwzfv7Uk8SRguozAKqH8BYctKpJnUDzM6sTELSPo/6lcwFpCMcvVqEh59LUA==}
 
   '@modelcontextprotocol/sdk@1.29.0':
     resolution: {integrity: sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ==}
@@ -8005,6 +8014,8 @@ snapshots:
       '@jridgewell/sourcemap-codec': 1.5.5
 
   '@js-sdsl/ordered-map@4.4.2': {}
+
+  '@mdn/browser-compat-data@8.0.11': {}
 
   '@modelcontextprotocol/sdk@1.29.0(supports-color@10.2.2)(zod@4.4.3)':
     dependencies:

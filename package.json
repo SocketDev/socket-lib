@@ -3601,6 +3601,7 @@
     "@inquirer/password": "5.1.1",
     "@inquirer/search": "4.2.1",
     "@inquirer/select": "5.2.1",
+    "@mdn/browser-compat-data": "catalog:",
     "@npmcli/arborist": "9.9.0",
     "@npmcli/package-json": "7.0.5",
     "@npmcli/promise-spawn": "8.0.3",
