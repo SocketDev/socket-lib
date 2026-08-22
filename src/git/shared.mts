@@ -10,6 +10,7 @@ import { debugNs } from '../debug/output.mjs'
 import { getGlobMatcher } from '../globs/matcher.mjs'
 import { getNodePath } from '../node/path.mjs'
 import { normalizePath } from '../paths/normalize.mjs'
+import { arrayToSorted } from '../polyfills/array.mjs'
 import { ArrayIsArray } from '../primordials/array.mjs'
 import { BufferIsBuffer } from '../primordials/buffer.mjs'
 import { JSONStringify } from '../primordials/json.mjs'
@@ -366,7 +367,7 @@ export function stableKey(value: unknown): string {
   return JSONStringify(value, (_key, val) => {
     if (val !== null && typeof val === 'object' && !ArrayIsArray(val)) {
       const sorted: Record<string, unknown> = {}
-      const sortedKeys = ObjectKeys(val as object).toSorted()
+      const sortedKeys = arrayToSorted(ObjectKeys(val as object))
       for (let i = 0, { length } = sortedKeys; i < length; i += 1) {
         const k = sortedKeys[i]!
         sorted[k] = (val as Record<string, unknown>)[k]

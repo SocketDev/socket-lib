@@ -13,6 +13,8 @@
  *   it started: the repairs never corrupt a payload that was already valid.
  */
 
+import { arrayToReversed } from '../polyfills/array.mjs'
+
 /**
  * Close an under-terminated JSON object by appending the closers its open stack
  * still needs. Observed live from Qwen2.5-Coder-7B: the object arrives one `}`
@@ -61,7 +63,7 @@ export function closeUnbalancedJson(raw: string): string | undefined {
   if (inString || stack.length === 0) {
     return undefined
   }
-  return raw.slice(start) + stack.toReversed().join('')
+  return raw.slice(start) + arrayToReversed(stack).join('')
 }
 
 /**

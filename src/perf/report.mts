@@ -6,6 +6,7 @@
  */
 
 import { debugLog } from '../debug/output.mjs'
+import { arrayToSorted } from '../polyfills/array.mjs'
 import { MathRound } from '../primordials/math.mjs'
 import { ObjectKeys, ObjectValues } from '../primordials/object.mjs'
 
@@ -40,7 +41,7 @@ export function generatePerformanceReport(): string {
   }
 
   const summary = getPerformanceSummary()
-  const operations = ObjectKeys(summary).toSorted()
+  const operations = arrayToSorted(ObjectKeys(summary))
 
   let report = '\n╔═══════════════════════════════════════════════╗\n'
   report += '║         Performance Report                    ║\n'
@@ -89,7 +90,7 @@ export function printPerformanceSummary(): void {
   }
 
   const summary = getPerformanceSummary()
-  const operations = ObjectKeys(summary).toSorted()
+  const operations = arrayToSorted(ObjectKeys(summary))
 
   debugLog('[perf]\n=== Performance Summary ===')
 

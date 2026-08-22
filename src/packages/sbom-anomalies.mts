@@ -6,6 +6,8 @@
  *   (`pkg:<type>/<name>@<version>`) optionally annotated with markers.
  */
 
+import { arrayToSorted } from '../polyfills/array.mjs'
+
 // Matches a package URL: `pkg:<type>/` then capture 1 = the package name (up to
 // the version `@`), then capture 2 = the version (starts with a digit, runs to
 // the next space or paren so trailing annotations like "(deprecated)" are left
@@ -37,12 +39,12 @@ export function findSbomAnomalies(componentsText: string): string[] {
     versions.add(version)
   }
   const anomalies: string[] = []
-  const names = [...versionsByName.keys()].toSorted()
+  const names = arrayToSorted([...versionsByName.keys()])
   for (let i = 0, { length } = names; i < length; i += 1) {
     const name = names[i]!
     const versions = versionsByName.get(name)!
     if (versions.size > 1) {
-      const list = [...versions].toSorted().join(', ')
+      const list = arrayToSorted([...versions]).join(', ')
       anomalies.push(`Duplicate versions of ${name}: ${list}.`)
     }
   }

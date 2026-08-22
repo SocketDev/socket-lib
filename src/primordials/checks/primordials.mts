@@ -25,6 +25,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 
 import { joinOr } from '../../arrays/join.mjs'
+import { arrayToSorted } from '../../polyfills/array.mjs'
 import { ErrorCtor } from '../error.mjs'
 
 // ── Config ──────────────────────────────────────────────────────────
@@ -137,7 +138,7 @@ export function checkPrimordials(
 
   // Diff.
   const findings: PrimordialsFinding[] = []
-  const usedNames = [...used].toSorted()
+  const usedNames = arrayToSorted([...used])
   for (let i = 0, { length } = usedNames; i < length; i += 1) {
     const name = usedNames[i]!
     if (config.nodeInternalOnly.has(name)) {

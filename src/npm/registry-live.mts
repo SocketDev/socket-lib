@@ -10,6 +10,7 @@
  *   `http-request/browser` twin.
  */
 
+import { arrayToSorted } from '../polyfills/array.mjs'
 import { encodeRegistryName } from './registry.mjs'
 
 const NPM_REGISTRY = 'https://registry.npmjs.org'
@@ -119,7 +120,7 @@ export async function getMaintainers(
     const names = (json.maintainers ?? [])
       .map(m => m.name)
       .filter((n): n is string => typeof n === 'string' && n.length > 0)
-    return names.toSorted()
+    return arrayToSorted(names)
   } catch (e) {
     if (httpErrorStatus(e) === 404) {
       return undefined

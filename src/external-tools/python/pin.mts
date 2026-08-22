@@ -35,6 +35,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { isWin32 } from '../../constants/platform.mjs'
+import { arrayToSorted } from '../../polyfills/array.mjs'
 import { safeDelete, safeMkdir } from '../../fs/safe.mjs'
 import { computeHashes } from '../../crypto/integrity.mjs'
 
@@ -208,7 +209,7 @@ export async function resolvePipPackagePin(
     const artifacts: PipArtifactPin[] = []
     const targetName = normalizeDistName(specDistName(spec))
     let top: { hash: ComputedHashes; name: string; version: string } | undefined
-    const sortedFiles = files.toSorted()
+    const sortedFiles = arrayToSorted(files)
     for (let i = 0, { length } = sortedFiles; i < length; i += 1) {
       const file = sortedFiles[i]!
       const bytes = await fs.readFile(path.join(scratch, file))

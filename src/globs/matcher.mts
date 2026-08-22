@@ -8,6 +8,7 @@
 import { ArrayIsArray } from '../primordials/array.mjs'
 import { JSONStringify } from '../primordials/json.mjs'
 import { ObjectKeys } from '../primordials/object.mjs'
+import { arrayToSorted } from '../polyfills/array.mjs'
 import { StringPrototypeStartsWith } from '../primordials/string.mjs'
 
 import {
@@ -68,13 +69,14 @@ export function getGlobMatcher(
   // element-wise so `['a', 'b']` and `['b', 'a']` hit the same entry —
   // otherwise equivalent matchers re-compile and evict each other under
   // the 100-entry cap.
-  const sortedPatterns = [...patterns].toSorted()
+  const sortedPatterns = arrayToSorted([...patterns])
   const sortedOptions = options
-    ? ObjectKeys(options)
-        .toSorted()
+    ? arrayToSorted(ObjectKeys(options))
         .map(k => {
           const value = options[k as keyof typeof options]
-          const normalized = ArrayIsArray(value) ? [...value].toSorted() : value
+          const normalized = ArrayIsArray(value)
+            ? arrayToSorted([...value])
+            : value
           return `${k}:${JSONStringify(normalized)}`
         })
         .join(',')

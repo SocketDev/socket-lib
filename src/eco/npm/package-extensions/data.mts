@@ -9,13 +9,14 @@
  */
 
 import { packageExtensions as yarnPackageExtensions } from '../../../external/@yarnpkg/extensions.js'
+import { arrayToSorted } from '../../../polyfills/array.mjs'
 
 import type { PackageExtension } from './types.mjs'
 
 const { freeze: ObjectFreeze } = Object
 
 const packageExtensions = ObjectFreeze(
-  (
+  arrayToSorted(
     [
       /* c8 ignore next - External @yarnpkg/extensions data */
       ...yarnPackageExtensions,
@@ -44,21 +45,22 @@ const packageExtensions = ObjectFreeze(
           },
         },
       ],
-    ] as PackageExtension[]
-  ).toSorted((a_, b_) => {
-    const aIndex = a_[0].lastIndexOf('@')
-    const bIndex = b_[0].lastIndexOf('@')
-    const a = aIndex === -1 ? a_[0] : a_[0].slice(0, aIndex)
-    const b = bIndex === -1 ? b_[0] : b_[0].slice(0, bIndex)
-    // Simulate the default compareFn of String.prototype.sort.
-    if (a < b) {
-      return -1
-    }
-    if (a > b) {
-      return 1
-    }
-    return 0
-  }),
+    ] as PackageExtension[],
+    (a_, b_) => {
+      const aIndex = a_[0].lastIndexOf('@')
+      const bIndex = b_[0].lastIndexOf('@')
+      const a = aIndex === -1 ? a_[0] : a_[0].slice(0, aIndex)
+      const b = bIndex === -1 ? b_[0] : b_[0].slice(0, bIndex)
+      // Simulate the default compareFn of String.prototype.sort.
+      if (a < b) {
+        return -1
+      }
+      if (a > b) {
+        return 1
+      }
+      return 0
+    },
+  ),
 )
 
 export { packageExtensions }

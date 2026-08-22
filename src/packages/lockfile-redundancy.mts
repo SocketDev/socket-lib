@@ -6,6 +6,8 @@
  *   duplicates (a package and its ESM twin) both installed at once.
  */
 
+import { arrayToSorted } from '../polyfills/array.mjs'
+
 export interface RedundantPackageFinding {
   name: string
   reason: string
@@ -54,12 +56,12 @@ export function findRedundantPackages(
     versions.add(version)
   }
   const findings: RedundantPackageFinding[] = []
-  const names = [...versionsByName.keys()].toSorted()
+  const names = arrayToSorted([...versionsByName.keys()])
   for (let i = 0, { length } = names; i < length; i += 1) {
     const name = names[i]!
     const versions = versionsByName.get(name)!
     if (versions.size > 1) {
-      const list = [...versions].toSorted().join(', ')
+      const list = arrayToSorted([...versions]).join(', ')
       findings.push({
         name,
         reason: `Installed at ${versions.size} versions (${list}); collapse to one.`,

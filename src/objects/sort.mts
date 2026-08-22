@@ -6,6 +6,7 @@
  *   `JSON.stringify` will iterate insertion order.
  */
 
+import { arrayToSorted } from '../polyfills/array.mjs'
 import { ObjectFromEntries } from '../primordials/object.mjs'
 import { ReflectOwnKeys } from '../primordials/reflect.mjs'
 import { localeCompare } from '../sorts/natural.mjs'
@@ -136,7 +137,7 @@ export function toSortedObjectFromEntries<T = unknown>(
   }
   return ObjectFromEntries([
     // The String constructor is safe to use with symbols.
-    ...symbolEntries.toSorted(entryKeyComparator),
-    ...otherEntries.toSorted(entryKeyComparator),
+    ...arrayToSorted(symbolEntries, entryKeyComparator),
+    ...arrayToSorted(otherEntries, entryKeyComparator),
   ])
 }

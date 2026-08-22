@@ -29,6 +29,7 @@ enableGlobalVirtualStore: true
   # the high-severity security exception; exact-pinned so a future version
   # re-soaks.
 catalog:
+  '@mdn/browser-compat-data': 8.0.11
   # agent-ci runs a repo's GitHub Actions workflows locally in Docker so a
   # change can be validated before it's pushed (see the `agent-ci` skill).
   # The published package is a self-contained Node CLI (`dist/cli.js`) — no
@@ -42,7 +43,6 @@ catalog:
   # fundamentals report). Exact-pinned; the whole package is younger than
   # the soak window, so it carries a minimumReleaseAgeExclude entry below.
   '@shadscan/cli': 0.16.0
-  '@mdn/browser-compat-data': 8.0.11
   '@sinclair/typebox': 0.34.52
   'ecc-agentshield': 1.4.0
   'run-local-ci': 0.18.1

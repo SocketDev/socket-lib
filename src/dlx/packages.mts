@@ -5,6 +5,7 @@
 import { readDirNamesSync } from '../fs/read-dir.mjs'
 import { safeDelete, safeDeleteSync } from '../fs/safe.mjs'
 import { getSocketDlxDir } from '../paths/socket.mjs'
+import { arrayToSorted } from '../polyfills/array.mjs'
 import { getDlxInstalledPackageDir, getDlxPackageDir } from './paths.mjs'
 
 import { ArrayPrototypeFilter } from '../primordials/array.mjs'
@@ -60,9 +61,9 @@ export async function listDlxPackagesAsync(): Promise<string[]> {
     const entries = await fs.promises.readdir(getSocketDlxDir(), {
       withFileTypes: true,
     })
-    return ArrayPrototypeFilter(entries, e => e.isDirectory())
-      .map(e => e.name)
-      .toSorted()
+    return arrayToSorted(
+      ArrayPrototypeFilter(entries, e => e.isDirectory()).map(e => e.name),
+    )
   } catch {
     return []
   }

@@ -7,6 +7,7 @@
 
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
+import { arrayToSorted } from '../polyfills/array.mjs'
 import { naturalCompare } from '../sorts/natural.mjs'
 
 import { isDirEmptySync } from './inspect.mjs'
@@ -47,7 +48,7 @@ export function innerReadDirNames(
           })),
     )
     .map((d: Dirent) => d.name)
-  return sort ? names.toSorted(naturalCompare) : names
+  return sort ? arrayToSorted(names, naturalCompare) : names
 }
 
 /**

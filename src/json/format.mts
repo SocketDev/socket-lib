@@ -4,6 +4,7 @@
  *   and determining when JSON files should be saved based on content changes.
  */
 
+import { arrayToSorted } from '../polyfills/array.mjs'
 import { JSONStringify } from '../primordials/json.mjs'
 
 import { ObjectKeys } from '../primordials/object.mjs'
@@ -238,7 +239,7 @@ export function sortKeys(
   obj: Record<string, unknown>,
 ): Record<string, unknown> {
   const sorted: Record<string, unknown> = { __proto__: null }
-  const keys = ObjectKeys(obj).toSorted()
+  const keys = arrayToSorted(ObjectKeys(obj))
   for (let i = 0, { length } = keys; i < length; i += 1) {
     const key = keys[i]!
     sorted[key] = obj[key]
