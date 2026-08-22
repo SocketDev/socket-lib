@@ -10,6 +10,8 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  nativeSetCombine,
+  nativeSetPredicate,
   setDifference,
   setDifferenceNative,
   setDifferenceShim,
@@ -227,6 +229,30 @@ describe('the combining methods', () => {
       setDifference === diffPicked &&
       setSymmetricDifference === symPicked
     expect(allSelected).toBe(true)
+  })
+})
+
+describe('the native-detection factories', () => {
+  // Every Set method exists on a modern engine, so the "no native" side of
+  // each `Native ?? Shim` pair is unreachable through the public exports.
+  it('nativeSetCombine returns undefined for a method Set lacks', () => {
+    expect(nativeSetCombine('definitelyNotAMethod')).toBe(undefined)
+  })
+
+  it('nativeSetCombine forwards the receiver and argument', () => {
+    const bridge = nativeSetCombine('union')
+    expect(typeof bridge).toBe('function')
+    expect([...bridge!(new Set([1]), setLike([2]))]).toEqual([1, 2])
+  })
+
+  it('nativeSetPredicate returns undefined for a method Set lacks', () => {
+    expect(nativeSetPredicate('definitelyNotAMethod')).toBe(undefined)
+  })
+
+  it('nativeSetPredicate coerces the result to a boolean', () => {
+    const bridge = nativeSetPredicate('isSubsetOf')
+    expect(typeof bridge).toBe('function')
+    expect(bridge!(new Set([1]), setLike([1, 2]))).toBe(true)
   })
 })
 

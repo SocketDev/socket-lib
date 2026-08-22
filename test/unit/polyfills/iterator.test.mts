@@ -25,6 +25,8 @@ import {
   iteratorSome,
   iteratorTake,
   iteratorToArray,
+  nativeIteratorHelper,
+  nativeIteratorStatic,
 } from '../../../src/polyfills/iterator/index.mjs'
 import {
   iteratorEveryShim,
@@ -230,6 +232,41 @@ describe('the lazy helpers', () => {
     const picked = iteratorMapNative ?? iteratorMapShim
     const selectedIsPicked = iteratorMap === picked
     expect(selectedIsPicked).toBe(true)
+  })
+})
+
+describe('the native-detection factories', () => {
+  // On a modern engine every native exists, so the "no native" side of each
+  // `Native ?? Shim` pair is unreachable through the public exports. Driving
+  // the factories directly reaches it without pretending the engine is older.
+  it('nativeIteratorHelper returns undefined for a method the prototype lacks', () => {
+    expect(nativeIteratorHelper('definitelyNotAHelper')).toBe(undefined)
+  })
+
+  it('nativeIteratorHelper forwards the receiver and arguments', () => {
+    const bridge =
+      nativeIteratorHelper<
+        (receiver: unknown, fn: (value: number) => number) => Iterator<number>
+      >('map')
+    expect(typeof bridge).toBe('function')
+    const mapped = bridge!(iterOf([1, 2]), (v: number) => v * 2)
+    expect(drain(mapped as { next: () => IteratorResult<number> })).toEqual([
+      2, 4,
+    ])
+  })
+
+  it('nativeIteratorStatic returns undefined for a static Iterator lacks', () => {
+    expect(nativeIteratorStatic('definitelyNotAStatic')).toBe(undefined)
+  })
+
+  it('nativeIteratorStatic forwards its arguments', () => {
+    const bridge =
+      nativeIteratorStatic<(source: unknown) => Iterator<number>>('from')
+    expect(typeof bridge).toBe('function')
+    const wrapped = bridge!(iterOf([7]))
+    expect(drain(wrapped as { next: () => IteratorResult<number> })).toEqual([
+      7,
+    ])
   })
 })
 
