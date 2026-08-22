@@ -266,6 +266,15 @@ export function splitTypeErrorBlame(
   dirtyFiles: ReadonlySet<string>,
   pushedFiles: ReadonlySet<string>,
 ): { blocking: string[]; foreign: string[] } {
+  // An EMPTY pushed set means the gate could not read what this push carries (a
+  // new branch, a detached range, a git that would not answer) — not that the
+  // push carries nothing. Attributing against it would call every dirty file
+  // foreign and wave the whole push through, which is backwards: unknown has to
+  // block, or the permissive path is exactly the one that fires when the gate
+  // is least sure.
+  if (pushedFiles.size === 0) {
+    return { blocking: [...errorFiles], foreign: [] }
+  }
   const blocking: string[] = []
   const foreign: string[] = []
   for (let i = 0, { length } = errorFiles; i < length; i += 1) {
