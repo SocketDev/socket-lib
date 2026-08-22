@@ -24,7 +24,7 @@ import { findPathEnvKey, replacePathInEnv } from '../../env/path.mjs'
 import { getAbortSignal } from '../../process/abort.mjs'
 import { getNodeChildProcess } from '../../node/child-process.mjs'
 import { getOwn } from '../../objects/inspect.mjs'
-import { getDefaultSpinner } from '../../spinner/default.mjs'
+import { peekDefaultSpinner } from '../../spinner/default-state.mjs'
 
 import {
   getNpmCliPromiseSpawn,
@@ -127,11 +127,12 @@ export function spawn(
     throws = true,
     ...rawSpawnOptions
   } = { __proto__: null, ...options } as SpawnOptions
-  // Lazily acquire the default spinner at call time rather than capturing it at
-  // module-eval. Constructing it at import time pins a native handle into the
-  // module, which aborts V8 --build-snapshot of anything that transitively
-  // imports this module. An explicit options.spinner still wins.
-  const spinnerInstance = optionsSpinner ?? getDefaultSpinner()
+  // Peek rather than getDefaultSpinner(): only interleave with a default
+  // spinner that already exists. Forcing one into existence here would load
+  // the whole spinner subsystem (yocto-spinner) on every spawn() call, even
+  // for a caller — like a perry-compiled binary — that never shows one. An
+  // explicit options.spinner still wins.
+  const spinnerInstance = optionsSpinner ?? peekDefaultSpinner()
   const spawnOptions = { __proto__: null, ...rawSpawnOptions }
   const { env, shell, stdio, stdioString = true } = spawnOptions
   const cwd = spawnOptions.cwd ? String(spawnOptions.cwd) : undefined

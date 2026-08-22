@@ -10,13 +10,13 @@ import { generateSocketSpinnerFrames } from '../term/effects/pulse-frames.mjs'
 import yoctoSpinner from '../external/@socketregistry/yocto-spinner.js'
 import { hasOwn } from '../objects/predicates.mjs'
 
+import { peekDefaultSpinner, setDefaultSpinner } from './default-state.mjs'
 import { Spinner } from './spinner.mjs'
 
 import type { SpinnerInstance, SpinnerStyle } from './types.mjs'
 
 // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
 let cliSpinners: Record<string, SpinnerStyle> | undefined
-let spinner: SpinnerInstance | undefined
 
 /**
  * Get available CLI spinner styles or a specific style by name. Extends the
@@ -90,8 +90,10 @@ export function getCliSpinners(
  * @returns Shared default spinner instance
  */
 export function getDefaultSpinner(): SpinnerInstance {
+  let spinner = peekDefaultSpinner()
   if (spinner === undefined) {
     spinner = Spinner()
+    setDefaultSpinner(spinner)
   }
   return spinner
 }
