@@ -10,6 +10,10 @@
 
 import { ArrayCtor, ArrayPrototypeSort } from '../primordials/array.mjs'
 import { TypeErrorCtor } from '../primordials/error.mjs'
+import { MathFloor, MathMin } from '../primordials/math.mjs'
+import { NumberCtor, NumberIsNaN } from '../primordials/number.mjs'
+
+const MAX_SAFE_LENGTH = 2 ** 53 - 1
 
 export type ToReversedFn = <T>(arr: readonly T[]) => T[]
 
@@ -34,7 +38,7 @@ export const arrayToReversedNative: ToReversedFn | undefined =
  * input is never mutated and the output is dense.
  */
 export function arrayToReversedShim<T>(arr: readonly T[]): T[] {
-  const { length } = arr
+  const length = toLength(arr.length)
   const out = new ArrayCtor<T>(length)
   for (let i = 0; i < length; i += 1) {
     out[i] = arr[length - i - 1]!
@@ -78,7 +82,7 @@ export function arrayToSortedShim<T>(
   }
   // Copied index by index rather than with slice: slice PRESERVES holes, and a
   // hole sorts after undefined instead of becoming one.
-  const { length } = arr
+  const length = toLength(arr.length)
   const out = new ArrayCtor<T>(length)
   for (let i = 0; i < length; i += 1) {
     out[i] = arr[i]!
@@ -88,3 +92,16 @@ export function arrayToSortedShim<T>(
 
 export const arrayToSorted: ToSortedFn =
   arrayToSortedNative ?? arrayToSortedShim
+
+/**
+ * The spec's ToLength: a length is clamped to a non-negative integer under
+ * 2^53-1. Without it a `length` of -1 or NaN reaches `new Array(length)` and
+ * throws a RangeError where the spec produces an empty array.
+ */
+export function toLength(value: unknown): number {
+  const n = NumberCtor(value)
+  if (NumberIsNaN(n) || n <= 0) {
+    return 0
+  }
+  return MathMin(MathFloor(n), MAX_SAFE_LENGTH)
+}

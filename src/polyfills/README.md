@@ -40,6 +40,49 @@ an absent one:
 - `SharedArrayBuffer.grow`
 - symbols as `WeakMap` and `WeakSet` keys
 
+## Observable behavior is the whole contract
+
+A shim matches what the spec says a caller can **observe**. It does not
+reimplement the spec's internal machinery for its own sake.
+
+The distinction decides real questions. `Set.prototype.union` is defined over a
+`GetSetRecord` abstraction, so the letter of the spec says to read `size`, then
+`has`, then `keys` off the argument in that order and cache them. What a caller
+can observe is narrower: which elements the result holds, the order they are in,
+which argument shapes throw a `TypeError`, and that a `Set`-like with its own
+`has` is honored. A shim that gets all of that right is correct even if it never
+builds a record.
+
+So the rule is: match the observable surface exactly, and take any liberty
+behind it.
+
+- **Observable, so it is a requirement:** the result's contents and iteration
+  order, whether the input is mutated, `undefined` sorted last, the result's
+  prototype (`Object.groupBy` returns a null-prototype object), whether a hole
+  stays a hole, which errors throw and when relative to other side effects,
+  how many times a callback runs and with which arguments.
+- **Not observable, so it is free:** the internal record or list the spec
+  allocates, the order of steps a caller cannot detect, and the algorithm used
+  to get the same answer.
+
+The risk in that freedom is calling something unobservable when it is not, which
+is why the claim is tested rather than asserted.
+
+## test262 is what enforces it
+
+`tc39/test262` is the conformance suite for exactly this contract, so the shims
+run against it rather than against hand-written assertions alone.
+
+- The corpus is pinned as a shallow, sparse submodule at
+  `upstream/test262`, holding only `harness/` plus the `test/built-ins/`
+  subtrees these shims implement.
+- `pnpm run test262` runs a **subset**: the runner maps each polyfill to its
+  test262 directories and runs only those, with the shim installed OVER the
+  native method so the suite exercises the shim rather than the engine.
+- Hand-written unit tests stay: they cover the native/shim selection and the
+  three-export shape, which are this package's contract rather than the
+  language's.
+
 ## Floors come from compat data
 
 The Node major each feature landed in is read from

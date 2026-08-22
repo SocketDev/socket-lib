@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 617 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 621 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -584,6 +584,12 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/perf/timer](./dist/perf/timer.d.ts)
 - [@socketsecurity/lib/perf/types](./dist/perf/types.d.ts)
 
+## polyfills/
+
+- [@socketsecurity/lib/polyfills/array](./dist/polyfills/array.d.ts)
+- [@socketsecurity/lib/polyfills/group-by](./dist/polyfills/group-by.d.ts)
+- [@socketsecurity/lib/polyfills/promise](./dist/polyfills/promise.d.ts)
+
 ## primordials/
 
 - [@socketsecurity/lib/primordials/array](./dist/primordials/array.d.ts)
@@ -701,6 +707,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 
 - [@socketsecurity/lib/spinner/create-spinner-class](./dist/spinner/create-spinner-class.d.ts)
 - [@socketsecurity/lib/spinner/default](./dist/spinner/default.d.ts)
+- [@socketsecurity/lib/spinner/default-state](./dist/spinner/default-state.d.ts)
 - [@socketsecurity/lib/spinner/format](./dist/spinner/format.d.ts)
 - [@socketsecurity/lib/spinner/spinner](./dist/spinner/spinner.d.ts)
 - [@socketsecurity/lib/spinner/spinner-internals](./dist/spinner/spinner-internals.d.ts)

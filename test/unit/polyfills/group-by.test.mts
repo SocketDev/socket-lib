@@ -65,6 +65,10 @@ describe('objectGroupBy', () => {
         const out = groupBy(new Set([1, 2]), () => 'k')
         expect(out['k' as never]).toEqual([1, 2])
       })
+
+      it('throws a TypeError when the callback is not callable', () => {
+        expect(() => groupBy(['x'], undefined as never)).toThrow(TypeError)
+      })
     })
   }
 
@@ -106,6 +110,10 @@ describe('mapGroupBy', () => {
 
       it('an empty iterable yields an empty map', () => {
         expect(groupBy([], () => 'k').size).toBe(0)
+      })
+
+      it('throws a TypeError when the callback is not callable', () => {
+        expect(() => groupBy(['x'], undefined as never)).toThrow(TypeError)
       })
     })
   }

@@ -1,0 +1,21 @@
+# Test-time reference: the tc39 conformance suite the `src/polyfills` shims are
+# run against. Never a build input - nothing here is compiled or shipped.
+#
+# `sparse-checkout` is honored by scripts/fleet/git-partial-submodule.mts;
+# vanilla `git submodule update` ignores the field and would fetch the whole
+# ~270 MB corpus. The subtree list mirrors `test/test262-config/features.json`,
+# which is the single source: the runner fails loud when a feature there names a
+# directory this list does not carry.
+#
+# no-release-tag: tc39 publishes no releases - the only tags are automated
+# web-features-manifest snapshots.
+# test262-2026.07.02 (2026-07-02) sha256:c50acd8a9f047d98f8e4e19993d5aa00524e763d4c1cadee4c6053565103065b
+[submodule "upstream/test262"]
+	path = upstream/test262
+	url = https://github.com/tc39/test262.git
+	ref = 64ff467c0c1d60c077995bb7c5f93a9d8cc8ade1
+	branch = main
+	shallow = true
+	ignore = dirty
+	sparse-checkout = harness/ test/built-ins/Array/prototype/toReversed/ test/built-ins/Array/prototype/toSorted/ test/built-ins/Map/groupBy/ test/built-ins/Object/groupBy/ test/built-ins/Promise/try/ test/built-ins/Promise/withResolvers/
+	verify = none

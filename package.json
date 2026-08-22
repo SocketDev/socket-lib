@@ -2663,6 +2663,21 @@
       "types": "./dist/perf/types.d.ts",
       "default": "./dist/perf/types.js"
     },
+    "./polyfills/array": {
+      "source": "./src/polyfills/array.mts",
+      "types": "./dist/polyfills/array.d.ts",
+      "default": "./dist/polyfills/array.js"
+    },
+    "./polyfills/group-by": {
+      "source": "./src/polyfills/group-by.mts",
+      "types": "./dist/polyfills/group-by.d.ts",
+      "default": "./dist/polyfills/group-by.js"
+    },
+    "./polyfills/promise": {
+      "source": "./src/polyfills/promise.mts",
+      "types": "./dist/polyfills/promise.d.ts",
+      "default": "./dist/polyfills/promise.js"
+    },
     "./primordials/array": {
       "source": "./src/primordials/array.mts",
       "types": "./dist/primordials/array.d.ts",
@@ -3115,6 +3130,11 @@
       "types": "./dist/spinner/default.d.ts",
       "default": "./dist/spinner/default.js"
     },
+    "./spinner/default-state": {
+      "source": "./src/spinner/default-state.mts",
+      "types": "./dist/spinner/default-state.d.ts",
+      "default": "./dist/spinner/default-state.js"
+    },
     "./spinner/format": {
       "source": "./src/spinner/format.mts",
       "types": "./dist/spinner/format.d.ts",
@@ -3555,6 +3575,7 @@
     "sync-package-manager-pins": "node scripts/fleet/sync-package-manager-pins.mts",
     "test": "node scripts/fleet/test.mts",
     "test:fuzz": "node scripts/repo/fuzz.mts",
+    "test262": "node test/scripts/test262-runner.mts",
     "update": "node scripts/fleet/update.mts",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
     "type": "node node_modules/typescript/bin/tsc --noEmit -p .config/fleet/tsconfig.check.json",
@@ -3714,7 +3735,7 @@
     }
   },
   "engines": {
-    "node": ">=18",
+    "node": ">=22",
     "npm": ">=12.0.2",
     "pnpm": ">=11.0.5"
   },

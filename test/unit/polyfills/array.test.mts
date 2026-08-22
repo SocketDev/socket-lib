@@ -15,7 +15,31 @@ import {
   arrayToSorted,
   arrayToSortedNative,
   arrayToSortedShim,
+  toLength,
 } from '../../../src/polyfills/array.mjs'
+
+describe('toLength', () => {
+  it('clamps a negative or non-numeric length to zero', () => {
+    // Without this, `new Array(-1)` throws a RangeError where the spec
+    // produces an empty array.
+    expect(toLength(-1)).toBe(0)
+    expect(toLength(Number.NaN)).toBe(0)
+    expect(toLength(undefined)).toBe(0)
+    expect(toLength(-0)).toBe(0)
+  })
+
+  it('truncates toward zero', () => {
+    expect(toLength(3.7)).toBe(3)
+  })
+
+  it('coerces a numeric string', () => {
+    expect(toLength('2')).toBe(2)
+  })
+
+  it('caps at the maximum safe length', () => {
+    expect(toLength(Number.POSITIVE_INFINITY)).toBe(2 ** 53 - 1)
+  })
+})
 
 describe('arrayToReversed', () => {
   for (const [label, toReversed] of [

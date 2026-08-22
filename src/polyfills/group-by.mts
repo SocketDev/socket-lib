@@ -11,6 +11,7 @@
  *     argument and both iterate the iterable exactly once.
  */
 
+import { TypeErrorCtor } from '../primordials/error.mjs'
 import { MapCtor } from '../primordials/map-set.mjs'
 import { ObjectCtor } from '../primordials/object.mjs'
 
@@ -38,6 +39,9 @@ export function mapGroupByShim<K, T>(
   items: Iterable<T>,
   keySelector: (item: T, index: number) => K,
 ): Map<K, T[]> {
+  if (typeof keySelector !== 'function') {
+    throw new TypeErrorCtor('The callback must be a function')
+  }
   const groups = new MapCtor<K, T[]>()
   let index = 0
   for (const item of items) {
@@ -86,6 +90,9 @@ export function objectGroupByShim<K extends PropertyKey, T>(
   items: Iterable<T>,
   keySelector: (item: T, index: number) => K,
 ): Partial<Record<K, T[]>> {
+  if (typeof keySelector !== 'function') {
+    throw new TypeErrorCtor('The callback must be a function')
+  }
   // oxlint-disable-next-line socket/prefer-undefined-over-null -- spec: null proto
   const groups = ObjectCtor.create(null) as Record<PropertyKey, T[]>
   let index = 0

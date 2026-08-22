@@ -1,0 +1,12 @@
+# Known test262 failures for the src/polyfills shims.
+#
+# One test id per line, relative to the test262 root. A line ending in `/`
+# allows every test beneath that directory.
+#
+# The runner fails when an entry here matches no test (a rename upstream) and
+# when a listed test PASSES (the entry is stale), so this file cannot quietly
+# grow stale and mask a real regression.
+#
+# Empty is the healthy state: every shim's observable behavior matches the
+# suite. Add an entry only with a comment saying why the difference is
+# acceptable and what would remove it.

@@ -1,0 +1,90 @@
+{
+  "comment": [
+    "Single source for the test262 subset. Each entry maps one shim to the",
+    "test262 directories that specify it, plus how to install the shim over",
+    "the native so the suite exercises OUR code and not the engine's.",
+    "",
+    "`install` describes a prototype method or a constructor static:",
+    "  target   - the object the method hangs off",
+    "  property - the method name test262 calls",
+    "  export   - the shim export in the built module",
+    "  length   - the method's own `length`, which test262 asserts",
+    "  receiverAs - 'argument' passes the receiver as the first parameter,",
+    "               'this' invokes the shim with it, absent drops it",
+    "",
+    "The .gitmodules sparse-checkout must cover every `dirs` entry; the runner",
+    "fails loud when it does not."
+  ],
+  "features": [
+    {
+      "name": "Array.prototype.toReversed",
+      "module": "polyfills/array.js",
+      "dirs": ["test/built-ins/Array/prototype/toReversed"],
+      "install": {
+        "target": "Array.prototype",
+        "property": "toReversed",
+        "export": "arrayToReversedShim",
+        "length": 0,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Array.prototype.toSorted",
+      "module": "polyfills/array.js",
+      "dirs": ["test/built-ins/Array/prototype/toSorted"],
+      "install": {
+        "target": "Array.prototype",
+        "property": "toSorted",
+        "export": "arrayToSortedShim",
+        "length": 1,
+        "receiverAs": "argument"
+      }
+    },
+    {
+      "name": "Map.groupBy",
+      "module": "polyfills/group-by.js",
+      "dirs": ["test/built-ins/Map/groupBy"],
+      "install": {
+        "target": "Map",
+        "property": "groupBy",
+        "export": "mapGroupByShim",
+        "length": 2
+      }
+    },
+    {
+      "name": "Object.groupBy",
+      "module": "polyfills/group-by.js",
+      "dirs": ["test/built-ins/Object/groupBy"],
+      "install": {
+        "target": "Object",
+        "property": "groupBy",
+        "export": "objectGroupByShim",
+        "length": 2
+      }
+    },
+    {
+      "name": "Promise.try",
+      "module": "polyfills/promise.js",
+      "dirs": ["test/built-ins/Promise/try"],
+      "install": {
+        "target": "Promise",
+        "property": "try",
+        "export": "promiseTrySpecShim",
+        "length": 1,
+        "receiverAs": "this"
+      }
+    },
+    {
+      "name": "Promise.withResolvers",
+      "module": "polyfills/promise.js",
+      "dirs": ["test/built-ins/Promise/withResolvers"],
+      "install": {
+        "target": "Promise",
+        "property": "withResolvers",
+        "export": "promiseWithResolversSpecShim",
+        "length": 0,
+        "receiverAs": "this"
+      }
+    }
+  ]
+}
