@@ -63,7 +63,9 @@ describe('classifier', () => {
 
   it('does not treat a prefix without a slash as a directory', () => {
     expect(
-      isAllowed('test/built-ins/PromiseOther/x.js', ['test/built-ins/Promise']),
+      isAllowed('test/built-ins/PromiseOther/resolve.js', [
+        'test/built-ins/Promise',
+      ]),
     ).toBe(false)
   })
 

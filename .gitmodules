@@ -17,5 +17,5 @@
 	branch = main
 	shallow = true
 	ignore = dirty
-	sparse-checkout = harness/ test/built-ins/Array/prototype/toReversed/ test/built-ins/Array/prototype/toSorted/ test/built-ins/Map/groupBy/ test/built-ins/Object/groupBy/ test/built-ins/Promise/try/ test/built-ins/Promise/withResolvers/
+	sparse-checkout = harness/ test/built-ins/Array/prototype/toReversed/ test/built-ins/Array/prototype/toSorted/ test/built-ins/Map/groupBy/ test/built-ins/Object/groupBy/ test/built-ins/Promise/try/ test/built-ins/Promise/withResolvers/ test/built-ins/Set/prototype/difference/ test/built-ins/Set/prototype/intersection/ test/built-ins/Set/prototype/isDisjointFrom/ test/built-ins/Set/prototype/isSubsetOf/ test/built-ins/Set/prototype/isSupersetOf/ test/built-ins/Set/prototype/symmetricDifference/ test/built-ins/Set/prototype/union/
 	verify = none

@@ -820,6 +820,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/active-edits-bash-recorder:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -844,6 +848,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/ai-balancer-proxy-start:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -930,12 +938,20 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/authorization-phrase-emission-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
 
   .claude/hooks/fleet/auto-land-on-stop:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -954,6 +970,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/bot-comment-collapse-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1147,6 +1167,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/clipboard-snippet-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1162,6 +1186,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/code-as-law-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1238,6 +1266,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/config-refs-are-segregated-at-edit:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1281,6 +1313,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/crlf-split-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1303,6 +1339,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/defer-to-script-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1457,6 +1497,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/fixer-foreign-edits-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1479,6 +1523,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/foreign-repo-conventions-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1530,6 +1578,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/gitignore-is-single-file-at-edit:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1580,6 +1632,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/hook-snapshot-rewire-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1649,12 +1705,20 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/latest-release-pin-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
 
   .claude/hooks/fleet/link-protocol-dep-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1687,6 +1751,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/long-running-task-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1760,6 +1828,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/model-fallback:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1798,6 +1870,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/no-amend-foreign-commit-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -1999,6 +2075,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/no-ignoring-tracked-file-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2241,6 +2321,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/no-shell-injection-bypass-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2327,6 +2411,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/no-unmocked-ai-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2343,6 +2431,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/no-upstream-edit-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2586,6 +2678,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/playwright-launch-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2721,6 +2817,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/prefer-mcp-server-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2798,6 +2898,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/private-package-name-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2834,6 +2938,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/prose-code-format-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -2945,6 +3053,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/repo-map-refresh:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3102,6 +3214,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/shared-index-add-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3168,6 +3284,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/spend-warning-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3202,6 +3322,10 @@ importers:
         version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
 
   .claude/hooks/fleet/stale-tree-clobber-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3250,18 +3374,30 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/test-env-scrub-order-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
 
   .claude/hooks/fleet/test-network-pattern-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
         version: 26.2.0
 
   .claude/hooks/fleet/test-platform-coverage-nudge:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3406,6 +3542,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/verify-before-publish-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'
@@ -3445,6 +3585,10 @@ importers:
         version: 26.2.0
 
   .claude/hooks/fleet/vscode-folder-open-task-guard:
+    dependencies:
+      '@socketsecurity/lib-stable':
+        specifier: 'catalog:'
+        version: '@socketsecurity/lib@6.7.0(patch_hash=6013bc5930e8dc12861356e4d5a6affc9c860745c8c0cfdabb4ec9fc635009af)(typescript@7.0.2)'
     devDependencies:
       '@types/node':
         specifier: 'catalog:'

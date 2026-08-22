@@ -6,8 +6,8 @@
   "schemaVersion": 1,
   "repoName": "socket-lib",
   "bundle": {
-    "ref": "fleet-pack-5787859fa41673f57fc1f2ccb8552ba3524e2426",
-    "cascadeSha": "5787859fa41673f57fc1f2ccb8552ba3524e2426"
+    "ref": "fleet-pack-c6901e56c559f5be12df3ab2f309687e469303a8",
+    "cascadeSha": "c6901e56c559f5be12df3ab2f309687e469303a8"
   },
   "repo": {
     "type": "solo"
@@ -133,8 +133,10 @@
       "managed-ruleset-identity",
       "member-release-probe",
       "mirror-lock",
+      "model-catalog",
       "model-choices",
       "model-list-cache",
+      "model-target-ids",
       "model-targets",
       "model-training-policy",
       "never-walked-entries",
@@ -156,6 +158,7 @@
       "pr-body-law",
       "process-lifecycle",
       "prose-em-dash",
+      "provider-apis",
       "provider-availability",
       "provider-credentials",
       "provider-models",
