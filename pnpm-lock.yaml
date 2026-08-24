@@ -212,8 +212,8 @@ catalogs:
       specifier: 0.0.79
       version: 0.0.79
     '@shadscan/cli':
-      specifier: 0.16.0
-      version: 0.16.0
+      specifier: 0.17.0
+      version: 0.17.0
     '@socketregistry/packageurl-js-stable':
       specifier: npm:@socketregistry/packageurl-js@1.5.2
       version: 1.5.2
@@ -534,7 +534,7 @@ importers:
         version: 0.0.79
       '@shadscan/cli':
         specifier: 'catalog:'
-        version: 0.16.0
+        version: 0.17.0
       '@sinclair/typebox':
         specifier: 0.34.52
         version: 0.34.52
@@ -4965,8 +4965,8 @@ packages:
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
 
-  '@shadscan/cli@0.16.0':
-    resolution: {integrity: sha512-CTAfeoKYITalPQMOO15sCSa3wRmV1gChzm4qLv/dR2bh7fQOH9ZHNS8w++J+Qtb5+PAj8WAv7B3rTCCVBJczpw==}
+  '@shadscan/cli@0.17.0':
+    resolution: {integrity: sha512-bRMrWmcdUAlZ3YZa6S4j0taFJK47mCOdsH1XWpts/GRrXbkPurtm8HJiBkoBbPGP3RXmZ1yO3IMwiJCw+G9OIA==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -8613,7 +8613,7 @@ snapshots:
 
   '@rolldown/pluginutils@1.0.1': {}
 
-  '@shadscan/cli@0.16.0':
+  '@shadscan/cli@0.17.0':
     dependencies:
       cross-spawn: 7.0.6
       jsonc-parser: 3.3.1
