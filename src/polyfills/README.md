@@ -27,6 +27,21 @@ The native and the shim stay separately reachable on purpose:
 `errors/predicates.mts` already followed this shape for `Error.isError`, with
 `ErrorIsError` captured in `primordials/error.mts`; these modules match it.
 
+## Iterator helpers take the iterator first
+
+The eleven `Iterator.prototype` helpers, `Iterator.from`, and `Iterator.concat`
+are shimmed as free functions whose first argument is the iterator:
+`iteratorMap(iter, fn)`, not `iter.map(fn)`. On Node 18 there is no method on
+the prototype to call, so a method-shaped shim would have nowhere to live
+without patching a global, which this package does not do.
+
+Three of them are not here, and the reason is the same in each case - a shim
+would be inventing behavior rather than filling a gap:
+
+- `chunks`, `windows`, `join`, and `includes` are proposals no Node ships.
+- `Iterator.prototype[Symbol.dispose]` is `version_added: false` for Node in
+  upstream compat data.
+
 ## What belongs here
 
 A built-in a **pure-JS shim can actually implement**. Anything needing engine
@@ -52,6 +67,16 @@ can observe is narrower: which elements the result holds, the order they are in,
 which argument shapes throw a `TypeError`, and that a `Set`-like with its own
 `has` is honored. A shim that gets all of that right is correct even if it never
 builds a record.
+
+Getting that boundary wrong in either direction costs something. `set.mts`
+looked finished with a plain, readable implementation, and test262 rejected 38
+of its 186 tests: the result was built with `Set.prototype.add` (observable to
+anyone who patches it), the receiver was read with `for…of` rather than a
+primordial (so a subclass's overrides ran), `next` was fetched once per loop
+turn rather than once (observable as extra property gets), and `isSubsetOf`
+iterated a snapshot where the spec iterates live (so a set-like whose `has`
+deletes from the receiver got the wrong answer). None of those are internal
+bookkeeping, and none were visible from reading the code.
 
 So the rule is: match the observable surface exactly, and take any liberty
 behind it.

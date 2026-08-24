@@ -6,6 +6,7 @@
  */
 
 import { TypeErrorCtor } from './error.mjs'
+import { ObjectGetOwnPropertyDescriptor } from './object.mjs'
 import { uncurryThis } from './uncurry.mjs'
 
 // Stage 3+ TC39 proposals that Node 22+ ships but TypeScript's
@@ -88,6 +89,13 @@ export const SetPrototypeSymmetricDifference = uncurryThis(
 )
 export const SetPrototypeUnion = uncurryThis(Set.prototype.union)
 export const SetPrototypeValues = uncurryThis(Set.prototype.values)
+// `size` is an accessor rather than a method, so it is captured from its
+// descriptor. Reading `set.size` directly would go through a prototype the
+// caller can patch, and would not throw on a non-Set the way the real getter
+// does.
+export const SetPrototypeSizeGetter = uncurryThis(
+  ObjectGetOwnPropertyDescriptor(Set.prototype, 'size')!.get!,
+)
 
 // ─── WeakMap (prototype) ───────────────────────────────────────────────
 export const WeakMapPrototypeDelete = uncurryThis(WeakMap.prototype.delete)

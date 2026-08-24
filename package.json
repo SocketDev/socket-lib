@@ -2673,6 +2673,26 @@
       "types": "./dist/polyfills/group-by.d.ts",
       "default": "./dist/polyfills/group-by.js"
     },
+    "./polyfills/iterator": {
+      "source": "./src/polyfills/iterator/index.mts",
+      "types": "./dist/polyfills/iterator/index.d.ts",
+      "default": "./dist/polyfills/iterator/index.js"
+    },
+    "./polyfills/iterator/eager": {
+      "source": "./src/polyfills/iterator/eager.mts",
+      "types": "./dist/polyfills/iterator/eager.d.ts",
+      "default": "./dist/polyfills/iterator/eager.js"
+    },
+    "./polyfills/iterator/lazy": {
+      "source": "./src/polyfills/iterator/lazy.mts",
+      "types": "./dist/polyfills/iterator/lazy.d.ts",
+      "default": "./dist/polyfills/iterator/lazy.js"
+    },
+    "./polyfills/iterator/statics": {
+      "source": "./src/polyfills/iterator/statics.mts",
+      "types": "./dist/polyfills/iterator/statics.d.ts",
+      "default": "./dist/polyfills/iterator/statics.js"
+    },
     "./polyfills/promise": {
       "source": "./src/polyfills/promise.mts",
       "types": "./dist/polyfills/promise.d.ts",
