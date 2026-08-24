@@ -193,7 +193,6 @@
     "primordials/checks/primordials",
     "primordials/checks/primordials-defaults",
     "primordials/function",
-    "primordials/symbol",
     "process/open-url",
     "process/spawn/kill-tree",
     "process/spawn/pty",
