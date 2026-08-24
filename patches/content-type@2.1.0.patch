@@ -1,17 +1,3 @@
-diff --git a/.cache/agent-discovery.json b/.cache/agent-discovery.json
-new file mode 100644
-index 0000000000000000000000000000000000000000..a5c0503a570288e3f40d83d9aa087a8e72fb1709
---- /dev/null
-+++ b/.cache/agent-discovery.json
-@@ -0,0 +1,8 @@
-+{
-+  "agents": {
-+    "claude": "/Users/jdalton/.local/bin/claude",
-+    "codex": "/opt/homebrew/bin/codex",
-+    "opencode": "/Users/jdalton/.opencode/bin/opencode"
-+  },
-+  "writtenAt": 1787591168173
-+}
 diff --git a/dist/index.js b/dist/index.js
 index 6f3a3e71d2e667ec749a8c80ae459944d78a1ee7..e1b8f23f941a311d829efedbdd3671259294705e 100644
 --- a/dist/index.js

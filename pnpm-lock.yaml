@@ -471,7 +471,7 @@ patchedDependencies:
   '@yarnpkg/core@4.9.1': 90d84a2833b418e806d5458847773c4c9104fc8e8aa2fa3971f1fd0a68bad1c9
   brace-expansion@5.0.9: a89e05a7c781115d8e78a92c9f9b843aa7c534a587baa5ac808074d4fafa6857
   chalk@5.6.2: 3e5adfdfa27f0c9e066fe820ac91f77773798f205f5e43ff220b250007196661
-  content-type@2.1.0: efe7bafdcc2e906c3bd439e1ac09d26155a368d5d2fc660d17d6aacca64bbf0e
+  content-type@2.1.0: b31aaba8e88c408e66a3fb9abe46a7d4a6a10490b250e9cda768e624a26ad94a
   js-tokens@10.0.0: 9ca5535547c973063c8c2d0a7d33505cef80152329f2572507a54abbb4099826
   minimatch@10.2.6: 83f1ea5b333d1b6fe1b36f93ccb222aa02e5dd468b2c646e285d7d53d234e174
   minipass-flush@1.0.7: 4a4cd8b943f82f604bbf860eb115cf24118327b78afb799fee8dfd90c3546769
@@ -8214,7 +8214,7 @@ snapshots:
       '@hono/node-server': 1.19.14(hono@4.13.2)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
-      content-type: 2.1.0(patch_hash=efe7bafdcc2e906c3bd439e1ac09d26155a368d5d2fc660d17d6aacca64bbf0e)
+      content-type: 2.1.0(patch_hash=b31aaba8e88c408e66a3fb9abe46a7d4a6a10490b250e9cda768e624a26ad94a)
       cors: 2.8.6
       cross-spawn: 7.0.6
       eventsource: 3.0.7
@@ -9297,7 +9297,7 @@ snapshots:
   body-parser@2.3.0(supports-color@10.2.2):
     dependencies:
       bytes: 3.1.2
-      content-type: 2.1.0(patch_hash=efe7bafdcc2e906c3bd439e1ac09d26155a368d5d2fc660d17d6aacca64bbf0e)
+      content-type: 2.1.0(patch_hash=b31aaba8e88c408e66a3fb9abe46a7d4a6a10490b250e9cda768e624a26ad94a)
       debug: 4.4.3(supports-color@10.2.2)
       http-errors: 2.0.1
       iconv-lite: 0.7.3
@@ -9448,7 +9448,7 @@ snapshots:
 
   content-disposition@1.1.0: {}
 
-  content-type@2.1.0(patch_hash=efe7bafdcc2e906c3bd439e1ac09d26155a368d5d2fc660d17d6aacca64bbf0e): {}
+  content-type@2.1.0(patch_hash=b31aaba8e88c408e66a3fb9abe46a7d4a6a10490b250e9cda768e624a26ad94a): {}
 
   convert-source-map@2.0.0: {}
 
@@ -9713,7 +9713,7 @@ snapshots:
       accepts: 2.0.0
       body-parser: 2.3.0(supports-color@10.2.2)
       content-disposition: 1.1.0
-      content-type: 2.1.0(patch_hash=efe7bafdcc2e906c3bd439e1ac09d26155a368d5d2fc660d17d6aacca64bbf0e)
+      content-type: 2.1.0(patch_hash=b31aaba8e88c408e66a3fb9abe46a7d4a6a10490b250e9cda768e624a26ad94a)
       cookie: 0.7.2
       cookie-signature: 1.2.2
       debug: 4.4.3(supports-color@10.2.2)
@@ -11408,7 +11408,7 @@ snapshots:
 
   type-is@2.1.0:
     dependencies:
-      content-type: 2.1.0(patch_hash=efe7bafdcc2e906c3bd439e1ac09d26155a368d5d2fc660d17d6aacca64bbf0e)
+      content-type: 2.1.0(patch_hash=b31aaba8e88c408e66a3fb9abe46a7d4a6a10490b250e9cda768e624a26ad94a)
       media-typer: 1.1.0
       mime-types: 3.0.2
 
