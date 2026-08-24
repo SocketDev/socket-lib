@@ -1920,6 +1920,11 @@
       "types": "./dist/globs/types.d.ts",
       "default": "./dist/globs/types.js"
     },
+    "./hooks/dispatch-failure": {
+      "source": "./src/hooks/dispatch-failure.mts",
+      "types": "./dist/hooks/dispatch-failure.d.ts",
+      "default": "./dist/hooks/dispatch-failure.js"
+    },
     "./http-request": {
       "source": "./src/http-request/node.mts",
       "browser": {
