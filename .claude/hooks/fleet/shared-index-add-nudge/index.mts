@@ -173,8 +173,13 @@ export const hook = defineHook({
     return notify(formatNudge(foreign))
   }),
   event: 'PreToolUse',
+  // Machine-wide-wired so the shared-index risk is caught in any repo session,
+  // but `mode: 'fleet'` stands it down outside a roster member: the fix this
+  // nudges toward, `scripts/fleet/commit-paths.mts`, is a fleet-cascaded
+  // script that does not exist in a foreign repo.
   global: true,
   matcher: ['Bash'],
+  mode: 'fleet',
   type: 'nudge',
 })
 

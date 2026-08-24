@@ -364,9 +364,9 @@ describe('themes/resolve', () => {
 
     it('deep-merges meta', () => {
       const ext = extendTheme(base, {
-        meta: { author: 'jdalton' },
+        meta: { author: 'octocat' },
       })
-      expect(ext.meta?.author).toBe('jdalton')
+      expect(ext.meta?.author).toBe('octocat')
       expect(ext.meta?.description).toBe('Base theme')
     })
 
