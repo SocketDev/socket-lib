@@ -1,0 +1,58 @@
+diff --git a/.cache/agent-discovery.json b/.cache/agent-discovery.json
+new file mode 100644
+index 0000000000000000000000000000000000000000..a5c0503a570288e3f40d83d9aa087a8e72fb1709
+--- /dev/null
++++ b/.cache/agent-discovery.json
+@@ -0,0 +1,8 @@
++{
++  "agents": {
++    "claude": "/Users/jdalton/.local/bin/claude",
++    "codex": "/opt/homebrew/bin/codex",
++    "opencode": "/Users/jdalton/.opencode/bin/opencode"
++  },
++  "writtenAt": 1787591168173
++}
+diff --git a/dist/index.js b/dist/index.js
+index 6f3a3e71d2e667ec749a8c80ae459944d78a1ee7..e1b8f23f941a311d829efedbdd3671259294705e 100644
+--- a/dist/index.js
++++ b/dist/index.js
+@@ -48,10 +48,39 @@ function format(obj) {
+     }
+     return result;
+ }
++/**
++ * Get the content-type header value off a req/res-like object.
++ */
++function getContentTypeFromObject(obj) {
++    let header;
++    if (typeof obj.getHeader === 'function') {
++        // res-like
++        header = obj.getHeader('content-type');
++    }
++    else if (obj.headers && typeof obj.headers === 'object') {
++        // req-like
++        header = obj.headers['content-type'];
++    }
++    if (typeof header !== 'string') {
++        throw new TypeError('content-type header is missing from object');
++    }
++    return header;
++}
+ /**
+  * Parse a `Content-Type` header.
+  */
+ function parse(header, options) {
++    if (!header) {
++        throw new TypeError('argument string is required');
++    }
++    // compat shim: content-type@1 accepted a req/res-like object in place of
++    // a raw header string (getcontenttype()); content-type@2 dropped that,
++    // requiring the caller to read the header itself first. body-parser@2.2.2
++    // still calls `contentType.parse(req)` directly, so restore the
++    // passthrough here for object input; string input is unchanged.
++    if (typeof header === 'object') {
++        header = getContentTypeFromObject(header);
++    }
+     const stopChar = options?.comma === true ? COMMA : 65536; // Sentinel for "no stop char".
+     const len = header.length;
+     let index = skipOWS(header, options?.start ?? 0, len);

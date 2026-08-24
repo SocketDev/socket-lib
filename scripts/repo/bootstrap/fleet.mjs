@@ -748,7 +748,7 @@ function hybridBundlePaths(manifest) {
  * - A file entry with a source: kept as-is.
  * - A DIRECTORY entry: expanded into every file beneath it, each inheriting the
  *   directory's flags. 39 of the manifest's entries are whole-tree mirror roots
- *   (`scripts/fleet`, `.claude/hooks/fleet`, `docs/fleet/agents.md`) and they
+ *   (`scripts/fleet`, `.claude/hooks/fleet`, `docs/agents.md/fleet`) and they
  *   are the bulk of the payload. Expanding rather than special-casing keeps the
  *   always-tracked skip, the canonical splice and the per-file read-only lock
  *   all applying, with no second placement path to drift from the first.
