@@ -43,6 +43,18 @@ const fakeSpinner = {
 const getDefaultSpinner = vi.fn(() => fakeSpinner)
 vi.mock(import('../../src/spinner/default.mjs'), () => ({ getDefaultSpinner }))
 
+// `spawn()` PEEKS at the default spinner rather than acquiring one, so the peek
+// is spied separately. Without this, asserting only that getDefaultSpinner was
+// never called would also pass if spawn ignored spinners altogether.
+const peekDefaultSpinner = vi.fn(() => undefined)
+vi.mock(
+  import('../../src/spinner/default-state.mjs'),
+  async importOriginal => ({
+    ...(await importOriginal()),
+    peekDefaultSpinner,
+  }),
+)
+
 // Spy on the shared process AbortSignal accessor so we can observe whether a
 // consuming module grabs it at import time vs. at call time.
 const getAbortSignal = vi.fn(() => new AbortController().signal)
@@ -79,14 +91,18 @@ describe('snapshot safety — lazy default-spinner acquisition', () => {
       expect(getDefaultSpinner).not.toHaveBeenCalled()
     })
 
-    it('acquires the default spinner when spawn() runs without an override', async () => {
+    it('peeks at the default spinner without forcing one into existence', async () => {
       const { spawn } = await import('../../src/process/spawn/child.mjs')
-      expect(getDefaultSpinner).not.toHaveBeenCalled()
+      expect(peekDefaultSpinner).not.toHaveBeenCalled()
 
-      // Resolve a trivial child so the promise settles; spawn() acquires the
+      // Resolve a trivial child so the promise settles; spawn() consults the
       // spinner synchronously at the top of the call before any awaiting.
       await spawn(process.execPath, ['-e', '0']).catch(() => {})
-      expect(getDefaultSpinner).toHaveBeenCalled()
+      expect(peekDefaultSpinner).toHaveBeenCalled()
+      // The point of peeking: spawn only interleaves with a spinner that
+      // ALREADY exists. Acquiring one here would load yocto-spinner on every
+      // spawn call, which is the handle this whole file guards against.
+      expect(getDefaultSpinner).not.toHaveBeenCalled()
     })
   })
 
