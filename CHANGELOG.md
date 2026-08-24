@@ -5,49 +5,143 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [7.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.0) - 2026-08-17
-
-v7 is an API-cleanup release: it shrinks the published surface to the
-supported set, renames the pieces that had grown confusing names, and adds
-the AI, spawn, and git utilities the fleet had been duplicating per repo.
-
-### Changed (breaking)
-
-- **`exports`** - the published surface shrinks to the supported set: 25 module-internal shared subpaths are no longer exported. Code importing them must use the public entry points
-- **`constants`** - the shared public API token is retired; each repo carries its own
-- **`api`** - the v6 back-compat residue is deleted and option bags are normalized: a required argument is positional, and a bag holds only real options
-- **`exe`** - `bin` and `argv` consolidate into one `exe` namespace; path resolution groups under `exe/path`; `sea` and `smol` are `exe` submodules with a `detect` leaf; the trusted helpers melt into their domains as `path`/`sanitize`
-- **`config`** - the layered repo-config reader is `config/repo` (was `fleet-repo`)
-- **`json`** - `parseJsonSafe` is now `parseJsonStrict` (and `ParseJsonSafeOptions` is `ParseJsonStrictOptions`); the `getUrl` loader is dropped
-- **`platform`** - the predicate migration finishes; the static helpers it replaces are unexported
-- **`eco`** - the `yarnpkg` parent is dropped; each package manager's manifest handling now lives under that manager's own module
-- **`taxonomy`** - split concepts merge, terms get a namespace, and one-file directories are flattened
-- **`cleanup`** - `sorts/semver`, the `process/shared` shim, and the dlx legacy get/set are deleted
-- **`cli`** - `--json` is a real mode on `prim` with the describe envelope, and every repo entry script self-describes via `runMain`
+## [7.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.0) - 2026-08-24
 
 ### Added
 
-- **`ai`** - 8 utilities from the odai project, registered in the exports map
-- **`spawn`** - run lanes (`runInherit`, `runCapture`, `runInheritTee`, `waitForStdioFlush`), a `trim` option for byte-faithful `spawnSync` output, and a `throws` option so non-zero exits can resolve instead of rejecting
-- **`git`** - a pure porcelain status parser, and git-refs write helpers (branch create/advance/delete, tag create)
-- **`github`** - container package paths with every slash escaped; `githubRefLink` learns the stack kind
-- **`secrets`** - pure OAuth PKCE helpers (S256 pair, discovery and auth URLs, loopback callback parse)
-- **`npm`** - live cache-busted registry reads (checked latest, maintainers)
-- **`paths`** - `separatorWrappedSubstring` and `isSeparatorWrapped`
-- **`pty`** - `NON_INTERACTIVE_RENDER_ENV`, `stdoutIsFileBacked`, and the pumped run lane
-- **`cli`** - entrypoint detection and a fail-soft main runner
-- **`open-url`** - skips the browser launch under a detected test runner
-- **`build-stubs`** - the build now fails when shipped code can reach a dev stub
+- **`polyfills`** — shim ES2025 Set and iterators
+- **`polyfills`** — support Node 18 by shimming toSorted and toReversed
+- **`polyfills`** — spec shims for built-ins above Node 18
+- **`releases`** — authenticate release fetches through every source
+- **`github`** — wire rate-limit handling into fetchGitHub
+- **`github`** — track the rate-limit budget
+- **`github`** — resolve a token from the gh CLI
+- **`github`** — add GraphQL helper to edit a submitted PR review body
+- **`build`** — declare bundlesVendoredDeps and home the define map
+- **`paths`** — add getSocketStateDbPath and state/db helpers
+- **`ai`** — recognize a fireconnect-stored fireworks key as keyed
+- **`ai`** — add the Kimi K2.6 synthetic rung to the fable and opus chains
+- **`git`** — add centralized gitSync/gitSpawn + withIsolatedIndex helpers
+- **`ai`** — add 8 utilities from odai for v7
+- **`paths`** — separatorWrappedSubstring + isSeparatorWrapped
+- **`links`** — githubRefLink learns the stack kind
+- **`github`** — build container package paths with every slash escaped
+- **`build-stubs`** — fail the build when shipped code can reach a stub
+- **`secrets`** — add pure oauth pkce seams (s256 pair, discovery and auth urls, loopback callback parse)
+- **`cli`** — add entrypoint detection and fail-soft main runner
+- **`git`** — add pure porcelain status parser
+- **`github`** — add git-refs write helpers (branch create/advance/delete, tag create)
+- **`npm`** — add live cache-busted registry reads (checked latest, maintainers)
+- **`open-url`** — skip the browser launch under a detected test runner
+- **`pty`** — add NON\_INTERACTIVE\_RENDER\_ENV, stdoutIsFileBacked, and the pumped run lane
+- **`spawn`** — add run lanes — runInherit, runCapture, runInheritTee, waitForStdioFlush
+- **`spawn`** — add trim option so spawnSync can keep byte-faithful output
+- **`spawn`** — add throws option so non-zero exits can resolve instead of rejecting
+- **`secrets`** — add redactContext deep payload redaction and export the new modules
+- **`secrets`** — add shared secret token-pattern catalog
+- **`promises`** — add createBackoff escalating-wait pacing
+- **`strings`** — add splitLines newline-aware line splitter
+- **`api`** — _delete the v7 back-compat residue and normalize option bags_
+- **`cli`** — _make --json a real mode on prim and cover the describe envelope_
+- **`scripts`** — _self-describe every repo entry script via runMain_
+- **`cleanup`** — _delete sorts/semver, the process/shared shim, and the dlx legacy get/set_
+- **`exports`** — _unpublish the 25 module-internal shared subpaths_
+- **`github`** — one gh CLI runner, extracted from four private copies
+- **`github`** — explain a timeout or dropped connection with the platform status
+- **`open-url`** — open a URL in a new window, not a tab
+- **`spinner`** — suppress animation for ai-agent-driven runs like ci
+- **`spawn`** — decide the Windows shell per command, not per platform
+- **`argv`** — publish the CLI self-description contract as argv/meta
+- **`secrets`** — socket.dev login — browser paste flow now, OAuth discovery-gated
+- **`secrets`** — slot the sockeye keychain.node biometric backend into resolve()
+- **`constants`** — _retire the shared public API token_
+- **`exports`** — expose llms.txt through the exports map
+
+### Changed
+
+- **`test`** — bound the connection-error fetches
+- _rename the broker's daemon from proteus to sockeye_
+- **`stubs`** — restore the stub list — its regeneration breaks the build
+- **`exe`** — _melt trusted helpers into their domains, rename to path/sanitize_
+- **`exe`** — _group path resolution under exe/path_
+- **`exe`** — _file sea and smol as exe submodules with a detect leaf_
+- **`taxonomy`** — _merge split concepts, add term namespace, drop one-file dirs_
+- **`eco`** — _drop the yarnpkg parent and group lockfile concerns per package manager_
+- **`exe`** — _consolidate bin and argv into one exe namespace_
+- **`api`** — _rename package-manager constants, de-trap two signatures, uncollide stderr_
+- **`platform`** — _finish the predicate migration and unexport the statics_
+- **`json`** — _rename ParseJsonSafeOptions to ParseJsonStrictOptions_
+- **`json`** — _rename parseJsonSafe to parseJsonStrict and drop the getUrl loader_
 
 ### Fixed
 
-- **`dist`** - declaration files pair with the `.js` they describe again. After the source move to `.mts`, dist shipped `x.js` beside `x.d.mts`, so a deep import got no types at all
-- **`secrets`/`github`/`native-messaging`** - shipped code no longer imports the dev-only `lib-stable` alias, which consumers in pnpm's global virtual store layout could not resolve. Any import chain through `ai` or `secrets` crashed with `Cannot find module` for those consumers in 6.7.0
-- **`test`** - the perry native-compile fixture tracks the `.mts` rename, and the spawn-heavy dlx pair gets real headroom under load
+- **`build-stubs`** — expose primordials/symbol for fleet consumers
+- **`spinner`** — fast-path spawn's default-spinner lookup to a peek
+- **`git`** — track the hook surface git reads before hydration
+- **`docs`** — restore the pnpm rule citations in the fleet block
+- **`prim`** — apply the audit exemptions to member references too
+- **`test`** — drop the redundant force flag in test and script call sites
+- **`fs`** — drop the redundant force flag in src delete call sites
+- **`fs`** — state why the delete-guard check forces, drop a redundant flag
+- **`test`** — drop a redundant force flag on a temp-dir cleanup
+- **`fs`** — make safeDelete's force opt-in so the cwd guard actually holds
+- **`prim`** — drop the output-token cap the SDK never applied
+- **`prim`** — resolve the wasm parser from the sibling the build copies
+- **`build`** — point the prim externals at the real acorn package name
+- **`types`** — annotate the prim tooling and bundle scripts
+- **`scripts`** — narrow the primordials surface instead of asserting it
+- **`scripts`** — type the repo build scripts for the widened check
+- **`lib`** — home the guarded-define config under .config/fleet and mark six builder assertions
+- **`scripts`** — repoint the AST import at the renamed ast/core module
+- **`lib`** — declare the fleet AST parser devDep
+- **`state`** — load node:sqlite lazily so a consumer can snapshot
+- **`lib`** — repair five more verified defect paths
+- **`lib`** — repair six verified defect paths
+- **`docs`** — point every documented import at the subpath that exports it
+- **`dlx`** — verify a cached binary against the caller pin
+- **`checks`** — clear the five CI check failures from the v7 wave
+- **`types`** — drop the module override from tsconfig.check so .mts sources resolve
+- **`types`** — add .d.ts for vendored @npmcli/package-json wrappers, fix tsconfig include for .mts sources
+- **`test`** — finish the perry fixture rename
+- **`dist`** — pair declarations with the .js they describe
+- **`build`** — realign the lockfile so frozen installs work again
+- **`build-stubs`** — expose http-request/fetch/browser, primordials/headers for fleet consumers
+- **`checks`** — clear six preflight failures blocking the release
+- **`external`** — declare the names the per-dep shims import
+- **`logger`** — give the browser leaf the default singleton
+- **`exe`** — import the path normalizer relatively, not through the package name
+- **`build`** — fail the build on a phantom dependency instead of shipping one
+- **`build`** — inline semver into npm-pack so the shipped bundle needs no dependency
+- **`docs`** — strip em-dashes where the generator emits them, not after
+- **`git`** — untrack the gitignored zizmor config
+- **`secrets,github,native-messaging`** — stop shipped code importing a devDependency
+- **`build-stubs`** — expose the browser logger so bundlers get real code
+- **`build-stubs`** — expose the browser fetch transport and its primordial
+- **`build`** — expose the http-request browser leaf and finish the local- import convergence
+- **`spawn`** — repair test casts flagged by tsc and refresh llms.txt for the run lane
+- **`test`** — give the newWindow describe its URL fixture too
+- **`test`** — give buildOpenUrlInvocation its URL fixture
+- **`objects`** — stop merge from walking dunder keys onto the prototype chain
+- **`types`** — declare the vendored inquirer password bundle
 
 ### Internal
 
-- **`src`** - every source file is `.mts` and every relative import names its target explicitly (2,118 of them), so the declarations build and the bundler resolve identically
+- **`bootstrap`** — await the newest-ref lookup on install
+- **`hooks`** — dispatch policy for a dead runtime
+- **`gitignore`** — re-include the files this member must keep tracked
+- **`lint`** — name the real rule in two suppressions, drop a dead export
+- **`deps`** — declare the yaml devDep the fleet payload needs
+- **`config`** — move the CLI config into the member tier
+- **`check`** — type the delete-guard logger explicitly
+- **`check`** — gate that the delete guard stays opt-in
+- **`config`** — declare the vendored-package aliases where the type gate reads them
+- **`deps`** — align the workspace with the published pack
+- **`deps`** — restore the payload importer the lockfile dropped
+- **`deps`** — patch published lib 6.7.0 for its two phantom dependencies
+- **`ci`** — keep the zizmor config tracked, it is not fleet payload
+- **`deps`** — restore the payload importer the reconcile dropped
+- **`config`** — _name the layered reader config/repo, not fleet-repo_
+- **`deps`** — repin fleet-pack to 3553c56 and reconcile the lockfile catalog
 
 ## [6.7.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.7.0) - 2026-08-05
 
