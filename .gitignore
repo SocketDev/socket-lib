@@ -126,7 +126,7 @@ dist/
 # so each is ignored in BOTH the repo-root live copy AND the template/base/
 # mirror — the fleet keeps ignores in this root block, not nested per-dir
 # files. Keep in lock-step with RELEASE_ONLY_DIR_MIRROR_FILES (scripts/repo/
-# sync-scaffolding/dir-mirror-skip.mts). See docs/fleet/agents.md/release-vs-cascade.md.
+# sync-scaffolding/dir-mirror-skip.mts). See docs/agents.md/fleet/release-vs-cascade.md.
 **/.claude/hooks/fleet/_dist/fleet-pack.cjs
 # Prebuilt dispatch-launcher variants (one per platform-arch), CI
 # cross-compiled and hydrated from the release bundle; the host build
@@ -208,7 +208,7 @@ Thumbs.db
 **/.vitiate/
 
 # Vendored / upstream trees + conformance fixtures — untracked-by-default
-# (docs/fleet/agents.md/untracked-by-default.md): someone else's source or
+# (docs/agents.md/fleet/untracked-by-default.md): someone else's source or
 # synced corpora, restored by the owning sync/build step, never hand-edited.
 # A repo that must track a hand-written file inside one re-includes it
 # OUTSIDE this block (!<dir>/ then <dir>/* then !<dir>/<file>).
