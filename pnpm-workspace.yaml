@@ -339,7 +339,7 @@ overrides:
   '@grpc/proto-loader': '0.8.1'
   '@inquirer/ansi': '2.0.7'
   '@inquirer/core': '11.2.1'
-  '@inquirer/figures': '2.0.7'
+  '@inquirer/figures': '2.0.8'
   '@npmcli/arborist': '9.9.1'
   '@npmcli/git': '6.0.3'
   '@npmcli/installed-package-contents': '4.0.0'
@@ -386,7 +386,7 @@ overrides:
   'diff': '9.0.0'
   'estraverse': '5.3.0'
   'fast-uri': '3.1.5'
-  'globby': '16.2.3'
+  'globby': '16.2.4'
   'has-flag': '5.0.1'
   # 4.12.25+ clears GHSA-88fw-hqm2-52qc (hono CORS wildcard+credentials reflect),
   # pulled transitively via @anthropic-ai/claude-agent-sdk.
