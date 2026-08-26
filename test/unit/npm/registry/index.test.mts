@@ -23,16 +23,16 @@ import {
   hasProvenance,
   isVersionPublished,
   parsePackument,
-} from '../../../src/npm/registry.mjs'
+} from '../../../../src/npm/registry/index.mjs'
 
 import type {
   AttestationBundle,
   NpmHttpOptions,
   PackumentVersion,
-} from '../../../src/npm/registry.mjs'
+} from '../../../../src/npm/registry/index.mjs'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
-const fixturesDir = path.resolve(testDir, '../../fixtures/npm')
+const fixturesDir = path.resolve(testDir, '../../../fixtures/npm')
 const localRequire = createRequire(import.meta.url)
 
 const packumentFixture = localRequire(
@@ -46,6 +46,9 @@ function makeHttpAdapter(
   responses: Map<string, unknown>,
 ): NpmHttpOptions['http'] {
   return {
+    async bytes(): Promise<Uint8Array> {
+      throw new Error('makeHttpAdapter: this adapter serves JSON only')
+    },
     async json<T>(url: string): Promise<T> {
       if (!responses.has(url)) {
         throw new Error(`Unexpected URL in test: ${url}`)
@@ -328,6 +331,9 @@ describe('getAttestations (nock-mocked http adapter)', () => {
 
   it('returns undefined on fetch error (404-equivalent)', async () => {
     const http: NpmHttpOptions['http'] = {
+      async bytes(): Promise<Uint8Array> {
+        throw new Error('Not found')
+      },
       async json() {
         throw new Error('Not found')
       },
@@ -389,6 +395,9 @@ describe('nock integration — getPackument with nock-intercepted http adapter',
 
     let capturedUrl: string | undefined
     const http: NpmHttpOptions['http'] = {
+      async bytes(): Promise<Uint8Array> {
+        throw new Error('this adapter serves JSON only')
+      },
       async json<T>(url: string): Promise<T> {
         capturedUrl = url
         const responses = new Map([[url, packumentFixture]])
@@ -405,6 +414,9 @@ describe('nock integration — getPackument with nock-intercepted http adapter',
 describe('isVersionPublished', () => {
   function httpReturning(body: unknown): NpmHttpOptions['http'] {
     return {
+      async bytes(): Promise<Uint8Array> {
+        throw new Error('httpReturning: this adapter serves JSON only')
+      },
       async json<T>(): Promise<T> {
         return body as T
       },
@@ -413,6 +425,9 @@ describe('isVersionPublished', () => {
 
   function httpThrowing(): NpmHttpOptions['http'] {
     return {
+      async bytes(): Promise<Uint8Array> {
+        throw new Error('404 Not Found')
+      },
       async json<T>(): Promise<T> {
         throw new Error('404 Not Found')
       },

@@ -13,9 +13,9 @@ import {
   fetchLatestPublishedVersionChecked,
   getMaintainers,
   httpErrorStatus,
-} from '../../../src/npm/registry-live.mjs'
+} from '../../../../src/npm/registry/live.mjs'
 
-import type { NpmLiveHttpOptions } from '../../../src/npm/registry-live.mjs'
+import type { NpmHttpOptions } from '../../../../src/npm/registry/index.mjs'
 
 interface RecordedCall {
   headers: Record<string, string> | undefined
@@ -25,9 +25,16 @@ interface RecordedCall {
 function makeAdapter(
   respond: (url: string) => unknown,
   calls: RecordedCall[],
-): NpmLiveHttpOptions {
+): NpmHttpOptions {
   return {
     http: {
+      async bytes(
+        url: string,
+        init?: { headers?: Record<string, string> | undefined } | undefined,
+      ): Promise<Uint8Array> {
+        calls.push({ headers: init?.headers, url })
+        return new Uint8Array(0)
+      },
       async json<T>(
         url: string,
         init?: { headers?: Record<string, string> | undefined } | undefined,
@@ -138,8 +145,11 @@ describe('fetchLatestPublishedVersionChecked', () => {
   })
 
   it('treats a 404 as reachable-but-never-published', async () => {
-    const options: NpmLiveHttpOptions = {
+    const options: NpmHttpOptions = {
       http: {
+        async bytes(): Promise<never> {
+          throw new Error('this adapter serves JSON only')
+        },
         async json(): Promise<never> {
           throw make404()
         },
@@ -150,8 +160,11 @@ describe('fetchLatestPublishedVersionChecked', () => {
   })
 
   it('treats a network error as unreachable, never as unpublished', async () => {
-    const options: NpmLiveHttpOptions = {
+    const options: NpmHttpOptions = {
       http: {
+        async bytes(): Promise<never> {
+          throw new Error('this adapter serves JSON only')
+        },
         async json(): Promise<never> {
           throw new Error('ETIMEDOUT')
         },
@@ -162,8 +175,11 @@ describe('fetchLatestPublishedVersionChecked', () => {
   })
 
   it('treats a 5xx as unreachable', async () => {
-    const options: NpmLiveHttpOptions = {
+    const options: NpmHttpOptions = {
       http: {
+        async bytes(): Promise<never> {
+          throw new Error('this adapter serves JSON only')
+        },
         async json(): Promise<never> {
           const e = new Error('HTTP 503')
           ;(e as unknown as { response: { status: number } }).response = {
@@ -214,8 +230,11 @@ describe('getMaintainers', () => {
   })
 
   it('returns undefined on a 404 (never published)', async () => {
-    const options: NpmLiveHttpOptions = {
+    const options: NpmHttpOptions = {
       http: {
+        async bytes(): Promise<never> {
+          throw new Error('this adapter serves JSON only')
+        },
         async json(): Promise<never> {
           throw make404()
         },
@@ -225,8 +244,11 @@ describe('getMaintainers', () => {
   })
 
   it('propagates non-404 failures so membership gates fail closed', async () => {
-    const options: NpmLiveHttpOptions = {
+    const options: NpmHttpOptions = {
       http: {
+        async bytes(): Promise<never> {
+          throw new Error('this adapter serves JSON only')
+        },
         async json(): Promise<never> {
           throw new Error('ECONNRESET')
         },

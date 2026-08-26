@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for `src/npm/registry.ts`'s `parseProvenancePredicate` —
+ * @file Unit tests for `src/npm/registry/index.mts`'s `parseProvenancePredicate` —
  *   parsing the npm transparency-log attestation bundle down to the SLSA
  *   provenance predicate, including every malformed-entry `continue` path
  *   (missing/invalid verificationMaterial, non-JSON content, a non-string or
@@ -14,12 +14,12 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { parseProvenancePredicate } from '../../../src/npm/registry.mjs'
+import { parseProvenancePredicate } from '../../../../src/npm/registry/index.mjs'
 
-import type { AttestationBundle } from '../../../src/npm/registry.mjs'
+import type { AttestationBundle } from '../../../../src/npm/registry/index.mjs'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
-const fixturesDir = path.resolve(testDir, '../../fixtures/npm')
+const fixturesDir = path.resolve(testDir, '../../../fixtures/npm')
 const localRequire = createRequire(import.meta.url)
 
 const attestationFixture = localRequire(

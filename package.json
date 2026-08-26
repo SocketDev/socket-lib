@@ -2372,22 +2372,148 @@
       "default": "./dist/npm/meta-types.js"
     },
     "./npm/registry": {
-      "source": "./src/npm/registry.mts",
+      "source": "./src/npm/registry/index.mts",
       "browser": {
-        "types": "./dist/npm/registry.d.ts",
-        "default": "./dist/npm/registry.js"
+        "types": "./dist/npm/registry/index.d.ts",
+        "default": "./dist/npm/registry/index.js"
       },
-      "types": "./dist/npm/registry.d.ts",
-      "default": "./dist/npm/registry.js"
+      "types": "./dist/npm/registry/index.d.ts",
+      "default": "./dist/npm/registry/index.js"
     },
-    "./npm/registry-live": {
-      "source": "./src/npm/registry-live.mts",
+    "./npm/registry/access": {
+      "source": "./src/npm/registry/access.mts",
       "browser": {
-        "types": "./dist/npm/registry-live.d.ts",
-        "default": "./dist/npm/registry-live.js"
+        "types": "./dist/npm/registry/access.d.ts",
+        "default": "./dist/npm/registry/access.js"
       },
-      "types": "./dist/npm/registry-live.d.ts",
-      "default": "./dist/npm/registry-live.js"
+      "types": "./dist/npm/registry/access.d.ts",
+      "default": "./dist/npm/registry/access.js"
+    },
+    "./npm/registry/audit": {
+      "source": "./src/npm/registry/audit.mts",
+      "browser": {
+        "types": "./dist/npm/registry/audit.d.ts",
+        "default": "./dist/npm/registry/audit.js"
+      },
+      "types": "./dist/npm/registry/audit.d.ts",
+      "default": "./dist/npm/registry/audit.js"
+    },
+    "./npm/registry/cache": {
+      "source": "./src/npm/registry/cache.mts",
+      "browser": {
+        "types": "./dist/npm/registry/cache.d.ts",
+        "default": "./dist/npm/registry/cache.js"
+      },
+      "types": "./dist/npm/registry/cache.d.ts",
+      "default": "./dist/npm/registry/cache.js"
+    },
+    "./npm/registry/client": {
+      "source": "./src/npm/registry/client.mts",
+      "browser": {
+        "types": "./dist/npm/registry/client.d.ts",
+        "default": "./dist/npm/registry/client.js"
+      },
+      "types": "./dist/npm/registry/client.d.ts",
+      "default": "./dist/npm/registry/client.js"
+    },
+    "./npm/registry/live": {
+      "source": "./src/npm/registry/live.mts",
+      "browser": {
+        "types": "./dist/npm/registry/live.d.ts",
+        "default": "./dist/npm/registry/live.js"
+      },
+      "types": "./dist/npm/registry/live.d.ts",
+      "default": "./dist/npm/registry/live.js"
+    },
+    "./npm/registry/oidc": {
+      "source": "./src/npm/registry/oidc.mts",
+      "browser": {
+        "types": "./dist/npm/registry/oidc.d.ts",
+        "default": "./dist/npm/registry/oidc.js"
+      },
+      "types": "./dist/npm/registry/oidc.d.ts",
+      "default": "./dist/npm/registry/oidc.js"
+    },
+    "./npm/registry/org": {
+      "source": "./src/npm/registry/org.mts",
+      "browser": {
+        "types": "./dist/npm/registry/org.d.ts",
+        "default": "./dist/npm/registry/org.js"
+      },
+      "types": "./dist/npm/registry/org.d.ts",
+      "default": "./dist/npm/registry/org.js"
+    },
+    "./npm/registry/publish": {
+      "source": "./src/npm/registry/publish.mts",
+      "browser": {
+        "types": "./dist/npm/registry/publish.d.ts",
+        "default": "./dist/npm/registry/publish.js"
+      },
+      "types": "./dist/npm/registry/publish.d.ts",
+      "default": "./dist/npm/registry/publish.js"
+    },
+    "./npm/registry/search": {
+      "source": "./src/npm/registry/search.mts",
+      "browser": {
+        "types": "./dist/npm/registry/search.d.ts",
+        "default": "./dist/npm/registry/search.js"
+      },
+      "types": "./dist/npm/registry/search.d.ts",
+      "default": "./dist/npm/registry/search.js"
+    },
+    "./npm/registry/stage": {
+      "source": "./src/npm/registry/stage.mts",
+      "browser": {
+        "types": "./dist/npm/registry/stage.d.ts",
+        "default": "./dist/npm/registry/stage.js"
+      },
+      "types": "./dist/npm/registry/stage.d.ts",
+      "default": "./dist/npm/registry/stage.js"
+    },
+    "./npm/registry/stage-actions": {
+      "source": "./src/npm/registry/stage-actions.mts",
+      "browser": {
+        "types": "./dist/npm/registry/stage-actions.d.ts",
+        "default": "./dist/npm/registry/stage-actions.js"
+      },
+      "types": "./dist/npm/registry/stage-actions.d.ts",
+      "default": "./dist/npm/registry/stage-actions.js"
+    },
+    "./npm/registry/stage-tarball": {
+      "source": "./src/npm/registry/stage-tarball.mts",
+      "browser": {
+        "types": "./dist/npm/registry/stage-tarball.d.ts",
+        "default": "./dist/npm/registry/stage-tarball.js"
+      },
+      "types": "./dist/npm/registry/stage-tarball.d.ts",
+      "default": "./dist/npm/registry/stage-tarball.js"
+    },
+    "./npm/registry/team": {
+      "source": "./src/npm/registry/team.mts",
+      "browser": {
+        "types": "./dist/npm/registry/team.d.ts",
+        "default": "./dist/npm/registry/team.js"
+      },
+      "types": "./dist/npm/registry/team.d.ts",
+      "default": "./dist/npm/registry/team.js"
+    },
+    "./npm/registry/tokens": {
+      "source": "./src/npm/registry/tokens.mts",
+      "browser": {
+        "types": "./dist/npm/registry/tokens.d.ts",
+        "default": "./dist/npm/registry/tokens.js"
+      },
+      "types": "./dist/npm/registry/tokens.d.ts",
+      "default": "./dist/npm/registry/tokens.js"
+    },
+    "./npm/registry/trust": {
+      "source": "./src/npm/registry/trust.mts",
+      "browser": {
+        "types": "./dist/npm/registry/trust.d.ts",
+        "default": "./dist/npm/registry/trust.js"
+      },
+      "types": "./dist/npm/registry/trust.d.ts",
+      "default": "./dist/npm/registry/trust.js"
     },
     "./objects/getters": {
       "source": "./src/objects/getters.mts",

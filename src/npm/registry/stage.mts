@@ -18,11 +18,10 @@
  *   "I could not ask" are different facts and a pipeline must not confuse them.
  */
 
-import { encodeRegistryName } from './registry.mjs'
+import { npmAuthHeaders, resolveRegistry } from './client.mjs'
+import { encodeRegistryName } from './index.mjs'
 
-import type { NpmLiveHttpOptions } from './registry-live.mjs'
-
-const NPM_REGISTRY = 'https://registry.npmjs.org'
+import type { NpmHttpOptions } from './index.mjs'
 
 /**
  * Every lifecycle state npm reports for an exact version.
@@ -61,12 +60,32 @@ export interface NpmStageItem {
 
 export interface NpmStageListRead {
   readonly items: readonly NpmStageItem[]
+  readonly page?: number | undefined
+  readonly perPage?: number | undefined
   /**
    * False when the registry could not be asked. Distinct from an empty
    * `items`, which means it answered and nothing is staged.
    */
   readonly reachable: boolean
+  /**
+   * How many staged items exist across every page, not how many are on this
+   * one. Paging on `items.length` alone silently stops at the first short
+   * page.
+   */
   readonly total?: number | undefined
+}
+
+/**
+ * One staged item read on its own, or the fact that it could not be read.
+ */
+export interface NpmStageItemRead {
+  readonly item?: NpmStageItem | undefined
+  /**
+   * False when the registry could not be asked. A reachable read with no
+   * `item` means npm answered 404: no such staged version, or none this token
+   * may see.
+   */
+  readonly reachable: boolean
 }
 
 export interface NpmVersionStatusRead {
@@ -75,10 +94,43 @@ export interface NpmVersionStatusRead {
 }
 
 /**
- * Authorization header for a token-bearing read.
+ * Authorization header for a token-bearing read. Delegates to
+ * `npmAuthHeaders` so this client has exactly one place that decides how a
+ * credential is put on the wire.
  */
 export function authHeaders(token: string): Record<string, string> {
-  return { authorization: `Bearer ${token}` }
+  return npmAuthHeaders({ token })
+}
+
+/**
+ * One staged version looked up directly by its stage id.
+ *
+ * A 404 is reported as `reachable: true` with no item, matching
+ * {@link fetchVersionStatus}: npm answers 404 both for "no such stage id" and
+ * for "not yours to see", so neither is a failure worth retrying.
+ */
+export async function fetchStagedItem(
+  stageId: string,
+  options: NpmHttpOptions & {
+    registry?: string | undefined
+    token: string
+  },
+): Promise<NpmStageItemRead> {
+  const opts = { __proto__: null, ...options } as typeof options
+  const registry = resolveRegistry(opts.registry)
+  try {
+    const json = await opts.http.json<NpmStageItem>(
+      `${registry}/-/stage/${encodeURIComponent(stageId)}`,
+      { headers: authHeaders(opts.token) },
+    )
+    return { item: json, reachable: true }
+  } catch (e) {
+    const status = (e as { status?: number | undefined } | null)?.status
+    if (status === 404) {
+      return { item: undefined, reachable: true }
+    }
+    return { reachable: false }
+  }
 }
 
 /**
@@ -86,18 +138,25 @@ export function authHeaders(token: string): Record<string, string> {
  *
  * `packageName` narrows the list to one package, which is what a release
  * pipeline wants: it is asking about its own package, not the whole account.
+ * `page` is 0-indexed and `perPage` is capped at 100 by npm.
  */
 export async function fetchStagedVersions(
-  options: NpmLiveHttpOptions & {
+  options: NpmHttpOptions & {
     packageName?: string | undefined
+    page?: number | undefined
     perPage?: number | undefined
+    registry?: string | undefined
     token: string
   },
 ): Promise<NpmStageListRead> {
   const opts = { __proto__: null, ...options } as typeof options
+  const registry = resolveRegistry(opts.registry)
   const query: string[] = []
   if (opts.packageName) {
     query.push(`package=${encodeRegistryName(opts.packageName)}`)
+  }
+  if (opts.page !== undefined) {
+    query.push(`page=${String(opts.page)}`)
   }
   if (opts.perPage !== undefined) {
     query.push(`perPage=${String(opts.perPage)}`)
@@ -106,12 +165,16 @@ export async function fetchStagedVersions(
   try {
     const json = await opts.http.json<{
       items?: NpmStageItem[] | undefined
+      page?: number | undefined
+      perPage?: number | undefined
       total?: number | undefined
-    }>(`${NPM_REGISTRY}/-/stage${suffix}`, {
+    }>(`${registry}/-/stage${suffix}`, {
       headers: authHeaders(opts.token),
     })
     return {
       items: Array.isArray(json.items) ? json.items : [],
+      page: json.page,
+      perPage: json.perPage,
       reachable: true,
       total: json.total,
     }
@@ -130,10 +193,14 @@ export async function fetchStagedVersions(
 export async function fetchVersionStatus(
   packageName: string,
   version: string,
-  options: NpmLiveHttpOptions & { token: string },
+  options: NpmHttpOptions & {
+    registry?: string | undefined
+    token: string
+  },
 ): Promise<NpmVersionStatusRead> {
   const opts = { __proto__: null, ...options } as typeof options
-  const url = `${NPM_REGISTRY}/-/package/${encodeRegistryName(packageName)}/version/${encodeURIComponent(version)}/status`
+  const registry = resolveRegistry(opts.registry)
+  const url = `${registry}/-/package/${encodeRegistryName(packageName)}/version/${encodeURIComponent(version)}/status`
   try {
     const json = await opts.http.json<{
       status?: NpmVersionStatus | undefined
@@ -158,7 +225,7 @@ export async function fetchVersionStatus(
 export async function findStagedVersion(
   packageName: string,
   version: string,
-  options: NpmLiveHttpOptions & { token: string },
+  options: NpmHttpOptions & { token: string },
 ): Promise<NpmStageItem | undefined> {
   const read = await fetchStagedVersions({ ...options, packageName })
   if (!read.reachable) {

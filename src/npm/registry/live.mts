@@ -1,36 +1,24 @@
 /**
  * @file Live (CDN-cache-defeating) npm registry reads — the cache-busted
  *   packument fetch, the checked latest-version read, and the maintainer-list
- *   read. Sits beside `./registry` (which owns the pure parsers and plain
+ *   read. Sits beside `./index` (which owns the pure parsers and plain
  *   packument reads) so both stay under the file-size cap. Browser-safe: the
- *   HTTP adapter is injected by the caller, and the adapter here accepts an
- *   optional `headers` init so the no-cache request headers reach the wire.
- *   Node callers pass `httpJson` from `@socketsecurity/lib/http-request`
- *   (its options object accepts `headers`); browser callers pass the
- *   `http-request/browser` twin.
+ *   HTTP adapter is injected by the caller, and every adapter method accepts an
+ *   optional init carrying request headers — the cache-busting reads are
+ *   pointless if the no-cache headers never reach the wire. Node callers pass
+ *   `{ bytes: httpBytes, json: httpJson }` from
+ *   `@socketsecurity/lib/http-request`; browser callers pass the
+ *   `http-request/browser` twin. The adapter type is `NpmHttpOptions` from
+ *   `./index`, which is the one definition of that method set for the whole
+ *   directory.
  */
 
-import { arrayToSorted } from '../polyfills/array.mjs'
-import { encodeRegistryName } from './registry.mjs'
+import { arrayToSorted } from '../../polyfills/array.mjs'
+import { encodeRegistryName } from './index.mjs'
+
+import type { NpmHttpOptions } from './index.mjs'
 
 const NPM_REGISTRY = 'https://registry.npmjs.org'
-
-/**
- * Injectable HTTP adapter for the live reads. Like `NpmHttpOptions` in
- * `./registry`, but the `json` method takes an optional init carrying request
- * headers — the cache-busting reads are pointless if the no-cache headers
- * never reach the wire. An adapter that ignores the second parameter still
- * satisfies the type, so `NpmHttpOptions` adapters remain usable where header
- * fidelity does not matter.
- */
-export interface NpmLiveHttpOptions {
-  http: {
-    json<T>(
-      url: string,
-      init?: { headers?: Record<string, string> | undefined } | undefined,
-    ): Promise<T>
-  }
-}
 
 export interface CacheBustedRead {
   headers: Record<string, string>
@@ -75,7 +63,7 @@ export function cacheBustedRead(
  */
 export async function fetchLatestPublishedVersionChecked(
   name: string,
-  options: NpmLiveHttpOptions & { nonce?: string | undefined },
+  options: NpmHttpOptions & { nonce?: string | undefined },
 ): Promise<RegistryLatestRead> {
   const opts = { __proto__: null, ...options } as typeof options
   const read = cacheBustedRead(
@@ -105,7 +93,7 @@ export async function fetchLatestPublishedVersionChecked(
  */
 export async function getMaintainers(
   name: string,
-  options: NpmLiveHttpOptions & { nonce?: string | undefined },
+  options: NpmHttpOptions & { nonce?: string | undefined },
 ): Promise<string[] | undefined> {
   const opts = { __proto__: null, ...options } as typeof options
   const read = cacheBustedRead(

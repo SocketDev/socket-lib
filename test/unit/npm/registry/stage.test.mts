@@ -12,7 +12,7 @@ import {
   fetchVersionStatus,
   findStagedVersion,
   isPendingStatus,
-} from '../../../src/npm/registry-stage.mjs'
+} from '../../../../src/npm/registry/stage.mjs'
 
 /**
  * An adapter that answers `payload` for any URL, recording what it was asked.
@@ -25,6 +25,13 @@ function stubHttp(payload: unknown) {
   return {
     calls,
     http: {
+      async bytes(
+        url: string,
+        init?: { headers?: Record<string, string> | undefined } | undefined,
+      ): Promise<Uint8Array> {
+        calls.push({ headers: init?.headers, url })
+        return new Uint8Array(0)
+      },
       async json<T>(
         url: string,
         init?: { headers?: Record<string, string> | undefined } | undefined,
@@ -40,10 +47,14 @@ function stubHttp(payload: unknown) {
  * An adapter that always rejects, with an optional HTTP status.
  */
 function failingHttp(status?: number | undefined) {
+  const error = () => Object.assign(new Error('boom'), status ? { status } : {})
   return {
     http: {
+      async bytes(): Promise<Uint8Array> {
+        throw error()
+      },
       async json<T>(): Promise<T> {
-        throw Object.assign(new Error('boom'), status ? { status } : {})
+        throw error()
       },
     },
   }
@@ -87,6 +98,38 @@ describe('fetchStagedVersions', () => {
     assert.match(
       stub.calls[0]!.url,
       /package=%40example%2Fpkg|package=@example%2Fpkg/,
+    )
+  })
+
+  test('puts page and perPage on the query string', async () => {
+    const stub = stubHttp({ items: [] })
+    await fetchStagedVersions({ ...stub, page: 2, perPage: 50, token: 'tok' })
+    assert.match(stub.calls[0]!.url, /page=2/)
+    assert.match(stub.calls[0]!.url, /perPage=50/)
+  })
+
+  test('reports total, so paging does not stop at a short page', async () => {
+    const stub = stubHttp({
+      items: [STAGED_ITEM],
+      page: 0,
+      perPage: 10,
+      total: 42,
+    })
+    const read = await fetchStagedVersions({ ...stub, token: 'tok' })
+    assert.equal(read.total, 42)
+    assert.equal(read.page, 0)
+    assert.equal(read.perPage, 10)
+  })
+
+  test('honors a registry override', async () => {
+    const stub = stubHttp({ items: [] })
+    await fetchStagedVersions({
+      ...stub,
+      registry: 'https://registry.example.test/',
+      token: 'tok',
+    })
+    assert.ok(
+      stub.calls[0]!.url.startsWith('https://registry.example.test/-/stage'),
     )
   })
 

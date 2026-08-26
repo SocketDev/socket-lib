@@ -2,10 +2,11 @@
  * @file Browser-safe npm registry client — pure parsers + injectable-fetch
  *   shell. Safe for Chrome MV3 service workers, content scripts, and any
  *   environment without `node:*` builtins. The HTTP adapter is injected by the
- *   caller (`{ http: { json } }`) so Node callers pass `httpJson` from
- *   `@socketsecurity/lib/http-request` and browser callers pass `httpJson` from
- *   `@socketsecurity/lib/http-request/browser`. No network dependency at module
- *   load time.
+ *   caller (`{ http: { bytes, json } }`) so Node callers pass `httpBytes` +
+ *   `httpJson` from `@socketsecurity/lib/http-request` and browser callers pass
+ *   the same pair from `@socketsecurity/lib/http-request/browser`. No network
+ *   dependency at module load time. `NpmHttpAdapter` below is the single
+ *   definition of that method set; every sibling module composes it.
  *
  *   ## Endpoints covered
  *
@@ -40,7 +41,7 @@
 import {
   StringPrototypeIndexOf,
   StringPrototypeSlice,
-} from '../primordials/string.mjs'
+} from '../../primordials/string.mjs'
 
 const NPM_REGISTRY = 'https://registry.npmjs.org'
 const NPM_DOWNLOADS_API = 'https://api.npmjs.org'
@@ -48,12 +49,55 @@ const CDN_JSDELIVR = 'https://cdn.jsdelivr.net'
 const SLSA_PROVENANCE_TYPE = 'https://slsa.dev/provenance/v1'
 
 /**
- * Injectable HTTP adapter. Pass `httpJson` from
- * `@socketsecurity/lib/http-request` (Node) or
- * `@socketsecurity/lib/http-request/browser` (browser / extension).
+ * The parts of a request every npm client here varies. Deliberately a subset
+ * of both the Node and browser `HttpRequestOptions`, so a real adapter
+ * satisfies it without a wrapper and a test double stays a few lines long.
+ *
+ * `retries` and `timeout` are here because the metadata client
+ * (`../meta-cache/shared`) forwards both to the same adapter, and both Node's
+ * `HttpRequestOptions` and the browser's `BrowserHttpRequestOptions` accept
+ * them under these exact names. They stay OPTIONAL, so every existing adapter
+ * and test double satisfies the type unchanged; an adapter free to ignore
+ * them is still a valid adapter.
+ */
+export interface NpmHttpInit {
+  body?: string | undefined
+  headers?: Record<string, string> | undefined
+  method?: string | undefined
+  retries?: number | undefined
+  timeout?: number | undefined
+}
+
+/**
+ * The one injectable HTTP adapter every npm registry module in this directory
+ * accepts. Declared here so the method set has a single definition rather than
+ * one per module.
+ *
+ * `bytes` is not optional. `GET /-/stage/{stage-id}/tarball` answers
+ * `application/octet-stream`, and a client that can only decode text has no
+ * honest way to carry those bytes: UTF-8 decoding replaces every invalid
+ * sequence instead of failing, so a tarball comes back damaged and no error is
+ * raised. An adapter that cannot hold bytes cannot serve this API, so the type
+ * says so up front instead of letting the corruption happen at run time.
+ *
+ * Both methods must throw on a non-2xx status; the error only needs to carry
+ * the status as `status` or `response.status`, which is what `httpErrorStatus`
+ * in `./live` reads.
+ *
+ * Node callers pass `{ bytes: httpBytes, json: httpJson }` from
+ * `@socketsecurity/lib/http-request`; browser and extension callers pass the
+ * same pair from `@socketsecurity/lib/http-request/browser`.
+ */
+export interface NpmHttpAdapter {
+  bytes(url: string, init?: NpmHttpInit | undefined): Promise<Uint8Array>
+  json<T>(url: string, init?: NpmHttpInit | undefined): Promise<T>
+}
+
+/**
+ * Injectable HTTP adapter for the public, unauthenticated registry reads.
  */
 export interface NpmHttpOptions {
-  http: { json<T>(url: string): Promise<T> }
+  http: NpmHttpAdapter
 }
 
 export interface AttestationBundleEntry {
