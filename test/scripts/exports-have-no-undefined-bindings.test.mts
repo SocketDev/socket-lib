@@ -107,12 +107,24 @@ describe('parseProbeOutput', () => {
     expect(
       parseProbeOutput(
         JSON.stringify({
-          findings: [{ binding: 'a', file: '/f.js', source: '/s.js' }],
+          findings: [
+            {
+              binding: 'exampleFn',
+              file: '/path/to/barrel.js',
+              source: '/path/to/leaf.js',
+            },
+          ],
           observed: 3,
         }),
       ),
     ).toEqual({
-      findings: [{ binding: 'a', file: '/f.js', source: '/s.js' }],
+      findings: [
+        {
+          binding: 'exampleFn',
+          file: '/path/to/barrel.js',
+          source: '/path/to/leaf.js',
+        },
+      ],
       observed: 3,
     })
   })
