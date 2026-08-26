@@ -209,6 +209,8 @@ export async function deleteNpmToken(
  *
  * Token values in the reply are redacted by npm. Never cached: this is a
  * per-credential inventory of credentials.
+ *
+ * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function fetchNpmTokens(
   options: NpmRegistryHttpOptions &
