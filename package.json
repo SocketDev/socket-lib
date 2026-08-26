@@ -2398,6 +2398,15 @@
       "types": "./dist/npm/registry/audit.d.ts",
       "default": "./dist/npm/registry/audit.js"
     },
+    "./npm/registry/auth": {
+      "source": "./src/npm/registry/auth.mts",
+      "browser": {
+        "types": "./dist/npm/registry/auth.d.ts",
+        "default": "./dist/npm/registry/auth.js"
+      },
+      "types": "./dist/npm/registry/auth.d.ts",
+      "default": "./dist/npm/registry/auth.js"
+    },
     "./npm/registry/cache": {
       "source": "./src/npm/registry/cache.mts",
       "browser": {
