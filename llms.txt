@@ -1,8 +1,8 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 627 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 649 subpath exports, grouped by namespace.
 
-Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
+Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
 ## Top-level
 
@@ -519,12 +519,34 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 
 ## npm/
 
-- [@socketsecurity/lib/npm/meta](./dist/npm/meta.d.ts)
-- [@socketsecurity/lib/npm/meta-cache](./dist/npm/meta-cache.d.ts)
+- [@socketsecurity/lib/npm/meta](./dist/npm/meta/node.d.ts)
+- [@socketsecurity/lib/npm/meta-cache](./dist/npm/meta-cache/node.d.ts)
+- [@socketsecurity/lib/npm/meta-cache/browser](./dist/npm/meta-cache/browser.d.ts)
+- [@socketsecurity/lib/npm/meta-cache/node](./dist/npm/meta-cache/node.d.ts)
 - [@socketsecurity/lib/npm/meta-slice](./dist/npm/meta-slice.d.ts)
 - [@socketsecurity/lib/npm/meta-types](./dist/npm/meta-types.d.ts)
-- [@socketsecurity/lib/npm/registry](./dist/npm/registry.d.ts)
-- [@socketsecurity/lib/npm/registry-live](./dist/npm/registry-live.d.ts)
+- [@socketsecurity/lib/npm/meta/browser](./dist/npm/meta/browser.d.ts)
+- [@socketsecurity/lib/npm/meta/node](./dist/npm/meta/node.d.ts)
+- [@socketsecurity/lib/npm/registry](./dist/npm/registry/index.d.ts)
+- [@socketsecurity/lib/npm/registry/access](./dist/npm/registry/access.d.ts)
+- [@socketsecurity/lib/npm/registry/audit](./dist/npm/registry/audit.d.ts)
+- [@socketsecurity/lib/npm/registry/auth](./dist/npm/registry/auth.d.ts)
+- [@socketsecurity/lib/npm/registry/cache](./dist/npm/registry/cache.d.ts)
+- [@socketsecurity/lib/npm/registry/client](./dist/npm/registry/client.d.ts)
+- [@socketsecurity/lib/npm/registry/live](./dist/npm/registry/live.d.ts)
+- [@socketsecurity/lib/npm/registry/oidc](./dist/npm/registry/oidc.d.ts)
+- [@socketsecurity/lib/npm/registry/org](./dist/npm/registry/org.d.ts)
+- [@socketsecurity/lib/npm/registry/publish](./dist/npm/registry/publish.d.ts)
+- [@socketsecurity/lib/npm/registry/search](./dist/npm/registry/search.d.ts)
+- [@socketsecurity/lib/npm/registry/stage](./dist/npm/registry/stage.d.ts)
+- [@socketsecurity/lib/npm/registry/stage-actions](./dist/npm/registry/stage-actions.d.ts)
+- [@socketsecurity/lib/npm/registry/stage-tarball](./dist/npm/registry/stage-tarball.d.ts)
+- [@socketsecurity/lib/npm/registry/tarball](./dist/npm/registry/tarball/node.d.ts)
+- [@socketsecurity/lib/npm/registry/tarball/browser](./dist/npm/registry/tarball/browser.d.ts)
+- [@socketsecurity/lib/npm/registry/tarball/node](./dist/npm/registry/tarball/node.d.ts)
+- [@socketsecurity/lib/npm/registry/team](./dist/npm/registry/team.d.ts)
+- [@socketsecurity/lib/npm/registry/tokens](./dist/npm/registry/tokens.d.ts)
+- [@socketsecurity/lib/npm/registry/trust](./dist/npm/registry/trust.d.ts)
 
 ## objects/
 
