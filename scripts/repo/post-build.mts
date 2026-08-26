@@ -85,6 +85,27 @@ async function main(): Promise<void> {
         args: ['scripts/repo/validate/external-esm-cjs.mts', ...fixArgs],
         command: 'node',
       },
+      // LAST, and in this order: an undefined export is a shipped bug, so both
+      // halves gate the build rather than only the test run. The graph walk is
+      // milliseconds and fails fast on the topology; the runtime sweep then
+      // imports every public subpath in its own process and measures what a
+      // consumer would actually get. Neither was wired here before, which is
+      // how a poisoned binding reached a release while the source comments
+      // claimed the build enforced it.
+      {
+        args: [
+          'scripts/repo/check/reexports-have-no-import-cycles.mts',
+          ...fixArgs,
+        ],
+        command: 'node',
+      },
+      {
+        args: [
+          'scripts/repo/check/exports-have-no-undefined-bindings.mts',
+          ...fixArgs,
+        ],
+        command: 'node',
+      },
     ])
 
     if (!quiet) {

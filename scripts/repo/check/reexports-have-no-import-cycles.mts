@@ -57,6 +57,18 @@ const REEXPORT_RE =
   /\bexports\.([A-Za-z_$][\w$]*)\s*=\s*([A-Za-z_$][\w$]*)\.([A-Za-z_$][\w$]*)\s*;/g
 
 /**
+ * One eager `exports.a = mod.b` re-export in a built file.
+ */
+export interface EagerReexport {
+  // The name the re-exporting module publishes.
+  exported: string
+  // The name read off the source module — the read that can return undefined.
+  local: string
+  // Absolute path of the module the value is read from.
+  target: string
+}
+
+/**
  * One re-exported binding whose source module imports the re-exporter back.
  */
 export interface ReexportCycleFinding {
@@ -92,11 +104,14 @@ export function listDistFiles(root: string): string[] {
 }
 
 /**
- * The eager re-exports in a built file, as a map of source file to the binding
- * names taken from it. A re-export that renames (`exports.a = mod.b`) counts
- * the same — the read that can return undefined is the one on the right.
+ * Every eager re-export in a built file, one record per binding.
+ *
+ * Both names are kept. `exported` is what the re-exporting module publishes,
+ * `local` is the property read off the source module — and that read is the
+ * one that can hand back undefined mid-cycle, so a checker measuring the
+ * runtime value has to know which name to look up on which side.
  */
-export function readReexports(file: string): Map<string, string[]> {
+export function readEagerReexports(file: string): EagerReexport[] {
   const source = readFileSync(file, 'utf8')
   const aliases = new Map<string, string>()
   ALIAS_RE.lastIndex = 0
@@ -108,20 +123,35 @@ export function readReexports(file: string): Map<string, string[]> {
     }
     aliasMatch = ALIAS_RE.exec(source)
   }
-  const byTarget = new Map<string, string[]>()
+  const found: EagerReexport[] = []
   REEXPORT_RE.lastIndex = 0
   let match = REEXPORT_RE.exec(source)
   while (match) {
     const target = aliases.get(match[2]!)
     if (target) {
-      const names = byTarget.get(target)
-      if (names) {
-        names.push(match[1]!)
-      } else {
-        byTarget.set(target, [match[1]!])
-      }
+      found.push({ exported: match[1]!, local: match[3]!, target })
     }
     match = REEXPORT_RE.exec(source)
+  }
+  return found
+}
+
+/**
+ * The eager re-exports in a built file, as a map of source file to the binding
+ * names taken from it. A re-export that renames (`exports.a = mod.b`) counts
+ * the same — the read that can return undefined is the one on the right.
+ */
+export function readReexports(file: string): Map<string, string[]> {
+  const byTarget = new Map<string, string[]>()
+  const found = readEagerReexports(file)
+  for (let i = 0, { length } = found; i < length; i += 1) {
+    const { exported, target } = found[i]!
+    const names = byTarget.get(target)
+    if (names) {
+      names.push(exported)
+    } else {
+      byTarget.set(target, [exported])
+    }
   }
   return byTarget
 }
