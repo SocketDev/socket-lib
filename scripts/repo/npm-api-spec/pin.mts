@@ -99,6 +99,13 @@ export interface SpecPin {
 }
 
 /**
+ * Which pin file to read or write. Tests point this at a scratch file.
+ */
+export interface SpecPinPathOptions {
+  pinPath?: string | undefined
+}
+
+/**
  * The `sha256:<hex>` digest of `bytes`, in the one checksum vocabulary the
  * fleet writes on every surface.
  */
@@ -122,8 +129,10 @@ export function isFullCommitSha(value: string): boolean {
  * on a fresh checkout of a branch that predates the pin.
  */
 export function readSpecPin(
-  pinPath: string = SPEC_PIN_PATH,
+  options?: SpecPinPathOptions | undefined,
 ): SpecPin | undefined {
+  const opts = { __proto__: null, ...options } as SpecPinPathOptions
+  const pinPath = opts.pinPath ?? SPEC_PIN_PATH
   let text: string
   try {
     text = readFileSync(pinPath, 'utf8')
@@ -159,7 +168,9 @@ export function refLabelFor(branch: string, date: Date): string {
  */
 export function writeSpecPin(
   pin: SpecPin,
-  pinPath: string = SPEC_PIN_PATH,
+  options?: SpecPinPathOptions | undefined,
 ): void {
+  const opts = { __proto__: null, ...options } as SpecPinPathOptions
+  const pinPath = opts.pinPath ?? SPEC_PIN_PATH
   writeFileSync(pinPath, `${JSON.stringify(pin, undefined, 2)}\n`)
 }

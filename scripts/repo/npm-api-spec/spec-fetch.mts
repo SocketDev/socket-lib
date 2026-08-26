@@ -39,6 +39,14 @@ export const HEAD_TTL_MS = 24 * 60 * 60 * 1000
 export const FETCH_TIMEOUT_MS = 15_000
 
 /**
+ * Which cache root a spec-cache read or write is rooted at. Tests point this
+ * at a scratch directory.
+ */
+export interface CacheDirOptions {
+  cacheDir?: string | undefined
+}
+
+/**
  * A fetched spec, keyed by repo-relative path.
  */
 export interface FetchedSpec {
@@ -69,9 +77,10 @@ export interface HeadReadOptions {
  */
 export function cacheDirForSha(
   sha: string,
-  cacheDir: string = SPEC_CACHE_DIR,
+  options?: CacheDirOptions | undefined,
 ): string {
-  return path.join(cacheDir, sha)
+  const opts = { __proto__: null, ...options } as CacheDirOptions
+  return path.join(opts.cacheDir ?? SPEC_CACHE_DIR, sha)
 }
 
 /**
@@ -82,10 +91,11 @@ export function cacheDirForSha(
 export function cacheFileFor(
   sha: string,
   specPath: string,
-  cacheDir: string = SPEC_CACHE_DIR,
+  options?: CacheDirOptions | undefined,
 ): string {
+  const opts = { __proto__: null, ...options } as CacheDirOptions
   return path.join(
-    cacheDirForSha(sha, cacheDir),
+    cacheDirForSha(sha, { cacheDir: opts.cacheDir }),
     specPath.replaceAll('/', '__'),
   )
 }
@@ -165,7 +175,7 @@ export async function readSpecPath(
 ): Promise<string | undefined> {
   const opts = { __proto__: null, ...options } as SpecReadOptions
   const cacheDir = opts.cacheDir ?? SPEC_CACHE_DIR
-  const cached = readCachedSpecFile(specPath, sha, cacheDir)
+  const cached = readCachedSpecFile(specPath, sha, { cacheDir })
   if (cached !== undefined) {
     return cached
   }
@@ -176,7 +186,7 @@ export async function readSpecPath(
   if (fetched === undefined) {
     return undefined
   }
-  writeCachedSpecFile(specPath, sha, fetched, cacheDir)
+  writeCachedSpecFile(specPath, sha, fetched, { cacheDir })
   return fetched
 }
 
@@ -186,9 +196,10 @@ export async function readSpecPath(
 export function readCachedSpecFile(
   specPath: string,
   sha: string,
-  cacheDir: string = SPEC_CACHE_DIR,
+  options?: CacheDirOptions | undefined,
 ): string | undefined {
-  const file = cacheFileFor(sha, specPath, cacheDir)
+  const opts = { __proto__: null, ...options } as CacheDirOptions
+  const file = cacheFileFor(sha, specPath, { cacheDir: opts.cacheDir })
   if (!existsSync(file)) {
     return undefined
   }
@@ -317,9 +328,10 @@ export function writeCachedSpecFile(
   specPath: string,
   sha: string,
   text: string,
-  cacheDir: string = SPEC_CACHE_DIR,
+  options?: CacheDirOptions | undefined,
 ): void {
-  const file = cacheFileFor(sha, specPath, cacheDir)
+  const opts = { __proto__: null, ...options } as CacheDirOptions
+  const file = cacheFileFor(sha, specPath, { cacheDir: opts.cacheDir })
   mkdirSync(path.dirname(file), { recursive: true })
   writeFileSync(file, text)
 }

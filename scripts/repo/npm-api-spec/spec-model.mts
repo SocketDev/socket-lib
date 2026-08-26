@@ -38,6 +38,23 @@ export const HTTP_METHODS: readonly string[] = [
 ]
 
 /**
+ * Recursion state for a schema field walk. Both are internal bookkeeping:
+ * callers pass neither, and the walk passes them down to itself.
+ */
+export interface SchemaFieldsOptions {
+  depth?: number | undefined
+  prefix?: string | undefined
+}
+
+/**
+ * Recursion state for a `$ref` walk. `depth` is internal bookkeeping the walk
+ * passes down to itself, so a cyclic schema terminates.
+ */
+export interface SchemaWalkOptions {
+  depth?: number | undefined
+}
+
+/**
  * One operation, flattened.
  */
 export interface SpecEndpoint {
@@ -121,13 +138,17 @@ export function derefNode(
   node: unknown,
   docs: SpecDocuments,
   currentFile: string,
-  depth: number = 0,
+  options?: SchemaWalkOptions | undefined,
 ): unknown {
+  const opts = { __proto__: null, ...options } as SchemaWalkOptions
+  const depth = opts.depth ?? 0
   if (depth >= MAX_SCHEMA_DEPTH) {
     return node
   }
   if (Array.isArray(node)) {
-    return node.map(entry => derefNode(entry, docs, currentFile, depth + 1))
+    return node.map(entry =>
+      derefNode(entry, docs, currentFile, { depth: depth + 1 }),
+    )
   }
   const record = readRecord(node)
   if (!record) {
@@ -139,13 +160,13 @@ export function derefNode(
     if (!target) {
       return node
     }
-    return derefNode(target.node, docs, target.file, depth + 1)
+    return derefNode(target.node, docs, target.file, { depth: depth + 1 })
   }
   const out: Record<string, unknown> = {}
   const keys = Object.keys(record)
   for (let i = 0, { length } = keys; i < length; i += 1) {
     const key = keys[i]!
-    out[key] = derefNode(record[key], docs, currentFile, depth + 1)
+    out[key] = derefNode(record[key], docs, currentFile, { depth: depth + 1 })
   }
   return out
 }
@@ -170,9 +191,11 @@ export function escapeFieldSegment(name: string): string {
  */
 export function extractSchemaFields(
   schema: unknown,
-  prefix: string = '',
-  depth: number = 0,
+  options?: SchemaFieldsOptions | undefined,
 ): string[] {
+  const opts = { __proto__: null, ...options } as SchemaFieldsOptions
+  const depth = opts.depth ?? 0
+  const prefix = opts.prefix ?? ''
   const record = readRecord(schema)
   if (!record || depth >= MAX_SCHEMA_DEPTH) {
     return []
@@ -185,11 +208,18 @@ export function extractSchemaFields(
       continue
     }
     for (let j = 0, blen = branches.length; j < blen; j += 1) {
-      out.push(...extractSchemaFields(branches[j], prefix, depth + 1))
+      out.push(
+        ...extractSchemaFields(branches[j], { depth: depth + 1, prefix }),
+      )
     }
   }
   if (record['items'] !== undefined) {
-    out.push(...extractSchemaFields(record['items'], `${prefix}[]`, depth + 1))
+    out.push(
+      ...extractSchemaFields(record['items'], {
+        depth: depth + 1,
+        prefix: `${prefix}[]`,
+      }),
+    )
   }
   const properties = readRecord(record['properties'])
   if (properties) {
@@ -199,7 +229,12 @@ export function extractSchemaFields(
       const escaped = escapeFieldSegment(name)
       const fieldPath = prefix ? `${prefix}.${escaped}` : escaped
       out.push(fieldPath)
-      out.push(...extractSchemaFields(properties[name], fieldPath, depth + 1))
+      out.push(
+        ...extractSchemaFields(properties[name], {
+          depth: depth + 1,
+          prefix: fieldPath,
+        }),
+      )
     }
   }
   return out

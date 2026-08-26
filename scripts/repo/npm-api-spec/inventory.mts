@@ -48,6 +48,13 @@ export const HELPER_DIR = path.join(REPO_ROOT, 'src', 'npm', 'registry')
 export const HELPER_DIR_LABEL = 'src/npm/registry'
 
 /**
+ * Where to read helper modules from. Tests point this at a scratch directory.
+ */
+export interface ReadHelperModulesOptions {
+  helperDir?: string | undefined
+}
+
+/**
  * The on-disk shape of the generated inventory.
  */
 export interface SpecInventoryFile {
@@ -55,6 +62,13 @@ export interface SpecInventoryFile {
   readonly endpoints: readonly SpecEndpoint[]
   readonly sha: string
   readonly specIntegrity: string
+}
+
+/**
+ * Which inventory file to read or write. Tests point this at a scratch file.
+ */
+export interface SpecInventoryPathOptions {
+  inventoryPath?: string | undefined
 }
 
 /**
@@ -73,8 +87,10 @@ export function buildSpecInventory(spec: FetchedSpec): SpecInventory {
  * is skipped, so one bad file degrades the report rather than killing it.
  */
 export function readHelperModules(
-  helperDir: string = HELPER_DIR,
+  options?: ReadHelperModulesOptions | undefined,
 ): HelperModule[] {
+  const opts = { __proto__: null, ...options } as ReadHelperModulesOptions
+  const helperDir = opts.helperDir ?? HELPER_DIR
   const out: HelperModule[] = []
   const names = readdirSync(helperDir)
     .filter(name => name.endsWith('.mts'))
@@ -96,8 +112,10 @@ export function readHelperModules(
  * The committed inventory, or undefined when it is absent or unreadable.
  */
 export function readSpecInventory(
-  inventoryPath: string = SPEC_INVENTORY_PATH,
+  options?: SpecInventoryPathOptions | undefined,
 ): SpecInventory | undefined {
+  const opts = { __proto__: null, ...options } as SpecInventoryPathOptions
+  const inventoryPath = opts.inventoryPath ?? SPEC_INVENTORY_PATH
   let parsed: unknown
   try {
     parsed = JSON.parse(readFileSync(inventoryPath, 'utf8'))
@@ -155,8 +173,10 @@ export async function formatGeneratedFiles(
  */
 export function writeSpecInventory(
   inventory: SpecInventory,
-  inventoryPath: string = SPEC_INVENTORY_PATH,
+  options?: SpecInventoryPathOptions | undefined,
 ): void {
+  const opts = { __proto__: null, ...options } as SpecInventoryPathOptions
+  const inventoryPath = opts.inventoryPath ?? SPEC_INVENTORY_PATH
   const file: SpecInventoryFile = {
     '//': GENERATED_BANNER,
     endpoints: inventory.endpoints,

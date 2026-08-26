@@ -126,24 +126,26 @@ describe('the pin round-trip', () => {
 
   it('reads back exactly what it wrote', () => {
     const pinPath = path.join(scratchDir(), 'spec-pin.json')
-    writeSpecPin(examplePin(), pinPath)
-    expect(readSpecPin(pinPath)).toStrictEqual(examplePin())
+    writeSpecPin(examplePin(), { pinPath })
+    expect(readSpecPin({ pinPath })).toStrictEqual(examplePin())
   })
 
   it('answers undefined for a pin that is not there', () => {
-    expect(readSpecPin(path.join(scratchDir(), 'absent.json'))).toBe(undefined)
+    expect(
+      readSpecPin({ pinPath: path.join(scratchDir(), 'absent.json') }),
+    ).toBe(undefined)
   })
 
   it('answers undefined for a pin that is not JSON', () => {
     const pinPath = path.join(scratchDir(), 'spec-pin.json')
     writeFileSync(pinPath, 'not json at all')
-    expect(readSpecPin(pinPath)).toBe(undefined)
+    expect(readSpecPin({ pinPath })).toBe(undefined)
   })
 
   it('answers undefined for JSON missing the sha', () => {
     const pinPath = path.join(scratchDir(), 'spec-pin.json')
     writeFileSync(pinPath, JSON.stringify({ files: [] }))
-    expect(readSpecPin(pinPath)).toBe(undefined)
+    expect(readSpecPin({ pinPath })).toBe(undefined)
   })
 })
 
@@ -182,21 +184,27 @@ describe('specIntegrityOf', () => {
 
 describe('the spec file cache', () => {
   it('flattens a nested spec path into one cache level', () => {
-    const file = cacheFileFor(EXAMPLE_SHA, 'api/a/b.yaml', '/tmp/example-cache')
-    expect(path.basename(file)).toBe('api__a__b.yaml')
+    const file = cacheFileFor(EXAMPLE_SHA, 'api/registry/example.yaml', {
+      cacheDir: '/path/to/example-cache',
+    })
+    expect(path.basename(file)).toBe('api__registry__example.yaml')
   })
 
   it('reads back exactly what it wrote', () => {
     const dir = scratchDir()
-    writeCachedSpecFile('api/example.yaml', EXAMPLE_SHA, 'body', dir)
-    expect(readCachedSpecFile('api/example.yaml', EXAMPLE_SHA, dir)).toBe(
-      'body',
-    )
+    writeCachedSpecFile('api/example.yaml', EXAMPLE_SHA, 'body', {
+      cacheDir: dir,
+    })
+    expect(
+      readCachedSpecFile('api/example.yaml', EXAMPLE_SHA, { cacheDir: dir }),
+    ).toBe('body')
   })
 
   it('answers undefined for a path that was never cached', () => {
     expect(
-      readCachedSpecFile('api/absent.yaml', EXAMPLE_SHA, scratchDir()),
+      readCachedSpecFile('api/absent.yaml', EXAMPLE_SHA, {
+        cacheDir: scratchDir(),
+      }),
     ).toBe(undefined)
   })
 })
@@ -246,21 +254,25 @@ describe('the generated inventory', () => {
   it('reads back exactly what it wrote', () => {
     const file = path.join(scratchDir(), 'spec-inventory.generated.json')
     const inventory = buildSpecInventory(exampleSpec())
-    writeSpecInventory(inventory, file)
-    expect(readSpecInventory(file)).toStrictEqual(inventory)
+    writeSpecInventory(inventory, { inventoryPath: file })
+    expect(readSpecInventory({ inventoryPath: file })).toStrictEqual(inventory)
   })
 
   it('carries the do-not-hand-edit banner', () => {
     const file = path.join(scratchDir(), 'spec-inventory.generated.json')
-    writeSpecInventory(buildSpecInventory(exampleSpec()), file)
-    expect(readSpecInventory(file)).toBeTruthy()
+    writeSpecInventory(buildSpecInventory(exampleSpec()), {
+      inventoryPath: file,
+    })
+    expect(readSpecInventory({ inventoryPath: file })).toBeTruthy()
     expect(GENERATED_BANNER).toContain('Do not hand-edit')
   })
 
   it('answers undefined for an inventory that is not there', () => {
-    expect(readSpecInventory(path.join(scratchDir(), 'absent.json'))).toBe(
-      undefined,
-    )
+    expect(
+      readSpecInventory({
+        inventoryPath: path.join(scratchDir(), 'absent.json'),
+      }),
+    ).toBe(undefined)
   })
 })
 
