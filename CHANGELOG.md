@@ -5,10 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [7.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.0) - 2026-08-24
+## [7.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.0) - 2026-08-26
 
 ### Added
 
+- **`npm`** — ship browser twins for the tarball reader and metadata client
+- **`npm`** — answer registry auth challenges through an onauth hook
+- **`npm`** — add the npm registry api client under a registry/ directory
+- **`npm`** — read npm staging and version lifecycle status
 - **`polyfills`** — shim ES2025 Set and iterators
 - **`polyfills`** — support Node 18 by shimming toSorted and toReversed
 - **`polyfills`** — spec shims for built-ins above Node 18
@@ -75,6 +79,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **`npm-api-spec`** — keep the drift file-doc header a plain block comment
+- **`paths`** — move the leaf implementations out of the re-export barrel
+- **`patches`** — drop the stray cache hunk from the content-type patch
 - **`build-stubs`** — expose primordials/symbol for fleet consumers
 - **`spinner`** — fast-path spawn's default-spinner lookup to a peek
 - **`git`** — track the hook surface git reads before hydration
