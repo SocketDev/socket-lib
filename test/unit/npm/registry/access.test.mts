@@ -175,13 +175,18 @@ describe('revokeTeamPackageAccess', () => {
 
   test('encodes the org and team into the path', async () => {
     const stub = recordingHttp()
-    await revokeTeamPackageAccess('example org', 'wombats/x', 'example-pkg', {
-      ...stub,
-      ...AUTH,
-    })
+    await revokeTeamPackageAccess(
+      'example org',
+      'wombats/maintainers',
+      'example-pkg',
+      {
+        ...stub,
+        ...AUTH,
+      },
+    )
     assert.match(
       stub.calls[0]!.url,
-      /\/-\/team\/example%20org\/wombats%2Fx\/package$/,
+      /\/-\/team\/example%20org\/wombats%2Fmaintainers\/package$/,
     )
   })
 
@@ -425,5 +430,13 @@ describe('registry override', () => {
       stub.calls[0]!.url,
       'https://registry.example.test/-/org/example-org/user',
     )
+  })
+})
+
+describe('setPackageAccess optional fields', () => {
+  test('an empty params bag sends an empty body rather than nulls', async () => {
+    const stub = recordingHttp({})
+    await setPackageAccess('example-pkg', {}, { ...stub, ...AUTH })
+    assert.deepEqual(JSON.parse(stub.calls[0]!.body!), {})
   })
 })

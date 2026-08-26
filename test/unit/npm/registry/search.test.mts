@@ -131,6 +131,11 @@ describe('nextSearchFrom', () => {
     const read = { objects: [{}], reachable: true as const }
     assert.equal(nextSearchFrom({ from: 0, text: 'x' }, read), undefined)
   })
+
+  test('an absent from offset starts at zero', () => {
+    const read = { objects: [{}, {}], reachable: true as const, total: 100 }
+    assert.equal(nextSearchFrom({ text: 'example' }, read), 2)
+  })
 })
 
 describe('buildAdvisoryQueryKey', () => {
@@ -144,6 +149,13 @@ describe('buildAdvisoryQueryKey', () => {
     const a = buildAdvisoryQueryKey({ a: ['1.0.0'] })
     const b = buildAdvisoryQueryKey({ a: ['1.0.1'] })
     assert.notEqual(a, b)
+  })
+
+  test('a name with no versions contributes an empty version list', () => {
+    const key = buildAdvisoryQueryKey({
+      'example-pkg': undefined as unknown as string[],
+    })
+    assert.equal(key, 'example-pkg@')
   })
 })
 
@@ -163,6 +175,22 @@ describe('fetchBulkAdvisories', () => {
     assert.deepEqual(JSON.parse(stub.calls[0]!.body!), {
       '@example/pkg': ['1.0.0'],
     })
+  })
+
+  test('a non-object body yields no advisories but stays reachable', async () => {
+    const stub = recordingHttp('not-an-object')
+    const read = await fetchBulkAdvisories({ 'example-pkg': ['1.0.0'] }, stub)
+    assert.deepEqual(read.advisories, {})
+    assert.equal(read.reachable, true)
+  })
+
+  test('a null body yields no advisories but stays reachable', async () => {
+    // Parsed rather than written as a literal: a real adapter hands back the
+    // result of JSON.parse, and a bare `null` body is what produces it.
+    const stub = recordingHttp(JSON.parse('null'))
+    const read = await fetchBulkAdvisories({ 'example-pkg': ['1.0.0'] }, stub)
+    assert.deepEqual(read.advisories, {})
+    assert.equal(read.reachable, true)
   })
 
   test('an empty reply with reachable:true genuinely means clean', async () => {

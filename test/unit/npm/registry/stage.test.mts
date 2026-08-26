@@ -74,6 +74,13 @@ const STAGED_ITEM = {
 }
 
 describe('fetchStagedVersions', () => {
+  test('a non-array items field yields no items but stays reachable', async () => {
+    const stub = stubHttp({ items: 'not-an-array', total: 0 })
+    const read = await fetchStagedVersions({ ...stub, token: 'tok' })
+    assert.deepEqual(read.items, [])
+    assert.equal(read.reachable, true)
+  })
+
   test('returns the staged items with their shasum', async () => {
     const stub = stubHttp({ items: [STAGED_ITEM], total: 1 })
     const read = await fetchStagedVersions({ ...stub, token: 'tok' })

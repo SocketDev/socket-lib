@@ -1,3 +1,6 @@
+// socket-lint: mirror-exempt — exercises the onAuth retry contract across every
+// OTP-gated endpoint at once; the route table is the test, so splitting it per
+// endpoint module would copy the harness three ways and lose that property.
 /**
  * @file Unit tests for the endpoints that route through the `onAuth`
  *   callback.
