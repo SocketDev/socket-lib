@@ -8,19 +8,22 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { getBatch, getVersionTrustInfo } from '../../../src/npm/meta.mjs'
+import {
+  getBatch,
+  getVersionTrustInfo,
+} from '../../../../src/npm/meta/node.mjs'
 import {
   tolerantSleep,
   tolerantTimeout,
-} from '../../_shared/fleet/lib/timing.mts'
+} from '../../../_shared/fleet/lib/timing.mts'
 import {
   createStubHttpAdapter,
   freshCache,
   setupNpmMetaCacheIsolation,
-} from './meta-test-helpers.mts'
+} from '../meta-test-helpers.mts'
 
-import type { PackumentMetaSlim } from '../../../src/npm/meta-types.mjs'
-import type { RawPackument } from '../../../src/npm/meta-types.mjs'
+import type { PackumentMetaSlim } from '../../../../src/npm/meta-types.mjs'
+import type { RawPackument } from '../../../../src/npm/meta-types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '1.0.0' },

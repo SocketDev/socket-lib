@@ -1,102 +1,226 @@
 /**
- * @file E2E: bundle a socket-lib surface for the BROWSER with webpack (and
- *   esbuild) and assert it bundles clean. Guards that node/module.ts's bare
+ * @file E2E: bundle a socket-lib surface for the BROWSER with webpack AND with
+ *   esbuild and assert it bundles clean. Guards that node/module.ts's bare
  *   `module` import stays browser-safe: the lib's package.json `browser` field
  *   maps every node builtin (incl. `module`) to `false`, so a browser bundler
  *   stubs it instead of throwing UnhandledSchemeError (which a `node:` prefix
- *   would). The esbuild arm skips until that soak-gated dep is installed. The
- *   debug/memo arm goes further than bundling: it EXECUTES the emitted bundle
- *   inside a bare `node:vm` context (no `process` global) to prove the
- *   browser-load contract — the graph evaluates cleanly, `debugLog` no-ops, and
- *   `memoizeAsync` works. The npm/registry arm applies the same vm-execution
- *   proof to the npm registry module: pure parsers and encoding helpers must
- *   evaluate and run in a process-less context.
+ *   would).
+ *   Most arms go further than bundling: they EXECUTE the emitted bundle inside
+ *   a bare `node:vm` context with no `process` and no `require`, so a
+ *   surviving Node dependency fails HERE rather than in a consumer's build.
+ *
+ *   - debug/memo — the graph evaluates, `debugLog` no-ops, `memoizeAsync` works.
+ *   - npm/registry — pure parsers and encoding helpers run process-less.
+ *   - npm tarball — a REAL gzipped tar goes through `DecompressionStream` and the
+ *     pure header walk, with only the web globals a browser supplies.
+ *   - npm metadata — imports the BARE `./npm/meta` and `./npm/meta-cache`
+ *     subpaths, so the bundler resolving their `browser` condition to the twin,
+ *     rather than to the cacache-backed Node half, is what makes the bundle
+ *     build and run at all. BOTH BUNDLERS RUN THE SAME ASSERTIONS. The
+ *     browser-twin arms are written once as {@link observeNpmTarballTwin} and
+ *     {@link observeNpmMetaTwin}, then run under webpack and under esbuild. Two
+ *     independent implementations of conditional exports agreeing on which twin
+ *     `./npm/meta` resolves to is the claim; one bundler alone could be
+ *     agreeing with its own quirk. Both rigs live in
+ *     `./browser-bundle-helpers`.
  */
-import { existsSync, mkdirSync, readFileSync, symlinkSync } from 'node:fs'
-import { createRequire } from 'node:module'
-import os from 'node:os'
+import { existsSync } from 'node:fs'
 import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import vm from 'node:vm'
 
 import { describe, expect, it } from 'vitest'
-import webpack from 'webpack'
 
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
-import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
+import {
+  makePackageTarball,
+  MANIFEST,
+} from '../unit/npm/registry/tarball/tarball-helpers.mts'
+import {
+  bundleForWeb,
+  bundleForWebWithEsbuild,
+  fixtureDir,
+} from './browser-bundle-helpers.mts'
 
-const testDir = path.dirname(fileURLToPath(import.meta.url))
-const repoRoot = path.resolve(testDir, '..', '..')
-const fixtureDir = path.resolve(repoRoot, 'test', 'fixtures', 'browser')
+import type { WebBundler } from './browser-bundle-helpers.mts'
+
 const entry = path.join(fixtureDir, 'entry.mjs')
 const entryDebug = path.join(fixtureDir, 'entry-debug.mjs')
 const entryBuiltinAi = path.join(fixtureDir, 'entry-builtin-ai.mjs')
 const entryNpm = path.join(fixtureDir, 'entry-npm.mjs')
-const localRequire = createRequire(import.meta.url)
+const entryNpmMeta = path.join(fixtureDir, 'entry-npm-meta.mjs')
+const entryNpmTarball = path.join(fixtureDir, 'entry-npm-tarball.mjs')
 
-// Minimal shape — esbuild is soak-gated, so it can't be a resolvable type
-// import while absent; the arm only runs once esbuild is installed.
-interface EsbuildLike {
-  build(options: {
-    absWorkingDir: string
-    bundle: boolean
-    entryPoints: string[]
-    platform: string
-    write: boolean
-  }): Promise<{ errors: unknown[] }>
+/**
+ * Run a bundle inside a bare vm context and return the library global. The
+ * sandbox holds ONLY what is passed plus `console`; `process` and `require`
+ * are absent by construction, which is the property every arm relies on.
+ */
+function runInBareContext<T>(
+  source: string,
+  library: string,
+  globals: Record<string, unknown> = {},
+): T {
+  const sandbox: Record<string, unknown> = { console, ...globals }
+  vm.createContext(sandbox)
+  vm.runInContext(source, sandbox)
+  return sandbox[library] as T
 }
 
-// Resolve @socketsecurity/lib to THIS repo (the self-dep symlinks to the
-// published version), so the bundle exercises the local dist + browser field.
-function linkLocalLib(): void {
-  const scopeDir = path.join(fixtureDir, 'node_modules', '@socketsecurity')
-  mkdirSync(scopeDir, { recursive: true })
-  const link = path.join(scopeDir, 'lib')
-  safeDeleteSync(link)
-  symlinkSync(repoRoot, link, 'dir')
-}
-
-function hasEsbuild(): boolean {
-  try {
-    localRequire.resolve('esbuild')
-    return true
-  } catch {
-    return false
+/**
+ * Bundle the npm tarball browser twin and run it process-less, returning what
+ * was observed rather than asserting it.
+ *
+ * The observation is a flat object so ONE `expect` in the test case covers the
+ * bundle outcome and both behaviours: a bundling failure lands in `errors` and
+ * shows the bundler's own text in the diff instead of a bare rejection. Every
+ * bundler arm calls this, so the expected result is written once as
+ * {@link NPM_TARBALL_TWIN}.
+ *
+ * The tarball bytes are built on the Node side so no binary fixture is checked
+ * in, and the sandbox gets only the four web globals a real browser supplies.
+ */
+async function observeNpmTarballTwin(
+  bundle: WebBundler,
+  filename: string,
+): Promise<Record<string, unknown>> {
+  const result = await bundle({
+    entry: entryNpmTarball,
+    filename,
+    library: 'socketLibNpmTarballE2e',
+  })
+  if (result.errors) {
+    return { errors: result.errors }
   }
+  const bundled = runInBareContext<{
+    rejectsPlainBytes(): Promise<boolean>
+    run(bytes: Uint8Array): Promise<{
+      manifestName: string
+      manifestVersion: string
+      names: string[]
+    }>
+  }>(result.source, 'socketLibNpmTarballE2e', {
+    Blob,
+    DecompressionStream,
+    Response,
+    TextDecoder,
+  })
+  const bytes = await makePackageTarball()
+  return {
+    errors: undefined,
+    ...(await bundled.run(bytes)),
+    rejectsPlainBytes: await bundled.rejectsPlainBytes(),
+  }
+}
+
+/**
+ * What {@link observeNpmTarballTwin} must observe under every bundler.
+ */
+const NPM_TARBALL_TWIN = {
+  errors: undefined,
+  manifestName: MANIFEST.name,
+  manifestVersion: MANIFEST.version,
+  names: ['index.mjs', 'package.json'],
+  // Plain (ungzipped) bytes are rejected, so the reader is really gunzipping
+  // rather than getting lucky on a tar it never decompressed.
+  rejectsPlainBytes: true,
+}
+
+/**
+ * The packument the metadata twin is fed. Two versions with `time` entries,
+ * which is the minimum shape `getLatestVersion` and `getVersions` both read.
+ */
+const PACKUMENT = {
+  'dist-tags': { latest: '2.0.0' },
+  name: 'widget',
+  time: {
+    '1.0.0': '2024-01-01T00:00:00.000Z',
+    '2.0.0': '2024-06-01T00:00:00.000Z',
+  },
+  versions: { '1.0.0': { dist: {} }, '2.0.0': { dist: {} } },
+}
+
+/**
+ * Bundle the npm metadata browser twin and run it process-less, returning what
+ * was observed rather than asserting it.
+ *
+ * The fixture imports the BARE `./npm/meta` and `./npm/meta-cache` subpaths, so
+ * observing anything at all is the proof that `bundle`'s resolver picked the
+ * browser twin over the cacache-backed Node half.
+ */
+async function observeNpmMetaTwin(
+  bundle: WebBundler,
+  filename: string,
+): Promise<Record<string, unknown>> {
+  const result = await bundle({
+    entry: entryNpmMeta,
+    filename,
+    library: 'socketLibNpmMetaE2e',
+  })
+  if (result.errors) {
+    return { errors: result.errors }
+  }
+  // The fetch family is here because the bundled default HTTP adapter
+  // touches `Headers` and `URLSearchParams` at module-evaluation time.
+  // Every one of these is a global a real browser always supplies, so
+  // requiring them is honest; `process` and `require` remain absent,
+  // which is the actual claim.
+  const bundled = runInBareContext<{
+    run(packument: unknown): Promise<{
+      batchLength: number
+      fetches: number
+      latest: string
+      name: string
+      versions: string[]
+    }>
+    runWithWebStorage(packument: unknown): Promise<{
+      fetches: number
+      name: string
+      storedKeys: boolean
+    }>
+  }>(result.source, 'socketLibNpmMetaE2e', {
+    AbortController,
+    Headers,
+    Request,
+    Response,
+    TextDecoder,
+    TextEncoder,
+    URL,
+    URLSearchParams,
+    fetch,
+  })
+  return {
+    errors: undefined,
+    run: await bundled.run(PACKUMENT),
+    webStorage: await bundled.runWithWebStorage(PACKUMENT),
+  }
+}
+
+/**
+ * What {@link observeNpmMetaTwin} must observe under every bundler.
+ */
+const NPM_META_TWIN = {
+  errors: undefined,
+  run: {
+    batchLength: 2,
+    // One upstream call for four reads — the injected cache deduped the
+    // rest, which is the whole reason this module has a cache tier.
+    fetches: 1,
+    latest: '2.0.0',
+    name: 'widget',
+    versions: ['1.0.0', '2.0.0'],
+  },
+  // A second cache over the same Web Storage reads the first one's entry,
+  // so the durable tier survives what a page reload would destroy.
+  webStorage: { fetches: 1, name: 'widget', storedKeys: true },
 }
 
 describe('browser-bundle e2e', () => {
   it(
     'webpack bundles the lib for target:web (node builtins stubbed)',
     async () => {
-      linkLocalLib()
-      const outDir = path.join(os.tmpdir(), 'socket-lib-webpack-e2e')
-      safeDeleteSync(outDir)
-      const config: webpack.Configuration = {
-        entry,
-        target: 'web',
-        mode: 'production',
-        output: { path: outDir, filename: 'bundle.js' },
-        resolve: {
-          conditionNames: ['browser', 'import', 'require', 'default'],
-        },
-      }
-      const stats = await new Promise<webpack.Stats | undefined>(
-        (resolve, reject) => {
-          webpack(config, (error, result) => {
-            if (error) {
-              reject(error)
-            } else {
-              resolve(result)
-            }
-          })
-        },
-      )
-      expect(
-        stats?.hasErrors(),
-        stats?.toString({ all: false, errors: true }),
-      ).toBe(false)
-      expect(existsSync(path.join(outDir, 'bundle.js'))).toBe(true)
+      const result = await bundleForWeb({ entry, filename: 'bundle.js' })
+      expect(result.errors).toBeUndefined()
+      expect(existsSync(result.outFile)).toBe(true)
     },
     tolerantTimeout(120_000),
   )
@@ -104,47 +228,14 @@ describe('browser-bundle e2e', () => {
   it(
     'debug/output + memo/async load and run in a process-less vm context',
     async () => {
-      linkLocalLib()
-      const outDir = path.join(os.tmpdir(), 'socket-lib-webpack-e2e-debug')
-      safeDeleteSync(outDir)
-      const config: webpack.Configuration = {
+      const result = await bundleForWeb({
         entry: entryDebug,
-        target: 'web',
-        mode: 'production',
-        output: {
-          filename: 'debug-bundle.js',
-          globalObject: 'globalThis',
-          library: { name: 'socketLibBrowserE2e', type: 'var' },
-          path: outDir,
-          publicPath: '',
-        },
-        resolve: {
-          conditionNames: ['browser', 'import', 'require', 'default'],
-        },
-      }
-      const stats = await new Promise<webpack.Stats | undefined>(
-        (resolve, reject) => {
-          webpack(config, (error, result) => {
-            if (error) {
-              reject(error)
-            } else {
-              resolve(result)
-            }
-          })
-        },
-      )
-      expect(
-        stats?.hasErrors(),
-        stats?.toString({ all: false, errors: true }),
-      ).toBe(false)
+        filename: 'debug-bundle.js',
+        library: 'socketLibBrowserE2e',
+      })
+      expect(result.errors).toBeUndefined()
 
-      // Execute the bundle in a bare vm context with console, which browsers
-      // have, but NO process global — module evaluation must not touch it.
-      const source = readFileSync(path.join(outDir, 'debug-bundle.js'), 'utf8')
-      const sandbox: Record<string, unknown> = { console }
-      vm.createContext(sandbox)
-      vm.runInContext(source, sandbox)
-      const bundled = sandbox['socketLibBrowserE2e'] as {
+      const bundled = runInBareContext<{
         run(): Promise<{
           a: number
           b: number
@@ -152,9 +243,8 @@ describe('browser-bundle e2e', () => {
           calls: number
           debugLogThrew: boolean
         }>
-      }
-      const result = await bundled.run()
-      expect(result).toEqual({
+      }>(result.source, 'socketLibBrowserE2e')
+      expect(await bundled.run()).toEqual({
         a: 42,
         b: 42,
         cached: 7,
@@ -168,60 +258,22 @@ describe('browser-bundle e2e', () => {
   it(
     'language-model resolver returns the browser global without a Node runtime',
     async () => {
-      linkLocalLib()
-      const outDir = path.join(
-        os.tmpdir(),
-        'socket-lib-webpack-e2e-language-model',
-      )
-      safeDeleteSync(outDir)
-      const config: webpack.Configuration = {
+      const result = await bundleForWeb({
         entry: entryBuiltinAi,
-        target: 'web',
-        mode: 'production',
-        output: {
-          filename: 'language-model-bundle.js',
-          globalObject: 'globalThis',
-          library: { name: 'socketLibLanguageModelE2e', type: 'var' },
-          path: outDir,
-          publicPath: '',
-        },
-        resolve: {
-          conditionNames: ['browser', 'import', 'require', 'default'],
-        },
-      }
-      const stats = await new Promise<webpack.Stats | undefined>(
-        (resolve, reject) => {
-          webpack(config, (error, result) => {
-            if (error) {
-              reject(error)
-            } else {
-              resolve(result)
-            }
-          })
-        },
-      )
-      expect(
-        stats?.hasErrors(),
-        stats?.toString({ all: false, errors: true }),
-      ).toBe(false)
+        filename: 'language-model-bundle.js',
+        library: 'socketLibLanguageModelE2e',
+      })
+      expect(result.errors).toBeUndefined()
 
-      const source = readFileSync(
-        path.join(outDir, 'language-model-bundle.js'),
-        'utf8',
-      )
       const browserFactory = {
         availability: async () => 'available',
         create: async () => Object.create(null),
       }
-      const sandbox: Record<string, unknown> = {
-        LanguageModel: browserFactory,
-        console,
-      }
-      vm.createContext(sandbox)
-      vm.runInContext(source, sandbox)
-      const bundled = sandbox['socketLibLanguageModelE2e'] as {
-        getFactory(): unknown
-      }
+      const bundled = runInBareContext<{ getFactory(): unknown }>(
+        result.source,
+        'socketLibLanguageModelE2e',
+        { LanguageModel: browserFactory },
+      )
       expect(bundled.getFactory()).toBe(browserFactory)
     },
     tolerantTimeout(120_000),
@@ -230,47 +282,14 @@ describe('browser-bundle e2e', () => {
   it(
     'npm/registry module evaluates and runs in a process-less vm context',
     async () => {
-      linkLocalLib()
-      const outDir = path.join(os.tmpdir(), 'socket-lib-webpack-e2e-npm')
-      safeDeleteSync(outDir)
-      const config: webpack.Configuration = {
+      const result = await bundleForWeb({
         entry: entryNpm,
-        target: 'web',
-        mode: 'production',
-        output: {
-          filename: 'npm-bundle.js',
-          globalObject: 'globalThis',
-          library: { name: 'socketLibNpmE2e', type: 'var' },
-          path: outDir,
-          publicPath: '',
-        },
-        resolve: {
-          conditionNames: ['browser', 'import', 'require', 'default'],
-        },
-      }
-      const stats = await new Promise<webpack.Stats | undefined>(
-        (resolve, reject) => {
-          webpack(config, (error, result) => {
-            if (error) {
-              reject(error)
-            } else {
-              resolve(result)
-            }
-          })
-        },
-      )
-      expect(
-        stats?.hasErrors(),
-        stats?.toString({ all: false, errors: true }),
-      ).toBe(false)
+        filename: 'npm-bundle.js',
+        library: 'socketLibNpmE2e',
+      })
+      expect(result.errors).toBeUndefined()
 
-      // Execute in a bare vm context — no `process` global — to prove the
-      // module graph does not touch process or node:* at evaluation time.
-      const source = readFileSync(path.join(outDir, 'npm-bundle.js'), 'utf8')
-      const sandbox: Record<string, unknown> = { console }
-      vm.createContext(sandbox)
-      vm.runInContext(source, sandbox)
-      const bundled = sandbox['socketLibNpmE2e'] as {
+      const bundled = runInBareContext<{
         run(): {
           cdnEncoded: string
           cdnPath: string
@@ -279,9 +298,8 @@ describe('browser-bundle e2e', () => {
           registryEncoded: string
           withAttestation: boolean
         }
-      }
-      const result = bundled.run()
-      expect(result).toEqual({
+      }>(result.source, 'socketLibNpmE2e')
+      expect(bundled.run()).toEqual({
         cdnEncoded: '%40scope/pkg',
         cdnPath: '%40scope/pkg@1.0.0/package.json',
         name: 'test-pkg',
@@ -293,20 +311,65 @@ describe('browser-bundle e2e', () => {
     tolerantTimeout(120_000),
   )
 
-  describe.skipIf(!hasEsbuild())('esbuild', () => {
+  it(
+    'npm tarball browser twin gunzips and untars in a process-less vm context',
+    async () => {
+      expect(
+        await observeNpmTarballTwin(bundleForWeb, 'npm-tarball-bundle.js'),
+      ).toEqual(NPM_TARBALL_TWIN)
+    },
+    tolerantTimeout(120_000),
+  )
+
+  it(
+    'npm metadata client resolves its browser twin and runs in a process-less vm context',
+    async () => {
+      expect(
+        await observeNpmMetaTwin(bundleForWeb, 'npm-meta-bundle.js'),
+      ).toEqual(NPM_META_TWIN)
+    },
+    tolerantTimeout(120_000),
+  )
+
+  // esbuild is a pinned devDependency, so this block is unconditional. A
+  // second resolver over the same exports map is the point: it re-proves the
+  // browser twins independently of webpack's resolution.
+  describe('esbuild', () => {
     it(
       'bundles the lib for platform:browser (node builtins stubbed)',
       async () => {
-        linkLocalLib()
-        const esbuild = localRequire('esbuild') as EsbuildLike
-        const result = await esbuild.build({
-          absWorkingDir: fixtureDir,
-          bundle: true,
-          entryPoints: [entry],
-          platform: 'browser',
-          write: false,
+        const result = await bundleForWebWithEsbuild({
+          entry,
+          filename: 'bundle.js',
         })
-        expect(result.errors).toHaveLength(0)
+        expect(result.errors).toBeUndefined()
+        expect(existsSync(result.outFile)).toBe(true)
+      },
+      tolerantTimeout(120_000),
+    )
+
+    it(
+      'npm tarball browser twin gunzips and untars in a process-less vm context',
+      async () => {
+        expect(
+          await observeNpmTarballTwin(
+            bundleForWebWithEsbuild,
+            'npm-tarball-esbuild.js',
+          ),
+        ).toEqual(NPM_TARBALL_TWIN)
+      },
+      tolerantTimeout(120_000),
+    )
+
+    it(
+      'npm metadata client resolves its browser twin and runs in a process-less vm context',
+      async () => {
+        expect(
+          await observeNpmMetaTwin(
+            bundleForWebWithEsbuild,
+            'npm-meta-esbuild.js',
+          ),
+        ).toEqual(NPM_META_TWIN)
       },
       tolerantTimeout(120_000),
     )

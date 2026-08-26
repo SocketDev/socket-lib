@@ -2336,22 +2336,36 @@
       "default": "./dist/node/util.js"
     },
     "./npm/meta": {
-      "source": "./src/npm/meta.mts",
+      "source": "./src/npm/meta/node.mts",
       "browser": {
-        "types": "./dist/npm/meta.d.ts",
-        "default": "./dist/npm/meta.js"
+        "types": "./dist/npm/meta/browser.d.ts",
+        "default": "./dist/npm/meta/browser.js"
       },
-      "types": "./dist/npm/meta.d.ts",
-      "default": "./dist/npm/meta.js"
+      "types": "./dist/npm/meta/node.d.ts",
+      "default": "./dist/npm/meta/node.js"
     },
     "./npm/meta-cache": {
-      "source": "./src/npm/meta-cache.mts",
+      "source": "./src/npm/meta-cache/node.mts",
       "browser": {
-        "types": "./dist/npm/meta-cache.d.ts",
-        "default": "./dist/npm/meta-cache.js"
+        "types": "./dist/npm/meta-cache/browser.d.ts",
+        "default": "./dist/npm/meta-cache/browser.js"
       },
-      "types": "./dist/npm/meta-cache.d.ts",
-      "default": "./dist/npm/meta-cache.js"
+      "types": "./dist/npm/meta-cache/node.d.ts",
+      "default": "./dist/npm/meta-cache/node.js"
+    },
+    "./npm/meta-cache/browser": {
+      "source": "./src/npm/meta-cache/browser.mts",
+      "browser": {
+        "types": "./dist/npm/meta-cache/browser.d.ts",
+        "default": "./dist/npm/meta-cache/browser.js"
+      },
+      "types": "./dist/npm/meta-cache/browser.d.ts",
+      "default": "./dist/npm/meta-cache/browser.js"
+    },
+    "./npm/meta-cache/node": {
+      "source": "./src/npm/meta-cache/node.mts",
+      "types": "./dist/npm/meta-cache/node.d.ts",
+      "default": "./dist/npm/meta-cache/node.js"
     },
     "./npm/meta-slice": {
       "source": "./src/npm/meta-slice.mts",
@@ -2370,6 +2384,20 @@
       },
       "types": "./dist/npm/meta-types.d.ts",
       "default": "./dist/npm/meta-types.js"
+    },
+    "./npm/meta/browser": {
+      "source": "./src/npm/meta/browser.mts",
+      "browser": {
+        "types": "./dist/npm/meta/browser.d.ts",
+        "default": "./dist/npm/meta/browser.js"
+      },
+      "types": "./dist/npm/meta/browser.d.ts",
+      "default": "./dist/npm/meta/browser.js"
+    },
+    "./npm/meta/node": {
+      "source": "./src/npm/meta/node.mts",
+      "types": "./dist/npm/meta/node.d.ts",
+      "default": "./dist/npm/meta/node.js"
     },
     "./npm/registry": {
       "source": "./src/npm/registry/index.mts",
@@ -2496,6 +2524,25 @@
       },
       "types": "./dist/npm/registry/stage-tarball.d.ts",
       "default": "./dist/npm/registry/stage-tarball.js"
+    },
+    "./npm/registry/tarball": {
+      "source": "./src/npm/registry/tarball/node.mts",
+      "types": "./dist/npm/registry/tarball/node.d.ts",
+      "default": "./dist/npm/registry/tarball/node.js"
+    },
+    "./npm/registry/tarball/browser": {
+      "source": "./src/npm/registry/tarball/browser.mts",
+      "browser": {
+        "types": "./dist/npm/registry/tarball/browser.d.ts",
+        "default": "./dist/npm/registry/tarball/browser.js"
+      },
+      "types": "./dist/npm/registry/tarball/browser.d.ts",
+      "default": "./dist/npm/registry/tarball/browser.js"
+    },
+    "./npm/registry/tarball/node": {
+      "source": "./src/npm/registry/tarball/node.mts",
+      "types": "./dist/npm/registry/tarball/node.d.ts",
+      "default": "./dist/npm/registry/tarball/node.js"
     },
     "./npm/registry/team": {
       "source": "./src/npm/registry/team.mts",

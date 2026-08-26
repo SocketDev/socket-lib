@@ -12,12 +12,15 @@ import { StringPrototypeStartsWith } from '../primordials/string.mjs'
 import type AdmZipType from '../external/adm-zip.js'
 import type tarFsType from '../external/tar-fs.js'
 
-// 100MB
-export const DEFAULT_MAX_FILE_SIZE = 100 * 1024 * 1024
-// 1GB
-export const DEFAULT_MAX_TOTAL_SIZE = 1024 * 1024 * 1024
-// Maximum number of entries to prevent inode exhaustion DoS.
-export const DEFAULT_MAX_ENTRIES = 100_000
+// Re-exported so the `archives/*` modules keep importing their defaults from
+// one place. They LIVE in `./types` because that module imports nothing, which
+// lets the browser-side npm tarball reader share them; this one reaches
+// `node:fs` and cannot be on a browser path.
+export {
+  DEFAULT_MAX_ENTRIES,
+  DEFAULT_MAX_FILE_SIZE,
+  DEFAULT_MAX_TOTAL_SIZE,
+} from './types.mjs'
 
 let admZip: typeof AdmZipType | undefined
 let tarFs: typeof tarFsType | undefined

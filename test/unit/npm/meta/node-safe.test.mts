@@ -14,14 +14,14 @@ import {
   safeGetPublishDate,
   safeGetVersions,
   safeGetVersionTrustInfo,
-} from '../../../src/npm/meta.mjs'
+} from '../../../../src/npm/meta/node.mjs'
 import {
   createStubHttpAdapter,
   freshCache,
   setupNpmMetaCacheIsolation,
-} from './meta-test-helpers.mts'
+} from '../meta-test-helpers.mts'
 
-import type { RawPackument } from '../../../src/npm/meta-types.mjs'
+import type { RawPackument } from '../../../../src/npm/meta-types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '1.0.0' },

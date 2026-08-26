@@ -334,6 +334,32 @@ export function headersToRecord(headers: Headers): Record<string, string> {
 }
 
 /**
+ * GET / POST a binary endpoint, returning the response bytes undecoded.
+ *
+ * Sets `Accept: application/octet-stream`; user-supplied headers win. Use this
+ * instead of `httpText` for any `application/octet-stream` reply — a tarball
+ * run through UTF-8 text decoding is corrupted silently, because every byte
+ * sequence that is not valid UTF-8 is replaced rather than rejected. Throws
+ * `HttpResponseError` on non-2xx.
+ */
+export async function httpBytes(
+  url: string,
+  options?: BrowserHttpRequestOptions | undefined,
+): Promise<Uint8Array> {
+  const opts = { __proto__: null, ...options } as BrowserHttpRequestOptions
+  const headers: Record<string, string> = {
+    Accept: 'application/octet-stream',
+    ...opts.headers,
+  }
+  const response = await httpRequest(url, {
+    ...opts,
+    headers,
+    throwOnError: true,
+  })
+  return response.body
+}
+
+/**
  * GET / POST a JSON endpoint. Automatically sets `Accept: application/json`,
  * plus `Content-Type: application/json` when a body is present. Throws
  * `HttpResponseError` on non-2xx.

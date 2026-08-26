@@ -20,7 +20,7 @@ import type {
   HttpRequestOptions,
   HttpResponse,
 } from '../../../src/http-request/node.mjs'
-import { createNpmMetaCache } from '../../../src/npm/meta-cache.mjs'
+import { createNpmMetaCache } from '../../../src/npm/meta-cache/node.mjs'
 import type { NpmMetaHttpAdapter } from '../../../src/npm/meta-types.mjs'
 import { invalidateCaches } from '../../../src/paths/rewire.mjs'
 
@@ -105,10 +105,13 @@ export function freshOptions(
 }
 
 /**
- * Build a real `HttpResponseError` with the given `status` — the shape
- * `getPackumentSlim`'s 404 handling checks via `instanceof`. Every
- * `HttpResponse` field is populated with an inert stand-in since only
- * `status`/`ok`/`statusText` matter for these tests.
+ * Build a real `HttpResponseError` with the given `status`. The cache's 404
+ * handling reads that status STRUCTURALLY (`httpErrorStatus`, via
+ * `response.status`) rather than by `instanceof`, so the Node and browser
+ * `http-request` twins and any injected adapter are all recognized; this
+ * helper covers the Node twin's real error shape. Every `HttpResponse` field
+ * is populated with an inert stand-in since only `status`/`ok`/`statusText`
+ * matter for these tests.
  */
 export function makeHttpResponseError(
   status: number,

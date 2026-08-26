@@ -23,6 +23,42 @@ export type { HttpResponse } from './response-types.mjs'
 export type { HttpRequestOptions } from './request-types.mjs'
 
 /**
+ * GET / POST a binary endpoint, returning the response bytes undecoded.
+ *
+ * Sets `Accept: application/octet-stream`; user-supplied headers always win.
+ * Use this instead of `httpText` for any `application/octet-stream` reply — a
+ * tarball or other binary payload run through UTF-8 text decoding is corrupted
+ * silently, because every byte sequence that is not valid UTF-8 is replaced
+ * rather than rejected. Throws `HttpResponseError` on non-2xx.
+ */
+export async function httpBytes(
+  url: string,
+  options?: HttpRequestOptions | undefined,
+): Promise<Uint8Array> {
+  const {
+    body,
+    headers = {},
+    ...restOptions
+  } = {
+    __proto__: null,
+    ...options,
+  } as HttpRequestOptions
+  const mergedHeaders = {
+    Accept: 'application/octet-stream',
+    ...headers,
+  }
+  const response = await httpRequest(url, {
+    body,
+    headers: mergedHeaders,
+    ...restOptions,
+  })
+  if (!response.ok) {
+    throw new HttpResponseError(response)
+  }
+  return response.body
+}
+
+/**
  * GET / POST a JSON endpoint. Automatically sets `Accept: application/json` and
  * `Content-Type: application/json` when a body is present; user-supplied
  * headers always win. Throws `HttpResponseError` on non-2xx.

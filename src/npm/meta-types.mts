@@ -7,8 +7,7 @@
  */
 
 import type { TtlCache } from '../cache/ttl/types.mjs'
-// no-platform-http-import: server-only module backed by a cacache cache; node platform is intentional.
-import type { HttpRequestOptions } from '../http-request/node.mjs'
+import type { NpmHttpAdapter } from './registry/index.mjs'
 
 /**
  * Per-name/per-batch failure shape returned by `getBatch` in place of a
@@ -54,9 +53,11 @@ export type BatchResult = PackageError | PackumentMetaSlim
  */
 export interface GetPackumentSlimOptions {
   /**
-   * Cache instance backing the fetch. Defaults to a lazily-created module
-   * singleton (`prefix: 'npm-meta'`, 15-minute TTL). Pass a dedicated instance
-   * (`createNpmMetaCache`) for test isolation or a non-default TTL.
+   * Cache instance backing the fetch. Defaults to the resolved twin's
+   * lazily-created module singleton (`prefix: 'npm-meta'`, 15-minute TTL):
+   * cacache-backed on Node, memory-only in the browser. Pass a dedicated
+   * instance (`createNpmMetaCache`) for test isolation, a non-default TTL, or
+   * — in the browser — a persistent `storage` adapter.
    */
   cache?: TtlCache | undefined
   /**
@@ -68,8 +69,10 @@ export interface GetPackumentSlimOptions {
    */
   force?: boolean | undefined
   /**
-   * Injectable HTTP adapter, mirroring `NpmHttpOptions` from `./registry`.
-   * Defaults to `httpJson` from `../http-request/node`.
+   * Injectable HTTP adapter, the `json` half of `NpmHttpAdapter` from
+   * `./registry`. Defaults to the resolved twin's `httpJson` — the Node HTTP
+   * stack from `../http-request/node`, or `fetch` from
+   * `../http-request/browser`.
    */
   http?: NpmMetaHttpAdapter | undefined
   /**
@@ -176,12 +179,22 @@ export interface LatestVersionResult {
 }
 
 /**
- * Injectable HTTP adapter for the metadata client. Signature-compatible with
- * `httpJson` from `../http-request/node` so the default is a direct reference.
+ * Injectable HTTP adapter for the metadata client — the `json` half of the
+ * npm registry client's `NpmHttpAdapter` (`./registry`), narrowed with `Pick`
+ * rather than redeclared, so the method set has exactly ONE definition across
+ * the whole npm surface.
+ *
+ * Narrowed rather than used whole because this client never fetches a tarball:
+ * requiring `bytes` would force every caller and every test double to supply a
+ * method the metadata path cannot call. A full `NpmHttpAdapter` satisfies this
+ * type structurally, so one adapter object serves both clients.
+ *
+ * Both the Node (`httpJson` from `../http-request/node`) and browser
+ * (`httpJson` from `../http-request/browser`) implementations match it
+ * directly, which is what lets `./meta-cache/node` and `./meta-cache/browser`
+ * differ only in which one they default to.
  */
-export interface NpmMetaHttpAdapter {
-  json<T>(url: string, options?: HttpRequestOptions | undefined): Promise<T>
-}
+export type NpmMetaHttpAdapter = Pick<NpmHttpAdapter, 'json'>
 
 /**
  * The slimmed packument this client returns — top-level fields plus the

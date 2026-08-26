@@ -13,8 +13,6 @@
     "ai/subagent-status",
     "archives/detect",
     "archives/extract",
-    "archives/tar",
-    "archives/types",
     "archives/zip",
     "cacache/tmp",
     "cli/check",

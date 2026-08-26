@@ -27,7 +27,12 @@ async function loadFresh() {
   const reqMod = await import('../../../src/http-request/request.mjs')
   const httpReqMock = reqMod.httpRequest as ReturnType<typeof vi.fn>
   const mod = await import('../../../src/http-request/node.mjs')
-  return { httpReqMock, httpJson: mod.httpJson, httpText: mod.httpText }
+  return {
+    httpReqMock,
+    httpBytes: mod.httpBytes,
+    httpJson: mod.httpJson,
+    httpText: mod.httpText,
+  }
 }
 
 beforeEach(() => {
@@ -36,6 +41,75 @@ beforeEach(() => {
 
 afterEach(() => {
   vi.clearAllMocks()
+})
+
+describe.sequential('http-request/node — httpBytes', () => {
+  test('returns the raw response body undecoded', async () => {
+    const { httpBytes, httpReqMock } = await loadFresh()
+    // 0xc3 0x28 is not valid UTF-8. Text decoding would substitute U+FFFD and
+    // change the byte count, which is the corruption this function exists to
+    // avoid.
+    const raw = Buffer.from([0x1f, 0x8b, 0x08, 0xc3, 0x28])
+    httpReqMock.mockResolvedValueOnce({
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      headers: {},
+      body: raw,
+      text: () => raw.toString('utf8'),
+      json: () => ({}),
+      arrayBuffer: () => new ArrayBuffer(0),
+      rawResponse: undefined,
+    })
+    const bytes = await httpBytes('https://registry.example.test/tarball')
+    expect(Array.from(bytes)).toEqual([0x1f, 0x8b, 0x08, 0xc3, 0x28])
+  })
+
+  test('sets Accept: application/octet-stream by default', async () => {
+    const { httpBytes, httpReqMock } = await loadFresh()
+    httpReqMock.mockResolvedValueOnce(makeResponse({ ok: true, body: '' }))
+    await httpBytes('https://example.com/blob')
+    const callArg = httpReqMock.mock.calls[0]![1] as {
+      headers: Record<string, string>
+    }
+    expect(callArg.headers['Accept']).toBe('application/octet-stream')
+  })
+
+  test('user-provided headers override defaults', async () => {
+    const { httpBytes, httpReqMock } = await loadFresh()
+    httpReqMock.mockResolvedValueOnce(makeResponse({ ok: true, body: '' }))
+    await httpBytes('https://example.com/blob', {
+      headers: { Accept: 'application/gzip', Authorization: 'Bearer tok' },
+    })
+    const callArg = httpReqMock.mock.calls[0]![1] as {
+      headers: Record<string, string>
+    }
+    expect(callArg.headers['Accept']).toBe('application/gzip')
+    expect(callArg.headers['Authorization']).toBe('Bearer tok')
+  })
+
+  test('forwards the method and body', async () => {
+    const { httpBytes, httpReqMock } = await loadFresh()
+    httpReqMock.mockResolvedValueOnce(makeResponse({ ok: true, body: '' }))
+    await httpBytes('https://example.com/blob', {
+      method: 'POST',
+      body: 'payload',
+    })
+    const callArg = httpReqMock.mock.calls[0]![1] as {
+      body?: string | undefined
+      method?: string | undefined
+    }
+    expect(callArg.method).toBe('POST')
+    expect(callArg.body).toBe('payload')
+  })
+
+  test('throws HttpResponseError when response.ok is false', async () => {
+    const { httpBytes, httpReqMock } = await loadFresh()
+    httpReqMock.mockResolvedValueOnce(
+      makeResponse({ ok: false, status: 404, body: 'not found' }),
+    )
+    await expect(httpBytes('https://example.com/blob')).rejects.toThrow()
+  })
 })
 
 describe.sequential('http-request/node — httpJson', () => {

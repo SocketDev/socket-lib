@@ -56,6 +56,43 @@ export const config: ExportsConfig = {
       from: './logger/logger',
       to: './logger/node',
     },
+    // Deliberately NO `browserTo`. The tarball twins are not a mirrored pair:
+    // `./npm/registry/tarball/node` is a SUPERSET, adding the four disk exports
+    // (extractNpmTarball, withNpmTarballFile, fetchAndExtractStagedTarball,
+    // createNpmTarballScratchDir) that a browser has no filesystem for. A
+    // browser condition here would silently drop those four in browser bundles
+    // only — a missing-filesystem problem re-surfacing as a call-time
+    // TypeError. Browser consumers import `./npm/registry/tarball/browser` and
+    // find out at compile time instead.
+    {
+      from: './npm/registry/tarball',
+      to: './npm/registry/tarball/node',
+    },
+    // The metadata client's twins ARE a mirrored pair — same named exports,
+    // differing only in which HTTP adapter and which TtlCache store they
+    // default to — so unlike the tarball entry above, a `browser` condition
+    // here drops nothing. It is the whole point: a web extension importing
+    // `./npm/meta` resolves the fetch-backed, memo-cached browser twin, and a
+    // server importing the same specifier still gets the Node stack and the
+    // cacache-backed store.
+    //
+    // The browser twins carry two EXTRA exports (`createWebStorageAdapter`,
+    // `createWebStorageMetaCache`) that only mean something in a browser.
+    // Extra-in-browser is the safe direction for a condition: a Node consumer
+    // never silently loses an export, and a browser consumer who wants those
+    // two imports `./npm/meta-cache/browser` explicitly, so `tsc` — which
+    // resolves types through the `default` condition — agrees with the bundler
+    // instead of reporting a symbol the runtime has.
+    {
+      browserTo: './npm/meta/browser',
+      from: './npm/meta',
+      to: './npm/meta/node',
+    },
+    {
+      browserTo: './npm/meta-cache/browser',
+      from: './npm/meta-cache',
+      to: './npm/meta-cache/node',
+    },
   ],
   // Browser-safe export paths (glob-matched) — each gets a self-routing
   // `browser` condition. Subtree globs are audited zero-Node-dep families
@@ -71,7 +108,34 @@ export const config: ExportsConfig = {
     './debug/**',
     './errors/**',
     './memo/**',
-    './npm/**',
+    // Still NOT `./npm/**`. Every leaf under it is now browser-CAPABLE, but
+    // three are the Node halves of twin pairs — `./npm/meta/node`,
+    // `./npm/meta-cache/node`, `./npm/registry/tarball/node` — and a
+    // self-routing `browser` condition on those would point a browser bundler
+    // straight at the Node file. The twin ENTRIES (`./npm/meta`,
+    // `./npm/meta-cache`) get their browser condition from a `browserTo`
+    // alias above, which routes to the browser half; the browser halves
+    // themselves are caught by `**/browser` below.
+    //
+    // This is also why neither `./npm/meta*` nor `./npm/meta/*` appears here,
+    // despite the `./npm/registry*` + `./npm/registry/*` pair below looking
+    // like a template to copy. `matchesGlob` makes `./npm/meta/*` one segment,
+    // which matches `./npm/meta/node` — the exact Node twin this list must not
+    // claim. `./npm/meta*` would match the `./npm/meta` and `./npm/meta-cache`
+    // ENTRIES, whose targets are the Node halves, and a self-routing condition
+    // would then override the correct `browserTo` with the Node file.
+    // `check/browser-exports-have-no-node-builtins.mts` re-derives all of this
+    // from the built bytes on every check run, so either mistake fails the
+    // build rather than shipping a false claim.
+    './npm/meta-slice',
+    './npm/meta-types',
+    // Both registry patterns keep their `*`. A wildcard-FREE pattern is a
+    // SUBTREE prefix here, so a bare `./npm/registry` also claims
+    // `./npm/registry/tarball/node` — the Node twin reaching node:fs and
+    // node:zlib. `./npm/registry*` stops at the entry leaf; `./npm/registry/*`
+    // is one segment, so it covers the sixteen helpers but not `tarball/node`.
+    './npm/registry*',
+    './npm/registry/*',
     './objects/**',
     './oci/**',
     './regexps/**',
@@ -120,6 +184,16 @@ export const config: ExportsConfig = {
     'dist/**/shared.d.mts',
     'dist/**/shared.d.ts',
     'dist/**/shared.js',
+    // Same rule for a shared core that outgrew one file. `npm/meta-cache`'s
+    // private core splits in two to stay under the 500-line cap: `shared`
+    // holds the cache plumbing and `shared-policy` holds the fetch and its
+    // failure policies. The second half is no more public than the first.
+    // Matching on the `shared-` prefix keeps that a CONVENTION rather than a
+    // growing list of one-off paths — no `shared-*` leaf exists outside this
+    // pattern's intent.
+    'dist/**/shared-*.d.mts',
+    'dist/**/shared-*.d.ts',
+    'dist/**/shared-*.js',
     'src/**',
   ],
   nodeRange: '>=22',

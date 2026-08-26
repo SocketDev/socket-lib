@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest'
 import type {
   PackumentVersion,
   PackumentVersionDist,
-} from '../../../src/npm/registry.mjs'
+} from '../../../src/npm/registry/index.mjs'
 import type {
   RawPackumentVersion,
   RawVersionDist,

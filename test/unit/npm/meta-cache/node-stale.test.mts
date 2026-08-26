@@ -12,7 +12,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { createTtlCache } from '../../../src/cache/ttl/store.mjs'
+import { createTtlCache } from '../../../../src/cache/ttl/store.mjs'
 import {
   buildMetaCacheKey,
   createNpmMetaCache,
@@ -20,18 +20,18 @@ import {
   getPackumentSlim,
   getStaleMeta,
   rememberStaleMeta,
-} from '../../../src/npm/meta-cache.mjs'
-import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
+} from '../../../../src/npm/meta-cache/node.mjs'
+import { tolerantSleep } from '../../../_shared/fleet/lib/timing.mts'
 import {
   createStubHttpAdapter,
   makeHttpResponseError,
   setupNpmMetaCacheIsolation,
-} from './meta-test-helpers.mts'
+} from '../meta-test-helpers.mts'
 
 import type {
   PackumentMetaSlim,
   RawPackument,
-} from '../../../src/npm/meta-types.mjs'
+} from '../../../../src/npm/meta-types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '1.0.0' },

@@ -1,21 +1,26 @@
 /**
- * @file Cached, batch-capable npm registry metadata client — the Socket-wide
- *   replacement for ad-hoc packument fetchers. Sibling of `./registry` (pure
- *   parsers + injectable HTTP): this module owns caching (`./meta-cache`),
- *   slimming (`./meta-slice`), and the derived helpers built on top
- *   (`getVersions`, `getLatestVersion`, `getPublishDate`,
- *   `getVersionTrustInfo`, `getBatch`) plus their `safe*` fail-open variants.
- *   Node-only because the cache layer is cacache-backed; unlike
- *   `./registry`, this module is not browser-safe.
+ * @file Platform-free core of the npm metadata client — the derived helpers
+ *   (`getVersions`, `getLatestVersion`, `getPublishDate`, `getBatch`,
+ *   `getVersionTrustInfo`) and their `safe*` fail-open variants, plus the pure
+ *   date/semver predicates they lean on.
+ *   Every helper here takes a `fetchSlim` as its FIRST parameter rather than
+ *   importing one. That is the whole platform split: the only thing separating
+ *   a Node metadata client from a browser one is which `getPackumentSlim` it
+ *   calls, so `./node` and `./browser` are each a thin binding of these
+ *   functions to their own twin of `../meta-cache`.
+ *   Nothing in this module reaches a `node:` builtin. That includes the batch
+ *   path: `pEach` comes from `../../promises/iterate`, whose lazy
+ *   `timers/promises` require uses a BARE specifier, so a browser bundler
+ *   stubs it through the package's top-level `browser` field instead of
+ *   throwing `UnhandledSchemeError` on a `node:` prefix.
  */
 
-import { errorMessage } from '../errors/message.mjs'
-// no-platform-http-import: server-only module with a cacache-backed cache; node platform is intentional.
-import { HttpResponseError } from '../http-request/node.mjs'
-import { RangeErrorCtor } from '../primordials/error.mjs'
-import { pEach } from '../promises/iterate.mjs'
-import { getSemver } from '../versions/shared.mjs'
-import { getPackumentSlim, PackumentNotFoundError } from './meta-cache.mjs'
+import { errorMessage } from '../../errors/message.mjs'
+import { RangeErrorCtor } from '../../primordials/error.mjs'
+import { pEach } from '../../promises/iterate.mjs'
+import { getSemver } from '../../versions/shared.mjs'
+import { httpErrorStatus } from '../registry/live.mjs'
+import { PackumentNotFoundError } from '../meta-cache/shared.mjs'
 
 import type {
   BatchOptions,
@@ -26,73 +31,44 @@ import type {
   LatestVersionResult,
   PackumentMetaSlim,
   VersionTrustInfo,
-} from './meta-types.mjs'
+} from '../meta-types.mjs'
 
-export {
-  buildMetaCacheKey,
-  createNpmMetaCache,
-  fetchPackumentSlim,
-  getDefaultMetaCache,
-  getPackumentSlim,
-  getStaleMeta,
-  PackumentNotFoundError,
-  rememberStaleMeta,
-} from './meta-cache.mjs'
-export {
-  sliceOneVersion,
-  slicePackument,
-  sliceVersionMeta,
-} from './meta-slice.mjs'
-export type {
-  CachedPackumentEntry,
-  CachedPackumentHit,
-  CachedPackumentMiss,
-  ResolvedPackumentFetchOptions,
-} from './meta-cache.mjs'
-export type {
-  BatchOptions,
-  BatchResult,
-  GetPackumentSlimOptions,
-  GetVersionsOptions,
-  GetVersionsResult,
-  LatestVersionResult,
-  NpmMetaHttpAdapter,
-  PackageError,
-  PackumentMetaSlim,
-  PackumentVariant,
-  PackumentVersionMetaSlim,
-  RawNpmUser,
-  RawPackument,
-  RawPackumentVersion,
-  RawVersionDist,
-  VersionTrustInfo,
-} from './meta-types.mjs'
+const ALL_DIGITS_RE = /^\d+$/
 
 /**
- * Extract the HTTP status code from a caught error when it came from the
- * `httpJson` adapter (`HttpResponseError`) or a synthesized
- * `PackumentNotFoundError`; `undefined` for anything else (network failure,
- * abort, a custom test-double error).
+ * The one capability every helper here needs and none of them may import: a
+ * cached packument fetch. `./node` binds `../meta-cache/node`'s
+ * `getPackumentSlim`; `./browser` binds `../meta-cache/browser`'s.
+ */
+export type FetchPackumentSlim = (
+  name: string,
+  options?: GetPackumentSlimOptions | undefined,
+) => Promise<PackumentMetaSlim>
+
+/**
+ * Extract the HTTP status code from a caught error.
+ *
+ * Structural rather than `instanceof`: the Node and browser `http-request`
+ * twins each declare their OWN `HttpResponseError` class, so an `instanceof`
+ * check would recognize only whichever one this module happened to import and
+ * silently return `undefined` for the other, or for a status-carrying error
+ * from an injected adapter. `httpErrorStatus` reads `response.status` then
+ * `status`, which covers both twins and `PackumentNotFoundError` alike.
  */
 export function extractHttpStatus(error: unknown): number | undefined {
-  if (error instanceof HttpResponseError) {
-    return error.response.status
-  }
-  if (error instanceof PackumentNotFoundError) {
-    return error.status
-  }
-  return undefined
+  return httpErrorStatus(error)
 }
 
 /**
- * Fetch `getPackumentSlim` for every name with bounded concurrency, returning
- * an index-preserving array. Every item is attempted regardless of
+ * Fetch `fetchSlim` for every name with bounded concurrency, returning an
+ * index-preserving array. Every item is attempted regardless of
  * `throwOnError` — nothing is aborted in-flight. A per-item failure becomes a
  * `PackageError` at that index; when `throwOnError` is `true`, once every
  * item has settled the error from the LOWEST-INDEX failed item is thrown —
  * deterministic regardless of settle order.
  */
 export async function getBatch(
+  fetchSlim: FetchPackumentSlim,
   names: string[],
   options?: BatchOptions | undefined,
 ): Promise<BatchResult[]> {
@@ -110,7 +86,7 @@ export async function getBatch(
     names.map((name, index) => ({ index, name })),
     async item => {
       try {
-        results[item.index] = await getPackumentSlim(item.name, opts)
+        results[item.index] = await fetchSlim(item.name, opts)
       } catch (e) {
         failures.push({ error: e, index: item.index })
         results[item.index] = {
@@ -149,11 +125,12 @@ export async function getBatch(
  *   version satisfies.
  */
 export async function getLatestVersion(
+  fetchSlim: FetchPackumentSlim,
   name: string,
   options?: GetVersionsOptions | undefined,
 ): Promise<LatestVersionResult> {
   const opts = { __proto__: null, ...options } as GetVersionsOptions
-  const meta = await getPackumentSlim(name, opts)
+  const meta = await fetchSlim(name, opts)
   if (!opts.range) {
     const version = meta.distTags['latest'] ?? ''
     return {
@@ -195,11 +172,12 @@ export async function getLatestVersion(
  * the version isn't in the packument.
  */
 export async function getPublishDate(
+  fetchSlim: FetchPackumentSlim,
   name: string,
   version: string,
   options?: GetPackumentSlimOptions | undefined,
 ): Promise<string | undefined> {
-  const meta = await getPackumentSlim(name, options)
+  const meta = await fetchSlim(name, options)
   return meta.versions[version]?.time || undefined
 }
 
@@ -213,11 +191,12 @@ export async function getPublishDate(
  *   dist-tag that isn't present in the packument.
  */
 export async function getVersions(
+  fetchSlim: FetchPackumentSlim,
   name: string,
   options?: GetVersionsOptions | undefined,
 ): Promise<GetVersionsResult> {
   const opts = { __proto__: null, ...options } as GetVersionsOptions
-  const meta = await getPackumentSlim(name, opts)
+  const meta = await fetchSlim(name, opts)
 
   const time: Record<string, string> = {}
   const versionKeys = Object.keys(meta.versions)
@@ -256,6 +235,7 @@ export async function getVersions(
  * from the abbreviated packument).
  */
 export async function getVersionTrustInfo(
+  fetchSlim: FetchPackumentSlim,
   name: string,
   options?: GetPackumentSlimOptions | undefined,
   // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
@@ -265,7 +245,7 @@ export async function getVersionTrustInfo(
     ...options,
     variant: 'full',
   } as GetPackumentSlimOptions
-  const meta = await getPackumentSlim(name, fullOptions)
+  const meta = await fetchSlim(name, fullOptions)
   // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
   const result: Record<string, VersionTrustInfo> = {}
   const versions = Object.keys(meta.versions)
@@ -371,31 +351,29 @@ export function resolveRequestedVersions(
 
 /**
  * Fail-open `getLatestVersion` — `undefined` on any error.
- *
- * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function safeGetLatestVersion(
+  fetchSlim: FetchPackumentSlim,
   name: string,
   options?: GetVersionsOptions | undefined,
 ): Promise<LatestVersionResult | undefined> {
   try {
-    return await getLatestVersion(name, options)
+    return await getLatestVersion(fetchSlim, name, options)
   } catch {
     return undefined
   }
 }
 
 /**
- * Fail-open `getPackumentSlim` — `undefined` on any error.
- *
- * @unused No internal or Socket consumers; exercised only by its unit tests.
+ * Fail-open packument fetch — `undefined` on any error.
  */
 export async function safeGetPackumentSlim(
+  fetchSlim: FetchPackumentSlim,
   name: string,
   options?: GetPackumentSlimOptions | undefined,
 ): Promise<PackumentMetaSlim | undefined> {
   try {
-    return await getPackumentSlim(name, options)
+    return await fetchSlim(name, options)
   } catch {
     return undefined
   }
@@ -403,16 +381,15 @@ export async function safeGetPackumentSlim(
 
 /**
  * Fail-open `getPublishDate` — `undefined` on any error.
- *
- * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function safeGetPublishDate(
+  fetchSlim: FetchPackumentSlim,
   name: string,
   version: string,
   options?: GetPackumentSlimOptions | undefined,
 ): Promise<string | undefined> {
   try {
-    return await getPublishDate(name, version, options)
+    return await getPublishDate(fetchSlim, name, version, options)
   } catch {
     return undefined
   }
@@ -420,15 +397,14 @@ export async function safeGetPublishDate(
 
 /**
  * Fail-open `getVersions` — an empty result on any error.
- *
- * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function safeGetVersions(
+  fetchSlim: FetchPackumentSlim,
   name: string,
   options?: GetVersionsOptions | undefined,
 ): Promise<GetVersionsResult> {
   try {
-    return await getVersions(name, options)
+    return await getVersions(fetchSlim, name, options)
   } catch {
     return { distTags: {}, time: {}, versions: [] }
   }
@@ -436,22 +412,19 @@ export async function safeGetVersions(
 
 /**
  * Fail-open `getVersionTrustInfo` — an empty record on any error.
- *
- * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export async function safeGetVersionTrustInfo(
+  fetchSlim: FetchPackumentSlim,
   name: string,
   options?: GetPackumentSlimOptions | undefined,
   // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
 ): Promise<Record<string, VersionTrustInfo>> {
   try {
-    return await getVersionTrustInfo(name, options)
+    return await getVersionTrustInfo(fetchSlim, name, options)
   } catch {
     return {}
   }
 }
-
-const ALL_DIGITS_RE = /^\d+$/
 
 /**
  * Resolve an `after` filter value to epoch milliseconds. A `number` is used

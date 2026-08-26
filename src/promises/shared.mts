@@ -28,5 +28,11 @@ export function getTimers(): typeof timersPromises {
   if (!IS_NODE) {
     return undefined as unknown as typeof timersPromises
   }
-  return require('node:timers/promises') as typeof timersPromises
+  // Bare specifier, not node:, so webpack resolve.fallback / the browser
+  // field can stub this builtin in browser bundles; a node: prefix throws
+  // UnhandledSchemeError there. `promises/iterate` is reachable from the
+  // browser-safe `npm/meta` graph via `pEach`, so the prefix here was a real
+  // browser-bundle break even though the call is IS_NODE-gated.
+  // oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
+  return require('timers/promises') as typeof timersPromises
 }
