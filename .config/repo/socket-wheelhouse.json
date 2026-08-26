@@ -19,10 +19,15 @@
   },
   "cover": {
     "thresholds": {
-      "statements": 93,
-      "branches": 87,
-      "functions": 94,
-      "lines": 93
+      "statements": 96,
+      "branches": 91,
+      "functions": 97,
+      "lines": 96
+    }
+  },
+  "coverage": {
+    "exclude": {
+      "add": ["src/perf/**"]
     }
   },
   "lint": {

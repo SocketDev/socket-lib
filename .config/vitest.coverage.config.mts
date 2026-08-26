@@ -43,6 +43,22 @@ const libSpecificExcludes = [
   'src/dlx/binary.mts',
 ]
 
+// `src/perf/**` is excluded via the `coverage.exclude.add` overlay in
+// `.config/repo/socket-wheelhouse.json`, which is the one surface both the
+// vitest tiers and the c8 children tier read. Rationale: the fleet baseline
+// already excludes `perf/**` and vitest honours it — the main and isolated
+// tiers report ZERO files under `src/perf/`. The children tier runs through
+// c8's programmatic Report, whose matcher anchors that glob differently, so a
+// spawned child that happens to load `src/perf/metrics.mts` leaks one entry
+// into the merged aggregate. That entry is not a measurement of the file: it
+// arrives UNMAPPED (122 per-line "statements" for a 46-line module) and it
+// appears or vanishes with whichever children a run spawns, moving the
+// aggregate by roughly half a point either way. The module is unit-tested in
+// `test/unit/perf/metrics.test.mts`, so the exclusion hides no untested code —
+// it only makes every tier agree with what the mapped tiers already do. Drift
+// watch: drop the overlay entry once the children tier shares the mapped
+// tiers' glob anchoring.
+
 /**
  * Base coverage config for socket-lib: fleet defaults + lib-specific exclusions
  * layered on top.
