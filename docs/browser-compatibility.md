@@ -179,6 +179,9 @@ That default is a decision, not a placeholder:
 - **`localStorage` is the wrong shape for packuments.** It is synchronous main-thread I/O with a roughly 5 MB origin budget, and one slimmed packument for a popular package runs to hundreds of KB. Caching them there evicts the host application's own data to store something re-fetchable.
 - **A cache is never load-bearing here.** Every read falls back to a fetch, so losing the tier across a page load costs latency, never correctness.
 
+<details>
+<summary>Tier picker table and storage adapter examples</summary>
+
 Pick the tier that matches your context:
 
 | Context                              | Suggested tier                    | How                                                   |
@@ -223,6 +226,8 @@ const meta = await getPackumentSlim('left-pad', {
   http: { json: httpJson },
 })
 ```
+
+</details>
 
 Storage failures are always swallowed: a `QuotaExceededError` or a blocked `localStorage` degrades the cache to memory-only rather than failing the fetch. The persisted-stale and storm-control tiers receive the same adapter as the primary cache, so serve-stale-on-error survives a reload too.
 
