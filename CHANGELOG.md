@@ -5,6 +5,36 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [7.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.1) - 2026-08-26
+
+### Fixed
+
+- **`types`** — point the shipped `.d.ts` re-exports at `.js` instead of `.mjs`.
+  7.0.0 shipped 322 declaration files carrying 517 re-export specifiers that
+  named `./x.mjs`, and the package ships no `.mjs` or `.d.mts` files at all.
+  TypeScript resolves a `.mjs` specifier only to `.mts` or `.d.mts`, so every
+  one of those re-exports resolved to nothing and the symbols behind it
+  silently became `any` — no error, no warning, just lost types. Roughly 260
+  symbols across 24 public subpaths were affected, among them
+  `paths/normalize`, `npm/meta`, `stdio/prompts`, `http-request` and
+  `secrets/keychain`. A symbol declared directly in its own subpath kept its
+  type, which is why the regression was invisible in ordinary use: importing
+  `fromUnixPath` from `paths/conversion` type-checked while the same function
+  imported from `paths/normalize` accepted any arguments at all. Upgrading
+  restores the real types, so code that leaned on the `any` may surface
+  genuine type errors that 7.0.0 hid.
+
+### Added
+
+- **`build`** — fail the build when a public subpath exports a binding that is
+  `undefined` at runtime. A circular import makes the bundler's eager
+  re-export snapshot a half-built module, pinning the binding to `undefined`
+  for the life of the process; Node mentions it only in a warning that reads
+  as cosmetic. The new check imports every subpath in the exports map in its
+  own process and compares each re-export against its source module, so the
+  symptom is measured rather than inferred. The graph-based sibling check now
+  gates the build as well; neither ran at build time before.
+
 ## [7.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.0) - 2026-08-26
 
 ### Added
