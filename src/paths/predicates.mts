@@ -20,7 +20,6 @@ import {
   StringPrototypeStartsWith,
 } from '../primordials/string.mjs'
 
-import { foldPathForCompare } from './normalize.mjs'
 import {
   CHAR_BACKWARD_SLASH,
   CHAR_COLON,
@@ -29,6 +28,7 @@ import {
   CHAR_LOWERCASE_Z,
   CHAR_UPPERCASE_A,
   CHAR_UPPERCASE_Z,
+  foldPathForCompare,
   msysDriveRegExp,
   nodeModulesPathRegExp,
   pathLikeToString,

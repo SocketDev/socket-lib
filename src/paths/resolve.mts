@@ -11,9 +11,8 @@ import { isWin32 } from '../constants/platform.mjs'
 
 import { StringPrototypeCharCodeAt } from '../primordials/string.mjs'
 
-import { CHAR_UPPERCASE_A, CHAR_UPPERCASE_Z } from './shared.mjs'
-import { normalizePath } from './normalize.mjs'
 import { isAbsolute, isPathSeparator } from './predicates.mjs'
+import { CHAR_UPPERCASE_A, CHAR_UPPERCASE_Z, normalizePath } from './shared.mjs'
 
 /**
  * Calculate the relative path from one path to another.

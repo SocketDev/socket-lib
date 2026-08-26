@@ -11,8 +11,7 @@ import { isWin32 } from '../constants/platform.mjs'
 
 import { StringPrototypeStartsWith } from '../primordials/string.mjs'
 
-import { pathLikeToString, slashRegExp } from './shared.mjs'
-import { normalizePath } from './normalize.mjs'
+import { normalizePath, pathLikeToString, slashRegExp } from './shared.mjs'
 
 /**
  * Convert Unix-style POSIX paths to native Windows paths.

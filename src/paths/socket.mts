@@ -28,7 +28,7 @@ import {
   DOT_SOCKET_DIR,
   RUN_DIR,
 } from './dirnames.mjs'
-import { normalizePath } from './normalize.mjs'
+import { normalizePath } from './shared.mjs'
 import { getPathValue } from './rewire.mjs'
 
 import { getNodeOs } from '../node/os.mjs'

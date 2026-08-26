@@ -11,7 +11,7 @@ import process from 'node:process'
 import { getNodePath } from '../node/path.mjs'
 import { getSmolPath } from '../exe/smol/path.mjs'
 
-import { normalizePath } from './normalize.mjs'
+import { normalizePath } from './shared.mjs'
 
 export interface WalkUpOptions {
   /**

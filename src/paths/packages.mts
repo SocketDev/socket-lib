@@ -2,7 +2,7 @@
  * @file Package.json path resolution utilities.
  */
 
-import { normalizePath } from './normalize.mjs'
+import { normalizePath } from './shared.mjs'
 
 import { StringPrototypeEndsWith } from '../primordials/string.mjs'
 
