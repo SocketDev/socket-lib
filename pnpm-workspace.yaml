@@ -390,7 +390,7 @@ overrides:
   'has-flag': '5.0.1'
   # 4.12.25+ clears GHSA-88fw-hqm2-52qc (hono CORS wildcard+credentials reflect),
   # pulled transitively via @anthropic-ai/claude-agent-sdk.
-  'hono': '4.13.2'
+  'hono': '4.13.3'
   'hosted-git-info': '8.1.0'
   'ip-address': '10.5.0'
   'isexe': '3.1.5'
