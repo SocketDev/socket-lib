@@ -1,0 +1,64 @@
+{
+  "files": [
+    {
+      "integrity": "sha256:353fac4fb768462ffec00649e0ed3715de02b06e4fdc996477f55e3c01db88e0",
+      "path": "api/base.yaml"
+    },
+    {
+      "integrity": "sha256:5ac109fb43a59d952037ce47d54b4aa0bfd65d5c5deeebe64d185b21e0edfb62",
+      "path": "api/merge-config.yaml"
+    },
+    {
+      "integrity": "sha256:a0711624e2371b03457091f8ca2df51c1fe888414e7f89cb41a41eca1b3b38db",
+      "path": "api/registry.npmjs.com/access.yaml"
+    },
+    {
+      "integrity": "sha256:a977f157ae26a2eceed364a8e99a39b0f4dd540cf994ca2e73549d0f796006d0",
+      "path": "api/registry.npmjs.com/audit.yaml"
+    },
+    {
+      "integrity": "sha256:261f6ce97841fb69c0f1f859d5751baba05ee3a94d5b4a81dc53845fcd3a0e6b",
+      "path": "api/registry.npmjs.com/oidc.yaml"
+    },
+    {
+      "integrity": "sha256:2d5b37ed3fc079abe5dbe5d3c76b25c3134908a8a9103576d2c4a89390b5bb88",
+      "path": "api/registry.npmjs.com/org.yaml"
+    },
+    {
+      "integrity": "sha256:2dde56e48ed1f201eec5ed86d29108eb822570bdf3e7dea7271e46833f3f409a",
+      "path": "api/registry.npmjs.com/package-version-status.yaml"
+    },
+    {
+      "integrity": "sha256:3f612bff9d004480ed6b58134e37f5c5318f62773e58574fd1731d813759929e",
+      "path": "api/registry.npmjs.com/publish.yaml"
+    },
+    {
+      "integrity": "sha256:bb88b1f03681612d7e10a3fc7cba2b5253165f11d98d256fd8eac139281fa8ed",
+      "path": "api/registry.npmjs.com/search.yaml"
+    },
+    {
+      "integrity": "sha256:d40d959b2483a98c035fe552ef7d16e02547dec14f9e5a4960093667167670d2",
+      "path": "api/registry.npmjs.com/stage.yaml"
+    },
+    {
+      "integrity": "sha256:ab7cba1b94504fbd33096d32a8651b5c44ff3ac3ee6fd633d94ba79072a47b46",
+      "path": "api/registry.npmjs.com/team.yaml"
+    },
+    {
+      "integrity": "sha256:c09fe31655e1b9de70031b373a66184b9732639414d90ad85561bef78286f628",
+      "path": "api/registry.npmjs.com/token.yaml"
+    },
+    {
+      "integrity": "sha256:968e7f53589546ac08aaec149c41733ac6efa474ce2d0adf14ee170e731b562d",
+      "path": "api/registry.npmjs.com/trust.yaml"
+    },
+    {
+      "integrity": "sha256:9a16644a632b702326fcc9a08db79136b81e5a25386d2e56345c885136c0237f",
+      "path": "api/shared-components.yaml"
+    }
+  ],
+  "generatedBy": "scripts/repo/sync-npm-api-spec.mts --refresh",
+  "refLabel": "main 2026-08-25",
+  "repo": "npm/api-documentation",
+  "sha": "861fa7a1fc048008a081dce6a407c6a9e5bca475"
+}
