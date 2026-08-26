@@ -14,13 +14,23 @@
  *   on purpose, to catch ESM/CJS interop bugs that only appear after bundling,
  *   and they broke the moment the extension changed.
  *
+ *   Renaming the file is only half the job. tsgo emits a `.mts` source's
+ *   re-exports with `.mjs` specifiers (`export { x } from './leaf.mjs'`),
+ *   which is right for a `.d.mts` and wrong the instant the file becomes a
+ *   `.d.ts`. TypeScript resolves a `.mjs` specifier ONLY to `.mts`/`.d.mts`,
+ *   and the pack ships neither, so every such re-export dangles and each
+ *   symbol behind it silently degrades to `any` - no consumer error, just
+ *   lost types. That shipped in 7.0.0: 322 declarations, 517 dead specifiers,
+ *   ~260 symbols across 24 public subpaths. So rewrite the specifiers to
+ *   `.js` as part of the rename, matching what rolldown emits beside them.
+ *
  *   Runs BEFORE package-exports generation so the map is built from the final
  *   names.
  *
  *   Usage: node scripts/repo/post-build/pair-declarations-with-js.mts [--quiet]
  */
 
-import { readdirSync, renameSync } from 'node:fs'
+import { readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
@@ -68,24 +78,69 @@ export function pairedDeclarationPath(mtsPath: string): string {
   return `${mtsPath.slice(0, -DTS_MTS_SUFFIX.length)}.d.ts`
 }
 
+/**
+ * Point a declaration's relative `.mjs` specifiers at `.js`.
+ *
+ * Comment lines are skipped so a JSDoc `@example` that shows a `.mjs` import
+ * keeps reading the way the author wrote it. Only `from '...'` and
+ * `import('...')` in real statement positions move, and only when the
+ * specifier is relative - a bare package specifier is that package's business.
+ */
+export function rewriteDeclarationSpecifiers(source: string): string {
+  // Walk line by line without splitting: `m` stops `.` at the newline, so a
+  // CRLF file's trailing \r rides along inside the match and is written back
+  // untouched. Splitting and rejoining would silently retype the line endings.
+  return source.replace(/^.*$/gm, line => {
+    const trimmed = line.trimStart()
+    if (
+      trimmed.startsWith('*') ||
+      trimmed.startsWith('//') ||
+      trimmed.startsWith('/*')
+    ) {
+      return line
+    }
+    return (
+      line
+        // `from '<relative>.mjs'` -> `from '<relative>.js'`.
+        // 1. (\bfrom\s*') the keyword and the opening quote
+        // 2. (\.[^']*) the specifier body, which MUST start with a dot so a
+        //    bare package specifier stays that package's business
+        // 3. \.mjs(') the extension to swap and the closing quote
+        .replace(/(\bfrom\s*')(\.[^']*)\.mjs(')/g, '$1$2.js$3')
+        // The same swap for a type-position `import('<relative>.mjs')`.
+        // 1. (\bimport\s*\(\s*') the keyword, paren and opening quote
+        // 2. (\.[^']*) the dot-anchored specifier body
+        // 3. \.mjs('\s*\)) the extension, closing quote and paren
+        .replace(/(\bimport\s*\(\s*')(\.[^']*)\.mjs('\s*\))/g, '$1$2.js$3')
+    )
+  })
+}
+
 export function main(): void {
   const quiet = process.argv.includes('--quiet')
   const distDir = path.join(REPO_ROOT, 'dist')
   const found = findDeclarationMts(distDir)
+  let rewritten = 0
   for (let i = 0, { length } = found; i < length; i += 1) {
     const from = found[i]!
+    const source = readFileSync(from, 'utf8')
+    const next = rewriteDeclarationSpecifiers(source)
+    if (next !== source) {
+      writeFileSync(from, next)
+      rewritten += 1
+    }
     renameSync(from, pairedDeclarationPath(from))
   }
   if (!quiet) {
     logger.success(
-      `post-build: paired ${found.length} declaration(s) with their .js runtime.`,
+      `post-build: paired ${found.length} declaration(s) with their .js runtime, ${rewritten} respecified.`,
     )
   }
 }
 
 const SCRIPT_META: ScriptMeta = {
   describe:
-    'renames dist .d.mts declarations to .d.ts so they pair with the emitted .js',
+    'renames dist .d.mts declarations to .d.ts and repoints their .mjs specifiers at .js',
   help: `Usage: node scripts/repo/post-build/pair-declarations-with-js.mts [flags]
 
   --quiet  print nothing on success`,
