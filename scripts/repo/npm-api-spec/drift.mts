@@ -1,4 +1,4 @@
-/**
+/*
  * @file Diff npm's published spec against what `src/npm/` implements. Pure: it
  *   takes the two inventories and returns findings, so both the check and its
  *   tests drive it without touching the network or the filesystem.
