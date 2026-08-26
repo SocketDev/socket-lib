@@ -70,12 +70,12 @@ describe('readNpmTarballEntries', () => {
 
   test('reads nested paths', async () => {
     const bytes = await makeNpmTarball([
-      { body: 'deep\n', name: 'package/a/b/c.txt' },
+      { body: 'deep\n', name: 'package/lib/nested/deep.txt' },
     ])
     const entries = await readNpmTarballEntries(bytes)
     assert.deepEqual(
       entries.map(e => e.name),
-      ['a/b/c.txt'],
+      ['lib/nested/deep.txt'],
     )
   })
 
@@ -94,12 +94,12 @@ describe('readNpmTarballEntries', () => {
   test('skips directory entries', async () => {
     const bytes = await makeNpmTarball([
       { name: 'package/lib', type: 'directory' },
-      { body: 'x\n', name: 'package/lib/x.js' },
+      { body: 'body\n', name: 'package/lib/example.js' },
     ])
     const entries = await readNpmTarballEntries(bytes)
     assert.deepEqual(
       entries.map(e => e.name),
-      ['lib/x.js'],
+      ['lib/example.js'],
     )
   })
 
@@ -135,8 +135,8 @@ describe('readNpmTarballEntries', () => {
 
   test('enforces the entry-count limit', async () => {
     const bytes = await makeNpmTarball([
-      { body: 'a\n', name: 'package/a.txt' },
-      { body: 'b\n', name: 'package/b.txt' },
+      { body: 'first\n', name: 'package/first.txt' },
+      { body: 'second\n', name: 'package/second.txt' },
     ])
     await assert.rejects(
       readNpmTarballEntries(bytes, { maxEntries: 1 }),
@@ -156,8 +156,8 @@ describe('readNpmTarballEntries', () => {
 
   test('enforces the total-size limit', async () => {
     const bytes = await makeNpmTarball([
-      { body: 'x'.repeat(32), name: 'package/a.txt' },
-      { body: 'y'.repeat(32), name: 'package/b.txt' },
+      { body: 'x'.repeat(32), name: 'package/first.txt' },
+      { body: 'y'.repeat(32), name: 'package/second.txt' },
     ])
     await assert.rejects(
       readNpmTarballEntries(bytes, { maxTotalSize: 40 }),

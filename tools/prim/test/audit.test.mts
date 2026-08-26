@@ -133,9 +133,9 @@ describe('which files the walk reads', () => {
     // Vendored code is not the user's to migrate, and node_modules would
     // dominate every audit.
     const findings = await audit({
-      '.cache/c.mjs': 'Object.keys(o)\n',
-      'external/b.mjs': 'Object.keys(o)\n',
-      'node_modules/pkg/a.mjs': 'Object.keys(o)\n',
+      '.cache/cached.mjs': 'Object.keys(o)\n',
+      'external/vendored.mjs': 'Object.keys(o)\n',
+      'node_modules/pkg/installed.mjs': 'Object.keys(o)\n',
     })
     expect(findings).toEqual([])
   })
@@ -156,7 +156,7 @@ describe('which files the walk reads', () => {
 
   it('honours a caller-supplied skip list instead of the defaults', async () => {
     const { scanDir, targetRoot } = target({
-      'generated/a.mjs': 'Object.keys(o)\n',
+      'generated/emitted.mjs': 'Object.keys(o)\n',
       'keep.mjs': 'Object.keys(o)\n',
     })
     const findings = await auditDirectory({

@@ -244,10 +244,11 @@ describe('extractSchemaFields', () => {
 
 describe('mergeConfigInputs', () => {
   it('reads the input list and roots it under api/', () => {
-    const text = 'inputs:\n  - inputFile: base.yaml\n  - inputFile: a/b.yaml\n'
+    const text =
+      'inputs:\n  - inputFile: base.yaml\n  - inputFile: registry/example.yaml\n'
     expect(mergeConfigInputs(text)).toStrictEqual([
       'api/base.yaml',
-      'api/a/b.yaml',
+      'api/registry/example.yaml',
     ])
   })
 

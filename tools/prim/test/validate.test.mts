@@ -120,15 +120,20 @@ describe('extractImports', () => {
   it('collects import, export-from and export-star specifiers', () => {
     const specs = extractImports(
       [
-        "import { a } from './a.mts'",
-        "export { b } from './b.mts'",
-        "export * from './c.mts'",
+        "import { named } from './imported.mts'",
+        "export { renamed } from './re-exported.mts'",
+        "export * from './star-exported.mts'",
         "import 'node:fs'",
         'const local = 1',
       ].join('\n'),
       '/repo/src/example.mts',
     )
-    expect(specs).toEqual(['./a.mts', './b.mts', './c.mts', 'node:fs'])
+    expect(specs).toEqual([
+      './imported.mts',
+      './re-exported.mts',
+      './star-exported.mts',
+      'node:fs',
+    ])
   })
 
   it('strips TypeScript types before parsing a .mts file', () => {
@@ -143,8 +148,11 @@ describe('extractImports', () => {
 
   it('parses a plain .js file without stripping', () => {
     expect(
-      extractImports("import { a } from './a.js'\n", '/repo/src/example.js'),
-    ).toEqual(['./a.js'])
+      extractImports(
+        "import { named } from './imported.js'\n",
+        '/repo/src/example.js',
+      ),
+    ).toEqual(['./imported.js'])
   })
 
   it('throws on syntactically invalid source', () => {

@@ -297,8 +297,8 @@ describe('readNpmTarballEntries', () => {
 
   test('enforces the entry-count limit', async () => {
     const bytes = await makeNpmTarball([
-      { body: 'a\n', name: 'package/a.txt' },
-      { body: 'b\n', name: 'package/b.txt' },
+      { body: 'first\n', name: 'package/first.txt' },
+      { body: 'second\n', name: 'package/second.txt' },
     ])
     await assert.rejects(
       readNpmTarballEntries(bytes, { maxEntries: 1 }),

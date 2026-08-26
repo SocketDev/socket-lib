@@ -61,15 +61,15 @@ exports.isRelative = function () {};
 describe('readReexports', () => {
   it('maps each eager re-export to the file it copies from', () => {
     const dir = writeGraph({
-      'a.js': `const require_b = require('./b.js');
-exports.one = require_b.one;
-exports.two = require_b.two;
+      'barrel.js': `const require_leaf = require('./leaf.js');
+exports.one = require_leaf.one;
+exports.two = require_leaf.two;
 `,
-      'b.js': 'exports.one = 1;\nexports.two = 2;\n',
+      'leaf.js': 'exports.one = 1;\nexports.two = 2;\n',
     })
-    const found = readReexports(path.join(dir, 'a.js'))
+    const found = readReexports(path.join(dir, 'barrel.js'))
     expect([...found.values()]).toEqual([['one', 'two']])
-    expect([...found.keys()].map(f => path.basename(f))).toEqual(['b.js'])
+    expect([...found.keys()].map(f => path.basename(f))).toEqual(['leaf.js'])
   })
 
   it('ignores a local export that is not copied from another module', () => {
@@ -90,12 +90,12 @@ exports.x = require_gone.x;
 
   it('records a renaming re-export under the name it publishes', () => {
     const dir = writeGraph({
-      'a.js': `const require_b = require('./b.js');
-exports.outer = require_b.inner;
+      'barrel.js': `const require_leaf = require('./leaf.js');
+exports.outer = require_leaf.inner;
 `,
-      'b.js': 'exports.inner = 1;\n',
+      'leaf.js': 'exports.inner = 1;\n',
     })
-    expect([...readReexports(path.join(dir, 'a.js')).values()]).toEqual([
+    expect([...readReexports(path.join(dir, 'barrel.js')).values()]).toEqual([
       ['outer'],
     ])
   })
@@ -168,11 +168,11 @@ exports.isPath = function () { return require_shared.normalizePath(); };
     // The three cycles dist already has. They cannot strand a binding, so the
     // gate must not fail them - otherwise it needs an allowlist and rots.
     const dir = writeGraph({
-      'a.js': `const require_b = require('./b.js');
-exports.a = function () { return require_b.b(); };
+      'left.js': `const require_right = require('./right.js');
+exports.left = function () { return require_right.right(); };
 `,
-      'b.js': `const require_a = require('./a.js');
-exports.b = function () { return require_a.a; };
+      'right.js': `const require_left = require('./left.js');
+exports.right = function () { return require_left.left; };
 `,
     })
     expect(auditReexportCycles(listDistFiles(dir))).toEqual([])

@@ -39,19 +39,19 @@ function writeGraph(files: Record<string, string>): string {
 describe('readSpecifiers', () => {
   it('reads static, re-export, side-effect, dynamic, and require forms', () => {
     const dir = writeGraph({
-      'a.js': [
-        `import { x } from './x.js'`,
-        `export { y } from './y.js'`,
+      'entry.js': [
+        `import { named } from './static-import.js'`,
+        `export { renamed } from './re-export.js'`,
         `import './side.js'`,
-        `const z = await import('./z.js')`,
-        `const w = require('node:fs')`,
+        `const lazy = await import('./dynamic-import.js')`,
+        `const fs = require('node:fs')`,
       ].join('\n'),
     })
-    expect(readSpecifiers(path.join(dir, 'a.js')).toSorted()).toEqual([
+    expect(readSpecifiers(path.join(dir, 'entry.js')).toSorted()).toEqual([
+      './dynamic-import.js',
+      './re-export.js',
       './side.js',
-      './x.js',
-      './y.js',
-      './z.js',
+      './static-import.js',
       'node:fs',
     ])
   })
@@ -136,21 +136,21 @@ describe('browserTargetOf', () => {
   it('reads a nested self-routing condition', () => {
     expect(
       browserTargetOf({
-        browser: { default: './dist/x.js', types: './dist/x.d.ts' },
-        default: './dist/x.js',
+        browser: { default: './dist/example.js', types: './dist/example.d.ts' },
+        default: './dist/example.js',
       }),
-    ).toBe('./dist/x.js')
+    ).toBe('./dist/example.js')
   })
 
   it('reads a bare-string build override', () => {
-    expect(browserTargetOf({ browser: './dist/x.browser.js' })).toBe(
-      './dist/x.browser.js',
+    expect(browserTargetOf({ browser: './dist/example.browser.js' })).toBe(
+      './dist/example.browser.js',
     )
   })
 
   it('returns undefined for an entry with no browser condition', () => {
-    expect(browserTargetOf({ default: './dist/x.js' })).toBe(undefined)
-    expect(browserTargetOf('./dist/x.js')).toBe(undefined)
+    expect(browserTargetOf({ default: './dist/example.js' })).toBe(undefined)
+    expect(browserTargetOf('./dist/example.js')).toBe(undefined)
     // A JSON null, the way one would arrive from a hand-edited package.json.
     // `typeof null` is 'object', so this is the branch that would throw.
     expect(browserTargetOf(JSON.parse('null'))).toBe(undefined)
