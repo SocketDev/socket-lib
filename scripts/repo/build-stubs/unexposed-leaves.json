@@ -70,8 +70,6 @@
     "exe/argv/flag-predicates",
     "exe/argv/flag-types",
     "exe/argv/meta",
-    "exe/argv/parse",
-    "exe/argv/parse-args-string",
     "exe/exec",
     "exe/path/find",
     "exe/sea/detect",
@@ -214,8 +212,7 @@
     "temporal/now",
     "temporal/slots",
     "temporal/system",
-    "temporal/temporal",
-    "term/colors/palette/socket"
+    "temporal/temporal"
   ],
   "scannedRoster": [
     "abitious",
