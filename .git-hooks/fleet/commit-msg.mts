@@ -43,7 +43,7 @@ import {
 import type { GitAuthor } from '../_shared/git-identity.mts'
 import {
   commitSubject,
-  isPlaceholderSubject,
+  commitSubjectVerdict,
 } from '../_shared/commit-subject.mts'
 // Conventional Commits header validation — the SAME source the
 // commit-message-format-guard PreToolUse hook uses. That guard only sees
@@ -226,7 +226,16 @@ const main = (): number => {
     // calls; this catches the same junk subject (`initial`/`wip`/`test`) on a
     // subprocess / worktree / CI / test-harness commit the tool layer misses.
     const subject = commitSubject(cleaned || original)
-    if (isPlaceholderSubject(subject)) {
+    const verdict = commitSubjectVerdict(subject)
+    if (verdict === 'empty') {
+      // An empty subject is a MECHANICAL failure, not a lazy one. Naming the
+      // denylist here sent authors hunting for a rule that never fired.
+      logger.fail('Commit blocked: the commit message is empty.')
+      logger.info(
+        'Usually the message never arrived: a `-F <file>` path that does not exist, a command line truncated before its `-m`/`-F`, or an editor closed without saving. Check the file is readable and the flag survived, then re-run.',
+      )
+      errors++
+    } else if (verdict === 'placeholder') {
       logger.fail(`Commit blocked: placeholder subject "${subject}".`)
       logger.info(
         'Write a Conventional Commits subject stating what changed (e.g. `fix(scan): handle empty manifest`). Placeholder titles like "initial"/"wip"/"test" are the fingerprint of a test-harness or replayed commit.',

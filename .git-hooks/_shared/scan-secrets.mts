@@ -2,8 +2,6 @@
 // API-key allowlist that exempts known-safe matches (public/example/fake
 // tokens we deliberately ship). Gate-free string logic built on scan-core.
 
-import { SOCKET_PUBLIC_API_KEY } from '@socketsecurity/lib-stable/constants/socket'
-
 import { lineIsSuppressed, scanLines } from './scan-core.mts'
 // Personal-path matcher lives in the gate-free _shared/personal-path.mts so the
 // edit-time personal-path-guard shares THIS code, was a lock-step inline copy.
@@ -62,8 +60,14 @@ export const SOCKET_SECURITY_ENV = SOCKET_TOKEN_ENV_NAMES[0]!
 // `oxlint-disable-line socket/socket-api-token-env`, own-line semantics,
 // and hard-coding one spelling as a substring is exactly how a scanner
 // and the linter drift apart.
+// Socket's PUBLIC anonymous-tier key, which lib-stable ships in its dist and
+// the rolldown hook bundle inlines. Truncated on purpose: `includes` matches
+// the full token, and spelling it out would make this file the leak it
+// prevents. A prefix, not a key.
+const PUBLIC_API_KEY_PREFIX = 'sktsec_t_--'
+
 const isAllowedApiKey = (line: string): boolean =>
-  line.includes(SOCKET_PUBLIC_API_KEY) ||
+  line.includes(PUBLIC_API_KEY_PREFIX) ||
   line.includes(FAKE_TOKEN_MARKER) ||
   line.includes(FAKE_TOKEN_LEGACY) ||
   SOCKET_TOKEN_ENV_NAMES.some(name => line.includes(name)) ||

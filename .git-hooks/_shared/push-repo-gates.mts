@@ -104,7 +104,7 @@ export const scanSoakAnnotations = (): number => {
 //
 // SCOPE: the pushed COMMITS via `--range=`, NEVER the working tree, which on a
 // shared checkout also holds a parallel session's files. Empty `ranges` falls
-// back to `--all`. See docs/agents.md/fleet/push-policy.md.
+// back to `--all`. See docs/fleet/agents.md/push-policy.md.
 //
 // Degrades to a skip (not a block) when there's no lint script, the script
 // isn't a `node <path>` invocation, or there's no oxlint config. Bypass:
