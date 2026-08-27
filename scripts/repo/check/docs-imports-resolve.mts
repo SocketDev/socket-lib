@@ -6,7 +6,7 @@
  *   broken instruction rather than a typo. Four such breaks shipped at once:
  *   `getDefaultLogger` from `./logger` (only `./logger/default` has it),
  *   `httpDownload` from `./http-request` (it lives at `./http-request/download`),
- *   `WIN32`/`DARWIN` documented as constants when they are `isWin32()` and
+ *   `isWin32()`/`DARWIN` documented as constants when they are `isWin32()` and
  *   `isDarwin()` functions, and a palette subpath that never existed.
  *
  *   The export check IMPORTS the built module and reads its real export names.

@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 
 import { spawn } from '../../src/process/spawn/child.mjs'
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
@@ -28,7 +28,7 @@ const perryBin = path.resolve(
   repoRoot,
   'node_modules',
   '.bin',
-  WIN32 ? 'perry.cmd' : 'perry',
+  isWin32() ? 'perry.cmd' : 'perry',
 )
 
 // Fail-closed per fleet rule: telemetry off, no background update checks.
@@ -62,7 +62,7 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
       // sidecar derives from the same path).
       const out = path.join(
         os.tmpdir(),
-        WIN32 ? 'socket-lib-perry-e2e.exe' : 'socket-lib-perry-e2e',
+        isWin32() ? 'socket-lib-perry-e2e.exe' : 'socket-lib-perry-e2e',
       )
       // perry names the attest sidecar off the -o path; on Windows the .exe
       // stem may or may not be kept, so track both candidates.
@@ -77,7 +77,7 @@ describe.skipIf(!existsSync(perryBin))('perry native-compile e2e', () => {
       const compiled = await spawn(
         perryBin,
         ['compile', 'entry.mts', '-o', out],
-        { cwd: fixtureDir, env: perryEnv, shell: WIN32, stdioString: true },
+        { cwd: fixtureDir, env: perryEnv, shell: isWin32(), stdioString: true },
       ).catch(error => error)
       expect(
         compiled.code,

@@ -11,6 +11,7 @@ import { readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 
@@ -24,7 +25,6 @@ import { runMain } from '../fleet/_shared/run-main.mts'
 import type { ScriptMeta } from '../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
-const WIN32 = process.platform === 'win32'
 
 type PackageExports = Record<
   string,
@@ -314,8 +314,8 @@ async function main(): Promise<void> {
     try {
       await spawn(
         // Windows needs the .cmd shim — the extension-less .bin file is a POSIX
-        // sh script cmd.exe (shell: WIN32) can't run.
-        WIN32 ? 'node_modules\\.bin\\oxfmt.cmd' : 'node_modules/.bin/oxfmt',
+        // sh script cmd.exe (shell: isWin32()) can't run.
+        isWin32() ? 'node_modules\\.bin\\oxfmt.cmd' : 'node_modules/.bin/oxfmt',
         [
           '-c',
           '.config/fleet/oxfmtrc.json',
@@ -327,7 +327,7 @@ async function main(): Promise<void> {
         ],
         {
           cwd: rootPath,
-          shell: WIN32,
+          shell: isWin32(),
           stdio: 'ignore',
         },
       )

@@ -14,7 +14,7 @@
  *     throughout Socket tools for cross-platform path handling.
  */
 
-import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -470,10 +470,10 @@ describe('paths/normalize predicates', () => {
 
     it('should handle Windows drive letters A-Z', () => {
       // Windows drive letters are only recognized as absolute on Windows.
-      expect(isAbsolute('A:\\path')).toBe(WIN32)
-      expect(isAbsolute('Z:\\path')).toBe(WIN32)
-      expect(isAbsolute('a:\\path')).toBe(WIN32)
-      expect(isAbsolute('z:\\path')).toBe(WIN32)
+      expect(isAbsolute('A:\\path')).toBe(isWin32())
+      expect(isAbsolute('Z:\\path')).toBe(isWin32())
+      expect(isAbsolute('a:\\path')).toBe(isWin32())
+      expect(isAbsolute('z:\\path')).toBe(isWin32())
     })
 
     it('should handle multiple consecutive slashes correctly', () => {

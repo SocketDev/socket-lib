@@ -28,7 +28,9 @@ const externalDir = path.join(REPO_ROOT, 'dist', 'external')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
-const { isQuiet } = require('@socketsecurity/lib-stable/argv/flag-predicates')
+const {
+  isQuiet,
+} = require('@socketsecurity/lib-stable/exe/argv/flag-predicates')
 const { errorMessage } = require('@socketsecurity/lib-stable/errors/message')
 const { errorStack } = require('@socketsecurity/lib-stable/errors/stack')
 const {

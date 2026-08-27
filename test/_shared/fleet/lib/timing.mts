@@ -6,7 +6,7 @@
  *   runner-specific wrappers (`itFlaky`, `describeFlaky`, etc.) live in the
  *   per-repo `test/util/skip-helpers.mts` and call into this module.
  */
-import { WIN32 } from './platform.mts'
+import { isWin32 } from './platform.mts'
 
 /**
  * Tolerance multiplier applied to timeouts and sleep budgets on Windows.
@@ -28,7 +28,7 @@ export const TIMEOUT_MULTIPLIER: number = 5
  * less than this value will see the lower bound clip on Windows — compare
  * assertions against `Math.max(expected, MIN_TIMER_QUANTUM_MS)`.
  */
-export const MIN_TIMER_QUANTUM_MS: number = WIN32 ? 15.6 : 1
+export const MIN_TIMER_QUANTUM_MS: number = isWin32() ? 15.6 : 1
 
 /**
  * Returns `ms` on non-Windows, `ms * TIMEOUT_MULTIPLIER` on Windows. Apply to
@@ -46,7 +46,7 @@ export const MIN_TIMER_QUANTUM_MS: number = WIN32 ? 15.6 : 1
  *   ```
  */
 export function tolerantTimeout(ms: number): number {
-  return WIN32 ? ms * TIMEOUT_MULTIPLIER : ms
+  return isWin32() ? ms * TIMEOUT_MULTIPLIER : ms
 }
 
 /**

@@ -10,7 +10,7 @@ import process from 'node:process'
 import { parse } from '@babel/parser'
 import MagicString from 'magic-string'
 
-import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { isQuiet } from '@socketsecurity/lib-stable/exe/argv/flag-predicates'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { isErrnoException } from '@socketsecurity/lib-stable/errors/predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'

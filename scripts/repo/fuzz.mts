@@ -21,6 +21,7 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from '@socketsecurity/lib-stable/process/spawn/types'
@@ -32,14 +33,13 @@ import type { ScriptMeta } from '../fleet/_shared/run-main.mts'
 
 const logger = getDefaultLogger()
 
-const WIN32 = process.platform === 'win32'
 // scripts/repo/fuzz.mts → repo root is two levels up.
 const repoRoot = path.resolve(import.meta.dirname, '..', '..')
 const VITEST_BIN = path.join(
   repoRoot,
   'node_modules',
   '.bin',
-  WIN32 ? 'vitest.cmd' : 'vitest',
+  isWin32() ? 'vitest.cmd' : 'vitest',
 )
 
 /**

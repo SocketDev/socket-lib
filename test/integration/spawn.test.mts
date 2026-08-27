@@ -18,7 +18,7 @@ import process from 'node:process'
 import { spawn, spawnSync } from '@socketsecurity/lib/process/spawn/child'
 import { describe, expect, it } from 'vitest'
 
-import { WIN32 } from '../_shared/fleet/lib/platform.mts'
+import { isWin32 } from '../_shared/fleet/lib/platform.mts'
 import { itWindowsOnly } from '../unit/util/skip-helpers.mjs'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
@@ -39,7 +39,7 @@ describe('spawn integration', () => {
               ...process.env,
               PATH: `${dir}${path.delimiter}${process.env['PATH'] ?? ''}`,
             },
-            shell: WIN32,
+            shell: isWin32(),
           })
           expect(result.stdout.trim()).toBe('works')
         } finally {
@@ -123,7 +123,7 @@ describe('spawn integration', () => {
             ...process.env,
             PATH: `${dir}${path.delimiter}${process.env['PATH'] ?? ''}`,
           },
-          shell: WIN32,
+          shell: isWin32(),
         })
         expect(result.stdout.trim()).toBe('works')
       } finally {

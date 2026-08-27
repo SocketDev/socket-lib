@@ -14,7 +14,7 @@ import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
-import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 
 import { REPO_ROOT } from '../../fleet/paths.mts'
 import { readHelperModule } from './helper-ast.mts'
@@ -152,7 +152,7 @@ export async function formatGeneratedFiles(
     await spawn(
       // Windows needs the .cmd shim: the extension-less .bin file is a POSIX
       // sh script cmd.exe cannot run.
-      WIN32 ? 'node_modules\\.bin\\oxfmt.cmd' : 'node_modules/.bin/oxfmt',
+      isWin32() ? 'node_modules\\.bin\\oxfmt.cmd' : 'node_modules/.bin/oxfmt',
       [
         '-c',
         '.config/fleet/oxfmtrc.json',
@@ -161,7 +161,7 @@ export async function formatGeneratedFiles(
         '--write',
         ...files,
       ],
-      { cwd: REPO_ROOT, shell: WIN32, stdio: 'ignore' },
+      { cwd: REPO_ROOT, shell: isWin32(), stdio: 'ignore' },
     )
   } catch {
     // Formatting is best effort — a refresh still wrote correct bytes.

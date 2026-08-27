@@ -3,6 +3,7 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
+import { isWin32 } from '@socketsecurity/lib/constants/platform'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import {
@@ -36,11 +37,9 @@ afterEach(() => {
 })
 
 describe('external-tools/python/from-download — path helpers', () => {
-  const WIN32 = process.platform === 'win32'
-
   test('pythonBinPath nests under python/ with the per-OS interpreter', () => {
     const dir = path.join('tools', 'python-dist')
-    const expected = WIN32
+    const expected = isWin32()
       ? path.join(dir, 'python', 'python.exe')
       : path.join(dir, 'python', 'bin', 'python3')
     expect(pythonBinPath(dir)).toBe(expected)

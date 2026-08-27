@@ -13,7 +13,7 @@ import path from 'node:path'
 
 import { rolldown } from 'rolldown'
 
-import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { buildConfig } from '../../../.config/rolldown.config.mts'
@@ -165,11 +165,13 @@ export async function buildTypes(
   commands.push({
     // npm writes a `.cmd` shim on Windows; the extension-less file is a POSIX
     // sh script cmd.exe can't run ("'node_modules' is not recognized"), so pick
-    // the platform-correct shim. shell: WIN32 lets cmd.exe resolve the .cmd.
+    // the platform-correct shim. shell: isWin32() lets cmd.exe resolve the .cmd.
     args: ['--project', 'tsconfig.dts.json'],
-    command: WIN32 ? 'node_modules\\.bin\\tsgo.cmd' : 'node_modules/.bin/tsgo',
+    command: isWin32()
+      ? 'node_modules\\.bin\\tsgo.cmd'
+      : 'node_modules/.bin/tsgo',
     options: {
-      shell: WIN32,
+      shell: isWin32(),
     },
   })
 

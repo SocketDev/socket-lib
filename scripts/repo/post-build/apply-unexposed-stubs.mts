@@ -6,7 +6,7 @@
  *   before the dist validators so the stubbed export names still gate.
  */
 
-import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { isQuiet } from '@socketsecurity/lib-stable/exe/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {

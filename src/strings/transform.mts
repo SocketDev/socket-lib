@@ -27,7 +27,7 @@ const quotedEntryRegExp = /^".*"$/
  *
  * @example
  *   ;```ts
- *   stripBom('﻿hello world') // 'hello world'
+ *   stripBom('\ufeffhello world') // 'hello world'
  *   stripBom('hello world') // 'hello world'
  *   stripBom('') // ''
  *   ```

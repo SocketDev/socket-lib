@@ -10,7 +10,7 @@ import process from 'node:process'
 
 import { watch } from 'rolldown'
 
-import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { isQuiet } from '@socketsecurity/lib-stable/exe/argv/flag-predicates'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'

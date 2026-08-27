@@ -35,7 +35,7 @@ import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { isQuiet } from '@socketsecurity/lib-stable/argv/flag-predicates'
+import { isQuiet } from '@socketsecurity/lib-stable/exe/argv/flag-predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {

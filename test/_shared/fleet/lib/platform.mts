@@ -1,6 +1,6 @@
 /**
  * @file Fleet-canonical platform predicates and platform-aware name helpers for
- *   tests. Re-exports the single-source-of-truth `WIN32` + `normalizePath` from
+ *   tests. Re-exports the single-source-of-truth `isWin32()` + `normalizePath` from
  *   `@socketsecurity/lib-stable` so tests have one import surface and any
  *   future change to the canonical detection flows through one place. Pairs
  *   with `./timing.mts` (Windows-tolerant timing budgets), `./tags.mts`
@@ -8,7 +8,7 @@
  *   opt-in by directory presence — the `socket/prefer-windows-test-helpers`
  *   lint rule fires only when `test/_shared/fleet/lib/` is present.
  */
-import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { envFlag } from './env.mts'
@@ -20,7 +20,7 @@ import { envFlag } from './env.mts'
  * env-overridden test fixtures, additional separators to fold — flows through
  * one source of truth.
  */
-export { WIN32, normalizePath }
+export { isWin32, normalizePath }
 
 /**
  * True when running under continuous integration. Reads the `CI` env var via
@@ -38,7 +38,7 @@ export const IS_CI: boolean = envFlag('CI')
  * the value under test instead — this helper covers the rare case where the
  * un-normalized form is the actual contract.
  */
-export const NATIVE_PATH_SEP: string = WIN32 ? '\\' : '/'
+export const NATIVE_PATH_SEP: string = isWin32() ? '\\' : '/'
 
 /**
  * Append `.exe` to `name` on Windows; return `name` unchanged elsewhere. For
@@ -51,5 +51,5 @@ export const NATIVE_PATH_SEP: string = WIN32 ? '\\' : '/'
  *   ```
  */
 export function windowsExe(name: string): string {
-  return WIN32 ? `${name}.exe` : name
+  return isWin32() ? `${name}.exe` : name
 }

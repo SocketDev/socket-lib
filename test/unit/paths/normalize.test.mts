@@ -12,7 +12,7 @@
  *     Socket tools for cross-platform path handling.
  */
 
-import { WIN32 } from '@socketsecurity/lib-stable/constants/platform'
+import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -196,7 +196,7 @@ describe('paths/normalize', () => {
     })
 
     it('should handle Buffer input', () => {
-      if (WIN32) {
+      if (isWin32()) {
         const buffer = Buffer.from('/gamma/projects/app')
         expect(fromUnixPath(buffer)).toBe('C:\\projects\\app')
       } else {
@@ -295,7 +295,7 @@ describe('paths/normalize', () => {
     })
 
     it('should handle Buffer input', () => {
-      if (WIN32) {
+      if (isWin32()) {
         const buffer = Buffer.from('C:\\projects\\app')
         expect(toUnixPath(buffer)).toBe('/gamma/projects/app')
       } else {
@@ -305,7 +305,7 @@ describe('paths/normalize', () => {
     })
 
     it('should handle URL input', () => {
-      if (WIN32) {
+      if (isWin32()) {
         const url = new URL('file:///C:/Windows/System32')
         const result = toUnixPath(url)
         expect(result).toContain('/c/')
