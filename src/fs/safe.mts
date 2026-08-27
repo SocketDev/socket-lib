@@ -147,6 +147,7 @@ export async function safeDelete(
   await pRetry(
     async () => {
       await del.deleteAsync(patterns, {
+        ...(opts.cwd === undefined ? {} : { cwd: opts.cwd }),
         dryRun: false,
         force: shouldForce,
         onlyFiles: false,
@@ -257,6 +258,7 @@ export function safeDeleteSync(
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       del.deleteSync(patterns, {
+        ...(opts.cwd === undefined ? {} : { cwd: opts.cwd }),
         dryRun: false,
         force: shouldForce,
         onlyFiles: false,

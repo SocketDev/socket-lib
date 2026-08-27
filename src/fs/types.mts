@@ -198,6 +198,19 @@ export interface ReadOptions extends Abortable {
  */
 export interface RemoveOptions {
   /**
+   * The directory the deletion is contained within.
+   *
+   * Naming a root MOVES the cwd guard, it does not lift it: the target must
+   * still resolve to a descendant, and the root itself and anything above it
+   * still throw. This is what a tool operating on a directory it owns but does
+   * not run from should reach for - a cascade writing into another checkout, a
+   * packer clearing a build root. Prefer it over `force`, which removes the
+   * boundary instead of relocating it.
+   *
+   * @default process.cwd()
+   */
+  cwd?: string | undefined
+  /**
    * Permit deleting the current working directory or anything above it.
    *
    * NOT node's `force`. `fs.rm(p)` means "do not throw when

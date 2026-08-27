@@ -296,6 +296,52 @@ describe('safeMkdirSync', () => {
   })
 })
 
+describe('safeDelete cwd relocates the guard', () => {
+  // `cwd` is the force-free answer for a tool that owns a directory it does not
+  // run from - a cascade writing into another checkout. It MOVES del's boundary
+  // to the named root rather than removing it, so a descendant deletes and the
+  // root itself still throws.
+  const ownedRoot = path.join(
+    process.cwd(),
+    '..',
+    `safe-delete-cwd-probe-${process.pid}`,
+  )
+  const child = path.join(ownedRoot, 'child')
+
+  beforeEach(async () => {
+    await fs.mkdir(child, { recursive: true })
+    await fs.writeFile(path.join(child, 'file.txt'), 'bye')
+  })
+
+  afterEach(async () => {
+    // oxlint-disable-next-line socket/no-force-delete -- probe is outside cwd
+    await safeDelete(ownedRoot, { force: true })
+  })
+
+  it('deletes a descendant of the named root without force', async () => {
+    await safeDelete(child, { cwd: ownedRoot })
+    expect(existsSync(child)).toBe(false)
+    expect(existsSync(ownedRoot)).toBe(true)
+  })
+
+  it('deletes a descendant synchronously too', () => {
+    safeDeleteSync(child, { cwd: ownedRoot })
+    expect(existsSync(child)).toBe(false)
+  })
+
+  it('still refuses the named root itself', async () => {
+    await expect(safeDelete(ownedRoot, { cwd: ownedRoot })).rejects.toThrow()
+    expect(existsSync(child)).toBe(true)
+  })
+
+  it('still refuses a path above the named root', async () => {
+    await expect(
+      safeDelete(path.dirname(ownedRoot), { cwd: ownedRoot }),
+    ).rejects.toThrow()
+    expect(existsSync(child)).toBe(true)
+  })
+})
+
 describe('safeDelete force is opt-in', () => {
   // Regression: `force` defaulted to true, which disabled del's cwd guard for
   // every caller that passed no options, so `safeDelete(pathOutsideCwd)` deleted
