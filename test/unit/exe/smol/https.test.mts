@@ -4,7 +4,7 @@
  *   tests.
  */
 
-import { getSmolHttps as getSmolHttpsStable } from '@socketsecurity/lib-stable/smol/https'
+import { getSmolHttps as getSmolHttpsStable } from '@socketsecurity/lib-stable/exe/smol/https'
 import { describe, expect, it } from 'vitest'
 
 import { getSmolHttps } from '../../../../src/exe/smol/https.mjs'

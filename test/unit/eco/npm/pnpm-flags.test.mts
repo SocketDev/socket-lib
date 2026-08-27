@@ -11,7 +11,7 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { isNpmLoglevelFlag as isNpmLoglevelFlagStable } from '@socketsecurity/lib-stable/eco/npm/npm/flags'
+import { isNpmLoglevelFlag as isNpmLoglevelFlagStable } from '@socketsecurity/lib-stable/eco/npm/npm-cli/flags'
 
 import {
   isPnpmFrozenLockfileFlag,
