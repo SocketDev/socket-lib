@@ -1,7 +1,6 @@
 {
   "leaves": [
     "ai/advisor",
-    "ai/agent-context",
     "ai/assist",
     "ai/billing-context",
     "ai/cost",
@@ -67,7 +66,6 @@
     "env/providers",
     "env/runtimes",
     "events/exit/signals",
-    "exe/argv/flag-predicates",
     "exe/argv/flag-types",
     "exe/argv/meta",
     "exe/exec",
