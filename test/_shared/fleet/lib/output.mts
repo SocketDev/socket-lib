@@ -8,7 +8,7 @@
  *   instead of hand-rolling an ANSI regex at each call site.
  */
 
-import { stripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
+import { stripAnsi } from '@socketsecurity/lib-stable/term/ansi/strip'
 
 // Decorative glyphs the fleet loggers prefix (⚡ banner, ✧ sparkle, and the
 // bare variation-selector that can trail an emoji) — stripped alongside ANSI so

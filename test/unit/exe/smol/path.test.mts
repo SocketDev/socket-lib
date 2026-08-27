@@ -4,7 +4,7 @@
  *   binaries). The native path is exercised by socket-btm's own tests.
  */
 
-import { getSmolPath as getSmolPathStable } from '@socketsecurity/lib-stable/smol/path'
+import { getSmolPath as getSmolPathStable } from '@socketsecurity/lib-stable/exe/smol/path'
 import { describe, expect, it } from 'vitest'
 
 import { getSmolPath } from '../../../../src/exe/smol/path.mjs'

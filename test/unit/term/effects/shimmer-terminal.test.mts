@@ -11,8 +11,8 @@
 
 import { describe, expect, it } from 'vitest'
 
-import { ANSI_RESET as CANONICAL_ANSI_RESET } from '@socketsecurity/lib-stable/ansi/constants'
-import { ansiTruecolor as canonicalAnsiTruecolor } from '@socketsecurity/lib-stable/effects/shimmer-terminal'
+import { ANSI_RESET as CANONICAL_ANSI_RESET } from '@socketsecurity/lib-stable/term/ansi/constants'
+import { ansiTruecolor as canonicalAnsiTruecolor } from '@socketsecurity/lib-stable/term/effects/shimmer-terminal'
 
 import {
   blockKernel,

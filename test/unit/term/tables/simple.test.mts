@@ -1,4 +1,4 @@
-import { stripAnsi as canonicalStripAnsi } from '@socketsecurity/lib-stable/ansi/strip'
+import { stripAnsi as canonicalStripAnsi } from '@socketsecurity/lib-stable/term/ansi/strip'
 import { describe, expect, it, vi } from 'vitest'
 
 import type { YoctoColors } from '../../../../src/external/yoctocolors-cjs.js'

@@ -11,7 +11,7 @@ import {
   DEFAULT_BASE_COLOR as canonicalDefaultBaseColor,
   frameColors as canonicalFrameColors,
   WHITE as canonicalWhite,
-} from '@socketsecurity/lib-stable/effects/shimmer'
+} from '@socketsecurity/lib-stable/term/effects/shimmer'
 
 import {
   blendRgb,
