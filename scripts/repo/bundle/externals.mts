@@ -6,7 +6,7 @@
 
 import process from 'node:process'
 
-import { isQuiet } from '../quiet.mts'
+import { isQuiet } from '../flags/predicates.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { pluralize } from '@socketsecurity/lib-stable/words/pluralize'

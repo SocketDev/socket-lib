@@ -6,7 +6,7 @@
  *   before the dist validators so the stubbed export names still gate.
  */
 
-import { isQuiet } from '../quiet.mts'
+import { isQuiet } from '../flags/predicates.mts'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {
