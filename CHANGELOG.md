@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [7.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.1) - 2026-08-26
+## [7.0.1](https://github.com/SocketDev/socket-lib/releases/tag/v7.0.1) - 2026-08-27
 
 ### Fixed
 
@@ -24,9 +24,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   restores the real types, so code that leaned on the `any` may surface
   genuine type errors that 7.0.0 hid.
 
-### Added
+### Internal
 
-- **`build`** — fail the build when a public subpath exports a binding that is
+- **`check`** — fail the build when a public subpath exports a binding that is
   `undefined` at runtime. A circular import makes the bundler's eager
   re-export snapshot a half-built module, pinning the binding to `undefined`
   for the life of the process; Node mentions it only in a warning that reads
