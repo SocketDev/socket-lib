@@ -44,6 +44,13 @@ export default defineConfig({
     }),
   ],
   test: {
-    include: ['test/**/*.fuzz.ts'],
+    // The fleet writes TypeScript as `.mts`, so the targets are `*.fuzz.mts`.
+    // A `.ts`-only glob matched nothing here and vitest exits 1 on an empty
+    // run, which read as a fuzz crash rather than the config bug it was.
+    include: ['test/**/*.fuzz.mts'],
+    // An empty match is not a failure. A repo with no fuzz target yet should
+    // stay quiet rather than fail its scheduled run; the fuzz-tiers check is
+    // what asserts a target ought to exist.
+    passWithNoTests: true,
   },
 })
