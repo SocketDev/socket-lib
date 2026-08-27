@@ -496,8 +496,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 Five additive features plus public-surface polish on top of 6.0.0. The path renames drop doubled-name leaves (`spawn/spawn`, `ttl-cache/cache`, `globs/glob`, `links/link`, `promise-queue/queue`) and regroup three top-level directories whose contents were the same concept (process events) under a new `events/` umbrella. Renames are path-only; no symbol renames or behavior changes.
 
-```diff
-
 ### Added
 
 - **`colors/socket-palette`** — Socket-branded 24-bit ANSI palette. Three themes (`'light' | 'dark' | 'synthwave'`) expose status colors (`success` / `warning` / `alert` / `error` / `info`) plus the Socket brand constants (`socketPurple` `#8c50ff`, `socketPink` `#ff00aa`). Each helper emits `\x1b[38;2;R;G;Bm` directly rather than rounding to the legacy 8-color palette, so truecolor terminals render the brand hex byte-for-byte. Hex values exposed via `palette.hex.*` for callers building their own escapes. Default theme is `'dark'`.
@@ -526,6 +524,7 @@ Five additive features plus public-surface polish on top of 6.0.0. The path rena
 
 ### Migration
 
+```diff
 - import { spawn, spawnSync } from '@socketsecurity/lib/spawn/spawn'
 - import { isSpawnError, SpawnError } from '@socketsecurity/lib/spawn/errors'
 - import type { SpawnOptions } from '@socketsecurity/lib/spawn/types'
@@ -559,8 +558,6 @@ No symbol names changed. No behavior changes.
 ## [6.0.0](https://github.com/SocketDev/socket-lib/releases/tag/v6.0.0) - 2026-05-20
 
 Public-surface reshape. All top-level barrels are gone; import from named leaf subpaths instead. `@socketsecurity/lib/logger` and `@socketsecurity/lib/errors` stay as aliases.
-
-```diff
 
 ### Added
 
@@ -598,6 +595,7 @@ Public-surface reshape. All top-level barrels are gone; import from named leaf s
 
 ### Migration
 
+```diff
 - import { safeDelete, readJson } from '@socketsecurity/lib/fs'
 + import { safeDelete } from '@socketsecurity/lib/fs/safe'
 + import { readJson } from '@socketsecurity/lib/fs/read-json'
