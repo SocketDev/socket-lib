@@ -3746,6 +3746,16 @@
       "types": "./dist/words/types.d.ts",
       "default": "./dist/words/types.js"
     },
+    "./yaml/edit": {
+      "source": "./src/yaml/edit.mts",
+      "types": "./dist/yaml/edit.d.ts",
+      "default": "./dist/yaml/edit.js"
+    },
+    "./yaml/types": {
+      "source": "./src/yaml/types.mts",
+      "types": "./dist/yaml/types.d.ts",
+      "default": "./dist/yaml/types.js"
+    },
     "./data/extensions.json": "./data/extensions.json",
     "./package.json": "./package.json",
     "./llms.txt": "./llms.txt"
