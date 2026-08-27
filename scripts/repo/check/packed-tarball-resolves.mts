@@ -46,10 +46,7 @@ import { existsSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
-import {
-  isJson,
-  isQuiet,
-} from '@socketsecurity/lib-stable/exe/argv/flag-predicates'
+import { isJson, isQuiet } from '../quiet.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'

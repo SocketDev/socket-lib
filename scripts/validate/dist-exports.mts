@@ -16,9 +16,7 @@ const distDir = path.join(REPO_ROOT, 'dist')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
-const {
-  isQuiet,
-} = require('@socketsecurity/lib-stable/exe/argv/flag-predicates')
+const { isQuiet } = require('../repo/quiet.mts')
 const { errorMessage } = require('@socketsecurity/lib-stable/errors/message')
 const {
   getDefaultLogger,
