@@ -4,6 +4,19 @@
  *   dir, cacache dir, ~/.socket); paths outside those need an explicit `force:
  *   true`. The mkdir helpers default to `recursive: true` and swallow `EEXIST`
  *   so concurrent callers don't race-condition each other.
+ *   A path inside an allowed tree needs no `force`, in EITHER spelling. The
+ *   allow-list carries each directory twice — as `path.resolve` returns it and
+ *   as its real path — because a symlinked component makes those differ and a
+ *   caller may hold either. macOS is the case in practice: `os.tmpdir()`
+ *   reports `/var/folders/…`, the real path is `/private/var/folders/…`, and
+ *   `/var` is a symlink to `/private/var`. Anything that walked or globbed the
+ *   temp tree arrives with the `/private` spelling, and matching only the
+ *   first form made it look out-of-tree.
+ *   The two forms are computed ONCE per process and cached, so this costs a
+ *   handful of `realpathSync` calls at first use and plain string comparisons
+ *   thereafter. The target path is deliberately NOT resolved per call: that
+ *   would put a syscall on every delete and need a cache keyed by caller input,
+ *   which is the kind that grows without bound.
  */
 
 import { isArray } from '../arrays/predicates.mjs'

@@ -10,6 +10,7 @@
  *   cache callbacks); `getAllowedDirectories()` rehydrates on next call.
  */
 
+import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
 import {
   getOsTmpDir,
@@ -31,16 +32,39 @@ export function clearAllowedDirectories(): void {
 /**
  * Get resolved allowed directories for safe deletion with lazy caching. These
  * directories are resolved once and cached for the process lifetime.
+ *
+ * BOTH the resolved and the real path of each directory are listed, because
+ * they differ whenever a component is a symlink and a caller may hold either
+ * form. macOS is the case that matters: `os.tmpdir()` reports
+ * `/var/folders/…`, its real path is `/private/var/folders/…`, and `/var` is a
+ * symlink to `/private/var`. A caller that ran the path through
+ * `fs.realpathSync` — which anything walking or globbing the temp tree does —
+ * arrives with the `/private` form. Listing only the resolved form made that
+ * caller look like it was deleting outside every allowed tree, so a scratch
+ * cleanup inside the temp dir was refused.
  */
 export function getAllowedDirectories(): string[] {
   if (cachedAllowedDirs === undefined) {
+    const fs = getNodeFs()
     const path = getNodePath()
+    const dirs = new Set<string>()
 
-    cachedAllowedDirs = [
-      path.resolve(getOsTmpDir()),
-      path.resolve(getSocketCacacheDir()),
-      path.resolve(getSocketUserDir()),
-    ]
+    for (const dir of [
+      getOsTmpDir(),
+      getSocketCacacheDir(),
+      getSocketUserDir(),
+    ]) {
+      const resolved = path.resolve(dir)
+      dirs.add(resolved)
+      try {
+        dirs.add(fs.realpathSync(resolved))
+      } catch {
+        // The directory need not exist yet — the cacache and Socket user dirs
+        // are created lazily. The resolved form above still guards it.
+      }
+    }
+
+    cachedAllowedDirs = [...dirs]
   }
   return cachedAllowedDirs
 }
