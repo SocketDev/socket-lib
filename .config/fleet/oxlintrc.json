@@ -52,6 +52,7 @@
     "socket/lint-disable-precedes-code": "error",
     "socket/max-comment-block-lines": "error",
     "socket/max-file-lines": "error",
+    "socket/mcp-tool-names-are-conventional": "error",
     "socket/no-agent-brand-assumption": "error",
     "socket/no-bare-crypto-named-usage": "error",
     "socket/no-bare-spawn-childproc-access": "error",
