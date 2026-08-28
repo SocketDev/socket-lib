@@ -18,6 +18,16 @@ import { Logger } from '../../../src/logger/node.mjs'
 import { LOG_SYMBOLS } from '../../../src/logger/symbols.mjs'
 import { THEMES } from '../../../src/term/themes/themes.mjs'
 
+/*
+ * Color is a property of the destination stream, so the escapes wrapping a
+ * symbol differ between a terminal and a redirected stream. Equivalence against
+ * the published build is asserted on the glyph, which is the part that has to
+ * agree.
+ */
+function stripColor(text: string): string {
+  return text.replaceAll(/\u001B\[\d+m/g, '')
+}
+
 describe('Logger - Theme Handling', () => {
   let stdout: Writable
   let stderr: Writable
@@ -96,8 +106,10 @@ describe('Logger - Theme Handling', () => {
     })
 
     it('should support get operation on LOG_SYMBOLS', () => {
-      const symbol = Reflect.get(LOG_SYMBOLS, 'success')
-      expect(symbol).toBe(canonicalLogSymbols['success'])
+      const symbol = Reflect.get(LOG_SYMBOLS, 'success') as string
+      expect(stripColor(symbol)).toBe(
+        stripColor(canonicalLogSymbols['success']!),
+      )
     })
 
     it('should support getOwnPropertyDescriptor on LOG_SYMBOLS', () => {

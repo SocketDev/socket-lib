@@ -6,7 +6,9 @@
  *   `withSpinner*` wrappers.
  */
 
-import { getYoctocolors } from '../logger/colors.mjs'
+import process from 'node:process'
+
+import { applyColor } from '../logger/colors.mjs'
 
 import { MathMax, MathRound } from '../primordials/math.mjs'
 import type { ProgressInfo, SpinnerStyle } from './types.mjs'
@@ -100,8 +102,9 @@ export function renderProgressBar(
   )
   const empty = MathMax(0, width - filled)
   const bar = '█'.repeat(filled) + '░'.repeat(empty)
-  // Cyan progress bar; the palette loads lazily on first render (see
-  // logger/colors.getYoctocolors) so importing this leaf stays cheap and
-  // browser-load-safe.
-  return getYoctocolors().cyan(bar)
+  // Cyan progress bar on stderr, where the spinner draws. Routed through
+  // applyColor so the escape is withheld when stderr is redirected; the palette
+  // loads lazily on first render (see logger/colors.getYoctocolors) so
+  // importing this leaf stays cheap and browser-load-safe.
+  return applyColor(bar, 'cyan', { stream: process.stderr })
 }
