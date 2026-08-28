@@ -48,52 +48,6 @@
       ],
       "origin": "system"
     },
-    "pnpm": {
-      "notes": [
-        "pnpm publishes 7 platform-native binaries: linux-{x64,arm64}{,-musl}, darwin-arm64, win-{x64,arm64}. Verified against v11.8.0 (2026-06-18).",
-        "linux-*-musl tarballs are first-class assets with distinct integrity from the glibc tarballs — the binaries are linked against different libcs and only the matching one runs on its target. Don't 'simplify' by pointing musl keys at the glibc asset.",
-        "darwin-x64 is the odd one out: upstream dropped the SEA binary in 11.0.5 because of nodejs/node#62893 (upstream LIEF/Mach-O bug that the Node team has declined to fix). Intel Mac instead installs the npm-registry JS tarball (`pnpm-<version>.tgz`) + runs it through system Node. external-tools/update.mts recognizes the `<pkg>-<version>.tgz` asset shape and fetches its integrity from the npm registry rather than the GitHub release.",
-        "v11.8.0 had all 8 platforms re-hashed (GitHub assets as sha512 SRIs + darwin-x64 from the npm registry's dist.integrity). It published 2026-06-18, inside the 7-day minimumReleaseAge soak, so the bump rode a dated `soakBypass` entry (auto-disarms at `removable`) — pnpm releases are GitHub-asset distributions from a known publisher; the soak targets npm typosquats / malicious freshpubs. external-tools/update.mts won't auto-pick a still-soaking release, so this was a hand-bump; drop the cleared soakBypass on the next routine bump."
-      ],
-      "description": "Fast, disk space efficient package manager",
-      "repository": "github:pnpm/pnpm",
-      "version": "11.21.0",
-      "platforms": {
-        "darwin-arm64": {
-          "asset": "pnpm-darwin-arm64.tar.gz",
-          "integrity": "sha512-l2jFPzHUG5Q23s94DgKV76erfg0vVhwG4CdKZCHkRSfct8LTWu1oLtH8WJqb84Eg5ZIy5BTMfyY+APoeLuTm0Q=="
-        },
-        "darwin-x64": {
-          "asset": "pnpm-11.21.0.tgz",
-          "integrity": "sha512-UhcFvOaJkk6scvWjWHEi82JonvZXHlW6gAdv1jfBETLs/62ib61Op5xIW/3b/T1aKlsFgFp36JPeceyKbMo7sQ=="
-        },
-        "linux-arm64": {
-          "asset": "pnpm-linux-arm64.tar.gz",
-          "integrity": "sha512-thFUlWeQIphtc8AkfTm0FPhMSyMVYOdrA2XqpJit+OEeMStRhqvF6i4yPs5k06UiVLvIFkOQszCVoyjZmezzsg=="
-        },
-        "linux-arm64-musl": {
-          "asset": "pnpm-linux-arm64-musl.tar.gz",
-          "integrity": "sha512-bbFyhWWvphDpll91+ddNT/fk588DAJwpLqFkUTfZ4FxYFFUkgZ2YCifOFPTEZWIV+Zsa8EPojyA2hQoXnbMxXg=="
-        },
-        "linux-x64": {
-          "asset": "pnpm-linux-x64.tar.gz",
-          "integrity": "sha512-B8OLLdn1CEgvoo2oH1RYIJ1tiiSsUNQcbeTlGytCbPsrwvLo+lVM7as3/yphexA8D/WSiiWLZXAa89t0G1lNgg=="
-        },
-        "linux-x64-musl": {
-          "asset": "pnpm-linux-x64-musl.tar.gz",
-          "integrity": "sha512-cBovlI9TaTK2RjCae2HO9u41Z1novo55EPrBJbxKGnL1Gy8nHGdwUI+BlKMSvN6eLDSn55UX7vGJCBXfJHEZLw=="
-        },
-        "win32-arm64": {
-          "asset": "pnpm-win32-arm64.zip",
-          "integrity": "sha512-a7x1RBGuoqNXh3K9iA4HLbuN9QNJRnxazJ5Njf748u26Lm9j6D26Y2esi5ewhAOkkb8GTM8lcVDRwU2Ui/+H8Q=="
-        },
-        "win32-x64": {
-          "asset": "pnpm-win32-x64.zip",
-          "integrity": "sha512-FFyPTtPoRjRCSEpSVhcbe1AW4Bq/e6Sm3TXewVsvr/sNjRBszNooNEwPehQq7rD3ecUb0oqjul0iBtwmb16njw=="
-        }
-      },
-      "origin": "gh-asset"
-    },
     "sfw-enterprise": {
       "notes": [
         "SFW (Socket Firewall) enterprise flavor (private, SocketDev/firewall-release). Same 7-platform set as sfw-free. Enterprise downloads require GITHUB_TOKEN auth (private repo); install-tool.mjs forwards GITHUB_TOKEN automatically when set.",
