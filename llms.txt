@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 649 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 653 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -492,6 +492,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/memo/once](./dist/memo/once.d.ts)
 - [@socketsecurity/lib/memo/types](./dist/memo/types.d.ts)
 - [@socketsecurity/lib/memo/weak](./dist/memo/weak.d.ts)
+- [@socketsecurity/lib/memo/weak-async](./dist/memo/weak-async.d.ts)
 
 ## native-messaging/
 
@@ -793,6 +794,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/term/colors/convert](./dist/term/colors/convert.d.ts)
 - [@socketsecurity/lib/term/colors/palette/named](./dist/term/colors/palette/named.d.ts)
 - [@socketsecurity/lib/term/colors/palette/socket](./dist/term/colors/palette/socket.d.ts)
+- [@socketsecurity/lib/term/colors/support](./dist/term/colors/support.d.ts)
 - [@socketsecurity/lib/term/colors/types](./dist/term/colors/types.d.ts)
 - [@socketsecurity/lib/term/effects/pulse-frames](./dist/term/effects/pulse-frames.d.ts)
 - [@socketsecurity/lib/term/effects/shimmer](./dist/term/effects/shimmer.d.ts)
@@ -829,3 +831,8 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/words/capitalize](./dist/words/capitalize.d.ts)
 - [@socketsecurity/lib/words/pluralize](./dist/words/pluralize.d.ts)
 - [@socketsecurity/lib/words/types](./dist/words/types.d.ts)
+
+## yaml/
+
+- [@socketsecurity/lib/yaml/edit](./dist/yaml/edit.d.ts)
+- [@socketsecurity/lib/yaml/types](./dist/yaml/types.d.ts)
