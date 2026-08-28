@@ -37,7 +37,8 @@ afterEach(() => {
 
 describe('readParentMap', () => {
   it('parses a ps table and skips the header row', () => {
-    psState.stdout = '  PID  PPID\n    1     0\n  349     1\n 1024   349\n'
+    psState.stdout =
+      '  PID  PPID COMMAND\n    1     0 /sbin/launchd\n  349     1 /usr/libexec/logd\n 1024   349 node example.mjs\n'
     const parents = readParentMap()
     expect(parents.get(1)).toBe(0)
     expect(parents.get(349)).toBe(1)
@@ -51,7 +52,8 @@ describe('readParentMap', () => {
     // absorbs a stray \r, AND the split is \r?\n. Either alone is sufficient,
     // so this spec pins the OUTCOME rather than one mechanism — mutating
     // either one back does not break it, and that is the honest position.
-    psState.stdout = '  PID  PPID\r\n  100    50\r\n  200   100\r\n'
+    psState.stdout =
+      '  PID  PPID COMMAND\r\n  100    50 node parent.mjs\r\n  200   100 node child.mjs\r\n'
     const parents = readParentMap()
     expect(parents.get(100)).toBe(50)
     expect(parents.get(200)).toBe(100)
@@ -63,7 +65,8 @@ describe('readParentMap', () => {
     // the status was checked at all — it passed against a build with the check
     // removed. Parseable rows are what make the assertion mean something.
     psState.status = 1
-    psState.stdout = '  PID  PPID\n  100    50\n  200   100\n'
+    psState.stdout =
+      '  PID  PPID COMMAND\n  100    50 node parent.mjs\n  200   100 node child.mjs\n'
     expect(readParentMap().size).toBe(0)
   })
 
@@ -75,7 +78,7 @@ describe('readParentMap', () => {
   it('ignores malformed rows rather than throwing', () => {
     // A best-effort cleanup path must never throw: it runs inside a timer
     // callback where nothing can catch it.
-    psState.stdout = 'garbage line\n  100    50\n\n   noise here\n'
+    psState.stdout = 'garbage line\n  100    50 node example.mjs\n\n   noise\n'
     const parents = readParentMap()
     expect(parents.get(100)).toBe(50)
     expect(parents.size).toBe(1)

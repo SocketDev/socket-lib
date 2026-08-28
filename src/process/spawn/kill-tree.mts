@@ -23,6 +23,7 @@
 
 import { isWin32 } from '../../constants/platform.mjs'
 import { getNodeChildProcess } from '../../node/child-process.mjs'
+import { readProcessTree } from '../tree.mjs'
 
 import type { ChildProcess } from 'node:child_process'
 
@@ -170,34 +171,22 @@ export function killProcessTree(
 }
 
 /**
- * Snapshot the POSIX process table as `pid -> ppid`. One `ps` call, parsed
- * once: walking the tree needs the whole table anyway, and re-reading it
- * per-level would let processes move between reads.
+ * Snapshot the POSIX process table as `pid -> ppid`.
  *
- * Returns an empty map when `ps` is unavailable or fails, which makes the
- * caller fall back to signalling the single pid — never to signalling nothing
- * it did not mean to.
+ * Delegates to {@link readProcessTree}, the package's one process-table
+ * reader, rather than running its own `ps`. Two readers in one package drift:
+ * this one shipped without the `maxBuffer` bump that a full table on a busy
+ * host needs, and would have silently truncated where the other does not.
+ *
+ * Returns an empty map when `ps` is unavailable, which makes the caller fall
+ * back to signalling the single pid — never to signalling nothing it did not
+ * mean to.
  */
 export function readParentMap(): Map<number, number> {
   const parents = new Map<number, number>()
-  const childProcess = getNodeChildProcess()
-  // Synchronous read in a best-effort cleanup path; an async spawn would race
-  // teardown, which is the same reason the Windows branch uses spawnSync.
-  // oxlint-disable-next-line socket/prefer-async-spawn -- sync cleanup
-  const res = childProcess.spawnSync('ps', ['-Ao', 'pid,ppid'], {
-    encoding: 'utf8',
-  })
-  if (res.status !== 0 || typeof res.stdout !== 'string') {
-    return parents
-  }
-  const lines = res.stdout.split(/\r?\n/)
-  for (let i = 0, { length } = lines; i < length; i += 1) {
-    // Leading spaces because ps right-aligns; the header row fails to parse
-    // and is skipped by the isFinite check below.
-    const match = /^\s*(\d+)\s+(\d+)\s*$/.exec(lines[i]!)
-    if (match) {
-      parents.set(Number(match[1]), Number(match[2]))
-    }
+  const rows = readProcessTree()
+  for (let i = 0, { length } = rows; i < length; i += 1) {
+    parents.set(rows[i]!.pid, rows[i]!.ppid)
   }
   return parents
 }
