@@ -13,11 +13,9 @@
  *   browser-load-safe and cheap at module init.
  */
 
-import type supportsColorCjs from '../../external/supports-color.js'
-
 import type { ColorInfo, Options } from '../../external/supports-color.js'
 
-let cachedSupportsColor: typeof supportsColorCjs | undefined
+let cachedSupportsColor: SupportsColorModule | undefined
 
 /**
  * Palette width a stream accepts, widest capability last.
@@ -34,6 +32,20 @@ export type ColorPalette = 'none' | 'basic' | 'ansi256' | 'truecolor'
  */
 export interface ColorStreamLike {
   isTTY?: boolean | undefined
+}
+
+/**
+ * The detector module as `require` returns it. The package's DEFAULT export is
+ * the eager `{ stdout, stderr }` pair, and `createSupportsColor` is a sibling
+ * NAMED export, so neither alone describes what `require` hands back.
+ */
+export interface SupportsColorModule {
+  createSupportsColor: (
+    stream?: ColorStreamLike | undefined,
+    options?: Options | undefined,
+  ) => ColorInfo
+  stdout: ColorInfo
+  stderr: ColorInfo
 }
 
 /**
@@ -102,10 +114,7 @@ export function getColorCapability(
   }
   const options: Options | undefined =
     sniffFlags === undefined ? undefined : { sniffFlags }
-  const info = getSupportsColor().createSupportsColor(
-    stream as Parameters<typeof supportsColorCjs.createSupportsColor>[0],
-    options,
-  )
+  const info = getSupportsColor().createSupportsColor(stream, options)
   return toColorCapability(info)
 }
 
@@ -131,10 +140,10 @@ export interface ColorCapabilityConfig {
  *
  * @returns The detector module.
  */
-export function getSupportsColor(): typeof supportsColorCjs {
+export function getSupportsColor(): SupportsColorModule {
   if (cachedSupportsColor === undefined) {
     cachedSupportsColor =
-      require('../../external/supports-color') as typeof supportsColorCjs
+      require('../../external/supports-color') as SupportsColorModule
   }
   return cachedSupportsColor
 }
