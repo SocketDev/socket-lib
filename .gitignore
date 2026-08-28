@@ -132,6 +132,7 @@ dist/
 # JSON so rolldown inlines the prices into fleet-pack.cjs. A build output in
 # BOTH trees, shipped in the pack, never cascaded.
 **/scripts/fleet/constants/model-pricing.generated.mts
+**/scripts/fleet/constants/fleet-pack-version.generated.mts
 # Prebuilt dispatch-launcher variants (one per platform-arch), CI
 # cross-compiled and hydrated from the release bundle; the host build
 # copies its match into _shared/ instead of invoking cc. Contract:
