@@ -96,6 +96,52 @@ export function exportLeaves(repoRoot: string): string[] {
     .filter(k => k !== 'package.json')
 }
 
+/**
+ * A leaf held out of the stub list, with the consumer it waits for.
+ */
+export interface KeptLeaf {
+  leaf: string
+  reason: string
+}
+
+/**
+ * The leaves published with a real implementation ahead of their first fleet
+ * consumer. The stub list is consumer-driven, so without this a primitive
+ * shipped for the fleet to adopt is stubbed on its first release, and a stub
+ * cannot acquire the consumer that would un-stub it.
+ */
+export function keptLeafEntries(repoRoot: string): KeptLeaf[] {
+  const keepPath = path.join(
+    repoRoot,
+    'scripts/repo/build-stubs/keep-exposed-leaves.json',
+  )
+  if (!existsSync(keepPath)) {
+    return []
+  }
+  const parsed = JSON.parse(readFileSync(keepPath, 'utf8')) as {
+    leaves?: KeptLeaf[] | undefined
+  }
+  return parsed.leaves ?? []
+}
+
+export function keptLeaves(repoRoot: string): Set<string> {
+  return new Set(keptLeafEntries(repoRoot).map(entry => entry.leaf))
+}
+
+/**
+ * The keep-list entries a real fleet consumer now imports. Each is redundant —
+ * the consumer alone keeps the leaf out of the stub list.
+ */
+export function redundantKeptLeaves(
+  repoRoot: string,
+  usedLeaves: ReadonlySet<string>,
+): string[] {
+  return keptLeafEntries(repoRoot)
+    .filter(entry => usedLeaves.has(entry.leaf))
+    .map(entry => entry.leaf)
+    .toSorted()
+}
+
 // One import statement's parse: the leaf it names and its bindings.
 export interface ParsedImport {
   leaf: string
@@ -147,41 +193,73 @@ export function parseLibImports(text: string): ParsedImport[] {
   return results
 }
 
-// Source files in a repo that can import the lib — tracked plus untracked
-// (unignored) files, so a consumer written but not yet committed still counts
-// as fleet usage. (The 6.5.1 npm/meta stub shipped because the only consumer
-// was untracked work in progress at audit time.)
-function sourceFiles(repoDir: string): string[] {
-  const r = spawnSync(
-    'git',
-    [
-      'ls-files',
-      '--cached',
-      '--others',
-      '--exclude-standard',
-      '*.ts',
-      '*.mts',
-      '*.cts',
-      '*.tsx',
-      '*.js',
-      '*.mjs',
-      '*.cjs',
-    ],
-    { cwd: repoDir, stdio: 'pipe', stdioString: true },
-  )
+const SOURCE_EXTENSION_PATHSPECS = [
+  '*.ts',
+  '*.mts',
+  '*.cts',
+  '*.tsx',
+  '*.js',
+  '*.mjs',
+  '*.cjs',
+]
+
+/**
+ * The fleet payload directories. A thin member gitignores every one of these,
+ * so `--exclude-standard` hides them and a leaf reached only by a cascaded
+ * fleet script reads as fleet-unused. These are listed back in explicitly.
+ */
+export const FLEET_PAYLOAD_PATHSPECS = [
+  '.claude/hooks/fleet/',
+  '.claude/skills/fleet/',
+  '.git-hooks/fleet/',
+  'scripts/fleet/',
+]
+
+function gitLsFiles(repoDir: string, args: string[]): string[] {
+  const r = spawnSync('git', ['ls-files', ...args], {
+    cwd: repoDir,
+    stdio: 'pipe',
+    stdioString: true,
+  })
   if (r.status !== 0) {
     return []
   }
   return String(r.stdout ?? '')
     .split(/\r?\n/)
     .map(line => line.trim())
-    .filter(
-      line =>
-        Boolean(line) &&
-        !line.includes('node_modules') &&
-        !line.startsWith('dist/') &&
-        !line.startsWith('coverage/'),
-    )
+    .filter(Boolean)
+}
+
+// Source files in a repo that can import the lib — tracked plus untracked
+// (unignored) files, so a consumer written but not yet committed still counts
+// as fleet usage. (The 6.5.1 npm/meta stub shipped because the only consumer
+// was untracked work in progress at audit time.) The cascaded fleet payload is
+// gitignored in every thin member, so it is collected in a second pass that
+// asks for ignored files under those directories. (The 7.0.1 exe/argv/parse
+// stub shipped because its only consumer was `scripts/fleet/release-pipeline`,
+// which the first pass cannot see.)
+export function sourceFiles(repoDir: string): string[] {
+  const tracked = gitLsFiles(repoDir, [
+    '--cached',
+    '--others',
+    '--exclude-standard',
+    ...SOURCE_EXTENSION_PATHSPECS,
+  ])
+  const fleetPayload = gitLsFiles(repoDir, [
+    '--others',
+    '--ignored',
+    '--exclude-standard',
+    '--',
+    ...FLEET_PAYLOAD_PATHSPECS,
+  ]).filter(line =>
+    SOURCE_EXTENSION_PATHSPECS.some(spec => line.endsWith(spec.slice(1))),
+  )
+  return [...new Set([...tracked, ...fleetPayload])].filter(
+    line =>
+      !line.includes('node_modules') &&
+      !line.startsWith('dist/') &&
+      !line.startsWith('coverage/'),
+  )
 }
 
 /**
@@ -237,7 +315,10 @@ export function auditFleetLibUsage(repoRoot: string): FleetLibUsageReport {
     }
   }
   const publicLeaves = exportLeaves(repoRoot)
-  const unusedLeaves = publicLeaves.filter(leaf => !leaves[leaf])
+  const kept = keptLeaves(repoRoot)
+  const unusedLeaves = publicLeaves.filter(
+    leaf => !leaves[leaf] && !kept.has(leaf),
+  )
   const usages = Object.values(leaves)
   for (let i = 0, { length } = usages; i < length; i += 1) {
     const usage = usages[i] as LeafUsage
