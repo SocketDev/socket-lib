@@ -59,6 +59,14 @@ export type PromiseSpawnOptions = {
   cwd?: string | undefined
   env?: NodeJS.ProcessEnv | undefined
   gid?: number | undefined
+  /**
+   * Also kill the child's DESCENDANTS when `timeout`/`localTimeout` expires.
+   * Node's own timeout signals only the direct child, so a spawned tool that
+   * spawned its own children leaves them alive and reparented to init. Opt-in
+   * because it changes what gets cleaned up on timeout; the error thrown is
+   * unchanged. Default: false.
+   */
+  killTreeOnTimeout?: boolean | undefined
   localTimeout?: number | undefined
   shell?: boolean | string | undefined
   signal?: AbortSignal | undefined
@@ -347,6 +355,15 @@ export interface WritableStreamType {
  */
 export type SpawnOptions = Remap<
   NodeSpawnOptions & {
+    /**
+     * Also kill the child's DESCENDANTS when `timeout`/`localTimeout` expires.
+     * Node's own timeout signals only the direct child, so a spawned tool that
+     * spawned its own children leaves them alive and reparented to init — and
+     * a leaked grandchild inherits the stdout pipe, so the spawn promise does
+     * not even settle until it exits. Opt-in: it changes what gets cleaned up,
+     * never what gets thrown. Default: false.
+     */
+    killTreeOnTimeout?: boolean | undefined
     localTimeout?: number | undefined
     spinner?: SpinnerInstance | undefined
     stdioString?: boolean | undefined

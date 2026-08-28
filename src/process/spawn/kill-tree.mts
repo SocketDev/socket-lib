@@ -4,10 +4,13 @@
  *   orphans them (they reparent to init on POSIX and run forever). These
  *   helpers kill the whole tree:
  *
- *   - POSIX: when the child was spawned `detached: true` it leads its own process
- *     group, so `process.kill(-pid, signal)` signals every member at once. Pass
- *     the default `{ detached: true }` for that behavior; pass `{ detached:
- *     false }` to signal only the single pid.
+ *   - POSIX, `detached: true` (default): the child leads its own process group,
+ *     so `process.kill(-pid, signal)` signals every member at once.
+ *   - POSIX, `detached: false`: there is no group to signal, so the process table
+ *     is snapshotted once and every descendant is signalled individually. A
+ *     non-detached child is the common case — Node's own `timeout` option
+ *     signals only the direct child — so without this walk a timed-out spawn
+ *     leaves its whole subtree alive and reparented to init.
  *   - Windows: there are no POSIX process groups, so we shell out to `taskkill /T
  *     /F /pid <pid>`, which walks and terminates the descendant tree. The
  *     `signal` argument is ignored on Windows (taskkill is always a forceful
@@ -36,6 +39,48 @@ export interface KillProcessTreeOptions {
    * taskkill performs a forceful terminate.
    */
   signal?: NodeJS.Signals | number | undefined
+}
+
+/**
+ * Every descendant of `pid`, deepest-last, from a `pid -> ppid` snapshot.
+ *
+ * Why a snapshot rather than repeated `pgrep -P`: a process that exits during
+ * the walk reparents its children to init, and they would vanish from a
+ * later query while still holding memory. Reading the table once fixes the
+ * shape of the tree before anything is signalled.
+ *
+ * The visited set doubles as a cycle guard: a corrupt table must not hang a
+ * cleanup path.
+ */
+export function collectDescendantPids(
+  pid: number,
+  parents: ReadonlyMap<number, number>,
+): number[] {
+  const childrenByParent = new Map<number, number[]>()
+  for (const [child, parent] of parents) {
+    const siblings = childrenByParent.get(parent)
+    if (siblings) {
+      siblings.push(child)
+    } else {
+      childrenByParent.set(parent, [child])
+    }
+  }
+  const descendants: number[] = []
+  const seen = new Set<number>([pid])
+  const queue = [pid]
+  while (queue.length > 0) {
+    const next = queue.shift()!
+    const children = childrenByParent.get(next) ?? []
+    for (let i = 0, { length } = children; i < length; i += 1) {
+      const child = children[i]!
+      if (!seen.has(child)) {
+        seen.add(child)
+        descendants.push(child)
+        queue.push(child)
+      }
+    }
+  }
+  return descendants
 }
 
 /**
@@ -95,15 +140,66 @@ export function killProcessTree(
     if (detached) {
       // Negative pid → the whole process group led by the detached child.
       process.kill(-pid, signal)
-    } else {
-      process.kill(pid, signal)
+      return true
     }
+    // Not a group leader, so there is no group to signal. Walk the process
+    // table instead — without this the function signals ONE pid while its name
+    // promises a tree, and every grandchild survives and reparents to init.
+    // That is the exact shape of the leak this fallback exists for: a spawn
+    // that times out, kills its direct child, and silently leaves the tree
+    // behind holding memory forever.
+    const descendants = collectDescendantPids(pid, readParentMap())
+    // Descendants first: the tree was snapshotted before any signal, so both
+    // orders reach every pid, but killing children first stops the root from
+    // spawning more while the walk is in flight.
+    for (let i = 0, { length } = descendants; i < length; i += 1) {
+      try {
+        process.kill(descendants[i]!, signal)
+      } catch {
+        // Already gone, or not ours to signal — the same best-effort contract
+        // the single-pid path has always had.
+      }
+    }
+    process.kill(pid, signal)
     return true
   } catch {
     // Nothing actionable: ESRCH means the process is already gone and EPERM
     // means it isn't ours to signal.
     return false
   }
+}
+
+/**
+ * Snapshot the POSIX process table as `pid -> ppid`. One `ps` call, parsed
+ * once: walking the tree needs the whole table anyway, and re-reading it
+ * per-level would let processes move between reads.
+ *
+ * Returns an empty map when `ps` is unavailable or fails, which makes the
+ * caller fall back to signalling the single pid — never to signalling nothing
+ * it did not mean to.
+ */
+export function readParentMap(): Map<number, number> {
+  const parents = new Map<number, number>()
+  const childProcess = getNodeChildProcess()
+  // Synchronous read in a best-effort cleanup path; an async spawn would race
+  // teardown, which is the same reason the Windows branch uses spawnSync.
+  // oxlint-disable-next-line socket/prefer-async-spawn -- sync cleanup
+  const res = childProcess.spawnSync('ps', ['-Ao', 'pid,ppid'], {
+    encoding: 'utf8',
+  })
+  if (res.status !== 0 || typeof res.stdout !== 'string') {
+    return parents
+  }
+  const lines = res.stdout.split(/\r?\n/)
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    // Leading spaces because ps right-aligns; the header row fails to parse
+    // and is skipped by the isFinite check below.
+    const match = /^\s*(\d+)\s+(\d+)\s*$/.exec(lines[i]!)
+    if (match) {
+      parents.set(Number(match[1]), Number(match[2]))
+    }
+  }
+  return parents
 }
 
 /**

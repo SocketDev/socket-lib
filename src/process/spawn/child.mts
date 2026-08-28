@@ -34,6 +34,7 @@ import {
 import { enhanceSpawnError, isSpawnError } from './errors.mjs'
 import { isStdioType } from './stdio.mjs'
 import { resolveSpawnTimeout } from './timeout.mjs'
+import { maybeArmTreeKill } from './tree-kill-timer.mjs'
 
 import type {
   BufferEncoding,
@@ -201,6 +202,7 @@ export function spawn(
   )
   /* c8 ignore stop */
   const oldSpawnPromise = spawnPromise
+  maybeArmTreeKill(oldSpawnPromise, spawnOptions as Record<string, unknown>)
   // The async IIFE wraps each transformation into a single
   // try/catch — same semantics as the previous .then/.catch chain,
   // expressed as straight-line async/await so the success and

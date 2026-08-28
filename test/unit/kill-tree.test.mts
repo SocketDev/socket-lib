@@ -22,9 +22,19 @@ import { describe, expect, it } from 'vitest'
 
 import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
 
+// `tolerantSleep` returns a platform-adjusted BUDGET in ms, not a promise, so
+// awaiting it directly resolves on the next tick and the delay never happens.
+function sleepFor(ms: number): Promise<void> {
+  return new Promise(resolve => {
+    setTimeout(resolve, tolerantSleep(ms))
+  })
+}
+
 import {
+  collectDescendantPids,
   isProcessAlive,
   killProcessTree,
+  readParentMap,
 } from '../../src/process/spawn/kill-tree.mjs'
 
 import { itUnixOnly } from './util/skip-helpers.mjs'
@@ -132,4 +142,85 @@ describe('killProcessTree', () => {
     // Whole group gone — signalling it now throws ESRCH.
     expect(() => process.kill(-(pid as number), 0)).toThrow()
   })
+})
+
+describe('collectDescendantPids', () => {
+  it('walks a multi-level tree from a pid -> ppid snapshot', () => {
+    // 10 -> 20 -> 30, plus an unrelated 40. Only the subtree comes back.
+    const parents = new Map([
+      [20, 10],
+      [30, 20],
+      [40, 99],
+    ])
+    expect(collectDescendantPids(10, parents).toSorted()).toEqual([20, 30])
+  })
+
+  it('returns nothing for a leaf', () => {
+    expect(collectDescendantPids(30, new Map([[30, 20]]))).toEqual([])
+  })
+
+  it('terminates on a cyclic table rather than hanging cleanup', () => {
+    // A corrupt/racing table must not hang a best-effort kill path.
+    const parents = new Map([
+      [10, 20],
+      [20, 10],
+    ])
+    expect(collectDescendantPids(10, parents)).toEqual([20])
+  })
+})
+
+describe('readParentMap', () => {
+  itUnixOnly('includes this process and its real parent', () => {
+    const parents = readParentMap()
+    expect(parents.get(process.pid)).toBe(process.ppid)
+  })
+})
+
+describe('killProcessTree non-detached tree walk', () => {
+  itUnixOnly(
+    'kills a grandchild that Node\u2019s own timeout would orphan',
+    async () => {
+      // The regression this fallback exists for, reproduced exactly: Node's
+      // `timeout` option SIGTERMs only the direct child, so the grandchild
+      // survives and reparents to init. Verified before the fix — the
+      // grandchild was still alive at ppid 1.
+      const child = spawn(
+        'sh',
+        ['-c', 'sleep 30 & echo $!; wait'],
+        // NOT detached: the case with no process group to signal.
+        { stdio: ['ignore', 'pipe', 'ignore'] },
+      )
+      const grandchildPid = await new Promise<number>(resolve => {
+        // Raw node:child_process handle, not the lib's spawn wrapper — this
+        // test needs the ChildProcess itself to exercise process-tree kills.
+        // oxlint-disable-next-line socket/no-bare-spawn-childproc-access -- raw ChildProcess
+        child.stdout!.once('data', (d: Buffer) =>
+          resolve(Number(String(d).trim())),
+        )
+      })
+      expect(isProcessAlive(grandchildPid)).toBe(true)
+
+      const exited = new Promise<void>(resolve => {
+        // oxlint-disable-next-line socket/no-bare-spawn-childproc-access -- raw ChildProcess
+        child.once('exit', () => resolve())
+      })
+      expect(killProcessTree(child, { detached: false })).toBe(true)
+
+      // Wait on the EVENT, not a liveness probe: a signalled direct child
+      // becomes a zombie until libuv reaps it, and signal 0 reports a zombie
+      // as alive. Only the exit event means actually gone.
+      await exited
+
+      // Poll the grandchild: nothing owns its reaping, so delivery timing is
+      // the scheduler's. A fixed sleep either flakes under load or pads runs.
+      const deadline = Date.now() + 5000
+      while (Date.now() < deadline && isProcessAlive(grandchildPid)) {
+        // eslint-disable-next-line no-await-in-loop -- serial liveness poll
+        await sleepFor(50)
+      }
+
+      // Without the ppid walk this stays true: orphaned, reparented to init.
+      expect(isProcessAlive(grandchildPid)).toBe(false)
+    },
+  )
 })
