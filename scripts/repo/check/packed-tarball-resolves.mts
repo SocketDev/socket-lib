@@ -295,29 +295,38 @@ export function main(): number {
   )
 
   try {
+    // pnpm 12 resolves a bare tarball path as a package NAME and dropped
+    // `--offline` from `pnpm add`, so the probe declares the tarball as a
+    // `file:` dependency and installs that. The offline guarantee moves to the
+    // config form; the assertion does not depend on it, because the package
+    // ships zero runtime dependencies and a successful install therefore
+    // cannot have needed the network.
     writeFileSync(
       path.join(scratchDir, 'package.json'),
-      JSON.stringify({ name: 'packed-tarball-resolves-probe', private: true }),
+      JSON.stringify({
+        name: 'packed-tarball-resolves-probe',
+        private: true,
+        dependencies: {
+          [inspection.packedManifest?.name ?? PACKAGE_NAME]:
+            `file:${inspection.tarball}`,
+        },
+      }),
     )
-    const installed = spawnSync(
-      'pnpm',
-      ['add', inspection.tarball, '--offline'],
-      {
-        cwd: scratchDir,
-        timeout: 120_000,
-      },
-    )
+    const installed = spawnSync('pnpm', ['install', '--config.offline=true'], {
+      cwd: scratchDir,
+      timeout: 120_000,
+    })
     if (installed.error || installed.status !== 0) {
       logger.error(
         `${CHECK} installing the packed tarball failed.\n` +
-          '  What:  `pnpm add <tarball> --offline` did not complete.\n' +
+          '  What:  `pnpm install` over a `file:<tarball>` dependency did not complete.\n' +
           `  Where: ${scratchDir}\n` +
           `  Saw:   exit ${installed.status ?? 'spawn error'}; ${
             installed.error
               ? errorMessage(installed.error)
               : String(installed.stderr ?? '').slice(0, 1000)
           }\n` +
-          '  Fix:   confirm the packed manifest carries no unresolved runtime dependency and retry `pnpm add` manually against the tarball.',
+          '  Fix:   confirm the packed manifest carries no unresolved runtime dependency and retry the install manually against the tarball.',
       )
       return 1
     }
