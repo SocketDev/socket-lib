@@ -22,6 +22,7 @@
 .config/fleet/git-authors.json linguist-generated=true
 .config/fleet/lockstep.schema.json linguist-generated=true
 .config/fleet/markdownlint-rules linguist-generated=true
+.config/fleet/mcp linguist-generated=true
 .config/fleet/oxfmtrc.json linguist-generated=true
 .config/fleet/oxlint-plugin/_shared linguist-generated=true
 .config/fleet/oxlint-plugin/fleet linguist-generated=true

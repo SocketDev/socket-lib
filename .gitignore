@@ -416,6 +416,8 @@ pnpm-debug.log
 .claude/hooks/fleet/_shared/snapshot-hostile-builtins.mts
 .claude/hooks/fleet/_shared/snapshot-loader.cjs
 .claude/hooks/fleet/_shared/snapshot-notes.md
+.claude/hooks/fleet/_shared/socket-fleet-user-agent.mts
+.claude/hooks/fleet/_shared/socket-public-token.mts
 .claude/hooks/fleet/_shared/sorted-by.mts
 .claude/hooks/fleet/_shared/sparkle-auto-update.mts
 .claude/hooks/fleet/_shared/spawn-timeout.mts
@@ -517,11 +519,19 @@ pnpm-debug.log
 .claude/hooks/fleet/authorization-phrase-emission-guard/index.mts
 .claude/hooks/fleet/authorization-phrase-emission-guard/package.json
 .claude/hooks/fleet/authorization-phrase-emission-guard/tsconfig.json
+.claude/hooks/fleet/auto-land-on-edit/README.md
+.claude/hooks/fleet/auto-land-on-edit/index.mts
+.claude/hooks/fleet/auto-land-on-edit/package.json
+.claude/hooks/fleet/auto-land-on-edit/tsconfig.json
 .claude/hooks/fleet/auto-land-on-stop/README.md
 .claude/hooks/fleet/auto-land-on-stop/hold.mts
 .claude/hooks/fleet/auto-land-on-stop/index.mts
 .claude/hooks/fleet/auto-land-on-stop/package.json
 .claude/hooks/fleet/auto-land-on-stop/tsconfig.json
+.claude/hooks/fleet/auto-push-on-stop/README.md
+.claude/hooks/fleet/auto-push-on-stop/index.mts
+.claude/hooks/fleet/auto-push-on-stop/package.json
+.claude/hooks/fleet/auto-push-on-stop/tsconfig.json
 .claude/hooks/fleet/avoid-cd-nudge/README.md
 .claude/hooks/fleet/avoid-cd-nudge/index.mts
 .claude/hooks/fleet/avoid-cd-nudge/package.json
@@ -2614,7 +2624,6 @@ docs/fleet/agents.md/worktree-hygiene.md
 docs/fleet/agents.md/writing-skills-well.md
 docs/references/fleet/sfw-local-install.md
 opencode.json
-patches/@socketsecurity__lib@6.7.0.patch
 patches/brace-expansion@5.0.9.patch
 patches/minimatch@10.2.6.patch
 scripts/fleet/_shared/action-port-map.mts
@@ -2758,7 +2767,10 @@ scripts/fleet/_shared/tracked-globs.mts
 scripts/fleet/_shared/unix-path.mts
 scripts/fleet/_shared/untrack-offenders.mts
 scripts/fleet/ai-backends-status.mts
+scripts/fleet/ai-balancer/active-rung.mts
 scripts/fleet/ai-balancer/anthropic-to-openai.mts
+scripts/fleet/ai-balancer/api-key-helper.d.mts
+scripts/fleet/ai-balancer/api-key-helper.mjs
 scripts/fleet/ai-balancer/balancer-errors.mts
 scripts/fleet/ai-balancer/claude-api-key-helper.mts
 scripts/fleet/ai-balancer/compaction-trigger.mts
@@ -2849,6 +2861,8 @@ scripts/fleet/changelog/render.mts
 scripts/fleet/changelog/scopes.mts
 scripts/fleet/changelog/sections.mts
 scripts/fleet/check.mts
+scripts/fleet/check/_shared/generated-artifacts.mts
+scripts/fleet/check/_shared/literal-path-tails.mts
 scripts/fleet/check/account-identity-is-not-committed.mts
 scripts/fleet/check/action-pins-are-current.mts
 scripts/fleet/check/action-ports-are-lock-stepped.mts
@@ -2862,10 +2876,12 @@ scripts/fleet/check/agents-have-rule-citations.mts
 scripts/fleet/check/ai-spawns-have-paired-effort.mts
 scripts/fleet/check/alias-mirrors-are-ungated.mts
 scripts/fleet/check/allowlist-entries-are-justified.mts
+scripts/fleet/check/api-key-helper-is-dep-zero-in-the-payload.mts
 scripts/fleet/check/app-token-minters-are-identical.mts
 scripts/fleet/check/app-tokens-are-scoped.mts
 scripts/fleet/check/artifact-gates-are-real.mts
 scripts/fleet/check/backend-routing-is-legal.mts
+scripts/fleet/check/balancer-primary-rung-is-paid.mts
 scripts/fleet/check/balancer-routing-is-context-aware.mts
 scripts/fleet/check/baseline-catalog-deps-are-covered.mts
 scripts/fleet/check/block-comments-are-closed-once.mts
@@ -2956,6 +2972,7 @@ scripts/fleet/check/format-write-is-convergent.mts
 scripts/fleet/check/fresh-members-are-squashed-until-release.mts
 scripts/fleet/check/fuzz-targets-are-sound.mts
 scripts/fleet/check/fuzz-tiers-are-covered.mts
+scripts/fleet/check/generated-artifacts-are-current.mts
 scripts/fleet/check/generated-globs-are-consistent.mts
 scripts/fleet/check/generated-outputs-are-untracked.mts
 scripts/fleet/check/gh-aw-emissions-are-declared.mts
@@ -3023,6 +3040,7 @@ scripts/fleet/check/package-manager-pins-are-synced.mts
 scripts/fleet/check/packed-readme-pins-release-refs.mts
 scripts/fleet/check/path-tools-are-at-pinned-version.mts
 scripts/fleet/check/paths-are-canonical.mts
+scripts/fleet/check/paths-are-constructed-once.mts
 scripts/fleet/check/paths-are-normalized-before-match-at-commit.mts
 scripts/fleet/check/paths/allowlist.mts
 scripts/fleet/check/paths/exempt.mts
@@ -3067,6 +3085,7 @@ scripts/fleet/check/release-publish-scripts-are-conventionally-named.mts
 scripts/fleet/check/release-receipts-match-observable-state.mts
 scripts/fleet/check/release-tags-are-immutable.mts
 scripts/fleet/check/release-tags-match-provenance.mts
+scripts/fleet/check/repo-owned-claude-paths-are-tracked.mts
 scripts/fleet/check/report-paths-are-helper-built.mts
 scripts/fleet/check/researching-recency-contract-is-current.mts
 scripts/fleet/check/review-stages-are-ordered.mts
@@ -3165,6 +3184,7 @@ scripts/fleet/constants/fixture-name-burn-down.mts
 scripts/fleet/constants/generated-globs.mts
 scripts/fleet/constants/model-pricing.json
 scripts/fleet/constants/npm-registry.mts
+scripts/fleet/constants/path-construction-burn-down.json
 scripts/fleet/constants/prose-em-dash-burn-down.json
 scripts/fleet/constants/prose-em-dash-burn-down.mts
 scripts/fleet/constants/real-identity-burn-down.json
@@ -3423,6 +3443,7 @@ scripts/fleet/registry-infra/npm/shared.mts
 scripts/fleet/registry-infra/npm/stage-cli.mts
 scripts/fleet/registry-infra/npm/staged-browser-parse.mts
 scripts/fleet/registry-infra/npm/staged-browser-read.mts
+scripts/fleet/registry-infra/npm/staged-cross-check.mts
 scripts/fleet/registry-infra/npm/staged-workspace.mts
 scripts/fleet/registry-infra/npm/staged.mts
 scripts/fleet/registry-infra/npm/threat-scan.mts
