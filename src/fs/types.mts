@@ -198,6 +198,19 @@ export interface ReadOptions extends Abortable {
  */
 export interface RemoveOptions {
   /**
+   * Extra directories a target may be contained within, added to the built-in
+   * set (the OS temp dir, the cacache, and the Socket user dir).
+   *
+   * A target that resolves to a descendant of any listed root deletes without
+   * `force`. This is what names a SIBLING tree the caller owns: a cascade
+   * staging inside another checkout, a packer clearing a build root next door.
+   * Containment still has to hold, so a root here widens the allow-list by one
+   * named tree rather than removing the boundary the way `force` does.
+   *
+   * @default [ ] - only the built-in temp, cacache, and Socket user dirs
+   */
+  allowedDirs?: readonly string[] | undefined
+  /**
    * The directory the deletion is contained within.
    *
    * Naming a root MOVES the cwd guard, it does not lift it: the target must

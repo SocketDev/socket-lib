@@ -16,8 +16,9 @@ import { afterEach, describe, expect, it } from 'vitest'
 
 import { safeDelete, safeDeleteSync } from '../../../src/fs/safe.mjs'
 import {
-  clearAllowedDirectories,
-  getAllowedDirectories,
+  areAllPathsInAllowedDirs,
+  clearDefaultAllowedDirectories,
+  getDefaultAllowedDirectories,
 } from '../../../src/fs/shared.mjs'
 
 const madeDirs: string[] = []
@@ -37,12 +38,12 @@ afterEach(() => {
       safeDeleteSync(dir, { recursive: true })
     }
   }
-  clearAllowedDirectories()
+  clearDefaultAllowedDirectories()
 })
 
-describe('getAllowedDirectories', () => {
+describe('getDefaultAllowedDirectories', () => {
   it('lists the temp dir in both its resolved and real form', () => {
-    const dirs = getAllowedDirectories()
+    const dirs = getDefaultAllowedDirectories()
     const resolved = path.resolve(os.tmpdir())
     const real = realpathSync(resolved)
 
@@ -53,24 +54,33 @@ describe('getAllowedDirectories', () => {
   it('holds no duplicate entry when the two forms are identical', () => {
     // On a platform with no symlink in the temp path both forms collapse, and
     // the list must not carry the same string twice.
-    const dirs = getAllowedDirectories()
+    const dirs = getDefaultAllowedDirectories()
     expect(new Set(dirs).size).toBe(dirs.length)
   })
 
-  it('caches, so repeated reads do not re-resolve', () => {
-    // Same array identity proves the realpath calls happen once per process
-    // rather than once per delete.
-    const first = getAllowedDirectories()
-    const second = getAllowedDirectories()
-    expect(second).toBe(first)
+  it('hands back a fresh array, so a caller cannot widen the list', () => {
+    // The reason the cache is not returned directly: a caller that appends its
+    // own roots would otherwise widen the allow-list for every later delete in
+    // the process.
+    const first = getDefaultAllowedDirectories()
+    first.push('/appended-by-a-caller')
+    const second = getDefaultAllowedDirectories()
+
+    expect(second).not.toBe(first)
+    expect(second).not.toContain('/appended-by-a-caller')
+  })
+
+  it('reads the same set on repeated calls', () => {
+    const first = getDefaultAllowedDirectories()
+    const second = getDefaultAllowedDirectories()
+    expect(second).toEqual(first)
   })
 
   it('rehydrates after the cache is cleared', () => {
-    const first = getAllowedDirectories()
-    clearAllowedDirectories()
-    const second = getAllowedDirectories()
+    const first = getDefaultAllowedDirectories()
+    clearDefaultAllowedDirectories()
+    const second = getDefaultAllowedDirectories()
 
-    expect(second).not.toBe(first)
     expect(second).toEqual(first)
   })
 })
@@ -101,7 +111,7 @@ describe('safeDelete inside the temp dir', () => {
     // behavioural version of this check would have to target a real directory
     // to prove the point. The home dir and the filesystem root are the two
     // that must stay off the list.
-    const dirs = getAllowedDirectories()
+    const dirs = getDefaultAllowedDirectories()
 
     expect(dirs).not.toContain(os.homedir())
     expect(dirs).not.toContain(path.parse(process.cwd()).root)
@@ -109,5 +119,46 @@ describe('safeDelete inside the temp dir', () => {
     for (const dir of dirs) {
       expect(path.isAbsolute(dir)).toBe(true)
     }
+  })
+})
+
+describe('safeDelete with a caller-named allowedDirs root', () => {
+  it('deletes inside a named sibling root without force', () => {
+    // The cascade case: a tree the caller owns but does not run from. Built
+    // under the temp dir so the test never touches a real sibling checkout.
+    const sibling = makeDir(realpathSync(os.tmpdir()), 'safe-allowed-sibling')
+    const inside = makeDir(sibling, 'staged')
+
+    safeDeleteSync(inside, { allowedDirs: [sibling], recursive: true })
+
+    expect(existsSync(inside)).toBe(false)
+    expect(existsSync(sibling)).toBe(true)
+  })
+
+  it('grants a named root only to what it contains', () => {
+    // Asserted on the containment predicate rather than by deleting: the temp
+    // dir is itself an allowed root, so anything staged there for a behavioural
+    // test would be authorized by the built-in list regardless of the argument.
+    // These paths are therefore outside every default tree and need not exist.
+    const sibling = path.join(path.parse(process.cwd()).root, 'named-root')
+    const inside = path.join(sibling, 'staged')
+    const escaping = path.join(sibling, '..', 'not-staged')
+
+    expect(areAllPathsInAllowedDirs([inside], [sibling])).toBe(true)
+    expect(areAllPathsInAllowedDirs([sibling], [sibling])).toBe(true)
+    expect(areAllPathsInAllowedDirs([escaping], [sibling])).toBe(false)
+    // Without the named root, the same target is refused.
+    expect(areAllPathsInAllowedDirs([inside])).toBe(false)
+    // Every pattern has to be contained, not just one.
+    expect(areAllPathsInAllowedDirs([inside, escaping], [sibling])).toBe(false)
+  })
+
+  it('leaves the default roots unchanged after a call names its own', () => {
+    const sibling = makeDir(realpathSync(os.tmpdir()), 'safe-allowed-leak')
+    const inside = makeDir(sibling, 'staged')
+
+    safeDeleteSync(inside, { allowedDirs: [sibling], recursive: true })
+
+    expect(getDefaultAllowedDirectories()).not.toContain(sibling)
   })
 })

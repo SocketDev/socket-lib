@@ -19,7 +19,7 @@
 
 import { registerCacheInvalidation } from '../paths/rewire.mjs'
 
-import { clearAllowedDirectories } from './shared.mjs'
+import { clearDefaultAllowedDirectories } from './shared.mjs'
 
 /**
  * Invalidate the cached allowed directories. Called automatically by the
@@ -34,7 +34,7 @@ import { clearAllowedDirectories } from './shared.mjs'
  * @internal Used for test rewiring
  */
 export function invalidatePathCache(): void {
-  clearAllowedDirectories()
+  clearDefaultAllowedDirectories()
 }
 
 /**

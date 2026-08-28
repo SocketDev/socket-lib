@@ -7,7 +7,7 @@
  *   common owner for the allowed-directory cache. The cache is invalidated by
  *   `invalidatePathCache()` in `fs/path-cache.ts` whenever paths are rewired in
  *   tests (`paths/rewire.ts` registers `invalidatePathCache` as one of its
- *   cache callbacks); `getAllowedDirectories()` rehydrates on next call.
+ *   cache callbacks); `getDefaultAllowedDirectories()` rehydrates on next call.
  */
 
 import { getNodeFs } from '../node/fs.mjs'
@@ -21,11 +21,58 @@ import {
 let cachedAllowedDirs: string[] | undefined
 
 /**
+ * Whether every pattern resolves inside an allowed tree.
+ *
+ * `extraDirs` names additional roots for THIS call. The default roots stay
+ * untouched: {@link getDefaultAllowedDirectories} hands back a fresh array, so
+ * appending here cannot widen the allow-list for a later caller.
+ *
+ * @param patterns - Delete patterns, resolved against the process cwd.
+ * @param extraDirs - Extra roots permitted for this call.
+ *
+ * @returns `true` when each pattern is contained by some allowed root.
+ */
+export function areAllPathsInAllowedDirs(
+  patterns: readonly string[],
+  extraDirs?: readonly string[] | undefined,
+): boolean {
+  if (!patterns.length) {
+    return false
+  }
+  const path = getNodePath()
+  const roots = getDefaultAllowedDirectories()
+  if (extraDirs) {
+    for (let i = 0, { length } = extraDirs; i < length; i += 1) {
+      const extraDir = extraDirs[i]
+      if (extraDir) {
+        roots.push(path.resolve(extraDir))
+      }
+    }
+  }
+  return patterns.every(pattern => {
+    const resolvedPath = path.resolve(pattern)
+    for (let i = 0, { length } = roots; i < length; i += 1) {
+      const root = roots[i]!
+      const isInRoot =
+        resolvedPath === root || resolvedPath.startsWith(root + path.sep)
+      if (!isInRoot) {
+        continue
+      }
+      const relativePath = path.relative(root, resolvedPath)
+      if (!relativePath.startsWith('..')) {
+        return true
+      }
+    }
+    return false
+  })
+}
+
+/**
  * Clear the cached allowed-directories list. Used by `invalidatePathCache()`
  * when test path rewiring changes any of the underlying paths so the next read
  * picks up the new resolved values.
  */
-export function clearAllowedDirectories(): void {
+export function clearDefaultAllowedDirectories(): void {
   cachedAllowedDirs = undefined
 }
 
@@ -43,7 +90,7 @@ export function clearAllowedDirectories(): void {
  * caller look like it was deleting outside every allowed tree, so a scratch
  * cleanup inside the temp dir was refused.
  */
-export function getAllowedDirectories(): string[] {
+export function getDefaultAllowedDirectories(): string[] {
   if (cachedAllowedDirs === undefined) {
     const fs = getNodeFs()
     const path = getNodePath()
@@ -66,5 +113,7 @@ export function getAllowedDirectories(): string[] {
 
     cachedAllowedDirs = [...dirs]
   }
-  return cachedAllowedDirs
+  // A COPY, so a caller that appends its own roots cannot widen the allow-list
+  // for every later caller in the process.
+  return [...cachedAllowedDirs]
 }

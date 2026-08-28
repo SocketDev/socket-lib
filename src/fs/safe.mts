@@ -1,36 +1,35 @@
 /**
  * @file Safe deletion + idempotent directory creation. The delete helpers gate
  *   destructive operations behind an "allowed directories" allow-list (temp
- *   dir, cacache dir, ~/.socket); paths outside those need an explicit `force:
- *   true`. The mkdir helpers default to `recursive: true` and swallow `EEXIST`
- *   so concurrent callers don't race-condition each other.
- *   A path inside an allowed tree needs no `force`, in EITHER spelling. The
- *   allow-list carries each directory twice — as `path.resolve` returns it and
- *   as its real path — because a symlinked component makes those differ and a
- *   caller may hold either. macOS is the case in practice: `os.tmpdir()`
- *   reports `/var/folders/…`, the real path is `/private/var/folders/…`, and
- *   `/var` is a symlink to `/private/var`. Anything that walked or globbed the
- *   temp tree arrives with the `/private` spelling, and matching only the
- *   first form made it look out-of-tree.
- *   The two forms are computed ONCE per process and cached, so this costs a
- *   handful of `realpathSync` calls at first use and plain string comparisons
- *   thereafter. The target path is deliberately NOT resolved per call: that
- *   would put a syscall on every delete and need a cache keyed by caller input,
- *   which is the kind that grows without bound.
+ *   dir, cacache dir, ~/.socket). A path outside those either names its own
+ *   root via `allowedDirs` or `cwd`, which keeps containment enforced against
+ *   the named tree, or passes `force: true`, which drops the boundary
+ *   altogether. The mkdir helpers default to `recursive: true` and swallow
+ *   `EEXIST` so concurrent callers don't race-condition each other. A path
+ *   inside an allowed tree needs no `force`, in EITHER spelling. The allow-list
+ *   carries each directory twice — as `path.resolve` returns it and as its real
+ *   path — because a symlinked component makes those differ and a caller may
+ *   hold either. macOS is the case in practice: `os.tmpdir()` reports
+ *   `/var/folders/…`, the real path is `/private/var/folders/…`, and `/var` is
+ *   a symlink to `/private/var`. Anything that walked or globbed the temp tree
+ *   arrives with the `/private` spelling, and matching only the first form made
+ *   it look out-of-tree. The two forms are computed ONCE per process and
+ *   cached, so this costs a handful of `realpathSync` calls at first use and
+ *   plain string comparisons thereafter. The target path is deliberately NOT
+ *   resolved per call: that would put a syscall on every delete and need a
+ *   cache keyed by caller input, which is the kind that grows without bound.
  */
 
 import { isArray } from '../arrays/predicates.mjs'
 import { isErrnoException } from '../errors/predicates.mjs'
 import { getNodeFs } from '../node/fs.mjs'
-import { getNodePath } from '../node/path.mjs'
 import { objectFreeze } from '../objects/mutate.mjs'
 import { pathLikeToString } from '../paths/normalize.mjs'
 import { AtomicsWait, Int32ArrayCtor } from '../primordials/array.mjs'
 import { SharedArrayBufferCtor } from '../primordials/globals.mjs'
-import { StringPrototypeStartsWith } from '../primordials/string.mjs'
 import { pRetry } from '../promises/retry.mjs'
 
-import { getAllowedDirectories } from './shared.mjs'
+import { areAllPathsInAllowedDirs } from './shared.mjs'
 // Side-effect import: registers invalidatePathCache with paths/rewire
 // so test-time path overrides flush the allowed-directories cache used
 // by safeDelete / safeDeleteSync below. Without this import, rewiring
@@ -97,6 +96,9 @@ export function getDel() {
  *
  * @param filepath - Path or array of paths to delete (supports glob patterns)
  * @param options - Deletion options including force, retries, and recursion.
+ * @param options.allowedDirs - Extra roots the target may sit inside, for this
+ *   call only. Names a sibling tree the caller owns without lifting the
+ *   boundary; prefer it over `force`.
  * @param options.force - Set to true to allow deleting cwd and above (use with
  *   caution)
  *
@@ -124,31 +126,8 @@ export async function safeDelete(
   // Measured against a real checkout.
   /* c8 ignore start */
   let shouldForce = opts.force === true
-  if (!shouldForce && patterns.length > 0) {
-    const path = getNodePath()
-    const allowedDirs = getAllowedDirectories()
-
-    const allInAllowedDirs = patterns.every(pattern => {
-      const resolvedPath = path.resolve(pattern)
-
-      for (const allowedDir of allowedDirs) {
-        const isInAllowedDir =
-          StringPrototypeStartsWith(resolvedPath, allowedDir + path.sep) ||
-          resolvedPath === allowedDir
-        const relativePath = path.relative(allowedDir, resolvedPath)
-        const isGoingBackward = StringPrototypeStartsWith(relativePath, '..')
-
-        if (isInAllowedDir && !isGoingBackward) {
-          return true
-        }
-      }
-
-      return false
-    })
-
-    if (allInAllowedDirs) {
-      shouldForce = true
-    }
+  if (!shouldForce && areAllPathsInAllowedDirs(patterns, opts.allowedDirs)) {
+    shouldForce = true
   }
   /* c8 ignore stop */
 
@@ -206,6 +185,9 @@ export async function safeDelete(
  *
  * @param filepath - Path or array of paths to delete (supports glob patterns)
  * @param options - Deletion options including force, retries, and recursion.
+ * @param options.allowedDirs - Extra roots the target may sit inside, for this
+ *   call only. Names a sibling tree the caller owns without lifting the
+ *   boundary; prefer it over `force`.
  * @param options.force - Set to true to allow deleting cwd and above (use with
  *   caution)
  *
@@ -233,31 +215,8 @@ export function safeDeleteSync(
   // Measured against a real checkout.
   /* c8 ignore start */
   let shouldForce = opts.force === true
-  if (!shouldForce && patterns.length > 0) {
-    const path = getNodePath()
-    const allowedDirs = getAllowedDirectories()
-
-    const allInAllowedDirs = patterns.every(pattern => {
-      const resolvedPath = path.resolve(pattern)
-
-      for (const allowedDir of allowedDirs) {
-        const isInAllowedDir =
-          StringPrototypeStartsWith(resolvedPath, allowedDir + path.sep) ||
-          resolvedPath === allowedDir
-        const relativePath = path.relative(allowedDir, resolvedPath)
-        const isGoingBackward = StringPrototypeStartsWith(relativePath, '..')
-
-        if (isInAllowedDir && !isGoingBackward) {
-          return true
-        }
-      }
-
-      return false
-    })
-
-    if (allInAllowedDirs) {
-      shouldForce = true
-    }
+  if (!shouldForce && areAllPathsInAllowedDirs(patterns, opts.allowedDirs)) {
+    shouldForce = true
   }
   /* c8 ignore stop */
 
