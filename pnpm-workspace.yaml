@@ -77,7 +77,7 @@ catalog:
   # derivation, version compare, config validation). Runs standalone in vitest.
   # published: 2026-07-08 (past 7-day soak). See .claude/skills/fleet/property-testing.
   'fast-check': 4.9.0
-  'magic-string': 1.2.2
+  'magic-string': 1.2.3
   'markdownlint-cli2': 0.23.2
   'mdast-util-from-markdown': 2.0.3
   # GFM pair for render-faithful markdown parsing (tables, footnotes,
@@ -199,61 +199,30 @@ allowBuilds:
 # minutes = 7 days. Same value fleet repos use.
 minimumReleaseAge: 10080
 minimumReleaseAgeExclude:
-  # Socket-owned scopes — bypass the soak window because they ship
-  # through Socket's own provenance + publish pipeline. Canonical
-  # list: scripts/constants/socket-scopes.mts SOCKET_PACKAGE_PATTERNS.
-  # Mirrored in `.config/taze.config.mts` (same scopes, same reason)
-  # and consumed by scripts/fleet/external-tools/update.mts via
-  # isSocketSourcedPackage / isSocketSourcedRepository.
   - '@socketoverride/*'
   - '@socketregistry/*'
   - '@socketsecurity/*'
-  - 'sfw'
-  - 'socket'
-  # pnpm and the other external tools are NOT listed here. Their soak bypass
-  # lives inline in scripts/fleet/setup/external-tools.json as a per-tool
-  # `soakBypass` block carrying `published` + `removable` dates, which
-  # `soak-exclude-scope-guard` requires (this list is Socket-owned scopes only)
-  # and which auto-disarms on the `removable` date instead of lingering here.
-  # Agent-CI 0.17.1 gives each job private writable node_modules and shares
-  # completed pnpm/Yarn/Bun dependency trees through atomic lockfile-keyed
-  # snapshots. dtu-github-actions is its matching workflow-parser package.
-  # Both are dev-only local-CI tools and must stay on the same exact version.
-  # playwright-core@1.55.1 — headless Chromium driver for the
-  # rendering-chromium-to-png skill. Well-known Microsoft package, dev-only
-  # (renders PNGs an agent can read; no runtime/ship surface). Long past soak;
-  # listed for cascade parity. Exact-pinned so a future minor re-soaks.
-  # compromise@14.15.1 is the attested re-publish that clears the
-  # trust-downgrade flag on 14.15.0. The catalog bump to 14.15.1 + the
-  # removed `trustPolicyExclude: compromise@14.15.0` need a matching
-  # lockfile entry, and 14.15.1 published today so the resolution needs
-  # a soak bypass. Scoped to the exact tag so a future 14.15.2 still
-  # goes through the normal soak time.
-  # vite 8.0.14 ships rolldown 1.0.2 natively (no esbuild transitive).
-  # Excluded from the 7-day soak so we can pull the rolldown-based
-  # build now — the fleet rule "bundler = rolldown, not esbuild"
-  # trumps the soak heuristic for this one pinned version. Scoped to
+  - sfw
+  - socket
   - '@stuie/*'
   - '@ultrathink/*'
-  # oxfmt 0.55.0 — the formatter; bumped from 0.48.0 for its jsdoc fixes.
-  # The main package + per-platform binding family are pinned to the exact
-  # version (a scope glob would blanket-bypass any future @oxfmt publish). All
-  # published within the 7-day soak; exact-pinned so a future 0.56 re-soaks.
-  # oxlint 1.75.0 — the linter; catalog-pinned at 1.75.0. The main package + its
-  # per-platform binding family are soak-excluded because oxlint is a
-  # known-publisher (oxc) tool and the fleet MIGRATES + SUPPORTS its plugin API
-  # (the socket/* rules are kept current with oxlint's plugin surface), so a
-  # fresh oxlint is adopted immediately rather than pinned back. The soak targets
-  # npm freshpub typosquats, not a first-party oxc release.
   - '@sdxgen/*'
+  - sdxgen
+  # published: 2026-08-21 | removable: 2026-08-28
+  - dtu-github-actions@0.18.1
+  # published: 2026-08-21 | removable: 2026-08-28
+  - run-local-ci@0.18.1
+  - '@abitious/*'
+  - '@decmpfs/*'
+  - '@node-smol/*'
+  - sockeye
+  - 'sfw'
+  - 'socket'
   - 'sdxgen'
   # published: 2026-08-21 | removable: 2026-08-28
   - 'dtu-github-actions@0.18.1'
   # published: 2026-08-21 | removable: 2026-08-28
   - 'run-local-ci@0.18.1'
-  - '@abitious/*'
-  - '@decmpfs/*'
-  - '@node-smol/*'
   - 'sockeye'
 
 # Refuse transitive (sub-) deps declared via git/tarball/local-tarball
@@ -300,14 +269,14 @@ overrides:
   'hasown': 'npm:@socketregistry/hasown@1.0.7'
   'iconv-lite': '0.7.3'
   'isexe@>=3': '4.0.0'
-  'js-yaml@>=5.0.0 <5.2.2': '5.3.0'
+  'js-yaml@>=5.0.0 <5.2.2': '5.2.2'
   'lru-cache@>=10': '11.5.2'
-  'magic-string': '1.2.2'
+  'magic-string': '1.1.0'
   'mime-db': '1.54.0'
   'mime-types@>=3': '3.0.2'
   'minimatch@>=3': '10.2.6'
   'minipass@>=4': '7.1.3'
-  'postcss@>=8': '8.5.26'
+  'postcss@>=8': '8.5.25'
   'safe-buffer': 'npm:@socketregistry/safe-buffer@1.0.9'
   'safer-buffer': 'npm:@socketregistry/safer-buffer@1.0.10'
   'semver@>=5.0.0 <7.6.0': '7.8.5'

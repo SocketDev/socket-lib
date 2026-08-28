@@ -6,8 +6,8 @@
   "schemaVersion": 1,
   "repoName": "socket-lib",
   "bundle": {
-    "ref": "fleet-pack-be1e30c7abe47643f0f36b9d8571c185bdf74a5d",
-    "cascadeSha": "be1e30c7abe47643f0f36b9d8571c185bdf74a5d"
+    "ref": "fleet-pack-23c67c5c5f2ade18ea76d9d27d7b843ae768ae8a",
+    "cascadeSha": "23c67c5c5f2ade18ea76d9d27d7b843ae768ae8a"
   },
   "repo": {
     "type": "solo"
