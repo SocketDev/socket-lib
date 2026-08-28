@@ -20,10 +20,12 @@
  *   1. Build first when `dist/` is missing.
  *   2. `pnpm pack` into an OS tmpdir via the shared `packAndInspect()` (never the
  *      repo tree).
- *   3. Install the tarball into a SECOND OS-tmpdir scratch package via `pnpm add
- *      <tarball> --offline` — the package ships zero runtime dependencies, so
- *      no network fetch is ever needed; `--offline` makes that a guarantee
- *      rather than an assumption.
+ *   3. Install the tarball into a SECOND OS-tmpdir scratch package, declaring
+ *      it as a `file:<tarball>` dependency and running `pnpm install` — pnpm 12
+ *      resolves a bare tarball path as a package NAME, and dropped `--offline`
+ *      from `pnpm add`. The package ships zero runtime dependencies, so no
+ *      network fetch is ever needed; `--config.offline=true` makes that a
+ *      guarantee rather than an assumption.
  *   4. Spawn `node` inside the scratch dir to `require()` and dynamically
  *      `import()` a fixed sample of the ~15 hottest subpaths — ranked by
  *      grepping `@socketsecurity/lib-stable/<subpath>` usage across socket-cli,
