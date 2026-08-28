@@ -2245,6 +2245,15 @@
       "types": "./dist/memo/weak.d.ts",
       "default": "./dist/memo/weak.js"
     },
+    "./memo/weak-async": {
+      "source": "./src/memo/weak-async.mts",
+      "browser": {
+        "types": "./dist/memo/weak-async.d.ts",
+        "default": "./dist/memo/weak-async.js"
+      },
+      "types": "./dist/memo/weak-async.d.ts",
+      "default": "./dist/memo/weak-async.js"
+    },
     "./native-messaging/host": {
       "source": "./src/native-messaging/host.mts",
       "types": "./dist/native-messaging/host.d.ts",
