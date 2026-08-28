@@ -2461,10 +2461,6 @@ pnpm-debug.log
 .github/local-ci.Dockerfile
 .github/zizmor.yml
 .mcp.json
-assets/fleet/badge-follow-bluesky.svg
-assets/fleet/badge-follow-x.svg
-assets/fleet/socket-combomark-dark.svg
-assets/fleet/socket-combomark-light.svg
 docs/design/fleet/README.md
 docs/design/fleet/components.css
 docs/design/fleet/tokens.css
