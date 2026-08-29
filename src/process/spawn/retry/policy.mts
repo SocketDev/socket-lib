@@ -99,6 +99,36 @@ export function nextRetryDelayMs(
 }
 
 /**
+ * The async twin of {@link runWithSpawnRetryUsing}, for callers that can await
+ * a real timer instead of blocking a thread.
+ *
+ * Same three ordering rules: a success never retries, a clean non-zero exit
+ * never retries, and a wait always precedes a retry.
+ */
+export async function runWithSpawnRetryAsync<Result extends SpawnRetryFailure>(
+  sleeper: (ms: number) => Promise<void>,
+  attempt: () => Promise<Result>,
+  options?: SpawnRetryOptions | undefined,
+): Promise<Result> {
+  const attempts = totalSpawnAttempts(options)
+  let waitMs = firstRetryDelayMs(options)
+  for (let n = 1; ; n += 1) {
+    // eslint-disable-next-line no-await-in-loop -- attempts ARE sequential
+    const result = await attempt()
+    if (
+      attempts === 1 ||
+      spawnSucceeded(result) ||
+      !shouldRetrySpawn(result, n, options)
+    ) {
+      return result
+    }
+    // eslint-disable-next-line no-await-in-loop -- the pause IS the point
+    await sleeper(waitMs)
+    waitMs = nextRetryDelayMs(waitMs, options)
+  }
+}
+
+/**
  * Run `attempt` until it succeeds, the budget runs out, or the failure is one
  * the policy will not retry. Returns the last result either way.
  *
