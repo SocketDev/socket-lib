@@ -33,6 +33,7 @@ import {
 } from './shared.mjs'
 import { enhanceSpawnError, isSpawnError } from './errors.mjs'
 import { isStdioType } from './stdio.mjs'
+import { runWithSpawnRetry } from './retry.mjs'
 import { resolveSpawnTimeout } from './timeout.mjs'
 import { maybeArmTreeKill } from './tree-kill-timer.mjs'
 
@@ -413,6 +414,11 @@ export function spawnSync(
     shell: getOwn(options, 'shell') as boolean | string | undefined,
   })
   const {
+    isRetryable,
+    retries,
+    retryDelayMs,
+    retryFactor,
+    retryMaxDelayMs,
     stripAnsi: shouldStripAnsi = true,
     trim = true,
     ...rawSpawnOptions
@@ -436,10 +442,23 @@ export function spawnSync(
   } as NodeSpawnOptions & { encoding: BufferEncoding | 'buffer' }
   const stdioString = spawnOptions.encoding !== 'buffer'
   const childProcess = getNodeChildProcess()
-  // This IS the lib's sync spawn primitive; it must call the underlying
-  // spawnSync.
-  // oxlint-disable-next-line socket/prefer-async-spawn -- sync primitive
-  const result = childProcess.spawnSync(actualCmd, args, spawnOptions)
+  const retryOptions = {
+    isRetryable,
+    retries,
+    retryDelayMs,
+    retryFactor,
+    retryMaxDelayMs,
+  }
+  // Retry is opt-in: with no `retries` this runs the command exactly once.
+  // The wait between attempts is synchronous, because the whole call is.
+  const result = runWithSpawnRetry(
+    () =>
+      // This IS the lib's sync spawn primitive; it must call the underlying
+      // spawnSync.
+      // oxlint-disable-next-line socket/prefer-async-spawn -- sync primitive
+      childProcess.spawnSync(actualCmd, args, spawnOptions),
+    retryOptions,
+  )
   if (stdioString) {
     const { stderr, stdout } = result
     // `trim: false` keeps the decode byte-faithful — the default trim eats

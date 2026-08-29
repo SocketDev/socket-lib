@@ -20,6 +20,7 @@
 import type { SendHandle, Serializable, StdioOptions } from 'node:child_process'
 import type { EventEmitter } from 'node:events'
 
+import type { SpawnRetryOptions } from './retry.mjs'
 import type { Remap } from '../../objects/types.mjs'
 import type { SpinnerInstance } from '../../spinner/types.mjs'
 
@@ -354,22 +355,23 @@ export interface WritableStreamType {
  *   argument control. Default: false.
  */
 export type SpawnOptions = Remap<
-  NodeSpawnOptions & {
-    /**
-     * Also kill the child's DESCENDANTS when `timeout`/`localTimeout` expires.
-     * Node's own timeout signals only the direct child, so a spawned tool that
-     * spawned its own children leaves them alive and reparented to init — and
-     * a leaked grandchild inherits the stdout pipe, so the spawn promise does
-     * not even settle until it exits. Opt-in: it changes what gets cleaned up,
-     * never what gets thrown. Default: false.
-     */
-    killTreeOnTimeout?: boolean | undefined
-    localTimeout?: number | undefined
-    spinner?: SpinnerInstance | undefined
-    stdioString?: boolean | undefined
-    stripAnsi?: boolean | undefined
-    throws?: boolean | undefined
-  }
+  NodeSpawnOptions &
+    SpawnRetryOptions & {
+      /**
+       * Also kill the child's DESCENDANTS when `timeout`/`localTimeout`
+       * expires. Node's own timeout signals only the direct child, so a spawned
+       * tool that spawned its own children leaves them alive and reparented to
+       * init — and a leaked grandchild inherits the stdout pipe, so the spawn
+       * promise does not even settle until it exits. Opt-in: it changes what
+       * gets cleaned up, never what gets thrown. Default: false.
+       */
+      killTreeOnTimeout?: boolean | undefined
+      localTimeout?: number | undefined
+      spinner?: SpinnerInstance | undefined
+      stdioString?: boolean | undefined
+      stripAnsi?: boolean | undefined
+      throws?: boolean | undefined
+    }
 >
 export type SpawnResult<T = string | Buffer> = PromiseSpawnResult<T>
 /**
@@ -410,10 +412,11 @@ export type SpawnStdioResult = {
  * may flip the default to `false`.
  */
 export type SpawnSyncOptions = Remap<
-  NodeSpawnSyncOptions & {
-    localTimeout?: number | undefined
-    stdioString?: boolean | undefined
-    stripAnsi?: boolean | undefined
-    trim?: boolean | undefined
-  }
+  NodeSpawnSyncOptions &
+    SpawnRetryOptions & {
+      localTimeout?: number | undefined
+      stdioString?: boolean | undefined
+      stripAnsi?: boolean | undefined
+      trim?: boolean | undefined
+    }
 >
