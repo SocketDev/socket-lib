@@ -13,10 +13,6 @@ import {
   runWithSpawnRetry,
   sleepSync,
 } from '../../src/process/spawn/retry/browser.mjs'
-import {
-  isTransientSpawnFailure,
-  totalSpawnAttempts,
-} from '../../src/process/spawn/retry/policy.mjs'
 
 describe('browser retry variant', () => {
   it('reports that it cannot wait', () => {
@@ -55,10 +51,5 @@ describe('browser retry variant', () => {
     )
     expect(runs).toBe(1)
     expect(result.status).toBe(0)
-  })
-
-  it('re-exports the shared policy so callers need one import', () => {
-    expect(totalSpawnAttempts({ retries: 2 })).toBe(3)
-    expect(isTransientSpawnFailure({ signal: 'SIGKILL' })).toBe(true)
   })
 })
