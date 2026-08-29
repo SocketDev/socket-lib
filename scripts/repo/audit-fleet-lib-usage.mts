@@ -25,6 +25,11 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { keptLeafEntries } from './build-stubs/settings.mts'
+
+export type { KeptLeaf } from './build-stubs/settings.mts'
+export { keptLeafEntries } from './build-stubs/settings.mts'
+
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
@@ -94,34 +99,6 @@ export function exportLeaves(repoRoot: string): string[] {
     .filter(k => k.startsWith('./') && !k.includes('*'))
     .map(k => k.slice(2))
     .filter(k => k !== 'package.json')
-}
-
-/**
- * A leaf held out of the stub list, with the consumer it waits for.
- */
-export interface KeptLeaf {
-  leaf: string
-  reason: string
-}
-
-/**
- * The leaves published with a real implementation ahead of their first fleet
- * consumer. The stub list is consumer-driven, so without this a primitive
- * shipped for the fleet to adopt is stubbed on its first release, and a stub
- * cannot acquire the consumer that would un-stub it.
- */
-export function keptLeafEntries(repoRoot: string): KeptLeaf[] {
-  const keepPath = path.join(
-    repoRoot,
-    'scripts/repo/build-stubs/keep-exposed-leaves.json',
-  )
-  if (!existsSync(keepPath)) {
-    return []
-  }
-  const parsed = JSON.parse(readFileSync(keepPath, 'utf8')) as {
-    leaves?: KeptLeaf[] | undefined
-  }
-  return parsed.leaves ?? []
 }
 
 export function keptLeaves(repoRoot: string): Set<string> {
@@ -430,10 +407,9 @@ function main(): void {
     const candidates = graphSafeStubCandidates(REPO_ROOT, report)
     const listPath = path.join(
       REPO_ROOT,
-      'scripts',
+      '.config',
       'repo',
-      'build-stubs',
-      'unexposed-leaves.json',
+      'socket-wheelhouse.json',
     )
     // Record the roster this verdict was judged against, not just the verdict.
     // "Unused" is a claim about the whole fleet, so the list is only as good
@@ -491,7 +467,7 @@ const SCRIPT_META: ScriptMeta = {
 
   --out <file>          write the JSON report to <file> instead of stdout
   --write-stub-list      write the graph-safe stub candidates to
-                         scripts/repo/build-stubs/unexposed-leaves.json`,
+                         .config/repo/socket-wheelhouse.json`,
 }
 
 if (isMainModule(import.meta.url)) {

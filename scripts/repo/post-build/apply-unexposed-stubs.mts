@@ -1,6 +1,6 @@
 /*
  * @file Post-build CLI for the unexposed-leaf stub pass: swaps each built
- *   dist module named in `scripts/repo/build-stubs/unexposed-leaves.json`
+ *   dist module named in `.config/repo/socket-wheelhouse.json`
  *   for a throwing stub (see `scripts/repo/build-stubs/unexposed.mts`).
  *   Runs after the CJS-export rewrite so the stub bodies are final, and
  *   before the dist validators so the stubbed export names still gate.
@@ -38,7 +38,7 @@ function main(): void {
 
 const SCRIPT_META: ScriptMeta = {
   describe:
-    'swaps each dist module listed in unexposed-leaves.json for a throwing stub',
+    'swaps each dist module listed in the buildStubs.unexposed section for a throwing stub',
   help: `Usage: node scripts/repo/post-build/apply-unexposed-stubs.mts [flags]
 
   --quiet, --silent   suppress the success summary`,

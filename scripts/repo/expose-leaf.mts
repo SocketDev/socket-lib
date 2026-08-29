@@ -172,7 +172,7 @@ function main(): void {
     return
   }
   if (!noCommit) {
-    const paths = ['scripts/repo/build-stubs/unexposed-leaves.json']
+    const paths = ['.config/repo/socket-wheelhouse.json']
     const subject = `fix(build-stubs): expose ${plan.exposed.join(', ')} for fleet consumers`
     const commit = spawnSync('git', ['commit', '-o', ...paths, '-m', subject], {
       cwd: REPO_ROOT,

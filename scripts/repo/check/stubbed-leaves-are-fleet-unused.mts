@@ -13,7 +13,7 @@
  *       every SDK browser bundle threw before touching `fetch`.
  *
  *   (b) dist bytes: a built dist module carrying the build-stub banner must
- *       be named in scripts/repo/build-stubs/unexposed-leaves.json — a stub
+ *       be named in .config/repo/socket-wheelhouse.json — a stub
  *       outside the committed allowlist means the build compiled out a leaf
  *       nobody signed off on. Skipped when dist/ is absent (unbuilt tree).
  *
@@ -177,7 +177,7 @@ export function main(): void {
       }
       logger.error(
         `${CHECK} the built dist ships throwing stubs outside the allowlist.\n` +
-          '  Where: dist/ vs scripts/repo/build-stubs/unexposed-leaves.json\n' +
+          '  Where: dist/ vs .config/repo/socket-wheelhouse.json\n' +
           `  Saw: ${unlisted.length} banner-marked dist module(s) not in the committed stub list; wanted every stub allowlisted.\n` +
           '  Fix: rebuild from a clean dist, or regenerate the list with `node scripts/repo/audit-fleet-lib-usage.mts --write-stub-list`.',
       )
@@ -202,7 +202,7 @@ export function main(): void {
     const scanned = readScannedRoster(REPO_ROOT)
     logger.error(
       `${CHECK} the stub list was judged against a different fleet.\n` +
-        '  Where: scripts/repo/build-stubs/unexposed-leaves.json\n' +
+        '  Where: .config/repo/socket-wheelhouse.json\n' +
         `  Saw: ${scanned.length ? `recorded roster of ${scanned.length}` : 'NO recorded roster (list predates the record)'}` +
         (coverage.missing.length
           ? `, never judged against ${coverage.missing.join(', ')}`
@@ -225,7 +225,7 @@ export function main(): void {
       }
       logger.error(
         `${CHECK} the committed stub list is stale against the roster.\n` +
-          '  Where: scripts/repo/build-stubs/unexposed-leaves.json\n' +
+          '  Where: .config/repo/socket-wheelhouse.json\n' +
           `  Saw: ${stale.length} listed leaf/leaves the fleet now reaches; wanted every listed leaf fleet-unused.\n` +
           '  Fix: run `node scripts/repo/audit-fleet-lib-usage.mts --write-stub-list`, commit the regenerated list, and rebuild.',
       )

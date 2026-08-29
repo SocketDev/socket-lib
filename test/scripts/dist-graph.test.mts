@@ -23,7 +23,7 @@ import { makeUnexposedModuleSource } from '../../scripts/repo/build-stubs/unexpo
 interface FixtureSpec {
   // package.json "exports".
   exports: Record<string, unknown>
-  // Leaves in unexposed-leaves.json.
+  // Leaves in the buildStubs.unexposed section.
   leaves: string[]
   // dist-relative path -> file body. A body of undefined means "stub it".
   files: Record<string, string | undefined>
@@ -35,11 +35,13 @@ function writeFixtureRepo(spec: FixtureSpec): string {
     path.join(repoRoot, 'package.json'),
     JSON.stringify({ exports: spec.exports }),
   )
-  const stubsDir = path.join(repoRoot, 'scripts', 'repo', 'build-stubs')
-  mkdirSync(stubsDir, { recursive: true })
+  const settingsDir = path.join(repoRoot, '.config', 'repo')
+  mkdirSync(settingsDir, { recursive: true })
   writeFileSync(
-    path.join(stubsDir, 'unexposed-leaves.json'),
-    JSON.stringify({ leaves: spec.leaves }),
+    path.join(settingsDir, 'socket-wheelhouse.json'),
+    JSON.stringify({
+      buildStubs: { unexposed: { leaves: spec.leaves, scannedRoster: [] } },
+    }),
   )
   const entries = Object.entries(spec.files)
   for (let i = 0, { length } = entries; i < length; i += 1) {

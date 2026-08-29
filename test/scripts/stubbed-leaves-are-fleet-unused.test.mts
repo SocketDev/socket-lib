@@ -28,11 +28,15 @@ function writeFixtureRepo(): string {
       },
     }),
   )
-  const stubsDir = path.join(repoRoot, 'scripts', 'repo', 'build-stubs')
-  mkdirSync(stubsDir, { recursive: true })
+  const settingsDir = path.join(repoRoot, '.config', 'repo')
+  mkdirSync(settingsDir, { recursive: true })
   writeFileSync(
-    path.join(stubsDir, 'unexposed-leaves.json'),
-    JSON.stringify({ leaves: ['listed/mod'] }),
+    path.join(settingsDir, 'socket-wheelhouse.json'),
+    JSON.stringify({
+      buildStubs: {
+        unexposed: { leaves: ['listed/mod'], scannedRoster: [] },
+      },
+    }),
   )
   for (const leaf of ['listed', 'real', 'unlisted']) {
     mkdirSync(path.join(repoRoot, 'dist', leaf), { recursive: true })
