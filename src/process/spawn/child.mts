@@ -33,7 +33,7 @@ import {
 } from './shared.mjs'
 import { enhanceSpawnError, isSpawnError } from './errors.mjs'
 import { isStdioType } from './stdio.mjs'
-import { runWithSpawnRetry } from './retry.mjs'
+import { runWithSpawnRetry } from './retry/node.mjs'
 import { resolveSpawnTimeout } from './timeout.mjs'
 import { maybeArmTreeKill } from './tree-kill-timer.mjs'
 

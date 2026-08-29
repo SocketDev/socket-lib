@@ -16,7 +16,7 @@ import {
   shouldRetrySpawn,
   sleepSync,
   totalSpawnAttempts,
-} from '../../src/process/spawn/retry.mjs'
+} from '../../src/process/spawn/retry/node.mjs'
 
 describe('isTransientSpawnFailure', () => {
   it('retries a child killed by a signal', () => {

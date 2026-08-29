@@ -20,7 +20,7 @@
 import type { SendHandle, Serializable, StdioOptions } from 'node:child_process'
 import type { EventEmitter } from 'node:events'
 
-import type { SpawnRetryOptions } from './retry.mjs'
+import type { SpawnRetryOptions } from './retry/policy.mjs'
 import type { Remap } from '../../objects/types.mjs'
 import type { SpinnerInstance } from '../../spinner/types.mjs'
 

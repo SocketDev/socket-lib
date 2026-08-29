@@ -2,7 +2,7 @@
   "comment": "Public leaves that ship with a real implementation even though no roster repo imports them yet. The stub list is consumer-driven, so a primitive published for the fleet to adopt is stubbed on its first release \u2014 and a stubbed leaf cannot acquire the consumer that would un-stub it. Each entry names the consumer it waits for. Remove an entry once that consumer lands; the audit reports the entry as redundant.",
   "leaves": [
     {
-      "leaf": "process/spawn/retry",
+      "leaf": "process/spawn/retry/node",
       "reason": "The spawn retry policy. Ships ahead of its first consumer: the wheelhouse GHCR listing collapses onto it once this releases."
     },
     {
