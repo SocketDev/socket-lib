@@ -39,6 +39,7 @@ export default config({
   ],
   rules: {
     'socket-repo/no-inline-lazy-node-getter': 'error',
+    'socket-repo/prefer-node-getter': 'error',
     // socket-lib dist lands inside a consumer V8 startup snapshot, so a
     // module-scope load of a native-backed builtin in src/ aborts every
     // downstream `node --build-snapshot`. The fleet default scope covers what

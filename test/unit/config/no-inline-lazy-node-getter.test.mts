@@ -8,23 +8,31 @@
  *   form).
  */
 
-import assert from 'node:assert/strict'
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import { describe, test } from 'node:test'
 
-import { whichSync } from '@socketsecurity/lib-stable/bin/which'
+import { describe, expect, it } from 'vitest'
+
+import { whichSync } from '@socketsecurity/lib-stable/exe/path/which'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 const HERE = path.dirname(fileURLToPath(import.meta.url))
 // Plugin entry, absolute so the spawned oxlint resolves it from a tmpdir.
-const PLUGIN_INDEX = path.resolve(HERE, '..', 'index.mts')
-const NODE_MODULES_BIN = path.resolve(
+const PLUGIN_INDEX = path.resolve(
   HERE,
   '..',
+  '..',
+  '..',
+  '.config',
+  'repo',
+  'oxlint-plugin',
+  'index.mts',
+)
+const NODE_MODULES_BIN = path.resolve(
+  HERE,
   '..',
   '..',
   '..',
@@ -96,33 +104,33 @@ function runOxlint(
 }
 
 describe('socket-repo/no-inline-lazy-node-getter', () => {
-  test('flags getFs().member inline access', () => {
+  it('flags getFs().member inline access', () => {
     if (!resolveOxlintBinary()) {
       return
     }
     const { stdout } = runOxlint(
       'function f() {\n  return getFs().existsSync("/x")\n}\n',
     )
-    assert.ok(
+    expect(
       hasRuleFinding(stdout),
       `expected ${RULE_NAME} finding, got:\n${stdout}`,
-    )
+    ).toBe(true)
   })
 
-  test('does not flag a bound-const getter', () => {
+  it('does not flag a bound-const getter', () => {
     if (!resolveOxlintBinary()) {
       return
     }
     const { stdout } = runOxlint(
       'function f() {\n  const fs = getFs()\n  return fs.existsSync("/x")\n}\n',
     )
-    assert.ok(
+    expect(
       !hasRuleFinding(stdout),
       `expected no ${RULE_NAME} finding, got:\n${stdout}`,
-    )
+    ).toBe(true)
   })
 
-  test('autofix hoists the const and rewrites the call', () => {
+  it('autofix hoists the const and rewrites the call', () => {
     if (!resolveOxlintBinary()) {
       return
     }
@@ -130,21 +138,21 @@ describe('socket-repo/no-inline-lazy-node-getter', () => {
       'function f() {\n  return getNodePath().join("a", "b")\n}\n',
       { fix: true },
     )
-    assert.ok(
+    expect(
       code.includes('const path = getNodePath()'),
       `expected hoisted const, got:\n${code}`,
-    )
-    assert.ok(
+    ).toBe(true)
+    expect(
       code.includes('path.join("a", "b")'),
       `expected rewritten call, got:\n${code}`,
-    )
-    assert.ok(
+    ).toBe(true)
+    expect(
       !/getNodePath\(\)\.join/.test(code),
       `expected no remaining inline call, got:\n${code}`,
-    )
+    ).toBe(true)
   })
 
-  test('autofix dedupes two inline calls of the same getter in one statement', () => {
+  it('autofix dedupes two inline calls of the same getter in one statement', () => {
     if (!resolveOxlintBinary()) {
       return
     }
@@ -153,18 +161,17 @@ describe('socket-repo/no-inline-lazy-node-getter', () => {
       { fix: true },
     )
     const hoists = (code.match(/const path = getNodePath\(\)/g) ?? []).length
-    assert.equal(
+    expect(
       hoists,
-      1,
       `expected exactly one hoisted const, got ${hoists}:\n${code}`,
-    )
-    assert.ok(
+    ).toBe(1)
+    expect(
       code.includes('path.basename(x, path.extname(x))'),
       `expected both calls rewritten, got:\n${code}`,
-    )
+    ).toBe(true)
   })
 
-  test('autofix keeps a leading oxlint-disable-next-line attached to its statement', () => {
+  it('autofix keeps a leading oxlint-disable-next-line attached to its statement', () => {
     if (!resolveOxlintBinary()) {
       return
     }
@@ -174,11 +181,11 @@ describe('socket-repo/no-inline-lazy-node-getter', () => {
     )
     // The hoisted const must land BEFORE the disable comment, so the directive
     // still sits on the line directly above the statSync statement.
-    assert.ok(
+    expect(
       /const fs = getFs\(\)\n\s*\/\/ oxlint-disable-next-line[^\n]*\n\s*return fs\.statSync/.test(
         code,
       ),
       `expected hoist before the disable comment, got:\n${code}`,
-    )
+    ).toBe(true)
   })
 })

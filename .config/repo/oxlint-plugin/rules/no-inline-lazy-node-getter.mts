@@ -47,6 +47,7 @@ const GETTER_TO_BINDING: Record<string, string> = {
   getNodeModule: 'nodeModule',
   getNodeOs: 'os',
   getNodePath: 'path',
+  getNodeProcess: 'nodeProcess',
   getNodeTimersPromises: 'timersPromises',
   getNodeUrl: 'url',
   getNodeUtil: 'util',

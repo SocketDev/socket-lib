@@ -7,6 +7,7 @@
  */
 
 import noInlineLazyNodeGetter from './rules/no-inline-lazy-node-getter.mts'
+import preferNodeGetter from './rules/prefer-node-getter.mts'
 
 const plugin = {
   meta: {
@@ -14,6 +15,7 @@ const plugin = {
   },
   rules: {
     'no-inline-lazy-node-getter': noInlineLazyNodeGetter,
+    'prefer-node-getter': preferNodeGetter,
   },
 }
 

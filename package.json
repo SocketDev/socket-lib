@@ -1675,6 +1675,11 @@
       "types": "./dist/fs/allowed-dirs-cache.d.ts",
       "default": "./dist/fs/allowed-dirs-cache.js"
     },
+    "./fs/atomic": {
+      "source": "./src/fs/atomic.mts",
+      "types": "./dist/fs/atomic.d.ts",
+      "default": "./dist/fs/atomic.js"
+    },
     "./fs/copy": {
       "source": "./src/fs/copy.mts",
       "types": "./dist/fs/copy.d.ts",
@@ -3059,6 +3064,34 @@
       "types": "./dist/process/spawn/pty.d.ts",
       "default": "./dist/process/spawn/pty.js"
     },
+    "./process/spawn/retry": {
+      "source": "./src/process/spawn/retry/node.mts",
+      "browser": {
+        "types": "./dist/process/spawn/retry/browser.d.ts",
+        "default": "./dist/process/spawn/retry/browser.js"
+      },
+      "types": "./dist/process/spawn/retry/node.d.ts",
+      "default": "./dist/process/spawn/retry/node.js"
+    },
+    "./process/spawn/retry/browser": {
+      "source": "./src/process/spawn/retry/browser.mts",
+      "browser": {
+        "types": "./dist/process/spawn/retry/browser.d.ts",
+        "default": "./dist/process/spawn/retry/browser.js"
+      },
+      "types": "./dist/process/spawn/retry/browser.d.ts",
+      "default": "./dist/process/spawn/retry/browser.js"
+    },
+    "./process/spawn/retry/node": {
+      "source": "./src/process/spawn/retry/node.mts",
+      "types": "./dist/process/spawn/retry/node.d.ts",
+      "default": "./dist/process/spawn/retry/node.js"
+    },
+    "./process/spawn/retry/policy": {
+      "source": "./src/process/spawn/retry/policy.mts",
+      "types": "./dist/process/spawn/retry/policy.d.ts",
+      "default": "./dist/process/spawn/retry/policy.js"
+    },
     "./process/spawn/run": {
       "source": "./src/process/spawn/run.mts",
       "types": "./dist/process/spawn/run.d.ts",
@@ -3074,6 +3107,11 @@
       "types": "./dist/process/spawn/timeout.d.ts",
       "default": "./dist/process/spawn/timeout.js"
     },
+    "./process/spawn/tree-kill-timer": {
+      "source": "./src/process/spawn/tree-kill-timer.mts",
+      "types": "./dist/process/spawn/tree-kill-timer.d.ts",
+      "default": "./dist/process/spawn/tree-kill-timer.js"
+    },
     "./process/spawn/types": {
       "source": "./src/process/spawn/types.mts",
       "types": "./dist/process/spawn/types.d.ts",
@@ -3084,10 +3122,20 @@
       "types": "./dist/process/spawn/windows-shell.d.ts",
       "default": "./dist/process/spawn/windows-shell.js"
     },
+    "./process/spawn/with-retry": {
+      "source": "./src/process/spawn/with-retry.mts",
+      "types": "./dist/process/spawn/with-retry.d.ts",
+      "default": "./dist/process/spawn/with-retry.js"
+    },
     "./process/transient": {
       "source": "./src/process/transient.mts",
       "types": "./dist/process/transient.d.ts",
       "default": "./dist/process/transient.js"
+    },
+    "./process/tree": {
+      "source": "./src/process/tree.mts",
+      "types": "./dist/process/tree.d.ts",
+      "default": "./dist/process/tree.js"
     },
     "./promises/abort": {
       "source": "./src/promises/abort.mts",
