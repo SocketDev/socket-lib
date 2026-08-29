@@ -76,6 +76,107 @@ export interface CopyOptions {
 }
 
 /**
+ * Errno values that mean "this filesystem has no reflink", as opposed to
+ * "this copy failed".
+ *
+ * The distinction is the point. A blanket `catch` would also swallow ENOENT on
+ * a missing source and EACCES on an unwritable destination, retry them as a
+ * plain copy, and report whatever that did - so a real failure becomes a slow
+ * success or a confusing second error.
+ */
+const NO_REFLINK_ERRNOS: ReadonlySet<string> = new Set([
+  'EINVAL',
+  'ENOSYS',
+  'ENOTSUP',
+  'EOPNOTSUPP',
+  'EXDEV',
+])
+
+/**
+ * Whether the filesystem has already answered that it cannot reflink.
+ *
+ * One refusal answers for the whole process. Asking again per file costs a
+ * failed syscall each time, on exactly the systems that are already the slow
+ * ones.
+ */
+let reflinkUnsupported = false
+
+/**
+ * Copy one directory tree, sharing the bytes of every file when the filesystem
+ * can. See {@link cloneFile} for what the sharing buys.
+ *
+ * Children come from one `readdir` with their types attached, so nothing stats
+ * a path twice to learn what it is. Symlinks are recreated as symlinks:
+ * following one would turn a link into a full copy of its target, and a link
+ * pointing outside the tree would drag in whatever it names.
+ *
+ * @param from - Source directory.
+ * @param to - Destination directory.
+ */
+export async function cloneDir(from: PathLike, to: PathLike): Promise<void> {
+  const fs = getNodeFs()
+  const path = getNodePath()
+  const fromStr = pathLikeToString(from)
+  const toStr = pathLikeToString(to)
+  await safeMkdir(toStr)
+  const entries = await fs.promises.readdir(fromStr, { withFileTypes: true })
+  await Promise.all(
+    entries.map(async entry => {
+      const childFrom = path.join(fromStr, entry.name)
+      const childTo = path.join(toStr, entry.name)
+      if (entry.isDirectory()) {
+        await cloneDir(childFrom, childTo)
+        return
+      }
+      if (entry.isSymbolicLink()) {
+        const target = await fs.promises.readlink(childFrom)
+        await safeDelete(childTo)
+        await fs.promises.symlink(target, childTo)
+        return
+      }
+      await cloneFile(childFrom, childTo)
+    }),
+  )
+}
+
+/**
+ * Copy one file, sharing its bytes with the source when the filesystem can.
+ *
+ * `COPYFILE_FICLONE` asks for a copy-on-write clone: APFS and Btrfs answer with
+ * a metadata operation whatever the file size, and everything else copies the
+ * bytes. A clone is NOT a hard link - the two files carry separate inodes and
+ * separate mode bits, so writing one can never reach back into the other.
+ *
+ * @example
+ *   ;```js
+ *   // Near-free on APFS, a plain copy elsewhere.
+ *   await cloneFile('./template/hook.mts', './.cache/stage/hook.mts')
+ *   ```
+ *
+ * @param from - Source file.
+ * @param to - Destination file.
+ */
+export async function cloneFile(from: PathLike, to: PathLike): Promise<void> {
+  const fs = getNodeFs()
+  const fromStr = pathLikeToString(from)
+  const toStr = pathLikeToString(to)
+  if (reflinkUnsupported) {
+    await fs.promises.copyFile(fromStr, toStr)
+    return
+  }
+  try {
+    await fs.promises.copyFile(fromStr, toStr, fs.constants.COPYFILE_FICLONE)
+  } catch (e) {
+    const code = (e as NodeJS.ErrnoException | undefined)?.code
+    if (code === undefined || !NO_REFLINK_ERRNOS.has(code)) {
+      throw e
+    }
+    reflinkUnsupported = true
+    await fs.promises.copyFile(fromStr, toStr)
+  }
+}
+
+/**
  * Recursively copy a file or directory tree from `from` to `to`.
  *
  * Works for both files and directories. The `mode` option chooses how an
@@ -140,4 +241,11 @@ export async function copy(
     throw e
     /* c8 ignore stop */
   }
+}
+
+/**
+ * Forget that a filesystem refused to reflink, so the next clone asks again.
+ */
+export function resetReflinkSupport(): void {
+  reflinkUnsupported = false
 }
