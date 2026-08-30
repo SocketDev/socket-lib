@@ -251,6 +251,10 @@ blockExoticSubdeps: true
 #    `"@socketsecurity/lib": "workspace:*"`, pnpm rewrites it to the
 #    pinned npm version instead of a sibling working tree.
 overrides:
+  # GHSA-frvp-7c67-39w9 - path traversal in serve-static on Windows via an
+  # encoded backslash. Reached transitively through the agent SDK's MCP SDK,
+  # which still resolves a vulnerable range on its own.
+  '@hono/node-server@<1.19.15': '1.19.17'
   # Fleet-canonical overrides (managed by socket-wheelhouse sync; do not edit).
   '@sinclair/typebox': 'catalog:'
   '@socketregistry/packageurl-js': 'catalog:'

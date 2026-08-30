@@ -345,6 +345,7 @@ catalogs:
       version: 0.3.1
 
 overrides:
+  '@hono/node-server@<1.19.15': 1.19.17
   '@sinclair/typebox': 0.34.52
   '@socketregistry/packageurl-js': 1.5.2
   '@socketsecurity/lib': 7.0.1
@@ -4414,8 +4415,8 @@ packages:
   '@henrygd/queue@1.2.0':
     resolution: {integrity: sha512-jW/BLSTpcvExDhqJGxtIPgGr2O0IFF8XUNDwEbfCfhrXT8a4xztQ9Lv6U/vbYzYC0xVWn+3zv6YnLUh3bEFUKA==}
 
-  '@hono/node-server@1.19.14':
-    resolution: {integrity: sha512-GwtvgtXxnWsucXvbQXkRgqksiH2Qed37H9xHZocE5sA3N8O8O8/8FA3uclQXxXVzc9XBZuEOMK7+r02FmSpHtw==}
+  '@hono/node-server@1.19.17':
+    resolution: {integrity: sha512-dSneS5qhiauZWGDCeK4o695Xd9nUNjviSZCMQrj10eetr8Uln1ucn6bbphOM6UynAMMtNIzZNSpL9vnASJwrPQ==}
     engines: {node: '>=18.14.1'}
     peerDependencies:
       hono: 4.13.3
@@ -8198,7 +8199,7 @@ snapshots:
 
   '@henrygd/queue@1.2.0': {}
 
-  '@hono/node-server@1.19.14(hono@4.13.3)':
+  '@hono/node-server@1.19.17(hono@4.13.3)':
     dependencies:
       hono: 4.13.3
 
@@ -8308,7 +8309,7 @@ snapshots:
 
   '@modelcontextprotocol/sdk@1.29.0(supports-color@10.2.2)(zod@4.4.3)':
     dependencies:
-      '@hono/node-server': 1.19.14(hono@4.13.3)
+      '@hono/node-server': 1.19.17(hono@4.13.3)
       ajv: 8.20.0
       ajv-formats: 3.0.1(ajv@8.20.0)
       content-type: 2.1.0(patch_hash=b31aaba8e88c408e66a3fb9abe46a7d4a6a10490b250e9cda768e624a26ad94a)
