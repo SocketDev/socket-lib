@@ -78,3 +78,39 @@ export function readBuildStubs(repoRoot: string): {
 export function keptLeafEntries(repoRoot: string): KeptLeaf[] {
   return readBuildStubs(repoRoot).keepExposed
 }
+
+/**
+ * Replace `buildStubs.unexposed` in the member settings file, leaving every
+ * other key exactly as it was.
+ *
+ * Read-modify-write, never a whole-document write. The settings file is a
+ * HYBRID surface: the fleet cascade owns most of it and the member owns its
+ * `<repo>` cutouts, so a writer that serializes only the section it cares
+ * about silently deletes everyone else's. That is not hypothetical — a
+ * whole-document write here once reduced the file from seventeen top-level
+ * keys to two, taking `bundle.ref` with it, and every CI run then failed at
+ * the payload fetch because the fleet-pack pin was gone.
+ *
+ * A writer that touches one section must therefore round-trip the document.
+ */
+export function writeUnexposedLeaves(
+  repoRoot: string,
+  record: UnexposedRecord,
+  writeFileSync: (p: string, data: string) => void,
+): void {
+  const settingsPath = memberSettingsPath(repoRoot)
+  const parsed = existsSync(settingsPath)
+    ? (JSON.parse(readFileSync(settingsPath, 'utf8')) as Record<
+        string,
+        unknown
+      >)
+    : {}
+  const section = {
+    ...(parsed['buildStubs'] as Record<string, unknown> | undefined),
+    unexposed: record,
+  }
+  writeFileSync(
+    settingsPath,
+    `${JSON.stringify({ ...parsed, buildStubs: section }, null, 2)}\n`,
+  )
+}

@@ -12,8 +12,8 @@
 import { describe, expect, test } from 'vitest'
 
 import {
-  listWithoutLeaves,
   planExposure,
+  recordWithoutLeaves,
 } from '../../scripts/repo/expose-leaf.mts'
 
 const EXPORTED = ['http-request/checksum-file', 'cover/formatters', 'fs/safe']
@@ -63,18 +63,16 @@ describe('planExposure', () => {
   })
 })
 
-describe('listWithoutLeaves', () => {
+describe('recordWithoutLeaves', () => {
   test('drops the exposed leaf and keeps the rest', () => {
-    const out = JSON.parse(
-      listWithoutLeaves(
-        [
-          'alphalphalphalphalphalphalphalphalphalpha/one',
-          'beta/two',
-          'gamma/three',
-        ],
-        ['alpha'],
-        ['beta/two'],
-      ),
+    const out = recordWithoutLeaves(
+      [
+        'alphalphalphalphalphalphalphalphalphalpha/one',
+        'beta/two',
+        'gamma/three',
+      ],
+      ['alpha'],
+      ['beta/two'],
     )
     expect(out.leaves).toEqual([
       'alphalphalphalphalphalphalphalphalphalpha/one',
@@ -85,24 +83,21 @@ describe('listWithoutLeaves', () => {
   test('preserves the roster record so coverage stays verifiable', () => {
     // Dropping scannedRoster here would silently reopen the hole the coverage
     // check exists to close.
-    const out = JSON.parse(
-      listWithoutLeaves(
-        ['alphalphalphalphalphalphalphalphalphalpha/one'],
-        ['alpha', 'beta'],
-        ['alphalphalphalphalphalphalphalphalphalpha/one'],
-      ),
+    const out = recordWithoutLeaves(
+      ['alphalphalphalphalphalphalphalphalphalpha/one'],
+      ['alpha', 'beta'],
+      ['alphalphalphalphalphalphalphalphalphalpha/one'],
     )
     expect(out.scannedRoster).toEqual(['alpha', 'beta'])
     expect(out.leaves).toEqual([])
   })
 
-  test('emits a trailing newline so the file stays diff-clean', () => {
-    expect(
-      listWithoutLeaves(
-        ['alphalphalphalphalphalphalphalphalphalpha/one'],
-        [],
-        [],
-      ),
-    ).toMatch(/\}\n$/)
+  test('returns a record, not a serialized document', () => {
+    // The whole-document write is what deleted fifteen sibling keys. Handing
+    // the caller a RECORD makes that mistake unavailable: the only writer that
+    // takes it round-trips the file.
+    const out = recordWithoutLeaves(['alpha/one'], [], [])
+    expect(typeof out).toBe('object')
+    expect(Object.keys(out).toSorted()).toEqual(['leaves', 'scannedRoster'])
   })
 })

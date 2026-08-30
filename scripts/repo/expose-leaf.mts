@@ -36,8 +36,10 @@ import { exportLeaves } from './audit-fleet-lib-usage.mts'
 import {
   readScannedRoster,
   readUnexposedLeaves,
-  unexposedLeavesPath,
 } from './build-stubs/unexposed.mts'
+import { writeUnexposedLeaves } from './build-stubs/settings.mts'
+
+import type { UnexposedRecord } from './build-stubs/settings.mts'
 import { isMainModule } from '../fleet/_shared/is-main-module.mts'
 import { runMain } from '../fleet/_shared/run-main.mts'
 import { REPO_ROOT } from '../fleet/paths.mts'
@@ -89,20 +91,16 @@ export function planExposure(
  * The stub list with `remove` taken out, preserving the roster record so the
  * coverage check still knows what evidence produced the remaining entries.
  */
-export function listWithoutLeaves(
+export function recordWithoutLeaves(
   leaves: readonly string[],
   scannedRoster: readonly string[],
   remove: readonly string[],
-): string {
+): UnexposedRecord {
   const drop = new Set(remove)
-  return `${JSON.stringify(
-    {
-      leaves: leaves.filter(leaf => !drop.has(leaf)),
-      scannedRoster: [...scannedRoster],
-    },
-    null,
-    2,
-  )}\n`
+  return {
+    leaves: leaves.filter(leaf => !drop.has(leaf)),
+    scannedRoster: [...scannedRoster],
+  }
 }
 
 function main(): void {
@@ -146,9 +144,10 @@ function main(): void {
     )
     return
   }
-  writeFileSync(
-    unexposedLeavesPath(REPO_ROOT),
-    listWithoutLeaves(listed, readScannedRoster(REPO_ROOT), plan.exposed),
+  writeUnexposedLeaves(
+    REPO_ROOT,
+    recordWithoutLeaves(listed, readScannedRoster(REPO_ROOT), plan.exposed),
+    writeFileSync,
   )
   logger.success(
     `expose-leaf: removed ${plan.exposed.join(', ')} from the stub list.`,
