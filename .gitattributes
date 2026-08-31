@@ -51,6 +51,7 @@
 .git-hooks/fleet linguist-generated=true
 .git-hooks/post-commit linguist-generated=true
 .git-hooks/pre-commit linguist-generated=true
+.git-hooks/pre-merge-commit linguist-generated=true
 .git-hooks/pre-push linguist-generated=true
 .github/actions/fleet/_shared linguist-generated=true
 .github/actions/fleet/cache-pnpm-store linguist-generated=true

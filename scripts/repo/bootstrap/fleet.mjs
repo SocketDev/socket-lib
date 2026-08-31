@@ -613,6 +613,7 @@ const ALWAYS_TRACKED_GITHUB_PREFIXES = [
  * be reached.
  */
 const ALWAYS_TRACKED_PREFIXES = [
+  '.claude/output-styles/fleet.md',
   '.config/fleet/tsconfig.check.json',
   '.editorconfig',
   '.git-hooks/',
@@ -1801,8 +1802,32 @@ function extractFleetBlockLines(target) {
     .split('\n')
     .filter(line => line.trim() !== '')
 }
+/**
+ * Non-Claude harness surfaces the fleet GENERATES, never tracks.
+ *
+ * Each is a projection of a Claude-side source: `AGENTS.md` and the rule dirs
+ * point at CLAUDE.md, `opencode.json` / `.codex/` project `.mcp.json`, and
+ * `.agents/skills/` flattens `.claude/skills/` for the hosts that discover
+ * skills one level deep. Regenerating them is cheap; tracking them means every
+ * member carries a copy that drifts and conflicts.
+ *
+ * Listed here so a hydrate ignores AND untracks the whole set. Before this,
+ * only `.agents/` was named, so a member that had committed `AGENTS.md` or
+ * `.codex/` kept it tracked forever and the generator fought git on every run.
+ */
+const HARNESS_ALIAS_PATHS = [
+  '.agents/',
+  '.clinerules/',
+  '.codex/',
+  '.cursor/',
+  '.kiro/',
+  '.opencode/',
+  '.windsurf/',
+  'AGENTS.md',
+  'opencode.json',
+]
 function isLegacyFleetRegionUntrackEntry(line) {
-  if (line === '.agents/') return true
+  if (HARNESS_ALIAS_PATHS.includes(line)) return true
   return (
     line !== '' &&
     !line.startsWith('#') &&
@@ -1904,7 +1929,7 @@ function refreshFleetPackIgnores(config) {
     '# Fleet-pack untrack set — managed by scripts/repo/bootstrap/fleet.mjs.',
     '# REGENERATED from the release-bundle manifest on every hydrate; stale',
     '# entries are pruned. Hand-added ignores belong OUTSIDE these markers.',
-    '.agents/',
+    ...HARNESS_ALIAS_PATHS,
     ...sortedRoots,
     packEndMarker(),
   ].join('\n')
@@ -1931,7 +1956,7 @@ function untrackFleetPackPaths(config) {
   }
   const { dest, manifest } = cfg
   refreshFleetPackIgnores(cfg)
-  const rmTargets = ['.agents/', ...fleetPackOwnedPaths(manifest)]
+  const rmTargets = [...HARNESS_ALIAS_PATHS, ...fleetPackOwnedPaths(manifest)]
   if (rmTargets.length > 0)
     try {
       execFileSync(
@@ -2702,6 +2727,15 @@ const ERR_BUNDLE_BEHIND_LOCAL = 'ERR_WHEELHOUSE_BUNDLE_BEHIND_LOCAL_TEMPLATE'
  * where the bundle IS the only source of truth and applying it is correct.
  * Any git failure also returns false: this guard refuses a provably stale
  * bundle, and never blocks on a question it could not answer.
+ *
+ * That includes an UNREACHABLE pin, which is the normal state after the fleet
+ * squashes its default branch. The cascade-side twin
+ * (`isPinnedBundleBehindLocalTemplate` in
+ * scripts/repo/sync-scaffolding/fleet-pack-channel.mts) reads the same state as
+ * BEHIND, and the split is deliberate: there, being wrong means delivering a
+ * payload that was already current, and here it means raising
+ * ERR_WHEELHOUSE_BUNDLE_BEHIND_LOCAL_TEMPLATE and failing a member's install.
+ * Only one of those is safe to guess at.
  */
 function isBundleBehindLocalTemplate(config) {
   const { dest, manifestTemplateSha } = {
@@ -3231,6 +3265,7 @@ export {
   ERR_LOCKSTEP_MISMATCH,
   FLEET_STATUS_SCRIPT,
   GHCR_HOST,
+  HARNESS_ALIAS_PATHS,
   HYBRID_BUNDLE_PATHS,
   MANIFEST_ACCEPT,
   PREPARE_FETCH,

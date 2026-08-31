@@ -49,7 +49,7 @@ catalog:
   # pinned while the fleet migrates; the 0.x entry is deleted once no member
   # imports the scoped name. 1.3.10 is inside the 7-day soak, so it carries a
   # dated minimumReleaseAgeExclude entry above.
-  'typebox': 1.3.16
+  'typebox': 1.3.17
   '@socketregistry/packageurl-js': 1.5.2
   # -stable aliases: pnpm `overrides:` can't redirect a package's own
   # name when used INSIDE that same package — Node ESM treats it as a
@@ -161,7 +161,7 @@ catalog:
   # Test-only tar extraction seam for archives coverage; single-sourced here so
   # the devDep and the dedup override below stay on one pin.
   'tar-fs': 3.1.3
-  'vite': 8.2.2
+  'vite': 8.2.0
   'vitiate': 0.3.1
   # Read by scripts/fleet/constants/catalog-holds.mts, cascaded fleet payload.
   # No script keys on it, so the devDep is declared via FLEET_REQUIRED_DEVDEPS.
@@ -214,10 +214,6 @@ minimumReleaseAgeExclude:
   - sockeye
   # published: 2026-08-26 | removable: 2026-09-02
   - magic-string@1.2.3
-  # published: 2026-08-21 | removable: 2026-08-28
-  - dtu-github-actions@0.18.1
-  # published: 2026-08-21 | removable: 2026-08-28
-  - run-local-ci@0.18.1
   - 'sfw'
   - 'socket'
   - 'sdxgen'

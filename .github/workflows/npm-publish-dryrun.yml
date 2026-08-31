@@ -1,4 +1,4 @@
-name: 🧪 npm publish dry-run
+name: 🧪 npm Publish Dry-Run
 
 # Cascade-owned — every npm-publishing repo carries the byte-identical copy.
 # Continuous validation of the RELEASE PATH between releases: a weekly cron

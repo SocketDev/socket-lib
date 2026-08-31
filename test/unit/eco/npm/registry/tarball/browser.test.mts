@@ -17,11 +17,7 @@ import {
 } from '../../../../../../src/eco/npm/registry/tarball/browser.mjs'
 import { readNpmTarballManifest as readManifestOnNode } from '../../../../../../src/eco/npm/registry/tarball/node.mjs'
 
-import {
-  makeNpmTarball,
-  makePackageTarball,
-  MANIFEST,
-} from './util.mjs'
+import { makeNpmTarball, makePackageTarball, MANIFEST } from './util.mjs'
 
 /**
  * Decode an entry's bytes for comparison against the fixture's source text.

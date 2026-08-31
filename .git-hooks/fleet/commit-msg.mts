@@ -38,9 +38,9 @@ import {
 import {
   isAllowedAuthor,
   isDeniedIdentity,
+  parseGitIdentLine,
   readIdentityPolicy,
 } from '../_shared/git-identity.mts'
-import type { GitAuthor } from '../_shared/git-identity.mts'
 import {
   commitSubject,
   commitSubjectVerdict,
@@ -55,16 +55,6 @@ import {
 } from '../_shared/commit-format.mts'
 
 const logger = getDefaultLogger()
-
-// Parse `Name <email>` out of a `git var GIT_AUTHOR_IDENT` string
-// (`Name <email> <ts> <tz>`).
-function parseIdent(ident: string): GitAuthor {
-  const m = /^(.*?)\s*<([^>]*)>/.exec(ident)
-  return {
-    name: m?.[1]?.trim() || undefined,
-    email: m?.[2]?.trim() || undefined,
-  }
-}
 
 function identLabel(which: 'GIT_AUTHOR_IDENT' | 'GIT_COMMITTER_IDENT'): string {
   return which === 'GIT_AUTHOR_IDENT' ? 'author' : 'committer'
@@ -260,7 +250,7 @@ const main = (): number => {
       // `git var` failed, unusual env — fail open, don't block a real commit.
       continue
     }
-    const who = parseIdent(ident)
+    const who = parseGitIdentLine(ident)
     const denied = isDeniedIdentity(who, policy)
     if (denied || !isAllowedAuthor(who, policy)) {
       const id = `${who.name ?? '(unset)'} <${who.email ?? '(unset)'}>`

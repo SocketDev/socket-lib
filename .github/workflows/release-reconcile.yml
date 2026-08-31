@@ -1,4 +1,4 @@
-name: 🩹 Release reconcile
+name: 🩹 Release Reconcile
 
 # TAG-GAP HEALER — heals versions that are LIVE on the npm registry but have
 # no v* tag + immutable GH release. Owner promotes happen in the npm web UI,
@@ -114,8 +114,16 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
+          # The wheelhouse PRODUCES the pack, so it never fetches one. Its
+          # scripts/fleet is gitignored and materialized from template/base by
+          # the cascade, so a fresh CI checkout looks payload-less exactly like
+          # a thin member's — and the fetcher then failed on the bundle.ref no
+          # wheelhouse has: "no --ref and no bundle.ref in .config/repo/...".
+          # The sync-scaffolding manifest dir exists only here, which is the
+          # same discriminator isWheelhouseCheckout() uses.
           if [ ! -f scripts/fleet/setup/external-tools.json ] \
-            && [ -f scripts/repo/bootstrap/fleet.mjs ]; then
+            && [ -f scripts/repo/bootstrap/fleet.mjs ] \
+            && [ ! -d scripts/repo/sync-scaffolding/manifest ]; then
             echo 'needed=true' >> "$GITHUB_OUTPUT"
           else
             echo 'needed=false' >> "$GITHUB_OUTPUT"
