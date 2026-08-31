@@ -7,7 +7,7 @@
  *   module from `constants/agents`.
  */
 
-import which from '../external/which.js'
+import which from '../../../external/which.js'
 
 // Agent names.
 export const NPM = 'npm'

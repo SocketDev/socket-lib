@@ -12,7 +12,7 @@
  *      managers.
  */
 
-import { NPM_BIN_PATH } from '../../../constants/package-managers.mjs'
+import { NPM_BIN_PATH } from '../constants/package-managers.mjs'
 import { isDebug } from '../../../debug/namespace.mjs'
 import {
   ArrayPrototypeIndexOf,

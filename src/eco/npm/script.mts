@@ -19,7 +19,7 @@ import {
   PACKAGE_LOCK_JSON,
   PNPM_LOCK_YAML,
   YARN_LOCK,
-} from '../../constants/package-managers.mjs'
+} from './constants/package-managers.mjs'
 import {
   getExecPath,
   getNodeNoWarningsFlags,

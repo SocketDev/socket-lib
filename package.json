@@ -472,11 +472,6 @@
       "types": "./dist/constants/licenses.d.ts",
       "default": "./dist/constants/licenses.js"
     },
-    "./constants/lifecycle-script-names": {
-      "source": "./src/constants/lifecycle-script-names.mts",
-      "types": "./dist/constants/lifecycle-script-names.d.ts",
-      "default": "./dist/constants/lifecycle-script-names.js"
-    },
     "./constants/maintained-node-versions": {
       "source": "./src/constants/maintained-node-versions.mts",
       "types": "./dist/constants/maintained-node-versions.d.ts",
@@ -487,20 +482,10 @@
       "types": "./dist/constants/node.d.ts",
       "default": "./dist/constants/node.js"
     },
-    "./constants/package-default-node-range": {
-      "source": "./src/constants/package-default-node-range.mts",
-      "types": "./dist/constants/package-default-node-range.d.ts",
-      "default": "./dist/constants/package-default-node-range.js"
-    },
     "./constants/package-default-socket-categories": {
       "source": "./src/constants/package-default-socket-categories.mts",
       "types": "./dist/constants/package-default-socket-categories.d.ts",
       "default": "./dist/constants/package-default-socket-categories.js"
-    },
-    "./constants/package-managers": {
-      "source": "./src/constants/package-managers.mts",
-      "types": "./dist/constants/package-managers.d.ts",
-      "default": "./dist/constants/package-managers.js"
     },
     "./constants/packages": {
       "source": "./src/constants/packages.mts",
@@ -762,6 +747,21 @@
       "source": "./src/eco/npm/bun/exec.mts",
       "types": "./dist/eco/npm/bun/exec.d.ts",
       "default": "./dist/eco/npm/bun/exec.js"
+    },
+    "./eco/npm/constants/lifecycle-script-names": {
+      "source": "./src/eco/npm/constants/lifecycle-script-names.mts",
+      "types": "./dist/eco/npm/constants/lifecycle-script-names.d.ts",
+      "default": "./dist/eco/npm/constants/lifecycle-script-names.js"
+    },
+    "./eco/npm/constants/package-default-node-range": {
+      "source": "./src/eco/npm/constants/package-default-node-range.mts",
+      "types": "./dist/eco/npm/constants/package-default-node-range.d.ts",
+      "default": "./dist/eco/npm/constants/package-default-node-range.js"
+    },
+    "./eco/npm/constants/package-managers": {
+      "source": "./src/eco/npm/constants/package-managers.mts",
+      "types": "./dist/eco/npm/constants/package-managers.d.ts",
+      "default": "./dist/eco/npm/constants/package-managers.js"
     },
     "./eco/npm/manifest-format": {
       "source": "./src/eco/npm/manifest-format.mts",

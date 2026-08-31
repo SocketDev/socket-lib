@@ -4,7 +4,7 @@
  *   https://docs.npmjs.com/cli/v10/using-npm/scripts#life-cycle-scripts.
  */
 
-import { SetCtor } from '../primordials/map-set.mjs'
+import { SetCtor } from '../../../primordials/map-set.mjs'
 const lifecycleScriptNames = new SetCtor(
   [
     'dependencies',

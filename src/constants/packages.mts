@@ -8,8 +8,8 @@
 import pacote from '../external/pacote.js'
 import { packageExtensions as packageExtensionsImport } from '../eco/npm/package-extensions/data.mjs'
 import { normalizePath } from '../paths/normalize.mjs'
-import { lifecycleScriptNames as lifecycleScriptNamesImport } from './lifecycle-script-names.mjs'
-import { packageDefaultNodeRange as packageDefaultNodeRangeImport } from './package-default-node-range.mjs'
+import { lifecycleScriptNames as lifecycleScriptNamesImport } from '../eco/npm/constants/lifecycle-script-names.mjs'
+import { packageDefaultNodeRange as packageDefaultNodeRangeImport } from '../eco/npm/constants/package-default-node-range.mjs'
 import { packageDefaultSocketCategories as packageDefaultSocketCategoriesImport } from './package-default-socket-categories.mjs'
 
 import { ArrayFrom } from '../primordials/array.mjs'

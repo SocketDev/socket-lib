@@ -2,7 +2,7 @@
  * @file Default Node.js version range for packages.
  */
 
-import { maintainedNodeVersions } from './maintained-node-versions.mjs'
+import { maintainedNodeVersions } from '../../../constants/maintained-node-versions.mjs'
 
 // The major is the integer prefix of the controlled 'X.Y.Z' constant — a
 // full semver parse here pulled the entire semver graph (whose index builds

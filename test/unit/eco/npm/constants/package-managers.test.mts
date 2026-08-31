@@ -32,7 +32,10 @@ import {
   YARN_BERRY,
   YARN_CLASSIC,
   YARN_LOCK,
-} from '../../../src/constants/package-managers.mjs'
+} from '../../../../../src/eco/npm/constants/package-managers.mjs'
+// The BUILT artifact, not the published package. lib-stable is for helpers;
+// a parity test must compare src/ against the dist/ this repo produces, or it
+// measures whatever was last released instead of what this checkout builds.
 import {
   BUN as stableBUN,
   NPM as stableNPM,
@@ -46,7 +49,7 @@ import {
   VLT as stableVLT,
   YARN as stableYARN,
   YARN_CLASSIC as stableYARN_CLASSIC,
-} from '@socketsecurity/lib-stable/constants/package-managers'
+} from '../../../../../dist/eco/npm/constants/package-managers.js'
 import { describe, expect, it } from 'vitest'
 
 describe('constants/package-managers', () => {
