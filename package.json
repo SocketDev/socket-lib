@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "7.0.2",
+  "version": "7.0.2-prerelease",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
     "Socket.dev",
