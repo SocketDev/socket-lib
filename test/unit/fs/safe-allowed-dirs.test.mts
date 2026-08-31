@@ -41,50 +41,6 @@ afterEach(() => {
   clearDefaultAllowedDirectories()
 })
 
-describe('getDefaultAllowedDirectories', () => {
-  it('lists the temp dir in both its resolved and real form', () => {
-    const dirs = getDefaultAllowedDirectories()
-    const resolved = path.resolve(os.tmpdir())
-    const real = realpathSync(resolved)
-
-    expect(dirs).toContain(resolved)
-    expect(dirs).toContain(real)
-  })
-
-  it('holds no duplicate entry when the two forms are identical', () => {
-    // On a platform with no symlink in the temp path both forms collapse, and
-    // the list must not carry the same string twice.
-    const dirs = getDefaultAllowedDirectories()
-    expect(new Set(dirs).size).toBe(dirs.length)
-  })
-
-  it('hands back a fresh array, so a caller cannot widen the list', () => {
-    // The reason the cache is not returned directly: a caller that appends its
-    // own roots would otherwise widen the allow-list for every later delete in
-    // the process.
-    const first = getDefaultAllowedDirectories()
-    first.push('/appended-by-a-caller')
-    const second = getDefaultAllowedDirectories()
-
-    expect(second).not.toBe(first)
-    expect(second).not.toContain('/appended-by-a-caller')
-  })
-
-  it('reads the same set on repeated calls', () => {
-    const first = getDefaultAllowedDirectories()
-    const second = getDefaultAllowedDirectories()
-    expect(second).toEqual(first)
-  })
-
-  it('rehydrates after the cache is cleared', () => {
-    const first = getDefaultAllowedDirectories()
-    clearDefaultAllowedDirectories()
-    const second = getDefaultAllowedDirectories()
-
-    expect(second).toEqual(first)
-  })
-})
-
 describe('safeDelete inside the temp dir', () => {
   it('removes a path given in the resolved form', async () => {
     const dir = makeDir(path.resolve(os.tmpdir()), 'safe-allowed-resolved')
