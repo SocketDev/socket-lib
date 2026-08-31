@@ -3780,3 +3780,11 @@ test/fleet/registry-infra/npm/placeholder.test.mts
 test/fleet/scripts/setup.mts
 test/fleet/unit/comment-voice.test.mts
 # </fleet-pack>
+
+# ─── repo-local (socket-lib): re-include after the fleet-pack block, since
+# gitignore uses last-match-wins and this negation must outrank the fleet
+# block's own patterns ───
+# The fleet-pack `AGENTS.md` ignore (inside <fleet-pack> above) matches this
+# directory too on a case-insensitive filesystem (`agents.md` == `AGENTS.md`);
+# this is hand-authored repo doc content, not fleet-pack payload.
+!/docs/repo/agents.md/
