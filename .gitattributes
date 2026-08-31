@@ -86,7 +86,6 @@
 .github/workflows/npm-publish-dryrun.yml linguist-generated=true
 .github/workflows/npm-publish.yml linguist-generated=true
 .github/workflows/prune-workflow-runs.yml linguist-generated=true
-.github/workflows/release-reconcile.yml linguist-generated=true
 .github/workflows/weekly-fuzz.yml linguist-generated=true
 .github/workflows/weekly-odai-cache.yml linguist-generated=true
 .github/workflows/weekly-update.yml linguist-generated=true
