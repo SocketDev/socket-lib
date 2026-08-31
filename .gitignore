@@ -136,7 +136,7 @@ dist/
 # Prebuilt dispatch-launcher variants (one per platform-arch), CI
 # cross-compiled and hydrated from the release bundle; the host build
 # copies its match into _shared/ instead of invoking cc. Contract:
-# scripts/fleet/_shared/launcher-variants.mts.
+# scripts/fleet/pack/launcher-variants.mts.
 **/.claude/hooks/fleet/_dist/launchers/
 # Legacy pre-v1.0.16 dispatch layout: socket-sdk-js still tracks the
 # _dispatch/index.cjs loader, which requires ./fleet-pack.cjs — that generated
@@ -276,6 +276,14 @@ pnpm-debug.log
 # REGENERATED from the release-bundle manifest on every hydrate; stale
 # entries are pruned. Hand-added ignores belong OUTSIDE these markers.
 .agents/
+.clinerules/
+.codex/
+.cursor/
+.kiro/
+.opencode/
+.windsurf/
+AGENTS.md
+opencode.json
 .claude/agents/fleet/code-reviewer.md
 .claude/agents/fleet/fix.md
 .claude/agents/fleet/offload.md
@@ -1941,7 +1949,6 @@ pnpm-debug.log
 .claude/hooks/fleet/zsh-word-split-guard/index.mts
 .claude/hooks/fleet/zsh-word-split-guard/package.json
 .claude/hooks/fleet/zsh-word-split-guard/tsconfig.json
-.claude/output-styles/fleet.md
 .claude/rules/fleet/a-peers-claim-is-a-lead.md
 .claude/rules/fleet/claude-md-is-a-bullet-index.md
 .claude/rules/fleet/code-first-then-ai.md

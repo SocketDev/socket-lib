@@ -490,7 +490,7 @@ function writeAppliedRef(dest, ref) {
 }
 
 //#endregion
-//#region template/base/scripts/fleet/_shared/fleet-canonical-splice.mts
+//#region template/base/scripts/fleet/fs/fleet-canonical-splice.mts
 const FLEET_CANONICAL_END_SENTINEL = ['#fleet', 'canonical', 'end'].join('-')
 const FLEET_CANONICAL_SPLICE_FILES = [
   '.config/fleet/oxlintrc.json',
@@ -584,7 +584,7 @@ function spliceFleetCanonicalContent(source, target) {
 }
 
 //#endregion
-//#region template/base/scripts/fleet/_shared/github-tracked-surface.mts
+//#region template/base/scripts/fleet/github/tracked-surface.mts
 const ALWAYS_TRACKED_GITHUB_PREFIXES = [
   '.github/actions/fleet/_shared/',
   '.github/actions/fleet/cache-pnpm-store/',
@@ -658,7 +658,7 @@ function isAlwaysTrackedGitHubSurface(relPath) {
 }
 
 //#endregion
-//#region template/base/scripts/fleet/_shared/mirror-lock.mts
+//#region template/base/scripts/fleet/fs/mirror-lock.mts
 /**
  * @file Mirror-lock lift primitives. The cascade chmods live fleet mirrors
  *   read-only (0444/0555) so stray edits fail at the filesystem level; every
@@ -1088,7 +1088,7 @@ function mergeWorkspaceYaml(config) {
 }
 
 //#endregion
-//#region template/base/scripts/fleet/_shared/hook-wiring.mts
+//#region template/base/scripts/fleet/hooks/wiring.mts
 const DISPATCH_EVENTS = ['PreToolUse', 'PostToolUse', 'SessionStart', 'Stop']
 const INDEX_REL = '.claude/hooks/fleet/index.cjs'
 const LAUNCHER_REL = '.claude/hooks/fleet/_shared/dispatch-launcher'

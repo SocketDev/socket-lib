@@ -94,7 +94,7 @@
 - 🚨 Module-scope functions use `function foo() {}` declarations, not arrow consts. [`sorting`](docs/fleet/agents.md/sorting.md)
 - 🚨 Every top-level `src/` symbol is exported; `typescript/no-explicit-any` is fleet-wide, never relaxed; `as any` is forbidden. [`export-and-no-any`](docs/fleet/agents.md/export-and-no-any.md)
 - An exported name carries a domain word; a bare single generic token (`create`/`parse`/`get`) is grep noise. [`code-style`](docs/fleet/agents.md/code-style.md)
-- 🚨 A directory's shared module is `util`/`utils` (one spelling per repo) and NEVER repeats its directory name; `-helpers` is not a name. [`shared-module-is-named-util`](docs/fleet/agents.md/shared-module-is-named-util.md)
+- 🚨 A directory's shared module is `util`/`utils` (one spelling per repo) and NEVER repeats its directory name; `-helpers` is not a name. (`scripts/fleet/check/shared-modules-are-named-util.mts`) [`shared-module-is-named-util`](docs/fleet/agents.md/shared-module-is-named-util.md)
 - 🚨 Fixture names in tests are fake but DESCRIPTIVE (`example.js`, `@example/module`), never single letters; backlog shrinks only. (`scripts/fleet/check/fixture-names-are-descriptive.mts`) [`code-style`](docs/fleet/agents.md/code-style.md)
 - 🚨 A test fixture names a FICTIONAL person (`octocat`, `example-user`), never a real maintainer; the real set is derived from git at run time, never committed. (`scripts/fleet/check/test-identities-are-fictional.mts`) [`code-style`](docs/fleet/agents.md/code-style.md)
 - 🚨 A credential-shaped test fixture is a SANCTIONED DUMMY, readable as fake by a human and by secret scanning. (`scripts/fleet/check/test-credentials-are-safe-dummies.mts`) [`safe-dummy-values`](docs/fleet/agents.md/safe-dummy-values.md)

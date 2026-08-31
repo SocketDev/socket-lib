@@ -217,10 +217,6 @@ minimumReleaseAgeExclude:
   - 'sfw'
   - 'socket'
   - 'sdxgen'
-  # published: 2026-08-21 | removable: 2026-08-28
-  - 'dtu-github-actions@0.18.1'
-  # published: 2026-08-21 | removable: 2026-08-28
-  - 'run-local-ci@0.18.1'
   - 'sockeye'
 
 # Refuse transitive (sub-) deps declared via git/tarball/local-tarball

@@ -29,7 +29,7 @@ import {
 import {
   acquireFixerLock,
   fixerLockPath,
-} from '../../scripts/fleet/_shared/fixer-lock.mts'
+} from '../../scripts/fleet/process/fixer-lock.mts'
 // One owner for the path, per `paths-are-constructed-once`: a cascaded file is
 // tracked twice (source + live mirror), so a literal spelled here counts as
 // two construction sites on its own.
