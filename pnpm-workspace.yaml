@@ -251,6 +251,7 @@ overrides:
   '@socketsecurity/lib': 'catalog:'
   '@socketsecurity/registry': 'catalog:'
   '@socketsecurity/sdk': 'catalog:'
+  '@swc/core': '1.15.47'
   'brace-expansion@>=4': '5.0.9'
   'chalk@>=5': '5.6.2'
   'es-define-property': 'npm:@socketregistry/es-define-property@1.0.7'
@@ -285,16 +286,16 @@ overrides:
   'which': '7.0.0'
   'wrap-ansi@>=8': '9.0.2'
   'yaml@2': '2.9.0'
-  # GHSA-frvp-7c67-39w9 - path traversal in serve-static on Windows via an
-  # encoded backslash. Reached transitively through the agent SDK's MCP SDK,
-  # which still resolves a vulnerable range on its own.
-  '@hono/node-server@<1.19.15': '1.19.17'
 
   # Repo-specific overrides below.
   '@anthropic-ai/sdk': '0.91.1'
   # Dedup: @grpc/proto-loader 0.7 (dockerode) + 0.8 (@grpc/grpc-js) → 0.8.1.
   # Both CJS with a stable load/loadSync surface.
   '@grpc/proto-loader': '0.8.1'
+  # GHSA-frvp-7c67-39w9 - path traversal in serve-static on Windows via an
+  # encoded backslash. Reached transitively through the agent SDK's MCP SDK,
+  # which still resolves a vulnerable range on its own.
+  '@hono/node-server@<1.19.15': '1.19.17'
   '@inquirer/ansi': '2.0.7'
   '@inquirer/core': '11.2.1'
   '@inquirer/figures': '2.0.8'

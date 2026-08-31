@@ -45,6 +45,7 @@
 .config/fleet/tsconfig.check.base.json linguist-generated=true
 .config/fleet/tsconfig.check.json linguist-generated=true
 .config/fleet/vitest.coverage.fleet.config.mts linguist-generated=true
+.config/fleet/vitest.fuzz.fleet.config.mts linguist-generated=true
 .editorconfig linguist-generated=true
 .git-hooks/_shared linguist-generated=true
 .git-hooks/commit-msg linguist-generated=true
