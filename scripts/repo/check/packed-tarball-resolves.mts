@@ -54,12 +54,12 @@ import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
-import { packAndInspect } from '../../fleet/_shared/pack-inspect.mts'
-import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
-import { runMain } from '../../fleet/_shared/run-main.mts'
+import { packAndInspect } from '../../fleet/pack/inspect.mts'
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { runMain } from '../../fleet/process/run-main.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 
-import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 

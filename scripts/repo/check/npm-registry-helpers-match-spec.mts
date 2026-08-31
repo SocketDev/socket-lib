@@ -25,8 +25,8 @@ import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
-import { isJsonRequested, runMain } from '../../fleet/_shared/run-main.mts'
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
 import { reportDrift } from '../npm-api-spec/drift.mts'
 import {
   readHelperModules,
@@ -36,7 +36,7 @@ import { readSpecPin } from '../npm-api-spec/pin.mts'
 import { renderDriftLines } from '../npm-api-spec/render.mts'
 import { resolveSpecHead } from '../npm-api-spec/spec-fetch.mts'
 
-import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 import type { SpecCheckResult } from '../npm-api-spec/render.mts'
 
 const logger = getDefaultLogger()

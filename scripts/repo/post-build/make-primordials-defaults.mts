@@ -24,10 +24,10 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import globals from 'globals'
 
 import { REPO_ROOT } from '../../fleet/paths.mts'
-import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
-import { runMain } from '../../fleet/_shared/run-main.mts'
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { runMain } from '../../fleet/process/run-main.mts'
 
-import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 

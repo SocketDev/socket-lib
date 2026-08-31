@@ -10,7 +10,7 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { REPO_ROOT } from '../fleet/paths.mts'
-import { isMainModule } from '../fleet/_shared/is-main-module.mts'
+import { isMainModule } from '../fleet/process/is-main-module.mts'
 
 const distDir = path.join(REPO_ROOT, 'dist')
 const require = createRequire(import.meta.url)

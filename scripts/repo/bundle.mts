@@ -31,10 +31,10 @@ import {
 } from './bundle/steps.mts'
 import { verifyDist } from './bundle/verify-dist.mts'
 
-import { isMainModule } from '../fleet/_shared/is-main-module.mts'
-import { runMain } from '../fleet/_shared/run-main.mts'
+import { isMainModule } from '../fleet/process/is-main-module.mts'
+import { runMain } from '../fleet/process/run-main.mts'
 
-import type { ScriptMeta } from '../fleet/_shared/run-main.mts'
+import type { ScriptMeta } from '../fleet/process/run-main.mts'
 import type { BuildSourceResult } from './bundle/steps.mts'
 
 const logger = getDefaultLogger()

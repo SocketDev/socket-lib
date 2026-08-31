@@ -13,10 +13,10 @@ import { pluralize } from '@socketsecurity/lib-stable/words/pluralize'
 
 import { buildExternals } from '../build-externals/orchestrator.mts'
 
-import { isMainModule } from '../../fleet/_shared/is-main-module.mts'
-import { runMain } from '../../fleet/_shared/run-main.mts'
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { runMain } from '../../fleet/process/run-main.mts'
 
-import type { ScriptMeta } from '../../fleet/_shared/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
