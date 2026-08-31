@@ -614,6 +614,8 @@ const ALWAYS_TRACKED_GITHUB_PREFIXES = [
  */
 const ALWAYS_TRACKED_PREFIXES = [
   '.claude/output-styles/fleet.md',
+  '.config/fleet/.prettierignore',
+  '.config/fleet/oxlintrc.json',
   '.config/fleet/tsconfig.check.json',
   '.editorconfig',
   '.git-hooks/',
@@ -3161,6 +3163,21 @@ async function installFleet(config) {
     )
     const movedCount = applyMovedPaths(dest, manifest)
     const tombstonedCount = removeTombstonedPaths(dest, manifest)
+    const deliveredMovedFiles = {}
+    for (const moved of manifest.movedPaths ?? []) {
+      const to = normalizeBundlePath(moved.to)
+      if (to && existsSync(path.join(dest, to)))
+        deliveredMovedFiles[to] = 'moved'
+    }
+    const ignoreManifest = Object.keys(deliveredMovedFiles).length
+      ? {
+          ...memberManifest,
+          files: {
+            ...memberManifest.files,
+            ...deliveredMovedFiles,
+          },
+        }
+      : memberManifest
     installSegments(segmentsDir, dest, manifest)
     const settingsResult = installSettingsSegment(segmentsDir, dest, manifest)
     if (settingsResult !== 0) return settingsResult
@@ -3170,12 +3187,12 @@ async function installFleet(config) {
     if (cfg.thin)
       untrackFleetPackPaths({
         dest,
-        manifest: memberManifest,
+        manifest: ignoreManifest,
       })
     else if (readBundleRef(dest) !== void 0)
       refreshFleetPackIgnores({
         dest,
-        manifest: memberManifest,
+        manifest: ignoreManifest,
       })
     writeAppliedRef(dest, sourceRef)
     writeAppliedFiles(dest, Object.keys(memberManifest.files))
