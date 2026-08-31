@@ -4,10 +4,11 @@
 
 import { describe, expect, it } from 'vitest'
 
-// The BUILT artifact, not the published package. lib-stable is for helpers;
-// a parity test must compare src/ against the dist/ this repo produces, or it
-// measures whatever was last released instead of what this checkout builds.
-import { packageDefaultNodeRange as canonicalPackageDefaultNodeRange } from '../../../../../dist/eco/npm/constants/package-default-node-range.js'
+// EXPECTED only. lib-stable is an independent oracle a test may compare
+// against; it is never the ACTUAL, which must come from src/ or dist/. Its
+// subpath stays under `constants/` because that is where the PUBLISHED package
+// exports it — it moves here once this rename ships.
+import { packageDefaultNodeRange as canonicalPackageDefaultNodeRange } from '@socketsecurity/lib-stable/constants/package-default-node-range'
 
 import { packageDefaultNodeRange } from '../../../../../src/eco/npm/constants/package-default-node-range.mjs'
 
