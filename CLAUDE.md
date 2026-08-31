@@ -11,7 +11,7 @@
 - 🚨 Local main is canonical: origin ahead by own/bot squash commits ≠ newer truth. [`parallel-claude-sessions`](docs/fleet/agents.md/parallel-claude-sessions.md)
 - 🚨 Active-edits ledger coordinates concurrent actors: a path another live actor wrote within 5 min is blocked, as are open-ended wait promises. [`parallel-claude-sessions`](docs/fleet/agents.md/parallel-claude-sessions.md)
 - 🚨 Primary checkout stays on the default branch; branch work goes in a `git worktree`. [`parallel-claude-sessions`](docs/fleet/agents.md/parallel-claude-sessions.md)
-- 🚨 Codex companion sessions are quick checks, blocked past a 1-min budget. Bypass: `Allow codex-long-session bypass`. [`parallel-claude-sessions`](docs/fleet/agents.md/parallel-claude-sessions.md)
+- 🚨 Companion sessions are quick checks, blocked past a 1-min budget; a session the marker's harness cannot parent is never one. Bypass: `Allow agent-long-session bypass`. [`parallel-claude-sessions`](docs/fleet/agents.md/parallel-claude-sessions.md)
 - Never hard-code `main` in scripts: resolve the default branch via `git symbolic-ref`, fall back `main` → `master`. [`default-branch-resolution`](docs/fleet/agents.md/default-branch-resolution.md)
 - 🚨 Write no real customer name, private repo, Linear ref, or Slack thread on a public surface; use fictional slugs. [`public-surface-hygiene`](docs/fleet/agents.md/public-surface-hygiene.md) [`pull-request-target`](docs/fleet/agents.md/pull-request-target.md)
 - 🚨 Root `README.md` follows the fleet skeleton - 5 level-2 sections in order, every member. [`public-surface-hygiene`](docs/fleet/agents.md/public-surface-hygiene.md)
@@ -45,6 +45,7 @@
 - 🚨 Fix a lint/type/test error or broken comment in your reading window in a sibling commit; investigate before blaming the tool. [`judgment-and-self-evaluation`](docs/fleet/agents.md/judgment-and-self-evaluation.md)
 - 🚨 "stop"/"pause" means stop FORWARD action: finish the in-flight commit, never freeze broken. (`.claude/hooks/fleet/stop-means-commit-guard/`) [`stop-means-finish-the-commit`](docs/fleet/agents.md/stop-means-finish-the-commit.md)
 - 🚨 Scope work into chunks that land: verify each alone, commit it, then start the next. (`.claude/hooks/fleet/uncommitted-sweep-nudge/`) [`scope-work-into-landable-chunks`](docs/fleet/agents.md/scope-work-into-landable-chunks.md)
+- 🚨 Staging is the first step of committing, never a parking place: if you `git add`, commit and push NOW; staged paths you did NOT stage mean a peer is mid-commit, so WAIT. (`.claude/hooks/fleet/disowned-dirt-guard/`) [`worktree-hygiene`](docs/fleet/agents.md/worktree-hygiene.md)
 - 🚨 Finish a change, then commit it; never end a turn with a dirty worktree. [`worktree-hygiene`](docs/fleet/agents.md/worktree-hygiene.md)
 - 🚨 Smallest chunks, land ASAP; never checkout/switch mid-queue; a local fast-forward isn't landed until pushed. [`worktree-hygiene`](docs/fleet/agents.md/worktree-hygiene.md) <!--advisory-->
 - 🚨 Before reaching for a revert (git checkout/restore/reset to discard work), try fix forward. (`scripts/fleet/whose-work.mts`, `no-revert-guard`) [`fix-forward-not-revert`](docs/fleet/agents.md/fix-forward-not-revert.md)

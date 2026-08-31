@@ -208,14 +208,16 @@ minimumReleaseAgeExclude:
   - '@ultrathink/*'
   - '@sdxgen/*'
   - sdxgen
-  # published: 2026-08-21 | removable: 2026-08-28
-  - dtu-github-actions@0.18.1
-  # published: 2026-08-21 | removable: 2026-08-28
-  - run-local-ci@0.18.1
   - '@abitious/*'
   - '@decmpfs/*'
   - '@node-smol/*'
   - sockeye
+  # published: 2026-08-26 | removable: 2026-09-02
+  - magic-string@1.2.3
+  # published: 2026-08-21 | removable: 2026-08-28
+  - dtu-github-actions@0.18.1
+  # published: 2026-08-21 | removable: 2026-08-28
+  - run-local-ci@0.18.1
   - 'sfw'
   - 'socket'
   - 'sdxgen'
@@ -251,10 +253,6 @@ blockExoticSubdeps: true
 #    `"@socketsecurity/lib": "workspace:*"`, pnpm rewrites it to the
 #    pinned npm version instead of a sibling working tree.
 overrides:
-  # GHSA-frvp-7c67-39w9 - path traversal in serve-static on Windows via an
-  # encoded backslash. Reached transitively through the agent SDK's MCP SDK,
-  # which still resolves a vulnerable range on its own.
-  '@hono/node-server@<1.19.15': '1.19.17'
   # Fleet-canonical overrides (managed by socket-wheelhouse sync; do not edit).
   '@sinclair/typebox': 'catalog:'
   '@socketregistry/packageurl-js': 'catalog:'
@@ -295,6 +293,10 @@ overrides:
   'which': '7.0.0'
   'wrap-ansi@>=8': '9.0.2'
   'yaml@2': '2.9.0'
+  # GHSA-frvp-7c67-39w9 - path traversal in serve-static on Windows via an
+  # encoded backslash. Reached transitively through the agent SDK's MCP SDK,
+  # which still resolves a vulnerable range on its own.
+  '@hono/node-server@<1.19.15': '1.19.17'
 
   # Repo-specific overrides below.
   '@anthropic-ai/sdk': '0.91.1'

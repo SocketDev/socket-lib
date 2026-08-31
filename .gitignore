@@ -303,7 +303,9 @@ pnpm-debug.log
 .claude/hooks/fleet/_shared/README.md
 .claude/hooks/fleet/_shared/active-edits-ledger.mts
 .claude/hooks/fleet/_shared/agent-memory.mts
+.claude/hooks/fleet/_shared/ai-attribution-vendors.mts
 .claude/hooks/fleet/_shared/ai-attribution.mts
+.claude/hooks/fleet/_shared/ai-config-surfaces.mts
 .claude/hooks/fleet/_shared/ai-slop-patterns.mts
 .claude/hooks/fleet/_shared/artifact-gates.mts
 .claude/hooks/fleet/_shared/ast/calls.mts
@@ -373,6 +375,7 @@ pnpm-debug.log
 .claude/hooks/fleet/_shared/guard.mts
 .claude/hooks/fleet/_shared/handoff-request.mts
 .claude/hooks/fleet/_shared/honesty-framing.mts
+.claude/hooks/fleet/_shared/interpreter-writes.mts
 .claude/hooks/fleet/_shared/known-names.mts
 .claude/hooks/fleet/_shared/landable.mts
 .claude/hooks/fleet/_shared/learning-ledger.mts
@@ -415,6 +418,7 @@ pnpm-debug.log
 .claude/hooks/fleet/_shared/sparkle-auto-update.mts
 .claude/hooks/fleet/_shared/spawn-timeout.mts
 .claude/hooks/fleet/_shared/squash-sentinel.mts
+.claude/hooks/fleet/_shared/staging-is-transient.mts
 .claude/hooks/fleet/_shared/stop-nudge.mts
 .claude/hooks/fleet/_shared/stop-request.mts
 .claude/hooks/fleet/_shared/suppression-rules.mts
@@ -461,6 +465,11 @@ pnpm-debug.log
 .claude/hooks/fleet/agent-prompt-budget-guard/package.json
 .claude/hooks/fleet/agent-prompt-budget-guard/signal-position.mts
 .claude/hooks/fleet/agent-prompt-budget-guard/tsconfig.json
+.claude/hooks/fleet/agent-session-budget-guard/README.md
+.claude/hooks/fleet/agent-session-budget-guard/index.mts
+.claude/hooks/fleet/agent-session-budget-guard/package.json
+.claude/hooks/fleet/agent-session-budget-guard/reap.mts
+.claude/hooks/fleet/agent-session-budget-guard/tsconfig.json
 .claude/hooks/fleet/ai-balancer-proxy-start/README.md
 .claude/hooks/fleet/ai-balancer-proxy-start/index.mts
 .claude/hooks/fleet/ai-balancer-proxy-start/package.json
@@ -537,6 +546,10 @@ pnpm-debug.log
 .claude/hooks/fleet/avoid-cd-nudge/index.mts
 .claude/hooks/fleet/avoid-cd-nudge/package.json
 .claude/hooks/fleet/avoid-cd-nudge/tsconfig.json
+.claude/hooks/fleet/bash-file-write-guard/README.md
+.claude/hooks/fleet/bash-file-write-guard/index.mts
+.claude/hooks/fleet/bash-file-write-guard/package.json
+.claude/hooks/fleet/bash-file-write-guard/tsconfig.json
 .claude/hooks/fleet/bash-timeout-nudge/README.md
 .claude/hooks/fleet/bash-timeout-nudge/index.mts
 .claude/hooks/fleet/bash-timeout-nudge/package.json
@@ -644,11 +657,6 @@ pnpm-debug.log
 .claude/hooks/fleet/codex-no-write-guard/index.mts
 .claude/hooks/fleet/codex-no-write-guard/package.json
 .claude/hooks/fleet/codex-no-write-guard/tsconfig.json
-.claude/hooks/fleet/codex-session-budget-guard/README.md
-.claude/hooks/fleet/codex-session-budget-guard/index.mts
-.claude/hooks/fleet/codex-session-budget-guard/package.json
-.claude/hooks/fleet/codex-session-budget-guard/reap.mts
-.claude/hooks/fleet/codex-session-budget-guard/tsconfig.json
 .claude/hooks/fleet/codify-footgun-nudge/README.md
 .claude/hooks/fleet/codify-footgun-nudge/index.mts
 .claude/hooks/fleet/codify-footgun-nudge/package.json
@@ -734,6 +742,10 @@ pnpm-debug.log
 .claude/hooks/fleet/dep-derived-source-nudge/index.mts
 .claude/hooks/fleet/dep-derived-source-nudge/package.json
 .claude/hooks/fleet/dep-derived-source-nudge/tsconfig.json
+.claude/hooks/fleet/detached-head-write-guard/README.md
+.claude/hooks/fleet/detached-head-write-guard/index.mts
+.claude/hooks/fleet/detached-head-write-guard/package.json
+.claude/hooks/fleet/detached-head-write-guard/tsconfig.json
 .claude/hooks/fleet/dirty-lockfile-nudge/README.md
 .claude/hooks/fleet/dirty-lockfile-nudge/index.mts
 .claude/hooks/fleet/dirty-lockfile-nudge/package.json
@@ -1025,6 +1037,10 @@ pnpm-debug.log
 .claude/hooks/fleet/no-corepack-guard/index.mts
 .claude/hooks/fleet/no-corepack-guard/package.json
 .claude/hooks/fleet/no-corepack-guard/tsconfig.json
+.claude/hooks/fleet/no-credential-file-read-guard/README.md
+.claude/hooks/fleet/no-credential-file-read-guard/index.mts
+.claude/hooks/fleet/no-credential-file-read-guard/package.json
+.claude/hooks/fleet/no-credential-file-read-guard/tsconfig.json
 .claude/hooks/fleet/no-description-aside-guard/README.md
 .claude/hooks/fleet/no-description-aside-guard/index.mts
 .claude/hooks/fleet/no-description-aside-guard/package.json
@@ -1199,6 +1215,10 @@ pnpm-debug.log
 .claude/hooks/fleet/no-shell-injection-bypass-guard/index.mts
 .claude/hooks/fleet/no-shell-injection-bypass-guard/package.json
 .claude/hooks/fleet/no-shell-injection-bypass-guard/tsconfig.json
+.claude/hooks/fleet/no-shrinking-overwrite-guard/README.md
+.claude/hooks/fleet/no-shrinking-overwrite-guard/index.mts
+.claude/hooks/fleet/no-shrinking-overwrite-guard/package.json
+.claude/hooks/fleet/no-shrinking-overwrite-guard/tsconfig.json
 .claude/hooks/fleet/no-stdin-flag-without-input-guard/README.md
 .claude/hooks/fleet/no-stdin-flag-without-input-guard/index.mts
 .claude/hooks/fleet/no-stdin-flag-without-input-guard/package.json
@@ -1251,6 +1271,10 @@ pnpm-debug.log
 .claude/hooks/fleet/no-unmocked-net-guard/index.mts
 .claude/hooks/fleet/no-unmocked-net-guard/package.json
 .claude/hooks/fleet/no-unmocked-net-guard/tsconfig.json
+.claude/hooks/fleet/no-unsafe-delete-guard/README.md
+.claude/hooks/fleet/no-unsafe-delete-guard/index.mts
+.claude/hooks/fleet/no-unsafe-delete-guard/package.json
+.claude/hooks/fleet/no-unsafe-delete-guard/tsconfig.json
 .claude/hooks/fleet/no-upstream-edit-guard/README.md
 .claude/hooks/fleet/no-upstream-edit-guard/index.mts
 .claude/hooks/fleet/no-upstream-edit-guard/package.json
@@ -1830,6 +1854,10 @@ pnpm-debug.log
 .claude/hooks/fleet/upstream-is-read-only-guard/index.mts
 .claude/hooks/fleet/upstream-is-read-only-guard/package.json
 .claude/hooks/fleet/upstream-is-read-only-guard/tsconfig.json
+.claude/hooks/fleet/upstream-read-nudge/README.md
+.claude/hooks/fleet/upstream-read-nudge/index.mts
+.claude/hooks/fleet/upstream-read-nudge/package.json
+.claude/hooks/fleet/upstream-read-nudge/tsconfig.json
 .claude/hooks/fleet/use-repo-test-script-guard/README.md
 .claude/hooks/fleet/use-repo-test-script-guard/index.mts
 .claude/hooks/fleet/use-repo-test-script-guard/package.json
@@ -2178,6 +2206,7 @@ pnpm-debug.log
 .config/fleet/markdownlint-rules/socket-readme-social-badges.mts
 .config/fleet/markdownlint-rules/socket-task-list-syntax.mts
 .config/fleet/mcp/launch-fff-mcp.sh
+.config/fleet/mcp/launch-node-mcp.sh
 .config/fleet/oxfmtrc.json
 .config/fleet/oxlint-plugin/_shared/inject-import.mts
 .config/fleet/oxlint-plugin/fleet/bag-param-optionality-naming/index.mts
@@ -2200,6 +2229,7 @@ pnpm-debug.log
 .config/fleet/oxlint-plugin/fleet/mcp-tool-names-are-conventional/package.json
 .config/fleet/oxlint-plugin/fleet/no-agent-brand-assumption/index.mts
 .config/fleet/oxlint-plugin/fleet/no-agent-brand-assumption/package.json
+.config/fleet/oxlint-plugin/fleet/no-ai-slop-prose/index.mts
 .config/fleet/oxlint-plugin/fleet/no-bare-crypto-named-usage/index.mts
 .config/fleet/oxlint-plugin/fleet/no-bare-crypto-named-usage/package.json
 .config/fleet/oxlint-plugin/fleet/no-bare-spawn-childproc-access/index.mts
@@ -2345,10 +2375,13 @@ pnpm-debug.log
 .config/fleet/oxlint-plugin/fleet/personal-path-placeholders/package.json
 .config/fleet/oxlint-plugin/fleet/prefer-all-settled/index.mts
 .config/fleet/oxlint-plugin/fleet/prefer-all-settled/package.json
+.config/fleet/oxlint-plugin/fleet/prefer-array-from/index.mts
 .config/fleet/oxlint-plugin/fleet/prefer-async-spawn/index.mts
 .config/fleet/oxlint-plugin/fleet/prefer-async-spawn/package.json
 .config/fleet/oxlint-plugin/fleet/prefer-cached-for-loop/index.mts
 .config/fleet/oxlint-plugin/fleet/prefer-cached-for-loop/package.json
+.config/fleet/oxlint-plugin/fleet/prefer-compare-str/index.mts
+.config/fleet/oxlint-plugin/fleet/prefer-compare-str/package.json
 .config/fleet/oxlint-plugin/fleet/prefer-crlf-safe-split/index.mts
 .config/fleet/oxlint-plugin/fleet/prefer-crlf-safe-split/package.json
 .config/fleet/oxlint-plugin/fleet/prefer-ellipsis-char/index.mts
@@ -2661,6 +2694,7 @@ scripts/fleet/_shared/anthropic-key.mts
 scripts/fleet/_shared/backoff.mts
 scripts/fleet/_shared/balancer-latency.mts
 scripts/fleet/_shared/balancer-liveness.mts
+scripts/fleet/_shared/balancer-settings.mts
 scripts/fleet/_shared/bot-directives.mts
 scripts/fleet/_shared/browser-control/acquire.mts
 scripts/fleet/_shared/browser-control/browser-channel.mts
@@ -2692,6 +2726,7 @@ scripts/fleet/_shared/duration-budgets.mts
 scripts/fleet/_shared/errors.mts
 scripts/fleet/_shared/external-tools.mts
 scripts/fleet/_shared/fictional-identities.mts
+scripts/fleet/_shared/file-ownership.mts
 scripts/fleet/_shared/fireconnect-claude.mts
 scripts/fleet/_shared/fireconnect-config.mts
 scripts/fleet/_shared/fireworks-usage.mts
@@ -2772,21 +2807,21 @@ scripts/fleet/_shared/run-main.mts
 scripts/fleet/_shared/rust-tool-pins.mts
 scripts/fleet/_shared/safe-delete-guard.mts
 scripts/fleet/_shared/scope-flags.mts
+scripts/fleet/_shared/security-alert-feeds.mts
 scripts/fleet/_shared/security-posture-law.mts
 scripts/fleet/_shared/security-posture-probe.mts
 scripts/fleet/_shared/snapshot-hostile-builtins.mts
 scripts/fleet/_shared/socket-state.mts
 scripts/fleet/_shared/spawn-env-scan.mts
-scripts/fleet/_shared/spend-gauge-model.mts
 scripts/fleet/_shared/spend-projection.mts
 scripts/fleet/_shared/spend-report-charts.mts
 scripts/fleet/_shared/spend-report-html.mts
 scripts/fleet/_shared/spend-report-path.mts
 scripts/fleet/_shared/spend-report-theme.mts
 scripts/fleet/_shared/spend-statusline-render.mts
+scripts/fleet/_shared/staged-commit.mts
 scripts/fleet/_shared/statusline-launcher.mts
 scripts/fleet/_shared/statusline-render.mts
-scripts/fleet/_shared/subagent-panel-model.mts
 scripts/fleet/_shared/swift-targets.mts
 scripts/fleet/_shared/synthetic-quota.mts
 scripts/fleet/_shared/tar-executable.mts
@@ -2797,6 +2832,7 @@ scripts/fleet/_shared/test-isolation-law.mts
 scripts/fleet/_shared/tracked-globs.mts
 scripts/fleet/_shared/unix-path.mts
 scripts/fleet/_shared/untrack-offenders.mts
+scripts/fleet/_shared/workflow-display-names.mts
 scripts/fleet/agent-orphan-sweep.mts
 scripts/fleet/ai-backends-status.mts
 scripts/fleet/ai-balancer/active-rung.mts
@@ -2818,6 +2854,8 @@ scripts/fleet/ai-balancer/probe.mts
 scripts/fleet/ai-balancer/proxy.mts
 scripts/fleet/ai-balancer/routing.mts
 scripts/fleet/ai-balancer/rung-policy.mts
+scripts/fleet/ai-balancer/service-units.mts
+scripts/fleet/ai-balancer/service.mts
 scripts/fleet/ai-balancer/training-warning.mts
 scripts/fleet/ai-balancer/transform-request.mts
 scripts/fleet/ai-balancer/transport.mts
@@ -2906,6 +2944,7 @@ scripts/fleet/check/added-statements-are-covered.mts
 scripts/fleet/check/agent-offload-routes-are-declared.mts
 scripts/fleet/check/agents-are-well-formed.mts
 scripts/fleet/check/agents-have-rule-citations.mts
+scripts/fleet/check/ai-balancer-is-supervised.mts
 scripts/fleet/check/ai-balancer-starts-on-session.mts
 scripts/fleet/check/ai-spawns-have-paired-effort.mts
 scripts/fleet/check/alias-mirrors-are-ungated.mts
@@ -3015,6 +3054,7 @@ scripts/fleet/check/gh-aw-locks-are-current.mts
 scripts/fleet/check/gh-aw-workflow-models-are-canonical.mts
 scripts/fleet/check/gh-default-repo-matches-origin.mts
 scripts/fleet/check/gha-allowlist-matches-template-uses.mts
+scripts/fleet/check/git-credentials-are-not-ambient.mts
 scripts/fleet/check/git-fetch-bootstraps-are-lock-stepped.mts
 scripts/fleet/check/git-hooks-have-exit-status-propagation.mts
 scripts/fleet/check/github-action-aliases-are-not-frozen.mts
@@ -3153,6 +3193,7 @@ scripts/fleet/check/source-is-windows-portable.mts
 scripts/fleet/check/sources-are-mts.mts
 scripts/fleet/check/sparkle-auto-update-is-disabled.mts
 scripts/fleet/check/stable-aliases-match-base.mts
+scripts/fleet/check/stage-approvals-name-their-id.mts
 scripts/fleet/check/static-imports-are-declared.mts
 scripts/fleet/check/stray-artifacts-are-absent.mts
 scripts/fleet/check/subagent-status-doc-is-current.mts
@@ -3233,8 +3274,10 @@ scripts/fleet/constants/real-identity-burn-down.mts
 scripts/fleet/constants/soak-excludes.mts
 scripts/fleet/constants/soak.mts
 scripts/fleet/constants/socket-scopes.mts
+scripts/fleet/constants/source-extensions.mts
 scripts/fleet/constants/taze-passes.mts
 scripts/fleet/constants/tests-read-canonical-sources-burn-down.json
+scripts/fleet/context-cost.mts
 scripts/fleet/cover-report.mts
 scripts/fleet/cover-run.mts
 scripts/fleet/cover.mts
@@ -3288,6 +3331,7 @@ scripts/fleet/fmt-swift.mts
 scripts/fleet/format.mts
 scripts/fleet/fsync-dist.mts
 scripts/fleet/fuzz/report-crash.mts
+scripts/fleet/gen/agents-skills-mirror.mts
 scripts/fleet/gen/api-md.mts
 scripts/fleet/gen/aw-token-shapes.mts
 scripts/fleet/gen/coverage-badge.mts
@@ -3330,6 +3374,7 @@ scripts/fleet/lib/api-docs/docs-artifact.mts
 scripts/fleet/lib/api-docs/export-rows.mts
 scripts/fleet/lib/catalog-diff.mts
 scripts/fleet/lib/catalog-pin-floor.mts
+scripts/fleet/lib/claude-md-redundancy.mts
 scripts/fleet/lib/claude-md-trim.mts
 scripts/fleet/lib/commit-via-github-api.mts
 scripts/fleet/lib/coverage-badge.mts
@@ -3373,6 +3418,7 @@ scripts/fleet/lib/verify-release-hashes.mts
 scripts/fleet/lib/workspace-yaml.mts
 scripts/fleet/lint-actions.mts
 scripts/fleet/lint-cpp.mts
+scripts/fleet/lint-findings.mts
 scripts/fleet/lint-github-settings.mts
 scripts/fleet/lint-github-settings/detect.mts
 scripts/fleet/lint-github-settings/evaluate.mts
@@ -3454,6 +3500,7 @@ scripts/fleet/registry-infra/gh-org-choice.mts
 scripts/fleet/registry-infra/gh-otp-verify.mts
 scripts/fleet/registry-infra/gh-scope-cli.mts
 scripts/fleet/registry-infra/gh-scope-lease.mts
+scripts/fleet/registry-infra/gh-sigil-signin.mts
 scripts/fleet/registry-infra/go/shared.mts
 scripts/fleet/registry-infra/napi-matrix.mts
 scripts/fleet/registry-infra/npm/access-context-schema.mts
@@ -3614,6 +3661,7 @@ scripts/fleet/socket-lib-cascade/state.mts
 scripts/fleet/socket-lib-cascade/target.mts
 scripts/fleet/socket-wheelhouse-emit-schema.mts
 scripts/fleet/socket-wheelhouse-schema.mts
+scripts/fleet/socket-wheelhouse-schema/build-stubs.mts
 scripts/fleet/socket-wheelhouse-schema/build.mts
 scripts/fleet/socket-wheelhouse-schema/capabilities.mts
 scripts/fleet/socket-wheelhouse-schema/ci.mts

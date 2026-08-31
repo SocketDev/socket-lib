@@ -1,6 +1,6 @@
 {
   "name": "@socketsecurity/lib",
-  "version": "7.0.2-prerelease",
+  "version": "7.0.2",
   "description": "Core utilities and infrastructure for Socket.dev security tools",
   "keywords": [
     "Socket.dev",
@@ -2333,6 +2333,11 @@
       "source": "./src/node/path.mts",
       "types": "./dist/node/path.d.ts",
       "default": "./dist/node/path.js"
+    },
+    "./node/process": {
+      "source": "./src/node/process.mts",
+      "types": "./dist/node/process.d.ts",
+      "default": "./dist/node/process.js"
     },
     "./node/timers-promises": {
       "source": "./src/node/timers-promises.mts",
