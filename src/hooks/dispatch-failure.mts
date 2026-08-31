@@ -85,8 +85,8 @@ export interface HookRuntimeVerdict {
  * whose checkout HAS an install, where retrying runs the real check. An
  * enforcing hook whose checkout has no install fails OPEN and says so — the
  * message states plainly that enforcement is off and names the command that
- * turns it back on, because a warning a reader can act on is worth more than a
- * block that also blocks the repair.
+ * turns it back on. A block here would also block the repair, leaving the
+ * reader nothing to act on.
  */
 export function hookRuntimeVerdict(
   config: HookRuntimeFailure,

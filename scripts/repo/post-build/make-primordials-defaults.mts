@@ -15,6 +15,7 @@
  *   src/primordials/ exports change. Wired into scripts/repo/post-build.mts.
  */
 
+import { compareStr } from '@socketsecurity/lib-stable/sorts/strings'
 import { readdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
@@ -140,7 +141,7 @@ function main(): void {
       aliasEntries.push([name, globalAliases.get(name)!])
     }
   }
-  aliasEntries.sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+  aliasEntries.sort(([a], [b]) => compareStr(a, b))
 
   // Node-internal-only set — names that exist in Node's primordials
   // but socket-lib intentionally doesn't mirror. Hand-maintained;

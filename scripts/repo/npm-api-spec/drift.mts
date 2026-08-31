@@ -15,6 +15,8 @@
  *      is not always an omission; see {@link fieldIsCovered}.
  */
 
+import { compareStr } from '@socketsecurity/lib-stable/sorts/strings'
+
 import type { HelperEndpoint, HelperModule } from './helper-ast.mts'
 import type { SpecEndpoint, SpecInventory } from './spec-model.mts'
 
@@ -271,7 +273,7 @@ export function splitFieldPath(field: string): string[] {
 export function compareMissingFields(a: MissingField, b: MissingField): number {
   const left = `${a.route} ${a.kind} ${a.field}`
   const right = `${b.route} ${b.kind} ${b.field}`
-  return left < right ? -1 : left > right ? 1 : 0
+  return compareStr(left, right)
 }
 
 /**
@@ -283,7 +285,7 @@ export function compareUncovered(
 ): number {
   const left = `${a.path} ${a.method}`
   const right = `${b.path} ${b.method}`
-  return left < right ? -1 : left > right ? 1 : 0
+  return compareStr(left, right)
 }
 
 /**
@@ -295,5 +297,5 @@ export function compareUndocumented(
 ): number {
   const left = `${a.path} ${a.method}`
   const right = `${b.path} ${b.method}`
-  return left < right ? -1 : left > right ? 1 : 0
+  return compareStr(left, right)
 }
