@@ -25,6 +25,7 @@ import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
+import { unexposedLeavesPath } from './build-stubs/unexposed.mts'
 import { keptLeafEntries } from './build-stubs/settings.mts'
 
 export type { KeptLeaf } from './build-stubs/settings.mts'
@@ -405,12 +406,7 @@ function main(): void {
   const report = auditFleetLibUsage(REPO_ROOT)
   if (writeStubList) {
     const candidates = graphSafeStubCandidates(REPO_ROOT, report)
-    const listPath = path.join(
-      REPO_ROOT,
-      '.config',
-      'repo',
-      'socket-wheelhouse.json',
-    )
+    const listPath = unexposedLeavesPath(REPO_ROOT)
     // Record the roster this verdict was judged against, not just the verdict.
     // "Unused" is a claim about the whole fleet, so the list is only as good
     // as the consumer set behind it — and with no record, one computed against
