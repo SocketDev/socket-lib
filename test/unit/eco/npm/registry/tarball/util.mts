@@ -11,8 +11,8 @@
 // @ts-expect-error - no type declarations
 import tarStream from 'tar-stream'
 
-import { createGzipCompressor } from '../../../../../src/compression/gzip.mjs'
-import { BufferConcat } from '../../../../../src/primordials/buffer.mjs'
+import { createGzipCompressor } from '../../../../../../src/compression/gzip.mjs'
+import { BufferConcat } from '../../../../../../src/primordials/buffer.mjs'
 
 /**
  * The manifest baked into {@link makePackageTarball}.

@@ -19,13 +19,13 @@ import {
   getStaleMeta,
   normalizeRegistryUrl,
   PackumentNotFoundError,
-} from '../../../../src/npm/meta-cache/browser.mjs'
+} from '../../../../../src/eco/npm/meta-cache/browser.mjs'
 
-import type { WebStorageLike } from '../../../../src/npm/meta-cache/browser.mjs'
+import type { WebStorageLike } from '../../../../../src/eco/npm/meta-cache/browser.mjs'
 import type {
   NpmMetaHttpAdapter,
   RawPackument,
-} from '../../../../src/npm/meta-types.mjs'
+} from '../../../../../src/eco/npm/meta-types.mjs'
 
 const PACKUMENT: RawPackument = {
   'dist-tags': { latest: '1.0.0' },

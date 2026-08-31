@@ -34,15 +34,15 @@
  *   threw.
  */
 
-import { extractTarGz } from '../../../archives/tar.mjs'
-import { decompressGzip } from '../../../compression/gzip.mjs'
-import { safeDelete } from '../../../fs/safe.mjs'
-import { getNodeFsPromises } from '../../../node/fs-promises.mjs'
-import { getNodePath } from '../../../node/path.mjs'
-import { normalizePath } from '../../../paths/normalize.mjs'
-import { getOsTmpDir } from '../../../paths/socket.mjs'
-import { BufferFrom } from '../../../primordials/buffer.mjs'
-import { JSONParse } from '../../../primordials/json.mjs'
+import { extractTarGz } from '../../../../archives/tar.mjs'
+import { decompressGzip } from '../../../../compression/gzip.mjs'
+import { safeDelete } from '../../../../fs/safe.mjs'
+import { getNodeFsPromises } from '../../../../node/fs-promises.mjs'
+import { getNodePath } from '../../../../node/path.mjs'
+import { normalizePath } from '../../../../paths/normalize.mjs'
+import { getOsTmpDir } from '../../../../paths/socket.mjs'
+import { BufferFrom } from '../../../../primordials/buffer.mjs'
+import { JSONParse } from '../../../../primordials/json.mjs'
 import { fetchStagedTarball } from '../stage-tarball.mjs'
 
 import {
@@ -52,7 +52,7 @@ import {
   readTarEntries,
 } from './shared.mjs'
 
-import type { ExtractOptions } from '../../../archives/types.mjs'
+import type { ExtractOptions } from '../../../../archives/types.mjs'
 import type { NpmAuthOptions, NpmRegistryHttpOptions } from '../client.mjs'
 import type { NpmTarballEntry } from './shared.mjs'
 

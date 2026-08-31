@@ -14,14 +14,14 @@ import {
   gunzipBytes,
   readNpmTarballEntries,
   readNpmTarballManifest,
-} from '../../../../../src/npm/registry/tarball/browser.mjs'
-import { readNpmTarballManifest as readManifestOnNode } from '../../../../../src/npm/registry/tarball/node.mjs'
+} from '../../../../../../src/eco/npm/registry/tarball/browser.mjs'
+import { readNpmTarballManifest as readManifestOnNode } from '../../../../../../src/eco/npm/registry/tarball/node.mjs'
 
 import {
   makeNpmTarball,
   makePackageTarball,
   MANIFEST,
-} from './tarball-helpers.mjs'
+} from './util.mjs'
 
 /**
  * Decode an entry's bytes for comparison against the fixture's source text.

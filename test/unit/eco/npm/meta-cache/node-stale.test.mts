@@ -1,18 +1,18 @@
 /**
- * @file Unit tests for `src/npm/meta-cache.ts`'s persisted-stale + storm-control
- *   tier: serve-stale-on-error (including the storm-cache short-circuit that
- *   serves a burst of callers without re-hitting a registry that just failed),
- *   and the standalone `getStaleMeta` / `rememberStaleMeta` / `getCachePeers`
- *   accessors. Split out of `meta-cache.test.mts` to keep each file under the
- *   fleet's 500-line soft cap — see that file for the primary TTL/force/dedupe/
- *   negative-cache coverage. HTTP is mocked via the `StubHttpAdapter` test
- *   double, so no live network; cacache persistence is isolated per test via a
- *   unique `SOCKET_CACACHE_DIR`.
+ * @file Unit tests for `src/eco/npm/meta-cache.ts`'s persisted-stale +
+ *   storm-control tier: serve-stale-on-error (including the storm-cache
+ *   short-circuit that serves a burst of callers without re-hitting a registry
+ *   that just failed), and the standalone `getStaleMeta` / `rememberStaleMeta`
+ *   / `getCachePeers` accessors. Split out of `meta-cache.test.mts` to keep
+ *   each file under the fleet's 500-line soft cap — see that file for the
+ *   primary TTL/force/dedupe/ negative-cache coverage. HTTP is mocked via the
+ *   `StubHttpAdapter` test double, so no live network; cacache persistence is
+ *   isolated per test via a unique `SOCKET_CACACHE_DIR`.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { createTtlCache } from '../../../../src/cache/ttl/store.mjs'
+import { createTtlCache } from '../../../../../src/cache/ttl/store.mjs'
 import {
   buildMetaCacheKey,
   createNpmMetaCache,
@@ -20,8 +20,8 @@ import {
   getPackumentSlim,
   getStaleMeta,
   rememberStaleMeta,
-} from '../../../../src/npm/meta-cache/node.mjs'
-import { tolerantSleep } from '../../../_shared/fleet/lib/timing.mts'
+} from '../../../../../src/eco/npm/meta-cache/node.mjs'
+import { tolerantSleep } from '../../../../_shared/fleet/lib/timing.mts'
 import {
   createStubHttpAdapter,
   makeHttpResponseError,
@@ -31,7 +31,7 @@ import {
 import type {
   PackumentMetaSlim,
   RawPackument,
-} from '../../../../src/npm/meta-types.mjs'
+} from '../../../../../src/eco/npm/meta-types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '1.0.0' },

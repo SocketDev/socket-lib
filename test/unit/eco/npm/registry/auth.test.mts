@@ -15,12 +15,12 @@ import {
   npmWebAuthHeaders,
   parseNpmAuthChallenge,
   sendWithNpmAuthRetry,
-} from '../../../../src/npm/registry/auth.mjs'
+} from '../../../../../src/eco/npm/registry/auth.mjs'
 
 import type {
   NpmAuthAnswer,
   NpmAuthChallenge,
-} from '../../../../src/npm/registry/auth.mjs'
+} from '../../../../../src/eco/npm/registry/auth.mjs'
 
 /**
  * The exact web-auth payload npm's spec carries as its `web_auth_flow`

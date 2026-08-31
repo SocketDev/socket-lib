@@ -13,7 +13,7 @@
  *   to produce that sentence, so it produces `reachable: false` instead.
  */
 
-import { arrayToSorted } from '../../polyfills/array.mjs'
+import { arrayToSorted } from '../../../polyfills/array.mjs'
 import { buildNpmCacheKey, readThroughCache, selectNpmCache } from './cache.mjs'
 import { npmAuthHeaders, resolveRegistry } from './client.mjs'
 

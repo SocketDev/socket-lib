@@ -20,18 +20,18 @@ import {
   readNpmTarballEntries,
   readNpmTarballManifest,
   withNpmTarballFile,
-} from '../../../../../src/npm/registry/tarball/node.mjs'
-import { readNpmTarballEntries as readEntriesInBrowser } from '../../../../../src/npm/registry/tarball/browser.mjs'
-import { safeDelete } from '../../../../../src/fs/safe.mjs'
-import { normalizePath } from '../../../../../src/paths/normalize.mjs'
+} from '../../../../../../src/eco/npm/registry/tarball/node.mjs'
+import { readNpmTarballEntries as readEntriesInBrowser } from '../../../../../../src/eco/npm/registry/tarball/browser.mjs'
+import { safeDelete } from '../../../../../../src/fs/safe.mjs'
+import { normalizePath } from '../../../../../../src/paths/normalize.mjs'
 
-import { runWithTempDir } from '../../../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../../../../util/temp-file-helper.mjs'
 import {
   makeNpmTarball,
   makePackageTarball,
   makeUncompressedTar,
   MANIFEST,
-} from './tarball-helpers.mjs'
+} from './util.mjs'
 
 const AUTH = { token: 'tok' }
 

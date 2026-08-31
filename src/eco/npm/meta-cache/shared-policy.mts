@@ -60,7 +60,7 @@ import type {
   PackumentMetaSlim,
   RawPackument,
 } from '../meta-types.mjs'
-import type { TtlCache } from '../../cache/ttl/types.mjs'
+import type { TtlCache } from '../../../cache/ttl/types.mjs'
 
 const ACCEPT_ABBREVIATED =
   'application/vnd.npm.install-v1+json; q=1.0, application/json; q=0.8, */*'

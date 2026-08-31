@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for the pure npm packument slicer (`src/npm/meta-slice.ts`)
+ * @file Unit tests for the pure npm packument slicer (`src/eco/npm/meta-slice.ts`)
  *   — no network, no cache.
  */
 
@@ -9,9 +9,9 @@ import {
   sliceOneVersion,
   slicePackument,
   sliceVersionMeta,
-} from '../../../src/npm/meta-slice.mjs'
+} from '../../../../src/eco/npm/meta-slice.mjs'
 
-import type { RawPackument } from '../../../src/npm/meta-types.mjs'
+import type { RawPackument } from '../../../../src/eco/npm/meta-types.mjs'
 
 describe('sliceOneVersion', () => {
   it('keeps only time when the entry has no dist/engines/deprecated', () => {

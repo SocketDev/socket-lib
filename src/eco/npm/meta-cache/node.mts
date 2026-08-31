@@ -11,9 +11,9 @@
  *   package's top-level `browser` field.
  */
 
-import { createTtlCache } from '../../cache/ttl/store.mjs'
+import { createTtlCache } from '../../../cache/ttl/store.mjs'
 // no-platform-http-import: this file IS the Node half of a platform twin pair; binding the Node HTTP implementation is its entire job.
-import { httpJson } from '../../http-request/node.mjs'
+import { httpJson } from '../../../http-request/node.mjs'
 import {
   createNpmMetaCache as createSharedNpmMetaCache,
   getCachePeers as getSharedCachePeers,
@@ -28,7 +28,7 @@ import type {
   GetPackumentSlimOptions,
   PackumentMetaSlim,
 } from '../meta-types.mjs'
-import type { TtlCache, TtlCacheOptions } from '../../cache/ttl/types.mjs'
+import type { TtlCache, TtlCacheOptions } from '../../../cache/ttl/types.mjs'
 
 export {
   buildMetaCacheKey,

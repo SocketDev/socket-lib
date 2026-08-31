@@ -9,15 +9,15 @@ import assert from 'node:assert/strict'
 
 import { describe, test } from 'vitest'
 
-import { createBrowserTtlCache } from '../../../../src/cache/ttl/browser.mjs'
+import { createBrowserTtlCache } from '../../../../../src/cache/ttl/browser.mjs'
 import {
   buildAdvisoryQueryKey,
   fetchBulkAdvisories,
-} from '../../../../src/npm/registry/audit.mjs'
+} from '../../../../../src/eco/npm/registry/audit.mjs'
 import {
   nextSearchFrom,
   searchPackages,
-} from '../../../../src/npm/registry/search.mjs'
+} from '../../../../../src/eco/npm/registry/search.mjs'
 import {
   countingHttp,
   failingHttp,

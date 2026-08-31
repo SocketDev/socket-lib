@@ -6,7 +6,7 @@
  *   types, no runtime side effects.
  */
 
-import type { TtlCache } from '../cache/ttl/types.mjs'
+import type { TtlCache } from '../../cache/ttl/types.mjs'
 import type { NpmHttpAdapter } from './registry/index.mjs'
 
 /**

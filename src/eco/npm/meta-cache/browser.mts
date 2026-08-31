@@ -33,9 +33,9 @@
  *      throwing.
  */
 
-import { createBrowserTtlCache } from '../../cache/ttl/browser.mjs'
+import { createBrowserTtlCache } from '../../../cache/ttl/browser.mjs'
 // no-platform-http-import: this file IS the browser half of a platform twin pair; binding the browser HTTP implementation is its entire job.
-import { httpJson } from '../../http-request/browser.mjs'
+import { httpJson } from '../../../http-request/browser.mjs'
 import {
   createNpmMetaCache as createSharedNpmMetaCache,
   getCachePeers as getSharedCachePeers,
@@ -54,7 +54,7 @@ import type {
   BrowserTtlCacheOptions,
   TtlCache,
   TtlCacheStorage,
-} from '../../cache/ttl/types.mjs'
+} from '../../../cache/ttl/types.mjs'
 
 export {
   buildMetaCacheKey,

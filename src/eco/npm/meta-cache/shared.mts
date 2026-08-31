@@ -16,15 +16,15 @@
  *   `createBrowserTtlCache`.
  */
 
-import { JSONParse, JSONStringify } from '../../primordials/json.mjs'
-import { URLCtor } from '../../primordials/url.mjs'
+import { JSONParse, JSONStringify } from '../../../primordials/json.mjs'
+import { URLCtor } from '../../../primordials/url.mjs'
 
 import type {
   NpmMetaHttpAdapter,
   PackumentMetaSlim,
   PackumentVariant,
 } from '../meta-types.mjs'
-import type { TtlCache, TtlCacheOptions } from '../../cache/ttl/types.mjs'
+import type { TtlCache, TtlCacheOptions } from '../../../cache/ttl/types.mjs'
 
 export const NPM_REGISTRY = 'https://registry.npmjs.org'
 

@@ -12,22 +12,22 @@ import path from 'node:path'
 
 import { afterEach, beforeEach } from 'vitest'
 
-import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
+import { resetEnv, setEnv } from '../../../../src/env/rewire.mjs'
 // no-platform-http-import: test-only double for the Node-only npm-meta client; node platform is intentional.
-import { HttpResponseError } from '../../../src/http-request/node.mjs'
+import { HttpResponseError } from '../../../../src/http-request/node.mjs'
 // no-platform-http-import: test-only double for the Node-only npm-meta client; node platform is intentional.
 import type {
   HttpRequestOptions,
   HttpResponse,
-} from '../../../src/http-request/node.mjs'
-import { createNpmMetaCache } from '../../../src/npm/meta-cache/node.mjs'
-import type { NpmMetaHttpAdapter } from '../../../src/npm/meta-types.mjs'
-import { invalidateCaches } from '../../../src/paths/rewire.mjs'
+} from '../../../../src/http-request/node.mjs'
+import { createNpmMetaCache } from '../../../../src/eco/npm/meta-cache/node.mjs'
+import type { NpmMetaHttpAdapter } from '../../../../src/eco/npm/meta-types.mjs'
+import { invalidateCaches } from '../../../../src/paths/rewire.mjs'
 
 import type {
   TtlCache,
   TtlCacheOptions,
-} from '../../../src/cache/ttl/types.mjs'
+} from '../../../../src/cache/ttl/types.mjs'
 
 export interface Deferred<T> {
   promise: Promise<T>

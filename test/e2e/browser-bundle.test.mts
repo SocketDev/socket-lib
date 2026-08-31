@@ -34,7 +34,7 @@ import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 import {
   makePackageTarball,
   MANIFEST,
-} from '../unit/npm/registry/tarball/tarball-helpers.mts'
+} from '../unit/eco/npm/registry/tarball/util.mts'
 import {
   bundleForWeb,
   bundleForWebWithEsbuild,

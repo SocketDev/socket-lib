@@ -13,7 +13,7 @@ import { describe, test } from 'vitest'
 import {
   fetchStagedTarball,
   stagedTarballUrl,
-} from '../../../../src/npm/registry/stage-tarball.mjs'
+} from '../../../../../src/eco/npm/registry/stage-tarball.mjs'
 
 const AUTH = { token: 'tok' }
 

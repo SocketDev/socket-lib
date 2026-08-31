@@ -13,9 +13,9 @@ import {
   fetchLatestPublishedVersionChecked,
   getMaintainers,
   httpErrorStatus,
-} from '../../../../src/npm/registry/live.mjs'
+} from '../../../../../src/eco/npm/registry/live.mjs'
 
-import type { NpmHttpOptions } from '../../../../src/npm/registry/index.mjs'
+import type { NpmHttpOptions } from '../../../../../src/eco/npm/registry/index.mjs'
 
 interface RecordedCall {
   headers: Record<string, string> | undefined

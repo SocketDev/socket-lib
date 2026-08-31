@@ -10,7 +10,7 @@
 
 /**
  * The request parts an adapter is handed. Mirrors `NpmHttpInit` from
- * `src/npm/registry/index.mts`, spelled out here so the test doubles do not
+ * `src/eco/npm/registry/index.mts`, spelled out here so the test doubles do not
  * import the type they exist to satisfy.
  */
 export interface RecordedInit {

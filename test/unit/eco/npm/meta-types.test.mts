@@ -13,11 +13,11 @@ import { describe, expect, it } from 'vitest'
 import type {
   PackumentVersion,
   PackumentVersionDist,
-} from '../../../src/npm/registry/index.mjs'
+} from '../../../../src/eco/npm/registry/index.mjs'
 import type {
   RawPackumentVersion,
   RawVersionDist,
-} from '../../../src/npm/meta-types.mjs'
+} from '../../../../src/eco/npm/meta-types.mjs'
 
 /**
  * Type-checked at compile time: fails if `PackumentVersion.deprecated` ever

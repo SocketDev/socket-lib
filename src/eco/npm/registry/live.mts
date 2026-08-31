@@ -13,7 +13,7 @@
  *   directory.
  */
 
-import { arrayToSorted } from '../../polyfills/array.mjs'
+import { arrayToSorted } from '../../../polyfills/array.mjs'
 import { encodeRegistryName } from './index.mjs'
 
 import type { NpmHttpOptions } from './index.mjs'

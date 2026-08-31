@@ -1,11 +1,12 @@
 /**
- * @file Unit tests for `src/npm/registry/index.mts`'s `parseProvenancePredicate` —
- *   parsing the npm transparency-log attestation bundle down to the SLSA
- *   provenance predicate, including every malformed-entry `continue` path
- *   (missing/invalid verificationMaterial, non-JSON content, a non-string or
- *   non-decodable payload, a missing predicate field). Split out of
- *   `registry.test.mts` to keep each file under the fleet's 500-line soft cap.
- *   Pure-parser tests use sample JSON fixtures, so nothing hits the network.
+ * @file Unit tests for `src/eco/npm/registry/index.mts`'s
+ *   `parseProvenancePredicate` — parsing the npm transparency-log attestation
+ *   bundle down to the SLSA provenance predicate, including every
+ *   malformed-entry `continue` path (missing/invalid verificationMaterial,
+ *   non-JSON content, a non-string or non-decodable payload, a missing
+ *   predicate field). Split out of `registry.test.mts` to keep each file under
+ *   the fleet's 500-line soft cap. Pure-parser tests use sample JSON fixtures,
+ *   so nothing hits the network.
  */
 
 import { createRequire } from 'node:module'
@@ -14,9 +15,9 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { parseProvenancePredicate } from '../../../../src/npm/registry/index.mjs'
+import { parseProvenancePredicate } from '../../../../../src/eco/npm/registry/index.mjs'
 
-import type { AttestationBundle } from '../../../../src/npm/registry/index.mjs'
+import type { AttestationBundle } from '../../../../../src/eco/npm/registry/index.mjs'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
 const fixturesDir = path.resolve(testDir, '../../../fixtures/npm')

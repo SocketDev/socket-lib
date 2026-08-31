@@ -10,8 +10,8 @@ import assert from 'node:assert/strict'
 
 import { describe, test } from 'vitest'
 
-import { PackumentNotFoundError } from '../../../../src/npm/meta-cache/node.mjs'
-import { extractHttpStatus } from '../../../../src/npm/meta/node.mjs'
+import { PackumentNotFoundError } from '../../../../../src/eco/npm/meta-cache/node.mjs'
+import { extractHttpStatus } from '../../../../../src/eco/npm/meta/node.mjs'
 import { makeHttpResponseError } from '../meta-test-helpers.mjs'
 
 describe('extractHttpStatus', () => {

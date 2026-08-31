@@ -12,7 +12,7 @@
  *   Second, an authenticated read is NEVER cached. See `readThroughCache`.
  */
 
-import type { TtlCache } from '../../cache/ttl/types.mjs'
+import type { TtlCache } from '../../../cache/ttl/types.mjs'
 import type { NpmOnAuth } from './auth.mjs'
 
 /**

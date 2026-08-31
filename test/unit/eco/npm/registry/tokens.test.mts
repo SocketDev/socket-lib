@@ -13,7 +13,7 @@ import { describe, test } from 'vitest'
 import {
   createNpmToken,
   fetchNpmTokens,
-} from '../../../../src/npm/registry/tokens.mjs'
+} from '../../../../../src/eco/npm/registry/tokens.mjs'
 import { recordingHttp } from './api-helpers.mjs'
 
 const AUTH = { token: 'tok' }

@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for `src/npm/meta-cache.ts` — the cached packument fetch:
+ * @file Unit tests for `src/eco/npm/meta-cache.ts` — the cached packument fetch:
  *   accept-header selection, TTL hit/miss + `force`, in-flight dedupe via the
  *   cache's `getOrFetch`, negative (404) caching with status preservation, and
  *   serve-stale-on-error. HTTP is mocked via the `StubHttpAdapter` test double
@@ -16,8 +16,8 @@ import {
   getPackumentSlim,
   normalizeRegistryUrl,
   PackumentNotFoundError,
-} from '../../../../src/npm/meta-cache/node.mjs'
-import { tolerantSleep } from '../../../_shared/fleet/lib/timing.mts'
+} from '../../../../../src/eco/npm/meta-cache/node.mjs'
+import { tolerantSleep } from '../../../../_shared/fleet/lib/timing.mts'
 import {
   createDeferred,
   createStubHttpAdapter,
@@ -28,7 +28,7 @@ import {
 import type {
   PackumentMetaSlim,
   RawPackument,
-} from '../../../../src/npm/meta-types.mjs'
+} from '../../../../../src/eco/npm/meta-types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '1.0.0' },

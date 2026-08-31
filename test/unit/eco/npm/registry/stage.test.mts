@@ -12,7 +12,7 @@ import {
   fetchVersionStatus,
   findStagedVersion,
   isPendingStatus,
-} from '../../../../src/npm/registry/stage.mjs'
+} from '../../../../../src/eco/npm/registry/stage.mjs'
 
 /**
  * An adapter that answers `payload` for any URL, recording what it was asked.

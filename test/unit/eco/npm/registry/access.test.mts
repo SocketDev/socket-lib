@@ -15,20 +15,20 @@ import {
   grantTeamPackageAccess,
   revokeTeamPackageAccess,
   setPackageAccess,
-} from '../../../../src/npm/registry/access.mjs'
+} from '../../../../../src/eco/npm/registry/access.mjs'
 import {
   fetchOrgMembership,
   fetchOrgTeams,
   removeOrgMember,
   setOrgMembership,
-} from '../../../../src/npm/registry/org.mjs'
+} from '../../../../../src/eco/npm/registry/org.mjs'
 import {
   addTeamMember,
   createTeam,
   deleteTeam,
   fetchTeamMembers,
   removeTeamMember,
-} from '../../../../src/npm/registry/team.mjs'
+} from '../../../../../src/eco/npm/registry/team.mjs'
 import { failingHttp, recordingHttp } from './api-helpers.mjs'
 
 const AUTH = { token: 'tok' }

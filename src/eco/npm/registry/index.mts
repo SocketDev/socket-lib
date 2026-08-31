@@ -41,7 +41,7 @@
 import {
   StringPrototypeIndexOf,
   StringPrototypeSlice,
-} from '../../primordials/string.mjs'
+} from '../../../primordials/string.mjs'
 
 const NPM_REGISTRY = 'https://registry.npmjs.org'
 const NPM_DOWNLOADS_API = 'https://api.npmjs.org'

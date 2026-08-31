@@ -8,14 +8,14 @@ import assert from 'node:assert/strict'
 
 import { describe, test } from 'vitest'
 
-import { createBrowserTtlCache } from '../../../../src/cache/ttl/browser.mjs'
+import { createBrowserTtlCache } from '../../../../../src/cache/ttl/browser.mjs'
 import {
   ADVISORY_TTL_MS,
   buildNpmCacheKey,
   readThroughCache,
   SEARCH_TTL_MS,
   selectNpmCache,
-} from '../../../../src/npm/registry/cache.mjs'
+} from '../../../../../src/eco/npm/registry/cache.mjs'
 import { sleep } from './api-helpers.mjs'
 
 /**

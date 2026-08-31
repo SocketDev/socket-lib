@@ -17,7 +17,7 @@
 
 /// <reference lib="dom" />
 
-import { JSONParse } from '../../../primordials/json.mjs'
+import { JSONParse } from '../../../../primordials/json.mjs'
 
 import {
   isGzipBytes,
@@ -26,7 +26,7 @@ import {
   readTarEntries,
 } from './shared.mjs'
 
-import type { ExtractOptions } from '../../../archives/types.mjs'
+import type { ExtractOptions } from '../../../../archives/types.mjs'
 import type { NpmTarballEntry } from './shared.mjs'
 
 export type { NpmTarballEntry } from './shared.mjs'

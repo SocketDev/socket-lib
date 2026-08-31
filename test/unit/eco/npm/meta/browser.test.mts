@@ -18,14 +18,14 @@ import {
   getVersions,
   getVersionTrustInfo,
   safeGetVersions,
-} from '../../../../src/npm/meta/browser.mjs'
-import * as browserTwin from '../../../../src/npm/meta/browser.mjs'
-import * as nodeTwin from '../../../../src/npm/meta/node.mjs'
+} from '../../../../../src/eco/npm/meta/browser.mjs'
+import * as browserTwin from '../../../../../src/eco/npm/meta/browser.mjs'
+import * as nodeTwin from '../../../../../src/eco/npm/meta/node.mjs'
 
 import type {
   NpmMetaHttpAdapter,
   RawPackument,
-} from '../../../../src/npm/meta-types.mjs'
+} from '../../../../../src/eco/npm/meta-types.mjs'
 
 const PACKUMENT: RawPackument = {
   'dist-tags': { latest: '2.0.0' },

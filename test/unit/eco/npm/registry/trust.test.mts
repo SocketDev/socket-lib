@@ -8,7 +8,7 @@ import assert from 'node:assert/strict'
 
 import { describe, test } from 'vitest'
 
-import { fetchTrustedPublishers } from '../../../../src/npm/registry/trust.mjs'
+import { fetchTrustedPublishers } from '../../../../../src/eco/npm/registry/trust.mjs'
 import { recordingHttp } from './api-helpers.mjs'
 
 const AUTH = { token: 'tok' }

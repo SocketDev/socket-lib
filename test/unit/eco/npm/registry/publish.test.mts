@@ -8,24 +8,24 @@ import assert from 'node:assert/strict'
 
 import { describe, test } from 'vitest'
 
-import { exchangeOidcToken } from '../../../../src/npm/registry/oidc.mjs'
-import { publishPackage } from '../../../../src/npm/registry/publish.mjs'
+import { exchangeOidcToken } from '../../../../../src/eco/npm/registry/oidc.mjs'
+import { publishPackage } from '../../../../../src/eco/npm/registry/publish.mjs'
 import {
   approveStagedVersion,
   deleteStagedVersion,
   stagePackageVersion,
-} from '../../../../src/npm/registry/stage-actions.mjs'
-import { fetchStagedItem } from '../../../../src/npm/registry/stage.mjs'
+} from '../../../../../src/eco/npm/registry/stage-actions.mjs'
+import { fetchStagedItem } from '../../../../../src/eco/npm/registry/stage.mjs'
 import {
   createNpmToken,
   deleteNpmToken,
   fetchNpmTokens,
-} from '../../../../src/npm/registry/tokens.mjs'
+} from '../../../../../src/eco/npm/registry/tokens.mjs'
 import {
   addTrustedPublishers,
   deleteTrustedPublisher,
   fetchTrustedPublishers,
-} from '../../../../src/npm/registry/trust.mjs'
+} from '../../../../../src/eco/npm/registry/trust.mjs'
 import { failingHttp, recordingHttp } from './api-helpers.mjs'
 
 const AUTH = { token: 'tok' }

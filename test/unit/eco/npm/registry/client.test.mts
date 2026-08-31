@@ -20,7 +20,7 @@ import {
   sendNoContentRequest,
   shapeWriteFailure,
   shapeWriteSuccess,
-} from '../../../../src/npm/registry/client.mjs'
+} from '../../../../../src/eco/npm/registry/client.mjs'
 import { failingHttp, recordingHttp } from './api-helpers.mjs'
 
 describe('buildQuery', () => {

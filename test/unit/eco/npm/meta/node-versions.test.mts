@@ -1,5 +1,5 @@
 /**
- * @file Unit tests for `src/npm/meta.ts`'s version-filtering helpers —
+ * @file Unit tests for `src/eco/npm/meta.ts`'s version-filtering helpers —
  *   `getVersions` (range / loose / after / minAgeDays), `getLatestVersion`
  *   (tag + range paths), `getPublishDate`, and the `isMatured` end-of-UTC-day
  *   anchor. HTTP is mocked via `StubHttpAdapter` with no live network; cacache
@@ -14,8 +14,8 @@ import {
   getVersions,
   isMatured,
   toEpochMs,
-} from '../../../../src/npm/meta/node.mjs'
-import { PackumentNotFoundError } from '../../../../src/npm/meta-cache/node.mjs'
+} from '../../../../../src/eco/npm/meta/node.mjs'
+import { PackumentNotFoundError } from '../../../../../src/eco/npm/meta-cache/node.mjs'
 import {
   createStubHttpAdapter,
   freshCache,
@@ -23,7 +23,7 @@ import {
   setupNpmMetaCacheIsolation,
 } from '../meta-test-helpers.mts'
 
-import type { RawPackument } from '../../../../src/npm/meta-types.mjs'
+import type { RawPackument } from '../../../../../src/eco/npm/meta-types.mjs'
 
 const RAW: RawPackument = {
   'dist-tags': { latest: '2.0.0', next: '3.0.0-beta.0' },

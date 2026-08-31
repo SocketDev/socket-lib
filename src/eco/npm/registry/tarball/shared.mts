@@ -20,18 +20,18 @@ import {
   DEFAULT_MAX_ENTRIES,
   DEFAULT_MAX_FILE_SIZE,
   DEFAULT_MAX_TOTAL_SIZE,
-} from '../../../archives/types.mjs'
-import { Uint8ArrayCtor } from '../../../primordials/array.mjs'
-import { ErrorCtor } from '../../../primordials/error.mjs'
+} from '../../../../archives/types.mjs'
+import { Uint8ArrayCtor } from '../../../../primordials/array.mjs'
+import { ErrorCtor } from '../../../../primordials/error.mjs'
 import {
   StringPrototypeIndexOf,
   StringPrototypeReplaceAll,
   StringPrototypeSlice,
   StringPrototypeStartsWith,
   StringPrototypeTrim,
-} from '../../../primordials/string.mjs'
+} from '../../../../primordials/string.mjs'
 
-import type { ExtractOptions } from '../../../archives/types.mjs'
+import type { ExtractOptions } from '../../../../archives/types.mjs'
 
 /**
  * A tar block is 512 bytes, header included, and every file's data is padded

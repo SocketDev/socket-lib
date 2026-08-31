@@ -15,10 +15,10 @@
  *   throwing `UnhandledSchemeError` on a `node:` prefix.
  */
 
-import { errorMessage } from '../../errors/message.mjs'
-import { RangeErrorCtor } from '../../primordials/error.mjs'
-import { pEach } from '../../promises/iterate.mjs'
-import { getSemver } from '../../versions/shared.mjs'
+import { errorMessage } from '../../../errors/message.mjs'
+import { RangeErrorCtor } from '../../../primordials/error.mjs'
+import { pEach } from '../../../promises/iterate.mjs'
+import { getSemver } from '../../../versions/shared.mjs'
 import { httpErrorStatus } from '../registry/live.mjs'
 import { PackumentNotFoundError } from '../meta-cache/shared.mjs'
 

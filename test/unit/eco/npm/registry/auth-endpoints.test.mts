@@ -14,22 +14,22 @@ import assert from 'node:assert/strict'
 
 import { describe, test } from 'vitest'
 
-import { createBrowserTtlCache } from '../../../../src/cache/ttl/browser.mjs'
+import { createBrowserTtlCache } from '../../../../../src/cache/ttl/browser.mjs'
 import {
   approveStagedVersion,
   deleteStagedVersion,
-} from '../../../../src/npm/registry/stage-actions.mjs'
+} from '../../../../../src/eco/npm/registry/stage-actions.mjs'
 import {
   createNpmToken,
   deleteNpmToken,
-} from '../../../../src/npm/registry/tokens.mjs'
+} from '../../../../../src/eco/npm/registry/tokens.mjs'
 import {
   addTrustedPublishers,
   deleteTrustedPublisher,
   fetchTrustedPublishers,
-} from '../../../../src/npm/registry/trust.mjs'
+} from '../../../../../src/eco/npm/registry/trust.mjs'
 
-import type { NpmOnAuth } from '../../../../src/npm/registry/auth.mjs'
+import type { NpmOnAuth } from '../../../../../src/eco/npm/registry/auth.mjs'
 
 /**
  * The one-time password a driver hands back. Distinctive enough that a search
