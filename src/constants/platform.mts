@@ -2,9 +2,8 @@
  * @file Platform detection and OS-specific constants.
  */
 
-import { existsSync } from 'node:fs'
-
 import { getNodeOs } from '../node/os.mjs'
+import { getNodeFs } from '../node/fs.mjs'
 
 /**
  * CPU architecture type.
@@ -61,7 +60,8 @@ export function getLibc(): Libc | undefined {
     } else {
       memoizedLibc = 'glibc'
       for (let i = 0, { length } = MUSL_LINKERS; i < length; i += 1) {
-        if (existsSync(MUSL_LINKERS[i]!)) {
+        const fs = getNodeFs()
+        if (fs.existsSync(MUSL_LINKERS[i]!)) {
           memoizedLibc = 'musl'
           break
         }

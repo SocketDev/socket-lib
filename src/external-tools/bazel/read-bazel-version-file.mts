@@ -10,20 +10,20 @@
  *   orchestrator's job.
  */
 
-import path from 'node:path'
-
 import { safeReadFile } from '../../fs/read-file.mjs'
 import {
   StringPrototypeIndexOf,
   StringPrototypeSlice,
   StringPrototypeTrim,
 } from '../../primordials/string.mjs'
+import { getNodePath } from '../../node/path.mjs'
 
 const BAZEL_VERSION_FILE = '.bazelversion'
 
 export async function readBazelVersionFile(
   startDir: string,
 ): Promise<string | undefined> {
+  const path = getNodePath()
   let current = path.resolve(startDir)
   while (true) {
     const candidate = path.join(current, BAZEL_VERSION_FILE)

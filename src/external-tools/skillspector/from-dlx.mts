@@ -8,12 +8,11 @@
  *     venv when its `skillspector` entry-point already exists.
  */
 
-import path from 'node:path'
-
 import { getSocketDlxDir } from '../../paths/socket.mjs'
 import { createPipVenv } from '../from-pip-venv.mjs'
 
 import type { ResolvedSkillSpector } from './types.mjs'
+import { getNodePath } from '../../node/path.mjs'
 
 export interface SkillSpectorFromDlxOptions {
   /**
@@ -39,6 +38,7 @@ export async function skillspectorFromDlx(
   if (!sha) {
     return undefined
   }
+  const path = getNodePath()
   const cacheDir =
     options.cacheDir ?? path.join(getSocketDlxDir(), 'skillspector', sha)
   const installSpec = `git+${UPSTREAM_REPO}@${sha}`

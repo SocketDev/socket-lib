@@ -8,8 +8,6 @@
  *   `./package.ts` — no helper.
  */
 
-import os from 'node:os'
-
 import pacote from '../external/pacote.js'
 import { safeDelete, safeMkdir } from '../fs/safe.mjs'
 import { safeIdealTree, writeSafeNpmrc } from './arborist.mjs'
@@ -29,6 +27,7 @@ import {
 
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
+import { getNodeOs } from '../node/os.mjs'
 
 /**
  * Lockfile source for the `lockfile` option on `downloadNpmPackage`.
@@ -179,6 +178,7 @@ export async function resolveNpmPackagePin(
         ? minReleaseMins * 60_000
         : 0
   const before = ageMs > 0 ? new DateCtor(DateNow() - ageMs) : undefined
+  const os = getNodeOs()
   const scratch = path.join(
     os.tmpdir(),
     `socket-lib-pin-${process.pid}-${Date.now()}`,

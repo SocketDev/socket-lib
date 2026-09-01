@@ -4,8 +4,6 @@
  *   schema and queries; this module only opens, closes, and creates tables.
  */
 
-import path from 'node:path'
-
 // `node:sqlite` is loaded INSIDE openSocketStateDb, not imported here. The
 // module is backed by a native binding, which registers an external reference
 // V8 cannot serialize, so a static import aborts any consumer's
@@ -16,6 +14,7 @@ import type { DatabaseSync } from 'node:sqlite'
 
 import { safeMkdirSync } from '../fs/safe.mjs'
 import { getSocketStateDbPath } from '../paths/socket.mjs'
+import { getNodePath } from '../node/path.mjs'
 
 export function closeSocketStateDb(db: DatabaseSync): void {
   db.close()
@@ -31,6 +30,7 @@ export function ensureTable(
 
 export function openSocketStateDb(appName: string): DatabaseSync {
   const dbPath = getSocketStateDbPath(appName)
+  const path = getNodePath()
   safeMkdirSync(path.dirname(dbPath))
   const { DatabaseSync } = process.getBuiltinModule('node:sqlite')
   const db = new DatabaseSync(dbPath)

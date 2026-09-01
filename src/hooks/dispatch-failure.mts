@@ -1,3 +1,5 @@
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
 /**
  * @file The failure policy a machine-global agent hook dispatcher applies when
  *   a hook's own runtime cannot load, as distinct from a hook that loaded and
@@ -21,9 +23,6 @@
  *   the policy stays self-contained.
  */
 
-import { existsSync } from 'node:fs'
-import path from 'node:path'
-
 /**
  * Suffix marking a hook whose purpose is enforcement rather than advice.
  */
@@ -42,15 +41,19 @@ export interface HookRuntimeFacts {
   readonly depsInstalled: boolean
 }
 
+const fs = getNodeFs()
 /**
  * Probe `repoDir` for the one fact the policy turns on. Takes an injected
  * `exists` so the decision table can be exercised without a filesystem.
  */
 export function hookRuntimeFacts(
   repoDir: string,
-  exists: (filepath: string) => boolean = existsSync,
+  exists: (filepath: string) => boolean = fs.existsSync,
 ): HookRuntimeFacts {
-  return { depsInstalled: exists(path.join(repoDir, NODE_MODULES_DIRNAME)) }
+  const path = getNodePath()
+  return {
+    depsInstalled: exists(path.join(repoDir, NODE_MODULES_DIRNAME)),
+  }
 }
 
 /**

@@ -14,9 +14,6 @@
  *   fail-or-pass, the worktree is removed.
  */
 
-import { existsSync } from 'node:fs'
-import path from 'node:path'
-
 import { errorMessage } from '../errors/message.mjs'
 import { spawnSync } from '../process/spawn/child.mjs'
 import { isSpawnError } from '../process/spawn/errors.mjs'
@@ -32,6 +29,8 @@ import { ErrorCtor } from '../primordials/error.mjs'
 import { MathMax } from '../primordials/math.mjs'
 
 import { PromiseAll } from '../primordials/promise.mjs'
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
 
 const DEFAULT_CONCURRENCY = 4
 const MAX_CONCURRENCY = 8
@@ -243,7 +242,9 @@ export async function spawnAiAgentsInWorktrees<I, T>(
     Math.min(options.concurrency ?? DEFAULT_CONCURRENCY, MAX_CONCURRENCY),
   )
   const baseRepo = options.baseRepo
-  if (!existsSync(path.join(baseRepo, '.git'))) {
+  const fs = getNodeFs()
+  const path = getNodePath()
+  if (!fs.existsSync(path.join(baseRepo, '.git'))) {
     throw new ErrorCtor(
       `spawnAiAgentsInWorktrees: baseRepo is not a git checkout: ${baseRepo}`,
     )

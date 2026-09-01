@@ -6,13 +6,12 @@
  *   no callers outside this directory.
  */
 
-import path from 'node:path'
-
 import { ErrorCtor } from '../primordials/error.mjs'
 import { ObjectFreeze } from '../primordials/object.mjs'
 import { StringPrototypeToLowerCase } from '../primordials/string.mjs'
 
 import type { CompressFileOptions, CompressOptions } from './types.mjs'
+import { getNodePath } from '../node/path.mjs'
 
 export interface ResolvedFileArgs {
   destPath: string
@@ -74,6 +73,7 @@ export function resolveFileArgs(
  * `decompressGzipFile` for the canonical example).
  */
 export function stripExt(filePath: string, exts: ReadonlySet<string>): string {
+  const path = getNodePath()
   const ext = path.extname(filePath)
   if (!exts.has(StringPrototypeToLowerCase(ext))) {
     return filePath

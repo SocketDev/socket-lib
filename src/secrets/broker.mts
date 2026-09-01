@@ -13,10 +13,10 @@
  *   so today this only talks to an already-running daemon.
  */
 
-import { existsSync } from 'node:fs'
 import net from 'node:net'
 
 import { getRuntimeSocketPath } from '../paths/socket.mjs'
+import { getNodeFs } from '../node/fs.mjs'
 
 // The daemon's name; getRuntimeSocketPath maps it to the socket path the daemon
 // and this client both compute (1 path, 1 reference).
@@ -53,10 +53,11 @@ export async function requestFromBroker({
   service,
 }: BrokerRequestOptions): Promise<string | undefined> {
   const socketPath = getRuntimeSocketPath(SOCKEYE_SOCKET_NAME)
-  // Self-gating: no socket file means no daemon. existsSync is also false for a
+  // Self-gating: no socket file means no daemon. getNodeFs().existsSync is also false for a
   // Windows pipe path, so the broker stays dormant there until the win32 daemon
+  const fs = getNodeFs()
   // ships, with the caller transparently falling through to the keychain.
-  if (!existsSync(socketPath)) {
+  if (!fs.existsSync(socketPath)) {
     return undefined
   }
   return await new Promise<string | undefined>(resolvePromise => {

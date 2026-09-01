@@ -4,8 +4,6 @@
  *   (`assertArchiveExists`, `validatePathWithinBase`).
  */
 
-import { existsSync } from 'node:fs'
-
 import { ErrorCtor } from '../primordials/error.mjs'
 import { StringPrototypeStartsWith } from '../primordials/string.mjs'
 
@@ -26,6 +24,7 @@ let admZip: typeof AdmZipType | undefined
 let tarFs: typeof tarFsType | undefined
 
 import { getNodePath } from '../node/path.mjs'
+import { getNodeFs } from '../node/fs.mjs'
 
 /**
  * Assert that an archive file exists on disk before handing it to the
@@ -41,7 +40,8 @@ import { getNodePath } from '../node/path.mjs'
  * @throws Error with `code: 'ENOENT'` if archivePath doesn't exist.
  */
 export function assertArchiveExists(archivePath: string): void {
-  if (!existsSync(archivePath)) {
+  const fs = getNodeFs()
+  if (!fs.existsSync(archivePath)) {
     const err = new ErrorCtor(
       `ENOENT: no such file or directory, open '${archivePath}'`,
     ) as Error & { code: string; path: string }

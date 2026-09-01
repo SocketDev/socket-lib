@@ -8,8 +8,6 @@
  *   extracted binary.
  */
 
-import path from 'node:path'
-
 import { getSocketWheelhouseDir } from '../../paths/socket.mjs'
 import { downloadAndExtractTool } from '../from-download.mjs'
 
@@ -23,6 +21,7 @@ import type { HashInput } from '../../crypto/integrity.mjs'
 import type { ResolvedJanus } from './types.mjs'
 
 import { ErrorCtor } from '../../primordials/error.mjs'
+import { getNodePath } from '../../node/path.mjs'
 
 export interface JanusFromDownloadOptions {
   version: string
@@ -59,6 +58,7 @@ export async function janusFromDownload(
       `janusFromDownload: no upstream asset for janus@${version} on \`${platformArch}\`. The platform is in the supported set but the version may be missing; check https://github.com/divmain/janus/releases/tag/v${version}.`,
     )
   }
+  const path = getNodePath()
   const extractedDir =
     cacheDir ??
     path.join(getSocketWheelhouseDir(), 'janus', version, platformArch)

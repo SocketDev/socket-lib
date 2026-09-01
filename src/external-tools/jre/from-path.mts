@@ -6,11 +6,10 @@
  *   convention every distribution follows.
  */
 
-import path from 'node:path'
-
 import { which } from '../../exe/path/which.mjs'
 
 import type { ResolvedJre } from './types.mjs'
+import { getNodePath } from '../../node/path.mjs'
 
 export async function jreFromPath(): Promise<ResolvedJre | undefined> {
   const javaOnPath = await which('java', { nothrow: true })
@@ -18,6 +17,7 @@ export async function jreFromPath(): Promise<ResolvedJre | undefined> {
   if (typeof javaOnPath !== 'string') {
     return undefined
   }
+  const path = getNodePath()
   /* c8 ignore stop */
   return {
     javaPath: javaOnPath,

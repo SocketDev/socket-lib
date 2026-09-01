@@ -57,6 +57,33 @@ const GETTER_TO_BINDING: Record<string, string> = {
 } as Record<string, string>
 
 /**
+ * Every enclosing scope of a node, innermost first.
+ *
+ * A hoisted `const` is visible to the whole block it lands in, so a second use
+ * anywhere in that block - or in any block nested inside it - must reuse the
+ * binding rather than declare its own. Keying only on the enclosing STATEMENT
+ * sees two statements in one function as unrelated and emits the declaration
+ * twice, which is a redeclaration error rather than a style nit.
+ */
+export function enclosingScopeKeys(node: AstNode): string[] {
+  const keys: string[] = []
+  let current: AstNode | undefined = node
+  while (current) {
+    const { type } = current
+    if (
+      type === 'BlockStatement' ||
+      type === 'Program' ||
+      type === 'StaticBlock' ||
+      type === 'SwitchStatement'
+    ) {
+      keys.push(String(current.range?.[0] ?? current.start ?? ''))
+    }
+    current = current.parent
+  }
+  return keys
+}
+
+/**
  * Walk up from a node to the nearest enclosing statement — the node whose
  * parent is a block / program / switch-case body. The hoisted `const` is
  * inserted before it.
@@ -102,13 +129,16 @@ const rule = {
       ? context.getSourceCode()
       : context.sourceCode
 
-    // Dedup hoists within a single lint pass. When one statement holds two
-    // inline calls of the SAME getter — `path.basename(x, getNodePath()
-    // .extname(x))` next to another `getNodePath()` — emitting the
-    // `const path = getNodePath()` hoist for each would write the
-    // declaration twice. Key by enclosing-statement range + binding: the
-    // first occurrence hoists + rewrites, the rest only rewrite to the
-    // already-declared binding.
+    // Dedup hoists within a single lint pass. The first occurrence in a scope
+    // hoists and rewrites; every later one only rewrites to the binding that
+    // is now in scope.
+    //
+    // Keyed by SCOPE, not by enclosing statement. A `const` hoisted before one
+    // statement is visible to the rest of its block and to every block nested
+    // in it, so a statement-keyed set treats two uses in one function as
+    // unrelated and emits `const path = getNodePath()` twice - TS2451, not a
+    // style nit. Checking each ancestor scope also stops an inner block from
+    // shadowing a binding an outer block already declared.
     const hoisted = new Set<string>()
 
     return {
@@ -134,9 +164,10 @@ const rule = {
           node.property?.type === 'Identifier' ? node.property.name : '…'
 
         const enclosing = findEnclosingStatement(node)
-        const hoistKey = enclosing
-          ? `${enclosing.range?.[0] ?? enclosing.start ?? enclosing.loc?.start?.line}:${binding}`
-          : ''
+        const scopeKeys = enclosingScopeKeys(node).map(
+          key => `${key}:${binding}`,
+        )
+        const hoistKey = scopeKeys[0] ?? ''
 
         context.report({
           node: object,
@@ -147,9 +178,9 @@ const rule = {
             if (!enclosing) {
               return undefined
             }
-            // Second+ inline call of the same getter in one statement: the
-            // hoist already exists, just point this call at the binding.
-            if (hoisted.has(hoistKey)) {
+            // Already bound in this scope or an enclosing one: point this call
+            // at that binding instead of declaring a second.
+            if (scopeKeys.some(key => hoisted.has(key))) {
               return fixer.replaceText(object, binding)
             }
             hoisted.add(hoistKey)

@@ -9,8 +9,6 @@
  *   `external-tools.json` when available.
  */
 
-import path from 'node:path'
-
 import { getSocketDlxDir } from '../../paths/socket.mjs'
 import { downloadAndExtractTool } from '../from-download.mjs'
 
@@ -19,6 +17,7 @@ import { getSbtDownloadUrl } from './asset-names.mjs'
 import type { BinaryDownloader } from '../from-download.mjs'
 import type { HashInput } from '../../crypto/integrity.mjs'
 import type { ResolvedSbt } from './types.mjs'
+import { getNodePath } from '../../node/path.mjs'
 
 export interface SbtFromDownloadOptions {
   /**
@@ -59,6 +58,7 @@ export async function sbtFromDownload(
     ...options,
   } as typeof options
   const url = getSbtDownloadUrl({ version })
+  const path = getNodePath()
   const extractedDir = cacheDir ?? path.join(getSocketDlxDir(), 'sbt', version)
   // strip:1 unwraps the top-level `sbt/` directory the tgz contains,
   // so `bin/sbt` lands at extractedDir/bin/sbt.
