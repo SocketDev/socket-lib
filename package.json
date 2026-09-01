@@ -1942,6 +1942,11 @@
       "types": "./dist/git/unstaged.d.ts",
       "default": "./dist/git/unstaged.js"
     },
+    "./git/worktree": {
+      "source": "./src/git/worktree.mts",
+      "types": "./dist/git/worktree.d.ts",
+      "default": "./dist/git/worktree.js"
+    },
     "./github/cli": {
       "source": "./src/github/cli.mts",
       "types": "./dist/github/cli.d.ts",
