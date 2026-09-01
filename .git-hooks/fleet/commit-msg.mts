@@ -239,7 +239,7 @@ const main = (): number => {
   // calls, but a subprocess / fresh worktree / CI / test-harness commit
   // never routes through that layer — that is how a batch of
   // test@example.com commits once reached a fleet repo's main. This fires on
-  // the git commit-msg stage regardless of origin, reading the SAME cascaded
+  // the `git commit`-msg stage regardless of origin, reading the SAME cascaded
   // .config/fleet|repo/git-authors.json policy so the two never diverge.
   const policy = readIdentityPolicy(process.cwd())
   for (const which of ['GIT_AUTHOR_IDENT', 'GIT_COMMITTER_IDENT'] as const) {

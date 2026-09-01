@@ -45,6 +45,7 @@
     "import/no-named-as-default-member": "off",
     "import/no-self-import": "error",
     "import/no-unassigned-import": "off",
+    "socket/backtick-commands-in-comments": "error",
     "socket/bag-param-optionality-naming": "error",
     "socket/export-top-level-functions": "error",
     "socket/exported-name-has-domain-word": "error",

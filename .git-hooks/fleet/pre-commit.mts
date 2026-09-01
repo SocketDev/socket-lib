@@ -50,7 +50,7 @@ const main = (): number => {
   // mass-delete-guard checked the index when the `git commit` command was seen,
   // but a pre-commit step (lint/test) can stage deletions mid-commit, after
   // that check passed. The index here IS the about-to-commit tree, so this is
-  // the last line of defense against a wipe (a hung pnpm test once staged the
+  // the last line of defense against a wipe (a hung `pnpm test` once staged the
   // whole .claude/ tree for deletion). Runs before the ACM-staged read because
   // a pure-deletion commit has zero ACM files. No bypass — a wipe is never
   // intentional; finish/abort the operation that staged it. Untracking ignored
