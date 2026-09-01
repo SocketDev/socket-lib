@@ -314,8 +314,8 @@
   "schemaVersion": 1,
   "repoName": "socket-lib",
   "bundle": {
-    "ref": "fleet-pack-acdae6de271afae703df05fbdc199eec3d9e4084",
-    "cascadeSha": "acdae6de271afae703df05fbdc199eec3d9e4084"
+    "ref": "fleet-pack-80c8f2d105876c7349264f4236fe5880f01a7646",
+    "cascadeSha": "80c8f2d105876c7349264f4236fe5880f01a7646"
   },
   "repo": {
     "type": "solo"
@@ -335,9 +335,7 @@
   },
   "coverage": {
     "exclude": {
-      "add": [
-        "src/perf/**"
-      ]
+      "add": ["src/perf/**"]
     }
   },
   "lint": {

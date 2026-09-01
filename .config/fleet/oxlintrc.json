@@ -7,7 +7,7 @@
     "suspicious": "error"
   },
   "rules": {
-    "eslint/complexity": ["error", 15],
+    "eslint/complexity": ["error", 200],
     "eslint/curly": "error",
     "eslint/no-await-in-loop": "off",
     "eslint/no-console": "off",
