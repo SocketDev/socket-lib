@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 653 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 660 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -94,12 +94,9 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/constants/encoding](./dist/constants/encoding.d.ts)
 - [@socketsecurity/lib/constants/github](./dist/constants/github.d.ts)
 - [@socketsecurity/lib/constants/licenses](./dist/constants/licenses.d.ts)
-- [@socketsecurity/lib/constants/lifecycle-script-names](./dist/constants/lifecycle-script-names.d.ts)
 - [@socketsecurity/lib/constants/maintained-node-versions](./dist/constants/maintained-node-versions.d.ts)
 - [@socketsecurity/lib/constants/node](./dist/constants/node.d.ts)
-- [@socketsecurity/lib/constants/package-default-node-range](./dist/constants/package-default-node-range.d.ts)
 - [@socketsecurity/lib/constants/package-default-socket-categories](./dist/constants/package-default-socket-categories.d.ts)
-- [@socketsecurity/lib/constants/package-managers](./dist/constants/package-managers.d.ts)
 - [@socketsecurity/lib/constants/packages](./dist/constants/packages.d.ts)
 - [@socketsecurity/lib/constants/platform](./dist/constants/platform.d.ts)
 - [@socketsecurity/lib/constants/runtime](./dist/constants/runtime.d.ts)
@@ -164,7 +161,16 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/eco/manifest/parse-manifest](./dist/eco/manifest/parse-manifest.d.ts)
 - [@socketsecurity/lib/eco/manifest/types](./dist/eco/manifest/types.d.ts)
 - [@socketsecurity/lib/eco/npm/bun/exec](./dist/eco/npm/bun/exec.d.ts)
+- [@socketsecurity/lib/eco/npm/constants/lifecycle-script-names](./dist/eco/npm/constants/lifecycle-script-names.d.ts)
+- [@socketsecurity/lib/eco/npm/constants/package-default-node-range](./dist/eco/npm/constants/package-default-node-range.d.ts)
+- [@socketsecurity/lib/eco/npm/constants/package-managers](./dist/eco/npm/constants/package-managers.d.ts)
 - [@socketsecurity/lib/eco/npm/manifest-format](./dist/eco/npm/manifest-format.d.ts)
+- [@socketsecurity/lib/eco/npm/meta-cache/browser](./dist/eco/npm/meta-cache/browser.d.ts)
+- [@socketsecurity/lib/eco/npm/meta-cache/node](./dist/eco/npm/meta-cache/node.d.ts)
+- [@socketsecurity/lib/eco/npm/meta-slice](./dist/eco/npm/meta-slice.d.ts)
+- [@socketsecurity/lib/eco/npm/meta-types](./dist/eco/npm/meta-types.d.ts)
+- [@socketsecurity/lib/eco/npm/meta/browser](./dist/eco/npm/meta/browser.d.ts)
+- [@socketsecurity/lib/eco/npm/meta/node](./dist/eco/npm/meta/node.d.ts)
 - [@socketsecurity/lib/eco/npm/npm-cli/exec](./dist/eco/npm/npm-cli/exec.d.ts)
 - [@socketsecurity/lib/eco/npm/npm-cli/extract-package-name-from-path](./dist/eco/npm/npm-cli/extract-package-name-from-path.d.ts)
 - [@socketsecurity/lib/eco/npm/npm-cli/flags](./dist/eco/npm/npm-cli/flags.d.ts)
@@ -181,6 +187,25 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/eco/npm/pnpm/lockfile/package-id-v5](./dist/eco/npm/pnpm/lockfile/package-id-v5.d.ts)
 - [@socketsecurity/lib/eco/npm/pnpm/lockfile/package-id-v6-v9](./dist/eco/npm/pnpm/lockfile/package-id-v6-v9.d.ts)
 - [@socketsecurity/lib/eco/npm/pnpm/lockfile/parse](./dist/eco/npm/pnpm/lockfile/parse.d.ts)
+- [@socketsecurity/lib/eco/npm/registry](./dist/eco/npm/registry/index.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/access](./dist/eco/npm/registry/access.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/audit](./dist/eco/npm/registry/audit.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/auth](./dist/eco/npm/registry/auth.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/cache](./dist/eco/npm/registry/cache.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/client](./dist/eco/npm/registry/client.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/live](./dist/eco/npm/registry/live.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/oidc](./dist/eco/npm/registry/oidc.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/org](./dist/eco/npm/registry/org.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/publish](./dist/eco/npm/registry/publish.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/search](./dist/eco/npm/registry/search.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/stage](./dist/eco/npm/registry/stage.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/stage-actions](./dist/eco/npm/registry/stage-actions.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/stage-tarball](./dist/eco/npm/registry/stage-tarball.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/tarball/browser](./dist/eco/npm/registry/tarball/browser.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/tarball/node](./dist/eco/npm/registry/tarball/node.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/team](./dist/eco/npm/registry/team.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/tokens](./dist/eco/npm/registry/tokens.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/trust](./dist/eco/npm/registry/trust.d.ts)
 - [@socketsecurity/lib/eco/npm/script](./dist/eco/npm/script.d.ts)
 - [@socketsecurity/lib/eco/npm/vlt/exec](./dist/eco/npm/vlt/exec.d.ts)
 - [@socketsecurity/lib/eco/npm/yarn/exec](./dist/eco/npm/yarn/exec.d.ts)
@@ -362,6 +387,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 
 - [@socketsecurity/lib/fs/access](./dist/fs/access.d.ts)
 - [@socketsecurity/lib/fs/allowed-dirs-cache](./dist/fs/allowed-dirs-cache.d.ts)
+- [@socketsecurity/lib/fs/atomic](./dist/fs/atomic.d.ts)
 - [@socketsecurity/lib/fs/copy](./dist/fs/copy.d.ts)
 - [@socketsecurity/lib/fs/encoding](./dist/fs/encoding.d.ts)
 - [@socketsecurity/lib/fs/find](./dist/fs/find.d.ts)
@@ -390,6 +416,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/git/tree](./dist/git/tree.d.ts)
 - [@socketsecurity/lib/git/types](./dist/git/types.d.ts)
 - [@socketsecurity/lib/git/unstaged](./dist/git/unstaged.d.ts)
+- [@socketsecurity/lib/git/worktree](./dist/git/worktree.d.ts)
 
 ## github/
 
@@ -514,40 +541,10 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/node/module](./dist/node/module.d.ts)
 - [@socketsecurity/lib/node/os](./dist/node/os.d.ts)
 - [@socketsecurity/lib/node/path](./dist/node/path.d.ts)
+- [@socketsecurity/lib/node/process](./dist/node/process.d.ts)
 - [@socketsecurity/lib/node/timers-promises](./dist/node/timers-promises.d.ts)
 - [@socketsecurity/lib/node/url](./dist/node/url.d.ts)
 - [@socketsecurity/lib/node/util](./dist/node/util.d.ts)
-
-## npm/
-
-- [@socketsecurity/lib/npm/meta](./dist/npm/meta/node.d.ts)
-- [@socketsecurity/lib/npm/meta-cache](./dist/npm/meta-cache/node.d.ts)
-- [@socketsecurity/lib/npm/meta-cache/browser](./dist/npm/meta-cache/browser.d.ts)
-- [@socketsecurity/lib/npm/meta-cache/node](./dist/npm/meta-cache/node.d.ts)
-- [@socketsecurity/lib/npm/meta-slice](./dist/npm/meta-slice.d.ts)
-- [@socketsecurity/lib/npm/meta-types](./dist/npm/meta-types.d.ts)
-- [@socketsecurity/lib/npm/meta/browser](./dist/npm/meta/browser.d.ts)
-- [@socketsecurity/lib/npm/meta/node](./dist/npm/meta/node.d.ts)
-- [@socketsecurity/lib/npm/registry](./dist/npm/registry/index.d.ts)
-- [@socketsecurity/lib/npm/registry/access](./dist/npm/registry/access.d.ts)
-- [@socketsecurity/lib/npm/registry/audit](./dist/npm/registry/audit.d.ts)
-- [@socketsecurity/lib/npm/registry/auth](./dist/npm/registry/auth.d.ts)
-- [@socketsecurity/lib/npm/registry/cache](./dist/npm/registry/cache.d.ts)
-- [@socketsecurity/lib/npm/registry/client](./dist/npm/registry/client.d.ts)
-- [@socketsecurity/lib/npm/registry/live](./dist/npm/registry/live.d.ts)
-- [@socketsecurity/lib/npm/registry/oidc](./dist/npm/registry/oidc.d.ts)
-- [@socketsecurity/lib/npm/registry/org](./dist/npm/registry/org.d.ts)
-- [@socketsecurity/lib/npm/registry/publish](./dist/npm/registry/publish.d.ts)
-- [@socketsecurity/lib/npm/registry/search](./dist/npm/registry/search.d.ts)
-- [@socketsecurity/lib/npm/registry/stage](./dist/npm/registry/stage.d.ts)
-- [@socketsecurity/lib/npm/registry/stage-actions](./dist/npm/registry/stage-actions.d.ts)
-- [@socketsecurity/lib/npm/registry/stage-tarball](./dist/npm/registry/stage-tarball.d.ts)
-- [@socketsecurity/lib/npm/registry/tarball](./dist/npm/registry/tarball/node.d.ts)
-- [@socketsecurity/lib/npm/registry/tarball/browser](./dist/npm/registry/tarball/browser.d.ts)
-- [@socketsecurity/lib/npm/registry/tarball/node](./dist/npm/registry/tarball/node.d.ts)
-- [@socketsecurity/lib/npm/registry/team](./dist/npm/registry/team.d.ts)
-- [@socketsecurity/lib/npm/registry/tokens](./dist/npm/registry/tokens.d.ts)
-- [@socketsecurity/lib/npm/registry/trust](./dist/npm/registry/trust.d.ts)
 
 ## objects/
 
@@ -659,12 +656,19 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/process/spawn/errors](./dist/process/spawn/errors.d.ts)
 - [@socketsecurity/lib/process/spawn/kill-tree](./dist/process/spawn/kill-tree.d.ts)
 - [@socketsecurity/lib/process/spawn/pty](./dist/process/spawn/pty.d.ts)
+- [@socketsecurity/lib/process/spawn/retry](./dist/process/spawn/retry/node.d.ts)
+- [@socketsecurity/lib/process/spawn/retry/browser](./dist/process/spawn/retry/browser.d.ts)
+- [@socketsecurity/lib/process/spawn/retry/node](./dist/process/spawn/retry/node.d.ts)
+- [@socketsecurity/lib/process/spawn/retry/policy](./dist/process/spawn/retry/policy.d.ts)
 - [@socketsecurity/lib/process/spawn/run](./dist/process/spawn/run.d.ts)
 - [@socketsecurity/lib/process/spawn/stdio](./dist/process/spawn/stdio.d.ts)
 - [@socketsecurity/lib/process/spawn/timeout](./dist/process/spawn/timeout.d.ts)
+- [@socketsecurity/lib/process/spawn/tree-kill-timer](./dist/process/spawn/tree-kill-timer.d.ts)
 - [@socketsecurity/lib/process/spawn/types](./dist/process/spawn/types.d.ts)
 - [@socketsecurity/lib/process/spawn/windows-shell](./dist/process/spawn/windows-shell.d.ts)
+- [@socketsecurity/lib/process/spawn/with-retry](./dist/process/spawn/with-retry.d.ts)
 - [@socketsecurity/lib/process/transient](./dist/process/transient.d.ts)
+- [@socketsecurity/lib/process/tree](./dist/process/tree.d.ts)
 
 ## promises/
 

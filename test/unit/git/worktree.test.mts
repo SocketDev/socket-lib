@@ -398,6 +398,44 @@ describe('listGitWorktrees', () => {
   })
 })
 
+// Asserted directly rather than only against the async form: two identically
+// broken implementations would agree with each other and pass.
+describe('listGitWorktreesSync', () => {
+  it('lists the main worktree of a fresh repo', () => {
+    const repo = makeRepo()
+    const entries = listGitWorktreesSync(repo)
+    assert.equal(entries.length, 1)
+    assert.equal(entries[0]!.main, true)
+    assert.equal(entries[0]!.path, resolveWorktreePath(repo))
+  })
+
+  it('sees a linked worktree under the OS temp dir', () => {
+    const repo = makeRepo()
+    const wt = createGitWorktreeTmpDir(NS, 'sync-listed')
+    git(repo, 'worktree', 'add', '--detach', wt, 'HEAD')
+    const paths = listGitWorktreesSync(repo).map(e => e.path)
+    assert.ok(paths.includes(resolveWorktreePath(wt)))
+  })
+
+  // Fails soft: an empty list means "remove nothing", the safe direction.
+  it('returns empty outside a repository', () => {
+    const outside = mkdtempSync(path.join(os.tmpdir(), 'lib-wt-sync-outside-'))
+    assert.deepEqual(listGitWorktreesSync(outside), [])
+  })
+
+  it('reads a raw multi-line lock reason, proving -z on the sync path', () => {
+    const repo = makeRepo()
+    const wt = createGitWorktreeTmpDir(NS, 'sync-locked')
+    git(repo, 'worktree', 'add', '--detach', wt, 'HEAD')
+    git(repo, 'worktree', 'lock', wt, '--reason', 'reason\nwith a newline')
+    const found = listGitWorktreesSync(repo).find(
+      e => e.path === resolveWorktreePath(wt),
+    )
+    assert.equal(found?.lockReason, 'reason\nwith a newline')
+    git(repo, 'worktree', 'unlock', wt)
+  })
+})
+
 describe('findGitWorktree', () => {
   it('finds the main worktree by any path spelling', async () => {
     const found = await findGitWorktree(process.cwd(), process.cwd())
