@@ -128,7 +128,6 @@ export const DIRECT_IMPORT_BASELINE: readonly string[] = [
   'src/ipc/paths.mts',
   'src/ipc/write.mts',
   'src/json/edit.mts',
-  'src/logger/console.mts',
   'src/native-messaging/host.mts',
   'src/native-messaging/install.mts',
   'src/packages/find.mts',

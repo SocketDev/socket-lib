@@ -24,8 +24,6 @@
 // field; a `node:` prefix throws UnhandledSchemeError in webpack browser
 // bundles.
 // oxlint-disable-next-line unicorn/prefer-node-protocol -- browser stub
-import process from 'process'
-
 import type { Console } from 'node:console'
 
 import {
@@ -34,6 +32,7 @@ import {
   ObjectFromEntries,
 } from '../primordials/object.mjs'
 
+import { getNodeProcess } from '../node/process.mjs'
 import { ReflectConstruct } from '../primordials/reflect.mjs'
 import {
   consolePropAttributes,
@@ -117,9 +116,10 @@ export function ensurePrototypeInitialized() {
             if (ctorArgs.length) {
               con = constructConsole(...ctorArgs)
             } else {
+              const nodeProcess = getNodeProcess()
               con = constructConsole({
-                stdout: process.stdout,
-                stderr: process.stderr,
+                stdout: nodeProcess.stdout,
+                stderr: nodeProcess.stderr,
               }) as typeof console & Record<string, unknown>
               for (const { 0: k, 1: method } of getBoundConsoleEntries()) {
                 con[k] = method
@@ -175,9 +175,10 @@ export function resolveConsole(
     if (ctorArgs.length) {
       con = constructConsole(...ctorArgs)
     } else {
+      const nodeProcess = getNodeProcess()
       con = constructConsole({
-        stdout: process.stdout,
-        stderr: process.stderr,
+        stdout: nodeProcess.stdout,
+        stderr: nodeProcess.stderr,
       }) as typeof console & Record<string, unknown>
       for (const { 0: key, 1: method } of getBoundConsoleEntries()) {
         con[key] = method
