@@ -58,14 +58,17 @@ export const BUILTIN_ACCESSORS: ReadonlyArray<
 ] as const)
 
 /**
- * A lookbehind that skips an identifier already qualified by a member access
- * (`options.path`) while still matching one behind a spread (`...process.env`).
+ * Guards on what may precede a rewritable identifier.
  *
- * The naive `(?<![\w.$'"])` treats both the same and leaves the spread case
- * un-rewritten, which reads as a clean run and then fails type-check on an
- * import nothing uses.
+ * - Not a member access (`options.path`), since that names someone else's
+ *   property. The naive `(?<![\w.$'"])` also blocks a SPREAD
+ *   (`...process.env`), leaving it un-rewritten - a clean-looking run that then
+ *   fails type-check on an import nothing uses.
+ * - Not `typeof `, which in a type position accepts only a name. Rewriting
+ *   `typeof process.emitWarning` to `typeof getNodeProcess().emitWarning` is a
+ *   syntax error, and a type reference erases at build anyway.
  */
-export const NOT_A_MEMBER_ACCESS = `(?<![\\w$'"])(?<!(?<![.][.])[.])`
+export const NOT_A_MEMBER_ACCESS = `(?<![\\w$'"])(?<!(?<![.][.])[.])(?<!typeof )`
 
 /**
  * The import specifier for an accessor module, relative to the rewritten file.
@@ -78,6 +81,47 @@ export function accessorSpecifier(
   const to = path.resolve(REPO_ROOT, 'src', 'node', `${moduleName}.mjs`)
   const rel = path.relative(from, to).split(path.sep).join('/')
   return rel.startsWith('.') ? rel : `./${rel}`
+}
+
+// Match a complete string literal in source code — three alternatives joined by |:
+//   '(?:[^'\\\n]|\\.)*'  single-quoted: any char except quote/backslash/newline, or an escape sequence
+//   "(?:[^"\\\n]|\\.)*"  double-quoted: same rule for double-quote delimiters
+//   `(?:[^`\\]|\\.)*`    template literal (no newline restriction): any char except backtick/backslash, or an escape
+const STRING_LITERAL_RE =
+  /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/g
+
+/**
+ * Replace every string literal with an opaque placeholder, and the inverse.
+ *
+ * A rewrite keyed on an identifier cannot tell code from the inside of a
+ * string, and a bare builtin name is a common path segment: rewriting `fs` in
+ * `'../../fs/promises/safe.mjs'` produced
+ * `'../../getNodeFs().promises/safe.mjs'`, a module specifier pointing nowhere.
+ * Masking first means the rewrite only ever sees code.
+ */
+export function maskStringLiterals(source: string): {
+  literals: string[]
+  masked: string
+} {
+  const literals: string[] = []
+  const masked = source.replace(STRING_LITERAL_RE, literal => {
+    literals.push(literal)
+    return `\u0000S${literals.length - 1}\u0000`
+  })
+  return { literals, masked }
+}
+
+/**
+ * Put masked string literals back.
+ */
+export function unmaskStringLiterals(
+  masked: string,
+  literals: readonly string[],
+): string {
+  return masked.replace(
+    /\u0000S(\d+)\u0000/g,
+    (_match: string, index: string) => literals[Number(index)] as string,
+  )
 }
 
 /**
@@ -102,6 +146,10 @@ export function rewriteSource(source: string, filePath: string): string {
     // Drop the import BEFORE rewriting uses. Rewriting first would also edit
     // the specifier string in the import line itself.
     text = text.replace(importRe, '')
+    // Rewrite identifiers over MASKED text, so a builtin's name appearing
+    // inside a string (a path segment, a message) is never touched.
+    const { literals, masked } = maskStringLiterals(text)
+    text = masked
     if (clause.startsWith('{')) {
       const entries = clause
         .slice(1, -1)
@@ -125,6 +173,7 @@ export function rewriteSource(source: string, filePath: string): string {
         (_match: string, member: string) => `${getter}().${member}`,
       )
     }
+    text = unmaskStringLiterals(text, literals)
     const line = `import { ${getter} } from '${accessorSpecifier(filePath, moduleName)}'\n`
     // A file may already import the accessor for a builtin it uses both ways.
     if (!text.includes(line)) {
