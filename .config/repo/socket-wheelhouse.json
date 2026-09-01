@@ -194,7 +194,6 @@
         "external-tools/uv/types",
         "fs/allowed-dirs-cache",
         "fs/resolve-module",
-        "git/exec",
         "git/ignored",
         "git/isolated-index",
         "git/status",
@@ -336,7 +335,9 @@
   },
   "coverage": {
     "exclude": {
-      "add": ["src/perf/**"]
+      "add": [
+        "src/perf/**"
+      ]
     }
   },
   "lint": {
