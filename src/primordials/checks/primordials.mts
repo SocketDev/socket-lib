@@ -21,12 +21,11 @@
  *      can render or fail-CI on specific kinds.
  */
 
-import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
-import path from 'node:path'
-
 import { joinOr } from '../../arrays/join.mjs'
 import { arrayToSorted } from '../../polyfills/array.mjs'
 import { ErrorCtor } from '../error.mjs'
+import { getNodeFs } from '../../node/fs.mjs'
+import { getNodePath } from '../../node/path.mjs'
 
 // ── Config ──────────────────────────────────────────────────────────
 
@@ -98,16 +97,18 @@ export function checkPrimordials(
   const usedToFiles = new Map<string, string[]>()
 
   for (const dir of config.scanDirs) {
+    const path = getNodePath()
     const fullDir = path.resolve(repoRoot, dir)
     const jsFiles = collectJsFiles(fullDir)
     for (const file of jsFiles) {
       let src: string
       try {
-        src = readFileSync(file, 'utf8')
-        // readFileSync rarely throws on files we just enumerated; the
+        const fs = getNodeFs()
+        src = fs.readFileSync(file, 'utf8')
+        // getNodeFs().readFileSync rarely throws on files we just enumerated; the
         // includes()-false and names-empty arms fire only on files
         // that don't actually destructure primordials.
-        /* c8 ignore start - readFileSync rarely throws on files already enumerated */
+        /* c8 ignore start - getNodeFs().readFileSync rarely throws on files already enumerated */
       } catch {
         continue
       }
@@ -198,7 +199,8 @@ export function checkPrimordials(
  */
 export function collectJsFiles(dir: string): string[] {
   const out: string[] = []
-  if (!existsSync(dir)) {
+  const fs = getNodeFs()
+  if (!fs.existsSync(dir)) {
     return out
   }
   const stack = [dir]
@@ -206,16 +208,18 @@ export function collectJsFiles(dir: string): string[] {
     const cur = stack.pop()!
     let entries: string[]
     try {
-      entries = readdirSync(cur)
+      entries = fs.readdirSync(cur)
     } catch {
       continue
     }
     for (let i = 0, { length } = entries; i < length; i += 1) {
       const name = entries[i]!
+      const path = getNodePath()
       const full = path.join(cur, name)
       let stat
       try {
-        stat = statSync(full)
+        // oxlint-disable-next-line socket/prefer-exists-sync -- needs isDirectory
+        stat = fs.statSync(full)
       } catch {
         continue
       }
@@ -310,25 +314,29 @@ export function extractTsExports(src: string): string[] {
  * directory layout, concatenating exports across every `*.ts` / `*.d.ts` leaf.
  */
 export function readSocketLibPrimordialNames(resolved: string): Set<string> {
-  const stat = statSync(resolved)
+  const fs = getNodeFs()
+  // oxlint-disable-next-line socket/prefer-exists-sync -- needs isFile
+  const stat = fs.statSync(resolved)
   if (stat.isFile()) {
-    return new Set(extractTsExports(readFileSync(resolved, 'utf8')))
+    return new Set(extractTsExports(fs.readFileSync(resolved, 'utf8')))
   }
   // Directory: concatenate all *.ts and *.d.ts leaves.
   const out = new Set<string>()
   // Each scanned leaf either has TS exports or is a leftover declaration
   // file; we don't separate them — the parser handles both forms.
   /* c8 ignore start - leaf-classification branches aren't tested separately */
-  for (const name of readdirSync(resolved)) {
+  for (const name of fs.readdirSync(resolved)) {
     if (!name.endsWith('.ts') && !name.endsWith('.d.ts')) {
       continue
     }
+    const path = getNodePath()
     const full = path.join(resolved, name)
-    const fileStat = statSync(full)
+    // oxlint-disable-next-line socket/prefer-exists-sync -- needs isFile
+    const fileStat = fs.statSync(full)
     if (!fileStat.isFile()) {
       continue
     }
-    for (const exp of extractTsExports(readFileSync(full, 'utf8'))) {
+    for (const exp of extractTsExports(fs.readFileSync(full, 'utf8'))) {
       out.add(exp)
     }
   }
@@ -360,7 +368,8 @@ export function resolveSocketLibPrimordials(
   // them sub-arms separately even when the primary path is hit.
   /* c8 ignore start - resolver branch needs dedicated test setup per candidate */
   if (config.socketLibPrimordialsPath) {
-    if (!existsSync(config.socketLibPrimordialsPath)) {
+    const fs = getNodeFs()
+    if (!fs.existsSync(config.socketLibPrimordialsPath)) {
       throw new ErrorCtor(
         `socketLibPrimordialsPath does not exist: ${config.socketLibPrimordialsPath}`,
       )
@@ -368,6 +377,7 @@ export function resolveSocketLibPrimordials(
     return config.socketLibPrimordialsPath
   }
   const repoRoot = config.repoRoot ?? process.cwd()
+  const path = getNodePath()
   const siblingDir = path.resolve(
     repoRoot,
     '..',
@@ -375,7 +385,8 @@ export function resolveSocketLibPrimordials(
     'src',
     'primordials',
   )
-  if (existsSync(siblingDir)) {
+  const fs = getNodeFs()
+  if (fs.existsSync(siblingDir)) {
     return siblingDir
   }
   const siblingLegacy = path.resolve(
@@ -385,7 +396,7 @@ export function resolveSocketLibPrimordials(
     'src',
     'primordials.ts',
   )
-  if (existsSync(siblingLegacy)) {
+  if (fs.existsSync(siblingLegacy)) {
     return siblingLegacy
   }
   const installedDir = path.resolve(
@@ -396,7 +407,7 @@ export function resolveSocketLibPrimordials(
     'dist',
     'primordials',
   )
-  if (existsSync(installedDir)) {
+  if (fs.existsSync(installedDir)) {
     return installedDir
   }
   const installedLegacy = path.resolve(
@@ -407,7 +418,7 @@ export function resolveSocketLibPrimordials(
     'dist',
     'primordials.d.ts',
   )
-  if (existsSync(installedLegacy)) {
+  if (fs.existsSync(installedLegacy)) {
     return installedLegacy
   }
   /* c8 ignore stop */
