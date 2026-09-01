@@ -5,7 +5,7 @@
  */
 
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, realpathSync } from 'node:fs'
+import { existsSync, mkdirSync, mkdtempSync, realpathSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -13,14 +13,19 @@ import { describe, it } from 'vitest'
 
 import { normalizePath } from '../../../src/paths/normalize.mts'
 import {
+  createGitWorktreeTmpDir,
   findGitWorktree,
+  getGitWorktreeTmpDir,
   isRemovableGitWorktree,
   listGitWorktrees,
   listGitWorktreesSync,
   parseGitWorktreePorcelain,
   resolveWorktreePath,
+  sanitizeWorktreeLabel,
   stdoutText,
 } from '../../../src/git/worktree.mts'
+
+const NS = 'socket-lib-worktree-spec'
 
 const MAIN_AND_LINKED = [
   'worktree /repo',
@@ -159,6 +164,69 @@ describe('resolveWorktreePath', () => {
       resolveWorktreePath('.'),
       normalizePath(realpathSync(path.resolve('.'))),
     )
+  })
+})
+
+describe('sanitizeWorktreeLabel', () => {
+  it('passes a safe label through', () => {
+    assert.equal(sanitizeWorktreeLabel('review-pr_42.v1'), 'review-pr_42.v1')
+  })
+
+  // A separator or a `..` segment must not steer the path out of its parent.
+  it('collapses separators and trims the residue', () => {
+    assert.equal(sanitizeWorktreeLabel('../../escape'), 'escape')
+    assert.equal(sanitizeWorktreeLabel('a/b/c'), 'a-b-c')
+  })
+
+  it('falls back for a label of pure separators', () => {
+    assert.equal(sanitizeWorktreeLabel('///'), 'task')
+    assert.equal(sanitizeWorktreeLabel(''), 'task')
+  })
+
+  it('caps the length', () => {
+    assert.equal(sanitizeWorktreeLabel('x'.repeat(200)).length, 40)
+  })
+})
+
+describe('getGitWorktreeTmpDir', () => {
+  it('creates the home under the system temp dir', () => {
+    const home = getGitWorktreeTmpDir(NS)
+    assert.equal(path.basename(home), NS)
+    assert.ok(existsSync(home))
+  })
+
+  // The dir has to exist before the resolve, or macOS hands back the
+  // unresolved /var/folders spelling that never matches git's output.
+  it('returns the resolved form git would report', () => {
+    assert.equal(
+      getGitWorktreeTmpDir(NS),
+      normalizePath(realpathSync(path.join(os.tmpdir(), NS))),
+    )
+  })
+
+  it('sanitizes a namespace that would escape the temp dir', () => {
+    const home = getGitWorktreeTmpDir('../../escape-ns')
+    assert.equal(path.dirname(home), normalizePath(realpathSync(os.tmpdir())))
+  })
+})
+
+describe('createGitWorktreeTmpDir', () => {
+  it('lands inside the namespace home and carries the label', () => {
+    const dir = createGitWorktreeTmpDir(NS, 'review-pr-42')
+    assert.equal(path.dirname(dir), getGitWorktreeTmpDir(NS))
+    assert.ok(path.basename(dir).startsWith('review-pr-42-'))
+  })
+
+  // mkdtemp, not a pid or a timestamp, so concurrent callers cannot collide.
+  it('two calls with one label produce two directories', () => {
+    assert.notEqual(
+      createGitWorktreeTmpDir(NS, 'same'),
+      createGitWorktreeTmpDir(NS, 'same'),
+    )
+  })
+
+  it('is a real directory git can be pointed at', () => {
+    assert.ok(existsSync(createGitWorktreeTmpDir(NS, 'real')))
   })
 })
 

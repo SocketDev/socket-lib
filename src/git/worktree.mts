@@ -9,8 +9,10 @@
  *   and naive string equality silently misses it.
  */
 
+import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
 import { normalizePath } from '../paths/normalize.mjs'
+import { getOsTmpDir } from '../paths/socket.mjs'
 import { gitSpawn, gitSync } from './exec.mjs'
 import { getCachedRealpath, getCwd } from './repo.mjs'
 
@@ -65,6 +67,41 @@ export interface GitWorktree {
 }
 
 /**
+ * Create a unique scratch directory for a worktree under the OS temp dir, and
+ * return it in the form git reports.
+ *
+ * The system temp dir is the right home for a throwaway worktree on macOS,
+ * Linux and Windows alike. Placing one beside its repository instead puts a
+ * live checkout where a directory-scanning tool reads it as a sibling project.
+ *
+ * `mkdtemp` picks the suffix, so two concurrent callers asking for the same
+ * label never collide. The caller then runs `git worktree add` into the result.
+ *
+ * @example
+ *   ;```typescript
+ *   const dir = createGitWorktreeTmpDir('socket-worktrees', 'review-pr-42')
+ *   await gitSpawn(['worktree', 'add', '--detach', dir, 'HEAD'], { cwd: repo })
+ *   ```
+ *
+ * @param namespace - Directory under the temp dir that groups a tool's
+ *   worktrees, so a sweeper has one place to look.
+ * @param label - Short slug describing the task, for readability only. It is
+ *   sanitized, so it can never steer the path out of the namespace.
+ *
+ * @returns The created directory, realpath-resolved and normalized.
+ */
+export function createGitWorktreeTmpDir(
+  namespace: string,
+  label: string,
+): string {
+  const fs = getNodeFs()
+  const path = getNodePath()
+  const home = getGitWorktreeTmpDir(namespace)
+  const slug = sanitizeWorktreeLabel(label)
+  return resolveWorktreePath(fs.mkdtempSync(path.join(home, `${slug}-`)))
+}
+
+/**
  * Find the worktree git lists at `worktreePath`, or undefined when git does not
  * list one there.
  *
@@ -92,6 +129,27 @@ export async function findGitWorktree(
   const wanted = resolveWorktreePath(worktreePath)
   const worktrees = await listGitWorktrees(repoRoot)
   return worktrees.find(entry => entry.path === wanted)
+}
+
+/**
+ * Get the temp-dir home holding a tool's scratch worktrees, creating it on
+ * first use.
+ *
+ * Creation has to precede the resolve: an absent directory has no realpath, and
+ * on macOS that would hand back the unresolved `/var/folders/...` spelling that
+ * never matches git's output.
+ *
+ * @param namespace - Directory under the temp dir that groups a tool's
+ *   worktrees. Sanitized, so it stays one level under the temp dir.
+ *
+ * @returns The home directory, realpath-resolved and normalized.
+ */
+export function getGitWorktreeTmpDir(namespace: string): string {
+  const fs = getNodeFs()
+  const path = getNodePath()
+  const home = path.join(getOsTmpDir(), sanitizeWorktreeLabel(namespace))
+  fs.mkdirSync(home, { recursive: true })
+  return resolveWorktreePath(home)
 }
 
 /**
@@ -238,6 +296,31 @@ export function resolveWorktreePath(worktreePath: string): string {
     // resolving still compares correctly against git's record.
     return normalizePath(abs)
   }
+}
+
+/**
+ * Reduce a caller-supplied label to a single safe path segment.
+ *
+ * Every character outside `[A-Za-z0-9._-]` collapses to one dash, so a
+ * separator or a `..` segment cannot steer a path out of its parent. The
+ * leading and trailing dots and dashes that leaves are then trimmed, so a label
+ * of pure separators reduces to nothing rather than to `-`, and an empty result
+ * falls back to `task`.
+ *
+ * @param label - Any caller-supplied string.
+ *
+ * @returns A non-empty, single-segment slug of at most 40 characters.
+ */
+export function sanitizeWorktreeLabel(label: string): string {
+  return (
+    label
+      // Any run of characters outside the safe set becomes one dash.
+      .replace(/[^a-zA-Z0-9._-]+/g, '-')
+      // Then trim a leading OR trailing run of dots and dashes, which is what
+      // the collapse above leaves behind for a `../` prefix.
+      .replace(/^[-.]+|[-.]+$/g, '')
+      .slice(0, 40) || 'task'
+  )
 }
 
 /**
