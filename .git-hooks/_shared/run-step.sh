@@ -1,5 +1,16 @@
 # Shared pre-commit step runners, sourced by .git-hooks/fleet/pre-commit so the
 # error-visibility + budget-bounding logic lives in ONE place.
+#
+# STAYS .sh, NOT .mts. The fleet writes TypeScript everywhere above the node
+# boundary; this file sits below it. Two reasons it cannot move:
+#   1. The hook dispatchers are pure POSIX sh and SOURCE this file, so its
+#      functions have to exist in the caller's shell. A node script cannot
+#      export a shell function back to its parent.
+#   2. It bounds a step and, on timeout, kills the whole PROCESS GROUP —
+#      the sfw pnpm-shim plus every descendant. That is job-control, which
+#      the shell owns.
+# Its own callee, resolve-node.sh, is what puts node on PATH in the first
+# place, so this layer runs before `node` is reliably callable.
 
 # Error-visibility helper. When lint/test fails, harness output often
 # shows only a final "Failed with non-blocking status code" line — the

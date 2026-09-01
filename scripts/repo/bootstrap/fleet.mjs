@@ -840,6 +840,32 @@ function ensureWritableTarget(target) {
   }
 }
 /**
+ * Place one file, surviving another actor re-locking it mid-flight.
+ *
+ * `ensureWritableTarget` lifts the lock and the write follows, but those are
+ * two syscalls with a gap between them. A cascade running in a second process
+ * locks each mirror right after its own copy, so it can land in that gap and
+ * the write EACCESes on a file that was writable when it was checked.
+ *
+ * Measured: a `pnpm i` hydration died on the first mirror it reached while a
+ * cascade ran beside it, and `prepare` logged it as "reported a problem —
+ * continuing", leaving the tree partly materialized with no failure anyone saw.
+ *
+ * One retry, because the race is a narrow window rather than a contended lock —
+ * a second EACCES means the target is genuinely not writable, and that throws.
+ */
+function placeWithLockRetry(target, write) {
+  ensureWritableTarget(target)
+  try {
+    write()
+  } catch (e) {
+    const code = e?.code
+    if (code !== 'EACCES' && code !== 'EPERM') throw e
+    ensureWritableTarget(target)
+    write()
+  }
+}
+/**
  * True when a just-placed file may carry the read-only lock. Three classes
  * never may:
  *
@@ -1441,13 +1467,13 @@ function installFiles(filesDir, dest, manifest, options) {
           readFileSync(target, 'utf8'),
         )
     }
-    ensureWritableTarget(target)
     if (spliced !== void 0) {
-      writeFileSync(target, spliced)
+      const content = spliced
+      placeWithLockRetry(target, () => writeFileSync(target, content))
       placed += 1
       continue
     }
-    copyFileSync(source, target)
+    placeWithLockRetry(target, () => copyFileSync(source, target))
     placed += 1
     if (
       locking &&
