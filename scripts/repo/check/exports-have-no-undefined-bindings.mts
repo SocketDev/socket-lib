@@ -53,6 +53,12 @@ import {
   listDistFiles,
   readEagerReexports,
 } from './reexports-have-no-import-cycles.mts'
+import {
+  buildProbeSource,
+  parseProbeOutput,
+} from './undefined-bindings-probe.mts'
+
+import type { ProbeFinding } from './undefined-bindings-probe.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
@@ -141,55 +147,6 @@ export function buildProbePlan(files: string[]): ProbePlan {
 }
 
 /**
- * The child program. Requires one entry, then compares each eager re-export's
- * runtime value against the value on the module it was read from.
- *
- * Written as a CJS string because it must run with `node -e`, sharing nothing
- * with this process — a fresh require cache per subpath is the entire point.
- */
-export function buildProbeSource(): string {
-  return `
-const { readFileSync, realpathSync } = require('node:fs')
-const plan = JSON.parse(readFileSync(process.env['PROBE_PLAN'], 'utf8'))
-// require.cache is keyed by REALPATH. On macOS /var is a symlink to
-// /private/var, so a plan built from the walked path misses every lookup and
-// the probe reports a clean run it never performed. Canonicalize both sides.
-const real = p => { try { return realpathSync(p) } catch { return p } }
-try {
-  require(process.env['PROBE_TARGET'])
-} catch (e) {
-  process.stdout.write(JSON.stringify({ error: String((e && e.message) || e) }))
-  process.exit(0)
-}
-const findings = []
-let observed = 0
-const cache = require.cache
-for (const file of Object.keys(plan)) {
-  const mod = cache[real(file)]
-  if (!mod) { continue }
-  observed += 1
-  const exported = mod.exports
-  if (!exported || typeof exported !== 'object') { continue }
-  for (const entry of plan[file]) {
-    const sourceMod = cache[real(entry.target)]
-    if (!sourceMod) { continue }
-    const sourceExported = sourceMod.exports
-    if (!sourceExported || typeof sourceExported !== 'object') { continue }
-    let here
-    let there
-    try { here = exported[entry.exported] } catch { continue }
-    if (here !== undefined) { continue }
-    try { there = sourceExported[entry.local] } catch { continue }
-    if (there === undefined) { continue }
-    findings.push({ binding: entry.exported, file, source: entry.target })
-  }
-}
-process.stdout.write(JSON.stringify({ findings, observed }))
-process.exit(0)
-`
-}
-
-/**
  * A finding, rendered the way the fleet's error-message rule asks: what broke,
  * where, what was seen against what was wanted, and the fix.
  */
@@ -242,37 +199,6 @@ export function listPublicSubpathTargets(
 }
 
 /**
- * Parse a probe's stdout. A child that printed nothing usable is reported as
- * an error rather than silently counted clean.
- */
-export function parseProbeOutput(stdout: string): {
-  error?: string | undefined
-  findings: Array<{ binding: string; file: string; source: string }>
-  observed: number
-} {
-  let parsed
-  try {
-    parsed = JSON.parse(stdout) as {
-      error?: string | undefined
-      findings?:
-        | Array<{ binding: string; file: string; source: string }>
-        | undefined
-      observed?: number | undefined
-    }
-  } catch {
-    return {
-      error: `probe printed unparseable output: ${stdout.slice(0, 200)}`,
-      findings: [],
-      observed: 0,
-    }
-  }
-  if (parsed.error) {
-    return { error: parsed.error, findings: [], observed: 0 }
-  }
-  return { findings: parsed.findings ?? [], observed: parsed.observed ?? 0 }
-}
-
-/**
  * Probe every subpath, each in its own process, and collect the poisoned
  * bindings. Concurrency is capped at the CPU count; each child is short.
  */
@@ -291,49 +217,106 @@ export async function auditUndefinedBindings(
   let done = 0
   let observed = 0
 
+  // Targets are handed out in CHUNKS, one child per chunk, rather than one
+  // child per target. Node startup dominated this check: 663 targets cost 663
+  // process launches, ~26s of CPU for a few seconds of actual probing.
+  const workerCount = Math.max(1, os.cpus().length)
+  const chunkSize = Math.max(1, Math.ceil(targets.length / workerCount))
+  const chunks: SubpathTarget[][] = []
+  for (let i = 0; i < targets.length; i += chunkSize) {
+    chunks.push(targets.slice(i, i + chunkSize))
+  }
+
   async function worker(): Promise<void> {
-    while (next < targets.length) {
-      const target = targets[next]!
+    while (next < chunks.length) {
+      const chunk = chunks[next]!
       next += 1
+      const targetsFile = path.join(scratchDir, `targets-${next}.json`)
+      writeFileSync(targetsFile, JSON.stringify(chunk.map(t => t.file)))
       let stdout = ''
       try {
         ;({ stdout } = await execFileAsync('node', ['-e', probeSource], {
           env: {
             ...process.env,
             PROBE_PLAN: planFile,
-            PROBE_TARGET: target.file,
+            PROBE_TARGETS: targetsFile,
           },
-          maxBuffer: 64 * 1024 * 1024,
-          timeout: PROBE_TIMEOUT_MS,
+          maxBuffer: 256 * 1024 * 1024,
+          timeout: PROBE_TIMEOUT_MS * chunk.length,
         }))
       } catch {
-        // A subpath that cannot even load is a different check's business
-        // (packed-tarball-resolves owns resolution). Do not fail here on it.
-        done += 1
-        onProgress?.(done)
+        // A chunk that dies takes its targets with it. Falling back to one
+        // child per target keeps a single unloadable subpath from silently
+        // dropping the rest of its chunk from the sweep.
+        for (const target of chunk) {
+          const single = await probeOne(target)
+          if (single) {
+            observed += single.observed
+            collect(single.findings, target)
+          }
+          done += 1
+          onProgress?.(done)
+        }
         continue
       }
-      const parsed = parseProbeOutput(stdout)
-      observed += parsed.observed
-      for (const raw of parsed.findings) {
-        findings.push({
-          binding: raw.binding,
-          chain: findPathBack(raw.source, raw.file)?.map(f =>
-            path.relative(distDir, f),
-          ),
-          file: path.relative(distDir, raw.file),
-          source: path.relative(distDir, raw.source),
-          subpath: target.subpath,
-        })
+      const byTarget = new Map(chunk.map(t => [t.file, t]))
+      const lines = stdout.split(/\r?\n/)
+      for (let i = 0, { length } = lines; i < length; i += 1) {
+        const line = lines[i] as string
+        if (!line) {
+          continue
+        }
+        const parsed = parseProbeOutput(line)
+        const target = byTarget.get(parsed.target ?? '')
+        observed += parsed.observed
+        if (target) {
+          collect(parsed.findings, target)
+        }
+        done += 1
+        onProgress?.(done)
       }
-      done += 1
-      onProgress?.(done)
     }
   }
 
-  await Promise.all(
-    Array.from({ length: Math.max(1, os.cpus().length) }, worker),
-  )
+  function collect(raws: readonly ProbeFinding[], target: SubpathTarget): void {
+    for (const raw of raws) {
+      findings.push({
+        binding: raw.binding,
+        chain: findPathBack(raw.source, raw.file)?.map(f =>
+          path.relative(distDir, f),
+        ),
+        file: path.relative(distDir, raw.file),
+        source: path.relative(distDir, raw.source),
+        subpath: target.subpath,
+      })
+    }
+  }
+
+  async function probeOne(
+    target: SubpathTarget,
+  ): Promise<{ findings: ProbeFinding[]; observed: number } | undefined> {
+    const oneFile = path.join(scratchDir, 'one.json')
+    writeFileSync(oneFile, JSON.stringify([target.file]))
+    try {
+      const { stdout } = await execFileAsync('node', ['-e', probeSource], {
+        env: {
+          ...process.env,
+          PROBE_PLAN: planFile,
+          PROBE_TARGETS: oneFile,
+        },
+        maxBuffer: 64 * 1024 * 1024,
+        timeout: PROBE_TIMEOUT_MS,
+      })
+      const parsed = parseProbeOutput(stdout.split(/\r?\n/)[0] ?? '')
+      return { findings: parsed.findings, observed: parsed.observed }
+    } catch {
+      // A subpath that cannot even load is a different check's business
+      // (packed-tarball-resolves owns resolution). Do not fail here on it.
+      return undefined
+    }
+  }
+
+  await Promise.all(Array.from({ length: workerCount }, worker))
   return {
     findings: findings.toSorted((a, b) =>
       `${a.file}:${a.binding}:${a.subpath}` <

@@ -24,11 +24,13 @@ import { describe, expect, it } from 'vitest'
 import {
   auditUndefinedBindings,
   buildProbePlan,
-  buildProbeSource,
   formatFinding,
   listPublicSubpathTargets,
-  parseProbeOutput,
 } from '../../scripts/repo/check/exports-have-no-undefined-bindings.mts'
+import {
+  buildProbeSource,
+  parseProbeOutput,
+} from '../../scripts/repo/check/undefined-bindings-probe.mts'
 import { listDistFiles } from '../../scripts/repo/check/reexports-have-no-import-cycles.mts'
 import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
