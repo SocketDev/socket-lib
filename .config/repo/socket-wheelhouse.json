@@ -6,6 +6,18 @@
   "buildStubs": {
     "keepExposed": [
       {
+        "leaf": "polyfills/group-by",
+        "reason": "Exercised by the test262 conformance suite, which runs against dist/. The stub list is consumer-driven and no fleet repo imports a polyfill by name, so it reads as unused; stubbing it made every Map.groupBy and Object.groupBy conformance case throw instead of run. A polyfill's purpose is to be present in the build."
+      },
+      {
+        "leaf": "polyfills/promise",
+        "reason": "Same as polyfills/group-by: the test262 cases for Promise.try and Promise.withResolvers run against dist/ and load this module."
+      },
+      {
+        "leaf": "polyfills/set",
+        "reason": "Same as polyfills/group-by: the test262 cases for the Set methods (difference, intersection, isDisjointFrom, isSubsetOf, union, and the rest) run against dist/ and load this module."
+      },
+      {
         "leaf": "process/spawn/retry/browser",
         "reason": "The browser retry variant. Ships with its Node twin so the export alias resolves in both conditions."
       },
@@ -53,6 +65,8 @@
         "ai/subagent-status",
         "archives/detect",
         "archives/extract",
+        "archives/tar",
+        "archives/types",
         "archives/zip",
         "cacache/tmp",
         "cli/check",
@@ -82,6 +96,12 @@
         "eco/manifest/types",
         "eco/npm/bun/exec",
         "eco/npm/manifest-format",
+        "eco/npm/meta-cache/browser",
+        "eco/npm/meta-cache/node",
+        "eco/npm/meta-slice",
+        "eco/npm/meta-types",
+        "eco/npm/meta/browser",
+        "eco/npm/meta/node",
         "eco/npm/npm-cli/exec",
         "eco/npm/npm-cli/extract-package-name-from-path",
         "eco/npm/npm-cli/lockfile/format",
@@ -95,6 +115,24 @@
         "eco/npm/pnpm/lockfile/package-id-v5",
         "eco/npm/pnpm/lockfile/package-id-v6-v9",
         "eco/npm/pnpm/lockfile/parse",
+        "eco/npm/registry/access",
+        "eco/npm/registry/audit",
+        "eco/npm/registry/auth",
+        "eco/npm/registry/cache",
+        "eco/npm/registry/client",
+        "eco/npm/registry/live",
+        "eco/npm/registry/oidc",
+        "eco/npm/registry/org",
+        "eco/npm/registry/publish",
+        "eco/npm/registry/search",
+        "eco/npm/registry/stage",
+        "eco/npm/registry/stage-actions",
+        "eco/npm/registry/stage-tarball",
+        "eco/npm/registry/tarball/browser",
+        "eco/npm/registry/tarball/node",
+        "eco/npm/registry/team",
+        "eco/npm/registry/tokens",
+        "eco/npm/registry/trust",
         "eco/npm/script",
         "eco/npm/vlt/exec",
         "eco/npm/yarn/exec",
@@ -193,12 +231,15 @@
         "external-tools/uv/resolve",
         "external-tools/uv/types",
         "fs/allowed-dirs-cache",
+        "fs/atomic",
         "fs/resolve-module",
+        "git/exec",
         "git/ignored",
         "git/isolated-index",
         "git/status",
         "git/tree",
         "git/unstaged",
+        "git/worktree",
         "github/cli",
         "github/commit",
         "github/ghsa",
@@ -221,19 +262,8 @@
         "native-messaging/rate-limit",
         "native-messaging/run",
         "node/events",
+        "node/process",
         "node/timers-promises",
-        "npm/registry/access",
-        "npm/registry/audit",
-        "npm/registry/cache",
-        "npm/registry/oidc",
-        "npm/registry/org",
-        "npm/registry/publish",
-        "npm/registry/search",
-        "npm/registry/stage",
-        "npm/registry/stage-actions",
-        "npm/registry/team",
-        "npm/registry/tokens",
-        "npm/registry/trust",
         "objects/getters",
         "oci/blob",
         "oci/manifest",
@@ -245,9 +275,6 @@
         "packages/lockfile-redundancy",
         "packages/sbom-anomalies",
         "paths/filenames",
-        "polyfills/group-by",
-        "polyfills/promise",
-        "polyfills/set",
         "primordials/checks/primordials",
         "primordials/checks/primordials-defaults",
         "primordials/function",
@@ -335,7 +362,9 @@
   },
   "coverage": {
     "exclude": {
-      "add": ["src/perf/**"]
+      "add": [
+        "src/perf/**"
+      ]
     }
   },
   "lint": {
