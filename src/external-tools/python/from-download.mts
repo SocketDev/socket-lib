@@ -6,9 +6,6 @@
  *   `python/python.exe` on Windows) — no strip.
  */
 
-import path from 'node:path'
-import process from 'node:process'
-
 import { getSocketDlxDir } from '../../paths/socket.mjs'
 import { downloadAndExtractTool } from '../from-download.mjs'
 
@@ -17,6 +14,8 @@ import { getPythonArch, pythonAsset } from './asset-names.mjs'
 import type { BinaryDownloader } from '../from-download.mjs'
 import type { HashInput } from '../../crypto/integrity.mjs'
 import type { ResolvedPython } from './types.mjs'
+import { getNodePath } from '../../node/path.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 export interface PythonFromDownloadOptions {
   /**
@@ -60,10 +59,15 @@ export function pythonBinPath(
   extractedDir: string,
   arch?: string | undefined,
 ): string {
-  const isWin = arch ? arch.startsWith('win-') : process.platform === 'win32'
+  const nodeProcess = getNodeProcess()
+  const isWin = arch
+    ? arch.startsWith('win-')
+    : nodeProcess.platform === 'win32'
   if (isWin) {
+    const path = getNodePath()
     return path.join(extractedDir, 'python', 'python.exe')
   }
+  const path = getNodePath()
   return path.join(extractedDir, 'python', 'bin', 'python3')
 }
 
@@ -75,6 +79,7 @@ export function pythonCacheDir(
   tag: string,
   arch: string,
 ): string {
+  const path = getNodePath()
   return path.join(getSocketDlxDir(), 'python', `${version}-${tag}-${arch}`)
 }
 

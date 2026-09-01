@@ -10,10 +10,9 @@
  *   unsupported platform/arch.
  */
 
-import process from 'node:process'
-
 import { getLibc } from '../../constants/platform.mjs'
 import { ObjectFreeze } from '../../primordials/object.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 // node platform → Adoptium platform segment. Node reports `win32`; the JRE keys
 // use `win`. macOS/Linux pass through.
@@ -32,9 +31,10 @@ const NODE_ARCH_TO_JRE: Readonly<Record<string, string>> = ObjectFreeze({
 }) as unknown as Readonly<Record<string, string>>
 
 export function getJreArch(): string | undefined {
-  /* c8 ignore start - depends on process.platform/arch + libc probe. */
-  const platform = NODE_PLATFORM_TO_JRE[process.platform]
-  const arch = NODE_ARCH_TO_JRE[process.arch]
+  const nodeProcess = getNodeProcess()
+  /* c8 ignore start - depends on getNodeProcess().platform/arch + libc probe. */
+  const platform = NODE_PLATFORM_TO_JRE[nodeProcess.platform]
+  const arch = NODE_ARCH_TO_JRE[nodeProcess.arch]
   if (!platform || !arch) {
     return undefined
   }

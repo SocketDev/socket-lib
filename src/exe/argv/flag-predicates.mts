@@ -12,16 +12,16 @@
  *      accepts both `--quiet` and `--silent`).
  */
 
-import process from 'node:process'
-
 import {
   ArrayIsArray,
   ArrayPrototypeIncludes,
 } from '../../primordials/array.mjs'
 
 import type { FlagInput, FlagValues } from './flag-types.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
-const processArg = [...process.argv]
+const nodeProcess = getNodeProcess()
+const processArg = [...nodeProcess.argv]
 
 /**
  * Get the appropriate log level based on flags. Returns 'silent', 'error',
@@ -66,7 +66,7 @@ export function makeFlagPredicate(
 ): (input?: FlagInput | undefined) => boolean {
   const argvForms = [...longFlags, ...shortFlags]
   return function check(input?: FlagInput | undefined): boolean {
-    // processArg is module-frozen process.argv slice; no-input branch only
+    // processArg is module-frozen getNodeProcess().argv slice; no-input branch only
     // reachable when invoked from a process whose argv contains the flag,
     // which test runners can't simulate.
     /* c8 ignore start */
@@ -82,8 +82,8 @@ export function makeFlagPredicate(
 }
 
 /**
- * Check if all flag is set. Accepts FlagValues object, process.argv array, or
- * undefined (uses process.argv).
+ * Check if all flag is set. Accepts FlagValues object, getNodeProcess().argv
+ * array, or undefined (uses getNodeProcess().argv).
  *
  * @example
  *   ;```typescript

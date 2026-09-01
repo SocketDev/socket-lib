@@ -5,9 +5,6 @@
  *   the archive name.
  */
 
-import path from 'node:path'
-import process from 'node:process'
-
 import { getSocketDlxDir } from '../../paths/socket.mjs'
 import { downloadAndExtractTool } from '../from-download.mjs'
 
@@ -16,6 +13,8 @@ import { getTrivyAssetEntry, getTrivyDownloadUrl } from './asset-names.mjs'
 import type { BinaryDownloader } from '../from-download.mjs'
 import type { HashInput } from '../../crypto/integrity.mjs'
 import type { ResolvedTrivy } from './types.mjs'
+import { getNodePath } from '../../node/path.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 export interface TrivyFromDownloadOptions {
   version: string
@@ -41,6 +40,7 @@ export async function trivyFromDownload(
   // unpacker from the cached filename. `entry.suffix` already carries
   // the right extension (`.tar.gz` for posix, `.zip` for windows).
   const archiveExt = entry?.suffix.endsWith('.zip') ? '.zip' : '.tar.gz'
+  const path = getNodePath()
   const extractedDir =
     cacheDir ?? path.join(getSocketDlxDir(), 'trivy', version, platformArch)
   const archive = await downloadAndExtractTool({
@@ -50,7 +50,8 @@ export async function trivyFromDownload(
     extractedDir,
     downloader,
   })
-  const binary = process.platform === 'win32' ? 'trivy.exe' : 'trivy'
+  const nodeProcess = getNodeProcess()
+  const binary = nodeProcess.platform === 'win32' ? 'trivy.exe' : 'trivy'
   return {
     path: path.join(extractedDir, binary),
     source: 'download',

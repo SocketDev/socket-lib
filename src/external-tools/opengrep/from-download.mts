@@ -5,9 +5,6 @@
  *   `isArchive` flag drives extraction vs. copy.
  */
 
-import path from 'node:path'
-import { promises as fsPromises } from 'node:fs'
-
 import { getSocketDlxDir } from '../../paths/socket.mjs'
 import { safeMkdir } from '../../fs/safe.mjs'
 import {
@@ -23,6 +20,8 @@ import {
 import type { BinaryDownloader } from '../from-download.mjs'
 import type { HashInput } from '../../crypto/integrity.mjs'
 import type { ResolvedOpengrep } from './types.mjs'
+import { getNodeFs } from '../../node/fs.mjs'
+import { getNodePath } from '../../node/path.mjs'
 
 export interface OpengrepFromDownloadOptions {
   version: string
@@ -44,6 +43,7 @@ export async function opengrepFromDownload(
   if (!url || !entry) {
     return undefined
   }
+  const path = getNodePath()
   const targetDir =
     cacheDir ?? path.join(getSocketDlxDir(), 'opengrep', version, platformArch)
 
@@ -73,8 +73,9 @@ export async function opengrepFromDownload(
   })
   await safeMkdir(targetDir)
   const finalPath = path.join(targetDir, 'opengrep')
-  await fsPromises.copyFile(archive.archivePath, finalPath)
-  await fsPromises.chmod(finalPath, 0o755)
+  const fs = getNodeFs()
+  await fs.promises.copyFile(archive.archivePath, finalPath)
+  await fs.promises.chmod(finalPath, 0o755)
   return {
     path: finalPath,
     source: 'download',

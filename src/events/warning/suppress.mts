@@ -4,10 +4,9 @@
  *   calls are cheap.
  */
 
-import process from 'node:process'
-
 import { SetCtor } from '../../primordials/map-set.mjs'
 import { ReflectApply } from '../../primordials/reflect.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 // Store the original emitWarning function to avoid repeat wrapping.
 let originalEmitWarning: typeof process.emitWarning | undefined
@@ -16,8 +15,8 @@ let originalEmitWarning: typeof process.emitWarning | undefined
 const suppressedWarnings = new SetCtor<string>()
 
 /**
- * Restore the original process.emitWarning function. Call this to re-enable all
- * warnings after suppressing them.
+ * Restore the original getNodeProcess().emitWarning function. Call this to
+ * re-enable all warnings after suppressing them.
  *
  * @example
  *   ;```typescript
@@ -28,7 +27,8 @@ const suppressedWarnings = new SetCtor<string>()
  */
 export function restoreWarnings(): void {
   if (originalEmitWarning) {
-    process.emitWarning = originalEmitWarning
+    const nodeProcess = getNodeProcess()
+    nodeProcess.emitWarning = originalEmitWarning
     originalEmitWarning = undefined
     suppressedWarnings.clear()
   }
@@ -36,7 +36,7 @@ export function restoreWarnings(): void {
 
 /**
  * Internal function to set up warning suppression. Only wraps
- * process.emitWarning once, regardless of how many times it's called.
+ * getNodeProcess().emitWarning once, regardless of how many times it's called.
  */
 export function setupSuppression(): void {
   // Only wrap once - store the original on first call.
@@ -44,8 +44,9 @@ export function setupSuppression(): void {
   // hit the second-call no-op branch.
   /* c8 ignore start */
   if (!originalEmitWarning) {
-    originalEmitWarning = process.emitWarning
-    process.emitWarning = (warning: string | Error, ...args: unknown[]) => {
+    const nodeProcess = getNodeProcess()
+    originalEmitWarning = nodeProcess.emitWarning
+    nodeProcess.emitWarning = (warning: string | Error, ...args: unknown[]) => {
       if (typeof warning === 'string') {
         for (const suppressedType of suppressedWarnings) {
           if (warning.includes(suppressedType)) {
@@ -54,7 +55,7 @@ export function setupSuppression(): void {
         }
       } else if (warning !== null && typeof warning === 'object') {
         /* c8 ignore start - Object-shaped warning suppression
-           (Error / Warning instances). process.emitWarning rarely
+           (Error / Warning instances). getNodeProcess().emitWarning rarely
            passes object form in test runs; covered when consumers
            pass real Warning subclasses. */
         const warningObj = warning as { name?: string | undefined }

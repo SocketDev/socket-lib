@@ -57,22 +57,40 @@ const GETTER_TO_BINDING: Record<string, string> = {
 } as Record<string, string>
 
 /**
- * Whether `text` already declares `const <binding> = <getter>()`.
+ * Whether `scope` itself declares `const <binding> = <getter>()`.
  *
  * The fixer's own dedup set only remembers what THIS pass wrote, and a fixable
  * rule runs in passes: the first hoists a binding into the source, the next
  * starts with an empty set, cannot see it, and hoists a second one. Reading the
- * scope's text closes that gap, since a binding already in the source is
- * exactly what the set is missing.
+ * scope closes that gap.
+ *
+ * It inspects the scope's OWN statements, not its text. A scope's text contains
+ * every nested function body too, so a text match let a binding declared inside
+ * one function satisfy the check for a sibling function - the hoist was skipped
+ * and the sibling referenced a name that was never in scope.
  */
 export function declaresBinding(
-  text: string,
+  scope: AstNode,
   binding: string,
   getter: string,
 ): boolean {
-  return new RegExp(
-    `\\bconst\\s+${binding}\\s*=\\s*${getter}\\s*\\(\\s*\\)`,
-  ).test(text)
+  const body = Array.isArray(scope.body) ? scope.body : undefined
+  if (!body) {
+    return false
+  }
+  return body.some((statement: AstNode) => {
+    if (statement?.type !== 'VariableDeclaration') {
+      return false
+    }
+    return (statement.declarations ?? []).some(
+      (declarator: AstNode) =>
+        declarator?.id?.type === 'Identifier' &&
+        declarator.id.name === binding &&
+        declarator.init?.type === 'CallExpression' &&
+        declarator.init.callee?.type === 'Identifier' &&
+        declarator.init.callee.name === getter,
+    )
+  })
 }
 
 /**
@@ -189,7 +207,7 @@ const rule = {
         )
         const hoistKey = scopeKeys[0] ?? ''
         const alreadyDeclared = scopes.some(scope =>
-          declaresBinding(sourceCode.getText(scope), binding, getter),
+          declaresBinding(scope, binding, getter),
         )
 
         context.report({

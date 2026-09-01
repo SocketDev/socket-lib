@@ -18,9 +18,6 @@
  *     pin).
  */
 
-import path from 'node:path'
-import process from 'node:process'
-
 import { getSocketDlxDir } from '../../paths/socket.mjs'
 import { downloadAndExtractTool } from '../from-download.mjs'
 
@@ -31,6 +28,8 @@ import type { HashInput } from '../../crypto/integrity.mjs'
 import type { ResolvedJre } from './types.mjs'
 
 import { StringPrototypeStartsWith } from '../../primordials/string.mjs'
+import { getNodePath } from '../../node/path.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 export interface JreFromDownloadOptions {
   /**
@@ -83,6 +82,7 @@ export async function jreFromDownload(
   if (!url) {
     return undefined
   }
+  const path = getNodePath()
   const extractedDir =
     cacheDir ??
     path.join(getSocketDlxDir(), 'jre', String(version), platformArch)
@@ -103,11 +103,12 @@ export async function jreFromDownload(
     extractOptions: { strip: 1 },
     downloader,
   })
-  const javaBinary = process.platform === 'win32' ? 'java.exe' : 'java'
+  const nodeProcess = getNodeProcess()
+  const javaBinary = nodeProcess.platform === 'win32' ? 'java.exe' : 'java'
   // macOS Adoptium archives nest the runnable JRE under
   // `Contents/Home/`; other platforms put `bin/` at the top.
   const macHome = path.join(extractedDir, 'Contents', 'Home')
-  const javaHome = process.platform === 'darwin' ? macHome : extractedDir
+  const javaHome = nodeProcess.platform === 'darwin' ? macHome : extractedDir
   return {
     javaPath: path.join(javaHome, 'bin', javaBinary),
     javaHome,

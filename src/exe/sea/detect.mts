@@ -14,9 +14,8 @@
  *      cleanly on stock Node < 24, browsers, Deno, Bun.
  */
 
-import process from 'node:process'
-
 import { normalizePath } from '../../paths/normalize.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 /**
  * Cached SEA detection result.
@@ -35,8 +34,9 @@ let isSeaCache: boolean | undefined
  *   ```
  */
 export function getSeaBinaryPath(): string | undefined {
-  return isSeaBinary() && process.argv[0]
-    ? normalizePath(process.argv[0])
+  const nodeProcess = getNodeProcess()
+  return isSeaBinary() && nodeProcess.argv[0]
+    ? normalizePath(nodeProcess.argv[0])
     : undefined
 }
 

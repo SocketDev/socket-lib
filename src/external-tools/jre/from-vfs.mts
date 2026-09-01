@@ -9,12 +9,11 @@
  *   - The `jre` key doesn't exist in the payload
  */
 
-import path from 'node:path'
-import process from 'node:process'
-
 import { getSmolVfs } from '../../exe/smol/vfs.mjs'
 
 import type { ResolvedJre } from './types.mjs'
+import { getNodePath } from '../../node/path.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 /**
  * Relative VFS key for the bundled JRE. Passed as a bare suffix to
@@ -32,11 +31,13 @@ export async function jreFromVfs(): Promise<ResolvedJre | undefined> {
     return undefined
   }
   const javaHome = await vfs.extract(JRE_VFS_KEY)
+  const path = getNodePath()
+  const nodeProcess = getNodeProcess()
   return {
     javaPath: path.join(
       javaHome,
       'bin',
-      process.platform === 'win32' ? 'java.exe' : 'java',
+      nodeProcess.platform === 'win32' ? 'java.exe' : 'java',
     ),
     javaHome,
     source: 'vfs',

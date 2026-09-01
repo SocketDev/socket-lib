@@ -7,10 +7,9 @@
  *   extracted one directory deep (`python/bin/python3`).
  */
 
-import process from 'node:process'
-
 import { getLibc } from '../../constants/platform.mjs'
 import { ObjectFreeze } from '../../primordials/object.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 // platform-arch → python-build-standalone target triple. Upstream ships both
 // gnu (glibc) and musl Linux builds, so musl hosts get the real musl triple,
@@ -93,9 +92,10 @@ export const DEFAULT_PYTHON_PIN = ObjectFreeze({
  * `getPlatformArch` — neither matches python-build-standalone's key set.
  */
 export function getPythonArch(): string | undefined {
-  /* c8 ignore start - depends on process.platform/arch + libc probe. */
-  const platform = NODE_PLATFORM_TO_PY[process.platform]
-  const arch = NODE_ARCH_TO_PY[process.arch]
+  const nodeProcess = getNodeProcess()
+  /* c8 ignore start - depends on getNodeProcess().platform/arch + libc probe. */
+  const platform = NODE_PLATFORM_TO_PY[nodeProcess.platform]
+  const arch = NODE_ARCH_TO_PY[nodeProcess.arch]
   if (!platform || !arch) {
     return undefined
   }

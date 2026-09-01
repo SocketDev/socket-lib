@@ -3,11 +3,10 @@
  *   logic to determine when shadow binary installation should be skipped.
  */
 
-import process from 'node:process'
-
 import { normalizePath } from '../../paths/normalize.mjs'
 
 import type { ShadowInstallationOptions } from './types.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 /**
  * Determines if shadow binaries should be installed. Shadows should NOT be
@@ -33,7 +32,8 @@ export function shouldSkipShadow(
   binPath: string,
   options?: ShadowInstallationOptions | undefined,
 ): boolean {
-  const { cwd = process.cwd(), win32 = false } = {
+  const nodeProcess = getNodeProcess()
+  const { cwd = nodeProcess.cwd(), win32 = false } = {
     __proto__: null,
     ...options,
   } as ShadowInstallationOptions
@@ -56,10 +56,10 @@ export function shouldSkipShadow(
   }
 
   // Check environment variable for exec/npx/dlx indicators.
-  const userAgent = process.env['npm_config_user_agent']
+  const userAgent = nodeProcess.env['npm_config_user_agent']
   if (
     userAgent?.includes('exec') ||
-    userAgent?.includes('npx') || // # socket-lint: allow npx
+    userAgent?.includes('npx') ||
     userAgent?.includes('dlx')
   ) {
     return true
@@ -69,7 +69,7 @@ export function shouldSkipShadow(
   const normalizedCwd = normalizePath(cwd)
 
   // Check if running from npm's npx cache.
-  const npmCache = process.env['npm_config_cache']
+  const npmCache = nodeProcess.env['npm_config_cache']
   if (npmCache && normalizedCwd.includes(normalizePath(npmCache))) {
     return true
   }

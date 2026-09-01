@@ -138,46 +138,56 @@ export function rewriteSource(source: string, filePath: string): string {
       `^import\\s+(?!type\\b)(.+?)\\s+from\\s+'(?:node:)?${builtin.replace('/', '\\/')}'\\n`,
       'm',
     )
-    const match = importRe.exec(text)
-    if (!match) {
-      continue
-    }
-    const clause = (match[1] ?? '').trim()
-    // Drop the import BEFORE rewriting uses. Rewriting first would also edit
-    // the specifier string in the import line itself.
-    text = text.replace(importRe, '')
-    // Rewrite identifiers over MASKED text, so a builtin's name appearing
-    // inside a string (a path segment, a message) is never touched.
-    const { literals, masked } = maskStringLiterals(text)
-    text = masked
-    if (clause.startsWith('{')) {
-      const entries = clause
-        .slice(1, -1)
-        .split(',')
-        .map(part => part.trim())
-        .filter(Boolean)
-      for (let i = 0, { length } = entries; i < length; i += 1) {
-        const parts = (entries[i] as string).split(/\s+as\s+/)
-        const imported = (parts[0] ?? '').trim()
-        const local = (parts[parts.length - 1] ?? '').trim()
-        const replacement = `${getter}().${imported}`
+    // A module can import the same builtin twice — `{ existsSync }` on one line
+    // and `{ promises as fsPromises }` on the next. Matching once left the
+    // second import in place, so the file kept a direct `node:` binding and the
+    // rule still fired on it after a run that reported success.
+    let match = importRe.exec(text)
+    while (match) {
+      const clause = (match[1] ?? '').trim()
+      // Drop the import BEFORE rewriting uses. Rewriting first would also edit
+      // the specifier string in the import line itself.
+      text = text.replace(importRe, '')
+      // Rewrite identifiers over MASKED text, so a builtin's name appearing
+      // inside a string (a path segment, a message) is never touched.
+      const { literals, masked } = maskStringLiterals(text)
+      text = masked
+      if (clause.startsWith('{')) {
+        const entries = clause
+          .slice(1, -1)
+          .split(',')
+          .map(part => part.trim())
+          .filter(Boolean)
+        for (let i = 0, { length } = entries; i < length; i += 1) {
+          const parts = (entries[i] as string).split(/\s+as\s+/)
+          const imported = (parts[0] ?? '').trim()
+          const local = (parts[parts.length - 1] ?? '').trim()
+          const replacement = `${getter}().${imported}`
+          text = text.replace(
+            new RegExp(`${NOT_A_MEMBER_ACCESS}${local}\\b`, 'g'),
+            () => replacement,
+          )
+        }
+      } else {
+        const namespace = clause.replace(/^\*\s+as\s+/, '').trim()
         text = text.replace(
-          new RegExp(`${NOT_A_MEMBER_ACCESS}${local}\\b`, 'g'),
-          () => replacement,
+          new RegExp(`${NOT_A_MEMBER_ACCESS}${namespace}\\.(\\w+)`, 'g'),
+          (_match: string, member: string) => `${getter}().${member}`,
         )
       }
-    } else {
-      const namespace = clause.replace(/^\*\s+as\s+/, '').trim()
-      text = text.replace(
-        new RegExp(`${NOT_A_MEMBER_ACCESS}${namespace}\\.(\\w+)`, 'g'),
-        (_match: string, member: string) => `${getter}().${member}`,
-      )
-    }
-    text = unmaskStringLiterals(text, literals)
-    const line = `import { ${getter} } from '${accessorSpecifier(filePath, moduleName)}'\n`
-    // A file may already import the accessor for a builtin it uses both ways.
-    if (!text.includes(line)) {
-      added.push(line)
+      const rewroteSomething = text !== masked
+      text = unmaskStringLiterals(text, literals)
+      // Only import the accessor when a use actually moved to it. A module whose
+      // sole mention of the builtin sits in a type position or a string has
+      // nothing left to call, and an unused import fails the build.
+      if (rewroteSomething) {
+        const line = `import { ${getter} } from '${accessorSpecifier(filePath, moduleName)}'\n`
+        // A file may already import the accessor for a builtin it uses both ways.
+        if (!text.includes(line) && !added.includes(line)) {
+          added.push(line)
+        }
+      }
+      match = importRe.exec(text)
     }
   }
   if (!added.length) {

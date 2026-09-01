@@ -7,20 +7,21 @@
  *   unconditionally without paying a stat per resolution.
  */
 
-import path from 'node:path'
-import process from 'node:process'
-
 import type { ResolvedJre } from './types.mjs'
+import { getNodePath } from '../../node/path.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 export function jreFromJavaHome(): ResolvedJre | undefined {
-  const javaHomeEnv = process.env['JAVA_HOME']
+  const nodeProcess = getNodeProcess()
+  const javaHomeEnv = nodeProcess.env['JAVA_HOME']
   if (!javaHomeEnv) {
     return undefined
   }
+  const path = getNodePath()
   const javaPath = path.join(
     javaHomeEnv,
     'bin',
-    process.platform === 'win32' ? 'java.exe' : 'java',
+    nodeProcess.platform === 'win32' ? 'java.exe' : 'java',
   )
   return {
     javaPath,

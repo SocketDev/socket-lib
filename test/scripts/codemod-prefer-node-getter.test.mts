@@ -74,6 +74,35 @@ describe('rewriteSource', () => {
     ).toBe(1)
   })
 
+  it('leaves a typeof type position alone', () => {
+    const out = rewriteSource(
+      "import process from 'node:process'\n\nlet f: typeof process.emitWarning | undefined\nexport const g = () => process.pid\n",
+      'src/state/db.mts',
+    )
+    expect(out).toContain('typeof process.emitWarning')
+    expect(out).toContain('getNodeProcess().pid')
+  })
+
+  it('leaves the builtin name inside a string alone', () => {
+    const out = rewriteSource(
+      "import { existsSync } from 'node:fs'\nimport { safe } from '../../fs/promises/safe.mjs'\n\nexport const x = existsSync(safe)\n",
+      'src/external-tools/python/pin.mts',
+    )
+    expect(out).toContain("'../../fs/promises/safe.mjs'")
+    expect(out).toContain('getNodeFs().existsSync(safe)')
+  })
+
+  it('handles two imports of the same builtin', () => {
+    const out = rewriteSource(
+      "import { existsSync } from 'node:fs'\nimport { promises as fsPromises } from 'node:fs'\n\nexport const x = existsSync('a')\nexport const y = fsPromises.readFile('b')\n",
+      'src/state/db.mts',
+    )
+    expect(out).not.toContain("from 'node:fs'")
+    expect(out).toContain("getNodeFs().existsSync('a')")
+    expect(out).toContain('getNodeFs().promises.readFile')
+    expect(out.split('import { getNodeFs } from').length - 1).toBe(1)
+  })
+
   it('returns the source unchanged when no wrapped builtin is imported', () => {
     const source = "import { z } from './z.mjs'\n\nexport const x = z\n"
     expect(rewriteSource(source, 'src/state/db.mts')).toBe(source)

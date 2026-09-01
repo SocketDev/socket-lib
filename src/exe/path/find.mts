@@ -17,8 +17,6 @@
  *     through to `which` on PATH.
  */
 
-import process from 'node:process'
-
 import { isWin32 } from '../../constants/platform.mjs'
 import { getHome } from '../../env/home.mjs'
 import { getAppdata, getLocalappdata } from '../../env/windows.mjs'
@@ -28,6 +26,7 @@ import { ArrayIsArray } from '../../primordials/array.mjs'
 import { getFs, getPath } from '../shared.mjs'
 import { isShadowBinPath } from '../shadow/detect.mjs'
 import { whichRealSync } from './which.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 /**
  * Find the real executable for a binary, bypassing shadow bins.
@@ -99,8 +98,9 @@ export function findRealNpm(): string {
 
   // Try to find npm alongside the node executable. On Windows this is
   // npm.cmd; on POSIX it's the bare npm shim. WIN32-only candidates
+  const nodeProcess = getNodeProcess()
   // tested on Windows runners.
-  const nodeDir = path.dirname(process.execPath)
+  const nodeDir = path.dirname(nodeProcess.execPath)
   /* c8 ignore start */
   const nodeDirCandidates = isWin32()
     ? [path.join(nodeDir, 'npm.cmd'), path.join(nodeDir, 'npm')]

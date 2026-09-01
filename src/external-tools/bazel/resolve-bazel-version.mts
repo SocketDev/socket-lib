@@ -11,10 +11,9 @@
  *      surfaces an actionable error.
  */
 
-import process from 'node:process'
-
 import { getLatestRelease } from '../../releases/github-listing.mjs'
 import { readBazelVersionFile } from './read-bazel-version-file.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 export interface ResolveBazelVersionOptions {
   /**
@@ -27,9 +26,10 @@ export async function resolveBazelVersion(
   options?: ResolveBazelVersionOptions | undefined,
 ): Promise<string | undefined> {
   options = { __proto__: null, ...options } as typeof options
-  const cwd = options?.cwd ?? process.cwd()
+  const nodeProcess = getNodeProcess()
+  const cwd = options?.cwd ?? nodeProcess.cwd()
 
-  const envOverride = process.env['USE_BAZEL_VERSION']
+  const envOverride = nodeProcess.env['USE_BAZEL_VERSION']
   if (envOverride && envOverride.length > 0) {
     return envOverride
   }

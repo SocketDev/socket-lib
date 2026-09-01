@@ -4,8 +4,6 @@
  *   strings, arrays, aliases, defaults, and coercion.
  */
 
-import process from 'node:process'
-
 import yargsParser from '../../external/yargs-parser.js'
 
 import { ArrayPrototypeIncludes } from '../../primordials/array.mjs'
@@ -13,6 +11,7 @@ import { ArrayPrototypeIncludes } from '../../primordials/array.mjs'
 import { ObjectEntries } from '../../primordials/object.mjs'
 
 import { StringPrototypeStartsWith } from '../../primordials/string.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 /**
  * Yargs parser options interface.
  */
@@ -74,7 +73,7 @@ export interface ParseArgsOptionsConfig {
  * util.parseArgs.
  */
 export interface ParseArgsConfig {
-  // Command-line arguments to parse (defaults to process.argv.slice(2)).
+  // Command-line arguments to parse (defaults to getNodeProcess().argv.slice(2)).
   args?: readonly string[] | undefined
   // Options configuration object.
   // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
@@ -125,8 +124,8 @@ export const commonParseArgsConfig: ParseArgsConfig = {
 }
 
 /**
- * Extract positional arguments from process.argv. Useful for commands that
- * accept file paths or other positional parameters.
+ * Extract positional arguments from getNodeProcess().argv. Useful for commands
+ * that accept file paths or other positional parameters.
  *
  * @example
  *   ;```typescript
@@ -135,7 +134,8 @@ export const commonParseArgsConfig: ParseArgsConfig = {
  *   ```
  */
 export function getPositionalArgs(startIndex = 2): string[] {
-  const args = process.argv.slice(startIndex)
+  const nodeProcess = getNodeProcess()
+  const args = nodeProcess.argv.slice(startIndex)
   const positionals: string[] = []
   let i = 0
 
@@ -152,6 +152,7 @@ export function getPositionalArgs(startIndex = 2): string[] {
   return positionals
 }
 
+const nodeProcess = getNodeProcess()
 /**
  * Check if a specific flag is present in argv.
  *
@@ -161,7 +162,7 @@ export function getPositionalArgs(startIndex = 2): string[] {
  *   hasFlag('force', ['--force', '--quiet']) // true
  *   ```
  */
-export function hasFlag(flag: string, argv = process.argv): boolean {
+export function hasFlag(flag: string, argv = nodeProcess.argv): boolean {
   return ArrayPrototypeIncludes(argv, `--${flag}`)
 }
 
@@ -186,7 +187,7 @@ export function parseArgs<T = Record<string, unknown>>(
   const {
     allowNegative = false,
     allowPositionals = true,
-    args = process.argv.slice(2),
+    args = nodeProcess.argv.slice(2),
     configuration,
     options = {},
     strict = true,

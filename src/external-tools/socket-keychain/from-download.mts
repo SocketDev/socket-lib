@@ -3,9 +3,6 @@
  *   integrity, and copy it into the shared Wheelhouse rack.
  */
 
-import path from 'node:path'
-import { promises as fsPromises } from 'node:fs'
-
 import { normalizePath } from '../../paths/normalize.mjs'
 import { getSocketRackToolDir } from '../../paths/socket.mjs'
 import { ErrorCtor } from '../../primordials/error.mjs'
@@ -19,6 +16,8 @@ import {
 import type { HashInput } from '../../crypto/integrity.mjs'
 import type { BinaryDownloader } from '../from-download.mjs'
 import type { ResolvedSocketKeychain } from './types.mjs'
+import { getNodeFs } from '../../node/fs.mjs'
+import { getNodePath } from '../../node/path.mjs'
 
 export interface SocketKeychainFromDownloadOptions {
   cacheDir?: string | undefined
@@ -44,6 +43,7 @@ export async function socketKeychainFromDownload(
     )
   }
 
+  const path = getNodePath()
   const targetDir = normalizePath(
     cacheDir ??
       path.join(
@@ -57,10 +57,11 @@ export async function socketKeychainFromDownload(
     name: entry.asset,
     url,
   })
-  await fsPromises.mkdir(targetDir, { recursive: true, mode: 0o700 })
+  const fs = getNodeFs()
+  await fs.promises.mkdir(targetDir, { recursive: true, mode: 0o700 })
   const finalPath = normalizePath(path.join(targetDir, entry.binary))
-  await fsPromises.copyFile(downloaded.archivePath, finalPath)
-  await fsPromises.chmod(finalPath, 0o700)
+  await fs.promises.copyFile(downloaded.archivePath, finalPath)
+  await fs.promises.chmod(finalPath, 0o700)
   return {
     integrity: downloaded.integrity,
     path: finalPath,

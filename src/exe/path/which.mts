@@ -15,8 +15,6 @@
  *   return a stale path.
  */
 
-import process from 'node:process'
-
 import whichModule from '../../external/which.js'
 import { isPath } from '../../paths/normalize.mjs'
 import { ArrayIsArray, ArrayPrototypeMap } from '../../primordials/array.mjs'
@@ -26,6 +24,7 @@ import { resolveRealBinSync } from './resolve.mjs'
 
 import type { WhichOptions as ExternalWhichOptions } from '../../external/which.js'
 import type { WhichLocalBinOptions, WhichOptions } from '../types.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 /**
  * Build the binPathCache / binPathAllCache key for a whichReal /
@@ -108,8 +107,8 @@ export async function which(
  * .exe shim on Windows, the symlink on POSIX), falling back to a plain PATH
  * lookup, or undefined when the tool resolves nowhere. `options.cwd` overrides
  * the project root whose node_modules/.bin is searched (default
- * process.cwd()); an explicit `options.path` replaces that local bin dir
- * entirely.
+ * getNodeProcess().cwd()); an explicit `options.path` replaces that local bin
+ * dir entirely.
  *
  * In npm's terminology this is "local" (vs "global" with `-g`): a locally
  * installed package's executables are linked into node_modules/.bin. See
@@ -127,8 +126,10 @@ export function whichLocalBin(
 ): string | undefined {
   const opts = { __proto__: null, ...options } as WhichLocalBinOptions
   const path = getPath()
+  const nodeProcess = getNodeProcess()
   const localBin =
-    opts.path ?? path.join(opts.cwd ?? process.cwd(), 'node_modules', '.bin')
+    opts.path ??
+    path.join(opts.cwd ?? nodeProcess.cwd(), 'node_modules', '.bin')
   const local = whichSync(binName, { nothrow: true, path: localBin })
   if (typeof local === 'string') {
     return local

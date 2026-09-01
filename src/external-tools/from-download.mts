@@ -25,9 +25,6 @@
  *     reporters.
  */
 
-import { existsSync } from 'node:fs'
-import { promises as fsPromises } from 'node:fs'
-
 import { extractArchive } from '../archives/extract.mjs'
 import { safeDelete, safeMkdir } from '../fs/safe.mjs'
 import { uniqueSync } from '../fs/unique.mjs'
@@ -37,6 +34,7 @@ import { downloadBinary } from '../dlx/binary-download.mjs'
 
 import type { ExtractOptions } from '../archives/types.mjs'
 import type { HashInput } from '../crypto/integrity.mjs'
+import { getNodeFs } from '../node/fs.mjs'
 
 /**
  * Result of `downloadAndExtractTool`. Extends `DownloadedArchive` with the
@@ -98,15 +96,16 @@ export async function downloadAndExtractTool(
   // Skip extraction when the target dir already has content. An empty dir
   // (e.g. a stale pre-created placeholder) counts as not-yet-extracted.
   let alreadyExtracted = false
-  if (existsSync(extractedDir)) {
-    const entries = await fsPromises.readdir(extractedDir)
+  const fs = getNodeFs()
+  if (fs.existsSync(extractedDir)) {
+    const entries = await fs.promises.readdir(extractedDir)
     alreadyExtracted = entries.length > 0
   }
   let extracted = false
   if (!alreadyExtracted) {
     // Extract into a sibling temp directory, then atomically rename it into
     // place. Extracting straight into extractedDir would let a killed
-    // process leave a PARTIAL tree there — existsSync + non-empty readdir
+    // process leave a PARTIAL tree there — getNodeFs().existsSync + non-empty readdir
     // on the next call would misread that partial tree as "already
     // extracted" and never retry. Renaming a completed temp dir onto
     // extractedDir (absent, or present-but-empty per the check above) is
@@ -118,7 +117,7 @@ export async function downloadAndExtractTool(
     await safeMkdir(tempDir)
     try {
       await extractArchive(archive.archivePath, tempDir, extractOptions)
-      await fsPromises.rename(tempDir, extractedDir)
+      await fs.promises.rename(tempDir, extractedDir)
       extracted = true
     } catch (e) {
       await safeDelete(tempDir)

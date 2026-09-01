@@ -31,8 +31,6 @@
  *      directory either.
  */
 
-import process from 'node:process'
-
 import { findPathEnvKey, replacePathInEnv } from '../../env/path.mjs'
 import { readRealPath } from '../../fs/inspect.mjs'
 import { findOutermostGitRoot } from '../../git/repo.mjs'
@@ -44,6 +42,7 @@ import { stripSurroundingQuotes } from '../../strings/transform.mjs'
 
 import { isShadowBinPath } from '../shadow/detect.mjs'
 import { whichSync } from './which.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 /**
  * Options for {@link resolveSanitizedExecutable}.
@@ -227,11 +226,12 @@ export function resolveSanitizedExecutable(
     useOutermostGitRoot = false,
   } = opts
   const path = getNodePath()
-  const env = opts.env ?? process.env
+  const nodeProcess = getNodeProcess()
+  const env = opts.env ?? nodeProcess.env
   const pathKey = findPathEnvKey(env)
   const rawPath = (pathKey ? env[pathKey] : undefined) ?? ''
   const untrustedRoot = resolveUntrustedRoot(
-    opts.untrustedRoot ?? process.cwd(),
+    opts.untrustedRoot ?? nodeProcess.cwd(),
     { useOutermostGitRoot },
   )
 
