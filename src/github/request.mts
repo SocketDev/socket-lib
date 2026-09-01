@@ -3,7 +3,7 @@
  *   point that the rest of the github/ modules go through for REST calls. It
  *   handles five things the callers shouldn't have to repeat:
  *
- *   1. Token resolution (env → git config → `gh`, memoized) when the caller
+ *   1. Token resolution (env → `git config` → `gh`, memoized) when the caller
  *      doesn't pass an explicit token. `gh` is in the chain because it holds
  *      the keychain-stored credential that no environment variable carries, and
  *      a request that silently goes out anonymous is served 60 requests an hour
@@ -111,7 +111,7 @@ export async function fetchGitHub<T = unknown>(
   options?: GitHubFetchOptions | undefined,
 ): Promise<T> {
   const opts = { __proto__: null, ...options } as GitHubFetchOptions
-  // The memoized resolver, so the full chain (env, git config, `gh`) is
+  // The memoized resolver, so the full chain (env, `git config`, `gh`) is
   // reachable without paying a subprocess per request. Without `gh` in the
   // chain a developer machine whose only credential is in the OS keychain
   // sends every request anonymously.

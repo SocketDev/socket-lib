@@ -13,7 +13,7 @@
  *   normal commit does: HEAD's tree plus the staged change. On an unborn branch
  *   (no commits yet) `read-tree HEAD` has nothing to copy and the temp index is
  *   left empty, which is correct for a repo with no history. Use this when a
- *   git add/commit races another session's git operations (the fleet
+ *   `git add`/commit races another session's git operations (the fleet
  *   parallel-claude-sessions scenario): the temp index sidesteps the shared
  *   lock entirely, so the commit lands without waiting for the other process.
  *   Note this isolates from the SHARED index's current staged state too —

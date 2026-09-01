@@ -221,7 +221,7 @@ export function resolveRealBinSync(binPath: string): string {
           // pnpm.cmd and yarn.cmd can have different formats depending on installation method
           // Common formats include:
           // 1. Setup-pnpm action format: node "%~dp0\..\pnpm\bin\pnpm.cjs" %*
-          // 2. npm install -g pnpm format: similar to cmd-shim
+          // 2. `npm install` -g pnpm format: similar to cmd-shim
           // 3. Standalone installer format: various patterns
 
           // Try setup-pnpm/setup-yarn action format first

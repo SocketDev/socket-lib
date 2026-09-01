@@ -16,8 +16,8 @@
  *   - `AI_PROFILE.create` — edit AND create files. Adds Write on top of `.edit`.
  *     Still no Bash. Codegen, adding a test, refactors that split modules.
  *   - `AI_PROFILE.verify` — `.create` plus a READ-ONLY Bash allowlist (node /
- *     pnpm test+run / git status·diff·log). Lets an agent author files AND run
- *     the verifier, whether its own tests or a check script, but it CANNOT
+ *     `pnpm test`+run / `git status`·diff·log). Lets an agent author files AND
+ *     run the verifier, whether its own tests or a check script, but it CANNOT
  *     mutate the repo: no `git add`, no `git commit`, no install. For codegen
  *     that must self-verify without being trusted to land.
  *   - `AI_PROFILE.full` — `.verify` plus the mutating git commands (`git add` /

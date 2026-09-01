@@ -387,7 +387,7 @@ describe('snapshot safety — built dist survives node --build-snapshot', () => 
   // [Foreign] handle or unresolvable external reference aborts serialization
   // with a non-zero exit, so exit 0 proves the import path is handle-free.
   //
-  // node --build-snapshot's minimal CJS loader cannot resolve nested user
+  // `node --build-snapshot`'s minimal CJS loader cannot resolve nested user
   // requires, but createRequire() inside the snapshot main script can, so the
   // harness requires the dist module through a createRequire bound to dist/.
   // SharedArrayBuffer is shimmed because the snapshot main context omits it,

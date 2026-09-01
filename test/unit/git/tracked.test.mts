@@ -57,7 +57,7 @@ describe('getSubmodulePaths edge cases (real temp repo)', () => {
   it('returns [] with no .gitmodules; isInSubmodule short-circuits', async () => {
     await runWithTempDir(async tmpDir => {
       initRepo(tmpDir)
-      // No .gitmodules → git config exits non-zero → the catch yields ''.
+      // No .gitmodules → `git config` exits non-zero → the catch yields ''.
       expect(await getSubmodulePaths({ cwd: tmpDir })).toEqual([])
       // Empty submodule list → isInSubmodule returns false without parsing.
       expect(await isInSubmodule('anything/example', { cwd: tmpDir })).toBe(

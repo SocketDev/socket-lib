@@ -3,15 +3,15 @@
  *   variables, `git config github.token`, then the `gh` CLI's own credential.
  *   The combined fallback (`getGitHubTokenWithFallback`) is what most callers
  *   want; the individual helpers exist so callers can constrain the search
- *   (e.g., env-only contexts where shelling out would be wrong).
- *   The `gh` step is last but it is the one that fires most often on a
- *   developer machine, because `gh auth login` stores its token in the OS
- *   KEYCHAIN. No environment variable and no git config entry is written, so a
- *   resolver that stops before this step reports "no token" on a machine that
- *   is fully authenticated. The cost is a SILENT downgrade rather than an
- *   error: GitHub serves anonymous requests at 60/hour against 5000, so a
- *   sweep succeeds for its first few calls and then fails in a way that reads
- *   as a network problem. See `github/rate-limit` for making that visible.
+ *   (e.g., env-only contexts where shelling out would be wrong). The `gh` step
+ *   is last but it is the one that fires most often on a developer machine,
+ *   because `gh auth login` stores its token in the OS KEYCHAIN. No environment
+ *   variable and no `git config` entry is written, so a resolver that stops
+ *   before this step reports "no token" on a machine that is fully
+ *   authenticated. The cost is a SILENT downgrade rather than an error: GitHub
+ *   serves anonymous requests at 60/hour against 5000, so a sweep succeeds for
+ *   its first few calls and then fails in a way that reads as a network
+ *   problem. See `github/rate-limit` for making that visible.
  */
 
 import { getGhToken, getGithubToken } from '../env/github.mjs'
@@ -106,8 +106,8 @@ export async function getGitHubTokenFromGhCli(
 }
 
 /**
- * Get GitHub authentication token from git config. Reads the `github.token`
- * configuration value from git config. This is a fallback method when
+ * Get GitHub authentication token from `git config`. Reads the `github.token`
+ * configuration value from `git config`. This is a fallback method when
  * environment variables don't contain a token.
  *
  * @example
@@ -128,7 +128,7 @@ export async function getGitHubTokenFromGhCli(
  *
  * @param options - Spawn options for git command execution.
  *
- * @returns GitHub token from git config, or `undefined` if not configured
+ * @returns GitHub token from `git config`, or `undefined` if not configured
  */
 export async function getGitHubTokenFromGitConfig(
   options?: SpawnOptions | undefined,
@@ -143,7 +143,7 @@ export async function getGitHubTokenFromGitConfig(
       return result.stdout.toString().trim()
     }
   } catch {
-    // Ignore errors - git config may not have token.
+    // Ignore errors - `git config` may not have token.
   }
   return undefined
   /* c8 ignore stop */
@@ -151,7 +151,7 @@ export async function getGitHubTokenFromGitConfig(
 
 /**
  * Get GitHub authentication token from all available sources. Checks
- * environment variables, then git config, then the `gh` CLI. This is the
+ * environment variables, then `git config`, then the `gh` CLI. This is the
  * recommended way to get a GitHub token with maximum compatibility.
  *
  * Priority order:
@@ -160,7 +160,7 @@ export async function getGitHubTokenFromGitConfig(
  * 2. Git config (github.token)
  * 3. The `gh` CLI (`gh auth token`)
  *
- * Env and git config come first because they are cheap and explicit: a caller
+ * Env and `git config` come first because they are cheap and explicit: a caller
  * that sets `GITHUB_TOKEN` means that token, and CI sets it. `gh` is last
  * because it costs a subprocess, and it is present because it is the source
  * that actually holds the credential on a developer machine.

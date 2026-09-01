@@ -79,7 +79,7 @@ export function shouldSkipShadow(
   const tempPatterns = [
     // npm's npx cache directory
     '_npx',
-    // pnpm dlx temporary store
+    // `pnpm dlx` temporary store
     '.pnpm-store',
     // Common dlx directory prefix
     'dlx-',

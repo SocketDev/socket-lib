@@ -142,7 +142,7 @@ describe.sequential('packages/isolation — isolatePackage', () => {
     const result = await isolatePackage(srcDir, { install })
     expect(result.tmpdir).toContain('node_modules')
     expect(result.tmpdir).toContain('localpkg')
-    // install callback fired in place of pnpm install.
+    // install callback fired in place of `pnpm install`.
     expect(install).toHaveBeenCalledTimes(1)
     // package.json was copied through.
     const installedPkg = JSON.parse(

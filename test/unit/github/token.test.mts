@@ -127,7 +127,7 @@ describe.sequential('github/token', () => {
   describe('getGitHubTokenFromGhCli', () => {
     // This lane exists because `gh auth login` stores its credential in the OS
     // keychain, so on a developer machine it is the only source that answers
-    // while env and git config are both empty. A resolver that stopped before
+    // while env and `git config` are both empty. A resolver that stopped before
     // it reports "no token" on a fully authenticated machine and silently
     // downgrades to 60 requests/hour.
     it('answers undefined when gh is not on PATH, without throwing', async () => {

@@ -277,7 +277,7 @@ describe('executePackage', () => {
   })
 
   it('forwards args to the spawned process', async () => {
-    // Echo via node -p
+    // Echo via `node -p`
     const promise = executePackage(process.execPath, [
       '-p',
       '"hello-from-execute"',

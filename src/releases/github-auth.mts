@@ -28,7 +28,7 @@ export function baseHeaders(): Record<string, string> {
  * or GITHUB_TOKEN.
  *
  * Prefer {@link getAuthHeadersWithFallback} wherever the call site can await:
- * this one cannot see a token held by `gh` or git config, so it reports "no
+ * this one cannot see a token held by `gh` or `git config`, so it reports "no
  * credential" on a machine that has one.
  *
  * @example
@@ -50,7 +50,7 @@ export function getAuthHeaders(): Record<string, string> {
 
 /**
  * Get GitHub authentication headers, resolving the token from every source:
- * environment, git config, then the `gh` CLI.
+ * environment, `git config`, then the `gh` CLI.
  *
  * @example
  *   ;```typescript

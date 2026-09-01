@@ -34,7 +34,7 @@ export async function getTreeManifest(
   const { cwd = getCwd() } = { __proto__: null, ...options } as GitPathOptions
   // `-c core.quotePath=false`: emit non-ASCII path bytes verbatim instead of the
   // config-dependent `\NNN`-escaped form. Without it the manifest — and thus the
-  // content pin hashed from it — would shift with the caller's git config for a
+  // content pin hashed from it — would shift with the caller's `git config` for a
   // tree containing a non-ASCII path, defeating the "unmovable" guarantee. It is
   // a no-op for an all-ASCII tree, so pins already computed stay valid.
   const result = (await spawn(

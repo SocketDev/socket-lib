@@ -180,7 +180,7 @@ describe('capability ladder (read ⊂ edit ⊂ create ⊂ verify ⊂ full)', () 
     }
     expect(verify.size).toBeGreaterThan(create.size)
     // verify ⊆ full at the tool level; the Bash ALLOWLIST is the true
-    // widening (full adds git add/commit + pnpm exec).
+    // widening (full adds `git add`/commit + `pnpm exec`).
     for (const t of verify) {
       expect(full.has(t)).toBe(true)
     }

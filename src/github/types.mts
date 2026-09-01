@@ -146,7 +146,7 @@ export interface GitHubTag {
 }
 
 /**
- * GitHub commit object returned by the API. Represents a git commit with
+ * GitHub commit object returned by the API. Represents a `git commit` with
  * metadata.
  */
 export interface GitHubCommit {

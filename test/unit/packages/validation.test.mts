@@ -232,10 +232,10 @@ describe('packages/validation', () => {
     })
 
     it('should support common package manager spec types', () => {
-      expect(isRegistryFetcherType('version')).toBe(true) // npm install pkg@1.0.0
-      expect(isRegistryFetcherType('range')).toBe(true) // npm install pkg@^1.0.0
-      expect(isRegistryFetcherType('tag')).toBe(true) // npm install pkg@latest
-      expect(isRegistryFetcherType('alias')).toBe(true) // npm install alias@npm:pkg
+      expect(isRegistryFetcherType('version')).toBe(true) // `npm install` pkg@1.0.0
+      expect(isRegistryFetcherType('range')).toBe(true) // `npm install` pkg@^1.0.0
+      expect(isRegistryFetcherType('tag')).toBe(true) // `npm install` pkg@latest
+      expect(isRegistryFetcherType('alias')).toBe(true) // `npm install` alias@npm:pkg
     })
 
     it('should filter out non-registry fetch types', () => {

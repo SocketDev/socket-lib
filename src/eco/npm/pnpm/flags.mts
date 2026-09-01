@@ -48,7 +48,7 @@ export function isPnpmIgnoreScriptsFlag(cmdArg: string): boolean {
 }
 
 /**
- * Check if a command argument is a pnpm install command.
+ * Check if a command argument is a `pnpm install` command.
  *
  * @example
  *   ;```typescript

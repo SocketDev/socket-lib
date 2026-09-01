@@ -78,12 +78,12 @@ export interface DlxBinaryOptions {
   force?: boolean | undefined
 
   /**
-   * Skip confirmation prompts (auto-approve). Aligns with npx --yes/-y flag.
+   * Skip confirmation prompts (auto-approve). Aligns with `npx --yes`/-y flag.
    */
   yes?: boolean | undefined
 
   /**
-   * Run quietly, suppressing output. Aligns with npx --quiet/-q and pnpm
+   * Run quietly, suppressing output. Aligns with `npx --quiet`/-q and pnpm
    * --silent/-s flags.
    */
   quiet?: boolean | undefined

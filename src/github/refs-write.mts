@@ -10,7 +10,7 @@
  *   non-2xx and JSON-parses the body; a `DELETE` ref returns 204 with an
  *   empty body, so that path uses `httpText`. All three go over node:http, so
  *   nock intercepts them in tests. Auth matches `./request`: an explicit
- *   `token` wins, else `getGitHubToken()` resolves env → git config.
+ *   `token` wins, else `getGitHubToken()` resolves env → `git config`.
  */
 
 // no-platform-http-import: server-only module writing GitHub refs over node:http; node platform is intentional.
@@ -96,7 +96,7 @@ export interface GitRefConfig {
   readonly repo: string
   /**
    * GitHub token with contents:write. Falls back to `getGitHubToken()`
-   * (env → git config) when omitted, matching `fetchGitHub`.
+   * (env → `git config`) when omitted, matching `fetchGitHub`.
    */
   readonly token?: string | undefined
 }

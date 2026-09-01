@@ -2,7 +2,7 @@
  * @file Unit tests for temporary package executor detection (npx/dlx). Tests
  *   detection of temporary package executor environments:
  *
- *   - isTransientProcess() detects npx, pnpm dlx, yarn dlx
+ *   - isTransientProcess() detects npx, `pnpm dlx`, `yarn dlx`
  *   - User agent parsing from npm_config_user_agent
  *   - Environment variable inspection
  *   - Package manager version detection Used by Socket CLI to adapt behavior when

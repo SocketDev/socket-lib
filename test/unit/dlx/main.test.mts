@@ -8,8 +8,8 @@
  *   - isDlxPackageInstalled(), listDlxPackages() package management
  *   - removeDlxPackage(), removeDlxPackageSync() package removal
  *   - generateCacheKey() creates unique cache keys for packages Used by Socket
- *     CLI for pnpm dlx / npx-style package execution. The pure path-resolution
- *     tests live in paths.test.mts.
+ *     CLI for `pnpm dlx` / npx-style package execution. The pure
+ *     path-resolution tests live in paths.test.mts.
  */
 
 import crypto from 'node:crypto'

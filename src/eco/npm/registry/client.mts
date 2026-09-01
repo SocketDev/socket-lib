@@ -132,7 +132,7 @@ export function buildQuery(
 }
 
 /**
- * A short, actionable hint for an npm status code, or undefined when the
+ * A short, actionable hint for an `npm status` code, or undefined when the
  * status carries no npm-specific meaning worth explaining.
  *
  * The 403 wording matters most: npm returns it when a granular access token

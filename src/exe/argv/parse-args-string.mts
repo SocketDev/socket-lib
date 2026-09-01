@@ -25,7 +25,7 @@ import { parse as shellParse } from '../../external/shell-quote.js'
  * Operators and comments are dropped (use `shell/parse` to keep them).
  *
  * @example
- *   parseArgsString('git commit -m "hello world"')
+ *   parseArgsString('`git commit` -m "hello world"')
  *   // → ['git', 'commit', '-m', 'hello world']
  *
  *   parseArgsString('foo --bar="x y" baz')

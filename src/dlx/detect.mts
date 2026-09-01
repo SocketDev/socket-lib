@@ -206,7 +206,7 @@ export function findPackageJson(filePath: string): string | undefined {
   const cached = packageJsonPathCache.get(startDir)
   if (cached !== undefined) {
     // Negative entries expire after a short TTL so a directory that later
-    // gains a package.json (npm install in a sibling workspace, etc.) is
+    // gains a package.json (`npm install` in a sibling workspace, etc.) is
     // re-probed instead of permanently stuck on the cached "not found".
     if (cached.path === undefined) {
       if (DateNow() - cached.at < PACKAGE_JSON_NEGATIVE_TTL_MS) {

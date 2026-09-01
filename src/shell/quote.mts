@@ -14,7 +14,7 @@ import { quote as shellQuote } from '../external/shell-quote.js'
  *
  * @example
  *   quote(['git', 'commit', '-m', 'hello world'])
- *   // → "git commit -m 'hello world'"
+ *   // → "`git commit` -m 'hello world'"
  *
  *   quote(['echo', '$HOME'])
  *   // → "echo \\$HOME"

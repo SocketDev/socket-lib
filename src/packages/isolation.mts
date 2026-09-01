@@ -152,7 +152,7 @@ export async function isolatePackage(
       ),
     )
 
-    // Use custom install function or default pnpm install.
+    // Use custom install function or default `pnpm install`.
     if (install) {
       await install(packageTempDir)
     } else {

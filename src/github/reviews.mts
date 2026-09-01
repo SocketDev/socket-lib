@@ -77,7 +77,7 @@ export async function getPullRequestReviewNodeId(
  *
  * Token handling mirrors `fetchGhsaDetailsViaGraphQL` /
  * `fetchRefShaViaGraphQL`: an explicit `options.token` wins, otherwise
- * `getGitHubToken()` resolves env → git config. GraphQL mutations always
+ * `getGitHubToken()` resolves env → `git config`. GraphQL mutations always
  * require auth. There is no anonymous write path, so a caller relying on the
  * env/git-config fallback must have one of those set.
  *

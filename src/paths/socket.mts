@@ -247,7 +247,7 @@ export function getSocketRackToolDir(options: {
  * `<org>-<repo>` lowercased + dash-cased (e.g. `justrach-codedb`).
  *
  * Smallest-practical clone form (smallest disk + fastest initial fetch without
- * the treeless tax): git clone --depth=1 --single-branch --filter=blob:none
+ * the treeless tax): `git clone` --depth=1 --single-branch --filter=blob:none
  * <url> <dest> `--depth=1` truncates history, `--single-branch` skips other
  * refs, and `--filter=blob:none` (a BLOBLESS partial clone) fetches file blobs
  * lazily on first access — so the initial download is tree-metadata only.

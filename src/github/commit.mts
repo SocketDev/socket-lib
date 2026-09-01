@@ -62,7 +62,7 @@ export interface CreateSignedCommitOptions {
    */
   readonly repo: string
   /**
-   * GitHub token. Falls back to env / git config via `getGitHubToken()`.
+   * GitHub token. Falls back to env / `git config` via `getGitHubToken()`.
    */
   readonly token?: string | undefined
 }

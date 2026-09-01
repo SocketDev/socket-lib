@@ -44,7 +44,7 @@ import type { ParseEntry } from '../external/shell-quote.js'
  *   detectShellHazards('diff <(cat a) b')
  *   // → { equalsExpansion: [], processSubstitution: true }
  *
- *   detectShellHazards('git status')
+ *   detectShellHazards('`git status`')
  *   // → { equalsExpansion: [], processSubstitution: false }
  */
 export function detectShellHazards(cmd: string): {
@@ -272,7 +272,7 @@ export type {
  * parser drops the opening quote and returns the rest as plain tokens.
  *
  * @example
- *   parseShell('git commit -m "hello world"')
+ *   parseShell('`git commit` -m "hello world"')
  *   // → ['git', 'commit', '-m', 'hello world']
  *
  *   parseShell('ls && echo done')

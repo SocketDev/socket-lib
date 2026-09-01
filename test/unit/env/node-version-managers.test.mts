@@ -271,7 +271,7 @@ describe('env/node-version-managers', () => {
     })
 
     it('does not mis-detect `nodejs-asdf-test` (substring false positive)', () => {
-      // `.asdf/installs/nodejs/` is the canonical asdf node install path.
+      // `.asdf/installs/nodejs/` is the canonical asdf `node install` path.
       // A random directory containing "asdf" as a substring must not
       // match.
       maskAllManagerEnv()

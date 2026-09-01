@@ -7,8 +7,8 @@
  *   1. pnpm-lock.yaml → execPnpm(['run', scriptName, ...args])
  *   2. package-lock.json → execNpm(['run', scriptName, ...args])
  *   3. yarn.lock → execYarn(['run', scriptName, ...args])
- *   4. No lockfile → node --run scriptName (or `node <npm-cli> run` on older Node
- *      where `node --run` isn't available) Honors `shell: true` by passing
+ *   4. No lockfile → `node --run` scriptName (or `node <npm-cli> run` on older
+ *      Node where `node --run` isn't available) Honors `shell: true` by passing
  *      through to spawn() unchanged.
  */
 

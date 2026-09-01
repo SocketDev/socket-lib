@@ -130,7 +130,7 @@ export function getChangedFilesSync(
  *   ```
  *
  * @param pathname - File or directory path to check.
- * @param options - Options for the git status check.
+ * @param options - Options for the `git status` check.
  *
  * @returns Promise resolving to `true` if path has any changes, `false`
  *   otherwise.
@@ -185,7 +185,7 @@ export async function isChanged(
  *   ```
  *
  * @param pathname - File or directory path to check.
- * @param options - Options for the git status check.
+ * @param options - Options for the `git status` check.
  *
  * @returns `true` if path has any changes, `false` otherwise.
  */

@@ -107,13 +107,13 @@ export interface DlxPackageOptions extends EnsurePackageInstallOptions {
   binaryName?: string | undefined
 
   /**
-   * Force reinstallation even if the package exists. Aligns with npx --yes/-y
+   * Force reinstallation even if the package exists. Aligns with `npx --yes`/-y
    * flag behavior.
    */
   force?: boolean | undefined
 
   /**
-   * Run quietly, suppressing output. Aligns with npx --quiet/-q and pnpm
+   * Run quietly, suppressing output. Aligns with `npx --quiet`/-q and pnpm
    * --silent/-s flags.
    */
   quiet?: boolean | undefined
@@ -130,7 +130,7 @@ export interface DlxPackageOptions extends EnsurePackageInstallOptions {
   spec: string
 
   /**
-   * Skip confirmation prompts (auto-approve). Aligns with npx --yes/-y flag.
+   * Skip confirmation prompts (auto-approve). Aligns with `npx --yes`/-y flag.
    */
   yes?: boolean | undefined
 }
