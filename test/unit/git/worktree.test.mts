@@ -5,23 +5,32 @@
  */
 
 import assert from 'node:assert/strict'
-import { existsSync, mkdirSync, mkdtempSync, realpathSync } from 'node:fs'
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  realpathSync,
+  writeFileSync,
+} from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
 import { describe, it } from 'vitest'
 
 import { normalizePath } from '../../../src/paths/normalize.mts'
+import { spawnSync } from '../../../src/process/spawn/child.mts'
 import {
   createGitWorktreeTmpDir,
   findGitWorktree,
   getGitWorktreeTmpDir,
+  GIT_WORKTREE_LIST_ARGS,
   isRemovableGitWorktree,
   listGitWorktrees,
   listGitWorktreesSync,
   parseGitWorktreePorcelain,
   resolveWorktreePath,
   sanitizeWorktreeLabel,
+  splitPorcelainLines,
   stdoutText,
 } from '../../../src/git/worktree.mts'
 
@@ -143,6 +152,33 @@ describe('parseGitWorktreePorcelain', () => {
       [],
     )
   })
+
+  it('parses the -z form git is asked for', () => {
+    const entries = parseGitWorktreePorcelain(
+      'worktree /repo\0branch refs/heads/main\0\0worktree /repo-wt\0detached\0\0',
+    )
+    assert.equal(entries.length, 2)
+    assert.equal(entries[0]!.branch, 'main')
+    assert.equal(entries[1]!.detached, true)
+  })
+
+  // The reason -z is not optional: a worktree path holding a newline cannot be
+  // read out of the line-oriented form, and a path is what gets deleted.
+  it('keeps a newline inside a path intact under -z', () => {
+    const [entry] = parseGitWorktreePorcelain(
+      'worktree /odd\nname\0detached\0\0',
+    )
+    assert.equal(entry!.path, resolveWorktreePath('/odd\nname'))
+  })
+
+  // Without -z, git escapes unusual characters in a lock reason and quotes the
+  // whole value per core.quotePath. Under -z the reason arrives raw.
+  it('reads a raw multi-line lock reason under -z', () => {
+    const [entry] = parseGitWorktreePorcelain(
+      'worktree /locked\0locked reason\nwith a newline\0\0',
+    )
+    assert.equal(entry!.lockReason, 'reason\nwith a newline')
+  })
 })
 
 describe('resolveWorktreePath', () => {
@@ -164,6 +200,53 @@ describe('resolveWorktreePath', () => {
       resolveWorktreePath('.'),
       normalizePath(realpathSync(path.resolve('.'))),
     )
+  })
+})
+
+describe('GIT_WORKTREE_LIST_ARGS', () => {
+  // git's own manual: "It is recommended to combine this with -z". Dropping it
+  // reintroduces the newline-in-path and quoted-lock-reason failures below.
+  it('asks git for the -z porcelain form', () => {
+    assert.deepEqual(
+      [...GIT_WORKTREE_LIST_ARGS],
+      ['worktree', 'list', '--porcelain', '-z'],
+    )
+  })
+})
+
+describe('splitPorcelainLines', () => {
+  it('splits the -z form on NUL', () => {
+    assert.deepEqual(splitPorcelainLines('worktree /repo\0bare\0\0'), [
+      'worktree /repo',
+      'bare',
+      '',
+      '',
+    ])
+  })
+
+  it('splits the plain form on newlines', () => {
+    assert.deepEqual(splitPorcelainLines('worktree /repo\nbare\n'), [
+      'worktree /repo',
+      'bare',
+      '',
+    ])
+  })
+
+  it('tolerates CRLF in the plain form', () => {
+    assert.deepEqual(splitPorcelainLines('worktree /repo\r\nbare'), [
+      'worktree /repo',
+      'bare',
+    ])
+  })
+
+  // A NUL anywhere means the payload is the -z form, so splitting on newlines
+  // too would corrupt exactly the record -z exists to protect.
+  it('never splits a NUL payload on an embedded newline', () => {
+    assert.deepEqual(splitPorcelainLines('worktree /has\nnewline\0bare\0'), [
+      'worktree /has\nnewline',
+      'bare',
+      '',
+    ])
   })
 })
 
@@ -227,6 +310,56 @@ describe('createGitWorktreeTmpDir', () => {
 
   it('is a real directory git can be pointed at', () => {
     assert.ok(existsSync(createGitWorktreeTmpDir(NS, 'real')))
+  })
+})
+
+function git(cwd: string, ...args: string[]): void {
+  spawnSync('git', args, { cwd })
+}
+
+function makeRepo(): string {
+  const repo = realpathSync(mkdtempSync(path.join(os.tmpdir(), 'lib-wt-repo-')))
+  git(repo, 'init', '--quiet', '--initial-branch', 'main')
+  git(repo, 'config', 'user.email', 'octocat@example.com')
+  git(repo, 'config', 'user.name', 'octocat')
+  git(repo, 'config', 'commit.gpgsign', 'false')
+  writeFileSync(path.join(repo, 'example.txt'), 'seed\n')
+  git(repo, 'add', 'example.txt')
+  git(repo, 'commit', '--quiet', '--no-gpg-sign', '-m', 'chore: seed')
+  return repo
+}
+
+describe('listGitWorktrees against real git', () => {
+  it('sees a worktree created under the OS temp dir', async () => {
+    const repo = makeRepo()
+    const wt = createGitWorktreeTmpDir(NS, 'listed')
+    git(repo, 'worktree', 'add', '--detach', wt, 'HEAD')
+    const paths = (await listGitWorktrees(repo)).map(e => e.path)
+    assert.ok(paths.includes(resolveWorktreePath(wt)))
+  })
+
+  // Proves -z reached git: the plain form would return this quoted, with the
+  // newline spelled out as an escape.
+  it('returns a multi-line lock reason unquoted and unescaped', async () => {
+    const repo = makeRepo()
+    const wt = createGitWorktreeTmpDir(NS, 'locked')
+    git(repo, 'worktree', 'add', '--detach', wt, 'HEAD')
+    git(repo, 'worktree', 'lock', wt, '--reason', 'reason\nwith a newline')
+    const found = await findGitWorktree(repo, wt)
+    assert.equal(found?.locked, true)
+    assert.equal(found?.lockReason, 'reason\nwith a newline')
+    assert.equal(await isRemovableGitWorktree(repo, wt), false)
+    git(repo, 'worktree', 'unlock', wt)
+  })
+
+  it('reports the main worktree first and a linked one after', async () => {
+    const repo = makeRepo()
+    const wt = createGitWorktreeTmpDir(NS, 'ordered')
+    git(repo, 'worktree', 'add', '--detach', wt, 'HEAD')
+    const entries = await listGitWorktrees(repo)
+    assert.equal(entries[0]!.main, true)
+    assert.equal(entries[0]!.path, resolveWorktreePath(repo))
+    assert.equal(entries.filter(e => !e.main).length, 1)
   })
 })
 

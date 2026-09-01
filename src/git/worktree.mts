@@ -1,12 +1,26 @@
 /**
- * @file Worktree enumeration over `git worktree list --porcelain`. Git is the
- *   only authority on what a worktree is: a caller must never infer one from a
- *   sibling directory, a name prefix, or any other filesystem heuristic, and
- *   must never delete a directory git does not list.
+ * @file Worktree enumeration over `git worktree list --porcelain -z`. Git is
+ *   the only authority on what a worktree is: a caller must never infer one
+ *   from a sibling directory, a name prefix, or any other filesystem heuristic,
+ *   and must never delete a directory git does not list.
+ *   `-z` is git's own recommendation rather than a preference. Its manual says
+ *   of `--porcelain`: "It is recommended to combine this with -z", because a
+ *   worktree path containing a newline cannot be parsed out of the
+ *   line-oriented form. Without `-z` git also escapes unusual characters in a
+ *   lock reason and quotes the whole value per `core.quotePath`, so the reason
+ *   arrives wrapped in quotes with its newlines spelled out.
  *   Paths are realpath-resolved on both sides before comparison. Git reports a
  *   worktree by its resolved path, so on macOS a worktree created under
  *   `os.tmpdir()` (`/var/folders/...`) comes back as `/private/var/folders/...`
  *   and naive string equality silently misses it.
+ *
+ * @see https://git-scm.com/docs/git-worktree
+ * @see https://github.com/git/git/blob/v2.54.0/Documentation/git-worktree.adoc
+ *   Section "Porcelain Format": one attribute per line, label and value
+ *   separated by a single space, a boolean attribute present as a label only,
+ *   the first attribute of a record always `worktree`, an empty line ending it.
+ * @see https://github.com/git/git/blob/v2.54.0/builtin/worktree.c
+ *   `show_worktree_porcelain` emits the records this module parses.
  */
 
 import { getNodeFs } from '../node/fs.mjs'
@@ -65,6 +79,22 @@ export interface GitWorktree {
    */
   readonly prunableReason: string | undefined
 }
+
+/**
+ * The one argument vector this module uses to enumerate worktrees.
+ *
+ * `-z` is git's documented recommendation for `--porcelain`, and the only form
+ * that survives a worktree path containing a newline or a lock reason with
+ * unusual characters.
+ *
+ * @see https://github.com/git/git/blob/v2.54.0/Documentation/git-worktree.adoc
+ */
+export const GIT_WORKTREE_LIST_ARGS: readonly string[] = [
+  'worktree',
+  'list',
+  '--porcelain',
+  '-z',
+]
 
 /**
  * Create a unique scratch directory for a worktree under the OS temp dir, and
@@ -185,7 +215,7 @@ export async function isRemovableGitWorktree(
 export async function listGitWorktrees(
   repoRoot: string = getCwd(),
 ): Promise<readonly GitWorktree[]> {
-  const result = await gitSpawn(['worktree', 'list', '--porcelain'], {
+  const result = await gitSpawn(GIT_WORKTREE_LIST_ARGS, {
     cwd: repoRoot,
   })
   if (result.code !== 0) {
@@ -204,7 +234,7 @@ export async function listGitWorktrees(
 export function listGitWorktreesSync(
   repoRoot: string = getCwd(),
 ): readonly GitWorktree[] {
-  const result = gitSync(['worktree', 'list', '--porcelain'], { cwd: repoRoot })
+  const result = gitSync(GIT_WORKTREE_LIST_ARGS, { cwd: repoRoot })
   if (result.status !== 0) {
     return []
   }
@@ -226,7 +256,7 @@ export function parseGitWorktreePorcelain(
   porcelain: string,
 ): readonly GitWorktree[] {
   const out: GitWorktree[] = []
-  const lines = porcelain.split(/\r?\n/)
+  const lines = splitPorcelainLines(porcelain)
   let current: Record<string, string | boolean> | undefined
   const flush = () => {
     if (!current) {
@@ -321,6 +351,29 @@ export function sanitizeWorktreeLabel(label: string): string {
       .replace(/^[-.]+|[-.]+$/g, '')
       .slice(0, 40) || 'task'
   )
+}
+
+/**
+ * Split porcelain output into its attribute lines.
+ *
+ * `-z` terminates every line with NUL instead of a newline, which is the form
+ * this module asks git for and the only form that survives a worktree path
+ * containing a newline. A NUL anywhere means the whole payload is that form, so
+ * splitting on newlines as well would corrupt exactly the record `-z` exists to
+ * protect.
+ *
+ * The newline branch stays for a caller holding output from a plain
+ * `--porcelain` run, which git still documents.
+ *
+ * @param porcelain - Raw stdout from `git worktree list --porcelain [-z]`.
+ *
+ * @returns The attribute lines, with an empty entry marking a record boundary.
+ */
+export function splitPorcelainLines(porcelain: string): string[] {
+  if (porcelain.includes('\0')) {
+    return porcelain.split('\0')
+  }
+  return porcelain.split(/\r?\n/)
 }
 
 /**
