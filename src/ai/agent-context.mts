@@ -31,9 +31,8 @@ import { getEnvValue } from '../env/rewire.mjs'
 import { getXdgConfigHome } from '../env/xdg.mjs'
 import { normalizePath } from '../paths/normalize.mjs'
 
-import path from 'node:path'
-
 import type { AiAgentName } from './types.mjs'
+import { getNodePath } from '../node/path.mjs'
 
 /**
  * The detected running agent + the raw version token from `AI_AGENT`, when
@@ -116,6 +115,7 @@ export function agentPaths(
   }
   switch (agent) {
     case 'claude': {
+      const path = getNodePath()
       const configDir = path.join(home, '.claude')
       // Claude keys memory by cwd slug: an absolute cwd with every `/`
       // replaced by `-` (a leading `/` becomes a leading `-`).
@@ -132,6 +132,7 @@ export function agentPaths(
     }
     case 'codex': {
       const codexHome = getEnvValue('CODEX_HOME')
+      const path = getNodePath()
       return {
         agent,
         configDir: codexHome || path.join(home, '.codex'),
@@ -145,10 +146,13 @@ export function agentPaths(
       if (xdg) {
         base = xdg
       } else if (isWin32()) {
+        const path = getNodePath()
         base = getEnvValue('APPDATA') || path.join(home, '.config')
       } else {
+        const path = getNodePath()
         base = path.join(home, '.config')
       }
+      const path = getNodePath()
       return {
         agent,
         configDir: path.join(base, 'opencode'),
@@ -156,6 +160,7 @@ export function agentPaths(
       }
     }
     case 'gemini': {
+      const path = getNodePath()
       return {
         agent,
         configDir: path.join(home, '.gemini'),

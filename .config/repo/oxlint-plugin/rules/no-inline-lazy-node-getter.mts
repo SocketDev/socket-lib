@@ -57,6 +57,25 @@ const GETTER_TO_BINDING: Record<string, string> = {
 } as Record<string, string>
 
 /**
+ * Whether `text` already declares `const <binding> = <getter>()`.
+ *
+ * The fixer's own dedup set only remembers what THIS pass wrote, and a fixable
+ * rule runs in passes: the first hoists a binding into the source, the next
+ * starts with an empty set, cannot see it, and hoists a second one. Reading the
+ * scope's text closes that gap, since a binding already in the source is
+ * exactly what the set is missing.
+ */
+export function declaresBinding(
+  text: string,
+  binding: string,
+  getter: string,
+): boolean {
+  return new RegExp(
+    `\\bconst\\s+${binding}\\s*=\\s*${getter}\\s*\\(\\s*\\)`,
+  ).test(text)
+}
+
+/**
  * Every enclosing scope of a node, innermost first.
  *
  * A hoisted `const` is visible to the whole block it lands in, so a second use
@@ -65,8 +84,8 @@ const GETTER_TO_BINDING: Record<string, string> = {
  * sees two statements in one function as unrelated and emits the declaration
  * twice, which is a redeclaration error rather than a style nit.
  */
-export function enclosingScopeKeys(node: AstNode): string[] {
-  const keys: string[] = []
+export function enclosingScopes(node: AstNode): AstNode[] {
+  const scopes: AstNode[] = []
   let current: AstNode | undefined = node
   while (current) {
     const { type } = current
@@ -76,11 +95,11 @@ export function enclosingScopeKeys(node: AstNode): string[] {
       type === 'StaticBlock' ||
       type === 'SwitchStatement'
     ) {
-      keys.push(String(current.range?.[0] ?? current.start ?? ''))
+      scopes.push(current)
     }
     current = current.parent
   }
-  return keys
+  return scopes
 }
 
 /**
@@ -164,10 +183,14 @@ const rule = {
           node.property?.type === 'Identifier' ? node.property.name : '…'
 
         const enclosing = findEnclosingStatement(node)
-        const scopeKeys = enclosingScopeKeys(node).map(
-          key => `${key}:${binding}`,
+        const scopes = enclosingScopes(node)
+        const scopeKeys = scopes.map(
+          scope => `${scope.range?.[0] ?? scope.start ?? ''}:${binding}`,
         )
         const hoistKey = scopeKeys[0] ?? ''
+        const alreadyDeclared = scopes.some(scope =>
+          declaresBinding(sourceCode.getText(scope), binding, getter),
+        )
 
         context.report({
           node: object,
@@ -178,9 +201,10 @@ const rule = {
             if (!enclosing) {
               return undefined
             }
-            // Already bound in this scope or an enclosing one: point this call
-            // at that binding instead of declaring a second.
-            if (scopeKeys.some(key => hoisted.has(key))) {
+            // Already bound in this scope or an enclosing one - by an earlier
+            // report in this pass, or by a declaration already in the source:
+            // point this call at that binding instead of declaring a second.
+            if (alreadyDeclared || scopeKeys.some(key => hoisted.has(key))) {
               return fixer.replaceText(object, binding)
             }
             hoisted.add(hoistKey)

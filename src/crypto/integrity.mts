@@ -18,7 +18,6 @@
  *     re-hash without the bytes. "SSRI" is just another name for Subresource
  *     Integrity — only this module should mention it, inside `parseIntegrity`.
  */
-import crypto from 'node:crypto'
 
 import { hash as computeDigest } from './hash.mjs'
 
@@ -29,6 +28,7 @@ import { ErrorCtor, TypeErrorCtor } from '../primordials/error.mjs'
 import { ObjectFreeze } from '../primordials/object.mjs'
 
 import { StringPrototypeToLowerCase } from '../primordials/string.mjs'
+import { getNodeCrypto } from '../node/crypto.mjs'
 
 /**
  * SRI-blessed hash algorithms. The W3C set; the prefix is part of the wire
@@ -173,6 +173,7 @@ export function equalHashes(a: HashInput, b: HashInput): boolean {
   }
   const aBuf = BufferFrom!(aHash.hex, 'hex')
   const bBuf = BufferFrom!(bHash.hex, 'hex')
+  const crypto = getNodeCrypto()
   return aBuf.length === bBuf.length && crypto.timingSafeEqual(aBuf, bBuf)
 }
 
@@ -278,9 +279,9 @@ export function parseIntegrity(sri: string): ParsedIntegrity {
 /**
  * Verify `bytes` against an expected hash. Reads the algorithm the expected
  * hash declares, computes only that digest, and compares with
- * `crypto.timingSafeEqual` — so any encoding (hex / SRI / {@link Hash}) and any
- * algorithm (sha256 / sha384 / sha512) verifies without the caller reconciling
- * formats first.
+ * `getNodeCrypto().timingSafeEqual` — so any encoding (hex / SRI / {@link Hash})
+ * and any algorithm (sha256 / sha384 / sha512) verifies without the caller
+ * reconciling formats first.
  *
  * @throws HashMismatchError when the recomputed digest doesn't match.
  * @throws TypeError when `expected` is not a recognized hash.
@@ -293,6 +294,7 @@ export function verifyHash(
   const actualHash = computeHash(bytes, expectedHash.algorithm)
   const expectedBuf = BufferFrom!(expectedHash.hex, 'hex')
   const actualBuf = BufferFrom!(actualHash.hex, 'hex')
+  const crypto = getNodeCrypto()
   if (
     expectedBuf.length !== actualBuf.length ||
     !crypto.timingSafeEqual(expectedBuf, actualBuf)

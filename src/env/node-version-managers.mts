@@ -4,10 +4,10 @@
  *   the user the exact command to run instead of a generic "install newer Node"
  *   line. Detection is best-effort:
  *
- *   1. **process.execPath** — the running Node binary's path is the most reliable
- *      signal. `~/.nvm/versions/node/...`, `~/.volta/tools/...`, `~/.fnm/...`,
- *      `~/.asdf/installs/nodejs/...`, `~/n/...` each have well-known directory
- *      shapes.
+ *   1. **getNodeProcess().execPath** — the running Node binary's path is the most
+ *      reliable signal. `~/.nvm/versions/node/...`, `~/.volta/tools/...`,
+ *      `~/.fnm/...`, `~/.asdf/installs/nodejs/...`, `~/n/...` each have
+ *      well-known directory shapes.
  *   2. **Environment variables** — `NVM_DIR`, `FNM_DIR`, `FNM_MULTISHELL_PATH`,
  *      `VOLTA_HOME`, `ASDF_DIR`, `N_PREFIX`. These are set by the shell
  *      integration each manager ships.
@@ -21,9 +21,8 @@
  *      the Chrome protocol.
  */
 
-import process from 'node:process'
-
 import { getEnvValue } from './rewire.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 export type NodeVersionManager =
   | 'asdf'
@@ -35,10 +34,10 @@ export type NodeVersionManager =
   | 'volta'
 
 /**
- * Detect the Node version manager currently providing `process.execPath`.
- * Returns `'system'` when no manager is detected — the user is running a Node
- * installed by the OS package manager, the official .pkg/.msi installer, or a
- * manually placed binary.
+ * Detect the Node version manager currently providing
+ * `getNodeProcess().execPath`. Returns `'system'` when no manager is detected —
+ * the user is running a Node installed by the OS package manager, the official
+ * .pkg/.msi installer, or a manually placed binary.
  *
  * @example
  *   ;```typescript
@@ -46,7 +45,8 @@ export type NodeVersionManager =
  *   ```
  */
 export function detectActiveNodeManager(): NodeVersionManager {
-  const exec = process.execPath
+  const nodeProcess = getNodeProcess()
+  const exec = nodeProcess.execPath
   // Path-based detection wins — it tells us where the *running* node came
   // from, regardless of what env vars are set. A user can have NVM_DIR set
   // but still be running a Volta-managed node.

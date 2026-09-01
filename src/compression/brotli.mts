@@ -9,10 +9,7 @@
  */
 
 import type { Buffer } from 'node:buffer'
-import { createReadStream, createWriteStream } from 'node:fs'
-import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
-import { promisify } from 'node:util'
 import {
   brotliCompress,
   brotliDecompress,
@@ -33,9 +30,13 @@ import type { CompressFileOptions, CompressOptions } from './types.mjs'
 import { BufferFrom, BufferIsBuffer } from '../primordials/buffer.mjs'
 
 import { SetCtor } from '../primordials/map-set.mjs'
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+import { getNodeUtil } from '../node/util.mjs'
 
-const brotliCompressAsync = promisify(brotliCompress)
-const brotliDecompressAsync = promisify(brotliDecompress)
+const util = getNodeUtil()
+const brotliCompressAsync = util.promisify(brotliCompress)
+const brotliDecompressAsync = util.promisify(brotliDecompress)
 
 // Brotli has no defined magic bytes — the format starts with header
 // data that can technically be anything. The closest signal is the
@@ -113,10 +114,11 @@ export async function compressBrotliFile(
     maybeOptions,
     p => `${p}.br`,
   )
+  const fs = getNodeFs()
   await pipeline(
-    createReadStream(srcPath),
+    fs.createReadStream(srcPath),
     createBrotliCompress(resolveBrotliOptions(options)),
-    createWriteStream(destPath),
+    fs.createWriteStream(destPath),
   )
   if (inPlace) {
     await safeDelete(srcPath)
@@ -187,10 +189,11 @@ export async function decompressBrotliFile(
       return stripExt(p, BROTLI_EXTS)
     },
   )
+  const fs = getNodeFs()
   await pipeline(
-    createReadStream(srcPath),
+    fs.createReadStream(srcPath),
     createBrotliDecompress(),
-    createWriteStream(destPath),
+    fs.createWriteStream(destPath),
   )
   if (inPlace) {
     await safeDelete(srcPath)
@@ -203,6 +206,7 @@ export async function decompressBrotliFile(
  * (case-insensitive). Naming follows node:path's `extname`.
  */
 export function hasBrotliExt(filePath: string): boolean {
+  const path = getNodePath()
   return BROTLI_EXTS.has(StringPrototypeToLowerCase(path.extname(filePath)))
 }
 

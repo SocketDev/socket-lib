@@ -12,8 +12,6 @@
  *     state through closures and obscure the security-defense intent.
  */
 
-import { createReadStream } from 'node:fs'
-import process from 'node:process'
 import { pipeline } from 'node:stream/promises'
 import { createGunzip } from 'node:zlib'
 
@@ -30,6 +28,8 @@ import {
 } from './shared.mjs'
 
 import type { ExtractOptions } from './types.mjs'
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Extract a tar archive to a directory.
@@ -51,7 +51,7 @@ export async function extractTar(
 ): Promise<void> {
   // Normalize the "missing archive" surface (see extractZip) — throw
   // ENOENT up front with a clear message rather than letting the
-  // Node-level createReadStream eventually surface as a stream error.
+  // Node-level getNodeFs().createReadStream eventually surface as a stream error.
   assertArchiveExists(archivePath)
 
   const {
@@ -85,7 +85,7 @@ export async function extractTar(
       /* c8 ignore stop */
 
       /* c8 ignore start - Security-defense branches inside tar-fs
-         map() schedule extractStream.destroy via process.nextTick.
+         map() schedule extractStream.destroy via getNodeProcess().nextTick.
          tar-fs@3.1.2 has an async-cleanup race after destroy that
          crashes the vitest pool runner. Re-enable once tar-fs is
          upgraded or the SUT refactors destroy. */
@@ -93,7 +93,8 @@ export async function extractTar(
       entryCount += 1
       if (entryCount > maxEntries) {
         destroyScheduled = true
-        process.nextTick(() => {
+        const nodeProcess = getNodeProcess()
+        nodeProcess.nextTick(() => {
           extractStream.destroy(
             new ErrorCtor(
               `Archive has too many entries: exceeded limit of ${maxEntries}`,
@@ -106,7 +107,8 @@ export async function extractTar(
       // Reject entries with null bytes in names as defense in depth.
       if (header.name.includes('\0')) {
         destroyScheduled = true
-        process.nextTick(() => {
+        const nodeProcess = getNodeProcess()
+        nodeProcess.nextTick(() => {
           extractStream.destroy(
             new ErrorCtor(
               `Invalid null byte in archive entry name: ${header.name}`,
@@ -119,7 +121,8 @@ export async function extractTar(
       // Check for symlinks
       if (header.type === 'link' || header.type === 'symlink') {
         destroyScheduled = true
-        process.nextTick(() => {
+        const nodeProcess = getNodeProcess()
+        nodeProcess.nextTick(() => {
           extractStream.destroy(
             new ErrorCtor(
               `Symlink detected in archive: ${header.name}. Symlinks are not supported for security reasons.`,
@@ -132,7 +135,8 @@ export async function extractTar(
       // Check individual file size
       if (header.size && header.size > maxFileSize) {
         destroyScheduled = true
-        process.nextTick(() => {
+        const nodeProcess = getNodeProcess()
+        nodeProcess.nextTick(() => {
           extractStream.destroy(
             new ErrorCtor(
               `File size exceeds limit: ${header.name} (${header.size} bytes > ${maxFileSize} bytes)`,
@@ -147,7 +151,8 @@ export async function extractTar(
         totalExtractedSize += header.size
         if (totalExtractedSize > maxTotalSize) {
           destroyScheduled = true
-          process.nextTick(() => {
+          const nodeProcess = getNodeProcess()
+          nodeProcess.nextTick(() => {
             extractStream.destroy(
               new ErrorCtor(
                 `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
@@ -169,7 +174,8 @@ export async function extractTar(
     // Error will be caught by pipeline
   })
 
-  const readStream = createReadStream(archivePath)
+  const fs = getNodeFs()
+  const readStream = fs.createReadStream(archivePath)
 
   try {
     await pipeline(readStream, extractStream)
@@ -232,7 +238,7 @@ export async function extractTarGz(
       /* c8 ignore stop */
 
       /* c8 ignore start - Security-defense branches inside tar-fs
-         map() schedule extractStream.destroy via process.nextTick.
+         map() schedule extractStream.destroy via getNodeProcess().nextTick.
          tar-fs@3.1.2 has an async-cleanup race after destroy that
          crashes the vitest pool runner. Re-enable once tar-fs is
          upgraded or the SUT refactors destroy. */
@@ -240,7 +246,8 @@ export async function extractTarGz(
       entryCount += 1
       if (entryCount > maxEntries) {
         destroyScheduled = true
-        process.nextTick(() => {
+        const nodeProcess = getNodeProcess()
+        nodeProcess.nextTick(() => {
           extractStream.destroy(
             new ErrorCtor(
               `Archive has too many entries: exceeded limit of ${maxEntries}`,
@@ -253,7 +260,8 @@ export async function extractTarGz(
       // Reject entries with null bytes in names as defense in depth.
       if (header.name.includes('\0')) {
         destroyScheduled = true
-        process.nextTick(() => {
+        const nodeProcess = getNodeProcess()
+        nodeProcess.nextTick(() => {
           extractStream.destroy(
             new ErrorCtor(
               `Invalid null byte in archive entry name: ${header.name}`,
@@ -266,7 +274,8 @@ export async function extractTarGz(
       // Check for symlinks
       if (header.type === 'link' || header.type === 'symlink') {
         destroyScheduled = true
-        process.nextTick(() => {
+        const nodeProcess = getNodeProcess()
+        nodeProcess.nextTick(() => {
           extractStream.destroy(
             new ErrorCtor(
               `Symlink detected in archive: ${header.name}. Symlinks are not supported for security reasons.`,
@@ -279,7 +288,8 @@ export async function extractTarGz(
       // Check individual file size
       if (header.size && header.size > maxFileSize) {
         destroyScheduled = true
-        process.nextTick(() => {
+        const nodeProcess = getNodeProcess()
+        nodeProcess.nextTick(() => {
           extractStream.destroy(
             new ErrorCtor(
               `File size exceeds limit: ${header.name} (${header.size} bytes > ${maxFileSize} bytes)`,
@@ -294,7 +304,8 @@ export async function extractTarGz(
         totalExtractedSize += header.size
         if (totalExtractedSize > maxTotalSize) {
           destroyScheduled = true
-          process.nextTick(() => {
+          const nodeProcess = getNodeProcess()
+          nodeProcess.nextTick(() => {
             extractStream.destroy(
               new ErrorCtor(
                 `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
@@ -316,7 +327,8 @@ export async function extractTarGz(
     // Error will be caught by pipeline
   })
 
-  const readStream = createReadStream(archivePath)
+  const fs = getNodeFs()
+  const readStream = fs.createReadStream(archivePath)
 
   try {
     await pipeline(readStream, createGunzip(), extractStream)

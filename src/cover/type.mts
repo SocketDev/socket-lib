@@ -2,8 +2,6 @@
  * @file TypeScript type coverage utilities.
  */
 
-import process from 'node:process'
-
 import { spawn } from '../process/spawn/child.mjs'
 
 import type { GetTypeCoverageOptions, TypeCoverageResult } from './types.mjs'
@@ -11,6 +9,7 @@ import type { GetTypeCoverageOptions, TypeCoverageResult } from './types.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
 
 import { NumberParseInt } from '../primordials/number.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 /**
  * Get TypeScript type coverage metrics.
  *
@@ -20,9 +19,10 @@ import { NumberParseInt } from '../primordials/number.mjs'
 export async function getTypeCoverage(
   options?: GetTypeCoverageOptions | undefined,
 ): Promise<TypeCoverageResult | undefined> {
+  const nodeProcess = getNodeProcess()
   const opts = {
     __proto__: null,
-    cwd: process.cwd(),
+    cwd: nodeProcess.cwd(),
     generateIfMissing: false,
     ...options,
   } as GetTypeCoverageOptions

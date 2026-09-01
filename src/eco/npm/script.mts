@@ -12,8 +12,6 @@
  *      through to spawn() unchanged.
  */
 
-import process from 'node:process'
-
 import {
   NPM_REAL_EXEC_PATH,
   PACKAGE_LOCK_JSON,
@@ -36,6 +34,7 @@ import { execPnpm } from './pnpm/exec.mjs'
 import { execYarn } from './yarn/exec.mjs'
 
 import type { SpawnOptions } from '../../process/spawn/types.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 export interface ExecScriptOptions extends SpawnOptions {
   prepost?: boolean | undefined
@@ -78,8 +77,9 @@ export function execScript(
 
   const useNodeRun = !prepost && supportsNodeRun()
 
+  const nodeProcess = getNodeProcess()
   const cwd =
-    (getOwn(spawnOptions, 'cwd') as string | undefined) ?? process.cwd()
+    (getOwn(spawnOptions, 'cwd') as string | undefined) ?? nodeProcess.cwd()
 
   const pnpmLockPath = findUpSync(PNPM_LOCK_YAML, { cwd }) as string | undefined
   if (pnpmLockPath) {

@@ -1,22 +1,21 @@
 /**
- * @file Fail-soft entrypoint runner for CLI scripts. Wraps a script's
- *   `main()` so a throw / rejection can NEVER escape as an unhandled
- *   rejection + raw stack trace: the error is surfaced via the logger as a
- *   MESSAGE, never a stack, and the process exits non-zero. `main()` may
- *   return its exit code (or nothing → 0). This replaces the bare
- *   `void (async () => { process.exitCode = await main() })()` entry pattern,
- *   which crashes with a raw stack if `main()` throws. It also owns the
- *   whole-argv concerns every entry shares, so a new script inherits them
- *   instead of having to remember each: `--describe` prints the script's
- *   one-line purpose, `-h`/`--help` prints its usage (both from the
- *   {@link ScriptMeta} the entry passes, both BEFORE `main()` runs or any
- *   lock is taken), and a bare `--` in argv is refused before `main()` runs.
+ * @file Fail-soft entrypoint runner for CLI scripts. Wraps a script's `main()`
+ *   so a throw / rejection can NEVER escape as an unhandled rejection + raw
+ *   stack trace: the error is surfaced via the logger as a MESSAGE, never a
+ *   stack, and the process exits non-zero. `main()` may return its exit code
+ *   (or nothing → 0). This replaces the bare `void (async () => {
+ *   getNodeProcess().exitCode = await main() })()` entry pattern, which crashes
+ *   with a raw stack if `main()` throws. It also owns the whole-argv concerns
+ *   every entry shares, so a new script inherits them instead of having to
+ *   remember each: `--describe` prints the script's one-line purpose,
+ *   `-h`/`--help` prints its usage (both from the {@link ScriptMeta} the entry
+ *   passes, both BEFORE `main()` runs or any lock is taken), and a bare `--` in
+ *   argv is refused before `main()` runs.
  */
-
-import process from 'node:process'
 
 import { errorMessage } from '../errors/message.mjs'
 import { getDefaultLogger } from '../logger/default.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * The message shown when argv carries a bare `--`. Names the script so the
@@ -102,11 +101,11 @@ export function helpText(kind: 'describe' | 'help', meta: ScriptMeta): string {
 }
 
 /**
- * Run a script's `main()` FAIL-SOFT: set `process.exitCode` to its resolved
- * return (`?? 0`), and on ANY throw / rejection log the message (never a raw
- * stack) via the default logger and set `process.exitCode = 1`. Never
- * rethrows, so a CLI can't crash the user with an unhandled stack. Call it
- * inside the entrypoint guard:
+ * Run a script's `main()` FAIL-SOFT: set `getNodeProcess().exitCode` to its
+ * resolved return (`?? 0`), and on ANY throw / rejection log the message (never
+ * a raw stack) via the default logger and set `getNodeProcess().exitCode = 1`.
+ * Never rethrows, so a CLI can't crash the user with an unhandled stack. Call
+ * it inside the entrypoint guard:
  *
  * @example
  *   ;```ts
@@ -120,7 +119,7 @@ export function runMain(main: MainFn, meta?: ScriptMeta | undefined): void {
 }
 
 /**
- * The awaitable core of {@link runMain} — set `process.exitCode` from
+ * The awaitable core of {@link runMain} — set `getNodeProcess().exitCode` from
  * `main()`'s resolved return, or on any throw log the message + set exit
  * code 1. A `main()` that returns no number keeps whatever code it assigned
  * itself, and only an unclaimed code defaults to 0. Resolves, never rejects.
@@ -132,7 +131,8 @@ export async function runMainAsync(
   meta?: ScriptMeta | undefined,
 ): Promise<void> {
   const logger = getDefaultLogger()
-  const argv = process.argv.slice(2)
+  const nodeProcess = getNodeProcess()
+  const argv = nodeProcess.argv.slice(2)
   if (meta) {
     // Answered before the bare-`--` refusal, before any lock, before main():
     // a help request must succeed even on an argv the script would refuse,
@@ -140,32 +140,32 @@ export async function runMainAsync(
     const request = helpRequest(argv)
     if (request) {
       logger.log(helpText(request, meta))
-      process.exitCode = 0
+      nodeProcess.exitCode = 0
       return
     }
   }
   if (hasBareDoubleDash(argv)) {
     // Refuse rather than guess. Silently dropping flags fails OPEN, which for
     // a destructive script means running live when a preview was requested.
-    const scriptName = process.argv[1]?.split('/').pop() ?? 'this script'
+    const scriptName = nodeProcess.argv[1]?.split('/').pop() ?? 'this script'
     logger.error(bareDoubleDashMessage(scriptName))
-    process.exitCode = 1
+    nodeProcess.exitCode = 1
     return
   }
   try {
     const code = await main()
     if (typeof code === 'number') {
-      process.exitCode = code
-    } else if (!process.exitCode) {
+      nodeProcess.exitCode = code
+    } else if (!nodeProcess.exitCode) {
       // Only default to 0 when nothing has claimed a code. A `main(): void`
-      // signals failure the other sanctioned way — assign `process.exitCode`,
+      // signals failure the other sanctioned way — assign `getNodeProcess().exitCode`,
       // then return — and unconditionally writing 0 here would turn that into
       // a SILENT GREEN: the script prints its failure and still exits 0, so
       // every caller gating on the exit status reads success.
-      process.exitCode = 0
+      nodeProcess.exitCode = 0
     }
   } catch (e) {
     logger.error(errorMessage(e))
-    process.exitCode = 1
+    nodeProcess.exitCode = 1
   }
 }

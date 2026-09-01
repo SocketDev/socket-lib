@@ -10,10 +10,6 @@
  *   error)
  */
 
-import { existsSync, readFileSync } from 'node:fs'
-import path from 'node:path'
-import process from 'node:process'
-
 import { errorMessage } from '../errors/message.mjs'
 import { getDefaultLogger } from '../logger/default.mjs'
 import { ArrayIsArray } from '../primordials/array.mjs'
@@ -33,6 +29,9 @@ import type {
 import { parseArgs as parseLibArgs } from '../exe/argv/parse.mjs'
 
 import { MapCtor, SetCtor } from '../primordials/map-set.mjs'
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 const logger = getDefaultLogger()
 
@@ -79,12 +78,13 @@ export interface SerializedFinding {
 }
 
 export function loadConfig(configPath: string): PrimordialsCheckConfig {
-  if (!existsSync(configPath)) {
+  const fs = getNodeFs()
+  if (!fs.existsSync(configPath)) {
     throw new ErrorCtor(`config file not found: ${configPath}`)
   }
   let parsed: unknown
   try {
-    parsed = JSONParse(readFileSync(configPath, 'utf8'))
+    parsed = JSONParse(fs.readFileSync(configPath, 'utf8'))
   } catch (e) {
     throw new ErrorCtor(`config file is not valid JSON: ${errorMessage(e)}`)
   }
@@ -145,6 +145,7 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
 
   // repoRoot is where scanDirs are resolved from. Default to cwd —
   // the user runs `socket-lib check prim` from their repo root.
+  const nodeProcess = getNodeProcess()
   // Override via config if the config lives somewhere unusual.
   return {
     scanDirs: raw.scanDirs as string[],
@@ -154,7 +155,7 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
       typeof raw.socketLibPrimordialsPath === 'string'
         ? raw.socketLibPrimordialsPath
         : undefined,
-    repoRoot: process.cwd(),
+    repoRoot: nodeProcess.cwd(),
   }
 }
 
@@ -250,6 +251,7 @@ export function renderHuman(
   }
 }
 
+const nodeProcess = getNodeProcess()
 /**
  * Pick the config file. Returns the explicit `--config` argument when given
  * (even if it doesn't exist — the caller will surface the error with the path
@@ -258,19 +260,22 @@ export function renderHuman(
  * "config file not found" error message names the canonical default.
  *
  * `baseDir` is the directory the relative candidates resolve against; it
- * defaults to `process.cwd()`, the repo root the user runs from, and is a
- * parameter so callers/tests can probe a fixture tree without `process.chdir`.
+ * defaults to `getNodeProcess().cwd()`, the repo root the user runs from, and
+ * is a parameter so callers/tests can probe a fixture tree without
+ * `getNodeProcess().chdir`.
  */
 export function resolveConfigPath(
   explicit: string | undefined,
-  baseDir: string = process.cwd(),
+  baseDir: string = nodeProcess.cwd(),
 ): string {
   if (explicit !== undefined) {
     return explicit
   }
   for (let i = 0, { length } = FALLBACK_CONFIG_PATHS; i < length; i += 1) {
     const candidate = FALLBACK_CONFIG_PATHS[i]!
-    if (existsSync(path.resolve(baseDir, candidate))) {
+    const fs = getNodeFs()
+    const path = getNodePath()
+    if (fs.existsSync(path.resolve(baseDir, candidate))) {
       return candidate
     }
   }
@@ -287,6 +292,7 @@ export async function runCheckPrimordials(
   }
   let config: PrimordialsCheckConfig
   try {
+    const path = getNodePath()
     config = loadConfig(path.resolve(resolveConfigPath(args.config)))
   } catch (e) {
     logger.error(`socket-lib check primordials: ${errorMessage(e)}`)

@@ -14,8 +14,6 @@
  *   - download + integrity verification — `./binary-download`
  */
 
-import process from 'node:process'
-
 import { getArch, isWin32 } from '../constants/platform.mjs'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time.mjs'
 import { readJson } from '../fs/read-json.mjs'
@@ -88,7 +86,8 @@ export async function dlxBinary(
   const force = yes === true ? true : userForce
   // Generate cache paths similar to pnpm/npx structure.
   const cacheDir = getDlxCachePath()
-  const binaryName = name || `binary-${process.platform}-${getArch()}`
+  const nodeProcess = getNodeProcess()
+  const binaryName = name || `binary-${nodeProcess.platform}-${getArch()}`
   // Create spec from URL and binary name for unique cache identity.
   const spec = `${url}:${binaryName}`
   const cacheKey = generateCacheKey(spec)
@@ -203,7 +202,7 @@ export async function dlxBinary(
         ...spawnOptions,
         env: {
           ...spawnOptions?.env,
-          PATH: `${cacheEntryDir}${path.delimiter}${process.env['PATH'] || ''}`,
+          PATH: `${cacheEntryDir}${path.delimiter}${nodeProcess.env['PATH'] || ''}`,
         },
         // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (isWin32() && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
         shell: true,
@@ -253,12 +252,13 @@ export function executeBinary(
   // Windows: prepend cache dir to PATH so cmd.exe can locate the binary.
   const path = getNodePath()
   const cacheEntryDir = path.dirname(binaryPath)
+  const nodeProcess = getNodeProcess()
   const finalSpawnOptions = needsShell
     ? {
         ...spawnOptions,
         env: {
           ...spawnOptions?.env,
-          PATH: `${cacheEntryDir}${path.delimiter}${process.env['PATH'] || ''}`,
+          PATH: `${cacheEntryDir}${path.delimiter}${nodeProcess.env['PATH'] || ''}`,
         },
         // oxlint-disable-next-line socket/prefer-shell-win32 -- already gated by `needsShell` (isWin32() && .bat/.cmd/.ps1), so this branch only runs on Windows for a script extension; shell: true is the intended cmd.exe wrap.
         shell: true,
@@ -287,3 +287,4 @@ export type {
   DlxBinaryResult,
   DlxMetadata,
 } from './binary-types.mjs'
+import { getNodeProcess } from '../node/process.mjs'

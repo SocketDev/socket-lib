@@ -2,8 +2,6 @@
  * @file Code coverage utilities for parsing v8 coverage data.
  */
 
-import process from 'node:process'
-
 import { readJson } from '../fs/read-json.mjs'
 import { isPlainObject } from '../objects/predicates.mjs'
 import { spawn } from '../process/spawn/child.mjs'
@@ -24,6 +22,7 @@ import type {
   V8CoverageData,
   V8FileCoverage,
 } from './types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Calculate coverage metric with percentage.
@@ -53,9 +52,10 @@ export async function getCodeCoverage(
   options?: GetCodeCoverageOptions | undefined,
 ): Promise<CodeCoverageResult> {
   const path = getNodePath()
+  const nodeProcess = getNodeProcess()
   const opts = {
     __proto__: null,
-    coveragePath: path.join(process.cwd(), 'coverage/coverage-final.json'),
+    coveragePath: path.join(nodeProcess.cwd(), 'coverage/coverage-final.json'),
     generateIfMissing: false,
     ...options,
   } as GetCodeCoverageOptions
@@ -72,7 +72,7 @@ export async function getCodeCoverage(
     if (generateIfMissing) {
       // Run vitest to generate coverage.
       await spawn('vitest', ['run', '--coverage'], {
-        cwd: process.cwd(),
+        cwd: nodeProcess.cwd(),
         stdio: 'inherit',
       })
     } else {

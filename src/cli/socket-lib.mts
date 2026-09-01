@@ -10,9 +10,6 @@
  *   `@socketsecurity/lib` as a (dev)dependency.
  */
 
-import { createRequire } from 'node:module'
-import process from 'node:process'
-
 import {
   buildCliManifest,
   describeRequest,
@@ -21,12 +18,15 @@ import {
 import { getDefaultLogger } from '../logger/default.mjs'
 
 import { runCheck } from './check.mjs'
+import { getNodeProcess } from '../node/process.mjs'
+import { getNodeModule } from '../node/module.mjs'
 
 const logger = getDefaultLogger()
 
 // Resolves to the repo root from src/cli/ and to the published package root
+const nodeModule = getNodeModule()
 // from dist/cli/ — the same two hops in both layouts.
-const { version: LIB_VERSION } = createRequire(import.meta.url)(
+const { version: LIB_VERSION } = nodeModule.createRequire(import.meta.url)(
   '../../package.json',
 ) as { version: string }
 
@@ -90,12 +90,13 @@ export function printHelp(): void {
   logger.log('Run `socket-lib check --help` for the list of checks.')
 }
 
+const nodeProcess = getNodeProcess()
 export async function main(
-  args: readonly string[] = process.argv.slice(2),
+  args: readonly string[] = nodeProcess.argv.slice(2),
 ): Promise<number> {
   const describeKind = describeRequest(args)
   if (describeKind) {
-    process.stdout.write(renderDescribe(describeKind, MANIFEST))
+    nodeProcess.stdout.write(renderDescribe(describeKind, MANIFEST))
     return 0
   }
 
@@ -132,7 +133,7 @@ declare const module: unknown
    module is invoked as the bin (`socket-lib`), not when imported. */
 if (typeof require !== 'undefined' && require.main === module) {
   void main().then(code => {
-    process.exit(code)
+    nodeProcess.exit(code)
   })
 }
 /* c8 ignore stop */

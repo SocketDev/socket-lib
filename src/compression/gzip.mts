@@ -9,10 +9,7 @@
  */
 
 import type { Buffer } from 'node:buffer'
-import { createReadStream, createWriteStream } from 'node:fs'
-import path from 'node:path'
 import { pipeline } from 'node:stream/promises'
-import { promisify } from 'node:util'
 import { createGunzip, createGzip, gunzip, gzip } from 'node:zlib'
 import type { ZlibOptions } from 'node:zlib'
 
@@ -27,9 +24,13 @@ import type { CompressFileOptions, CompressOptions } from './types.mjs'
 import { BufferFrom, BufferIsBuffer } from '../primordials/buffer.mjs'
 
 import { SetCtor } from '../primordials/map-set.mjs'
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+import { getNodeUtil } from '../node/util.mjs'
 
-const gzipAsync = promisify(gzip)
-const gunzipAsync = promisify(gunzip)
+const util = getNodeUtil()
+const gzipAsync = util.promisify(gzip)
+const gunzipAsync = util.promisify(gunzip)
 
 // Gzip has a real magic-byte signature: 0x1f 0x8b.
 const GZIP_MAGIC_0 = 0x1f
@@ -86,10 +87,11 @@ export async function compressGzipFile(
     maybeOptions,
     p => `${p}.gz`,
   )
+  const fs = getNodeFs()
   await pipeline(
-    createReadStream(srcPath),
+    fs.createReadStream(srcPath),
     createGzip(resolveGzipOptions(options)),
-    createWriteStream(destPath),
+    fs.createWriteStream(destPath),
   )
   if (inPlace) {
     await safeDelete(srcPath)
@@ -156,15 +158,17 @@ export async function decompressGzipFile(
       // .tgz is conventionally .tar.gz collapsed — recover the .tar so
       // a round-trip through compress/decompress is lossless.
       const stripped = stripExt(p, GZIP_EXTS)
+      const path = getNodePath()
       return StringPrototypeToLowerCase(path.extname(p)) === '.tgz'
         ? `${stripped}.tar`
         : stripped
     },
   )
+  const fs = getNodeFs()
   await pipeline(
-    createReadStream(srcPath),
+    fs.createReadStream(srcPath),
     createGunzip(),
-    createWriteStream(destPath),
+    fs.createWriteStream(destPath),
   )
   if (inPlace) {
     await safeDelete(srcPath)
@@ -177,6 +181,7 @@ export async function decompressGzipFile(
  * (case-insensitive). Naming follows node:path's `extname`.
  */
 export function hasGzipExt(filePath: string): boolean {
+  const path = getNodePath()
   return GZIP_EXTS.has(StringPrototypeToLowerCase(path.extname(filePath)))
 }
 

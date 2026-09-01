@@ -14,10 +14,6 @@
  *      cold-start cost.
  */
 
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { mkdir } from 'node:fs/promises'
-import path from 'node:path'
-
 import { whichSync } from '../exe/path/which.mjs'
 import { errorMessage } from '../errors/message.mjs'
 import { getDefaultLogger } from '../logger/default.mjs'
@@ -28,6 +24,9 @@ const logger = getDefaultLogger()
 import type { AiAgentName, DiscoveredAgents } from './types.mjs'
 
 import { DateNow } from '../primordials/date.mjs'
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+import { getNodeFsPromises } from '../node/fs-promises.mjs'
 
 const KNOWN_AGENTS: readonly AiAgentName[] = [
   'claude',
@@ -49,6 +48,7 @@ export interface OnDiskCache {
 }
 
 export function cachePathFor(repoRoot: string): string {
+  const path = getNodePath()
   return path.join(repoRoot, '.cache', 'agent-discovery.json')
 }
 
@@ -119,11 +119,12 @@ export function getDiscoveredAiAgents(): DiscoveredAgents | undefined {
 }
 
 export function readDiskCache(cachePath: string): DiscoveredAgents | undefined {
-  if (!existsSync(cachePath)) {
+  const fs = getNodeFs()
+  if (!fs.existsSync(cachePath)) {
     return undefined
   }
   try {
-    const raw = readFileSync(cachePath, 'utf8')
+    const raw = fs.readFileSync(cachePath, 'utf8')
     const parsed = JSONParse(raw) as OnDiskCache
     if (
       typeof parsed !== 'object' ||
@@ -155,9 +156,14 @@ export async function writeDiskCache(
   agents: DiscoveredAgents,
 ): Promise<void> {
   try {
-    await mkdir(path.dirname(cachePath), { recursive: true })
+    const fsPromises = getNodeFsPromises()
+    const path = getNodePath()
+    await fsPromises.mkdir(path.dirname(cachePath), {
+      recursive: true,
+    })
     const payload: OnDiskCache = { agents, writtenAt: DateNow() }
-    writeFileSync(cachePath, JSONStringify(payload, undefined, 2) + '\n')
+    const fs = getNodeFs()
+    fs.writeFileSync(cachePath, JSONStringify(payload, undefined, 2) + '\n')
   } catch (e) {
     // Cache-write failure is non-fatal — discovery still works for
     // the current process via the in-process cache.

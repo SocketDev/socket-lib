@@ -12,8 +12,6 @@
  *   backoff (5s / 15s / 45s). Each retry is a fresh subprocess.
  */
 
-import process from 'node:process'
-
 import { errorMessage } from '../errors/message.mjs'
 import { DateNow } from '../primordials/date.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
@@ -44,6 +42,7 @@ import type {
   AiAgentName,
   SpawnAiAgentOptions,
 } from './types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 const MAX_ATTEMPTS = 3
 const BACKOFF_BASE_MS = 5000
@@ -224,7 +223,7 @@ export async function pickAgent(
  *   const result = await spawnAiAgent({
  *   ...AI_PROFILE.edit,
  *   prompt: 'Fix the lint findings in src/foo.ts',
- *   cwd: process.cwd(),
+ *   cwd: getNodeProcess().cwd(),
  *   model: 'claude-sonnet-4-6',
  *   timeoutMs: 5 * 60 * 1000,
  *   })
@@ -254,10 +253,11 @@ export async function spawnAiAgent(
     exitCode = 0
 
     try {
+      const nodeProcess = getNodeProcess()
       const child = spawn(agent, args, {
         cwd: options.cwd,
         // Only override env when the caller supplies one; absent = inherit.
-        ...(options.env ? { env: { ...process.env, ...options.env } } : {}),
+        ...(options.env ? { env: { ...nodeProcess.env, ...options.env } } : {}),
         stdio: 'pipe',
         stdioString: true,
         timeout: options.timeoutMs,

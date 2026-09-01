@@ -4,12 +4,12 @@
  *   and feature-detection flags for APIs that vary across Node releases.
  */
 
-import process from 'node:process'
-
 import { maintainedNodeVersions } from './maintained-node-versions.mjs'
 
 import { NumberParseInt } from '../primordials/number.mjs'
-const NODE_VERSION = process.version
+import { getNodeProcess } from '../node/process.mjs'
+const nodeProcess = getNodeProcess()
+const NODE_VERSION = nodeProcess.version
 
 let nodeDisableSigusr1Flags: string[]
 let nodeHardenFlags: string[]
@@ -19,10 +19,10 @@ let nodePermissionFlags: string[]
 /**
  * Get the absolute path to the currently running Node.js binary.
  *
- * @returns The value of `process.execPath`.
+ * @returns The value of `getNodeProcess().execPath`.
  */
 export function getExecPath(): string {
-  return process.execPath
+  return nodeProcess.execPath
 }
 
 /**
@@ -109,7 +109,7 @@ export function getNodeHardenFlags(): string[] {
  */
 export function getNodeMajorVersion(): number {
   // NODE_VERSION always has shape `vMAJOR.MINOR.PATCH`; the `?? '0'`
-  // and `|| 0` are defensive against malformed process.version.
+  // and `|| 0` are defensive against malformed getNodeProcess().version.
   /* c8 ignore start */
   const major = NODE_VERSION.slice(1).split('.')[0] ?? '0'
   return NumberParseInt(major, 10) || 0
@@ -122,7 +122,7 @@ export function getNodeMajorVersion(): number {
  * @returns The minor version number, or `0` if it cannot be parsed.
  */
 export function getNodeMinorVersion(): number {
-  // Defensive `?? '0'` against malformed process.version.
+  // Defensive `?? '0'` against malformed getNodeProcess().version.
   /* c8 ignore start */
   return NumberParseInt(NODE_VERSION.split('.')[1] ?? '0', 10)
   /* c8 ignore stop */
@@ -149,7 +149,7 @@ export function getNodeNoWarningsFlags(): string[] {
  * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function getNodePatchVersion(): number {
-  // Defensive `?? '0'` against malformed process.version.
+  // Defensive `?? '0'` against malformed getNodeProcess().version.
   /* c8 ignore start */
   return NumberParseInt(NODE_VERSION.split('.')[2] ?? '0', 10)
   /* c8 ignore stop */
@@ -189,7 +189,7 @@ export function getNodePermissionFlags(): string[] {
 }
 
 /**
- * Get the full Node.js version string from `process.version`.
+ * Get the full Node.js version string from `getNodeProcess().version`.
  *
  * @returns The runtime version, including the leading `v` (e.g. `v22.11.0`).
  */
@@ -344,14 +344,14 @@ export function supportsNodeStripTypesDefault(): boolean {
 
 /**
  * Check whether this process was spawned with an IPC channel. When `true`,
- * `process.send()` is callable to message the parent process.
+ * `getNodeProcess().send()` is callable to message the parent process.
  *
  * @returns `true` when the current process has an IPC channel to its parent.
  *
  * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
 export function supportsProcessSend(): boolean {
-  return typeof process.send === 'function'
+  return typeof nodeProcess.send === 'function'
 }
 
 // Node.js constants.

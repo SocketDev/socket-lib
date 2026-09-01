@@ -10,9 +10,6 @@
  *     `dlx/binary.ts` for size hygiene.
  */
 
-import process from 'node:process'
-import { existsSync } from 'node:fs'
-
 import { DLX_BINARY_CACHE_TTL } from '../constants/time.mjs'
 import { readJson } from '../fs/read-json.mjs'
 import { safeDelete } from '../fs/safe.mjs'
@@ -31,6 +28,7 @@ import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
 
 import type { DlxMetadata } from './binary-types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Clean expired entries from the DLX cache.
@@ -64,7 +62,7 @@ export async function cleanDlxCache(
     const metaPath = getBinaryCacheMetadataPath(entryPath)
 
     try {
-      if (!(await existsSync(entryPath))) {
+      if (!(await fs.existsSync(entryPath))) {
         continue
       }
 
@@ -205,7 +203,7 @@ export async function listDlxCache(): Promise<
   for (const entry of entries) {
     const entryPath = path.join(cacheDir, entry)
     try {
-      if (!(await existsSync(entryPath))) {
+      if (!(await fs.existsSync(entryPath))) {
         continue
       }
 
@@ -316,8 +314,9 @@ export async function writeBinaryCacheMetadata(
     },
   }
   const fs = getNodeFs()
+  const nodeProcess = getNodeProcess()
   // Use atomic write-then-rename pattern to prevent corruption on crash
-  const tmpPath = `${metaPath}.tmp.${process.pid}`
+  const tmpPath = `${metaPath}.tmp.${nodeProcess.pid}`
   await fs.promises.writeFile(tmpPath, JSONStringify(metadata, null, 2))
   await fs.promises.rename(tmpPath, metaPath)
 }

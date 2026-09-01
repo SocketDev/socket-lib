@@ -7,8 +7,6 @@
  *     `dlx/binary.ts` for size hygiene.
  */
 
-import process from 'node:process'
-
 import { getArch, isWin32 } from '../constants/platform.mjs'
 import { DLX_BINARY_CACHE_TTL } from '../constants/time.mjs'
 import { isError } from '../errors/predicates.mjs'
@@ -37,6 +35,7 @@ import type { DlxBinaryOptions } from './binary-types.mjs'
 import type { HttpDownloadWriteStreamFactory } from '../http-request/download-types.mjs'
 
 import { BufferFrom } from '../primordials/buffer.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Download a binary from a URL with caching, without executing it. Similar to
@@ -95,7 +94,8 @@ export async function downloadBinary(
   const path = getNodePath()
   // Generate cache paths similar to pnpm/npx structure.
   const cacheDir = getDlxCachePath()
-  const binaryName = name || `binary-${process.platform}-${getArch()}`
+  const nodeProcess = getNodeProcess()
+  const binaryName = name || `binary-${nodeProcess.platform}-${getArch()}`
   // Create spec from URL and binary name for unique cache identity.
   const spec = `${url}:${binaryName}`
   const cacheKey = generateCacheKey(spec)
