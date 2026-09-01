@@ -3788,3 +3788,12 @@ test/fleet/unit/comment-voice.test.mts
 # directory too on a case-insensitive filesystem (`agents.md` == `AGENTS.md`);
 # this is hand-authored repo doc content, not fleet-pack payload.
 !/docs/repo/agents.md/
+
+# Fleet rolldown plugins, delivered by the cascade's opt-in bundle channel.
+# They are fleet payload and must never be tracked here, but the fleet-pack
+# untrack block above is regenerated from the PINNED pack's manifest, and this
+# repo's pin predates these files — so they arrived and sat visible-and-
+# untracked, one `git add -A` from being committed into a member that is
+# supposed to fetch them. Drop this entry once the pin moves past the release
+# that lists them.
+/.config/fleet/rolldown/
