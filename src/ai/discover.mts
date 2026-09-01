@@ -26,7 +26,7 @@ import type { AiAgentName, DiscoveredAgents } from './types.mjs'
 import { DateNow } from '../primordials/date.mjs'
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
-import { getNodeFsPromises } from '../node/fs-promises.mjs'
+import { getNodeFsPromises } from '../node/fs/promises.mjs'
 
 const KNOWN_AGENTS: readonly AiAgentName[] = [
   'claude',

@@ -5,7 +5,7 @@
 
 import type * as NodeFsPromises from 'node:fs/promises'
 
-import { IS_NODE } from '../constants/runtime.mjs'
+import { IS_NODE } from '../../constants/runtime.mjs'
 
 let fsPromises: typeof NodeFsPromises | undefined
 

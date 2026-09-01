@@ -1,12 +1,12 @@
 /**
- * @file Unit tests for src/node/fs-promises.ts.
+ * @file Unit tests for src/node/fs/promises.ts.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeFsPromises } from '../../../src/node/fs-promises.mjs'
+import { getNodeFsPromises } from '../../../../src/node/fs/promises.mjs'
 
-describe('node/fs-promises', () => {
+describe('node/fs/promises', () => {
   it('returns the node:fs/promises module', () => {
     const fsp = getNodeFsPromises()!
     expect(typeof fsp.readFile).toBe('function')

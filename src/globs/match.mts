@@ -27,7 +27,7 @@
  */
 
 import { getNodeFs } from '../node/fs.mjs'
-import { getNodeFsPromises } from '../node/fs-promises.mjs'
+import { getNodeFsPromises } from '../node/fs/promises.mjs'
 import { resolve } from '../paths/normalize.mjs'
 import { pFilter } from '../promises/iterate.mjs'
 import { fromAsync } from '../promises/resolvers.mjs'

@@ -44,7 +44,7 @@ export const BUILTIN_ACCESSORS: ReadonlyArray<
   ['child_process', 'getNodeChildProcess', 'child-process'],
   ['crypto', 'getNodeCrypto', 'crypto'],
   ['events', 'getNodeEvents', 'events'],
-  ['fs/promises', 'getNodeFsPromises', 'fs-promises'],
+  ['fs/promises', 'getNodeFsPromises', 'fs/promises'],
   ['fs', 'getNodeFs', 'fs'],
   ['http', 'getNodeHttp', 'http'],
   ['https', 'getNodeHttps', 'https'],
@@ -52,7 +52,7 @@ export const BUILTIN_ACCESSORS: ReadonlyArray<
   ['os', 'getNodeOs', 'os'],
   ['path', 'getNodePath', 'path'],
   ['process', 'getNodeProcess', 'process'],
-  ['timers/promises', 'getNodeTimersPromises', 'timers-promises'],
+  ['timers/promises', 'getNodeTimersPromises', 'timers/promises'],
   ['url', 'getNodeUrl', 'url'],
   ['util', 'getNodeUtil', 'util'],
 ] as const)

@@ -1,12 +1,12 @@
 /**
- * @file Unit tests for src/node/timers-promises.ts.
+ * @file Unit tests for src/node/timers/promises.ts.
  */
 
 import { describe, expect, it } from 'vitest'
 
-import { getNodeTimersPromises } from '../../../src/node/timers-promises.mjs'
+import { getNodeTimersPromises } from '../../../../src/node/timers/promises.mjs'
 
-describe('node/timers-promises', () => {
+describe('node/timers/promises', () => {
   it('returns the node:timers/promises module', () => {
     const tp = getNodeTimersPromises()!
     expect(typeof tp.setTimeout).toBe('function')

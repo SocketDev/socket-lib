@@ -37,7 +37,7 @@
 import { extractTarGz } from '../../../../archives/tar.mjs'
 import { decompressGzip } from '../../../../compression/gzip.mjs'
 import { safeDelete } from '../../../../fs/safe.mjs'
-import { getNodeFsPromises } from '../../../../node/fs-promises.mjs'
+import { getNodeFsPromises } from '../../../../node/fs/promises.mjs'
 import { getNodePath } from '../../../../node/path.mjs'
 import { normalizePath } from '../../../../paths/normalize.mjs'
 import { getOsTmpDir } from '../../../../paths/socket.mjs'

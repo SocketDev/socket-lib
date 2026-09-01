@@ -82,7 +82,7 @@
         "reason": "Reached from shipped code through the getNode* accessor modules. The accessors are how a leaf reaches a builtin, so any module that stops importing node: directly makes them reachable."
       },
       {
-        "leaf": "node/timers-promises",
+        "leaf": "node/timers/promises",
         "reason": "Reached from shipped code through the getNode* accessor modules. The accessors are how a leaf reaches a builtin, so any module that stops importing node: directly makes them reachable."
       },
       {

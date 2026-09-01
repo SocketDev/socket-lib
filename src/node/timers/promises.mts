@@ -5,7 +5,7 @@
 
 import type * as NodeTimersPromises from 'node:timers/promises'
 
-import { IS_NODE } from '../constants/runtime.mjs'
+import { IS_NODE } from '../../constants/runtime.mjs'
 
 let timersPromises: typeof NodeTimersPromises | undefined
 

@@ -24,7 +24,7 @@ import type {
   HttpDownloadOptions,
   HttpDownloadResult,
 } from './download-types.mjs'
-import { getNodeTimersPromises } from '../node/timers-promises.mjs'
+import { getNodeTimersPromises } from '../node/timers/promises.mjs'
 
 /**
  * Download a file from a URL to a local path with redirect support, retry

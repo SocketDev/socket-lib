@@ -2545,10 +2545,10 @@
       "types": "./dist/node/fs.d.ts",
       "default": "./dist/node/fs.js"
     },
-    "./node/fs-promises": {
-      "source": "./src/node/fs-promises.mts",
-      "types": "./dist/node/fs-promises.d.ts",
-      "default": "./dist/node/fs-promises.js"
+    "./node/fs/promises": {
+      "source": "./src/node/fs/promises.mts",
+      "types": "./dist/node/fs/promises.d.ts",
+      "default": "./dist/node/fs/promises.js"
     },
     "./node/http": {
       "source": "./src/node/http.mts",
@@ -2580,10 +2580,10 @@
       "types": "./dist/node/process.d.ts",
       "default": "./dist/node/process.js"
     },
-    "./node/timers-promises": {
-      "source": "./src/node/timers-promises.mts",
-      "types": "./dist/node/timers-promises.d.ts",
-      "default": "./dist/node/timers-promises.js"
+    "./node/timers/promises": {
+      "source": "./src/node/timers/promises.mts",
+      "types": "./dist/node/timers/promises.d.ts",
+      "default": "./dist/node/timers/promises.js"
     },
     "./node/url": {
       "source": "./src/node/url.mts",

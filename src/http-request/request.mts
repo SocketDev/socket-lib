@@ -20,7 +20,7 @@ import { HttpResponseError } from './response-types.mjs'
 
 import type { HttpRequestOptions } from './request-types.mjs'
 import type { HttpResponse } from './response-types.mjs'
-import { getNodeTimersPromises } from '../node/timers-promises.mjs'
+import { getNodeTimersPromises } from '../node/timers/promises.mjs'
 
 /**
  * Make an HTTP/HTTPS request with retry logic and redirect support. Provides a
