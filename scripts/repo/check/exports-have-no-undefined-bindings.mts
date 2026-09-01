@@ -56,9 +56,9 @@ import {
 import {
   buildProbeSource,
   parseProbeOutput,
-} from './undefined-bindings-probe.mts'
+} from './_shared/undefined-bindings-probe.mts'
 
-import type { ProbeFinding } from './undefined-bindings-probe.mts'
+import type { ProbeFinding } from './_shared/undefined-bindings-probe.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 

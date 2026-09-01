@@ -30,7 +30,7 @@ import {
 import {
   buildProbeSource,
   parseProbeOutput,
-} from '../../scripts/repo/check/undefined-bindings-probe.mts'
+} from '../../scripts/repo/check/_shared/undefined-bindings-probe.mts'
 import { listDistFiles } from '../../scripts/repo/check/reexports-have-no-import-cycles.mts'
 import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
