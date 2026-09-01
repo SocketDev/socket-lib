@@ -20,7 +20,7 @@ import { parseProvenancePredicate } from '../../../../../src/eco/npm/registry/in
 import type { AttestationBundle } from '../../../../../src/eco/npm/registry/index.mjs'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
-const fixturesDir = path.resolve(testDir, '../../../fixtures/npm')
+const fixturesDir = path.resolve(testDir, '../../../../fixtures/npm')
 const localRequire = createRequire(import.meta.url)
 
 const attestationFixture = localRequire(

@@ -6,8 +6,6 @@
  *   `withSpinner*` wrappers.
  */
 
-import process from 'node:process'
-
 import { applyColor } from '../logger/colors.mjs'
 
 import { MathMax, MathRound } from '../primordials/math.mjs'
@@ -18,6 +16,14 @@ import type { ProgressInfo, SpinnerStyle } from './types.mjs'
  * color rather than holding its own palette reference.
  */
 export const COLOR_INHERIT = 'inherit'
+
+// Read off globalThis rather than importing `node:process`. This leaf carries
+// the `browser` condition, and a static `node:process` import is a hard
+// resolve error in a bundler however little of it the module uses — one
+// `process.stderr` read here pulled `./debug/output` and six `./memo/*` leaves
+// into the same failure. Undefined off-Node is the correct answer: applyColor
+// then has no stream to test and withholds the escape.
+const globalProcess = globalThis.process as NodeJS.Process | undefined
 
 /**
  * Minimal spinner style for CI environments. Uses empty frame and max interval
@@ -106,5 +112,5 @@ export function renderProgressBar(
   // applyColor so the escape is withheld when stderr is redirected; the palette
   // loads lazily on first render (see logger/colors.getYoctocolors) so
   // importing this leaf stays cheap and browser-load-safe.
-  return applyColor(bar, 'cyan', { stream: process.stderr })
+  return applyColor(bar, 'cyan', { stream: globalProcess?.stderr })
 }

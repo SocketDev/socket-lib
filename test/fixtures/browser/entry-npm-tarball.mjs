@@ -9,7 +9,7 @@
 import {
   readNpmTarballEntries,
   readNpmTarballManifest,
-} from '@socketsecurity/lib/npm/registry/tarball/browser'
+} from '@socketsecurity/lib/eco/npm/registry/tarball/browser'
 
 export async function run(bytes) {
   const entries = await readNpmTarballEntries(bytes)

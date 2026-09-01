@@ -10,7 +10,7 @@ import { isNodeBuiltin } from '@socketsecurity/lib/node/module'
 import {
   encodePackageName,
   parsePackument,
-} from '@socketsecurity/lib/npm/registry'
+} from '@socketsecurity/lib/eco/npm/registry'
 
 export const result = isNodeBuiltin('fs')
 export const npmResult = { encodePackageName, parsePackument }

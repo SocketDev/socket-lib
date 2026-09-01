@@ -6,8 +6,60 @@
   "buildStubs": {
     "keepExposed": [
       {
+        "leaf": "archives/tar",
+        "reason": "Reached from a leaf that ships real code, through the dist require graph. Invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "archives/types",
+        "reason": "Reached from a leaf that ships real code, through the dist require graph. Invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "eco/npm/meta-cache/browser",
+        "reason": "Reached through the browser/default condition of a twin entry (./eco/npm/meta, ./eco/npm/meta-cache, ./eco/npm/registry/tarball). A leaf reachable only through an exports CONDITION is invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "eco/npm/meta-cache/node",
+        "reason": "Reached through the browser/default condition of a twin entry (./eco/npm/meta, ./eco/npm/meta-cache, ./eco/npm/registry/tarball). A leaf reachable only through an exports CONDITION is invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "eco/npm/meta-slice",
+        "reason": "Reached from a leaf that ships real code, through the dist require graph. Invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "eco/npm/meta/browser",
+        "reason": "Reached through the browser/default condition of a twin entry (./eco/npm/meta, ./eco/npm/meta-cache, ./eco/npm/registry/tarball). A leaf reachable only through an exports CONDITION is invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "eco/npm/meta/node",
+        "reason": "Reached through the browser/default condition of a twin entry (./eco/npm/meta, ./eco/npm/meta-cache, ./eco/npm/registry/tarball). A leaf reachable only through an exports CONDITION is invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
         "leaf": "eco/npm/npm-cli/flags",
         "reason": "isNpmLoglevelFlag is the oracle this repo's own pnpm-flags parity test compares against, imported from the -stable snapshot so the check never validates src against itself. A repo-local test importing through @socketsecurity/lib-stable is invisible to the fleet-usage leg, which counts importers of @socketsecurity/lib."
+      },
+      {
+        "leaf": "eco/npm/registry/auth",
+        "reason": "Reached from a leaf that ships real code, through the dist require graph. Invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "eco/npm/registry/client",
+        "reason": "Reached from a leaf that ships real code, through the dist require graph. Invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "eco/npm/registry/live",
+        "reason": "Reached from a leaf that ships real code, through the dist require graph. Invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "eco/npm/registry/stage-tarball",
+        "reason": "Reached from a leaf that ships real code, through the dist require graph. Invisible to the fleet-usage leg, which asks who imports a specifier."
+      },
+      {
+        "leaf": "eco/npm/registry/tarball/browser",
+        "reason": "Exercised by this repo's own browser-bundle e2e, which bundles the leaf and runs it in a process-less vm. A repo-local e2e is invisible to the fleet-usage leg, which counts importers of @socketsecurity/lib."
+      },
+      {
+        "leaf": "eco/npm/registry/tarball/node",
+        "reason": "Reached through the browser/default condition of a twin entry (./eco/npm/meta, ./eco/npm/meta-cache, ./eco/npm/registry/tarball). A leaf reachable only through an exports CONDITION is invisible to the fleet-usage leg, which asks who imports a specifier."
       },
       {
         "leaf": "exe/smol/https",
@@ -105,8 +157,6 @@
         "ai/subagent-status",
         "archives/detect",
         "archives/extract",
-        "archives/tar",
-        "archives/types",
         "archives/zip",
         "cacache/tmp",
         "cli/check",
@@ -136,12 +186,7 @@
         "eco/manifest/types",
         "eco/npm/bun/exec",
         "eco/npm/manifest-format",
-        "eco/npm/meta-cache/browser",
-        "eco/npm/meta-cache/node",
-        "eco/npm/meta-slice",
         "eco/npm/meta-types",
-        "eco/npm/meta/browser",
-        "eco/npm/meta/node",
         "eco/npm/npm-cli/exec",
         "eco/npm/npm-cli/extract-package-name-from-path",
         "eco/npm/npm-cli/lockfile/format",
@@ -157,19 +202,13 @@
         "eco/npm/pnpm/lockfile/parse",
         "eco/npm/registry/access",
         "eco/npm/registry/audit",
-        "eco/npm/registry/auth",
         "eco/npm/registry/cache",
-        "eco/npm/registry/client",
-        "eco/npm/registry/live",
         "eco/npm/registry/oidc",
         "eco/npm/registry/org",
         "eco/npm/registry/publish",
         "eco/npm/registry/search",
         "eco/npm/registry/stage",
         "eco/npm/registry/stage-actions",
-        "eco/npm/registry/stage-tarball",
-        "eco/npm/registry/tarball/browser",
-        "eco/npm/registry/tarball/node",
         "eco/npm/registry/team",
         "eco/npm/registry/tokens",
         "eco/npm/registry/trust",

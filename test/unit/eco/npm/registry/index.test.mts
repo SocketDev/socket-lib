@@ -32,7 +32,7 @@ import type {
 } from '../../../../../src/eco/npm/registry/index.mjs'
 
 const testDir = path.dirname(fileURLToPath(import.meta.url))
-const fixturesDir = path.resolve(testDir, '../../../fixtures/npm')
+const fixturesDir = path.resolve(testDir, '../../../../fixtures/npm')
 const localRequire = createRequire(import.meta.url)
 
 const packumentFixture = localRequire(

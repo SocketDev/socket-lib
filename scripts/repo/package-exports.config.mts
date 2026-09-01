@@ -70,8 +70,8 @@ export const config: ExportsConfig = {
     // TypeError. Browser consumers import `./npm/registry/tarball/browser` and
     // find out at compile time instead.
     {
-      from: './npm/registry/tarball',
-      to: './npm/registry/tarball/node',
+      from: './eco/npm/registry/tarball',
+      to: './eco/npm/registry/tarball/node',
     },
     // The metadata client's twins ARE a mirrored pair — same named exports,
     // differing only in which HTTP adapter and which TtlCache store they
@@ -89,14 +89,14 @@ export const config: ExportsConfig = {
     // resolves types through the `default` condition — agrees with the bundler
     // instead of reporting a symbol the runtime has.
     {
-      browserTo: './npm/meta/browser',
-      from: './npm/meta',
-      to: './npm/meta/node',
+      browserTo: './eco/npm/meta/browser',
+      from: './eco/npm/meta',
+      to: './eco/npm/meta/node',
     },
     {
-      browserTo: './npm/meta-cache/browser',
-      from: './npm/meta-cache',
-      to: './npm/meta-cache/node',
+      browserTo: './eco/npm/meta-cache/browser',
+      from: './eco/npm/meta-cache',
+      to: './eco/npm/meta-cache/node',
     },
   ],
   // Browser-safe export paths (glob-matched) — each gets a self-routing
@@ -132,15 +132,15 @@ export const config: ExportsConfig = {
     // `check/browser-exports-have-no-node-builtins.mts` re-derives all of this
     // from the built bytes on every check run, so either mistake fails the
     // build rather than shipping a false claim.
-    './npm/meta-slice',
-    './npm/meta-types',
+    './eco/npm/meta-slice',
+    './eco/npm/meta-types',
     // Both registry patterns keep their `*`. A wildcard-FREE pattern is a
     // SUBTREE prefix here, so a bare `./npm/registry` also claims
     // `./npm/registry/tarball/node` — the Node twin reaching node:fs and
     // node:zlib. `./npm/registry*` stops at the entry leaf; `./npm/registry/*`
     // is one segment, so it covers the sixteen helpers but not `tarball/node`.
-    './npm/registry*',
-    './npm/registry/*',
+    './eco/npm/registry*',
+    './eco/npm/registry/*',
     './objects/**',
     './oci/**',
     './regexps/**',

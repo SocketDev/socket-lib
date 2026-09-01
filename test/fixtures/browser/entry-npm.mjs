@@ -8,7 +8,7 @@ import {
   encodePackageName,
   hasProvenance,
   parsePackument,
-} from '@socketsecurity/lib/npm/registry'
+} from '@socketsecurity/lib/eco/npm/registry'
 
 export function run() {
   const registryEncoded = encodePackageName('@scope/pkg')

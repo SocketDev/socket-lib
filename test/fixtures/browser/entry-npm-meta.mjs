@@ -17,12 +17,12 @@ import {
   createNpmMetaCache,
   createWebStorageMetaCache,
   getPackumentSlim,
-} from '@socketsecurity/lib/npm/meta-cache'
+} from '@socketsecurity/lib/eco/npm/meta-cache'
 import {
   getBatch,
   getLatestVersion,
   getVersions,
-} from '@socketsecurity/lib/npm/meta'
+} from '@socketsecurity/lib/eco/npm/meta'
 
 // An injected adapter, so the run proves the client's own logic rather than
 // the network. The default adapter is still bundled and evaluated.

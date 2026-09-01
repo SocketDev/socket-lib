@@ -768,6 +768,24 @@
       "types": "./dist/eco/npm/manifest-format.d.ts",
       "default": "./dist/eco/npm/manifest-format.js"
     },
+    "./eco/npm/meta": {
+      "source": "./src/eco/npm/meta/node.mts",
+      "browser": {
+        "types": "./dist/eco/npm/meta/browser.d.ts",
+        "default": "./dist/eco/npm/meta/browser.js"
+      },
+      "types": "./dist/eco/npm/meta/node.d.ts",
+      "default": "./dist/eco/npm/meta/node.js"
+    },
+    "./eco/npm/meta-cache": {
+      "source": "./src/eco/npm/meta-cache/node.mts",
+      "browser": {
+        "types": "./dist/eco/npm/meta-cache/browser.d.ts",
+        "default": "./dist/eco/npm/meta-cache/browser.js"
+      },
+      "types": "./dist/eco/npm/meta-cache/node.d.ts",
+      "default": "./dist/eco/npm/meta-cache/node.js"
+    },
     "./eco/npm/meta-cache/browser": {
       "source": "./src/eco/npm/meta-cache/browser.mts",
       "browser": {
@@ -784,11 +802,19 @@
     },
     "./eco/npm/meta-slice": {
       "source": "./src/eco/npm/meta-slice.mts",
+      "browser": {
+        "types": "./dist/eco/npm/meta-slice.d.ts",
+        "default": "./dist/eco/npm/meta-slice.js"
+      },
       "types": "./dist/eco/npm/meta-slice.d.ts",
       "default": "./dist/eco/npm/meta-slice.js"
     },
     "./eco/npm/meta-types": {
       "source": "./src/eco/npm/meta-types.mts",
+      "browser": {
+        "types": "./dist/eco/npm/meta-types.d.ts",
+        "default": "./dist/eco/npm/meta-types.js"
+      },
       "types": "./dist/eco/npm/meta-types.d.ts",
       "default": "./dist/eco/npm/meta-types.js"
     },
@@ -888,73 +914,134 @@
     },
     "./eco/npm/registry": {
       "source": "./src/eco/npm/registry/index.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/index.d.ts",
+        "default": "./dist/eco/npm/registry/index.js"
+      },
       "types": "./dist/eco/npm/registry/index.d.ts",
       "default": "./dist/eco/npm/registry/index.js"
     },
     "./eco/npm/registry/access": {
       "source": "./src/eco/npm/registry/access.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/access.d.ts",
+        "default": "./dist/eco/npm/registry/access.js"
+      },
       "types": "./dist/eco/npm/registry/access.d.ts",
       "default": "./dist/eco/npm/registry/access.js"
     },
     "./eco/npm/registry/audit": {
       "source": "./src/eco/npm/registry/audit.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/audit.d.ts",
+        "default": "./dist/eco/npm/registry/audit.js"
+      },
       "types": "./dist/eco/npm/registry/audit.d.ts",
       "default": "./dist/eco/npm/registry/audit.js"
     },
     "./eco/npm/registry/auth": {
       "source": "./src/eco/npm/registry/auth.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/auth.d.ts",
+        "default": "./dist/eco/npm/registry/auth.js"
+      },
       "types": "./dist/eco/npm/registry/auth.d.ts",
       "default": "./dist/eco/npm/registry/auth.js"
     },
     "./eco/npm/registry/cache": {
       "source": "./src/eco/npm/registry/cache.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/cache.d.ts",
+        "default": "./dist/eco/npm/registry/cache.js"
+      },
       "types": "./dist/eco/npm/registry/cache.d.ts",
       "default": "./dist/eco/npm/registry/cache.js"
     },
     "./eco/npm/registry/client": {
       "source": "./src/eco/npm/registry/client.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/client.d.ts",
+        "default": "./dist/eco/npm/registry/client.js"
+      },
       "types": "./dist/eco/npm/registry/client.d.ts",
       "default": "./dist/eco/npm/registry/client.js"
     },
     "./eco/npm/registry/live": {
       "source": "./src/eco/npm/registry/live.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/live.d.ts",
+        "default": "./dist/eco/npm/registry/live.js"
+      },
       "types": "./dist/eco/npm/registry/live.d.ts",
       "default": "./dist/eco/npm/registry/live.js"
     },
     "./eco/npm/registry/oidc": {
       "source": "./src/eco/npm/registry/oidc.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/oidc.d.ts",
+        "default": "./dist/eco/npm/registry/oidc.js"
+      },
       "types": "./dist/eco/npm/registry/oidc.d.ts",
       "default": "./dist/eco/npm/registry/oidc.js"
     },
     "./eco/npm/registry/org": {
       "source": "./src/eco/npm/registry/org.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/org.d.ts",
+        "default": "./dist/eco/npm/registry/org.js"
+      },
       "types": "./dist/eco/npm/registry/org.d.ts",
       "default": "./dist/eco/npm/registry/org.js"
     },
     "./eco/npm/registry/publish": {
       "source": "./src/eco/npm/registry/publish.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/publish.d.ts",
+        "default": "./dist/eco/npm/registry/publish.js"
+      },
       "types": "./dist/eco/npm/registry/publish.d.ts",
       "default": "./dist/eco/npm/registry/publish.js"
     },
     "./eco/npm/registry/search": {
       "source": "./src/eco/npm/registry/search.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/search.d.ts",
+        "default": "./dist/eco/npm/registry/search.js"
+      },
       "types": "./dist/eco/npm/registry/search.d.ts",
       "default": "./dist/eco/npm/registry/search.js"
     },
     "./eco/npm/registry/stage": {
       "source": "./src/eco/npm/registry/stage.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/stage.d.ts",
+        "default": "./dist/eco/npm/registry/stage.js"
+      },
       "types": "./dist/eco/npm/registry/stage.d.ts",
       "default": "./dist/eco/npm/registry/stage.js"
     },
     "./eco/npm/registry/stage-actions": {
       "source": "./src/eco/npm/registry/stage-actions.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/stage-actions.d.ts",
+        "default": "./dist/eco/npm/registry/stage-actions.js"
+      },
       "types": "./dist/eco/npm/registry/stage-actions.d.ts",
       "default": "./dist/eco/npm/registry/stage-actions.js"
     },
     "./eco/npm/registry/stage-tarball": {
       "source": "./src/eco/npm/registry/stage-tarball.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/stage-tarball.d.ts",
+        "default": "./dist/eco/npm/registry/stage-tarball.js"
+      },
       "types": "./dist/eco/npm/registry/stage-tarball.d.ts",
       "default": "./dist/eco/npm/registry/stage-tarball.js"
+    },
+    "./eco/npm/registry/tarball": {
+      "source": "./src/eco/npm/registry/tarball/node.mts",
+      "types": "./dist/eco/npm/registry/tarball/node.d.ts",
+      "default": "./dist/eco/npm/registry/tarball/node.js"
     },
     "./eco/npm/registry/tarball/browser": {
       "source": "./src/eco/npm/registry/tarball/browser.mts",
@@ -972,16 +1059,28 @@
     },
     "./eco/npm/registry/team": {
       "source": "./src/eco/npm/registry/team.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/team.d.ts",
+        "default": "./dist/eco/npm/registry/team.js"
+      },
       "types": "./dist/eco/npm/registry/team.d.ts",
       "default": "./dist/eco/npm/registry/team.js"
     },
     "./eco/npm/registry/tokens": {
       "source": "./src/eco/npm/registry/tokens.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/tokens.d.ts",
+        "default": "./dist/eco/npm/registry/tokens.js"
+      },
       "types": "./dist/eco/npm/registry/tokens.d.ts",
       "default": "./dist/eco/npm/registry/tokens.js"
     },
     "./eco/npm/registry/trust": {
       "source": "./src/eco/npm/registry/trust.mts",
+      "browser": {
+        "types": "./dist/eco/npm/registry/trust.d.ts",
+        "default": "./dist/eco/npm/registry/trust.js"
+      },
       "types": "./dist/eco/npm/registry/trust.d.ts",
       "default": "./dist/eco/npm/registry/trust.js"
     },
