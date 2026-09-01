@@ -6,11 +6,10 @@
  *   modes inherited from umask.
  */
 
-import process from 'node:process'
-
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Ensure IPC directory exists for stub file creation. Uses restrictive (0o700)
@@ -28,8 +27,9 @@ export async function ensureIpcDirectory(filePath: string): Promise<void> {
   const dir = path.dirname(filePath)
   await fs.promises.mkdir(dir, { recursive: true, mode: 0o700 })
   // Windows skip-path; tested on Windows runners.
+  const nodeProcess = getNodeProcess()
   /* c8 ignore start */
-  if (process.platform === 'win32') {
+  if (nodeProcess.platform === 'win32') {
     return
   }
   /* c8 ignore stop */
@@ -42,8 +42,8 @@ export async function ensureIpcDirectory(filePath: string): Promise<void> {
     throw new ErrorCtor(`IPC path is not a directory: ${dir}`)
   }
   /* c8 ignore stop */
-  const getuid = process.getuid
-  /* c8 ignore next - process.getuid is always present on POSIX. */
+  const getuid = nodeProcess.getuid
+  /* c8 ignore next - getNodeProcess().getuid is always present on POSIX. */
   const ownUid = typeof getuid === 'function' ? getuid.call(process) : -1
   /* c8 ignore next 5 - Cross-user ownership guard fires only if the
      IPC directory was created by a different uid; can't be triggered

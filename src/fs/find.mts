@@ -6,8 +6,6 @@
  *   current shape visits root, then breaks.
  */
 
-import process from 'node:process'
-
 import { isArray } from '../arrays/predicates.mjs'
 import { getAbortSignal } from '../process/abort.mjs'
 import { getNodeFs } from '../node/fs.mjs'
@@ -17,6 +15,7 @@ import { walkUp } from '../paths/walk.mjs'
 import { getSmolPath } from '../exe/smol/path.mjs'
 
 import type { FindUpOptions, FindUpSyncOptions } from './types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Find a file or directory by traversing up parent directories. Searches from
@@ -44,7 +43,8 @@ export async function findUp(
   name: string | string[] | readonly string[],
   options?: FindUpOptions | undefined,
 ): Promise<string | undefined> {
-  const { cwd = process.cwd(), signal = getAbortSignal() } = {
+  const nodeProcess = getNodeProcess()
+  const { cwd = nodeProcess.cwd(), signal = getAbortSignal() } = {
     __proto__: null,
     ...options,
   } as FindUpOptions
@@ -115,7 +115,8 @@ export function findUpSync(
   name: string | string[] | readonly string[],
   options?: FindUpSyncOptions | undefined,
 ) {
-  const { cwd = process.cwd(), stopAt } = {
+  const nodeProcess = getNodeProcess()
+  const { cwd = nodeProcess.cwd(), stopAt } = {
     __proto__: null,
     ...options,
   } as FindUpSyncOptions

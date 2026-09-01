@@ -11,8 +11,6 @@
  *   request.setHeader('User-Agent', getSocketCallerUserAgent())
  */
 
-import process from 'node:process'
-
 import { SOCKET_LIB_NAME, SOCKET_LIB_VERSION } from '../constants/socket.mjs'
 import { getEnvValue } from '../env/rewire.mjs'
 import { pkgNameToSlug } from '../packages/specs.mjs'

@@ -19,11 +19,6 @@
  *   assertNodeStripTypesSupported.
  */
 
-import { chmodSync, mkdirSync, writeFileSync } from 'node:fs'
-import path from 'node:path'
-import process from 'node:process'
-import { fileURLToPath } from 'node:url'
-
 import { spawnSync } from '../process/spawn/child.mjs'
 
 import {
@@ -40,12 +35,18 @@ import {
   nodeManagerUpgradeHint,
 } from '../env/node-version-managers.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+import { getNodeProcess } from '../node/process.mjs'
+import { getNodeUrl } from '../node/url.mjs'
 
 export const HOST_NAME = 'dev.socket.trusted_publisher_host'
 
 export const MIN_NODE_VERSION_FOR_STRIP_TYPES = '22.6.0'
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const path = getNodePath()
+const url = getNodeUrl()
+const __dirname = path.dirname(url.fileURLToPath(import.meta.url))
 // Absolute path to the run.ts entry point in this package.
 const HOST_SCRIPT = path.resolve(__dirname, 'run.ts')
 
@@ -137,7 +138,7 @@ export function chromeManifestDirs(): string[] {
     ]
   }
   // Linux (XDG)
-  // Through the env rewire, like HOME/APPDATA above — a direct process.env
+  // Through the env rewire, like HOME/APPDATA above — a direct getNodeProcess().env
   // read leaks the runner's real XDG config dir past withEnv in tests.
   const config = getEnvValue('XDG_CONFIG_HOME') ?? path.join(home, '.config')
   return [
@@ -185,9 +186,10 @@ export function installNativeHost(options: InstallOptions): InstallResult {
   const written: string[] = []
 
   for (const dir of dirs) {
-    mkdirSync(dir, { recursive: true })
+    const fs = getNodeFs()
+    fs.mkdirSync(dir, { recursive: true })
     const manifestPath = path.join(dir, `${HOST_NAME}.json`)
-    writeFileSync(
+    fs.writeFileSync(
       manifestPath,
       JSON.stringify(manifest, null, 2) + '\n',
       'utf8',
@@ -223,18 +225,22 @@ export function stripTypesFlag(): string {
 }
 
 export function writeWrapperPosix(wrapperPath: string): void {
-  const nodeBin = process.execPath
+  const nodeProcess = getNodeProcess()
+  const nodeBin = nodeProcess.execPath
   const flag = stripTypesFlag()
   const script =
     ['#!/bin/sh', `exec "${nodeBin}" ${flag}"${HOST_SCRIPT}" "$@"`].join('\n') +
     '\n'
-  writeFileSync(wrapperPath, script, { encoding: 'utf8' })
-  chmodSync(wrapperPath, 0o755)
+  const fs = getNodeFs()
+  fs.writeFileSync(wrapperPath, script, { encoding: 'utf8' })
+  fs.chmodSync(wrapperPath, 0o755)
 }
 
 export function writeWrapperWindows(wrapperPath: string): void {
-  const nodeBin = process.execPath
+  const nodeProcess = getNodeProcess()
+  const nodeBin = nodeProcess.execPath
   const flag = stripTypesFlag()
   const script = `@echo off\r\n"${nodeBin}" ${flag}"${HOST_SCRIPT}" %*\r\n`
-  writeFileSync(wrapperPath, script, { encoding: 'utf8' })
+  const fs = getNodeFs()
+  fs.writeFileSync(wrapperPath, script, { encoding: 'utf8' })
 }

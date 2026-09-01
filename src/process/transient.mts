@@ -30,6 +30,7 @@ export function isTransientProcess(cwd = process.cwd()): boolean {
   const userAgent = process.env['npm_config_user_agent']
   if (
     userAgent?.includes('exec') ||
+    // oxlint-disable-next-line socket/no-npx-dlx -- matches a user-agent string
     userAgent?.includes('npx') ||
     userAgent?.includes('dlx')
   ) {

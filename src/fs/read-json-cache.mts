@@ -30,8 +30,6 @@
  *     CWDs would get separate cache entries — correct but pessimistic.
  */
 
-import process from 'node:process'
-
 import { DateNow } from '../primordials/date.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
 import { JSONParse, JSONStringify } from '../primordials/json.mjs'
@@ -39,6 +37,7 @@ import { MapCtor } from '../primordials/map-set.mjs'
 import { NumberIsFinite, NumberParseInt } from '../primordials/number.mjs'
 
 import type { JsonValue } from '../json/types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 const DEFAULT_MAX_ENTRIES = 256
 const DEFAULT_TTL_MS = 5 * 60 * 1000
@@ -137,7 +136,8 @@ export function getReadJsonCacheStats(): {
 }
 
 export function readMaxFromEnv(): number {
-  const env = process.env['SOCKET_LIB_READ_JSON_CACHE_MAX']
+  const nodeProcess = getNodeProcess()
+  const env = nodeProcess.env['SOCKET_LIB_READ_JSON_CACHE_MAX']
   if (env) {
     const n = NumberParseInt(env, 10)
     if (n > 0 && NumberIsFinite(n)) {
@@ -148,7 +148,8 @@ export function readMaxFromEnv(): number {
 }
 
 export function readTtlFromEnv(): number {
-  const env = process.env['SOCKET_LIB_READ_JSON_CACHE_TTL_MS']
+  const nodeProcess = getNodeProcess()
+  const env = nodeProcess.env['SOCKET_LIB_READ_JSON_CACHE_TTL_MS']
   if (env) {
     const n = NumberParseInt(env, 10)
     // Allow `0` (disabled — entries never expire by time alone; LRU cap

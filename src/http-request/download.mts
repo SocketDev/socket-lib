@@ -10,8 +10,6 @@
  *   `request.ts` to obtain the unconsumed `rawResponse` it pipes to disk.
  */
 
-import { setTimeout as delay } from 'node:timers/promises'
-
 import { safeDelete } from '../fs/safe.mjs'
 import { BufferFrom } from '../primordials/buffer.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
@@ -26,6 +24,7 @@ import type {
   HttpDownloadOptions,
   HttpDownloadResult,
 } from './download-types.mjs'
+import { getNodeTimersPromises } from '../node/timers-promises.mjs'
 
 /**
  * Download a file from a URL to a local path with redirect support, retry
@@ -212,7 +211,8 @@ export async function httpDownload(
 
       // Retry with exponential backoff
       const delayMs = retryDelay * 2 ** attempt
-      await delay(delayMs)
+      const timersPromises = getNodeTimersPromises()
+      await timersPromises.setTimeout(delayMs)
     }
   }
 

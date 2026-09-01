@@ -5,9 +5,6 @@
  *   sits at the cache-dir root.
  */
 
-import path from 'node:path'
-import process from 'node:process'
-
 import { getSocketDlxDir } from '../../paths/socket.mjs'
 import { downloadAndExtractTool } from '../from-download.mjs'
 
@@ -16,6 +13,8 @@ import { getUvAssetEntry, getUvDownloadUrl } from './asset-names.mjs'
 import type { BinaryDownloader } from '../from-download.mjs'
 import type { HashInput } from '../../crypto/integrity.mjs'
 import type { ResolvedUv } from './types.mjs'
+import { getNodePath } from '../../node/path.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 export interface UvFromDownloadOptions {
   version: string
@@ -38,6 +37,7 @@ export async function uvFromDownload(
     return undefined
   }
   const archiveExt = entry.asset.endsWith('.zip') ? '.zip' : '.tar.gz'
+  const path = getNodePath()
   const extractedDir =
     cacheDir ?? path.join(getSocketDlxDir(), 'uv', version, platformArch)
   // strip:1 unwraps the upstream `<triple>/` directory so `uv[.exe]`
@@ -50,7 +50,8 @@ export async function uvFromDownload(
     extractOptions: { strip: 1 },
     downloader,
   })
-  const binary = process.platform === 'win32' ? 'uv.exe' : 'uv'
+  const nodeProcess = getNodeProcess()
+  const binary = nodeProcess.platform === 'win32' ? 'uv.exe' : 'uv'
   return {
     path: path.join(extractedDir, binary),
     source: 'download',

@@ -144,6 +144,72 @@ export function findEnclosingStatement(node: AstNode): AstNode | undefined {
   return undefined
 }
 
+// The leftmost sub-expression of each node type — the one whose first token is
+// also the whole expression's first token.
+const LEFTMOST_EDGE: Record<string, string> = {
+  __proto__: null,
+  BinaryExpression: 'left',
+  CallExpression: 'callee',
+  ConditionalExpression: 'test',
+  LogicalExpression: 'left',
+  MemberExpression: 'object',
+  NewExpression: 'callee',
+  SequenceExpression: 'expressions',
+  TaggedTemplateExpression: 'tag',
+  TSNonNullExpression: 'expression',
+} as unknown as Record<string, string>
+
+// Node types whose own first token continues a preceding expression.
+const HAZARDOUS_START_TYPES = new Set([
+  'ArrayExpression',
+  'TaggedTemplateExpression',
+  'TemplateLiteral',
+])
+
+/**
+ * Whether `statement` opens with a token that would glue it to a preceding
+ * expression under automatic semicolon insertion.
+ *
+ * `const x = getX()` followed by a line starting `(` parses as `getX()(…)` - a
+ * call, not two statements - so the binding initializes from its own result and
+ * the file stops compiling.
+ *
+ * Read off the AST rather than the statement's text. A leading `(` has no node
+ * of its own in this parser, so the tell is positional: the leftmost expression
+ * starts AFTER the statement does, and the only thing that fits in between is
+ * an open paren.
+ */
+export function startsWithHazardousToken(statement: AstNode): boolean {
+  if (statement?.type !== 'ExpressionStatement') {
+    return false
+  }
+  const statementStart = statement.range?.[0] ?? statement.start
+  let node: AstNode | undefined = statement.expression
+  while (node) {
+    if (HAZARDOUS_START_TYPES.has(node.type)) {
+      return true
+    }
+    if (
+      node.type === 'UnaryExpression' &&
+      (node.operator === '-' || node.operator === '+')
+    ) {
+      return true
+    }
+    const edge = LEFTMOST_EDGE[node.type]
+    if (!edge) {
+      break
+    }
+    const next = node[edge]
+    node = Array.isArray(next) ? next[0] : next
+  }
+  const leftmostStart = node?.range?.[0] ?? node?.start
+  return (
+    typeof statementStart === 'number' &&
+    typeof leftmostStart === 'number' &&
+    leftmostStart > statementStart
+  )
+}
+
 const rule = {
   meta: {
     type: 'suggestion',
@@ -244,10 +310,13 @@ const rule = {
               lastComment.loc?.end?.line === enclosing.loc.start.line - 1
                 ? lastComment
                 : enclosing
+            // Terminate the hoist when the statement it precedes would glue
+            // itself to the declaration under ASI.
+            const startsHazard = startsWithHazardousToken(enclosing)
             return [
               fixer.insertTextBefore(
                 anchor,
-                `const ${binding} = ${getter}()\n${indent}`,
+                `const ${binding} = ${getter}()\n${indent}${startsHazard ? ';' : ''}`,
               ),
               fixer.replaceText(object, binding),
             ]

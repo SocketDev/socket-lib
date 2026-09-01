@@ -20,12 +20,11 @@
  *   - TtlCache singleton + clearRefCache — `./refs-cache`
  */
 
-import process from 'node:process'
-
 import { fetchRefSha } from './refs-rest.mjs'
 import { getGithubCache } from './refs-cache.mjs'
 
 import type { ResolveRefOptions } from './types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Resolve a git ref (tag, branch, or commit SHA) to its full commit SHA.
@@ -98,8 +97,9 @@ export async function resolveRefToSha(
 
   const cacheKey = `${owner}/${repo}@${ref}`
 
+  const nodeProcess = getNodeProcess()
   // Optionally disable cache.
-  if (process.env['DISABLE_GITHUB_CACHE']) {
+  if (nodeProcess.env['DISABLE_GITHUB_CACHE']) {
     return await fetchRefSha(owner, repo, ref, opts)
   }
 

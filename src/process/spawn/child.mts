@@ -18,8 +18,6 @@
  *   - https://cheatsheetseries.owasp.org/cheatsheets/Nodejs_Security_Cheat_Sheet.html
  */
 
-import process from 'node:process'
-
 import { findPathEnvKey, replacePathInEnv } from '../../env/path.mjs'
 import { getAbortSignal } from '../../process/abort.mjs'
 import { getNodeChildProcess } from '../../node/child-process.mjs'

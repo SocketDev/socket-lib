@@ -8,9 +8,6 @@
  *   `external-tools.json` when available.
  */
 
-import path from 'node:path'
-import process from 'node:process'
-
 import { getSocketDlxDir } from '../../paths/socket.mjs'
 import { downloadAndExtractTool } from '../from-download.mjs'
 
@@ -19,6 +16,8 @@ import { getTrufflehogDownloadUrl } from './asset-names.mjs'
 import type { BinaryDownloader } from '../from-download.mjs'
 import type { HashInput } from '../../crypto/integrity.mjs'
 import type { ResolvedTrufflehog } from './types.mjs'
+import { getNodePath } from '../../node/path.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 export interface TrufflehogFromDownloadOptions {
   /**
@@ -56,6 +55,7 @@ export async function trufflehogFromDownload(
   if (!url) {
     return undefined
   }
+  const path = getNodePath()
   const extractedDir =
     cacheDir ??
     path.join(getSocketDlxDir(), 'trufflehog', version, platformArch)
@@ -66,7 +66,9 @@ export async function trufflehogFromDownload(
     extractedDir,
     downloader,
   })
-  const binary = process.platform === 'win32' ? 'trufflehog.exe' : 'trufflehog'
+  const nodeProcess = getNodeProcess()
+  const binary =
+    nodeProcess.platform === 'win32' ? 'trufflehog.exe' : 'trufflehog'
   return {
     path: path.join(extractedDir, binary),
     source: 'download',

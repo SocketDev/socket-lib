@@ -8,10 +8,9 @@
  *   resolved.
  */
 
-import { createRequire } from 'node:module'
-import process from 'node:process'
-
 import { getNodePath } from '../node/path.mjs'
+import { getNodeModule } from '../node/module.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Resolve a module specifier as if `require`'d from `fromDir`.
@@ -59,11 +58,12 @@ export function requireResolveFrom(
     ...options,
   } as { nothrow?: boolean | undefined }
   const path = getNodePath()
-  // createRequire needs a FILE path as its anchor; appending a synthetic
+  // getNodeModule().createRequire needs a FILE path as its anchor; appending a synthetic
   // filename makes a directory behave like the module doing the require.
   const anchor = path.join(path.resolve(fromDir), 'noop.js')
   try {
-    return createRequire(anchor).resolve(specifier)
+    const nodeModule = getNodeModule()
+    return nodeModule.createRequire(anchor).resolve(specifier)
   } catch (e) {
     if (nothrow) {
       return undefined
@@ -95,7 +95,8 @@ export function requireResolveFromCwd(
   options?: { nothrow?: boolean | undefined } | undefined,
 ): string | undefined {
   options = { __proto__: null, ...options } as typeof options
+  const nodeProcess = getNodeProcess()
   return options?.nothrow
-    ? requireResolveFrom(process.cwd(), specifier, { nothrow: true })
-    : requireResolveFrom(process.cwd(), specifier)
+    ? requireResolveFrom(nodeProcess.cwd(), specifier, { nothrow: true })
+    : requireResolveFrom(nodeProcess.cwd(), specifier)
 }

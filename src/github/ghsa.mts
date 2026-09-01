@@ -10,8 +10,6 @@
  *     which transport ran.
  */
 
-import process from 'node:process'
-
 import { httpRequest } from '../http-request/request.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
 import { JSONParse, JSONStringify } from '../primordials/json.mjs'
@@ -22,6 +20,7 @@ import { GITHUB_GRAPHQL_URL } from './constants.mjs'
 import { GitHubEmptyBodyError } from './errors.mjs'
 
 import type { GhsaDetails, GitHubFetchOptions } from './types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Fetch GitHub Security Advisory details with caching. Retrieves advisory
@@ -68,8 +67,9 @@ export async function cacheFetchGhsa(
   const key = `ghsa:${ghsaId}`
 
   // Cache-bypass arm fires only when DISABLE_GITHUB_CACHE env is set.
+  const nodeProcess = getNodeProcess()
   /* c8 ignore next 3 */
-  if (process.env['DISABLE_GITHUB_CACHE']) {
+  if (nodeProcess.env['DISABLE_GITHUB_CACHE']) {
     return await fetchGhsaDetails(ghsaId, options)
   }
 

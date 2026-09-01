@@ -98,7 +98,8 @@ export function resolveRealBinSync(binPath: string): string {
     /* c8 ignore start */
     if (
       basename === 'npm' ||
-      basename === 'npx' // # socket-lint: allow npx
+      // oxlint-disable-next-line socket/no-npx-dlx -- executable name
+      basename === 'npx'
     ) {
       if (voltaNpmVersion) {
         const relCliPath = `bin/${basename}-cli.js`
@@ -148,16 +149,17 @@ export function resolveRealBinSync(binPath: string): string {
     }
   }
   /* c8 ignore start - Windows-only wrapper-script resolution; tested
-     on Windows runners. The whole `if (isWin32())` block parses npm/npx/ // socket-lint: allow npx
-     pnpm/yarn .cmd/.bat/.ps1 shims to extract the underlying CLI JS
-     path. Unreachable on macOS/Linux. */
+     on Windows runners. The whole `if (isWin32())` block parses the
+     `npm`, `npx`, `pnpm` and `yarn` .cmd/.bat/.ps1 shims to extract the
+     underlying CLI JS path. Unreachable on macOS/Linux. */
   if (isWin32()) {
     const hasKnownExt =
       extLowered === '' ||
       extLowered === '.cmd' ||
       extLowered === '.exe' ||
       extLowered === '.ps1'
-    const isNpmOrNpx = basename === 'npm' || basename === 'npx' // # socket-lint: allow npx
+    // oxlint-disable-next-line socket/no-npx-dlx -- executable name
+    const isNpmOrNpx = basename === 'npm' || basename === 'npx'
     const isPnpmOrYarn = basename === 'pnpm' || basename === 'yarn'
     if (hasKnownExt && isNpmOrNpx) {
       // The quick route assumes a bin path like: C:\Program Files\nodejs\npm.cmd
@@ -320,7 +322,8 @@ export function resolveRealBinSync(binPath: string): string {
     // Handle Unix shell scripts on non-Windows platforms.
     let hasNoExt = extLowered === ''
     const isPnpmOrYarn = basename === 'pnpm' || basename === 'yarn'
-    const isNpmOrNpx = basename === 'npm' || basename === 'npx' // # socket-lint: allow npx
+    // oxlint-disable-next-line socket/no-npx-dlx -- executable name
+    const isNpmOrNpx = basename === 'npm' || basename === 'npx'
 
     // Handle special case where pnpm path in CI has extra segments.
     // In setup-pnpm GitHub Action, the path might be malformed like:

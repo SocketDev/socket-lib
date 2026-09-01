@@ -15,10 +15,9 @@
  *   present. It is opt-in, so every existing caller keeps the behavior it has.
  */
 
-import process from 'node:process'
-
 import { getNodeChildProcess } from '../node/child-process.mjs'
 import { getNodeFs } from '../node/fs.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Spawn options handed to an {@link OpenUrlSpawner}. `openUrl` computes these
@@ -94,7 +93,8 @@ export function buildOpenUrlInvocation(
   url: string,
   options?: OpenUrlOptions | undefined,
 ): { args: string[]; command: string; newWindow: boolean } {
-  const { newWindow = false, platform = process.platform } = {
+  const nodeProcess = getNodeProcess()
+  const { newWindow = false, platform = nodeProcess.platform } = {
     __proto__: null,
     ...options,
   } as OpenUrlOptions
@@ -142,9 +142,10 @@ export function openUrl(
   url: string,
   options?: OpenUrlOptions | undefined,
 ): void {
+  const nodeProcess = getNodeProcess()
   const {
-    env = process.env,
-    platform = process.platform,
+    env = nodeProcess.env,
+    platform = nodeProcess.platform,
     skipUnderTestRunner = true,
     spawn = defaultOpenUrlSpawner,
   } = {
@@ -226,10 +227,11 @@ export function resolveNewWindowBrowser(
   options?: OpenUrlOptions | undefined,
 ): string | undefined {
   const fs = getNodeFs()
+  const nodeProcess = getNodeProcess()
   const {
-    env = process.env,
+    env = nodeProcess.env,
     exists = fs.existsSync,
-    platform = process.platform,
+    platform = nodeProcess.platform,
   } = { __proto__: null, ...options } as OpenUrlOptions
   const override = env[BROWSER_BINARY_ENV_VAR]
   if (typeof override === 'string' && override !== '') {
@@ -245,6 +247,7 @@ export function resolveNewWindowBrowser(
   return undefined
 }
 
+const nodeProcess = getNodeProcess()
 /**
  * True when the opener must NOT spawn: a test runner with no explicit opt-in.
  * Vitest sets `VITEST` in the worker and `NODE_ENV=test` covers the other
@@ -252,7 +255,7 @@ export function resolveNewWindowBrowser(
  * that want the same detection around their own launch paths.
  */
 export function shouldSkipSpawn(
-  env: Record<string, string | undefined> = process.env,
+  env: Record<string, string | undefined> = nodeProcess.env,
 ): boolean {
   const underRunner = Boolean(env['VITEST']) || env['NODE_ENV'] === 'test'
   return underRunner && !env[ALLOW_SPAWN_ENV_VAR]

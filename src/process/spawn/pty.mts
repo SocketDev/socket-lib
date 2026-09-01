@@ -16,12 +16,11 @@
  *   child's exit code.
  */
 
-import process from 'node:process'
-
 import { getNodeChildProcess } from '../../node/child-process.mjs'
 import { getNodeFs } from '../../node/fs.mjs'
 
 import type { ChildProcess } from 'node:child_process'
+import { getNodeProcess } from '../../node/process.mjs'
 
 /**
  * Environment entries that quiet a PTY child's rendering without breaking its
@@ -115,12 +114,13 @@ export async function ptyRun(
   args: readonly string[],
   options?: PtyRunOptions | undefined,
 ): Promise<PtyRunResult> {
+  const nodeProcess = getNodeProcess()
   const {
     cwd,
     env,
     onStderr,
     onStdout,
-    platform = process.platform,
+    platform = nodeProcess.platform,
     signal,
   } = { __proto__: null, ...options } as PtyRunOptions
   const invocation = buildPtyInvocation(platform, command, [...args])
@@ -184,11 +184,13 @@ export async function ptyRunPumped(
   return await ptyRun(command, args, {
     ...opts,
     onStderr: (chunk: string) => {
-      process.stderr.write(chunk)
+      const nodeProcess = getNodeProcess()
+      nodeProcess.stderr.write(chunk)
       opts.onStderr?.(chunk)
     },
     onStdout: (chunk: string) => {
-      process.stdout.write(chunk)
+      const nodeProcess = getNodeProcess()
+      nodeProcess.stdout.write(chunk)
       opts.onStdout?.(chunk)
     },
   })

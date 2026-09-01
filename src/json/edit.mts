@@ -2,7 +2,6 @@
  * @file Editable JSON file manipulation with formatting preservation.
  */
 
-import process from 'node:process'
 import { sleep } from '../promises/timers.mjs'
 
 import { isErrnoException } from '../errors/predicates.mjs'
@@ -28,6 +27,7 @@ import type {
   EditableJsonOptions,
   EditableJsonSaveOptions,
 } from './types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 const identSymbol = INDENT_SYMBOL
 const newlineSymbol = NEWLINE_SYMBOL
@@ -262,8 +262,9 @@ export async function readFile(filepath: string): Promise<string> {
   // Retry on ENOENT. Windows-only retry-count and delay; tested on
   // Windows runners. The retry-loop body itself fires only after a
   // transient ENOENT, which tests don't simulate.
+  const nodeProcess = getNodeProcess()
   /* c8 ignore start */
-  const maxRetries = process.platform === 'win32' ? 5 : 1
+  const maxRetries = nodeProcess.platform === 'win32' ? 5 : 1
   for (let attempt = 0; attempt <= maxRetries; attempt++) {
     try {
       return await fsPromises.readFile(filepath, 'utf8')
@@ -275,7 +276,7 @@ export async function readFile(filepath: string): Promise<string> {
         throw e
       }
 
-      const delay = process.platform === 'win32' ? 50 * (attempt + 1) : 20
+      const delay = nodeProcess.platform === 'win32' ? 50 * (attempt + 1) : 20
       await sleep(delay)
     }
   }
@@ -311,8 +312,9 @@ export async function retryWrite(
          Windows runners. */
       // On Windows, add a delay and verify file exists to ensure it's fully flushed
       // This prevents ENOENT errors when immediately reading after write
+      const nodeProcess = getNodeProcess()
       // Windows CI runners are significantly slower than local development
-      if (process.platform === 'win32') {
+      if (nodeProcess.platform === 'win32') {
         // Initial delay to allow OS to flush the write
         await sleep(50)
         // Verify the file is actually present with retries

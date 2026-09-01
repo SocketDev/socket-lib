@@ -5,11 +5,10 @@
  *   filesystem; `paths/packages.ts` stays pure path-string shaping.
  */
 
-import { fileURLToPath } from 'node:url'
-
 import { findUpSync } from '../fs/find.mjs'
 import { getNodePath } from '../node/path.mjs'
 import { normalizePath } from '../paths/normalize.mjs'
+import { getNodeUrl } from '../node/url.mjs'
 
 export interface FindUpPackageJsonOptions {
   /**
@@ -68,7 +67,8 @@ export function findUpPackageJson(
     __proto__: null,
     ...options,
   } as FindUpPackageJsonOptions
-  const scriptPath = fileURLToPath(meta.url)
+  const url = getNodeUrl()
+  const scriptPath = url.fileURLToPath(meta.url)
   const path = getNodePath()
   const scriptDir = path.dirname(scriptPath)
   const found = findUpSync(names as string[], { cwd: scriptDir, stopAt })

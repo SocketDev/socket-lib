@@ -6,8 +6,6 @@
  *   where the previous owner exited ungracefully.
  */
 
-import process from 'node:process'
-
 import { safeDelete } from '../fs/safe.mjs'
 import { getNodeFs } from '../node/fs.mjs'
 import { parseSchema } from '../schema/parse.mjs'
@@ -21,6 +19,7 @@ import { getIpcStubPath } from './paths.mjs'
 
 import type { promises as fsPromises } from 'node:fs'
 import type { IpcStub } from './types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Write IPC data to a stub file for inter-process data transfer.
@@ -60,9 +59,10 @@ export async function writeIpcStub(
   const stubPath = getIpcStubPath(appName)
   await ensureIpcDirectory(stubPath)
 
+  const nodeProcess = getNodeProcess()
   const ipcData: IpcStub = {
     data,
-    pid: process.pid,
+    pid: nodeProcess.pid,
     timestamp: DateNow(),
   }
 

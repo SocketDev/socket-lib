@@ -6,8 +6,6 @@
  *   when `isPerfEnabled()` is true.
  */
 
-import process from 'node:process'
-
 import { debugLog } from '../debug/output.mjs'
 import { errorMessage } from '../errors/message.mjs'
 import { DateNow } from '../primordials/date.mjs'
@@ -17,6 +15,7 @@ import { performanceMetrics } from './shared.mjs'
 import { isPerfEnabled } from './enabled.mjs'
 
 import type { PerformanceMetrics } from './types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Measure execution time of an async function.
@@ -195,7 +194,8 @@ export function trackMemory(label: string): number {
     return 0
   }
 
-  const usage = process.memoryUsage()
+  const nodeProcess = getNodeProcess()
+  const usage = nodeProcess.memoryUsage()
   const heapUsedMB = MathRound((usage.heapUsed / 1024 / 1024) * 100) / 100
 
   debugLog(`[perf] [MEMORY] ${label}: ${heapUsedMB}MB heap used`)

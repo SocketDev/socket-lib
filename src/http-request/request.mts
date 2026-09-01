@@ -11,8 +11,6 @@
  *     `./response-reader`
  */
 
-import { setTimeout as delay } from 'node:timers/promises'
-
 import { ErrorCtor } from '../primordials/error.mjs'
 import { MathMax, MathMin, MathRound } from '../primordials/math.mjs'
 import { NumberIsNaN } from '../primordials/number.mjs'
@@ -22,6 +20,7 @@ import { HttpResponseError } from './response-types.mjs'
 
 import type { HttpRequestOptions } from './request-types.mjs'
 import type { HttpResponse } from './response-types.mjs'
+import { getNodeTimersPromises } from '../node/timers-promises.mjs'
 
 /**
  * Make an HTTP/HTTPS request with retry logic and redirect support. Provides a
@@ -174,17 +173,19 @@ export async function httpRequest(
         if (retryResult === false) {
           break
         }
-        // A number overrides the delay (clamped to >= 0; NaN falls back to default).
+        // A number overrides the getNodeTimersPromises().setTimeout (clamped to >= 0; NaN falls back to default).
         const actualDelay =
           typeof retryResult === 'number' && !NumberIsNaN(retryResult)
             ? MathMax(0, retryResult)
             : delayMs
         lastDelaySeconds = MathRound(actualDelay / 1000)
-        await delay(actualDelay)
+        const timersPromises = getNodeTimersPromises()
+        await timersPromises.setTimeout(actualDelay)
       } else {
         // Default: retry with exponential backoff
         lastDelaySeconds = MathRound(delayMs / 1000)
-        await delay(delayMs)
+        const timersPromises = getNodeTimersPromises()
+        await timersPromises.setTimeout(delayMs)
       }
     }
   }

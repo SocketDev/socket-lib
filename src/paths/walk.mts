@@ -6,12 +6,11 @@
  *   without computing the whole chain.
  */
 
-import process from 'node:process'
-
 import { getNodePath } from '../node/path.mjs'
 import { getSmolPath } from '../exe/smol/path.mjs'
 
 import { normalizePath } from './shared.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 export interface WalkUpOptions {
   /**
@@ -50,7 +49,8 @@ export function* walkUp(
   from: string,
   options?: WalkUpOptions | undefined,
 ): Generator<string> {
-  const { cwd = process.cwd(), stopAt } = {
+  const nodeProcess = getNodeProcess()
+  const { cwd = nodeProcess.cwd(), stopAt } = {
     __proto__: null,
     ...options,
   } as WalkUpOptions

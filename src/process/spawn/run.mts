@@ -12,11 +12,10 @@
  *   is always a parameter — nothing here assumes a repo root.
  */
 
-import process from 'node:process'
-
 import { isWin32 } from '../../constants/platform.mjs'
 
 import { spawn } from './child.mjs'
+import { getNodeProcess } from '../../node/process.mjs'
 
 /**
  * What {@link runCapture} resolves with: the exit code plus the collected
@@ -136,12 +135,14 @@ export async function runInheritTee(
   const forwardStdout =
     onStdout ??
     ((chunk: Buffer) => {
-      process.stdout.write(chunk)
+      const nodeProcess = getNodeProcess()
+      nodeProcess.stdout.write(chunk)
     })
   const forwardStderr =
     onStderr ??
     ((chunk: Buffer) => {
-      process.stderr.write(chunk)
+      const nodeProcess = getNodeProcess()
+      nodeProcess.stderr.write(chunk)
     })
   const childPromise = spawn(cmd, args, {
     cwd,

@@ -59,6 +59,7 @@ export function shouldSkipShadow(
   const userAgent = nodeProcess.env['npm_config_user_agent']
   if (
     userAgent?.includes('exec') ||
+    // oxlint-disable-next-line socket/no-npx-dlx -- matches a user-agent string
     userAgent?.includes('npx') ||
     userAgent?.includes('dlx')
   ) {

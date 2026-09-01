@@ -4,8 +4,6 @@
  *   writers and readers agree on where stubs land.
  */
 
-import process from 'node:process'
-
 import { getNodePath } from '../node/path.mjs'
 import { getOsTmpDir } from '../paths/socket.mjs'
 

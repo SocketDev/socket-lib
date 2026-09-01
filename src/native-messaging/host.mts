@@ -14,8 +14,6 @@
  *   TTY-only paths when running in this context.
  */
 
-import process from 'node:process'
-
 import { errorMessage } from '../errors/message.mjs'
 import { getDefaultLogger } from '../logger/default.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
@@ -23,6 +21,7 @@ import { readSocketApiToken } from '../secrets/socket-api-token.mjs'
 import { assertNodeStripTypesSupported } from './install.mjs'
 
 import type { Readable, Writable } from 'node:stream'
+import { getNodeProcess } from '../node/process.mjs'
 
 const logger = getDefaultLogger()
 
@@ -30,8 +29,9 @@ export async function handleOne(
   stdin?: Readable | undefined,
   stdout?: Writable | undefined,
 ): Promise<void> {
-  const inStream = stdin ?? process.stdin
-  const outStream = stdout ?? process.stdout
+  const nodeProcess = getNodeProcess()
+  const inStream = stdin ?? nodeProcess.stdin
+  const outStream = stdout ?? nodeProcess.stdout
   const header = await readExact(4, inStream)
   const length = header.readUInt32LE(0)
   if (length === 0 || length > 1_048_576) {
@@ -77,7 +77,8 @@ export function readExact(
   length: number,
   stream?: Readable | undefined,
 ): Promise<Buffer> {
-  const src = stream ?? process.stdin
+  const nodeProcess = getNodeProcess()
+  const src = stream ?? nodeProcess.stdin
   return new Promise((resolve, reject) => {
     const chunks: Buffer[] = []
     let received = 0
@@ -139,14 +140,16 @@ export async function runHost(): Promise<void> {
     assertNodeStripTypesSupported()
   } catch (e) {
     logger.error(errorMessage(e))
-    process.exit(1)
+    const nodeProcess = getNodeProcess()
+    nodeProcess.exit(1)
   }
   while (true) {
     try {
       await handleOne()
     } catch {
+      const nodeProcess = getNodeProcess()
       // stdin closed — normal Chrome shutdown.
-      process.exit(0)
+      nodeProcess.exit(0)
     }
   }
 }
@@ -161,5 +164,6 @@ export function writeMessage(
   // Native messaging protocol requires raw binary writes to stdout.
   // Chrome treats any non-protocol byte as a framing error, so the logger
   // must not be used here.
-  ;(stream ?? process.stdout).write(Buffer.concat([header, payload]))
+  const nodeProcess = getNodeProcess()
+  ;(stream ?? nodeProcess.stdout).write(Buffer.concat([header, payload]))
 }
