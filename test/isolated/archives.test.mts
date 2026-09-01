@@ -14,9 +14,9 @@ import process from 'node:process'
 import { createGzip } from 'node:zlib'
 
 import AdmZip from '../../src/external/adm-zip.js'
-// @ts-expect-error - no type declarations
-import tarStream from 'tar-stream'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+
+import { createTarPack } from '../_shared/tar-pack.mts'
 
 import { detectArchiveFormat } from '../../src/archives/detect.mjs'
 import { extractArchive } from '../../src/archives/extract.mjs'
@@ -53,7 +53,7 @@ beforeAll(async () => {
   zipStrip.writeZip(testZipWithStripPath)
 
   testTarPath = path.join(tempDir, 'test-archive.tar')
-  const pack = tarStream.pack()
+  const pack = createTarPack()
   pack.entry({ name: 'file1.txt' }, 'tar-content1')
   pack.entry({ name: 'dir/file2.txt' }, 'tar-content2')
   pack.entry({ name: 'dir/nested/file3.txt' }, 'tar-content3')
@@ -67,7 +67,7 @@ beforeAll(async () => {
   })
 
   testTarWithStripPath = path.join(tempDir, 'test-strip.tar')
-  const packStrip = tarStream.pack()
+  const packStrip = createTarPack()
   packStrip.entry({ name: 'prefix/file1.txt' }, 'tar-strip-content1')
   packStrip.entry({ name: 'prefix/dir/file2.txt' }, 'tar-strip-content2')
   packStrip.entry({ name: 'prefix/dir/nested/file3.txt' }, 'tar-strip-content3')
@@ -81,7 +81,7 @@ beforeAll(async () => {
   })
 
   testTarGzPath = path.join(tempDir, 'test-archive.tar.gz')
-  const packGz = tarStream.pack()
+  const packGz = createTarPack()
   packGz.entry({ name: 'file1.txt' }, 'targz-content1')
   packGz.entry({ name: 'dir/file2.txt' }, 'targz-content2')
   packGz.entry({ name: 'dir/nested/file3.txt' }, 'targz-content3')
@@ -355,7 +355,7 @@ describe('archives', () => {
           path.dirname(testTarGzPath),
           'test-strip.tar.gz',
         )
-        const packStrip = tarStream.pack()
+        const packStrip = createTarPack()
         packStrip.entry({ name: 'prefix/file1.txt' }, 'targz-strip-content1')
         packStrip.entry(
           { name: 'prefix/dir/file2.txt' },

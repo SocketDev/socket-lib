@@ -8,6 +8,9 @@ import { getSmolHttps as getSmolHttpsStable } from '@socketsecurity/lib-stable/e
 import { describe, expect, it } from 'vitest'
 
 import { getSmolHttps } from '../../../../src/exe/smol/https.mjs'
+import { stableAvailable } from '../../../_shared/lib-stable-parity.mts'
+
+const hasStable = stableAvailable(getSmolHttpsStable)
 
 describe('smol/https', () => {
   describe('getSmolHttps', () => {
@@ -15,7 +18,7 @@ describe('smol/https', () => {
       expect(getSmolHttps()).toBe(undefined)
     })
 
-    it('is idempotent across repeated calls', () => {
+    it.skipIf(!hasStable)('matches the released build', () => {
       expect(getSmolHttps()).toBe(getSmolHttpsStable())
     })
 

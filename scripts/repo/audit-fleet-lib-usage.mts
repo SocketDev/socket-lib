@@ -26,7 +26,10 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { unexposedLeavesPath } from './build-stubs/unexposed.mts'
-import { keptLeafEntries } from './build-stubs/settings.mts'
+import {
+  keptLeafEntries,
+  writeUnexposedLeaves,
+} from './build-stubs/settings.mts'
 
 export type { KeptLeaf } from './build-stubs/settings.mts'
 export { keptLeafEntries } from './build-stubs/settings.mts'
@@ -411,16 +414,19 @@ function main(): void {
     // "Unused" is a claim about the whole fleet, so the list is only as good
     // as the consumer set behind it — and with no record, one computed against
     // a smaller fleet reads exactly like a correct one.
-    writeFileSync(
-      listPath,
-      `${JSON.stringify(
-        {
-          leaves: candidates,
-          scannedRoster: rosterRepoNames(REPO_ROOT).toSorted(),
-        },
-        null,
-        2,
-      )}\n`,
+    //
+    // Route through writeUnexposedLeaves, which round-trips the document. The
+    // settings file is a hybrid surface holding seventeen top-level keys, so
+    // serializing this record on its own writes a two-key file and takes
+    // `bundle.ref` — the fleet-pack pin every CI run fetches its payload with —
+    // down with the rest.
+    writeUnexposedLeaves(
+      REPO_ROOT,
+      {
+        leaves: candidates,
+        scannedRoster: rosterRepoNames(REPO_ROOT).toSorted(),
+      },
+      writeFileSync,
     )
     logger.success(
       `audit-fleet-lib-usage: ${candidates.length} graph-safe stub leaf(s) → ${listPath}`,

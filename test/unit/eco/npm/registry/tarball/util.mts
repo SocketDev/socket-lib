@@ -8,8 +8,8 @@
  *   catch.
  */
 
-// @ts-expect-error - no type declarations
-import tarStream from 'tar-stream'
+import { createTarPack } from '../../../../../_shared/tar-pack.mts'
+import type { TarPackHeader } from '../../../../../_shared/tar-pack.mts'
 
 import { createGzipCompressor } from '../../../../../../src/compression/gzip.mjs'
 import { BufferConcat } from '../../../../../../src/primordials/buffer.mjs'
@@ -36,15 +36,15 @@ export interface FixtureEntry {
 export async function makeNpmTarball(
   entries: readonly FixtureEntry[],
 ): Promise<Uint8Array> {
-  const pack = tarStream.pack()
+  const pack = createTarPack()
   for (let i = 0, { length } = entries; i < length; i += 1) {
     const entry = entries[i]!
-    const header: Record<string, unknown> = { name: entry.name }
+    const header: TarPackHeader = { name: entry.name }
     if (entry.type) {
-      header['type'] = entry.type
+      header.type = entry.type
     }
     if (entry.linkname) {
-      header['linkname'] = entry.linkname
+      header.linkname = entry.linkname
     }
     pack.entry(header, entry.body ?? '')
   }
@@ -67,7 +67,7 @@ export async function makeNpmTarball(
 export async function makeUncompressedTar(
   entries: readonly FixtureEntry[],
 ): Promise<Uint8Array> {
-  const pack = tarStream.pack()
+  const pack = createTarPack()
   for (let i = 0, { length } = entries; i < length; i += 1) {
     const entry = entries[i]!
     pack.entry({ name: entry.name }, entry.body ?? '')

@@ -80,18 +80,62 @@ export function keptLeafEntries(repoRoot: string): KeptLeaf[] {
 }
 
 /**
+ * Add kept-leaf entries, leaving every other key untouched.
+ *
+ * Exposure survives only when recorded HERE. Dropping a leaf from
+ * `unexposed.leaves` alone lasts until the next `--write-stub-list`, which
+ * recomputes that list from fleet consumers and re-adds anything no repo
+ * imports by specifier. Existing entries win, so a hand-written reason is never
+ * replaced by a generated one.
+ */
+export function addKeptLeaves(
+  repoRoot: string,
+  entries: readonly KeptLeaf[],
+  writeFileSync: (p: string, data: string) => void,
+): void {
+  const settingsPath = memberSettingsPath(repoRoot)
+  const parsed = existsSync(settingsPath)
+    ? (JSON.parse(readFileSync(settingsPath, 'utf8')) as Record<
+        string,
+        unknown
+      >)
+    : {}
+  const buildStubs = parsed['buildStubs'] as
+    | { keepExposed?: KeptLeaf[] | undefined }
+    | undefined
+  const byLeaf = new Map<string, KeptLeaf>()
+  for (const entry of buildStubs?.keepExposed ?? []) {
+    byLeaf.set(entry.leaf, entry)
+  }
+  for (const entry of entries) {
+    if (!byLeaf.has(entry.leaf)) {
+      byLeaf.set(entry.leaf, entry)
+    }
+  }
+  const keepExposed = [...byLeaf.values()].toSorted((a, b) =>
+    a.leaf < b.leaf ? -1 : a.leaf > b.leaf ? 1 : 0,
+  )
+  const section = {
+    ...(parsed['buildStubs'] as Record<string, unknown> | undefined),
+    keepExposed,
+  }
+  writeFileSync(
+    settingsPath,
+    `${JSON.stringify({ ...parsed, buildStubs: section }, null, 2)}\n`,
+  )
+}
+
+/**
  * Replace `buildStubs.unexposed` in the member settings file, leaving every
  * other key exactly as it was.
  *
  * Read-modify-write, never a whole-document write. The settings file is a
  * HYBRID surface: the fleet cascade owns most of it and the member owns its
  * `<repo>` cutouts, so a writer that serializes only the section it cares
- * about silently deletes everyone else's. That is not hypothetical — a
+ * about silently deletes everyone else's. That is not hypothetical - a
  * whole-document write here once reduced the file from seventeen top-level
  * keys to two, taking `bundle.ref` with it, and every CI run then failed at
  * the payload fetch because the fleet-pack pin was gone.
- *
- * A writer that touches one section must therefore round-trip the document.
  */
 export function writeUnexposedLeaves(
   repoRoot: string,

@@ -14,9 +14,9 @@ import process from 'node:process'
 import { createGzip } from 'node:zlib'
 
 import AdmZip from '../../src/external/adm-zip.js'
-// @ts-expect-error - no type declarations
-import tarStream from 'tar-stream'
 import { describe, expect, it } from 'vitest'
+
+import { createTarPack } from '../_shared/tar-pack.mts'
 
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
 
@@ -144,7 +144,7 @@ describe('archives security features', () => {
 
           // Create tar with large file
           const fileSize = 150 * 1024 * 1024
-          const pack = tarStream.pack()
+          const pack = createTarPack()
 
           // Use a callback to write large data in chunks
           const entry = pack.entry({ name: 'large-file.bin', size: fileSize })
@@ -213,7 +213,7 @@ describe('archives security features', () => {
         const symlinkTarPath = path.join(tempDir, 'symlink.tar')
 
         // Create tar with symlink entry
-        const pack = tarStream.pack()
+        const pack = createTarPack()
         const entry = pack.entry({
           linkname: '/etc/passwd',
           name: 'malicious-link',
@@ -241,7 +241,7 @@ describe('archives security features', () => {
         const linkTarPath = path.join(tempDir, 'link.tar')
 
         // Create tar with hard link entry
-        const pack = tarStream.pack()
+        const pack = createTarPack()
         const entry = pack.entry({
           linkname: '/etc/passwd',
           name: 'malicious-link',
@@ -269,7 +269,7 @@ describe('archives security features', () => {
         const symlinkTarGzPath = path.join(tempDir, 'symlink.tar.gz')
 
         // Create tar.gz with symlink entry
-        const pack = tarStream.pack()
+        const pack = createTarPack()
         const entry = pack.entry({
           linkname: '/etc/passwd',
           name: 'malicious-link',

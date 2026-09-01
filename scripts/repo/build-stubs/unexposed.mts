@@ -26,6 +26,17 @@ const logger = getDefaultLogger()
 // keys on, so re-running the build never double-stubs.
 export const STUB_BANNER = '/* socket-lib build-stub: unexposed leaf */'
 
+/**
+ * The `code` a build-stub throws with. Consumers branch on this rather than on
+ * the message, which is prose that gets reworded.
+ */
+export const STUB_ERROR_CODE = 'ERR_SOCKET_LIB_LEAF_COMPILED_OUT'
+
+/**
+ * The `name` a build-stub's error carries, for readable stacks and logs.
+ */
+export const STUB_ERROR_NAME = 'LeafCompiledOutError'
+
 export const EXPOSE_ISSUE_URL = 'https://github.com/SocketDev/socket-lib/issues'
 
 /**
@@ -65,7 +76,7 @@ export function makeUnexposedModuleSource(
 // leaf, so its implementation is compiled out of the published build.
 function unexposed(name) {
   return function () {
-    throw new Error(
+    var err = new Error(
       name + ' is compiled out of this @socketsecurity/lib build.\\n' +
       '  Where: @socketsecurity/lib/${leaf}\\n' +
       '  Saw: a call to a build-stubbed export; wanted the real implementation.\\n' +
@@ -74,6 +85,15 @@ function unexposed(name) {
       '  which un-stubs the leaf, rebuilds, and commits. Then cut a release to\\n' +
       '  ship it. No socket-lib checkout? Open an issue at ${EXPOSE_ISSUE_URL}.'
     );
+    // A code so a caller can branch on the stub without matching the wording.
+    // Deliberately NOT an Error subclass: this module is generated standalone
+    // into every stubbed leaf, so each copy would carry its own constructor and
+    // \`instanceof\` would answer false across the package boundary that callers
+    // actually sit on. A code crosses realms; a class does not.
+    err.name = ${JSON.stringify(STUB_ERROR_NAME)};
+    err.code = ${JSON.stringify(STUB_ERROR_CODE)};
+    err.leaf = ${JSON.stringify(leaf)};
+    throw err;
   };
 }
 ${assignments}

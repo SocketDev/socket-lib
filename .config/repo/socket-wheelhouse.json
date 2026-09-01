@@ -6,8 +6,40 @@
   "buildStubs": {
     "keepExposed": [
       {
+        "leaf": "eco/npm/npm-cli/flags",
+        "reason": "isNpmLoglevelFlag is the oracle this repo's own pnpm-flags parity test compares against, imported from the -stable snapshot so the check never validates src against itself. A repo-local test importing through @socketsecurity/lib-stable is invisible to the fleet-usage leg, which counts importers of @socketsecurity/lib."
+      },
+      {
+        "leaf": "exe/smol/https",
+        "reason": "getSmolHttps is the oracle for the smol/https parity test, on the same footing as eco/npm/npm-cli/flags."
+      },
+      {
+        "leaf": "http-request/browser",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "http-request/fetch/browser",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "logger/browser",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
         "leaf": "polyfills/group-by",
         "reason": "Exercised by the test262 conformance suite, which runs against dist/. The stub list is consumer-driven and no fleet repo imports a polyfill by name, so it reads as unused; stubbing it made every Map.groupBy and Object.groupBy conformance case throw instead of run. A polyfill's purpose is to be present in the build."
+      },
+      {
+        "leaf": "polyfills/iterator/eager",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "polyfills/iterator/lazy",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "polyfills/iterator/statics",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
       },
       {
         "leaf": "polyfills/promise",
@@ -16,6 +48,14 @@
       {
         "leaf": "polyfills/set",
         "reason": "Same as polyfills/group-by: the test262 cases for the Set methods (difference, intersection, isDisjointFrom, isSubsetOf, union, and the rest) run against dist/ and load this module."
+      },
+      {
+        "leaf": "primordials/headers",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "primordials/symbol",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
       },
       {
         "leaf": "process/spawn/retry/browser",
@@ -362,9 +402,7 @@
   },
   "coverage": {
     "exclude": {
-      "add": [
-        "src/perf/**"
-      ]
+      "add": ["src/perf/**"]
     }
   },
   "lint": {

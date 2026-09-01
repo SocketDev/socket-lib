@@ -29,6 +29,8 @@
 import { writeFileSync } from 'node:fs'
 import process from 'node:process'
 
+import { parseArgs } from 'node:util'
+
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
@@ -37,7 +39,7 @@ import {
   readScannedRoster,
   readUnexposedLeaves,
 } from './build-stubs/unexposed.mts'
-import { writeUnexposedLeaves } from './build-stubs/settings.mts'
+import { addKeptLeaves, writeUnexposedLeaves } from './build-stubs/settings.mts'
 
 import type { UnexposedRecord } from './build-stubs/settings.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
@@ -103,11 +105,32 @@ export function recordWithoutLeaves(
   }
 }
 
+/**
+ * The reason stored beside a leaf exposed without an explicit `--reason`.
+ *
+ * States the two cases that reach this script. Both are invisible to the
+ * fleet-usage leg, because neither imports the leaf by its published specifier.
+ */
+export const DEFAULT_EXPOSURE_REASON =
+  'Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused.'
+
 function main(): void {
-  const argv = process.argv.slice(2)
-  const dryRun = argv.includes('--dry-run')
-  const noCommit = argv.includes('--no-commit')
-  const requested = argv.filter(a => !a.startsWith('-'))
+  // parseArgs over hand-rolled argv scanning: `--reason` takes a VALUE, so a
+  // positional filter of "does not start with -" reads its text as a list of
+  // leaves, and the index arithmetic that avoids that has an off-by-one when
+  // the flag is absent.
+  const { positionals, values } = parseArgs({
+    allowPositionals: true,
+    options: {
+      'dry-run': { type: 'boolean' },
+      'no-commit': { type: 'boolean' },
+      reason: { type: 'string' },
+    },
+  })
+  const dryRun = values['dry-run'] === true
+  const noCommit = values['no-commit'] === true
+  const exposureReason = values.reason ?? DEFAULT_EXPOSURE_REASON
+  const requested = positionals
   if (!requested.length) {
     logger.fail(
       'expose-leaf: no leaf named.\n' +
@@ -147,6 +170,14 @@ function main(): void {
   writeUnexposedLeaves(
     REPO_ROOT,
     recordWithoutLeaves(listed, readScannedRoster(REPO_ROOT), plan.exposed),
+    writeFileSync,
+  )
+  // Record the exposure durably. The stub list is regenerated from fleet
+  // consumers, so a leaf only dropped from it comes back on the next
+  // --write-stub-list and ships throwing again.
+  addKeptLeaves(
+    REPO_ROOT,
+    plan.exposed.map(leaf => ({ leaf, reason: exposureReason })),
     writeFileSync,
   )
   logger.success(

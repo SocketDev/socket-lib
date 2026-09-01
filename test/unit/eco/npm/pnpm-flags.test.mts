@@ -13,6 +13,12 @@ import { describe, expect, it } from 'vitest'
 
 import { isNpmLoglevelFlag as isNpmLoglevelFlagStable } from '@socketsecurity/lib-stable/eco/npm/npm-cli/flags'
 
+import { stableAvailable } from '../../../_shared/lib-stable-parity.mts'
+
+const hasStableLoglevelFlag = stableAvailable(() =>
+  isNpmLoglevelFlagStable('--silent'),
+)
+
 import {
   isPnpmFrozenLockfileFlag,
   isPnpmIgnoreScriptsFlag,
@@ -110,28 +116,31 @@ describe('pnpm flag detection', () => {
   })
 
   describe('isPnpmLoglevelFlag', () => {
-    it('should behave identically to isNpmLoglevelFlag', () => {
-      // Module dedup is unreliable under vitest's threaded pool — the
-      // two import paths can resolve to distinct copies of the
-      // function reference. Verify behavioral identity across the
-      // exhaustive input set instead of `===`. The npm oracle comes from
-      // the published `-stable` snapshot so this never validates src
-      // against itself.
-      const samples = [
-        '--loglevel',
-        '--loglevel=warn',
-        '-l',
-        '--silent',
-        '--quiet',
-        '-q',
-        '--unrelated',
-        '',
-      ]
-      for (let i = 0, { length } = samples; i < length; i += 1) {
-        const s = samples[i]!
-        expect(isPnpmLoglevelFlag(s)).toBe(isNpmLoglevelFlagStable(s))
-      }
-    })
+    it.skipIf(!hasStableLoglevelFlag)(
+      'should behave identically to isNpmLoglevelFlag',
+      () => {
+        // Module dedup is unreliable under vitest's threaded pool — the
+        // two import paths can resolve to distinct copies of the
+        // function reference. Verify behavioral identity across the
+        // exhaustive input set instead of `===`. The npm oracle comes from
+        // the published `-stable` snapshot so this never validates src
+        // against itself.
+        const samples = [
+          '--loglevel',
+          '--loglevel=warn',
+          '-l',
+          '--silent',
+          '--quiet',
+          '-q',
+          '--unrelated',
+          '',
+        ]
+        for (let i = 0, { length } = samples; i < length; i += 1) {
+          const s = samples[i]!
+          expect(isPnpmLoglevelFlag(s)).toBe(isNpmLoglevelFlagStable(s))
+        }
+      },
+    )
 
     it('should return true for --loglevel', () => {
       expect(isPnpmLoglevelFlag('--loglevel')).toBe(true)
