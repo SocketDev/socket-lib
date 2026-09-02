@@ -459,9 +459,7 @@
   },
   "coverage": {
     "exclude": {
-      "add": [
-        "src/perf/**"
-      ]
+      "add": ["src/perf/**"]
     }
   },
   "lint": {
