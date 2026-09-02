@@ -12,7 +12,11 @@ import { arrayToSorted } from '../polyfills/array.mjs'
 // the version `@`), then capture 2 = the version (starts with a digit, runs to
 // the next space or paren so trailing annotations like "(deprecated)" are left
 // out).
-const PURL_PATTERN = /pkg:[^/\s]+\/(.+?)@([0-9][^\s()]*)/
+// Every run is bounded. Unbounded `[^/\s]+` before the required `/`, and a
+// lazy `(.+?)` before the required `@`, both let a long line rescan from each
+// start position (CodeQL js/polynomial-redos). A purl type is a short word and
+// a package name is far under 256.
+const PURL_PATTERN = /pkg:[^/\s]{1,64}\/(.{1,256}?)@([0-9][^\s()]{0,256})/
 
 /**
  * Find anomalies in an SBOM component list. Flags any component name present at

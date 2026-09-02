@@ -15,16 +15,6 @@
 
 import { arrayToReversed } from '../polyfills/array.mjs'
 
-/**
- * Close an under-terminated JSON object by appending the closers its open stack
- * still needs. Observed live from Qwen2.5-Coder-7B: the object arrives one `}`
- * short, which both strict parsing and balanced-prefix extraction reject. Walks
- * from the first `{` with string and escape tracking, then appends the missing
- * closers in reverse open order. Returns `undefined` when the text has no
- * object start, ends inside a string, closes with a mismatched bracket, or is
- * already balanced: the caller uses this only as a last-resort reparse, so
- * "nothing to do" and "cannot repair" both yield `undefined`.
- */
 export function closeUnbalancedJson(raw: string): string | undefined {
   const start = raw.indexOf('{')
   if (start === -1) {
@@ -64,6 +54,40 @@ export function closeUnbalancedJson(raw: string): string | undefined {
     return undefined
   }
   return raw.slice(start) + arrayToReversed(stack).join('')
+}
+
+/**
+ * Close an under-terminated JSON object by appending the closers its open stack
+ * still needs. Observed live from Qwen2.5-Coder-7B: the object arrives one `}`
+ * short, which both strict parsing and balanced-prefix extraction reject. Walks
+ * from the first `{` with string and escape tracking, then appends the missing
+ * closers in reverse open order. Returns `undefined` when the text has no
+ * object start, ends inside a string, closes with a mismatched bracket, or is
+ * already balanced: the caller uses this only as a last-resort reparse, so
+ * "nothing to do" and "cannot repair" both yield `undefined`.
+ */
+// The body of the first ``` fence, or undefined when the text carries none.
+// An opening fence may be tagged (```json); the tag runs to the end of that
+// line, so the body starts after it.
+export function extractFencedBody(text: string): string | undefined {
+  const open = text.indexOf('```')
+  if (open === -1) {
+    return undefined
+  }
+  const afterOpen = open + 3
+  const newline = text.indexOf('\n', afterOpen)
+  const tag = text.slice(afterOpen, newline === -1 ? text.length : newline)
+  // A tagged fence puts the body on the next line; an untagged one starts
+  // immediately, so only skip the line when what follows is a bare tag.
+  const bodyStart =
+    newline !== -1 && /^[a-z]{0,16}$/i.test(tag.trim())
+      ? newline + 1
+      : afterOpen
+  const close = text.indexOf('```', bodyStart)
+  if (close === -1) {
+    return undefined
+  }
+  return text.slice(bodyStart, close).trim()
 }
 
 /**
@@ -186,12 +210,13 @@ export function repairJson(raw: string): string {
  */
 export function stripJsonFence(raw: string): string {
   const trimmed = raw.trim()
-  // Opening ``` optionally followed by `json` (?:json)?, then optional
-  // whitespace \s*, then a lazy capture of the fenced body ([\s\S]*?) up to the
-  // closing ```.
-  const fenceMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)```/)
-  if (fenceMatch && fenceMatch[1] !== undefined) {
-    return fenceMatch[1].trim()
+  // Located by index rather than by regex. A lazy body scan up to a required
+  // closing fence re-runs from every start position, which is quadratic on a
+  // long unfenced payload (CodeQL js/polynomial-redos); two indexOf calls read
+  // the same shape in one pass.
+  const fenced = extractFencedBody(trimmed)
+  if (fenced !== undefined) {
+    return fenced
   }
   return trimmed
 }

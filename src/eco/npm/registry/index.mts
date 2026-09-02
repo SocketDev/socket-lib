@@ -246,7 +246,12 @@ export function encodePackageName(
  * `@scope%2Fname`.
  */
 export function encodeRegistryName(name: string): string {
-  return encodeURIComponent(name).replace('%40', '@')
+  const encoded = encodeURIComponent(name)
+  // Only a LEADING `@` belongs to a scope. `.replace('%40', '@')` restored it
+  // because a string replace takes the FIRST match and the scope sigil happens
+  // to be first - correct by accident, and read as an incomplete replacement
+  // (CodeQL js/incomplete-sanitization). Anchoring says what is meant.
+  return encoded.startsWith('%40') ? `@${encoded.slice(3)}` : encoded
 }
 
 /**

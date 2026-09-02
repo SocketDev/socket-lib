@@ -70,6 +70,9 @@ describe('containerSettingsUrl', () => {
       url,
       'https://github.com/orgs/example-org/packages/container/example-repo%2Fexample-pack/settings',
     )
-    assert.ok(!url.includes('api.github.com'))
+    // Compare the parsed HOST, not a substring: `includes` would also pass a
+    // url whose host merely contains the string (CodeQL
+    // js/incomplete-url-substring-sanitization).
+    assert.notEqual(new URL(url).host, 'api.github.com')
   })
 })
