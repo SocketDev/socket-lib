@@ -1,7 +1,7 @@
 /**
- * @file String transformations: `stripBom`, `stripSurroundingQuotes`,
- *   `toKebabCase`, `trimNewlines`. All four are pure functions with no side
- *   effects.
+ * @file String transformations: `stripBom`, `stripPaddedSuffix`,
+ *   `stripSurroundingQuotes`, `toKebabCase`, `trimCharsFromEnds`,
+ *   `trimNewlines`. All are pure functions with no side effects.
  */
 
 import {
@@ -12,6 +12,17 @@ import {
 
 // A PATH entry may carry surrounding double quotes; `which` strips them too.
 const quotedEntryRegExp = /^".*"$/
+
+// The whitespace `\s` matches, as character codes, so the scans above stay
+// index-based rather than re-entering the regex engine.
+export function isTrimmableSpace(code: number): boolean {
+  return (
+    code === 32 ||
+    (code >= 9 && code <= 13) ||
+    code === 0xa0 ||
+    code === 0xfe_ff
+  )
+}
 
 /**
  * Strip the Byte Order Mark (BOM) from the beginning of a string.
@@ -42,6 +53,49 @@ export function stripBom(str: string): string {
   return str.length > 0 && StringPrototypeCharCodeAt(str, 0) === 0xfe_ff
     ? StringPrototypeSlice(str, 1)
     : str
+}
+
+/**
+ * Remove a trailing `suffix` together with any whitespace around it.
+ *
+ * Returns the input unchanged when the suffix is absent, so a caller can
+ * compare identity to learn whether anything was removed.
+ *
+ * The regex form - `/\s*<suffix>\s*$/` - is polynomial: the leading `\s*` and
+ * the anchored trailing `\s*` make the engine re-scan the whitespace run from
+ * each start position. This walks the end of the string once instead.
+ *
+ * @example
+ *   ;```ts
+ *   stripPaddedSuffix('# END x env (managed)', '(managed)') // '# END x env'
+ *   stripPaddedSuffix('# END x env', '(managed)') // '# END x env' (unchanged)
+ *   ```
+ *
+ * @param str - The string to strip.
+ * @param suffix - The literal suffix to remove.
+ *
+ * @returns The string without the suffix and its padding, or `str` unchanged.
+ */
+export function stripPaddedSuffix(str: string, suffix: string): string {
+  if (suffix.length === 0) {
+    return str
+  }
+  let end = str.length
+  while (end > 0 && isTrimmableSpace(str.charCodeAt(end - 1))) {
+    end -= 1
+  }
+  const suffixStart = end - suffix.length
+  if (
+    suffixStart < 0 ||
+    StringPrototypeSlice(str, suffixStart, end) !== suffix
+  ) {
+    return str
+  }
+  let start = suffixStart
+  while (start > 0 && isTrimmableSpace(str.charCodeAt(start - 1))) {
+    start -= 1
+  }
+  return StringPrototypeSlice(str, 0, start)
 }
 
 /**
@@ -94,6 +148,47 @@ export function toKebabCase(str: string): string {
       .replace(/_/g, '-')
       .toLowerCase()
   )
+}
+
+/**
+ * Trim every leading and trailing character that appears in `chars`.
+ *
+ * A single index scan from each end, so cost is linear in the run actually
+ * trimmed. The regex form of this - `/^[-.]+|[-.]+$/g` - is what CodeQL flags
+ * as polynomial-redos: the engine retries the trailing alternative from every
+ * position, so a long string of the trimmed character costs quadratic time.
+ *
+ * @example
+ *   ;```ts
+ *   trimCharsFromEnds('--a.b--', '-.') // 'a.b'
+ *   trimCharsFromEnds('...', '-.') // ''
+ *   trimCharsFromEnds('abc', '-.') // 'abc'
+ *   ```
+ *
+ * @param str - The string to trim.
+ * @param chars - Characters to strip from both ends.
+ *
+ * @returns The trimmed string.
+ */
+export function trimCharsFromEnds(str: string, chars: string): string {
+  const { length } = str
+  if (length === 0 || chars.length === 0) {
+    return str
+  }
+  let start = 0
+  while (start < length && chars.includes(str[start] as string)) {
+    start += 1
+  }
+  if (start === length) {
+    return ''
+  }
+  let end = length
+  while (end > start && chars.includes(str[end - 1] as string)) {
+    end -= 1
+  }
+  return start === 0 && end === length
+    ? str
+    : StringPrototypeSlice(str, start, end)
 }
 
 /**

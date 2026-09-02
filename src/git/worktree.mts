@@ -29,6 +29,7 @@ import { normalizePath } from '../paths/normalize.mjs'
 import { getOsTmpDir } from '../paths/socket.mjs'
 import { gitSpawn, gitSync } from './exec.mjs'
 import { getCachedRealpath, getCwd } from './repo.mjs'
+import { trimCharsFromEnds } from '../strings/transform.mjs'
 
 /**
  * One entry from `git worktree list --porcelain`.
@@ -342,15 +343,13 @@ export function resolveWorktreePath(worktreePath: string): string {
  * @returns A non-empty, single-segment slug of at most 40 characters.
  */
 export function sanitizeWorktreeLabel(label: string): string {
-  return (
-    label
-      // Any run of characters outside the safe set becomes one dash.
-      .replace(/[^a-zA-Z0-9._-]+/g, '-')
-      // Then trim a leading OR trailing run of dots and dashes, which is what
-      // the collapse above leaves behind for a `../` prefix.
-      .replace(/^[-.]+|[-.]+$/g, '')
-      .slice(0, 40) || 'task'
-  )
+  // Any run of characters outside the safe set becomes one dash.
+  const collapsed = label.replace(/[^a-zA-Z0-9._-]+/g, '-')
+  // Then trim a leading OR trailing run of dots and dashes, which is what the
+  // collapse above leaves behind for a `../` prefix. Trimmed by index rather
+  // than `/^[-.]+|[-.]+$/g`, whose anchored trailing alternative re-scans from
+  // every position and costs quadratic time on a long run of dashes.
+  return trimCharsFromEnds(collapsed, '-.').slice(0, 40) || 'task'
 }
 
 /**

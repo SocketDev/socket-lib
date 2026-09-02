@@ -2,8 +2,10 @@ import { describe, expect, it } from 'vitest'
 
 import {
   stripBom,
+  stripPaddedSuffix,
   stripSurroundingQuotes,
   toKebabCase,
+  trimCharsFromEnds,
   trimNewlines,
 } from '../../../src/strings/transform.mjs'
 
@@ -227,5 +229,47 @@ describe('strings/transform — trimNewlines', () => {
   it('handles only trailing newlines', () => {
     expect(trimNewlines('test\n\n')).toBe('test')
     expect(trimNewlines('test\r\r')).toBe('test')
+  })
+})
+
+describe('trimCharsFromEnds', () => {
+  it('trims both ends and leaves the middle', () => {
+    expect(trimCharsFromEnds('--a.b--', '-.')).toBe('a.b')
+  })
+
+  it('returns empty when every character is trimmed', () => {
+    expect(trimCharsFromEnds('...', '-.')).toBe('')
+  })
+
+  it('returns the input untouched when nothing matches', () => {
+    expect(trimCharsFromEnds('abc', '-.')).toBe('abc')
+    expect(trimCharsFromEnds('', '-.')).toBe('')
+    expect(trimCharsFromEnds('abc', '')).toBe('abc')
+  })
+
+  it('stays linear on a long run', () => {
+    // The regex this replaces went quadratic here.
+    expect(trimCharsFromEnds('-'.repeat(100_000) + 'x', '-.')).toBe('x')
+  })
+})
+
+describe('stripPaddedSuffix', () => {
+  it('removes the suffix and the whitespace around it', () => {
+    expect(stripPaddedSuffix('# END x env (managed)', '(managed)')).toBe(
+      '# END x env',
+    )
+    expect(stripPaddedSuffix('a (managed)   ', '(managed)')).toBe('a')
+  })
+
+  it('returns the input unchanged when the suffix is absent', () => {
+    const input = '# END x env'
+    expect(stripPaddedSuffix(input, '(managed)')).toBe(input)
+    expect(stripPaddedSuffix(input, '')).toBe(input)
+  })
+
+  it('does not strip a suffix that only appears mid-string', () => {
+    expect(stripPaddedSuffix('(managed) tail', '(managed)')).toBe(
+      '(managed) tail',
+    )
   })
 })

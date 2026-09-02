@@ -51,6 +51,7 @@ import { ObjectEntries } from '../primordials/object.mjs'
 import { RegExpCtor } from '../primordials/regexp.mjs'
 
 import { StringPrototypeEndsWith } from '../primordials/string.mjs'
+import { stripPaddedSuffix } from '../strings/transform.mjs'
 
 export function buildBlock(options: WriteOptions): {
   begin: string
@@ -104,7 +105,7 @@ export function clear(
   for (let i = 0, { length } = sentinelsToStrip; i < length; i += 1) {
     const begin = sentinelsToStrip[i]!
     const end = begin.replace(/\bBEGIN\b/, 'END')
-    const endStripped = end.replace(/\s*\(managed\)\s*$/, '')
+    const endStripped = stripPaddedSuffix(end, '(managed)')
     const endAlt =
       end === endStripped
         ? escapeRegExp(end)
@@ -278,7 +279,7 @@ export function write(options: WriteOptions): WriteResult {
   // END didn't).
   for (const legacyBegin of options.legacySentinels ?? []) {
     const legacyEnd = legacyBegin.replace(/\bBEGIN\b/, 'END')
-    const legacyEndStripped = legacyEnd.replace(/\s*\(managed\)\s*$/, '')
+    const legacyEndStripped = stripPaddedSuffix(legacyEnd, '(managed)')
     const endAlt =
       legacyEnd === legacyEndStripped
         ? escapeRegExp(legacyEnd)
