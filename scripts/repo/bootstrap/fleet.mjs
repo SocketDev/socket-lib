@@ -696,6 +696,7 @@ function isAlwaysTrackedGitHubSurface(relPath) {
  */
 const CLAUDE_HOME = path.join(os.homedir(), '.claude')
 const CLAUDE_ACCOUNT_CONFIG = path.join(os.homedir(), '.claude.json')
+const CLAUDE_USER_SETTINGS = path.join(CLAUDE_HOME, 'settings.json')
 const CODEX_HOME = path.join(os.homedir(), '.codex')
 const FIRECONNECT_HOME = path.join(os.homedir(), '.fireconnect')
 const XDG_DATA_HOME = path.join(os.homedir(), '.local', 'share')
