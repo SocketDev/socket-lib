@@ -206,6 +206,7 @@ Thumbs.db
 # generated-globs.mts) by generated-globs-are-consistent.mts.
 **/build/
 **/dist/
+**/tmp/
 /template/generated/
 **/out/
 **/.cache/
