@@ -19,6 +19,9 @@ import process from 'node:process'
 import { fileURLToPath } from 'node:url'
 import crypto from 'node:crypto'
 import { execFileSync } from 'node:child_process'
+import '@socketsecurity/lib-stable/paths/normalize'
+import { getSocketWheelhouseDir } from '@socketsecurity/lib-stable/paths/socket'
+import '@socketsecurity/lib-stable/paths/rewire'
 import https from 'node:https'
 
 //#region scripts/repo/gen/bootstrap/src/dep0-io.mts
@@ -658,6 +661,534 @@ function isAlwaysTrackedGitHubSurface(relPath) {
   }
   return false
 }
+
+//#endregion
+//#region template/base/scripts/fleet/paths.mts
+/**
+ * @file Canonical path constants + resolvers for this package. Mantra: 1 path,
+ *   1 reference. Every path the scripts in this directory need — config files,
+ *   lockfiles, build outputs, cache dirs, manifest files — gets constructed
+ *   exactly once here. Every consumer imports the constructed value. A future
+ *   rename or relocation is a one-file edit; consumers don't have to be
+ *   re-audited. Per-package, like package.json: every package that has its own
+ *   `scripts/` directory has its own `paths.mts`. A sub-package can inherit
+ *   from a parent's paths.mts by re-exporting: // packages/foo/bar/paths.mts
+ *   export * from '../../../scripts/fleet/paths.mts' // Add
+ *   sub-package-specific overrides below the export line. export const
+ *   FOO_BAR_DIST = path.join(REPO_ROOT, 'packages', 'foo', 'bar', 'dist')
+ *   Consumers resolve `paths.mts` the same way Node resolves `package.json` —
+ *   relative to the importing file's location, with `..`-walks finding the
+ *   nearest one. Two flavors of path live in this file:
+ *
+ *   1. STATIC CONSTANTS — paths that don't depend on runtime input. Example:
+ *      `REPO_ROOT`, `CONFIG_DIR`, `TOOL_CACHE_DIR`. Importable as-is.
+ *   2. RESOLVER FUNCTIONS — paths that need a search, multiple accepted locations
+ *      or runtime input, a target directory, a package name. Example:
+ *      `findSocketWheelhouseConfig(repoRoot)` resolves
+ *      `.config/repo/socket-wheelhouse.json` when it exists. Resolution from
+ *      script call sites: every script anchors on its own location via
+ *      `fileURLToPath(import.meta.url)`, then walks up to the
+ *      package.json-bearing ancestor. `process.cwd()` is forbidden in scripts/
+ *      per fleet rule (the user / Claude Code may invoke from any subdir).
+ *
+ * @see The fleet rule: CLAUDE.md "1 path, 1 reference" and the
+ *   `socket/no-process-cwd-in-scripts-hooks` oxlint rule.
+ */
+const CLAUDE_HOME = path.join(os.homedir(), '.claude')
+const CLAUDE_ACCOUNT_CONFIG = path.join(os.homedir(), '.claude.json')
+const CODEX_HOME = path.join(os.homedir(), '.codex')
+const FIRECONNECT_HOME = path.join(os.homedir(), '.fireconnect')
+const XDG_DATA_HOME = path.join(os.homedir(), '.local', 'share')
+const OPENCODE_HOME = path.join(XDG_DATA_HOME, 'opencode')
+/**
+ * Walk up from this module's own location to find the repo root — the nearest
+ * ancestor that has a `package.json`. Cached per-process since the answer
+ * doesn't change at runtime.
+ *
+ * @throws If no package.json ancestor exists (= we're not in a repo).
+ */
+function resolveRepoRoot$1() {
+  let cur = path.dirname(fileURLToPath(import.meta.url))
+  const root = path.parse(cur).root
+  while (cur && cur !== root) {
+    if (existsSync(path.join(cur, 'package.json'))) return cur
+    const parent = path.dirname(cur)
+    if (parent === cur) break
+    cur = parent
+  }
+  throw new Error(
+    `Could not resolve repo root from ${fileURLToPath(import.meta.url)} (no ancestor has package.json).`,
+  )
+}
+/**
+ * Absolute path to the repo root (nearest `package.json` ancestor).
+ */
+const REPO_ROOT = resolveRepoRoot$1()
+/**
+ * Absolute path to `template/base`, the cascade's canonical source tree.
+ *
+ * Only the wheelhouse has one, so a caller checks existence before reading —
+ * `OWNS_RELOCATED_TESTS` below is that check. Declared here beside REPO_ROOT
+ * because the pricing constants further down build on it, and a later
+ * declaration would put them in its temporal dead zone.
+ */
+const TEMPLATE_BASE_DIR = path.join(REPO_ROOT, 'template', 'base')
+/**
+ * Absolute path to the repo's `.config/` directory.
+ */
+const CONFIG_DIR = path.join(REPO_ROOT, '.config')
+/**
+ * Segregated `.config/` subtrees: `fleet/` holds fleet-identical cascaded
+ * config, `repo/` holds repo-owned config. No loose files sit in `.config/`.
+ */
+const CONFIG_FLEET_DIR = path.join(CONFIG_DIR, 'fleet')
+const CONFIG_REPO_DIR = path.join(CONFIG_DIR, 'repo')
+/**
+ * The lockstep schema is fleet-identical, so it lives under `.config/fleet/`;
+ * `pnpm run lockstep:emit-schema` regenerates it here from the TypeBox source.
+ */
+const LOCKSTEP_SCHEMA = path.join(CONFIG_FLEET_DIR, 'lockstep.schema.json')
+/**
+ * Absolute path to the repo's `node_modules/` directory.
+ */
+const NODE_MODULES_DIR = path.join(REPO_ROOT, 'node_modules')
+const NOTION_BACKUPS_DIR = path.join(getSocketWheelhouseDir(), 'notion-backups')
+/**
+ * Absolute path to the repo's tool-cache root — a repo-root `.cache/`. Fleet
+ * convention: every per-repo tool cache and every piece of per-repo runtime
+ * state lives under here (coverage, the hook bundle cache, the active-edits
+ * ledger, our own audit caches). Auto-gitignored via the fleet's `**∕.cache/`
+ * rule. Segmented into `fleet/` + `repo/` below.
+ *
+ * It sits at the repo root, NOT inside the dependency tree, because the store
+ * has to outlive it: `rm -rf node_modules` and a package `clean` both took the
+ * old location with them, destroying state that concurrent hook processes were
+ * still writing (one such `clean` died on `ENOTEMPTY` mid-sweep). A `clean`
+ * scopes to build output; the cache root is not build output.
+ */
+const TOOL_CACHE_DIR = path.join(REPO_ROOT, '.cache')
+/**
+ * Fleet-owned tool-cache segment: fleet-managed caches (coverage, hooks,
+ * snapshots, etc.) live under here — mirroring the `.claude/hooks/{fleet,repo}`
+ * / `.github/actions/{fleet,repo}` segmentation.
+ */
+const FLEET_CACHE_DIR = path.join(TOOL_CACHE_DIR, 'fleet')
+/**
+ * Memoized pre-push typecheck verdicts, keyed on HEAD plus the dirty-file set.
+ *
+ * Reproducible output for THIS checkout, so it belongs under the repo's own
+ * gitignored `.cache` rather than a store that outlives the tree: a stale
+ * entry can only describe a tree that no longer exists.
+ */
+const TYPECHECK_CACHE_DIR = path.join(FLEET_CACHE_DIR, 'typecheck')
+/**
+ * Rendered human-facing reports a fleet script produces (HTML, SVG, whatever a
+ * browser opens). One directory per producing script, named after it, holding
+ * an `index.html` and an `assets/` directory for anything the page cannot
+ * inline:
+ *
+ *     reports/<script-name>/index.html
+ *     reports/<script-name>/assets/*
+ *
+ * So `spend-report.mts` writes `reports/spend-report/index.html`, and the
+ * directory name says which script to re-run to refresh it.
+ *
+ * EVERY report takes this shape, including one that inlines everything and
+ * ships no assets today. Allowing a flat `<name>.html` alongside would make
+ * every consumer look for two shapes, and a report that later grew an asset
+ * would move, breaking whatever pointed at the old path. Construct these paths
+ * with `_shared/spend-report-path.mts`, never by hand.
+ *
+ * Distinct from `.claude/reports/`, which holds hand-written Markdown that is
+ * part of the repo's record. This is generated output: untracked, disposable,
+ * and rebuilt by re-running its script.
+ */
+const FLEET_REPORTS_DIR = path.join(FLEET_CACHE_DIR, 'reports')
+/**
+ * Repo-owned tool-cache segment: caches specific to THIS repo (not fleet
+ * tooling) live under here.
+ */
+const REPO_CACHE_DIR = path.join(TOOL_CACHE_DIR, 'repo')
+/**
+ * Single coverage home. Every tier's report is persisted here as one distinctly
+ * named FLAT file — never a per-tier subdir. vitest/c8 reporters emit a fixed
+ * `coverage-final.json` and `clean: true` wipes the whole reportsDirectory, so
+ * each tier reports into the throwaway `COVERAGE_SCRATCH_DIR` and the runner
+ * renames the result to its flat name here. The merge writes the combined
+ * `coverage-final.json` + `coverage-summary.json` at this root — the badge +
+ * release gate read the summary from here. The only files under here are the
+ * flat `*.json`; raw dumps + scratch live in `COVERAGE_SCRATCH_DIR` (tmp).
+ */
+const COVERAGE_DIR = path.join(FLEET_CACHE_DIR, 'coverage')
+/**
+ * Per-tier istanbul final reports — flat files in COVERAGE_DIR. The runner
+ * moves each tier's scratch `coverage-final.json` out to its named path here;
+ * the merge reads them back and folds them.
+ */
+const COVERAGE_FINAL_MAIN_PATH = path.join(
+  COVERAGE_DIR,
+  'coverage-final.main.json',
+)
+const COVERAGE_FINAL_ISOLATED_PATH = path.join(
+  COVERAGE_DIR,
+  'coverage-final.isolated.json',
+)
+const COVERAGE_FINAL_ENFORCERS_PATH = path.join(
+  COVERAGE_DIR,
+  'coverage-final.enforcers.json',
+)
+const COVERAGE_FINAL_CHILDREN_PATH = path.join(
+  COVERAGE_DIR,
+  'coverage-final.children.json',
+)
+/**
+ * The merged istanbul final report the coverage runner writes after folding
+ * every tier (main + isolated + enforcers + children) together.
+ */
+const COVERAGE_FINAL_PATH = path.join(COVERAGE_DIR, 'coverage-final.json')
+/**
+ * The json-summary the badge + release-check read (line/branch/etc. totals).
+ */
+const COVERAGE_SUMMARY_PATH = path.join(COVERAGE_DIR, 'coverage-summary.json')
+/**
+ * Transient coverage scratch — OUTSIDE the coverage home so raw V8 dumps and
+ * each tier's throwaway `coverage-final.json` never clutter COVERAGE_DIR. Lives
+ * in the OS temp dir and is wiped per run. `os` is a node builtin so paths.mts
+ * stays import-safe for the rolldown loader.
+ *
+ * A cover run pins a UNIQUE per-run dir via the FLEET_COVERAGE_SCRATCH_DIR env
+ * (set by scripts/fleet/cover/scratch-isolation.mts, imported before this
+ * module loads) so concurrent cover runs never wipe each other's raw child
+ * dumps or the vitest v8 `.tmp` at startup — the source of the cover-gate
+ * measurement wobble. Consumers that don't set it (measure-one-enforcer, ad-hoc
+ * tools) fall back to the fixed shared path. Keep this env-name literal in
+ * lockstep with scratch-isolation.mts's FLEET_COVERAGE_SCRATCH_DIR_ENV.
+ */
+const COVERAGE_SCRATCH_DIR =
+  process.env['FLEET_COVERAGE_SCRATCH_DIR'] ||
+  path.join(os.tmpdir(), 'fleet-coverage-scratch')
+/**
+ * Throwaway reportsDirectory for the vitest tiers (main / isolated). A
+ * dedicated subdir — NOT the scratch root — so a tier's `clean: true` wipes
+ * only its own report and never the sibling `children-raw` (the raw V8 dumps
+ * must survive across the sequential main + isolated runs). The runner renames
+ * the `coverage-final.json` here out to the flat per-tier path after each run.
+ */
+const COVERAGE_SCRATCH_VITEST_DIR = path.join(COVERAGE_SCRATCH_DIR, 'vitest')
+/**
+ * Absolute path to the raw child-profile subdir the runner sets as
+ * `FLEET_CHILD_V8_COVERAGE_DIR` — under the transient scratch, never
+ * COVERAGE_DIR.
+ */
+const COVERAGE_CHILDREN_RAW_DIR = path.join(
+  COVERAGE_SCRATCH_DIR,
+  'children-raw',
+)
+/**
+ * Absolute path to the repo's `.claude/settings.json` (the fleet hook wiring:
+ * the dispatcher matcher entries + standalone per-hook entries).
+ */
+const CLAUDE_SETTINGS_JSON = path.join(REPO_ROOT, '.claude', 'settings.json')
+/**
+ * Absolute path to the fleet hooks directory.
+ *
+ * `FLEET_HOOKS_ROOT` relocates it, and every path below derives from it, so a
+ * build can target a DIFFERENT hook tree without a second set of constants.
+ * The wheelhouse uses that to build the shipped pack from
+ * `template/base/.claude/hooks/fleet`: the two trees hold different hook sets,
+ * since a conditional-layer hook composes into the live tree of a repo entitled
+ * to it and is absent from `template/base`, and the release bundle ships
+ * `template/base` to EVERY member. Building the shipped pack from the live tree
+ * embeds a hook the member never receives.
+ */
+const HOOKS_ROOT_OVERRIDE = process.env['FLEET_HOOKS_ROOT']
+const FLEET_HOOKS_DIR = HOOKS_ROOT_OVERRIDE
+  ? path.resolve(HOOKS_ROOT_OVERRIDE)
+  : path.join(REPO_ROOT, '.claude', 'hooks', 'fleet')
+/**
+ * Dispatcher BUILD-INPUT directory: the dispatcher source, entry shims, and
+ * generated tables. Built artifacts land in `DIST_DIR`; the hand-written
+ * loader sits at `FLEET_HOOK_INDEX_PATH` above both.
+ */
+const DISPATCH_DIR = path.join(FLEET_HOOKS_DIR, '_shared')
+/**
+ * Built hook artifacts, rolldown output. This dir plus the loader is the ENTIRE
+ * hook payload a member receives: `.claude/hooks/fleet/index.cjs` +
+ * `.claude/hooks/fleet/_dist/fleet-pack.cjs`. Underscore-prefixed so the
+ * hook-dir scanners skip it, like `_shared/` and `_shared/`.
+ */
+const DIST_DIR = path.join(FLEET_HOOKS_DIR, '_dist')
+/**
+ * The hand-written CJS loader — the one path settings.json ever names. Lives
+ * ABOVE `_dist/` because it is authored, not built: `_dist/` holds exclusively
+ * build output.
+ */
+const FLEET_HOOK_INDEX_PATH = path.join(FLEET_HOOKS_DIR, 'index.cjs')
+/**
+ * The generated static dispatch table (gen/hook-dispatch writes this).
+ */
+const DISPATCH_TABLE_PATH = path.join(DISPATCH_DIR, 'dispatch-table.mts')
+const DISPATCH_TABLE_SNAPSHOT_PATH = path.join(
+  DISPATCH_DIR,
+  'dispatch-table-snapshot.mts',
+)
+const DISPATCH_TABLE_EXCLUDED_PATH = path.join(
+  DISPATCH_DIR,
+  'dispatch-table-excluded.mts',
+)
+const EXCLUDED_BUNDLE_PATH = path.join(DISPATCH_DIR, 'excluded-fleet-pack.cjs')
+/**
+ * The GENERATED dispatch manifest the dep-0 bootstrap dispatcher
+ * (`_shared/dispatch.mts`) routes off. Emitted by gen/hook-dispatch alongside
+ * the dispatch tables — never hand-maintained. Lives in `_shared/` (not
+ * `_shared/`) because the bootstrap runtime path reads it directly.
+ */
+const DISPATCH_MANIFEST_PATH = path.join(
+  FLEET_HOOKS_DIR,
+  '_shared',
+  'dispatch-manifest.json',
+)
+/**
+ * The GENERATED ahead-of-time TypeBox validators (gen/hook-validators writes
+ * this). A hook process is one-per-tool-event, so compiling a schema at startup
+ * pays JIT codegen on every run and amortizes it over a single check; the maker
+ * emits the compiler's own JavaScript at BUILD time instead, and the runtime
+ * graph never loads TypeBox at all.
+ */
+const HOOK_VALIDATORS_PATH = path.join(DISPATCH_DIR, 'generated-validators.mts')
+/**
+ * The dispatcher entry that rolldown bundles.
+ */
+const DISPATCH_ENTRY_PATH = path.join(DISPATCH_DIR, 'dispatch-entry.mts')
+/**
+ * The CJS hook bundle (rolldown output; release-shipped, gitignored).
+ */
+const HOOK_BUNDLE_PATH = path.join(DIST_DIR, 'fleet-pack.cjs')
+/**
+ * The fleet oxlint plugin source dir + its rolldown-bundled artifact. Members
+ * load the bundle via `jsPlugins`; the wheelhouse edits + tests the source and
+ * builds the bundle from it (scripts/fleet/build-oxlint-bundle.mts). The bundle
+ * is release-only, gitignored, never committed, like the hook bundle above.
+ */
+const OXLINT_PLUGIN_DIR = path.join(
+  REPO_ROOT,
+  '.config',
+  'fleet',
+  'oxlint-plugin',
+)
+const OXLINT_PLUGIN_SOURCE_ENTRY = path.join(OXLINT_PLUGIN_DIR, 'index.mts')
+const OXLINT_PLUGIN_BUNDLE_PATH = path.join(
+  REPO_ROOT,
+  '.config',
+  'fleet',
+  'oxlint-plugin.mjs',
+)
+/**
+ * Absolute path to the repo's `pnpm-workspace.yaml`.
+ */
+const PNPM_WORKSPACE_YAML = path.join(REPO_ROOT, 'pnpm-workspace.yaml')
+/**
+ * Absolute path to the cascaded fleet catalog — the fleet-canonical `catalog:`
+ * slice every member carries. The `.fleet` infix keeps it from colliding with
+ * the real `pnpm-workspace.yaml`, see the file's own header.
+ */
+const FLEET_CATALOG_YAML = path.join(
+  CONFIG_DIR,
+  'fleet',
+  'pnpm-workspace.fleet.yaml',
+)
+/**
+ * Absolute path to a given repo root's `package.json`.
+ */
+function resolvePackageJsonPath(repoRoot) {
+  return path.join(repoRoot, 'package.json')
+}
+/**
+ * Absolute path to the repo's `package.json`.
+ */
+const PACKAGE_JSON = resolvePackageJsonPath(REPO_ROOT)
+/**
+ * Absolute path to a given repo root's `pnpm-lock.yaml`. Tooling that analyzes
+ * an arbitrary checkout (a fleet member, a test fixture tree) resolves it from
+ * here instead of rebuilding the segment.
+ */
+function resolvePnpmLockPath(repoRoot) {
+  return path.join(repoRoot, 'pnpm-lock.yaml')
+}
+/**
+ * Absolute path to the repo's `pnpm-lock.yaml`.
+ */
+const PNPM_LOCK = resolvePnpmLockPath(REPO_ROOT)
+/**
+ * The pricing data the cost tooling reads, and the module rendered from it.
+ *
+ * The JSON is the editable source the pricing skill writes. The module is a
+ * BUILD OUTPUT: `gen/model-pricing-module.mts` inlines the data there so
+ * rolldown bakes it into `fleet-pack.cjs`, which is why no consumer needs the
+ * JSON on disk and neither file joins the cascade payload.
+ */
+const MODEL_PRICING_JSON = path.join(
+  REPO_ROOT,
+  'scripts',
+  'fleet',
+  'constants',
+  'model-pricing.json',
+)
+const MODEL_PRICING_MODULE = path.join(
+  REPO_ROOT,
+  'scripts',
+  'fleet',
+  'constants',
+  'model-pricing.generated.mts',
+)
+/**
+ * The `template/base` twins of the two above.
+ *
+ * The bake runs per tree, the same split `prebuild-dispatch-artifacts` keeps:
+ * the live module feeds this checkout, and this one is what the bundle walk
+ * ships. Only the wheelhouse has them, so a caller checks existence first.
+ */
+const TEMPLATE_MODEL_PRICING_JSON = path.join(
+  TEMPLATE_BASE_DIR,
+  'scripts',
+  'fleet',
+  'constants',
+  'model-pricing.json',
+)
+const TEMPLATE_MODEL_PRICING_MODULE = path.join(
+  TEMPLATE_BASE_DIR,
+  'scripts',
+  'fleet',
+  'constants',
+  'model-pricing.generated.mts',
+)
+/**
+ * The module carrying the pack's own version, and its `template/base` twin.
+ *
+ * Baked from the WHEELHOUSE root `package.json` at build time, so it is the
+ * version of the pack a member is running. A member reading its own
+ * `package.json` at run time would report the member's version instead, which
+ * is a different number and never the one the pack was cut at.
+ */
+const FLEET_PACK_VERSION_MODULE = path.join(
+  REPO_ROOT,
+  'scripts',
+  'fleet',
+  'constants',
+  'fleet-pack-version.generated.mts',
+)
+const TEMPLATE_FLEET_PACK_VERSION_MODULE = path.join(
+  TEMPLATE_BASE_DIR,
+  'scripts',
+  'fleet',
+  'constants',
+  'fleet-pack-version.generated.mts',
+)
+/**
+ * The wheelhouse's own manifest, the source of the baked pack version.
+ */
+const REPO_PACKAGE_JSON = path.join(REPO_ROOT, 'package.json')
+/**
+ * Absolute path to the release pipeline runner. Callers that re-enter the
+ * pipeline as a child process (the promote runner's `--reconcile` hand-off)
+ * resolve it from here rather than rebuilding the segments, so a move updates
+ * one definition instead of every call site.
+ */
+const PUBLISH_PIPELINE_SCRIPT = path.join(
+  REPO_ROOT,
+  'scripts',
+  'fleet',
+  'publish-pipeline.mts',
+)
+/**
+ * The fleet check scripts, relative to the repo root.
+ *
+ * Repo-relative on purpose: every runner spawns a check with the repo root as
+ * cwd, so an absolute path would have to be made relative again at each call.
+ */
+const FLEET_CHECK_DIR = path.join('scripts', 'fleet', 'check')
+/**
+ * Absolute path to the script-only check tsconfig (`tsc -p`'d directly by the
+ * check step, never editor/language-server discovered — that's the root
+ * `tsconfig.json`'s job). Lives at `.config/fleet/`, not the repo root.
+ */
+const TSCONFIG_CHECK_PATH = path.join(
+  CONFIG_DIR,
+  'fleet',
+  'tsconfig.check.json',
+)
+/**
+ * The repo-tier test tree. Wheelhouse-only hook / lint-rule / git-hook tests
+ * live under `test/repo/{unit,integration,e2e}/` (vitest), never co-located in
+ * the cascaded trees. See docs/fleet/agents.md/test-layout.md.
+ */
+const TEST_REPO_DIR = path.join(REPO_ROOT, 'test', 'repo')
+/**
+ * The AI balancer's payload directory, relative to a repo root.
+ *
+ * ONE owner for the two entry points that live in it. Both were constructed
+ * separately before — `claude-api-key-helper.mts` spelled the helper's relative
+ * path, `service.mts` spelled the proxy's absolute one — so the `ai-balancer/`
+ * to `ai/balancer/` move updated one and left the other naming a directory that
+ * no longer exists. The launchd unit rendered from the stale copy pointed at
+ * nothing, and the supervised proxy crash-looped.
+ *
+ * Relative, because a caller may resolve against a repo root that is not this
+ * one: the service installer accepts an explicit root so a test can render a
+ * unit without touching the real checkout.
+ */
+const AI_BALANCER_RELATIVE_DIR = 'scripts/fleet/ai/balancer'
+/**
+ * The dep-0 API-key helper, relative to a repo root. `.claude/settings.json`
+ * carries this string verbatim in its `apiKeyHelper` command.
+ */
+const API_KEY_HELPER_RELATIVE_PATH = `${AI_BALANCER_RELATIVE_DIR}/api-key-helper.mjs`
+/**
+ * The balancer proxy entry point, relative to a repo root. The supervisor unit
+ * names it as the program it runs.
+ */
+const BALANCER_PROXY_RELATIVE_PATH = `${AI_BALANCER_RELATIVE_DIR}/proxy.mts`
+/**
+ * The balancer proxy inside THIS checkout.
+ */
+const BALANCER_PROXY_PATH = path.join(
+  REPO_ROOT,
+  ...BALANCER_PROXY_RELATIVE_PATH.split('/'),
+)
+/**
+ * Both relocated homes a lint-rule test may live in (unit for in-process,
+ * integration for spawn-based). The oxlint-rule triad check looks here.
+ */
+const LINT_RULE_TEST_DIRS = [
+  path.join(TEST_REPO_DIR, 'unit', 'lint-rules'),
+  path.join(TEST_REPO_DIR, 'integration', 'lint-rules'),
+]
+/**
+ * Both relocated homes a hook test may live in (unit for in-process,
+ * integration for spawn-based). `hooks-shared` holds the `_shared/` helper
+ * tests.
+ */
+const HOOK_TEST_DIRS = [
+  path.join(TEST_REPO_DIR, 'integration', 'hooks'),
+  path.join(TEST_REPO_DIR, 'integration', 'hooks-shared'),
+  path.join(TEST_REPO_DIR, 'unit', 'hooks'),
+  path.join(TEST_REPO_DIR, 'unit', 'hooks-shared'),
+]
+/**
+ * Both relocated homes a git-hook test may live in.
+ */
+const GIT_HOOK_TEST_DIRS = [
+  path.join(TEST_REPO_DIR, 'integration', 'git-hooks'),
+  path.join(TEST_REPO_DIR, 'unit', 'git-hooks'),
+]
+/**
+ * True only in the wheelhouse, which OWNS the relocated tests under
+ * `test/repo/`. A member repo ships the rule/hook SOURCES but not their tests
+ * (wheelhouse-only) — so test-presence assertions must gate on this and pass
+ * return no gaps, in a member. The wheelhouse is the repo carrying
+ * `template/base/`.
+ */
+const OWNS_RELOCATED_TESTS = existsSync(TEMPLATE_BASE_DIR)
 
 //#endregion
 //#region template/base/scripts/fleet/fs/mirror-lock.mts

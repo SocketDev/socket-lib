@@ -3,15 +3,48 @@
   "description": "External tools required to build + release this repo. The canonical schema lives at socket-wheelhouse/packages/build-infra/lib/external-tools-schema.json (generated from scripts/fleet/lib/external-tools-schema.mts); every fleet repo references it via the $schema field above so validators pick up the single source of truth. Extend the `tools` map with repo-specific entries (e.g. language toolchains for sdxgen, git credential helpers for packageurl-js).",
   "tools": {
     "gh": {
-      "description": "GitHub CLI — workflow dispatch, release downloads, PR creation in weekly-update; host for the gh-aw agentic-workflows extension.",
-      "version": "2.94.0",
+      "version": "2.99.0",
+      "repository": "github:cli/cli",
+      "origin": "gh-asset",
+      "platforms": {
+        "darwin-arm64": {
+          "asset": "gh_2.99.0_macOS_arm64.zip",
+          "integrity": "sha512-1P6jwZImulYx+mQZtNHhcXHS8IsLODu7qsi8xgx+m8vmL/B3arA2NaSbepD93CICnlEKWJBvmuvYC4kV3lzCtg=="
+        },
+        "darwin-x64": {
+          "asset": "gh_2.99.0_macOS_amd64.zip",
+          "integrity": "sha512-b3ROgokDVvT7cG/vQ8ar3eK1ZWG8JaG4j2WZoEP3KBhbngpNVDjoYw2WqoRU+NLs4ANGdeYSoqCItU6S/4C7kw=="
+        },
+        "linux-arm64": {
+          "asset": "gh_2.99.0_linux_arm64.tar.gz",
+          "integrity": "sha512-PyiIHeQefunffZZAQ92wXdJKY+CtIhccblHZ2SsX3vqshhvZjdpq9cDpXabENHsbure6D5/UCcewfAiqkGDzlA=="
+        },
+        "linux-x64": {
+          "asset": "gh_2.99.0_linux_amd64.tar.gz",
+          "integrity": "sha512-E6mfO+9OWhJ0rO5ME00BLWbB0bp8LroI9oigcw2z5Qem8AGqyl1bl1oMGmeYeZT4MwgvWvfFiyIKvgiS6UbPjQ=="
+        },
+        "win32-arm64": {
+          "asset": "gh_2.99.0_windows_arm64.zip",
+          "integrity": "sha512-bfkWvHKeso1sYZiVi/rCEbCmQX6VKFNZRKBs8BAuyB5iBZkSywtsNNf7o/krzdneJQKwZjhW32oAtUkRwdmqww=="
+        },
+        "win32-x64": {
+          "asset": "gh_2.99.0_windows_amd64.zip",
+          "integrity": "sha512-QCr18KItSY0J7uEoqCJvy/Ese3+evunMgMadzJO5itpm5NEvNkeb9SvWhIPwenFe3xNe1hYF9I33b6sIkAPjcA=="
+        }
+      },
+      "description": "GitHub CLI - workflow dispatch, release downloads, PR creation, and the --attach media uploader; host for the gh-aw agentic-workflows extension.",
+      "binaryName": "gh",
       "notes": [
         "Required: only in workflows that call `gh api` / `gh pr create` (weekly-update, provenance)",
-        "Preinstalled on GitHub-hosted runners",
-        "Local: `brew install gh` / `winget install gh` / `apt install gh`",
-        "The gh-aw extension needs gh >= 2.0.0; the pinned version above is the current latest"
+        "Preinstalled on GitHub-hosted runners; elsewhere the pinned archive above is downloaded and integrity-checked rather than installed by a system package manager",
+        "The gh-aw extension needs gh >= 2.0.0",
+        "2.99.0 adds the repeatable `--attach` flag on issue/pr create/edit/comment, which uploads a local image or video to user-attachments and rewrites the body to the hosted URL"
       ],
-      "origin": "system"
+      "soakBypass": {
+        "version": "2.99.0",
+        "published": "2026-09-01",
+        "removable": "2026-09-08"
+      }
     },
     "gh-aw": {
       "description": "GitHub Agentic Workflows — `gh` extension that authors agentic workflows as `.github/workflows/<name>.md` (markdown + frontmatter) and compiles them to a hardened `<name>.lock.yml`. The fleet uses `engine: claude`.",

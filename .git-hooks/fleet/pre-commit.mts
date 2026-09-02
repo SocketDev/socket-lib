@@ -464,7 +464,7 @@ const main = (): number => {
       }
       logger.info(
         'Lead with the pnpm form; keep npm/yarn as fallbacks. To ' +
-          'suppress a fenced block, include `socket-lint: allow ' +
+          'suppress a fenced block, include `oxlint-disable-next-line ' +
           'pnpm-first` anywhere in the block.',
       )
     }

@@ -83,7 +83,6 @@
 .github/workflows/*.lock.yml linguist-generated=true merge=ours
 .github/workflows/get-green.yml linguist-generated=true
 .github/workflows/github-release.yml linguist-generated=true
-.github/workflows/npm-publish-dryrun.yml linguist-generated=true
 .github/workflows/npm-publish.yml linguist-generated=true
 .github/workflows/prune-workflow-runs.yml linguist-generated=true
 .github/workflows/weekly-fuzz.yml linguist-generated=true

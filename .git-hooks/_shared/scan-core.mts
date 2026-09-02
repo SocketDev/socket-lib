@@ -44,14 +44,14 @@ export const splitLines = (text: string): string[] =>
 
 // Per-line opt-out marker for our pre-commit / pre-push scanners.
 //
-// Canonical form:    <comment-prefix> socket-lint: allow
-// Targeted form:     <comment-prefix> socket-lint: allow <rule>
+// Canonical form:    <comment-prefix> oxlint-disable-next-line
+// Targeted form:     <comment-prefix> oxlint-disable-next-line <rule>
 //
 // `<comment-prefix>` is whichever comment style the host file uses —
 // `#` for shell / YAML / TOML / Dockerfile, `//` for TS / JS / Rust /
 // Go / C-family, or `/*` for the C-block-comment opener. The hook is
 // invoked from many file types; pinning to `#` made the marker fail
-// silently in `.ts` / `.mts` files (where `// socket-lint: allow` is
+// silently in `.ts` / `.mts` files (where `// oxlint-disable-next-line` is
 // the only sensible spelling) and confused contributors.
 //
 // The targeted form names a specific rule (`personal-path`, `npx`,
@@ -80,7 +80,7 @@ export const splitLines = (text: string): string[] =>
 /**
  * The rule id an opt-out on `line` names, in either spelling. `matched` is
  * false when the line carries no opt-out at all; `id` is undefined for the
- * bare `socket-lint: allow` blanket form, which names no rule. Pure.
+ * bare `oxlint-disable-next-line` blanket form, which names no rule. Pure.
  */
 const LEGACY_ZIZMOR_MARKER_RE = /(?:#|\/\*|\/\/)\s*zizmor:\s*[\w-]+/
 
