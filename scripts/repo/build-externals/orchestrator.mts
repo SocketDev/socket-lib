@@ -96,9 +96,8 @@ export async function bundleAllPackages(
   for (const { bundle, name } of externalPackages) {
     if (bundle) {
       const outputPath = path.join(distExternalDir, `${name}.js`)
-      const size = await bundlePackage(name, outputPath, {
+      const size = await bundlePackage(name, outputPath, rootDir, {
         quiet,
-        rootDir,
       })
       if (size) {
         bundledCount++
@@ -139,10 +138,14 @@ export async function bundleAllPackages(
         await fs.copyFile(srcPath, outputPath)
       } else if (optional) {
         try {
-          const size = await bundlePackage(`${scope}/${name}`, outputPath, {
-            quiet,
+          const size = await bundlePackage(
+            `${scope}/${name}`,
+            outputPath,
             rootDir,
-          })
+            {
+              quiet,
+            },
+          )
           if (size) {
             bundledCount++
             totalSize += size
@@ -153,10 +156,14 @@ export async function bundleAllPackages(
           }
         }
       } else {
-        const size = await bundlePackage(`${scope}/${name}`, outputPath, {
-          quiet,
+        const size = await bundlePackage(
+          `${scope}/${name}`,
+          outputPath,
           rootDir,
-        })
+          {
+            quiet,
+          },
+        )
         if (size) {
           bundledCount++
           totalSize += size
@@ -178,10 +185,14 @@ export async function bundleAllPackages(
           await fs.copyFile(srcPath, outputPath)
         } else if (optional) {
           try {
-            const size = await bundlePackage(`${scope}/${pkg}`, outputPath, {
-              quiet,
+            const size = await bundlePackage(
+              `${scope}/${pkg}`,
+              outputPath,
               rootDir,
-            })
+              {
+                quiet,
+              },
+            )
             if (size) {
               bundledCount++
               totalSize += size
@@ -192,10 +203,14 @@ export async function bundleAllPackages(
             }
           }
         } else {
-          const size = await bundlePackage(`${scope}/${pkg}`, outputPath, {
-            quiet,
+          const size = await bundlePackage(
+            `${scope}/${pkg}`,
+            outputPath,
             rootDir,
-          })
+            {
+              quiet,
+            },
+          )
           if (size) {
             bundledCount++
             totalSize += size
@@ -217,9 +232,8 @@ export async function bundleAllPackages(
         const packageName = `${scope}/${subpath}`
         // Ensure parent directory exists
         await ensureDir(path.dirname(outputPath))
-        const size = await bundlePackage(packageName, outputPath, {
+        const size = await bundlePackage(packageName, outputPath, rootDir, {
           quiet,
-          rootDir,
         })
         if (size) {
           bundledCount++

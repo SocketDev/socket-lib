@@ -28,16 +28,17 @@ const logger = getDefaultLogger()
  *
  * @param {string} packageName - Name of the package to bundle.
  * @param {string} outputPath - Output file path.
- * @param {object} options - Bundling options.
- * @param {boolean} options.quiet - Suppress output.
- * @param {string} options.rootDir - Root directory.
+ * @param {string} rootDir - Root directory.
+ * @param {object} [options] - Bundling options.
+ * @param {boolean} [options.quiet] - Suppress output.
  *
  * @returns {Promise<number | undefined>} Size in KB or undefined on error
  */
 export async function bundlePackage(
   packageName: string,
   outputPath: string,
-  options: { quiet?: boolean | undefined; rootDir: string },
+  rootDir: string,
+  options?: { quiet?: boolean | undefined } | undefined,
 ) {
   // Read through a null-prototype copy so a polluted Object.prototype cannot
   // supply either option. Bound to a variable first: a destructuring pattern
@@ -45,7 +46,6 @@ export async function bundlePackage(
   // excess property.
   const opts = { __proto__: null, ...options }
   const quiet = opts.quiet ?? false
-  const { rootDir } = opts
 
   if (!quiet) {
     logger.log(`  Bundling ${packageName}...`)
