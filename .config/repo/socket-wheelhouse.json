@@ -6,6 +6,10 @@
   "buildStubs": {
     "keepExposed": [
       {
+        "leaf": "ai/agent-context",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
         "leaf": "archives/tar",
         "reason": "Reached from a leaf that ships real code, through the dist require graph. Invisible to the fleet-usage leg, which asks who imports a specifier."
       },
@@ -149,7 +153,6 @@
     "unexposed": {
       "leaves": [
         "ai/advisor",
-        "ai/agent-context",
         "ai/assist",
         "ai/billing-context",
         "ai/cost",
@@ -447,7 +450,9 @@
   },
   "coverage": {
     "exclude": {
-      "add": ["src/perf/**"]
+      "add": [
+        "src/perf/**"
+      ]
     }
   },
   "lint": {
