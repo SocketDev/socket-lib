@@ -138,14 +138,20 @@ export async function getRegistryToken(
 export function parseWwwAuthenticate(
   header: string,
 ): AuthChallenge | undefined {
-  const bearer = /^\s*Bearer\s+(.*)$/i.exec(header)
+  // `header.trimStart()` first: `/^\s*Bearer/` puts an unbounded run right
+  // before a required literal, so a header of pure whitespace makes the engine
+  // retry from every position (CodeQL js/polynomial-redos).
+  const bearer = /^Bearer\s+(.*)$/i.exec(header.trimStart())
   if (!bearer) {
     return undefined
   }
   const params: Record<string, string> = Object.create(null)
   // Each challenge param is `key="value"`: capture 1 = the word-char key,
   // capture 2 = the quoted value, which is anything but a double quote.
-  for (const match of bearer[1]!.matchAll(/(\w+)="([^"]*)"/g)) {
+  // The key length is bounded. An unbounded `\w+` sitting before the required
+  // `="` lets a long unbroken word run rescan from each position; a challenge
+  // param key is a short identifier, so 64 is well clear of any real one.
+  for (const match of bearer[1]!.matchAll(/(\w{1,64})="([^"]*)"/g)) {
     params[match[1]!] = match[2]!
   }
   const { realm } = params

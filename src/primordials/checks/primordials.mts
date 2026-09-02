@@ -287,7 +287,10 @@ export function extractTsExports(src: string): string[] {
   )) {
     out.add(m[1]!)
   }
-  for (const m of src.matchAll(/^export\s*\{\s*([^}]+)\}/gm)) {
+  // Whitespace runs are bounded. `\s*` before the required `{` lets a long run
+  // rescan from each position (CodeQL js/polynomial-redos); real source puts a
+  // single space there, so 16 is generous.
+  for (const m of src.matchAll(/^export\s{0,16}\{\s{0,16}([^}]+)\}/gm)) {
     const rawNames = m[1]!.split(',')
     for (let i = 0, { length } = rawNames; i < length; i += 1) {
       const raw = rawNames[i]!
@@ -436,7 +439,9 @@ export function resolveSocketLibPrimordials(
  */
 export function stripComments(src: string): string {
   let out = src.replace(/\/\*[\s\S]*?\*\//g, '')
-  out = out.replace(/^[\t ]*\/\/.*$/gm, '')
-  out = out.replace(/[\t ]+\/\/.*$/gm, '')
+  // Indent runs are bounded for the same reason: an unbounded `[\t ]*` sitting
+  // before the required `//` rescans a long indent from every position.
+  out = out.replace(/^[\t ]{0,200}\/\/.*$/gm, '')
+  out = out.replace(/[\t ]{1,200}\/\/.*$/gm, '')
   return out
 }
