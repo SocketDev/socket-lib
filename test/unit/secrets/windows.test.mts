@@ -115,7 +115,9 @@ describeWindowsOnly('secrets/windows — getDpapiFilePath', () => {
 
   test('rejects service with path-traversal characters', async () => {
     const { getDpapiFilePath } = await loadFresh()
-    expect(() => getDpapiFilePath('../evil', 'acc')).toThrow(/path-traversal/)
+    expect(() => getDpapiFilePath('../untrusted', 'acc')).toThrow(
+      /path-traversal/,
+    )
   })
 
   test('rejects account with path-traversal characters', async () => {

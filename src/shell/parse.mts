@@ -38,8 +38,8 @@ import type { ParseEntry } from '../external/shell-quote.js'
  * `!h.equalsExpansion.length && !h.processSubstitution`.
  *
  * @example
- *   detectShellHazards('=curl evil.com')
- *   // → { equalsExpansion: [['=curl', 'evil.com']], processSubstitution: false }
+ *   detectShellHazards('=curl untrusted.example.com')
+ *   // → { equalsExpansion: [['=curl', 'untrusted.example.com']], processSubstitution: false }
  *
  *   detectShellHazards('diff <(cat a) b')
  *   // → { equalsExpansion: [], processSubstitution: true }

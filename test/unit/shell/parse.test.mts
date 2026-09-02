@@ -304,8 +304,8 @@ describe('shell/parse hasBinCall', () => {
 
   describe('detectShellHazards', () => {
     it('flags a Zsh EQUALS expansion and returns the hidden tokens', () => {
-      expect(detectShellHazards('=curl evil.com')).toEqual({
-        equalsExpansion: [['=curl', 'evil.com']],
+      expect(detectShellHazards('=curl untrusted.example.com')).toEqual({
+        equalsExpansion: [['=curl', 'untrusted.example.com']],
         processSubstitution: false,
       })
     })

@@ -139,9 +139,9 @@ describeUnixOnly('resolveSanitizedExecutable', () => {
     const repo = path.join(root, 'repo')
     const trustedBin = path.join(root, 'trusted-bin')
     const fallbackBin = path.join(root, 'fallback-bin')
-    const evil = writeExecutable(repo, 'evil-payload')
+    const untrusted = writeExecutable(repo, 'untrusted-payload')
     mkdirSync(trustedBin, { recursive: true })
-    symlinkSync(evil, path.join(trustedBin, 'socket-fixture-tool'))
+    symlinkSync(untrusted, path.join(trustedBin, 'socket-fixture-tool'))
     const expected = writeExecutable(fallbackBin, 'socket-fixture-tool')
     const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: envWithPath([trustedBin, fallbackBin]),
@@ -220,9 +220,9 @@ describeUnixOnly('resolveSanitizedExecutable', () => {
     const root = makeTempRoot()
     const repo = path.join(root, 'repo')
     const trustedBin = path.join(root, 'trusted-bin')
-    const evil = writeExecutable(repo, 'evil-payload')
+    const untrusted = writeExecutable(repo, 'untrusted-payload')
     mkdirSync(trustedBin, { recursive: true })
-    symlinkSync(evil, path.join(trustedBin, 'socket-fixture-tool'))
+    symlinkSync(untrusted, path.join(trustedBin, 'socket-fixture-tool'))
     const resolved = resolveSanitizedExecutable('socket-fixture-tool', {
       env: envWithPath([trustedBin]),
       untrustedFallback: 'all',

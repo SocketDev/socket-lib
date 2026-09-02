@@ -72,18 +72,18 @@ describe('http-request/user-agent', () => {
     it('should sanitize an untrusted caller (no header injection)', () => {
       const ua = buildUserAgent(
         { name: '@socketsecurity/lib', version: '6.0.0' },
-        'evil\r\nX-Injected: 1',
+        'untrusted\r\nX-Injected: 1',
       )
       expect(ua).not.toContain('\r')
       expect(ua).not.toContain('\n')
-      expect(ua.endsWith(' evil X-Injected: 1')).toBe(true)
+      expect(ua.endsWith(' untrusted X-Injected: 1')).toBe(true)
     })
   })
 
   describe('sanitizeUserAgent', () => {
     it('should strip CR/LF (header-injection defense)', () => {
-      expect(sanitizeUserAgent('evil/1.0\r\nX-Injected: 1')).toBe(
-        'evil/1.0 X-Injected: 1',
+      expect(sanitizeUserAgent('untrusted/1.0\r\nX-Injected: 1')).toBe(
+        'untrusted/1.0 X-Injected: 1',
       )
     })
 

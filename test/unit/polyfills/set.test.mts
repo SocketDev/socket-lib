@@ -295,7 +295,7 @@ describe('the predicate methods', () => {
         // deleted element must never be visited. A snapshot would visit it and
         // wrongly answer false.
         const receiver = new Set(['a', 'b', 'c'])
-        const evil = {
+        const tampered = {
           has(value: string) {
             if (value === 'a') {
               receiver.delete('c')
@@ -307,7 +307,7 @@ describe('the predicate methods', () => {
           },
           size: 3,
         }
-        expect(isSubsetOf(receiver, evil)).toBe(true)
+        expect(isSubsetOf(receiver, tampered)).toBe(true)
         expect([...receiver]).toEqual(['a', 'b'])
       })
 

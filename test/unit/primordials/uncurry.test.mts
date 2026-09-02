@@ -75,7 +75,7 @@ describe('prototype-pollution resilience', () => {
   it('captures persist even if JSON.parse is clobbered', () => {
     const saved = JSON.parse
     try {
-      ;(JSON as { parse: unknown }).parse = () => 'evil'
+      ;(JSON as { parse: unknown }).parse = () => 'untrusted'
       expect(JSONParse('{"a":1}')).toEqual({ a: 1 })
     } finally {
       ;(JSON as { parse: typeof saved }).parse = saved

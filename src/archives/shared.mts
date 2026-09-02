@@ -87,7 +87,7 @@ export function validatePathWithinBase(
   const resolvedBase = path.resolve(baseDir)
 
   // Ensure target path starts with base directory + separator
-  // This prevents attacks like /base/dir vs /base/dir-evil
+  // This prevents attacks like /base/dir vs /base/dir-sibling
   if (
     !StringPrototypeStartsWith(resolvedTarget, resolvedBase + path.sep) &&
     resolvedTarget !== resolvedBase

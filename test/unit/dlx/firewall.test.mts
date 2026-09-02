@@ -163,7 +163,7 @@ describe.sequential('dlx/firewall — checkFirewallPurls HTTP path', () => {
     httpJson.mockResolvedValueOnce({
       alerts: [{ severity: 'critical', type: 'malware' }],
     })
-    const arb = makeArb([{ name: 'evil', version: '2.0.0' }])
+    const arb = makeArb([{ name: 'untrusted', version: '2.0.0' }])
     await expect(check(arb, 'top')).rejects.toThrow(
       /Socket Firewall blocked installation of "top"/,
     )

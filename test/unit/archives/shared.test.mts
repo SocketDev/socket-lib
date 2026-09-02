@@ -95,11 +95,11 @@ describe('validatePathWithinBase', () => {
   })
 
   it('rejects a sibling directory sharing the base as a prefix', () => {
-    // The `/base/dir` vs `/base/dir-evil` case: a bare startsWith without the
+    // The `/base/dir` vs `/base/dir-sibling` case: a bare startsWith without the
     // separator would let the sibling through.
     const base = path.join(tmpDir(), 'dir')
     expect(() =>
-      validatePathWithinBase(`${base}-evil/file.txt`, base, 'file.txt'),
+      validatePathWithinBase(`${base}-untrusted/file.txt`, base, 'file.txt'),
     ).toThrow(/Path traversal attempt detected/)
   })
 
@@ -110,9 +110,9 @@ describe('validatePathWithinBase', () => {
       validatePathWithinBase(
         path.join(base, '..', 'escaped.txt'),
         base,
-        'evil-entry.txt',
+        'untrusted-entry.txt',
       ),
-    ).toThrow(/evil-entry\.txt/)
+    ).toThrow(/untrusted-entry\.txt/)
   })
 
   it('resolves relative inputs before comparing', () => {

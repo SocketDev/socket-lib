@@ -47,7 +47,7 @@ export function getNodeFs(): typeof NodeFs {
 // IS_NODE-gated module (undefined in a browser, where the browser field stubs
 // `fs` to false). Node's fs sync methods are standalone functions (no `this`
 // binding needed — verified), so a plain member read freezes the reference:
-// unlike `getNodeFs().existsSync`, a later `nodeFs.existsSync = evil` cannot
+// unlike `getNodeFs().existsSync`, a later `nodeFs.existsSync = tampered` cannot
 // redirect these — the method-level twin of the object snapshot. Frozen refs
 // are NOT spy-able — use `getNodeFs()` for the test injection path; reach for these
 // only on a hot path that wants tamper-resistance. Exported as direct consts
