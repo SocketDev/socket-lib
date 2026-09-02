@@ -1,8 +1,8 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 660 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 665 subpath exports, grouped by namespace.
 
-Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
+Import any namespace by its subpath, e.g. `import { callAiHttpModel } from '@socketsecurity/lib/ai/http'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
 ## Top-level
 
@@ -12,7 +12,9 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 ## ai/
 
 - [@socketsecurity/lib/ai/advisor](./dist/ai/advisor.d.ts)
-- [@socketsecurity/lib/ai/agent-context](./dist/ai/agent-context.d.ts)
+- [@socketsecurity/lib/ai/agent/context](./dist/ai/agent/context.d.ts)
+- [@socketsecurity/lib/ai/agent/detect](./dist/ai/agent/detect.d.ts)
+- [@socketsecurity/lib/ai/agent/paths](./dist/ai/agent/paths.d.ts)
 - [@socketsecurity/lib/ai/assist](./dist/ai/assist.d.ts)
 - [@socketsecurity/lib/ai/backends](./dist/ai/backends.d.ts)
 - [@socketsecurity/lib/ai/billing-context](./dist/ai/billing-context.d.ts)
@@ -165,6 +167,8 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/eco/npm/constants/package-default-node-range](./dist/eco/npm/constants/package-default-node-range.d.ts)
 - [@socketsecurity/lib/eco/npm/constants/package-managers](./dist/eco/npm/constants/package-managers.d.ts)
 - [@socketsecurity/lib/eco/npm/manifest-format](./dist/eco/npm/manifest-format.d.ts)
+- [@socketsecurity/lib/eco/npm/meta](./dist/eco/npm/meta/node.d.ts)
+- [@socketsecurity/lib/eco/npm/meta-cache](./dist/eco/npm/meta-cache/node.d.ts)
 - [@socketsecurity/lib/eco/npm/meta-cache/browser](./dist/eco/npm/meta-cache/browser.d.ts)
 - [@socketsecurity/lib/eco/npm/meta-cache/node](./dist/eco/npm/meta-cache/node.d.ts)
 - [@socketsecurity/lib/eco/npm/meta-slice](./dist/eco/npm/meta-slice.d.ts)
@@ -201,6 +205,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/eco/npm/registry/stage](./dist/eco/npm/registry/stage.d.ts)
 - [@socketsecurity/lib/eco/npm/registry/stage-actions](./dist/eco/npm/registry/stage-actions.d.ts)
 - [@socketsecurity/lib/eco/npm/registry/stage-tarball](./dist/eco/npm/registry/stage-tarball.d.ts)
+- [@socketsecurity/lib/eco/npm/registry/tarball](./dist/eco/npm/registry/tarball/node.d.ts)
 - [@socketsecurity/lib/eco/npm/registry/tarball/browser](./dist/eco/npm/registry/tarball/browser.d.ts)
 - [@socketsecurity/lib/eco/npm/registry/tarball/node](./dist/eco/npm/registry/tarball/node.d.ts)
 - [@socketsecurity/lib/eco/npm/registry/team](./dist/eco/npm/registry/team.d.ts)
@@ -535,14 +540,14 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/node/crypto](./dist/node/crypto.d.ts)
 - [@socketsecurity/lib/node/events](./dist/node/events.d.ts)
 - [@socketsecurity/lib/node/fs](./dist/node/fs.d.ts)
-- [@socketsecurity/lib/node/fs-promises](./dist/node/fs-promises.d.ts)
+- [@socketsecurity/lib/node/fs/promises](./dist/node/fs/promises.d.ts)
 - [@socketsecurity/lib/node/http](./dist/node/http.d.ts)
 - [@socketsecurity/lib/node/https](./dist/node/https.d.ts)
 - [@socketsecurity/lib/node/module](./dist/node/module.d.ts)
 - [@socketsecurity/lib/node/os](./dist/node/os.d.ts)
 - [@socketsecurity/lib/node/path](./dist/node/path.d.ts)
 - [@socketsecurity/lib/node/process](./dist/node/process.d.ts)
-- [@socketsecurity/lib/node/timers-promises](./dist/node/timers-promises.d.ts)
+- [@socketsecurity/lib/node/timers/promises](./dist/node/timers/promises.d.ts)
 - [@socketsecurity/lib/node/url](./dist/node/url.d.ts)
 - [@socketsecurity/lib/node/util](./dist/node/util.d.ts)
 
