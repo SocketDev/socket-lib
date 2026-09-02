@@ -6,7 +6,15 @@
   "buildStubs": {
     "keepExposed": [
       {
-        "leaf": "ai/agent-context",
+        "leaf": "ai/agent/context",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "ai/agent/detect",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "ai/agent/paths",
         "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
       },
       {
@@ -236,6 +244,7 @@
         "env/runtimes",
         "events/exit/signals",
         "exe/argv/meta",
+        "exe/argv/parse-args-string",
         "exe/exec",
         "exe/path/find",
         "exe/sea/detect",
