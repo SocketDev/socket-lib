@@ -32,15 +32,21 @@ export interface AgentCost {
 // `"prompt_tokens"`/`"completion_tokens"`). Matched loosely (any surrounding
 // keys, either naming) since the exact shape drifts across CLI versions:
 // capture group 1 is the input-side count, group 2 the output-side count.
+// Every run is bounded: an unbounded `\s*` before a required `:` and a lazy
+// `[^{}]*?` before a required key both rescan from each start position on a
+// long line (CodeQL js/polynomial-redos). JSON whitespace is a byte or two, a
+// token count is under 20 digits, and the gap between the two keys of one
+// usage object is far under 512.
 const JSON_USAGE_FORWARD_RE =
-  /"(?:input_tokens|prompt_tokens)"\s*:\s*(\d+)[^{}]*?"(?:completion_tokens|output_tokens)"\s*:\s*(\d+)/i
+  /"(?:input_tokens|prompt_tokens)"\s{0,8}:\s{0,8}(\d{1,20})[^{}]{0,512}?"(?:completion_tokens|output_tokens)"\s{0,8}:\s{0,8}(\d{1,20})/i
 // Same object, reversed key order: group 1 is output-side, group 2 input-side.
 const JSON_USAGE_REVERSED_RE =
-  /"(?:completion_tokens|output_tokens)"\s*:\s*(\d+)[^{}]*?"(?:input_tokens|prompt_tokens)"\s*:\s*(\d+)/i
-const JSON_TOTAL_TOKENS_RE = /"total_tokens"\s*:\s*(\d+)/i
+  /"(?:completion_tokens|output_tokens)"\s{0,8}:\s{0,8}(\d{1,20})[^{}]{0,512}?"(?:input_tokens|prompt_tokens)"\s{0,8}:\s{0,8}(\d{1,20})/i
+const JSON_TOTAL_TOKENS_RE = /"total_tokens"\s{0,8}:\s{0,8}(\d{1,20})/i
 // A `costUsd` / `cost_usd` / `total_cost_usd` key in either naming style,
 // capturing the dollar amount that follows.
-const JSON_COST_RE = /"(?:costUsd|cost_usd|total_cost_usd)"\s*:\s*([\d.]+)/i
+const JSON_COST_RE =
+  /"(?:costUsd|cost_usd|total_cost_usd)"\s{0,8}:\s{0,8}([\d.]{1,40})/i
 
 // Text-footer fallbacks — a line like "Total cost: $0.0123" or "input tokens:
 // 1,234". Tolerant of a "total "/"in"/"out" prefix and comma-separated

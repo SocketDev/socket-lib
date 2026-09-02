@@ -24,6 +24,7 @@
 import { joinOr } from '../../arrays/join.mjs'
 import { arrayToSorted } from '../../polyfills/array.mjs'
 import { ErrorCtor } from '../error.mjs'
+import { StringPrototypeSlice } from '../string.mjs'
 import { getNodeFs } from '../../node/fs.mjs'
 import { getNodePath } from '../../node/path.mjs'
 
@@ -432,13 +433,39 @@ export function resolveSocketLibPrimordials(
   )
 }
 
+// Remove every `/* … */` block, walking the string once.
+//
+// The regex form is `/\/\*[\s\S]*?\*\//g`: a lazy body scan up to a required
+// closing delimiter. On input that opens a block and never closes it, the
+// engine retries that scan from every later position, which is quadratic
+// (CodeQL js/polynomial-redos). Two indexOf calls per block read the same shape
+// in one pass, and an unterminated block drops its tail exactly as the lazy
+// match did - by matching nothing.
+export function stripBlockComments(src: string): string {
+  let out = ''
+  let cursor = 0
+  for (;;) {
+    const open = src.indexOf('/*', cursor)
+    if (open === -1) {
+      break
+    }
+    const close = src.indexOf('*/', open + 2)
+    if (close === -1) {
+      break
+    }
+    out += StringPrototypeSlice(src, cursor, open)
+    cursor = close + 2
+  }
+  return cursor === 0 ? src : out + StringPrototypeSlice(src, cursor)
+}
+
 /**
  * Strip `/* … *‍/` block comments and `//` line comments. Comments inside
  * primordials destructures would otherwise leak captured names; stripping first
  * keeps the regex simple.
  */
 export function stripComments(src: string): string {
-  let out = src.replace(/\/\*[\s\S]*?\*\//g, '')
+  let out = stripBlockComments(src)
   // Indent runs are bounded for the same reason: an unbounded `[\t ]*` sitting
   // before the required `//` rescans a long indent from every position.
   out = out.replace(/^[\t ]{0,200}\/\/.*$/gm, '')
