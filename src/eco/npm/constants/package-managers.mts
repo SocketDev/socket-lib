@@ -3,7 +3,7 @@
  *   (npm/pnpm/yarn/bun/vlt/npx), lockfile names, registry URLs, and resolved
  *   npm binary paths used across Socket tooling.
  *   Says manager, never agent: `agent` names an AI coding agent in this
- *   codebase (`ai/agent-context`, `env/agents`), which is why v7 renamed this
+ *   codebase (`ai/agent/detect`, `env/agents`), which is why v7 renamed this
  *   module from `constants/agents`.
  */
 

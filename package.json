@@ -158,10 +158,20 @@
       "types": "./dist/ai/advisor.d.ts",
       "default": "./dist/ai/advisor.js"
     },
-    "./ai/agent-context": {
-      "source": "./src/ai/agent-context.mts",
-      "types": "./dist/ai/agent-context.d.ts",
-      "default": "./dist/ai/agent-context.js"
+    "./ai/agent/context": {
+      "source": "./src/ai/agent/context.mts",
+      "types": "./dist/ai/agent/context.d.ts",
+      "default": "./dist/ai/agent/context.js"
+    },
+    "./ai/agent/detect": {
+      "source": "./src/ai/agent/detect.mts",
+      "types": "./dist/ai/agent/detect.d.ts",
+      "default": "./dist/ai/agent/detect.js"
+    },
+    "./ai/agent/paths": {
+      "source": "./src/ai/agent/paths.mts",
+      "types": "./dist/ai/agent/paths.d.ts",
+      "default": "./dist/ai/agent/paths.js"
     },
     "./ai/assist": {
       "source": "./src/ai/assist.mts",

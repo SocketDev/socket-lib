@@ -1,30 +1,17 @@
 /**
- * @file Tests for ai/agent-context — detectAgent() (which agent is running,
- *   from env) + agentPaths() (per-agent, per-platform config/memory dirs).
- *   Manipulates process.env + mocks platform/home so the cross-platform
- *   branches are exercised deterministically.
+ * @file Tests for ai/agent/paths — agentPaths() resolves the per-agent,
+ *   per-platform config dir plus Claude's memory dir. Manipulates process.env
+ *   so the home and XDG branches are exercised deterministically.
  */
 
 import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { agentPaths, detectAgent } from '../../../src/ai/agent-context.mjs'
+import { agentPaths } from '../../../../src/ai/agent/paths.mjs'
 
 // Snapshot + restore the env keys the module reads.
-const KEYS = [
-  'AI_AGENT',
-  'CLAUDECODE',
-  'CLAUDE_CODE_ENTRYPOINT',
-  'OPENCODE',
-  'CODEX_HOME',
-  'CODEX_SANDBOX',
-  'CODEX_COMPANION_SESSION_ID',
-  'HOME',
-  'USERPROFILE',
-  'XDG_CONFIG_HOME',
-  'APPDATA',
-]
+const KEYS = ['CODEX_HOME', 'HOME', 'USERPROFILE', 'XDG_CONFIG_HOME', 'APPDATA']
 let saved: Record<string, string | undefined>
 
 beforeEach(() => {
@@ -34,6 +21,7 @@ beforeEach(() => {
     saved[k] = process.env[k]
     delete process.env[k]
   }
+  process.env['HOME'] = '/home/alice'
 })
 
 afterEach(() => {
@@ -48,53 +36,7 @@ afterEach(() => {
   vi.restoreAllMocks()
 })
 
-describe('detectAgent', () => {
-  it('reads AI_AGENT family prefix (claude-code → claude)', () => {
-    process.env['AI_AGENT'] = 'claude-code_2-1-169_agent'
-    const d = detectAgent()
-    expect(d?.agent).toBe('claude')
-    expect(d?.raw).toBe('claude-code_2-1-169_agent')
-  })
-
-  it('maps codex / opencode / gemini AI_AGENT prefixes', () => {
-    process.env['AI_AGENT'] = 'codex_1.0_agent'
-    expect(detectAgent()?.agent).toBe('codex')
-    process.env['AI_AGENT'] = 'opencode-x'
-    expect(detectAgent()?.agent).toBe('opencode')
-    process.env['AI_AGENT'] = 'gemini-cli'
-    expect(detectAgent()?.agent).toBe('gemini')
-  })
-
-  it('falls back to CLAUDECODE when AI_AGENT is unset', () => {
-    process.env['CLAUDECODE'] = '1'
-    expect(detectAgent()?.agent).toBe('claude')
-  })
-
-  it('falls back to OPENCODE / codex markers', () => {
-    process.env['OPENCODE'] = '1'
-    expect(detectAgent()?.agent).toBe('opencode')
-    delete process.env['OPENCODE']
-    process.env['CODEX_HOME'] = '/example/.codex'
-    expect(detectAgent()?.agent).toBe('codex')
-  })
-
-  it('does NOT treat the codex-plugin companion var as codex-running', () => {
-    // CODEX_COMPANION_SESSION_ID is set even under Claude by the codex
-    // plugin, so it must not be a codex signal.
-    process.env['CODEX_COMPANION_SESSION_ID'] = 'abc'
-    expect(detectAgent()).toBeUndefined()
-  })
-
-  it('returns undefined in a plain shell (no agent signal)', () => {
-    expect(detectAgent()).toBeUndefined()
-  })
-})
-
 describe('agentPaths', () => {
-  beforeEach(() => {
-    process.env['HOME'] = '/home/alice'
-  })
-
   it('claude: ~/.claude config; memory keyed by cwd slug', () => {
     const p = agentPaths('claude', {
       cwd: '/Users/<user>/projects/socket-btm',
@@ -143,6 +85,13 @@ describe('agentPaths', () => {
       path.join('/home/alice', '.gemini'),
     )
     expect(agentPaths('gemini')?.memoryDir).toBeUndefined()
+  })
+
+  it('every agent reports the agent it was asked about', () => {
+    expect(agentPaths('claude')?.agent).toBe('claude')
+    expect(agentPaths('codex')?.agent).toBe('codex')
+    expect(agentPaths('opencode')?.agent).toBe('opencode')
+    expect(agentPaths('gemini')?.agent).toBe('gemini')
   })
 
   it('USERPROFILE is the home fallback (Windows-style, no HOME)', () => {
