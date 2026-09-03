@@ -146,7 +146,7 @@ async function run() {
       positionals.push(a)
     }
   }
-  const [url, integrityArg, destDir, binName] = positionals
+  const { 0: url, 1: integrityArg, 2: destDir, 3: binName } = positionals
 
   if (!url || !integrityArg || !destDir) {
     logger.fail(

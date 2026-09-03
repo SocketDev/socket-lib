@@ -6,7 +6,7 @@
 
 # <fleet>
 # Cascaded from socket-wheelhouse/template/base/. Don't edit locally —
-# edit upstream and re-cascade via sync-scaffolding. Marked
+# edit upstream and re-cascade via commit-cascade. Marked
 # linguist-generated so GitHub PR diffs collapse them by default.
 .claude/agents/fleet linguist-generated=true
 .claude/commands/fleet linguist-generated=true

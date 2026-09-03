@@ -263,6 +263,164 @@ export declare function fetchBundleSource(config: {
   readonly tmp: string;
 }): Promise<FetchedBundle>;
 //#endregion
+//#region scripts/repo/gen/bootstrap/src/fleet-pack-manifest.d.mts
+export declare function normalizeManifestEntryPath(entry: {
+  path: string;
+}): string;
+export interface FleetFileManifest {
+  /**
+   * Hook payloads gated on a member capability (stamped from each hook's
+   * `// @capability <name>` header at pack build time): placed only when the
+   * member declares it.
+   */
+  capabilityScopedFiles?: ReadonlyArray<{
+    capability: string;
+    files: readonly string[];
+  }> | undefined;
+  files: Record<string, string>;
+  movedPaths?: ReadonlyArray<{
+    from: string;
+    to: string;
+  }> | undefined;
+  removedPaths?: readonly string[] | undefined;
+  segments?: ReadonlyArray<{
+    path: string;
+  }> | undefined;
+  settingsSegment?: {
+    path: string;
+  } | undefined;
+  shapeScopedFiles?: ReadonlyArray<{
+    files: readonly string[];
+    ship: ReadonlyArray<{
+      from: string;
+      types?: readonly string[] | undefined;
+    }>;
+  }> | undefined;
+}
+/**
+ * Drop the manifest's shape-scoped files that the member's build shape does
+ * not ship, so every downstream consumer (placement, prune, ignore refresh,
+ * applied-files record) sees one consistent, member-effective file set. The
+ * matcher mirrors releaseChecksumFiles in commit-cascade/repo-shape.mts;
+ * the group DATA is stamped by make-publish-bundle from that one source.
+ * Fail-open: no stamped groups, or an unknown shape (absent/malformed member
+ * config), returns the manifest untouched — a config problem must never
+ * withhold payload.
+ */
+/**
+ * Drop the manifest's capability-scoped hook payloads the member does not
+ * declare, so a `@capability cargo` hook never lands in a repo with no cargo
+ * capability — the pack-side twin of the cascade's dirMirrorSkipPredicate
+ * capability gate. Fails OPEN on an unknown capabilities read (absent or
+ * malformed settings file): a config problem must never withhold payload.
+ * The prune sees the same filtered set, so a wrongly placed copy heals on
+ * the next fetch.
+ */
+export declare function filterManifestForCapabilities<T extends FleetFileManifest>(manifest: T, capabilities: readonly string[] | undefined): T;
+export declare function filterManifestForShape<T extends FleetFileManifest>(manifest: T, shape: {
+  from: string | undefined;
+  type: string | undefined;
+}): T;
+/**
+ * Compute the gitignore entries for thin mode — the wholly-fleet files that the
+ * download/fetch action supplies, so they need not be git-tracked. Hybrid paths
+ * (manifest.segments — CLAUDE.md, pnpm-workspace.yaml, …) are merged per repo
+ * and stay tracked, so they're excluded. The DESIGNATED sentinel-splice files
+ * are hybrids too — they carry a member tail below the fleet-canonical end
+ * sentinel that only the member's git history preserves; untracking one turns
+ * the next fresh clone into a tail wipe.
+ *
+ * The GitHub CI surface (`isAlwaysTrackedGitHubSurface` —
+ * `.github/workflows/**` and `.github/actions/fleet/**`) is HARD-excluded too:
+ * GitHub reads a workflow's cron and a `uses: ./.github/actions/...` composite
+ * from the committed default-branch tree BEFORE any fetch step runs, so
+ * untracking one breaks CI outright. The bundle still ships them; they reach
+ * members in the cascade COMMIT, tracked.
+ *
+ * EVERY entry is EXPLICIT — one line per bundle file, never a blanket
+ * `…/fleet/` dir entry. A dir blanket also swallows any future non-bundle
+ * file that lands beside the payload, hiding it from git entirely; the
+ * explicit list ignores exactly what the bundle supplies and nothing else.
+ * The sync-prune is manifest-scoped too — see pruneStaleFleetFiles.
+ */
+export declare function fleetPackOwnedPaths(manifest: FleetFileManifest): string[];
+/**
+ * The lines currently inside a target's fleet-marked gitignore block, or an
+ * empty array when the target has no block. Used to carry the cascade's rules
+ * through the thin-mode splice instead of replacing them.
+ */
+export declare function extractFleetBlockLines(target: string): string[];
+/**
+ * Non-Claude harness surfaces the fleet GENERATES, never tracks.
+ *
+ * Each is a projection of a Claude-side source: `AGENTS.md` and the rule dirs
+ * point at CLAUDE.md, `opencode.json` / `.codex/` project `.mcp.json`, and
+ * `.agents/skills/` flattens `.claude/skills/` for the hosts that discover
+ * skills one level deep. Regenerating them is cheap; tracking them means every
+ * member carries a copy that drifts and conflicts.
+ *
+ * Listed here so a hydrate ignores AND untracks the whole set. Before this,
+ * only `.agents/` was named, so a member that had committed `AGENTS.md` or
+ * `.codex/` kept it tracked forever and the generator fought git on every run.
+ */
+export declare const HARNESS_ALIAS_PATHS: readonly string[];
+/**
+ * Strip a pre-marker untrack block: its header plus the run of path lines under
+ * it, up to the next comment or end of file.
+ *
+ * Without markers there is nothing for {@link splicePackBlock} to replace, so
+ * such a block is never regenerated and never pruned. Its entries then outlive
+ * their reason: measured on ultrathink, a 2498-line legacy block still ignored
+ * `.config/repo/vitest.config.mts` long after that file was reclassified from
+ * bundle payload to a cascaded conditional-group file, so the member could not
+ * track it and CI's fresh clone had no copy at all. Removing the whole run is
+ * safe because the block is wholly tool-written — every line is an exact path,
+ * so a hand-authored glob or directory ignore never lives inside it — and
+ * anything the CURRENT manifest still ships is re-emitted into the managed
+ * region on the same hydrate.
+ */
+export declare function stripLegacyPackBlock(target: string): string;
+/**
+ * Strip the old refresh's per-file untrack entries from INSIDE the `<fleet>`
+ * region — they live in the fetcher-owned `<fleet-pack>` region now. The
+ * cascade's own rules in the region are preserved untouched; a file with no
+ * fleet region is returned unchanged. One-time migration shape: once a member
+ * has been cleaned (or its cascade rewrote the block), this is a no-op.
+ */
+export declare function stripLegacyUntrackEntriesFromFleetBlock(target: string): string;
+/**
+ * Write the fetcher-owned `<fleet-pack>` `.gitignore` region: `.agents/` (the
+ * regenerated agent mirror — dead weight in a thin consumer; the fetch
+ * repopulates it) plus the wholly-fleet bundle untrack paths (see
+ * fleetPackOwnedPaths). The region is REGENERATED from the manifest on every
+ * run — replaced whole, so a stale entry from an earlier pack is pruned
+ * instead of carried forward (the old append-only refresh accreted every
+ * prior line forever). Hand-added ignores belong outside the markers and are
+ * untouched, as is the cascade's `<fleet>` region — the two writers own
+ * disjoint regions, so neither can discard the other's rules. The dep-0
+ * bootstrap (`scripts/repo/bootstrap/`) is NOT listed: it ships via the
+ * manual cascade, never the release bundle, so it never enters this untrack
+ * set and stays tracked by default.
+ *
+ * This is the HALF that is safe to run unconditionally for a thin consumer. It
+ * only edits `.gitignore`; it never touches the git index, so a member whose
+ * payload is still tracked keeps every file it has committed (gitignore has no
+ * effect on tracked paths). The index-mutating half lives in
+ * untrackFleetPackPaths and stays behind an explicit `--thin`.
+ */
+export declare function refreshFleetPackIgnores(config: UntrackFleetPackConfig): void;
+/**
+ * Apply thin mode: refresh the gitignore block (refreshFleetPackIgnores), then
+ * untrack those paths from git so the fetch action repopulates them going
+ * forward. The `git rm --cached` is the CONVERSION step and is destructive —
+ * it drops files from the index — so it stays behind an explicit `--thin` and
+ * is never inferred from repo state. socket-vscode is the case that forces the
+ * distinction: it carries a pinned `bundle.ref` AND 81 still-tracked payload
+ * files, so inferring the untrack from the pin alone would silently delete
+ * them from its index on the next ordinary hydrate.
+ */
+export declare function untrackFleetPackPaths(config: UntrackFleetPackConfig): void;
+//#endregion
 //#region scripts/repo/gen/bootstrap/src/ghcr-fetch.d.mts
 export declare const GHCR_HOST = "ghcr.io";
 export declare const MANIFEST_ACCEPT: string;
@@ -460,8 +618,26 @@ export interface InstallFilesResult {
    * --refresh-tracked).
    */
   refreshedTracked: string[];
+  /**
+   * Targets already holding the exact bytes, so no write happened. This runs
+   * from the pnpm `prepare` lifecycle on every `pnpm run`, so a high
+   * `unchanged` with `placed` near zero is the healthy steady state.
+   */
+  unchanged: number;
 }
-export declare function installFiles(filesDir: string, dest: string, manifest: BundleManifest, options?: InstallFilesOptions): InstallFilesResult;
+/**
+ * Whether the target already holds the exact bytes a placement would write.
+ *
+ * Size first, because a differing size settles it without reading either file.
+ * WHY skip at all: this runs from the pnpm `prepare` lifecycle, so it fires on
+ * EVERY `pnpm run <anything>`, and an unconditional copy rewrote all ~3.5k
+ * mirrors each time. That churns every mtime and leaves a window where a
+ * concurrent reader sees a half-rewritten tree — measured as spurious failures
+ * in tests that shell out to `git status` while a second pnpm invocation was
+ * mid-prepare.
+ */
+export declare function hasIdenticalBytes(source: string, target: string): boolean;
+export declare function installFiles(filesDir: string, dest: string, manifest: BundleManifest, options?: InstallFilesOptions | undefined): InstallFilesResult;
 /**
  * Materialize the fleet mirrors in a PRODUCER checkout from its own
  * `template/base`, rather than from a fetched bundle.
@@ -481,7 +657,7 @@ export declare function installFiles(filesDir: string, dest: string, manifest: B
  * Returns undefined when `template/base` is absent, which is every consumer:
  * the caller then knows this checkout is not a producer and fetches instead.
  */
-export declare function materializeFromLocalTemplate(dest: string, manifest: BundleManifest, options?: InstallFilesOptions): InstallFilesResult | undefined;
+export declare function materializeFromLocalTemplate(dest: string, manifest: BundleManifest, options?: InstallFilesOptions | undefined): InstallFilesResult | undefined;
 /**
  * Untrack the bundle's GENERATED build outputs (`manifest.generatedPaths`)
  * from the git index after placement. The bundle SHIPS these files — placement
@@ -530,162 +706,6 @@ export declare const FLEET_STATUS_SCRIPT = "node scripts/repo/bootstrap/fleet.mj
  * if package.json is absent. (Dep-0 file — raw JSON, not EditablePackageJson.)
  */
 export declare function wirePackageJson(dest: string): void;
-export declare function normalizeManifestEntryPath(entry: {
-  path: string;
-}): string;
-export interface FleetFileManifest {
-  /**
-   * Hook payloads gated on a member capability (stamped from each hook's
-   * `// @capability <name>` header at pack build time): placed only when the
-   * member declares it.
-   */
-  capabilityScopedFiles?: ReadonlyArray<{
-    capability: string;
-    files: readonly string[];
-  }> | undefined;
-  files: Record<string, string>;
-  movedPaths?: ReadonlyArray<{
-    from: string;
-    to: string;
-  }> | undefined;
-  removedPaths?: readonly string[] | undefined;
-  segments?: ReadonlyArray<{
-    path: string;
-  }> | undefined;
-  settingsSegment?: {
-    path: string;
-  } | undefined;
-  shapeScopedFiles?: ReadonlyArray<{
-    files: readonly string[];
-    ship: ReadonlyArray<{
-      from: string;
-      types?: readonly string[] | undefined;
-    }>;
-  }> | undefined;
-}
-/**
- * Drop the manifest's shape-scoped files that the member's build shape does
- * not ship, so every downstream consumer (placement, prune, ignore refresh,
- * applied-files record) sees one consistent, member-effective file set. The
- * matcher mirrors releaseChecksumFiles in sync-scaffolding/repo-shape.mts;
- * the group DATA is stamped by make-publish-bundle from that one source.
- * Fail-open: no stamped groups, or an unknown shape (absent/malformed member
- * config), returns the manifest untouched — a config problem must never
- * withhold payload.
- */
-/**
- * Drop the manifest's capability-scoped hook payloads the member does not
- * declare, so a `@capability cargo` hook never lands in a repo with no cargo
- * capability — the pack-side twin of the cascade's dirMirrorSkipPredicate
- * capability gate. Fails OPEN on an unknown capabilities read (absent or
- * malformed settings file): a config problem must never withhold payload.
- * The prune sees the same filtered set, so a wrongly placed copy heals on
- * the next fetch.
- */
-export declare function filterManifestForCapabilities<T extends FleetFileManifest>(manifest: T, capabilities: readonly string[] | undefined): T;
-export declare function filterManifestForShape<T extends FleetFileManifest>(manifest: T, shape: {
-  from: string | undefined;
-  type: string | undefined;
-}): T;
-/**
- * Compute the gitignore entries for thin mode — the wholly-fleet files that the
- * download/fetch action supplies, so they need not be git-tracked. Hybrid paths
- * (manifest.segments — CLAUDE.md, pnpm-workspace.yaml, …) are merged per repo
- * and stay tracked, so they're excluded. The DESIGNATED sentinel-splice files
- * are hybrids too — they carry a member tail below the fleet-canonical end
- * sentinel that only the member's git history preserves; untracking one turns
- * the next fresh clone into a tail wipe.
- *
- * The GitHub CI surface (`isAlwaysTrackedGitHubSurface` —
- * `.github/workflows/**` and `.github/actions/fleet/**`) is HARD-excluded too:
- * GitHub reads a workflow's cron and a `uses: ./.github/actions/...` composite
- * from the committed default-branch tree BEFORE any fetch step runs, so
- * untracking one breaks CI outright. The bundle still ships them; they reach
- * members in the cascade COMMIT, tracked.
- *
- * EVERY entry is EXPLICIT — one line per bundle file, never a blanket
- * `…/fleet/` dir entry. A dir blanket also swallows any future non-bundle
- * file that lands beside the payload, hiding it from git entirely; the
- * explicit list ignores exactly what the bundle supplies and nothing else.
- * The sync-prune is manifest-scoped too — see pruneStaleFleetFiles.
- */
-export declare function fleetPackOwnedPaths(manifest: FleetFileManifest): string[];
-/**
- * The lines currently inside a target's fleet-marked gitignore block, or an
- * empty array when the target has no block. Used to carry the cascade's rules
- * through the thin-mode splice instead of replacing them.
- */
-export declare function extractFleetBlockLines(target: string): string[];
-/**
- * Non-Claude harness surfaces the fleet GENERATES, never tracks.
- *
- * Each is a projection of a Claude-side source: `AGENTS.md` and the rule dirs
- * point at CLAUDE.md, `opencode.json` / `.codex/` project `.mcp.json`, and
- * `.agents/skills/` flattens `.claude/skills/` for the hosts that discover
- * skills one level deep. Regenerating them is cheap; tracking them means every
- * member carries a copy that drifts and conflicts.
- *
- * Listed here so a hydrate ignores AND untracks the whole set. Before this,
- * only `.agents/` was named, so a member that had committed `AGENTS.md` or
- * `.codex/` kept it tracked forever and the generator fought git on every run.
- */
-export declare const HARNESS_ALIAS_PATHS: readonly string[];
-/**
- * Strip a pre-marker untrack block: its header plus the run of path lines under
- * it, up to the next comment or end of file.
- *
- * Without markers there is nothing for {@link splicePackBlock} to replace, so
- * such a block is never regenerated and never pruned. Its entries then outlive
- * their reason: measured on ultrathink, a 2498-line legacy block still ignored
- * `.config/repo/vitest.config.mts` long after that file was reclassified from
- * bundle payload to a cascaded conditional-group file, so the member could not
- * track it and CI's fresh clone had no copy at all. Removing the whole run is
- * safe because the block is wholly tool-written — every line is an exact path,
- * so a hand-authored glob or directory ignore never lives inside it — and
- * anything the CURRENT manifest still ships is re-emitted into the managed
- * region on the same hydrate.
- */
-export declare function stripLegacyPackBlock(target: string): string;
-/**
- * Strip the old refresh's per-file untrack entries from INSIDE the `<fleet>`
- * region — they live in the fetcher-owned `<fleet-pack>` region now. The
- * cascade's own rules in the region are preserved untouched; a file with no
- * fleet region is returned unchanged. One-time migration shape: once a member
- * has been cleaned (or its cascade rewrote the block), this is a no-op.
- */
-export declare function stripLegacyUntrackEntriesFromFleetBlock(target: string): string;
-/**
- * Write the fetcher-owned `<fleet-pack>` `.gitignore` region: `.agents/` (the
- * regenerated agent mirror — dead weight in a thin consumer; the fetch
- * repopulates it) plus the wholly-fleet bundle untrack paths (see
- * fleetPackOwnedPaths). The region is REGENERATED from the manifest on every
- * run — replaced whole, so a stale entry from an earlier pack is pruned
- * instead of carried forward (the old append-only refresh accreted every
- * prior line forever). Hand-added ignores belong outside the markers and are
- * untouched, as is the cascade's `<fleet>` region — the two writers own
- * disjoint regions, so neither can discard the other's rules. The dep-0
- * bootstrap (`scripts/repo/bootstrap/`) is NOT listed: it ships via the
- * manual cascade, never the release bundle, so it never enters this untrack
- * set and stays tracked by default.
- *
- * This is the HALF that is safe to run unconditionally for a thin consumer. It
- * only edits `.gitignore`; it never touches the git index, so a member whose
- * payload is still tracked keeps every file it has committed (gitignore has no
- * effect on tracked paths). The index-mutating half lives in
- * untrackFleetPackPaths and stays behind an explicit `--thin`.
- */
-export declare function refreshFleetPackIgnores(config: UntrackFleetPackConfig): void;
-/**
- * Apply thin mode: refresh the gitignore block (refreshFleetPackIgnores), then
- * untrack those paths from git so the fetch action repopulates them going
- * forward. The `git rm --cached` is the CONVERSION step and is destructive —
- * it drops files from the index — so it stays behind an explicit `--thin` and
- * is never inferred from repo state. socket-vscode is the case that forces the
- * distinction: it carries a pinned `bundle.ref` AND 81 still-tracked payload
- * files, so inferring the untrack from the pin alone would silently delete
- * them from its index on the next ordinary hydrate.
- */
-export declare function untrackFleetPackPaths(config: UntrackFleetPackConfig): void;
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/lockstep.d.mts
 export type LockStepStateName = 'current' | 'out-of-sync' | 'update-available';
@@ -842,7 +862,7 @@ export declare const ERR_BUNDLE_BEHIND_LOCAL = "ERR_WHEELHOUSE_BUNDLE_BEHIND_LOC
  * That includes an UNREACHABLE pin, which is the normal state after the fleet
  * squashes its default branch. The cascade-side twin
  * (`isPinnedBundleBehindLocalTemplate` in
- * scripts/repo/sync-scaffolding/fleet-pack-channel.mts) reads the same state as
+ * scripts/repo/commit-cascade/fleet-pack-channel.mts) reads the same state as
  * BEHIND, and the split is deliberate: there, being wrong means delivering a
  * payload that was already current, and here it means raising
  * ERR_WHEELHOUSE_BUNDLE_BEHIND_LOCAL_TEMPLATE and failing a member's install.
