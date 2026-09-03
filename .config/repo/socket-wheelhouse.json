@@ -150,6 +150,10 @@
         "reason": "readProcessTree and the self-nesting check. Waits on socket-wheelhouse's stale-process-sweeper replacing its private copy with this one."
       },
       {
+        "leaf": "strings/lines",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
         "leaf": "yaml/edit",
         "reason": "EditableYaml. Waits on the fleet migration of regex-based pnpm-workspace.yaml edits to a comment-preserving editor."
       },
@@ -394,7 +398,6 @@
         "stdio/progress",
         "stdio/stderr",
         "stdio/stdout",
-        "strings/lines",
         "strings/search",
         "temporal/instant",
         "temporal/now",
@@ -459,7 +462,9 @@
   },
   "coverage": {
     "exclude": {
-      "add": ["src/perf/**"]
+      "add": [
+        "src/perf/**"
+      ]
     }
   },
   "lint": {
