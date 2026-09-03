@@ -537,6 +537,11 @@
       "types": "./dist/constants/typescript.d.ts",
       "default": "./dist/constants/typescript.js"
     },
+    "./constants/units": {
+      "source": "./src/constants/units.mts",
+      "types": "./dist/constants/units.d.ts",
+      "default": "./dist/constants/units.js"
+    },
     "./cover/code": {
       "source": "./src/cover/code.mts",
       "types": "./dist/cover/code.d.ts",
