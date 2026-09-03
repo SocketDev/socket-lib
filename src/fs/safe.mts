@@ -3,10 +3,13 @@
  *   destructive operations behind an "allowed directories" allow-list (temp
  *   dir, cacache dir, ~/.socket). A path outside those either names its own
  *   root via `allowedDirs` or `cwd`, which keeps containment enforced against
- *   the named tree, or passes `force: true`, which drops the boundary
- *   altogether. The mkdir helpers default to `recursive: true` and swallow
- *   `EEXIST` so concurrent callers don't race-condition each other. A path
- *   inside an allowed tree needs no `force`, in EITHER spelling. The allow-list
+ *   the named tree, or calls `forceDelete`, which drops the boundary
+ *   altogether. Three names, widest to narrowest: `forceDelete` ignores
+ *   location, `safeDelete` widens by location, `strictDelete` refuses a
+ *   root-resolving target outright. Forcing is a NAME rather than an option so
+ *   a linter can match it at the call site and a reader can grep it. The mkdir
+ *   helpers default to `recursive: true` and swallow `EEXIST` so concurrent
+ *   callers don't race-condition each other. The allow-list
  *   carries each directory twice — as `path.resolve` returns it and as its real
  *   path — because a symlinked component makes those differ and a caller may
  *   hold either. macOS is the case in practice: `os.tmpdir()` reports
@@ -18,6 +21,13 @@
  *   plain string comparisons thereafter. The target path is deliberately NOT
  *   resolved per call: that would put a syscall on every delete and need a
  *   cache keyed by caller input, which is the kind that grows without bound.
+ *
+ * @warning `forceDelete`/`forceDeleteSync` drop the boundary that stands
+ *   between a delete and a working checkout. `socket/no-force-delete` flags
+ *   every call, so clearing it takes an explicit escape comment. AI agents:
+ *   ask the operator before reaching for either, and name what you intend to
+ *   delete - `safeDelete` with `allowedDirs`, or `strictDelete`, is almost
+ *   always the right answer.
  */
 
 import { isArray } from '../arrays/predicates.mjs'
@@ -59,6 +69,19 @@ let delModule:
   | { deleteAsync: typeof deleteAsyncType; deleteSync: typeof deleteSyncType }
   | undefined
 
+/**
+ * How a delete runs, as opposed to what it deletes.
+ *
+ * Separate from `RemoveOptions` on purpose: `forced` is not something a caller
+ * of `safeDelete` may pass, it is what `forceDelete` hands the shared runner.
+ */
+export interface DeleteRunOptions {
+  /**
+   * Skip the location check entirely. Set only by `forceDelete`.
+   */
+  readonly forced?: boolean | undefined
+}
+
 export function getDel() {
   if (delModule === undefined) {
     delModule = /*@__PURE__*/ require('../external/del')
@@ -66,48 +89,10 @@ export function getDel() {
   return delModule!
 }
 
-/**
- * Safely delete a file or directory asynchronously with built-in protections.
- *
- * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer
- * deletion with these safety features:
- *
- * - By default, prevents deleting the current working directory (cwd) and above
- * - Allows deleting descendant paths within cwd without the force option
- * - Automatically uses force: true for temp directory, cacache, and ~/.socket
- *   subdirectories
- * - Protects against accidental deletion of parent directories via `../` paths
- *
- * @example
- *   ;```ts
- *   // Delete files within cwd (safe by default)
- *   await safeDelete('./build')
- *   await safeDelete('./dist')
- *
- *   // Delete with glob patterns
- *   await safeDelete(['./temp/**', '!./temp/keep.txt'])
- *
- *   // Delete with custom retry settings
- *   await safeDelete('./flaky-dir', { maxRetries: 5, retryDelay: 500 })
- *
- *   // Force delete cwd or above (requires explicit force: true)
- *   await safeDelete('../parent-dir', { force: true })
- *   ```
- *
- * @param filepath - Path or array of paths to delete (supports glob patterns)
- * @param options - Deletion options including force, retries, and recursion.
- * @param options.allowedDirs - Extra roots the target may sit inside, for this
- *   call only. Names a sibling tree the caller owns without lifting the
- *   boundary; prefer it over `force`.
- * @param options.force - Set to true to allow deleting cwd and above (use with
- *   caution)
- *
- * @throws {Error} When attempting to delete protected paths without force
- *   option.
- */
-export async function safeDelete(
+export async function runDelete(
   filepath: PathLike | PathLike[],
-  options?: RemoveOptions | undefined,
+  options: RemoveOptions | undefined,
+  runOptions?: DeleteRunOptions | undefined,
 ) {
   // deleteAsync is lazily loaded via getDel()
   const opts = { __proto__: null, ...options } as RemoveOptions
@@ -115,21 +100,16 @@ export async function safeDelete(
     ? filepath.map(pathLikeToString)
     : [pathLikeToString(filepath)]
 
-  // `force` is OPT-IN. It defaults to false so del's own guard stands: a
-  // descendant of cwd deletes freely, cwd itself and anything above it throws.
-  // The allowedDirs branch below then re-enables force for the three trees a
-  // caller can never harm by clearing - the OS temp dir, the cacache, and the
-  // Socket user dir - so a scratch-dir cleanup needs no flag either.
-  //
-  // This defaulted to TRUE, which disabled the guard for every caller that
-  // passed no options, so `safeDelete(dirAboveCwd)` deleted it without a word.
-  // Measured against a real checkout.
-  /* c8 ignore start */
-  let shouldForce = opts.force === true
-  if (!shouldForce && areAllPathsInAllowedDirs(patterns, opts.allowedDirs)) {
-    shouldForce = true
-  }
-  /* c8 ignore stop */
+  // LOCATION decides, and nothing else. del's own guard stands: a descendant
+  // of cwd deletes freely, cwd itself and anything above it throws, and the
+  // three trees a caller can never harm by clearing - the OS temp dir, the
+  // cacache, and the Socket user dir - lift it automatically, so a scratch-dir
+  // cleanup needs no flag. A caller who must delete outside all of that calls
+  // `forceDelete`, which is a NAME at the call site rather than a flag inside
+  // an options bag.
+  const shouldForce =
+    runOptions?.forced === true ||
+    areAllPathsInAllowedDirs(patterns, opts.allowedDirs)
 
   const maxRetries = opts.maxRetries ?? defaultRemoveOptions.maxRetries
   const retryDelay = opts.retryDelay ?? defaultRemoveOptions.retryDelay
@@ -155,48 +135,10 @@ export async function safeDelete(
   /* c8 ignore stop */
 }
 
-/**
- * Safely delete a file or directory synchronously with built-in protections.
- *
- * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer
- * deletion with these safety features:
- *
- * - By default, prevents deleting the current working directory (cwd) and above
- * - Allows deleting descendant paths within cwd without the force option
- * - Automatically uses force: true for temp directory, cacache, and ~/.socket
- *   subdirectories
- * - Protects against accidental deletion of parent directories via `../` paths
- *
- * @example
- *   ;```ts
- *   // Delete files within cwd (safe by default)
- *   safeDeleteSync('./build')
- *   safeDeleteSync('./dist')
- *
- *   // Delete with glob patterns
- *   safeDeleteSync(['./temp/**', '!./temp/keep.txt'])
- *
- *   // Delete multiple paths
- *   safeDeleteSync(['./coverage', './reports'])
- *
- *   // Force delete cwd or above (requires explicit force: true)
- *   safeDeleteSync('../parent-dir', { force: true })
- *   ```
- *
- * @param filepath - Path or array of paths to delete (supports glob patterns)
- * @param options - Deletion options including force, retries, and recursion.
- * @param options.allowedDirs - Extra roots the target may sit inside, for this
- *   call only. Names a sibling tree the caller owns without lifting the
- *   boundary; prefer it over `force`.
- * @param options.force - Set to true to allow deleting cwd and above (use with
- *   caution)
- *
- * @throws {Error} When attempting to delete protected paths without force
- *   option.
- */
-export function safeDeleteSync(
+export function runDeleteSync(
   filepath: PathLike | PathLike[],
-  options?: RemoveOptions | undefined,
+  options: RemoveOptions | undefined,
+  runOptions?: DeleteRunOptions | undefined,
 ) {
   // deleteSync is lazily loaded via getDel()
   const opts = { __proto__: null, ...options } as RemoveOptions
@@ -204,21 +146,16 @@ export function safeDeleteSync(
     ? filepath.map(pathLikeToString)
     : [pathLikeToString(filepath)]
 
-  // `force` is OPT-IN. It defaults to false so del's own guard stands: a
-  // descendant of cwd deletes freely, cwd itself and anything above it throws.
-  // The allowedDirs branch below then re-enables force for the three trees a
-  // caller can never harm by clearing - the OS temp dir, the cacache, and the
-  // Socket user dir - so a scratch-dir cleanup needs no flag either.
-  //
-  // This defaulted to TRUE, which disabled the guard for every caller that
-  // passed no options, so `safeDelete(dirAboveCwd)` deleted it without a word.
-  // Measured against a real checkout.
-  /* c8 ignore start */
-  let shouldForce = opts.force === true
-  if (!shouldForce && areAllPathsInAllowedDirs(patterns, opts.allowedDirs)) {
-    shouldForce = true
-  }
-  /* c8 ignore stop */
+  // LOCATION decides, and nothing else. del's own guard stands: a descendant
+  // of cwd deletes freely, cwd itself and anything above it throws, and the
+  // three trees a caller can never harm by clearing - the OS temp dir, the
+  // cacache, and the Socket user dir - lift it automatically, so a scratch-dir
+  // cleanup needs no flag. A caller who must delete outside all of that calls
+  // `forceDelete`, which is a NAME at the call site rather than a flag inside
+  // an options bag.
+  const shouldForce =
+    runOptions?.forced === true ||
+    areAllPathsInAllowedDirs(patterns, opts.allowedDirs)
 
   const maxRetries = opts.maxRetries ?? defaultRemoveOptions.maxRetries
   const retryDelay = opts.retryDelay ?? defaultRemoveOptions.retryDelay
@@ -261,6 +198,93 @@ export function safeDeleteSync(
     throw lastError
   }
   /* c8 ignore stop */
+}
+
+/**
+ * Safely delete a file or directory asynchronously with built-in protections.
+ *
+ * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer
+ * deletion with these safety features:
+ *
+ * - By default, prevents deleting the current working directory (cwd) and above
+ * - Allows deleting descendant paths within cwd without the force option
+ * - Automatically uses force: true for temp directory, cacache, and ~/.socket
+ *   subdirectories
+ * - Protects against accidental deletion of parent directories via `../` paths
+ *
+ * @example
+ *   ;```ts
+ *   // Delete files within cwd (safe by default)
+ *   await safeDelete('./build')
+ *   await safeDelete('./dist')
+ *
+ *   // Delete with glob patterns
+ *   await safeDelete(['./temp/**', '!./temp/keep.txt'])
+ *
+ *   // Delete with custom retry settings
+ *   await safeDelete('./flaky-dir', { maxRetries: 5, retryDelay: 500 })
+ *
+ *   // Delete cwd or above on purpose - a different function, by name
+ *   await forceDelete('../parent-dir')
+ *   ```
+ *
+ * @param filepath - Path or array of paths to delete (supports glob patterns)
+ * @param options - Deletion options including retries and recursion.
+ * @param options.allowedDirs - Extra roots the target may sit inside, for this
+ *   call only. Names a sibling tree the caller owns without lifting the
+ *   boundary; prefer it over reaching for `forceDelete`.
+ *
+ * @throws {Error} When attempting to delete protected paths
+ * option.
+ */
+export async function safeDelete(
+  filepath: PathLike | PathLike[],
+  options?: RemoveOptions | undefined,
+) {
+  await runDelete(filepath, options)
+}
+
+/**
+ * Safely delete a file or directory synchronously with built-in protections.
+ *
+ * Uses [`del`](https://socket.dev/npm/package/del/overview/8.0.1) for safer
+ * deletion with these safety features:
+ *
+ * - By default, prevents deleting the current working directory (cwd) and above
+ * - Allows deleting descendant paths within cwd without the force option
+ * - Automatically uses force: true for temp directory, cacache, and ~/.socket
+ *   subdirectories
+ * - Protects against accidental deletion of parent directories via `../` paths
+ *
+ * @example
+ *   ;```ts
+ *   // Delete files within cwd (safe by default)
+ *   safeDeleteSync('./build')
+ *   safeDeleteSync('./dist')
+ *
+ *   // Delete with glob patterns
+ *   safeDeleteSync(['./temp/**', '!./temp/keep.txt'])
+ *
+ *   // Delete multiple paths
+ *   safeDeleteSync(['./coverage', './reports'])
+ *
+ *   // Delete cwd or above on purpose - a different function, by name
+ *   forceDeleteSync('../parent-dir')
+ *   ```
+ *
+ * @param filepath - Path or array of paths to delete (supports glob patterns)
+ * @param options - Deletion options including retries and recursion.
+ * @param options.allowedDirs - Extra roots the target may sit inside, for this
+ *   call only. Names a sibling tree the caller owns without lifting the
+ *   boundary; prefer it over reaching for `forceDeleteSync`.
+ *
+ * @throws {Error} When attempting to delete protected paths.
+ */
+export function safeDeleteSync(
+  filepath: PathLike | PathLike[],
+  options?: RemoveOptions | undefined,
+) {
+  runDeleteSync(filepath, options)
 }
 
 /**

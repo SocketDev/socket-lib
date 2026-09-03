@@ -224,22 +224,6 @@ export interface RemoveOptions {
    */
   cwd?: string | undefined
   /**
-   * Permit deleting the current working directory or anything above it.
-   *
-   * NOT node's `force`. `fs.rm(p)` means "do not throw when
-   * the path is missing"; this one lifts a SAFETY boundary, and the two are
-   * easy to confuse because they share a name. Missing paths are already
-   * tolerated here regardless, since the pattern simply matches nothing.
-   *
-   * Off by default. Descendants of the cwd delete without it, and the OS temp
-   * dir, the cacache, and the Socket user dir raise it automatically, so a
-   * scratch cleanup never needs it either. That leaves one case: deleting
-   * outside the cwd on purpose - which is worth stating at the call site.
-   *
-   * @default false, raised automatically inside temp, cacache, and ~/.socket
-   */
-  force?: boolean | undefined
-  /**
    * Maximum number of retry attempts on failure.
    *
    * @default 3

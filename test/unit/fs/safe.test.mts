@@ -10,6 +10,7 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
+import { forceDelete } from '../../../src/fs/force.mjs'
 import {
   safeDelete,
   safeDeleteSync,
@@ -72,20 +73,6 @@ describe('safeDelete', () => {
 
   it('should not throw for non-existent files', async () => {
     await expect(safeDelete('/nonexistent/file.txt')).resolves.toBeUndefined()
-  })
-
-  it('should respect force option', async () => {
-    await runWithTempDir(async tmpDir => {
-      const testFile = path.join(tmpDir, 'file.txt')
-      await fs.writeFile(testFile, '', 'utf8')
-
-      // The flag is this test's subject.
-      // oxlint-disable-next-line socket/no-force-delete -- the subject
-      await safeDelete(testFile, { force: true })
-
-      const exists = existsSync(testFile)
-      expect(exists).toBe(false)
-    }, 'safeDelete-force-')
   })
 
   it('should respect maxRetries and retryDelay options', async () => {
@@ -315,7 +302,7 @@ describe('safeDelete cwd relocates the guard', () => {
 
   afterEach(async () => {
     // oxlint-disable-next-line socket/no-force-delete -- probe is outside cwd
-    await safeDelete(ownedRoot, { force: true })
+    await forceDelete(ownedRoot)
   })
 
   it('deletes a descendant of the named root without force', async () => {
@@ -370,7 +357,7 @@ describe('safeDelete force is opt-in', () => {
   afterEach(async () => {
     // The probe sits outside cwd on purpose, so removing it needs the flag.
     // oxlint-disable-next-line socket/no-force-delete -- probe is outside cwd
-    await safeDelete(outsideCwd, { force: true })
+    await forceDelete(outsideCwd)
   })
 
   it('rejects a path outside cwd when no options are passed', async () => {
@@ -386,7 +373,7 @@ describe('safeDelete force is opt-in', () => {
   it('deletes it when force is explicitly requested', async () => {
     // The opt-in path is the assertion.
     // oxlint-disable-next-line socket/no-force-delete -- the subject
-    await safeDelete(outsideCwd, { force: true })
+    await forceDelete(outsideCwd)
     expect(existsSync(outsideCwd)).toBe(false)
   })
 

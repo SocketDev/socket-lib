@@ -137,7 +137,7 @@ describe('fs - Additional Coverage (dir/delete/inspect)', () => {
 
       try {
         await fs.writeFile(testFile, 'test', 'utf8')
-        await safeDelete(testFile, { force: false })
+        await safeDelete(testFile)
 
         // oxlint-disable-next-line socket/prefer-exists-sync -- verify deletion via raw fs, not the lib wrapper.
         const exists = existsSync(testFile)
@@ -160,7 +160,7 @@ describe('fs - Additional Coverage (dir/delete/inspect)', () => {
         await fs.writeFile(file1, 'test1', 'utf8')
         await fs.writeFile(file2, 'test2', 'utf8')
 
-        await safeDelete([file1, file2], { force: false })
+        await safeDelete([file1, file2])
 
         // oxlint-disable-next-line socket/prefer-exists-sync -- verify deletion via raw fs, not the lib wrapper.
         const exists1 = existsSync(file1)
@@ -211,7 +211,7 @@ describe('fs - Additional Coverage (dir/delete/inspect)', () => {
 
       try {
         await fs.writeFile(testFile, 'test', 'utf8')
-        safeDeleteSync(testFile, { force: false })
+        safeDeleteSync(testFile)
 
         // oxlint-disable-next-line socket/prefer-exists-sync -- verify deletion via raw fs, not the lib wrapper.
         const exists = existsSync(testFile)

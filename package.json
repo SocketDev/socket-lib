@@ -1941,6 +1941,11 @@
       "types": "./dist/fs/find.d.ts",
       "default": "./dist/fs/find.js"
     },
+    "./fs/force": {
+      "source": "./src/fs/force.mts",
+      "types": "./dist/fs/force.d.ts",
+      "default": "./dist/fs/force.js"
+    },
     "./fs/inspect": {
       "source": "./src/fs/inspect.mts",
       "types": "./dist/fs/inspect.d.ts",
@@ -1975,6 +1980,11 @@
       "source": "./src/fs/safe.mts",
       "types": "./dist/fs/safe.d.ts",
       "default": "./dist/fs/safe.js"
+    },
+    "./fs/strict": {
+      "source": "./src/fs/strict.mts",
+      "types": "./dist/fs/strict.d.ts",
+      "default": "./dist/fs/strict.js"
     },
     "./fs/types": {
       "source": "./src/fs/types.mts",
