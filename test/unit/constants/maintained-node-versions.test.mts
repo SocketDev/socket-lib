@@ -61,7 +61,12 @@ describe('maintained-node-versions', () => {
 
   describe('array contents', () => {
     it('should have versions in order: last, previous, current, next', () => {
-      const [first, second, third, fourth] = maintainedNodeVersions
+      const {
+        0: first,
+        1: second,
+        2: third,
+        3: fourth,
+      } = maintainedNodeVersions
       expect(first).toBe(canonicalMaintainedNodeVersions.last)
       expect(second).toBe(canonicalMaintainedNodeVersions.previous)
       expect(third).toBe(canonicalMaintainedNodeVersions.current)
@@ -267,7 +272,12 @@ describe('maintained-node-versions', () => {
     })
 
     it('should support destructuring', () => {
-      const [first, second, third, fourth] = maintainedNodeVersions
+      const {
+        0: first,
+        1: second,
+        2: third,
+        3: fourth,
+      } = maintainedNodeVersions
       expect(first).toBe(canonicalMaintainedNodeVersions.last)
       expect(second).toBe(canonicalMaintainedNodeVersions.previous)
       expect(third).toBe(canonicalMaintainedNodeVersions.current)

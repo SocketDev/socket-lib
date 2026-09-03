@@ -158,7 +158,7 @@ export async function processDirectory(
               // signature; `walk` narrows each one itself.
               const childEntries = Object.entries(node)
               for (let i = 0, { length } = childEntries; i < length; i += 1) {
-                const [key, child] = childEntries[i]!
+                const { 0: key, 1: child } = childEntries[i]!
                 if (key === 'end' || key === 'loc' || key === 'start') {
                   continue
                 }

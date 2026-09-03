@@ -235,7 +235,7 @@ describe.sequential('ttl-cache — timing', () => {
       // entry, even though its internal `await get()` is still pending.
       await Promise.resolve()
       resolveFetcher('joined')
-      const [v1, v2, v3] = await Promise.all([p1, p2, p3])
+      const { 0: v1, 1: v2, 2: v3 } = await Promise.all([p1, p2, p3])
       expect([v1, v2, v3]).toEqual(['joined', 'joined', 'joined'])
       expect(fetchCount).toBe(1)
     })

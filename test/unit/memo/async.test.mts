@@ -16,7 +16,7 @@ describe('memo/async — memoizeAsync', () => {
     const p1 = memo()
     const p2 = memo()
     resolveOuter(42)
-    const [r1, r2] = await Promise.all([p1, p2])
+    const { 0: r1, 1: r2 } = await Promise.all([p1, p2])
     expect(r1).toBe(42)
     expect(r2).toBe(42)
     expect(calls).toBe(1)

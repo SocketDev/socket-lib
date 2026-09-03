@@ -38,7 +38,11 @@ describe('ESM imports from CommonJS', () => {
     })
 
     it('should import all leaves together', async () => {
-      const [globMod, defaultsMod, matcherMod] = await Promise.all([
+      const {
+        0: globMod,
+        1: defaultsMod,
+        2: matcherMod,
+      } = await Promise.all([
         // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.
         import('@socketsecurity/lib/globs/match'),
         // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- dynamic import is the behavior under test.

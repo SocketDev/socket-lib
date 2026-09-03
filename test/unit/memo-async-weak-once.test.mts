@@ -49,11 +49,11 @@ describe('memoizeAsync', () => {
     const memoized = memoizeAsync(fn)
 
     // Call concurrently
-    const [result1, result2, result3] = await Promise.all([
-      memoized(5),
-      memoized(5),
-      memoized(5),
-    ])
+    const {
+      0: result1,
+      1: result2,
+      2: result3,
+    } = await Promise.all([memoized(5), memoized(5), memoized(5)])
 
     expect(result1).toBe(10)
     expect(result2).toBe(10)

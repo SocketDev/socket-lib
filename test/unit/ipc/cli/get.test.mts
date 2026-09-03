@@ -287,7 +287,7 @@ describe('ipc/cli/get', () => {
 
       expect(Array.isArray(entries)).toBe(true)
       for (let i = 0, { length } = entries; i < length; i += 1) {
-        const [key, value] = entries[i]!
+        const { 0: key, 1: value } = entries[i]!
         expect(ipc[key as keyof IpcObject]).toBe(value)
       }
     })

@@ -37,7 +37,7 @@ export function stackedBar(
   let out = ''
   let used = 0
   for (let i = 0, { length } = segments; i < length; i += 1) {
-    const [count, color, glyph] = segments[i]!
+    const { 0: count, 1: color, 2: glyph } = segments[i]!
     const cells =
       i === length - 1 ? width - used : Math.round((count / total) * width)
     if (cells > 0) {
@@ -148,7 +148,7 @@ function renderPassThrough(d: ReportData): void {
     (a, b) => b[1].length - a[1].length,
   )
   for (let i = 0, { length } = repos; i < length; i += 1) {
-    const [repo, list] = repos[i]!
+    const { 0: repo, 1: list } = repos[i]!
     logger.log(
       `    ${c.yellow}${repo.replace(/^socket-/, '')}${c.reset} ${c.dim}(${list.length})${c.reset}`,
     )
@@ -203,7 +203,7 @@ function renderAreas(d: ReportData): void {
     `  ${c.bold}by area${c.reset} ${c.dim}(adopted/cascade/unused)${c.reset}`,
   )
   for (let i = 0, { length } = areas; i < length; i += 1) {
-    const [name, a] = areas[i]!
+    const { 0: name, 1: a } = areas[i]!
     const bar = stackedBar(
       [
         [a.adopted, c.green, GLYPH.adopted],

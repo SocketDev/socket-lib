@@ -45,7 +45,7 @@ function writeFixtureRepo(spec: FixtureSpec): string {
   )
   const entries = Object.entries(spec.files)
   for (let i = 0, { length } = entries; i < length; i += 1) {
-    const [rel, body] = entries[i]!
+    const { 0: rel, 1: body } = entries[i]!
     const absPath = path.join(repoRoot, rel)
     mkdirSync(path.dirname(absPath), { recursive: true })
     writeFileSync(absPath, body ?? makeUnexposedModuleSource(rel, ['doThing']))

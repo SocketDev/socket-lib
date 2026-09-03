@@ -319,7 +319,7 @@ describe('git extended tests', () => {
       const asyncResult = getChangedFiles({ cwd: projectRoot })
       const syncResult = getChangedFilesSync({ cwd: projectRoot })
 
-      const [async, sync] = await Promise.all([
+      const { 0: async, 1: sync } = await Promise.all([
         asyncResult,
         Promise.resolve(syncResult),
       ])

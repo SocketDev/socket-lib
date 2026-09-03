@@ -416,7 +416,13 @@ describe('PromiseQueue', () => {
     it('should work with different data types', async () => {
       const queue = new PromiseQueue(2)
 
-      const [str, num, obj, arr, bool] = await Promise.all([
+      const {
+        0: str,
+        1: num,
+        2: obj,
+        3: arr,
+        4: bool,
+      } = await Promise.all([
         queue.add(async () => 'string'),
         queue.add(async () => 42),
         queue.add(async () => ({ key: 'value' })),

@@ -28,7 +28,7 @@ const defaultEmitWarning = process.emitWarning.bind(process) as (
   ...args: EmitWarningArgs
 ) => void
 process.emitWarning = function emitWarning(...args) {
-  const [warning, name] = args
+  const { 0: warning, 1: name } = args
   const warningStr = typeof warning === 'string' ? warning : warning?.message
   const warningName =
     typeof name === 'string'

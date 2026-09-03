@@ -89,11 +89,11 @@ export function resolveRepoConfig<T = unknown>(
   // stays unambiguous when only one tier exists (readConfigLayers drops absent
   // layers, which would otherwise shift positions).
   const base = { cwd: opts.cwd, rootDir: opts.repoRoot }
-  const [fleet] = readConfigLayers<T>(name, {
+  const { 0: fleet } = readConfigLayers<T>(name, {
     ...base,
     dirs: [FLEET_LAYER_DIRS[0]!],
   })
-  const [repo] = readConfigLayers<T>(name, {
+  const { 0: repo } = readConfigLayers<T>(name, {
     ...base,
     dirs: [FLEET_LAYER_DIRS[1]!],
   })

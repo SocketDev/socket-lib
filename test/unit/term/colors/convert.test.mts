@@ -33,7 +33,7 @@ describe('colors', () => {
       const color: ColorValue = [140, 82, 255]
       if (isRgbTuple(color)) {
         // TypeScript should narrow type to ColorRgb here
-        const [r, g, b] = color
+        const { 0: r, 1: g, 2: b } = color
         expect(r).toBe(140)
         expect(g).toBe(82)
         expect(b).toBe(255)
@@ -173,7 +173,7 @@ describe('colors', () => {
           expect(rgb).toHaveLength(3)
 
           // Verify all RGB values are in valid range [0, 255]
-          const [r, g, b] = rgb
+          const { 0: r, 1: g, 2: b } = rgb
           expect(r).toBeGreaterThanOrEqual(0)
           expect(r).toBeLessThanOrEqual(255)
           expect(g).toBeGreaterThanOrEqual(0)

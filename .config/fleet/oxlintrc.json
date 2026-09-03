@@ -150,6 +150,7 @@
     "socket/prefer-node-builtin-imports": "error",
     "socket/prefer-non-capturing-group": "error",
     "socket/prefer-normalize-path": "error",
+    "socket/prefer-object-array-destructure": "error",
     "socket/prefer-optional-chain": "error",
     "socket/prefer-pure-call-form": "error",
     "socket/prefer-refined-record": "error",

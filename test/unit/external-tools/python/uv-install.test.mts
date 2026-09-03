@@ -88,7 +88,7 @@ describe.sequential('external-tools/python/uv-install — uvSyncProject', () => 
     const { uvSyncProject, spawnMock } = await loadFresh()
     await uvSyncProject({ projectDir: PROJECT, uvBin: UV })
     expect(spawnMock).toHaveBeenCalledTimes(1)
-    const [bin, args] = spawnMock.mock.calls[0]! as [string, string[]]
+    const { 0: bin, 1: args } = spawnMock.mock.calls[0]! as [string, string[]]
     expect(bin).toBe(UV)
     expect(args).toEqual(['sync', '--locked', '--project', PROJECT])
   })

@@ -323,7 +323,7 @@ describe('constants/package-managers', () => {
 
       const entries = Object.entries(lockfiles)
       for (let i = 0, { length } = entries; i < length; i += 1) {
-        const [lockfile, agent] = entries[i]!
+        const { 0: lockfile, 1: agent } = entries[i]!
         expect(typeof lockfile).toBe('string')
         expect(typeof agent).toBe('string')
       }

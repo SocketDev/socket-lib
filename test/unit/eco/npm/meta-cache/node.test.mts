@@ -267,7 +267,7 @@ describe('getPackumentSlim — in-flight dedupe', () => {
     await Promise.resolve()
     await Promise.resolve()
     deferred.resolve(RAW)
-    const [r1, r2] = await Promise.all([p1, p2])
+    const { 0: r1, 1: r2 } = await Promise.all([p1, p2])
 
     expect(requestCount).toBe(1)
     expect(r1.name).toBe('left-pad')

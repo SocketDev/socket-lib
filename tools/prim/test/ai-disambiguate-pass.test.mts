@@ -223,7 +223,7 @@ describe('what the disambiguator is told', () => {
     await (
       await drain()
     ).result
-    const [call] = disambiguateReceiver.mock.calls
+    const { 0: call } = disambiguateReceiver.mock.calls
     expect(call?.[0]).toMatchObject({
       aiEnabled: true,
       column: 5,

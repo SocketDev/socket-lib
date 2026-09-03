@@ -355,7 +355,12 @@ async function main(): Promise<void> {
         buildTypes({ quiet, skipClean: true }),
         buildPrim({ quiet }),
       ])
-      const [srcSettled, externalsSettled, typesSettled, primSettled] = settled
+      const {
+        0: srcSettled,
+        1: externalsSettled,
+        2: typesSettled,
+        3: primSettled,
+      } = settled
       const srcResult: BuildSourceResult =
         srcSettled.status === 'fulfilled'
           ? srcSettled.value

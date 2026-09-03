@@ -128,7 +128,11 @@ describe('spawnForRole', () => {
       } as never,
     )
     expect(mockSpawnTier).toHaveBeenCalledTimes(1)
-    const [tier, passedCtx, passedOptions] = mockSpawnTier.mock.calls[0]!
+    const {
+      0: tier,
+      1: passedCtx,
+      2: passedOptions,
+    } = mockSpawnTier.mock.calls[0]!
     // security planning → opus
     expect(tier).toBe('opus')
     expect(passedCtx).toBe(ctx)

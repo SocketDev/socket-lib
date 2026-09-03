@@ -181,7 +181,7 @@ export function createStubPlugin(
   stubMap: Record<string, string | [RegExp, string]> = STUB_MAP,
 ): Plugin {
   const stubs = Object.entries(stubMap).map(([pattern, value]) => {
-    const [importerFilter, filename] = Array.isArray(value)
+    const { 0: importerFilter, 1: filename } = Array.isArray(value)
       ? value
       : [undefined, value]
     return {

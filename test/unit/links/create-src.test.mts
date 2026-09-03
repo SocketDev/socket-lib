@@ -57,7 +57,7 @@ describe('links/create — hyperlink (source)', () => {
     const { hyperlink } = await import('../../../src/links/create.mjs')
     hyperlink('Docs', URL)
     expect(terminalLinkMock).toHaveBeenCalledTimes(1)
-    const [text, url] = terminalLinkMock.mock.calls[0]!
+    const { 0: text, 1: url } = terminalLinkMock.mock.calls[0]!
     expect(text).toBe('Docs')
     expect(url).toBe(URL)
   })

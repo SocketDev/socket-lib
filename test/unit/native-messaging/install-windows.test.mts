@@ -64,7 +64,7 @@ describe('registerWindows', () => {
   it('adds the native-host key under HKCU with the manifest as its value', () => {
     registerWindows('C:\\hosts\\manifest.json')
     expect(mockSpawnSync).toHaveBeenCalledTimes(1)
-    const [cmd, args] = mockSpawnSync.mock.calls[0]!
+    const { 0: cmd, 1: args } = mockSpawnSync.mock.calls[0]!
     expect(cmd).toBe('reg')
     expect(args[0]).toBe('add')
     // Asserted structurally rather than against the module's own HOST_NAME:
@@ -117,7 +117,7 @@ describe('installNativeHost on Windows', () => {
     expect(readFileSync(result.wrapperPath, 'utf8')).toContain('@echo off')
     // ...then registers the first manifest it wrote.
     expect(mockSpawnSync).toHaveBeenCalledTimes(1)
-    const [cmd, args] = mockSpawnSync.mock.calls[0]!
+    const { 0: cmd, 1: args } = mockSpawnSync.mock.calls[0]!
     expect(cmd).toBe('reg')
     expect(args).toContain(result.manifestPaths[0])
   })

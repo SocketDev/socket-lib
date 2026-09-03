@@ -53,7 +53,7 @@ describe('parseGitWorktreePorcelain', () => {
   })
 
   it('reads the branch without its refs/heads prefix', () => {
-    const [main, linked] = parseGitWorktreePorcelain(MAIN_AND_LINKED)
+    const { 0: main, 1: linked } = parseGitWorktreePorcelain(MAIN_AND_LINKED)
     assert.equal(main!.branch, 'main')
     assert.equal(linked!.branch, 'feature/example')
   })
@@ -69,12 +69,12 @@ describe('parseGitWorktreePorcelain', () => {
   })
 
   it('carries HEAD through', () => {
-    const [main] = parseGitWorktreePorcelain(MAIN_AND_LINKED)
+    const { 0: main } = parseGitWorktreePorcelain(MAIN_AND_LINKED)
     assert.equal(main!.head, '1111111111111111111111111111111111111111')
   })
 
   it('reads a detached HEAD as branchless', () => {
-    const [entry] = parseGitWorktreePorcelain(
+    const { 0: entry } = parseGitWorktreePorcelain(
       [
         'worktree /repo-detached',
         'HEAD 3333333333333333333333333333333333333333',
@@ -87,7 +87,7 @@ describe('parseGitWorktreePorcelain', () => {
   })
 
   it('reads a bare worktree', () => {
-    const [entry] = parseGitWorktreePorcelain(
+    const { 0: entry } = parseGitWorktreePorcelain(
       ['worktree /repo-bare', 'bare', ''].join('\n'),
     )
     assert.equal(entry!.bare, true)
@@ -97,7 +97,7 @@ describe('parseGitWorktreePorcelain', () => {
   // A locked worktree is off-limits to automated removal whether or not git
   // recorded a reason, so the flag and the reason are separate fields.
   it('reads a reasonless lock as locked', () => {
-    const [entry] = parseGitWorktreePorcelain(
+    const { 0: entry } = parseGitWorktreePorcelain(
       ['worktree /repo-locked', 'locked', ''].join('\n'),
     )
     assert.equal(entry!.locked, true)
@@ -105,7 +105,7 @@ describe('parseGitWorktreePorcelain', () => {
   })
 
   it('keeps the lock reason when git recorded one', () => {
-    const [entry] = parseGitWorktreePorcelain(
+    const { 0: entry } = parseGitWorktreePorcelain(
       ['worktree /repo-locked', 'locked on removable media', ''].join('\n'),
     )
     assert.equal(entry!.locked, true)
@@ -113,12 +113,12 @@ describe('parseGitWorktreePorcelain', () => {
   })
 
   it('reads prunable with and without a reason', () => {
-    const [bare] = parseGitWorktreePorcelain(
+    const { 0: bare } = parseGitWorktreePorcelain(
       ['worktree /gone', 'prunable', ''].join('\n'),
     )
     assert.equal(bare!.prunable, true)
     assert.equal(bare!.prunableReason, undefined)
-    const [withReason] = parseGitWorktreePorcelain(
+    const { 0: withReason } = parseGitWorktreePorcelain(
       [
         'worktree /gone',
         'prunable gitdir file points to non-existent location',
@@ -165,7 +165,7 @@ describe('parseGitWorktreePorcelain', () => {
   // The reason -z is not optional: a worktree path holding a newline cannot be
   // read out of the line-oriented form, and a path is what gets deleted.
   it('keeps a newline inside a path intact under -z', () => {
-    const [entry] = parseGitWorktreePorcelain(
+    const { 0: entry } = parseGitWorktreePorcelain(
       'worktree /odd\nname\0detached\0\0',
     )
     assert.equal(entry!.path, resolveWorktreePath('/odd\nname'))
@@ -174,7 +174,7 @@ describe('parseGitWorktreePorcelain', () => {
   // Without -z, git escapes unusual characters in a lock reason and quotes the
   // whole value per core.quotePath. Under -z the reason arrives raw.
   it('reads a raw multi-line lock reason under -z', () => {
-    const [entry] = parseGitWorktreePorcelain(
+    const { 0: entry } = parseGitWorktreePorcelain(
       'worktree /locked\0locked reason\nwith a newline\0\0',
     )
     assert.equal(entry!.lockReason, 'reason\nwith a newline')
