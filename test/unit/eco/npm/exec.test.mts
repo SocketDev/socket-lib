@@ -1,27 +1,62 @@
 /**
- * @file Integration tests for package manager execution wrappers. Exercises
- *   execNpm(), execPnpm(), execYarn(), and execScript() against the real spawn
- *   path. Full command execution can't run here, so these assert the observable
- *   contract: each wrapper returns a Promise and accepts the documented
- *   argument shapes (terminator splitting, loglevel preservation,
- *   install-command handling).
+ * @file Tests for the package manager execution wrappers. Exercises execNpm(),
+ *   execPnpm(), execYarn(), and execScript() down to the spawn call, which is
+ *   mocked: the wrappers are argument transformers, and letting them reach a
+ *   real spawn started nineteen unawaited `npm install` / `pnpm install` /
+ *   `yarn install` processes in the repo itself. Those outlived the test body,
+ *   so the worker took over twenty seconds to tear down and the coverage run
+ *   timed out killing it. With the mock the wrappers still run end to end and
+ *   the arguments they build are readable, which is the contract worth
+ *   asserting.
  */
 
 import process from 'node:process'
 
-import { describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
+
+// Hoisted so the mock factory, which vitest runs before this module body,
+// still sees an initialized spy. The stand-in resolves the fields a caller
+// reads off a finished spawn; the live `process` and `stdin` handles a real
+// PromiseSpawnResult also carries are left off, since supplying them means
+// starting the process this mock exists to avoid.
+const { spawn } = vi.hoisted(() => ({
+  spawn: vi.fn(async () => ({
+    args: [],
+    cmd: '',
+    code: 0,
+    stderr: '',
+    stdout: '',
+  })),
+}))
+
+vi.mock(import('../../../../src/process/spawn/child.mjs'), async orig => {
+  const actual = await orig()
+  return {
+    ...actual,
+    // `spawn` is overloaded (string and Buffer output), and one spy signature
+    // cannot satisfy every overload. The wrappers only ever reach the string
+    // one, so the stand-in is asserted into place here rather than widened.
+    spawn: spawn as unknown as typeof actual.spawn,
+  }
+})
 
 import { execNpm } from '../../../../src/eco/npm/npm-cli/exec.mjs'
 import { execPnpm } from '../../../../src/eco/npm/pnpm/exec.mjs'
 import { execScript } from '../../../../src/eco/npm/script.mjs'
 import { execYarn } from '../../../../src/eco/npm/yarn/exec.mjs'
 
-describe('agent execution', () => {
-  describe('Integration tests (using real spawn)', () => {
-    // These tests verify the actual behavior without mocking
-    // We can't easily test the full execution without running actual commands
-    // so we focus on what we can test: the flag detection integration
+// The argv the wrapper handed to spawn on the most recent call.
+function lastSpawnArgs(): string[] {
+  const call = spawn.mock.calls.at(-1) as unknown as [string, string[]]
+  return call[1]
+}
 
+beforeEach(() => {
+  spawn.mockClear()
+})
+
+describe('agent execution', () => {
+  describe('argument transformation down to the spawn call', () => {
     describe('execNpm argument transformation', () => {
       it('should have a function that returns a promise', () => {
         const result = execNpm(['--version'])
@@ -89,56 +124,53 @@ describe('agent execution', () => {
     })
 
     describe('argument terminator (--) handling', () => {
-      it('execNpm should split args at -- terminator', () => {
-        const result = execNpm([
-          'install',
-          '--save',
-          '--',
-          '--no-audit',
-          '--fund',
-        ])
-        result.catch(() => {})
-        expect(result).toBeInstanceOf(Promise)
+      it('execNpm should split args at -- terminator', async () => {
+        await execNpm(['install', '--save', '--', '--script-shell', 'bash'])
+        const args = lastSpawnArgs()
+        expect(args).toContain('--')
+        expect(args.indexOf('--save')).toBeLessThan(args.indexOf('--'))
+        expect(args.indexOf('--')).toBeLessThan(args.indexOf('--script-shell'))
       })
 
-      it('execPnpm should split args at -- terminator', () => {
-        const result = execPnpm(['install', '--', '--progress'])
-        result.catch(() => {})
-        expect(result).toBeInstanceOf(Promise)
+      it('execPnpm should split args at -- terminator', async () => {
+        await execPnpm(['install', '--', '--progress'])
+        const args = lastSpawnArgs()
+        expect(args.indexOf('--')).toBeLessThan(args.indexOf('--progress'))
       })
 
-      it('execYarn should split args at -- terminator', () => {
-        const result = execYarn(['install', '--', '--frozen-lockfile'])
-        result.catch(() => {})
-        expect(result).toBeInstanceOf(Promise)
+      it('execYarn should split args at -- terminator', async () => {
+        await execYarn(['install', '--', '--frozen-lockfile'])
+        const args = lastSpawnArgs()
+        expect(args.indexOf('--')).toBeLessThan(
+          args.indexOf('--frozen-lockfile'),
+        )
       })
     })
 
     describe('loglevel preservation', () => {
-      it('execNpm should preserve user-provided --loglevel', () => {
-        const result = execNpm(['install', '--loglevel', 'silent'])
-        result.catch(() => {})
-        expect(result).toBeInstanceOf(Promise)
+      it('execNpm should preserve user-provided --loglevel', async () => {
+        await execNpm(['install', '--loglevel', 'silent'])
+        const args = lastSpawnArgs()
+        expect(args).toContain('silent')
+        expect(args.filter(arg => arg === '--loglevel')).toHaveLength(1)
       })
 
-      it('execPnpm should preserve user-provided --loglevel', () => {
-        const result = execPnpm(['install', '--loglevel', 'silent'])
-        result.catch(() => {})
-        expect(result).toBeInstanceOf(Promise)
+      it('execPnpm should preserve user-provided --loglevel', async () => {
+        await execPnpm(['install', '--loglevel', 'silent'])
+        expect(lastSpawnArgs()).toContain('silent')
       })
     })
 
     describe('execPnpm install-command coverage', () => {
-      it('should handle install command without ignore-scripts flag (adds --ignore-scripts)', () => {
-        const result = execPnpm(['install'])
-        result.catch(() => {})
-        expect(result).toBeInstanceOf(Promise)
+      it('should handle install command without ignore-scripts flag (adds --ignore-scripts)', async () => {
+        await execPnpm(['install'])
+        expect(lastSpawnArgs()).toContain('--ignore-scripts')
       })
 
-      it('should respect existing --ignore-scripts flag', () => {
-        const result = execPnpm(['install', '--ignore-scripts'])
-        result.catch(() => {})
-        expect(result).toBeInstanceOf(Promise)
+      it('should respect existing --ignore-scripts flag', async () => {
+        await execPnpm(['install', '--ignore-scripts'])
+        const args = lastSpawnArgs()
+        expect(args.filter(arg => arg === '--ignore-scripts')).toHaveLength(1)
       })
 
       it('should not add --ignore-scripts for non-install commands', () => {
