@@ -94,7 +94,7 @@ describe('json/safe-parse', () => {
     })
 
     it('should allow pollution keys when allowPrototype is true', () => {
-      const result = parseJsonStrict('{"__proto__":{"x":1}}', undefined, {
+      const result = parseJsonStrict('{"__proto__":{"x":1}}', {
         allowPrototype: true,
       })
       expect(result).toBeDefined()
@@ -104,21 +104,21 @@ describe('json/safe-parse', () => {
   describe('size limit enforcement', () => {
     it('should throw when JSON exceeds maxSize', () => {
       const large = JSON.stringify({ data: 'x'.repeat(1000) })
-      expect(() => parseJsonStrict(large, undefined, { maxSize: 100 })).toThrow(
+      expect(() => parseJsonStrict(large, { maxSize: 100 })).toThrow(
         /exceeds maximum size/,
       )
     })
 
     it('includes byte-count detail in error when maxSize differs from default', () => {
       const large = JSON.stringify({ data: 'x'.repeat(1000) })
-      expect(() => parseJsonStrict(large, undefined, { maxSize: 100 })).toThrow(
+      expect(() => parseJsonStrict(large, { maxSize: 100 })).toThrow(
         /of 100 bytes/,
       )
     })
 
     it('should succeed within maxSize', () => {
       const small = JSON.stringify({ data: 'x'.repeat(10) })
-      expect(parseJsonStrict(small, undefined, { maxSize: 100 })).toEqual({
+      expect(parseJsonStrict(small, { maxSize: 100 })).toEqual({
         data: 'x'.repeat(10),
       })
     })
@@ -136,7 +136,7 @@ describe('json/safe-parse', () => {
         age: z.number(),
       })
       const json = '{"name":"Alice","age":30}'
-      const result = parseJsonStrict(json, userSchema)
+      const result = parseJsonStrict(json, { schema: userSchema })
       expect(result).toEqual({ name: 'Alice', age: 30 })
     })
 
@@ -146,7 +146,7 @@ describe('json/safe-parse', () => {
         age: z.number(),
       })
       const json = '{"name":"Alice","age":"invalid"}'
-      expect(() => parseJsonStrict(json, userSchema)).toThrow(
+      expect(() => parseJsonStrict(json, { schema: userSchema })).toThrow(
         /Validation failed/,
       )
     })
@@ -156,7 +156,9 @@ describe('json/safe-parse', () => {
         required: z.string(),
       })
       const json = '{}'
-      expect(() => parseJsonStrict(json, schema)).toThrow(/required/)
+      expect(() => parseJsonStrict(json, { schema: schema })).toThrow(
+        /required/,
+      )
     })
 
     it('should handle nested schema', () => {
@@ -167,18 +169,20 @@ describe('json/safe-parse', () => {
         }),
       })
       const json = '{"user":{"name":"Test","email":"test@example.com"}}'
-      const result = parseJsonStrict(json, schema)
+      const result = parseJsonStrict(json, { schema: schema })
       expect(result.user.name).toBe('Test')
     })
 
     it('should handle array schema validation', () => {
       const schema = z.array(z.number())
-      expect(parseJsonStrict('[1,2,3,4,5]', schema)).toEqual([1, 2, 3, 4, 5])
+      expect(parseJsonStrict('[1,2,3,4,5]', { schema })).toEqual([
+        1, 2, 3, 4, 5,
+      ])
     })
 
     it('should throw on invalid array items', () => {
       const schema = z.array(z.number())
-      expect(() => parseJsonStrict('[1,2,"string",4]', schema)).toThrow(
+      expect(() => parseJsonStrict('[1,2,"string",4]', { schema })).toThrow(
         /Validation failed/,
       )
     })
