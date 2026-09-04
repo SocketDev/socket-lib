@@ -8,6 +8,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import nock from 'nock'
 
 import { clearPackumentCache } from '../../../src/constants/packages.mjs'
+import { safeDelete } from '../../../src/fs/safe.mjs'
 import { readPackageJson } from '../../../src/packages/read.mjs'
 import { extractPackage, packPackage } from '../../../src/packages/tarball.mjs'
 import type { ExtractOptions } from '../../../src/packages/types.mjs'
@@ -263,15 +264,25 @@ describe('packages/tarball — extract & pack (mocked registry, offline)', () =>
       'should use tmpPrefix option for temp directory',
       async () => {
         let tmpPath = ''
-        await extractPackage(
-          'is-number@7.0.0',
-          withMockedNet({ tmpPrefix: 'test-prefix-' }),
-          async destPath => {
-            tmpPath = destPath
-          },
-        )
+        try {
+          await extractPackage(
+            'is-number@7.0.0',
+            withMockedNet({ tmpPrefix: 'test-prefix-' }),
+            async destPath => {
+              tmpPath = destPath
+            },
+          )
 
-        expect(tmpPath).toBeTruthy()
+          expect(tmpPath).toBeTruthy()
+        } finally {
+          // cacache's withTmp does not always reclaim the directory it made,
+          // and the pacote cache resolves under the checkout here, so the
+          // extracted package is left sitting in the working tree where the
+          // format gate then reports it as an unformatted file.
+          if (tmpPath) {
+            await safeDelete(tmpPath)
+          }
+        }
       },
       tolerantTimeout(30_000),
     )
