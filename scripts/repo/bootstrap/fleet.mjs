@@ -2186,7 +2186,7 @@ function formatLockStepError(parts) {
     `  Where:  .config/repo/socket-wheelhouse.json (bundle.ref + bundle.cascadeSha).`,
     `  Wanted: bundle.cascadeSha === templateSha of the release at bundle.ref.`,
     `  Saw:    ref = ${ref} (${sawTemplate}), cascadeSha = ${cascadeSha}.`,
-    `  Fix:    re-cascade to the pin — \`node scripts/repo/dog-food/run.mts --fix\` — OR re-pin bundle.ref to the release whose templateSha is ${cascadeSha}.`,
+    `  Fix:    re-cascade to the pin — \`node scripts/repo/dogfood/run.mts --fix\` — OR re-pin bundle.ref to the release whose templateSha is ${cascadeSha}.`,
   ].join('\n')
 }
 const NOTICE_STORE_REL = '.cache/fleet/socket-wheelhouse/update-notice.json'
@@ -2248,7 +2248,7 @@ function formatUpdateNotice(config) {
   const lines = [
     'A newer fleet scaffolding release is available.',
     `Re-cascade to ${newestRef}:`,
-    'node scripts/repo/dog-food/run.mts --fix',
+    'node scripts/repo/dogfood/run.mts --fix',
   ]
   if (!color) return lines.map(l => `  ${l}`).join('\n')
   const width = Math.max(...lines.map(l => l.length))
