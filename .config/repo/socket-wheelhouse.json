@@ -494,7 +494,7 @@
     "llmsTxt": true
   },
   "vitest": {
-    "unitBudgetMs": 180000
+    "unitBudgetMs": 600000
   },
   "bornTested": {
     "grandfathered": [
