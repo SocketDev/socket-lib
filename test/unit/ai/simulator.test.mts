@@ -64,14 +64,16 @@ describe('LanguageModelSimulator', () => {
 describe('installLanguageModelSimulator', () => {
   it('sets globalThis.LanguageModel', () => {
     const target = {} as typeof globalThis
-    const sim = installLanguageModelSimulator(target)
+    const sim = installLanguageModelSimulator({ target })
     expect(
       (target as { LanguageModel?: unknown | undefined }).LanguageModel,
     ).toBe(sim)
   })
 
   it('returns the simulator instance', () => {
-    const sim = installLanguageModelSimulator({} as typeof globalThis)
+    const sim = installLanguageModelSimulator({
+      target: {} as typeof globalThis,
+    })
     expect(sim).toBeInstanceOf(LanguageModelSimulator)
   })
 })

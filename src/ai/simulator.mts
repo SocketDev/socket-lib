@@ -36,6 +36,12 @@ export interface ResponseRule {
 
 export interface LanguageModelSimulatorOptions {
   /**
+   * Object the simulator is installed onto. Defaults to `globalThis`; a test
+   * passes its own to avoid touching the real global.
+   */
+  readonly target?: typeof globalThis | undefined
+
+  /**
    * Ordered list of rules. The first rule whose `when` predicate returns true
    * determines the response.
    */
@@ -103,11 +109,13 @@ export class LanguageModelSessionSimulator implements SessionLike {
  * Install the simulator onto `globalThis.LanguageModel` so
  * `createBuiltinModel` finds it.
  */
-// oxlint-disable-next-line socket/no-optional-param-before-options-bag -- published signature; target defaults to globalThis and callers pass it positionally.
 export function installLanguageModelSimulator(
-  target: typeof globalThis = globalThis,
   options?: LanguageModelSimulatorOptions | undefined,
 ): LanguageModelSimulator {
+  const { target = globalThis } = {
+    __proto__: null,
+    ...options,
+  } as LanguageModelSimulatorOptions
   const simulator = new LanguageModelSimulator(options)
   ;(target as { LanguageModel?: LanguageModelLike | undefined }).LanguageModel =
     simulator
