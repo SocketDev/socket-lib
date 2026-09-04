@@ -745,7 +745,7 @@ function checkCanonicalForks(
       }
       logger.info('')
       logger.info(
-        'Fleet-canonical files (anything tracked by socket-wheelhouse/scripts/sync-scaffolding/manifest.mts) ' +
+        'Fleet-canonical files (anything tracked by socket-wheelhouse/scripts/repo/commit-cascade/manifest.mts) ' +
           'MUST be edited in socket-wheelhouse/template/<path> and cascaded out — never authored directly.',
       )
       logger.info('')
@@ -753,7 +753,7 @@ function checkCanonicalForks(
       logger.info('  1. Edit socket-wheelhouse/template/<path> instead')
       logger.info('  2. Commit + push template')
       logger.info(
-        '  3. Cascade with: node scripts/repo/sync-scaffolding/cli.mts --target . --fix',
+        '  3. Cascade with: node scripts/repo/commit-cascade/run.mts --target . --fix',
       )
       logger.info('')
       logger.info(
