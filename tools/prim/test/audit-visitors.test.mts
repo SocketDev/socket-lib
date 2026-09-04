@@ -19,13 +19,14 @@ import { describe, expect, it } from 'vitest'
 
 import { walk } from '../src/acorn-wasm.mts'
 import { buildLineStarts, PARSE_OPTIONS } from '../src/audit-helpers.mts'
-import { buildVisitors } from '../src/audit-visitors.mts'
+import { buildVisitors, nearestAncestor } from '../src/audit-visitors.mts'
 
 import type { AuditPendingAmbiguous } from '../src/audit-visitors.mts'
 
 interface Recorded {
   offset: number
   pattern: string
+  primordial: string | undefined
 }
 
 interface Redeclared {
@@ -61,8 +62,8 @@ function audit(
     },
     exported: new Set(options?.exported ?? []),
     pendingAmbiguous: pending,
-    record: (_file, offset, pattern) => {
-      recorded.push({ offset, pattern })
+    record: (_file, offset, pattern, primordial) => {
+      recorded.push({ offset, pattern, primordial })
     },
     recordRedeclaration: (_file, _offset, name, pattern) => {
       redeclared.push({ name, pattern })
@@ -279,5 +280,84 @@ describe('the recorded offset', () => {
     const { recorded } = audit(src)
     const hit = recorded.find(r => r.pattern === 'Object.keys(...)')
     expect(hit?.offset).toBe(src.indexOf('Object.keys'))
+  })
+})
+
+describe('the constructor name a finding names', () => {
+  it('uses the Ctor suffix the surface exports', () => {
+    const { recorded } = audit('new Set()\n', { exported: ['SetCtor'] })
+    expect(recorded[0]?.primordial).toBe('SetCtor')
+  })
+
+  it('uses the bare global when that is what the surface exports', () => {
+    // The Node bootstrap surface exports `Set`, not `SetCtor`.
+    const { recorded } = audit('new Set()\n', { exported: ['Set'] })
+    expect(recorded[0]?.primordial).toBe('Set')
+  })
+
+  it('names the Ctor form as the gap when the surface exports neither', () => {
+    const { recorded } = audit('new Set()\n')
+    expect(recorded[0]?.primordial).toBe('SetCtor')
+  })
+})
+
+describe('the right-hand side a redeclaration reports', () => {
+  it('marks an unreadable receiver rather than printing undefined', () => {
+    // `a.b.parse` has a member expression where a global name would be, and
+    // there is no name to print for it.
+    const { redeclared } = audit('const JSONParse = a.b.parse\n', {
+      exported: ['JSONParse'],
+    })
+    expect(redeclared[0]?.pattern).toBe('const JSONParse = ?.parse')
+  })
+})
+
+describe('static calls the audit refuses on purpose', () => {
+  it('ignores a computed method call', () => {
+    expect(patterns("s['charAt'](0)\n")).toEqual([])
+  })
+
+  it('ignores a non-callable static', () => {
+    expect(patterns('Error.prepareStackTrace(err, frames)\n')).toEqual([])
+  })
+
+  it('ignores a static whose return type narrows on the call site', () => {
+    expect(patterns("Symbol.for('tag')\n")).toEqual([])
+  })
+})
+
+describe('bare member references the audit refuses on purpose', () => {
+  it('ignores a non-callable static', () => {
+    expect(patterns('const f = Error.prepareStackTrace\n')).toEqual([])
+  })
+
+  it('ignores a static whose return type narrows on the call site', () => {
+    expect(patterns('const f = Symbol.for\n')).toEqual([])
+  })
+})
+
+describe('a method call on a guessed receiver', () => {
+  it('reports it, marked as a guess', () => {
+    // `re` reads as a RegExp, which is the whole of the static signal.
+    expect(patterns('re.someMethod(value)\n')).toContain(
+      're.someMethod(...)  [guessed: RegExp]',
+    )
+  })
+
+  it('ignores a receiver whose name says nothing', () => {
+    expect(patterns('thing.someMethod(value)\n')).toEqual([])
+  })
+})
+
+describe('nearestAncestor', () => {
+  it('skips the node itself', () => {
+    const node = { start: 0, type: 'Identifier' }
+    const parent = { start: 0, type: 'Program' }
+    expect(nearestAncestor([parent, node], node)).toBe(parent)
+  })
+
+  it('reports nothing when the node is the only entry', () => {
+    const node = { start: 0, type: 'Program' }
+    expect(nearestAncestor([node], node)).toBeUndefined()
   })
 })
