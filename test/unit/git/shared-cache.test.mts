@@ -6,6 +6,9 @@
  *   exported, so both are reachable here without waiting or shelling out.
  */
 
+import os from 'node:os'
+import path from 'node:path'
+
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import {
@@ -75,16 +78,18 @@ describe('setCachedGitDiff', () => {
 
 describe('stableKey', () => {
   it('reads the same for two objects written in different orders', () => {
-    const written = stableKey({ absolute: true, cwd: '/repo' })
-    const reordered = stableKey({ cwd: '/repo', absolute: true })
+    // Plain values, not paths: the assertion is the key ORDER, and a real path
+    // would make the expected string differ by platform.
+    const written = stableKey({ absolute: true, depth: 2 })
+    const reordered = stableKey({ depth: 2, absolute: true })
 
     expect(written).toBe(reordered)
-    expect(written).toBe('{"absolute":true,"cwd":"/repo"}')
+    expect(written).toBe('{"absolute":true,"depth":2}')
   })
 
   it('still separates two objects that differ', () => {
-    const one = stableKey({ cwd: '/repo' })
-    const other = stableKey({ cwd: '/other' })
+    const one = stableKey({ cwd: path.join(os.tmpdir(), 'one') })
+    const other = stableKey({ cwd: path.join(os.tmpdir(), 'other') })
 
     expect(one).not.toBe(other)
   })

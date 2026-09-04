@@ -7,6 +7,9 @@
  *   sibling git-remote spec covers the pure URL parsers.
  */
 
+import os from 'node:os'
+import path from 'node:path'
+
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 // Hoisted so the mock factory, which runs before this module body, sees
@@ -39,6 +42,11 @@ import {
 } from '../../src/git/remote.mts'
 
 const REMOTE = 'git@github.com:Acme/Widgets.git'
+
+// A real absolute path on every platform. A POSIX literal like `/checkout` is
+// not absolute on Windows, so a directory argument written that way stops
+// meaning what the test says the moment anything resolves it.
+const CHECKOUT = path.join(os.tmpdir(), 'example-checkout')
 
 // gitSpawn resolves; its exit code is `code`.
 function spawnResolves(code: number, stdout: string): void {
@@ -93,41 +101,41 @@ describe('the async origin readers', () => {
   it('asks git for the origin URL in the given directory', async () => {
     spawnResolves(0, `${REMOTE}\n`)
 
-    await expect(originRemoteUrl('/checkout')).resolves.toBe(REMOTE)
+    await expect(originRemoteUrl(CHECKOUT)).resolves.toBe(REMOTE)
     expect(gitSpawn).toHaveBeenCalledWith(
       ['remote', 'get-url', 'origin'],
-      expect.objectContaining({ cwd: '/checkout' }),
+      expect.objectContaining({ cwd: CHECKOUT }),
     )
   })
 
   it('reports no URL when the checkout has no origin', async () => {
     spawnResolves(2, '')
 
-    await expect(originRemoteUrl('/checkout')).resolves.toBeUndefined()
+    await expect(originRemoteUrl(CHECKOUT)).resolves.toBeUndefined()
   })
 
   it('preserves case in the owner/repo pair', async () => {
     spawnResolves(0, `${REMOTE}\n`)
 
-    await expect(originOwnerRepo('/checkout')).resolves.toBe('Acme/Widgets')
+    await expect(originOwnerRepo(CHECKOUT)).resolves.toBe('Acme/Widgets')
   })
 
   it('reports no owner/repo when there is no origin', async () => {
     spawnResolves(2, '')
 
-    await expect(originOwnerRepo('/checkout')).resolves.toBeUndefined()
+    await expect(originOwnerRepo(CHECKOUT)).resolves.toBeUndefined()
   })
 
   it('lowercases the slug', async () => {
     spawnResolves(0, `${REMOTE}\n`)
 
-    await expect(originSlug('/checkout')).resolves.toBe('widgets')
+    await expect(originSlug(CHECKOUT)).resolves.toBe('widgets')
   })
 
   it('reports no slug when there is no origin', async () => {
     spawnResolves(2, '')
 
-    await expect(originSlug('/checkout')).resolves.toBeUndefined()
+    await expect(originSlug(CHECKOUT)).resolves.toBeUndefined()
   })
 })
 
@@ -135,40 +143,40 @@ describe('the sync origin readers', () => {
   it('asks git for the origin URL in the given directory', () => {
     syncReturns(0, `${REMOTE}\n`)
 
-    expect(originRemoteUrlSync('/checkout')).toBe(REMOTE)
+    expect(originRemoteUrlSync(CHECKOUT)).toBe(REMOTE)
     expect(gitSync).toHaveBeenCalledWith(
       ['remote', 'get-url', 'origin'],
-      expect.objectContaining({ cwd: '/checkout' }),
+      expect.objectContaining({ cwd: CHECKOUT }),
     )
   })
 
   it('reports no URL when the checkout has no origin', () => {
     syncReturns(2, '')
 
-    expect(originRemoteUrlSync('/checkout')).toBeUndefined()
+    expect(originRemoteUrlSync(CHECKOUT)).toBeUndefined()
   })
 
   it('preserves case in the owner/repo pair', () => {
     syncReturns(0, `${REMOTE}\n`)
 
-    expect(originOwnerRepoSync('/checkout')).toBe('Acme/Widgets')
+    expect(originOwnerRepoSync(CHECKOUT)).toBe('Acme/Widgets')
   })
 
   it('reports no owner/repo when there is no origin', () => {
     syncReturns(2, '')
 
-    expect(originOwnerRepoSync('/checkout')).toBeUndefined()
+    expect(originOwnerRepoSync(CHECKOUT)).toBeUndefined()
   })
 
   it('lowercases the slug', () => {
     syncReturns(0, `${REMOTE}\n`)
 
-    expect(originSlugSync('/checkout')).toBe('widgets')
+    expect(originSlugSync(CHECKOUT)).toBe('widgets')
   })
 
   it('reports no slug when there is no origin', () => {
     syncReturns(2, '')
 
-    expect(originSlugSync('/checkout')).toBeUndefined()
+    expect(originSlugSync(CHECKOUT)).toBeUndefined()
   })
 })

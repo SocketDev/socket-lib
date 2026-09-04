@@ -7,6 +7,9 @@
  *   observable without a network call or an installed engine.
  */
 
+import os from 'node:os'
+import path from 'node:path'
+
 import { describe, expect, it, vi } from 'vitest'
 
 import { spawnTierWithFallback } from '../../../src/ai/spawn.mjs'
@@ -14,6 +17,10 @@ import { spawnTierWithFallback } from '../../../src/ai/spawn.mjs'
 import type { LocalAgentProvider } from '../../../src/ai/spawn-local.mjs'
 import type { RouteContext } from '../../../src/ai/route.mjs'
 import type { SpawnAiAgentOptions } from '../../../src/ai/types.mjs'
+
+// A real absolute path on every platform. A POSIX literal is not absolute on
+// Windows, so a cwd written that way stops meaning what the test says.
+const CHECKOUT = path.join(os.tmpdir(), 'example-checkout')
 
 // No CLI agent is installed and no provider is keyed, so the only candidate
 // left in a chain is its keyless local rung.
@@ -27,7 +34,7 @@ function localOnlyContext(): RouteContext {
 
 function options(): Omit<SpawnAiAgentOptions, 'agent' | 'effort' | 'model'> {
   return {
-    cwd: '/example/checkout',
+    cwd: CHECKOUT,
     disallow: ['Bash'],
     permissionMode: 'dontAsk',
     prompt: 'summarize the diff',
