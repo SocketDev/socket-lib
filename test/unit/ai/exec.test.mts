@@ -6,6 +6,10 @@
  *   exercised with side-effect-free commands.
  */
 
+import { realpathSync } from 'node:fs'
+import os from 'node:os'
+import process from 'node:process'
+
 import { describe, expect, it } from 'vitest'
 
 import {
@@ -67,6 +71,35 @@ describe('realRunner', () => {
   it('surfaces a non-zero exit as a result, not a throw', async () => {
     const result = await realRunner.run('exit 7')
     expect(result.exitCode).toBe(7)
+  })
+
+  it('runs in the directory it is given', async () => {
+    const result = await realRunner.run('pwd', { cwd: os.tmpdir() })
+    expect(result.exitCode).toBe(0)
+    // macOS reports the temp dir through a symlink, so compare the real path.
+    expect(realpathSync(result.stdout.trim())).toBe(realpathSync(os.tmpdir()))
+  })
+
+  it('passes the environment it is given', async () => {
+    const result = await realRunner.run('echo "$EXAMPLE_MARKER"', {
+      env: { ...process.env, EXAMPLE_MARKER: 'marker-value' },
+    })
+    expect(result.stdout.trim()).toBe('marker-value')
+  })
+
+  it('accepts an abort signal that never fires', async () => {
+    const controller = new AbortController()
+    const result = await realRunner.run('echo signalled', {
+      signal: controller.signal,
+    })
+    expect(result.exitCode).toBe(0)
+    expect(result.stdout).toMatch(/signalled/)
+  })
+
+  it('surfaces stderr alongside the exit code', async () => {
+    const result = await realRunner.run('echo oops >&2; exit 2')
+    expect(result.exitCode).toBe(2)
+    expect(result.stderr).toMatch(/oops/)
   })
 })
 
