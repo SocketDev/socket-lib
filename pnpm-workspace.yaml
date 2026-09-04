@@ -29,7 +29,7 @@ enableGlobalVirtualStore: true
   # the high-severity security exception; exact-pinned so a future version
   # re-soaks.
 catalog:
-  '@mdn/browser-compat-data': 8.0.12
+  '@mdn/browser-compat-data': 8.1.0
   # run-local-ci (bin: local-ci, formerly published as @redwoodjs/agent-ci)
   # runs a repo's GitHub Actions workflows locally in Docker so a change can
   # be validated before it's pushed (see the `agent-ci` skill). dtu-github-
@@ -69,7 +69,7 @@ catalog:
   '@socketsecurity/sdk': 4.1.4
   '@socketsecurity/sdk-stable': 'npm:@socketsecurity/sdk@4.1.4'
   '@types/mdast': 4.0.4
-  '@types/node': 26.3.0
+  '@types/node': 26.4.0
   '@types/semver': 7.8.0
   '@types/shell-quote': 1.7.5
   'compromise': 14.16.0
@@ -127,7 +127,7 @@ catalog:
   # @rolldown/binding-* + @oxc-project/types stay as soak-excluded
   # transitives (consumers depend on `rolldown` only).
   'regjsparser': 0.13.2
-  'rolldown': 1.2.5
+  'rolldown': 1.2.6
   'semver': 7.8.5
   'shell-quote': 1.10.0
   'taze': 21.1.0
@@ -174,6 +174,7 @@ catalog:
 # scripts. Declining is the safe default; running native build scripts from a
 # transitive dep is unnecessary attack surface here.
 allowBuilds:
+  '@anthropic-ai/claude-code': false
   # Optional native addon for ssh2 crypto acceleration; JS fallback is fine.
   cpu-features: false
   # Ships prebuilt dist; its postinstall codegen isn't needed as a dependency.
@@ -212,12 +213,12 @@ minimumReleaseAgeExclude:
   - '@decmpfs/*'
   - '@node-smol/*'
   - sockeye
-  # published: 2026-08-26 | removable: 2026-09-02
-  - magic-string@1.2.3
   - 'sfw'
   - 'socket'
   - 'sdxgen'
   - 'sockeye'
+  # published: 2026-09-03 | removable: 2026-09-10
+  - '@mdn/browser-compat-data@8.1.0'
 
 # Refuse transitive (sub-) deps declared via git/tarball/local-tarball
 # specs. Direct git deps in this repo are still allowed; this only
