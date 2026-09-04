@@ -51,16 +51,20 @@ export const StringPrototypeCharAt = uncurryThis(String.prototype.charAt)
 // NaN from an int32 signature); the wrapper here translates -1 back
 // to NaN to match `String.prototype.charCodeAt` spec.
 const smolCharCodeAt = smolPrimordial?.stringCharCodeAt
-// smolCharCodeAt fast-path fires only on socket-btm's smol Node binary.
-/* c8 ignore start - smol Node fast path unreachable on stock Node test runner */
+// The fast path is hoisted out of the pick below so the ignore covers only it.
+// Wrapping the whole pick also excluded the uncurried fallback, which is the
+// arm every stock-Node caller takes, so the tested arm sat outside the
+// denominator and read as covered without being measured.
+/* c8 ignore start - the smol Fast API binding ships only on socket-btm's smol Node binary, so this body cannot run under the stock-Node runner */
+export function smolStringCharCodeAt(s: string, i: number): number {
+  const code = smolCharCodeAt!(s, i)
+  return code === -1 ? NaN : code
+}
+/* c8 ignore stop */
 export const StringPrototypeCharCodeAt: (s: string, i: number) => number =
   smolCharCodeAt
-    ? (s, i) => {
-        const code = smolCharCodeAt(s, i)
-        return code === -1 ? NaN : code
-      }
+    ? smolStringCharCodeAt
     : uncurryThis(String.prototype.charCodeAt)
-/* c8 ignore stop */
 export const StringPrototypeCodePointAt = uncurryThis(
   String.prototype.codePointAt,
 )
