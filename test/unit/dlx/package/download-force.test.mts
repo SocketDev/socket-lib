@@ -206,7 +206,8 @@ describe.sequential('executePackage shell selection', () => {
     expect(spawnMock).toHaveBeenCalledWith(
       'C:/pkg/cli.cmd',
       ['run'],
-      // oxlint-disable-next-line socket/prefer-shell-win32 -- asserts the value isWin32() resolved to
+      // The mock forces isWin32() true, so this asserts the resolved value.
+      // oxlint-disable-next-line socket/prefer-shell-win32 -- resolved value
       { cwd: 'C:/', shell: true },
       undefined,
     )
@@ -219,7 +220,8 @@ describe.sequential('executePackage shell selection', () => {
     expect(spawnMock).toHaveBeenCalledWith(
       'C:/pkg/cli.ps1',
       [],
-      // oxlint-disable-next-line socket/prefer-shell-win32 -- asserts the value isWin32() resolved to
+      // The mock forces isWin32() true, so this asserts the resolved value.
+      // oxlint-disable-next-line socket/prefer-shell-win32 -- resolved value
       { shell: true },
       undefined,
     )
