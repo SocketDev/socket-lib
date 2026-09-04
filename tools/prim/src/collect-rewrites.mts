@@ -21,7 +21,7 @@ import {
   TYPE_NARROWING_STATIC_CALLS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
 } from './globals.mts'
-import { findClosingParen, walkAst } from './source-text.mts'
+import { findClosingParen, findOpenParen, walkAst } from './source-text.mts'
 
 /**
  * Walk `ast` and append every applicable primordial rewrite to `rewrites`,
@@ -178,7 +178,7 @@ export function collectRewrites(options: {
             lastArgEnd:
               node.arguments.length > 0
                 ? toChar(node.arguments.at(-1)!.end)
-                : toChar(node.callee.end),
+                : findOpenParen(src, toChar(node.callee.end)),
             methodName: property.name,
             objectEnd: toChar(object.end),
             objectStart: toChar(object.start),
@@ -223,10 +223,13 @@ export function collectRewrites(options: {
           )
         : ''
     const callStart = toChar(node.callee.start)
+    // With no arguments there is no last argument to scan from, and the paren
+    // scan refuses to start on the call's own `(`. Handing it the position just
+    // past that paren is what lets a no-argument call be rewritten.
     const lastArgEnd =
       node.arguments.length > 0
         ? toChar(node.arguments.at(-1)!.end)
-        : toChar(node.callee.end)
+        : findOpenParen(src, toChar(node.callee.end))
     const callEnd = findClosingParen(src, lastArgEnd)
     if (callEnd < 0) {
       // Couldn't find `)` — bail on this rewrite rather than corrupt.

@@ -311,16 +311,39 @@ describe('prototype calls', () => {
     expect(out.rewritten).toBe('const p = StringPrototypePadStart(s, 4, "0")\n')
   })
 
-  it('leaves a no-argument call alone rather than guess its span', () => {
-    // With no arguments the scan for the closing paren starts at the opening
-    // one, which is not a character it accepts, so it reports no span and the
-    // rewrite is dropped. Bailing is the designed response to a span the
-    // classifier cannot place.
+  it('emits the receiver alone when the call takes no arguments', () => {
     const out = collect('const c = s.charAt()\n', {
       exported: ['StringPrototypeCharAt'],
     })
+    expect(out.rewritten).toBe('const c = StringPrototypeCharAt(s)\n')
+  })
+
+  it('spans the whole no-argument call, including its parens', () => {
+    // The span has to reach past the `)`, or the rewrite leaves a stray pair
+    // of parens behind it.
+    const out = collect('s.charAt()\n', {
+      exported: ['StringPrototypeCharAt'],
+    })
+    expect(out.rewrites).toHaveLength(1)
+    expect(out.rewrites[0]!.end).toBe('s.charAt()'.length)
+  })
+
+  it('tolerates a comment between the callee and its empty argument list', () => {
+    const out = collect('const c = s.charAt /* why */ ()\n', {
+      exported: ['StringPrototypeCharAt'],
+    })
+    expect(out.rewritten).toBe('const c = StringPrototypeCharAt(s)\n')
+  })
+
+  it('leaves an optional call alone, whose span it cannot place', () => {
+    // `s.charAt?.()` short-circuits when `charAt` is nullish, and the
+    // primordial form has no way to express that, so declining is correct.
+    // The paren scan reports no span because `?.` sits where `(` would.
+    const out = collect('const c = s.charAt?.()\n', {
+      exported: ['StringPrototypeCharAt'],
+    })
     expect(out.rewrites).toEqual([])
-    expect(out.rewritten).toBe('const c = s.charAt()\n')
+    expect(out.rewritten).toBe('const c = s.charAt?.()\n')
   })
 
   it('asserts non-null on a nullable primordial in a TypeScript source', () => {
@@ -366,13 +389,14 @@ describe('receivers the classifier only guesses at', () => {
   })
 
   it('records the whole call span for a no-argument ambiguous site', () => {
-    // With no arguments the queue has no last argument to end at, so the span
-    // has to fall back to the end of the callee.
-    const { pending } = collect('const out = thing.then()\n', {
-      aiDisambiguate: true,
-    })
+    // With no arguments the queue has no last argument to end at, so it
+    // records the position just past the call's own `(`. Recording the end of
+    // the callee instead put the drain pass's paren scan on that paren, which
+    // it refuses to start on, and the deferred rewrite was dropped.
+    const source = 'const out = thing.then()\n'
+    const { pending } = collect(source, { aiDisambiguate: true })
     expect(pending).toHaveLength(1)
     expect(pending[0]!.firstArgStart).toBe(-1)
-    expect(pending[0]!.lastArgEnd).toBe(pending[0]!.calleeEnd)
+    expect(pending[0]!.lastArgEnd).toBe(source.indexOf('()') + 1)
   })
 })

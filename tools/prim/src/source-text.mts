@@ -146,31 +146,11 @@ export function buildByteToCharMap(src: string): number[] | undefined {
 export function findClosingParen(src: string, from: number): number {
   let i = from
   while (i < src.length) {
+    i = skipTrivia(src, i)
+    if (i >= src.length) {
+      break
+    }
     const c = src.charCodeAt(i)
-    // Whitespace.
-    if (c === 0x20 || c === 0x09 || c === 0x0a || c === 0x0d) {
-      i++
-      continue
-    }
-    // Line comment.
-    if (c === 0x2f && src.charCodeAt(i + 1) === 0x2f) {
-      while (i < src.length && src.charCodeAt(i) !== 0x0a) {
-        i++
-      }
-      continue
-    }
-    // Block comment.
-    if (c === 0x2f && src.charCodeAt(i + 1) === 0x2a) {
-      i += 2
-      while (i < src.length - 1) {
-        if (src.charCodeAt(i) === 0x2a && src.charCodeAt(i + 1) === 0x2f) {
-          i += 2
-          break
-        }
-        i++
-      }
-      continue
-    }
     // Trailing comma.
     if (c === 0x2c) {
       i++
@@ -185,6 +165,19 @@ export function findClosingParen(src: string, from: number): number {
     return -1
   }
   return -1
+}
+
+/**
+ * Scan `src` forward from `from` for a call's own `(`, returning the char index
+ * just after it, or -1 when the next meaningful character is something else.
+ *
+ * A call with no arguments has no last argument to scan from, so
+ * {@link findClosingParen} would start on the opening paren and bail. Starting
+ * it one past that paren is what lets `s.charAt()` be rewritten at all.
+ */
+export function findOpenParen(src: string, from: number): number {
+  const i = skipTrivia(src, from)
+  return src.charCodeAt(i) === 0x28 ? i + 1 : -1
 }
 
 /**
@@ -264,6 +257,43 @@ export function repairEndPositions(node: unknown): number {
     return correctedEnd
   }
   return reportedEnd
+}
+
+/**
+ * The first index at or after `from` that is not whitespace, a line comment, or
+ * a block comment.
+ */
+export function skipTrivia(src: string, from: number): number {
+  let i = from
+  while (i < src.length) {
+    const c = src.charCodeAt(i)
+    // Whitespace.
+    if (c === 0x20 || c === 0x09 || c === 0x0a || c === 0x0d) {
+      i++
+      continue
+    }
+    // Line comment.
+    if (c === 0x2f && src.charCodeAt(i + 1) === 0x2f) {
+      while (i < src.length && src.charCodeAt(i) !== 0x0a) {
+        i++
+      }
+      continue
+    }
+    // Block comment.
+    if (c === 0x2f && src.charCodeAt(i + 1) === 0x2a) {
+      i += 2
+      while (i < src.length - 1) {
+        if (src.charCodeAt(i) === 0x2a && src.charCodeAt(i + 1) === 0x2f) {
+          i += 2
+          break
+        }
+        i++
+      }
+      continue
+    }
+    break
+  }
+  return i
 }
 
 /**

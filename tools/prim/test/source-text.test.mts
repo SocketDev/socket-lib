@@ -18,7 +18,9 @@ import {
   atomicWrite,
   buildByteToCharMap,
   findClosingParen,
+  findOpenParen,
   repairEndPositions,
+  skipTrivia,
   walkAst,
 } from '../src/source-text.mts'
 
@@ -36,9 +38,47 @@ function tmpRoot(): string {
   return root
 }
 
+describe('findOpenParen', () => {
+  it('returns the index just past the paren', () => {
+    expect(findOpenParen('fn()', 2)).toBe(3)
+  })
+
+  it('steps over whitespace and comments to reach it', () => {
+    expect(findOpenParen('fn /* why */ ()', 2)).toBe(14)
+  })
+
+  it('reports nothing when the next character is not a paren', () => {
+    // `fn?.()` short-circuits, and the `?` is what stops the scan.
+    expect(findOpenParen('fn?.()', 2)).toBe(-1)
+  })
+
+  it('reports nothing at the end of the source', () => {
+    expect(findOpenParen('fn', 2)).toBe(-1)
+  })
+})
+
+describe('skipTrivia', () => {
+  it('leaves a meaningful character where it is', () => {
+    expect(skipTrivia('a', 0)).toBe(0)
+  })
+
+  it('steps over mixed whitespace and both comment forms', () => {
+    const src = '  \t\n// why\n/* also */x'
+    expect(skipTrivia(src, 0)).toBe(src.indexOf('x'))
+  })
+
+  it('stops at the end of a source that is only trivia', () => {
+    expect(skipTrivia('   ', 0)).toBe(3)
+  })
+})
+
 describe('findClosingParen', () => {
   it('returns the index just past the paren', () => {
     expect(findClosingParen('fn(a)', 4)).toBe(5)
+  })
+
+  it('reports nothing when the source ends before a paren', () => {
+    expect(findClosingParen('fn(a   ', 4)).toBe(-1)
   })
 
   it('steps over spaces, tabs and newlines', () => {
