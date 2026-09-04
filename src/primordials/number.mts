@@ -44,16 +44,23 @@ export const NumberIsSafeInteger =
 export const NumberParseFloat =
   smolPrimordial?.numberParseFloat ?? Number.parseFloat
 const smolParseInt10 = smolPrimordial?.numberParseInt10
-// smolParseInt10 fast-path fires only on socket-btm's smol Node binary;
-// stock Node falls through to Number.parseInt.
-/* c8 ignore start - smol fast-path branch only reachable on socket-btm smol Node binary */
-export const NumberParseInt: typeof Number.parseInt = smolParseInt10
-  ? (s, radix) =>
-      radix === undefined || radix === 10
-        ? smolParseInt10(s as string)
-        : Number.parseInt(s, radix)
-  : Number.parseInt
+// Read once, here, like every other binding in this file. A later reference to
+// `Number.parseInt` would be a live global lookup at call time, which is the
+// patching this module exists to be immune to.
+const stockParseInt = Number.parseInt
+// The fast path is hoisted out of the pick below so the ignore covers only it.
+// Wrapping the whole pick also excluded the stock arm, the one every caller on
+// a stock runner takes, so the tested arm sat outside the denominator.
+/* c8 ignore start - the smol Fast API binding ships only on socket-btm's smol Node binary, so this body cannot run under the stock-Node runner */
+export function smolNumberParseInt(s: string, radix?: number | undefined) {
+  return radix === undefined || radix === 10
+    ? smolParseInt10!(s)
+    : stockParseInt(s, radix)
+}
 /* c8 ignore stop */
+export const NumberParseInt: typeof Number.parseInt = smolParseInt10
+  ? smolNumberParseInt
+  : stockParseInt
 export const NumberPrototypeToExponential = uncurryThis(
   Number.prototype.toExponential,
 )

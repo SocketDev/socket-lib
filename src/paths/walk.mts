@@ -60,8 +60,8 @@ export function* walkUp(
   // to node:path on stock Node. `getSmolPath()` is undefined on stock Node,
   // so `dirname` is `path.dirname` in every non-smol environment (incl.
   // tests); the native binding is exercised by socket-btm's own tests.
-  /* c8 ignore next 2 - native binding only on socket-btm smol binaries. */
   const smol = getSmolPath()
+  /* c8 ignore next 1 - the native binding ships only on socket-btm smol binaries, so only the fallback arm runs here */
   const dirname = smol?.dirname ?? path.dirname
   let dir = path.resolve(cwd, from)
   const stopDir = stopAt ? path.resolve(cwd, stopAt) : undefined
