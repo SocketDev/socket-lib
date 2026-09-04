@@ -6,7 +6,7 @@
  */
 
 import assert from 'node:assert/strict'
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 
@@ -121,11 +121,14 @@ describe('loadCache', () => {
   test('a round trip through saveCache returns the entries', () => {
     const root = makeRoot()
     const saved = loadCache(root)
-    saved.entries['abc'] = { type: 'Array', reason: 'because' }
+    const entry = {
+      reason: 'because',
+      timestamp: 1_700_000_000_000,
+      type: 'Array',
+    }
+    saved.entries['abc'] = entry
     saveCache(root, saved)
-    assert.deepStrictEqual(loadCache(root).entries, {
-      abc: { type: 'Array', reason: 'because' },
-    })
+    assert.deepStrictEqual(loadCache(root).entries, { abc: entry })
   })
 
   test('malformed JSON reads as empty rather than throwing', () => {
