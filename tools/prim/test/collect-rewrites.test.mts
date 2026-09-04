@@ -232,3 +232,147 @@ describe('the collected spans', () => {
     expect(out.used).toEqual([])
   })
 })
+
+describe('call shapes the classifier does not touch', () => {
+  it('leaves a plain function call alone', () => {
+    const out = collect('const v = keys(o)\n', { exported: ['ObjectKeys'] })
+    expect(out.rewrites).toEqual([])
+  })
+
+  it('leaves a computed member call alone', () => {
+    // The property is a literal, not an identifier, so there is no method
+    // name to look up.
+    const out = collect("const c = s['charAt'](0)\n", {
+      exported: ['StringPrototypeCharAt'],
+    })
+    expect(out.rewrites).toEqual([])
+  })
+
+  it('leaves a nested member call alone', () => {
+    // The receiver is itself a member expression, so its type is not a name
+    // the guesser can read.
+    const out = collect('const c = a.b.charAt(0)\n', {
+      exported: ['StringPrototypeCharAt'],
+    })
+    expect(out.rewrites).toEqual([])
+  })
+})
+
+describe('statics the classifier refuses on purpose', () => {
+  it('leaves a non-callable static alone', () => {
+    // Error.prepareStackTrace is a V8 setter, so calling the primordial
+    // would call something that is not a function.
+    const out = collect('Error.prepareStackTrace(err, frames)\n', {
+      exported: ['ErrorPrepareStackTrace'],
+    })
+    expect(out.rewrites).toEqual([])
+  })
+
+  it('leaves a static whose return type narrows on the call site alone', () => {
+    // Symbol.for returns a unique symbol at the literal call site; through an
+    // alias it collapses to plain symbol and breaks computed class keys.
+    const out = collect("const s = Symbol.for('tag')\n", {
+      exported: ['SymbolFor'],
+    })
+    expect(out.rewrites).toEqual([])
+  })
+
+  it('leaves a node built-in module static alone', () => {
+    // basename is a path method, not a prototype method of a global.
+    const out = collect('const b = path.basename(p)\n', {
+      exported: ['StringPrototypeBasename'],
+    })
+    expect(out.rewrites).toEqual([])
+  })
+
+  it('asserts non-null on a nullable static in a TypeScript source', () => {
+    const out = collect('const k = Object.keys(o)\n', {
+      exported: ['ObjectKeys'],
+      isTsFile: true,
+      nullable: ['ObjectKeys'],
+    })
+    expect(out.rewritten).toBe('const k = ObjectKeys!(o)\n')
+  })
+})
+
+describe('prototype calls', () => {
+  it('moves the receiver into the first argument slot', () => {
+    const out = collect('const c = s.charAt(0)\n', {
+      exported: ['StringPrototypeCharAt'],
+    })
+    expect(out.rewritten).toBe('const c = StringPrototypeCharAt(s, 0)\n')
+    expect(out.used).toContain('StringPrototypeCharAt')
+  })
+
+  it('keeps every argument, in order', () => {
+    const out = collect('const p = s.padStart(4, "0")\n', {
+      exported: ['StringPrototypePadStart'],
+    })
+    expect(out.rewritten).toBe('const p = StringPrototypePadStart(s, 4, "0")\n')
+  })
+
+  it('leaves a no-argument call alone rather than guess its span', () => {
+    // With no arguments the scan for the closing paren starts at the opening
+    // one, which is not a character it accepts, so it reports no span and the
+    // rewrite is dropped. Bailing is the designed response to a span the
+    // classifier cannot place.
+    const out = collect('const c = s.charAt()\n', {
+      exported: ['StringPrototypeCharAt'],
+    })
+    expect(out.rewrites).toEqual([])
+    expect(out.rewritten).toBe('const c = s.charAt()\n')
+  })
+
+  it('asserts non-null on a nullable primordial in a TypeScript source', () => {
+    const out = collect('const c = s.charAt(0)\n', {
+      exported: ['StringPrototypeCharAt'],
+      isTsFile: true,
+      nullable: ['StringPrototypeCharAt'],
+    })
+    expect(out.rewritten).toBe('const c = StringPrototypeCharAt!(s, 0)\n')
+  })
+
+  it('leaves the call alone when the surface does not export the primordial', () => {
+    const out = collect('const c = s.charAt(0)\n')
+    expect(out.rewrites).toEqual([])
+  })
+})
+
+describe('receivers the classifier only guesses at', () => {
+  it('rewrites an ambiguous method when the receiver name gives it away', () => {
+    // `re` reads as a RegExp, which is the whole of the static signal.
+    const out = collect('if (re.test(value)) {}\n', {
+      exported: ['RegExpPrototypeTest'],
+    })
+    expect(out.rewritten).toBe('if (RegExpPrototypeTest(re, value)) {}\n')
+  })
+
+  it('skips an ambiguous guess when guessed receivers are opted out', () => {
+    const out = collect('if (re.test(value)) {}\n', {
+      exported: ['RegExpPrototypeTest'],
+      includeGuessed: false,
+    })
+    expect(out.rewrites).toEqual([])
+    expect(out.skipped).toBe(1)
+  })
+
+  it('skips an unambiguous method on a guessed receiver when opted out', () => {
+    const out = collect('const v = re.someMethod(value)\n', {
+      exported: ['RegExpPrototypeSomeMethod'],
+      includeGuessed: false,
+    })
+    expect(out.rewrites).toEqual([])
+    expect(out.skipped).toBe(1)
+  })
+
+  it('records the whole call span for a no-argument ambiguous site', () => {
+    // With no arguments the queue has no last argument to end at, so the span
+    // has to fall back to the end of the callee.
+    const { pending } = collect('const out = thing.then()\n', {
+      aiDisambiguate: true,
+    })
+    expect(pending).toHaveLength(1)
+    expect(pending[0]!.firstArgStart).toBe(-1)
+    expect(pending[0]!.lastArgEnd).toBe(pending[0]!.calleeEnd)
+  })
+})
