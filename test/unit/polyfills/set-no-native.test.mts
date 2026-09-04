@@ -52,6 +52,15 @@ describe('the native lookups', () => {
     expect(typeof Set.prototype.union).toBe('function')
   })
 
+  it('are reading the module under test, not a second copy of it', () => {
+    // The shims build their result with the same SetCtor the lookups read, so
+    // a result carrying the stand-in's name proves the mock reached the module
+    // rather than only the test's own import of it.
+    expect(sets.setUnion(new Set([1]), new Set([2])).constructor.name).toBe(
+      'SetWithoutCombinators',
+    )
+  })
+
   it('find no combining method to bridge', () => {
     expect(sets.setUnionNative).toBeUndefined()
     expect(sets.setIntersectionNative).toBeUndefined()

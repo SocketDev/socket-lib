@@ -10,8 +10,10 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  closeIterator,
   nativeSetCombine,
   nativeSetPredicate,
+  nextOf,
   setDifference,
   setDifferenceNative,
   setDifferenceShim,
@@ -347,5 +349,97 @@ describe('the predicate methods', () => {
       setIsSupersetOf === superPicked &&
       setIsDisjointFrom === disjointPicked
     expect(allSelected).toBe(true)
+  })
+})
+
+describe('which side a shim iterates', () => {
+  it('difference walks the other side when the receiver is larger', () => {
+    // Three against one: the shim deletes the other side's keys from a copy of
+    // the receiver rather than asking `has` three times.
+    const asked: number[] = []
+    const other = {
+      has(value: number) {
+        asked.push(value)
+        return value === 2
+      },
+      keys: () => [2][Symbol.iterator](),
+      size: 1,
+    }
+    expect([...setDifferenceShim(new Set([1, 2, 3]), other)]).toEqual([1, 3])
+    expect(asked).toEqual([])
+  })
+
+  it('difference asks the other side when the receiver is no larger', () => {
+    // One against two, so `has` runs — and answers no, which is the arm that
+    // keeps the element.
+    expect([...setDifferenceShim(new Set([1]), setLike([2, 3]))]).toEqual([1])
+  })
+
+  it('isDisjointFrom walks the other side when the receiver is larger', () => {
+    expect(setIsDisjointFromShim(new Set([1, 2, 3]), setLike([9]))).toBe(true)
+  })
+
+  it('isDisjointFrom stops on the first shared element it finds there', () => {
+    expect(setIsDisjointFromShim(new Set([1, 2, 3]), setLike([2]))).toBe(false)
+  })
+
+  it('isDisjointFrom closes the other side when it stops early', () => {
+    // Stopping mid-iteration owes the iterator a `return` call, and only the
+    // larger-receiver arm reaches that close.
+    let closed = 0
+    const values = [2, 3]
+    const other = {
+      has: (value: number) => values.includes(value),
+      keys() {
+        const inner = values[Symbol.iterator]()
+        return {
+          next: () => inner.next(),
+          return: () => {
+            closed += 1
+            return { done: true as const, value: undefined }
+          },
+          [Symbol.iterator]() {
+            return this
+          },
+        }
+      },
+      size: 2,
+    }
+    expect(setIsDisjointFromShim(new Set([1, 2, 3]), other)).toBe(false)
+    expect(closed).toBe(1)
+  })
+
+  it('isSupersetOf answers no before reading a larger other side', () => {
+    expect(setIsSupersetOfShim(new Set([1]), setLike([1, 2, 3]))).toBe(false)
+  })
+})
+
+describe('the set-like contract at its edges', () => {
+  it('accepts an infinite size, which no truncation applies to', () => {
+    // A set-like may report Infinity to mean "ask me, do not iterate me", and
+    // the size is carried through rather than trunc'd.
+    const record = setRecordOf<number>({
+      has: () => true,
+      keys: () => [][Symbol.iterator](),
+      size: Number.POSITIVE_INFINITY,
+    })
+    expect(record.size).toBe(Number.POSITIVE_INFINITY)
+  })
+
+  it('leaves a non-object alone rather than calling return on it', () => {
+    expect(() => {
+      closeIterator(undefined)
+      closeIterator(42)
+    }).not.toThrow()
+  })
+
+  it('leaves an iterator with no return alone', () => {
+    expect(() => {
+      closeIterator({ next: () => ({ done: true, value: undefined }) })
+    }).not.toThrow()
+  })
+
+  it('refuses an iterator whose next is not callable', () => {
+    expect(() => nextOf({ next: 0 })).toThrow(/callable next/)
   })
 })
