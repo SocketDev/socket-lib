@@ -14,8 +14,6 @@ import { packageDefaultSocketCategories as packageDefaultSocketCategoriesImport 
 
 import { ArrayFrom } from '../primordials/array.mjs'
 
-import { ObjectEntries } from '../primordials/object.mjs'
-
 import { ReflectGetPrototypeOf } from '../primordials/reflect.mjs'
 let cachedLifecycleScriptNames: string[]
 let cachedPackageDefaultNodeRange: string | undefined
@@ -74,8 +72,13 @@ export function getPackageDefaultSocketCategories() {
 
 export function getPackageExtensions(): Iterable<[string, unknown]> {
   if (cachedPackageExtensions === undefined) {
-    // packageExtensions is imported at the top
-    cachedPackageExtensions = ObjectEntries(packageExtensionsImport)
+    // Already an array of `[selector, extension]` pairs, which is the shape
+    // callers iterate. Running it through Object.entries wraps each pair in an
+    // `[index, pair]` tuple, so every caller read the array index where the
+    // selector belongs and no extension ever matched a package.
+    cachedPackageExtensions = packageExtensionsImport as Iterable<
+      [string, unknown]
+    >
   }
   return cachedPackageExtensions
 }
