@@ -3,8 +3,10 @@
  *   rationale: the `require` runs at module load behind the runtime `IS_NODE`
  *   guard (false in browsers → never executes there), giving a load-time
  *   snapshot in Node while staying browser-safe. `getNodeOs()` returns the
- *   module object for a late, spy-able method lookup; the frozen `os<Method>`
- *   snapshots below are the tamper-proof hot-path twin.
+ *   module object for a late, spy-able method lookup; the frozen `Os<Method>`
+ *   snapshots below are the tamper-proof hot-path twin. They carry the
+ *   capitalized primordial spelling because that is what they are: a frozen
+ *   reference to a built-in method, same contract as `StringPrototypeCharAt`.
  */
 
 import type * as NodeOs from 'node:os'
@@ -26,7 +28,7 @@ export function getNodeOs(): typeof NodeOs {
 // IS_NODE-gated module, which is undefined in a browser. Frozen refs aren't
 // spy-able — use `getNodeOs()` for the test injection path. See node/fs.ts for the
 // full two-surface rationale.
-export const osArch = nodeOs?.arch
-export const osHomedir = nodeOs?.homedir
-export const osPlatform = nodeOs?.platform
-export const osTmpdir = nodeOs?.tmpdir
+export const OsArch = nodeOs?.arch
+export const OsHomedir = nodeOs?.homedir
+export const OsPlatform = nodeOs?.platform
+export const OsTmpdir = nodeOs?.tmpdir

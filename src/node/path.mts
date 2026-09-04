@@ -29,10 +29,10 @@ export function getNodePath(): typeof NodePath {
 // `nodePath.join = tampered` can't redirect these. Frozen refs aren't spy-able —
 // use `getNodePath()` for the test injection path. Direct-const exports (the
 // primordials/intl shape) keep it sort-clean + tree-shakable.
-export const pathBasename = nodePath?.basename
-export const pathDirname = nodePath?.dirname
-export const pathExtname = nodePath?.extname
-export const pathIsAbsolute = nodePath?.isAbsolute
-export const pathJoin = nodePath?.join
-export const pathRelative = nodePath?.relative
-export const pathResolve = nodePath?.resolve
+export const PathBasename = nodePath?.basename
+export const PathDirname = nodePath?.dirname
+export const PathExtname = nodePath?.extname
+export const PathIsAbsolute = nodePath?.isAbsolute
+export const PathJoin = nodePath?.join
+export const PathRelative = nodePath?.relative
+export const PathResolve = nodePath?.resolve

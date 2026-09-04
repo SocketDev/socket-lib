@@ -11,7 +11,7 @@
  *   eager-but-guarded form keeps the browser-safe behavior while gaining the
  *   load-time snapshot. Two surfaces: `getNodeFs()` returns the module object
  *   with LATE method lookup (spy-able — the test injection point); the
- *   `fs<Method>` consts (`fsExistsSync`, `fsReadFileSync`, …) are method
+ *   `Fs<Method>` consts (`FsExistsSync`, `FsReadFileSync`, …) are method
  *   references FROZEN at load, tamper-proof against a method swap but not
  *   spy-able, for Socket's hot fs calls. Both stay browser-safe behind IS_NODE
  *   \+ `/*@__PURE__*\/`.
@@ -53,10 +53,10 @@ export function getNodeFs(): typeof NodeFs {
 // only on a hot path that wants tamper-resistance. Exported as direct consts
 // (the `primordials/intl` shape) so there's no helper/getter to sort and no
 // `/*@__PURE__*/`-on-a-call concern; an unused const tree-shakes on its own.
-export const fsAccessSync = nodeFs?.accessSync
-export const fsExistsSync = nodeFs?.existsSync
-export const fsMkdirSync = nodeFs?.mkdirSync
-export const fsReadFileSync = nodeFs?.readFileSync
-export const fsRealpathSync = nodeFs?.realpathSync
-export const fsStatSync = nodeFs?.statSync
-export const fsWriteFileSync = nodeFs?.writeFileSync
+export const FsAccessSync = nodeFs?.accessSync
+export const FsExistsSync = nodeFs?.existsSync
+export const FsMkdirSync = nodeFs?.mkdirSync
+export const FsReadFileSync = nodeFs?.readFileSync
+export const FsRealpathSync = nodeFs?.realpathSync
+export const FsStatSync = nodeFs?.statSync
+export const FsWriteFileSync = nodeFs?.writeFileSync

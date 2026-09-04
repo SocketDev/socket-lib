@@ -9,7 +9,7 @@
  *   scope. Splitting it that way keeps the binding placement in the rule that
  *   already owns it, rather than teaching a second tool the same convention.
  *
- *   It rewrites to the ACCESSOR, never to a frozen `pathJoin`-style snapshot.
+ *   It rewrites to the ACCESSOR, never to a frozen `PathJoin`-style snapshot.
  *   Those are opt-in for hot paths and are not spy-able, so converting a module
  *   whose tests inject through `getNodeFs()` would silently break them.
  *
