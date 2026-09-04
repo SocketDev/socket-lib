@@ -283,6 +283,7 @@ export interface ChildProcess extends EventEmitter {
     sendHandle?: SendHandle | undefined,
     callback?: ((error: Error | null) => void) | undefined,
   ): boolean
+  // oxlint-disable-next-line socket/no-optional-param-before-options-bag -- node ChildProcess.send contract.
   send(
     message: Serializable,
     sendHandle?: SendHandle | undefined,

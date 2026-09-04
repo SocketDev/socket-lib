@@ -105,6 +105,7 @@ export function spawn(
   options: SpawnOptions & { stdioString: false },
   extra?: SpawnExtra | undefined,
 ): SpawnResult<Buffer>
+// oxlint-disable-next-line socket/no-optional-param-before-options-bag -- node child_process contract.
 export function spawn(
   cmd: string,
   args?: string[] | readonly string[] | undefined,
@@ -114,7 +115,7 @@ export function spawn(
 // This mirrors node's own child_process.spawn(command, args, options) on
 // purpose: callers write spawn('git', ['push']) exactly as they would against
 // the builtin, so the shape is fixed by that contract, not chosen here.
-// oxlint-disable-next-line socket/no-optional-positional-trap -- node child_process contract.
+// oxlint-disable-next-line socket/no-optional-positional-trap, socket/no-optional-param-before-options-bag -- node child_process contract.
 export function spawn(
   cmd: string,
   args?: string[] | readonly string[] | undefined,
@@ -391,11 +392,13 @@ export function spawnSync(
     encoding: 'buffer' | null
   },
 ): SpawnSyncReturns<Buffer>
+// oxlint-disable-next-line socket/no-optional-param-before-options-bag -- node child_process contract.
 export function spawnSync(
   cmd: string,
   args?: string[] | readonly string[] | undefined,
   options?: SpawnSyncOptions | undefined,
 ): SpawnSyncReturns<string | Buffer>
+// oxlint-disable-next-line socket/no-optional-param-before-options-bag -- node child_process contract.
 export function spawnSync(
   cmd: string,
   args?: string[] | readonly string[] | undefined,

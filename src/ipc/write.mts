@@ -74,7 +74,7 @@ export async function writeIpcStub(
   // planted file or an old stub from a reused PID — and (b) refuse to
   // follow a symlink at the final path component, which on shared temp
   // dirs (e.g. /tmp on Linux) could otherwise redirect this write into
-  // the victim's own files. O_NOFOLLOW is a no-op on Windows, where the
+  // the target user's own files. O_NOFOLLOW is a no-op on Windows, where the
   // per-user $TEMP makes the attack moot anyway.
   const flags =
     fs.constants.O_CREAT |

@@ -40,7 +40,7 @@ export function asRetryFailure(result: SpawnStdioResult): SpawnRetryFailure {
 // Mirrors spawn(cmd, args, options, extra) on purpose: a caller swaps one for
 // the other without rewriting the call, so the shape is fixed by that
 // contract rather than chosen here.
-// oxlint-disable-next-line socket/no-optional-positional-trap -- mirrors spawn
+// oxlint-disable-next-line socket/no-optional-positional-trap, socket/no-optional-param-before-options-bag -- mirrors spawn
 export async function spawnWithRetry(
   cmd: string,
   args?: string[] | readonly string[] | undefined,

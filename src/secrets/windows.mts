@@ -261,7 +261,7 @@ export function validateKeychainComponent(value: string, name: string): void {
   if (
     // Screens an IDENTIFIER for separator characters and rejects them for
     // security; not a path match.
-    // oxlint-disable-next-line socket/prefer-normalize-path -- not a path
+    // oxlint-disable-next-line socket/prefer-socket-lib-normalize-path -- not a path
     /[\\/]/.test(value) ||
     value.includes('..') ||
     value.includes('\0') ||
