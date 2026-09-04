@@ -14,6 +14,11 @@ import { DateCtor, DateNow } from '../primordials/date.mjs'
 const logger = getDefaultLogger()
 export interface FooterOptions {
   /**
+   * Text shown above the border. Omit for a bare rule.
+   */
+  message?: string | undefined
+
+  /**
    * Width of the footer border in characters.
    *
    * @default 80
@@ -113,14 +118,11 @@ export interface SummaryStats {
  *
  * @returns Formatted footer string with border and optional info
  */
-// oxlint-disable-next-line socket/no-optional-param-before-options-bag -- published signature; folding message into the bag is a breaking change.
-export function createFooter(
-  message?: string | undefined,
-  options?: FooterOptions | undefined,
-): string {
+export function createFooter(options?: FooterOptions | undefined): string {
   const {
     borderChar = '=',
     color = 'gray',
+    message,
     showDuration = false,
     showTimestamp = false,
     startTime,
@@ -217,9 +219,9 @@ export function createSummaryFooter(
     ArrayPrototypePush(parts, `${LOG_SYMBOLS['fail']} ${stats.errors} errors`)
   }
 
-  const message = parts.join(' | ')
-  return createFooter(message, {
+  return createFooter({
     ...options,
+    message: parts.join(' | '),
     showDuration: stats.duration !== undefined,
     ...(stats.duration !== undefined && { startTime: stats.duration }),
   })

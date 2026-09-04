@@ -40,34 +40,35 @@ describe('stdio/footer', () => {
     })
 
     it('should create footer with message', () => {
-      const result = createFooter('Build complete')
+      const result = createFooter({ message: 'Build complete' })
       expect(result).toContain('Build complete')
       expect(result).toContain('='.repeat(80))
     })
 
     it('should create footer with custom width', () => {
-      const result = createFooter(undefined, { width: 60 })
+      const result = createFooter({ width: 60 })
       expect(result).toBe('='.repeat(60))
     })
 
     it('should create footer with custom border char', () => {
-      const result = createFooter(undefined, { borderChar: '-' })
+      const result = createFooter({ borderChar: '-' })
       expect(result).toBe('-'.repeat(80))
     })
 
     it('should create footer with custom color', () => {
-      const result = createFooter('Success', { color: 'green' })
+      const result = createFooter({ message: 'Success', color: 'green' })
       expect(result).toContain('Success')
     })
 
     it('should show timestamp when requested', () => {
-      const result = createFooter('Done', { showTimestamp: true })
+      const result = createFooter({ message: 'Done', showTimestamp: true })
       expect(result).toContain('Completed at:')
       expect(result).toContain('Done')
     })
 
     it('should show duration when requested with startTime', () => {
-      const result = createFooter('Done', {
+      const result = createFooter({
+        message: 'Done',
         showDuration: true,
         startTime: startTimeForDuration(3),
       })
@@ -75,12 +76,13 @@ describe('stdio/footer', () => {
     })
 
     it('should not show duration without startTime', () => {
-      const result = createFooter('Done', { showDuration: true })
+      const result = createFooter({ message: 'Done', showDuration: true })
       expect(result).not.toContain('Duration:')
     })
 
     it('should show both timestamp and duration', () => {
-      const result = createFooter('Done', {
+      const result = createFooter({
+        message: 'Done',
         showTimestamp: true,
         showDuration: true,
         startTime: startTimeForDuration(3),
@@ -90,40 +92,41 @@ describe('stdio/footer', () => {
     })
 
     it('should handle message with timestamp', () => {
-      const result = createFooter('Complete', { showTimestamp: true })
+      const result = createFooter({ message: 'Complete', showTimestamp: true })
       const lines = result.split(/\r?\n/)
       expect(lines.some(line => line.includes('Complete'))).toBe(true)
       expect(lines.some(line => line.includes('Completed at:'))).toBe(true)
     })
 
     it('should handle empty message', () => {
-      const result = createFooter('')
+      const result = createFooter({ message: '' })
       expect(result).toContain('='.repeat(80))
     })
 
     it('should handle undefined message', () => {
-      const result = createFooter(undefined)
+      const result = createFooter({ message: undefined })
       expect(result).toBe('='.repeat(80))
     })
 
     it('should handle long message', () => {
       const longMessage = 'A'.repeat(200)
-      const result = createFooter(longMessage)
+      const result = createFooter({ message: longMessage })
       expect(result).toContain(longMessage)
     })
 
     it('should handle message with special characters', () => {
-      const result = createFooter('Build: 100% complete')
+      const result = createFooter({ message: 'Build: 100% complete' })
       expect(result).toContain('Build: 100% complete')
     })
 
     it('should handle Unicode message', () => {
-      const result = createFooter('完了しました')
+      const result = createFooter({ message: '完了しました' })
       expect(result).toContain('完了しました')
     })
 
     it('should format duration correctly', () => {
-      const result = createFooter('Done', {
+      const result = createFooter({
+        message: 'Done',
         showDuration: true,
         startTime: startTimeForDuration(9.5),
       })
@@ -131,7 +134,8 @@ describe('stdio/footer', () => {
     })
 
     it('should handle very short duration', () => {
-      const result = createFooter('Done', {
+      const result = createFooter({
+        message: 'Done',
         showDuration: true,
         startTime: startTimeForDuration(0.05),
       })
@@ -139,7 +143,8 @@ describe('stdio/footer', () => {
     })
 
     it('should handle zero duration', () => {
-      const result = createFooter('Done', {
+      const result = createFooter({
+        message: 'Done',
         showDuration: true,
         startTime: startTimeForDuration(0),
       })
@@ -158,7 +163,8 @@ describe('stdio/footer', () => {
       ]
       for (let i = 0, { length } = colors; i < length; i += 1) {
         const color = colors[i]!
-        const result = createFooter('Message', {
+        const result = createFooter({
+          message: 'Message',
           color: color as
             | 'cyan'
             | 'green'
@@ -173,7 +179,7 @@ describe('stdio/footer', () => {
     })
 
     it('should handle undefined color', () => {
-      const result = createFooter('Message', { color: undefined })
+      const result = createFooter({ message: 'Message', color: undefined })
       expect(result).toContain('Message')
     })
 
@@ -183,25 +189,26 @@ describe('stdio/footer', () => {
     })
 
     it('should end with border', () => {
-      const result = createFooter('Message')
+      const result = createFooter({ message: 'Message' })
       const lines = result.split(/\r?\n/)
       expect(lines[lines.length - 1]).toBe('='.repeat(80))
     })
 
     it('should handle small width', () => {
-      const result = createFooter(undefined, { width: 10 })
+      const result = createFooter({ width: 10 })
       expect(result).toBe('='.repeat(10))
     })
 
     it('should handle large width', () => {
-      const result = createFooter(undefined, { width: 200 })
+      const result = createFooter({ width: 200 })
       expect(result).toBe('='.repeat(200))
     })
   })
 
   describe('integration', () => {
     it('should create complete report footer', () => {
-      const footer = createFooter('Analysis complete', {
+      const footer = createFooter({
+        message: 'Analysis complete',
         showTimestamp: true,
         showDuration: true,
         startTime: startTimeForDuration(5),
@@ -228,8 +235,9 @@ describe('stdio/footer', () => {
     })
 
     it('should support multiple footer styles', () => {
-      const simple = createFooter('Done')
-      const detailed = createFooter('Done', {
+      const simple = createFooter({ message: 'Done' })
+      const detailed = createFooter({
+        message: 'Done',
         showTimestamp: true,
         showDuration: true,
         startTime: Date.now() - 5000,
@@ -242,7 +250,8 @@ describe('stdio/footer', () => {
     })
 
     it('should handle build report footer', () => {
-      const footer = createFooter('Build successful', {
+      const footer = createFooter({
+        message: 'Build successful',
         showDuration: true,
         startTime: startTimeForDuration(5),
         color: 'green',
@@ -256,27 +265,28 @@ describe('stdio/footer', () => {
 
   describe('edge cases', () => {
     it('should handle zero width', () => {
-      const result = createFooter(undefined, { width: 0 })
+      const result = createFooter({ width: 0 })
       expect(result).toBe('')
     })
 
     it('should handle width of 1', () => {
-      const result = createFooter(undefined, { width: 1 })
+      const result = createFooter({ width: 1 })
       expect(result).toBe('=')
     })
 
     it('should handle empty border char', () => {
-      const result = createFooter(undefined, { borderChar: '' })
+      const result = createFooter({ borderChar: '' })
       expect(result).toBe('')
     })
 
     it('should handle multi-character border', () => {
-      const result = createFooter(undefined, { borderChar: '=-' })
+      const result = createFooter({ borderChar: '=-' })
       expect(result).toContain('=-')
     })
 
     it('should handle negative startTime', () => {
-      const result = createFooter('Done', {
+      const result = createFooter({
+        message: 'Done',
         showDuration: true,
         startTime: startTimeForDuration(6),
       })
@@ -285,7 +295,8 @@ describe('stdio/footer', () => {
     })
 
     it('should handle startTime in future', () => {
-      const result = createFooter('Done', {
+      const result = createFooter({
+        message: 'Done',
         showDuration: true,
         startTime: startTimeForDuration(-9),
       })
@@ -294,7 +305,7 @@ describe('stdio/footer', () => {
     })
 
     it('should handle message with newlines', () => {
-      const result = createFooter('Line1\nLine2')
+      const result = createFooter({ message: 'Line1\nLine2' })
       expect(result).toContain('Line1')
       expect(result).toContain('Line2')
     })
@@ -302,7 +313,8 @@ describe('stdio/footer', () => {
 
   describe('real-world usage', () => {
     it('should create CLI command completion footer', () => {
-      const footer = createFooter('Command completed successfully', {
+      const footer = createFooter({
+        message: 'Command completed successfully',
         showDuration: true,
         startTime: startTimeForDuration(3),
         color: 'green',
@@ -312,7 +324,8 @@ describe('stdio/footer', () => {
     })
 
     it('should create analysis report footer', () => {
-      const footer = createFooter('Security analysis complete', {
+      const footer = createFooter({
+        message: 'Security analysis complete',
         showTimestamp: true,
         showDuration: true,
         startTime: startTimeForDuration(15),
