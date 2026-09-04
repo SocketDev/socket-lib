@@ -282,4 +282,23 @@ describe('buildSnippet', () => {
     const snippet = buildSnippet(src, lineStarts, 1)
     assert.equal(snippet, 'only one line')
   })
+
+  test('starts at offset zero when the table has no entries', () => {
+    // An empty table means nothing to clamp against, so the window is the
+    // whole source rather than a slice starting at NaN.
+    const src = 'no line table was built'
+    const snippet = buildSnippet(src, [], 1)
+    assert.equal(snippet, src)
+  })
+
+  test('ends at the source end when the end line has no recorded offset', () => {
+    // A table longer than the offsets it holds — a hole where the end line
+    // would be read. The window falls back to the end of the source, minus
+    // the one byte the normal path drops to exclude the next line's newline.
+    const src = 'a\nb\nc\n'
+    const lineStarts = [0, 2]
+    lineStarts.length = 12
+    const snippet = buildSnippet(src, lineStarts, 1)
+    assert.equal(snippet, 'a\nb\nc')
+  })
 })
