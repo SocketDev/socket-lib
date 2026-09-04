@@ -345,16 +345,14 @@ export function parseGitDiffStdout(
 }
 
 export function setCachedGitDiff(key: string, result: string[]): void {
-  // LRU eviction triggers at GIT_CACHE_MAX_SIZE; not reachable from
-  // typical test runs which exercise <10 distinct queries.
-  /* c8 ignore start */
+  // LRU eviction at GIT_CACHE_MAX_SIZE. A typical run holds fewer than ten
+  // distinct queries, so this fires only under a caller that churns keys.
   if (gitDiffCache.size >= GIT_CACHE_MAX_SIZE) {
     const oldest = gitDiffCache.keys().next().value
     if (oldest !== undefined) {
       gitDiffCache.delete(oldest)
     }
   }
-  /* c8 ignore stop */
   gitDiffCache.set(key, { expiresAt: Date.now() + GIT_CACHE_TTL_MS, result })
 }
 
