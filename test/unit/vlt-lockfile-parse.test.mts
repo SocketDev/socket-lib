@@ -98,4 +98,65 @@ describe('jsParseVltLock', () => {
     const result = jsParseVltLock('{ nope')
     expect(result.packages).toHaveLength(0)
   })
+
+  test('skips a node that is not a tuple', () => {
+    const lock = JSON.stringify({
+      lockfileVersion: 1,
+      nodes: { 'registry~~lodash@4.17.21': { name: 'lodash' } },
+    })
+    expect(jsParseVltLock(lock).packages).toHaveLength(0)
+  })
+
+  test('skips a node whose name is in neither the column nor the id', () => {
+    // A key that is not a DepID leaves nothing to recover the name from.
+    const lock = JSON.stringify({
+      lockfileVersion: 1,
+      nodes: { 'not-a-dep-id': [0, undefined, undefined, undefined] },
+    })
+    expect(jsParseVltLock(lock).packages).toHaveLength(0)
+  })
+
+  test('defaults the lock version when the file omits it', () => {
+    expect(jsParseVltLock(JSON.stringify({ nodes: {} })).lockVersion).toBe('1')
+  })
+})
+
+describe("jsParseVltLock's name index", () => {
+  function indexOf(lock: string): Record<string, number | number[]> {
+    const result = jsParseVltLock(lock) as unknown as {
+      _index: Record<string, number | number[]>
+    }
+    return result._index
+  }
+
+  test('points a single entry at its position', () => {
+    const lock = JSON.stringify({
+      nodes: {
+        'registry~~lodash@4.17.21': [0, undefined, undefined, undefined],
+      },
+    })
+    expect(indexOf(lock)['lodash']).toBe(0)
+  })
+
+  test('collects both positions when a name appears twice', () => {
+    // Two versions of one package is the ordinary case, not an error.
+    const lock = JSON.stringify({
+      nodes: {
+        'registry~~lodash@4.17.21': [0, undefined, undefined, undefined],
+        'registry~~lodash@3.10.1': [0, undefined, undefined, undefined],
+      },
+    })
+    expect(indexOf(lock)['lodash']).toEqual([0, 1])
+  })
+
+  test('keeps growing the list past the second duplicate', () => {
+    const lock = JSON.stringify({
+      nodes: {
+        'registry~~lodash@4.17.21': [0, undefined, undefined, undefined],
+        'registry~~lodash@3.10.1': [0, undefined, undefined, undefined],
+        'registry~~lodash@2.4.2': [0, undefined, undefined, undefined],
+      },
+    })
+    expect(indexOf(lock)['lodash']).toEqual([0, 1, 2])
+  })
 })

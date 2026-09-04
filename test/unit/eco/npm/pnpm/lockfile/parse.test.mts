@@ -169,6 +169,26 @@ describe('eco/npm/pnpm/lockfile/parse', () => {
       expect(fs.isOptional).toBe(true)
     })
 
+    it('reads the repo and commit out of a git resolution', () => {
+      const lock = `lockfileVersion: '9.0'\n\npackages:\n\n  example-pkg@https://codeload.example.com/tar:\n    resolution: {type: git, repo: https://github.com/example-owner/example-pkg.git, commit: 0123456789abcdef0123456789abcdef01234567}\n`
+      const result = parsePnpmLock(lock)
+      const pkg = result.packages.find(p => p.name === 'example-pkg')!
+      expect(pkg.vcsUrl).toBe(
+        'https://github.com/example-owner/example-pkg.git',
+      )
+      expect(pkg.vcsCommit).toBe('0123456789abcdef0123456789abcdef01234567')
+    })
+
+    it('leaves the commit unset when the git resolution omits one', () => {
+      const lock = `lockfileVersion: '9.0'\n\npackages:\n\n  example-pkg@https://codeload.example.com/tar:\n    resolution: {type: git, repo: https://github.com/example-owner/example-pkg.git}\n`
+      const result = parsePnpmLock(lock)
+      const pkg = result.packages.find(p => p.name === 'example-pkg')!
+      expect(pkg.vcsUrl).toBe(
+        'https://github.com/example-owner/example-pkg.git',
+      )
+      expect(pkg.vcsCommit).toBeUndefined()
+    })
+
     it('skips workspace link: deps in importers (inline form)', () => {
       const lock = `lockfileVersion: '6.0'\n\nimporters:\n\n  .:\n    dependencies:\n      my-workspace: link:packages/my-workspace\n`
       const result = parsePnpmLock(lock)
