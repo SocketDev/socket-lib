@@ -50,6 +50,7 @@ export interface ExecScriptOptions extends SpawnOptions {
  *
  * @returns The spawned `ChildProcess`-like promise from the underlying runner.
  */
+// oxlint-disable-next-line socket/no-optional-param-before-options-bag -- mirrors spawn; args doubles as the options bag.
 export function execScript(
   scriptName: string,
   args?: string[] | readonly string[] | ExecScriptOptions | undefined,

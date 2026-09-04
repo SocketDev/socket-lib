@@ -2,6 +2,8 @@
  * @file JSON type definitions and interfaces.
  */
 
+import type { Schema } from '../schema/types.mjs'
+
 /**
  * JSON primitive types: `null`, `boolean`, `number`, or `string`.
  *
@@ -93,7 +95,13 @@ export type JsonReviver = (key: string, value: unknown) => unknown
  *   }
  *   ```
  */
-export interface ParseJsonStrictOptions {
+export interface ParseJsonStrictOptions<T = unknown> {
+  /**
+   * Zod-shaped schema validated against the parsed value, via
+   * `@socketsecurity/lib/schema/validate`.
+   */
+  schema?: Schema<T> | undefined
+
   /**
    * Allow dangerous prototype pollution keys (`__proto__`, `constructor`,
    * `prototype`). Set to `true` only if you trust the JSON source completely.
@@ -104,7 +112,7 @@ export interface ParseJsonStrictOptions {
    *   parseJsonStrict('{"__proto__": {"polluted": true}}')
    *
    *   // Allows the parse (dangerous!)
-   *   parseJsonStrict('{"__proto__": {"polluted": true}}', undefined, {
+   *   parseJsonStrict('{"__proto__": {"polluted": true}}', {
    *     allowPrototype: true,
    *   })
    *   ```
@@ -120,7 +128,7 @@ export interface ParseJsonStrictOptions {
    * @example
    *   ;```ts
    *   // Limit to 1KB
-   *   parseJsonStrict(jsonString, undefined, { maxSize: 1024 })
+   *   parseJsonStrict(jsonString, { maxSize: 1024 })
    *   ```
    *
    * @default 10_485_760 (10 MB)

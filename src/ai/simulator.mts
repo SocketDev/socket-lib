@@ -103,6 +103,7 @@ export class LanguageModelSessionSimulator implements SessionLike {
  * Install the simulator onto `globalThis.LanguageModel` so
  * `createBuiltinModel` finds it.
  */
+// oxlint-disable-next-line socket/no-optional-param-before-options-bag -- published signature; target defaults to globalThis and callers pass it positionally.
 export function installLanguageModelSimulator(
   target: typeof globalThis = globalThis,
   options?: LanguageModelSimulatorOptions | undefined,

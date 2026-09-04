@@ -113,6 +113,7 @@ export interface SummaryStats {
  *
  * @returns Formatted footer string with border and optional info
  */
+// oxlint-disable-next-line socket/no-optional-param-before-options-bag -- published signature; folding message into the bag is a breaking change.
 export function createFooter(
   message?: string | undefined,
   options?: FooterOptions | undefined,

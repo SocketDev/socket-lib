@@ -7,7 +7,6 @@
 
 import { validateSchema } from '../schema/validate.mjs'
 import { stripBom } from '../strings/transform.mjs'
-import type { Schema } from '../schema/types.mjs'
 import { BufferByteLength } from '../primordials/buffer.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
 import { JSONParse } from '../primordials/json.mjs'
@@ -172,56 +171,27 @@ const DEFAULT_MAX_SIZE = 10 * 1024 * 1024
  * Safely parse JSON with optional schema validation and security controls.
  * Throws on parse failure, validation failure, or security violation.
  *
- * Recommended for parsing untrusted JSON (user input, network payloads,
- * anything beyond a trust boundary). Layers:
+ * Untrusted input only: size cap, prototype-pollution reviver, optional schema.
+ * Trusted reads (package.json, local config) want `parseJson()` instead.
  *
- * 1. Size cap (default 10 MB) prevents memory exhaustion.
- * 2. Prototype-pollution reviver rejects `__proto__` / `constructor` / `prototype`
- *    keys at any depth (unless `allowPrototype: true`).
- * 3. Optional Zod-shaped schema validation via
- *    `@socketsecurity/lib/schema/validate`.
- *
- * For trusted-source reads (package.json, local config files), prefer
- * `parseJson()` — it offers Buffer/BOM handling and filepath-aware error
- * messages, without the untrusted-input overhead.
- *
- * @example
- *   ;```ts
- *   // Basic parsing with type inference.
- *   const data = parseJsonStrict<User>('{"name":"Alice","age":30}')
- *
- *   // With schema validation.
- *   import { z } from 'zod'
- *   const userSchema = z.object({ name: z.string(), age: z.number() })
- *   const user = parseJsonStrict('{"name":"Alice","age":30}', userSchema)
- *
- *   // With size limit.
- *   const data = parseJsonStrict(jsonString, undefined, { maxSize: 1024 })
- *
- *   // Allow prototype keys (DANGEROUS — only for trusted sources).
- *   const data = parseJsonStrict('{"__proto__":{}}', undefined, {
- *     allowPrototype: true,
- *   })
- *   ```
- *
- * @throws {Error} When `jsonString` exceeds `maxSize`.
- * @throws {Error} When JSON parsing fails.
- * @throws {Error} When prototype-pollution keys are detected (and
- *   `allowPrototype` is not `true`).
- * @throws {Error} When schema validation fails.
+ * @throws {Error} On oversize input, parse failure, prototype-pollution keys,
+ *   or schema validation failure.
  *
  * @unused No internal or Socket consumers; downstream repos call the plain
  *   `parseJson`. Exercised only by its unit tests.
  */
 export function parseJsonStrict<T = unknown>(
   jsonString: string,
-  schema?: Schema<T> | undefined,
-  options?: ParseJsonStrictOptions | undefined,
+  options?: ParseJsonStrictOptions<T> | undefined,
 ): T {
-  const { allowPrototype = false, maxSize = DEFAULT_MAX_SIZE } = {
+  const {
+    allowPrototype = false,
+    maxSize = DEFAULT_MAX_SIZE,
+    schema,
+  } = {
     __proto__: null,
     ...options,
-  } as ParseJsonStrictOptions
+  } as ParseJsonStrictOptions<T>
 
   // Size check up front.
   const byteLength = BufferByteLength!(jsonString, 'utf8')
