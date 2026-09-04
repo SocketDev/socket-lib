@@ -78,6 +78,10 @@
         "reason": "getSmolHttps is the oracle for the smol/https parity test, on the same footing as eco/npm/npm-cli/flags."
       },
       {
+        "leaf": "git/exec",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
         "leaf": "http-request/browser",
         "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
       },
@@ -336,7 +340,6 @@
         "fs/allowed-dirs-cache",
         "fs/atomic",
         "fs/resolve-module",
-        "git/exec",
         "git/ignored",
         "git/isolated-index",
         "git/status",
@@ -462,7 +465,9 @@
   },
   "coverage": {
     "exclude": {
-      "add": ["src/perf/**"]
+      "add": [
+        "src/perf/**"
+      ]
     }
   },
   "lint": {
