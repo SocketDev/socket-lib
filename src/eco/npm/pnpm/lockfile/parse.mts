@@ -64,6 +64,9 @@ import type {
 
 const RE_INTEGRITY = /integrity:\s*([a-zA-Z0-9+/=-]+)/
 const RE_TARBALL = /tarball:\s*['"]?([^'"}\s]+)['"]?/
+// pnpm writes a git source as an inline flow mapping, not a tarball URL.
+const RE_GIT_REPO = /repo:\s*['"]?([^'",}\s]+)['"]?/
+const RE_GIT_COMMIT = /commit:\s*['"]?([^'",}\s]+)['"]?/
 
 export type PackageIndex = Record<string, number | number[]>
 
@@ -313,6 +316,12 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
         const tarballMatch = RegExpPrototypeExec(RE_TARBALL, trimmed)
         if (tarballMatch) {
           currentPkg.resolved = tarballMatch[1]
+        }
+        const repoMatch = RegExpPrototypeExec(RE_GIT_REPO, trimmed)
+        if (repoMatch) {
+          currentPkg.vcsUrl = repoMatch[1]
+          const commitMatch = RegExpPrototypeExec(RE_GIT_COMMIT, trimmed)
+          currentPkg.vcsCommit = commitMatch ? commitMatch[1] : undefined
         }
       } else if (StringPrototypeIndexOf(trimmed, 'dependencies:') === 0) {
         currentPkg.dependencies = []

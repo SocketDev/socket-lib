@@ -12,7 +12,9 @@
 import { ManifestError } from './manifest-error.mjs'
 import { parseCargoLock } from '../cargo/parse-lockfile.mjs'
 import { parsePackageLock } from '../npm/npm-cli/lockfile/parse.mjs'
+import { jsParseBunLock } from '../npm/bun/lockfile/parse.mjs'
 import { parsePnpmLock } from '../npm/pnpm/lockfile/parse.mjs'
+import { jsParseVltLock } from '../npm/vlt/lockfile/parse.mjs'
 import { parseYarnLock } from '../npm/yarn/lockfile/parse.mjs'
 import { StringPrototypeIndexOf } from '../../primordials/string.mjs'
 import { getSmolManifest } from '../../exe/smol/manifest.mjs'
@@ -20,7 +22,14 @@ import { getSmolManifest } from '../../exe/smol/manifest.mjs'
 import type { ParsedLockfile } from './types.mjs'
 import type { EcosystemString } from '../purl.mjs'
 
-export type LockfileFormat = 'npm' | 'yarn' | 'pnpm' | 'composer' | 'cargo'
+export type LockfileFormat =
+  | 'npm'
+  | 'yarn'
+  | 'pnpm'
+  | 'bun'
+  | 'vlt'
+  | 'composer'
+  | 'cargo'
 
 export function jsParseLockfile(
   content: string,
@@ -44,6 +53,10 @@ export function jsParseLockfile(
       return parseYarnLock(content)
     case 'pnpm':
       return parsePnpmLock(content)
+    case 'bun':
+      return jsParseBunLock(content)
+    case 'vlt':
+      return jsParseVltLock(content)
     case 'cargo':
       return parseCargoLock(content)
     default:
@@ -58,6 +71,17 @@ export function sniffLockfileFormat(
   content: string,
 ): LockfileFormat | undefined {
   if (StringPrototypeIndexOf(content, '"lockfileVersion"') !== -1) {
+    // bun.lock and vlt-lock.json carry the same key, so they are ruled out
+    // first; otherwise both parse as npm and yield garbage.
+    if (StringPrototypeIndexOf(content, '"configVersion"') !== -1) {
+      return 'bun'
+    }
+    if (
+      StringPrototypeIndexOf(content, '"nodes"') !== -1 &&
+      StringPrototypeIndexOf(content, '"edges"') !== -1
+    ) {
+      return 'vlt'
+    }
     return 'npm'
   }
   if (

@@ -867,6 +867,16 @@
       "types": "./dist/eco/npm/npm-cli/lockfile/format.d.ts",
       "default": "./dist/eco/npm/npm-cli/lockfile/format.js"
     },
+    "./eco/npm/bun/lockfile/parse": {
+      "source": "./src/eco/npm/bun/lockfile/parse.mts",
+      "types": "./dist/eco/npm/bun/lockfile/parse.d.ts",
+      "default": "./dist/eco/npm/bun/lockfile/parse.js"
+    },
+    "./eco/npm/vlt/lockfile/parse": {
+      "source": "./src/eco/npm/vlt/lockfile/parse.mts",
+      "types": "./dist/eco/npm/vlt/lockfile/parse.d.ts",
+      "default": "./dist/eco/npm/vlt/lockfile/parse.js"
+    },
     "./eco/npm/npm-cli/lockfile/parse": {
       "source": "./src/eco/npm/npm-cli/lockfile/parse.mts",
       "types": "./dist/eco/npm/npm-cli/lockfile/parse.d.ts",
@@ -2030,6 +2040,11 @@
       "source": "./src/git/isolated-index.mts",
       "types": "./dist/git/isolated-index.d.ts",
       "default": "./dist/git/isolated-index.js"
+    },
+    "./git/remote": {
+      "source": "./src/git/remote.mts",
+      "types": "./dist/git/remote.d.ts",
+      "default": "./dist/git/remote.js"
     },
     "./git/repo": {
       "source": "./src/git/repo.mts",

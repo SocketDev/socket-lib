@@ -53,7 +53,7 @@ import { SetCtor } from '../../../../primordials/map-set.mjs'
 import { ObjectFreeze, ObjectKeys } from '../../../../primordials/object.mjs'
 import { getSmolManifest } from '../../../../exe/smol/manifest.mjs'
 import { extractPackageNameFromPath } from '../extract-package-name-from-path.mjs'
-import { parseGitUrl } from '../parse-git-url.mjs'
+import { parseGitDep } from '../../parse-git-dep.mjs'
 
 import {
   StringPrototypeLastIndexOf,
@@ -117,7 +117,7 @@ export function buildPackageRef(name: string, pkg: RawPackage): PackageRef {
   let vcsUrl: string | undefined
   let vcsCommit: string | undefined
   if (typeof pkg.resolved === 'string') {
-    const gitMatch = parseGitUrl(pkg.resolved)
+    const gitMatch = parseGitDep(pkg.resolved)
     if (gitMatch) {
       vcsUrl = gitMatch.url
       vcsCommit = gitMatch.commit

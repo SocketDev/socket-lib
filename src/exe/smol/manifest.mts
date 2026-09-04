@@ -92,7 +92,15 @@ export interface ParsedLockfile {
 export interface FormatDescriptor {
   readonly ecosystem: EcosystemString
   readonly type: 'manifest' | 'lockfile'
-  readonly format?: 'npm' | 'yarn' | 'pnpm' | 'composer' | 'cargo' | undefined
+  readonly format?:
+    | 'npm'
+    | 'yarn'
+    | 'pnpm'
+    | 'bun'
+    | 'vlt'
+    | 'composer'
+    | 'cargo'
+    | undefined
 }
 
 /**
@@ -139,7 +147,15 @@ export interface SmolManifestBinding {
   parseLockfile(
     content: string,
     ecosystem: EcosystemString,
-    format?: 'npm' | 'yarn' | 'pnpm' | 'composer' | 'cargo' | undefined,
+    format?:
+      | 'npm'
+      | 'yarn'
+      | 'pnpm'
+      | 'bun'
+      | 'vlt'
+      | 'composer'
+      | 'cargo'
+      | undefined,
   ): ParsedLockfile
   createStreamingParser(
     content: string,

@@ -48,6 +48,7 @@ import {
   StringPrototypeTrim,
 } from '../../../../primordials/string.mjs'
 import { getSmolManifest } from '../../../../exe/smol/manifest.mjs'
+import { parseGitDep } from '../../parse-git-dep.mjs'
 import { parseYarnDescriptor } from './descriptor.mjs'
 
 import type { PackageRef, ParsedLockfile } from '../../../manifest/types.mjs'
@@ -265,6 +266,7 @@ export function jsParseYarnLock(content: string): ParsedLockfile {
       continue
     }
     if (entry.name && entry.version) {
+      const gitDep = parseGitDep(entry.resolved)
       const ref = ObjectFreeze({
         __proto__: null,
         name: entry.name,
@@ -277,8 +279,8 @@ export function jsParseYarnLock(content: string): ParsedLockfile {
         isOptional: entry.isOptional,
         isPeer: false,
         isBundled: false,
-        vcsUrl: undefined,
-        vcsCommit: undefined,
+        vcsUrl: gitDep?.url,
+        vcsCommit: gitDep?.commit,
         dependencies: entry.dependencies,
       }) as unknown as PackageRef
       ArrayPrototypePush(packages, ref)
