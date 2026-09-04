@@ -19,7 +19,7 @@ const HIDDEN = [
   'union',
 ]
 
-vi.mock(import('../../../src/primordials/map-set.mts'), async orig => {
+vi.mock(import('../../../src/primordials/map-set.mjs'), async orig => {
   const actual = await orig()
   // A real Set in every respect the shims use, with the combinators shadowed
   // so the prototype lookup finds nothing callable.
@@ -46,6 +46,12 @@ beforeAll(async () => {
 })
 
 describe('the native lookups', () => {
+  it('are looking at an engine that does have the natives', () => {
+    // Without this the suite would pass on an engine below Node 22 for the
+    // wrong reason, and prove nothing about the fallback.
+    expect(typeof Set.prototype.union).toBe('function')
+  })
+
   it('find no combining method to bridge', () => {
     expect(sets.setUnionNative).toBeUndefined()
     expect(sets.setIntersectionNative).toBeUndefined()
