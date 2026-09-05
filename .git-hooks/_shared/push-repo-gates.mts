@@ -515,7 +515,7 @@ export const scanDispatchDrift = (): number => {
     return 0
   }
   const r = spawnSync(
-    'node',
+    process.execPath,
     ['scripts/fleet/check/dispatch-table-is-current.mts', '--quiet'],
     { stdio: 'inherit' },
   )

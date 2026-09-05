@@ -248,14 +248,12 @@ runs:
         # major-bounded SemVer RANGE derived from external-tools.json by
         # sync-package-manager-pins.mts, meant for dev machines, and it
         # routinely differs from the exact version a consumer's action pin
-        # resolves to. With pnpm managing package-manager versions (the
-        # default), that difference makes every `pnpm install` hard-fail with
-        # "configured to use X, your current pnpm is Y". Turn the management
-        # off so the action-pinned binary always wins; the floor a repo
+        # resolves to. Each member's pnpm-workspace.yaml carries
+        # `pmOnFail: warn`, so that difference emits a warning rather than a
+        # hard-fail — the action-pinned binary always wins. The floor a repo
         # actually cares about is its `engines.pnpm` range, and pnpm versions
         # are reconciled by cascade, not by failing CI on a version outside
         # the devEngines range.
-        echo "npm_config_manage_package_manager_versions=false" >> "${GITHUB_ENV:-/dev/null}"
         # Optional pnpm provenance for downstream steps and Docker builds —
         # lets a consumer pass `--build-arg PNPM_VERSION` sourced from the
         # SOCKET_TOOL_PNPM_VERSION env var instead of a drift-prone ARG
