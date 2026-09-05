@@ -48,6 +48,12 @@ export type Remap<T> = { [K in keyof T]: T[K] } extends infer O
   : never
 
 /**
+ * Widen `T` so an object literal may carry `__proto__: null` without TS2353.
+ * A type costs nothing at runtime, unlike a prototype-rewriting helper.
+ */
+export type NullProto<T> = T & { __proto__?: null | undefined }
+
+/**
  * Type for dynamic lazy getter record.
  */
 export type LazyGetterRecord<T> = {
