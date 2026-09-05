@@ -56,7 +56,7 @@ describe('spawn integration', () => {
     })
 
     it('should execute node command and capture output', async () => {
-      const result = await spawn('node', ['--version'])
+      const result = await spawn(process.execPath, ['--version'])
       expect(result.code).toBe(0)
       expect(result.stdout.toString()).toMatch(/^v\d+\.\d+\.\d+/)
       expect(result.stderr.toString()).toBe('')
@@ -65,7 +65,7 @@ describe('spawn integration', () => {
     it('should handle command failure with non-zero exit code', async () => {
       // spawn throws on non-zero exit by default
       try {
-        await spawn('node', ['--invalid-flag'])
+        await spawn(process.execPath, ['--invalid-flag'])
         expect.fail('Should have thrown')
       } catch (error: unknown) {
         const err = error as {
@@ -79,12 +79,16 @@ describe('spawn integration', () => {
     })
 
     it('should pass environment variables to spawned process', async () => {
-      const result = await spawn('node', ['-p', 'process.env.TEST_VAR'], {
-        env: {
-          ...process.env,
-          TEST_VAR: 'test-value',
+      const result = await spawn(
+        process.execPath,
+        ['-p', 'process.env.TEST_VAR'],
+        {
+          env: {
+            ...process.env,
+            TEST_VAR: 'test-value',
+          },
         },
-      })
+      )
       expect(result.code).toBe(0)
       expect(result.stdout.toString().trim()).toBe('test-value')
     })
@@ -139,24 +143,28 @@ describe('spawn integration', () => {
     })
 
     it('should execute node command synchronously', () => {
-      const result = spawnSync('node', ['--version'])
+      const result = spawnSync(process.execPath, ['--version'])
       expect(result.status).toBe(0)
       expect(result.stdout.toString()).toMatch(/^v\d+\.\d+\.\d+/)
     })
 
     it('should handle sync command failure', () => {
-      const result = spawnSync('node', ['--invalid-flag'])
+      const result = spawnSync(process.execPath, ['--invalid-flag'])
       expect(result.status).not.toBe(0)
       expect(result.stderr.toString()).toContain('invalid')
     })
 
     it('should pass environment to sync spawned process', () => {
-      const result = spawnSync('node', ['-p', 'process.env.SYNC_VAR'], {
-        env: {
-          ...process.env,
-          SYNC_VAR: 'sync-value',
+      const result = spawnSync(
+        process.execPath,
+        ['-p', 'process.env.SYNC_VAR'],
+        {
+          env: {
+            ...process.env,
+            SYNC_VAR: 'sync-value',
+          },
         },
-      })
+      )
       expect(result.status).toBe(0)
       expect(result.stdout.toString().trim()).toBe('sync-value')
     })

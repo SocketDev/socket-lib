@@ -27,7 +27,7 @@ describe('execBin', () => {
     if (!resolved) {
       return
     }
-    const result = await execBin('node', ['--version'])
+    const result = await execBin(process.execPath, ['--version'])
     expect(result.code).toBe(0)
     expect(result.stdout).toBeTruthy()
   })

@@ -55,7 +55,7 @@ describe('spawn/child — spawn', () => {
 
   it('handles options with env', async () => {
     const result = await spawn(
-      'node',
+      process.execPath,
       ['-e', 'console.log(process.env.TEST_VAR)'],
       {
         env: { ...process.env, TEST_VAR: 'test-value' },
@@ -105,7 +105,7 @@ describe('spawn/child — spawn', () => {
 
   it('strips ANSI codes by default', async () => {
     const result = await spawn(
-      'node',
+      process.execPath,
       ['-e', 'console.log("\\x1b[31mred\\x1b[0m")'],
       {},
     )
@@ -116,7 +116,7 @@ describe('spawn/child — spawn', () => {
 
   it('does not strip ANSI codes when stripAnsi: false', async () => {
     const result = await spawn(
-      'node',
+      process.execPath,
       ['-e', 'console.log("\\x1b[31mred\\x1b[0m")'],
       {
         stripAnsi: false,
@@ -237,7 +237,7 @@ describe('spawn/child — security', () => {
 describe('spawn/child — throws option', () => {
   it('rejects on non-zero exit by default', async () => {
     try {
-      await spawn('node', ['-e', 'process.exit(2)'])
+      await spawn(process.execPath, ['-e', 'process.exit(2)'])
       expect.fail('Should have thrown')
     } catch (e) {
       expect(isSpawnError(e)).toBe(true)
@@ -246,7 +246,7 @@ describe('spawn/child — throws option', () => {
 
   it('rejects on non-zero exit with explicit throws: true', async () => {
     try {
-      await spawn('node', ['-e', 'process.exit(2)'], { throws: true })
+      await spawn(process.execPath, ['-e', 'process.exit(2)'], { throws: true })
       expect.fail('Should have thrown')
     } catch (e) {
       expect(isSpawnError(e)).toBe(true)
@@ -254,14 +254,14 @@ describe('spawn/child — throws option', () => {
   })
 
   it('resolves with the non-zero exit code when throws: false', async () => {
-    const { code } = await spawn('node', ['-e', 'process.exit(3)'], {
+    const { code } = await spawn(process.execPath, ['-e', 'process.exit(3)'], {
       throws: false,
     })
     expect(code).toBe(3)
   })
 
   it('sets the exitCode alias on the resolved failure result', async () => {
-    const settled = await spawn('node', ['-e', 'process.exit(7)'], {
+    const settled = await spawn(process.execPath, ['-e', 'process.exit(7)'], {
       throws: false,
     })
     expect((settled as typeof settled & { exitCode: number }).exitCode).toBe(7)
@@ -269,7 +269,7 @@ describe('spawn/child — throws option', () => {
 
   it('carries stdout and stderr on the resolved failure result', async () => {
     const { code, stderr, stdout } = await spawn(
-      'node',
+      process.execPath,
       [
         '-e',
         'process.stdout.write("partial out"); process.stderr.write("the error"); process.exit(4)',
@@ -298,7 +298,7 @@ describe('spawn/child — throws option', () => {
 
   it('strips ANSI from the resolved failure result by default', async () => {
     const { code, stderr } = await spawn(
-      'node',
+      process.execPath,
       ['-e', 'process.stderr.write("\\x1b[31mred\\x1b[0m"); process.exit(5)'],
       { throws: false },
     )
@@ -309,7 +309,7 @@ describe('spawn/child — throws option', () => {
 
   it('returns Buffers on the resolved failure result with stdioString: false', async () => {
     const { code, stdout } = await spawn(
-      'node',
+      process.execPath,
       ['-e', 'process.stdout.write("bytes"); process.exit(6)'],
       { stdioString: false, throws: false },
     )
@@ -318,9 +318,13 @@ describe('spawn/child — throws option', () => {
   })
 
   it('resolves a signal-killed child instead of rejecting', async () => {
-    const childPromise = spawn('node', ['-e', 'setInterval(() => {}, 1000)'], {
-      throws: false,
-    })
+    const childPromise = spawn(
+      process.execPath,
+      ['-e', 'setInterval(() => {}, 1000)'],
+      {
+        throws: false,
+      },
+    )
     childPromise.process.kill('SIGTERM')
     const { signal } = await childPromise
     expect(signal).toBe('SIGTERM')
@@ -415,7 +419,7 @@ describe('spawn/child — spinner stop/restart around child process', () => {
         startCount += 1
       },
     }
-    await spawn('node', ['-e', 'process.exit(7)'], {
+    await spawn(process.execPath, ['-e', 'process.exit(7)'], {
       spinner: spinnerMock as never,
       stdio: 'inherit',
     }).catch(() => {})

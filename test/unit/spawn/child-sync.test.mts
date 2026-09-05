@@ -69,7 +69,7 @@ describe('spawnSync', () => {
   it('should handle options with env', () => {
     // Test that custom env is passed to spawned process
     const result = spawnSync(
-      'node',
+      process.execPath,
       ['-e', 'console.log(process.env.TEST_VAR)'],
       {
         env: { ...process.env, TEST_VAR: 'test-value' },
@@ -98,7 +98,7 @@ describe('spawnSync', () => {
 
   it('should strip ANSI codes by default', () => {
     const result = spawnSync(
-      'node',
+      process.execPath,
       ['-e', 'console.log("\\x1b[31mred\\x1b[0m")'],
       {},
     )
@@ -110,7 +110,7 @@ describe('spawnSync', () => {
 
   it('should not strip ANSI codes when stripAnsi: false', () => {
     const result = spawnSync(
-      'node',
+      process.execPath,
       ['-e', 'console.log("\\x1b[31mred\\x1b[0m")'],
       {
         stripAnsi: false,
@@ -218,25 +218,29 @@ describe('spawnSync', () => {
     const EMIT_PORCELAIN = `process.stdout.write(${JSON.stringify(PORCELAIN)})`
 
     it('trims decoded stdout by default (eating the leading status column)', () => {
-      const result = spawnSync('node', ['-e', EMIT_PORCELAIN])
+      const result = spawnSync(process.execPath, ['-e', EMIT_PORCELAIN])
       expect(result.status).toBe(0)
       expect(result.stdout).toBe('M lib/a.ts\n?? untracked.txt')
     })
 
     it('trims with explicit trim: true', () => {
-      const result = spawnSync('node', ['-e', EMIT_PORCELAIN], { trim: true })
+      const result = spawnSync(process.execPath, ['-e', EMIT_PORCELAIN], {
+        trim: true,
+      })
       expect(result.stdout).toBe('M lib/a.ts\n?? untracked.txt')
     })
 
     it('preserves leading and trailing whitespace with trim: false', () => {
-      const result = spawnSync('node', ['-e', EMIT_PORCELAIN], { trim: false })
+      const result = spawnSync(process.execPath, ['-e', EMIT_PORCELAIN], {
+        trim: false,
+      })
       expect(result.status).toBe(0)
       expect(result.stdout).toBe(PORCELAIN)
     })
 
     it('preserves stderr whitespace with trim: false', () => {
       const result = spawnSync(
-        'node',
+        process.execPath,
         ['-e', 'process.stderr.write("  padded err  ")'],
         { trim: false },
       )
@@ -244,7 +248,7 @@ describe('spawnSync', () => {
     })
 
     it('leaves Buffer output untouched either way (no decode, no trim)', () => {
-      const result = spawnSync('node', ['-e', EMIT_PORCELAIN], {
+      const result = spawnSync(process.execPath, ['-e', EMIT_PORCELAIN], {
         stdioString: false,
         trim: false,
       })
@@ -254,7 +258,7 @@ describe('spawnSync', () => {
 
     it('still strips ANSI when trim: false (the options are independent)', () => {
       const result = spawnSync(
-        'node',
+        process.execPath,
         ['-e', 'process.stdout.write(" \\x1b[31mred\\x1b[0m \\n")'],
         { trim: false },
       )

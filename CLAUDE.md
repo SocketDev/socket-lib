@@ -92,6 +92,7 @@
 - Default to no comments; when written, for a junior reader. [`code-style`](docs/fleet/agents.md/code-style.md) [`parser-comments`](docs/fleet/agents.md/parser-comments.md)
 - Comments + prose state the present, never the removed past: no "used to be X", no relocation tombstone. [`parser-comments`](docs/fleet/agents.md/parser-comments.md)
 - The fleet deletes, it does not deprecate: no `@deprecated` marker, no legacy fallback, no back-compat alias. [`no-deprecation`](docs/fleet/agents.md/no-deprecation.md)
+- 🚨 Never land a burn-down list to make a check pass; one you encounter is one you finish, list and machinery together. (`scripts/fleet/check/checks-carry-no-burn-down-lists.mts`) [`no-burn-down-lists`](docs/fleet/agents.md/no-burn-down-lists.md)
 - Never prefix an identifier with `_`: privacy is module boundaries or an `_internal/` directory. [`no-underscore-identifiers`](docs/fleet/agents.md/no-underscore-identifiers.md)
 - Module-scope functions use `function foo() {}` declarations, not arrow consts. [`sorting`](docs/fleet/agents.md/sorting.md)
 - Every top-level `src/` symbol is exported; `typescript/no-explicit-any` is fleet-wide, never relaxed. [`export-and-no-any`](docs/fleet/agents.md/export-and-no-any.md)

@@ -235,15 +235,19 @@ export async function auditUndefinedBindings(
       writeFileSync(targetsFile, JSON.stringify(chunk.map(t => t.file)))
       let stdout = ''
       try {
-        ;({ stdout } = await execFileAsync('node', ['-e', probeSource], {
-          env: {
-            ...process.env,
-            PROBE_PLAN: planFile,
-            PROBE_TARGETS: targetsFile,
+        ;({ stdout } = await execFileAsync(
+          process.execPath,
+          ['-e', probeSource],
+          {
+            env: {
+              ...process.env,
+              PROBE_PLAN: planFile,
+              PROBE_TARGETS: targetsFile,
+            },
+            maxBuffer: 256 * 1024 * 1024,
+            timeout: PROBE_TIMEOUT_MS * chunk.length,
           },
-          maxBuffer: 256 * 1024 * 1024,
-          timeout: PROBE_TIMEOUT_MS * chunk.length,
-        }))
+        ))
       } catch {
         // A chunk that dies takes its targets with it. Falling back to one
         // child per target keeps a single unloadable subpath from silently
@@ -298,15 +302,19 @@ export async function auditUndefinedBindings(
     const oneFile = path.join(scratchDir, 'one.json')
     writeFileSync(oneFile, JSON.stringify([target.file]))
     try {
-      const { stdout } = await execFileAsync('node', ['-e', probeSource], {
-        env: {
-          ...process.env,
-          PROBE_PLAN: planFile,
-          PROBE_TARGETS: oneFile,
+      const { stdout } = await execFileAsync(
+        process.execPath,
+        ['-e', probeSource],
+        {
+          env: {
+            ...process.env,
+            PROBE_PLAN: planFile,
+            PROBE_TARGETS: oneFile,
+          },
+          maxBuffer: 64 * 1024 * 1024,
+          timeout: PROBE_TIMEOUT_MS,
         },
-        maxBuffer: 64 * 1024 * 1024,
-        timeout: PROBE_TIMEOUT_MS,
-      })
+      )
       const parsed = parseProbeOutput(stdout.split(/\r?\n/)[0] ?? '')
       return { findings: parsed.findings, observed: parsed.observed }
     } catch {

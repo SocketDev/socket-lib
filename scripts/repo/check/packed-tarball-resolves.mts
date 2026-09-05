@@ -205,7 +205,7 @@ export function runPackedSubpathProbe(
     buildPackedProbeSource(packageName, subpaths, mode),
     'utf8',
   )
-  const result = spawnSync('node', [probePath], {
+  const result = spawnSync(process.execPath, [probePath], {
     cwd: scratchDir,
     timeout: 60_000,
   })
