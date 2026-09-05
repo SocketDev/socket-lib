@@ -93,7 +93,6 @@
     "socket/no-placeholders": "error",
     "socket/no-platform-specific-import": "error",
     "socket/no-private-path-in-source": "error",
-    "socket/no-removed-past-in-comments": "error",
     "socket/no-process-chdir": "error",
     "socket/no-process-cwd-in-scripts-hooks": "error",
     "socket/no-promise-race": "error",
