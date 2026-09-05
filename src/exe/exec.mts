@@ -40,6 +40,7 @@ import type { SpawnOptions } from '../process/spawn/types.mjs'
  *   await execBin('/usr/local/bin/node', ['script.js'], { cwd: '/tmp' })
  *   ```
  */
+// oxlint-disable-next-line socket/no-optional-param-before-options-bag -- mirrors spawn.
 export async function execBin(
   binPath: string,
   args?: string[] | undefined,

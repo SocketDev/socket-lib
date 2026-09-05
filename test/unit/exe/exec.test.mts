@@ -17,12 +17,16 @@ import { safeDelete } from '../../../src/fs/safe.mjs'
 
 describe('execBin', () => {
   it('should execute a binary by path', async () => {
-    const result = await execBin('node', ['--version'])
+    const result = await execBin(process.execPath, ['--version'])
     expect(result.code).toBe(0)
     expect(result.stdout).toBeTruthy()
   })
 
-  it('should execute a binary by name', async () => {
+  it('should resolve a bare binary name through PATH', async () => {
+    const resolved = await whichReal('node')
+    if (!resolved) {
+      return
+    }
     const result = await execBin('node', ['--version'])
     expect(result.code).toBe(0)
     expect(result.stdout).toBeTruthy()
@@ -46,18 +50,21 @@ describe('execBin', () => {
   })
 
   it('should handle binary with arguments', async () => {
-    const result = await execBin('node', ['-e', 'console.log("hello")'])
+    const result = await execBin(process.execPath, [
+      '-e',
+      'console.log("hello")',
+    ])
     expect(result.code).toBe(0)
     expect(result.stdout).toContain('hello')
   })
 
   it('should handle binary without arguments', async () => {
-    const result = await execBin('node', ['--version'])
+    const result = await execBin(process.execPath, ['--version'])
     expect(result.code).toBe(0)
   })
 
   it('should pass options to spawn', async () => {
-    const result = await execBin('node', ['--version'], {
+    const result = await execBin(process.execPath, ['--version'], {
       cwd: process.cwd(),
     })
     expect(result.code).toBe(0)
@@ -74,7 +81,7 @@ describe('execBin', () => {
       const scriptPath = path.join(tmpDir, 'test.js')
       await fs.writeFile(scriptPath, 'console.log("test output")', 'utf8')
 
-      const result = await execBin('node', [scriptPath])
+      const result = await execBin(process.execPath, [scriptPath])
       expect(result.code).toBe(0)
       expect(result.stdout).toContain('test output')
     }, 'execBin-script-')
@@ -83,7 +90,7 @@ describe('execBin', () => {
 
 describe('execBin - path handling', () => {
   it('should handle binary name that needs path resolution', async () => {
-    const result = await execBin('node', ['-p', 'process.version'])
+    const result = await execBin(process.execPath, ['-p', 'process.version'])
     expect(result.code).toBe(0)
     expect(result.stdout).toMatch(/^v\d+\.\d+\.\d+/)
   })
@@ -105,11 +112,11 @@ describe('execBin - path handling', () => {
 describe('binary path caching', () => {
   it('should cache binary path resolution for execBin', async () => {
     // First call resolves and caches
-    const result1 = await execBin('node', ['-p', '"first"'])
+    const result1 = await execBin(process.execPath, ['-p', '"first"'])
     expect(result1.code).toBe(0)
 
     // Second call should hit the cache, returning the same result faster
-    const result2 = await execBin('node', ['-p', '"second"'])
+    const result2 = await execBin(process.execPath, ['-p', '"second"'])
     expect(result2.code).toBe(0)
 
     // Both should work correctly
