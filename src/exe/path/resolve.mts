@@ -61,8 +61,13 @@ export function resolveRealBinSync(binPath: string): string {
   const ext = path.extname(binPath)
   const extLowered = ext.toLowerCase()
   const basename = path.basename(binPath, ext)
+  // Lowercased: Windows paths are case-insensitive, so `NODE.EXE` names the
+  // same binary as `node.exe` and must take the same branch. `ext` is already
+  // lowercased directly above for the same reason.
   const voltaIndex =
-    basename === 'node' ? -1 : (/(?<=\/)\.volta\//i.exec(binPath)?.index ?? -1)
+    basename.toLowerCase() === 'node'
+      ? -1
+      : (/(?<=\/)\.volta\//i.exec(binPath)?.index ?? -1)
   if (voltaIndex !== -1) {
     const voltaPath = binPath.slice(0, voltaIndex)
     // Check Volta cache first - keyed by volta path + binary name.

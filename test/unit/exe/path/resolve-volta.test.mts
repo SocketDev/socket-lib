@@ -147,4 +147,17 @@ describe.sequential('bin.ts — Volta resolution', () => {
     const result = resolveRealBinSync(fakeNodeShim)
     expect(typeof result).toBe('string')
   })
+
+  it('skips Volta path for a cased Windows spelling of node', () => {
+    // Windows paths are case-insensitive, so NODE.EXE names the same binary as
+    // node.exe and must take the same shim-avoidance branch. The extension is
+    // stripped before the comparison, so `.exe` alone was never the gap — the
+    // CASE was: `NODE.EXE` yields basename `NODE`, which failed `=== 'node'`
+    // and sent the caller down the Volta resolution path instead.
+    writePlatform({ node: { runtime: '20.0.0', npm: '10.0.0' } })
+    for (const spelling of ['NODE.EXE', 'Node.exe', 'node.EXE']) {
+      const shim = path.join(voltaRoot, '.volta', 'bin', spelling)
+      expect(resolveRealBinSync(shim)).toBe(shim)
+    }
+  })
 })
