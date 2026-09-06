@@ -2001,6 +2001,11 @@
       "types": "./dist/fs/safe.d.ts",
       "default": "./dist/fs/safe.js"
     },
+    "./fs/scratch": {
+      "source": "./src/fs/scratch.mts",
+      "types": "./dist/fs/scratch.d.ts",
+      "default": "./dist/fs/scratch.js"
+    },
     "./fs/strict": {
       "source": "./src/fs/strict.mts",
       "types": "./dist/fs/strict.d.ts",
