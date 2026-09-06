@@ -21,10 +21,10 @@ import { isWin32 } from '../../constants/platform.mjs'
 import { normalizePath } from '../../paths/normalize.mjs'
 import { getFs, getPath } from '../shared.mjs'
 import {
+  BIN_SHIM_FORMAT,
+  binShimFormat,
   isKnownShimExtension,
   isNodeBinName,
-  isNpmOrNpxBin,
-  isPnpmOrYarnBin,
 } from './bin-kinds.mjs'
 import { posixShimRelPath, windowsShimRelPath } from './resolve-shims.mjs'
 import { resolveVoltaBinSync } from './resolve-volta.mjs'
@@ -65,7 +65,10 @@ export function normalizedBinPath(binPath: string): string {
  */
 export function npmWindowsQuickCliPath(config: BinPathFacts): string {
   const { basename, binPath, extLowered } = config
-  if (!isKnownShimExtension(extLowered) || !isNpmOrNpxBin(basename)) {
+  if (
+    !isKnownShimExtension(extLowered) ||
+    binShimFormat(basename) !== BIN_SHIM_FORMAT.npmCli
+  ) {
     return ''
   }
   const fs = getFs()
@@ -132,10 +135,10 @@ export function resolvePosixWrapperPath(config: BinPathFacts): string {
   const { basename, extLowered } = config
   const fs = getFs()
   const path = getPath()
-  const isWrapperBin = isPnpmOrYarnBin(basename) || isNpmOrNpxBin(basename)
-  const binPath = isPnpmOrYarnBin(basename)
-    ? repairMalformedPnpmBinPath(config.binPath)
-    : config.binPath
+  // A cmd-shim binary on Unix is already the real script: nothing to unwrap.
+  const isWrapperBin = binShimFormat(basename) !== BIN_SHIM_FORMAT.cmdShim
+  // Self-gating on its own path marker, so it needs no basename check here.
+  const binPath = repairMalformedPnpmBinPath(config.binPath)
   // Recomputed rather than reused: repairing the path can change the extension.
   const hasNoExt = !path.extname(binPath)
   // Verify existence before reading so a missing bin path is not an ENOENT.

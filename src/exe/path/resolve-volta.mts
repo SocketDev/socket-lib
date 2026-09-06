@@ -11,7 +11,7 @@
 import { readJsonSync } from '../../fs/read-json.mjs'
 import { normalizePath } from '../../paths/normalize.mjs'
 import { getFs, getPath, voltaBinCache } from '../shared.mjs'
-import { isNpmOrNpxBin } from './bin-kinds.mjs'
+import { BIN_SHIM_FORMAT, binShimFormat } from './bin-kinds.mjs'
 
 /**
  * The subset of Volta's `user/platform.json` that pins tool versions.
@@ -63,13 +63,14 @@ export function resolveVoltaBinSync(config: {
   // The npm cascade (image/npm/<ver> → image/node/<ver>/lib/node_modules/npm)
   // and the .cmd extension fallback are exercised on Windows runners.
   /* c8 ignore start */
-  const voltaBinPath = isNpmOrNpxBin(basename)
-    ? voltaNpmCliPath({
-        basename,
-        imagePath,
-        platform: readVoltaPlatform(userPath),
-      })
-    : voltaPackageBinPath({ basename, imagePath, userPath })
+  const voltaBinPath =
+    binShimFormat(basename) === BIN_SHIM_FORMAT.npmCli
+      ? voltaNpmCliPath({
+          basename,
+          imagePath,
+          platform: readVoltaPlatform(userPath),
+        })
+      : voltaPackageBinPath({ basename, imagePath, userPath })
   /* c8 ignore stop */
   if (!voltaBinPath) {
     return ''
