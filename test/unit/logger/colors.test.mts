@@ -7,6 +7,7 @@ beforeEach(() => {
     vi.stubEnv(key, undefined)
   }
   vi.stubEnv('TERM', 'xterm-256color')
+  vi.stubEnv('COLORTERM', 'truecolor')
 })
 
 afterEach(() => {
