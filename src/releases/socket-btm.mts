@@ -209,159 +209,171 @@ export async function downloadSocketBtmRelease(
   tool: string,
   options: SocketBtmReleaseConfig | undefined,
 ): Promise<string> {
-  // options-undefined fallback fires when caller omits options.
-  /* c8 ignore next */
-  const config = { __proto__: null, ...options } as unknown as {
-    cwd?: string | undefined
-    downloadDir?: string | undefined
-    quiet?: boolean | undefined
-    tag?: string | undefined
-  }
-  const { cwd, downloadDir, quiet = false, tag } = config
-
-  // Auto-generate toolPrefix from tool name (follows socket-btm tag pattern: {tool}-{date}-{commit})
-  const toolPrefix = `${tool}-`
-
-  let downloadConfig: DownloadGitHubReleaseConfig
-
-  // Infer type from presence of 'asset' field
-  if (options && 'asset' in options) {
-    // Asset download
-    const assetConfig = {
-      __proto__: null,
-      ...(options as SocketBtmAssetConfig),
-    } as SocketBtmAssetConfig
-    const { asset, output, removeMacOSQuarantine = false } = assetConfig
-
-    // Resolve asset pattern to actual asset name if needed.
-    let resolvedAsset: string
-    let resolvedTag = tag
-
-    // Check if asset is a string without a wildcard, meaning an exact match.
-    const isExactMatch = typeof asset === 'string' && !asset.includes('*')
-
-    if (isExactMatch) {
-      // Exact asset name provided.
-      resolvedAsset = asset as string
-    } else {
-      // Pattern provided (wildcard string, object, or RegExp) - need to find matching asset.
-      if (tag) {
-        throw new ErrorCtor(
-          'Cannot use asset pattern with explicit tag. Either provide exact asset name or omit tag.',
-        )
-      }
-
-      // Find latest release with matching asset.
-      resolvedTag =
-        (await getLatestRelease(toolPrefix, SOCKET_BTM_REPO, {
-          assetPattern: asset,
-        })) ?? undefined
-
-      if (!resolvedTag) {
-        throw new ErrorCtor(
-          `No ${tool} release with matching asset pattern found`,
-        )
-      }
-
-      const assetUrl = await getReleaseAssetUrl(
-        resolvedTag,
-        asset,
-        SOCKET_BTM_REPO,
-      )
-
-      // No-asset throw and split-pop-fallback fire only on edge cases.
-      /* c8 ignore start */
-      if (!assetUrl) {
-        throw new ErrorCtor(`No matching asset found in release ${resolvedTag}`)
-      }
-      resolvedAsset = assetUrl.split('/').pop() || asset.toString()
-      /* c8 ignore stop */
-    }
-
-    // output-undefined fallback fires when caller omits output.
-    /* c8 ignore next */
-    const outputName = output || resolvedAsset
-
-    // For non-binary assets, use a simple 'assets' directory instead of platform-arch
-    const platformArch = 'assets'
-
-    downloadConfig = {
-      owner: SOCKET_BTM_REPO.owner,
-      repo: SOCKET_BTM_REPO.repo,
-      ...(cwd !== undefined && { cwd }),
-      ...(downloadDir !== undefined && { downloadDir }),
-      toolName: tool,
-      platformArch,
-      binaryName: outputName,
-      assetName: resolvedAsset,
-      toolPrefix,
-      ...(resolvedTag !== undefined && { tag: resolvedTag }),
-      quiet,
-      removeMacOSQuarantine,
-    }
-  } else {
-    // Binary download
-    const binaryConfig = {
-      __proto__: null,
-      ...(options as SocketBtmBinaryConfig | undefined),
-    } as SocketBtmBinaryConfig
-    const {
-      bin,
-      libc = detectLibc(),
-      removeMacOSQuarantine = true,
-      targetArch = getArch(),
-      targetPlatform = getOs(),
-    } = binaryConfig
-
-    // Default bin to tool if not provided (like brew/cargo)
-    const baseName = bin || tool
-
-    const assetName = getBinaryAssetName(
-      baseName,
-      targetPlatform,
-      targetArch,
-      libc,
-    )
-    const platformArch = getPlatformArch(targetPlatform, targetArch, libc)
-    const binaryName = getBinaryName(baseName, targetPlatform)
-
-    // Resolve the tag up front: the `.node` prebuilt asset candidate below is
-    // tag-infixed, so the latest tag must be known before the download.
-    let resolvedTag = tag
-    if (resolvedTag === undefined) {
-      resolvedTag =
-        (await getLatestRelease(toolPrefix, SOCKET_BTM_REPO)) ?? undefined
-      if (!resolvedTag) {
-        throw new ErrorCtor(
-          `No ${toolPrefix} release found in ${SOCKET_BTM_REPO.owner}/${SOCKET_BTM_REPO.repo}`,
-        )
-      }
-    }
-
-    // Ordered asset candidates: the plain `<bin>-<platformArch>` shape the
-    // executable tool families publish, then the tag-infixed
-    // `<tag>-<platformArch>.node` shape the `.node` prebuilt families publish
-    // (e.g. opentui-20260424-18f0f46-linux-x64-musl.node).
-    const assetNames = [
-      assetName,
-      getNodePrebuildAssetName(resolvedTag, targetPlatform, targetArch, libc),
-    ]
-
-    downloadConfig = {
-      owner: SOCKET_BTM_REPO.owner,
-      repo: SOCKET_BTM_REPO.repo,
-      ...(cwd !== undefined && { cwd }),
-      ...(downloadDir !== undefined && { downloadDir }),
-      toolName: tool,
-      platformArch,
-      binaryName,
-      assetName: assetNames,
-      toolPrefix,
-      tag: resolvedTag,
-      quiet,
-      removeMacOSQuarantine,
-    }
-  }
-
+  const downloadConfig =
+    options && 'asset' in options
+      ? await getSocketBtmAssetDownloadConfig(tool, options)
+      : await getSocketBtmBinaryDownloadConfig(tool, options)
   return await downloadGitHubRelease(downloadConfig)
+}
+
+export async function getSocketBtmAssetDownloadConfig(
+  tool: string,
+  options: SocketBtmAssetConfig,
+): Promise<DownloadGitHubReleaseConfig> {
+  const {
+    cwd,
+    downloadDir,
+    quiet = false,
+    tag,
+  } = { __proto__: null, ...options }
+  const toolPrefix = `${tool}-`
+  // Asset download
+  const assetConfig = {
+    __proto__: null,
+    ...(options as SocketBtmAssetConfig),
+  } as SocketBtmAssetConfig
+  const { asset, output, removeMacOSQuarantine = false } = assetConfig
+
+  // Resolve asset pattern to actual asset name if needed.
+  let resolvedAsset: string
+  let resolvedTag = tag
+
+  // Check if asset is a string without a wildcard, meaning an exact match.
+  const isExactMatch = typeof asset === 'string' && !asset.includes('*')
+
+  if (isExactMatch) {
+    // Exact asset name provided.
+    resolvedAsset = asset as string
+  } else {
+    // Pattern provided (wildcard string, object, or RegExp) - need to find matching asset.
+    if (tag) {
+      throw new ErrorCtor(
+        'Cannot use asset pattern with explicit tag. Either provide exact asset name or omit tag.',
+      )
+    }
+
+    // Find latest release with matching asset.
+    resolvedTag =
+      (await getLatestRelease(toolPrefix, SOCKET_BTM_REPO, {
+        assetPattern: asset,
+      })) ?? undefined
+
+    if (!resolvedTag) {
+      throw new ErrorCtor(
+        `No ${tool} release with matching asset pattern found`,
+      )
+    }
+
+    const assetUrl = await getReleaseAssetUrl(
+      resolvedTag,
+      asset,
+      SOCKET_BTM_REPO,
+    )
+
+    // No-asset throw and split-pop-fallback fire only on edge cases.
+    /* c8 ignore start */
+    if (!assetUrl) {
+      throw new ErrorCtor(`No matching asset found in release ${resolvedTag}`)
+    }
+    resolvedAsset = assetUrl.split('/').pop() || asset.toString()
+    /* c8 ignore stop */
+  }
+
+  // output-undefined fallback fires when caller omits output.
+  /* c8 ignore next */
+  const outputName = output || resolvedAsset
+
+  // For non-binary assets, use a simple 'assets' directory instead of platform-arch
+  const platformArch = 'assets'
+
+  return {
+    __proto__: null,
+    owner: SOCKET_BTM_REPO.owner,
+    repo: SOCKET_BTM_REPO.repo,
+    ...(cwd !== undefined && { cwd }),
+    ...(downloadDir !== undefined && { downloadDir }),
+    toolName: tool,
+    platformArch,
+    binaryName: outputName,
+    assetName: resolvedAsset,
+    toolPrefix,
+    ...(resolvedTag !== undefined && { tag: resolvedTag }),
+    quiet,
+    removeMacOSQuarantine,
+  }
+}
+
+export async function getSocketBtmBinaryDownloadConfig(
+  tool: string,
+  options: SocketBtmBinaryConfig | undefined,
+): Promise<DownloadGitHubReleaseConfig> {
+  const {
+    cwd,
+    downloadDir,
+    quiet = false,
+    tag,
+  } = { __proto__: null, ...options }
+  const toolPrefix = `${tool}-`
+  // Binary download
+  const binaryConfig = {
+    __proto__: null,
+    ...(options as SocketBtmBinaryConfig | undefined),
+  } as SocketBtmBinaryConfig
+  const {
+    bin,
+    libc = detectLibc(),
+    removeMacOSQuarantine = true,
+    targetArch = getArch(),
+    targetPlatform = getOs(),
+  } = binaryConfig
+
+  // Default bin to tool if not provided (like brew/cargo)
+  const baseName = bin || tool
+
+  const assetName = getBinaryAssetName(
+    baseName,
+    targetPlatform,
+    targetArch,
+    libc,
+  )
+  const platformArch = getPlatformArch(targetPlatform, targetArch, libc)
+  const binaryName = getBinaryName(baseName, targetPlatform)
+
+  // Resolve the tag up front: the `.node` prebuilt asset candidate below is
+  // tag-infixed, so the latest tag must be known before the download.
+  let resolvedTag = tag
+  if (resolvedTag === undefined) {
+    resolvedTag =
+      (await getLatestRelease(toolPrefix, SOCKET_BTM_REPO)) ?? undefined
+    if (!resolvedTag) {
+      throw new ErrorCtor(
+        `No ${toolPrefix} release found in ${SOCKET_BTM_REPO.owner}/${SOCKET_BTM_REPO.repo}`,
+      )
+    }
+  }
+
+  // Ordered asset candidates: the plain `<bin>-<platformArch>` shape the
+  // executable tool families publish, then the tag-infixed
+  // `<tag>-<platformArch>.node` shape the `.node` prebuilt families publish
+  // (e.g. opentui-20260424-18f0f46-linux-x64-musl.node).
+  const assetNames = [
+    assetName,
+    getNodePrebuildAssetName(resolvedTag, targetPlatform, targetArch, libc),
+  ]
+
+  return {
+    __proto__: null,
+    owner: SOCKET_BTM_REPO.owner,
+    repo: SOCKET_BTM_REPO.repo,
+    ...(cwd !== undefined && { cwd }),
+    ...(downloadDir !== undefined && { downloadDir }),
+    toolName: tool,
+    platformArch,
+    binaryName,
+    assetName: assetNames,
+    toolPrefix,
+    tag: resolvedTag,
+    quiet,
+    removeMacOSQuarantine,
+  }
 }
