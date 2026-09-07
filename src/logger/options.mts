@@ -7,7 +7,7 @@
  *   slots.
  */
 
-import { THEMES } from '../term/themes/themes.mjs'
+import { THEMES } from '../term/themes/presets.mjs'
 
 import type { Theme } from '../term/themes/types.mjs'
 

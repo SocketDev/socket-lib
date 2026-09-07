@@ -17,7 +17,7 @@ import {
   withTheme,
   withThemeSync,
 } from '../../src/term/themes/context.mjs'
-import { SOCKET_THEME, THEMES } from '../../src/term/themes/themes.mjs'
+import { SOCKET_THEME, THEMES } from '../../src/term/themes/presets.mjs'
 import {
   createTheme,
   extendTheme,

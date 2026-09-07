@@ -19,7 +19,7 @@ import {
 // config aliases `@socketsecurity/lib-stable` back to `src`).
 import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/logger/symbols'
 import { setTheme } from '../../src/term/themes/context.mjs'
-import { THEMES } from '../../src/term/themes/themes.mjs'
+import { THEMES } from '../../src/term/themes/presets.mjs'
 import { setupLoggerHarness } from './logger-fixtures.mjs'
 
 /**

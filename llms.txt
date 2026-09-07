@@ -761,7 +761,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/spinner/default](./dist/spinner/default.d.ts)
 - [@socketsecurity/lib/spinner/default-state](./dist/spinner/default-state.d.ts)
 - [@socketsecurity/lib/spinner/format](./dist/spinner/format.d.ts)
-- [@socketsecurity/lib/spinner/spinner](./dist/spinner/spinner.d.ts)
+- [@socketsecurity/lib/spinner/spinner](./dist/spinner/create.d.ts)
 - [@socketsecurity/lib/spinner/spinner-internals](./dist/spinner/spinner-internals.d.ts)
 - [@socketsecurity/lib/spinner/spinner-shimmer-methods](./dist/spinner/spinner-shimmer-methods.d.ts)
 - [@socketsecurity/lib/spinner/spinner-status-methods](./dist/spinner/spinner-status-methods.d.ts)
@@ -805,7 +805,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/temporal/now](./dist/temporal/now.d.ts)
 - [@socketsecurity/lib/temporal/slots](./dist/temporal/slots.d.ts)
 - [@socketsecurity/lib/temporal/system](./dist/temporal/system.d.ts)
-- [@socketsecurity/lib/temporal/temporal](./dist/temporal/temporal.d.ts)
+- [@socketsecurity/lib/temporal/temporal](./dist/temporal/namespace.d.ts)
 
 ## term/
 
@@ -826,7 +826,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/term/tables/types](./dist/term/tables/types.d.ts)
 - [@socketsecurity/lib/term/themes/context](./dist/term/themes/context.d.ts)
 - [@socketsecurity/lib/term/themes/resolve](./dist/term/themes/resolve.d.ts)
-- [@socketsecurity/lib/term/themes/themes](./dist/term/themes/themes.d.ts)
+- [@socketsecurity/lib/term/themes/themes](./dist/term/themes/presets.d.ts)
 - [@socketsecurity/lib/term/themes/types](./dist/term/themes/types.d.ts)
 
 ## url/

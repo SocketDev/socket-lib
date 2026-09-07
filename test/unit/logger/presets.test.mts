@@ -16,7 +16,7 @@ import { LOG_SYMBOLS as canonicalLogSymbols } from '@socketsecurity/lib-stable/l
 
 import { Logger } from '../../../src/logger/node.mjs'
 import { LOG_SYMBOLS } from '../../../src/logger/symbols.mjs'
-import { THEMES } from '../../../src/term/themes/themes.mjs'
+import { THEMES } from '../../../src/term/themes/presets.mjs'
 
 /*
  * Color is a property of the destination stream, so the escapes wrapping a

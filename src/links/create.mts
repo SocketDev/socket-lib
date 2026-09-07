@@ -7,7 +7,7 @@ import terminalLink from '../external/terminal-link.js'
 import yoctocolorsCjs from '../external/yoctocolors-cjs.js'
 import { ArrayIsArray } from '../primordials/array.mjs'
 import { getTheme } from '../term/themes/context.mjs'
-import { THEMES } from '../term/themes/themes.mjs'
+import { THEMES } from '../term/themes/presets.mjs'
 import { resolveColor } from '../term/themes/resolve.mjs'
 
 import type { ColorName } from '../term/colors/types.mjs'

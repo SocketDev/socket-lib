@@ -17,8 +17,8 @@ import process from 'node:process'
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 
-import { Spinner } from '../../src/spinner/spinner.mjs'
-import { getCliSpinners } from '../../src/spinner/default.mjs'
+import { Spinner } from '../../../src/spinner/create.mjs'
+import { getCliSpinners } from '../../../src/spinner/default.mjs'
 
 describe('spinner', () => {
   // Mock stdout/stderr to prevent actual spinner output during tests

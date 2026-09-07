@@ -17,8 +17,8 @@
 import process from 'node:process'
 import { createInquirerTheme } from '../../../src/stdio/prompts.mjs'
 import type { Choice, Context } from '../../../src/stdio/prompts.mjs'
-import { THEMES } from '../../../src/term/themes/themes.mjs'
-import type { ThemeName } from '../../../src/term/themes/themes.mjs'
+import { THEMES } from '../../../src/term/themes/presets.mjs'
+import type { ThemeName } from '../../../src/term/themes/presets.mjs'
 import { describe, expect, it } from 'vitest'
 
 describe('stdio/prompts', () => {

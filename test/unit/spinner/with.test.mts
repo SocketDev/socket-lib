@@ -11,7 +11,7 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 
-import { Spinner } from '../../../src/spinner/spinner.mjs'
+import { Spinner } from '../../../src/spinner/create.mjs'
 import { withSpinner, withSpinnerSync } from '../../../src/spinner/with.mjs'
 
 describe('spinner — with wrappers', () => {

@@ -24,7 +24,7 @@ import { isCI } from '../env/ci.mjs'
 import { ArrayIsArray } from '../primordials/array.mjs'
 import { TypeErrorCtor } from '../primordials/error.mjs'
 import { getTheme } from '../term/themes/context.mjs'
-import { THEMES } from '../term/themes/themes.mjs'
+import { THEMES } from '../term/themes/presets.mjs'
 import { resolveColor } from '../term/themes/resolve.mjs'
 
 import { COLOR_INHERIT } from './format.mjs'

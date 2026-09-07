@@ -3485,9 +3485,9 @@
       "default": "./dist/spinner/format.js"
     },
     "./spinner/spinner": {
-      "source": "./src/spinner/spinner.mts",
-      "types": "./dist/spinner/spinner.d.ts",
-      "default": "./dist/spinner/spinner.js"
+      "source": "./src/spinner/create.mts",
+      "types": "./dist/spinner/create.d.ts",
+      "default": "./dist/spinner/create.js"
     },
     "./spinner/spinner-internals": {
       "source": "./src/spinner/spinner-internals.mts",
@@ -3658,9 +3658,9 @@
       "default": "./dist/temporal/system.js"
     },
     "./temporal/temporal": {
-      "source": "./src/temporal/temporal.mts",
-      "types": "./dist/temporal/temporal.d.ts",
-      "default": "./dist/temporal/temporal.js"
+      "source": "./src/temporal/namespace.mts",
+      "types": "./dist/temporal/namespace.d.ts",
+      "default": "./dist/temporal/namespace.js"
     },
     "./term/ansi/constants": {
       "source": "./src/term/ansi/constants.mts",
@@ -3748,9 +3748,9 @@
       "default": "./dist/term/themes/resolve.js"
     },
     "./term/themes/themes": {
-      "source": "./src/term/themes/themes.mts",
-      "types": "./dist/term/themes/themes.d.ts",
-      "default": "./dist/term/themes/themes.js"
+      "source": "./src/term/themes/presets.mts",
+      "types": "./dist/term/themes/presets.d.ts",
+      "default": "./dist/term/themes/presets.js"
     },
     "./term/themes/types": {
       "source": "./src/term/themes/types.mts",

@@ -6,7 +6,7 @@
 
 import { ANSI_BOLD, ANSI_DIM, ANSI_RESET } from '../ansi/constants.mjs'
 
-import type { ThemeName } from '../themes/themes.mjs'
+import type { ThemeName } from '../themes/presets.mjs'
 import type { Theme } from '../themes/types.mjs'
 
 export type SocketFramesOptions = {
