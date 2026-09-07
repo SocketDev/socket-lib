@@ -56,90 +56,24 @@ export function normalizeEncoding(
  * @see https://github.com/nodejs/node/blob/ae62b36d442b7bf987e85ae6e0df0f02cc1bb17f/lib/internal/util.js#L247-L310
  */
 export function normalizeEncodingSlow(enc: string): BufferEncoding {
-  const { length } = enc
-  if (length === 4) {
-    if (enc === 'UCS2' || enc === 'ucs2') {
-      return 'utf16le'
-    }
-    if (enc.toLowerCase() === 'ucs2') {
-      return 'utf16le'
-    }
-  } else if (
-    (length === 3 && enc === 'hex') ||
-    enc === 'HEX' ||
-    enc.toLowerCase() === 'hex'
-  ) {
-    return 'hex'
-  } else if (length === 5) {
-    if (enc === 'ascii') {
+  switch (enc.toLowerCase()) {
+    case 'ascii':
       return 'ascii'
-    }
-    if (enc === 'ucs-2') {
-      return 'utf16le'
-    }
-    if (enc === 'ASCII') {
-      return 'ascii'
-    }
-    if (enc === 'UCS-2') {
-      return 'utf16le'
-    }
-    enc = enc.toLowerCase()
-    if (enc === 'ascii') {
-      return 'ascii'
-    }
-    if (enc === 'ucs-2') {
-      return 'utf16le'
-    }
-  } else if (length === 6) {
-    if (enc === 'base64') {
+    case 'base64':
       return 'base64'
-    }
-    if (enc === 'binary' || enc === 'latin1') {
-      return 'latin1'
-    }
-    if (enc === 'BASE64') {
-      return 'base64'
-    }
-    if (enc === 'BINARY' || enc === 'LATIN1') {
-      return 'latin1'
-    }
-    enc = enc.toLowerCase()
-    if (enc === 'base64') {
-      return 'base64'
-    }
-    if (enc === 'binary' || enc === 'latin1') {
-      return 'latin1'
-    }
-    // Length 7/8/9 branches handle utf16le, utf-16le, base64url. Each
-    // length needs a specific encoding; tests cover the canonical forms
-    // but the inner case-coercion sub-arms (the second/third operand
-    // of each `||`) fire only on mixed-case inputs.
-    /* c8 ignore start */
-  } else if (length === 7) {
-    if (
-      enc === 'utf16le' ||
-      enc === 'UTF16LE' ||
-      enc.toLowerCase() === 'utf16le'
-    ) {
-      return 'utf16le'
-    }
-  } else if (length === 8) {
-    if (
-      enc === 'utf-16le' ||
-      enc === 'UTF-16LE' ||
-      enc.toLowerCase() === 'utf-16le'
-    ) {
-      return 'utf16le'
-    }
-  } else if (length === 9) {
-    if (
-      enc === 'base64url' ||
-      enc === 'BASE64URL' ||
-      enc.toLowerCase() === 'base64url'
-    ) {
+    case 'base64url':
       return 'base64url'
-    }
+    case 'binary':
+    case 'latin1':
+      return 'latin1'
+    case 'hex':
+      return 'hex'
+    case 'ucs-2':
+    case 'ucs2':
+    case 'utf-16le':
+    case 'utf16le':
+      return 'utf16le'
+    default:
+      return 'utf8'
   }
-  /* c8 ignore stop */
-  return 'utf8'
 }
