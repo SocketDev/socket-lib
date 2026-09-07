@@ -190,7 +190,7 @@ export function iteratorRecordOf<T>(iterator: object): IteratorRecord<T> {
     closeQuietly: () => closeIteratorQuietly(iterator),
     iterator,
     nextMethod: next,
-    next: () => {
+    next: (): StepResult<T> => {
       if (typeof next !== 'function') {
         throw new TypeErrorCtor('The iterator must have a callable next')
       }

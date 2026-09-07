@@ -44,7 +44,10 @@ import {
   iteratorTakeShim,
   limitOf,
 } from '../../../src/polyfills/iterator/lazy.mjs'
-import { iteratorHelperPrototype } from '../../../src/polyfills/iterator/shared.mjs'
+import {
+  iteratorHelperPrototype,
+  iteratorRecordOf,
+} from '../../../src/polyfills/iterator/shared.mjs'
 import {
   iteratorConcatShim,
   iteratorFromShim,
@@ -417,6 +420,7 @@ describe('the statics', () => {
 describe('lazy iterator result records', () => {
   it('preserves ordinary fresh result objects through every lazy shim', () => {
     const helpers = [
+      iteratorRecordOf<number>(iterOf([2])),
       iteratorDropShim<number>(iterOf([1, 2]), 1),
       iteratorFilterShim<number>(iterOf([1, 2]), value => value === 2),
       iteratorFlatMapShim<number, number>(iterOf([2]), value => [value]),
