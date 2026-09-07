@@ -180,35 +180,35 @@
       ],
       "description": "uv — Astral Python package/project manager (pinned, SRI-verified)",
       "repository": "github:astral-sh/uv",
-      "version": "0.12.5",
+      "version": "0.12.7",
       "binaryName": "uv",
       "platforms": {
         "darwin-arm64": {
           "asset": "uv-aarch64-apple-darwin.tar.gz",
-          "integrity": "sha512-N7EGyD7M/4RfS5eERXgafTtYKz4ssIdnKoA81/sJzbdD2GUYZNfn3U8IZm1vyvBmHt9RmmDPnjANF0PJbkeNEg=="
+          "integrity": "sha512-//y39pP48mmEfJ4y0arOqB/NUu7p0ByMVpUh7FdHyfUYcrKccWbNDaEZDeDfZGJo+TuO4GKrQkSoWr3m8H50wQ=="
         },
         "darwin-x64": {
           "asset": "uv-x86_64-apple-darwin.tar.gz",
-          "integrity": "sha512-GMRB8yith2jiNGJBLUn2ajTicf3ngn52wH+M93WQ5J3bCl76f5UL2WSZW7mv4QWQZjGojpsK04q1+sd22D3Nvg=="
+          "integrity": "sha512-jxI/QHy4fwyNe7yvzre8xcclVAip9a1Jvk19EdhE2pEHQAIEjYtOy5Ol6nKUhc6ypRPU8/p0hMib+dM/Wvi8Ow=="
         },
         "linux-arm64": {
           "asset": "uv-aarch64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-gjoOCUdqySf6PaLK8yf9jDaB4+ICtuOkT995DZ53xACo5WLlca4wpBDYFQwrz1Z7Qf9fE9nHVXUoG1QPLA5GPg=="
+          "integrity": "sha512-l15YMZfGCNMNQvK/J14Ny6lHAgv2yuOzPaw+OD8pmDE35t7jENFq0HUNW89l9HCv4q8rIiB4kG8Da5VGBCz/Mw=="
         },
         "linux-x64": {
           "asset": "uv-x86_64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-tOM2F+kFnYfppCihH+5M5T3UM8S3hilNhJvOVW8AMjH7sx90AgP30uOYTRJVKH2YDmMfcTf268bgHOF+kHxSZA=="
+          "integrity": "sha512-iypkBjnn+GvivDSc/eXxKihJJT1Q9YJhNGchKfnSvTKnpzBEnw6SdGnfagAvOTBk1bvZHDYfWIheRV88aYKiVg=="
         },
         "win32-x64": {
           "asset": "uv-x86_64-pc-windows-msvc.zip",
-          "integrity": "sha512-Rab5OJ3XiibfOhvkGStjCdN1Ymbq/CktJwxHVloGEMQELavUDNh54U6cqvN7IpfJXid4y2qQoOsGlcTaRI9tOg=="
+          "integrity": "sha512-B+R5J3VoOb7hesOCJHbT2ohQbGMiPcBOCPi+FWHuAFOJVfhHLEbAXzm/uQ46jMmvAfKTcC+u4X1tws/rIreXaw=="
         }
       },
       "origin": "gh-asset"
     },
     "zizmor": {
       "description": "GitHub Actions security linter — audits .github/ for workflow-injection / credential-leak patterns.",
-      "version": "1.29.0",
+      "version": "1.30.0",
       "repository": "github:zizmorcore/zizmor",
       "notes": [
         "Required: CI (blocks merges on medium+ findings)",
@@ -217,23 +217,23 @@
       "platforms": {
         "darwin-arm64": {
           "asset": "zizmor-aarch64-apple-darwin.tar.gz",
-          "integrity": "sha512-lXyZ6VFPvuPZdn/j+ZKHNTrwDelq2mpGmZCNT8QEvpKxvg5v3cP+gLLTxoBo3q591UuPLpLpgQ29eMXu1FnSeg=="
+          "integrity": "sha512-kkaQ+tzBju3cQu4TMiobDw0gcdsYKLliOfdDh0LiAvm+FFXuMdYoRyqalMD1Fcpvs6hcJB2OOcrY5VbScyazpA=="
         },
         "darwin-x64": {
           "asset": "zizmor-x86_64-apple-darwin.tar.gz",
-          "integrity": "sha512-PTiTH43f43WY7yVjC0Mvigsh8XoQzDMH9/bcvhEVpl0i8nO7HBS47uvgolLh5McSCI9u8CKvCHqKm132ku3FuQ=="
+          "integrity": "sha512-6DobW4UdYS1ZZuZNLRjtZGD+1t01WtUDuPN9xImViS2AZsfFK5GvC48KZOEJ4uMNi+1LIrTNJdFoKAJ+wLRwDA=="
         },
         "linux-arm64": {
           "asset": "zizmor-aarch64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-VuBT1NwuQez9OSaucn3fkdvRmd0cRoLomozfnebDnQEtxNbcq+GJAVxeYusS0t3PTDNcC4oOBtEIh6AiyvZbLQ=="
+          "integrity": "sha512-nhJOFX1+nCyTjVXBNVW5sfkN+iyOnppcY0sc4aCd4qUO9tfI/ASNzYn/0/AeruOGhAk5UkyLhuiKSpQ6MdbrQA=="
         },
         "linux-x64": {
           "asset": "zizmor-x86_64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-+ud35oavU/AEGqKoNZVg8b/dwuFuKM/TfujGmXomnV3mScdhmavrkiNpx/9vUbQ+htk7eYfK2nRStzIVWA19KA=="
+          "integrity": "sha512-MF8BdJuZLNboRUPXRUJjicZs14PDjfflIDRM87ji8E0eNbwmyH7lZ/cdclITjhcz1iK+z3u33w16dEp7fVCIgA=="
         },
         "win32-x64": {
           "asset": "zizmor-x86_64-pc-windows-msvc.zip",
-          "integrity": "sha512-r6YP+e2GsOklaxEf9JHrixkeR0NNkVAaMGcvwLxkt1JlYJpxFizH/LzhcsMmPSrLkELf6LNB2JL8hpDa5dBAww=="
+          "integrity": "sha512-4dB8Yp+jq60z7omGw5W8CdA+1yLaqK0BWIMgjFXNv+k0wewldPoIcZj8LGSFgjUmxlGYXdkIvJ3RzRyKVixctQ=="
         }
       },
       "origin": "gh-asset"
