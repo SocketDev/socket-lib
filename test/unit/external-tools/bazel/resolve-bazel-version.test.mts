@@ -30,54 +30,58 @@ export async function withTmpDir(
 
 // Sequential because USE_BAZEL_VERSION is process-scoped under
 // vitest's `isolate: false` config.
-describe.sequential('external-tools/bazel/resolve-bazel-version', () => {
-  afterEach(() => {
-    vi.unstubAllEnvs()
-  })
-
-  it('returns USE_BAZEL_VERSION when set', async () => {
-    vi.stubEnv('USE_BAZEL_VERSION', '6.4.0')
-    await withTmpDir(async tmpDir => {
-      expect(await resolveBazelVersion({ cwd: tmpDir })).toBe('6.4.0')
+describe(
+  'external-tools/bazel/resolve-bazel-version',
+  { concurrent: false },
+  () => {
+    afterEach(() => {
+      vi.unstubAllEnvs()
     })
-  })
 
-  it('ignores empty USE_BAZEL_VERSION and falls through to .bazelversion', async () => {
-    vi.stubEnv('USE_BAZEL_VERSION', '')
-    await withTmpDir(async tmpDir => {
-      await fs.writeFile(path.join(tmpDir, '.bazelversion'), '7.4.0\n')
-      expect(await resolveBazelVersion({ cwd: tmpDir })).toBe('7.4.0')
+    it('returns USE_BAZEL_VERSION when set', async () => {
+      vi.stubEnv('USE_BAZEL_VERSION', '6.4.0')
+      await withTmpDir(async tmpDir => {
+        expect(await resolveBazelVersion({ cwd: tmpDir })).toBe('6.4.0')
+      })
     })
-  })
 
-  it('reads .bazelversion when no env override is set', async () => {
-    vi.stubEnv('USE_BAZEL_VERSION', '')
-    await withTmpDir(async tmpDir => {
-      await fs.writeFile(path.join(tmpDir, '.bazelversion'), '7.4.0\n')
-      expect(await resolveBazelVersion({ cwd: tmpDir })).toBe('7.4.0')
+    it('ignores empty USE_BAZEL_VERSION and falls through to .bazelversion', async () => {
+      vi.stubEnv('USE_BAZEL_VERSION', '')
+      await withTmpDir(async tmpDir => {
+        await fs.writeFile(path.join(tmpDir, '.bazelversion'), '7.4.0\n')
+        expect(await resolveBazelVersion({ cwd: tmpDir })).toBe('7.4.0')
+      })
     })
-  })
 
-  it('walks up to find .bazelversion in a parent', async () => {
-    vi.stubEnv('USE_BAZEL_VERSION', '')
-    await withTmpDir(async tmpDir => {
-      const child = path.join(tmpDir, 'a', 'b')
-      await fs.mkdir(child, { recursive: true })
-      await fs.writeFile(path.join(tmpDir, '.bazelversion'), '6.0.0\n')
-      expect(await resolveBazelVersion({ cwd: child })).toBe('6.0.0')
+    it('reads .bazelversion when no env override is set', async () => {
+      vi.stubEnv('USE_BAZEL_VERSION', '')
+      await withTmpDir(async tmpDir => {
+        await fs.writeFile(path.join(tmpDir, '.bazelversion'), '7.4.0\n')
+        expect(await resolveBazelVersion({ cwd: tmpDir })).toBe('7.4.0')
+      })
     })
-  })
 
-  it('honors USE_BAZEL_VERSION even when .bazelversion exists (env wins)', async () => {
-    vi.stubEnv('USE_BAZEL_VERSION', '8.0.0')
-    await withTmpDir(async tmpDir => {
-      await fs.writeFile(path.join(tmpDir, '.bazelversion'), '7.4.0\n')
-      expect(await resolveBazelVersion({ cwd: tmpDir })).toBe('8.0.0')
+    it('walks up to find .bazelversion in a parent', async () => {
+      vi.stubEnv('USE_BAZEL_VERSION', '')
+      await withTmpDir(async tmpDir => {
+        const child = path.join(tmpDir, 'a', 'b')
+        await fs.mkdir(child, { recursive: true })
+        await fs.writeFile(path.join(tmpDir, '.bazelversion'), '6.0.0\n')
+        expect(await resolveBazelVersion({ cwd: child })).toBe('6.0.0')
+      })
     })
-  })
 
-  it('accepts a default cwd when options is omitted', async () => {
-    vi.stubEnv('USE_BAZEL_VERSION', '6.4.0')
-    expect(await resolveBazelVersion()).toBe('6.4.0')
-  })
-})
+    it('honors USE_BAZEL_VERSION even when .bazelversion exists (env wins)', async () => {
+      vi.stubEnv('USE_BAZEL_VERSION', '8.0.0')
+      await withTmpDir(async tmpDir => {
+        await fs.writeFile(path.join(tmpDir, '.bazelversion'), '7.4.0\n')
+        expect(await resolveBazelVersion({ cwd: tmpDir })).toBe('8.0.0')
+      })
+    })
+
+    it('accepts a default cwd when options is omitted', async () => {
+      vi.stubEnv('USE_BAZEL_VERSION', '6.4.0')
+      expect(await resolveBazelVersion()).toBe('6.4.0')
+    })
+  },
+)

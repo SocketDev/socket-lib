@@ -14,7 +14,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { resolveRealBinSync } from '../../../../src/exe/path/resolve.mjs'
 import { safeDelete } from '../../../../src/fs/safe.mjs'
 
-describe.sequential('bin.ts — Volta resolution', () => {
+describe('bin.ts — Volta resolution', { concurrent: false }, () => {
   let voltaRoot: string
 
   beforeEach(() => {

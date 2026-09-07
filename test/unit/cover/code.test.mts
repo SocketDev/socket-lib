@@ -12,15 +12,15 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { spawn } from '../../../src/process/spawn/child.mjs'
+import { getCodeCoverage } from '../../../src/cover/code.mjs'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+
 // Mock via the src/ relative path so vitest intercepts the same
 // module instance that src/cover/code.ts imports (which uses
 // relative paths internally). Package-specifier mocks don't survive
 // vitest's threaded-pool dedup gaps.
 vi.mock(import('../../../src/process/spawn/child.mjs'))
-
-import { spawn } from '../../../src/process/spawn/child.mjs'
-import { getCodeCoverage } from '../../../src/cover/code.mjs'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpDir: string
 
@@ -30,7 +30,7 @@ export function writeCoverageFile(data: unknown): string {
   return file
 }
 
-describe.sequential('cover/code', () => {
+describe('cover/code', { concurrent: false }, () => {
   beforeEach(() => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'socket-lib-cover-test-'))
     vi.mocked(spawn).mockReset()

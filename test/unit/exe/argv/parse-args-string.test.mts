@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest'
 
 import { parseArgsString } from '../../../../src/exe/argv/parse-args-string.mjs'
 
-describe.sequential('argv/parse-args-string', () => {
+describe('argv/parse-args-string', { concurrent: false }, () => {
   it('tokenizes a bare command', () => {
     expect(parseArgsString('git status')).toEqual(['git', 'status'])
   })

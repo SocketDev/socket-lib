@@ -36,78 +36,90 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/bazel/resolve — cacheKey', () => {
-  test('returns "local-only" without downloadIfMissing', async () => {
-    const { cacheKey } = await loadFresh()
-    expect(cacheKey(undefined)).toBe('local-only')
-    expect(cacheKey({})).toBe('local-only')
-  })
+describe(
+  'external-tools/bazel/resolve — cacheKey',
+  { concurrent: false },
+  () => {
+    test('returns "local-only" without downloadIfMissing', async () => {
+      const { cacheKey } = await loadFresh()
+      expect(cacheKey(undefined)).toBe('local-only')
+      expect(cacheKey({})).toBe('local-only')
+    })
 
-  test('encodes a string integrity', async () => {
-    const { cacheKey } = await loadFresh()
-    expect(
-      cacheKey({
-        downloadIfMissing: {
-          version: '7.0.0',
-          platformArch: 'darwin-arm64',
-          integrity: 'sha256-abc',
-        },
-      }),
-    ).toBe('dl:7.0.0:darwin-arm64:sha256-abc')
-  })
+    test('encodes a string integrity', async () => {
+      const { cacheKey } = await loadFresh()
+      expect(
+        cacheKey({
+          downloadIfMissing: {
+            version: '7.0.0',
+            platformArch: 'darwin-arm64',
+            integrity: 'sha256-abc',
+          },
+        }),
+      ).toBe('dl:7.0.0:darwin-arm64:sha256-abc')
+    })
 
-  test('encodes a Hash object integrity', async () => {
-    const { cacheKey } = await loadFresh()
-    const hash = makeHash('sha256', 'a'.repeat(64))
-    expect(
-      cacheKey({
-        downloadIfMissing: {
-          version: '7.0.0',
-          platformArch: 'darwin-arm64',
-          integrity: hash,
-        },
-      }),
-    ).toBe(`dl:7.0.0:darwin-arm64:${hash.sri}`)
-  })
-})
+    test('encodes a Hash object integrity', async () => {
+      const { cacheKey } = await loadFresh()
+      const hash = makeHash('sha256', 'a'.repeat(64))
+      expect(
+        cacheKey({
+          downloadIfMissing: {
+            version: '7.0.0',
+            platformArch: 'darwin-arm64',
+            integrity: hash,
+          },
+        }),
+      ).toBe(`dl:7.0.0:darwin-arm64:${hash.sri}`)
+    })
+  },
+)
 
-describe.sequential('external-tools/bazel/resolve — doResolveBazel', () => {
-  test('returns PATH result when bazel is on PATH', async () => {
-    const { doResolveBazel, fromPath } = await loadFresh()
-    const expected = { binaryPath: '/usr/bin/bazel', source: 'path' as const }
-    fromPath.mockResolvedValueOnce(expected)
-    expect(await doResolveBazel()).toBe(expected)
-  })
+describe(
+  'external-tools/bazel/resolve — doResolveBazel',
+  { concurrent: false },
+  () => {
+    test('returns PATH result when bazel is on PATH', async () => {
+      const { doResolveBazel, fromPath } = await loadFresh()
+      const expected = { binaryPath: '/usr/bin/bazel', source: 'path' as const }
+      fromPath.mockResolvedValueOnce(expected)
+      expect(await doResolveBazel()).toBe(expected)
+    })
 
-  test('returns undefined when PATH misses and download not enabled', async () => {
-    const { doResolveBazel, fromPath } = await loadFresh()
-    fromPath.mockResolvedValueOnce(undefined)
-    expect(await doResolveBazel()).toBeUndefined()
-  })
+    test('returns undefined when PATH misses and download not enabled', async () => {
+      const { doResolveBazel, fromPath } = await loadFresh()
+      fromPath.mockResolvedValueOnce(undefined)
+      expect(await doResolveBazel()).toBeUndefined()
+    })
 
-  test('falls through to download when PATH misses + opts.downloadIfMissing', async () => {
-    const { doResolveBazel, fromDownload, fromPath } = await loadFresh()
-    fromPath.mockResolvedValueOnce(undefined)
-    const expected = {
-      binaryPath: '/cache/bazel',
-      source: 'download' as const,
-    }
-    fromDownload.mockResolvedValueOnce(expected)
-    const opts = {
-      downloadIfMissing: { version: '7.0.0', platformArch: 'darwin-arm64' },
-    }
-    expect(await doResolveBazel(opts)).toBe(expected)
-    expect(fromDownload).toHaveBeenCalledWith(opts.downloadIfMissing)
-  })
-})
+    test('falls through to download when PATH misses + opts.downloadIfMissing', async () => {
+      const { doResolveBazel, fromDownload, fromPath } = await loadFresh()
+      fromPath.mockResolvedValueOnce(undefined)
+      const expected = {
+        binaryPath: '/cache/bazel',
+        source: 'download' as const,
+      }
+      fromDownload.mockResolvedValueOnce(expected)
+      const opts = {
+        downloadIfMissing: { version: '7.0.0', platformArch: 'darwin-arm64' },
+      }
+      expect(await doResolveBazel(opts)).toBe(expected)
+      expect(fromDownload).toHaveBeenCalledWith(opts.downloadIfMissing)
+    })
+  },
+)
 
-describe.sequential('external-tools/bazel/resolve — resolveBazel memoization', () => {
-  test('memoizes by cacheKey', async () => {
-    const { fromPath, resolveBazel } = await loadFresh()
-    const expected = { binaryPath: '/usr/bin/bazel', source: 'path' as const }
-    fromPath.mockResolvedValueOnce(expected)
-    expect(await resolveBazel()).toBe(expected)
-    expect(await resolveBazel()).toBe(expected)
-    expect(fromPath).toHaveBeenCalledTimes(1)
-  })
-})
+describe(
+  'external-tools/bazel/resolve — resolveBazel memoization',
+  { concurrent: false },
+  () => {
+    test('memoizes by cacheKey', async () => {
+      const { fromPath, resolveBazel } = await loadFresh()
+      const expected = { binaryPath: '/usr/bin/bazel', source: 'path' as const }
+      fromPath.mockResolvedValueOnce(expected)
+      expect(await resolveBazel()).toBe(expected)
+      expect(await resolveBazel()).toBe(expected)
+      expect(fromPath).toHaveBeenCalledTimes(1)
+    })
+  },
+)
