@@ -217,3 +217,22 @@ describe('findUpSync', () => {
     }, 'findUpSync-only-dirs-file-')
   })
 })
+
+describe('findUp type precedence', () => {
+  it('prefers directories when both filters are enabled in both read modes', async () => {
+    await runWithTempDir(async tmpDir => {
+      await fs.writeFile(path.join(tmpDir, 'config.json'), '{}')
+      await fs.mkdir(path.join(tmpDir, 'config-directory'))
+      const names = ['config.json', 'config-directory']
+      const options = { cwd: tmpDir, onlyDirectories: true, onlyFiles: true }
+      const expected = path.join(tmpDir, 'config-directory')
+      expect(await findUp(names, options)).toBe(expected)
+      expect(findUpSync(names, { ...options, stopAt: tmpDir })).toBe(expected)
+      const either = { cwd: tmpDir, onlyDirectories: false, onlyFiles: false }
+      expect(await findUp(names, either)).toBe(path.join(tmpDir, 'config.json'))
+      expect(findUpSync(names, { ...either, stopAt: tmpDir })).toBe(
+        path.join(tmpDir, 'config.json'),
+      )
+    }, 'find-up-type-')
+  })
+})

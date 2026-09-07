@@ -14,6 +14,8 @@ import { normalizePath } from '../paths/normalize.mjs'
 import { walkUp } from '../paths/walk.mjs'
 import { getSmolPath } from '../exe/smol/path.mjs'
 
+import type { Stats } from 'node:fs'
+
 import type { FindUpOptions, FindUpSyncOptions } from './types.mjs'
 import { getNodeProcess } from '../node/process.mjs'
 
@@ -73,10 +75,7 @@ export async function findUp(
       try {
         // oxlint-disable-next-line socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory().
         const stats = await fs.promises.stat(thePath)
-        if (!onlyDirectories && stats.isFile()) {
-          return normalizePath(thePath)
-        }
-        if (!onlyFiles && stats.isDirectory()) {
+        if (matchesFindUpType(stats, { onlyDirectories, onlyFiles })) {
           return normalizePath(thePath)
         }
       } catch {}
@@ -154,14 +153,22 @@ export function findUpSync(
       try {
         // oxlint-disable-next-line socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory().
         const stats = fs.statSync(thePath)
-        if (!onlyDirectories && stats.isFile()) {
-          return normalizePath(thePath)
-        }
-        if (!onlyFiles && stats.isDirectory()) {
+        if (matchesFindUpType(stats, { onlyDirectories, onlyFiles })) {
           return normalizePath(thePath)
         }
       } catch {}
     }
   }
   return undefined
+}
+
+export function matchesFindUpType(
+  stats: Pick<Stats, 'isFile' | 'isDirectory'>,
+  options: { onlyDirectories: boolean; onlyFiles: boolean },
+): boolean {
+  const settings = { __proto__: null, ...options }
+  const { onlyDirectories, onlyFiles } = settings
+  return (
+    (!onlyDirectories && stats.isFile()) || (!onlyFiles && stats.isDirectory())
+  )
 }
