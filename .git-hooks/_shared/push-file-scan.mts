@@ -11,6 +11,7 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { debugCheck } from './check-output.mts'
 
 import { readFileForScan, shouldSkipFile } from './file-scan.mts'
 import { gitLines } from './git.mts'
@@ -274,7 +275,7 @@ function reportClaudeLockdown(file: string, text: string): number {
   logger.info(
     'A headless `query()` / `new ClaudeSDKClient()` MUST set tools, ' +
       'allowedTools, disallowedTools, permissionMode (dontAsk), and never ' +
-      'bypassPermissions / default. See .claude/skills/fleet/locking-down-claude/.',
+      'bypassPermissions / default. See .claude/skills/fleet/locking-down-agent-calls/.',
   )
   return 1
 }
@@ -350,7 +351,7 @@ function scanFileContent(file: string, text: string): number {
 
 // Scans changed files in the range for secrets, keys, and leaks.
 export const scanFilesInRange = (range: string): number => {
-  logger.info('Checking files for security issues…')
+  debugCheck('Checking files for security issues…')
   // Normalize to POSIX forward slashes — same reason as pre-commit.mts.
   const changed = gitLines('diff', '--name-only', range).map(normalizePath)
   if (changed.length === 0) {

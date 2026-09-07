@@ -137,9 +137,10 @@ export declare function findFleetBlockSpans(lines: readonly string[], commentSty
  * byte-for-byte, except that removing a block sandwiched between blank lines
  * drops one of them rather than leaving a doubled blank.
  * If markers are absent:
+ *
  * - `html` style (CLAUDE.md, README): insert before the first level-2 heading
- * (`## `) with i > 0, or append at end.
- * - other styles: append with a leading blank line separator.
+ *   (`## `) with i > 0, or append at end.
+ * - Other styles: append with a leading blank line separator.
  */
 export declare function spliceFleetBlock(config: SpliceConfig): string;
 export declare function run(cmd: string, args: readonly string[]): void;
@@ -421,9 +422,11 @@ export declare function refreshFleetPackIgnores(config: UntrackFleetPackConfig):
  */
 export declare function untrackFleetPackPaths(config: UntrackFleetPackConfig): void;
 //#endregion
+//#region template/base/scripts/fleet/constants/oci-media-types.d.mts
+declare const OCI_MANIFEST_ACCEPT: string;
+//#endregion
 //#region scripts/repo/gen/bootstrap/src/ghcr-fetch.d.mts
 export declare const GHCR_HOST = "ghcr.io";
-export declare const MANIFEST_ACCEPT: string;
 export interface GhcrHttpResponse {
   readonly body: Buffer;
   readonly headers: NodeJS.Dict<string | string[]>;
@@ -1020,3 +1023,4 @@ export declare function runStatus(config: InstallConfig): Promise<number>;
 export declare function installFleet(config: InstallConfig): Promise<number>;
 export declare function isMainModule(): boolean;
 //#endregion
+export { OCI_MANIFEST_ACCEPT as MANIFEST_ACCEPT };

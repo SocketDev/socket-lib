@@ -92,13 +92,18 @@ export function parseIntegrity(s) {
     if (rest.length === hexLen && /^[0-9a-f]+$/i.test(rest)) {
       // `<algo>-<hex>` form (go.dev / rustup / Google .deb checksums) —
       // convert to base64 so the comparison is shape-consistent.
-      return { algo, expected: Buffer.from(rest, 'hex').toString('base64') }
+      return {
+        __proto__: null,
+        algo,
+        expected: Buffer.from(rest, 'hex').toString('base64'),
+      }
     }
-    return { algo, expected: rest }
+    return { __proto__: null, algo, expected: rest }
   }
   if (/^[0-9a-f]{64}$/i.test(s)) {
     // Bare sha256 hex — convert to SRI base64 for the comparison.
     return {
+      __proto__: null,
       algo: 'sha256',
       expected: Buffer.from(s, 'hex').toString('base64'),
     }

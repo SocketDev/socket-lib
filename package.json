@@ -1411,6 +1411,11 @@
       "types": "./dist/exe/exec.d.ts",
       "default": "./dist/exe/exec.js"
     },
+    "./exe/path/bin-kinds": {
+      "source": "./src/exe/path/bin-kinds.mts",
+      "types": "./dist/exe/path/bin-kinds.d.ts",
+      "default": "./dist/exe/path/bin-kinds.js"
+    },
     "./exe/path/find": {
       "source": "./src/exe/path/find.mts",
       "types": "./dist/exe/path/find.d.ts",
@@ -1420,6 +1425,16 @@
       "source": "./src/exe/path/resolve.mts",
       "types": "./dist/exe/path/resolve.d.ts",
       "default": "./dist/exe/path/resolve.js"
+    },
+    "./exe/path/resolve-shims": {
+      "source": "./src/exe/path/resolve-shims.mts",
+      "types": "./dist/exe/path/resolve-shims.d.ts",
+      "default": "./dist/exe/path/resolve-shims.js"
+    },
+    "./exe/path/resolve-volta": {
+      "source": "./src/exe/path/resolve-volta.mts",
+      "types": "./dist/exe/path/resolve-volta.d.ts",
+      "default": "./dist/exe/path/resolve-volta.js"
     },
     "./exe/path/sanitize": {
       "source": "./src/exe/path/sanitize.mts",
@@ -3957,7 +3972,12 @@
     "sync-global-hooks": "node scripts/fleet/sync-global-hooks.mts",
     "build:hook-bundle": "node scripts/fleet/build-hook-bundle.mts",
     "build:hook-snapshot": "node scripts/fleet/build-hook-snapshot.mts",
-    "build:snapshot-launcher": "node scripts/fleet/build-snapshot-launcher.mts"
+    "build:snapshot-launcher": "node scripts/fleet/build-snapshot-launcher.mts",
+    "context:cost": "node scripts/fleet/context-cost.mts",
+    "context:ratchet": "node scripts/fleet/check/context-cost-is-under-the-ratchet.mts",
+    "gen:glyph": "node scripts/fleet/gen/glyph.mts",
+    "mcp:profile": "node scripts/fleet/mcp/profile.mts",
+    "repo:map": "node scripts/fleet/gen/repo-map.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",

@@ -643,5 +643,16 @@
       "unix-path",
       "untrack-offenders"
     ]
+  },
+  "contextBudget": {
+    "measuredBytes": 44675,
+    "ratchetBytes": 46909,
+    "baselineBytes": 44675,
+    "targetBytes": 31272,
+    "note": "measuredBytes is today; ratchetBytes is the ceiling that fails a check, earned via RATCHET_HEADROOM and only ever tightening; targetBytes is where the surface is being driven, TARGET_SHARE of baselineBytes, and is reported rather than enforced.",
+    "clientRatchets": {
+      "claude": 46909,
+      "codex": 43630
+    }
   }
 }

@@ -347,11 +347,11 @@ export async function maybeNotifyUpdate(): Promise<void> {
     const newestRef = await resolveNewestRef(repo)
     // STAMP EVERY ANSWER, including the two that change nothing.
     //
-    // The store used to be written only by `maybeShowUpdateNotice` below,
-    // which is reached only when an update was actually found. So for a member
-    // that is already current - the steady state, and the overwhelmingly
-    // common one - `lastCheckMs` never advanced, the TTL gate above never
-    // fired, and the registry lookup ran on EVERY `pnpm install`. The throttle
+    // Writing it only from `maybeShowUpdateNotice` below would reach the store
+    // only when an update was actually found. For a member that is already
+    // current - the steady state, and the overwhelmingly common one -
+    // `lastCheckMs` would never advance, the TTL gate above would never fire,
+    // and the registry lookup would run on EVERY `pnpm install`. The throttle
     // only ever engaged for members that were behind, which are the ones least
     // in need of throttling.
     //

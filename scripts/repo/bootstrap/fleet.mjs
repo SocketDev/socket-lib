@@ -254,9 +254,10 @@ function findFleetBlockSpans(lines, commentStyle) {
  * byte-for-byte, except that removing a block sandwiched between blank lines
  * drops one of them rather than leaving a doubled blank.
  * If markers are absent:
+ *
  * - `html` style (CLAUDE.md, README): insert before the first level-2 heading
- * (`## `) with i > 0, or append at end.
- * - other styles: append with a leading blank line separator.
+ *   (`## `) with i > 0, or append at end.
+ * - Other styles: append with a leading blank line separator.
  */
 function spliceFleetBlock(config) {
   const { commentStyle, fleetBlock, target } = {
@@ -637,6 +638,8 @@ const ALWAYS_TRACKED_PREFIXES = [
   '.npmrc',
   'assets/fleet/badge-follow-bluesky.svg',
   'assets/fleet/badge-follow-x.svg',
+  'assets/fleet/important.LICENSE',
+  'assets/fleet/important.svg',
   'assets/fleet/socket-combomark-dark.svg',
   'assets/fleet/socket-combomark-light.svg',
   'scripts/repo/bootstrap/',
@@ -1521,6 +1524,13 @@ function fleetSettingsKeys(settings) {
     )
   return keys.slice(start, end + 1)
 }
+function priorFleetSettingsKeys(settings) {
+  try {
+    return new Set(fleetSettingsKeys(settings))
+  } catch {
+    return /* @__PURE__ */ new Set()
+  }
+}
 function isLegacyFleetCommentEnv(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return false
   const entries = Object.entries(value)
@@ -1548,6 +1558,7 @@ function mergeClaudeSettings(config) {
   const merged = {}
   for (const key of fleetKeys) merged[key] = cloneJson(fleetSettings[key])
   if (repoSettings !== void 0) {
+    const priorFleetKeys = priorFleetSettingsKeys(repoSettings)
     spliceRepoHookEntries(merged, repoSettings)
     const hostLauncherEvents = launcherWiredEvents(repoSettings)
     if (hostLauncherEvents.size > 0)
@@ -1559,6 +1570,7 @@ function mergeClaudeSettings(config) {
     for (const [key, value] of Object.entries(repoSettings)) {
       if (
         fleetKeySet.has(key) ||
+        priorFleetKeys.has(key) ||
         key === '// <fleet>' ||
         key === '// </fleet>' ||
         (key === 'env' && isLegacyFleetCommentEnv(value))
@@ -2376,14 +2388,17 @@ function networkFailureMessage(config) {
 }
 
 //#endregion
-//#region scripts/repo/gen/bootstrap/src/ghcr-fetch.mts
-const GHCR_HOST = 'ghcr.io'
-const MANIFEST_ACCEPT = [
+//#region template/base/scripts/fleet/constants/oci-media-types.mts
+const OCI_MANIFEST_ACCEPT = [
   'application/vnd.oci.image.manifest.v1+json',
   'application/vnd.oci.image.index.v1+json',
   'application/vnd.docker.distribution.manifest.v2+json',
   'application/vnd.docker.distribution.manifest.list.v2+json',
 ].join(', ')
+
+//#endregion
+//#region scripts/repo/gen/bootstrap/src/ghcr-fetch.mts
+const GHCR_HOST = 'ghcr.io'
 const MAX_REDIRECTS = 5
 const REQUEST_TIMEOUT_MS = 3e4
 /**
@@ -2566,7 +2581,7 @@ async function getGhcrToken(repo, registry, httpFn = httpGet) {
 async function fetchOciManifest(repo, ref, token, registry, httpFn = httpGet) {
   const res = await httpFn(`https://${registry}/v2/${repo}/manifests/${ref}`, {
     headers: {
-      accept: MANIFEST_ACCEPT,
+      accept: OCI_MANIFEST_ACCEPT,
       authorization: `Bearer ${token}`,
     },
   })
@@ -3353,7 +3368,7 @@ export {
   GHCR_HOST,
   HARNESS_ALIAS_PATHS,
   HYBRID_BUNDLE_PATHS,
-  MANIFEST_ACCEPT,
+  OCI_MANIFEST_ACCEPT as MANIFEST_ACCEPT,
   PREPARE_FETCH,
   PREPARE_FROM_TEMPLATE,
   SETTINGS_CANDIDATES,
