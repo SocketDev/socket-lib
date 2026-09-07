@@ -75,6 +75,21 @@ export interface NpmTarballEntry {
  * decompressor, whose own error would name a stream problem rather than the
  * text-adapter mistake that actually caused it.
  */
+export function getTarExtractLimits(options: ExtractOptions | undefined): {
+  maxEntries: number
+  maxFileSize: number
+  maxTotalSize: number
+  strip: number
+} {
+  const {
+    maxEntries = DEFAULT_MAX_ENTRIES,
+    maxFileSize = DEFAULT_MAX_FILE_SIZE,
+    maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
+    strip = 0,
+  } = { __proto__: null, ...options } as ExtractOptions
+  return { __proto__: null, maxEntries, maxFileSize, maxTotalSize, strip }
+}
+
 export function isGzipBytes(bytes: Uint8Array): boolean {
   return (
     bytes.length >= 2 && bytes[0] === GZIP_MAGIC_0 && bytes[1] === GZIP_MAGIC_1
@@ -204,12 +219,8 @@ export function readTarEntries(
   bytes: Uint8Array,
   options?: ExtractOptions | undefined,
 ): NpmTarballEntry[] {
-  const {
-    maxEntries = DEFAULT_MAX_ENTRIES,
-    maxFileSize = DEFAULT_MAX_FILE_SIZE,
-    maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
-    strip = 0,
-  } = { __proto__: null, ...options } as ExtractOptions
+  const { maxEntries, maxFileSize, maxTotalSize, strip } =
+    getTarExtractLimits(options)
   const entries: NpmTarballEntry[] = []
   let offset = 0
   let entryCount = 0
@@ -250,18 +261,8 @@ export function readTarEntries(
       offset += dataBlocks
       continue
     }
-    const prefix = readString(header, 345, 155)
-    const base = readString(header, 0, 100)
-    const rawName = pendingName ?? (prefix === '' ? base : `${prefix}/${base}`)
+    const rawName = readTarEntryName(header, pendingName, typeFlag)
     pendingName = undefined
-    if (StringPrototypeIndexOf(rawName, '\0') !== -1) {
-      throw new ErrorCtor(`Invalid null byte in archive entry name: ${rawName}`)
-    }
-    if (typeFlag === '1' || typeFlag === '2') {
-      throw new ErrorCtor(
-        `Symlink or hardlink entries are not allowed: ${rawName}`,
-      )
-    }
     // Directories and other non-regular types carry no bytes worth returning.
     // ustar spells a regular file '0', and older archives leave the field NUL.
     if (typeFlag !== '' && typeFlag !== '0') {
@@ -297,6 +298,25 @@ export function readTarEntries(
     offset += dataBlocks
   }
   return entries
+}
+
+export function readTarEntryName(
+  header: Uint8Array,
+  pendingName: string | undefined,
+  typeFlag: string,
+): string {
+  const prefix = readString(header, 345, 155)
+  const base = readString(header, 0, 100)
+  const rawName = pendingName ?? (prefix === '' ? base : `${prefix}/${base}`)
+  if (StringPrototypeIndexOf(rawName, '\0') !== -1) {
+    throw new ErrorCtor(`Invalid null byte in archive entry name: ${rawName}`)
+  }
+  if (typeFlag === '1' || typeFlag === '2') {
+    throw new ErrorCtor(
+      `Symlink or hardlink entries are not allowed: ${rawName}`,
+    )
+  }
+  return rawName
 }
 
 /**
