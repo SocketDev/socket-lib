@@ -186,9 +186,7 @@ export function trimCharsFromEnds(str: string, chars: string): string {
   while (end > start && chars.includes(str[end - 1] as string)) {
     end -= 1
   }
-  return start === 0 && end === length
-    ? str
-    : StringPrototypeSlice(str, start, end)
+  return StringPrototypeSlice(str, start, end)
 }
 
 /**
@@ -247,7 +245,5 @@ export function trimNewlines(str: string): string {
     }
     end -= 1
   }
-  return start === 0 && end === length
-    ? str
-    : StringPrototypeSlice(str, start, end)
+  return StringPrototypeSlice(str, start, end)
 }
