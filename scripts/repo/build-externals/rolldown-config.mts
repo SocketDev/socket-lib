@@ -126,6 +126,7 @@ export function createForceNodeModulesPlugin(): Plugin {
     'normalize-package-data',
   ]
   const matchers = packagesWithPathMappings.map(pkg => ({
+    __proto__: null,
     pkg,
     re: new RegExp(`^${pkg}(/|$)`),
   }))
@@ -142,7 +143,11 @@ export function createForceNodeModulesPlugin(): Plugin {
         return undefined
       }
       try {
-        return { id: requireResolve.resolve(source), external: false }
+        return {
+          __proto__: null,
+          id: requireResolve.resolve(source),
+          external: false,
+        }
       } catch {
         // require.resolve fails for ESM-only packages; resolve the
         // package.json and derive the entry point instead.
@@ -162,7 +167,11 @@ export function createForceNodeModulesPlugin(): Plugin {
               ? exportsField
               : (exportsField?.default ?? pkgJson.module ?? pkgJson.main)
           if (entry) {
-            return { id: path.resolve(pkgDir, entry), external: false }
+            return {
+              __proto__: null,
+              id: path.resolve(pkgDir, entry),
+              external: false,
+            }
           }
         } catch {}
         return undefined
@@ -185,6 +194,7 @@ export function createStubPlugin(
       ? value
       : [undefined, value]
     return {
+      __proto__: null,
       filter: new RegExp(pattern),
       importerFilter,
       contents: readFileSync(path.join(stubsDir, filename), 'utf8'),
@@ -203,7 +213,7 @@ export function createStubPlugin(
         if (importerFilter && (!importer || !importerFilter.test(importer))) {
           continue
         }
-        return { id: `${prefix}${stubFile}` }
+        return { __proto__: null, id: `${prefix}${stubFile}` }
       }
       return undefined
     },
