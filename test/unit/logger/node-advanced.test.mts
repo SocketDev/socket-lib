@@ -20,7 +20,7 @@ import { Logger } from '../../../src/logger/node.mjs'
 
 // Runs sequentially: the logger and stream state must be isolated per test,
 // and concurrent execution risks state sharing across tests in this suite.
-describe.sequential('Logger - Advanced Features', () => {
+describe('Logger - Advanced Features', { concurrent: false }, () => {
   let stdout: Writable
   let stderr: Writable
   let stdoutData: string[]

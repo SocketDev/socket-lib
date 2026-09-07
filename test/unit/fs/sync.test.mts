@@ -23,7 +23,7 @@ import { writeJsonSync } from '../../../src/fs/write-json.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
-describe.sequential('fs - Sync Functions', () => {
+describe('fs - Sync Functions', { concurrent: false }, () => {
   let testDir: string
 
   beforeEach(() => {

@@ -32,78 +32,90 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe.sequential('fs/read-json-cache — clearReadJsonCache', () => {
-  it('drops all entries and resets hits/misses', () => {
-    setCachedJson('/a', 1, 1, 1, { x: 1 })
-    getCachedJson('/a', 1, 1, 1)
-    getCachedJson('/missing', 0, 0, 0)
-    let stats = getReadJsonCacheStats()
-    expect(stats.size).toBe(1)
-    expect(stats.hits).toBe(1)
-    expect(stats.misses).toBe(1)
+describe(
+  'fs/read-json-cache — clearReadJsonCache',
+  { concurrent: false },
+  () => {
+    it('drops all entries and resets hits/misses', () => {
+      setCachedJson('/a', 1, 1, 1, { x: 1 })
+      getCachedJson('/a', 1, 1, 1)
+      getCachedJson('/missing', 0, 0, 0)
+      let stats = getReadJsonCacheStats()
+      expect(stats.size).toBe(1)
+      expect(stats.hits).toBe(1)
+      expect(stats.misses).toBe(1)
 
-    clearReadJsonCache()
-    stats = getReadJsonCacheStats()
-    expect(stats.size).toBe(0)
-    expect(stats.hits).toBe(0)
-    expect(stats.misses).toBe(0)
-  })
-})
+      clearReadJsonCache()
+      stats = getReadJsonCacheStats()
+      expect(stats.size).toBe(0)
+      expect(stats.hits).toBe(0)
+      expect(stats.misses).toBe(0)
+    })
+  },
+)
 
-describe.sequential('fs/read-json-cache — set/get round-trip', () => {
-  it('round-trips a value when the stat signature matches', () => {
-    setCachedJson('/a', 1, 100, 200, { name: 'a' })
-    const result = getCachedJson('/a', 1, 100, 200)
-    expect(result).toEqual({ name: 'a' })
-  })
+describe(
+  'fs/read-json-cache — set/get round-trip',
+  { concurrent: false },
+  () => {
+    it('round-trips a value when the stat signature matches', () => {
+      setCachedJson('/a', 1, 100, 200, { name: 'a' })
+      const result = getCachedJson('/a', 1, 100, 200)
+      expect(result).toEqual({ name: 'a' })
+    })
 
-  it('returns undefined on miss', () => {
-    expect(getCachedJson('/absent', 0, 0, 0)).toBeUndefined()
-  })
+    it('returns undefined on miss', () => {
+      expect(getCachedJson('/absent', 0, 0, 0)).toBeUndefined()
+    })
 
-  it('returns undefined when ino mismatches', () => {
-    setCachedJson('/a', 1, 100, 200, { name: 'a' })
-    expect(getCachedJson('/a', 99, 100, 200)).toBeUndefined()
-  })
+    it('returns undefined when ino mismatches', () => {
+      setCachedJson('/a', 1, 100, 200, { name: 'a' })
+      expect(getCachedJson('/a', 99, 100, 200)).toBeUndefined()
+    })
 
-  it('returns undefined when size mismatches', () => {
-    setCachedJson('/a', 1, 100, 200, { name: 'a' })
-    expect(getCachedJson('/a', 1, 999, 200)).toBeUndefined()
-  })
+    it('returns undefined when size mismatches', () => {
+      setCachedJson('/a', 1, 100, 200, { name: 'a' })
+      expect(getCachedJson('/a', 1, 999, 200)).toBeUndefined()
+    })
 
-  it('returns undefined when mtimeMs mismatches', () => {
-    setCachedJson('/a', 1, 100, 200, { name: 'a' })
-    expect(getCachedJson('/a', 1, 100, 999)).toBeUndefined()
-  })
+    it('returns undefined when mtimeMs mismatches', () => {
+      setCachedJson('/a', 1, 100, 200, { name: 'a' })
+      expect(getCachedJson('/a', 1, 100, 999)).toBeUndefined()
+    })
 
-  it('drops the stale entry after stat mismatch (single miss, not repeated)', () => {
-    setCachedJson('/a', 1, 100, 200, { name: 'a' })
-    getCachedJson('/a', 1, 100, 999) // miss → drops
-    // Subsequent lookup with matching key still misses; the entry is gone.
-    getCachedJson('/a', 1, 100, 200)
-    expect(getReadJsonCacheStats().size).toBe(0)
-  })
-})
+    it('drops the stale entry after stat mismatch (single miss, not repeated)', () => {
+      setCachedJson('/a', 1, 100, 200, { name: 'a' })
+      getCachedJson('/a', 1, 100, 999) // miss → drops
+      // Subsequent lookup with matching key still misses; the entry is gone.
+      getCachedJson('/a', 1, 100, 200)
+      expect(getReadJsonCacheStats().size).toBe(0)
+    })
+  },
+)
 
-describe.sequential('fs/read-json-cache — defensive cloning', () => {
-  it("returns a clone on hit so caller mutations don't poison the cache", () => {
-    setCachedJson('/a', 1, 1, 1, { nested: { count: 0 } })
-    const a = getCachedJson('/a', 1, 1, 1) as { nested: { count: number } }
-    a.nested.count = 999
-    const b = getCachedJson('/a', 1, 1, 1) as { nested: { count: number } }
-    expect(b.nested.count).toBe(0)
-  })
+describe(
+  'fs/read-json-cache — defensive cloning',
+  { concurrent: false },
+  () => {
+    it("returns a clone on hit so caller mutations don't poison the cache", () => {
+      setCachedJson('/a', 1, 1, 1, { nested: { count: 0 } })
+      const a = getCachedJson('/a', 1, 1, 1) as { nested: { count: number } }
+      a.nested.count = 999
+      const b = getCachedJson('/a', 1, 1, 1) as { nested: { count: number } }
+      expect(b.nested.count).toBe(0)
+    })
 
-  it("stores a clone on insert so caller mutations after set don't bleed in", () => {
-    const original = { nested: { count: 0 } }
-    setCachedJson('/a', 1, 1, 1, original)
-    original.nested.count = 999
-    const got = getCachedJson('/a', 1, 1, 1) as { nested: { count: number } }
-    expect(got.nested.count).toBe(0)
-  })
-})
+    it("stores a clone on insert so caller mutations after set don't bleed in", () => {
+      const original = { nested: { count: 0 } }
+      setCachedJson('/a', 1, 1, 1, original)
+      original.nested.count = 999
+      const got = getCachedJson('/a', 1, 1, 1) as { nested: { count: number } }
+      expect(got.nested.count).toBe(0)
+    })
+  },
+)
 
-describe.sequential('fs/read-json-cache — LRU eviction', () => {
+describe('fs/read-json-cache — LRU eviction', { concurrent: false }, () => {
   it('evicts the oldest entry when max is reached', () => {
     setReadJsonCacheMax(2)
     setCachedJson('/a', 1, 1, 1, { v: 'a' })
@@ -134,7 +146,7 @@ describe.sequential('fs/read-json-cache — LRU eviction', () => {
   })
 })
 
-describe.sequential('fs/read-json-cache — TTL eviction', () => {
+describe('fs/read-json-cache — TTL eviction', { concurrent: false }, () => {
   it('ttlMs=0 disables time-based eviction', () => {
     setReadJsonCacheTtlMs(0)
     setCachedJson('/a', 1, 1, 1, { v: 'a' })
@@ -163,7 +175,7 @@ describe.sequential('fs/read-json-cache — TTL eviction', () => {
   })
 })
 
-describe.sequential('fs/read-json-cache — env-var config', () => {
+describe('fs/read-json-cache — env-var config', { concurrent: false }, () => {
   it('readMaxFromEnv returns default when env is unset', () => {
     vi.stubEnv('SOCKET_LIB_READ_JSON_CACHE_MAX', '')
     expect(readMaxFromEnv()).toBe(256)
@@ -205,18 +217,22 @@ describe.sequential('fs/read-json-cache — env-var config', () => {
   })
 })
 
-describe.sequential('fs/read-json-cache — getReadJsonCacheStats', () => {
-  it('reports size + max + ttlMs + hits + misses', () => {
-    setReadJsonCacheMax(10)
-    setReadJsonCacheTtlMs(2000)
-    setCachedJson('/a', 1, 1, 1, { v: 'a' })
-    getCachedJson('/a', 1, 1, 1)
-    getCachedJson('/absent', 0, 0, 0)
-    const stats = getReadJsonCacheStats()
-    expect(stats.size).toBe(1)
-    expect(stats.max).toBe(10)
-    expect(stats.ttlMs).toBe(2000)
-    expect(stats.hits).toBe(1)
-    expect(stats.misses).toBe(1)
-  })
-})
+describe(
+  'fs/read-json-cache — getReadJsonCacheStats',
+  { concurrent: false },
+  () => {
+    it('reports size + max + ttlMs + hits + misses', () => {
+      setReadJsonCacheMax(10)
+      setReadJsonCacheTtlMs(2000)
+      setCachedJson('/a', 1, 1, 1, { v: 'a' })
+      getCachedJson('/a', 1, 1, 1)
+      getCachedJson('/absent', 0, 0, 0)
+      const stats = getReadJsonCacheStats()
+      expect(stats.size).toBe(1)
+      expect(stats.max).toBe(10)
+      expect(stats.ttlMs).toBe(2000)
+      expect(stats.hits).toBe(1)
+      expect(stats.misses).toBe(1)
+    })
+  },
+)

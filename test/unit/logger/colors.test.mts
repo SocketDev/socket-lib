@@ -1,6 +1,7 @@
-import { describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { applyColor, getYoctocolors } from '../../../src/logger/colors.mjs'
+import { getSupportsColor } from '../../../src/term/colors/support.mjs'
 
 const colors = getYoctocolors()
 
@@ -9,7 +10,20 @@ const colors = getYoctocolors()
 const TTY = { stream: { isTTY: true } }
 const PIPE = { stream: { isTTY: false } }
 
-describe.sequential('logger/colors — applyColor', () => {
+beforeEach(() => {
+  vi.spyOn(getSupportsColor(), 'createSupportsColor').mockImplementation(
+    stream =>
+      stream?.isTTY
+        ? { has16m: true, has256: true, hasBasic: true, level: 3 }
+        : false,
+  )
+})
+
+afterEach(() => {
+  vi.restoreAllMocks()
+})
+
+describe('logger/colors — applyColor', { concurrent: false }, () => {
   test('routes named colors through the yoctocolors function map', () => {
     expect(applyColor('hi', 'green', TTY)).toBe(colors.green('hi'))
     expect(applyColor('hi', 'red', TTY)).toBe(colors.red('hi'))
@@ -46,6 +60,16 @@ describe.sequential('logger/colors — applyColor', () => {
     expect(applyColor('hi', 'red', PIPE)).toBe('hi')
   })
 
+  test('withholds RGB escapes from a terminal with only basic color support', () => {
+    vi.mocked(getSupportsColor().createSupportsColor).mockReturnValue({
+      has16m: false,
+      has256: false,
+      hasBasic: true,
+      level: 1,
+    })
+    expect(applyColor('plain', [12, 34, 56], TTY)).toBe('plain')
+  })
+
   test('withholds a 24-bit escape from a stream that accepts none', () => {
     expect(applyColor('hi', [255, 0, 0], PIPE)).toBe('hi')
   })
@@ -61,7 +85,7 @@ describe.sequential('logger/colors — applyColor', () => {
   })
 })
 
-describe.sequential('logger/colors — getYoctocolors', () => {
+describe('logger/colors — getYoctocolors', { concurrent: false }, () => {
   test('returns the vendored yoctocolors-cjs module shape', () => {
     expect(typeof colors.green).toBe('function')
     expect(typeof colors.red).toBe('function')
