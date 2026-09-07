@@ -36,8 +36,8 @@ describe('windows env', () => {
   })
 
   it('normalizes Windows separators in the returned fallback path', () => {
-    expect(getAppdataFallbackPath('C:\\fixtures\\home')).toBe(
-      'C:/fixtures/home/AppData/Roaming',
+    expect(getAppdataFallbackPath('C:\\fixtures\\profile')).toBe(
+      'C:/fixtures/profile/AppData/Roaming',
     )
   })
 
