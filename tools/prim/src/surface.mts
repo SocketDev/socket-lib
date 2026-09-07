@@ -97,17 +97,7 @@ export function capitalize(s: string): string {
   return s[0]!.toUpperCase() + s.slice(1)
 }
 
-/**
- * Compute the full set of primordials Node's bootstrap installs by enumerating
- * the static + prototype methods of the upstream globals. This mirrors what
- * `lib/internal/per_context/primordials.js` does at runtime via
- * `copyPropsRenamed` + `copyPrototype` helpers — names like `ArrayPrototypeMap`
- * aren't directly assigned in the source but installed by reflection, so
- * name-only regex parsing misses them.
- */
-export function deriveNodeBootstrapSurface() {
-  const exports = new Set()
-
+export function collectNamespacePrimordials(exports: Set<string>): void {
   for (let i = 0, { length } = NODE_PRIMORDIAL_NAMESPACES; i < length; i += 1) {
     const ns = NODE_PRIMORDIAL_NAMESPACES[i]!
     const original = GLOBAL_RECORD[ns]
@@ -124,6 +114,20 @@ export function deriveNodeBootstrapSurface() {
       }
     }
   }
+}
+
+/**
+ * Compute the full set of primordials Node's bootstrap installs by enumerating
+ * the static + prototype methods of the upstream globals. This mirrors what
+ * `lib/internal/per_context/primordials.js` does at runtime via
+ * `copyPropsRenamed` + `copyPrototype` helpers — names like `ArrayPrototypeMap`
+ * aren't directly assigned in the source but installed by reflection, so
+ * name-only regex parsing misses them.
+ */
+export function deriveNodeBootstrapSurface() {
+  const exports = new Set<string>()
+
+  collectNamespacePrimordials(exports)
 
   for (let i = 0, { length } = NODE_PRIMORDIAL_GLOBALS; i < length; i += 1) {
     const name = NODE_PRIMORDIAL_GLOBALS[i]!
@@ -222,7 +226,7 @@ export function loadPrimordialsSurface(
     if (!existsSync(resolved)) {
       throw new Error(`--surface path not found: ${resolved}`)
     }
-    return { source: resolved, ...parseExports(resolved) }
+    return { __proto__: null, source: resolved, ...parseExports(resolved) }
   }
   const siblingDir = path.resolve(
     targetRoot,
@@ -232,7 +236,7 @@ export function loadPrimordialsSurface(
     'primordials',
   )
   if (existsSync(siblingDir)) {
-    return { source: siblingDir, ...parseExports(siblingDir) }
+    return { __proto__: null, source: siblingDir, ...parseExports(siblingDir) }
   }
   const siblingLegacy = path.resolve(
     targetRoot,
@@ -242,7 +246,11 @@ export function loadPrimordialsSurface(
     'primordials.ts',
   )
   if (existsSync(siblingLegacy)) {
-    return { source: siblingLegacy, ...parseExports(siblingLegacy) }
+    return {
+      __proto__: null,
+      source: siblingLegacy,
+      ...parseExports(siblingLegacy),
+    }
   }
   const installedDir = path.join(
     targetRoot,
@@ -253,7 +261,11 @@ export function loadPrimordialsSurface(
     'primordials',
   )
   if (existsSync(installedDir)) {
-    return { source: installedDir, ...parseExports(installedDir) }
+    return {
+      __proto__: null,
+      source: installedDir,
+      ...parseExports(installedDir),
+    }
   }
   const installedLegacy = path.join(
     targetRoot,
@@ -264,7 +276,11 @@ export function loadPrimordialsSurface(
     'primordials.js',
   )
   if (existsSync(installedLegacy)) {
-    return { source: installedLegacy, ...parseExports(installedLegacy) }
+    return {
+      __proto__: null,
+      source: installedLegacy,
+      ...parseExports(installedLegacy),
+    }
   }
   throw new Error(
     `Cannot locate @socketsecurity/lib/primordials. Tried:\n  ${siblingDir}\n  ${siblingLegacy}\n  ${installedDir}\n  ${installedLegacy}\n` +
@@ -272,7 +288,71 @@ export function loadPrimordialsSurface(
   )
 }
 
-export function parseExports(sourcePath: string) {
+export interface ParsedPrimordialsSurface {
+  exports: Set<string>
+  nullable: Set<string>
+  exportToLeaf: Map<string, string>
+}
+
+export function parseExports(sourcePath: string): ParsedPrimordialsSurface {
+  const exportToLeaf = new Map<string, string>()
+  const src = readSurfaceSources(sourcePath, exportToLeaf)
+  const exports = new Set<string>()
+  const nullable = new Set<string>()
+  // ESM inline form: `export const Foo = …`
+  for (const m of src.matchAll(/^export const ([A-Z][a-zA-Z0-9]+)/gm)) {
+    exports.add(m[1]!)
+  }
+  // Lower-case function exports: the Node-platform `process` primordials
+  // (`processCwd`, `processNextTick`, …) are `export function`, not const, and
+  // lower-case. The codemod's `process.cwd()` → `processCwd()` rewrite needs
+  // them in the surface so the `exported.has(...)` guard passes.
+  for (const m of src.matchAll(/^export function ([a-z][a-zA-Z0-9]+)/gm)) {
+    exports.add(m[1]!)
+  }
+  // ESM grouped form: `export { Foo, Bar, Baz }` (with or without trailing
+  // `from '...'`).
+  for (const m of src.matchAll(/^export\s*\{\s*([\s\S]+?)\s*\}/gm)) {
+    const idents = m[1]!.split(',')
+    for (let i = 0, { length } = idents; i < length; i += 1) {
+      const ident = idents[i]!
+      const cleaned = ident.trim().replace(/^([A-Z][a-zA-Z0-9]+).*$/, '$1')
+      if (/^[A-Z][a-zA-Z0-9]+$/.test(cleaned)) {
+        exports.add(cleaned)
+      }
+    }
+  }
+  // Node bootstrap form: `primordials.Foo = ...` direct assignments.
+  for (const m of src.matchAll(/\bprimordials\.([A-Z][a-zA-Z0-9]+)\s*=/g)) {
+    exports.add(m[1]!)
+  }
+  // Detect nullable typed exports — `export const Foo: T | undefined = …`.
+  // The annotation may span multiple lines; match up to the `=` that
+  // ends the declaration's left-hand side.
+  for (const m of src.matchAll(
+    /^export const ([A-Z][a-zA-Z0-9]+)\s*:\s*([\s\S]+?)\s*=\s/gm,
+  )) {
+    if (/\|\s*undefined\b/.test(m[2]!)) {
+      nullable.add(m[1]!)
+    }
+  }
+  // Heuristic: detect a Node `per_context/primordials.js` and union in
+  // the dynamically-derived surface (the names Node installs via
+  // copyPrototype/copyPropsRenamed reflection that aren't in the file
+  // as text).
+  if (sourcePath.includes('per_context/primordials')) {
+    for (const name of deriveNodeBootstrapSurface()) {
+      exports.add(name)
+    }
+  }
+  const surface = { __proto__: null, exports, nullable, exportToLeaf }
+  return surface
+}
+
+export function readSurfaceSources(
+  sourcePath: string,
+  exportToLeaf: Map<string, string>,
+): string {
   // Post-split layout: `sourcePath` may be a directory of leaves
   // (`primordials/`). Concatenate every leaf so the regex passes below
   // see the same shape as the legacy single-file path. Track which
@@ -280,8 +360,6 @@ export function parseExports(sourcePath: string) {
   // transform-primordials uses this.
   const stat = statSync(sourcePath)
   let src
-  // exportToLeaf is empty for the legacy single-file path.
-  const exportToLeaf = new Map()
   if (stat.isDirectory()) {
     const parts = []
     const names = readdirSync(sourcePath).toSorted()
@@ -313,12 +391,12 @@ export function parseExports(sourcePath: string) {
       for (const m of leafContent.matchAll(
         /^export const ([A-Z][a-zA-Z0-9]+)/gm,
       )) {
-        exportToLeaf.set(m[1], leafName)
+        exportToLeaf.set(m[1]!, leafName)
       }
       for (const m of leafContent.matchAll(
         /^export function ([A-Z][a-zA-Z0-9]+)/gm,
       )) {
-        exportToLeaf.set(m[1], leafName)
+        exportToLeaf.set(m[1]!, leafName)
       }
       // Also capture lower-case helpers (`uncurryThis`, `applyBind`,
       // `applySafe`, `bindCall`, `weakRefSafe`) since the codemod
@@ -326,14 +404,14 @@ export function parseExports(sourcePath: string) {
       for (const m of leafContent.matchAll(
         /^export const ([a-z][a-zA-Z0-9]+)/gm,
       )) {
-        exportToLeaf.set(m[1], leafName)
+        exportToLeaf.set(m[1]!, leafName)
       }
       // Lower-case function exports — the Node-platform `process` primordials
       // (`processCwd`, `processNextTick`, …) are `export function`, not const.
       for (const m of leafContent.matchAll(
         /^export function ([a-z][a-zA-Z0-9]+)/gm,
       )) {
-        exportToLeaf.set(m[1], leafName)
+        exportToLeaf.set(m[1]!, leafName)
       }
       parts.push(leafContent)
     }
@@ -341,53 +419,5 @@ export function parseExports(sourcePath: string) {
   } else {
     src = readFileSync(sourcePath, 'utf8')
   }
-  const exports = new Set()
-  const nullable = new Set()
-  // ESM inline form: `export const Foo = …`
-  for (const m of src.matchAll(/^export const ([A-Z][a-zA-Z0-9]+)/gm)) {
-    exports.add(m[1])
-  }
-  // Lower-case function exports: the Node-platform `process` primordials
-  // (`processCwd`, `processNextTick`, …) are `export function`, not const, and
-  // lower-case. The codemod's `process.cwd()` → `processCwd()` rewrite needs
-  // them in the surface so the `exported.has(...)` guard passes.
-  for (const m of src.matchAll(/^export function ([a-z][a-zA-Z0-9]+)/gm)) {
-    exports.add(m[1])
-  }
-  // ESM grouped form: `export { Foo, Bar, Baz }` (with or without trailing
-  // `from '...'`).
-  for (const m of src.matchAll(/^export\s*\{\s*([\s\S]+?)\s*\}/gm)) {
-    const idents = m[1]!.split(',')
-    for (let i = 0, { length } = idents; i < length; i += 1) {
-      const ident = idents[i]!
-      const cleaned = ident.trim().replace(/^([A-Z][a-zA-Z0-9]+).*$/, '$1')
-      if (/^[A-Z][a-zA-Z0-9]+$/.test(cleaned)) {
-        exports.add(cleaned)
-      }
-    }
-  }
-  // Node bootstrap form: `primordials.Foo = ...` direct assignments.
-  for (const m of src.matchAll(/\bprimordials\.([A-Z][a-zA-Z0-9]+)\s*=/g)) {
-    exports.add(m[1])
-  }
-  // Detect nullable typed exports — `export const Foo: T | undefined = …`.
-  // The annotation may span multiple lines; match up to the `=` that
-  // ends the declaration's left-hand side.
-  for (const m of src.matchAll(
-    /^export const ([A-Z][a-zA-Z0-9]+)\s*:\s*([\s\S]+?)\s*=\s/gm,
-  )) {
-    if (/\|\s*undefined\b/.test(m[2]!)) {
-      nullable.add(m[1])
-    }
-  }
-  // Heuristic: detect a Node `per_context/primordials.js` and union in
-  // the dynamically-derived surface (the names Node installs via
-  // copyPrototype/copyPropsRenamed reflection that aren't in the file
-  // as text).
-  if (sourcePath.includes('per_context/primordials')) {
-    for (const name of deriveNodeBootstrapSurface()) {
-      exports.add(name)
-    }
-  }
-  return { exports, nullable, exportToLeaf }
+  return src
 }

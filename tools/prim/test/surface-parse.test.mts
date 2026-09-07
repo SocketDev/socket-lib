@@ -79,7 +79,9 @@ describe('parseExports on a single file', () => {
       'primordials.ts',
       'export const ArrayPrototypeMap = 1\nexport const ObjectKeys = 2\n',
     )
-    const { exports } = parseExports(file)
+    const surface = parseExports(file)
+    expect(Object.getPrototypeOf(surface)).toBeNull()
+    const { exports } = surface
     expect([...exports].toSorted()).toEqual(['ArrayPrototypeMap', 'ObjectKeys'])
   })
 

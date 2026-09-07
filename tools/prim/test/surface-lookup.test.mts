@@ -54,6 +54,7 @@ describe('an explicit --surface path', () => {
       'export const ArrayPrototypeMap = 1\n',
     )
     const surface = loadPrimordialsSurface(targetRoot, explicit)
+    expect(Object.getPrototypeOf(surface)).toBeNull()
     expect(surface.source).toBe(explicit)
     expect(surface.exports.has('ArrayPrototypeMap')).toBe(true)
     expect(surface.exports.has('ObjectKeys')).toBe(false)
@@ -83,6 +84,7 @@ describe('the sibling socket-lib checkout', () => {
       LEAF,
     )
     const surface = loadPrimordialsSurface(targetRoot)
+    expect(Object.getPrototypeOf(surface)).toBeNull()
     expect(surface.source).toBe(
       path.join(root, 'socket-lib', 'src', 'primordials'),
     )
@@ -116,6 +118,7 @@ describe('the sibling socket-lib checkout', () => {
       LEAF,
     )
     const surface = loadPrimordialsSurface(targetRoot)
+    expect(Object.getPrototypeOf(surface)).toBeNull()
     expect(surface.source).toBe(sibling)
     expect(surface.exports.has('BrandNewPrimordial')).toBe(true)
   })
