@@ -32,10 +32,18 @@ export function defaultKeyGen(args: readonly unknown[]): string {
       return `\0fn:${value.name || 'anonymous'}`
     }
     if (value instanceof Map) {
-      return { __tag: 'Map', entries: Array.from(value.entries()) }
+      return {
+        __proto__: null,
+        __tag: 'Map',
+        entries: Array.from(value.entries()),
+      }
     }
     if (value instanceof Set) {
-      return { __tag: 'Set', values: Array.from(value.values()) }
+      return {
+        __proto__: null,
+        __tag: 'Set',
+        values: Array.from(value.values()),
+      }
     }
     return value
   })
