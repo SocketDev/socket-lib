@@ -152,6 +152,7 @@ export async function detectAvailableBackends(): Promise<
   const names = Object.keys(BACKENDS) as BackendName[]
   const results = await Promise.all(
     names.map(async name => ({
+      __proto__: null,
       available: await isCommandAvailable(BACKENDS[name]!.bin),
       name,
     })),

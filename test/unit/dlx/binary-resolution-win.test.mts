@@ -8,22 +8,19 @@
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import type * as PlatformConstants from '../../../src/constants/platform.mjs'
+import {
+  makePackageBinsExecutable,
+  resolveBinaryPath,
+} from '../../../src/dlx/binary-resolution.mjs'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // Mock the platform predicate BEFORE importing the SUT so it sees isWin32() === true.
 vi.mock(import('../../../src/constants/platform.mjs'), async importOriginal => {
   const actual = await importOriginal<typeof PlatformConstants>()
   return { ...actual, isWin32: () => true }
 })
-
-import {
-  makePackageBinsExecutable,
-  resolveBinaryPath,
-} from '../../../src/dlx/binary-resolution.mjs'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string
 

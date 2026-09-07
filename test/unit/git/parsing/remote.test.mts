@@ -12,7 +12,7 @@ import {
   parseRemoteUrl,
   slugFromRemoteUrl,
   splitOwnerRepo,
-} from '../../src/git/remote.mts'
+} from '../../../../src/git/remote.mts'
 
 describe('parseRemoteUrl', () => {
   test.each([
@@ -69,7 +69,7 @@ describe('splitOwnerRepo', () => {
     })
   })
 
-  test.each(['widgets', '/widgets', 'acme/', 'acme/a/b', ''])(
+  test.each(['widgets', '/widgets', 'acme/', 'acme/widgets/extra', ''])(
     'rejects %j so a bare name never reads as qualified',
     value => {
       expect(splitOwnerRepo(value)).toBeUndefined()

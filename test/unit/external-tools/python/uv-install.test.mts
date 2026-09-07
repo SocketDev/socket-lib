@@ -70,8 +70,7 @@ afterEach(() => {
 describe('external-tools/python/uv-install — uvProjectTargetDir', () => {
   test('lands under _dlx/<cacheKey>/site-packages', () => {
     const dir = uvProjectTargetDir(PROJECT)
-    const norm = normalizePath(dir)
-    expect(norm).toMatch(/\/_dlx\/[a-f0-9]{16}\/site-packages$/)
+    expect(normalizePath(dir)).toMatch(/\/_dlx\/[a-f0-9]{16}\/site-packages$/)
   })
 
   test('is deterministic per project and differs across projects', () => {

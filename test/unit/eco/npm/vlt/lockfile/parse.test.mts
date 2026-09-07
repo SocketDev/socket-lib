@@ -9,7 +9,7 @@ import {
   jsParseVltLock,
   parseVltDepId,
   splitNameVersion,
-} from '../../src/eco/npm/vlt/lockfile/parse.mts'
+} from '../../../../../../src/eco/npm/vlt/lockfile/parse.mts'
 
 const LOCK = JSON.stringify({
   lockfileVersion: 1,
@@ -23,7 +23,12 @@ const LOCK = JSON.stringify({
     ],
     'registry~~@scope/pkg@1.2.3': [2, undefined, 'sha512-scoped==', undefined],
     'registry~~opt@1.0.0': [1, 'opt', undefined, undefined],
-    'git~github:a/b~main': [0, 'b', undefined, undefined],
+    'git~github:example-owner/example-repo~main': [
+      0,
+      'example-repo',
+      undefined,
+      undefined,
+    ],
   },
   edges: {
     'file·. lodash': 'prod ^4.17.21 registry~~lodash@4.17.21',
@@ -34,13 +39,20 @@ describe('parseVltDepId', () => {
   test.each([
     ['registry~~lodash@4.17.21', 'registry', '', 'lodash@4.17.21'],
     ['registry~vlt~y@latest', 'registry', 'vlt', 'y@latest'],
-    ['git~github:a/b~main', 'git', 'github:a/b', 'main'],
+    [
+      'git~github:example-owner/example-repo~main',
+      'git',
+      'github:example-owner/example-repo',
+      'main',
+    ],
   ])('splits %s', (id, type, scope, detail) => {
     expect(parseVltDepId(id)).toEqual({ type, scope, detail })
   })
 
   test('keeps a detail containing a tilde whole', () => {
-    expect(parseVltDepId('git~github:a/b~feat~x')?.detail).toBe('feat~x')
+    expect(
+      parseVltDepId('git~github:example-owner/example-repo~feat~x')?.detail,
+    ).toBe('feat~x')
   })
 
   test('returns undefined for a non-DepID', () => {
@@ -88,8 +100,8 @@ describe('jsParseVltLock', () => {
 
   test('a git node carries vcsUrl and vcsCommit instead of a version', () => {
     const result = jsParseVltLock(LOCK)
-    const git = result.packages.find(p => p.name === 'b')!
-    expect(git.vcsUrl).toBe('github:a/b')
+    const git = result.packages.find(p => p.name === 'example-repo')!
+    expect(git.vcsUrl).toBe('github:example-owner/example-repo')
     expect(git.vcsCommit).toBe('main')
     expect(git.version).toBe('')
   })

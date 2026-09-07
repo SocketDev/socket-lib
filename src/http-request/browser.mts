@@ -168,6 +168,25 @@ export async function attempt(
   } finally {
     cleanup()
   }
+
+  function buildBrowserRequestInit(
+    requestMethod: string,
+    requestOptions: BrowserHttpRequestOptions,
+  ): RequestInit {
+    const opts = { __proto__: null, ...requestOptions } as typeof requestOptions
+    const requestInit: RequestInit = { method: requestMethod }
+    if (opts.headers) {
+      requestInit.headers = opts.headers
+    }
+    if (opts.body !== undefined) {
+      ;(requestInit as { body?: BodyInit | null | undefined }).body =
+        opts.body as BodyInit
+    }
+    if (opts.followRedirects === false) {
+      requestInit.redirect = 'manual'
+    }
+    return requestInit
+  }
 }
 
 export function decodeText(bytes: Uint8Array): string {
@@ -435,23 +454,4 @@ export async function httpText(
 
 export function sleep(ms: number): Promise<void> {
   return new PromiseCtor(resolve => setTimeout(resolve, ms))
-}
-
-export function buildBrowserRequestInit(
-  method: string,
-  options: BrowserHttpRequestOptions,
-): RequestInit {
-  const opts = { __proto__: null, ...options } as typeof options
-  const init: RequestInit = { method }
-  if (opts.headers) {
-    init.headers = opts.headers
-  }
-  if (opts.body !== undefined) {
-    ;(init as { body?: BodyInit | null | undefined }).body =
-      opts.body as BodyInit
-  }
-  if (opts.followRedirects === false) {
-    init.redirect = 'manual'
-  }
-  return init
 }

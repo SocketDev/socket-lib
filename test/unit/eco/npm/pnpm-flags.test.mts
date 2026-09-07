@@ -10,21 +10,18 @@
  */
 
 import { describe, expect, it } from 'vitest'
-
 import { isNpmLoglevelFlag as isNpmLoglevelFlagStable } from '@socketsecurity/lib-stable/eco/npm/npm-cli/flags'
-
 import { stableAvailable } from '../../../_shared/lib-stable-parity.mts'
-
-const hasStableLoglevelFlag = stableAvailable(() =>
-  isNpmLoglevelFlagStable('--silent'),
-)
-
 import {
   isPnpmFrozenLockfileFlag,
   isPnpmIgnoreScriptsFlag,
   isPnpmInstallCommand,
   isPnpmLoglevelFlag,
 } from '../../../../src/eco/npm/pnpm/flags.mjs'
+
+const hasStableLoglevelFlag = stableAvailable(() =>
+  isNpmLoglevelFlagStable('--silent'),
+)
 
 describe('pnpm flag detection', () => {
   describe('isPnpmIgnoreScriptsFlag', () => {

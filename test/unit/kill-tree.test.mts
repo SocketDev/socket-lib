@@ -17,10 +17,15 @@
 // oxlint-disable-next-line socket/prefer-async-spawn -- process-group test
 import { spawn } from 'node:child_process'
 import process from 'node:process'
-
 import { describe, expect, it } from 'vitest'
-
 import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
+import {
+  collectDescendantPids,
+  isProcessAlive,
+  killProcessTree,
+  readParentMap,
+} from '../../src/process/spawn/kill-tree.mjs'
+import { itUnixOnly } from './util/skip-helpers.mjs'
 
 // `tolerantSleep` returns a platform-adjusted BUDGET in ms, not a promise, so
 // awaiting it directly resolves on the next tick and the delay never happens.
@@ -29,15 +34,6 @@ function sleepFor(ms: number): Promise<void> {
     setTimeout(resolve, tolerantSleep(ms))
   })
 }
-
-import {
-  collectDescendantPids,
-  isProcessAlive,
-  killProcessTree,
-  readParentMap,
-} from '../../src/process/spawn/kill-tree.mjs'
-
-import { itUnixOnly } from './util/skip-helpers.mjs'
 
 // Build a ChildProcess-shaped stub. Callers pass `undefined` for "not set";
 // we convert to the `null` Node actually uses for exitCode/signalCode here,

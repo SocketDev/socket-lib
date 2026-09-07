@@ -6,9 +6,10 @@
 
 import { ErrorCtor } from '../primordials/error.mjs'
 import { StringPrototypeStartsWith } from '../primordials/string.mjs'
-
 import type AdmZipType from '../external/adm-zip.js'
 import type tarFsType from '../external/tar-fs.js'
+import { getNodePath } from '../node/path.mjs'
+import { getNodeFs } from '../node/fs.mjs'
 
 // Re-exported so the `archives/*` modules keep importing their defaults from
 // one place. They LIVE in `./types` because that module imports nothing, which
@@ -22,9 +23,6 @@ export {
 
 let admZip: typeof AdmZipType | undefined
 let tarFs: typeof tarFsType | undefined
-
-import { getNodePath } from '../node/path.mjs'
-import { getNodeFs } from '../node/fs.mjs'
 
 /**
  * Assert that an archive file exists on disk before handing it to the

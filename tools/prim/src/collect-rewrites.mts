@@ -21,6 +21,7 @@ import {
   TYPE_NARROWING_STATIC_CALLS,
   UNAMBIGUOUS_PROTOTYPE_METHODS,
 } from './globals.mts'
+import type { AstNode } from './source-text.mts'
 import { findClosingParen, findOpenParen, walkAst } from './source-text.mts'
 
 /**
@@ -62,87 +63,72 @@ export function collectRewrites(options: {
   } = { __proto__: null, ...options } as typeof options
   let skipped = 0
 
-  walkAst(ast, node => {
-    // ── new Foo(...) ────────────────────────────────────────────────
-    if (node.type === 'NewExpression') {
-      const callee = node.callee
-      if (callee?.type !== 'Identifier' || !TRACKED_GLOBALS.has(callee.name)) {
-        return
-      }
-      const ctor = ctorPrimordialName(callee.name)
-      if (!exported.has(ctor)) {
-        return
-      }
-      // Replace the `Foo` identifier with `Ctor` or its aliased form.
-      // Add `!` for nullable ctors in TS sources — see static-call site
-      // for rationale.
-      const ctorNeedsBang = isTsFile && nullable && nullable.has(ctor)
-      rewrites.push({
-        start: toChar(callee.start),
-        end: toChar(callee.end),
-        replacement: localName(ctor) + (ctorNeedsBang ? '!' : ''),
-      })
-      usedPrimordials.add(ctor)
+  function collectConstructorRewrite(node: AstNode): void {
+    const callee = node.callee
+    if (callee?.type !== 'Identifier' || !TRACKED_GLOBALS.has(callee.name)) {
       return
     }
-
-    // ── Foo.bar(args) and obj.method(args) ──────────────────────────
-    if (node.type !== 'CallExpression') {
+    const ctor = ctorPrimordialName(callee.name)
+    if (!exported.has(ctor)) {
       return
     }
-    if (node.callee?.type !== 'MemberExpression') {
-      return
-    }
-    const { object, property } = node.callee
+    // Replace the `Foo` identifier with `Ctor` or its aliased form.
+    // Add `!` for nullable ctors in TS sources — see static-call site
+    // for rationale.
+    const ctorNeedsBang = isTsFile && nullable && nullable.has(ctor)
+    rewrites.push({
+      start: toChar(callee.start),
+      end: toChar(callee.end),
+      replacement: localName(ctor) + (ctorNeedsBang ? '!' : ''),
+    })
+    usedPrimordials.add(ctor)
+    return
+  }
+  function collectStaticRewrite(
+    node: AstNode,
+    object: AstNode,
+    property: AstNode,
+  ): void {
+    // Skip data-property / accessor statics that aren't callable
+    // primordials (e.g. Error.prepareStackTrace — V8 setter). Same
+    // suppression as audit.mts so audit/codemod stay in lock-step.
     if (
-      !object ||
-      !property ||
-      property.type !== 'Identifier' ||
-      object.type !== 'Identifier'
+      INTENTIONAL_NON_PRIMORDIAL_STATICS.has(`${object.name}.${property.name}`)
     ) {
       return
     }
-
-    // Static: Foo.bar(args) → FooBar(args)
-    if (TRACKED_GLOBALS.has(object.name)) {
-      // Skip data-property / accessor statics that aren't callable
-      // primordials (e.g. Error.prepareStackTrace — V8 setter). Same
-      // suppression as audit.mts so audit/codemod stay in lock-step.
-      if (
-        INTENTIONAL_NON_PRIMORDIAL_STATICS.has(
-          `${object.name}.${property.name}`,
-        )
-      ) {
-        return
-      }
-      // Skip statics whose return type narrows on the literal call site
-      // (e.g. Symbol.for returns `unique symbol`). Rewriting through a
-      // primordial alias collapses to plain `symbol` and breaks
-      // computed-key class members downstream.
-      if (TYPE_NARROWING_STATIC_CALLS.has(`${object.name}.${property.name}`)) {
-        return
-      }
-      const expected = staticPrimordialName(object.name, property.name)
-      if (!exported.has(expected)) {
-        return
-      }
-      // Replace `Foo.bar` (the whole MemberExpression callee) with the
-      // primordial name or its aliased form. Args list stays intact.
-      // For nullable primordials (e.g. Buffer.* in cross-env builds where
-      // BufferCtor may be `undefined`), add a `!` non-null assertion
-      // when emitting into a TypeScript source — the call site's
-      // existence proves the runtime is Node, but the type still says
-      // `T | undefined`. Plain JS sources don't get the assertion.
-      const needsBang = isTsFile && nullable && nullable.has(expected)
-      rewrites.push({
-        start: toChar(node.callee.start),
-        end: toChar(node.callee.end),
-        replacement: localName(expected) + (needsBang ? '!' : ''),
-      })
-      usedPrimordials.add(expected)
+    // Skip statics whose return type narrows on the literal call site
+    // (e.g. Symbol.for returns `unique symbol`). Rewriting through a
+    // primordial alias collapses to plain `symbol` and breaks
+    // computed-key class members downstream.
+    if (TYPE_NARROWING_STATIC_CALLS.has(`${object.name}.${property.name}`)) {
       return
     }
-
+    const expected = staticPrimordialName(object.name, property.name)
+    if (!exported.has(expected)) {
+      return
+    }
+    // Replace `Foo.bar` (the whole MemberExpression callee) with the
+    // primordial name or its aliased form. Args list stays intact.
+    // For nullable primordials (e.g. Buffer.* in cross-env builds where
+    // BufferCtor may be `undefined`), add a `!` non-null assertion
+    // when emitting into a TypeScript source — the call site's
+    // existence proves the runtime is Node, but the type still says
+    // `T | undefined`. Plain JS sources don't get the assertion.
+    const needsBang = isTsFile && nullable && nullable.has(expected)
+    rewrites.push({
+      start: toChar(node.callee!.start),
+      end: toChar(node.callee!.end),
+      replacement: localName(expected) + (needsBang ? '!' : ''),
+    })
+    usedPrimordials.add(expected)
+    return
+  }
+  function resolvePrototypeReceiver(
+    node: AstNode,
+    object: AstNode,
+    property: AstNode,
+  ): string | undefined {
     // Prototype: receiver disambiguation.
     let receiverType = UNAMBIGUOUS_PROTOTYPE_METHODS.get(property.name)
     if (!receiverType) {
@@ -171,18 +157,18 @@ export function collectRewrites(options: {
           // Ambiguous-method callers must consult Claude before deciding
           // whether to rewrite.
           pendingAmbiguous.push({
-            calleeStart: toChar(node.callee.start),
-            calleeEnd: toChar(node.callee.end),
+            calleeStart: toChar(node.callee!.start),
+            calleeEnd: toChar(node.callee!.end),
             firstArgStart:
               node.arguments.length > 0 ? toChar(node.arguments[0]!.start) : -1,
             lastArgEnd:
               node.arguments.length > 0
                 ? toChar(node.arguments.at(-1)!.end)
-                : findOpenParen(src, toChar(node.callee.end)),
+                : findOpenParen(src, toChar(node.callee!.end)),
             methodName: property.name,
             objectEnd: toChar(object.end),
             objectStart: toChar(object.start),
-            offset: node.callee.start,
+            offset: node.callee!.start,
             receiverName: object.name,
           })
           return
@@ -202,6 +188,14 @@ export function collectRewrites(options: {
         receiverType = guess
       }
     }
+    return receiverType
+  }
+  function emitPrototypeRewrite(
+    node: AstNode,
+    object: AstNode,
+    property: AstNode,
+    receiverType: string,
+  ): void {
     const expected = prototypePrimordialName(receiverType, property.name)
     if (!expected || !exported.has(expected)) {
       return
@@ -210,7 +204,7 @@ export function collectRewrites(options: {
     // Need to span from start of `node.callee` through the closing `)`.
     // node.end is unreliable on bundles (acorn-wasm parser bug — see
     // repairEndPositions above), so we don't trust it for the outermost
-    // span. Instead: take the start of the call (= node.callee.start)
+    // span. Instead: take the start of the call (= node.callee!.start)
     // and scan forward from after the last argument's end to find the
     // matching `)`. Whitespace, line comments, and trailing commas
     // between the last arg and `)` are tolerated.
@@ -222,14 +216,14 @@ export function collectRewrites(options: {
             toChar(node.arguments.at(-1)!.end),
           )
         : ''
-    const callStart = toChar(node.callee.start)
+    const callStart = toChar(node.callee!.start)
     // With no arguments there is no last argument to scan from, and the paren
     // scan refuses to start on the call's own `(`. Handing it the position just
     // past that paren is what lets a no-argument call be rewritten.
     const lastArgEnd =
       node.arguments.length > 0
         ? toChar(node.arguments.at(-1)!.end)
-        : findOpenParen(src, toChar(node.callee.end))
+        : findOpenParen(src, toChar(node.callee!.end))
     const callEnd = findClosingParen(src, lastArgEnd)
     if (callEnd < 0) {
       // Couldn't find `)` — bail on this rewrite rather than corrupt.
@@ -246,6 +240,38 @@ export function collectRewrites(options: {
       replacement,
     })
     usedPrimordials.add(expected)
+  }
+
+  walkAst(ast, node => {
+    if (node.type === 'NewExpression') {
+      collectConstructorRewrite(node)
+      return
+    }
+    if (node.type !== 'CallExpression') {
+      return
+    }
+    if (node.callee?.type !== 'MemberExpression') {
+      return
+    }
+    const { object, property } = node.callee
+    if (
+      !object ||
+      !property ||
+      property.type !== 'Identifier' ||
+      object.type !== 'Identifier'
+    ) {
+      return
+    }
+
+    if (TRACKED_GLOBALS.has(object.name)) {
+      collectStaticRewrite(node, object, property)
+      return
+    }
+    const receiverType = resolvePrototypeReceiver(node, object, property)
+    if (receiverType === undefined) {
+      return
+    }
+    emitPrototypeRewrite(node, object, property, receiverType)
   })
 
   return { skipped }

@@ -180,11 +180,7 @@ export async function downloadNpmPackage(
   // Make all binaries in the package executable on Unix systems.
   makePackageBinsExecutable(packageDir, packageName)
 
-  return {
-    binaryPath,
-    installed,
-    packageDir,
-  }
+  return { binaryPath, installed, packageDir }
 }
 
 /**
@@ -261,7 +257,7 @@ export async function ensurePackageInstalled(
 
   return await processLock.withLock(
     lockPath,
-    async () => {
+    async (): Promise<{ installed: boolean; packageDir: string }> => {
       // fs is imported at the top
       // Double-check if already installed, unless force is set.
       // Another process may have installed while waiting for lock.

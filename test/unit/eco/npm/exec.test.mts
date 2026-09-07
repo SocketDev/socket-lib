@@ -11,8 +11,11 @@
  */
 
 import process from 'node:process'
-
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { execNpm } from '../../../../src/eco/npm/npm-cli/exec.mjs'
+import { execPnpm } from '../../../../src/eco/npm/pnpm/exec.mjs'
+import { execScript } from '../../../../src/eco/npm/script.mjs'
+import { execYarn } from '../../../../src/eco/npm/yarn/exec.mjs'
 
 // Hoisted so the mock factory, which vitest runs before this module body,
 // still sees an initialized spy. The stand-in resolves the fields a caller
@@ -39,11 +42,6 @@ vi.mock(import('../../../../src/process/spawn/child.mjs'), async orig => {
     spawn: spawn as unknown as typeof actual.spawn,
   }
 })
-
-import { execNpm } from '../../../../src/eco/npm/npm-cli/exec.mjs'
-import { execPnpm } from '../../../../src/eco/npm/pnpm/exec.mjs'
-import { execScript } from '../../../../src/eco/npm/script.mjs'
-import { execYarn } from '../../../../src/eco/npm/yarn/exec.mjs'
 
 // The argv the wrapper handed to spawn on the most recent call.
 function lastSpawnArgs(): string[] {

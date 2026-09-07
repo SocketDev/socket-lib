@@ -8,17 +8,13 @@ import spdxCorrect from '../external/spdx-correct.js'
 import spdxExpParse from '../external/spdx-expression-parse.js'
 import { hasOwn } from '../objects/predicates.mjs'
 import { normalizePath } from '../paths/normalize.mjs'
-
 import type { LicenseNode } from './types.mjs'
-
 import { ErrorCtor } from '../primordials/error.mjs'
-
 import { MapCtor } from '../primordials/map-set.mjs'
-
 import { RegExpPrototypeExec } from '../primordials/regexp.mjs'
-const copyLeftLicenses = getCopyLeftLicenses()
-
 import { getNodePath } from '../node/path.mjs'
+
+const copyLeftLicenses = getCopyLeftLicenses()
 
 const BINARY_OPERATION_NODE_TYPE = 'BinaryOperation'
 const LICENSE_NODE_TYPE = 'License'

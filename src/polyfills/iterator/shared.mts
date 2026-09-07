@@ -190,7 +190,7 @@ export function iteratorRecordOf<T>(iterator: object): IteratorRecord<T> {
     closeQuietly: () => closeIteratorQuietly(iterator),
     iterator,
     nextMethod: next,
-    next: () => {
+    next: (): StepResult<T> => {
       if (typeof next !== 'function') {
         throw new TypeErrorCtor('The iterator must have a callable next')
       }
@@ -203,7 +203,10 @@ export function iteratorRecordOf<T>(iterator: object): IteratorRecord<T> {
         // `value` getter, and the spec never reaches it.
         return doneResult()
       }
-      return { done: false, value: ReflectGet(result, 'value') as T }
+      return {
+        done: false,
+        value: ReflectGet(result, 'value') as T,
+      }
     },
   }
 }

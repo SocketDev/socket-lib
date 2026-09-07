@@ -65,25 +65,7 @@ const ARG_OPTIONS = {
 }
 
 export async function runCli(argv) {
-  const describeKind = describeRequest(argv)
-  if (describeKind) {
-    // `--describe --json` (either order) answers the fleet-runner-shaped
-    // `{describe, help}` envelope instead of the full command manifest —
-    // plain `--describe` stays the one-liner, unchanged.
-    process.stdout.write(
-      describeKind === 'json'
-        ? renderDescribeHelpJson()
-        : renderDescribe(describeKind, MANIFEST),
-    )
-    return
-  }
-  // Bare `prim` / `prim help` / `prim --help` → print help. With --json
-  // riding along and no command to report a result for, answer the same
-  // `{describe, help}` envelope rather than silently ignoring the flag.
-  if (argv.length === 0 || argv[0] === 'help') {
-    process.stdout.write(
-      argv.includes('--json') ? renderDescribeHelpJson() : HELP,
-    )
+  if (printRequestedHelp(argv)) {
     return
   }
 
@@ -134,6 +116,31 @@ export async function runCli(argv) {
   // Handle it before the surface load so users don't need to pass
   // --surface for a lint-only check.
   if (command === 'lint') {
+    runLintCommand()
+    return
+  }
+
+  let surface: ReturnType<typeof loadPrimordialsSurface>
+  try {
+    surface = loadPrimordialsSurface(targetRoot, values.surface)
+  } catch (e) {
+    fail(e.message)
+  }
+
+  // Codemod runs its own pass — don't pre-audit (avoids any
+  // shared-AST surprises and is faster).
+  if (command === 'mod') {
+    await runModCommand()
+    return
+  }
+
+  if (command === 'audit') {
+    await runAuditCommand()
+    return
+  }
+
+  fail(`unknown command: ${command}\n\n${HELP}`)
+  function runLintCommand(): void {
     const primordialSources = values['primordials-source']
     const findings = lintSource({
       targetRoot,
@@ -150,17 +157,7 @@ export async function runCli(argv) {
     }
     return
   }
-
-  let surface
-  try {
-    surface = loadPrimordialsSurface(targetRoot, values.surface)
-  } catch (e) {
-    fail(e.message)
-  }
-
-  // Codemod runs its own pass — don't pre-audit (avoids any
-  // shared-AST surprises and is faster).
-  if (command === 'mod') {
+  async function runModCommand(): Promise<void> {
     // Auto-detect when we're scanning a tree that owns its OWN
     // `primordials.ts` (i.e. socket-lib itself, or any project that
     // re-exports primordials from a local module). When the tree owns
@@ -242,8 +239,7 @@ export async function runCli(argv) {
     reportMod(result, json, values.apply, values.diff)
     return
   }
-
-  if (command === 'audit') {
+  async function runAuditCommand(): Promise<void> {
     const findings = await auditDirectory({
       aiDisambiguate: values['ai-disambiguate'],
       exported: surface.exports,
@@ -271,12 +267,7 @@ export async function runCli(argv) {
     if (!wantGaps) {
       filtered = filtered.filter(f => f.kind !== 'gap')
     }
-    const mode =
-      values.coverage && !values.gaps
-        ? 'coverage'
-        : values.gaps && !values.coverage
-          ? 'gaps'
-          : 'audit'
+    const mode = auditReportMode(values.coverage, values.gaps)
     // Audits silently skip files that fail to parse or fail TS-strip.
     // Pull the per-file lists off the findings array (they're attached
     // there by audit.mts) and pass them through so neither human nor
@@ -320,8 +311,6 @@ export async function runCli(argv) {
     }
     return
   }
-
-  fail(`unknown command: ${command}\n\n${HELP}`)
 }
 
 // Extensions checked when looking for a sibling `primordials.*` file
@@ -398,4 +387,39 @@ export function isSplitPrimordials(localPrimordialsPath: string): boolean {
   } catch {
     return false
   }
+}
+
+export function printRequestedHelp(argv: readonly string[]): boolean {
+  const describeKind = describeRequest(argv)
+  if (describeKind) {
+    // `--describe --json` (either order) answers the fleet-runner-shaped
+    // `{describe, help}` envelope instead of the full command manifest —
+    // plain `--describe` stays the one-liner, unchanged.
+    process.stdout.write(
+      describeKind === 'json'
+        ? renderDescribeHelpJson()
+        : renderDescribe(describeKind, MANIFEST),
+    )
+    return true
+  }
+  // Bare `prim` / `prim help` / `prim --help` → print help. With --json
+  // riding along and no command to report a result for, answer the same
+  // `{describe, help}` envelope rather than silently ignoring the flag.
+  if (argv.length === 0 || argv[0] === 'help') {
+    process.stdout.write(
+      argv.includes('--json') ? renderDescribeHelpJson() : HELP,
+    )
+    return true
+  }
+
+  return false
+}
+
+export function auditReportMode(
+  coverage: unknown,
+  gaps: unknown,
+): 'coverage' | 'gaps' | 'audit' {
+  const mode =
+    coverage && !gaps ? 'coverage' : gaps && !coverage ? 'gaps' : 'audit'
+  return mode
 }

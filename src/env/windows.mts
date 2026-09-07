@@ -4,6 +4,7 @@
  */
 
 import { getNodePath } from '../node/path.mjs'
+import { normalizePath } from '../paths/normalize.mjs'
 
 import { getEnvValue } from './rewire.mjs'
 
@@ -27,7 +28,7 @@ export function getAppdata(): string | undefined {
 
 export function getAppdataFallbackPath(home: string): string {
   const path = getNodePath()
-  return path.join(home, 'AppData', 'Roaming')
+  return normalizePath(path.join(home, 'AppData', 'Roaming'))
 }
 
 /**

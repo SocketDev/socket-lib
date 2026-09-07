@@ -15,19 +15,16 @@ import {
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
-
 import {
   computeHash,
   HashMismatchError,
 } from '../../../../src/crypto/integrity.mjs'
 import { setPath } from '../../../../src/paths/rewire.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-
 import type NpmArborist from '../../../../src/external/@npmcli/arborist.js'
+import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
 
 // FakeArborist backs `new Arborist(...)` inside src/dlx/package.mts so the
 // hash-pin tests below never resolve/reify against the real npm registry —
@@ -67,8 +64,6 @@ vi.mock(import('../../../../src/external/@npmcli/arborist.js'), () => ({
 vi.mock(import('../../../../src/dlx/firewall.mjs'), () => ({
   checkFirewallPurls: checkFirewallPurlsMock,
 }))
-
-import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
 
 beforeEach(() => {
   arboristCtorMock.mockReset()

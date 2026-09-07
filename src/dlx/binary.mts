@@ -21,13 +21,9 @@ import { safeMkdir } from '../fs/safe.mjs'
 import { normalizePath } from '../paths/normalize.mjs'
 import { spawn } from '../process/spawn/child.mjs'
 import { generateCacheKey } from './cache.mjs'
-
 import { parseHash } from '../crypto/integrity.mjs'
-
 import { ArrayIsArray } from '../primordials/array.mjs'
-
 import { ErrorCtor } from '../primordials/error.mjs'
-
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
 import {
@@ -37,9 +33,9 @@ import {
   writeBinaryCacheMetadata,
 } from './binary-cache.mjs'
 import { downloadBinaryFile, verifyCachedBinary } from './binary-download.mjs'
-
 import type { DlxBinaryOptions, DlxBinaryResult } from './binary-types.mjs'
 import type { SpawnExtra, SpawnOptions } from '../process/spawn/types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Download and execute a binary from a URL with caching.
@@ -287,4 +283,3 @@ export type {
   DlxBinaryResult,
   DlxMetadata,
 } from './binary-types.mjs'
-import { getNodeProcess } from '../node/process.mjs'

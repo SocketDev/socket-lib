@@ -6,6 +6,12 @@
  */
 
 import { describe, expect, it, vi } from 'vitest'
+import {
+  findSelfNestedProcesses,
+  isSelfNestedProcess,
+  readProcessTree,
+  SELF_NEST_DEPTH,
+} from '../../src/process/tree.mjs'
 
 const psState = vi.hoisted(() => ({
   status: 0,
@@ -19,13 +25,6 @@ vi.mock(import('../../src/node/child-process.mjs'), () => ({
     spawnSync: () => ({ status: psState.status, stdout: psState.stdout }),
   })) as never,
 }))
-
-import {
-  findSelfNestedProcesses,
-  isSelfNestedProcess,
-  readProcessTree,
-  SELF_NEST_DEPTH,
-} from '../../src/process/tree.mjs'
 
 type Row = { command: string; pid: number; ppid: number }
 

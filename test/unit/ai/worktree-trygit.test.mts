@@ -8,6 +8,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { tryGit } from '../../../src/ai/worktree.mjs'
 
 const { mockSpawnSync } = vi.hoisted(() => ({ mockSpawnSync: vi.fn() }))
 
@@ -18,8 +19,6 @@ vi.mock(
     spawnSync: mockSpawnSync,
   }),
 )
-
-import { tryGit } from '../../../src/ai/worktree.mjs'
 
 beforeEach(() => {
   mockSpawnSync.mockReset()

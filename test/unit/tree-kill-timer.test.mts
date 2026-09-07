@@ -11,6 +11,10 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  maybeArmTreeKill,
+  TREE_KILL_LEAD_MS,
+} from '../../src/process/spawn/tree-kill-timer.mjs'
 
 const killState = vi.hoisted(() => ({
   calls: [] as Array<{ target: unknown; options: unknown }>,
@@ -22,11 +26,6 @@ vi.mock(import('../../src/process/spawn/kill-tree.mjs'), () => ({
     return true
   }) as never,
 }))
-
-import {
-  maybeArmTreeKill,
-  TREE_KILL_LEAD_MS,
-} from '../../src/process/spawn/tree-kill-timer.mjs'
 
 // A spawn-promise stand-in: a real thenable plus the `process` handle the
 // helper reads. Settling is controlled by the test.

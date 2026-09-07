@@ -83,8 +83,9 @@ export function buildSpecInventory(spec: FetchedSpec): SpecInventory {
 }
 
 /**
- * Every `src/eco/npm/registry/*.mts` read as an AST. A module that will not parse
- * is skipped, so one bad file degrades the report rather than killing it.
+ * Every `src/eco/npm/registry/*.mts` read as an AST. A module that will not
+ * parse is skipped, so one bad file degrades the report rather than killing
+ * it.
  */
 export function readHelperModules(
   options?: ReadHelperModulesOptions | undefined,

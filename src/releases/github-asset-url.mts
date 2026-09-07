@@ -133,10 +133,12 @@ export async function fetchReleaseAssetsViaGraphQL(
   }
   // ?? [] fallback fires when GraphQL returns no releaseAssets.
   /* c8 ignore start */
-  return (release.releaseAssets?.nodes ?? []).map(n => ({
-    browser_download_url: n.downloadUrl,
-    name: n.name,
-  }))
+  return (release.releaseAssets?.nodes ?? []).map(
+    (n): { browser_download_url: string; name: string } => ({
+      browser_download_url: n.downloadUrl,
+      name: n.name,
+    }),
+  )
   /* c8 ignore stop */
 }
 

@@ -12,6 +12,17 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
+import {
+  buildLineStarts,
+  isSourceFile,
+  lineColumnAt,
+  PARSE_OPTIONS,
+  TS_EXTENSIONS,
+} from './audit-helpers.mts'
+import { buildVisitors } from './audit-visitors.mts'
+import { disambiguateReceiver } from './disambiguate.mts'
+import { prototypePrimordialName } from './globals.mts'
+import { walk } from './acorn-wasm.mts'
 
 /**
  * Argument list the interceptor below forwards. `process.emitWarning` has four
@@ -45,17 +56,6 @@ process.emitWarning = function emitWarning(...args) {
   return defaultEmitWarning(...args)
 }
 
-import {
-  buildLineStarts,
-  isSourceFile,
-  lineColumnAt,
-  PARSE_OPTIONS,
-  TS_EXTENSIONS,
-} from './audit-helpers.mts'
-import { buildVisitors } from './audit-visitors.mts'
-import { disambiguateReceiver } from './disambiguate.mts'
-import { prototypePrimordialName } from './globals.mts'
-
 /**
  * The visitor table `buildVisitors` hands the walk. Derived from the builder so
  * the per-node parameter types stay in one place.
@@ -64,7 +64,6 @@ export type AuditVisitors = ReturnType<typeof buildVisitors>
 
 // `@ultrathink/acorn.rs.wasm` ships no declarations; ./acorn-wasm.mts is the
 // one typed accessor for it, so this module does not name a second.
-import { walk } from './acorn-wasm.mts'
 
 /**
  * `covered` — the primordial exists today. `gap` — it still has to be added to

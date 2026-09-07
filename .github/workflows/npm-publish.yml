@@ -46,6 +46,10 @@ on:
         description: 'npm dist-tag to publish under.'
         type: string
         default: 'latest'
+      bump:
+        description: 'Create the version bump before publishing; disable when already committed.'
+        type: boolean
+        default: true
       release-as:
         description: >-
           Force the bump level. MAJOR is never derived from commits — the

@@ -4,6 +4,7 @@
  *   to keep each test file under the fleet's 500-line soft cap.
  */
 
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { describe, expect, it } from 'vitest'
 
 import { parseJson } from '../../../src/json/parse.mjs'
@@ -74,7 +75,9 @@ describe('parseJson error handling and edge cases', () => {
         parseJson('{invalid}', { filepath })
         expect.fail('Should have thrown')
       } catch (e) {
-        expect((e as Error).message).toMatch(/^\/test\/file\.json:/)
+        expect(normalizePath((e as Error).message)).toMatch(
+          /^\/test\/file\.json:/,
+        )
       }
     })
 

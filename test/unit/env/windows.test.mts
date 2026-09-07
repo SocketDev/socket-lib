@@ -20,6 +20,7 @@ import {
 } from '../../../src/env/windows.mjs'
 import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import path from 'node:path'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { afterEach, describe, expect, it } from 'vitest'
 
@@ -30,7 +31,13 @@ describe('windows env', () => {
 
   it('resolves the roaming fallback from the supplied home', () => {
     expect(getAppdataFallbackPath('/example-home')).toBe(
-      path.join('/example-home', 'AppData', 'Roaming'),
+      normalizePath(path.join('/example-home', 'AppData', 'Roaming')),
+    )
+  })
+
+  it('normalizes Windows separators in the returned fallback path', () => {
+    expect(getAppdataFallbackPath('C:\\fixtures\\home')).toBe(
+      'C:/fixtures/home/AppData/Roaming',
     )
   })
 

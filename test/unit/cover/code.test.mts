@@ -9,18 +9,16 @@
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { spawn } from '../../../src/process/spawn/child.mjs'
+import { getCodeCoverage } from '../../../src/cover/code.mjs'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 // Mock via the src/ relative path so vitest intercepts the same
 // module instance that src/cover/code.ts imports (which uses
 // relative paths internally). Package-specifier mocks don't survive
 // vitest's threaded-pool dedup gaps.
 vi.mock(import('../../../src/process/spawn/child.mjs'))
-
-import { spawn } from '../../../src/process/spawn/child.mjs'
-import { getCodeCoverage } from '../../../src/cover/code.mjs'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpDir: string
 

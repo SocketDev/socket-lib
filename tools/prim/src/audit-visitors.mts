@@ -55,6 +55,80 @@ export function buildVisitors({
     return sktName
   }
 
+  function recordReceiverCall(
+    node: AstNode,
+    object: AstNode,
+    property: AstNode,
+  ): void {
+    // Strongest signal: the method name itself maps to one type
+    // unambiguously (e.g. `.toUpperCase()` → String only,
+    // `.getTime()` → Date only).
+    const methodType = UNAMBIGUOUS_PROTOTYPE_METHODS.get(property.name)
+    if (methodType) {
+      record(
+        currentFile.relPath,
+        node.start,
+        `${object.name}.${property.name}(...)  [method: ${methodType}]`,
+        prototypePrimordialName(methodType, property.name),
+      )
+      return
+    }
+    // Skip when the property name is a known Node built-in module
+    // static method (path.isAbsolute, fs.readFile, os.tmpdir, etc.).
+    // The receiver is a module object regardless of identifier
+    // shape — guessing the receiver as String/Array would be wrong.
+    if (NODE_MODULE_STATIC_METHODS.has(property.name)) {
+      return
+    }
+    // Hard cases (.test, .then, .exec, .catch, .finally): widely
+    // duck-typed by user libraries. Static guess via identifier
+    // name still applies ("re" → RegExp, "promise" → Promise);
+    // for the rest, queue for AI-deferred classification when
+    // --ai-disambiguate is on.
+    if (isAmbiguousMethod(property.name)) {
+      const guess = guessReceiverType(object.name)
+      if (guess) {
+        record(
+          currentFile.relPath,
+          node.start,
+          `${object.name}.${property.name}(...)  [guessed: ${guess}]`,
+          prototypePrimordialName(guess, property.name),
+        )
+        return
+      }
+      if (aiDisambiguate) {
+        // Defer to a post-walk async pass. Snapshot what the
+        // disambiguator needs; the AST gets thrown away when
+        // the walk ends, so we capture by value.
+        const { line, column } = lineColumnAt(
+          currentFile.lineStarts,
+          node.start,
+        )
+        pendingAmbiguous.push({
+          column,
+          file: currentFile.relPath,
+          line,
+          methodName: property.name,
+          offset: node.start,
+          receiverName: object.name,
+          snippet: buildSnippet(currentFile.src, currentFile.lineStarts, line),
+        })
+      }
+      return
+    }
+    // Weaker signal: guess the receiver's type from its name.
+    const guess = guessReceiverType(object.name)
+    if (!guess) {
+      return
+    }
+    record(
+      currentFile.relPath,
+      node.start,
+      `${object.name}.${property.name}(...)  [guessed: ${guess}]`,
+      prototypePrimordialName(guess, property.name),
+    )
+  }
+
   return {
     VariableDeclarator(node: VariableDeclaratorNode, ancestors: AstNode[]) {
       // Detect local-alias redeclaration of primordials:
@@ -97,22 +171,7 @@ export function buildVisitors({
       }
       // Only care about top-level declarations (Program → VariableDeclaration → VariableDeclarator).
       // Local-scope shadowing is a different kind of bug and out of scope.
-      let topLevel = false
-      for (let i = ancestors.length - 1; i >= 0; i -= 1) {
-        const a = ancestors[i]!
-        if (a.type === 'Program') {
-          topLevel = true
-          break
-        }
-        if (
-          a.type === 'ArrowFunctionExpression' ||
-          a.type === 'FunctionDeclaration' ||
-          a.type === 'FunctionExpression'
-        ) {
-          return
-        }
-      }
-      if (!topLevel) {
+      if (!isTopLevelDeclaration(ancestors)) {
         return
       }
       // Compose a human-readable RHS string for the report.
@@ -188,77 +247,7 @@ export function buildVisitors({
         return
       }
       if (object.type === 'Identifier') {
-        // Strongest signal: the method name itself maps to one type
-        // unambiguously (e.g. `.toUpperCase()` → String only,
-        // `.getTime()` → Date only).
-        const methodType = UNAMBIGUOUS_PROTOTYPE_METHODS.get(property.name)
-        if (methodType) {
-          record(
-            currentFile.relPath,
-            node.start,
-            `${object.name}.${property.name}(...)  [method: ${methodType}]`,
-            prototypePrimordialName(methodType, property.name),
-          )
-          return
-        }
-        // Skip when the property name is a known Node built-in module
-        // static method (path.isAbsolute, fs.readFile, os.tmpdir, etc.).
-        // The receiver is a module object regardless of identifier
-        // shape — guessing the receiver as String/Array would be wrong.
-        if (NODE_MODULE_STATIC_METHODS.has(property.name)) {
-          return
-        }
-        // Hard cases (.test, .then, .exec, .catch, .finally): widely
-        // duck-typed by user libraries. Static guess via identifier
-        // name still applies ("re" → RegExp, "promise" → Promise);
-        // for the rest, queue for AI-deferred classification when
-        // --ai-disambiguate is on.
-        if (isAmbiguousMethod(property.name)) {
-          const guess = guessReceiverType(object.name)
-          if (guess) {
-            record(
-              currentFile.relPath,
-              node.start,
-              `${object.name}.${property.name}(...)  [guessed: ${guess}]`,
-              prototypePrimordialName(guess, property.name),
-            )
-            return
-          }
-          if (aiDisambiguate) {
-            // Defer to a post-walk async pass. Snapshot what the
-            // disambiguator needs; the AST gets thrown away when
-            // the walk ends, so we capture by value.
-            const { line, column } = lineColumnAt(
-              currentFile.lineStarts,
-              node.start,
-            )
-            pendingAmbiguous.push({
-              column,
-              file: currentFile.relPath,
-              line,
-              methodName: property.name,
-              offset: node.start,
-              receiverName: object.name,
-              snippet: buildSnippet(
-                currentFile.src,
-                currentFile.lineStarts,
-                line,
-              ),
-            })
-          }
-          return
-        }
-        // Weaker signal: guess the receiver's type from its name.
-        const guess = guessReceiverType(object.name)
-        if (!guess) {
-          return
-        }
-        record(
-          currentFile.relPath,
-          node.start,
-          `${object.name}.${property.name}(...)  [guessed: ${guess}]`,
-          prototypePrimordialName(guess, property.name),
-        )
+        recordReceiverCall(node, object, property)
       }
     },
     MemberExpression(node: AstNode, ancestors: AstNode[]) {
@@ -284,18 +273,8 @@ export function buildVisitors({
       // and its inner `Object.prototype` separately - so without the same two
       // exemptions here, both shapes are still reported and the exemptions
       // above buy nothing.
-      const parent = nearestAncestor(ancestors, node)
-      if (parent) {
-        if (
-          parent.type === 'CallExpression' &&
-          parent.callee === node &&
-          isExportsInteropGlue(parent)
-        ) {
-          return
-        }
-        if (isObjectPrototypeIdiom(parent)) {
-          return
-        }
+      if (isInteropMemberContext(node, ancestors)) {
+        return
       }
       const propName = node.property.name
       if (propName[0] !== propName[0]!.toLowerCase()) {
@@ -323,6 +302,48 @@ export function buildVisitors({
       )
     },
   }
+}
+
+export function isInteropMemberContext(
+  node: AstNode,
+  ancestors: AstNode[],
+): boolean {
+  const parent = nearestAncestor(ancestors, node)
+  if (parent) {
+    if (
+      parent.type === 'CallExpression' &&
+      parent.callee === node &&
+      isExportsInteropGlue(parent)
+    ) {
+      return true
+    }
+    if (isObjectPrototypeIdiom(parent)) {
+      return true
+    }
+  }
+  return false
+}
+
+export function isTopLevelDeclaration(ancestors: readonly AstNode[]): boolean {
+  let topLevel = false
+  for (let i = ancestors.length - 1; i >= 0; i -= 1) {
+    const a = ancestors[i]!
+    if (a.type === 'Program') {
+      topLevel = true
+      break
+    }
+    if (
+      a.type === 'ArrowFunctionExpression' ||
+      a.type === 'FunctionDeclaration' ||
+      a.type === 'FunctionExpression'
+    ) {
+      return false
+    }
+  }
+  if (!topLevel) {
+    return false
+  }
+  return true
 }
 
 /**

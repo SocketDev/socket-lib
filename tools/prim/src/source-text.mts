@@ -180,6 +180,17 @@ export function findOpenParen(src: string, from: number): number {
   return src.charCodeAt(i) === 0x28 ? i + 1 : -1
 }
 
+export function repairArrayEndPositions(children: readonly unknown[]): number {
+  let m = 0
+  for (const child of children) {
+    const e = repairEndPositions(child)
+    if (e > m) {
+      m = e
+    }
+  }
+  return m
+}
+
 /**
  * Repair AST end positions in place. Walks depth-first; for each node whose
  * `end` is missing or smaller than the computed end of its children, replaces
@@ -199,33 +210,11 @@ export function repairEndPositions(node: unknown): number {
     return 0
   }
   if (Array.isArray(node)) {
-    const children: readonly unknown[] = node
-    let m = 0
-    for (const child of children) {
-      const e = repairEndPositions(child)
-      if (e > m) {
-        m = e
-      }
-    }
-    return m
+    return repairArrayEndPositions(node)
   }
   const record = node as AstNodeRecord
   if (typeof record.type !== 'string') {
-    // Not an AST node (e.g. a literal value, a token list). Recurse
-    // through nested objects/arrays so we still reach AST descendants.
-    let m = 0
-    const objectKeys = Object.keys(record)
-    for (let i = 0, { length } = objectKeys; i < length; i += 1) {
-      const key = objectKeys[i]!
-      if (key === 'loc' || key === 'range' || key.startsWith('_')) {
-        continue
-      }
-      const e = repairEndPositions(record[key])
-      if (e > m) {
-        m = e
-      }
-    }
-    return m
+    return repairObjectEndPositions(record)
   }
 
   let maxChildEnd = 0
@@ -257,6 +246,24 @@ export function repairEndPositions(node: unknown): number {
     return correctedEnd
   }
   return reportedEnd
+}
+
+export function repairObjectEndPositions(record: AstNodeRecord): number {
+  // Not an AST node (e.g. a literal value, a token list). Recurse
+  // through nested objects/arrays so we still reach AST descendants.
+  let m = 0
+  const objectKeys = Object.keys(record)
+  for (let i = 0, { length } = objectKeys; i < length; i += 1) {
+    const key = objectKeys[i]!
+    if (key === 'loc' || key === 'range' || key.startsWith('_')) {
+      continue
+    }
+    const e = repairEndPositions(record[key])
+    if (e > m) {
+      m = e
+    }
+  }
+  return m
 }
 
 /**

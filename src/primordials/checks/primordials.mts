@@ -97,38 +97,42 @@ export function checkPrimordials(
   const used = new Set<string>()
   const usedToFiles = new Map<string, string[]>()
 
-  for (const dir of config.scanDirs) {
-    const path = getNodePath()
-    const fullDir = path.resolve(repoRoot, dir)
-    const jsFiles = collectJsFiles(fullDir)
-    for (const file of jsFiles) {
-      let src: string
-      try {
-        const fs = getNodeFs()
-        src = fs.readFileSync(file, 'utf8')
-        // getNodeFs().readFileSync rarely throws on files we just enumerated; the
-        // includes()-false and names-empty arms fire only on files
-        // that don't actually destructure primordials.
-        /* c8 ignore start - getNodeFs().readFileSync rarely throws on files already enumerated */
-      } catch {
-        continue
-      }
-      /* c8 ignore stop */
-      if (!src.includes('primordials')) {
-        continue
-      }
-      const names = extractPrimordialsNames(src)
-      if (names.length === 0) {
-        continue
-      }
-      const rel = path.relative(repoRoot, file)
-      for (const name of names) {
-        used.add(name)
-        const arr = usedToFiles.get(name) ?? []
-        if (!arr.includes(rel)) {
-          arr.push(rel)
+  collectUsedPrimordials()
+
+  function collectUsedPrimordials(): void {
+    for (const dir of config.scanDirs) {
+      const path = getNodePath()
+      const fullDir = path.resolve(repoRoot, dir)
+      const jsFiles = collectJsFiles(fullDir)
+      for (const file of jsFiles) {
+        let src: string
+        try {
+          const fs = getNodeFs()
+          src = fs.readFileSync(file, 'utf8')
+          // getNodeFs().readFileSync rarely throws on files we just enumerated; the
+          // includes()-false and names-empty arms fire only on files
+          // that don't actually destructure primordials.
+          /* c8 ignore start - getNodeFs().readFileSync rarely throws on files already enumerated */
+        } catch {
+          continue
         }
-        usedToFiles.set(name, arr)
+        /* c8 ignore stop */
+        if (!src.includes('primordials')) {
+          continue
+        }
+        const names = extractPrimordialsNames(src)
+        if (names.length === 0) {
+          continue
+        }
+        const rel = path.relative(repoRoot, file)
+        for (const name of names) {
+          used.add(name)
+          const arr = usedToFiles.get(name) ?? []
+          if (!arr.includes(rel)) {
+            arr.push(rel)
+          }
+          usedToFiles.set(name, arr)
+        }
       }
     }
   }

@@ -4,7 +4,6 @@
  */
 
 import npmPackageArg from '../external/npm-package-arg.js'
-
 import { isWin32 } from '../constants/platform.mjs'
 import { errorMessage } from '../errors/message.mjs'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize.mjs'
@@ -12,19 +11,17 @@ import { getOsTmpDir } from '../paths/socket.mjs'
 import { spawn } from '../process/spawn/child.mjs'
 import { windowsShellOption } from '../process/spawn/windows-shell.mjs'
 import { readPackageJson } from './read.mjs'
-
 import type { PackageJson } from './types.mjs'
-
 import { ErrorCtor } from '../primordials/error.mjs'
-
 import { JSONParse, JSONStringify } from '../primordials/json.mjs'
-
 import { ObjectEntries } from '../primordials/object.mjs'
-
 import {
   StringPrototypeEndsWith,
   StringPrototypeStartsWith,
 } from '../primordials/string.mjs'
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+
 export type IsolatePackageOptions = {
   imports?: Record<string, string> | undefined
   install?: ((cwd: string) => Promise<void>) | undefined
@@ -50,9 +47,6 @@ const FS_CP_OPTIONS = {
   recursive: true,
   ...(isWin32() ? { maxRetries: 3, retryDelay: 100 } : {}),
 }
-
-import { getNodeFs } from '../node/fs.mjs'
-import { getNodePath } from '../node/path.mjs'
 
 /**
  * Isolates a package in a temporary test environment.

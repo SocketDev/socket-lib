@@ -24,66 +24,6 @@ import type {
 } from './types.mjs'
 import { getNodeProcess } from '../node/process.mjs'
 
-export function addCodeCoverageCounts(
-  totals: { covered: number; total: number },
-  counts: unknown,
-): void {
-  if (isPlainObject(counts)) {
-    addCodeCoverageValues(totals, ObjectValues(counts))
-  }
-}
-
-export function addCodeCoverageValues(
-  totals: { covered: number; total: number },
-  counts: readonly unknown[],
-): void {
-  for (const count of counts) {
-    if (typeof count === 'number') {
-      totals.total += 1
-      if (count > 0) {
-        totals.covered += 1
-      }
-    }
-  }
-}
-
-export function aggregateCodeCoverage(coverageData: V8CoverageData) {
-  // Aggregate metrics across all files.
-  const totals = {
-    __proto__: null,
-    branches: { __proto__: null, covered: 0, total: 0 },
-    functions: { __proto__: null, covered: 0, total: 0 },
-    lines: { __proto__: null, covered: 0, total: 0 },
-    statements: { __proto__: null, covered: 0, total: 0 },
-  }
-
-  for (const fileCoverage of ObjectValues(coverageData)) {
-    if (!isPlainObject(fileCoverage)) {
-      continue
-    }
-
-    const fc = fileCoverage as V8FileCoverage
-
-    addCodeCoverageCounts(totals.statements, fc.s)
-    addCodeCoverageCounts(totals.functions, fc.f)
-    if (isPlainObject(fc.b)) {
-      for (const branches of ObjectValues(fc.b)) {
-        if (ArrayIsArray(branches)) {
-          addCodeCoverageValues(totals.branches, branches)
-        }
-      }
-    }
-
-    // Note: Lines are typically derived from statement map in v8.
-    // For simplicity, we use statements as a proxy for lines.
-    // In a production implementation, you'd parse statementMap to get actual line coverage.
-    totals.lines.covered = totals.statements.covered
-    totals.lines.total = totals.statements.total
-  }
-
-  return totals
-}
-
 /**
  * Calculate coverage metric with percentage.
  */
@@ -157,5 +97,63 @@ export async function getCodeCoverage(
     functions: calculateMetric(totals.functions),
     lines: calculateMetric(totals.lines),
     statements: calculateMetric(totals.statements),
+  }
+  function addCodeCoverageCounts(
+    metricTotals: { covered: number; total: number },
+    counts: unknown,
+  ): void {
+    if (isPlainObject(counts)) {
+      addCodeCoverageValues(metricTotals, ObjectValues(counts))
+    }
+  }
+
+  function addCodeCoverageValues(
+    metricTotals: { covered: number; total: number },
+    counts: readonly unknown[],
+  ): void {
+    for (const count of counts) {
+      if (typeof count === 'number') {
+        metricTotals.total += 1
+        if (count > 0) {
+          metricTotals.covered += 1
+        }
+      }
+    }
+  }
+  function aggregateCodeCoverage(filesData: V8CoverageData) {
+    // Aggregate metrics across all files.
+    const aggregateTotals = {
+      __proto__: null,
+      branches: { __proto__: null, covered: 0, total: 0 },
+      functions: { __proto__: null, covered: 0, total: 0 },
+      lines: { __proto__: null, covered: 0, total: 0 },
+      statements: { __proto__: null, covered: 0, total: 0 },
+    }
+
+    for (const fileCoverage of ObjectValues(filesData)) {
+      if (!isPlainObject(fileCoverage)) {
+        continue
+      }
+
+      const fc = fileCoverage as V8FileCoverage
+
+      addCodeCoverageCounts(aggregateTotals.statements, fc.s)
+      addCodeCoverageCounts(aggregateTotals.functions, fc.f)
+      if (isPlainObject(fc.b)) {
+        for (const branches of ObjectValues(fc.b)) {
+          if (ArrayIsArray(branches)) {
+            addCodeCoverageValues(aggregateTotals.branches, branches)
+          }
+        }
+      }
+
+      // Note: Lines are typically derived from statement map in v8.
+      // For simplicity, we use statements as a proxy for lines.
+      // In a production implementation, you'd parse statementMap to get actual line coverage.
+      aggregateTotals.lines.covered = aggregateTotals.statements.covered
+      aggregateTotals.lines.total = aggregateTotals.statements.total
+    }
+
+    return aggregateTotals
   }
 }

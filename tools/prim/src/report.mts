@@ -115,7 +115,7 @@ export function reportMod(result, json, applied, showDiff = false) {
     const fileLine = `  ${f.file}: ${f.rewrites} rewrite(s), import added: ${f.importAdded ? 'yes' : 'no'}\n`
     process.stdout.write(fileLine)
   }
-  if (showDiff && !applied) {
+  function reportPlannedDiffs(): void {
     // Dry-run preview: render unified line-diff per planned rewrite by
     // reading the pre-change source from disk and comparing it to the
     // staged new source. Disk is never written in dry-run mode.
@@ -138,5 +138,9 @@ export function reportMod(result, json, applied, showDiff = false) {
       logger.log('')
       logger.log(String(patch))
     }
+  }
+
+  if (showDiff && !applied) {
+    reportPlannedDiffs()
   }
 }

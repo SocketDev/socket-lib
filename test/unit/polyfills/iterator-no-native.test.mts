@@ -10,6 +10,7 @@
  */
 
 import { beforeAll, describe, expect, it, vi } from 'vitest'
+import type * as IteratorIndex from '../../../src/polyfills/iterator/index.mjs'
 
 vi.mock(import('../../../src/polyfills/iterator/shared.mts'), async orig => ({
   ...(await orig()),
@@ -17,8 +18,6 @@ vi.mock(import('../../../src/polyfills/iterator/shared.mts'), async orig => ({
   // against it comes back empty.
   iteratorPrototypeOf: () => Object.create(null),
 }))
-
-import type * as IteratorIndex from '../../../src/polyfills/iterator/index.mjs'
 
 let iterators: typeof IteratorIndex
 
@@ -50,6 +49,25 @@ describe('the native lookups', () => {
 })
 
 describe('the exported helpers on that engine', () => {
+  it('returns ordinary iterator result objects from every lazy shim', () => {
+    const helpers = [
+      iterators.iteratorDrop(counter(1), 0),
+      iterators.iteratorFilter(counter(1), () => true),
+      iterators.iteratorFlatMap(counter(1), (value: number) => [value]),
+      iterators.iteratorMap(counter(1), (value: number) => value),
+      iterators.iteratorTake(counter(1), 1),
+    ]
+    for (let i = 0, { length } = helpers; i < length; i += 1) {
+      const helper = helpers[i]!
+      const value = helper.next()
+      expect(value.done).toBe(false)
+      expect(Object.getPrototypeOf(value)).toBe(Object.prototype)
+      const done = helper.next()
+      expect(done.done).toBe(true)
+      expect(Object.getPrototypeOf(done)).toBe(Object.prototype)
+    }
+  })
+
   it('map through the shim', () => {
     expect(
       iterators.iteratorToArray(

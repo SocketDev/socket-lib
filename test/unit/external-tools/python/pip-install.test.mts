@@ -66,8 +66,7 @@ describe('external-tools/python/pip-install — pipPackageDir', () => {
     const dir = pipPackageDir(
       'git+https://github.com/NVIDIA/skillspector.git@abc1234',
     )
-    const norm = normalizePath(dir)
-    expect(norm).toMatch(/\/_dlx\/[a-f0-9]{16}\/site-packages$/)
+    expect(normalizePath(dir)).toMatch(/\/_dlx\/[a-f0-9]{16}\/site-packages$/)
   })
 
   test('is deterministic per spec and differs across specs', () => {

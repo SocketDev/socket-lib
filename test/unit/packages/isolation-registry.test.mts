@@ -18,9 +18,9 @@ import {
 } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { safeDelete } from '../../../src/fs/safe.mjs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { isolatePackage } from '../../../src/packages/isolation.mjs'
 
 // Hoisted so the mock factory, which runs before this module body, sees an
 // initialized spy. The default implementation stands in for `pnpm add`: it
@@ -38,8 +38,6 @@ vi.mock(import('../../../src/process/spawn/child.mjs'), async orig => {
     spawn: spawn as unknown as typeof actual.spawn,
   }
 })
-
-import { isolatePackage } from '../../../src/packages/isolation.mjs'
 
 const tmpDirs: string[] = []
 

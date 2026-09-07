@@ -8,6 +8,7 @@
  */
 
 import { beforeAll, describe, expect, it, vi } from 'vitest'
+import type * as SetPolyfills from '../../../src/polyfills/set.mjs'
 
 const HIDDEN = [
   'difference',
@@ -36,8 +37,6 @@ vi.mock(import('../../../src/primordials/map-set.mjs'), async orig => {
     SetCtor: SetWithoutCombinators as unknown as typeof actual.SetCtor,
   }
 })
-
-import type * as SetPolyfills from '../../../src/polyfills/set.mjs'
 
 let sets: typeof SetPolyfills
 

@@ -69,7 +69,7 @@ export function iteratorDropShim<T>(
     close: source.close,
     done: false,
     running: false,
-    step: () => {
+    step: (): StepResult<T> => {
       while (left > 0) {
         if (left !== Infinity) {
           left -= 1
@@ -105,7 +105,7 @@ export function iteratorFilterShim<T>(
     close: source.close,
     done: false,
     running: false,
-    step: () => {
+    step: (): StepResult<T> => {
       for (;;) {
         const result = source.next()
         if (result.done) {
@@ -202,7 +202,7 @@ export function iteratorMapShim<T, U>(
     close: source.close,
     done: false,
     running: false,
-    step: () => {
+    step: (): StepResult<U> => {
       const result = source.next()
       if (result.done) {
         return doneResult()
@@ -210,7 +210,10 @@ export function iteratorMapShim<T, U>(
       const at = index
       index += 1
       try {
-        return { done: false, value: mapper(result.value as T, at) }
+        return {
+          done: false,
+          value: mapper(result.value as T, at),
+        }
       } catch (e) {
         source.closeQuietly()
         throw e
@@ -234,7 +237,7 @@ export function iteratorTakeShim<T>(
     close: source.close,
     done: false,
     running: false,
-    step: () => {
+    step: (): StepResult<T> => {
       if (left === 0) {
         source.close()
         return doneResult()

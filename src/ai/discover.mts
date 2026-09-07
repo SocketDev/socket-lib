@@ -18,15 +18,13 @@ import { whichSync } from '../exe/path/which.mjs'
 import { errorMessage } from '../errors/message.mjs'
 import { getDefaultLogger } from '../logger/default.mjs'
 import { JSONParse, JSONStringify } from '../primordials/json.mjs'
-
-const logger = getDefaultLogger()
-
 import type { AiAgentName, DiscoveredAgents } from './types.mjs'
-
 import { DateNow } from '../primordials/date.mjs'
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
 import { getNodeFsPromises } from '../node/fs/promises.mjs'
+
+const logger = getDefaultLogger()
 
 const KNOWN_AGENTS: readonly AiAgentName[] = [
   'claude',

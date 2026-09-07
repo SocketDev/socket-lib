@@ -90,16 +90,20 @@ export function getGlobMatcher(
     return existing
   }
 
-  // LRU eviction triggers at 100 entries; not reachable from typical
-  // test runs.
-  /* c8 ignore start */
-  if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
-    const oldest = matcherCache.keys().next().value
-    if (oldest !== undefined) {
-      matcherCache.delete(oldest)
+  evictOldestMatcher()
+
+  function evictOldestMatcher(): void {
+    // LRU eviction triggers at 100 entries; not reachable from typical
+    // test runs.
+    /* c8 ignore start */
+    if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
+      const oldest = matcherCache.keys().next().value
+      if (oldest !== undefined) {
+        matcherCache.delete(oldest)
+      }
     }
+    /* c8 ignore stop */
   }
-  /* c8 ignore stop */
 
   // Narrow `path.matchesGlob` fast-path. picomatch's defaults
   // (`dot: true`, `nocase: true`) silently differ from

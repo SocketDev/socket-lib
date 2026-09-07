@@ -214,6 +214,16 @@ export async function applyCodemod({
     result.skipped += fileResult.skipped
   }
 
+  function writeValidatedPlans(): void {
+    // All checks green — commit the planned writes. Per-file atomic;
+    // any individual write failure aborts the rest (leaving partial
+    // state, but every file so far is internally consistent).
+    for (let i = 0, { length } = plans; i < length; i += 1) {
+      const plan = plans[i]!
+      atomicWrite(plan.absPath, plan.newSource)
+    }
+  }
+
   if (useTwoPhase) {
     const findings = validateRewrites(plans, { primordialsRoot })
     if (findings.length > 0) {
@@ -224,13 +234,7 @@ export async function applyCodemod({
       result.validationFindings = findings
       return result
     }
-    // All checks green — commit the planned writes. Per-file atomic;
-    // any individual write failure aborts the rest (leaving partial
-    // state, but every file so far is internally consistent).
-    for (let i = 0, { length } = plans; i < length; i += 1) {
-      const plan = plans[i]!
-      atomicWrite(plan.absPath, plan.newSource)
-    }
+    writeValidatedPlans()
   }
   result.files = reportEntries
 

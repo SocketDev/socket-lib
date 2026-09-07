@@ -62,13 +62,21 @@ export function divider(options?: DividerOptions | undefined): string {
  */
 export const dividers = {
   /**
-   * Thick double-line divider using `═`
+   * Arrow divider using `→`
    */
-  thick: () => divider({ char: '═' }),
+  arrow: () => divider({ char: '→' }),
   /**
-   * Thin single-line divider using `─`
+   * Dashed divider using `╌`
    */
-  thin: () => divider({ char: '─' }),
+  dashed: () => divider({ char: '╌' }),
+  /**
+   * Diamond divider using `◆`
+   */
+  diamond: () => divider({ char: '◆' }),
+  /**
+   * Dotted divider using `·`
+   */
+  dotted: () => divider({ char: '·' }),
   /**
    * Double-line divider, an alias for thick.
    */
@@ -78,29 +86,21 @@ export const dividers = {
    */
   single: () => divider({ char: '-' }),
   /**
-   * Dotted divider using `·`
-   */
-  dotted: () => divider({ char: '·' }),
-  /**
-   * Dashed divider using `╌`
-   */
-  dashed: () => divider({ char: '╌' }),
-  /**
-   * Wave divider using `~`
-   */
-  wave: () => divider({ char: '~' }),
-  /**
    * Star divider using `*`
    */
   star: () => divider({ char: '*' }),
   /**
-   * Diamond divider using `◆`
+   * Thick double-line divider using `═`
    */
-  diamond: () => divider({ char: '◆' }),
+  thick: () => divider({ char: '═' }),
   /**
-   * Arrow divider using `→`
+   * Thin single-line divider using `─`
    */
-  arrow: () => divider({ char: '→' }),
+  thin: () => divider({ char: '─' }),
+  /**
+   * Wave divider using `~`
+   */
+  wave: () => divider({ char: '~' }),
 } as const
 
 /**

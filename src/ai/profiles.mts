@@ -70,24 +70,10 @@ const VERIFY_BASH_ALLOW = [
 ] as const
 
 /**
- * Capability ladder of lockdown profiles, ordered least → most capable. Key
- * order documents the ladder; each tier is a strict superset of the previous
- * tier's tool surface.
+ * Capability ladder of lockdown profiles, ordered least → most capable. Each
+ * tier is a strict superset of the previous tier's tool surface.
  */
 export const AI_PROFILE = {
-  read: {
-    allow: [],
-    disallow: ['Agent', 'Bash', 'Edit', 'Write'],
-    permissionMode: 'dontAsk',
-    tools: ['Glob', 'Grep', 'Read', 'WebFetch', 'WebSearch'],
-  },
-  // No Write: edits land in existing files, never create new ones.
-  edit: {
-    allow: [],
-    disallow: ['Agent', 'Bash', 'WebFetch', 'WebSearch', 'Write'],
-    permissionMode: 'acceptEdits',
-    tools: ['Edit', 'Glob', 'Grep', 'Read'],
-  },
   // Write added: may create files. Bash still denied.
   create: {
     allow: [],
@@ -95,14 +81,12 @@ export const AI_PROFILE = {
     permissionMode: 'acceptEdits',
     tools: ['Edit', 'Glob', 'Grep', 'Read', 'Write'],
   },
-  // `.create` + a READ-ONLY Bash allowlist: run code / tests / inspect git, so
-  // the agent can self-verify what it authored — but NO `git add`/`git commit`,
-  // so it cannot land. The verify-without-trust-to-commit tier.
-  verify: {
-    allow: [...VERIFY_BASH_ALLOW],
-    disallow: ['Agent', 'WebFetch', 'WebSearch'],
+  // No Write: edits land in existing files, never create new ones.
+  edit: {
+    allow: [],
+    disallow: ['Agent', 'Bash', 'WebFetch', 'WebSearch', 'Write'],
     permissionMode: 'acceptEdits',
-    tools: ['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Write'],
+    tools: ['Edit', 'Glob', 'Grep', 'Read'],
   },
   // `.verify` + the MUTATING git commands + `pnpm exec`; anything else denied.
   // Composed from the BASH_ALLOW blocks so the surface stays one source.
@@ -116,5 +100,21 @@ export const AI_PROFILE = {
     permissionMode: 'acceptEdits',
     tools: ['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Write'],
   },
-  // oxlint-disable-next-line socket/prefer-refined-record -- open string keys
-} as const satisfies Readonly<Record<string, AiProfile>>
+  read: {
+    allow: [],
+    disallow: ['Agent', 'Bash', 'Edit', 'Write'],
+    permissionMode: 'dontAsk',
+    tools: ['Glob', 'Grep', 'Read', 'WebFetch', 'WebSearch'],
+  },
+  // `.create` + a READ-ONLY Bash allowlist: run code / tests / inspect git, so
+  // the agent can self-verify what it authored — but NO `git add`/`git commit`,
+  // so it cannot land. The verify-without-trust-to-commit tier.
+  verify: {
+    allow: [...VERIFY_BASH_ALLOW],
+    disallow: ['Agent', 'WebFetch', 'WebSearch'],
+    permissionMode: 'acceptEdits',
+    tools: ['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Write'],
+  },
+} as const satisfies Readonly<
+  Record<'create' | 'edit' | 'full' | 'read' | 'verify', AiProfile>
+>

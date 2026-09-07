@@ -229,41 +229,45 @@ export function parseArgs<T = Record<string, unknown>>(
     },
   }
 
-  // Process each option configuration.
-  for (const { 0: key, 1: optionConfig } of ObjectEntries(options)) {
-    const {
-      coerce,
-      default: defaultValue,
-      multiple,
-      short,
-      type,
-    } = optionConfig
+  configureYargsOptions()
 
-    // Set the option type.
-    if (type === 'boolean') {
-      yargsOptions.boolean?.push(key)
-    } else if (type === 'string') {
-      yargsOptions.string?.push(key)
-    }
+  function configureYargsOptions(): void {
+    // Process each option configuration.
+    for (const { 0: key, 1: optionConfig } of ObjectEntries(options)) {
+      const {
+        coerce,
+        default: defaultValue,
+        multiple,
+        short,
+        type,
+      } = optionConfig
 
-    // Handle multiple values (arrays).
-    if (multiple) {
-      yargsOptions.array?.push(key)
-    }
+      // Set the option type.
+      if (type === 'boolean') {
+        yargsOptions.boolean?.push(key)
+      } else if (type === 'string') {
+        yargsOptions.string?.push(key)
+      }
 
-    // Set short alias.
-    if (short) {
-      ;(yargsOptions.alias as Record<string, string>)[short] = key
-    }
+      // Handle multiple values (arrays).
+      if (multiple) {
+        yargsOptions.array?.push(key)
+      }
 
-    // Set default value.
-    if (defaultValue !== undefined) {
-      ;(yargsOptions.default as Record<string, unknown>)[key] = defaultValue
-    }
+      // Set short alias.
+      if (short) {
+        ;(yargsOptions.alias as Record<string, string>)[short] = key
+      }
 
-    // Set coerce function.
-    if (coerce) {
-      ;(yargsOptions.coerce as Record<string, unknown>)[key] = coerce
+      // Set default value.
+      if (defaultValue !== undefined) {
+        ;(yargsOptions.default as Record<string, unknown>)[key] = defaultValue
+      }
+
+      // Set coerce function.
+      if (coerce) {
+        ;(yargsOptions.coerce as Record<string, unknown>)[key] = coerce
+      }
     }
   }
 

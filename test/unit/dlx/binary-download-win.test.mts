@@ -8,11 +8,11 @@ import crypto from 'node:crypto'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import type * as PlatformModule from '../../../src/constants/platform.mjs'
 import type * as DownloadModule from '../../../src/http-request/download.mjs'
+import { downloadBinaryFile } from '../../../src/dlx/binary-download.mjs'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 vi.mock(import('../../../src/constants/platform.mjs'), async importOriginal => {
   const actual = await importOriginal<typeof PlatformModule>()
@@ -45,9 +45,6 @@ vi.mock(
     }
   },
 )
-
-import { downloadBinaryFile } from '../../../src/dlx/binary-download.mjs'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmp: string
 

@@ -83,7 +83,7 @@ export async function getBatch(
   const results: BatchResult[] = Array.from({ length: names.length })
   const failures: Array<{ error: unknown; index: number }> = []
   await pEach(
-    names.map((name, index) => ({ index, name })),
+    names.map((name, index) => ({ __proto__: null, index, name })),
     async item => {
       try {
         results[item.index] = await fetchSlim(item.name, opts)
