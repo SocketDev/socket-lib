@@ -101,17 +101,7 @@ export async function attempt(
 ): Promise<BrowserHttpResponse> {
   options = { __proto__: null, ...options } as typeof options
   const method = options.method ?? 'GET'
-  const init: RequestInit = { method }
-  if (options.headers) {
-    init.headers = options.headers
-  }
-  if (options.body !== undefined) {
-    ;(init as { body?: BodyInit | null | undefined }).body =
-      options.body as BodyInit
-  }
-  if (options.followRedirects === false) {
-    init.redirect = 'manual'
-  }
+  const init = buildBrowserRequestInit(method, options)
   const { signal, cleanup } = combineSignals(options.signal, options.timeout)
   if (signal) {
     init.signal = signal
@@ -445,4 +435,23 @@ export async function httpText(
 
 export function sleep(ms: number): Promise<void> {
   return new PromiseCtor(resolve => setTimeout(resolve, ms))
+}
+
+export function buildBrowserRequestInit(
+  method: string,
+  options: BrowserHttpRequestOptions,
+): RequestInit {
+  const opts = { __proto__: null, ...options } as typeof options
+  const init: RequestInit = { method }
+  if (opts.headers) {
+    init.headers = opts.headers
+  }
+  if (opts.body !== undefined) {
+    ;(init as { body?: BodyInit | null | undefined }).body =
+      opts.body as BodyInit
+  }
+  if (opts.followRedirects === false) {
+    init.redirect = 'manual'
+  }
+  return init
 }

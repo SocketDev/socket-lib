@@ -26,13 +26,7 @@ export function closeUnbalancedJson(raw: string): string | undefined {
   for (let i = start, { length } = raw; i < length; i += 1) {
     const char = raw[i]!
     if (inString) {
-      if (escaped) {
-        escaped = false
-      } else if (char === '\\') {
-        escaped = true
-      } else if (char === '"') {
-        inString = false
-      }
+      consumeStringCharacter(char)
       continue
     }
     if (char === '"') {
@@ -48,6 +42,15 @@ export function closeUnbalancedJson(raw: string): string | undefined {
       if (stack.length === 0) {
         return undefined
       }
+    }
+  }
+  function consumeStringCharacter(char: string): void {
+    if (escaped) {
+      escaped = false
+    } else if (char === '\\') {
+      escaped = true
+    } else if (char === '"') {
+      inString = false
     }
   }
   if (inString || stack.length === 0) {

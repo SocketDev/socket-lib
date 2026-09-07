@@ -78,15 +78,19 @@ export async function withSpinner<T>(
   const savedShimmerState =
     withOptions?.shimmer !== undefined ? spinner.shimmerState : undefined
 
-  // Apply temporary options
-  if (withOptions?.color !== undefined) {
-    spinner.color = toRgb(withOptions.color)
-  }
-  if (withOptions?.shimmer !== undefined) {
-    if (typeof withOptions.shimmer === 'string') {
-      spinner.updateShimmer({ dir: withOptions.shimmer })
-    } else {
-      spinner.setShimmer(withOptions.shimmer)
+  applyTemporaryOptions()
+
+  function applyTemporaryOptions(): void {
+    // Apply temporary options
+    if (withOptions?.color !== undefined) {
+      spinner!.color = toRgb(withOptions.color)
+    }
+    if (withOptions?.shimmer !== undefined) {
+      if (typeof withOptions.shimmer === 'string') {
+        spinner!.updateShimmer({ dir: withOptions.shimmer })
+      } else {
+        spinner!.setShimmer(withOptions.shimmer)
+      }
     }
   }
 

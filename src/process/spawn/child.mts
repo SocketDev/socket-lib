@@ -164,14 +164,18 @@ export function spawn(
       : replacePathInEnv(baseEnv, searchPath, findPathEnvKey(baseEnv))
   // The stdio option can be a string or an array.
   // https://nodejs.org/api/child_process.html#optionsstdio
-  const wasSpinning = !!spinnerInstance?.isSpinning
-  const shouldStopSpinner =
-    wasSpinning &&
-    !isStdioType(stdio as string | string[], 'ignore') &&
-    !isStdioType(stdio as string | string[], 'pipe')
+  const shouldStopSpinner = shouldStopForOutput()
+  function shouldStopForOutput(): boolean {
+    const wasSpinning = !!spinnerInstance?.isSpinning
+    const stopForOutput =
+      wasSpinning &&
+      !isStdioType(stdio as string | string[], 'ignore') &&
+      !isStdioType(stdio as string | string[], 'pipe')
+    return stopForOutput
+  }
   const shouldRestartSpinner = shouldStopSpinner
   if (shouldStopSpinner) {
-    spinnerInstance.stop()
+    spinnerInstance!.stop()
   }
   // npmCliPromiseSpawn is lazily loaded via getNpmCliPromiseSpawn()
   // Use __proto__: null to prevent prototype pollution when passing to
@@ -268,7 +272,7 @@ export function spawn(
       try {
         return await prevPromise
       } finally {
-        spinnerInstance.start()
+        spinnerInstance!.start()
       }
     })() as PromiseSpawnResult
   }

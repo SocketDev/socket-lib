@@ -17,14 +17,13 @@ import path from 'node:path'
 import { pathToFileURL } from 'node:url'
 import process from 'node:process'
 
-import { REPO_ROOT } from '../../fleet/paths.mts'
+import { DIST_EXTERNAL_DIR } from '../paths.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
 import { runMain } from '../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const externalDir = path.join(REPO_ROOT, 'dist', 'external')
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
@@ -89,21 +88,22 @@ const DEFAULT_ONLY_ALLOWED = new Set([
  * Check if module exports work correctly for both CJS and ESM.
  */
 export async function checkModuleExports(filePath: string) {
-  const relativePath = path.relative(externalDir, filePath)
+  const relativePath = path.relative(DIST_EXTERNAL_DIR, filePath)
   const normalizedPath = normalizePath(relativePath)
-  const issues = []
+  const issues: string[] = []
 
   // Skip validation for packages that legitimately only export default.
   if (DEFAULT_ONLY_ALLOWED.has(normalizedPath)) {
-    return { path: normalizedPath, ok: true, issues: [] }
+    return { __proto__: null, path: normalizedPath, ok: true, issues: [] }
   }
 
   // Test 1: CJS require() - should work without .default
-  let cjsModule
+  let cjsModule: ReturnType<typeof require>
   try {
     cjsModule = require(filePath)
   } catch (e) {
     return {
+      __proto__: null,
       path: normalizedPath,
       ok: false,
       issues: [`CJS require() failed: ${errorMessage(e)}`],
@@ -115,40 +115,10 @@ export async function checkModuleExports(filePath: string) {
   const cjsKeys =
     cjsType === 'object' && cjsModule !== null ? Object.keys(cjsModule) : []
 
-  // Check for problematic CJS patterns
-  if (cjsType === 'object' && cjsModule !== null) {
-    // If only key is 'default', it's wrapped incorrectly
-    if (cjsKeys.length === 1 && cjsKeys[0] === 'default') {
-      issues.push(
-        'CJS: Module only exports { default: value } - internal code would need .default accessor',
-      )
-    }
-
-    // Empty object is suspicious
-    if (cjsKeys.length === 0) {
-      issues.push(
-        'CJS: Module exports empty object - may indicate bundling issue',
-      )
-    }
-
-    // Check if .default shadows the main export
-    if ('default' in cjsModule && cjsModule.default !== undefined) {
-      // If .default is a circular reference (module.default === module), that's okay
-      if (cjsModule.default !== cjsModule) {
-        const nonDefaultKeys = cjsKeys.filter(k => k !== 'default')
-        // If there are other exports, this might be intentional (like @inquirer modules)
-        // We'll check ESM compatibility below
-        if (nonDefaultKeys.length === 0) {
-          issues.push(
-            'CJS: Module has .default but no other exports - may be wrapped',
-          )
-        }
-      }
-    }
-  }
+  checkCjsExportStructure()
 
   // Test 2: ESM import - should work correctly
-  let esmModule
+  let esmModule: Record<string, unknown>
   try {
     const moduleUrl = pathToFileURL(filePath).href
     // oxlint-disable-next-line socket/no-dynamic-import-outside-bundle -- module path is computed from filePath at runtime.
@@ -156,6 +126,7 @@ export async function checkModuleExports(filePath: string) {
   } catch (e) {
     issues.push(`ESM import failed: ${errorMessage(e)}`)
     return {
+      __proto__: null,
       path: normalizedPath,
       ok: false,
       issues,
@@ -163,47 +134,135 @@ export async function checkModuleExports(filePath: string) {
   }
 
   // Validate ESM export structure
-  const esmDefault = esmModule.default
+  const { default: esmDefault } = esmModule
   const esmKeys = Object.keys(esmModule).filter(k => k !== 'default')
 
-  // Test 3: ESM/CJS interop validation
-  if (cjsType === 'function') {
-    // Functions should be importable as default export in ESM
+  checkModuleInterop()
+
+  checkInquirerExports()
+
+  function checkInquirerExports(): void {
+    // Test 4: Specific checks for @inquirer modules
+    if (normalizedPath.startsWith('@inquirer/')) {
+      const moduleName = normalizedPath.split('/')[1]
+
+      // confirm, input, password should export functions directly
+      if (['confirm', 'input', 'password'].includes(moduleName)) {
+        if (cjsType !== 'function') {
+          issues.push(
+            `@inquirer/${moduleName}: Should export function directly for CJS (got ${cjsType})`,
+          )
+        }
+        if (typeof esmDefault !== 'function') {
+          issues.push(
+            `@inquirer/${moduleName}: Should export function as default for ESM (got ${typeof esmDefault})`,
+          )
+        }
+      }
+
+      // select, checkbox, search should have both default function and Separator
+      if (['select', 'checkbox', 'search'].includes(moduleName)) {
+        if (!cjsKeys.includes('Separator')) {
+          issues.push(
+            `@inquirer/${moduleName}: Missing Separator export in CJS`,
+          )
+        }
+        if (!('default' in cjsModule)) {
+          issues.push(`@inquirer/${moduleName}: Missing default export in CJS`)
+        }
+        if (typeof cjsModule.default !== 'function') {
+          issues.push(
+            `@inquirer/${moduleName}: default should be a function (got ${typeof cjsModule.default})`,
+          )
+        }
+        // Check ESM access to Separator
+        if (!('Separator' in esmModule)) {
+          issues.push(
+            `@inquirer/${moduleName}: Separator not accessible in ESM`,
+          )
+        }
+      }
+    }
+  }
+
+  function checkFunctionDefault(): void {
     if (typeof esmDefault !== 'function') {
       issues.push(
         `ESM: Default export should be a function (got ${typeof esmDefault}), but CJS exports function directly`,
       )
     }
-  } else if (cjsType === 'object' && cjsModule !== null) {
-    // For objects with both default and named exports (like @inquirer modules)
-    if ('default' in cjsModule && cjsModule.default !== cjsModule) {
-      // ESM should have the default export
-      if (esmDefault === undefined) {
+  }
+
+  function checkModuleInterop(): void {
+    // Test 3: ESM/CJS interop validation
+    if (cjsType === 'function') {
+      // Functions should be importable as default export in ESM
+      checkFunctionDefault()
+    } else if (cjsType === 'object' && cjsModule !== null) {
+      // For objects with both default and named exports (like @inquirer modules)
+      if ('default' in cjsModule && cjsModule.default !== cjsModule) {
+        // ESM should have the default export
+        if (esmDefault === undefined) {
+          issues.push(
+            'ESM: Missing default export, but CJS has .default property',
+          )
+        }
+
+        // Named exports should be accessible in ESM's default import
+        const nonDefaultCjsKeys = cjsKeys.filter(k => k !== 'default')
+        for (let i = 0, { length } = nonDefaultCjsKeys; i < length; i += 1) {
+          const key = nonDefaultCjsKeys[i]!
+          // In ESM, named exports appear as properties of the default import
+          // when importing a CJS module
+          if (!(key in esmModule) && !(key in ((esmDefault || {}) as object))) {
+            issues.push(
+              `ESM: Named export '${key}' not accessible (not in module or default object)`,
+            )
+          }
+        }
+      } else {
+        // Regular object exports - all CJS keys should be in ESM default
+        if (esmDefault !== null && typeof esmDefault === 'object') {
+          const esmDefaultKeys = Object.keys(esmDefault)
+          for (const key of cjsKeys) {
+            if (!esmDefaultKeys.includes(key)) {
+              issues.push(
+                `ESM: Named export '${key}' missing from default object`,
+              )
+            }
+          }
+        }
+      }
+    }
+  }
+
+  function checkCjsExportStructure(): void {
+    // Check for problematic CJS patterns
+    if (cjsType === 'object' && cjsModule !== null) {
+      // If only key is 'default', it's wrapped incorrectly
+      if (cjsKeys.length === 1 && cjsKeys[0] === 'default') {
         issues.push(
-          'ESM: Missing default export, but CJS has .default property',
+          'CJS: Module only exports { default: value } - internal code would need .default accessor',
         )
       }
 
-      // Named exports should be accessible in ESM's default import
-      const nonDefaultCjsKeys = cjsKeys.filter(k => k !== 'default')
-      for (let i = 0, { length } = nonDefaultCjsKeys; i < length; i += 1) {
-        const key = nonDefaultCjsKeys[i]!
-        // In ESM, named exports appear as properties of the default import
-        // when importing a CJS module
-        if (!(key in esmModule) && !(key in (esmDefault || {}))) {
-          issues.push(
-            `ESM: Named export '${key}' not accessible (not in module or default object)`,
-          )
-        }
+      // Empty object is suspicious
+      if (cjsKeys.length === 0) {
+        issues.push(
+          'CJS: Module exports empty object - may indicate bundling issue',
+        )
       }
-    } else {
-      // Regular object exports - all CJS keys should be in ESM default
-      if (esmDefault !== null && typeof esmDefault === 'object') {
-        const esmDefaultKeys = Object.keys(esmDefault)
-        for (const key of cjsKeys) {
-          if (!esmDefaultKeys.includes(key)) {
+
+      // Check if .default shadows the main export
+      if ('default' in cjsModule && cjsModule.default !== undefined) {
+        // If .default is a circular reference (module.default === module), that's okay
+        if (cjsModule.default !== cjsModule) {
+          const nonDefaultKeys = cjsKeys.filter(k => k !== 'default')
+          // If there are other exports, this might be intentional (like @inquirer modules)
+          // We'll check ESM compatibility below
+          if (nonDefaultKeys.length === 0) {
             issues.push(
-              `ESM: Named export '${key}' missing from default object`,
+              'CJS: Module has .default but no other exports - may be wrapped',
             )
           }
         }
@@ -211,45 +270,8 @@ export async function checkModuleExports(filePath: string) {
     }
   }
 
-  // Test 4: Specific checks for @inquirer modules
-  if (normalizedPath.startsWith('@inquirer/')) {
-    const moduleName = normalizedPath.split('/')[1]
-
-    // confirm, input, password should export functions directly
-    if (['confirm', 'input', 'password'].includes(moduleName)) {
-      if (cjsType !== 'function') {
-        issues.push(
-          `@inquirer/${moduleName}: Should export function directly for CJS (got ${cjsType})`,
-        )
-      }
-      if (typeof esmDefault !== 'function') {
-        issues.push(
-          `@inquirer/${moduleName}: Should export function as default for ESM (got ${typeof esmDefault})`,
-        )
-      }
-    }
-
-    // select, checkbox, search should have both default function and Separator
-    if (['select', 'checkbox', 'search'].includes(moduleName)) {
-      if (!cjsKeys.includes('Separator')) {
-        issues.push(`@inquirer/${moduleName}: Missing Separator export in CJS`)
-      }
-      if (!('default' in cjsModule)) {
-        issues.push(`@inquirer/${moduleName}: Missing default export in CJS`)
-      }
-      if (typeof cjsModule.default !== 'function') {
-        issues.push(
-          `@inquirer/${moduleName}: default should be a function (got ${typeof cjsModule.default})`,
-        )
-      }
-      // Check ESM access to Separator
-      if (!('Separator' in esmModule)) {
-        issues.push(`@inquirer/${moduleName}: Separator not accessible in ESM`)
-      }
-    }
-  }
-
   return {
+    __proto__: null,
     path: normalizedPath,
     ok: issues.length === 0,
     issues,
@@ -281,7 +303,7 @@ async function runValidation(): Promise<void> {
     logger.step('Validating dist/external ESM/CJS exports')
   }
 
-  const modules = getExternalModules(externalDir)
+  const modules = getExternalModules(DIST_EXTERNAL_DIR)
 
   if (modules.length === 0) {
     if (!quiet) {
@@ -295,18 +317,22 @@ async function runValidation(): Promise<void> {
   const failures = results.filter(r => !r.ok)
   const successes = results.filter(r => r.ok)
 
+  function reportModuleFailures(): void {
+    for (let i = 0, { length } = failures; i < length; i += 1) {
+      const failure = failures[i]!
+      logger.log(`  ${failure.path}`)
+      for (const issue of failure.issues) {
+        logger.substep(issue)
+      }
+    }
+  }
+
   if (failures.length > 0) {
     if (!quiet) {
       logger.fail(
         `Found ${failures.length} external ${pluralize('module', { count: failures.length })} with ESM/CJS export issues:`,
       )
-      for (let i = 0, { length } = failures; i < length; i += 1) {
-        const failure = failures[i]!
-        logger.log(`  ${failure.path}`)
-        for (const issue of failure.issues) {
-          logger.substep(issue)
-        }
-      }
+      reportModuleFailures()
       logger.log('')
       logger.warn('Recommended fixes:')
       logger.substep(

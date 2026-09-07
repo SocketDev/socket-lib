@@ -17,6 +17,17 @@ import { getSmolPath } from '../exe/smol/path.mjs'
 import type { FindUpOptions, FindUpSyncOptions } from './types.mjs'
 import { getNodeProcess } from '../node/process.mjs'
 
+export function findStatsMatch(
+  stats: { isFile(): boolean; isDirectory(): boolean },
+  options: Pick<FindUpOptions, 'onlyDirectories' | 'onlyFiles'>,
+): boolean {
+  const opts = { __proto__: null, ...options } as typeof options
+  return (
+    (!opts.onlyDirectories && stats.isFile()) ||
+    (!opts.onlyFiles && stats.isDirectory())
+  )
+}
+
 /**
  * Find a file or directory by traversing up parent directories. Searches from
  * the starting directory upward to the filesystem root. Useful for finding
@@ -73,10 +84,7 @@ export async function findUp(
       try {
         // oxlint-disable-next-line socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory().
         const stats = await fs.promises.stat(thePath)
-        if (!onlyDirectories && stats.isFile()) {
-          return normalizePath(thePath)
-        }
-        if (!onlyFiles && stats.isDirectory()) {
+        if (findStatsMatch(stats, { onlyDirectories, onlyFiles })) {
           return normalizePath(thePath)
         }
       } catch {}
@@ -154,10 +162,7 @@ export function findUpSync(
       try {
         // oxlint-disable-next-line socket/prefer-exists-sync -- needs stat to discriminate file vs directory matches via isFile()/isDirectory().
         const stats = fs.statSync(thePath)
-        if (!onlyDirectories && stats.isFile()) {
-          return normalizePath(thePath)
-        }
-        if (!onlyFiles && stats.isDirectory()) {
+        if (findStatsMatch(stats, { onlyDirectories, onlyFiles })) {
           return normalizePath(thePath)
         }
       } catch {}

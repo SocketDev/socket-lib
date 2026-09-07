@@ -61,12 +61,16 @@ export function enhanceSpawnError(error: unknown): unknown {
   // Build enhanced message.
   let enhancedMessage = `Command failed: ${cmd}`
 
-  if (args && args.length > 0) {
-    const argsStr = args.join(' ')
-    if (argsStr.length < 100) {
-      enhancedMessage += ` ${argsStr}`
-    } else {
-      enhancedMessage += ` ${argsStr.slice(0, 97)}...`
+  appendCommandArguments()
+
+  function appendCommandArguments(): void {
+    if (args && args.length > 0) {
+      const argsStr = args.join(' ')
+      if (argsStr.length < 100) {
+        enhancedMessage += ` ${argsStr}`
+      } else {
+        enhancedMessage += ` ${argsStr.slice(0, 97)}...`
+      }
     }
   }
 

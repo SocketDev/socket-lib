@@ -86,22 +86,26 @@ export function parseAgentCost(
 
   let inputTokens: number | undefined
   let outputTokens: number | undefined
-  const forward = JSON_USAGE_FORWARD_RE.exec(text)
-  if (forward) {
-    inputTokens = parseNumber(forward[1])
-    outputTokens = parseNumber(forward[2])
-  } else {
-    const reversed = JSON_USAGE_REVERSED_RE.exec(text)
-    if (reversed) {
-      outputTokens = parseNumber(reversed[1])
-      inputTokens = parseNumber(reversed[2])
+  readTokenCounts()
+
+  function readTokenCounts(): void {
+    const forward = JSON_USAGE_FORWARD_RE.exec(text)
+    if (forward) {
+      inputTokens = parseNumber(forward[1])
+      outputTokens = parseNumber(forward[2])
+    } else {
+      const reversed = JSON_USAGE_REVERSED_RE.exec(text)
+      if (reversed) {
+        outputTokens = parseNumber(reversed[1])
+        inputTokens = parseNumber(reversed[2])
+      }
     }
-  }
-  if (inputTokens === undefined) {
-    inputTokens = parseNumber(TEXT_INPUT_TOKENS_RE.exec(text)?.[1])
-  }
-  if (outputTokens === undefined) {
-    outputTokens = parseNumber(TEXT_OUTPUT_TOKENS_RE.exec(text)?.[1])
+    if (inputTokens === undefined) {
+      inputTokens = parseNumber(TEXT_INPUT_TOKENS_RE.exec(text)?.[1])
+    }
+    if (outputTokens === undefined) {
+      outputTokens = parseNumber(TEXT_OUTPUT_TOKENS_RE.exec(text)?.[1])
+    }
   }
 
   let totalTokens =

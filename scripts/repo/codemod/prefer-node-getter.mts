@@ -193,15 +193,7 @@ export function rewriteSource(source: string, filePath: string): string {
   if (!added.length) {
     return text === source ? source : text
   }
-  const lines = text.split(/\r?\n/)
-  let insertAt = 0
-  for (let i = 0, { length } = lines; i < length; i += 1) {
-    const line = lines[i] as string
-    if (line.startsWith('import ') || line.startsWith('} from ')) {
-      insertAt = i + 1
-    }
-  }
-  return `${lines.slice(0, insertAt).join('\n')}\n${added.join('')}${lines.slice(insertAt).join('\n')}`
+  return insertAccessorImports(text, added)
 }
 
 function main(): void {
@@ -249,4 +241,16 @@ const SCRIPT_META: ScriptMeta = {
 
 if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
+}
+
+function insertAccessorImports(text: string, added: readonly string[]): string {
+  const lines = text.split(/\r?\n/)
+  let insertAt = 0
+  for (let i = 0, { length } = lines; i < length; i += 1) {
+    const line = lines[i] as string
+    if (line.startsWith('import ') || line.startsWith('} from ')) {
+      insertAt = i + 1
+    }
+  }
+  return `${lines.slice(0, insertAt).join('\n')}\n${added.join('')}${lines.slice(insertAt).join('\n')}`
 }

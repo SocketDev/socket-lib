@@ -10,6 +10,7 @@ import path from 'node:path'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { REPO_ROOT } from '../../fleet/paths.mts'
+import { DIST_EXTERNAL_DIR, SRC_EXTERNAL_DIR } from '../paths.mts'
 import { bundlePackage } from './bundler.mts'
 import { externalPackages, scopedPackages } from './config.mts'
 import { copyLocalFiles, ensureDir } from './copy-files.mts'
@@ -18,7 +19,6 @@ import { transformPrimordials } from './transform-primordials.mts'
 const logger = getDefaultLogger()
 
 const rootDir = REPO_ROOT
-const distExternalDir = path.join(rootDir, 'dist', 'external')
 
 /**
  * Main build function.
@@ -40,7 +40,7 @@ export async function buildExternals(
   const showDetails = verbose && !quiet
 
   // Ensure dist/external directory exists.
-  await ensureDir(distExternalDir)
+  await ensureDir(DIST_EXTERNAL_DIR)
 
   // Bundle all packages
   const { bundledCount, totalSize } = await bundleAllPackages({
@@ -48,13 +48,13 @@ export async function buildExternals(
   })
 
   // Post-process: Fix node-gyp strings to prevent bundler issues for consumers
-  await fixNodeGypStrings(distExternalDir, { quiet })
+  await fixNodeGypStrings(DIST_EXTERNAL_DIR, { quiet })
 
   // Post-process: rewrite `require("node:X")` to the bare builtin form so
   // browser bundlers can stub the specifier via the package.json `browser`
   // field (webpack throws UnhandledSchemeError on the `node:` scheme before
   // the stubs apply — same doctrine as src/node/module.ts's bare `module`).
-  await rewriteBareBuiltinRequires(distExternalDir, { quiet })
+  await rewriteBareBuiltinRequires(DIST_EXTERNAL_DIR, { quiet })
 
   // Post-process: rewrite well-known global calls (Buffer.from, Date.now,
   // Object.keys, …) to socket-lib's primordials surface so the bundled
@@ -63,18 +63,18 @@ export async function buildExternals(
   // bug (it repairs broken `end` positions by walking children, and
   // scans source for the closing `)` when the call's outer end is
   // unreliable — see tools/prim/src/codemod.mts).
-  const distRoot = path.dirname(distExternalDir)
-  await transformPrimordials(distRoot, distExternalDir, { quiet })
+  const distRoot = path.dirname(DIST_EXTERNAL_DIR)
+  await transformPrimordials(distRoot, DIST_EXTERNAL_DIR, { quiet })
 
   // Ship hand-authored .d.ts stubs (e.g. src/external/std-env.d.ts) next to the
   // bundled .js so public re-exports of an external's type surface resolve for
   // consumers — an inlined devDependency has no downstream types otherwise. Runs
   // last so the .js-only transform passes above never parse a .d.ts.
-  await copyLocalFiles(path.join(rootDir, 'src', 'external'), distExternalDir, {
+  await copyLocalFiles(SRC_EXTERNAL_DIR, DIST_EXTERNAL_DIR, {
     quiet: quiet || !showDetails,
   })
 
-  return { bundledCount, totalSize }
+  return { __proto__: null, bundledCount, totalSize }
 }
 
 /**
@@ -95,7 +95,7 @@ export async function bundleAllPackages(
   // Bundle each external package or copy non-bundled files.
   for (const { bundle, name } of externalPackages) {
     if (bundle) {
-      const outputPath = path.join(distExternalDir, `${name}.js`)
+      const outputPath = path.join(DIST_EXTERNAL_DIR, `${name}.js`)
       const size = await bundlePackage(name, outputPath, rootDir, {
         quiet,
       })
@@ -105,8 +105,8 @@ export async function bundleAllPackages(
       }
     } else {
       // Copy the non-bundled thin re-export wrapper as-is.
-      const srcPath = path.join(rootDir, 'src', 'external', `${name}.js`)
-      const destPath = path.join(distExternalDir, `${name}.js`)
+      const srcPath = path.join(SRC_EXTERNAL_DIR, `${name}.js`)
+      const destPath = path.join(DIST_EXTERNAL_DIR, `${name}.js`)
       await fs.copyFile(srcPath, destPath)
     }
   }
@@ -120,102 +120,18 @@ export async function bundleAllPackages(
     scope,
     subpaths,
   } of scopedPackages) {
-    const scopeDir = path.join(distExternalDir, scope)
+    const scopeDir = path.join(DIST_EXTERNAL_DIR, scope)
     await ensureDir(scopeDir)
 
-    if (name) {
-      // Single package in scope.
-      const outputPath = path.join(scopeDir, `${name}.js`)
-      if (bundle === false) {
-        // Copy the non-bundled thin re-export wrapper as-is.
-        const srcPath = path.join(
-          rootDir,
-          'src',
-          'external',
-          scope,
-          `${name}.js`,
-        )
-        await fs.copyFile(srcPath, outputPath)
-      } else if (optional) {
-        try {
-          const size = await bundlePackage(
-            `${scope}/${name}`,
-            outputPath,
-            rootDir,
-            {
-              quiet,
-            },
-          )
-          if (size) {
-            bundledCount++
-            totalSize += size
-          }
-        } catch {
-          if (!quiet) {
-            logger.log(`  Skipping optional package ${scope}/${name}`)
-          }
-        }
-      } else {
-        const size = await bundlePackage(
-          `${scope}/${name}`,
-          outputPath,
-          rootDir,
-          {
-            quiet,
-          },
-        )
-        if (size) {
-          bundledCount++
-          totalSize += size
-        }
-      }
-    } else if (packages) {
-      // Multiple packages in scope.
-      for (const pkg of packages) {
-        const outputPath = path.join(scopeDir, `${pkg}.js`)
-        if (bundle === false) {
-          // Copy the non-bundled thin re-export wrapper as-is.
-          const srcPath = path.join(
-            rootDir,
-            'src',
-            'external',
-            scope,
-            `${pkg}.js`,
-          )
-          await fs.copyFile(srcPath, outputPath)
-        } else if (optional) {
-          try {
-            const size = await bundlePackage(
-              `${scope}/${pkg}`,
-              outputPath,
-              rootDir,
-              {
-                quiet,
-              },
-            )
-            if (size) {
-              bundledCount++
-              totalSize += size
-            }
-          } catch {
-            if (!quiet) {
-              logger.log(`  Skipping optional package ${scope}/${pkg}`)
-            }
-          }
-        } else {
-          const size = await bundlePackage(
-            `${scope}/${pkg}`,
-            outputPath,
-            rootDir,
-            {
-              quiet,
-            },
-          )
-          if (size) {
-            bundledCount++
-            totalSize += size
-          }
-        }
+    for (const packageName of name ? [name] : (packages ?? [])) {
+      const size = await bundleScopedPackage(scope, packageName, {
+        bundle,
+        optional,
+        quiet,
+      })
+      if (size) {
+        bundledCount++
+        totalSize += size
       }
     }
 
@@ -228,7 +144,7 @@ export async function bundleAllPackages(
         // '@sinclair/typebox/value' — exports map uses './value', so the
         // subpath can't include .js or resolve will fail).
         const outFilename = subpath.endsWith('.js') ? subpath : `${subpath}.js`
-        const outputPath = path.join(distExternalDir, scope, outFilename)
+        const outputPath = path.join(DIST_EXTERNAL_DIR, scope, outFilename)
         const packageName = `${scope}/${subpath}`
         // Ensure parent directory exists
         await ensureDir(path.dirname(outputPath))
@@ -243,7 +159,7 @@ export async function bundleAllPackages(
     }
   }
 
-  return { bundledCount, totalSize }
+  return { __proto__: null, bundledCount, totalSize }
 }
 
 /**
@@ -352,5 +268,38 @@ export async function rewriteBareBuiltinRequires(
         }
       }
     }
+  }
+}
+
+async function bundleScopedPackage(
+  scope: string,
+  name: string,
+  options: {
+    bundle?: boolean | undefined
+    optional?: boolean | undefined
+    quiet?: boolean | undefined
+  },
+): Promise<number | undefined> {
+  const opts = { __proto__: null, ...options } as typeof options
+  const outputPath = path.join(DIST_EXTERNAL_DIR, scope, `${name}.js`)
+  if (opts.bundle === false) {
+    await fs.copyFile(
+      path.join(SRC_EXTERNAL_DIR, scope, `${name}.js`),
+      outputPath,
+    )
+    return undefined
+  }
+  try {
+    return await bundlePackage(`${scope}/${name}`, outputPath, rootDir, {
+      quiet: opts.quiet,
+    })
+  } catch (error) {
+    if (!opts.optional) {
+      throw error
+    }
+    if (!opts.quiet) {
+      logger.log(`  Skipping optional package ${scope}/${name}`)
+    }
+    return undefined
   }
 }
