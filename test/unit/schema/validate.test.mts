@@ -40,6 +40,7 @@ describe('schema/validate', () => {
       if (!result.ok) {
         expect(result.errors.length).toBeGreaterThanOrEqual(2)
         for (const issue of result.errors) {
+          expect(Object.getPrototypeOf(issue)).toBeNull()
           expect(Array.isArray(issue.path)).toBe(true)
           expect(typeof issue.message).toBe('string')
         }

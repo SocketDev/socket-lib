@@ -100,6 +100,7 @@ export function normalizeZodError(err: unknown): ValidationIssue[] {
       message?: string | undefined
     }
     return {
+      __proto__: null,
       path: ArrayIsArray(i.path) ? i.path : [],
       message: typeof i.message === 'string' ? i.message : 'Invalid value',
     }
