@@ -116,6 +116,10 @@ export function reportMod(result, json, applied, showDiff = false) {
     process.stdout.write(fileLine)
   }
   if (showDiff && !applied) {
+    reportPlannedDiffs()
+  }
+
+  function reportPlannedDiffs(): void {
     // Dry-run preview: render unified line-diff per planned rewrite by
     // reading the pre-change source from disk and comparing it to the
     // staged new source. Disk is never written in dry-run mode.

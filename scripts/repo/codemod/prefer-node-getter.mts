@@ -193,6 +193,10 @@ export function rewriteSource(source: string, filePath: string): string {
   if (!added.length) {
     return text === source ? source : text
   }
+  return insertGetterImports(text, added)
+}
+
+function insertGetterImports(text: string, added: string[]): string {
   const lines = text.split(/\r?\n/)
   let insertAt = 0
   for (let i = 0, { length } = lines; i < length; i += 1) {

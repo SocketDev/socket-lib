@@ -149,38 +149,43 @@ async function main(): Promise<void> {
       types: Boolean(values['types']),
     }
 
-    // Determine what to clean
-    const cleanAll =
-      flags.all ||
-      (!flags.cache &&
-        !flags.coverage &&
-        !flags.dist &&
-        !flags.types &&
-        !flags.modules)
+    function collectCleanTasks() {
+      // Determine what to clean
+      const cleanAll =
+        flags.all ||
+        (!flags.cache &&
+          !flags.coverage &&
+          !flags.dist &&
+          !flags.types &&
+          !flags.modules)
 
-    const tasks = []
+      const tasks = []
 
-    // Build task list
-    if (cleanAll || flags.cache) {
-      tasks.push({ name: 'cache', pattern: '.cache' })
+      // Build task list
+      if (cleanAll || flags.cache) {
+        tasks.push({ name: 'cache', pattern: '.cache' })
+      }
+
+      if (cleanAll || flags.coverage) {
+        tasks.push({ name: 'coverage', pattern: 'coverage' })
+      }
+
+      if (cleanAll || flags.dist) {
+        tasks.push({
+          name: 'dist',
+          patterns: ['dist', '*.tsbuildinfo', '.tsbuildinfo'],
+        })
+      } else if (flags.types) {
+        tasks.push({ name: 'dist/types', patterns: ['dist/types'] })
+      }
+
+      if (flags.modules) {
+        tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
+      }
+
+      return tasks
     }
-
-    if (cleanAll || flags.coverage) {
-      tasks.push({ name: 'coverage', pattern: 'coverage' })
-    }
-
-    if (cleanAll || flags.dist) {
-      tasks.push({
-        name: 'dist',
-        patterns: ['dist', '*.tsbuildinfo', '.tsbuildinfo'],
-      })
-    } else if (flags.types) {
-      tasks.push({ name: 'dist/types', patterns: ['dist/types'] })
-    }
-
-    if (flags.modules) {
-      tasks.push({ name: 'node_modules', pattern: '**/node_modules' })
-    }
+    const tasks = collectCleanTasks()
 
     // Check if there's anything to clean
     if (tasks.length === 0) {

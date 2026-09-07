@@ -65,25 +65,32 @@ const ARG_OPTIONS = {
 }
 
 export async function runCli(argv) {
-  const describeKind = describeRequest(argv)
-  if (describeKind) {
-    // `--describe --json` (either order) answers the fleet-runner-shaped
-    // `{describe, help}` envelope instead of the full command manifest —
-    // plain `--describe` stays the one-liner, unchanged.
-    process.stdout.write(
-      describeKind === 'json'
-        ? renderDescribeHelpJson()
-        : renderDescribe(describeKind, MANIFEST),
-    )
-    return
+  function printRequestedHelp(): boolean {
+    const describeKind = describeRequest(argv)
+    if (describeKind) {
+      // `--describe --json` (either order) answers the fleet-runner-shaped
+      // `{describe, help}` envelope instead of the full command manifest —
+      // plain `--describe` stays the one-liner, unchanged.
+      process.stdout.write(
+        describeKind === 'json'
+          ? renderDescribeHelpJson()
+          : renderDescribe(describeKind, MANIFEST),
+      )
+      return true
+    }
+    // Bare `prim` / `prim help` / `prim --help` → print help. With --json
+    // riding along and no command to report a result for, answer the same
+    // `{describe, help}` envelope rather than silently ignoring the flag.
+    if (argv.length === 0 || argv[0] === 'help') {
+      process.stdout.write(
+        argv.includes('--json') ? renderDescribeHelpJson() : HELP,
+      )
+      return true
+    }
+
+    return false
   }
-  // Bare `prim` / `prim help` / `prim --help` → print help. With --json
-  // riding along and no command to report a result for, answer the same
-  // `{describe, help}` envelope rather than silently ignoring the flag.
-  if (argv.length === 0 || argv[0] === 'help') {
-    process.stdout.write(
-      argv.includes('--json') ? renderDescribeHelpJson() : HELP,
-    )
+  if (printRequestedHelp()) {
     return
   }
 
@@ -134,6 +141,9 @@ export async function runCli(argv) {
   // Handle it before the surface load so users don't need to pass
   // --surface for a lint-only check.
   if (command === 'lint') {
+    return runLintCommand()
+  }
+  function runLintCommand(): void {
     const primordialSources = values['primordials-source']
     const findings = lintSource({
       targetRoot,
@@ -161,6 +171,10 @@ export async function runCli(argv) {
   // Codemod runs its own pass — don't pre-audit (avoids any
   // shared-AST surprises and is faster).
   if (command === 'mod') {
+    return runModCommand()
+  }
+
+  async function runModCommand(): Promise<void> {
     // Auto-detect when we're scanning a tree that owns its OWN
     // `primordials.ts` (i.e. socket-lib itself, or any project that
     // re-exports primordials from a local module). When the tree owns
@@ -244,6 +258,10 @@ export async function runCli(argv) {
   }
 
   if (command === 'audit') {
+    return runAuditCommand()
+  }
+
+  async function runAuditCommand(): Promise<void> {
     const findings = await auditDirectory({
       aiDisambiguate: values['ai-disambiguate'],
       exported: surface.exports,
@@ -291,29 +309,40 @@ export async function runCli(argv) {
       parseFailureFiles,
       stripFailureFiles,
     )
-    if (!json) {
-      // Human-readable warning + per-file list. Goes to stderr so the
-      // findings on stdout stay machine-pipeable.
-      const totalSkipped = parseFailureFiles.length + stripFailureFiles.length
-      if (totalSkipped > 0) {
-        // CLI tool: stderr for human warnings keeps stdout pure
-        // machine-pipeable JSON / findings text.
-        const warnMsg = `prim: warning — ${totalSkipped} file(s) skipped and excluded from findings. Audit is incomplete.\n`
-        process.stderr.write(warnMsg)
-        if (parseFailureFiles.length > 0) {
-          const header = `  parse-failed (${parseFailureFiles.length}):\n`
-          process.stderr.write(header)
-          for (let i = 0, { length } = parseFailureFiles; i < length; i += 1) {
-            const f = parseFailureFiles[i]!
-            process.stderr.write(`    ${f}\n`)
+    reportSkippedFiles()
+    function reportSkippedFiles(): void {
+      if (!json) {
+        // Human-readable warning + per-file list. Goes to stderr so the
+        // findings on stdout stay machine-pipeable.
+        const totalSkipped = parseFailureFiles.length + stripFailureFiles.length
+        if (totalSkipped > 0) {
+          // CLI tool: stderr for human warnings keeps stdout pure
+          // machine-pipeable JSON / findings text.
+          const warnMsg = `prim: warning — ${totalSkipped} file(s) skipped and excluded from findings. Audit is incomplete.\n`
+          process.stderr.write(warnMsg)
+          if (parseFailureFiles.length > 0) {
+            const header = `  parse-failed (${parseFailureFiles.length}):\n`
+            process.stderr.write(header)
+            for (
+              let i = 0, { length } = parseFailureFiles;
+              i < length;
+              i += 1
+            ) {
+              const f = parseFailureFiles[i]!
+              process.stderr.write(`    ${f}\n`)
+            }
           }
-        }
-        if (stripFailureFiles.length > 0) {
-          const header = `  ts-strip-failed (${stripFailureFiles.length}):\n`
-          process.stderr.write(header)
-          for (let i = 0, { length } = stripFailureFiles; i < length; i += 1) {
-            const f = stripFailureFiles[i]!
-            process.stderr.write(`    ${f}\n`)
+          if (stripFailureFiles.length > 0) {
+            const header = `  ts-strip-failed (${stripFailureFiles.length}):\n`
+            process.stderr.write(header)
+            for (
+              let i = 0, { length } = stripFailureFiles;
+              i < length;
+              i += 1
+            ) {
+              const f = stripFailureFiles[i]!
+              process.stderr.write(`    ${f}\n`)
+            }
           }
         }
       }

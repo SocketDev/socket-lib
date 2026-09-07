@@ -225,28 +225,35 @@ async function main(): Promise<void> {
     const quiet = isQuiet(values)
     const { verbose } = flags
 
-    // `--needed` is the `prepare`/install path. In CI, skip it entirely: CI
-    // runs explicit build/test/check steps, so the install-time `prepare`
-    // build is redundant work that only adds latency to every `pnpm install`
-    // in the pipeline. (Locally, `--needed` still builds when dist is absent.)
-    if (flags.needed && process.env['CI'] === 'true') {
-      if (!quiet) {
-        logger.info(
-          'CI detected — skipping prepare-time build (CI builds explicitly)',
-        )
+    function shouldSkipBuild(): boolean {
+      // `--needed` is the `prepare`/install path. In CI, skip it entirely: CI
+      // runs explicit build/test/check steps, so the install-time `prepare`
+      // build is redundant work that only adds latency to every `pnpm install`
+      // in the pipeline. (Locally, `--needed` still builds when dist is absent.)
+      if (flags.needed && process.env['CI'] === 'true') {
+        if (!quiet) {
+          logger.info(
+            'CI detected — skipping prepare-time build (CI builds explicitly)',
+          )
+        }
+        process.exitCode = 0
+        return true
       }
-      process.exitCode = 0
-      return
-    }
 
-    // Check if build is needed. isBuildNeeded() short-circuits when dist
-    // artifacts already exist, so a local `pnpm install` with a built dist/
-    // is near-instant instead of rebuilding every time.
-    if (flags.needed && !isBuildNeeded()) {
-      if (!quiet) {
-        logger.info('Build artifacts exist, skipping build')
+      // Check if build is needed. isBuildNeeded() short-circuits when dist
+      // artifacts already exist, so a local `pnpm install` with a built dist/
+      // is near-instant instead of rebuilding every time.
+      if (flags.needed && !isBuildNeeded()) {
+        if (!quiet) {
+          logger.info('Build artifacts exist, skipping build')
+        }
+        process.exitCode = 0
+        return true
       }
-      process.exitCode = 0
+
+      return false
+    }
+    if (shouldSkipBuild()) {
       return
     }
 
@@ -271,6 +278,16 @@ async function main(): Promise<void> {
     }
     // Build source only
     else if (flags.src && !flags.types) {
+      await runSourceBuild()
+    }
+    // Build everything (default)
+    else {
+      if (!(await runFullBuild())) {
+        return
+      }
+    }
+
+    async function runSourceBuild(): Promise<void> {
       if (!quiet) {
         printHeader('Building Source')
       }
@@ -284,8 +301,8 @@ async function main(): Promise<void> {
         logger.substep(`Source build complete in ${buildTime}ms`)
       }
     }
-    // Build everything (default)
-    else {
+
+    async function runFullBuild(): Promise<boolean> {
       if (!quiet) {
         printHeader('Building Package')
       }
@@ -331,66 +348,69 @@ async function main(): Promise<void> {
           logger.error('Clean failed')
         }
         process.exitCode = exitCode
-        return
+        return false
       }
 
       if (!quiet) {
         logger.success('Build Cleaned')
       }
 
-      // Run source, externals, and types builds in parallel. Use
-      // `allSettled` so a rejection in one builder doesn't short-
-      // circuit the others mid-write — past CI flakiness on a SHIP
-      // had buildExternals finish + log "Build completed successfully"
-      // while buildSource/buildTypes were still writing files, then
-      // the test runner started before those writes flushed.
-      const settled = await Promise.allSettled([
-        buildSource({
-          quiet,
-          verbose,
-          skipClean: true,
-          analyze: flags.analyze,
-        }),
-        buildExternals({ quiet, verbose }),
-        buildTypes({ quiet, skipClean: true }),
-        buildPrim({ quiet }),
-      ])
-      const {
-        0: srcSettled,
-        1: externalsSettled,
-        2: typesSettled,
-        3: primSettled,
-      } = settled
-      const srcResult: BuildSourceResult =
-        srcSettled.status === 'fulfilled'
-          ? srcSettled.value
-          : (logger.error(`buildSource rejected: ${srcSettled.reason}`),
-            { exitCode: 1, buildTime: 0 })
-      const externalsExitCode: number =
-        externalsSettled.status === 'fulfilled'
-          ? externalsSettled.value
-          : (logger.error(
-              `buildExternals rejected: ${externalsSettled.reason}`,
-            ),
-            1)
-      const typesExitCode: number =
-        typesSettled.status === 'fulfilled'
-          ? typesSettled.value
-          : (logger.error(`buildTypes rejected: ${typesSettled.reason}`), 1)
-      const primExitCode: number =
-        primSettled.status === 'fulfilled'
-          ? primSettled.value
-          : (logger.error(`buildPrim rejected: ${primSettled.reason}`), 1)
+      async function runParallelBuilders(): Promise<void> {
+        // Run source, externals, and types builds in parallel. Use
+        // `allSettled` so a rejection in one builder doesn't short-
+        // circuit the others mid-write — past CI flakiness on a SHIP
+        // had buildExternals finish + log "Build completed successfully"
+        // while buildSource/buildTypes were still writing files, then
+        // the test runner started before those writes flushed.
+        const settled = await Promise.allSettled([
+          buildSource({
+            quiet,
+            verbose,
+            skipClean: true,
+            analyze: flags.analyze,
+          }),
+          buildExternals({ quiet, verbose }),
+          buildTypes({ quiet, skipClean: true }),
+          buildPrim({ quiet }),
+        ])
+        const {
+          0: srcSettled,
+          1: externalsSettled,
+          2: typesSettled,
+          3: primSettled,
+        } = settled
+        const srcResult: BuildSourceResult =
+          srcSettled.status === 'fulfilled'
+            ? srcSettled.value
+            : (logger.error(`buildSource rejected: ${srcSettled.reason}`),
+              { exitCode: 1, buildTime: 0 })
+        const externalsExitCode: number =
+          externalsSettled.status === 'fulfilled'
+            ? externalsSettled.value
+            : (logger.error(
+                `buildExternals rejected: ${externalsSettled.reason}`,
+              ),
+              1)
+        const typesExitCode: number =
+          typesSettled.status === 'fulfilled'
+            ? typesSettled.value
+            : (logger.error(`buildTypes rejected: ${typesSettled.reason}`), 1)
+        const primExitCode: number =
+          primSettled.status === 'fulfilled'
+            ? primSettled.value
+            : (logger.error(`buildPrim rejected: ${primSettled.reason}`), 1)
 
-      // Check if any of the parallel builds failed
-      exitCode =
-        srcResult.exitCode !== 0
-          ? srcResult.exitCode
-          : externalsExitCode !== 0
-            ? externalsExitCode
-            : typesExitCode !== 0
-              ? typesExitCode
-              : primExitCode
+        // Check if any of the parallel builds failed
+        exitCode =
+          srcResult.exitCode !== 0
+            ? srcResult.exitCode
+            : externalsExitCode !== 0
+              ? externalsExitCode
+              : typesExitCode !== 0
+                ? typesExitCode
+                : primExitCode
+      }
+      await runParallelBuilders()
 
       // If all parallel builds succeeded, flush dist/ to disk and run the
       // post-build dist-shaping steps.
@@ -411,17 +431,21 @@ async function main(): Promise<void> {
           exitCode = await verifyDist(distDir)
         }
       }
+      return true
     }
 
-    // Print final status and footer
-    if (!quiet) {
-      if (exitCode === 0) {
-        logger.success('Build completed successfully!')
-      } else {
-        logger.error('Build failed')
+    function reportBuildStatus(): void {
+      // Print final status and footer
+      if (!quiet) {
+        if (exitCode === 0) {
+          logger.success('Build completed successfully!')
+        } else {
+          logger.error('Build failed')
+        }
+        printFooter()
       }
-      printFooter()
     }
+    reportBuildStatus()
 
     if (exitCode !== 0) {
       process.exitCode = exitCode

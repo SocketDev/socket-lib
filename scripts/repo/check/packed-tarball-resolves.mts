@@ -254,29 +254,38 @@ export function main(): number {
   const quiet = isQuiet()
   const json = isJson()
 
-  const distDir = path.join(REPO_ROOT, 'dist')
-  if (!existsSync(distDir)) {
-    if (!quiet) {
-      logger.log(`${CHECK} dist/ absent — building first (\`pnpm run build\`).`)
+  function ensureBuiltDist(): number {
+    const distDir = path.join(REPO_ROOT, 'dist')
+    if (!existsSync(distDir)) {
+      if (!quiet) {
+        logger.log(
+          `${CHECK} dist/ absent — building first (\`pnpm run build\`).`,
+        )
+      }
+      const built = spawnSync('pnpm', ['run', 'build'], {
+        cwd: REPO_ROOT,
+        timeout: 600_000,
+      })
+      if (built.error || built.status !== 0) {
+        logger.error(
+          `${CHECK} the build failed.\n` +
+            '  What:  `pnpm run build` did not complete before packing.\n' +
+            `  Where: ${REPO_ROOT}\n` +
+            `  Saw:   exit ${built.status ?? 'spawn error'}; ${
+              built.error
+                ? errorMessage(built.error)
+                : String(built.stderr ?? '').slice(0, 1000)
+            }\n` +
+            '  Fix:   run `pnpm run build` directly and fix the reported build error.',
+        )
+        return 1
+      }
     }
-    const built = spawnSync('pnpm', ['run', 'build'], {
-      cwd: REPO_ROOT,
-      timeout: 600_000,
-    })
-    if (built.error || built.status !== 0) {
-      logger.error(
-        `${CHECK} the build failed.\n` +
-          '  What:  `pnpm run build` did not complete before packing.\n' +
-          `  Where: ${REPO_ROOT}\n` +
-          `  Saw:   exit ${built.status ?? 'spawn error'}; ${
-            built.error
-              ? errorMessage(built.error)
-              : String(built.stderr ?? '').slice(0, 1000)
-          }\n` +
-          '  Fix:   run `pnpm run build` directly and fix the reported build error.',
-      )
-      return 1
-    }
+
+    return 0
+  }
+  if (ensureBuiltDist() !== 0) {
+    return 1
   }
 
   const inspection = packAndInspect(REPO_ROOT)
@@ -314,22 +323,33 @@ export function main(): number {
         },
       }),
     )
-    const installed = spawnSync('pnpm', ['install', '--config.offline=true'], {
-      cwd: scratchDir,
-      timeout: 120_000,
-    })
-    if (installed.error || installed.status !== 0) {
-      logger.error(
-        `${CHECK} installing the packed tarball failed.\n` +
-          '  What:  `pnpm install` over a `file:<tarball>` dependency did not complete.\n' +
-          `  Where: ${scratchDir}\n` +
-          `  Saw:   exit ${installed.status ?? 'spawn error'}; ${
-            installed.error
-              ? errorMessage(installed.error)
-              : String(installed.stderr ?? '').slice(0, 1000)
-          }\n` +
-          '  Fix:   confirm the packed manifest carries no unresolved runtime dependency and retry the install manually against the tarball.',
+    function installPackedTarball(): boolean {
+      const installed = spawnSync(
+        'pnpm',
+        ['install', '--config.offline=true'],
+        {
+          cwd: scratchDir,
+          timeout: 120_000,
+        },
       )
+      if (installed.error || installed.status !== 0) {
+        logger.error(
+          `${CHECK} installing the packed tarball failed.\n` +
+            '  What:  `pnpm install` over a `file:<tarball>` dependency did not complete.\n' +
+            `  Where: ${scratchDir}\n` +
+            `  Saw:   exit ${installed.status ?? 'spawn error'}; ${
+              installed.error
+                ? errorMessage(installed.error)
+                : String(installed.stderr ?? '').slice(0, 1000)
+            }\n` +
+            '  Fix:   confirm the packed manifest carries no unresolved runtime dependency and retry the install manually against the tarball.',
+        )
+        return false
+      }
+
+      return true
+    }
+    if (!installPackedTarball()) {
       return 1
     }
 

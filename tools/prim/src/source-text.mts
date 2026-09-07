@@ -180,6 +180,28 @@ export function findOpenParen(src: string, from: number): number {
   return src.charCodeAt(i) === 0x28 ? i + 1 : -1
 }
 
+export function repairChildEndPositions(
+  record: AstNodeRecord,
+  { astNode }: { astNode: boolean },
+): number {
+  let maximum = 0
+  const keys = Object.keys(record)
+  for (let i = 0, { length } = keys; i < length; i += 1) {
+    const key = keys[i]!
+    if (key === 'loc' || key === 'range' || key.startsWith('_')) {
+      continue
+    }
+    if (astNode && (key === 'end' || key === 'start')) {
+      continue
+    }
+    const childEnd = repairEndPositions(record[key])
+    if (childEnd > maximum) {
+      maximum = childEnd
+    }
+  }
+  return maximum
+}
+
 /**
  * Repair AST end positions in place. Walks depth-first; for each node whose
  * `end` is missing or smaller than the computed end of its children, replaces
@@ -211,41 +233,9 @@ export function repairEndPositions(node: unknown): number {
   }
   const record = node as AstNodeRecord
   if (typeof record.type !== 'string') {
-    // Not an AST node (e.g. a literal value, a token list). Recurse
-    // through nested objects/arrays so we still reach AST descendants.
-    let m = 0
-    const objectKeys = Object.keys(record)
-    for (let i = 0, { length } = objectKeys; i < length; i += 1) {
-      const key = objectKeys[i]!
-      if (key === 'loc' || key === 'range' || key.startsWith('_')) {
-        continue
-      }
-      const e = repairEndPositions(record[key])
-      if (e > m) {
-        m = e
-      }
-    }
-    return m
+    return repairChildEndPositions(record, { astNode: false })
   }
-
-  let maxChildEnd = 0
-  const nodeKeys = Object.keys(record)
-  for (let i = 0, { length } = nodeKeys; i < length; i += 1) {
-    const key = nodeKeys[i]!
-    if (
-      key === 'loc' ||
-      key === 'range' ||
-      key === 'start' ||
-      key === 'end' ||
-      key.startsWith('_')
-    ) {
-      continue
-    }
-    const e = repairEndPositions(record[key])
-    if (e > maxChildEnd) {
-      maxChildEnd = e
-    }
-  }
+  const maxChildEnd = repairChildEndPositions(record, { astNode: true })
 
   // If the reported end is sane (>= start AND >= max-child-end), keep it.
   // Otherwise replace with the larger of (start, maxChildEnd).

@@ -269,6 +269,10 @@ export function findInsertionPoint(source: string): number {
   if (lastEnd > 0) {
     return lastEnd
   }
+  return findLeadingCommentEnd(source)
+}
+
+export function findLeadingCommentEnd(source: string): number {
   // No imports/requires — skip past leading shebang + leading JSDoc /
   // line-comment block so the inserted import lands BELOW the
   // `@fileoverview` doc, not above it.

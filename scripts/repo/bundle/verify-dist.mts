@@ -129,15 +129,18 @@ function collectRequiredSpecifiers(src: string): Set<string> {
     ) {
       found.add(String(candidate.arguments[0]!.value))
     }
-    const childValues = Object.values(node)
-    for (let i = 0, { length } = childValues; i < length; i += 1) {
-      const value = childValues[i]
-      if (Array.isArray(value)) {
-        stack.push(...value)
-      } else if (value !== null && typeof value === 'object') {
-        stack.push(value)
+    function enqueueChildren(parent: object): void {
+      const childValues = Object.values(parent)
+      for (let i = 0, { length } = childValues; i < length; i += 1) {
+        const value = childValues[i]
+        if (Array.isArray(value)) {
+          stack.push(...value)
+        } else if (value !== null && typeof value === 'object') {
+          stack.push(value)
+        }
       }
     }
+    enqueueChildren(node)
   }
   return found
 }
@@ -198,7 +201,11 @@ export async function verifyDist(distDir: string): Promise<number> {
   for (let i = 0; i < files.length; i += CONCURRENCY) {
     const chunk = files.slice(i, i + CONCURRENCY)
     const results = await Promise.all(
-      chunk.map(async file => ({ file, error: await checkFile(file) })),
+      chunk.map(async file => ({
+        __proto__: null,
+        file,
+        error: await checkFile(file),
+      })),
     )
     for (const { error, file } of results) {
       if (error !== undefined) {

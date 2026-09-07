@@ -167,20 +167,23 @@ export function findStubsReachableFromShippedCode(
   // Which leaves claim a given dist file, so a finding can name the leaf to
   // pass to expose-leaf.mts rather than just the file that throws.
   const targetOwners = new Map<string, string[]>()
-  for (const [leaf, targets] of leafTargets) {
-    for (let i = 0, { length } = targets; i < length; i += 1) {
-      const resolved = resolveDistFile(repoRoot, targets[i] as string)
-      if (!resolved) {
-        continue
-      }
-      const owners = targetOwners.get(resolved)
-      if (owners) {
-        owners.push(leaf)
-      } else {
-        targetOwners.set(resolved, [leaf])
+  function collectTargetOwners(): void {
+    for (const [leaf, targets] of leafTargets) {
+      for (let i = 0, { length } = targets; i < length; i += 1) {
+        const resolved = resolveDistFile(repoRoot, targets[i] as string)
+        if (!resolved) {
+          continue
+        }
+        const owners = targetOwners.get(resolved)
+        if (owners) {
+          owners.push(leaf)
+        } else {
+          targetOwners.set(resolved, [leaf])
+        }
       }
     }
   }
+  collectTargetOwners()
 
   // Seed with every dist target of every leaf that is NOT on the stub list.
   // Those are the entry points a consumer can resolve and expect to work.
