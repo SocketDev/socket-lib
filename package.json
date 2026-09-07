@@ -3919,6 +3919,7 @@
     "sync-package-manager-pins": "node scripts/fleet/sync-package-manager-pins.mts",
     "test": "node scripts/fleet/test.mts",
     "test:fuzz": "node scripts/repo/fuzz.mts",
+    "test:isolated": "node scripts/fleet/test-runner/run-vitest.mts run --config .config/repo/vitest.config.isolated.mts",
     "test262": "node test/scripts/test262-runner.mts",
     "update": "node scripts/fleet/update.mts",
     "weekly-update": "node scripts/fleet/weekly-update.mts",
