@@ -144,6 +144,16 @@ describe('redeclaration of an exported primordial', () => {
     ).toEqual([])
   })
 
+  it('ignores aliases nested in function expressions but keeps program blocks', () => {
+    const { redeclared } = audit(
+      'const factory = function () { const ErrorCtor = Error }; { const JSONParse = JSON.parse }',
+      { exported: ['ErrorCtor', 'JSONParse'] },
+    )
+    expect(redeclared).toEqual([
+      { name: 'JSONParse', pattern: 'const JSONParse = JSON.parse' },
+    ])
+  })
+
   it('ignores a declaration inside an arrow function', () => {
     expect(
       audit('const f = () => {\n  const ErrorCtor = Error\n}\n', {
@@ -229,6 +239,16 @@ describe('the ambiguous-method queue', () => {
     expect(pending.length).toBe(1)
     expect(pending[0]!.methodName).toBe('then')
     expect(pending[0]!.receiverName).toBe('thing')
+  })
+
+  it('records known receivers without adding them to the deferred queue', () => {
+    const { pending, recorded } = audit('re.test(input); thing.then(next)', {
+      aiDisambiguate: true,
+    })
+    expect(recorded.map(finding => finding.pattern)).toEqual([
+      're.test(...)  [guessed: RegExp]',
+    ])
+    expect(pending.map(finding => finding.receiverName)).toEqual(['thing'])
   })
 
   it('snapshots position and source by value', () => {

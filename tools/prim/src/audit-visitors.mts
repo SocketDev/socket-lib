@@ -55,6 +55,38 @@ export function buildVisitors({
     return sktName
   }
 
+  function recordAmbiguousMethod(
+    receiverName: string,
+    methodName: string,
+    offset: number,
+  ) {
+    const guess = guessReceiverType(receiverName)
+    if (guess) {
+      record(
+        currentFile.relPath,
+        offset,
+        `${receiverName}.${methodName}(...)  [guessed: ${guess}]`,
+        prototypePrimordialName(guess, methodName),
+      )
+      return
+    }
+    if (aiDisambiguate) {
+      // Defer to a post-walk async pass. Snapshot what the
+      // disambiguator needs; the AST gets thrown away when
+      // the walk ends, so we capture by value.
+      const { line, column } = lineColumnAt(currentFile.lineStarts, offset)
+      pendingAmbiguous.push({
+        column,
+        file: currentFile.relPath,
+        line,
+        methodName,
+        offset,
+        receiverName,
+        snippet: buildSnippet(currentFile.src, currentFile.lineStarts, line),
+      })
+    }
+  }
+
   return {
     VariableDeclarator(node: VariableDeclaratorNode, ancestors: AstNode[]) {
       // Detect local-alias redeclaration of primordials:
@@ -97,22 +129,7 @@ export function buildVisitors({
       }
       // Only care about top-level declarations (Program → VariableDeclaration → VariableDeclarator).
       // Local-scope shadowing is a different kind of bug and out of scope.
-      let topLevel = false
-      for (let i = ancestors.length - 1; i >= 0; i -= 1) {
-        const a = ancestors[i]!
-        if (a.type === 'Program') {
-          topLevel = true
-          break
-        }
-        if (
-          a.type === 'ArrowFunctionExpression' ||
-          a.type === 'FunctionDeclaration' ||
-          a.type === 'FunctionExpression'
-        ) {
-          return
-        }
-      }
-      if (!topLevel) {
+      if (!isProgramScoped(ancestors)) {
         return
       }
       // Compose a human-readable RHS string for the report.
@@ -161,22 +178,7 @@ export function buildVisitors({
         return
       }
       if (object.type === 'Identifier' && TRACKED_GLOBALS.has(object.name)) {
-        // Skip data-property / accessor statics that aren't callable
-        // primordials (e.g. Error.prepareStackTrace — V8 setter).
-        if (
-          INTENTIONAL_NON_PRIMORDIAL_STATICS.has(
-            `${object.name}.${property.name}`,
-          )
-        ) {
-          return
-        }
-        // Skip statics whose return type narrows on the literal call
-        // site (Symbol.for returns `unique symbol`). Rewriting through a
-        // primordial alias collapses to plain `symbol` and breaks
-        // computed-key class members.
-        if (
-          TYPE_NARROWING_STATIC_CALLS.has(`${object.name}.${property.name}`)
-        ) {
+        if (isExemptStatic(object.name, property.name)) {
           return
         }
         record(
@@ -214,38 +216,7 @@ export function buildVisitors({
         // for the rest, queue for AI-deferred classification when
         // --ai-disambiguate is on.
         if (isAmbiguousMethod(property.name)) {
-          const guess = guessReceiverType(object.name)
-          if (guess) {
-            record(
-              currentFile.relPath,
-              node.start,
-              `${object.name}.${property.name}(...)  [guessed: ${guess}]`,
-              prototypePrimordialName(guess, property.name),
-            )
-            return
-          }
-          if (aiDisambiguate) {
-            // Defer to a post-walk async pass. Snapshot what the
-            // disambiguator needs; the AST gets thrown away when
-            // the walk ends, so we capture by value.
-            const { line, column } = lineColumnAt(
-              currentFile.lineStarts,
-              node.start,
-            )
-            pendingAmbiguous.push({
-              column,
-              file: currentFile.relPath,
-              line,
-              methodName: property.name,
-              offset: node.start,
-              receiverName: object.name,
-              snippet: buildSnippet(
-                currentFile.src,
-                currentFile.lineStarts,
-                line,
-              ),
-            })
-          }
+          recordAmbiguousMethod(object.name, property.name, node.start)
           return
         }
         // Weaker signal: guess the receiver's type from its name.
@@ -284,35 +255,14 @@ export function buildVisitors({
       // and its inner `Object.prototype` separately - so without the same two
       // exemptions here, both shapes are still reported and the exemptions
       // above buy nothing.
-      const parent = nearestAncestor(ancestors, node)
-      if (parent) {
-        if (
-          parent.type === 'CallExpression' &&
-          parent.callee === node &&
-          isExportsInteropGlue(parent)
-        ) {
-          return
-        }
-        if (isObjectPrototypeIdiom(parent)) {
-          return
-        }
+      if (isExemptMemberParent(ancestors, node)) {
+        return
       }
       const propName = node.property.name
       if (propName[0] !== propName[0]!.toLowerCase()) {
         return
       }
-      // Skip data-property / accessor statics that aren't callable
-      // primordials (e.g. Error.prepareStackTrace — V8 setter).
-      if (
-        INTENTIONAL_NON_PRIMORDIAL_STATICS.has(
-          `${node.object.name}.${propName}`,
-        )
-      ) {
-        return
-      }
-      // Skip statics whose return type narrows on the literal call
-      // site (Symbol.for). See codemod.mts for the rationale.
-      if (TYPE_NARROWING_STATIC_CALLS.has(`${node.object.name}.${propName}`)) {
+      if (isExemptStatic(node.object.name, propName)) {
         return
       }
       record(
@@ -323,6 +273,50 @@ export function buildVisitors({
       )
     },
   }
+}
+
+export function isExemptMemberParent(
+  ancestors: readonly AstNode[],
+  node: AstNode,
+): boolean {
+  const parent = nearestAncestor(ancestors, node)
+  if (!parent) {
+    return false
+  }
+  return (
+    (parent.type === 'CallExpression' &&
+      parent.callee === node &&
+      isExportsInteropGlue(parent)) ||
+    isObjectPrototypeIdiom(parent)
+  )
+}
+
+export function isExemptStatic(
+  receiverName: string,
+  propertyName: string,
+): boolean {
+  const memberName = `${receiverName}.${propertyName}`
+  return (
+    INTENTIONAL_NON_PRIMORDIAL_STATICS.has(memberName) ||
+    TYPE_NARROWING_STATIC_CALLS.has(memberName)
+  )
+}
+
+export function isProgramScoped(ancestors: readonly AstNode[]): boolean {
+  for (let index = ancestors.length - 1; index >= 0; index -= 1) {
+    const ancestor = ancestors[index]!
+    if (ancestor.type === 'Program') {
+      return true
+    }
+    if (
+      ancestor.type === 'ArrowFunctionExpression' ||
+      ancestor.type === 'FunctionDeclaration' ||
+      ancestor.type === 'FunctionExpression'
+    ) {
+      return false
+    }
+  }
+  return false
 }
 
 /**
