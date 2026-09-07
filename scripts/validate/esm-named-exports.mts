@@ -119,10 +119,8 @@ function namedExportIssue(
       }
     | undefined,
 ): string | undefined {
-  const { hasDefaultExport, hasNamedExportsObject } = {
-    __proto__: null,
-    ...options,
-  }
+  const settings = { __proto__: null, ...options }
+  const { hasDefaultExport, hasNamedExportsObject } = settings
   if (typeof mod !== 'object' || mod === null) {
     return 'Module exports a primitive value instead of an object with named exports'
   }
