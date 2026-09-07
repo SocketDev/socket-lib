@@ -52,6 +52,15 @@ let matchesGlobProbed = false
  *   const isSource = getGlobMatcher(['src/**', '!**\/*.test.ts'])
  *   ```
  */
+export function evictOldestGlobMatcher(): void {
+  if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
+    const oldest = matcherCache.keys().next().value
+    if (oldest !== undefined) {
+      matcherCache.delete(oldest)
+    }
+  }
+}
+
 export function getGlobMatcher(
   glob: Pattern | Pattern[],
   options?:
@@ -93,12 +102,7 @@ export function getGlobMatcher(
   // LRU eviction triggers at 100 entries; not reachable from typical
   // test runs.
   /* c8 ignore start */
-  if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
-    const oldest = matcherCache.keys().next().value
-    if (oldest !== undefined) {
-      matcherCache.delete(oldest)
-    }
-  }
+  evictOldestGlobMatcher()
   /* c8 ignore stop */
 
   // Narrow `path.matchesGlob` fast-path. picomatch's defaults

@@ -61,14 +61,7 @@ export function enhanceSpawnError(error: unknown): unknown {
   // Build enhanced message.
   let enhancedMessage = `Command failed: ${cmd}`
 
-  if (args && args.length > 0) {
-    const argsStr = args.join(' ')
-    if (argsStr.length < 100) {
-      enhancedMessage += ` ${argsStr}`
-    } else {
-      enhancedMessage += ` ${argsStr.slice(0, 97)}...`
-    }
-  }
+  enhancedMessage += formatSpawnErrorArgs(args)
 
   // signal vs code arms exercised individually but not always paired.
   // Long-line stderr fallback (>=200 chars) fires only for verbose
@@ -162,6 +155,14 @@ export function enhanceSpawnError(error: unknown): unknown {
  *
  * @returns {boolean} `true` if the value has spawn error properties
  */
+export function formatSpawnErrorArgs(args: SpawnError['args']): string {
+  if (!args || args.length === 0) {
+    return ''
+  }
+  const text = args.join(' ')
+  return ` ${text.length < 100 ? text : `${text.slice(0, 97)}...`}`
+}
+
 export function isSpawnError(value: unknown): value is SpawnError {
   // Must be an Error. `isError` is cross-realm safe (it reads the
   // [[ErrorData]] slot rather than using `instanceof`), so a rejection that

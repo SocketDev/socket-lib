@@ -133,6 +133,50 @@ export const commonParseArgsConfig: ParseArgsConfig = {
  *   getPositionalArgs() // ["src", "lib"]
  *   ```
  */
+export function configureYargsOptions(
+  options: NonNullable<ParseArgsConfig['options']>,
+  yargsOptions: YargsOptions,
+): void {
+  options = { __proto__: null, ...options } as typeof options
+  // Process each option configuration.
+  for (const { 0: key, 1: optionConfig } of ObjectEntries(options)) {
+    const {
+      coerce,
+      default: defaultValue,
+      multiple,
+      short,
+      type,
+    } = optionConfig
+
+    // Set the option type.
+    if (type === 'boolean') {
+      yargsOptions.boolean?.push(key)
+    } else if (type === 'string') {
+      yargsOptions.string?.push(key)
+    }
+
+    // Handle multiple values (arrays).
+    if (multiple) {
+      yargsOptions.array?.push(key)
+    }
+
+    // Set short alias.
+    if (short) {
+      ;(yargsOptions.alias as Record<string, string>)[short] = key
+    }
+
+    // Set default value.
+    if (defaultValue !== undefined) {
+      ;(yargsOptions.default as Record<string, unknown>)[key] = defaultValue
+    }
+
+    // Set coerce function.
+    if (coerce) {
+      ;(yargsOptions.coerce as Record<string, unknown>)[key] = coerce
+    }
+  }
+}
+
 export function getPositionalArgs(startIndex = 2): string[] {
   const nodeProcess = getNodeProcess()
   const args = nodeProcess.argv.slice(startIndex)
@@ -229,43 +273,7 @@ export function parseArgs<T = Record<string, unknown>>(
     },
   }
 
-  // Process each option configuration.
-  for (const { 0: key, 1: optionConfig } of ObjectEntries(options)) {
-    const {
-      coerce,
-      default: defaultValue,
-      multiple,
-      short,
-      type,
-    } = optionConfig
-
-    // Set the option type.
-    if (type === 'boolean') {
-      yargsOptions.boolean?.push(key)
-    } else if (type === 'string') {
-      yargsOptions.string?.push(key)
-    }
-
-    // Handle multiple values (arrays).
-    if (multiple) {
-      yargsOptions.array?.push(key)
-    }
-
-    // Set short alias.
-    if (short) {
-      ;(yargsOptions.alias as Record<string, string>)[short] = key
-    }
-
-    // Set default value.
-    if (defaultValue !== undefined) {
-      ;(yargsOptions.default as Record<string, unknown>)[key] = defaultValue
-    }
-
-    // Set coerce function.
-    if (coerce) {
-      ;(yargsOptions.coerce as Record<string, unknown>)[key] = coerce
-    }
-  }
+  configureYargsOptions(options, yargsOptions)
 
   // Parse the arguments.
   const parsed = yargsParser(args as string[], yargsOptions)
