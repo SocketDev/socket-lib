@@ -120,6 +120,19 @@ export function enclosingScopes(node: AstNode): AstNode[] {
   return scopes
 }
 
+export function expressionStartsAfterStatement(
+  statement: AstNode,
+  expression: AstNode | undefined,
+): boolean {
+  const statementStart = statement.range?.[0] ?? statement.start
+  const expressionStart = expression?.range?.[0] ?? expression?.start
+  return (
+    typeof statementStart === 'number' &&
+    typeof expressionStart === 'number' &&
+    expressionStart > statementStart
+  )
+}
+
 /**
  * Walk up from a node to the nearest enclosing statement — the node whose
  * parent is a block / program / switch-case body. The hoisted `const` is
@@ -183,7 +196,6 @@ export function startsWithHazardousToken(statement: AstNode): boolean {
   if (statement?.type !== 'ExpressionStatement') {
     return false
   }
-  const statementStart = statement.range?.[0] ?? statement.start
   let node: AstNode | undefined = statement.expression
   while (node) {
     if (HAZARDOUS_START_TYPES.has(node.type)) {
@@ -202,12 +214,7 @@ export function startsWithHazardousToken(statement: AstNode): boolean {
     const next = node[edge]
     node = Array.isArray(next) ? next[0] : next
   }
-  const leftmostStart = node?.range?.[0] ?? node?.start
-  return (
-    typeof statementStart === 'number' &&
-    typeof leftmostStart === 'number' &&
-    leftmostStart > statementStart
-  )
+  return expressionStartsAfterStatement(statement, node)
 }
 
 const rule = {
