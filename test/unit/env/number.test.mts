@@ -64,3 +64,40 @@ describe.sequential('env/number — float mode', () => {
     ).toBe(99)
   })
 })
+
+describe('envAsNumber coercion boundaries', () => {
+  test('keeps string infinity opt-in separate from broad coercion', () => {
+    expect(
+      envAsNumber('Infinity', { mode: 'float', allowInfinity: true }),
+    ).toBe(Infinity)
+    expect(
+      envAsNumber('-Infinity', { mode: 'float', allowInfinity: true }),
+    ).toBe(-Infinity)
+    expect(envAsNumber('Infinity', { mode: 'float', defaultValue: 7 })).toBe(7)
+    expect(
+      envAsNumber(Infinity, {
+        mode: 'float',
+        allowInfinity: true,
+        defaultValue: 7,
+      }),
+    ).toBe(7)
+  })
+
+  test('coerces an object once and preserves integer parsing', () => {
+    let calls = 0
+    const value = {
+      toString() {
+        calls += 1
+        return '12.75units'
+      },
+    }
+    expect(envAsNumber(value)).toBe(12)
+    expect(calls).toBe(1)
+  })
+
+  test('normalizes negative zero for string and numeric values', () => {
+    expect(envAsNumber('-0', { mode: 'float' })).toBe(0)
+    expect(envAsNumber(-0, { mode: 'float' })).toBe(0)
+    expect(envAsNumber(false, { defaultValue: 9 })).toBe(9)
+  })
+})

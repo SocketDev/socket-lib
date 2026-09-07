@@ -45,39 +45,23 @@ export function envAsNumber(
     ...options,
   } as EnvAsNumberOptions
 
-  // Fast-paths for the strict `string | undefined` shape, per helpers
-  // semantics.
   if (value === undefined || value === null) {
     return defaultValue
   }
+  const num =
+    mode === 'float'
+      ? NumberCtor(String(value))
+      : NumberParseInt(String(value), 10)
   if (typeof value === 'string') {
-    if (!value) {
-      return defaultValue
-    }
-    // float vs int mode tested separately; non-finite + allowInfinity
-    // arms exercised only when caller opts into infinity handling.
-    /* c8 ignore start */
-    const num = mode === 'float' ? NumberCtor(value) : NumberParseInt(value, 10)
-    if (NumberIsNaN(num)) {
+    if (!value || NumberIsNaN(num)) {
       return defaultValue
     }
     if (!NumberIsFinite(num)) {
       return allowInfinity ? num : defaultValue
     }
     return num || 0
-    /* c8 ignore stop */
   }
 
-  // Broad (unknown) path — coerce via String() then parse. Defensive
-  // path; tests pass strings.
-  /* c8 ignore start */
-  const numOrNaN =
-    mode === 'float'
-      ? NumberCtor(String(value))
-      : NumberParseInt(String(value), 10)
-  const numMayBeNegZero = NumberIsFinite(numOrNaN)
-    ? numOrNaN
-    : NumberCtor(defaultValue)
+  const numMayBeNegZero = NumberIsFinite(num) ? num : NumberCtor(defaultValue)
   return numMayBeNegZero || 0
-  /* c8 ignore stop */
 }
