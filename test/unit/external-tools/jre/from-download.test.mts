@@ -51,7 +51,7 @@ export function buildJreTarball(scratchDir: string): Promise<Buffer> {
 // each other's value. Local vitest config has `sequence.concurrent: true`,
 // which would make tests in this file race their afterEach(safeDelete) against
 // each other's bodies.
-describe.sequential('external-tools/jre/from-download', () => {
+describe('external-tools/jre/from-download', { concurrent: false }, () => {
   let scratch: string
   beforeEach(() => {
     scratch = mkdtempSync(path.join(os.tmpdir(), 'jre-from-download-test-'))

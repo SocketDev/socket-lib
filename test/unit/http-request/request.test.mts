@@ -41,7 +41,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('http-request/request — happy path', () => {
+describe('http-request/request — happy path', { concurrent: false }, () => {
   test('returns the response on the first successful attempt', async () => {
     const { httpRequest, httpRequestAttempt } = await loadFresh()
     const resp = makeResponse({ ok: true })
@@ -76,32 +76,36 @@ describe.sequential('http-request/request — happy path', () => {
   })
 })
 
-describe.sequential('http-request/request — stream body guard', () => {
-  test('throws when a Readable-shaped body is combined with retries > 0', async () => {
-    const { httpRequest } = await loadFresh()
-    const streamBody = { pipe: () => {} }
-    await expect(
-      httpRequest('https://example.com', {
-        body: streamBody as never,
-        retries: 2,
-      }),
-    ).rejects.toThrow(/Streaming body.*cannot be used with retries/)
-  })
-
-  test('forces followRedirects:false when body is stream-shaped', async () => {
-    const { httpRequest, httpRequestAttempt } = await loadFresh()
-    httpRequestAttempt.mockResolvedValueOnce(makeResponse({ ok: true }))
-    const streamBody = { pipe: () => {} }
-    await httpRequest('https://example.com', {
-      body: streamBody as never,
-      followRedirects: true,
+describe(
+  'http-request/request — stream body guard',
+  { concurrent: false },
+  () => {
+    test('throws when a Readable-shaped body is combined with retries > 0', async () => {
+      const { httpRequest } = await loadFresh()
+      const streamBody = { pipe: () => {} }
+      await expect(
+        httpRequest('https://example.com', {
+          body: streamBody as never,
+          retries: 2,
+        }),
+      ).rejects.toThrow(/Streaming body.*cannot be used with retries/)
     })
-    const [, opts] = httpRequestAttempt.mock.calls[0]!
-    expect(opts.followRedirects).toBe(false)
-  })
-})
 
-describe.sequential('http-request/request — throwOnError', () => {
+    test('forces followRedirects:false when body is stream-shaped', async () => {
+      const { httpRequest, httpRequestAttempt } = await loadFresh()
+      httpRequestAttempt.mockResolvedValueOnce(makeResponse({ ok: true }))
+      const streamBody = { pipe: () => {} }
+      await httpRequest('https://example.com', {
+        body: streamBody as never,
+        followRedirects: true,
+      })
+      const [, opts] = httpRequestAttempt.mock.calls[0]!
+      expect(opts.followRedirects).toBe(false)
+    })
+  },
+)
+
+describe('http-request/request — throwOnError', { concurrent: false }, () => {
   test('wraps a non-OK response in HttpResponseError when throwOnError is true', async () => {
     const { HttpResponseError, httpRequest, httpRequestAttempt } =
       await loadFresh()
@@ -121,7 +125,7 @@ describe.sequential('http-request/request — throwOnError', () => {
   })
 })
 
-describe.sequential('http-request/request — retry loop', () => {
+describe('http-request/request — retry loop', { concurrent: false }, () => {
   test('retries after a failure, then returns the success', async () => {
     const { httpRequest, httpRequestAttempt } = await loadFresh()
     httpRequestAttempt
@@ -255,86 +259,90 @@ describe.sequential('http-request/request — retry loop', () => {
   })
 })
 
-describe.sequential('http-request/request — retry telemetry headers', () => {
-  test('does not add retry headers to the first attempt', async () => {
-    const { httpRequest, httpRequestAttempt } = await loadFresh()
-    httpRequestAttempt.mockResolvedValueOnce(makeResponse({ ok: true }))
-    await httpRequest('https://example.com', {
-      headers: { 'X-Foo': 'bar' },
-      retries: 2,
-      retryDelay: 0,
+describe(
+  'http-request/request — retry telemetry headers',
+  { concurrent: false },
+  () => {
+    test('does not add retry headers to the first attempt', async () => {
+      const { httpRequest, httpRequestAttempt } = await loadFresh()
+      httpRequestAttempt.mockResolvedValueOnce(makeResponse({ ok: true }))
+      await httpRequest('https://example.com', {
+        headers: { 'X-Foo': 'bar' },
+        retries: 2,
+        retryDelay: 0,
+      })
+      const [, opts] = httpRequestAttempt.mock.calls[0]!
+      expect(opts.headers).toEqual({ 'X-Foo': 'bar' })
+      expect(opts.headers['Retry-Attempt']).toBeUndefined()
     })
-    const [, opts] = httpRequestAttempt.mock.calls[0]!
-    expect(opts.headers).toEqual({ 'X-Foo': 'bar' })
-    expect(opts.headers['Retry-Attempt']).toBeUndefined()
-  })
 
-  test('stamps Retry-Attempt / Retry-Max / Retry-After on retried requests', async () => {
-    const { httpRequest, httpRequestAttempt } = await loadFresh()
-    httpRequestAttempt
-      .mockRejectedValueOnce(new Error('first'))
-      .mockRejectedValueOnce(new Error('second'))
-      .mockResolvedValueOnce(makeResponse({ ok: true }))
-    // onRetry overrides the delay to 0 so the test stays fast while still
-    // exercising the per-attempt header stamping. Retry-After reflects the
-    // computed exponential delay (retryDelay * 2**attempt, in seconds) which
-    // we capture below independently of the actual wait.
-    await httpRequest('https://example.com', {
-      headers: { 'X-Foo': 'bar' },
-      retries: 5,
-      retryDelay: 1000,
-      onRetry: () => 0,
+    test('stamps Retry-Attempt / Retry-Max / Retry-After on retried requests', async () => {
+      const { httpRequest, httpRequestAttempt } = await loadFresh()
+      httpRequestAttempt
+        .mockRejectedValueOnce(new Error('first'))
+        .mockRejectedValueOnce(new Error('second'))
+        .mockResolvedValueOnce(makeResponse({ ok: true }))
+      // onRetry overrides the delay to 0 so the test stays fast while still
+      // exercising the per-attempt header stamping. Retry-After reflects the
+      // computed exponential delay (retryDelay * 2**attempt, in seconds) which
+      // we capture below independently of the actual wait.
+      await httpRequest('https://example.com', {
+        headers: { 'X-Foo': 'bar' },
+        retries: 5,
+        retryDelay: 1000,
+        onRetry: () => 0,
+      })
+      // Second call = first retry: attempt 1, computed delay 1000ms -> 1s.
+      const [, firstRetry] = httpRequestAttempt.mock.calls[1]!
+      expect(firstRetry.headers).toEqual({
+        'X-Foo': 'bar',
+        'Retry-Attempt': '1',
+        'Retry-Max': '5',
+        'Retry-After': '0',
+      })
+      // Third call = second retry: attempt 2.
+      const [, secondRetry] = httpRequestAttempt.mock.calls[2]!
+      expect(secondRetry.headers).toEqual({
+        'X-Foo': 'bar',
+        'Retry-Attempt': '2',
+        'Retry-Max': '5',
+        'Retry-After': '0',
+      })
     })
-    // Second call = first retry: attempt 1, computed delay 1000ms -> 1s.
-    const [, firstRetry] = httpRequestAttempt.mock.calls[1]!
-    expect(firstRetry.headers).toEqual({
-      'X-Foo': 'bar',
-      'Retry-Attempt': '1',
-      'Retry-Max': '5',
-      'Retry-After': '0',
-    })
-    // Third call = second retry: attempt 2.
-    const [, secondRetry] = httpRequestAttempt.mock.calls[2]!
-    expect(secondRetry.headers).toEqual({
-      'X-Foo': 'bar',
-      'Retry-Attempt': '2',
-      'Retry-Max': '5',
-      'Retry-After': '0',
-    })
-  })
 
-  test('Retry-After reflects an onRetry-overridden delay (rounded seconds)', async () => {
-    const { httpRequest, httpRequestAttempt } = await loadFresh()
-    httpRequestAttempt
-      .mockRejectedValueOnce(new Error('first'))
-      .mockResolvedValueOnce(makeResponse({ ok: true }))
-    await httpRequest('https://example.com', {
-      retries: 1,
-      retryDelay: 60_000,
-      // Override to 1.5s — mirrors honoring a server Retry-After; rounds to 2.
-      onRetry: () => 1500,
+    test('Retry-After reflects an onRetry-overridden delay (rounded seconds)', async () => {
+      const { httpRequest, httpRequestAttempt } = await loadFresh()
+      httpRequestAttempt
+        .mockRejectedValueOnce(new Error('first'))
+        .mockResolvedValueOnce(makeResponse({ ok: true }))
+      await httpRequest('https://example.com', {
+        retries: 1,
+        retryDelay: 60_000,
+        // Override to 1.5s — mirrors honoring a server Retry-After; rounds to 2.
+        onRetry: () => 1500,
+      })
+      const [, retry] = httpRequestAttempt.mock.calls[1]!
+      expect(retry.headers['Retry-After']).toBe('2')
+      expect(retry.headers['Retry-Attempt']).toBe('1')
     })
-    const [, retry] = httpRequestAttempt.mock.calls[1]!
-    expect(retry.headers['Retry-After']).toBe('2')
-    expect(retry.headers['Retry-Attempt']).toBe('1')
-  })
 
-  test('does not mutate the caller headers object across retries', async () => {
-    const { httpRequest, httpRequestAttempt } = await loadFresh()
-    httpRequestAttempt
-      .mockRejectedValueOnce(new Error('first'))
-      .mockResolvedValueOnce(makeResponse({ ok: true }))
-    const callerHeaders = { 'X-Foo': 'bar' }
-    await httpRequest('https://example.com', {
-      headers: callerHeaders,
-      retries: 1,
-      retryDelay: 0,
+    test('does not mutate the caller headers object across retries', async () => {
+      const { httpRequest, httpRequestAttempt } = await loadFresh()
+      httpRequestAttempt
+        .mockRejectedValueOnce(new Error('first'))
+        .mockResolvedValueOnce(makeResponse({ ok: true }))
+      const callerHeaders = { 'X-Foo': 'bar' }
+      await httpRequest('https://example.com', {
+        headers: callerHeaders,
+        retries: 1,
+        retryDelay: 0,
+      })
+      expect(callerHeaders).toEqual({ 'X-Foo': 'bar' })
     })
-    expect(callerHeaders).toEqual({ 'X-Foo': 'bar' })
-  })
-})
+  },
+)
 
-describe.sequential('http-request/request — re-exports', () => {
+describe('http-request/request — re-exports', { concurrent: false }, () => {
   test('re-exports httpRequestAttempt and readIncomingResponse from the leaves', async () => {
     const mod = await import('../../../src/http-request/request.mjs')
     expect(typeof mod.httpRequestAttempt).toBe('function')

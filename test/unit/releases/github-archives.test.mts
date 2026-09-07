@@ -55,7 +55,7 @@ const REPO = { __proto__: null, owner: 'SocketDev', repo: 'socket-btm' } as {
   repo: string
 }
 
-describe.sequential('releases/github-archives', () => {
+describe('releases/github-archives', { concurrent: false }, () => {
   let testDir: string
 
   beforeEach(() => {

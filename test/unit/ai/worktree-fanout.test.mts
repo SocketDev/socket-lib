@@ -43,7 +43,7 @@ afterEach(async () => {
   await safeDelete(tmpRoot)
 })
 
-describe.sequential('ai/worktree — git read helpers', () => {
+describe('ai/worktree — git read helpers', { concurrent: false }, () => {
   test('git returns trimmed stdout', () => {
     expect(git(repo, 'rev-parse', '--abbrev-ref', 'HEAD')).toBe('main')
   })
@@ -86,107 +86,111 @@ describe.sequential('ai/worktree — git read helpers', () => {
   })
 })
 
-describe.sequential('ai/worktree — spawnAiAgentsInWorktrees', () => {
-  test('refuses a baseRepo that is not a git checkout', async () => {
-    const bare = path.join(tmpRoot, 'plain-dir')
-    mkdirSync(bare, { recursive: true })
+describe(
+  'ai/worktree — spawnAiAgentsInWorktrees',
+  { concurrent: false },
+  () => {
+    test('refuses a baseRepo that is not a git checkout', async () => {
+      const bare = path.join(tmpRoot, 'plain-dir')
+      mkdirSync(bare, { recursive: true })
 
-    await expect(
-      spawnAiAgentsInWorktrees(['one'], async () => 'ok', { baseRepo: bare }),
-    ).rejects.toThrow(/not a git checkout/)
-  })
-
-  test('returns one settled entry per item, in input order', async () => {
-    const seen: string[] = []
-    const settled = await spawnAiAgentsInWorktrees(
-      ['first', 'second'],
-      async item => {
-        seen.push(item)
-        return item.toUpperCase()
-      },
-      {
-        baseRepo: repo,
-        concurrency: 1,
-        namePrefix: 'fanout-order',
-        worktreeRoot: path.join(tmpRoot, 'wt-order'),
-      },
-    )
-
-    expect(settled).toHaveLength(2)
-    expect(settled[0]?.status).toBe('fulfilled')
-    expect(settled[1]?.status).toBe('fulfilled')
-    expect(seen).toStrictEqual(['first', 'second'])
-  })
-
-  test('one item rejecting leaves its sibling fulfilled', async () => {
-    const settled = await spawnAiAgentsInWorktrees(
-      ['good', 'bad'],
-      async item => {
-        if (item === 'bad') {
-          throw new Error('boom')
-        }
-        return item
-      },
-      {
-        baseRepo: repo,
-        concurrency: 2,
-        namePrefix: 'fanout-mixed',
-        worktreeRoot: path.join(tmpRoot, 'wt-mixed'),
-      },
-    )
-
-    expect(settled[0]?.status).toBe('fulfilled')
-    expect(settled[1]?.status).toBe('rejected')
-  })
-
-  test('an empty item list settles empty without touching git', async () => {
-    const settled = await spawnAiAgentsInWorktrees([], async () => 'never', {
-      baseRepo: repo,
-      worktreeRoot: path.join(tmpRoot, 'wt-empty'),
+      await expect(
+        spawnAiAgentsInWorktrees(['one'], async () => 'ok', { baseRepo: bare }),
+      ).rejects.toThrow(/not a git checkout/)
     })
 
-    expect(settled).toStrictEqual([])
-  })
+    test('returns one settled entry per item, in input order', async () => {
+      const seen: string[] = []
+      const settled = await spawnAiAgentsInWorktrees(
+        ['first', 'second'],
+        async item => {
+          seen.push(item)
+          return item.toUpperCase()
+        },
+        {
+          baseRepo: repo,
+          concurrency: 1,
+          namePrefix: 'fanout-order',
+          worktreeRoot: path.join(tmpRoot, 'wt-order'),
+        },
+      )
 
-  test('a concurrency above the cap still runs every item', async () => {
-    // The clamp is MathMax(1, min(requested, MAX_CONCURRENCY)), so an absurd
-    // request must neither spawn that many workers nor drop an item.
-    const settled = await spawnAiAgentsInWorktrees(
-      ['a', 'b', 'c'],
-      async item => item,
-      {
+      expect(settled).toHaveLength(2)
+      expect(settled[0]?.status).toBe('fulfilled')
+      expect(settled[1]?.status).toBe('fulfilled')
+      expect(seen).toStrictEqual(['first', 'second'])
+    })
+
+    test('one item rejecting leaves its sibling fulfilled', async () => {
+      const settled = await spawnAiAgentsInWorktrees(
+        ['good', 'bad'],
+        async item => {
+          if (item === 'bad') {
+            throw new Error('boom')
+          }
+          return item
+        },
+        {
+          baseRepo: repo,
+          concurrency: 2,
+          namePrefix: 'fanout-mixed',
+          worktreeRoot: path.join(tmpRoot, 'wt-mixed'),
+        },
+      )
+
+      expect(settled[0]?.status).toBe('fulfilled')
+      expect(settled[1]?.status).toBe('rejected')
+    })
+
+    test('an empty item list settles empty without touching git', async () => {
+      const settled = await spawnAiAgentsInWorktrees([], async () => 'never', {
         baseRepo: repo,
-        concurrency: 9999,
-        namePrefix: 'fanout-cap',
-        worktreeRoot: path.join(tmpRoot, 'wt-cap'),
-      },
-    )
+        worktreeRoot: path.join(tmpRoot, 'wt-empty'),
+      })
 
-    expect(settled).toHaveLength(3)
-    expect(settled.every(entry => entry.status === 'fulfilled')).toBe(true)
-  })
-
-  test('a concurrency below one is raised to one', async () => {
-    const settled = await spawnAiAgentsInWorktrees(['solo'], async i => i, {
-      baseRepo: repo,
-      concurrency: 0,
-      namePrefix: 'fanout-floor',
-      worktreeRoot: path.join(tmpRoot, 'wt-floor'),
+      expect(settled).toStrictEqual([])
     })
 
-    expect(settled).toHaveLength(1)
-    expect(settled[0]?.status).toBe('fulfilled')
-  })
+    test('a concurrency above the cap still runs every item', async () => {
+      // The clamp is MathMax(1, min(requested, MAX_CONCURRENCY)), so an absurd
+      // request must neither spawn that many workers nor drop an item.
+      const settled = await spawnAiAgentsInWorktrees(
+        ['a', 'b', 'c'],
+        async item => item,
+        {
+          baseRepo: repo,
+          concurrency: 9999,
+          namePrefix: 'fanout-cap',
+          worktreeRoot: path.join(tmpRoot, 'wt-cap'),
+        },
+      )
 
-  test('the branch defaults to the base repo current branch', async () => {
-    // No `branch` option, so currentBranch(baseRepo) supplies it. A wrong
-    // default surfaces as a failed worktree add, never as a silent pass.
-    const settled = await spawnAiAgentsInWorktrees(['x'], async i => i, {
-      baseRepo: repo,
-      namePrefix: 'fanout-branch',
-      worktreeRoot: path.join(tmpRoot, 'wt-branch'),
+      expect(settled).toHaveLength(3)
+      expect(settled.every(entry => entry.status === 'fulfilled')).toBe(true)
     })
 
-    expect(settled[0]?.status).toBe('fulfilled')
-  })
-})
+    test('a concurrency below one is raised to one', async () => {
+      const settled = await spawnAiAgentsInWorktrees(['solo'], async i => i, {
+        baseRepo: repo,
+        concurrency: 0,
+        namePrefix: 'fanout-floor',
+        worktreeRoot: path.join(tmpRoot, 'wt-floor'),
+      })
+
+      expect(settled).toHaveLength(1)
+      expect(settled[0]?.status).toBe('fulfilled')
+    })
+
+    test('the branch defaults to the base repo current branch', async () => {
+      // No `branch` option, so currentBranch(baseRepo) supplies it. A wrong
+      // default surfaces as a failed worktree add, never as a silent pass.
+      const settled = await spawnAiAgentsInWorktrees(['x'], async i => i, {
+        baseRepo: repo,
+        namePrefix: 'fanout-branch',
+        worktreeRoot: path.join(tmpRoot, 'wt-branch'),
+      })
+
+      expect(settled[0]?.status).toBe('fulfilled')
+    })
+  },
+)

@@ -15,7 +15,7 @@ import { safeDelete } from '../../../src/fs/safe.mjs'
 import { invalidateCaches } from '../../../src/paths/rewire.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-describe.sequential('ttl-cache — LRU + clock skew', () => {
+describe('ttl-cache — LRU + clock skew', { concurrent: false }, () => {
   let testCacheDir: string
 
   beforeEach(() => {

@@ -27,6 +27,7 @@ import { isolatePackage } from '../../../src/packages/isolation.mjs'
 // creates the package directory under node_modules that the caller reads its
 // original manifest from, because an install that leaves node_modules empty is
 // not a shape isolatePackage is written for.
+
 const { spawn } = vi.hoisted(() => ({ spawn: vi.fn() }))
 
 vi.mock(import('../../../src/process/spawn/child.mjs'), async orig => {

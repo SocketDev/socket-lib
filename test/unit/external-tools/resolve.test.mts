@@ -69,7 +69,7 @@ export function buildSbtTarball(scratchDir: string): Promise<Buffer> {
 // in this file. Local vitest config has `sequence.concurrent: true`,
 // which would interleave beforeEach calls and racing concurrent tests
 // would clobber each other's scratch + memoization-cache state.
-describe.sequential('external-tools resolver memoization', () => {
+describe('external-tools resolver memoization', { concurrent: false }, () => {
   let scratch: string
 
   beforeEach(() => {

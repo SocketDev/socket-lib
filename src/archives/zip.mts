@@ -36,6 +36,50 @@ import type { ExtractOptions } from './types.mjs'
  * @param outputDir - Directory to extract to.
  * @param options - Extraction options.
  */
+export async function extractStrippedZipEntries(
+  zip: InstanceType<ReturnType<typeof getAdmZip>>,
+  entries: ReturnType<typeof zip.getEntries>,
+  normalizedOutputDir: string,
+  strip: number,
+): Promise<void> {
+  const path = getNodePath()
+  const dirsToCreate = new SetCtor<string>()
+  for (const entry of entries) {
+    if (entry.isDirectory) {
+      continue
+    }
+
+    // ZIP entries always use forward slashes per ZIP specification
+    const parts = entry.entryName.split('/')
+    if (parts.length <= strip) {
+      continue
+    }
+
+    const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
+    const targetPath = path.join(normalizedOutputDir, strippedPath)
+    dirsToCreate.add(path.dirname(targetPath))
+  }
+
+  // Create all directories
+  await PromiseAll(ArrayFrom(dirsToCreate).map(dir => safeMkdir(dir)))
+
+  for (const entry of entries) {
+    if (entry.isDirectory) {
+      continue
+    }
+
+    const parts = entry.entryName.split('/')
+    if (parts.length <= strip) {
+      continue
+    }
+
+    const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
+    const targetPath = path.join(normalizedOutputDir, strippedPath)
+
+    zip.extractEntryTo(entry, path.dirname(targetPath), false, true)
+  }
+}
+
 export async function extractZip(
   archivePath: string,
   outputDir: string,
@@ -136,41 +180,7 @@ export async function extractZip(
 
     zip.extractAllTo(normalizedOutputDir, true)
   } else {
-    const dirsToCreate = new SetCtor<string>()
-    for (const entry of entries) {
-      if (entry.isDirectory) {
-        continue
-      }
-
-      // ZIP entries always use forward slashes per ZIP specification
-      const parts = entry.entryName.split('/')
-      if (parts.length <= strip) {
-        continue
-      }
-
-      const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
-      const targetPath = path.join(normalizedOutputDir, strippedPath)
-      dirsToCreate.add(path.dirname(targetPath))
-    }
-
-    // Create all directories
-    await PromiseAll(ArrayFrom(dirsToCreate).map(dir => safeMkdir(dir)))
-
-    for (const entry of entries) {
-      if (entry.isDirectory) {
-        continue
-      }
-
-      const parts = entry.entryName.split('/')
-      if (parts.length <= strip) {
-        continue
-      }
-
-      const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
-      const targetPath = path.join(normalizedOutputDir, strippedPath)
-
-      zip.extractEntryTo(entry, path.dirname(targetPath), false, true)
-    }
+    await extractStrippedZipEntries(zip, entries, normalizedOutputDir, strip)
   }
   /* c8 ignore stop */
 }

@@ -14,7 +14,7 @@ beforeEach(() => {
   invalidateAll()
 })
 
-describe.sequential('secrets/shared — cacheKey', () => {
+describe('secrets/shared — cacheKey', { concurrent: false }, () => {
   test('combines service + account with a space separator', () => {
     const key = cacheKey('svc', 'acct')
     expect(key).toBe('svc acct')
@@ -33,33 +33,37 @@ describe.sequential('secrets/shared — cacheKey', () => {
   })
 })
 
-describe.sequential('secrets/shared — setCached / getCached / has', () => {
-  test('getCached returns undefined before anything is cached', () => {
-    expect(getCached('svc', 'acct')).toBeUndefined()
-    expect(has('svc', 'acct')).toBe(false)
-  })
+describe(
+  'secrets/shared — setCached / getCached / has',
+  { concurrent: false },
+  () => {
+    test('getCached returns undefined before anything is cached', () => {
+      expect(getCached('svc', 'acct')).toBeUndefined()
+      expect(has('svc', 'acct')).toBe(false)
+    })
 
-  test('setCached stores a string and getCached returns it', () => {
-    setCached('svc', 'acct', 'tok-1')
-    expect(getCached('svc', 'acct')).toBe('tok-1')
-    expect(has('svc', 'acct')).toBe(true)
-  })
+    test('setCached stores a string and getCached returns it', () => {
+      setCached('svc', 'acct', 'tok-1')
+      expect(getCached('svc', 'acct')).toBe('tok-1')
+      expect(has('svc', 'acct')).toBe(true)
+    })
 
-  test('setCached can store undefined (cache the absence)', () => {
-    setCached('svc', 'acct', undefined)
-    expect(getCached('svc', 'acct')).toBeUndefined()
-    expect(has('svc', 'acct')).toBe(true)
-  })
+    test('setCached can store undefined (cache the absence)', () => {
+      setCached('svc', 'acct', undefined)
+      expect(getCached('svc', 'acct')).toBeUndefined()
+      expect(has('svc', 'acct')).toBe(true)
+    })
 
-  test('different service/account pairs are independent', () => {
-    setCached('s1', 'a1', 'one')
-    setCached('s2', 'a2', 'two')
-    expect(getCached('s1', 'a1')).toBe('one')
-    expect(getCached('s2', 'a2')).toBe('two')
-  })
-})
+    test('different service/account pairs are independent', () => {
+      setCached('s1', 'a1', 'one')
+      setCached('s2', 'a2', 'two')
+      expect(getCached('s1', 'a1')).toBe('one')
+      expect(getCached('s2', 'a2')).toBe('two')
+    })
+  },
+)
 
-describe.sequential('secrets/shared — invalidate', () => {
+describe('secrets/shared — invalidate', { concurrent: false }, () => {
   test('invalidate drops a single cache entry', () => {
     setCached('svc', 'a', 'tok')
     invalidate('svc', 'a')
@@ -79,7 +83,7 @@ describe.sequential('secrets/shared — invalidate', () => {
   })
 })
 
-describe.sequential('secrets/shared — invalidateAll', () => {
+describe('secrets/shared — invalidateAll', { concurrent: false }, () => {
   test('clears every entry', () => {
     setCached('s1', 'a', '1')
     setCached('s2', 'b', '2')
@@ -91,7 +95,7 @@ describe.sequential('secrets/shared — invalidateAll', () => {
   })
 })
 
-describe.sequential('secrets/shared — dedupeRead', () => {
+describe('secrets/shared — dedupeRead', { concurrent: false }, () => {
   test('calls reader once on first read and caches the result', async () => {
     let calls = 0
     const reader = async () => {

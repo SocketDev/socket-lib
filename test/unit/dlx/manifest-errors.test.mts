@@ -49,7 +49,7 @@ export function makeFsError(code: string): Error {
   return e
 }
 
-describe.sequential('dlx/manifest — error branches', () => {
+describe('dlx/manifest — error branches', { concurrent: false }, () => {
   let testDir: string
   let manifestPath: string
   let manifest: DlxManifest

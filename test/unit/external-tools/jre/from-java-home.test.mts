@@ -13,7 +13,7 @@ import { jreFromJavaHome } from '../../../../src/external-tools/jre/from-java-ho
 import { windowsExe } from '../../../_shared/fleet/lib/platform.mts'
 
 // Run sequentially — stubEnv is process-scoped, races concurrently.
-describe.sequential('external-tools/jre/from-java-home', () => {
+describe('external-tools/jre/from-java-home', { concurrent: false }, () => {
   afterEach(() => {
     vi.unstubAllEnvs()
   })

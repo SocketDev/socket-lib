@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest'
 import { cacheKey } from '../../../../src/external-tools/jre/resolve.mjs'
 import { makeHash } from '../../../../src/crypto/integrity.mjs'
 
-describe.sequential('external-tools/jre/resolve — cacheKey', () => {
+describe('external-tools/jre/resolve — cacheKey', { concurrent: false }, () => {
   test('returns "local-only" when no opts are given', () => {
     expect(cacheKey(undefined)).toBe('local-only')
   })

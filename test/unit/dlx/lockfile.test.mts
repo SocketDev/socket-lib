@@ -17,7 +17,7 @@ import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
 import { describeNetworkOnly } from '../util/platform-suites.mjs'
 
-describe.sequential('dlx/lockfile — specName', () => {
+describe('dlx/lockfile — specName', { concurrent: false }, () => {
   it('returns the name from a versioned spec', () => {
     expect(specName('lodash@4.17.21')).toBe('lodash')
   })
@@ -44,7 +44,7 @@ describe.sequential('dlx/lockfile — specName', () => {
   })
 })
 
-describe.sequential('dlx/lockfile — specRange', () => {
+describe('dlx/lockfile — specRange', { concurrent: false }, () => {
   it('returns the range from a versioned spec', () => {
     expect(specRange('lodash@4.17.21')).toBe('4.17.21')
   })

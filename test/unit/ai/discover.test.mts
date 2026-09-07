@@ -43,7 +43,7 @@ afterEach(async () => {
   resetAiAgentDiscoveryCache()
 })
 
-describe.sequential('cachePathFor', () => {
+describe('cachePathFor', { concurrent: false }, () => {
   test('places cache under the repo-root cache dir', () => {
     const result = cachePathFor('/foo')
     expect(path.isAbsolute(result)).toBe(true)
@@ -54,7 +54,7 @@ describe.sequential('cachePathFor', () => {
   })
 })
 
-describe.sequential('discoverFresh', () => {
+describe('discoverFresh', { concurrent: false }, () => {
   test('returns an object whose values are absolute string paths', () => {
     const out = discoverFresh()
     expect(typeof out).toBe('object')
@@ -78,7 +78,7 @@ describe.sequential('discoverFresh', () => {
   })
 })
 
-describe.sequential('readDiskCache', () => {
+describe('readDiskCache', { concurrent: false }, () => {
   test('returns undefined when the file does not exist', () => {
     expect(readDiskCache(path.join(tmpRoot, 'missing.json'))).toBeUndefined()
   })
@@ -135,7 +135,7 @@ describe.sequential('readDiskCache', () => {
   })
 })
 
-describe.sequential('writeDiskCache', () => {
+describe('writeDiskCache', { concurrent: false }, () => {
   test('creates the parent dir and writes a JSON file with agents + writtenAt', async () => {
     const cachePath = cachePathFor(tmpRoot)
     await writeDiskCache(cachePath, { claude: '/bin/claude' })
@@ -163,7 +163,7 @@ describe.sequential('writeDiskCache', () => {
   })
 })
 
-describe.sequential('getDiscoveredAiAgents', () => {
+describe('getDiscoveredAiAgents', { concurrent: false }, () => {
   test('returns undefined before any discovery', () => {
     expect(getDiscoveredAiAgents()).toBeUndefined()
   })
@@ -174,7 +174,7 @@ describe.sequential('getDiscoveredAiAgents', () => {
   })
 })
 
-describe.sequential('discoverAiAgents', () => {
+describe('discoverAiAgents', { concurrent: false }, () => {
   test('populates the in-process cache on first call', async () => {
     const out = await discoverAiAgents({ repoRoot: tmpRoot })
     expect(getDiscoveredAiAgents()).toBe(out)

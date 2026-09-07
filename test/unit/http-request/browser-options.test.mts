@@ -39,7 +39,7 @@ async function loadFresh() {
   }
 }
 
-describe.sequential('http-request/browser options', () => {
+describe('http-request/browser options', { concurrent: false }, () => {
   let fetchSpy: ReturnType<typeof vi.fn>
   let httpRequest: Awaited<ReturnType<typeof loadFresh>>['httpRequest']
 

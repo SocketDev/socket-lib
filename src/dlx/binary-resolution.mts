@@ -126,7 +126,8 @@ export function findBinaryPath(
  * bin field and makes all binaries executable (chmod 0o755). Handles both
  * single binary (string) and multiple binaries (object) formats.
  *
- * Aligns with npm's approach: - Uses 0o755 permission, matching npm's cmd-shim
+ * Aligns with npm's approach: - Uses 0o755 permission, matching npm's cmd-shim.
+ *
  * - Reads bin field from package.json, matching npm's bin-links and libnpmexec
  * - Handles both string and object bin formats.
  *

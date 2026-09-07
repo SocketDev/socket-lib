@@ -294,6 +294,7 @@ export async function httpRequestAttempt(
                 maxRedirects: maxRedirects - 1,
                 maxResponseSize,
                 method,
+                signal,
                 stream,
                 timeout,
               }),

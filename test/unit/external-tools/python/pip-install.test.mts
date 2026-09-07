@@ -78,114 +78,118 @@ describe('external-tools/python/pip-install — pipPackageDir', () => {
   })
 })
 
-describe.sequential('external-tools/python/pip-install — downloadPipPackage', () => {
-  test('runs pip install --target without --require-hashes when no hash', async () => {
-    const { downloadPipPackage, readdirMock, spawnMock } = await loadFresh()
-    // First readdir (pre-check) empty → not installed; second (post-spawn) → installed.
-    readdirMock
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(['skillspector'])
-    const result = await downloadPipPackage({
-      pythonBin: '/dlx/python/bin/python3',
-      spec: 'skillspector==1.0.0',
+describe(
+  'external-tools/python/pip-install — downloadPipPackage',
+  { concurrent: false },
+  () => {
+    test('runs pip install --target without --require-hashes when no hash', async () => {
+      const { downloadPipPackage, readdirMock, spawnMock } = await loadFresh()
+      // First readdir (pre-check) empty → not installed; second (post-spawn) → installed.
+      readdirMock
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(['skillspector'])
+      const result = await downloadPipPackage({
+        pythonBin: '/dlx/python/bin/python3',
+        spec: 'skillspector==1.0.0',
+      })
+      expect(result.installed).toBe(true)
+      const args = spawnMock.mock.calls[0]![1] as string[]
+      expect(args).toContain('--target')
+      expect(args).toContain('skillspector==1.0.0')
+      expect(args).not.toContain('--require-hashes')
     })
-    expect(result.installed).toBe(true)
-    const args = spawnMock.mock.calls[0]![1] as string[]
-    expect(args).toContain('--target')
-    expect(args).toContain('skillspector==1.0.0')
-    expect(args).not.toContain('--require-hashes')
-  })
 
-  test('adds --require-hashes + sha256-normalized --hash when hash is set', async () => {
-    const { downloadPipPackage, readdirMock, spawnMock } = await loadFresh()
-    readdirMock
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(['skillspector'])
-    await downloadPipPackage({
-      hash: 'deadbeef',
-      pythonBin: '/dlx/python/bin/python3',
-      spec: 'skillspector==1.0.0',
+    test('adds --require-hashes + sha256-normalized --hash when hash is set', async () => {
+      const { downloadPipPackage, readdirMock, spawnMock } = await loadFresh()
+      readdirMock
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(['skillspector'])
+      await downloadPipPackage({
+        hash: 'deadbeef',
+        pythonBin: '/dlx/python/bin/python3',
+        spec: 'skillspector==1.0.0',
+      })
+      const args = spawnMock.mock.calls[0]![1] as string[]
+      expect(args).toContain('--require-hashes')
+      expect(args).toContain('--hash=sha256:deadbeef')
     })
-    const args = spawnMock.mock.calls[0]![1] as string[]
-    expect(args).toContain('--require-hashes')
-    expect(args).toContain('--hash=sha256:deadbeef')
-  })
 
-  test('passes an already-prefixed sha256: hash through unchanged', async () => {
-    const { downloadPipPackage, readdirMock, spawnMock } = await loadFresh()
-    readdirMock
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(['skillspector'])
-    await downloadPipPackage({
-      hash: 'sha256:cafef00d',
-      pythonBin: '/dlx/python/bin/python3',
-      spec: 'skillspector==1.0.0',
+    test('passes an already-prefixed sha256: hash through unchanged', async () => {
+      const { downloadPipPackage, readdirMock, spawnMock } = await loadFresh()
+      readdirMock
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(['skillspector'])
+      await downloadPipPackage({
+        hash: 'sha256:cafef00d',
+        pythonBin: '/dlx/python/bin/python3',
+        spec: 'skillspector==1.0.0',
+      })
+      const args = spawnMock.mock.calls[0]![1] as string[]
+      expect(args).toContain('--hash=sha256:cafef00d')
     })
-    const args = spawnMock.mock.calls[0]![1] as string[]
-    expect(args).toContain('--hash=sha256:cafef00d')
-  })
 
-  test('skips the install when the package dir is already non-empty', async () => {
-    const { downloadPipPackage, readdirMock, spawnMock } = await loadFresh()
-    readdirMock.mockResolvedValueOnce(['skillspector'])
-    const result = await downloadPipPackage({
-      pythonBin: '/dlx/python/bin/python3',
-      spec: 'skillspector==1.0.0',
+    test('skips the install when the package dir is already non-empty', async () => {
+      const { downloadPipPackage, readdirMock, spawnMock } = await loadFresh()
+      readdirMock.mockResolvedValueOnce(['skillspector'])
+      const result = await downloadPipPackage({
+        pythonBin: '/dlx/python/bin/python3',
+        spec: 'skillspector==1.0.0',
+      })
+      expect(result.installed).toBe(false)
+      expect(spawnMock).not.toHaveBeenCalled()
     })
-    expect(result.installed).toBe(false)
-    expect(spawnMock).not.toHaveBeenCalled()
-  })
 
-  test('recovers from a stale lock: deletes it, retries, installs', async () => {
-    const {
-      downloadPipPackage,
-      readFileMock,
-      readdirMock,
-      spawnMock,
-      writeFileMock,
-    } = await loadFresh()
-    // The three readdir results in order: not-installed at the pre-check,
-    // not-installed at the retry pre-check, installed at the post-spawn
-    // verify.
-    readdirMock
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(['skillspector'])
-    // First writeFile loses the lock race (EEXIST); the second one after the
-    // retry wins.
-    writeFileMock
-      .mockRejectedValueOnce(eexist())
-      .mockResolvedValueOnce(undefined)
-    // The lock holds a dead PID → isStaleLock true (process.kill throws ESRCH).
-    readFileMock.mockResolvedValueOnce('2147483646')
-    const result = await downloadPipPackage({
-      pythonBin: '/dlx/python/bin/python3',
-      spec: 'skillspector==1.0.0',
+    test('recovers from a stale lock: deletes it, retries, installs', async () => {
+      const {
+        downloadPipPackage,
+        readFileMock,
+        readdirMock,
+        spawnMock,
+        writeFileMock,
+      } = await loadFresh()
+      // The three readdir results in order: not-installed at the pre-check,
+      // not-installed at the retry pre-check, installed at the post-spawn
+      // verify.
+      readdirMock
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(['skillspector'])
+      // First writeFile loses the lock race (EEXIST); the second one after the
+      // retry wins.
+      writeFileMock
+        .mockRejectedValueOnce(eexist())
+        .mockResolvedValueOnce(undefined)
+      // The lock holds a dead PID → isStaleLock true (process.kill throws ESRCH).
+      readFileMock.mockResolvedValueOnce('2147483646')
+      const result = await downloadPipPackage({
+        pythonBin: '/dlx/python/bin/python3',
+        spec: 'skillspector==1.0.0',
+      })
+      expect(result.installed).toBe(true)
+      expect(spawnMock).toHaveBeenCalledTimes(1)
     })
-    expect(result.installed).toBe(true)
-    expect(spawnMock).toHaveBeenCalledTimes(1)
-  })
 
-  test('a peer that finishes the install first is observed on retry (no double-install)', async () => {
-    const {
-      downloadPipPackage,
-      readFileMock,
-      readdirMock,
-      spawnMock,
-      writeFileMock,
-    } = await loadFresh()
-    // Pre-check empty; after the stale-lock retry the dir is now populated by
-    // the peer → installed:false, no spawn.
-    readdirMock
-      .mockResolvedValueOnce([])
-      .mockResolvedValueOnce(['skillspector'])
-    writeFileMock.mockRejectedValueOnce(eexist())
-    readFileMock.mockResolvedValueOnce('2147483646')
-    const result = await downloadPipPackage({
-      pythonBin: '/dlx/python/bin/python3',
-      spec: 'skillspector==1.0.0',
+    test('a peer that finishes the install first is observed on retry (no double-install)', async () => {
+      const {
+        downloadPipPackage,
+        readFileMock,
+        readdirMock,
+        spawnMock,
+        writeFileMock,
+      } = await loadFresh()
+      // Pre-check empty; after the stale-lock retry the dir is now populated by
+      // the peer → installed:false, no spawn.
+      readdirMock
+        .mockResolvedValueOnce([])
+        .mockResolvedValueOnce(['skillspector'])
+      writeFileMock.mockRejectedValueOnce(eexist())
+      readFileMock.mockResolvedValueOnce('2147483646')
+      const result = await downloadPipPackage({
+        pythonBin: '/dlx/python/bin/python3',
+        spec: 'skillspector==1.0.0',
+      })
+      expect(result.installed).toBe(false)
+      expect(spawnMock).not.toHaveBeenCalled()
     })
-    expect(result.installed).toBe(false)
-    expect(spawnMock).not.toHaveBeenCalled()
-  })
-})
+  },
+)

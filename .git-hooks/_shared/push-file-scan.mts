@@ -164,7 +164,7 @@ function reportPrivateKeys(file: string, text: string): number {
 // any dependency exists, so they call console.* directly. template/ holds the
 // canonical sources that cascade to those same trees in downstream fleet
 // repos, so the destination exemption has to apply at the source too;
-// `layerless` collapses the archetype layer segment so template/base/... stays
+// `layerless` collapses the archetype layer segment so template/base/universal/... stays
 // exempt. src/logger/ IS the logger.
 function isLoggerScanTarget(file: string, layerless: string): boolean {
   return (
@@ -316,7 +316,7 @@ function warnAiConfigPoison(file: string, text: string): void {
 function scanFileContent(file: string, text: string): number {
   // Layer-agnostic form of the path for the `template/...` exemptions: the
   // archetype move buries the canonical sources under template/<layer>/, so
-  // the prefix exemptions test this collapsed form (template/base/.git-hooks/x
+  // the prefix exemptions test this collapsed form (template/base/universal/.git-hooks/x
   // → template/.git-hooks/x) instead of the raw moved path.
   const layerless = stripTemplateLayer(file)
   let errors = 0

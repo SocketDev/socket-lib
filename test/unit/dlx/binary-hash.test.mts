@@ -24,7 +24,7 @@ afterAll(async () => {
   await stopDlxTestServer(testServer.server)
 })
 
-describe.sequential('dlx/binary hash normalization', () => {
+describe('dlx/binary hash normalization', { concurrent: false }, () => {
   it('accepts a sha512 SRI hash string', async () => {
     await runWithTempDir(async tmpDir => {
       const restoreHome = mockHomeDir(tmpDir)

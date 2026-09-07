@@ -113,74 +113,81 @@ describe('external-tools/python/pin — specDistName', () => {
   })
 })
 
-describe.sequential('external-tools/python/pin — resolvePipPackagePin', () => {
-  test('hashes the closure and builds a --require-hashes requirements body', async () => {
-    const { resolvePipPackagePin, readFileMock, readdirMock, spawnMock } =
-      await loadFresh()
-    readdirMock.mockResolvedValueOnce([
-      'is_odd-3.0.1-py3-none-any.whl',
-      'is_number-1.0.0-py3-none-any.whl',
-    ])
-    // computeHashes hashes whatever bytes we hand back; distinct bytes →
-    // distinct checksums.
-    readFileMock.mockImplementation(async (p: string) =>
-      Buffer.from(p.includes('is_odd') ? 'odd-bytes' : 'number-bytes'),
-    )
-    const pin = await resolvePipPackagePin({
-      pythonBin: '/dlx/python/bin/python3',
-      spec: 'is-odd==3.0.1',
-    })
-    // pip download was invoked, not pip install.
-    const args = spawnMock.mock.calls[0]![1] as string[]
-    expect(args).toContain('download')
-    expect(args).toContain('--dest')
-    expect(args).toContain('is-odd==3.0.1')
-    // Top-level resolves to the spec's dist name.
-    expect(pin.name).toBe('is-odd')
-    expect(pin.version).toBe('3.0.1')
-    expect(pin.artifacts).toHaveLength(2)
-    // Requirements lines are name==version --hash=sha256:<hex>.
-    const lines = pin.requirements.trim().split(/\r?\n/)
-    for (let i = 0, { length } = lines; i < length; i += 1) {
-      const line = lines[i]!
-      expect(line).toMatch(/^[\w-]+==[\d.]+ --hash=sha256:[a-f0-9]{64}$/)
-    }
-    expect(pin.hash.integrity).toMatch(/^sha512-/)
-  })
-
-  test('throws PipPackagePinError when pip download yields no artifacts', async () => {
-    const { resolvePipPackagePin, PipPackagePinError, readdirMock } =
-      await loadFresh()
-    readdirMock.mockResolvedValueOnce(['some.txt', 'notes.log'])
-    await expect(
-      resolvePipPackagePin({
+describe(
+  'external-tools/python/pin — resolvePipPackagePin',
+  { concurrent: false },
+  () => {
+    test('hashes the closure and builds a --require-hashes requirements body', async () => {
+      const { resolvePipPackagePin, readFileMock, readdirMock, spawnMock } =
+        await loadFresh()
+      readdirMock.mockResolvedValueOnce([
+        'is_odd-3.0.1-py3-none-any.whl',
+        'is_number-1.0.0-py3-none-any.whl',
+      ])
+      // computeHashes hashes whatever bytes we hand back; distinct bytes →
+      // distinct checksums.
+      readFileMock.mockImplementation(async (p: string) =>
+        Buffer.from(p.includes('is_odd') ? 'odd-bytes' : 'number-bytes'),
+      )
+      const pin = await resolvePipPackagePin({
         pythonBin: '/dlx/python/bin/python3',
         spec: 'is-odd==3.0.1',
-      }),
-    ).rejects.toBeInstanceOf(PipPackagePinError)
-  })
-
-  test('throws PipPackagePinError on an empty spec', async () => {
-    const { resolvePipPackagePin, PipPackagePinError } = await loadFresh()
-    await expect(
-      resolvePipPackagePin({ pythonBin: '/dlx/python/bin/python3', spec: '' }),
-    ).rejects.toBeInstanceOf(PipPackagePinError)
-  })
-
-  test('falls back to the first artifact when the git spec name matches none', async () => {
-    const { resolvePipPackagePin, readFileMock, readdirMock } =
-      await loadFresh()
-    // A git spec: the downloaded wheel is named after the project, not the URL.
-    readdirMock.mockResolvedValueOnce(['skillspector-0.1.0-py3-none-any.whl'])
-    readFileMock.mockResolvedValue(Buffer.from('wheel-bytes'))
-    const pin = await resolvePipPackagePin({
-      pythonBin: '/dlx/python/bin/python3',
-      spec: 'git+https://github.com/NVIDIA/skillspector.git@abc1234',
+      })
+      // pip download was invoked, not pip install.
+      const args = spawnMock.mock.calls[0]![1] as string[]
+      expect(args).toContain('download')
+      expect(args).toContain('--dest')
+      expect(args).toContain('is-odd==3.0.1')
+      // Top-level resolves to the spec's dist name.
+      expect(pin.name).toBe('is-odd')
+      expect(pin.version).toBe('3.0.1')
+      expect(pin.artifacts).toHaveLength(2)
+      // Requirements lines are name==version --hash=sha256:<hex>.
+      const lines = pin.requirements.trim().split(/\r?\n/)
+      for (let i = 0, { length } = lines; i < length; i += 1) {
+        const line = lines[i]!
+        expect(line).toMatch(/^[\w-]+==[\d.]+ --hash=sha256:[a-f0-9]{64}$/)
+      }
+      expect(pin.hash.integrity).toMatch(/^sha512-/)
     })
-    // specDistName can't extract a name from the bare git URL, so top falls
-    // back to the first (only) artifact.
-    expect(pin.name).toBe('skillspector')
-    expect(pin.version).toBe('0.1.0')
-    expect(pin.artifacts).toHaveLength(1)
-  })
-})
+
+    test('throws PipPackagePinError when pip download yields no artifacts', async () => {
+      const { resolvePipPackagePin, PipPackagePinError, readdirMock } =
+        await loadFresh()
+      readdirMock.mockResolvedValueOnce(['some.txt', 'notes.log'])
+      await expect(
+        resolvePipPackagePin({
+          pythonBin: '/dlx/python/bin/python3',
+          spec: 'is-odd==3.0.1',
+        }),
+      ).rejects.toBeInstanceOf(PipPackagePinError)
+    })
+
+    test('throws PipPackagePinError on an empty spec', async () => {
+      const { resolvePipPackagePin, PipPackagePinError } = await loadFresh()
+      await expect(
+        resolvePipPackagePin({
+          pythonBin: '/dlx/python/bin/python3',
+          spec: '',
+        }),
+      ).rejects.toBeInstanceOf(PipPackagePinError)
+    })
+
+    test('falls back to the first artifact when the git spec name matches none', async () => {
+      const { resolvePipPackagePin, readFileMock, readdirMock } =
+        await loadFresh()
+      // A git spec: the downloaded wheel is named after the project, not the URL.
+      readdirMock.mockResolvedValueOnce(['skillspector-0.1.0-py3-none-any.whl'])
+      readFileMock.mockResolvedValue(Buffer.from('wheel-bytes'))
+      const pin = await resolvePipPackagePin({
+        pythonBin: '/dlx/python/bin/python3',
+        spec: 'git+https://github.com/NVIDIA/skillspector.git@abc1234',
+      })
+      // specDistName can't extract a name from the bare git URL, so top falls
+      // back to the first (only) artifact.
+      expect(pin.name).toBe('skillspector')
+      expect(pin.version).toBe('0.1.0')
+      expect(pin.artifacts).toHaveLength(1)
+    })
+  },
+)

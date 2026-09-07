@@ -14,7 +14,7 @@ import {
   ANSI_UNDERLINE,
 } from '../../../../src/term/ansi/constants.mjs'
 
-describe.sequential('ansi/constants (src)', () => {
+describe('ansi/constants (src)', { concurrent: false }, () => {
   it('exports the canonical ANSI escape sequences', () => {
     expect(ANSI_RESET).toBe('\x1b[0m')
     expect(ANSI_BOLD).toBe('\x1b[1m')

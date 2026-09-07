@@ -58,197 +58,201 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/skillspector/resolve resolution order', () => {
-  test('returns the VFS hit when present, skipping PATH + DLX', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce({
-      path: '/vfs/skillspector',
-      source: 'vfs',
+describe(
+  'external-tools/skillspector/resolve resolution order',
+  { concurrent: false },
+  () => {
+    test('returns the VFS hit when present, skipping PATH + DLX', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce({
+        path: '/vfs/skillspector',
+        source: 'vfs',
+      })
+      const result = await doResolveSkillSpector({ sha: 'abc1234' })
+      expect(result).toEqual({ path: '/vfs/skillspector', source: 'vfs' })
+      expect(pathMock).not.toHaveBeenCalled()
+      expect(dlxMock).not.toHaveBeenCalled()
     })
-    const result = await doResolveSkillSpector({ sha: 'abc1234' })
-    expect(result).toEqual({ path: '/vfs/skillspector', source: 'vfs' })
-    expect(pathMock).not.toHaveBeenCalled()
-    expect(dlxMock).not.toHaveBeenCalled()
-  })
 
-  test('falls through VFS miss to PATH', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce({
-      path: '/usr/local/bin/skillspector',
-      source: 'path',
+    test('falls through VFS miss to PATH', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce({
+        path: '/usr/local/bin/skillspector',
+        source: 'path',
+      })
+      const result = await doResolveSkillSpector({ sha: 'abc1234' })
+      expect(result).toEqual({
+        path: '/usr/local/bin/skillspector',
+        source: 'path',
+      })
+      expect(dlxMock).not.toHaveBeenCalled()
     })
-    const result = await doResolveSkillSpector({ sha: 'abc1234' })
-    expect(result).toEqual({
-      path: '/usr/local/bin/skillspector',
-      source: 'path',
-    })
-    expect(dlxMock).not.toHaveBeenCalled()
-  })
 
-  test('falls through VFS + PATH misses to DLX', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce(undefined)
-    dlxMock.mockResolvedValueOnce({
-      path: '/dlx/cache/bin/skillspector',
-      source: 'dlx',
+    test('falls through VFS + PATH misses to DLX', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce(undefined)
+      dlxMock.mockResolvedValueOnce({
+        path: '/dlx/cache/bin/skillspector',
+        source: 'dlx',
+      })
+      const result = await doResolveSkillSpector({ sha: 'abc1234' })
+      expect(result?.source).toBe('dlx')
+      expect(dlxMock).toHaveBeenCalledWith({
+        sha: 'abc1234',
+        cacheDir: undefined,
+      })
     })
-    const result = await doResolveSkillSpector({ sha: 'abc1234' })
-    expect(result?.source).toBe('dlx')
-    expect(dlxMock).toHaveBeenCalledWith({
-      sha: 'abc1234',
-      cacheDir: undefined,
-    })
-  })
 
-  test('returns undefined when localOnly=true and VFS+PATH both miss', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce(undefined)
-    const result = await doResolveSkillSpector({
-      sha: 'abc1234',
-      localOnly: true,
+    test('returns undefined when localOnly=true and VFS+PATH both miss', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce(undefined)
+      const result = await doResolveSkillSpector({
+        sha: 'abc1234',
+        localOnly: true,
+      })
+      expect(result).toBeUndefined()
+      expect(dlxMock).not.toHaveBeenCalled()
     })
-    expect(result).toBeUndefined()
-    expect(dlxMock).not.toHaveBeenCalled()
-  })
 
-  test('returns undefined when sha is omitted and VFS+PATH both miss', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce(undefined)
-    const result = await doResolveSkillSpector({})
-    expect(result).toBeUndefined()
-    expect(dlxMock).not.toHaveBeenCalled()
-  })
+    test('returns undefined when sha is omitted and VFS+PATH both miss', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce(undefined)
+      const result = await doResolveSkillSpector({})
+      expect(result).toBeUndefined()
+      expect(dlxMock).not.toHaveBeenCalled()
+    })
 
-  test('returns undefined when all three tiers miss', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce(undefined)
-    dlxMock.mockResolvedValueOnce(undefined)
-    const result = await doResolveSkillSpector({ sha: 'abc1234' })
-    expect(result).toBeUndefined()
-  })
+    test('returns undefined when all three tiers miss', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce(undefined)
+      dlxMock.mockResolvedValueOnce(undefined)
+      const result = await doResolveSkillSpector({ sha: 'abc1234' })
+      expect(result).toBeUndefined()
+    })
 
-  test('passes cacheDir to the DLX tier', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce(undefined)
-    dlxMock.mockResolvedValueOnce({ path: '/x', source: 'dlx' })
-    await doResolveSkillSpector({
-      sha: 'abc1234',
-      cacheDir: '/custom/cache',
+    test('passes cacheDir to the DLX tier', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce(undefined)
+      dlxMock.mockResolvedValueOnce({ path: '/x', source: 'dlx' })
+      await doResolveSkillSpector({
+        sha: 'abc1234',
+        cacheDir: '/custom/cache',
+      })
+      expect(dlxMock).toHaveBeenCalledWith({
+        sha: 'abc1234',
+        cacheDir: '/custom/cache',
+      })
     })
-    expect(dlxMock).toHaveBeenCalledWith({
-      sha: 'abc1234',
-      cacheDir: '/custom/cache',
-    })
-  })
 
-  test('runs the UV tier before DLX when uvProjectDir + uvBin are set', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce(undefined)
-    uvMock.mockResolvedValueOnce({
-      path: '/proj/.venv/bin/skillspector',
-      source: 'uv',
+    test('runs the UV tier before DLX when uvProjectDir + uvBin are set', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce(undefined)
+      uvMock.mockResolvedValueOnce({
+        path: '/proj/.venv/bin/skillspector',
+        source: 'uv',
+      })
+      const result = await doResolveSkillSpector({
+        sha: 'abc1234',
+        uvProjectDir: '/proj',
+        uvBin: '/uv',
+      })
+      expect(result?.source).toBe('uv')
+      expect(uvMock).toHaveBeenCalledWith({ projectDir: '/proj', uvBin: '/uv' })
+      // UV hit short-circuits — DLX never runs.
+      expect(dlxMock).not.toHaveBeenCalled()
     })
-    const result = await doResolveSkillSpector({
-      sha: 'abc1234',
-      uvProjectDir: '/proj',
-      uvBin: '/uv',
-    })
-    expect(result?.source).toBe('uv')
-    expect(uvMock).toHaveBeenCalledWith({ projectDir: '/proj', uvBin: '/uv' })
-    // UV hit short-circuits — DLX never runs.
-    expect(dlxMock).not.toHaveBeenCalled()
-  })
 
-  test('UV-tier miss falls through to DLX', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce(undefined)
-    uvMock.mockResolvedValueOnce(undefined)
-    dlxMock.mockResolvedValueOnce({
-      path: '/dlx/bin/skillspector',
-      source: 'dlx',
+    test('UV-tier miss falls through to DLX', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce(undefined)
+      uvMock.mockResolvedValueOnce(undefined)
+      dlxMock.mockResolvedValueOnce({
+        path: '/dlx/bin/skillspector',
+        source: 'dlx',
+      })
+      const result = await doResolveSkillSpector({
+        sha: 'abc1234',
+        uvProjectDir: '/proj',
+        uvBin: '/uv',
+      })
+      expect(result?.source).toBe('dlx')
+      expect(uvMock).toHaveBeenCalledTimes(1)
     })
-    const result = await doResolveSkillSpector({
-      sha: 'abc1234',
-      uvProjectDir: '/proj',
-      uvBin: '/uv',
-    })
-    expect(result?.source).toBe('dlx')
-    expect(uvMock).toHaveBeenCalledTimes(1)
-  })
 
-  test('UV tier is skipped without both uvProjectDir AND uvBin', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce(undefined)
-    dlxMock.mockResolvedValueOnce({
-      path: '/dlx/bin/skillspector',
-      source: 'dlx',
+    test('UV tier is skipped without both uvProjectDir AND uvBin', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce(undefined)
+      dlxMock.mockResolvedValueOnce({
+        path: '/dlx/bin/skillspector',
+        source: 'dlx',
+      })
+      // uvProjectDir set but uvBin missing → uv tier never runs, DLX does.
+      await doResolveSkillSpector({ sha: 'abc1234', uvProjectDir: '/proj' })
+      expect(uvMock).not.toHaveBeenCalled()
+      expect(dlxMock).toHaveBeenCalledTimes(1)
     })
-    // uvProjectDir set but uvBin missing → uv tier never runs, DLX does.
-    await doResolveSkillSpector({ sha: 'abc1234', uvProjectDir: '/proj' })
-    expect(uvMock).not.toHaveBeenCalled()
-    expect(dlxMock).toHaveBeenCalledTimes(1)
-  })
 
-  test('localOnly skips the UV tier even with a project configured', async () => {
-    const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
-      await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce(undefined)
-    const result = await doResolveSkillSpector({
-      sha: 'abc1234',
-      uvProjectDir: '/proj',
-      uvBin: '/uv',
-      localOnly: true,
+    test('localOnly skips the UV tier even with a project configured', async () => {
+      const { doResolveSkillSpector, vfsMock, pathMock, uvMock, dlxMock } =
+        await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce(undefined)
+      const result = await doResolveSkillSpector({
+        sha: 'abc1234',
+        uvProjectDir: '/proj',
+        uvBin: '/uv',
+        localOnly: true,
+      })
+      expect(result).toBeUndefined()
+      expect(uvMock).not.toHaveBeenCalled()
+      expect(dlxMock).not.toHaveBeenCalled()
     })
-    expect(result).toBeUndefined()
-    expect(uvMock).not.toHaveBeenCalled()
-    expect(dlxMock).not.toHaveBeenCalled()
-  })
 
-  test('memoizes via the public resolveSkillSpector — second call reuses the first', async () => {
-    const { resolveSkillSpector, vfsMock, pathMock } = await loadFresh()
-    vfsMock.mockResolvedValueOnce(undefined)
-    pathMock.mockResolvedValueOnce({
-      path: '/usr/local/bin/skillspector',
-      source: 'path',
+    test('memoizes via the public resolveSkillSpector — second call reuses the first', async () => {
+      const { resolveSkillSpector, vfsMock, pathMock } = await loadFresh()
+      vfsMock.mockResolvedValueOnce(undefined)
+      pathMock.mockResolvedValueOnce({
+        path: '/usr/local/bin/skillspector',
+        source: 'path',
+      })
+      const first = await resolveSkillSpector({ sha: 'abc1234' })
+      const second = await resolveSkillSpector({ sha: 'abc1234' })
+      expect(second).toBe(first)
+      // VFS + PATH only invoked once each — the memo hit short-circuits.
+      expect(vfsMock).toHaveBeenCalledTimes(1)
+      expect(pathMock).toHaveBeenCalledTimes(1)
     })
-    const first = await resolveSkillSpector({ sha: 'abc1234' })
-    const second = await resolveSkillSpector({ sha: 'abc1234' })
-    expect(second).toBe(first)
-    // VFS + PATH only invoked once each — the memo hit short-circuits.
-    expect(vfsMock).toHaveBeenCalledTimes(1)
-    expect(pathMock).toHaveBeenCalledTimes(1)
-  })
 
-  test('different opts produce separate memo entries', async () => {
-    const { resolveSkillSpector, vfsMock, pathMock } = await loadFresh()
-    vfsMock.mockResolvedValue(undefined)
-    pathMock.mockResolvedValue({
-      path: '/usr/local/bin/skillspector',
-      source: 'path',
+    test('different opts produce separate memo entries', async () => {
+      const { resolveSkillSpector, vfsMock, pathMock } = await loadFresh()
+      vfsMock.mockResolvedValue(undefined)
+      pathMock.mockResolvedValue({
+        path: '/usr/local/bin/skillspector',
+        source: 'path',
+      })
+      await resolveSkillSpector({ sha: 'abc1234' })
+      await resolveSkillSpector({ sha: 'def5678' })
+      expect(vfsMock).toHaveBeenCalledTimes(2)
+      expect(pathMock).toHaveBeenCalledTimes(2)
     })
-    await resolveSkillSpector({ sha: 'abc1234' })
-    await resolveSkillSpector({ sha: 'def5678' })
-    expect(vfsMock).toHaveBeenCalledTimes(2)
-    expect(pathMock).toHaveBeenCalledTimes(2)
-  })
-})
+  },
+)

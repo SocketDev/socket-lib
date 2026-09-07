@@ -58,210 +58,222 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/from-pip-venv / pipVenvEntryPointPath', () => {
-  test('Unix layout uses bin/<name>', () => {
-    // pipVenvEntryPointPath reads process.platform at call time; the test
-    // host's platform dictates the result. Assert against the platform we
-    // run on.
-    const result = pipVenvEntryPointPath('/cache/venv', 'skillspector')
-    if (process.platform === 'win32') {
-      expect(result.endsWith('Scripts\\skillspector.exe')).toBe(true)
-    } else {
-      expect(result.endsWith('bin/skillspector')).toBe(true)
-    }
-  })
-
-  test('different entry points produce different paths', () => {
-    const a = pipVenvEntryPointPath('/cache/venv', 'foo')
-    const b = pipVenvEntryPointPath('/cache/venv', 'bar')
-    expect(a).not.toBe(b)
-  })
-
-  test('different cache dirs produce different paths', () => {
-    const a = pipVenvEntryPointPath('/cache/alpha', 'tool')
-    const b = pipVenvEntryPointPath('/cache/beta', 'tool')
-    expect(a).not.toBe(b)
-  })
-})
-
-describe.sequential('external-tools/from-pip-venv / findPython', () => {
-  test('returns the first Python found on PATH', async () => {
-    const { findPython, whichMock } = await loadFresh()
-    whichMock.mockResolvedValueOnce('/usr/bin/python3')
-    const result = await findPython()
-    if (process.platform === 'win32') {
-      expect(whichMock).toHaveBeenCalledWith('python', { nothrow: true })
-    } else {
-      expect(whichMock).toHaveBeenCalledWith('python3', { nothrow: true })
-    }
-    expect(result).toBe('/usr/bin/python3')
-  })
-
-  test('falls back to the secondary candidate when the first misses', async () => {
-    const { findPython, whichMock } = await loadFresh()
-    whichMock.mockResolvedValueOnce(undefined)
-    whichMock.mockResolvedValueOnce('/usr/bin/python')
-    const result = await findPython()
-    expect(result).toBe('/usr/bin/python')
-    expect(whichMock).toHaveBeenCalledTimes(2)
-  })
-
-  test('returns undefined when no Python is on PATH', async () => {
-    const { findPython, whichMock } = await loadFresh()
-    whichMock.mockResolvedValue(undefined)
-    const result = await findPython()
-    expect(result).toBeUndefined()
-  })
-})
-
-describe.sequential('external-tools/from-pip-venv / createPipVenv', () => {
-  test('cache hit: returns existing entry-point without spawning', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } =
-      await loadFresh()
-    // First existsSync (entry-point) returns true → cache hit.
-    existsMock.mockReturnValue(true)
-    const result = await createPipVenv({
-      cacheDir: '/cache/venv',
-      entryPoint: 'tool',
-      installSpec: 'tool==1.0.0',
+describe(
+  'external-tools/from-pip-venv / pipVenvEntryPointPath',
+  { concurrent: false },
+  () => {
+    test('Unix layout uses bin/<name>', () => {
+      // pipVenvEntryPointPath reads process.platform at call time; the test
+      // host's platform dictates the result. Assert against the platform we
+      // run on.
+      const result = pipVenvEntryPointPath('/cache/venv', 'skillspector')
+      if (process.platform === 'win32') {
+        expect(result.endsWith('Scripts\\skillspector.exe')).toBe(true)
+      } else {
+        expect(result.endsWith('bin/skillspector')).toBe(true)
+      }
     })
-    expect(result.created).toBe(false)
-    expect(result.entryPointPath).toContain('tool')
-    expect(spawnMock).not.toHaveBeenCalled()
-    expect(whichMock).not.toHaveBeenCalled()
-  })
 
-  test('cache miss: creates venv then pip-installs', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } =
-      await loadFresh()
-    // 1st existsSync is the entry-point check → false, a cache miss.
-    // 2nd existsSync is the venv python check → true, the venv was created.
-    // 3rd existsSync is the post-install entry-point check → true, install OK.
-    existsMock
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(true)
-    whichMock.mockResolvedValueOnce('/usr/bin/python3')
-    spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
-    const result = await createPipVenv({
-      cacheDir: '/cache/venv',
-      entryPoint: 'tool',
-      installSpec: 'tool==1.0.0',
+    test('different entry points produce different paths', () => {
+      const a = pipVenvEntryPointPath('/cache/venv', 'foo')
+      const b = pipVenvEntryPointPath('/cache/venv', 'bar')
+      expect(a).not.toBe(b)
     })
-    expect(result.created).toBe(true)
-    // Two spawn calls: venv create, pip install.
-    expect(spawnMock).toHaveBeenCalledTimes(2)
-    const venvCall = spawnMock.mock.calls[0]!
-    expect(venvCall[0]).toBe('/usr/bin/python3')
-    expect(venvCall[1]).toEqual(['-m', 'venv', '--clear', '/cache/venv'])
-    const pipCall = spawnMock.mock.calls[1]!
-    expect(pipCall[1]).toContain('install')
-    expect(pipCall[1]).toContain('tool==1.0.0')
-  })
 
-  test('throws when no Python is on PATH', async () => {
-    const { createPipVenv, existsMock, whichMock } = await loadFresh()
-    existsMock.mockReturnValueOnce(false)
-    whichMock.mockResolvedValue(undefined)
-    await expect(
-      createPipVenv({
+    test('different cache dirs produce different paths', () => {
+      const a = pipVenvEntryPointPath('/cache/alpha', 'tool')
+      const b = pipVenvEntryPointPath('/cache/beta', 'tool')
+      expect(a).not.toBe(b)
+    })
+  },
+)
+
+describe(
+  'external-tools/from-pip-venv / findPython',
+  { concurrent: false },
+  () => {
+    test('returns the first Python found on PATH', async () => {
+      const { findPython, whichMock } = await loadFresh()
+      whichMock.mockResolvedValueOnce('/usr/bin/python3')
+      const result = await findPython()
+      if (process.platform === 'win32') {
+        expect(whichMock).toHaveBeenCalledWith('python', { nothrow: true })
+      } else {
+        expect(whichMock).toHaveBeenCalledWith('python3', { nothrow: true })
+      }
+      expect(result).toBe('/usr/bin/python3')
+    })
+
+    test('falls back to the secondary candidate when the first misses', async () => {
+      const { findPython, whichMock } = await loadFresh()
+      whichMock.mockResolvedValueOnce(undefined)
+      whichMock.mockResolvedValueOnce('/usr/bin/python')
+      const result = await findPython()
+      expect(result).toBe('/usr/bin/python')
+      expect(whichMock).toHaveBeenCalledTimes(2)
+    })
+
+    test('returns undefined when no Python is on PATH', async () => {
+      const { findPython, whichMock } = await loadFresh()
+      whichMock.mockResolvedValue(undefined)
+      const result = await findPython()
+      expect(result).toBeUndefined()
+    })
+  },
+)
+
+describe(
+  'external-tools/from-pip-venv / createPipVenv',
+  { concurrent: false },
+  () => {
+    test('cache hit: returns existing entry-point without spawning', async () => {
+      const { createPipVenv, existsMock, spawnMock, whichMock } =
+        await loadFresh()
+      // First existsSync (entry-point) returns true → cache hit.
+      existsMock.mockReturnValue(true)
+      const result = await createPipVenv({
         cacheDir: '/cache/venv',
         entryPoint: 'tool',
         installSpec: 'tool==1.0.0',
-      }),
-    ).rejects.toThrow(/no Python interpreter/)
-  })
+      })
+      expect(result.created).toBe(false)
+      expect(result.entryPointPath).toContain('tool')
+      expect(spawnMock).not.toHaveBeenCalled()
+      expect(whichMock).not.toHaveBeenCalled()
+    })
 
-  test('throws when venv create succeeds but the venv python is missing', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } =
-      await loadFresh()
-    // entry-point check → miss; venv python → missing, so the venv is broken.
-    existsMock.mockReturnValueOnce(false).mockReturnValueOnce(false)
-    whichMock.mockResolvedValueOnce('/usr/bin/python3')
-    spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
-    await expect(
-      createPipVenv({
+    test('cache miss: creates venv then pip-installs', async () => {
+      const { createPipVenv, existsMock, spawnMock, whichMock } =
+        await loadFresh()
+      // 1st existsSync is the entry-point check → false, a cache miss.
+      // 2nd existsSync is the venv python check → true, the venv was created.
+      // 3rd existsSync is the post-install entry-point check → true, install OK.
+      existsMock
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true)
+      whichMock.mockResolvedValueOnce('/usr/bin/python3')
+      spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
+      const result = await createPipVenv({
         cacheDir: '/cache/venv',
         entryPoint: 'tool',
         installSpec: 'tool==1.0.0',
-      }),
-    ).rejects.toThrow(/venv created.*is missing/)
-  })
+      })
+      expect(result.created).toBe(true)
+      // Two spawn calls: venv create, pip install.
+      expect(spawnMock).toHaveBeenCalledTimes(2)
+      const venvCall = spawnMock.mock.calls[0]!
+      expect(venvCall[0]).toBe('/usr/bin/python3')
+      expect(venvCall[1]).toEqual(['-m', 'venv', '--clear', '/cache/venv'])
+      const pipCall = spawnMock.mock.calls[1]!
+      expect(pipCall[1]).toContain('install')
+      expect(pipCall[1]).toContain('tool==1.0.0')
+    })
 
-  test('throws when pip install succeeds but entry-point not created', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } =
-      await loadFresh()
-    // entry-point check → miss; venv python → present; post-install entry-point → still missing
-    existsMock
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(false)
-    whichMock.mockResolvedValueOnce('/usr/bin/python3')
-    spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
-    await expect(
-      createPipVenv({
+    test('throws when no Python is on PATH', async () => {
+      const { createPipVenv, existsMock, whichMock } = await loadFresh()
+      existsMock.mockReturnValueOnce(false)
+      whichMock.mockResolvedValue(undefined)
+      await expect(
+        createPipVenv({
+          cacheDir: '/cache/venv',
+          entryPoint: 'tool',
+          installSpec: 'tool==1.0.0',
+        }),
+      ).rejects.toThrow(/no Python interpreter/)
+    })
+
+    test('throws when venv create succeeds but the venv python is missing', async () => {
+      const { createPipVenv, existsMock, spawnMock, whichMock } =
+        await loadFresh()
+      // entry-point check → miss; venv python → missing, so the venv is broken.
+      existsMock.mockReturnValueOnce(false).mockReturnValueOnce(false)
+      whichMock.mockResolvedValueOnce('/usr/bin/python3')
+      spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
+      await expect(
+        createPipVenv({
+          cacheDir: '/cache/venv',
+          entryPoint: 'tool',
+          installSpec: 'tool==1.0.0',
+        }),
+      ).rejects.toThrow(/venv created.*is missing/)
+    })
+
+    test('throws when pip install succeeds but entry-point not created', async () => {
+      const { createPipVenv, existsMock, spawnMock, whichMock } =
+        await loadFresh()
+      // entry-point check → miss; venv python → present; post-install entry-point → still missing
+      existsMock
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(false)
+      whichMock.mockResolvedValueOnce('/usr/bin/python3')
+      spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
+      await expect(
+        createPipVenv({
+          cacheDir: '/cache/venv',
+          entryPoint: 'tool',
+          installSpec: 'tool==1.0.0',
+        }),
+      ).rejects.toThrow(/entry-point.*was not created/)
+    })
+
+    test('caller-supplied python override skips findPython', async () => {
+      const { createPipVenv, existsMock, spawnMock, whichMock } =
+        await loadFresh()
+      existsMock
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true)
+      spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
+      const result = await createPipVenv({
         cacheDir: '/cache/venv',
         entryPoint: 'tool',
         installSpec: 'tool==1.0.0',
-      }),
-    ).rejects.toThrow(/entry-point.*was not created/)
-  })
-
-  test('caller-supplied python override skips findPython', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } =
-      await loadFresh()
-    existsMock
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(true)
-    spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
-    const result = await createPipVenv({
-      cacheDir: '/cache/venv',
-      entryPoint: 'tool',
-      installSpec: 'tool==1.0.0',
-      python: '/custom/python',
+        python: '/custom/python',
+      })
+      expect(result.created).toBe(true)
+      // findPython was not consulted because the caller provided python.
+      expect(whichMock).not.toHaveBeenCalled()
+      expect(spawnMock.mock.calls[0]![0]).toBe('/custom/python')
     })
-    expect(result.created).toBe(true)
-    // findPython was not consulted because the caller provided python.
-    expect(whichMock).not.toHaveBeenCalled()
-    expect(spawnMock.mock.calls[0]![0]).toBe('/custom/python')
-  })
 
-  test('passes --no-input + --disable-pip-version-check to pip install', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } =
-      await loadFresh()
-    existsMock
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(true)
-    whichMock.mockResolvedValueOnce('/usr/bin/python3')
-    spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
-    await createPipVenv({
-      cacheDir: '/cache/venv',
-      entryPoint: 'tool',
-      installSpec: 'tool==1.0.0',
+    test('passes --no-input + --disable-pip-version-check to pip install', async () => {
+      const { createPipVenv, existsMock, spawnMock, whichMock } =
+        await loadFresh()
+      existsMock
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true)
+      whichMock.mockResolvedValueOnce('/usr/bin/python3')
+      spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
+      await createPipVenv({
+        cacheDir: '/cache/venv',
+        entryPoint: 'tool',
+        installSpec: 'tool==1.0.0',
+      })
+      const pipArgs = spawnMock.mock.calls[1]![1] as string[]
+      expect(pipArgs).toContain('--no-input')
+      expect(pipArgs).toContain('--disable-pip-version-check')
     })
-    const pipArgs = spawnMock.mock.calls[1]![1] as string[]
-    expect(pipArgs).toContain('--no-input')
-    expect(pipArgs).toContain('--disable-pip-version-check')
-  })
 
-  test('git-SHA installSpec is passed through verbatim', async () => {
-    const { createPipVenv, existsMock, spawnMock, whichMock } =
-      await loadFresh()
-    existsMock
-      .mockReturnValueOnce(false)
-      .mockReturnValueOnce(true)
-      .mockReturnValueOnce(true)
-    whichMock.mockResolvedValueOnce('/usr/bin/python3')
-    spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
-    const gitSpec = 'git+https://github.com/NVIDIA/skillspector.git@abc1234'
-    await createPipVenv({
-      cacheDir: '/cache/venv',
-      entryPoint: 'skillspector',
-      installSpec: gitSpec,
+    test('git-SHA installSpec is passed through verbatim', async () => {
+      const { createPipVenv, existsMock, spawnMock, whichMock } =
+        await loadFresh()
+      existsMock
+        .mockReturnValueOnce(false)
+        .mockReturnValueOnce(true)
+        .mockReturnValueOnce(true)
+      whichMock.mockResolvedValueOnce('/usr/bin/python3')
+      spawnMock.mockResolvedValue({ stdout: '', stderr: '', exitCode: 0 })
+      const gitSpec = 'git+https://github.com/NVIDIA/skillspector.git@abc1234'
+      await createPipVenv({
+        cacheDir: '/cache/venv',
+        entryPoint: 'skillspector',
+        installSpec: gitSpec,
+      })
+      const pipArgs = spawnMock.mock.calls[1]![1] as string[]
+      expect(pipArgs[pipArgs.length - 1]).toBe(gitSpec)
     })
-    const pipArgs = spawnMock.mock.calls[1]![1] as string[]
-    expect(pipArgs[pipArgs.length - 1]).toBe(gitSpec)
-  })
-})
+  },
+)

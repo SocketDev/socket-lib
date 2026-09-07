@@ -21,7 +21,7 @@ vi.mock(import('../../../src/process/spawn/child.mjs'), () =>
 
 setupHarness({ mockSpawn, mockSpawnSync })
 
-describe.sequential('secrets/windows — runPsSync', () => {
+describe('secrets/windows — runPsSync', { concurrent: false }, () => {
   test('returns stdout/stderr/status from spawnSync', async () => {
     mockSpawnSync.mockReturnValueOnce({
       status: 3,
@@ -54,7 +54,7 @@ describe.sequential('secrets/windows — runPsSync', () => {
   })
 })
 
-describe.sequential('secrets/windows — readDpapiSync', () => {
+describe('secrets/windows — readDpapiSync', { concurrent: false }, () => {
   test('returns undefined when file does not exist', async () => {
     const { readDpapiSync } = await loadFresh()
     expect(
@@ -95,7 +95,7 @@ describe.sequential('secrets/windows — readDpapiSync', () => {
   })
 })
 
-describe.sequential('secrets/windows — readWindowsSync', () => {
+describe('secrets/windows — readWindowsSync', { concurrent: false }, () => {
   test('returns CM value when status === 0', async () => {
     mockSpawnSync.mockReturnValueOnce({
       status: 0,
@@ -137,7 +137,7 @@ describe.sequential('secrets/windows — readWindowsSync', () => {
   })
 })
 
-describe.sequential('secrets/windows — writeDpapiSync', () => {
+describe('secrets/windows — writeDpapiSync', { concurrent: false }, () => {
   test('returns silently on status 0', async () => {
     mockSpawnSync.mockReturnValueOnce({ status: 0, stderr: '' })
     const { writeDpapiSync } = await loadFresh()
@@ -158,7 +158,7 @@ describe.sequential('secrets/windows — writeDpapiSync', () => {
   })
 })
 
-describe.sequential('secrets/windows — writeWindowsSync', () => {
+describe('secrets/windows — writeWindowsSync', { concurrent: false }, () => {
   test('returns silently when CM succeeds', async () => {
     mockSpawnSync.mockReturnValueOnce({ status: 0, stdout: '', stderr: '' })
     const { writeWindowsSync } = await loadFresh()
@@ -174,7 +174,7 @@ describe.sequential('secrets/windows — writeWindowsSync', () => {
   })
 })
 
-describe.sequential('secrets/windows — deleteWindowsSync', () => {
+describe('secrets/windows — deleteWindowsSync', { concurrent: false }, () => {
   test('returns "removed" when CM removes successfully', async () => {
     mockSpawnSync.mockReturnValueOnce({ status: 0, stdout: '', stderr: '' })
     const { deleteWindowsSync } = await loadFresh()

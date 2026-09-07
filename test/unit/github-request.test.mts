@@ -15,7 +15,7 @@ import { resetEnv, setEnv } from '../../src/env/rewire.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import nock from 'nock'
 
-describe.sequential('github fetch and refs', () => {
+describe('github fetch and refs', { concurrent: false }, () => {
   beforeEach(() => {
     // Clear environment variables
     resetEnv()

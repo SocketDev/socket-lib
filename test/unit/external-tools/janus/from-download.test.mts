@@ -25,7 +25,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/janus/from-download', () => {
+describe('external-tools/janus/from-download', { concurrent: false }, () => {
   test('throws when platformArch is not in the supported set (linux)', async () => {
     const { janusFromDownload, downloadMock } = await loadFresh()
     await expect(

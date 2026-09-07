@@ -10,7 +10,7 @@ import {
   getDefaultSpinner,
 } from '../../../src/spinner/default.mjs'
 
-describe.sequential('spinner/default — getCliSpinners', () => {
+describe('spinner/default — getCliSpinners', { concurrent: false }, () => {
   it('returns the full spinner registry when no name is passed', () => {
     const all = getCliSpinners()
     expect(typeof all).toBe('object')
@@ -38,7 +38,7 @@ describe.sequential('spinner/default — getCliSpinners', () => {
   })
 })
 
-describe.sequential('spinner/default — getDefaultSpinner', () => {
+describe('spinner/default — getDefaultSpinner', { concurrent: false }, () => {
   it('returns a SpinnerInstance', () => {
     const sp = getDefaultSpinner()
     expect(typeof sp).toBe('object')

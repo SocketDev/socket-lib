@@ -41,58 +41,68 @@ afterEach(() => {
   vi.unstubAllEnvs()
 })
 
-describe.sequential('github/refs — resolveRefToSha cache disabled', () => {
-  test('bypasses the cache and calls fetchRefSha directly when DISABLE_GITHUB_CACHE is set', async () => {
-    vi.stubEnv('DISABLE_GITHUB_CACHE', '1')
-    const { fetchRefSha, getGithubCache, resolveRefToSha } = await loadFresh()
-    fetchRefSha.mockResolvedValueOnce('abc123')
-    const sha = await resolveRefToSha('owner', 'repo', 'main')
-    expect(sha).toBe('abc123')
-    expect(fetchRefSha).toHaveBeenCalledWith(
-      'owner',
-      'repo',
-      'main',
-      expect.any(Object),
-    )
-    expect(getGithubCache).not.toHaveBeenCalled()
-  })
-
-  test('forwards options through to fetchRefSha', async () => {
-    vi.stubEnv('DISABLE_GITHUB_CACHE', '1')
-    const { fetchRefSha, resolveRefToSha } = await loadFresh()
-    fetchRefSha.mockResolvedValueOnce('def456')
-    await resolveRefToSha('owner', 'repo', 'v1.0.0', { token: 'ghp_test' })
-    const [, , , opts] = fetchRefSha.mock.calls[0]!
-    expect((opts as { token?: string | undefined }).token).toBe('ghp_test')
-  })
-})
-
-describe.sequential('github/refs — resolveRefToSha cache enabled', () => {
-  test('routes through the cache.getOrFetch wrapper when cache is enabled', async () => {
-    const { fetchRefSha, getGithubCache, resolveRefToSha } = await loadFresh()
-    fetchRefSha.mockResolvedValueOnce('cache-hit')
-    const sha = await resolveRefToSha('owner', 'repo', 'main')
-    expect(sha).toBe('cache-hit')
-    expect(getGithubCache).toHaveBeenCalled()
-  })
-
-  test('uses the canonical "owner/repo@ref" cacheKey shape', async () => {
-    let capturedKey: string | undefined
-    const cacheMod = await import('../../../src/github/refs-cache.mjs')
-    ;(cacheMod.getGithubCache as ReturnType<typeof vi.fn>).mockReturnValueOnce({
-      getOrFetch: vi.fn(async (key: string, fn: () => Promise<string>) => {
-        capturedKey = key
-        return await fn()
-      }),
+describe(
+  'github/refs — resolveRefToSha cache disabled',
+  { concurrent: false },
+  () => {
+    test('bypasses the cache and calls fetchRefSha directly when DISABLE_GITHUB_CACHE is set', async () => {
+      vi.stubEnv('DISABLE_GITHUB_CACHE', '1')
+      const { fetchRefSha, getGithubCache, resolveRefToSha } = await loadFresh()
+      fetchRefSha.mockResolvedValueOnce('abc123')
+      const sha = await resolveRefToSha('owner', 'repo', 'main')
+      expect(sha).toBe('abc123')
+      expect(fetchRefSha).toHaveBeenCalledWith(
+        'owner',
+        'repo',
+        'main',
+        expect.any(Object),
+      )
+      expect(getGithubCache).not.toHaveBeenCalled()
     })
-    const { fetchRefSha, resolveRefToSha } = await loadFresh()
-    fetchRefSha.mockResolvedValueOnce('sha')
-    await resolveRefToSha('socketdev', 'lib', 'main')
-    expect(capturedKey).toBe('socketdev/lib@main')
-  })
-})
 
-describe.sequential('github/refs — re-exports', () => {
+    test('forwards options through to fetchRefSha', async () => {
+      vi.stubEnv('DISABLE_GITHUB_CACHE', '1')
+      const { fetchRefSha, resolveRefToSha } = await loadFresh()
+      fetchRefSha.mockResolvedValueOnce('def456')
+      await resolveRefToSha('owner', 'repo', 'v1.0.0', { token: 'ghp_test' })
+      const [, , , opts] = fetchRefSha.mock.calls[0]!
+      expect((opts as { token?: string | undefined }).token).toBe('ghp_test')
+    })
+  },
+)
+
+describe(
+  'github/refs — resolveRefToSha cache enabled',
+  { concurrent: false },
+  () => {
+    test('routes through the cache.getOrFetch wrapper when cache is enabled', async () => {
+      const { fetchRefSha, getGithubCache, resolveRefToSha } = await loadFresh()
+      fetchRefSha.mockResolvedValueOnce('cache-hit')
+      const sha = await resolveRefToSha('owner', 'repo', 'main')
+      expect(sha).toBe('cache-hit')
+      expect(getGithubCache).toHaveBeenCalled()
+    })
+
+    test('uses the canonical "owner/repo@ref" cacheKey shape', async () => {
+      let capturedKey: string | undefined
+      const cacheMod = await import('../../../src/github/refs-cache.mjs')
+      ;(
+        cacheMod.getGithubCache as ReturnType<typeof vi.fn>
+      ).mockReturnValueOnce({
+        getOrFetch: vi.fn(async (key: string, fn: () => Promise<string>) => {
+          capturedKey = key
+          return await fn()
+        }),
+      })
+      const { fetchRefSha, resolveRefToSha } = await loadFresh()
+      fetchRefSha.mockResolvedValueOnce('sha')
+      await resolveRefToSha('socketdev', 'lib', 'main')
+      expect(capturedKey).toBe('socketdev/lib@main')
+    })
+  },
+)
+
+describe('github/refs — re-exports', { concurrent: false }, () => {
   test('re-exports clearRefCache + getGithubCache + fetchRefShaViaGraphQL + fetchRefSha', async () => {
     const mod = await import('../../../src/github/refs.mjs')
     expect(typeof mod.clearRefCache).toBe('function')
@@ -102,31 +112,35 @@ describe.sequential('github/refs — re-exports', () => {
   })
 })
 
-describe.sequential('github/refs — clearRefCache smoke tests', () => {
-  test('clearRefCache is callable without throwing', async () => {
-    const mod = await import('../../../src/github/refs.mjs')
-    expect(() => mod.clearRefCache()).not.toThrow()
-  })
+describe(
+  'github/refs — clearRefCache smoke tests',
+  { concurrent: false },
+  () => {
+    test('clearRefCache is callable without throwing', async () => {
+      const mod = await import('../../../src/github/refs.mjs')
+      expect(() => mod.clearRefCache()).not.toThrow()
+    })
 
-  test('multiple sequential clears do not throw', async () => {
-    const mod = await import('../../../src/github/refs.mjs')
-    await expect(
-      (async () => {
-        await mod.clearRefCache()
-        await mod.clearRefCache()
-        await mod.clearRefCache()
-      })(),
-    ).resolves.not.toThrow()
-  })
+    test('multiple sequential clears do not throw', async () => {
+      const mod = await import('../../../src/github/refs.mjs')
+      await expect(
+        (async () => {
+          await mod.clearRefCache()
+          await mod.clearRefCache()
+          await mod.clearRefCache()
+        })(),
+      ).resolves.not.toThrow()
+    })
 
-  test('concurrent clears resolve without throwing', async () => {
-    const mod = await import('../../../src/github/refs.mjs')
-    await expect(
-      Promise.all([
-        mod.clearRefCache(),
-        mod.clearRefCache(),
-        mod.clearRefCache(),
-      ]),
-    ).resolves.toBeDefined()
-  })
-})
+    test('concurrent clears resolve without throwing', async () => {
+      const mod = await import('../../../src/github/refs.mjs')
+      await expect(
+        Promise.all([
+          mod.clearRefCache(),
+          mod.clearRefCache(),
+          mod.clearRefCache(),
+        ]),
+      ).resolves.toBeDefined()
+    })
+  },
+)

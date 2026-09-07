@@ -267,11 +267,11 @@
     },
     {
       "files": [
-        "**/template/base/.claude/**",
-        "**/template/base/.config/fleet/**",
-        "**/template/base/.git-hooks/**",
-        "**/template/base/scripts/fleet/**",
-        "**/template/base/test/fleet/**"
+        "**/template/base/universal/.claude/**",
+        "**/template/base/universal/.config/fleet/**",
+        "**/template/base/universal/.git-hooks/**",
+        "**/template/base/universal/scripts/fleet/**",
+        "**/template/base/universal/test/fleet/**"
       ],
       "rules": {
         "socket/max-file-lines": "off"

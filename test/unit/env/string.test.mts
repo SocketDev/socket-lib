@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 
 import { envAsString } from '../../../src/env/string.mjs'
 
-describe.sequential('env/string — envAsString', () => {
+describe('env/string — envAsString', { concurrent: false }, () => {
   test('returns the trimmed string for a plain string input', () => {
     expect(envAsString('  hello  ')).toBe('hello')
   })

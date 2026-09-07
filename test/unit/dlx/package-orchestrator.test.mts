@@ -38,7 +38,7 @@ function stagePackage(installRoot: string, packageName: string): string {
   return normalizePath(binaryPath)
 }
 
-describe.sequential('dlx/package orchestrators', () => {
+describe('dlx/package orchestrators', { concurrent: false }, () => {
   it('returns a pre-staged package without reinstalling it', async () => {
     await runWithTempDir(async installRoot => {
       const expectedBinaryPath = stagePackage(installRoot, 'fixture-package')

@@ -30,7 +30,7 @@ function makeMockSpinner() {
   }
 }
 
-describe.sequential('debug/output', () => {
+describe('debug/output', { concurrent: false }, () => {
   // oxlint-disable-next-line typescript/no-explicit-any -- spy type flexibility
   let infoSpy: any
   // oxlint-disable-next-line typescript/no-explicit-any -- spy type flexibility

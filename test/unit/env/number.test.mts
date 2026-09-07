@@ -2,38 +2,42 @@ import { describe, expect, test } from 'vitest'
 
 import { envAsNumber } from '../../../src/env/number.mjs'
 
-describe.sequential('env/number — envAsNumber (default int mode)', () => {
-  test('parses an integer string', () => {
-    expect(envAsNumber('3000')).toBe(3000)
-  })
+describe(
+  'env/number — envAsNumber (default int mode)',
+  { concurrent: false },
+  () => {
+    test('parses an integer string', () => {
+      expect(envAsNumber('3000')).toBe(3000)
+    })
 
-  test('returns 0 for unparseable strings', () => {
-    expect(envAsNumber('abc')).toBe(0)
-  })
+    test('returns 0 for unparseable strings', () => {
+      expect(envAsNumber('abc')).toBe(0)
+    })
 
-  test('returns 0 for undefined with no default', () => {
-    expect(envAsNumber(undefined)).toBe(0)
-  })
+    test('returns 0 for undefined with no default', () => {
+      expect(envAsNumber(undefined)).toBe(0)
+    })
 
-  test('returns 0 for null with no default', () => {
-    expect(envAsNumber(undefined)).toBe(0)
-  })
+    test('returns 0 for null with no default', () => {
+      expect(envAsNumber(undefined)).toBe(0)
+    })
 
-  test('returns defaultValue via options', () => {
-    expect(envAsNumber(undefined, { defaultValue: 99 })).toBe(99)
-  })
+    test('returns defaultValue via options', () => {
+      expect(envAsNumber(undefined, { defaultValue: 99 })).toBe(99)
+    })
 
-  test('empty string falls through to defaultValue', () => {
-    expect(envAsNumber('', { defaultValue: 42 })).toBe(42)
-  })
+    test('empty string falls through to defaultValue', () => {
+      expect(envAsNumber('', { defaultValue: 42 })).toBe(42)
+    })
 
-  test('parseInt-style: takes the leading integer of mixed strings', () => {
-    // `parseInt('3000abc', 10)` returns 3000.
-    expect(envAsNumber('3000abc')).toBe(3000)
-  })
-})
+    test('parseInt-style: takes the leading integer of mixed strings', () => {
+      // `parseInt('3000abc', 10)` returns 3000.
+      expect(envAsNumber('3000abc')).toBe(3000)
+    })
+  },
+)
 
-describe.sequential('env/number — float mode', () => {
+describe('env/number — float mode', { concurrent: false }, () => {
   test('parses a decimal string', () => {
     expect(envAsNumber('3.14', { mode: 'float' })).toBe(3.14)
   })

@@ -16,7 +16,7 @@ import {
 } from '../../../src/dlx/binary-resolution.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
-// Mock the platform predicate BEFORE importing the SUT so it sees isWin32() === true.
+// Vitest hoists the platform mock before module imports.
 vi.mock(import('../../../src/constants/platform.mjs'), async importOriginal => {
   const actual = await importOriginal<typeof PlatformConstants>()
   return { ...actual, isWin32: () => true }
@@ -32,67 +32,75 @@ afterEach(async () => {
   await safeDelete(tmp)
 })
 
-describe.sequential('dlx/binary-resolution — resolveBinaryPath (isWin32() stub)', () => {
-  it('returns the .cmd wrapper when present', () => {
-    const base = path.join(tmp, 'tool')
-    writeFileSync(`${base}.cmd`, 'rem cmd wrapper')
-    expect(resolveBinaryPath(base)).toBe(`${base}.cmd`)
-  })
+describe(
+  'dlx/binary-resolution — resolveBinaryPath (isWin32() stub)',
+  { concurrent: false },
+  () => {
+    it('returns the .cmd wrapper when present', () => {
+      const base = path.join(tmp, 'tool')
+      writeFileSync(`${base}.cmd`, 'rem cmd wrapper')
+      expect(resolveBinaryPath(base)).toBe(`${base}.cmd`)
+    })
 
-  it('returns the .bat wrapper when .cmd is absent', () => {
-    const base = path.join(tmp, 'tool-bat')
-    writeFileSync(`${base}.bat`, 'rem bat wrapper')
-    expect(resolveBinaryPath(base)).toBe(`${base}.bat`)
-  })
+    it('returns the .bat wrapper when .cmd is absent', () => {
+      const base = path.join(tmp, 'tool-bat')
+      writeFileSync(`${base}.bat`, 'rem bat wrapper')
+      expect(resolveBinaryPath(base)).toBe(`${base}.bat`)
+    })
 
-  it('returns the .ps1 wrapper when .cmd and .bat are absent', () => {
-    const base = path.join(tmp, 'tool-ps1')
-    writeFileSync(`${base}.ps1`, '# ps1 wrapper')
-    expect(resolveBinaryPath(base)).toBe(`${base}.ps1`)
-  })
+    it('returns the .ps1 wrapper when .cmd and .bat are absent', () => {
+      const base = path.join(tmp, 'tool-ps1')
+      writeFileSync(`${base}.ps1`, '# ps1 wrapper')
+      expect(resolveBinaryPath(base)).toBe(`${base}.ps1`)
+    })
 
-  it('returns the .exe wrapper when only .exe is present', () => {
-    const base = path.join(tmp, 'tool-exe')
-    writeFileSync(`${base}.exe`, 'MZ')
-    expect(resolveBinaryPath(base)).toBe(`${base}.exe`)
-  })
+    it('returns the .exe wrapper when only .exe is present', () => {
+      const base = path.join(tmp, 'tool-exe')
+      writeFileSync(`${base}.exe`, 'MZ')
+      expect(resolveBinaryPath(base)).toBe(`${base}.exe`)
+    })
 
-  it('returns the bare path when only bare exists', () => {
-    const base = path.join(tmp, 'tool-bare')
-    writeFileSync(base, '#!/usr/bin/env node')
-    expect(resolveBinaryPath(base)).toBe(base)
-  })
+    it('returns the bare path when only bare exists', () => {
+      const base = path.join(tmp, 'tool-bare')
+      writeFileSync(base, '#!/usr/bin/env node')
+      expect(resolveBinaryPath(base)).toBe(base)
+    })
 
-  it('returns basePath unchanged when no wrapper exists', () => {
-    const base = path.join(tmp, 'tool-missing')
-    expect(resolveBinaryPath(base)).toBe(base)
-  })
+    it('returns basePath unchanged when no wrapper exists', () => {
+      const base = path.join(tmp, 'tool-missing')
+      expect(resolveBinaryPath(base)).toBe(base)
+    })
 
-  it('uses the cache on the second lookup (same path)', () => {
-    const base = path.join(tmp, 'tool-cache')
-    writeFileSync(`${base}.cmd`, 'rem')
-    const first = resolveBinaryPath(base)
-    const second = resolveBinaryPath(base)
-    expect(second).toBe(first)
-    expect(second).toBe(`${base}.cmd`)
-  })
+    it('uses the cache on the second lookup (same path)', () => {
+      const base = path.join(tmp, 'tool-cache')
+      writeFileSync(`${base}.cmd`, 'rem')
+      const first = resolveBinaryPath(base)
+      const second = resolveBinaryPath(base)
+      expect(second).toBe(first)
+      expect(second).toBe(`${base}.cmd`)
+    })
 
-  it('drops the cached path when the cached file disappears', async () => {
-    const base = path.join(tmp, 'tool-stale')
-    writeFileSync(`${base}.cmd`, 'rem')
-    expect(resolveBinaryPath(base)).toBe(`${base}.cmd`)
-    await safeDelete(`${base}.cmd`)
-    // Subsequent lookup invalidates the stale cache entry.
-    // With no wrapper present, falls back to basePath.
-    expect(resolveBinaryPath(base)).toBe(base)
-  })
-})
+    it('drops the cached path when the cached file disappears', async () => {
+      const base = path.join(tmp, 'tool-stale')
+      writeFileSync(`${base}.cmd`, 'rem')
+      expect(resolveBinaryPath(base)).toBe(`${base}.cmd`)
+      await safeDelete(`${base}.cmd`)
+      // Subsequent lookup invalidates the stale cache entry.
+      // With no wrapper present, falls back to basePath.
+      expect(resolveBinaryPath(base)).toBe(base)
+    })
+  },
+)
 
-describe.sequential('dlx/binary-resolution — makePackageBinsExecutable (isWin32() stub)', () => {
-  it('early-returns without touching the filesystem on Windows', () => {
-    // No package.json need exist; the Win32 path returns before any I/O.
-    expect(() =>
-      makePackageBinsExecutable(tmp, 'never-installed'),
-    ).not.toThrow()
-  })
-})
+describe(
+  'dlx/binary-resolution — makePackageBinsExecutable (isWin32() stub)',
+  { concurrent: false },
+  () => {
+    it('early-returns without touching the filesystem on Windows', () => {
+      // No package.json need exist; the Win32 path returns before any I/O.
+      expect(() =>
+        makePackageBinsExecutable(tmp, 'never-installed'),
+      ).not.toThrow()
+    })
+  },
+)

@@ -70,7 +70,7 @@ vi.mock(
 
 const REPO = { owner: 'SocketDev', repo: 'socket-btm' }
 
-describe.sequential('releases/github-downloads — extras', () => {
+describe('releases/github-downloads — extras', { concurrent: false }, () => {
   let testDir: string
 
   beforeEach(() => {

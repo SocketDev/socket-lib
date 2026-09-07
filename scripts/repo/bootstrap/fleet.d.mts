@@ -19,7 +19,8 @@ export interface InstallConfig {
   readonly bundle?: string | undefined;
   readonly dest?: string | undefined;
   /**
-   * Materialize mirrors from this checkout's own template/base (producer).
+   * Materialize mirrors from this checkout's own template/base/universal
+   * (producer).
    */
   readonly fromTemplate?: boolean | undefined;
   readonly dryRun?: boolean | undefined;
@@ -264,11 +265,24 @@ export declare function fetchBundleSource(config: {
   readonly tmp: string;
 }): Promise<FetchedBundle>;
 //#endregion
+//#region template/base/universal/scripts/fleet/lib/conditional-config.d.mts
+type ConfigFlag = 'bundlesVendoredDeps' | 'hasGhcr' | 'hasNapi' | 'hasPrebakes' | 'hasRust' | 'isGithubAction';
+//#endregion
+//#region scripts/repo/gen/bootstrap/src/conditional-files.d.mts
+interface ConditionalManifestGroup {
+  readonly marker?: string | undefined;
+  readonly capability?: string | undefined;
+  readonly buildType?: string | undefined;
+  readonly configFlag?: ConfigFlag | undefined;
+  readonly files: readonly string[];
+}
+//#endregion
 //#region scripts/repo/gen/bootstrap/src/fleet-pack-manifest.d.mts
 export declare function normalizeManifestEntryPath(entry: {
   path: string;
 }): string;
 export interface FleetFileManifest {
+  conditionalScopedFiles?: readonly ConditionalManifestGroup[] | undefined;
   /**
    * Hook payloads gated on a member capability (stamped from each hook's
    * `// @capability <name>` header at pack build time): placed only when the
@@ -643,7 +657,7 @@ export declare function hasIdenticalBytes(source: string, target: string): boole
 export declare function installFiles(filesDir: string, dest: string, manifest: BundleManifest, options?: InstallFilesOptions | undefined): InstallFilesResult;
 /**
  * Materialize the fleet mirrors in a PRODUCER checkout from its own
- * `template/base`, rather than from a fetched bundle.
+ * `template/base/universal`, rather than from a fetched bundle.
  *
  * The wheelhouse holds the canon locally, so it has no bundle to fetch and is
  * not a fleet-pack consumer. That is the only reason its mirrors stayed in
@@ -652,13 +666,14 @@ export declare function installFiles(filesDir: string, dest: string, manifest: B
  *
  * Why it must live in this dep-0 entry and not in the cascade: the cascade
  * cannot load without the payload it would be materializing.
- * `template/base/scripts/fleet/land-work.mts` and its siblings import the LIVE
- * `.claude/hooks/fleet/_shared/**`, so a checkout whose mirrors are absent dies
- * at module resolution before any fixer runs. Same reason the fetcher cannot
- * ship inside the bundle it fetches.
+ * `template/base/universal/scripts/fleet/land-work.mts` and its siblings import
+ * the LIVE `.claude/hooks/fleet/_shared/**`, so a checkout whose mirrors are
+ * absent dies at module resolution before any fixer runs. Same reason the
+ * fetcher cannot ship inside the bundle it fetches.
  *
- * Returns undefined when `template/base` is absent, which is every consumer:
- * the caller then knows this checkout is not a producer and fetches instead.
+ * Returns undefined when `template/base/universal` is absent, which is every
+ * consumer: the caller then knows this checkout is not a producer and fetches
+ * instead.
  */
 export declare function materializeFromLocalTemplate(dest: string, manifest: BundleManifest, options?: InstallFilesOptions | undefined): InstallFilesResult | undefined;
 /**
@@ -694,9 +709,10 @@ export declare const SYNC_FLEET_SCRIPT = "node scripts/repo/bootstrap/fleet.mjs"
 export declare const PREPARE_FETCH = "node scripts/repo/bootstrap/prepare.mts";
 /**
  * The PRODUCER belt: materialize the mirrors from this checkout's own
- * `template/base` instead of fetching a bundle. The wheelhouse's counterpart to
- * PREPARE_FETCH, and it runs in the same slot for the same reason — the
- * git-hooks installer it precedes is itself one of the untracked mirrors.
+ * `template/base/universal` instead of fetching a bundle. The wheelhouse's
+ * counterpart to PREPARE_FETCH, and it runs in the same slot for the same
+ * reason — the git-hooks installer it precedes is itself one of the untracked
+ * mirrors.
  */
 export declare const PREPARE_FROM_TEMPLATE = "node scripts/repo/bootstrap/fleet.mjs --from-template";
 export declare const FLEET_STATUS_SCRIPT = "node scripts/repo/bootstrap/fleet.mjs --status";

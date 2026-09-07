@@ -45,7 +45,7 @@ describe('releases/socket-btm', () => {
     })
   })
 
-  describe.sequential('downloadSocketBtmRelease', () => {
+  describe('downloadSocketBtmRelease', { concurrent: false }, () => {
     beforeEach(() => {
       vi.mocked(downloadGitHubRelease).mockReset()
       vi.mocked(getLatestRelease).mockReset()

@@ -111,6 +111,10 @@ export function isExportsInteropGlue(node: AstNode): boolean {
   if (!firstArg) {
     return false
   }
+  return isExportsTarget(firstArg)
+}
+
+export function isExportsTarget(firstArg: AstNode): boolean {
   // Object.defineProperty(exports, ...)
   if (firstArg.type === 'Identifier' && firstArg.name === 'exports') {
     return true

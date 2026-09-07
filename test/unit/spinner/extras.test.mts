@@ -10,7 +10,7 @@ import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { Spinner } from '../../../src/spinner/create.mjs'
 import { withSpinnerRestore } from '../../../src/spinner/with.mjs'
 
-describe.sequential('spinner — extras', () => {
+describe('spinner — extras', { concurrent: false }, () => {
   beforeEach(() => {
     // SOCKET_DEBUG enables debug mode.
     setEnv('SOCKET_DEBUG', '*')

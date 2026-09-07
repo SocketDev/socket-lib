@@ -20,7 +20,7 @@ import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { invalidateCaches } from '../../../src/paths/rewire.mjs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
-describe.sequential('ttl-cache', () => {
+describe('ttl-cache', { concurrent: false }, () => {
   let cache: ReturnType<typeof createTtlCache>
   let testCacheDir: string
 

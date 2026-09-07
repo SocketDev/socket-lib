@@ -514,7 +514,7 @@ function isLoggerExemptPath(file: string): boolean {
   // template/ is the canonical source for code that cascades to
   // .claude/hooks/, .git-hooks/, and scripts/. Apply the same
   // exemption at the source. stripTemplateLayer collapses the
-  // archetype layer segment (template/base/... → template/...) so
+  // archetype layer segment (template/base/universal/... → template/...) so
   // the move stays exempt.
   const layerless = stripTemplateLayer(file)
   return (

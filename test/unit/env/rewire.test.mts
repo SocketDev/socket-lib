@@ -90,7 +90,7 @@ describe('env rewiring', () => {
     })
   })
 
-  describe.sequential('isolated test scenarios', () => {
+  describe('isolated test scenarios', { concurrent: false }, () => {
     beforeEach(() => {
       resetEnv()
     })

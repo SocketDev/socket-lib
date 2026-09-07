@@ -42,7 +42,7 @@ afterAll(async () => {
   await stopDlxTestServer(testServer.server)
 })
 
-describe.sequential('dlx-binary', () => {
+describe('dlx-binary', { concurrent: false }, () => {
   describe('getDlxCachePath', () => {
     it('should return normalized cache path', () => {
       const cachePath = getDlxCachePath()

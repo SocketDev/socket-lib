@@ -1,22 +1,21 @@
 /**
- * @file Unit coverage for the primordials-surface narrowing in
- *   scripts/repo/build-externals/transform-primordials.mts.
- *   `parseExports` in tools/prim builds its exports set and exportToLeaf map
- *   without element types, so the surface arrives as `Set<unknown>` /
- *   `Map<any, any>` and cannot satisfy applyCodemod's `Set<string>`. These two
- *   helpers narrow by TEST rather than by assertion, and that choice is what
- *   the specs pin: an assertion would claim a guarantee the producer does not
- *   make, whereas dropping a non-string name is correct — such a name could
- *   never drive a rewrite.
+ * Tests surface filtering and the generated bundle consumer.
  */
 
 import assert from 'node:assert/strict'
+import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
+import os from 'node:os'
+import path from 'node:path'
+
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 import { describe, test } from 'vitest'
 
 import {
   stringMap,
   stringSet,
+  transformPrimordials,
 } from '../../../scripts/repo/build-externals/transform-primordials.mts'
 
 describe('stringSet', () => {
@@ -116,5 +115,44 @@ describe('stringMap', () => {
 
   test('accepts a Map directly, which is how the surface arrives', () => {
     assert.deepEqual([...stringMap(new Map([['a', 'leaf']]))], [['a', 'leaf']])
+  })
+})
+
+describe('transformPrimordials bundle consumer', () => {
+  test('keeps an executable per-leaf rewrite and returns isolated counters', async () => {
+    const root = mkdtempSync(path.join(os.tmpdir(), 'primordial-bundle-'))
+    try {
+      const sourceDir = path.join(root, 'src', 'primordials')
+      const distDir = path.join(root, 'dist')
+      const externalDir = path.join(distDir, 'external')
+      const runtimeDir = path.join(distDir, 'primordials')
+      for (const dir of [sourceDir, externalDir, runtimeDir]) {
+        mkdirSync(dir, { recursive: true })
+      }
+      writeFileSync(
+        path.join(sourceDir, 'array.mts'),
+        'export const ArrayIsArray = Array.isArray',
+      )
+      writeFileSync(
+        path.join(runtimeDir, 'array.js'),
+        'exports.ArrayIsArray = Array.isArray',
+      )
+      const bundle = path.join(externalDir, 'example.js')
+      writeFileSync(bundle, 'module.exports = Array.isArray([])')
+      const result = await transformPrimordials(distDir, externalDir, {
+        quiet: true,
+      })
+      assert.equal(Object.getPrototypeOf(result), null)
+      assert.equal(result.filesChanged, 1)
+      assert.equal(result.rewriteCount, 1)
+      assert.equal(createRequire(import.meta.url)(bundle), true)
+      const second = await transformPrimordials(distDir, externalDir, {
+        quiet: true,
+      })
+      assert.equal(second.filesChanged, 0)
+      assert.equal(second.rewriteCount, 0)
+    } finally {
+      await safeDelete(root)
+    }
   })
 })

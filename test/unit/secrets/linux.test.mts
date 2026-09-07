@@ -198,21 +198,25 @@ afterAll(async () => {
   )
 })
 
-describe.sequential('secrets/linux — isLinuxBackendAvailable', () => {
-  test('returns true when secret-tool --version exits 0', async () => {
-    mockSpawnSync.mockReturnValueOnce({ status: 0 })
-    const { isLinuxBackendAvailable } = await loadFresh()
-    expect(isLinuxBackendAvailable()).toBe(true)
-  })
+describe(
+  'secrets/linux — isLinuxBackendAvailable',
+  { concurrent: false },
+  () => {
+    test('returns true when secret-tool --version exits 0', async () => {
+      mockSpawnSync.mockReturnValueOnce({ status: 0 })
+      const { isLinuxBackendAvailable } = await loadFresh()
+      expect(isLinuxBackendAvailable()).toBe(true)
+    })
 
-  test('returns false when secret-tool is missing (status != 0)', async () => {
-    mockSpawnSync.mockReturnValueOnce({ status: undefined })
-    const { isLinuxBackendAvailable } = await loadFresh()
-    expect(isLinuxBackendAvailable()).toBe(false)
-  })
-})
+    test('returns false when secret-tool is missing (status != 0)', async () => {
+      mockSpawnSync.mockReturnValueOnce({ status: undefined })
+      const { isLinuxBackendAvailable } = await loadFresh()
+      expect(isLinuxBackendAvailable()).toBe(false)
+    })
+  },
+)
 
-describe.sequential('secrets/linux — readLinux', () => {
+describe('secrets/linux — readLinux', { concurrent: false }, () => {
   test('returns trimmed stdout on status 0', async () => {
     mockSpawn.mockImplementationOnce(() =>
       makeFakeChild({ stdout: 'linux-secret\n', exitCode: 0 }),
@@ -247,7 +251,7 @@ describe.sequential('secrets/linux — readLinux', () => {
   })
 })
 
-describe.sequential('secrets/linux — readLinuxSync', () => {
+describe('secrets/linux — readLinuxSync', { concurrent: false }, () => {
   test('returns trimmed stdout on status 0', async () => {
     mockSpawnSync.mockReturnValueOnce({ status: 0, stdout: 'sync-secret\n' })
     const { readLinuxSync } = await loadFresh()
@@ -267,7 +271,7 @@ describe.sequential('secrets/linux — readLinuxSync', () => {
   })
 })
 
-describe.sequential('secrets/linux — writeLinux', () => {
+describe('secrets/linux — writeLinux', { concurrent: false }, () => {
   test('resolves on status 0', async () => {
     // `stdinCapture: writes` swaps the FakeChild's default no-op stdin
     // for a sink that records every chunk — so the assertion below can
@@ -328,7 +332,7 @@ describe.sequential('secrets/linux — writeLinux', () => {
   })
 })
 
-describe.sequential('secrets/linux — writeLinuxSync', () => {
+describe('secrets/linux — writeLinuxSync', { concurrent: false }, () => {
   test('returns silently on status 0', async () => {
     mockSpawnSync.mockReturnValueOnce({ status: 0, stderr: '' })
     const { writeLinuxSync } = await loadFresh()
@@ -361,7 +365,7 @@ describe.sequential('secrets/linux — writeLinuxSync', () => {
   })
 })
 
-describe.sequential('secrets/linux — deleteLinux', () => {
+describe('secrets/linux — deleteLinux', { concurrent: false }, () => {
   test('returns "removed" on status 0', async () => {
     mockSpawn.mockImplementationOnce(() => makeFakeChild({ exitCode: 0 }))
     const { deleteLinux } = await loadFresh()
@@ -386,7 +390,7 @@ describe.sequential('secrets/linux — deleteLinux', () => {
   })
 })
 
-describe.sequential('secrets/linux — deleteLinuxSync', () => {
+describe('secrets/linux — deleteLinuxSync', { concurrent: false }, () => {
   test('returns "removed" on status 0', async () => {
     mockSpawnSync.mockReturnValueOnce({ status: 0 })
     const { deleteLinuxSync } = await loadFresh()

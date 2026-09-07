@@ -5,7 +5,7 @@ import {
   skillspectorFromVfs,
 } from '../../../../src/external-tools/skillspector/from-vfs.mjs'
 
-describe.sequential('external-tools/skillspector/from-vfs', () => {
+describe('external-tools/skillspector/from-vfs', { concurrent: false }, () => {
   test('exports SKILLSPECTOR_VFS_KEY constant', () => {
     expect(SKILLSPECTOR_VFS_KEY).toBe('skillspector')
   })

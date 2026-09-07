@@ -216,7 +216,7 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
   // Find the first attestation with valid provenance data.
   const provenance = findProvenance(attestations)
   if (!provenance) {
-    return { level: 'attested' }
+    return { __proto__: null, level: 'attested' }
   }
 
   const provenanceData = provenance as {
@@ -265,6 +265,7 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
     isTrustedPublisher(repository)
 
   return {
+    __proto__: null,
     commitSha,
     gitRef,
     level: trusted ? 'trusted' : 'attested',

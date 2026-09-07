@@ -5,7 +5,7 @@ import {
   trufflehogFromVfs,
 } from '../../../../src/external-tools/trufflehog/from-vfs.mjs'
 
-describe.sequential('external-tools/trufflehog/from-vfs', () => {
+describe('external-tools/trufflehog/from-vfs', { concurrent: false }, () => {
   test('exports TRUFFLEHOG_VFS_KEY constant', () => {
     expect(TRUFFLEHOG_VFS_KEY).toBe('trufflehog')
   })

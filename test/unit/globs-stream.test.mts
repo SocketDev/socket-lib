@@ -149,7 +149,7 @@ describe('globStreamLicenses', () => {
 // `sequence.concurrent: true` (off-CI), parallel `it` blocks would
 // overwrite the shared variable mid-run. Force sequential here so
 // each test sees its own beforeEach-created directory.
-describe.sequential('trailing-slash ignore patterns', () => {
+describe('trailing-slash ignore patterns', { concurrent: false }, () => {
   let tmpRoot: string
 
   beforeEach(async () => {

@@ -56,7 +56,7 @@ export function snapshotEnv(): { restore: () => void } {
   }
 }
 
-describe.sequential('secrets/socket-api-token', () => {
+describe('secrets/socket-api-token', { concurrent: false }, () => {
   let envSnap: { restore: () => void }
   beforeEach(() => {
     envSnap = snapshotEnv()

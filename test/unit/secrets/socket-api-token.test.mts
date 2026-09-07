@@ -26,106 +26,114 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('secrets/socket-api-token — readSocketApiToken (async)', () => {
-  test('returns the resolved value', async () => {
-    const { readSocketApiToken, resolveMock } = await loadFresh()
-    resolveMock.mockResolvedValueOnce({
-      value: 'tok-xyz',
-      source: 'env',
-      account: 'SOCKET_API_TOKEN',
+describe(
+  'secrets/socket-api-token — readSocketApiToken (async)',
+  { concurrent: false },
+  () => {
+    test('returns the resolved value', async () => {
+      const { readSocketApiToken, resolveMock } = await loadFresh()
+      resolveMock.mockResolvedValueOnce({
+        value: 'tok-xyz',
+        source: 'env',
+        account: 'SOCKET_API_TOKEN',
+      })
+      expect(await readSocketApiToken()).toBe('tok-xyz')
     })
-    expect(await readSocketApiToken()).toBe('tok-xyz')
-  })
 
-  test('passes service="socketsecurity" and the canonical accounts list', async () => {
-    const { readSocketApiToken, resolveMock } = await loadFresh()
-    resolveMock.mockResolvedValueOnce(undefined)
-    await readSocketApiToken()
-    const callArg = resolveMock.mock.calls[0]![0] as {
-      service: string
-      accounts: readonly string[]
-    }
-    expect(callArg.service).toBe('socketsecurity')
-    // socket-api-token-env: bootstrap — asserting the source's literal account
-    // fallback list, which includes the SOCKET_API_KEY legacy alias by design.
-    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
-  })
-
-  test('falls back to the legacy service="socket-cli" when socketsecurity misses', async () => {
-    const { readSocketApiToken, resolveMock } = await loadFresh()
-    // Primary (socketsecurity) misses → the `??` triggers the legacy call.
-    resolveMock.mockResolvedValueOnce(undefined)
-    resolveMock.mockResolvedValueOnce({ value: 'legacy-token' })
-    const token = await readSocketApiToken()
-    expect(resolveMock.mock.calls).toHaveLength(2)
-    expect((resolveMock.mock.calls[1]![0] as { service: string }).service).toBe(
-      'socket-cli',
-    )
-    expect(token).toBe('legacy-token')
-  })
-
-  test('does not call the legacy service when socketsecurity resolves', async () => {
-    const { readSocketApiToken, resolveMock } = await loadFresh()
-    resolveMock.mockResolvedValueOnce({ value: 'primary-token' })
-    const token = await readSocketApiToken()
-    // The `??` short-circuits — no legacy fallback call.
-    expect(resolveMock.mock.calls).toHaveLength(1)
-    expect(token).toBe('primary-token')
-  })
-
-  test('forwards allowEnvOnly to resolve', async () => {
-    const { readSocketApiToken, resolveMock } = await loadFresh()
-    resolveMock.mockResolvedValueOnce(undefined)
-    await readSocketApiToken({ allowEnvOnly: true })
-    const callArg = resolveMock.mock.calls[0]![0] as { allowEnvOnly: unknown }
-    expect(callArg.allowEnvOnly).toBe(true)
-  })
-
-  test('returns undefined when resolve returns undefined', async () => {
-    const { readSocketApiToken, resolveMock } = await loadFresh()
-    resolveMock.mockResolvedValueOnce(undefined)
-    expect(await readSocketApiToken()).toBeUndefined()
-  })
-})
-
-describe.sequential('secrets/socket-api-token — readSocketApiTokenSync', () => {
-  test('returns the resolved value', async () => {
-    const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
-    resolveSyncMock.mockReturnValueOnce({
-      value: 'tok-xyz',
-      source: 'keychain',
-      account: 'SOCKET_API_TOKEN',
+    test('passes service="socketsecurity" and the canonical accounts list', async () => {
+      const { readSocketApiToken, resolveMock } = await loadFresh()
+      resolveMock.mockResolvedValueOnce(undefined)
+      await readSocketApiToken()
+      const callArg = resolveMock.mock.calls[0]![0] as {
+        service: string
+        accounts: readonly string[]
+      }
+      expect(callArg.service).toBe('socketsecurity')
+      // socket-api-token-env: bootstrap — asserting the source's literal account
+      // fallback list, which includes the SOCKET_API_KEY legacy alias by design.
+      expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
     })
-    expect(readSocketApiTokenSync()).toBe('tok-xyz')
-  })
 
-  test('passes service="socketsecurity" and the canonical accounts list', async () => {
-    const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
-    resolveSyncMock.mockReturnValueOnce(undefined)
-    readSocketApiTokenSync()
-    const callArg = resolveSyncMock.mock.calls[0]![0] as {
-      service: string
-      accounts: readonly string[]
-    }
-    expect(callArg.service).toBe('socketsecurity')
-    // socket-api-token-env: bootstrap — asserting the source's literal account
-    // fallback list, which includes the SOCKET_API_KEY legacy alias by design.
-    expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
-  })
+    test('falls back to the legacy service="socket-cli" when socketsecurity misses', async () => {
+      const { readSocketApiToken, resolveMock } = await loadFresh()
+      // Primary (socketsecurity) misses → the `??` triggers the legacy call.
+      resolveMock.mockResolvedValueOnce(undefined)
+      resolveMock.mockResolvedValueOnce({ value: 'legacy-token' })
+      const token = await readSocketApiToken()
+      expect(resolveMock.mock.calls).toHaveLength(2)
+      expect(
+        (resolveMock.mock.calls[1]![0] as { service: string }).service,
+      ).toBe('socket-cli')
+      expect(token).toBe('legacy-token')
+    })
 
-  test('forwards allowEnvOnly to resolveSync', async () => {
-    const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
-    resolveSyncMock.mockReturnValueOnce(undefined)
-    readSocketApiTokenSync({ allowEnvOnly: true })
-    const callArg = resolveSyncMock.mock.calls[0]![0] as {
-      allowEnvOnly: unknown
-    }
-    expect(callArg.allowEnvOnly).toBe(true)
-  })
+    test('does not call the legacy service when socketsecurity resolves', async () => {
+      const { readSocketApiToken, resolveMock } = await loadFresh()
+      resolveMock.mockResolvedValueOnce({ value: 'primary-token' })
+      const token = await readSocketApiToken()
+      // The `??` short-circuits — no legacy fallback call.
+      expect(resolveMock.mock.calls).toHaveLength(1)
+      expect(token).toBe('primary-token')
+    })
 
-  test('returns undefined when resolveSync returns undefined', async () => {
-    const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
-    resolveSyncMock.mockReturnValueOnce(undefined)
-    expect(readSocketApiTokenSync()).toBeUndefined()
-  })
-})
+    test('forwards allowEnvOnly to resolve', async () => {
+      const { readSocketApiToken, resolveMock } = await loadFresh()
+      resolveMock.mockResolvedValueOnce(undefined)
+      await readSocketApiToken({ allowEnvOnly: true })
+      const callArg = resolveMock.mock.calls[0]![0] as { allowEnvOnly: unknown }
+      expect(callArg.allowEnvOnly).toBe(true)
+    })
+
+    test('returns undefined when resolve returns undefined', async () => {
+      const { readSocketApiToken, resolveMock } = await loadFresh()
+      resolveMock.mockResolvedValueOnce(undefined)
+      expect(await readSocketApiToken()).toBeUndefined()
+    })
+  },
+)
+
+describe(
+  'secrets/socket-api-token — readSocketApiTokenSync',
+  { concurrent: false },
+  () => {
+    test('returns the resolved value', async () => {
+      const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
+      resolveSyncMock.mockReturnValueOnce({
+        value: 'tok-xyz',
+        source: 'keychain',
+        account: 'SOCKET_API_TOKEN',
+      })
+      expect(readSocketApiTokenSync()).toBe('tok-xyz')
+    })
+
+    test('passes service="socketsecurity" and the canonical accounts list', async () => {
+      const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
+      resolveSyncMock.mockReturnValueOnce(undefined)
+      readSocketApiTokenSync()
+      const callArg = resolveSyncMock.mock.calls[0]![0] as {
+        service: string
+        accounts: readonly string[]
+      }
+      expect(callArg.service).toBe('socketsecurity')
+      // socket-api-token-env: bootstrap — asserting the source's literal account
+      // fallback list, which includes the SOCKET_API_KEY legacy alias by design.
+      expect(callArg.accounts).toEqual(['SOCKET_API_TOKEN', 'SOCKET_API_KEY'])
+    })
+
+    test('forwards allowEnvOnly to resolveSync', async () => {
+      const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
+      resolveSyncMock.mockReturnValueOnce(undefined)
+      readSocketApiTokenSync({ allowEnvOnly: true })
+      const callArg = resolveSyncMock.mock.calls[0]![0] as {
+        allowEnvOnly: unknown
+      }
+      expect(callArg.allowEnvOnly).toBe(true)
+    })
+
+    test('returns undefined when resolveSync returns undefined', async () => {
+      const { readSocketApiTokenSync, resolveSyncMock } = await loadFresh()
+      resolveSyncMock.mockReturnValueOnce(undefined)
+      expect(readSocketApiTokenSync()).toBeUndefined()
+    })
+  },
+)

@@ -224,42 +224,52 @@ async function main(): Promise<void> {
 
     const quiet = isQuiet(values)
 
-    // `--needed` is the `prepare`/install path. In CI, skip it entirely: CI
-    // runs explicit build/test/check steps, so the install-time `prepare`
-    // build is redundant work that only adds latency to every `pnpm install`
-    // in the pipeline. (Locally, `--needed` still builds when dist is absent.)
-    if (flags.needed && process.env['CI'] === 'true') {
-      if (!quiet) {
-        logger.info(
-          'CI detected — skipping prepare-time build (CI builds explicitly)',
-        )
+    function shouldSkipBuild(): boolean {
+      // `--needed` is the `prepare`/install path. In CI, skip it entirely: CI
+      // runs explicit build/test/check steps, so the install-time `prepare`
+      // build is redundant work that only adds latency to every `pnpm install`
+      // in the pipeline. (Locally, `--needed` still builds when dist is absent.)
+      if (flags.needed && process.env['CI'] === 'true') {
+        if (!quiet) {
+          logger.info(
+            'CI detected — skipping prepare-time build (CI builds explicitly)',
+          )
+        }
+        process.exitCode = 0
+        return true
       }
-      process.exitCode = 0
-      return
-    }
 
-    // Check if build is needed. isBuildNeeded() short-circuits when dist
-    // artifacts already exist, so a local `pnpm install` with a built dist/
-    // is near-instant instead of rebuilding every time.
-    if (flags.needed && !isBuildNeeded()) {
-      if (!quiet) {
-        logger.info('Build artifacts exist, skipping build')
+      // Check if build is needed. isBuildNeeded() short-circuits when dist
+      // artifacts already exist, so a local `pnpm install` with a built dist/
+      // is near-instant instead of rebuilding every time.
+      if (flags.needed && !isBuildNeeded()) {
+        if (!quiet) {
+          logger.info('Build artifacts exist, skipping build')
+        }
+        process.exitCode = 0
+        return true
       }
-      process.exitCode = 0
+
+      return false
+    }
+    if (shouldSkipBuild()) {
       return
     }
 
     const exitCode = await runSelectedBuild({ ...flags, quiet })
 
-    // Print final status and footer
-    if (!quiet) {
-      if (exitCode === 0) {
-        logger.success('Build completed successfully!')
-      } else {
-        logger.error('Build failed')
+    function reportBuildStatus(): void {
+      // Print final status and footer
+      if (!quiet) {
+        if (exitCode === 0) {
+          logger.success('Build completed successfully!')
+        } else {
+          logger.error('Build failed')
+        }
+        printFooter()
       }
-      printFooter()
     }
+    reportBuildStatus()
 
     if (exitCode !== 0) {
       process.exitCode = exitCode

@@ -37,7 +37,7 @@ afterAll(async () => {
   await stopDlxTestServer(testServer.server)
 })
 
-describe.sequential('dlx-binary re-validation', () => {
+describe('dlx-binary re-validation', { concurrent: false }, () => {
   describe('cache metadata re-download', () => {
     it('should re-download if metadata is invalid', async () => {
       await runWithTempDir(async tmpDir => {

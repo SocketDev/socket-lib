@@ -68,7 +68,7 @@ function registryError(code: string): Error & { code: string } {
   return err
 }
 
-describe.sequential('ensurePackageInstalled failure paths', () => {
+describe('ensurePackageInstalled failure paths', { concurrent: false }, () => {
   let tmpDir: string
 
   beforeEach(() => {

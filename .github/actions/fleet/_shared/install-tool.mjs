@@ -113,6 +113,25 @@ export function parseIntegrity(s) {
   )
 }
 
+export async function fetchToolResponse(url, headers) {
+  for (let attempt = 0; ; attempt++) {
+    // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- dep-0 bootstrap
+    const response = await fetch(url, {
+      redirect: 'follow',
+      headers,
+      signal: AbortSignal.timeout(120_000),
+    })
+    if (
+      attempt === 2 ||
+      ![408, 429, 500, 502, 503, 504].includes(response.status)
+    ) {
+      return response
+    }
+    await response.body?.cancel()
+    await new Promise(resolve => setTimeout(resolve, 1000 * 2 ** attempt))
+  }
+}
+
 // true when this file is the invoked script (not imported). Lets the pure
 // helpers above be imported by unit tests without triggering the download /
 // verify / extract pipeline.
@@ -183,10 +202,7 @@ async function run() {
   // the never.
   // oxlint-disable-next-line socket/export-top-level-functions, typescript/consistent-return -- action helper
   async function main() {
-    // pre-setup-node action; @socketsecurity/lib-stable not installed yet, only
-    // built-in fetch is available.
-    // oxlint-disable-next-line socket/no-fetch-prefer-http-request -- fetch only
-    const res = await fetch(url, { redirect: 'follow', headers })
+    const res = await fetchToolResponse(url, headers)
     if (!res.ok) {
       // oxlint-disable-next-line socket/no-logger-glyph-prefix -- bootstrap shim; logger.fail does not print a glyph
       logger.fail(

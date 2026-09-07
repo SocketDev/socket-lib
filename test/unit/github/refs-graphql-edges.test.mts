@@ -28,96 +28,110 @@ function mkResponse(body: Buffer, ok: boolean, status: number) {
   } as unknown as Awaited<ReturnType<typeof httpRequest>>
 }
 
-describe.sequential('github/refs-graphql — fetchRefShaViaGraphQL', () => {
-  beforeEach(() => {
-    vi.mocked(httpRequest).mockReset()
-  })
-  afterEach(() => {
-    vi.clearAllMocks()
-  })
+describe(
+  'github/refs-graphql — fetchRefShaViaGraphQL',
+  { concurrent: false },
+  () => {
+    beforeEach(() => {
+      vi.mocked(httpRequest).mockReset()
+    })
+    afterEach(() => {
+      vi.clearAllMocks()
+    })
 
-  it('returns undefined on non-OK status', async () => {
-    vi.mocked(httpRequest).mockResolvedValueOnce(
-      mkResponse(Buffer.from(''), false, 503),
-    )
-    expect(await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {})).toBeUndefined()
-  })
+    it('returns undefined on non-OK status', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        mkResponse(Buffer.from(''), false, 503),
+      )
+      expect(
+        await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {}),
+      ).toBeUndefined()
+    })
 
-  it('returns undefined when GraphQL returns empty body', async () => {
-    vi.mocked(httpRequest).mockResolvedValueOnce(
-      mkResponse(Buffer.from(''), true, 200),
-    )
-    expect(await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {})).toBeUndefined()
-  })
+    it('returns undefined when GraphQL returns empty body', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        mkResponse(Buffer.from(''), true, 200),
+      )
+      expect(
+        await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {}),
+      ).toBeUndefined()
+    })
 
-  it('returns undefined on malformed JSON body', async () => {
-    vi.mocked(httpRequest).mockResolvedValueOnce(
-      mkResponse(Buffer.from('<html>not json</html>'), true, 200),
-    )
-    expect(await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {})).toBeUndefined()
-  })
+    it('returns undefined on malformed JSON body', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        mkResponse(Buffer.from('<html>not json</html>'), true, 200),
+      )
+      expect(
+        await fetchRefShaViaGraphQL('o', 'r', 'v1.0.0', {}),
+      ).toBeUndefined()
+    })
 
-  it('returns branch OID when tagRef is null but branchRef resolves', async () => {
-    vi.mocked(httpRequest).mockResolvedValueOnce(
-      mkResponse(
-        Buffer.from(
-          JSONStringify({
-            data: {
-              repository: {
-                tagRef: GRAPHQL_NULL,
-                branchRef: { target: { oid: 'sha-branch' } },
-                commit: GRAPHQL_NULL,
+    it('returns branch OID when tagRef is null but branchRef resolves', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        mkResponse(
+          Buffer.from(
+            JSONStringify({
+              data: {
+                repository: {
+                  tagRef: GRAPHQL_NULL,
+                  branchRef: { target: { oid: 'sha-branch' } },
+                  commit: GRAPHQL_NULL,
+                },
               },
-            },
-          }),
+            }),
+          ),
+          true,
+          200,
         ),
-        true,
-        200,
-      ),
-    )
-    expect(await fetchRefShaViaGraphQL('o', 'r', 'main', {})).toBe('sha-branch')
-  })
+      )
+      expect(await fetchRefShaViaGraphQL('o', 'r', 'main', {})).toBe(
+        'sha-branch',
+      )
+    })
 
-  it('returns undefined when all three aliases are null', async () => {
-    vi.mocked(httpRequest).mockResolvedValueOnce(
-      mkResponse(
-        Buffer.from(
-          JSONStringify({
-            data: {
-              repository: {
-                tagRef: GRAPHQL_NULL,
-                branchRef: GRAPHQL_NULL,
-                commit: GRAPHQL_NULL,
+    it('returns undefined when all three aliases are null', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        mkResponse(
+          Buffer.from(
+            JSONStringify({
+              data: {
+                repository: {
+                  tagRef: GRAPHQL_NULL,
+                  branchRef: GRAPHQL_NULL,
+                  commit: GRAPHQL_NULL,
+                },
               },
-            },
-          }),
+            }),
+          ),
+          true,
+          200,
         ),
-        true,
-        200,
-      ),
-    )
-    expect(await fetchRefShaViaGraphQL('o', 'r', 'unknown', {})).toBeUndefined()
-  })
+      )
+      expect(
+        await fetchRefShaViaGraphQL('o', 'r', 'unknown', {}),
+      ).toBeUndefined()
+    })
 
-  it('sends Authorization header when token option is provided', async () => {
-    vi.mocked(httpRequest).mockResolvedValueOnce(
-      mkResponse(
-        Buffer.from(
-          JSONStringify({
-            data: {
-              repository: {
-                branchRef: { target: { oid: 'sha-auth' } },
+    it('sends Authorization header when token option is provided', async () => {
+      vi.mocked(httpRequest).mockResolvedValueOnce(
+        mkResponse(
+          Buffer.from(
+            JSONStringify({
+              data: {
+                repository: {
+                  branchRef: { target: { oid: 'sha-auth' } },
+                },
               },
-            },
-          }),
+            }),
+          ),
+          true,
+          200,
         ),
-        true,
-        200,
-      ),
-    )
-    await fetchRefShaViaGraphQL('o', 'r', 'main', { token: 'gh-tok-xyz' })
-    const call = vi.mocked(httpRequest).mock.calls[0]
-    const opts = call?.[1] as { headers?: Record<string, string> | undefined }
-    expect(opts?.headers?.['Authorization']).toBe('Bearer gh-tok-xyz')
-  })
-})
+      )
+      await fetchRefShaViaGraphQL('o', 'r', 'main', { token: 'gh-tok-xyz' })
+      const call = vi.mocked(httpRequest).mock.calls[0]
+      const opts = call?.[1] as { headers?: Record<string, string> | undefined }
+      expect(opts?.headers?.['Authorization']).toBe('Bearer gh-tok-xyz')
+    })
+  },
+)

@@ -41,7 +41,7 @@ afterEach(async () => {
   await safeDelete(tmpDir)
 })
 
-describe.sequential('readJson cache (async)', () => {
+describe('readJson cache (async)', { concurrent: false }, () => {
   it('caches successive reads of the same file', async () => {
     const file = path.join(tmpDir, 'alpha.json')
     await fs.writeFile(file, JSON.stringify({ count: 1 }))
@@ -94,7 +94,7 @@ describe.sequential('readJson cache (async)', () => {
   })
 })
 
-describe.sequential('readJsonSync cache', () => {
+describe('readJsonSync cache', { concurrent: false }, () => {
   it('caches successive reads', () => {
     const file = path.join(tmpDir, 'alpha.json')
     writeFileSync(file, JSON.stringify({ count: 1 }))
@@ -115,7 +115,7 @@ describe.sequential('readJsonSync cache', () => {
   })
 })
 
-describe.sequential('cache controls', () => {
+describe('cache controls', { concurrent: false }, () => {
   it('clearReadJsonCache drops all entries and resets stats', async () => {
     const file = path.join(tmpDir, 'alpha.json')
     await fs.writeFile(file, JSON.stringify({ v: 1 }))

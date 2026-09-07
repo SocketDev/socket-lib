@@ -40,7 +40,7 @@ export function makeFsError(code: string): Error {
   return e
 }
 
-describe.sequential('dlx/packages — error branches', () => {
+describe('dlx/packages — error branches', { concurrent: false }, () => {
   let testDlxDir: string
 
   beforeEach(() => {

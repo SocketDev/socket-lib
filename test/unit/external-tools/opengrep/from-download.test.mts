@@ -30,7 +30,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/opengrep/from-download', () => {
+describe('external-tools/opengrep/from-download', { concurrent: false }, () => {
   test('returns undefined when the platform-arch is not shipped', async () => {
     const { opengrepFromDownload, downloadMock, archiveMock } =
       await loadFresh()

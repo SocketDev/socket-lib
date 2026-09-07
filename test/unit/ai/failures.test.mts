@@ -6,7 +6,7 @@ import {
   isQuotaExhausted,
 } from '../../../src/ai/failures.mjs'
 
-describe.sequential('isOverloaded', () => {
+describe('isOverloaded', { concurrent: false }, () => {
   test('detects "API Error: 529" in stdout', () => {
     expect(isOverloaded('API Error: 529 Overloaded', '')).toBe(true)
   })
@@ -29,7 +29,7 @@ describe.sequential('isOverloaded', () => {
   })
 })
 
-describe.sequential('isQuotaExhausted', () => {
+describe('isQuotaExhausted', { concurrent: false }, () => {
   test('detects an HTTP 429 in stdout or stderr', () => {
     expect(isQuotaExhausted('API Error: 429 Too Many Requests', '')).toBe(true)
     expect(isQuotaExhausted('', '429 Too Many Requests')).toBe(true)
@@ -64,7 +64,7 @@ describe.sequential('isQuotaExhausted', () => {
   })
 })
 
-describe.sequential('isModelUnavailable', () => {
+describe('isModelUnavailable', { concurrent: false }, () => {
   // Real CLI output captured while Fable 5 was down.
   test('detects a model offline ("currently unavailable")', () => {
     expect(

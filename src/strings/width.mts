@@ -93,6 +93,7 @@ try {
  *
  * Calculates how many columns a string will occupy when displayed in a
  * terminal, accounting for:
+ *
  * - ANSI escape codes, which are stripped before calculation
  * - Wide characters (CJK ideographs, fullwidth forms) that take 2 columns
  * - Emoji that take 2 columns, complex sequences included

@@ -32,7 +32,7 @@ import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 const cjsRequire = createRequire(import.meta.url)
 const fsCjs = cjsRequire('node:fs') as typeof fsType
 
-describe.sequential('process/lock', () => {
+describe('process/lock', { concurrent: false }, () => {
   let testLockPath: string
 
   beforeEach(() => {

@@ -16,40 +16,44 @@ import {
   resolvePackageJsonEntryExports,
 } from '../../../src/packages/exports.mjs'
 
-describe.sequential('packages/exports — isConditionalExports', () => {
-  it('returns false for non-objects', () => {
-    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
-    expect(isConditionalExports(null)).toBe(false)
-    expect(isConditionalExports(undefined)).toBe(false)
-    expect(isConditionalExports('./index.js')).toBe(false)
-    expect(isConditionalExports(['./index.js'])).toBe(false)
-  })
+describe(
+  'packages/exports — isConditionalExports',
+  { concurrent: false },
+  () => {
+    it('returns false for non-objects', () => {
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
+      expect(isConditionalExports(null)).toBe(false)
+      expect(isConditionalExports(undefined)).toBe(false)
+      expect(isConditionalExports('./index.js')).toBe(false)
+      expect(isConditionalExports(['./index.js'])).toBe(false)
+    })
 
-  it('returns false for empty object', () => {
-    expect(isConditionalExports({})).toBe(false)
-  })
+    it('returns false for empty object', () => {
+      expect(isConditionalExports({})).toBe(false)
+    })
 
-  it('returns true when no keys start with "."', () => {
-    expect(
-      isConditionalExports({
-        import: './index.mjs',
-        require: './index.cjs',
-      }),
-    ).toBe(true)
-  })
+    it('returns true when no keys start with "."', () => {
+      expect(
+        isConditionalExports({
+          import: './index.mjs',
+          require: './index.cjs',
+        }),
+      ).toBe(true)
+    })
 
-  it('returns false when any key starts with "."', () => {
-    expect(isConditionalExports({ '.': './index.js' })).toBe(false)
-    expect(
-      isConditionalExports({
-        '.': './index.js',
-        './utils': './utils.js',
-      }),
-    ).toBe(false)
-  })
-})
+    it('returns false when any key starts with "."', () => {
+      expect(isConditionalExports({ '.': './index.js' })).toBe(false)
+      expect(
+        isConditionalExports({
+          '.': './index.js',
+          './utils': './utils.js',
+        }),
+      ).toBe(false)
+    })
+  },
+)
 
-describe.sequential('packages/exports — isSubpathExports', () => {
+describe('packages/exports — isSubpathExports', { concurrent: false }, () => {
   it('returns false for non-objects', () => {
     // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(isSubpathExports(null)).toBe(false)
@@ -73,7 +77,7 @@ describe.sequential('packages/exports — isSubpathExports', () => {
   })
 })
 
-describe.sequential('packages/exports — getSubpaths', () => {
+describe('packages/exports — getSubpaths', { concurrent: false }, () => {
   it('returns [] for non-objects', () => {
     // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(getSubpaths(null)).toEqual([])
@@ -96,7 +100,7 @@ describe.sequential('packages/exports — getSubpaths', () => {
   })
 })
 
-describe.sequential('packages/exports — getExportFilePaths', () => {
+describe('packages/exports — getExportFilePaths', { concurrent: false }, () => {
   it('returns [] for non-objects', () => {
     // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
     expect(getExportFilePaths(null)).toEqual([])
@@ -139,76 +143,84 @@ describe.sequential('packages/exports — getExportFilePaths', () => {
   })
 })
 
-describe.sequential('packages/exports — resolvePackageJsonEntryExports', () => {
-  it('wraps a string in canonical "." form', () => {
-    expect(resolvePackageJsonEntryExports('./index.js')).toEqual({
-      '.': './index.js',
+describe(
+  'packages/exports — resolvePackageJsonEntryExports',
+  { concurrent: false },
+  () => {
+    it('wraps a string in canonical "." form', () => {
+      expect(resolvePackageJsonEntryExports('./index.js')).toEqual({
+        '.': './index.js',
+      })
     })
-  })
 
-  it('wraps an array in canonical "." form', () => {
-    expect(resolvePackageJsonEntryExports(['./index.js'])).toEqual({
-      '.': ['./index.js'],
+    it('wraps an array in canonical "." form', () => {
+      expect(resolvePackageJsonEntryExports(['./index.js'])).toEqual({
+        '.': ['./index.js'],
+      })
     })
-  })
 
-  it('passes through conditional-shape objects', () => {
-    const exports = { import: './alpha.mjs', require: './alpha.cjs' }
-    expect(resolvePackageJsonEntryExports(exports)).toBe(exports)
-  })
+    it('passes through conditional-shape objects', () => {
+      const exports = { import: './alpha.mjs', require: './alpha.cjs' }
+      expect(resolvePackageJsonEntryExports(exports)).toBe(exports)
+    })
 
-  it('passes through subpath-shape objects', () => {
-    const exports = { '.': './index.js' }
-    expect(resolvePackageJsonEntryExports(exports)).toBe(exports)
-  })
+    it('passes through subpath-shape objects', () => {
+      const exports = { '.': './index.js' }
+      expect(resolvePackageJsonEntryExports(exports)).toBe(exports)
+    })
 
-  it('returns undefined for non-object non-array non-string', () => {
-    expect(resolvePackageJsonEntryExports(undefined)).toBeUndefined()
-    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
-    expect(resolvePackageJsonEntryExports(null)).toBeUndefined()
-    expect(resolvePackageJsonEntryExports(42)).toBeUndefined()
-  })
-})
+    it('returns undefined for non-object non-array non-string', () => {
+      expect(resolvePackageJsonEntryExports(undefined)).toBeUndefined()
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
+      expect(resolvePackageJsonEntryExports(null)).toBeUndefined()
+      expect(resolvePackageJsonEntryExports(42)).toBeUndefined()
+    })
+  },
+)
 
-describe.sequential('packages/exports — findTypesForSubpath', () => {
-  it('returns undefined when subpath is not present', () => {
-    expect(
-      findTypesForSubpath(
-        { '.': { import: './alpha.mjs', types: './alpha.d.ts' } },
-        './does-not-exist.js',
-      ),
-    ).toBeUndefined()
-  })
+describe(
+  'packages/exports — findTypesForSubpath',
+  { concurrent: false },
+  () => {
+    it('returns undefined when subpath is not present', () => {
+      expect(
+        findTypesForSubpath(
+          { '.': { import: './alpha.mjs', types: './alpha.d.ts' } },
+          './does-not-exist.js',
+        ),
+      ).toBeUndefined()
+    })
 
-  it('finds types adjacent to a matching object-shape leaf', () => {
-    const exports = {
-      '.': {
-        types: './dist/index.d.ts',
-        import: './dist/index.js',
-      },
-    }
-    expect(findTypesForSubpath(exports, './dist/index.js')).toBe(
-      './dist/index.d.ts',
-    )
-  })
-
-  it('finds types adjacent to a matching array-shape leaf', () => {
-    const exports = {
-      '.': [
-        {
-          types: './dist/array.d.ts',
-          import: './dist/array.mjs',
+    it('finds types adjacent to a matching object-shape leaf', () => {
+      const exports = {
+        '.': {
+          types: './dist/index.d.ts',
+          import: './dist/index.js',
         },
-      ],
-    }
-    // Crawling reaches the array's object child; the object's `types`
-    // sits next to a matching `import` value.
-    expect(findTypesForSubpath(exports, './dist/array.mjs')).toBe(
-      './dist/array.d.ts',
-    )
-  })
+      }
+      expect(findTypesForSubpath(exports, './dist/index.js')).toBe(
+        './dist/index.d.ts',
+      )
+    })
 
-  it('returns undefined when the input has no objects at all', () => {
-    expect(findTypesForSubpath('./scalar.js', './scalar.js')).toBeUndefined()
-  })
-})
+    it('finds types adjacent to a matching array-shape leaf', () => {
+      const exports = {
+        '.': [
+          {
+            types: './dist/array.d.ts',
+            import: './dist/array.mjs',
+          },
+        ],
+      }
+      // Crawling reaches the array's object child; the object's `types`
+      // sits next to a matching `import` value.
+      expect(findTypesForSubpath(exports, './dist/array.mjs')).toBe(
+        './dist/array.d.ts',
+      )
+    })
+
+    it('returns undefined when the input has no objects at all', () => {
+      expect(findTypesForSubpath('./scalar.js', './scalar.js')).toBeUndefined()
+    })
+  },
+)

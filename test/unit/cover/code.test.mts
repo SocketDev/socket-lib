@@ -28,7 +28,7 @@ export function writeCoverageFile(data: unknown): string {
   return file
 }
 
-describe.sequential('cover/code', () => {
+describe('cover/code', { concurrent: false }, () => {
   beforeEach(() => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'socket-lib-cover-test-'))
     vi.mocked(spawn).mockReset()

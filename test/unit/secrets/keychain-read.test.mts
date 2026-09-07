@@ -46,7 +46,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('secrets/keychain — readSecret', () => {
+describe('secrets/keychain — readSecret', { concurrent: false }, () => {
   test('routes to readMacOS on darwin', async () => {
     const { macos, mod } = await loadFresh('darwin')
     macos['readMacOS']!.mockResolvedValueOnce('mac-value')
@@ -88,7 +88,7 @@ describe.sequential('secrets/keychain — readSecret', () => {
   })
 })
 
-describe.sequential('secrets/keychain — readSecretSync', () => {
+describe('secrets/keychain — readSecretSync', { concurrent: false }, () => {
   test('routes to readMacOSSync on darwin', async () => {
     const { macos, mod } = await loadFresh('darwin')
     macos['readMacOSSync']!.mockReturnValueOnce('mac-sync')

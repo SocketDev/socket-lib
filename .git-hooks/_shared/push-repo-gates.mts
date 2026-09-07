@@ -513,7 +513,7 @@ export function pushedRangeFiles(ranges: readonly string[]): string[] {
   return [...out]
 }
 
-// Dispatch-table drift — WHEELHOUSE-ONLY (gated on the canonical `template/base`
+// Dispatch-table drift — WHEELHOUSE-ONLY (gated on the canonical `template/base/universal`
 // seed, which only the wheelhouse has). The rolldown bundle's static dispatch
 // table must match a fresh regen of the hooks present; a mismatch means a hook
 // was added/removed without rebuilding, or a byte-cascaded table references an
@@ -523,7 +523,7 @@ export function pushedRangeFiles(ranges: readonly string[]): string[] {
 // until the cascade regenerates per-tree, so blocking their push would
 // false-fire — they rely on CI's `check --all` for the same check.
 export const scanDispatchDrift = (): number => {
-  if (!existsSync('template/base')) {
+  if (!existsSync('template/base/universal')) {
     return 0
   }
   const r = spawnSync(

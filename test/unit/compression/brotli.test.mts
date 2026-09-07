@@ -57,7 +57,7 @@ afterEach(async () => {
 // tests in parallel, racing the tmpDir mutation. `describe.sequential` keeps
 // the file's tests sequential regardless of the global setting — file
 // IO tests want one-at-a-time semantics anyway.
-describe.sequential('compression — brotli', () => {
+describe('compression — brotli', { concurrent: false }, () => {
   describe('brotli — in-memory', () => {
     it('round-trips a string through compressBrotli + decompressBrotli', async () => {
       const compressed = await compressBrotli(SMALL_TEXT)

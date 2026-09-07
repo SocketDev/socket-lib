@@ -5,7 +5,7 @@ import {
   uvFromVfs,
 } from '../../../../src/external-tools/uv/from-vfs.mjs'
 
-describe.sequential('external-tools/uv/from-vfs', () => {
+describe('external-tools/uv/from-vfs', { concurrent: false }, () => {
   test('exports UV_VFS_KEY constant', () => {
     expect(UV_VFS_KEY).toBe('uv')
   })

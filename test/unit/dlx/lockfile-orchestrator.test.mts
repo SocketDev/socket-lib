@@ -44,7 +44,7 @@ vi.mock(import('../../../src/fs/safe.mjs'), async importOriginal => {
   }
 })
 
-describe.sequential('dlx/lockfile orchestrator', () => {
+describe('dlx/lockfile orchestrator', { concurrent: false }, () => {
   beforeEach(() => {
     vi.mocked(safeIdealTree).mockResolvedValue({
       integrity: 'sha512-registry-value',

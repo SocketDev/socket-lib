@@ -28,7 +28,7 @@ export {
 import { getNodeFs } from '../node/fs.mjs'
 import { ErrorCtor } from '../primordials/error.mjs'
 import { NumberCtor } from '../primordials/number.mjs'
-import type { PathLike } from 'node:fs'
+import type { BigIntStats, PathLike, Stats } from 'node:fs'
 
 import type { ReadJsonOptions } from './types.mjs'
 
@@ -118,26 +118,7 @@ export async function readJson(
   }
   function handleReadError(e: unknown): undefined {
     if (shouldThrow) {
-      const code = (e as NodeJS.ErrnoException).code
-      if (code === 'ENOENT') {
-        throw new ErrorCtor(
-          `JSON file not found: ${filepath}\n` +
-            'Ensure the file exists or create it with the expected structure.',
-          { cause: e },
-        )
-      }
-      // EPERM operand fires on Windows; the if-truthy + EACCES-vs-
-      // EPERM operand sub-arms vary per platform.
-      /* c8 ignore start - EACCES/EPERM branch is platform-dependent */
-      if (code === 'EACCES' || code === 'EPERM') {
-        throw new ErrorCtor(
-          `Permission denied reading JSON file: ${filepath}\n` +
-            'Check file permissions or run with appropriate access.',
-          { cause: e },
-        )
-      }
-      /* c8 ignore stop */
-      throw e
+      throwReadJsonError(filepath, e)
     }
     return undefined
   }
@@ -159,11 +140,7 @@ export async function readJson(
       // Need ino+size+mtime as the cache invalidation key, not existence.
       // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
       const statAfter = await fs.promises.stat(filepath)
-      if (
-        NumberCtor(statAfter.ino) === NumberCtor(preReadStat.ino) &&
-        NumberCtor(statAfter.size) === NumberCtor(preReadStat.size) &&
-        NumberCtor(statAfter.mtimeMs) === NumberCtor(preReadStat.mtimeMs)
-      ) {
+      if (readJsonStatsMatch(preReadStat, statAfter)) {
         setCachedJson(
           pathStr,
           NumberCtor(preReadStat.ino),
@@ -178,6 +155,17 @@ export async function readJson(
     }
   }
   return parsed
+}
+
+export function readJsonStatsMatch(
+  before: Stats | BigIntStats,
+  after: Stats | BigIntStats,
+): boolean {
+  return (
+    NumberCtor(after.ino) === NumberCtor(before.ino) &&
+    NumberCtor(after.size) === NumberCtor(before.size) &&
+    NumberCtor(after.mtimeMs) === NumberCtor(before.mtimeMs)
+  )
 }
 
 /**
@@ -260,26 +248,7 @@ export function readJsonSync(
   }
   function handleReadError(e: unknown): undefined {
     if (shouldThrow) {
-      const code = (e as NodeJS.ErrnoException).code
-      if (code === 'ENOENT') {
-        throw new ErrorCtor(
-          `JSON file not found: ${filepath}\n` +
-            'Ensure the file exists or create it with the expected structure.',
-          { cause: e },
-        )
-      }
-      // EPERM operand fires on Windows; the if-truthy + EACCES-vs-
-      // EPERM operand sub-arms vary per platform.
-      /* c8 ignore start - EACCES/EPERM branch is platform-dependent */
-      if (code === 'EACCES' || code === 'EPERM') {
-        throw new ErrorCtor(
-          `Permission denied reading JSON file: ${filepath}\n` +
-            'Check file permissions or run with appropriate access.',
-          { cause: e },
-        )
-      }
-      /* c8 ignore stop */
-      throw e
+      throwReadJsonError(filepath, e)
     }
     return undefined
   }
@@ -296,11 +265,7 @@ export function readJsonSync(
       // Need ino+size+mtime as the cache invalidation key, not existence.
       // oxlint-disable-next-line socket/prefer-exists-sync -- cache key
       const statAfter = fs.statSync(filepath)
-      if (
-        NumberCtor(statAfter.ino) === NumberCtor(preReadStat.ino) &&
-        NumberCtor(statAfter.size) === NumberCtor(preReadStat.size) &&
-        NumberCtor(statAfter.mtimeMs) === NumberCtor(preReadStat.mtimeMs)
-      ) {
+      if (readJsonStatsMatch(preReadStat, statAfter)) {
         setCachedJson(
           pathStr,
           NumberCtor(preReadStat.ino),
@@ -315,4 +280,27 @@ export function readJsonSync(
     }
   }
   return parsed
+}
+
+export function throwReadJsonError(filepath: PathLike, error: unknown): never {
+  const code = (error as NodeJS.ErrnoException).code
+  if (code === 'ENOENT') {
+    throw new ErrorCtor(
+      `JSON file not found: ${filepath}\n` +
+        'Ensure the file exists or create it with the expected structure.',
+      { cause: error },
+    )
+  }
+  // EPERM operand fires on Windows; the if-truthy + EACCES-vs-
+  // EPERM operand sub-arms vary per platform.
+  /* c8 ignore start - EACCES/EPERM branch is platform-dependent */
+  if (code === 'EACCES' || code === 'EPERM') {
+    throw new ErrorCtor(
+      `Permission denied reading JSON file: ${filepath}\n` +
+        'Check file permissions or run with appropriate access.',
+      { cause: error },
+    )
+  }
+  /* c8 ignore stop */
+  throw error
 }

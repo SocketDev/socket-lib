@@ -7,7 +7,7 @@ import { describe, expect, it } from 'vitest'
 import { ansiRegex, stripAnsi } from '../../../../src/term/ansi/strip.mjs'
 import { stringWidth } from '../../../../src/strings/width.mjs'
 
-describe.sequential('ansi/strip (src) — ansiRegex', () => {
+describe('ansi/strip (src) — ansiRegex', { concurrent: false }, () => {
   it('returns a fresh RegExp each call (global flag avoids shared lastIndex)', () => {
     const a = ansiRegex()
     const b = ansiRegex()
@@ -31,7 +31,7 @@ describe.sequential('ansi/strip (src) — ansiRegex', () => {
   })
 })
 
-describe.sequential('ansi/strip (src) — stripAnsi', () => {
+describe('ansi/strip (src) — stripAnsi', { concurrent: false }, () => {
   it('strips a simple color sequence', () => {
     expect(stripAnsi('\x1b[31mhello\x1b[0m')).toBe('hello')
   })

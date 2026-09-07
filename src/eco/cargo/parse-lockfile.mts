@@ -128,7 +128,7 @@ export function jsParseCargoLock(content: string): ParsedLockfile {
   } as unknown as PackageIndex
 
   function consumePackageLine(entry: CargoEntryState, trimmed: string): void {
-    // Multi-line dependencies array returns.
+    // Read the next line of a multi-line dependencies array.
     if (entry.inDependencies) {
       if (StringPrototypeIndexOf(trimmed, ']') !== -1) {
         entry.inDependencies = false

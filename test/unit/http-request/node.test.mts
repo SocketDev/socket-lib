@@ -43,7 +43,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('http-request/node — httpBytes', () => {
+describe('http-request/node — httpBytes', { concurrent: false }, () => {
   test('returns the raw response body undecoded', async () => {
     const { httpBytes, httpReqMock } = await loadFresh()
     // 0xc3 0x28 is not valid UTF-8. Text decoding would substitute U+FFFD and
@@ -112,7 +112,7 @@ describe.sequential('http-request/node — httpBytes', () => {
   })
 })
 
-describe.sequential('http-request/node — httpJson', () => {
+describe('http-request/node — httpJson', { concurrent: false }, () => {
   test('returns parsed JSON on a 2xx response', async () => {
     const { httpJson, httpReqMock } = await loadFresh()
     httpReqMock.mockResolvedValueOnce(
@@ -177,7 +177,7 @@ describe.sequential('http-request/node — httpJson', () => {
   })
 })
 
-describe.sequential('http-request/node — httpText', () => {
+describe('http-request/node — httpText', { concurrent: false }, () => {
   test('returns the response body as text on a 2xx response', async () => {
     const { httpText, httpReqMock } = await loadFresh()
     httpReqMock.mockResolvedValueOnce(

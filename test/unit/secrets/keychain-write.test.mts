@@ -46,7 +46,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('secrets/keychain — writeSecret', () => {
+describe('secrets/keychain — writeSecret', { concurrent: false }, () => {
   test('throws TypeError when value is empty', async () => {
     const { mod } = await loadFresh('darwin')
     await expect(
@@ -120,7 +120,7 @@ describe.sequential('secrets/keychain — writeSecret', () => {
   })
 })
 
-describe.sequential('secrets/keychain — writeSecretSync', () => {
+describe('secrets/keychain — writeSecretSync', { concurrent: false }, () => {
   test('throws TypeError when value is empty', async () => {
     const { mod } = await loadFresh('darwin')
     expect(() =>

@@ -91,7 +91,7 @@ afterEach(async () => {
   vi.clearAllMocks()
 })
 
-describe.sequential('http-request/download — happy path', () => {
+describe('http-request/download — happy path', { concurrent: false }, () => {
   test('writes file at destPath via atomic rename from temp', async () => {
     const dest = path.join(tmpRoot, 'tool.bin')
     mockHttpRequestAttempt.mockResolvedValueOnce(
@@ -170,87 +170,99 @@ describe.sequential('http-request/download — happy path', () => {
   })
 })
 
-describe.sequential('http-request/download — stale dest overwrite', () => {
-  test('overwrites an existing dest file via atomic rename', async () => {
-    const dest = path.join(tmpRoot, 'staletest.bin')
-    writeFileSync(dest, 'prior-content')
-    mockHttpRequestAttempt.mockResolvedValueOnce(
-      makeFakeResponse({ body: 'new-content' }),
-    )
-    const { httpDownload } = await loadFresh()
-    await httpDownload('https://example.com/x', dest)
-    expect(readFileSync(dest, 'utf8')).toBe('new-content')
-  })
-})
-
-describe.sequential('http-request/download — sha256 verification', () => {
-  test('accepts a matching sha256', async () => {
-    const dest = path.join(tmpRoot, 'sha-ok.bin')
-    const body = 'verified-bytes'
-    const expected = sha256Hex(body)
-    mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
-    const { httpDownload } = await loadFresh()
-    const result = await httpDownload('https://example.com/x', dest, {
-      sha256: expected,
+describe(
+  'http-request/download — stale dest overwrite',
+  { concurrent: false },
+  () => {
+    test('overwrites an existing dest file via atomic rename', async () => {
+      const dest = path.join(tmpRoot, 'staletest.bin')
+      writeFileSync(dest, 'prior-content')
+      mockHttpRequestAttempt.mockResolvedValueOnce(
+        makeFakeResponse({ body: 'new-content' }),
+      )
+      const { httpDownload } = await loadFresh()
+      await httpDownload('https://example.com/x', dest)
+      expect(readFileSync(dest, 'utf8')).toBe('new-content')
     })
-    expect(result.path).toBe(dest)
-  })
+  },
+)
 
-  test('throws on sha256 mismatch', async () => {
-    const dest = path.join(tmpRoot, 'sha-bad.bin')
-    mockHttpRequestAttempt.mockResolvedValueOnce(
-      makeFakeResponse({ body: 'wrong-bytes' }),
-    )
-    const { httpDownload } = await loadFresh()
-    await expect(
-      httpDownload('https://example.com/x', dest, {
-        sha256: 'a'.repeat(64),
-      }),
-    ).rejects.toThrow(/Checksum verification failed/)
-    expect(existsSync(dest)).toBe(false)
-  })
-
-  test('lowercases the expected sha256 before comparing (timing-safe)', async () => {
-    const dest = path.join(tmpRoot, 'sha-uppercase.bin')
-    const body = 'check-case'
-    const expected = sha256Hex(body)
-    mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
-    const { httpDownload } = await loadFresh()
-    const result = await httpDownload('https://example.com/x', dest, {
-      sha256: expected.toUpperCase(),
+describe(
+  'http-request/download — sha256 verification',
+  { concurrent: false },
+  () => {
+    test('accepts a matching sha256', async () => {
+      const dest = path.join(tmpRoot, 'sha-ok.bin')
+      const body = 'verified-bytes'
+      const expected = sha256Hex(body)
+      mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
+      const { httpDownload } = await loadFresh()
+      const result = await httpDownload('https://example.com/x', dest, {
+        sha256: expected,
+      })
+      expect(result.path).toBe(dest)
     })
-    expect(result.path).toBe(dest)
-  })
-})
 
-describe.sequential('http-request/download — SRI verification', () => {
-  test('accepts a matching streamed SHA-512 integrity', async () => {
-    const dest = path.join(tmpRoot, 'integrity-ok.bin')
-    const body = 'verified-integrity'
-    mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
-    const { httpDownload } = await loadFresh()
-    const result = await httpDownload('https://example.com/x', dest, {
-      integrity: sha512Integrity(body),
+    test('throws on sha256 mismatch', async () => {
+      const dest = path.join(tmpRoot, 'sha-bad.bin')
+      mockHttpRequestAttempt.mockResolvedValueOnce(
+        makeFakeResponse({ body: 'wrong-bytes' }),
+      )
+      const { httpDownload } = await loadFresh()
+      await expect(
+        httpDownload('https://example.com/x', dest, {
+          sha256: 'a'.repeat(64),
+        }),
+      ).rejects.toThrow(/Checksum verification failed/)
+      expect(existsSync(dest)).toBe(false)
     })
-    expect(result.path).toBe(dest)
-  })
 
-  test('rejects a mismatch before publishing the destination', async () => {
-    const dest = path.join(tmpRoot, 'integrity-bad.bin')
-    mockHttpRequestAttempt.mockResolvedValueOnce(
-      makeFakeResponse({ body: 'wrong-integrity' }),
-    )
-    const { httpDownload } = await loadFresh()
-    await expect(
-      httpDownload('https://example.com/x', dest, {
-        integrity: sha512Integrity('expected-integrity'),
-      }),
-    ).rejects.toThrow(/Integrity verification failed/)
-    expect(existsSync(dest)).toBe(false)
-  })
-})
+    test('lowercases the expected sha256 before comparing (timing-safe)', async () => {
+      const dest = path.join(tmpRoot, 'sha-uppercase.bin')
+      const body = 'check-case'
+      const expected = sha256Hex(body)
+      mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
+      const { httpDownload } = await loadFresh()
+      const result = await httpDownload('https://example.com/x', dest, {
+        sha256: expected.toUpperCase(),
+      })
+      expect(result.path).toBe(dest)
+    })
+  },
+)
 
-describe.sequential('http-request/download — retry loop', () => {
+describe(
+  'http-request/download — SRI verification',
+  { concurrent: false },
+  () => {
+    test('accepts a matching streamed SHA-512 integrity', async () => {
+      const dest = path.join(tmpRoot, 'integrity-ok.bin')
+      const body = 'verified-integrity'
+      mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
+      const { httpDownload } = await loadFresh()
+      const result = await httpDownload('https://example.com/x', dest, {
+        integrity: sha512Integrity(body),
+      })
+      expect(result.path).toBe(dest)
+    })
+
+    test('rejects a mismatch before publishing the destination', async () => {
+      const dest = path.join(tmpRoot, 'integrity-bad.bin')
+      mockHttpRequestAttempt.mockResolvedValueOnce(
+        makeFakeResponse({ body: 'wrong-integrity' }),
+      )
+      const { httpDownload } = await loadFresh()
+      await expect(
+        httpDownload('https://example.com/x', dest, {
+          integrity: sha512Integrity('expected-integrity'),
+        }),
+      ).rejects.toThrow(/Integrity verification failed/)
+      expect(existsSync(dest)).toBe(false)
+    })
+  },
+)
+
+describe('http-request/download — retry loop', { concurrent: false }, () => {
   test('retries after a failed attempt and succeeds on retry', async () => {
     const dest = path.join(tmpRoot, 'retry-ok.bin')
     mockHttpRequestAttempt
@@ -279,126 +291,134 @@ describe.sequential('http-request/download — retry loop', () => {
   })
 })
 
-describe.sequential('http-request/download — option pass-through', () => {
-  test('forwards ca / headers / maxRedirects / timeout to httpRequestAttempt', async () => {
-    const dest = path.join(tmpRoot, 'passthrough.bin')
-    mockHttpRequestAttempt.mockResolvedValueOnce(
-      makeFakeResponse({ body: '.' }),
-    )
-    const { httpDownload } = await loadFresh()
-    await httpDownload('https://example.com/x', dest, {
-      ca: ['fake-ca'],
-      headers: { Authorization: 'Bearer x' },
-      maxRedirects: 2,
-      timeout: 5000,
+describe(
+  'http-request/download — option pass-through',
+  { concurrent: false },
+  () => {
+    test('forwards ca / headers / maxRedirects / timeout to httpRequestAttempt', async () => {
+      const dest = path.join(tmpRoot, 'passthrough.bin')
+      mockHttpRequestAttempt.mockResolvedValueOnce(
+        makeFakeResponse({ body: '.' }),
+      )
+      const { httpDownload } = await loadFresh()
+      await httpDownload('https://example.com/x', dest, {
+        ca: ['fake-ca'],
+        headers: { Authorization: 'Bearer x' },
+        maxRedirects: 2,
+        timeout: 5000,
+      })
+      const [, opts] = mockHttpRequestAttempt.mock.calls[0]!
+      const o = opts as {
+        ca?: string[] | undefined
+        headers?: Record<string, string> | undefined
+        maxRedirects?: number | undefined
+        timeout?: number | undefined
+        stream?: boolean | undefined
+      }
+      expect(o.ca).toEqual(['fake-ca'])
+      expect(o.headers).toEqual({ Authorization: 'Bearer x' })
+      expect(o.maxRedirects).toBe(2)
+      expect(o.timeout).toBe(5000)
+      expect(o.stream).toBe(true)
     })
-    const [, opts] = mockHttpRequestAttempt.mock.calls[0]!
-    const o = opts as {
-      ca?: string[] | undefined
-      headers?: Record<string, string> | undefined
-      maxRedirects?: number | undefined
-      timeout?: number | undefined
-      stream?: boolean | undefined
-    }
-    expect(o.ca).toEqual(['fake-ca'])
-    expect(o.headers).toEqual({ Authorization: 'Bearer x' })
-    expect(o.maxRedirects).toBe(2)
-    expect(o.timeout).toBe(5000)
-    expect(o.stream).toBe(true)
-  })
 
-  test('uses defaults: followRedirects=true, maxRedirects=5, timeout=120000', async () => {
-    const dest = path.join(tmpRoot, 'defaults.bin')
-    mockHttpRequestAttempt.mockResolvedValueOnce(
-      makeFakeResponse({ body: '.' }),
-    )
-    const { httpDownload } = await loadFresh()
-    await httpDownload('https://example.com/x', dest)
-    const [, opts] = mockHttpRequestAttempt.mock.calls[0]!
-    const o = opts as {
-      followRedirects?: boolean | undefined
-      maxRedirects?: number | undefined
-      timeout?: number | undefined
-    }
-    expect(o.followRedirects).toBe(true)
-    expect(o.maxRedirects).toBe(5)
-    expect(o.timeout).toBe(120_000)
-  })
-})
-
-describe.sequential('http-request/download — temp/stream cleanup branches', () => {
-  test('cleans up a leftover temp file from a failed attempt before retrying', async () => {
-    const dest = path.join(tmpRoot, 'retry-cleanup.bin')
-    // First attempt: response succeeds, but checksum mismatch leaves temp
-    // file pending — the catch arm at L192-195 runs.
-    // Then second attempt succeeds with the correct content.
-    mockHttpRequestAttempt
-      .mockResolvedValueOnce(makeFakeResponse({ body: 'wrong' }))
-      .mockResolvedValueOnce(makeFakeResponse({ body: 'right' }))
-    const expected = sha256Hex('right')
-    const { httpDownload } = await loadFresh()
-    const result = await httpDownload('https://example.com/x', dest, {
-      retries: 1,
-      retryDelay: 0,
-      sha256: expected,
+    test('uses defaults: followRedirects=true, maxRedirects=5, timeout=120000', async () => {
+      const dest = path.join(tmpRoot, 'defaults.bin')
+      mockHttpRequestAttempt.mockResolvedValueOnce(
+        makeFakeResponse({ body: '.' }),
+      )
+      const { httpDownload } = await loadFresh()
+      await httpDownload('https://example.com/x', dest)
+      const [, opts] = mockHttpRequestAttempt.mock.calls[0]!
+      const o = opts as {
+        followRedirects?: boolean | undefined
+        maxRedirects?: number | undefined
+        timeout?: number | undefined
+      }
+      expect(o.followRedirects).toBe(true)
+      expect(o.maxRedirects).toBe(5)
+      expect(o.timeout).toBe(120_000)
     })
-    expect(result.path).toBe(dest)
-    expect(readFileSync(dest, 'utf8')).toBe('right')
-  })
+  },
+)
 
-  test('rejects when rawResponse emits an error mid-stream', async () => {
-    const dest = path.join(tmpRoot, 'res-error.bin')
-    const rawResponse = new PassThrough()
-    // Attach an error listener BEFORE the function runs to consume the error
-    // event we'll emit. The download fn also attaches one inside the Promise
-    // executor; both consume the same emit.
-    rawResponse.on('error', () => {})
-    mockHttpRequestAttempt.mockResolvedValueOnce({
-      body: Buffer.from(''),
-      headers: { 'content-length': '0' },
-      ok: true,
-      rawResponse,
-      status: 200,
-      statusText: 'OK',
-      text: () => '',
-      json: () => ({}),
-      arrayBuffer: () => new ArrayBuffer(0),
+describe(
+  'http-request/download — temp/stream cleanup branches',
+  { concurrent: false },
+  () => {
+    test('cleans up a leftover temp file from a failed attempt before retrying', async () => {
+      const dest = path.join(tmpRoot, 'retry-cleanup.bin')
+      // First attempt: response succeeds, but checksum mismatch leaves temp
+      // file pending — the catch arm at L192-195 runs.
+      // Then second attempt succeeds with the correct content.
+      mockHttpRequestAttempt
+        .mockResolvedValueOnce(makeFakeResponse({ body: 'wrong' }))
+        .mockResolvedValueOnce(makeFakeResponse({ body: 'right' }))
+      const expected = sha256Hex('right')
+      const { httpDownload } = await loadFresh()
+      const result = await httpDownload('https://example.com/x', dest, {
+        retries: 1,
+        retryDelay: 0,
+        sha256: expected,
+      })
+      expect(result.path).toBe(dest)
+      expect(readFileSync(dest, 'utf8')).toBe('right')
     })
-    const { httpDownload } = await loadFresh()
-    setTimeout(
-      () => rawResponse.emit('error', new Error('network-blip')),
-      minTimerQuantum(10),
-    )
-    await expect(httpDownload('https://example.com/x', dest)).rejects.toThrow(
-      /network-blip/,
-    )
-  })
 
-  test('rejects with a wrapped error when the destination write stream errors', async () => {
-    // Point destPath at a non-existent parent dir — createWriteStream emits an
-    // ENOENT error on the open. fileStream.on('error') wraps and rejects.
-    const dest = path.join(tmpRoot, 'no-such-dir', 'file.bin')
-    mockHttpRequestAttempt.mockResolvedValueOnce(
-      makeFakeResponse({ body: 'data' }),
-    )
-    const { httpDownload } = await loadFresh()
-    await expect(httpDownload('https://example.com/x', dest)).rejects.toThrow(
-      /Failed to write file/,
-    )
-  })
-
-  test('reports onProgress with downloaded/total when content-length is set', async () => {
-    const dest = path.join(tmpRoot, 'progress.bin')
-    const body = 'abcdefghij'
-    mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
-    const progress: Array<[number, number]> = []
-    const { httpDownload } = await loadFresh()
-    await httpDownload('https://example.com/x', dest, {
-      onProgress: (downloaded, total) => progress.push([downloaded, total]),
+    test('rejects when rawResponse emits an error mid-stream', async () => {
+      const dest = path.join(tmpRoot, 'res-error.bin')
+      const rawResponse = new PassThrough()
+      // Attach an error listener BEFORE the function runs to consume the error
+      // event we'll emit. The download fn also attaches one inside the Promise
+      // executor; both consume the same emit.
+      rawResponse.on('error', () => {})
+      mockHttpRequestAttempt.mockResolvedValueOnce({
+        body: Buffer.from(''),
+        headers: { 'content-length': '0' },
+        ok: true,
+        rawResponse,
+        status: 200,
+        statusText: 'OK',
+        text: () => '',
+        json: () => ({}),
+        arrayBuffer: () => new ArrayBuffer(0),
+      })
+      const { httpDownload } = await loadFresh()
+      setTimeout(
+        () => rawResponse.emit('error', new Error('network-blip')),
+        minTimerQuantum(10),
+      )
+      await expect(httpDownload('https://example.com/x', dest)).rejects.toThrow(
+        /network-blip/,
+      )
     })
-    expect(progress.length).toBeGreaterThan(0)
-    const last = progress[progress.length - 1]!
-    expect(last[0]).toBe(body.length)
-    expect(last[1]).toBe(body.length)
-  })
-})
+
+    test('rejects with a wrapped error when the destination write stream errors', async () => {
+      // Point destPath at a non-existent parent dir — createWriteStream emits an
+      // ENOENT error on the open. fileStream.on('error') wraps and rejects.
+      const dest = path.join(tmpRoot, 'no-such-dir', 'file.bin')
+      mockHttpRequestAttempt.mockResolvedValueOnce(
+        makeFakeResponse({ body: 'data' }),
+      )
+      const { httpDownload } = await loadFresh()
+      await expect(httpDownload('https://example.com/x', dest)).rejects.toThrow(
+        /Failed to write file/,
+      )
+    })
+
+    test('reports onProgress with downloaded/total when content-length is set', async () => {
+      const dest = path.join(tmpRoot, 'progress.bin')
+      const body = 'abcdefghij'
+      mockHttpRequestAttempt.mockResolvedValueOnce(makeFakeResponse({ body }))
+      const progress: Array<[number, number]> = []
+      const { httpDownload } = await loadFresh()
+      await httpDownload('https://example.com/x', dest, {
+        onProgress: (downloaded, total) => progress.push([downloaded, total]),
+      })
+      expect(progress.length).toBeGreaterThan(0)
+      const last = progress[progress.length - 1]!
+      expect(last[0]).toBe(body.length)
+      expect(last[1]).toBe(body.length)
+    })
+  },
+)

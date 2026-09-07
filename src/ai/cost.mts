@@ -108,16 +108,7 @@ export function parseAgentCost(
     }
   }
 
-  let totalTokens =
-    parseNumber(JSON_TOTAL_TOKENS_RE.exec(text)?.[1]) ??
-    parseNumber(TEXT_TOTAL_TOKENS_RE.exec(text)?.[1])
-  if (
-    totalTokens === undefined &&
-    inputTokens !== undefined &&
-    outputTokens !== undefined
-  ) {
-    totalTokens = inputTokens + outputTokens
-  }
+  const totalTokens = parseTotalAgentTokens(text, inputTokens, outputTokens)
 
   const costUsd =
     parseNumber(JSON_COST_RE.exec(text)?.[1]) ??
@@ -137,4 +128,23 @@ export function parseNumber(raw: string | undefined): number | undefined {
   }
   const value = Number(raw.replace(/,/g, ''))
   return Number.isFinite(value) ? value : undefined
+}
+
+export function parseTotalAgentTokens(
+  text: string,
+  inputTokens: number | undefined,
+  outputTokens: number | undefined,
+): number | undefined {
+  let totalTokens =
+    parseNumber(JSON_TOTAL_TOKENS_RE.exec(text)?.[1]) ??
+    parseNumber(TEXT_TOTAL_TOKENS_RE.exec(text)?.[1])
+  if (
+    totalTokens === undefined &&
+    inputTokens !== undefined &&
+    outputTokens !== undefined
+  ) {
+    totalTokens = inputTokens + outputTokens
+  }
+
+  return totalTokens
 }

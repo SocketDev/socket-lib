@@ -56,11 +56,15 @@ afterEach(async () => {
   await safeDelete(tmp)
 })
 
-describe.sequential('dlx/binary-download — Windows branch (isWin32() stubbed true)', () => {
-  it('skips chmod on Windows (downloadBinaryFile returns integrity)', async () => {
-    const destPath = path.join(tmp, 'win-binary.exe')
-    const result = await downloadBinaryFile('https://example.com/x', destPath)
-    // The result is the SRI integrity hash; chmod was bypassed.
-    expect(result.startsWith('sha512-')).toBe(true)
-  })
-})
+describe(
+  'dlx/binary-download — Windows branch (isWin32() stubbed true)',
+  { concurrent: false },
+  () => {
+    it('skips chmod on Windows (downloadBinaryFile returns integrity)', async () => {
+      const destPath = path.join(tmp, 'win-binary.exe')
+      const result = await downloadBinaryFile('https://example.com/x', destPath)
+      // The result is the SRI integrity hash; chmod was bypassed.
+      expect(result.startsWith('sha512-')).toBe(true)
+    })
+  },
+)

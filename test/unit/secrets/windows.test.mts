@@ -24,7 +24,7 @@ vi.mock(import('../../../src/process/spawn/child.mjs'), () =>
 
 setupHarness({ mockSpawn, mockSpawnSync })
 
-describe.sequential('secrets/windows — buildTarget', () => {
+describe('secrets/windows — buildTarget', { concurrent: false }, () => {
   test('joins service + account with a colon', async () => {
     const { buildTarget } = await loadFresh()
     expect(buildTarget('svc', 'acc')).toBe('svc:acc')
@@ -37,7 +37,7 @@ describe.sequential('secrets/windows — buildTarget', () => {
   })
 })
 
-describe.sequential('secrets/windows — quotePs', () => {
+describe('secrets/windows — quotePs', { concurrent: false }, () => {
   test('wraps a plain string in single quotes', async () => {
     const { quotePs } = await loadFresh()
     expect(quotePs('hello')).toBe(`'hello'`)
@@ -54,45 +54,49 @@ describe.sequential('secrets/windows — quotePs', () => {
   })
 })
 
-describe.sequential('secrets/windows — validateKeychainComponent', () => {
-  test('accepts a plain identifier', async () => {
-    const { validateKeychainComponent } = await loadFresh()
-    expect(() =>
-      validateKeychainComponent('socket-cli', 'service'),
-    ).not.toThrow()
-  })
+describe(
+  'secrets/windows — validateKeychainComponent',
+  { concurrent: false },
+  () => {
+    test('accepts a plain identifier', async () => {
+      const { validateKeychainComponent } = await loadFresh()
+      expect(() =>
+        validateKeychainComponent('socket-cli', 'service'),
+      ).not.toThrow()
+    })
 
-  test('rejects forward slashes', async () => {
-    const { validateKeychainComponent } = await loadFresh()
-    expect(() => validateKeychainComponent('a/b', 'service')).toThrow(
-      /path-traversal/,
-    )
-  })
+    test('rejects forward slashes', async () => {
+      const { validateKeychainComponent } = await loadFresh()
+      expect(() => validateKeychainComponent('a/b', 'service')).toThrow(
+        /path-traversal/,
+      )
+    })
 
-  test('rejects backslashes', async () => {
-    const { validateKeychainComponent } = await loadFresh()
-    expect(() => validateKeychainComponent('a\\b', 'service')).toThrow(
-      /path-traversal/,
-    )
-  })
+    test('rejects backslashes', async () => {
+      const { validateKeychainComponent } = await loadFresh()
+      expect(() => validateKeychainComponent('a\\b', 'service')).toThrow(
+        /path-traversal/,
+      )
+    })
 
-  test('rejects ".." anywhere in the value', async () => {
-    const { validateKeychainComponent } = await loadFresh()
-    expect(() => validateKeychainComponent('..', 'service')).toThrow()
-    expect(() => validateKeychainComponent('a..b', 'service')).toThrow()
-  })
+    test('rejects ".." anywhere in the value', async () => {
+      const { validateKeychainComponent } = await loadFresh()
+      expect(() => validateKeychainComponent('..', 'service')).toThrow()
+      expect(() => validateKeychainComponent('a..b', 'service')).toThrow()
+    })
 
-  test('rejects NUL byte', async () => {
-    const { validateKeychainComponent } = await loadFresh()
-    expect(() => validateKeychainComponent('a\0b', 'service')).toThrow()
-  })
+    test('rejects NUL byte', async () => {
+      const { validateKeychainComponent } = await loadFresh()
+      expect(() => validateKeychainComponent('a\0b', 'service')).toThrow()
+    })
 
-  test('rejects empty string + "."', async () => {
-    const { validateKeychainComponent } = await loadFresh()
-    expect(() => validateKeychainComponent('', 'service')).toThrow()
-    expect(() => validateKeychainComponent('.', 'service')).toThrow()
-  })
-})
+    test('rejects empty string + "."', async () => {
+      const { validateKeychainComponent } = await loadFresh()
+      expect(() => validateKeychainComponent('', 'service')).toThrow()
+      expect(() => validateKeychainComponent('.', 'service')).toThrow()
+    })
+  },
+)
 
 // %APPDATA% / AppData\Roaming path composition is Windows-specific: the source
 // resolves it with Windows path semantics, so the join only matches a host
@@ -126,21 +130,25 @@ describeWindowsOnly('secrets/windows — getDpapiFilePath', () => {
   })
 })
 
-describe.sequential('secrets/windows — isWindowsBackendAvailable', () => {
-  test('returns true when powershell exit 0', async () => {
-    mockSpawnSync.mockReturnValueOnce({ status: 0 })
-    const { isWindowsBackendAvailable } = await loadFresh()
-    expect(isWindowsBackendAvailable()).toBe(true)
-  })
+describe(
+  'secrets/windows — isWindowsBackendAvailable',
+  { concurrent: false },
+  () => {
+    test('returns true when powershell exit 0', async () => {
+      mockSpawnSync.mockReturnValueOnce({ status: 0 })
+      const { isWindowsBackendAvailable } = await loadFresh()
+      expect(isWindowsBackendAvailable()).toBe(true)
+    })
 
-  test('returns false when powershell is missing', async () => {
-    mockSpawnSync.mockReturnValueOnce({ status: undefined })
-    const { isWindowsBackendAvailable } = await loadFresh()
-    expect(isWindowsBackendAvailable()).toBe(false)
-  })
-})
+    test('returns false when powershell is missing', async () => {
+      mockSpawnSync.mockReturnValueOnce({ status: undefined })
+      const { isWindowsBackendAvailable } = await loadFresh()
+      expect(isWindowsBackendAvailable()).toBe(false)
+    })
+  },
+)
 
-describe.sequential('secrets/windows — runPsAsync', () => {
+describe('secrets/windows — runPsAsync', { concurrent: false }, () => {
   test('returns aggregated stdout + stderr + status', async () => {
     mockSpawn.mockImplementationOnce(() =>
       makeFakeChild({ stdout: 'OUT', stderr: 'ERR', exitCode: 7 }),
@@ -183,7 +191,7 @@ describe.sequential('secrets/windows — runPsAsync', () => {
   })
 })
 
-describe.sequential('secrets/windows — readDpapi', () => {
+describe('secrets/windows — readDpapi', { concurrent: false }, () => {
   test('returns undefined when file does not exist', async () => {
     const { readDpapi } = await loadFresh()
     expect(
@@ -220,7 +228,7 @@ describe.sequential('secrets/windows — readDpapi', () => {
   })
 })
 
-describe.sequential('secrets/windows — readWindows', () => {
+describe('secrets/windows — readWindows', { concurrent: false }, () => {
   test('returns CredentialManager value when status === 0', async () => {
     mockSpawn.mockImplementationOnce(() =>
       makeFakeChild({ stdout: 'cm-value\n', exitCode: 0 }),
@@ -266,7 +274,7 @@ describe.sequential('secrets/windows — readWindows', () => {
   })
 })
 
-describe.sequential('secrets/windows — writeDpapi', () => {
+describe('secrets/windows — writeDpapi', { concurrent: false }, () => {
   test('creates parent dir + invokes PowerShell with token on stdin', async () => {
     const filePath = path.join(harness.tmpRoot, 'new-dir', 'item.enc')
     expect(existsSync(path.dirname(filePath))).toBe(false)
@@ -304,7 +312,7 @@ describe.sequential('secrets/windows — writeDpapi', () => {
   })
 })
 
-describe.sequential('secrets/windows — writeWindows', () => {
+describe('secrets/windows — writeWindows', { concurrent: false }, () => {
   test('returns silently when CredentialManager succeeds', async () => {
     mockSpawn.mockImplementationOnce(() => makeFakeChild({ exitCode: 0 }))
     const { writeWindows } = await loadFresh()
@@ -336,7 +344,7 @@ describe.sequential('secrets/windows — writeWindows', () => {
   })
 })
 
-describe.sequential('secrets/windows — deleteWindows', () => {
+describe('secrets/windows — deleteWindows', { concurrent: false }, () => {
   test('returns "removed" when CredentialManager removes successfully', async () => {
     mockSpawn.mockImplementationOnce(() => makeFakeChild({ exitCode: 0 }))
     const { deleteWindows } = await loadFresh()

@@ -28,7 +28,7 @@ async function loadWithMkdirError(code: string | undefined) {
   return await import('../../../src/dlx/binary.mjs')
 }
 
-describe.sequential('dlx/binary cache directory errors', () => {
+describe('dlx/binary cache directory errors', { concurrent: false }, () => {
   afterEach(() => {
     vi.doUnmock(import('../../../src/fs/safe.mjs'))
   })

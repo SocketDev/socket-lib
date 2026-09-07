@@ -44,7 +44,10 @@ import {
   iteratorTakeShim,
   limitOf,
 } from '../../../src/polyfills/iterator/lazy.mjs'
-import { iteratorHelperPrototype } from '../../../src/polyfills/iterator/shared.mjs'
+import {
+  iteratorHelperPrototype,
+  iteratorRecordOf,
+} from '../../../src/polyfills/iterator/shared.mjs'
 import {
   iteratorConcatShim,
   iteratorFromShim,
@@ -411,5 +414,28 @@ describe('the statics', () => {
     const bothSelected =
       iteratorFrom === fromPicked && iteratorConcat === concatPicked
     expect(bothSelected).toBe(true)
+  })
+})
+
+describe('lazy iterator result records', () => {
+  it('preserves ordinary fresh result objects through every lazy shim', () => {
+    const helpers = [
+      iteratorRecordOf<number>(iterOf([2])),
+      iteratorDropShim<number>(iterOf([1, 2]), 1),
+      iteratorFilterShim<number>(iterOf([1, 2]), value => value === 2),
+      iteratorFlatMapShim<number, number>(iterOf([2]), value => [value]),
+      iteratorMapShim<number, number>(iterOf([1]), value => value * 2),
+      iteratorTakeShim<number>(iterOf([2, 3]), 1),
+    ]
+    for (let i = 0, { length } = helpers; i < length; i += 1) {
+      const helper = helpers[i]!
+      const yielded = helper.next()
+      expect(yielded).toEqual({ done: false, value: 2 })
+      expect(Object.getPrototypeOf(yielded)).toBe(Object.prototype)
+      const done = helper.next()
+      expect(done).toEqual({ done: true, value: undefined })
+      expect(Object.getPrototypeOf(done)).toBe(Object.prototype)
+      expect(helper.next()).not.toBe(done)
+    }
   })
 })

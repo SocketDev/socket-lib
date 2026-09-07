@@ -25,7 +25,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/trivy/from-download', () => {
+describe('external-tools/trivy/from-download', { concurrent: false }, () => {
   test('returns undefined when the platform-arch is not shipped', async () => {
     const { trivyFromDownload, downloadMock } = await loadFresh()
     const result = await trivyFromDownload({

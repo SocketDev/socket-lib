@@ -19,7 +19,7 @@ import {
   getGitHubTokenWithFallback,
 } from '../../../src/github/token.mjs'
 
-describe.sequential('github/token', () => {
+describe('github/token', { concurrent: false }, () => {
   // Neutralize the ambient token vars at the process.env level so a real CI
   // GITHUB_TOKEN can't leak in and outrank a per-test value. This must live in
   // process.env (not setEnv overrides): several tests call resetEnv() in their

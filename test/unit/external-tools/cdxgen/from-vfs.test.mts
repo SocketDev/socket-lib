@@ -5,7 +5,7 @@ import {
   cdxgenFromVfs,
 } from '../../../../src/external-tools/cdxgen/from-vfs.mjs'
 
-describe.sequential('external-tools/cdxgen/from-vfs', () => {
+describe('external-tools/cdxgen/from-vfs', { concurrent: false }, () => {
   test('exports CDXGEN_VFS_KEY constant', () => {
     expect(CDXGEN_VFS_KEY).toBe('cdxgen')
   })

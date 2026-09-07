@@ -35,7 +35,7 @@ afterEach(async () => {
   await safeDelete(tmp)
 })
 
-describe.sequential('dlx/arborist — getBaseArboristOptions', () => {
+describe('dlx/arborist — getBaseArboristOptions', { concurrent: false }, () => {
   it('pins the security-hardened flags', () => {
     const opts = getBaseArboristOptions('/install', { quiet: true }) as Record<
       string,
@@ -65,7 +65,7 @@ describe.sequential('dlx/arborist — getBaseArboristOptions', () => {
   })
 })
 
-describe.sequential('dlx/arborist — readSingleDependency', () => {
+describe('dlx/arborist — readSingleDependency', { concurrent: false }, () => {
   it('returns the only dependency name', () => {
     const pkgPath = path.join(tmp, 'package.json')
     writeFileSync(
@@ -100,109 +100,113 @@ describe.sequential('dlx/arborist — readSingleDependency', () => {
   })
 })
 
-describe.sequential('dlx/arborist — readTopLevelFromIdealTree', () => {
-  const makeTree = (
-    nodes: Array<{
-      name?: string | undefined
-      version?: string | undefined
-      integrity?: string | undefined
-      depth?: number | undefined
-      isProjectRoot?: boolean | undefined
-    }>,
-  ) => ({ inventory: new Map(nodes.map((n, i) => [String(i), n])) })
+describe(
+  'dlx/arborist — readTopLevelFromIdealTree',
+  { concurrent: false },
+  () => {
+    const makeTree = (
+      nodes: Array<{
+        name?: string | undefined
+        version?: string | undefined
+        integrity?: string | undefined
+        depth?: number | undefined
+        isProjectRoot?: boolean | undefined
+      }>,
+    ) => ({ inventory: new Map(nodes.map((n, i) => [String(i), n])) })
 
-  it('returns the depth=1 node matching targetName', () => {
-    const tree = makeTree([
-      { isProjectRoot: true, depth: 0 },
-      {
+    it('returns the depth=1 node matching targetName', () => {
+      const tree = makeTree([
+        { isProjectRoot: true, depth: 0 },
+        {
+          name: 'is-number',
+          version: '7.0.0',
+          integrity: 'sha512-abc=',
+          depth: 1,
+        },
+      ])
+      expect(readTopLevelFromIdealTree(tree, 'is-number')).toEqual({
         name: 'is-number',
         version: '7.0.0',
         integrity: 'sha512-abc=',
-        depth: 1,
-      },
-    ])
-    expect(readTopLevelFromIdealTree(tree, 'is-number')).toEqual({
-      name: 'is-number',
-      version: '7.0.0',
-      integrity: 'sha512-abc=',
+      })
     })
-  })
 
-  it('skips nested nodes at depth > 1 with the same name', () => {
-    const tree = makeTree([
-      {
-        name: 'is-number',
-        version: '6.0.0',
-        integrity: 'sha512-old=',
-        depth: 2,
-      },
-      {
-        name: 'is-number',
-        version: '7.0.0',
-        integrity: 'sha512-new=',
-        depth: 1,
-      },
-    ])
-    expect(readTopLevelFromIdealTree(tree, 'is-number').version).toBe('7.0.0')
-  })
+    it('skips nested nodes at depth > 1 with the same name', () => {
+      const tree = makeTree([
+        {
+          name: 'is-number',
+          version: '6.0.0',
+          integrity: 'sha512-old=',
+          depth: 2,
+        },
+        {
+          name: 'is-number',
+          version: '7.0.0',
+          integrity: 'sha512-new=',
+          depth: 1,
+        },
+      ])
+      expect(readTopLevelFromIdealTree(tree, 'is-number').version).toBe('7.0.0')
+    })
 
-  it('throws when the target name is not found', () => {
-    const tree = makeTree([
-      { name: 'other', version: '1.0.0', integrity: 'x', depth: 1 },
-    ])
-    expect(() => readTopLevelFromIdealTree(tree, 'absent')).toThrow(
-      /no top-level node for absent/,
-    )
-  })
+    it('throws when the target name is not found', () => {
+      const tree = makeTree([
+        { name: 'other', version: '1.0.0', integrity: 'x', depth: 1 },
+      ])
+      expect(() => readTopLevelFromIdealTree(tree, 'absent')).toThrow(
+        /no top-level node for absent/,
+      )
+    })
 
-  it('throws when the depth=1 match is missing version', () => {
-    const tree = makeTree([{ name: 'pkg', integrity: 'x', depth: 1 }])
-    expect(() => readTopLevelFromIdealTree(tree, 'pkg')).toThrow(
-      /missing version\/integrity/,
-    )
-  })
+    it('throws when the depth=1 match is missing version', () => {
+      const tree = makeTree([{ name: 'pkg', integrity: 'x', depth: 1 }])
+      expect(() => readTopLevelFromIdealTree(tree, 'pkg')).toThrow(
+        /missing version\/integrity/,
+      )
+    })
 
-  it('throws when the depth=1 match is missing integrity', () => {
-    const tree = makeTree([{ name: 'pkg', version: '1.0.0', depth: 1 }])
-    expect(() => readTopLevelFromIdealTree(tree, 'pkg')).toThrow(
-      /missing version\/integrity/,
-    )
-  })
+    it('throws when the depth=1 match is missing integrity', () => {
+      const tree = makeTree([{ name: 'pkg', version: '1.0.0', depth: 1 }])
+      expect(() => readTopLevelFromIdealTree(tree, 'pkg')).toThrow(
+        /missing version\/integrity/,
+      )
+    })
 
-  it('throws when inventory is missing entirely', () => {
-    expect(() => readTopLevelFromIdealTree({}, 'pkg')).toThrow(
-      /missing inventory/,
-    )
-  })
+    it('throws when inventory is missing entirely', () => {
+      expect(() => readTopLevelFromIdealTree({}, 'pkg')).toThrow(
+        /missing inventory/,
+      )
+    })
 
-  it('throws when tree is null', () => {
-    // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
-    expect(() => readTopLevelFromIdealTree(null, 'pkg')).toThrow(
-      /missing inventory/,
-    )
-  })
+    it('throws when tree is null', () => {
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- callers may pass null; tested explicitly.
+      expect(() => readTopLevelFromIdealTree(null, 'pkg')).toThrow(
+        /missing inventory/,
+      )
+    })
 
-  it('skips isProjectRoot:true nodes even at depth=1', () => {
-    const tree = makeTree([
-      {
-        name: 'is-number',
-        isProjectRoot: true,
-        version: '7.0.0',
-        integrity: 'x',
-        depth: 1,
-      },
-      {
-        name: 'is-number',
-        version: '8.0.0',
-        integrity: 'y',
-        depth: 1,
-      },
-    ])
-    expect(readTopLevelFromIdealTree(tree, 'is-number').version).toBe('8.0.0')
-  })
-})
+    it('skips isProjectRoot:true nodes even at depth=1', () => {
+      const tree = makeTree([
+        {
+          name: 'is-number',
+          isProjectRoot: true,
+          version: '7.0.0',
+          integrity: 'x',
+          depth: 1,
+        },
+        {
+          name: 'is-number',
+          version: '8.0.0',
+          integrity: 'y',
+          depth: 1,
+        },
+      ])
+      expect(readTopLevelFromIdealTree(tree, 'is-number').version).toBe('8.0.0')
+    })
+  },
+)
 
-describe.sequential('dlx/arborist — writeSafeNpmrc', () => {
+describe('dlx/arborist — writeSafeNpmrc', { concurrent: false }, () => {
   async function read(installPath: string) {
     return readFileSync(path.join(installPath, '.npmrc'), 'utf8')
   }

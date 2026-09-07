@@ -23,7 +23,7 @@ import {
 } from '../../../src/dlx/package.mjs'
 import { safeDelete } from '../../../src/fs/safe.mjs'
 
-describe.sequential('dlx/package — pure functions', () => {
+describe('dlx/package — pure functions', { concurrent: false }, () => {
   let testDir: string
 
   beforeEach(() => {

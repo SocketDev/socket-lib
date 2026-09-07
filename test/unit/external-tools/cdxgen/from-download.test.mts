@@ -44,7 +44,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/cdxgen/from-download', () => {
+describe('external-tools/cdxgen/from-download', { concurrent: false }, () => {
   test('returns undefined when the platform-arch is not shipped', async () => {
     const { cdxgenFromDownload, archiveMock } = await loadFresh()
     const result = await cdxgenFromDownload({
@@ -127,11 +127,7 @@ describe.sequential('external-tools/cdxgen/from-download', () => {
       platformArch: 'linux-x64',
       version: '12.4.1',
     })
-    // Normalize to forward slashes so the regex matches across darwin /
-    // linux / win32. `path.join` on win32 produces backslashes for ALL
-    // separators, including ones already in the input, so a literal
-    // `/fake/dlx` prefix would become `\fake\dlx` on Windows.
-    expect(normalizePath(result!.path)).toMatch(
+    expect(normalizePath(result?.path ?? '')).toMatch(
       /\/fake\/dlx\/cdxgen\/12\.4\.1\/linux-x64-slim/,
     )
   })

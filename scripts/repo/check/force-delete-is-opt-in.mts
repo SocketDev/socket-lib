@@ -2,8 +2,7 @@
 /**
  * @file Check the built safeDelete containment contract.
  *   A path outside cwd must be refused without options. A descendant of cwd
- *   must remain deletable. Cleanup names the probe parent as cwd, preserving
- *   the containment check for every deletion.
+ *   must remain deletable. Cleanup authorizes only the probe directory.
  *   Usage: node scripts/repo/check/force-delete-is-opt-in.mts [--quiet]
  */
 
@@ -22,7 +21,7 @@ const REPO_ROOT = path.resolve(
 interface SafeFs {
   safeDelete: (
     filepath: string,
-    options?: { cwd?: string | undefined } | undefined,
+    options?: { allowedDirs?: readonly string[] | undefined } | undefined,
   ) => Promise<void>
 }
 
@@ -101,7 +100,7 @@ export async function probeDeleteGuard(config: {
       property: 'refuses outside cwd',
     })
   }
-  await safe.safeDelete(outside, { cwd: root })
+  await safe.safeDelete(outside, { allowedDirs: [outside] })
 
   // A descendant must delete without additional options.
   const inside = path.join(cwd, `force-optin-probe-${process.pid}`)
@@ -118,7 +117,7 @@ export async function probeDeleteGuard(config: {
       detail: `safeDelete refused ${inside}, a descendant of the cwd, which must not need additional options`,
       property: 'allows inside cwd',
     })
-    await safe.safeDelete(inside, { cwd })
+    await safe.safeDelete(inside, { allowedDirs: [inside] })
   }
 
   return findings

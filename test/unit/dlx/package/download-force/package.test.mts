@@ -78,7 +78,7 @@ function stagePackage(installRoot: string, packageName: string): void {
   )
 }
 
-describe.sequential('downloadNpmPackage force resolution', () => {
+describe('downloadNpmPackage force resolution', { concurrent: false }, () => {
   let tmpDir: string
 
   beforeEach(() => {
@@ -166,7 +166,7 @@ describe.sequential('downloadNpmPackage force resolution', () => {
   })
 })
 
-describe.sequential('executePackage shell selection', () => {
+describe('executePackage shell selection', { concurrent: false }, () => {
   beforeEach(() => {
     isWin32Mock.mockReset().mockReturnValue(false)
     spawnMock.mockReset().mockReturnValue({ ok: true })
