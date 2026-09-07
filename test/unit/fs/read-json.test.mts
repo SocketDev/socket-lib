@@ -48,6 +48,25 @@ describe('readJson', () => {
     await expect(readJson('/nonexistent/file.json')).rejects.toThrow()
   })
 
+  it('preserves the missing-file cause for both read modes', async () => {
+    await runWithTempDir(async tmpDir => {
+      const missingFile = path.join(tmpDir, 'missing-config.json')
+      await expect(readJson(missingFile)).rejects.toMatchObject({
+        cause: { code: 'ENOENT', path: missingFile },
+      })
+      let failure: unknown
+      try {
+        readJsonSync(missingFile)
+      } catch (error) {
+        failure = error
+      }
+      expect(failure).toBeInstanceOf(Error)
+      expect(failure).toMatchObject({
+        cause: { code: 'ENOENT', path: missingFile },
+      })
+    }, 'read-json-cause-')
+  })
+
   it('should return undefined when throws is false and file does not exist', async () => {
     const result = await readJson('/nonexistent/file.json', { throws: false })
     expect(result).toBeUndefined()
