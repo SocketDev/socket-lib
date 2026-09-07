@@ -19,15 +19,23 @@ const LEAKY_AGENT_ENV_KEYS = [
   'AUGMENT_AGENT',
   'CLAUDE_CODE',
   'CLAUDECODE',
+  'CODEX_SANDBOX',
+  'CODEX_THREAD_ID',
   'CURSOR_AGENT',
+  'EDITOR',
   'GEMINI_CLI',
+  'GOOSE_PROVIDER',
+  'JUNIE_DATA',
+  'JUNIE_SHIM_PATH',
   'OPENCODE',
   'REPL_ID',
+  'TERM_PROGRAM',
 ]
 
 describe('env/agents', () => {
   beforeEach(() => {
     vi.resetModules()
+    vi.stubEnv('PATH', '/example-agent-free-path')
     for (let i = 0, { length } = LEAKY_AGENT_ENV_KEYS; i < length; i += 1) {
       vi.stubEnv(LEAKY_AGENT_ENV_KEYS[i]!, undefined)
     }

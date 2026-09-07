@@ -1,6 +1,17 @@
-import { describe, expect, test } from 'vitest'
+import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { applyColor, getYoctocolors } from '../../../src/logger/colors.mjs'
+
+beforeEach(() => {
+  for (const key of ['CI', 'FORCE_COLOR', 'NO_COLOR', 'TF_BUILD']) {
+    vi.stubEnv(key, undefined)
+  }
+  vi.stubEnv('TERM', 'xterm-256color')
+})
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
 
 const colors = getYoctocolors()
 

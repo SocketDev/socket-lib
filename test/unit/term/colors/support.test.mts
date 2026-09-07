@@ -20,7 +20,18 @@ import {
   toColorCapability,
   toColorPalette,
 } from '../../../../src/term/colors/support.mjs'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+beforeEach(() => {
+  for (const key of ['CI', 'FORCE_COLOR', 'NO_COLOR', 'TF_BUILD']) {
+    vi.stubEnv(key, undefined)
+  }
+  vi.stubEnv('TERM', 'xterm-256color')
+})
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
 
 const NO_COLOR_CAPABILITY = {
   has16m: false,
