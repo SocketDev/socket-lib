@@ -37,6 +37,7 @@ export const primBuildConfig: RolldownOptions = {
     // `inlineDynamicImports: true`. Both settings produce one bundle.
     codeSplitting: false,
     minify: false,
+    comments: { annotation: true, jsdoc: false, legal: true },
     banner: '"use strict";\n/* Socket Lib prim - bundled with rolldown */',
   },
   platform: 'node',
