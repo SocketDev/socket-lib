@@ -23,7 +23,7 @@ import {
   failingHttp,
   recordingHttp,
   sleep,
-} from './api-helpers.mjs'
+} from './http-fixtures.mjs'
 
 const SEARCH_PAGE = {
   objects: [{ package: { name: '@example/pkg', version: '1.0.0' } }],

@@ -22,7 +22,7 @@ import {
   npmPurl,
   resolveBinaryPath,
 } from '../../../../src/dlx/package.mjs'
-import { runWithTempDir } from '../../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../../util/temp-files.mjs'
 
 // Helper that owns the `prefer-exists-sync` exemption once instead of
 // repeating it at every fs.statSync() call — these tests read the mode

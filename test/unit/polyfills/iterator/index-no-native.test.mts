@@ -10,20 +10,23 @@
  */
 
 import { beforeAll, describe, expect, it, vi } from 'vitest'
-import type * as IteratorIndex from '../../../src/polyfills/iterator/index.mjs'
+import type * as IteratorIndex from '../../../../src/polyfills/iterator/index.mjs'
 
-vi.mock(import('../../../src/polyfills/iterator/shared.mts'), async orig => ({
-  ...(await orig()),
-  // An engine below Node 22 has no %IteratorHelperPrototype%, so every lookup
-  // against it comes back empty.
-  iteratorPrototypeOf: () => Object.create(null),
-}))
+vi.mock(
+  import('../../../../src/polyfills/iterator/shared.mts'),
+  async orig => ({
+    ...(await orig()),
+    // An engine below Node 22 has no %IteratorHelperPrototype%, so every lookup
+    // against it comes back empty.
+    iteratorPrototypeOf: () => Object.create(null),
+  }),
+)
 
 let iterators: typeof IteratorIndex
 
 beforeAll(async () => {
   Reflect.deleteProperty(globalThis, 'Iterator')
-  iterators = await import('../../../src/polyfills/iterator/index.mjs')
+  iterators = await import('../../../../src/polyfills/iterator/index.mjs')
 })
 
 function counter(limit: number): IterableIterator<number> {

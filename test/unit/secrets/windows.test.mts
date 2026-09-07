@@ -4,7 +4,7 @@ import { Writable } from 'node:stream'
 
 import { describe, expect, test, vi } from 'vitest'
 
-import { describeWindowsOnly } from '../util/skip-helpers.mjs'
+import { describeWindowsOnly } from '../util/platform-suites.mjs'
 import {
   harness,
   loadFresh,

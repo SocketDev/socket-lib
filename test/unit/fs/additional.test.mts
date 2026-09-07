@@ -30,7 +30,7 @@ import { readJson, readJsonSync } from '../../../src/fs/read-json.mjs'
 import { writeJson, writeJsonSync } from '../../../src/fs/write-json.mjs'
 import { describe, expect, it } from 'vitest'
 import { minTimerQuantum } from '../../_shared/fleet/lib/timing.mts'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('fs - Additional Coverage', () => {
   describe('findUp edge cases', () => {

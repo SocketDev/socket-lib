@@ -40,7 +40,7 @@ import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { clearPath, resetPaths, setPath } from '../../../src/paths/rewire.mjs'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { describeUnixOnly } from '../util/skip-helpers.mjs'
+import { describeUnixOnly } from '../util/platform-suites.mjs'
 
 describe('paths/socket', () => {
   afterEach(() => {

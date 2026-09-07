@@ -22,7 +22,7 @@ import {
 } from '../../../src/process/spawn/shared.mjs'
 import { spawn, spawnSync } from '../../../src/process/spawn/child.mjs'
 
-import { describeUnixOnly } from '../util/skip-helpers.mjs'
+import { describeUnixOnly } from '../util/platform-suites.mjs'
 
 const tempRoots: string[] = []
 

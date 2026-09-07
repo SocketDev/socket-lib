@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 
 import { forceDelete, forceDeleteSync } from '../../../src/fs/force.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('forceDelete', () => {
   it('removes a target without consulting location', async () => {

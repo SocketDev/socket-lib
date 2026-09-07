@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 
 import { atomicTempPath, writeFileAtomicSync } from '../../../src/fs/atomic.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('atomicTempPath', () => {
   it('is a dotted sibling in the target directory', () => {

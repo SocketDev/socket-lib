@@ -15,7 +15,7 @@ import {
 
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
-import { describeNetworkOnly } from '../util/skip-helpers.mjs'
+import { describeNetworkOnly } from '../util/platform-suites.mjs'
 
 describe.sequential('dlx/lockfile — specName', () => {
   it('returns the name from a versioned spec', () => {

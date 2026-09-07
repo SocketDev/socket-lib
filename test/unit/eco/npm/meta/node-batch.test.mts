@@ -20,7 +20,7 @@ import {
   createStubHttpAdapter,
   freshCache,
   setupNpmMetaCacheIsolation,
-} from '../meta-test-helpers.mts'
+} from '../meta-fixtures.mts'
 
 import type { PackumentMetaSlim } from '../../../../../src/eco/npm/meta-types.mjs'
 import type { RawPackument } from '../../../../../src/eco/npm/meta-types.mjs'

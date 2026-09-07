@@ -21,7 +21,7 @@ import {
   shapeWriteFailure,
   shapeWriteSuccess,
 } from '../../../../../src/eco/npm/registry/client.mjs'
-import { failingHttp, recordingHttp } from './api-helpers.mjs'
+import { failingHttp, recordingHttp } from './http-fixtures.mjs'
 
 describe('buildQuery', () => {
   test('skips undefined values', () => {

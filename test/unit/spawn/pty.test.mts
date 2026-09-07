@@ -23,7 +23,7 @@ import {
   stdoutIsFileBacked,
 } from '../../../src/process/spawn/pty.mjs'
 
-import { itUnixOnly } from '../util/skip-helpers.mjs'
+import { itUnixOnly } from '../util/platform-suites.mjs'
 
 const HAS_SCRIPT = whichSync('script') !== null
 // The end-to-end case allocates a REAL PTY through the system `script`

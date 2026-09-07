@@ -1,6 +1,6 @@
 /**
  * @file Unit tests for the npm trusted-publisher endpoints. The HTTP adapter is
- *   the in-memory double from `./api-helpers`, so every case runs with no
+ *   the in-memory double from `./http-fixtures`, so every case runs with no
  *   network.
  */
 
@@ -9,7 +9,7 @@ import assert from 'node:assert/strict'
 import { describe, test } from 'vitest'
 
 import { fetchTrustedPublishers } from '../../../../../src/eco/npm/registry/trust.mjs'
-import { recordingHttp } from './api-helpers.mjs'
+import { recordingHttp } from './http-fixtures.mjs'
 
 const AUTH = { token: 'tok' }
 

@@ -11,7 +11,7 @@
  *
  * @example
  *   ;```ts
- *   import { itWindowsOnly, itUnixOnly, itNetworkOnly } from '../util/skip-helpers.mjs'
+ *   import { itWindowsOnly, itUnixOnly, itNetworkOnly } from '../util/platform-suites.mjs'
  *
  *   itWindowsOnly('should convert MSYS drive letter paths', () => { ... })
  *   itUnixOnly('should not convert MSYS-like paths on Unix', () => { ... })

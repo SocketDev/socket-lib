@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest'
 
 import { cloneDir, cloneFile } from '../../../src/fs/copy.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('cloneFile', () => {
   it('reproduces the bytes', async () => {

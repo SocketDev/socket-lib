@@ -14,8 +14,8 @@ import { extractPackage, packPackage } from '../../../src/packages/tarball.mjs'
 import type { ExtractOptions } from '../../../src/packages/types.mjs'
 import type { PacoteOptions } from '../../../src/packages/types.mjs'
 import { normalizePath } from '../../../src/paths/normalize.mjs'
-import { describeNetworkOnly } from '../util/skip-helpers.mjs'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { describeNetworkOnly } from '../util/platform-suites.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
 
 type ExtractCallback = (destPath: string) => Promise<unknown>

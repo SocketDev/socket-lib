@@ -26,7 +26,7 @@ import {
 import { readRealPath } from '../../../../src/fs/inspect.mjs'
 import { safeDelete } from '../../../../src/fs/safe.mjs'
 
-import { describeUnixOnly } from '../../util/skip-helpers.mjs'
+import { describeUnixOnly } from '../../util/platform-suites.mjs'
 
 const tempRoots: string[] = []
 

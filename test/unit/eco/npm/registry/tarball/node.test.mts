@@ -25,7 +25,7 @@ import { readNpmTarballEntries as readEntriesInBrowser } from '../../../../../..
 import { safeDelete } from '../../../../../../src/fs/safe.mjs'
 import { normalizePath } from '../../../../../../src/paths/normalize.mjs'
 
-import { runWithTempDir } from '../../../../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../../../../util/temp-files.mjs'
 import {
   makeNpmTarball,
   makePackageTarball,

@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 
 import { uniqueSync } from '../../../src/fs/unique.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('uniqueSync', () => {
   it('should return same path if file does not exist', async () => {

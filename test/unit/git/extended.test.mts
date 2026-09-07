@@ -24,7 +24,7 @@ import { getUnstagedFiles } from '../../../src/git/unstaged.mjs'
 import { normalizePath } from '../../../src/paths/normalize.mjs'
 import { spawnSync } from '../../../src/process/spawn/child.mjs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('git extended tests', () => {
   const projectRoot = normalizePath(process.cwd())

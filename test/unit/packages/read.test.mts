@@ -15,7 +15,7 @@ import {
 } from '../../../src/packages/read.mjs'
 import type { NormalizeOptions } from '../../../src/packages/types.mjs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 type ReadPackageJsonSyncOptions = NormalizeOptions & {
   editable?: boolean | undefined

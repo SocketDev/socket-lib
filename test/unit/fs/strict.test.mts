@@ -16,7 +16,7 @@ import {
   strictDeleteSync,
 } from '../../../src/fs/strict.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('deleteRefusalReason', () => {
   it('refuses an empty or dot-only target', () => {

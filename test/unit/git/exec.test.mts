@@ -19,7 +19,7 @@ import {
   stderrText,
 } from '../../../src/git/exec.mjs'
 import { spawnSync } from '../../../src/process/spawn/child.mjs'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 // Real git spawns under CPU contention; match the sibling
 // extended-real-ops.test.mts describe-scope timeout bump.

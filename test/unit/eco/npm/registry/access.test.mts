@@ -30,7 +30,7 @@ import {
   fetchTeamMembers,
   removeTeamMember,
 } from '../../../../../src/eco/npm/registry/team.mjs'
-import { failingHttp, recordingHttp } from './api-helpers.mjs'
+import { failingHttp, recordingHttp } from './http-fixtures.mjs'
 
 const AUTH = { token: 'tok' }
 

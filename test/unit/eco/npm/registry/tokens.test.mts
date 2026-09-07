@@ -1,9 +1,9 @@
 /**
  * @file Unit tests for the npm access-token endpoints. The HTTP adapter is the
- *   in-memory double from `./api-helpers`, so every case runs with no network.
- *   The cases here pin the wire shape of the optional fields: npm reads them
- *   under snake_case names, and an omitted one must be absent rather than sent
- *   as an explicit null.
+ *   in-memory double from `./http-fixtures`, so every case runs with no
+ *   network. The cases here pin the wire shape of the optional fields: npm
+ *   reads them under snake_case names, and an omitted one must be absent rather
+ *   than sent as an explicit null.
  */
 
 import assert from 'node:assert/strict'
@@ -14,7 +14,7 @@ import {
   createNpmToken,
   fetchNpmTokens,
 } from '../../../../../src/eco/npm/registry/tokens.mjs'
-import { recordingHttp } from './api-helpers.mjs'
+import { recordingHttp } from './http-fixtures.mjs'
 
 const AUTH = { token: 'tok' }
 

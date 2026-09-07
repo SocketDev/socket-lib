@@ -29,7 +29,7 @@ import {
 import { spawnSync } from '../../../src/process/spawn/child.mjs'
 import { describe, expect, it, vi } from 'vitest'
 import { tolerantTimeout } from '../../_shared/fleet/lib/timing.mts'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 import { safeDelete } from '../../../src/fs/safe.mjs'
 
 describe('git extended tests - real git operations', () => {

@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest'
 
 import { readJson, readJsonSync } from '../../../src/fs/read-json.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('readJson', () => {
   it('should read and parse JSON file', async () => {
