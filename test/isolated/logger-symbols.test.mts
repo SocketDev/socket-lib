@@ -176,7 +176,7 @@ describe('Logger symbols and stripping', () => {
     })
   })
 
-  describe.sequential('blank line tracking', () => {
+  describe('blank line tracking', { concurrent: false }, () => {
     it('should track when last line was blank', () => {
       harness.testLogger.log('')
       harness.testLogger.logNewline()
@@ -200,7 +200,7 @@ describe('Logger symbols and stripping', () => {
     })
   })
 
-  describe.sequential('edge cases', () => {
+  describe('edge cases', { concurrent: false }, () => {
     it('should handle empty strings', () => {
       harness.testLogger.log('')
       harness.testLogger.error('')

@@ -28,6 +28,7 @@ const LEAKY_AGENT_ENV_KEYS = [
   'JUNIE_DATA',
   'JUNIE_SHIM_PATH',
   'OPENCODE',
+  'PATH',
   'REPL_ID',
   'TERM_PROGRAM',
 ]

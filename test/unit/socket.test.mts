@@ -68,7 +68,7 @@ describe('paths', () => {
 
     it('should end with .socket directory', () => {
       const result = getSocketUserDir()
-      expect(result).toMatch(/\.socket$/)
+      expect(normalizePath(result)).toMatch(/\.socket$/)
     })
 
     it('should be absolute path', () => {
@@ -169,7 +169,7 @@ describe('paths', () => {
       const appDir = getSocketAppDir('test')
       const cacheDir = getSocketAppCacheDir('test')
       expect(cacheDir).toContain(appDir)
-      expect(cacheDir).toMatch(/cache$/)
+      expect(normalizePath(cacheDir)).toMatch(/cache$/)
     })
 
     it('should return normalized path', () => {
@@ -201,7 +201,7 @@ describe('paths', () => {
       const cacheDir = getSocketAppCacheDir('test')
       const ttlDir = getSocketAppCacheTtlDir('test')
       expect(ttlDir).toContain(cacheDir)
-      expect(ttlDir).toMatch(/ttl$/)
+      expect(normalizePath(ttlDir)).toMatch(/ttl$/)
     })
 
     it('should return normalized path', () => {

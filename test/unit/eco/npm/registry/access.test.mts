@@ -3,7 +3,6 @@
  *   HTTP adapter is injected, so every case runs with no network.
  */
 
-import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import assert from 'node:assert/strict'
 
 import { describe, test } from 'vitest'
@@ -185,9 +184,9 @@ describe('revokeTeamPackageAccess', () => {
         ...AUTH,
       },
     )
-    assert.match(
-      normalizePath(stub.calls[0]!.url),
-      /\/-\/team\/example%20org\/wombats%2Fmaintainers\/package$/,
+    assert.equal(
+      new URL(stub.calls[0]!.url).pathname,
+      '/-/team/example%20org/wombats%2Fmaintainers/package',
     )
   })
 

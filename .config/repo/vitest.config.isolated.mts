@@ -69,8 +69,8 @@ const vitestConfigIsolated = defineConfig({
     // Full isolation for tests that modify shared module state.
     // Forks pool gives each test file its own child process.
     pool: 'forks',
-    maxWorkers: 1,
     fileParallelism: false,
+    maxWorkers: 1,
     isolate: true,
     // Heavy I/O tests such as archive extraction and large http fixtures need
     // headroom under coverage instrumentation. CI is colder and slower than

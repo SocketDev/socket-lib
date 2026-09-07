@@ -38,7 +38,7 @@ afterEach(() => {
   safeDeleteSync(tmpRoot)
 })
 
-describe.sequential('runOne', () => {
+describe('runOne', { concurrent: false }, () => {
   // runOne owns one item's whole worktree lifecycle: add → run → merge →
   // clean up. Each arm is driven against a real repo, since the decisions it
   // makes (merged? cleaned up?) are readable only from git's actual state.

@@ -120,7 +120,9 @@ describe('findUpPackageJson', () => {
     // to the socket-lib package.json — never hard-coded.
     const found = findUpPackageJson(import.meta)
     expect(found).toBe(
-      fileURLToPath(new URL('../../../package.json', import.meta.url)),
+      normalizePath(
+        fileURLToPath(new URL('../../../package.json', import.meta.url)),
+      ),
     )
   })
 })
