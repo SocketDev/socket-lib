@@ -1,7 +1,7 @@
 /**
  * @file Build, read, and write the two inventories the drift diff compares:
  *   the generated projection of npm's pinned spec, and the AST read of
- *   `src/npm/registry/*.mts`.
+ *   `src/eco/npm/registry/*.mts`.
  *   The spec inventory is COMMITTED and GENERATED. Committing it is what lets
  *   the check run with no network and no cache - a fresh CI checkout still
  *   knows exactly which endpoints the pinned spec declares. Generating it is
@@ -39,13 +39,13 @@ export const GENERATED_BANNER =
  * `tarball/` subdirectory is out of scope — it reads archive bytes rather than
  * calling a registry endpoint, and the extension test skips it.
  */
-export const HELPER_DIR = path.join(REPO_ROOT, 'src', 'npm', 'registry')
+export const HELPER_DIR = path.join(REPO_ROOT, 'src', 'eco', 'npm', 'registry')
 
 /**
  * How a helper module's file is labelled in the report, relative to the repo
  * root. Joined with the module's basename by the renderer.
  */
-export const HELPER_DIR_LABEL = 'src/npm/registry'
+export const HELPER_DIR_LABEL = 'src/eco/npm/registry'
 
 /**
  * Where to read helper modules from. Tests point this at a scratch directory.
@@ -83,7 +83,7 @@ export function buildSpecInventory(spec: FetchedSpec): SpecInventory {
 }
 
 /**
- * Every `src/npm/registry/*.mts` read as an AST. A module that will not parse
+ * Every `src/eco/npm/registry/*.mts` read as an AST. A module that will not parse
  * is skipped, so one bad file degrades the report rather than killing it.
  */
 export function readHelperModules(

@@ -10,13 +10,15 @@
  *     SocketPURL_Type from socket-sdk-js.
  */
 
-export const PURL_Type = {
+export const PURL_Type: Readonly<{
+  [Type in Uppercase<PURLString>]: Lowercase<Type>
+}> = {
   ALPM: 'alpm',
   APK: 'apk',
   BITBUCKET: 'bitbucket',
-  COCOAPODS: 'cocoapods',
   CARGO: 'cargo',
   CHROME: 'chrome',
+  COCOAPODS: 'cocoapods',
   COMPOSER: 'composer',
   CONAN: 'conan',
   CONDA: 'conda',
@@ -43,7 +45,7 @@ export const PURL_Type = {
   SWIFT: 'swift',
   VCS: 'vcs',
   VSCODE: 'vscode',
-} as const
+}
 
 export type PURLString =
   | 'alpm'

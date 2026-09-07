@@ -2,12 +2,21 @@
  * @file Unit tests for Socket Registry type definitions.
  */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, expectTypeOf, it } from 'vitest'
 
 import { PURL_Type } from '../../../src/eco/purl.mjs'
 
 describe('types', () => {
   describe('PURL_Type enum', () => {
+    it('preserves uppercase keys and their exact lowercase literal types', () => {
+      expectTypeOf(PURL_Type.NPM).toEqualTypeOf<'npm'>()
+      expectTypeOf(PURL_Type.COCOAPODS).toEqualTypeOf<'cocoapods'>()
+      for (const [key, value] of Object.entries(PURL_Type)) {
+        expect(key).toBe(key.toUpperCase())
+        expect(value).toBe(key.toLowerCase())
+      }
+    })
+
     it('should have NPM type', () => {
       expect(PURL_Type.NPM).toBe('npm')
     })
