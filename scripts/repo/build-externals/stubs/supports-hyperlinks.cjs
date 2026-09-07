@@ -18,9 +18,10 @@ function parseVersion(version) {
   // "3.4.19beta" still yields 3.4.19.
   const parts = /(\d+)(?:\.(\d+))?(?:\.(\d+))?/.exec(version || '')
   if (!parts) {
-    return { major: 0, minor: 0, patch: 0 }
+    return { __proto__: null, major: 0, minor: 0, patch: 0 }
   }
   return {
+    __proto__: null,
     major: Number(parts[1] || 0),
     minor: Number(parts[2] || 0),
     patch: Number(parts[3] || 0),
@@ -47,6 +48,12 @@ function supported(stream) {
   if (env['WT_SESSION']) {
     return true
   }
+  return (
+    terminalProgramSupportsHyperlinks(env) ?? platformSupportsHyperlinks(env)
+  )
+}
+
+function terminalProgramSupportsHyperlinks(env) {
   if (env['TERM_PROGRAM']) {
     const version = parseVersion(env['TERM_PROGRAM_VERSION'])
     switch (env['TERM_PROGRAM']) {
@@ -63,6 +70,10 @@ function supported(stream) {
         break
     }
   }
+  return undefined
+}
+
+function platformSupportsHyperlinks(env) {
   if (env['VTE_VERSION']) {
     // 0.50.0 is where VTE gained OSC 8; 0.50.0 exactly is excluded upstream.
     if (env['VTE_VERSION'] === '0.50.0') {
