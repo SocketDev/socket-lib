@@ -18,7 +18,7 @@ vi.mock(import('../../../src/http-request/request.mjs'))
 // Match the production source's primordials convention.
 const JSONStringify = JSON.stringify
 
-describe.sequential('releases/github-api: getLatestRelease', () => {
+describe('releases/github-api: getLatestRelease', { concurrent: false }, () => {
   const mockReleases = [
     {
       assets: [
