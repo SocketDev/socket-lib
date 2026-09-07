@@ -33,7 +33,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/skillspector/from-path', () => {
+describe('external-tools/skillspector/from-path', { concurrent: false }, () => {
   test('returns undefined when which returns undefined (not on PATH)', async () => {
     const { skillspectorFromPath, whichMock } = await loadFresh()
     whichMock.mockResolvedValueOnce(undefined)

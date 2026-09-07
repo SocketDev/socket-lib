@@ -26,7 +26,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/synp/from-path', () => {
+describe('external-tools/synp/from-path', { concurrent: false }, () => {
   test('returns a resolved record with source="path" when which returns a string', async () => {
     const { synpFromPath, whichMock } = await loadFresh()
     whichMock.mockResolvedValueOnce('/usr/local/bin/synp')

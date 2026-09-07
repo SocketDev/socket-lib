@@ -25,7 +25,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/uv/from-download', () => {
+describe('external-tools/uv/from-download', { concurrent: false }, () => {
   test('returns undefined when the platform-arch is not shipped', async () => {
     const { uvFromDownload, downloadMock } = await loadFresh()
     const result = await uvFromDownload({

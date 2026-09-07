@@ -38,7 +38,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/sbt/resolve — cacheKey', () => {
+describe('external-tools/sbt/resolve — cacheKey', { concurrent: false }, () => {
   test('returns "local-only" without downloadIfMissing', async () => {
     const { cacheKey } = await loadFresh()
     expect(cacheKey(undefined)).toBe('local-only')
@@ -77,47 +77,56 @@ describe.sequential('external-tools/sbt/resolve — cacheKey', () => {
   })
 })
 
-describe.sequential('external-tools/sbt/resolve — doResolveSbt', () => {
-  test('returns PATH result when sbt is on PATH', async () => {
-    const { doResolveSbt, fromPath, fromVfs } = await loadFresh()
-    fromVfs.mockResolvedValueOnce(undefined)
-    const expected = { binaryPath: '/usr/bin/sbt', source: 'path' as const }
-    fromPath.mockResolvedValueOnce(expected)
-    expect(await doResolveSbt()).toBe(expected)
-  })
+describe(
+  'external-tools/sbt/resolve — doResolveSbt',
+  { concurrent: false },
+  () => {
+    test('returns PATH result when sbt is on PATH', async () => {
+      const { doResolveSbt, fromPath, fromVfs } = await loadFresh()
+      fromVfs.mockResolvedValueOnce(undefined)
+      const expected = { binaryPath: '/usr/bin/sbt', source: 'path' as const }
+      fromPath.mockResolvedValueOnce(expected)
+      expect(await doResolveSbt()).toBe(expected)
+    })
 
-  test('returns undefined when PATH misses and download not enabled', async () => {
-    const { doResolveSbt, fromPath, fromVfs } = await loadFresh()
-    fromVfs.mockResolvedValueOnce(undefined)
-    fromPath.mockResolvedValueOnce(undefined)
-    expect(await doResolveSbt()).toBeUndefined()
-  })
+    test('returns undefined when PATH misses and download not enabled', async () => {
+      const { doResolveSbt, fromPath, fromVfs } = await loadFresh()
+      fromVfs.mockResolvedValueOnce(undefined)
+      fromPath.mockResolvedValueOnce(undefined)
+      expect(await doResolveSbt()).toBeUndefined()
+    })
 
-  test('falls through to download when PATH misses + opts.downloadIfMissing', async () => {
-    const { doResolveSbt, fromDownload, fromPath, fromVfs } = await loadFresh()
-    fromVfs.mockResolvedValueOnce(undefined)
-    fromPath.mockResolvedValueOnce(undefined)
-    const expected = {
-      binaryPath: '/cache/sbt',
-      source: 'download' as const,
-    }
-    fromDownload.mockResolvedValueOnce(expected)
-    const opts = { downloadIfMissing: { version: '1.9.0' } }
-    expect(await doResolveSbt(opts)).toBe(expected)
-    expect(fromDownload).toHaveBeenCalledWith(opts.downloadIfMissing)
-  })
-})
+    test('falls through to download when PATH misses + opts.downloadIfMissing', async () => {
+      const { doResolveSbt, fromDownload, fromPath, fromVfs } =
+        await loadFresh()
+      fromVfs.mockResolvedValueOnce(undefined)
+      fromPath.mockResolvedValueOnce(undefined)
+      const expected = {
+        binaryPath: '/cache/sbt',
+        source: 'download' as const,
+      }
+      fromDownload.mockResolvedValueOnce(expected)
+      const opts = { downloadIfMissing: { version: '1.9.0' } }
+      expect(await doResolveSbt(opts)).toBe(expected)
+      expect(fromDownload).toHaveBeenCalledWith(opts.downloadIfMissing)
+    })
+  },
+)
 
-describe.sequential('external-tools/sbt/resolve — resolveSbt memoization', () => {
-  test('memoizes by cacheKey', async () => {
-    const { fromPath, fromVfs, resolveSbt } = await loadFresh()
-    fromVfs.mockResolvedValue(undefined)
-    const expected = { binaryPath: '/usr/bin/sbt', source: 'path' as const }
-    fromPath.mockResolvedValueOnce(expected)
-    const a = await resolveSbt()
-    const b = await resolveSbt()
-    expect(a).toBe(expected)
-    expect(b).toBe(expected)
-    expect(fromPath).toHaveBeenCalledTimes(1)
-  })
-})
+describe(
+  'external-tools/sbt/resolve — resolveSbt memoization',
+  { concurrent: false },
+  () => {
+    test('memoizes by cacheKey', async () => {
+      const { fromPath, fromVfs, resolveSbt } = await loadFresh()
+      fromVfs.mockResolvedValue(undefined)
+      const expected = { binaryPath: '/usr/bin/sbt', source: 'path' as const }
+      fromPath.mockResolvedValueOnce(expected)
+      const a = await resolveSbt()
+      const b = await resolveSbt()
+      expect(a).toBe(expected)
+      expect(b).toBe(expected)
+      expect(fromPath).toHaveBeenCalledTimes(1)
+    })
+  },
+)

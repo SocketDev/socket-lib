@@ -5,7 +5,7 @@ import {
   trivyFromVfs,
 } from '../../../../src/external-tools/trivy/from-vfs.mjs'
 
-describe.sequential('external-tools/trivy/from-vfs', () => {
+describe('external-tools/trivy/from-vfs', { concurrent: false }, () => {
   test('exports TRIVY_VFS_KEY constant', () => {
     expect(TRIVY_VFS_KEY).toBe('trivy')
   })

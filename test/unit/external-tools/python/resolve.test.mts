@@ -112,76 +112,84 @@ describe('external-tools/python/resolve — cacheKey', () => {
   })
 })
 
-describe.sequential('external-tools/python/resolve — doResolvePython', () => {
-  test('PATH wins by default when present', async () => {
-    const { doResolvePython, pythonFromPathMock, pythonFromDownloadMock } =
-      await loadFresh()
-    pythonFromPathMock.mockResolvedValueOnce(ON_PATH)
-    const result = await doResolvePython({ downloadIfMissing: PIN })
-    expect(result).toEqual(ON_PATH)
-    // Download tier not consulted when PATH hits and preferDownload is off.
-    expect(pythonFromDownloadMock).not.toHaveBeenCalled()
-  })
-
-  test('preferDownload tries the download tier first', async () => {
-    const { doResolvePython, pythonFromPathMock, pythonFromDownloadMock } =
-      await loadFresh()
-    pythonFromDownloadMock.mockResolvedValueOnce(DOWNLOADED)
-    const result = await doResolvePython({
-      preferDownload: true,
-      downloadIfMissing: PIN,
+describe(
+  'external-tools/python/resolve — doResolvePython',
+  { concurrent: false },
+  () => {
+    test('PATH wins by default when present', async () => {
+      const { doResolvePython, pythonFromPathMock, pythonFromDownloadMock } =
+        await loadFresh()
+      pythonFromPathMock.mockResolvedValueOnce(ON_PATH)
+      const result = await doResolvePython({ downloadIfMissing: PIN })
+      expect(result).toEqual(ON_PATH)
+      // Download tier not consulted when PATH hits and preferDownload is off.
+      expect(pythonFromDownloadMock).not.toHaveBeenCalled()
     })
-    expect(result).toEqual(DOWNLOADED)
-    expect(pythonFromPathMock).not.toHaveBeenCalled()
-  })
 
-  test('falls back to download when PATH misses', async () => {
-    const { doResolvePython, pythonFromPathMock, pythonFromDownloadMock } =
-      await loadFresh()
-    pythonFromPathMock.mockResolvedValueOnce(undefined)
-    pythonFromDownloadMock.mockResolvedValueOnce(DOWNLOADED)
-    const result = await doResolvePython({ downloadIfMissing: PIN })
-    expect(result).toEqual(DOWNLOADED)
-  })
-
-  test('preferDownload falls through to PATH when the download tier misses', async () => {
-    const { doResolvePython, pythonFromPathMock, pythonFromDownloadMock } =
-      await loadFresh()
-    pythonFromDownloadMock.mockResolvedValueOnce(undefined)
-    pythonFromPathMock.mockResolvedValueOnce(ON_PATH)
-    const result = await doResolvePython({
-      preferDownload: true,
-      downloadIfMissing: PIN,
+    test('preferDownload tries the download tier first', async () => {
+      const { doResolvePython, pythonFromPathMock, pythonFromDownloadMock } =
+        await loadFresh()
+      pythonFromDownloadMock.mockResolvedValueOnce(DOWNLOADED)
+      const result = await doResolvePython({
+        preferDownload: true,
+        downloadIfMissing: PIN,
+      })
+      expect(result).toEqual(DOWNLOADED)
+      expect(pythonFromPathMock).not.toHaveBeenCalled()
     })
-    expect(result).toEqual(ON_PATH)
-  })
 
-  test('returns undefined when PATH misses and no download pin is given', async () => {
-    const { doResolvePython, pythonFromPathMock } = await loadFresh()
-    pythonFromPathMock.mockResolvedValueOnce(undefined)
-    expect(await doResolvePython()).toBeUndefined()
-  })
-})
+    test('falls back to download when PATH misses', async () => {
+      const { doResolvePython, pythonFromPathMock, pythonFromDownloadMock } =
+        await loadFresh()
+      pythonFromPathMock.mockResolvedValueOnce(undefined)
+      pythonFromDownloadMock.mockResolvedValueOnce(DOWNLOADED)
+      const result = await doResolvePython({ downloadIfMissing: PIN })
+      expect(result).toEqual(DOWNLOADED)
+    })
 
-describe.sequential('external-tools/python/resolve — resolvePython memoization', () => {
-  test('caches the resolution per option-shape (one probe per key)', async () => {
-    const { resolvePython, pythonFromPathMock } = await loadFresh()
-    pythonFromPathMock.mockResolvedValue(ON_PATH)
-    const a = await resolvePython()
-    const b = await resolvePython()
-    expect(a).toEqual(ON_PATH)
-    expect(b).toEqual(ON_PATH)
-    // Same key → resolved once.
-    expect(pythonFromPathMock).toHaveBeenCalledTimes(1)
-  })
+    test('preferDownload falls through to PATH when the download tier misses', async () => {
+      const { doResolvePython, pythonFromPathMock, pythonFromDownloadMock } =
+        await loadFresh()
+      pythonFromDownloadMock.mockResolvedValueOnce(undefined)
+      pythonFromPathMock.mockResolvedValueOnce(ON_PATH)
+      const result = await doResolvePython({
+        preferDownload: true,
+        downloadIfMissing: PIN,
+      })
+      expect(result).toEqual(ON_PATH)
+    })
 
-  test('resetPythonResolution clears the cache', async () => {
-    const { resolvePython, resetPythonResolution, pythonFromPathMock } =
-      await loadFresh()
-    pythonFromPathMock.mockResolvedValue(ON_PATH)
-    await resolvePython()
-    resetPythonResolution()
-    await resolvePython()
-    expect(pythonFromPathMock).toHaveBeenCalledTimes(2)
-  })
-})
+    test('returns undefined when PATH misses and no download pin is given', async () => {
+      const { doResolvePython, pythonFromPathMock } = await loadFresh()
+      pythonFromPathMock.mockResolvedValueOnce(undefined)
+      expect(await doResolvePython()).toBeUndefined()
+    })
+  },
+)
+
+describe(
+  'external-tools/python/resolve — resolvePython memoization',
+  { concurrent: false },
+  () => {
+    test('caches the resolution per option-shape (one probe per key)', async () => {
+      const { resolvePython, pythonFromPathMock } = await loadFresh()
+      pythonFromPathMock.mockResolvedValue(ON_PATH)
+      const a = await resolvePython()
+      const b = await resolvePython()
+      expect(a).toEqual(ON_PATH)
+      expect(b).toEqual(ON_PATH)
+      // Same key → resolved once.
+      expect(pythonFromPathMock).toHaveBeenCalledTimes(1)
+    })
+
+    test('resetPythonResolution clears the cache', async () => {
+      const { resolvePython, resetPythonResolution, pythonFromPathMock } =
+        await loadFresh()
+      pythonFromPathMock.mockResolvedValue(ON_PATH)
+      await resolvePython()
+      resetPythonResolution()
+      await resolvePython()
+      expect(pythonFromPathMock).toHaveBeenCalledTimes(2)
+    })
+  },
+)

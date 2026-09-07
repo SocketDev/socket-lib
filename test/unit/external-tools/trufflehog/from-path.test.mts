@@ -27,7 +27,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/trufflehog/from-path', () => {
+describe('external-tools/trufflehog/from-path', { concurrent: false }, () => {
   test('returns a resolved record with source="path" when which returns a string', async () => {
     const { trufflehogFromPath, whichMock } = await loadFresh()
     whichMock.mockResolvedValueOnce('/usr/local/bin/trufflehog')

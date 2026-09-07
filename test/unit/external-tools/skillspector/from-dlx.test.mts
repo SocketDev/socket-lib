@@ -26,7 +26,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/skillspector/from-dlx', () => {
+describe('external-tools/skillspector/from-dlx', { concurrent: false }, () => {
   test('returns undefined when sha is empty', async () => {
     const { skillspectorFromDlx, createMock } = await loadFresh()
     const result = await skillspectorFromDlx({ sha: '' })

@@ -26,7 +26,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/trivy/from-path', () => {
+describe('external-tools/trivy/from-path', { concurrent: false }, () => {
   test('returns a resolved record with source="path" when which returns a string', async () => {
     const { trivyFromPath, whichMock } = await loadFresh()
     whichMock.mockResolvedValueOnce('/usr/local/bin/trivy')

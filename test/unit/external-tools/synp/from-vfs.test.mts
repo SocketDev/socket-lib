@@ -5,7 +5,7 @@ import {
   synpFromVfs,
 } from '../../../../src/external-tools/synp/from-vfs.mjs'
 
-describe.sequential('external-tools/synp/from-vfs', () => {
+describe('external-tools/synp/from-vfs', { concurrent: false }, () => {
   test('exports SYNP_VFS_KEY constant', () => {
     expect(SYNP_VFS_KEY).toBe('synp')
   })

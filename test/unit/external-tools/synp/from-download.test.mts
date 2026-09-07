@@ -20,7 +20,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/synp/from-download', () => {
+describe('external-tools/synp/from-download', { concurrent: false }, () => {
   test('returns a Resolved* with the resolved bin path', async () => {
     const { synpFromDownload, downloadMock } = await loadFresh()
     downloadMock.mockResolvedValueOnce({ binaryPath: '/dlx/synp/bin/synp' })
