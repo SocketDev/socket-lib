@@ -89,6 +89,18 @@ import type npmCliPromiseSpawnType from '../../external/@npmcli/promise-spawn.js
  */
 // Typed overloads — narrow the resolved stdout/stderr based on `stdioString`.
 // Default (stdioString: true) → strings. `stdioString: false` → Buffers.
+export function shouldPauseSpawnSpinner(options: {
+  wasSpinning: boolean
+  stdio: SpawnOptions['stdio']
+}): boolean {
+  const { wasSpinning, stdio } = { __proto__: null, ...options }
+  return (
+    wasSpinning &&
+    !isStdioType(stdio as string | string[], 'ignore') &&
+    !isStdioType(stdio as string | string[], 'pipe')
+  )
+}
+
 export function spawn(
   cmd: string,
   args?: string[] | readonly string[] | undefined,
@@ -165,10 +177,7 @@ export function spawn(
   // The stdio option can be a string or an array.
   // https://nodejs.org/api/child_process.html#optionsstdio
   const wasSpinning = !!spinnerInstance?.isSpinning
-  const shouldStopSpinner =
-    wasSpinning &&
-    !isStdioType(stdio as string | string[], 'ignore') &&
-    !isStdioType(stdio as string | string[], 'pipe')
+  const shouldStopSpinner = shouldPauseSpawnSpinner({ wasSpinning, stdio })
   const shouldRestartSpinner = shouldStopSpinner
   if (shouldStopSpinner) {
     spinnerInstance.stop()

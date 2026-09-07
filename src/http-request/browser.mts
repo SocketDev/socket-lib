@@ -100,18 +100,8 @@ export async function attempt(
   options: BrowserHttpRequestOptions,
 ): Promise<BrowserHttpResponse> {
   options = { __proto__: null, ...options } as typeof options
-  const method = options.method ?? 'GET'
-  const init: RequestInit = { method }
-  if (options.headers) {
-    init.headers = options.headers
-  }
-  if (options.body !== undefined) {
-    ;(init as { body?: BodyInit | null | undefined }).body =
-      options.body as BodyInit
-  }
-  if (options.followRedirects === false) {
-    init.redirect = 'manual'
-  }
+  const init = createBrowserRequestInit(options)
+  const method = init.method!
   const { signal, cleanup } = combineSignals(options.signal, options.timeout)
   if (signal) {
     init.signal = signal
@@ -178,6 +168,25 @@ export async function attempt(
   } finally {
     cleanup()
   }
+}
+
+export function createBrowserRequestInit(
+  options: BrowserHttpRequestOptions,
+): RequestInit {
+  options = { __proto__: null, ...options } as typeof options
+  const method = options.method ?? 'GET'
+  const init: RequestInit = { method }
+  if (options.headers) {
+    init.headers = options.headers
+  }
+  if (options.body !== undefined) {
+    ;(init as { body?: BodyInit | null | undefined }).body =
+      options.body as BodyInit
+  }
+  if (options.followRedirects === false) {
+    init.redirect = 'manual'
+  }
+  return init
 }
 
 export function decodeText(bytes: Uint8Array): string {

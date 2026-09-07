@@ -137,7 +137,7 @@ export function configureYargsOptions(
   options: NonNullable<ParseArgsConfig['options']>,
   yargsOptions: YargsOptions,
 ): void {
-  options = { __proto__: null, ...options } as typeof options
+  options = { __proto__: null, ...options } as unknown as typeof options
   // Process each option configuration.
   for (const { 0: key, 1: optionConfig } of ObjectEntries(options)) {
     const {

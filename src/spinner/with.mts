@@ -26,6 +26,23 @@ import type {
  * default; named colors resolve to an RGB tuple; tuples and palettes pass
  * through unchanged.
  */
+export function applyTemporarySpinnerOptions(
+  spinner: NonNullable<WithSpinnerOptions<unknown>['spinner']>,
+  withOptions: WithSpinnerOptions<unknown>['withOptions'],
+): void {
+  // Apply temporary options
+  if (withOptions?.color !== undefined) {
+    spinner.color = toRgb(withOptions.color)
+  }
+  if (withOptions?.shimmer !== undefined) {
+    if (typeof withOptions.shimmer === 'string') {
+      spinner.updateShimmer({ dir: withOptions.shimmer })
+    } else {
+      spinner.setShimmer(withOptions.shimmer)
+    }
+  }
+}
+
 export function toShimmerColor(
   color: ColorInherit | ColorValue | Palette,
 ): RGB | Palette | undefined {
@@ -78,17 +95,7 @@ export async function withSpinner<T>(
   const savedShimmerState =
     withOptions?.shimmer !== undefined ? spinner.shimmerState : undefined
 
-  // Apply temporary options
-  if (withOptions?.color !== undefined) {
-    spinner.color = toRgb(withOptions.color)
-  }
-  if (withOptions?.shimmer !== undefined) {
-    if (typeof withOptions.shimmer === 'string') {
-      spinner.updateShimmer({ dir: withOptions.shimmer })
-    } else {
-      spinner.setShimmer(withOptions.shimmer)
-    }
-  }
+  applyTemporarySpinnerOptions(spinner, withOptions)
 
   spinner.start(message)
   try {
