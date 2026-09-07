@@ -290,6 +290,7 @@ export function orderCandidates(
   const promoteCheap = env === 'local' && BULK_TIERS.has(opts.tier)
   const usable = usableTierCandidates(opts.tier, opts.route)
   const scored = usable.map((candidate, index) => ({
+    __proto__: null,
     candidate,
     index,
     score: candidateScore({
