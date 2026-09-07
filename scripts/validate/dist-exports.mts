@@ -37,7 +37,7 @@ export function checkExport(filePath: string) {
   // backslashes.
   const normalizedPath = normalizePath(relativePath)
   if (normalizedPath.startsWith('external/')) {
-    return { path: filePath, ok: true, skipped: true }
+    return { __proto__: null, path: filePath, ok: true, skipped: true }
   }
 
   // Executables intentionally run at module load (for example, Chrome's
@@ -46,7 +46,7 @@ export function checkExport(filePath: string) {
   // package-wide marker for an entrypoint, regardless of its directory.
   try {
     if (readFileSync(filePath, 'utf8').startsWith('#!/usr/bin/env node')) {
-      return { path: filePath, ok: true, skipped: true }
+      return { __proto__: null, path: filePath, ok: true, skipped: true }
     }
   } catch {
     // Let require() below report an unreadable or missing public export.
@@ -57,7 +57,7 @@ export function checkExport(filePath: string) {
 
     // Handle primitive exports (strings, numbers, etc.)
     if (typeof mod !== 'object' || mod === null) {
-      return { path: filePath, ok: true }
+      return { __proto__: null, path: filePath, ok: true }
     }
 
     const hasDefault = 'default' in mod && mod.default !== undefined
@@ -69,6 +69,7 @@ export function checkExport(filePath: string) {
       // If only key is 'default', the export is wrapped incorrectly
       if (directKeys.length === 0) {
         return {
+          __proto__: null,
           path: filePath,
           ok: false,
           reason: 'Export wrapped in { default: value } - needs .default',
@@ -76,9 +77,10 @@ export function checkExport(filePath: string) {
       }
     }
 
-    return { path: filePath, ok: true }
+    return { __proto__: null, path: filePath, ok: true }
   } catch (e) {
     return {
+      __proto__: null,
       path: filePath,
       ok: false,
       reason: `Failed to require: ${errorMessage(e)}`,

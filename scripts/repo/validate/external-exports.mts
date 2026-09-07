@@ -98,9 +98,10 @@ export function checkExternalExport(filePath: string) {
       // UNLESS it's in the allowed list of packages that legitimately only export default
       if (keys.length === 1 && keys[0] === 'default') {
         if (DEFAULT_ONLY_ALLOWED.has(normalizedPath)) {
-          return { path: normalizedPath, ok: true, keys: 1 }
+          return { __proto__: null, path: normalizedPath, ok: true, keys: 1 }
         }
         return {
+          __proto__: null,
           path: normalizedPath,
           ok: false,
           reason:
@@ -115,7 +116,12 @@ export function checkExternalExport(filePath: string) {
         // Check if .default is a circular reference (module.default === module)
         // This is okay - it's how some modules provide both CJS and ESM compatibility
         if (mod.default === mod) {
-          return { path: normalizedPath, ok: true, keys: nonDefaultKeys.length }
+          return {
+            __proto__: null,
+            path: normalizedPath,
+            ok: true,
+            keys: nonDefaultKeys.length,
+          }
         }
 
         // If .default exists but so do other exports, it might be okay, since
@@ -128,6 +134,7 @@ export function checkExternalExport(filePath: string) {
             Object.keys(mod.default).length > nonDefaultKeys.length)
         ) {
           return {
+            __proto__: null,
             path: normalizedPath,
             ok: false,
             reason:
@@ -139,19 +146,31 @@ export function checkExternalExport(filePath: string) {
       // Empty object is suspicious
       if (keys.length === 0) {
         return {
+          __proto__: null,
           path: normalizedPath,
           ok: false,
           reason: 'Module exports empty object - may indicate bundling issue',
         }
       }
 
-      return { path: normalizedPath, ok: true, keys: keys.length }
+      return {
+        __proto__: null,
+        path: normalizedPath,
+        ok: true,
+        keys: keys.length,
+      }
     }
 
     // Primitive exports are okay for some modules
-    return { path: normalizedPath, ok: true, keys: 'primitive' }
+    return {
+      __proto__: null,
+      path: normalizedPath,
+      ok: true,
+      keys: 'primitive',
+    }
   } catch (e) {
     return {
+      __proto__: null,
       path: normalizedPath,
       ok: false,
       reason: `Failed to require: ${errorMessage(e)}`,
