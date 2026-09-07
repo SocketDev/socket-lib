@@ -3957,7 +3957,8 @@
     "sync-global-hooks": "node scripts/fleet/sync-global-hooks.mts",
     "build:hook-bundle": "node scripts/fleet/build-hook-bundle.mts",
     "build:hook-snapshot": "node scripts/fleet/build-hook-snapshot.mts",
-    "build:snapshot-launcher": "node scripts/fleet/build-snapshot-launcher.mts"
+    "build:snapshot-launcher": "node scripts/fleet/build-snapshot-launcher.mts",
+    "gen:glyph": "node scripts/fleet/gen/glyph.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
@@ -4084,8 +4085,8 @@
   },
   "engines": {
     "node": ">=22",
-    "npm": ">=12.0.2",
-    "pnpm": ">=12.0.0"
+    "npm": "^11.19.0 || >=12.0.2",
+    "pnpm": "^11.25.0 || >=12.3.4"
   },
   "allowScripts": {
     "cpu-features": false,
