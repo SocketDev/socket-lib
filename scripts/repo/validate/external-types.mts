@@ -50,6 +50,7 @@ export function checkTypeDefinition(filePath: string) {
     content = readFileSync(filePath, 'utf8')
   } catch (e) {
     return {
+      __proto__: null,
       path: normalizedPath,
       ok: false,
       issues: [`Failed to read file: ${errorMessage(e)}`],
@@ -100,9 +101,21 @@ export function checkTypeDefinition(filePath: string) {
     )
   }
 
-  // Check for specific external modules that might need special attention
-  const fileName = path.basename(filePath, '.d.ts')
+  issues.push(
+    ...knownExternalTypeIssues(path.basename(filePath, '.d.ts'), content),
+  )
 
+  return {
+    __proto__: null,
+    path: normalizedPath,
+    ok: issues.length === 0,
+    issues,
+    hasExport,
+  }
+}
+
+function knownExternalTypeIssues(fileName: string, content: string): string[] {
+  const issues: string[] = []
   // Validate known external modules
   if (fileName === 'semver') {
     // Ensure semver has key functions
@@ -129,12 +142,7 @@ export function checkTypeDefinition(filePath: string) {
     }
   }
 
-  return {
-    path: normalizedPath,
-    ok: issues.length === 0,
-    issues,
-    hasExport,
-  }
+  return issues
 }
 
 /**
