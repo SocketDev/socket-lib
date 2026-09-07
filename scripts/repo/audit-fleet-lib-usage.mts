@@ -1,7 +1,7 @@
 /*
  * @file Fleet-wide usage audit of the @socketsecurity/lib export surface —
  *   the evidence base for stubbing never-used exports out of the published
- *   build. Walks every roster sibling checkout under ~/projects, collects
+ *   build. Walks every roster sibling beside the primary checkout, collects
  *   each `@socketsecurity/lib[-stable]/<leaf>` import with its named
  *   bindings, and reconciles them against this package's exports map.
  *
@@ -38,6 +38,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { REPO_ROOT } from '../fleet/paths.mts'
+import { listWorktrees } from '../fleet/git/worktree.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
 import { runMain } from '../fleet/process/run-main.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
@@ -78,13 +79,18 @@ export function rosterRepoNames(repoRoot: string): string[] {
   return roster.repos.map(r => r.name)
 }
 
+export function fleetProjectsDir(repoRoot: string): string {
+  const primary = listWorktrees(repoRoot).find(worktree => worktree.main)
+  return normalizePath(path.dirname(primary?.path ?? repoRoot))
+}
+
 /**
  * The roster repos with no checkout on disk beside this one. Each missing
  * checkout is a blind spot: its imports are invisible, so every leaf only it
  * uses would be misclassified as fleet-unused.
  */
 export function missingRosterRepos(repoRoot: string): string[] {
-  const projectsDir = path.dirname(repoRoot)
+  const projectsDir = fleetProjectsDir(repoRoot)
   return rosterRepoNames(repoRoot).filter(
     name => !existsSync(path.join(projectsDir, name, '.git')),
   )
@@ -247,7 +253,7 @@ export function sourceFiles(repoDir: string): string[] {
  * Run the audit across every roster sibling that exists on disk.
  */
 export function auditFleetLibUsage(repoRoot: string): FleetLibUsageReport {
-  const projectsDir = path.dirname(repoRoot)
+  const projectsDir = fleetProjectsDir(repoRoot)
   const names = rosterRepoNames(repoRoot)
   const leaves: Record<string, LeafUsage> = {}
   const reposScanned: string[] = []
@@ -400,7 +406,7 @@ function main(): void {
     if (missing.length > 0) {
       throw new Error(
         'audit-fleet-lib-usage: refusing to write the stub list with roster blind spots.\n' +
-          `  Where: ${path.dirname(REPO_ROOT)}\n` +
+          `  Where: ${fleetProjectsDir(REPO_ROOT)}\n` +
           `  Saw: ${missing.length} roster repo(s) with no checkout on disk (${missing.join(', ')}); wanted every roster member scannable.\n` +
           '  Fix: clone the missing checkout(s) beside this repo, then re-run --write-stub-list.',
       )
