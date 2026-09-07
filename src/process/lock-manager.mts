@@ -240,6 +240,15 @@ export class ProcessLockManager {
     // Ensure exit handler is registered before any lock acquisition.
     this.ensureExitHandler()
 
+    function ensureParentDirectory(): void {
+      const path = getNodePath()
+      const parent = path.dirname(lockPath)
+      if (parent && parent !== '.' && parent !== lockPath) {
+        const fs = getNodeFs()
+        fs.mkdirSync(parent, { recursive: true })
+      }
+    }
+
     return (await pRetry(
       async () => {
         try {
@@ -254,16 +263,8 @@ export class ProcessLockManager {
             }
           }
 
-          // Ensure parent directory exists. Use path.dirname() so POSIX
-          // separators, Windows separators, and mixed-separator inputs are all
-          // handled correctly — the previous Math.max(lastIndexOf('/'), '\\')
-          // approach failed on relative paths and mixed-separator inputs.
           const fs = getNodeFs()
-          const path = getNodePath()
-          const parent = path.dirname(lockPath)
-          if (parent && parent !== '.' && parent !== lockPath) {
-            fs.mkdirSync(parent, { recursive: true })
-          }
+          ensureParentDirectory()
 
           // Atomic lock acquisition via a non-recursive mkdir.
           // Without recursive, mkdirSync throws EEXIST if another process

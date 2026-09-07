@@ -114,6 +114,9 @@ export async function readJson(
       encoding: string
     })
   } catch (e) {
+    return handleReadError(e)
+  }
+  function handleReadError(e: unknown): undefined {
     if (shouldThrow) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'ENOENT') {
@@ -253,6 +256,9 @@ export function readJsonSync(
       encoding: string
     })
   } catch (e) {
+    return handleReadError(e)
+  }
+  function handleReadError(e: unknown): undefined {
     if (shouldThrow) {
       const code = (e as NodeJS.ErrnoException).code
       if (code === 'ENOENT') {

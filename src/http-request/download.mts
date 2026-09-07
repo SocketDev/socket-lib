@@ -105,22 +105,26 @@ export async function httpDownload(
   // passed) and the inner total===0 + interval-throttle branches fire
   // only on real network downloads, not the unit test mocks.
   /* c8 ignore start */
-  let progressCallback:
+  const progressCallback = getProgressCallback()
+  function getProgressCallback():
     | ((downloaded: number, total: number) => void)
-    | undefined
-  if (onProgress) {
-    progressCallback = onProgress
-  } else if (logger) {
-    let lastPercent = 0
-    progressCallback = (downloaded: number, total: number) => {
-      const percent = total === 0 ? 0 : MathFloor((downloaded / total) * 100)
-      if (percent >= lastPercent + progressInterval) {
-        logger.log(
-          `  Progress: ${percent}% (${(downloaded / 1024 / 1024).toFixed(1)} MB / ${(total / 1024 / 1024).toFixed(1)} MB)`,
-        )
-        lastPercent = percent
+    | undefined {
+    let callback: ((downloaded: number, total: number) => void) | undefined
+    if (onProgress) {
+      callback = onProgress
+    } else if (logger) {
+      let lastPercent = 0
+      callback = (downloaded: number, total: number) => {
+        const percent = total === 0 ? 0 : MathFloor((downloaded / total) * 100)
+        if (percent >= lastPercent + progressInterval) {
+          logger.log(
+            `  Progress: ${percent}% (${(downloaded / 1024 / 1024).toFixed(1)} MB / ${(total / 1024 / 1024).toFixed(1)} MB)`,
+          )
+          lastPercent = percent
+        }
       }
     }
+    return callback
   }
   /* c8 ignore stop */
 
@@ -137,6 +141,45 @@ export async function httpDownload(
     await safeDelete(tempPath)
   }
 
+  async function verifyDownload(result: HttpDownloadResult): Promise<void> {
+    // Both digests were computed over the response chunks before they reached
+    // the destination stream, so verification does not reread the temp file.
+    if (sha256) {
+      const expectedHash = sha256.toLowerCase()
+
+      // Use constant-time comparison to prevent timing attacks.
+      if (
+        result.sha256.length !== expectedHash.length ||
+        !crypto.timingSafeEqual(
+          BufferFrom!(result.sha256),
+          Buffer.from(expectedHash),
+        )
+      ) {
+        await safeDelete(tempPath)
+        throw new ErrorCtor(
+          `Checksum verification failed for ${url}\n` +
+            `Expected: ${expectedHash}\n` +
+            `Computed: ${result.sha256}`,
+        )
+      }
+    }
+    if (
+      integrity &&
+      (result.integrity.length !== integrity.length ||
+        !crypto.timingSafeEqual(
+          BufferFrom!(result.integrity),
+          Buffer.from(integrity),
+        ))
+    ) {
+      await safeDelete(tempPath)
+      throw new ErrorCtor(
+        `Integrity verification failed for ${url}\n` +
+          `Expected: ${integrity}\n` +
+          `Computed: ${result.integrity}`,
+      )
+    }
+  }
+
   // Retry logic with exponential backoff
   let lastError: Error | undefined
   for (let attempt = 0; attempt <= retries; attempt++) {
@@ -151,42 +194,7 @@ export async function httpDownload(
         timeout,
       })
 
-      // Both digests were computed over the response chunks before they reached
-      // the destination stream, so verification does not reread the temp file.
-      if (sha256) {
-        const expectedHash = sha256.toLowerCase()
-
-        // Use constant-time comparison to prevent timing attacks.
-        if (
-          result.sha256.length !== expectedHash.length ||
-          !crypto.timingSafeEqual(
-            BufferFrom!(result.sha256),
-            Buffer.from(expectedHash),
-          )
-        ) {
-          await safeDelete(tempPath)
-          throw new ErrorCtor(
-            `Checksum verification failed for ${url}\n` +
-              `Expected: ${expectedHash}\n` +
-              `Computed: ${result.sha256}`,
-          )
-        }
-      }
-      if (
-        integrity &&
-        (result.integrity.length !== integrity.length ||
-          !crypto.timingSafeEqual(
-            BufferFrom!(result.integrity),
-            Buffer.from(integrity),
-          ))
-      ) {
-        await safeDelete(tempPath)
-        throw new ErrorCtor(
-          `Integrity verification failed for ${url}\n` +
-            `Expected: ${integrity}\n` +
-            `Computed: ${result.integrity}`,
-        )
-      }
+      await verifyDownload(result)
 
       // Download succeeded - atomically rename temp file to destination.
       // This overwrites any existing file at destPath.

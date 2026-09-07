@@ -160,6 +160,57 @@ export async function httpRequestAttempt(
     }
 
     /* c8 ignore start - External HTTP/HTTPS request */
+    function resolveStreamResponse(res: IncomingResponse): void {
+      const status = res.statusCode || 0
+      const statusText = res.statusMessage || ''
+      const ok = status >= 200 && status < 300
+
+      emitResponse({
+        headers: res.headers,
+        status,
+        statusText,
+      })
+
+      const emptyBody = BufferAlloc!(0)
+      resolveOnce({
+        arrayBuffer: () => emptyBody.buffer as ArrayBuffer,
+        body: emptyBody,
+        headers: res.headers,
+        json: () => {
+          throw new ErrorCtor('Cannot parse JSON from a streaming response')
+        },
+        ok,
+        rawResponse: res,
+        status,
+        statusText,
+        text: () => '',
+      })
+    }
+
+    function getRedirectHeaders(redirectParsed: URL): typeof headers {
+      let redirectHeaders = headers
+      if (new URLCtor(url).origin !== redirectParsed.origin) {
+        redirectHeaders = {
+          __proto__: null,
+        } as unknown as typeof headers
+        const stripped = new Set([
+          'authorization',
+          'cookie',
+          'proxy-authenticate',
+          'proxy-authorization',
+        ])
+        for (const key of ObjectKeys(headers)) {
+          if (!stripped.has(key.toLowerCase())) {
+            ;(redirectHeaders as Record<string, unknown>)[key] = (
+              headers as Record<string, unknown>
+            )[key]
+          }
+        }
+      }
+
+      return redirectHeaders
+    }
+
     const request = httpModule.request(
       requestOptions,
       (res: IncomingResponse) => {
@@ -229,27 +280,7 @@ export async function httpRequestAttempt(
               return
             }
 
-            // Strip auth/session headers on cross-origin redirects to prevent
-            // leaking credentials to third-party hosts (e.g., GitHub -> S3).
-            let redirectHeaders = headers
-            if (new URLCtor(url).origin !== redirectParsed.origin) {
-              redirectHeaders = {
-                __proto__: null,
-              } as unknown as typeof headers
-              const stripped = new Set([
-                'authorization',
-                'cookie',
-                'proxy-authenticate',
-                'proxy-authorization',
-              ])
-              for (const key of ObjectKeys(headers)) {
-                if (!stripped.has(key.toLowerCase())) {
-                  ;(redirectHeaders as Record<string, unknown>)[key] = (
-                    headers as Record<string, unknown>
-                  )[key]
-                }
-              }
-            }
+            const redirectHeaders = getRedirectHeaders(redirectParsed)
 
             // Redirect chaining — Promise adoption handles the inner result.
             settled = true
@@ -272,32 +303,7 @@ export async function httpRequestAttempt(
 
           // Stream mode: resolve immediately with unconsumed response.
           if (stream) {
-            const status = res.statusCode || 0
-            const statusText = res.statusMessage || ''
-            const ok = status >= 200 && status < 300
-
-            emitResponse({
-              headers: res.headers,
-              status,
-              statusText,
-            })
-
-            const emptyBody = BufferAlloc!(0)
-            resolveOnce({
-              arrayBuffer: () => emptyBody.buffer as ArrayBuffer,
-              body: emptyBody,
-              headers: res.headers,
-              json: () => {
-                throw new ErrorCtor(
-                  'Cannot parse JSON from a streaming response',
-                )
-              },
-              ok,
-              rawResponse: res,
-              status,
-              statusText,
-              text: () => '',
-            })
+            resolveStreamResponse(res)
             return
           }
 
