@@ -13,16 +13,25 @@
 
 import {
   getAppdata,
+  getAppdataFallbackPath,
   getComspec,
   getLocalappdata,
   getUserprofile,
 } from '../../../src/env/windows.mjs'
 import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
+import path from 'node:path'
+
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('windows env', () => {
   afterEach(() => {
     resetEnv()
+  })
+
+  it('resolves the roaming fallback from the supplied home', () => {
+    expect(getAppdataFallbackPath('/example-home')).toBe(
+      path.join('/example-home', 'AppData', 'Roaming'),
+    )
   })
 
   describe('getAppdata', () => {

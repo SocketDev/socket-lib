@@ -3,6 +3,8 @@
  *   Windows-specific user directory paths.
  */
 
+import { getNodePath } from '../node/path.mjs'
+
 import { getEnvValue } from './rewire.mjs'
 
 /**
@@ -21,6 +23,11 @@ import { getEnvValue } from './rewire.mjs'
  */
 export function getAppdata(): string | undefined {
   return getEnvValue('APPDATA')
+}
+
+export function getAppdataFallbackPath(home: string): string {
+  const path = getNodePath()
+  return path.join(home, 'AppData', 'Roaming')
 }
 
 /**

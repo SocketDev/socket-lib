@@ -23,6 +23,8 @@ import process from 'node:process'
 
 import type fs from 'node:fs'
 
+import { getAppdataFallbackPath } from '../env/windows.mjs'
+
 import { ErrorCtor } from '../primordials/error.mjs'
 
 import { JSONStringify } from '../primordials/json.mjs'
@@ -92,8 +94,7 @@ export function deleteWindowsSync(
 export function getDpapiFilePath(service: string, account: string): string {
   validateKeychainComponent(service, 'service')
   validateKeychainComponent(account, 'account')
-  const appData =
-    process.env['APPDATA'] ?? path.join(os.homedir(), 'AppData', 'Roaming')
+  const appData = process.env['APPDATA'] ?? getAppdataFallbackPath(os.homedir())
   return path.join(appData, service, `${account}.enc`)
 }
 
