@@ -1,27 +1,9 @@
 #!/usr/bin/env node
-/*
- * @file Gate: `safeDelete`'s cwd-and-above guard stays ON by default.
- *
- *   `force` resolved as `opts.force !== false`, so it defaulted to TRUE and
- *   every caller passing no options ran with the guard disabled. The docblock
- *   promised the opposite. Measured: `safeDelete(dirAboveCwd)` with no options
- *   deleted the directory and its contents, outside the OS temp dir so no
- *   auto-force rule applied. That is the shape that removed a working checkout.
- *
- *   This asserts the BEHAVIOR, not the source text. A grep for
- *   `opts.force === true` would pass on a comment and break on a harmless
- *   refactor, and neither tells you what a caller actually gets. So the check
- *   builds a real directory outside the cwd and requires the delete to refuse
- *   it, which is the thing a consumer depends on.
- *
- *   Two properties, because either one alone is a trap:
- *
- *   1. A path outside the cwd is REFUSED without `force`. Otherwise the guard
- *      is decorative.
- *   2. A descendant of the cwd still deletes WITHOUT `force`. Otherwise the fix
- *      is a wall, every caller reaches for the flag, and that is worse than
- *      where it started.
- *
+/**
+ * @file Check the built safeDelete containment contract.
+ *   A path outside cwd must be refused without options. A descendant of cwd
+ *   must remain deletable. Cleanup names the probe parent as cwd, preserving
+ *   the containment check for every deletion.
  *   Usage: node scripts/repo/check/force-delete-is-opt-in.mts [--quiet]
  */
 
@@ -40,7 +22,7 @@ const REPO_ROOT = path.resolve(
 interface SafeFs {
   safeDelete: (
     filepath: string,
-    options?: { force?: boolean | undefined } | undefined,
+    options?: { cwd?: string | undefined } | undefined,
   ) => Promise<void>
 }
 
@@ -115,16 +97,13 @@ export async function probeDeleteGuard(config: {
   writeFileSync(path.join(outside, 'precious.txt'), 'keep')
   if (!(await refusesDelete(safe, outside))) {
     findings.push({
-      detail: `safeDelete removed ${outside}, which is outside the cwd, with no force flag`,
+      detail: `safeDelete removed ${outside}, which is outside the cwd, with no options`,
       property: 'refuses outside cwd',
     })
   }
-  // The probe sits outside cwd by design, so clearing it needs the flag.
-  // oxlint-disable-next-line socket/no-force-delete -- probe is outside cwd
-  await safe.safeDelete(outside, { force: true })
+  await safe.safeDelete(outside, { cwd: root })
 
-  // 2. A descendant of the cwd must still delete with no flag, or every caller
-  // starts passing force and the guard buys nothing.
+  // A descendant must delete without additional options.
   const inside = path.join(cwd, `force-optin-probe-${process.pid}`)
   mkdirSync(inside, { recursive: true })
   writeFileSync(path.join(inside, 'x.txt'), 'x')
@@ -136,11 +115,10 @@ export async function probeDeleteGuard(config: {
   }
   if (existsSync(inside)) {
     findings.push({
-      detail: `safeDelete refused ${inside}, a descendant of the cwd, which must not need force`,
+      detail: `safeDelete refused ${inside}, a descendant of the cwd, which must not need additional options`,
       property: 'allows inside cwd',
     })
-    // oxlint-disable-next-line socket/no-force-delete -- refused above
-    await safe.safeDelete(inside, { force: true })
+    await safe.safeDelete(inside, { cwd })
   }
 
   return findings
@@ -178,7 +156,7 @@ export async function main(): Promise<void> {
       logger.error(`${finding.property}: ${finding.detail}`)
     }
     logger.error(
-      'Fix: `force` must resolve as `opts.force === true` in src/fs/safe.mts. A `!== false` spelling defaults it ON and disables the guard for every caller.',
+      'Fix: preserve containment in src/fs/safe.mts. Only the forceDelete runner or an allowed directory may bypass the cwd boundary.',
     )
     logger.groupEnd()
     process.exitCode = 1
