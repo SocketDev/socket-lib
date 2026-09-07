@@ -249,3 +249,32 @@ describe('eco/npm/pnpm/lockfile/parse', () => {
     })
   })
 })
+
+describe('pnpm parser section transitions', () => {
+  it('keeps importer order and indexes duplicate package versions across sections', () => {
+    const result = parsePnpmLock(`lockfileVersion: 9
+packages:
+  sample@1.0.0:
+    dependencies:
+      first-child: 1.0.0
+ignored:
+  hidden@9.0.0:
+importers:
+  .:
+    optionalDependencies:
+      importer-dependency: 2.0.0(peer@1.0.0)
+snapshots:
+  sample@3.0.0:
+    dev: true
+`)
+    expect(result.packages.map(entry => [entry.name, entry.version])).toEqual([
+      ['importer-dependency', '2.0.0'],
+      ['sample', '1.0.0'],
+      ['sample', '3.0.0'],
+    ])
+    expect(result.packages[0]?.isOptional).toBe(true)
+    expect(result.packages[1]?.dependencies).toEqual(['first-child'])
+    expect(result.packages[2]?.isDev).toBe(true)
+    expect(result._index['sample']).toEqual([1, 2])
+  })
+})
