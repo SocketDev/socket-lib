@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest'
 
 import { parsePackageSpec } from '../../../src/dlx/spec.mjs'
 
-describe.sequential('dlx/spec — parsePackageSpec', () => {
+describe('dlx/spec — parsePackageSpec', { concurrent: false }, () => {
   test('parses name@version into {name, version}', () => {
     expect(parsePackageSpec('lodash@4.17.21')).toEqual({
       name: 'lodash',

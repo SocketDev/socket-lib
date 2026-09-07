@@ -29,7 +29,7 @@ import { normalizePath } from '../../../src/paths/normalize.mjs'
 import { setPath } from '../../../src/paths/rewire.mjs'
 import { getSocketDlxDir } from '../../../src/paths/socket.mjs'
 
-describe.sequential('dlx paths', () => {
+describe('dlx paths', { concurrent: false }, () => {
   const testPackageName = 'test-package'
   let testDlxDir: string
 

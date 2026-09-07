@@ -11,6 +11,11 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import {
+  downloadNpmPackage,
+  executePackage,
+} from '../../../../src/dlx/package.mjs'
+
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 import type NpmArborist from '../../../../src/external/@npmcli/arborist.js'
@@ -60,11 +65,6 @@ vi.mock(import('../../../../src/process/spawn/child.mjs'), () => ({
   spawn: spawnMock,
 }))
 
-import {
-  downloadNpmPackage,
-  executePackage,
-} from '../../../../src/dlx/package.mjs'
-
 /**
  * Lay down a minimal installed package so findBinaryPath resolves without a
  * real install.
@@ -82,7 +82,7 @@ function stagePackage(installRoot: string, packageName: string): void {
   )
 }
 
-describe.sequential('downloadNpmPackage force resolution', () => {
+describe('downloadNpmPackage force resolution', { concurrent: false }, () => {
   let tmpDir: string
 
   beforeEach(() => {
@@ -170,7 +170,7 @@ describe.sequential('downloadNpmPackage force resolution', () => {
   })
 })
 
-describe.sequential('executePackage shell selection', () => {
+describe('executePackage shell selection', { concurrent: false }, () => {
   beforeEach(() => {
     isWin32Mock.mockReset().mockReturnValue(false)
     spawnMock.mockReset().mockReturnValue({ ok: true })

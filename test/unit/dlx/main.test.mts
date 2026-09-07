@@ -41,7 +41,7 @@ import {
 import { safeDelete, safeDeleteSync } from '../../../src/fs/safe.mjs'
 import { getSocketDlxDir } from '../../../src/paths/socket.mjs'
 
-describe.sequential('dlx', () => {
+describe('dlx', { concurrent: false }, () => {
   const testPackageName = 'test-package'
   let originalEnv: string | undefined
   let testDlxDir: string

@@ -39,7 +39,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('dlx/firewall — npmPurl', () => {
+describe('dlx/firewall — npmPurl', { concurrent: false }, () => {
   test('builds an unscoped npm PURL', () => {
     expect(npmPurl('lodash', '4.17.21')).toBe('pkg:npm/lodash@4.17.21')
   })
@@ -65,7 +65,7 @@ describe.sequential('dlx/firewall — npmPurl', () => {
   })
 })
 
-describe.sequential('dlx/firewall — checkFirewallPurls', () => {
+describe('dlx/firewall — checkFirewallPurls', { concurrent: false }, () => {
   test('returns immediately when idealTree is missing (no HTTP)', async () => {
     // No idealTree property → undefined → early return.
     const fakeArb = { idealTree: undefined } as unknown as Parameters<
@@ -136,110 +136,114 @@ describe.sequential('dlx/firewall — checkFirewallPurls', () => {
   })
 })
 
-describe.sequential('dlx/firewall — checkFirewallPurls HTTP path', () => {
-  test('returns without throwing when the API reports no alerts', async () => {
-    const { checkFirewallPurls: check, httpJson } = await loadFresh()
-    httpJson.mockResolvedValueOnce({ alerts: [] })
-    const arb = makeArb([{ name: 'safe', version: '1.0.0' }])
-    await expect(check(arb, 'safe')).resolves.toBeUndefined()
-    expect(httpJson).toHaveBeenCalledTimes(1)
-  })
-
-  test('returns without throwing when alerts are below the block threshold', async () => {
-    const { checkFirewallPurls: check, httpJson } = await loadFresh()
-    httpJson.mockResolvedValueOnce({
-      alerts: [
-        { severity: 'low', type: 'minor' },
-        { severity: 'medium', type: 'moderate' },
-        { severity: 'info', type: 'note' },
-      ],
+describe(
+  'dlx/firewall — checkFirewallPurls HTTP path',
+  { concurrent: false },
+  () => {
+    test('returns without throwing when the API reports no alerts', async () => {
+      const { checkFirewallPurls: check, httpJson } = await loadFresh()
+      httpJson.mockResolvedValueOnce({ alerts: [] })
+      const arb = makeArb([{ name: 'safe', version: '1.0.0' }])
+      await expect(check(arb, 'safe')).resolves.toBeUndefined()
+      expect(httpJson).toHaveBeenCalledTimes(1)
     })
-    const arb = makeArb([{ name: 'noisy', version: '1.0.0' }])
-    await expect(check(arb, 'noisy')).resolves.toBeUndefined()
-  })
 
-  test('throws when any dep has a critical-severity alert', async () => {
-    const { checkFirewallPurls: check, httpJson } = await loadFresh()
-    httpJson.mockResolvedValueOnce({
-      alerts: [{ severity: 'critical', type: 'malware' }],
+    test('returns without throwing when alerts are below the block threshold', async () => {
+      const { checkFirewallPurls: check, httpJson } = await loadFresh()
+      httpJson.mockResolvedValueOnce({
+        alerts: [
+          { severity: 'low', type: 'minor' },
+          { severity: 'medium', type: 'moderate' },
+          { severity: 'info', type: 'note' },
+        ],
+      })
+      const arb = makeArb([{ name: 'noisy', version: '1.0.0' }])
+      await expect(check(arb, 'noisy')).resolves.toBeUndefined()
     })
-    const arb = makeArb([{ name: 'untrusted', version: '2.0.0' }])
-    await expect(check(arb, 'top')).rejects.toThrow(
-      /Socket Firewall blocked installation of "top"/,
-    )
-  })
 
-  test('throws when any dep has a high-severity alert', async () => {
-    const { checkFirewallPurls: check, httpJson } = await loadFresh()
-    httpJson.mockResolvedValueOnce({
-      alerts: [{ severity: 'high', type: 'cve' }],
-    })
-    const arb = makeArb([{ name: 'risky', version: '1.0.0' }])
-    await expect(check(arb, 'top')).rejects.toThrow(/risky@1\.0\.0/)
-  })
-
-  test('lists every blocked dep in the thrown message', async () => {
-    const { checkFirewallPurls: check, httpJson } = await loadFresh()
-    httpJson
-      .mockResolvedValueOnce({
+    test('throws when any dep has a critical-severity alert', async () => {
+      const { checkFirewallPurls: check, httpJson } = await loadFresh()
+      httpJson.mockResolvedValueOnce({
         alerts: [{ severity: 'critical', type: 'malware' }],
       })
-      .mockResolvedValueOnce({
+      const arb = makeArb([{ name: 'untrusted', version: '2.0.0' }])
+      await expect(check(arb, 'top')).rejects.toThrow(
+        /Socket Firewall blocked installation of "top"/,
+      )
+    })
+
+    test('throws when any dep has a high-severity alert', async () => {
+      const { checkFirewallPurls: check, httpJson } = await loadFresh()
+      httpJson.mockResolvedValueOnce({
         alerts: [{ severity: 'high', type: 'cve' }],
       })
-    const arb = makeArb([
-      { name: 'a', version: '1.0.0' },
-      { name: 'b', version: '2.0.0' },
-    ])
-    await expect(check(arb, 'top')).rejects.toThrow(/a@1\.0\.0/)
-    httpJson.mockClear()
-    httpJson
-      .mockResolvedValueOnce({
-        alerts: [{ severity: 'critical', type: 'malware' }],
+      const arb = makeArb([{ name: 'risky', version: '1.0.0' }])
+      await expect(check(arb, 'top')).rejects.toThrow(/risky@1\.0\.0/)
+    })
+
+    test('lists every blocked dep in the thrown message', async () => {
+      const { checkFirewallPurls: check, httpJson } = await loadFresh()
+      httpJson
+        .mockResolvedValueOnce({
+          alerts: [{ severity: 'critical', type: 'malware' }],
+        })
+        .mockResolvedValueOnce({
+          alerts: [{ severity: 'high', type: 'cve' }],
+        })
+      const arb = makeArb([
+        { name: 'a', version: '1.0.0' },
+        { name: 'b', version: '2.0.0' },
+      ])
+      await expect(check(arb, 'top')).rejects.toThrow(/a@1\.0\.0/)
+      httpJson.mockClear()
+      httpJson
+        .mockResolvedValueOnce({
+          alerts: [{ severity: 'critical', type: 'malware' }],
+        })
+        .mockResolvedValueOnce({
+          alerts: [{ severity: 'high', type: 'cve' }],
+        })
+      await expect(check(arb, 'top')).rejects.toThrow(/b@2\.0\.0/)
+    })
+
+    test('falls back to alert.key then "unknown" when type is missing', async () => {
+      const { checkFirewallPurls: check, httpJson } = await loadFresh()
+      httpJson.mockResolvedValueOnce({
+        alerts: [
+          { severity: 'critical', key: 'fallback-key' },
+          { severity: 'high' },
+        ],
       })
-      .mockResolvedValueOnce({
-        alerts: [{ severity: 'high', type: 'cve' }],
+      const arb = makeArb([{ name: 'mixed', version: '1.0.0' }])
+      await expect(check(arb, 'top')).rejects.toThrow(/fallback-key/)
+      httpJson.mockClear()
+      httpJson.mockResolvedValueOnce({
+        alerts: [{ severity: 'high' }],
       })
-    await expect(check(arb, 'top')).rejects.toThrow(/b@2\.0\.0/)
-  })
-
-  test('falls back to alert.key then "unknown" when type is missing', async () => {
-    const { checkFirewallPurls: check, httpJson } = await loadFresh()
-    httpJson.mockResolvedValueOnce({
-      alerts: [
-        { severity: 'critical', key: 'fallback-key' },
-        { severity: 'high' },
-      ],
+      await expect(check(arb, 'top')).rejects.toThrow(/unknown/)
     })
-    const arb = makeArb([{ name: 'mixed', version: '1.0.0' }])
-    await expect(check(arb, 'top')).rejects.toThrow(/fallback-key/)
-    httpJson.mockClear()
-    httpJson.mockResolvedValueOnce({
-      alerts: [{ severity: 'high' }],
+
+    test('treats httpJson errors as non-fatal (allows install to proceed)', async () => {
+      const { checkFirewallPurls: check, httpJson } = await loadFresh()
+      httpJson.mockRejectedValueOnce(new Error('network down'))
+      const arb = makeArb([{ name: 'pkg', version: '1.0.0' }])
+      await expect(check(arb, 'pkg')).resolves.toBeUndefined()
     })
-    await expect(check(arb, 'top')).rejects.toThrow(/unknown/)
-  })
 
-  test('treats httpJson errors as non-fatal (allows install to proceed)', async () => {
-    const { checkFirewallPurls: check, httpJson } = await loadFresh()
-    httpJson.mockRejectedValueOnce(new Error('network down'))
-    const arb = makeArb([{ name: 'pkg', version: '1.0.0' }])
-    await expect(check(arb, 'pkg')).resolves.toBeUndefined()
-  })
-
-  test('treats a malformed response (alerts undefined) as no alerts', async () => {
-    const { checkFirewallPurls: check, httpJson } = await loadFresh()
-    httpJson.mockResolvedValueOnce({})
-    const arb = makeArb([{ name: 'pkg', version: '1.0.0' }])
-    await expect(check(arb, 'pkg')).resolves.toBeUndefined()
-  })
-
-  test('ignores alerts with no severity field', async () => {
-    const { checkFirewallPurls: check, httpJson } = await loadFresh()
-    httpJson.mockResolvedValueOnce({
-      alerts: [{ type: 'orphan' }, { severity: 'critical', type: 'real' }],
+    test('treats a malformed response (alerts undefined) as no alerts', async () => {
+      const { checkFirewallPurls: check, httpJson } = await loadFresh()
+      httpJson.mockResolvedValueOnce({})
+      const arb = makeArb([{ name: 'pkg', version: '1.0.0' }])
+      await expect(check(arb, 'pkg')).resolves.toBeUndefined()
     })
-    const arb = makeArb([{ name: 'pkg', version: '1.0.0' }])
-    await expect(check(arb, 'pkg')).rejects.toThrow(/real/)
-  })
-})
+
+    test('ignores alerts with no severity field', async () => {
+      const { checkFirewallPurls: check, httpJson } = await loadFresh()
+      httpJson.mockResolvedValueOnce({
+        alerts: [{ type: 'orphan' }, { severity: 'critical', type: 'real' }],
+      })
+      const arb = makeArb([{ name: 'pkg', version: '1.0.0' }])
+      await expect(check(arb, 'pkg')).rejects.toThrow(/real/)
+    })
+  },
+)

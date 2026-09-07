@@ -14,51 +14,55 @@ beforeEach(() => {
   binaryPathCache.clear()
 })
 
-describe.sequential('dlx/shared — binaryPathCacheSet (bounded LRU)', () => {
-  test('sets a value the first time', () => {
-    binaryPathCacheSet('key', '/path/value')
-    expect(binaryPathCache.get('key')).toBe('/path/value')
-  })
+describe(
+  'dlx/shared — binaryPathCacheSet (bounded LRU)',
+  { concurrent: false },
+  () => {
+    test('sets a value the first time', () => {
+      binaryPathCacheSet('key', '/path/value')
+      expect(binaryPathCache.get('key')).toBe('/path/value')
+    })
 
-  test('updating an existing key bumps it to MRU (re-insertion)', () => {
-    binaryPathCacheSet('a', '/a')
-    binaryPathCacheSet('b', '/b')
-    binaryPathCacheSet('c', '/c')
-    // Touching 'a' should re-insert it as most-recently-used.
-    binaryPathCacheSet('a', '/a-new')
-    // Map iteration order = insertion order; the LRU should now be 'b'.
-    const keys = [...binaryPathCache.keys()]
-    expect(keys).toEqual(['b', 'c', 'a'])
-    expect(binaryPathCache.get('a')).toBe('/a-new')
-  })
+    test('updating an existing key bumps it to MRU (re-insertion)', () => {
+      binaryPathCacheSet('a', '/a')
+      binaryPathCacheSet('b', '/b')
+      binaryPathCacheSet('c', '/c')
+      // Touching 'a' should re-insert it as most-recently-used.
+      binaryPathCacheSet('a', '/a-new')
+      // Map iteration order = insertion order; the LRU should now be 'b'.
+      const keys = [...binaryPathCache.keys()]
+      expect(keys).toEqual(['b', 'c', 'a'])
+      expect(binaryPathCache.get('a')).toBe('/a-new')
+    })
 
-  test('exports a 200-entry cap constant', () => {
-    const cap = BINARY_PATH_CACHE_MAX_SIZE
-    expect(cap).toBe(EXPECTED_CACHE_MAX_SIZE)
-  })
+    test('exports a 200-entry cap constant', () => {
+      const cap = BINARY_PATH_CACHE_MAX_SIZE
+      expect(cap).toBe(EXPECTED_CACHE_MAX_SIZE)
+    })
 
-  test('evicts the LRU entry when the cap is exceeded', () => {
-    // Fill to the cap.
-    for (let i = 0; i < EXPECTED_CACHE_MAX_SIZE; i += 1) {
-      binaryPathCacheSet(`k${i}`, `/v${i}`)
-    }
-    expect(binaryPathCache.size).toBe(EXPECTED_CACHE_MAX_SIZE)
-    // One more entry triggers LRU eviction of `k0`.
-    binaryPathCacheSet('newest', '/newest')
-    expect(binaryPathCache.size).toBe(EXPECTED_CACHE_MAX_SIZE)
-    expect(binaryPathCache.has('k0')).toBe(false)
-    expect(binaryPathCache.has('newest')).toBe(true)
-  })
+    test('evicts the LRU entry when the cap is exceeded', () => {
+      // Fill to the cap.
+      for (let i = 0; i < EXPECTED_CACHE_MAX_SIZE; i += 1) {
+        binaryPathCacheSet(`k${i}`, `/v${i}`)
+      }
+      expect(binaryPathCache.size).toBe(EXPECTED_CACHE_MAX_SIZE)
+      // One more entry triggers LRU eviction of `k0`.
+      binaryPathCacheSet('newest', '/newest')
+      expect(binaryPathCache.size).toBe(EXPECTED_CACHE_MAX_SIZE)
+      expect(binaryPathCache.has('k0')).toBe(false)
+      expect(binaryPathCache.has('newest')).toBe(true)
+    })
 
-  test('touching an entry near the LRU prevents its eviction on next insert', () => {
-    for (let i = 0; i < EXPECTED_CACHE_MAX_SIZE; i += 1) {
-      binaryPathCacheSet(`k${i}`, `/v${i}`)
-    }
-    // Bump k0 to MRU.
-    binaryPathCacheSet('k0', '/v0-touched')
-    binaryPathCacheSet('newest', '/newest')
-    // Now k1 is the LRU and should be the one evicted.
-    expect(binaryPathCache.has('k0')).toBe(true)
-    expect(binaryPathCache.has('k1')).toBe(false)
-  })
-})
+    test('touching an entry near the LRU prevents its eviction on next insert', () => {
+      for (let i = 0; i < EXPECTED_CACHE_MAX_SIZE; i += 1) {
+        binaryPathCacheSet(`k${i}`, `/v${i}`)
+      }
+      // Bump k0 to MRU.
+      binaryPathCacheSet('k0', '/v0-touched')
+      binaryPathCacheSet('newest', '/newest')
+      // Now k1 is the LRU and should be the one evicted.
+      expect(binaryPathCache.has('k0')).toBe(true)
+      expect(binaryPathCache.has('k1')).toBe(false)
+    })
+  },
+)

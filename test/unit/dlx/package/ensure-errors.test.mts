@@ -12,6 +12,8 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
+
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
 import type NpmArborist from '../../../../src/external/@npmcli/arborist.js'
@@ -52,8 +54,6 @@ vi.mock(import('../../../../src/fs/safe.mjs'), async importOriginal => {
   }
 })
 
-import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
-
 /**
  * Build an errno-shaped rejection the way node's fs surfaces one.
  */
@@ -72,7 +72,7 @@ function registryError(code: string): Error & { code: string } {
   return err
 }
 
-describe.sequential('ensurePackageInstalled failure paths', () => {
+describe('ensurePackageInstalled failure paths', { concurrent: false }, () => {
   let tmpDir: string
 
   beforeEach(() => {

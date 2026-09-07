@@ -27,7 +27,7 @@ import type {
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
-describe.sequential('DlxManifest class', () => {
+describe('DlxManifest class', { concurrent: false }, () => {
   let testDir: string
   let manifestPath: string
   let manifest: DlxManifest

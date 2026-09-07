@@ -27,7 +27,7 @@ afterEach(async () => {
   await safeDelete(tmp)
 })
 
-describe.sequential('dlx/detect — findPackageJson', () => {
+describe('dlx/detect — findPackageJson', { concurrent: false }, () => {
   // findPackageJson takes a *file* path; the startDir is dirname(filePath).
   // Each test passes a synthetic file path inside tmp so dirname → tmp.
   const fileIn = (dir: string) => path.join(dir, 'src', 'index.ts')
@@ -82,7 +82,7 @@ describe.sequential('dlx/detect — findPackageJson', () => {
   })
 })
 
-describe.sequential('dlx/detect — readPackageJson', () => {
+describe('dlx/detect — readPackageJson', { concurrent: false }, () => {
   it('reads + parses a valid package.json', () => {
     const pkgPath = path.join(tmp, 'package.json')
     writeFileSync(pkgPath, JSON.stringify({ name: 'x', version: '1' }))

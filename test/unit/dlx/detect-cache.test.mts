@@ -17,7 +17,7 @@ import {
 import { safeDelete } from '../../../src/fs/safe.mjs'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
-describe.sequential('dlx/detect — cache + stale paths', () => {
+describe('dlx/detect — cache + stale paths', { concurrent: false }, () => {
   let testDir: string
 
   beforeEach(() => {

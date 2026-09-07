@@ -23,7 +23,7 @@ import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 let tmpDir: string
 let savedDlxDir: string | undefined
 
-describe.sequential('dlx/packages', () => {
+describe('dlx/packages', { concurrent: false }, () => {
   beforeEach(async () => {
     tmpDir = mkdtempSync(path.join(os.tmpdir(), 'socket-dlx-test-'))
     savedDlxDir = process.env['SOCKET_DLX_DIR']

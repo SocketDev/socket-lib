@@ -18,6 +18,8 @@ import process from 'node:process'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
+
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import {
@@ -68,8 +70,6 @@ vi.mock(import('../../../../src/dlx/firewall.mjs'), () => ({
   checkFirewallPurls: checkFirewallPurlsMock,
 }))
 
-import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
-
 beforeEach(() => {
   arboristCtorMock.mockReset()
   arboristBuildIdealTreeMock
@@ -86,7 +86,7 @@ beforeEach(() => {
 // `sequence.concurrent: true` (off-CI), parallel `it` blocks would
 // overwrite both, making the .npmrc assertion read from the wrong
 // tmpDir. Force sequential here.
-describe.sequential('ensurePackageInstalled (cached path)', () => {
+describe('ensurePackageInstalled (cached path)', { concurrent: false }, () => {
   let tmpDir: string
   let savedDlxDir: string | undefined
 
@@ -189,130 +189,139 @@ describe.sequential('ensurePackageInstalled (cached path)', () => {
   })
 })
 
-describe.sequential('ensurePackageInstalled (installRoot option)', () => {
-  let tmpDir: string
+describe(
+  'ensurePackageInstalled (installRoot option)',
+  { concurrent: false },
+  () => {
+    let tmpDir: string
 
-  beforeEach(async () => {
-    tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dlx-pkg-installRoot-'))
-  })
-
-  afterEach(async () => {
-    try {
-      await safeDelete(tmpDir)
-    } catch {}
-  })
-
-  it('uses installRoot verbatim — no cacheKey appended', async () => {
-    // Pre-stage <installRoot>/node_modules/<pkg>/package.json directly
-    // (no cacheKey subdirectory). The early-return path inside
-    // ensurePackageInstalled then short-circuits Arborist.
-    const installRoot = path.join(tmpDir, 'my-build-cache')
-    const installedDir = path.join(installRoot, 'node_modules', 'lodash')
-    mkdirSync(installedDir, { recursive: true })
-    writeFileSync(
-      path.join(installedDir, 'package.json'),
-      JSON.stringify({ name: 'lodash', version: '4.17.21' }),
-    )
-
-    const result = await ensurePackageInstalled('lodash', 'lodash@4.17.21', {
-      force: false,
-      install: { installRoot },
+    beforeEach(async () => {
+      tmpDir = mkdtempSync(path.join(os.tmpdir(), 'dlx-pkg-installRoot-'))
     })
 
-    expect(result.installed).toBe(false)
-    expect(normalizePath(result.packageDir)).toBe(normalizePath(installRoot))
-  })
+    afterEach(async () => {
+      try {
+        await safeDelete(tmpDir)
+      } catch {}
+    })
 
-  it('does not collide with the default cache layout', async () => {
-    // Two parallel "installs" of the same spec — one to the default
-    // dlxDir cache (cacheKey-keyed), one to a custom installRoot
-    // (verbatim) — must end up at distinct directories.
-    const customPath = path.join(tmpDir, 'custom')
-    const defaultDlxDir = path.join(tmpDir, 'default-dlx')
+    it('uses installRoot verbatim — no cacheKey appended', async () => {
+      // Pre-stage <installRoot>/node_modules/<pkg>/package.json directly
+      // (no cacheKey subdirectory). The early-return path inside
+      // ensurePackageInstalled then short-circuits Arborist.
+      const installRoot = path.join(tmpDir, 'my-build-cache')
+      const installedDir = path.join(installRoot, 'node_modules', 'lodash')
+      mkdirSync(installedDir, { recursive: true })
+      writeFileSync(
+        path.join(installedDir, 'package.json'),
+        JSON.stringify({ name: 'lodash', version: '4.17.21' }),
+      )
 
-    // Stage at customPath (no cacheKey).
-    const customInstalled = path.join(customPath, 'node_modules', 'lodash')
-    mkdirSync(customInstalled, { recursive: true })
-    writeFileSync(
-      path.join(customInstalled, 'package.json'),
-      JSON.stringify({ name: 'lodash', version: '4.17.21' }),
-    )
+      const result = await ensurePackageInstalled('lodash', 'lodash@4.17.21', {
+        force: false,
+        install: { installRoot },
+      })
 
-    // Stage at default location (with cacheKey).
-    const cacheKey = crypto
-      .createHash('sha512')
-      .update('lodash@4.17.21')
-      .digest('hex')
-      .slice(0, 16)
-    const defaultInstalled = path.join(
-      defaultDlxDir,
-      cacheKey,
-      'node_modules',
-      'lodash',
-    )
-    mkdirSync(defaultInstalled, { recursive: true })
-    writeFileSync(
-      path.join(defaultInstalled, 'package.json'),
-      JSON.stringify({ name: 'lodash', version: '4.17.21' }),
-    )
+      expect(result.installed).toBe(false)
+      expect(normalizePath(result.packageDir)).toBe(normalizePath(installRoot))
+    })
 
-    // Resolve via installRoot.
-    const customResult = await ensurePackageInstalled(
-      'lodash',
-      'lodash@4.17.21',
-      { force: false, install: { installRoot: customPath } },
-    )
-    expect(normalizePath(customResult.packageDir)).toBe(
-      normalizePath(customPath),
-    )
+    it('does not collide with the default cache layout', async () => {
+      // Two parallel "installs" of the same spec — one to the default
+      // dlxDir cache (cacheKey-keyed), one to a custom installRoot
+      // (verbatim) — must end up at distinct directories.
+      const customPath = path.join(tmpDir, 'custom')
+      const defaultDlxDir = path.join(tmpDir, 'default-dlx')
 
-    // Resolve via default (point SOCKET_DLX_DIR at our default-dlx tmp).
-    const savedDlxDir = process.env['SOCKET_DLX_DIR']
-    process.env['SOCKET_DLX_DIR'] = defaultDlxDir
-    setPath('socket-dlx-dir', defaultDlxDir)
-    try {
-      const defaultResult = await ensurePackageInstalled(
+      // Stage at customPath (no cacheKey).
+      const customInstalled = path.join(customPath, 'node_modules', 'lodash')
+      mkdirSync(customInstalled, { recursive: true })
+      writeFileSync(
+        path.join(customInstalled, 'package.json'),
+        JSON.stringify({ name: 'lodash', version: '4.17.21' }),
+      )
+
+      // Stage at default location (with cacheKey).
+      const cacheKey = crypto
+        .createHash('sha512')
+        .update('lodash@4.17.21')
+        .digest('hex')
+        .slice(0, 16)
+      const defaultInstalled = path.join(
+        defaultDlxDir,
+        cacheKey,
+        'node_modules',
+        'lodash',
+      )
+      mkdirSync(defaultInstalled, { recursive: true })
+      writeFileSync(
+        path.join(defaultInstalled, 'package.json'),
+        JSON.stringify({ name: 'lodash', version: '4.17.21' }),
+      )
+
+      // Resolve via installRoot.
+      const customResult = await ensurePackageInstalled(
         'lodash',
         'lodash@4.17.21',
-        { force: false },
+        { force: false, install: { installRoot: customPath } },
       )
-      expect(normalizePath(defaultResult.packageDir)).toBe(
-        normalizePath(path.join(defaultDlxDir, cacheKey)),
+      expect(normalizePath(customResult.packageDir)).toBe(
+        normalizePath(customPath),
       )
-      // Distinct paths — proves the option doesn't accidentally fold
-      // into the default layout.
-      expect(defaultResult.packageDir).not.toBe(customResult.packageDir)
-    } finally {
-      if (savedDlxDir === undefined) {
-        delete process.env['SOCKET_DLX_DIR']
-      } else {
-        process.env['SOCKET_DLX_DIR'] = savedDlxDir
+
+      // Resolve via default (point SOCKET_DLX_DIR at our default-dlx tmp).
+      const savedDlxDir = process.env['SOCKET_DLX_DIR']
+      process.env['SOCKET_DLX_DIR'] = defaultDlxDir
+      setPath('socket-dlx-dir', defaultDlxDir)
+      try {
+        const defaultResult = await ensurePackageInstalled(
+          'lodash',
+          'lodash@4.17.21',
+          { force: false },
+        )
+        expect(normalizePath(defaultResult.packageDir)).toBe(
+          normalizePath(path.join(defaultDlxDir, cacheKey)),
+        )
+        // Distinct paths — proves the option doesn't accidentally fold
+        // into the default layout.
+        expect(defaultResult.packageDir).not.toBe(customResult.packageDir)
+      } finally {
+        if (savedDlxDir === undefined) {
+          delete process.env['SOCKET_DLX_DIR']
+        } else {
+          process.env['SOCKET_DLX_DIR'] = savedDlxDir
+        }
+        setPath('socket-dlx-dir', undefined)
       }
-      setPath('socket-dlx-dir', undefined)
-    }
-  })
+    })
 
-  it('works with scoped package names', async () => {
-    const installRoot = path.join(tmpDir, 'scoped')
-    const installedDir = path.join(installRoot, 'node_modules', '@scope', 'pkg')
-    mkdirSync(installedDir, { recursive: true })
-    writeFileSync(
-      path.join(installedDir, 'package.json'),
-      JSON.stringify({ name: '@scope/pkg', version: '2.0.0' }),
-    )
+    it('works with scoped package names', async () => {
+      const installRoot = path.join(tmpDir, 'scoped')
+      const installedDir = path.join(
+        installRoot,
+        'node_modules',
+        '@scope',
+        'pkg',
+      )
+      mkdirSync(installedDir, { recursive: true })
+      writeFileSync(
+        path.join(installedDir, 'package.json'),
+        JSON.stringify({ name: '@scope/pkg', version: '2.0.0' }),
+      )
 
-    const result = await ensurePackageInstalled(
-      '@scope/pkg',
-      '@scope/pkg@2.0.0',
-      { force: false, install: { installRoot } },
-    )
+      const result = await ensurePackageInstalled(
+        '@scope/pkg',
+        '@scope/pkg@2.0.0',
+        { force: false, install: { installRoot } },
+      )
 
-    expect(result.installed).toBe(false)
-    expect(normalizePath(result.packageDir)).toBe(normalizePath(installRoot))
-  })
-})
+      expect(result.installed).toBe(false)
+      expect(normalizePath(result.packageDir)).toBe(normalizePath(installRoot))
+    })
+  },
+)
 
-describe.sequential('ensurePackageInstalled (hash pin)', () => {
+describe('ensurePackageInstalled (hash pin)', { concurrent: false }, () => {
   let tmpDir: string
 
   beforeEach(() => {
