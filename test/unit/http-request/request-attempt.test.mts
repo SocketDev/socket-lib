@@ -146,6 +146,58 @@ describe(
     // executor's synchronous frame, so a throw while parsing a bad Location
     // header must be caught internally and turned into a rejection — never an
     // uncaughtException that takes the process down.
+    test('preserves cancellation through a redirect', async () => {
+      const controller = new AbortController()
+      const redirectedAbort = vi.fn()
+      const redirectedOptions: Array<Record<string, unknown>> = []
+      httpStub.request.mockImplementation(
+        (
+          options: Record<string, unknown>,
+          onResponse: (response: unknown) => void,
+        ) => {
+          const request = makeFakeRequest()
+          if (options['path'] === '/start') {
+            queueMicrotask(() =>
+              onResponse({
+                headers: { location: '/finish' },
+                resume: vi.fn(),
+                statusCode: 302,
+                statusMessage: 'Found',
+              }),
+            )
+          } else {
+            redirectedOptions.push(options)
+            const signal = options['signal'] as AbortSignal | undefined
+            signal?.addEventListener(
+              'abort',
+              () => {
+                redirectedAbort()
+                request.emit('error', new Error('cancelled request'))
+              },
+              { once: true },
+            )
+            queueMicrotask(() => {
+              controller.abort()
+              if (!signal?.aborted) {
+                request.emit('error', new Error('request without cancellation'))
+              }
+            })
+          }
+          return request
+        },
+      )
+
+      const { httpRequestAttempt } = await loadAttempt()
+      await expect(
+        httpRequestAttempt('http://example.com/start', {
+          signal: controller.signal,
+        }),
+      ).rejects.toThrow()
+      expect(redirectedOptions).toHaveLength(1)
+      expect(redirectedOptions[0]?.['signal']).toBe(controller.signal)
+      expect(redirectedAbort).toHaveBeenCalledOnce()
+    })
+
     test('rejects instead of throwing when the redirect Location header is unparseable', async () => {
       const fakeReq = makeFakeRequest()
       const fakeRes = {
