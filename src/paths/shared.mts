@@ -56,6 +56,59 @@ export const msysDriveRegExp = /^\/([a-zA-Z])($|\/)/
 export const nodeModulesPathRegExp = /(?:[/\\]|^)node_modules(?:$|[/\\])/
 export const slashRegExp = /[/\\]/
 
+export function appendNormalizedPathSegment(
+  state: NormalizedPathState,
+  segment: string,
+  prefix: string,
+): void {
+  if (segment.length === 0 || segment === '.') {
+    return
+  }
+  if (segment === '..') {
+    collapsePathParent(state, prefix)
+  } else {
+    state.collapsed += (state.collapsed.length === 0 ? '' : '/') + segment
+    state.segmentCount += 1
+  }
+}
+
+export interface NormalizedPathState {
+  collapsed: string
+  segmentCount: number
+  leadingDotDots: number
+}
+
+export function collapsePathParent(
+  state: NormalizedPathState,
+  prefix: string,
+): void {
+  if (state.segmentCount > 0) {
+    const lastSeparatorIndex = state.collapsed.lastIndexOf('/')
+    if (lastSeparatorIndex === -1) {
+      state.collapsed = ''
+      state.segmentCount = 0
+      if (state.leadingDotDots > 0 && !prefix) {
+        state.collapsed = '..'
+        state.leadingDotDots = 1
+      }
+    } else {
+      const lastSegmentStart = lastSeparatorIndex + 1
+      const lastSegmentValue = state.collapsed.slice(lastSegmentStart)
+      if (lastSegmentValue === '..') {
+        state.collapsed = `${state.collapsed}/..`
+        state.leadingDotDots += 1
+      } else {
+        state.collapsed = state.collapsed.slice(0, lastSeparatorIndex)
+        state.segmentCount -= 1
+      }
+    }
+  } else if (!prefix) {
+    state.collapsed =
+      state.collapsed + (state.collapsed.length === 0 ? '' : '/') + '..'
+    state.leadingDotDots += 1
+  }
+}
+
 /**
  * Normalize a path for equality comparison — forward slashes, no trailing
  * separator, lowercased on Windows.
@@ -71,6 +124,24 @@ export function foldPathForCompare(pathLike: string): string {
     normalized = normalized.slice(0, -1)
   }
   return isWin32() ? normalized.toLowerCase() : normalized
+}
+
+export function hasUncPathPrefix(filepath: string): boolean {
+  const first = StringPrototypeCharCodeAt(filepath, 0)
+  return (
+    filepath.length > 2 &&
+    isPathSeparatorCode(first) &&
+    StringPrototypeCharCodeAt(filepath, 1) === first &&
+    StringPrototypeCharCodeAt(filepath, 2) !== first
+  )
+}
+
+export function hasUncPathShare(filepath: string): boolean {
+  const serverStart = skipPathSeparators(filepath, 2)
+  const serverEnd = indexOfPathSeparator(filepath, serverStart)
+  return (
+    serverEnd > 2 && skipPathSeparators(filepath, serverEnd) < filepath.length
+  )
 }
 
 /**
@@ -108,6 +179,10 @@ export function indexOfPathSeparator(
   return -1
 }
 
+export function isPathSeparatorCode(code: number): boolean {
+  return code === 47 || code === 92
+}
+
 // On Windows, convert MSYS drive notation to native: /c/path → C:/path
 export function msysDriveToNative(normalized: string): string {
   /* c8 ignore start - Windows-only branch. */
@@ -119,6 +194,24 @@ export function msysDriveToNative(normalized: string): string {
   }
   /* c8 ignore stop */
   return normalized
+}
+
+export function normalizedPathPrefix(filepath: string) {
+  const namespaceKind = StringPrototypeCharCodeAt(filepath, 2)
+  if (
+    filepath.length > 4 &&
+    StringPrototypeCharCodeAt(filepath, 3) === 92 &&
+    (namespaceKind === 63 || namespaceKind === 46) &&
+    StringPrototypeCharCodeAt(filepath, 0) === 92 &&
+    StringPrototypeCharCodeAt(filepath, 1) === 92
+  ) {
+    return { __proto__: null, prefix: '//', start: 2 }
+  }
+  if (hasUncPathPrefix(filepath) && hasUncPathShare(filepath)) {
+    return { __proto__: null, prefix: '//', start: 2 }
+  }
+  const start = skipPathSeparators(filepath, 0)
+  return { __proto__: null, prefix: start ? '/' : '', start }
 }
 
 /**
@@ -159,223 +252,52 @@ export function normalizePath(pathLike: string | Buffer | URL): string {
   if (length === 0) {
     return '.'
   }
-  if (length < 2) {
-    return length === 1 &&
-      StringPrototypeCharCodeAt(filepath, 0) === 92 /*'\\'*/
-      ? '/'
-      : filepath
+  if (length === 1) {
+    return StringPrototypeCharCodeAt(filepath, 0) === 92 ? '/' : filepath
   }
-
-  let code = 0
-  let start = 0
-
-  // Ensure win32 namespaces have two leading slashes so they are handled
-  // properly by path.win32.parse() after being normalized.
-  // https://learn.microsoft.com/en-us/windows/win32/fileio/naming-a-file#namespaces
-  let prefix = ''
-  if (length > 4 && StringPrototypeCharCodeAt(filepath, 3) === 92 /*'\\'*/) {
-    const code2 = StringPrototypeCharCodeAt(filepath, 2)
-    // Look for \\?\ or \\.\
-    if (
-      (code2 === 63 /*'?'*/ || code2 === 46) /*'.'*/ &&
-      StringPrototypeCharCodeAt(filepath, 0) === 92 /*'\\'*/ &&
-      StringPrototypeCharCodeAt(filepath, 1) === 92 /*'\\'*/
-    ) {
-      start = 2
-      prefix = '//'
-    }
-  }
-  if (start === 0) {
-    /* c8 ignore start - UNC path detection (\\server\share). Rare
-       input; not exercised by typical test fixtures. */
-    // UNC paths must start with exactly two slashes, not more.
-    if (
-      length > 2 &&
-      ((StringPrototypeCharCodeAt(filepath, 0) === 92 /*'\\'*/ &&
-        StringPrototypeCharCodeAt(filepath, 1) === 92 /*'\\'*/ &&
-        StringPrototypeCharCodeAt(filepath, 2) !== 92) /*'\\'*/ ||
-        (StringPrototypeCharCodeAt(filepath, 0) === 47 /*'/'*/ &&
-          StringPrototypeCharCodeAt(filepath, 1) === 47 /*'/'*/ &&
-          StringPrototypeCharCodeAt(filepath, 2) !== 47)) /*'/'*/
-    ) {
-      // Valid UNC requires server/share.
-      let firstSegmentEnd = -1
-      let hasSecondSegment = false
-
-      // Skip leading slashes after the initial double slash.
-      let i = 2
-      while (
-        i < length &&
-        (StringPrototypeCharCodeAt(filepath, i) === 47 /*'/'*/ ||
-          StringPrototypeCharCodeAt(filepath, i) === 92) /*'\\'*/
-      ) {
-        i++
-      }
-
-      // Find the end of the first segment, the server name.
-      while (i < length) {
-        const char = StringPrototypeCharCodeAt(filepath, i)
-        if (char === 47 /*'/'*/ || char === 92 /*'\\'*/) {
-          firstSegmentEnd = i
-          break
-        }
-        i++
-      }
-
-      if (firstSegmentEnd > 2) {
-        i = firstSegmentEnd
-        while (
-          i < length &&
-          (StringPrototypeCharCodeAt(filepath, i) === 47 /*'/'*/ ||
-            StringPrototypeCharCodeAt(filepath, i) === 92) /*'\\'*/
-        ) {
-          i++
-        }
-        if (i < length) {
-          hasSecondSegment = true
-        }
-      }
-
-      if (firstSegmentEnd > 2 && hasSecondSegment) {
-        // Valid UNC — preserve double leading slashes.
-        start = 2
-        prefix = '//'
-      } else {
-        // Repeated slashes, treat as regular path.
-        code = StringPrototypeCharCodeAt(filepath, start)
-        while (code === 47 /*'/'*/ || code === 92 /*'\\'*/) {
-          start += 1
-          code = StringPrototypeCharCodeAt(filepath, start)
-        }
-        if (start) {
-          prefix = '/'
-        }
-      }
-      /* c8 ignore stop */
-    } else {
-      // Trim leading slashes for regular paths.
-      code = StringPrototypeCharCodeAt(filepath, start)
-      while (code === 47 /*'/'*/ || code === 92 /*'\\'*/) {
-        start += 1
-        code = StringPrototypeCharCodeAt(filepath, start)
-      }
-      if (start) {
-        prefix = '/'
-      }
-    }
-  }
+  const initial = normalizedPathPrefix(filepath)
+  const { prefix } = initial
+  let { start } = initial
   let nextIndex = indexOfPathSeparator(filepath, start)
-  // Single-segment-no-separator early-return path; sub-arms each fire on
-  // specific inputs.
-  /* c8 ignore start */
   if (nextIndex === -1) {
-    const segment = filepath.slice(start)
-    if (segment === '.' || segment.length === 0) {
-      return prefix || '.'
-    }
-    if (segment === '..') {
-      return prefix ? StringPrototypeSlice(prefix, 0, -1) || '/' : '..'
-    }
-    return msysDriveToNative(prefix + segment)
+    return normalizeSinglePathSegment(filepath.slice(start), prefix)
   }
-  /* c8 ignore stop */
-  // Process segments and handle '.', '..', and empty segments.
-  /* c8 ignore start */
-  let collapsed = ''
-  let segmentCount = 0
-  let leadingDotDots = 0
+  const state: NormalizedPathState = {
+    collapsed: '',
+    segmentCount: 0,
+    leadingDotDots: 0,
+  }
   while (nextIndex !== -1) {
-    const segment = filepath.slice(start, nextIndex)
-    if (segment.length > 0 && segment !== '.') {
-      if (segment === '..') {
-        if (segmentCount > 0) {
-          const lastSeparatorIndex = collapsed.lastIndexOf('/')
-          if (lastSeparatorIndex === -1) {
-            collapsed = ''
-            segmentCount = 0
-            if (leadingDotDots > 0 && !prefix) {
-              collapsed = '..'
-              leadingDotDots = 1
-            }
-          } else {
-            const lastSegmentStart = lastSeparatorIndex + 1
-            const lastSegmentValue = collapsed.slice(lastSegmentStart)
-            if (lastSegmentValue === '..') {
-              collapsed = `${collapsed}/${segment}`
-              leadingDotDots += 1
-            } else {
-              collapsed = collapsed.slice(0, lastSeparatorIndex)
-              segmentCount -= 1
-            }
-          }
-        } else if (!prefix) {
-          collapsed = collapsed + (collapsed.length === 0 ? '' : '/') + segment
-          leadingDotDots += 1
-        }
-      } else {
-        collapsed = collapsed + (collapsed.length === 0 ? '' : '/') + segment
-        segmentCount += 1
-      }
-    }
-    start = nextIndex + 1
-    code = StringPrototypeCharCodeAt(filepath, start)
-    while (code === 47 /*'/'*/ || code === 92 /*'\\'*/) {
-      start += 1
-      code = StringPrototypeCharCodeAt(filepath, start)
-    }
+    appendNormalizedPathSegment(state, filepath.slice(start, nextIndex), prefix)
+    start = skipPathSeparators(filepath, nextIndex + 1)
     nextIndex = indexOfPathSeparator(filepath, start)
   }
-  const lastSegment = filepath.slice(start)
-  if (lastSegment.length > 0 && lastSegment !== '.') {
-    if (lastSegment === '..') {
-      if (segmentCount > 0) {
-        const lastSeparatorIndex = collapsed.lastIndexOf('/')
-        if (lastSeparatorIndex === -1) {
-          collapsed = ''
-          segmentCount = 0
-          if (leadingDotDots > 0 && !prefix) {
-            collapsed = '..'
-            leadingDotDots = 1
-          }
-        } else {
-          const lastSegmentStart = lastSeparatorIndex + 1
-          const lastSegmentValue = collapsed.slice(lastSegmentStart)
-          if (lastSegmentValue === '..') {
-            collapsed = `${collapsed}/${lastSegment}`
-            leadingDotDots += 1
-          } else {
-            collapsed = collapsed.slice(0, lastSeparatorIndex)
-            segmentCount -= 1
-          }
-        }
-      } else if (!prefix) {
-        collapsed =
-          collapsed + (collapsed.length === 0 ? '' : '/') + lastSegment
-        leadingDotDots += 1
-      }
-    } else {
-      collapsed = collapsed + (collapsed.length === 0 ? '' : '/') + lastSegment
-      segmentCount += 1
-    }
-  }
-  /* c8 ignore stop */
-
+  appendNormalizedPathSegment(state, filepath.slice(start), prefix)
+  const { collapsed } = state
   if (collapsed.length === 0) {
     return prefix || '.'
   }
-  // A bare drive letter that came from a drive ROOT keeps its slash: `D:\` and
-  // `D:/` normalize to `D:/`, not `D:`. The trailing separator is significant
-  // on a drive root — `D:` alone means "current directory on D:", a different
-  // location. Detected by a separator immediately after the colon in the
-  // original input (index 2), so drive-relative `D:foo` is unaffected.
+  // A drive root keeps its slash; a bare drive denotes its current directory.
   if (
     DRIVE_LETTER_REGEXP.test(collapsed) &&
-    (StringPrototypeCharCodeAt(filepath, 2) === 47 /*'/'*/ ||
-      StringPrototypeCharCodeAt(filepath, 2) === 92) /*'\\'*/
+    isPathSeparatorCode(StringPrototypeCharCodeAt(filepath, 2))
   ) {
     return msysDriveToNative(`${prefix}${collapsed}/`)
   }
   return msysDriveToNative(prefix + collapsed)
+}
+
+export function normalizeSinglePathSegment(
+  segment: string,
+  prefix: string,
+): string {
+  if (segment === '.' || segment.length === 0) {
+    return prefix || '.'
+  }
+  if (segment === '..') {
+    return prefix ? StringPrototypeSlice(prefix, 0, -1) || '/' : '..'
+  }
+  return msysDriveToNative(prefix + segment)
 }
 
 /**
@@ -444,4 +366,11 @@ export function pathLikeToString(
     }
   }
   return String(pathLike)
+}
+
+export function skipPathSeparators(filepath: string, start: number): number {
+  while (isPathSeparatorCode(StringPrototypeCharCodeAt(filepath, start))) {
+    start += 1
+  }
+  return start
 }
