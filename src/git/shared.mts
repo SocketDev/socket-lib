@@ -72,6 +72,7 @@ export function getCachedGitDiff(key: string): string[] | undefined {
  * Prepares argument arrays for `spawn()`/`spawnSync()` calls that retrieve: -
  * `all`: All staged, unstaged, and untracked changed files via `git status
  * --porcelain` - `unstaged`: Unstaged modifications via `git diff --name-only`
+ *
  * - `staged`: Staged changes via `git diff --cached --name-only`
  *
  * Automatically resolves symlinks in the provided `cwd` and enables shell mode

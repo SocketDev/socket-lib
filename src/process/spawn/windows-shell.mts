@@ -51,11 +51,12 @@ export interface NeedsWindowsShellOptions {
  * Whether spawning `command` needs `shell: true`.
  *
  * False on every non-Windows platform. On Windows:
- * - a `.cmd` / `.bat` / `.ps1` script needs the shell, because cmd.exe
- * interprets it rather than exec'ing it;
- * - a `.exe` / `.com` does NOT, so it avoids cmd.exe quoting altogether;
- * - a bare stem (`pnpm`, `gh`) needs it, because PATHEXT resolution is what
- * finds the `.cmd` shim, and that resolution is the shell's job.
+ *
+ * - A `.cmd` / `.bat` / `.ps1` script needs the shell, because cmd.exe interprets
+ *   it rather than exec'ing it;
+ * - A `.exe` / `.com` does NOT, so it avoids cmd.exe quoting altogether;
+ * - A bare stem (`pnpm`, `gh`) needs it, because PATHEXT resolution is what finds
+ *   the `.cmd` shim, and that resolution is the shell's job.
  *
  * An unrecognized extension is treated as a bare stem: the safe answer is the
  * shell, since that is the behavior `shell: isWin32()` already had.

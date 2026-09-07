@@ -8,12 +8,14 @@
  *      registers any `node:smol-*` builtins.
  *   2. `getSmolUtil()` — lazy-loader for the `node:smol-util` binding, which
  *      provides native `uncurryThis` and `applyBind` (single V8 dispatch via
- *      `args.Data()` + `v8::Function::Call`, skipping the BoundFunction adapter
- *      + `Function.prototype.call` trampoline that the JS form
- *      `bind.bind(call)(fn)` hits twice per invocation). ~2x faster on hot
- *      uncurried-call sites. `getSmolUtil()` returns `undefined` on stock Node
- *      + non-Node runtimes. Result is cached across calls; the lazy-loader
- *      follows the same shape as `src/node/fs.ts` etc.
+ *      `args.Data()` + `v8::Function::Call`, skipping the BoundFunction
+ *      adapter
+ *
+ *   - `Function.prototype.call` trampoline that the JS form `bind.bind(call)(fn)`
+ *     hits twice per invocation). ~2x faster on hot uncurried-call sites.
+ *     `getSmolUtil()` returns `undefined` on stock Node
+ *   - non-Node runtimes. Result is cached across calls; the lazy-loader follows
+ *     the same shape as `src/node/fs.ts` etc.
  *
  * @see https://github.com/SocketDev/socket-btm — socket-btm builds
  *   the smol binary that exposes the `node:smol-util` binding.
