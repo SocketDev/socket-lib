@@ -11,8 +11,11 @@
  *     storage.
  */
 
+import path from 'node:path'
+
 import {
   getAppdata,
+  getAppdataDir,
   getComspec,
   getLocalappdata,
   getUserprofile,
@@ -34,6 +37,22 @@ describe('windows env', () => {
     it('should return undefined when not set', () => {
       setEnv('APPDATA', undefined)
       expect(getAppdata()).toBeUndefined()
+    })
+  })
+
+  describe('getAppdataDir', () => {
+    it('should return APPDATA when set, ignoring the home fallback', () => {
+      setEnv('APPDATA', 'C:\\Users\\TestUser\\AppData\\Roaming')
+      expect(getAppdataDir('C:\\Users\\Other')).toBe(
+        'C:\\Users\\TestUser\\AppData\\Roaming',
+      )
+    })
+
+    it('should fall back to homeDir/AppData/Roaming when APPDATA is unset', () => {
+      setEnv('APPDATA', undefined)
+      expect(getAppdataDir('/home/example-user')).toBe(
+        path.join('/home/example-user', 'AppData', 'Roaming'),
+      )
     })
   })
 

@@ -27,7 +27,7 @@ import {
   supportsNodeStripTypesDefault,
 } from '../constants/node.mjs'
 import { isDarwin, isWin32 } from '../constants/platform.mjs'
-import { getAppdata } from '../env/windows.mjs'
+import { getAppdataDir } from '../env/windows.mjs'
 import { getHome } from '../env/home.mjs'
 import { getEnvValue } from '../env/rewire.mjs'
 import {
@@ -125,8 +125,8 @@ export function chromeManifestDirs(): string[] {
   }
   if (isWin32()) {
     // On Windows we write the manifest file and then add the registry key.
-    // getAppdata() goes through the env rewire so tests can override.
-    const appData = getAppdata() ?? path.join(home, 'AppData', 'Roaming')
+    // getAppdataDir() goes through the env rewire so tests can override.
+    const appData = getAppdataDir(home)
     return [
       path.join(
         appData,

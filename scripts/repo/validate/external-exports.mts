@@ -10,14 +10,14 @@ import { readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { REPO_ROOT } from '../../fleet/paths.mts'
+import { DIST_EXTERNAL_DIR } from '../_shared/paths.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
 import { runMain } from '../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const externalDir = path.join(REPO_ROOT, 'dist', 'external')
+const externalDir = DIST_EXTERNAL_DIR
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require

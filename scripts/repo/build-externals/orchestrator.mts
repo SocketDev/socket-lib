@@ -10,6 +10,7 @@ import path from 'node:path'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { REPO_ROOT } from '../../fleet/paths.mts'
+import { DIST_EXTERNAL_DIR, SRC_EXTERNAL_DIR } from '../_shared/paths.mts'
 import { bundlePackage } from './bundler.mts'
 import { externalPackages, scopedPackages } from './config.mts'
 import { copyLocalFiles, ensureDir } from './copy-files.mts'
@@ -18,7 +19,7 @@ import { transformPrimordials } from './transform-primordials.mts'
 const logger = getDefaultLogger()
 
 const rootDir = REPO_ROOT
-const distExternalDir = path.join(rootDir, 'dist', 'external')
+const distExternalDir = DIST_EXTERNAL_DIR
 
 /**
  * Main build function.
@@ -70,7 +71,7 @@ export async function buildExternals(
   // bundled .js so public re-exports of an external's type surface resolve for
   // consumers — an inlined devDependency has no downstream types otherwise. Runs
   // last so the .js-only transform passes above never parse a .d.ts.
-  await copyLocalFiles(path.join(rootDir, 'src', 'external'), distExternalDir, {
+  await copyLocalFiles(SRC_EXTERNAL_DIR, distExternalDir, {
     quiet: quiet || !showDetails,
   })
 
@@ -105,7 +106,7 @@ export async function bundleAllPackages(
       }
     } else {
       // Copy the non-bundled thin re-export wrapper as-is.
-      const srcPath = path.join(rootDir, 'src', 'external', `${name}.js`)
+      const srcPath = path.join(SRC_EXTERNAL_DIR, `${name}.js`)
       const destPath = path.join(distExternalDir, `${name}.js`)
       await fs.copyFile(srcPath, destPath)
     }
@@ -287,7 +288,7 @@ async function bundleScopedPackage(
   const { bundle = true, optional = false, quiet = false } = settings
   const outputPath = path.join(distExternalDir, scope, `${name}.js`)
   if (bundle === false) {
-    const srcPath = path.join(rootDir, 'src', 'external', scope, `${name}.js`)
+    const srcPath = path.join(SRC_EXTERNAL_DIR, scope, `${name}.js`)
     await fs.copyFile(srcPath, outputPath)
     return 0
   }

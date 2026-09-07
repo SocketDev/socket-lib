@@ -3,6 +3,8 @@
  *   Windows-specific user directory paths.
  */
 
+import { getNodePath } from '../node/path.mjs'
+
 import { getEnvValue } from './rewire.mjs'
 
 /**
@@ -21,6 +23,29 @@ import { getEnvValue } from './rewire.mjs'
  */
 export function getAppdata(): string | undefined {
   return getEnvValue('APPDATA')
+}
+
+/**
+ * The Windows roaming Application Data directory, falling back to the
+ * conventional location under `homeDir` when APPDATA is unset. Sole owner of
+ * the `AppData/Roaming` tail: every caller reads it from here so a relocation
+ * is a one-file edit.
+ *
+ * @example
+ *   ;```typescript
+ *   import { getAppdataDir } from '@socketsecurity/lib/env/windows'
+ *
+ *   const dir = getAppdataDir(os.homedir())
+ *   // e.g. 'C:\\Users\\Public\\AppData\\Roaming'
+ *   ```
+ *
+ * @param homeDir - The user home directory used for the fallback.
+ *
+ * @returns The roaming AppData directory path
+ */
+export function getAppdataDir(homeDir: string): string {
+  const path = getNodePath()
+  return getAppdata() ?? path.join(homeDir, 'AppData', 'Roaming')
 }
 
 /**
