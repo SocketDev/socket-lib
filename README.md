@@ -75,6 +75,7 @@ See [CLAUDE.md](./CLAUDE.md) for contributor guidelines.
 MIT
 
 <br/>
+
 <div align="center">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/SocketDev/socket-lib/HEAD/assets/fleet/socket-combomark-dark.svg">
