@@ -29,6 +29,10 @@ export interface VltDepId {
   readonly detail: string
 }
 
+export function getVltString(value: unknown): string | undefined {
+  return typeof value === 'string' ? value : undefined
+}
+
 export function jsParseVltLock(content: string): ParsedLockfile {
   const packages: PackageRef[] = []
   const packageIndex: Record<string, number | number[]> = Object.create(null)
@@ -46,38 +50,11 @@ export function jsParseVltLock(content: string): ParsedLockfile {
     if (!Array.isArray(node)) {
       continue
     }
-    const depId = parseVltDepId(id)
-    const fromId = depId ? splitNameVersion(depId.detail) : undefined
-    // The name column is omitted when it is recoverable from the DepID.
-    const name =
-      (typeof node[1] === 'string' && node[1] ? node[1] : undefined) ??
-      fromId?.name
-    if (!name) {
+    const ref = parseVltPackage(id, node)
+    if (!ref) {
       continue
     }
-    const flags = typeof node[0] === 'number' ? node[0] : 0
-    // vlt encodes a git source in the DepID itself, e.g. `git~github:a/b~main`.
-    const gitDep =
-      depId?.type === 'git'
-        ? parseGitDep(`${depId.scope}#${depId.detail}`)
-        : undefined
-
-    const ref = ObjectFreeze({
-      __proto__: null,
-      name,
-      version: gitDep ? '' : (fromId?.version ?? ''),
-      resolved: typeof node[3] === 'string' ? node[3] : undefined,
-      integrity: typeof node[2] === 'string' ? node[2] : undefined,
-      ecosystem: 'npm',
-      depType: (flags & FLAG_DEV) === 0 ? 'prod' : 'dev',
-      isDev: (flags & FLAG_DEV) !== 0,
-      isOptional: (flags & FLAG_OPTIONAL) !== 0,
-      isPeer: false,
-      isBundled: false,
-      vcsUrl: gitDep?.url,
-      vcsCommit: gitDep?.commit,
-      dependencies: ObjectFreeze([]),
-    }) as unknown as PackageRef
+    const { name } = ref
     ArrayPrototypePush(packages, ref)
 
     const at = packageIndex[name]
@@ -115,6 +92,42 @@ export function parseVltDepId(id: string): VltDepId | undefined {
     // A hosted-git ref can itself contain `~`, so keep the remainder whole.
     detail: parts.slice(2).join('~'),
   } as unknown as VltDepId
+}
+
+export function parseVltPackage(
+  id: string,
+  node: unknown[],
+): PackageRef | undefined {
+  const depId = parseVltDepId(id)
+  const fromId = depId ? splitNameVersion(depId.detail) : undefined
+  // The name column is omitted when it is recoverable from the DepID.
+  const name = getVltString(node[1]) || fromId?.name
+  if (!name) {
+    return undefined
+  }
+  const flags = typeof node[0] === 'number' ? node[0] : 0
+  // vlt encodes a git source in the DepID itself, e.g. `git~github:a/b~main`.
+  const gitDep =
+    depId?.type === 'git'
+      ? parseGitDep(`${depId.scope}#${depId.detail}`)
+      : undefined
+
+  return ObjectFreeze({
+    __proto__: null,
+    name,
+    version: gitDep ? '' : (fromId?.version ?? ''),
+    resolved: getVltString(node[3]),
+    integrity: getVltString(node[2]),
+    ecosystem: 'npm',
+    depType: (flags & FLAG_DEV) === 0 ? 'prod' : 'dev',
+    isDev: (flags & FLAG_DEV) !== 0,
+    isOptional: (flags & FLAG_OPTIONAL) !== 0,
+    isPeer: false,
+    isBundled: false,
+    vcsUrl: gitDep?.url,
+    vcsCommit: gitDep?.commit,
+    dependencies: ObjectFreeze([]),
+  }) as unknown as PackageRef
 }
 
 /**
