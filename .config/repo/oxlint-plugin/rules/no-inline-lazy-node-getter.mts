@@ -183,7 +183,10 @@ export function startsWithHazardousToken(statement: AstNode): boolean {
   if (statement?.type !== 'ExpressionStatement') {
     return false
   }
-  const statementStart = statement.range?.[0] ?? statement.start
+  function nodeStart(node: AstNode | undefined): number | undefined {
+    return node?.range?.[0] ?? node?.start
+  }
+  const statementStart = nodeStart(statement)
   let node: AstNode | undefined = statement.expression
   while (node) {
     if (HAZARDOUS_START_TYPES.has(node.type)) {
@@ -202,7 +205,7 @@ export function startsWithHazardousToken(statement: AstNode): boolean {
     const next = node[edge]
     node = Array.isArray(next) ? next[0] : next
   }
-  const leftmostStart = node?.range?.[0] ?? node?.start
+  const leftmostStart = nodeStart(node)
   return (
     typeof statementStart === 'number' &&
     typeof leftmostStart === 'number' &&

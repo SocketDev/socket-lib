@@ -177,7 +177,11 @@ function main(): void {
   // --write-stub-list and ships throwing again.
   addKeptLeaves(
     REPO_ROOT,
-    plan.exposed.map(leaf => ({ leaf, reason: exposureReason })),
+    plan.exposed.map(leaf => ({
+      __proto__: null,
+      leaf,
+      reason: exposureReason,
+    })),
     writeFileSync,
   )
   logger.success(

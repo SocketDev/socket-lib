@@ -83,7 +83,10 @@ jobs:
           payload-token-client-id: ${{ vars.SOCKET_PAYLOAD_CLIENT_ID }}
           payload-token-private-key: ${{ secrets.SOCKET_PAYLOAD_APP_PRIVATE_KEY }}
       - uses: ./.github/actions/fleet/run-script
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
+          setup-script: pnpm run build
           main-script: pnpm run check --all
 
   test:

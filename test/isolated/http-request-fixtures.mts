@@ -65,181 +65,219 @@ export function listeningPort(server: http.Server): number {
 export function setupHttpFixture(): void {
   let httpServer: http.Server
 
+  const routes: Record<
+    string,
+    (res: http.ServerResponse, req: http.IncomingMessage) => void
+  > = {
+    '/json': res => {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify({ message: 'Hello, World!', status: 'success' }))
+    },
+    '/text': res => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end('Plain text response')
+    },
+    '/gzip': res => {
+      // gzip-encoded JSON body — httpRequest advertises
+      // Accept-Encoding: gzip and must transparently decode so
+      // .json()/.text() see the inflated payload, not raw deflated bytes.
+      res.writeHead(200, {
+        'Content-Encoding': 'gzip',
+        'Content-Type': 'application/json',
+      })
+      res.end(gzipSync(JSON.stringify({ encoded: 'gzip', ok: true })))
+    },
+    '/brotli': res => {
+      res.writeHead(200, {
+        'Content-Encoding': 'br',
+        'Content-Type': 'application/json',
+      })
+      res.end(brotliCompressSync(JSON.stringify({ encoded: 'br', ok: true })))
+    },
+    '/redirect': res => {
+      res.writeHead(302, { Location: '/text' })
+      res.end()
+    },
+    '/redirect-absolute': res => {
+      res.writeHead(302, { Location: `${fixture.baseUrl}/text` })
+      res.end()
+    },
+    '/redirect-loop-1': res => {
+      res.writeHead(302, { Location: '/redirect-loop-2' })
+      res.end()
+    },
+    '/redirect-loop-2': res => {
+      res.writeHead(302, { Location: '/redirect-loop-3' })
+      res.end()
+    },
+    '/redirect-loop-3': res => {
+      res.writeHead(302, { Location: '/redirect-loop-4' })
+      res.end()
+    },
+    '/redirect-loop-4': res => {
+      res.writeHead(302, { Location: '/redirect-loop-5' })
+      res.end()
+    },
+    '/redirect-loop-5': res => {
+      res.writeHead(302, { Location: '/redirect-loop-6' })
+      res.end()
+    },
+    '/redirect-loop-6': res => {
+      res.writeHead(302, { Location: '/text' })
+      res.end()
+    },
+    '/not-found': res => {
+      res.writeHead(404, { 'Content-Type': 'text/plain' })
+      res.end('Not Found')
+    },
+    '/server-error': res => {
+      res.writeHead(500, { 'Content-Type': 'text/plain' })
+      res.end('Internal Server Error')
+    },
+    '/timeout': () => {
+      // Don't respond - simulate timeout
+      return
+    },
+    '/slow': res => {
+      // Respond after delay
+      setTimeout(() => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end('Slow response')
+      }, 100)
+    },
+    '/echo-method': (res, req) => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end(req.method)
+    },
+    '/echo-body': (res, req) => {
+      let body = ''
+      req.on('data', chunk => {
+        body += chunk.toString()
+      })
+      req.on('end', () => {
+        res.writeHead(200, { 'Content-Type': 'text/plain' })
+        res.end(body)
+      })
+    },
+    '/echo-headers': (res, req) => {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end(JSON.stringify(req.headers))
+    },
+    '/binary': res => {
+      res.writeHead(200, { 'Content-Type': 'application/octet-stream' })
+      const buffer = Buffer.from([0x00, 0x01, 0x02, 0x03, 0xff, 0xfe, 0xfd])
+      res.end(buffer)
+    },
+    '/download': res => {
+      const content = 'Download test content'
+      res.writeHead(200, {
+        'Content-Length': String(content.length),
+        'Content-Type': 'text/plain',
+      })
+      // Send data in chunks to test progress
+      const chunk1 = content.slice(0, 10)
+      const chunk2 = content.slice(10)
+      res.write(chunk1)
+      setTimeout(() => {
+        res.end(chunk2)
+      }, 10)
+    },
+    '/large-download': res => {
+      const content = 'X'.repeat(1000)
+      res.writeHead(200, {
+        'Content-Length': String(content.length),
+        'Content-Type': 'text/plain',
+      })
+      res.end(content)
+    },
+    '/download-no-length': res => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end('No content length')
+    },
+    '/invalid-json': res => {
+      res.writeHead(200, { 'Content-Type': 'application/json' })
+      res.end('not valid json{')
+    },
+    '/checksum-file': res => {
+      const content = 'Test content for checksum verification'
+      res.writeHead(200, {
+        'Content-Length': String(content.length),
+        'Content-Type': 'text/plain',
+      })
+      res.end(content)
+    },
+    '/checksums.txt': res => {
+      const content = 'Test content for checksum verification'
+      const hash = crypto.createHash('sha256').update(content).digest('hex')
+      const checksums = `${hash}  checksum-file\nabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890  other-file\n`
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end(checksums)
+    },
+    '/checksums-single-space.txt': res => {
+      const content = 'Test content for checksum verification'
+      const hash = crypto.createHash('sha256').update(content).digest('hex')
+      const checksums = `${hash} checksum-file\n`
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end(checksums)
+    },
+    '/checksums-missing.txt': res => {
+      const checksums =
+        'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890  other-file\n'
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end(checksums)
+    },
+    '/checksums-empty.txt': res => {
+      res.writeHead(200, { 'Content-Type': 'text/plain' })
+      res.end('# This file has no checksums\n\n')
+    },
+    '/large-body': res => {
+      const content = 'X'.repeat(10_000)
+      res.writeHead(200, {
+        'Content-Length': String(content.length),
+        'Content-Type': 'text/plain',
+      })
+      res.end(content)
+    },
+    '/post-success': (res, req) => {
+      if (req.method === 'POST') {
+        res.writeHead(201, { 'Content-Type': 'application/json' })
+        res.end(JSON.stringify({ created: true }))
+      } else {
+        res.writeHead(405)
+        res.end()
+      }
+    },
+    '/no-redirect': res => {
+      res.writeHead(301, { Location: '/text' })
+      res.end()
+    },
+    '/upload-form': (res, req) => {
+      let body = ''
+      req.on('data', chunk => {
+        body += chunk.toString()
+      })
+      req.on('end', () => {
+        const contentType = req.headers['content-type'] || ''
+        res.writeHead(200, { 'Content-Type': 'application/json' })
+        res.end(
+          JSON.stringify({
+            contentType,
+            bodyLength: body.length,
+            hasMultipart: contentType.includes('multipart'),
+          }),
+        )
+      })
+    },
+  }
+
   beforeAll(async () => {
     await new Promise<void>(resolve => {
       httpServer = http.createServer((req, res) => {
         const url = req.url || ''
 
-        if (url === '/json') {
-          res.writeHead(200, { 'Content-Type': 'application/json' })
-          res.end(
-            JSON.stringify({ message: 'Hello, World!', status: 'success' }),
-          )
-        } else if (url === '/text') {
-          res.writeHead(200, { 'Content-Type': 'text/plain' })
-          res.end('Plain text response')
-        } else if (url === '/gzip') {
-          // gzip-encoded JSON body — httpRequest advertises
-          // Accept-Encoding: gzip and must transparently decode so
-          // .json()/.text() see the inflated payload, not raw deflated bytes.
-          res.writeHead(200, {
-            'Content-Encoding': 'gzip',
-            'Content-Type': 'application/json',
-          })
-          res.end(gzipSync(JSON.stringify({ encoded: 'gzip', ok: true })))
-        } else if (url === '/brotli') {
-          res.writeHead(200, {
-            'Content-Encoding': 'br',
-            'Content-Type': 'application/json',
-          })
-          res.end(
-            brotliCompressSync(JSON.stringify({ encoded: 'br', ok: true })),
-          )
-        } else if (url === '/redirect') {
-          res.writeHead(302, { Location: '/text' })
-          res.end()
-        } else if (url === '/redirect-absolute') {
-          res.writeHead(302, { Location: `${fixture.baseUrl}/text` })
-          res.end()
-        } else if (url === '/redirect-loop-1') {
-          res.writeHead(302, { Location: '/redirect-loop-2' })
-          res.end()
-        } else if (url === '/redirect-loop-2') {
-          res.writeHead(302, { Location: '/redirect-loop-3' })
-          res.end()
-        } else if (url === '/redirect-loop-3') {
-          res.writeHead(302, { Location: '/redirect-loop-4' })
-          res.end()
-        } else if (url === '/redirect-loop-4') {
-          res.writeHead(302, { Location: '/redirect-loop-5' })
-          res.end()
-        } else if (url === '/redirect-loop-5') {
-          res.writeHead(302, { Location: '/redirect-loop-6' })
-          res.end()
-        } else if (url === '/redirect-loop-6') {
-          res.writeHead(302, { Location: '/text' })
-          res.end()
-        } else if (url === '/not-found') {
-          res.writeHead(404, { 'Content-Type': 'text/plain' })
-          res.end('Not Found')
-        } else if (url === '/server-error') {
-          res.writeHead(500, { 'Content-Type': 'text/plain' })
-          res.end('Internal Server Error')
-        } else if (url === '/timeout') {
-          // Don't respond - simulate timeout
-          return
-        } else if (url === '/slow') {
-          // Respond after delay
-          setTimeout(() => {
-            res.writeHead(200, { 'Content-Type': 'text/plain' })
-            res.end('Slow response')
-          }, 100)
-        } else if (url === '/echo-method') {
-          res.writeHead(200, { 'Content-Type': 'text/plain' })
-          res.end(req.method)
-        } else if (url === '/echo-body') {
-          let body = ''
-          req.on('data', chunk => {
-            body += chunk.toString()
-          })
-          req.on('end', () => {
-            res.writeHead(200, { 'Content-Type': 'text/plain' })
-            res.end(body)
-          })
-        } else if (url === '/echo-headers') {
-          res.writeHead(200, { 'Content-Type': 'application/json' })
-          res.end(JSON.stringify(req.headers))
-        } else if (url === '/binary') {
-          res.writeHead(200, { 'Content-Type': 'application/octet-stream' })
-          const buffer = Buffer.from([0x00, 0x01, 0x02, 0x03, 0xff, 0xfe, 0xfd])
-          res.end(buffer)
-        } else if (url === '/download') {
-          const content = 'Download test content'
-          res.writeHead(200, {
-            'Content-Length': String(content.length),
-            'Content-Type': 'text/plain',
-          })
-          // Send data in chunks to test progress
-          const chunk1 = content.slice(0, 10)
-          const chunk2 = content.slice(10)
-          res.write(chunk1)
-          setTimeout(() => {
-            res.end(chunk2)
-          }, 10)
-        } else if (url === '/large-download') {
-          const content = 'X'.repeat(1000)
-          res.writeHead(200, {
-            'Content-Length': String(content.length),
-            'Content-Type': 'text/plain',
-          })
-          res.end(content)
-        } else if (url === '/download-no-length') {
-          res.writeHead(200, { 'Content-Type': 'text/plain' })
-          res.end('No content length')
-        } else if (url === '/invalid-json') {
-          res.writeHead(200, { 'Content-Type': 'application/json' })
-          res.end('not valid json{')
-        } else if (url === '/checksum-file') {
-          const content = 'Test content for checksum verification'
-          res.writeHead(200, {
-            'Content-Length': String(content.length),
-            'Content-Type': 'text/plain',
-          })
-          res.end(content)
-        } else if (url === '/checksums.txt') {
-          const content = 'Test content for checksum verification'
-          const hash = crypto.createHash('sha256').update(content).digest('hex')
-          const checksums = `${hash}  checksum-file\nabcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890  other-file\n`
-          res.writeHead(200, { 'Content-Type': 'text/plain' })
-          res.end(checksums)
-        } else if (url === '/checksums-single-space.txt') {
-          const content = 'Test content for checksum verification'
-          const hash = crypto.createHash('sha256').update(content).digest('hex')
-          const checksums = `${hash} checksum-file\n`
-          res.writeHead(200, { 'Content-Type': 'text/plain' })
-          res.end(checksums)
-        } else if (url === '/checksums-missing.txt') {
-          const checksums =
-            'abcdef1234567890abcdef1234567890abcdef1234567890abcdef1234567890  other-file\n'
-          res.writeHead(200, { 'Content-Type': 'text/plain' })
-          res.end(checksums)
-        } else if (url === '/checksums-empty.txt') {
-          res.writeHead(200, { 'Content-Type': 'text/plain' })
-          res.end('# This file has no checksums\n\n')
-        } else if (url === '/large-body') {
-          const content = 'X'.repeat(10_000)
-          res.writeHead(200, {
-            'Content-Length': String(content.length),
-            'Content-Type': 'text/plain',
-          })
-          res.end(content)
-        } else if (url === '/post-success') {
-          if (req.method === 'POST') {
-            res.writeHead(201, { 'Content-Type': 'application/json' })
-            res.end(JSON.stringify({ created: true }))
-          } else {
-            res.writeHead(405)
-            res.end()
-          }
-        } else if (url === '/no-redirect') {
-          res.writeHead(301, { Location: '/text' })
-          res.end()
-        } else if (url === '/upload-form') {
-          let body = ''
-          req.on('data', chunk => {
-            body += chunk.toString()
-          })
-          req.on('end', () => {
-            const contentType = req.headers['content-type'] || ''
-            res.writeHead(200, { 'Content-Type': 'application/json' })
-            res.end(
-              JSON.stringify({
-                contentType,
-                bodyLength: body.length,
-                hasMultipart: contentType.includes('multipart'),
-              }),
-            )
-          })
+        const handler = Object.hasOwn(routes, url) ? routes[url] : undefined
+        if (handler) {
+          handler(res, req)
         } else {
           res.writeHead(200, { 'Content-Type': 'text/plain' })
           res.end('OK')
