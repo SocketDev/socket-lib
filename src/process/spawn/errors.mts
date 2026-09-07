@@ -149,6 +149,14 @@ export function enhanceSpawnError(error: unknown): unknown {
   return enhancedError
 }
 
+export function formatSpawnErrorArgs(args: SpawnError['args']): string {
+  if (!args || args.length === 0) {
+    return ''
+  }
+  const text = args.join(' ')
+  return ` ${text.length < 100 ? text : `${text.slice(0, 97)}...`}`
+}
+
 /**
  * Check if a value is a spawn error with expected error properties. Tests for
  * common error properties from child process failures.
