@@ -89,10 +89,14 @@ export async function httpRequest(
 
   // Readable streams are one-shot — they cannot be replayed on retry or redirect.
   // Duck-type check: streams have a `pipe` method.
-  const isStreamBody =
-    body !== undefined &&
-    typeof body === 'object' &&
-    typeof (body as { pipe?: unknown | undefined }).pipe === 'function'
+  function hasStreamBody(): boolean {
+    return (
+      body !== undefined &&
+      typeof body === 'object' &&
+      typeof (body as { pipe?: unknown | undefined }).pipe === 'function'
+    )
+  }
+  const isStreamBody = hasStreamBody()
 
   if (isStreamBody && retries > 0) {
     throw new ErrorCtor(
@@ -118,60 +122,24 @@ export async function httpRequest(
     timeout,
   }
 
-  // Retry logic with exponential backoff
-  let lastError: Error | undefined
-  // Seconds waited before the upcoming attempt, surfaced via the Retry-After
-  // request header for server-side logging. Updated in the catch block below.
-  let lastDelaySeconds = 0
-  for (let attempt = 0; attempt <= retries; attempt++) {
-    // Build a fresh per-attempt options object so each attempt carries its own
-    // headers snapshot — the caller's `headers` is reused and must not change.
-    // On retries (attempt > 0), stamp outgoing telemetry headers so the server
-    // can log retry state.
-    const attemptOpts: HttpRequestOptions =
-      attempt > 0
-        ? {
-            ...baseAttemptOpts,
-            headers: {
-              ...headers,
-              'Retry-Attempt': `${attempt}`,
-              'Retry-Max': `${retries}`,
-              'Retry-After': `${lastDelaySeconds}`,
-            },
-          }
-        : baseAttemptOpts
-    try {
-      const response = await httpRequestAttempt(url, attemptOpts)
-
-      // When throwOnError is enabled, non-2xx responses become errors
-      // so they can be retried or caught by callers.
-      if (throwOnError && !response.ok) {
-        throw new HttpResponseError(response)
-      }
-
-      return response
-    } catch (e) {
-      lastError = e as Error
-
-      // Last attempt - throw error
-      if (attempt === retries) {
-        break
-      }
-
-      // Honor caller-initiated abort. If the signal fired, don't retry —
-      // the caller explicitly cancelled.
-      if (signal?.aborted) {
-        break
-      }
-
+  async function runRequestAttempts(): Promise<HttpResponse> {
+    // Retry logic with exponential backoff
+    let lastError: Error | undefined
+    // Seconds waited before the upcoming attempt, surfaced via the Retry-After
+    // request header for server-side logging. Updated in the catch block below.
+    let lastDelaySeconds = 0
+    async function waitForRetry(
+      attempt: number,
+      error: unknown,
+    ): Promise<boolean> {
       // Consult onRetry callback if provided. Exponential backoff is capped at
       // retryDelayMax so a high `retries` count can't produce multi-minute waits.
       const delayMs = MathMin(retryDelay * 2 ** attempt, retryDelayMax)
       if (onRetry) {
-        const retryResult = onRetry(attempt + 1, e, delayMs)
+        const retryResult = onRetry(attempt + 1, error, delayMs)
         // false = stop retrying, rethrow immediately.
         if (retryResult === false) {
-          break
+          return false
         }
         // A number overrides the getNodeTimersPromises().setTimeout (clamped to >= 0; NaN falls back to default).
         const actualDelay =
@@ -187,10 +155,58 @@ export async function httpRequest(
         const timersPromises = getNodeTimersPromises()
         await timersPromises.setTimeout(delayMs)
       }
+      return true
     }
-  }
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      // Build a fresh per-attempt options object so each attempt carries its own
+      // headers snapshot — the caller's `headers` is reused and must not change.
+      // On retries (attempt > 0), stamp outgoing telemetry headers so the server
+      // can log retry state.
+      const attemptOpts: HttpRequestOptions =
+        attempt > 0
+          ? {
+              ...baseAttemptOpts,
+              headers: {
+                ...headers,
+                'Retry-Attempt': `${attempt}`,
+                'Retry-Max': `${retries}`,
+                'Retry-After': `${lastDelaySeconds}`,
+              },
+            }
+          : baseAttemptOpts
+      try {
+        const response = await httpRequestAttempt(url, attemptOpts)
 
-  throw lastError || new ErrorCtor('Request failed after retries')
+        // When throwOnError is enabled, non-2xx responses become errors
+        // so they can be retried or caught by callers.
+        if (throwOnError && !response.ok) {
+          throw new HttpResponseError(response)
+        }
+
+        return response
+      } catch (e) {
+        lastError = e as Error
+
+        // Last attempt - throw error
+        if (attempt === retries) {
+          break
+        }
+
+        // Honor caller-initiated abort. If the signal fired, don't retry —
+        // the caller explicitly cancelled.
+        if (signal?.aborted) {
+          break
+        }
+
+        if (!(await waitForRetry(attempt, e))) {
+          break
+        }
+      }
+    }
+
+    throw lastError || new ErrorCtor('Request failed after retries')
+  }
+  return runRequestAttempts()
 }
 
 // Re-exports — preserve the historical `http-request/request` surface

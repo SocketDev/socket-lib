@@ -105,23 +105,29 @@ export async function httpDownload(
   // passed) and the inner total===0 + interval-throttle branches fire
   // only on real network downloads, not the unit test mocks.
   /* c8 ignore start */
-  let progressCallback:
+  function createProgressCallback():
     | ((downloaded: number, total: number) => void)
-    | undefined
-  if (onProgress) {
-    progressCallback = onProgress
-  } else if (logger) {
-    let lastPercent = 0
-    progressCallback = (downloaded: number, total: number) => {
-      const percent = total === 0 ? 0 : MathFloor((downloaded / total) * 100)
-      if (percent >= lastPercent + progressInterval) {
-        logger.log(
-          `  Progress: ${percent}% (${(downloaded / 1024 / 1024).toFixed(1)} MB / ${(total / 1024 / 1024).toFixed(1)} MB)`,
-        )
-        lastPercent = percent
+    | undefined {
+    let progressCallback:
+      | ((downloaded: number, total: number) => void)
+      | undefined
+    if (onProgress) {
+      progressCallback = onProgress
+    } else if (logger) {
+      let lastPercent = 0
+      progressCallback = (downloaded: number, total: number) => {
+        const percent = total === 0 ? 0 : MathFloor((downloaded / total) * 100)
+        if (percent >= lastPercent + progressInterval) {
+          logger.log(
+            `  Progress: ${percent}% (${(downloaded / 1024 / 1024).toFixed(1)} MB / ${(total / 1024 / 1024).toFixed(1)} MB)`,
+          )
+          lastPercent = percent
+        }
       }
     }
+    return progressCallback
   }
+  const progressCallback = createProgressCallback()
   /* c8 ignore stop */
 
   // Download to a temp file first, then atomically rename to destination.
@@ -135,6 +141,47 @@ export async function httpDownload(
   // Clean up any stale temp file from a previous failed download.
   if (fs.existsSync(tempPath)) {
     await safeDelete(tempPath)
+  }
+
+  async function verifyDownloadedFile(
+    result: Awaited<ReturnType<typeof httpDownloadAttempt>>,
+  ): Promise<void> {
+    // Both digests were computed over the response chunks before they reached
+    // the destination stream, so verification does not reread the temp file.
+    if (sha256) {
+      const expectedHash = sha256.toLowerCase()
+
+      // Use constant-time comparison to prevent timing attacks.
+      if (
+        result.sha256.length !== expectedHash.length ||
+        !crypto.timingSafeEqual(
+          BufferFrom!(result.sha256),
+          Buffer.from(expectedHash),
+        )
+      ) {
+        await safeDelete(tempPath)
+        throw new ErrorCtor(
+          `Checksum verification failed for ${url}\n` +
+            `Expected: ${expectedHash}\n` +
+            `Computed: ${result.sha256}`,
+        )
+      }
+    }
+    if (
+      integrity &&
+      (result.integrity.length !== integrity.length ||
+        !crypto.timingSafeEqual(
+          BufferFrom!(result.integrity),
+          Buffer.from(integrity),
+        ))
+    ) {
+      await safeDelete(tempPath)
+      throw new ErrorCtor(
+        `Integrity verification failed for ${url}\n` +
+          `Expected: ${integrity}\n` +
+          `Computed: ${result.integrity}`,
+      )
+    }
   }
 
   // Retry logic with exponential backoff
@@ -151,42 +198,7 @@ export async function httpDownload(
         timeout,
       })
 
-      // Both digests were computed over the response chunks before they reached
-      // the destination stream, so verification does not reread the temp file.
-      if (sha256) {
-        const expectedHash = sha256.toLowerCase()
-
-        // Use constant-time comparison to prevent timing attacks.
-        if (
-          result.sha256.length !== expectedHash.length ||
-          !crypto.timingSafeEqual(
-            BufferFrom!(result.sha256),
-            Buffer.from(expectedHash),
-          )
-        ) {
-          await safeDelete(tempPath)
-          throw new ErrorCtor(
-            `Checksum verification failed for ${url}\n` +
-              `Expected: ${expectedHash}\n` +
-              `Computed: ${result.sha256}`,
-          )
-        }
-      }
-      if (
-        integrity &&
-        (result.integrity.length !== integrity.length ||
-          !crypto.timingSafeEqual(
-            BufferFrom!(result.integrity),
-            Buffer.from(integrity),
-          ))
-      ) {
-        await safeDelete(tempPath)
-        throw new ErrorCtor(
-          `Integrity verification failed for ${url}\n` +
-            `Expected: ${integrity}\n` +
-            `Computed: ${result.integrity}`,
-        )
-      }
+      await verifyDownloadedFile(result)
 
       // Download succeeded - atomically rename temp file to destination.
       // This overwrites any existing file at destPath.
