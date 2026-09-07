@@ -10,9 +10,8 @@
  *   lock reason and quotes the whole value per `core.quotePath`, so the reason
  *   arrives wrapped in quotes with its newlines spelled out.
  *   Paths are realpath-resolved on both sides before comparison. Git reports a
- *   worktree by its resolved path, so on macOS a worktree created under
- *   `os.tmpdir()` (`/var/folders/...`) comes back as `/private/var/folders/...`
- *   and naive string equality silently misses it.
+ *   worktree by its resolved path. On macOS, `os.tmpdir()` can contain a
+ *   symlinked component, so unresolved paths can fail to match Git's output.
  *
  * @see https://git-scm.com/docs/git-worktree
  * @see https://github.com/git/git/blob/v2.54.0/Documentation/git-worktree.adoc
@@ -167,8 +166,8 @@ export async function findGitWorktree(
  * first use.
  *
  * Creation has to precede the resolve: an absent directory has no realpath, and
- * on macOS that would hand back the unresolved `/var/folders/...` spelling that
- * never matches git's output.
+ * on macOS that can return a path with a symlinked component that does not
+ * match Git's resolved path.
  *
  * @param namespace - Directory under the temp dir that groups a tool's
  *   worktrees. Sanitized, so it stays one level under the temp dir.
