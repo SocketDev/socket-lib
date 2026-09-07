@@ -68,277 +68,298 @@ afterEach(async () => {
   vi.clearAllMocks()
 })
 
-describe.sequential('dlx/binary-download — downloadBinary cache hit', () => {
-  test('reuses a valid cached binary and reads integrity from metadata', async () => {
-    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
-    const url = 'https://example.com/tool-xyz'
-    const name = 'mytool'
-    const cacheKey = generateCacheKey(`${url}:${name}`)
-    const cacheEntryDir = path.join(tmpRoot, cacheKey)
-    mkdirSync(cacheEntryDir, { recursive: true })
-    writeFileSync(path.join(cacheEntryDir, name), 'cached-bytes')
-    writeFileSync(
-      path.join(cacheEntryDir, '.dlx-metadata.json'),
-      JSON.stringify({
-        version: '1.0.0',
-        cache_key: cacheKey,
-        timestamp: Date.now(),
-        integrity: 'sha512-cachedintegrity==',
-        size: 12,
-        source: { type: 'download', url },
-      }),
-    )
-    const result = await downloadBinary({ url, name })
-    expect(result.downloaded).toBe(false)
-    expect(result.integrity).toBe('sha512-cachedintegrity==')
-    expect(httpDownload).not.toHaveBeenCalled()
-  })
-
-  test('falls back to recomputing integrity from disk when metadata lacks integrity', async () => {
-    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
-    const url = 'https://example.com/tool-no-meta'
-    const name = 'mytool'
-    const cacheKey = generateCacheKey(`${url}:${name}`)
-    const cacheEntryDir = path.join(tmpRoot, cacheKey)
-    mkdirSync(cacheEntryDir, { recursive: true })
-    writeFileSync(path.join(cacheEntryDir, name), 'cached-bytes')
-    writeFileSync(
-      path.join(cacheEntryDir, '.dlx-metadata.json'),
-      JSON.stringify({
-        version: '1.0.0',
-        cache_key: cacheKey,
-        timestamp: Date.now(),
-        size: 12,
-      }),
-    )
-    const result = await downloadBinary({ url, name })
-    expect(result.downloaded).toBe(false)
-    expect(result.integrity).toMatch(/^sha512-/)
-    expect(httpDownload).not.toHaveBeenCalled()
-  })
-})
-
-describe.sequential('dlx/binary-download — downloadBinary fresh download', () => {
-  test('downloads, writes cache metadata, returns downloaded: true', async () => {
-    const { downloadBinary, httpDownload } = await loadFresh()
-    httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
-      writeFileSync(p, 'new-bytes')
-      return mockDownloadResult(p, 'new-bytes')
-    })
-    const result = await downloadBinary({
-      url: 'https://example.com/tool',
-      name: 'mytool',
-    })
-    expect(result.downloaded).toBe(true)
-    expect(result.integrity).toMatch(/^sha512-/)
-    const cacheEntryDir = path.dirname(result.binaryPath)
-    const metaPath = path.join(cacheEntryDir, '.dlx-metadata.json')
-    expect(statSync(metaPath).isFile()).toBe(true)
-    if (!IS_WIN) {
-      expect(statSync(result.binaryPath).mode & 0o777).toBe(0o755)
-    }
-  })
-
-  test('force: true bypasses cache validation (downloaded: true even with valid cache)', async () => {
-    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
-    const url = 'https://example.com/tool-force'
-    const name = 'mytool'
-    const cacheKey = generateCacheKey(`${url}:${name}`)
-    const cacheEntryDir = path.join(tmpRoot, cacheKey)
-    mkdirSync(cacheEntryDir, { recursive: true })
-    // No pre-existing file — force=true takes the download path; the
-    // mocked httpDownload writes the file.
-    httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
-      writeFileSync(p, 'fresh-bytes')
-      return mockDownloadResult(p, 'fresh-bytes')
-    })
-    const result = await downloadBinary({ url, name, force: true })
-    expect(result.downloaded).toBe(true)
-    expect(httpDownload).toHaveBeenCalled()
-  })
-
-  test('expired cache (TTL exceeded) is treated as invalid and triggers fresh-path', async () => {
-    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
-    const url = 'https://example.com/tool-ttl'
-    const name = 'mytool'
-    const cacheKey = generateCacheKey(`${url}:${name}`)
-    const cacheEntryDir = path.join(tmpRoot, cacheKey)
-    // Pre-make the dir + ancient metadata so isBinaryCacheValid() returns false.
-    mkdirSync(cacheEntryDir, { recursive: true })
-    writeFileSync(
-      path.join(cacheEntryDir, '.dlx-metadata.json'),
-      JSON.stringify({
-        version: '1.0.0',
-        cache_key: cacheKey,
-        timestamp: 1_700_000_000_000,
-        integrity: 'sha512-stale==',
-        size: 11,
-      }),
-    )
-    httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
-      writeFileSync(p, 'fresh-bytes')
-      return mockDownloadResult(p, 'fresh-bytes')
-    })
-    const result = await downloadBinary({ url, name, cacheTtl: 1000 })
-    expect(result.downloaded).toBe(true)
-    expect(httpDownload).toHaveBeenCalled()
-  })
-
-  test('hash: sha512 SRI string normalizes to integrity pin', async () => {
-    const { downloadBinary, httpDownload } = await loadFresh()
-    httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
-      writeFileSync(p, 'bytes')
-      return mockDownloadResult(p, 'bytes')
-    })
-    const fake = 'sha512-' + 'B'.repeat(86) + '=='
-    await expect(
-      downloadBinary({
-        url: 'https://example.com/tool-hash',
-        name: 'mytool',
-        hash: fake,
-      }),
-    ).rejects.toThrow(/Integrity mismatch/)
-  })
-
-  test('hash: sha256 hex string normalizes to sha256 pin', async () => {
-    const { downloadBinary, httpDownload } = await loadFresh()
-    httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
-      writeFileSync(p, 'bytes')
-      return mockDownloadResult(p, 'bytes')
-    })
-    const sha256 = 'a'.repeat(64)
-    await downloadBinary({
-      url: 'https://example.com/tool-csum',
-      name: 'mytool',
-      hash: sha256,
-    })
-    // Inline sha256 verification is delegated to httpDownload — assert
-    // sha256 was forwarded in its opts.
-    const [, , opts] = httpDownload.mock.calls[0]!
-    expect((opts as { sha256?: string | undefined } | undefined)?.sha256).toBe(
-      sha256,
-    )
-  })
-
-  test('uses platform-default binary name when none provided', async () => {
-    const { downloadBinary, httpDownload } = await loadFresh()
-    httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
-      writeFileSync(p, 'bytes')
-      return mockDownloadResult(p, 'bytes')
-    })
-    const result = await downloadBinary({
-      url: 'https://example.com/no-name',
-    })
-    expect(result.binaryPath).toMatch(/binary-[a-z0-9]+-[a-z0-9]+$/)
-  })
-})
-
-describe.sequential('dlx/binary-download — mkdir failure wrapping', () => {
-  // These tests need a fresh-mocked safeMkdir per test; isolate via
-  // resetModules + doMock + unmock to avoid leaking into siblings.
-  async function loadWithMkdirError(code: string | undefined) {
-    vi.resetModules()
-    vi.doMock(import('../../../src/fs/safe.mjs'), async () => {
-      const actual = await vi.importActual<typeof FsSafeModule>(
-        '../../../src/fs/safe',
+describe(
+  'dlx/binary-download — downloadBinary cache hit',
+  { concurrent: false },
+  () => {
+    test('reuses a valid cached binary and reads integrity from metadata', async () => {
+      const { downloadBinary, generateCacheKey, httpDownload } =
+        await loadFresh()
+      const url = 'https://example.com/tool-xyz'
+      const name = 'mytool'
+      const cacheKey = generateCacheKey(`${url}:${name}`)
+      const cacheEntryDir = path.join(tmpRoot, cacheKey)
+      mkdirSync(cacheEntryDir, { recursive: true })
+      writeFileSync(path.join(cacheEntryDir, name), 'cached-bytes')
+      writeFileSync(
+        path.join(cacheEntryDir, '.dlx-metadata.json'),
+        JSON.stringify({
+          version: '1.0.0',
+          cache_key: cacheKey,
+          timestamp: Date.now(),
+          integrity: 'sha512-cachedintegrity==',
+          size: 12,
+          source: { type: 'download', url },
+        }),
       )
-      const err = new Error(code ?? 'generic')
-      if (code) {
-        Object.assign(err, { code })
+      const result = await downloadBinary({ url, name })
+      expect(result.downloaded).toBe(false)
+      expect(result.integrity).toBe('sha512-cachedintegrity==')
+      expect(httpDownload).not.toHaveBeenCalled()
+    })
+
+    test('falls back to recomputing integrity from disk when metadata lacks integrity', async () => {
+      const { downloadBinary, generateCacheKey, httpDownload } =
+        await loadFresh()
+      const url = 'https://example.com/tool-no-meta'
+      const name = 'mytool'
+      const cacheKey = generateCacheKey(`${url}:${name}`)
+      const cacheEntryDir = path.join(tmpRoot, cacheKey)
+      mkdirSync(cacheEntryDir, { recursive: true })
+      writeFileSync(path.join(cacheEntryDir, name), 'cached-bytes')
+      writeFileSync(
+        path.join(cacheEntryDir, '.dlx-metadata.json'),
+        JSON.stringify({
+          version: '1.0.0',
+          cache_key: cacheKey,
+          timestamp: Date.now(),
+          size: 12,
+        }),
+      )
+      const result = await downloadBinary({ url, name })
+      expect(result.downloaded).toBe(false)
+      expect(result.integrity).toMatch(/^sha512-/)
+      expect(httpDownload).not.toHaveBeenCalled()
+    })
+  },
+)
+
+describe(
+  'dlx/binary-download — downloadBinary fresh download',
+  { concurrent: false },
+  () => {
+    test('downloads, writes cache metadata, returns downloaded: true', async () => {
+      const { downloadBinary, httpDownload } = await loadFresh()
+      httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
+        writeFileSync(p, 'new-bytes')
+        return mockDownloadResult(p, 'new-bytes')
+      })
+      const result = await downloadBinary({
+        url: 'https://example.com/tool',
+        name: 'mytool',
+      })
+      expect(result.downloaded).toBe(true)
+      expect(result.integrity).toMatch(/^sha512-/)
+      const cacheEntryDir = path.dirname(result.binaryPath)
+      const metaPath = path.join(cacheEntryDir, '.dlx-metadata.json')
+      expect(statSync(metaPath).isFile()).toBe(true)
+      if (!IS_WIN) {
+        expect(statSync(result.binaryPath).mode & 0o777).toBe(0o755)
       }
-      return { ...actual, safeMkdir: vi.fn().mockRejectedValue(err) }
     })
-    const bcMod = await import('../../../src/dlx/binary-cache.mjs')
-    ;(bcMod.getDlxCachePath as ReturnType<typeof vi.fn>).mockReturnValue(
-      tmpRoot,
-    )
-    const mod = await import('../../../src/dlx/binary-download.mjs')
-    return { downloadBinary: mod.downloadBinary }
-  }
 
-  afterEach(async () => {
-    vi.doUnmock(import('../../../src/fs/safe.mjs'))
-  })
-
-  test('wraps EACCES with a permission-denied message', async () => {
-    const { downloadBinary } = await loadWithMkdirError('EACCES')
-    await expect(
-      downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
-    ).rejects.toThrow(/Permission denied creating binary cache directory/)
-  })
-
-  test('wraps EPERM with a permission-denied message', async () => {
-    const { downloadBinary } = await loadWithMkdirError('EPERM')
-    await expect(
-      downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
-    ).rejects.toThrow(/Permission denied/)
-  })
-
-  test('wraps EROFS with a read-only-filesystem message', async () => {
-    const { downloadBinary } = await loadWithMkdirError('EROFS')
-    await expect(
-      downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
-    ).rejects.toThrow(/read-only filesystem/)
-  })
-
-  test('wraps unknown errors with a generic "Failed to create" message', async () => {
-    const { downloadBinary } = await loadWithMkdirError(undefined)
-    await expect(
-      downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
-    ).rejects.toThrow(/Failed to create binary cache directory/)
-  })
-})
-
-describe.sequential('dlx/binary-download — downloadBinary headers', () => {
-  test('forwards caller headers through to httpDownload', async () => {
-    const { downloadBinary, httpDownload } = await loadFresh()
-    const url = 'https://example.com/private-tool'
-    const name = 'privtool'
-    httpDownload.mockImplementation(async (_u: string, destPath: string) => {
-      writeFileSync(destPath, 'authed-bytes')
-      return { integrity: 'sha512-authed==', size: 12 }
+    test('force: true bypasses cache validation (downloaded: true even with valid cache)', async () => {
+      const { downloadBinary, generateCacheKey, httpDownload } =
+        await loadFresh()
+      const url = 'https://example.com/tool-force'
+      const name = 'mytool'
+      const cacheKey = generateCacheKey(`${url}:${name}`)
+      const cacheEntryDir = path.join(tmpRoot, cacheKey)
+      mkdirSync(cacheEntryDir, { recursive: true })
+      // No pre-existing file — force=true takes the download path; the
+      // mocked httpDownload writes the file.
+      httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
+        writeFileSync(p, 'fresh-bytes')
+        return mockDownloadResult(p, 'fresh-bytes')
+      })
+      const result = await downloadBinary({ url, name, force: true })
+      expect(result.downloaded).toBe(true)
+      expect(httpDownload).toHaveBeenCalled()
     })
-    await downloadBinary({
-      url,
-      name,
-      headers: { authorization: 'Bearer secret-token' },
+
+    test('expired cache (TTL exceeded) is treated as invalid and triggers fresh-path', async () => {
+      const { downloadBinary, generateCacheKey, httpDownload } =
+        await loadFresh()
+      const url = 'https://example.com/tool-ttl'
+      const name = 'mytool'
+      const cacheKey = generateCacheKey(`${url}:${name}`)
+      const cacheEntryDir = path.join(tmpRoot, cacheKey)
+      // Pre-make the dir + ancient metadata so isBinaryCacheValid() returns false.
+      mkdirSync(cacheEntryDir, { recursive: true })
+      writeFileSync(
+        path.join(cacheEntryDir, '.dlx-metadata.json'),
+        JSON.stringify({
+          version: '1.0.0',
+          cache_key: cacheKey,
+          timestamp: 1_700_000_000_000,
+          integrity: 'sha512-stale==',
+          size: 11,
+        }),
+      )
+      httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
+        writeFileSync(p, 'fresh-bytes')
+        return mockDownloadResult(p, 'fresh-bytes')
+      })
+      const result = await downloadBinary({ url, name, cacheTtl: 1000 })
+      expect(result.downloaded).toBe(true)
+      expect(httpDownload).toHaveBeenCalled()
     })
-    expect(httpDownload).toHaveBeenCalledWith(
-      url,
-      expect.any(String),
-      expect.objectContaining({
+
+    test('hash: sha512 SRI string normalizes to integrity pin', async () => {
+      const { downloadBinary, httpDownload } = await loadFresh()
+      httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
+        writeFileSync(p, 'bytes')
+        return mockDownloadResult(p, 'bytes')
+      })
+      const fake = 'sha512-' + 'B'.repeat(86) + '=='
+      await expect(
+        downloadBinary({
+          url: 'https://example.com/tool-hash',
+          name: 'mytool',
+          hash: fake,
+        }),
+      ).rejects.toThrow(/Integrity mismatch/)
+    })
+
+    test('hash: sha256 hex string normalizes to sha256 pin', async () => {
+      const { downloadBinary, httpDownload } = await loadFresh()
+      httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
+        writeFileSync(p, 'bytes')
+        return mockDownloadResult(p, 'bytes')
+      })
+      const sha256 = 'a'.repeat(64)
+      await downloadBinary({
+        url: 'https://example.com/tool-csum',
+        name: 'mytool',
+        hash: sha256,
+      })
+      // Inline sha256 verification is delegated to httpDownload — assert
+      // sha256 was forwarded in its opts.
+      const [, , opts] = httpDownload.mock.calls[0]!
+      expect(
+        (opts as { sha256?: string | undefined } | undefined)?.sha256,
+      ).toBe(sha256)
+    })
+
+    test('uses platform-default binary name when none provided', async () => {
+      const { downloadBinary, httpDownload } = await loadFresh()
+      httpDownload.mockImplementationOnce(async (_url: string, p: string) => {
+        writeFileSync(p, 'bytes')
+        return mockDownloadResult(p, 'bytes')
+      })
+      const result = await downloadBinary({
+        url: 'https://example.com/no-name',
+      })
+      expect(result.binaryPath).toMatch(/binary-[a-z0-9]+-[a-z0-9]+$/)
+    })
+  },
+)
+
+describe(
+  'dlx/binary-download — mkdir failure wrapping',
+  { concurrent: false },
+  () => {
+    // These tests need a fresh-mocked safeMkdir per test; isolate via
+    // resetModules + doMock + unmock to avoid leaking into siblings.
+    async function loadWithMkdirError(code: string | undefined) {
+      vi.resetModules()
+      vi.doMock(import('../../../src/fs/safe.mjs'), async () => {
+        const actual = await vi.importActual<typeof FsSafeModule>(
+          '../../../src/fs/safe',
+        )
+        const err = new Error(code ?? 'generic')
+        if (code) {
+          Object.assign(err, { code })
+        }
+        return { ...actual, safeMkdir: vi.fn().mockRejectedValue(err) }
+      })
+      const bcMod = await import('../../../src/dlx/binary-cache.mjs')
+      ;(bcMod.getDlxCachePath as ReturnType<typeof vi.fn>).mockReturnValue(
+        tmpRoot,
+      )
+      const mod = await import('../../../src/dlx/binary-download.mjs')
+      return { downloadBinary: mod.downloadBinary }
+    }
+
+    afterEach(async () => {
+      vi.doUnmock(import('../../../src/fs/safe.mjs'))
+    })
+
+    test('wraps EACCES with a permission-denied message', async () => {
+      const { downloadBinary } = await loadWithMkdirError('EACCES')
+      await expect(
+        downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
+      ).rejects.toThrow(/Permission denied creating binary cache directory/)
+    })
+
+    test('wraps EPERM with a permission-denied message', async () => {
+      const { downloadBinary } = await loadWithMkdirError('EPERM')
+      await expect(
+        downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
+      ).rejects.toThrow(/Permission denied/)
+    })
+
+    test('wraps EROFS with a read-only-filesystem message', async () => {
+      const { downloadBinary } = await loadWithMkdirError('EROFS')
+      await expect(
+        downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
+      ).rejects.toThrow(/read-only filesystem/)
+    })
+
+    test('wraps unknown errors with a generic "Failed to create" message', async () => {
+      const { downloadBinary } = await loadWithMkdirError(undefined)
+      await expect(
+        downloadBinary({ url: 'https://example.com/tool', name: 'tool' }),
+      ).rejects.toThrow(/Failed to create binary cache directory/)
+    })
+  },
+)
+
+describe(
+  'dlx/binary-download — downloadBinary headers',
+  { concurrent: false },
+  () => {
+    test('forwards caller headers through to httpDownload', async () => {
+      const { downloadBinary, httpDownload } = await loadFresh()
+      const url = 'https://example.com/private-tool'
+      const name = 'privtool'
+      httpDownload.mockImplementation(async (_u: string, destPath: string) => {
+        writeFileSync(destPath, 'authed-bytes')
+        return { integrity: 'sha512-authed==', size: 12 }
+      })
+      await downloadBinary({
+        url,
+        name,
         headers: { authorization: 'Bearer secret-token' },
-      }),
-    )
-  })
-
-  test('keys the cache on url and name only, so a rotated credential hits the same entry', async () => {
-    const { downloadBinary, generateCacheKey, httpDownload } = await loadFresh()
-    const url = 'https://example.com/rotating-tool'
-    const name = 'rotating'
-    // Seed the entry as if a previous run downloaded it under an older token.
-    const cacheKey = generateCacheKey(`${url}:${name}`)
-    const cacheEntryDir = path.join(tmpRoot, cacheKey)
-    mkdirSync(cacheEntryDir, { recursive: true })
-    writeFileSync(path.join(cacheEntryDir, name), 'cached-bytes')
-    writeFileSync(
-      path.join(cacheEntryDir, '.dlx-metadata.json'),
-      JSON.stringify({
-        version: '1.0.0',
-        cache_key: cacheKey,
-        timestamp: Date.now(),
-        integrity: 'sha512-cachedintegrity==',
-        size: 12,
-        source: { type: 'download', url },
-      }),
-    )
-    // A DIFFERENT credential must not orphan the entry.
-    const result = await downloadBinary({
-      url,
-      name,
-      headers: { authorization: 'Bearer rotated-token' },
+      })
+      expect(httpDownload).toHaveBeenCalledWith(
+        url,
+        expect.any(String),
+        expect.objectContaining({
+          headers: { authorization: 'Bearer secret-token' },
+        }),
+      )
     })
-    expect(result.downloaded).toBe(false)
-    expect(httpDownload).not.toHaveBeenCalled()
-  })
-})
+
+    test('keys the cache on url and name only, so a rotated credential hits the same entry', async () => {
+      const { downloadBinary, generateCacheKey, httpDownload } =
+        await loadFresh()
+      const url = 'https://example.com/rotating-tool'
+      const name = 'rotating'
+      // Seed the entry as if a previous run downloaded it under an older token.
+      const cacheKey = generateCacheKey(`${url}:${name}`)
+      const cacheEntryDir = path.join(tmpRoot, cacheKey)
+      mkdirSync(cacheEntryDir, { recursive: true })
+      writeFileSync(path.join(cacheEntryDir, name), 'cached-bytes')
+      writeFileSync(
+        path.join(cacheEntryDir, '.dlx-metadata.json'),
+        JSON.stringify({
+          version: '1.0.0',
+          cache_key: cacheKey,
+          timestamp: Date.now(),
+          integrity: 'sha512-cachedintegrity==',
+          size: 12,
+          source: { type: 'download', url },
+        }),
+      )
+      // A DIFFERENT credential must not orphan the entry.
+      const result = await downloadBinary({
+        url,
+        name,
+        headers: { authorization: 'Bearer rotated-token' },
+      })
+      expect(result.downloaded).toBe(false)
+      expect(httpDownload).not.toHaveBeenCalled()
+    })
+  },
+)

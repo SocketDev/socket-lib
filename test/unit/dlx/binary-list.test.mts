@@ -36,7 +36,7 @@ afterAll(async () => {
   await stopDlxTestServer(testServer.server)
 })
 
-describe.sequential('dlx-binary cache enumeration', () => {
+describe('dlx-binary cache enumeration', { concurrent: false }, () => {
   describe('metadata writes (atomic operation)', () => {
     it('should write metadata atomically using temp file', async () => {
       await runWithTempDir(async tmpDir => {

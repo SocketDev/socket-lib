@@ -67,7 +67,7 @@ export function sha512OfBuffer(buf: Buffer): string {
   return `sha512-${h}`
 }
 
-describe.sequential('dlx/binary — downloadBinaryFile', () => {
+describe('dlx/binary — downloadBinaryFile', { concurrent: false }, () => {
   let testDir: string
 
   beforeEach(() => {

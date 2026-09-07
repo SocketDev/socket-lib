@@ -32,7 +32,7 @@ afterAll(async () => {
   await stopDlxTestServer(testServer.server)
 })
 
-describe.sequential('dlx-binary cache cleanup', () => {
+describe('dlx-binary cache cleanup', { concurrent: false }, () => {
   describe('cleanDlxCache', () => {
     it('should return 0 if cache directory does not exist', async () => {
       await runWithTempDir(async tmpDir => {

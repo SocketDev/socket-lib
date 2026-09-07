@@ -11,6 +11,9 @@ import path from 'node:path'
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
+import { downloadBinaryFile } from '../../../src/dlx/binary-download.mjs'
+import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
+
 import type * as PlatformModule from '../../../src/constants/platform.mjs'
 import type * as DownloadModule from '../../../src/http-request/download.mjs'
 
@@ -46,9 +49,6 @@ vi.mock(
   },
 )
 
-import { downloadBinaryFile } from '../../../src/dlx/binary-download.mjs'
-import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-
 let tmp: string
 
 beforeEach(async () => {
@@ -59,11 +59,15 @@ afterEach(async () => {
   await safeDelete(tmp)
 })
 
-describe.sequential('dlx/binary-download — Windows branch (isWin32() stubbed true)', () => {
-  it('skips chmod on Windows (downloadBinaryFile returns integrity)', async () => {
-    const destPath = path.join(tmp, 'win-binary.exe')
-    const result = await downloadBinaryFile('https://example.com/x', destPath)
-    // The result is the SRI integrity hash; chmod was bypassed.
-    expect(result.startsWith('sha512-')).toBe(true)
-  })
-})
+describe(
+  'dlx/binary-download — Windows branch (isWin32() stubbed true)',
+  { concurrent: false },
+  () => {
+    it('skips chmod on Windows (downloadBinaryFile returns integrity)', async () => {
+      const destPath = path.join(tmp, 'win-binary.exe')
+      const result = await downloadBinaryFile('https://example.com/x', destPath)
+      // The result is the SRI integrity hash; chmod was bypassed.
+      expect(result.startsWith('sha512-')).toBe(true)
+    })
+  },
+)
