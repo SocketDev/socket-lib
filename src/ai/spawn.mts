@@ -68,105 +68,133 @@ export function buildArgs(
   const allAllowed = [...options.tools, ...(options.allow ?? [])]
 
   switch (agent) {
-    case 'claude': {
-      // https://code.claude.com/docs/en/cli-reference
-      const args: string[] = [
-        '--print',
-        '--permission-mode',
-        options.permissionMode,
-        '--add-dir',
-        options.cwd,
-      ]
-      for (const dir of options.addDirs ?? []) {
-        args.push('--add-dir', dir)
-      }
-      if (options.model) {
-        args.push('--model', options.model)
-      }
-      // Fable / Mythos are adaptive-thinking-only; the effort dial does not
-      // apply, so omit `--effort` for them rather than pass a level they ignore.
-      if (options.effort && !isAdaptiveOnlyModel(options.model ?? '')) {
-        args.push('--effort', options.effort)
-      }
-      if (allAllowed.length > 0) {
-        args.push('--allowedTools', ...allAllowed)
-      }
-      if (options.disallow.length > 0) {
-        args.push('--disallowedTools', ...options.disallow)
-      }
-      if (options.extraArgs) {
-        args.push(...options.extraArgs)
-      }
-      return args
-    }
-    case 'codex': {
-      // Codex CLI uses --tools / --disallow-tools, no --permission-mode
-      // (it has a separate --read-only flag instead). Plan-mode maps
-      // to --read-only; acceptEdits and dontAsk both run normally.
-      const args: string[] = ['--print']
-      if (options.permissionMode === 'plan') {
-        args.push('--read-only')
-      }
-      if (options.model) {
-        args.push('--model', options.model)
-      }
-      if (options.effort) {
-        // Codex takes reasoning effort as a `-c` config override, not a
-        // flag. Its vocab tops out at xhigh (no `max`), so clamp the shared
-        // AiEffort `max` down to xhigh — codex's ceiling.
-        const codexEffort = options.effort === 'max' ? 'xhigh' : options.effort
-        args.push('-c', `model_reasoning_effort=${codexEffort}`)
-      }
-      if (allAllowed.length > 0) {
-        args.push('--tools', allAllowed.join(','))
-      }
-      if (options.disallow.length > 0) {
-        args.push('--disallow-tools', options.disallow.join(','))
-      }
-      args.push('--cwd', options.cwd)
-      if (options.extraArgs) {
-        args.push(...options.extraArgs)
-      }
-      return args
-    }
-    case 'gemini': {
-      // Gemini CLI: --no-interactive for headless, --workspace for cwd.
-      const args: string[] = ['--no-interactive', '--workspace', options.cwd]
-      if (options.model) {
-        args.push('--model', options.model)
-      }
-      if (allAllowed.length > 0) {
-        args.push('--allowed-tools', allAllowed.join(','))
-      }
-      if (options.disallow.length > 0) {
-        args.push('--denied-tools', options.disallow.join(','))
-      }
-      if (options.permissionMode === 'plan') {
-        args.push('--read-only')
-      }
-      if (options.extraArgs) {
-        args.push(...options.extraArgs)
-      }
-      return args
-    }
-    case 'opencode': {
-      // OpenCode CLI: --print, --tools, --no-tools.
-      const args: string[] = ['--print', '--cwd', options.cwd]
-      if (options.model) {
-        args.push('--model', options.model)
-      }
-      if (allAllowed.length > 0) {
-        args.push('--tools', allAllowed.join(','))
-      }
-      if (options.disallow.length > 0) {
-        args.push('--no-tools', options.disallow.join(','))
-      }
-      if (options.extraArgs) {
-        args.push(...options.extraArgs)
-      }
-      return args
-    }
+    case 'claude':
+      return buildClaudeArgs(options, allAllowed)
+    case 'codex':
+      return buildCodexArgs(options, allAllowed)
+    case 'gemini':
+      return buildGeminiArgs(options, allAllowed)
+    case 'opencode':
+      return buildOpencodeArgs(options, allAllowed)
   }
+}
+
+export function buildClaudeArgs(
+  options: SpawnAiAgentOptions,
+  allAllowed: string[],
+): string[] {
+  options = { __proto__: null, ...options } as typeof options
+  // https://code.claude.com/docs/en/cli-reference
+  const args: string[] = [
+    '--print',
+    '--permission-mode',
+    options.permissionMode,
+    '--add-dir',
+    options.cwd,
+  ]
+  for (const dir of options.addDirs ?? []) {
+    args.push('--add-dir', dir)
+  }
+  if (options.model) {
+    args.push('--model', options.model)
+  }
+  // Fable / Mythos are adaptive-thinking-only; the effort dial does not
+  // apply, so omit `--effort` for them rather than pass a level they ignore.
+  if (options.effort && !isAdaptiveOnlyModel(options.model ?? '')) {
+    args.push('--effort', options.effort)
+  }
+  if (allAllowed.length > 0) {
+    args.push('--allowedTools', ...allAllowed)
+  }
+  if (options.disallow.length > 0) {
+    args.push('--disallowedTools', ...options.disallow)
+  }
+  if (options.extraArgs) {
+    args.push(...options.extraArgs)
+  }
+  return args
+}
+
+export function buildCodexArgs(
+  options: SpawnAiAgentOptions,
+  allAllowed: string[],
+): string[] {
+  options = { __proto__: null, ...options } as typeof options
+  // Codex CLI uses --tools / --disallow-tools, no --permission-mode
+  // (it has a separate --read-only flag instead). Plan-mode maps
+  // to --read-only; acceptEdits and dontAsk both run normally.
+  const args: string[] = ['--print']
+  if (options.permissionMode === 'plan') {
+    args.push('--read-only')
+  }
+  if (options.model) {
+    args.push('--model', options.model)
+  }
+  if (options.effort) {
+    // Codex takes reasoning effort as a `-c` config override, not a
+    // flag. Its vocab tops out at xhigh (no `max`), so clamp the shared
+    // AiEffort `max` down to xhigh — codex's ceiling.
+    const codexEffort = options.effort === 'max' ? 'xhigh' : options.effort
+    args.push('-c', `model_reasoning_effort=${codexEffort}`)
+  }
+  if (allAllowed.length > 0) {
+    args.push('--tools', allAllowed.join(','))
+  }
+  if (options.disallow.length > 0) {
+    args.push('--disallow-tools', options.disallow.join(','))
+  }
+  args.push('--cwd', options.cwd)
+  if (options.extraArgs) {
+    args.push(...options.extraArgs)
+  }
+  return args
+}
+
+export function buildGeminiArgs(
+  options: SpawnAiAgentOptions,
+  allAllowed: string[],
+): string[] {
+  options = { __proto__: null, ...options } as typeof options
+  // Gemini CLI: --no-interactive for headless, --workspace for cwd.
+  const args: string[] = ['--no-interactive', '--workspace', options.cwd]
+  if (options.model) {
+    args.push('--model', options.model)
+  }
+  if (allAllowed.length > 0) {
+    args.push('--allowed-tools', allAllowed.join(','))
+  }
+  if (options.disallow.length > 0) {
+    args.push('--denied-tools', options.disallow.join(','))
+  }
+  if (options.permissionMode === 'plan') {
+    args.push('--read-only')
+  }
+  if (options.extraArgs) {
+    args.push(...options.extraArgs)
+  }
+  return args
+}
+
+export function buildOpencodeArgs(
+  options: SpawnAiAgentOptions,
+  allAllowed: string[],
+): string[] {
+  options = { __proto__: null, ...options } as typeof options
+  // OpenCode CLI: --print, --tools, --no-tools.
+  const args: string[] = ['--print', '--cwd', options.cwd]
+  if (options.model) {
+    args.push('--model', options.model)
+  }
+  if (allAllowed.length > 0) {
+    args.push('--tools', allAllowed.join(','))
+  }
+  if (options.disallow.length > 0) {
+    args.push('--no-tools', options.disallow.join(','))
+  }
+  if (options.extraArgs) {
+    args.push(...options.extraArgs)
+  }
+  return args
 }
 
 /**
@@ -176,6 +204,19 @@ export function buildArgs(
  * than passing a level they should ignore. Matches both alias and full-id
  * shapes (`fable`, `claude-fable-5`, `mythos`, `claude-mythos-5`).
  */
+export function findRejectedAgentFlag(
+  args: string[],
+  stdout: string,
+  stderr: string,
+  exitCode: number,
+): string | undefined {
+  return exitCode === 0
+    ? undefined
+    : OPTIONAL_CLI_FLAGS.find(
+        flag => args.includes(flag) && isUnknownCliOption(stdout, stderr, flag),
+      )
+}
+
 export function isAdaptiveOnlyModel(model: string): boolean {
   return (
     /\b(?:fable|mythos)\b/i.test(model) ||
@@ -285,13 +326,7 @@ export async function spawnAiAgent(
     // An optimization flag the installed CLI does not know fails the spawn
     // before any work happens. Drop it and retry: the run proceeds at the
     // CLI's default reasoning depth instead of dying on an arg mismatch.
-    const rejected =
-      exitCode === 0
-        ? undefined
-        : OPTIONAL_CLI_FLAGS.find(
-            flag =>
-              args.includes(flag) && isUnknownCliOption(stdout, stderr, flag),
-          )
+    const rejected = findRejectedAgentFlag(args, stdout, stderr, exitCode)
     if (rejected) {
       args = withoutCliFlag(args, rejected)
       continue
