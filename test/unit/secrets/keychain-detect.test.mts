@@ -47,7 +47,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('secrets/keychain — detectPlatform', () => {
+describe('secrets/keychain — detectPlatform', { concurrent: false }, () => {
   test('returns darwin / linux / win32 verbatim', async () => {
     for (const p of ['darwin', 'linux', 'win32'] as const) {
       const { mod } = await loadFresh(p)
@@ -61,43 +61,47 @@ describe.sequential('secrets/keychain — detectPlatform', () => {
   })
 })
 
-describe.sequential('secrets/keychain — getBackendAvailability', () => {
-  test('darwin: reports security(1) toolName, no installHint', async () => {
-    const { macos, mod } = await loadFresh('darwin')
-    macos['isMacOSBackendAvailable']!.mockReturnValue(true)
-    const result = mod.getBackendAvailability()
-    expect(result.available).toBe(true)
-    expect(result.toolName).toBe('security(1)')
-    expect(result.installHint).toBeUndefined()
-  })
+describe(
+  'secrets/keychain — getBackendAvailability',
+  { concurrent: false },
+  () => {
+    test('darwin: reports security(1) toolName, no installHint', async () => {
+      const { macos, mod } = await loadFresh('darwin')
+      macos['isMacOSBackendAvailable']!.mockReturnValue(true)
+      const result = mod.getBackendAvailability()
+      expect(result.available).toBe(true)
+      expect(result.toolName).toBe('security(1)')
+      expect(result.installHint).toBeUndefined()
+    })
 
-  test('linux: includes install hint when libsecret is unavailable', async () => {
-    const { linux, mod } = await loadFresh('linux')
-    linux['isLinuxBackendAvailable']!.mockReturnValue(false)
-    const result = mod.getBackendAvailability()
-    expect(result.available).toBe(false)
-    expect(result.toolName).toBe('secret-tool')
-    expect(result.installHint).toMatch(/apt install libsecret-tools/)
-  })
+    test('linux: includes install hint when libsecret is unavailable', async () => {
+      const { linux, mod } = await loadFresh('linux')
+      linux['isLinuxBackendAvailable']!.mockReturnValue(false)
+      const result = mod.getBackendAvailability()
+      expect(result.available).toBe(false)
+      expect(result.toolName).toBe('secret-tool')
+      expect(result.installHint).toMatch(/apt install libsecret-tools/)
+    })
 
-  test('linux: omits install hint when libsecret is available', async () => {
-    const { linux, mod } = await loadFresh('linux')
-    linux['isLinuxBackendAvailable']!.mockReturnValue(true)
-    expect(mod.getBackendAvailability().installHint).toBeUndefined()
-  })
+    test('linux: omits install hint when libsecret is available', async () => {
+      const { linux, mod } = await loadFresh('linux')
+      linux['isLinuxBackendAvailable']!.mockReturnValue(true)
+      expect(mod.getBackendAvailability().installHint).toBeUndefined()
+    })
 
-  test('win32: reports PowerShell CredentialManager toolName', async () => {
-    const { mod, windows } = await loadFresh('win32')
-    windows['isWindowsBackendAvailable']!.mockReturnValue(true)
-    const result = mod.getBackendAvailability()
-    expect(result.toolName).toBe('PowerShell (CredentialManager / DPAPI)')
-  })
+    test('win32: reports PowerShell CredentialManager toolName', async () => {
+      const { mod, windows } = await loadFresh('win32')
+      windows['isWindowsBackendAvailable']!.mockReturnValue(true)
+      const result = mod.getBackendAvailability()
+      expect(result.toolName).toBe('PowerShell (CredentialManager / DPAPI)')
+    })
 
-  test('other: reports not-supported message', async () => {
-    const { mod } = await loadFresh('other')
-    const result = mod.getBackendAvailability()
-    expect(result.available).toBe(false)
-    expect(result.toolName).toBe('n/a')
-    expect(result.installHint).toMatch(/is not supported/)
-  })
-})
+    test('other: reports not-supported message', async () => {
+      const { mod } = await loadFresh('other')
+      const result = mod.getBackendAvailability()
+      expect(result.available).toBe(false)
+      expect(result.toolName).toBe('n/a')
+      expect(result.installHint).toMatch(/is not supported/)
+    })
+  },
+)

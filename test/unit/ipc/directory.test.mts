@@ -18,7 +18,7 @@ afterEach(async () => {
   await safeDelete(tmpRoot)
 })
 
-describe.sequential('ipc/directory — ensureIpcDirectory', () => {
+describe('ipc/directory — ensureIpcDirectory', { concurrent: false }, () => {
   test('creates the parent directory when it does not exist', async () => {
     const filePath = path.join(tmpRoot, 'nested', 'sub', 'file.sock')
     await ensureIpcDirectory(filePath)

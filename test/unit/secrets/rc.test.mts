@@ -28,7 +28,7 @@ afterEach(async () => {
   vi.unstubAllEnvs()
 })
 
-describe.sequential('escapeRegExp', () => {
+describe('escapeRegExp', { concurrent: false }, () => {
   test('escapes regex metacharacters', () => {
     expect(escapeRegExp('a.b*c+d?e^f$g{h}i(j)k|l[m]n\\o')).toBe(
       'a\\.b\\*c\\+d\\?e\\^f\\$g\\{h\\}i\\(j\\)k\\|l\\[m\\]n\\\\o',
@@ -44,7 +44,7 @@ describe.sequential('escapeRegExp', () => {
   })
 })
 
-describe.sequential('shellSingleQuote', () => {
+describe('shellSingleQuote', { concurrent: false }, () => {
   test('wraps a plain string in single quotes', () => {
     expect(shellSingleQuote('hello')).toBe(`'hello'`)
   })
@@ -68,7 +68,7 @@ describe.sequential('shellSingleQuote', () => {
   })
 })
 
-describe.sequential('buildBlock', () => {
+describe('buildBlock', { concurrent: false }, () => {
   test('produces a BEGIN/END block with a single export line', () => {
     const { begin, body, end, full } = buildBlock({
       service: 'my-service',
@@ -115,7 +115,7 @@ describe.sequential('buildBlock', () => {
   })
 })
 
-describe.sequential('pickRcFile', () => {
+describe('pickRcFile', { concurrent: false }, () => {
   test('returns ~/.zshenv when explicit shell=zsh', () => {
     vi.stubEnv('HOME', '/tmp/fakehome')
     expect(pickRcFile('zsh')).toBe(path.join('/tmp/fakehome', '.zshenv'))
@@ -170,7 +170,7 @@ describe.sequential('pickRcFile', () => {
   })
 })
 
-describe.sequential('writeRcFile', () => {
+describe('writeRcFile', { concurrent: false }, () => {
   test.skipIf(IS_WIN32)('writes content with 0o600 mode', () => {
     // Windows doesn't honor POSIX mode bits; the chmod call is a
     // no-op on win32 and the file ends up with whatever default ACL

@@ -29,7 +29,7 @@ export function makeFsError(code: string): Error {
   return e
 }
 
-describe.sequential('process-lock — error branches', () => {
+describe('process-lock — error branches', { concurrent: false }, () => {
   let testDir: string
 
   beforeEach(() => {

@@ -175,14 +175,18 @@ afterAll(async () => {
   )
 })
 
-describe.sequential('secrets/macos — isMacOSBackendAvailable', () => {
-  test('always returns true (security(1) ships with macOS)', async () => {
-    const { isMacOSBackendAvailable } = await loadFresh()
-    expect(isMacOSBackendAvailable()).toBe(true)
-  })
-})
+describe(
+  'secrets/macos — isMacOSBackendAvailable',
+  { concurrent: false },
+  () => {
+    test('always returns true (security(1) ships with macOS)', async () => {
+      const { isMacOSBackendAvailable } = await loadFresh()
+      expect(isMacOSBackendAvailable()).toBe(true)
+    })
+  },
+)
 
-describe.sequential('secrets/macos — readMacOS', () => {
+describe('secrets/macos — readMacOS', { concurrent: false }, () => {
   test('returns trimmed stdout when status === 0', async () => {
     mockSpawn.mockImplementationOnce(() =>
       makeFakeChild({ stdout: 'secret-value\n', exitCode: 0 }),
@@ -219,7 +223,7 @@ describe.sequential('secrets/macos — readMacOS', () => {
   })
 })
 
-describe.sequential('secrets/macos — readMacOSSync', () => {
+describe('secrets/macos — readMacOSSync', { concurrent: false }, () => {
   test('returns trimmed stdout when status === 0', async () => {
     mockSpawnSync.mockReturnValueOnce({ status: 0, stdout: 'sync-val\n' })
     const { readMacOSSync } = await loadFresh()
@@ -239,7 +243,7 @@ describe.sequential('secrets/macos — readMacOSSync', () => {
   })
 })
 
-describe.sequential('secrets/macos — writeMacOS', () => {
+describe('secrets/macos — writeMacOS', { concurrent: false }, () => {
   test('succeeds silently on status 0', async () => {
     mockSpawn.mockImplementationOnce(() => makeFakeChild({ exitCode: 0 }))
     const { writeMacOS } = await loadFresh()
@@ -297,7 +301,7 @@ describe.sequential('secrets/macos — writeMacOS', () => {
   })
 })
 
-describe.sequential('secrets/macos — writeMacOSSync', () => {
+describe('secrets/macos — writeMacOSSync', { concurrent: false }, () => {
   test('succeeds silently on status 0', async () => {
     mockSpawnSync.mockReturnValueOnce({ status: 0, stderr: '' })
     const { writeMacOSSync } = await loadFresh()
@@ -311,7 +315,7 @@ describe.sequential('secrets/macos — writeMacOSSync', () => {
   })
 })
 
-describe.sequential('secrets/macos — deleteMacOS', () => {
+describe('secrets/macos — deleteMacOS', { concurrent: false }, () => {
   test('returns "removed" on status 0', async () => {
     mockSpawn.mockImplementationOnce(() => makeFakeChild({ exitCode: 0 }))
     const { deleteMacOS } = await loadFresh()
@@ -342,7 +346,7 @@ describe.sequential('secrets/macos — deleteMacOS', () => {
   })
 })
 
-describe.sequential('secrets/macos — deleteMacOSSync', () => {
+describe('secrets/macos — deleteMacOSSync', { concurrent: false }, () => {
   test('returns "removed" on status 0', async () => {
     mockSpawnSync.mockReturnValueOnce({ status: 0 })
     const { deleteMacOSSync } = await loadFresh()
@@ -356,7 +360,7 @@ describe.sequential('secrets/macos — deleteMacOSSync', () => {
   })
 })
 
-describe.sequential('secrets/macos — runAsync', () => {
+describe('secrets/macos — runAsync', { concurrent: false }, () => {
   test('returns aggregated stdout + stderr + close-event status', async () => {
     mockSpawn.mockImplementationOnce(() =>
       makeFakeChild({ stdout: 'OUT', stderr: 'ERR', exitCode: 7 }),

@@ -35,7 +35,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('secrets/find — readEnv', () => {
+describe('secrets/find — readEnv', { concurrent: false }, () => {
   test('returns the trimmed value when env var is set', async () => {
     const { readEnv } = await loadFresh()
     vi.stubEnv('MY_VAR', '  hello  ')
@@ -60,7 +60,7 @@ describe.sequential('secrets/find — readEnv', () => {
   })
 })
 
-describe.sequential('secrets/find — resolve (async)', () => {
+describe('secrets/find — resolve (async)', { concurrent: false }, () => {
   test('returns env hit with source="env" when first account is set', async () => {
     const { resolve, readAsync } = await loadFresh()
     vi.stubEnv('TOK_NEW', 'from-env')
@@ -123,7 +123,7 @@ describe.sequential('secrets/find — resolve (async)', () => {
   })
 })
 
-describe.sequential('secrets/find — resolveSync', () => {
+describe('secrets/find — resolveSync', { concurrent: false }, () => {
   test('returns env hit with source="env" when first account is set', async () => {
     const { resolveSync, readSync } = await loadFresh()
     vi.stubEnv('TOK_NEW', 'from-env')

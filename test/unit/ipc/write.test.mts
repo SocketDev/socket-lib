@@ -26,7 +26,7 @@ afterEach(async () => {
   await safeDelete(appDir)
 })
 
-describe.sequential('ipc/write — writeIpcStub', () => {
+describe('ipc/write — writeIpcStub', { concurrent: false }, () => {
   test('returns the stub path and creates the file', async () => {
     const returned = await writeIpcStub(appName, { hello: 'world' })
     expect(returned).toBe(stubPath)

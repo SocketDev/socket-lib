@@ -326,7 +326,7 @@ describe('ipc/cli/get', () => {
    * fresh after setting process.env. The module caches `_ipcObject` on first
    * call, so we must reset modules between tests.
    */
-  describe.sequential('env variable parsing', () => {
+  describe('env variable parsing', { concurrent: false }, () => {
     const ENV_VARS = [
       'SOCKET_CLI_FIX',
       'SOCKET_CLI_OPTIMIZE',

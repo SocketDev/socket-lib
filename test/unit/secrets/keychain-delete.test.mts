@@ -46,63 +46,75 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('secrets/keychain — deleteSecret + deleteSecretSync', () => {
-  test('async: routes to deleteMacOS on darwin', async () => {
-    const { macos, mod } = await loadFresh('darwin')
-    macos['deleteMacOS']!.mockResolvedValueOnce('removed')
-    expect(await mod.deleteSecret({ service: 's', account: 'a' })).toBe(
-      'removed',
-    )
-  })
+describe(
+  'secrets/keychain — deleteSecret + deleteSecretSync',
+  { concurrent: false },
+  () => {
+    test('async: routes to deleteMacOS on darwin', async () => {
+      const { macos, mod } = await loadFresh('darwin')
+      macos['deleteMacOS']!.mockResolvedValueOnce('removed')
+      expect(await mod.deleteSecret({ service: 's', account: 'a' })).toBe(
+        'removed',
+      )
+    })
 
-  test('async: routes to deleteLinux on linux', async () => {
-    const { linux, mod } = await loadFresh('linux')
-    linux['deleteLinux']!.mockResolvedValueOnce('absent')
-    expect(await mod.deleteSecret({ service: 's', account: 'a' })).toBe(
-      'absent',
-    )
-  })
+    test('async: routes to deleteLinux on linux', async () => {
+      const { linux, mod } = await loadFresh('linux')
+      linux['deleteLinux']!.mockResolvedValueOnce('absent')
+      expect(await mod.deleteSecret({ service: 's', account: 'a' })).toBe(
+        'absent',
+      )
+    })
 
-  test('async: routes to deleteWindows on win32', async () => {
-    const { mod, windows } = await loadFresh('win32')
-    windows['deleteWindows']!.mockResolvedValueOnce('removed')
-    expect(await mod.deleteSecret({ service: 's', account: 'a' })).toBe(
-      'removed',
-    )
-  })
+    test('async: routes to deleteWindows on win32', async () => {
+      const { mod, windows } = await loadFresh('win32')
+      windows['deleteWindows']!.mockResolvedValueOnce('removed')
+      expect(await mod.deleteSecret({ service: 's', account: 'a' })).toBe(
+        'removed',
+      )
+    })
 
-  test('async: returns "absent" on unsupported platforms', async () => {
-    const { mod } = await loadFresh('other')
-    expect(await mod.deleteSecret({ service: 's', account: 'a' })).toBe(
-      'absent',
-    )
-  })
+    test('async: returns "absent" on unsupported platforms', async () => {
+      const { mod } = await loadFresh('other')
+      expect(await mod.deleteSecret({ service: 's', account: 'a' })).toBe(
+        'absent',
+      )
+    })
 
-  test('sync: routes to deleteMacOSSync on darwin', async () => {
-    const { macos, mod } = await loadFresh('darwin')
-    macos['deleteMacOSSync']!.mockReturnValueOnce('removed')
-    expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe('removed')
-  })
+    test('sync: routes to deleteMacOSSync on darwin', async () => {
+      const { macos, mod } = await loadFresh('darwin')
+      macos['deleteMacOSSync']!.mockReturnValueOnce('removed')
+      expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe(
+        'removed',
+      )
+    })
 
-  test('sync: routes to deleteLinuxSync on linux', async () => {
-    const { linux, mod } = await loadFresh('linux')
-    linux['deleteLinuxSync']!.mockReturnValueOnce('removed')
-    expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe('removed')
-  })
+    test('sync: routes to deleteLinuxSync on linux', async () => {
+      const { linux, mod } = await loadFresh('linux')
+      linux['deleteLinuxSync']!.mockReturnValueOnce('removed')
+      expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe(
+        'removed',
+      )
+    })
 
-  test('sync: routes to deleteWindowsSync on win32', async () => {
-    const { mod, windows } = await loadFresh('win32')
-    windows['deleteWindowsSync']!.mockReturnValueOnce('absent')
-    expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe('absent')
-  })
+    test('sync: routes to deleteWindowsSync on win32', async () => {
+      const { mod, windows } = await loadFresh('win32')
+      windows['deleteWindowsSync']!.mockReturnValueOnce('absent')
+      expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe(
+        'absent',
+      )
+    })
 
-  test('sync: returns "absent" on unsupported platforms', async () => {
-    const { mod } = await loadFresh('other')
-    expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe('absent')
-  })
-})
+    test('sync: returns "absent" on unsupported platforms', async () => {
+      const { mod } = await loadFresh('other')
+      expect(mod.deleteSecretSync({ service: 's', account: 'a' })).toBe(
+        'absent',
+      )
+    })
+  },
+)
 
-describe.sequential('secrets/keychain — slot helpers', () => {
+describe('secrets/keychain — slot helpers', { concurrent: false }, () => {
   test('readSecretFromSlots returns first matching account', async () => {
     const { macos, mod } = await loadFresh('darwin')
     macos['readMacOS']!.mockResolvedValueOnce(undefined).mockResolvedValueOnce(
@@ -195,7 +207,7 @@ describe.sequential('secrets/keychain — slot helpers', () => {
   })
 })
 
-describe.sequential('secrets/keychain — clearCache', () => {
+describe('secrets/keychain — clearCache', { concurrent: false }, () => {
   test('drops the in-process cache so subsequent reads hit the backend', async () => {
     const { macos, mod } = await loadFresh('darwin')
     macos['readMacOS']!.mockResolvedValueOnce('first').mockResolvedValueOnce(
