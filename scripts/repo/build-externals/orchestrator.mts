@@ -74,7 +74,7 @@ export async function buildExternals(
     quiet: quiet || !showDetails,
   })
 
-  return { bundledCount, totalSize }
+  return { __proto__: null, bundledCount, totalSize }
 }
 
 /**
@@ -123,99 +123,16 @@ export async function bundleAllPackages(
     const scopeDir = path.join(distExternalDir, scope)
     await ensureDir(scopeDir)
 
-    if (name) {
-      // Single package in scope.
-      const outputPath = path.join(scopeDir, `${name}.js`)
-      if (bundle === false) {
-        // Copy the non-bundled thin re-export wrapper as-is.
-        const srcPath = path.join(
-          rootDir,
-          'src',
-          'external',
-          scope,
-          `${name}.js`,
-        )
-        await fs.copyFile(srcPath, outputPath)
-      } else if (optional) {
-        try {
-          const size = await bundlePackage(
-            `${scope}/${name}`,
-            outputPath,
-            rootDir,
-            {
-              quiet,
-            },
-          )
-          if (size) {
-            bundledCount++
-            totalSize += size
-          }
-        } catch {
-          if (!quiet) {
-            logger.log(`  Skipping optional package ${scope}/${name}`)
-          }
-        }
-      } else {
-        const size = await bundlePackage(
-          `${scope}/${name}`,
-          outputPath,
-          rootDir,
-          {
-            quiet,
-          },
-        )
-        if (size) {
-          bundledCount++
-          totalSize += size
-        }
-      }
-    } else if (packages) {
-      // Multiple packages in scope.
-      for (const pkg of packages) {
-        const outputPath = path.join(scopeDir, `${pkg}.js`)
-        if (bundle === false) {
-          // Copy the non-bundled thin re-export wrapper as-is.
-          const srcPath = path.join(
-            rootDir,
-            'src',
-            'external',
-            scope,
-            `${pkg}.js`,
-          )
-          await fs.copyFile(srcPath, outputPath)
-        } else if (optional) {
-          try {
-            const size = await bundlePackage(
-              `${scope}/${pkg}`,
-              outputPath,
-              rootDir,
-              {
-                quiet,
-              },
-            )
-            if (size) {
-              bundledCount++
-              totalSize += size
-            }
-          } catch {
-            if (!quiet) {
-              logger.log(`  Skipping optional package ${scope}/${pkg}`)
-            }
-          }
-        } else {
-          const size = await bundlePackage(
-            `${scope}/${pkg}`,
-            outputPath,
-            rootDir,
-            {
-              quiet,
-            },
-          )
-          if (size) {
-            bundledCount++
-            totalSize += size
-          }
-        }
+    const names = name ? [name] : (packages ?? [])
+    for (let i = 0, { length } = names; i < length; i += 1) {
+      const size = await bundleScopedPackage(scope, names[i]!, {
+        bundle,
+        optional,
+        quiet,
+      })
+      if (size) {
+        bundledCount++
+        totalSize += size
       }
     }
 
@@ -243,7 +160,7 @@ export async function bundleAllPackages(
     }
   }
 
-  return { bundledCount, totalSize }
+  return { __proto__: null, bundledCount, totalSize }
 }
 
 /**
@@ -352,5 +269,39 @@ export async function rewriteBareBuiltinRequires(
         }
       }
     }
+  }
+}
+
+async function bundleScopedPackage(
+  scope: string,
+  name: string,
+  options?:
+    | {
+        bundle?: boolean | undefined
+        optional?: boolean | undefined
+        quiet?: boolean | undefined
+      }
+    | undefined,
+): Promise<number | undefined> {
+  const settings = { __proto__: null, ...options }
+  const { bundle = true, optional = false, quiet = false } = settings
+  const outputPath = path.join(distExternalDir, scope, `${name}.js`)
+  if (bundle === false) {
+    const srcPath = path.join(rootDir, 'src', 'external', scope, `${name}.js`)
+    await fs.copyFile(srcPath, outputPath)
+    return 0
+  }
+  try {
+    return await bundlePackage(`${scope}/${name}`, outputPath, rootDir, {
+      quiet,
+    })
+  } catch (error) {
+    if (!optional) {
+      throw error
+    }
+    if (!quiet) {
+      logger.log(`  Skipping optional package ${scope}/${name}`)
+    }
+    return 0
   }
 }
