@@ -197,13 +197,6 @@ export function buildOpencodeArgs(
   return args
 }
 
-/**
- * Fable and Mythos run adaptive thinking only — thinking is always on and there
- * is no manual thinking-budget knob. The effort dial does not apply the way it
- * does on Opus, so the spawn layer drops `--effort` for these models rather
- * than passing a level they should ignore. Matches both alias and full-id
- * shapes (`fable`, `claude-fable-5`, `mythos`, `claude-mythos-5`).
- */
 export function findRejectedAgentFlag(
   args: string[],
   stdout: string,
@@ -217,6 +210,13 @@ export function findRejectedAgentFlag(
       )
 }
 
+/**
+ * Fable and Mythos run adaptive thinking only — thinking is always on and there
+ * is no manual thinking-budget knob. The effort dial does not apply the way it
+ * does on Opus, so the spawn layer drops `--effort` for these models rather
+ * than passing a level they should ignore. Matches both alias and full-id
+ * shapes (`fable`, `claude-fable-5`, `mythos`, `claude-mythos-5`).
+ */
 export function isAdaptiveOnlyModel(model: string): boolean {
   return (
     /\b(?:fable|mythos)\b/i.test(model) ||

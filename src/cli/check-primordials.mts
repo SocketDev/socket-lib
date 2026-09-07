@@ -102,30 +102,33 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
   // Validate shape with concrete error messages — config files are
   // hand-edited and a misspelling here is the most common failure
   // mode. Don't let a wrong type slip through to the check engine.
-  if (!ArrayIsArray(raw.scanDirs)) {
-    throw new ErrorCtor(
-      `config.scanDirs must be an array of strings (got ${typeof raw.scanDirs})`,
-    )
-  }
-  for (const [i, v] of raw.scanDirs.entries()) {
-    if (typeof v !== 'string') {
-      throw new ErrorCtor(`config.scanDirs[${i}] must be a string`)
+  function validateRawPrimordialsConfig(): void {
+    if (!ArrayIsArray(raw.scanDirs)) {
+      throw new ErrorCtor(
+        `config.scanDirs must be an array of strings (got ${typeof raw.scanDirs})`,
+      )
+    }
+    for (const [i, v] of raw.scanDirs.entries()) {
+      if (typeof v !== 'string') {
+        throw new ErrorCtor(`config.scanDirs[${i}] must be a string`)
+      }
+    }
+    if (
+      raw.aliasMap !== undefined &&
+      (typeof raw.aliasMap !== 'object' ||
+        raw.aliasMap === null ||
+        ArrayIsArray(raw.aliasMap))
+    ) {
+      throw new ErrorCtor('config.aliasMap must be an object of source→target')
+    }
+    if (
+      raw.nodeInternalOnly !== undefined &&
+      !ArrayIsArray(raw.nodeInternalOnly)
+    ) {
+      throw new ErrorCtor('config.nodeInternalOnly must be an array of strings')
     }
   }
-  if (
-    raw.aliasMap !== undefined &&
-    (typeof raw.aliasMap !== 'object' ||
-      raw.aliasMap === null ||
-      ArrayIsArray(raw.aliasMap))
-  ) {
-    throw new ErrorCtor('config.aliasMap must be an object of source→target')
-  }
-  if (
-    raw.nodeInternalOnly !== undefined &&
-    !ArrayIsArray(raw.nodeInternalOnly)
-  ) {
-    throw new ErrorCtor('config.nodeInternalOnly must be an array of strings')
-  }
+  validateRawPrimordialsConfig()
 
   // Merge the Socket-canonical defaults with the user's config. The user
   // map overlays the defaults — any key the user defines wins, but they
@@ -322,6 +325,7 @@ export function serialize(result: PrimordialsCheckResult): {
     ok: result.findings.length === 0,
     used: result.used.size,
     findings: result.findings.map(f => ({
+      __proto__: null,
       kind: f.kind,
       name: f.name,
       files: f.files,

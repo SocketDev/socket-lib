@@ -123,16 +123,6 @@ export const commonParseArgsConfig: ParseArgsConfig = {
   strict: false,
 }
 
-/**
- * Extract positional arguments from getNodeProcess().argv. Useful for commands
- * that accept file paths or other positional parameters.
- *
- * @example
- *   ;```typescript
- *   // process.argv = ["node", "script.js", "src", "lib", "--verbose"]
- *   getPositionalArgs() // ["src", "lib"]
- *   ```
- */
 export function configureYargsOptions(
   options: NonNullable<ParseArgsConfig['options']>,
   yargsOptions: YargsOptions,
@@ -177,6 +167,16 @@ export function configureYargsOptions(
   }
 }
 
+/**
+ * Extract positional arguments from getNodeProcess().argv. Useful for commands
+ * that accept file paths or other positional parameters.
+ *
+ * @example
+ *   ;```typescript
+ *   // process.argv = ["node", "script.js", "src", "lib", "--verbose"]
+ *   getPositionalArgs() // ["src", "lib"]
+ *   ```
+ */
 export function getPositionalArgs(startIndex = 2): string[] {
   const nodeProcess = getNodeProcess()
   const args = nodeProcess.argv.slice(startIndex)

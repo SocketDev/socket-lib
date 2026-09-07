@@ -12,22 +12,20 @@ import { readFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-
 import type { Plugin, RolldownOptions } from 'rolldown'
-
 import { defineGuardedPlugin } from '../../../.config/fleet/rolldown/define-guarded.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 import {
   createCollapseEngineGatesPlugin,
   readSupportedNodeRange,
 } from './collapse-engine-gates.mts'
+import { GUARDED_DEFINES } from './guarded-defines.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 // Imported AND re-exported: the config below substitutes the map, and existing
 // consumers import it from here. See guarded-defines.mts for why the constant
 // does not sit beside the plugin import.
-import { GUARDED_DEFINES } from './guarded-defines.mts'
 
 export { GUARDED_DEFINES }
 const stubsDir = path.join(__dirname, 'stubs')

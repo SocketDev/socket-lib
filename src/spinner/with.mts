@@ -19,13 +19,6 @@ import type {
   WithSpinnerSyncOptions,
 } from './types.mjs'
 
-/**
- * Narrow a saved shimmer color (`'inherit' | ColorName | ColorRgb | Palette`)
- * down to the `RGB | Palette | undefined` shape `ShimmerConfig.color` accepts.
- * `'inherit'` becomes `undefined` so `setShimmer` falls back to its inherit
- * default; named colors resolve to an RGB tuple; tuples and palettes pass
- * through unchanged.
- */
 export function applyTemporarySpinnerOptions(
   spinner: NonNullable<WithSpinnerOptions<unknown>['spinner']>,
   withOptions: WithSpinnerOptions<unknown>['withOptions'],
@@ -43,6 +36,13 @@ export function applyTemporarySpinnerOptions(
   }
 }
 
+/**
+ * Narrow a saved shimmer color (`'inherit' | ColorName | ColorRgb | Palette`)
+ * down to the `RGB | Palette | undefined` shape `ShimmerConfig.color` accepts.
+ * `'inherit'` becomes `undefined` so `setShimmer` falls back to its inherit
+ * default; named colors resolve to an RGB tuple; tuples and palettes pass
+ * through unchanged.
+ */
 export function toShimmerColor(
   color: ColorInherit | ColorValue | Palette,
 ): RGB | Palette | undefined {

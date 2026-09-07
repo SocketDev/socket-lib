@@ -197,10 +197,10 @@ export const ULTRA_THEME: Theme = {
  */
 export const THEMES = {
   __proto__: null,
+  lush: LUSH_THEME,
   socket: SOCKET_THEME,
   sunset: SUNSET_THEME,
   terracotta: TERRACOTTA_THEME,
-  lush: LUSH_THEME,
   ultra: ULTRA_THEME,
 } as const
 

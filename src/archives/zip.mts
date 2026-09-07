@@ -23,19 +23,6 @@ import {
 
 import type { ExtractOptions } from './types.mjs'
 
-/**
- * Extract a zip archive to a directory.
- *
- * @example
- *   ;```typescript
- *   await extractZip('/tmp/archive.zip', '/tmp/output')
- *   await extractZip('/tmp/archive.zip', '/tmp/output', { strip: 1 })
- *   ```
- *
- * @param archivePath - Path to zip file.
- * @param outputDir - Directory to extract to.
- * @param options - Extraction options.
- */
 export async function extractStrippedZipEntries(
   zip: InstanceType<ReturnType<typeof getAdmZip>>,
   entries: ReturnType<typeof zip.getEntries>,
@@ -80,6 +67,19 @@ export async function extractStrippedZipEntries(
   }
 }
 
+/**
+ * Extract a zip archive to a directory.
+ *
+ * @example
+ *   ;```typescript
+ *   await extractZip('/tmp/archive.zip', '/tmp/output')
+ *   await extractZip('/tmp/archive.zip', '/tmp/output', { strip: 1 })
+ *   ```
+ *
+ * @param archivePath - Path to zip file.
+ * @param outputDir - Directory to extract to.
+ * @param options - Extraction options.
+ */
 export async function extractZip(
   archivePath: string,
   outputDir: string,

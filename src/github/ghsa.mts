@@ -343,24 +343,31 @@ export async function fetchGhsaDetailsViaGraphQL(
   // vulnerabilities/cvss/cwes fire only when GraphQL returns minimal
   // advisory shape; tests seed rich responses.
   /* c8 ignore start */
-  return {
-    ghsaId: adv.ghsaId,
-    summary: adv.summary,
-    details: adv.description,
-    severity: adv.severity.toLowerCase(),
-    aliases:
-      adv.identifiers?.filter(i => i.type !== 'GHSA').map(i => i.value) ?? [],
-    publishedAt: adv.publishedAt,
-    updatedAt: adv.updatedAt,
-    withdrawnAt: adv.withdrawnAt ?? '',
-    references: adv.references ?? [],
-    vulnerabilities: adv.vulnerabilities?.nodes ?? [],
-    // GhsaDetails.cvss is typed `... | null` to match the REST
-    // `/advisories/:id` shape. Preserving `null` here is the external-
-    // API-contract exception called out in the lint rule docs.
-    // oxlint-disable-next-line socket/prefer-undefined-over-null -- external API contract requires null over undefined
-    cvss: adv.cvss ?? null,
-    cwes: adv.cwes?.nodes ?? [],
+  function normalizeGraphqlAdvisory(
+    advisory: NonNullable<typeof adv>,
+  ): GhsaDetails {
+    return {
+      ghsaId: advisory.ghsaId,
+      summary: advisory.summary,
+      details: advisory.description,
+      severity: advisory.severity.toLowerCase(),
+      aliases:
+        advisory.identifiers
+          ?.filter(i => i.type !== 'GHSA')
+          .map(i => i.value) ?? [],
+      publishedAt: advisory.publishedAt,
+      updatedAt: advisory.updatedAt,
+      withdrawnAt: advisory.withdrawnAt ?? '',
+      references: advisory.references ?? [],
+      vulnerabilities: advisory.vulnerabilities?.nodes ?? [],
+      // GhsaDetails.cvss is typed `... | null` to match the REST
+      // `/advisories/:id` shape. Preserving `null` here is the external-
+      // API-contract exception called out in the lint rule docs.
+      // oxlint-disable-next-line socket/prefer-undefined-over-null -- external API contract requires null over undefined
+      cvss: advisory.cvss ?? null,
+      cwes: advisory.cwes?.nodes ?? [],
+    }
   }
+  return normalizeGraphqlAdvisory(adv)
   /* c8 ignore stop */
 }

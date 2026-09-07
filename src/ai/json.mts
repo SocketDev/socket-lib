@@ -107,14 +107,6 @@ export function findCanonicalKey(
   return key
 }
 
-/**
- * Replace fullwidth and typographic JSON punctuation with the ASCII forms.
- * Small on-device models emit fullwidth comma, colon, and semicolon plus curly
- * quotes mid-structure, observed live from Gemini Nano at temperature 0, and a
- * strict `JSON.parse` rejects them. Only runs on the repair path, after a
- * strict parse already failed, so a legitimate curly quote inside a string
- * value can at worst leave the reply as unparseable as it started.
- */
 export function findJsonStringEnd(raw: string, start: number): number {
   for (let index = start; index < raw.length; index += 1) {
     if (raw[index] === '\\') {
@@ -126,6 +118,14 @@ export function findJsonStringEnd(raw: string, start: number): number {
   return -1
 }
 
+/**
+ * Replace fullwidth and typographic JSON punctuation with the ASCII forms.
+ * Small on-device models emit fullwidth comma, colon, and semicolon plus curly
+ * quotes mid-structure, observed live from Gemini Nano at temperature 0, and a
+ * strict `JSON.parse` rejects them. Only runs on the repair path, after a
+ * strict parse already failed, so a legitimate curly quote inside a string
+ * value can at worst leave the reply as unparseable as it started.
+ */
 export function normalizeJsonPunctuation(raw: string): string {
   return raw
     .replaceAll('\u{FF0C}', ',')

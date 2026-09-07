@@ -161,6 +161,22 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
     },
     LOCAL,
   ],
+  haiku: [
+    {
+      effort: HAIKU.effort,
+      engine: 'claude',
+      model: HAIKU.model,
+      provider: 'anthropic',
+    },
+    { effort: 'low', engine: 'codex', model: 'gpt-5.5', provider: 'openai' },
+    {
+      effort: 'low',
+      engine: 'opencode',
+      model: 'synthetic/hf:moonshotai/Kimi-K2.6',
+      provider: 'synthetic',
+    },
+    LOCAL,
+  ],
   opus: [
     {
       effort: OPUS.effort,
@@ -196,22 +212,6 @@ export const TIER_CHAINS: Readonly<Record<AiTier, readonly TierCandidate[]>> = {
       model: 'synthetic/hf:moonshotai/Kimi-K2.6',
       provider: 'synthetic',
     },
-  ],
-  haiku: [
-    {
-      effort: HAIKU.effort,
-      engine: 'claude',
-      model: HAIKU.model,
-      provider: 'anthropic',
-    },
-    { effort: 'low', engine: 'codex', model: 'gpt-5.5', provider: 'openai' },
-    {
-      effort: 'low',
-      engine: 'opencode',
-      model: 'synthetic/hf:moonshotai/Kimi-K2.6',
-      provider: 'synthetic',
-    },
-    LOCAL,
   ],
 } as unknown as Readonly<Record<AiTier, readonly TierCandidate[]>>
 

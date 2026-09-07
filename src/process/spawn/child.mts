@@ -93,7 +93,10 @@ export function shouldPauseSpawnSpinner(options: {
   wasSpinning: boolean
   stdio: SpawnOptions['stdio']
 }): boolean {
-  const { wasSpinning, stdio } = { __proto__: null, ...options }
+  const { wasSpinning, stdio } = {
+    __proto__: null,
+    ...options,
+  } as typeof options
   return (
     wasSpinning &&
     !isStdioType(stdio as string | string[], 'ignore') &&
@@ -180,7 +183,7 @@ export function spawn(
   const shouldStopSpinner = shouldPauseSpawnSpinner({ wasSpinning, stdio })
   const shouldRestartSpinner = shouldStopSpinner
   if (shouldStopSpinner) {
-    spinnerInstance.stop()
+    spinnerInstance!.stop()
   }
   // npmCliPromiseSpawn is lazily loaded via getNpmCliPromiseSpawn()
   // Use __proto__: null to prevent prototype pollution when passing to
@@ -277,7 +280,7 @@ export function spawn(
       try {
         return await prevPromise
       } finally {
-        spinnerInstance.start()
+        spinnerInstance!.start()
       }
     })() as PromiseSpawnResult
   }

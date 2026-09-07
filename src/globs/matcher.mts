@@ -28,30 +28,6 @@ import type { Pattern } from './types.mjs'
 let matchesGlobCache: ((p: string, pattern: string) => boolean) | undefined
 let matchesGlobProbed = false
 
-/**
- * Return a glob-matcher function, memoized by pattern + options.
- *
- * The returned function is a fast synchronous predicate built on picomatch.
- * Results are memoized — calling `getGlobMatcher(['*.ts'])` a thousand times in
- * a loop returns the same compiled matcher each time, so callers do not need to
- * hoist it themselves.
- *
- * The cache is LRU with a cap of 100 entries. Cache keys fold together the
- * (sorted) pattern list and (sorted) option set, so arguments that differ only
- * in ordering share a matcher.
- *
- * Default options: `dot: true`, `nocase: true`. Patterns starting with `!`
- * become ignore patterns.
- *
- * @example
- *   ;```typescript
- *   const isMatch = getGlobMatcher('*.ts')
- *   isMatch('index.ts') // true
- *   isMatch('index.js') // false
- *
- *   const isSource = getGlobMatcher(['src/**', '!**\/*.test.ts'])
- *   ```
- */
 export function evictOldestGlobMatcher(): void {
   if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
     const oldest = matcherCache.keys().next().value
@@ -61,6 +37,9 @@ export function evictOldestGlobMatcher(): void {
   }
 }
 
+/**
+ * Return a matcher cached by patterns and options, with at most 100 entries.
+ */
 export function getGlobMatcher(
   glob: Pattern | Pattern[],
   options?:

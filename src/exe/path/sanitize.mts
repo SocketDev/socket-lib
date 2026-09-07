@@ -238,28 +238,31 @@ export function resolveSanitizedExecutable(
   const searchableEntries: string[] = []
   const trustedEntries: string[] = []
   const unsafeEntries: string[] = []
-  const rawEntries = rawPath.split(path.delimiter)
-  for (let i = 0, { length } = rawEntries; i < length; i += 1) {
-    const rawEntry = rawEntries[i]!
-    const entry = stripSurroundingQuotes(rawEntry)
-    // An empty entry, a bare `.`, or any relative entry resolves against the
-    // process cwd inside `which` — the very directory under attack.
-    if (!entry || entry === '.' || !path.isAbsolute(entry)) {
-      unsafeEntries.push(rawEntry)
-      continue
+  function classifyExecutablePathEntries(): void {
+    const rawEntries = rawPath.split(path.delimiter)
+    for (let i = 0, { length } = rawEntries; i < length; i += 1) {
+      const rawEntry = rawEntries[i]!
+      const entry = stripSurroundingQuotes(rawEntry)
+      // An empty entry, a bare `.`, or any relative entry resolves against the
+      // process cwd inside `which` — the very directory under attack.
+      if (!entry || entry === '.' || !path.isAbsolute(entry)) {
+        unsafeEntries.push(rawEntry)
+        continue
+      }
+      searchableEntries.push(entry)
+      const real = readRealPath(entry)
+      if (
+        !real ||
+        (untrustedRoot && isPathWithinRoot(real, untrustedRoot)) ||
+        (excludeShadowBins && (isShadowBinPath(entry) || isShadowBinPath(real)))
+      ) {
+        unsafeEntries.push(rawEntry)
+        continue
+      }
+      trustedEntries.push(entry)
     }
-    searchableEntries.push(entry)
-    const real = readRealPath(entry)
-    if (
-      !real ||
-      (untrustedRoot && isPathWithinRoot(real, untrustedRoot)) ||
-      (excludeShadowBins && (isShadowBinPath(entry) || isShadowBinPath(real)))
-    ) {
-      unsafeEntries.push(rawEntry)
-      continue
-    }
-    trustedEntries.push(entry)
   }
+  classifyExecutablePathEntries()
 
   const poisoned = new Set<string>()
   let binPath: string | undefined

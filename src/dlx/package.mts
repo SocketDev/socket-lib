@@ -269,7 +269,7 @@ export async function ensurePackageInstalled(
         // Verify package.json exists.
         const pkgJsonPath = path.join(installedDir, 'package.json')
         if (fs.existsSync(pkgJsonPath)) {
-          return { installed: false, packageDir }
+          return { __proto__: null, installed: false, packageDir }
         }
       }
 
@@ -278,29 +278,32 @@ export async function ensurePackageInstalled(
       // Sniff: explicit { type, value } wins; bare string whose first
       // non-whitespace character is `{` is JSON content, else a filesystem
       // path.
-      if (install?.lockfile !== undefined) {
-        const spec = install.lockfile
-        const lockDest = path.join(packageDir, 'package-lock.json')
-        let isContent: boolean
-        let value: string
-        if (typeof spec === 'string') {
-          isContent = spec.trimStart().startsWith('{')
-          value = spec
-        } else {
-          isContent = spec.type === 'content'
-          value = spec.value
+      function materializeInstallLockfile(): void {
+        if (install?.lockfile !== undefined) {
+          const spec = install.lockfile
+          const lockDest = path.join(packageDir, 'package-lock.json')
+          let isContent: boolean
+          let value: string
+          if (typeof spec === 'string') {
+            isContent = spec.trimStart().startsWith('{')
+            value = spec
+          } else {
+            isContent = spec.type === 'content'
+            value = spec.value
+          }
+          if (isContent) {
+            fs.writeFileSync(lockDest, value, 'utf8')
+          } else {
+            fs.copyFileSync(value, lockDest)
+          }
+          fs.writeFileSync(
+            path.join(packageDir, '.npmrc'),
+            'ignore-scripts=true\naudit=false\nfund=false\nsave=false\n',
+            'utf8',
+          )
         }
-        if (isContent) {
-          fs.writeFileSync(lockDest, value, 'utf8')
-        } else {
-          fs.copyFileSync(value, lockDest)
-        }
-        fs.writeFileSync(
-          path.join(packageDir, '.npmrc'),
-          'ignore-scripts=true\naudit=false\nfund=false\nsave=false\n',
-          'utf8',
-        )
       }
+      materializeInstallLockfile()
 
       // Install package and dependencies using Arborist, the way npx does.
       // Split into buildIdealTree → firewall check → reify so we can
@@ -357,45 +360,48 @@ export async function ensurePackageInstalled(
         /* c8 ignore next - External Arborist call */
         await arb.reify({ save: true })
       } catch (e) {
-        // Rethrow a hash-pin mismatch without wrapping — the caller asked
-        // to pin an exact package and needs to see that specifically, not
-        // a generic install failure.
-        if (e instanceof HashMismatchError) {
-          throw e
-        }
-        // Rethrow firewall block errors without wrapping.
-        if (isError(e) && e.message.startsWith('Socket Firewall blocked')) {
-          throw e
-        }
-        const code = (e as { code?: string | undefined } | null)?.code
-        if (code === 'E404' || code === 'ETARGET') {
+        function throwPackageInstallError(): never {
+          // Rethrow a hash-pin mismatch without wrapping — the caller asked
+          // to pin an exact package and needs to see that specifically, not
+          // a generic install failure.
+          if (e instanceof HashMismatchError) {
+            throw e
+          }
+          // Rethrow firewall block errors without wrapping.
+          if (isError(e) && e.message.startsWith('Socket Firewall blocked')) {
+            throw e
+          }
+          const code = (e as { code?: string | undefined } | null)?.code
+          if (code === 'E404' || code === 'ETARGET') {
+            throw new ErrorCtor(
+              `Package not found: ${packageSpec}\n` +
+                'Verify the package exists on npm registry and check the version.\n' +
+                `Visit https://www.npmjs.com/package/${packageName} to see available versions.`,
+              { cause: e },
+            )
+          }
+          if (
+            code === 'EAI_AGAIN' ||
+            code === 'ENOTFOUND' ||
+            code === 'ETIMEDOUT'
+          ) {
+            throw new ErrorCtor(
+              `Network error installing ${packageSpec}\n` +
+                'Check your internet connection and try again.',
+              { cause: e },
+            )
+          }
           throw new ErrorCtor(
-            `Package not found: ${packageSpec}\n` +
-              'Verify the package exists on npm registry and check the version.\n' +
-              `Visit https://www.npmjs.com/package/${packageName} to see available versions.`,
+            `Failed to install package: ${packageSpec}\n` +
+              `Destination: ${installedDir}\n` +
+              'Check npm registry connectivity or package name.',
             { cause: e },
           )
         }
-        if (
-          code === 'EAI_AGAIN' ||
-          code === 'ENOTFOUND' ||
-          code === 'ETIMEDOUT'
-        ) {
-          throw new ErrorCtor(
-            `Network error installing ${packageSpec}\n` +
-              'Check your internet connection and try again.',
-            { cause: e },
-          )
-        }
-        throw new ErrorCtor(
-          `Failed to install package: ${packageSpec}\n` +
-            `Destination: ${installedDir}\n` +
-            'Check npm registry connectivity or package name.',
-          { cause: e },
-        )
+        throwPackageInstallError()
       }
 
-      return { installed: true, packageDir }
+      return { __proto__: null, installed: true, packageDir }
     },
     {
       // Align with npm npx locking strategy.

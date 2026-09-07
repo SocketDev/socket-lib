@@ -21,13 +21,9 @@ import { safeMkdir } from '../fs/safe.mjs'
 import { normalizePath } from '../paths/normalize.mjs'
 import { spawn } from '../process/spawn/child.mjs'
 import { generateCacheKey } from './cache.mjs'
-
 import { parseHash } from '../crypto/integrity.mjs'
-
 import { ArrayIsArray } from '../primordials/array.mjs'
-
 import { ErrorCtor } from '../primordials/error.mjs'
-
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
 import {
@@ -37,9 +33,9 @@ import {
   writeBinaryCacheMetadata,
 } from './binary-cache.mjs'
 import { downloadBinaryFile, verifyCachedBinary } from './binary-download.mjs'
-
 import type { DlxBinaryOptions, DlxBinaryResult } from './binary-types.mjs'
 import type { SpawnExtra, SpawnOptions } from '../process/spawn/types.mjs'
+import { getNodeProcess } from '../node/process.mjs'
 
 /**
  * Download and execute a binary from a URL with caching.
@@ -97,72 +93,78 @@ export async function dlxBinary(
   let downloaded = false
   let computedIntegrity = integrity
 
-  // Check if we need to download.
-  if (
-    !force &&
-    fs.existsSync(cacheEntryDir) &&
-    (await isBinaryCacheValid(cacheEntryDir, cacheTtl))
-  ) {
-    // Binary is cached and valid, read the integrity from metadata.
-    try {
-      const metaPath = getBinaryCacheMetadataPath(cacheEntryDir)
-      const metadata = await readJson(metaPath, { throws: false })
-      if (
-        metadata !== null &&
-        typeof metadata === 'object' &&
-        !ArrayIsArray(metadata) &&
-        typeof (metadata as Record<string, unknown>)['integrity'] === 'string'
-      ) {
-        computedIntegrity = (metadata as Record<string, unknown>)[
-          'integrity'
-        ] as string
-        // Re-check binary exists after reading metadata (TOCTOU protection).
-        // Prevents race where binary is deleted between validity check and use.
-        if (fs.existsSync(binaryPath)) {
-          // A cache hit skips downloadBinaryFile, and with it the pin check that
-          // function performs, so measure the on-disk bytes here. Otherwise a
-          // pinned caller is protected only on the first fetch per machine.
-          await verifyCachedBinary(binaryPath, { integrity, sha256 })
+  async function inspectBinaryCache(): Promise<void> {
+    // Check if we need to download.
+    if (
+      !force &&
+      fs.existsSync(cacheEntryDir) &&
+      (await isBinaryCacheValid(cacheEntryDir, cacheTtl))
+    ) {
+      // Binary is cached and valid, read the integrity from metadata.
+      try {
+        const metaPath = getBinaryCacheMetadataPath(cacheEntryDir)
+        const metadata = await readJson(metaPath, { throws: false })
+        if (
+          metadata !== null &&
+          typeof metadata === 'object' &&
+          !ArrayIsArray(metadata) &&
+          typeof (metadata as Record<string, unknown>)['integrity'] === 'string'
+        ) {
+          computedIntegrity = (metadata as Record<string, unknown>)[
+            'integrity'
+          ] as string
+          // Re-check binary exists after reading metadata (TOCTOU protection).
+          // Prevents race where binary is deleted between validity check and use.
+          if (fs.existsSync(binaryPath)) {
+            // A cache hit skips downloadBinaryFile, and with it the pin check that
+            // function performs, so measure the on-disk bytes here. Otherwise a
+            // pinned caller is protected only on the first fetch per machine.
+            await verifyCachedBinary(binaryPath, { integrity, sha256 })
+          } else {
+            downloaded = true
+          }
         } else {
+          // If metadata is invalid, re-download.
           downloaded = true
         }
-      } else {
-        // If metadata is invalid, re-download.
+      } catch {
+        // If we can't read metadata, re-download.
         downloaded = true
       }
-    } catch {
-      // If we can't read metadata, re-download.
+    } else {
       downloaded = true
     }
-  } else {
-    downloaded = true
   }
+  await inspectBinaryCache()
 
   if (downloaded) {
     // Ensure cache directory exists before downloading.
-    try {
-      await safeMkdir(cacheEntryDir)
-    } catch (e) {
-      const code = (e as NodeJS.ErrnoException).code
-      if (code === 'EACCES' || code === 'EPERM') {
+    async function ensureBinaryCacheDirectory(): Promise<void> {
+      try {
+        await safeMkdir(cacheEntryDir)
+      } catch (e) {
+        const code = (e as NodeJS.ErrnoException).code
+        if (code === 'EACCES' || code === 'EPERM') {
+          throw new ErrorCtor(
+            `Permission denied creating binary cache directory: ${cacheEntryDir}\n` +
+              'Please check directory permissions or run with appropriate access.',
+            { cause: e },
+          )
+        }
+        if (code === 'EROFS') {
+          throw new ErrorCtor(
+            `Cannot create binary cache directory on read-only filesystem: ${cacheEntryDir}\n` +
+              'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
+            { cause: e },
+          )
+        }
         throw new ErrorCtor(
-          `Permission denied creating binary cache directory: ${cacheEntryDir}\n` +
-            'Please check directory permissions or run with appropriate access.',
+          `Failed to create binary cache directory: ${cacheEntryDir}`,
           { cause: e },
         )
       }
-      if (code === 'EROFS') {
-        throw new ErrorCtor(
-          `Cannot create binary cache directory on read-only filesystem: ${cacheEntryDir}\n` +
-            'Ensure the filesystem is writable or set SOCKET_DLX_DIR to a writable location.',
-          { cause: e },
-        )
-      }
-      throw new ErrorCtor(
-        `Failed to create binary cache directory: ${cacheEntryDir}`,
-        { cause: e },
-      )
     }
+    await ensureBinaryCacheDirectory()
 
     // Download the binary.
     computedIntegrity = await downloadBinaryFile(url, binaryPath, {
@@ -287,4 +289,3 @@ export type {
   DlxBinaryResult,
   DlxMetadata,
 } from './binary-types.mjs'
-import { getNodeProcess } from '../node/process.mjs'

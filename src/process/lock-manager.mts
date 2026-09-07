@@ -259,11 +259,14 @@ export class ProcessLockManager {
           // handled correctly — the previous Math.max(lastIndexOf('/'), '\\')
           // approach failed on relative paths and mixed-separator inputs.
           const fs = getNodeFs()
-          const path = getNodePath()
-          const parent = path.dirname(lockPath)
-          if (parent && parent !== '.' && parent !== lockPath) {
-            fs.mkdirSync(parent, { recursive: true })
+          function ensureLockParentDirectory(): void {
+            const path = getNodePath()
+            const parent = path.dirname(lockPath)
+            if (parent && parent !== '.' && parent !== lockPath) {
+              fs.mkdirSync(parent, { recursive: true })
+            }
           }
+          ensureLockParentDirectory()
 
           // Atomic lock acquisition via a non-recursive mkdir.
           // Without recursive, mkdirSync throws EEXIST if another process

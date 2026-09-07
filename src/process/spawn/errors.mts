@@ -138,6 +138,14 @@ export function enhanceSpawnError(error: unknown): unknown {
   return enhancedError
 }
 
+export function formatSpawnErrorArgs(args: SpawnError['args']): string {
+  if (!args || args.length === 0) {
+    return ''
+  }
+  const text = args.join(' ')
+  return ` ${text.length < 100 ? text : `${text.slice(0, 97)}...`}`
+}
+
 /**
  * Check if a value is a spawn error with expected error properties. Tests for
  * common error properties from child process failures.
@@ -155,14 +163,6 @@ export function enhanceSpawnError(error: unknown): unknown {
  *
  * @returns {boolean} `true` if the value has spawn error properties
  */
-export function formatSpawnErrorArgs(args: SpawnError['args']): string {
-  if (!args || args.length === 0) {
-    return ''
-  }
-  const text = args.join(' ')
-  return ` ${text.length < 100 ? text : `${text.slice(0, 97)}...`}`
-}
-
 export function isSpawnError(value: unknown): value is SpawnError {
   // Must be an Error. `isError` is cross-realm safe (it reads the
   // [[ErrorData]] slot rather than using `instanceof`), so a rejection that

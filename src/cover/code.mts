@@ -24,6 +24,21 @@ import type {
 } from './types.mjs'
 import { getNodeProcess } from '../node/process.mjs'
 
+export function addCoverageCounts(
+  counts: unknown[],
+  totals: { covered: number; total: number },
+): void {
+  for (let i = 0, { length } = counts; i < length; i += 1) {
+    const count = counts[i]!
+    if (typeof count === 'number') {
+      totals.total += 1
+      if (count > 0) {
+        totals.covered += 1
+      }
+    }
+  }
+}
+
 /**
  * Calculate coverage metric with percentage.
  */
@@ -110,14 +125,7 @@ export async function getCodeCoverage(
     // Aggregate statements.
     if (fc.s && isPlainObject(fc.s)) {
       const statementCounts = ObjectValues(fc.s)
-      for (const count of statementCounts) {
-        if (typeof count === 'number') {
-          totals.statements.total += 1
-          if (count > 0) {
-            totals.statements.covered += 1
-          }
-        }
-      }
+      addCoverageCounts(statementCounts, totals.statements)
     }
 
     // Aggregate branches.
@@ -125,14 +133,7 @@ export async function getCodeCoverage(
       const branchCounts = ObjectValues(fc.b)
       for (const branches of branchCounts) {
         if (ArrayIsArray(branches)) {
-          for (const count of branches) {
-            if (typeof count === 'number') {
-              totals.branches.total += 1
-              if (count > 0) {
-                totals.branches.covered += 1
-              }
-            }
-          }
+          addCoverageCounts(branches, totals.branches)
         }
       }
     }
@@ -140,14 +141,7 @@ export async function getCodeCoverage(
     // Aggregate functions.
     if (fc.f && isPlainObject(fc.f)) {
       const functionCounts = ObjectValues(fc.f)
-      for (const count of functionCounts) {
-        if (typeof count === 'number') {
-          totals.functions.total += 1
-          if (count > 0) {
-            totals.functions.covered += 1
-          }
-        }
-      }
+      addCoverageCounts(functionCounts, totals.functions)
     }
 
     // Note: Lines are typically derived from statement map in v8.
