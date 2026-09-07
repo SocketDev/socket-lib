@@ -160,17 +160,22 @@ export function consumeEntryProperties(
   startPos: number,
   entry: YarnEntryState,
 ): number {
-  let pos = startPos
-  while (pos < content.length) {
-    const eol = StringPrototypeIndexOf(content, '\n', pos)
-    const end = eol === -1 ? content.length : eol
-    const line = StringPrototypeSlice(content, pos, end)
-    if (line.length === 0 || (line[0] !== '\t' && line[0] !== ' ')) {
-      break
+  function consumeResolution(propLine: string): void {
+    const colonIdx = StringPrototypeIndexOf(propLine, ':')
+    if (colonIdx > 0) {
+      const resValue = stripQuotes(
+        StringPrototypeTrim(StringPrototypeSlice(propLine, colonIdx + 1)),
+      )
+      if (
+        StringPrototypeIndexOf(resValue, 'http://') === 0 ||
+        StringPrototypeIndexOf(resValue, 'https://') === 0
+      ) {
+        entry.resolved = resValue
+      }
     }
-    const propLine = StringPrototypeTrim(line)
-    pos = end + 1
+  }
 
+  function consumeProperty(propLine: string): void {
     if (
       StringPrototypeIndexOf(propLine, 'version ') === 0 ||
       StringPrototypeIndexOf(propLine, 'version:') === 0
@@ -199,23 +204,26 @@ export function consumeEntryProperties(
         )
       }
     } else if (StringPrototypeIndexOf(propLine, 'resolution') === 0) {
-      const colonIdx = StringPrototypeIndexOf(propLine, ':')
-      if (colonIdx > 0) {
-        const resValue = stripQuotes(
-          StringPrototypeTrim(StringPrototypeSlice(propLine, colonIdx + 1)),
-        )
-        if (
-          StringPrototypeIndexOf(resValue, 'http://') === 0 ||
-          StringPrototypeIndexOf(resValue, 'https://') === 0
-        ) {
-          entry.resolved = resValue
-        }
-      }
+      consumeResolution(propLine)
     } else if (StringPrototypeIndexOf(propLine, 'dependencies:') === 0) {
       pos = consumeDependencyList(content, pos, entry.dependencies)
     } else if (StringPrototypeIndexOf(propLine, 'dependenciesMeta:') === 0) {
       pos = consumeDependenciesMeta(content, pos, entry)
     }
+  }
+
+  let pos = startPos
+  while (pos < content.length) {
+    const eol = StringPrototypeIndexOf(content, '\n', pos)
+    const end = eol === -1 ? content.length : eol
+    const line = StringPrototypeSlice(content, pos, end)
+    if (line.length === 0 || (line[0] !== '\t' && line[0] !== ' ')) {
+      break
+    }
+    const propLine = StringPrototypeTrim(line)
+    pos = end + 1
+
+    consumeProperty(propLine)
   }
   return pos
 }
@@ -227,6 +235,32 @@ export function jsParseYarnLock(content: string): ParsedLockfile {
   } as unknown as PackageIndex
   const isBerry = StringPrototypeIndexOf(content, '__metadata:') !== -1
 
+  function isIgnoredLine(line: string): boolean {
+    return !line || StringPrototypeTrim(line) === '' || line[0] === '#'
+  }
+
+  function appendEntry(entry: YarnEntryState): void {
+    const gitDep = parseGitDep(entry.resolved)
+    const ref = ObjectFreeze({
+      __proto__: null,
+      name: entry.name,
+      version: entry.version,
+      resolved: entry.resolved,
+      integrity: entry.integrity || entry.checksum || undefined,
+      ecosystem: 'npm',
+      depType: 'prod',
+      isDev: false,
+      isOptional: entry.isOptional,
+      isPeer: false,
+      isBundled: false,
+      vcsUrl: gitDep?.url,
+      vcsCommit: gitDep?.commit,
+      dependencies: entry.dependencies,
+    }) as unknown as PackageRef
+    ArrayPrototypePush(packages, ref)
+    addToYarnIndex(packageIndex, entry.name, packages.length - 1)
+  }
+
   let pos = 0
   while (pos < content.length) {
     const eol = StringPrototypeIndexOf(content, '\n', pos)
@@ -234,7 +268,7 @@ export function jsParseYarnLock(content: string): ParsedLockfile {
     const line = StringPrototypeSlice(content, pos, end)
     pos = end + 1
 
-    if (!line || StringPrototypeTrim(line) === '' || line[0] === '#') {
+    if (isIgnoredLine(line)) {
       continue
     }
     if (StringPrototypeTrim(line) === '__metadata:') {
@@ -266,25 +300,7 @@ export function jsParseYarnLock(content: string): ParsedLockfile {
       continue
     }
     if (entry.name && entry.version) {
-      const gitDep = parseGitDep(entry.resolved)
-      const ref = ObjectFreeze({
-        __proto__: null,
-        name: entry.name,
-        version: entry.version,
-        resolved: entry.resolved,
-        integrity: entry.integrity || entry.checksum || undefined,
-        ecosystem: 'npm',
-        depType: 'prod',
-        isDev: false,
-        isOptional: entry.isOptional,
-        isPeer: false,
-        isBundled: false,
-        vcsUrl: gitDep?.url,
-        vcsCommit: gitDep?.commit,
-        dependencies: entry.dependencies,
-      }) as unknown as PackageRef
-      ArrayPrototypePush(packages, ref)
-      addToYarnIndex(packageIndex, entry.name, packages.length - 1)
+      appendEntry(entry)
     }
   }
 

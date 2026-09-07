@@ -218,42 +218,33 @@ export function readTarEntries(
   // Set by a GNU `L` block or a pax `x` record, and consumed by the very next
   // file header, whose own name field is then ignored.
   let pendingName: string | undefined
-  while (offset + BLOCK_SIZE <= bytes.length) {
-    const header = bytes.subarray(offset, offset + BLOCK_SIZE)
-    offset += BLOCK_SIZE
-    if (isZeroBlock(header)) {
-      zeroBlocks += 1
-      if (zeroBlocks === 2) {
-        break
-      }
-      continue
-    }
-    zeroBlocks = 0
-    const size = readNumber(header, 124, 12)
-    const dataBlocks = Math.ceil(size / BLOCK_SIZE) * BLOCK_SIZE
-    const typeFlag = readString(header, 156, 1)
+  function consumeExtendedHeader(
+    typeFlag: string,
+    size: number,
+    dataBlocks: number,
+  ): boolean {
     // GNU long name: this block's DATA is the next entry's path.
     if (typeFlag === 'L') {
       pendingName = readString(bytes, offset, size)
       offset += dataBlocks
-      continue
+      return true
     }
     // pax extended header: a `path=` record overrides the next entry's path.
     if (typeFlag === 'X' || typeFlag === 'x') {
       pendingName = readPaxPath(bytes.subarray(offset, offset + size))
       offset += dataBlocks
-      continue
+      return true
     }
     // A pax GLOBAL header applies to the whole archive, not the next entry, so
     // it must not be read as a pending name.
     if (typeFlag === 'g') {
       offset += dataBlocks
-      continue
+      return true
     }
-    const prefix = readString(header, 345, 155)
-    const base = readString(header, 0, 100)
-    const rawName = pendingName ?? (prefix === '' ? base : `${prefix}/${base}`)
-    pendingName = undefined
+    return false
+  }
+
+  function validateEntryName(rawName: string, typeFlag: string): void {
     if (StringPrototypeIndexOf(rawName, '\0') !== -1) {
       throw new ErrorCtor(`Invalid null byte in archive entry name: ${rawName}`)
     }
@@ -262,12 +253,9 @@ export function readTarEntries(
         `Symlink or hardlink entries are not allowed: ${rawName}`,
       )
     }
-    // Directories and other non-regular types carry no bytes worth returning.
-    // ustar spells a regular file '0', and older archives leave the field NUL.
-    if (typeFlag !== '' && typeFlag !== '0') {
-      offset += dataBlocks
-      continue
-    }
+  }
+
+  function appendEntry(rawName: string, size: number): void {
     entryCount += 1
     if (entryCount > maxEntries) {
       throw new ErrorCtor(
@@ -294,6 +282,37 @@ export function readTarEntries(
         name: stripped,
       })
     }
+  }
+
+  while (offset + BLOCK_SIZE <= bytes.length) {
+    const header = bytes.subarray(offset, offset + BLOCK_SIZE)
+    offset += BLOCK_SIZE
+    if (isZeroBlock(header)) {
+      zeroBlocks += 1
+      if (zeroBlocks === 2) {
+        break
+      }
+      continue
+    }
+    zeroBlocks = 0
+    const size = readNumber(header, 124, 12)
+    const dataBlocks = Math.ceil(size / BLOCK_SIZE) * BLOCK_SIZE
+    const typeFlag = readString(header, 156, 1)
+    if (consumeExtendedHeader(typeFlag, size, dataBlocks)) {
+      continue
+    }
+    const prefix = readString(header, 345, 155)
+    const base = readString(header, 0, 100)
+    const rawName = pendingName ?? (prefix === '' ? base : `${prefix}/${base}`)
+    pendingName = undefined
+    validateEntryName(rawName, typeFlag)
+    // Directories and other non-regular types carry no bytes worth returning.
+    // ustar spells a regular file '0', and older archives leave the field NUL.
+    if (typeFlag !== '' && typeFlag !== '0') {
+      offset += dataBlocks
+      continue
+    }
+    appendEntry(rawName, size)
     offset += dataBlocks
   }
   return entries

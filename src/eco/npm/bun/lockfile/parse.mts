@@ -55,23 +55,11 @@ export function jsParseBunLock(content: string): ParsedLockfile {
   const packages: PackageRef[] = []
   const packageIndex: Record<string, number | number[]> = Object.create(null)
 
-  let data: RawBunLockfile
-  try {
-    data = JSON.parse(stripTrailingCommas(content)) as RawBunLockfile
-  } catch {
-    data = {}
-  }
-
-  const entries = Object.entries(data.packages ?? {})
-  for (let i = 0, { length } = entries; i < length; i += 1) {
-    const tuple = entries[i]![1]
-    if (!Array.isArray(tuple) || typeof tuple[0] !== 'string') {
-      continue
-    }
-    const { name, version } = parseBunDescriptor(tuple[0])
-    if (!name) {
-      continue
-    }
+  function makePackageRef(
+    tuple: unknown[],
+    name: string,
+    version: string,
+  ): PackageRef {
     // A workspace member resolves from disk: no registry version, no integrity.
     const isWorkspace = StringPrototypeStartsWith(version, WORKSPACE_PROTOCOL)
     const gitDep = parseGitDep(version)
@@ -90,7 +78,7 @@ export function jsParseBunLock(content: string): ParsedLockfile {
         ? (tuple[integrityAt] as string)
         : undefined
 
-    const ref = ObjectFreeze({
+    return ObjectFreeze({
       __proto__: null,
       name,
       version: isWorkspace || gitDep ? '' : version,
@@ -106,6 +94,26 @@ export function jsParseBunLock(content: string): ParsedLockfile {
       vcsCommit: gitDep?.commit,
       dependencies: ObjectFreeze(dependencyNames(meta)),
     }) as unknown as PackageRef
+  }
+
+  let data: RawBunLockfile
+  try {
+    data = JSON.parse(stripTrailingCommas(content)) as RawBunLockfile
+  } catch {
+    data = {}
+  }
+
+  const entries = Object.entries(data.packages ?? {})
+  for (let i = 0, { length } = entries; i < length; i += 1) {
+    const tuple = entries[i]![1]
+    if (!Array.isArray(tuple) || typeof tuple[0] !== 'string') {
+      continue
+    }
+    const { name, version } = parseBunDescriptor(tuple[0])
+    if (!name) {
+      continue
+    }
+    const ref = makePackageRef(tuple, name, version)
     ArrayPrototypePush(packages, ref)
 
     const at = packageIndex[name]

@@ -412,8 +412,63 @@ export function parsePackument(raw: unknown): PackumentRecord | undefined {
 export function parseProvenancePredicate(
   bundle: unknown,
 ): ProvenancePredicate | undefined {
+  function decodePredicate(
+    encodedPayload: string,
+  ): ProvenancePredicate | undefined {
+    let payload: unknown
+    try {
+      payload = JSON.parse(atob(encodedPayload))
+    } catch {
+      return undefined
+    }
+    if (payload === null || typeof payload !== 'object') {
+      return undefined
+    }
+    const statement = payload as { predicate?: unknown | undefined }
+    if (
+      statement.predicate === null ||
+      typeof statement.predicate !== 'object'
+    ) {
+      return undefined
+    }
+    return statement.predicate as ProvenancePredicate
+  }
+
+  function readPredicate(b: unknown): ProvenancePredicate | undefined {
+    if (b === null || typeof b !== 'object') {
+      return undefined
+    }
+    const verificationMaterial = (
+      b as { verificationMaterial?: unknown | undefined }
+    ).verificationMaterial
+    if (
+      verificationMaterial === null ||
+      typeof verificationMaterial !== 'object'
+    ) {
+      return undefined
+    }
+    const content = (verificationMaterial as { content?: unknown | undefined })
+      .content
+    if (typeof content !== 'string') {
+      return undefined
+    }
+    let parsed: unknown
+    try {
+      parsed = JSON.parse(content)
+    } catch {
+      return undefined
+    }
+    if (parsed === undefined || parsed === null || typeof parsed !== 'object') {
+      return undefined
+    }
+    const envelope = parsed as { payload?: string | undefined }
+    if (typeof envelope.payload !== 'string') {
+      return undefined
+    }
+    return decodePredicate(envelope.payload)
+  }
+
   if (
-    bundle === undefined ||
     bundle === null ||
     typeof bundle !== 'object' ||
     !('attestations' in bundle) ||
@@ -422,10 +477,6 @@ export function parseProvenancePredicate(
     return undefined
   }
   const { attestations } = bundle as AttestationBundle
-  // The Array.isArray guard above already narrows `attestations` to a real
-  // array, and even an empty array is truthy, so this falsy-check can never
-  // take its true branch at run time. It stays only to satisfy the optional
-  // `attestations?: ... | undefined` field type.
   /* c8 ignore start - unreachable behind the Array.isArray guard above. */
   if (!attestations) {
     return undefined
@@ -435,60 +486,10 @@ export function parseProvenancePredicate(
     if (entry.predicateType !== SLSA_PROVENANCE_TYPE) {
       continue
     }
-    const b = entry.bundle
-    if (b === undefined || b === null || typeof b !== 'object') {
-      continue
+    const predicate = readPredicate(entry.bundle)
+    if (predicate !== undefined) {
+      return predicate
     }
-    const verificationMaterial = (
-      b as { verificationMaterial?: unknown | undefined }
-    ).verificationMaterial
-    if (
-      verificationMaterial === undefined ||
-      verificationMaterial === null ||
-      typeof verificationMaterial !== 'object'
-    ) {
-      continue
-    }
-    const content = (verificationMaterial as { content?: unknown | undefined })
-      .content
-    if (typeof content !== 'string') {
-      continue
-    }
-    let parsed: unknown
-    try {
-      parsed = JSON.parse(content)
-    } catch {
-      continue
-    }
-    if (parsed === undefined || parsed === null || typeof parsed !== 'object') {
-      continue
-    }
-    const envelope = parsed as { payload?: string | undefined }
-    if (typeof envelope.payload !== 'string') {
-      continue
-    }
-    let payload: unknown
-    try {
-      payload = JSON.parse(atob(envelope.payload))
-    } catch {
-      continue
-    }
-    if (
-      payload === undefined ||
-      payload === null ||
-      typeof payload !== 'object'
-    ) {
-      continue
-    }
-    const statement = payload as { predicate?: unknown | undefined }
-    if (
-      statement.predicate === undefined ||
-      statement.predicate === null ||
-      typeof statement.predicate !== 'object'
-    ) {
-      continue
-    }
-    return statement.predicate as ProvenancePredicate
   }
   return undefined
 }

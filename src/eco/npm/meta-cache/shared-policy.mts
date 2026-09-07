@@ -161,7 +161,7 @@ export async function resolvePackumentSlim(
     variant,
   }
 
-  if (opts.force) {
+  async function forceRefresh(): Promise<PackumentMetaSlim> {
     const cached = await cache.get<CachedPackumentEntry>(key)
     if (
       cached?.kind === 'hit' &&
@@ -187,6 +187,10 @@ export async function resolvePackumentSlim(
       throw new PackumentNotFoundError(name, result.status)
     }
     return cloneMeta(result.meta)
+  }
+
+  if (opts.force) {
+    return forceRefresh()
   }
 
   const storming = await stormCache.get<PackumentMetaSlim>(key)

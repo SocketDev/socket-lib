@@ -235,7 +235,7 @@ export async function downloadSocketBtmRelease(
     // Asset download
     const assetConfig = {
       __proto__: null,
-      ...assetOptions,
+      ...(assetOptions as SocketBtmAssetConfig),
     } as SocketBtmAssetConfig
     const { asset, output, removeMacOSQuarantine = false } = assetConfig
 

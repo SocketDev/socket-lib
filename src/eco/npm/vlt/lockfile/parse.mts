@@ -33,6 +33,37 @@ export function jsParseVltLock(content: string): ParsedLockfile {
   const packages: PackageRef[] = []
   const packageIndex: Record<string, number | number[]> = Object.create(null)
 
+  function makePackageRef(
+    node: unknown[],
+    name: string,
+    depId: VltDepId | undefined,
+    fromId: ReturnType<typeof splitNameVersion> | undefined,
+  ): PackageRef {
+    const flags = typeof node[0] === 'number' ? node[0] : 0
+    // vlt encodes a git source in the DepID itself, e.g. `git~github:a/b~main`.
+    const gitDep =
+      depId?.type === 'git'
+        ? parseGitDep(`${depId.scope}#${depId.detail}`)
+        : undefined
+
+    return ObjectFreeze({
+      __proto__: null,
+      name,
+      version: gitDep ? '' : (fromId?.version ?? ''),
+      resolved: typeof node[3] === 'string' ? node[3] : undefined,
+      integrity: typeof node[2] === 'string' ? node[2] : undefined,
+      ecosystem: 'npm',
+      depType: (flags & FLAG_DEV) === 0 ? 'prod' : 'dev',
+      isDev: (flags & FLAG_DEV) !== 0,
+      isOptional: (flags & FLAG_OPTIONAL) !== 0,
+      isPeer: false,
+      isBundled: false,
+      vcsUrl: gitDep?.url,
+      vcsCommit: gitDep?.commit,
+      dependencies: ObjectFreeze([]),
+    }) as unknown as PackageRef
+  }
+
   let data: RawVltLockfile
   try {
     data = JSON.parse(content) as RawVltLockfile
@@ -55,29 +86,7 @@ export function jsParseVltLock(content: string): ParsedLockfile {
     if (!name) {
       continue
     }
-    const flags = typeof node[0] === 'number' ? node[0] : 0
-    // vlt encodes a git source in the DepID itself, e.g. `git~github:a/b~main`.
-    const gitDep =
-      depId?.type === 'git'
-        ? parseGitDep(`${depId.scope}#${depId.detail}`)
-        : undefined
-
-    const ref = ObjectFreeze({
-      __proto__: null,
-      name,
-      version: gitDep ? '' : (fromId?.version ?? ''),
-      resolved: typeof node[3] === 'string' ? node[3] : undefined,
-      integrity: typeof node[2] === 'string' ? node[2] : undefined,
-      ecosystem: 'npm',
-      depType: (flags & FLAG_DEV) === 0 ? 'prod' : 'dev',
-      isDev: (flags & FLAG_DEV) !== 0,
-      isOptional: (flags & FLAG_OPTIONAL) !== 0,
-      isPeer: false,
-      isBundled: false,
-      vcsUrl: gitDep?.url,
-      vcsCommit: gitDep?.commit,
-      dependencies: ObjectFreeze([]),
-    }) as unknown as PackageRef
+    const ref = makePackageRef(node, name, depId, fromId)
     ArrayPrototypePush(packages, ref)
 
     const at = packageIndex[name]

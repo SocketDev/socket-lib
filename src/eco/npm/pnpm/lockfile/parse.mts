@@ -142,6 +142,190 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
   let currentImporter: ImporterState | undefined
   let importerIndent = 0
 
+  function consumeImporterDependency(
+    trimmed: string,
+    section: ImporterState['section'],
+  ): void {
+    // pnpm v9 nests each dep as a block — skip its sub-properties.
+    if (
+      StringPrototypeIndexOf(trimmed, 'specifier:') === 0 ||
+      StringPrototypeIndexOf(trimmed, 'version:') === 0 ||
+      StringPrototypeIndexOf(trimmed, 'resolution:') === 0
+    ) {
+      return
+    }
+    const colonIdx = StringPrototypeIndexOf(trimmed, ':')
+    if (colonIdx > 0) {
+      const depName = StringPrototypeSlice(trimmed, 0, colonIdx)
+      const depVersion = StringPrototypeTrim(
+        StringPrototypeSlice(trimmed, colonIdx + 1),
+      )
+      // Skip block-style v9 importer entries (where the parent
+      // line is `name:` and the version is nested under it as a
+      // separate `version:` property). The nested-line skip above
+      // handles the children; this guard stops the parent line
+      // from being emitted with empty version. Also skip
+      // workspace-local protocol refs (`link:` / `workspace:` /
+      // `file:`) — they aren't shippable artifacts.
+      if (
+        depVersion.length === 0 ||
+        StringPrototypeIndexOf(depVersion, 'link:') === 0 ||
+        StringPrototypeIndexOf(depVersion, 'workspace:') === 0 ||
+        StringPrototypeIndexOf(depVersion, 'file:') === 0
+      ) {
+        return
+      }
+      const versionWithoutPeer = stripPeerSuffix(depVersion)
+      if (packageIndex[depName] === undefined) {
+        const ref = ObjectFreeze({
+          __proto__: null,
+          name: depName,
+          version: versionWithoutPeer,
+          resolved: undefined,
+          integrity: undefined,
+          ecosystem: 'npm',
+          depType:
+            section === 'dev'
+              ? 'dev'
+              : section === 'optional'
+                ? 'optional'
+                : 'prod',
+          isDev: section === 'dev',
+          isOptional: section === 'optional',
+          isPeer: false,
+          isBundled: false,
+          vcsUrl: undefined,
+          vcsCommit: undefined,
+          dependencies: [],
+        }) as unknown as PackageRef
+        ArrayPrototypePush(packages, ref)
+        packageIndex[depName] = packages.length - 1
+      }
+    }
+  }
+
+  function consumeImporterLine(line: string, trimmed: string): void {
+    const indent = indentOf(line)
+    if (indent === 2 && StringPrototypeEndsWith(trimmed, ':')) {
+      currentImporter = { section: undefined }
+      importerIndent = indent
+      return
+    }
+    if (currentImporter && indent > importerIndent) {
+      if (StringPrototypeIndexOf(trimmed, 'devDependencies:') === 0) {
+        currentImporter.section = 'dev'
+      } else if (
+        StringPrototypeIndexOf(trimmed, 'optionalDependencies:') === 0
+      ) {
+        currentImporter.section = 'optional'
+      } else if (StringPrototypeIndexOf(trimmed, 'dependencies:') === 0) {
+        currentImporter.section = 'prod'
+      } else if (indent > importerIndent + 2) {
+        consumeImporterDependency(trimmed, currentImporter.section)
+      }
+    }
+  }
+
+  function isDependencyBoundary(trimmed: string): boolean {
+    return (
+      StringPrototypeIndexOf(trimmed, 'peerDependencies:') === 0 ||
+      StringPrototypeIndexOf(trimmed, 'optionalDependencies:') === 0 ||
+      StringPrototypeIndexOf(trimmed, 'engines:') === 0 ||
+      StringPrototypeIndexOf(trimmed, 'os:') === 0 ||
+      StringPrototypeIndexOf(trimmed, 'cpu:') === 0 ||
+      StringPrototypeIndexOf(trimmed, 'bin:') === 0
+    )
+  }
+
+  function consumePackageDependencies(
+    entry: PnpmEntry,
+    trimmed: string,
+    indent: number,
+  ): void {
+    if (StringPrototypeIndexOf(trimmed, 'dependencies:') === 0) {
+      entry.dependencies = []
+      entry._inDeps = true
+    } else if (entry._inDeps && isDependencyBoundary(trimmed)) {
+      entry._inDeps = false
+    } else if (entry._inDeps && indent > currentIndent + 2) {
+      const colonIdx = StringPrototypeIndexOf(trimmed, ':')
+      if (colonIdx > 0) {
+        ArrayPrototypePush(
+          entry.dependencies,
+          StringPrototypeSlice(trimmed, 0, colonIdx),
+        )
+      }
+    }
+  }
+
+  function consumePackageLine(
+    entry: PnpmEntry,
+    trimmed: string,
+    indent: number,
+  ): void {
+    if (StringPrototypeIndexOf(trimmed, 'dev:') === 0) {
+      if (StringPrototypeIndexOf(trimmed, 'true') !== -1) {
+        entry.depType = 'dev'
+        entry.isDev = true
+      }
+    } else if (StringPrototypeIndexOf(trimmed, 'optional:') === 0) {
+      if (StringPrototypeIndexOf(trimmed, 'true') !== -1) {
+        entry.depType = 'optional'
+        entry.isOptional = true
+      }
+    } else if (StringPrototypeIndexOf(trimmed, 'integrity:') === 0) {
+      entry.integrity = StringPrototypeTrim(StringPrototypeSlice(trimmed, 10))
+    } else if (StringPrototypeIndexOf(trimmed, 'resolution:') === 0) {
+      const intMatch = RegExpPrototypeExec(RE_INTEGRITY, trimmed)
+      if (intMatch) {
+        entry.integrity = intMatch[1]
+      }
+      const tarballMatch = RegExpPrototypeExec(RE_TARBALL, trimmed)
+      if (tarballMatch) {
+        entry.resolved = tarballMatch[1]
+      }
+      const repoMatch = RegExpPrototypeExec(RE_GIT_REPO, trimmed)
+      if (repoMatch) {
+        entry.vcsUrl = repoMatch[1]
+        const commitMatch = RegExpPrototypeExec(RE_GIT_COMMIT, trimmed)
+        entry.vcsCommit = commitMatch ? commitMatch[1] : undefined
+      }
+    } else {
+      consumePackageDependencies(entry, trimmed, indent)
+    }
+  }
+
+  function consumePackageHeader(line: string, trimmed: string): void {
+    const indent = indentOf(line)
+    // A package entry must end with `:`, sit at indent 2-4, and — if
+    // we're already inside one — be at the same depth or shallower.
+    // Deeper means it's a property block of the current entry.
+    const isPackageEntry =
+      indent >= 2 &&
+      indent <= 4 &&
+      StringPrototypeEndsWith(trimmed, ':') &&
+      trimmed.length > 1 &&
+      (currentPkg === undefined || indent <= currentIndent)
+
+    if (isPackageEntry) {
+      if (currentPkg?.name) {
+        const ref = freezeEntry(currentPkg)
+        ArrayPrototypePush(packages, ref)
+        addToPnpmIndex(packageIndex, currentPkg.name, packages.length - 1)
+      }
+      const key = StringPrototypeSlice(trimmed, 0, -1)
+      const parsed =
+        key[0] === '/' ? parsePnpmPackageIdV5(key) : parsePnpmPackageIdV6V9(key)
+      currentPkg = newPnpmEntry(parsed.name, parsed.version)
+      currentIndent = indent
+      return
+    }
+
+    if (currentPkg && indent > currentIndent) {
+      consumePackageLine(currentPkg, trimmed, indent)
+    }
+  }
+
   let pos = 0
   while (pos < content.length) {
     const eol = StringPrototypeIndexOf(content, '\n', pos)
@@ -171,14 +355,7 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
     }
 
     // New top-level section ends current section.
-    if (
-      line[0] !== ' ' &&
-      line[0] !== '\t' &&
-      trimmed.length > 0 &&
-      trimmed !== 'packages:' &&
-      trimmed !== 'snapshots:' &&
-      trimmed !== 'importers:'
-    ) {
+    if (line[0] !== ' ' && line[0] !== '\t' && trimmed.length > 0) {
       inPackages = false
       inSnapshots = false
       inImporters = false
@@ -186,81 +363,7 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
     }
 
     if (inImporters) {
-      const indent = indentOf(line)
-      if (indent === 2 && StringPrototypeEndsWith(trimmed, ':')) {
-        currentImporter = { section: undefined }
-        importerIndent = indent
-        continue
-      }
-      if (currentImporter && indent > importerIndent) {
-        if (StringPrototypeIndexOf(trimmed, 'devDependencies:') === 0) {
-          currentImporter.section = 'dev'
-        } else if (
-          StringPrototypeIndexOf(trimmed, 'optionalDependencies:') === 0
-        ) {
-          currentImporter.section = 'optional'
-        } else if (StringPrototypeIndexOf(trimmed, 'dependencies:') === 0) {
-          currentImporter.section = 'prod'
-        } else if (indent > importerIndent + 2) {
-          // pnpm v9 nests each dep as a block — skip its sub-properties.
-          if (
-            StringPrototypeIndexOf(trimmed, 'specifier:') === 0 ||
-            StringPrototypeIndexOf(trimmed, 'version:') === 0 ||
-            StringPrototypeIndexOf(trimmed, 'resolution:') === 0
-          ) {
-            continue
-          }
-          const colonIdx = StringPrototypeIndexOf(trimmed, ':')
-          if (colonIdx > 0) {
-            const depName = StringPrototypeSlice(trimmed, 0, colonIdx)
-            const depVersion = StringPrototypeTrim(
-              StringPrototypeSlice(trimmed, colonIdx + 1),
-            )
-            // Skip block-style v9 importer entries (where the parent
-            // line is `name:` and the version is nested under it as a
-            // separate `version:` property). The nested-line skip above
-            // handles the children; this guard stops the parent line
-            // from being emitted with empty version. Also skip
-            // workspace-local protocol refs (`link:` / `workspace:` /
-            // `file:`) — they aren't shippable artifacts.
-            if (
-              depVersion.length === 0 ||
-              StringPrototypeIndexOf(depVersion, 'link:') === 0 ||
-              StringPrototypeIndexOf(depVersion, 'workspace:') === 0 ||
-              StringPrototypeIndexOf(depVersion, 'file:') === 0
-            ) {
-              continue
-            }
-            const versionWithoutPeer = stripPeerSuffix(depVersion)
-            if (packageIndex[depName] === undefined) {
-              const section = currentImporter.section
-              const ref = ObjectFreeze({
-                __proto__: null,
-                name: depName,
-                version: versionWithoutPeer,
-                resolved: undefined,
-                integrity: undefined,
-                ecosystem: 'npm',
-                depType:
-                  section === 'dev'
-                    ? 'dev'
-                    : section === 'optional'
-                      ? 'optional'
-                      : 'prod',
-                isDev: section === 'dev',
-                isOptional: section === 'optional',
-                isPeer: false,
-                isBundled: false,
-                vcsUrl: undefined,
-                vcsCommit: undefined,
-                dependencies: [],
-              }) as unknown as PackageRef
-              ArrayPrototypePush(packages, ref)
-              packageIndex[depName] = packages.length - 1
-            }
-          }
-        }
-      }
+      consumeImporterLine(line, trimmed)
       continue
     }
 
@@ -268,84 +371,7 @@ export function jsParsePnpmLock(content: string): ParsedLockfile {
       continue
     }
 
-    const indent = indentOf(line)
-    // A package entry must end with `:`, sit at indent 2-4, and — if
-    // we're already inside one — be at the same depth or shallower.
-    // Deeper means it's a property block of the current entry.
-    const isPackageEntry =
-      indent >= 2 &&
-      indent <= 4 &&
-      StringPrototypeEndsWith(trimmed, ':') &&
-      trimmed.length > 1 &&
-      (currentPkg === undefined || indent <= currentIndent)
-
-    if (isPackageEntry) {
-      if (currentPkg?.name) {
-        const ref = freezeEntry(currentPkg)
-        ArrayPrototypePush(packages, ref)
-        addToPnpmIndex(packageIndex, currentPkg.name, packages.length - 1)
-      }
-      const key = StringPrototypeSlice(trimmed, 0, -1)
-      const parsed =
-        key[0] === '/' ? parsePnpmPackageIdV5(key) : parsePnpmPackageIdV6V9(key)
-      currentPkg = newPnpmEntry(parsed.name, parsed.version)
-      currentIndent = indent
-      continue
-    }
-
-    if (currentPkg && indent > currentIndent) {
-      if (StringPrototypeIndexOf(trimmed, 'dev:') === 0) {
-        if (StringPrototypeIndexOf(trimmed, 'true') !== -1) {
-          currentPkg.depType = 'dev'
-          currentPkg.isDev = true
-        }
-      } else if (StringPrototypeIndexOf(trimmed, 'optional:') === 0) {
-        if (StringPrototypeIndexOf(trimmed, 'true') !== -1) {
-          currentPkg.depType = 'optional'
-          currentPkg.isOptional = true
-        }
-      } else if (StringPrototypeIndexOf(trimmed, 'integrity:') === 0) {
-        currentPkg.integrity = StringPrototypeTrim(
-          StringPrototypeSlice(trimmed, 10),
-        )
-      } else if (StringPrototypeIndexOf(trimmed, 'resolution:') === 0) {
-        const intMatch = RegExpPrototypeExec(RE_INTEGRITY, trimmed)
-        if (intMatch) {
-          currentPkg.integrity = intMatch[1]
-        }
-        const tarballMatch = RegExpPrototypeExec(RE_TARBALL, trimmed)
-        if (tarballMatch) {
-          currentPkg.resolved = tarballMatch[1]
-        }
-        const repoMatch = RegExpPrototypeExec(RE_GIT_REPO, trimmed)
-        if (repoMatch) {
-          currentPkg.vcsUrl = repoMatch[1]
-          const commitMatch = RegExpPrototypeExec(RE_GIT_COMMIT, trimmed)
-          currentPkg.vcsCommit = commitMatch ? commitMatch[1] : undefined
-        }
-      } else if (StringPrototypeIndexOf(trimmed, 'dependencies:') === 0) {
-        currentPkg.dependencies = []
-        currentPkg._inDeps = true
-      } else if (
-        currentPkg._inDeps &&
-        (StringPrototypeIndexOf(trimmed, 'peerDependencies:') === 0 ||
-          StringPrototypeIndexOf(trimmed, 'optionalDependencies:') === 0 ||
-          StringPrototypeIndexOf(trimmed, 'engines:') === 0 ||
-          StringPrototypeIndexOf(trimmed, 'os:') === 0 ||
-          StringPrototypeIndexOf(trimmed, 'cpu:') === 0 ||
-          StringPrototypeIndexOf(trimmed, 'bin:') === 0)
-      ) {
-        currentPkg._inDeps = false
-      } else if (currentPkg._inDeps && indent > currentIndent + 2) {
-        const colonIdx = StringPrototypeIndexOf(trimmed, ':')
-        if (colonIdx > 0) {
-          ArrayPrototypePush(
-            currentPkg.dependencies,
-            StringPrototypeSlice(trimmed, 0, colonIdx),
-          )
-        }
-      }
-    }
+    consumePackageHeader(line, trimmed)
   }
 
   if (currentPkg?.name) {

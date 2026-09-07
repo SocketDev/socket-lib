@@ -127,6 +127,53 @@ export function jsParseCargoLock(content: string): ParsedLockfile {
     __proto__: null,
   } as unknown as PackageIndex
 
+  function consumePackageLine(entry: CargoEntryState, trimmed: string): void {
+    // Multi-line dependencies array returns.
+    if (entry.inDependencies) {
+      if (StringPrototypeIndexOf(trimmed, ']') !== -1) {
+        entry.inDependencies = false
+        return
+      }
+      // Drop trailing comma BEFORE name extraction so the closing
+      // quote ends up adjacent to the value (lets extractCargoDepName
+      // strip both quotes cleanly).
+      const noComma =
+        trimmed[trimmed.length - 1] === ','
+          ? StringPrototypeSlice(trimmed, 0, -1)
+          : trimmed
+      const cleaned = extractCargoDepName(noComma)
+      if (cleaned.length > 0) {
+        ArrayPrototypePush(entry.dependencies, cleaned)
+      }
+      return
+    }
+
+    if (StringPrototypeIndexOf(trimmed, 'name') === 0) {
+      entry.name = stripTomlString(valueAfterEquals(trimmed))
+    } else if (StringPrototypeIndexOf(trimmed, 'version') === 0) {
+      entry.version = stripTomlString(valueAfterEquals(trimmed))
+    } else if (StringPrototypeIndexOf(trimmed, 'source') === 0) {
+      entry.source = stripTomlString(valueAfterEquals(trimmed))
+    } else if (StringPrototypeIndexOf(trimmed, 'checksum') === 0) {
+      entry.checksum = stripTomlString(valueAfterEquals(trimmed))
+    } else if (StringPrototypeIndexOf(trimmed, 'dependencies') === 0) {
+      const value = valueAfterEquals(trimmed)
+      // Inline single-line form: `dependencies = [ "a", "b" ]`.
+      if (
+        StringPrototypeIndexOf(value, '[') !== -1 &&
+        StringPrototypeIndexOf(value, ']') !== -1
+      ) {
+        const raw = parseInlineArray(value)
+        for (let i = 0, { length } = raw; i < length; i++) {
+          ArrayPrototypePush(entry.dependencies, extractCargoDepName(raw[i]!))
+        }
+      } else {
+        // Multi-line form: `dependencies = [` followed by lines.
+        entry.inDependencies = true
+      }
+    }
+  }
+
   let lockVersion = '1'
   let currentEntry: CargoEntryState | undefined
 
@@ -160,53 +207,7 @@ export function jsParseCargoLock(content: string): ParsedLockfile {
     }
 
     if (currentEntry) {
-      // Multi-line dependencies array continues.
-      if (currentEntry.inDependencies) {
-        if (StringPrototypeIndexOf(trimmed, ']') !== -1) {
-          currentEntry.inDependencies = false
-          continue
-        }
-        // Drop trailing comma BEFORE name extraction so the closing
-        // quote ends up adjacent to the value (lets extractCargoDepName
-        // strip both quotes cleanly).
-        const noComma =
-          trimmed[trimmed.length - 1] === ','
-            ? StringPrototypeSlice(trimmed, 0, -1)
-            : trimmed
-        const cleaned = extractCargoDepName(noComma)
-        if (cleaned.length > 0) {
-          ArrayPrototypePush(currentEntry.dependencies, cleaned)
-        }
-        continue
-      }
-
-      if (StringPrototypeIndexOf(trimmed, 'name') === 0) {
-        currentEntry.name = stripTomlString(valueAfterEquals(trimmed))
-      } else if (StringPrototypeIndexOf(trimmed, 'version') === 0) {
-        currentEntry.version = stripTomlString(valueAfterEquals(trimmed))
-      } else if (StringPrototypeIndexOf(trimmed, 'source') === 0) {
-        currentEntry.source = stripTomlString(valueAfterEquals(trimmed))
-      } else if (StringPrototypeIndexOf(trimmed, 'checksum') === 0) {
-        currentEntry.checksum = stripTomlString(valueAfterEquals(trimmed))
-      } else if (StringPrototypeIndexOf(trimmed, 'dependencies') === 0) {
-        const value = valueAfterEquals(trimmed)
-        // Inline single-line form: `dependencies = [ "a", "b" ]`.
-        if (
-          StringPrototypeIndexOf(value, '[') !== -1 &&
-          StringPrototypeIndexOf(value, ']') !== -1
-        ) {
-          const raw = parseInlineArray(value)
-          for (let i = 0, { length } = raw; i < length; i++) {
-            ArrayPrototypePush(
-              currentEntry.dependencies,
-              extractCargoDepName(raw[i]!),
-            )
-          }
-        } else {
-          // Multi-line form: `dependencies = [` followed by lines.
-          currentEntry.inDependencies = true
-        }
-      }
+      consumePackageLine(currentEntry, trimmed)
     } else {
       // Top-level scalars.
       if (StringPrototypeIndexOf(trimmed, 'version') === 0) {
