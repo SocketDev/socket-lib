@@ -14,6 +14,43 @@ import { StringPrototypeCharCodeAt } from '../primordials/string.mjs'
 import { isAbsolute, isPathSeparator } from './predicates.mjs'
 import { CHAR_UPPERCASE_A, CHAR_UPPERCASE_Z, normalizePath } from './shared.mjs'
 
+export function findCommonPathPrefix(actualFrom: string, actualTo: string) {
+  // Compare paths char-by-char to find the longest common prefix.
+  const length =
+    actualFrom.length < actualTo.length
+      ? actualFrom.length - 1
+      : actualTo.length - 1
+  let lastCommonSep = -1
+  let i = 0
+
+  for (; i < length; i += 1) {
+    let fromCode = StringPrototypeCharCodeAt(actualFrom, 1 + i)
+    let toCode = StringPrototypeCharCodeAt(actualTo, 1 + i)
+
+    /* c8 ignore start - Windows-only case folding. */
+    if (isWin32()) {
+      if (fromCode >= CHAR_UPPERCASE_A && fromCode <= CHAR_UPPERCASE_Z) {
+        fromCode += 32
+      }
+      if (toCode >= CHAR_UPPERCASE_A && toCode <= CHAR_UPPERCASE_Z) {
+        toCode += 32
+      }
+    }
+    /* c8 ignore stop */
+
+    if (fromCode !== toCode) {
+      break
+    }
+
+    // Use the original (unfolded) code from actualFrom to detect separators.
+    if (isPathSeparator(StringPrototypeCharCodeAt(actualFrom, 1 + i))) {
+      lastCommonSep = i
+    }
+  }
+
+  return { __proto__: null, length, index: i, lastCommonSep }
+}
+
 /**
  * Calculate the relative path from one path to another.
  *
@@ -70,35 +107,9 @@ export function relative(from: string, to: string): string {
   const toEnd = actualTo.length
   const toLen = toEnd - toStart
 
-  // Compare paths char-by-char to find the longest common prefix.
-  const length = fromLen < toLen ? fromLen : toLen
-  let lastCommonSep = -1
-  let i = 0
-
-  for (; i < length; i += 1) {
-    let fromCode = StringPrototypeCharCodeAt(actualFrom, fromStart + i)
-    let toCode = StringPrototypeCharCodeAt(actualTo, toStart + i)
-
-    /* c8 ignore start - Windows-only case folding. */
-    if (isWin32()) {
-      if (fromCode >= CHAR_UPPERCASE_A && fromCode <= CHAR_UPPERCASE_Z) {
-        fromCode += 32
-      }
-      if (toCode >= CHAR_UPPERCASE_A && toCode <= CHAR_UPPERCASE_Z) {
-        toCode += 32
-      }
-    }
-    /* c8 ignore stop */
-
-    if (fromCode !== toCode) {
-      break
-    }
-
-    // Use the original (unfolded) code from actualFrom to detect separators.
-    if (isPathSeparator(StringPrototypeCharCodeAt(actualFrom, fromStart + i))) {
-      lastCommonSep = i
-    }
-  }
+  const common = findCommonPathPrefix(actualFrom, actualTo)
+  const { length, index: i } = common
+  let { lastCommonSep } = common
 
   // Edge cases where one path is a prefix of the other.
   /* c8 ignore start */
@@ -122,16 +133,28 @@ export function relative(from: string, to: string): string {
   }
   /* c8 ignore stop */
 
+  const out = relativePathParentSegments(
+    actualFrom,
+    fromStart + lastCommonSep + 1,
+  )
+
+  return out + actualTo.slice(toStart + lastCommonSep)
+}
+
+export function relativePathParentSegments(
+  actualFrom: string,
+  start: number,
+): string {
+  const fromEnd = actualFrom.length
   // Generate '../' segments for each directory in `from` after the common base.
   let out = ''
-  for (i = fromStart + lastCommonSep + 1; i <= fromEnd; i += 1) {
+  for (let i = start; i <= fromEnd; i += 1) {
     const code = StringPrototypeCharCodeAt(actualFrom, i)
     if (i === fromEnd || isPathSeparator(code)) {
       out += out.length === 0 ? '..' : '/..'
     }
   }
-
-  return out + actualTo.slice(toStart + lastCommonSep)
+  return out
 }
 
 /**
