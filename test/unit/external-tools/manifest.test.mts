@@ -29,7 +29,7 @@ afterEach(async () => {
   await safeDelete(tmpRoot)
 })
 
-describe.sequential('isObject', () => {
+describe('isObject', { concurrent: false }, () => {
   test('true for plain objects', () => {
     expect(isObject({})).toBe(true)
     expect(isObject({ a: 1 })).toBe(true)
@@ -52,7 +52,7 @@ describe.sequential('isObject', () => {
   })
 })
 
-describe.sequential('parseChecksum', () => {
+describe('parseChecksum', { concurrent: false }, () => {
   test('returns a normalized ToolChecksum on a valid record', () => {
     const result = parseChecksum(
       { asset: 'tool.tar.gz', integrity: VALID_INTEGRITY },
@@ -101,7 +101,7 @@ describe.sequential('parseChecksum', () => {
   })
 })
 
-describe.sequential('parsePlatforms', () => {
+describe('parsePlatforms', { concurrent: false }, () => {
   test('returns a map keyed by platform-arch', () => {
     const result = parsePlatforms(
       {
@@ -143,7 +143,7 @@ describe.sequential('parsePlatforms', () => {
   })
 })
 
-describe.sequential('parseToolEntry', () => {
+describe('parseToolEntry', { concurrent: false }, () => {
   test('returns kind="other" for a non-object', () => {
     expect(parseToolEntry('not-an-object', 't')).toEqual({
       kind: 'other',
@@ -242,7 +242,7 @@ describe.sequential('parseToolEntry', () => {
   })
 })
 
-describe.sequential('getTool', () => {
+describe('getTool', { concurrent: false }, () => {
   function manifestWith(entry: Manifest['tools'][string]): Manifest {
     return { tools: { mytool: entry } }
   }
@@ -277,7 +277,7 @@ describe.sequential('getTool', () => {
   })
 })
 
-describe.sequential('getToolFlavor', () => {
+describe('getToolFlavor', { concurrent: false }, () => {
   test('returns the flavor when kind="flavored" and flavor exists', () => {
     const flavor = { repository: 'r', platforms: {} }
     const m: Manifest = {
@@ -331,7 +331,7 @@ describe.sequential('getToolFlavor', () => {
   })
 })
 
-describe.sequential('readExternalToolsManifest', () => {
+describe('readExternalToolsManifest', { concurrent: false }, () => {
   test('reads a valid manifest and parses tool entries', async () => {
     const filepath = path.join(tmpRoot, 'external-tools.json')
     writeFileSync(

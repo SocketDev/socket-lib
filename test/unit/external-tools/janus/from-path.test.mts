@@ -27,7 +27,7 @@ afterEach(() => {
   vi.clearAllMocks()
 })
 
-describe.sequential('external-tools/janus/from-path', () => {
+describe('external-tools/janus/from-path', { concurrent: false }, () => {
   test('returns a resolved record with source="path" when which returns a string', async () => {
     const { janusFromPath, whichMock } = await loadFresh()
     whichMock.mockResolvedValueOnce('/usr/local/bin/janus')

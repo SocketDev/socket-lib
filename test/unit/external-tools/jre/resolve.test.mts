@@ -14,7 +14,7 @@ import {
 // Run sequentially because tests mutate process.env and the JRE
 // resolver's memo cache — both global state under vitest's
 // isolate: false / concurrent: true config.
-describe.sequential('external-tools/jre/resolve', () => {
+describe('external-tools/jre/resolve', { concurrent: false }, () => {
   beforeEach(() => {
     resetJreResolution()
   })

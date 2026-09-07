@@ -5,7 +5,7 @@ import {
   opengrepFromVfs,
 } from '../../../../src/external-tools/opengrep/from-vfs.mjs'
 
-describe.sequential('external-tools/opengrep/from-vfs', () => {
+describe('external-tools/opengrep/from-vfs', { concurrent: false }, () => {
   test('exports OPENGREP_VFS_KEY constant', () => {
     expect(OPENGREP_VFS_KEY).toBe('opengrep')
   })
