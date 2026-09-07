@@ -7,7 +7,7 @@ import {
 } from '../../../src/perf/metrics.mjs'
 import { perfTimer } from '../../../src/perf/timer.mjs'
 
-describe.sequential('perf/metrics', () => {
+describe('perf/metrics', { concurrent: false }, () => {
   describe('getPerformanceMetrics()', () => {
     beforeEach(() => {
       clearPerformanceMetrics()

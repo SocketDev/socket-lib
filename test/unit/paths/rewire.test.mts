@@ -25,7 +25,7 @@ afterEach(() => {
   resetPaths()
 })
 
-describe.sequential('paths/rewire — getPathValue', () => {
+describe('paths/rewire — getPathValue', { concurrent: false }, () => {
   it('returns the override when one is set', () => {
     setPath('test-key-x', '/override/path')
     expect(getPathValue('test-key-x', () => '/computed')).toBe('/override/path')
@@ -59,7 +59,7 @@ describe.sequential('paths/rewire — getPathValue', () => {
   })
 })
 
-describe.sequential('paths/rewire — hasOverride', () => {
+describe('paths/rewire — hasOverride', { concurrent: false }, () => {
   it('returns true after setPath', () => {
     setPath('h-key-1', '/v')
     expect(hasOverride('h-key-1')).toBe(true)
@@ -76,7 +76,7 @@ describe.sequential('paths/rewire — hasOverride', () => {
   })
 })
 
-describe.sequential('paths/rewire — invalidateCaches', () => {
+describe('paths/rewire — invalidateCaches', { concurrent: false }, () => {
   it('does not affect a subsequent getPathValue call (nothing memoized to drop)', () => {
     const fn = vi.fn(() => '/v1')
     getPathValue('inv-key', fn)

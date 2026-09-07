@@ -21,7 +21,7 @@ import {
   tolerantTimeout,
 } from '../../_shared/fleet/lib/timing.mts'
 
-describe.sequential('ttl-cache — timing', () => {
+describe('ttl-cache — timing', { concurrent: false }, () => {
   let cache: ReturnType<typeof createTtlCache>
   let testCacheDir: string
 

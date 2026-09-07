@@ -72,7 +72,7 @@ vi.mock(import('../../../src/cacache/write.mjs'), async importOriginal => {
   }
 })
 
-describe.sequential('ttl-cache — getAll wildcard', () => {
+describe('ttl-cache — getAll wildcard', { concurrent: false }, () => {
   let testCacheDir: string
 
   beforeEach(() => {

@@ -36,7 +36,7 @@ import {
 // in this file would run in parallel. Force sequential execution to
 // keep `clearPerformanceMetrics()` + `getPerformanceMetrics()[0]`
 // assertions deterministic.
-describe.sequential('performance reporting', () => {
+describe('performance reporting', { concurrent: false }, () => {
   describe('getPerformanceSummary()', () => {
     beforeEach(() => {
       clearPerformanceMetrics()

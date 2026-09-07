@@ -8,7 +8,7 @@ import {
 } from '../../../src/perf/metrics.mjs'
 import { measure, measureSync, perfTimer } from '../../../src/perf/timer.mjs'
 
-describe.sequential('perf/timer', () => {
+describe('perf/timer', { concurrent: false }, () => {
   describe('module import', () => {
     it('should import performance module', () => {
       expect(perfTimer).toBeDefined()

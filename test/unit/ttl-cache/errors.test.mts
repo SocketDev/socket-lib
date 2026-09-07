@@ -37,7 +37,7 @@ vi.mock(import('../../../src/cacache/write.mjs'), async importOriginal => {
   }
 })
 
-describe.sequential('ttl-cache — error branches', () => {
+describe('ttl-cache — error branches', { concurrent: false }, () => {
   let testCacheDir: string
 
   beforeEach(() => {

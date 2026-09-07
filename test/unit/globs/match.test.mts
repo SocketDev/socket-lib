@@ -96,40 +96,44 @@ describe('globs/match — glob', () => {
 // caller passing only `cwd` takes the node:fs fast path, while adding any
 // other option (`canUseNodeFsGlob`) falls back to fast-glob — both must
 // agree that a matching directory is excluded by default.
-describe.sequential('globs/match — onlyFiles default parity', () => {
-  let tmpDir: string
+describe(
+  'globs/match — onlyFiles default parity',
+  { concurrent: false },
+  () => {
+    let tmpDir: string
 
-  beforeEach(() => {
-    tmpDir = mkdtempSync(path.join(os.tmpdir(), 'socket-lib-glob-match-'))
-    mkdirSync(path.join(tmpDir, 'entry-dir'), { recursive: true })
-    writeFileSync(path.join(tmpDir, 'entry-file.txt'), 'x')
-  })
+    beforeEach(() => {
+      tmpDir = mkdtempSync(path.join(os.tmpdir(), 'socket-lib-glob-match-'))
+      mkdirSync(path.join(tmpDir, 'entry-dir'), { recursive: true })
+      writeFileSync(path.join(tmpDir, 'entry-file.txt'), 'x')
+    })
 
-  afterEach(async () => {
-    await safeDelete(tmpDir)
-  })
+    afterEach(async () => {
+      await safeDelete(tmpDir)
+    })
 
-  it('glob: fast path (cwd only) returns the file, not the directory', async () => {
-    const files = await glob('entry*', { cwd: tmpDir })
-    expect(files).toContain('entry-file.txt')
-    expect(files).not.toContain('entry-dir')
-  })
+    it('glob: fast path (cwd only) returns the file, not the directory', async () => {
+      const files = await glob('entry*', { cwd: tmpDir })
+      expect(files).toContain('entry-file.txt')
+      expect(files).not.toContain('entry-dir')
+    })
 
-  it('glob: fast-glob fallback (extra option) returns the file, not the directory', async () => {
-    const files = await glob('entry*', { cwd: tmpDir, unique: true })
-    expect(files).toContain('entry-file.txt')
-    expect(files).not.toContain('entry-dir')
-  })
+    it('glob: fast-glob fallback (extra option) returns the file, not the directory', async () => {
+      const files = await glob('entry*', { cwd: tmpDir, unique: true })
+      expect(files).toContain('entry-file.txt')
+      expect(files).not.toContain('entry-dir')
+    })
 
-  it('globSync: fast path (cwd only) returns the file, not the directory', () => {
-    const files = globSync('entry*', { cwd: tmpDir })
-    expect(files).toContain('entry-file.txt')
-    expect(files).not.toContain('entry-dir')
-  })
+    it('globSync: fast path (cwd only) returns the file, not the directory', () => {
+      const files = globSync('entry*', { cwd: tmpDir })
+      expect(files).toContain('entry-file.txt')
+      expect(files).not.toContain('entry-dir')
+    })
 
-  it('globSync: fast-glob fallback (extra option) returns the file, not the directory', () => {
-    const files = globSync('entry*', { cwd: tmpDir, unique: true })
-    expect(files).toContain('entry-file.txt')
-    expect(files).not.toContain('entry-dir')
-  })
-})
+    it('globSync: fast-glob fallback (extra option) returns the file, not the directory', () => {
+      const files = globSync('entry*', { cwd: tmpDir, unique: true })
+      expect(files).toContain('entry-file.txt')
+      expect(files).not.toContain('entry-dir')
+    })
+  },
+)

@@ -8,7 +8,7 @@
 import { getGhsaUrl } from '../../src/github/request.mjs'
 import { describe, expect, it } from 'vitest'
 
-describe.sequential('github ghsa url', () => {
+describe('github ghsa url', { concurrent: false }, () => {
   describe('getGhsaUrl', () => {
     it('should generate correct GHSA URL', () => {
       const url = getGhsaUrl('GHSA-xxxx-xxxx-xxxx')
