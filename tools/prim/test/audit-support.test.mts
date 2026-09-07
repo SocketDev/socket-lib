@@ -29,7 +29,7 @@ import {
   lineColumnAt,
   PARSE_OPTIONS,
   TS_EXTENSIONS,
-} from '../src/audit-helpers.mts'
+} from '../src/audit-support.mts'
 
 import type { AstNode } from '../src/source-text.mts'
 

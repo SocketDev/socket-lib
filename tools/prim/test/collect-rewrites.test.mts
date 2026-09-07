@@ -15,7 +15,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { parse } from '../src/acorn-wasm.mts'
-import { PARSE_OPTIONS } from '../src/audit-helpers.mts'
+import { PARSE_OPTIONS } from '../src/audit-support.mts'
 import { collectRewrites } from '../src/collect-rewrites.mts'
 
 import type { PendingAmbiguous, Rewrite } from '../src/ai-disambiguate-pass.mts'

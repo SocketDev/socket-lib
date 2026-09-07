@@ -18,7 +18,7 @@
 import { describe, expect, it } from 'vitest'
 
 import { walk } from '../src/acorn-wasm.mts'
-import { buildLineStarts, PARSE_OPTIONS } from '../src/audit-helpers.mts'
+import { buildLineStarts, PARSE_OPTIONS } from '../src/audit-support.mts'
 import { buildVisitors, nearestAncestor } from '../src/audit-visitors.mts'
 
 import type { AuditPendingAmbiguous } from '../src/audit-visitors.mts'

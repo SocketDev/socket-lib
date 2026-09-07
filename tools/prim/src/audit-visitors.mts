@@ -12,7 +12,7 @@ import {
   isExportsInteropGlue,
   isObjectPrototypeIdiom,
   lineColumnAt,
-} from './audit-helpers.mts'
+} from './audit-support.mts'
 import { buildSnippet } from './disambiguate.mts'
 import {
   ctorPrimordialName,

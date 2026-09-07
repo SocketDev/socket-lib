@@ -18,7 +18,7 @@ import {
   lineColumnAt,
   PARSE_OPTIONS,
   TS_EXTENSIONS,
-} from './audit-helpers.mts'
+} from './audit-support.mts'
 import { buildVisitors } from './audit-visitors.mts'
 import { disambiguateReceiver } from './disambiguate.mts'
 import { prototypePrimordialName } from './globals.mts'
