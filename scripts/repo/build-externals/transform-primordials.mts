@@ -176,6 +176,7 @@ export async function transformPrimordials(
   }
 
   return {
+    __proto__: null,
     filesChanged: result.filesChanged,
     rewriteCount: result.rewriteCount,
   }
