@@ -10,6 +10,8 @@ import { createRequire } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
 
+import { isMainModule } from '../fleet/process/is-main-module.mts'
+
 import { REPO_ROOT } from '../fleet/paths.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 
@@ -36,7 +38,7 @@ export function checkEsmNamedExports(filePath: string) {
   const relativePath = path.relative(distDir, filePath)
   const normalizedPath = normalizePath(relativePath)
   if (normalizedPath.startsWith('external/')) {
-    return { path: filePath, ok: true, skipped: true }
+    return { __proto__: null, path: filePath, ok: true, skipped: true }
   }
   // Skip CLI entry points (any file with a `#!/usr/bin/env node` shebang) —
   // they side-effect-run at load time, not modules with named exports. A
@@ -48,7 +50,7 @@ export function checkEsmNamedExports(filePath: string) {
   try {
     const head = readFileSync(filePath, 'utf-8').slice(0, 256)
     if (head.startsWith('#!/usr/bin/env node')) {
-      return { path: filePath, ok: true, skipped: true }
+      return { __proto__: null, path: filePath, ok: true, skipped: true }
     }
   } catch {
     // Fall through — let the regular check report a real read error.
@@ -83,75 +85,64 @@ export function checkEsmNamedExports(filePath: string) {
       mod = require(filePath)
     } catch (requireError) {
       return {
+        __proto__: null,
         path: filePath,
         ok: false,
         reason: `Failed to require: ${errorMessage(requireError)}`,
       }
     }
 
-    // If it's a primitive, it can't have named exports
-    if (typeof mod !== 'object' || mod === null) {
-      return {
-        path: filePath,
-        ok: false,
-        reason:
-          'Module exports a primitive value instead of an object with named exports',
-      }
-    }
-
-    // If module only has 'default' key, it's not ESM-compatible
-    const keys = Object.keys(mod)
-    if (keys.length === 1 && keys[0] === 'default') {
-      return {
-        path: filePath,
-        ok: false,
-        reason:
-          'Module only exports { default: value } - should export named exports directly',
-      }
-    }
-
-    // If we have suspicious patterns and no proper object exports
-    if (hasDefaultExport && !hasNamedExportsObject) {
-      // But let's be lenient if the module does have named exports when required
-      if (keys.length > 0 && !keys.includes('default')) {
-        // It's fine - esbuild generated proper interop
-        return { path: filePath, ok: true }
-      }
-
-      return {
-        path: filePath,
-        ok: false,
-        reason:
-          'Module uses default export pattern instead of named exports object',
-      }
-    }
-
-    // If we have an empty object, check if it's a type-only file
-    if (keys.length === 0) {
-      // Type-only files have no runtime exports — accepted patterns:
-      //   <dir>/types.js              (e.g., cover/types.js, effects/types.js)
-      //   <dir>/<name>-types.js       (e.g., releases/github-types.js)
-      const isTypeOnlyFile =
-        normalizedPath.endsWith('/types.js') ||
-        normalizedPath.endsWith('-types.js')
-      if (isTypeOnlyFile) {
-        return { path: filePath, ok: true }
-      }
-      return {
-        path: filePath,
-        ok: false,
-        reason: 'Module exports an empty object with no named exports',
-      }
-    }
-
-    return { path: filePath, ok: true }
+    const reason = namedExportIssue(mod, normalizedPath, {
+      hasDefaultExport,
+      hasNamedExportsObject,
+    })
+    return reason
+      ? { __proto__: null, path: filePath, ok: false, reason }
+      : { __proto__: null, path: filePath, ok: true }
   } catch (e) {
     return {
+      __proto__: null,
       path: filePath,
       ok: false,
       reason: `Failed to analyze: ${errorMessage(e)}`,
     }
   }
+}
+
+function namedExportIssue(
+  mod: unknown,
+  normalizedPath: string,
+  options?:
+    | {
+        hasDefaultExport?: boolean | undefined
+        hasNamedExportsObject?: boolean | undefined
+      }
+    | undefined,
+): string | undefined {
+  const { hasDefaultExport, hasNamedExportsObject } = {
+    __proto__: null,
+    ...options,
+  }
+  if (typeof mod !== 'object' || mod === null) {
+    return 'Module exports a primitive value instead of an object with named exports'
+  }
+  const keys = Object.keys(mod)
+  if (keys.length === 1 && keys[0] === 'default') {
+    return 'Module only exports { default: value } - should export named exports directly'
+  }
+  if (hasDefaultExport && !hasNamedExportsObject) {
+    return keys.length > 0 && !keys.includes('default')
+      ? undefined
+      : 'Module uses default export pattern instead of named exports object'
+  }
+  if (
+    keys.length === 0 &&
+    !normalizedPath.endsWith('/types.js') &&
+    !normalizedPath.endsWith('-types.js')
+  ) {
+    return 'Module exports an empty object with no named exports'
+  }
+  return undefined
 }
 
 /**
@@ -215,7 +206,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch(error => {
-  logger.fail(`Validation failed: ${error.message}`)
-  process.exitCode = 1
-})
+if (isMainModule(import.meta.url)) {
+  main().catch(error => {
+    logger.fail(`Validation failed: ${error.message}`)
+    process.exitCode = 1
+  })
+}
