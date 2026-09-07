@@ -184,9 +184,9 @@ describe('revokeTeamPackageAccess', () => {
         ...AUTH,
       },
     )
-    assert.match(
-      stub.calls[0]!.url,
-      /\/-\/team\/example%20org\/wombats%2Fmaintainers\/package$/,
+    assert.equal(
+      new URL(stub.calls[0]!.url).pathname,
+      '/-/team/example%20org/wombats%2Fmaintainers/package',
     )
   })
 

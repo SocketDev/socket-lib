@@ -10,6 +10,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { readParentMap } from '../../src/process/spawn/kill-tree.mjs'
 
 const psState = vi.hoisted(() => ({
   status: 0,
@@ -23,8 +24,6 @@ vi.mock(import('../../src/node/child-process.mjs'), () => ({
     spawnSync: () => ({ status: psState.status, stdout: psState.stdout }),
   })) as never,
 }))
-
-import { readParentMap } from '../../src/process/spawn/kill-tree.mjs'
 
 beforeEach(() => {
   psState.status = 0

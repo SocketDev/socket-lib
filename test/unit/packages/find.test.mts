@@ -119,6 +119,6 @@ describe('findUpPackageJson', () => {
     // Self-test: findUpPackageJson(import.meta) from this test file resolves
     // to the socket-lib package.json — never hard-coded.
     const found = findUpPackageJson(import.meta)
-    expect(found).toMatch(/socket-lib\/package\.json$/)
+    expect(normalizePath(found)).toMatch(/socket-lib\/package\.json$/)
   })
 })

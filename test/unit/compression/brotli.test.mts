@@ -52,11 +52,7 @@ afterEach(async () => {
   await safeDelete(tmpDir)
 })
 
-// Tests share a module-scoped `tmpDir` set up in `beforeEach`. Vitest's
-// `sequence.concurrent` setting, which is true locally, would otherwise run
-// tests in parallel, racing the tmpDir mutation. `describe.sequential` keeps
-// the file's tests sequential regardless of the global setting — file
-// IO tests want one-at-a-time semantics anyway.
+// Tests share a temporary directory, so this suite disables concurrent execution.
 describe('compression — brotli', { concurrent: false }, () => {
   describe('brotli — in-memory', () => {
     it('round-trips a string through compressBrotli + decompressBrotli', async () => {

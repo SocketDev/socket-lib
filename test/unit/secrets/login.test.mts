@@ -5,6 +5,13 @@
  */
 
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { setKeychainAddon } from '../../../src/secrets/addon.mjs'
+import {
+  discoverSocketOauth,
+  loginWithBrowser,
+  loginWithSocketOauth,
+  storeSocketApiToken,
+} from '../../../src/secrets/login.mjs'
 
 // vi.mock factories are hoisted above const initializers, so the mocks live
 // in vi.hoisted().
@@ -40,14 +47,6 @@ vi.mock('../../../src/secrets/keychain', () => ({
 vi.mock('../../../src/http-request/request', () => ({
   httpRequest: httpRequestMock,
 }))
-
-import { setKeychainAddon } from '../../../src/secrets/addon.mjs'
-import {
-  discoverSocketOauth,
-  loginWithBrowser,
-  loginWithSocketOauth,
-  storeSocketApiToken,
-} from '../../../src/secrets/login.mjs'
 
 afterEach(() => {
   vi.clearAllMocks()

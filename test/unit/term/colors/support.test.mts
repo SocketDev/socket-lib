@@ -20,7 +20,7 @@ import {
   toColorCapability,
   toColorPalette,
 } from '../../../../src/term/colors/support.mjs'
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 const NO_COLOR_CAPABILITY = {
   has16m: false,
@@ -31,6 +31,19 @@ const NO_COLOR_CAPABILITY = {
 }
 
 describe('term/colors/support', () => {
+  beforeEach(() => {
+    vi.stubEnv('TERM', 'xterm-256color')
+    vi.stubEnv('CI', undefined)
+    vi.stubEnv('FORCE_COLOR', undefined)
+    vi.stubEnv('NO_COLOR', undefined)
+    vi.stubEnv('TF_BUILD', undefined)
+    vi.stubEnv('TEAMCITY_VERSION', undefined)
+  })
+
+  afterEach(() => {
+    vi.unstubAllEnvs()
+  })
+
   describe('toColorPalette', () => {
     it('maps every level to its palette name', () => {
       expect(toColorPalette(0)).toBe('none')

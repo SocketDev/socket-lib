@@ -11,6 +11,8 @@
  *     resolution across Socket tools.
  */
 
+import { normalizePath } from '../../../src/paths/normalize.mjs'
+
 import { getSocketUserDir as getSocketUserDirStable } from '@socketsecurity/lib-stable/paths/socket'
 
 import {
@@ -354,7 +356,7 @@ describe('paths/socket', () => {
     it('should nest the app DB inside _state', () => {
       const result = getSocketStateDbPath('wheelhouse')
       expect(result).toContain('.socket/_state')
-      expect(result).toMatch(/\/_state\/wheelhouse\.sqlite$/)
+      expect(normalizePath(result)).toMatch(/\/_state\/wheelhouse\.sqlite$/)
     })
 
     it('should honor the _state dir override', () => {
@@ -372,7 +374,7 @@ describe('paths/socket', () => {
 
     it('should nest under the _state dir', () => {
       const result = getSocketAppStateDir('sockeye')
-      expect(result).toMatch(/\/_state\/sockeye$/)
+      expect(normalizePath(result)).toMatch(/\/_state\/sockeye$/)
     })
   })
 
@@ -384,7 +386,7 @@ describe('paths/socket', () => {
 
     it('should end with the app state dir + /run', () => {
       const runDir = getSocketAppRuntimeDir('sockeye')
-      expect(runDir).toMatch(/\/_state\/sockeye\/run$/)
+      expect(normalizePath(runDir)).toMatch(/\/_state\/sockeye\/run$/)
     })
   })
 
@@ -406,7 +408,7 @@ describe('paths/socket', () => {
       setEnv('XDG_RUNTIME_DIR', undefined)
       setPath('tmpdir', '/tmp/run')
       const result = getRuntimeSocketPath('sockeye')
-      expect(result).toMatch(/^\/tmp\/run\/sockeye-\d+\.sock$/)
+      expect(normalizePath(result)).toMatch(/^\/tmp\/run\/sockeye-\d+\.sock$/)
     })
   })
 

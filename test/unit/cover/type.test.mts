@@ -11,6 +11,8 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { spawn } from '../../../src/process/spawn/child.mjs'
+import { getTypeCoverage } from '../../../src/cover/type.mjs'
 
 // Mock via the src/ relative path so vitest intercepts the same
 // module instance that src/cover/type.ts imports (which uses
@@ -18,9 +20,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 // vitest's threaded-pool dedup gaps. See:
 // test/unit/releases/*.test.mts for the canonical pattern.
 vi.mock(import('../../../src/process/spawn/child.mjs'))
-
-import { spawn } from '../../../src/process/spawn/child.mjs'
-import { getTypeCoverage } from '../../../src/cover/type.mjs'
 
 describe('cover/type', () => {
   beforeEach(() => {

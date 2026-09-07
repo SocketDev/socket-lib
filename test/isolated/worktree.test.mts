@@ -47,7 +47,7 @@ afterEach(() => {
   safeDeleteSync(tmpRoot)
 })
 
-describe.sequential('git', () => {
+describe('git', { concurrent: false }, () => {
   test('returns trimmed stdout for a successful command', () => {
     const out = git(repo, 'rev-parse', '--abbrev-ref', 'HEAD')
     expect(out).toBe('main')
@@ -59,7 +59,7 @@ describe.sequential('git', () => {
   })
 })
 
-describe.sequential('currentBranch', () => {
+describe('currentBranch', { concurrent: false }, () => {
   test('returns the current branch name', () => {
     expect(currentBranch(repo)).toBe('main')
   })
@@ -70,7 +70,7 @@ describe.sequential('currentBranch', () => {
   })
 })
 
-describe.sequential('tryGit', () => {
+describe('tryGit', { concurrent: false }, () => {
   test('ok=true with output for a successful command', () => {
     const r = tryGit(repo, 'rev-parse', '--show-toplevel')
     expect(r.ok).toBe(true)
@@ -98,7 +98,7 @@ describe.sequential('tryGit', () => {
   })
 })
 
-describe.sequential('hasCommittedChanges', () => {
+describe('hasCommittedChanges', { concurrent: false }, () => {
   test('returns false on a fresh worktree with no commits past the base', () => {
     expect(hasCommittedChanges(repo, 'main')).toBe(false)
   })
@@ -115,7 +115,7 @@ describe.sequential('hasCommittedChanges', () => {
   })
 })
 
-describe.sequential('hasStagedOrUnstaged', () => {
+describe('hasStagedOrUnstaged', { concurrent: false }, () => {
   test('returns false on a clean working tree', () => {
     expect(hasStagedOrUnstaged(repo)).toBe(false)
   })
@@ -132,7 +132,7 @@ describe.sequential('hasStagedOrUnstaged', () => {
   })
 })
 
-describe.sequential('spawnAiAgentsInWorktrees', () => {
+describe('spawnAiAgentsInWorktrees', { concurrent: false }, () => {
   test('throws when baseRepo is not a git checkout', async () => {
     const notARepo = path.join(tmpRoot, 'not-a-repo')
     mkdirSync(notARepo, { recursive: true })

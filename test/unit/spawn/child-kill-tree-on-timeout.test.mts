@@ -9,10 +9,11 @@
  */
 
 import process from 'node:process'
-
 import { describe, expect } from 'vitest'
-
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
+import { spawn } from '../../../src/process/spawn/child.mjs'
+import { isProcessAlive } from '../../../src/process/spawn/kill-tree.mjs'
+import { itUnixOnly } from '../util/skip-helpers.mjs'
 
 // `tolerantSleep` returns a platform-adjusted BUDGET in ms, not a promise, so
 // awaiting it directly resolves on the next tick and the delay never happens.
@@ -21,11 +22,6 @@ function sleepFor(ms: number): Promise<void> {
     setTimeout(resolve, tolerantSleep(ms))
   })
 }
-
-import { spawn } from '../../../src/process/spawn/child.mjs'
-import { isProcessAlive } from '../../../src/process/spawn/kill-tree.mjs'
-
-import { itUnixOnly } from '../util/skip-helpers.mjs'
 
 // Print the background pid, then outlive the timeout so it always fires.
 const TREE_SCRIPT = 'sleep 30 & echo $!; wait'

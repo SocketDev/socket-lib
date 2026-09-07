@@ -7,10 +7,7 @@ import {
 } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-// `describe.sequential` because the source uses module-scoped state
-// (`inProcessCache`) and these tests rely on a shared `tmpRoot` cleared
-// in beforeEach/afterEach. Concurrent tests would race on the dir +
-// the global cache, producing flaky ENOENTs.
+// Tests run sequentially because they share temporary files and the discovery cache.
 import { afterEach, beforeEach, describe, expect, test } from 'vitest'
 
 import {

@@ -17,20 +17,9 @@ import {
 } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { afterAll, describe, expect, it } from 'vitest'
-
 import { safeDelete } from '../../../src/fs/safe.mjs'
 import { withEnvSync } from '../../../src/env/rewire.mjs'
-
-const tmpDirs: string[] = []
-
-afterAll(async () => {
-  for (const dir of tmpDirs.splice(0)) {
-    await safeDelete(dir)
-  }
-})
-
 import {
   assertNodeStripTypesSupported,
   buildManifest,
@@ -42,6 +31,14 @@ import {
   writeWrapperPosix,
   writeWrapperWindows,
 } from '../../../src/native-messaging/install.mjs'
+
+const tmpDirs: string[] = []
+
+afterAll(async () => {
+  for (const dir of tmpDirs.splice(0)) {
+    await safeDelete(dir)
+  }
+})
 
 describe('buildManifest', () => {
   it('returns the canonical Chrome native-host manifest shape', () => {

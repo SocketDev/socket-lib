@@ -10,10 +10,14 @@
 import { mkdtempSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { afterAll, describe, expect, it, vi } from 'vitest'
-
 import { safeDelete } from '../../../src/fs/safe.mjs'
+import {
+  assertNodeStripTypesSupported,
+  chromeManifestDirs,
+  installNativeHost,
+} from '../../../src/native-messaging/install.mjs'
+import { withEnvSync } from '../../../src/env/rewire.mjs'
 
 vi.mock(import('../../../src/constants/node.mjs'), async importOriginal => ({
   ...(await importOriginal()),
@@ -29,13 +33,6 @@ vi.mock(
     isWin32: () => false,
   }),
 )
-
-import {
-  assertNodeStripTypesSupported,
-  chromeManifestDirs,
-  installNativeHost,
-} from '../../../src/native-messaging/install.mjs'
-import { withEnvSync } from '../../../src/env/rewire.mjs'
 
 const tmpDirs: string[] = []
 

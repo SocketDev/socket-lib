@@ -346,55 +346,59 @@ describe('Logger methods', () => {
     })
   })
 
-  describe.sequential('indentation with stream-bound loggers', () => {
-    it('should only affect stderr when dedenting stderr logger', () => {
-      harness.testLogger.indent()
-      harness.testLogger.indent()
-      harness.testLogger.stderr.dedent()
-      harness.testLogger.stderr.error('stderr 1 indent')
-      harness.testLogger.log('stdout 2 indents')
-      const errOutput = harness.stderrChunks.join('')
-      const outOutput = harness.stdoutChunks.join('')
-      expect(errOutput).toContain('  stderr 1 indent')
-      expect(outOutput).toContain('    stdout 2 indents')
-    })
+  describe(
+    'indentation with stream-bound loggers',
+    { concurrent: false },
+    () => {
+      it('should only affect stderr when dedenting stderr logger', () => {
+        harness.testLogger.indent()
+        harness.testLogger.indent()
+        harness.testLogger.stderr.dedent()
+        harness.testLogger.stderr.error('stderr 1 indent')
+        harness.testLogger.log('stdout 2 indents')
+        const errOutput = harness.stderrChunks.join('')
+        const outOutput = harness.stdoutChunks.join('')
+        expect(errOutput).toContain('  stderr 1 indent')
+        expect(outOutput).toContain('    stdout 2 indents')
+      })
 
-    it('should only affect stdout when dedenting stdout logger', () => {
-      harness.testLogger.indent()
-      harness.testLogger.indent()
-      harness.testLogger.stdout.dedent()
-      harness.testLogger.log('stdout 1 indent')
-      harness.testLogger.error('stderr 2 indents')
-      const outOutput = harness.stdoutChunks.join('')
-      const errOutput = harness.stderrChunks.join('')
-      expect(outOutput).toContain('  stdout 1 indent')
-      expect(errOutput).toContain('    stderr 2 indents')
-    })
+      it('should only affect stdout when dedenting stdout logger', () => {
+        harness.testLogger.indent()
+        harness.testLogger.indent()
+        harness.testLogger.stdout.dedent()
+        harness.testLogger.log('stdout 1 indent')
+        harness.testLogger.error('stderr 2 indents')
+        const outOutput = harness.stdoutChunks.join('')
+        const errOutput = harness.stderrChunks.join('')
+        expect(outOutput).toContain('  stdout 1 indent')
+        expect(errOutput).toContain('    stderr 2 indents')
+      })
 
-    it('should only reset stderr when calling resetIndent on stderr', () => {
-      harness.testLogger.indent()
-      harness.testLogger.stderr.resetIndent()
-      harness.testLogger.stderr.error('no indent')
-      harness.testLogger.log('has indent')
-      const errOutput = harness.stderrChunks.join('')
-      const outOutput = harness.stdoutChunks.join('')
-      expect(errOutput.trim()).toContain('no indent')
-      expect(outOutput).toContain('  has indent')
-    })
+      it('should only reset stderr when calling resetIndent on stderr', () => {
+        harness.testLogger.indent()
+        harness.testLogger.stderr.resetIndent()
+        harness.testLogger.stderr.error('no indent')
+        harness.testLogger.log('has indent')
+        const errOutput = harness.stderrChunks.join('')
+        const outOutput = harness.stdoutChunks.join('')
+        expect(errOutput.trim()).toContain('no indent')
+        expect(outOutput).toContain('  has indent')
+      })
 
-    it('should only reset stdout when calling resetIndent on stdout', () => {
-      harness.testLogger.indent()
-      harness.testLogger.stdout.resetIndent()
-      harness.testLogger.log('no indent')
-      harness.testLogger.error('has indent')
-      const outOutput = harness.stdoutChunks.join('')
-      const errOutput = harness.stderrChunks.join('')
-      expect(outOutput.trim()).toBe('no indent')
-      expect(errOutput).toContain('  has indent')
-    })
-  })
+      it('should only reset stdout when calling resetIndent on stdout', () => {
+        harness.testLogger.indent()
+        harness.testLogger.stdout.resetIndent()
+        harness.testLogger.log('no indent')
+        harness.testLogger.error('has indent')
+        const outOutput = harness.stdoutChunks.join('')
+        const errOutput = harness.stderrChunks.join('')
+        expect(outOutput.trim()).toBe('no indent')
+        expect(errOutput).toContain('  has indent')
+      })
+    },
+  )
 
-  describe.sequential('logCallCount', () => {
+  describe('logCallCount', { concurrent: false }, () => {
     it('should start at 0', () => {
       expect(harness.testLogger.logCallCount).toBe(0)
     })

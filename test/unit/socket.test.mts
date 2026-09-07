@@ -16,6 +16,8 @@
  *     Socket tool state management and caching strategies.
  */
 
+import { normalizePath } from '../../src/paths/normalize.mjs'
+
 import process from 'node:process'
 import {
   getSocketAppCacheDir,
@@ -50,9 +52,9 @@ describe('paths', () => {
       const result = getSocketHomePath()
       expect(result).not.toContain('\\')
       if (process.platform === 'win32') {
-        expect(result).toMatch(/^[A-Za-z]:\//)
+        expect(normalizePath(result)).toMatch(/^[A-Za-z]:\//)
       } else {
-        expect(result).toMatch(/^\//)
+        expect(normalizePath(result)).toMatch(/^\//)
       }
     })
   })
@@ -67,15 +69,15 @@ describe('paths', () => {
 
     it('should end with .socket directory', () => {
       const result = getSocketUserDir()
-      expect(result).toMatch(/\.socket$/)
+      expect(normalizePath(result)).toMatch(/\.socket$/)
     })
 
     it('should be absolute path', () => {
       const result = getSocketUserDir()
       if (process.platform === 'win32') {
-        expect(result).toMatch(/^[A-Za-z]:\//)
+        expect(normalizePath(result)).toMatch(/^[A-Za-z]:\//)
       } else {
-        expect(result).toMatch(/^\//)
+        expect(normalizePath(result)).toMatch(/^\//)
       }
     })
 
@@ -107,7 +109,7 @@ describe('paths', () => {
     it('should handle empty app name', () => {
       const result = getSocketAppDir('')
       expect(result).toContain('.socket/_')
-      expect(result).toMatch(/\/_$/)
+      expect(normalizePath(result)).toMatch(/\/_$/)
     })
 
     it('should handle app name with special characters', () => {
@@ -168,7 +170,7 @@ describe('paths', () => {
       const appDir = getSocketAppDir('test')
       const cacheDir = getSocketAppCacheDir('test')
       expect(cacheDir).toContain(appDir)
-      expect(cacheDir).toMatch(/cache$/)
+      expect(normalizePath(cacheDir)).toMatch(/cache$/)
     })
 
     it('should return normalized path', () => {
@@ -200,7 +202,7 @@ describe('paths', () => {
       const cacheDir = getSocketAppCacheDir('test')
       const ttlDir = getSocketAppCacheTtlDir('test')
       expect(ttlDir).toContain(cacheDir)
-      expect(ttlDir).toMatch(/ttl$/)
+      expect(normalizePath(ttlDir)).toMatch(/ttl$/)
     })
 
     it('should return normalized path', () => {
@@ -248,7 +250,7 @@ describe('paths', () => {
 
     it('should nest under the _state dir', () => {
       const result = getSocketAppStateDir('sockeye')
-      expect(result).toMatch(/\/_state\/sockeye$/)
+      expect(normalizePath(result)).toMatch(/\/_state\/sockeye$/)
     })
   })
 
@@ -260,7 +262,7 @@ describe('paths', () => {
 
     it('should end with the app state dir + /run', () => {
       const runDir = getSocketAppRuntimeDir('sockeye')
-      expect(runDir).toMatch(/\/_state\/sockeye\/run$/)
+      expect(normalizePath(runDir)).toMatch(/\/_state\/sockeye\/run$/)
     })
 
     it('should return normalized path', () => {
@@ -338,11 +340,11 @@ describe('paths', () => {
 
       if (process.platform === 'win32') {
         // Windows paths should have drive letter and forward slashes after normalization
-        expect(userDir).toMatch(/^[A-Za-z]:\//)
+        expect(normalizePath(userDir)).toMatch(/^[A-Za-z]:\//)
         expect(userDir).not.toContain('\\')
       } else {
         // Unix-like paths should start with /
-        expect(userDir).toMatch(/^\//)
+        expect(normalizePath(userDir)).toMatch(/^\//)
       }
     })
 
@@ -357,9 +359,9 @@ describe('paths', () => {
       for (let i = 0, { length } = paths; i < length; i += 1) {
         const path = paths[i]!
         if (process.platform === 'win32') {
-          expect(path).toMatch(/^[A-Za-z]:\//)
+          expect(normalizePath(path)).toMatch(/^[A-Za-z]:\//)
         } else {
-          expect(path).toMatch(/^\//)
+          expect(normalizePath(path)).toMatch(/^\//)
         }
       }
     })
@@ -429,25 +431,25 @@ describe('paths', () => {
     it('should generate correct app directory from a bare name', () => {
       const cliDir = getSocketAppDir('socket')
       expect(cliDir).toContain('_socket')
-      expect(cliDir).toMatch(/\/_socket$/)
+      expect(normalizePath(cliDir)).toMatch(/\/_socket$/)
     })
 
     it('should generate correct state directory', () => {
       const stateDir = getSocketStateDir()
       expect(stateDir).toContain('_state')
-      expect(stateDir).toMatch(/\/_state$/)
+      expect(normalizePath(stateDir)).toMatch(/\/_state$/)
     })
 
     it('should generate correct DLX directory', () => {
       const dlxDir = getSocketDlxDir()
       expect(dlxDir).toContain('_dlx')
-      expect(dlxDir).toMatch(/\/_dlx$/)
+      expect(normalizePath(dlxDir)).toMatch(/\/_dlx$/)
     })
 
     it('should generate correct cacache directory', () => {
       const cacacheDir = getSocketCacacheDir()
       expect(cacacheDir).toContain('_cacache')
-      expect(cacacheDir).toMatch(/\/_cacache$/)
+      expect(normalizePath(cacacheDir)).toMatch(/\/_cacache$/)
     })
   })
 })

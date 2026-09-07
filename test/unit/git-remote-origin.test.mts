@@ -9,8 +9,16 @@
 
 import os from 'node:os'
 import path from 'node:path'
-
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import {
+  originOwnerRepo,
+  originOwnerRepoSync,
+  originRemoteUrl,
+  originRemoteUrlSync,
+  originSlug,
+  originSlugSync,
+  urlFromResult,
+} from '../../src/git/remote.mts'
 
 // Hoisted so the mock factory, which runs before this module body, sees
 // initialized spies.
@@ -30,16 +38,6 @@ vi.mock(import('../../src/git/exec.mts'), async orig => {
     gitSync: gitSync as unknown as typeof actual.gitSync,
   }
 })
-
-import {
-  originOwnerRepo,
-  originOwnerRepoSync,
-  originRemoteUrl,
-  originRemoteUrlSync,
-  originSlug,
-  originSlugSync,
-  urlFromResult,
-} from '../../src/git/remote.mts'
 
 const REMOTE = 'git@github.com:Acme/Widgets.git'
 

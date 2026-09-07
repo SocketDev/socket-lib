@@ -1,12 +1,10 @@
 import process from 'node:process'
 import path from 'node:path'
-
 import { afterEach, describe, expect, it, vi } from 'vitest'
-
-vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'))
-
 import { spawn } from '@socketsecurity/lib-stable/process/spawn/child'
 import { runQuiet } from '../../../scripts/fleet/cover.mts'
+
+vi.mock(import('@socketsecurity/lib-stable/process/spawn/child'))
 
 describe('runQuiet', () => {
   afterEach(() => {

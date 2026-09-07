@@ -12,6 +12,7 @@ interface StdioTestContext {
   originalIsTTY: boolean | undefined
   originalColumns: number | undefined
   originalRows: number | undefined
+  originalPrototype: object | null
   writeSpy: ReturnType<typeof vi.spyOn>
   cursorToSpy?: ReturnType<typeof vi.spyOn> | undefined
   clearLineSpy?: ReturnType<typeof vi.spyOn> | undefined
@@ -30,6 +31,7 @@ export function setupStdioTest(
   const mutableStream = stream as unknown as Record<string, unknown>
 
   const context: StdioTestContext = {
+    originalPrototype: Object.getPrototypeOf(stream) as object | null,
     originalIsTTY: stream.isTTY,
     originalColumns: stream.columns,
     originalRows: stream.rows,
@@ -115,6 +117,8 @@ export function teardownStdioTest(
   context.cursorToSpy?.mockRestore()
   context.clearLineSpy?.mockRestore()
   context.clearScreenDownSpy?.mockRestore()
+
+  Object.setPrototypeOf(stream, context.originalPrototype)
 
   // Restore original properties
   Object.defineProperty(stream, 'isTTY', {

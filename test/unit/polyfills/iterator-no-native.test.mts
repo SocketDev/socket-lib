@@ -10,6 +10,7 @@
  */
 
 import { beforeAll, describe, expect, it, vi } from 'vitest'
+import type * as IteratorIndex from '../../../src/polyfills/iterator/index.mjs'
 
 vi.mock(import('../../../src/polyfills/iterator/shared.mts'), async orig => ({
   ...(await orig()),
@@ -17,8 +18,6 @@ vi.mock(import('../../../src/polyfills/iterator/shared.mts'), async orig => ({
   // against it comes back empty.
   iteratorPrototypeOf: () => Object.create(null),
 }))
-
-import type * as IteratorIndex from '../../../src/polyfills/iterator/index.mjs'
 
 let iterators: typeof IteratorIndex
 

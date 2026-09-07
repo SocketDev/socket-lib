@@ -11,10 +11,13 @@
 import { mkdtempSync, readFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { safeDelete } from '../../../src/fs/safe.mjs'
+import {
+  installNativeHost,
+  registerWindows,
+} from '../../../src/native-messaging/install.mjs'
+import { withEnvSync } from '../../../src/env/rewire.mjs'
 
 const { mockSpawnSync } = vi.hoisted(() => ({ mockSpawnSync: vi.fn() }))
 
@@ -34,12 +37,6 @@ vi.mock(
     isWin32: () => true,
   }),
 )
-
-import {
-  installNativeHost,
-  registerWindows,
-} from '../../../src/native-messaging/install.mjs'
-import { withEnvSync } from '../../../src/env/rewire.mjs'
 
 const tmpDirs: string[] = []
 

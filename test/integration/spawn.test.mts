@@ -10,6 +10,8 @@
  *     other external commands.
  */
 
+import { normalizePath } from '../../src/paths/normalize.mjs'
+
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -99,7 +101,7 @@ describe('spawn integration', () => {
       })
       expect(result.code).toBe(0)
       // macOS uses /private/tmp symlink, Windows Git Bash uses /d/tmp or similar
-      expect(result.stdout.toString().trim()).toMatch(
+      expect(normalizePath(result.stdout.toString().trim())).toMatch(
         /^(?:\/[a-z]\/tmp|\/private\/tmp|\/tmp)$/,
       )
     })

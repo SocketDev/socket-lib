@@ -1,9 +1,14 @@
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import type * as BundleConfig from '../../../scripts/repo/build-externals/config.mts'
+import {
+  buildExternals,
+  bundleAllPackages,
+} from '../../../scripts/repo/build-externals/orchestrator.mts'
+import { bundlePackage } from '../../../scripts/repo/build-externals/bundler.mts'
+import { copyLocalFiles } from '../../../scripts/repo/build-externals/copy-files.mts'
+import { transformPrimordials } from '../../../scripts/repo/build-externals/transform-primordials.mts'
 
 const fixtures = vi.hoisted(() => {
   const external: typeof BundleConfig.externalPackages = []
@@ -26,14 +31,6 @@ vi.mock(
   import('../../../scripts/repo/build-externals/transform-primordials.mts'),
   () => ({ transformPrimordials: vi.fn() }),
 )
-
-import {
-  buildExternals,
-  bundleAllPackages,
-} from '../../../scripts/repo/build-externals/orchestrator.mts'
-import { bundlePackage } from '../../../scripts/repo/build-externals/bundler.mts'
-import { copyLocalFiles } from '../../../scripts/repo/build-externals/copy-files.mts'
-import { transformPrimordials } from '../../../scripts/repo/build-externals/transform-primordials.mts'
 
 beforeEach(() => {
   fixtures.external.length = 0

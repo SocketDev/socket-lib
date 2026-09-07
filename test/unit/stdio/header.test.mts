@@ -11,8 +11,14 @@
  */
 
 import { describe, expect, it, vi } from 'vitest'
-
 import type { YoctoColors } from '../../../src/external/yoctocolors-cjs.js'
+import { stripAnsi } from '../../../src/term/ansi/strip.mjs'
+import { printFooter } from '../../../src/stdio/footer.mjs'
+import {
+  createHeader,
+  createSectionHeader,
+  printHeader,
+} from '../../../src/stdio/header.mjs'
 
 const forcedColors = vi.hoisted(() => {
   const format = (open: number, close: number) => (value: string) =>
@@ -32,14 +38,6 @@ const forcedColors = vi.hoisted(() => {
 vi.mock(import('../../../src/external/yoctocolors-cjs.js'), () => ({
   default: forcedColors as unknown as YoctoColors,
 }))
-
-import { stripAnsi } from '../../../src/term/ansi/strip.mjs'
-import { printFooter } from '../../../src/stdio/footer.mjs'
-import {
-  createHeader,
-  createSectionHeader,
-  printHeader,
-} from '../../../src/stdio/header.mjs'
 
 describe('stdio/header', () => {
   describe('createHeader', () => {
