@@ -269,33 +269,37 @@ export async function ensurePackageInstalled(
         }
       }
 
-      // If a lockfile was provided, materialize it into packageDir and
-      // drop a hardened .npmrc alongside. Arborist picks up both.
-      // Sniff: explicit { type, value } wins; bare string whose first
-      // non-whitespace character is `{` is JSON content, else a filesystem
-      // path.
-      if (install?.lockfile !== undefined) {
-        const spec = install.lockfile
-        const lockDest = path.join(packageDir, 'package-lock.json')
-        let isContent: boolean
-        let value: string
-        if (typeof spec === 'string') {
-          isContent = spec.trimStart().startsWith('{')
-          value = spec
-        } else {
-          isContent = spec.type === 'content'
-          value = spec.value
+      materializeInstallLockfile()
+
+      function materializeInstallLockfile(): void {
+        // If a lockfile was provided, materialize it into packageDir and
+        // drop a hardened .npmrc alongside. Arborist picks up both.
+        // Sniff: explicit { type, value } wins; bare string whose first
+        // non-whitespace character is `{` is JSON content, else a filesystem
+        // path.
+        if (install?.lockfile !== undefined) {
+          const spec = install.lockfile
+          const lockDest = path.join(packageDir, 'package-lock.json')
+          let isContent: boolean
+          let value: string
+          if (typeof spec === 'string') {
+            isContent = spec.trimStart().startsWith('{')
+            value = spec
+          } else {
+            isContent = spec.type === 'content'
+            value = spec.value
+          }
+          if (isContent) {
+            fs.writeFileSync(lockDest, value, 'utf8')
+          } else {
+            fs.copyFileSync(value, lockDest)
+          }
+          fs.writeFileSync(
+            path.join(packageDir, '.npmrc'),
+            'ignore-scripts=true\naudit=false\nfund=false\nsave=false\n',
+            'utf8',
+          )
         }
-        if (isContent) {
-          fs.writeFileSync(lockDest, value, 'utf8')
-        } else {
-          fs.copyFileSync(value, lockDest)
-        }
-        fs.writeFileSync(
-          path.join(packageDir, '.npmrc'),
-          'ignore-scripts=true\naudit=false\nfund=false\nsave=false\n',
-          'utf8',
-        )
       }
 
       // Install package and dependencies using Arborist, the way npx does.
@@ -333,13 +337,17 @@ export async function ensurePackageInstalled(
         // idealTree, independently of anything this code path computes)
         // before spending a firewall check or a tarball download on the
         // wrong package/version.
-        if (install?.hash !== undefined) {
-          const top = readTopLevelFromIdealTree(idealTree, packageName)
-          if (!equalHashes(install.hash, top.integrity)) {
-            throw new HashMismatchError(
-              parseHash(install.hash),
-              parseHash(top.integrity),
-            )
+        verifyInstallHash()
+
+        function verifyInstallHash(): void {
+          if (install?.hash !== undefined) {
+            const top = readTopLevelFromIdealTree(idealTree, packageName)
+            if (!equalHashes(install.hash, top.integrity)) {
+              throw new HashMismatchError(
+                parseHash(install.hash),
+                parseHash(top.integrity),
+              )
+            }
           }
         }
 

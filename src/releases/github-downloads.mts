@@ -67,18 +67,23 @@ export async function downloadGitHubRelease(
     toolPrefix,
   } = config
 
-  // Get the release tag, either the explicit one or the latest.
-  let tag: string
-  if (explicitTag) {
-    tag = explicitTag
-  } else if (toolPrefix) {
-    const latestTag = await getLatestRelease(toolPrefix, { owner, repo })
-    if (!latestTag) {
-      throw new ErrorCtor(`No ${toolPrefix} release found in ${owner}/${repo}`)
+  const tag = await resolveReleaseTag()
+
+  async function resolveReleaseTag(): Promise<string> {
+    // Get the release tag, either the explicit one or the latest.
+    if (explicitTag) {
+      return explicitTag
+    } else if (toolPrefix) {
+      const latestTag = await getLatestRelease(toolPrefix, { owner, repo })
+      if (!latestTag) {
+        throw new ErrorCtor(
+          `No ${toolPrefix} release found in ${owner}/${repo}`,
+        )
+      }
+      return latestTag
+    } else {
+      throw new ErrorCtor('Either toolPrefix or tag must be provided')
     }
-    tag = latestTag
-  } else {
-    throw new ErrorCtor('Either toolPrefix or tag must be provided')
   }
 
   const path = getNodePath()
@@ -119,23 +124,27 @@ export async function downloadGitHubRelease(
     { quiet },
   )
 
-  // Make executable on Unix-like systems.
-  const isWindows = StringPrototypeEndsWith(binaryName, '.exe')
-  if (!isWindows) {
-    fs.chmodSync(binaryPath, 0o755)
+  await prepareDownloadedBinary()
 
-    // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
-    if (
-      removeMacOSQuarantine &&
-      process.platform === 'darwin' &&
-      StringPrototypeStartsWith(platformArch, 'darwin')
-    ) {
-      try {
-        await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {
-          stdio: 'ignore',
-        })
-      } catch {
-        // Ignore errors - attribute might not exist or xattr might not be available.
+  async function prepareDownloadedBinary(): Promise<void> {
+    // Make executable on Unix-like systems.
+    const isWindows = StringPrototypeEndsWith(binaryName, '.exe')
+    if (!isWindows) {
+      fs.chmodSync(binaryPath, 0o755)
+
+      // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
+      if (
+        removeMacOSQuarantine &&
+        process.platform === 'darwin' &&
+        StringPrototypeStartsWith(platformArch, 'darwin')
+      ) {
+        try {
+          await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {
+            stdio: 'ignore',
+          })
+        } catch {
+          // Ignore errors - attribute might not exist or xattr might not be available.
+        }
       }
     }
   }

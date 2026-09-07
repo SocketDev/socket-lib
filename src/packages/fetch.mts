@@ -78,17 +78,28 @@ export async function resolveGitHubTgzUrl(
 
   /* c8 ignore start - External GitHub API calls */
   if (user && project) {
+    return await resolveTagArchive(user, project)
+  }
+
+  async function resolveTagArchive(
+    repoOwner: string,
+    repoProject: string,
+  ): Promise<string> {
     const fetcher = getFetcher()
     let apiUrl = ''
     if (isGitHubUrl) {
-      apiUrl = gitHubTagRefUrl(user, project, parsedSpec.gitCommittish || '')
+      apiUrl = gitHubTagRefUrl(
+        repoOwner,
+        repoProject,
+        parsedSpec.gitCommittish || '',
+      )
     } else {
       const versionStr = version as string
       // First try to resolve the sha for a tag starting with "v", e.g. v1.2.3.
-      apiUrl = gitHubTagRefUrl(user, project, `v${versionStr}`)
+      apiUrl = gitHubTagRefUrl(repoOwner, repoProject, `v${versionStr}`)
       if (!(await fetcher(apiUrl, { method: 'head' })).ok) {
         // If a sha isn't found, try again with the "v" removed, e.g. 1.2.3.
-        apiUrl = gitHubTagRefUrl(user, project, versionStr)
+        apiUrl = gitHubTagRefUrl(repoOwner, repoProject, versionStr)
         if (!(await fetcher(apiUrl, { method: 'head' })).ok) {
           apiUrl = ''
         }
@@ -113,9 +124,10 @@ export async function resolveGitHubTgzUrl(
       }
       const sha = json?.object?.sha
       if (sha) {
-        return gitHubTgzUrl(user, project, sha)
+        return gitHubTgzUrl(repoOwner, repoProject, sha)
       }
     }
+    return ''
   }
   /* c8 ignore stop */
   return ''

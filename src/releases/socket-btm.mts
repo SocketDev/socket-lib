@@ -222,14 +222,20 @@ export async function downloadSocketBtmRelease(
   // Auto-generate toolPrefix from tool name (follows socket-btm tag pattern: {tool}-{date}-{commit})
   const toolPrefix = `${tool}-`
 
-  let downloadConfig: DownloadGitHubReleaseConfig
+  const downloadConfig =
+    options && 'asset' in options
+      ? await resolveAssetDownloadConfig(options)
+      : await resolveBinaryDownloadConfig()
 
-  // Infer type from presence of 'asset' field
-  if (options && 'asset' in options) {
+  return await downloadGitHubRelease(downloadConfig)
+
+  async function resolveAssetDownloadConfig(
+    assetOptions: SocketBtmReleaseConfig,
+  ): Promise<DownloadGitHubReleaseConfig> {
     // Asset download
     const assetConfig = {
       __proto__: null,
-      ...(options as SocketBtmAssetConfig),
+      ...assetOptions,
     } as SocketBtmAssetConfig
     const { asset, output, removeMacOSQuarantine = false } = assetConfig
 
@@ -285,7 +291,7 @@ export async function downloadSocketBtmRelease(
     // For non-binary assets, use a simple 'assets' directory instead of platform-arch
     const platformArch = 'assets'
 
-    downloadConfig = {
+    return {
       owner: SOCKET_BTM_REPO.owner,
       repo: SOCKET_BTM_REPO.repo,
       ...(cwd !== undefined && { cwd }),
@@ -299,7 +305,9 @@ export async function downloadSocketBtmRelease(
       quiet,
       removeMacOSQuarantine,
     }
-  } else {
+  }
+
+  async function resolveBinaryDownloadConfig(): Promise<DownloadGitHubReleaseConfig> {
     // Binary download
     const binaryConfig = {
       __proto__: null,
@@ -347,7 +355,7 @@ export async function downloadSocketBtmRelease(
       getNodePrebuildAssetName(resolvedTag, targetPlatform, targetArch, libc),
     ]
 
-    downloadConfig = {
+    return {
       owner: SOCKET_BTM_REPO.owner,
       repo: SOCKET_BTM_REPO.repo,
       ...(cwd !== undefined && { cwd }),
@@ -362,6 +370,4 @@ export async function downloadSocketBtmRelease(
       removeMacOSQuarantine,
     }
   }
-
-  return await downloadGitHubRelease(downloadConfig)
 }

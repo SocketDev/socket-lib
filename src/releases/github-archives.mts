@@ -69,19 +69,28 @@ export async function downloadAndExtractArchive(
 
   await safeMkdir(outputDir)
 
-  // Determine file extension from pattern or format
-  let ext = '.archive'
-  if (format) {
-    ext = format === 'tar.gz' ? '.tar.gz' : `.${format}`
-  } else if (typeof assetPattern === 'string') {
-    const detectedFormat = detectArchiveFormat(assetPattern)
-    if (detectedFormat) {
-      ext = detectedFormat === 'tar.gz' ? '.tar.gz' : `.${detectedFormat}`
+  const archiveExtension = getArchiveExtension()
+
+  function getArchiveExtension(): string {
+    // Determine file extension from pattern or format
+    let ext = '.archive'
+    if (format) {
+      ext = format === 'tar.gz' ? '.tar.gz' : `.${format}`
+    } else if (typeof assetPattern === 'string') {
+      const detectedFormat = detectArchiveFormat(assetPattern)
+      if (detectedFormat) {
+        ext = detectedFormat === 'tar.gz' ? '.tar.gz' : `.${detectedFormat}`
+      }
     }
+
+    return ext
   }
 
   // Download archive to temporary location
-  const archivePath = path.join(outputDir, `__temp_download__${ext}`)
+  const archivePath = path.join(
+    outputDir,
+    `__temp_download__${archiveExtension}`,
+  )
 
   if (!quiet) {
     logger.info(`Downloading archive from release ${tag}...`)
