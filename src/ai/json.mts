@@ -21,22 +21,13 @@ export function closeUnbalancedJson(raw: string): string | undefined {
     return undefined
   }
   const stack: string[] = []
-  let inString = false
-  let escaped = false
   for (let i = start, { length } = raw; i < length; i += 1) {
     const char = raw[i]!
-    if (inString) {
-      if (escaped) {
-        escaped = false
-      } else if (char === '\\') {
-        escaped = true
-      } else if (char === '"') {
-        inString = false
-      }
-      continue
-    }
     if (char === '"') {
-      inString = true
+      i = findJsonStringEnd(raw, i + 1)
+      if (i === -1) {
+        return undefined
+      }
     } else if (char === '{') {
       stack.push('}')
     } else if (char === '[') {
@@ -50,7 +41,7 @@ export function closeUnbalancedJson(raw: string): string | undefined {
       }
     }
   }
-  if (inString || stack.length === 0) {
+  if (stack.length === 0) {
     return undefined
   }
   return raw.slice(start) + arrayToReversed(stack).join('')
@@ -124,6 +115,17 @@ export function findCanonicalKey(
  * strict parse already failed, so a legitimate curly quote inside a string
  * value can at worst leave the reply as unparseable as it started.
  */
+export function findJsonStringEnd(raw: string, start: number): number {
+  for (let index = start; index < raw.length; index += 1) {
+    if (raw[index] === '\\') {
+      index += 1
+    } else if (raw[index] === '"') {
+      return index
+    }
+  }
+  return -1
+}
+
 export function normalizeJsonPunctuation(raw: string): string {
   return raw
     .replaceAll('\u{FF0C}', ',')

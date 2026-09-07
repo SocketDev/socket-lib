@@ -75,43 +75,36 @@ const VERIFY_BASH_ALLOW = [
  * tier's tool surface.
  */
 export const AI_PROFILE = {
-  read: {
-    allow: [],
-    disallow: ['Agent', 'Bash', 'Edit', 'Write'],
-    permissionMode: 'dontAsk',
-    tools: ['Glob', 'Grep', 'Read', 'WebFetch', 'WebSearch'],
-  },
-  // No Write: edits land in existing files, never create new ones.
-  edit: {
-    allow: [],
-    disallow: ['Agent', 'Bash', 'WebFetch', 'WebSearch', 'Write'],
-    permissionMode: 'acceptEdits',
-    tools: ['Edit', 'Glob', 'Grep', 'Read'],
-  },
-  // Write added: may create files. Bash still denied.
   create: {
     allow: [],
     disallow: ['Agent', 'Bash', 'WebFetch', 'WebSearch'],
     permissionMode: 'acceptEdits',
     tools: ['Edit', 'Glob', 'Grep', 'Read', 'Write'],
   },
-  // `.create` + a READ-ONLY Bash allowlist: run code / tests / inspect git, so
-  // the agent can self-verify what it authored — but NO `git add`/`git commit`,
-  // so it cannot land. The verify-without-trust-to-commit tier.
-  verify: {
-    allow: [...VERIFY_BASH_ALLOW],
-    disallow: ['Agent', 'WebFetch', 'WebSearch'],
+  edit: {
+    allow: [],
+    disallow: ['Agent', 'Bash', 'WebFetch', 'WebSearch', 'Write'],
     permissionMode: 'acceptEdits',
-    tools: ['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Write'],
+    tools: ['Edit', 'Glob', 'Grep', 'Read'],
   },
-  // `.verify` + the MUTATING git commands + `pnpm exec`; anything else denied.
-  // Composed from the BASH_ALLOW blocks so the surface stays one source.
   full: {
     allow: [
       ...VERIFY_BASH_ALLOW,
       ...BASH_ALLOW.gitWrite,
       ...BASH_ALLOW.pkgExec,
     ],
+    disallow: ['Agent', 'WebFetch', 'WebSearch'],
+    permissionMode: 'acceptEdits',
+    tools: ['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Write'],
+  },
+  read: {
+    allow: [],
+    disallow: ['Agent', 'Bash', 'Edit', 'Write'],
+    permissionMode: 'dontAsk',
+    tools: ['Glob', 'Grep', 'Read', 'WebFetch', 'WebSearch'],
+  },
+  verify: {
+    allow: [...VERIFY_BASH_ALLOW],
     disallow: ['Agent', 'WebFetch', 'WebSearch'],
     permissionMode: 'acceptEdits',
     tools: ['Bash', 'Edit', 'Glob', 'Grep', 'Read', 'Write'],
