@@ -93,176 +93,11 @@ export async function processDirectory(
         fixedCount += await processDirectory(fullPath, { verbose })
       } else if (entry.isFile() && entry.name.endsWith('.js')) {
         const content = await fs.readFile(fullPath, 'utf8')
-        const s = new MagicString(content)
-        let modified = false
-
-        // Check if this is a single default export with __toCommonJS pattern
-        if (
-          content.includes('module.exports = __toCommonJS(') &&
-          content.includes('default: () => ')
-        ) {
-          // Parse AST to find the export pattern and value identifier
-          try {
-            const ast = parse(content, {
-              sourceType: 'module',
-              plugins: [],
-            })
-
-            let valueIdentifier = undefined
-            let exportCallStart = undefined
-            let exportCallEnd = undefined
-            let toCommonJSStart = undefined
-            let toCommonJSEnd = undefined
-
-            // Find __export call with default export
-            const walk = (value: unknown): void => {
-              if (!isAstNode(value)) {
-                return
-              }
-              const node = value
-
-              // Look for: __export(name, { default: () => value_identifier })
-              if (
-                node.type === 'CallExpression' &&
-                node.callee?.type === 'Identifier' &&
-                node.callee.name === '__export' &&
-                node.arguments?.length === 2 &&
-                node.arguments[1]?.type === 'ObjectExpression'
-              ) {
-                const defaultProp = node.arguments[1]?.properties?.find(
-                  p =>
-                    p?.type === 'ObjectProperty' &&
-                    p.key?.name === 'default' &&
-                    p.value?.type === 'ArrowFunctionExpression',
-                )
-                if (defaultProp?.value?.body?.name) {
-                  valueIdentifier = defaultProp.value.body.name
-                  exportCallStart = node.start
-                  exportCallEnd = node.end
-                }
-              }
-
-              // Look for: module.exports = __toCommonJS(name)
-              if (
-                node.type === 'AssignmentExpression' &&
-                node.left?.type === 'MemberExpression' &&
-                node.left.object?.name === 'module' &&
-                node.left.property?.name === 'exports' &&
-                node.right?.type === 'CallExpression' &&
-                node.right.callee?.name === '__toCommonJS'
-              ) {
-                toCommonJSStart = node.start
-                toCommonJSEnd = node.end
-              }
-
-              // Recursively walk. Entries rather than keys so the child is
-              // read without indexing back into a node that declares no index
-              // signature; `walk` narrows each one itself.
-              const childEntries = Object.entries(node)
-              for (let i = 0, { length } = childEntries; i < length; i += 1) {
-                const { 0: key, 1: child } = childEntries[i]!
-                if (key === 'end' || key === 'loc' || key === 'start') {
-                  continue
-                }
-                if (Array.isArray(child)) {
-                  for (const item of child) {
-                    walk(item)
-                  }
-                } else {
-                  walk(child)
-                }
-              }
-            }
-
-            walk(ast.program)
-
-            // Each end offset is assigned in the same branch as its start, so
-            // naming all four here is what types the offsets as numbers below.
-            if (
-              valueIdentifier &&
-              exportCallStart !== undefined &&
-              exportCallEnd !== undefined &&
-              toCommonJSStart !== undefined &&
-              toCommonJSEnd !== undefined
-            ) {
-              // Remove the __export call and surrounding statement
-              // Find the semicolon and newline after the call
-              let removeEnd = exportCallEnd
-              while (
-                removeEnd < content.length &&
-                (content[removeEnd] === '\n' || content[removeEnd] === ';')
-              ) {
-                removeEnd++
-              }
-              s.remove(exportCallStart, removeEnd)
-
-              // Replace the entire statement: module.exports = __toCommonJS(name);
-              // Find and include the semicolon
-              let statementEnd = toCommonJSEnd
-              while (
-                statementEnd < content.length &&
-                (content[statementEnd] === '\n' ||
-                  content[statementEnd] === ' ' ||
-                  content[statementEnd] === ';')
-              ) {
-                if (content[statementEnd] === ';') {
-                  statementEnd++
-                  break
-                }
-                statementEnd++
-              }
-              // Replace the entire statement with a comment
-              s.overwrite(
-                toCommonJSStart,
-                statementEnd,
-                '/* module.exports will be set at end of file */',
-              )
-
-              // Add module.exports at the end of the file
-              s.append(`\nmodule.exports = ${valueIdentifier};\n`)
-
-              modified = true
-            }
-          } catch {
-            // If parsing fails, skip this optimization
-          }
-        }
-
-        // SIMPLIFIED APPROACH: External packages use standard CommonJS exports.
-        // rolldown bundles them with `minify: false` producing clean `module.exports` patterns.
-        // All external packages work directly: require('./external/packagename')
-        // NO .default references needed - internal code uses them as-is.
-
-        // Fix relative paths ONLY for files in the root dist directory
-        const isRootFile = path.dirname(fullPath) === distDir
-        if (
-          isRootFile &&
-          (content.includes('require("../') || content.includes("require('../"))
-        ) {
-          let pos = 0
-          while ((pos = content.indexOf('require("../', pos)) !== -1) {
-            s.overwrite(
-              pos + 'require("'.length,
-              pos + 'require("../'.length,
-              './',
-            )
-            pos += 1
-            modified = true
-          }
-          pos = 0
-          while ((pos = content.indexOf("require('../", pos)) !== -1) {
-            s.overwrite(
-              pos + "require('".length,
-              pos + "require('../".length,
-              './',
-            )
-            pos += 1
-            modified = true
-          }
-        }
-
-        if (modified) {
-          await fs.writeFile(fullPath, s.toString())
+        const rewritten = rewriteCommonJsExports(content, {
+          rootFile: path.dirname(fullPath) === distDir,
+        })
+        if (rewritten !== content) {
+          await fs.writeFile(fullPath, rewritten)
           if (verbose) {
             const relativePath = path.relative(distDir, fullPath)
             logger.log(`    Fixed ${relativePath}`)
@@ -279,6 +114,165 @@ export async function processDirectory(
   }
 
   return fixedCount
+}
+
+interface ExportCall {
+  name: string
+  node: AstNode
+}
+
+interface ExportPatterns {
+  exportCall?: ExportCall | undefined
+  assignment?: AstNode | undefined
+}
+
+function defaultExportCall(node: AstNode): ExportCall | undefined {
+  if (
+    node.type !== 'CallExpression' ||
+    node.callee?.type !== 'Identifier' ||
+    node.callee.name !== '__export' ||
+    node.arguments?.length !== 2 ||
+    node.arguments[1]?.type !== 'ObjectExpression'
+  ) {
+    return undefined
+  }
+  const property = node.arguments[1].properties?.find(
+    candidate =>
+      candidate?.type === 'ObjectProperty' &&
+      candidate.key?.name === 'default' &&
+      candidate.value?.type === 'ArrowFunctionExpression',
+  )
+  const name = property?.value?.body?.name
+  if (!name) {
+    return undefined
+  }
+  const result = { __proto__: null, name, node }
+  return result
+}
+
+function findExportPatterns(value: unknown, patterns: ExportPatterns): void {
+  if (!isAstNode(value)) {
+    return
+  }
+  const exportCall = defaultExportCall(value)
+  if (exportCall) {
+    patterns.exportCall = exportCall
+  }
+  if (isCommonJsAssignment(value)) {
+    patterns.assignment = value
+  }
+  const entries = Object.entries(value)
+  for (let index = 0, { length } = entries; index < length; index += 1) {
+    const { 0: key, 1: child } = entries[index]!
+    if (key === 'end' || key === 'loc' || key === 'start') {
+      continue
+    }
+    if (Array.isArray(child)) {
+      for (const item of child) {
+        findExportPatterns(item, patterns)
+      }
+    } else {
+      findExportPatterns(child, patterns)
+    }
+  }
+}
+
+function isCommonJsAssignment(node: AstNode): boolean {
+  return (
+    node.type === 'AssignmentExpression' &&
+    node.left?.type === 'MemberExpression' &&
+    node.left.object?.name === 'module' &&
+    node.left.property?.name === 'exports' &&
+    node.right?.type === 'CallExpression' &&
+    node.right.callee?.name === '__toCommonJS'
+  )
+}
+
+function rewriteDefaultExport(content: string, output: MagicString): boolean {
+  if (
+    !content.includes('module.exports = __toCommonJS(') ||
+    !content.includes('default: () => ')
+  ) {
+    return false
+  }
+  try {
+    const ast = parse(content, { sourceType: 'module', plugins: [] })
+    const patterns: ExportPatterns = {}
+    findExportPatterns(ast.program, patterns)
+    const { exportCall, assignment } = patterns
+    if (
+      !exportCall ||
+      exportCall.node.start === undefined ||
+      exportCall.node.end === undefined ||
+      assignment?.start === undefined ||
+      assignment.end === undefined
+    ) {
+      return false
+    }
+    let removeEnd = exportCall.node.end
+    while (
+      removeEnd < content.length &&
+      (content[removeEnd] === '\n' || content[removeEnd] === ';')
+    ) {
+      removeEnd += 1
+    }
+    output.remove(exportCall.node.start, removeEnd)
+    output.overwrite(
+      assignment.start,
+      assignmentStatementEnd(content, assignment.end),
+      '/* module.exports will be set at end of file */',
+    )
+    output.append(`\nmodule.exports = ${exportCall.name};\n`)
+    return true
+  } catch {
+    return false
+  }
+}
+
+function assignmentStatementEnd(content: string, start: number): number {
+  let end = start
+  while (
+    end < content.length &&
+    (content[end] === '\n' || content[end] === ' ' || content[end] === ';')
+  ) {
+    if (content[end] === ';') {
+      return end + 1
+    }
+    end += 1
+  }
+  return end
+}
+
+function rewriteRootRequires(content: string, output: MagicString): boolean {
+  let modified = false
+  for (const quote of ['"', "'"]) {
+    const prefix = `require(${quote}`
+    const pattern = `${prefix}../`
+    let position = 0
+    while ((position = content.indexOf(pattern, position)) !== -1) {
+      output.overwrite(
+        position + prefix.length,
+        position + pattern.length,
+        './',
+      )
+      position += 1
+      modified = true
+    }
+  }
+  return modified
+}
+
+export function rewriteCommonJsExports(
+  content: string,
+  options: { rootFile?: boolean | undefined } = {},
+): string {
+  const settings = { __proto__: null, ...options }
+  const output = new MagicString(content)
+  let modified = rewriteDefaultExport(content, output)
+  if (settings.rootFile && rewriteRootRequires(content, output)) {
+    modified = true
+  }
+  return modified ? output.toString() : content
 }
 
 if (isMainModule(import.meta.url)) {

@@ -4,7 +4,10 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { processDirectory } from '../../../scripts/repo/post-build/rewrite-cjs-exports.mts'
+import {
+  processDirectory,
+  rewriteCommonJsExports,
+} from '../../../scripts/repo/post-build/rewrite-cjs-exports.mts'
 import { runWithTempDir } from '../util/temp-file-helper.mjs'
 
 const bundle =
@@ -48,5 +51,36 @@ describe('processDirectory', () => {
     await runWithTempDir(async directory => {
       expect(await processDirectory(path.join(directory, 'missing'))).toBe(0)
     }, 'rewrite-cjs-missing-')
+  })
+})
+
+describe('rewriteCommonJsExports', () => {
+  it('rewrites both require quote styles only for root files', () => {
+    const source = `const first = require('../first'); const second = require("../second");`
+    expect(rewriteCommonJsExports(source)).toBe(source)
+    expect(rewriteCommonJsExports(source, { rootFile: true })).toBe(
+      `const first = require('./first'); const second = require("./second");`,
+    )
+  })
+
+  it('preserves assignment separators before following statements', () => {
+    const source = bundle.replace(
+      '__toCommonJS(result_exports);',
+      '__toCommonJS(result_exports) \n;',
+    )
+    expect(rewriteCommonJsExports(source)).toBe(rewritten)
+  })
+
+  it('preserves the last matching default export in traversal order', () => {
+    const source = bundle.replace(
+      'var answer',
+      '__export(other_exports, { default: () => replacement });\nvar replacement = 7;\nvar answer',
+    )
+    const result = rewriteCommonJsExports(source)
+    expect(result).toContain(
+      '__export(result_exports, { default: () => answer });',
+    )
+    expect(result).not.toContain('__export(other_exports,')
+    expect(result).toContain('module.exports = replacement;')
   })
 })
