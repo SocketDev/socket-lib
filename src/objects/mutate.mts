@@ -67,10 +67,6 @@ export function merge<T extends object, U extends object>(
       Record<PropertyKey, unknown>,
     ]
 
-    if (!currentSource || !currentTarget) {
-      continue
-    }
-
     const isSourceArray = isArray(currentSource)
     const isTargetArray = isArray(currentTarget)
 
