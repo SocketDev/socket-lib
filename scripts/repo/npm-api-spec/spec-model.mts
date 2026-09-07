@@ -369,13 +369,7 @@ export function shapeEndpoint(
   const requestBody = readRecord(resolved['requestBody'])
   const requestContent = readRecord(requestBody?.['content'])
   if (requestContent) {
-    const types = Object.keys(requestContent)
-    for (let i = 0, { length } = types; i < length; i += 1) {
-      const media = readRecord(requestContent[types[i]!])
-      for (const field of extractSchemaFields(media?.['schema'])) {
-        requestFields.add(field)
-      }
-    }
+    collectMediaSchemaFields(requestContent, requestFields)
   }
   const responseFields = new Set<string>()
   const responses = readRecord(resolved['responses'])
@@ -390,13 +384,7 @@ export function shapeEndpoint(
       if (!content) {
         continue
       }
-      const types = Object.keys(content)
-      for (let j = 0, tlen = types.length; j < tlen; j += 1) {
-        const media = readRecord(content[types[j]!])
-        for (const field of extractSchemaFields(media?.['schema'])) {
-          responseFields.add(field)
-        }
-      }
+      collectMediaSchemaFields(content, responseFields)
     }
   }
   const operationId = resolved['operationId']
@@ -409,5 +397,18 @@ export function shapeEndpoint(
     responseFields: [...responseFields].toSorted(),
     sourceFile,
     summary: typeof summary === 'string' ? summary : '',
+  }
+}
+
+function collectMediaSchemaFields(
+  content: Record<string, unknown>,
+  fields: Set<string>,
+): void {
+  const types = Object.keys(content)
+  for (let i = 0, { length } = types; i < length; i += 1) {
+    const media = readRecord(content[types[i]!])
+    for (const field of extractSchemaFields(media?.['schema'])) {
+      fields.add(field)
+    }
   }
 }
