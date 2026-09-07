@@ -49,7 +49,7 @@ afterEach(async () => {
 
 // See compression.test.mts for why this suite runs sequentially: the
 // tmpDir is module-scoped and mutated in beforeEach.
-describe.sequential('compression — gzip', () => {
+describe('compression — gzip', { concurrent: false }, () => {
   describe('gzip — in-memory', () => {
     it('round-trips a string through compressGzip + decompressGzip', async () => {
       const compressed = await compressGzip(SMALL_TEXT)

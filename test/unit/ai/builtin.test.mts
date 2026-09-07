@@ -67,7 +67,7 @@ afterEach(() => {
   }
 })
 
-describe.sequential('getLanguageModel', () => {
+describe('getLanguageModel', { concurrent: false }, () => {
   it('returns the browser global without probing Node', async () => {
     const browser = factory('browser')
     setBrowserFactory(browser)

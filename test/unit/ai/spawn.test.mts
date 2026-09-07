@@ -43,7 +43,7 @@ function baseOpts(
   }
 }
 
-describe.sequential('backoffFor', () => {
+describe('backoffFor', { concurrent: false }, () => {
   test('exponential backoff: 5s / 15s / 45s', () => {
     expect(backoffFor(1)).toBe(5000)
     expect(backoffFor(2)).toBe(15_000)
@@ -55,7 +55,7 @@ describe.sequential('backoffFor', () => {
   })
 })
 
-describe.sequential('buildArgs — claude', () => {
+describe('buildArgs — claude', { concurrent: false }, () => {
   test('includes --print, permission-mode, and --add-dir', () => {
     const args = buildArgs('claude', baseOpts())
     expect(args).toContain('--print')
@@ -154,7 +154,7 @@ describe.sequential('buildArgs — claude', () => {
   })
 })
 
-describe.sequential('buildArgs — codex', () => {
+describe('buildArgs — codex', { concurrent: false }, () => {
   test('always includes --print and --cwd', () => {
     const args = buildArgs('codex', baseOpts())
     expect(args[0]).toBe('--print')
@@ -220,7 +220,7 @@ describe.sequential('buildArgs — codex', () => {
   })
 })
 
-describe.sequential('buildArgs — gemini', () => {
+describe('buildArgs — gemini', { concurrent: false }, () => {
   test('always includes --no-interactive and --workspace', () => {
     const args = buildArgs('gemini', baseOpts())
     expect(args).toContain('--no-interactive')
@@ -256,7 +256,7 @@ describe.sequential('buildArgs — gemini', () => {
   })
 })
 
-describe.sequential('buildArgs — opencode', () => {
+describe('buildArgs — opencode', { concurrent: false }, () => {
   test('always includes --print and --cwd', () => {
     const args = buildArgs('opencode', baseOpts())
     expect(args).toContain('--print')
@@ -287,7 +287,7 @@ describe.sequential('buildArgs — opencode', () => {
   })
 })
 
-describe.sequential('pickAgent', () => {
+describe('pickAgent', { concurrent: false }, () => {
   test('returns the requested agent when it is discovered', async () => {
     setupCache({ claude: '/bin/claude', codex: '/bin/codex' })
     expect(await pickAgent('codex', tmpRoot)).toBe('codex')

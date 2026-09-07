@@ -7,7 +7,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { isDebug, isDebugNs } from '../../../src/debug/namespace.mjs'
 import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 
-describe.sequential('debug/namespace', () => {
+describe('debug/namespace', { concurrent: false }, () => {
   beforeEach(() => {
     vi.stubEnv('SOCKET_DEBUG', '')
   })
