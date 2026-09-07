@@ -15,38 +15,45 @@ import { GITHUB_GRAPHQL_URL } from './constants.mjs'
 
 import type { GitHubFetchOptions } from './types.mjs'
 
+export type GraphqlRefResponse = {
+  data?:
+    | {
+        repository?:
+          | {
+              tagRef?:
+                | {
+                    target?:
+                      | {
+                          __typename: 'Tag'
+                          target?: { oid: string } | undefined
+                        }
+                      | { __typename: 'Commit'; oid: string }
+                      | null
+                      | undefined
+                  }
+                | null
+                | undefined
+              branchRef?:
+                | { target?: { oid: string } | null | undefined }
+                | null
+                | undefined
+              commit?:
+                | {
+                    __typename?: string | undefined
+                    oid?: string | undefined
+                  }
+                | null
+                | undefined
+            }
+          | null
+          | undefined
+      }
+    | undefined
+  errors?: Array<{ message: string }> | undefined
+}
+
 /**
- * Resolve a ref to its commit SHA via GraphQL.
- *
- * Why this function exists: This is the fallback that `fetchRefSha` calls when
- * the REST tier-cascade detects the "GitHub returned 200 + empty body" incident
- * shape. GraphQL hits a different backend than REST listings, so it stays
- * consistent through the kinds of incidents that produce empty REST responses.
- *
- * What it does: The REST cascade needs three separate calls (tag, branch,
- * commit) because REST has no single "resolve any ref" endpoint. GraphQL DOES —
- * `Repository.ref(qualifiedName)` resolves tags AND branches by their
- * fully-qualified name, and `Repository.object(oid)` resolves a raw commit SHA.
- * We bundle all three into ONE query using GraphQL aliases (`tagRef`,
- * `branchRef`, `commit`) and pick whichever resolved.
- *
- * Annotated vs lightweight tags: In Git, a "lightweight tag" is just a name
- * that points directly at a commit. An "annotated tag" is a separate object
- * (with tagger info, message, etc.) that itself points at the commit. GraphQL's
- * `Tag.target` field gives us the commit SHA for annotated tags in one shot —
- * REST needs a _second_ HTTP call to dereference. The `... on Tag { target {
- * oid } }` / `... on Commit { oid }` inline-fragments handle both shapes.
- *
- * Return contract:
- *
- * - Returns the SHA string when any form matches.
- * - Returns `undefined` when the ref genuinely doesn't exist as a tag, branch, OR
- *   commit. The caller treats `undefined` the same as "REST cascade also
- *   failed" — a real "ref not found".
- * - Returns `undefined` rather than throwing on transport-level failures too:
- *   non-OK HTTP, empty GraphQL body, or JSON parse error. The REST cascade's
- *   "ref not found" message is more useful to the end user than a GraphQL
- *   transport error.
+ * Resolve a ref through GraphQL, preferring tags, then branches, then commits.
  */
 export async function fetchRefShaViaGraphQL(
   owner: string,
@@ -124,84 +131,30 @@ export async function fetchRefShaViaGraphQL(
     // another transport because there isn't a third option.
     return undefined
   }
-  let parsed: {
-    data?:
-      | {
-          repository?:
-            | {
-                tagRef?:
-                  | {
-                      target?:
-                        | {
-                            __typename: 'Tag'
-                            target?: { oid: string } | undefined
-                          }
-                        | { __typename: 'Commit'; oid: string }
-                        | null
-                        | undefined
-                    }
-                  | null
-                  | undefined
-                branchRef?:
-                  | { target?: { oid: string } | null | undefined }
-                  | null
-                  | undefined
-                commit?:
-                  | {
-                      __typename?: string | undefined
-                      oid?: string | undefined
-                    }
-                  | null
-                  | undefined
-              }
-            | null
-            | undefined
-        }
-      | undefined
-    errors?: Array<{ message: string }> | undefined
-  }
+  let parsed: GraphqlRefResponse
   try {
     parsed = JSONParse(response.body.toString('utf8'))
   } catch {
     return undefined
   }
-  // GraphQL has two ways of saying "no":
-  //
-  //   1. The aliased field comes back as `null` (e.g.
-  //      `tagRef: null`). This is GraphQL's normal way of saying
-  //      "the lookup ran but found nothing." It is NOT in the
-  //      response's `errors[]` array — it's just a null in `data`.
-  //   2. A genuine error (malformed query, repo doesn't exist,
-  //      auth missing) shows up in the top-level `errors[]` array.
-  //
-  // For form-level "not found" we want behavior #1 — keep walking
-  // the alias list. We only treat `errors[]` as a hard failure if
-  // the entire `data.repository` came back null (e.g. wrong owner
-  // / repo / private and we're unauthenticated).
-  //
-  // Walk the aliases in the SAME priority order as the REST
-  // cascade (tag → branch → commit) so the function's behavior is
-  // identical to REST when both backends return data.
   const repoData = parsed.data?.repository
-  // Defensive: GraphQL endpoint always returns repository for a valid query.
-  /* c8 ignore start */
-  if (!repoData) {
-    return undefined
-  }
-  /* c8 ignore stop */
+  return repoData ? resolveGraphqlRefOid(repoData) : undefined
+}
+
+export function resolveGraphqlRefOid(
+  repoData: NonNullable<NonNullable<GraphqlRefResponse['data']>['repository']>,
+): string | undefined {
   const tagTarget = repoData.tagRef?.target
   if (tagTarget) {
     // GraphQL annotated-tag vs. lightweight-tag/commit cascade. Both
     // arms reachable depending on the ref type, but tests don't always
     // mock both.
-    /* c8 ignore start */
     if (tagTarget.__typename === 'Tag') {
       return tagTarget.target?.oid ?? undefined
     }
     if (tagTarget.__typename === 'Commit') {
       return tagTarget.oid ?? undefined
     }
-    /* c8 ignore stop */
   }
   const branchOid = repoData.branchRef?.target?.oid
   if (branchOid) {
@@ -209,10 +162,8 @@ export async function fetchRefShaViaGraphQL(
   }
   // Commit fallback fires only when neither tagRef nor branchRef yields
   // an oid; tests seed at least one of them.
-  /* c8 ignore start */
   if (repoData.commit?.__typename === 'Commit' && repoData.commit.oid) {
     return repoData.commit.oid
   }
   return undefined
-  /* c8 ignore stop */
 }
