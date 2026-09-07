@@ -4,7 +4,6 @@
  */
 
 import npmPackageArg from '../external/npm-package-arg.js'
-
 import { isWin32 } from '../constants/platform.mjs'
 import { errorMessage } from '../errors/message.mjs'
 import { isAbsolute, isPath, trimLeadingDotSlash } from '../paths/normalize.mjs'
@@ -12,19 +11,17 @@ import { getOsTmpDir } from '../paths/socket.mjs'
 import { spawn } from '../process/spawn/child.mjs'
 import { windowsShellOption } from '../process/spawn/windows-shell.mjs'
 import { readPackageJson } from './read.mjs'
-
 import type { PackageJson } from './types.mjs'
-
 import { ErrorCtor } from '../primordials/error.mjs'
-
 import { JSONParse, JSONStringify } from '../primordials/json.mjs'
-
 import { ObjectEntries } from '../primordials/object.mjs'
-
 import {
   StringPrototypeEndsWith,
   StringPrototypeStartsWith,
 } from '../primordials/string.mjs'
+import { getNodeFs } from '../node/fs.mjs'
+import { getNodePath } from '../node/path.mjs'
+
 export type IsolatePackageOptions = {
   imports?: Record<string, string> | undefined
   install?: ((cwd: string) => Promise<void>) | undefined
@@ -51,27 +48,26 @@ const FS_CP_OPTIONS = {
   ...(isWin32() ? { maxRetries: 3, retryDelay: 100 } : {}),
 }
 
-import { getNodeFs } from '../node/fs.mjs'
-import { getNodePath } from '../node/path.mjs'
+export function getIsolatedPackageScopePath(
+  packageName: string,
+  packageTempDir: string,
+): string {
+  const path = getNodePath()
+  return StringPrototypeStartsWith(packageName, '@')
+    ? path.join(packageTempDir, 'node_modules', packageName.split('/')[0] ?? '')
+    : path.join(packageTempDir, 'node_modules')
+}
 
-/**
- * Isolates a package in a temporary test environment.
- *
- * Supports multiple input types: 1. Absolute or relative file system path 2.
- * Package name with optional version spec 3. npm package spec (parsed via
- * npm-package-arg)
- *
- * @throws {Error} When package installation or setup fails.
- */
-export async function isolatePackage(
+export async function getIsolatedPackageSource(
   packageSpec: string,
-  options?: IsolatePackageOptions | undefined,
-): Promise<IsolatePackageResult> {
+  optSourcePath: string | undefined,
+): Promise<{
+  packageName: string
+  sourcePath: string | undefined
+  spec: string | undefined
+}> {
   const fs = getNodeFs()
   const path = getNodePath()
-  const opts = { __proto__: null, ...options } as IsolatePackageOptions
-  const { imports, install, onPackageJson, sourcePath: optSourcePath } = opts
-
   let sourcePath = optSourcePath
   let packageName: string | undefined
   let spec: string | undefined
@@ -125,6 +121,33 @@ export async function isolatePackage(
   if (!packageName) {
     throw new ErrorCtor(`Could not determine package name from: ${packageSpec}`)
   }
+
+  const source = { __proto__: null, packageName, sourcePath, spec }
+  return source
+}
+
+/**
+ * Isolates a package in a temporary test environment.
+ *
+ * Supports multiple input types: 1. Absolute or relative file system path 2.
+ * Package name with optional version spec 3. npm package spec (parsed via
+ * npm-package-arg)
+ *
+ * @throws {Error} When package installation or setup fails.
+ */
+export async function isolatePackage(
+  packageSpec: string,
+  options?: IsolatePackageOptions | undefined,
+): Promise<IsolatePackageResult> {
+  const fs = getNodeFs()
+  const path = getNodePath()
+  const opts = { __proto__: null, ...options } as IsolatePackageOptions
+  const { imports, install, onPackageJson } = opts
+
+  const { packageName, sourcePath, spec } = await getIsolatedPackageSource(
+    packageSpec,
+    opts.sourcePath,
+  )
 
   // Create temp directory for this package.
   const sanitizedName = packageName.replace(/[@/]/g, '-')
@@ -193,13 +216,7 @@ export async function isolatePackage(
       )
     }
 
-    const scopedPath = StringPrototypeStartsWith(packageName, '@')
-      ? path.join(
-          packageTempDir,
-          'node_modules',
-          packageName.split('/')[0] ?? '',
-        )
-      : path.join(packageTempDir, 'node_modules')
+    const scopedPath = getIsolatedPackageScopePath(packageName, packageTempDir)
 
     await fs.promises.mkdir(scopedPath, { recursive: true })
     installedPath = path.join(packageTempDir, 'node_modules', packageName)

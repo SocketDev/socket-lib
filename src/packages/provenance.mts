@@ -216,7 +216,7 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
   // Find the first attestation with valid provenance data.
   const provenance = findProvenance(attestations)
   if (!provenance) {
-    return { level: 'attested' }
+    return { __proto__: null, level: 'attested' }
   }
 
   const provenanceData = provenance as {
@@ -242,19 +242,20 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
         }
       | undefined
   }
-  const { externalParameters, predicate } = provenanceData
+  const { predicate } = provenanceData
+  const externalParameters = provenanceData.externalParameters ?? {}
   const def = predicate?.buildDefinition
 
   // Handle both SLSA v0.2, which uses direct properties, and v1, which nests
   // them under a workflow object.
-  const workflow = externalParameters?.workflow
-  const workflowRef = workflow?.ref || externalParameters?.workflow_ref
-  const workflowUrl = externalParameters?.context
+  const workflow = externalParameters.workflow ?? {}
+  const workflowRef = workflow.ref || externalParameters.workflow_ref
+  const workflowUrl = externalParameters.context
   const workflowPlatform = def?.buildType
-  const repository = workflow?.repository || externalParameters?.repository
-  const gitRef = externalParameters?.ref || workflow?.ref
-  const commitSha = externalParameters?.sha
-  const workflowRunId = externalParameters?.run_id
+  const repository = workflow.repository || externalParameters.repository
+  const gitRef = externalParameters.ref || workflow.ref
+  const commitSha = externalParameters.sha
+  const workflowRunId = externalParameters.run_id
 
   // Check for trusted publishers (GitHub Actions, GitLab CI/CD).
   const trusted =
@@ -264,6 +265,7 @@ export function getProvenanceDetails(attestationData: unknown): unknown {
     isTrustedPublisher(repository)
 
   return {
+    __proto__: null,
     commitSha,
     gitRef,
     level: trusted ? 'trusted' : 'attested',

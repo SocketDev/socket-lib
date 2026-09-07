@@ -211,8 +211,14 @@ export async function downloadSocketBtmRelease(
 ): Promise<string> {
   const downloadConfig =
     options && 'asset' in options
-      ? await getSocketBtmAssetDownloadConfig(tool, options)
-      : await getSocketBtmBinaryDownloadConfig(tool, options)
+      ? await getSocketBtmAssetDownloadConfig(
+          tool,
+          options as SocketBtmAssetConfig,
+        )
+      : await getSocketBtmBinaryDownloadConfig(
+          tool,
+          options as SocketBtmBinaryConfig | undefined,
+        )
   return await downloadGitHubRelease(downloadConfig)
 }
 
@@ -220,12 +226,8 @@ export async function getSocketBtmAssetDownloadConfig(
   tool: string,
   options: SocketBtmAssetConfig,
 ): Promise<DownloadGitHubReleaseConfig> {
-  const {
-    cwd,
-    downloadDir,
-    quiet = false,
-    tag,
-  } = { __proto__: null, ...options }
+  const config = { __proto__: null, ...options }
+  const { cwd, downloadDir, quiet = false, tag } = config
   const toolPrefix = `${tool}-`
   // Asset download
   const assetConfig = {
@@ -286,7 +288,7 @@ export async function getSocketBtmAssetDownloadConfig(
   // For non-binary assets, use a simple 'assets' directory instead of platform-arch
   const platformArch = 'assets'
 
-  return {
+  const downloadConfig = {
     __proto__: null,
     owner: SOCKET_BTM_REPO.owner,
     repo: SOCKET_BTM_REPO.repo,
@@ -301,18 +303,15 @@ export async function getSocketBtmAssetDownloadConfig(
     quiet,
     removeMacOSQuarantine,
   }
+  return downloadConfig
 }
 
 export async function getSocketBtmBinaryDownloadConfig(
   tool: string,
   options: SocketBtmBinaryConfig | undefined,
 ): Promise<DownloadGitHubReleaseConfig> {
-  const {
-    cwd,
-    downloadDir,
-    quiet = false,
-    tag,
-  } = { __proto__: null, ...options }
+  const config = { __proto__: null, ...options }
+  const { cwd, downloadDir, quiet = false, tag } = config
   const toolPrefix = `${tool}-`
   // Binary download
   const binaryConfig = {
@@ -361,7 +360,7 @@ export async function getSocketBtmBinaryDownloadConfig(
     getNodePrebuildAssetName(resolvedTag, targetPlatform, targetArch, libc),
   ]
 
-  return {
+  const downloadConfig = {
     __proto__: null,
     owner: SOCKET_BTM_REPO.owner,
     repo: SOCKET_BTM_REPO.repo,
@@ -376,4 +375,5 @@ export async function getSocketBtmBinaryDownloadConfig(
     quiet,
     removeMacOSQuarantine,
   }
+  return downloadConfig
 }

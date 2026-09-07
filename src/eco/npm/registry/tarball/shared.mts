@@ -87,7 +87,14 @@ export function getTarExtractLimits(options: ExtractOptions | undefined): {
     maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
     strip = 0,
   } = { __proto__: null, ...options } as ExtractOptions
-  return { __proto__: null, maxEntries, maxFileSize, maxTotalSize, strip }
+  const limits = {
+    __proto__: null,
+    maxEntries,
+    maxFileSize,
+    maxTotalSize,
+    strip,
+  }
+  return limits
 }
 
 export function isGzipBytes(bytes: Uint8Array): boolean {

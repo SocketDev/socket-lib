@@ -357,6 +357,12 @@ export function hasProvenance(versionEntry: PackumentVersion): boolean {
  *
  * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
+export function isProvenanceObject(
+  value: unknown,
+): value is Record<string, unknown> {
+  return value !== undefined && value !== null && typeof value === 'object'
+}
+
 export async function isVersionPublished(
   name: string,
   version: string,
@@ -413,40 +419,25 @@ export function parseProvenancePredicate(
   bundle: unknown,
 ): ProvenancePredicate | undefined {
   if (
-    bundle === undefined ||
-    bundle === null ||
-    typeof bundle !== 'object' ||
+    !isProvenanceObject(bundle) ||
     !('attestations' in bundle) ||
     !Array.isArray((bundle as AttestationBundle).attestations)
   ) {
     return undefined
   }
-  const { attestations } = bundle as AttestationBundle
-  // The Array.isArray guard above already narrows `attestations` to a real
-  // array, and even an empty array is truthy, so this falsy-check can never
-  // take its true branch at run time. It stays only to satisfy the optional
-  // `attestations?: ... | undefined` field type.
-  /* c8 ignore start - unreachable behind the Array.isArray guard above. */
-  if (!attestations) {
-    return undefined
-  }
-  /* c8 ignore stop */
+  const attestations = (bundle as AttestationBundle).attestations!
   for (const entry of attestations) {
     if (entry.predicateType !== SLSA_PROVENANCE_TYPE) {
       continue
     }
     const b = entry.bundle
-    if (b === undefined || b === null || typeof b !== 'object') {
+    if (!isProvenanceObject(b)) {
       continue
     }
     const verificationMaterial = (
       b as { verificationMaterial?: unknown | undefined }
     ).verificationMaterial
-    if (
-      verificationMaterial === undefined ||
-      verificationMaterial === null ||
-      typeof verificationMaterial !== 'object'
-    ) {
+    if (!isProvenanceObject(verificationMaterial)) {
       continue
     }
     const content = (verificationMaterial as { content?: unknown | undefined })
@@ -460,7 +451,7 @@ export function parseProvenancePredicate(
     } catch {
       continue
     }
-    if (parsed === undefined || parsed === null || typeof parsed !== 'object') {
+    if (!isProvenanceObject(parsed)) {
       continue
     }
     const envelope = parsed as { payload?: string | undefined }
@@ -473,19 +464,11 @@ export function parseProvenancePredicate(
     } catch {
       continue
     }
-    if (
-      payload === undefined ||
-      payload === null ||
-      typeof payload !== 'object'
-    ) {
+    if (!isProvenanceObject(payload)) {
       continue
     }
     const statement = payload as { predicate?: unknown | undefined }
-    if (
-      statement.predicate === undefined ||
-      statement.predicate === null ||
-      typeof statement.predicate !== 'object'
-    ) {
+    if (!isProvenanceObject(statement.predicate)) {
       continue
     }
     return statement.predicate as ProvenancePredicate
