@@ -136,6 +136,7 @@ export async function fetchReleasesViaGraphQL(
     )
   }
   return (parsed.data?.repository?.releases?.nodes ?? []).map(n => ({
+    __proto__: null,
     tag_name: n.tagName,
     published_at: n.publishedAt,
     assets: n.releaseAssets?.nodes ?? [],
