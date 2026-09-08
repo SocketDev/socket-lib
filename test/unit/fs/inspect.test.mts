@@ -19,7 +19,7 @@ import {
   safeStatSync,
 } from '../../../src/fs/inspect.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('isDir', () => {
   it('should return true for directories', async () => {

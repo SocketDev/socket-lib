@@ -99,10 +99,12 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
   const sectional = root[CONFIG_SECTION]
   const raw = (sectional !== undefined ? sectional : root) as RawConfig
 
-  // Validate shape with concrete error messages — config files are
-  // hand-edited and a misspelling here is the most common failure
-  // mode. Don't let a wrong type slip through to the check engine.
-  function validateRawPrimordialsConfig(): void {
+  validateRawConfig()
+
+  function validateRawConfig(): void {
+    // Validate shape with concrete error messages — config files are
+    // hand-edited and a misspelling here is the most common failure
+    // mode. Don't let a wrong type slip through to the check engine.
     if (!ArrayIsArray(raw.scanDirs)) {
       throw new ErrorCtor(
         `config.scanDirs must be an array of strings (got ${typeof raw.scanDirs})`,
@@ -128,7 +130,6 @@ export function loadConfig(configPath: string): PrimordialsCheckConfig {
       throw new ErrorCtor('config.nodeInternalOnly must be an array of strings')
     }
   }
-  validateRawPrimordialsConfig()
 
   // Merge the Socket-canonical defaults with the user's config. The user
   // map overlays the defaults — any key the user defines wins, but they

@@ -17,7 +17,7 @@ import {
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
-import { mockHomeDir, runWithTempDir } from '../util/temp-file-helper.mjs'
+import { mockHomeDir, runWithTempDir } from '../util/temp-files.mjs'
 import { normalizePath } from '../../../src/paths/normalize.mjs'
 import { safeDelete } from '../../../src/fs/safe.mjs'
 import { startDlxTestServer, stopDlxTestServer } from './binary-test-server.mts'

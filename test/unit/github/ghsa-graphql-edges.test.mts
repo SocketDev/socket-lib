@@ -5,7 +5,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { fetchGhsaDetailsViaGraphQL } from '../../../src/github/ghsa.mjs'
 import { GitHubEmptyBodyError } from '../../../src/github/errors.mjs'
 import { httpRequest } from '../../../src/http-request/request.mjs'

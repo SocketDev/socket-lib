@@ -100,8 +100,8 @@ export async function attempt(
   options: BrowserHttpRequestOptions,
 ): Promise<BrowserHttpResponse> {
   options = { __proto__: null, ...options } as typeof options
-  const init = createBrowserRequestInit(options)
-  const method = init.method!
+  const method = options.method ?? 'GET'
+  const init = buildBrowserRequestInit(method, options)
   const { signal, cleanup } = combineSignals(options.signal, options.timeout)
   if (signal) {
     init.signal = signal
@@ -168,25 +168,25 @@ export async function attempt(
   } finally {
     cleanup()
   }
-}
 
-export function createBrowserRequestInit(
-  options: BrowserHttpRequestOptions,
-): RequestInit {
-  options = { __proto__: null, ...options } as typeof options
-  const method = options.method ?? 'GET'
-  const init: RequestInit = { method }
-  if (options.headers) {
-    init.headers = options.headers
+  function buildBrowserRequestInit(
+    requestMethod: string,
+    requestOptions: BrowserHttpRequestOptions,
+  ): RequestInit {
+    const opts = { __proto__: null, ...requestOptions } as typeof requestOptions
+    const requestInit: RequestInit = { method: requestMethod }
+    if (opts.headers) {
+      requestInit.headers = opts.headers
+    }
+    if (opts.body !== undefined) {
+      ;(requestInit as { body?: BodyInit | null | undefined }).body =
+        opts.body as BodyInit
+    }
+    if (opts.followRedirects === false) {
+      requestInit.redirect = 'manual'
+    }
+    return requestInit
   }
-  if (options.body !== undefined) {
-    ;(init as { body?: BodyInit | null | undefined }).body =
-      options.body as BodyInit
-  }
-  if (options.followRedirects === false) {
-    init.redirect = 'manual'
-  }
-  return init
 }
 
 export function decodeText(bytes: Uint8Array): string {

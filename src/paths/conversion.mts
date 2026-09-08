@@ -51,7 +51,7 @@ export function fromUnixPath(pathLike: string | Buffer | URL): string {
  *
  * @example
  *   ;```typescript
- *   splitPath('/home/user/file.txt') // ['', 'home', 'user', 'file.txt']
+ *   splitPath('/workspace/example/file.txt') // ['', 'workspace', 'example', 'file.txt']
  *   splitPath('C:\\Users\\John') // ['C:', 'Users', 'John']
  *   splitPath('') // []
  *   ```
@@ -79,7 +79,7 @@ export function splitPath(pathLike: string | Buffer | URL): string[] {
  * @example
  *   ;```typescript
  *   toUnixPath('C:\\path\\to\\file.txt') // '/c/path/to/file.txt' on Windows
- *   toUnixPath('/home/user/file') // '/home/user/file'
+ *   toUnixPath('/workspace/example/file') // '/workspace/example/file'
  *   ```
  *
  * @param {string | Buffer | URL} pathLike - The path to convert.

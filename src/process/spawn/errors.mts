@@ -61,7 +61,18 @@ export function enhanceSpawnError(error: unknown): unknown {
   // Build enhanced message.
   let enhancedMessage = `Command failed: ${cmd}`
 
-  enhancedMessage += formatSpawnErrorArgs(args)
+  appendCommandArguments()
+
+  function appendCommandArguments(): void {
+    if (args && args.length > 0) {
+      const argsStr = args.join(' ')
+      if (argsStr.length < 100) {
+        enhancedMessage += ` ${argsStr}`
+      } else {
+        enhancedMessage += ` ${argsStr.slice(0, 97)}...`
+      }
+    }
+  }
 
   // signal vs code arms exercised individually but not always paired.
   // Long-line stderr fallback (>=200 chars) fires only for verbose

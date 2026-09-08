@@ -19,7 +19,7 @@ import {
   writeStackTrace,
   writeWarning,
 } from '../../../src/stdio/stderr.mjs'
-import { setupStdioTestSuite } from '../util/stdio-test-helper.mjs'
+import { setupStdioTestSuite } from '../util/stdio-capture.mjs'
 
 describe('stdio/stderr', () => {
   const getContext = setupStdioTestSuite(stderr)

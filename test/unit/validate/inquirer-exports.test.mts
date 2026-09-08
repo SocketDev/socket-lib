@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url'
 
 import { describe, expect, it } from 'vitest'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 const wrapperRoot = fileURLToPath(
   new URL('../../../src/external/@inquirer/', import.meta.url),

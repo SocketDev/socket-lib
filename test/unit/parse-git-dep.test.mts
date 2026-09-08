@@ -10,24 +10,34 @@ import { parseGitDep } from '../../src/eco/npm/parse-git-dep.mts'
 describe('npm spellings', () => {
   test.each([
     [
-      'git+ssh://git@github.com/o/r.git#abc123',
-      'git+ssh://git@github.com/o/r.git',
+      'git+ssh://git@github.com/example-owner/example-repo.git#abc123',
+      'git+ssh://git@github.com/example-owner/example-repo.git',
       'abc123',
     ],
     [
-      'git+https://github.com/o/r.git#abc123',
-      'git+https://github.com/o/r.git',
+      'git+https://github.com/example-owner/example-repo.git#abc123',
+      'git+https://github.com/example-owner/example-repo.git',
       'abc123',
     ],
-    ['git://github.com/o/r.git#abc123', 'git://github.com/o/r.git', 'abc123'],
-    ['github:o/r#abc123', 'github:o/r', 'abc123'],
+    [
+      'git://github.com/example-owner/example-repo.git#abc123',
+      'git://github.com/example-owner/example-repo.git',
+      'abc123',
+    ],
+    [
+      'github:example-owner/example-repo#abc123',
+      'github:example-owner/example-repo',
+      'abc123',
+    ],
   ])('%s', (spec, url, commit) => {
     expect(parseGitDep(spec)).toEqual({ url, commit })
   })
 
   test('no fragment leaves the commit undefined', () => {
-    expect(parseGitDep('git+https://github.com/o/r.git')).toEqual({
-      url: 'git+https://github.com/o/r.git',
+    expect(
+      parseGitDep('git+https://github.com/example-owner/example-repo.git'),
+    ).toEqual({
+      url: 'git+https://github.com/example-owner/example-repo.git',
       commit: undefined,
     })
   })
@@ -36,29 +46,44 @@ describe('npm spellings', () => {
 describe('yarn spellings', () => {
   // Classic omits the git+ prefix entirely; only the .git suffix marks it.
   test('classic: bare https with a .git suffix', () => {
-    expect(parseGitDep('https://github.com/o/r.git#abc123')).toEqual({
-      url: 'https://github.com/o/r.git',
+    expect(
+      parseGitDep('https://github.com/example-owner/example-repo.git#abc123'),
+    ).toEqual({
+      url: 'https://github.com/example-owner/example-repo.git',
       commit: 'abc123',
     })
   })
 
   // Berry writes the ref as a named param, not a bare fragment.
   test('berry: #commit=<sha>', () => {
-    expect(parseGitDep('https://github.com/o/r.git#commit=abc123')).toEqual({
-      url: 'https://github.com/o/r.git',
+    expect(
+      parseGitDep(
+        'https://github.com/example-owner/example-repo.git#commit=abc123',
+      ),
+    ).toEqual({
+      url: 'https://github.com/example-owner/example-repo.git',
       commit: 'abc123',
     })
   })
 
   test('berry: commit= alongside sibling params', () => {
     expect(
-      parseGitDep('https://github.com/o/r.git#workspace=%2F&commit=abc123'),
-    ).toEqual({ url: 'https://github.com/o/r.git', commit: 'abc123' })
+      parseGitDep(
+        'https://github.com/example-owner/example-repo.git#workspace=%2F&commit=abc123',
+      ),
+    ).toEqual({
+      url: 'https://github.com/example-owner/example-repo.git',
+      commit: 'abc123',
+    })
   })
 
   test('berry: a param-only fragment yields no commit, not a bogus one', () => {
-    expect(parseGitDep('https://github.com/o/r.git#workspace=%2F')).toEqual({
-      url: 'https://github.com/o/r.git',
+    expect(
+      parseGitDep(
+        'https://github.com/example-owner/example-repo.git#workspace=%2F',
+      ),
+    ).toEqual({
+      url: 'https://github.com/example-owner/example-repo.git',
       commit: undefined,
     })
   })
@@ -69,10 +94,13 @@ describe('pnpm resolution objects', () => {
     expect(
       parseGitDep({
         type: 'git',
-        repo: 'https://github.com/o/r.git',
+        repo: 'https://github.com/example-owner/example-repo.git',
         commit: 'abc123',
       }),
-    ).toEqual({ url: 'https://github.com/o/r.git', commit: 'abc123' })
+    ).toEqual({
+      url: 'https://github.com/example-owner/example-repo.git',
+      commit: 'abc123',
+    })
   })
 
   test('a tarball resolution is not a git dep', () => {

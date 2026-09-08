@@ -215,77 +215,94 @@ describe('prim mod fixture corpus', () => {
     test(fixture.name, async () => {
       const { result, cleanup, targetRoot } = await runFixture(fixture.dir)
       try {
-        function assertValidationResult(): void {
-          if (fixture.expected.ok) {
-            assert.notEqual(
-              result.validationFailed,
-              true,
-              `expected ok: true; got validationFailed with ${JSON.stringify(result.validationFindings, null, 2)}`,
-            )
-          } else {
-            assert.equal(
-              result.validationFailed,
-              true,
-              'expected ok: false; got a successful run',
-            )
-            const expectedFindings = fixture.expected.findings ?? []
-            for (let j = 0, { length: el } = expectedFindings; j < el; j += 1) {
-              const want = expectedFindings[j]!
-              const match = (result.validationFindings ?? []).find(
-                f =>
-                  f.kind === want.kind &&
-                  (want.fileMatches === undefined ||
-                    new RegExp(want.fileMatches).test(f.file)),
-              )
-              assert.ok(
-                match,
-                `expected a finding with kind=${want.kind} fileMatches=${want.fileMatches}; got ${JSON.stringify(result.validationFindings, null, 2)}`,
-              )
-            }
-          }
-        }
-        assertValidationResult()
-        const expectedFiles = fixture.expected.files ?? {}
-        for (const [relPath, fileExpected] of Object.entries(expectedFiles)) {
-          const absPath = path.join(targetRoot, relPath)
-          if (fileExpected.rewrites !== undefined) {
-            const fileResult = result.files.find(f => f.file === relPath)
-            assert.equal(
-              fileResult?.rewrites ?? 0,
-              fileExpected.rewrites,
-              `expected ${relPath} to have ${fileExpected.rewrites} rewrite(s); got ${fileResult?.rewrites ?? 0}`,
-            )
-          }
-          if (fileExpected.importAdded !== undefined) {
-            const fileResult = result.files.find(f => f.file === relPath)
-            assert.equal(
-              fileResult?.importAdded ?? false,
-              fileExpected.importAdded,
-              `expected ${relPath} importAdded=${fileExpected.importAdded}; got ${fileResult?.importAdded ?? false}`,
-            )
-          }
-          function assertFileContent(): void {
-            if (fileExpected.contentIncludes || fileExpected.contentExcludes) {
-              const actual = readFileSync(absPath, 'utf8')
-              for (const needle of fileExpected.contentIncludes ?? []) {
-                assert.ok(
-                  actual.includes(needle),
-                  `expected ${relPath} to include "${needle}"; full content:\n${actual}`,
-                )
-              }
-              for (const needle of fileExpected.contentExcludes ?? []) {
-                assert.ok(
-                  !actual.includes(needle),
-                  `expected ${relPath} to NOT include "${needle}"; full content:\n${actual}`,
-                )
-              }
-            }
-          }
-          assertFileContent()
-        }
+        assertFixtureValidation(fixture.expected, result)
+        assertFixtureFiles(fixture.expected, result, targetRoot)
       } finally {
         cleanup()
       }
     })
   }
 })
+
+function assertFixtureValidation(
+  expected: Expected,
+  result: Awaited<ReturnType<typeof applyCodemod>>,
+): void {
+  if (expected.ok) {
+    assert.notEqual(
+      result.validationFailed,
+      true,
+      `expected ok: true; got validationFailed with ${JSON.stringify(result.validationFindings, null, 2)}`,
+    )
+  } else {
+    assert.equal(
+      result.validationFailed,
+      true,
+      'expected ok: false; got a successful run',
+    )
+    const expectedFindings = expected.findings ?? []
+    for (let j = 0, { length: el } = expectedFindings; j < el; j += 1) {
+      const want = expectedFindings[j]!
+      const match = (result.validationFindings ?? []).find(
+        f =>
+          f.kind === want.kind &&
+          (want.fileMatches === undefined ||
+            new RegExp(want.fileMatches).test(f.file)),
+      )
+      assert.ok(
+        match,
+        `expected a finding with kind=${want.kind} fileMatches=${want.fileMatches}; got ${JSON.stringify(result.validationFindings, null, 2)}`,
+      )
+    }
+  }
+}
+
+function assertFixtureFiles(
+  expected: Expected,
+  result: Awaited<ReturnType<typeof applyCodemod>>,
+  targetRoot: string,
+): void {
+  const expectedFiles = expected.files ?? {}
+  for (const [relPath, fileExpected] of Object.entries(expectedFiles)) {
+    const absPath = path.join(targetRoot, relPath)
+    if (fileExpected.rewrites !== undefined) {
+      const fileResult = result.files.find(f => f.file === relPath)
+      assert.equal(
+        fileResult?.rewrites ?? 0,
+        fileExpected.rewrites,
+        `expected ${relPath} to have ${fileExpected.rewrites} rewrite(s); got ${fileResult?.rewrites ?? 0}`,
+      )
+    }
+    if (fileExpected.importAdded !== undefined) {
+      const fileResult = result.files.find(f => f.file === relPath)
+      assert.equal(
+        fileResult?.importAdded ?? false,
+        fileExpected.importAdded,
+        `expected ${relPath} importAdded=${fileExpected.importAdded}; got ${fileResult?.importAdded ?? false}`,
+      )
+    }
+    assertFixtureContent(absPath, relPath, fileExpected)
+  }
+}
+
+function assertFixtureContent(
+  absPath: string,
+  relPath: string,
+  fileExpected: ExpectedFile,
+): void {
+  if (fileExpected.contentIncludes || fileExpected.contentExcludes) {
+    const actual = readFileSync(absPath, 'utf8')
+    for (const needle of fileExpected.contentIncludes ?? []) {
+      assert.ok(
+        actual.includes(needle),
+        `expected ${relPath} to include "${needle}"; full content:\n${actual}`,
+      )
+    }
+    for (const needle of fileExpected.contentExcludes ?? []) {
+      assert.ok(
+        !actual.includes(needle),
+        `expected ${relPath} to NOT include "${needle}"; full content:\n${actual}`,
+      )
+    }
+  }
+}

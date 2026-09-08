@@ -22,7 +22,7 @@ import { Logger } from '../../src/logger/node.mjs'
 import { minTimerQuantum } from '../_shared/fleet/lib/timing.mts'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
-import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
+import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 setupHttpFixture()
 

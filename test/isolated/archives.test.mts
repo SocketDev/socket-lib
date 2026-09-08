@@ -25,7 +25,7 @@ import { extractZip } from '../../src/archives/zip.mjs'
 import { safeDelete } from '../../src/fs/safe.mjs'
 
 import { tolerantTimeout } from '../_shared/fleet/lib/timing.mts'
-import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
+import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 let testZipPath: string
 let testTarPath: string

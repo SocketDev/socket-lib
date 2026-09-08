@@ -6,8 +6,8 @@
 import type { AsyncLocalStorage } from 'node:async_hooks'
 
 import type { Theme } from './types.mjs'
-import { SOCKET_THEME, THEMES } from './themes.mjs'
-import type { ThemeName } from './themes.mjs'
+import { SOCKET_THEME, THEMES } from './presets.mjs'
+import type { ThemeName } from './presets.mjs'
 
 import { SetCtor } from '../../primordials/map-set.mjs'
 import { getNodeAsyncHooks } from '../../node/async-hooks.mjs'

@@ -159,61 +159,35 @@ export async function httpRequestAttempt(
       }
     }
 
-    function handleRedirect(res: IncomingResponse, location: string): void {
-      // Drain the redirect response body to free the socket.
-      res.resume()
+    /* c8 ignore start - External HTTP/HTTPS request */
+    function resolveStreamResponse(res: IncomingResponse): void {
+      const status = res.statusCode || 0
+      const statusText = res.statusMessage || ''
+      const ok = status >= 200 && status < 300
 
       emitResponse({
         headers: res.headers,
-        status: res.statusCode,
-        statusText: res.statusMessage,
+        status,
+        statusText,
       })
 
-      if (maxRedirects <= 0) {
-        // Hook already emitted above — reject directly to avoid double-fire.
-        settled = true
-        reject(
-          new ErrorCtor(
-            `Too many redirects (exceeded maximum: ${maxRedirects})`,
-          ),
-        )
-        return
-      }
+      const emptyBody = BufferAlloc!(0)
+      resolveOnce({
+        arrayBuffer: () => emptyBody.buffer as ArrayBuffer,
+        body: emptyBody,
+        headers: res.headers,
+        json: () => {
+          throw new ErrorCtor('Cannot parse JSON from a streaming response')
+        },
+        ok,
+        rawResponse: res,
+        status,
+        statusText,
+        text: () => '',
+      })
+    }
 
-      // Resolve the Location header against the current url whether it
-      // is absolute or relative — the URL constructor ignores the base
-      // when the first argument already parses as an absolute URL. A
-      // scheme check on `.protocol` (not `startsWith('http')`, which
-      // also accepts `httpfoo:`) validates the result.
-      const redirectParsed = new URLCtor(location, url)
-      if (
-        redirectParsed.protocol !== 'http:' &&
-        redirectParsed.protocol !== 'https:'
-      ) {
-        // Hook already emitted above — reject directly to avoid double-fire.
-        settled = true
-        reject(
-          new ErrorCtor(
-            `Redirect Location has an unsupported scheme: ${location}`,
-          ),
-        )
-        return
-      }
-      const redirectUrl = redirectParsed.toString()
-
-      if (isHttps && redirectParsed.protocol !== 'https:') {
-        // Hook already emitted above — reject directly to avoid double-fire.
-        settled = true
-        reject(
-          new ErrorCtor(
-            `Redirect from HTTPS to HTTP is not allowed: ${redirectUrl}`,
-          ),
-        )
-        return
-      }
-
-      // Strip auth/session headers on cross-origin redirects to prevent
-      // leaking credentials to third-party hosts (e.g., GitHub -> S3).
+    function getRedirectHeaders(redirectParsed: URL): typeof headers {
       let redirectHeaders = headers
       if (new URLCtor(url).origin !== redirectParsed.origin) {
         redirectHeaders = {
@@ -234,27 +208,9 @@ export async function httpRequestAttempt(
         }
       }
 
-      // Redirect chaining — Promise adoption handles the inner result.
-      settled = true
-      resolve(
-        httpRequestAttempt(redirectUrl, {
-          body,
-          ca,
-          followRedirects,
-          headers: redirectHeaders,
-          hooks,
-          maxRedirects: maxRedirects - 1,
-          maxResponseSize,
-          method,
-          signal,
-          stream,
-          timeout,
-        }),
-      )
-      return
+      return redirectHeaders
     }
 
-    /* c8 ignore start - External HTTP/HTTPS request */
     const request = httpModule.request(
       requestOptions,
       (res: IncomingResponse) => {
@@ -272,38 +228,83 @@ export async function httpRequestAttempt(
             res.statusCode < 400 &&
             res.headers.location
           ) {
-            handleRedirect(res, res.headers.location)
+            // Drain the redirect response body to free the socket.
+            res.resume()
+
+            emitResponse({
+              headers: res.headers,
+              status: res.statusCode,
+              statusText: res.statusMessage,
+            })
+
+            if (maxRedirects <= 0) {
+              // Hook already emitted above — reject directly to avoid double-fire.
+              settled = true
+              reject(
+                new ErrorCtor(
+                  `Too many redirects (exceeded maximum: ${maxRedirects})`,
+                ),
+              )
+              return
+            }
+
+            // Resolve the Location header against the current url whether it
+            // is absolute or relative — the URL constructor ignores the base
+            // when the first argument already parses as an absolute URL. A
+            // scheme check on `.protocol` (not `startsWith('http')`, which
+            // also accepts `httpfoo:`) validates the result.
+            const redirectParsed = new URLCtor(res.headers.location, url)
+            if (
+              redirectParsed.protocol !== 'http:' &&
+              redirectParsed.protocol !== 'https:'
+            ) {
+              // Hook already emitted above — reject directly to avoid double-fire.
+              settled = true
+              reject(
+                new ErrorCtor(
+                  `Redirect Location has an unsupported scheme: ${res.headers.location}`,
+                ),
+              )
+              return
+            }
+            const redirectUrl = redirectParsed.toString()
+
+            if (isHttps && redirectParsed.protocol !== 'https:') {
+              // Hook already emitted above — reject directly to avoid double-fire.
+              settled = true
+              reject(
+                new ErrorCtor(
+                  `Redirect from HTTPS to HTTP is not allowed: ${redirectUrl}`,
+                ),
+              )
+              return
+            }
+
+            const redirectHeaders = getRedirectHeaders(redirectParsed)
+
+            // Redirect chaining — Promise adoption handles the inner result.
+            settled = true
+            resolve(
+              httpRequestAttempt(redirectUrl, {
+                body,
+                ca,
+                followRedirects,
+                headers: redirectHeaders,
+                hooks,
+                maxRedirects: maxRedirects - 1,
+                maxResponseSize,
+                method,
+                signal,
+                stream,
+                timeout,
+              }),
+            )
             return
           }
 
           // Stream mode: resolve immediately with unconsumed response.
           if (stream) {
-            const status = res.statusCode || 0
-            const statusText = res.statusMessage || ''
-            const ok = status >= 200 && status < 300
-
-            emitResponse({
-              headers: res.headers,
-              status,
-              statusText,
-            })
-
-            const emptyBody = BufferAlloc!(0)
-            resolveOnce({
-              arrayBuffer: () => emptyBody.buffer as ArrayBuffer,
-              body: emptyBody,
-              headers: res.headers,
-              json: () => {
-                throw new ErrorCtor(
-                  'Cannot parse JSON from a streaming response',
-                )
-              },
-              ok,
-              rawResponse: res,
-              status,
-              statusText,
-              text: () => '',
-            })
+            resolveStreamResponse(res)
             return
           }
 

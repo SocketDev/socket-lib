@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 /**
- * @file Repo check — the npm registry helpers in `src/npm/registry/` still
+ * @file Repo check — the npm registry helpers in `src/eco/npm/registry/` still
  *   match npm's published OpenAPI spec. Those helpers were hand-written from
  *   the rendered docs at api-docs.npmjs.com, which drifts silently: npm adds an
  *   endpoint or renames a field and nothing in this repo notices. This gate
  *   notices. It compares two inventories. The spec side is
  *   `scripts/repo/npm-api-spec/spec-inventory.generated.json`, the committed
  *   projection of the pinned `npm/api-documentation` commit. The implementation
- *   side is an AST read of every `src/npm/registry/*.mts`, per
+ *   side is an AST read of every `src/eco/npm/registry/*.mts`, per
  *   socket/no-source-sniffing. Neither side needs the network, so the default
  *   path runs fully offline and a CI box with no egress gets the same verdict
  *   as a laptop. `--online` adds one more question: has npm's `main` moved past
@@ -132,7 +132,7 @@ async function main(): Promise<void> {
 
 const SCRIPT_META: ScriptMeta = {
   describe:
-    "checks the src/npm/registry helpers still match npm's published OpenAPI spec",
+    "checks the src/eco/npm/registry helpers still match npm's published OpenAPI spec",
   help: `Usage: node scripts/repo/check/npm-registry-helpers-match-spec.mts [flags]
 
   --json      print the drift report as JSON instead of prose

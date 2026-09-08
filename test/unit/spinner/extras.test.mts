@@ -7,7 +7,7 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
-import { Spinner } from '../../../src/spinner/spinner.mjs'
+import { Spinner } from '../../../src/spinner/create.mjs'
 import { withSpinnerRestore } from '../../../src/spinner/with.mjs'
 
 describe('spinner — extras', { concurrent: false }, () => {

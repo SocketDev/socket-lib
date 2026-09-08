@@ -10,7 +10,7 @@ import { describe, expect, it } from 'vitest'
 
 import { copy, CopyMode } from '../../../src/fs/copy.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('copy', () => {
   it('copies a single file', async () => {

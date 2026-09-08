@@ -180,11 +180,7 @@ export async function downloadNpmPackage(
   // Make all binaries in the package executable on Unix systems.
   makePackageBinsExecutable(packageDir, packageName)
 
-  return {
-    binaryPath,
-    installed,
-    packageDir,
-  }
+  return { binaryPath, installed, packageDir }
 }
 
 /**
@@ -261,7 +257,7 @@ export async function ensurePackageInstalled(
 
   return await processLock.withLock(
     lockPath,
-    async () => {
+    async (): Promise<{ installed: boolean; packageDir: string }> => {
       // fs is imported at the top
       // Double-check if already installed, unless force is set.
       // Another process may have installed while waiting for lock.
@@ -269,16 +265,18 @@ export async function ensurePackageInstalled(
         // Verify package.json exists.
         const pkgJsonPath = path.join(installedDir, 'package.json')
         if (fs.existsSync(pkgJsonPath)) {
-          return { __proto__: null, installed: false, packageDir }
+          return { installed: false, packageDir }
         }
       }
 
-      // If a lockfile was provided, materialize it into packageDir and
-      // drop a hardened .npmrc alongside. Arborist picks up both.
-      // Sniff: explicit { type, value } wins; bare string whose first
-      // non-whitespace character is `{` is JSON content, else a filesystem
-      // path.
+      materializeInstallLockfile()
+
       function materializeInstallLockfile(): void {
+        // If a lockfile was provided, materialize it into packageDir and
+        // drop a hardened .npmrc alongside. Arborist picks up both.
+        // Sniff: explicit { type, value } wins; bare string whose first
+        // non-whitespace character is `{` is JSON content, else a filesystem
+        // path.
         if (install?.lockfile !== undefined) {
           const spec = install.lockfile
           const lockDest = path.join(packageDir, 'package-lock.json')
@@ -303,7 +301,6 @@ export async function ensurePackageInstalled(
           )
         }
       }
-      materializeInstallLockfile()
 
       // Install package and dependencies using Arborist, the way npx does.
       // Split into buildIdealTree → firewall check → reify so we can
@@ -340,13 +337,17 @@ export async function ensurePackageInstalled(
         // idealTree, independently of anything this code path computes)
         // before spending a firewall check or a tarball download on the
         // wrong package/version.
-        if (install?.hash !== undefined) {
-          const top = readTopLevelFromIdealTree(idealTree, packageName)
-          if (!equalHashes(install.hash, top.integrity)) {
-            throw new HashMismatchError(
-              parseHash(install.hash),
-              parseHash(top.integrity),
-            )
+        verifyInstallHash()
+
+        function verifyInstallHash(): void {
+          if (install?.hash !== undefined) {
+            const top = readTopLevelFromIdealTree(idealTree, packageName)
+            if (!equalHashes(install.hash, top.integrity)) {
+              throw new HashMismatchError(
+                parseHash(install.hash),
+                parseHash(top.integrity),
+              )
+            }
           }
         }
 
@@ -360,48 +361,45 @@ export async function ensurePackageInstalled(
         /* c8 ignore next - External Arborist call */
         await arb.reify({ save: true })
       } catch (e) {
-        function throwPackageInstallError(): never {
-          // Rethrow a hash-pin mismatch without wrapping — the caller asked
-          // to pin an exact package and needs to see that specifically, not
-          // a generic install failure.
-          if (e instanceof HashMismatchError) {
-            throw e
-          }
-          // Rethrow firewall block errors without wrapping.
-          if (isError(e) && e.message.startsWith('Socket Firewall blocked')) {
-            throw e
-          }
-          const code = (e as { code?: string | undefined } | null)?.code
-          if (code === 'E404' || code === 'ETARGET') {
-            throw new ErrorCtor(
-              `Package not found: ${packageSpec}\n` +
-                'Verify the package exists on npm registry and check the version.\n' +
-                `Visit https://www.npmjs.com/package/${packageName} to see available versions.`,
-              { cause: e },
-            )
-          }
-          if (
-            code === 'EAI_AGAIN' ||
-            code === 'ENOTFOUND' ||
-            code === 'ETIMEDOUT'
-          ) {
-            throw new ErrorCtor(
-              `Network error installing ${packageSpec}\n` +
-                'Check your internet connection and try again.',
-              { cause: e },
-            )
-          }
+        // Rethrow a hash-pin mismatch without wrapping — the caller asked
+        // to pin an exact package and needs to see that specifically, not
+        // a generic install failure.
+        if (e instanceof HashMismatchError) {
+          throw e
+        }
+        // Rethrow firewall block errors without wrapping.
+        if (isError(e) && e.message.startsWith('Socket Firewall blocked')) {
+          throw e
+        }
+        const code = (e as { code?: string | undefined } | null)?.code
+        if (code === 'E404' || code === 'ETARGET') {
           throw new ErrorCtor(
-            `Failed to install package: ${packageSpec}\n` +
-              `Destination: ${installedDir}\n` +
-              'Check npm registry connectivity or package name.',
+            `Package not found: ${packageSpec}\n` +
+              'Verify the package exists on npm registry and check the version.\n' +
+              `Visit https://www.npmjs.com/package/${packageName} to see available versions.`,
             { cause: e },
           )
         }
-        throwPackageInstallError()
+        if (
+          code === 'EAI_AGAIN' ||
+          code === 'ENOTFOUND' ||
+          code === 'ETIMEDOUT'
+        ) {
+          throw new ErrorCtor(
+            `Network error installing ${packageSpec}\n` +
+              'Check your internet connection and try again.',
+            { cause: e },
+          )
+        }
+        throw new ErrorCtor(
+          `Failed to install package: ${packageSpec}\n` +
+            `Destination: ${installedDir}\n` +
+            'Check npm registry connectivity or package name.',
+          { cause: e },
+        )
       }
 
-      return { __proto__: null, installed: true, packageDir }
+      return { installed: true, packageDir }
     },
     {
       // Align with npm npx locking strategy.

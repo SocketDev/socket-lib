@@ -18,7 +18,7 @@ import {
   safeMkdirSync,
 } from '../../../src/fs/safe.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 // Helper that owns the `prefer-exists-sync` exemption once instead of
 // repeating it at every fs.stat() call — these tests verify the stat

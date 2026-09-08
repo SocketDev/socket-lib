@@ -21,11 +21,27 @@ import {
   getUserprofile,
 } from '../../../src/env/windows.mjs'
 import { resetEnv, setEnv } from '../../../src/env/rewire.mjs'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
+
 import { afterEach, describe, expect, it } from 'vitest'
 
 describe('windows env', () => {
   afterEach(() => {
     resetEnv()
+  })
+
+  it('resolves the roaming fallback from the supplied home', () => {
+    setEnv('APPDATA', undefined)
+    expect(getAppdataDir('/example-home')).toBe(
+      normalizePath(path.join('/example-home', 'AppData', 'Roaming')),
+    )
+  })
+
+  it('normalizes Windows separators in the returned fallback path', () => {
+    setEnv('APPDATA', undefined)
+    expect(getAppdataDir('C:\\fixtures\\profile')).toBe(
+      'C:/fixtures/profile/AppData/Roaming',
+    )
   })
 
   describe('getAppdata', () => {

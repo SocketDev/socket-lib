@@ -87,42 +87,44 @@ export async function httpRequest(
     timeout = 30_000,
   } = { __proto__: null, ...options } as HttpRequestOptions
 
-  // Readable streams are one-shot — they cannot be replayed on retry or redirect.
-  // Duck-type check: streams have a `pipe` method.
-  function hasStreamBody(): boolean {
-    return (
-      body !== undefined &&
-      typeof body === 'object' &&
-      typeof (body as { pipe?: unknown | undefined }).pipe === 'function'
-    )
-  }
-  const isStreamBody = hasStreamBody()
+  return await runRequest()
 
-  if (isStreamBody && retries > 0) {
-    throw new ErrorCtor(
-      'Streaming body (Readable/FormData) cannot be used with retries. ' +
-        'Streams are consumed on first attempt and cannot be replayed. ' +
-        'Set retries: 0 or buffer the body as a string/Buffer.',
-    )
-  }
+  async function runRequest(): Promise<HttpResponse> {
+    // Readable streams are one-shot — they cannot be replayed on retry or redirect.
+    // Duck-type check: streams have a `pipe` method.
+    const isStreamBody = hasStreamBody()
+    function hasStreamBody(): boolean {
+      return (
+        body !== undefined &&
+        typeof body === 'object' &&
+        typeof (body as { pipe?: unknown | undefined }).pipe === 'function'
+      )
+    }
 
-  const baseAttemptOpts: HttpRequestOptions = {
-    body,
-    ca,
-    // Disable redirect following for stream bodies — the stream is consumed
-    // on the first request and cannot be re-piped to the redirect target.
-    followRedirects: isStreamBody ? false : followRedirects,
-    headers,
-    hooks,
-    maxRedirects,
-    maxResponseSize,
-    method,
-    signal,
-    stream,
-    timeout,
-  }
+    if (isStreamBody && retries > 0) {
+      throw new ErrorCtor(
+        'Streaming body (Readable/FormData) cannot be used with retries. ' +
+          'Streams are consumed on first attempt and cannot be replayed. ' +
+          'Set retries: 0 or buffer the body as a string/Buffer.',
+      )
+    }
 
-  async function runRequestAttempts(): Promise<HttpResponse> {
+    const baseAttemptOpts: HttpRequestOptions = {
+      body,
+      ca,
+      // Disable redirect following for stream bodies — the stream is consumed
+      // on the first request and cannot be re-piped to the redirect target.
+      followRedirects: isStreamBody ? false : followRedirects,
+      headers,
+      hooks,
+      maxRedirects,
+      maxResponseSize,
+      method,
+      signal,
+      stream,
+      timeout,
+    }
+
     // Retry logic with exponential backoff
     let lastError: Error | undefined
     // Seconds waited before the upcoming attempt, surfaced via the Retry-After
@@ -206,7 +208,6 @@ export async function httpRequest(
 
     throw lastError || new ErrorCtor('Request failed after retries')
   }
-  return runRequestAttempts()
 }
 
 // Re-exports — preserve the historical `http-request/request` surface

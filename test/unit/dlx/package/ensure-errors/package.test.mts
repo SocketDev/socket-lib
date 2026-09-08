@@ -9,14 +9,10 @@
 import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
-import { ensurePackageInstalled } from '../../../../src/dlx/package.mjs'
-
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-
-import type NpmArborist from '../../../../src/external/@npmcli/arborist.js'
+import type NpmArborist from '../../../../../src/external/@npmcli/arborist.js'
+import { ensurePackageInstalled } from '../../../../../src/dlx/package.mjs'
 
 const {
   arboristBuildIdealTreeMock,
@@ -30,7 +26,7 @@ const {
   safeMkdirMock: vi.fn(),
 }))
 
-vi.mock(import('../../../../src/external/@npmcli/arborist.js'), () => ({
+vi.mock(import('../../../../../src/external/@npmcli/arborist.js'), () => ({
   default: class FakeArborist {
     async buildIdealTree(options: unknown) {
       return await arboristBuildIdealTreeMock(options)
@@ -42,11 +38,11 @@ vi.mock(import('../../../../src/external/@npmcli/arborist.js'), () => ({
   } as unknown as typeof NpmArborist,
 }))
 
-vi.mock(import('../../../../src/dlx/firewall.mjs'), () => ({
+vi.mock(import('../../../../../src/dlx/firewall.mjs'), () => ({
   checkFirewallPurls: checkFirewallPurlsMock,
 }))
 
-vi.mock(import('../../../../src/fs/safe.mjs'), async importOriginal => {
+vi.mock(import('../../../../../src/fs/safe.mjs'), async importOriginal => {
   const actual = await importOriginal()
   return {
     ...actual,

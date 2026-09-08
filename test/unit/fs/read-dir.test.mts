@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 
 import { readDirNames, readDirNamesSync } from '../../../src/fs/read-dir.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('readDirNames', () => {
   it('should read directory names', async () => {

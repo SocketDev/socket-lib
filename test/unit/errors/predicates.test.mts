@@ -14,7 +14,7 @@ import {
   isErrorShim,
 } from '../../../src/errors/predicates.mjs'
 
-import { describeRequires } from '../util/skip-helpers.mjs'
+import { describeRequires } from '../util/platform-suites.mjs'
 
 describe('isError', () => {
   it('recognizes Error instances', () => {

@@ -93,7 +93,9 @@ export async function dlxBinary(
   let downloaded = false
   let computedIntegrity = integrity
 
-  async function inspectBinaryCache(): Promise<void> {
+  await checkCachedBinary()
+
+  async function checkCachedBinary(): Promise<void> {
     // Check if we need to download.
     if (
       !force &&
@@ -135,11 +137,12 @@ export async function dlxBinary(
       downloaded = true
     }
   }
-  await inspectBinaryCache()
 
   if (downloaded) {
-    // Ensure cache directory exists before downloading.
+    await ensureBinaryCacheDirectory()
+
     async function ensureBinaryCacheDirectory(): Promise<void> {
+      // Ensure cache directory exists before downloading.
       try {
         await safeMkdir(cacheEntryDir)
       } catch (e) {
@@ -164,7 +167,6 @@ export async function dlxBinary(
         )
       }
     }
-    await ensureBinaryCacheDirectory()
 
     // Download the binary.
     computedIntegrity = await downloadBinaryFile(url, binaryPath, {

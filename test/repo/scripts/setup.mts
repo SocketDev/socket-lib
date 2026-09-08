@@ -5,8 +5,9 @@
  *   opt-outs: live-network and live-keychain suites skip unless a lane opts in.
  *   The env is set at module top level so it lands before test collection reads
  *   it (the `describeNetworkOnly` / `itNetworkOnly` gates in
- *   `test/unit/util/skip-helpers.ts`). Fleet-wide concerns — nock fail-closed,
- *   git-env isolation, custom matchers — live in the fleet setup file.
+ *   `test/unit/util/platform-suites.ts`). Fleet-wide concerns — nock
+ *   fail-closed, git-env isolation, custom matchers — live in the fleet setup
+ *   file.
  */
 
 import process from 'node:process'
@@ -15,7 +16,7 @@ import process from 'node:process'
 // setup fails network closed (nock.disableNetConnect), so a live-registry suite
 // that ran here would throw; `SOCKET_LIB_RUN_NETWORK_TESTS=1` opts a lane in for
 // the real integration suites. `_SKIP_` semantics (set = skip) match
-// skip-helpers.ts.
+// platform-suites.ts.
 if (!process.env['SOCKET_LIB_RUN_NETWORK_TESTS']) {
   process.env['SOCKET_LIB_SKIP_NETWORK_TESTS'] = '1'
 }

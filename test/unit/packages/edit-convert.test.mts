@@ -17,7 +17,7 @@ import {
 } from '../../../src/packages/edit.mjs'
 import { describe, expect, it } from 'vitest'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 interface EditableInternals {
   filename: string

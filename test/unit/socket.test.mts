@@ -16,8 +16,7 @@
  *     Socket tool state management and caching strategies.
  */
 
-import { normalizePath } from '../../src/paths/normalize.mjs'
-
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import process from 'node:process'
 import {
   getSocketAppCacheDir,

@@ -22,7 +22,7 @@ import {
   toUnixPath,
 } from '../../../src/paths/normalize.mjs'
 
-import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers.mjs'
+import { itUnixOnly, itWindowsOnly } from '../util/platform-suites.mjs'
 
 describe('paths/normalize', () => {
   describe('foldPathForCompare', () => {

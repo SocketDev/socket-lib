@@ -4,8 +4,7 @@
  *   to keep each test file under the fleet's 500-line soft cap.
  */
 
-import { normalizePath } from '../../../src/paths/normalize.mjs'
-
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { describe, expect, it } from 'vitest'
 
 import { parseJson } from '../../../src/json/parse.mjs'

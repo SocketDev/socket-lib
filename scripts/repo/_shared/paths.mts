@@ -7,6 +7,7 @@
  */
 
 import path from 'node:path'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { REPO_ROOT } from '../../fleet/paths.mts'
 
@@ -14,9 +15,13 @@ import { REPO_ROOT } from '../../fleet/paths.mts'
  * Hand-maintained sources for the vendored external dependencies, before the
  * bundler runs.
  */
-export const SRC_EXTERNAL_DIR = path.join(REPO_ROOT, 'src', 'external')
+export const SRC_EXTERNAL_DIR = normalizePath(
+  path.join(REPO_ROOT, 'src', 'external'),
+)
 
 /**
  * Built vendored external dependencies, the tree the validators read.
  */
-export const DIST_EXTERNAL_DIR = path.join(REPO_ROOT, 'dist', 'external')
+export const DIST_EXTERNAL_DIR = normalizePath(
+  path.join(REPO_ROOT, 'dist', 'external'),
+)

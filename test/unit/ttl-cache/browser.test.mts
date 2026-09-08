@@ -11,7 +11,7 @@ import { describe, expect, it } from 'vitest'
 
 import { createBrowserTtlCache } from '../../../src/cache/ttl/browser.mjs'
 import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
-import { createDeferred, createMemoryAdapter } from './browser-test-helpers.mts'
+import { createDeferred, createMemoryAdapter } from './browser-storage.mts'
 
 describe('browser ttl-cache', () => {
   describe('createBrowserTtlCache', () => {

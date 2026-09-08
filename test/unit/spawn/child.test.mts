@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
 import { spawn, spawnExitResult } from '../../../src/process/spawn/child.mjs'
 import { isSpawnError } from '../../../src/process/spawn/errors.mjs'
 
-import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers.mjs'
+import { itUnixOnly, itWindowsOnly } from '../util/platform-suites.mjs'
 
 describe('spawn/child — spawn', () => {
   it('accepts a platform-scaled localTimeout', async () => {

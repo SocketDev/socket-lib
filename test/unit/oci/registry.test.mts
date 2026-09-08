@@ -11,9 +11,9 @@ import {
   pullFirstLayer,
   resolveImageManifest,
 } from '../../../src/oci/registry.mjs'
-import { makeFakeAdapter, sha256Digest } from './oci-test-helpers.mts'
+import { makeFakeAdapter, sha256Digest } from './http-fixtures.mts'
 
-import type { FakeRoute } from './oci-test-helpers.mts'
+import type { FakeRoute } from './http-fixtures.mts'
 
 describe('GHCR_REGISTRY', () => {
   it('is ghcr.io', () => {

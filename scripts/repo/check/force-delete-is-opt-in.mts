@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
- * Verify built safeDelete refuses outside-cwd targets by default and still
- * deletes descendants. Cleanup authorizes only the directory created by each
- * probe through allowedDirs.
+ * @file Check the built safeDelete containment contract.
+ *   A path outside cwd must be refused without options. A descendant of cwd
+ *   must remain deletable. Cleanup authorizes only the probe directory.
+ *   Usage: node scripts/repo/check/force-delete-is-opt-in.mts [--quiet]
  */
 
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
@@ -95,14 +96,13 @@ export async function probeDeleteGuard(config: {
   writeFileSync(path.join(outside, 'precious.txt'), 'keep')
   if (!(await refusesDelete(safe, outside))) {
     findings.push({
-      detail: `safeDelete removed ${outside}, which is outside the cwd, with no force flag`,
+      detail: `safeDelete removed ${outside}, which is outside the cwd, with no options`,
       property: 'refuses outside cwd',
     })
   }
   await safe.safeDelete(outside, { allowedDirs: [outside] })
 
-  // 2. A descendant of the cwd must still delete with no flag, or every caller
-  // starts passing force and the guard buys nothing.
+  // A descendant must delete without additional options.
   const inside = path.join(cwd, `force-optin-probe-${process.pid}`)
   mkdirSync(inside, { recursive: true })
   writeFileSync(path.join(inside, 'x.txt'), 'x')
@@ -114,7 +114,7 @@ export async function probeDeleteGuard(config: {
   }
   if (existsSync(inside)) {
     findings.push({
-      detail: `safeDelete refused ${inside}, a descendant of the cwd, which must not need force`,
+      detail: `safeDelete refused ${inside}, a descendant of the cwd, which must not need additional options`,
       property: 'allows inside cwd',
     })
     await safe.safeDelete(inside, { allowedDirs: [inside] })
@@ -155,7 +155,7 @@ export async function main(): Promise<void> {
       logger.error(`${finding.property}: ${finding.detail}`)
     }
     logger.error(
-      'Fix: enforce default directory containment in src/fs/safe.mts while permitting descendants of the current working directory.',
+      'Fix: preserve containment in src/fs/safe.mts. Only the forceDelete runner or an allowed directory may bypass the cwd boundary.',
     )
     logger.groupEnd()
     process.exitCode = 1

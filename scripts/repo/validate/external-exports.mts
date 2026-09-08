@@ -17,7 +17,6 @@ import { runMain } from '../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const externalDir = DIST_EXTERNAL_DIR
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
@@ -83,7 +82,7 @@ const DEFAULT_ONLY_ALLOWED = new Set([
  * Check if an external module export is usable without .default.
  */
 export function checkExternalExport(filePath: string) {
-  const relativePath = path.relative(externalDir, filePath)
+  const relativePath = path.relative(DIST_EXTERNAL_DIR, filePath)
   const normalizedPath = normalizePath(relativePath)
 
   try {
@@ -195,7 +194,7 @@ async function runValidation(): Promise<void> {
     logger.step('Validating dist/external exports')
   }
 
-  const modules = getExternalModules(externalDir)
+  const modules = getExternalModules(DIST_EXTERNAL_DIR)
 
   if (modules.length === 0) {
     if (!quiet) {

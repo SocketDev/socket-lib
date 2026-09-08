@@ -26,7 +26,7 @@ import {
   createStubHttpAdapter,
   makeHttpResponseError,
   setupNpmMetaCacheIsolation,
-} from '../meta-test-helpers.mts'
+} from '../meta-fixtures.mts'
 
 import type {
   PackumentMetaSlim,

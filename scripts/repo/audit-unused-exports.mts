@@ -208,22 +208,7 @@ function main(): number {
   const srcFiles = listSourceFiles(srcRoot).filter(
     f => !f.startsWith(path.join(srcRoot, 'external') + path.sep),
   )
-  function collectSourceDefinitions(): void {
-    for (let i = 0, { length } = srcFiles; i < length; i += 1) {
-      const file = srcFiles[i]!
-      const defs = collectExportDefs(readFileSync(file, 'utf8'), file)
-      for (let j = 0, jlen = defs.length; j < jlen; j += 1) {
-        const def = defs[j]!
-        const list = defsByName.get(def.name)
-        if (list) {
-          list.push(def)
-        } else {
-          defsByName.set(def.name, [def])
-        }
-      }
-    }
-  }
-  collectSourceDefinitions()
+  collectSourceExportDefinitions(srcFiles, defsByName)
 
   // Names defined in >1 module can't be attributed by token scan — set aside.
   const collisions: ExportDef[] = []
@@ -366,4 +351,23 @@ const SCRIPT_META: ScriptMeta = {
 
 if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
+}
+
+function collectSourceExportDefinitions(
+  srcFiles: readonly string[],
+  defsByName: Map<string, ExportDef[]>,
+): void {
+  for (let i = 0, { length } = srcFiles; i < length; i += 1) {
+    const file = srcFiles[i]!
+    const defs = collectExportDefs(readFileSync(file, 'utf8'), file)
+    for (let j = 0, jlen = defs.length; j < jlen; j += 1) {
+      const def = defs[j]!
+      const list = defsByName.get(def.name)
+      if (list) {
+        list.push(def)
+      } else {
+        defsByName.set(def.name, [def])
+      }
+    }
+  }
 }

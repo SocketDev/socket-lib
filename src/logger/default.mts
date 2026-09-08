@@ -8,7 +8,7 @@
  *   right implementation per platform.
  */
 
-import { Logger } from './logger.mjs'
+import { Logger } from './class-entry.mjs'
 
 let sharedLogger: Logger | undefined
 

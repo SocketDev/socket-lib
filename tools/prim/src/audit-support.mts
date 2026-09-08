@@ -119,6 +119,10 @@ export function isExportsTarget(firstArg: AstNode): boolean {
   if (firstArg.type === 'Identifier' && firstArg.name === 'exports') {
     return true
   }
+  return isModuleExportsReference(firstArg)
+}
+
+export function isModuleExportsReference(firstArg: AstNode): boolean {
   // Object.defineProperty(module.exports, ...)
   if (
     firstArg.type === 'MemberExpression' &&

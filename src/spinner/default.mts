@@ -11,7 +11,7 @@ import yoctoSpinner from '../external/@socketregistry/yocto-spinner.js'
 import { hasOwn } from '../objects/predicates.mjs'
 
 import { peekDefaultSpinner, setDefaultSpinner } from './default-state.mjs'
-import { Spinner } from './spinner.mjs'
+import { Spinner } from './create.mjs'
 
 import type { SpinnerInstance, SpinnerStyle } from './types.mjs'
 

@@ -21,8 +21,7 @@
  *     {@link observeNpmMetaTwin}, then run under webpack and under esbuild. Two
  *     independent implementations of conditional exports agreeing on which twin
  *     `./npm/meta` resolves to is the claim; one bundler alone could be
- *     agreeing with its own quirk. Both rigs live in
- *     `./browser-bundle-helpers`.
+ *     agreeing with its own quirk. Both rigs live in `./browser-bundling`.
  */
 import { existsSync } from 'node:fs'
 import path from 'node:path'
@@ -39,9 +38,9 @@ import {
   bundleForWeb,
   bundleForWebWithEsbuild,
   fixtureDir,
-} from './browser-bundle-helpers.mts'
+} from './browser-bundling.mts'
 
-import type { WebBundler } from './browser-bundle-helpers.mts'
+import type { WebBundler } from './browser-bundling.mts'
 
 const entry = path.join(fixtureDir, 'entry.mjs')
 const entryDebug = path.join(fixtureDir, 'entry-debug.mjs')

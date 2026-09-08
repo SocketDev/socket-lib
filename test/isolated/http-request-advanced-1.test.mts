@@ -31,7 +31,7 @@ import {
   listeningPort,
   setupHttpFixture,
 } from './http-request-fixtures.mjs'
-import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
+import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 import type {
   HttpHookRequestInfo,

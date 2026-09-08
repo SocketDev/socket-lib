@@ -7,6 +7,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import process from 'node:process'
 import { defineConfig } from 'vitest/config'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import { baseCoverageConfig } from '../vitest.coverage.config.mts'
 import { REPO_CACHE_DIR, REPO_ROOT } from '../../scripts/fleet/paths.mts'
@@ -23,7 +24,7 @@ const workerHeapMB = isCI ? 6144 : 12_288
 // Normalize paths for cross-platform glob patterns, forcing forward slashes on
 // Windows.
 export function toGlobPath(pathLike: string) {
-  return pathLike.replaceAll('\\', '/')
+  return normalizePath(pathLike)
 }
 
 const vitestConfigIsolated = defineConfig({
@@ -80,10 +81,7 @@ const vitestConfigIsolated = defineConfig({
     sequence: {
       concurrent: false,
     },
-    coverage: {
-      ...baseCoverageConfig,
-      reportsDirectory: 'coverage-isolated',
-    },
+    coverage: baseCoverageConfig,
   },
 })
 

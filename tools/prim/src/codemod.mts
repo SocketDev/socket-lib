@@ -214,16 +214,7 @@ export async function applyCodemod({
     result.skipped += fileResult.skipped
   }
 
-  function validateAndWritePlans(): boolean {
-    const findings = validateRewrites(plans, { primordialsRoot })
-    if (findings.length > 0) {
-      // Reject the batch. Caller (cli.mts) sees the findings + bails.
-      // Working tree stays pristine — that's the whole point of the
-      // two-phase split.
-      result.validationFailed = true
-      result.validationFindings = findings
-      return false
-    }
+  function writeValidatedPlans(): void {
     // All checks green — commit the planned writes. Per-file atomic;
     // any individual write failure aborts the rest (leaving partial
     // state, but every file so far is internally consistent).
@@ -231,10 +222,19 @@ export async function applyCodemod({
       const plan = plans[i]!
       atomicWrite(plan.absPath, plan.newSource)
     }
-    return true
   }
-  if (useTwoPhase && !validateAndWritePlans()) {
-    return result
+
+  if (useTwoPhase) {
+    const findings = validateRewrites(plans, { primordialsRoot })
+    if (findings.length > 0) {
+      // Reject the batch. Caller (cli.mts) sees the findings + bails.
+      // Working tree stays pristine — that's the whole point of the
+      // two-phase split.
+      result.validationFailed = true
+      result.validationFindings = findings
+      return result
+    }
+    writeValidatedPlans()
   }
   result.files = reportEntries
 

@@ -9,6 +9,9 @@
 import { readFileSync } from 'node:fs'
 import process from 'node:process'
 
+import { writeError } from '../../../src/stdio/stderr.mjs'
+import { write } from '../../../src/stdio/stdout.mjs'
+
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { createPatch } from 'diff'
 
@@ -16,8 +19,10 @@ import { formatHuman, formatJson } from './format.mts'
 import { formatLintFindings } from './lint.mts'
 import { formatValidationReport } from './validate.mts'
 
+const logger = getDefaultLogger()
+
 export function fail(msg) {
-  process.stderr.write(`prim: ${msg}\n`)
+  writeError(`prim: ${msg}\n`)
   process.exit(1)
 }
 
@@ -44,9 +49,9 @@ export function report(
       stripFailures: stripFailureFiles.length,
       stripFailureFiles,
     })
-    process.stdout.write(`${payload}\n`)
+    write(`${payload}\n`)
   } else {
-    process.stdout.write(formatHuman(findings, { mode, targetName }) + '\n')
+    write(formatHuman(findings, { mode, targetName }) + '\n')
   }
 }
 
@@ -58,10 +63,10 @@ export function reportLint(findings, json, targetName) {
       count: findings.length,
       findings,
     })
-    process.stdout.write(`${payload}\n`)
+    write(`${payload}\n`)
     return
   }
-  process.stdout.write(formatLintFindings(findings, { targetName }))
+  write(formatLintFindings(findings, { targetName }))
 }
 
 export function reportMod(result, json, applied, showDiff = false) {
@@ -79,9 +84,9 @@ export function reportMod(result, json, applied, showDiff = false) {
         validationFailed: true,
         validationFindings: result.validationFindings,
       })
-      process.stdout.write(`${payload}\n`)
+      write(`${payload}\n`)
     } else {
-      process.stderr.write(`${validationReport}\n`)
+      writeError(`${validationReport}\n`)
     }
     process.exitCode = 1
     return
@@ -94,36 +99,31 @@ export function reportMod(result, json, applied, showDiff = false) {
       skipped: result.skipped,
       files: result.files,
     })
-    process.stdout.write(`${payload}\n`)
+    write(`${payload}\n`)
     return
   }
   const verb = applied ? 'Wrote' : 'Would write'
   if (result.rewriteCount === 0) {
-    process.stdout.write('mod: no rewrites needed.\n')
+    write('mod: no rewrites needed.\n')
     return
   }
   const summary = `mod: ${verb} ${result.rewriteCount} rewrite(s) across ${result.filesChanged} file(s).\n`
-  process.stdout.write(summary)
+  write(summary)
   if (result.skipped > 0) {
     const skippedMsg = `mod: skipped ${result.skipped} candidate(s) — pass --include-guessed to rewrite receiver-guessed sites too.\n`
-    process.stdout.write(skippedMsg)
+    write(skippedMsg)
   }
   if (!applied) {
-    process.stdout.write('mod: dry run — pass --apply to write changes.\n')
+    write('mod: dry run — pass --apply to write changes.\n')
   }
   for (const f of result.files) {
     const fileLine = `  ${f.file}: ${f.rewrites} rewrite(s), import added: ${f.importAdded ? 'yes' : 'no'}\n`
-    process.stdout.write(fileLine)
+    write(fileLine)
   }
-  if (showDiff && !applied) {
-    reportPlannedDiffs()
-  }
-
   function reportPlannedDiffs(): void {
     // Dry-run preview: render unified line-diff per planned rewrite by
     // reading the pre-change source from disk and comparing it to the
     // staged new source. Disk is never written in dry-run mode.
-    const logger = getDefaultLogger()
     for (const plan of result.plans ?? []) {
       let oldSource = ''
       try {
@@ -142,5 +142,9 @@ export function reportMod(result, json, applied, showDiff = false) {
       logger.log('')
       logger.log(String(patch))
     }
+  }
+
+  if (showDiff && !applied) {
+    reportPlannedDiffs()
   }
 }

@@ -82,13 +82,9 @@ export function clearDefaultAllowedDirectories(): void {
  *
  * BOTH the resolved and the real path of each directory are listed, because
  * they differ whenever a component is a symlink and a caller may hold either
- * form. macOS is the case that matters: `os.tmpdir()` reports
- * `/var/folders/…`, its real path is `/private/var/folders/…`, and `/var` is a
- * symlink to `/private/var`. A caller that ran the path through
- * `fs.realpathSync` — which anything walking or globbing the temp tree does —
- * arrives with the `/private` form. Listing only the resolved form made that
- * caller look like it was deleting outside every allowed tree, so a scratch
- * cleanup inside the temp dir was refused.
+ * form. On macOS, `os.tmpdir()` can contain a symlinked component.
+ * A caller that uses `fs.realpathSync` holds the real path instead.
+ * Listing both forms permits cleanup through either path to the allowed tree.
  */
 export function getDefaultAllowedDirectories(): string[] {
   if (cachedAllowedDirs === undefined) {

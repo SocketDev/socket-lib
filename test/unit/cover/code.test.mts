@@ -9,9 +9,7 @@
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { spawn } from '../../../src/process/spawn/child.mjs'
 import { getCodeCoverage } from '../../../src/cover/code.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'

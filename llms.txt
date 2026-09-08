@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 667 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 676 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -107,6 +107,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/constants/testing](./dist/constants/testing.d.ts)
 - [@socketsecurity/lib/constants/time](./dist/constants/time.d.ts)
 - [@socketsecurity/lib/constants/typescript](./dist/constants/typescript.d.ts)
+- [@socketsecurity/lib/constants/units](./dist/constants/units.d.ts)
 
 ## cover/
 
@@ -163,6 +164,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/eco/manifest/parse-manifest](./dist/eco/manifest/parse-manifest.d.ts)
 - [@socketsecurity/lib/eco/manifest/types](./dist/eco/manifest/types.d.ts)
 - [@socketsecurity/lib/eco/npm/bun/exec](./dist/eco/npm/bun/exec.d.ts)
+- [@socketsecurity/lib/eco/npm/bun/lockfile/parse](./dist/eco/npm/bun/lockfile/parse.d.ts)
 - [@socketsecurity/lib/eco/npm/constants/lifecycle-script-names](./dist/eco/npm/constants/lifecycle-script-names.d.ts)
 - [@socketsecurity/lib/eco/npm/constants/package-default-node-range](./dist/eco/npm/constants/package-default-node-range.d.ts)
 - [@socketsecurity/lib/eco/npm/constants/package-managers](./dist/eco/npm/constants/package-managers.d.ts)
@@ -183,6 +185,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/eco/npm/npm-cli/parse-git-url](./dist/eco/npm/npm-cli/parse-git-url.d.ts)
 - [@socketsecurity/lib/eco/npm/package-extensions/data](./dist/eco/npm/package-extensions/data.d.ts)
 - [@socketsecurity/lib/eco/npm/package-extensions/types](./dist/eco/npm/package-extensions/types.d.ts)
+- [@socketsecurity/lib/eco/npm/parse-git-dep](./dist/eco/npm/parse-git-dep.d.ts)
 - [@socketsecurity/lib/eco/npm/parse-package-json](./dist/eco/npm/parse-package-json.d.ts)
 - [@socketsecurity/lib/eco/npm/pnpm/exec](./dist/eco/npm/pnpm/exec.d.ts)
 - [@socketsecurity/lib/eco/npm/pnpm/flags](./dist/eco/npm/pnpm/flags.d.ts)
@@ -213,6 +216,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/eco/npm/registry/trust](./dist/eco/npm/registry/trust.d.ts)
 - [@socketsecurity/lib/eco/npm/script](./dist/eco/npm/script.d.ts)
 - [@socketsecurity/lib/eco/npm/vlt/exec](./dist/eco/npm/vlt/exec.d.ts)
+- [@socketsecurity/lib/eco/npm/vlt/lockfile/parse](./dist/eco/npm/vlt/lockfile/parse.d.ts)
 - [@socketsecurity/lib/eco/npm/yarn/exec](./dist/eco/npm/yarn/exec.d.ts)
 - [@socketsecurity/lib/eco/npm/yarn/lockfile/descriptor](./dist/eco/npm/yarn/lockfile/descriptor.d.ts)
 - [@socketsecurity/lib/eco/npm/yarn/lockfile/format](./dist/eco/npm/yarn/lockfile/format.d.ts)
@@ -280,8 +284,11 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/exe/argv/parse](./dist/exe/argv/parse.d.ts)
 - [@socketsecurity/lib/exe/argv/parse-args-string](./dist/exe/argv/parse-args-string.d.ts)
 - [@socketsecurity/lib/exe/exec](./dist/exe/exec.d.ts)
+- [@socketsecurity/lib/exe/path/bin-kinds](./dist/exe/path/bin-kinds.d.ts)
 - [@socketsecurity/lib/exe/path/find](./dist/exe/path/find.d.ts)
 - [@socketsecurity/lib/exe/path/resolve](./dist/exe/path/resolve.d.ts)
+- [@socketsecurity/lib/exe/path/resolve-shims](./dist/exe/path/resolve-shims.d.ts)
+- [@socketsecurity/lib/exe/path/resolve-volta](./dist/exe/path/resolve-volta.d.ts)
 - [@socketsecurity/lib/exe/path/sanitize](./dist/exe/path/sanitize.d.ts)
 - [@socketsecurity/lib/exe/path/which](./dist/exe/path/which.d.ts)
 - [@socketsecurity/lib/exe/sea/detect](./dist/exe/sea/detect.d.ts)
@@ -404,6 +411,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/fs/read-json-cache](./dist/fs/read-json-cache.d.ts)
 - [@socketsecurity/lib/fs/resolve-module](./dist/fs/resolve-module.d.ts)
 - [@socketsecurity/lib/fs/safe](./dist/fs/safe.d.ts)
+- [@socketsecurity/lib/fs/scratch](./dist/fs/scratch.d.ts)
 - [@socketsecurity/lib/fs/strict](./dist/fs/strict.d.ts)
 - [@socketsecurity/lib/fs/types](./dist/fs/types.d.ts)
 - [@socketsecurity/lib/fs/unique](./dist/fs/unique.d.ts)
@@ -416,6 +424,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/git/exec](./dist/git/exec.d.ts)
 - [@socketsecurity/lib/git/ignored](./dist/git/ignored.d.ts)
 - [@socketsecurity/lib/git/isolated-index](./dist/git/isolated-index.d.ts)
+- [@socketsecurity/lib/git/remote](./dist/git/remote.d.ts)
 - [@socketsecurity/lib/git/repo](./dist/git/repo.d.ts)
 - [@socketsecurity/lib/git/staged](./dist/git/staged.d.ts)
 - [@socketsecurity/lib/git/status](./dist/git/status.d.ts)
@@ -752,7 +761,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/spinner/default](./dist/spinner/default.d.ts)
 - [@socketsecurity/lib/spinner/default-state](./dist/spinner/default-state.d.ts)
 - [@socketsecurity/lib/spinner/format](./dist/spinner/format.d.ts)
-- [@socketsecurity/lib/spinner/spinner](./dist/spinner/spinner.d.ts)
+- [@socketsecurity/lib/spinner/spinner](./dist/spinner/create.d.ts)
 - [@socketsecurity/lib/spinner/spinner-internals](./dist/spinner/spinner-internals.d.ts)
 - [@socketsecurity/lib/spinner/spinner-shimmer-methods](./dist/spinner/spinner-shimmer-methods.d.ts)
 - [@socketsecurity/lib/spinner/spinner-status-methods](./dist/spinner/spinner-status-methods.d.ts)
@@ -796,7 +805,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/temporal/now](./dist/temporal/now.d.ts)
 - [@socketsecurity/lib/temporal/slots](./dist/temporal/slots.d.ts)
 - [@socketsecurity/lib/temporal/system](./dist/temporal/system.d.ts)
-- [@socketsecurity/lib/temporal/temporal](./dist/temporal/temporal.d.ts)
+- [@socketsecurity/lib/temporal/temporal](./dist/temporal/namespace.d.ts)
 
 ## term/
 
@@ -817,7 +826,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/term/tables/types](./dist/term/tables/types.d.ts)
 - [@socketsecurity/lib/term/themes/context](./dist/term/themes/context.d.ts)
 - [@socketsecurity/lib/term/themes/resolve](./dist/term/themes/resolve.d.ts)
-- [@socketsecurity/lib/term/themes/themes](./dist/term/themes/themes.d.ts)
+- [@socketsecurity/lib/term/themes/themes](./dist/term/themes/presets.d.ts)
 - [@socketsecurity/lib/term/themes/types](./dist/term/themes/types.d.ts)
 
 ## url/

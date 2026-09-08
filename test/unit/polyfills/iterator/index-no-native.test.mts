@@ -10,20 +10,23 @@
  */
 
 import { beforeAll, describe, expect, it, vi } from 'vitest'
-import type * as IteratorIndex from '../../../src/polyfills/iterator/index.mjs'
+import type * as IteratorIndex from '../../../../src/polyfills/iterator/index.mjs'
 
-vi.mock(import('../../../src/polyfills/iterator/shared.mts'), async orig => ({
-  ...(await orig()),
-  // An engine below Node 22 has no %IteratorHelperPrototype%, so every lookup
-  // against it comes back empty.
-  iteratorPrototypeOf: () => Object.create(null),
-}))
+vi.mock(
+  import('../../../../src/polyfills/iterator/shared.mts'),
+  async orig => ({
+    ...(await orig()),
+    // An engine below Node 22 has no %IteratorHelperPrototype%, so every lookup
+    // against it comes back empty.
+    iteratorPrototypeOf: () => Object.create(null),
+  }),
+)
 
 let iterators: typeof IteratorIndex
 
 beforeAll(async () => {
   Reflect.deleteProperty(globalThis, 'Iterator')
-  iterators = await import('../../../src/polyfills/iterator/index.mjs')
+  iterators = await import('../../../../src/polyfills/iterator/index.mjs')
 })
 
 function counter(limit: number): IterableIterator<number> {
@@ -49,6 +52,25 @@ describe('the native lookups', () => {
 })
 
 describe('the exported helpers on that engine', () => {
+  it('returns ordinary iterator result objects from every lazy shim', () => {
+    const helpers = [
+      iterators.iteratorDrop(counter(1), 0),
+      iterators.iteratorFilter(counter(1), () => true),
+      iterators.iteratorFlatMap(counter(1), (value: number) => [value]),
+      iterators.iteratorMap(counter(1), (value: number) => value),
+      iterators.iteratorTake(counter(1), 1),
+    ]
+    for (let i = 0, { length } = helpers; i < length; i += 1) {
+      const helper = helpers[i]!
+      const value = helper.next()
+      expect(value.done).toBe(false)
+      expect(Object.getPrototypeOf(value)).toBe(Object.prototype)
+      const done = helper.next()
+      expect(done.done).toBe(true)
+      expect(Object.getPrototypeOf(done)).toBe(Object.prototype)
+    }
+  })
+
   it('map through the shim', () => {
     expect(
       iterators.iteratorToArray(

@@ -12,7 +12,7 @@ import { describe, expect, it } from 'vitest'
 import { execBin } from '../../../src/exe/exec.mjs'
 import { whichReal, whichRealSync } from '../../../src/exe/path/which.mjs'
 import { isError } from '../../../src/errors/predicates.mjs'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 import { safeDelete } from '../../../src/fs/safe.mjs'
 
 describe('execBin', () => {

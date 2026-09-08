@@ -238,7 +238,9 @@ export function resolveSanitizedExecutable(
   const searchableEntries: string[] = []
   const trustedEntries: string[] = []
   const unsafeEntries: string[] = []
-  function classifyExecutablePathEntries(): void {
+  classifyPathEntries()
+
+  function classifyPathEntries(): void {
     const rawEntries = rawPath.split(path.delimiter)
     for (let i = 0, { length } = rawEntries; i < length; i += 1) {
       const rawEntry = rawEntries[i]!
@@ -262,7 +264,6 @@ export function resolveSanitizedExecutable(
       trustedEntries.push(entry)
     }
   }
-  classifyExecutablePathEntries()
 
   const poisoned = new Set<string>()
   let binPath: string | undefined

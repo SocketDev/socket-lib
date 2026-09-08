@@ -24,6 +24,8 @@ import { ciSpinner } from './format.mjs'
 
 import type { SpinnerInstance, SpinnerOptions, SpinnerStyle } from './types.mjs'
 
+const logger = getDefaultLogger()
+
 export type YoctoSpinnerFactory = (options: Record<string, unknown>) => {
   constructor: YoctoSpinnerConstructor
 }
@@ -68,9 +70,11 @@ export function Spinner(options?: SpinnerOptions | undefined): SpinnerInstance {
     const tempInstance = yoctoFactory({})
     const YoctoSpinnerClass = tempInstance.constructor
     /* c8 ignore stop */
-    const logger = getDefaultLogger() as unknown as SpinnerLogger
 
-    SpinnerCtor = createSpinnerClass(YoctoSpinnerClass, logger)
+    SpinnerCtor = createSpinnerClass(
+      YoctoSpinnerClass,
+      logger as unknown as SpinnerLogger,
+    )
 
     // CI and AI-agent-driven runs get the minimal no-animation spinner: an
     // agent reads a transcript, so throbber frames are pure noise there.

@@ -118,49 +118,53 @@ export async function extractZip(
   }
   /* c8 ignore stop */
 
-  let totalExtractedSize = 0
+  validateZipEntries()
 
-  for (const entry of entries) {
-    if (entry.isDirectory) {
-      continue
+  function validateZipEntries(): void {
+    let totalExtractedSize = 0
+
+    for (const entry of entries) {
+      if (entry.isDirectory) {
+        continue
+      }
+
+      /* c8 ignore start */
+      if (entry.entryName.includes('\0')) {
+        throw new ErrorCtor(
+          `Invalid null byte in archive entry name: ${entry.entryName}`,
+        )
+      }
+      /* c8 ignore stop */
+
+      // Check individual file size
+      const uncompressedSize = entry.header.size
+      if (uncompressedSize > maxFileSize) {
+        throw new ErrorCtor(
+          `File size exceeds limit: ${entry.entryName} (${uncompressedSize} bytes > ${maxFileSize} bytes)`,
+        )
+      }
+
+      // Check total extracted size
+      totalExtractedSize += uncompressedSize
+      if (totalExtractedSize > maxTotalSize) {
+        throw new ErrorCtor(
+          `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
+        )
+      }
+
+      // ZIP entries always use forward slashes per ZIP specification
+      const parts = entry.entryName.split('/')
+      if (parts.length <= strip) {
+        continue
+      }
+
+      const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
+      const targetPath = path.join(normalizedOutputDir, strippedPath)
+
+      // Validate the path is within the target directory, which prevents path
+      // traversal.
+      validatePathWithinBase(targetPath, normalizedOutputDir, entry.entryName)
     }
-
-    /* c8 ignore start */
-    if (entry.entryName.includes('\0')) {
-      throw new ErrorCtor(
-        `Invalid null byte in archive entry name: ${entry.entryName}`,
-      )
-    }
-    /* c8 ignore stop */
-
-    // Check individual file size
-    const uncompressedSize = entry.header.size
-    if (uncompressedSize > maxFileSize) {
-      throw new ErrorCtor(
-        `File size exceeds limit: ${entry.entryName} (${uncompressedSize} bytes > ${maxFileSize} bytes)`,
-      )
-    }
-
-    // Check total extracted size
-    totalExtractedSize += uncompressedSize
-    if (totalExtractedSize > maxTotalSize) {
-      throw new ErrorCtor(
-        `Total extracted size exceeds limit: ${totalExtractedSize} bytes > ${maxTotalSize} bytes`,
-      )
-    }
-
-    // ZIP entries always use forward slashes per ZIP specification
-    const parts = entry.entryName.split('/')
-    if (parts.length <= strip) {
-      continue
-    }
-
-    const strippedPath = ArrayPrototypeSlice(parts, strip).join('/')
-    const targetPath = path.join(normalizedOutputDir, strippedPath)
-
-    // Validate the path is within the target directory, which prevents path
-    // traversal.
-    validatePathWithinBase(targetPath, normalizedOutputDir, entry.entryName)
   }
 
   // strip===0 vs strip>0 cases tested separately; isDirectory arms

@@ -63,7 +63,7 @@ export function collectRewrites(options: {
   } = { __proto__: null, ...options } as typeof options
   let skipped = 0
 
-  function rewriteConstructor(node: AstNode): void {
+  function collectConstructorRewrite(node: AstNode): void {
     const callee = node.callee
     if (callee?.type !== 'Identifier' || !TRACKED_GLOBALS.has(callee.name)) {
       return
@@ -84,9 +84,8 @@ export function collectRewrites(options: {
     usedPrimordials.add(ctor)
     return
   }
-
-  function rewriteStatic(
-    callee: AstNode,
+  function collectStaticRewrite(
+    node: AstNode,
     object: AstNode,
     property: AstNode,
   ): void {
@@ -118,89 +117,86 @@ export function collectRewrites(options: {
     // `T | undefined`. Plain JS sources don't get the assertion.
     const needsBang = isTsFile && nullable && nullable.has(expected)
     rewrites.push({
-      start: toChar(callee.start),
-      end: toChar(callee.end),
+      start: toChar(node.callee!.start),
+      end: toChar(node.callee!.end),
       replacement: localName(expected) + (needsBang ? '!' : ''),
     })
     usedPrimordials.add(expected)
     return
   }
-
-  function rewritePrototype(
+  function resolvePrototypeReceiver(
     node: AstNode,
-    callee: AstNode,
     object: AstNode,
     property: AstNode,
-  ): void {
+  ): string | undefined {
     // Prototype: receiver disambiguation.
     let receiverType = UNAMBIGUOUS_PROTOTYPE_METHODS.get(property.name)
-    function deferAmbiguousCall(): void {
-      pendingAmbiguous.push({
-        calleeStart: toChar(callee.start),
-        calleeEnd: toChar(callee.end),
-        firstArgStart:
-          node.arguments.length > 0 ? toChar(node.arguments[0]!.start) : -1,
-        lastArgEnd:
-          node.arguments.length > 0
-            ? toChar(node.arguments.at(-1)!.end)
-            : findOpenParen(src, toChar(callee.end)),
-        methodName: property.name,
-        objectEnd: toChar(object.end),
-        objectStart: toChar(object.start),
-        offset: callee.start,
-        receiverName: object.name,
-      })
-    }
-    function classifyReceiver(): boolean {
-      if (!receiverType) {
-        // Skip when the property name is a known Node built-in module
-        // static method (path.isAbsolute, fs.readFile, etc.). Same
-        // suppression as audit.mts to keep audit/codemod in lock-step.
-        if (NODE_MODULE_STATIC_METHODS.has(property.name)) {
-          return false
-        }
-        // Hard cases (.test, .then, .exec, .catch, .finally): widely
-        // duck-typed by user libraries. Try the static guess first;
-        // fall back to AI-deferred classification when --ai-disambiguate
-        // is on. See ambiguous-methods.mts for the rationale.
-        if (isAmbiguousMethod(property.name)) {
-          const guess = guessReceiverType(object.name)
-          if (guess) {
-            // Static signal won — drop into the same path as a
-            // non-ambiguous guessed receiver below.
-            if (!includeGuessed) {
-              skipped += 1
-              return false
-            }
-            receiverType = guess
-          } else if (aiDisambiguate) {
-            // Defer: capture the call site for a post-walk async pass.
-            // Ambiguous-method callers must consult Claude before deciding
-            // whether to rewrite.
-            deferAmbiguousCall()
-            return false
-          } else {
-            skipped += 1
-            return false
-          }
-        } else {
-          const guess = guessReceiverType(object.name)
-          if (!guess) {
-            return false
-          }
+    if (!receiverType) {
+      // Skip when the property name is a known Node built-in module
+      // static method (path.isAbsolute, fs.readFile, etc.). Same
+      // suppression as audit.mts to keep audit/codemod in lock-step.
+      if (NODE_MODULE_STATIC_METHODS.has(property.name)) {
+        return
+      }
+      // Hard cases (.test, .then, .exec, .catch, .finally): widely
+      // duck-typed by user libraries. Try the static guess first;
+      // fall back to AI-deferred classification when --ai-disambiguate
+      // is on. See ambiguous-methods.mts for the rationale.
+      if (isAmbiguousMethod(property.name)) {
+        const guess = guessReceiverType(object.name)
+        if (guess) {
+          // Static signal won — drop into the same path as a
+          // non-ambiguous guessed receiver below.
           if (!includeGuessed) {
             skipped += 1
-            return false
+            return
           }
           receiverType = guess
+        } else if (aiDisambiguate) {
+          // Defer: capture the call site for a post-walk async pass.
+          // Ambiguous-method callers must consult Claude before deciding
+          // whether to rewrite.
+          pendingAmbiguous.push({
+            calleeStart: toChar(node.callee!.start),
+            calleeEnd: toChar(node.callee!.end),
+            firstArgStart:
+              node.arguments.length > 0 ? toChar(node.arguments[0]!.start) : -1,
+            lastArgEnd:
+              node.arguments.length > 0
+                ? toChar(node.arguments.at(-1)!.end)
+                : findOpenParen(src, toChar(node.callee!.end)),
+            methodName: property.name,
+            objectEnd: toChar(object.end),
+            objectStart: toChar(object.start),
+            offset: node.callee!.start,
+            receiverName: object.name,
+          })
+          return
+        } else {
+          skipped += 1
+          return
         }
+      } else {
+        const guess = guessReceiverType(object.name)
+        if (!guess) {
+          return
+        }
+        if (!includeGuessed) {
+          skipped += 1
+          return
+        }
+        receiverType = guess
       }
-      return true
     }
-    if (!classifyReceiver()) {
-      return
-    }
-    const expected = prototypePrimordialName(receiverType!, property.name)
+    return receiverType
+  }
+  function emitPrototypeRewrite(
+    node: AstNode,
+    object: AstNode,
+    property: AstNode,
+    receiverType: string,
+  ): void {
+    const expected = prototypePrimordialName(receiverType, property.name)
     if (!expected || !exported.has(expected)) {
       return
     }
@@ -208,7 +204,7 @@ export function collectRewrites(options: {
     // Need to span from start of `node.callee` through the closing `)`.
     // node.end is unreliable on bundles (acorn-wasm parser bug — see
     // repairEndPositions above), so we don't trust it for the outermost
-    // span. Instead: take the start of the call (= callee.start)
+    // span. Instead: take the start of the call (= node.callee!.start)
     // and scan forward from after the last argument's end to find the
     // matching `)`. Whitespace, line comments, and trailing commas
     // between the last arg and `)` are tolerated.
@@ -220,14 +216,14 @@ export function collectRewrites(options: {
             toChar(node.arguments.at(-1)!.end),
           )
         : ''
-    const callStart = toChar(callee.start)
+    const callStart = toChar(node.callee!.start)
     // With no arguments there is no last argument to scan from, and the paren
     // scan refuses to start on the call's own `(`. Handing it the position just
     // past that paren is what lets a no-argument call be rewritten.
     const lastArgEnd =
       node.arguments.length > 0
         ? toChar(node.arguments.at(-1)!.end)
-        : findOpenParen(src, toChar(callee.end))
+        : findOpenParen(src, toChar(node.callee!.end))
     const callEnd = findClosingParen(src, lastArgEnd)
     if (callEnd < 0) {
       // Couldn't find `)` — bail on this rewrite rather than corrupt.
@@ -247,13 +243,10 @@ export function collectRewrites(options: {
   }
 
   walkAst(ast, node => {
-    // ── new Foo(...) ────────────────────────────────────────────────
     if (node.type === 'NewExpression') {
-      rewriteConstructor(node)
+      collectConstructorRewrite(node)
       return
     }
-
-    // ── Foo.bar(args) and obj.method(args) ──────────────────────────
     if (node.type !== 'CallExpression') {
       return
     }
@@ -270,13 +263,15 @@ export function collectRewrites(options: {
       return
     }
 
-    // Static: Foo.bar(args) → FooBar(args)
     if (TRACKED_GLOBALS.has(object.name)) {
-      rewriteStatic(node.callee, object, property)
+      collectStaticRewrite(node, object, property)
       return
     }
-
-    rewritePrototype(node, node.callee, object, property)
+    const receiverType = resolvePrototypeReceiver(node, object, property)
+    if (receiverType === undefined) {
+      return
+    }
+    emitPrototypeRewrite(node, object, property, receiverType)
   })
 
   return { skipped }

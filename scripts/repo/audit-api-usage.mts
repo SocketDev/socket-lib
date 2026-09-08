@@ -279,40 +279,7 @@ function main(): number {
   const libRoot = path.resolve(import.meta.dirname, '../..')
   const subpaths = exportSubpaths(path.join(libRoot, 'package.json'))
 
-  // Walk every consumer, collecting refs, skipping socket-lib's own tree.
-  const allRefs: UsageRef[] = []
-  function collectConsumerReferences(): void {
-    for (
-      let i = 0, { length } = consumers.length ? consumers : [];
-      i < length;
-      i += 1
-    ) {
-      const repo = consumers[i]!
-      const root = path.join(PROJECTS_DIR, repo)
-      if (!existsSync(root)) {
-        logger.warn(`skip (absent): ${repo}`)
-        continue
-      }
-      const files = listSourceFiles(root)
-      for (let j = 0, flen = files.length; j < flen; j += 1) {
-        const file = files[j]!
-        const source = readFileSync(file, 'utf8')
-        // Fast-path pre-filter only; not inferring behavior — it skips files
-        // that cannot contain a lib specifier before the real AST walk in
-        // collectRefs.
-        // oxlint-disable-next-line socket/no-source-sniffing -- pre-filter only
-        if (!source.includes(PKG)) {
-          continue
-        }
-        const parsed = tryParse(source)
-        if (!parsed) {
-          continue
-        }
-        allRefs.push(...collectRefs(source, file, repo))
-      }
-    }
-  }
-  collectConsumerReferences()
+  const allRefs = collectConsumerReferences(consumers)
 
   // A subpath is USED if any ref names it exactly. Only TWO kinds are genuine
   // blind spots — they reference the package WITHOUT naming a subpath's
@@ -445,4 +412,40 @@ const SCRIPT_META: ScriptMeta = {
 
 if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
+}
+
+function collectConsumerReferences(consumers: readonly string[]): UsageRef[] {
+  // Walk every consumer, collecting refs, skipping socket-lib's own tree.
+  const allRefs: UsageRef[] = []
+  for (
+    let i = 0, { length } = consumers.length ? consumers : [];
+    i < length;
+    i += 1
+  ) {
+    const repo = consumers[i]!
+    const root = path.join(PROJECTS_DIR, repo)
+    if (!existsSync(root)) {
+      logger.warn(`skip (absent): ${repo}`)
+      continue
+    }
+    const files = listSourceFiles(root)
+    for (let j = 0, flen = files.length; j < flen; j += 1) {
+      const file = files[j]!
+      const source = readFileSync(file, 'utf8')
+      // Fast-path pre-filter only; not inferring behavior — it skips files
+      // that cannot contain a lib specifier before the real AST walk in
+      // collectRefs.
+      // oxlint-disable-next-line socket/no-source-sniffing -- pre-filter only
+      if (!source.includes(PKG)) {
+        continue
+      }
+      const parsed = tryParse(source)
+      if (!parsed) {
+        continue
+      }
+      allRefs.push(...collectRefs(source, file, repo))
+    }
+  }
+
+  return allRefs
 }

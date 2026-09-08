@@ -203,7 +203,10 @@ export function iteratorRecordOf<T>(iterator: object): IteratorRecord<T> {
         // `value` getter, and the spec never reaches it.
         return doneResult()
       }
-      return { done: false, value: ReflectGet(result, 'value') as T }
+      return {
+        done: false,
+        value: ReflectGet(result, 'value') as T,
+      }
     },
   }
 }

@@ -223,7 +223,6 @@ async function main(): Promise<void> {
     }
 
     const quiet = isQuiet(values)
-    const { verbose } = flags
 
     function shouldSkipBuild(): boolean {
       // `--needed` is the `prepare`/install path. In CI, skip it entirely: CI
@@ -257,182 +256,7 @@ async function main(): Promise<void> {
       return
     }
 
-    let exitCode = 0
-
-    // Handle watch mode
-    if (flags.watch) {
-      if (!quiet) {
-        printHeader('Build Runner (Watch Mode)')
-      }
-      exitCode = await watchBuild({ quiet, verbose })
-    }
-    // Build types only
-    else if (flags.types && !flags.src) {
-      if (!quiet) {
-        printHeader('Building TypeScript Declarations')
-      }
-      exitCode = await buildTypes({ quiet })
-      if (exitCode === 0 && !quiet) {
-        logger.substep('Type declarations built')
-      }
-    }
-    // Build source only
-    else if (flags.src && !flags.types) {
-      await runSourceBuild()
-    }
-    // Build everything (default)
-    else {
-      if (!(await runFullBuild())) {
-        return
-      }
-    }
-
-    async function runSourceBuild(): Promise<void> {
-      if (!quiet) {
-        printHeader('Building Source')
-      }
-      const { buildTime, exitCode: srcExitCode } = await buildSource({
-        quiet,
-        verbose,
-        analyze: flags.analyze,
-      })
-      exitCode = srcExitCode
-      if (exitCode === 0 && !quiet) {
-        logger.substep(`Source build complete in ${buildTime}ms`)
-      }
-    }
-
-    async function runFullBuild(): Promise<boolean> {
-      if (!quiet) {
-        printHeader('Building Package')
-      }
-
-      // Validate external type definitions before building
-      const validateArgs = ['scripts/repo/validate/external-types.mts']
-      if (quiet) {
-        validateArgs.push('--quiet')
-      }
-      if (verbose) {
-        validateArgs.push('--verbose')
-      }
-
-      const validateExitCode = await runSequence([
-        {
-          args: validateArgs,
-          command: 'node',
-        },
-      ])
-
-      // Only warn on validation failure, don't block build
-      // (some external modules may still use export = for now)
-      if (validateExitCode !== 0 && verbose && !quiet) {
-        logger.warn('Some external type definitions use legacy patterns')
-        logger.substep(
-          'Build will continue, but consider migrating to ES6 exports',
-        )
-      }
-
-      exitCode = await runSequence([
-        {
-          args: [
-            'scripts/repo/bundle/clean.mts',
-            '--dist',
-            '--types',
-            '--quiet',
-          ],
-          command: 'node',
-        },
-      ])
-      if (exitCode !== 0) {
-        if (!quiet) {
-          logger.error('Clean failed')
-        }
-        process.exitCode = exitCode
-        return false
-      }
-
-      if (!quiet) {
-        logger.success('Build Cleaned')
-      }
-
-      async function runParallelBuilders(): Promise<void> {
-        // Run source, externals, and types builds in parallel. Use
-        // `allSettled` so a rejection in one builder doesn't short-
-        // circuit the others mid-write — past CI flakiness on a SHIP
-        // had buildExternals finish + log "Build completed successfully"
-        // while buildSource/buildTypes were still writing files, then
-        // the test runner started before those writes flushed.
-        const settled = await Promise.allSettled([
-          buildSource({
-            quiet,
-            verbose,
-            skipClean: true,
-            analyze: flags.analyze,
-          }),
-          buildExternals({ quiet, verbose }),
-          buildTypes({ quiet, skipClean: true }),
-          buildPrim({ quiet }),
-        ])
-        const {
-          0: srcSettled,
-          1: externalsSettled,
-          2: typesSettled,
-          3: primSettled,
-        } = settled
-        const srcResult: BuildSourceResult =
-          srcSettled.status === 'fulfilled'
-            ? srcSettled.value
-            : (logger.error(`buildSource rejected: ${srcSettled.reason}`),
-              { exitCode: 1, buildTime: 0 })
-        const externalsExitCode: number =
-          externalsSettled.status === 'fulfilled'
-            ? externalsSettled.value
-            : (logger.error(
-                `buildExternals rejected: ${externalsSettled.reason}`,
-              ),
-              1)
-        const typesExitCode: number =
-          typesSettled.status === 'fulfilled'
-            ? typesSettled.value
-            : (logger.error(`buildTypes rejected: ${typesSettled.reason}`), 1)
-        const primExitCode: number =
-          primSettled.status === 'fulfilled'
-            ? primSettled.value
-            : (logger.error(`buildPrim rejected: ${primSettled.reason}`), 1)
-
-        // Check if any of the parallel builds failed
-        exitCode =
-          srcResult.exitCode !== 0
-            ? srcResult.exitCode
-            : externalsExitCode !== 0
-              ? externalsExitCode
-              : typesExitCode !== 0
-                ? typesExitCode
-                : primExitCode
-      }
-      await runParallelBuilders()
-
-      // If all parallel builds succeeded, flush dist/ to disk and run the
-      // post-build dist-shaping steps.
-      if (exitCode === 0) {
-        // Fsync barrier — see `fsync-dist.mts`. Runs between the parallel
-        // builders and downstream phases (runPostBuild, then tests) so no
-        // consumer reads stale page-cache state.
-        const distDir = path.join(rootPath, 'dist')
-        if (existsSync(distDir)) {
-          await fsyncDist(distDir)
-        }
-        const postBuildExitCode = await runPostBuild({ quiet, verbose })
-        exitCode = postBuildExitCode
-        // Integrity guard: syntax-check the emitted JS so a corrupt or
-        // half-written file from a parallel-write race fails the build
-        // here rather than as a cryptic SyntaxError at test time.
-        if (exitCode === 0 && existsSync(distDir)) {
-          exitCode = await verifyDist(distDir)
-        }
-      }
-      return true
-    }
+    const exitCode = await runSelectedBuild({ ...flags, quiet })
 
     function reportBuildStatus(): void {
       // Print final status and footer
@@ -472,4 +296,195 @@ const SCRIPT_META: ScriptMeta = {
 
 if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
+}
+
+async function buildCompletePackage(flags: {
+  quiet: boolean
+  verbose: boolean
+  analyze: boolean
+}): Promise<number> {
+  const { quiet, verbose } = flags
+  let exitCode = 0
+  // Validate external type definitions before building
+  const validateArgs = ['scripts/repo/validate/external-types.mts']
+  if (quiet) {
+    validateArgs.push('--quiet')
+  }
+  if (verbose) {
+    validateArgs.push('--verbose')
+  }
+
+  const validateExitCode = await runSequence([
+    {
+      args: validateArgs,
+      command: 'node',
+    },
+  ])
+
+  // Only warn on validation failure, don't block build
+  // (some external modules may still use export = for now)
+  if (validateExitCode !== 0 && verbose && !quiet) {
+    logger.warn('Some external type definitions use legacy patterns')
+    logger.substep('Build will continue, but consider migrating to ES6 exports')
+  }
+
+  exitCode = await runSequence([
+    {
+      args: ['scripts/repo/bundle/clean.mts', '--dist', '--types', '--quiet'],
+      command: 'node',
+    },
+  ])
+  if (exitCode !== 0) {
+    if (!quiet) {
+      logger.error('Clean failed')
+    }
+    return exitCode
+  }
+
+  if (!quiet) {
+    logger.success('Build Cleaned')
+  }
+
+  exitCode = await buildPackageParts(flags)
+
+  // If all parallel builds succeeded, flush dist/ to disk and run the
+  // post-build dist-shaping steps.
+  if (exitCode === 0) {
+    // Fsync barrier — see `fsync-dist.mts`. Runs between the parallel
+    // builders and downstream phases (runPostBuild, then tests) so no
+    // consumer reads stale page-cache state.
+    const distDir = path.join(rootPath, 'dist')
+    if (existsSync(distDir)) {
+      await fsyncDist(distDir)
+    }
+    const postBuildExitCode = await runPostBuild({ quiet, verbose })
+    exitCode = postBuildExitCode
+    // Integrity guard: syntax-check the emitted JS so a corrupt or
+    // half-written file from a parallel-write race fails the build
+    // here rather than as a cryptic SyntaxError at test time.
+    if (exitCode === 0 && existsSync(distDir)) {
+      exitCode = await verifyDist(distDir)
+    }
+  }
+  return exitCode
+}
+
+async function buildPackageParts(flags: {
+  quiet: boolean
+  verbose: boolean
+  analyze: boolean
+}): Promise<number> {
+  const { quiet, verbose } = flags
+  let exitCode = 0
+  // Run source, externals, and types builds in parallel. Use
+  // `allSettled` so a rejection in one builder doesn't short-
+  // circuit the others mid-write — past CI flakiness on a SHIP
+  // had buildExternals finish + log "Build completed successfully"
+  // while buildSource/buildTypes were still writing files, then
+  // the test runner started before those writes flushed.
+  const settled = await Promise.allSettled([
+    buildSource({
+      quiet,
+      verbose,
+      skipClean: true,
+      analyze: flags.analyze,
+    }),
+    buildExternals({ quiet, verbose }),
+    buildTypes({ quiet, skipClean: true }),
+    buildPrim({ quiet }),
+  ])
+  const {
+    0: srcSettled,
+    1: externalsSettled,
+    2: typesSettled,
+    3: primSettled,
+  } = settled
+  const srcResult: BuildSourceResult =
+    srcSettled.status === 'fulfilled'
+      ? srcSettled.value
+      : (logger.error(`buildSource rejected: ${srcSettled.reason}`),
+        { exitCode: 1, buildTime: 0 })
+  const externalsExitCode: number =
+    externalsSettled.status === 'fulfilled'
+      ? externalsSettled.value
+      : (logger.error(`buildExternals rejected: ${externalsSettled.reason}`), 1)
+  const typesExitCode: number =
+    typesSettled.status === 'fulfilled'
+      ? typesSettled.value
+      : (logger.error(`buildTypes rejected: ${typesSettled.reason}`), 1)
+  const primExitCode: number =
+    primSettled.status === 'fulfilled'
+      ? primSettled.value
+      : (logger.error(`buildPrim rejected: ${primSettled.reason}`), 1)
+
+  // Check if any of the parallel builds failed
+  exitCode =
+    srcResult.exitCode !== 0
+      ? srcResult.exitCode
+      : externalsExitCode !== 0
+        ? externalsExitCode
+        : typesExitCode !== 0
+          ? typesExitCode
+          : primExitCode
+
+  return exitCode
+}
+
+async function runSelectedBuild(flags: {
+  watch: boolean
+  types: boolean
+  src: boolean
+  analyze: boolean
+  verbose: boolean
+  quiet: boolean
+}): Promise<number> {
+  const { quiet, verbose } = flags
+  let exitCode = 0
+
+  // Handle watch mode
+  if (flags.watch) {
+    if (!quiet) {
+      printHeader('Build Runner (Watch Mode)')
+    }
+    exitCode = await watchBuild({ quiet, verbose })
+  }
+  // Build types only
+  else if (flags.types && !flags.src) {
+    if (!quiet) {
+      printHeader('Building TypeScript Declarations')
+    }
+    exitCode = await buildTypes({ quiet })
+    if (exitCode === 0 && !quiet) {
+      logger.substep('Type declarations built')
+    }
+  }
+  // Build source only
+  else if (flags.src && !flags.types) {
+    if (!quiet) {
+      printHeader('Building Source')
+    }
+    const { buildTime, exitCode: srcExitCode } = await buildSource({
+      quiet,
+      verbose,
+      analyze: flags.analyze,
+    })
+    exitCode = srcExitCode
+    if (exitCode === 0 && !quiet) {
+      logger.substep(`Source build complete in ${buildTime}ms`)
+    }
+  }
+  // Build everything (default)
+  else {
+    if (!quiet) {
+      printHeader('Building Package')
+    }
+
+    exitCode = await buildCompletePackage({
+      quiet,
+      verbose,
+      analyze: flags.analyze,
+    })
+  }
+
+  return exitCode
 }

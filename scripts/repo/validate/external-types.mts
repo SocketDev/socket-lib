@@ -22,7 +22,6 @@ import { runMain } from '../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const externalDir = SRC_EXTERNAL_DIR
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
@@ -41,7 +40,7 @@ const logger = getDefaultLogger()
  * Check if a .d.ts file uses proper module export patterns.
  */
 export function checkTypeDefinition(filePath: string) {
-  const relativePath = path.relative(externalDir, filePath)
+  const relativePath = path.relative(SRC_EXTERNAL_DIR, filePath)
   const normalizedPath = normalizePath(relativePath)
   const issues = []
 
@@ -192,7 +191,7 @@ async function runValidation(): Promise<void> {
     logger.step('Validating src/external type definitions')
   }
 
-  const dtsFiles = getDtsFilesRecursive(externalDir)
+  const dtsFiles = getDtsFilesRecursive(SRC_EXTERNAL_DIR)
 
   if (dtsFiles.length === 0) {
     if (!quiet) {

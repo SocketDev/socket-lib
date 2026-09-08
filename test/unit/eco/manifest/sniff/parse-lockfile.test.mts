@@ -9,7 +9,7 @@ import { describe, expect, test } from 'vitest'
 import {
   jsParseLockfile,
   sniffLockfileFormat,
-} from '../../src/eco/manifest/parse-lockfile.mts'
+} from '../../../../../src/eco/manifest/parse-lockfile.mts'
 
 const BUN = `{
   "lockfileVersion": 1,

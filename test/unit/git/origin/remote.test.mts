@@ -18,7 +18,7 @@ import {
   originSlug,
   originSlugSync,
   urlFromResult,
-} from '../../src/git/remote.mts'
+} from '../../../../src/git/remote.mts'
 
 // Hoisted so the mock factory, which runs before this module body, sees
 // initialized spies.
@@ -27,7 +27,7 @@ const { gitSpawn, gitSync } = vi.hoisted(() => ({
   gitSync: vi.fn(),
 }))
 
-vi.mock(import('../../src/git/exec.mts'), async orig => {
+vi.mock(import('../../../../src/git/exec.mts'), async orig => {
   const actual = await orig()
   return {
     ...actual,

@@ -97,6 +97,8 @@ export function checkPrimordials(
   const used = new Set<string>()
   const usedToFiles = new Map<string, string[]>()
 
+  collectUsedPrimordials()
+
   function collectUsedPrimordials(): void {
     for (const dir of config.scanDirs) {
       const path = getNodePath()
@@ -134,7 +136,6 @@ export function checkPrimordials(
       }
     }
   }
-  collectUsedPrimordials()
 
   // Read socket-lib's exported names. The resolver returns either a file for
   // the legacy single-file layout or a directory for the post-split layout.

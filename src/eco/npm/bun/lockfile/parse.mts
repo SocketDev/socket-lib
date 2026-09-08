@@ -55,6 +55,47 @@ export function jsParseBunLock(content: string): ParsedLockfile {
   const packages: PackageRef[] = []
   const packageIndex: Record<string, number | number[]> = Object.create(null)
 
+  function makePackageRef(
+    tuple: unknown[],
+    name: string,
+    version: string,
+  ): PackageRef {
+    // A workspace member resolves from disk: no registry version, no integrity.
+    const isWorkspace = StringPrototypeStartsWith(version, WORKSPACE_PROTOCOL)
+    const gitDep = parseGitDep(version)
+    // A git entry drops the registry slot, so its meta sits one place earlier.
+    const metaAt = typeof tuple[1] === 'object' && tuple[1] !== null ? 1 : 2
+    const meta = (
+      typeof tuple[metaAt] === 'object' && tuple[metaAt] !== null
+        ? tuple[metaAt]
+        : undefined
+    ) as BunMeta | undefined
+    const registry = typeof tuple[1] === 'string' ? tuple[1] : ''
+    const integrityAt = metaAt + 1
+    const integrity =
+      typeof tuple[integrityAt] === 'string' &&
+      StringPrototypeStartsWith(tuple[integrityAt] as string, 'sha')
+        ? (tuple[integrityAt] as string)
+        : undefined
+
+    return ObjectFreeze({
+      __proto__: null,
+      name,
+      version: isWorkspace || gitDep ? '' : version,
+      resolved: registry || undefined,
+      integrity,
+      ecosystem: 'npm',
+      depType: 'prod',
+      isDev: false,
+      isOptional: false,
+      isPeer: false,
+      isBundled: false,
+      vcsUrl: gitDep?.url,
+      vcsCommit: gitDep?.commit,
+      dependencies: ObjectFreeze(dependencyNames(meta)),
+    }) as unknown as PackageRef
+  }
+
   let data: RawBunLockfile
   try {
     data = JSON.parse(stripTrailingCommas(content)) as RawBunLockfile
@@ -68,11 +109,11 @@ export function jsParseBunLock(content: string): ParsedLockfile {
     if (!Array.isArray(tuple) || typeof tuple[0] !== 'string') {
       continue
     }
-    const ref = parseBunPackage(tuple[0], tuple)
-    if (!ref) {
+    const { name, version } = parseBunDescriptor(tuple[0])
+    if (!name) {
       continue
     }
-    const { name } = ref
+    const ref = makePackageRef(tuple, name, version)
     ArrayPrototypePush(packages, ref)
 
     const at = packageIndex[name]
@@ -114,50 +155,6 @@ export function parseBunDescriptor(descriptor: string): {
     name: StringPrototypeSlice(descriptor, 0, at),
     version: StringPrototypeSlice(descriptor, at + 1),
   } as unknown as { name: string; version: string }
-}
-
-export function parseBunPackage(
-  descriptor: string,
-  tuple: unknown[],
-): PackageRef | undefined {
-  const { name, version } = parseBunDescriptor(descriptor)
-  if (!name) {
-    return undefined
-  }
-  // A workspace member resolves from disk: no registry version, no integrity.
-  const isWorkspace = StringPrototypeStartsWith(version, WORKSPACE_PROTOCOL)
-  const gitDep = parseGitDep(version)
-  // A git entry drops the registry slot, so its meta sits one place earlier.
-  const metaAt = typeof tuple[1] === 'object' && tuple[1] !== null ? 1 : 2
-  const meta = (
-    typeof tuple[metaAt] === 'object' && tuple[metaAt] !== null
-      ? tuple[metaAt]
-      : undefined
-  ) as BunMeta | undefined
-  const registry = typeof tuple[1] === 'string' ? tuple[1] : ''
-  const integrityAt = metaAt + 1
-  const integrity =
-    typeof tuple[integrityAt] === 'string' &&
-    StringPrototypeStartsWith(tuple[integrityAt] as string, 'sha')
-      ? (tuple[integrityAt] as string)
-      : undefined
-
-  return ObjectFreeze({
-    __proto__: null,
-    name,
-    version: isWorkspace || gitDep ? '' : version,
-    resolved: registry || undefined,
-    integrity,
-    ecosystem: 'npm',
-    depType: 'prod',
-    isDev: false,
-    isOptional: false,
-    isPeer: false,
-    isBundled: false,
-    vcsUrl: gitDep?.url,
-    vcsCommit: gitDep?.commit,
-    dependencies: ObjectFreeze(dependencyNames(meta)),
-  }) as unknown as PackageRef
 }
 
 /**

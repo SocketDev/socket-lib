@@ -5,7 +5,6 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import { fetchRefShaViaGraphQL } from '../../../src/github/refs-graphql.mjs'
 import { httpRequest } from '../../../src/http-request/request.mjs'
 

@@ -24,7 +24,6 @@ import { runMain } from '../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const externalDir = DIST_EXTERNAL_DIR
 const require = createRequire(import.meta.url)
 
 // Import CommonJS modules using require
@@ -89,7 +88,7 @@ const DEFAULT_ONLY_ALLOWED = new Set([
  * Check if module exports work correctly for both CJS and ESM.
  */
 export async function checkModuleExports(filePath: string) {
-  const relativePath = path.relative(externalDir, filePath)
+  const relativePath = path.relative(DIST_EXTERNAL_DIR, filePath)
   const normalizedPath = normalizePath(relativePath)
   const issues: string[] = []
 
@@ -179,7 +178,7 @@ async function runValidation(): Promise<void> {
     logger.step('Validating dist/external ESM/CJS exports')
   }
 
-  const modules = getExternalModules(externalDir)
+  const modules = getExternalModules(DIST_EXTERNAL_DIR)
 
   if (modules.length === 0) {
     if (!quiet) {
@@ -193,18 +192,22 @@ async function runValidation(): Promise<void> {
   const failures = results.filter(r => !r.ok)
   const successes = results.filter(r => r.ok)
 
+  function reportModuleFailures(): void {
+    for (let i = 0, { length } = failures; i < length; i += 1) {
+      const failure = failures[i]!
+      logger.log(`  ${failure.path}`)
+      for (const issue of failure.issues) {
+        logger.substep(issue)
+      }
+    }
+  }
+
   if (failures.length > 0) {
     if (!quiet) {
       logger.fail(
         `Found ${failures.length} external ${pluralize('module', { count: failures.length })} with ESM/CJS export issues:`,
       )
-      for (let i = 0, { length } = failures; i < length; i += 1) {
-        const failure = failures[i]!
-        logger.log(`  ${failure.path}`)
-        for (const issue of failure.issues) {
-          logger.substep(issue)
-        }
-      }
+      reportModuleFailures()
       logger.log('')
       logger.warn('Recommended fixes:')
       logger.substep(

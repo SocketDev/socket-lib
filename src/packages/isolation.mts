@@ -48,84 +48,6 @@ const FS_CP_OPTIONS = {
   ...(isWin32() ? { maxRetries: 3, retryDelay: 100 } : {}),
 }
 
-export function getIsolatedPackageScopePath(
-  packageName: string,
-  packageTempDir: string,
-): string {
-  const path = getNodePath()
-  return StringPrototypeStartsWith(packageName, '@')
-    ? path.join(packageTempDir, 'node_modules', packageName.split('/')[0] ?? '')
-    : path.join(packageTempDir, 'node_modules')
-}
-
-export async function getIsolatedPackageSource(
-  packageSpec: string,
-  optSourcePath: string | undefined,
-): Promise<{
-  packageName: string
-  sourcePath: string | undefined
-  spec: string | undefined
-}> {
-  const fs = getNodeFs()
-  const path = getNodePath()
-  let sourcePath = optSourcePath
-  let packageName: string | undefined
-  let spec: string | undefined
-
-  // Determine if this is a path or package spec.
-  if (isPath(packageSpec)) {
-    // File system path.
-    // Handle edge case on Windows where path.relative() returns an absolute path
-    // when paths are on different drives, and the test prepends './' to it.
-    // Example: './C:\path\to\file' should be treated as 'C:\path\to\file'.
-    const trimmedPath = trimLeadingDotSlash(packageSpec)
-    const pathToResolve = isAbsolute(trimmedPath) ? trimmedPath : packageSpec
-    sourcePath = path.resolve(pathToResolve)
-
-    if (!fs.existsSync(sourcePath)) {
-      throw new ErrorCtor(`Source path does not exist: ${sourcePath}`)
-    }
-
-    // Read package.json to get the name.
-    const pkgJson = await readPackageJson(sourcePath, { normalize: true })
-    if (!pkgJson) {
-      throw new ErrorCtor(`Could not read package.json from: ${sourcePath}`)
-    }
-    packageName = pkgJson.name as string
-  } else {
-    // Parse as npm package spec.
-    // npmPackageArg is imported at the top
-    const parsed = npmPackageArg(packageSpec)
-
-    packageName = parsed.name
-
-    if (parsed.type === 'directory' || parsed.type === 'file') {
-      sourcePath = parsed.fetchSpec
-      if (!sourcePath || !fs.existsSync(sourcePath)) {
-        throw new ErrorCtor(`Source path does not exist: ${sourcePath}`)
-      }
-      // If package name not provided by parser, read from package.json.
-      if (!packageName) {
-        const pkgJson = await readPackageJson(sourcePath, { normalize: true })
-        if (!pkgJson) {
-          throw new ErrorCtor(`Could not read package.json from: ${sourcePath}`)
-        }
-        packageName = pkgJson.name as string
-      }
-    } else {
-      // Registry package.
-      spec = parsed.fetchSpec || parsed.rawSpec
-    }
-  }
-
-  if (!packageName) {
-    throw new ErrorCtor(`Could not determine package name from: ${packageSpec}`)
-  }
-
-  const source = { __proto__: null, packageName, sourcePath, spec }
-  return source
-}
-
 /**
  * Isolates a package in a temporary test environment.
  *
@@ -142,12 +64,67 @@ export async function isolatePackage(
   const fs = getNodeFs()
   const path = getNodePath()
   const opts = { __proto__: null, ...options } as IsolatePackageOptions
-  const { imports, install, onPackageJson } = opts
+  const { imports, install, onPackageJson, sourcePath: optSourcePath } = opts
 
-  const { packageName, sourcePath, spec } = await getIsolatedPackageSource(
-    packageSpec,
-    opts.sourcePath,
-  )
+  let sourcePath = optSourcePath
+  let packageName: string | undefined
+  let spec: string | undefined
+
+  await resolvePackageSource()
+
+  async function resolvePackageSource(): Promise<void> {
+    // Determine if this is a path or package spec.
+    if (isPath(packageSpec)) {
+      // File system path.
+      // Handle edge case on Windows where path.relative() returns an absolute path
+      // when paths are on different drives, and the test prepends './' to it.
+      // Example: './C:\path\to\file' should be treated as 'C:\path\to\file'.
+      const trimmedPath = trimLeadingDotSlash(packageSpec)
+      const pathToResolve = isAbsolute(trimmedPath) ? trimmedPath : packageSpec
+      sourcePath = path.resolve(pathToResolve)
+
+      if (!fs.existsSync(sourcePath)) {
+        throw new ErrorCtor(`Source path does not exist: ${sourcePath}`)
+      }
+
+      // Read package.json to get the name.
+      const pkgJson = await readPackageJson(sourcePath, { normalize: true })
+      if (!pkgJson) {
+        throw new ErrorCtor(`Could not read package.json from: ${sourcePath}`)
+      }
+      packageName = pkgJson.name as string
+    } else {
+      // Parse as npm package spec.
+      // npmPackageArg is imported at the top
+      const parsed = npmPackageArg(packageSpec)
+
+      packageName = parsed.name
+
+      if (parsed.type === 'directory' || parsed.type === 'file') {
+        sourcePath = parsed.fetchSpec
+        if (!sourcePath || !fs.existsSync(sourcePath)) {
+          throw new ErrorCtor(`Source path does not exist: ${sourcePath}`)
+        }
+        // If package name not provided by parser, read from package.json.
+        if (!packageName) {
+          const pkgJson = await readPackageJson(sourcePath, { normalize: true })
+          if (!pkgJson) {
+            throw new ErrorCtor(
+              `Could not read package.json from: ${sourcePath}`,
+            )
+          }
+          packageName = pkgJson.name as string
+        }
+      } else {
+        // Registry package.
+        spec = parsed.fetchSpec || parsed.rawSpec
+      }
+    }
+  }
+
+  if (!packageName) {
+    throw new ErrorCtor(`Could not determine package name from: ${packageSpec}`)
+  }
 
   // Create temp directory for this package.
   const sanitizedName = packageName.replace(/[@/]/g, '-')
@@ -198,14 +175,18 @@ export async function isolatePackage(
       normalize: true,
     })
 
-    // Copy source files on top if provided.
-    if (sourcePath) {
-      // Check if source and destination are the same (symlinked).
-      const realInstalledPath = await resolveRealPath(installedPath)
-      const realSourcePath = await resolveRealPath(sourcePath)
+    await copyPackageSource()
 
-      if (realSourcePath !== realInstalledPath) {
-        await fs.promises.cp(sourcePath, installedPath, FS_CP_OPTIONS)
+    async function copyPackageSource(): Promise<void> {
+      // Copy source files on top if provided.
+      if (sourcePath) {
+        // Check if source and destination are the same (symlinked).
+        const realInstalledPath = await resolveRealPath(installedPath)
+        const realSourcePath = await resolveRealPath(sourcePath)
+
+        if (realSourcePath !== realInstalledPath) {
+          await fs.promises.cp(sourcePath, installedPath, FS_CP_OPTIONS)
+        }
       }
     }
   } else {
@@ -216,7 +197,13 @@ export async function isolatePackage(
       )
     }
 
-    const scopedPath = getIsolatedPackageScopePath(packageName, packageTempDir)
+    const scopedPath = StringPrototypeStartsWith(packageName, '@')
+      ? path.join(
+          packageTempDir,
+          'node_modules',
+          packageName.split('/')[0] ?? '',
+        )
+      : path.join(packageTempDir, 'node_modules')
 
     await fs.promises.mkdir(scopedPath, { recursive: true })
     installedPath = path.join(packageTempDir, 'node_modules', packageName)

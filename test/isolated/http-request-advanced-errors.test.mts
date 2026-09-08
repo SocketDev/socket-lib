@@ -20,7 +20,7 @@ import { enrichErrorMessage } from '../../src/http-request/errors.mjs'
 import { httpRequest } from '../../src/http-request/request.mjs'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
-import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
+import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 import type {
   IncomingRequest,

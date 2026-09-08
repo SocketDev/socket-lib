@@ -9,7 +9,7 @@ import {
   jsParseBunLock,
   parseBunDescriptor,
   stripTrailingCommas,
-} from '../../src/eco/npm/bun/lockfile/parse.mts'
+} from '../../../../../../src/eco/npm/bun/lockfile/parse.mts'
 
 const REGISTRY_LOCK = `{
   "lockfileVersion": 1,

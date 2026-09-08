@@ -61,15 +61,45 @@ export function divider(options?: DividerOptions | undefined): string {
  *   ```
  */
 export const dividers = {
+  /**
+   * Arrow divider using `→`
+   */
   arrow: () => divider({ char: '→' }),
+  /**
+   * Dashed divider using `╌`
+   */
   dashed: () => divider({ char: '╌' }),
+  /**
+   * Diamond divider using `◆`
+   */
   diamond: () => divider({ char: '◆' }),
+  /**
+   * Dotted divider using `·`
+   */
   dotted: () => divider({ char: '·' }),
+  /**
+   * Double-line divider, an alias for thick.
+   */
   double: () => divider({ char: '═' }),
+  /**
+   * Simple single dash divider using `-`
+   */
   single: () => divider({ char: '-' }),
+  /**
+   * Star divider using `*`
+   */
   star: () => divider({ char: '*' }),
+  /**
+   * Thick double-line divider using `═`
+   */
   thick: () => divider({ char: '═' }),
+  /**
+   * Thin single-line divider using `─`
+   */
   thin: () => divider({ char: '─' }),
+  /**
+   * Wave divider using `~`
+   */
   wave: () => divider({ char: '~' }),
 } as const
 

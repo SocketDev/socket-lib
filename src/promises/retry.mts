@@ -128,7 +128,10 @@ export async function pRetry<T>(
     retries,
     signal,
   } = normalizeRetryOptions(options)
-  if (signal?.aborted) {
+  function isAborted(): boolean | undefined {
+    return signal?.aborted
+  }
+  if (isAborted()) {
     return undefined
   }
   if (retries === 0) {
@@ -141,22 +144,14 @@ export async function pRetry<T>(
   let delay = baseDelayMs as number
   let error: unknown = UNDEFINED_TOKEN
 
-  function selectRetryWait(
-    retryError: unknown,
-    remaining: number,
-    waitTime: number,
-  ): number | false {
-    // onRetry callback variants (return-false-cancel, return-number-
-    // override-delay, throw-rethrow) fire only when caller passes a
-    // sophisticated onRetry. Most tests use no onRetry.
-    /* c8 ignore start */
+  // onRetry callback variants (return-false-cancel, return-number-
+  // override-delay, throw-rethrow) fire only when caller passes a
+  // sophisticated onRetry. Most tests use no onRetry.
+  /* c8 ignore start */
+  function resolveRetryDelay(e: unknown, waitTime: number): number | false {
     if (typeof onRetry === 'function') {
       try {
-        const result = onRetry(
-          (retries as number) - remaining,
-          retryError,
-          waitTime,
-        )
+        const result = onRetry((retries as number) - attempts, e, waitTime)
         if (result === false && onRetryCancelOnFalse) {
           return false
         }
@@ -169,36 +164,14 @@ export async function pRetry<T>(
         }
       }
     }
-    /* c8 ignore stop */
-
     return waitTime
   }
-
-  async function waitUntilNextAttempt(waitTime: number): Promise<boolean> {
-    try {
-      await timers.setTimeout(waitTime, undefined, { signal })
-      // Abort during setTimeout fires only when signal is aborted
-      // mid-delay; tests cover abort during fn but not during delay.
-      /* c8 ignore start */
-    } catch {
-      return false
-    }
-    /* c8 ignore stop */
-
-    // Abort-after-delay requires precise timing.
-    /* c8 ignore start */
-    if (signal?.aborted) {
-      return false
-    }
-    /* c8 ignore stop */
-
-    return true
-  }
+  /* c8 ignore stop */
 
   while (attempts-- >= 0) {
     // Abort-before-attempt requires signal aborted between iterations.
     /* c8 ignore start */
-    if (signal?.aborted) {
+    if (isAborted()) {
       return undefined
     }
     /* c8 ignore stop */
@@ -217,15 +190,28 @@ export async function pRetry<T>(
       }
       // Clamp wait time to max delay.
       waitTime = MathMin(waitTime, maxDelayMs as number)
-      const selectedWait = selectRetryWait(e, attempts, waitTime)
-      if (selectedWait === false) {
+      const retryDelay = resolveRetryDelay(e, waitTime)
+      if (retryDelay === false) {
         break
       }
-      waitTime = selectedWait
+      waitTime = retryDelay
 
-      if (!(await waitUntilNextAttempt(waitTime))) {
+      try {
+        await timers.setTimeout(waitTime, undefined, { signal })
+        // Abort during setTimeout fires only when signal is aborted
+        // mid-delay; tests cover abort during fn but not during delay.
+        /* c8 ignore start */
+      } catch {
         return undefined
       }
+      /* c8 ignore stop */
+
+      // Abort-after-delay requires precise timing.
+      /* c8 ignore start */
+      if (isAborted()) {
+        return undefined
+      }
+      /* c8 ignore stop */
 
       // Exponentially increase the delay for the next attempt, capping at maxDelayMs.
       delay = MathMin(delay * (backoffFactor as number), maxDelayMs as number)

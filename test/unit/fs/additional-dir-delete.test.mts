@@ -26,7 +26,7 @@ import { readDirNames, readDirNamesSync } from '../../../src/fs/read-dir.mjs'
 import { safeDelete, safeDeleteSync } from '../../../src/fs/safe.mjs'
 import { uniqueSync } from '../../../src/fs/unique.mjs'
 import { describe, expect, it } from 'vitest'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('fs - Additional Coverage (dir/delete/inspect)', () => {
   describe('readDirNames with more options', () => {

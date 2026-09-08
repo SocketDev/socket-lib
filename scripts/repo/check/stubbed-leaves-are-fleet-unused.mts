@@ -152,42 +152,7 @@ export function main(): void {
   const quiet = isQuiet()
   let failed = false
 
-  const distDir = path.join(REPO_ROOT, 'dist')
-  if (existsSync(distDir)) {
-    // Reachability leg. Asks whether shipped code can REACH a stub, which the
-    // usage leg below cannot answer: it asks who imports a specifier, and a
-    // leaf resolved through an exports CONDITION is named by nobody.
-    const reachable = findStubsReachableFromShippedCode(REPO_ROOT)
-    if (reachable.length > 0) {
-      for (let i = 0, { length } = reachable; i < length; i += 1) {
-        const f = reachable[i] as ReachableStubFinding
-        logger.error(
-          `${CHECK} reachable stub: ${f.file} via ${f.chain.join(' -> ')}`,
-        )
-      }
-      logger.error(`${CHECK} ${reachableStubErrorMessage(reachable)}`)
-      failed = true
-    }
-
-    const unlisted = findUnlistedStubs(REPO_ROOT)
-    if (unlisted.length > 0) {
-      for (let i = 0, { length } = unlisted; i < length; i += 1) {
-        const f = unlisted[i] as UnlistedStubFinding
-        logger.error(`${CHECK} unlisted stub: ${f.leaf} → ${f.target}`)
-      }
-      logger.error(
-        `${CHECK} the built dist ships throwing stubs outside the allowlist.\n` +
-          '  Where: dist/ vs .config/repo/socket-wheelhouse.json\n' +
-          `  Saw: ${unlisted.length} banner-marked dist module(s) not in the committed stub list; wanted every stub allowlisted.\n` +
-          '  Fix: rebuild from a clean dist, or regenerate the list with `node scripts/repo/audit-fleet-lib-usage.mts --write-stub-list`.',
-      )
-      failed = true
-    }
-  } else if (!quiet) {
-    logger.warn(
-      `${CHECK} dist/ absent — stub-banner leg skipped (build first for full coverage).`,
-    )
-  }
+  failed = reportDistStubs(quiet)
 
   function checkRosterCoverage(): void {
     // Coverage leg. Runs even when a checkout is missing, because it compares
@@ -261,4 +226,46 @@ const SCRIPT_META: ScriptMeta = {
 
 if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
+}
+
+function reportDistStubs(quiet: boolean): boolean {
+  let failed = false
+  const distDir = path.join(REPO_ROOT, 'dist')
+  if (existsSync(distDir)) {
+    // Reachability leg. Asks whether shipped code can REACH a stub, which the
+    // usage leg below cannot answer: it asks who imports a specifier, and a
+    // leaf resolved through an exports CONDITION is named by nobody.
+    const reachable = findStubsReachableFromShippedCode(REPO_ROOT)
+    if (reachable.length > 0) {
+      for (let i = 0, { length } = reachable; i < length; i += 1) {
+        const f = reachable[i] as ReachableStubFinding
+        logger.error(
+          `${CHECK} reachable stub: ${f.file} via ${f.chain.join(' -> ')}`,
+        )
+      }
+      logger.error(`${CHECK} ${reachableStubErrorMessage(reachable)}`)
+      failed = true
+    }
+
+    const unlisted = findUnlistedStubs(REPO_ROOT)
+    if (unlisted.length > 0) {
+      for (let i = 0, { length } = unlisted; i < length; i += 1) {
+        const f = unlisted[i] as UnlistedStubFinding
+        logger.error(`${CHECK} unlisted stub: ${f.leaf} → ${f.target}`)
+      }
+      logger.error(
+        `${CHECK} the built dist ships throwing stubs outside the allowlist.\n` +
+          '  Where: dist/ vs .config/repo/socket-wheelhouse.json\n' +
+          `  Saw: ${unlisted.length} banner-marked dist module(s) not in the committed stub list; wanted every stub allowlisted.\n` +
+          '  Fix: rebuild from a clean dist, or regenerate the list with `node scripts/repo/audit-fleet-lib-usage.mts --write-stub-list`.',
+      )
+      failed = true
+    }
+  } else if (!quiet) {
+    logger.warn(
+      `${CHECK} dist/ absent — stub-banner leg skipped (build first for full coverage).`,
+    )
+  }
+
+  return failed
 }

@@ -40,46 +40,6 @@ export function getFetcher(): ReturnType<typeof makeFetchHappen.defaults> {
   return cachedFetcher
 }
 
-export async function getGitHubCommitSha(
-  apiUrl: string,
-  fetcher: ReturnType<typeof getFetcher>,
-): Promise<string | undefined> {
-  const resp = await fetcher(apiUrl)
-  // resp.json() throws on non-JSON bodies (e.g. SFW block-page HTML
-  // when api.github.com isn't allow-listed, or any other proxy
-  // intercept that returns a non-JSON body). Treat that as "no
-  // sha found" and fall through to the empty-string return; the
-  // caller decides whether to retry without the GitHub URL.
-  let json: { object?: { sha?: string | undefined } | undefined } | undefined
-  try {
-    json = (await resp.json()) as {
-      object?: { sha?: string | undefined } | undefined
-    }
-  } catch {
-    json = undefined
-  }
-  return json?.object?.sha
-}
-
-export async function getGitHubVersionRefUrl(
-  user: string,
-  project: string,
-  versionStr: string,
-  fetcher: ReturnType<typeof getFetcher>,
-): Promise<string> {
-  let apiUrl = ''
-  // First try to resolve the sha for a tag starting with "v", e.g. v1.2.3.
-  apiUrl = gitHubTagRefUrl(user, project, `v${versionStr}`)
-  if (!(await fetcher(apiUrl, { method: 'head' })).ok) {
-    // If a sha isn't found, try again with the "v" removed, e.g. 1.2.3.
-    apiUrl = gitHubTagRefUrl(user, project, versionStr)
-    if (!(await fetcher(apiUrl, { method: 'head' })).ok) {
-      apiUrl = ''
-    }
-  }
-  return apiUrl
-}
-
 /**
  * Resolve GitHub tarball URL for a package specifier.
  *
@@ -118,24 +78,56 @@ export async function resolveGitHubTgzUrl(
 
   /* c8 ignore start - External GitHub API calls */
   if (user && project) {
+    return await resolveTagArchive(user, project)
+  }
+
+  async function resolveTagArchive(
+    repoOwner: string,
+    repoProject: string,
+  ): Promise<string> {
     const fetcher = getFetcher()
     let apiUrl = ''
     if (isGitHubUrl) {
-      apiUrl = gitHubTagRefUrl(user, project, parsedSpec.gitCommittish || '')
-    } else {
-      apiUrl = await getGitHubVersionRefUrl(
-        user,
-        project,
-        version as string,
-        fetcher,
+      apiUrl = gitHubTagRefUrl(
+        repoOwner,
+        repoProject,
+        parsedSpec.gitCommittish || '',
       )
-    }
-    if (apiUrl) {
-      const sha = await getGitHubCommitSha(apiUrl, fetcher)
-      if (sha) {
-        return gitHubTgzUrl(user, project, sha)
+    } else {
+      const versionStr = version as string
+      // First try to resolve the sha for a tag starting with "v", e.g. v1.2.3.
+      apiUrl = gitHubTagRefUrl(repoOwner, repoProject, `v${versionStr}`)
+      if (!(await fetcher(apiUrl, { method: 'head' })).ok) {
+        // If a sha isn't found, try again with the "v" removed, e.g. 1.2.3.
+        apiUrl = gitHubTagRefUrl(repoOwner, repoProject, versionStr)
+        if (!(await fetcher(apiUrl, { method: 'head' })).ok) {
+          apiUrl = ''
+        }
       }
     }
+    if (apiUrl) {
+      const resp = await fetcher(apiUrl)
+      // resp.json() throws on non-JSON bodies (e.g. SFW block-page HTML
+      // when api.github.com isn't allow-listed, or any other proxy
+      // intercept that returns a non-JSON body). Treat that as "no
+      // sha found" and fall through to the empty-string return; the
+      // caller decides whether to retry without the GitHub URL.
+      let json:
+        | { object?: { sha?: string | undefined } | undefined }
+        | undefined
+      try {
+        json = (await resp.json()) as {
+          object?: { sha?: string | undefined } | undefined
+        }
+      } catch {
+        json = undefined
+      }
+      const sha = json?.object?.sha
+      if (sha) {
+        return gitHubTgzUrl(repoOwner, repoProject, sha)
+      }
+    }
+    return ''
   }
   /* c8 ignore stop */
   return ''

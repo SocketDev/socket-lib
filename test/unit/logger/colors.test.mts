@@ -3,6 +3,18 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { applyColor, getYoctocolors } from '../../../src/logger/colors.mjs'
 import { getSupportsColor } from '../../../src/term/colors/support.mjs'
 
+beforeEach(() => {
+  for (const key of ['CI', 'FORCE_COLOR', 'NO_COLOR', 'TF_BUILD']) {
+    vi.stubEnv(key, undefined)
+  }
+  vi.stubEnv('TERM', 'xterm-256color')
+  vi.stubEnv('COLORTERM', 'truecolor')
+})
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+})
+
 const colors = getYoctocolors()
 
 // applyColor withholds the escape from a destination that accepts no color, so

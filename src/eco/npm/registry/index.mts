@@ -357,12 +357,6 @@ export function hasProvenance(versionEntry: PackumentVersion): boolean {
  *
  * @unused No internal or Socket consumers; exercised only by its unit tests.
  */
-export function isProvenanceObject(
-  value: unknown,
-): value is Record<string, unknown> {
-  return value !== undefined && value !== null && typeof value === 'object'
-}
-
 export async function isVersionPublished(
   name: string,
   version: string,
@@ -418,60 +412,84 @@ export function parsePackument(raw: unknown): PackumentRecord | undefined {
 export function parseProvenancePredicate(
   bundle: unknown,
 ): ProvenancePredicate | undefined {
-  if (
-    !isProvenanceObject(bundle) ||
-    !('attestations' in bundle) ||
-    !Array.isArray((bundle as AttestationBundle).attestations)
-  ) {
-    return undefined
-  }
-  const attestations = (bundle as AttestationBundle).attestations!
-  for (const entry of attestations) {
-    if (entry.predicateType !== SLSA_PROVENANCE_TYPE) {
-      continue
+  function decodePredicate(
+    encodedPayload: string,
+  ): ProvenancePredicate | undefined {
+    let payload: unknown
+    try {
+      payload = JSON.parse(atob(encodedPayload))
+    } catch {
+      return undefined
     }
-    const b = entry.bundle
-    if (!isProvenanceObject(b)) {
-      continue
+    if (payload === null || typeof payload !== 'object') {
+      return undefined
+    }
+    const statement = payload as { predicate?: unknown | undefined }
+    if (
+      statement.predicate === null ||
+      typeof statement.predicate !== 'object'
+    ) {
+      return undefined
+    }
+    return statement.predicate as ProvenancePredicate
+  }
+
+  function readPredicate(b: unknown): ProvenancePredicate | undefined {
+    if (b === null || typeof b !== 'object') {
+      return undefined
     }
     const verificationMaterial = (
       b as { verificationMaterial?: unknown | undefined }
     ).verificationMaterial
-    if (!isProvenanceObject(verificationMaterial)) {
-      continue
+    if (
+      verificationMaterial === null ||
+      typeof verificationMaterial !== 'object'
+    ) {
+      return undefined
     }
     const content = (verificationMaterial as { content?: unknown | undefined })
       .content
     if (typeof content !== 'string') {
-      continue
+      return undefined
     }
     let parsed: unknown
     try {
       parsed = JSON.parse(content)
     } catch {
-      continue
+      return undefined
     }
-    if (!isProvenanceObject(parsed)) {
-      continue
+    if (parsed === undefined || parsed === null || typeof parsed !== 'object') {
+      return undefined
     }
     const envelope = parsed as { payload?: string | undefined }
     if (typeof envelope.payload !== 'string') {
+      return undefined
+    }
+    return decodePredicate(envelope.payload)
+  }
+
+  if (
+    bundle === null ||
+    typeof bundle !== 'object' ||
+    !('attestations' in bundle) ||
+    !Array.isArray((bundle as AttestationBundle).attestations)
+  ) {
+    return undefined
+  }
+  const { attestations } = bundle as AttestationBundle
+  /* c8 ignore start - unreachable behind the Array.isArray guard above. */
+  if (!attestations) {
+    return undefined
+  }
+  /* c8 ignore stop */
+  for (const entry of attestations) {
+    if (entry.predicateType !== SLSA_PROVENANCE_TYPE) {
       continue
     }
-    let payload: unknown
-    try {
-      payload = JSON.parse(atob(envelope.payload))
-    } catch {
-      continue
+    const predicate = readPredicate(entry.bundle)
+    if (predicate !== undefined) {
+      return predicate
     }
-    if (!isProvenanceObject(payload)) {
-      continue
-    }
-    const statement = payload as { predicate?: unknown | undefined }
-    if (!isProvenanceObject(statement.predicate)) {
-      continue
-    }
-    return statement.predicate as ProvenancePredicate
   }
   return undefined
 }

@@ -114,6 +114,9 @@ export async function readJson(
       encoding: string
     })
   } catch (e) {
+    return handleReadError(e)
+  }
+  function handleReadError(e: unknown): undefined {
     if (shouldThrow) {
       throwReadJsonError(filepath, e)
     }
@@ -241,6 +244,9 @@ export function readJsonSync(
       encoding: string
     })
   } catch (e) {
+    return handleReadError(e)
+  }
+  function handleReadError(e: unknown): undefined {
     if (shouldThrow) {
       throwReadJsonError(filepath, e)
     }

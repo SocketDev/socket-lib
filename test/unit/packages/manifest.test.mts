@@ -5,11 +5,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
 import type * as PacoteModule from '../../../src/external/pacote.js'
-
-// Mock pacote BEFORE importing src/packages/manifest so the mocked
-// pacote.manifest / pacote.packument are seen by the SUT.
 import type { PackageJson } from '../../../src/packages/types.mjs'
 import {
   createPackageJson,
@@ -19,6 +15,9 @@ import {
   trimPublishManifest,
 } from '../../../src/packages/manifest.mjs'
 import pacote from '../../../src/external/pacote.js'
+
+// Mock pacote BEFORE importing src/packages/manifest so the mocked
+// pacote.manifest / pacote.packument are seen by the SUT.
 
 vi.mock(
   import('../../../src/external/pacote.js'),

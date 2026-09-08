@@ -8,16 +8,13 @@
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-
+import type * as PlatformConstants from '../../../src/constants/platform.mjs'
 import {
   makePackageBinsExecutable,
   resolveBinaryPath,
 } from '../../../src/dlx/binary-resolution.mjs'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
-
-import type * as PlatformConstants from '../../../src/constants/platform.mjs'
 
 // Vitest hoists the platform mock before module imports.
 vi.mock(import('../../../src/constants/platform.mjs'), async importOriginal => {

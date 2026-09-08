@@ -19,7 +19,7 @@ import { fetchChecksumFile } from '../../src/http-request/checksum-file.mjs'
 import { httpDownload } from '../../src/http-request/download.mjs'
 
 import { fixture, setupHttpFixture } from './http-request-fixtures.mjs'
-import { runWithTempDir } from '../unit/util/temp-file-helper.mjs'
+import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 setupHttpFixture()
 

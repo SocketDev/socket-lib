@@ -7,7 +7,7 @@
  *   original error so callers see the same failure surface as a plain `await`.
  */
 
-import process from 'node:process'
+import { writeError } from '../stdio/stderr.mjs'
 
 import { toRgb } from '../term/colors/convert.mjs'
 
@@ -18,23 +18,6 @@ import type {
   WithSpinnerRestoreOptions,
   WithSpinnerSyncOptions,
 } from './types.mjs'
-
-export function applyTemporarySpinnerOptions(
-  spinner: NonNullable<WithSpinnerOptions<unknown>['spinner']>,
-  withOptions: WithSpinnerOptions<unknown>['withOptions'],
-): void {
-  // Apply temporary options
-  if (withOptions?.color !== undefined) {
-    spinner.color = toRgb(withOptions.color)
-  }
-  if (withOptions?.shimmer !== undefined) {
-    if (typeof withOptions.shimmer === 'string') {
-      spinner.updateShimmer({ dir: withOptions.shimmer })
-    } else {
-      spinner.setShimmer(withOptions.shimmer)
-    }
-  }
-}
 
 /**
  * Narrow a saved shimmer color (`'inherit' | ColorName | ColorRgb | Palette`)
@@ -95,7 +78,21 @@ export async function withSpinner<T>(
   const savedShimmerState =
     withOptions?.shimmer !== undefined ? spinner.shimmerState : undefined
 
-  applyTemporarySpinnerOptions(spinner, withOptions)
+  applyTemporaryOptions()
+
+  function applyTemporaryOptions(): void {
+    // Apply temporary options
+    if (withOptions?.color !== undefined) {
+      spinner!.color = toRgb(withOptions.color)
+    }
+    if (withOptions?.shimmer !== undefined) {
+      if (typeof withOptions.shimmer === 'string') {
+        spinner!.updateShimmer({ dir: withOptions.shimmer })
+      } else {
+        spinner!.setShimmer(withOptions.shimmer)
+      }
+    }
+  }
 
   spinner.start(message)
   try {
@@ -112,7 +109,7 @@ export async function withSpinner<T>(
     // corresponding option; tests cover paths individually.
     /* c8 ignore start */
     if (wasSpinning) {
-      process.stderr.write('\r\x1B[2K')
+      writeError('\r\x1B[2K')
     }
 
     if (savedColor !== undefined) {

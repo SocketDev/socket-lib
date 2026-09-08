@@ -339,13 +339,15 @@ export async function fetchGhsaDetailsViaGraphQL(
   if (!adv) {
     throw new ErrorCtor(`GHSA ${ghsaId} not found`)
   }
-  // The ?? defaults across identifiers/withdrawnAt/references/
-  // vulnerabilities/cvss/cwes fire only when GraphQL returns minimal
-  // advisory shape; tests seed rich responses.
-  /* c8 ignore start */
-  function normalizeGraphqlAdvisory(
-    advisory: NonNullable<typeof adv>,
+  return toGhsaDetails(adv)
+
+  function toGhsaDetails(
+    advisory: NonNullable<NonNullable<typeof parsed.data>['securityAdvisory']>,
   ): GhsaDetails {
+    // The ?? defaults across identifiers/withdrawnAt/references/
+    // vulnerabilities/cvss/cwes fire only when GraphQL returns minimal
+    // advisory shape; tests seed rich responses.
+    /* c8 ignore start */
     return {
       ghsaId: advisory.ghsaId,
       summary: advisory.summary,
@@ -367,7 +369,6 @@ export async function fetchGhsaDetailsViaGraphQL(
       cvss: advisory.cvss ?? null,
       cwes: advisory.cwes?.nodes ?? [],
     }
+    /* c8 ignore stop */
   }
-  return normalizeGraphqlAdvisory(adv)
-  /* c8 ignore stop */
 }

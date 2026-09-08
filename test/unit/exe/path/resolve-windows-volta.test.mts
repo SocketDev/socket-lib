@@ -11,7 +11,7 @@ import path from 'node:path'
 import { describe, expect, it } from 'vitest'
 
 import { resolveRealBinSync } from '../../../../src/exe/path/resolve.mjs'
-import { runWithTempDir } from '../../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../../util/temp-files.mjs'
 
 describe('resolveRealBinSync - Windows scenarios', () => {
   it('should handle extensionless npm on Windows', async () => {

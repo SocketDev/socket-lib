@@ -16,7 +16,7 @@ import {
   SEARCH_TTL_MS,
   selectNpmCache,
 } from '../../../../../src/eco/npm/registry/cache.mjs'
-import { sleep } from './api-helpers.mjs'
+import { sleep } from './http-fixtures.mjs'
 
 /**
  * A fetcher that counts its own calls, so a test can tell a cache hit from a

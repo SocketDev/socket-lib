@@ -129,18 +129,7 @@ function collectRequiredSpecifiers(src: string): Set<string> {
     ) {
       found.add(String(candidate.arguments[0]!.value))
     }
-    function enqueueChildren(parent: object): void {
-      const childValues = Object.values(parent)
-      for (let i = 0, { length } = childValues; i < length; i += 1) {
-        const value = childValues[i]
-        if (Array.isArray(value)) {
-          stack.push(...value)
-        } else if (value !== null && typeof value === 'object') {
-          stack.push(value)
-        }
-      }
-    }
-    enqueueChildren(node)
+    appendAstChildren(node, stack)
   }
   return found
 }
@@ -258,4 +247,16 @@ if (process.argv[1]?.endsWith('verify-dist.mts')) {
     }
     process.exitCode = code
   })
+}
+
+function appendAstChildren(node: object, stack: unknown[]): void {
+  const childValues = Object.values(node)
+  for (let i = 0, { length } = childValues; i < length; i += 1) {
+    const value = childValues[i]
+    if (Array.isArray(value)) {
+      stack.push(...value)
+    } else if (value !== null && typeof value === 'object') {
+      stack.push(value)
+    }
+  }
 }

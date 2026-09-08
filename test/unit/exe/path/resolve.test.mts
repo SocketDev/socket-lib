@@ -13,7 +13,7 @@ import { describe, expect, it } from 'vitest'
 import { resolveRealBinSync } from '../../../../src/exe/path/resolve.mjs'
 import { isError } from '../../../../src/errors/predicates.mjs'
 import { getDefaultLogger } from '../../../../src/logger/default.mjs'
-import { runWithTempDir } from '../../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../../util/temp-files.mjs'
 
 const logger = getDefaultLogger()
 

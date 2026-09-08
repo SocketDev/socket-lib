@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from 'vitest'
 import { safeDelete as deleteFixtureDirectory } from '@socketsecurity/lib-stable/fs/safe'
 
 import { probeDeleteGuard } from '../../../scripts/repo/check/force-delete-is-opt-in.mts'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 describe('probeDeleteGuard', () => {
   it('keeps the refusal probe unconfigured and scopes cleanup to its own directory', async () => {

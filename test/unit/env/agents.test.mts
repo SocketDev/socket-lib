@@ -36,6 +36,7 @@ const LEAKY_AGENT_ENV_KEYS = [
 describe('env/agents', () => {
   beforeEach(() => {
     vi.resetModules()
+    vi.stubEnv('PATH', '/example-agent-free-path')
     for (let i = 0, { length } = LEAKY_AGENT_ENV_KEYS; i < length; i += 1) {
       vi.stubEnv(LEAKY_AGENT_ENV_KEYS[i]!, undefined)
     }

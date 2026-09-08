@@ -60,11 +60,31 @@ export async function downloadGitHubRelease(
     owner,
     platformArch,
     quiet = false,
+    removeMacOSQuarantine = true,
     repo,
+    tag: explicitTag,
     toolName,
+    toolPrefix,
   } = config
 
-  const tag = await resolveGitHubReleaseTag(config)
+  const tag = await resolveReleaseTag()
+
+  async function resolveReleaseTag(): Promise<string> {
+    // Get the release tag, either the explicit one or the latest.
+    if (explicitTag) {
+      return explicitTag
+    } else if (toolPrefix) {
+      const latestTag = await getLatestRelease(toolPrefix, { owner, repo })
+      if (!latestTag) {
+        throw new ErrorCtor(
+          `No ${toolPrefix} release found in ${owner}/${repo}`,
+        )
+      }
+      return latestTag
+    } else {
+      throw new ErrorCtor('Either toolPrefix or tag must be provided')
+    }
+  }
 
   const path = getNodePath()
   // Resolve the download directory, which may be absolute or relative to cwd.
@@ -104,7 +124,30 @@ export async function downloadGitHubRelease(
     { quiet },
   )
 
-  await prepareGitHubReleaseBinary(binaryPath, config)
+  await prepareDownloadedBinary()
+
+  async function prepareDownloadedBinary(): Promise<void> {
+    // Make executable on Unix-like systems.
+    const isWindows = StringPrototypeEndsWith(binaryName, '.exe')
+    if (!isWindows) {
+      fs.chmodSync(binaryPath, 0o755)
+
+      // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
+      if (
+        removeMacOSQuarantine &&
+        process.platform === 'darwin' &&
+        StringPrototypeStartsWith(platformArch, 'darwin')
+      ) {
+        try {
+          await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {
+            stdio: 'ignore',
+          })
+        } catch {
+          // Ignore errors - attribute might not exist or xattr might not be available.
+        }
+      }
+    }
+  }
 
   // Write version file.
   await fs.promises.writeFile(versionPath, tag, 'utf8')
@@ -169,53 +212,4 @@ export async function downloadReleaseAsset(
     retries: 2,
     retryDelay: 5000,
   })
-}
-
-export async function prepareGitHubReleaseBinary(
-  binaryPath: string,
-  config: DownloadGitHubReleaseConfig,
-): Promise<void> {
-  const { binaryName, platformArch, removeMacOSQuarantine = true } = config
-  const fs = getNodeFs()
-  // Make executable on Unix-like systems.
-  const isWindows = StringPrototypeEndsWith(binaryName, '.exe')
-  if (!isWindows) {
-    fs.chmodSync(binaryPath, 0o755)
-
-    // Remove macOS quarantine attribute if present (only on macOS host for macOS target).
-    if (
-      removeMacOSQuarantine &&
-      process.platform === 'darwin' &&
-      StringPrototypeStartsWith(platformArch, 'darwin')
-    ) {
-      try {
-        await spawn('xattr', ['-d', 'com.apple.quarantine', binaryPath], {
-          stdio: 'ignore',
-        })
-      } catch {
-        // Ignore errors - attribute might not exist or xattr might not be available.
-      }
-    }
-  }
-}
-
-export async function resolveGitHubReleaseTag(
-  config: DownloadGitHubReleaseConfig,
-): Promise<string> {
-  const { tag: explicitTag, toolPrefix, owner, repo } = config
-  // Get the release tag, either the explicit one or the latest.
-  let tag: string
-  if (explicitTag) {
-    tag = explicitTag
-  } else if (toolPrefix) {
-    const latestTag = await getLatestRelease(toolPrefix, { owner, repo })
-    if (!latestTag) {
-      throw new ErrorCtor(`No ${toolPrefix} release found in ${owner}/${repo}`)
-    }
-    tag = latestTag
-  } else {
-    throw new ErrorCtor('Either toolPrefix or tag must be provided')
-  }
-
-  return tag
 }

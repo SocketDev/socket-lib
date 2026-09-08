@@ -8,7 +8,7 @@ import {
   processDirectory,
   rewriteCommonJsExports,
 } from '../../../scripts/repo/post-build/rewrite-cjs-exports.mts'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 const bundle =
   'var result_exports = {};\n__export(result_exports, { default: () => answer });\nmodule.exports = __toCommonJS(result_exports);\nvar answer = { value: 42 };\n'

@@ -26,7 +26,7 @@ import {
   deleteTrustedPublisher,
   fetchTrustedPublishers,
 } from '../../../../../src/eco/npm/registry/trust.mjs'
-import { failingHttp, recordingHttp } from './api-helpers.mjs'
+import { failingHttp, recordingHttp } from './http-fixtures.mjs'
 
 const AUTH = { token: 'tok' }
 const OTP_AUTH = { otp: '123456', token: 'tok' }

@@ -19,7 +19,7 @@ import {
   pathIsUnderSubmodule,
 } from '../../../src/git/tracked.mjs'
 import { spawnSync } from '../../../src/process/spawn/child.mjs'
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 function initRepo(dir: string): void {
   spawnSync('git', ['init'], { cwd: dir })

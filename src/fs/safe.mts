@@ -9,14 +9,12 @@
  *   root-resolving target outright. Forcing is a NAME rather than an option so
  *   a linter can match it at the call site and a reader can grep it. The mkdir
  *   helpers default to `recursive: true` and swallow `EEXIST` so concurrent
- *   callers don't race-condition each other. The allow-list
- *   carries each directory twice — as `path.resolve` returns it and as its real
- *   path — because a symlinked component makes those differ and a caller may
- *   hold either. macOS is the case in practice: `os.tmpdir()` reports
- *   `/var/folders/…`, the real path is `/private/var/folders/…`, and `/var` is
- *   a symlink to `/private/var`. Anything that walked or globbed the temp tree
- *   arrives with the `/private` spelling, and matching only the first form made
- *   it look out-of-tree. The two forms are computed ONCE per process and
+ *   callers don't race-condition each other. The allow-list carries each
+ *   directory twice — as `path.resolve` returns it and as its real path —
+ *   because a symlinked component makes those differ and a caller may hold
+ *   either. On macOS, `os.tmpdir()` can contain a symlinked component. Walking
+ *   or globbing the temp tree can return its real path instead. Both forms must
+ *   match the allowed tree. The two forms are computed once per process and
  *   cached, so this costs a handful of `realpathSync` calls at first use and
  *   plain string comparisons thereafter. The target path is deliberately NOT
  *   resolved per call: that would put a syscall on every delete and need a

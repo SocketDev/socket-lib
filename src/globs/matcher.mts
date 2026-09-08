@@ -28,17 +28,29 @@ import type { Pattern } from './types.mjs'
 let matchesGlobCache: ((p: string, pattern: string) => boolean) | undefined
 let matchesGlobProbed = false
 
-export function evictOldestGlobMatcher(): void {
-  if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
-    const oldest = matcherCache.keys().next().value
-    if (oldest !== undefined) {
-      matcherCache.delete(oldest)
-    }
-  }
-}
-
 /**
- * Return a matcher cached by patterns and options, with at most 100 entries.
+ * Return a glob-matcher function, memoized by pattern + options.
+ *
+ * The returned function is a fast synchronous predicate built on picomatch.
+ * Results are memoized — calling `getGlobMatcher(['*.ts'])` a thousand times in
+ * a loop returns the same compiled matcher each time, so callers do not need to
+ * hoist it themselves.
+ *
+ * The cache is LRU with a cap of 100 entries. Cache keys fold together the
+ * (sorted) pattern list and (sorted) option set, so arguments that differ only
+ * in ordering share a matcher.
+ *
+ * Default options: `dot: true`, `nocase: true`. Patterns starting with `!`
+ * become ignore patterns.
+ *
+ * @example
+ *   ;```typescript
+ *   const isMatch = getGlobMatcher('*.ts')
+ *   isMatch('index.ts') // true
+ *   isMatch('index.js') // false
+ *
+ *   const isSource = getGlobMatcher(['src/**', '!**\/*.test.ts'])
+ *   ```
  */
 export function getGlobMatcher(
   glob: Pattern | Pattern[],
@@ -78,11 +90,20 @@ export function getGlobMatcher(
     return existing
   }
 
-  // LRU eviction triggers at 100 entries; not reachable from typical
-  // test runs.
-  /* c8 ignore start */
-  evictOldestGlobMatcher()
-  /* c8 ignore stop */
+  evictOldestMatcher()
+
+  function evictOldestMatcher(): void {
+    // LRU eviction triggers at 100 entries; not reachable from typical
+    // test runs.
+    /* c8 ignore start */
+    if (matcherCache.size >= MATCHER_CACHE_MAX_SIZE) {
+      const oldest = matcherCache.keys().next().value
+      if (oldest !== undefined) {
+        matcherCache.delete(oldest)
+      }
+    }
+    /* c8 ignore stop */
+  }
 
   // Narrow `path.matchesGlob` fast-path. picomatch's defaults
   // (`dot: true`, `nocase: true`) silently differ from

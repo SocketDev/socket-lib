@@ -2,48 +2,50 @@
  * @file PURL (Package URL) ecosystem identifiers shared across every package
  *   manager Socket understands.
  *
- *   - `PURL_TYPE` — runtime const mapping camelCase keys to lowercase ecosystem
- *     slugs (e.g. `PURL_TYPE.npm === 'npm'`)
+ *   - `PURL_Type` — runtime const mapping uppercase keys to lowercase ecosystem
+ *     slugs (e.g. `PURL_Type.NPM === 'npm'`)
  *   - `PURLString` — string-union of every PURL ecosystem slug
  *   - `EcosystemString` — semantic alias of `PURLString` for places where
  *     "ecosystem" reads more naturally than "PURL string" Based on
- *     SocketPURL_TYPE from socket-sdk-js.
+ *     SocketPURL_Type from socket-sdk-js.
  */
 
-export const PURL_TYPE = {
-  alpm: 'alpm',
-  apk: 'apk',
-  bitbucket: 'bitbucket',
-  cargo: 'cargo',
-  chrome: 'chrome',
-  cocoapods: 'cocoapods',
-  composer: 'composer',
-  conan: 'conan',
-  conda: 'conda',
-  cran: 'cran',
-  deb: 'deb',
-  docker: 'docker',
-  gem: 'gem',
-  generic: 'generic',
-  github: 'github',
-  golang: 'golang',
-  hackage: 'hackage',
-  hex: 'hex',
-  huggingface: 'huggingface',
-  maven: 'maven',
-  mlflow: 'mlflow',
-  npm: 'npm',
-  nuget: 'nuget',
-  oci: 'oci',
-  pub: 'pub',
-  pypi: 'pypi',
-  qpkg: 'qpkg',
-  rpm: 'rpm',
-  swid: 'swid',
-  swift: 'swift',
-  vcs: 'vcs',
-  vscode: 'vscode',
-} as const
+export const PURL_Type: Readonly<{
+  [Type in Uppercase<PURLString>]: Lowercase<Type>
+}> = {
+  ALPM: 'alpm',
+  APK: 'apk',
+  BITBUCKET: 'bitbucket',
+  CARGO: 'cargo',
+  CHROME: 'chrome',
+  COCOAPODS: 'cocoapods',
+  COMPOSER: 'composer',
+  CONAN: 'conan',
+  CONDA: 'conda',
+  CRAN: 'cran',
+  DEB: 'deb',
+  DOCKER: 'docker',
+  GEM: 'gem',
+  GENERIC: 'generic',
+  GITHUB: 'github',
+  GOLANG: 'golang',
+  HACKAGE: 'hackage',
+  HEX: 'hex',
+  HUGGINGFACE: 'huggingface',
+  MAVEN: 'maven',
+  MLFLOW: 'mlflow',
+  NPM: 'npm',
+  NUGET: 'nuget',
+  OCI: 'oci',
+  PUB: 'pub',
+  PYPI: 'pypi',
+  QPKG: 'qpkg',
+  RPM: 'rpm',
+  SWID: 'swid',
+  SWIFT: 'swift',
+  VCS: 'vcs',
+  VSCODE: 'vscode',
+}
 
 export type PURLString =
   | 'alpm'

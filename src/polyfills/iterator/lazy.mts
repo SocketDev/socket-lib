@@ -210,7 +210,10 @@ export function iteratorMapShim<T, U>(
       const at = index
       index += 1
       try {
-        return { done: false, value: mapper(result.value as T, at) }
+        return {
+          done: false,
+          value: mapper(result.value as T, at),
+        }
       } catch (e) {
         source.closeQuietly()
         throw e

@@ -12,18 +12,16 @@ import { readdirSync, readFileSync, statSync } from 'node:fs'
 import { stripTypeScriptTypes } from 'node:module'
 import path from 'node:path'
 import process from 'node:process'
-
 import {
   buildLineStarts,
   isSourceFile,
   lineColumnAt,
   PARSE_OPTIONS,
   TS_EXTENSIONS,
-} from './audit-helpers.mts'
+} from './audit-support.mts'
 import { buildVisitors } from './audit-visitors.mts'
 import { disambiguateReceiver } from './disambiguate.mts'
 import { prototypePrimordialName } from './globals.mts'
-
 import { walk } from './acorn-wasm.mts'
 
 /**

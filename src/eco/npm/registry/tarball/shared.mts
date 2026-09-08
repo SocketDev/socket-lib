@@ -75,28 +75,6 @@ export interface NpmTarballEntry {
  * decompressor, whose own error would name a stream problem rather than the
  * text-adapter mistake that actually caused it.
  */
-export function getTarExtractLimits(options: ExtractOptions | undefined): {
-  maxEntries: number
-  maxFileSize: number
-  maxTotalSize: number
-  strip: number
-} {
-  const {
-    maxEntries = DEFAULT_MAX_ENTRIES,
-    maxFileSize = DEFAULT_MAX_FILE_SIZE,
-    maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
-    strip = 0,
-  } = { __proto__: null, ...options } as ExtractOptions
-  const limits = {
-    __proto__: null,
-    maxEntries,
-    maxFileSize,
-    maxTotalSize,
-    strip,
-  }
-  return limits
-}
-
 export function isGzipBytes(bytes: Uint8Array): boolean {
   return (
     bytes.length >= 2 && bytes[0] === GZIP_MAGIC_0 && bytes[1] === GZIP_MAGIC_1
@@ -226,8 +204,12 @@ export function readTarEntries(
   bytes: Uint8Array,
   options?: ExtractOptions | undefined,
 ): NpmTarballEntry[] {
-  const { maxEntries, maxFileSize, maxTotalSize, strip } =
-    getTarExtractLimits(options)
+  const {
+    maxEntries = DEFAULT_MAX_ENTRIES,
+    maxFileSize = DEFAULT_MAX_FILE_SIZE,
+    maxTotalSize = DEFAULT_MAX_TOTAL_SIZE,
+    strip = 0,
+  } = { __proto__: null, ...options } as ExtractOptions
   const entries: NpmTarballEntry[] = []
   let offset = 0
   let entryCount = 0
@@ -236,46 +218,44 @@ export function readTarEntries(
   // Set by a GNU `L` block or a pax `x` record, and consumed by the very next
   // file header, whose own name field is then ignored.
   let pendingName: string | undefined
-  while (offset + BLOCK_SIZE <= bytes.length) {
-    const header = bytes.subarray(offset, offset + BLOCK_SIZE)
-    offset += BLOCK_SIZE
-    if (isZeroBlock(header)) {
-      zeroBlocks += 1
-      if (zeroBlocks === 2) {
-        break
-      }
-      continue
-    }
-    zeroBlocks = 0
-    const size = readNumber(header, 124, 12)
-    const dataBlocks = Math.ceil(size / BLOCK_SIZE) * BLOCK_SIZE
-    const typeFlag = readString(header, 156, 1)
+  function consumeExtendedHeader(
+    typeFlag: string,
+    size: number,
+    dataBlocks: number,
+  ): boolean {
     // GNU long name: this block's DATA is the next entry's path.
     if (typeFlag === 'L') {
       pendingName = readString(bytes, offset, size)
       offset += dataBlocks
-      continue
+      return true
     }
     // pax extended header: a `path=` record overrides the next entry's path.
     if (typeFlag === 'X' || typeFlag === 'x') {
       pendingName = readPaxPath(bytes.subarray(offset, offset + size))
       offset += dataBlocks
-      continue
+      return true
     }
     // A pax GLOBAL header applies to the whole archive, not the next entry, so
     // it must not be read as a pending name.
     if (typeFlag === 'g') {
       offset += dataBlocks
-      continue
+      return true
     }
-    const rawName = readTarEntryName(header, pendingName, typeFlag)
-    pendingName = undefined
-    // Directories and other non-regular types carry no bytes worth returning.
-    // ustar spells a regular file '0', and older archives leave the field NUL.
-    if (typeFlag !== '' && typeFlag !== '0') {
-      offset += dataBlocks
-      continue
+    return false
+  }
+
+  function validateEntryName(rawName: string, typeFlag: string): void {
+    if (StringPrototypeIndexOf(rawName, '\0') !== -1) {
+      throw new ErrorCtor(`Invalid null byte in archive entry name: ${rawName}`)
     }
+    if (typeFlag === '1' || typeFlag === '2') {
+      throw new ErrorCtor(
+        `Symlink or hardlink entries are not allowed: ${rawName}`,
+      )
+    }
+  }
+
+  function appendEntry(rawName: string, size: number): void {
     entryCount += 1
     if (entryCount > maxEntries) {
       throw new ErrorCtor(
@@ -302,28 +282,40 @@ export function readTarEntries(
         name: stripped,
       })
     }
+  }
+
+  while (offset + BLOCK_SIZE <= bytes.length) {
+    const header = bytes.subarray(offset, offset + BLOCK_SIZE)
+    offset += BLOCK_SIZE
+    if (isZeroBlock(header)) {
+      zeroBlocks += 1
+      if (zeroBlocks === 2) {
+        break
+      }
+      continue
+    }
+    zeroBlocks = 0
+    const size = readNumber(header, 124, 12)
+    const dataBlocks = Math.ceil(size / BLOCK_SIZE) * BLOCK_SIZE
+    const typeFlag = readString(header, 156, 1)
+    if (consumeExtendedHeader(typeFlag, size, dataBlocks)) {
+      continue
+    }
+    const prefix = readString(header, 345, 155)
+    const base = readString(header, 0, 100)
+    const rawName = pendingName ?? (prefix === '' ? base : `${prefix}/${base}`)
+    pendingName = undefined
+    validateEntryName(rawName, typeFlag)
+    // Directories and other non-regular types carry no bytes worth returning.
+    // ustar spells a regular file '0', and older archives leave the field NUL.
+    if (typeFlag !== '' && typeFlag !== '0') {
+      offset += dataBlocks
+      continue
+    }
+    appendEntry(rawName, size)
     offset += dataBlocks
   }
   return entries
-}
-
-export function readTarEntryName(
-  header: Uint8Array,
-  pendingName: string | undefined,
-  typeFlag: string,
-): string {
-  const prefix = readString(header, 345, 155)
-  const base = readString(header, 0, 100)
-  const rawName = pendingName ?? (prefix === '' ? base : `${prefix}/${base}`)
-  if (StringPrototypeIndexOf(rawName, '\0') !== -1) {
-    throw new ErrorCtor(`Invalid null byte in archive entry name: ${rawName}`)
-  }
-  if (typeFlag === '1' || typeFlag === '2') {
-    throw new ErrorCtor(
-      `Symlink or hardlink entries are not allowed: ${rawName}`,
-    )
-  }
-  return rawName
 }
 
 /**

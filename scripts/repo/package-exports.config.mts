@@ -169,15 +169,11 @@ export const config: ExportsConfig = {
     'dist/bin/acorn-wasm.cjs',
     'dist/bin/prim.cjs',
     'dist/external/**',
-    // `./logger/logger` is aliased to `./logger/node` (with a browser-condition
-    // override), so the platform-agnostic re-export leaf `dist/logger/logger.*`
-    // ships but no export reaches it — the alias jumps over it. Excluded so the
-    // validator doesn't flag the shadowed leaf. (Latent: the alias could be
-    // dropped to let `logger.js` self-route, but that changes resolution — out
-    // of scope for the generator migration.)
-    'dist/logger/logger.d.mts',
-    'dist/logger/logger.d.ts',
-    'dist/logger/logger.js',
+    // The public logger alias selects node or browser directly, so these
+    // platform-neutral internal files do not need their own export.
+    'dist/logger/class-entry.d.mts',
+    'dist/logger/class-entry.d.ts',
+    'dist/logger/class-entry.js',
     // Module-internal helper leaves. Every `*/shared.mts` header describes
     // itself as private to its directory; none had a real import across the
     // fleet, so v7 stops publishing them as subpaths.
@@ -203,4 +199,9 @@ export const config: ExportsConfig = {
   ],
   nodeRange: '>=22',
   outDir: 'dist',
+  publicNames: {
+    './spinner/create': './spinner/spinner',
+    './temporal/namespace': './temporal/temporal',
+    './term/themes/presets': './term/themes/themes',
+  },
 }

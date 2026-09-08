@@ -6,7 +6,7 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { pathToFileURL } from 'node:url'
+import { fileURLToPath, pathToFileURL } from 'node:url'
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
@@ -119,6 +119,10 @@ describe('findUpPackageJson', () => {
     // Self-test: findUpPackageJson(import.meta) from this test file resolves
     // to the socket-lib package.json — never hard-coded.
     const found = findUpPackageJson(import.meta)
-    expect(normalizePath(found)).toMatch(/socket-lib\/package\.json$/)
+    expect(found).toBe(
+      normalizePath(
+        fileURLToPath(new URL('../../../package.json', import.meta.url)),
+      ),
+    )
   })
 })

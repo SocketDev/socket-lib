@@ -20,7 +20,7 @@ import {
 } from '../../../src/cli/main.mjs'
 
 import type { ScriptMeta } from '../../../src/cli/main.mjs'
-import type { Logger } from '../../../src/logger/logger.mjs'
+import type { Logger } from '../../../src/logger/class-entry.mjs'
 
 const logSpy = vi.fn()
 const errorSpy = vi.fn()

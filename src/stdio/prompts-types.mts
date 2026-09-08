@@ -7,7 +7,7 @@
 
 import type { Remap } from '../objects/types.mjs'
 import type { SpinnerInstance } from '../spinner/types.mjs'
-import type { ThemeName } from '../term/themes/themes.mjs'
+import type { ThemeName } from '../term/themes/presets.mjs'
 import type { Theme } from '../term/themes/types.mjs'
 
 /**

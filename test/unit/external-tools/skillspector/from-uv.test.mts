@@ -10,7 +10,7 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { normalizePath } from '@socketsecurity/lib/paths/normalize'
 
 import { venvEntryPoint } from '../../../../src/external-tools/skillspector/from-uv.mjs'
-import { describeUnixOnly } from '../../util/skip-helpers.mjs'
+import { describeUnixOnly } from '../../util/platform-suites.mjs'
 
 import type * as NodeFs from 'node:fs'
 

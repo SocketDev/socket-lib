@@ -19,7 +19,7 @@ import {
   safeReadFileSync,
 } from '../../../src/fs/read-file.mjs'
 
-import { runWithTempDir } from '../util/temp-file-helper.mjs'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 import type { SafeReadOptions } from '../../../src/fs/types.mjs'
 

@@ -21,13 +21,16 @@ export function closeUnbalancedJson(raw: string): string | undefined {
     return undefined
   }
   const stack: string[] = []
+  let inString = false
+  let escaped = false
   for (let i = start, { length } = raw; i < length; i += 1) {
     const char = raw[i]!
+    if (inString) {
+      consumeStringCharacter(char)
+      continue
+    }
     if (char === '"') {
-      i = findJsonStringEnd(raw, i + 1)
-      if (i === -1) {
-        return undefined
-      }
+      inString = true
     } else if (char === '{') {
       stack.push('}')
     } else if (char === '[') {
@@ -41,7 +44,16 @@ export function closeUnbalancedJson(raw: string): string | undefined {
       }
     }
   }
-  if (stack.length === 0) {
+  function consumeStringCharacter(char: string): void {
+    if (escaped) {
+      escaped = false
+    } else if (char === '\\') {
+      escaped = true
+    } else if (char === '"') {
+      inString = false
+    }
+  }
+  if (inString || stack.length === 0) {
     return undefined
   }
   return raw.slice(start) + arrayToReversed(stack).join('')
@@ -105,17 +117,6 @@ export function findCanonicalKey(
     }
   }
   return key
-}
-
-export function findJsonStringEnd(raw: string, start: number): number {
-  for (let index = start; index < raw.length; index += 1) {
-    if (raw[index] === '\\') {
-      index += 1
-    } else if (raw[index] === '"') {
-      return index
-    }
-  }
-  return -1
 }
 
 /**

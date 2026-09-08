@@ -29,6 +29,9 @@
 import { existsSync, readdirSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+
+import { writeError } from '../../../src/stdio/stderr.mjs'
+import { write } from '../../../src/stdio/stdout.mjs'
 import { parseArgs } from 'node:util'
 
 import { describeRequest, renderDescribe } from '../../../src/exe/argv/meta.mjs'
@@ -65,32 +68,7 @@ const ARG_OPTIONS = {
 }
 
 export async function runCli(argv) {
-  function printRequestedHelp(): boolean {
-    const describeKind = describeRequest(argv)
-    if (describeKind) {
-      // `--describe --json` (either order) answers the fleet-runner-shaped
-      // `{describe, help}` envelope instead of the full command manifest —
-      // plain `--describe` stays the one-liner, unchanged.
-      process.stdout.write(
-        describeKind === 'json'
-          ? renderDescribeHelpJson()
-          : renderDescribe(describeKind, MANIFEST),
-      )
-      return true
-    }
-    // Bare `prim` / `prim help` / `prim --help` → print help. With --json
-    // riding along and no command to report a result for, answer the same
-    // `{describe, help}` envelope rather than silently ignoring the flag.
-    if (argv.length === 0 || argv[0] === 'help') {
-      process.stdout.write(
-        argv.includes('--json') ? renderDescribeHelpJson() : HELP,
-      )
-      return true
-    }
-
-    return false
-  }
-  if (printRequestedHelp()) {
+  if (printRequestedHelp(argv)) {
     return
   }
 
@@ -112,7 +90,7 @@ export async function runCli(argv) {
     // No command to report a JSON result for — `--json` alone answers the
     // same `{describe, help}` envelope as `--describe --json` rather than
     // falling through to the human help banner.
-    process.stdout.write(values.json ? renderDescribeHelpJson() : HELP)
+    write(values.json ? renderDescribeHelpJson() : HELP)
     return
   }
 
@@ -141,8 +119,30 @@ export async function runCli(argv) {
   // Handle it before the surface load so users don't need to pass
   // --surface for a lint-only check.
   if (command === 'lint') {
-    return runLintCommand()
+    runLintCommand()
+    return
   }
+
+  let surface: ReturnType<typeof loadPrimordialsSurface>
+  try {
+    surface = loadPrimordialsSurface(targetRoot, values.surface)
+  } catch (e) {
+    fail(e.message)
+  }
+
+  // Codemod runs its own pass — don't pre-audit (avoids any
+  // shared-AST surprises and is faster).
+  if (command === 'mod') {
+    await runModCommand()
+    return
+  }
+
+  if (command === 'audit') {
+    await runAuditCommand()
+    return
+  }
+
+  fail(`unknown command: ${command}\n\n${HELP}`)
   function runLintCommand(): void {
     const primordialSources = values['primordials-source']
     const findings = lintSource({
@@ -160,20 +160,6 @@ export async function runCli(argv) {
     }
     return
   }
-
-  let surface
-  try {
-    surface = loadPrimordialsSurface(targetRoot, values.surface)
-  } catch (e) {
-    fail(e.message)
-  }
-
-  // Codemod runs its own pass — don't pre-audit (avoids any
-  // shared-AST surprises and is faster).
-  if (command === 'mod') {
-    return runModCommand()
-  }
-
   async function runModCommand(): Promise<void> {
     // Auto-detect when we're scanning a tree that owns its OWN
     // `primordials.ts` (i.e. socket-lib itself, or any project that
@@ -256,11 +242,6 @@ export async function runCli(argv) {
     reportMod(result, json, values.apply, values.diff)
     return
   }
-
-  if (command === 'audit') {
-    return runAuditCommand()
-  }
-
   async function runAuditCommand(): Promise<void> {
     const findings = await auditDirectory({
       aiDisambiguate: values['ai-disambiguate'],
@@ -289,12 +270,7 @@ export async function runCli(argv) {
     if (!wantGaps) {
       filtered = filtered.filter(f => f.kind !== 'gap')
     }
-    const mode =
-      values.coverage && !values.gaps
-        ? 'coverage'
-        : values.gaps && !values.coverage
-          ? 'gaps'
-          : 'audit'
+    const mode = auditReportMode(values.coverage, values.gaps)
     // Audits silently skip files that fail to parse or fail TS-strip.
     // Pull the per-file lists off the findings array (they're attached
     // there by audit.mts) and pass them through so neither human nor
@@ -309,48 +285,35 @@ export async function runCli(argv) {
       parseFailureFiles,
       stripFailureFiles,
     )
-    reportSkippedFiles()
-    function reportSkippedFiles(): void {
-      if (!json) {
-        // Human-readable warning + per-file list. Goes to stderr so the
-        // findings on stdout stay machine-pipeable.
-        const totalSkipped = parseFailureFiles.length + stripFailureFiles.length
-        if (totalSkipped > 0) {
-          // CLI tool: stderr for human warnings keeps stdout pure
-          // machine-pipeable JSON / findings text.
-          const warnMsg = `prim: warning — ${totalSkipped} file(s) skipped and excluded from findings. Audit is incomplete.\n`
-          process.stderr.write(warnMsg)
-          if (parseFailureFiles.length > 0) {
-            const header = `  parse-failed (${parseFailureFiles.length}):\n`
-            process.stderr.write(header)
-            for (
-              let i = 0, { length } = parseFailureFiles;
-              i < length;
-              i += 1
-            ) {
-              const f = parseFailureFiles[i]!
-              process.stderr.write(`    ${f}\n`)
-            }
+    if (!json) {
+      // Human-readable warning + per-file list. Goes to stderr so the
+      // findings on stdout stay machine-pipeable.
+      const totalSkipped = parseFailureFiles.length + stripFailureFiles.length
+      if (totalSkipped > 0) {
+        // CLI tool: stderr for human warnings keeps stdout pure
+        // machine-pipeable JSON / findings text.
+        const warnMsg = `prim: warning — ${totalSkipped} file(s) skipped and excluded from findings. Audit is incomplete.\n`
+        writeError(warnMsg)
+        if (parseFailureFiles.length > 0) {
+          const header = `  parse-failed (${parseFailureFiles.length}):\n`
+          writeError(header)
+          for (let i = 0, { length } = parseFailureFiles; i < length; i += 1) {
+            const f = parseFailureFiles[i]!
+            writeError(`    ${f}\n`)
           }
-          if (stripFailureFiles.length > 0) {
-            const header = `  ts-strip-failed (${stripFailureFiles.length}):\n`
-            process.stderr.write(header)
-            for (
-              let i = 0, { length } = stripFailureFiles;
-              i < length;
-              i += 1
-            ) {
-              const f = stripFailureFiles[i]!
-              process.stderr.write(`    ${f}\n`)
-            }
+        }
+        if (stripFailureFiles.length > 0) {
+          const header = `  ts-strip-failed (${stripFailureFiles.length}):\n`
+          writeError(header)
+          for (let i = 0, { length } = stripFailureFiles; i < length; i += 1) {
+            const f = stripFailureFiles[i]!
+            writeError(`    ${f}\n`)
           }
         }
       }
     }
     return
   }
-
-  fail(`unknown command: ${command}\n\n${HELP}`)
 }
 
 // Extensions checked when looking for a sibling `primordials.*` file
@@ -427,4 +390,37 @@ export function isSplitPrimordials(localPrimordialsPath: string): boolean {
   } catch {
     return false
   }
+}
+
+export function printRequestedHelp(argv: readonly string[]): boolean {
+  const describeKind = describeRequest(argv)
+  if (describeKind) {
+    // `--describe --json` (either order) answers the fleet-runner-shaped
+    // `{describe, help}` envelope instead of the full command manifest —
+    // plain `--describe` stays the one-liner, unchanged.
+    write(
+      describeKind === 'json'
+        ? renderDescribeHelpJson()
+        : renderDescribe(describeKind, MANIFEST),
+    )
+    return true
+  }
+  // Bare `prim` / `prim help` / `prim --help` → print help. With --json
+  // riding along and no command to report a result for, answer the same
+  // `{describe, help}` envelope rather than silently ignoring the flag.
+  if (argv.length === 0 || argv[0] === 'help') {
+    write(argv.includes('--json') ? renderDescribeHelpJson() : HELP)
+    return true
+  }
+
+  return false
+}
+
+export function auditReportMode(
+  coverage: unknown,
+  gaps: unknown,
+): 'coverage' | 'gaps' | 'audit' {
+  const mode =
+    coverage && !gaps ? 'coverage' : gaps && !coverage ? 'gaps' : 'audit'
+  return mode
 }

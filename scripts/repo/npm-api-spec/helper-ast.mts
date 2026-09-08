@@ -1,5 +1,5 @@
 /**
- * @file Read `src/npm/registry/*.mts` as an AST and report what each helper
+ * @file Read `src/eco/npm/registry/*.mts` as an AST and report what each helper
  *   actually calls.
  *   Parsed, never grepped, per socket/no-source-sniffing: a regex over the text
  *   would decide "which endpoint does this helper hit" from wording, and any

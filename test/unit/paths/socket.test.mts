@@ -11,8 +11,7 @@
  *     resolution across Socket tools.
  */
 
-import { normalizePath } from '../../../src/paths/normalize.mjs'
-
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { getSocketUserDir as getSocketUserDirStable } from '@socketsecurity/lib-stable/paths/socket'
 
 import {
@@ -41,7 +40,7 @@ import { clearEnv, resetEnv, setEnv } from '../../../src/env/rewire.mjs'
 import { clearPath, resetPaths, setPath } from '../../../src/paths/rewire.mjs'
 import { afterEach, describe, expect, it } from 'vitest'
 
-import { describeUnixOnly } from '../util/skip-helpers.mjs'
+import { describeUnixOnly } from '../util/platform-suites.mjs'
 
 describe('paths/socket', () => {
   afterEach(() => {

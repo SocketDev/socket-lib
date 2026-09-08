@@ -438,7 +438,8 @@ describe('listGitWorktreesSync', () => {
 
 describe('findGitWorktree', () => {
   it('finds the main worktree by any path spelling', async () => {
-    const found = await findGitWorktree(process.cwd(), process.cwd())
+    const repo = makeRepo()
+    const found = await findGitWorktree(repo, path.join(repo, '.'))
     assert.ok(found)
     assert.equal(found.main, true)
   })
@@ -462,10 +463,8 @@ describe('findGitWorktree', () => {
 
 describe('isRemovableGitWorktree', () => {
   it('refuses the main worktree', async () => {
-    assert.equal(
-      await isRemovableGitWorktree(process.cwd(), process.cwd()),
-      false,
-    )
+    const repo = makeRepo()
+    assert.equal(await isRemovableGitWorktree(repo, repo), false)
   })
 
   it('refuses a directory git does not list', async () => {

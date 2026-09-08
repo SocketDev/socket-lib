@@ -126,47 +126,6 @@ export async function fetchPackumentSlim(
   return slicePackument(raw)
 }
 
-export interface ForcedPackumentRefreshOptions {
-  cache: TtlCache
-  fetchOptions: ResolvedPackumentFetchOptions
-  key: string
-  name: string
-  staleCache: TtlCache
-  stormCache: TtlCache
-}
-
-export async function refreshPackumentSlim(
-  options: ForcedPackumentRefreshOptions,
-): Promise<PackumentMetaSlim> {
-  const opts = { __proto__: null, ...options }
-  const { cache, fetchOptions, key, name, staleCache, stormCache } = opts
-  const cached = await cache.get<CachedPackumentEntry>(key)
-  if (
-    cached?.kind === 'hit' &&
-    Date.now() - cached.cachedAt <= FORCE_MIN_AGE_MS
-  ) {
-    return cloneMeta(cached.meta)
-  }
-  // Never remove the pre-existing entry before fetching: it stays exactly
-  // as it was unless this fetch succeeds or definitively confirms absence
-  // — a failed forced refresh never destroys previously-good data.
-  let result: CachedPackumentEntry
-  try {
-    result = await fetchAndCacheEntry(name, key, fetchOptions, staleCache)
-  } catch (e) {
-    const stale = await serveStaleOnFailure(staleCache, stormCache, key)
-    if (stale !== undefined) {
-      return cloneMeta(stale)
-    }
-    throw e
-  }
-  await cache.set(key, result)
-  if (result.kind === 'miss') {
-    throw new PackumentNotFoundError(name, result.status)
-  }
-  return cloneMeta(result.meta)
-}
-
 /**
  * Fetch a package's packument, slice it down to `PackumentMetaSlim`, and
  * cache the result. Concurrent calls for the same registry, name, and variant
@@ -202,15 +161,36 @@ export async function resolvePackumentSlim(
     variant,
   }
 
+  async function forceRefresh(): Promise<PackumentMetaSlim> {
+    const cached = await cache.get<CachedPackumentEntry>(key)
+    if (
+      cached?.kind === 'hit' &&
+      Date.now() - cached.cachedAt <= FORCE_MIN_AGE_MS
+    ) {
+      return cloneMeta(cached.meta)
+    }
+    // Never remove the pre-existing entry before fetching: it stays exactly
+    // as it was unless this fetch succeeds or definitively confirms absence
+    // — a failed forced refresh never destroys previously-good data.
+    let result: CachedPackumentEntry
+    try {
+      result = await fetchAndCacheEntry(name, key, fetchOptions, staleCache)
+    } catch (e) {
+      const stale = await serveStaleOnFailure(staleCache, stormCache, key)
+      if (stale !== undefined) {
+        return cloneMeta(stale)
+      }
+      throw e
+    }
+    await cache.set(key, result)
+    if (result.kind === 'miss') {
+      throw new PackumentNotFoundError(name, result.status)
+    }
+    return cloneMeta(result.meta)
+  }
+
   if (opts.force) {
-    return await refreshPackumentSlim({
-      cache,
-      fetchOptions,
-      key,
-      name,
-      staleCache,
-      stormCache,
-    })
+    return forceRefresh()
   }
 
   const storming = await stormCache.get<PackumentMetaSlim>(key)

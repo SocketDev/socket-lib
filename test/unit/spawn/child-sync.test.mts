@@ -16,7 +16,7 @@ import { describe, expect, it } from 'vitest'
 import { isWin32 } from '../../../src/constants/platform.mjs'
 import { spawnSync } from '../../../src/process/spawn/child.mjs'
 
-import { itUnixOnly, itWindowsOnly } from '../util/skip-helpers.mjs'
+import { itUnixOnly, itWindowsOnly } from '../util/platform-suites.mjs'
 import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 describe('spawnSync', () => {

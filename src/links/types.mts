@@ -3,7 +3,7 @@
  *   Pure types, no runtime side effects.
  */
 
-import type { ThemeName } from '../term/themes/themes.mjs'
+import type { ThemeName } from '../term/themes/presets.mjs'
 import type { Theme } from '../term/themes/types.mjs'
 
 /**

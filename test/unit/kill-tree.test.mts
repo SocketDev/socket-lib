@@ -25,7 +25,7 @@ import {
   killProcessTree,
   readParentMap,
 } from '../../src/process/spawn/kill-tree.mjs'
-import { itUnixOnly } from './util/skip-helpers.mjs'
+import { itUnixOnly } from './util/platform-suites.mjs'
 
 // `tolerantSleep` returns a platform-adjusted BUDGET in ms, not a promise, so
 // awaiting it directly resolves on the next tick and the delay never happens.
