@@ -1,7 +1,15 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
+import { cpSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
-import { afterEach, beforeEach, describe, expect, test } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  test,
+} from 'vitest'
 
 import { tolerantSleep } from '../_shared/fleet/lib/timing.mts'
 import {
@@ -26,6 +34,7 @@ import { safeDeleteSync } from '@socketsecurity/lib-stable/fs/safe'
 
 let tmpRoot: string
 let repo: string
+let seedRepo: string
 
 function initRepo(dir: string): void {
   sh(dir, 'git init -b main -q')
@@ -34,11 +43,19 @@ function initRepo(dir: string): void {
   sh(dir, 'git commit --allow-empty -q -m "initial"')
 }
 
+beforeAll(() => {
+  seedRepo = mkdtempSync(path.join(os.tmpdir(), 'ai-worktree-seed-'))
+  initRepo(seedRepo)
+})
+
+afterAll(() => {
+  safeDeleteSync(seedRepo)
+})
+
 beforeEach(() => {
   tmpRoot = mkdtempSync(path.join(os.tmpdir(), 'ai-worktree-test-'))
   repo = path.join(tmpRoot, 'repo')
-  mkdirSync(repo, { recursive: true })
-  initRepo(repo)
+  cpSync(seedRepo, repo, { recursive: true })
 })
 
 afterEach(() => {
