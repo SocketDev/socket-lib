@@ -1,97 +1,3 @@
-# ============================================================================
-# OS-specific files
-# ============================================================================
-._.DS_Store
-.DS_Store
-Thumbs.db
-
-# ============================================================================
-# Environment and secrets
-# ============================================================================
-.env
-.env.*
-!.env.example
-
-# ============================================================================
-# Node.js dependencies and configuration
-# ============================================================================
-.npmrc.local
-.nvm
-.pnpmfile.cjs
-node_modules
-# Defensive cache ignore — Node compile-cache, corepack, and other
-# tools occasionally drop scratch dirs into a project-local .cache/.
-# node_modules/.cache/ is the canonical home for tools we control.
-**/.cache/
-
-# `prim` audit/codemod's AI-disambiguation cache. Keyed on
-# (method, receiver, snippet-hash) so verdicts persist across runs
-# and re-runs are free; not portable across machines (verdicts
-# depend on an account's API key budget) so it's gitignored.
-.prim-cache/
-
-# `perry`'s per-module object cache. Perry hardcodes it to
-# `<project_root>/.perry-cache/` (no env/flag relocates it; only
-# PERRY_NO_CACHE disables it) and its own source treats the dir as a
-# machine-local, gitignored cache. The perry native-compile e2e runs
-# with `cwd` at the fixture, so it lands under test/fixtures/.
-.perry-cache/
-npm-debug.log*
-pnpm-debug.log*
-yarn-error.log*
-yarn.lock
-
-# ============================================================================
-# Build outputs and artifacts
-# ============================================================================
-.type-coverage/
-coverage/
-coverage-isolated/
-dist/
-*.tsbuildinfo
-*.tgz
-*.tmp
-
-# ============================================================================
-# Editor and IDE files
-# ============================================================================
-.idea/
-.vscode/
-!.vscode/settings.json
-*.old
-*.swo
-*.swp
-*~
-
-# ============================================================================
-# Development and debugging
-# ============================================================================
-*.log
-
-# ============================================================================
-# Backup and temporary files
-# ============================================================================
-*.backup
-*.bak
-*.orig
-/test/temp/
-
-# ============================================================================
-# Archive directories
-# ============================================================================
-**/docs/archive/
-
-# ============================================================================
-# Claude Code configuration
-# ============================================================================
-/.claude/*
-!/.claude/agents/
-!/.claude/commands/
-!/.claude/ops/
-!/.claude/skills/
-!/.claude/hooks/
-!/.claude/settings.json
-
 # <fleet>
 # Managed by socket-wheelhouse. Don't edit locally — edit upstream
 # in scripts/repo/commit-cascade/checks/gitignore-fleet-block.mts and
@@ -231,47 +137,6 @@ node_modules
 npm-debug.log
 pnpm-debug.log
 *.tgz
-# </fleet>
-# <repo>
-# THIN member: the fleet payload is untracked; scripts/repo/bootstrap/prepare.mts
-# fetches it from the pinned fleet-pack release (bundle.ref in
-# .config/repo/socket-wheelhouse.json) before install-git-hooks runs.
-/scripts/fleet/
-# pnpm applies these at install, so an untracked patch silently stops being
-# applied for everyone else. The fleet block lists them individually because
-# they were once local-only; tracked is correct now.
-!/patches/@socketsecurity__lib@6.7.0.patch
-!/patches/brace-expansion@5.0.9.patch
-!/patches/minimatch@10.2.6.patch
-# </repo>
-
-# ─── repo-local (socket-wheelhouse): keep hand-authored files that the
-# fleet-canonical globs would otherwise ignore (untrack-ignored-files fix) ───
-!/src/external/
-!/test/fixtures/
-!/tools/prim/test/fixtures/
-# Committed package-tarball fixtures for the offline pacote registry mock; the
-# `*.tgz` glob above would otherwise ignore them (a file glob a directory
-# negation can't re-include).
-!/test/fixtures/npm/*.tgz
-
-# ─── repo-local: fleet hook bundle build output (generated-outputs-are-untracked).
-# The v1.0.11 bundle still ships _dist/bundle.cjs, so it lands on disk from a
-# refresh; keep it out of tracking until the fleet gitignore block covers it. ───
-/.claude/hooks/fleet/_dist/
-
-# ─── vitiate coverage-guided fuzz lane (`pnpm run test:fuzz`) caches ───
-# `.swc/` is the SWC instrument plugin's WASM cache; `.vitiate/` holds the
-# regenerable corpus + run results. Both are rebuilt on every fuzz run — never
-# commit them. (A crash-repro artifact worth keeping as a regression guard
-# would be re-included here explicitly; none exist yet.)
-/.swc/
-/.vitiate/
-
-# Repo-local: generated run artifacts (release checksums, fixture build objects)
-/checksums.txt
-/test/fixtures/perry/*.o
-
 # <fleet-pack>
 # Fleet-pack untrack set — managed by scripts/repo/bootstrap/fleet.mjs.
 # REGENERATED from the release-bundle manifest on every hydrate; stale
@@ -2917,6 +2782,12 @@ scripts/fleet/balancer/gauge-ramp.mts
 scripts/fleet/balancer/latency.mts
 scripts/fleet/balancer/liveness.mts
 scripts/fleet/balancer/settings.mts
+scripts/fleet/bench/chart-report.mts
+scripts/fleet/bench/chart-theme.mts
+scripts/fleet/bench/charts.mts
+scripts/fleet/bench/compact-query-chart.mts
+scripts/fleet/bench/query-chart.mts
+scripts/fleet/bench/summary-chart.mts
 scripts/fleet/brew-publish.mts
 scripts/fleet/browser-control-graft.mts
 scripts/fleet/browser/chrome-cdp.mts
@@ -3329,9 +3200,11 @@ scripts/fleet/constants/test-isolation.mts
 scripts/fleet/context-cost.mts
 scripts/fleet/coordination/claim-tools.mts
 scripts/fleet/coordination/claim.mts
+scripts/fleet/cover-allowance.mts
 scripts/fleet/cover-report.mts
 scripts/fleet/cover-run.mts
 scripts/fleet/cover.mts
+scripts/fleet/cover/budget-allowances.mts
 scripts/fleet/cover/bun-lane.mts
 scripts/fleet/cover/command.mts
 scripts/fleet/cover/cpp-lane.mts
@@ -3341,6 +3214,8 @@ scripts/fleet/cover/lane-budget.mts
 scripts/fleet/cover/lane-contract.mts
 scripts/fleet/cover/lane-paths.mts
 scripts/fleet/cover/lanes.mts
+scripts/fleet/cover/measure-reporter.mts
+scripts/fleet/cover/measure.mts
 scripts/fleet/cover/native-lanes.mts
 scripts/fleet/cover/native-phases.mts
 scripts/fleet/cover/phases.mts
@@ -3414,6 +3289,7 @@ scripts/fleet/fuzz/report-crash.mts
 scripts/fleet/gen/agents-skills-mirror.mts
 scripts/fleet/gen/api-md.mts
 scripts/fleet/gen/aw-token-shapes.mts
+scripts/fleet/gen/chart-references.mts
 scripts/fleet/gen/coverage-badge.mts
 scripts/fleet/gen/fleet-pack-version.mts
 scripts/fleet/gen/gitmodules-hash.mts
@@ -3428,6 +3304,7 @@ scripts/fleet/gen/hook-dispatch.mts
 scripts/fleet/gen/hook-validators.mts
 scripts/fleet/gen/llms-txt.mts
 scripts/fleet/gen/model-pricing-module.mts
+scripts/fleet/gen/package-exports-public-names.mts
 scripts/fleet/gen/package-exports.mts
 scripts/fleet/gen/png-optimize.mts
 scripts/fleet/gen/repo-map.mts
@@ -3460,6 +3337,7 @@ scripts/fleet/github/security-alert-feeds.mts
 scripts/fleet/github/token.mts
 scripts/fleet/github/tracked-surface.mts
 scripts/fleet/github/workflow-display-names.mts
+scripts/fleet/gitignore/compose.mts
 scripts/fleet/gitmodules-contract.mts
 scripts/fleet/go-publish.mts
 scripts/fleet/grant-ruleset-bypass.mts
@@ -3612,6 +3490,7 @@ scripts/fleet/pre-push-gate.mts
 scripts/fleet/preflight.mts
 scripts/fleet/prepare-cadence.mts
 scripts/fleet/prepare.mts
+scripts/fleet/prepare/codex-plugin-hooks.mts
 scripts/fleet/prepare/self-heal.mts
 scripts/fleet/process/active-run-marker.mts
 scripts/fleet/process/backoff.mts
@@ -3686,6 +3565,7 @@ scripts/fleet/registry-infra/npm/org-sweep.mts
 scripts/fleet/registry-infra/npm/org-web.mts
 scripts/fleet/registry-infra/npm/otp-runner.mts
 scripts/fleet/registry-infra/npm/owner-sweep.mts
+scripts/fleet/registry-infra/npm/pack-manifest-lock.mts
 scripts/fleet/registry-infra/npm/pack-manifest.mts
 scripts/fleet/registry-infra/npm/pack-preflight.mts
 scripts/fleet/registry-infra/npm/pinned-npm.mts
@@ -3890,6 +3770,7 @@ scripts/fleet/team-activity/lib/render.mts
 scripts/fleet/team-activity/lib/scan.mts
 scripts/fleet/team-activity/lib/state.mts
 scripts/fleet/team-activity/lib/types.mts
+scripts/fleet/temporal/calendar-month.mts
 scripts/fleet/test-runner/cli-args.mts
 scripts/fleet/test-runner/git-files.mts
 scripts/fleet/test-runner/mirror-resolver.mts
@@ -3968,6 +3849,139 @@ test/fleet/registry-infra/npm/placeholder.test.mts
 test/fleet/scripts/setup.mts
 test/fleet/unit/comment-voice.test.mts
 # </fleet-pack>
+# </fleet>
+# <repo>
+# ============================================================================
+# OS-specific files
+# ============================================================================
+._.DS_Store
+.DS_Store
+Thumbs.db
+
+# ============================================================================
+# Environment and secrets
+# ============================================================================
+.env
+.env.*
+!.env.example
+
+# ============================================================================
+# Node.js dependencies and configuration
+# ============================================================================
+.npmrc.local
+.nvm
+.pnpmfile.cjs
+node_modules
+# Defensive cache ignore — Node compile-cache, corepack, and other
+# tools occasionally drop scratch dirs into a project-local .cache/.
+# node_modules/.cache/ is the canonical home for tools we control.
+**/.cache/
+
+# `prim` audit/codemod's AI-disambiguation cache. Keyed on
+# (method, receiver, snippet-hash) so verdicts persist across runs
+# and re-runs are free; not portable across machines (verdicts
+# depend on an account's API key budget) so it's gitignored.
+.prim-cache/
+
+# `perry`'s per-module object cache. Perry hardcodes it to
+# `<project_root>/.perry-cache/` (no env/flag relocates it; only
+# PERRY_NO_CACHE disables it) and its own source treats the dir as a
+# machine-local, gitignored cache. The perry native-compile e2e runs
+# with `cwd` at the fixture, so it lands under test/fixtures/.
+.perry-cache/
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+yarn.lock
+
+# ============================================================================
+# Build outputs and artifacts
+# ============================================================================
+.type-coverage/
+coverage/
+coverage-isolated/
+dist/
+*.tsbuildinfo
+*.tgz
+*.tmp
+
+# ============================================================================
+# Editor and IDE files
+# ============================================================================
+.idea/
+.vscode/
+!.vscode/settings.json
+*.old
+*.swo
+*.swp
+*~
+
+# ============================================================================
+# Development and debugging
+# ============================================================================
+*.log
+
+# ============================================================================
+# Backup and temporary files
+# ============================================================================
+*.backup
+*.bak
+*.orig
+/test/temp/
+
+# ============================================================================
+# Archive directories
+# ============================================================================
+**/docs/archive/
+
+# ============================================================================
+# Claude Code configuration
+# ============================================================================
+/.claude/*
+!/.claude/agents/
+!/.claude/commands/
+!/.claude/skills/
+!/.claude/hooks/
+!/.claude/settings.json
+
+# THIN member: the fleet payload is untracked; scripts/repo/bootstrap/prepare.mts
+# fetches it from the pinned fleet-pack release (bundle.ref in
+# .config/repo/socket-wheelhouse.json) before install-git-hooks runs.
+/scripts/fleet/
+# pnpm applies these at install, so an untracked patch silently stops being
+# applied for everyone else. The fleet block lists them individually because
+# they were once local-only; tracked is correct now.
+!/patches/@socketsecurity__lib@6.7.0.patch
+!/patches/brace-expansion@5.0.9.patch
+!/patches/minimatch@10.2.6.patch
+
+# ─── repo-local (socket-wheelhouse): keep hand-authored files that the
+# fleet-canonical globs would otherwise ignore (untrack-ignored-files fix) ───
+!/src/external/
+!/test/fixtures/
+!/tools/prim/test/fixtures/
+# Committed package-tarball fixtures for the offline pacote registry mock; the
+# `*.tgz` glob above would otherwise ignore them (a file glob a directory
+# negation can't re-include).
+!/test/fixtures/npm/*.tgz
+
+# ─── repo-local: fleet hook bundle build output (generated-outputs-are-untracked).
+# The v1.0.11 bundle still ships _dist/bundle.cjs, so it lands on disk from a
+# refresh; keep it out of tracking until the fleet gitignore block covers it. ───
+/.claude/hooks/fleet/_dist/
+
+# ─── vitiate coverage-guided fuzz lane (`pnpm run test:fuzz`) caches ───
+# `.swc/` is the SWC instrument plugin's WASM cache; `.vitiate/` holds the
+# regenerable corpus + run results. Both are rebuilt on every fuzz run — never
+# commit them. (A crash-repro artifact worth keeping as a regression guard
+# would be re-included here explicitly; none exist yet.)
+/.swc/
+/.vitiate/
+
+# Repo-local: generated run artifacts (release checksums, fixture build objects)
+/checksums.txt
+/test/fixtures/perry/*.o
+
 
 # ─── repo-local (socket-lib): re-include after the fleet-pack block, since
 # gitignore uses last-match-wins and this negation must outrank the fleet
@@ -3985,3 +3999,4 @@ test/fleet/unit/comment-voice.test.mts
 # supposed to fetch them. Drop this entry once the pin moves past the release
 # that lists them.
 /.config/fleet/rolldown/
+# </repo>
