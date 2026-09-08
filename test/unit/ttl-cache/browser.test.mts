@@ -7,11 +7,15 @@
  *   in the sibling browser-storage.test.mts.
  */
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { createBrowserTtlCache } from '../../../src/cache/ttl/browser.mjs'
-import { tolerantSleep } from '../../_shared/fleet/lib/timing.mts'
 import { createDeferred, createMemoryAdapter } from './browser-storage.mts'
+
+vi.mock(import('../../../src/primordials/date.mjs'), async importOriginal => ({
+  ...(await importOriginal()),
+  DateNow: () => Date.now(),
+}))
 
 describe('browser ttl-cache', () => {
   describe('createBrowserTtlCache', () => {
@@ -85,11 +89,18 @@ describe('browser ttl-cache', () => {
     })
 
     it('keeps an entry alive within its ttl and expires it after', async () => {
-      const cache = createBrowserTtlCache({ ttl: 100 })
-      await cache.set('key', 'value')
-      expect(await cache.get('key')).toBe('value')
-      await new Promise(resolve => setTimeout(resolve, tolerantSleep(200)))
-      expect(await cache.get('key')).toBeUndefined()
+      vi.useFakeTimers({ toFake: ['Date'] })
+      try {
+        vi.setSystemTime(1000)
+        const cache = createBrowserTtlCache({ ttl: 100 })
+        await cache.set('key', 'value')
+        vi.setSystemTime(1099)
+        expect(await cache.get('key')).toBe('value')
+        vi.setSystemTime(1101)
+        expect(await cache.get('key')).toBeUndefined()
+      } finally {
+        vi.useRealTimers()
+      }
     })
 
     it('holds at the ttl boundary: expiresAt in the future is valid, in the past is expired', async () => {

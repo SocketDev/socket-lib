@@ -11,6 +11,11 @@
 import { memoize } from '../../src/memo/memoize.mjs'
 import { describe, expect, it, vi } from 'vitest'
 
+vi.mock(import('../../src/primordials/date.mjs'), async importOriginal => ({
+  ...(await importOriginal()),
+  DateNow: () => Date.now(),
+}))
+
 describe('memoization', () => {
   describe('memoize', () => {
     it('should cache function results', () => {
@@ -83,24 +88,22 @@ describe('memoization', () => {
       expect(fn).toHaveBeenCalledTimes(4)
     })
 
-    it('should respect TTL expiration', async () => {
-      const fn = vi.fn((n: number) => n * 2)
-      // Use a large margin so slow CI, Windows especially, doesn't race the
-      // wall clock: expire 100ms, sleep 500ms.
-      const memoized = memoize(fn, { ttl: 100 })
-
-      expect(memoized(5)).toBe(10)
-      expect(fn).toHaveBeenCalledTimes(1)
-
-      // Should be cached immediately
-      expect(memoized(5)).toBe(10)
-      expect(fn).toHaveBeenCalledTimes(1)
-
-      // Wait well past TTL to expire
-      await new Promise(resolve => setTimeout(resolve, 500))
-
-      expect(memoized(5)).toBe(10)
-      expect(fn).toHaveBeenCalledTimes(2)
+    it('should respect TTL expiration', () => {
+      vi.useFakeTimers({ toFake: ['Date'] })
+      try {
+        vi.setSystemTime(1000)
+        const fn = vi.fn((n: number) => n * 2)
+        const memoized = memoize(fn, { ttl: 100 })
+        expect(memoized(5)).toBe(10)
+        vi.setSystemTime(1099)
+        expect(memoized(5)).toBe(10)
+        expect(fn).toHaveBeenCalledTimes(1)
+        vi.setSystemTime(1101)
+        expect(memoized(5)).toBe(10)
+        expect(fn).toHaveBeenCalledTimes(2)
+      } finally {
+        vi.useRealTimers()
+      }
     })
 
     it('should use function name for debugging', () => {
