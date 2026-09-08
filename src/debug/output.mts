@@ -25,20 +25,9 @@ import { getNodeUtil } from '../node/util.mjs'
 import type { SpinnerInstance } from '../spinner/types.mjs'
 import type { InspectOptions, NamespacesOrOptions } from './types.mjs'
 
-let cachedLogger: ReturnType<typeof getDefaultLogger> | undefined
-
-// oxlint-disable-next-line socket/export-top-level-functions -- Private cache.
-function logger() {
-  if (cachedLogger === undefined) {
-    cachedLogger = getDefaultLogger()
-  }
-  return cachedLogger
-}
-
 /**
  * Debug output with caller info (wrapper for debugNs with default namespace).
  */
-
 export function debug(...args: unknown[]): void {
   debugNs('*', ...args)
 }
@@ -71,8 +60,9 @@ export function debugCache(
   const pointingTriangle = getPointingTriangle()
   const prefix = `[CACHE] ${callerName} ${pointingTriangle} ${operation}: ${key}`
   const args = meta !== undefined ? [prefix, meta] : [prefix]
-  const log = logger()
-  ReflectApply(log.info, log, args)
+  // oxlint-disable-next-line socket/no-inline-logger -- Preserve lazy init.
+  const logger = getDefaultLogger()
+  ReflectApply(logger.info, logger, args)
 }
 
 /**
@@ -104,8 +94,9 @@ export function debugCacheNs(
   const spinnerInstance = options.spinner || getSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
-  const log = logger()
-  ReflectApply(log.info, log, logArgs)
+  // oxlint-disable-next-line socket/no-inline-logger -- Preserve lazy init.
+  const logger = getDefaultLogger()
+  ReflectApply(logger.info, logger, logArgs)
   if (wasSpinning) {
     spinnerInstance?.start()
   }
@@ -167,9 +158,10 @@ export function debugDirNs(
   const spinnerInstance = options.spinner || getSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
-  const log = logger()
-  log.info(`[DEBUG] ${callerName} ${pointingTriangle} object inspection:`)
-  log.dir(obj, inspectOpts)
+  // oxlint-disable-next-line socket/no-inline-logger -- Preserve lazy init.
+  const logger = getDefaultLogger()
+  logger.info(`[DEBUG] ${callerName} ${pointingTriangle} object inspection:`)
+  logger.dir(obj, inspectOpts)
   if (wasSpinning) {
     spinnerInstance?.start()
   }
@@ -224,8 +216,9 @@ export function debugLogNs(
   const spinnerInstance = options.spinner || getSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
-  const log = logger()
-  ReflectApply(log.info, log, logArgs)
+  // oxlint-disable-next-line socket/no-inline-logger -- Preserve lazy init.
+  const logger = getDefaultLogger()
+  ReflectApply(logger.info, logger, logArgs)
   if (wasSpinning) {
     spinnerInstance?.start()
   }
@@ -262,8 +255,9 @@ export function debugNs(
   const spinnerInstance = options.spinner || getSpinner()
   const wasSpinning = spinnerInstance?.isSpinning
   spinnerInstance?.stop()
-  const log = logger()
-  ReflectApply(log.info, log, logArgs)
+  // oxlint-disable-next-line socket/no-inline-logger -- Preserve lazy init.
+  const logger = getDefaultLogger()
+  ReflectApply(logger.info, logger, logArgs)
   if (wasSpinning) {
     spinnerInstance?.start()
   }

@@ -22,16 +22,6 @@ import { getNodeUtil } from '../node/util.mjs'
 
 import type debugJs from '../external/debug.js'
 
-let cachedLogger: ReturnType<typeof getDefaultLogger> | undefined
-
-// oxlint-disable-next-line socket/export-top-level-functions -- Private cache.
-function logger() {
-  if (cachedLogger === undefined) {
-    cachedLogger = getDefaultLogger()
-  }
-  return cachedLogger
-}
-
 export const debugByNamespace = new MapCtor()
 
 let cachedDebugJs: typeof debugJs | undefined
@@ -46,7 +36,7 @@ let pointingTriangle: string | undefined
 /* c8 ignore start - customLog is assigned to debugJs instances and
    only fires when debugJs emits, which requires DEBUG=* env var
    set at the right module-load timing. Tests use the SOCKET_DEBUG
-   path which writes via log.info directly. */
+   path which writes via logger.info directly. */
 export function customLog(...args: unknown[]) {
   const util = getNodeUtil()
   const debugJsInstance = getDebugJs()
@@ -64,8 +54,11 @@ export function customLog(...args: unknown[]) {
             : debugJsInstance.inspectOpts.depth,
       }
     : {}
-  const log = logger()
-  ReflectApply(log.info, log, [util.formatWithOptions(inspectOpts, ...args)])
+  // oxlint-disable-next-line socket/no-inline-logger -- Preserve lazy init.
+  const logger = getDefaultLogger()
+  ReflectApply(logger.info, logger, [
+    util.formatWithOptions(inspectOpts, ...args),
+  ])
 }
 /* c8 ignore stop */
 
