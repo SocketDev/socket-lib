@@ -1,13 +1,13 @@
 /**
  * @file Unit tests for `compareSecrets`. Covers equality, inequality,
  *   length-mismatch handling, the string/Buffer mixed-input matrix, and
- *   sanity-checks on the timing-attack surface — see the comments inline for
- *   what the timing test does and doesn't prove.
+ *   native timing-safe comparisons for early and late byte mismatches.
  */
 
 import { Buffer } from 'node:buffer'
+import crypto from 'node:crypto'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 // compareSecrets is the ACTUAL under test
 // (expect(compareSecrets(...)).toBe(...)), not an expected-value builder;
@@ -135,49 +135,22 @@ describe('compareSecrets', () => {
     })
   })
 
-  describe('timing characteristics (sanity check, not a proof)', () => {
-    // Caveat: a microbenchmark in a test runner is NOT a real timing-
-    // attack proof — V8 JIT, GC, OS scheduler, and CPU caches all add
-    // noise that swamps the few nanoseconds an early-exit would save.
-    // This test exists to make a regression VISIBLE if someone replaces
-    // the implementation with a naive `===` (early-exit would show as
-    // an order-of-magnitude difference on a long secret with an early-
-    // byte mismatch). It's intentionally LENIENT and skipped under
-    // coverage runs, where instrumentation makes timing meaningless.
-    // test-exclusion: Instrumentation distorts timing; recheck with `pnpm test test/unit/secrets/compare.test.mts`.
-    it.skipIf(process.env['COVERAGE'] === 'true')(
-      'shows no order-of-magnitude difference between early- and late-byte mismatches',
-      () => {
-        const len = 1024
-        const baseline = 'a'.repeat(len)
-        const earlyMismatch = 'Z' + 'a'.repeat(len - 1)
-        const lateMismatch = 'a'.repeat(len - 1) + 'Z'
-
-        const iterations = 5000
-
-        function measure(other: string): number {
-          const start = process.hrtime.bigint()
-          for (let i = 0; i < iterations; i += 1) {
-            compareSecrets(baseline, other)
-          }
-          return Number(process.hrtime.bigint() - start)
-        }
-
-        // Warm-up to let V8 settle into the hot path.
-        measure(earlyMismatch)
-        measure(lateMismatch)
-
-        const tEarly = measure(earlyMismatch)
-        const tLate = measure(lateMismatch)
-
-        // A naive `===` would make tEarly ≪ tLate by ~1000x on this input.
-        // Any small-constant ratio (< 10x) is "indistinguishable" by the
-        // standard of a microbenchmark in a test. The threshold is set
-        // generously to avoid flakes on slow CI; the real signal is
-        // "they're the same order of magnitude."
-        const ratio = Math.max(tEarly, tLate) / Math.min(tEarly, tLate)
-        expect(ratio).toBeLessThan(10)
-      },
-    )
+  describe('native timing-safe comparison', () => {
+    it('uses timingSafeEqual for early and late byte mismatches', () => {
+      const baseline = Buffer.from('a'.repeat(1024))
+      const earlyMismatch = Buffer.from('Z' + 'a'.repeat(1023))
+      const lateMismatch = Buffer.from('a'.repeat(1023) + 'Z')
+      const compare = vi.spyOn(crypto, 'timingSafeEqual')
+      try {
+        expect(compareSecrets(baseline, earlyMismatch)).toBe(false)
+        expect(compareSecrets(baseline, lateMismatch)).toBe(false)
+        expect(compare.mock.calls).toEqual([
+          [baseline, earlyMismatch],
+          [baseline, lateMismatch],
+        ])
+      } finally {
+        compare.mockRestore()
+      }
+    })
   })
 })
