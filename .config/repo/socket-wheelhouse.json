@@ -154,6 +154,10 @@
         "reason": "readProcessTree and the self-nesting check. Waits on socket-wheelhouse's stale-process-sweeper replacing its private copy with this one."
       },
       {
+        "leaf": "stdio/stderr",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
         "leaf": "strings/lines",
         "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
       },
@@ -399,7 +403,6 @@
         "state/db",
         "stdio/clear",
         "stdio/progress",
-        "stdio/stderr",
         "stdio/stdout",
         "strings/search",
         "temporal/instant",
@@ -465,7 +468,9 @@
   },
   "coverage": {
     "exclude": {
-      "add": ["src/perf/**"]
+      "add": [
+        "src/perf/**"
+      ]
     }
   },
   "lint": {
