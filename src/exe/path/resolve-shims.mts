@@ -38,15 +38,15 @@ export function cmdShimRelPath(config: ShimSource): string {
   const { extLowered, source } = config
   if (extLowered === '.cmd') {
     // require-regex-comment: captures the script path from the cmd-shim `"%dp0%\<path>" %*` tail.
-    return /(?<="%dp0%\\).*(?=" %\*\r\n)/.exec(source)?.[0] || ''
+    return /(?<="%dp0%\\)[^"\r\n]+(?=" %\*\r?\n)/.exec(source)?.[0] || ''
   }
   if (extLowered === '') {
     // require-regex-comment: captures the script path from the cmd-shim `"$basedir/<path>" "$@"` tail.
-    return /(?<="$basedir\/).*(?=" "\$@"\n)/.exec(source)?.[0] || ''
+    return /(?<="\$basedir\/)[^"\r\n]+(?=" "\$@"\r?\n)/.exec(source)?.[0] || ''
   }
   if (extLowered === '.ps1') {
     // require-regex-comment: captures the script path from the cmd-shim `"$basedir/<path>" $args` tail.
-    return /(?<="\$basedir\/).*(?=" $args\n)/.exec(source)?.[0] || ''
+    return /(?<="\$basedir\/)[^"\r\n]+(?=" \$args\r?\n)/.exec(source)?.[0] || ''
   }
   return ''
 }
@@ -96,7 +96,7 @@ export function installerWindowsCmdRelPath(source: string): string {
       source,
     )?.groups?.['relPath'] ||
     // require-regex-comment: captures the script path from the cmd-shim `"%dp0%\<path>" %*` tail.
-    /(?<="%dp0%\\).*(?=" %\*\r\n)/.exec(source)?.[0] ||
+    /(?<="%dp0%\\)[^"\r\n]+(?=" %\*\r?\n)/.exec(source)?.[0] ||
     ''
   )
 }
@@ -115,7 +115,7 @@ export function installerWindowsShellRelPath(source: string): string {
       source,
     )?.[0] ||
     // require-regex-comment: captures the script path from the cmd-shim `"$basedir/<path>" "$@"` tail.
-    /(?<="\$basedir\/).*(?=" "\$@"\n)/.exec(source)?.[0] ||
+    /(?<="\$basedir\/)[^"\r\n]+(?=" "\$@"\r?\n)/.exec(source)?.[0] ||
     ''
   )
 }
@@ -135,7 +135,7 @@ export function installerWindowsShimRelPath(config: ShimSource): string {
   }
   if (extLowered === '.ps1') {
     // require-regex-comment: captures the script path from the PowerShell `"$basedir/<path>" $args` tail.
-    return /(?<="\$basedir\/).*(?=" $args\n)/.exec(source)?.[0] || ''
+    return /(?<="\$basedir\/)[^"\r\n]+(?=" \$args\r?\n)/.exec(source)?.[0] || ''
   }
   return ''
 }
