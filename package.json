@@ -3908,6 +3908,7 @@
     "ci:local": "node scripts/fleet/local-ci-skip-locks.mts run --all --quiet --pause-on-failure --github-token",
     "clean": "node scripts/fleet/clean.mts",
     "cover": "node scripts/fleet/cover.mts",
+    "cover:allowance": "node scripts/fleet/cover-allowance.mts",
     "dev": "node scripts/repo/bundle.mts --watch",
     "docs": "node scripts/repo/make-api-md.mts",
     "doctor": "node scripts/fleet/doctor.mts",
@@ -3976,7 +3977,8 @@
     "context:cost": "node scripts/fleet/context-cost.mts",
     "context:ratchet": "node scripts/fleet/check/context-cost-is-under-the-ratchet.mts",
     "gen:glyph": "node scripts/fleet/gen/glyph.mts",
-    "repo:map": "node scripts/fleet/gen/repo-map.mts"
+    "repo:map": "node scripts/fleet/gen/repo-map.mts",
+    "spend-usage": "node scripts/fleet/spend-usage.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
