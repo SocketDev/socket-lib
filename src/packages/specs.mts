@@ -3,7 +3,6 @@
  */
 
 import { REGISTRY_SCOPE_DELIMITER } from '../constants/socket.mjs'
-// @ts-expect-error - external vendored module
 import { PackageURL } from '../external/@socketregistry/packageurl-js.js'
 
 import { requireFrom } from '../node/module.mjs'
