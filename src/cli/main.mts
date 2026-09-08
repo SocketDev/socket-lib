@@ -17,10 +17,21 @@ import { errorMessage } from '../errors/message.mjs'
 import { getDefaultLogger } from '../logger/default.mjs'
 import { getNodeProcess } from '../node/process.mjs'
 
+let cachedLogger: ReturnType<typeof getDefaultLogger> | undefined
+
+// oxlint-disable-next-line socket/export-top-level-functions -- Private cache.
+function logger() {
+  if (cachedLogger === undefined) {
+    cachedLogger = getDefaultLogger()
+  }
+  return cachedLogger
+}
+
 /**
  * The message shown when argv carries a bare `--`. Names the script so the
  * corrected command can be pasted directly.
  */
+
 export function bareDoubleDashMessage(scriptName: string): string {
   return (
     'a bare `--` in the command line\n' +
@@ -130,7 +141,7 @@ export async function runMainAsync(
   main: MainFn,
   meta?: ScriptMeta | undefined,
 ): Promise<void> {
-  const logger = getDefaultLogger()
+  const log = logger()
   const nodeProcess = getNodeProcess()
   const argv = nodeProcess.argv.slice(2)
   if (meta) {
@@ -139,7 +150,7 @@ export async function runMainAsync(
     // and while another holder has the repo lock.
     const request = helpRequest(argv)
     if (request) {
-      logger.log(helpText(request, meta))
+      log.log(helpText(request, meta))
       nodeProcess.exitCode = 0
       return
     }
@@ -148,7 +159,7 @@ export async function runMainAsync(
     // Refuse rather than guess. Silently dropping flags fails OPEN, which for
     // a destructive script means running live when a preview was requested.
     const scriptName = nodeProcess.argv[1]?.split('/').pop() ?? 'this script'
-    logger.error(bareDoubleDashMessage(scriptName))
+    log.error(bareDoubleDashMessage(scriptName))
     nodeProcess.exitCode = 1
     return
   }
@@ -165,7 +176,7 @@ export async function runMainAsync(
       nodeProcess.exitCode = 0
     }
   } catch (e) {
-    logger.error(errorMessage(e))
+    log.error(errorMessage(e))
     nodeProcess.exitCode = 1
   }
 }

@@ -5,7 +5,7 @@
  *   `customLog` (the `debug-js` log-writer override). Node-bound pieces are
  *   deferred to first use — the vendored debug-js bundle is required lazily
  *   (its module top-level reads env / requires tty), the default `Logger` is
- *   constructed per call via the already-lazy `getDefaultLogger`, and
+ *   resolved on first use through `getDefaultLogger`, and
  *   `node:util` loads through the `getNodeUtil` accessor. Every call site
  *   sits behind the SOCKET_DEBUG / DEBUG env gates, so importing a `debug/*`
  *   leaf stays browser-load-safe and V8-snapshot-safe. Co-located so the
@@ -22,6 +22,16 @@ import { getNodeUtil } from '../node/util.mjs'
 
 import type debugJs from '../external/debug.js'
 
+let cachedLogger: ReturnType<typeof getDefaultLogger> | undefined
+
+// oxlint-disable-next-line socket/export-top-level-functions -- Private cache.
+function logger() {
+  if (cachedLogger === undefined) {
+    cachedLogger = getDefaultLogger()
+  }
+  return cachedLogger
+}
+
 export const debugByNamespace = new MapCtor()
 
 let cachedDebugJs: typeof debugJs | undefined
@@ -36,7 +46,7 @@ let pointingTriangle: string | undefined
 /* c8 ignore start - customLog is assigned to debugJs instances and
    only fires when debugJs emits, which requires DEBUG=* env var
    set at the right module-load timing. Tests use the SOCKET_DEBUG
-   path which writes via logger.info directly. */
+   path which writes via log.info directly. */
 export function customLog(...args: unknown[]) {
   const util = getNodeUtil()
   const debugJsInstance = getDebugJs()
@@ -54,10 +64,8 @@ export function customLog(...args: unknown[]) {
             : debugJsInstance.inspectOpts.depth,
       }
     : {}
-  const logger = getDefaultLogger()
-  ReflectApply(logger.info, logger, [
-    util.formatWithOptions(inspectOpts, ...args),
-  ])
+  const log = logger()
+  ReflectApply(log.info, log, [util.formatWithOptions(inspectOpts, ...args)])
 }
 /* c8 ignore stop */
 

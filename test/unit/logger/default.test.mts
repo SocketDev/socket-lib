@@ -14,6 +14,7 @@ import { describe, expect, it } from 'vitest'
 
 describe('getDefaultLogger', () => {
   it('should return a Logger with dynamic log methods', () => {
+    // oxlint-disable-next-line socket/no-inline-logger -- Factory under test.
     const log = getDefaultLogger()
     // Logger methods are installed dynamically; verify core methods exist.
     expect(typeof log.log).toBe('function')
@@ -22,12 +23,15 @@ describe('getDefaultLogger', () => {
   })
 
   it('should return the same instance on multiple calls', () => {
+    // oxlint-disable-next-line socket/no-inline-logger -- Factory under test.
     const log1 = getDefaultLogger()
+    // oxlint-disable-next-line socket/no-inline-logger -- Factory under test.
     const log2 = getDefaultLogger()
     expect(log1).toBe(log2)
   })
 
   it('should be usable for logging', () => {
+    // oxlint-disable-next-line socket/no-inline-logger -- Factory under test.
     const log = getDefaultLogger()
     // Logger methods are defined dynamically, just verify the instance works
     expect(() => log.log('test')).not.toThrow()

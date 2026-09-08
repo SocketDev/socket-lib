@@ -18,6 +18,8 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { fail, report, reportLint, reportMod } from '../src/report.mts'
 
+const logger = getDefaultLogger()
+
 function captureStdout() {
   return vi.spyOn(process.stdout, 'write').mockImplementation(() => true)
 }
@@ -284,9 +286,7 @@ describe('reportMod diff preview', () => {
   it('renders a unified patch per planned rewrite during a dry run', () => {
     const absPath = tmpFile(PLAN_FILE, 'const a = items.map(fn)\n')
     captureStdout()
-    const log = vi
-      .spyOn(getDefaultLogger(), 'log')
-      .mockImplementation(() => undefined)
+    const log = vi.spyOn(logger, 'log').mockImplementation(() => undefined)
     reportMod(
       modResult([
         {
@@ -310,9 +310,7 @@ describe('reportMod diff preview', () => {
     // losing the whole report.
     const absPath = tmpFile(PLAN_FILE, 'const a = 1\n')
     captureStdout()
-    const log = vi
-      .spyOn(getDefaultLogger(), 'log')
-      .mockImplementation(() => undefined)
+    const log = vi.spyOn(logger, 'log').mockImplementation(() => undefined)
     reportMod(
       modResult([
         {
@@ -333,9 +331,7 @@ describe('reportMod diff preview', () => {
     // empty noise.
     const absPath = tmpFile(PLAN_FILE, 'const a = 1\n')
     captureStdout()
-    const log = vi
-      .spyOn(getDefaultLogger(), 'log')
-      .mockImplementation(() => undefined)
+    const log = vi.spyOn(logger, 'log').mockImplementation(() => undefined)
     reportMod(
       modResult([{ absPath, newSource: 'const a = 2\n', relPath: PLAN_FILE }]),
       false,
@@ -347,9 +343,7 @@ describe('reportMod diff preview', () => {
 
   it('tolerates a result carrying no plans array', () => {
     captureStdout()
-    const log = vi
-      .spyOn(getDefaultLogger(), 'log')
-      .mockImplementation(() => undefined)
+    const log = vi.spyOn(logger, 'log').mockImplementation(() => undefined)
     reportMod(modResult([]), false, false, true)
     expect(log).not.toHaveBeenCalled()
   })
