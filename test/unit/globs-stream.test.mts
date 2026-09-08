@@ -13,15 +13,48 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
+import { Readable } from 'node:stream'
 import { glob, globSync } from '../../src/globs/match.mjs'
 import { getGlobMatcher } from '../../src/globs/matcher.mjs'
 import { globStreamLicenses } from '../../src/globs/stream.mjs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { safeDelete } from '@socketsecurity/lib-stable/fs/safe'
 
-describe('globStreamLicenses', () => {
+describe('globStreamLicenses', { concurrent: false }, () => {
+  let licenseRoot: string
+  const streams: Array<ReturnType<typeof globStreamLicenses>> = []
+
+  beforeEach(() => {
+    licenseRoot = mkdtempSync(
+      path.join(os.tmpdir(), 'socket-lib-license-stream-'),
+    )
+    mkdirSync(path.join(licenseRoot, 'src'))
+    writeFileSync(path.join(licenseRoot, 'LICENSE'), 'Example license')
+    writeFileSync(path.join(licenseRoot, 'src', 'LICENSE'), 'Nested license')
+  })
+
+  afterEach(async () => {
+    for (let i = 0, { length } = streams; i < length; i += 1) {
+      const stream = streams[i]
+      if (stream instanceof Readable) {
+        stream.destroy()
+      }
+    }
+    streams.length = 0
+    await safeDelete(licenseRoot)
+  })
+
+  function createLicenseStream(
+    dirname: string,
+    options?: Parameters<typeof globStreamLicenses>[1] | undefined,
+  ) {
+    const stream = globStreamLicenses(dirname, options)
+    streams.push(stream)
+    return stream
+  }
+
   it('should return a readable stream', () => {
-    const stream = globStreamLicenses(process.cwd())
+    const stream = createLicenseStream(licenseRoot)
     expect(stream).toBeDefined()
     expect(typeof stream.on).toBe('function')
     expect(typeof stream.pipe).toBe('function')
@@ -29,7 +62,7 @@ describe('globStreamLicenses', () => {
 
   it('should stream license files', async () => {
     const files: string[] = []
-    const stream = globStreamLicenses(process.cwd(), { recursive: false })
+    const stream = createLicenseStream(licenseRoot, { recursive: false })
 
     await new Promise<void>((resolve, reject) => {
       stream.on('data', (file: string) => files.push(file))
@@ -41,18 +74,22 @@ describe('globStreamLicenses', () => {
   })
 
   it('should accept dirname parameter', () => {
-    expect(() => globStreamLicenses('.')).not.toThrow()
-    expect(() => globStreamLicenses('./src')).not.toThrow()
+    expect(() => createLicenseStream(licenseRoot)).not.toThrow()
+    expect(() =>
+      createLicenseStream(path.join(licenseRoot, 'src')),
+    ).not.toThrow()
   })
 
   it('should accept options parameter', () => {
-    expect(() => globStreamLicenses('.', {})).not.toThrow()
-    expect(() => globStreamLicenses('.', { recursive: true })).not.toThrow()
+    expect(() => createLicenseStream(licenseRoot, {})).not.toThrow()
+    expect(() =>
+      createLicenseStream(licenseRoot, { recursive: true }),
+    ).not.toThrow()
   })
 
   it('should handle ignoreOriginals option', async () => {
     const files: string[] = []
-    const stream = globStreamLicenses(process.cwd(), {
+    const stream = createLicenseStream(licenseRoot, {
       ignoreOriginals: true,
       recursive: false,
     })
@@ -69,7 +106,7 @@ describe('globStreamLicenses', () => {
 
   it('should handle recursive option', async () => {
     const files: string[] = []
-    const stream = globStreamLicenses(process.cwd(), { recursive: true })
+    const stream = createLicenseStream(licenseRoot, { recursive: true })
 
     await new Promise<void>((resolve, reject) => {
       stream.on('data', (file: string) => files.push(file))
@@ -77,12 +114,17 @@ describe('globStreamLicenses', () => {
       stream.on('error', reject)
     })
 
-    expect(Array.isArray(files)).toBe(true)
+    expect(files.toSorted()).toEqual(
+      [
+        path.join(licenseRoot, 'LICENSE'),
+        path.join(licenseRoot, 'src', 'LICENSE'),
+      ].toSorted(),
+    )
   })
 
   it('should handle custom ignore patterns as array', async () => {
     const files: string[] = []
-    const stream = globStreamLicenses(process.cwd(), {
+    const stream = createLicenseStream(licenseRoot, {
       ignore: ['**/test/**', '**/node_modules/**'],
       recursive: false,
     })
@@ -97,28 +139,28 @@ describe('globStreamLicenses', () => {
   })
 
   it('should handle absolute option', () => {
-    const stream = globStreamLicenses('.', { absolute: false })
+    const stream = createLicenseStream(licenseRoot, { absolute: false })
     expect(stream).toBeDefined()
   })
 
   it('should handle dot option', () => {
-    const stream = globStreamLicenses('.', { dot: true })
+    const stream = createLicenseStream(licenseRoot, { dot: true })
     expect(stream).toBeDefined()
   })
 
   it('should handle deep option', () => {
-    const stream = globStreamLicenses('.', { deep: 3 })
+    const stream = createLicenseStream(licenseRoot, { deep: 3 })
     expect(stream).toBeDefined()
   })
 
   it('should handle cwd option', () => {
-    const stream = globStreamLicenses('.', { cwd: process.cwd() })
+    const stream = createLicenseStream(licenseRoot, { cwd: licenseRoot })
     expect(stream).toBeDefined()
   })
 
   it('should handle multiple options together', async () => {
     const files: string[] = []
-    const stream = globStreamLicenses(process.cwd(), {
+    const stream = createLicenseStream(licenseRoot, {
       recursive: true,
       ignoreOriginals: true,
       dot: true,
@@ -139,7 +181,7 @@ describe('globStreamLicenses', () => {
   })
 
   it('should handle empty options', () => {
-    const stream = globStreamLicenses('.')
+    const stream = createLicenseStream(licenseRoot)
     expect(stream).toBeDefined()
     expect(typeof stream.on).toBe('function')
   })
