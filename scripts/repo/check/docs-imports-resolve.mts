@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 /*
- * @file Gate: every `@socketsecurity/lib` import { getDefaultFormatting, stringifyWithFormatting } from '@socketsecurity/lib-stable/json/format'
-import shown in the docs resolves.
+ * @file Gate: every `@socketsecurity/lib` import shown in the docs resolves.
  *   A doc example is the first code a consumer runs, so a subpath missing from
  *   the exports map, or a named import the target module does not export, is a
  *   broken instruction rather than a typo. Four such breaks shipped at once:
@@ -22,6 +21,10 @@ import shown in the docs resolves.
  *   Usage: node scripts/repo/check/docs-imports-resolve.mts [--json]
  */
 
+import {
+  getDefaultFormatting,
+  stringifyWithFormatting,
+} from '@socketsecurity/lib-stable/json/format'
 import { globSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
