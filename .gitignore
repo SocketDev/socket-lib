@@ -1954,6 +1954,14 @@ opencode.json
 .claude/skills/fleet/driving-cursor-bugbot/lib/bugbot.mts
 .claude/skills/fleet/driving-cursor-bugbot/reference.md
 .claude/skills/fleet/extracting-design-systems/SKILL.md
+.claude/skills/fleet/fuzzing/SKILL.md
+.claude/skills/fleet/fuzzing/references/cpp.md
+.claude/skills/fleet/fuzzing/references/escalation-engines.md
+.claude/skills/fleet/fuzzing/references/go.md
+.claude/skills/fleet/fuzzing/references/high-value-targets.md
+.claude/skills/fleet/fuzzing/references/javascript-typescript.md
+.claude/skills/fleet/fuzzing/references/lock-step.md
+.claude/skills/fleet/fuzzing/references/rust.md
 .claude/skills/fleet/gh-stack/SKILL.md
 .claude/skills/fleet/gh-stack/reference.md
 .claude/skills/fleet/greening-ci-local/SKILL.md
@@ -2658,6 +2666,7 @@ docs/fleet/development/documentation.md
 docs/fleet/development/settings.md
 docs/fleet/development/setup.md
 docs/fleet/development/upgrades.md
+docs/fleet/fuzzing/practices.md
 docs/fleet/perf/async-work.md
 docs/fleet/perf/caching.md
 docs/fleet/perf/practices.md
@@ -3271,6 +3280,9 @@ scripts/fleet/cover/shards-inventory.mts
 scripts/fleet/cover/shards-paths.mts
 scripts/fleet/cover/shards-reporter.mts
 scripts/fleet/cover/shards.mts
+scripts/fleet/cover/types/analysis.mts
+scripts/fleet/cover/types/report.mts
+scripts/fleet/cover/types/run.mts
 scripts/fleet/crate-release-sha.mts
 scripts/fleet/cross-cli/fleet-fork-detect.mts
 scripts/fleet/cross-cli/pretooluse-hook.mts

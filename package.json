@@ -3978,7 +3978,17 @@
     "context:ratchet": "node scripts/fleet/check/context-cost-is-under-the-ratchet.mts",
     "gen:glyph": "node scripts/fleet/gen/glyph.mts",
     "repo:map": "node scripts/fleet/gen/repo-map.mts",
-    "spend-usage": "node scripts/fleet/spend-usage.mts"
+    "spend-usage": "node scripts/fleet/spend-usage.mts",
+    "ai-balancer": "node scripts/fleet/ai/balancer/launch.mts",
+    "ai-balancer:auth": "node scripts/fleet/ai/balancer/login.mts",
+    "ai-balancer:refresh": "node scripts/fleet/ai/balancer/service.mts refresh",
+    "ai-balancer:service": "node scripts/fleet/ai/balancer/service.mts",
+    "ai:read": "node scripts/fleet/ai/bounded-reader.mts",
+    "check:workspace-installation": "node scripts/fleet/check/workspace-installation.mts",
+    "cover:types": "node scripts/fleet/cover/types/run.mts",
+    "setup:ai-clients": "node scripts/fleet/setup/ai-clients.mts",
+    "npm:inventory": "node scripts/fleet/registry-infra/npm/account-inventory-read.mts",
+    "soak:check": "node scripts/fleet/check/soak-time-is-consistent.mts"
   },
   "devDependencies": {
     "@babel/core": "7.29.7",
