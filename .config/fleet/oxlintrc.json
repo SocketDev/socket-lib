@@ -168,6 +168,7 @@
     "socket/prefer-shell-win32": "error",
     "socket/prefer-socket-lib-compare-str": "error",
     "socket/prefer-socket-lib-error-message": "error",
+    "socket/prefer-socket-lib-json-format": "error",
     "socket/prefer-socket-lib-normalize-path": "error",
     "socket/prefer-socket-lib-predicates": "error",
     "socket/prefer-spawn-over-execsync": "error",

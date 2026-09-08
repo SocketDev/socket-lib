@@ -1869,7 +1869,9 @@ opencode.json
 .claude/hooks/fleet/zsh-word-split-guard/index.mts
 .claude/hooks/fleet/zsh-word-split-guard/package.json
 .claude/hooks/fleet/zsh-word-split-guard/tsconfig.json
+.claude/rules/fleet/check-names.md
 .claude/rules/fleet/fail-fast-linter-count-is-unknowable.md
+.claude/rules/fleet/file-deletion.md
 .claude/rules/fleet/lint-parity-across-languages.md
 .claude/rules/fleet/match-error-codes-not-messages.md
 .claude/rules/fleet/no-deferred-residue.md
@@ -1877,6 +1879,7 @@ opencode.json
 .claude/rules/fleet/prevent-spontaneous-agent-spawn.md
 .claude/rules/fleet/prose-style-and-doctrine.md
 .claude/rules/fleet/shared-module-is-named-util.md
+.claude/rules/fleet/shared-modules-are-named-util.md
 .claude/rules/fleet/task-scope.md
 .claude/rules/fleet/verify-state-before-acting.md
 .claude/skills/fleet/_shared/compound-lessons.md
@@ -2051,6 +2054,7 @@ opencode.json
 .claude/skills/fleet/researching-recency/reference.md
 .claude/skills/fleet/reviewing-code/SKILL.md
 .claude/skills/fleet/reviewing-code/run.mts
+.claude/skills/fleet/reviewing-test-quality/SKILL.md
 .claude/skills/fleet/reviewing-web-interfaces/SKILL.md
 .claude/skills/fleet/reviewing-web-interfaces/references/review-checklist.md
 .claude/skills/fleet/reviewing-web-interfaces/references/shadscan-audit.md
@@ -2365,6 +2369,7 @@ opencode.json
 .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-compare-str/package.json
 .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-error-message/index.mts
 .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-error-message/package.json
+.config/fleet/oxlint-plugin/fleet/prefer-socket-lib-json-format/index.mts
 .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-normalize-path/index.mts
 .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-normalize-path/package.json
 .config/fleet/oxlint-plugin/fleet/prefer-socket-lib-predicates/index.mts
@@ -2498,6 +2503,7 @@ docs/fleet/agents.md/c8-ignore-directives.md
 docs/fleet/agents.md/cascade-file-classification.md
 docs/fleet/agents.md/cascade-is-a-unit.md
 docs/fleet/agents.md/cascaded-hook-catalog.md
+docs/fleet/agents.md/check-names.md
 docs/fleet/agents.md/ci-env-is-runner-only.md
 docs/fleet/agents.md/claude-md-is-a-bullet-index.md
 docs/fleet/agents.md/code-first-then-ai.md
@@ -2525,6 +2531,7 @@ docs/fleet/agents.md/error-messages.md
 docs/fleet/agents.md/export-and-no-any.md
 docs/fleet/agents.md/fable-fallback.md
 docs/fleet/agents.md/feature-completeness.md
+docs/fleet/agents.md/file-deletion.md
 docs/fleet/agents.md/file-size.md
 docs/fleet/agents.md/fix-at-the-source-not-the-mirror.md
 docs/fleet/agents.md/fix-forward-not-revert.md
@@ -2612,6 +2619,7 @@ docs/fleet/agents.md/security-stack.md
 docs/fleet/agents.md/self-describing-scripts.md
 docs/fleet/agents.md/sfw-persistent-ca.md
 docs/fleet/agents.md/shared-module-is-named-util.md
+docs/fleet/agents.md/shared-modules-are-named-util.md
 docs/fleet/agents.md/shared-workflow-cascade.md
 docs/fleet/agents.md/single-gitignore.md
 docs/fleet/agents.md/single-source-of-truth.md
@@ -2645,6 +2653,23 @@ docs/fleet/agents.md/workspace-installation.md
 docs/fleet/agents.md/worktree-hygiene.md
 docs/fleet/agents.md/writing-skills-well.md
 docs/fleet/ai-balancer.md
+docs/fleet/development/commands.md
+docs/fleet/development/documentation.md
+docs/fleet/development/settings.md
+docs/fleet/development/setup.md
+docs/fleet/development/upgrades.md
+docs/fleet/perf/async-work.md
+docs/fleet/perf/caching.md
+docs/fleet/perf/practices.md
+docs/fleet/perf/profiling.md
+docs/fleet/testing/coverage.md
+docs/fleet/testing/isolation.md
+docs/fleet/testing/layout.md
+docs/fleet/testing/performance.md
+docs/fleet/testing/practices.md
+docs/fleet/testing/quality.md
+docs/fleet/workflows/practices.md
+docs/fleet/workflows/publishing.md
 docs/references/fleet/sfw-local-install.md
 patches/brace-expansion@5.0.9.patch
 patches/minimatch@10.2.6.patch
@@ -2884,6 +2909,7 @@ scripts/fleet/check/cascaded-fleet-trees-have-no-tests.mts
 scripts/fleet/check/catalog-pins-are-not-deprecated.mts
 scripts/fleet/check/changelog-is-commit-derived.mts
 scripts/fleet/check/check-names-are-assertions.mts
+scripts/fleet/check/check-names.mts
 scripts/fleet/check/check-registrations-resolve.mts
 scripts/fleet/check/checks-are-wired.mts
 scripts/fleet/check/checks-carry-no-burn-down-lists.mts
@@ -3017,6 +3043,7 @@ scripts/fleet/check/mutating-skills-have-model.mts
 scripts/fleet/check/name-rename-is-complete.mts
 scripts/fleet/check/native-sources-are-doctrine-clean.mts
 scripts/fleet/check/native-tests-are-network-off.mts
+scripts/fleet/check/no-burn-down-lists.mts
 scripts/fleet/check/node-modules-symlink-is-ignored.mts
 scripts/fleet/check/npm-package-page-is-visible.mts
 scripts/fleet/check/npm-packages-are-bot-co-owned.mts
@@ -3678,6 +3705,7 @@ scripts/fleet/resolve-release-tag.d.mts
 scripts/fleet/resolve-release-tag.mjs
 scripts/fleet/resolve-security-pin.mts
 scripts/fleet/review-action-ports.mts
+scripts/fleet/review-test-quality.mts
 scripts/fleet/rust-target-sweep.mts
 scripts/fleet/scanning-quality/findings.mts
 scripts/fleet/scanning-vulns/cli.mts
