@@ -162,6 +162,26 @@
         "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
       },
       {
+        "leaf": "temporal/instant",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "temporal/now",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "temporal/slots",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "temporal/system",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
+        "leaf": "temporal/temporal",
+        "reason": "Exposed by expose-leaf: reachable from shipped code, or needed by a repo-local consumer. Neither imports the leaf by its published specifier, so the fleet-usage leg scores it unused."
+      },
+      {
         "leaf": "yaml/edit",
         "reason": "EditableYaml. Waits on the fleet migration of regex-based pnpm-workspace.yaml edits to a comment-preserving editor."
       },
@@ -405,11 +425,6 @@
         "stdio/progress",
         "stdio/stdout",
         "strings/search",
-        "temporal/instant",
-        "temporal/now",
-        "temporal/slots",
-        "temporal/system",
-        "temporal/temporal",
         "versions/modify"
       ],
       "scannedRoster": [
@@ -468,9 +483,7 @@
   },
   "coverage": {
     "exclude": {
-      "add": [
-        "src/perf/**"
-      ]
+      "add": ["src/perf/**"]
     }
   },
   "lint": {
@@ -497,9 +510,6 @@
   },
   "docs": {
     "llmsTxt": true
-  },
-  "vitest": {
-    "unitBudgetMs": 600000
   },
   "bornTested": {
     "grandfathered": [
