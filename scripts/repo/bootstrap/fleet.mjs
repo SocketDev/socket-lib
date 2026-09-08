@@ -951,6 +951,7 @@ const ALWAYS_TRACKED_PREFIXES = [
   'assets/fleet/socket-combomark-dark.svg',
   'assets/fleet/socket-combomark-light.svg',
   'patches/run-local-ci@0.18.1.patch',
+  'patches/vitest@5.0.0.patch',
   'scripts/repo/bootstrap/',
 ]
 /**

@@ -2641,6 +2641,7 @@ docs/fleet/agents.md/vocabulary.md
 docs/fleet/agents.md/wheelhouse-controlled-drift.md
 docs/fleet/agents.md/windows-gotchas.md
 docs/fleet/agents.md/workflow-run-retention.md
+docs/fleet/agents.md/workspace-installation.md
 docs/fleet/agents.md/worktree-hygiene.md
 docs/fleet/agents.md/writing-skills-well.md
 docs/fleet/ai-balancer.md
@@ -3164,6 +3165,7 @@ scripts/fleet/check/workflow-token-is-read-only.mts
 scripts/fleet/check/workflows-have-no-retired-secrets.mts
 scripts/fleet/check/working-tree-is-clean.mts
 scripts/fleet/check/workspace-importers-have-manifests.mts
+scripts/fleet/check/workspace-installation.mts
 scripts/fleet/checks/repo-filter.mts
 scripts/fleet/checks/repo.mts
 scripts/fleet/checks/steps-hooks.mts
@@ -3209,9 +3211,11 @@ scripts/fleet/constants/test-isolation.mts
 scripts/fleet/context-cost.mts
 scripts/fleet/coordination/claim-tools.mts
 scripts/fleet/coordination/claim.mts
+scripts/fleet/cover-aggregate.mts
 scripts/fleet/cover-allowance.mts
 scripts/fleet/cover-report.mts
 scripts/fleet/cover-run.mts
+scripts/fleet/cover-shard.mts
 scripts/fleet/cover.mts
 scripts/fleet/cover/budget-allowances.mts
 scripts/fleet/cover/bun-lane.mts
@@ -3232,6 +3236,14 @@ scripts/fleet/cover/run.mts
 scripts/fleet/cover/rust-lane.mts
 scripts/fleet/cover/scope.mts
 scripts/fleet/cover/scratch-isolation.mts
+scripts/fleet/cover/shard-gate.mts
+scripts/fleet/cover/shard-run.mts
+scripts/fleet/cover/shards-coverage.mts
+scripts/fleet/cover/shards-discovery.mts
+scripts/fleet/cover/shards-inventory.mts
+scripts/fleet/cover/shards-paths.mts
+scripts/fleet/cover/shards-reporter.mts
+scripts/fleet/cover/shards.mts
 scripts/fleet/crate-release-sha.mts
 scripts/fleet/cross-cli/fleet-fork-detect.mts
 scripts/fleet/cross-cli/pretooluse-hook.mts
@@ -3417,6 +3429,7 @@ scripts/fleet/lib/telemetry-payload-shapes.mts
 scripts/fleet/lib/telemetry-scan.mts
 scripts/fleet/lib/unit-test-scan.mts
 scripts/fleet/lib/verify-release-hashes.mts
+scripts/fleet/lib/workspace-installation.mts
 scripts/fleet/lib/workspace-yaml.mts
 scripts/fleet/lint-actions.mts
 scripts/fleet/lint-cpp.mts
@@ -3815,9 +3828,13 @@ scripts/fleet/update/model-pricing.mts
 scripts/fleet/update/node.mts
 scripts/fleet/update/patch-rekey.mts
 scripts/fleet/update/patched-deps.mts
+scripts/fleet/util/coverage-children.mts
+scripts/fleet/util/coverage-functions.mts
 scripts/fleet/util/coverage-locations.mts
 scripts/fleet/util/coverage-merge.mts
 scripts/fleet/util/coverage-normalize.mts
+scripts/fleet/util/coverage-v8.d.mts
+scripts/fleet/util/coverage-v8.mjs
 scripts/fleet/util/multi-package-publish-verify.mts
 scripts/fleet/util/multi-package-publish.mts
 scripts/fleet/util/napi-targets.mts
@@ -3848,6 +3865,7 @@ test/fleet/_shared/lib/fake-git.mts
 test/fleet/_shared/lib/git-fixture.mts
 test/fleet/_shared/lib/isolate-home-env.mts
 test/fleet/_shared/lib/matchers.mts
+test/fleet/_shared/lib/network-preload.mjs
 test/fleet/_shared/lib/output.mts
 test/fleet/_shared/lib/package-bin.mts
 test/fleet/_shared/lib/platform.mts
