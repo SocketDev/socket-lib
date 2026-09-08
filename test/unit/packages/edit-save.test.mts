@@ -4,6 +4,10 @@
  *   edit.test.mts to keep each file under the line-count cap.
  */
 
+import {
+  getDefaultFormatting,
+  stringifyWithFormatting,
+} from '../../../src/json/format.mjs'
 import { promises as fs } from 'node:fs'
 import path from 'node:path'
 
@@ -216,7 +220,7 @@ describe('packages/editable persistence', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2) + '\n',
+          stringifyWithFormatting(pkgData, getDefaultFormatting()),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()
@@ -318,7 +322,7 @@ describe('packages/editable persistence', () => {
         const pkgData = { name: 'test', version: '1.0.0' }
         await fs.writeFile(
           path.join(tmpDir, 'package.json'),
-          JSON.stringify(pkgData, null, 2) + '\n',
+          stringifyWithFormatting(pkgData, getDefaultFormatting()),
         )
 
         const EditablePackageJson = getEditablePackageJsonClass()

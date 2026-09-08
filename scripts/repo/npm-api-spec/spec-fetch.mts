@@ -11,6 +11,10 @@
  *   says which one it used.
  */
 
+import {
+  getDefaultFormatting,
+  stringifyWithFormatting,
+} from '@socketsecurity/lib-stable/json/format'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 
@@ -241,7 +245,10 @@ export async function resolveSpecHead(
     mkdirSync(cacheDir, { recursive: true })
     writeFileSync(
       headFile,
-      `${JSON.stringify({ readAt: Date.now(), sha }, undefined, 2)}\n`,
+      stringifyWithFormatting(
+        { readAt: Date.now(), sha },
+        getDefaultFormatting(),
+      ),
     )
   }
   return sha

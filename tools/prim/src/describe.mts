@@ -4,6 +4,10 @@
  *   views of the interface cannot drift apart unnoticed.
  */
 
+import {
+  getDefaultFormatting,
+  stringifyWithFormatting,
+} from '../../../src/json/format.mjs'
 import { buildCliManifest } from '../../../src/exe/argv/meta.mjs'
 import primPackageJson from '../package.json' with { type: 'json' }
 
@@ -218,9 +222,8 @@ export const MANIFEST = buildCliManifest({
  * script answers with.
  */
 export function renderDescribeHelpJson(): string {
-  return `${JSON.stringify(
+  return stringifyWithFormatting(
     { describe: MANIFEST.description, help: HELP },
-    undefined,
-    2,
-  )}\n`
+    getDefaultFormatting(),
+  )
 }

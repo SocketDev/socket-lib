@@ -10,6 +10,10 @@
  *   touches a real settings file.
  */
 
+import {
+  getDefaultFormatting,
+  stringifyWithFormatting,
+} from '@socketsecurity/lib-stable/json/format'
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import path from 'node:path'
@@ -42,7 +46,10 @@ function setupRepo(): string {
   const dir = mkdtempSync(path.join(os.tmpdir(), 'build-stubs-settings-'))
   const settings = memberSettingsPath(dir)
   mkdirSync(path.dirname(settings), { recursive: true })
-  writeFileSync(settings, `${JSON.stringify(SETTINGS, null, 2)}\n`)
+  writeFileSync(
+    settings,
+    stringifyWithFormatting(SETTINGS, getDefaultFormatting()),
+  )
   return dir
 }
 

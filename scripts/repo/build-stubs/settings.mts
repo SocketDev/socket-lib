@@ -8,6 +8,10 @@
  *   checks agreeing on where the data lives.
  */
 
+import {
+  getDefaultFormatting,
+  stringifyWithFormatting,
+} from '@socketsecurity/lib-stable/json/format'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 
@@ -121,7 +125,10 @@ export function addKeptLeaves(
   }
   writeFileSync(
     settingsPath,
-    `${JSON.stringify({ ...parsed, buildStubs: section }, null, 2)}\n`,
+    stringifyWithFormatting(
+      { ...parsed, buildStubs: section },
+      getDefaultFormatting(),
+    ),
   )
 }
 
@@ -155,6 +162,9 @@ export function writeUnexposedLeaves(
   }
   writeFileSync(
     settingsPath,
-    `${JSON.stringify({ ...parsed, buildStubs: section }, null, 2)}\n`,
+    stringifyWithFormatting(
+      { ...parsed, buildStubs: section },
+      getDefaultFormatting(),
+    ),
   )
 }

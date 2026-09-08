@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /*
- * @file Gate: every `@socketsecurity/lib` import shown in the docs resolves.
+ * @file Gate: every `@socketsecurity/lib` import { getDefaultFormatting, stringifyWithFormatting } from '@socketsecurity/lib-stable/json/format'
+import shown in the docs resolves.
  *   A doc example is the first code a consumer runs, so a subpath missing from
  *   the exports map, or a named import the target module does not export, is a
  *   broken instruction rather than a typo. Four such breaks shipped at once:
@@ -195,7 +196,9 @@ export async function scanDocs(
 async function main(): Promise<number> {
   const findings = await scanDocs()
   if (process.argv.includes('--json')) {
-    process.stdout.write(`${JSON.stringify({ findings }, undefined, 2)}\n`)
+    process.stdout.write(
+      stringifyWithFormatting({ findings }, getDefaultFormatting()),
+    )
     return findings.length === 0 ? 0 : 1
   }
   if (findings.length === 0) {
