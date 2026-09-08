@@ -12,6 +12,8 @@
 
 import process from 'node:process'
 
+process.env['SOCKET_GITHUB_RETRY_BASE_DELAY_MS'] = '0'
+
 // Skip `describeNetworkOnly` / `itNetworkOnly` suites by default. The fleet
 // setup fails network closed (nock.disableNetConnect), so a live-registry suite
 // that ran here would throw; `SOCKET_LIB_RUN_NETWORK_TESTS=1` opts a lane in for

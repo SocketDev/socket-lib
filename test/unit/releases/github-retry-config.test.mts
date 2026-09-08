@@ -5,7 +5,7 @@
  *   `process.env` per case rather than re-importing the module. The frozen
  *   GITHUB_RETRY_CONFIG snapshots the delay at load time; we assert its fixed
  *   invariants (backoffFactor / retries / frozen / null proto) separately.
- *   Note: the vitest config sets SOCKET_GITHUB_RETRY_BASE_DELAY_MS=0 globally
+ *   Note: the repo test setup sets SOCKET_GITHUB_RETRY_BASE_DELAY_MS=0 globally
  *   so the slow GitHub-API retry tests don't burn real wallclock. Each case
  *   here sets the env explicitly and restores it after.
  */
@@ -75,8 +75,8 @@ describe('GITHUB_RETRY_CONFIG', () => {
     expect(GITHUB_RETRY_CONFIG.retries).toBe(2)
   })
 
-  it('exposes a numeric baseDelayMs', () => {
-    expect(typeof GITHUB_RETRY_CONFIG.baseDelayMs).toBe('number')
+  it('uses the test setup delay before module initialization', () => {
+    expect(GITHUB_RETRY_CONFIG.baseDelayMs).toBe(0)
   })
 
   it('is frozen (callers must not mutate the shared config)', () => {
