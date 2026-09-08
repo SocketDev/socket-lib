@@ -12,6 +12,15 @@
 import { pRetry } from '../../src/promises/retry.mjs'
 import { describe, expect, it, vi } from 'vitest'
 
+vi.mock(import('../../src/promises/shared.mjs'), async importOriginal => {
+  const original = await importOriginal()
+  const timers = original.getTimers()
+  const setTimeout: typeof timers.setTimeout = (delay, value, options) => {
+    return timers.setTimeout(Math.min(delay ?? 0, 0), value, options)
+  }
+  return { ...original, getTimers: () => ({ ...timers, setTimeout }) }
+})
+
 describe('promises', () => {
   describe('pRetry', () => {
     it('should return result on success', async () => {
