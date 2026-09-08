@@ -107,6 +107,9 @@ settings:
 
 catalogs:
   default:
+    '@bcoe/v8-coverage':
+      specifier: 1.0.2
+      version: 1.0.2
     '@mdn/browser-compat-data':
       specifier: 8.1.0
       version: 8.1.0
@@ -152,6 +155,9 @@ catalogs:
     '@vitiate/core':
       specifier: 0.3.1
       version: 0.3.1
+    ast-v8-to-istanbul:
+      specifier: 1.0.5
+      version: 1.0.5
     c8:
       specifier: 12.0.0
       version: 12.0.0
@@ -401,6 +407,9 @@ importers:
       '@babel/types':
         specifier: 7.29.8
         version: 7.29.8
+      '@bcoe/v8-coverage':
+        specifier: 'catalog:'
+        version: 1.0.2
       '@inquirer/checkbox':
         specifier: 5.2.2
         version: 5.2.2(@types/node@26.4.0)
@@ -500,6 +509,9 @@ importers:
       adm-zip:
         specifier: 0.6.0
         version: 0.6.0
+      ast-v8-to-istanbul:
+        specifier: 'catalog:'
+        version: 1.0.5
       c8:
         specifier: 'catalog:'
         version: 12.0.0
@@ -8088,29 +8100,21 @@ snapshots:
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
 
-  '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-x64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-x64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-win32-x64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-win32-x64@0.2.141': {}
 
   '@anthropic-ai/claude-agent-sdk@0.2.141(supports-color@10.2.2)(zod@4.4.3)':
     dependencies:
