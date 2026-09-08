@@ -9,17 +9,35 @@
 
 import process from 'node:process'
 
-import { describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 // @ts-expect-error - no type declarations
 import picomatch from 'picomatch'
 
 import { clearGitHubTokenCache } from '../../../src/github/token.mjs'
+import { spawn } from '../../../src/process/spawn/child.mjs'
 import {
   getAuthHeaders,
   getAuthHeadersWithFallback,
 } from '../../../src/releases/github-auth.mjs'
 import { SOCKET_BTM_REPO } from '../../../src/releases/socket-btm.mjs'
+
+vi.mock(import('../../../src/process/spawn/child.mjs'))
+
+beforeEach(() => {
+  vi.stubEnv('GH_TOKEN', undefined)
+  vi.stubEnv('GITHUB_TOKEN', undefined)
+  clearGitHubTokenCache()
+  vi.mocked(spawn).mockRejectedValue(
+    new Error('Example credential unavailable'),
+  )
+})
+
+afterEach(() => {
+  vi.unstubAllEnvs()
+  vi.mocked(spawn).mockReset()
+  clearGitHubTokenCache()
+})
 
 describe('releases/github-auth', () => {
   describe('SOCKET_BTM_REPO', () => {
@@ -224,11 +242,10 @@ describe('releases/github-auth getAuthHeadersWithFallback', () => {
     const headers = await getAuthHeadersWithFallback()
     expect(headers['Authorization']).not.toBe('Bearer ')
     expect(headers['Authorization']).not.toBe('Bearer undefined')
+    expect(headers['Authorization']).toBeUndefined()
   })
 
   it('reaches sources the env-only resolver cannot', async () => {
-    // Contract difference, asserted structurally: whenever the env is empty and
-    // the fallback still finds a credential, only the async resolver reports it.
     const saved = {
       gh: process.env['GH_TOKEN'],
       gt: process.env['GITHUB_TOKEN'],
@@ -237,10 +254,23 @@ describe('releases/github-auth getAuthHeadersWithFallback', () => {
     delete process.env['GITHUB_TOKEN']
     try {
       clearGitHubTokenCache()
+      vi.mocked(spawn).mockResolvedValueOnce({
+        cmd: 'git',
+        args: ['config', 'github.token'],
+        code: 0,
+        // oxlint-disable-next-line socket/prefer-undefined-over-null -- spawn results use null when no signal terminates the child.
+        signal: null,
+        stdout: 'example-git-token\n',
+        stderr: '',
+      })
       expect(getAuthHeaders()['Authorization']).toBe(undefined)
       const withFallback = await getAuthHeadersWithFallback()
-      const auth = withFallback['Authorization']
-      expect(auth === undefined || auth.startsWith('Bearer ')).toBe(true)
+      expect(withFallback['Authorization']).toBe('Bearer example-git-token')
+      expect(spawn).toHaveBeenCalledExactlyOnceWith(
+        'git',
+        ['config', 'github.token'],
+        { stdio: 'pipe' },
+      )
     } finally {
       if (saved.gh !== undefined) {
         process.env['GH_TOKEN'] = saved.gh
