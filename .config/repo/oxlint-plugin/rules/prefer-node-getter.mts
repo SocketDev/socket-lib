@@ -144,7 +144,7 @@ const rule = {
       return {}
     }
     return {
-      ImportDeclaration(node: AstNode) {
+      ImportDeclaration(node: AstNode<'ImportDeclaration'>) {
         const source = node.source?.value
         if (typeof source !== 'string') {
           return
