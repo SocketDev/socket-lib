@@ -3967,7 +3967,6 @@
     "lint:js": "node scripts/fleet/lint.mts",
     "gh:auth": "node scripts/fleet/gh-auth.mts",
     "offload:model": "node scripts/fleet/offload-model.mts",
-    "setup:fireconnect": "node scripts/fleet/setup/fireconnect.mts",
     "setup:offload-providers": "node scripts/fleet/setup/offload-providers.mts",
     "backup": "node scripts/fleet/backup-work.mts",
     "sync-global-hooks": "node scripts/fleet/sync-global-hooks.mts",
@@ -3977,7 +3976,6 @@
     "context:cost": "node scripts/fleet/context-cost.mts",
     "context:ratchet": "node scripts/fleet/check/context-cost-is-under-the-ratchet.mts",
     "gen:glyph": "node scripts/fleet/gen/glyph.mts",
-    "mcp:profile": "node scripts/fleet/mcp/profile.mts",
     "repo:map": "node scripts/fleet/gen/repo-map.mts"
   },
   "devDependencies": {

@@ -180,28 +180,28 @@
       ],
       "description": "uv — Astral Python package/project manager (pinned, SRI-verified)",
       "repository": "github:astral-sh/uv",
-      "version": "0.12.7",
+      "version": "0.12.8",
       "binaryName": "uv",
       "platforms": {
         "darwin-arm64": {
           "asset": "uv-aarch64-apple-darwin.tar.gz",
-          "integrity": "sha512-//y39pP48mmEfJ4y0arOqB/NUu7p0ByMVpUh7FdHyfUYcrKccWbNDaEZDeDfZGJo+TuO4GKrQkSoWr3m8H50wQ=="
+          "integrity": "sha512-mxKACg22ALu6YSyQRIifXjEtmOULwsQiNTT34sckQUhJoMxfJokHL8IeFyDyEG++AorMGtsdjzqUzXRpUdF1uQ=="
         },
         "darwin-x64": {
           "asset": "uv-x86_64-apple-darwin.tar.gz",
-          "integrity": "sha512-jxI/QHy4fwyNe7yvzre8xcclVAip9a1Jvk19EdhE2pEHQAIEjYtOy5Ol6nKUhc6ypRPU8/p0hMib+dM/Wvi8Ow=="
+          "integrity": "sha512-LaIX3vLiqs1KVVHEIRkADG21uDxANGz3CWZmj7gCnlwafHJmGs9xIizKbWAtL2RZDS4P1BZQxq2PP923xLOKfg=="
         },
         "linux-arm64": {
           "asset": "uv-aarch64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-l15YMZfGCNMNQvK/J14Ny6lHAgv2yuOzPaw+OD8pmDE35t7jENFq0HUNW89l9HCv4q8rIiB4kG8Da5VGBCz/Mw=="
+          "integrity": "sha512-Yyr1MJSMv3X9zH1Om5p6nFnkIeiyC+CL2EeC5yIT3l+4GT6Ym8o68NFrRzwNSPIBZrtGE7nZRxqDksF2WPyHkg=="
         },
         "linux-x64": {
           "asset": "uv-x86_64-unknown-linux-gnu.tar.gz",
-          "integrity": "sha512-iypkBjnn+GvivDSc/eXxKihJJT1Q9YJhNGchKfnSvTKnpzBEnw6SdGnfagAvOTBk1bvZHDYfWIheRV88aYKiVg=="
+          "integrity": "sha512-sSzyI7T2TSw32n5F3Qks+oPG9VwMwi97GmalXPKa7YrBtRc4MX6YINwL53gdJo96n3AvCrO3XzvAj+8QP69djQ=="
         },
         "win32-x64": {
           "asset": "uv-x86_64-pc-windows-msvc.zip",
-          "integrity": "sha512-B+R5J3VoOb7hesOCJHbT2ohQbGMiPcBOCPi+FWHuAFOJVfhHLEbAXzm/uQ46jMmvAfKTcC+u4X1tws/rIreXaw=="
+          "integrity": "sha512-TYAiHQd7ElvH8s8t819rlW4nOpuMCgEV2s/HWN1rj7N+jdx7Koact1+ItDYXQgKxir+J36+lDWTyRGxRgS9QIw=="
         }
       },
       "origin": "gh-asset"
