@@ -12,7 +12,7 @@
 const SYM_SUCCESS = '✓' // oxlint-disable-line socket/no-status-emoji -- canonical logger owner
 const SYM_FAIL = '✕' // oxlint-disable-line socket/no-status-emoji -- canonical logger owner
 const SYM_WARN = '⚠' // oxlint-disable-line socket/no-status-emoji -- canonical logger owner
-const SYM_INFO = 'ℹ' // oxlint-disable-line socket/no-status-emoji -- canonical logger owner
+const SYM_INFO = 'ⓘ' // oxlint-disable-line socket/no-status-emoji -- canonical logger owner
 
 export class Logger {
   log(message: unknown, ...args: unknown[]): this {
