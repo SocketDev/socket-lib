@@ -236,24 +236,30 @@ describe('pAllKeyed — spec conformance', () => {
   })
 
   it('runs values in parallel, not as a waterfall', async () => {
-    const order: string[] = []
-    function step(name: string, ms: number): Promise<string> {
-      return new Promise(resolve => {
-        setTimeout(() => {
-          order.push(name)
-          resolve(name)
-        }, minTimerQuantum(ms))
-      })
+    const started: string[] = []
+    const slow = Promise.withResolvers<string>()
+    const fast = Promise.withResolvers<string>()
+    function step(name: string, promise: Promise<string>) {
+      return {
+        // oxlint-disable-next-line unicorn/no-thenable -- Observe subscription.
+        then(resolve: (value: string) => void) {
+          started.push(name)
+          return promise.then(resolve)
+        },
+      }
     }
-    const started = Date.now()
-    await pAllKeyed({
-      slow: step('slow', 30),
-      fast: step('fast', 5),
+    const result = pAllKeyed({
+      slow: step('slow', slow.promise),
+      fast: step('fast', fast.promise),
     })
-    // A waterfall would run slow (30ms) THEN fast (5ms); parallel start
-    // means fast settles first and the whole thing takes ~one slow step.
-    expect(order).toEqual(['fast', 'slow'])
-    expect(Date.now() - started).toBeLessThan(minTimerQuantum(30) * 2)
+    await Promise.resolve()
+    try {
+      expect(started).toEqual(['slow', 'fast'])
+    } finally {
+      fast.resolve('fast')
+      slow.resolve('slow')
+    }
+    expect(await result).toEqual({ slow: 'slow', fast: 'fast' })
   })
 
   it('rejects with the FIRST-SETTLING rejection regardless of key order', async () => {
