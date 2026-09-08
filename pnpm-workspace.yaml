@@ -29,6 +29,7 @@ enableGlobalVirtualStore: true
   # the high-severity security exception; exact-pinned so a future version
   # re-soaks.
 catalog:
+  '@bcoe/v8-coverage': 1.0.2
   '@mdn/browser-compat-data': 8.1.0
   # run-local-ci (bin: local-ci, formerly published as @redwoodjs/agent-ci)
   # runs a repo's GitHub Actions workflows locally in Docker so a change can
@@ -36,6 +37,7 @@ catalog:
   # actions is its GitHub-Actions parser, pinned explicitly (not left
   # transitive) so its version is uniform fleet-wide.
   '@ultrathink/acorn.rs.wasm': 0.1.1
+  'ast-v8-to-istanbul': 1.0.5
   'brace-expansion': 5.0.9
   'dtu-github-actions': 0.18.1
   # shadscan — shadcn UI audit CLI for the design skills (missing UI
@@ -391,7 +393,7 @@ overrides:
   '@socketsecurity/lib': 'catalog:'
   '@socketsecurity/registry': 'catalog:'
   '@socketsecurity/sdk': 'catalog:'
-  '@swc/core': '1.16.1'
+  '@swc/core': '1.15.41'
   'brace-expansion@>=4': '5.0.9'
   'chalk@>=5': '5.6.2'
   'es-define-property': 'npm:@socketregistry/es-define-property@1.0.7'
@@ -636,6 +638,17 @@ patchedDependencies:
   # that body-parser@2.2.2 still relies on, after the content-type 1/2
   # collapse. Carried up from the 2.0.0 entry this replaced.
   content-type@2.1.0: patches/content-type@2.1.0.patch
+  # dedup: workflow variable presence (managed by socket-wheelhouse sync):
+  # Local CI must accept explicitly supplied empty workflow variables.
+  # The fleet payload client ID defaults to empty when no app is configured.
+  # Check own-property presence in run preflight and job validation;
+  # absent variables remain errors.
+  run-local-ci@0.18.1: patches/run-local-ci@0.18.1.patch
+  # dedup: coverage matcher allocation (managed by socket-wheelhouse sync):
+  # Coverage checks exclusions before matching includes.
+  # Compile exclusions once instead of once per include pattern.
+  # This preserves membership and bounds matcher memory for fleet coverage.
+  vitest@5.0.0: patches/vitest@5.0.0.patch
 
 # pnpm 11's packageManager-version-check failure policy. `warn` lets the
 # install proceed with a mismatched pnpm (emitting a warning) rather than
