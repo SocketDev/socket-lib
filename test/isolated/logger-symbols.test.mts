@@ -158,6 +158,7 @@ describe('Logger symbols and stripping', () => {
     })
 
     it('should strip unicode info symbols', () => {
+      harness.testLogger.info('ⓘ message')
       harness.testLogger.info('ℹ message')
       const output = harness.stderrChunks.join('')
       expect(output).toContain('message')

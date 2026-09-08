@@ -31,7 +31,7 @@ export type LogSymbols = {
    */
   fail: string
   /**
-   * Blue colored information symbol (ℹ or i in ASCII)
+   * Blue colored information symbol (ⓘ or i in ASCII)
    */
   info: string
   /**

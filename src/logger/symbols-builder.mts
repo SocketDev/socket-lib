@@ -27,7 +27,7 @@ import type { Theme } from '../term/themes/types.mjs'
  * Build a `LogSymbols` map for the given theme.
  *
  * On unicode-supporting terminals returns the canonical icons (`✔`, `✖`, `⚠`,
- * `ℹ`, `→`, `∴`, `↻`); otherwise returns ASCII fallbacks (`√`, `×`, `‼`, `i`,
+ * `ⓘ`, `→`, `∴`, `↻`); otherwise returns ASCII fallbacks (`√`, `×`, `‼`, `i`,
  * `>`, `:.`, `@`). Colors are pulled from the supplied theme via `applyColor`.
  */
 export function buildLoggerSymbols(theme: Theme): LogSymbols {
@@ -41,7 +41,7 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
     // oxlint-disable-next-line socket/no-status-emoji -- canonical source
     fail: applyColor(supported ? '✖' : '×', theme.colors.error),
     // oxlint-disable-next-line socket/no-status-emoji -- canonical source
-    info: applyColor(supported ? 'ℹ' : 'i', theme.colors.info),
+    info: applyColor(supported ? 'ⓘ' : 'i', theme.colors.info),
     // oxlint-disable-next-line socket/no-status-emoji -- canonical source
     progress: applyColor(supported ? '∴' : ':.', theme.colors.step),
     // oxlint-disable-next-line socket/no-status-emoji -- canonical source
@@ -58,7 +58,7 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
 
 /**
  * Strip leading log-status symbols and variation selectors from a string.
- * Matches both unicode forms (`✖`, `⚠`, `✔`, `ℹ`, `→`, `∴`, `↻`) and the
+ * Matches both unicode forms (`✖`, `⚠`, `✔`, `ⓘ`, `ℹ`, `→`, `∴`, `↻`) and the
  * unambiguous ASCII fallback `:.`. Does not strip lone ASCII letters (`i`, `>`,
  * `@`) since those would mangle real words.
  *
@@ -68,5 +68,5 @@ export function buildLoggerSymbols(theme: Theme): LogSymbols {
 export function stripLoggerSymbols(text: string): string {
   // This module is the source of the canonical status symbols.
   // oxlint-disable-next-line socket/no-status-emoji -- canonical source
-  return StringPrototypeReplace(text, /^(?::.|[✖✗×⚠‼✔✓√ℹ→∴↻])[️\s]*/u, '')
+  return StringPrototypeReplace(text, /^(?::.|[✖✗×⚠‼✔✓√ⓘℹ→∴↻])[️\s]*/u, '')
 }

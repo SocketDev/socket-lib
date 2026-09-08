@@ -57,7 +57,7 @@ export function createLogSymbols(): Record<string, string> {
     /* c8 ignore start - ASCII-fallback symbol arms only fire on
        terminals without unicode support; tests run on unicode TTYs. */
     target['fail'] = applyColor(supported ? '✖' : '×', errorColor)
-    target['info'] = applyColor(supported ? 'ℹ' : 'i', infoColor)
+    target['info'] = applyColor(supported ? 'ⓘ' : 'i', infoColor)
     target['progress'] = applyColor(supported ? '∴' : ':.', stepColor)
     target['reason'] = colors.dim(
       applyColor(supported ? '∴' : ':.', warningColor),
