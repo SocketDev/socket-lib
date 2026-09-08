@@ -9,12 +9,31 @@ import { describe, expect, it } from 'vitest'
 import {
   detectIndent,
   detectNewline,
+  extractFormatting,
+  getDefaultFormatting,
   sortKeys,
   stringifyWithFormatting,
   stripFormattingSymbols,
 } from '../../../src/json/format.mjs'
 
 describe('formatting', () => {
+  it('preserves CRLF and tab formatting when rewriting parsed JSON', () => {
+    const source = '{\r\n\t"enabled": false\r\n}'
+    const formatting = extractFormatting(source)
+    expect(formatting).toEqual({ indent: '\t', newline: '\r\n' })
+    expect(stringifyWithFormatting({ enabled: true }, formatting)).toBe(
+      '{\r\n\t"enabled": true\r\n}\r\n',
+    )
+  })
+
+  it('provides independent default formatting for each caller', () => {
+    const changed = getDefaultFormatting()
+    changed.indent = 4
+    changed.newline = '\r\n'
+    expect(getDefaultFormatting()).toEqual({ indent: 2, newline: '\n' })
+    expect(extractFormatting('{}')).toEqual({ indent: 2, newline: '\n' })
+  })
+
   describe('detectIndent', () => {
     it('should detect 2-space indentation', () => {
       const json = '{\n  "key": "value"\n}'
