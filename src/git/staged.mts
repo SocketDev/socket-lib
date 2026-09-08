@@ -4,11 +4,9 @@
  *   `changed.ts` if you need the broader view.
  */
 
-import { getNodePath } from '../node/path.mjs'
-import { normalizePath } from '../paths/normalize.mjs'
 import { ArrayPrototypeIncludes } from '../primordials/array.mjs'
 import { getGitDiffSpawnArgs, innerDiff, innerDiffSync } from './shared.mjs'
-import { getCachedRealpath, getCwd } from './repo.mjs'
+import { resolveGitRelativePath } from './repo.mjs'
 
 import type { GitDiffOptions } from './types.mjs'
 
@@ -135,15 +133,7 @@ export async function isStaged(
     ...options,
     absolute: false,
   })
-  const path = getNodePath()
-  // Resolve pathname through the cache to handle symlinks before computing
-  // the relative path.
-  const resolvedPathname = getCachedRealpath(pathname)
-  // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
-  /* c8 ignore start */
-  const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
-  /* c8 ignore stop */
-  const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
+  const relativePath = resolveGitRelativePath(pathname, options)
   return ArrayPrototypeIncludes(files, relativePath)
 }
 
@@ -192,14 +182,6 @@ export function isStagedSync(
     ...options,
     absolute: false,
   })
-  const path = getNodePath()
-  // Resolve pathname through the cache to handle symlinks before computing
-  // the relative path.
-  const resolvedPathname = getCachedRealpath(pathname)
-  // options.cwd-passed arm exercised when caller specifies cwd; default getCwd().
-  /* c8 ignore start */
-  const baseCwd = options?.cwd ? getCachedRealpath(options['cwd']) : getCwd()
-  /* c8 ignore stop */
-  const relativePath = normalizePath(path.relative(baseCwd, resolvedPathname))
+  const relativePath = resolveGitRelativePath(pathname, options)
   return ArrayPrototypeIncludes(files, relativePath)
 }

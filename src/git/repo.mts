@@ -8,6 +8,9 @@
 
 import { MapCtor } from '../primordials/map-set.mjs'
 import { processCwd } from '../primordials/process.mjs'
+import { normalizePath } from '../paths/normalize.mjs'
+
+import type { GitDiffOptions } from './types.mjs'
 
 import { getNodeFs } from '../node/fs.mjs'
 import { getNodePath } from '../node/path.mjs'
@@ -167,4 +170,15 @@ export function getCachedRealpath(pathname: string): string {
  */
 export function getCwd(): string {
   return getCachedRealpath(processCwd())
+}
+
+export function resolveGitRelativePath(
+  pathname: string,
+  options?: GitDiffOptions | undefined,
+): string {
+  const { cwd } = { __proto__: null, ...options } as GitDiffOptions
+  const path = getNodePath()
+  const baseCwd = cwd ? getCachedRealpath(cwd) : getCwd()
+  const resolvedPathname = getCachedRealpath(path.resolve(baseCwd, pathname))
+  return normalizePath(path.relative(baseCwd, resolvedPathname))
 }

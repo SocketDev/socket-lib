@@ -12,11 +12,13 @@
  *     filtering.
  */
 
-import { existsSync } from 'node:fs'
+import { realpathSync } from 'node:fs'
 import path from 'node:path'
-import process from 'node:process'
 
-import { describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+
+import { makeGitRepo } from '../fleet/_shared/lib/git-fixture.mts'
+import type { GitRepoFixture } from '../fleet/_shared/lib/git-fixture.mts'
 
 import {
   getChangedFiles,
@@ -39,7 +41,45 @@ import {
 } from '../../src/git/unstaged.mjs'
 
 describe('git', () => {
-  const projectRoot = process.cwd()
+  let fixture: GitRepoFixture
+  let projectRoot: string
+
+  beforeAll(() => {
+    fixture = makeGitRepo({ prefix: 'socket-lib-git-tests-' })
+    projectRoot = realpathSync(fixture.dir)
+    fixture.writeFile('package.json', '{"name":"example-module"}\n')
+    fixture.writeFile('README.md', 'Example module\n')
+    fixture.writeFile('pnpm-lock.yaml', 'lockfileVersion: 9\n')
+    fixture.writeFile('src/logger/node.mts', 'export const exampleLogger = 1\n')
+    fixture.git('add', '.')
+    fixture.git('commit', '-qm', 'test: seed git fixture')
+    fixture.writeFile('pnpm-lock.yaml', 'lockfileVersion: 9.0\n')
+    fixture.git('add', 'pnpm-lock.yaml')
+    fixture.writeFile(
+      'package.json',
+      '{"name":"example-module","private":true}\n',
+    )
+  })
+
+  afterAll(() => fixture?.cleanup())
+
+  it.each([
+    { name: 'isChanged', check: isChanged, filename: 'package.json' },
+    { name: 'isChangedSync', check: isChangedSync, filename: 'package.json' },
+    { name: 'isStaged', check: isStaged, filename: 'pnpm-lock.yaml' },
+    { name: 'isStagedSync', check: isStagedSync, filename: 'pnpm-lock.yaml' },
+    { name: 'isUnstaged', check: isUnstaged, filename: 'package.json' },
+    { name: 'isUnstagedSync', check: isUnstagedSync, filename: 'package.json' },
+  ] as const)(
+    '$name resolves filenames against the supplied cwd',
+    async ({ check, filename }) => {
+      expect(await check(filename, { cwd: projectRoot })).toBe(true)
+      expect(
+        await check(path.join(projectRoot, filename), { cwd: projectRoot }),
+      ).toBe(true)
+      expect(await check('README.md', { cwd: projectRoot })).toBe(false)
+    },
+  )
 
   describe('findGitRoot', () => {
     it('should find git root from current directory', () => {
@@ -212,16 +252,8 @@ describe('git', () => {
 
     it('should report unchanged for committed file in clean repo', async () => {
       const testFile = path.join(projectRoot, 'README.md')
-      // Skip if README is missing; should always exist in this repo.
-      if (!existsSync(testFile)) {
-        return
-      }
-      const changedFiles = await getChangedFiles({ cwd: projectRoot })
-      const isExpectedChanged = changedFiles.some(
-        f => f === testFile || f === 'README.md',
-      )
       const result = await isChanged(testFile, { cwd: projectRoot })
-      expect(result).toBe(isExpectedChanged)
+      expect(result).toBe(false)
     })
 
     it('should accept relative and absolute paths equivalently', async () => {
@@ -352,9 +384,6 @@ describe('git', () => {
     })
 
     it('should handle files in subdirectories', async () => {
-      // src/logger.ts was reshaped into src/logger/node.ts (v6.1
-      // renamed the leaf from `logger` to `default` so it lines up
-      // with `getDefaultLogger`).
       const result = await isChanged('src/logger/node.mts', {
         cwd: projectRoot,
       })
