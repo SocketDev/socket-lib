@@ -258,8 +258,10 @@ export function setupHttpFixture(): void {
       httpServer = http.createServer((req, res) => {
         const url = req.url || ''
 
-        const handler = httpFixtureHandlers[url]
-        if (handler) {
+        const handler = Object.hasOwn(httpFixtureHandlers, url)
+          ? httpFixtureHandlers[url]
+          : undefined
+        if (typeof handler === 'function') {
           handler(res, req)
         } else {
           res.writeHead(200, { 'Content-Type': 'text/plain' })
