@@ -4,7 +4,7 @@
  *   - Constructor produces an instance with the documented methods
  *   - Every method returns the logger (chainable)
  *   - Methods route to the right console.* sink (log/warn/error)
- *   - Status symbols (✓ ⚠ ✕ ℹ) are prefixed inline
+ *   - Status symbols (✓ ⚠ ✕ ⓘ) are prefixed inline
  *   - No reliance on node:process / node:console / fs
  */
 
@@ -56,9 +56,9 @@ describe('logger/browser → Logger', () => {
     expect(logSpy).toHaveBeenCalledWith('hello')
   })
 
-  it('info() prefixes with ℹ and routes to console.log', () => {
+  it('info() prefixes with ⓘ and routes to console.log', () => {
     new Logger().info('hello')
-    expect(logSpy).toHaveBeenCalledWith('ℹ', 'hello')
+    expect(logSpy).toHaveBeenCalledWith('ⓘ', 'hello')
   })
 
   it('warn() prefixes with ⚠ and routes to console.warn', () => {
@@ -83,6 +83,6 @@ describe('logger/browser → Logger', () => {
 
   it('passes extra args through unchanged', () => {
     new Logger().info('a', { x: 1 }, [2, 3])
-    expect(logSpy).toHaveBeenCalledWith('ℹ', 'a', { x: 1 }, [2, 3])
+    expect(logSpy).toHaveBeenCalledWith('ⓘ', 'a', { x: 1 }, [2, 3])
   })
 })

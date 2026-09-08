@@ -144,6 +144,7 @@ describe('compareSecrets', () => {
     // an order-of-magnitude difference on a long secret with an early-
     // byte mismatch). It's intentionally LENIENT and skipped under
     // coverage runs, where instrumentation makes timing meaningless.
+    // test-exclusion: Instrumentation distorts timing; recheck with `pnpm test test/unit/secrets/compare.test.mts`.
     it.skipIf(process.env['COVERAGE'] === 'true')(
       'shows no order-of-magnitude difference between early- and late-byte mismatches',
       () => {

@@ -67,6 +67,7 @@ describe('buildPtyInvocation', () => {
 })
 
 describe('ptyRun', () => {
+  // test-exclusion: Real PTY allocation needs the uninstrumented host; recheck with `pnpm test test/unit/spawn/pty.test.mts`.
   it.skipIf(!HAS_SCRIPT || UNDER_COVERAGE)(
     'streams stdout and resolves exit code 0 for `node --version`',
     async () => {
@@ -140,6 +141,7 @@ describe('stdoutIsFileBacked', () => {
 })
 
 describe('ptyRunPumped', () => {
+  // test-exclusion: Real PTY allocation needs the uninstrumented host; recheck with `pnpm test test/unit/spawn/pty.test.mts`.
   it.skipIf(!HAS_SCRIPT || UNDER_COVERAGE)(
     'forwards chunks to the parent streams AND to caller callbacks',
     async () => {
