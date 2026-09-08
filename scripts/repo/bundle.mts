@@ -1,6 +1,6 @@
 /**
  * @file Bundle runner (the `build` script): rolldown for the per-file source +
- *   externals builds, tsgo for declarations. Step scripts live in
+ *   externals builds, TypeScript 7 for declarations. Step scripts live in
  *   scripts/repo/bundle/: clean, externals, verify-dist.
  */
 
@@ -282,7 +282,7 @@ async function main(): Promise<void> {
 
 const SCRIPT_META: ScriptMeta = {
   describe:
-    'bundle runner — rolldown for source + externals builds, tsgo for declarations',
+    'bundle runner — rolldown for source + externals builds, TypeScript 7 for declarations',
   help: `Usage: node scripts/repo/bundle.mts [flags]
 
   --src        build source code only

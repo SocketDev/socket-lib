@@ -1,6 +1,6 @@
 /**
  * @file Individual build steps for the `build` runner (scripts/repo/bundle.mts):
- *   source built per-file by rolldown, TypeScript declarations (tsgo), the
+ *   source built per-file by rolldown, TypeScript 7 declarations, the
  *   prim CLI bundle, external dependencies, and the post-build dist-shaping
  *   pass. Each returns an exit code, and the source step also returns its
  *   build time, so the runner can log + sequence them; the runner owns
@@ -13,7 +13,6 @@ import path from 'node:path'
 
 import { rolldown } from 'rolldown'
 
-import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import { buildConfig } from '../../../.config/rolldown.config.mts'
@@ -140,7 +139,7 @@ export async function runNodeBuildScript(
 /**
  * Build TypeScript declarations. Returns exitCode for external logging.
  *
- * No `verbose`: this step runs clean.mts and tsgo, and neither accepts a
+ * No `verbose`: this step runs clean.mts and tsc, and neither accepts a
  * verbosity flag, so there is nothing to forward one to.
  */
 export interface BuildTypesOptions {
@@ -163,16 +162,8 @@ export async function buildTypes(
   }
 
   commands.push({
-    // npm writes a `.cmd` shim on Windows; the extension-less file is a POSIX
-    // sh script cmd.exe can't run ("'node_modules' is not recognized"), so pick
-    // the platform-correct shim. shell: isWin32() lets cmd.exe resolve the .cmd.
-    args: ['--project', 'tsconfig.dts.json'],
-    command: isWin32()
-      ? 'node_modules\\.bin\\tsgo.cmd'
-      : 'node_modules/.bin/tsgo',
-    options: {
-      shell: isWin32(),
-    },
+    args: ['node_modules/typescript/bin/tsc', '--project', 'tsconfig.dts.json'],
+    command: 'node',
   })
 
   const exitCode = await runSequence(commands)

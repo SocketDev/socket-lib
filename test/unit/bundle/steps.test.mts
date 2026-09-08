@@ -3,7 +3,7 @@
  *   forwards only the verbosity flags its child script accepts, a failing step
  *   names itself in one error line unless quiet, and a passing step says
  *   nothing. buildTypes deliberately has no verbose option, because neither
- *   clean.mts nor tsgo accepts a verbosity flag.
+ *   clean.mts nor tsc accepts a verbosity flag.
  */
 
 import { describe, expect, it, vi } from 'vitest'
@@ -12,6 +12,7 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {
   buildExternals,
+  buildTypes,
   runNodeBuildScript,
   runPostBuild,
   verbosityFlags,
@@ -133,5 +134,33 @@ describe('the steps that share runNodeBuildScript', () => {
       command: 'node',
     })
     expect(logged).toEqual(['Post-build failed'])
+  })
+})
+
+describe('buildTypes', () => {
+  it('runs the installed compiler through node after cleaning declarations', async () => {
+    reset(0)
+    expect(await buildTypes()).toBe(0)
+    expect(runCommand.calls).toEqual([
+      {
+        args: ['scripts/repo/bundle/clean.mts', '--types', '--quiet'],
+        command: 'node',
+      },
+      {
+        args: [
+          'node_modules/typescript/bin/tsc',
+          '--project',
+          'tsconfig.dts.json',
+        ],
+        command: 'node',
+      },
+    ])
+  })
+
+  it('preserves compiler failure when cleaning is skipped', async () => {
+    reset(2)
+    expect(await buildTypes({ skipClean: true, quiet: true })).toBe(2)
+    expect(runCommand.calls).toHaveLength(1)
+    expect(logged).toEqual([])
   })
 })
