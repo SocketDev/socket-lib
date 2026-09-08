@@ -2427,6 +2427,7 @@ opencode.json
 .config/fleet/oxlint-plugin/fleet/use-fleet-canonical-api-token-getter/index.mts
 .config/fleet/oxlint-plugin/fleet/use-fleet-canonical-api-token-getter/package.json
 .config/fleet/oxlint-plugin/index.mts
+.config/fleet/oxlint-plugin/lib/ast-children.mts
 .config/fleet/oxlint-plugin/lib/comment-checks.mts
 .config/fleet/oxlint-plugin/lib/comment-markers.mts
 .config/fleet/oxlint-plugin/lib/comparators.mts
