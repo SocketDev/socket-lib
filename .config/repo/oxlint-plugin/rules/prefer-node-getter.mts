@@ -74,7 +74,6 @@ export const DIRECT_IMPORT_BASELINE: readonly string[] = [
   'src/secrets/oauth-pkce.mts',
   'src/secrets/rc.mts',
   'src/secrets/windows.mts',
-  'src/spinner/with.mts',
   'src/stdio/clear.mts',
   'src/stdio/progress.mts',
   'src/stdio/stderr.mts',
