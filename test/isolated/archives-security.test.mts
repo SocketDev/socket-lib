@@ -14,6 +14,7 @@ import process from 'node:process'
 import { createGzip } from 'node:zlib'
 
 import AdmZip from '../../src/external/adm-zip.js'
+import type { AdmZipInstance } from '../../src/external/adm-zip.js'
 import { describe, expect, it } from 'vitest'
 
 import { createTarPack } from '../_shared/tar-pack.mts'
@@ -27,7 +28,11 @@ import { extractZip } from '../../src/archives/zip.mjs'
 import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
 // Size guards inspect declared metadata before decompressing fixture bytes.
-function addDeclaredSizeFile(zip: AdmZip, name: string, size: number): void {
+function addDeclaredSizeFile(
+  zip: AdmZipInstance,
+  name: string,
+  size: number,
+): void {
   zip.addFile(name, Buffer.from('fixture'))
   zip.getEntry(name)!.header.size = size
 }
