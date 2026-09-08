@@ -14,6 +14,8 @@ import { REPO_CACHE_DIR, REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const projectRoot = REPO_ROOT
+const activeLane = process.env['FLEET_LANE']
+const excludesIsolatedLane = activeLane === 'fast' || activeLane === 'mid'
 
 // Worker heap cap: smaller in CI (GitHub Actions ubuntu-latest has
 // ~7 GB total RAM — leave room for the runner + OS), generous locally
@@ -56,7 +58,12 @@ const vitestConfigIsolated = defineConfig({
         path.resolve(projectRoot, 'test/isolated/**/*.test.{js,ts,mjs,mts}'),
       ),
     ],
-    exclude: ['**/node_modules/**', '**/dist/**'],
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      ...(excludesIsolatedLane ? ['**/*'] : []),
+    ],
+    passWithNoTests: excludesIsolatedLane,
     reporters: ['default'],
     // Pin the worker's v8 old-generation heap ceiling so CI runs are
     // deterministic regardless of host RAM (Node defaults its heap

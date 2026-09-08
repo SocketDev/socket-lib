@@ -669,5 +669,25 @@
       "claude": 46909,
       "codex": 43630
     }
+  },
+  "vitest": {
+    "lanes": {
+      "mid": [
+        "test/unit/fs/**",
+        "test/unit/compression/**",
+        "test/unit/env/**",
+        "test/unit/exe/path/resolve.test.mts",
+        "test/unit/globs-stream.test.mts"
+      ],
+      "slow": [
+        "test/integration/**",
+        "test/e2e/**",
+        "test/isolated/**",
+        "test/unit/snapshot-safety.test.mts",
+        "test/unit/git/**",
+        "test/unit/spawn/**",
+        "test/unit/eco/npm/exec.test.mts"
+      ]
+    }
   }
 }
