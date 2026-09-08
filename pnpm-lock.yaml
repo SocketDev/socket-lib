@@ -683,9 +683,6 @@ importers:
       terminal-link:
         specifier: 2.1.1
         version: 2.1.1
-      type-coverage:
-        specifier: 2.30.1
-        version: 2.30.1(typescript@7.1.0-dev.20260901.1)
       typebox:
         specifier: 1.3.23
         version: 1.3.23
@@ -6964,9 +6961,6 @@ packages:
     resolution: {integrity: sha512-vpLQEs+VLCr1nU0BXS07maYoFwlDAH0gngQuuttxIwutDFEMHq2blX+8vpgxDdK3J1PwjCJiep77OitTZ4Ll1A==}
     engines: {node: 18 || 20 || >=22}
 
-  minimist@1.2.8:
-    resolution: {integrity: sha512-2yyAR8qBkN3YuheJanUpWC5U3bb5osDywNB8RzDVlDwDHbocAJveqqj1u8+SVD7jkWT4yvsHCpWqqWqAxb0zCA==}
-
   minimizer-webpack-plugin@5.6.1:
     resolution: {integrity: sha512-DoeAZz8Q1C1znwsUzej1fdoi4jCf7/+Em27ouLqfK/+3m8G+D7yDhUwrc3CNhjSzGUN1kn7Iv4sWmjflQHenpw==}
     engines: {node: '>= 10.13.0'}
@@ -7099,10 +7093,6 @@ packages:
   normalize-package-data@8.0.0:
     resolution: {integrity: sha512-RWk+PI433eESQ7ounYxIp67CYuVsS1uYSonX3kA6ps/3LWfjVQa/ptEg6Y3T6uAMq1mWpX9PQ+qx+QaHpsc7gQ==}
     engines: {node: ^20.17.0 || >=22.9.0}
-
-  normalize-path@3.0.0:
-    resolution: {integrity: sha512-6eZs5Ls3WtCisHWp9S2GUy8dqkpGi4BVSz3GaqiE6ezub0512ESztXUwUB6C6IKbQkY2Pnb/mD4WYojCRwcwLA==}
-    engines: {node: '>=0.10.0'}
 
   normalize-url@6.1.0:
     resolution: {integrity: sha512-DlL+XwOy3NxAQ8xuC0okPgK46iuVNAK01YN7RueYBqqFeGsBjV9XmCAzAdgt+667bCl5kPh9EqKKDwnaPG1I7A==}
@@ -7705,12 +7695,6 @@ packages:
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
-  tsutils@3.21.0:
-    resolution: {integrity: sha512-mHKK3iUXL+3UF6xL5k0PEhKRUBKPBCv/+RkEOpjRWxxx27KKRBmmA60A9pgOUvMi8GKhRMPEmjBRPzs2W7O1OA==}
-    engines: {node: '>= 6'}
-    peerDependencies:
-      typescript: '>=2.8.0 || >= 3.2.0-dev || >= 3.3.0-dev || >= 3.4.0-dev || >= 3.5.0-dev || >= 3.6.0-dev || >= 3.6.0-beta || >= 3.7.0-dev || >= 3.7.0-beta'
-
   tuf-js@4.1.0:
     resolution: {integrity: sha512-50QV99kCKH5P/Vs4E2Gzp7BopNV+KzTXqWeaxrfu5IQJBOULRsTIS9seSsOVT8ZnGXzCyx55nYWAi4qJzpZKEQ==}
     engines: {node: ^20.17.0 || >=22.9.0}
@@ -7720,15 +7704,6 @@ packages:
 
   typanion@3.14.0:
     resolution: {integrity: sha512-ZW/lVMRabETuYCd9O9ZvMhAh8GslSqaUjxmK/JLPCh6l73CvLBiuXswj/+7LdnWOgYsQ130FqLzFz5aGT4I3Ug==}
-
-  type-coverage-core@2.30.1:
-    resolution: {integrity: sha512-TFzqUvaZW5bTpKGBj3FwN8bYLsWA/smTOslISDg9rBMrpn5KadMQy9l3q068q+dXkn27CAdyfGTDlsH0PguG3A==}
-    peerDependencies:
-      typescript: 2 || 3 || 4 || 5 || 6 || 7
-
-  type-coverage@2.30.1:
-    resolution: {integrity: sha512-+Y05UXYBaeonULHdpkc7kr0BF5Ix+IsdI/UzI2S6hnkCacTA4ktpi9EnKWMYyISW6xRaLYIEqK+4fz1GLpHQFg==}
-    hasBin: true
 
   type-fest@0.21.3:
     resolution: {integrity: sha512-t0rzBq87m3fVcduHDUFhKmyyX+9eo6WQjZvf51Ea/M0Q7+T374Jp1aUiyUl0GKxp8M/OETVHSDvmkyPgvX+X2w==}
@@ -8022,29 +7997,21 @@ snapshots:
       tinyexec: 1.3.0
       tinyglobby: 0.2.17
 
-  '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-darwin-arm64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-darwin-x64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-arm64-musl@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-arm64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-x64-musl@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-linux-x64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-linux-x64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-win32-arm64@0.2.141': {}
 
-  '@anthropic-ai/claude-agent-sdk-win32-x64@0.2.141':
-    optional: true
+  '@anthropic-ai/claude-agent-sdk-win32-x64@0.2.141': {}
 
   '@anthropic-ai/claude-agent-sdk@0.2.141(supports-color@10.2.2)(zod@4.4.3)':
     dependencies:
@@ -10710,8 +10677,6 @@ snapshots:
     dependencies:
       brace-expansion: 5.0.9(patch_hash=a89e05a7c781115d8e78a92c9f9b843aa7c534a587baa5ac808074d4fafa6857)
 
-  minimist@1.2.8: {}
-
   minimizer-webpack-plugin@5.6.1(@swc/core@1.15.43)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.26)(webpack@5.109.2(@swc/core@1.15.43)(csso@5.0.5)(esbuild@0.28.2)(lightningcss@1.33.0)(postcss@8.5.26)):
     dependencies:
       '@jridgewell/trace-mapping': 0.3.31
@@ -10807,8 +10772,6 @@ snapshots:
       hosted-git-info: 8.1.0
       semver: 7.8.5
       validate-npm-package-license: 3.0.4
-
-  normalize-path@3.0.0: {}
 
   normalize-url@6.1.0: {}
 
@@ -11525,11 +11488,6 @@ snapshots:
 
   tslib@2.8.1: {}
 
-  tsutils@3.21.0(typescript@7.1.0-dev.20260901.1):
-    dependencies:
-      tslib: 2.8.1
-      typescript: 7.1.0-dev.20260901.1
-
   tuf-js@4.1.0(supports-color@10.2.2):
     dependencies:
       '@tufjs/models': 4.1.0
@@ -11541,23 +11499,6 @@ snapshots:
   tweetnacl@0.14.5: {}
 
   typanion@3.14.0: {}
-
-  type-coverage-core@2.30.1(typescript@7.1.0-dev.20260901.1):
-    dependencies:
-      fast-glob: 3.3.3
-      minimatch: 10.2.6(patch_hash=83f1ea5b333d1b6fe1b36f93ccb222aa02e5dd468b2c646e285d7d53d234e174)
-      normalize-path: 3.0.0
-      tslib: 2.8.1
-      tsutils: 3.21.0(typescript@7.1.0-dev.20260901.1)
-      typescript: 7.1.0-dev.20260901.1
-
-  type-coverage@2.30.1(typescript@7.1.0-dev.20260901.1):
-    dependencies:
-      chalk: 5.6.2(patch_hash=3e5adfdfa27f0c9e066fe820ac91f77773798f205f5e43ff220b250007196661)
-      minimist: 1.2.8
-      type-coverage-core: 2.30.1(typescript@7.1.0-dev.20260901.1)
-    transitivePeerDependencies:
-      - typescript
 
   type-fest@0.21.3: {}
 
