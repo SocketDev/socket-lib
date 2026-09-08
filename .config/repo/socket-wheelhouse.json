@@ -818,7 +818,26 @@
         "test/unit/ttl-cache/timing.test.mts",
         "tools/prim/test/ai-disambiguate-pass.test.mts",
         "tools/prim/test/disambiguate-sdk-unusable.test.mts",
-        "tools/prim/test/disambiguate-sdk.test.mts"
+        "tools/prim/test/disambiguate-sdk.test.mts",
+        "test/unit/eco/npm/meta/node-batch.test.mts",
+        "test/unit/eco/npm/meta/node-versions.test.mts",
+        "test/unit/eco/npm/meta-cache/node.test.mts",
+        "test/unit/eco/npm/meta-cache/node-stale.test.mts",
+        "test/unit/eco/npm/meta/node-safe.test.mts",
+        "test/unit/cacache/clear.test.mts",
+        "test/unit/cacache/tmp.test.mts",
+        "test/unit/cacache/write.test.mts",
+        "test/unit/cacache/read.test.mts",
+        "test/unit/packages/tarball.test.mts",
+        "test/unit/process/lock.test.mts",
+        "test/unit/dlx/manifest-class.test.mts",
+        "test/unit/external-tools/jre/from-download.test.mts",
+        "test/unit/eco/npm/registry/tarball/node.test.mts",
+        "tools/prim/test/cli-commands.test.mts",
+        "test/scripts/reexports-have-no-import-cycles.test.mts",
+        "test/unit/dlx/main.test.mts",
+        "test/unit/primordials/checks/primordials.test.mts",
+        "test/unit/packages/specs.test.mts"
       ],
       "slow": [
         "test/integration/**",
@@ -827,7 +846,19 @@
         "test/unit/snapshot-safety.test.mts",
         "test/unit/git/**",
         "test/unit/spawn/**",
-        "test/unit/eco/npm/exec.test.mts"
+        "test/unit/eco/npm/exec.test.mts",
+        "test/unit/ai/worktree-fanout.test.mts",
+        "test/unit/ai/worktree-runone.test.mts",
+        "test/unit/config/no-inline-lazy-node-getter.test.mts",
+        "test/fleet/e2e/comment-voice.test.mts",
+        "test/scripts/exports-have-no-undefined-bindings.test.mts",
+        "test/scripts/audit-fleet-lib-usage.test.mts",
+        "test/unit/kill-tree.test.mts",
+        "test/unit/exe/exec.test.mts",
+        "test/unit/dlx/binary.test.mts",
+        "test/unit/dlx/binary-redownload.test.mts",
+        "test/unit/dlx/binary-clean.test.mts",
+        "test/unit/dlx/binary-list.test.mts"
       ]
     }
   }
