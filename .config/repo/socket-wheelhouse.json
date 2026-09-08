@@ -474,6 +474,7 @@
     "bundlesVendoredDeps": true
   },
   "cover": {
+    "typeThreshold": 99,
     "thresholds": {
       "statements": 96,
       "branches": 91,

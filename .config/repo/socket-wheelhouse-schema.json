@@ -3,7 +3,12 @@
   "$id": "https://github.com/SocketDev/socket-wheelhouse-schema.json",
   "title": "socket-wheelhouse per-repo config",
   "type": "object",
-  "required": ["schemaVersion", "repoName", "repo", "build"],
+  "required": [
+    "schemaVersion",
+    "repoName",
+    "repo",
+    "build"
+  ],
   "properties": {
     "$schema": {
       "type": "string",
@@ -21,7 +26,9 @@
     },
     "repo": {
       "type": "object",
-      "required": ["type"],
+      "required": [
+        "type"
+      ],
       "properties": {
         "type": {
           "anyOf": [
@@ -42,7 +49,10 @@
     },
     "build": {
       "type": "object",
-      "required": ["from", "type"],
+      "required": [
+        "from",
+        "type"
+      ],
       "properties": {
         "from": {
           "anyOf": [
@@ -96,7 +106,7 @@
         },
         "bundlesVendoredDeps": {
           "type": "boolean",
-          "description": "The build inlines its vendored dependencies into the published artifact, so the cascade treats those deps as shipped rather than resolved at install. Read by sync-scaffolding/utils.mts as a repo capability; declared here because a field the fleet reads but the schema rejects fails socket-wheelhouse-config-matches-schema in every member that sets it."
+          "description": "The build inlines its vendored dependencies into the published artifact, so the cascade treats those deps as shipped rather than resolved at install. Read by commit-cascade/utils.mts as a repo capability; declared here because a field the fleet reads but the schema rejects fails socket-wheelhouse-config-matches-schema in every member that sets it."
         },
         "runtime": {
           "anyOf": [
@@ -123,7 +133,10 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["from", "type"],
+        "required": [
+          "from",
+          "type"
+        ],
         "properties": {
           "from": {
             "anyOf": [
@@ -186,10 +199,64 @@
       "properties": {
         "localAssist": {
           "type": "boolean",
-          "description": "Opt into keyless single-shot AI assists via the odai CLI from SocketDev/odai — on-device backends such as Gemini Nano through headless Chrome, a loopback llama-server, or the deterministic simulator; no ANTHROPIC_API_KEY involved. Summary-class tasks only, read by scripts/fleet/_shared/odai.mts consumers such as the land-work commit-body summarizer. Default false; when no odai backend resolves the assist is a clean skip, never a failure."
+          "description": "Opt into keyless single-shot AI assists via the odai CLI from SocketDev/odai — on-device backends such as Gemini Nano through headless Chrome, a loopback llama-server, or the deterministic simulator; no ANTHROPIC_API_KEY involved. Summary-class tasks only, read by scripts/fleet/ai/odai.mts consumers such as the land-work commit-body summarizer. Default false; when no odai backend resolves the assist is a clean skip, never a failure."
         }
       },
       "description": "Keyless local AI opt-ins. Per-repo, default all-off."
+    },
+    "buildStubs": {
+      "type": "object",
+      "properties": {
+        "keepExposed": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": [
+              "leaf",
+              "reason"
+            ],
+            "properties": {
+              "leaf": {
+                "type": "string",
+                "description": "Export subpath, without the leading `./`. Example: `process/spawn/retry/node`."
+              },
+              "reason": {
+                "type": "string",
+                "description": "The consumer this leaf waits for. Remove the entry once that consumer lands; the audit then reports the entry as redundant."
+              }
+            },
+            "additionalProperties": false
+          },
+          "description": "Leaves that ship with a real implementation even though no roster repo imports them yet. The stub list is consumer-driven, so a primitive published for the fleet to adopt is stubbed on its first release - and a stubbed leaf cannot acquire the consumer that would un-stub it."
+        },
+        "unexposed": {
+          "type": "object",
+          "required": [
+            "leaves",
+            "scannedRoster"
+          ],
+          "properties": {
+            "leaves": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "Export subpaths the audit proved unused, swapped for throwing stubs at build time."
+            },
+            "scannedRoster": {
+              "type": "array",
+              "items": {
+                "type": "string"
+              },
+              "description": "The repos the verdict was judged against. \"Unused\" is a claim about the whole fleet, so the list is only as good as the consumer set behind it - and with no record, one computed against a smaller fleet reads exactly like a correct one."
+            }
+          },
+          "additionalProperties": false,
+          "description": "Regenerated by `audit-fleet-lib-usage.mts --write-stub-list` rather than hand-maintained. Committed so the published build reproduces without sibling checkouts."
+        }
+      },
+      "additionalProperties": false,
+      "description": "Leaf lists for the published build-stub pass. Only a repo that publishes a per-leaf subpath surface sets this."
     },
     "capabilities": {
       "type": "object",
@@ -199,7 +266,7 @@
           "items": {
             "type": "string"
           },
-          "description": "This repo ships Rust; the value is the repo-relative paths of the package roots holding it (`[\".\"]` when the Cargo workspace sits at the repo root). Declaring `cargo` activates the `rust` coverage lane in `pnpm run cover`, folds its line coverage into the README badge, and arms the coverage-lanes-are-wired check: a declared capability whose lane measures nothing fails the gate instead of passing silently, while a machine with no cargo toolchain reports an explicit skip. `cargo` also gates capability-tagged fleet hooks at cascade time — an artifact whose header declares `@capability cargo` is installed only into a repo that declares this key (scripts/repo/sync-scaffolding/capabilities.mts)."
+          "description": "This repo ships Rust; the value is the repo-relative paths of the package roots holding it (`[\".\"]` when the Cargo workspace sits at the repo root). Declaring `cargo` activates the `rust` coverage lane in `pnpm run cover`, folds its line coverage into the README badge, and arms the coverage-lanes-are-wired check: a declared capability whose lane measures nothing fails the gate instead of passing silently, while a machine with no cargo toolchain reports an explicit skip. `cargo` also gates capability-tagged fleet hooks at cascade time — an artifact whose header declares `@capability cargo` is installed only into a repo that declares this key (scripts/repo/commit-cascade/capabilities.mts)."
         },
         "cpp": {
           "type": "array",
@@ -224,7 +291,7 @@
         }
       },
       "additionalProperties": false,
-      "description": "Language capabilities beyond JS/TS. Keys must stay in lockstep with VALID_CAPABILITIES in scripts/repo/sync-scaffolding/repo-shape.mts and LANE_BY_CAPABILITY in scripts/fleet/cover/lanes.mts."
+      "description": "Language capabilities beyond JS/TS. Keys must stay in lockstep with VALID_CAPABILITIES in scripts/repo/commit-cascade/repo-shape.mts and LANE_BY_CAPABILITY in scripts/fleet/cover/lanes.mts."
     },
     "claude": {
       "type": "object",
@@ -247,6 +314,121 @@
     "cover": {
       "type": "object",
       "properties": {
+        "typeThreshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 100,
+          "description": "Minimum typed identifier percentage enforced by cover and cover:types."
+        },
+        "budgetAllowances": {
+          "type": "object",
+          "properties": {
+            "fast": {
+              "type": "object",
+              "required": [
+                "maxMs",
+                "reason",
+                "created",
+                "expires"
+              ],
+              "properties": {
+                "maxMs": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 600000
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "created": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 10,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "expires": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 10,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              },
+              "additionalProperties": false
+            },
+            "mid": {
+              "type": "object",
+              "required": [
+                "maxMs",
+                "reason",
+                "created",
+                "expires"
+              ],
+              "properties": {
+                "maxMs": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 600000
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "created": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 10,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "expires": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 10,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              },
+              "additionalProperties": false
+            },
+            "slow": {
+              "type": "object",
+              "required": [
+                "maxMs",
+                "reason",
+                "created",
+                "expires"
+              ],
+              "properties": {
+                "maxMs": {
+                  "type": "integer",
+                  "exclusiveMinimum": 0,
+                  "maximum": 600000
+                },
+                "reason": {
+                  "type": "string",
+                  "minLength": 1,
+                  "pattern": "\\S"
+                },
+                "created": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 10,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                },
+                "expires": {
+                  "type": "string",
+                  "minLength": 10,
+                  "maxLength": 10,
+                  "pattern": "^\\d{4}-\\d{2}-\\d{2}$"
+                }
+              },
+              "additionalProperties": false
+            }
+          },
+          "additionalProperties": false,
+          "description": "Temporary measured coverage lane limits. Each allowance expires at 00:00 UTC on expires, at most one calendar month after created. The run-wide deadline still applies."
+        },
         "suites": {
           "type": "object",
           "patternProperties": {
@@ -370,13 +552,18 @@
       "properties": {
         "contrast": {
           "type": "object",
-          "required": ["files"],
+          "required": [
+            "files"
+          ],
           "properties": {
             "files": {
               "type": "array",
               "items": {
                 "type": "object",
-                "required": ["path", "checks"],
+                "required": [
+                  "path",
+                  "checks"
+                ],
                 "properties": {
                   "path": {
                     "type": "string",
@@ -386,7 +573,10 @@
                     "type": "array",
                     "items": {
                       "type": "object",
-                      "required": ["selector", "bg"],
+                      "required": [
+                        "selector",
+                        "bg"
+                      ],
                       "properties": {
                         "selector": {
                           "type": "string",
@@ -429,7 +619,10 @@
       "properties": {
         "prebakes": {
           "type": "object",
-          "required": ["registry", "prebakes"],
+          "required": [
+            "registry",
+            "prebakes"
+          ],
           "properties": {
             "description": {
               "type": "string"
@@ -464,14 +657,20 @@
                 },
                 "go": {
                   "type": "object",
-                  "required": ["version", "sha256"],
+                  "required": [
+                    "version",
+                    "sha256"
+                  ],
                   "properties": {
                     "version": {
                       "type": "string"
                     },
                     "sha256": {
                       "type": "object",
-                      "required": ["amd64", "arm64"],
+                      "required": [
+                        "amd64",
+                        "arm64"
+                      ],
                       "properties": {
                         "amd64": {
                           "type": "string",
@@ -490,14 +689,20 @@
                 },
                 "rustup": {
                   "type": "object",
-                  "required": ["version", "sha256"],
+                  "required": [
+                    "version",
+                    "sha256"
+                  ],
                   "properties": {
                     "version": {
                       "type": "string"
                     },
                     "sha256": {
                       "type": "object",
-                      "required": ["amd64", "arm64"],
+                      "required": [
+                        "amd64",
+                        "arm64"
+                      ],
                       "properties": {
                         "amd64": {
                           "type": "string",
@@ -525,7 +730,13 @@
               "type": "array",
               "items": {
                 "type": "object",
-                "required": ["name", "status", "from", "installs", "purpose"],
+                "required": [
+                  "name",
+                  "status",
+                  "from",
+                  "installs",
+                  "purpose"
+                ],
                 "properties": {
                   "name": {
                     "type": "string",
@@ -742,7 +953,9 @@
     },
     "napi": {
       "type": "object",
-      "required": ["platforms"],
+      "required": [
+        "platforms"
+      ],
       "properties": {
         "platforms": {
           "type": "array",
@@ -806,7 +1019,9 @@
       "type": "array",
       "items": {
         "type": "object",
-        "required": ["reason"],
+        "required": [
+          "reason"
+        ],
         "properties": {
           "rule": {
             "type": "string",
@@ -840,6 +1055,10 @@
     "release": {
       "type": "object",
       "properties": {
+        "github": {
+          "type": "boolean",
+          "description": "Whether this repo cuts GitHub Releases. Defaults to true, so a repo that omits it keeps the channel — only an explicit false opts out, because the workflow is cascaded fleet-wide and a member publishing to npm or crates.io uses the release as the immutable marker its consumers and provenance checks read. Set false where distribution runs entirely through another channel: socket-wheelhouse ships its fleet pack as an OCI artifact on GHCR (pulled anonymously by scripts/repo/gen/bootstrap/src/ghcr-fetch.mts and gated by check/pack-reads-are-registry-only.mts), so a parallel GitHub Release only mints a second name for bytes nobody fetches under it. Read by scripts/fleet/release/github-release-enabled.mts, which gates the github-release workflow."
+        },
         "releaseLine": {
           "type": "object",
           "properties": {
@@ -871,7 +1090,10 @@
           "type": "array",
           "items": {
             "type": "object",
-            "required": ["id", "reason"],
+            "required": [
+              "id",
+              "reason"
+            ],
             "properties": {
               "id": {
                 "type": "string",
@@ -903,7 +1125,7 @@
         "versionSource": {
           "type": "string",
           "minLength": 1,
-          "description": "Repo-relative path of the manifest that owns the release version, granting that ONE file the exemption from the private-package 0.0.0 pin. Declare it when the root manifest is private yet versioned for a non-npm channel (a browser-store or marketplace listing, a binary release), or when a workspace designates one member as the lockstep bump source. Read by scripts/fleet/_shared/release-version-source.mts — the single answer shared by private-packages-are-unpublishable, bump.mts, and any build stamping a version. Leave it unset when every package publishes to npm: each manifest's own version is then its released version."
+          "description": "Repo-relative path of the manifest that owns the release version, granting that ONE file the exemption from the private-package 0.0.0 pin. Declare it when the root manifest is private yet versioned for a non-npm channel (a browser-store or marketplace listing, a binary release), or when a workspace designates one member as the lockstep bump source. Read by scripts/fleet/release/version-source.mts — the single answer shared by private-packages-are-unpublishable, bump.mts, and any build stamping a version. Leave it unset when every package publishes to npm: each manifest's own version is then its released version."
         },
         "latestDistTagBranch": {
           "type": "string",
@@ -976,7 +1198,7 @@
           "items": {
             "type": "string"
           },
-          "description": "Heavy external-suite / cross-impl conformance wrapper globs excluded from the DEFAULT (unit) + cover suites, keeping the unit pass inside the fleet under-a-minute budget. A repo setting this MUST pair it with an explicit `test:conformance` runner so the tier never silently drops."
+          "description": "Heavy external-suite / cross-impl conformance wrapper globs excluded from the DEFAULT (unit) + cover suites, keeping the unit pass inside the fleet 10-second budget. A repo setting this MUST pair it with an explicit `test:conformance` runner so the tier never silently drops."
         },
         "lanes": {
           "type": "object",
@@ -1037,10 +1259,11 @@
           ],
           "description": "Vitest pool implementation. `threads` (the fleet default) is faster; `forks` gives each file a real process, which a suite needing true process isolation — its own cwd, its own native addon state — requires."
         },
-        "unitBudgetMs": {
+        "testBudgetMs": {
           "type": "number",
-          "minimum": 1000,
-          "description": "Wall-clock budget for the unit test suites under cover.mts, in milliseconds. Fleet default 60000 (under a minute). A suite exceeding the budget gets a loud report-only warning pointing at the slow/mid lanes (`vitest.lanes`); the gate ratchets to a hard failure once the fleet conforms."
+          "exclusiveMinimum": 0,
+          "maximum": 10000,
+          "description": "Wall-clock budget for the unit test suites under cover.mts, in milliseconds. The unit tier answers in seconds, so 10000 is both the default and the ceiling: a repo may tune DOWN, never up. A suite that needs longer is telling you it is not a unit suite, and it belongs in the mid or slow lane (`vitest.lanes`). Reach for `pool: threads` and `vitest.nonIsolated` before reaching for a bigger number."
         }
       },
       "additionalProperties": false,
@@ -1079,6 +1302,13 @@
         "blockExoticSubdeps": {
           "type": "boolean",
           "description": "Refuse transitive git/tarball subdeps (direct git deps still allowed). Required true; the field exists so a repo can document the intent locally."
+        },
+        "catalogDriftIgnore": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "description": "Package patterns exempt from catalog drift checks."
         },
         "minimumReleaseAge": {
           "type": "integer",
