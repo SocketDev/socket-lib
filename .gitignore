@@ -1897,6 +1897,8 @@ opencode.json
 .claude/skills/fleet/auditing-gha/canonical-patterns.mts
 .claude/skills/fleet/auditing-gha/run-report.mts
 .claude/skills/fleet/auditing-gha/run.mts
+.claude/skills/fleet/authoring-charts/SKILL.md
+.claude/skills/fleet/authoring-charts/references/markdown-comparisons.md
 .claude/skills/fleet/authoring-spec/SKILL.md
 .claude/skills/fleet/building-tdd/SKILL.md
 .claude/skills/fleet/cascading-fleet/SKILL.md
@@ -2062,6 +2064,7 @@ opencode.json
 .claude/skills/fleet/scanning-vulns/SKILL.md
 .claude/skills/fleet/scanning-vulns/references/procedure.md
 .claude/skills/fleet/setup-repo/SKILL.md
+.claude/skills/fleet/spend/SKILL.md
 .claude/skills/fleet/squashing-history/SKILL.md
 .claude/skills/fleet/squashing-history/reference.md
 .claude/skills/fleet/squashing-history/references/cascade-interaction.md
@@ -3736,10 +3739,13 @@ scripts/fleet/spend-forecast.mts
 scripts/fleet/spend-report.mts
 scripts/fleet/spend-statusline-render-entry.mts
 scripts/fleet/spend-statusline.mts
+scripts/fleet/spend-usage.mts
 scripts/fleet/spend/claude-usage-breakdowns.mts
 scripts/fleet/spend/claude-usage.mts
+scripts/fleet/spend/codex-account.mts
 scripts/fleet/spend/codex-usage.mts
 scripts/fleet/spend/fireworks-usage.mts
+scripts/fleet/spend/harness.mts
 scripts/fleet/spend/ledger-report.mts
 scripts/fleet/spend/offload-read.mts
 scripts/fleet/spend/offload.mts
