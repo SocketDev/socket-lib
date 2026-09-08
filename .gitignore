@@ -311,6 +311,7 @@ opencode.json
 .claude/hooks/fleet/_shared/stop-request.mts
 .claude/hooks/fleet/_shared/suppression-rules.mts
 .claude/hooks/fleet/_shared/tag-shapes.mts
+.claude/hooks/fleet/_shared/task-scope.mts
 .claude/hooks/fleet/_shared/test/fixtures.mts
 .claude/hooks/fleet/_shared/token-patterns.mts
 .claude/hooks/fleet/_shared/trailing-aside.mts
@@ -1711,6 +1712,10 @@ opencode.json
 .claude/hooks/fleet/target-arch-env-guard/index.mts
 .claude/hooks/fleet/target-arch-env-guard/package.json
 .claude/hooks/fleet/target-arch-env-guard/tsconfig.json
+.claude/hooks/fleet/task-scope-guard/README.md
+.claude/hooks/fleet/task-scope-guard/index.mts
+.claude/hooks/fleet/task-scope-guard/package.json
+.claude/hooks/fleet/task-scope-guard/tsconfig.json
 .claude/hooks/fleet/test-dir-name-guard/README.md
 .claude/hooks/fleet/test-dir-name-guard/index.mts
 .claude/hooks/fleet/test-dir-name-guard/package.json
@@ -1872,6 +1877,7 @@ opencode.json
 .claude/rules/fleet/prevent-spontaneous-agent-spawn.md
 .claude/rules/fleet/prose-style-and-doctrine.md
 .claude/rules/fleet/shared-module-is-named-util.md
+.claude/rules/fleet/task-scope.md
 .claude/rules/fleet/verify-state-before-acting.md
 .claude/skills/fleet/_shared/compound-lessons.md
 .claude/skills/fleet/_shared/env-check.md
