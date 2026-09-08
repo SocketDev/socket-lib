@@ -26,6 +26,12 @@ import { extractZip } from '../../src/archives/zip.mjs'
 
 import { runWithTempDir } from '../unit/util/temp-files.mjs'
 
+// Size guards inspect declared metadata before decompressing fixture bytes.
+function addDeclaredSizeFile(zip: AdmZip, name: string, size: number): void {
+  zip.addFile(name, Buffer.from('fixture'))
+  zip.getEntry(name)!.header.size = size
+}
+
 // Suppress unhandled error warnings from tar-fs stream destruction.
 // The errors are properly caught by the pipeline, but Vitest tracks Error
 // object creation. The size-limit failures below tear down the tar stream,
@@ -96,9 +102,7 @@ describe('archives security features', () => {
           const bombZipPath = path.join(tempDir, 'bomb.zip')
           const zip = new AdmZip()
 
-          // Create a large buffer (150MB > 100MB default)
-          const largeBuffer = Buffer.alloc(150 * 1024 * 1024)
-          zip.addFile('large-file.bin', largeBuffer)
+          addDeclaredSizeFile(zip, 'large-file.bin', 150 * 1024 * 1024)
 
           zip.writeZip(bombZipPath)
 
@@ -118,11 +122,10 @@ describe('archives security features', () => {
           const bombZipPath = path.join(tempDir, 'bomb-total.zip')
           const zip = new AdmZip()
 
-          // Create multiple 80MB files (15 * 80MB = 1200MB > 1GB default total)
-          // But each file is under 100MB individual limit
+          // Fifteen declared 80 MiB entries exceed the default 1 GiB total.
+          // Each declared entry remains below the default 100 MiB limit.
           for (let i = 0; i < 15; i++) {
-            const buffer = Buffer.alloc(80 * 1024 * 1024)
-            zip.addFile(`file${i}.bin`, buffer)
+            addDeclaredSizeFile(zip, `file${i}.bin`, 80 * 1024 * 1024)
           }
 
           zip.writeZip(bombZipPath)
@@ -142,28 +145,26 @@ describe('archives security features', () => {
         await runWithTempDir(async tempDir => {
           const bombTarPath = path.join(tempDir, 'bomb.tar')
 
-          // Create tar with large file
-          const fileSize = 150 * 1024 * 1024
           const pack = createTarPack()
-
-          // Use a callback to write large data in chunks
-          const entry = pack.entry({ name: 'large-file.bin', size: fileSize })
-
-          // Write in chunks to avoid memory issues
-          const chunkSize = 10 * 1024 * 1024
-          for (let i = 0; i < fileSize; i += chunkSize) {
-            const size = Math.min(chunkSize, fileSize - i)
-            entry.write(Buffer.alloc(size))
-          }
-          entry.end()
+          pack.entry({ name: 'large-file.bin' }, Buffer.from('fixture'))
           pack.finalize()
-
-          const tarWriteStream = createWriteStream(bombTarPath)
-          await new Promise<void>((resolve, reject) => {
-            pack.pipe(tarWriteStream)
-            tarWriteStream.on('finish', () => resolve())
-            tarWriteStream.on('error', reject)
-          })
+          const chunks: Uint8Array[] = []
+          for await (const chunk of pack) {
+            chunks.push(chunk)
+          }
+          const archive = Buffer.concat(chunks)
+          archive.write(
+            `${(150 * 1024 * 1024).toString(8).padStart(11, '0')}\0`,
+            124,
+          )
+          // TAR checksums count the checksum field as eight ASCII spaces.
+          archive.fill(32, 148, 156)
+          let checksum = 0
+          for (const byte of archive.subarray(0, 512)) {
+            checksum += byte
+          }
+          archive.write(`${checksum.toString(8).padStart(6, '0')}\0 `, 148)
+          await fs.writeFile(bombTarPath, archive)
 
           const extractDir = path.join(tempDir, 'extract')
           await expect(extractTar(bombTarPath, extractDir)).rejects.toThrow(
@@ -179,30 +180,29 @@ describe('archives security features', () => {
         const zipPath = path.join(tempDir, 'custom.zip')
         const zip = new AdmZip()
 
-        // Create 5MB file
-        const buffer = Buffer.alloc(5 * 1024 * 1024)
+        const buffer = Buffer.alloc(5 * 1024)
         zip.addFile('file.bin', buffer)
 
         zip.writeZip(zipPath)
 
         const extractDir = path.join(tempDir, 'extract')
 
-        // Should fail with 1MB limit
+        // Reject above the configured limit.
         await expect(
           extractZip(zipPath, extractDir, {
-            maxFileSize: 1 * 1024 * 1024,
+            maxFileSize: 1024,
           }),
         ).rejects.toThrow(/File size exceeds limit/)
 
-        // Should succeed with 10MB limit
+        // Extract the actual payload below both configured limits.
         const extractDir2 = path.join(tempDir, 'extract2')
         await extractZip(zipPath, extractDir2, {
-          maxFileSize: 10 * 1024 * 1024,
-          maxTotalSize: 10 * 1024 * 1024,
+          maxFileSize: 10 * 1024,
+          maxTotalSize: 10 * 1024,
         })
 
         const extracted = await fs.readFile(path.join(extractDir2, 'file.bin'))
-        expect(extracted.length).toBe(5 * 1024 * 1024)
+        expect(extracted).toEqual(buffer)
       }, 'security-custom-limits-')
     })
   })
@@ -320,9 +320,7 @@ describe('archives security features', () => {
       await runWithTempDir(async tempDir => {
         const zipPath = path.join(tempDir, 'archive.zip')
         const zip = new AdmZip()
-        // Create a large file to test size limits via auto-detection
-        const largeBuffer = Buffer.alloc(150 * 1024 * 1024)
-        zip.addFile('large.bin', largeBuffer)
+        addDeclaredSizeFile(zip, 'large.bin', 150 * 1024 * 1024)
         zip.writeZip(zipPath)
 
         const extractDir = path.join(tempDir, 'extract')
