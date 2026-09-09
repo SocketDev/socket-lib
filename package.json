@@ -1239,6 +1239,11 @@
       "types": "./dist/env/path.d.ts",
       "default": "./dist/env/path.js"
     },
+    "./env/power-state": {
+      "source": "./src/env/power-state.mts",
+      "types": "./dist/env/power-state.d.ts",
+      "default": "./dist/env/power-state.js"
+    },
     "./env/pre-commit": {
       "source": "./src/env/pre-commit.mts",
       "types": "./dist/env/pre-commit.d.ts",
