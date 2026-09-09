@@ -11,6 +11,8 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
 import { getPowerSnapshot, getPowerState } from '../../../src/power/node.mjs'
 
+import { getLinuxPowerSnapshot } from '../../../src/power/probe.mjs'
+
 const state = vi.hoisted(() => ({
   platform: 'darwin',
   native: undefined as unknown,
@@ -414,4 +416,41 @@ describe('getPowerSnapshot', () => {
       vi.useRealTimers()
     }
   })
+})
+
+test('aborted Linux inventory stops before reading supply contents', async () => {
+  const controller = new AbortController()
+  controller.abort()
+  expect(await getLinuxPowerSnapshot(controller.signal)).toEqual({
+    state: 'unknown',
+    batteryPercent: undefined,
+  })
+  expect(command).not.toHaveBeenCalled()
+})
+
+test('late inconclusive native detection never starts an OS probe', async () => {
+  vi.useFakeTimers()
+  const pending = Promise.withResolvers<unknown>()
+  try {
+    state.native = { isOnAcPower: () => pending.promise }
+    const result = getPowerState()
+    await vi.advanceTimersByTimeAsync(2000)
+    expect(await result).toBe('unknown')
+    pending.resolve(undefined)
+    await vi.advanceTimersByTimeAsync(0)
+    expect(command).not.toHaveBeenCalled()
+    expect(vi.getTimerCount()).toBe(0)
+  } finally {
+    pending.resolve(undefined)
+    vi.useRealTimers()
+  }
+})
+
+test('unsupported snapshot platform retains unknown source and charge', async () => {
+  state.platform = 'freebsd'
+  expect(await getPowerSnapshot()).toEqual({
+    state: 'unknown',
+    batteryPercent: undefined,
+  })
+  expect(command).not.toHaveBeenCalled()
 })

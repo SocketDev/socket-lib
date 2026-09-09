@@ -41,7 +41,7 @@ describe('browser power', () => {
     },
   )
 
-  test.each([undefined, false, 'battery'])(
+  test.each([undefined, false, 'battery', {}])(
     'handles invalid manager %s',
     async battery => {
       vi.stubGlobal('navigator', { getBattery: async () => battery })
