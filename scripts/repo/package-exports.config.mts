@@ -27,6 +27,11 @@ export const config: ExportsConfig = {
   // to `./errors/message`.
   aliases: [
     {
+      browserTo: './power/browser',
+      from: './power',
+      to: './power/node',
+    },
+    {
       browserTo: './process/spawn/retry/browser',
       from: './process/spawn/retry',
       to: './process/spawn/retry/node',

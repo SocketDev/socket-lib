@@ -1239,11 +1239,6 @@
       "types": "./dist/env/path.d.ts",
       "default": "./dist/env/path.js"
     },
-    "./env/power-state": {
-      "source": "./src/env/power-state.mts",
-      "types": "./dist/env/power-state.d.ts",
-      "default": "./dist/env/power-state.js"
-    },
     "./env/pre-commit": {
       "source": "./src/env/pre-commit.mts",
       "types": "./dist/env/pre-commit.d.ts",
@@ -2983,6 +2978,39 @@
       "source": "./src/polyfills/set.mts",
       "types": "./dist/polyfills/set.d.ts",
       "default": "./dist/polyfills/set.js"
+    },
+    "./power": {
+      "source": "./src/power/node.mts",
+      "browser": {
+        "types": "./dist/power/browser.d.ts",
+        "default": "./dist/power/browser.js"
+      },
+      "types": "./dist/power/node.d.ts",
+      "default": "./dist/power/node.js"
+    },
+    "./power/browser": {
+      "source": "./src/power/browser.mts",
+      "browser": {
+        "types": "./dist/power/browser.d.ts",
+        "default": "./dist/power/browser.js"
+      },
+      "types": "./dist/power/browser.d.ts",
+      "default": "./dist/power/browser.js"
+    },
+    "./power/node": {
+      "source": "./src/power/node.mts",
+      "types": "./dist/power/node.d.ts",
+      "default": "./dist/power/node.js"
+    },
+    "./power/probe": {
+      "source": "./src/power/probe.mts",
+      "types": "./dist/power/probe.d.ts",
+      "default": "./dist/power/probe.js"
+    },
+    "./power/util": {
+      "source": "./src/power/util.mts",
+      "types": "./dist/power/util.d.ts",
+      "default": "./dist/power/util.js"
     },
     "./primordials/array": {
       "source": "./src/primordials/array.mts",

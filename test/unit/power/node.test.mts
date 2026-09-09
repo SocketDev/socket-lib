@@ -1,18 +1,15 @@
 import path from 'node:path'
 import { ChildProcess } from 'node:child_process'
+import type { ExecException, execFile } from 'node:child_process'
 import process from 'node:process'
-import * as fsPromises from 'node:fs/promises'
+import fs from 'node:fs/promises'
 import { mkdtempSync, writeFileSync } from 'node:fs'
 import os from 'node:os'
 import { safeDelete } from '../../../src/fs/safe.mjs'
-import type { SpawnResult } from '../../../src/process/spawn/types.mjs'
 
 import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 
-import {
-  getPowerSnapshot,
-  getPowerState,
-} from '../../../src/env/power-state.mjs'
+import { getPowerSnapshot, getPowerState } from '../../../src/power/node.mjs'
 
 const state = vi.hoisted(() => ({
   platform: 'darwin',
@@ -27,24 +24,16 @@ const state = vi.hoisted(() => ({
   entries: ['adapter', 'battery'],
 }))
 const command = vi.hoisted(() =>
-  vi.fn((cmd: string, args: readonly string[] = []): SpawnResult<string> => {
-    const child = new ChildProcess()
-    const output: Awaited<SpawnResult<string>> = {
-      cmd,
-      args,
-      code: 0,
-      signal: child.signalCode,
-      stdout: state.stdout,
-      stderr: '',
+  vi.fn((...parameters: Parameters<typeof execFile>) => {
+    const callback = parameters[3]
+    let error: ExecException | null = null
+    if (state.commandError) {
+      error = Object.assign(new Error('probe unavailable'), {
+        cmd: parameters[0],
+      })
     }
-    const promise = state.commandError
-      ? Promise.reject(new Error('probe unavailable'))
-      : Promise.resolve(output)
-    const handles: Pick<SpawnResult<string>, 'process' | 'stdin'> = {
-      process: child,
-      stdin: child.stdin,
-    }
-    return Object.assign(promise, handles)
+    callback?.(error, state.stdout, '')
+    return new ChildProcess()
   }),
 )
 
@@ -62,7 +51,7 @@ vi.mock(import('../../../src/node/process.mjs'), () => {
   return { getNodeProcess: () => mockProcess }
 })
 vi.mock(import('../../../src/node/fs/promises.mjs'), () => {
-  const mockFs = { ...fsPromises }
+  const mockFs = { ...fs }
   vi.spyOn(mockFs, 'readdir').mockImplementation(async (directory, options) => {
     state.directories.push(String(directory))
     if (state.readError) {
@@ -71,7 +60,7 @@ vi.mock(import('../../../src/node/fs/promises.mjs'), () => {
     for (const entry of state.entries) {
       writeFileSync(path.join(state.directory, entry), '')
     }
-    return await fsPromises.readdir(state.directory, options)
+    return await fs.readdir(state.directory, options)
   })
   vi.spyOn(mockFs, 'readFile').mockImplementation(async file => {
     const value = state.files.get(path.basename(path.dirname(String(file))))
@@ -82,14 +71,12 @@ vi.mock(import('../../../src/node/fs/promises.mjs'), () => {
   })
   return { getNodeFsPromises: () => mockFs }
 })
-vi.mock(
-  import('../../../src/process/spawn/child.mjs'),
-  async importOriginal => {
-    const actual = { ...(await importOriginal()) }
-    vi.spyOn(actual, 'spawn').mockImplementation(command)
-    return actual
-  },
-)
+vi.mock(import('../../../src/node/child-process.mjs'), async importOriginal => {
+  const actual = await importOriginal()
+  const child = { ...actual.getNodeChildProcess() }
+  vi.spyOn(child, 'execFile').mockImplementation(command)
+  return { getNodeChildProcess: () => child }
+})
 
 beforeEach(() => {
   state.platform = 'darwin'
@@ -157,6 +144,7 @@ describe('getPowerState', () => {
         killSignal: 'SIGKILL',
         shell: false,
       }),
+      expect.any(Function),
     )
   })
 
@@ -180,6 +168,7 @@ describe('getPowerState', () => {
       'powershell.exe',
       expect.arrayContaining(['-NoProfile', '-NonInteractive']),
       expect.objectContaining({ timeout: 2000, shell: false }),
+      expect.any(Function),
     )
   })
 

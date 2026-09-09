@@ -3,20 +3,15 @@
  *   probes. Missing or inconclusive evidence returns unknown.
  */
 
+import { POWER_PROBE_TIMEOUT_MS, withPowerProbeDeadline } from './util.mjs'
+import type { PowerSnapshot, PowerState } from './util.mjs'
+
+import { KB } from '../constants/units.mjs'
+import { getNodeChildProcess } from '../node/child-process.mjs'
 import { getNodeFsPromises } from '../node/fs/promises.mjs'
 import { getNodePath } from '../node/path.mjs'
 import { getNodeProcess } from '../node/process.mjs'
 
-import { spawn } from '../process/spawn/child.mjs'
-
-export type PowerState = 'ac' | 'battery' | 'unknown'
-
-export type PowerSnapshot = {
-  state: PowerState
-  batteryPercent: number | undefined
-}
-
-export const POWER_PROBE_TIMEOUT_MS = 2000
 export const POWER_SUPPLY_DIRECTORY = '/sys/class/power_supply'
 export const POWER_SUPPLY_LIMIT = 64
 
@@ -308,33 +303,26 @@ export async function readPowerStateCommand(
   args: readonly string[],
   signal: AbortSignal,
 ): Promise<string> {
-  const result = await spawn(command, args, {
-    timeout: POWER_PROBE_TIMEOUT_MS,
-    killSignal: 'SIGKILL',
-    signal,
-    shell: false,
-    stdio: ['ignore', 'pipe', 'ignore'],
-    stdioString: true,
-  })
-  return result.stdout.trim()
-}
-
-export async function withPowerProbeDeadline<T>(
-  probe: (signal: AbortSignal) => Promise<T>,
-  fallback: T,
-): Promise<T> {
-  const controller = new AbortController()
-  return await new Promise<T>(resolve => {
-    const timer = setTimeout(() => {
-      controller.abort()
-      resolve(fallback)
-    }, POWER_PROBE_TIMEOUT_MS)
-    function finishPowerProbe(value: T): void {
-      clearTimeout(timer)
-      resolve(value)
-    }
-    void probe(controller.signal).then(finishPowerProbe, () =>
-      finishPowerProbe(fallback),
+  return await new Promise<string>((resolve, reject) => {
+    const childProcess = getNodeChildProcess()
+    childProcess.execFile(
+      command,
+      args,
+      {
+        encoding: 'utf8',
+        timeout: POWER_PROBE_TIMEOUT_MS,
+        killSignal: 'SIGKILL',
+        signal,
+        shell: false,
+        maxBuffer: 64 * KB,
+      },
+      (error, stdout) => {
+        if (error) {
+          reject(error)
+        } else {
+          resolve(stdout.trim())
+        }
+      },
     )
   })
 }
