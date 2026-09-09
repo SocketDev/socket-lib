@@ -18,6 +18,10 @@ import { getGlobMatcher } from '@socketsecurity/lib/globs/matcher'
 import { GUARDED_DEFINES } from '../../scripts/repo/build-externals/guarded-defines.mts'
 
 describe('externals guarded defines', () => {
+  it('preserves runtime DEBUG namespace selection', () => {
+    expect(GUARDED_DEFINES).not.toHaveProperty('process.env.DEBUG')
+  })
+
   it('never substitutes a bare identifier that is a real global in this runtime', () => {
     const bareIdentifiers = Object.keys(GUARDED_DEFINES).filter(
       key => !key.includes('.'),

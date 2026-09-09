@@ -26,7 +26,6 @@ export const GUARDED_DEFINES: Record<string, string> = {
   HTMLElement: 'undefined',
   'process.browser': 'false',
   'process.env.CI': 'false',
-  'process.env.DEBUG': 'undefined',
   'process.env.JEST_WORKER_ID': 'undefined',
   'process.env.NODE_ENV': '"production"',
   'process.env.NODE_TEST': 'undefined',
