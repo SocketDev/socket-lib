@@ -4029,6 +4029,8 @@ dist/
 # ─── repo-local (socket-wheelhouse): keep hand-authored files that the
 # fleet-canonical globs would otherwise ignore (untrack-ignored-files fix) ───
 !/src/external/
+!/scripts/repo/build/
+!/test/unit/build/
 !/test/fixtures/
 !/tools/prim/test/fixtures/
 # Committed package-tarball fixtures for the offline pacote registry mock; the

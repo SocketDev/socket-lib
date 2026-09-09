@@ -239,14 +239,14 @@ export async function buildExternals(
 }
 
 /**
- * Run the post-build dist-shaping steps (scripts/repo/post-build.mts). Returns
+ * Run the post-build dist-shaping steps (scripts/repo/build/post.mts). Returns
  * exitCode for external logging.
  */
 export async function runPostBuild(
   options: BuildStepOptions = {},
 ): Promise<number> {
   return await runNodeBuildScript(
-    'scripts/repo/post-build.mts',
+    'scripts/repo/build/post.mts',
     'Post-build',
     options,
   )

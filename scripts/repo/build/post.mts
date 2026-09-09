@@ -8,18 +8,18 @@
  */
 
 import process from 'node:process'
-import { isQuiet } from './flags/predicates.mts'
+import { isQuiet } from '../flags/predicates.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { runSequence } from '../fleet/util/run-command.mts'
+import { runSequence } from '../../fleet/util/run-command.mts'
 
-import { isMainModule } from '../fleet/process/is-main-module.mts'
-import { runMain } from '../fleet/process/run-main.mts'
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { runMain } from '../../fleet/process/run-main.mts'
 
-import type { ScriptMeta } from '../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -45,7 +45,7 @@ async function main(): Promise<void> {
       // so the pairing rename has to happen before it, not after.
       {
         args: [
-          'scripts/repo/post-build/pair-declarations-with-js.mts',
+          'scripts/repo/build/post/pair-declarations-with-js.mts',
           ...fixArgs,
         ],
         command: 'node',
@@ -56,17 +56,17 @@ async function main(): Promise<void> {
       },
       {
         args: [
-          'scripts/repo/post-build/rewrite-external-imports.mts',
+          'scripts/repo/build/post/rewrite-external-imports.mts',
           ...fixArgs,
         ],
         command: 'node',
       },
       {
-        args: ['scripts/repo/post-build/rewrite-cjs-exports.mts', ...fixArgs],
+        args: ['scripts/repo/build/post/rewrite-cjs-exports.mts', ...fixArgs],
         command: 'node',
       },
       {
-        args: ['scripts/repo/post-build/apply-unexposed-stubs.mts', ...fixArgs],
+        args: ['scripts/repo/build/post/apply-unexposed-stubs.mts', ...fixArgs],
         command: 'node',
       },
       {
@@ -125,7 +125,7 @@ async function main(): Promise<void> {
 const SCRIPT_META: ScriptMeta = {
   describe:
     'orchestrates the post-build dist-shaping steps: exports rewrite, external imports, stubs, validators',
-  help: `Usage: node scripts/repo/post-build.mts [flags]
+  help: `Usage: node scripts/repo/build/post.mts [flags]
 
   --verbose           show detailed output from each step
   --quiet, --silent   suppress progress messages`,

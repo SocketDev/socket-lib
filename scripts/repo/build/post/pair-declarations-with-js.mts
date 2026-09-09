@@ -27,7 +27,7 @@
  *   Runs BEFORE package-exports generation so the map is built from the final
  *   names.
  *
- *   Usage: node scripts/repo/post-build/pair-declarations-with-js.mts [--quiet]
+ *   Usage: node scripts/repo/build/post/pair-declarations-with-js.mts [--quiet]
  */
 
 import { readdirSync, readFileSync, renameSync, writeFileSync } from 'node:fs'
@@ -36,11 +36,11 @@ import process from 'node:process'
 
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { REPO_ROOT } from '../../fleet/paths.mts'
-import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { REPO_ROOT } from '../../../fleet/paths.mts'
+import { isMainModule } from '../../../fleet/process/is-main-module.mts'
+import { runMain } from '../../../fleet/process/run-main.mts'
 
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -141,7 +141,7 @@ export function main(): void {
 const SCRIPT_META: ScriptMeta = {
   describe:
     'renames dist .d.mts declarations to .d.ts and repoints their .mjs specifiers at .js',
-  help: `Usage: node scripts/repo/post-build/pair-declarations-with-js.mts [flags]
+  help: `Usage: node scripts/repo/build/post/pair-declarations-with-js.mts [flags]
 
   --quiet  print nothing on success`,
 }

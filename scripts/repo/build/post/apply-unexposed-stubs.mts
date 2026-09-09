@@ -6,19 +6,19 @@
  *   before the dist validators so the stubbed export names still gate.
  */
 
-import { isQuiet } from '../flags/predicates.mts'
+import { isQuiet } from '../../flags/predicates.mts'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import {
   findStubsReachableFromShippedCode,
   reachableStubErrorMessage,
-} from '../build-stubs/dist-graph.mts'
-import { applyUnexposedStubs } from '../build-stubs/unexposed.mts'
-import { REPO_ROOT } from '../../fleet/paths.mts'
-import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+} from '../../build-stubs/dist-graph.mts'
+import { applyUnexposedStubs } from '../../build-stubs/unexposed.mts'
+import { REPO_ROOT } from '../../../fleet/paths.mts'
+import { isMainModule } from '../../../fleet/process/is-main-module.mts'
+import { runMain } from '../../../fleet/process/run-main.mts'
 
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -39,7 +39,7 @@ function main(): void {
 const SCRIPT_META: ScriptMeta = {
   describe:
     'swaps each dist module listed in the buildStubs.unexposed section for a throwing stub',
-  help: `Usage: node scripts/repo/post-build/apply-unexposed-stubs.mts [flags]
+  help: `Usage: node scripts/repo/build/post/apply-unexposed-stubs.mts [flags]
 
   --quiet, --silent   suppress the success summary`,
 }

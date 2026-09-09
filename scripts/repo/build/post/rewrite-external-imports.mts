@@ -7,14 +7,14 @@ import { promises as fs } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 
-import { isQuiet } from '../flags/predicates.mts'
+import { isQuiet } from '../../flags/predicates.mts'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { isErrnoException } from '@socketsecurity/lib-stable/errors/predicates'
 
-import { externalPackages, scopedPackages } from '../build-externals/config.mts'
-import { REPO_ROOT } from '../../fleet/paths.mts'
+import { externalPackages, scopedPackages } from '../../build-externals/config.mts'
+import { REPO_ROOT } from '../../../fleet/paths.mts'
 
 const logger = getDefaultLogger()
 

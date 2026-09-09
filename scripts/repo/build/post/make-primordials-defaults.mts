@@ -12,7 +12,7 @@
  *   transitively just to run a primordials check), and the bundler runs at
  *   publish time, before consumer install. Embedding the derived map keeps the
  *   published bundle self-contained. Re-run whenever globals bumps, or
- *   src/primordials/ exports change. Wired into scripts/repo/post-build.mts.
+ *   src/primordials/ exports change. Wired into scripts/repo/build/post.mts.
  */
 
 import { compareStr } from '@socketsecurity/lib-stable/sorts/strings'
@@ -23,11 +23,11 @@ import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
 import globals from 'globals'
 
-import { REPO_ROOT } from '../../fleet/paths.mts'
-import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { REPO_ROOT } from '../../../fleet/paths.mts'
+import { isMainModule } from '../../../fleet/process/is-main-module.mts'
+import { runMain } from '../../../fleet/process/run-main.mts'
 
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -160,7 +160,7 @@ function main(): void {
   ]
 
   const banner = `/**
- * @file GENERATED — do not edit by hand. Run \`node scripts/repo/post-build/make-primordials-defaults.mts\`
+ * @file GENERATED — do not edit by hand. Run \`node scripts/repo/build/post/make-primordials-defaults.mts\`
  *   (also runs as part of \`pnpm run build\`) to regenerate from the
  *   \`globals\` npm package's globals.json crossed against
  *   src/primordials/*.ts \`Ctor\` exports.
@@ -212,7 +212,7 @@ ${internalArrLines.join('\n')}
 const SCRIPT_META: ScriptMeta = {
   describe:
     'codegens src/primordials/checks/primordials-defaults.ts from the globals package crossed against src/primordials/*.ts',
-  help: `Usage: node scripts/repo/post-build/make-primordials-defaults.mts
+  help: `Usage: node scripts/repo/build/post/make-primordials-defaults.mts
 
   No flags. Re-run whenever globals bumps or src/primordials/ exports change.`,
 }

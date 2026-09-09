@@ -1,5 +1,5 @@
 /**
- * @file Specs for scripts/repo/post-build/pair-declarations-with-js — the
+ * @file Specs for scripts/repo/build/post/pair-declarations-with-js — the
  *   rename step that also repoints declaration specifiers.
  *   The bug these lock down shipped in 7.0.0: tsgo emits a `.mts` source's
  *   re-exports with `.mjs` specifiers, the step renamed the file to `.d.ts`
@@ -15,7 +15,7 @@ import path from 'node:path'
 
 import { describe, expect, it } from 'vitest'
 
-import { rewriteDeclarationSpecifiers } from '../../scripts/repo/post-build/pair-declarations-with-js.mts'
+import { rewriteDeclarationSpecifiers } from '../../scripts/repo/build/post/pair-declarations-with-js.mts'
 import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
 
 const DIST_DIR = path.join(REPO_ROOT, 'dist')

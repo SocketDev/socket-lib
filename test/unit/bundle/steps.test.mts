@@ -130,7 +130,7 @@ describe('the steps that share runNodeBuildScript', () => {
     reset(1)
     await runPostBuild({ verbose: true })
     expect(runCommand.calls[0]).toEqual({
-      args: ['scripts/repo/post-build.mts', '--verbose'],
+      args: ['scripts/repo/build/post.mts', '--verbose'],
       command: 'node',
     })
     expect(logged).toEqual(['Post-build failed'])

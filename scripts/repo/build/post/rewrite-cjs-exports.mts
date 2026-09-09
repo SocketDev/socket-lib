@@ -10,17 +10,17 @@ import process from 'node:process'
 import { parse } from '@babel/parser'
 import MagicString from 'magic-string'
 
-import { isQuiet } from '../flags/predicates.mts'
+import { isQuiet } from '../../flags/predicates.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { isErrnoException } from '@socketsecurity/lib-stable/errors/predicates'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 
-import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { isMainModule } from '../../../fleet/process/is-main-module.mts'
+import { runMain } from '../../../fleet/process/run-main.mts'
 
-import { REPO_ROOT } from '../../fleet/paths.mts'
+import { REPO_ROOT } from '../../../fleet/paths.mts'
 
-import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../../../fleet/process/run-main.mts'
 
 const logger = getDefaultLogger()
 
@@ -281,7 +281,7 @@ export function rewriteCommonJsExports(
 const SCRIPT_META: ScriptMeta = {
   describe:
     "rewrites the bundler's minified CommonJS exports in dist/ to a plain module.exports assignment",
-  help: `Usage: node scripts/repo/post-build/rewrite-cjs-exports.mts [flags]
+  help: `Usage: node scripts/repo/build/post/rewrite-cjs-exports.mts [flags]
 
   --verbose             name every rewritten file
   --quiet, --silent     suppress non-error output`,
