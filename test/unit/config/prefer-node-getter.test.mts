@@ -78,7 +78,7 @@ describe('isExemptFile', () => {
   })
 
   it('exempts anything outside a src tree', () => {
-    expect(isExemptFile('/repo/scripts/repo/bundle.mts')).toBe(true)
+    expect(isExemptFile('/repo/scripts/repo/build/run.mts')).toBe(true)
   })
 
   it('exempts a nested src belonging to a tool, script, or test', () => {

@@ -187,7 +187,7 @@ async function main(): Promise<void> {
 const SCRIPT_META: ScriptMeta = {
   describe:
     'unified clean runner — removes build artifacts, caches, and other generated files',
-  help: `Usage: node scripts/repo/bundle/clean.mts [flags]
+  help: `Usage: node scripts/repo/build/clean.mts [flags]
 
   --all               clean everything (default if no flags)
   --cache             clean cache directories

@@ -1,7 +1,7 @@
 /**
  * @file Bundle runner (the `build` script): rolldown for the per-file source +
  *   externals builds, TypeScript 7 for declarations. Step scripts live in
- *   scripts/repo/bundle/: clean, externals, verify-dist.
+ *   scripts/repo/build/: clean, externals, verify-dist.
  */
 
 import { existsSync, readFileSync } from 'node:fs'
@@ -10,32 +10,32 @@ import process from 'node:process'
 
 import { watch } from 'rolldown'
 
-import { isQuiet } from './flags/predicates.mts'
+import { isQuiet } from '../flags/predicates.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
-import { buildConfig } from '../../.config/rolldown.config.mts'
+import { buildConfig } from '../../../.config/rolldown.config.mts'
 // Repo root from the canonical paths module (1 path, 1 reference).
-import { REPO_ROOT as rootPath } from '../fleet/paths.mts'
-import { parseArgs } from '../fleet/util/parse-args.mts'
-import { runSequence } from '../fleet/util/run-command.mts'
-import { fsyncDist } from './bundle/fsync-dist.mts'
+import { REPO_ROOT as rootPath } from '../../fleet/paths.mts'
+import { parseArgs } from '../../fleet/util/parse-args.mts'
+import { runSequence } from '../../fleet/util/run-command.mts'
+import { fsyncDist } from './fsync-dist.mts'
 import {
   buildExternals,
   buildPrim,
   buildSource,
   buildTypes,
   runPostBuild,
-} from './bundle/steps.mts'
-import { verifyDist } from './bundle/verify-dist.mts'
+} from './steps.mts'
+import { verifyDist } from './verify-dist.mts'
 
-import { isMainModule } from '../fleet/process/is-main-module.mts'
-import { runMain } from '../fleet/process/run-main.mts'
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { runMain } from '../../fleet/process/run-main.mts'
 
-import type { ScriptMeta } from '../fleet/process/run-main.mts'
-import type { BuildSourceResult } from './bundle/steps.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
+import type { BuildSourceResult } from './steps.mts'
 
 const logger = getDefaultLogger()
 
@@ -283,7 +283,7 @@ async function main(): Promise<void> {
 const SCRIPT_META: ScriptMeta = {
   describe:
     'bundle runner — rolldown for source + externals builds, TypeScript 7 for declarations',
-  help: `Usage: node scripts/repo/bundle.mts [flags]
+  help: `Usage: node scripts/repo/build/run.mts [flags]
 
   --src        build source code only
   --types      build TypeScript declarations only
@@ -330,7 +330,7 @@ async function buildCompletePackage(flags: {
 
   exitCode = await runSequence([
     {
-      args: ['scripts/repo/bundle/clean.mts', '--dist', '--types', '--quiet'],
+      args: ['scripts/repo/build/clean.mts', '--dist', '--types', '--quiet'],
       command: 'node',
     },
   ])

@@ -16,7 +16,7 @@ import {
   runNodeBuildScript,
   runPostBuild,
   verbosityFlags,
-} from '../../../scripts/repo/bundle/steps.mts'
+} from '../../../scripts/repo/build/steps.mts'
 
 import type { CommandSpec } from '../../../scripts/fleet/util/run-command.mts'
 
@@ -75,7 +75,7 @@ describe('runNodeBuildScript', () => {
   it('runs the script under node with its verbosity flags', async () => {
     reset(0)
     const exitCode = await runNodeBuildScript(
-      'scripts/repo/bundle/example.mts',
+      'scripts/repo/build/example.mts',
       'Thing build',
       {
         verbose: true,
@@ -84,7 +84,7 @@ describe('runNodeBuildScript', () => {
     expect(exitCode).toBe(0)
     expect(runCommand.calls).toEqual([
       {
-        args: ['scripts/repo/bundle/example.mts', '--verbose'],
+        args: ['scripts/repo/build/example.mts', '--verbose'],
         command: 'node',
       },
     ])
@@ -92,14 +92,14 @@ describe('runNodeBuildScript', () => {
 
   it('says nothing when the script succeeds', async () => {
     reset(0)
-    await runNodeBuildScript('scripts/repo/bundle/example.mts', 'Thing build')
+    await runNodeBuildScript('scripts/repo/build/example.mts', 'Thing build')
     expect(logged).toEqual([])
   })
 
   it('names the step once when the script fails', async () => {
     reset(2)
     const exitCode = await runNodeBuildScript(
-      'scripts/repo/bundle/example.mts',
+      'scripts/repo/build/example.mts',
       'Thing build',
     )
     expect(exitCode).toBe(2)
@@ -108,7 +108,7 @@ describe('runNodeBuildScript', () => {
 
   it('stays silent on failure when quiet', async () => {
     reset(2)
-    await runNodeBuildScript('scripts/repo/bundle/example.mts', 'Thing build', {
+    await runNodeBuildScript('scripts/repo/build/example.mts', 'Thing build', {
       quiet: true,
     })
     expect(logged).toEqual([])
@@ -120,7 +120,7 @@ describe('the steps that share runNodeBuildScript', () => {
     reset(1)
     await buildExternals({ quiet: false })
     expect(runCommand.calls[0]).toEqual({
-      args: ['scripts/repo/bundle/externals.mts'],
+      args: ['scripts/repo/build/externals.mts'],
       command: 'node',
     })
     expect(logged).toEqual(['External dependencies build failed'])
@@ -143,7 +143,7 @@ describe('buildTypes', () => {
     expect(await buildTypes()).toBe(0)
     expect(runCommand.calls).toEqual([
       {
-        args: ['scripts/repo/bundle/clean.mts', '--types', '--quiet'],
+        args: ['scripts/repo/build/clean.mts', '--types', '--quiet'],
         command: 'node',
       },
       {

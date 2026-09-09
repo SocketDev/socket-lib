@@ -238,7 +238,7 @@ export async function verifyDist(distDir: string): Promise<number> {
   return 0
 }
 
-// Allow running standalone: `node scripts/repo/bundle/verify-dist.mts [distDir]`.
+// Allow running standalone: `node scripts/repo/build/verify-dist.mts [distDir]`.
 if (process.argv[1]?.endsWith('verify-dist.mts')) {
   const distDir = path.resolve(process.argv[2] ?? 'dist')
   verifyDist(distDir).then(code => {

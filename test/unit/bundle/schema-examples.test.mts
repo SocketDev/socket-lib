@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { normalizePrimSchemaExamples } from '../../../scripts/repo/bundle/schema-examples.mts'
+import { normalizePrimSchemaExamples } from '../../../scripts/repo/build/schema-examples.mts'
 
 const examplePath = ['', 'home', 'user', 'monorepo', 'CLAUDE.md'].join('/')
 const descriptionPrefix =

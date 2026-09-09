@@ -44,7 +44,7 @@ async function main(): Promise<void> {
 const SCRIPT_META: ScriptMeta = {
   describe:
     'bundles external dependencies (cacache, pacote, make-fetch-happen, …) into standalone modules',
-  help: `Usage: node scripts/repo/bundle/externals.mts [flags]
+  help: `Usage: node scripts/repo/build/externals.mts [flags]
 
   --verbose             show detailed build output
   --quiet, --silent     suppress progress messages`,

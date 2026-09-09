@@ -7,8 +7,8 @@ import { describe, expect, it } from 'vitest'
 import {
   processDirectory,
   rewriteCommonJsExports,
-} from '../../../../scripts/repo/build/post/rewrite-cjs-exports.mts'
-import { runWithTempDir } from '../../util/temp-files.mjs'
+} from '../../../scripts/repo/build/post/rewrite-cjs-exports.mts'
+import { runWithTempDir } from '../util/temp-files.mjs'
 
 const bundle =
   'var result_exports = {};\n__export(result_exports, { default: () => answer });\nmodule.exports = __toCommonJS(result_exports);\nvar answer = { value: 42 };\n'

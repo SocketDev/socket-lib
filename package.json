@@ -3902,14 +3902,14 @@
     "provenance": true
   },
   "scripts": {
-    "build": "node scripts/repo/bundle.mts",
+    "build": "node scripts/repo/build/run.mts",
     "check": "node scripts/fleet/check.mts",
     "check:paths": "node scripts/fleet/check/paths-are-canonical.mts",
     "ci:local": "node scripts/fleet/local-ci-skip-locks.mts run --all --quiet --pause-on-failure --github-token",
     "clean": "node scripts/fleet/clean.mts",
     "cover": "node scripts/fleet/cover.mts",
     "cover:allowance": "node scripts/fleet/cover-allowance.mts",
-    "dev": "node scripts/repo/bundle.mts --watch",
+    "dev": "node scripts/repo/build/run.mts --watch",
     "docs": "node scripts/repo/make-api-md.mts",
     "doctor": "node scripts/fleet/doctor.mts",
     "doctor:auth": "node scripts/fleet/check/setup-is-prompt-less.mts",

@@ -1,5 +1,5 @@
 /**
- * @file Individual build steps for the `build` runner (scripts/repo/bundle.mts):
+ * @file Individual build steps for the `build` runner (scripts/repo/build/run.mts):
  *   source built per-file by rolldown, TypeScript 7 declarations, the
  *   prim CLI bundle, external dependencies, and the post-build dist-shaping
  *   pass. Each returns an exit code, and the source step also returns its
@@ -50,7 +50,7 @@ export async function buildSource(
   if (!skipClean) {
     const exitCode = await runSequence([
       {
-        args: ['scripts/repo/bundle/clean.mts', '--dist', '--quiet'],
+        args: ['scripts/repo/build/clean.mts', '--dist', '--quiet'],
         command: 'node',
       },
     ])
@@ -156,7 +156,7 @@ export async function buildTypes(
 
   if (!skipClean) {
     commands.push({
-      args: ['scripts/repo/bundle/clean.mts', '--types', '--quiet'],
+      args: ['scripts/repo/build/clean.mts', '--types', '--quiet'],
       command: 'node',
     })
   }
@@ -232,7 +232,7 @@ export async function buildExternals(
   options: BuildStepOptions = {},
 ): Promise<number> {
   return await runNodeBuildScript(
-    'scripts/repo/bundle/externals.mts',
+    'scripts/repo/build/externals.mts',
     'External dependencies build',
     options,
   )

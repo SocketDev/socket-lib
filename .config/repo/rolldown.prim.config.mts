@@ -25,7 +25,7 @@ import type { RolldownOptions } from 'rolldown'
 // Repo root comes from the canonical paths module (1 path, 1 reference) — never
 // hand-walked with `__dirname/../..`, which silently breaks when the file moves.
 import { REPO_ROOT } from '../../scripts/fleet/paths.mts'
-import { normalizePrimSchemaExamples } from '../../scripts/repo/bundle/schema-examples.mts'
+import { normalizePrimSchemaExamples } from '../../scripts/repo/build/schema-examples.mts'
 
 export const primBuildConfig: RolldownOptions = {
   input: path.join(REPO_ROOT, 'tools/prim/bin/prim.mts'),
