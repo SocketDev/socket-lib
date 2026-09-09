@@ -118,11 +118,11 @@ export function closeIterator(iterator: object): void {
  * For when an error is already pending, which must be the one the caller sees.
  */
 export function closeIteratorQuietly(iterator: object): void {
-  const ret = ReflectGet(iterator, 'return')
-  if (typeof ret !== 'function') {
-    return
-  }
   try {
+    const ret = ReflectGet(iterator, 'return')
+    if (typeof ret !== 'function') {
+      return
+    }
     ReflectApply(ret, iterator, [])
   } catch {
     // The pending error is the one the caller must see.
