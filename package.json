@@ -3437,6 +3437,11 @@
       "types": "./dist/secrets/oauth-pkce.d.ts",
       "default": "./dist/secrets/oauth-pkce.js"
     },
+    "./secrets/one-password": {
+      "source": "./src/secrets/one-password.mts",
+      "types": "./dist/secrets/one-password.d.ts",
+      "default": "./dist/secrets/one-password.js"
+    },
     "./secrets/patterns": {
       "source": "./src/secrets/patterns.mts",
       "types": "./dist/secrets/patterns.d.ts",
