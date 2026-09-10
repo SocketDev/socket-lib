@@ -237,6 +237,28 @@ jobs:
           set -euo pipefail
           mkdir -p .cache/repo/coverage-diagnostics
           pnpm run cover --measure --lane fast 2>&1 | tee .cache/repo/coverage-diagnostics/fast.log
+      - name: Profile failed fast coverage lane
+        if: failure() && steps.coverage.outcome == 'failure'
+        timeout-minutes: 3
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          profile_dir="$PWD/.cache/repo/coverage-diagnostics/cpu"
+          mkdir -p "$profile_dir"
+          if [ -d .cache/fleet/coverage/measurement ]; then
+            cp -R .cache/fleet/coverage/measurement .cache/repo/coverage-diagnostics/control
+          fi
+          cat > "$profile_dir/preload.mjs" <<'EOF'
+          import { fileURLToPath } from 'node:url'
+          const directory = fileURLToPath(new URL('.', import.meta.url))
+          for (const flag of ['--cpu-prof', `--cpu-prof-dir=${directory}`]) {
+            if (!process.execArgv.includes(flag)) process.execArgv.push(flag)
+          }
+          EOF
+          export NODE_OPTIONS="${NODE_OPTIONS:+${NODE_OPTIONS} }--cpu-prof --cpu-prof-dir=${profile_dir} --import=${profile_dir}/preload.mjs"
+          pnpm run cover --measure --lane fast 2>&1 | tee .cache/repo/coverage-diagnostics/profile.log
       - name: Upload coverage diagnostics
         if: always() && steps.coverage.outcome == 'failure'
         uses: ./.github/actions/fleet/upload-artifact
