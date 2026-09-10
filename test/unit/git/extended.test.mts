@@ -10,7 +10,7 @@
  *     git.test.ts with deeper coverage of error paths and caching logic.
  */
 
-import { promises as fs } from 'node:fs'
+import { promises as fs, realpathSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import {
@@ -21,10 +21,11 @@ import {
 import { findGitRoot } from '../../../src/git/repo.mjs'
 import { getStagedFiles } from '../../../src/git/staged.mjs'
 import { getUnstagedFiles } from '../../../src/git/unstaged.mjs'
-import { normalizePath } from '../../../src/paths/normalize.mjs'
+import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { spawnSync } from '../../../src/process/spawn/child.mjs'
 import { describe, expect, it } from 'vitest'
 import { runWithTempDir } from '../util/temp-files.mjs'
+import { makeGitRepo } from '../../fleet/_shared/lib/git-fixture.mts'
 
 describe('git extended tests', () => {
   const projectRoot = normalizePath(process.cwd())
@@ -328,17 +329,41 @@ describe('git extended tests', () => {
   })
 
   describe('cwd resolution with symlinks', () => {
-    it('should resolve symlinks in cwd', async () => {
-      // This tests that fs.realpathSync is called for cwd
-      const result = await getChangedFiles({ cwd: projectRoot })
-      expect(Array.isArray(result)).toBe(true)
-    })
-
-    it('should resolve symlinks in pathname for is* functions', async () => {
-      const testFile = path.join(projectRoot, 'package.json')
-      const isChangedResult = await isChanged(testFile, { cwd: projectRoot })
-      expect(typeof isChangedResult).toBe('boolean')
-    })
+    it.each(['cwd', 'pathname'] as const)(
+      'resolves a directory symlink in the %s',
+      async mode => {
+        const fixture = makeGitRepo({ prefix: 'git-symlink-target-' })
+        try {
+          fixture.writeFile('example.txt', 'untracked content')
+          const target = realpathSync(fixture.dir)
+          await runWithTempDir(async directory => {
+            const link = path.join(directory, 'linked-repository')
+            await fs.symlink(target, link, 'junction')
+            expect(await fs.realpath(link)).toBe(target)
+            if (mode === 'cwd') {
+              expect(
+                await getChangedFiles({ cache: false, cwd: link }),
+              ).toEqual(['example.txt'])
+              expect(
+                await getChangedFiles({
+                  absolute: true,
+                  cache: false,
+                  cwd: link,
+                }),
+              ).toEqual([normalizePath(path.join(target, 'example.txt'))])
+            } else {
+              expect(
+                await isChanged(path.join(link, 'example.txt'), {
+                  cwd: target,
+                }),
+              ).toBe(true)
+            }
+          }, 'git-symlink-parent-')
+        } finally {
+          fixture.cleanup()
+        }
+      },
+    )
 
     it('should handle cwd same as default root', async () => {
       const defaultCwd = process.cwd()
