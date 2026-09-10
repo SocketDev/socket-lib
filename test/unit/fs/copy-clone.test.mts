@@ -24,7 +24,7 @@ describe('cloneFile', () => {
 
       await cloneFile(from, to)
 
-      expect(readFileSync(to, 'utf8')).toBe('export const leaf = 1\n')
+      expect(readFileSync(to)).toEqual(Buffer.from('export const leaf = 1\n'))
     }, 'clone-file-')
   })
 
@@ -38,7 +38,7 @@ describe('cloneFile', () => {
       writeFileSync(to, 'rewritten\n', 'utf8')
 
       // A hard link would have carried this back into the template.
-      expect(readFileSync(from, 'utf8')).toBe('original\n')
+      expect(readFileSync(from)).toEqual(Buffer.from('original\n'))
     }, 'clone-independent-')
   })
 
@@ -51,7 +51,7 @@ describe('cloneFile', () => {
 
       await cloneFile(from, to)
 
-      expect(readFileSync(to, 'utf8')).toBe('fresh\n')
+      expect(readFileSync(to)).toEqual(Buffer.from('fresh\n'))
     }, 'clone-overwrite-')
   })
 
@@ -87,13 +87,15 @@ describe('cloneDir', () => {
 
       await cloneDir(from, to)
 
-      expect(readFileSync(path.join(to, 'root.mts'), 'utf8')).toBe('root\n')
-      expect(readFileSync(path.join(to, 'nested', 'mid.mts'), 'utf8')).toBe(
-        'mid\n',
+      expect(readFileSync(path.join(to, 'root.mts'))).toEqual(
+        Buffer.from('root\n'),
       )
-      expect(
-        readFileSync(path.join(to, 'nested', 'deep', 'leaf.mts'), 'utf8'),
-      ).toBe('leaf\n')
+      expect(readFileSync(path.join(to, 'nested', 'mid.mts'))).toEqual(
+        Buffer.from('mid\n'),
+      )
+      expect(readFileSync(path.join(to, 'nested', 'deep', 'leaf.mts'))).toEqual(
+        Buffer.from('leaf\n'),
+      )
     }, 'clone-dir-')
   })
 
@@ -122,14 +124,15 @@ describe('cloneDir', () => {
       mkdirSync(to, { recursive: true })
       writeFileSync(path.join(from, 'shipped.mts'), 'shipped\n', 'utf8')
       writeFileSync(path.join(to, 'extra.mts'), 'extra\n', 'utf8')
+      const extraBytes = readFileSync(path.join(to, 'extra.mts'))
 
       await cloneDir(from, to)
 
       // cloneDir writes what the source holds; pruning extras belongs to the
       // caller's swap, not here.
-      expect(readFileSync(path.join(to, 'extra.mts'), 'utf8')).toBe('extra\n')
-      expect(readFileSync(path.join(to, 'shipped.mts'), 'utf8')).toBe(
-        'shipped\n',
+      expect(readFileSync(path.join(to, 'extra.mts'))).toEqual(extraBytes)
+      expect(readFileSync(path.join(to, 'shipped.mts'))).toEqual(
+        Buffer.from('shipped\n'),
       )
     }, 'clone-extra-')
   })

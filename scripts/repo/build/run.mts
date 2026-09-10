@@ -11,6 +11,7 @@ import process from 'node:process'
 import { watch } from 'rolldown'
 
 import { isQuiet } from '../flags/predicates.mts'
+import { getEnvValue } from '@socketsecurity/lib-stable/env/rewire'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
@@ -229,7 +230,7 @@ async function main(): Promise<void> {
       // runs explicit build/test/check steps, so the install-time `prepare`
       // build is redundant work that only adds latency to every `pnpm install`
       // in the pipeline. (Locally, `--needed` still builds when dist is absent.)
-      if (flags.needed && process.env['CI'] === 'true') {
+      if (flags.needed && getEnvValue('CI') === 'true') {
         if (!quiet) {
           logger.info(
             'CI detected — skipping prepare-time build (CI builds explicitly)',

@@ -24,8 +24,9 @@ describe('processDirectory', () => {
       await fs.writeFile(filename, bundle)
       await fs.writeFile(path.join(directory, 'untouched.txt'), bundle)
       expect(await processDirectory(directory)).toBe(1)
-      expect(await fs.readFile(filename, 'utf8')).toBe(rewritten)
-      expect(createRequire(import.meta.url)(filename)).toEqual({ value: 42 })
+      const exported = createRequire(import.meta.url)(filename)
+      expect(exported).toEqual({ value: 42 })
+      expect(Reflect.ownKeys(exported)).toEqual(['value'])
       expect(
         await fs.readFile(path.join(directory, 'untouched.txt'), 'utf8'),
       ).toBe(bundle)
@@ -43,7 +44,7 @@ describe('processDirectory', () => {
       const filename = path.join(directory, 'example.js')
       await fs.writeFile(filename, source)
       expect(await processDirectory(directory)).toBe(0)
-      expect(await fs.readFile(filename, 'utf8')).toBe(source)
+      expect(await fs.readFile(filename)).toEqual(Buffer.from(source))
     }, 'rewrite-cjs-preserve-')
   })
 
