@@ -262,14 +262,14 @@ describe('walkAst', () => {
 describe('atomicWrite', () => {
   it('writes the content through', () => {
     const root = tmpRoot()
-    const file = path.join(root, 'example.mts')
-    atomicWrite(file, 'const a = 1\n')
-    expect(readFileSync(file)).toEqual(Buffer.from('const a = 1\n'))
+    const file = path.join(root, 'example.txt')
+    atomicWrite(file, 'café\u0000\n')
+    expect(readFileSync(file)).toEqual(Buffer.from('café\u0000\n'))
   })
 
   it('replaces existing content whole', () => {
     const root = tmpRoot()
-    const file = path.join(root, 'example.mts')
+    const file = path.join(root, 'example.txt')
     writeFileSync(file, 'old\n', 'utf8')
     atomicWrite(file, 'new\n')
     expect(readFileSync(file)).toEqual(Buffer.from('new\n'))

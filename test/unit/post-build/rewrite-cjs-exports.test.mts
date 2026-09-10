@@ -43,8 +43,9 @@ describe('processDirectory', () => {
     await runWithTempDir(async directory => {
       const filename = path.join(directory, 'example.js')
       await fs.writeFile(filename, source)
+      const originalBytes = await fs.readFile(filename)
       expect(await processDirectory(directory)).toBe(0)
-      expect(await fs.readFile(filename)).toEqual(Buffer.from(source))
+      expect(await fs.readFile(filename)).toEqual(originalBytes)
     }, 'rewrite-cjs-preserve-')
   })
 

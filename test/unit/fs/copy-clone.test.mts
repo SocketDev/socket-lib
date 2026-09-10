@@ -21,10 +21,11 @@ describe('cloneFile', () => {
       const from = path.join(tmpDir, 'source.mts')
       const to = path.join(tmpDir, 'clone.mts')
       writeFileSync(from, 'export const leaf = 1\n', 'utf8')
+      const sourceBytes = readFileSync(from)
 
       await cloneFile(from, to)
 
-      expect(readFileSync(to)).toEqual(Buffer.from('export const leaf = 1\n'))
+      expect(readFileSync(to)).toEqual(sourceBytes)
     }, 'clone-file-')
   })
 
@@ -33,12 +34,13 @@ describe('cloneFile', () => {
       const from = path.join(tmpDir, 'source.mts')
       const to = path.join(tmpDir, 'clone.mts')
       writeFileSync(from, 'original\n', 'utf8')
+      const sourceBytes = readFileSync(from)
       await cloneFile(from, to)
 
       writeFileSync(to, 'rewritten\n', 'utf8')
 
       // A hard link would have carried this back into the template.
-      expect(readFileSync(from)).toEqual(Buffer.from('original\n'))
+      expect(readFileSync(from)).toEqual(sourceBytes)
     }, 'clone-independent-')
   })
 
@@ -48,10 +50,11 @@ describe('cloneFile', () => {
       const to = path.join(tmpDir, 'clone.mts')
       writeFileSync(from, 'fresh\n', 'utf8')
       writeFileSync(to, 'stale\n', 'utf8')
+      const sourceBytes = readFileSync(from)
 
       await cloneFile(from, to)
 
-      expect(readFileSync(to)).toEqual(Buffer.from('fresh\n'))
+      expect(readFileSync(to)).toEqual(sourceBytes)
     }, 'clone-overwrite-')
   })
 
@@ -77,24 +80,22 @@ describe('cloneDir', () => {
       // Build the source AFTER proving an absent source does not half-create.
       const { mkdirSync } = await import('node:fs')
       mkdirSync(path.join(from, 'nested', 'deep'), { recursive: true })
-      writeFileSync(path.join(from, 'root.mts'), 'root\n', 'utf8')
-      writeFileSync(path.join(from, 'nested', 'mid.mts'), 'mid\n', 'utf8')
-      writeFileSync(
-        path.join(from, 'nested', 'deep', 'leaf.mts'),
-        'leaf\n',
-        'utf8',
-      )
+      const rootPath = path.join(from, 'root.mts')
+      const midPath = path.join(from, 'nested', 'mid.mts')
+      const leafPath = path.join(from, 'nested', 'deep', 'leaf.mts')
+      writeFileSync(rootPath, 'root\n', 'utf8')
+      writeFileSync(midPath, 'mid\n', 'utf8')
+      writeFileSync(leafPath, 'leaf\n', 'utf8')
+      const rootBytes = readFileSync(rootPath)
+      const midBytes = readFileSync(midPath)
+      const leafBytes = readFileSync(leafPath)
 
       await cloneDir(from, to)
 
-      expect(readFileSync(path.join(to, 'root.mts'))).toEqual(
-        Buffer.from('root\n'),
-      )
-      expect(readFileSync(path.join(to, 'nested', 'mid.mts'))).toEqual(
-        Buffer.from('mid\n'),
-      )
+      expect(readFileSync(path.join(to, 'root.mts'))).toEqual(rootBytes)
+      expect(readFileSync(path.join(to, 'nested', 'mid.mts'))).toEqual(midBytes)
       expect(readFileSync(path.join(to, 'nested', 'deep', 'leaf.mts'))).toEqual(
-        Buffer.from('leaf\n'),
+        leafBytes,
       )
     }, 'clone-dir-')
   })
@@ -122,18 +123,18 @@ describe('cloneDir', () => {
       const to = path.join(tmpDir, 'live')
       mkdirSync(from, { recursive: true })
       mkdirSync(to, { recursive: true })
-      writeFileSync(path.join(from, 'shipped.mts'), 'shipped\n', 'utf8')
+      const shippedPath = path.join(from, 'shipped.mts')
+      writeFileSync(shippedPath, 'shipped\n', 'utf8')
       writeFileSync(path.join(to, 'extra.mts'), 'extra\n', 'utf8')
       const extraBytes = readFileSync(path.join(to, 'extra.mts'))
+      const shippedBytes = readFileSync(shippedPath)
 
       await cloneDir(from, to)
 
       // cloneDir writes what the source holds; pruning extras belongs to the
       // caller's swap, not here.
       expect(readFileSync(path.join(to, 'extra.mts'))).toEqual(extraBytes)
-      expect(readFileSync(path.join(to, 'shipped.mts'))).toEqual(
-        Buffer.from('shipped\n'),
-      )
+      expect(readFileSync(path.join(to, 'shipped.mts'))).toEqual(shippedBytes)
     }, 'clone-extra-')
   })
 })
