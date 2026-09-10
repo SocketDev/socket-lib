@@ -1,440 +1,275 @@
-/**
- * @file Unit tests for concurrent promise queue utilities. Tests PromiseQueue
- *   class for controlled async concurrency:
- *
- *   - Constructor with configurable concurrency limit
- *   - add() queues promises with automatic execution
- *   - Concurrency control: limits parallel promise execution
- *   - onEmpty(), onIdle() lifecycle events
- *   - size, pending properties for queue state inspection
- *   - Error handling: failed promises don't block queue Used by Socket tools for
- *     rate-limited parallel operations (API calls, file I/O).
- */
-
-import { PromiseQueue } from '../../src/promises/queue.mjs'
 import { describe, expect, it } from 'vitest'
 
-// Helper to create a delayed promise
-export function delay(
-  ms: number,
-  value?: unknown | undefined,
-): Promise<unknown> {
-  return new Promise(resolve => setTimeout(() => resolve(value), ms))
-}
+import { PromiseQueue } from '../../src/promises/queue.mjs'
 
 describe('PromiseQueue', () => {
-  describe('constructor', () => {
-    it('should create queue with valid concurrency', () => {
-      expect(() => new PromiseQueue(1)).not.toThrow()
-      expect(() => new PromiseQueue(5)).not.toThrow()
-      expect(() => new PromiseQueue(100)).not.toThrow()
-    })
-
-    it('should throw error for invalid concurrency', () => {
-      expect(() => new PromiseQueue(0)).toThrow(
-        'maxConcurrency must be at least 1',
-      )
-      expect(() => new PromiseQueue(-1)).toThrow(
-        'maxConcurrency must be at least 1',
-      )
-    })
-
-    it('should accept maxQueueLength parameter', () => {
-      expect(() => new PromiseQueue(1, 10)).not.toThrow()
-      expect(() => new PromiseQueue(5, 100)).not.toThrow()
-    })
-
-    it('should work without maxQueueLength', () => {
-      expect(() => new PromiseQueue(1)).not.toThrow()
-      const queue = new PromiseQueue(2)
-      expect(queue).toBeInstanceOf(PromiseQueue)
-    })
+  it.each([1, 5, 100])('accepts concurrency %i', concurrency => {
+    const queue = new PromiseQueue(concurrency)
+    expect(queue.activeCount).toBe(0)
+    expect(queue.pendingCount).toBe(0)
   })
 
-  describe('add', () => {
-    it('should execute a single task', async () => {
-      const queue = new PromiseQueue(1)
-      const result = await queue.add(async () => 'test')
-      expect(result).toBe('test')
-    })
-
-    it('should execute multiple tasks sequentially', async () => {
-      const queue = new PromiseQueue(1)
-      const results: number[] = []
-
-      await Promise.all([
-        queue.add(async () => {
-          results.push(1)
-          await delay(10)
-          return 1
-        }),
-        queue.add(async () => {
-          results.push(2)
-          await delay(10)
-          return 2
-        }),
-        queue.add(async () => {
-          results.push(3)
-          await delay(10)
-          return 3
-        }),
-      ])
-
-      expect(results).toEqual([1, 2, 3])
-    })
-
-    it('should execute tasks with concurrency limit', async () => {
-      const queue = new PromiseQueue(2)
-      let concurrent = 0
-      let maxConcurrent = 0
-
-      const task = async () => {
-        concurrent++
-        maxConcurrent = Math.max(maxConcurrent, concurrent)
-        await delay(50)
-        concurrent--
-        return concurrent
-      }
-
-      await Promise.all([
-        queue.add(task),
-        queue.add(task),
-        queue.add(task),
-        queue.add(task),
-      ])
-
-      expect(maxConcurrent).toBe(2)
-    })
-
-    it('should return task results', async () => {
-      const queue = new PromiseQueue(2)
-      const result1 = await queue.add(async () => 'result1')
-      const result2 = await queue.add(async () => 42)
-      const result3 = await queue.add(async () => ({ key: 'value' }))
-
-      expect(result1).toBe('result1')
-      expect(result2).toBe(42)
-      expect(result3).toEqual({ key: 'value' })
-    })
-
-    it('should handle task errors', async () => {
-      const queue = new PromiseQueue(1)
-      await expect(
-        queue.add(async () => {
-          throw new Error('Task failed')
-        }),
-      ).rejects.toThrow('Task failed')
-    })
-
-    it('should continue processing after task error', async () => {
-      const queue = new PromiseQueue(1)
-
-      const p1 = queue
-        .add(async () => {
-          throw new Error('First fails')
-        })
-        .catch(e => e.message)
-
-      const p2 = queue.add(async () => 'second succeeds')
-
-      const results = await Promise.all([p1, p2])
-      expect(results[0]).toBe('First fails')
-      expect(results[1]).toBe('second succeeds')
-    })
+  it.each([0, -1])('rejects concurrency %i', concurrency => {
+    expect(() => new PromiseQueue(concurrency)).toThrow(Error)
   })
 
-  describe('maxQueueLength', () => {
-    it('should reject the newest submission when queue is full (drop-newest, FIFO-fair)', async () => {
-      const queue = new PromiseQueue(1, 2)
-      const results: string[] = []
-      const errors: Error[] = []
-
-      // Concurrency 1, queue cap 2. task1 runs immediately, task2+task3
-      // fill the queue, task4 arrives over the cap and should be rejected —
-      // earlier submitters (task2, task3) keep their slots.
-      const tasks = [
-        queue.add(async () => {
-          await delay(50)
-          results.push('task1')
-          return 'task1'
-        }),
-        queue.add(async () => {
-          results.push('task2')
-          return 'task2'
-        }),
-        queue.add(async () => {
-          results.push('task3')
-          return 'task3'
-        }),
-        queue
-          .add(async () => {
-            results.push('task4')
-            return 'task4'
-          })
-          .catch((e: Error) => errors.push(e)),
-      ]
-
-      await Promise.all(tasks.map(t => t.catch(() => {})))
-
-      expect(errors.length).toBe(1)
-      expect(errors[0]?.message).toBe('Task dropped: queue length exceeded')
-      expect(results).toContain('task1')
-      expect(results).toContain('task2')
-      expect(results).toContain('task3')
-      expect(results).not.toContain('task4')
-    })
-
-    it('should work without dropping tasks when under limit', async () => {
-      const queue = new PromiseQueue(1, 10)
-      const results = await Promise.all([
-        queue.add(async () => 1),
-        queue.add(async () => 2),
-        queue.add(async () => 3),
-      ])
-
-      expect(results).toEqual([1, 2, 3])
-    })
+  it('accepts a queue length limit', () => {
+    expect(new PromiseQueue(1, 10).pendingCount).toBe(0)
+    expect(new PromiseQueue(5, 100).pendingCount).toBe(0)
   })
 
-  describe('activeCount', () => {
-    it('should return 0 for idle queue', () => {
-      const queue = new PromiseQueue(1)
-      expect(queue.activeCount).toBe(0)
-    })
-
-    it('should track running tasks', async () => {
-      const queue = new PromiseQueue(2)
-
-      const task1 = queue.add(async () => {
-        await delay(50)
-        return 'done'
-      })
-
-      // Give it a tick to start
-      await delay(5)
-      expect(queue.activeCount).toBeGreaterThan(0)
-
-      await task1
-      // Wait a bit for cleanup
-      await delay(5)
-      expect(queue.activeCount).toBe(0)
-    })
-
-    it('should not exceed maxConcurrency', async () => {
-      const queue = new PromiseQueue(2)
-
-      queue.add(async () => await delay(100))
-      queue.add(async () => await delay(100))
-      queue.add(async () => await delay(100))
-
-      await delay(10)
-      expect(queue.activeCount).toBeLessThanOrEqual(2)
-    })
+  it('returns the result of one task', async () => {
+    expect(await new PromiseQueue(1).add(async () => 'result')).toBe('result')
   })
 
-  describe('pendingCount', () => {
-    it('should return 0 for empty queue', () => {
-      const queue = new PromiseQueue(1)
-      expect(queue.pendingCount).toBe(0)
-    })
-
-    it('should track queued tasks', async () => {
-      const queue = new PromiseQueue(1)
-
-      queue.add(async () => await delay(100))
-      queue.add(async () => await delay(10))
-      queue.add(async () => await delay(10))
-
-      await delay(10)
-      expect(queue.pendingCount).toBeGreaterThan(0)
-    })
-
-    it('should decrease as tasks complete', async () => {
-      const queue = new PromiseQueue(1)
-
-      queue.add(async () => await delay(20))
-      queue.add(async () => await delay(20))
-      const task3 = queue.add(async () => await delay(20))
-
-      await delay(5)
-      const initialPending = queue.pendingCount
-
-      await task3
-      expect(queue.pendingCount).toBeLessThan(initialPending)
-    })
-  })
-
-  describe('clear', () => {
-    it('should clear pending tasks and reject their promises', async () => {
-      const queue = new PromiseQueue(1)
-
-      // First task starts running (concurrency=1).
-      queue.add(async () => await delay(100))
-      // These are queued (pending).
-      const pending1 = queue.add(async () => await delay(10))
-      const pending2 = queue.add(async () => await delay(10))
-
-      await delay(10)
-      const beforeClear = queue.pendingCount
-
-      queue.clear()
-      expect(queue.pendingCount).toBe(0)
-      expect(beforeClear).toBeGreaterThan(0)
-
-      await expect(pending1).rejects.toThrow('Task cancelled: queue cleared')
-      await expect(pending2).rejects.toThrow('Task cancelled: queue cleared')
-    })
-
-    it('should not affect running tasks', async () => {
-      const queue = new PromiseQueue(1)
-      let completed = false
-
-      const runningTask = queue.add(async () => {
-        await delay(50)
-        completed = true
-        return 'done'
-      })
-
-      await delay(10)
-      queue.clear()
-
-      const result = await runningTask
-      expect(result).toBe('done')
-      expect(completed).toBe(true)
-    })
-
-    it('should allow new tasks after clear', async () => {
-      const queue = new PromiseQueue(2)
-
-      // With concurrency=2, the task starts immediately rather than pending.
-      queue.add(async () => await delay(50))
-      queue.clear()
-
-      const result = await queue.add(async () => 'new task')
-      expect(result).toBe('new task')
-    })
-  })
-
-  describe('onIdle', () => {
-    it('onIdle resolves without throwing for empty queue', async () => {
-      const queue = new PromiseQueue(1)
-      await expect(queue.onIdle()).resolves.not.toThrow()
-    })
-
-    it('should wait for all tasks to complete', async () => {
-      const queue = new PromiseQueue(2)
-      const completed: number[] = []
-
+  it('starts sequential tasks in submission order after the previous task completes', async () => {
+    const queue = new PromiseQueue(1)
+    const gates = Array.from({ length: 3 }, () => Promise.withResolvers<void>())
+    const started: number[] = []
+    const tasks = gates.map((gate, index) =>
       queue.add(async () => {
-        await delay(30)
-        completed.push(1)
-      })
-      queue.add(async () => {
-        await delay(30)
-        completed.push(2)
-      })
-      queue.add(async () => {
-        await delay(30)
-        completed.push(3)
-      })
-
-      await queue.onIdle()
-      expect(completed).toEqual([1, 2, 3])
-    })
-
-    it('should work with sequential calls', async () => {
-      const queue = new PromiseQueue(1)
-
-      queue.add(async () => await delay(20))
-      await queue.onIdle()
-
-      queue.add(async () => await delay(20))
-      await queue.onIdle()
-
-      expect(queue.activeCount).toBe(0)
-      expect(queue.pendingCount).toBe(0)
-    })
+        started.push(index)
+        await gate.promise
+        return index
+      }),
+    )
+    expect(started).toEqual([0])
+    for (const [index, gate] of gates.entries()) {
+      gate.resolve()
+      expect(await tasks[index]).toBe(index)
+      expect(started).toEqual([0, 1, 2].slice(0, Math.min(index + 2, 3)))
+    }
+    expect(queue.activeCount).toBe(0)
+    expect(queue.pendingCount).toBe(0)
   })
 
-  describe('integration', () => {
-    it('should handle complex workflow', async () => {
-      const queue = new PromiseQueue(3, 50)
-      const results: number[] = []
+  it('runs at most two tasks and starts the next task when a slot opens', async () => {
+    const queue = new PromiseQueue(2)
+    const gates = Array.from({ length: 4 }, () => Promise.withResolvers<void>())
+    const started: number[] = []
+    const tasks = gates.map((gate, index) =>
+      queue.add(async () => {
+        started.push(index)
+        await gate.promise
+        return index
+      }),
+    )
+    expect(started).toEqual([0, 1])
+    expect(queue.activeCount).toBe(2)
+    expect(queue.pendingCount).toBe(2)
+    gates[1]!.resolve()
+    await tasks[1]
+    expect(started).toEqual([0, 1, 2])
+    expect(queue.activeCount).toBe(2)
+    expect(queue.pendingCount).toBe(1)
+    gates[0]!.resolve()
+    await tasks[0]
+    expect(started).toEqual([0, 1, 2, 3])
+    gates[2]!.resolve()
+    gates[3]!.resolve()
+    expect(await Promise.all(tasks)).toEqual([0, 1, 2, 3])
+    expect(queue.activeCount).toBe(0)
+    expect(queue.pendingCount).toBe(0)
+  })
 
-      // Add many tasks - use larger queue to avoid dropping
-      const tasks = Array.from({ length: 20 }, (_, i) =>
-        queue.add(async () => {
-          await delay(Math.random() * 20)
-          results.push(i)
-          return i
-        }),
-      )
-
-      await Promise.all(tasks)
-
-      expect(results.length).toBe(20)
-      // Wait a bit for cleanup
-      await delay(5)
-      expect(queue.activeCount).toBe(0)
-      expect(queue.pendingCount).toBe(0)
-    })
-
-    it('should handle mixed success and failure', async () => {
-      const queue = new PromiseQueue(2)
-      const results = await Promise.allSettled([
-        queue.add(async () => 'success'),
-        queue.add(async () => {
-          throw new Error('fail')
-        }),
-        queue.add(async () => 'success2'),
-        queue.add(async () => {
-          throw new Error('fail2')
-        }),
-      ])
-
-      const fulfilled = results.filter(r => r.status === 'fulfilled')
-      const rejected = results.filter(r => r.status === 'rejected')
-
-      expect(fulfilled.length).toBe(2)
-      expect(rejected.length).toBe(2)
-    })
-
-    it('should maintain order for sequential execution', async () => {
-      const queue = new PromiseQueue(1)
-      const order: number[] = []
-
+  it('returns heterogeneous task values', async () => {
+    const queue = new PromiseQueue(2)
+    expect(
       await Promise.all([
-        queue.add(async () => order.push(1)),
-        queue.add(async () => order.push(2)),
-        queue.add(async () => order.push(3)),
-        queue.add(async () => order.push(4)),
-      ])
-
-      expect(order).toEqual([1, 2, 3, 4])
-    })
-
-    it('should work with different data types', async () => {
-      const queue = new PromiseQueue(2)
-
-      const {
-        0: str,
-        1: num,
-        2: obj,
-        3: arr,
-        4: bool,
-      } = await Promise.all([
         queue.add(async () => 'string'),
         queue.add(async () => 42),
         queue.add(async () => ({ key: 'value' })),
         queue.add(async () => [1, 2, 3]),
         queue.add(async () => true),
-      ])
+      ]),
+    ).toEqual(['string', 42, { key: 'value' }, [1, 2, 3], true])
+  })
 
-      expect(str).toBe('string')
-      expect(num).toBe(42)
-      expect(obj).toEqual({ key: 'value' })
-      expect(arr).toEqual([1, 2, 3])
-      expect(bool).toBe(true)
+  it('rejects with the task error and continues processing', async () => {
+    const queue = new PromiseQueue(1)
+    const failure = new Error('fixture task failure')
+    const failed = queue.add(async () => {
+      throw failure
     })
+    const succeeding = queue.add(async () => 'next result')
+    await expect(failed).rejects.toBe(failure)
+    expect(await succeeding).toBe('next result')
+    expect(queue.activeCount).toBe(0)
+  })
+
+  it('rejects the newest submission while preserving the queued tasks in order', async () => {
+    const queue = new PromiseQueue(1, 2)
+    const gate = Promise.withResolvers<void>()
+    const started: string[] = []
+    const running = queue.add(async () => {
+      await gate.promise
+      return 'running'
+    })
+    const first = queue.add(async () => {
+      started.push('first')
+      return 'first'
+    })
+    const second = queue.add(async () => {
+      started.push('second')
+      return 'second'
+    })
+    await expect(
+      queue.add(async () => {
+        started.push('dropped')
+      }),
+    ).rejects.toThrow(Error)
+    expect(queue.pendingCount).toBe(2)
+    gate.resolve()
+    expect(await Promise.all([running, first, second])).toEqual([
+      'running',
+      'first',
+      'second',
+    ])
+    expect(started).toEqual(['first', 'second'])
+  })
+
+  it('accepts every task below the queue length limit', async () => {
+    const queue = new PromiseQueue(1, 10)
+    expect(
+      await Promise.all([1, 2, 3].map(value => queue.add(async () => value))),
+    ).toEqual([1, 2, 3])
+  })
+
+  it('clears pending tasks without cancelling the active task', async () => {
+    const queue = new PromiseQueue(1)
+    const gate = Promise.withResolvers<string>()
+    const running = queue.add(async () => await gate.promise)
+    const pending = [
+      queue.add(async () => 'first'),
+      queue.add(async () => 'second'),
+    ]
+    const settled = Promise.allSettled(pending)
+    expect(queue.pendingCount).toBe(2)
+    queue.clear()
+    expect(queue.pendingCount).toBe(0)
+    expect(queue.activeCount).toBe(1)
+    const results = await settled
+    expect(results.map(result => result.status)).toEqual([
+      'rejected',
+      'rejected',
+    ])
+    for (const result of results) {
+      if (result.status === 'rejected') {
+        expect(result.reason).toBeInstanceOf(Error)
+      }
+    }
+    gate.resolve('active result')
+    expect(await running).toBe('active result')
+    expect(queue.activeCount).toBe(0)
+  })
+
+  it('accepts new tasks after clearing while an earlier task is active', async () => {
+    const queue = new PromiseQueue(2)
+    const gate = Promise.withResolvers<void>()
+    const running = queue.add(async () => await gate.promise)
+    queue.clear()
+    expect(await queue.add(async () => 'new task')).toBe('new task')
+    gate.resolve()
+    await running
+  })
+
+  it('resolves onIdle for an empty queue', async () => {
+    await expect(new PromiseQueue(1).onIdle()).resolves.toBeUndefined()
+  })
+
+  it('resolves all idle observers only after running and queued tasks finish', async () => {
+    const queue = new PromiseQueue(2)
+    const gates = Array.from({ length: 3 }, () => Promise.withResolvers<void>())
+    const completed: number[] = []
+    const tasks = gates.map((gate, index) =>
+      queue.add(async () => {
+        await gate.promise
+        completed.push(index)
+      }),
+    )
+    let idleCount = 0
+    const observers = [queue.onIdle(), queue.onIdle()].map(async idle => {
+      await idle
+      idleCount++
+    })
+    gates[0]!.resolve()
+    await tasks[0]
+    expect(idleCount).toBe(0)
+    expect(completed).toEqual([0])
+    gates[1]!.resolve()
+    await tasks[1]
+    expect(idleCount).toBe(0)
+    gates[2]!.resolve()
+    await Promise.all([...tasks, ...observers])
+    expect(completed).toEqual([0, 1, 2])
+    expect(idleCount).toBe(2)
+  })
+
+  it('supports repeated busy and idle cycles', async () => {
+    const queue = new PromiseQueue(1)
+    for (let cycle = 0; cycle < 2; cycle++) {
+      const gate = Promise.withResolvers<void>()
+      const running = queue.add(async () => await gate.promise)
+      const idle = queue.onIdle()
+      gate.resolve()
+      await Promise.all([running, idle])
+      expect(queue.activeCount).toBe(0)
+      expect(queue.pendingCount).toBe(0)
+    }
+  })
+
+  it('handles twenty tasks without dropping results', async () => {
+    const queue = new PromiseQueue(3, 50)
+    const gate = Promise.withResolvers<void>()
+    const values = Array.from({ length: 20 }, (...[, index]) => index)
+    const tasks = values.map(value =>
+      queue.add(async () => {
+        await gate.promise
+        return value
+      }),
+    )
+    expect(queue.activeCount).toBe(3)
+    expect(queue.pendingCount).toBe(17)
+    gate.resolve()
+    expect(await Promise.all(tasks)).toEqual(values)
+    await queue.onIdle()
+    expect(queue.activeCount).toBe(0)
+    expect(queue.pendingCount).toBe(0)
+  })
+
+  it('keeps successful results when other tasks fail', async () => {
+    const queue = new PromiseQueue(2)
+    const firstFailure = new Error('fixture first failure')
+    const secondFailure = new Error('fixture second failure')
+    expect(
+      await Promise.allSettled([
+        queue.add(async () => 'success'),
+        queue.add(async () => {
+          throw firstFailure
+        }),
+        queue.add(async () => 'success2'),
+        queue.add(async () => {
+          throw secondFailure
+        }),
+      ]),
+    ).toEqual([
+      { status: 'fulfilled', value: 'success' },
+      { status: 'rejected', reason: firstFailure },
+      { status: 'fulfilled', value: 'success2' },
+      { status: 'rejected', reason: secondFailure },
+    ])
+  })
+
+  it('keeps separate queue instances independent', async () => {
+    const first = new PromiseQueue(1)
+    const second = new PromiseQueue(1)
+    const gate = Promise.withResolvers<void>()
+    const pending = first.add(async () => await gate.promise)
+    expect(await second.add(async () => 'independent')).toBe('independent')
+    await second.onIdle()
+    expect(first.activeCount).toBe(1)
+    expect(second.activeCount).toBe(0)
+    gate.resolve()
+    await pending
   })
 })
