@@ -64,7 +64,7 @@ export const SPEC_INVENTORY_PATH = path.join(
   'scripts',
   'repo',
   'npm-api-spec',
-  'spec-inventory.generated.json',
+  'spec-inventory.golden.json',
 )
 
 /**

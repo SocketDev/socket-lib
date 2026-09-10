@@ -5,7 +5,7 @@
  *   the rendered docs at api-docs.npmjs.com, which drifts silently: npm adds an
  *   endpoint or renames a field and nothing in this repo notices. This gate
  *   notices. It compares two inventories. The spec side is
- *   `scripts/repo/npm-api-spec/spec-inventory.generated.json`, the committed
+ *   `scripts/repo/npm-api-spec/spec-inventory.golden.json`, the committed
  *   projection of the pinned `npm/api-documentation` commit. The implementation
  *   side is an AST read of every `src/eco/npm/registry/*.mts`, per
  *   socket/no-source-sniffing. Neither side needs the network, so the default

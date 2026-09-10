@@ -1,6 +1,6 @@
 # @socketsecurity/lib
 
-> Core utilities and infrastructure for Socket.dev security tools. 681 subpath exports, grouped by namespace.
+> Core utilities and infrastructure for Socket.dev security tools. 682 subpath exports, grouped by namespace.
 
 Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/advisor'`. Each link below points at the TypeScript declarations shipped in the package, where the full signature for that subpath lives.
 
@@ -744,6 +744,7 @@ Import any namespace by its subpath, e.g. `import '@socketsecurity/lib/ai/adviso
 - [@socketsecurity/lib/secrets/login](./dist/secrets/login.d.ts)
 - [@socketsecurity/lib/secrets/macos](./dist/secrets/macos.d.ts)
 - [@socketsecurity/lib/secrets/oauth-pkce](./dist/secrets/oauth-pkce.d.ts)
+- [@socketsecurity/lib/secrets/one-password](./dist/secrets/one-password.d.ts)
 - [@socketsecurity/lib/secrets/patterns](./dist/secrets/patterns.d.ts)
 - [@socketsecurity/lib/secrets/rc](./dist/secrets/rc.d.ts)
 - [@socketsecurity/lib/secrets/redact](./dist/secrets/redact.d.ts)

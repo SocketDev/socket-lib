@@ -252,14 +252,14 @@ describe('the generated inventory', () => {
   })
 
   it('reads back exactly what it wrote', () => {
-    const file = path.join(scratchDir(), 'spec-inventory.generated.json')
+    const file = path.join(scratchDir(), 'spec-inventory.golden.json')
     const inventory = buildSpecInventory(exampleSpec())
     writeSpecInventory(inventory, { inventoryPath: file })
     expect(readSpecInventory({ inventoryPath: file })).toStrictEqual(inventory)
   })
 
   it('carries the do-not-hand-edit banner', () => {
-    const file = path.join(scratchDir(), 'spec-inventory.generated.json')
+    const file = path.join(scratchDir(), 'spec-inventory.golden.json')
     writeSpecInventory(buildSpecInventory(exampleSpec()), {
       inventoryPath: file,
     })
@@ -306,7 +306,7 @@ describe('describeSyncResult', () => {
     const text = describeSyncResult(
       result({ mode: 'refresh', wrote: true }),
     ).join('\n')
-    expect(text).toContain('spec-inventory.generated.json')
+    expect(text).toContain('spec-inventory.golden.json')
   })
 
   it('reports the endpoint count on a clean verify', () => {

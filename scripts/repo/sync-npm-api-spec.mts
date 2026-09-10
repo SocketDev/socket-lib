@@ -171,9 +171,7 @@ export function describeSyncResult(result: SyncResult): string[] {
     }
   }
   if (result.wrote) {
-    lines.push(
-      `${SCRIPT} wrote spec-pin.json and spec-inventory.generated.json.`,
-    )
+    lines.push(`${SCRIPT} wrote spec-pin.json and spec-inventory.golden.json.`)
   }
   return lines
 }
@@ -206,7 +204,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/sync-npm-api-spec.mts [flags]
 
   --refresh   advance the pin to the current ${SPEC_BRANCH} head and rewrite
-              spec-pin.json + spec-inventory.generated.json
+              spec-pin.json + spec-inventory.golden.json
   --json      print the result as JSON instead of prose
 
 Without --refresh the script VERIFIES: it re-reads ${SPEC_REPO} at the

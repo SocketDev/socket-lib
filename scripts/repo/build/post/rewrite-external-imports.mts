@@ -13,7 +13,10 @@ import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
 import { isErrnoException } from '@socketsecurity/lib-stable/errors/predicates'
 
-import { externalPackages, scopedPackages } from '../../build-externals/config.mts'
+import {
+  externalPackages,
+  scopedPackages,
+} from '../../build-externals/config.mts'
 import { REPO_ROOT } from '../../../fleet/paths.mts'
 
 const logger = getDefaultLogger()
