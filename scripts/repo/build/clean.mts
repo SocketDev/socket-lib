@@ -12,17 +12,20 @@ import fastGlob from 'fast-glob'
 
 import { isQuiet } from '../flags/predicates.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  getScriptArgs,
+  getScriptLogger,
+} from '../../fleet/process/script-output.mts'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { parseArgs } from '../../fleet/util/parse-args.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 const rootPath = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -97,6 +100,7 @@ async function main(): Promise<void> {
   try {
     // Parse arguments
     const { values } = parseArgs({
+      args: getScriptArgs(),
       options: {
         all: {
           type: 'boolean',
@@ -135,7 +139,7 @@ async function main(): Promise<void> {
       strict: false,
     })
 
-    const quiet = isQuiet(values)
+    const quiet = isQuiet(values) || isJsonRequested(process.argv.slice(2))
 
     // `strict: false` leaves `values` with an index signature of `unknown`, so
     // coerce once instead of bracket-reading a possibly-unknown flag at each
@@ -196,6 +200,7 @@ const SCRIPT_META: ScriptMeta = {
   --types             clean TypeScript declarations only
   --modules           clean node_modules
   --quiet, --silent   suppress progress messages`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

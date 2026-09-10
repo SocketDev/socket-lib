@@ -210,6 +210,7 @@ const SCRIPT_META: ScriptMeta = {
 Without --refresh the script VERIFIES: it re-reads ${SPEC_REPO} at the
 committed sha and fails when any file's bytes no longer hash to the recorded
 sha256. Both modes fail open when GitHub cannot be reached.`,
+  json: 'native',
 }
 
 if (isMainModule(import.meta.url)) {

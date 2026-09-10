@@ -34,18 +34,18 @@ import {
 export type { KeptLeaf } from './build-stubs/settings.mts'
 export { keptLeafEntries } from './build-stubs/settings.mts'
 
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import { getScriptLogger } from '../fleet/process/script-output.mts'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { REPO_ROOT } from '../fleet/paths.mts'
 import { listWorktrees } from '../fleet/git/worktree.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
-import { runMain } from '../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../fleet/process/run-main.mts'
 import { normalizePath } from '@socketsecurity/lib-stable/paths/normalize'
 
 import type { ScriptMeta } from '../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 export interface LeafUsage {
   named: string[]
@@ -413,6 +413,7 @@ function main(): void {
     }
   }
   const report = auditFleetLibUsage(REPO_ROOT)
+  const json = JSON.stringify(report, null, 2)
   if (writeStubList) {
     const candidates = graphSafeStubCandidates(REPO_ROOT, report)
     const listPath = unexposedLeavesPath(REPO_ROOT)
@@ -437,10 +438,12 @@ function main(): void {
     logger.success(
       `audit-fleet-lib-usage: ${candidates.length} graph-safe stub leaf(s) → ${listPath}`,
     )
+    if (isJsonRequested(process.argv.slice(2))) {
+      process.stdout.write(`${json}\n`)
+    }
     return
   }
   const outFlag = process.argv.indexOf('--out')
-  const json = JSON.stringify(report, null, 2)
   if (outFlag !== -1 && process.argv[outFlag + 1]) {
     const outPath = path.resolve(process.argv[outFlag + 1] as string)
     // macOS tmpdir lives under /var/folders while /tmp symlinks /private/tmp;
@@ -463,9 +466,12 @@ function main(): void {
         `${Object.keys(report.leaves).length} leaf module(s) used, ` +
         `${report.unusedLeaves.length} unused → ${outPath}`,
     )
+    if (isJsonRequested(process.argv.slice(2))) {
+      process.stdout.write(`${json}\n`)
+    }
     return
   }
-  logger.log(json)
+  process.stdout.write(`${json}\n`)
 }
 
 const SCRIPT_META: ScriptMeta = {
@@ -476,6 +482,7 @@ const SCRIPT_META: ScriptMeta = {
   --out <file>          write the JSON report to <file> instead of stdout
   --write-stub-list      write the graph-safe stub candidates to
                          .config/repo/socket-wheelhouse.json`,
+  json: 'native',
 }
 
 if (isMainModule(import.meta.url)) {

@@ -10,23 +10,26 @@
 import process from 'node:process'
 import { isQuiet } from '../flags/predicates.mts'
 import { errorMessage } from '@socketsecurity/lib-stable/errors/message'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  getScriptLogger,
+  scriptStdio,
+} from '../../fleet/process/script-output.mts'
 import { printFooter } from '@socketsecurity/lib-stable/stdio/footer'
 import { printHeader } from '@socketsecurity/lib-stable/stdio/header'
 
 import { runSequence } from '../../fleet/util/run-command.mts'
 
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
-import { runMain } from '../../fleet/process/run-main.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 async function main(): Promise<void> {
   try {
     const verbose = process.argv.includes('--verbose')
-    const quiet = isQuiet()
+    const quiet = isQuiet() || isJsonRequested(process.argv.slice(2))
 
     if (!quiet) {
       printHeader('Fixing Build Output')
@@ -49,10 +52,12 @@ async function main(): Promise<void> {
           ...fixArgs,
         ],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       {
         args: ['scripts/fleet/gen/package-exports.mts', ...fixArgs],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       {
         args: [
@@ -60,30 +65,37 @@ async function main(): Promise<void> {
           ...fixArgs,
         ],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       {
         args: ['scripts/repo/build/post/rewrite-cjs-exports.mts', ...fixArgs],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       {
         args: ['scripts/repo/build/post/apply-unexposed-stubs.mts', ...fixArgs],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       {
         args: ['scripts/validate/esm-named-exports.mts', ...fixArgs],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       {
         args: ['scripts/validate/dist-exports.mts', ...fixArgs],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       {
         args: ['scripts/repo/validate/external-exports.mts', ...fixArgs],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       {
         args: ['scripts/repo/validate/external-esm-cjs.mts', ...fixArgs],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       // LAST, and in this order: an undefined export is a shipped bug, so both
       // halves gate the build rather than only the test run. The graph walk is
@@ -98,6 +110,7 @@ async function main(): Promise<void> {
           ...fixArgs,
         ],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
       {
         args: [
@@ -105,6 +118,7 @@ async function main(): Promise<void> {
           ...fixArgs,
         ],
         command: 'node',
+        options: { stdio: scriptStdio('inherit') },
       },
     ])
 
@@ -129,6 +143,7 @@ const SCRIPT_META: ScriptMeta = {
 
   --verbose           show detailed output from each step
   --quiet, --silent   suppress progress messages`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

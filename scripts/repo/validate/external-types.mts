@@ -28,13 +28,11 @@ const require = createRequire(import.meta.url)
 const { isQuiet } = require('../flags/predicates.mts')
 const { errorMessage } = require('@socketsecurity/lib-stable/errors/message')
 const { errorStack } = require('@socketsecurity/lib-stable/errors/stack')
-const {
-  getDefaultLogger,
-} = require('@socketsecurity/lib-stable/logger/default')
+const { getScriptLogger } = require('../../fleet/process/script-output.mts')
 const { normalizePath } = require('@socketsecurity/lib-stable/paths/normalize')
 const { pluralize } = require('@socketsecurity/lib-stable/words/pluralize')
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 /**
  * Check if a .d.ts file uses proper module export patterns.
@@ -252,6 +250,7 @@ const SCRIPT_META: ScriptMeta = {
 
   --verbose             show detail on success
   --quiet, --silent     suppress non-error output`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

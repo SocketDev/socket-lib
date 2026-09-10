@@ -22,7 +22,11 @@ import path from 'node:path'
 import process from 'node:process'
 
 import { isWin32 } from '@socketsecurity/lib-stable/constants/platform'
-import { getDefaultLogger } from '@socketsecurity/lib-stable/logger/default'
+import {
+  getScriptArgs,
+  getScriptLogger,
+  scriptStdio,
+} from '../fleet/process/script-output.mts'
 import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 import type { SpawnSyncOptions } from '@socketsecurity/lib-stable/process/spawn/types'
 
@@ -31,7 +35,7 @@ import { runMain } from '../fleet/process/run-main.mts'
 
 import type { ScriptMeta } from '../fleet/process/run-main.mts'
 
-const logger = getDefaultLogger()
+const logger = getScriptLogger()
 
 // scripts/repo/fuzz.mts → repo root is two levels up.
 const repoRoot = path.resolve(import.meta.dirname, '..', '..')
@@ -134,7 +138,7 @@ export function sweepOrphanedShmSegments(): void {
   }
 }
 
-function main(): number {
+export function main(): number {
   sweepOrphanedShmSegments()
 
   // Sync-required: top-level CLI runner, exits with the child's code.
@@ -144,12 +148,12 @@ function main(): number {
     // No `--config`: vitest auto-discovers the repo-root vitest.config.mts, which
     // is the only config both this parent run and vitiate's re-spawned child agree
     // on (the child never receives --config). See vitest.config.mts header.
-    ['run', ...process.argv.slice(2)],
+    ['run', ...getScriptArgs()],
     {
       __proto__: null,
       cwd: repoRoot,
       env: { __proto__: null, ...process.env, VITIATE_FUZZ: '1' },
-      stdio: 'inherit',
+      stdio: scriptStdio('inherit'),
     } as unknown as SpawnSyncOptions,
   ) as { status?: number | null | undefined }
 
@@ -163,6 +167,7 @@ const SCRIPT_META: ScriptMeta = {
 
   Forwards extra argv to \`vitest run\` (e.g. a single *.fuzz.ts path).
   Budget via the FUZZ_TIME_MS env var (default 15s; CI raises it).`,
+  json: 'result',
 }
 
 if (isMainModule(import.meta.url)) {

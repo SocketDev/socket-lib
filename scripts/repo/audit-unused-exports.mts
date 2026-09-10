@@ -347,6 +347,7 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/audit-unused-exports.mts [flags]
 
   --json   emit the report as JSON instead of a plain-text list`,
+  json: 'native',
 }
 
 if (isMainModule(import.meta.url)) {

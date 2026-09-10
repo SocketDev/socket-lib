@@ -141,6 +141,7 @@ const SCRIPT_META: ScriptMeta = {
   --strict    also fail when a spec field is named nowhere in the owning module
 
 Refresh the pin with \`node scripts/repo/sync-npm-api-spec.mts --refresh\`.`,
+  json: 'native',
 }
 
 if (isMainModule(import.meta.url)) {

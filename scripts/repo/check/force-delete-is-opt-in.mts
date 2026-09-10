@@ -9,6 +9,10 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
+import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { isJsonRequested, runMain } from '../../fleet/process/run-main.mts'
+import { getScriptLogger } from '../../fleet/process/script-output.mts'
+import type { ScriptMeta } from '../../fleet/process/run-main.mts'
 import { fileURLToPath, pathToFileURL } from 'node:url'
 
 const REPO_ROOT = path.resolve(
@@ -126,7 +130,9 @@ export async function probeDeleteGuard(config: {
 export async function main(): Promise<void> {
   const isQuiet = process.argv.includes('--quiet')
   const { log, safe } = await loadBuilt()
-  const logger = log.getDefaultLogger()
+  const logger = isJsonRequested(process.argv.slice(2))
+    ? getScriptLogger()
+    : log.getDefaultLogger()
   // del resolves its guard against the REAL cwd, so the property under test is
   // cwd-relative and cannot be anchored on import.meta.url. Asserted equal to
   // the repo root, which is where the check runner runs it, so a probe never
@@ -168,6 +174,13 @@ export async function main(): Promise<void> {
   }
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
-  void main()
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'checks that deletion outside the working directory requires authorization',
+  help: 'Usage: node scripts/repo/check/force-delete-is-opt-in.mts [--quiet] [--json]',
+  json: 'result',
+}
+
+if (isMainModule(import.meta.url)) {
+  runMain(main, SCRIPT_META)
 }

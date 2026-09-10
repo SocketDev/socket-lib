@@ -56,6 +56,8 @@ import { spawnSync } from '@socketsecurity/lib-stable/process/spawn/child'
 
 import { packAndInspect } from '../../fleet/pack/inspect.mts'
 import { isMainModule } from '../../fleet/process/is-main-module.mts'
+import { isAgent } from '@socketsecurity/lib-stable/env/agents'
+import { abortScript } from '../../fleet/process/script-result.mts'
 import { runMain } from '../../fleet/process/run-main.mts'
 import { REPO_ROOT } from '../../fleet/paths.mts'
 
@@ -251,11 +253,11 @@ function formatFailureLine(packageName: string, failure: ProbeFailure): string {
 }
 
 export function main(): number {
-  const quiet = isQuiet()
+  const quiet = isQuiet() || isJson()
   const json = isJson()
 
   if (!ensurePackedDist(quiet)) {
-    return 1
+    return failPackedCheck()
   }
 
   const inspection = packAndInspect(REPO_ROOT)
@@ -267,7 +269,7 @@ export function main(): number {
         '  Saw:   packAndInspect() returned no inspection — the pack, tar listing, or packed-manifest read failed.\n' +
         '  Fix:   run `pnpm pack` directly from the repo root and fix the reported error.',
     )
-    return 1
+    return failPackedCheck()
   }
 
   const packDir = path.dirname(inspection.tarball)
@@ -298,7 +300,7 @@ export function main(): number {
       timeout: 120_000,
     })
     if (!reportPackedInstallStatus(installed, scratchDir)) {
-      return 1
+      return failPackedCheck()
     }
 
     const packageName = inspection.packedManifest?.name ?? PACKAGE_NAME
@@ -331,7 +333,7 @@ export function main(): number {
           `  Saw:   ${errorMessage(e)}\n` +
           '  Fix:   rerun this check and inspect the scratch dir it prints on failure.',
       )
-      return 1
+      return failPackedCheck()
     }
 
     if (json) {
@@ -353,7 +355,7 @@ export function main(): number {
       return 1
     }
 
-    if (!quiet) {
+    if (!quiet && !isAgent()) {
       logger.success(
         `${CHECK} ok — ${report.probedSubpaths} hot subpath(s) resolve (require + import) from the packed tarball.`,
       )
@@ -371,10 +373,18 @@ const SCRIPT_META: ScriptMeta = {
   help: `Usage: node scripts/repo/check/packed-tarball-resolves.mts [flags]
   --quiet  suppress the success message
   --json   print the machine-readable PackedTarballReport instead of prose`,
+  json: 'native',
 }
 
 if (isMainModule(import.meta.url)) {
   runMain(main, SCRIPT_META)
+}
+
+function failPackedCheck(): number {
+  if (isJson()) {
+    abortScript(1)
+  }
+  return 1
 }
 
 function ensurePackedDist(quiet: boolean): boolean {

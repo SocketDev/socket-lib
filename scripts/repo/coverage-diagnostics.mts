@@ -29,6 +29,7 @@ import { runQuietCommand } from '../fleet/cover-run.mts'
 import { REPO_ROOT } from '../fleet/paths.mts'
 import { isMainModule } from '../fleet/process/is-main-module.mts'
 import { runMain } from '../fleet/process/run-main.mts'
+import type { ScriptMeta } from '../fleet/process/run-main.mts'
 import { getScriptArgs } from '../fleet/process/script-output.mts'
 import { coverageDiagnosticPaths } from './_shared/paths.mts'
 import {
@@ -47,6 +48,13 @@ const COVERAGE_PROFILE_TEST_FILES = [
   'test/unit/cacache/shared.test.mts',
   'test/unit/external-tools/uv/from-vfs.test.mts',
 ]
+
+const SCRIPT_META: ScriptMeta = {
+  describe:
+    'Compare coverage workers or profile representative tests; diagnostic results do not establish gate success.',
+  help: 'Usage: pnpm run cover:diagnose [--profile]',
+  json: 'result',
+}
 
 function readDiagnosticJson(
   directory: string,
@@ -256,21 +264,14 @@ export async function runCoverageDiagnostics(
 }
 
 if (isMainModule(import.meta.url)) {
-  runMain(
-    async () => {
-      const { values } = parseArgs({
-        args: getScriptArgs(),
-        options: { profile: { type: 'boolean', default: false } },
-        strict: true,
-      })
-      process.exitCode = await runCoverageDiagnostics({
-        profile: values.profile,
-      })
-    },
-    {
-      describe:
-        'Compare coverage workers or profile representative tests; diagnostic results do not establish gate success.',
-      help: 'Usage: pnpm run cover:diagnose [--profile]',
-    },
-  )
+  runMain(async () => {
+    const { values } = parseArgs({
+      args: getScriptArgs(),
+      options: { profile: { type: 'boolean', default: false } },
+      strict: true,
+    })
+    process.exitCode = await runCoverageDiagnostics({
+      profile: values.profile,
+    })
+  }, SCRIPT_META)
 }
