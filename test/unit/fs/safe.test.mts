@@ -5,12 +5,16 @@
  */
 
 import { existsSync, promises as fs } from 'node:fs'
+import os from 'node:os'
 import path from 'node:path'
 import process from 'node:process'
 
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+
+import { safeDelete as deleteFixtureRoot } from '@socketsecurity/lib-stable/fs/safe'
 
 import { forceDelete } from '../../../src/fs/force.mjs'
+import { resetPaths, setPath } from '../../../src/paths/rewire.mjs'
 import {
   safeDelete,
   safeDeleteSync,
@@ -283,26 +287,42 @@ describe('safeMkdirSync', () => {
   })
 })
 
+async function createGuardedSandbox() {
+  const root = await fs.mkdtemp(path.join(os.tmpdir(), 'safe-delete-guard-'))
+  const working = path.join(root, 'working')
+  const allowedTemp = path.join(root, 'allowed-temp')
+  await fs.mkdir(working)
+  setPath('tmpdir', allowedTemp)
+  setPath('socket-cacache-dir', path.join(root, 'allowed-cache'))
+  setPath('socket-user-dir', path.join(root, 'allowed-user'))
+  vi.spyOn(process, 'cwd').mockReturnValue(working)
+  return { root, working, allowedTemp }
+}
+
+async function cleanupGuardedSandbox(root: string | undefined) {
+  vi.restoreAllMocks()
+  resetPaths()
+  if (root) {
+    await deleteFixtureRoot(root)
+  }
+}
+
 describe('safeDelete cwd relocates the guard', () => {
-  // `cwd` is the force-free answer for a tool that owns a directory it does not
-  // run from - a cascade writing into another checkout. It MOVES del's boundary
-  // to the named root rather than removing it, so a descendant deletes and the
-  // root itself still throws.
-  const ownedRoot = path.join(
-    process.cwd(),
-    '..',
-    `safe-delete-cwd-probe-${process.pid}`,
-  )
-  const child = path.join(ownedRoot, 'child')
+  let sandbox: Awaited<ReturnType<typeof createGuardedSandbox>> | undefined
+  let ownedRoot: string
+  let child: string
 
   beforeEach(async () => {
+    sandbox = await createGuardedSandbox()
+    ownedRoot = path.join(sandbox.root, 'guarded-parent', 'owned')
+    child = path.join(ownedRoot, 'child')
     await fs.mkdir(child, { recursive: true })
-    await fs.writeFile(path.join(child, 'file.txt'), 'bye')
+    await fs.writeFile(path.join(child, 'file.txt'), 'keep')
   })
 
   afterEach(async () => {
-    // oxlint-disable-next-line socket/no-force-delete -- probe is outside cwd
-    await forceDelete(ownedRoot)
+    await cleanupGuardedSandbox(sandbox?.root)
+    sandbox = undefined
   })
 
   it('deletes a descendant of the named root without force', async () => {
@@ -317,47 +337,35 @@ describe('safeDelete cwd relocates the guard', () => {
   })
 
   it('still refuses the named root itself', async () => {
-    await expect(safeDelete(ownedRoot, { cwd: ownedRoot })).rejects.toThrow()
+    await expect(
+      safeDelete(ownedRoot, { cwd: ownedRoot, maxRetries: 0 }),
+    ).rejects.toThrow()
     expect(existsSync(child)).toBe(true)
   })
 
   it('still refuses a path above the named root', async () => {
+    const parent = path.join(sandbox!.root, 'guarded-parent')
     await expect(
-      safeDelete(path.dirname(ownedRoot), { cwd: ownedRoot }),
+      safeDelete(parent, { cwd: ownedRoot, maxRetries: 0 }),
     ).rejects.toThrow()
     expect(existsSync(child)).toBe(true)
   })
 })
 
 describe('safeDelete force is opt-in', () => {
-  // Regression: `force` defaulted to true, which disabled del's cwd guard for
-  // every caller that passed no options, so `safeDelete(pathOutsideCwd)` deleted
-  // it without a word. Measured against a real checkout, which it removed.
-  //
-  // The target is a NON-EXISTENT sibling of cwd on purpose. The guard decides on
-  // path shape before touching the filesystem, so the assertion needs no real
-  // tree - and a regression here cannot destroy one. `process.chdir` is
-  // unavailable in a vitest worker, so cwd stays put and the path moves instead.
-  // A REAL directory outside cwd, created here and cleaned up here. del does
-  // not throw for a path that does not exist, so the guard can only be observed
-  // against a tree that is actually there. `process.chdir` is unavailable in a
-  // vitest worker, so cwd stays put and the target sits beside it. If the guard
-  // ever regresses, the only casualty is this directory.
-  const outsideCwd = path.join(
-    process.cwd(),
-    '..',
-    `safe-delete-guard-probe-${process.pid}`,
-  )
+  let sandbox: Awaited<ReturnType<typeof createGuardedSandbox>> | undefined
+  let outsideCwd: string
 
   beforeEach(async () => {
+    sandbox = await createGuardedSandbox()
+    outsideCwd = path.join(sandbox.root, 'outside')
     await fs.mkdir(path.join(outsideCwd, 'child'), { recursive: true })
     await fs.writeFile(path.join(outsideCwd, 'precious.txt'), 'keep')
   })
 
   afterEach(async () => {
-    // The probe sits outside cwd on purpose, so removing it needs the flag.
-    // oxlint-disable-next-line socket/no-force-delete -- probe is outside cwd
-    await forceDelete(outsideCwd)
+    await cleanupGuardedSandbox(sandbox?.root)
+    sandbox = undefined
   })
 
   it('rejects a path outside cwd when no options are passed', async () => {
@@ -371,27 +379,22 @@ describe('safeDelete force is opt-in', () => {
   })
 
   it('deletes it when force is explicitly requested', async () => {
-    // The opt-in path is the assertion.
-    // oxlint-disable-next-line socket/no-force-delete -- the subject
+    // oxlint-disable-next-line socket/no-force-delete -- private fixture.
     await forceDelete(outsideCwd)
     expect(existsSync(outsideCwd)).toBe(false)
   })
 
   it('still deletes a descendant of cwd without a flag', async () => {
-    await runWithTempDir(async tmpDir => {
-      const child = path.join(tmpDir, 'build')
-      await fs.mkdir(child, { recursive: true })
-      await safeDelete(child)
-      expect(existsSync(child)).toBe(false)
-    }, 'safeDelete-descendant-')
+    const child = path.join(sandbox!.working, 'build')
+    await fs.mkdir(child)
+    await safeDelete(child)
+    expect(existsSync(child)).toBe(false)
   })
 
   it('still auto-forces inside the OS temp dir, so scratch cleanup needs no flag', async () => {
-    await runWithTempDir(async tmpDir => {
-      const scratch = path.join(tmpDir, 'scratch')
-      await fs.mkdir(scratch, { recursive: true })
-      await safeDelete(scratch)
-      expect(existsSync(scratch)).toBe(false)
-    }, 'safeDelete-autoforce-')
+    const scratch = path.join(sandbox!.allowedTemp, 'scratch')
+    await fs.mkdir(scratch, { recursive: true })
+    await safeDelete(scratch)
+    expect(existsSync(scratch)).toBe(false)
   })
 })
