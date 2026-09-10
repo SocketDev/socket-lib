@@ -161,6 +161,50 @@ function sourcePatch(
   )
 }
 
+function applyStrictPatch(
+  scratch: string,
+  patch: Uint8Array,
+  strip: number,
+): boolean {
+  return (
+    readCanonicalGit(
+      scratch,
+      ['apply', '--whitespace=nowarn', `-p${strip}`, '-'],
+      { input: patch },
+    ).status === 0
+  )
+}
+
+function applyIndividualHunks(
+  scratch: string,
+  destination: string,
+  patch: Uint8Array,
+  strip: number,
+): boolean {
+  const sections = Buffer.from(patch)
+    .toString('utf8')
+    .split(/(?=^@@ )/mu)
+  const header = sections.shift()
+  if (!header || sections.length === 0) {
+    return false
+  }
+  for (let i = 0, { length } = sections; i < length; i += 1) {
+    const hunk = Buffer.from(header + sections[i])
+    if (applyStrictPatch(scratch, hunk, strip)) {
+      continue
+    }
+    const replacement = applyCanonicalReplacements(
+      readFileSync(destination),
+      hunk,
+    )
+    if (!replacement) {
+      return false
+    }
+    writeFileSync(destination, replacement)
+  }
+  return true
+}
+
 function applyProofSteps(
   member: string,
   file: string,
@@ -194,23 +238,12 @@ function applyProofSteps(
         step.sourcePath.split('/').length -
         normalizePath(file).split('/').length +
         1
-      const result = readCanonicalGit(
-        scratch,
-        ['apply', '--whitespace=nowarn', `-p${strip}`, '-'],
-        { input: patch },
-      )
-      if (result.status !== 0) {
-        if (step.application !== 'unique-replacement') {
-          return undefined
-        }
-        const replacement = applyCanonicalReplacements(
-          readFileSync(destination),
-          patch,
-        )
-        if (!replacement) {
-          return undefined
-        }
-        writeFileSync(destination, replacement)
+      if (
+        !applyStrictPatch(scratch, patch, strip) &&
+        (step.application !== 'unique-replacement' ||
+          !applyIndividualHunks(scratch, destination, patch, strip))
+      ) {
+        return undefined
       }
     }
     return readFileSync(destination)

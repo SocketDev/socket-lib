@@ -37,15 +37,19 @@ export function readCanonicalGit(
       delete env[name]
     }
   }
-  const result = spawnSync('git', ['--literal-pathspecs', ...args], {
-    cwd: root,
-    encoding: 'buffer',
-    env,
-    input: options.input,
-    stdio: ['pipe', 'pipe', 'pipe'],
-    timeout: 5000,
-    maxBuffer: 4_194_304,
-  })
+  const result = spawnSync(
+    'git',
+    ['--no-replace-objects', '--literal-pathspecs', ...args],
+    {
+      cwd: root,
+      encoding: 'buffer',
+      env,
+      input: options.input,
+      stdio: ['pipe', 'pipe', 'pipe'],
+      timeout: 5000,
+      maxBuffer: 4_194_304,
+    },
+  )
   return {
     status: result.status ?? 1,
     stdout: Buffer.isBuffer(result.stdout)
