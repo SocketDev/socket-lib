@@ -231,12 +231,20 @@ jobs:
           set -euo pipefail
           mkdir -p .cache/repo/coverage-diagnostics
           pnpm run cover --measure --lane fast 2>&1 | tee .cache/repo/coverage-diagnostics/fast.log
+      - name: Mint diagnostic source read token
+        id: diagnostic-source-token
+        if: failure() && steps.coverage.outcome == 'failure'
+        uses: ./.github/actions/fleet/github-payload-app-token
+        with:
+          client-id: ${{ vars.SOCKET_PR_CLIENT_ID }}
+          private-key: ${{ secrets.SOCKET_PR_APP_PRIVATE_KEY }}
       - name: Measure demand-loaded network mocks
         if: failure() && steps.coverage.outcome == 'failure'
         timeout-minutes: 3
         shell: bash
         env:
           GH_TOKEN: ${{ github.token }}
+          PAYLOAD_TOKEN: ${{ steps.diagnostic-source-token.outputs.token }}
           CANONICAL_COMMIT: f9e90fc7f80f2682441d4938570c9d5c593f7431 # test-setup-demand-load
         run: |
           set -euo pipefail
@@ -245,11 +253,9 @@ jobs:
           cp test/fleet/scripts/setup.mts "$diagnostics/setup.before.mts"
           cp .config/repo/socket-wheelhouse.json "$diagnostics/settings.before.json"
           test ! -e test/fleet/_shared/lib/network-mocks.mts
-          git init -q "$diagnostics/canonical"
-          git -C "$diagnostics/canonical" fetch --depth=1 https://github.com/SocketDev/socket-wheelhouse.git "$CANONICAL_COMMIT"
-          test "$(git -C "$diagnostics/canonical" rev-parse FETCH_HEAD)" = "$CANONICAL_COMMIT"
-          git -C "$diagnostics/canonical" show FETCH_HEAD:template/base/universal/test/fleet/scripts/setup.mts > "$diagnostics/setup.candidate.mts"
-          git -C "$diagnostics/canonical" show FETCH_HEAD:template/base/universal/test/fleet/_shared/lib/network-mocks.mts > "$diagnostics/network-mocks.candidate.mts"
+          GH_TOKEN="$PAYLOAD_TOKEN" gh api "repos/SocketDev/socket-wheelhouse/contents/template/base/universal/test/fleet/scripts/setup.mts?ref=${CANONICAL_COMMIT}" --jq .content | base64 --decode > "$diagnostics/setup.candidate.mts"
+          GH_TOKEN="$PAYLOAD_TOKEN" gh api "repos/SocketDev/socket-wheelhouse/contents/template/base/universal/test/fleet/_shared/lib/network-mocks.mts?ref=${CANONICAL_COMMIT}" --jq .content | base64 --decode > "$diagnostics/network-mocks.candidate.mts"
+          printf '%s  %s\n' 7dce0c8b69ce693ec251382e842cc81e2edaf63077c0c22a8f6ece12bb77f967 "$diagnostics/setup.candidate.mts" 70db56b163d15b03dd35315d457402212600f9a6cd31b87785977df46f0a28df "$diagnostics/network-mocks.candidate.mts" | sha256sum --check
           cat > "$diagnostics/restore.mjs" <<'EOF'
           import assert from 'node:assert/strict'
           import { readFileSync, rmSync } from 'node:fs'
