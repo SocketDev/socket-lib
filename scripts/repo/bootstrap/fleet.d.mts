@@ -2,10 +2,11 @@
 export declare function migrateWorkspaceSettings(dest: string, yaml: string): string;
 //#endregion
 //#region template/base/universal/scripts/fleet/lib/conditional-config.d.mts
-type ConfigFlag = 'bundlesVendoredDeps' | 'hasGhcr' | 'hasNapi' | 'hasPrebakes' | 'hasRust' | 'isGithubAction';
+type ConfigFlag = 'bundlesVendoredDeps' | 'hasGhcr' | 'hasGithubRelease' | 'hasNapi' | 'hasPrebakes' | 'hasRust' | 'isGithubAction';
 //#endregion
 //#region scripts/repo/gen/bootstrap/src/conditional-files.d.mts
 interface ConditionalManifestGroup {
+  readonly removeWhenInactive?: boolean | undefined;
   readonly marker?: string | undefined;
   readonly capability?: string | undefined;
   readonly buildType?: string | undefined;
@@ -579,7 +580,8 @@ export declare function removeTombstonedPaths(dest: string, manifest: FleetFileM
  * `.config/fleet/tsconfig.check.json`, `.gitkeep` seeds, cascade-only
  * release-excluded scripts under `scripts/fleet/` — can never be collateral.
  * Excluded conditional files without a record are pruned only when their
- * bytes match the archive. Locally customized files remain untouched.
+ * bytes match the archive or the group declares removal when inactive.
+ * Other locally customized files remain untouched.
  */
 interface PruneStaleFleetFilesOptions {
   archiveManifest?: FleetFileManifest | undefined;
@@ -644,14 +646,14 @@ export declare function installFiles(filesDir: string, dest: string, manifest: B
  */
 export declare function materializeFromLocalTemplate(dest: string, manifest: BundleManifest, options?: InstallFilesOptions | undefined): InstallFilesResult | undefined;
 /**
- * Untrack the bundle's GENERATED build outputs (`manifest.generatedPaths`)
- * from the git index after placement. The bundle SHIPS these files — placement
+ * Untrack the bundle's GENERATED build outputs (`manifest.generatedPaths`) from
+ * the git index after placement. The bundle SHIPS these files — placement
  * writes them to disk — while the fleet gitignore block ignores them and
  * `generated-outputs-are-untracked` forbids TRACKING them. A member that
- * historically committed one (fleet-pack.cjs et al., before the ignore existed)
- * heals on the next refresh: the file stays on disk, but leaves the index.
- * Non-fatal by design — a non-git dest or an already-clean index is a no-op
- * (`--ignore-unmatch`).
+ * historically committed one (fleet-pack.generated.cjs et al., before the
+ * ignore existed) heals on the next refresh: the file stays on disk, but leaves
+ * the index. Non-fatal by design — a non-git dest or an already-clean index is
+ * a no-op (`--ignore-unmatch`).
  */
 export declare function untrackGeneratedOutputs(dest: string, generatedPaths: readonly string[] | undefined): void;
 /**

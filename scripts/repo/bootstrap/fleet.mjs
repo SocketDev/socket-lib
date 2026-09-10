@@ -564,6 +564,12 @@ function migrateWorkspaceSettings(dest, yaml) {
 }
 
 //#endregion
+//#region template/base/universal/scripts/fleet/release/github/config.mts
+function githubReleaseEnabled(config) {
+  return config?.release?.github !== false
+}
+
+//#endregion
 //#region template/base/universal/scripts/fleet/lib/conditional-config.mts
 function isPlainObject(value) {
   if (value === null || typeof value !== 'object' || Array.isArray(value))
@@ -634,6 +640,8 @@ function configFlagHolds(flag, raw) {
   switch (flag) {
     case 'bundlesVendoredDeps':
       return bundlesVendoredDeps(raw)
+    case 'hasGithubRelease':
+      return githubReleaseEnabled(raw)
     case 'hasGhcr':
       return publishesToGhcr(raw)
     case 'hasNapi':
@@ -1359,6 +1367,9 @@ function localTemplateManifests(filesDir, manifest, dest) {
       groups.push({
         [entry.triggerKind]: entry.conditional,
         files: [file],
+        ...(entry.removeWhenInactive === true
+          ? { removeWhenInactive: true }
+          : {}),
       })
   }
   const conditionalRoot = path.join(path.dirname(filesDir), 'conditional')
@@ -2169,7 +2180,9 @@ function pruneStaleFleetFiles(dest, manifest, previousFiles, options) {
         !Object.hasOwn(manifest.files, file) &&
         existsSync(absolute) &&
         lstatSync(absolute).isFile() &&
-        computeSha256(readFileSync(absolute)) === archiveManifest?.files[file]
+        (group.removeWhenInactive === true ||
+          computeSha256(readFileSync(absolute)) ===
+            archiveManifest?.files[file])
       )
         candidates.add(file)
     }
@@ -2364,14 +2377,14 @@ function materializeFromLocalTemplate(dest, manifest, options) {
   return total
 }
 /**
- * Untrack the bundle's GENERATED build outputs (`manifest.generatedPaths`)
- * from the git index after placement. The bundle SHIPS these files — placement
+ * Untrack the bundle's GENERATED build outputs (`manifest.generatedPaths`) from
+ * the git index after placement. The bundle SHIPS these files — placement
  * writes them to disk — while the fleet gitignore block ignores them and
  * `generated-outputs-are-untracked` forbids TRACKING them. A member that
- * historically committed one (fleet-pack.cjs et al., before the ignore existed)
- * heals on the next refresh: the file stays on disk, but leaves the index.
- * Non-fatal by design — a non-git dest or an already-clean index is a no-op
- * (`--ignore-unmatch`).
+ * historically committed one (fleet-pack.generated.cjs et al., before the
+ * ignore existed) heals on the next refresh: the file stays on disk, but leaves
+ * the index. Non-fatal by design — a non-git dest or an already-clean index is
+ * a no-op (`--ignore-unmatch`).
  */
 function untrackGeneratedOutputs(dest, generatedPaths) {
   if (!generatedPaths || generatedPaths.length === 0) return
